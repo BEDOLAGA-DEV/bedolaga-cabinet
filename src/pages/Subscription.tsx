@@ -944,6 +944,20 @@ export default function Subscription() {
             </h2>
           </div>
 
+          {/* Legacy subscription notice - if user has subscription without tariff */}
+          {subscription && !subscription.is_trial && !subscription.tariff_id && (
+            <div className="mb-6 p-4 bg-accent-500/10 border border-accent-500/30 rounded-xl">
+              <div className="text-accent-400 font-medium mb-2">📦 Выберите тариф для продления</div>
+              <div className="text-sm text-dark-300">
+                Ваша текущая подписка была создана до введения тарифов.
+                Для продления необходимо выбрать один из доступных тарифов.
+              </div>
+              <div className="text-xs text-dark-500 mt-2">
+                ⚠️ Ваша текущая подписка продолжит действовать до окончания срока.
+              </div>
+            </div>
+          )}
+
           {/* Switch Tariff Preview Modal */}
           {switchTariffId && (
             <div ref={switchModalRef} className="mb-6 bg-dark-800/50 rounded-xl p-5 space-y-4">
@@ -1043,6 +1057,8 @@ export default function Subscription() {
                 .map((tariff) => {
                 const isCurrentTariff = tariff.is_current || tariff.id === subscription?.tariff_id
                 const canSwitch = subscription && subscription.tariff_id && !isCurrentTariff && !subscription.is_trial
+                // Если есть подписка БЕЗ tariff_id (классическая) - разрешить выбрать тариф
+                const isLegacySubscription = subscription && !subscription.is_trial && !subscription.tariff_id
 
                 return (
                   <div
@@ -1120,28 +1136,38 @@ export default function Subscription() {
                             {t('subscription.extend')}
                           </button>
                         )
+                      ) : isLegacySubscription ? (
+                        /* Legacy subscription without tariff - allow selecting tariff for renewal */
+                        <button
+                          onClick={() => {
+                            setSelectedTariff(tariff)
+                            setSelectedTariffPeriod(tariff.periods[0] || null)
+                            setShowTariffPurchase(true)
+                          }}
+                          className="btn-primary flex-1 py-2 text-sm"
+                        >
+                          Выбрать для продления
+                        </button>
+                      ) : canSwitch ? (
+                        /* Other tariffs with existing tariff - switch button */
+                        <button
+                          onClick={() => setSwitchTariffId(tariff.id)}
+                          className="btn-secondary flex-1 py-2 text-sm"
+                        >
+                          {t('subscription.switchTariff.switch')}
+                        </button>
                       ) : (
-                        /* Other tariffs - only switch button (no extend) */
-                        canSwitch ? (
-                          <button
-                            onClick={() => setSwitchTariffId(tariff.id)}
-                            className="btn-secondary flex-1 py-2 text-sm"
-                          >
-                            {t('subscription.switchTariff.switch')}
-                          </button>
-                        ) : (
-                          /* No subscription or trial - purchase button */
-                          <button
-                            onClick={() => {
-                              setSelectedTariff(tariff)
-                              setSelectedTariffPeriod(tariff.periods[0] || null)
-                              setShowTariffPurchase(true)
-                            }}
-                            className="btn-primary flex-1 py-2 text-sm"
-                          >
-                            {t('subscription.purchase')}
-                          </button>
-                        )
+                        /* No subscription or trial - purchase button */
+                        <button
+                          onClick={() => {
+                            setSelectedTariff(tariff)
+                            setSelectedTariffPeriod(tariff.periods[0] || null)
+                            setShowTariffPurchase(true)
+                          }}
+                          className="btn-primary flex-1 py-2 text-sm"
+                        >
+                          {t('subscription.purchase')}
+                        </button>
                       )}
                     </div>
                   </div>
