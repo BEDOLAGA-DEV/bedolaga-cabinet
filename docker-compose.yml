@@ -1,0 +1,21 @@
+services:
+  cabinet-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # API URL - use /api for same-server deployment or full URL for external backend
+        VITE_API_URL: ${VITE_API_URL:-/api}
+        VITE_TELEGRAM_BOT_USERNAME: ${VITE_TELEGRAM_BOT_USERNAME}
+        VITE_APP_NAME: ${VITE_APP_NAME:-Cabinet}
+        VITE_APP_LOGO: ${VITE_APP_LOGO:-V}
+    container_name: cabinet_frontend
+    restart: unless-stopped
+    ports:
+      - "${CABINET_PORT:-3000}:80"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
