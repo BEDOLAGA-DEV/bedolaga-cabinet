@@ -1,6 +1,6 @@
 # Bedolaga Cabinet - Web Interface
 
-Современный веб-интерфейс личного кабинета для VPN бота на базе [Remnawave Bedolaga Telegram Bot](https://github.com/BEDOLAGA-DEV/remnawave-bedolaga-telegram-bot)
+Современный веб-интерфейс личного кабинета для VPN бота на базе [Remnawave Bedolaga Telegram Bot](https://github.com/BEDOLAGA-DEV/remnawave-bedolaga-telegram-bot).
 
 ## Возможности
 
@@ -21,7 +21,7 @@
 
 ## Быстрый старт
 
-### Вариант 1: Готовый Docker образ
+### Вариант A: Готовый Docker образ
 
 ```bash
 # Из GitHub Container Registry
@@ -31,7 +31,9 @@ docker pull ghcr.io/bedolaga-dev/bedolaga-cabinet:latest
 docker pull bedolaga/bedolaga-cabinet:latest
 ```
 
-### Вариант 2: Сборка из исходников
+Затем настройте Caddy/Nginx для проксирования (см. раздел "Настройка прокси для production").
+
+### Вариант B: Сборка из исходников
 
 #### 1. Клонирование репозитория
 
@@ -94,31 +96,100 @@ CABINET_ALLOWED_ORIGINS=http://localhost:3000,https://cabinet.yourdomain.com
 
 ## Настройка прокси для production
 
-Frontend раздает только статические файлы. Для работы с API нужно настроить reverse proxy, который будет проксировать запросы `/api/*` на backend бота.
+Frontend - это статические файлы (HTML, JS, CSS). Для работы нужно:
+1. Раздавать статику через веб-сервер
+2. Проксировать `/api/*` запросы на backend бота
 
-### Вариант 1: Caddy
+> **💡 Важно:** Docker контейнер из этого репозитория содержит nginx, который слушает на **внутреннем порту 80**.
+> Это НЕ хост-порт! Выберите один из вариантов ниже в зависимости от вашей инфраструктуры.
 
-Добавьте в ваш Caddyfile:
+### Вариант 1: Caddy раздает статику напрямую
+
+**✅ Рекомендуется** - без лишних слоев прокси, максимальная производительность.
+
+Соберите frontend и примонтируйте в Caddy:
+
+```bash
+# Соберите образ или скопируйте dist из контейнера
+docker compose build
+docker create --name temp_cabinet cabinet_frontend
+docker cp temp_cabinet:/usr/share/nginx/html ./cabinet-dist
+docker rm temp_cabinet
+```
+
+Caddyfile:
 
 ```caddyfile
 cabinet.yourdomain.com {
-    # Проксировать API запросы на backend
+    root * /srv/cabinet
+    encode gzip
+
+    # API запросы на backend
     handle /api/* {
         uri strip_prefix /api
         reverse_proxy backend_bot:8080
     }
 
-    # Остальное - на frontend контейнер
+    # Статические файлы
+    handle {
+        try_files {path} /index.html
+        file_server
+    }
+}
+```
+
+docker-compose.yml для Caddy:
+
+```yaml
+services:
+  caddy:
+    image: caddy:2-alpine
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./cabinet-dist:/srv/cabinet:ro
+      - caddy_data:/data
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - bot_network
+```
+
+### Вариант 2: Проксирование на frontend контейнер
+
+Если хотите использовать готовый Docker контейнер с nginx внутри:
+
+**⚠️ Внимание:** Порт `80` в примерах - это **внутренний порт контейнера** (nginx внутри), не хост-порт!
+
+docker-compose.yml:
+```yaml
+services:
+  cabinet-frontend:
+    image: ghcr.io/bedolaga-dev/bedolaga-cabinet:latest
+    container_name: cabinet_frontend
+    restart: unless-stopped
+    # Не открываем порты на хосте, только для internal network
+    networks:
+      - bot_network
+```
+
+Caddy проксирует на контейнер:
+```caddyfile
+cabinet.yourdomain.com {
+    # API на backend
+    handle /api/* {
+        uri strip_prefix /api
+        reverse_proxy backend_bot:8080
+    }
+
+    # Frontend контейнер (nginx внутри на порту 80)
     handle {
         reverse_proxy cabinet_frontend:80
     }
 }
 ```
 
-### Вариант 2: Nginx
-
-Добавьте в конфигурацию Nginx:
-
+Или Nginx:
 ```nginx
 server {
     listen 443 ssl http2;
@@ -127,7 +198,7 @@ server {
     ssl_certificate /path/to/cert.pem;
     ssl_certificate_key /path/to/key.pem;
 
-    # API запросы проксируем на backend
+    # API на backend
     location /api/ {
         rewrite ^/api/(.*) /$1 break;
         proxy_pass http://backend_bot:8080;
@@ -138,7 +209,7 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
     }
 
-    # Frontend контейнер
+    # Frontend контейнер (nginx внутри на порту 80)
     location / {
         proxy_pass http://cabinet_frontend:80;
         proxy_set_header Host $host;
@@ -147,9 +218,9 @@ server {
 }
 ```
 
-### Вариант 3: Статика + прямое проксирование
+### Вариант 3: Статика без Docker
 
-Если хотите раздавать статику напрямую без Docker:
+**Самый быстрый вариант - раздача статики напрямую.**
 
 ```bash
 # Соберите проект
@@ -299,6 +370,10 @@ bedolaga-cabinet/
 
 - [Remnawave Bedolaga Telegram Bot](https://github.com/BEDOLAGA-DEV/remnawave-bedolaga-telegram-bot) - Backend бота
 - [Bedolaga Chat](https://t.me/+wTdMtSWq8YdmZmVi) - Чат поддержки
+
+## Лицензия
+
+Apache-2.0 License - см. [LICENSE](LICENSE)
 
 ## Контакты
 
