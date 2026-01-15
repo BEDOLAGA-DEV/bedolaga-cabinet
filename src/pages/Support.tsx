@@ -271,14 +271,20 @@ export default function Support() {
   if (supportConfig && !supportConfig.tickets_enabled) {
     const getSupportMessage = () => {
       if (supportConfig.support_type === 'profile') {
+        const supportUsername = supportConfig.support_username || '@support'
         return {
           title: t('support.ticketsDisabled'),
-          message: t('support.useProfile'),
-          buttonText: t('support.goToProfile'),
+          message: t('support.contactSupport', { username: supportUsername }),
+          buttonText: t('support.contactUs'),
           buttonAction: () => {
             const webApp = window.Telegram?.WebApp
-            if (webApp?.close) {
-              webApp.close()
+            const url = supportUsername.startsWith('@')
+              ? `https://t.me/${supportUsername.slice(1)}`
+              : `https://t.me/${supportUsername}`
+            if (webApp?.openTelegramLink) {
+              webApp.openTelegramLink(url)
+            } else {
+              window.open(url, '_blank')
             }
           },
         }
