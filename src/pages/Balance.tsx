@@ -212,7 +212,13 @@ export default function Balance() {
           </div>
         ) : transactions?.items && transactions.items.length > 0 ? (
           <div className="space-y-3">
-            {transactions.items.map((tx) => (
+            {transactions.items.map((tx) => {
+              // Determine if this is a debit (negative) or credit (positive) transaction
+              const isDebit = normalizeType(tx.type) === 'SUBSCRIPTION_PAYMENT' || normalizeType(tx.type) === 'WITHDRAWAL'
+              const sign = isDebit ? '-' : '+'
+              const colorClass = isDebit ? 'text-error-400' : 'text-success-400'
+
+              return (
               <div
                 key={tx.id}
                 className="flex items-center justify-between p-4 rounded-xl bg-dark-800/30 border border-dark-700/30"
@@ -230,11 +236,12 @@ export default function Balance() {
                     <div className="text-sm text-dark-400">{tx.description}</div>
                   )}
                 </div>
-                <div className={`text-lg font-semibold ${tx.amount_kopeks > 0 ? 'text-success-400' : 'text-error-400'}`}>
-                  {tx.amount_kopeks > 0 ? '+' : ''}{formatAmount(tx.amount_rubles)} {currencySymbol}
+                <div className={`text-lg font-semibold ${colorClass}`}>
+                  {sign}{formatAmount(tx.amount_rubles)} {currencySymbol}
                 </div>
               </div>
-            ))}
+              )
+            })}
           </div>
         ) : (
           <div className="text-center py-12">
