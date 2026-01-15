@@ -1,0 +1,43 @@
+# Dependencies
+node_modules
+
+# Build output (we build inside Docker)
+dist
+build
+
+# Development files
+.git
+.gitignore
+.vscode
+.idea
+*.log
+
+# Docker files (not needed in context)
+docker-compose*.yml
+Dockerfile
+.dockerignore
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Test files
+coverage
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+__tests__
+
+# Documentation
+README.md
+docs
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Misc
+*.md
+LICENSE
