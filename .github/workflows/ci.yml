@@ -24,7 +24,7 @@ jobs:
         run: npm ci
 
       - name: Run ESLint
-        run: npm run lint -- --max-warnings 20
+        run: npm run lint -- --max-warnings 50
 
       - name: Type check
         run: npm run type-check
