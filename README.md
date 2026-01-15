@@ -25,10 +25,10 @@
 
 ```bash
 # Из GitHub Container Registry
-docker pull ghcr.io/bedolaga-dev/bedolaga-cabinet:latest
+docker pull ghcr.io/fr1ngg/bedolaga-cabinet:latest
 
 # Или из Docker Hub
-docker pull bedolaga/bedolaga-cabinet:latest
+docker pull fr1ngg/bedolaga-cabinet:latest
 ```
 
 Затем настройте Caddy/Nginx для проксирования (см. раздел "Настройка прокси для production").
