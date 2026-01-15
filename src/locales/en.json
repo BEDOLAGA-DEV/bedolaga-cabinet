@@ -218,7 +218,9 @@
       "newPackage": "New package",
       "switch": "Change",
       "switched": "Traffic changed"
-    }
+    },
+    "purchasedTraffic": "Purchased Traffic",
+    "trafficResetAt": "Reset"
   },
   "balance": {
     "title": "Balance",

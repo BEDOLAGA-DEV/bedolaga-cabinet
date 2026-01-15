@@ -218,7 +218,9 @@
       "newPackage": "Новый пакет",
       "switch": "Изменить",
       "switched": "Трафик изменён"
-    }
+    },
+    "purchasedTraffic": "Докупленный трафик",
+    "trafficResetAt": "Сброс"
   },
   "balance": {
     "title": "Баланс",
