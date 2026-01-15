@@ -198,9 +198,9 @@ export default function Referral() {
                   </div>
                 </div>
                 {ref.has_paid ? (
-                  <span className="badge-success">Paid</span>
+                  <span className="badge-success">{t('referral.status.paid')}</span>
                 ) : (
-                  <span className="badge-neutral">Pending</span>
+                  <span className="badge-neutral">{t('referral.status.pending')}</span>
                 )}
               </div>
             ))}
@@ -232,7 +232,7 @@ export default function Referral() {
                     {earning.referral_first_name || earning.referral_username || 'Referral'}
                   </div>
                   <div className="text-xs text-dark-500 mt-0.5">
-                    {earning.reason} • {new Date(earning.created_at).toLocaleDateString()}
+                    {t(`referral.reasons.${earning.reason}`, earning.reason)} • {new Date(earning.created_at).toLocaleDateString()}
                   </div>
                 </div>
                 <div className="text-success-400 font-semibold">

@@ -220,7 +220,9 @@ export default function Subscription() {
       if (!selectedTariff) {
         throw new Error('Tariff not selected')
       }
-      const days = useCustomDays ? customDays : (selectedTariffPeriod?.days || 30)
+      // For daily tariffs, always use 1 day
+      const isDailyTariff = selectedTariff.is_daily || (selectedTariff.daily_price_kopeks && selectedTariff.daily_price_kopeks > 0)
+      const days = isDailyTariff ? 1 : (useCustomDays ? customDays : (selectedTariffPeriod?.days || 30))
       const trafficGb = useCustomTraffic && selectedTariff.custom_traffic_enabled ? customTrafficGb : undefined
       return subscriptionApi.purchaseTariff(selectedTariff.id, days, trafficGb)
     },
