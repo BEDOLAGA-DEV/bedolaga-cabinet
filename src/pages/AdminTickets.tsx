@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { adminApi, AdminTicket, AdminTicketDetail, AdminTicketMessage, TicketSettings } from '../api/admin'
+import { adminApi, AdminTicket, AdminTicketDetail, AdminTicketMessage } from '../api/admin'
 import { ticketsApi } from '../api/tickets'
 
 function AdminMessageMedia({ message, t }: { message: AdminTicketMessage; t: (key: string) => string }) {
