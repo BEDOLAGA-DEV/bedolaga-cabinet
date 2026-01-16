@@ -55,6 +55,7 @@ export interface TariffDetail {
   traffic_limit_gb: number
   device_limit: number
   device_price_kopeks: number | null
+  max_device_limit: number | null
   tier_level: number
   display_order: number
   period_prices: PeriodPrice[]
@@ -91,6 +92,7 @@ export interface TariffCreateRequest {
   traffic_limit_gb?: number
   device_limit?: number
   device_price_kopeks?: number
+  max_device_limit?: number
   tier_level?: number
   period_prices?: PeriodPrice[]
   allowed_squads?: string[]
@@ -122,6 +124,7 @@ export interface TariffUpdateRequest {
   traffic_limit_gb?: number
   device_limit?: number
   device_price_kopeks?: number
+  max_device_limit?: number
   tier_level?: number
   display_order?: number
   period_prices?: PeriodPrice[]
