@@ -1046,7 +1046,24 @@ export default function Subscription() {
           )}
 
           {!showTariffPurchase ? (
-            /* Tariff List - current tariff first */
+            <>
+            {/* Promo group discount banner */}
+            {tariffs.some(t => t.promo_group_name) && (
+              <div className="mb-4 p-3 bg-success-500/10 border border-success-500/30 rounded-xl flex items-center gap-3">
+                <div className="w-8 h-8 bg-success-500/20 rounded-lg flex items-center justify-center text-success-400">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
+                  </svg>
+                </div>
+                <div>
+                  <div className="text-sm font-medium text-success-400">
+                    Ваша группа: {tariffs.find(t => t.promo_group_name)?.promo_group_name}
+                  </div>
+                  <div className="text-xs text-dark-400">Персональные скидки применены к ценам</div>
+                </div>
+              </div>
+            )}
+            {/* Tariff List - current tariff first */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {[...tariffs]
                 .sort((a, b) => {
@@ -1098,18 +1115,37 @@ export default function Subscription() {
                       {(() => {
                         // Daily tariff price (is_daily + daily_price_kopeks)
                         const dailyPrice = tariff.daily_price_kopeks ?? tariff.price_per_day_kopeks ?? 0
+                        const originalDailyPrice = tariff.original_daily_price_kopeks || 0
                         if (dailyPrice > 0) {
                           return (
-                            <span>
-                              <span className="text-accent-400 font-medium">{formatPrice(dailyPrice)}</span> / день
+                            <span className="flex items-center gap-2">
+                              <span className="text-accent-400 font-medium">{formatPrice(dailyPrice)}</span>
+                              {originalDailyPrice > dailyPrice && (
+                                <span className="text-dark-500 text-xs line-through">{formatPrice(originalDailyPrice)}</span>
+                              )}
+                              <span>/ день</span>
+                              {tariff.daily_discount_percent && tariff.daily_discount_percent > 0 && (
+                                <span className="px-1.5 py-0.5 bg-success-500/20 text-success-400 text-xs rounded">-{tariff.daily_discount_percent}%</span>
+                              )}
                             </span>
                           )
                         }
                         // Period-based price
                         if (tariff.periods.length > 0) {
+                          const firstPeriod = tariff.periods[0]
+                          const hasDiscount = firstPeriod?.original_price_kopeks && firstPeriod.original_price_kopeks > firstPeriod.price_kopeks
                           return (
-                            <span>
-                              {t('subscription.from')} <span className="text-accent-400 font-medium">{formatPrice(tariff.periods[0]?.price_kopeks || 0)}</span>
+                            <span className="flex items-center gap-2 flex-wrap">
+                              <span>{t('subscription.from')}</span>
+                              <span className="text-accent-400 font-medium">{formatPrice(firstPeriod?.price_kopeks || 0)}</span>
+                              {hasDiscount && (
+                                <>
+                                  <span className="text-dark-500 text-xs line-through">{formatPrice(firstPeriod.original_price_kopeks!)}</span>
+                                  {firstPeriod.discount_percent && (
+                                    <span className="px-1.5 py-0.5 bg-success-500/20 text-success-400 text-xs rounded">-{firstPeriod.discount_percent}%</span>
+                                  )}
+                                </>
+                              )}
                             </span>
                           )
                         }
@@ -1176,6 +1212,7 @@ export default function Subscription() {
                 )
               })}
             </div>
+            </>
           ) : selectedTariff && (
             /* Tariff Purchase Form */
             <div ref={tariffPurchaseRef} className="space-y-6">
@@ -1300,14 +1337,24 @@ export default function Subscription() {
                           setSelectedTariffPeriod(period)
                           setUseCustomDays(false)
                         }}
-                        className={`p-4 rounded-xl border text-left transition-all ${
+                        className={`p-4 rounded-xl border text-left transition-all relative ${
                           selectedTariffPeriod?.days === period.days && !useCustomDays
                             ? 'border-accent-500 bg-accent-500/10'
                             : 'border-dark-700/50 hover:border-dark-600 bg-dark-800/30'
                         }`}
                       >
+                        {period.discount_percent && period.discount_percent > 0 && (
+                          <div className="absolute -top-2 -right-2 px-2 py-0.5 bg-success-500 text-white text-xs font-medium rounded-full">
+                            -{period.discount_percent}%
+                          </div>
+                        )}
                         <div className="text-lg font-semibold text-dark-100">{period.label}</div>
-                        <div className="text-accent-400 font-medium">{formatPrice(period.price_kopeks)}</div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-accent-400 font-medium">{formatPrice(period.price_kopeks)}</span>
+                          {period.original_price_kopeks && period.original_price_kopeks > period.price_kopeks && (
+                            <span className="text-dark-500 text-sm line-through">{formatPrice(period.original_price_kopeks)}</span>
+                          )}
+                        </div>
                         <div className="text-xs text-dark-500 mt-1">{formatPrice(period.price_per_month_kopeks)}/{t('subscription.month')}</div>
                       </button>
                     ))}
