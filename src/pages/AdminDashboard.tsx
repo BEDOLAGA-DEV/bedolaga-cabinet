@@ -227,8 +227,6 @@ export default function AdminDashboard() {
       setLoading(true)
       setError(null)
       const data = await statsApi.getDashboardStats()
-      console.log('Dashboard stats received:', data)
-      console.log('Tariff stats:', data?.tariff_stats)
       setStats(data)
     } catch (err) {
       setError(t('adminDashboard.loadError'))
