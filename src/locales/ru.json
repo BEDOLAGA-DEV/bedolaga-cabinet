@@ -276,6 +276,34 @@
       "telegram_stars": {
         "name": "Telegram Stars",
         "description": "Оплата через Telegram Stars"
+      },
+      "heleket": {
+        "name": "Heleket Crypto",
+        "description": "Оплата криптовалютой через Heleket"
+      },
+      "mulenpay": {
+        "name": "MulenPay",
+        "description": "Оплата через MulenPay"
+      },
+      "pal24": {
+        "name": "PAL24",
+        "description": "Оплата через PAL24"
+      },
+      "platega": {
+        "name": "Platega",
+        "description": "Оплата через Platega"
+      },
+      "wata": {
+        "name": "Wata",
+        "description": "Оплата через Wata"
+      },
+      "cloudpayments": {
+        "name": "CloudPayments",
+        "description": "Оплата банковской картой через CloudPayments"
+      },
+      "freekassa": {
+        "name": "FreeKassa",
+        "description": "Оплата через FreeKassa"
       }
     }
   },

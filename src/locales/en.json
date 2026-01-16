@@ -276,6 +276,34 @@
       "telegram_stars": {
         "name": "Telegram Stars",
         "description": "Pay with Telegram Stars"
+      },
+      "heleket": {
+        "name": "Heleket Crypto",
+        "description": "Pay with cryptocurrency via Heleket"
+      },
+      "mulenpay": {
+        "name": "MulenPay",
+        "description": "Pay via MulenPay"
+      },
+      "pal24": {
+        "name": "PAL24",
+        "description": "Pay via PAL24"
+      },
+      "platega": {
+        "name": "Platega",
+        "description": "Pay via Platega"
+      },
+      "wata": {
+        "name": "Wata",
+        "description": "Pay via Wata"
+      },
+      "cloudpayments": {
+        "name": "CloudPayments",
+        "description": "Pay with bank card via CloudPayments"
+      },
+      "freekassa": {
+        "name": "FreeKassa",
+        "description": "Pay via FreeKassa"
       }
     }
   },
