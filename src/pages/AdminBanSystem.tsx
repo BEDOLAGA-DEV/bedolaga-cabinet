@@ -183,46 +183,56 @@ export default function AdminBanSystem() {
       setError(null)
 
       switch (tab) {
-        case 'dashboard':
+        case 'dashboard': {
           const statsData = await banSystemApi.getStats()
           setStats(statsData)
           break
-        case 'users':
+        }
+        case 'users': {
           const usersData = await banSystemApi.getUsers({ limit: 50 })
           setUsers(usersData)
           break
-        case 'punishments':
+        }
+        case 'punishments': {
           const punishmentsData = await banSystemApi.getPunishments()
           setPunishments(punishmentsData)
           break
-        case 'nodes':
+        }
+        case 'nodes': {
           const nodesData = await banSystemApi.getNodes()
           setNodes(nodesData)
           break
-        case 'agents':
+        }
+        case 'agents': {
           const agentsData = await banSystemApi.getAgents()
           setAgents(agentsData)
           break
-        case 'violations':
+        }
+        case 'violations': {
           const violationsData = await banSystemApi.getTrafficViolations()
           setViolations(violationsData)
           break
-        case 'settings':
+        }
+        case 'settings': {
           const settingsData = await banSystemApi.getSettings()
           setSettings(settingsData)
           break
-        case 'traffic':
+        }
+        case 'traffic': {
           const trafficData = await banSystemApi.getTraffic()
           setTraffic(trafficData)
           break
-        case 'reports':
+        }
+        case 'reports': {
           const reportData = await banSystemApi.getReport(reportHours)
           setReport(reportData)
           break
-        case 'health':
+        }
+        case 'health': {
           const healthData = await banSystemApi.getHealth()
           setHealth(healthData)
           break
+        }
       }
     } catch {
       setError(t('banSystem.loadError'))
