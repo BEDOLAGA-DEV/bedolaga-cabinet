@@ -32,6 +32,8 @@ export interface TariffListItem {
   description: string | null
   is_active: boolean
   is_trial_available: boolean
+  is_daily: boolean
+  daily_price_kopeks: number
   traffic_limit_gb: number
   device_limit: number
   tier_level: number
