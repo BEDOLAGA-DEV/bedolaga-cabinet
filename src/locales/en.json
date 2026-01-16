@@ -557,7 +557,23 @@
         "subscription": "Subscription",
         "connect": "Connect",
         "additional": "Additional"
-      }
+      },
+      "import": "Import",
+      "export": "Export",
+      "importApps": "Import apps from JSON",
+      "exportApps": "Export apps to JSON",
+      "importPreview": "Import Preview",
+      "confirmImport": "Import Apps",
+      "importError": "Invalid JSON file format",
+      "importCreateError": "Failed to create some apps",
+      "noAppsToImport": "No apps to import",
+      "remnaWaveToggle": "Toggle RemnaWave source",
+      "refreshRemnaWave": "Refresh from RemnaWave",
+      "remnaWaveMode": "Showing apps from RemnaWave panel. Read-only mode.",
+      "remnaWaveSettings": "RemnaWave Settings",
+      "remnaWaveConfigUuid": "Config UUID",
+      "remnaWaveConfigUuidHint": "UUID of subscription page config from RemnaWave panel",
+      "availableConfigs": "Available configs"
     },
     "tickets": {
       "title": "Ticket Management",

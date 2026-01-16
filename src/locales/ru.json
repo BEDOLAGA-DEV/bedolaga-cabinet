@@ -557,7 +557,23 @@
         "subscription": "Подписка",
         "connect": "Подключение",
         "additional": "Дополнительно"
-      }
+      },
+      "import": "Импорт",
+      "export": "Экспорт",
+      "importApps": "Импорт приложений из JSON",
+      "exportApps": "Экспорт приложений в JSON",
+      "importPreview": "Предпросмотр импорта",
+      "confirmImport": "Импортировать",
+      "importError": "Неверный формат JSON файла",
+      "importCreateError": "Ошибка при создании приложений",
+      "noAppsToImport": "Нет приложений для импорта",
+      "remnaWaveToggle": "Переключить источник RemnaWave",
+      "refreshRemnaWave": "Обновить данные из RemnaWave",
+      "remnaWaveMode": "Отображаются приложения из панели RemnaWave. Режим только для чтения.",
+      "remnaWaveSettings": "Настройки RemnaWave",
+      "remnaWaveConfigUuid": "UUID конфигурации",
+      "remnaWaveConfigUuidHint": "UUID конфигурации страницы подписки из панели RemnaWave",
+      "availableConfigs": "Доступные конфигурации"
     },
     "tickets": {
       "title": "Управление тикетами",
