@@ -83,6 +83,8 @@ export interface TariffDetail {
   // Дневной тариф
   is_daily: boolean
   daily_price_kopeks: number
+  // Режим сброса трафика
+  traffic_reset_mode: string | null  // 'DAY', 'WEEK', 'MONTH', 'NO_RESET', null = глобальная настройка
   created_at: string
   updated_at: string | null
 }
@@ -117,6 +119,8 @@ export interface TariffCreateRequest {
   // Дневной тариф
   is_daily?: boolean
   daily_price_kopeks?: number
+  // Режим сброса трафика
+  traffic_reset_mode?: string | null
 }
 
 export interface TariffUpdateRequest {
@@ -150,6 +154,8 @@ export interface TariffUpdateRequest {
   // Дневной тариф
   is_daily?: boolean
   daily_price_kopeks?: number
+  // Режим сброса трафика
+  traffic_reset_mode?: string | null
 }
 
 export interface TariffToggleResponse {

@@ -155,6 +155,9 @@ function PeriodTariffModal({ tariff, servers, onSave, onClose, isLoading }: Peri
     tariff?.traffic_topup_packages || {}
   )
 
+  // Режим сброса трафика
+  const [trafficResetMode, setTrafficResetMode] = useState<string | null>(tariff?.traffic_reset_mode || null)
+
   // Новый период для добавления
   const [newPeriodDays, setNewPeriodDays] = useState(30)
   const [newPeriodPrice, setNewPeriodPrice] = useState(300)
@@ -185,6 +188,7 @@ function PeriodTariffModal({ tariff, servers, onSave, onClose, isLoading }: Peri
       max_topup_traffic_gb: maxTopupTrafficGb,
       is_daily: false,
       daily_price_kopeks: 0,
+      traffic_reset_mode: trafficResetMode,
     }
     onSave(data)
   }
@@ -579,6 +583,44 @@ function PeriodTariffModal({ tariff, servers, onSave, onClose, isLoading }: Peri
                   </div>
                 )}
               </div>
+
+              {/* Режим сброса трафика */}
+              <div className="p-4 bg-dark-700/50 rounded-lg">
+                <h4 className="text-sm font-medium text-dark-200 mb-3">Режим сброса трафика</h4>
+                <p className="text-xs text-dark-500 mb-3">
+                  Определяет, когда сбрасывается использованный трафик у подписчиков этого тарифа
+                </p>
+                <div className="space-y-2">
+                  {[
+                    { value: null, label: '🌐 Глобальная настройка', desc: 'Использовать значение из конфига бота' },
+                    { value: 'DAY', label: '📅 Ежедневно', desc: 'Сброс каждый день' },
+                    { value: 'WEEK', label: '📆 Еженедельно', desc: 'Сброс каждую неделю' },
+                    { value: 'MONTH', label: '🗓️ Ежемесячно', desc: 'Сброс каждый месяц' },
+                    { value: 'NO_RESET', label: '🚫 Никогда', desc: 'Трафик не сбрасывается' },
+                  ].map(option => (
+                    <button
+                      key={option.value || 'global'}
+                      type="button"
+                      onClick={() => setTrafficResetMode(option.value)}
+                      className={`w-full p-3 rounded-lg text-left transition-colors ${
+                        trafficResetMode === option.value
+                          ? 'bg-accent-500/20 border border-accent-500'
+                          : 'bg-dark-600 border border-dark-500 hover:border-dark-400'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <span className="text-sm text-dark-100">{option.label}</span>
+                          <p className="text-xs text-dark-400 mt-0.5">{option.desc}</p>
+                        </div>
+                        {trafficResetMode === option.value && (
+                          <span className="text-accent-400"><CheckIcon /></span>
+                        )}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           )}
         </div>
@@ -635,6 +677,9 @@ function DailyTariffModal({ tariff, servers, onSave, onClose, isLoading }: Daily
     tariff?.traffic_topup_packages || {}
   )
 
+  // Режим сброса трафика
+  const [trafficResetMode, setTrafficResetMode] = useState<string | null>(tariff?.traffic_reset_mode || null)
+
   const [activeTab, setActiveTab] = useState<'basic' | 'servers' | 'extra'>('basic')
 
   const handleSubmit = () => {
@@ -661,6 +706,7 @@ function DailyTariffModal({ tariff, servers, onSave, onClose, isLoading }: Daily
       max_topup_traffic_gb: maxTopupTrafficGb,
       is_daily: true,
       daily_price_kopeks: dailyPriceKopeks,
+      traffic_reset_mode: trafficResetMode,
     }
     onSave(data)
   }
@@ -968,6 +1014,44 @@ function DailyTariffModal({ tariff, servers, onSave, onClose, isLoading }: Daily
                     </div>
                   </div>
                 )}
+              </div>
+
+              {/* Режим сброса трафика */}
+              <div className="p-4 bg-dark-700/50 rounded-lg">
+                <h4 className="text-sm font-medium text-dark-200 mb-3">Режим сброса трафика</h4>
+                <p className="text-xs text-dark-500 mb-3">
+                  Определяет, когда сбрасывается использованный трафик у подписчиков этого тарифа
+                </p>
+                <div className="space-y-2">
+                  {[
+                    { value: null, label: '🌐 Глобальная настройка', desc: 'Использовать значение из конфига бота' },
+                    { value: 'DAY', label: '📅 Ежедневно', desc: 'Сброс каждый день' },
+                    { value: 'WEEK', label: '📆 Еженедельно', desc: 'Сброс каждую неделю' },
+                    { value: 'MONTH', label: '🗓️ Ежемесячно', desc: 'Сброс каждый месяц' },
+                    { value: 'NO_RESET', label: '🚫 Никогда', desc: 'Трафик не сбрасывается' },
+                  ].map(option => (
+                    <button
+                      key={option.value || 'global'}
+                      type="button"
+                      onClick={() => setTrafficResetMode(option.value)}
+                      className={`w-full p-3 rounded-lg text-left transition-colors ${
+                        trafficResetMode === option.value
+                          ? 'bg-amber-500/20 border border-amber-500'
+                          : 'bg-dark-600 border border-dark-500 hover:border-dark-400'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <span className="text-sm text-dark-100">{option.label}</span>
+                          <p className="text-xs text-dark-400 mt-0.5">{option.desc}</p>
+                        </div>
+                        {trafficResetMode === option.value && (
+                          <span className="text-amber-400"><CheckIcon /></span>
+                        )}
+                      </div>
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           )}
