@@ -1,3 +1,7 @@
+# Docker Compose для локальной разработки/тестирования
+# Для production используйте готовые образы или настройте Caddy/Nginx
+# См. README.md раздел "Настройка прокси для production"
+
 services:
   cabinet-frontend:
     build:
@@ -11,10 +15,14 @@ services:
         VITE_APP_LOGO: ${VITE_APP_LOGO:-V}
     container_name: cabinet_frontend
     restart: unless-stopped
+    env_file:
+      - .env  # Загрузить переменные из .env файла
     ports:
+      # Маппинг: <хост-порт>:<контейнер-порт>
+      # Внутри контейнера nginx слушает на порту 80
       - "${CABINET_PORT:-3000}:80"
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/"]
       interval: 30s
       timeout: 3s
       retries: 3

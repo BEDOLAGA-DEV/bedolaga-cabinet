@@ -55,10 +55,75 @@ const InfinityIcon = () => (
   </svg>
 )
 
-// Default period options
-const DEFAULT_PERIODS = [7, 14, 30, 90, 180, 365]
+const CalendarIcon = () => (
+  <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+  </svg>
+)
 
-interface TariffModalProps {
+const SunIcon = () => (
+  <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+  </svg>
+)
+
+// Type selection modal
+interface TariffTypeSelectProps {
+  onSelect: (isDaily: boolean) => void
+  onClose: () => void
+}
+
+function TariffTypeSelect({ onSelect, onClose }: TariffTypeSelectProps) {
+  return (
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+      <div className="bg-dark-800 rounded-xl w-full max-w-md overflow-hidden">
+        <div className="flex items-center justify-between p-4 border-b border-dark-700">
+          <h2 className="text-lg font-semibold text-dark-100">Выберите тип тарифа</h2>
+          <button onClick={onClose} className="p-1 hover:bg-dark-700 rounded-lg transition-colors">
+            <XIcon />
+          </button>
+        </div>
+        <div className="p-4 space-y-3">
+          <button
+            onClick={() => onSelect(false)}
+            className="w-full p-4 bg-dark-700 hover:bg-dark-600 rounded-xl transition-colors text-left group"
+          >
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-accent-500/20 rounded-lg text-accent-400 group-hover:bg-accent-500/30">
+                <CalendarIcon />
+              </div>
+              <div>
+                <h3 className="font-medium text-dark-100">Периодный тариф</h3>
+                <p className="text-sm text-dark-400 mt-1">
+                  Оплата за период (7, 30, 90 дней и т.д.). Произвольные периоды и цены.
+                </p>
+              </div>
+            </div>
+          </button>
+          <button
+            onClick={() => onSelect(true)}
+            className="w-full p-4 bg-dark-700 hover:bg-dark-600 rounded-xl transition-colors text-left group"
+          >
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-amber-500/20 rounded-lg text-amber-400 group-hover:bg-amber-500/30">
+                <SunIcon />
+              </div>
+              <div>
+                <h3 className="font-medium text-dark-100">Суточный тариф</h3>
+                <p className="text-sm text-dark-400 mt-1">
+                  Ежедневное списание с баланса. Можно ставить на паузу.
+                </p>
+              </div>
+            </div>
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Period tariff modal
+interface PeriodTariffModalProps {
   tariff?: TariffDetail | null
   servers: ServerInfo[]
   onSave: (data: TariffCreateRequest | TariffUpdateRequest) => void
@@ -66,46 +131,37 @@ interface TariffModalProps {
   isLoading?: boolean
 }
 
-function TariffModal({ tariff, servers, onSave, onClose, isLoading }: TariffModalProps) {
-  const { t } = useTranslation()
+function PeriodTariffModal({ tariff, servers, onSave, onClose, isLoading }: PeriodTariffModalProps) {
   const isEdit = !!tariff
 
   const [name, setName] = useState(tariff?.name || '')
   const [description, setDescription] = useState(tariff?.description || '')
-  const [trafficLimitGb, setTrafficLimitGb] = useState(tariff?.traffic_limit_gb || 0)
+  const [trafficLimitGb, setTrafficLimitGb] = useState(tariff?.traffic_limit_gb || 100)
   const [deviceLimit, setDeviceLimit] = useState(tariff?.device_limit || 1)
   const [devicePriceKopeks, setDevicePriceKopeks] = useState(tariff?.device_price_kopeks || 0)
+  const [maxDeviceLimit, setMaxDeviceLimit] = useState(tariff?.max_device_limit || 0)
   const [tierLevel, setTierLevel] = useState(tariff?.tier_level || 1)
   const [periodPrices, setPeriodPrices] = useState<PeriodPrice[]>(
-    tariff?.period_prices || DEFAULT_PERIODS.map(d => ({ days: d, price_kopeks: 0 }))
+    tariff?.period_prices?.length ? tariff.period_prices : []
   )
   const [selectedSquads, setSelectedSquads] = useState<string[]>(tariff?.allowed_squads || [])
   const [serverTrafficLimits, setServerTrafficLimits] = useState<Record<string, ServerTrafficLimit>>(
     tariff?.server_traffic_limits || {}
   )
-  // Произвольное количество дней
-  const [customDaysEnabled, setCustomDaysEnabled] = useState(tariff?.custom_days_enabled || false)
-  const [pricePerDayKopeks, setPricePerDayKopeks] = useState(tariff?.price_per_day_kopeks || 0)
-  const [minDays, setMinDays] = useState(tariff?.min_days || 1)
-  const [maxDays, setMaxDays] = useState(tariff?.max_days || 365)
-  // Произвольный трафик
-  const [customTrafficEnabled, setCustomTrafficEnabled] = useState(tariff?.custom_traffic_enabled || false)
-  const [trafficPricePerGbKopeks, setTrafficPricePerGbKopeks] = useState(tariff?.traffic_price_per_gb_kopeks || 0)
-  const [minTrafficGb, setMinTrafficGb] = useState(tariff?.min_traffic_gb || 1)
-  const [maxTrafficGb, setMaxTrafficGb] = useState(tariff?.max_traffic_gb || 1000)
   // Докупка трафика
   const [trafficTopupEnabled, setTrafficTopupEnabled] = useState(tariff?.traffic_topup_enabled || false)
   const [maxTopupTrafficGb, setMaxTopupTrafficGb] = useState(tariff?.max_topup_traffic_gb || 0)
   const [trafficTopupPackages, setTrafficTopupPackages] = useState<Record<string, number>>(
     tariff?.traffic_topup_packages || {}
   )
-  // Дневной тариф
-  const [isDaily, setIsDaily] = useState(tariff?.is_daily || false)
-  const [dailyPriceKopeks, setDailyPriceKopeks] = useState(tariff?.daily_price_kopeks || 0)
-  const [activeTab, setActiveTab] = useState<'basic' | 'prices' | 'servers' | 'custom'>('basic')
+
+  // Новый период для добавления
+  const [newPeriodDays, setNewPeriodDays] = useState(30)
+  const [newPeriodPrice, setNewPeriodPrice] = useState(300)
+
+  const [activeTab, setActiveTab] = useState<'basic' | 'periods' | 'servers' | 'extra'>('basic')
 
   const handleSubmit = () => {
-    // Фильтруем лимиты только для выбранных серверов и только если они заданы (> 0)
     const filteredLimits: Record<string, ServerTrafficLimit> = {}
     for (const uuid of selectedSquads) {
       if (serverTrafficLimits[uuid] && serverTrafficLimits[uuid].traffic_limit_gb > 0) {
@@ -119,27 +175,16 @@ function TariffModal({ tariff, servers, onSave, onClose, isLoading }: TariffModa
       traffic_limit_gb: trafficLimitGb,
       device_limit: deviceLimit,
       device_price_kopeks: devicePriceKopeks > 0 ? devicePriceKopeks : undefined,
+      max_device_limit: maxDeviceLimit > 0 ? maxDeviceLimit : undefined,
       tier_level: tierLevel,
       period_prices: periodPrices.filter(p => p.price_kopeks > 0),
       allowed_squads: selectedSquads,
       server_traffic_limits: Object.keys(filteredLimits).length > 0 ? filteredLimits : {},
-      // Произвольное количество дней
-      custom_days_enabled: customDaysEnabled,
-      price_per_day_kopeks: pricePerDayKopeks,
-      min_days: minDays,
-      max_days: maxDays,
-      // Произвольный трафик
-      custom_traffic_enabled: customTrafficEnabled,
-      traffic_price_per_gb_kopeks: trafficPricePerGbKopeks,
-      min_traffic_gb: minTrafficGb,
-      max_traffic_gb: maxTrafficGb,
-      // Докупка трафика
       traffic_topup_enabled: trafficTopupEnabled,
       traffic_topup_packages: trafficTopupPackages,
       max_topup_traffic_gb: maxTopupTrafficGb,
-      // Дневной тариф
-      is_daily: isDaily,
-      daily_price_kopeks: dailyPriceKopeks,
+      is_daily: false,
+      daily_price_kopeks: 0,
     }
     onSave(data)
   }
@@ -159,14 +204,26 @@ function TariffModal({ tariff, servers, onSave, onClose, isLoading }: TariffModa
     )
   }
 
-  const updatePeriodPrice = (days: number, priceKopeks: number) => {
-    setPeriodPrices(prev => {
-      const existing = prev.find(p => p.days === days)
-      if (existing) {
-        return prev.map(p => p.days === days ? { ...p, price_kopeks: priceKopeks } : p)
+  const addPeriod = () => {
+    if (newPeriodDays > 0 && newPeriodPrice > 0) {
+      // Проверяем, нет ли уже такого периода
+      const exists = periodPrices.some(p => p.days === newPeriodDays)
+      if (!exists) {
+        setPeriodPrices(prev => [...prev, { days: newPeriodDays, price_kopeks: newPeriodPrice * 100 }].sort((a, b) => a.days - b.days))
+        setNewPeriodDays(30)
+        setNewPeriodPrice(300)
       }
-      return [...prev, { days, price_kopeks: priceKopeks }]
-    })
+    }
+  }
+
+  const removePeriod = (days: number) => {
+    setPeriodPrices(prev => prev.filter(p => p.days !== days))
+  }
+
+  const updatePeriodPrice = (days: number, priceRubles: number) => {
+    setPeriodPrices(prev => prev.map(p =>
+      p.days === days ? { ...p, price_kopeks: priceRubles * 100 } : p
+    ))
   }
 
   return (
@@ -174,9 +231,17 @@ function TariffModal({ tariff, servers, onSave, onClose, isLoading }: TariffModa
       <div className="bg-dark-800 rounded-xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-dark-700">
-          <h2 className="text-lg font-semibold text-dark-100">
-            {isEdit ? t('admin.tariffs.edit') : t('admin.tariffs.create')}
-          </h2>
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-accent-500/20 rounded-lg text-accent-400">
+              <CalendarIcon />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-dark-100">
+                {isEdit ? 'Редактирование тарифа' : 'Новый периодный тариф'}
+              </h2>
+              <p className="text-xs text-dark-500">Оплата за период</p>
+            </div>
+          </div>
           <button onClick={onClose} className="p-1 hover:bg-dark-700 rounded-lg transition-colors">
             <XIcon />
           </button>
@@ -184,7 +249,7 @@ function TariffModal({ tariff, servers, onSave, onClose, isLoading }: TariffModa
 
         {/* Tabs */}
         <div className="flex border-b border-dark-700">
-          {(['basic', 'prices', 'servers', 'custom'] as const).map(tab => (
+          {(['basic', 'periods', 'servers', 'extra'] as const).map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -194,10 +259,10 @@ function TariffModal({ tariff, servers, onSave, onClose, isLoading }: TariffModa
                   : 'text-dark-400 hover:text-dark-200'
               }`}
             >
-              {tab === 'basic' && t('admin.tariffs.tabs.basic')}
-              {tab === 'prices' && t('admin.tariffs.tabs.prices')}
-              {tab === 'servers' && t('admin.tariffs.tabs.servers')}
-              {tab === 'custom' && 'Гибкие опции'}
+              {tab === 'basic' && 'Основное'}
+              {tab === 'periods' && 'Периоды'}
+              {tab === 'servers' && 'Серверы'}
+              {tab === 'extra' && 'Дополнительно'}
             </button>
           ))}
         </div>
@@ -208,31 +273,31 @@ function TariffModal({ tariff, servers, onSave, onClose, isLoading }: TariffModa
             <div className="space-y-4">
               {/* Name */}
               <div>
-                <label className="block text-sm text-dark-300 mb-1">{t('admin.tariffs.name')}</label>
+                <label className="block text-sm text-dark-300 mb-1">Название тарифа</label>
                 <input
                   type="text"
                   value={name}
                   onChange={e => setName(e.target.value)}
                   className="w-full px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-dark-100 focus:outline-none focus:border-accent-500"
-                  placeholder={t('admin.tariffs.namePlaceholder')}
+                  placeholder="Например: Стандарт"
                 />
               </div>
 
               {/* Description */}
               <div>
-                <label className="block text-sm text-dark-300 mb-1">{t('admin.tariffs.description')}</label>
+                <label className="block text-sm text-dark-300 mb-1">Описание</label>
                 <textarea
                   value={description}
                   onChange={e => setDescription(e.target.value)}
                   className="w-full px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-dark-100 focus:outline-none focus:border-accent-500 resize-none"
-                  rows={3}
-                  placeholder={t('admin.tariffs.descriptionPlaceholder')}
+                  rows={2}
+                  placeholder="Краткое описание тарифа"
                 />
               </div>
 
               {/* Traffic Limit */}
               <div>
-                <label className="block text-sm text-dark-300 mb-1">{t('admin.tariffs.trafficLimit')}</label>
+                <label className="block text-sm text-dark-300 mb-1">Лимит трафика</label>
                 <div className="flex items-center gap-2">
                   <input
                     type="number"
@@ -241,20 +306,20 @@ function TariffModal({ tariff, servers, onSave, onClose, isLoading }: TariffModa
                     className="w-32 px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-dark-100 focus:outline-none focus:border-accent-500"
                     min={0}
                   />
-                  <span className="text-dark-400">GB</span>
+                  <span className="text-dark-400">ГБ</span>
                   {trafficLimitGb === 0 && (
                     <span className="flex items-center gap-1 text-sm text-success-500">
                       <InfinityIcon />
-                      {t('admin.tariffs.unlimited')}
+                      Безлимит
                     </span>
                   )}
                 </div>
-                <p className="text-xs text-dark-500 mt-1">{t('admin.tariffs.trafficHint')}</p>
+                <p className="text-xs text-dark-500 mt-1">0 = безлимитный трафик</p>
               </div>
 
               {/* Device Limit */}
               <div>
-                <label className="block text-sm text-dark-300 mb-1">{t('admin.tariffs.deviceLimit')}</label>
+                <label className="block text-sm text-dark-300 mb-1">Устройств в тарифе</label>
                 <input
                   type="number"
                   value={deviceLimit}
@@ -266,7 +331,7 @@ function TariffModal({ tariff, servers, onSave, onClose, isLoading }: TariffModa
 
               {/* Tier Level */}
               <div>
-                <label className="block text-sm text-dark-300 mb-1">{t('admin.tariffs.tierLevel')}</label>
+                <label className="block text-sm text-dark-300 mb-1">Уровень тарифа</label>
                 <input
                   type="number"
                   value={tierLevel}
@@ -275,73 +340,95 @@ function TariffModal({ tariff, servers, onSave, onClose, isLoading }: TariffModa
                   min={1}
                   max={10}
                 />
-                <p className="text-xs text-dark-500 mt-1">{t('admin.tariffs.tierHint')}</p>
+                <p className="text-xs text-dark-500 mt-1">Влияет на доступность перехода между тарифами</p>
               </div>
             </div>
           )}
 
-          {activeTab === 'prices' && (
-            <div className="space-y-3">
-              <p className="text-sm text-dark-400 mb-4">{t('admin.tariffs.pricesHint')}</p>
-              {DEFAULT_PERIODS.map(days => {
-                const price = periodPrices.find(p => p.days === days)?.price_kopeks || 0
-                const isEnabled = price > 0
-                return (
-                  <div
-                    key={days}
-                    className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${
-                      isEnabled
-                        ? 'bg-dark-700/50'
-                        : 'bg-dark-800/30 opacity-60'
-                    }`}
-                  >
-                    {/* Toggle */}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (isEnabled) {
-                          updatePeriodPrice(days, 0)
-                        } else {
-                          updatePeriodPrice(days, 10000) // Default 100₽
-                        }
-                      }}
-                      className={`w-10 h-6 rounded-full transition-colors relative ${
-                        isEnabled ? 'bg-accent-500' : 'bg-dark-600'
-                      }`}
-                    >
-                      <span
-                        className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${
-                          isEnabled ? 'left-5' : 'left-1'
-                        }`}
-                      />
-                    </button>
-                    <span className="w-20 text-dark-300">{days} {t('admin.tariffs.days')}</span>
+          {activeTab === 'periods' && (
+            <div className="space-y-4">
+              <p className="text-sm text-dark-400">
+                Добавьте периоды и цены для тарифа. Пользователи смогут выбирать из добавленных периодов.
+              </p>
+
+              {/* Add new period */}
+              <div className="p-4 bg-dark-700/50 rounded-lg border border-dashed border-dark-600">
+                <h4 className="text-sm font-medium text-dark-300 mb-3">Добавить период</h4>
+                <div className="flex items-end gap-3 flex-wrap">
+                  <div>
+                    <label className="block text-xs text-dark-500 mb-1">Дней</label>
                     <input
                       type="number"
-                      value={price / 100}
-                      onChange={e => updatePeriodPrice(days, Math.max(0, parseFloat(e.target.value) || 0) * 100)}
-                      disabled={!isEnabled}
-                      className={`w-32 px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-dark-100 focus:outline-none focus:border-accent-500 ${
-                        !isEnabled ? 'opacity-50 cursor-not-allowed' : ''
-                      }`}
-                      min={0}
-                      step={1}
+                      value={newPeriodDays}
+                      onChange={e => setNewPeriodDays(Math.max(1, parseInt(e.target.value) || 1))}
+                      className="w-24 px-3 py-2 bg-dark-600 border border-dark-500 rounded-lg text-dark-100 focus:outline-none focus:border-accent-500"
+                      min={1}
                     />
-                    <span className="text-dark-400">₽</span>
-                    {!isEnabled && (
-                      <span className="text-xs text-dark-500">{t('admin.tariffs.periodDisabled')}</span>
-                    )}
                   </div>
-                )
-              })}
+                  <div>
+                    <label className="block text-xs text-dark-500 mb-1">Цена (₽)</label>
+                    <input
+                      type="number"
+                      value={newPeriodPrice}
+                      onChange={e => setNewPeriodPrice(Math.max(1, parseInt(e.target.value) || 1))}
+                      className="w-28 px-3 py-2 bg-dark-600 border border-dark-500 rounded-lg text-dark-100 focus:outline-none focus:border-accent-500"
+                      min={1}
+                    />
+                  </div>
+                  <button
+                    onClick={addPeriod}
+                    disabled={periodPrices.some(p => p.days === newPeriodDays)}
+                    className="px-4 py-2 bg-accent-500 text-white rounded-lg hover:bg-accent-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  >
+                    <PlusIcon />
+                    Добавить
+                  </button>
+                </div>
+              </div>
+
+              {/* Period list */}
+              {periodPrices.length === 0 ? (
+                <div className="text-center py-8 text-dark-500">
+                  Нет добавленных периодов. Добавьте хотя бы один период.
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {periodPrices.map(period => (
+                    <div
+                      key={period.days}
+                      className="flex items-center gap-3 p-3 bg-dark-700/50 rounded-lg"
+                    >
+                      <div className="w-20 text-dark-300 font-medium">{period.days} дн.</div>
+                      <input
+                        type="number"
+                        value={period.price_kopeks / 100}
+                        onChange={e => updatePeriodPrice(period.days, Math.max(0, parseFloat(e.target.value) || 0))}
+                        className="w-28 px-3 py-2 bg-dark-600 border border-dark-500 rounded-lg text-dark-100 focus:outline-none focus:border-accent-500"
+                        min={0}
+                        step={1}
+                      />
+                      <span className="text-dark-400">₽</span>
+                      <div className="flex-1" />
+                      <button
+                        onClick={() => removePeriod(period.days)}
+                        className="p-2 text-dark-400 hover:text-error-400 hover:bg-error-500/20 rounded-lg transition-colors"
+                      >
+                        <TrashIcon />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
           {activeTab === 'servers' && (
             <div className="space-y-2">
-              <p className="text-sm text-dark-400 mb-4">{t('admin.tariffs.serversHint')}</p>
+              <p className="text-sm text-dark-400 mb-4">
+                Выберите серверы, доступные на этом тарифе. Можно задать индивидуальный лимит трафика для каждого.
+              </p>
               {servers.length === 0 ? (
-                <p className="text-dark-500 text-center py-4">{t('admin.tariffs.noServers')}</p>
+                <p className="text-dark-500 text-center py-4">Нет доступных серверов</p>
               ) : (
                 servers.map(server => {
                   const isSelected = selectedSquads.includes(server.squad_uuid)
@@ -371,10 +458,9 @@ function TariffModal({ tariff, servers, onSave, onClose, isLoading }: TariffModa
                           <span className="text-xs text-dark-500">{server.country_code}</span>
                         )}
                       </div>
-                      {/* Лимит трафика для сервера */}
                       {isSelected && (
                         <div className="mt-2 ml-8 flex items-center gap-2">
-                          <span className="text-xs text-dark-400">{t('admin.tariffs.serverTrafficLimit')}:</span>
+                          <span className="text-xs text-dark-400">Лимит трафика:</span>
                           <input
                             type="number"
                             value={serverLimit}
@@ -387,9 +473,9 @@ function TariffModal({ tariff, servers, onSave, onClose, isLoading }: TariffModa
                             min={0}
                             placeholder="0"
                           />
-                          <span className="text-xs text-dark-400">GB</span>
+                          <span className="text-xs text-dark-400">ГБ</span>
                           {serverLimit === 0 && (
-                            <span className="text-xs text-dark-500">({t('admin.tariffs.useDefault')})</span>
+                            <span className="text-xs text-dark-500">(использовать общий)</span>
                           )}
                         </div>
                       )}
@@ -400,179 +486,43 @@ function TariffModal({ tariff, servers, onSave, onClose, isLoading }: TariffModa
             </div>
           )}
 
-          {activeTab === 'custom' && (
+          {activeTab === 'extra' && (
             <div className="space-y-6">
-              {/* Дневной тариф */}
-              <div className="p-4 bg-dark-700/50 rounded-lg border border-amber-500/30">
-                <div className="flex items-center justify-between mb-3">
-                  <div>
-                    <h4 className="text-sm font-medium text-amber-400">🌙 Дневной тариф</h4>
-                    <p className="text-xs text-dark-500 mt-1">Ежедневное списание с баланса. Можно ставить на паузу.</p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setIsDaily(!isDaily)}
-                    className={`w-10 h-6 rounded-full transition-colors relative ${
-                      isDaily ? 'bg-amber-500' : 'bg-dark-600'
-                    }`}
-                  >
-                    <span
-                      className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${
-                        isDaily ? 'left-5' : 'left-1'
-                      }`}
-                    />
-                  </button>
-                </div>
-                {isDaily && (
-                  <div className="flex items-center gap-3">
-                    <span className="text-sm text-dark-400 w-32">Цена за день:</span>
-                    <input
-                      type="number"
-                      value={dailyPriceKopeks / 100}
-                      onChange={e => setDailyPriceKopeks(Math.max(0, parseFloat(e.target.value) || 0) * 100)}
-                      className="w-24 px-3 py-2 bg-dark-600 border border-dark-500 rounded-lg text-dark-100 focus:outline-none focus:border-amber-500"
-                      min={0}
-                      step={0.1}
-                    />
-                    <span className="text-dark-400">₽/день</span>
-                  </div>
-                )}
-              </div>
-
-              {/* Цена за доп. устройство */}
+              {/* Докупка устройств */}
               <div className="p-4 bg-dark-700/50 rounded-lg">
                 <h4 className="text-sm font-medium text-dark-200 mb-3">Докупка устройств</h4>
-                <div className="flex items-center gap-3">
-                  <span className="text-sm text-dark-400">Цена за устройство (30 дней):</span>
-                  <input
-                    type="number"
-                    value={devicePriceKopeks / 100}
-                    onChange={e => setDevicePriceKopeks(Math.max(0, parseFloat(e.target.value) || 0) * 100)}
-                    className="w-24 px-3 py-2 bg-dark-600 border border-dark-500 rounded-lg text-dark-100 focus:outline-none focus:border-accent-500"
-                    min={0}
-                    step={1}
-                  />
-                  <span className="text-dark-400">₽</span>
-                </div>
-                <p className="text-xs text-dark-500 mt-1">0 = докупка недоступна</p>
-              </div>
-
-              {/* Произвольное количество дней */}
-              <div className="p-4 bg-dark-700/50 rounded-lg">
-                <div className="flex items-center justify-between mb-3">
-                  <h4 className="text-sm font-medium text-dark-200">Произвольное кол-во дней</h4>
-                  <button
-                    type="button"
-                    onClick={() => setCustomDaysEnabled(!customDaysEnabled)}
-                    className={`w-10 h-6 rounded-full transition-colors relative ${
-                      customDaysEnabled ? 'bg-accent-500' : 'bg-dark-600'
-                    }`}
-                  >
-                    <span
-                      className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${
-                        customDaysEnabled ? 'left-5' : 'left-1'
-                      }`}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm text-dark-400 w-48">Цена за устройство (30 дней):</span>
+                    <input
+                      type="number"
+                      value={devicePriceKopeks / 100}
+                      onChange={e => setDevicePriceKopeks(Math.max(0, parseFloat(e.target.value) || 0) * 100)}
+                      className="w-24 px-3 py-2 bg-dark-600 border border-dark-500 rounded-lg text-dark-100 focus:outline-none focus:border-accent-500"
+                      min={0}
+                      step={1}
                     />
-                  </button>
-                </div>
-                {customDaysEnabled && (
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-3">
-                      <span className="text-sm text-dark-400 w-32">Цена за день:</span>
-                      <input
-                        type="number"
-                        value={pricePerDayKopeks / 100}
-                        onChange={e => setPricePerDayKopeks(Math.max(0, parseFloat(e.target.value) || 0) * 100)}
-                        className="w-24 px-3 py-2 bg-dark-600 border border-dark-500 rounded-lg text-dark-100 focus:outline-none focus:border-accent-500"
-                        min={0}
-                        step={0.1}
-                      />
-                      <span className="text-dark-400">₽</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <span className="text-sm text-dark-400 w-32">Мин. дней:</span>
-                      <input
-                        type="number"
-                        value={minDays}
-                        onChange={e => setMinDays(Math.max(1, parseInt(e.target.value) || 1))}
-                        className="w-24 px-3 py-2 bg-dark-600 border border-dark-500 rounded-lg text-dark-100 focus:outline-none focus:border-accent-500"
-                        min={1}
-                      />
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <span className="text-sm text-dark-400 w-32">Макс. дней:</span>
-                      <input
-                        type="number"
-                        value={maxDays}
-                        onChange={e => setMaxDays(Math.max(1, parseInt(e.target.value) || 365))}
-                        className="w-24 px-3 py-2 bg-dark-600 border border-dark-500 rounded-lg text-dark-100 focus:outline-none focus:border-accent-500"
-                        min={1}
-                      />
-                    </div>
+                    <span className="text-dark-400">₽</span>
                   </div>
-                )}
-              </div>
-
-              {/* Произвольный трафик */}
-              <div className="p-4 bg-dark-700/50 rounded-lg">
-                <div className="flex items-center justify-between mb-3">
-                  <h4 className="text-sm font-medium text-dark-200">Произвольный трафик при покупке</h4>
-                  <button
-                    type="button"
-                    onClick={() => setCustomTrafficEnabled(!customTrafficEnabled)}
-                    className={`w-10 h-6 rounded-full transition-colors relative ${
-                      customTrafficEnabled ? 'bg-accent-500' : 'bg-dark-600'
-                    }`}
-                  >
-                    <span
-                      className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${
-                        customTrafficEnabled ? 'left-5' : 'left-1'
-                      }`}
+                  <p className="text-xs text-dark-500">0 = докупка недоступна</p>
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm text-dark-400 w-48">Макс. устройств на тарифе:</span>
+                    <input
+                      type="number"
+                      value={maxDeviceLimit}
+                      onChange={e => setMaxDeviceLimit(Math.max(0, parseInt(e.target.value) || 0))}
+                      className="w-24 px-3 py-2 bg-dark-600 border border-dark-500 rounded-lg text-dark-100 focus:outline-none focus:border-accent-500"
+                      min={0}
                     />
-                  </button>
-                </div>
-                {customTrafficEnabled && (
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-3">
-                      <span className="text-sm text-dark-400 w-32">Цена за 1 ГБ:</span>
-                      <input
-                        type="number"
-                        value={trafficPricePerGbKopeks / 100}
-                        onChange={e => setTrafficPricePerGbKopeks(Math.max(0, parseFloat(e.target.value) || 0) * 100)}
-                        className="w-24 px-3 py-2 bg-dark-600 border border-dark-500 rounded-lg text-dark-100 focus:outline-none focus:border-accent-500"
-                        min={0}
-                        step={0.1}
-                      />
-                      <span className="text-dark-400">₽</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <span className="text-sm text-dark-400 w-32">Мин. ГБ:</span>
-                      <input
-                        type="number"
-                        value={minTrafficGb}
-                        onChange={e => setMinTrafficGb(Math.max(1, parseInt(e.target.value) || 1))}
-                        className="w-24 px-3 py-2 bg-dark-600 border border-dark-500 rounded-lg text-dark-100 focus:outline-none focus:border-accent-500"
-                        min={1}
-                      />
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <span className="text-sm text-dark-400 w-32">Макс. ГБ:</span>
-                      <input
-                        type="number"
-                        value={maxTrafficGb}
-                        onChange={e => setMaxTrafficGb(Math.max(1, parseInt(e.target.value) || 1000))}
-                        className="w-24 px-3 py-2 bg-dark-600 border border-dark-500 rounded-lg text-dark-100 focus:outline-none focus:border-accent-500"
-                        min={1}
-                      />
-                    </div>
                   </div>
-                )}
+                  <p className="text-xs text-dark-500">0 = без ограничений</p>
+                </div>
               </div>
 
               {/* Докупка трафика */}
               <div className="p-4 bg-dark-700/50 rounded-lg">
                 <div className="flex items-center justify-between mb-3">
-                  <h4 className="text-sm font-medium text-dark-200">Докупка трафика (после покупки)</h4>
+                  <h4 className="text-sm font-medium text-dark-200">Докупка трафика</h4>
                   <button
                     type="button"
                     onClick={() => setTrafficTopupEnabled(!trafficTopupEnabled)}
@@ -602,7 +552,7 @@ function TariffModal({ tariff, servers, onSave, onClose, isLoading }: TariffModa
                       <span className="text-xs text-dark-500">(0 = без ограничений)</span>
                     </div>
                     <div className="mt-3">
-                      <span className="text-sm text-dark-400">Пакеты трафика (ГБ: цена ₽):</span>
+                      <span className="text-sm text-dark-400">Пакеты трафика:</span>
                       <div className="mt-2 grid grid-cols-2 gap-2">
                         {[5, 10, 20, 50].map(gb => (
                           <div key={gb} className="flex items-center gap-2">
@@ -639,14 +589,404 @@ function TariffModal({ tariff, servers, onSave, onClose, isLoading }: TariffModa
             onClick={onClose}
             className="px-4 py-2 text-dark-300 hover:text-dark-100 transition-colors"
           >
-            {t('common.cancel')}
+            Отмена
           </button>
           <button
             onClick={handleSubmit}
-            disabled={!name || isLoading}
+            disabled={!name || periodPrices.length === 0 || isLoading}
             className="px-4 py-2 bg-accent-500 text-white rounded-lg hover:bg-accent-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isLoading ? t('common.loading') : t('common.save')}
+            {isLoading ? 'Сохранение...' : 'Сохранить'}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Daily tariff modal
+interface DailyTariffModalProps {
+  tariff?: TariffDetail | null
+  servers: ServerInfo[]
+  onSave: (data: TariffCreateRequest | TariffUpdateRequest) => void
+  onClose: () => void
+  isLoading?: boolean
+}
+
+function DailyTariffModal({ tariff, servers, onSave, onClose, isLoading }: DailyTariffModalProps) {
+  const isEdit = !!tariff
+
+  const [name, setName] = useState(tariff?.name || '')
+  const [description, setDescription] = useState(tariff?.description || '')
+  const [trafficLimitGb, setTrafficLimitGb] = useState(tariff?.traffic_limit_gb || 100)
+  const [deviceLimit, setDeviceLimit] = useState(tariff?.device_limit || 1)
+  const [devicePriceKopeks, setDevicePriceKopeks] = useState(tariff?.device_price_kopeks || 0)
+  const [maxDeviceLimit, setMaxDeviceLimit] = useState(tariff?.max_device_limit || 0)
+  const [tierLevel, setTierLevel] = useState(tariff?.tier_level || 1)
+  const [dailyPriceKopeks, setDailyPriceKopeks] = useState(tariff?.daily_price_kopeks || 0)
+  const [selectedSquads, setSelectedSquads] = useState<string[]>(tariff?.allowed_squads || [])
+  const [serverTrafficLimits, setServerTrafficLimits] = useState<Record<string, ServerTrafficLimit>>(
+    tariff?.server_traffic_limits || {}
+  )
+  // Докупка трафика
+  const [trafficTopupEnabled, setTrafficTopupEnabled] = useState(tariff?.traffic_topup_enabled || false)
+  const [maxTopupTrafficGb, setMaxTopupTrafficGb] = useState(tariff?.max_topup_traffic_gb || 0)
+  const [trafficTopupPackages, setTrafficTopupPackages] = useState<Record<string, number>>(
+    tariff?.traffic_topup_packages || {}
+  )
+
+  const [activeTab, setActiveTab] = useState<'basic' | 'servers' | 'extra'>('basic')
+
+  const handleSubmit = () => {
+    const filteredLimits: Record<string, ServerTrafficLimit> = {}
+    for (const uuid of selectedSquads) {
+      if (serverTrafficLimits[uuid] && serverTrafficLimits[uuid].traffic_limit_gb > 0) {
+        filteredLimits[uuid] = serverTrafficLimits[uuid]
+      }
+    }
+
+    const data: TariffCreateRequest | TariffUpdateRequest = {
+      name,
+      description: description || undefined,
+      traffic_limit_gb: trafficLimitGb,
+      device_limit: deviceLimit,
+      device_price_kopeks: devicePriceKopeks > 0 ? devicePriceKopeks : undefined,
+      max_device_limit: maxDeviceLimit > 0 ? maxDeviceLimit : undefined,
+      tier_level: tierLevel,
+      period_prices: [],
+      allowed_squads: selectedSquads,
+      server_traffic_limits: Object.keys(filteredLimits).length > 0 ? filteredLimits : {},
+      traffic_topup_enabled: trafficTopupEnabled,
+      traffic_topup_packages: trafficTopupPackages,
+      max_topup_traffic_gb: maxTopupTrafficGb,
+      is_daily: true,
+      daily_price_kopeks: dailyPriceKopeks,
+    }
+    onSave(data)
+  }
+
+  const updateServerTrafficLimit = (uuid: string, limitGb: number) => {
+    setServerTrafficLimits(prev => ({
+      ...prev,
+      [uuid]: { traffic_limit_gb: limitGb }
+    }))
+  }
+
+  const toggleServer = (uuid: string) => {
+    setSelectedSquads(prev =>
+      prev.includes(uuid)
+        ? prev.filter(s => s !== uuid)
+        : [...prev, uuid]
+    )
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+      <div className="bg-dark-800 rounded-xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+        {/* Header */}
+        <div className="flex items-center justify-between p-4 border-b border-dark-700">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-amber-500/20 rounded-lg text-amber-400">
+              <SunIcon />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-dark-100">
+                {isEdit ? 'Редактирование тарифа' : 'Новый суточный тариф'}
+              </h2>
+              <p className="text-xs text-dark-500">Ежедневное списание</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="p-1 hover:bg-dark-700 rounded-lg transition-colors">
+            <XIcon />
+          </button>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex border-b border-dark-700">
+          {(['basic', 'servers', 'extra'] as const).map(tab => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-4 py-2 text-sm font-medium transition-colors ${
+                activeTab === tab
+                  ? 'text-amber-400 border-b-2 border-amber-400'
+                  : 'text-dark-400 hover:text-dark-200'
+              }`}
+            >
+              {tab === 'basic' && 'Основное'}
+              {tab === 'servers' && 'Серверы'}
+              {tab === 'extra' && 'Дополнительно'}
+            </button>
+          ))}
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto p-4">
+          {activeTab === 'basic' && (
+            <div className="space-y-4">
+              {/* Name */}
+              <div>
+                <label className="block text-sm text-dark-300 mb-1">Название тарифа</label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={e => setName(e.target.value)}
+                  className="w-full px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-dark-100 focus:outline-none focus:border-amber-500"
+                  placeholder="Например: Суточный"
+                />
+              </div>
+
+              {/* Description */}
+              <div>
+                <label className="block text-sm text-dark-300 mb-1">Описание</label>
+                <textarea
+                  value={description}
+                  onChange={e => setDescription(e.target.value)}
+                  className="w-full px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-dark-100 focus:outline-none focus:border-amber-500 resize-none"
+                  rows={2}
+                  placeholder="Краткое описание тарифа"
+                />
+              </div>
+
+              {/* Daily Price */}
+              <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-lg">
+                <label className="block text-sm text-amber-400 font-medium mb-2">Цена за день</label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    value={dailyPriceKopeks / 100}
+                    onChange={e => setDailyPriceKopeks(Math.max(0, parseFloat(e.target.value) || 0) * 100)}
+                    className="w-32 px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-dark-100 focus:outline-none focus:border-amber-500"
+                    min={0}
+                    step={0.1}
+                  />
+                  <span className="text-dark-400">₽/день</span>
+                </div>
+                <p className="text-xs text-dark-500 mt-2">Списывается ежедневно с баланса пользователя</p>
+              </div>
+
+              {/* Traffic Limit */}
+              <div>
+                <label className="block text-sm text-dark-300 mb-1">Лимит трафика</label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    value={trafficLimitGb}
+                    onChange={e => setTrafficLimitGb(Math.max(0, parseInt(e.target.value) || 0))}
+                    className="w-32 px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-dark-100 focus:outline-none focus:border-amber-500"
+                    min={0}
+                  />
+                  <span className="text-dark-400">ГБ</span>
+                  {trafficLimitGb === 0 && (
+                    <span className="flex items-center gap-1 text-sm text-success-500">
+                      <InfinityIcon />
+                      Безлимит
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Device Limit */}
+              <div>
+                <label className="block text-sm text-dark-300 mb-1">Устройств в тарифе</label>
+                <input
+                  type="number"
+                  value={deviceLimit}
+                  onChange={e => setDeviceLimit(Math.max(1, parseInt(e.target.value) || 1))}
+                  className="w-32 px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-dark-100 focus:outline-none focus:border-amber-500"
+                  min={1}
+                />
+              </div>
+
+              {/* Tier Level */}
+              <div>
+                <label className="block text-sm text-dark-300 mb-1">Уровень тарифа</label>
+                <input
+                  type="number"
+                  value={tierLevel}
+                  onChange={e => setTierLevel(Math.min(10, Math.max(1, parseInt(e.target.value) || 1)))}
+                  className="w-32 px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-dark-100 focus:outline-none focus:border-amber-500"
+                  min={1}
+                  max={10}
+                />
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'servers' && (
+            <div className="space-y-2">
+              <p className="text-sm text-dark-400 mb-4">
+                Выберите серверы, доступные на этом тарифе.
+              </p>
+              {servers.length === 0 ? (
+                <p className="text-dark-500 text-center py-4">Нет доступных серверов</p>
+              ) : (
+                servers.map(server => {
+                  const isSelected = selectedSquads.includes(server.squad_uuid)
+                  const serverLimit = serverTrafficLimits[server.squad_uuid]?.traffic_limit_gb || 0
+                  return (
+                    <div
+                      key={server.id}
+                      className={`p-3 rounded-lg transition-colors ${
+                        isSelected
+                          ? 'bg-amber-500/20 border border-amber-500/50'
+                          : 'bg-dark-700 hover:bg-dark-600 border border-transparent'
+                      }`}
+                    >
+                      <div
+                        onClick={() => toggleServer(server.squad_uuid)}
+                        className="flex items-center gap-3 cursor-pointer"
+                      >
+                        <div className={`w-5 h-5 rounded flex items-center justify-center ${
+                          isSelected
+                            ? 'bg-amber-500 text-white'
+                            : 'bg-dark-600'
+                        }`}>
+                          {isSelected && <CheckIcon />}
+                        </div>
+                        <span className="text-dark-200 flex-1">{server.display_name}</span>
+                        {server.country_code && (
+                          <span className="text-xs text-dark-500">{server.country_code}</span>
+                        )}
+                      </div>
+                      {isSelected && (
+                        <div className="mt-2 ml-8 flex items-center gap-2">
+                          <span className="text-xs text-dark-400">Лимит трафика:</span>
+                          <input
+                            type="number"
+                            value={serverLimit}
+                            onClick={e => e.stopPropagation()}
+                            onChange={e => {
+                              e.stopPropagation()
+                              updateServerTrafficLimit(server.squad_uuid, Math.max(0, parseInt(e.target.value) || 0))
+                            }}
+                            className="w-20 px-2 py-1 bg-dark-600 border border-dark-500 rounded text-sm text-dark-100 focus:outline-none focus:border-amber-500"
+                            min={0}
+                          />
+                          <span className="text-xs text-dark-400">ГБ</span>
+                          {serverLimit === 0 && (
+                            <span className="text-xs text-dark-500">(использовать общий)</span>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )
+                })
+              )}
+            </div>
+          )}
+
+          {activeTab === 'extra' && (
+            <div className="space-y-6">
+              {/* Докупка устройств */}
+              <div className="p-4 bg-dark-700/50 rounded-lg">
+                <h4 className="text-sm font-medium text-dark-200 mb-3">Докупка устройств</h4>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm text-dark-400 w-48">Цена за устройство (30 дней):</span>
+                    <input
+                      type="number"
+                      value={devicePriceKopeks / 100}
+                      onChange={e => setDevicePriceKopeks(Math.max(0, parseFloat(e.target.value) || 0) * 100)}
+                      className="w-24 px-3 py-2 bg-dark-600 border border-dark-500 rounded-lg text-dark-100 focus:outline-none focus:border-amber-500"
+                      min={0}
+                      step={1}
+                    />
+                    <span className="text-dark-400">₽</span>
+                  </div>
+                  <p className="text-xs text-dark-500">0 = докупка недоступна</p>
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm text-dark-400 w-48">Макс. устройств на тарифе:</span>
+                    <input
+                      type="number"
+                      value={maxDeviceLimit}
+                      onChange={e => setMaxDeviceLimit(Math.max(0, parseInt(e.target.value) || 0))}
+                      className="w-24 px-3 py-2 bg-dark-600 border border-dark-500 rounded-lg text-dark-100 focus:outline-none focus:border-amber-500"
+                      min={0}
+                    />
+                  </div>
+                  <p className="text-xs text-dark-500">0 = без ограничений</p>
+                </div>
+              </div>
+
+              {/* Докупка трафика */}
+              <div className="p-4 bg-dark-700/50 rounded-lg">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-sm font-medium text-dark-200">Докупка трафика</h4>
+                  <button
+                    type="button"
+                    onClick={() => setTrafficTopupEnabled(!trafficTopupEnabled)}
+                    className={`w-10 h-6 rounded-full transition-colors relative ${
+                      trafficTopupEnabled ? 'bg-amber-500' : 'bg-dark-600'
+                    }`}
+                  >
+                    <span
+                      className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${
+                        trafficTopupEnabled ? 'left-5' : 'left-1'
+                      }`}
+                    />
+                  </button>
+                </div>
+                {trafficTopupEnabled && (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm text-dark-400 w-32">Макс. лимит:</span>
+                      <input
+                        type="number"
+                        value={maxTopupTrafficGb}
+                        onChange={e => setMaxTopupTrafficGb(Math.max(0, parseInt(e.target.value) || 0))}
+                        className="w-24 px-3 py-2 bg-dark-600 border border-dark-500 rounded-lg text-dark-100 focus:outline-none focus:border-amber-500"
+                        min={0}
+                      />
+                      <span className="text-dark-400">ГБ</span>
+                      <span className="text-xs text-dark-500">(0 = без ограничений)</span>
+                    </div>
+                    <div className="mt-3">
+                      <span className="text-sm text-dark-400">Пакеты трафика:</span>
+                      <div className="mt-2 grid grid-cols-2 gap-2">
+                        {[5, 10, 20, 50].map(gb => (
+                          <div key={gb} className="flex items-center gap-2">
+                            <span className="text-sm text-dark-300 w-12">{gb} ГБ:</span>
+                            <input
+                              type="number"
+                              value={(trafficTopupPackages[String(gb)] || 0) / 100}
+                              onChange={e => {
+                                const price = Math.max(0, parseFloat(e.target.value) || 0) * 100
+                                setTrafficTopupPackages(prev => ({
+                                  ...prev,
+                                  [String(gb)]: price
+                                }))
+                              }}
+                              className="w-20 px-2 py-1 bg-dark-600 border border-dark-500 rounded text-sm text-dark-100 focus:outline-none focus:border-amber-500"
+                              min={0}
+                              step={1}
+                            />
+                            <span className="text-xs text-dark-400">₽</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="flex justify-end gap-3 p-4 border-t border-dark-700">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 text-dark-300 hover:text-dark-100 transition-colors"
+          >
+            Отмена
+          </button>
+          <button
+            onClick={handleSubmit}
+            disabled={!name || dailyPriceKopeks <= 0 || isLoading}
+            className="px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isLoading ? 'Сохранение...' : 'Сохранить'}
           </button>
         </div>
       </div>
@@ -658,7 +998,9 @@ export default function AdminTariffs() {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
 
-  const [showModal, setShowModal] = useState(false)
+  const [showTypeSelect, setShowTypeSelect] = useState(false)
+  const [showPeriodModal, setShowPeriodModal] = useState(false)
+  const [showDailyModal, setShowDailyModal] = useState(false)
   const [editingTariff, setEditingTariff] = useState<TariffDetail | null>(null)
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null)
 
@@ -678,7 +1020,8 @@ export default function AdminTariffs() {
     mutationFn: tariffsApi.createTariff,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-tariffs'] })
-      setShowModal(false)
+      setShowPeriodModal(false)
+      setShowDailyModal(false)
     },
   })
 
@@ -687,7 +1030,8 @@ export default function AdminTariffs() {
       tariffsApi.updateTariff(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-tariffs'] })
-      setShowModal(false)
+      setShowPeriodModal(false)
+      setShowDailyModal(false)
       setEditingTariff(null)
     },
   })
@@ -714,11 +1058,25 @@ export default function AdminTariffs() {
     },
   })
 
+  const handleTypeSelect = (isDaily: boolean) => {
+    setShowTypeSelect(false)
+    if (isDaily) {
+      setShowDailyModal(true)
+    } else {
+      setShowPeriodModal(true)
+    }
+  }
+
   const handleEdit = async (tariffId: number) => {
     try {
       const detail = await tariffsApi.getTariff(tariffId)
       setEditingTariff(detail)
-      setShowModal(true)
+      // Открываем соответствующую модалку в зависимости от типа тарифа
+      if (detail.is_daily) {
+        setShowDailyModal(true)
+      } else {
+        setShowPeriodModal(true)
+      }
     } catch (error) {
       console.error('Failed to load tariff:', error)
     }
@@ -730,6 +1088,12 @@ export default function AdminTariffs() {
     } else {
       createMutation.mutate(data as TariffCreateRequest)
     }
+  }
+
+  const handleCloseModal = () => {
+    setShowPeriodModal(false)
+    setShowDailyModal(false)
+    setEditingTariff(null)
   }
 
   const tariffs = tariffsData?.tariffs || []
@@ -748,7 +1112,7 @@ export default function AdminTariffs() {
           </div>
         </div>
         <button
-          onClick={() => { setEditingTariff(null); setShowModal(true) }}
+          onClick={() => { setEditingTariff(null); setShowTypeSelect(true) }}
           className="flex items-center gap-2 px-4 py-2 bg-accent-500 text-white rounded-lg hover:bg-accent-600 transition-colors"
         >
           <PlusIcon />
@@ -778,6 +1142,15 @@ export default function AdminTariffs() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
                     <h3 className="font-medium text-dark-100 truncate">{tariff.name}</h3>
+                    {tariff.is_daily ? (
+                      <span className="px-2 py-0.5 text-xs bg-amber-500/20 text-amber-400 rounded">
+                        Суточный
+                      </span>
+                    ) : (
+                      <span className="px-2 py-0.5 text-xs bg-accent-500/20 text-accent-400 rounded">
+                        Периодный
+                      </span>
+                    )}
                     {tariff.is_trial_available && (
                       <span className="px-2 py-0.5 text-xs bg-success-500/20 text-success-400 rounded">
                         {t('admin.tariffs.trial')}
@@ -790,6 +1163,9 @@ export default function AdminTariffs() {
                     )}
                   </div>
                   <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-dark-400">
+                    {tariff.is_daily && tariff.daily_price_kopeks > 0 && (
+                      <span className="text-amber-400">{(tariff.daily_price_kopeks / 100).toFixed(2)} ₽/день</span>
+                    )}
                     <span>
                       {tariff.traffic_limit_gb === 0
                         ? t('admin.tariffs.unlimited')
@@ -854,13 +1230,32 @@ export default function AdminTariffs() {
         </div>
       )}
 
-      {/* Create/Edit Modal */}
-      {showModal && (
-        <TariffModal
+      {/* Type Selection Modal */}
+      {showTypeSelect && (
+        <TariffTypeSelect
+          onSelect={handleTypeSelect}
+          onClose={() => setShowTypeSelect(false)}
+        />
+      )}
+
+      {/* Period Tariff Modal */}
+      {showPeriodModal && (
+        <PeriodTariffModal
           tariff={editingTariff}
           servers={servers}
           onSave={handleSave}
-          onClose={() => { setShowModal(false); setEditingTariff(null) }}
+          onClose={handleCloseModal}
+          isLoading={createMutation.isPending || updateMutation.isPending}
+        />
+      )}
+
+      {/* Daily Tariff Modal */}
+      {showDailyModal && (
+        <DailyTariffModal
+          tariff={editingTariff}
+          servers={servers}
+          onSave={handleSave}
+          onClose={handleCloseModal}
           isLoading={createMutation.isPending || updateMutation.isPending}
         />
       )}

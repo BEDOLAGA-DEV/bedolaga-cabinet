@@ -1,7 +1,17 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import { adminAppsApi, AppDefinition, LocalizedText, AppStep, AppButton } from '../api/adminApps'
+import {
+  adminAppsApi,
+  AppDefinition,
+  LocalizedText,
+  AppStep,
+  AppButton,
+  exportToRemnawaveFormat,
+  importFromRemnawaveFormat,
+  RemnawaveConfig,
+  importFromRemnawaveFormat as convertRemnawave,
+} from '../api/adminApps'
 
 // Icons
 const AppsIcon = () => (
@@ -49,6 +59,37 @@ const CopyIcon = () => (
 const StarIcon = ({ filled }: { filled: boolean }) => (
   <svg className={`w-4 h-4 ${filled ? 'fill-yellow-400 text-yellow-400' : 'text-dark-500'}`} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+  </svg>
+)
+
+const DownloadIcon = () => (
+  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+  </svg>
+)
+
+const UploadIcon = () => (
+  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+  </svg>
+)
+
+const CloudSyncIcon = () => (
+  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15a4.5 4.5 0 004.5 4.5H18a3.75 3.75 0 001.332-7.257 3 3 0 00-3.758-3.848 5.25 5.25 0 00-10.233 2.33A4.502 4.502 0 002.25 15z" />
+  </svg>
+)
+
+const RefreshIcon = () => (
+  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+  </svg>
+)
+
+const SettingsIcon = () => (
+  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M10.343 3.94c.09-.542.56-.94 1.11-.94h1.093c.55 0 1.02.398 1.11.94l.149.894c.07.424.384.764.78.93.398.164.855.142 1.205-.108l.737-.527a1.125 1.125 0 011.45.12l.773.774c.39.389.44 1.002.12 1.45l-.527.737c-.25.35-.272.806-.107 1.204.165.397.505.71.93.78l.893.15c.543.09.94.56.94 1.109v1.094c0 .55-.397 1.02-.94 1.11l-.893.149c-.425.07-.765.383-.93.78-.165.398-.143.854.107 1.204l.527.738c.32.447.269 1.06-.12 1.45l-.774.773a1.125 1.125 0 01-1.449.12l-.738-.527c-.35-.25-.806-.272-1.203-.107-.397.165-.71.505-.781.929l-.149.894c-.09.542-.56.94-1.11.94h-1.094c-.55 0-1.019-.398-1.11-.94l-.148-.894c-.071-.424-.384-.764-.781-.93-.398-.164-.854-.142-1.204.108l-.738.527c-.447.32-1.06.269-1.45-.12l-.773-.774a1.125 1.125 0 01-.12-1.45l.527-.737c.25-.35.273-.806.108-1.204-.165-.397-.505-.71-.93-.78l-.894-.15c-.542-.09-.94-.56-.94-1.109v-1.094c0-.55.398-1.02.94-1.11l.894-.149c.424-.07.765-.383.93-.78.165-.398.143-.854-.107-1.204l-.527-.738a1.125 1.125 0 01.12-1.45l.773-.773a1.125 1.125 0 011.45-.12l.737.527c.35.25.807.272 1.204.107.397-.165.71-.505.78-.929l.15-.894z" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
   </svg>
 )
 
@@ -389,11 +430,61 @@ export default function AdminApps() {
   const [selectedPlatform, setSelectedPlatform] = useState<string>('ios')
   const [editingApp, setEditingApp] = useState<{ app: AppDefinition; isNew: boolean } | null>(null)
   const [copyTarget, setCopyTarget] = useState<{ appId: string; platform: string } | null>(null)
+  const [showImportModal, setShowImportModal] = useState(false)
+  const [importError, setImportError] = useState<string | null>(null)
+  const [importPreview, setImportPreview] = useState<{ platformApps: Record<string, AppDefinition[]> } | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [useRemnaWave, setUseRemnaWave] = useState(false)
+  const [showRemnaWaveSettings, setShowRemnaWaveSettings] = useState(false)
+  const [remnaWaveUuidInput, setRemnaWaveUuidInput] = useState('')
 
-  const { data: apps, isLoading } = useQuery({
+  // Check if RemnaWave config is available
+  const { data: remnaWaveStatus, refetch: refetchStatus } = useQuery({
+    queryKey: ['remnawave-status'],
+    queryFn: adminAppsApi.getRemnaWaveStatus,
+    staleTime: 60000,
+  })
+
+  // List available RemnaWave configs
+  const { data: availableConfigs, isLoading: isLoadingConfigs } = useQuery({
+    queryKey: ['remnawave-configs-list'],
+    queryFn: adminAppsApi.listRemnaWaveConfigs,
+    enabled: showRemnaWaveSettings,
+    staleTime: 30000,
+  })
+
+  // Mutation for setting UUID
+  const setUuidMutation = useMutation({
+    mutationFn: adminAppsApi.setRemnaWaveUuid,
+    onSuccess: () => {
+      refetchStatus()
+      queryClient.invalidateQueries({ queryKey: ['remnawave-config'] })
+      setShowRemnaWaveSettings(false)
+    },
+  })
+
+  // Fetch RemnaWave config when toggle is enabled
+  const { data: remnaWaveConfig, isLoading: isRemnaWaveLoading, refetch: refetchRemnaWave } = useQuery({
+    queryKey: ['remnawave-config'],
+    queryFn: adminAppsApi.getRemnaWaveConfig,
+    enabled: useRemnaWave && remnaWaveStatus?.enabled,
+    staleTime: 0,
+  })
+
+  // Convert RemnaWave config to local format
+  const remnaWaveApps = remnaWaveConfig
+    ? convertRemnawave(remnaWaveConfig).platformApps[selectedPlatform] || []
+    : []
+
+  const { data: localApps, isLoading: isLocalLoading } = useQuery({
     queryKey: ['admin-apps', selectedPlatform],
     queryFn: () => adminAppsApi.getPlatformApps(selectedPlatform),
+    enabled: !useRemnaWave,
   })
+
+  // Select which apps to show based on toggle
+  const apps = useRemnaWave ? remnaWaveApps : localApps
+  const isLoading = useRemnaWave ? isRemnaWaveLoading : isLocalLoading
 
   const createMutation = useMutation({
     mutationFn: ({ platform, app }: { platform: string; app: AppDefinition }) =>
@@ -438,6 +529,85 @@ export default function AdminApps() {
     },
   })
 
+  // Fetch all platforms for export
+  const { data: allPlatformApps } = useQuery({
+    queryKey: ['admin-apps-all'],
+    queryFn: async () => {
+      const result: Record<string, AppDefinition[]> = {}
+      for (const platform of PLATFORMS) {
+        try {
+          result[platform] = await adminAppsApi.getPlatformApps(platform)
+        } catch {
+          result[platform] = []
+        }
+      }
+      return result
+    },
+  })
+
+  const { data: branding } = useQuery({
+    queryKey: ['admin-branding'],
+    queryFn: adminAppsApi.getBranding,
+  })
+
+  // Export handler
+  const handleExport = () => {
+    if (!allPlatformApps) return
+    const remnawaveConfig = exportToRemnawaveFormat(allPlatformApps, branding)
+    const json = JSON.stringify(remnawaveConfig, null, 2)
+    const blob = new Blob([json], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `apps-config-${new Date().toISOString().split('T')[0]}.json`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  }
+
+  // Import file handler
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setImportError(null)
+    setImportPreview(null)
+
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      try {
+        const json = JSON.parse(event.target?.result as string) as RemnawaveConfig
+        const imported = importFromRemnawaveFormat(json)
+        setImportPreview(imported)
+        setShowImportModal(true)
+      } catch (err) {
+        setImportError(t('admin.apps.importError', 'Invalid JSON file'))
+        setShowImportModal(true)
+      }
+    }
+    reader.readAsText(file)
+    // Reset file input
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
+
+  // Confirm import handler
+  const handleConfirmImport = async () => {
+    if (!importPreview) return
+    try {
+      for (const [platform, apps] of Object.entries(importPreview.platformApps)) {
+        for (const app of apps) {
+          await adminAppsApi.createApp(platform, app)
+        }
+      }
+      queryClient.invalidateQueries({ queryKey: ['admin-apps'] })
+      queryClient.invalidateQueries({ queryKey: ['admin-apps-all'] })
+      setShowImportModal(false)
+      setImportPreview(null)
+    } catch (err) {
+      setImportError(t('admin.apps.importCreateError', 'Failed to create some apps'))
+    }
+  }
+
   const handleMoveUp = (index: number) => {
     if (!apps || index === 0) return
     const newOrder = [...apps]
@@ -468,10 +638,59 @@ export default function AdminApps() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <AppsIcon />
-        <h1 className="text-2xl sm:text-3xl font-bold text-dark-50">{t('admin.apps.title')}</h1>
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <div className="flex items-center gap-3">
+          <AppsIcon />
+          <h1 className="text-2xl sm:text-3xl font-bold text-dark-50">{t('admin.apps.title')}</h1>
+        </div>
+
+        {/* RemnaWave Toggle & Settings */}
+        <div className="flex items-center gap-2">
+          {remnaWaveStatus?.enabled && (
+            <>
+              <button
+                onClick={() => setUseRemnaWave(!useRemnaWave)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  useRemnaWave
+                    ? 'bg-accent-500 text-white'
+                    : 'bg-dark-800 text-dark-300 hover:bg-dark-700'
+                }`}
+                title={t('admin.apps.remnaWaveToggle', 'Toggle RemnaWave source')}
+              >
+                <CloudSyncIcon />
+                <span>RemnaWave</span>
+              </button>
+              {useRemnaWave && (
+                <button
+                  onClick={() => refetchRemnaWave()}
+                  className="p-2 text-dark-400 hover:text-dark-200 hover:bg-dark-700 rounded-lg transition-colors"
+                  title={t('admin.apps.refreshRemnaWave', 'Refresh from RemnaWave')}
+                >
+                  <RefreshIcon />
+                </button>
+              )}
+            </>
+          )}
+          <button
+            onClick={() => {
+              setRemnaWaveUuidInput(remnaWaveStatus?.config_uuid || '')
+              setShowRemnaWaveSettings(true)
+            }}
+            className="p-2 text-dark-400 hover:text-dark-200 hover:bg-dark-700 rounded-lg transition-colors"
+            title={t('admin.apps.remnaWaveSettings', 'RemnaWave Settings')}
+          >
+            <SettingsIcon />
+          </button>
+        </div>
       </div>
+
+      {/* RemnaWave Info Banner */}
+      {useRemnaWave && (
+        <div className="bg-accent-500/10 border border-accent-500/30 text-accent-200 p-3 rounded-lg text-sm flex items-center gap-2">
+          <CloudSyncIcon />
+          <span>{t('admin.apps.remnaWaveMode', 'Showing apps from RemnaWave panel. Changes here are read-only.')}</span>
+        </div>
+      )}
 
       {/* Platform Tabs */}
       <div className="flex flex-wrap gap-2">
@@ -490,16 +709,44 @@ export default function AdminApps() {
         ))}
       </div>
 
-      {/* Add App Button */}
-      <div className="flex justify-end">
-        <button
-          onClick={() => setEditingApp({ app: createEmptyApp(selectedPlatform), isNew: true })}
-          className="btn-primary flex items-center gap-2"
-        >
-          <PlusIcon />
-          {t('admin.apps.addApp')}
-        </button>
-      </div>
+      {/* Action Buttons - Only show when not in RemnaWave mode */}
+      {!useRemnaWave && (
+        <div className="flex flex-wrap gap-3 justify-between items-center">
+          <div className="flex gap-2">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".json"
+              onChange={handleFileSelect}
+              className="hidden"
+            />
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="btn-secondary flex items-center gap-2"
+              title={t('admin.apps.importApps', 'Import Apps')}
+            >
+              <UploadIcon />
+              {t('admin.apps.import', 'Import')}
+            </button>
+            <button
+              onClick={handleExport}
+              disabled={!allPlatformApps}
+              className="btn-secondary flex items-center gap-2"
+              title={t('admin.apps.exportApps', 'Export Apps')}
+            >
+              <DownloadIcon />
+              {t('admin.apps.export', 'Export')}
+            </button>
+          </div>
+          <button
+            onClick={() => setEditingApp({ app: createEmptyApp(selectedPlatform), isNew: true })}
+            className="btn-primary flex items-center gap-2"
+          >
+            <PlusIcon />
+            {t('admin.apps.addApp')}
+          </button>
+        </div>
+      )}
 
       {/* Apps List */}
       {isLoading ? (
@@ -513,23 +760,25 @@ export default function AdminApps() {
               key={app.id}
               className="card flex items-center gap-4 p-4"
             >
-              {/* Reorder buttons */}
-              <div className="flex flex-col gap-1">
-                <button
-                  onClick={() => handleMoveUp(index)}
-                  disabled={index === 0}
-                  className="p-1 text-dark-400 hover:text-dark-200 disabled:opacity-30 disabled:cursor-not-allowed"
-                >
-                  <ChevronUpIcon />
-                </button>
-                <button
-                  onClick={() => handleMoveDown(index)}
-                  disabled={index === apps.length - 1}
-                  className="p-1 text-dark-400 hover:text-dark-200 disabled:opacity-30 disabled:cursor-not-allowed"
-                >
-                  <ChevronDownIcon />
-                </button>
-              </div>
+              {/* Reorder buttons - Only show when not in RemnaWave mode */}
+              {!useRemnaWave && (
+                <div className="flex flex-col gap-1">
+                  <button
+                    onClick={() => handleMoveUp(index)}
+                    disabled={index === 0}
+                    className="p-1 text-dark-400 hover:text-dark-200 disabled:opacity-30 disabled:cursor-not-allowed"
+                  >
+                    <ChevronUpIcon />
+                  </button>
+                  <button
+                    onClick={() => handleMoveDown(index)}
+                    disabled={index === apps.length - 1}
+                    className="p-1 text-dark-400 hover:text-dark-200 disabled:opacity-30 disabled:cursor-not-allowed"
+                  >
+                    <ChevronDownIcon />
+                  </button>
+                </div>
+              )}
 
               {/* App Info */}
               <div className="flex-1 min-w-0">
@@ -544,30 +793,32 @@ export default function AdminApps() {
                 <div className="text-xs text-dark-400 mt-1">{app.urlScheme}</div>
               </div>
 
-              {/* Actions */}
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setCopyTarget({ appId: app.id, platform: selectedPlatform })}
-                  className="p-2 text-dark-400 hover:text-dark-200 hover:bg-dark-700 rounded"
-                  title={t('admin.apps.copyTo')}
-                >
-                  <CopyIcon />
-                </button>
-                <button
-                  onClick={() => setEditingApp({ app, isNew: false })}
-                  className="p-2 text-dark-400 hover:text-dark-200 hover:bg-dark-700 rounded"
-                  title={t('common.edit')}
-                >
-                  <EditIcon />
-                </button>
-                <button
-                  onClick={() => handleDelete(app.id)}
-                  className="p-2 text-error-400 hover:text-error-300 hover:bg-error-500/10 rounded"
-                  title={t('common.delete')}
-                >
-                  <TrashIcon />
-                </button>
-              </div>
+              {/* Actions - Only show when not in RemnaWave mode */}
+              {!useRemnaWave && (
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setCopyTarget({ appId: app.id, platform: selectedPlatform })}
+                    className="p-2 text-dark-400 hover:text-dark-200 hover:bg-dark-700 rounded"
+                    title={t('admin.apps.copyTo')}
+                  >
+                    <CopyIcon />
+                  </button>
+                  <button
+                    onClick={() => setEditingApp({ app, isNew: false })}
+                    className="p-2 text-dark-400 hover:text-dark-200 hover:bg-dark-700 rounded"
+                    title={t('common.edit')}
+                  >
+                    <EditIcon />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(app.id)}
+                    className="p-2 text-error-400 hover:text-error-300 hover:bg-error-500/10 rounded"
+                    title={t('common.delete')}
+                  >
+                    <TrashIcon />
+                  </button>
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -621,6 +872,149 @@ export default function AdminApps() {
             >
               {t('common.cancel')}
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Import Modal */}
+      {showImportModal && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+          <div className="bg-dark-900 rounded-xl p-6 w-full max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
+            <h3 className="text-lg font-semibold text-dark-100 mb-4">
+              {t('admin.apps.importPreview', 'Import Preview')}
+            </h3>
+
+            {importError && (
+              <div className="bg-error-500/10 border border-error-500/30 text-error-400 p-3 rounded-lg mb-4">
+                {importError}
+              </div>
+            )}
+
+            {importPreview && (
+              <div className="flex-1 overflow-y-auto space-y-4 mb-4">
+                {Object.entries(importPreview.platformApps).map(([platform, platformApps]) => (
+                  platformApps.length > 0 && (
+                    <div key={platform} className="bg-dark-800/50 rounded-lg p-4">
+                      <h4 className="font-medium text-dark-200 mb-2">
+                        {PLATFORM_LABELS[platform] || platform} ({platformApps.length})
+                      </h4>
+                      <ul className="space-y-1">
+                        {platformApps.map((app, idx) => (
+                          <li key={idx} className="text-sm text-dark-400 flex items-center gap-2">
+                            {app.isFeatured && <StarIcon filled />}
+                            <span>{app.name}</span>
+                            <span className="text-dark-600 font-mono text-xs">({app.urlScheme || '-'})</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )
+                ))}
+                {Object.values(importPreview.platformApps).every(arr => arr.length === 0) && (
+                  <div className="text-dark-400 text-center py-8">
+                    {t('admin.apps.noAppsToImport', 'No apps to import')}
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className="flex gap-3 justify-end pt-4 border-t border-dark-700">
+              <button
+                onClick={() => {
+                  setShowImportModal(false)
+                  setImportPreview(null)
+                  setImportError(null)
+                }}
+                className="btn-secondary"
+              >
+                {t('common.cancel')}
+              </button>
+              {importPreview && !importError && (
+                <button
+                  onClick={handleConfirmImport}
+                  className="btn-primary"
+                >
+                  {t('admin.apps.confirmImport', 'Import Apps')}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* RemnaWave Settings Modal */}
+      {showRemnaWaveSettings && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+          <div className="bg-dark-900 rounded-xl p-6 w-full max-w-lg">
+            <h3 className="text-lg font-semibold text-dark-100 mb-4 flex items-center gap-2">
+              <CloudSyncIcon />
+              {t('admin.apps.remnaWaveSettings', 'RemnaWave Settings')}
+            </h3>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm text-dark-300 mb-2">
+                  {t('admin.apps.remnaWaveConfigUuid', 'Config UUID')}
+                </label>
+                <input
+                  type="text"
+                  value={remnaWaveUuidInput}
+                  onChange={(e) => setRemnaWaveUuidInput(e.target.value)}
+                  placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+                  className="input w-full font-mono text-sm"
+                />
+                <p className="text-xs text-dark-500 mt-1">
+                  {t('admin.apps.remnaWaveConfigUuidHint', 'UUID of subscription page config from RemnaWave panel')}
+                </p>
+              </div>
+
+              {/* Available configs from RemnaWave */}
+              {isLoadingConfigs ? (
+                <div className="flex items-center justify-center py-4">
+                  <div className="w-6 h-6 border-2 border-accent-500 border-t-transparent rounded-full animate-spin" />
+                </div>
+              ) : availableConfigs && availableConfigs.length > 0 && (
+                <div>
+                  <label className="block text-sm text-dark-300 mb-2">
+                    {t('admin.apps.availableConfigs', 'Available configs')}
+                  </label>
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {availableConfigs.map((config) => (
+                      <button
+                        key={config.uuid}
+                        onClick={() => setRemnaWaveUuidInput(config.uuid)}
+                        className={`w-full text-left p-3 rounded-lg border transition-colors ${
+                          remnaWaveUuidInput === config.uuid
+                            ? 'border-accent-500 bg-accent-500/10'
+                            : 'border-dark-700 bg-dark-800/50 hover:border-dark-600'
+                        }`}
+                      >
+                        <div className="font-medium text-dark-100">{config.name}</div>
+                        <div className="text-xs text-dark-500 font-mono mt-1">{config.uuid}</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="flex gap-3 justify-end mt-6 pt-4 border-t border-dark-700">
+              <button
+                onClick={() => setShowRemnaWaveSettings(false)}
+                className="btn-secondary"
+              >
+                {t('common.cancel')}
+              </button>
+              <button
+                onClick={() => setUuidMutation.mutate(remnaWaveUuidInput || null)}
+                disabled={setUuidMutation.isPending}
+                className="btn-primary"
+              >
+                {setUuidMutation.isPending
+                  ? t('common.loading')
+                  : t('common.save')}
+              </button>
+            </div>
           </div>
         </div>
       )}

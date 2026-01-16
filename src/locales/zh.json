@@ -1,4 +1,4 @@
-{
+﻿{
   "common": {
     "loading": "加载中...",
     "error": "错误",
@@ -165,7 +165,20 @@
     "currentBalance": "当前余额",
     "topUp": "充值",
     "topUpBalance": "充值余额",
-    "paymentMethods": "支付方式",
+    "paymentMethods": {
+      "yookassa": {
+        "name": "银行卡",
+        "description": "通过银行卡支付"
+      },
+      "cryptobot": {
+        "name": "CryptoBot",
+        "description": "通过CryptoBot加密货币支付"
+      },
+      "telegram_stars": {
+        "name": "Telegram Stars",
+        "description": "通过Telegram Stars支付"
+      }
+    },
     "transactionHistory": "交易记录",
     "noTransactions": "暂无交易",
     "date": "日期",
@@ -199,21 +212,7 @@
       }
     },
     "minAmountError": "最小金额：{{amount}}",
-    "maxAmountError": "最大金额：{{amount}}",
-    "paymentMethods": {
-      "yookassa": {
-        "name": "银行卡",
-        "description": "通过银行卡支付"
-      },
-      "cryptobot": {
-        "name": "CryptoBot",
-        "description": "通过CryptoBot加密货币支付"
-      },
-      "telegram_stars": {
-        "name": "Telegram Stars",
-        "description": "通过Telegram Stars支付"
-      }
-    }
+    "maxAmountError": "最大金额：{{amount}}"
   },
   "referral": {
     "title": "推荐计划",
@@ -242,7 +241,18 @@
     "joined": "加入时间",
     "hasPaid": "已付款",
     "earningsHistory": "收益记录",
-    "reason": "原因"
+    "reason": "原因",
+    "status": {
+      "pending": "待定",
+      "paid": "已支付"
+    },
+    "reasons": {
+      "referral_registration_pending": "推荐用户注册",
+      "referral_registration": "推荐用户注册",
+      "referral_first_payment": "推荐用户首次付款",
+      "referral_subscription_renewal": "推荐用户续订",
+      "referral_bonus": "推荐奖金"
+    }
   },
   "support": {
     "title": "支持",
@@ -462,7 +472,23 @@
       "userLabel": "用户",
       "adminLabel": "管理员",
       "replyPlaceholder": "输入您的回复...",
-      "sendReply": "发送回复"
+      "sendReply": "发送回复",
+      "settings": "设置",
+      "supportMode": "支持模式",
+      "supportModeDesc": "选择用户如何联系支持",
+      "modeBoth": "工单和联系方式",
+      "modeTickets": "仅工单",
+      "modeContact": "仅联系方式",
+      "slaSettings": "SLA设置",
+      "slaEnabled": "启用 SLA（响应时间监控）",
+      "slaEnabledDesc": "自动通知过期工单",
+      "slaMinutes": "响应时间（分钟）",
+      "slaMinutesDesc": "回复工单的最长时间（1-1440分钟）",
+      "checkInterval": "检查间隔（秒）",
+      "checkIntervalDesc": "检查过期工单的频率（30-600秒）",
+      "reminderCooldown": "提醒间隔（分钟）",
+      "reminderCooldownDesc": "提醒之间的最小时间（1-120分钟）",
+      "settingsUpdateError": "保存设置时出错"
     },
     "tariffs": {
       "title": "套餐管理",

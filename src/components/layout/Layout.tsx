@@ -149,9 +149,11 @@ export default function Layout({ children }: LayoutProps) {
     }
   }, [])
 
-  // Lock body scroll when mobile menu is open
+  // Lock body scroll and scroll to top when mobile menu is open
   useEffect(() => {
     if (mobileMenuOpen) {
+      // Scroll to top so header is visible
+      window.scrollTo({ top: 0, behavior: 'instant' })
       document.body.style.overflow = 'hidden'
     } else {
       document.body.style.overflow = ''

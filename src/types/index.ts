@@ -214,6 +214,14 @@ export interface TariffPeriod {
   price_label: string
   price_per_month_kopeks: number
   price_per_month_label: string
+  // Discount info (if promo group discount applied)
+  original_price_kopeks?: number
+  original_price_label?: string
+  original_per_month_kopeks?: number
+  original_per_month_label?: string
+  discount_percent?: number
+  discount_amount_kopeks?: number
+  discount_label?: string
 }
 
 export interface TariffServer {
@@ -254,6 +262,14 @@ export interface Tariff {
   // Daily tariff options
   is_daily?: boolean
   daily_price_kopeks?: number
+  // Promo group discount info
+  promo_group_name?: string
+  original_device_price_kopeks?: number
+  device_discount_percent?: number
+  original_daily_price_kopeks?: number
+  daily_discount_percent?: number
+  original_price_per_day_kopeks?: number
+  custom_days_discount_percent?: number
 }
 
 export interface TariffsPurchaseOptions {
@@ -348,6 +364,12 @@ export interface Transaction {
   completed_at: string | null
 }
 
+export interface PaymentMethodOption {
+  id: string
+  name: string
+  description?: string | null
+}
+
 export interface PaymentMethod {
   id: string
   name: string
@@ -355,6 +377,7 @@ export interface PaymentMethod {
   min_amount_kopeks: number
   max_amount_kopeks: number
   is_available: boolean
+  options?: PaymentMethodOption[] | null
 }
 
 // Referral types

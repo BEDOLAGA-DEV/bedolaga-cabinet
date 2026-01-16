@@ -218,7 +218,9 @@
       "newPackage": "Новый пакет",
       "switch": "Изменить",
       "switched": "Трафик изменён"
-    }
+    },
+    "purchasedTraffic": "Докупленный трафик",
+    "trafficResetAt": "Сброс"
   },
   "balance": {
     "title": "Баланс",
@@ -260,6 +262,8 @@
     },
     "minAmountError": "Минимальная сумма: {{amount}} ₽",
     "maxAmountError": "Максимальная сумма: {{amount}} ₽",
+    "paymentOption": "Способ оплаты",
+    "selectPaymentOption": "Выберите способ оплаты",
     "paymentMethods": {
       "yookassa": {
         "name": "ЮKassa (Банковская карта)",
@@ -272,6 +276,34 @@
       "telegram_stars": {
         "name": "Telegram Stars",
         "description": "Оплата через Telegram Stars"
+      },
+      "heleket": {
+        "name": "Heleket Crypto",
+        "description": "Оплата криптовалютой через Heleket"
+      },
+      "mulenpay": {
+        "name": "MulenPay",
+        "description": "Оплата через MulenPay"
+      },
+      "pal24": {
+        "name": "PAL24",
+        "description": "Оплата через PAL24"
+      },
+      "platega": {
+        "name": "Platega",
+        "description": "Оплата через Platega"
+      },
+      "wata": {
+        "name": "Wata",
+        "description": "Оплата через Wata"
+      },
+      "cloudpayments": {
+        "name": "CloudPayments",
+        "description": "Оплата банковской картой через CloudPayments"
+      },
+      "freekassa": {
+        "name": "FreeKassa",
+        "description": "Оплата через FreeKassa"
       }
     }
   },
@@ -301,8 +333,19 @@
     "user": "Пользователь",
     "joined": "Присоединился",
     "hasPaid": "Оплатил",
+    "status": {
+      "pending": "Ожидание",
+      "paid": "Оплачено"
+    },
     "earningsHistory": "История начислений",
-    "reason": "Причина"
+    "reason": "Причина",
+    "reasons": {
+      "referral_registration_pending": "Регистрация реферала",
+      "referral_registration": "Регистрация реферала",
+      "referral_first_payment": "Первая оплата реферала",
+      "referral_subscription_renewal": "Продление подписки реферала",
+      "referral_bonus": "Бонус за реферала"
+    }
   },
   "support": {
     "title": "Поддержка",
@@ -514,7 +557,23 @@
         "subscription": "Подписка",
         "connect": "Подключение",
         "additional": "Дополнительно"
-      }
+      },
+      "import": "Импорт",
+      "export": "Экспорт",
+      "importApps": "Импорт приложений из JSON",
+      "exportApps": "Экспорт приложений в JSON",
+      "importPreview": "Предпросмотр импорта",
+      "confirmImport": "Импортировать",
+      "importError": "Неверный формат JSON файла",
+      "importCreateError": "Ошибка при создании приложений",
+      "noAppsToImport": "Нет приложений для импорта",
+      "remnaWaveToggle": "Переключить источник RemnaWave",
+      "refreshRemnaWave": "Обновить данные из RemnaWave",
+      "remnaWaveMode": "Отображаются приложения из панели RemnaWave. Режим только для чтения.",
+      "remnaWaveSettings": "Настройки RemnaWave",
+      "remnaWaveConfigUuid": "UUID конфигурации",
+      "remnaWaveConfigUuidHint": "UUID конфигурации страницы подписки из панели RemnaWave",
+      "availableConfigs": "Доступные конфигурации"
     },
     "tickets": {
       "title": "Управление тикетами",
@@ -534,7 +593,23 @@
       "userLabel": "Пользователь",
       "adminLabel": "Админ",
       "replyPlaceholder": "Введите ваш ответ...",
-      "sendReply": "Отправить"
+      "sendReply": "Отправить",
+      "settings": "Настройки",
+      "supportMode": "Режим поддержки",
+      "supportModeDesc": "Выберите, как пользователи могут связаться с поддержкой",
+      "modeBoth": "Тикеты и контакт",
+      "modeTickets": "Только тикеты",
+      "modeContact": "Только контакт",
+      "slaSettings": "Настройки SLA",
+      "slaEnabled": "Включить SLA (мониторинг времени ответа)",
+      "slaEnabledDesc": "Автоматические уведомления о просроченных тикетах",
+      "slaMinutes": "Время ответа (минуты)",
+      "slaMinutesDesc": "Максимальное время для ответа на тикет (1-1440 минут)",
+      "checkInterval": "Интервал проверки (секунды)",
+      "checkIntervalDesc": "Как часто проверять просроченные тикеты (30-600 секунд)",
+      "reminderCooldown": "Интервал напоминаний (минуты)",
+      "reminderCooldownDesc": "Минимальное время между напоминаниями (1-120 минут)",
+      "settingsUpdateError": "Ошибка сохранения настроек"
     },
     "tariffs": {
       "title": "Управление тарифами",
@@ -656,6 +731,17 @@
       "available": "Доступных",
       "withConnections": "С подключениями",
       "revenue": "Доход"
+    },
+    "tariffs": {
+      "title": "Статистика по тарифам",
+      "subtitle": "Распределение подписок по тарифам",
+      "tariffName": "Тариф",
+      "activeSubscriptions": "Активных",
+      "trialSubscriptions": "Триал",
+      "purchasedToday": "Сегодня",
+      "purchasedWeek": "Неделя",
+      "purchasedMonth": "Месяц",
+      "noTariffs": "Нет тарифов"
     }
   },
   "profile": {

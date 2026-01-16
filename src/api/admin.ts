@@ -53,6 +53,22 @@ export interface AdminTicketStats {
   closed: number
 }
 
+export interface TicketSettings {
+  sla_enabled: boolean
+  sla_minutes: number
+  sla_check_interval_seconds: number
+  sla_reminder_cooldown_minutes: number
+  support_system_mode: string  // tickets, contact, both
+}
+
+export interface TicketSettingsUpdate {
+  sla_enabled?: boolean
+  sla_minutes?: number
+  sla_check_interval_seconds?: number
+  sla_reminder_cooldown_minutes?: number
+  support_system_mode?: string
+}
+
 export interface AdminTicketListResponse {
   items: AdminTicket[]
   total: number
@@ -106,6 +122,18 @@ export const adminApi = {
   // Update ticket priority
   updateTicketPriority: async (ticketId: number, priority: string): Promise<AdminTicketDetail> => {
     const response = await apiClient.post(`/cabinet/admin/tickets/${ticketId}/priority`, { priority })
+    return response.data
+  },
+
+  // Get ticket settings
+  getTicketSettings: async (): Promise<TicketSettings> => {
+    const response = await apiClient.get('/cabinet/admin/tickets/settings')
+    return response.data
+  },
+
+  // Update ticket settings
+  updateTicketSettings: async (settings: TicketSettingsUpdate): Promise<TicketSettings> => {
+    const response = await apiClient.patch('/cabinet/admin/tickets/settings', settings)
     return response.data
   },
 }
@@ -169,12 +197,28 @@ export interface ServerStats {
   total_revenue_rubles: number
 }
 
+export interface TariffStatItem {
+  tariff_id: number
+  tariff_name: string
+  active_subscriptions: number
+  trial_subscriptions: number
+  purchased_today: number
+  purchased_week: number
+  purchased_month: number
+}
+
+export interface TariffStats {
+  tariffs: TariffStatItem[]
+  total_tariff_subscriptions: number
+}
+
 export interface DashboardStats {
   nodes: NodesOverview
   subscriptions: SubscriptionStats
   financial: FinancialStats
   servers: ServerStats
   revenue_chart: RevenueData[]
+  tariff_stats?: TariffStats
 }
 
 // ============ Dashboard Stats API ============

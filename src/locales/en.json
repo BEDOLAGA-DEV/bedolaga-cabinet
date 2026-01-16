@@ -218,7 +218,9 @@
       "newPackage": "New package",
       "switch": "Change",
       "switched": "Traffic changed"
-    }
+    },
+    "purchasedTraffic": "Purchased Traffic",
+    "trafficResetAt": "Reset"
   },
   "balance": {
     "title": "Balance",
@@ -260,6 +262,8 @@
     },
     "minAmountError": "Minimum amount: {{amount}} ₽",
     "maxAmountError": "Maximum amount: {{amount}} ₽",
+    "paymentOption": "Payment option",
+    "selectPaymentOption": "Select payment option",
     "paymentMethods": {
       "yookassa": {
         "name": "YooKassa (Bank Card)",
@@ -272,6 +276,34 @@
       "telegram_stars": {
         "name": "Telegram Stars",
         "description": "Pay with Telegram Stars"
+      },
+      "heleket": {
+        "name": "Heleket Crypto",
+        "description": "Pay with cryptocurrency via Heleket"
+      },
+      "mulenpay": {
+        "name": "MulenPay",
+        "description": "Pay via MulenPay"
+      },
+      "pal24": {
+        "name": "PAL24",
+        "description": "Pay via PAL24"
+      },
+      "platega": {
+        "name": "Platega",
+        "description": "Pay via Platega"
+      },
+      "wata": {
+        "name": "Wata",
+        "description": "Pay via Wata"
+      },
+      "cloudpayments": {
+        "name": "CloudPayments",
+        "description": "Pay with bank card via CloudPayments"
+      },
+      "freekassa": {
+        "name": "FreeKassa",
+        "description": "Pay via FreeKassa"
       }
     }
   },
@@ -301,8 +333,19 @@
     "user": "User",
     "joined": "Joined",
     "hasPaid": "Has Paid",
+    "status": {
+      "pending": "Pending",
+      "paid": "Paid"
+    },
     "earningsHistory": "Earnings History",
-    "reason": "Reason"
+    "reason": "Reason",
+    "reasons": {
+      "referral_registration_pending": "Referral Registration",
+      "referral_registration": "Referral Registration",
+      "referral_first_payment": "Referral First Payment",
+      "referral_subscription_renewal": "Referral Subscription Renewal",
+      "referral_bonus": "Referral Bonus"
+    }
   },
   "support": {
     "title": "Support",
@@ -514,7 +557,23 @@
         "subscription": "Subscription",
         "connect": "Connect",
         "additional": "Additional"
-      }
+      },
+      "import": "Import",
+      "export": "Export",
+      "importApps": "Import apps from JSON",
+      "exportApps": "Export apps to JSON",
+      "importPreview": "Import Preview",
+      "confirmImport": "Import Apps",
+      "importError": "Invalid JSON file format",
+      "importCreateError": "Failed to create some apps",
+      "noAppsToImport": "No apps to import",
+      "remnaWaveToggle": "Toggle RemnaWave source",
+      "refreshRemnaWave": "Refresh from RemnaWave",
+      "remnaWaveMode": "Showing apps from RemnaWave panel. Read-only mode.",
+      "remnaWaveSettings": "RemnaWave Settings",
+      "remnaWaveConfigUuid": "Config UUID",
+      "remnaWaveConfigUuidHint": "UUID of subscription page config from RemnaWave panel",
+      "availableConfigs": "Available configs"
     },
     "tickets": {
       "title": "Ticket Management",
@@ -534,7 +593,23 @@
       "userLabel": "User",
       "adminLabel": "Admin",
       "replyPlaceholder": "Type your reply...",
-      "sendReply": "Send Reply"
+      "sendReply": "Send Reply",
+      "settings": "Settings",
+      "supportMode": "Support mode",
+      "supportModeDesc": "Choose how users can contact support",
+      "modeBoth": "Tickets and contact",
+      "modeTickets": "Tickets only",
+      "modeContact": "Contact only",
+      "slaSettings": "SLA Settings",
+      "slaEnabled": "Enable SLA (response time monitoring)",
+      "slaEnabledDesc": "Automatic notifications for overdue tickets",
+      "slaMinutes": "Response time (minutes)",
+      "slaMinutesDesc": "Maximum time to respond to a ticket (1-1440 minutes)",
+      "checkInterval": "Check interval (seconds)",
+      "checkIntervalDesc": "How often to check for overdue tickets (30-600 seconds)",
+      "reminderCooldown": "Reminder interval (minutes)",
+      "reminderCooldownDesc": "Minimum time between reminders (1-120 minutes)",
+      "settingsUpdateError": "Error saving settings"
     },
     "tariffs": {
       "title": "Tariff Management",
@@ -656,6 +731,17 @@
       "available": "Available",
       "withConnections": "With Connections",
       "revenue": "Revenue"
+    },
+    "tariffs": {
+      "title": "Tariff Statistics",
+      "subtitle": "Subscription distribution by tariffs",
+      "tariffName": "Tariff",
+      "activeSubscriptions": "Active",
+      "trialSubscriptions": "Trial",
+      "purchasedToday": "Today",
+      "purchasedWeek": "Week",
+      "purchasedMonth": "Month",
+      "noTariffs": "No tariffs"
     }
   },
   "profile": {

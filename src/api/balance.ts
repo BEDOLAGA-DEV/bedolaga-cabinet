@@ -1,4 +1,4 @@
-﻿import apiClient from './client'
+import apiClient from './client'
 import type { Balance, Transaction, PaymentMethod, PaginatedResponse } from '../types'
 
 export const balanceApi = {
@@ -27,7 +27,7 @@ export const balanceApi = {
   },
 
   // Create top-up payment
-  createTopUp: async (amountKopeks: number, paymentMethod: string): Promise<{
+  createTopUp: async (amountKopeks: number, paymentMethod: string, paymentOption?: string): Promise<{
     payment_id: string
     payment_url: string
     amount_kopeks: number
@@ -35,10 +35,18 @@ export const balanceApi = {
     status: string
     expires_at: string | null
   }> => {
-    const response = await apiClient.post('/cabinet/balance/topup', {
+    const payload: {
+      amount_kopeks: number
+      payment_method: string
+      payment_option?: string
+    } = {
       amount_kopeks: amountKopeks,
       payment_method: paymentMethod,
-    })
+    }
+    if (paymentOption) {
+      payload.payment_option = paymentOption
+    }
+    const response = await apiClient.post('/cabinet/balance/topup', payload)
     return response.data
   },
 

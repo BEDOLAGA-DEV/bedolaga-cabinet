@@ -120,6 +120,8 @@ function MessageMedia({ message, t }: { message: TicketMessage; t: (key: string)
 }
 
 export default function Support() {
+  console.log('[Support] Component loaded - VERSION 2024-01-16-v3')
+
   const { t } = useTranslation()
   const queryClient = useQueryClient()
   const [selectedTicket, setSelectedTicket] = useState<TicketDetail | null>(null)
@@ -269,17 +271,63 @@ export default function Support() {
 
   // If tickets are disabled, show redirect message
   if (supportConfig && !supportConfig.tickets_enabled) {
+    console.log('[Support] Tickets disabled, config:', supportConfig)
+
     const getSupportMessage = () => {
+      console.log('[Support] Getting support message for type:', supportConfig.support_type)
+
       if (supportConfig.support_type === 'profile') {
+        const supportUsername = supportConfig.support_username || '@support'
+        console.log('[Support] Opening profile:', supportUsername)
         return {
           title: t('support.ticketsDisabled'),
-          message: t('support.useProfile'),
-          buttonText: t('support.goToProfile'),
+          message: t('support.contactSupport', { username: supportUsername }),
+          buttonText: t('support.contactUs'),
           buttonAction: () => {
+            console.log('[Support] Button clicked, opening:', supportUsername)
             const webApp = window.Telegram?.WebApp
-            if (webApp?.close) {
-              webApp.close()
+
+            // Extract username without @
+            const username = supportUsername.startsWith('@')
+              ? supportUsername.slice(1)
+              : supportUsername
+
+            // Try different URL formats
+            const telegramUrl = `tg://resolve?domain=${username}`
+            const webUrl = `https://t.me/${username}`
+
+            console.log('[Support] Telegram URL:', telegramUrl)
+            console.log('[Support] Web URL:', webUrl)
+            console.log('[Support] WebApp methods:', {
+              openTelegramLink: !!webApp?.openTelegramLink,
+              openLink: !!webApp?.openLink,
+            })
+
+            // Try openTelegramLink first (for tg:// links)
+            if (webApp?.openTelegramLink) {
+              console.log('[Support] Using openTelegramLink with web URL')
+              try {
+                webApp.openTelegramLink(webUrl)
+                return
+              } catch (e) {
+                console.error('[Support] openTelegramLink failed:', e)
+              }
             }
+
+            // Fallback to openLink
+            if (webApp?.openLink) {
+              console.log('[Support] Using openLink')
+              try {
+                webApp.openLink(webUrl)
+                return
+              } catch (e) {
+                console.error('[Support] openLink failed:', e)
+              }
+            }
+
+            // Last resort - window.open
+            console.log('[Support] Using window.open')
+            window.open(webUrl, '_blank')
           },
         }
       }
@@ -300,20 +348,34 @@ export default function Support() {
         }
       }
 
+      // Fallback: contact support (should not normally happen if config is correct)
       const supportUsername = supportConfig.support_username || '@support'
+      console.log('[Support] Fallback: Opening profile:', supportUsername)
       return {
         title: t('support.ticketsDisabled'),
         message: t('support.contactSupport', { username: supportUsername }),
         buttonText: t('support.contactUs'),
         buttonAction: () => {
+          console.log('[Support] Fallback button clicked, opening:', supportUsername)
           const webApp = window.Telegram?.WebApp
-          const url = supportUsername.startsWith('@')
-            ? `https://t.me/${supportUsername.slice(1)}`
-            : `https://t.me/${supportUsername}`
+
+          // Extract username without @
+          const username = supportUsername.startsWith('@')
+            ? supportUsername.slice(1)
+            : supportUsername
+
+          const webUrl = `https://t.me/${username}`
+          console.log('[Support] Fallback opening URL:', webUrl)
+
           if (webApp?.openTelegramLink) {
-            webApp.openTelegramLink(url)
+            console.log('[Support] Fallback using openTelegramLink')
+            webApp.openTelegramLink(webUrl)
+          } else if (webApp?.openLink) {
+            console.log('[Support] Fallback using openLink')
+            webApp.openLink(webUrl)
           } else {
-            window.open(url, '_blank')
+            console.log('[Support] Fallback using window.open')
+            window.open(webUrl, '_blank')
           }
         },
       }

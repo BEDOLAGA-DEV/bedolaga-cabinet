@@ -53,7 +53,12 @@ export default function TopUpModal({ method, onClose }: TopUpModalProps) {
   const { formatAmount, currencySymbol, convertAmount, convertToRub, targetCurrency } = useCurrency()
   const [amount, setAmount] = useState('')
   const [error, setError] = useState<string | null>(null)
+  const [selectedOption, setSelectedOption] = useState<string | null>(
+    method.options && method.options.length > 0 ? method.options[0].id : null
+  )
   const popupRef = useRef<Window | null>(null)
+
+  const hasOptions = method.options && method.options.length > 0
 
   const minRubles = method.min_amount_kopeks / 100
   const maxRubles = method.max_amount_kopeks / 100
@@ -121,7 +126,7 @@ export default function TopUpModal({ method, onClose }: TopUpModalProps) {
     status: string
     expires_at: string | null
   }, unknown, number>({
-    mutationFn: (amountKopeks: number) => balanceApi.createTopUp(amountKopeks, method.id),
+    mutationFn: (amountKopeks: number) => balanceApi.createTopUp(amountKopeks, method.id, selectedOption || undefined),
     onSuccess: (data) => {
       const redirectUrl = data.payment_url || (data as any).invoice_url
       if (redirectUrl) {
@@ -141,6 +146,7 @@ export default function TopUpModal({ method, onClose }: TopUpModalProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault(); setError(null)
+    if (hasOptions && !selectedOption) { setError(t('balance.selectPaymentOption', 'Выберите способ оплаты')); return }
     const amountCurrency = parseFloat(amount)
     if (isNaN(amountCurrency) || amountCurrency <= 0) { setError(t('balance.invalidAmount', 'Invalid amount')); return }
     const amountRubles = convertToRub(amountCurrency)
@@ -180,6 +186,33 @@ export default function TopUpModal({ method, onClose }: TopUpModalProps) {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {hasOptions && method.options && (
+            <div>
+              <label className="label">{t('balance.paymentOption', 'Способ оплаты')}</label>
+              <div className="flex flex-wrap gap-2">
+                {method.options.map((option) => (
+                  <button
+                    key={option.id}
+                    type="button"
+                    onClick={() => setSelectedOption(option.id)}
+                    className={`px-4 py-2.5 rounded-xl text-sm font-medium transition-all flex flex-col items-start ${
+                      selectedOption === option.id
+                        ? 'bg-accent-500 text-white ring-2 ring-accent-400 ring-offset-2 ring-offset-dark-900'
+                        : 'bg-dark-800 text-dark-300 hover:bg-dark-700'
+                    }`}
+                  >
+                    <span>{option.name}</span>
+                    {option.description && (
+                      <span className={`text-xs mt-0.5 ${selectedOption === option.id ? 'text-white/70' : 'text-dark-500'}`}>
+                        {option.description}
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div>
             <label className="label">{t('balance.amount')} ({currencySymbol})</label>
             <input

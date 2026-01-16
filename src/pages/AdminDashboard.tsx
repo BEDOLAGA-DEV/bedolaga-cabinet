@@ -184,32 +184,32 @@ function RevenueChart({ data }: { data: { date: string; amount_rubles: number }[
     )
   }
 
-  const maxValue = Math.max(...data.map(d => d.amount_rubles), 1)
   const last7Days = data.slice(-7)
+  const maxValue = Math.max(...last7Days.map(d => d.amount_rubles), 1)
 
   return (
-    <div className="h-48">
-      <div className="flex items-end justify-between h-36 gap-2">
-        {last7Days.map((item, index) => {
-          const height = (item.amount_rubles / maxValue) * 100
-          const date = new Date(item.date)
-          const dayName = date.toLocaleDateString('ru-RU', { weekday: 'short' })
+    <div className="space-y-3">
+      {last7Days.map((item, index) => {
+        const percentage = (item.amount_rubles / maxValue) * 100
+        const date = new Date(item.date)
+        const dayName = date.toLocaleDateString('ru-RU', { weekday: 'short' })
+        const dayNum = date.getDate()
 
-          return (
-            <div key={index} className="flex-1 flex flex-col items-center gap-2">
-              <div
-                className="w-full bg-accent-500/80 rounded-t-lg hover:bg-accent-500 transition-colors cursor-pointer group relative"
-                style={{ height: `${Math.max(height, 4)}%` }}
-              >
-                <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-dark-800 px-2 py-1 rounded text-xs text-dark-100 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10 border border-dark-600">
-                  {formatAmount(item.amount_rubles)} {currencySymbol}
-                </div>
-              </div>
-              <div className="text-xs text-dark-500">{dayName}</div>
+        return (
+          <div key={index} className="group">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-sm text-dark-300 font-medium capitalize">{dayName}, {dayNum}</span>
+              <span className="text-sm font-semibold text-dark-100">{formatAmount(item.amount_rubles)} {currencySymbol}</span>
             </div>
-          )
-        })}
-      </div>
+            <div className="h-3 bg-dark-700/50 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-accent-600 to-accent-400 rounded-full transition-all duration-500 ease-out group-hover:from-accent-500 group-hover:to-accent-300"
+                style={{ width: `${Math.max(percentage, 2)}%` }}
+              />
+            </div>
+          </div>
+        )
+      })}
     </div>
   )
 }
@@ -494,6 +494,58 @@ export default function AdminDashboard() {
               <div className="text-xs text-dark-500 mb-1">{t('adminDashboard.servers.revenue')}</div>
               <div className="text-2xl font-bold text-warning-400">{formatAmount(stats.servers.total_revenue_rubles)} {currencySymbol}</div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Tariff Stats */}
+      {stats?.tariff_stats && stats.tariff_stats.tariffs.length > 0 && (
+        <div className="bg-dark-800/30 backdrop-blur rounded-xl border border-dark-700 p-5">
+          <div className="flex items-center gap-3 mb-4">
+            <SubscriptionIcon />
+            <div>
+              <h2 className="text-lg font-semibold text-dark-100">{t('adminDashboard.tariffs.title')}</h2>
+              <p className="text-sm text-dark-400">{t('adminDashboard.tariffs.subtitle')}</p>
+            </div>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-dark-700">
+                  <th className="text-left text-xs text-dark-500 font-medium py-3 px-2">{t('adminDashboard.tariffs.tariffName')}</th>
+                  <th className="text-center text-xs text-dark-500 font-medium py-3 px-2">{t('adminDashboard.tariffs.activeSubscriptions')}</th>
+                  <th className="text-center text-xs text-dark-500 font-medium py-3 px-2">{t('adminDashboard.tariffs.trialSubscriptions')}</th>
+                  <th className="text-center text-xs text-dark-500 font-medium py-3 px-2">{t('adminDashboard.tariffs.purchasedToday')}</th>
+                  <th className="text-center text-xs text-dark-500 font-medium py-3 px-2">{t('adminDashboard.tariffs.purchasedWeek')}</th>
+                  <th className="text-center text-xs text-dark-500 font-medium py-3 px-2">{t('adminDashboard.tariffs.purchasedMonth')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {stats.tariff_stats.tariffs.map((tariff) => (
+                  <tr key={tariff.tariff_id} className="border-b border-dark-700/50 hover:bg-dark-800/50 transition-colors">
+                    <td className="py-3 px-2">
+                      <span className="font-medium text-dark-100">{tariff.tariff_name}</span>
+                    </td>
+                    <td className="text-center py-3 px-2">
+                      <span className="text-success-400 font-semibold">{tariff.active_subscriptions}</span>
+                    </td>
+                    <td className="text-center py-3 px-2">
+                      <span className="text-warning-400 font-semibold">{tariff.trial_subscriptions}</span>
+                    </td>
+                    <td className="text-center py-3 px-2">
+                      <span className="text-dark-200">{tariff.purchased_today}</span>
+                    </td>
+                    <td className="text-center py-3 px-2">
+                      <span className="text-dark-200">{tariff.purchased_week}</span>
+                    </td>
+                    <td className="text-center py-3 px-2">
+                      <span className="text-dark-200">{tariff.purchased_month}</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       )}

@@ -220,7 +220,9 @@ export default function Subscription() {
       if (!selectedTariff) {
         throw new Error('Tariff not selected')
       }
-      const days = useCustomDays ? customDays : (selectedTariffPeriod?.days || 30)
+      // For daily tariffs, always use 1 day
+      const isDailyTariff = selectedTariff.is_daily || (selectedTariff.daily_price_kopeks && selectedTariff.daily_price_kopeks > 0)
+      const days = isDailyTariff ? 1 : (useCustomDays ? customDays : (selectedTariffPeriod?.days || 30))
       const trafficGb = useCustomTraffic && selectedTariff.custom_traffic_enabled ? customTrafficGb : undefined
       return subscriptionApi.purchaseTariff(selectedTariff.id, days, trafficGb)
     },
@@ -484,7 +486,7 @@ export default function Subscription() {
           {/* Purchased Traffic Packages */}
           {subscription.traffic_purchases && subscription.traffic_purchases.length > 0 && (
             <div className="mb-6">
-              <div className="text-sm text-dark-500 mb-3">{t('subscription.purchasedTraffic', 'Докупленный трафик')}</div>
+              <div className="text-sm text-dark-500 mb-3">{t('subscription.purchasedTraffic')}</div>
               <div className="space-y-3">
                 {subscription.traffic_purchases.map((purchase) => (
                   <div key={purchase.id} className="p-3 rounded-lg bg-dark-800/50 border border-dark-700/50">
@@ -495,14 +497,26 @@ export default function Subscription() {
                         </svg>
                         <span className="text-base font-semibold text-dark-100">{purchase.traffic_gb} ГБ</span>
                       </div>
-                      <div className="text-sm text-dark-400">
-                        {purchase.days_remaining === 0 ? (
-                          <span className="text-orange-500">Истекает сегодня</span>
-                        ) : purchase.days_remaining === 1 ? (
-                          <span className="text-orange-400">Остался 1 день</span>
-                        ) : (
-                          <span>Осталось {purchase.days_remaining} {purchase.days_remaining >= 5 ? 'дней' : purchase.days_remaining === 1 ? 'день' : 'дня'}</span>
-                        )}
+                      <div className="flex flex-col items-end gap-1">
+                        <div className="text-sm text-dark-400">
+                          {purchase.days_remaining === 0 ? (
+                            <span className="text-orange-500">Истекает сегодня</span>
+                          ) : purchase.days_remaining === 1 ? (
+                            <span className="text-orange-400">Остался 1 день</span>
+                          ) : (
+                            <span>Осталось {purchase.days_remaining} {purchase.days_remaining >= 5 ? 'дней' : purchase.days_remaining === 1 ? 'день' : 'дня'}</span>
+                          )}
+                        </div>
+                        <div className="text-xs text-dark-500 flex items-center gap-1">
+                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          <span>{t('subscription.trafficResetAt', 'Сброс')}: {new Date(purchase.expires_at).toLocaleDateString(undefined, {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric'
+                          })}</span>
+                        </div>
                       </div>
                     </div>
                     <div className="relative h-1.5 bg-dark-700 rounded-full overflow-hidden">
@@ -932,6 +946,20 @@ export default function Subscription() {
             </h2>
           </div>
 
+          {/* Legacy subscription notice - if user has subscription without tariff */}
+          {subscription && !subscription.is_trial && !subscription.tariff_id && (
+            <div className="mb-6 p-4 bg-accent-500/10 border border-accent-500/30 rounded-xl">
+              <div className="text-accent-400 font-medium mb-2">📦 Выберите тариф для продления</div>
+              <div className="text-sm text-dark-300">
+                Ваша текущая подписка была создана до введения тарифов.
+                Для продления необходимо выбрать один из доступных тарифов.
+              </div>
+              <div className="text-xs text-dark-500 mt-2">
+                ⚠️ Ваша текущая подписка продолжит действовать до окончания срока.
+              </div>
+            </div>
+          )}
+
           {/* Switch Tariff Preview Modal */}
           {switchTariffId && (
             <div ref={switchModalRef} className="mb-6 bg-dark-800/50 rounded-xl p-5 space-y-4">
@@ -1018,7 +1046,24 @@ export default function Subscription() {
           )}
 
           {!showTariffPurchase ? (
-            /* Tariff List - current tariff first */
+            <>
+            {/* Promo group discount banner */}
+            {tariffs.some(t => t.promo_group_name) && (
+              <div className="mb-4 p-3 bg-success-500/10 border border-success-500/30 rounded-xl flex items-center gap-3">
+                <div className="w-8 h-8 bg-success-500/20 rounded-lg flex items-center justify-center text-success-400">
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
+                  </svg>
+                </div>
+                <div>
+                  <div className="text-sm font-medium text-success-400">
+                    Ваша группа: {tariffs.find(t => t.promo_group_name)?.promo_group_name}
+                  </div>
+                  <div className="text-xs text-dark-400">Персональные скидки применены к ценам</div>
+                </div>
+              </div>
+            )}
+            {/* Tariff List - current tariff first */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {[...tariffs]
                 .sort((a, b) => {
@@ -1031,6 +1076,8 @@ export default function Subscription() {
                 .map((tariff) => {
                 const isCurrentTariff = tariff.is_current || tariff.id === subscription?.tariff_id
                 const canSwitch = subscription && subscription.tariff_id && !isCurrentTariff && !subscription.is_trial
+                // Если есть подписка БЕЗ tariff_id (классическая) - разрешить выбрать тариф
+                const isLegacySubscription = subscription && !subscription.is_trial && !subscription.tariff_id
 
                 return (
                   <div
@@ -1068,18 +1115,37 @@ export default function Subscription() {
                       {(() => {
                         // Daily tariff price (is_daily + daily_price_kopeks)
                         const dailyPrice = tariff.daily_price_kopeks ?? tariff.price_per_day_kopeks ?? 0
+                        const originalDailyPrice = tariff.original_daily_price_kopeks || 0
                         if (dailyPrice > 0) {
                           return (
-                            <span>
-                              <span className="text-accent-400 font-medium">{formatPrice(dailyPrice)}</span> / день
+                            <span className="flex items-center gap-2">
+                              <span className="text-accent-400 font-medium">{formatPrice(dailyPrice)}</span>
+                              {originalDailyPrice > dailyPrice && (
+                                <span className="text-dark-500 text-xs line-through">{formatPrice(originalDailyPrice)}</span>
+                              )}
+                              <span>/ день</span>
+                              {tariff.daily_discount_percent && tariff.daily_discount_percent > 0 && (
+                                <span className="px-1.5 py-0.5 bg-success-500/20 text-success-400 text-xs rounded">-{tariff.daily_discount_percent}%</span>
+                              )}
                             </span>
                           )
                         }
                         // Period-based price
                         if (tariff.periods.length > 0) {
+                          const firstPeriod = tariff.periods[0]
+                          const hasDiscount = firstPeriod?.original_price_kopeks && firstPeriod.original_price_kopeks > firstPeriod.price_kopeks
                           return (
-                            <span>
-                              {t('subscription.from')} <span className="text-accent-400 font-medium">{formatPrice(tariff.periods[0]?.price_kopeks || 0)}</span>
+                            <span className="flex items-center gap-2 flex-wrap">
+                              <span>{t('subscription.from')}</span>
+                              <span className="text-accent-400 font-medium">{formatPrice(firstPeriod?.price_kopeks || 0)}</span>
+                              {hasDiscount && (
+                                <>
+                                  <span className="text-dark-500 text-xs line-through">{formatPrice(firstPeriod.original_price_kopeks!)}</span>
+                                  {firstPeriod.discount_percent && (
+                                    <span className="px-1.5 py-0.5 bg-success-500/20 text-success-400 text-xs rounded">-{firstPeriod.discount_percent}%</span>
+                                  )}
+                                </>
+                              )}
                             </span>
                           )
                         }
@@ -1108,34 +1174,45 @@ export default function Subscription() {
                             {t('subscription.extend')}
                           </button>
                         )
+                      ) : isLegacySubscription ? (
+                        /* Legacy subscription without tariff - allow selecting tariff for renewal */
+                        <button
+                          onClick={() => {
+                            setSelectedTariff(tariff)
+                            setSelectedTariffPeriod(tariff.periods[0] || null)
+                            setShowTariffPurchase(true)
+                          }}
+                          className="btn-primary flex-1 py-2 text-sm"
+                        >
+                          Выбрать для продления
+                        </button>
+                      ) : canSwitch ? (
+                        /* Other tariffs with existing tariff - switch button */
+                        <button
+                          onClick={() => setSwitchTariffId(tariff.id)}
+                          className="btn-secondary flex-1 py-2 text-sm"
+                        >
+                          {t('subscription.switchTariff.switch')}
+                        </button>
                       ) : (
-                        /* Other tariffs - only switch button (no extend) */
-                        canSwitch ? (
-                          <button
-                            onClick={() => setSwitchTariffId(tariff.id)}
-                            className="btn-secondary flex-1 py-2 text-sm"
-                          >
-                            {t('subscription.switchTariff.switch')}
-                          </button>
-                        ) : (
-                          /* No subscription or trial - purchase button */
-                          <button
-                            onClick={() => {
-                              setSelectedTariff(tariff)
-                              setSelectedTariffPeriod(tariff.periods[0] || null)
-                              setShowTariffPurchase(true)
-                            }}
-                            className="btn-primary flex-1 py-2 text-sm"
-                          >
-                            {t('subscription.purchase')}
-                          </button>
-                        )
+                        /* No subscription or trial - purchase button */
+                        <button
+                          onClick={() => {
+                            setSelectedTariff(tariff)
+                            setSelectedTariffPeriod(tariff.periods[0] || null)
+                            setShowTariffPurchase(true)
+                          }}
+                          className="btn-primary flex-1 py-2 text-sm"
+                        >
+                          {t('subscription.purchase')}
+                        </button>
                       )}
                     </div>
                   </div>
                 )
               })}
             </div>
+            </>
           ) : selectedTariff && (
             /* Tariff Purchase Form */
             <div ref={tariffPurchaseRef} className="space-y-6">
@@ -1260,14 +1337,24 @@ export default function Subscription() {
                           setSelectedTariffPeriod(period)
                           setUseCustomDays(false)
                         }}
-                        className={`p-4 rounded-xl border text-left transition-all ${
+                        className={`p-4 rounded-xl border text-left transition-all relative ${
                           selectedTariffPeriod?.days === period.days && !useCustomDays
                             ? 'border-accent-500 bg-accent-500/10'
                             : 'border-dark-700/50 hover:border-dark-600 bg-dark-800/30'
                         }`}
                       >
+                        {period.discount_percent && period.discount_percent > 0 && (
+                          <div className="absolute -top-2 -right-2 px-2 py-0.5 bg-success-500 text-white text-xs font-medium rounded-full">
+                            -{period.discount_percent}%
+                          </div>
+                        )}
                         <div className="text-lg font-semibold text-dark-100">{period.label}</div>
-                        <div className="text-accent-400 font-medium">{formatPrice(period.price_kopeks)}</div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-accent-400 font-medium">{formatPrice(period.price_kopeks)}</span>
+                          {period.original_price_kopeks && period.original_price_kopeks > period.price_kopeks && (
+                            <span className="text-dark-500 text-sm line-through">{formatPrice(period.original_price_kopeks)}</span>
+                          )}
+                        </div>
                         <div className="text-xs text-dark-500 mt-1">{formatPrice(period.price_per_month_kopeks)}/{t('subscription.month')}</div>
                       </button>
                     ))}

@@ -33,6 +33,7 @@ jobs:
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
+            type=sha
             type=raw,value=latest,enable={{is_default_branch}}
 
       - name: Build and push to Docker Hub
@@ -47,6 +48,6 @@ jobs:
           build-args: |
             VITE_API_URL=/api
             VITE_TELEGRAM_BOT_USERNAME=
-            VITE_APP_NAME=Bedolaga Cabinet
+            VITE_APP_NAME=Cabinet
             VITE_APP_LOGO=V
           platforms: linux/amd64,linux/arm64
