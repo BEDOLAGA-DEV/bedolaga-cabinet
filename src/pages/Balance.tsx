@@ -198,7 +198,6 @@ export default function Balance() {
               )
             })}
           </div>
-          <p className="mt-4 text-sm text-dark-500">{t('balance.useBot')}</p>
         </div>
       )}
 
