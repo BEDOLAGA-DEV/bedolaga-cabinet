@@ -61,6 +61,24 @@ const UsersIcon = () => (
   </svg>
 )
 
+const ChartIcon = () => (
+  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+  </svg>
+)
+
+const ClockIcon = () => (
+  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+  </svg>
+)
+
+const UserIcon = () => (
+  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+  </svg>
+)
+
 // Helper functions
 const getTypeLabel = (type: PromoCodeType): string => {
   const labels: Record<PromoCodeType, string> = {
@@ -88,6 +106,17 @@ const formatDate = (date: string | null): string => {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
+  })
+}
+
+const formatDateTime = (date: string | null): string => {
+  if (!date) return '-'
+  return new Date(date).toLocaleString('ru-RU', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
   })
 }
 
@@ -477,10 +506,170 @@ function PromoGroupModal({ group, onSave, onClose, isLoading }: PromoGroupModalP
   )
 }
 
+// Promocode Stats Modal
+interface PromocodeStatsModalProps {
+  promocode: PromoCodeDetail
+  onClose: () => void
+  onEdit: () => void
+}
+
+function PromocodeStatsModal({ promocode, onClose, onEdit }: PromocodeStatsModalProps) {
+  return (
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+      <div className="bg-dark-800 rounded-xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+        {/* Header */}
+        <div className="flex items-center justify-between p-4 border-b border-dark-700">
+          <div className="flex items-center gap-3">
+            <div className={`px-3 py-1.5 rounded-lg font-mono font-bold text-lg ${getTypeColor(promocode.type)}`}>
+              {promocode.code}
+            </div>
+            <span className={`px-2 py-0.5 text-xs rounded ${getTypeColor(promocode.type)}`}>
+              {getTypeLabel(promocode.type)}
+            </span>
+            {!promocode.is_active && (
+              <span className="px-2 py-0.5 text-xs bg-dark-600 text-dark-400 rounded">
+                Неактивен
+              </span>
+            )}
+          </div>
+          <button onClick={onClose} className="p-1 hover:bg-dark-700 rounded-lg transition-colors">
+            <XIcon />
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-6">
+          {/* Stats Cards */}
+          <div className="grid grid-cols-3 gap-4">
+            <div className="p-4 bg-dark-700/50 rounded-xl text-center">
+              <div className="text-3xl font-bold text-dark-100 mb-1">{promocode.total_uses}</div>
+              <div className="text-sm text-dark-400">Всего использований</div>
+            </div>
+            <div className="p-4 bg-dark-700/50 rounded-xl text-center">
+              <div className="text-3xl font-bold text-emerald-400 mb-1">{promocode.today_uses}</div>
+              <div className="text-sm text-dark-400">Сегодня</div>
+            </div>
+            <div className="p-4 bg-dark-700/50 rounded-xl text-center">
+              <div className="text-3xl font-bold text-accent-400 mb-1">
+                {promocode.max_uses === 0 ? '∞' : promocode.uses_left}
+              </div>
+              <div className="text-sm text-dark-400">Осталось</div>
+            </div>
+          </div>
+
+          {/* Details */}
+          <div className="p-4 bg-dark-700/50 rounded-xl space-y-3">
+            <h4 className="font-medium text-dark-200 mb-3">Детали промокода</h4>
+            <div className="grid grid-cols-2 gap-3 text-sm">
+              <div className="flex justify-between">
+                <span className="text-dark-400">Тип:</span>
+                <span className="text-dark-200">{getTypeLabel(promocode.type)}</span>
+              </div>
+              {promocode.type === 'balance' && (
+                <div className="flex justify-between">
+                  <span className="text-dark-400">Бонус:</span>
+                  <span className="text-emerald-400">+{promocode.balance_bonus_rubles} руб.</span>
+                </div>
+              )}
+              {(promocode.type === 'subscription_days' || promocode.type === 'trial_subscription') && (
+                <div className="flex justify-between">
+                  <span className="text-dark-400">Дней:</span>
+                  <span className="text-blue-400">+{promocode.subscription_days}</span>
+                </div>
+              )}
+              <div className="flex justify-between">
+                <span className="text-dark-400">Лимит:</span>
+                <span className="text-dark-200">
+                  {promocode.current_uses}/{promocode.max_uses === 0 ? '∞' : promocode.max_uses}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-dark-400">Статус:</span>
+                <span className={promocode.is_valid ? 'text-emerald-400' : 'text-error-400'}>
+                  {promocode.is_valid ? 'Активен' : 'Неактивен'}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-dark-400">Создан:</span>
+                <span className="text-dark-200">{formatDateTime(promocode.created_at)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-dark-400">Действует до:</span>
+                <span className="text-dark-200">{promocode.valid_until ? formatDate(promocode.valid_until) : 'Бессрочно'}</span>
+              </div>
+              {promocode.first_purchase_only && (
+                <div className="flex justify-between col-span-2">
+                  <span className="text-dark-400">Ограничение:</span>
+                  <span className="text-amber-400">Только первая покупка</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Usage History */}
+          <div className="p-4 bg-dark-700/50 rounded-xl">
+            <h4 className="font-medium text-dark-200 mb-3 flex items-center gap-2">
+              <ClockIcon />
+              История использования
+            </h4>
+            {promocode.recent_uses.length === 0 ? (
+              <p className="text-dark-500 text-sm text-center py-4">Промокод еще не использовался</p>
+            ) : (
+              <div className="space-y-2 max-h-64 overflow-y-auto">
+                {promocode.recent_uses.map((use) => (
+                  <div
+                    key={use.id}
+                    className="flex items-center justify-between p-3 bg-dark-600/50 rounded-lg"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-dark-500 rounded-full flex items-center justify-center">
+                        <UserIcon />
+                      </div>
+                      <div>
+                        <div className="text-sm font-medium text-dark-200">
+                          {use.user_full_name || use.user_username || `User #${use.user_id}`}
+                        </div>
+                        {use.user_username && (
+                          <div className="text-xs text-dark-500">@{use.user_username}</div>
+                        )}
+                      </div>
+                    </div>
+                    <div className="text-xs text-dark-400">
+                      {formatDateTime(use.used_at)}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="flex justify-end gap-3 p-4 border-t border-dark-700">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 text-dark-300 hover:text-dark-100 transition-colors"
+          >
+            Закрыть
+          </button>
+          <button
+            onClick={onEdit}
+            className="px-4 py-2 bg-accent-500 text-white rounded-lg hover:bg-accent-600 transition-colors flex items-center gap-2"
+          >
+            <EditIcon />
+            Редактировать
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function AdminPromocodes() {
   const queryClient = useQueryClient()
 
   const [activeTab, setActiveTab] = useState<'promocodes' | 'groups'>('promocodes')
+  const [viewingPromocode, setViewingPromocode] = useState<PromoCodeDetail | null>(null)
   const [showPromocodeModal, setShowPromocodeModal] = useState(false)
   const [showGroupModal, setShowGroupModal] = useState(false)
   const [editingPromocode, setEditingPromocode] = useState<PromoCodeDetail | null>(null)
@@ -563,6 +752,15 @@ export default function AdminPromocodes() {
     }
   }
 
+  const handleViewStats = async (id: number) => {
+    try {
+      const detail = await promocodesApi.getPromocode(id)
+      setViewingPromocode(detail)
+    } catch (error) {
+      console.error('Failed to load promocode stats:', error)
+    }
+  }
+
   const handleSavePromocode = (data: PromoCodeCreateRequest | PromoCodeUpdateRequest) => {
     if (editingPromocode) {
       updatePromocodeMutation.mutate({ id: editingPromocode.id, data })
@@ -626,6 +824,34 @@ export default function AdminPromocodes() {
           {activeTab === 'promocodes' ? 'Добавить промокод' : 'Добавить группу'}
         </button>
       </div>
+
+      {/* Stats Overview */}
+      {activeTab === 'promocodes' && promocodes.length > 0 && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+          <div className="p-4 bg-dark-800 rounded-xl border border-dark-700">
+            <div className="text-2xl font-bold text-dark-100">{promocodes.length}</div>
+            <div className="text-xs text-dark-400">Всего промокодов</div>
+          </div>
+          <div className="p-4 bg-dark-800 rounded-xl border border-dark-700">
+            <div className="text-2xl font-bold text-emerald-400">
+              {promocodes.filter(p => p.is_active && p.is_valid).length}
+            </div>
+            <div className="text-xs text-dark-400">Активных</div>
+          </div>
+          <div className="p-4 bg-dark-800 rounded-xl border border-dark-700">
+            <div className="text-2xl font-bold text-accent-400">
+              {promocodes.reduce((sum, p) => sum + p.current_uses, 0)}
+            </div>
+            <div className="text-xs text-dark-400">Использований</div>
+          </div>
+          <div className="p-4 bg-dark-800 rounded-xl border border-dark-700">
+            <div className="text-2xl font-bold text-amber-400">
+              {promocodes.filter(p => p.uses_left === 0 && p.max_uses > 0).length}
+            </div>
+            <div className="text-xs text-dark-400">Исчерпано</div>
+          </div>
+        </div>
+      )}
 
       {/* Tabs */}
       <div className="flex gap-1 mb-6 p-1 bg-dark-800 rounded-lg w-fit">
@@ -716,6 +942,13 @@ export default function AdminPromocodes() {
                     </div>
 
                     <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handleViewStats(promo.id)}
+                        className="p-2 bg-dark-700 text-dark-300 rounded-lg hover:bg-accent-500/20 hover:text-accent-400 transition-colors"
+                        title="Статистика"
+                      >
+                        <ChartIcon />
+                      </button>
                       <button
                         onClick={() => handleEditPromocode(promo.id)}
                         className="p-2 bg-dark-700 text-dark-300 rounded-lg hover:bg-dark-600 hover:text-dark-100 transition-colors"
@@ -836,6 +1069,19 @@ export default function AdminPromocodes() {
             setEditingGroup(null)
           }}
           isLoading={createGroupMutation.isPending || updateGroupMutation.isPending}
+        />
+      )}
+
+      {/* Promocode Stats Modal */}
+      {viewingPromocode && (
+        <PromocodeStatsModal
+          promocode={viewingPromocode}
+          onClose={() => setViewingPromocode(null)}
+          onEdit={() => {
+            setEditingPromocode(viewingPromocode)
+            setViewingPromocode(null)
+            setShowPromocodeModal(true)
+          }}
         />
       )}
 
