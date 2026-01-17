@@ -486,3 +486,33 @@ export interface AppConfig {
     supportUrl?: string
   }
 }
+
+// Pending payment types
+export interface PendingPayment {
+  id: number
+  method: string
+  method_display: string
+  identifier: string
+  amount_kopeks: number
+  amount_rubles: number
+  status: string
+  status_emoji: string
+  status_text: string
+  is_paid: boolean
+  is_checkable: boolean
+  created_at: string
+  expires_at: string | null
+  payment_url: string | null
+  user_id?: number
+  user_telegram_id?: number
+  user_username?: string | null
+}
+
+export interface ManualCheckResponse {
+  success: boolean
+  message: string
+  payment: PendingPayment | null
+  status_changed: boolean
+  old_status: string | null
+  new_status: string | null
+}
