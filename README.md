@@ -1,6 +1,6 @@
 # Bedolaga Cabinet - Web Interface
 
-Современный веб-интерфейс личного кабинета для VPN бота на базе [Remnawave Bedolaga Telegram Bot](https://github.com/BEDOLAGA-DEV/remnawave-bedolaga-telegram-bot).
+Современный веб-интерфейс личного кабинета для VPN бота на базе [Remnawave Bedolaga Telegram Bot V3.0.0+](https://github.com/BEDOLAGA-DEV/remnawave-bedolaga-telegram-bot).
 
 ## Возможности
 
