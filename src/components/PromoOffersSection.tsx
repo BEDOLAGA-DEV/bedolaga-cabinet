@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useTranslation } from 'react-i18next'
-import { promoApi, PromoOffer, ActiveDiscount } from '../api/promo'
+import { promoApi, PromoOffer } from '../api/promo'
 
 // Icons
 const GiftIcon = () => (
@@ -83,7 +82,6 @@ interface PromoOffersSectionProps {
 }
 
 export default function PromoOffersSection({ className = '' }: PromoOffersSectionProps) {
-  const { t } = useTranslation()
   const queryClient = useQueryClient()
   const [claimingId, setClaimingId] = useState<number | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
@@ -130,7 +128,6 @@ export default function PromoOffersSection({ className = '' }: PromoOffersSectio
 
   // Filter unclaimed and active offers
   const availableOffers = offers.filter(o => o.is_active && !o.is_claimed)
-  const claimedOffers = offers.filter(o => o.is_claimed)
 
   // Don't render if no offers and no active discount
   if (!offersLoading && availableOffers.length === 0 && (!activeDiscount || !activeDiscount.is_active)) {
