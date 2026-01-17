@@ -305,6 +305,12 @@
         "name": "FreeKassa",
         "description": "Pay via FreeKassa"
       }
+    },
+    "pendingPayments": {
+      "title": "Pending Payments",
+      "pay": "Pay",
+      "checkStatus": "Check Status",
+      "checking": "Checking..."
     }
   },
   "referral": {
@@ -440,7 +446,9 @@
       "wheel": "Wheel",
       "tariffs": "Tariffs",
       "servers": "Servers",
-      "broadcasts": "Broadcasts"
+      "broadcasts": "Broadcasts",
+      "users": "Users",
+      "payments": "Payments"
     },
     "panel": {
       "title": "Admin Panel",
@@ -452,7 +460,21 @@
       "wheelDesc": "Configure fortune wheel and prizes",
       "tariffsDesc": "Manage tariff plans",
       "serversDesc": "Configure VPN servers",
-      "broadcastsDesc": "Mass messaging to users"
+      "broadcastsDesc": "Mass messaging to users",
+      "usersDesc": "Manage bot users",
+      "paymentsDesc": "Payment verification"
+    },
+    "payments": {
+      "title": "Payment Verification",
+      "description": "Pending payments in the last 24 hours",
+      "totalPending": "Total Pending",
+      "filterByMethod": "Filter by method",
+      "noPayments": "No pending payments",
+      "paid": "Paid",
+      "user": "User",
+      "openLink": "Open Link",
+      "checkStatus": "Check Status",
+      "checking": "Checking..."
     },
     "wheel": {
       "title": "Fortune Wheel Settings",
