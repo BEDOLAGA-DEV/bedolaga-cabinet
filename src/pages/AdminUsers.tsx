@@ -147,9 +147,18 @@ function UserRow({ user, onSelect, formatAmount }: UserRowProps) {
             <TelegramIcon />
             {user.telegram_id}
           </span>
-          <StatusBadge status={user.status} />
-          {user.subscription_status && (
-            <StatusBadge status={user.subscription_status} />
+          {user.status !== 'active' && (
+            <StatusBadge status={user.status} />
+          )}
+          {user.has_subscription && user.subscription_status && (
+            <span className={`px-2 py-0.5 text-xs rounded-full border ${
+              user.subscription_status === 'active' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' :
+              user.subscription_status === 'trial' ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' :
+              'bg-amber-500/20 text-amber-400 border-amber-500/30'
+            }`}>
+              {user.subscription_status === 'active' ? 'Подписка' :
+               user.subscription_status === 'trial' ? 'Триал' : 'Истекла'}
+            </span>
           )}
         </div>
       </div>
@@ -867,14 +876,12 @@ export default function AdminUsers() {
       <div className="flex flex-col sm:flex-row gap-3 mb-4">
         <form onSubmit={handleSearch} className="flex-1">
           <div className="relative">
-            <SearchIcon />
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Поиск по ID, имени, username..."
               className="w-full pl-10 pr-4 py-2 bg-dark-800 border border-dark-700 rounded-xl text-dark-100 placeholder-dark-500 focus:border-dark-600 focus:outline-none"
-              style={{ paddingLeft: '2.5rem' }}
             />
             <div className="absolute left-3 top-1/2 -translate-y-1/2 text-dark-500">
               <SearchIcon />
