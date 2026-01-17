@@ -938,27 +938,50 @@ export default function AdminBanSystem() {
               {/* Group settings by category */}
               {(() => {
                 const grouped: Record<string, BanSettingDefinition[]> = {}
+
+                // Smart categorization: use API category or infer from key prefix
+                const inferCategory = (key: string, apiCategory: string | null): string => {
+                  if (apiCategory) return apiCategory
+                  if (key.startsWith('punishment_') || key.startsWith('progressive_ban')) return 'punishment'
+                  if (key.startsWith('traffic_')) return 'traffic'
+                  if (key.startsWith('network_')) return 'network'
+                  if (key.startsWith('rate_limit_')) return 'rate_limit'
+                  if (key.startsWith('notify_') || key.startsWith('daily_report')) return 'notifications'
+                  return 'general'
+                }
+
                 settings.settings.forEach((s) => {
-                  const cat = s.category || 'general'
+                  const cat = inferCategory(s.key, s.category)
                   if (!grouped[cat]) grouped[cat] = []
                   grouped[cat].push(s)
                 })
 
-                return Object.entries(grouped).map(([category, items]) => (
+                // Sort categories in logical order
+                const categoryOrder = ['general', 'punishment', 'progressive_bans', 'traffic', 'network', 'notifications', 'rate_limit']
+                const sortedCategories = Object.keys(grouped).sort((a, b) => {
+                  const aIdx = categoryOrder.indexOf(a)
+                  const bIdx = categoryOrder.indexOf(b)
+                  if (aIdx === -1 && bIdx === -1) return a.localeCompare(b)
+                  if (aIdx === -1) return 1
+                  if (bIdx === -1) return -1
+                  return aIdx - bIdx
+                })
+
+                return sortedCategories.map((category) => (
                   <div key={category} className="bg-dark-800/50 rounded-xl border border-dark-700 overflow-hidden">
                     <div className="p-4 border-b border-dark-700">
                       <h3 className="text-sm font-medium text-dark-200">{formatCategory(category)}</h3>
                     </div>
                     <div className="divide-y divide-dark-700">
-                      {items.map((setting) => (
-                        <div key={setting.key} className="p-4 flex items-center justify-between">
+                      {grouped[category].map((setting) => (
+                        <div key={setting.key} className="p-4 flex items-center justify-between gap-4">
                           <div className="flex-1 min-w-0">
                             <div className="text-dark-100 font-medium">{formatSettingKey(setting.key)}</div>
                             {setting.description && (
                               <div className="text-xs text-dark-500 mt-0.5">{setting.description}</div>
                             )}
                           </div>
-                          <div className="ml-4">
+                          <div className="flex-shrink-0">
                             {setting.type === 'bool' ? (
                               <button
                                 onClick={() => handleToggleSetting(setting.key)}
@@ -984,8 +1007,42 @@ export default function AdminBanSystem() {
                                 className="w-24 px-3 py-1.5 bg-dark-900 border border-dark-700 rounded-lg text-dark-100 text-sm focus:outline-none focus:border-accent-500 disabled:opacity-50"
                               />
                             ) : setting.type === 'list' ? (
-                              <div className="text-dark-300 text-sm">
-                                {Array.isArray(setting.value) ? setting.value.join(', ') : String(setting.value)}
+                              <div className="flex flex-wrap gap-1.5 max-w-xs justify-end">
+                                {Array.isArray(setting.value) && setting.value.length > 0 ? (
+                                  setting.value.map((item, idx) => (
+                                    <span
+                                      key={idx}
+                                      className="px-2 py-0.5 bg-accent-500/20 text-accent-400 rounded text-xs"
+                                    >
+                                      {String(item)}
+                                    </span>
+                                  ))
+                                ) : (
+                                  <span className="text-dark-500 text-sm">{t('common.noData')}</span>
+                                )}
+                                {setting.editable && nodes && setting.key.includes('nodes') && (
+                                  <select
+                                    className="px-2 py-1 bg-dark-900 border border-dark-700 rounded text-xs text-dark-300 focus:outline-none focus:border-accent-500"
+                                    onChange={(e) => {
+                                      if (e.target.value) {
+                                        const currentList = Array.isArray(setting.value) ? setting.value : []
+                                        if (!currentList.includes(e.target.value)) {
+                                          handleSetSetting(setting.key, [...currentList, e.target.value].join(','))
+                                        }
+                                        e.target.value = ''
+                                      }
+                                    }}
+                                    disabled={settingLoading === setting.key}
+                                  >
+                                    <option value="">+ {t('common.add')}</option>
+                                    {nodes.nodes
+                                      .filter(n => !Array.isArray(setting.value) || !setting.value.includes(n.name))
+                                      .map(n => (
+                                        <option key={n.name} value={n.name}>{n.name}</option>
+                                      ))
+                                    }
+                                  </select>
+                                )}
                               </div>
                             ) : (
                               <div className="text-dark-300 text-sm">{String(setting.value)}</div>
