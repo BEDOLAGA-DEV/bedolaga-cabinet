@@ -1,9 +1,10 @@
-import { useState, useEffect, useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect, useMemo, useCallback } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { useAuthStore } from '../store/auth'
 import { brandingApi, type BrandingInfo } from '../api/branding'
+import { getAndClearReturnUrl } from '../utils/token'
 import LanguageSwitcher from '../components/LanguageSwitcher'
 import TelegramLoginButton from '../components/TelegramLoginButton'
 
@@ -46,6 +47,7 @@ const cacheBranding = (data: BrandingInfo) => {
 export default function Login() {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const location = useLocation()
   const { isAuthenticated, loginWithTelegram, loginWithEmail } = useAuthStore()
   const [activeTab, setActiveTab] = useState<'telegram' | 'email'>('telegram')
   const [email, setEmail] = useState('')
@@ -53,6 +55,22 @@ export default function Login() {
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isTelegramWebApp, setIsTelegramWebApp] = useState(false)
+
+  // Получаем URL для возврата после авторизации
+  const getReturnUrl = useCallback(() => {
+    // Сначала проверяем state от React Router
+    const stateFrom = (location.state as { from?: string })?.from
+    if (stateFrom && stateFrom !== '/login') {
+      return stateFrom
+    }
+    // Затем проверяем сохранённый URL в sessionStorage (от safeRedirectToLogin)
+    const savedUrl = getAndClearReturnUrl()
+    if (savedUrl && savedUrl !== '/login') {
+      return savedUrl
+    }
+    // По умолчанию на главную
+    return '/'
+  }, [location.state])
 
   // Fetch branding
   const cachedBranding = useMemo(() => getCachedBranding(), [])
@@ -82,9 +100,9 @@ export default function Login() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/')
+      navigate(getReturnUrl(), { replace: true })
     }
-  }, [isAuthenticated, navigate])
+  }, [isAuthenticated, navigate, getReturnUrl])
 
   // Try Telegram WebApp authentication on mount
   useEffect(() => {
@@ -97,7 +115,7 @@ export default function Login() {
         setIsLoading(true)
         try {
           await loginWithTelegram(tg.initData)
-          navigate('/')
+          navigate(getReturnUrl(), { replace: true })
         } catch (err) {
           console.error('Telegram auth failed:', err)
           setError(t('auth.telegramRequired'))
@@ -108,7 +126,7 @@ export default function Login() {
     }
 
     tryTelegramAuth()
-  }, [loginWithTelegram, navigate, t])
+  }, [loginWithTelegram, navigate, t, getReturnUrl])
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -117,7 +135,7 @@ export default function Login() {
 
     try {
       await loginWithEmail(email, password)
-      navigate('/')
+      navigate(getReturnUrl(), { replace: true })
     } catch (err: unknown) {
       const error = err as { response?: { data?: { detail?: string } } }
       setError(error.response?.data?.detail || t('common.error'))
