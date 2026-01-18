@@ -61,6 +61,48 @@ const platformIconComponents: Record<string, React.FC> = {
 // Platform order for display
 const platformOrder = ['ios', 'android', 'windows', 'macos', 'linux', 'androidTV', 'appleTV']
 
+// Allowed app schemes for deep links
+const allowedAppSchemes = [
+  'happ://', 'flclash://', 'clash://', 'sing-box://', 'v2rayng://',
+  'sub://', 'shadowrocket://', 'hiddify://', 'streisand://',
+  'quantumult://', 'surge://', 'loon://', 'nekobox://', 'v2box://'
+]
+
+/**
+ * Validate URL to prevent XSS via javascript: and other dangerous schemes
+ * Only allows http, https, and known app store URLs
+ */
+function isValidExternalUrl(url: string | undefined): boolean {
+  if (!url) return false
+  const lowerUrl = url.toLowerCase().trim()
+
+  // Block dangerous schemes
+  const dangerousSchemes = ['javascript:', 'data:', 'vbscript:', 'file:']
+  if (dangerousSchemes.some(scheme => lowerUrl.startsWith(scheme))) {
+    return false
+  }
+
+  // Allow only http/https URLs
+  return lowerUrl.startsWith('http://') || lowerUrl.startsWith('https://')
+}
+
+/**
+ * Validate deep link URL - only allows known VPN app schemes
+ */
+function isValidDeepLink(url: string | undefined): boolean {
+  if (!url) return false
+  const lowerUrl = url.toLowerCase().trim()
+
+  // Block dangerous schemes
+  const dangerousSchemes = ['javascript:', 'data:', 'vbscript:', 'file:']
+  if (dangerousSchemes.some(scheme => lowerUrl.startsWith(scheme))) {
+    return false
+  }
+
+  // Allow known app schemes
+  return allowedAppSchemes.some(scheme => lowerUrl.startsWith(scheme))
+}
+
 // Detect user's platform from user agent
 function detectPlatform(): string | null {
   if (typeof window === 'undefined' || !navigator?.userAgent) {
@@ -170,7 +212,11 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
 
   // Handle deep link click - use miniapp redirect page like in miniapp index.html
   const handleConnect = (app: AppInfo) => {
-    if (!app.deepLink) return
+    // Validate deep link to prevent XSS
+    if (!app.deepLink || !isValidDeepLink(app.deepLink)) {
+      console.warn('Invalid or missing deep link:', app.deepLink)
+      return
+    }
 
     const lang = i18n.language?.startsWith('ru') ? 'ru' : 'en'
     const redirectUrl = `${window.location.origin}/miniapp/redirect.html?url=${encodeURIComponent(app.deepLink)}&lang=${lang}`
@@ -442,7 +488,9 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
                 </p>
                 {selectedApp.installationStep.buttons && selectedApp.installationStep.buttons.length > 0 && (
                   <div className="flex flex-wrap gap-2">
-                    {selectedApp.installationStep.buttons.map((btn, idx) => (
+                    {selectedApp.installationStep.buttons
+                      .filter((btn) => isValidExternalUrl(btn.buttonLink))
+                      .map((btn, idx) => (
                       <a
                         key={idx}
                         href={btn.buttonLink}
