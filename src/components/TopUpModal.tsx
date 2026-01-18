@@ -19,7 +19,10 @@ const buildCryptoBotDeepLink = (url: string): string | null => {
       return `tg://resolve?domain=CryptoBot${parsed.search || ''}`
     }
     return null
-  } catch { return null }
+  } catch (e) {
+    console.warn('[TopUpModal] Failed to build CryptoBot deep link:', e)
+    return null
+  }
 }
 
 const openPaymentLink = (url: string, reservedWindow?: Window | null) => {
@@ -28,7 +31,7 @@ const openPaymentLink = (url: string, reservedWindow?: Window | null) => {
 
   // If inside Telegram Mini App, let Telegram handle t.me links
   if (isTelegramPaymentLink(url) && webApp?.openTelegramLink) {
-    try { webApp.openTelegramLink(url); return } catch { /* ignore */ }
+    try { webApp.openTelegramLink(url); return } catch (e) { console.warn('[TopUpModal] openTelegramLink failed:', e) }
   }
 
   // Prefer Telegram deep link specifically for CryptoBot invoices, but only when
@@ -37,7 +40,7 @@ const openPaymentLink = (url: string, reservedWindow?: Window | null) => {
   const target = cb && !isTelegramPaymentLink(url) ? cb : url
 
   if (reservedWindow && !reservedWindow.closed) {
-    try { reservedWindow.location.href = target; reservedWindow.focus?.() } catch { /* ignore */ }
+    try { reservedWindow.location.href = target; reservedWindow.focus?.() } catch (e) { console.warn('[TopUpModal] Failed to use reserved window:', e) }
     return
   }
 
@@ -136,7 +139,7 @@ export default function TopUpModal({ method, onClose }: TopUpModalProps) {
       onClose()
     },
     onError: (error: unknown) => {
-      try { if (popupRef.current && !popupRef.current.closed) popupRef.current.close() } catch { /* ignore */ }
+      try { if (popupRef.current && !popupRef.current.closed) popupRef.current.close() } catch (e) { console.warn('[TopUpModal] Failed to close popup:', e) }
       popupRef.current = null
       const detail = (error as { response?: { data?: { detail?: string } } })?.response?.data?.detail || ''
       if (detail.includes('not yet implemented')) setError(t('balance.useBot'))

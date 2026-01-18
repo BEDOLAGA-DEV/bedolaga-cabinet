@@ -1,0 +1,255 @@
+/**
+ * Утилиты для безопасной работы с JWT токенами
+ */
+
+const TOKEN_KEYS = {
+  ACCESS: 'access_token',
+  REFRESH: 'refresh_token',
+  USER: 'user',
+  TELEGRAM_INIT: 'telegram_init_data',
+} as const
+
+interface JWTPayload {
+  exp?: number
+  iat?: number
+  sub?: string
+  [key: string]: unknown
+}
+
+/**
+ * Декодирует JWT токен без верификации подписи
+ * Используется только для чтения payload на клиенте
+ */
+export function decodeJWT(token: string): JWTPayload | null {
+  try {
+    const parts = token.split('.')
+    if (parts.length !== 3) return null
+
+    const payload = parts[1]
+    const decoded = atob(payload.replace(/-/g, '+').replace(/_/g, '/'))
+    return JSON.parse(decoded)
+  } catch {
+    return null
+  }
+}
+
+/**
+ * Проверяет, истёк ли срок действия токена
+ * @param token JWT токен
+ * @param bufferSeconds Буфер в секундах до истечения (по умолчанию 30 сек)
+ */
+export function isTokenExpired(token: string | null, bufferSeconds = 30): boolean {
+  if (!token) return true
+
+  const payload = decodeJWT(token)
+  if (!payload?.exp) return true
+
+  const now = Math.floor(Date.now() / 1000)
+  return payload.exp <= now + bufferSeconds
+}
+
+/**
+ * Проверяет, валиден ли токен (не истёк и корректный формат)
+ */
+export function isTokenValid(token: string | null): boolean {
+  if (!token) return false
+  return !isTokenExpired(token)
+}
+
+/**
+ * Безопасное хранилище токенов
+ * Использует sessionStorage вместо localStorage для защиты от XSS
+ * Токены не сохраняются между сессиями браузера
+ */
+export const tokenStorage = {
+  getAccessToken(): string | null {
+    try {
+      return sessionStorage.getItem(TOKEN_KEYS.ACCESS)
+    } catch {
+      return null
+    }
+  },
+
+  getRefreshToken(): string | null {
+    try {
+      return sessionStorage.getItem(TOKEN_KEYS.REFRESH)
+    } catch {
+      return null
+    }
+  },
+
+  setTokens(accessToken: string, refreshToken: string): void {
+    try {
+      sessionStorage.setItem(TOKEN_KEYS.ACCESS, accessToken)
+      sessionStorage.setItem(TOKEN_KEYS.REFRESH, refreshToken)
+    } catch {
+      console.error('Failed to save tokens to sessionStorage')
+    }
+  },
+
+  setAccessToken(accessToken: string): void {
+    try {
+      sessionStorage.setItem(TOKEN_KEYS.ACCESS, accessToken)
+    } catch {
+      console.error('Failed to save access token to sessionStorage')
+    }
+  },
+
+  clearTokens(): void {
+    try {
+      sessionStorage.removeItem(TOKEN_KEYS.ACCESS)
+      sessionStorage.removeItem(TOKEN_KEYS.REFRESH)
+      sessionStorage.removeItem(TOKEN_KEYS.USER)
+      // Также очищаем localStorage для миграции со старой версии
+      localStorage.removeItem(TOKEN_KEYS.ACCESS)
+      localStorage.removeItem(TOKEN_KEYS.REFRESH)
+      localStorage.removeItem(TOKEN_KEYS.USER)
+    } catch {
+      // ignore
+    }
+  },
+
+  /**
+   * Миграция токенов из localStorage в sessionStorage
+   * Вызывается при инициализации для обратной совместимости
+   */
+  migrateFromLocalStorage(): void {
+    try {
+      const accessToken = localStorage.getItem(TOKEN_KEYS.ACCESS)
+      const refreshToken = localStorage.getItem(TOKEN_KEYS.REFRESH)
+
+      if (accessToken && !sessionStorage.getItem(TOKEN_KEYS.ACCESS)) {
+        sessionStorage.setItem(TOKEN_KEYS.ACCESS, accessToken)
+      }
+      if (refreshToken && !sessionStorage.getItem(TOKEN_KEYS.REFRESH)) {
+        sessionStorage.setItem(TOKEN_KEYS.REFRESH, refreshToken)
+      }
+
+      // Удаляем из localStorage после миграции
+      localStorage.removeItem(TOKEN_KEYS.ACCESS)
+      localStorage.removeItem(TOKEN_KEYS.REFRESH)
+    } catch {
+      // ignore
+    }
+  },
+
+  getTelegramInitData(): string | null {
+    try {
+      return sessionStorage.getItem(TOKEN_KEYS.TELEGRAM_INIT)
+    } catch {
+      return null
+    }
+  },
+
+  setTelegramInitData(data: string): void {
+    try {
+      sessionStorage.setItem(TOKEN_KEYS.TELEGRAM_INIT, data)
+    } catch {
+      // ignore
+    }
+  },
+}
+
+/**
+ * Централизованный менеджер обновления токенов
+ * Предотвращает множественные параллельные refresh запросы
+ */
+class TokenRefreshManager {
+  private isRefreshing = false
+  private refreshPromise: Promise<string | null> | null = null
+  private subscribers: ((token: string | null) => void)[] = []
+  private refreshEndpoint = '/api/cabinet/auth/refresh'
+
+  setRefreshEndpoint(endpoint: string): void {
+    this.refreshEndpoint = endpoint
+  }
+
+  /**
+   * Обновляет access token используя refresh token
+   * При множественных вызовах возвращает один и тот же Promise
+   */
+  async refreshAccessToken(): Promise<string | null> {
+    // Если уже идёт refresh - возвращаем существующий Promise
+    if (this.isRefreshing && this.refreshPromise) {
+      return this.refreshPromise
+    }
+
+    const refreshToken = tokenStorage.getRefreshToken()
+    if (!refreshToken) {
+      return null
+    }
+
+    this.isRefreshing = true
+    this.refreshPromise = this.doRefresh(refreshToken)
+
+    try {
+      const result = await this.refreshPromise
+      this.notifySubscribers(result)
+      return result
+    } finally {
+      this.isRefreshing = false
+      this.refreshPromise = null
+    }
+  }
+
+  private async doRefresh(refreshToken: string): Promise<string | null> {
+    try {
+      const response = await fetch(this.refreshEndpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refresh_token: refreshToken }),
+      })
+
+      if (!response.ok) {
+        throw new Error(`Refresh failed: ${response.status}`)
+      }
+
+      const data = await response.json()
+      const newAccessToken = data.access_token
+
+      if (newAccessToken) {
+        tokenStorage.setAccessToken(newAccessToken)
+        return newAccessToken
+      }
+
+      return null
+    } catch (error) {
+      console.error('[TokenRefreshManager] Refresh failed:', error)
+      return null
+    }
+  }
+
+  /**
+   * Подписка на результат refresh (для ожидающих запросов)
+   */
+  subscribe(callback: (token: string | null) => void): () => void {
+    this.subscribers.push(callback)
+    return () => {
+      this.subscribers = this.subscribers.filter((cb) => cb !== callback)
+    }
+  }
+
+  private notifySubscribers(token: string | null): void {
+    this.subscribers.forEach((cb) => cb(token))
+    this.subscribers = []
+  }
+
+  /**
+   * Проверяет, идёт ли сейчас refresh
+   */
+  get isRefreshInProgress(): boolean {
+    return this.isRefreshing
+  }
+
+  /**
+   * Ожидает завершения текущего refresh (если есть)
+   */
+  async waitForRefresh(): Promise<string | null> {
+    if (this.refreshPromise) {
+      return this.refreshPromise
+    }
+    return tokenStorage.getAccessToken()
+  }
+}
+
+export const tokenRefreshManager = new TokenRefreshManager()
