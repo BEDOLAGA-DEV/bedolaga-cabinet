@@ -10,6 +10,8 @@ import TelegramLoginButton from '../components/TelegramLoginButton'
 
 const BRANDING_CACHE_KEY = 'cabinet-branding-cache'
 const BRANDING_CACHE_TTL = 1000 * 60 * 60 // 1 hour
+const RESEND_COOLDOWN_STAGES = [30, 60, 180, 900] // 30s, 1m, 3m, 15m
+const RESEND_RESET_TIME = 1000 * 60 * 60 // 1 hour
 
 const getCachedBranding = (): BrandingInfo | undefined => {
 	if (typeof window === 'undefined') {
@@ -52,6 +54,7 @@ export default function Login() {
 	const navigate = useNavigate()
 	const { isAuthenticated, loginWithTelegram, loginWithEmail } = useAuthStore()
 	const [activeTab, setActiveTab] = useState<'login' | 'register'>('login')
+	const [view, setView] = useState<'form' | 'verify'>('form')
 
 	// Login form state
 	const [email, setEmail] = useState('')
@@ -67,6 +70,48 @@ export default function Login() {
 	const [successMsg, setSuccessMsg] = useState('')
 	const [isLoading, setIsLoading] = useState(false)
 	const [isTelegramWebApp, setIsTelegramWebApp] = useState(false)
+
+	const [cooldown, setCooldown] = useState(0)
+	const [resendCount, setResendCount] = useState(0)
+
+	// Timer for resend cooldown and storage sync
+	useEffect(() => {
+		// Restore state from storage on mount
+		const storedLastRequest = localStorage.getItem('cabinet_email_last_request')
+		const storedCount = localStorage.getItem('cabinet_email_resend_count')
+
+		if (storedLastRequest && storedCount) {
+			const lastRequestTime = parseInt(storedLastRequest, 10)
+			const count = parseInt(storedCount, 10)
+			const now = Date.now()
+
+			// If more than 1 hour passed since last request, reset
+			if (now - lastRequestTime > RESEND_RESET_TIME) {
+				localStorage.removeItem('cabinet_email_last_request')
+				localStorage.removeItem('cabinet_email_resend_count')
+				setResendCount(0)
+				setCooldown(0)
+			} else {
+				setResendCount(count)
+				const stageDuration =
+					RESEND_COOLDOWN_STAGES[
+						Math.min(count, RESEND_COOLDOWN_STAGES.length - 1)
+					]
+				const elapsed = Math.floor((now - lastRequestTime) / 1000)
+				const remaining = Math.max(0, stageDuration - elapsed)
+				setCooldown(remaining)
+			}
+		}
+
+		const timer = window.setInterval(() => {
+			setCooldown(c => {
+				if (c <= 0) return 0
+				return c - 1
+			})
+		}, 1000)
+
+		return () => clearInterval(timer)
+	}, [])
 
 	// Fetch branding
 	const cachedBranding = useMemo(() => getCachedBranding(), [])
@@ -166,14 +211,29 @@ export default function Login() {
 				first_name: regFirstName || undefined,
 				last_name: regLastName || undefined,
 			})
-			setSuccessMsg(
-				'Регистрация успешна. Пожалуйста, перейдите по ссылке в письме для подтверждения почты',
-			)
-			// Clear form
-			setRegEmail('')
-			setRegPassword('')
-			setRegFirstName('')
-			setRegLastName('')
+			setView('verify')
+
+			const now = Date.now()
+			const storedLast = localStorage.getItem('cabinet_email_last_request')
+			const storedCount = localStorage.getItem('cabinet_email_resend_count')
+
+			let nextCount = 0
+			// If within reset window, increment level. Otherwise start fresh.
+			if (
+				storedLast &&
+				storedCount &&
+				now - parseInt(storedLast) < RESEND_RESET_TIME
+			) {
+				nextCount = Math.min(
+					parseInt(storedCount) + 1,
+					RESEND_COOLDOWN_STAGES.length - 1,
+				)
+			}
+
+			localStorage.setItem('cabinet_email_last_request', now.toString())
+			localStorage.setItem('cabinet_email_resend_count', nextCount.toString())
+			setResendCount(nextCount)
+			setCooldown(RESEND_COOLDOWN_STAGES[nextCount])
 		} catch (err: unknown) {
 			console.error('Registration error:', err)
 			const errorObj = err as {
@@ -194,6 +254,48 @@ export default function Login() {
 		}
 	}
 
+	const handleResend = async () => {
+		if (cooldown > 0) return
+		setError('')
+		setSuccessMsg('')
+		setIsLoading(true)
+		try {
+			await authApi.register({
+				email: regEmail,
+				password: regPassword,
+				first_name: regFirstName || undefined,
+				last_name: regLastName || undefined,
+			})
+			setSuccessMsg('Письмо отправлено повторно')
+
+			// Increment cooldown stage
+			const now = Date.now()
+			const nextCount = Math.min(
+				resendCount + 1,
+				RESEND_COOLDOWN_STAGES.length - 1,
+			)
+
+			localStorage.setItem('cabinet_email_last_request', now.toString())
+			localStorage.setItem('cabinet_email_resend_count', nextCount.toString())
+
+			setResendCount(nextCount)
+			setCooldown(RESEND_COOLDOWN_STAGES[nextCount])
+			setCooldown(60)
+		} catch (err: unknown) {
+			const errorObj = err as {
+				response?: { data?: { detail?: string | unknown } }
+			}
+			const detail = errorObj.response?.data?.detail
+			if (typeof detail === 'string') {
+				setError(detail)
+			} else {
+				setError(t('common.error'))
+			}
+		} finally {
+			setIsLoading(false)
+		}
+	}
+
 	// Switch tab handler
 	const switchTab = (tab: 'login' | 'register') => {
 		if (activeTab !== tab) {
@@ -201,6 +303,77 @@ export default function Login() {
 			setError('')
 			setSuccessMsg('')
 		}
+	}
+
+	if (view === 'verify') {
+		return (
+			<div className='min-h-screen flex items-center justify-center py-8 px-4 bg-dark-900 text-white'>
+				{/* Background gradient */}
+				<div className='fixed inset-0 bg-gradient-to-br from-dark-950 via-dark-900 to-dark-950' />
+				<div className='fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-accent-500/10 via-transparent to-transparent' />
+
+				<div className='relative max-w-md w-full text-center space-y-6 card p-8'>
+					<div className='mx-auto w-16 h-16 rounded-full bg-accent-500/10 flex items-center justify-center text-accent-400 mb-4'>
+						<svg
+							className='w-8 h-8'
+							fill='none'
+							viewBox='0 0 24 24'
+							stroke='currentColor'
+						>
+							<path
+								strokeLinecap='round'
+								strokeLinejoin='round'
+								strokeWidth={2}
+								d='M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z'
+							/>
+						</svg>
+					</div>
+
+					<h2 className='text-2xl font-bold'>Подтвердите Email</h2>
+					<p className='text-dark-300'>
+						Мы отправили письмо с подтверждением на{' '}
+						<strong className='text-white'>{regEmail}</strong>.<br />
+						Пожалуйста, перейдите по ссылке в письме.
+					</p>
+
+					{error && (
+						<div className='bg-error-500/10 border border-error-500/30 text-error-400 px-4 py-3 rounded-xl text-sm'>
+							{error}
+						</div>
+					)}
+					{successMsg && (
+						<div className='bg-success-500/10 border border-success-500/30 text-success-400 px-4 py-3 rounded-xl text-sm'>
+							{successMsg}
+						</div>
+					)}
+
+					<div className='space-y-3 pt-4'>
+						<button
+							onClick={handleResend}
+							disabled={cooldown > 0 || isLoading}
+							className={`w-full py-3 rounded-xl font-medium transition-all ${
+								cooldown > 0 || isLoading
+									? 'bg-dark-700 text-dark-400 cursor-not-allowed'
+									: 'bg-accent-500 hover:bg-accent-600 text-white'
+							}`}
+						>
+							{isLoading
+								? 'Отправка...'
+								: cooldown > 0
+									? `Отправить повторно через ${cooldown}с`
+									: 'Отправить письмо повторно'}
+						</button>
+
+						<button
+							onClick={() => setView('form')}
+							className='w-full py-3 text-dark-400 hover:text-white transition-colors'
+						>
+							Вернуться ко входу
+						</button>
+					</div>
+				</div>
+			</div>
+		)
 	}
 
 	return (
