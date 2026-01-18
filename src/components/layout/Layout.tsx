@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useAuthStore } from '../../store/auth'
 import LanguageSwitcher from '../LanguageSwitcher'
 import PromoDiscountBadge from '../PromoDiscountBadge'
+import TicketNotificationBell from '../TicketNotificationBell'
 import { contestsApi } from '../../api/contests'
 import { pollsApi } from '../../api/polls'
 import { brandingApi } from '../../api/branding'
@@ -337,6 +338,7 @@ export default function Layout({ children }: LayoutProps) {
               )}
 
               <PromoDiscountBadge />
+              <TicketNotificationBell isAdmin={isAdminActive()} />
               <LanguageSwitcher />
 
               {/* Profile - Desktop */}

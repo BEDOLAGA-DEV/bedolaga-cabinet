@@ -460,6 +460,8 @@ function TicketSettingsModal({ onClose }: { onClose: () => void }) {
     sla_check_interval_seconds: settings?.sla_check_interval_seconds ?? 60,
     sla_reminder_cooldown_minutes: settings?.sla_reminder_cooldown_minutes ?? 15,
     support_system_mode: settings?.support_system_mode ?? 'both',
+    cabinet_user_notifications_enabled: settings?.cabinet_user_notifications_enabled ?? true,
+    cabinet_admin_notifications_enabled: settings?.cabinet_admin_notifications_enabled ?? true,
   })
 
   // Update form when settings load
@@ -471,6 +473,8 @@ function TicketSettingsModal({ onClose }: { onClose: () => void }) {
         sla_check_interval_seconds: settings.sla_check_interval_seconds,
         sla_reminder_cooldown_minutes: settings.sla_reminder_cooldown_minutes,
         support_system_mode: settings.support_system_mode,
+        cabinet_user_notifications_enabled: settings.cabinet_user_notifications_enabled ?? true,
+        cabinet_admin_notifications_enabled: settings.cabinet_admin_notifications_enabled ?? true,
       })
     }
   }, [settings])
@@ -524,6 +528,43 @@ function TicketSettingsModal({ onClose }: { onClose: () => void }) {
                 <option value="contact">{t('admin.tickets.modeContact')}</option>
               </select>
               <p className="text-xs text-dark-500 mt-1">{t('admin.tickets.supportModeDesc')}</p>
+            </div>
+
+            {/* Cabinet Notifications */}
+            <div className="border-t border-dark-800/50 pt-6">
+              <h3 className="text-lg font-semibold text-dark-100 mb-4">{t('admin.tickets.cabinetNotifications')}</h3>
+
+              {/* User Notifications */}
+              <div className="mb-4">
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.cabinet_user_notifications_enabled}
+                    onChange={(e) => setFormData({ ...formData, cabinet_user_notifications_enabled: e.target.checked })}
+                    className="w-5 h-5 rounded border-dark-700 bg-dark-800 text-accent-500 focus:ring-2 focus:ring-accent-500 focus:ring-offset-0"
+                  />
+                  <div>
+                    <div className="text-dark-100 font-medium">{t('admin.tickets.userNotificationsEnabled')}</div>
+                    <div className="text-sm text-dark-500">{t('admin.tickets.userNotificationsEnabledDesc')}</div>
+                  </div>
+                </label>
+              </div>
+
+              {/* Admin Notifications */}
+              <div>
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.cabinet_admin_notifications_enabled}
+                    onChange={(e) => setFormData({ ...formData, cabinet_admin_notifications_enabled: e.target.checked })}
+                    className="w-5 h-5 rounded border-dark-700 bg-dark-800 text-accent-500 focus:ring-2 focus:ring-accent-500 focus:ring-offset-0"
+                  />
+                  <div>
+                    <div className="text-dark-100 font-medium">{t('admin.tickets.adminNotificationsEnabled')}</div>
+                    <div className="text-sm text-dark-500">{t('admin.tickets.adminNotificationsEnabledDesc')}</div>
+                  </div>
+                </label>
+              </div>
             </div>
 
             <div className="border-t border-dark-800/50 pt-6">

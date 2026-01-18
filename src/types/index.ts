@@ -516,3 +516,33 @@ export interface ManualCheckResponse {
   old_status: string | null
   new_status: string | null
 }
+
+// Ticket notifications types
+export interface TicketNotification {
+  id: number
+  ticket_id: number
+  notification_type: 'new_ticket' | 'admin_reply' | 'user_reply'
+  message: string | null
+  is_read: boolean
+  created_at: string
+  read_at: string | null
+}
+
+export interface TicketNotificationList {
+  items: TicketNotification[]
+  unread_count: number
+}
+
+export interface UnreadCountResponse {
+  unread_count: number
+}
+
+export interface TicketSettings {
+  sla_enabled: boolean
+  sla_minutes: number
+  sla_check_interval_seconds: number
+  sla_reminder_cooldown_minutes: number
+  support_system_mode: string
+  cabinet_user_notifications_enabled: boolean
+  cabinet_admin_notifications_enabled: boolean
+}
