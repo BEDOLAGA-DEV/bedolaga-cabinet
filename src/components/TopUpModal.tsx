@@ -7,24 +7,8 @@ import { checkRateLimit, getRateLimitResetTime, RATE_LIMIT_KEYS } from '../utils
 import type { PaymentMethod } from '../types'
 
 const TELEGRAM_LINK_REGEX = /^https?:\/\/t\.me\//i
-const CRYPTOBOT_INVOICE_REGEX = /^(?:https?:\/\/)?(?:app\.cr\.bot|cr\.bot)\/invoices\/([A-Za-z0-9_-]+)/i
 
 const isTelegramPaymentLink = (url: string): boolean => TELEGRAM_LINK_REGEX.test(url)
-
-const buildCryptoBotDeepLink = (url: string): string | null => {
-  try {
-    const m = url.match(CRYPTOBOT_INVOICE_REGEX)
-    if (m && m[1]) return `tg://resolve?domain=CryptoBot&start=${m[1]}`
-    const parsed = new URL(url)
-    if (/^(?:www\.)?t\.me$/i.test(parsed.hostname) && /\/CryptoBot/i.test(parsed.pathname)) {
-      return `tg://resolve?domain=CryptoBot${parsed.search || ''}`
-    }
-    return null
-  } catch (e) {
-    console.warn('[TopUpModal] Failed to build CryptoBot deep link:', e)
-    return null
-  }
-}
 
 const openPaymentLink = (url: string, reservedWindow?: Window | null) => {
   if (typeof window === 'undefined' || !url) return
@@ -35,19 +19,20 @@ const openPaymentLink = (url: string, reservedWindow?: Window | null) => {
     try { webApp.openTelegramLink(url); return } catch (e) { console.warn('[TopUpModal] openTelegramLink failed:', e) }
   }
 
-  // Prefer Telegram deep link specifically for CryptoBot invoices, but only when
-  // the backend didn't already return a direct t.me link (those work fine).
-  const cb = buildCryptoBotDeepLink(url)
-  const target = cb && !isTelegramPaymentLink(url) ? cb : url
+  // Inside Telegram Mini App → open in external browser
+  if (webApp?.openLink) {
+    try { webApp.openLink(url, { try_instant_view: false }); return } catch (e) { console.warn('[TopUpModal] webApp.openLink failed:', e) }
+  }
 
+  // Regular browser: use reserved popup window if available
   if (reservedWindow && !reservedWindow.closed) {
-    try { reservedWindow.location.href = target; reservedWindow.focus?.() } catch (e) { console.warn('[TopUpModal] Failed to use reserved window:', e) }
+    try { reservedWindow.location.href = url; reservedWindow.focus?.() } catch (e) { console.warn('[TopUpModal] Failed to use reserved window:', e) }
     return
   }
 
-  const w2 = window.open(target, '_blank', 'noopener,noreferrer')
+  const w2 = window.open(url, '_blank', 'noopener,noreferrer')
   if (w2) { w2.opener = null; return }
-  window.location.href = target
+  window.location.href = url
 }
 
 interface TopUpModalProps { method: PaymentMethod; onClose: () => void }
