@@ -272,26 +272,6 @@ export default function Login() {
 						</div>
 					)}
 
-					{/* Telegram Login Button (Always visible) */}
-					<div className='mb-6'>
-						{isLoading && isTelegramWebApp ? (
-							<div className='text-center py-2'>
-								<div className='w-6 h-6 border-2 border-accent-500 border-t-transparent rounded-full animate-spin mx-auto mb-2' />
-								<p className='text-sm text-dark-400'>
-									{t('auth.authenticating')}
-								</p>
-							</div>
-						) : (
-							<TelegramLoginButton botUsername={botUsername} />
-						)}
-					</div>
-
-					<div className='flex items-center gap-4 mb-6'>
-						<div className='h-px bg-dark-700 flex-1' />
-						<span className='text-dark-400 text-sm'>{t('common.or')}</span>
-						<div className='h-px bg-dark-700 flex-1' />
-					</div>
-
 					{activeTab === 'login' ? (
 						<form className='space-y-5' onSubmit={handleEmailLogin}>
 							<div>
@@ -431,3 +411,23 @@ export default function Login() {
 		</div>
 	)
 }
+
+;<div className='flex items-center gap-4 my-6'>
+	<div className='h-px bg-dark-700 flex-1' />
+	<span className='text-dark-400 text-sm'>{t('common.or')}</span>
+	<div className='h-px bg-dark-700 flex-1' />
+</div>
+
+{
+	/* Telegram Login Button (Always visible) */
+}
+;<div className='mb-6'>
+	{isLoading && isTelegramWebApp ? (
+		<div className='text-center py-2'>
+			<div className='w-6 h-6 border-2 border-accent-500 border-t-transparent rounded-full animate-spin mx-auto mb-2' />
+			<p className='text-sm text-dark-400'>{t('auth.authenticating')}</p>
+		</div>
+	) : (
+		<TelegramLoginButton botUsername={botUsername} />
+	)}
+</div>
