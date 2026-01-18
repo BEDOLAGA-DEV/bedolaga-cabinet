@@ -184,9 +184,19 @@ export default function Login() {
 			console.error('Login error:', err)
 			const error = err as {
 				response?: { data?: { detail?: string | unknown } }
+				response?: { status?: number }
 			}
 			const detail = error.response?.data?.detail
-			if (typeof detail === 'string') {
+			const status = error.response?.status
+			if (status === 403 && detail === 'EMAIL_NOT_VERIFIED') {
+				setView('verify')
+				setRegEmail(email)
+				setRegPassword(password)
+				setSuccessMsg(
+					'Аккаунт зарегистрирован, но email не подтверждён. Проверьте почту или отправьте письмо повторно.',
+				)
+				setError('')
+			} else if (typeof detail === 'string') {
 				setError(detail)
 			} else if (Array.isArray(detail)) {
 				setError(t('common.error'))
@@ -260,22 +270,21 @@ export default function Login() {
 		setSuccessMsg('')
 		setIsLoading(true)
 		try {
-			await authApi.resendVerification(regEmail)
+			await authApi.resendVerification({
+				email: regEmail,
+				password: regPassword,
+			})
 			setSuccessMsg('Письмо отправлено повторно')
-
 			// Increment cooldown stage
 			const now = Date.now()
 			const nextCount = Math.min(
 				resendCount + 1,
 				RESEND_COOLDOWN_STAGES.length - 1,
 			)
-
 			localStorage.setItem('cabinet_email_last_request', now.toString())
 			localStorage.setItem('cabinet_email_resend_count', nextCount.toString())
-
 			setResendCount(nextCount)
 			setCooldown(RESEND_COOLDOWN_STAGES[nextCount])
-			setCooldown(60)
 		} catch (err: unknown) {
 			const errorObj = err as {
 				response?: { data?: { detail?: string | unknown } }
