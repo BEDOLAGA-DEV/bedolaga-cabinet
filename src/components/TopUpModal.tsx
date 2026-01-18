@@ -41,7 +41,6 @@ interface TopUpModalProps {
 export default function TopUpModal({ method, onClose, initialAmountRubles }: TopUpModalProps) {
   const { t } = useTranslation()
   const { formatAmount, currencySymbol, convertAmount, convertToRub, targetCurrency } = useCurrency()
-  const containerRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
   const getInitialAmount = (): string => {
@@ -58,7 +57,7 @@ export default function TopUpModal({ method, onClose, initialAmountRubles }: Top
   const [selectedOption, setSelectedOption] = useState<string | null>(
     method.options && method.options.length > 0 ? method.options[0].id : null
   )
-  const [isKeyboardOpen, setIsKeyboardOpen] = useState(false)
+  const [isInputFocused, setIsInputFocused] = useState(false)
   const popupRef = useRef<Window | null>(null)
 
   const hasOptions = method.options && method.options.length > 0
@@ -68,31 +67,6 @@ export default function TopUpModal({ method, onClose, initialAmountRubles }: Top
   const isStarsMethod = methodKey.includes('stars')
   const methodName = t(`balance.paymentMethods.${methodKey}.name`, { defaultValue: '' }) || method.name
   const isTelegramMiniApp = typeof window !== 'undefined' && Boolean(window.Telegram?.WebApp?.initData)
-
-  // Detect keyboard open/close
-  useEffect(() => {
-    const handleFocus = () => setIsKeyboardOpen(true)
-    const handleBlur = () => setTimeout(() => setIsKeyboardOpen(false), 100)
-
-    const input = inputRef.current
-    if (input) {
-      input.addEventListener('focus', handleFocus)
-      input.addEventListener('blur', handleBlur)
-      return () => {
-        input.removeEventListener('focus', handleFocus)
-        input.removeEventListener('blur', handleBlur)
-      }
-    }
-  }, [])
-
-  // Scroll to input when keyboard opens
-  useEffect(() => {
-    if (isKeyboardOpen && containerRef.current && inputRef.current) {
-      setTimeout(() => {
-        inputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-      }, 150)
-    }
-  }, [isKeyboardOpen])
 
   const starsPaymentMutation = useMutation({
     mutationFn: (amountKopeks: number) => balanceApi.createStarsInvoice(amountKopeks),
@@ -172,25 +146,23 @@ export default function TopUpModal({ method, onClose, initialAmountRubles }: Top
   const inputStep = currencyDecimals === 0 ? 1 : 0.01
   const isPending = topUpMutation.isPending || starsPaymentMutation.isPending
 
-  return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center">
-      <div className="absolute inset-0" onClick={onClose} />
+  // When input is focused in Telegram Mini App, position modal at top
+  const modalPosition = isInputFocused && isTelegramMiniApp ? 'items-start pt-2' : 'items-end sm:items-center'
 
-      <div
-        ref={containerRef}
-        className="relative w-full sm:max-w-md sm:mx-4 bg-dark-900 sm:rounded-2xl rounded-t-2xl border border-dark-700/50 shadow-2xl animate-slide-up max-h-[85vh] overflow-hidden flex flex-col"
-      >
-        {/* Compact Header */}
-        <div className="flex-shrink-0 flex justify-between items-center px-4 py-3 border-b border-dark-800">
+  return (
+    <div className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex justify-center ${modalPosition}`}>
+      <div className="absolute inset-0" onClick={() => { inputRef.current?.blur(); onClose() }} />
+
+      <div className="relative w-full sm:max-w-md sm:mx-4 bg-dark-900 sm:rounded-2xl rounded-t-2xl border border-dark-700/50 shadow-2xl animate-slide-up">
+        {/* Header - hide when keyboard open on mobile */}
+        <div className={`flex justify-between items-center px-4 py-3 border-b border-dark-800 ${isInputFocused && isTelegramMiniApp ? 'hidden' : ''}`}>
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-accent-500/20 flex items-center justify-center">
               <svg className="w-4 h-4 text-accent-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
               </svg>
             </div>
-            <div>
-              <h2 className="text-base font-semibold text-dark-100">{methodName}</h2>
-            </div>
+            <h2 className="text-base font-semibold text-dark-100">{methodName}</h2>
           </div>
           <button onClick={onClose} className="w-8 h-8 rounded-lg bg-dark-800 hover:bg-dark-700 flex items-center justify-center">
             <svg className="w-4 h-4 text-dark-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -199,90 +171,88 @@ export default function TopUpModal({ method, onClose, initialAmountRubles }: Top
           </button>
         </div>
 
-        {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto overscroll-contain">
-          <div className="p-4 space-y-3">
-            {/* Payment options - compact grid */}
-            {hasOptions && method.options && (
-              <div className="grid grid-cols-2 gap-2">
-                {method.options.map((option) => (
+        {/* Content */}
+        <div className="p-4 space-y-3">
+          {/* Payment options - hide when keyboard open */}
+          {hasOptions && method.options && !isInputFocused && (
+            <div className="grid grid-cols-2 gap-2">
+              {method.options.map((option) => (
+                <button
+                  key={option.id}
+                  type="button"
+                  onClick={() => setSelectedOption(option.id)}
+                  className={`p-2.5 rounded-xl text-sm font-medium transition-all text-left ${
+                    selectedOption === option.id
+                      ? 'bg-accent-500 text-white'
+                      : 'bg-dark-800 text-dark-300 active:bg-dark-700'
+                  }`}
+                >
+                  {option.name}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Amount input */}
+          <div className="relative">
+            <input
+              ref={inputRef}
+              type="number"
+              inputMode="decimal"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              onFocus={() => setIsInputFocused(true)}
+              onBlur={() => setTimeout(() => setIsInputFocused(false), 150)}
+              placeholder={`${formatAmount(minRubles, 0)} – ${formatAmount(maxRubles, 0)}`}
+              step={inputStep}
+              className="w-full h-14 px-4 pr-16 text-xl font-semibold bg-dark-800 border border-dark-700 rounded-xl text-dark-100 placeholder:text-dark-500 focus:outline-none focus:border-accent-500 focus:ring-1 focus:ring-accent-500"
+              autoComplete="off"
+            />
+            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-dark-400 font-medium text-lg">
+              {currencySymbol}
+            </span>
+          </div>
+
+          {/* Quick amounts - always show, they help dismiss keyboard */}
+          {quickAmounts.length > 0 && (
+            <div className="grid grid-cols-4 gap-2">
+              {quickAmounts.map((a) => {
+                const quickValue = getQuickAmountValue(a)
+                const isSelected = amount === quickValue
+                return (
                   <button
-                    key={option.id}
+                    key={a}
                     type="button"
-                    onClick={() => setSelectedOption(option.id)}
-                    className={`p-2.5 rounded-xl text-sm font-medium transition-all text-left ${
-                      selectedOption === option.id
+                    onClick={() => {
+                      setAmount(quickValue)
+                      inputRef.current?.blur()
+                    }}
+                    className={`py-2.5 rounded-xl text-sm font-medium transition-all ${
+                      isSelected
                         ? 'bg-accent-500 text-white'
                         : 'bg-dark-800 text-dark-300 active:bg-dark-700'
                     }`}
                   >
-                    {option.name}
+                    {formatAmount(a, 0)}
                   </button>
-                ))}
-              </div>
-            )}
-
-            {/* Amount input with currency */}
-            <div className="relative">
-              <input
-                ref={inputRef}
-                type="number"
-                inputMode="decimal"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                placeholder={`${formatAmount(minRubles, 0)} – ${formatAmount(maxRubles, 0)}`}
-                step={inputStep}
-                className="w-full h-14 px-4 pr-16 text-xl font-semibold bg-dark-800 border border-dark-700 rounded-xl text-dark-100 placeholder:text-dark-500 focus:outline-none focus:border-accent-500 focus:ring-1 focus:ring-accent-500"
-                autoComplete="off"
-              />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-dark-400 font-medium text-lg">
-                {currencySymbol}
-              </span>
+                )
+              })}
             </div>
+          )}
 
-            {/* Quick amounts - compact */}
-            {quickAmounts.length > 0 && (
-              <div className="grid grid-cols-4 gap-2">
-                {quickAmounts.map((a) => {
-                  const quickValue = getQuickAmountValue(a)
-                  const isSelected = amount === quickValue
-                  return (
-                    <button
-                      key={a}
-                      type="button"
-                      onClick={() => {
-                        setAmount(quickValue)
-                        inputRef.current?.blur()
-                      }}
-                      className={`py-2.5 rounded-xl text-sm font-medium transition-all ${
-                        isSelected
-                          ? 'bg-accent-500 text-white'
-                          : 'bg-dark-800 text-dark-300 active:bg-dark-700'
-                      }`}
-                    >
-                      {formatAmount(a, 0)}
-                    </button>
-                  )
-                })}
-              </div>
-            )}
+          {/* Error - hide when keyboard open */}
+          {error && !isInputFocused && (
+            <div className="bg-error-500/10 border border-error-500/30 text-error-400 px-3 py-2 rounded-xl text-sm">
+              {error}
+            </div>
+          )}
 
-            {/* Error */}
-            {error && (
-              <div className="bg-error-500/10 border border-error-500/30 text-error-400 px-3 py-2 rounded-xl text-sm">
-                {error}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Fixed Footer with Submit */}
-        <div className="flex-shrink-0 p-4 pt-3 border-t border-dark-800 bg-dark-900 safe-area-inset-bottom">
+          {/* Submit button - always visible */}
           <button
             type="button"
             onClick={handleSubmit}
             disabled={isPending || !amount}
-            className="btn-primary w-full h-12 text-base font-semibold"
+            className="btn-primary w-full h-12 text-base font-semibold mt-2"
           >
             {isPending ? (
               <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -295,14 +265,21 @@ export default function TopUpModal({ method, onClose, initialAmountRubles }: Top
               </span>
             )}
           </button>
-          <button
-            type="button"
-            onClick={onClose}
-            className="w-full mt-2 py-2 text-sm text-dark-400 hover:text-dark-200"
-          >
-            {t('common.cancel')}
-          </button>
+
+          {/* Cancel - hide when keyboard open */}
+          {!isInputFocused && (
+            <button
+              type="button"
+              onClick={onClose}
+              className="w-full py-2 text-sm text-dark-400 hover:text-dark-200"
+            >
+              {t('common.cancel')}
+            </button>
+          )}
         </div>
+
+        {/* Safe area for iPhone */}
+        <div className="safe-area-inset-bottom" />
       </div>
     </div>
   )
