@@ -183,8 +183,7 @@ export default function Login() {
 		} catch (err: unknown) {
 			console.error('Login error:', err)
 			const error = err as {
-				response?: { data?: { detail?: string | unknown } }
-				response?: { status?: number }
+				response?: { data?: { detail?: string | unknown }; status?: number }
 			}
 			const detail = error.response?.data?.detail
 			const status = error.response?.status

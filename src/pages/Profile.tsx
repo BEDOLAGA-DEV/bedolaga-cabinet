@@ -174,9 +174,7 @@ export default function Profile() {
 									{t('profile.verificationRequired')}
 								</p>
 								<button
-									onClick={() =>
-										resendVerificationMutation.mutate(user.email || '')
-									}
+									onClick={() => resendVerificationMutation.mutate({ email: user.email || '', password: '' })}
 									disabled={resendVerificationMutation.isPending}
 									className='btn-primary'
 								>
