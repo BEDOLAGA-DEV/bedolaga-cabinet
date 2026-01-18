@@ -155,10 +155,21 @@ export default function AdminTickets() {
 
   const formatUser = (ticket: AdminTicket | AdminTicketDetail) => {
     if (!ticket.user) return 'Unknown'
-    const { first_name, last_name, username, telegram_id } = ticket.user
+    const { first_name, last_name, username } = ticket.user
     if (first_name || last_name) return `${first_name || ''} ${last_name || ''}`.trim()
     if (username) return `@${username}`
-    return `ID: ${telegram_id}`
+    return 'User'
+  }
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text).catch(() => {
+      const textarea = document.createElement('textarea')
+      textarea.value = text
+      document.body.appendChild(textarea)
+      textarea.select()
+      document.execCommand('copy')
+      document.body.removeChild(textarea)
+    })
   }
 
   return (
@@ -248,7 +259,17 @@ export default function AdminTickets() {
                     </span>
                   </div>
                   <div className="text-xs text-dark-500">
-                    {formatUser(ticket)} | {new Date(ticket.updated_at).toLocaleDateString()}
+                    {formatUser(ticket)}
+                    {ticket.user?.telegram_id && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); copyToClipboard(String(ticket.user!.telegram_id)) }}
+                        className="ml-1 text-dark-600 hover:text-accent-400 transition-colors"
+                        title={t('admin.tickets.copyTelegramId')}
+                      >
+                        (TG: {ticket.user!.telegram_id})
+                      </button>
+                    )}
+                    {' '}| {new Date(ticket.updated_at).toLocaleDateString()}
                   </div>
                   {ticket.last_message && (
                     <div className="text-xs text-dark-600 mt-1 truncate">
@@ -315,8 +336,17 @@ export default function AdminTickets() {
                   </div>
                 </div>
                 <div className="text-sm text-dark-500 mb-4">
-                  {t('admin.tickets.from')}: {formatUser(selectedTicket)} |{' '}
-                  {t('admin.tickets.created')}: {new Date(selectedTicket.created_at).toLocaleString()}
+                  {t('admin.tickets.from')}: {formatUser(selectedTicket)}
+                  {selectedTicket.user?.telegram_id && (
+                    <button
+                      onClick={() => copyToClipboard(String(selectedTicket.user!.telegram_id))}
+                      className="ml-1 px-2 py-0.5 text-xs bg-dark-700 hover:bg-dark-600 rounded transition-colors"
+                      title={t('admin.tickets.copyTelegramId')}
+                    >
+                      TG: {selectedTicket.user!.telegram_id}
+                    </button>
+                  )}
+                  {' '}| {t('admin.tickets.created')}: {new Date(selectedTicket.created_at).toLocaleString()}
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {['open', 'pending', 'answered', 'closed'].map((s) => (

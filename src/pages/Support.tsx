@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { ticketsApi } from '../api/tickets'
 import { infoApi } from '../api/info'
 import { logger } from '../utils/logger'
+import { checkRateLimit, getRateLimitResetTime, RATE_LIMIT_KEYS } from '../utils/rateLimit'
 import type { TicketDetail, TicketMessage } from '../types'
 
 const log = logger.createLogger('Support')
@@ -132,6 +133,7 @@ export default function Support() {
   const [newTitle, setNewTitle] = useState('')
   const [newMessage, setNewMessage] = useState('')
   const [replyMessage, setReplyMessage] = useState('')
+  const [rateLimitError, setRateLimitError] = useState<string | null>(null)
 
   // Media attachment states
   const [createAttachment, setCreateAttachment] = useState<MediaAttachment | null>(null)
@@ -507,6 +509,13 @@ export default function Support() {
               <form
                 onSubmit={(e) => {
                   e.preventDefault()
+                  setRateLimitError(null)
+                  // Rate limit: max 3 tickets per 60 seconds
+                  if (!checkRateLimit(RATE_LIMIT_KEYS.TICKET_CREATE, 3, 60000)) {
+                    const resetTime = getRateLimitResetTime(RATE_LIMIT_KEYS.TICKET_CREATE)
+                    setRateLimitError(t('support.tooManyRequests', { seconds: resetTime }) || `Слишком много запросов. Подождите ${resetTime} сек.`)
+                    return
+                  }
                   createMutation.mutate()
                 }}
                 className="space-y-4"
@@ -566,6 +575,12 @@ export default function Support() {
                     </button>
                   )}
                 </div>
+
+                {rateLimitError && (
+                  <div className="bg-error-500/10 border border-error-500/30 text-error-400 p-3 rounded-xl text-sm">
+                    {rateLimitError}
+                  </div>
+                )}
 
                 <div className="flex gap-3">
                   <button
@@ -655,6 +670,13 @@ export default function Support() {
                 <form
                   onSubmit={(e) => {
                     e.preventDefault()
+                    setRateLimitError(null)
+                    // Rate limit: max 5 replies per 30 seconds
+                    if (!checkRateLimit(RATE_LIMIT_KEYS.TICKET_REPLY, 5, 30000)) {
+                      const resetTime = getRateLimitResetTime(RATE_LIMIT_KEYS.TICKET_REPLY)
+                      setRateLimitError(t('support.tooManyRequests', { seconds: resetTime }) || `Слишком много запросов. Подождите ${resetTime} сек.`)
+                      return
+                    }
                     replyMutation.mutate()
                   }}
                   className="pt-4 border-t border-dark-800/50"
@@ -715,6 +737,11 @@ export default function Support() {
                         )}
                       </button>
                     </div>
+                    {rateLimitError && (
+                      <div className="mt-2 bg-error-500/10 border border-error-500/30 text-error-400 p-2 rounded-lg text-sm">
+                        {rateLimitError}
+                      </div>
+                    )}
                   </div>
                 </form>
               )}

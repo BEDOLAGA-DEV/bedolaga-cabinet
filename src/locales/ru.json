@@ -126,6 +126,9 @@
     "selectServers": "Выберите серверы",
     "selectDevices": "Устройства",
     "perDevice": "/ устройство",
+    "devicesFree": "устройств бесплатно",
+    "perExtraDevice": "/ доп. устройство",
+    "perMonth": "/мес",
     "summary": "Итого",
     "total": "К оплате",
     "purchase": "Купить",
@@ -728,7 +731,8 @@
       "checkIntervalDesc": "Как часто проверять просроченные тикеты (30-600 секунд)",
       "reminderCooldown": "Интервал напоминаний (минуты)",
       "reminderCooldownDesc": "Минимальное время между напоминаниями (1-120 минут)",
-      "settingsUpdateError": "Ошибка сохранения настроек"
+      "settingsUpdateError": "Ошибка сохранения настроек",
+      "copyTelegramId": "Нажмите чтобы скопировать Telegram ID"
     },
     "tariffs": {
       "title": "Управление тарифами",

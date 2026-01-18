@@ -71,7 +71,8 @@ export const useAuthStore = create<AuthState>()(
       },
 
       logout: () => {
-        const { refreshToken } = get()
+        // Get refresh token from secure storage, not zustand state
+        const refreshToken = tokenStorage.getRefreshToken()
         if (refreshToken) {
           authApi.logout(refreshToken).catch(() => {
             // Logout API call failed - ignore silently
@@ -259,8 +260,9 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: 'cabinet-auth',
+      // Only persist user info for UI caching
+      // Tokens are stored securely in sessionStorage via tokenStorage
       partialize: (state) => ({
-        refreshToken: state.refreshToken,
         user: state.user,
       }),
     }

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useMutation } from '@tanstack/react-query'
 import { balanceApi } from '../api/balance'
 import { useCurrency } from '../hooks/useCurrency'
+import { checkRateLimit, getRateLimitResetTime, RATE_LIMIT_KEYS } from '../utils/rateLimit'
 import type { PaymentMethod } from '../types'
 
 const TELEGRAM_LINK_REGEX = /^https?:\/\/t\.me\//i
@@ -139,6 +140,14 @@ export default function TopUpModal({ method, onClose }: TopUpModalProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault(); setError(null)
+
+    // Rate limit check: max 3 payment attempts per 30 seconds
+    if (!checkRateLimit(RATE_LIMIT_KEYS.PAYMENT, 3, 30000)) {
+      const resetTime = getRateLimitResetTime(RATE_LIMIT_KEYS.PAYMENT)
+      setError(t('balance.tooManyRequests', { seconds: resetTime }) || `Слишком много запросов. Подождите ${resetTime} сек.`)
+      return
+    }
+
     if (hasOptions && !selectedOption) { setError(t('balance.selectPaymentOption', 'Выберите способ оплаты')); return }
     const amountCurrency = parseFloat(amount)
     if (isNaN(amountCurrency) || amountCurrency <= 0) { setError(t('balance.invalidAmount', 'Invalid amount')); return }

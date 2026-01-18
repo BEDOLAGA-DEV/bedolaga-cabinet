@@ -126,6 +126,9 @@
     "selectServers": "Select Servers",
     "selectDevices": "Devices",
     "perDevice": "/ device",
+    "devicesFree": "devices free",
+    "perExtraDevice": "/ extra device",
+    "perMonth": "/mo",
     "summary": "Summary",
     "total": "Total",
     "purchase": "Purchase",
@@ -728,7 +731,8 @@
       "checkIntervalDesc": "How often to check for overdue tickets (30-600 seconds)",
       "reminderCooldown": "Reminder interval (minutes)",
       "reminderCooldownDesc": "Minimum time between reminders (1-120 minutes)",
-      "settingsUpdateError": "Error saving settings"
+      "settingsUpdateError": "Error saving settings",
+      "copyTelegramId": "Click to copy Telegram ID"
     },
     "tariffs": {
       "title": "Tariff Management",

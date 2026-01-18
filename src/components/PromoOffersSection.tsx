@@ -36,7 +36,14 @@ const ServerIcon = () => (
 // Helper functions
 const formatTimeLeft = (expiresAt: string): string => {
   const now = new Date()
-  const expires = new Date(expiresAt)
+  // Ensure UTC parsing - if no timezone specified, assume UTC
+  let expires: Date
+  if (expiresAt.includes('Z') || expiresAt.includes('+') || expiresAt.includes('-', 10)) {
+    expires = new Date(expiresAt)
+  } else {
+    // No timezone - treat as UTC
+    expires = new Date(expiresAt + 'Z')
+  }
   const diffMs = expires.getTime() - now.getTime()
 
   if (diffMs <= 0) return 'Истекло'

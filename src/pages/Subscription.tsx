@@ -1095,6 +1095,13 @@ export default function Subscription() {
             {/* Tariff List - current tariff first */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {[...tariffs]
+                // Hide Trial tariffs for users who already have trial subscription
+                .filter((tariff) => {
+                  if (subscription?.is_trial && tariff.name.toLowerCase().includes('trial')) {
+                    return false
+                  }
+                  return true
+                })
                 .sort((a, b) => {
                   const aIsCurrent = a.is_current || a.id === subscription?.tariff_id
                   const bIsCurrent = b.is_current || b.id === subscription?.tariff_id
@@ -1787,7 +1794,15 @@ export default function Subscription() {
               {/* Step: Server Selection */}
               {currentStep === 'servers' && selectedPeriod?.servers.options && (
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  {selectedPeriod.servers.options.map((server) => {
+                  {selectedPeriod.servers.options
+                    // Hide Trial server for users who already have trial subscription
+                    .filter((server) => {
+                      if (subscription?.is_trial && server.name.toLowerCase().includes('trial')) {
+                        return false
+                      }
+                      return true
+                    })
+                    .map((server) => {
                     const hasExistingDiscount = !!(server.discount_percent && server.discount_percent > 0)
                     const promoServer = applyPromoDiscount(server.price_kopeks, hasExistingDiscount)
 
@@ -1822,7 +1837,7 @@ export default function Subscription() {
                           <div>
                             <div className="font-medium text-dark-100">{server.name}</div>
                             <div className="flex items-center gap-2">
-                              <span className="text-sm text-accent-400">{formatPrice(promoServer.price)}</span>
+                              <span className="text-sm text-accent-400">{formatPrice(promoServer.price)}{t('subscription.perMonth')}</span>
                               {promoServer.original && (
                                 <span className="text-dark-500 text-xs line-through">{formatPrice(promoServer.original)}</span>
                               )}
@@ -1860,8 +1875,15 @@ export default function Subscription() {
                       +
                     </button>
                   </div>
-                  <div className="text-sm text-dark-500 mt-4">
-                    {formatPrice(selectedPeriod.devices.price_per_device_kopeks)} {t('subscription.perDevice')}
+                  <div className="text-sm text-dark-500 mt-4 text-center space-y-1">
+                    <div className="text-accent-400">
+                      {selectedPeriod.devices.min} {t('subscription.devicesFree')}
+                    </div>
+                    {selectedPeriod.devices.max > selectedPeriod.devices.min && (
+                      <div>
+                        {formatPrice(selectedPeriod.devices.price_per_device_kopeks)} {t('subscription.perExtraDevice')}
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
