@@ -406,28 +406,28 @@ export default function Login() {
 							</button>
 						</form>
 					)}
+
+					<div className='flex items-center gap-4 my-6'>
+						<div className='h-px bg-dark-700 flex-1' />
+						<span className='text-dark-400 text-sm'>{t('common.or')}</span>
+						<div className='h-px bg-dark-700 flex-1' />
+					</div>
+
+					{/* Telegram Login Button (Always visible) */}
+					<div className='mb-6'>
+						{isLoading && isTelegramWebApp ? (
+							<div className='text-center py-2'>
+								<div className='w-6 h-6 border-2 border-accent-500 border-t-transparent rounded-full animate-spin mx-auto mb-2' />
+								<p className='text-sm text-dark-400'>
+									{t('auth.authenticating')}
+								</p>
+							</div>
+						) : (
+							<TelegramLoginButton botUsername={botUsername} />
+						)}
+					</div>
 				</div>
 			</div>
 		</div>
 	)
 }
-
-;<div className='flex items-center gap-4 my-6'>
-	<div className='h-px bg-dark-700 flex-1' />
-	<span className='text-dark-400 text-sm'>{t('common.or')}</span>
-	<div className='h-px bg-dark-700 flex-1' />
-</div>
-
-{
-	/* Telegram Login Button (Always visible) */
-}
-;<div className='mb-6'>
-	{isLoading && isTelegramWebApp ? (
-		<div className='text-center py-2'>
-			<div className='w-6 h-6 border-2 border-accent-500 border-t-transparent rounded-full animate-spin mx-auto mb-2' />
-			<p className='text-sm text-dark-400'>{t('auth.authenticating')}</p>
-		</div>
-	) : (
-		<TelegramLoginButton botUsername={botUsername} />
-	)}
-</div>
