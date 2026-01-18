@@ -15,8 +15,10 @@ export default function TelegramLoginButton({
   useEffect(() => {
     if (!containerRef.current || !botUsername) return
 
-    // Clear previous widget
-    containerRef.current.innerHTML = ''
+    // Clear previous widget using safe DOM API
+    while (containerRef.current.firstChild) {
+      containerRef.current.removeChild(containerRef.current.firstChild)
+    }
 
     // Get current URL for redirect
     const redirectUrl = `${window.location.origin}/auth/telegram/callback`
