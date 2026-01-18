@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
+import DOMPurify from 'dompurify'
 import { infoApi, FaqPage } from '../api/info'
 
 const InfoIcon = () => (
@@ -41,6 +42,15 @@ const ChevronIcon = ({ expanded }: { expanded: boolean }) => (
 
 type TabType = 'faq' | 'rules' | 'privacy' | 'offer'
 
+// Sanitize HTML content to prevent XSS
+const sanitizeHtml = (html: string): string => {
+  return DOMPurify.sanitize(html, {
+    ALLOWED_TAGS: ['p', 'br', 'b', 'i', 'u', 'strong', 'em', 'a', 'ul', 'ol', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'blockquote', 'code', 'pre', 'span', 'div'],
+    ALLOWED_ATTR: ['href', 'target', 'rel', 'class'],
+    ALLOW_DATA_ATTR: false,
+  })
+}
+
 // Convert plain text to HTML with proper formatting
 const formatContent = (content: string): string => {
   if (!content) return ''
@@ -49,11 +59,11 @@ const formatContent = (content: string): string => {
   const hasHtmlTags = /<[a-z][\s\S]*>/i.test(content)
 
   if (hasHtmlTags) {
-    return content
+    return sanitizeHtml(content)
   }
 
   // Convert plain text to formatted HTML
-  return content
+  const result = content
     .split(/\n\n+/) // Split by double newlines (paragraphs)
     .map(paragraph => {
       // Check if it's a header (starts with # or numeric like "1.")
@@ -83,6 +93,8 @@ const formatContent = (content: string): string => {
       return `<p>${formattedParagraph}</p>`
     })
     .join('')
+
+  return sanitizeHtml(result)
 }
 
 export default function Info() {

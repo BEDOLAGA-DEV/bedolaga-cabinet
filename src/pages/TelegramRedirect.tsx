@@ -5,6 +5,26 @@ import { useQuery } from '@tanstack/react-query'
 import { useAuthStore } from '../store/auth'
 import { brandingApi } from '../api/branding'
 
+// Validate redirect URL to prevent open redirect attacks
+const getSafeRedirectUrl = (url: string | null): string => {
+  if (!url) return '/'
+  // Only allow relative paths starting with /
+  // Block protocol-relative URLs (//evil.com) and absolute URLs
+  if (!url.startsWith('/') || url.startsWith('//')) {
+    return '/'
+  }
+  // Additional check for encoded characters that could bypass validation
+  try {
+    const decoded = decodeURIComponent(url)
+    if (!decoded.startsWith('/') || decoded.startsWith('//') || decoded.includes('://')) {
+      return '/'
+    }
+  } catch {
+    return '/'
+  }
+  return url
+}
+
 export default function TelegramRedirect() {
   const { t } = useTranslation()
   const navigate = useNavigate()
@@ -24,8 +44,8 @@ export default function TelegramRedirect() {
   const logoLetter = branding?.logo_letter || import.meta.env.VITE_APP_LOGO || 'V'
   const logoUrl = branding ? brandingApi.getLogoUrl(branding) : null
 
-  // Get redirect target from URL params
-  const redirectTo = searchParams.get('redirect') || '/'
+  // Get redirect target from URL params (validated)
+  const redirectTo = getSafeRedirectUrl(searchParams.get('redirect'))
 
   useEffect(() => {
     // If already authenticated, redirect immediately
