@@ -5,6 +5,29 @@ import { useQuery } from '@tanstack/react-query'
 import { useAuthStore } from '../store/auth'
 import { brandingApi } from '../api/branding'
 
+// Validate redirect URL to prevent open redirect attacks
+const getSafeRedirectUrl = (url: string | null): string => {
+  if (!url) return '/'
+  // Only allow relative paths starting with /
+  // Block protocol-relative URLs (//evil.com) and absolute URLs
+  if (!url.startsWith('/') || url.startsWith('//')) {
+    return '/'
+  }
+  // Additional check for encoded characters that could bypass validation
+  try {
+    const decoded = decodeURIComponent(url)
+    if (!decoded.startsWith('/') || decoded.startsWith('//') || decoded.includes('://')) {
+      return '/'
+    }
+  } catch {
+    return '/'
+  }
+  return url
+}
+
+const MAX_RETRY_ATTEMPTS = 3
+const RETRY_COUNT_KEY = 'telegram_redirect_retry_count'
+
 export default function TelegramRedirect() {
   const { t } = useTranslation()
   const navigate = useNavigate()
@@ -12,6 +35,10 @@ export default function TelegramRedirect() {
   const { loginWithTelegram, isAuthenticated, isLoading: authLoading } = useAuthStore()
   const [status, setStatus] = useState<'loading' | 'success' | 'error' | 'not-telegram'>('loading')
   const [errorMessage, setErrorMessage] = useState('')
+  const [retryCount, setRetryCount] = useState(() => {
+    const stored = sessionStorage.getItem(RETRY_COUNT_KEY)
+    return stored ? parseInt(stored, 10) : 0
+  })
 
   // Get branding for nice display
   const { data: branding } = useQuery({
@@ -24,8 +51,8 @@ export default function TelegramRedirect() {
   const logoLetter = branding?.logo_letter || import.meta.env.VITE_APP_LOGO || 'V'
   const logoUrl = branding ? brandingApi.getLogoUrl(branding) : null
 
-  // Get redirect target from URL params
-  const redirectTo = searchParams.get('redirect') || '/'
+  // Get redirect target from URL params (validated)
+  const redirectTo = getSafeRedirectUrl(searchParams.get('redirect'))
 
   useEffect(() => {
     // If already authenticated, redirect immediately
@@ -76,12 +103,27 @@ export default function TelegramRedirect() {
     setTimeout(initTelegram, 300)
   }, [loginWithTelegram, navigate, isAuthenticated, authLoading, redirectTo, t])
 
-  // Handle retry
+  // Handle retry with limit to prevent infinite loops
   const handleRetry = () => {
+    if (retryCount >= MAX_RETRY_ATTEMPTS) {
+      setErrorMessage('Превышено количество попыток. Попробуйте позже.')
+      sessionStorage.removeItem(RETRY_COUNT_KEY)
+      return
+    }
+    const newCount = retryCount + 1
+    setRetryCount(newCount)
+    sessionStorage.setItem(RETRY_COUNT_KEY, String(newCount))
     setStatus('loading')
     setErrorMessage('')
     window.location.reload()
   }
+
+  // Clear retry count on successful auth
+  useEffect(() => {
+    if (status === 'success') {
+      sessionStorage.removeItem(RETRY_COUNT_KEY)
+    }
+  }, [status])
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">

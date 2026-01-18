@@ -26,6 +26,19 @@ const appSchemes = [
 
 const COUNTDOWN_SECONDS = 5
 
+// Validate deep link to prevent javascript: and other dangerous schemes
+const isValidDeepLink = (url: string): boolean => {
+  if (!url) return false
+  const lowerUrl = url.toLowerCase().trim()
+  // Block dangerous schemes
+  const dangerousSchemes = ['javascript:', 'data:', 'vbscript:', 'file:']
+  if (dangerousSchemes.some(scheme => lowerUrl.startsWith(scheme))) {
+    return false
+  }
+  // Only allow known app schemes
+  return appSchemes.some(app => lowerUrl.startsWith(app.scheme))
+}
+
 export default function DeepLinkRedirect() {
   const { i18n } = useTranslation()
   const navigate = useNavigate()
@@ -104,13 +117,13 @@ export default function DeepLinkRedirect() {
 
   // Open deep link - same as miniapp, just window.location.href
   const openDeepLink = useCallback(() => {
-    if (!deepLink) return
+    if (!deepLink || !isValidDeepLink(deepLink)) return
     window.location.href = deepLink
   }, [deepLink])
 
   // Countdown timer effect
   useEffect(() => {
-    if (!deepLink) {
+    if (!deepLink || !isValidDeepLink(deepLink)) {
       setStatus('error')
       return
     }

@@ -75,28 +75,20 @@ export default function TopUpModal({ method, onClose }: TopUpModalProps) {
   const starsPaymentMutation = useMutation({
     mutationFn: (amountKopeks: number) => balanceApi.createStarsInvoice(amountKopeks),
     onSuccess: (data) => {
-      console.log('[Stars] API response:', data)
-      console.log('[Stars] invoice_url:', data.invoice_url)
       const webApp = window.Telegram?.WebApp
-      console.log('[Stars] webApp:', webApp)
-      console.log('[Stars] openInvoice available:', !!webApp?.openInvoice)
 
       if (!data.invoice_url) {
-        console.error('[Stars] No invoice_url in response!')
         setError('Сервер не вернул ссылку на оплату')
         return
       }
 
       if (!webApp?.openInvoice) {
-        console.error('[Stars] openInvoice not available - not in Telegram Mini App?')
         setError('Оплата Stars доступна только в Telegram Mini App')
         return
       }
 
-      console.log('[Stars] Calling openInvoice with:', data.invoice_url)
       try {
         webApp.openInvoice(data.invoice_url, (status) => {
-          console.log('[Stars] Invoice callback status:', status)
           if (status === 'paid') {
             setError(null)
             onClose()
@@ -107,12 +99,10 @@ export default function TopUpModal({ method, onClose }: TopUpModalProps) {
           }
         })
       } catch (e) {
-        console.error('[Stars] openInvoice error:', e)
         setError('Ошибка открытия окна оплаты: ' + String(e))
       }
     },
     onError: (error: unknown) => {
-      console.error('[Stars] API error:', error)
       const axiosError = error as { response?: { data?: { detail?: string }, status?: number } }
       const detail = axiosError?.response?.data?.detail
       const status = axiosError?.response?.status

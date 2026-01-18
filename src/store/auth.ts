@@ -36,8 +36,12 @@ interface AuthState {
 }
 
 // Блокировка для предотвращения race condition при инициализации
-let initializePromise: Promise<void> | null = null
-let isInitializing = false
+// Используем объект для атомарности операций
+const initState = {
+  promise: null as Promise<void> | null,
+  isInitializing: false,
+  isInitialized: false,
+}
 
 export const useAuthStore = create<AuthState>()(
   persist(
@@ -69,8 +73,8 @@ export const useAuthStore = create<AuthState>()(
       logout: () => {
         const { refreshToken } = get()
         if (refreshToken) {
-          authApi.logout(refreshToken).catch((error) => {
-            console.error('[Auth] Logout API call failed:', error)
+          authApi.logout(refreshToken).catch(() => {
+            // Logout API call failed - ignore silently
           })
         }
         tokenStorage.clearTokens()
@@ -93,8 +97,7 @@ export const useAuthStore = create<AuthState>()(
           // Используем apiClient для единообразной обработки ошибок
           const response = await apiClient.get<{ is_admin: boolean }>('/cabinet/auth/me/is-admin')
           set({ isAdmin: response.data.is_admin })
-        } catch (error) {
-          console.error('[Auth] Failed to check admin status:', error)
+        } catch {
           set({ isAdmin: false })
         }
       },
@@ -103,19 +106,24 @@ export const useAuthStore = create<AuthState>()(
         try {
           const user = await authApi.getMe()
           set({ user })
-        } catch (error) {
-          console.error('[Auth] Failed to refresh user:', error)
+        } catch {
+          // Failed to refresh user - ignore silently
         }
       },
 
       initialize: async () => {
-        // Защита от race condition - если уже идёт инициализация, ждём её завершения
-        if (isInitializing && initializePromise) {
-          return initializePromise
+        // Защита от race condition - если уже инициализировано, выходим
+        if (initState.isInitialized) {
+          return
         }
 
-        isInitializing = true
-        initializePromise = (async () => {
+        // Если уже идёт инициализация, ждём её завершения
+        if (initState.isInitializing && initState.promise) {
+          return initState.promise
+        }
+
+        initState.isInitializing = true
+        initState.promise = (async () => {
           try {
             set({ isLoading: true })
 
@@ -167,8 +175,7 @@ export const useAuthStore = create<AuthState>()(
                 isLoading: false,
               })
               get().checkAdminStatus()
-            } catch (error) {
-              console.error('[Auth] getMe failed, trying refresh:', error)
+            } catch {
               // Token might be invalid on server, try to refresh
               const newToken = await tokenRefreshManager.refreshAccessToken()
               if (newToken) {
@@ -182,8 +189,7 @@ export const useAuthStore = create<AuthState>()(
                     isLoading: false,
                   })
                   get().checkAdminStatus()
-                } catch (userError) {
-                  console.error('[Auth] getMe failed after refresh:', userError)
+                } catch {
                   tokenStorage.clearTokens()
                   set({
                     accessToken: null,
@@ -206,12 +212,13 @@ export const useAuthStore = create<AuthState>()(
               }
             }
           } finally {
-            isInitializing = false
-            initializePromise = null
+            initState.isInitializing = false
+            initState.isInitialized = true
+            initState.promise = null
           }
         })()
 
-        return initializePromise
+        return initState.promise
       },
 
       loginWithTelegram: async (initData) => {
