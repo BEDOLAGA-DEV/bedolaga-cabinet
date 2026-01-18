@@ -145,6 +145,8 @@ export const useAuthStore = create<AuthState>()(
               const newToken = await tokenRefreshManager.refreshAccessToken()
               if (newToken) {
                 const user = await authApi.getMe()
+                // Сначала проверяем admin статус, потом снимаем isLoading
+                await get().checkAdminStatus()
                 set({
                   accessToken: newToken,
                   refreshToken,
@@ -152,7 +154,6 @@ export const useAuthStore = create<AuthState>()(
                   isAuthenticated: true,
                   isLoading: false,
                 })
-                get().checkAdminStatus()
               } else {
                 tokenStorage.clearTokens()
                 set({
@@ -168,6 +169,8 @@ export const useAuthStore = create<AuthState>()(
 
             try {
               const user = await authApi.getMe()
+              // Сначала проверяем admin статус, потом снимаем isLoading
+              await get().checkAdminStatus()
               set({
                 accessToken,
                 refreshToken,
@@ -175,13 +178,14 @@ export const useAuthStore = create<AuthState>()(
                 isAuthenticated: true,
                 isLoading: false,
               })
-              get().checkAdminStatus()
             } catch {
               // Token might be invalid on server, try to refresh
               const newToken = await tokenRefreshManager.refreshAccessToken()
               if (newToken) {
                 try {
                   const user = await authApi.getMe()
+                  // Сначала проверяем admin статус, потом снимаем isLoading
+                  await get().checkAdminStatus()
                   set({
                     accessToken: newToken,
                     refreshToken,
@@ -189,7 +193,6 @@ export const useAuthStore = create<AuthState>()(
                     isAuthenticated: true,
                     isLoading: false,
                   })
-                  get().checkAdminStatus()
                 } catch {
                   tokenStorage.clearTokens()
                   set({

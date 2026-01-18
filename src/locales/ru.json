@@ -35,6 +35,20 @@
     "info": "Информация",
     "wheel": "Колесо удачи"
   },
+  "notifications": {
+    "ticketNotifications": "Уведомления о тикетах",
+    "markAllRead": "Прочитать все",
+    "noNotifications": "Нет уведомлений",
+    "justNow": "Только что",
+    "minutesAgo": "{{count}} мин. назад",
+    "hoursAgo": "{{count}} ч. назад",
+    "daysAgo": "{{count}} д. назад",
+    "viewAll": "Все тикеты",
+    "newNotification": "Новое уведомление",
+    "clickToView": "Нажмите для просмотра",
+    "newTicket": "Новый тикет: {{title}}",
+    "newReply": "Новый ответ в тикете"
+  },
   "auth": {
     "login": "Вход",
     "register": "Регистрация",
@@ -732,7 +746,12 @@
       "reminderCooldown": "Интервал напоминаний (минуты)",
       "reminderCooldownDesc": "Минимальное время между напоминаниями (1-120 минут)",
       "settingsUpdateError": "Ошибка сохранения настроек",
-      "copyTelegramId": "Нажмите чтобы скопировать Telegram ID"
+      "copyTelegramId": "Нажмите чтобы скопировать Telegram ID",
+      "cabinetNotifications": "Уведомления в кабинете",
+      "userNotificationsEnabled": "Уведомления для пользователей",
+      "userNotificationsEnabledDesc": "Отправлять уведомления пользователям об ответах админа",
+      "adminNotificationsEnabled": "Уведомления для админов",
+      "adminNotificationsEnabledDesc": "Отправлять уведомления админам о новых тикетах и ответах"
     },
     "tariffs": {
       "title": "Управление тарифами",

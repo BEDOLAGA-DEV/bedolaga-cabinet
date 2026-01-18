@@ -517,6 +517,7 @@ export interface ManualCheckResponse {
   new_status: string | null
 }
 
+<<<<<<< HEAD
 // Ticket notification types
 export interface TicketNotification {
   id: number
@@ -525,13 +526,42 @@ export interface TicketNotification {
   message: string
   is_read: boolean
   created_at: string
+=======
+// Ticket notifications types
+export interface TicketNotification {
+  id: number
+  ticket_id: number
+  notification_type: 'new_ticket' | 'admin_reply' | 'user_reply'
+  message: string | null
+  is_read: boolean
+  created_at: string
+  read_at: string | null
+>>>>>>> af948391078db4bb97a333feb7e0ddfcf638b076
 }
 
 export interface TicketNotificationList {
   items: TicketNotification[]
+<<<<<<< HEAD
   total: number
+=======
+  unread_count: number
+>>>>>>> af948391078db4bb97a333feb7e0ddfcf638b076
 }
 
 export interface UnreadCountResponse {
   unread_count: number
 }
+<<<<<<< HEAD
+=======
+
+// Extended TicketSettings with cabinet notifications
+export interface TicketSettings {
+  sla_enabled: boolean
+  sla_minutes: number
+  sla_check_interval_seconds: number
+  sla_reminder_cooldown_minutes: number
+  support_system_mode: string
+  cabinet_user_notifications_enabled: boolean
+  cabinet_admin_notifications_enabled: boolean
+}
+>>>>>>> af948391078db4bb97a333feb7e0ddfcf638b076

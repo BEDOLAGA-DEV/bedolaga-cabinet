@@ -1,5 +1,3 @@
-name: CI
-
 on:
   push:
     branches: [main, dev]
@@ -31,3 +29,15 @@ jobs:
 
       - name: Build
         run: npm run build
+        env:
+          VITE_API_URL: /api
+          VITE_TELEGRAM_BOT_USERNAME: test_bot
+          VITE_APP_NAME: Cabinet
+          VITE_APP_LOGO: V
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 7

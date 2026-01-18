@@ -253,8 +253,39 @@ class TokenRefreshManager {
 export const tokenRefreshManager = new TokenRefreshManager()
 
 /**
+ * Ключ для сохранения URL для возврата после логина
+ */
+const RETURN_URL_KEY = 'auth_return_url'
+
+/**
+ * Сохраняет URL для возврата после авторизации
+ */
+export function saveReturnUrl(): void {
+  if (typeof window !== 'undefined') {
+    const currentPath = window.location.pathname + window.location.search
+    // Не сохраняем /login как return URL
+    if (currentPath && currentPath !== '/login') {
+      sessionStorage.setItem(RETURN_URL_KEY, currentPath)
+    }
+  }
+}
+
+/**
+ * Получает и очищает сохранённый URL для возврата
+ */
+export function getAndClearReturnUrl(): string | null {
+  if (typeof window !== 'undefined') {
+    const url = sessionStorage.getItem(RETURN_URL_KEY)
+    sessionStorage.removeItem(RETURN_URL_KEY)
+    return url
+  }
+  return null
+}
+
+/**
  * Безопасный редирект на страницу логина
  * Валидирует URL чтобы предотвратить open redirect уязвимость
+ * Сохраняет текущий URL для возврата после авторизации
  */
 export function safeRedirectToLogin(): void {
   // Разрешённые пути для редиректа (относительные пути нашего приложения)
@@ -262,6 +293,8 @@ export function safeRedirectToLogin(): void {
 
   // Проверяем, что мы на том же origin
   if (typeof window !== 'undefined') {
+    // Сохраняем текущий URL для возврата после логина
+    saveReturnUrl()
     // Используем только относительный путь для безопасности
     window.location.href = loginPath
   }

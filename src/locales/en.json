@@ -35,6 +35,20 @@
     "info": "Info",
     "wheel": "Fortune Wheel"
   },
+  "notifications": {
+    "ticketNotifications": "Ticket Notifications",
+    "markAllRead": "Mark all read",
+    "noNotifications": "No notifications",
+    "justNow": "Just now",
+    "minutesAgo": "{{count}} min ago",
+    "hoursAgo": "{{count}} h ago",
+    "daysAgo": "{{count}} d ago",
+    "viewAll": "View all tickets",
+    "newNotification": "New notification",
+    "clickToView": "Click to view",
+    "newTicket": "New ticket: {{title}}",
+    "newReply": "New reply in ticket"
+  },
   "auth": {
     "login": "Login",
     "register": "Register",
@@ -732,7 +746,12 @@
       "reminderCooldown": "Reminder interval (minutes)",
       "reminderCooldownDesc": "Minimum time between reminders (1-120 minutes)",
       "settingsUpdateError": "Error saving settings",
-      "copyTelegramId": "Click to copy Telegram ID"
+      "copyTelegramId": "Click to copy Telegram ID",
+      "cabinetNotifications": "Cabinet Notifications",
+      "userNotificationsEnabled": "User Notifications",
+      "userNotificationsEnabledDesc": "Send notifications to users about admin replies",
+      "adminNotificationsEnabled": "Admin Notifications",
+      "adminNotificationsEnabledDesc": "Send notifications to admins about new tickets and replies"
     },
     "tariffs": {
       "title": "Tariff Management",

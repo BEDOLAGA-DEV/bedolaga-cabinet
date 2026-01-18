@@ -1,7 +1,8 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { useAuthStore } from './store/auth'
 import Layout from './components/layout/Layout'
 import PageLoader from './components/common/PageLoader'
+import { saveReturnUrl } from './utils/token'
 import Login from './pages/Login'
 import TelegramCallback from './pages/TelegramCallback'
 import TelegramRedirect from './pages/TelegramRedirect'
@@ -36,13 +37,16 @@ import AdminRemnawave from './pages/AdminRemnawave'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuthStore()
+  const location = useLocation()
 
   if (isLoading) {
     return <PageLoader variant="dark" />
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />
+    // Сохраняем текущий URL для возврата после авторизации
+    saveReturnUrl()
+    return <Navigate to="/login" replace state={{ from: location.pathname }} />
   }
 
   return <Layout>{children}</Layout>
@@ -50,13 +54,16 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
 function AdminRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading, isAdmin } = useAuthStore()
+  const location = useLocation()
 
   if (isLoading) {
     return <PageLoader variant="light" />
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />
+    // Сохраняем текущий URL для возврата после авторизации
+    saveReturnUrl()
+    return <Navigate to="/login" replace state={{ from: location.pathname }} />
   }
 
   if (!isAdmin) {
