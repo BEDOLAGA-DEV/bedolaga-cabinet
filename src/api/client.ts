@@ -93,6 +93,12 @@ apiClient.interceptors.response.use(
   async (error: AxiosError) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean }
 
+    // Skip auth logic for login endpoints
+    if (originalRequest.url?.includes('/auth/email/login') ||
+        originalRequest.url?.includes('/auth/telegram')) {
+      return Promise.reject(error)
+    }
+
     // Если получили 401 и ещё не пробовали refresh (на случай если проверка exp не сработала)
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true

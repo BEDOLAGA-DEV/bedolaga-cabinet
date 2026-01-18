@@ -1,5 +1,8 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
+import { useEffect } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { useAuthStore } from './store/auth'
+import { brandingApi } from './api/branding'
 import Layout from './components/layout/Layout'
 import PageLoader from './components/common/PageLoader'
 import Login from './pages/Login'
@@ -66,6 +69,24 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
 }
 
 function App() {
+  const { data: branding } = useQuery({
+    queryKey: ['branding'],
+    queryFn: brandingApi.getBranding,
+    staleTime: 60000,
+  })
+
+  useEffect(() => {
+    const link = document.querySelector("link[rel~='icon']") as HTMLLinkElement
+    if (!link) return
+
+    const logoUrl = branding ? brandingApi.getLogoUrl(branding) : null
+    if (branding?.has_custom_logo && logoUrl) {
+      link.href = logoUrl
+    } else {
+      link.href = '/vite.svg'
+    }
+  }, [branding])
+
   return (
     <Routes>
       {/* Public routes */}
