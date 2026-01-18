@@ -1,8 +1,15 @@
 import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
+import { Link } from 'react-router-dom'
 import { adminApi, AdminTicket, AdminTicketDetail, AdminTicketMessage } from '../api/admin'
 import { ticketsApi } from '../api/tickets'
+
+const BackIcon = () => (
+  <svg className="w-5 h-5 text-dark-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+  </svg>
+)
 
 function AdminMessageMedia({ message, t }: { message: AdminTicketMessage; t: (key: string) => string }) {
   const [imageLoaded, setImageLoaded] = useState(false)
@@ -175,7 +182,15 @@ export default function AdminTickets() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl sm:text-3xl font-bold text-dark-50">{t('admin.tickets.title')}</h1>
+        <div className="flex items-center gap-3">
+          <Link
+            to="/admin"
+            className="w-10 h-10 flex items-center justify-center rounded-xl bg-dark-800 border border-dark-700 hover:border-dark-600 transition-colors"
+          >
+            <BackIcon />
+          </Link>
+          <h1 className="text-2xl sm:text-3xl font-bold text-dark-50">{t('admin.tickets.title')}</h1>
+        </div>
         <button
           onClick={() => setShowSettings(true)}
           className="btn-secondary flex items-center gap-2"
