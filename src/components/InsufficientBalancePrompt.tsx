@@ -145,22 +145,22 @@ function PaymentMethodModal({ paymentMethods, onSelect, onClose }: PaymentMethod
   const { formatAmount, currencySymbol } = useCurrency()
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center">
+    <div className="fixed inset-0 bg-black/70 z-50 flex items-start justify-center pt-12 sm:pt-0 sm:items-center px-3">
       <div className="absolute inset-0" onClick={onClose} />
 
-      <div className="relative w-full sm:max-w-lg sm:mx-4 bg-dark-900 sm:rounded-2xl rounded-t-2xl border border-dark-700/50 shadow-2xl animate-slide-up max-h-[80vh] flex flex-col">
-        {/* Compact Header */}
-        <div className="flex-shrink-0 flex justify-between items-center px-4 py-3 border-b border-dark-800">
-          <h2 className="text-base font-semibold text-dark-100">{t('balance.selectPaymentMethod')}</h2>
-          <button onClick={onClose} className="w-8 h-8 rounded-lg bg-dark-800 hover:bg-dark-700 flex items-center justify-center">
-            <svg className="w-4 h-4 text-dark-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <div className="relative w-full max-w-sm bg-dark-900 rounded-2xl border border-dark-700/50 shadow-2xl overflow-hidden max-h-[70vh] flex flex-col">
+        {/* Header */}
+        <div className="flex items-center justify-between px-4 py-3 bg-dark-800/50">
+          <span className="font-semibold text-dark-100">{t('balance.selectPaymentMethod')}</span>
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-dark-700 text-dark-400">
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
 
-        {/* Scrollable content */}
-        <div className="flex-1 overflow-y-auto overscroll-contain p-3">
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto p-3 space-y-2">
           {!paymentMethods ? (
             <div className="flex items-center justify-center py-8">
               <div className="w-6 h-6 border-2 border-accent-500 border-t-transparent rounded-full animate-spin" />
@@ -170,48 +170,39 @@ function PaymentMethodModal({ paymentMethods, onSelect, onClose }: PaymentMethod
               {t('balance.noPaymentMethods')}
             </div>
           ) : (
-            <div className="space-y-2">
-              {paymentMethods.map((method) => {
-                const methodKey = method.id.toLowerCase().replace(/-/g, '_')
-                const translatedName = t(`balance.paymentMethods.${methodKey}.name`, { defaultValue: '' })
+            paymentMethods.map((method) => {
+              const methodKey = method.id.toLowerCase().replace(/-/g, '_')
+              const translatedName = t(`balance.paymentMethods.${methodKey}.name`, { defaultValue: '' })
 
-                return (
-                  <button
-                    key={method.id}
-                    disabled={!method.is_available}
-                    onClick={() => method.is_available && onSelect(method)}
-                    className={`w-full p-3 rounded-xl border text-left transition-all flex items-center gap-3 ${
-                      method.is_available
-                        ? 'border-dark-700/50 bg-dark-800/30 active:bg-dark-700/50'
-                        : 'border-dark-800/30 bg-dark-900/30 opacity-50'
-                    }`}
-                  >
-                    <div className="w-10 h-10 rounded-lg bg-dark-800 flex items-center justify-center flex-shrink-0">
-                      <svg className="w-5 h-5 text-accent-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
-                      </svg>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="font-medium text-dark-100 text-sm">{translatedName || method.name}</div>
-                      <div className="text-xs text-dark-500">
-                        {formatAmount(method.min_amount_kopeks / 100, 0)} – {formatAmount(method.max_amount_kopeks / 100, 0)} {currencySymbol}
-                      </div>
-                    </div>
-                    <svg className="w-4 h-4 text-dark-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+              return (
+                <button
+                  key={method.id}
+                  disabled={!method.is_available}
+                  onClick={() => method.is_available && onSelect(method)}
+                  className={`w-full p-3 rounded-xl text-left flex items-center gap-3 ${
+                    method.is_available
+                      ? 'bg-dark-800 hover:bg-dark-700 active:bg-dark-600'
+                      : 'bg-dark-800/50 opacity-50'
+                  }`}
+                >
+                  <div className="w-9 h-9 rounded-lg bg-accent-500/20 flex items-center justify-center flex-shrink-0">
+                    <svg className="w-4 h-4 text-accent-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
                     </svg>
-                  </button>
-                )
-              })}
-            </div>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium text-dark-100 text-sm">{translatedName || method.name}</div>
+                    <div className="text-xs text-dark-500">
+                      {formatAmount(method.min_amount_kopeks / 100, 0)} – {formatAmount(method.max_amount_kopeks / 100, 0)} {currencySymbol}
+                    </div>
+                  </div>
+                  <svg className="w-4 h-4 text-dark-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                  </svg>
+                </button>
+              )
+            })
           )}
-        </div>
-
-        {/* Compact Footer */}
-        <div className="flex-shrink-0 p-3 pt-2 border-t border-dark-800 bg-dark-900 safe-area-inset-bottom">
-          <button type="button" onClick={onClose} className="w-full py-2 text-sm text-dark-400 hover:text-dark-200">
-            {t('common.cancel')}
-          </button>
         </div>
       </div>
     </div>
