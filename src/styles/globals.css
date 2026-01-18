@@ -837,6 +837,16 @@
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
   }
+
+  /* Safe area insets for mobile bottom sheets */
+  .safe-area-inset-bottom {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px));
+  }
+  @media (min-width: 640px) {
+    .safe-area-inset-bottom {
+      padding-bottom: 1.25rem;
+    }
+  }
 }
 
 /* Animations */
