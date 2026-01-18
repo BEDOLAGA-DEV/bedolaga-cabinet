@@ -37,275 +37,275 @@ import AdminPromoOffers from './pages/AdminPromoOffers'
 import AdminRemnawave from './pages/AdminRemnawave'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading } = useAuthStore()
+	const { isAuthenticated, isLoading } = useAuthStore()
 
-  if (isLoading) {
-    return <PageLoader variant="dark" />
-  }
+	if (isLoading) {
+		return <PageLoader variant='dark' />
+	}
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />
-  }
+	if (!isAuthenticated) {
+		return <Navigate to='/login' replace />
+	}
 
-  return <Layout>{children}</Layout>
+	return <Layout>{children}</Layout>
 }
 
 function AdminRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading, isAdmin } = useAuthStore()
+	const { isAuthenticated, isLoading, isAdmin } = useAuthStore()
 
-  if (isLoading) {
-    return <PageLoader variant="light" />
-  }
+	if (isLoading) {
+		return <PageLoader variant='light' />
+	}
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />
-  }
+	if (!isAuthenticated) {
+		return <Navigate to='/login' replace />
+	}
 
-  if (!isAdmin) {
-    return <Navigate to="/" replace />
-  }
+	if (!isAdmin) {
+		return <Navigate to='/' replace />
+	}
 
-  return <Layout>{children}</Layout>
+	return <Layout>{children}</Layout>
 }
 
 function App() {
-  const { data: branding } = useQuery({
-    queryKey: ['branding'],
-    queryFn: brandingApi.getBranding,
-    staleTime: 60000,
-  })
+	const { data: branding } = useQuery({
+		queryKey: ['branding'],
+		queryFn: brandingApi.getBranding,
+		staleTime: 60000,
+	})
 
-  useEffect(() => {
-    const link = document.querySelector("link[rel~='icon']") as HTMLLinkElement
-    if (!link) return
+	useEffect(() => {
+		const link = document.querySelector("link[rel~='icon']") as HTMLLinkElement
+		if (!link) return
 
-    const logoUrl = branding ? brandingApi.getLogoUrl(branding) : null
-    if (branding?.has_custom_logo && logoUrl) {
-      link.href = logoUrl
-    } else {
-      link.href = '/vite.svg'
-    }
-  }, [branding])
+		const logoUrl = branding ? brandingApi.getLogoUrl(branding) : null
+		if (branding?.has_custom_logo && logoUrl) {
+			link.href = logoUrl
+		} else {
+			link.href = '/vite.svg'
+		}
+	}, [branding])
 
-  return (
-    <Routes>
-      {/* Public routes */}
-      <Route path="/login" element={<Login />} />
-      <Route path="/auth/telegram/callback" element={<TelegramCallback />} />
-      <Route path="/auth/telegram" element={<TelegramRedirect />} />
-      <Route path="/tg" element={<TelegramRedirect />} />
-      <Route path="/connect" element={<DeepLinkRedirect />} />
-      <Route path="/add" element={<DeepLinkRedirect />} />
-      <Route path="/verify-email" element={<VerifyEmail />} />
+	return (
+		<Routes>
+			{/* Public routes */}
+			<Route path='/login' element={<Login />} />
+			<Route path='/auth/telegram/callback' element={<TelegramCallback />} />
+			<Route path='/auth/telegram' element={<TelegramRedirect />} />
+			<Route path='/tg' element={<TelegramRedirect />} />
+			<Route path='/connect' element={<DeepLinkRedirect />} />
+			<Route path='/add' element={<DeepLinkRedirect />} />
+			<Route path='/verify-email' element={<VerifyEmail />} />
 
-      {/* Protected routes */}
-      <Route
-        path="/"
-        element={
-          <ProtectedRoute>
-            <Dashboard />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/subscription"
-        element={
-          <ProtectedRoute>
-            <Subscription />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/balance"
-        element={
-          <ProtectedRoute>
-            <Balance />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/referral"
-        element={
-          <ProtectedRoute>
-            <Referral />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/support"
-        element={
-          <ProtectedRoute>
-            <Support />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/profile"
-        element={
-          <ProtectedRoute>
-            <Profile />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/contests"
-        element={
-          <ProtectedRoute>
-            <Contests />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/polls"
-        element={
-          <ProtectedRoute>
-            <Polls />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/info"
-        element={
-          <ProtectedRoute>
-            <Info />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/wheel"
-        element={
-          <ProtectedRoute>
-            <Wheel />
-          </ProtectedRoute>
-        }
-      />
+			{/* Protected routes */}
+			<Route
+				path='/'
+				element={
+					<ProtectedRoute>
+						<Dashboard />
+					</ProtectedRoute>
+				}
+			/>
+			<Route
+				path='/subscription'
+				element={
+					<ProtectedRoute>
+						<Subscription />
+					</ProtectedRoute>
+				}
+			/>
+			<Route
+				path='/balance'
+				element={
+					<ProtectedRoute>
+						<Balance />
+					</ProtectedRoute>
+				}
+			/>
+			<Route
+				path='/referral'
+				element={
+					<ProtectedRoute>
+						<Referral />
+					</ProtectedRoute>
+				}
+			/>
+			<Route
+				path='/support'
+				element={
+					<ProtectedRoute>
+						<Support />
+					</ProtectedRoute>
+				}
+			/>
+			<Route
+				path='/profile'
+				element={
+					<ProtectedRoute>
+						<Profile />
+					</ProtectedRoute>
+				}
+			/>
+			<Route
+				path='/contests'
+				element={
+					<ProtectedRoute>
+						<Contests />
+					</ProtectedRoute>
+				}
+			/>
+			<Route
+				path='/polls'
+				element={
+					<ProtectedRoute>
+						<Polls />
+					</ProtectedRoute>
+				}
+			/>
+			<Route
+				path='/info'
+				element={
+					<ProtectedRoute>
+						<Info />
+					</ProtectedRoute>
+				}
+			/>
+			<Route
+				path='/wheel'
+				element={
+					<ProtectedRoute>
+						<Wheel />
+					</ProtectedRoute>
+				}
+			/>
 
-      {/* Admin routes */}
-      <Route
-        path="/admin"
-        element={
-          <AdminRoute>
-            <AdminPanel />
-          </AdminRoute>
-        }
-      />
-      <Route
-        path="/admin/tickets"
-        element={
-          <AdminRoute>
-            <AdminTickets />
-          </AdminRoute>
-        }
-      />
-      <Route
-        path="/admin/settings"
-        element={
-          <AdminRoute>
-            <AdminSettings />
-          </AdminRoute>
-        }
-      />
-      <Route
-        path="/admin/apps"
-        element={
-          <AdminRoute>
-            <AdminApps />
-          </AdminRoute>
-        }
-      />
-      <Route
-        path="/admin/wheel"
-        element={
-          <AdminRoute>
-            <AdminWheel />
-          </AdminRoute>
-        }
-      />
-      <Route
-        path="/admin/tariffs"
-        element={
-          <AdminRoute>
-            <AdminTariffs />
-          </AdminRoute>
-        }
-      />
-      <Route
-        path="/admin/servers"
-        element={
-          <AdminRoute>
-            <AdminServers />
-          </AdminRoute>
-        }
-      />
-      <Route
-        path="/admin/dashboard"
-        element={
-          <AdminRoute>
-            <AdminDashboard />
-          </AdminRoute>
-        }
-      />
-      <Route
-        path="/admin/broadcasts"
-        element={
-          <AdminRoute>
-            <AdminBroadcasts />
-          </AdminRoute>
-        }
-      />
-      <Route
-        path="/admin/promocodes"
-        element={
-          <AdminRoute>
-            <AdminPromocodes />
-          </AdminRoute>
-        }
-      />
-      <Route
-        path="/admin/campaigns"
-        element={
-          <AdminRoute>
-            <AdminCampaigns />
-          </AdminRoute>
-        }
-      />
-      <Route
-        path="/admin/users"
-        element={
-          <AdminRoute>
-            <AdminUsers />
-          </AdminRoute>
-        }
-      />
-      <Route
-        path="/admin/payments"
-        element={
-          <AdminRoute>
-            <AdminPayments />
-          </AdminRoute>
-        }
-      />
-      <Route
-        path="/admin/promo-offers"
-        element={
-          <AdminRoute>
-            <AdminPromoOffers />
-          </AdminRoute>
-        }
-      />
-      <Route
-        path="/admin/remnawave"
-        element={
-          <AdminRoute>
-            <AdminRemnawave />
-          </AdminRoute>
-        }
-      />
+			{/* Admin routes */}
+			<Route
+				path='/admin'
+				element={
+					<AdminRoute>
+						<AdminPanel />
+					</AdminRoute>
+				}
+			/>
+			<Route
+				path='/admin/tickets'
+				element={
+					<AdminRoute>
+						<AdminTickets />
+					</AdminRoute>
+				}
+			/>
+			<Route
+				path='/admin/settings'
+				element={
+					<AdminRoute>
+						<AdminSettings />
+					</AdminRoute>
+				}
+			/>
+			<Route
+				path='/admin/apps'
+				element={
+					<AdminRoute>
+						<AdminApps />
+					</AdminRoute>
+				}
+			/>
+			<Route
+				path='/admin/wheel'
+				element={
+					<AdminRoute>
+						<AdminWheel />
+					</AdminRoute>
+				}
+			/>
+			<Route
+				path='/admin/tariffs'
+				element={
+					<AdminRoute>
+						<AdminTariffs />
+					</AdminRoute>
+				}
+			/>
+			<Route
+				path='/admin/servers'
+				element={
+					<AdminRoute>
+						<AdminServers />
+					</AdminRoute>
+				}
+			/>
+			<Route
+				path='/admin/dashboard'
+				element={
+					<AdminRoute>
+						<AdminDashboard />
+					</AdminRoute>
+				}
+			/>
+			<Route
+				path='/admin/broadcasts'
+				element={
+					<AdminRoute>
+						<AdminBroadcasts />
+					</AdminRoute>
+				}
+			/>
+			<Route
+				path='/admin/promocodes'
+				element={
+					<AdminRoute>
+						<AdminPromocodes />
+					</AdminRoute>
+				}
+			/>
+			<Route
+				path='/admin/campaigns'
+				element={
+					<AdminRoute>
+						<AdminCampaigns />
+					</AdminRoute>
+				}
+			/>
+			<Route
+				path='/admin/users'
+				element={
+					<AdminRoute>
+						<AdminUsers />
+					</AdminRoute>
+				}
+			/>
+			<Route
+				path='/admin/payments'
+				element={
+					<AdminRoute>
+						<AdminPayments />
+					</AdminRoute>
+				}
+			/>
+			<Route
+				path='/admin/promo-offers'
+				element={
+					<AdminRoute>
+						<AdminPromoOffers />
+					</AdminRoute>
+				}
+			/>
+			<Route
+				path='/admin/remnawave'
+				element={
+					<AdminRoute>
+						<AdminRemnawave />
+					</AdminRoute>
+				}
+			/>
 
-      {/* Catch all */}
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
-  )
+			{/* Catch all */}
+			<Route path='*' element={<Navigate to='/' replace />} />
+		</Routes>
+	)
 }
 
 export default App
