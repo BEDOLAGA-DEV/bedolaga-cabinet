@@ -77,8 +77,10 @@ export const authApi = {
 	},
 
 	// Resend verification email
-	resendVerification: async (): Promise<{ message: string }> => {
-		const response = await apiClient.post('/cabinet/auth/email/resend')
+	resendVerification: async (email: string): Promise<{ message: string }> => {
+		const response = await apiClient.post('/cabinet/auth/email/resend', {
+			email,
+		})
 		return response.data
 	},
 

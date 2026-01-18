@@ -260,12 +260,7 @@ export default function Login() {
 		setSuccessMsg('')
 		setIsLoading(true)
 		try {
-			await authApi.register({
-				email: regEmail,
-				password: regPassword,
-				first_name: regFirstName || undefined,
-				last_name: regLastName || undefined,
-			})
+			await authApi.resendVerification(regEmail)
 			setSuccessMsg('Письмо отправлено повторно')
 
 			// Increment cooldown stage
