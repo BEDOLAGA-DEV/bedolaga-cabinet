@@ -1,6 +1,8 @@
 // Currency exchange rate API
 // Uses free exchangerate.host API
 
+import axios from 'axios'
+
 interface ExchangeRates {
   USD: number
   CNY: number
@@ -33,39 +35,38 @@ export const currencyApi = {
 
     try {
       // Try primary API (exchangerate.host) - get RUB based rates
-      const response = await fetch(
-        'https://api.exchangerate.host/latest?base=RUB&symbols=USD,CNY,IRR'
-      )
+      const response = await axios.get<{
+        success?: boolean
+        rates?: { USD?: number; CNY?: number; IRR?: number }
+      }>('https://api.exchangerate.host/latest', {
+        params: { base: 'RUB', symbols: 'USD,CNY,IRR' },
+      })
 
-      if (response.ok) {
-        const data = await response.json()
-        if (data.success && data.rates) {
-          // API returns how much of each currency equals 1 RUB
-          // We need the inverse: how many RUB equals 1 of each currency
-          const rates: ExchangeRates = {
-            USD: data.rates.USD ? 1 / data.rates.USD : FALLBACK_RATES.USD,
-            CNY: data.rates.CNY ? 1 / data.rates.CNY : FALLBACK_RATES.CNY,
-            IRR: data.rates.IRR ? 1 / data.rates.IRR : FALLBACK_RATES.IRR,
-          }
-          cachedRates = { rates, timestamp: Date.now() }
-          return rates
+      if (response.data.success && response.data.rates) {
+        // API returns how much of each currency equals 1 RUB
+        // We need the inverse: how many RUB equals 1 of each currency
+        const rates: ExchangeRates = {
+          USD: response.data.rates.USD ? 1 / response.data.rates.USD : FALLBACK_RATES.USD,
+          CNY: response.data.rates.CNY ? 1 / response.data.rates.CNY : FALLBACK_RATES.CNY,
+          IRR: response.data.rates.IRR ? 1 / response.data.rates.IRR : FALLBACK_RATES.IRR,
         }
+        cachedRates = { rates, timestamp: Date.now() }
+        return rates
       }
 
       // Try backup API (open.er-api.com)
-      const backupResponse = await fetch('https://open.er-api.com/v6/latest/RUB')
+      const backupResponse = await axios.get<{
+        rates?: { USD?: number; CNY?: number; IRR?: number }
+      }>('https://open.er-api.com/v6/latest/RUB')
 
-      if (backupResponse.ok) {
-        const backupData = await backupResponse.json()
-        if (backupData.rates) {
-          const rates: ExchangeRates = {
-            USD: backupData.rates.USD ? 1 / backupData.rates.USD : FALLBACK_RATES.USD,
-            CNY: backupData.rates.CNY ? 1 / backupData.rates.CNY : FALLBACK_RATES.CNY,
-            IRR: backupData.rates.IRR ? 1 / backupData.rates.IRR : FALLBACK_RATES.IRR,
-          }
-          cachedRates = { rates, timestamp: Date.now() }
-          return rates
+      if (backupResponse.data.rates) {
+        const rates: ExchangeRates = {
+          USD: backupResponse.data.rates.USD ? 1 / backupResponse.data.rates.USD : FALLBACK_RATES.USD,
+          CNY: backupResponse.data.rates.CNY ? 1 / backupResponse.data.rates.CNY : FALLBACK_RATES.CNY,
+          IRR: backupResponse.data.rates.IRR ? 1 / backupResponse.data.rates.IRR : FALLBACK_RATES.IRR,
         }
+        cachedRates = { rates, timestamp: Date.now() }
+        return rates
       }
 
       // Return fallback rates if both APIs fail

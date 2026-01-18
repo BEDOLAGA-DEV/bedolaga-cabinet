@@ -30,6 +30,9 @@ import AdminBroadcasts from './pages/AdminBroadcasts'
 import AdminPromocodes from './pages/AdminPromocodes'
 import AdminCampaigns from './pages/AdminCampaigns'
 import AdminUsers from './pages/AdminUsers'
+import AdminPayments from './pages/AdminPayments'
+import AdminPromoOffers from './pages/AdminPromoOffers'
+import AdminRemnawave from './pages/AdminRemnawave'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuthStore()
@@ -259,6 +262,30 @@ function App() {
         element={
           <AdminRoute>
             <AdminUsers />
+          </AdminRoute>
+        }
+      />
+      <Route
+        path="/admin/payments"
+        element={
+          <AdminRoute>
+            <AdminPayments />
+          </AdminRoute>
+        }
+      />
+      <Route
+        path="/admin/promo-offers"
+        element={
+          <AdminRoute>
+            <AdminPromoOffers />
+          </AdminRoute>
+        }
+      />
+      <Route
+        path="/admin/remnawave"
+        element={
+          <AdminRoute>
+            <AdminRemnawave />
           </AdminRoute>
         }
       />

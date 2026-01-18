@@ -762,5 +762,19 @@
         "description": "使用这些按钮快速访问主要功能：充值余额、延长订阅和邀请好友。"
       }
     }
+  },
+  "promo": {
+    "activeDiscount": "活动折扣",
+    "discountActive": "折扣已激活！",
+    "discountDescription": "您的个人折扣适用于订阅购买",
+    "expiresIn": "到期时间",
+    "source": "来源",
+    "useNow": "立即使用",
+    "discountApplied": "折扣已应用",
+    "time": {
+      "days": "天",
+      "hours": "时",
+      "minutes": "分"
+    }
   }
 }

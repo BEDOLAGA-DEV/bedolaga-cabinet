@@ -3,7 +3,10 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { ticketsApi } from '../api/tickets'
 import { infoApi } from '../api/info'
+import { logger } from '../utils/logger'
 import type { TicketDetail, TicketMessage } from '../types'
+
+const log = logger.createLogger('Support')
 
 const PlusIcon = () => (
   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -120,7 +123,7 @@ function MessageMedia({ message, t }: { message: TicketMessage; t: (key: string)
 }
 
 export default function Support() {
-  console.log('[Support] Component loaded - VERSION 2024-01-16-v3')
+  log.debug('Component loaded')
 
   const { t } = useTranslation()
   const queryClient = useQueryClient()
@@ -271,20 +274,20 @@ export default function Support() {
 
   // If tickets are disabled, show redirect message
   if (supportConfig && !supportConfig.tickets_enabled) {
-    console.log('[Support] Tickets disabled, config:', supportConfig)
+    log.debug('Tickets disabled, config:', supportConfig)
 
     const getSupportMessage = () => {
-      console.log('[Support] Getting support message for type:', supportConfig.support_type)
+      log.debug('Getting support message for type:', supportConfig.support_type)
 
       if (supportConfig.support_type === 'profile') {
         const supportUsername = supportConfig.support_username || '@support'
-        console.log('[Support] Opening profile:', supportUsername)
+        log.debug('Opening profile:', supportUsername)
         return {
           title: t('support.ticketsDisabled'),
           message: t('support.contactSupport', { username: supportUsername }),
           buttonText: t('support.contactUs'),
           buttonAction: () => {
-            console.log('[Support] Button clicked, opening:', supportUsername)
+            log.debug('Button clicked, opening:', supportUsername)
             const webApp = window.Telegram?.WebApp
 
             // Extract username without @
@@ -292,41 +295,36 @@ export default function Support() {
               ? supportUsername.slice(1)
               : supportUsername
 
-            // Try different URL formats
-            const telegramUrl = `tg://resolve?domain=${username}`
             const webUrl = `https://t.me/${username}`
-
-            console.log('[Support] Telegram URL:', telegramUrl)
-            console.log('[Support] Web URL:', webUrl)
-            console.log('[Support] WebApp methods:', {
+            log.debug('Web URL:', webUrl, 'WebApp methods:', {
               openTelegramLink: !!webApp?.openTelegramLink,
               openLink: !!webApp?.openLink,
             })
 
             // Try openTelegramLink first (for tg:// links)
             if (webApp?.openTelegramLink) {
-              console.log('[Support] Using openTelegramLink with web URL')
+              log.debug('Using openTelegramLink with web URL')
               try {
                 webApp.openTelegramLink(webUrl)
                 return
               } catch (e) {
-                console.error('[Support] openTelegramLink failed:', e)
+                log.error('openTelegramLink failed:', e)
               }
             }
 
             // Fallback to openLink
             if (webApp?.openLink) {
-              console.log('[Support] Using openLink')
+              log.debug('Using openLink')
               try {
                 webApp.openLink(webUrl)
                 return
               } catch (e) {
-                console.error('[Support] openLink failed:', e)
+                log.error('openLink failed:', e)
               }
             }
 
             // Last resort - window.open
-            console.log('[Support] Using window.open')
+            log.debug('Using window.open')
             window.open(webUrl, '_blank')
           },
         }
@@ -350,13 +348,13 @@ export default function Support() {
 
       // Fallback: contact support (should not normally happen if config is correct)
       const supportUsername = supportConfig.support_username || '@support'
-      console.log('[Support] Fallback: Opening profile:', supportUsername)
+      log.debug('Fallback: Opening profile:', supportUsername)
       return {
         title: t('support.ticketsDisabled'),
         message: t('support.contactSupport', { username: supportUsername }),
         buttonText: t('support.contactUs'),
         buttonAction: () => {
-          console.log('[Support] Fallback button clicked, opening:', supportUsername)
+          log.debug('Fallback button clicked, opening:', supportUsername)
           const webApp = window.Telegram?.WebApp
 
           // Extract username without @
@@ -365,16 +363,16 @@ export default function Support() {
             : supportUsername
 
           const webUrl = `https://t.me/${username}`
-          console.log('[Support] Fallback opening URL:', webUrl)
+          log.debug('Fallback opening URL:', webUrl)
 
           if (webApp?.openTelegramLink) {
-            console.log('[Support] Fallback using openTelegramLink')
+            log.debug('Fallback using openTelegramLink')
             webApp.openTelegramLink(webUrl)
           } else if (webApp?.openLink) {
-            console.log('[Support] Fallback using openLink')
+            log.debug('Fallback using openLink')
             webApp.openLink(webUrl)
           } else {
-            console.log('[Support] Fallback using window.open')
+            log.debug('Fallback using window.open')
             window.open(webUrl, '_blank')
           }
         },

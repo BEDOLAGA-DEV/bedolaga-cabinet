@@ -10,6 +10,7 @@ import { balanceApi } from '../api/balance'
 import { wheelApi } from '../api/wheel'
 import ConnectionModal from '../components/ConnectionModal'
 import Onboarding, { useOnboarding } from '../components/Onboarding'
+import PromoOffersSection from '../components/PromoOffersSection'
 import { useCurrency } from '../hooks/useCurrency'
 
 // Icons
@@ -397,6 +398,9 @@ export default function Dashboard() {
           </div>
         </div>
       )}
+
+      {/* Promo Offers */}
+      <PromoOffersSection />
 
       {/* Fortune Wheel Banner */}
       {wheelConfig?.is_enabled && (

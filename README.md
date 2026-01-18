@@ -1,6 +1,6 @@
 # Bedolaga Cabinet - Web Interface
 
-Современный веб-интерфейс личного кабинета для VPN бота на базе [Remnawave Bedolaga Telegram Bot](https://github.com/BEDOLAGA-DEV/remnawave-bedolaga-telegram-bot).
+Современный веб-интерфейс личного кабинета для VPN бота на базе [Remnawave Bedolaga Telegram Bot V3.0.0+](https://github.com/BEDOLAGA-DEV/remnawave-bedolaga-telegram-bot).
 
 ## Возможности
 
@@ -70,7 +70,7 @@ VITE_APP_NAME=My VPN Cabinet
 VITE_APP_LOGO=V
 
 # Порт для Docker контейнера
-CABINET_PORT=3000
+CABINET_PORT=3020
 ```
 
 #### 3. Запуск в Docker
@@ -101,6 +101,7 @@ CABINET_ALLOWED_ORIGINS=http://localhost:3000,https://cabinet.yourdomain.com
 ## Настройка прокси для production
 
 Frontend - это статические файлы (HTML, JS, CSS). Для работы нужно:
+
 1. Раздавать статику через веб-сервер
 2. Проксировать `/api/*` запросы на backend бота
 
@@ -153,8 +154,8 @@ services:
       - ./cabinet-dist:/srv/cabinet:ro
       - caddy_data:/data
     ports:
-      - "80:80"
-      - "443:443"
+      - '80:80'
+      - '443:443'
     networks:
       - bot_network
 ```
@@ -164,6 +165,7 @@ services:
 Если хотите использовать готовый Docker контейнер с nginx внутри.
 
 **⚠️ Важно:**
+
 - Порт `80` в примерах - это **внутренний порт контейнера** (nginx внутри), не хост-порт!
 - Контейнеры должны быть в одной Docker сети для связи друг с другом
 - Имена контейнеров используются как DNS внутри Docker сети
@@ -194,11 +196,12 @@ services:
 
 networks:
   bot_network:
-    external: true  # Используем существующую сеть
-    name: remnawave-bedolaga-telegram-bot_bot_network  # Пример для bedolaga bot
+    external: true # Используем существующую сеть
+    name: remnawave-bedolaga-telegram-bot_bot_network # Пример для bedolaga bot
 ```
 
 **Важно:** Замените имя сети на вашу:
+
 - Если у вас bot + caddy: используйте сеть бота (обычно `<название_проекта>_bot_network`)
 - Если отдельный Caddy: узнайте через `docker network ls`
 - Если используете Traefik: обычно `traefik` или `web`
@@ -212,6 +215,7 @@ docker compose up -d
 **Шаг 4:** Добавьте в конфигурацию Caddy/Nginx:
 
 Caddy проксирует на контейнер:
+
 ```caddyfile
 cabinet.yourdomain.com {
     # API на backend
@@ -228,6 +232,7 @@ cabinet.yourdomain.com {
 ```
 
 Nginx (добавьте в существующий конфиг):
+
 ```nginx
 server {
     listen 443 ssl http2;
@@ -269,6 +274,7 @@ docker exec <nginx_container> nginx -s reload
 #### B. Если Caddy/Nginx ещё НЕ запущен:
 
 docker-compose.yml:
+
 ```yaml
 services:
   cabinet-frontend:
@@ -292,18 +298,18 @@ networks:
 
 ### Build-time (используются при сборке)
 
-| Переменная | Описание | По умолчанию |
-|------------|----------|--------------|
-| `VITE_API_URL` | Путь к API (`/api` или полный URL) | `/api` |
-| `VITE_TELEGRAM_BOT_USERNAME` | Username Telegram бота (без @) | - |
-| `VITE_APP_NAME` | Название приложения | `Cabinet` |
-| `VITE_APP_LOGO` | Логотип (короткий текст) | `V` |
+| Переменная                   | Описание                           | По умолчанию |
+| ---------------------------- | ---------------------------------- | ------------ |
+| `VITE_API_URL`               | Путь к API (`/api` или полный URL) | `/api`       |
+| `VITE_TELEGRAM_BOT_USERNAME` | Username Telegram бота (без @)     | -            |
+| `VITE_APP_NAME`              | Название приложения                | `Cabinet`    |
+| `VITE_APP_LOGO`              | Логотип (короткий текст)           | `V`          |
 
 ### Runtime (только для Docker)
 
-| Переменная | Описание | По умолчанию |
-|------------|----------|--------------|
-| `CABINET_PORT` | Порт контейнера | `3000` |
+| Переменная     | Описание        | По умолчанию |
+| -------------- | --------------- | ------------ |
+| `CABINET_PORT` | Порт контейнера | `3000`       |
 
 ## Структура проекта
 
@@ -337,6 +343,7 @@ bedolaga-cabinet/
 ### 502 Bad Gateway
 
 Убедитесь что:
+
 1. Backend бот запущен и работает
 2. Контейнеры находятся в одной Docker сети
 3. Имя сервиса backend в прокси конфигурации правильное

@@ -1,4 +1,6 @@
-﻿export interface MiniappCreatePaymentPayload {
+import axios, { AxiosError } from 'axios'
+
+export interface MiniappCreatePaymentPayload {
   initData: string
   method: string
   amountKopeks?: number | null
@@ -16,21 +18,26 @@ export const miniappApi = {
   createPayment: async (
     payload: MiniappCreatePaymentPayload
   ): Promise<MiniappCreatePaymentResponse> => {
-    const res = await fetch('/miniapp/payments/create', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        initData: payload.initData || '',
-        method: payload.method,
-        amountKopeks: payload.amountKopeks ?? null,
-        option: payload.option ?? null,
-      }),
-    })
-    const data = await res.json().catch(() => ({}))
-    if (!res.ok) {
-      const message = (data && (data.detail || data.message)) || 'Failed to create payment'
-      throw new Error(String(message))
+    try {
+      const response = await axios.post<MiniappCreatePaymentResponse>(
+        '/miniapp/payments/create',
+        {
+          initData: payload.initData || '',
+          method: payload.method,
+          amountKopeks: payload.amountKopeks ?? null,
+          option: payload.option ?? null,
+        },
+        {
+          headers: { 'Content-Type': 'application/json' },
+        }
+      )
+      return response.data
+    } catch (error) {
+      const axiosError = error as AxiosError<{ detail?: string; message?: string }>
+      const message = axiosError.response?.data?.detail
+        || axiosError.response?.data?.message
+        || 'Failed to create payment'
+      throw new Error(message)
     }
-    return data as MiniappCreatePaymentResponse
   },
 }

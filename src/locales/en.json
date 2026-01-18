@@ -307,6 +307,12 @@
         "name": "FreeKassa",
         "description": "Pay via FreeKassa"
       }
+    },
+    "pendingPayments": {
+      "title": "Pending Payments",
+      "pay": "Pay",
+      "checkStatus": "Check Status",
+      "checking": "Checking..."
     }
   },
   "referral": {
@@ -443,7 +449,10 @@
       "tariffs": "Tariffs",
       "servers": "Servers",
       "banSystem": "Ban Monitoring",
-      "broadcasts": "Broadcasts"
+      "broadcasts": "Broadcasts",
+      "users": "Users",
+      "payments": "Payments",
+      "remnawave": "RemnaWave"
     },
     "panel": {
       "title": "Admin Panel",
@@ -456,7 +465,85 @@
       "tariffsDesc": "Manage tariff plans",
       "serversDesc": "Configure VPN servers",
       "banSystemDesc": "Ban monitoring and violations",
-      "broadcastsDesc": "Mass messaging to users"
+      "broadcastsDesc": "Mass messaging to users",
+      "usersDesc": "Manage bot users",
+      "paymentsDesc": "Payment verification",
+      "remnawaveDesc": "Panel management and statistics"
+    },
+    "payments": {
+      "title": "Payment Verification",
+      "description": "Pending payments in the last 24 hours",
+      "totalPending": "Total Pending",
+      "filterByMethod": "Filter by method",
+      "noPayments": "No pending payments",
+      "paid": "Paid",
+      "user": "User",
+      "openLink": "Open Link",
+      "checkStatus": "Check Status",
+      "checking": "Checking..."
+    },
+    "remnawave": {
+      "title": "RemnaWave",
+      "subtitle": "Panel management and statistics",
+      "connected": "Connected",
+      "disconnected": "Not configured",
+      "noData": "Failed to load data",
+      "tabs": {
+        "overview": "Overview",
+        "nodes": "Nodes",
+        "squads": "Squads",
+        "sync": "Sync"
+      },
+      "overview": {
+        "system": "System",
+        "usersOnline": "Online",
+        "totalUsers": "Total Users",
+        "nodesOnline": "Nodes Online",
+        "connections": "Connections",
+        "bandwidth": "Realtime Bandwidth",
+        "download": "Download",
+        "upload": "Upload",
+        "total": "Total",
+        "server": "Server",
+        "cpu": "CPU Cores",
+        "memory": "Memory",
+        "uptime": "Uptime",
+        "traffic": "Traffic Statistics",
+        "usersByStatus": "Users by Status"
+      },
+      "nodes": {
+        "online": "Online",
+        "offline": "Offline",
+        "disabled": "Disabled",
+        "noNodes": "No nodes found",
+        "restart": "Restart",
+        "enable": "Enable",
+        "disable": "Disable",
+        "restartAll": "Restart All",
+        "confirmRestartAll": "Are you sure you want to restart all nodes?"
+      },
+      "squads": {
+        "synced": "Synced",
+        "notSynced": "Not synced",
+        "noSquads": "No squads found",
+        "syncServers": "Sync Servers"
+      },
+      "sync": {
+        "autoSync": "Auto Sync",
+        "runNow": "Run Now",
+        "manual": "Manual Sync",
+        "fromPanel": "Sync from Panel",
+        "fromPanelDesc": "Import users from RemnaWave panel to bot database",
+        "toPanel": "Sync to Panel",
+        "toPanelDesc": "Export users from bot database to RemnaWave panel",
+        "subscriptions": "Subscriptions",
+        "validate": "Validate",
+        "validateDesc": "Check and fix subscription inconsistencies",
+        "cleanup": "Cleanup",
+        "cleanupDesc": "Remove orphaned subscriptions without users",
+        "statuses": "Sync Statuses",
+        "statusesDesc": "Synchronize subscription statuses with panel"
+      }
     },
     "wheel": {
       "title": "Fortune Wheel Settings",
@@ -1178,6 +1265,20 @@
         "title": "Quick Actions",
         "description": "Use these buttons for quick access to main features: top up balance, extend subscription, and invite friends."
       }
+    }
+  },
+  "promo": {
+    "activeDiscount": "Active discount",
+    "discountActive": "Discount active!",
+    "discountDescription": "Your personal discount is applied to subscription purchases",
+    "expiresIn": "Expires in",
+    "source": "Source",
+    "useNow": "Use discount now",
+    "discountApplied": "Discount applied",
+    "time": {
+      "days": "d",
+      "hours": "h",
+      "minutes": "m"
     }
   }
 }

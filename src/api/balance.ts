@@ -1,5 +1,5 @@
-import apiClient from './client'
-import type { Balance, Transaction, PaymentMethod, PaginatedResponse } from '../types'
+﻿import apiClient from './client'
+import type { Balance, Transaction, PaymentMethod, PaginatedResponse, PendingPayment, ManualCheckResponse } from '../types'
 
 export const balanceApi = {
   // Get current balance
@@ -71,6 +71,29 @@ export const balanceApi = {
     const response = await apiClient.post('/cabinet/balance/stars-invoice', {
       amount_kopeks: amountKopeks,
     })
+    return response.data
+  },
+
+  // Get pending payments for manual verification
+  getPendingPayments: async (params?: {
+    page?: number
+    per_page?: number
+  }): Promise<PaginatedResponse<PendingPayment>> => {
+    const response = await apiClient.get<PaginatedResponse<PendingPayment>>('/cabinet/balance/pending-payments', {
+      params,
+    })
+    return response.data
+  },
+
+  // Get specific pending payment details
+  getPendingPayment: async (method: string, paymentId: number): Promise<PendingPayment> => {
+    const response = await apiClient.get<PendingPayment>(`/cabinet/balance/pending-payments/${method}/${paymentId}`)
+    return response.data
+  },
+
+  // Manually check payment status
+  checkPaymentStatus: async (method: string, paymentId: number): Promise<ManualCheckResponse> => {
+    const response = await apiClient.post<ManualCheckResponse>(`/cabinet/balance/pending-payments/${method}/${paymentId}/check`)
     return response.data
   },
 }

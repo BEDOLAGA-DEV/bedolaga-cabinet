@@ -81,6 +81,24 @@ const UsersIcon = ({ className = "w-8 h-8" }: { className?: string }) => (
   </svg>
 )
 
+const PaymentsIcon = ({ className = "w-8 h-8" }: { className?: string }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
+  </svg>
+)
+
+const PromoOffersIcon = ({ className = "w-8 h-8" }: { className?: string }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M21 11.25v8.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 109.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1114.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+  </svg>
+)
+
+const RemnawaveIcon = ({ className = "w-8 h-8" }: { className?: string }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 14.25h13.5m-13.5 0a3 3 0 01-3-3m3 3a3 3 0 100 6h13.5a3 3 0 100-6m-16.5-3a3 3 0 013-3h13.5a3 3 0 013 3m-19.5 0a4.5 4.5 0 01.9-2.7L5.737 5.1a3.375 3.375 0 012.7-1.35h7.126c1.062 0 2.062.5 2.7 1.35l2.587 3.45a4.5 4.5 0 01.9 2.7m0 0a3 3 0 01-3 3m0 3h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008zm-3 6h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008z" />
+  </svg>
+)
+
 const ChevronRightIcon = () => (
   <svg className="w-4 h-4 text-dark-500 group-hover:text-dark-300 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
@@ -231,6 +249,16 @@ export default function AdminPanel() {
       textColor: 'text-violet-400'
     },
     {
+      to: '/admin/promo-offers',
+      icon: <PromoOffersIcon />,
+      mobileIcon: <PromoOffersIcon className="w-6 h-6" />,
+      title: t('admin.nav.promoOffers', 'Промопредложения'),
+      description: t('admin.panel.promoOffersDesc', 'Персональные скидки и предложения'),
+      color: 'orange',
+      bgColor: 'bg-orange-500/20',
+      textColor: 'text-orange-400'
+    },
+    {
       to: '/admin/campaigns',
       icon: <CampaignIcon />,
       mobileIcon: <CampaignIcon className="w-6 h-6" />,
@@ -259,6 +287,26 @@ export default function AdminPanel() {
       color: 'error',
       bgColor: 'bg-red-500/20',
       textColor: 'text-red-400'
+    },
+    {
+      to: '/admin/payments',
+      icon: <PaymentsIcon />,
+      mobileIcon: <PaymentsIcon className="w-6 h-6" />,
+      title: t('admin.nav.payments', 'Платежи'),
+      description: t('admin.panel.paymentsDesc', 'Проверка платежей'),
+      color: 'lime',
+      bgColor: 'bg-lime-500/20',
+      textColor: 'text-lime-400'
+    },
+    {
+      to: '/admin/remnawave',
+      icon: <RemnawaveIcon />,
+      mobileIcon: <RemnawaveIcon className="w-6 h-6" />,
+      title: t('admin.nav.remnawave', 'RemnaWave'),
+      description: t('admin.panel.remnawaveDesc', 'Управление панелью и статистика'),
+      color: 'purple',
+      bgColor: 'bg-purple-500/20',
+      textColor: 'text-purple-400'
     },
   ]
 

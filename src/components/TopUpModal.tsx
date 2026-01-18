@@ -19,7 +19,10 @@ const buildCryptoBotDeepLink = (url: string): string | null => {
       return `tg://resolve?domain=CryptoBot${parsed.search || ''}`
     }
     return null
-  } catch { return null }
+  } catch (e) {
+    console.warn('[TopUpModal] Failed to build CryptoBot deep link:', e)
+    return null
+  }
 }
 
 const openPaymentLink = (url: string, reservedWindow?: Window | null) => {
@@ -28,7 +31,7 @@ const openPaymentLink = (url: string, reservedWindow?: Window | null) => {
 
   // If inside Telegram Mini App, let Telegram handle t.me links
   if (isTelegramPaymentLink(url) && webApp?.openTelegramLink) {
-    try { webApp.openTelegramLink(url); return } catch { /* ignore */ }
+    try { webApp.openTelegramLink(url); return } catch (e) { console.warn('[TopUpModal] openTelegramLink failed:', e) }
   }
 
   // Prefer Telegram deep link specifically for CryptoBot invoices, but only when
@@ -37,7 +40,7 @@ const openPaymentLink = (url: string, reservedWindow?: Window | null) => {
   const target = cb && !isTelegramPaymentLink(url) ? cb : url
 
   if (reservedWindow && !reservedWindow.closed) {
-    try { reservedWindow.location.href = target; reservedWindow.focus?.() } catch { /* ignore */ }
+    try { reservedWindow.location.href = target; reservedWindow.focus?.() } catch (e) { console.warn('[TopUpModal] Failed to use reserved window:', e) }
     return
   }
 
@@ -72,28 +75,20 @@ export default function TopUpModal({ method, onClose }: TopUpModalProps) {
   const starsPaymentMutation = useMutation({
     mutationFn: (amountKopeks: number) => balanceApi.createStarsInvoice(amountKopeks),
     onSuccess: (data) => {
-      console.log('[Stars] API response:', data)
-      console.log('[Stars] invoice_url:', data.invoice_url)
       const webApp = window.Telegram?.WebApp
-      console.log('[Stars] webApp:', webApp)
-      console.log('[Stars] openInvoice available:', !!webApp?.openInvoice)
 
       if (!data.invoice_url) {
-        console.error('[Stars] No invoice_url in response!')
         setError('Сервер не вернул ссылку на оплату')
         return
       }
 
       if (!webApp?.openInvoice) {
-        console.error('[Stars] openInvoice not available - not in Telegram Mini App?')
         setError('Оплата Stars доступна только в Telegram Mini App')
         return
       }
 
-      console.log('[Stars] Calling openInvoice with:', data.invoice_url)
       try {
         webApp.openInvoice(data.invoice_url, (status) => {
-          console.log('[Stars] Invoice callback status:', status)
           if (status === 'paid') {
             setError(null)
             onClose()
@@ -104,12 +99,10 @@ export default function TopUpModal({ method, onClose }: TopUpModalProps) {
           }
         })
       } catch (e) {
-        console.error('[Stars] openInvoice error:', e)
         setError('Ошибка открытия окна оплаты: ' + String(e))
       }
     },
     onError: (error: unknown) => {
-      console.error('[Stars] API error:', error)
       const axiosError = error as { response?: { data?: { detail?: string }, status?: number } }
       const detail = axiosError?.response?.data?.detail
       const status = axiosError?.response?.status
@@ -136,7 +129,7 @@ export default function TopUpModal({ method, onClose }: TopUpModalProps) {
       onClose()
     },
     onError: (error: unknown) => {
-      try { if (popupRef.current && !popupRef.current.closed) popupRef.current.close() } catch { /* ignore */ }
+      try { if (popupRef.current && !popupRef.current.closed) popupRef.current.close() } catch (e) { console.warn('[TopUpModal] Failed to close popup:', e) }
       popupRef.current = null
       const detail = (error as { response?: { data?: { detail?: string } } })?.response?.data?.detail || ''
       if (detail.includes('not yet implemented')) setError(t('balance.useBot'))

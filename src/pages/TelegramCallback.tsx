@@ -32,19 +32,27 @@ export default function TelegramCallback() {
         return
       }
 
+      // Parse and validate numeric fields
+      const parsedId = parseInt(id, 10)
+      const parsedAuthDate = parseInt(authDate, 10)
+
+      if (Number.isNaN(parsedId) || Number.isNaN(parsedAuthDate)) {
+        setError(t('auth.telegramRequired'))
+        return
+      }
+
       try {
         await loginWithTelegramWidget({
-          id: parseInt(id, 10),
+          id: parsedId,
           first_name: firstName,
           last_name: lastName || undefined,
           username: username || undefined,
           photo_url: photoUrl || undefined,
-          auth_date: parseInt(authDate, 10),
+          auth_date: parsedAuthDate,
           hash: hash,
         })
         navigate('/')
       } catch (err: unknown) {
-        console.error('Telegram auth error:', err)
         const error = err as { response?: { data?: { detail?: string } } }
         setError(error.response?.data?.detail || t('common.error'))
       }
