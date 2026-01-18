@@ -782,7 +782,7 @@ export default function Subscription() {
 
                   <button
                     onClick={() => devicePurchaseMutation.mutate()}
-                    disabled={devicePurchaseMutation.isPending || (devicePriceData?.total_price_kopeks && purchaseOptions && devicePriceData.total_price_kopeks > purchaseOptions.balance_kopeks)}
+                    disabled={devicePurchaseMutation.isPending || !!(devicePriceData?.total_price_kopeks && purchaseOptions && devicePriceData.total_price_kopeks > purchaseOptions.balance_kopeks)}
                     className="btn-primary w-full py-3"
                   >
                     {devicePurchaseMutation.isPending ? (
