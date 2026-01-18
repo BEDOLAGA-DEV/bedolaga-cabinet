@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useLocation } from 'react-router-dom'
 import { AxiosError } from 'axios'
 import { subscriptionApi } from '../api/subscription'
+import { promoApi } from '../api/promo'
 import type { PurchaseSelection, PeriodOption, Tariff, TariffPeriod, ClassicPurchaseOptions } from '../types'
 import ConnectionModal from '../components/ConnectionModal'
 import { useCurrency } from '../hooks/useCurrency'
@@ -55,6 +56,24 @@ export default function Subscription() {
   // Helper to format price from kopeks
   const formatPrice = (kopeks: number) => `${formatAmount(kopeks / 100)} ${currencySymbol}`
 
+  // Helper to apply promo discount to a price
+  const applyPromoDiscount = (priceKopeks: number, hasExistingDiscount: boolean = false): {
+    price: number;
+    original: number | null;
+    percent: number | null
+  } => {
+    // Only apply promo discount if no existing discount (from promo group) and we have an active promo discount
+    if (!activeDiscount?.is_active || !activeDiscount.discount_percent || hasExistingDiscount) {
+      return { price: priceKopeks, original: null, percent: null }
+    }
+    const discountedPrice = Math.round(priceKopeks * (1 - activeDiscount.discount_percent / 100))
+    return {
+      price: discountedPrice,
+      original: priceKopeks,
+      percent: activeDiscount.discount_percent
+    }
+  }
+
   // Purchase state (classic mode)
   const [currentStep, setCurrentStep] = useState<PurchaseStep>('period')
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodOption | null>(null)
@@ -89,6 +108,13 @@ export default function Subscription() {
   const { data: purchaseOptions, isLoading: optionsLoading } = useQuery({
     queryKey: ['purchase-options'],
     queryFn: subscriptionApi.getPurchaseOptions,
+  })
+
+  // Fetch active promo discount
+  const { data: activeDiscount } = useQuery({
+    queryKey: ['active-discount'],
+    queryFn: promoApi.getActiveDiscount,
+    staleTime: 30000,
   })
 
   // Check if in tariffs mode (moved up to be available for useEffect)
@@ -1116,16 +1142,25 @@ export default function Subscription() {
                         // Daily tariff price (is_daily + daily_price_kopeks)
                         const dailyPrice = tariff.daily_price_kopeks ?? tariff.price_per_day_kopeks ?? 0
                         const originalDailyPrice = tariff.original_daily_price_kopeks || 0
+                        const hasExistingDailyDiscount = originalDailyPrice > dailyPrice
                         if (dailyPrice > 0) {
+                          // Apply promo discount if no existing discount
+                          const promoDaily = applyPromoDiscount(dailyPrice, hasExistingDailyDiscount)
                           return (
                             <span className="flex items-center gap-2">
-                              <span className="text-accent-400 font-medium">{formatPrice(dailyPrice)}</span>
-                              {originalDailyPrice > dailyPrice && (
-                                <span className="text-dark-500 text-xs line-through">{formatPrice(originalDailyPrice)}</span>
+                              <span className="text-accent-400 font-medium">{formatPrice(promoDaily.price)}</span>
+                              {/* Show original price from promo group or promo offer */}
+                              {(hasExistingDailyDiscount || promoDaily.original) && (
+                                <span className="text-dark-500 text-xs line-through">
+                                  {formatPrice(hasExistingDailyDiscount ? originalDailyPrice : promoDaily.original!)}
+                                </span>
                               )}
                               <span>/ день</span>
-                              {tariff.daily_discount_percent && tariff.daily_discount_percent > 0 && (
+                              {/* Show discount badge */}
+                              {(tariff.daily_discount_percent && tariff.daily_discount_percent > 0) ? (
                                 <span className="px-1.5 py-0.5 bg-success-500/20 text-success-400 text-xs rounded">-{tariff.daily_discount_percent}%</span>
+                              ) : promoDaily.percent && (
+                                <span className="px-1.5 py-0.5 bg-orange-500/20 text-orange-400 text-xs rounded">-{promoDaily.percent}%</span>
                               )}
                             </span>
                           )
@@ -1133,18 +1168,24 @@ export default function Subscription() {
                         // Period-based price
                         if (tariff.periods.length > 0) {
                           const firstPeriod = tariff.periods[0]
-                          const hasDiscount = firstPeriod?.original_price_kopeks && firstPeriod.original_price_kopeks > firstPeriod.price_kopeks
+                          const hasExistingDiscount = !!(firstPeriod?.original_price_kopeks && firstPeriod.original_price_kopeks > firstPeriod.price_kopeks)
+                          // Apply promo discount if no existing discount
+                          const promoPeriod = applyPromoDiscount(firstPeriod?.price_kopeks || 0, hasExistingDiscount)
                           return (
                             <span className="flex items-center gap-2 flex-wrap">
                               <span>{t('subscription.from')}</span>
-                              <span className="text-accent-400 font-medium">{formatPrice(firstPeriod?.price_kopeks || 0)}</span>
-                              {hasDiscount && (
-                                <>
-                                  <span className="text-dark-500 text-xs line-through">{formatPrice(firstPeriod.original_price_kopeks!)}</span>
-                                  {firstPeriod.discount_percent && (
-                                    <span className="px-1.5 py-0.5 bg-success-500/20 text-success-400 text-xs rounded">-{firstPeriod.discount_percent}%</span>
-                                  )}
-                                </>
+                              <span className="text-accent-400 font-medium">{formatPrice(promoPeriod.price)}</span>
+                              {/* Show original price from promo group or promo offer */}
+                              {(hasExistingDiscount || promoPeriod.original) && (
+                                <span className="text-dark-500 text-xs line-through">
+                                  {formatPrice(hasExistingDiscount ? firstPeriod.original_price_kopeks! : promoPeriod.original!)}
+                                </span>
+                              )}
+                              {/* Show discount badge */}
+                              {hasExistingDiscount && firstPeriod.discount_percent ? (
+                                <span className="px-1.5 py-0.5 bg-success-500/20 text-success-400 text-xs rounded">-{firstPeriod.discount_percent}%</span>
+                              ) : promoPeriod.percent && (
+                                <span className="px-1.5 py-0.5 bg-orange-500/20 text-orange-400 text-xs rounded">-{promoPeriod.percent}%</span>
                               )}
                             </span>
                           )
@@ -1330,34 +1371,47 @@ export default function Subscription() {
                 {/* Fixed periods */}
                 {selectedTariff.periods.length > 0 && !useCustomDays && (
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
-                    {selectedTariff.periods.map((period) => (
-                      <button
-                        key={period.days}
-                        onClick={() => {
-                          setSelectedTariffPeriod(period)
-                          setUseCustomDays(false)
-                        }}
-                        className={`p-4 rounded-xl border text-left transition-all relative ${
-                          selectedTariffPeriod?.days === period.days && !useCustomDays
-                            ? 'border-accent-500 bg-accent-500/10'
-                            : 'border-dark-700/50 hover:border-dark-600 bg-dark-800/30'
-                        }`}
-                      >
-                        {period.discount_percent && period.discount_percent > 0 && (
-                          <div className="absolute -top-2 -right-2 px-2 py-0.5 bg-success-500 text-white text-xs font-medium rounded-full">
-                            -{period.discount_percent}%
-                          </div>
-                        )}
-                        <div className="text-lg font-semibold text-dark-100">{period.label}</div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-accent-400 font-medium">{formatPrice(period.price_kopeks)}</span>
-                          {period.original_price_kopeks && period.original_price_kopeks > period.price_kopeks && (
-                            <span className="text-dark-500 text-sm line-through">{formatPrice(period.original_price_kopeks)}</span>
+                    {selectedTariff.periods.map((period) => {
+                      const hasExistingDiscount = !!(period.original_price_kopeks && period.original_price_kopeks > period.price_kopeks)
+                      const promoPeriod = applyPromoDiscount(period.price_kopeks, hasExistingDiscount)
+                      const displayDiscount = hasExistingDiscount ? period.discount_percent : promoPeriod.percent
+                      const displayOriginal = hasExistingDiscount ? period.original_price_kopeks : promoPeriod.original
+                      const displayPrice = promoPeriod.price
+                      const displayPerMonth = hasExistingDiscount
+                        ? period.price_per_month_kopeks
+                        : Math.round(promoPeriod.price / (period.days / 30))
+
+                      return (
+                        <button
+                          key={period.days}
+                          onClick={() => {
+                            setSelectedTariffPeriod(period)
+                            setUseCustomDays(false)
+                          }}
+                          className={`p-4 rounded-xl border text-left transition-all relative ${
+                            selectedTariffPeriod?.days === period.days && !useCustomDays
+                              ? 'border-accent-500 bg-accent-500/10'
+                              : 'border-dark-700/50 hover:border-dark-600 bg-dark-800/30'
+                          }`}
+                        >
+                          {displayDiscount && displayDiscount > 0 && (
+                            <div className={`absolute -top-2 -right-2 px-2 py-0.5 text-white text-xs font-medium rounded-full ${
+                              hasExistingDiscount ? 'bg-success-500' : 'bg-orange-500'
+                            }`}>
+                              -{displayDiscount}%
+                            </div>
                           )}
-                        </div>
-                        <div className="text-xs text-dark-500 mt-1">{formatPrice(period.price_per_month_kopeks)}/{t('subscription.month')}</div>
-                      </button>
-                    ))}
+                          <div className="text-lg font-semibold text-dark-100">{period.label}</div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-accent-400 font-medium">{formatPrice(displayPrice)}</span>
+                            {displayOriginal && displayOriginal > displayPrice && (
+                              <span className="text-dark-500 text-sm line-through">{formatPrice(displayOriginal)}</span>
+                            )}
+                          </div>
+                          <div className="text-xs text-dark-500 mt-1">{formatPrice(displayPerMonth)}/{t('subscription.month')}</div>
+                        </button>
+                      )
+                    })}
                   </div>
                 )}
 
@@ -1400,10 +1454,25 @@ export default function Subscription() {
                             className="w-20 px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-dark-100 text-center"
                           />
                         </div>
-                        <div className="flex justify-between text-sm">
-                          <span className="text-dark-400">{customDays} дней × {formatPrice(selectedTariff.price_per_day_kopeks ?? 0)}/день</span>
-                          <span className="text-accent-400 font-medium">{formatPrice(customDays * (selectedTariff.price_per_day_kopeks ?? 0))}</span>
-                        </div>
+                        {(() => {
+                          const basePrice = customDays * (selectedTariff.price_per_day_kopeks ?? 0)
+                          const hasExistingDiscount = !!(selectedTariff.original_price_per_day_kopeks && selectedTariff.original_price_per_day_kopeks > (selectedTariff.price_per_day_kopeks ?? 0))
+                          const promoCustom = applyPromoDiscount(basePrice, hasExistingDiscount)
+                          return (
+                            <div className="flex justify-between text-sm">
+                              <span className="text-dark-400">{customDays} дней × {formatPrice(selectedTariff.price_per_day_kopeks ?? 0)}/день</span>
+                              <div className="flex items-center gap-2">
+                                <span className="text-accent-400 font-medium">{formatPrice(promoCustom.price)}</span>
+                                {promoCustom.original && (
+                                  <>
+                                    <span className="text-dark-500 text-xs line-through">{formatPrice(promoCustom.original)}</span>
+                                    <span className="px-1.5 py-0.5 bg-orange-500/20 text-orange-400 text-xs rounded">-{promoCustom.percent}%</span>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                          )
+                        })()}
                       </div>
                     )}
                   </div>
@@ -1472,42 +1541,76 @@ export default function Subscription() {
               {/* Summary & Purchase */}
               {(selectedTariffPeriod || useCustomDays) && (
                 <div className="bg-dark-800/50 rounded-xl p-5">
-                  {/* Price breakdown */}
-                  <div className="space-y-2 mb-4">
-                    {useCustomDays ? (
-                      <div className="flex justify-between text-sm text-dark-300">
-                        <span>Период: {customDays} дней</span>
-                        <span>{formatPrice(customDays * (selectedTariff.price_per_day_kopeks ?? 0))}</span>
-                      </div>
-                    ) : selectedTariffPeriod && (
-                      <div className="flex justify-between text-sm text-dark-300">
-                        <span>Период: {selectedTariffPeriod.label}</span>
-                        <span>{formatPrice(selectedTariffPeriod.price_kopeks)}</span>
-                      </div>
-                    )}
-                    {useCustomTraffic && selectedTariff.custom_traffic_enabled && (
-                      <div className="flex justify-between text-sm text-dark-300">
-                        <span>Трафик: {customTrafficGb} ГБ</span>
-                        <span>+{formatPrice(customTrafficGb * (selectedTariff.traffic_price_per_gb_kopeks ?? 0))}</span>
-                      </div>
-                    )}
-                  </div>
-
                   {(() => {
-                    const periodPrice = useCustomDays
+                    // Calculate prices with promo discount
+                    const basePeriodPrice = useCustomDays
                       ? customDays * (selectedTariff.price_per_day_kopeks ?? 0)
                       : (selectedTariffPeriod?.price_kopeks || 0)
+                    const hasExistingPeriodDiscount = !useCustomDays && selectedTariffPeriod?.original_price_kopeks
+                      ? selectedTariffPeriod.original_price_kopeks > selectedTariffPeriod.price_kopeks
+                      : false
+                    const promoPeriod = applyPromoDiscount(basePeriodPrice, hasExistingPeriodDiscount)
+
                     const trafficPrice = useCustomTraffic && selectedTariff.custom_traffic_enabled
                       ? customTrafficGb * (selectedTariff.traffic_price_per_gb_kopeks ?? 0)
                       : 0
-                    const totalPrice = periodPrice + trafficPrice
+
+                    const totalPrice = promoPeriod.price + trafficPrice
+                    const originalTotal = promoPeriod.original ? promoPeriod.original + trafficPrice : null
                     const hasEnoughBalance = purchaseOptions && totalPrice <= purchaseOptions.balance_kopeks
 
                     return (
                       <>
+                        {/* Price breakdown */}
+                        <div className="space-y-2 mb-4">
+                          {useCustomDays ? (
+                            <div className="flex justify-between text-sm text-dark-300">
+                              <span>Период: {customDays} дней</span>
+                              <div className="flex items-center gap-2">
+                                <span>{formatPrice(promoPeriod.price)}</span>
+                                {promoPeriod.original && (
+                                  <span className="text-dark-500 text-xs line-through">{formatPrice(promoPeriod.original)}</span>
+                                )}
+                              </div>
+                            </div>
+                          ) : selectedTariffPeriod && (
+                            <div className="flex justify-between text-sm text-dark-300">
+                              <span>Период: {selectedTariffPeriod.label}</span>
+                              <div className="flex items-center gap-2">
+                                <span>{formatPrice(promoPeriod.price)}</span>
+                                {(hasExistingPeriodDiscount || promoPeriod.original) && (
+                                  <span className="text-dark-500 text-xs line-through">
+                                    {formatPrice(hasExistingPeriodDiscount ? selectedTariffPeriod.original_price_kopeks! : promoPeriod.original!)}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                          {useCustomTraffic && selectedTariff.custom_traffic_enabled && (
+                            <div className="flex justify-between text-sm text-dark-300">
+                              <span>Трафик: {customTrafficGb} ГБ</span>
+                              <span>+{formatPrice(trafficPrice)}</span>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Promo discount info */}
+                        {promoPeriod.percent && (
+                          <div className="flex items-center justify-center gap-2 mb-4 p-2 bg-orange-500/10 border border-orange-500/30 rounded-lg">
+                            <span className="text-orange-400 text-sm font-medium">
+                              Скидка -{promoPeriod.percent}% применена
+                            </span>
+                          </div>
+                        )}
+
                         <div className="flex justify-between items-center mb-4 pt-2 border-t border-dark-700/50">
                           <span className="text-dark-100 font-medium">{t('subscription.total')}</span>
-                          <span className="text-2xl font-bold text-accent-400">{formatPrice(totalPrice)}</span>
+                          <div className="text-right">
+                            <span className="text-2xl font-bold text-accent-400">{formatPrice(totalPrice)}</span>
+                            {originalTotal && (
+                              <div className="text-sm text-dark-500 line-through">{formatPrice(originalTotal)}</div>
+                            )}
+                          </div>
                         </div>
 
                         {purchaseOptions && !hasEnoughBalance && (
@@ -1593,93 +1696,139 @@ export default function Subscription() {
               {/* Step: Period Selection */}
               {currentStep === 'period' && classicOptions && (
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  {classicOptions.periods.map((period) => (
-                    <button
-                      key={period.id}
-                      onClick={() => {
-                        setSelectedPeriod(period)
-                        if (period.traffic.current !== undefined) {
-                          setSelectedTraffic(period.traffic.current)
-                        }
-                        if (period.servers.selected) {
-                          setSelectedServers(period.servers.selected)
-                        }
-                        if (period.devices.current) {
-                          setSelectedDevices(period.devices.current)
-                        }
-                      }}
-                      className={`p-4 rounded-xl border text-left transition-all ${
-                        selectedPeriod?.id === period.id
-                          ? 'border-accent-500 bg-accent-500/10'
-                          : 'border-dark-700/50 hover:border-dark-600 bg-dark-800/30'
-                      }`}
-                    >
-                      <div className="text-lg font-semibold text-dark-100">{period.label}</div>
-                      <div className="text-accent-400 font-medium">{formatPrice(period.price_kopeks)}</div>
-                      {(period.discount_percent ?? 0) > 0 && (
-                        <span className="badge-success text-xs mt-2 inline-block">-{period.discount_percent}%</span>
-                      )}
-                    </button>
-                  ))}
+                  {classicOptions.periods.map((period) => {
+                    const hasExistingDiscount = !!(period.discount_percent && period.discount_percent > 0)
+                    const promoPeriod = applyPromoDiscount(period.price_kopeks, hasExistingDiscount)
+                    const displayDiscount = hasExistingDiscount ? period.discount_percent : promoPeriod.percent
+                    const displayOriginal = hasExistingDiscount ? period.original_price_kopeks : promoPeriod.original
+
+                    return (
+                      <button
+                        key={period.id}
+                        onClick={() => {
+                          setSelectedPeriod(period)
+                          if (period.traffic.current !== undefined) {
+                            setSelectedTraffic(period.traffic.current)
+                          }
+                          if (period.servers.selected) {
+                            setSelectedServers(period.servers.selected)
+                          }
+                          if (period.devices.current) {
+                            setSelectedDevices(period.devices.current)
+                          }
+                        }}
+                        className={`p-4 rounded-xl border text-left transition-all relative ${
+                          selectedPeriod?.id === period.id
+                            ? 'border-accent-500 bg-accent-500/10'
+                            : 'border-dark-700/50 hover:border-dark-600 bg-dark-800/30'
+                        }`}
+                      >
+                        {displayDiscount && displayDiscount > 0 && (
+                          <div className={`absolute -top-2 -right-2 px-2 py-0.5 text-white text-xs font-medium rounded-full ${
+                            hasExistingDiscount ? 'bg-success-500' : 'bg-orange-500'
+                          }`}>
+                            -{displayDiscount}%
+                          </div>
+                        )}
+                        <div className="text-lg font-semibold text-dark-100">{period.label}</div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-accent-400 font-medium">{formatPrice(promoPeriod.price)}</span>
+                          {displayOriginal && displayOriginal > promoPeriod.price && (
+                            <span className="text-dark-500 text-sm line-through">{formatPrice(displayOriginal)}</span>
+                          )}
+                        </div>
+                      </button>
+                    )
+                  })}
                 </div>
               )}
 
               {/* Step: Traffic Selection */}
               {currentStep === 'traffic' && selectedPeriod?.traffic.options && (
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  {selectedPeriod.traffic.options.map((option) => (
-                    <button
-                      key={option.value}
-                      onClick={() => setSelectedTraffic(option.value)}
-                      disabled={!option.is_available}
-                      className={`p-4 rounded-xl border text-center transition-all ${
-                        selectedTraffic === option.value
-                          ? 'border-accent-500 bg-accent-500/10'
-                          : option.is_available
-                            ? 'border-dark-700/50 hover:border-dark-600 bg-dark-800/30'
-                            : 'border-dark-800/30 bg-dark-900/30 opacity-50 cursor-not-allowed'
-                      }`}
-                    >
-                      <div className="text-lg font-semibold text-dark-100">{option.label}</div>
-                      <div className="text-accent-400">{formatPrice(option.price_kopeks)}</div>
-                    </button>
-                  ))}
+                  {selectedPeriod.traffic.options.map((option) => {
+                    const hasExistingDiscount = !!(option.discount_percent && option.discount_percent > 0)
+                    const promoTraffic = applyPromoDiscount(option.price_kopeks, hasExistingDiscount)
+
+                    return (
+                      <button
+                        key={option.value}
+                        onClick={() => setSelectedTraffic(option.value)}
+                        disabled={!option.is_available}
+                        className={`p-4 rounded-xl border text-center transition-all relative ${
+                          selectedTraffic === option.value
+                            ? 'border-accent-500 bg-accent-500/10'
+                            : option.is_available
+                              ? 'border-dark-700/50 hover:border-dark-600 bg-dark-800/30'
+                              : 'border-dark-800/30 bg-dark-900/30 opacity-50 cursor-not-allowed'
+                        }`}
+                      >
+                        {promoTraffic.percent && (
+                          <div className="absolute -top-2 -right-2 px-2 py-0.5 bg-orange-500 text-white text-xs font-medium rounded-full">
+                            -{promoTraffic.percent}%
+                          </div>
+                        )}
+                        <div className="text-lg font-semibold text-dark-100">{option.label}</div>
+                        <div className="flex items-center justify-center gap-2">
+                          <span className="text-accent-400">{formatPrice(promoTraffic.price)}</span>
+                          {promoTraffic.original && (
+                            <span className="text-dark-500 text-xs line-through">{formatPrice(promoTraffic.original)}</span>
+                          )}
+                        </div>
+                      </button>
+                    )
+                  })}
                 </div>
               )}
 
               {/* Step: Server Selection */}
               {currentStep === 'servers' && selectedPeriod?.servers.options && (
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  {selectedPeriod.servers.options.map((server) => (
-                    <button
-                      key={server.uuid}
-                      onClick={() => toggleServer(server.uuid)}
-                      disabled={!server.is_available}
-                      className={`p-4 rounded-xl border text-left transition-all ${
-                        selectedServers.includes(server.uuid)
-                          ? 'border-accent-500 bg-accent-500/10'
-                          : server.is_available
-                            ? 'border-dark-700/50 hover:border-dark-600 bg-dark-800/30'
-                            : 'border-dark-800/30 bg-dark-900/30 opacity-50 cursor-not-allowed'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 ${
+                  {selectedPeriod.servers.options.map((server) => {
+                    const hasExistingDiscount = !!(server.discount_percent && server.discount_percent > 0)
+                    const promoServer = applyPromoDiscount(server.price_kopeks, hasExistingDiscount)
+
+                    return (
+                      <button
+                        key={server.uuid}
+                        onClick={() => toggleServer(server.uuid)}
+                        disabled={!server.is_available}
+                        className={`p-4 rounded-xl border text-left transition-all relative ${
                           selectedServers.includes(server.uuid)
-                            ? 'border-accent-500 bg-accent-500'
-                            : 'border-dark-600'
-                        }`}>
-                          {selectedServers.includes(server.uuid) && (
-                            <CheckIcon />
-                          )}
+                            ? 'border-accent-500 bg-accent-500/10'
+                            : server.is_available
+                              ? 'border-dark-700/50 hover:border-dark-600 bg-dark-800/30'
+                              : 'border-dark-800/30 bg-dark-900/30 opacity-50 cursor-not-allowed'
+                        }`}
+                      >
+                        {promoServer.percent && (
+                          <div className="absolute -top-2 -right-2 px-2 py-0.5 bg-orange-500 text-white text-xs font-medium rounded-full">
+                            -{promoServer.percent}%
+                          </div>
+                        )}
+                        <div className="flex items-center gap-3">
+                          <div className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 ${
+                            selectedServers.includes(server.uuid)
+                              ? 'border-accent-500 bg-accent-500'
+                              : 'border-dark-600'
+                          }`}>
+                            {selectedServers.includes(server.uuid) && (
+                              <CheckIcon />
+                            )}
+                          </div>
+                          <div>
+                            <div className="font-medium text-dark-100">{server.name}</div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm text-accent-400">{formatPrice(promoServer.price)}</span>
+                              {promoServer.original && (
+                                <span className="text-dark-500 text-xs line-through">{formatPrice(promoServer.original)}</span>
+                              )}
+                            </div>
+                          </div>
                         </div>
-                        <div>
-                          <div className="font-medium text-dark-100">{server.name}</div>
-                          <div className="text-sm text-accent-400">{formatPrice(server.price_kopeks)}</div>
-                        </div>
-                      </div>
-                    </button>
-                  ))}
+                      </button>
+                    )
+                  })}
                 </div>
               )}
 
@@ -1723,6 +1872,18 @@ export default function Subscription() {
                     </div>
                   ) : preview ? (
                     <div className="bg-dark-800/50 rounded-xl p-5 space-y-4">
+                      {/* Active promo discount banner */}
+                      {activeDiscount?.is_active && activeDiscount.discount_percent && !preview.original_price_kopeks && (
+                        <div className="flex items-center justify-center gap-2 p-3 bg-orange-500/10 border border-orange-500/30 rounded-lg">
+                          <svg className="w-4 h-4 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+                          </svg>
+                          <span className="text-orange-400 text-sm font-medium">
+                            Скидка -{activeDiscount.discount_percent}% применена
+                          </span>
+                        </div>
+                      )}
+
                       {preview.breakdown.map((item, idx) => (
                         <div key={idx} className="flex justify-between text-dark-300">
                           <span>{item.label}</span>
@@ -1730,15 +1891,25 @@ export default function Subscription() {
                         </div>
                       ))}
 
-                      <div className="border-t border-dark-700/50 pt-4 flex justify-between items-center">
-                        <span className="font-semibold text-dark-100 text-lg">{t('subscription.total')}</span>
-                        <div className="text-right">
-                          <div className="text-2xl font-bold text-accent-400">{formatPrice(preview.total_price_kopeks)}</div>
-                          {preview.original_price_kopeks && (
-                            <div className="text-sm text-dark-500 line-through">{formatPrice(preview.original_price_kopeks)}</div>
-                          )}
-                        </div>
-                      </div>
+                      {(() => {
+                        // Apply promo discount if not already applied by server
+                        const hasServerDiscount = !!preview.original_price_kopeks
+                        const promoTotal = applyPromoDiscount(preview.total_price_kopeks, hasServerDiscount)
+                        const displayTotal = promoTotal.price
+                        const displayOriginal = hasServerDiscount ? preview.original_price_kopeks : promoTotal.original
+
+                        return (
+                          <div className="border-t border-dark-700/50 pt-4 flex justify-between items-center">
+                            <span className="font-semibold text-dark-100 text-lg">{t('subscription.total')}</span>
+                            <div className="text-right">
+                              <div className="text-2xl font-bold text-accent-400">{formatPrice(displayTotal)}</div>
+                              {displayOriginal && (
+                                <div className="text-sm text-dark-500 line-through">{formatPrice(displayOriginal)}</div>
+                              )}
+                            </div>
+                          </div>
+                        )
+                      })()}
 
                       {preview.discount_label && (
                         <div className="text-sm text-success-400 text-center">{preview.discount_label}</div>
