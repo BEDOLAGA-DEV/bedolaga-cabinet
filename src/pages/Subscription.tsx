@@ -301,18 +301,20 @@ export default function Subscription() {
   // Auto-scroll to switch tariff modal when it appears
   useEffect(() => {
     if (switchTariffId && switchModalRef.current) {
-      setTimeout(() => {
+      const timer = setTimeout(() => {
         switchModalRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
       }, 100)
+      return () => clearTimeout(timer)
     }
   }, [switchTariffId])
 
   // Auto-scroll to tariff purchase form when it appears
   useEffect(() => {
     if (showTariffPurchase && tariffPurchaseRef.current) {
-      setTimeout(() => {
+      const timer = setTimeout(() => {
         tariffPurchaseRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
       }, 100)
+      return () => clearTimeout(timer)
     }
   }, [showTariffPurchase])
 
@@ -320,11 +322,12 @@ export default function Subscription() {
   useEffect(() => {
     const state = location.state as { scrollToExtend?: boolean } | null
     if (state?.scrollToExtend && tariffsCardRef.current) {
-      setTimeout(() => {
+      const timer = setTimeout(() => {
         tariffsCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
       }, 300)
       // Clear the state to prevent re-scrolling on subsequent renders
       window.history.replaceState({}, document.title)
+      return () => clearTimeout(timer)
     }
   }, [location.state])
 

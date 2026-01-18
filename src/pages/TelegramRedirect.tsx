@@ -25,6 +25,9 @@ const getSafeRedirectUrl = (url: string | null): string => {
   return url
 }
 
+const MAX_RETRY_ATTEMPTS = 3
+const RETRY_COUNT_KEY = 'telegram_redirect_retry_count'
+
 export default function TelegramRedirect() {
   const { t } = useTranslation()
   const navigate = useNavigate()
@@ -32,6 +35,10 @@ export default function TelegramRedirect() {
   const { loginWithTelegram, isAuthenticated, isLoading: authLoading } = useAuthStore()
   const [status, setStatus] = useState<'loading' | 'success' | 'error' | 'not-telegram'>('loading')
   const [errorMessage, setErrorMessage] = useState('')
+  const [retryCount, setRetryCount] = useState(() => {
+    const stored = sessionStorage.getItem(RETRY_COUNT_KEY)
+    return stored ? parseInt(stored, 10) : 0
+  })
 
   // Get branding for nice display
   const { data: branding } = useQuery({
@@ -96,12 +103,27 @@ export default function TelegramRedirect() {
     setTimeout(initTelegram, 300)
   }, [loginWithTelegram, navigate, isAuthenticated, authLoading, redirectTo, t])
 
-  // Handle retry
+  // Handle retry with limit to prevent infinite loops
   const handleRetry = () => {
+    if (retryCount >= MAX_RETRY_ATTEMPTS) {
+      setErrorMessage('Превышено количество попыток. Попробуйте позже.')
+      sessionStorage.removeItem(RETRY_COUNT_KEY)
+      return
+    }
+    const newCount = retryCount + 1
+    setRetryCount(newCount)
+    sessionStorage.setItem(RETRY_COUNT_KEY, String(newCount))
     setStatus('loading')
     setErrorMessage('')
     window.location.reload()
   }
+
+  // Clear retry count on successful auth
+  useEffect(() => {
+    if (status === 'success') {
+      sessionStorage.removeItem(RETRY_COUNT_KEY)
+    }
+  }, [status])
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
