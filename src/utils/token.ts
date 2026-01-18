@@ -211,8 +211,8 @@ class TokenRefreshManager {
       }
 
       return null
-    } catch (error) {
-      console.error('[TokenRefreshManager] Refresh failed:', error)
+    } catch {
+      // Token refresh failed - don't log sensitive error details
       return null
     }
   }
