@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { Link } from 'react-router-dom'
 import {
   campaignsApi,
   CampaignListItem,
@@ -14,9 +15,9 @@ import {
 } from '../api/campaigns'
 
 // Icons
-const CampaignIcon = () => (
-  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5M9 11.25v1.5M12 9v3.75m3-6v6" />
+const BackIcon = () => (
+  <svg className="w-5 h-5 text-dark-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
   </svg>
 )
 
@@ -741,9 +742,12 @@ export default function AdminCampaigns() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-orange-500/20 rounded-lg text-orange-400">
-            <CampaignIcon />
-          </div>
+          <Link
+            to="/admin"
+            className="w-10 h-10 flex items-center justify-center rounded-xl bg-dark-800 border border-dark-700 hover:border-dark-600 transition-colors"
+          >
+            <BackIcon />
+          </Link>
           <div>
             <h1 className="text-xl font-semibold text-dark-100">Рекламные кампании</h1>
             <p className="text-sm text-dark-400">Управление рекламными ссылками</p>

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
+import { Link } from 'react-router-dom'
 import {
   tariffsApi,
   TariffListItem,
@@ -13,9 +14,9 @@ import {
 } from '../api/tariffs'
 
 // Icons
-const TariffIcon = () => (
-  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
+const BackIcon = () => (
+  <svg className="w-5 h-5 text-dark-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
   </svg>
 )
 
@@ -1187,9 +1188,12 @@ export default function AdminTariffs() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-accent-500/20 rounded-lg">
-            <TariffIcon />
-          </div>
+          <Link
+            to="/admin"
+            className="w-10 h-10 flex items-center justify-center rounded-xl bg-dark-800 border border-dark-700 hover:border-dark-600 transition-colors"
+          >
+            <BackIcon />
+          </Link>
           <div>
             <h1 className="text-xl font-semibold text-dark-100">{t('admin.tariffs.title')}</h1>
             <p className="text-sm text-dark-400">{t('admin.tariffs.subtitle')}</p>
