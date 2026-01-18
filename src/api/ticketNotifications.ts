@@ -32,9 +32,11 @@ export const ticketNotificationsApi = {
 
   // Admin notifications
   getAdminNotifications: async (unreadOnly = false, limit = 50, offset = 0): Promise<TicketNotificationList> => {
-    const response = await apiClient.get('/cabinet/admin/tickets/notifications', {
-      params: { unread_only: unreadOnly, limit, offset }
-    })
+    const params: Record<string, unknown> = { limit, offset }
+    if (unreadOnly) {
+      params.unread_only = true
+    }
+    const response = await apiClient.get('/cabinet/admin/tickets/notifications', { params })
     return response.data
   },
 
