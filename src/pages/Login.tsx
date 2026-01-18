@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { useAuthStore } from '../store/auth'
 import { brandingApi, type BrandingInfo } from '../api/branding'
+import { authApi } from '../api/auth'
 import LanguageSwitcher from '../components/LanguageSwitcher'
 import TelegramLoginButton from '../components/TelegramLoginButton'
 
@@ -50,10 +51,20 @@ export default function Login() {
 	const { t } = useTranslation()
 	const navigate = useNavigate()
 	const { isAuthenticated, loginWithTelegram, loginWithEmail } = useAuthStore()
-	const [activeTab, setActiveTab] = useState<'telegram' | 'email'>('telegram')
+	const [activeTab, setActiveTab] = useState<'login' | 'register'>('login')
+
+	// Login form state
 	const [email, setEmail] = useState('')
 	const [password, setPassword] = useState('')
+
+	// Register form state
+	const [regEmail, setRegEmail] = useState('')
+	const [regPassword, setRegPassword] = useState('')
+	const [regFirstName, setRegFirstName] = useState('')
+	const [regLastName, setRegLastName] = useState('')
+
 	const [error, setError] = useState('')
+	const [successMsg, setSuccessMsg] = useState('')
 	const [isLoading, setIsLoading] = useState(false)
 	const [isTelegramWebApp, setIsTelegramWebApp] = useState(false)
 
@@ -118,6 +129,7 @@ export default function Login() {
 	const handleEmailLogin = async (e: React.FormEvent) => {
 		e.preventDefault()
 		setError('')
+		setSuccessMsg('')
 		setIsLoading(true)
 
 		try {
@@ -129,17 +141,65 @@ export default function Login() {
 				response?: { data?: { detail?: string | unknown } }
 			}
 			const detail = error.response?.data?.detail
-
 			if (typeof detail === 'string') {
 				setError(detail)
 			} else if (Array.isArray(detail)) {
-				// Handle validation errors array
 				setError(t('common.error'))
 			} else {
 				setError(t('common.error'))
 			}
 		} finally {
 			setIsLoading(false)
+		}
+	}
+
+	const handleRegister = async (e: React.FormEvent) => {
+		e.preventDefault()
+		setError('')
+		setSuccessMsg('')
+		setIsLoading(true)
+
+		try {
+			await authApi.register({
+				email: regEmail,
+				password: regPassword,
+				first_name: regFirstName || undefined,
+				last_name: regLastName || undefined,
+			})
+			setSuccessMsg(
+				'Регистрация успешна. Пожалуйста, перейдите по ссылке в письме для подтверждения почты',
+			)
+			// Clear form
+			setRegEmail('')
+			setRegPassword('')
+			setRegFirstName('')
+			setRegLastName('')
+		} catch (err: unknown) {
+			console.error('Registration error:', err)
+			const errorObj = err as {
+				response?: { status?: number; data?: { detail?: string | unknown } }
+			}
+			const status = errorObj.response?.status
+			const detail = errorObj.response?.data?.detail
+
+			if (status === 400 && detail === 'REGISTER_EMAIL_ALREADY_EXISTS') {
+				setError('Этот Email уже зарегистрирован')
+			} else if (typeof detail === 'string') {
+				setError(detail)
+			} else {
+				setError(t('common.error'))
+			}
+		} finally {
+			setIsLoading(false)
+		}
+	}
+
+	// Switch tab handler
+	const switchTab = (tab: 'login' | 'register') => {
+		if (activeTab !== tab) {
+			setActiveTab(tab)
+			setError('')
+			setSuccessMsg('')
 		}
 	}
 
@@ -180,23 +240,23 @@ export default function Login() {
 					<div className='flex mb-6'>
 						<button
 							className={`flex-1 py-3 text-sm font-medium transition-all border-b-2 ${
-								activeTab === 'telegram'
+								activeTab === 'login'
 									? 'border-accent-500 text-accent-400'
 									: 'border-transparent text-dark-500 hover:text-dark-300'
 							}`}
-							onClick={() => setActiveTab('telegram')}
+							onClick={() => switchTab('login')}
 						>
-							Telegram
+							{t('auth.login')}
 						</button>
 						<button
 							className={`flex-1 py-3 text-sm font-medium transition-all border-b-2 ${
-								activeTab === 'email'
+								activeTab === 'register'
 									? 'border-accent-500 text-accent-400'
 									: 'border-transparent text-dark-500 hover:text-dark-300'
 							}`}
-							onClick={() => setActiveTab('email')}
+							onClick={() => switchTab('register')}
 						>
-							Email
+							{t('auth.register')}
 						</button>
 					</div>
 
@@ -206,24 +266,33 @@ export default function Login() {
 						</div>
 					)}
 
-					{activeTab === 'telegram' ? (
-						<div className='space-y-6'>
-							<p className='text-center text-sm text-dark-400'>
-								{t('auth.registerHint')}
-							</p>
-
-							{isLoading && isTelegramWebApp ? (
-								<div className='text-center py-8'>
-									<div className='w-8 h-8 border-2 border-accent-500 border-t-transparent rounded-full animate-spin mx-auto mb-3' />
-									<p className='text-sm text-dark-400'>
-										{t('auth.authenticating')}
-									</p>
-								</div>
-							) : (
-								<TelegramLoginButton botUsername={botUsername} />
-							)}
+					{successMsg && (
+						<div className='bg-success-500/10 border border-success-500/30 text-success-400 px-4 py-3 rounded-xl text-sm mb-6'>
+							{successMsg}
 						</div>
-					) : (
+					)}
+
+					{/* Telegram Login Button (Always visible) */}
+					<div className='mb-6'>
+						{isLoading && isTelegramWebApp ? (
+							<div className='text-center py-2'>
+								<div className='w-6 h-6 border-2 border-accent-500 border-t-transparent rounded-full animate-spin mx-auto mb-2' />
+								<p className='text-sm text-dark-400'>
+									{t('auth.authenticating')}
+								</p>
+							</div>
+						) : (
+							<TelegramLoginButton botUsername={botUsername} />
+						)}
+					</div>
+
+					<div className='flex items-center gap-4 mb-6'>
+						<div className='h-px bg-dark-700 flex-1' />
+						<span className='text-dark-400 text-sm'>{t('common.or')}</span>
+						<div className='h-px bg-dark-700 flex-1' />
+					</div>
+
+					{activeTab === 'login' ? (
 						<form className='space-y-5' onSubmit={handleEmailLogin}>
 							<div>
 								<label htmlFor='email' className='label'>
@@ -273,10 +342,88 @@ export default function Login() {
 									t('auth.login')
 								)}
 							</button>
+						</form>
+					) : (
+						<form className='space-y-5' onSubmit={handleRegister}>
+							<div className='grid grid-cols-2 gap-4'>
+								<div>
+									<label htmlFor='reg-firstName' className='label'>
+										Имя
+									</label>
+									<input
+										id='reg-firstName'
+										name='firstName'
+										type='text'
+										className='input'
+										placeholder='Иван'
+										value={regFirstName}
+										onChange={e => setRegFirstName(e.target.value)}
+									/>
+								</div>
+								<div>
+									<label htmlFor='reg-lastName' className='label'>
+										Фамилия
+									</label>
+									<input
+										id='reg-lastName'
+										name='lastName'
+										type='text'
+										className='input'
+										placeholder='Иванов'
+										value={regLastName}
+										onChange={e => setRegLastName(e.target.value)}
+									/>
+								</div>
+							</div>
 
-							<p className='text-center text-xs text-dark-500'>
-								{t('auth.registerHint')}
-							</p>
+							<div>
+								<label htmlFor='reg-email' className='label'>
+									{t('auth.email')}
+								</label>
+								<input
+									id='reg-email'
+									name='email'
+									type='email'
+									autoComplete='email'
+									required
+									className='input'
+									placeholder='you@example.com'
+									value={regEmail}
+									onChange={e => setRegEmail(e.target.value)}
+								/>
+							</div>
+
+							<div>
+								<label htmlFor='reg-password' className='label'>
+									{t('auth.password')}
+								</label>
+								<input
+									id='reg-password'
+									name='password'
+									type='password'
+									autoComplete='new-password'
+									required
+									className='input'
+									placeholder='••••••••'
+									value={regPassword}
+									onChange={e => setRegPassword(e.target.value)}
+								/>
+							</div>
+
+							<button
+								type='submit'
+								disabled={isLoading}
+								className='btn-primary w-full py-3'
+							>
+								{isLoading ? (
+									<span className='flex items-center justify-center gap-2'>
+										<span className='w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin' />
+										{t('common.loading')}
+									</span>
+								) : (
+									t('auth.register')
+								)}
+							</button>
 						</form>
 					)}
 				</div>
