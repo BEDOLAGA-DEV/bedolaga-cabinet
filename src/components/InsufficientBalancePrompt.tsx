@@ -145,10 +145,10 @@ function PaymentMethodModal({ paymentMethods, onSelect, onClose }: PaymentMethod
   const { formatAmount, currencySymbol } = useCurrency()
 
   return (
-    <div className="fixed inset-0 bg-black/70 z-50 flex items-start justify-center pt-12 sm:pt-0 sm:items-center px-3">
+    <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center px-4">
       <div className="absolute inset-0" onClick={onClose} />
 
-      <div className="relative w-full max-w-sm bg-dark-900 rounded-2xl border border-dark-700/50 shadow-2xl overflow-hidden max-h-[70vh] flex flex-col">
+      <div className="relative w-full max-w-sm bg-dark-900 rounded-2xl border border-dark-700/50 shadow-2xl overflow-hidden max-h-[80vh] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 bg-dark-800/50">
           <span className="font-semibold text-dark-100">{t('balance.selectPaymentMethod')}</span>
