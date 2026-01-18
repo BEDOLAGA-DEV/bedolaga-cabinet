@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { User } from '../types'
 import { authApi } from '../api/auth'
-import { tokenStorage, isTokenValid } from '../utils/token'
+import { tokenStorage, isTokenValid, tokenRefreshManager } from '../utils/token'
 
 export interface TelegramWidgetData {
   id: number
@@ -34,6 +34,10 @@ interface AuthState {
   loginWithEmail: (email: string, password: string) => Promise<void>
 }
 
+// Блокировка для предотвращения race condition при инициализации
+let initializePromise: Promise<void> | null = null
+let isInitializing = false
+
 export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
@@ -64,7 +68,9 @@ export const useAuthStore = create<AuthState>()(
       logout: () => {
         const { refreshToken } = get()
         if (refreshToken) {
-          authApi.logout(refreshToken).catch(console.error)
+          authApi.logout(refreshToken).catch((error) => {
+            console.error('[Auth] Logout API call failed:', error)
+          })
         }
         tokenStorage.clearTokens()
         set({
@@ -93,7 +99,7 @@ export const useAuthStore = create<AuthState>()(
             set({ isAdmin: data.is_admin })
           }
         } catch (error) {
-          console.error('Failed to check admin status:', error)
+          console.error('[Auth] Failed to check admin status:', error)
           set({ isAdmin: false })
         }
       },
@@ -103,89 +109,114 @@ export const useAuthStore = create<AuthState>()(
           const user = await authApi.getMe()
           set({ user })
         } catch (error) {
-          console.error('Failed to refresh user:', error)
+          console.error('[Auth] Failed to refresh user:', error)
         }
       },
 
       initialize: async () => {
-        set({ isLoading: true })
-
-        // Миграция токенов из localStorage (для обратной совместимости)
-        tokenStorage.migrateFromLocalStorage()
-
-        const accessToken = tokenStorage.getAccessToken()
-        const refreshToken = tokenStorage.getRefreshToken()
-
-        if (!accessToken || !refreshToken) {
-          set({ isLoading: false, isAuthenticated: false })
-          return
+        // Защита от race condition - если уже идёт инициализация, ждём её завершения
+        if (isInitializing && initializePromise) {
+          return initializePromise
         }
 
-        // Проверяем валидность токена перед использованием
-        if (!isTokenValid(accessToken)) {
-          // Токен истёк, пробуем обновить
+        isInitializing = true
+        initializePromise = (async () => {
           try {
-            const response = await authApi.refreshToken(refreshToken)
-            tokenStorage.setAccessToken(response.access_token)
-            const user = await authApi.getMe()
-            set({
-              accessToken: response.access_token,
-              refreshToken,
-              user,
-              isAuthenticated: true,
-              isLoading: false,
-            })
-            get().checkAdminStatus()
-            return
-          } catch {
-            tokenStorage.clearTokens()
-            set({
-              accessToken: null,
-              refreshToken: null,
-              user: null,
-              isAuthenticated: false,
-              isLoading: false,
-            })
-            return
-          }
-        }
+            set({ isLoading: true })
 
-        try {
-          const user = await authApi.getMe()
-          set({
-            accessToken,
-            refreshToken,
-            user,
-            isAuthenticated: true,
-            isLoading: false,
-          })
-          get().checkAdminStatus()
-        } catch (error) {
-          // Token might be invalid, try to refresh
-          try {
-            const response = await authApi.refreshToken(refreshToken)
-            tokenStorage.setAccessToken(response.access_token)
-            const user = await authApi.getMe()
-            set({
-              accessToken: response.access_token,
-              refreshToken,
-              user,
-              isAuthenticated: true,
-              isLoading: false,
-            })
-            get().checkAdminStatus()
-          } catch {
-            // Refresh failed, logout
-            tokenStorage.clearTokens()
-            set({
-              accessToken: null,
-              refreshToken: null,
-              user: null,
-              isAuthenticated: false,
-              isLoading: false,
-            })
+            // Миграция токенов из localStorage (для обратной совместимости)
+            tokenStorage.migrateFromLocalStorage()
+
+            const accessToken = tokenStorage.getAccessToken()
+            const refreshToken = tokenStorage.getRefreshToken()
+
+            if (!accessToken || !refreshToken) {
+              set({ isLoading: false, isAuthenticated: false })
+              return
+            }
+
+            // Проверяем валидность токена перед использованием
+            if (!isTokenValid(accessToken)) {
+              // Используем централизованный менеджер для refresh
+              const newToken = await tokenRefreshManager.refreshAccessToken()
+              if (newToken) {
+                const user = await authApi.getMe()
+                set({
+                  accessToken: newToken,
+                  refreshToken,
+                  user,
+                  isAuthenticated: true,
+                  isLoading: false,
+                })
+                get().checkAdminStatus()
+              } else {
+                tokenStorage.clearTokens()
+                set({
+                  accessToken: null,
+                  refreshToken: null,
+                  user: null,
+                  isAuthenticated: false,
+                  isLoading: false,
+                })
+              }
+              return
+            }
+
+            try {
+              const user = await authApi.getMe()
+              set({
+                accessToken,
+                refreshToken,
+                user,
+                isAuthenticated: true,
+                isLoading: false,
+              })
+              get().checkAdminStatus()
+            } catch (error) {
+              console.error('[Auth] getMe failed, trying refresh:', error)
+              // Token might be invalid on server, try to refresh
+              const newToken = await tokenRefreshManager.refreshAccessToken()
+              if (newToken) {
+                try {
+                  const user = await authApi.getMe()
+                  set({
+                    accessToken: newToken,
+                    refreshToken,
+                    user,
+                    isAuthenticated: true,
+                    isLoading: false,
+                  })
+                  get().checkAdminStatus()
+                } catch (userError) {
+                  console.error('[Auth] getMe failed after refresh:', userError)
+                  tokenStorage.clearTokens()
+                  set({
+                    accessToken: null,
+                    refreshToken: null,
+                    user: null,
+                    isAuthenticated: false,
+                    isLoading: false,
+                  })
+                }
+              } else {
+                // Refresh failed, logout
+                tokenStorage.clearTokens()
+                set({
+                  accessToken: null,
+                  refreshToken: null,
+                  user: null,
+                  isAuthenticated: false,
+                  isLoading: false,
+                })
+              }
+            }
+          } finally {
+            isInitializing = false
+            initializePromise = null
           }
-        }
+        })()
+
+        return initializePromise
       },
 
       loginWithTelegram: async (initData) => {
