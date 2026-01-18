@@ -516,3 +516,22 @@ export interface ManualCheckResponse {
   old_status: string | null
   new_status: string | null
 }
+
+// Ticket notification types
+export interface TicketNotification {
+  id: number
+  ticket_id: number
+  notification_type: string
+  message: string
+  is_read: boolean
+  created_at: string
+}
+
+export interface TicketNotificationList {
+  items: TicketNotification[]
+  total: number
+}
+
+export interface UnreadCountResponse {
+  unread_count: number
+}
