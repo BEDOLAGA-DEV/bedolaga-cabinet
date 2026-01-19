@@ -34,6 +34,7 @@ jobs:
           VITE_TELEGRAM_BOT_USERNAME:
           VITE_APP_NAME: Bedolaga Cabinet
           VITE_APP_LOGO: V
+          VITE_APP_VERSION: ${{ github.ref_name }}
 
       - name: Create dist archive
         run: |

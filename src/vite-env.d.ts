@@ -1,5 +1,8 @@
 /// <reference types="vite/client" />
 
+// Global constant defined in vite.config.ts
+declare const __APP_VERSION__: string
+
 interface ImportMetaEnv {
   readonly VITE_API_URL: string
   readonly VITE_TELEGRAM_BOT_USERNAME?: string

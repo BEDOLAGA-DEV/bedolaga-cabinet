@@ -11,6 +11,7 @@ import { pollsApi } from '../../api/polls'
 import { brandingApi } from '../../api/branding'
 import { wheelApi } from '../../api/wheel'
 import { themeColorsApi } from '../../api/themeColors'
+import { promoApi } from '../../api/promo'
 import { useTheme } from '../../hooks/useTheme'
 
 // Fallback branding from environment variables
@@ -210,6 +211,17 @@ export default function Layout({ children }: LayoutProps) {
     retry: false,
   })
 
+  // Fetch active discount to determine mobile layout
+  const { data: activeDiscount } = useQuery({
+    queryKey: ['active-discount'],
+    queryFn: promoApi.getActiveDiscount,
+    enabled: isAuthenticated,
+    staleTime: 30000,
+  })
+
+  // Check if promo is active (to hide language switcher on mobile)
+  const isPromoActive = activeDiscount?.is_active && activeDiscount?.discount_percent
+
   const navItems = useMemo(() => {
     const items = [
       { path: '/', label: t('nav.dashboard'), icon: HomeIcon },
@@ -339,7 +351,10 @@ export default function Layout({ children }: LayoutProps) {
 
               <PromoDiscountBadge />
               <TicketNotificationBell isAdmin={isAdminActive()} />
-              <LanguageSwitcher />
+              {/* Hide language switcher on mobile when promo is active */}
+              <div className={isPromoActive ? 'hidden sm:block' : ''}>
+                <LanguageSwitcher />
+              </div>
 
               {/* Profile - Desktop */}
               <div className="hidden sm:flex items-center gap-3">
@@ -389,29 +404,33 @@ export default function Layout({ children }: LayoutProps) {
           <div className="absolute inset-x-0 top-0 bottom-0 bg-dark-900 border-t border-dark-800/50 overflow-y-auto pb-[calc(5rem+env(safe-area-inset-bottom,0px))]">
             <div className="max-w-6xl mx-auto px-4 py-4">
               {/* User info */}
-              <div className="flex items-center gap-3 pb-4 mb-4 border-b border-dark-800/50">
-                {userPhotoUrl ? (
-                  <img
-                    src={userPhotoUrl}
-                    alt="Avatar"
-                    className="w-10 h-10 rounded-full object-cover"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none'
-                      e.currentTarget.nextElementSibling?.classList.remove('hidden')
-                    }}
-                  />
-                ) : null}
-                <div className={`w-10 h-10 rounded-full bg-dark-700 flex items-center justify-center ${userPhotoUrl ? 'hidden' : ''}`}>
-                  <UserIcon />
-                </div>
-                <div>
-                  <div className="text-sm font-medium text-dark-100">
-                    {user?.first_name || user?.username}
+              <div className="flex items-center justify-between pb-4 mb-4 border-b border-dark-800/50">
+                <div className="flex items-center gap-3">
+                  {userPhotoUrl ? (
+                    <img
+                      src={userPhotoUrl}
+                      alt="Avatar"
+                      className="w-10 h-10 rounded-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none'
+                        e.currentTarget.nextElementSibling?.classList.remove('hidden')
+                      }}
+                    />
+                  ) : null}
+                  <div className={`w-10 h-10 rounded-full bg-dark-700 flex items-center justify-center ${userPhotoUrl ? 'hidden' : ''}`}>
+                    <UserIcon />
                   </div>
-                  <div className="text-xs text-dark-500">
-                    @{user?.username || `ID: ${user?.telegram_id}`}
+                  <div>
+                    <div className="text-sm font-medium text-dark-100">
+                      {user?.first_name || user?.username}
+                    </div>
+                    <div className="text-xs text-dark-500">
+                      @{user?.username || `ID: ${user?.telegram_id}`}
+                    </div>
                   </div>
                 </div>
+                {/* Language switcher in mobile menu when promo is active */}
+                {isPromoActive && <LanguageSwitcher />}
               </div>
 
               {/* Nav items */}
@@ -480,6 +499,15 @@ export default function Layout({ children }: LayoutProps) {
         <div className="animate-fade-in">
           {children}
         </div>
+
+        {/* Version footer for admin pages */}
+        {isAdminActive() && (
+          <div className="mt-8 pt-4 border-t border-dark-800/50 text-center">
+            <span className="text-xs text-dark-500">
+              Cabinet {__APP_VERSION__}
+            </span>
+          </div>
+        )}
       </main>
 
       {/* Mobile Bottom Navigation - only core items */}
