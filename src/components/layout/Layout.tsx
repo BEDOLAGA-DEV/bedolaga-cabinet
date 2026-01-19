@@ -9,7 +9,7 @@ import TicketNotificationBell from '../TicketNotificationBell'
 import AnimatedBackground from '../AnimatedBackground'
 import { contestsApi } from '../../api/contests'
 import { pollsApi } from '../../api/polls'
-import { brandingApi } from '../../api/branding'
+import { brandingApi, getCachedBranding, setCachedBranding } from '../../api/branding'
 import { wheelApi } from '../../api/wheel'
 import { themeColorsApi } from '../../api/themeColors'
 import { promoApi } from '../../api/promo'
@@ -167,15 +167,21 @@ export default function Layout({ children }: LayoutProps) {
     }
   }, [mobileMenuOpen])
 
-  // Fetch branding settings
+  // Fetch branding settings with localStorage cache for instant load
   const { data: branding } = useQuery({
     queryKey: ['branding'],
-    queryFn: brandingApi.getBranding,
+    queryFn: async () => {
+      const data = await brandingApi.getBranding()
+      setCachedBranding(data) // Update cache
+      return data
+    },
+    initialData: getCachedBranding() ?? undefined, // Use cached data immediately
     staleTime: 60000, // 1 minute
+    refetchOnWindowFocus: true,
     retry: 1,
   })
 
-  // Computed branding values - use fallback only if branding not loaded yet
+  // Computed branding values - use fallback only if no branding and no cache
   const appName = branding ? branding.name : FALLBACK_NAME  // Empty string is valid (logo-only mode)
   const logoLetter = branding?.logo_letter || FALLBACK_LOGO
   const hasCustomLogo = branding?.has_custom_logo || false
