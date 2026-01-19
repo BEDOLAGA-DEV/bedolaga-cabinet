@@ -5,8 +5,12 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import App from './App'
 import { ThemeColorsProvider } from './providers/ThemeColorsProvider'
 import { ToastProvider } from './components/Toast'
+import { initLogoPreload } from './api/branding'
 import './i18n'
 import './styles/globals.css'
+
+// Preload logo from cache immediately on page load
+initLogoPreload()
 
 const queryClient = new QueryClient({
   defaultOptions: {

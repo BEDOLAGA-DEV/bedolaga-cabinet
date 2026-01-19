@@ -3,46 +3,10 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { useAuthStore } from '../store/auth'
-import { brandingApi, type BrandingInfo } from '../api/branding'
+import { brandingApi, getCachedBranding, setCachedBranding, preloadLogo, type BrandingInfo } from '../api/branding'
 import { getAndClearReturnUrl } from '../utils/token'
 import LanguageSwitcher from '../components/LanguageSwitcher'
 import TelegramLoginButton from '../components/TelegramLoginButton'
-
-const BRANDING_CACHE_KEY = 'cabinet-branding-cache'
-const BRANDING_CACHE_TTL = 1000 * 60 * 60 // 1 hour
-
-const getCachedBranding = (): BrandingInfo | undefined => {
-  if (typeof window === 'undefined') {
-    return undefined
-  }
-  try {
-    const raw = localStorage.getItem(BRANDING_CACHE_KEY)
-    if (!raw) return undefined
-    const parsed = JSON.parse(raw) as { data?: BrandingInfo; timestamp?: number }
-    if (!parsed?.data || !parsed.timestamp) return undefined
-    if (Date.now() - parsed.timestamp > BRANDING_CACHE_TTL) {
-      localStorage.removeItem(BRANDING_CACHE_KEY)
-      return undefined
-    }
-    return parsed.data
-  } catch {
-    return undefined
-  }
-}
-
-const cacheBranding = (data: BrandingInfo) => {
-  if (typeof window === 'undefined') {
-    return
-  }
-  try {
-    localStorage.setItem(
-      BRANDING_CACHE_KEY,
-      JSON.stringify({ data, timestamp: Date.now() })
-    )
-  } catch {
-    // Ignore storage errors (e.g., private mode)
-  }
-}
 
 export default function Login() {
   const { t } = useTranslation()
@@ -55,6 +19,7 @@ export default function Login() {
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isTelegramWebApp, setIsTelegramWebApp] = useState(false)
+  const [logoLoaded, setLogoLoaded] = useState(false)
 
   // Получаем URL для возврата после авторизации
   const getReturnUrl = useCallback(() => {
@@ -72,21 +37,20 @@ export default function Login() {
     return '/'
   }, [location.state])
 
-  // Fetch branding
+  // Fetch branding with unified cache
   const cachedBranding = useMemo(() => getCachedBranding(), [])
 
   const { data: branding } = useQuery<BrandingInfo>({
     queryKey: ['branding'],
-    queryFn: brandingApi.getBranding,
+    queryFn: async () => {
+      const data = await brandingApi.getBranding()
+      setCachedBranding(data)
+      preloadLogo(data)
+      return data
+    },
     staleTime: 60000,
-    placeholderData: cachedBranding,
+    initialData: cachedBranding ?? undefined,
   })
-
-  useEffect(() => {
-    if (branding) {
-      cacheBranding(branding)
-    }
-  }, [branding])
 
   const botUsername = import.meta.env.VITE_TELEGRAM_BOT_USERNAME || ''
   const appName = branding ? branding.name : (import.meta.env.VITE_APP_NAME || 'VPN')
@@ -168,11 +132,19 @@ export default function Login() {
       <div className="relative max-w-md w-full space-y-8">
         {/* Logo */}
         <div className="text-center">
-          <div className="mx-auto w-16 h-16 rounded-2xl bg-gradient-to-br from-accent-400 to-accent-600 flex items-center justify-center mb-6 shadow-lg shadow-accent-500/30 overflow-hidden">
-            {branding?.has_custom_logo && logoUrl ? (
-              <img src={logoUrl} alt={appName || 'Logo'} className="w-full h-full object-cover" />
-            ) : (
-              <span className="text-white font-bold text-2xl">{appLogo}</span>
+          <div className="mx-auto w-16 h-16 rounded-2xl bg-gradient-to-br from-accent-400 to-accent-600 flex items-center justify-center mb-6 shadow-lg shadow-accent-500/30 overflow-hidden relative">
+            {/* Always show letter as fallback */}
+            <span className={`text-white font-bold text-2xl absolute transition-opacity duration-200 ${branding?.has_custom_logo && logoLoaded ? 'opacity-0' : 'opacity-100'}`}>
+              {appLogo}
+            </span>
+            {/* Logo image with smooth fade-in */}
+            {branding?.has_custom_logo && logoUrl && (
+              <img
+                src={logoUrl}
+                alt={appName || 'Logo'}
+                className={`w-full h-full object-cover absolute transition-opacity duration-200 ${logoLoaded ? 'opacity-100' : 'opacity-0'}`}
+                onLoad={() => setLogoLoaded(true)}
+              />
             )}
           </div>
           {appName && (

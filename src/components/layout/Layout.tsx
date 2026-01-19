@@ -9,7 +9,7 @@ import TicketNotificationBell from '../TicketNotificationBell'
 import AnimatedBackground from '../AnimatedBackground'
 import { contestsApi } from '../../api/contests'
 import { pollsApi } from '../../api/polls'
-import { brandingApi, getCachedBranding, setCachedBranding } from '../../api/branding'
+import { brandingApi, getCachedBranding, setCachedBranding, preloadLogo } from '../../api/branding'
 import { wheelApi } from '../../api/wheel'
 import { themeColorsApi } from '../../api/themeColors'
 import { promoApi } from '../../api/promo'
@@ -167,12 +167,17 @@ export default function Layout({ children }: LayoutProps) {
     }
   }, [mobileMenuOpen])
 
+  // State to track if logo image has loaded
+  const [logoLoaded, setLogoLoaded] = useState(false)
+
   // Fetch branding settings with localStorage cache for instant load
   const { data: branding } = useQuery({
     queryKey: ['branding'],
     queryFn: async () => {
       const data = await brandingApi.getBranding()
       setCachedBranding(data) // Update cache
+      // Preload logo in background
+      preloadLogo(data)
       return data
     },
     initialData: getCachedBranding() ?? undefined, // Use cached data immediately
@@ -286,11 +291,19 @@ export default function Layout({ children }: LayoutProps) {
           <div className="flex justify-between items-center h-16 lg:h-20">
             {/* Logo */}
             <Link to="/" className={`flex items-center gap-2.5 flex-shrink-0 ${!appName ? 'lg:mr-4' : ''}`}>
-              <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 rounded-xl bg-gradient-to-br from-accent-400 to-accent-600 flex items-center justify-center overflow-hidden shadow-lg shadow-accent-500/20 flex-shrink-0">
-                {hasCustomLogo && logoUrl ? (
-                  <img src={logoUrl} alt={appName || 'Logo'} className="w-full h-full object-contain" />
-                ) : (
-                  <span className="text-white font-bold text-lg sm:text-xl lg:text-2xl">{logoLetter}</span>
+              <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 rounded-xl bg-gradient-to-br from-accent-400 to-accent-600 flex items-center justify-center overflow-hidden shadow-lg shadow-accent-500/20 flex-shrink-0 relative">
+                {/* Always show letter as fallback */}
+                <span className={`text-white font-bold text-lg sm:text-xl lg:text-2xl absolute transition-opacity duration-200 ${hasCustomLogo && logoLoaded ? 'opacity-0' : 'opacity-100'}`}>
+                  {logoLetter}
+                </span>
+                {/* Logo image with smooth fade-in */}
+                {hasCustomLogo && logoUrl && (
+                  <img
+                    src={logoUrl}
+                    alt={appName || 'Logo'}
+                    className={`w-full h-full object-contain absolute transition-opacity duration-200 ${logoLoaded ? 'opacity-100' : 'opacity-0'}`}
+                    onLoad={() => setLogoLoaded(true)}
+                  />
                 )}
               </div>
               {appName && (
