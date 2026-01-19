@@ -11,6 +11,30 @@ export interface AnimationEnabled {
   enabled: boolean
 }
 
+const BRANDING_CACHE_KEY = 'cabinet_branding'
+
+// Get cached branding from localStorage
+export const getCachedBranding = (): BrandingInfo | null => {
+  try {
+    const cached = localStorage.getItem(BRANDING_CACHE_KEY)
+    if (cached) {
+      return JSON.parse(cached)
+    }
+  } catch {
+    // localStorage not available or invalid JSON
+  }
+  return null
+}
+
+// Update branding cache in localStorage
+export const setCachedBranding = (branding: BrandingInfo) => {
+  try {
+    localStorage.setItem(BRANDING_CACHE_KEY, JSON.stringify(branding))
+  } catch {
+    // localStorage not available
+  }
+}
+
 export const brandingApi = {
   // Get current branding (public, no auth required)
   getBranding: async (): Promise<BrandingInfo> => {
