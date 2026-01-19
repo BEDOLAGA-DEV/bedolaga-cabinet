@@ -9,55 +9,24 @@ import type { PaymentMethod } from '../types'
 const TELEGRAM_LINK_REGEX = /^https?:\/\/t\.me\//i
 const isTelegramPaymentLink = (url: string): boolean => TELEGRAM_LINK_REGEX.test(url)
 
-/**
- * Открывает платёжную ссылку разными способами в зависимости от окружения.
- * Возвращает true если ссылка успешно открыта, false если все методы не сработали.
- */
-const openPaymentLink = (url: string, reservedWindow?: Window | null): boolean => {
-  if (typeof window === 'undefined' || !url) return false
+const openPaymentLink = (url: string, reservedWindow?: Window | null) => {
+  if (typeof window === 'undefined' || !url) return
   const webApp = window.Telegram?.WebApp
 
-  // Попытка 1: Telegram openTelegramLink для t.me ссылок
   if (isTelegramPaymentLink(url) && webApp?.openTelegramLink) {
-    try {
-      webApp.openTelegramLink(url)
-      return true
-    } catch (e) {
-      console.warn('[TopUpModal] openTelegramLink failed:', e)
-    }
+    try { webApp.openTelegramLink(url); return } catch (e) { console.warn('[TopUpModal] openTelegramLink failed:', e) }
   }
-
-  // Попытка 2: Telegram WebApp openLink
   if (webApp?.openLink) {
-    try {
-      webApp.openLink(url, { try_instant_view: false })
-      return true
-    } catch (e) {
-      console.warn('[TopUpModal] webApp.openLink failed:', e)
-    }
+    // try_browser: true - открывает диалог для перехода во внешний браузер (важно для мобильных)
+    try { webApp.openLink(url, { try_instant_view: false, try_browser: true }); return } catch (e) { console.warn('[TopUpModal] webApp.openLink failed:', e) }
   }
-
-  // Попытка 3: Зарезервированное окно браузера
   if (reservedWindow && !reservedWindow.closed) {
-    try {
-      reservedWindow.location.href = url
-      reservedWindow.focus?.()
-      return true
-    } catch (e) {
-      console.warn('[TopUpModal] Failed to use reserved window:', e)
-    }
+    try { reservedWindow.location.href = url; reservedWindow.focus?.() } catch (e) { console.warn('[TopUpModal] Failed to use reserved window:', e) }
+    return
   }
-
-  // Попытка 4: window.open
   const w2 = window.open(url, '_blank', 'noopener,noreferrer')
-  if (w2) {
-    w2.opener = null
-    return true
-  }
-
-  // Последний вариант: редирект текущей страницы
+  if (w2) { w2.opener = null; return }
   window.location.href = url
-  return true
 }
 
 interface TopUpModalProps {
@@ -114,46 +83,23 @@ export default function TopUpModal({ method, onClose, initialAmountRubles }: Top
   })
 
   const topUpMutation = useMutation<{
-    payment_id: string
-    payment_url?: string
-    invoice_url?: string
-    amount_kopeks: number
-    amount_rubles: number
-    status: string
-    expires_at: string | null
+    payment_id: string; payment_url?: string; invoice_url?: string
+    amount_kopeks: number; amount_rubles: number; status: string; expires_at: string | null
   }, unknown, number>({
     mutationFn: (amountKopeks: number) => balanceApi.createTopUp(amountKopeks, method.id, selectedOption || undefined),
     onSuccess: (data) => {
-      const redirectUrl = data.payment_url || data.invoice_url
-      if (!redirectUrl) {
-        setError(t('balance.noPaymentUrl', 'Сервер не вернул ссылку для оплаты'))
-        closePopupSafely()
-        return
-      }
-      const opened = openPaymentLink(redirectUrl, popupRef.current)
-      if (!opened) {
-        setError(t('balance.openLinkFailed', 'Не удалось открыть страницу оплаты'))
-      }
+      const redirectUrl = data.payment_url || (data as any).invoice_url
+      if (redirectUrl) openPaymentLink(redirectUrl, popupRef.current)
       popupRef.current = null
       onClose()
     },
     onError: (err: unknown) => {
-      closePopupSafely()
+      try { if (popupRef.current && !popupRef.current.closed) popupRef.current.close() } catch {}
+      popupRef.current = null
       const detail = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail || ''
       setError(detail.includes('not yet implemented') ? t('balance.useBot') : (detail || t('common.error')))
     },
   })
-
-  const closePopupSafely = () => {
-    try {
-      if (popupRef.current && !popupRef.current.closed) {
-        popupRef.current.close()
-      }
-    } catch (e) {
-      console.warn('[TopUpModal] Failed to close popup:', e)
-    }
-    popupRef.current = null
-  }
 
   const handleSubmit = () => {
     setError(null)
@@ -194,7 +140,7 @@ export default function TopUpModal({ method, onClose, initialAmountRubles }: Top
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 bg-dark-800/50">
           <span className="font-semibold text-dark-100">{methodName}</span>
-          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-dark-700 text-dark-400" aria-label="Close">
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-dark-700 text-dark-400">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>

@@ -227,8 +227,9 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
 
     if (isCustomScheme && tg?.openLink) {
       // For custom URL schemes - open redirect page in external browser via Telegram
+      // try_browser: true - показывает диалог для перехода во внешний браузер (важно для мобильных)
       try {
-        tg.openLink(redirectUrl, { try_instant_view: false })
+        tg.openLink(redirectUrl, { try_instant_view: false, try_browser: true })
         return
       } catch (e) {
         console.warn('tg.openLink failed:', e)
@@ -286,7 +287,7 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
               <h2 className="text-lg font-semibold text-dark-100">
                 {t('subscription.connection.title')}
               </h2>
-              <button onClick={onClose} className="btn-icon" aria-label="Close">
+              <button onClick={onClose} className="btn-icon">
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                 </svg>
