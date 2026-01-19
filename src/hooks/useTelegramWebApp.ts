@@ -8,6 +8,7 @@ export function useTelegramWebApp() {
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [isTelegramWebApp, setIsTelegramWebApp] = useState(false)
   const [safeAreaInset, setSafeAreaInset] = useState({ top: 0, bottom: 0, left: 0, right: 0 })
+  const [contentSafeAreaInset, setContentSafeAreaInset] = useState({ top: 0, bottom: 0, left: 0, right: 0 })
 
   const webApp = typeof window !== 'undefined' ? window.Telegram?.WebApp : undefined
 
@@ -20,6 +21,7 @@ export function useTelegramWebApp() {
     setIsTelegramWebApp(true)
     setIsFullscreen(webApp.isFullscreen || false)
     setSafeAreaInset(webApp.safeAreaInset || { top: 0, bottom: 0, left: 0, right: 0 })
+    setContentSafeAreaInset(webApp.contentSafeAreaInset || { top: 0, bottom: 0, left: 0, right: 0 })
 
     // Expand WebApp to full height
     webApp.expand()
@@ -29,12 +31,23 @@ export function useTelegramWebApp() {
     const handleFullscreenChanged = () => {
       setIsFullscreen(webApp.isFullscreen || false)
       setSafeAreaInset(webApp.safeAreaInset || { top: 0, bottom: 0, left: 0, right: 0 })
+      setContentSafeAreaInset(webApp.contentSafeAreaInset || { top: 0, bottom: 0, left: 0, right: 0 })
+    }
+
+    // Listen for safe area changes
+    const handleSafeAreaChanged = () => {
+      setSafeAreaInset(webApp.safeAreaInset || { top: 0, bottom: 0, left: 0, right: 0 })
+      setContentSafeAreaInset(webApp.contentSafeAreaInset || { top: 0, bottom: 0, left: 0, right: 0 })
     }
 
     webApp.onEvent('fullscreenChanged', handleFullscreenChanged)
+    webApp.onEvent('safeAreaChanged', handleSafeAreaChanged)
+    webApp.onEvent('contentSafeAreaChanged', handleSafeAreaChanged)
 
     return () => {
       webApp.offEvent('fullscreenChanged', handleFullscreenChanged)
+      webApp.offEvent('safeAreaChanged', handleSafeAreaChanged)
+      webApp.offEvent('contentSafeAreaChanged', handleSafeAreaChanged)
     }
   }, [webApp])
 
@@ -86,6 +99,7 @@ export function useTelegramWebApp() {
     isFullscreen,
     isFullscreenSupported,
     safeAreaInset,
+    contentSafeAreaInset,
     requestFullscreen,
     exitFullscreen,
     toggleFullscreen,

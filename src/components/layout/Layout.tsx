@@ -142,7 +142,7 @@ export default function Layout({ children }: LayoutProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const { toggleTheme, isDark } = useTheme()
   const [userPhotoUrl, setUserPhotoUrl] = useState<string | null>(null)
-  const { isTelegramWebApp, isFullscreen, isFullscreenSupported, toggleFullscreen } = useTelegramWebApp()
+  const { isTelegramWebApp, isFullscreen, isFullscreenSupported, toggleFullscreen, safeAreaInset, contentSafeAreaInset } = useTelegramWebApp()
 
   // Fetch enabled themes from API - same source of truth as AdminSettings
   const { data: enabledThemes } = useQuery({
@@ -300,7 +300,13 @@ export default function Layout({ children }: LayoutProps) {
       <AnimatedBackground />
 
       {/* Header */}
-      <header className="sticky top-0 z-50 glass border-b border-dark-800/50">
+      <header
+        className="sticky top-0 z-50 glass border-b border-dark-800/50"
+        style={{
+          // In fullscreen mode, add padding for safe area (notch/camera)
+          paddingTop: isFullscreen ? `${Math.max(safeAreaInset.top, contentSafeAreaInset.top)}px` : undefined,
+        }}
+      >
         <div className="w-full mx-auto px-4 sm:px-6">
           <div className="flex justify-between items-center h-16 lg:h-20">
             {/* Logo */}
