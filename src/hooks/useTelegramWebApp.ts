@@ -1,5 +1,25 @@
 import { useEffect, useState, useCallback } from 'react'
 
+const FULLSCREEN_CACHE_KEY = 'cabinet_fullscreen_enabled'
+
+// Get cached fullscreen setting
+export const getCachedFullscreenEnabled = (): boolean => {
+  try {
+    return localStorage.getItem(FULLSCREEN_CACHE_KEY) === 'true'
+  } catch {
+    return false
+  }
+}
+
+// Set cached fullscreen setting
+export const setCachedFullscreenEnabled = (enabled: boolean) => {
+  try {
+    localStorage.setItem(FULLSCREEN_CACHE_KEY, String(enabled))
+  } catch {
+    // localStorage not available
+  }
+}
+
 /**
  * Hook for Telegram WebApp API integration
  * Provides fullscreen mode, safe area insets, and other WebApp features
@@ -122,6 +142,16 @@ export function initTelegramWebApp() {
     // Disable vertical swipes to prevent accidental closing
     if (webApp.disableVerticalSwipes) {
       webApp.disableVerticalSwipes()
+    }
+
+    // Auto-enter fullscreen if enabled in settings (use cached value for instant response)
+    const fullscreenEnabled = getCachedFullscreenEnabled()
+    if (fullscreenEnabled && webApp.requestFullscreen && !webApp.isFullscreen) {
+      try {
+        webApp.requestFullscreen()
+      } catch (e) {
+        console.warn('Auto-fullscreen failed:', e)
+      }
     }
   }
 }

@@ -11,6 +11,10 @@ export interface AnimationEnabled {
   enabled: boolean
 }
 
+export interface FullscreenEnabled {
+  enabled: boolean
+}
+
 const BRANDING_CACHE_KEY = 'cabinet_branding'
 const LOGO_PRELOADED_KEY = 'cabinet_logo_preloaded'
 
@@ -119,6 +123,23 @@ export const brandingApi = {
   // Update animation enabled (admin only)
   updateAnimationEnabled: async (enabled: boolean): Promise<AnimationEnabled> => {
     const response = await apiClient.patch<AnimationEnabled>('/cabinet/branding/animation', { enabled })
+    return response.data
+  },
+
+  // Get fullscreen enabled (public, no auth required)
+  getFullscreenEnabled: async (): Promise<FullscreenEnabled> => {
+    try {
+      const response = await apiClient.get<FullscreenEnabled>('/cabinet/branding/fullscreen')
+      return response.data
+    } catch {
+      // If endpoint doesn't exist, default to disabled
+      return { enabled: false }
+    }
+  },
+
+  // Update fullscreen enabled (admin only)
+  updateFullscreenEnabled: async (enabled: boolean): Promise<FullscreenEnabled> => {
+    const response = await apiClient.patch<FullscreenEnabled>('/cabinet/branding/fullscreen', { enabled })
     return response.data
   },
 }

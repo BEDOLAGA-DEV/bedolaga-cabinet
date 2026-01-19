@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom'
 import { adminSettingsApi, SettingDefinition, SettingCategorySummary } from '../api/adminSettings'
 import { brandingApi, setCachedBranding } from '../api/branding'
 import { setCachedAnimationEnabled } from '../components/AnimatedBackground'
+import { setCachedFullscreenEnabled } from '../hooks/useTelegramWebApp'
 import { themeColorsApi } from '../api/themeColors'
 import { DEFAULT_THEME_COLORS, DEFAULT_ENABLED_THEMES } from '../types/theme'
 import { ColorPicker } from '../components/ColorPicker'
@@ -880,6 +881,21 @@ export default function AdminSettings() {
     },
   })
 
+  // Fullscreen toggle query and mutation
+  const { data: fullscreenSettings } = useQuery({
+    queryKey: ['fullscreen-enabled'],
+    queryFn: brandingApi.getFullscreenEnabled,
+  })
+
+  const updateFullscreenMutation = useMutation({
+    mutationFn: (enabled: boolean) => brandingApi.updateFullscreenEnabled(enabled),
+    onSuccess: (data) => {
+      // Update local cache immediately for instant effect
+      setCachedFullscreenEnabled(data.enabled)
+      queryClient.invalidateQueries({ queryKey: ['fullscreen-enabled'] })
+    },
+  })
+
   const updateNameMutation = useMutation({
     mutationFn: (name: string) => brandingApi.updateName(name),
     onSuccess: (data) => {
@@ -1225,6 +1241,29 @@ export default function AdminSettings() {
             >
               <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${
                 (animationSettings?.enabled ?? true) ? 'left-7' : 'left-1'
+              }`} />
+            </button>
+          </div>
+        </div>
+
+        {/* Fullscreen Toggle */}
+        <div className="mt-4 pt-4 border-t border-dark-700/50">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-medium text-dark-200">Авто-Fullscreen</h3>
+              <p className="text-xs text-dark-500 mt-0.5">
+                Автоматически открывать на полный экран в Telegram
+              </p>
+            </div>
+            <button
+              onClick={() => updateFullscreenMutation.mutate(!(fullscreenSettings?.enabled ?? false))}
+              disabled={updateFullscreenMutation.isPending}
+              className={`relative w-12 h-6 rounded-full transition-colors ${
+                (fullscreenSettings?.enabled ?? false) ? 'bg-accent-500' : 'bg-dark-600'
+              } ${updateFullscreenMutation.isPending ? 'opacity-50' : ''}`}
+            >
+              <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${
+                (fullscreenSettings?.enabled ?? false) ? 'left-7' : 'left-1'
               }`} />
             </button>
           </div>
