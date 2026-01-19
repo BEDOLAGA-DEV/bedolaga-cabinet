@@ -149,6 +149,15 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
     setDetectedPlatform(detectPlatform())
   }, [])
 
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    const originalStyle = window.getComputedStyle(document.body).overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = originalStyle
+    }
+  }, [])
+
   const getLocalizedText = (text: LocalizedText | undefined): string => {
     if (!text) return ''
     const lang = i18n.language || 'en'
@@ -217,11 +226,15 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
     window.location.href = redirectUrl
   }
 
-  // Modal wrapper - centered on all devices
+  // Modal wrapper - centered on desktop, top on mobile
   const ModalWrapper = ({ children }: { children: React.ReactNode }) => (
     <div
-      className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4"
-      style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top, 0px))', paddingBottom: 'calc(1rem + env(safe-area-inset-bottom, 0px))' }}
+      className="fixed inset-0 bg-black/70 z-50 flex items-start sm:items-center justify-center overflow-y-auto"
+      style={{
+        padding: '1rem',
+        paddingTop: 'calc(3rem + env(safe-area-inset-top, 0px))',
+        paddingBottom: 'calc(1rem + env(safe-area-inset-bottom, 0px))'
+      }}
       onClick={onClose}
     >
       <div
