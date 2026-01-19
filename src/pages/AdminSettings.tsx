@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { adminSettingsApi, SettingDefinition, SettingCategorySummary } from '../api/adminSettings'
 import { brandingApi } from '../api/branding'
+import { setCachedAnimationEnabled } from '../components/AnimatedBackground'
 import { themeColorsApi } from '../api/themeColors'
 import { DEFAULT_THEME_COLORS, DEFAULT_ENABLED_THEMES } from '../types/theme'
 import { ColorPicker } from '../components/ColorPicker'
@@ -872,7 +873,9 @@ export default function AdminSettings() {
 
   const updateAnimationMutation = useMutation({
     mutationFn: (enabled: boolean) => brandingApi.updateAnimationEnabled(enabled),
-    onSuccess: () => {
+    onSuccess: (data) => {
+      // Update local cache immediately for instant effect
+      setCachedAnimationEnabled(data.enabled)
       queryClient.invalidateQueries({ queryKey: ['animation-enabled'] })
     },
   })
