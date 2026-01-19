@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { adminSettingsApi, SettingDefinition, SettingCategorySummary } from '../api/adminSettings'
-import { brandingApi } from '../api/branding'
+import { brandingApi, setCachedBranding } from '../api/branding'
 import { setCachedAnimationEnabled } from '../components/AnimatedBackground'
 import { themeColorsApi } from '../api/themeColors'
 import { DEFAULT_THEME_COLORS, DEFAULT_ENABLED_THEMES } from '../types/theme'
@@ -882,7 +882,8 @@ export default function AdminSettings() {
 
   const updateNameMutation = useMutation({
     mutationFn: (name: string) => brandingApi.updateName(name),
-    onSuccess: () => {
+    onSuccess: (data) => {
+      setCachedBranding(data) // Update cache immediately
       queryClient.invalidateQueries({ queryKey: ['branding'] })
       setEditingName(false)
     },
@@ -890,14 +891,16 @@ export default function AdminSettings() {
 
   const uploadLogoMutation = useMutation({
     mutationFn: (file: File) => brandingApi.uploadLogo(file),
-    onSuccess: () => {
+    onSuccess: (data) => {
+      setCachedBranding(data) // Update cache immediately
       queryClient.invalidateQueries({ queryKey: ['branding'] })
     },
   })
 
   const deleteLogoMutation = useMutation({
     mutationFn: () => brandingApi.deleteLogo(),
-    onSuccess: () => {
+    onSuccess: (data) => {
+      setCachedBranding(data) // Update cache immediately
       queryClient.invalidateQueries({ queryKey: ['branding'] })
     },
   })
