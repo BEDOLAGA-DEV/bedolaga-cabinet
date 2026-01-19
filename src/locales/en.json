@@ -184,7 +184,8 @@
       "yourDevice": "Your device",
       "copyLink": "Copy subscription link",
       "copied": "Link copied!",
-      "openLink": "Open link"
+      "openLink": "Open link",
+      "instructions": "Instructions"
     },
     "myDevices": "My Devices",
     "noDevices": "No connected devices",

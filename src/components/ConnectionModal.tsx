@@ -438,7 +438,7 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
           </button>
           <div>
             <h2 className="font-semibold text-dark-100 text-sm">{selectedApp.name}</h2>
-            <p className="text-xs text-dark-500">{t('subscription.connection.instructions') || 'Инструкция'}</p>
+            <p className="text-xs text-dark-500">{t('subscription.connection.instructions')}</p>
           </div>
         </div>
         <button onClick={onClose} className="p-2 rounded-xl hover:bg-dark-800 text-dark-400">
