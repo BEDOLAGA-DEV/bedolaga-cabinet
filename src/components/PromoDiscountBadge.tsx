@@ -88,19 +88,12 @@ export default function PromoDiscountBadge() {
       {/* Badge button */}
       <button
         onClick={handleClick}
-        className="relative flex items-center gap-1.5 px-3 py-2 rounded-xl bg-gradient-to-r from-success-500/20 to-accent-500/20 border border-success-500/30 hover:border-success-500/50 transition-all group"
+        className="relative flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-success-500/15 hover:bg-success-500/25 transition-all group"
         title={t('promo.activeDiscount', 'Active discount')}
       >
-        {/* Animated sparkle effect */}
-        <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-success-500/10 to-accent-500/10 animate-pulse" />
-
-        <SparklesIcon />
-        <span className="relative font-bold text-success-400 text-sm">
+        <span className="font-bold text-success-400 text-sm">
           -{activeDiscount.discount_percent}%
         </span>
-
-        {/* Notification dot */}
-        <span className="absolute -top-1 -right-1 w-2 h-2 bg-success-400 rounded-full animate-pulse" />
       </button>
 
       {/* Dropdown - mobile: fixed centered, desktop: absolute right */}
