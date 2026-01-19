@@ -117,7 +117,9 @@ export default function Login() {
           await loginWithTelegram(tg.initData)
           navigate(getReturnUrl(), { replace: true })
         } catch (err) {
-          console.error('Telegram auth failed:', err)
+          // Log only status code to avoid leaking sensitive data
+          const status = (err as { response?: { status?: number } })?.response?.status
+          console.warn('Telegram auth failed with status:', status)
           setError(t('auth.telegramRequired'))
         } finally {
           setIsLoading(false)
@@ -137,8 +139,16 @@ export default function Login() {
       await loginWithEmail(email, password)
       navigate(getReturnUrl(), { replace: true })
     } catch (err: unknown) {
-      const error = err as { response?: { data?: { detail?: string } } }
-      setError(error.response?.data?.detail || t('common.error'))
+      const error = err as { response?: { status?: number; data?: { detail?: string } } }
+      // Show user-friendly error messages without exposing sensitive server details
+      const status = error.response?.status
+      if (status === 401 || status === 403) {
+        setError(t('auth.invalidCredentials', 'Неверный email или пароль'))
+      } else if (status === 429) {
+        setError(t('auth.tooManyAttempts', 'Слишком много попыток. Попробуйте позже'))
+      } else {
+        setError(t('common.error'))
+      }
     } finally {
       setIsLoading(false)
     }

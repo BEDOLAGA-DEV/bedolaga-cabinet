@@ -190,14 +190,14 @@ function RevenueChart({ data }: { data: { date: string; amount_rubles: number }[
 
   return (
     <div className="space-y-3">
-      {last7Days.map((item, index) => {
+      {last7Days.map((item) => {
         const percentage = (item.amount_rubles / maxValue) * 100
         const date = new Date(item.date)
         const dayName = date.toLocaleDateString('ru-RU', { weekday: 'short' })
         const dayNum = date.getDate()
 
         return (
-          <div key={index} className="group">
+          <div key={item.date} className="group">
             <div className="flex items-center justify-between mb-1">
               <span className="text-sm text-dark-300 font-medium capitalize">{dayName}, {dayNum}</span>
               <span className="text-sm font-semibold text-dark-100">{formatAmount(item.amount_rubles)} {currencySymbol}</span>

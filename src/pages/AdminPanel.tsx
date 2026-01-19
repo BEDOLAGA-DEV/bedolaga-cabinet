@@ -154,161 +154,202 @@ function DesktopAdminCard({ to, icon, title, description, bgColor, textColor }: 
   )
 }
 
+// Section group definition
+interface SectionGroup {
+  title: string
+  emoji: string
+  sections: AdminSection[]
+}
+
 export default function AdminPanel() {
   const { t } = useTranslation()
 
-  const adminSections: AdminSection[] = [
+  // Grouped admin sections
+  const sectionGroups: SectionGroup[] = [
     {
-      to: '/admin/dashboard',
-      icon: <ChartIcon />,
-      mobileIcon: <ChartIcon className="w-6 h-6" />,
-      title: t('admin.nav.dashboard'),
-      description: t('admin.panel.dashboardDesc'),
-      color: 'success',
-      bgColor: 'bg-emerald-500/20',
-      textColor: 'text-emerald-400'
+      title: 'Аналитика',
+      emoji: '📊',
+      sections: [
+        {
+          to: '/admin/dashboard',
+          icon: <ChartIcon />,
+          mobileIcon: <ChartIcon className="w-6 h-6" />,
+          title: t('admin.nav.dashboard'),
+          description: t('admin.panel.dashboardDesc'),
+          color: 'success',
+          bgColor: 'bg-emerald-500/20',
+          textColor: 'text-emerald-400'
+        },
+        {
+          to: '/admin/payments',
+          icon: <PaymentsIcon />,
+          mobileIcon: <PaymentsIcon className="w-6 h-6" />,
+          title: t('admin.nav.payments', 'Платежи'),
+          description: t('admin.panel.paymentsDesc', 'Проверка платежей'),
+          color: 'lime',
+          bgColor: 'bg-lime-500/20',
+          textColor: 'text-lime-400'
+        },
+      ]
     },
     {
-      to: '/admin/tickets',
-      icon: <TicketIcon />,
-      mobileIcon: <TicketIcon className="w-6 h-6" />,
-      title: t('admin.nav.tickets'),
-      description: t('admin.panel.ticketsDesc'),
-      color: 'warning',
-      bgColor: 'bg-amber-500/20',
-      textColor: 'text-amber-400'
+      title: 'Пользователи',
+      emoji: '👥',
+      sections: [
+        {
+          to: '/admin/users',
+          icon: <UsersIcon />,
+          mobileIcon: <UsersIcon className="w-6 h-6" />,
+          title: t('admin.nav.users', 'Пользователи'),
+          description: t('admin.panel.usersDesc', 'Управление пользователями'),
+          color: 'indigo',
+          bgColor: 'bg-indigo-500/20',
+          textColor: 'text-indigo-400'
+        },
+        {
+          to: '/admin/tickets',
+          icon: <TicketIcon />,
+          mobileIcon: <TicketIcon className="w-6 h-6" />,
+          title: t('admin.nav.tickets'),
+          description: t('admin.panel.ticketsDesc'),
+          color: 'warning',
+          bgColor: 'bg-amber-500/20',
+          textColor: 'text-amber-400'
+        },
+        {
+          to: '/admin/ban-system',
+          icon: <BanSystemIcon />,
+          mobileIcon: <BanSystemIcon className="w-6 h-6" />,
+          title: t('admin.nav.banSystem'),
+          description: t('admin.panel.banSystemDesc'),
+          color: 'error',
+          bgColor: 'bg-red-500/20',
+          textColor: 'text-red-400'
+        },
+      ]
     },
     {
-      to: '/admin/settings',
-      icon: <CogIcon />,
-      mobileIcon: <CogIcon className="w-6 h-6" />,
-      title: t('admin.nav.settings'),
-      description: t('admin.panel.settingsDesc'),
-      color: 'accent',
-      bgColor: 'bg-blue-500/20',
-      textColor: 'text-blue-400'
+      title: 'Тарифы и продажи',
+      emoji: '💰',
+      sections: [
+        {
+          to: '/admin/tariffs',
+          icon: <TariffIcon />,
+          mobileIcon: <TariffIcon className="w-6 h-6" />,
+          title: t('admin.nav.tariffs'),
+          description: t('admin.panel.tariffsDesc'),
+          color: 'info',
+          bgColor: 'bg-cyan-500/20',
+          textColor: 'text-cyan-400'
+        },
+        {
+          to: '/admin/promocodes',
+          icon: <PromocodeIcon />,
+          mobileIcon: <PromocodeIcon className="w-6 h-6" />,
+          title: t('admin.nav.promocodes', 'Промокоды'),
+          description: t('admin.panel.promocodesDesc', 'Управление промокодами'),
+          color: 'violet',
+          bgColor: 'bg-violet-500/20',
+          textColor: 'text-violet-400'
+        },
+        {
+          to: '/admin/promo-offers',
+          icon: <PromoOffersIcon />,
+          mobileIcon: <PromoOffersIcon className="w-6 h-6" />,
+          title: t('admin.nav.promoOffers', 'Промопредложения'),
+          description: t('admin.panel.promoOffersDesc', 'Персональные скидки и предложения'),
+          color: 'orange',
+          bgColor: 'bg-orange-500/20',
+          textColor: 'text-orange-400'
+        },
+      ]
     },
     {
-      to: '/admin/apps',
-      icon: <PhoneIcon />,
-      mobileIcon: <PhoneIcon className="w-6 h-6" />,
-      title: t('admin.nav.apps'),
-      description: t('admin.panel.appsDesc'),
-      color: 'success',
-      bgColor: 'bg-teal-500/20',
-      textColor: 'text-teal-400'
+      title: 'Маркетинг',
+      emoji: '📣',
+      sections: [
+        {
+          to: '/admin/campaigns',
+          icon: <CampaignIcon />,
+          mobileIcon: <CampaignIcon className="w-6 h-6" />,
+          title: t('admin.nav.campaigns', 'Кампании'),
+          description: t('admin.panel.campaignsDesc', 'Рекламные кампании'),
+          color: 'orange',
+          bgColor: 'bg-orange-500/20',
+          textColor: 'text-orange-400'
+        },
+        {
+          to: '/admin/broadcasts',
+          icon: <BroadcastIcon />,
+          mobileIcon: <BroadcastIcon className="w-6 h-6" />,
+          title: t('admin.nav.broadcasts'),
+          description: t('admin.panel.broadcastsDesc'),
+          color: 'orange',
+          bgColor: 'bg-orange-500/20',
+          textColor: 'text-orange-400'
+        },
+        {
+          to: '/admin/wheel',
+          icon: <WheelIcon />,
+          mobileIcon: <WheelIcon className="w-6 h-6" />,
+          title: t('admin.nav.wheel'),
+          description: t('admin.panel.wheelDesc'),
+          color: 'error',
+          bgColor: 'bg-rose-500/20',
+          textColor: 'text-rose-400'
+        },
+      ]
     },
     {
-      to: '/admin/wheel',
-      icon: <WheelIcon />,
-      mobileIcon: <WheelIcon className="w-6 h-6" />,
-      title: t('admin.nav.wheel'),
-      description: t('admin.panel.wheelDesc'),
-      color: 'error',
-      bgColor: 'bg-rose-500/20',
-      textColor: 'text-rose-400'
-    },
-    {
-      to: '/admin/tariffs',
-      icon: <TariffIcon />,
-      mobileIcon: <TariffIcon className="w-6 h-6" />,
-      title: t('admin.nav.tariffs'),
-      description: t('admin.panel.tariffsDesc'),
-      color: 'info',
-      bgColor: 'bg-cyan-500/20',
-      textColor: 'text-cyan-400'
-    },
-    {
-      to: '/admin/servers',
-      icon: <ServerIcon />,
-      mobileIcon: <ServerIcon className="w-6 h-6" />,
-      title: t('admin.nav.servers'),
-      description: t('admin.panel.serversDesc'),
-      color: 'purple',
-      bgColor: 'bg-purple-500/20',
-      textColor: 'text-purple-400'
-    },
-    {
-      to: '/admin/broadcasts',
-      icon: <BroadcastIcon />,
-      mobileIcon: <BroadcastIcon className="w-6 h-6" />,
-      title: t('admin.nav.broadcasts'),
-      description: t('admin.panel.broadcastsDesc'),
-      color: 'orange',
-      bgColor: 'bg-orange-500/20',
-      textColor: 'text-orange-400'
-    },
-    {
-      to: '/admin/promocodes',
-      icon: <PromocodeIcon />,
-      mobileIcon: <PromocodeIcon className="w-6 h-6" />,
-      title: t('admin.nav.promocodes', 'Промокоды'),
-      description: t('admin.panel.promocodesDesc', 'Управление промокодами'),
-      color: 'violet',
-      bgColor: 'bg-violet-500/20',
-      textColor: 'text-violet-400'
-    },
-    {
-      to: '/admin/promo-offers',
-      icon: <PromoOffersIcon />,
-      mobileIcon: <PromoOffersIcon className="w-6 h-6" />,
-      title: t('admin.nav.promoOffers', 'Промопредложения'),
-      description: t('admin.panel.promoOffersDesc', 'Персональные скидки и предложения'),
-      color: 'orange',
-      bgColor: 'bg-orange-500/20',
-      textColor: 'text-orange-400'
-    },
-    {
-      to: '/admin/campaigns',
-      icon: <CampaignIcon />,
-      mobileIcon: <CampaignIcon className="w-6 h-6" />,
-      title: t('admin.nav.campaigns', 'Кампании'),
-      description: t('admin.panel.campaignsDesc', 'Рекламные кампании'),
-      color: 'orange',
-      bgColor: 'bg-orange-500/20',
-      textColor: 'text-orange-400'
-    },
-    {
-      to: '/admin/users',
-      icon: <UsersIcon />,
-      mobileIcon: <UsersIcon className="w-6 h-6" />,
-      title: t('admin.nav.users', 'Пользователи'),
-      description: t('admin.panel.usersDesc', 'Управление пользователями'),
-      color: 'indigo',
-      bgColor: 'bg-indigo-500/20',
-      textColor: 'text-indigo-400'
-    },
-    {
-      to: '/admin/ban-system',
-      icon: <BanSystemIcon />,
-      mobileIcon: <BanSystemIcon className="w-6 h-6" />,
-      title: t('admin.nav.banSystem'),
-      description: t('admin.panel.banSystemDesc'),
-      color: 'error',
-      bgColor: 'bg-red-500/20',
-      textColor: 'text-red-400'
-    },
-    {
-      to: '/admin/payments',
-      icon: <PaymentsIcon />,
-      mobileIcon: <PaymentsIcon className="w-6 h-6" />,
-      title: t('admin.nav.payments', 'Платежи'),
-      description: t('admin.panel.paymentsDesc', 'Проверка платежей'),
-      color: 'lime',
-      bgColor: 'bg-lime-500/20',
-      textColor: 'text-lime-400'
-    },
-    {
-      to: '/admin/remnawave',
-      icon: <RemnawaveIcon />,
-      mobileIcon: <RemnawaveIcon className="w-6 h-6" />,
-      title: t('admin.nav.remnawave', 'RemnaWave'),
-      description: t('admin.panel.remnawaveDesc', 'Управление панелью и статистика'),
-      color: 'purple',
-      bgColor: 'bg-purple-500/20',
-      textColor: 'text-purple-400'
+      title: 'Система',
+      emoji: '⚙️',
+      sections: [
+        {
+          to: '/admin/settings',
+          icon: <CogIcon />,
+          mobileIcon: <CogIcon className="w-6 h-6" />,
+          title: t('admin.nav.settings'),
+          description: t('admin.panel.settingsDesc'),
+          color: 'accent',
+          bgColor: 'bg-blue-500/20',
+          textColor: 'text-blue-400'
+        },
+        {
+          to: '/admin/apps',
+          icon: <PhoneIcon />,
+          mobileIcon: <PhoneIcon className="w-6 h-6" />,
+          title: t('admin.nav.apps'),
+          description: t('admin.panel.appsDesc'),
+          color: 'success',
+          bgColor: 'bg-teal-500/20',
+          textColor: 'text-teal-400'
+        },
+        {
+          to: '/admin/servers',
+          icon: <ServerIcon />,
+          mobileIcon: <ServerIcon className="w-6 h-6" />,
+          title: t('admin.nav.servers'),
+          description: t('admin.panel.serversDesc'),
+          color: 'purple',
+          bgColor: 'bg-purple-500/20',
+          textColor: 'text-purple-400'
+        },
+        {
+          to: '/admin/remnawave',
+          icon: <RemnawaveIcon />,
+          mobileIcon: <RemnawaveIcon className="w-6 h-6" />,
+          title: t('admin.nav.remnawave', 'RemnaWave'),
+          description: t('admin.panel.remnawaveDesc', 'Управление панелью и статистика'),
+          color: 'purple',
+          bgColor: 'bg-purple-500/20',
+          textColor: 'text-purple-400'
+        },
+      ]
     },
   ]
+
+  // Flatten all sections for mobile view
+  const allSections = sectionGroups.flatMap(group => group.sections)
 
   return (
     <div className="animate-fade-in">
@@ -323,17 +364,30 @@ export default function AdminPanel() {
         </div>
       </div>
 
-      {/* Mobile: Compact 2-column grid */}
+      {/* Mobile: Compact grid (all sections) */}
       <div className="grid grid-cols-3 gap-3 sm:hidden">
-        {adminSections.map((section) => (
+        {allSections.map((section) => (
           <MobileAdminCard key={section.to} {...section} />
         ))}
       </div>
 
-      {/* Tablet/Desktop: List style */}
-      <div className="hidden sm:grid sm:grid-cols-1 lg:grid-cols-2 gap-3">
-        {adminSections.map((section) => (
-          <DesktopAdminCard key={section.to} {...section} />
+      {/* Tablet/Desktop: Grouped sections */}
+      <div className="hidden sm:block space-y-6">
+        {sectionGroups.map((group) => (
+          <div key={group.title}>
+            {/* Group header */}
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-xl">{group.emoji}</span>
+              <h2 className="text-sm font-semibold text-dark-400 uppercase tracking-wider">{group.title}</h2>
+            </div>
+
+            {/* Group cards */}
+            <div className="grid sm:grid-cols-1 lg:grid-cols-2 gap-3">
+              {group.sections.map((section) => (
+                <DesktopAdminCard key={section.to} {...section} />
+              ))}
+            </div>
+          </div>
         ))}
       </div>
     </div>

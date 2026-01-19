@@ -453,6 +453,7 @@ export interface LocalizedText {
 }
 
 export interface AppButton {
+  id?: string  // Unique identifier for React key (client-side only)
   buttonLink: string
   buttonText: LocalizedText
 }

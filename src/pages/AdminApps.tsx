@@ -189,7 +189,13 @@ function AppEditorModal({ app, platform, isNew, onSave, onClose }: AppEditorModa
   const addButton = (stepKey: 'installationStep' | 'additionalBeforeAddSubscriptionStep' | 'additionalAfterAddSubscriptionStep') => {
     const step = editedApp[stepKey] || emptyAppStep()
     const buttons = step.buttons || []
-    updateButtons(stepKey, [...buttons, { buttonLink: '', buttonText: emptyLocalizedText() }])
+    // Generate unique id for React key
+    const newButton: AppButton = {
+      id: `btn-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+      buttonLink: '',
+      buttonText: emptyLocalizedText()
+    }
+    updateButtons(stepKey, [...buttons, newButton])
   }
 
   const removeButton = (stepKey: 'installationStep' | 'additionalBeforeAddSubscriptionStep' | 'additionalAfterAddSubscriptionStep', index: number) => {
@@ -253,7 +259,7 @@ function AppEditorModal({ app, platform, isNew, onSave, onClose }: AppEditorModa
           </button>
         </div>
         {buttons.map((button, index) => (
-          <div key={index} className="p-3 bg-dark-800/50 rounded-lg space-y-2">
+          <div key={button.id || `fallback-${index}`} className="p-3 bg-dark-800/50 rounded-lg space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-xs text-dark-400">{t('admin.apps.button')} #{index + 1}</span>
               <button

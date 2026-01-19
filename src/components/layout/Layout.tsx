@@ -337,6 +337,7 @@ export default function Layout({ children }: LayoutProps) {
                              dark:text-dark-400 dark:hover:text-dark-100 dark:hover:bg-dark-800
                              text-champagne-500 hover:text-champagne-800 hover:bg-champagne-200/50"
                   title={isDark ? t('theme.light') || 'Light mode' : t('theme.dark') || 'Dark mode'}
+                  aria-label={isDark ? t('theme.light') || 'Switch to light mode' : t('theme.dark') || 'Switch to dark mode'}
                 >
                   <div className="relative w-5 h-5">
                     <div className={`absolute inset-0 transition-all duration-300 ${isDark ? 'opacity-100 rotate-0' : 'opacity-0 rotate-90'}`}>
@@ -373,6 +374,7 @@ export default function Layout({ children }: LayoutProps) {
                   onClick={logout}
                   className="btn-icon"
                   title={t('nav.logout')}
+                  aria-label={t('nav.logout') || 'Logout'}
                 >
                   <LogoutIcon />
                 </button>
@@ -382,6 +384,8 @@ export default function Layout({ children }: LayoutProps) {
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 className="lg:hidden btn-icon"
+                aria-label={mobileMenuOpen ? t('common.close') || 'Close menu' : t('nav.menu') || 'Open menu'}
+                aria-expanded={mobileMenuOpen}
               >
                 {mobileMenuOpen ? <CloseIcon /> : <MenuIcon />}
               </button>
@@ -500,14 +504,6 @@ export default function Layout({ children }: LayoutProps) {
           {children}
         </div>
 
-        {/* Version footer for admin pages */}
-        {isAdminActive() && (
-          <div className="mt-8 pt-4 border-t border-dark-800/50 text-center">
-            <span className="text-xs text-dark-500">
-              Cabinet {__APP_VERSION__}
-            </span>
-          </div>
-        )}
       </main>
 
       {/* Mobile Bottom Navigation - only core items */}

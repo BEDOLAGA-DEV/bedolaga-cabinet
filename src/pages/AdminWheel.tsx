@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
-import { adminWheelApi, type WheelPrizeAdmin } from '../api/wheel'
+import { adminWheelApi, type WheelPrizeAdmin, type CreateWheelPrizeData } from '../api/wheel'
 
 // Icons
 const BackIcon = () => (
@@ -468,7 +468,7 @@ export default function AdminWheel() {
             if (editingPrize) {
               updatePrizeMutation.mutate({ id: editingPrize.id, data })
             } else {
-              createPrizeMutation.mutate(data as any)
+              createPrizeMutation.mutate(data as CreateWheelPrizeData)
             }
           }}
         />
