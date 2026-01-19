@@ -61,12 +61,8 @@ const platformIconComponents: Record<string, React.FC> = {
 // Platform order for display
 const platformOrder = ['ios', 'android', 'windows', 'macos', 'linux', 'androidTV', 'appleTV']
 
-// Allowed app schemes for deep links
-const allowedAppSchemes = [
-  'happ://', 'flclash://', 'clash://', 'sing-box://', 'v2rayng://',
-  'sub://', 'shadowrocket://', 'hiddify://', 'streisand://',
-  'quantumult://', 'surge://', 'loon://', 'nekobox://', 'v2box://'
-]
+// Dangerous schemes that should never be allowed
+const dangerousSchemes = ['javascript:', 'data:', 'vbscript:', 'file:']
 
 /**
  * Validate URL to prevent XSS via javascript: and other dangerous schemes
@@ -87,20 +83,20 @@ function isValidExternalUrl(url: string | undefined): boolean {
 }
 
 /**
- * Validate deep link URL - only allows known VPN app schemes
+ * Validate deep link URL - blocks dangerous schemes only
+ * Allows any custom app scheme (clash://, hiddify://, etc.)
  */
 function isValidDeepLink(url: string | undefined): boolean {
   if (!url) return false
   const lowerUrl = url.toLowerCase().trim()
 
   // Block dangerous schemes
-  const dangerousSchemes = ['javascript:', 'data:', 'vbscript:', 'file:']
   if (dangerousSchemes.some(scheme => lowerUrl.startsWith(scheme))) {
     return false
   }
 
-  // Allow known app schemes
-  return allowedAppSchemes.some(scheme => lowerUrl.startsWith(scheme))
+  // Allow any URL that has a scheme (contains ://)
+  return lowerUrl.includes('://')
 }
 
 // Detect user's platform from user agent
