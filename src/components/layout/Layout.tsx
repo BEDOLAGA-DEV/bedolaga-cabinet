@@ -303,17 +303,11 @@ export default function Layout({ children }: LayoutProps) {
       <header
         className="sticky top-0 z-50 glass border-b border-dark-800/50"
         style={{
-          // In fullscreen mode, add padding for safe area (notch/camera)
-          paddingTop: isFullscreen ? `${Math.max(safeAreaInset.top, contentSafeAreaInset.top)}px` : undefined,
+          // In fullscreen mode, add padding for safe area + Telegram native controls (close/menu buttons in corners)
+          paddingTop: isFullscreen ? `${Math.max(safeAreaInset.top, contentSafeAreaInset.top) + 45}px` : undefined,
         }}
       >
-        <div
-          className="w-full mx-auto px-4 sm:px-6"
-          style={{
-            // In fullscreen mode, add left padding for Telegram native controls (close/menu buttons)
-            paddingLeft: isFullscreen ? '100px' : undefined,
-          }}
-        >
+        <div className="w-full mx-auto px-4 sm:px-6">
           <div className="flex justify-between items-center h-16 lg:h-20">
             {/* Logo */}
             <Link to="/" className={`flex items-center gap-2.5 flex-shrink-0 ${!appName ? 'lg:mr-4' : ''}`}>
