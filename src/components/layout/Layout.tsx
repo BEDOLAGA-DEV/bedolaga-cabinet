@@ -6,6 +6,7 @@ import { useAuthStore } from '../../store/auth'
 import LanguageSwitcher from '../LanguageSwitcher'
 import PromoDiscountBadge from '../PromoDiscountBadge'
 import TicketNotificationBell from '../TicketNotificationBell'
+import AnimatedBackground from '../AnimatedBackground'
 import { contestsApi } from '../../api/contests'
 import { pollsApi } from '../../api/polls'
 import { brandingApi } from '../../api/branding'
@@ -270,6 +271,9 @@ export default function Layout({ children }: LayoutProps) {
 
   return (
     <div className="min-h-screen flex flex-col">
+      {/* Animated Background */}
+      <AnimatedBackground />
+
       {/* Header */}
       <header className="sticky top-0 z-50 glass border-b border-dark-800/50">
         <div className="w-full mx-auto px-4 sm:px-6">
