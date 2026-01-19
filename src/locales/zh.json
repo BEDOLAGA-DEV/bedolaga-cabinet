@@ -33,6 +33,24 @@
     "info": "信息",
     "wheel": "幸运转盘"
   },
+  "notifications": {
+    "ticketNotifications": "工单通知",
+    "markAllRead": "全部标记已读",
+    "noNotifications": "暂无通知",
+    "justNow": "刚刚",
+    "minutesAgo": "{{count}}分钟前",
+    "hoursAgo": "{{count}}小时前",
+    "daysAgo": "{{count}}天前",
+    "viewAll": "查看所有工单",
+    "newNotification": "新通知",
+    "clickToView": "点击查看",
+    "newTicket": "新工单：{{title}}",
+    "newReply": "工单新回复：{{title}}",
+    "newTicketTitle": "新工单",
+    "newReplyTitle": "新回复",
+    "newUserReply": "用户回复了工单：{{title}}",
+    "newUserReplyTitle": "用户回复"
+  },
   "auth": {
     "login": "登录",
     "register": "注册",

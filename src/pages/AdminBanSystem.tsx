@@ -384,9 +384,75 @@ export default function AdminBanSystem() {
 
   if (error && !status?.enabled) {
     return (
-      <div className="flex flex-col items-center justify-center h-64 gap-4">
-        <div className="text-error-400">{error}</div>
-        <p className="text-dark-400 text-sm">{t('banSystem.configureHint')}</p>
+      <div className="min-h-[60vh] flex items-center justify-center animate-fade-in">
+        <div className="max-w-md w-full mx-4">
+          {/* Card */}
+          <div className="bg-dark-800/50 backdrop-blur-xl rounded-2xl border border-dark-700 p-8 text-center shadow-2xl">
+            {/* Icon */}
+            <div className="mb-6 flex justify-center">
+              <div className="relative">
+                <div className="w-20 h-20 bg-gradient-to-br from-error-500/20 to-warning-500/20 rounded-2xl flex items-center justify-center">
+                  <svg className="w-10 h-10 text-error-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                  </svg>
+                </div>
+                <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-dark-800 rounded-full flex items-center justify-center border border-dark-600">
+                  <svg className="w-3.5 h-3.5 text-dark-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            {/* Title */}
+            <h2 className="text-xl font-bold text-dark-100 mb-2">
+              {t('banSystem.title')}
+            </h2>
+
+            {/* Error message */}
+            <p className="text-error-400 font-medium mb-2">
+              {error}
+            </p>
+
+            {/* Hint */}
+            <p className="text-dark-400 text-sm mb-8">
+              {t('banSystem.configureHint')}
+            </p>
+
+            {/* Buttons */}
+            <div className="flex flex-col gap-3">
+              {/* Telegram Button */}
+              <a
+                href="https://t.me/fringg"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-3 w-full py-3 px-4 bg-gradient-to-r from-[#0088cc] to-[#0099dd] hover:from-[#0077bb] hover:to-[#0088cc] text-white font-medium rounded-xl transition-all duration-200 hover:scale-[1.02] hover:shadow-lg hover:shadow-[#0088cc]/20"
+              >
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+                </svg>
+                {t('banSystem.contactTelegram', { defaultValue: 'Написать в Telegram' })}
+              </a>
+
+              {/* Back Button */}
+              <button
+                onClick={() => window.history.back()}
+                className="flex items-center justify-center gap-2 w-full py-3 px-4 bg-dark-700 hover:bg-dark-600 text-dark-200 hover:text-dark-100 font-medium rounded-xl transition-all duration-200 border border-dark-600 hover:border-dark-500"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+                </svg>
+                {t('common.back', { defaultValue: 'Назад' })}
+              </button>
+            </div>
+          </div>
+
+          {/* Decorative elements */}
+          <div className="absolute inset-0 pointer-events-none overflow-hidden -z-10">
+            <div className="absolute top-1/4 -left-20 w-40 h-40 bg-accent-500/5 rounded-full blur-3xl" />
+            <div className="absolute bottom-1/4 -right-20 w-40 h-40 bg-error-500/5 rounded-full blur-3xl" />
+          </div>
+        </div>
       </div>
     )
   }

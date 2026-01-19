@@ -81,14 +81,15 @@ export function ColorPicker({ value, onChange, label, description, disabled }: C
       {description && <p className="text-xs text-dark-500 mb-2">{description}</p>}
 
       <div className="flex items-center gap-3">
-        {/* Color preview button */}
+        {/* Color preview button - min 44px for touch accessibility */}
         <button
           type="button"
           onClick={() => !disabled && setIsOpen(!isOpen)}
           disabled={disabled}
-          className="w-10 h-10 rounded-lg border-2 border-dark-700 shadow-inner transition-all hover:scale-105 hover:border-dark-600 disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
+          className="w-11 h-11 rounded-lg border-2 border-dark-700 shadow-inner transition-all hover:scale-105 hover:border-dark-600 disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
           style={{ backgroundColor: localValue || '#000000' }}
           title={localValue}
+          aria-label={`Select color: ${localValue}`}
         />
 
         {/* Hex input */}
@@ -112,13 +113,14 @@ export function ColorPicker({ value, onChange, label, description, disabled }: C
           className="sr-only"
         />
 
-        {/* Native picker button */}
+        {/* Native picker button - min 44px for touch accessibility */}
         <button
           type="button"
           onClick={() => colorInputRef.current?.click()}
           disabled={disabled}
-          className="btn-secondary p-2 disabled:opacity-50"
+          className="btn-secondary min-w-[44px] min-h-[44px] p-2.5 disabled:opacity-50"
           title="Open color picker"
+          aria-label="Open color picker"
         >
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             <path
@@ -134,16 +136,17 @@ export function ColorPicker({ value, onChange, label, description, disabled }: C
       {isOpen && (
         <div className="absolute z-50 mt-2 p-3 bg-dark-800 rounded-xl border border-dark-700 shadow-xl animate-fade-in">
           <div className="text-xs text-dark-400 mb-2">Preset colors</div>
-          <div className="grid grid-cols-6 gap-2">
+          <div className="grid grid-cols-4 sm:grid-cols-6 gap-1">
             {PRESET_COLORS.map((preset) => (
               <button
                 key={preset}
                 onClick={() => handlePresetClick(preset)}
-                className={`w-7 h-7 rounded-lg border-2 transition-all hover:scale-110 ${
-                  localValue === preset ? 'border-white' : 'border-dark-600 hover:border-dark-500'
+                className={`min-w-[44px] min-h-[44px] w-11 h-11 rounded-lg border-2 transition-all hover:scale-105 ${
+                  localValue === preset ? 'border-white ring-2 ring-white/30' : 'border-dark-600 hover:border-dark-500'
                 }`}
                 style={{ backgroundColor: preset }}
                 title={preset}
+                aria-label={`Select color ${preset}`}
               />
             ))}
           </div>

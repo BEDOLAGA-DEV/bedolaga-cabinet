@@ -1,39 +1,46 @@
+import { lazy, Suspense } from 'react'
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { useAuthStore } from './store/auth'
 import Layout from './components/layout/Layout'
 import PageLoader from './components/common/PageLoader'
 import { saveReturnUrl } from './utils/token'
+
+// Auth pages - load immediately (small)
 import Login from './pages/Login'
 import TelegramCallback from './pages/TelegramCallback'
 import TelegramRedirect from './pages/TelegramRedirect'
 import DeepLinkRedirect from './pages/DeepLinkRedirect'
-import Dashboard from './pages/Dashboard'
-import Subscription from './pages/Subscription'
-import Balance from './pages/Balance'
-import Referral from './pages/Referral'
-import Support from './pages/Support'
-import Profile from './pages/Profile'
-import AdminTickets from './pages/AdminTickets'
-import AdminSettings from './pages/AdminSettings'
-import AdminApps from './pages/AdminApps'
 import VerifyEmail from './pages/VerifyEmail'
-import Contests from './pages/Contests'
-import Polls from './pages/Polls'
-import Info from './pages/Info'
-import Wheel from './pages/Wheel'
-import AdminWheel from './pages/AdminWheel'
-import AdminTariffs from './pages/AdminTariffs'
-import AdminServers from './pages/AdminServers'
-import AdminPanel from './pages/AdminPanel'
-import AdminDashboard from './pages/AdminDashboard'
-import AdminBanSystem from './pages/AdminBanSystem'
-import AdminBroadcasts from './pages/AdminBroadcasts'
-import AdminPromocodes from './pages/AdminPromocodes'
-import AdminCampaigns from './pages/AdminCampaigns'
-import AdminUsers from './pages/AdminUsers'
-import AdminPayments from './pages/AdminPayments'
-import AdminPromoOffers from './pages/AdminPromoOffers'
-import AdminRemnawave from './pages/AdminRemnawave'
+
+// User pages - lazy load
+const Dashboard = lazy(() => import('./pages/Dashboard'))
+const Subscription = lazy(() => import('./pages/Subscription'))
+const Balance = lazy(() => import('./pages/Balance'))
+const Referral = lazy(() => import('./pages/Referral'))
+const Support = lazy(() => import('./pages/Support'))
+const Profile = lazy(() => import('./pages/Profile'))
+const Contests = lazy(() => import('./pages/Contests'))
+const Polls = lazy(() => import('./pages/Polls'))
+const Info = lazy(() => import('./pages/Info'))
+const Wheel = lazy(() => import('./pages/Wheel'))
+
+// Admin pages - lazy load (only for admins)
+const AdminPanel = lazy(() => import('./pages/AdminPanel'))
+const AdminTickets = lazy(() => import('./pages/AdminTickets'))
+const AdminSettings = lazy(() => import('./pages/AdminSettings'))
+const AdminApps = lazy(() => import('./pages/AdminApps'))
+const AdminWheel = lazy(() => import('./pages/AdminWheel'))
+const AdminTariffs = lazy(() => import('./pages/AdminTariffs'))
+const AdminServers = lazy(() => import('./pages/AdminServers'))
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'))
+const AdminBanSystem = lazy(() => import('./pages/AdminBanSystem'))
+const AdminBroadcasts = lazy(() => import('./pages/AdminBroadcasts'))
+const AdminPromocodes = lazy(() => import('./pages/AdminPromocodes'))
+const AdminCampaigns = lazy(() => import('./pages/AdminCampaigns'))
+const AdminUsers = lazy(() => import('./pages/AdminUsers'))
+const AdminPayments = lazy(() => import('./pages/AdminPayments'))
+const AdminPromoOffers = lazy(() => import('./pages/AdminPromoOffers'))
+const AdminRemnawave = lazy(() => import('./pages/AdminRemnawave'))
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuthStore()
@@ -73,6 +80,15 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
   return <Layout>{children}</Layout>
 }
 
+// Suspense wrapper for lazy components
+function LazyPage({ children }: { children: React.ReactNode }) {
+  return (
+    <Suspense fallback={<PageLoader variant="dark" />}>
+      {children}
+    </Suspense>
+  )
+}
+
 function App() {
   return (
     <Routes>
@@ -90,7 +106,7 @@ function App() {
         path="/"
         element={
           <ProtectedRoute>
-            <Dashboard />
+            <LazyPage><Dashboard /></LazyPage>
           </ProtectedRoute>
         }
       />
@@ -98,7 +114,7 @@ function App() {
         path="/subscription"
         element={
           <ProtectedRoute>
-            <Subscription />
+            <LazyPage><Subscription /></LazyPage>
           </ProtectedRoute>
         }
       />
@@ -106,7 +122,7 @@ function App() {
         path="/balance"
         element={
           <ProtectedRoute>
-            <Balance />
+            <LazyPage><Balance /></LazyPage>
           </ProtectedRoute>
         }
       />
@@ -114,7 +130,7 @@ function App() {
         path="/referral"
         element={
           <ProtectedRoute>
-            <Referral />
+            <LazyPage><Referral /></LazyPage>
           </ProtectedRoute>
         }
       />
@@ -122,7 +138,7 @@ function App() {
         path="/support"
         element={
           <ProtectedRoute>
-            <Support />
+            <LazyPage><Support /></LazyPage>
           </ProtectedRoute>
         }
       />
@@ -130,7 +146,7 @@ function App() {
         path="/profile"
         element={
           <ProtectedRoute>
-            <Profile />
+            <LazyPage><Profile /></LazyPage>
           </ProtectedRoute>
         }
       />
@@ -138,7 +154,7 @@ function App() {
         path="/contests"
         element={
           <ProtectedRoute>
-            <Contests />
+            <LazyPage><Contests /></LazyPage>
           </ProtectedRoute>
         }
       />
@@ -146,7 +162,7 @@ function App() {
         path="/polls"
         element={
           <ProtectedRoute>
-            <Polls />
+            <LazyPage><Polls /></LazyPage>
           </ProtectedRoute>
         }
       />
@@ -154,7 +170,7 @@ function App() {
         path="/info"
         element={
           <ProtectedRoute>
-            <Info />
+            <LazyPage><Info /></LazyPage>
           </ProtectedRoute>
         }
       />
@@ -162,7 +178,7 @@ function App() {
         path="/wheel"
         element={
           <ProtectedRoute>
-            <Wheel />
+            <LazyPage><Wheel /></LazyPage>
           </ProtectedRoute>
         }
       />
@@ -172,7 +188,7 @@ function App() {
         path="/admin"
         element={
           <AdminRoute>
-            <AdminPanel />
+            <LazyPage><AdminPanel /></LazyPage>
           </AdminRoute>
         }
       />
@@ -180,7 +196,7 @@ function App() {
         path="/admin/tickets"
         element={
           <AdminRoute>
-            <AdminTickets />
+            <LazyPage><AdminTickets /></LazyPage>
           </AdminRoute>
         }
       />
@@ -188,7 +204,7 @@ function App() {
         path="/admin/settings"
         element={
           <AdminRoute>
-            <AdminSettings />
+            <LazyPage><AdminSettings /></LazyPage>
           </AdminRoute>
         }
       />
@@ -196,7 +212,7 @@ function App() {
         path="/admin/apps"
         element={
           <AdminRoute>
-            <AdminApps />
+            <LazyPage><AdminApps /></LazyPage>
           </AdminRoute>
         }
       />
@@ -204,7 +220,7 @@ function App() {
         path="/admin/wheel"
         element={
           <AdminRoute>
-            <AdminWheel />
+            <LazyPage><AdminWheel /></LazyPage>
           </AdminRoute>
         }
       />
@@ -212,7 +228,7 @@ function App() {
         path="/admin/tariffs"
         element={
           <AdminRoute>
-            <AdminTariffs />
+            <LazyPage><AdminTariffs /></LazyPage>
           </AdminRoute>
         }
       />
@@ -220,7 +236,7 @@ function App() {
         path="/admin/servers"
         element={
           <AdminRoute>
-            <AdminServers />
+            <LazyPage><AdminServers /></LazyPage>
           </AdminRoute>
         }
       />
@@ -228,7 +244,7 @@ function App() {
         path="/admin/dashboard"
         element={
           <AdminRoute>
-            <AdminDashboard />
+            <LazyPage><AdminDashboard /></LazyPage>
           </AdminRoute>
         }
       />
@@ -236,7 +252,7 @@ function App() {
         path="/admin/ban-system"
         element={
           <AdminRoute>
-            <AdminBanSystem />
+            <LazyPage><AdminBanSystem /></LazyPage>
           </AdminRoute>
         }
       />
@@ -244,7 +260,7 @@ function App() {
         path="/admin/broadcasts"
         element={
           <AdminRoute>
-            <AdminBroadcasts />
+            <LazyPage><AdminBroadcasts /></LazyPage>
           </AdminRoute>
         }
       />
@@ -252,7 +268,7 @@ function App() {
         path="/admin/promocodes"
         element={
           <AdminRoute>
-            <AdminPromocodes />
+            <LazyPage><AdminPromocodes /></LazyPage>
           </AdminRoute>
         }
       />
@@ -260,7 +276,7 @@ function App() {
         path="/admin/campaigns"
         element={
           <AdminRoute>
-            <AdminCampaigns />
+            <LazyPage><AdminCampaigns /></LazyPage>
           </AdminRoute>
         }
       />
@@ -268,7 +284,7 @@ function App() {
         path="/admin/users"
         element={
           <AdminRoute>
-            <AdminUsers />
+            <LazyPage><AdminUsers /></LazyPage>
           </AdminRoute>
         }
       />
@@ -276,7 +292,7 @@ function App() {
         path="/admin/payments"
         element={
           <AdminRoute>
-            <AdminPayments />
+            <LazyPage><AdminPayments /></LazyPage>
           </AdminRoute>
         }
       />
@@ -284,7 +300,7 @@ function App() {
         path="/admin/promo-offers"
         element={
           <AdminRoute>
-            <AdminPromoOffers />
+            <LazyPage><AdminPromoOffers /></LazyPage>
           </AdminRoute>
         }
       />
@@ -292,7 +308,7 @@ function App() {
         path="/admin/remnawave"
         element={
           <AdminRoute>
-            <AdminRemnawave />
+            <LazyPage><AdminRemnawave /></LazyPage>
           </AdminRoute>
         }
       />

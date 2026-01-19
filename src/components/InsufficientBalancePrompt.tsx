@@ -145,14 +145,14 @@ function PaymentMethodModal({ paymentMethods, onSelect, onClose }: PaymentMethod
   const { formatAmount, currencySymbol } = useCurrency()
 
   return (
-    <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center px-4">
+    <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center px-4 pt-14 pb-28 sm:pt-0 sm:pb-0">
       <div className="absolute inset-0" onClick={onClose} />
 
-      <div className="relative w-full max-w-sm bg-dark-900 rounded-2xl border border-dark-700/50 shadow-2xl overflow-hidden max-h-[80vh] flex flex-col">
+      <div className="relative w-full max-w-sm bg-dark-900 rounded-2xl border border-dark-700/50 shadow-2xl overflow-hidden max-h-full flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 bg-dark-800/50">
           <span className="font-semibold text-dark-100">{t('balance.selectPaymentMethod')}</span>
-          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-dark-700 text-dark-400">
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-dark-700 text-dark-400" aria-label="Close">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>

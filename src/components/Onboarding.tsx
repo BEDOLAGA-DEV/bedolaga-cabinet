@@ -179,9 +179,9 @@ export default function Onboarding({ steps, onComplete, onSkip }: OnboardingProp
       >
         {/* Progress indicator */}
         <div className="flex items-center gap-1.5 mb-4">
-          {steps.map((_, index) => (
+          {steps.map((s, index) => (
             <div
-              key={index}
+              key={s.target}
               className={`h-1 rounded-full transition-all duration-300 ${
                 index === currentStep
                   ? 'w-6 bg-accent-500'

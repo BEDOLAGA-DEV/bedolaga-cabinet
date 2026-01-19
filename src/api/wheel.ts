@@ -98,6 +98,22 @@ export interface WheelPrizeAdmin {
   updated_at: string | null
 }
 
+// Type for creating a new prize (excludes id, config_id which are auto-generated)
+export interface CreateWheelPrizeData {
+  prize_type: string
+  prize_value: number
+  display_name: string
+  emoji?: string
+  color?: string
+  prize_value_kopeks: number
+  sort_order?: number
+  manual_probability?: number | null
+  is_active?: boolean
+  promo_balance_bonus_kopeks?: number
+  promo_subscription_days?: number
+  promo_traffic_gb?: number
+}
+
 export interface AdminWheelConfig {
   id: number
   is_enabled: boolean
@@ -223,20 +239,7 @@ export const adminWheelApi = {
   },
 
   // Create prize
-  createPrize: async (data: {
-    prize_type: string
-    prize_value: number
-    display_name: string
-    emoji?: string
-    color?: string
-    prize_value_kopeks: number
-    sort_order?: number
-    manual_probability?: number | null
-    is_active?: boolean
-    promo_balance_bonus_kopeks?: number
-    promo_subscription_days?: number
-    promo_traffic_gb?: number
-  }): Promise<WheelPrizeAdmin> => {
+  createPrize: async (data: CreateWheelPrizeData): Promise<WheelPrizeAdmin> => {
     const response = await apiClient.post<WheelPrizeAdmin>('/cabinet/admin/wheel/prizes', data)
     return response.data
   },

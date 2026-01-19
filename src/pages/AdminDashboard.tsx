@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom'
 import { statsApi, type DashboardStats, type NodeStatus } from '../api/admin'
 import { useCurrency } from '../hooks/useCurrency'
 
-// Icons
+// Icons - styled like main navigation
 const BackIcon = () => (
   <svg className="w-5 h-5 text-dark-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
@@ -12,26 +12,45 @@ const BackIcon = () => (
 )
 
 const ServerIcon = () => (
-  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 14.25h13.5m-13.5 0a3 3 0 01-3-3m3 3a3 3 0 100 6h13.5a3 3 0 100-6m-16.5-3a3 3 0 013-3h13.5a3 3 0 013 3m-19.5 0a4.5 4.5 0 01.9-2.7L5.737 5.1a3.375 3.375 0 012.7-1.35h7.126c1.062 0 2.062.5 2.7 1.35l2.587 3.45a4.5 4.5 0 01.9 2.7m0 0a3 3 0 01-3 3m0 3h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008zm-3 6h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008z" />
+  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 17.25v-.228a4.5 4.5 0 00-.12-1.03l-2.268-9.64a3.375 3.375 0 00-3.285-2.602H7.923a3.375 3.375 0 00-3.285 2.602l-2.268 9.64a4.5 4.5 0 00-.12 1.03v.228m19.5 0a3 3 0 01-3 3H5.25a3 3 0 01-3-3m19.5 0a3 3 0 00-3-3H5.25a3 3 0 00-3 3m16.5 0h.008v.008h-.008v-.008zm-3 0h.008v.008h-.008v-.008z" />
   </svg>
 )
 
-const UsersIcon = () => (
-  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+const UsersOnlineIcon = () => (
+  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
   </svg>
 )
 
-const CurrencyIcon = () => (
-  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
+const WalletIcon = () => (
+  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a2.25 2.25 0 00-2.25-2.25H15a3 3 0 11-6 0H5.25A2.25 2.25 0 003 12m18 0v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6m18 0V9M3 12V9m18 0a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 9m18 0V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v3" />
   </svg>
 )
 
-const SubscriptionIcon = () => (
-  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
+const ChartBarIcon = () => (
+  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+  </svg>
+)
+
+const SparklesIcon = () => (
+  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
+  </svg>
+)
+
+const CubeIcon = () => (
+  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" />
+  </svg>
+)
+
+const TagIcon = () => (
+  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M6 6h.008v.008H6V6z" />
   </svg>
 )
 
@@ -190,14 +209,14 @@ function RevenueChart({ data }: { data: { date: string; amount_rubles: number }[
 
   return (
     <div className="space-y-3">
-      {last7Days.map((item, index) => {
+      {last7Days.map((item) => {
         const percentage = (item.amount_rubles / maxValue) * 100
         const date = new Date(item.date)
         const dayName = date.toLocaleDateString('ru-RU', { weekday: 'short' })
         const dayNum = date.getDate()
 
         return (
-          <div key={index} className="group">
+          <div key={item.date} className="group">
             <div className="flex items-center justify-between mb-1">
               <span className="text-sm text-dark-300 font-medium capitalize">{dayName}, {dayNum}</span>
               <span className="text-sm font-semibold text-dark-100">{formatAmount(item.amount_rubles)} {currencySymbol}</span>
@@ -319,26 +338,26 @@ export default function AdminDashboard() {
         <StatCard
           title={t('adminDashboard.stats.usersOnline')}
           value={stats?.nodes.total_users_online || 0}
-          icon={<UsersIcon />}
+          icon={<UsersOnlineIcon />}
           color="success"
         />
         <StatCard
           title={t('adminDashboard.stats.activeSubscriptions')}
           value={stats?.subscriptions.active || 0}
           subtitle={`${t('adminDashboard.stats.total')}: ${stats?.subscriptions.total || 0}`}
-          icon={<SubscriptionIcon />}
+          icon={<SparklesIcon />}
           color="accent"
         />
         <StatCard
           title={t('adminDashboard.stats.incomeToday')}
           value={`${formatAmount(stats?.financial.income_today_rubles || 0)} ${currencySymbol}`}
-          icon={<CurrencyIcon />}
+          icon={<WalletIcon />}
           color="warning"
         />
         <StatCard
           title={t('adminDashboard.stats.incomeMonth')}
           value={`${formatAmount(stats?.financial.income_month_rubles || 0)} ${currencySymbol}`}
-          icon={<CurrencyIcon />}
+          icon={<ChartBarIcon />}
           color="info"
         />
       </div>
@@ -347,7 +366,9 @@ export default function AdminDashboard() {
       <div className="bg-dark-800/30 backdrop-blur rounded-xl border border-dark-700 p-5">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <ServerIcon />
+            <div className="p-2.5 rounded-lg bg-accent-500/20 text-accent-400">
+              <ServerIcon />
+            </div>
             <div>
               <h2 className="text-lg font-semibold text-dark-100">{t('adminDashboard.nodes.title')}</h2>
               <p className="text-sm text-dark-400">
@@ -395,7 +416,9 @@ export default function AdminDashboard() {
         {/* Revenue Chart */}
         <div className="bg-dark-800/30 backdrop-blur rounded-xl border border-dark-700 p-5">
           <div className="flex items-center gap-3 mb-4">
-            <CurrencyIcon />
+            <div className="p-2.5 rounded-lg bg-warning-500/20 text-warning-400">
+              <ChartBarIcon />
+            </div>
             <div>
               <h2 className="text-lg font-semibold text-dark-100">{t('adminDashboard.revenue.title')}</h2>
               <p className="text-sm text-dark-400">{t('adminDashboard.revenue.last7Days')}</p>
@@ -417,7 +440,9 @@ export default function AdminDashboard() {
         {/* Subscription Stats */}
         <div className="bg-dark-800/30 backdrop-blur rounded-xl border border-dark-700 p-5">
           <div className="flex items-center gap-3 mb-4">
-            <SubscriptionIcon />
+            <div className="p-2.5 rounded-lg bg-accent-500/20 text-accent-400">
+              <SparklesIcon />
+            </div>
             <div>
               <h2 className="text-lg font-semibold text-dark-100">{t('adminDashboard.subscriptions.title')}</h2>
               <p className="text-sm text-dark-400">{t('adminDashboard.subscriptions.subtitle')}</p>
@@ -478,7 +503,9 @@ export default function AdminDashboard() {
       {stats?.servers && (
         <div className="bg-dark-800/30 backdrop-blur rounded-xl border border-dark-700 p-5">
           <div className="flex items-center gap-3 mb-4">
-            <ServerIcon />
+            <div className="p-2.5 rounded-lg bg-info-500/20 text-info-400">
+              <CubeIcon />
+            </div>
             <h2 className="text-lg font-semibold text-dark-100">{t('adminDashboard.servers.title')}</h2>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -506,7 +533,9 @@ export default function AdminDashboard() {
       {stats?.tariff_stats && stats.tariff_stats.tariffs.length > 0 && (
         <div className="bg-dark-800/30 backdrop-blur rounded-xl border border-dark-700 p-5">
           <div className="flex items-center gap-3 mb-4">
-            <SubscriptionIcon />
+            <div className="p-2.5 rounded-lg bg-success-500/20 text-success-400">
+              <TagIcon />
+            </div>
             <div>
               <h2 className="text-lg font-semibold text-dark-100">{t('adminDashboard.tariffs.title')}</h2>
               <p className="text-sm text-dark-400">{t('adminDashboard.tariffs.subtitle')}</p>

@@ -59,6 +59,8 @@ export interface TicketSettings {
   sla_check_interval_seconds: number
   sla_reminder_cooldown_minutes: number
   support_system_mode: string  // tickets, contact, both
+  cabinet_user_notifications_enabled: boolean
+  cabinet_admin_notifications_enabled: boolean
 }
 
 export interface TicketSettingsUpdate {
@@ -67,6 +69,8 @@ export interface TicketSettingsUpdate {
   sla_check_interval_seconds?: number
   sla_reminder_cooldown_minutes?: number
   support_system_mode?: string
+  cabinet_user_notifications_enabled?: boolean
+  cabinet_admin_notifications_enabled?: boolean
 }
 
 export interface AdminTicketListResponse {

@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { ticketsApi } from '../api/tickets'
@@ -91,6 +91,7 @@ function MessageMedia({ message, t }: { message: TicketMessage; t: (key: string)
             <button
               className="absolute top-4 right-4 text-white/70 hover:text-white"
               onClick={() => setShowFullImage(false)}
+              aria-label="Close fullscreen"
             >
               <CloseIcon />
             </button>
@@ -141,6 +142,29 @@ export default function Support() {
   const createFileInputRef = useRef<HTMLInputElement>(null)
   const replyFileInputRef = useRef<HTMLInputElement>(null)
 
+  // Cleanup function to revoke object URLs and prevent memory leaks
+  const clearAttachment = useCallback((
+    attachment: MediaAttachment | null,
+    setAttachment: (a: MediaAttachment | null) => void
+  ) => {
+    if (attachment?.preview) {
+      URL.revokeObjectURL(attachment.preview)
+    }
+    setAttachment(null)
+  }, [])
+
+  // Cleanup on unmount to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      if (createAttachment?.preview) {
+        URL.revokeObjectURL(createAttachment.preview)
+      }
+      if (replyAttachment?.preview) {
+        URL.revokeObjectURL(replyAttachment.preview)
+      }
+    }
+  }, []) // Empty deps - only run on unmount
+
   // Get support configuration
   const { data: supportConfig, isLoading: configLoading } = useQuery({
     queryKey: ['support-config'],
@@ -162,8 +186,14 @@ export default function Support() {
   // Handle file selection
   const handleFileSelect = async (
     file: File,
-    setAttachment: (a: MediaAttachment | null) => void
+    setAttachment: (a: MediaAttachment | null) => void,
+    currentAttachment: MediaAttachment | null
   ) => {
+    // Revoke old object URL before creating new one
+    if (currentAttachment?.preview) {
+      URL.revokeObjectURL(currentAttachment.preview)
+    }
+
     // Validate file type
     const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
     if (!allowedTypes.includes(file.type)) {
@@ -224,7 +254,7 @@ export default function Support() {
       setShowCreateForm(false)
       setNewTitle('')
       setNewMessage('')
-      setCreateAttachment(null)
+      clearAttachment(createAttachment, setCreateAttachment)
       setSelectedTicket(ticket)
     },
   })
@@ -242,7 +272,7 @@ export default function Support() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['ticket', selectedTicket?.id] })
       setReplyMessage('')
-      setReplyAttachment(null)
+      clearAttachment(replyAttachment, setReplyAttachment)
     },
   })
 
@@ -443,7 +473,7 @@ export default function Support() {
           onClick={() => {
             setShowCreateForm(true)
             setSelectedTicket(null)
-            setCreateAttachment(null)
+            clearAttachment(createAttachment, setCreateAttachment)
           }}
           className="btn-primary"
         >
@@ -469,7 +499,7 @@ export default function Support() {
                   onClick={() => {
                     setSelectedTicket(ticket as unknown as TicketDetail)
                     setShowCreateForm(false)
-                    setReplyAttachment(null)
+                    clearAttachment(replyAttachment, setReplyAttachment)
                   }}
                   className={`w-full text-left p-4 rounded-xl border transition-all ${
                     selectedTicket?.id === ticket.id
@@ -555,14 +585,14 @@ export default function Support() {
                     className="hidden"
                     onChange={(e) => {
                       const file = e.target.files?.[0]
-                      if (file) handleFileSelect(file, setCreateAttachment)
+                      if (file) handleFileSelect(file, setCreateAttachment, createAttachment)
                       e.target.value = ''
                     }}
                   />
                   {createAttachment ? (
                     <AttachmentPreview
                       attachment={createAttachment}
-                      onRemove={() => setCreateAttachment(null)}
+                      onRemove={() => clearAttachment(createAttachment, setCreateAttachment)}
                     />
                   ) : (
                     <button
@@ -604,7 +634,7 @@ export default function Support() {
                     type="button"
                     onClick={() => {
                       setShowCreateForm(false)
-                      setCreateAttachment(null)
+                      clearAttachment(createAttachment, setCreateAttachment)
                     }}
                     className="btn-secondary"
                   >
@@ -704,14 +734,14 @@ export default function Support() {
                           className="hidden"
                           onChange={(e) => {
                             const file = e.target.files?.[0]
-                            if (file) handleFileSelect(file, setReplyAttachment)
+                            if (file) handleFileSelect(file, setReplyAttachment, replyAttachment)
                             e.target.value = ''
                           }}
                         />
                         {replyAttachment ? (
                           <AttachmentPreview
                             attachment={replyAttachment}
-                            onRemove={() => setReplyAttachment(null)}
+                            onRemove={() => clearAttachment(replyAttachment, setReplyAttachment)}
                           />
                         ) : (
                           <button

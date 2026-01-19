@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
@@ -46,6 +46,8 @@ export default function DeepLinkRedirect() {
   const [status, setStatus] = useState<Status>('countdown')
   const [countdown, setCountdown] = useState(COUNTDOWN_SECONDS)
   const [copied, setCopied] = useState(false)
+  const fallbackTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const copiedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Get branding
   const { data: branding } = useQuery({
@@ -135,23 +137,34 @@ export default function DeepLinkRedirect() {
         if (prev <= 1) {
           clearInterval(timer)
           openDeepLink()
-          // Show fallback after a delay
-          setTimeout(() => setStatus('fallback'), 2000)
+          // Show fallback after a delay - store ref for cleanup
+          fallbackTimeoutRef.current = setTimeout(() => setStatus('fallback'), 2000)
           return 0
         }
         return prev - 1
       })
     }, 1000)
 
-    return () => clearInterval(timer)
+    return () => {
+      clearInterval(timer)
+      // Cleanup fallback timeout on unmount
+      if (fallbackTimeoutRef.current) {
+        clearTimeout(fallbackTimeoutRef.current)
+        fallbackTimeoutRef.current = null
+      }
+    }
   }, [deepLink, status, openDeepLink])
 
   const handleCopyLink = async () => {
     const linkToCopy = subscriptionUrl || deepLink
+    // Clear previous timeout to prevent stacking
+    if (copiedTimeoutRef.current) {
+      clearTimeout(copiedTimeoutRef.current)
+    }
     try {
       await navigator.clipboard.writeText(linkToCopy)
       setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
+      copiedTimeoutRef.current = setTimeout(() => setCopied(false), 2000)
     } catch {
       const textarea = document.createElement('textarea')
       textarea.value = linkToCopy
@@ -160,9 +173,18 @@ export default function DeepLinkRedirect() {
       document.execCommand('copy')
       document.body.removeChild(textarea)
       setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
+      copiedTimeoutRef.current = setTimeout(() => setCopied(false), 2000)
     }
   }
+
+  // Cleanup copied timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (copiedTimeoutRef.current) {
+        clearTimeout(copiedTimeoutRef.current)
+      }
+    }
+  }, [])
 
   // Progress percentage
   const progress = ((COUNTDOWN_SECONDS - countdown) / COUNTDOWN_SECONDS) * 100

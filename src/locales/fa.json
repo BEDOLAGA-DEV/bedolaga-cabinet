@@ -33,6 +33,24 @@
     "info": "اطلاعات",
     "wheel": "چرخ شانس"
   },
+  "notifications": {
+    "ticketNotifications": "اعلان‌های تیکت",
+    "markAllRead": "خواندن همه",
+    "noNotifications": "اعلانی وجود ندارد",
+    "justNow": "همین الان",
+    "minutesAgo": "{{count}} دقیقه پیش",
+    "hoursAgo": "{{count}} ساعت پیش",
+    "daysAgo": "{{count}} روز پیش",
+    "viewAll": "مشاهده همه تیکت‌ها",
+    "newNotification": "اعلان جدید",
+    "clickToView": "برای مشاهده کلیک کنید",
+    "newTicket": "تیکت جدید: {{title}}",
+    "newReply": "پاسخ جدید در تیکت: {{title}}",
+    "newTicketTitle": "تیکت جدید",
+    "newReplyTitle": "پاسخ جدید",
+    "newUserReply": "کاربر در تیکت پاسخ داد: {{title}}",
+    "newUserReplyTitle": "پاسخ کاربر"
+  },
   "auth": {
     "login": "ورود",
     "register": "ثبت نام",
