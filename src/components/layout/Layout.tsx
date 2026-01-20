@@ -367,7 +367,7 @@ export default function Layout({ children }: LayoutProps) {
           paddingTop: isFullscreen ? `${Math.max(safeAreaInset.top, contentSafeAreaInset.top) + 45}px` : undefined,
         }}
       >
-        <div className="w-full mx-auto px-4 sm:px-6">
+        <div className="w-full mx-auto px-4 sm:px-6" onClick={() => mobileMenuOpen && setMobileMenuOpen(false)}>
           <div className="flex justify-between items-center h-16 lg:h-20">
             {/* Logo */}
             <Link to="/" onClick={() => setMobileMenuOpen(false)} className={`flex items-center gap-2.5 flex-shrink-0 ${!appName ? 'lg:mr-4' : ''}`}>
@@ -492,7 +492,10 @@ export default function Layout({ children }: LayoutProps) {
 
               {/* Mobile menu button */}
               <button
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setMobileMenuOpen(!mobileMenuOpen)
+                }}
                 className="lg:hidden btn-icon"
                 aria-label={mobileMenuOpen ? t('common.close') || 'Close menu' : t('nav.menu') || 'Open menu'}
                 aria-expanded={mobileMenuOpen}
