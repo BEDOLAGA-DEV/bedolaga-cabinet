@@ -353,7 +353,7 @@ export default function Layout({ children }: LayoutProps) {
 
       {/* Header */}
       <header
-        className="fixed top-0 left-0 right-0 z-50 glass border-b border-dark-800/50"
+        className="fixed top-0 left-0 right-0 z-50 glass shadow-lg shadow-black/10"
         style={{
           // In fullscreen mode, add padding for safe area + Telegram native controls (close/menu buttons in corners)
           paddingTop: isFullscreen ? `${Math.max(safeAreaInset.top, contentSafeAreaInset.top) + 45}px` : undefined,
@@ -363,9 +363,9 @@ export default function Layout({ children }: LayoutProps) {
           <div className="flex justify-between items-center h-16 lg:h-20">
             {/* Logo */}
             <Link to="/" onClick={() => setMobileMenuOpen(false)} className={`flex items-center gap-2.5 flex-shrink-0 ${!appName ? 'lg:mr-4' : ''}`}>
-              <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 rounded-xl bg-gradient-to-br from-accent-400 to-accent-600 flex items-center justify-center overflow-hidden shadow-lg shadow-accent-500/20 flex-shrink-0 relative">
+              <div className="w-10 h-10 sm:w-11 sm:h-11 lg:w-12 lg:h-12 rounded-xl bg-dark-800/80 dark:bg-dark-800/80 border border-dark-700/50 flex items-center justify-center overflow-hidden shadow-md flex-shrink-0 relative">
                 {/* Always show letter as fallback */}
-                <span className={`text-white font-bold text-lg sm:text-xl lg:text-2xl absolute transition-opacity duration-200 ${hasCustomLogo && logoLoaded ? 'opacity-0' : 'opacity-100'}`}>
+                <span className={`text-accent-400 font-bold text-lg sm:text-xl absolute transition-opacity duration-200 ${hasCustomLogo && logoLoaded ? 'opacity-0' : 'opacity-100'}`}>
                   {logoLetter}
                 </span>
                 {/* Logo image with smooth fade-in */}
@@ -423,7 +423,7 @@ export default function Layout({ children }: LayoutProps) {
             </nav>
 
             {/* Right side */}
-            <div className="flex items-center gap-2 sm:gap-3">
+            <div className="flex items-center gap-1.5 sm:gap-2">
               {/* Theme toggle button - only show if both themes are enabled */}
               {canToggle && (
                 <button
@@ -431,9 +431,10 @@ export default function Layout({ children }: LayoutProps) {
                     toggleTheme()
                     setMobileMenuOpen(false)
                   }}
-                  className="relative p-2.5 rounded-xl transition-all duration-300 hover:scale-110 active:scale-95
-                             dark:text-dark-400 dark:hover:text-dark-100 dark:hover:bg-dark-800
-                             text-champagne-500 hover:text-champagne-800 hover:bg-champagne-200/50"
+                  className="relative p-2 rounded-xl transition-all duration-200 
+                             bg-dark-800/50 hover:bg-dark-700 border border-dark-700/50
+                             dark:text-dark-400 dark:hover:text-accent-400
+                             text-champagne-500 hover:text-champagne-800"
                   title={isDark ? t('theme.light') || 'Light mode' : t('theme.dark') || 'Dark mode'}
                   aria-label={isDark ? t('theme.light') || 'Switch to light mode' : t('theme.dark') || 'Switch to dark mode'}
                 >

@@ -8,7 +8,7 @@
 
 - **Стиль:** Bento Grids (карточки разных размеров в сетке)
 - **Цветовая схема:** Зеленый неон на темном фоне, чистота
-- **Шрифт:** Urbanist (современный гротеск)
+- **Шрифт:** Manrope (современный гротеск, заменён с Urbanist)
 - **Скругления:** Крупные (24-32px)
 
 ---
@@ -112,9 +112,9 @@ interface BentoCardProps {
 
 ## Что НЕ делаем
 
-- ❌ Модалки (ConnectionModal, TopUpModal) — вторично
-- ❌ Страницы кроме Dashboard — после MVP
-- ❌ Header — работает, не ломаем
+- ✅ ~~Модалки (ConnectionModal, TopUpModal)~~ — Phase 6 complete
+- ✅ ~~Страницы кроме Dashboard~~ — Phase 5 complete
+- ✅ ~~Header~~ — Phase 7 complete
 - ❌ Рефакторинг логики — только UI
 
 ---
@@ -127,6 +127,8 @@ interface BentoCardProps {
 Этап 3: ██████████ 100%
 Этап 4: ██████████ 100%
 Этап 5: ██████████ 100%
+Этап 6: ██████████ 100%
+Этап 7: ██████████ 100%
 ─────────────────────
 Общий:  ██████████ 100%
 ```
@@ -182,10 +184,13 @@ interface BentoCardProps {
 ### Этап 7: Header
 > Обновить шапку (опционально)
 
-| # | Задача | Заметки |
-|---|--------|---------|
-| 7.1 | Лого в bento-стиле | Скругления, тень |
-| 7.2 | Mobile menu | Floating стиль? |
+| # | Задача | Статус | Заметки |
+|---|--------|--------|---------|
+| 7.0 | Смена шрифта Urbanist → Manrope | `[x]` | Google Fonts, tailwind.config.js, globals.css |
+| 7.1 | Glass container + shadow | `[x]` | `glass shadow-lg shadow-black/10` (без border-b) |
+| 7.2 | Logo в bento-контейнере | `[x]` | `rounded-xl bg-dark-800/80 border border-dark-700/50` (app icon style) |
+| 7.3 | Controls в bento-стиле | `[x]` | Все кнопки: `rounded-xl bg-dark-800/50 hover:bg-dark-700 border border-dark-700/50` |
+| 7.4 | Z-Index = 50 | `[x]` | Подтверждено (выше контента, ниже модалок z-[60]) |
 
 ### Этап 8: Полировка
 > Финальные штрихи
@@ -229,7 +234,14 @@ interface BentoCardProps {
 - ✅ **Profile.tsx**: 3 карточки → `bento-card`
 - ✅ **Info.tsx**: FAQ items, rules, privacy, offer → `bento-card`
 
-### 2026-01-20 — Phase 6 Complete (Модальные окна)
+### 2026-01-20 — Phase 7 Complete (Header + Font)
+- ✅ **Шрифт:** Urbanist → Manrope (Google Fonts, tailwind.config.js, globals.css)
+- ✅ **Header Container:** `glass` + `shadow-lg shadow-black/10` (убран border-b)
+- ✅ **Logo:** App icon style — `rounded-xl bg-dark-800/80 border border-dark-700/50`
+- ✅ **Theme Toggle:** Bento style — `rounded-xl bg-dark-800/50 hover:bg-dark-700 border border-dark-700/50`
+- ✅ **Language Switcher:** Bento style — то же
+- ✅ **Notification Bell:** Bento style — то же
+- ✅ **Z-Index:** Header = z-50 (верифицировано)
 - ✅ **ConnectionModal.tsx**: z-[60], rounded-3xl, backdrop-blur-xl (desktop + mobile wrapper)
 - ✅ **TopUpModal.tsx**: z-[60], rounded-3xl, backdrop-blur-xl
 - ✅ **InsufficientBalancePrompt.tsx**: z-[60], rounded-3xl, backdrop-blur-xl (PaymentMethodModal тоже)

@@ -106,7 +106,7 @@ export default {
         },
       },
       fontFamily: {
-        sans: ['Urbanist', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+        sans: ['Manrope', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
       },
       borderRadius: {
         'bento': '24px',
