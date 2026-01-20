@@ -1379,6 +1379,10 @@
   "theme": {
     "colors": "Цвета темы",
     "reset": "Сбросить",
+    "quickPresets": "Быстрые пресеты",
+    "quickPresetsDescription": "Выберите готовую цветовую схему",
+    "customColors": "Ручная настройка",
+    "customColorsDescription": "Настройте каждый цвет отдельно",
     "accent": "Акцентный цвет",
     "accentDescription": "Основной цвет бренда для кнопок, ссылок и интерактивных элементов",
     "darkTheme": "Тёмная тема",

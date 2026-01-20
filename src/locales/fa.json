@@ -700,6 +700,10 @@
   "theme": {
     "colors": "رنگ‌های تم",
     "reset": "بازنشانی",
+    "quickPresets": "پیش‌تنظیمات سریع",
+    "quickPresetsDescription": "یک طرح رنگی آماده انتخاب کنید",
+    "customColors": "رنگ‌های سفارشی",
+    "customColorsDescription": "هر رنگ را جداگانه سفارشی کنید",
     "accent": "رنگ تأکیدی",
     "accentDescription": "رنگ اصلی برند برای دکمه‌ها، لینک‌ها و عناصر تعاملی",
     "darkTheme": "تم تیره",

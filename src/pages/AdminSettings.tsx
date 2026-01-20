@@ -1496,222 +1496,221 @@ export default function AdminSettings() {
             </p>
           </div>
 
-          {/* Quick Presets */}
-          <div className="pb-6 border-b border-dark-700/50">
-            <label className="label mb-3">Быстрые пресеты</label>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              {THEME_PRESETS.map((preset) => (
-                <button
-                  key={preset.name}
-                  onClick={() => updateColorsMutation.mutate(preset.colors)}
-                  disabled={updateColorsMutation.isPending}
-                  className="group relative p-3 rounded-xl border border-dark-700 hover:border-dark-500 transition-all hover:scale-[1.02]"
-                  style={{ backgroundColor: preset.colors.darkBackground }}
-                >
-                  <div className="flex items-center gap-2 mb-2">
+          {/* Quick Presets - Collapsible */}
+          <div className="border-b border-dark-700/50">
+            <button
+              onClick={() => toggleThemeSection('presets')}
+              className="w-full flex items-center justify-between py-3 text-left"
+            >
+              <div className="flex items-center gap-3">
+                <div className="flex gap-0.5">
+                  {THEME_PRESETS.slice(0, 4).map((preset) => (
                     <div
-                      className="w-4 h-4 rounded-full ring-2 ring-white/20"
+                      key={preset.name}
+                      className="w-3 h-3 rounded-full"
                       style={{ backgroundColor: preset.colors.accent }}
                     />
-                    <span
-                      className="text-xs font-medium truncate"
-                      style={{ color: preset.colors.darkText }}
+                  ))}
+                </div>
+                <div>
+                  <span className="text-sm font-medium text-dark-200">{t('theme.quickPresets')}</span>
+                  <p className="text-xs text-dark-500">{t('theme.quickPresetsDescription')}</p>
+                </div>
+              </div>
+              <div className={`transition-transform ${expandedThemeSections.has('presets') ? 'rotate-180' : ''}`}>
+                <ChevronDownIcon />
+              </div>
+            </button>
+            {expandedThemeSections.has('presets') && (
+              <div className="pb-4">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {THEME_PRESETS.map((preset) => (
+                    <button
+                      key={preset.name}
+                      onClick={() => updateColorsMutation.mutate(preset.colors)}
+                      disabled={updateColorsMutation.isPending}
+                      className="group relative p-3 rounded-xl border border-dark-700 hover:border-dark-500 transition-all hover:scale-[1.02]"
+                      style={{ backgroundColor: preset.colors.darkBackground }}
                     >
-                      {preset.name}
-                    </span>
-                  </div>
-                  <div className="flex gap-1">
-                    <div
-                      className="w-3 h-3 rounded"
-                      style={{ backgroundColor: preset.colors.darkSurface }}
-                      title="Surface"
-                    />
-                    <div
-                      className="w-3 h-3 rounded"
-                      style={{ backgroundColor: preset.colors.success }}
-                      title="Success"
-                    />
-                    <div
-                      className="w-3 h-3 rounded"
-                      style={{ backgroundColor: preset.colors.warning }}
-                      title="Warning"
-                    />
-                    <div
-                      className="w-3 h-3 rounded"
-                      style={{ backgroundColor: preset.colors.error }}
-                      title="Error"
-                    />
-                  </div>
-                </button>
-              ))}
-            </div>
-            <p className="text-xs text-dark-500 mt-2">
-              Выберите готовую цветовую схему. Изменения сохраняются автоматически.
-            </p>
-          </div>
-
-          {/* Accent Color - Collapsible */}
-          <div className="border-b border-dark-700/50 pb-4">
-            <button
-              onClick={() => toggleThemeSection('accent')}
-              className="w-full flex items-center justify-between py-2 text-left"
-            >
-              <div className="flex items-center gap-3">
-                <div
-                  className="w-5 h-5 rounded-full border-2 border-dark-600"
-                  style={{ backgroundColor: themeColors?.accent || DEFAULT_THEME_COLORS.accent }}
-                />
-                <span className="text-sm font-medium text-dark-200">{t('theme.accent')}</span>
-              </div>
-              <ChevronDownIcon />
-            </button>
-            {expandedThemeSections.has('accent') && (
-              <div className="mt-3">
-                <ColorPicker
-                  label={t('theme.accent')}
-                  description={t('theme.accentDescription')}
-                  value={themeColors?.accent || DEFAULT_THEME_COLORS.accent}
-                  onChange={(color) => updateColorsMutation.mutate({ accent: color })}
-                  disabled={updateColorsMutation.isPending}
-                />
+                      <div className="flex items-center gap-2 mb-2">
+                        <div
+                          className="w-4 h-4 rounded-full ring-2 ring-white/20"
+                          style={{ backgroundColor: preset.colors.accent }}
+                        />
+                        <span
+                          className="text-xs font-medium truncate"
+                          style={{ color: preset.colors.darkText }}
+                        >
+                          {preset.name}
+                        </span>
+                      </div>
+                      <div className="flex gap-1">
+                        <div
+                          className="w-3 h-3 rounded"
+                          style={{ backgroundColor: preset.colors.darkSurface }}
+                        />
+                        <div
+                          className="w-3 h-3 rounded"
+                          style={{ backgroundColor: preset.colors.success }}
+                        />
+                        <div
+                          className="w-3 h-3 rounded"
+                          style={{ backgroundColor: preset.colors.warning }}
+                        />
+                        <div
+                          className="w-3 h-3 rounded"
+                          style={{ backgroundColor: preset.colors.error }}
+                        />
+                      </div>
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
           </div>
 
-          {/* Dark Theme Section - Collapsible */}
-          <div className="border-b border-dark-700/50 pb-4">
+          {/* Custom Colors - Collapsible */}
+          <div className="border-b border-dark-700/50">
             <button
-              onClick={() => toggleThemeSection('dark')}
-              className="w-full flex items-center justify-between py-2 text-left"
+              onClick={() => toggleThemeSection('custom')}
+              className="w-full flex items-center justify-between py-3 text-left"
             >
               <div className="flex items-center gap-3">
-                <MoonIcon />
-                <span className="text-sm font-medium text-dark-200">{t('theme.darkTheme')}</span>
-              </div>
-              <ChevronDownIcon />
-            </button>
-            {expandedThemeSections.has('dark') && (
-              <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <ColorPicker
-                  label={t('theme.background')}
-                  value={themeColors?.darkBackground || DEFAULT_THEME_COLORS.darkBackground}
-                  onChange={(color) => updateColorsMutation.mutate({ darkBackground: color })}
-                  disabled={updateColorsMutation.isPending}
-                />
-                <ColorPicker
-                  label={t('theme.surface')}
-                  value={themeColors?.darkSurface || DEFAULT_THEME_COLORS.darkSurface}
-                  onChange={(color) => updateColorsMutation.mutate({ darkSurface: color })}
-                  disabled={updateColorsMutation.isPending}
-                />
-                <ColorPicker
-                  label={t('theme.text')}
-                  value={themeColors?.darkText || DEFAULT_THEME_COLORS.darkText}
-                  onChange={(color) => updateColorsMutation.mutate({ darkText: color })}
-                  disabled={updateColorsMutation.isPending}
-                />
-                <ColorPicker
-                  label={t('theme.textSecondary')}
-                  value={themeColors?.darkTextSecondary || DEFAULT_THEME_COLORS.darkTextSecondary}
-                  onChange={(color) => updateColorsMutation.mutate({ darkTextSecondary: color })}
-                  disabled={updateColorsMutation.isPending}
-                />
-              </div>
-            )}
-          </div>
-
-          {/* Light Theme Section - Collapsible */}
-          <div className="border-b border-dark-700/50 pb-4">
-            <button
-              onClick={() => toggleThemeSection('light')}
-              className="w-full flex items-center justify-between py-2 text-left"
-            >
-              <div className="flex items-center gap-3">
-                <SunIcon />
-                <span className="text-sm font-medium text-dark-200">{t('theme.lightTheme')}</span>
-              </div>
-              <ChevronDownIcon />
-            </button>
-            {expandedThemeSections.has('light') && (
-              <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <ColorPicker
-                  label={t('theme.background')}
-                  value={themeColors?.lightBackground || DEFAULT_THEME_COLORS.lightBackground}
-                  onChange={(color) => updateColorsMutation.mutate({ lightBackground: color })}
-                  disabled={updateColorsMutation.isPending}
-                />
-                <ColorPicker
-                  label={t('theme.surface')}
-                  value={themeColors?.lightSurface || DEFAULT_THEME_COLORS.lightSurface}
-                  onChange={(color) => updateColorsMutation.mutate({ lightSurface: color })}
-                  disabled={updateColorsMutation.isPending}
-                />
-                <ColorPicker
-                  label={t('theme.text')}
-                  value={themeColors?.lightText || DEFAULT_THEME_COLORS.lightText}
-                  onChange={(color) => updateColorsMutation.mutate({ lightText: color })}
-                  disabled={updateColorsMutation.isPending}
-                />
-                <ColorPicker
-                  label={t('theme.textSecondary')}
-                  value={themeColors?.lightTextSecondary || DEFAULT_THEME_COLORS.lightTextSecondary}
-                  onChange={(color) => updateColorsMutation.mutate({ lightTextSecondary: color })}
-                  disabled={updateColorsMutation.isPending}
-                />
-              </div>
-            )}
-          </div>
-
-          {/* Status Colors - Collapsible */}
-          <div className="border-b border-dark-700/50 pb-4">
-            <button
-              onClick={() => toggleThemeSection('status')}
-              className="w-full flex items-center justify-between py-2 text-left"
-            >
-              <div className="flex items-center gap-3">
-                <div className="flex gap-1">
+                <div className="flex gap-0.5">
+                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: themeColors?.accent || DEFAULT_THEME_COLORS.accent }} />
+                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: themeColors?.darkBackground || DEFAULT_THEME_COLORS.darkBackground }} />
                   <div className="w-3 h-3 rounded-full" style={{ backgroundColor: themeColors?.success || DEFAULT_THEME_COLORS.success }} />
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: themeColors?.warning || DEFAULT_THEME_COLORS.warning }} />
                   <div className="w-3 h-3 rounded-full" style={{ backgroundColor: themeColors?.error || DEFAULT_THEME_COLORS.error }} />
                 </div>
-                <span className="text-sm font-medium text-dark-200">{t('theme.statusColors')}</span>
+                <div>
+                  <span className="text-sm font-medium text-dark-200">{t('theme.customColors')}</span>
+                  <p className="text-xs text-dark-500">{t('theme.customColorsDescription')}</p>
+                </div>
               </div>
-              <ChevronDownIcon />
+              <div className={`transition-transform ${expandedThemeSections.has('custom') ? 'rotate-180' : ''}`}>
+                <ChevronDownIcon />
+              </div>
             </button>
-            {expandedThemeSections.has('status') && (
-              <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <ColorPicker
-                  label={t('theme.success')}
-                  value={themeColors?.success || DEFAULT_THEME_COLORS.success}
-                  onChange={(color) => updateColorsMutation.mutate({ success: color })}
-                  disabled={updateColorsMutation.isPending}
-                />
-                <ColorPicker
-                  label={t('theme.warning')}
-                  value={themeColors?.warning || DEFAULT_THEME_COLORS.warning}
-                  onChange={(color) => updateColorsMutation.mutate({ warning: color })}
-                  disabled={updateColorsMutation.isPending}
-                />
-                <ColorPicker
-                  label={t('theme.error')}
-                  value={themeColors?.error || DEFAULT_THEME_COLORS.error}
-                  onChange={(color) => updateColorsMutation.mutate({ error: color })}
-                  disabled={updateColorsMutation.isPending}
-                />
+            {expandedThemeSections.has('custom') && (
+              <div className="pb-4 space-y-6">
+                {/* Accent Color */}
+                <div>
+                  <h4 className="text-sm font-medium text-dark-300 mb-3">{t('theme.accent')}</h4>
+                  <ColorPicker
+                    label={t('theme.accent')}
+                    description={t('theme.accentDescription')}
+                    value={themeColors?.accent || DEFAULT_THEME_COLORS.accent}
+                    onChange={(color) => updateColorsMutation.mutate({ accent: color })}
+                    disabled={updateColorsMutation.isPending}
+                  />
+                </div>
+
+                {/* Dark Theme */}
+                <div>
+                  <h4 className="text-sm font-medium text-dark-300 mb-3 flex items-center gap-2">
+                    <MoonIcon />
+                    {t('theme.darkTheme')}
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <ColorPicker
+                      label={t('theme.background')}
+                      value={themeColors?.darkBackground || DEFAULT_THEME_COLORS.darkBackground}
+                      onChange={(color) => updateColorsMutation.mutate({ darkBackground: color })}
+                      disabled={updateColorsMutation.isPending}
+                    />
+                    <ColorPicker
+                      label={t('theme.surface')}
+                      value={themeColors?.darkSurface || DEFAULT_THEME_COLORS.darkSurface}
+                      onChange={(color) => updateColorsMutation.mutate({ darkSurface: color })}
+                      disabled={updateColorsMutation.isPending}
+                    />
+                    <ColorPicker
+                      label={t('theme.text')}
+                      value={themeColors?.darkText || DEFAULT_THEME_COLORS.darkText}
+                      onChange={(color) => updateColorsMutation.mutate({ darkText: color })}
+                      disabled={updateColorsMutation.isPending}
+                    />
+                    <ColorPicker
+                      label={t('theme.textSecondary')}
+                      value={themeColors?.darkTextSecondary || DEFAULT_THEME_COLORS.darkTextSecondary}
+                      onChange={(color) => updateColorsMutation.mutate({ darkTextSecondary: color })}
+                      disabled={updateColorsMutation.isPending}
+                    />
+                  </div>
+                </div>
+
+                {/* Light Theme */}
+                <div>
+                  <h4 className="text-sm font-medium text-dark-300 mb-3 flex items-center gap-2">
+                    <SunIcon />
+                    {t('theme.lightTheme')}
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <ColorPicker
+                      label={t('theme.background')}
+                      value={themeColors?.lightBackground || DEFAULT_THEME_COLORS.lightBackground}
+                      onChange={(color) => updateColorsMutation.mutate({ lightBackground: color })}
+                      disabled={updateColorsMutation.isPending}
+                    />
+                    <ColorPicker
+                      label={t('theme.surface')}
+                      value={themeColors?.lightSurface || DEFAULT_THEME_COLORS.lightSurface}
+                      onChange={(color) => updateColorsMutation.mutate({ lightSurface: color })}
+                      disabled={updateColorsMutation.isPending}
+                    />
+                    <ColorPicker
+                      label={t('theme.text')}
+                      value={themeColors?.lightText || DEFAULT_THEME_COLORS.lightText}
+                      onChange={(color) => updateColorsMutation.mutate({ lightText: color })}
+                      disabled={updateColorsMutation.isPending}
+                    />
+                    <ColorPicker
+                      label={t('theme.textSecondary')}
+                      value={themeColors?.lightTextSecondary || DEFAULT_THEME_COLORS.lightTextSecondary}
+                      onChange={(color) => updateColorsMutation.mutate({ lightTextSecondary: color })}
+                      disabled={updateColorsMutation.isPending}
+                    />
+                  </div>
+                </div>
+
+                {/* Status Colors */}
+                <div>
+                  <h4 className="text-sm font-medium text-dark-300 mb-3">{t('theme.statusColors')}</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <ColorPicker
+                      label={t('theme.success')}
+                      value={themeColors?.success || DEFAULT_THEME_COLORS.success}
+                      onChange={(color) => updateColorsMutation.mutate({ success: color })}
+                      disabled={updateColorsMutation.isPending}
+                    />
+                    <ColorPicker
+                      label={t('theme.warning')}
+                      value={themeColors?.warning || DEFAULT_THEME_COLORS.warning}
+                      onChange={(color) => updateColorsMutation.mutate({ warning: color })}
+                      disabled={updateColorsMutation.isPending}
+                    />
+                    <ColorPicker
+                      label={t('theme.error')}
+                      value={themeColors?.error || DEFAULT_THEME_COLORS.error}
+                      onChange={(color) => updateColorsMutation.mutate({ error: color })}
+                      disabled={updateColorsMutation.isPending}
+                    />
+                  </div>
+                </div>
+
+                {/* Preview */}
+                <div className="p-4 bg-dark-800/50 rounded-xl">
+                  <h4 className="text-sm font-medium text-dark-300 mb-3">{t('theme.preview')}</h4>
+                  <div className="flex flex-wrap gap-2">
+                    <button className="btn-primary text-sm">{t('theme.previewButton')}</button>
+                    <button className="btn-secondary text-sm">{t('theme.previewSecondary')}</button>
+                    <span className="badge-success">{t('theme.success')}</span>
+                    <span className="badge-warning">{t('theme.warning')}</span>
+                    <span className="badge-error">{t('theme.error')}</span>
+                  </div>
+                </div>
               </div>
             )}
-          </div>
-
-          {/* Preview */}
-          <div className="p-4 bg-dark-800/50 rounded-xl">
-            <h4 className="text-sm font-medium text-dark-300 mb-3">{t('theme.preview')}</h4>
-            <div className="flex flex-wrap gap-2">
-              <button className="btn-primary text-sm">{t('theme.previewButton')}</button>
-              <button className="btn-secondary text-sm">{t('theme.previewSecondary')}</button>
-              <span className="badge-success">{t('theme.success')}</span>
-              <span className="badge-warning">{t('theme.warning')}</span>
-              <span className="badge-error">{t('theme.error')}</span>
-            </div>
           </div>
         </div>
       </div>

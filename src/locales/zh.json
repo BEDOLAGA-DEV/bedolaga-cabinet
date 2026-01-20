@@ -701,6 +701,10 @@
   "theme": {
     "colors": "主题颜色",
     "reset": "重置",
+    "quickPresets": "快速预设",
+    "quickPresetsDescription": "选择现成的配色方案",
+    "customColors": "自定义颜色",
+    "customColorsDescription": "单独自定义每种颜色",
     "accent": "主题色",
     "accentDescription": "用于按钮、链接和交互元素的主品牌颜色",
     "darkTheme": "深色主题",

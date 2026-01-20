@@ -1221,6 +1221,10 @@
   "theme": {
     "colors": "Theme Colors",
     "reset": "Reset",
+    "quickPresets": "Quick Presets",
+    "quickPresetsDescription": "Choose a ready-made color scheme",
+    "customColors": "Custom Colors",
+    "customColorsDescription": "Customize each color individually",
     "accent": "Accent Color",
     "accentDescription": "Main brand color for buttons, links and interactive elements",
     "darkTheme": "Dark Theme",
