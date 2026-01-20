@@ -7,6 +7,7 @@ import { useCurrency } from '../hooks/useCurrency'
 import { useTelegramWebApp } from '../hooks/useTelegramWebApp'
 import { checkRateLimit, getRateLimitResetTime, RATE_LIMIT_KEYS } from '../utils/rateLimit'
 import type { PaymentMethod } from '../types'
+import BentoCard from './ui/BentoCard'
 
 const TELEGRAM_LINK_REGEX = /^https?:\/\/t\.me\//i
 const isTelegramPaymentLink = (url: string): boolean => TELEGRAM_LINK_REGEX.test(url)
@@ -249,11 +250,9 @@ export default function TopUpModal({ method, onClose, initialAmountRubles }: Top
 
   // Auto-focus input - works on mobile in Telegram WebApp
   useEffect(() => {
-    // Small delay to ensure DOM is ready
     const timer = setTimeout(() => {
       if (inputRef.current) {
         inputRef.current.focus()
-        // For iOS Safari - scroll input into view to trigger keyboard
         if (isMobileScreen) {
           inputRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
         }
@@ -347,23 +346,31 @@ export default function TopUpModal({ method, onClose, initialAmountRubles }: Top
 
       {/* Quick amount buttons */}
       {quickAmounts.length > 0 && (
-        <div className="flex gap-2">
+        <div className="grid grid-cols-4 gap-2">
           {quickAmounts.map((a) => {
             const val = getQuickValue(a)
             const isSelected = amount === val
             return (
-              <button
+              <BentoCard
                 key={a}
+                as="button"
                 type="button"
                 onClick={() => { setAmount(val); inputRef.current?.blur() }}
-                className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all duration-200 ${
+                hover
+                glow={isSelected}
+                className={`flex flex-col items-center justify-center py-3 px-2 ${
                   isSelected
-                    ? 'bg-accent-500/20 text-accent-400 ring-1 ring-accent-500/40'
-                    : 'bg-dark-800/50 text-dark-400 hover:bg-dark-800 hover:text-dark-300 border border-dark-700/30'
+                    ? 'border-accent-500/50 bg-accent-500/10'
+                    : ''
                 }`}
               >
-                {formatAmount(a, 0)}
-              </button>
+                <span className={`text-base font-bold ${isSelected ? 'text-accent-400' : 'text-dark-200'}`}>
+                  {formatAmount(a, 0)}
+                </span>
+                <span className={`text-xs mt-0.5 ${isSelected ? 'text-accent-400/70' : 'text-dark-500'}`}>
+                  {currencySymbol}
+                </span>
+              </BentoCard>
             )
           })}
         </div>

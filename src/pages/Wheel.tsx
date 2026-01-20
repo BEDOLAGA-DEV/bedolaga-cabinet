@@ -692,7 +692,7 @@ export default function Wheel() {
 
       {/* Result Modal */}
       {showResultModal && spinResult && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
           <div
             className={`relative w-full max-w-md rounded-3xl p-8 text-center overflow-hidden ${
               spinResult.success

@@ -144,8 +144,8 @@ export default function Referral() {
 			</h1>
 
 			{/* Stats Cards */}
-			<div className='grid grid-cols-2 sm:grid-cols-3 gap-4'>
-				<div className='card'>
+			<div className='bento-grid'>
+				<div className='bento-card-hover'>
 					<div className='text-sm text-dark-400'>
 						{t('referral.stats.totalReferrals')}
 					</div>
@@ -155,7 +155,7 @@ export default function Referral() {
 						{t('referral.stats.activeReferrals').toLowerCase()}
 					</div>
 				</div>
-				<div className='card'>
+				<div className='bento-card-hover'>
 					<div className='text-sm text-dark-400'>
 						{t('referral.stats.totalEarnings')}
 					</div>
@@ -163,7 +163,7 @@ export default function Referral() {
 						{formatPositive(info?.total_earnings_rubles || 0)}
 					</div>
 				</div>
-				<div className='card col-span-2 sm:col-span-1'>
+				<div className='bento-card-hover col-span-2 sm:col-span-1'>
 					<div className='text-sm text-dark-400'>
 						{t('referral.stats.commissionRate')}
 					</div>
@@ -174,7 +174,7 @@ export default function Referral() {
 			</div>
 
 			{/* Referral Link */}
-			<div className='card'>
+			<div className='bento-card'>
 				<h2 className='text-lg font-semibold text-dark-100 mb-4'>
 					{t('referral.yourLink')}
 				</h2>
@@ -217,7 +217,7 @@ export default function Referral() {
 
 			{/* Program Terms */}
 			{terms && (
-				<div className='card'>
+				<div className='bento-card'>
 					<h2 className='text-lg font-semibold text-dark-100 mb-4'>
 						{t('referral.terms.title')}
 					</h2>
@@ -259,7 +259,7 @@ export default function Referral() {
 			)}
 
 			{/* Referrals List */}
-			<div className='card'>
+			<div className='bento-card'>
 				<h2 className='text-lg font-semibold text-dark-100 mb-4'>
 					{t('referral.yourReferrals')}
 				</h2>
@@ -314,7 +314,7 @@ export default function Referral() {
 
 			{/* Earnings History */}
 			{earnings?.items && earnings.items.length > 0 && (
-				<div className='card'>
+				<div className='bento-card'>
 					<h2 className='text-lg font-semibold text-dark-100 mb-4'>
 						{t('referral.earningsHistory')}
 					</h2>

@@ -254,7 +254,7 @@ export default function Dashboard() {
 
       {/* Subscription Status - Main Card */}
       {subscription && (
-        <div className="card">
+        <div className="bento-card">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-lg font-semibold text-dark-100">{t('subscription.status')}</h2>
             <span className={subscription.is_active ? 'badge-success' : 'badge-error'}>
@@ -336,9 +336,9 @@ export default function Dashboard() {
       )}
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="bento-grid">
         {/* Balance */}
-        <Link to="/balance" className="card-hover group" data-onboarding="balance">
+        <Link to="/balance" className="bento-card-hover group" data-onboarding="balance">
           <div className="flex items-center justify-between mb-3">
             <span className="text-dark-400 text-sm">{t('balance.currentBalance')}</span>
             <span className="text-dark-600 group-hover:text-accent-400 transition-colors">
@@ -352,7 +352,7 @@ export default function Dashboard() {
         </Link>
 
         {/* Subscription */}
-        <Link to="/subscription" className="card-hover group" data-onboarding="subscription-status">
+        <Link to="/subscription" className="bento-card-hover group" data-onboarding="subscription-status">
           <div className="flex items-center justify-between mb-3">
             <span className="text-dark-400 text-sm">{t('subscription.title')}</span>
             <span className="text-dark-600 group-hover:text-accent-400 transition-colors">
@@ -388,7 +388,7 @@ export default function Dashboard() {
         </Link>
 
         {/* Referrals */}
-        <Link to="/referral" className="card-hover group">
+        <Link to="/referral" className="bento-card-hover group">
           <div className="flex items-center justify-between mb-3">
             <span className="text-dark-400 text-sm">{t('referral.stats.totalReferrals')}</span>
             <span className="text-dark-600 group-hover:text-accent-400 transition-colors">
@@ -403,7 +403,7 @@ export default function Dashboard() {
         </Link>
 
         {/* Earnings */}
-        <Link to="/referral" className="card-hover group">
+        <Link to="/referral" className="bento-card-hover group">
           <div className="flex items-center justify-between mb-3">
             <span className="text-dark-400 text-sm">{t('referral.stats.totalEarnings')}</span>
             <span className="text-dark-600 group-hover:text-accent-400 transition-colors">
@@ -422,7 +422,7 @@ export default function Dashboard() {
 
       {/* Trial Activation */}
       {hasNoSubscription && !trialLoading && trialInfo?.is_available && (
-        <div className="card border-accent-500/30 bg-gradient-to-br from-accent-500/5 to-transparent">
+        <div className="bento-card-glow border-accent-500/30 bg-gradient-to-br from-accent-500/5 to-transparent">
           <div className="flex items-start gap-4">
             <div className="w-12 h-12 rounded-xl bg-accent-500/20 flex items-center justify-center flex-shrink-0">
               <SparklesIcon />
@@ -483,7 +483,7 @@ export default function Dashboard() {
       {wheelConfig?.is_enabled && (
         <Link
           to="/wheel"
-          className="group card-hover flex items-center justify-between"
+          className="group bento-card-hover flex items-center justify-between"
         >
           <div className="flex items-center gap-4">
             {/* Emoji */}
@@ -504,7 +504,7 @@ export default function Dashboard() {
       )}
 
       {/* Quick Actions */}
-      <div className="card" data-onboarding="quick-actions">
+      <div className="bento-card" data-onboarding="quick-actions">
         <h3 className="text-lg font-semibold text-dark-100 mb-4">{t('dashboard.quickActions')}</h3>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <Link to="/balance" className="btn-secondary justify-center text-center text-sm py-2.5">

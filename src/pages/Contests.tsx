@@ -86,8 +86,8 @@ export default function Contests() {
 
       {/* Game Modal */}
       {selectedContest && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
-          <div className="card max-w-lg w-full max-h-[80vh] overflow-y-auto">
+        <div className="fixed inset-0 z-[60] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bento-card max-w-lg w-full max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold">{selectedContest.name}</h2>
               <button onClick={handleCloseGame} className="text-dark-400 hover:text-dark-200">

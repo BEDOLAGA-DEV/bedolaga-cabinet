@@ -166,7 +166,7 @@ export default function Info() {
       return (
         <div className="space-y-2">
           {faqPages.map((faq: FaqPage) => (
-            <div key={faq.id} className="card p-0 overflow-hidden">
+            <div key={faq.id} className="bento-card p-0 overflow-hidden">
               <button
                 onClick={() => toggleFaq(faq.id)}
                 className="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-dark-800/50 transition-colors"
@@ -203,7 +203,7 @@ export default function Info() {
       }
 
       return (
-        <div className="card prose prose-invert max-w-none">
+        <div className="bento-card prose prose-invert max-w-none">
           <div dangerouslySetInnerHTML={{ __html: formatContent(rules.content) }} />
           {rules.updated_at && (
             <p className="text-sm text-dark-400 mt-6 pt-4 border-t border-dark-700">
@@ -232,7 +232,7 @@ export default function Info() {
       }
 
       return (
-        <div className="card prose prose-invert max-w-none">
+        <div className="bento-card prose prose-invert max-w-none">
           <div dangerouslySetInnerHTML={{ __html: formatContent(privacy.content) }} />
           {privacy.updated_at && (
             <p className="text-sm text-dark-400 mt-6 pt-4 border-t border-dark-700">
@@ -261,7 +261,7 @@ export default function Info() {
       }
 
       return (
-        <div className="card prose prose-invert max-w-none">
+        <div className="bento-card prose prose-invert max-w-none">
           <div dangerouslySetInnerHTML={{ __html: formatContent(offer.content) }} />
           {offer.updated_at && (
             <p className="text-sm text-dark-400 mt-6 pt-4 border-t border-dark-700">

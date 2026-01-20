@@ -426,7 +426,7 @@ export default function Subscription() {
 
       {/* Current Subscription */}
       {subscription ? (
-        <div className="card">
+        <div className="bento-card">
           <div className="flex items-center justify-between mb-6">
             <div>
               <h2 className="text-lg font-semibold text-dark-100">{t('subscription.currentPlan')}</h2>
@@ -631,7 +631,7 @@ export default function Subscription() {
 
       {/* Daily Subscription Pause */}
       {subscription && subscription.is_daily && !subscription.is_trial && (
-        <div className="card">
+        <div className="bento-card">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-lg font-semibold text-dark-100">{t('subscription.pause.title')}</h2>
@@ -730,7 +730,7 @@ export default function Subscription() {
 
       {/* Additional Options (Buy Devices) */}
       {subscription && subscription.is_active && !subscription.is_trial && (
-        <div className="card">
+        <div className="bento-card">
           <h2 className="text-lg font-semibold text-dark-100 mb-4">Дополнительные опции</h2>
 
           {/* Buy Devices */}
@@ -1150,7 +1150,7 @@ export default function Subscription() {
 
       {/* My Devices Section */}
       {subscription && (
-        <div className="card">
+        <div className="bento-card">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-dark-100">{t('subscription.myDevices')}</h2>
             {devicesData && devicesData.devices.length > 0 && (
@@ -1220,7 +1220,7 @@ export default function Subscription() {
 
       {/* Tariffs Section - Combined Purchase/Extend/Switch like MiniApp */}
       {isTariffsMode && tariffs.length > 0 && (
-        <div ref={tariffsCardRef} className="card">
+        <div ref={tariffsCardRef} className="bento-card">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-dark-100">
               {subscription?.is_daily && !subscription?.is_trial
@@ -1375,10 +1375,10 @@ export default function Subscription() {
                 return (
                   <div
                     key={tariff.id}
-                    className={`p-5 rounded-xl border text-left transition-all ${
+                    className={`bento-card-hover p-5 text-left transition-all ${
                       isCurrentTariff
-                        ? 'border-accent-500 bg-accent-500/10'
-                        : 'border-dark-700/50 bg-dark-800/30'
+                        ? 'bento-card-glow border-accent-500'
+                        : ''
                     }`}
                   >
                     <div className="flex items-start justify-between mb-3">
@@ -1922,7 +1922,7 @@ export default function Subscription() {
 
       {/* Purchase/Extend Section - Classic Mode */}
       {classicOptions && classicOptions.periods.length > 0 && (
-        <div ref={tariffsCardRef} className="card">
+        <div ref={tariffsCardRef} className="bento-card">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-dark-100">
               {subscription && !subscription.is_trial ? t('subscription.extend') : t('subscription.getSubscription')}
@@ -1984,10 +1984,10 @@ export default function Subscription() {
                             setSelectedDevices(period.devices.current)
                           }
                         }}
-                        className={`p-4 rounded-xl border text-left transition-all relative ${
+                        className={`bento-card-hover p-4 text-left transition-all relative ${
                           selectedPeriod?.id === period.id
-                            ? 'border-accent-500 bg-accent-500/10'
-                            : 'border-dark-700/50 hover:border-dark-600 bg-dark-800/30'
+                            ? 'bento-card-glow border-accent-500'
+                            : ''
                         }`}
                       >
                         {displayDiscount && displayDiscount > 0 && (
@@ -2022,13 +2022,11 @@ export default function Subscription() {
                         key={option.value}
                         onClick={() => setSelectedTraffic(option.value)}
                         disabled={!option.is_available}
-                        className={`p-4 rounded-xl border text-center transition-all relative ${
+                        className={`bento-card-hover p-4 text-center transition-all relative ${
                           selectedTraffic === option.value
-                            ? 'border-accent-500 bg-accent-500/10'
-                            : option.is_available
-                              ? 'border-dark-700/50 hover:border-dark-600 bg-dark-800/30'
-                              : 'border-dark-800/30 bg-dark-900/30 opacity-50 cursor-not-allowed'
-                        }`}
+                            ? 'bento-card-glow border-accent-500'
+                            : ''
+                        } ${!option.is_available ? 'opacity-50 cursor-not-allowed' : ''}`}
                       >
                         {promoTraffic.percent && (
                           <div className="absolute -top-2 -right-2 px-2 py-0.5 bg-orange-500 text-white text-xs font-medium rounded-full">
