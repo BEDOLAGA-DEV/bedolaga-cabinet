@@ -203,6 +203,10 @@
     background-color: rgba(254, 249, 240, 0.5) !important; /* champagne-100/50 */
   }
 
+  .light .bg-dark-900\/95 {
+    background-color: rgba(254, 249, 240, 0.95) !important; /* champagne-100/95 - mobile menu sticky header */
+  }
+
   .light .bg-dark-950 {
     background-color: #F7E7CE !important; /* champagne-200 */
   }
