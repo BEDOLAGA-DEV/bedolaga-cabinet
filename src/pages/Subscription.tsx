@@ -940,9 +940,10 @@ export default function Subscription() {
             </div>
           )}
 
-          {/* Server Management */}
-          <div className="mt-4">
-            {!showServerManagement ? (
+          {/* Server Management - only in classic mode */}
+          {!isTariffsMode && (
+            <div className="mt-4">
+              {!showServerManagement ? (
               <button
                 onClick={() => setShowServerManagement(true)}
                 className="w-full p-4 rounded-xl bg-dark-800/30 border border-dark-700/50 text-left hover:border-dark-600 transition-colors"
@@ -1143,6 +1144,7 @@ export default function Subscription() {
               </div>
             )}
           </div>
+          )}
         </div>
       )}
 

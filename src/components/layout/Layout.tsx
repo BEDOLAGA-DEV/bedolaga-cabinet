@@ -163,34 +163,25 @@ export default function Layout({ children }: LayoutProps) {
   }, [])
 
   // Lock body scroll when mobile menu is open (cross-platform)
+  // Note: We avoid using body position:fixed with top:-scrollY as it causes issues
+  // in Telegram Mini App where the menu disappears when opened from scrolled position
   useEffect(() => {
     if (!mobileMenuOpen) return
 
-    const scrollY = window.scrollY
     const body = document.body
     const html = document.documentElement
 
     // Save original styles
     const originalStyles = {
       bodyOverflow: body.style.overflow,
-      bodyPosition: body.style.position,
-      bodyTop: body.style.top,
-      bodyWidth: body.style.width,
-      bodyHeight: body.style.height,
       htmlOverflow: html.style.overflow,
-      htmlHeight: html.style.height,
     }
 
-    // Lock scroll - works on iOS, Android, and desktop
+    // Lock scroll - simple approach without body position manipulation
     body.style.overflow = 'hidden'
-    body.style.position = 'fixed'
-    body.style.top = `-${scrollY}px`
-    body.style.width = '100%'
-    body.style.height = '100%'
     html.style.overflow = 'hidden'
-    html.style.height = '100%'
 
-    // Prevent touchmove on body (extra protection for mobile)
+    // Prevent touchmove on body (critical for mobile, especially Telegram Mini App)
     const preventScroll = (e: TouchEvent) => {
       const target = e.target as HTMLElement
       // Allow scroll inside menu content
@@ -199,21 +190,22 @@ export default function Layout({ children }: LayoutProps) {
     }
     document.addEventListener('touchmove', preventScroll, { passive: false })
 
+    // Also prevent wheel scroll on desktop
+    const preventWheel = (e: WheelEvent) => {
+      const target = e.target as HTMLElement
+      if (target.closest('.mobile-menu-content')) return
+      e.preventDefault()
+    }
+    document.addEventListener('wheel', preventWheel, { passive: false })
+
     return () => {
       // Restore original styles
       body.style.overflow = originalStyles.bodyOverflow
-      body.style.position = originalStyles.bodyPosition
-      body.style.top = originalStyles.bodyTop
-      body.style.width = originalStyles.bodyWidth
-      body.style.height = originalStyles.bodyHeight
       html.style.overflow = originalStyles.htmlOverflow
-      html.style.height = originalStyles.htmlHeight
 
-      // Remove touchmove listener
+      // Remove listeners
       document.removeEventListener('touchmove', preventScroll)
-
-      // Restore scroll position
-      window.scrollTo(0, scrollY)
+      document.removeEventListener('wheel', preventWheel)
     }
   }, [mobileMenuOpen])
 
