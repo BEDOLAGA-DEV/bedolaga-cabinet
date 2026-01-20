@@ -210,23 +210,32 @@ export default function Layout({ children }: LayoutProps) {
     }
   }, [mobileMenuOpen])
 
-  // Detect virtual keyboard open/close using visualViewport API
+  // Detect virtual keyboard by tracking focus on input elements
   useEffect(() => {
-    const viewport = window.visualViewport
-    if (!viewport) return
-
-    const handleResize = () => {
-      // Keyboard is considered open if viewport height is significantly smaller than window height
-      const heightDiff = window.innerHeight - viewport.height
-      setIsKeyboardOpen(heightDiff > 150)
+    const handleFocusIn = (e: FocusEvent) => {
+      const target = e.target as HTMLElement
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
+        setIsKeyboardOpen(true)
+      }
     }
 
-    viewport.addEventListener('resize', handleResize)
-    viewport.addEventListener('scroll', handleResize)
+    const handleFocusOut = (e: FocusEvent) => {
+      const relatedTarget = e.relatedTarget as HTMLElement | null
+      // Only close if not focusing another input
+      if (!relatedTarget ||
+          (relatedTarget.tagName !== 'INPUT' &&
+           relatedTarget.tagName !== 'TEXTAREA' &&
+           !relatedTarget.isContentEditable)) {
+        setIsKeyboardOpen(false)
+      }
+    }
+
+    document.addEventListener('focusin', handleFocusIn)
+    document.addEventListener('focusout', handleFocusOut)
 
     return () => {
-      viewport.removeEventListener('resize', handleResize)
-      viewport.removeEventListener('scroll', handleResize)
+      document.removeEventListener('focusin', handleFocusIn)
+      document.removeEventListener('focusout', handleFocusOut)
     }
   }, [])
 
