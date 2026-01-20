@@ -65,6 +65,7 @@ export interface Subscription {
   autopay_enabled: boolean
   autopay_days_before: number
   subscription_url: string | null
+  hide_subscription_link: boolean
   is_active: boolean
   is_expired: boolean
   traffic_purchases?: TrafficPurchase[]

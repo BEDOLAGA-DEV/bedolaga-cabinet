@@ -5,9 +5,10 @@ import { Link } from 'react-router-dom'
 import { adminSettingsApi, SettingDefinition, SettingCategorySummary } from '../api/adminSettings'
 import { brandingApi, setCachedBranding } from '../api/branding'
 import { setCachedAnimationEnabled } from '../components/AnimatedBackground'
+import { setCachedFullscreenEnabled } from '../hooks/useTelegramWebApp'
 import { themeColorsApi } from '../api/themeColors'
-import { DEFAULT_THEME_COLORS, DEFAULT_ENABLED_THEMES } from '../types/theme'
-import { ColorPicker } from '../components/ColorPicker'
+import { DEFAULT_THEME_COLORS, DEFAULT_ENABLED_THEMES, ThemeColors } from '../types/theme'
+import { ThemeBentoPicker } from '../components/ThemeBentoPicker'
 import { applyThemeColors } from '../hooks/useThemeColors'
 import { updateEnabledThemesCache } from '../hooks/useTheme'
 
@@ -857,6 +858,7 @@ export default function AdminSettings() {
   const [searchQuery, setSearchQuery] = useState('')
   const [editingName, setEditingName] = useState(false)
   const [newName, setNewName] = useState('')
+  const [localColors, setLocalColors] = useState<ThemeColors | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Branding query and mutations
@@ -877,6 +879,21 @@ export default function AdminSettings() {
       // Update local cache immediately for instant effect
       setCachedAnimationEnabled(data.enabled)
       queryClient.invalidateQueries({ queryKey: ['animation-enabled'] })
+    },
+  })
+
+  // Fullscreen toggle query and mutation
+  const { data: fullscreenSettings } = useQuery({
+    queryKey: ['fullscreen-enabled'],
+    queryFn: brandingApi.getFullscreenEnabled,
+  })
+
+  const updateFullscreenMutation = useMutation({
+    mutationFn: (enabled: boolean) => brandingApi.updateFullscreenEnabled(enabled),
+    onSuccess: (data) => {
+      // Update local cache immediately for instant effect
+      setCachedFullscreenEnabled(data.enabled)
+      queryClient.invalidateQueries({ queryKey: ['fullscreen-enabled'] })
     },
   })
 
@@ -1229,6 +1246,29 @@ export default function AdminSettings() {
             </button>
           </div>
         </div>
+
+        {/* Fullscreen Toggle */}
+        <div className="mt-4 pt-4 border-t border-dark-700/50">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-medium text-dark-200">Авто-Fullscreen</h3>
+              <p className="text-xs text-dark-500 mt-0.5">
+                Автоматически открывать на полный экран в Telegram
+              </p>
+            </div>
+            <button
+              onClick={() => updateFullscreenMutation.mutate(!(fullscreenSettings?.enabled ?? false))}
+              disabled={updateFullscreenMutation.isPending}
+              className={`relative w-12 h-6 rounded-full transition-colors ${
+                (fullscreenSettings?.enabled ?? false) ? 'bg-accent-500' : 'bg-dark-600'
+              } ${updateFullscreenMutation.isPending ? 'opacity-50' : ''}`}
+            >
+              <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${
+                (fullscreenSettings?.enabled ?? false) ? 'left-7' : 'left-1'
+              }`} />
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Theme Colors Card */}
@@ -1316,113 +1356,18 @@ export default function AdminSettings() {
               Включите нужные темы для пользователей. Минимум одна тема должна быть активна.
             </p>
           </div>
-          {/* Accent Color */}
-          <ColorPicker
-            label={t('theme.accent')}
-            description={t('theme.accentDescription')}
-            value={themeColors?.accent || DEFAULT_THEME_COLORS.accent}
-            onChange={(color) => updateColorsMutation.mutate({ accent: color })}
-            disabled={updateColorsMutation.isPending}
+
+          <ThemeBentoPicker
+            currentColors={localColors || themeColors || DEFAULT_THEME_COLORS}
+            onColorsChange={(colors) => setLocalColors(colors)}
+            onSave={() => {
+              if (localColors) {
+                updateColorsMutation.mutate(localColors)
+                setLocalColors(null)
+              }
+            }}
+            isSaving={updateColorsMutation.isPending}
           />
-
-          {/* Dark Theme Section */}
-          <div>
-            <h3 className="text-sm font-medium text-dark-300 mb-3">{t('theme.darkTheme')}</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <ColorPicker
-                label={t('theme.background')}
-                value={themeColors?.darkBackground || DEFAULT_THEME_COLORS.darkBackground}
-                onChange={(color) => updateColorsMutation.mutate({ darkBackground: color })}
-                disabled={updateColorsMutation.isPending}
-              />
-              <ColorPicker
-                label={t('theme.surface')}
-                value={themeColors?.darkSurface || DEFAULT_THEME_COLORS.darkSurface}
-                onChange={(color) => updateColorsMutation.mutate({ darkSurface: color })}
-                disabled={updateColorsMutation.isPending}
-              />
-              <ColorPicker
-                label={t('theme.text')}
-                value={themeColors?.darkText || DEFAULT_THEME_COLORS.darkText}
-                onChange={(color) => updateColorsMutation.mutate({ darkText: color })}
-                disabled={updateColorsMutation.isPending}
-              />
-              <ColorPicker
-                label={t('theme.textSecondary')}
-                value={themeColors?.darkTextSecondary || DEFAULT_THEME_COLORS.darkTextSecondary}
-                onChange={(color) => updateColorsMutation.mutate({ darkTextSecondary: color })}
-                disabled={updateColorsMutation.isPending}
-              />
-            </div>
-          </div>
-
-          {/* Light Theme Section */}
-          <div>
-            <h3 className="text-sm font-medium text-dark-300 mb-3">{t('theme.lightTheme')}</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <ColorPicker
-                label={t('theme.background')}
-                value={themeColors?.lightBackground || DEFAULT_THEME_COLORS.lightBackground}
-                onChange={(color) => updateColorsMutation.mutate({ lightBackground: color })}
-                disabled={updateColorsMutation.isPending}
-              />
-              <ColorPicker
-                label={t('theme.surface')}
-                value={themeColors?.lightSurface || DEFAULT_THEME_COLORS.lightSurface}
-                onChange={(color) => updateColorsMutation.mutate({ lightSurface: color })}
-                disabled={updateColorsMutation.isPending}
-              />
-              <ColorPicker
-                label={t('theme.text')}
-                value={themeColors?.lightText || DEFAULT_THEME_COLORS.lightText}
-                onChange={(color) => updateColorsMutation.mutate({ lightText: color })}
-                disabled={updateColorsMutation.isPending}
-              />
-              <ColorPicker
-                label={t('theme.textSecondary')}
-                value={themeColors?.lightTextSecondary || DEFAULT_THEME_COLORS.lightTextSecondary}
-                onChange={(color) => updateColorsMutation.mutate({ lightTextSecondary: color })}
-                disabled={updateColorsMutation.isPending}
-              />
-            </div>
-          </div>
-
-          {/* Status Colors */}
-          <div>
-            <h3 className="text-sm font-medium text-dark-300 mb-3">{t('theme.statusColors')}</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <ColorPicker
-                label={t('theme.success')}
-                value={themeColors?.success || DEFAULT_THEME_COLORS.success}
-                onChange={(color) => updateColorsMutation.mutate({ success: color })}
-                disabled={updateColorsMutation.isPending}
-              />
-              <ColorPicker
-                label={t('theme.warning')}
-                value={themeColors?.warning || DEFAULT_THEME_COLORS.warning}
-                onChange={(color) => updateColorsMutation.mutate({ warning: color })}
-                disabled={updateColorsMutation.isPending}
-              />
-              <ColorPicker
-                label={t('theme.error')}
-                value={themeColors?.error || DEFAULT_THEME_COLORS.error}
-                onChange={(color) => updateColorsMutation.mutate({ error: color })}
-                disabled={updateColorsMutation.isPending}
-              />
-            </div>
-          </div>
-
-          {/* Preview */}
-          <div className="p-4 bg-dark-800/50 rounded-xl">
-            <h4 className="text-sm font-medium text-dark-300 mb-3">{t('theme.preview')}</h4>
-            <div className="flex flex-wrap gap-2">
-              <button className="btn-primary text-sm">{t('theme.previewButton')}</button>
-              <button className="btn-secondary text-sm">{t('theme.previewSecondary')}</button>
-              <span className="badge-success">{t('theme.success')}</span>
-              <span className="badge-warning">{t('theme.warning')}</span>
-              <span className="badge-error">{t('theme.error')}</span>
-            </div>
-          </div>
         </div>
       </div>
 

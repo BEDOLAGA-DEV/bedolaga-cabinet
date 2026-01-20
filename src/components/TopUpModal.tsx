@@ -1,10 +1,12 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import { useMutation } from '@tanstack/react-query'
 import { balanceApi } from '../api/balance'
 import { useCurrency } from '../hooks/useCurrency'
 import { checkRateLimit, getRateLimitResetTime, RATE_LIMIT_KEYS } from '../utils/rateLimit'
 import type { PaymentMethod } from '../types'
+import BentoCard from './ui/BentoCard'
 
 const TELEGRAM_LINK_REGEX = /^https?:\/\/t\.me\//i
 const isTelegramPaymentLink = (url: string): boolean => TELEGRAM_LINK_REGEX.test(url)
@@ -54,6 +56,35 @@ export default function TopUpModal({ method, onClose, initialAmountRubles }: Top
     method.options && method.options.length > 0 ? method.options[0].id : null
   )
   const popupRef = useRef<Window | null>(null)
+
+  // Scroll lock when modal is open
+  useEffect(() => {
+    const scrollY = window.scrollY
+
+    // Prevent all touch/wheel scroll on backdrop
+    const preventScroll = (e: TouchEvent) => {
+      const target = e.target as HTMLElement
+      if (target.closest('[data-modal-content]')) return
+      e.preventDefault()
+    }
+
+    const preventWheel = (e: WheelEvent) => {
+      const target = e.target as HTMLElement
+      if (target.closest('[data-modal-content]')) return
+      e.preventDefault()
+    }
+
+    document.addEventListener('touchmove', preventScroll, { passive: false })
+    document.addEventListener('wheel', preventWheel, { passive: false })
+    document.body.style.overflow = 'hidden'
+
+    return () => {
+      document.removeEventListener('touchmove', preventScroll)
+      document.removeEventListener('wheel', preventWheel)
+      document.body.style.overflow = ''
+      window.scrollTo(0, scrollY)
+    }
+  }, [])
 
   const hasOptions = method.options && method.options.length > 0
   const minRubles = method.min_amount_kopeks / 100
@@ -132,105 +163,181 @@ export default function TopUpModal({ method, onClose, initialAmountRubles }: Top
     : convertAmount(rub).toFixed(currencyDecimals)
   const isPending = topUpMutation.isPending || starsPaymentMutation.isPending
 
-  return (
-    <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center px-4 pt-14 pb-28 sm:pt-0 sm:pb-0">
-      <div className="absolute inset-0" onClick={onClose} />
+  // Auto-focus input on mount
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      inputRef.current?.focus()
+    }, 100)
+    return () => clearTimeout(timer)
+  }, [])
 
-      <div className="relative w-full max-w-sm bg-dark-900 rounded-2xl border border-dark-700/50 shadow-2xl overflow-hidden">
+  const modalContent = (
+    <div
+      className="fixed inset-0 bg-dark-950/80 backdrop-blur-sm z-[60] flex items-center justify-center p-4 overflow-hidden animate-in fade-in duration-200"
+      style={{
+        paddingBottom: `max(1rem, env(safe-area-inset-bottom, 0px))`,
+      }}
+      onClick={onClose}
+    >
+      <div
+        data-modal-content
+        className="w-full max-w-sm bg-dark-900/90 backdrop-blur-xl rounded-[32px] border border-dark-700/50 shadow-2xl overflow-hidden animate-scale-in flex flex-col max-h-[90vh]"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 bg-dark-800/50">
-          <span className="font-semibold text-dark-100">{methodName}</span>
-          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-dark-700 text-dark-400">
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <div className="flex items-center justify-between px-6 py-5 bg-dark-800/30 border-b border-dark-700/30">
+          <span className="text-lg font-bold text-dark-50 tracking-tight">{methodName}</span>
+          <button 
+            onClick={onClose} 
+            className="p-2 -mr-2 rounded-xl hover:bg-dark-700/50 text-dark-400 hover:text-dark-100 transition-colors"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
 
-        <div className="p-4 space-y-3">
-          {/* Payment options */}
-          {hasOptions && method.options && (
-            <div className="flex gap-2">
-              {method.options.map((opt) => (
-                <button
-                  key={opt.id}
-                  type="button"
-                  onClick={() => setSelectedOption(opt.id)}
-                  className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all ${
-                    selectedOption === opt.id
-                      ? 'bg-accent-500 text-white'
-                      : 'bg-dark-800 text-dark-300'
-                  }`}
-                >
-                  {opt.name}
-                </button>
-              ))}
-            </div>
-          )}
-
-          {/* Amount input */}
-          <div className="relative">
-            <input
-              ref={inputRef}
-              type="number"
-              inputMode="decimal"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              placeholder={`${formatAmount(minRubles, 0)} – ${formatAmount(maxRubles, 0)}`}
-              className="w-full h-12 px-4 pr-12 text-lg font-semibold bg-dark-800 border border-dark-700 rounded-xl text-dark-100 placeholder:text-dark-500 focus:outline-none focus:border-accent-500"
-              autoComplete="off"
-            />
-            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-dark-500 font-medium">
-              {currencySymbol}
-            </span>
-          </div>
-
-          {/* Quick amounts */}
+        <div className="p-6 space-y-6 overflow-y-auto custom-scrollbar">
           {quickAmounts.length > 0 && (
-            <div className="flex gap-2">
+            <div className="grid grid-cols-2 gap-3">
               {quickAmounts.map((a) => {
                 const val = getQuickValue(a)
+                const isSelected = amount === val
+                
                 return (
-                  <button
+                  <BentoCard
                     key={a}
+                    as="button"
                     type="button"
                     onClick={() => { setAmount(val); inputRef.current?.blur() }}
-                    className={`flex-1 py-2 rounded-lg text-sm font-medium ${
-                      amount === val ? 'bg-accent-500 text-white' : 'bg-dark-800 text-dark-300'
-                    }`}
+                    className={`flex flex-col items-center justify-center py-4 px-2 transition-all duration-300 group
+                      ${isSelected 
+                        ? 'border-accent-500 bg-accent-500/10 shadow-glow' 
+                        : 'hover:bg-dark-800/80 hover:border-dark-600'
+                      }`}
                   >
-                    {formatAmount(a, 0)}
-                  </button>
+                    <span className={`text-xl font-extrabold mb-0.5 ${isSelected ? 'text-accent-400' : 'text-dark-100 group-hover:text-white'}`}>
+                      {formatAmount(a, 0)}
+                    </span>
+                    <span className={`text-xs font-semibold uppercase tracking-wider ${isSelected ? 'text-accent-300/80' : 'text-dark-500 group-hover:text-dark-400'}`}>
+                      {currencySymbol}
+                    </span>
+                  </BentoCard>
                 )
               })}
             </div>
           )}
 
-          {/* Error */}
-          {error && (
-            <div className="text-error-400 text-sm text-center py-1">{error}</div>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between px-1">
+              <label className="text-xs font-semibold text-dark-400 uppercase tracking-wider">
+                {t('balance.amount') || 'Amount'}
+              </label>
+              <span className="text-xs text-dark-500 font-medium">
+                {formatAmount(minRubles, 0)} – {formatAmount(maxRubles, 0)} {currencySymbol}
+              </span>
+            </div>
+            
+            <div className="relative group">
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-accent-500/20 to-accent-600/20 rounded-2xl blur opacity-0 group-focus-within:opacity-100 transition duration-500" />
+              <div className="relative flex items-center bg-dark-800/50 border border-dark-700/50 rounded-2xl p-1 focus-within:bg-dark-800 focus-within:border-accent-500/50 transition-all duration-300">
+                <input
+                  ref={inputRef}
+                  type="number"
+                  inputMode="decimal"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  placeholder="0"
+                  className="w-full h-14 pl-5 pr-12 text-2xl font-bold bg-transparent text-dark-50 placeholder:text-dark-600 focus:outline-none"
+                  autoComplete="off"
+                />
+                <div className="absolute right-5 pointer-events-none">
+                  <span className="text-lg font-bold text-dark-400 group-focus-within:text-accent-400 transition-colors">
+                    {currencySymbol}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {hasOptions && method.options && (
+            <div className="space-y-3">
+              <label className="text-xs font-semibold text-dark-400 uppercase tracking-wider px-1">
+                Method Type
+              </label>
+              <div className="grid grid-cols-2 gap-2 bg-dark-800/30 p-1.5 rounded-2xl border border-dark-700/30">
+                {method.options.map((opt) => {
+                  const isSelected = selectedOption === opt.id
+                  return (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      onClick={() => setSelectedOption(opt.id)}
+                      className={`relative py-2.5 px-3 rounded-xl text-sm font-bold transition-all duration-300 ${
+                        isSelected
+                          ? 'bg-dark-700 text-white shadow-lg'
+                          : 'text-dark-400 hover:text-dark-200 hover:bg-dark-800/50'
+                      }`}
+                    >
+                      {isSelected && (
+                         <div className="absolute inset-0 bg-gradient-to-tr from-accent-500/10 to-transparent rounded-xl pointer-events-none" />
+                      )}
+                      {opt.name}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
           )}
 
-          {/* Submit */}
+          {error && (
+            <div className="bg-error-500/10 border border-error-500/20 rounded-xl p-3 flex items-start gap-3 animate-in fade-in slide-in-from-top-2">
+              <div className="text-error-400 mt-0.5">
+                <svg className="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <p className="text-sm font-medium text-error-200 leading-snug">{error}</p>
+            </div>
+          )}
+
           <button
             type="button"
             onClick={handleSubmit}
             disabled={isPending || !amount}
-            className="btn-primary w-full h-11 text-base font-semibold"
+            className={`
+              w-full h-14 rounded-2xl text-base font-bold tracking-wide transition-all duration-300
+              ${isPending || !amount 
+                ? 'bg-dark-800 text-dark-500 cursor-not-allowed border border-dark-700' 
+                : 'bg-accent-500 text-white shadow-lg shadow-accent-500/30 hover:bg-accent-400 hover:scale-[1.02] active:scale-[0.98]'
+              }
+            `}
           >
             {isPending ? (
-              <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              <div className="flex items-center justify-center gap-2">
+                <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <span>Processing...</span>
+              </div>
             ) : (
-              <>
-                {t('balance.topUp')}
+              <div className="flex items-center justify-center gap-2">
+                <span>{t('balance.topUp')}</span>
                 {amount && parseFloat(amount) > 0 && (
-                  <span className="ml-2 opacity-80">{formatAmount(parseFloat(amount), currencyDecimals)} {currencySymbol}</span>
+                  <>
+                    <span className="w-1 h-1 bg-white/40 rounded-full" />
+                    <span>{formatAmount(parseFloat(amount), currencyDecimals)} {currencySymbol}</span>
+                  </>
                 )}
-              </>
+              </div>
             )}
           </button>
         </div>
       </div>
     </div>
   )
+
+  if (typeof document !== 'undefined') {
+    return createPortal(modalContent, document.body)
+  }
+  return modalContent
 }
+

@@ -68,6 +68,12 @@ export default function Referral() {
 		queryFn: referralApi.getReferralInfo,
 	})
 
+	// Build referral link using frontend env variable for correct bot username
+	const botUsername = import.meta.env.VITE_TELEGRAM_BOT_USERNAME
+	const referralLink = info?.referral_code && botUsername
+		? `https://t.me/${botUsername}?start=${info.referral_code}`
+		: info?.referral_link || ''
+
 	const { data: terms } = useQuery({
 		queryKey: ['referral-terms'],
 		queryFn: referralApi.getReferralTerms,
@@ -90,15 +96,15 @@ export default function Referral() {
 	})
 
 	const copyLink = () => {
-		if (info?.referral_link) {
-			navigator.clipboard.writeText(info.referral_link)
+		if (referralLink) {
+			navigator.clipboard.writeText(referralLink)
 			setCopied(true)
 			setTimeout(() => setCopied(false), 2000)
 		}
 	}
 
 	const shareLink = () => {
-		if (!info?.referral_link) return
+		if (!referralLink) return
 		const shareText = t('referral.shareMessage', {
 			percent: info?.commission_percent || 0,
 			botName: branding?.name || import.meta.env.VITE_APP_NAME || 'Cabinet',
@@ -109,7 +115,7 @@ export default function Referral() {
 				.share({
 					title: t('referral.title'),
 					text: shareText,
-					url: info.referral_link,
+					url: referralLink,
 				})
 				.catch(() => {
 					// ignore cancellation errors
@@ -118,7 +124,7 @@ export default function Referral() {
 		}
 
 		const telegramUrl = `https://t.me/share/url?url=${encodeURIComponent(
-			info.referral_link
+			referralLink
 		)}&text=${encodeURIComponent(shareText)}`
 		window.open(telegramUrl, '_blank', 'noopener,noreferrer')
 	}
@@ -138,8 +144,8 @@ export default function Referral() {
 			</h1>
 
 			{/* Stats Cards */}
-			<div className='grid grid-cols-2 sm:grid-cols-3 gap-4'>
-				<div className='card'>
+			<div className='bento-grid'>
+				<div className='bento-card-hover'>
 					<div className='text-sm text-dark-400'>
 						{t('referral.stats.totalReferrals')}
 					</div>
@@ -149,7 +155,7 @@ export default function Referral() {
 						{t('referral.stats.activeReferrals').toLowerCase()}
 					</div>
 				</div>
-				<div className='card'>
+				<div className='bento-card-hover'>
 					<div className='text-sm text-dark-400'>
 						{t('referral.stats.totalEarnings')}
 					</div>
@@ -157,7 +163,7 @@ export default function Referral() {
 						{formatPositive(info?.total_earnings_rubles || 0)}
 					</div>
 				</div>
-				<div className='card col-span-2 sm:col-span-1'>
+				<div className='bento-card-hover col-span-2 sm:col-span-1'>
 					<div className='text-sm text-dark-400'>
 						{t('referral.stats.commissionRate')}
 					</div>
@@ -168,7 +174,7 @@ export default function Referral() {
 			</div>
 
 			{/* Referral Link */}
-			<div className='card'>
+			<div className='bento-card'>
 				<h2 className='text-lg font-semibold text-dark-100 mb-4'>
 					{t('referral.yourLink')}
 				</h2>
@@ -176,16 +182,16 @@ export default function Referral() {
 					<input
 						type='text'
 						readOnly
-						value={info?.referral_link || ''}
+						value={referralLink}
 						className='input flex-1'
 					/>
 					<div className='flex gap-2'>
 						<button
 							onClick={copyLink}
-							disabled={!info?.referral_link}
+							disabled={!referralLink}
 							className={`btn-primary px-5 ${
 								copied ? 'bg-success-500 hover:bg-success-500' : ''
-							} ${!info?.referral_link ? 'opacity-50 cursor-not-allowed' : ''}`}
+							} ${!referralLink ? 'opacity-50 cursor-not-allowed' : ''}`}
 						>
 							{copied ? <CheckIcon /> : <CopyIcon />}
 							<span className='ml-2'>
@@ -194,9 +200,9 @@ export default function Referral() {
 						</button>
 						<button
 							onClick={shareLink}
-							disabled={!info?.referral_link}
+							disabled={!referralLink}
 							className={`btn-secondary px-5 flex items-center ${
-								!info?.referral_link ? 'opacity-50 cursor-not-allowed' : ''
+								!referralLink ? 'opacity-50 cursor-not-allowed' : ''
 							}`}
 						>
 							<ShareIcon />
@@ -211,7 +217,7 @@ export default function Referral() {
 
 			{/* Program Terms */}
 			{terms && (
-				<div className='card'>
+				<div className='bento-card'>
 					<h2 className='text-lg font-semibold text-dark-100 mb-4'>
 						{t('referral.terms.title')}
 					</h2>
@@ -253,7 +259,7 @@ export default function Referral() {
 			)}
 
 			{/* Referrals List */}
-			<div className='card'>
+			<div className='bento-card'>
 				<h2 className='text-lg font-semibold text-dark-100 mb-4'>
 					{t('referral.yourReferrals')}
 				</h2>
@@ -308,7 +314,7 @@ export default function Referral() {
 
 			{/* Earnings History */}
 			{earnings?.items && earnings.items.length > 0 && (
-				<div className='card'>
+				<div className='bento-card'>
 					<h2 className='text-lg font-semibold text-dark-100 mb-4'>
 						{t('referral.earningsHistory')}
 					</h2>

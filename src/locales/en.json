@@ -33,7 +33,8 @@
     "contests": "Contests",
     "polls": "Polls",
     "info": "Info",
-    "wheel": "Fortune Wheel"
+    "wheel": "Fortune Wheel",
+    "menu": "Menu"
   },
   "notifications": {
     "ticketNotifications": "Ticket Notifications",
@@ -184,7 +185,9 @@
       "yourDevice": "Your device",
       "copyLink": "Copy subscription link",
       "copied": "Link copied!",
-      "openLink": "Open link"
+      "openLink": "Open link",
+      "instructions": "Instructions",
+      "changeApp": "Change app"
     },
     "myDevices": "My Devices",
     "noDevices": "No connected devices",
@@ -1311,6 +1314,25 @@
       "days": "d",
       "hours": "h",
       "minutes": "m"
+    }
+  },
+  "blocking": {
+    "maintenance": {
+      "title": "Maintenance",
+      "defaultMessage": "Service is temporarily unavailable. Maintenance in progress.",
+      "reason": "Reason",
+      "waitMessage": "Please wait..."
+    },
+    "channel": {
+      "title": "Channel Subscription",
+      "defaultMessage": "Please subscribe to our channel to continue",
+      "openChannel": "Open Channel",
+      "checkSubscription": "Check Subscription",
+      "checking": "Checking...",
+      "waitSeconds": "Wait {{seconds}} sec.",
+      "hint": "Click check button after subscribing",
+      "notSubscribed": "You haven't subscribed to the channel yet",
+      "checkError": "Check failed. Please try again later."
     }
   }
 }

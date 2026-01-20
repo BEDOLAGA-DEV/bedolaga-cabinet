@@ -43,3 +43,6 @@ coverage/
 tmp/
 temp/
 miniapp/
+
+# AI & Agents context
+.ai/

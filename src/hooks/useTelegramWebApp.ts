@@ -1,16 +1,37 @@
 import { useEffect, useState, useCallback } from 'react'
 
+const FULLSCREEN_CACHE_KEY = 'cabinet_fullscreen_enabled'
+
+// Get cached fullscreen setting
+export const getCachedFullscreenEnabled = (): boolean => {
+  try {
+    return localStorage.getItem(FULLSCREEN_CACHE_KEY) === 'true'
+  } catch {
+    return false
+  }
+}
+
+// Set cached fullscreen setting
+export const setCachedFullscreenEnabled = (enabled: boolean) => {
+  try {
+    localStorage.setItem(FULLSCREEN_CACHE_KEY, String(enabled))
+  } catch {
+    // localStorage not available
+  }
+}
+
 /**
  * Hook for Telegram WebApp API integration
  * Provides fullscreen mode, safe area insets, and other WebApp features
  */
 export function useTelegramWebApp() {
-  const [isFullscreen, setIsFullscreen] = useState(false)
-  const [isTelegramWebApp, setIsTelegramWebApp] = useState(false)
-  const [safeAreaInset, setSafeAreaInset] = useState({ top: 0, bottom: 0, left: 0, right: 0 })
-  const [contentSafeAreaInset, setContentSafeAreaInset] = useState({ top: 0, bottom: 0, left: 0, right: 0 })
-
+  // Initialize synchronously to avoid flash/flicker on first render
   const webApp = typeof window !== 'undefined' ? window.Telegram?.WebApp : undefined
+
+  const [isFullscreen, setIsFullscreen] = useState(() => webApp?.isFullscreen || false)
+  const [isTelegramWebApp, setIsTelegramWebApp] = useState(() => !!webApp)
+  const [safeAreaInset, setSafeAreaInset] = useState(() => webApp?.safeAreaInset || { top: 0, bottom: 0, left: 0, right: 0 })
+  const [contentSafeAreaInset, setContentSafeAreaInset] = useState(() => webApp?.contentSafeAreaInset || { top: 0, bottom: 0, left: 0, right: 0 })
 
   useEffect(() => {
     if (!webApp) {
@@ -122,6 +143,16 @@ export function initTelegramWebApp() {
     // Disable vertical swipes to prevent accidental closing
     if (webApp.disableVerticalSwipes) {
       webApp.disableVerticalSwipes()
+    }
+
+    // Auto-enter fullscreen if enabled in settings (use cached value for instant response)
+    const fullscreenEnabled = getCachedFullscreenEnabled()
+    if (fullscreenEnabled && webApp.requestFullscreen && !webApp.isFullscreen) {
+      try {
+        webApp.requestFullscreen()
+      } catch (e) {
+        console.warn('Auto-fullscreen failed:', e)
+      }
     }
   }
 }

@@ -32,6 +32,12 @@ const ChevronRightIcon = () => (
   </svg>
 )
 
+const RefreshIcon = ({ className = "w-4 h-4" }: { className?: string }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+  </svg>
+)
+
 // Check if device might be low-performance (Telegram WebApp on mobile)
 const isLowPerfDevice = (() => {
   const isTelegramWebApp = !!(window as unknown as { Telegram?: { WebApp?: unknown } }).Telegram?.WebApp
@@ -123,6 +129,47 @@ export default function Dashboard() {
     },
   })
 
+  // Traffic refresh state and mutation
+  const [trafficRefreshCooldown, setTrafficRefreshCooldown] = useState(0)
+  const [trafficData, setTrafficData] = useState<{
+    traffic_used_gb: number
+    traffic_used_percent: number
+    is_unlimited: boolean
+  } | null>(null)
+
+  const refreshTrafficMutation = useMutation({
+    mutationFn: subscriptionApi.refreshTraffic,
+    onSuccess: (data) => {
+      setTrafficData({
+        traffic_used_gb: data.traffic_used_gb,
+        traffic_used_percent: data.traffic_used_percent,
+        is_unlimited: data.is_unlimited,
+      })
+      if (data.rate_limited && data.retry_after_seconds) {
+        setTrafficRefreshCooldown(data.retry_after_seconds)
+      } else {
+        setTrafficRefreshCooldown(60)
+      }
+      // Also update subscription query cache
+      queryClient.invalidateQueries({ queryKey: ['subscription'] })
+    },
+    onError: (error: { response?: { status?: number; headers?: { get?: (key: string) => string } } }) => {
+      if (error.response?.status === 429) {
+        const retryAfter = error.response.headers?.get?.('Retry-After')
+        setTrafficRefreshCooldown(retryAfter ? parseInt(retryAfter, 10) : 60)
+      }
+    },
+  })
+
+  // Cooldown timer
+  useEffect(() => {
+    if (trafficRefreshCooldown <= 0) return
+    const timer = setInterval(() => {
+      setTrafficRefreshCooldown((prev) => Math.max(0, prev - 1))
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [trafficRefreshCooldown])
+
   const hasNoSubscription = !subscription && !subLoading && subError
 
   // Show onboarding for new users after data loads
@@ -207,7 +254,7 @@ export default function Dashboard() {
 
       {/* Subscription Status - Main Card */}
       {subscription && (
-        <div className="card">
+        <div className="bento-card">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-lg font-semibold text-dark-100">{t('subscription.status')}</h2>
             <span className={subscription.is_active ? 'badge-success' : 'badge-error'}>
@@ -223,9 +270,19 @@ export default function Dashboard() {
               </div>
             </div>
             <div>
-              <div className="text-sm text-dark-500 mb-1">{t('subscription.traffic')}</div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-sm text-dark-500">{t('subscription.traffic')}</span>
+                <button
+                  onClick={() => refreshTrafficMutation.mutate()}
+                  disabled={refreshTrafficMutation.isPending || trafficRefreshCooldown > 0}
+                  className="p-1 rounded-full hover:bg-dark-700/50 text-dark-400 hover:text-accent-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  title={trafficRefreshCooldown > 0 ? `${trafficRefreshCooldown}s` : t('common.refresh')}
+                >
+                  <RefreshIcon className={`w-3.5 h-3.5 ${refreshTrafficMutation.isPending ? 'animate-spin' : ''}`} />
+                </button>
+              </div>
               <div className="text-dark-100 font-medium">
-                {subscription.traffic_used_gb.toFixed(1)} / {subscription.traffic_limit_gb || '∞'} GB
+                {(trafficData?.traffic_used_gb ?? subscription.traffic_used_gb).toFixed(1)} / {subscription.traffic_limit_gb || '∞'} GB
               </div>
             </div>
             <div>
@@ -248,12 +305,14 @@ export default function Dashboard() {
             <div className="mt-6">
               <div className="flex justify-between text-sm mb-2">
                 <span className="text-dark-400">{t('subscription.trafficUsed')}</span>
-                <span className="text-dark-300">{subscription.traffic_used_percent.toFixed(1)}%</span>
+                <span className="text-dark-300">
+                  {(trafficData?.traffic_used_percent ?? subscription.traffic_used_percent).toFixed(1)}%
+                </span>
               </div>
               <div className="progress-bar">
                 <div
-                  className={`progress-fill ${getTrafficColor(subscription.traffic_used_percent)}`}
-                  style={{ width: `${Math.min(subscription.traffic_used_percent, 100)}%` }}
+                  className={`progress-fill ${getTrafficColor(trafficData?.traffic_used_percent ?? subscription.traffic_used_percent)}`}
+                  style={{ width: `${Math.min(trafficData?.traffic_used_percent ?? subscription.traffic_used_percent, 100)}%` }}
                 />
               </div>
             </div>
@@ -277,9 +336,9 @@ export default function Dashboard() {
       )}
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="bento-grid">
         {/* Balance */}
-        <Link to="/balance" className="card-hover group" data-onboarding="balance">
+        <Link to="/balance" className="bento-card-hover group" data-onboarding="balance">
           <div className="flex items-center justify-between mb-3">
             <span className="text-dark-400 text-sm">{t('balance.currentBalance')}</span>
             <span className="text-dark-600 group-hover:text-accent-400 transition-colors">
@@ -293,7 +352,7 @@ export default function Dashboard() {
         </Link>
 
         {/* Subscription */}
-        <Link to="/subscription" className="card-hover group" data-onboarding="subscription-status">
+        <Link to="/subscription" className="bento-card-hover group" data-onboarding="subscription-status">
           <div className="flex items-center justify-between mb-3">
             <span className="text-dark-400 text-sm">{t('subscription.title')}</span>
             <span className="text-dark-600 group-hover:text-accent-400 transition-colors">
@@ -329,7 +388,7 @@ export default function Dashboard() {
         </Link>
 
         {/* Referrals */}
-        <Link to="/referral" className="card-hover group">
+        <Link to="/referral" className="bento-card-hover group">
           <div className="flex items-center justify-between mb-3">
             <span className="text-dark-400 text-sm">{t('referral.stats.totalReferrals')}</span>
             <span className="text-dark-600 group-hover:text-accent-400 transition-colors">
@@ -344,7 +403,7 @@ export default function Dashboard() {
         </Link>
 
         {/* Earnings */}
-        <Link to="/referral" className="card-hover group">
+        <Link to="/referral" className="bento-card-hover group">
           <div className="flex items-center justify-between mb-3">
             <span className="text-dark-400 text-sm">{t('referral.stats.totalEarnings')}</span>
             <span className="text-dark-600 group-hover:text-accent-400 transition-colors">
@@ -363,7 +422,7 @@ export default function Dashboard() {
 
       {/* Trial Activation */}
       {hasNoSubscription && !trialLoading && trialInfo?.is_available && (
-        <div className="card border-accent-500/30 bg-gradient-to-br from-accent-500/5 to-transparent">
+        <div className="bento-card-glow border-accent-500/30 bg-gradient-to-br from-accent-500/5 to-transparent">
           <div className="flex items-start gap-4">
             <div className="w-12 h-12 rounded-xl bg-accent-500/20 flex items-center justify-center flex-shrink-0">
               <SparklesIcon />
@@ -424,7 +483,7 @@ export default function Dashboard() {
       {wheelConfig?.is_enabled && (
         <Link
           to="/wheel"
-          className="group card-hover flex items-center justify-between"
+          className="group bento-card-hover flex items-center justify-between"
         >
           <div className="flex items-center gap-4">
             {/* Emoji */}
@@ -445,7 +504,7 @@ export default function Dashboard() {
       )}
 
       {/* Quick Actions */}
-      <div className="card" data-onboarding="quick-actions">
+      <div className="bento-card" data-onboarding="quick-actions">
         <h3 className="text-lg font-semibold text-dark-100 mb-4">{t('dashboard.quickActions')}</h3>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <Link to="/balance" className="btn-secondary justify-center text-center text-sm py-2.5">

@@ -4,16 +4,11 @@ import { brandingApi } from '../api/branding'
 
 const ANIMATION_CACHE_KEY = 'cabinet_animation_enabled'
 
-// Detect low-performance device (mobile in Telegram WebApp)
+// Detect if user prefers reduced motion
 const isLowPerformance = (): boolean => {
-  // Check if running in Telegram WebApp
-  const isTelegramWebApp = !!(window as unknown as { Telegram?: { WebApp?: unknown } }).Telegram?.WebApp
-  // Check if mobile
-  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
-  // Check for reduced motion preference
+  // Only check for reduced motion preference - let animation run everywhere else
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-
-  return prefersReducedMotion || (isTelegramWebApp && isMobile)
+  return prefersReducedMotion
 }
 
 // Get cached value from localStorage
