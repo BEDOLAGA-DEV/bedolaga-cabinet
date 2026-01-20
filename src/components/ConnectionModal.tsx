@@ -342,7 +342,7 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
                 <p className="text-sm text-dark-200 leading-snug">
                   {getLocalizedText(selectedApp.installationStep.description)}
                 </p>
-                {selectedApp.installationStep.buttons?.length > 0 && (
+                {selectedApp.installationStep.buttons && selectedApp.installationStep.buttons.length > 0 && (
                   <div className="flex flex-wrap gap-2 mt-2">
                     {selectedApp.installationStep.buttons.filter(btn => isValidExternalUrl(btn.buttonLink)).map((btn, idx) => (
                       <a
