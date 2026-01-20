@@ -370,7 +370,7 @@ export default function Layout({ children }: LayoutProps) {
         <div className="w-full mx-auto px-4 sm:px-6">
           <div className="flex justify-between items-center h-16 lg:h-20">
             {/* Logo */}
-            <Link to="/" className={`flex items-center gap-2.5 flex-shrink-0 ${!appName ? 'lg:mr-4' : ''}`}>
+            <Link to="/" onClick={() => setMobileMenuOpen(false)} className={`flex items-center gap-2.5 flex-shrink-0 ${!appName ? 'lg:mr-4' : ''}`}>
               <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 rounded-xl bg-gradient-to-br from-accent-400 to-accent-600 flex items-center justify-center overflow-hidden shadow-lg shadow-accent-500/20 flex-shrink-0 relative">
                 {/* Always show letter as fallback */}
                 <span className={`text-white font-bold text-lg sm:text-xl lg:text-2xl absolute transition-opacity duration-200 ${hasCustomLogo && logoLoaded ? 'opacity-0' : 'opacity-100'}`}>
@@ -435,7 +435,10 @@ export default function Layout({ children }: LayoutProps) {
               {/* Theme toggle button - only show if both themes are enabled */}
               {canToggle && (
                 <button
-                  onClick={toggleTheme}
+                  onClick={() => {
+                    toggleTheme()
+                    setMobileMenuOpen(false)
+                  }}
                   className="relative p-2.5 rounded-xl transition-all duration-300 hover:scale-110 active:scale-95
                              dark:text-dark-400 dark:hover:text-dark-100 dark:hover:bg-dark-800
                              text-champagne-500 hover:text-champagne-800 hover:bg-champagne-200/50"
@@ -453,10 +456,14 @@ export default function Layout({ children }: LayoutProps) {
                 </button>
               )}
 
-              <PromoDiscountBadge />
-              <TicketNotificationBell isAdmin={isAdminActive()} />
+              <div onClick={() => setMobileMenuOpen(false)}>
+                <PromoDiscountBadge />
+              </div>
+              <div onClick={() => setMobileMenuOpen(false)}>
+                <TicketNotificationBell isAdmin={isAdminActive()} />
+              </div>
               {/* Hide language switcher on mobile when promo is active */}
-              <div className={isPromoActive ? 'hidden sm:block' : ''}>
+              <div className={isPromoActive ? 'hidden sm:block' : ''} onClick={() => setMobileMenuOpen(false)}>
                 <LanguageSwitcher />
               </div>
 

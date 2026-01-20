@@ -55,52 +55,31 @@ export default function TopUpModal({ method, onClose, initialAmountRubles }: Top
   )
   const popupRef = useRef<Window | null>(null)
 
-  // Scroll lock when modal is open (cross-platform including Android)
+  // Scroll lock when modal is open
   useEffect(() => {
     const scrollY = window.scrollY
-    const body = document.body
-    const html = document.documentElement
 
-    // Save original styles
-    const originalStyles = {
-      bodyOverflow: body.style.overflow,
-      bodyPosition: body.style.position,
-      bodyTop: body.style.top,
-      bodyWidth: body.style.width,
-      bodyHeight: body.style.height,
-      htmlOverflow: html.style.overflow,
-      htmlHeight: html.style.height,
-      bodyTouchAction: body.style.touchAction,
-    }
-
-    // Lock scroll
-    body.style.overflow = 'hidden'
-    body.style.position = 'fixed'
-    body.style.top = `-${scrollY}px`
-    body.style.width = '100%'
-    body.style.height = '100%'
-    body.style.touchAction = 'none'
-    html.style.overflow = 'hidden'
-    html.style.height = '100%'
-
-    // Prevent touchmove on backdrop (Android fix)
+    // Prevent all touch/wheel scroll on backdrop
     const preventScroll = (e: TouchEvent) => {
       const target = e.target as HTMLElement
       if (target.closest('[data-modal-content]')) return
       e.preventDefault()
     }
+
+    const preventWheel = (e: WheelEvent) => {
+      const target = e.target as HTMLElement
+      if (target.closest('[data-modal-content]')) return
+      e.preventDefault()
+    }
+
     document.addEventListener('touchmove', preventScroll, { passive: false })
+    document.addEventListener('wheel', preventWheel, { passive: false })
+    document.body.style.overflow = 'hidden'
 
     return () => {
-      body.style.overflow = originalStyles.bodyOverflow
-      body.style.position = originalStyles.bodyPosition
-      body.style.top = originalStyles.bodyTop
-      body.style.width = originalStyles.bodyWidth
-      body.style.height = originalStyles.bodyHeight
-      body.style.touchAction = originalStyles.bodyTouchAction
-      html.style.overflow = originalStyles.htmlOverflow
-      html.style.height = originalStyles.htmlHeight
       document.removeEventListener('touchmove', preventScroll)
+      document.removeEventListener('wheel', preventWheel)
+      document.body.style.overflow = ''
       window.scrollTo(0, scrollY)
     }
   }, [])
