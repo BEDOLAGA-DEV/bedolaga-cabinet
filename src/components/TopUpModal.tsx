@@ -164,17 +164,22 @@ export default function TopUpModal({ method, onClose, initialAmountRubles }: Top
     : convertAmount(rub).toFixed(currencyDecimals)
   const isPending = topUpMutation.isPending || starsPaymentMutation.isPending
 
+  // Auto-focus input on mount
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      inputRef.current?.focus()
+    }, 100)
+    return () => clearTimeout(timer)
+  }, [])
+
   return (
     <div
-      className="fixed inset-0 bg-black/70 z-[60] flex items-center justify-center"
+      className="fixed inset-0 bg-black/70 z-[60] flex items-start justify-center"
+      style={{ paddingTop: `calc(2rem + env(safe-area-inset-top, 0px))` }}
       onClick={onClose}
     >
       <div
         className="w-[calc(100%-2rem)] max-w-sm bg-dark-900 rounded-2xl border border-dark-700/50 shadow-2xl overflow-hidden animate-scale-in"
-        style={{
-          marginTop: 'env(safe-area-inset-top, 0px)',
-          marginBottom: 'env(safe-area-inset-bottom, 0px)',
-        }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}

@@ -339,18 +339,19 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
     window.location.href = redirectUrl
   }
 
-  // Modal wrapper - centered on all devices
+  // Modal wrapper - top aligned with auto-focus
   const ModalWrapper = ({ children }: { children: React.ReactNode }) => (
     <div
-      className="fixed inset-0 bg-black/70 z-[60] flex items-center justify-center"
+      className="fixed inset-0 bg-black/70 z-[60] flex items-start justify-center pt-8 sm:pt-12"
+      style={{ paddingTop: `calc(2rem + env(safe-area-inset-top, 0px))` }}
       onClick={onClose}
     >
       <div
-        className="w-[calc(100%-2rem)] max-w-sm bg-dark-900 rounded-2xl border border-dark-700/50 overflow-hidden animate-scale-in shadow-2xl flex flex-col"
+        ref={(el) => el?.focus()}
+        tabIndex={-1}
+        className="w-[calc(100%-2rem)] max-w-sm bg-dark-900 rounded-2xl border border-dark-700/50 overflow-hidden animate-scale-in shadow-2xl flex flex-col outline-none"
         style={{
-          maxHeight: 'calc(100dvh - 4rem)',
-          marginTop: 'env(safe-area-inset-top, 0px)',
-          marginBottom: 'env(safe-area-inset-bottom, 0px)',
+          maxHeight: 'calc(100dvh - 6rem)',
         }}
         onClick={(e) => e.stopPropagation()}
       >
