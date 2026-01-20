@@ -97,7 +97,7 @@ export default function Profile() {
       <h1 className="text-2xl sm:text-3xl font-bold text-dark-50">{t('profile.title')}</h1>
 
       {/* User Info Card */}
-      <div className="card">
+      <div className="bento-card">
         <h2 className="text-lg font-semibold text-dark-100 mb-6">{t('profile.accountInfo')}</h2>
         <div className="space-y-4">
           <div className="flex justify-between items-center py-3 border-b border-dark-800/50">
@@ -126,7 +126,7 @@ export default function Profile() {
       </div>
 
       {/* Email Section */}
-      <div className="card">
+      <div className="bento-card">
         <h2 className="text-lg font-semibold text-dark-100 mb-6">{t('profile.emailAuth')}</h2>
 
         {user?.email ? (
@@ -250,7 +250,7 @@ export default function Profile() {
       </div>
 
       {/* Notification Settings */}
-      <div className="card">
+      <div className="bento-card">
         <h2 className="text-lg font-semibold text-dark-100 mb-6">{t('profile.notifications.title')}</h2>
 
         {notificationsLoading ? (

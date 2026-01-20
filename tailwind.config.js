@@ -106,7 +106,15 @@ export default {
         },
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+        sans: ['Manrope', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+      },
+      borderRadius: {
+        'bento': '24px',
+        '4xl': '32px',
+      },
+      spacing: {
+        'bento': '16px',
+        'bento-lg': '24px',
       },
       fontSize: {
         '2xs': ['0.625rem', { lineHeight: '0.875rem' }],

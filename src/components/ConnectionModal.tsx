@@ -145,23 +145,16 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
     queryFn: () => subscriptionApi.getAppConfig(),
   })
 
-  // Detect platform ONCE on mount (stable reference)
   const detectedPlatform = useMemo(() => detectPlatform(), [])
 
-  // Set initial app based on detected platform - AFTER appConfig loads
   useEffect(() => {
     if (!appConfig?.platforms || selectedApp) return
-
-    // Priority: detected platform > first available platform
     let platform = detectedPlatform
     if (!platform || !appConfig.platforms[platform]?.length) {
       platform = platformOrder.find(p => appConfig.platforms[p]?.length > 0) || null
     }
-
     if (!platform || !appConfig.platforms[platform]?.length) return
-
     const apps = appConfig.platforms[platform]
-    // Select featured app or first app for the detected platform
     const app = apps.find(a => a.isFeatured) || apps[0]
     if (app) setSelectedApp(app)
   }, [appConfig, detectedPlatform, selectedApp])
@@ -174,7 +167,6 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
     setShowAppSelector(false)
   }, [])
 
-  // Keyboard: Escape to close (PC)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -187,7 +179,6 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [handleClose, handleBack, showAppSelector])
 
-  // Telegram back button (Android)
   useEffect(() => {
     if (!webApp?.BackButton) return
     const handler = showAppSelector ? handleBack : handleClose
@@ -199,7 +190,6 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
     }
   }, [webApp, handleClose, handleBack, showAppSelector])
 
-  // Scroll lock
   useEffect(() => {
     document.body.style.overflow = 'hidden'
     return () => { document.body.style.overflow = '' }
@@ -214,7 +204,6 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
   const availablePlatforms = useMemo(() => {
     if (!appConfig?.platforms) return []
     const available = platformOrder.filter(key => appConfig.platforms[key]?.length > 0)
-    // Put detected platform first
     if (detectedPlatform && available.includes(detectedPlatform)) {
       return [detectedPlatform, ...available.filter(p => p !== detectedPlatform)]
     }
@@ -256,7 +245,6 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
   // Wrapper component
   const Wrapper = ({ children }: { children: React.ReactNode }) => {
     if (isMobile) {
-      // Mobile fullscreen
       const content = (
         <div
           className="fixed inset-0 z-[9999] bg-dark-900 flex flex-col"
@@ -272,7 +260,7 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
       return content
     }
 
-    // Desktop centered
+    // Desktop centered - positioned higher
     return (
       <div className="fixed inset-0 bg-black/60 z-[60] flex items-start justify-center p-4 pt-[8vh]" onClick={handleClose}>
         <div
@@ -330,24 +318,19 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
 
     return (
       <Wrapper>
-        {/* Header */}
         <div className="flex items-center gap-3 p-4 border-b border-dark-800">
           <button onClick={handleBack} className="p-2 -ml-2 rounded-xl hover:bg-dark-800 text-dark-300">
             <BackIcon />
           </button>
           <h2 className="font-bold text-dark-100 text-lg">{t('subscription.connection.selectApp')}</h2>
         </div>
-
-        {/* Apps grouped by platform */}
         <div className={`${isMobile ? 'flex-1' : 'max-h-[60vh]'} overflow-y-auto p-4 space-y-5`}>
           {availablePlatforms.map(platform => {
             const apps = appConfig.platforms[platform]
             if (!apps?.length) return null
             const isCurrentPlatform = platform === detectedPlatform
-
             return (
               <div key={platform}>
-                {/* Platform header */}
                 <div className="flex items-center gap-2 mb-2 px-1">
                   <span className={`text-sm font-semibold ${isCurrentPlatform ? 'text-accent-400' : 'text-dark-400'}`}>
                     {platformNames[platform] || platform}
@@ -358,8 +341,6 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
                     </span>
                   )}
                 </div>
-
-                {/* Apps for this platform */}
                 <div className="space-y-2">
                   {apps.map(app => (
                     <button
@@ -396,7 +377,6 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
   // Main view
   return (
     <Wrapper>
-      {/* Header */}
       <div className="p-4 border-b border-dark-800">
         <div className="flex items-center justify-between mb-3">
           <h2 className="font-bold text-dark-100 text-lg">{t('subscription.connection.title')}</h2>
@@ -404,8 +384,6 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
             <CloseIcon />
           </button>
         </div>
-
-        {/* App selector button */}
         <button
           onClick={() => setShowAppSelector(true)}
           className="w-full flex items-center gap-3 p-3 rounded-xl bg-dark-800/50 hover:bg-dark-800 transition-colors"
@@ -421,9 +399,7 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
         </button>
       </div>
 
-      {/* Steps */}
       <div className={`${isMobile ? 'flex-1' : 'max-h-[50vh]'} overflow-y-auto p-4 space-y-4`}>
-        {/* Step 1: Install */}
         {selectedApp?.installationStep && (
           <div className="space-y-2">
             <div className="flex items-center gap-2">
@@ -449,7 +425,6 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
           </div>
         )}
 
-        {/* Step 2: Add subscription */}
         {selectedApp?.addSubscriptionStep && (
           <div className="space-y-3">
             <div className="flex items-center gap-2">
@@ -457,9 +432,7 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
               <span className="font-medium text-dark-100">{t('subscription.connection.addSubscription')}</span>
             </div>
             <p className="text-dark-400 text-sm ml-8">{getLocalizedText(selectedApp.addSubscriptionStep.description)}</p>
-
             <div className="space-y-2 ml-8">
-              {/* Connect button */}
               {selectedApp.deepLink && (
                 <button
                   onClick={() => handleConnect(selectedApp)}
@@ -469,8 +442,6 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
                   {t('subscription.connection.addToApp', { appName: selectedApp.name })}
                 </button>
               )}
-
-              {/* Copy link */}
               <button
                 onClick={copySubscriptionLink}
                 className={`w-full h-11 rounded-xl border transition-all flex items-center justify-center gap-2 text-sm font-medium ${
@@ -486,7 +457,6 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
           </div>
         )}
 
-        {/* Step 3: Connect */}
         {selectedApp?.connectAndUseStep && (
           <div className="space-y-2">
             <div className="flex items-center gap-2">
