@@ -231,36 +231,14 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
     }
   }, [appConfig, detectedPlatform, selectedApp])
 
-  // Lock body scroll when modal is open (works on iOS too)
+  // Prevent body scroll when modal is open
   useEffect(() => {
-    const scrollY = window.scrollY
-    const body = document.body
-    const html = document.documentElement
-
-    // Save original styles
-    const originalBodyOverflow = body.style.overflow
-    const originalBodyPosition = body.style.position
-    const originalBodyTop = body.style.top
-    const originalBodyWidth = body.style.width
-    const originalHtmlOverflow = html.style.overflow
-
-    // Lock scroll
-    body.style.overflow = 'hidden'
-    body.style.position = 'fixed'
-    body.style.top = `-${scrollY}px`
-    body.style.width = '100%'
-    html.style.overflow = 'hidden'
+    // Simple overflow hidden - let the modal handle its own scrolling
+    const originalOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
 
     return () => {
-      // Restore original styles
-      body.style.overflow = originalBodyOverflow
-      body.style.position = originalBodyPosition
-      body.style.top = originalBodyTop
-      body.style.width = originalBodyWidth
-      html.style.overflow = originalHtmlOverflow
-
-      // Restore scroll position
-      window.scrollTo(0, scrollY)
+      document.body.style.overflow = originalOverflow
     }
   }, [])
 
@@ -327,21 +305,19 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
     window.location.href = redirectUrl
   }
 
-  // Modal wrapper - centered on desktop, top on mobile
+  // Modal wrapper - centered on all devices
   const ModalWrapper = ({ children }: { children: React.ReactNode }) => (
     <div
-      className="fixed inset-0 bg-black/70 z-50 flex items-start sm:items-center justify-center overflow-y-auto overscroll-contain"
+      className="fixed inset-0 bg-black/70 z-[60] flex items-center justify-center p-4"
       style={{
-        padding: '1rem',
-        paddingTop: 'calc(2.5rem + env(safe-area-inset-top, 0px))',
-        paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))',
-        WebkitOverflowScrolling: 'touch'
+        paddingTop: 'calc(1rem + env(safe-area-inset-top, 0px))',
+        paddingBottom: 'calc(1rem + env(safe-area-inset-bottom, 0px))',
       }}
       onClick={onClose}
     >
       <div
         className="w-full max-w-sm bg-dark-900 rounded-2xl border border-dark-700/50 overflow-hidden animate-scale-in shadow-2xl"
-        style={{ maxHeight: 'calc(100vh - 4rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px))' }}
+        style={{ maxHeight: 'calc(100vh - 2rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px))' }}
         onClick={(e) => e.stopPropagation()}
       >
         {children}

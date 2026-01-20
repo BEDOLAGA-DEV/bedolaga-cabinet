@@ -133,10 +133,16 @@ export default function TopUpModal({ method, onClose, initialAmountRubles }: Top
   const isPending = topUpMutation.isPending || starsPaymentMutation.isPending
 
   return (
-    <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center px-4 pt-14 pb-28 sm:pt-0 sm:pb-0">
+    <div
+      className="fixed inset-0 bg-black/70 z-[60] flex items-center justify-center p-4"
+      style={{
+        paddingTop: 'calc(1rem + env(safe-area-inset-top, 0px))',
+        paddingBottom: 'calc(1rem + env(safe-area-inset-bottom, 0px))',
+      }}
+    >
       <div className="absolute inset-0" onClick={onClose} />
 
-      <div className="relative w-full max-w-sm bg-dark-900 rounded-2xl border border-dark-700/50 shadow-2xl overflow-hidden">
+      <div className="relative w-full max-w-sm bg-dark-900 rounded-2xl border border-dark-700/50 shadow-2xl overflow-hidden animate-scale-in">
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 bg-dark-800/50">
           <span className="font-semibold text-dark-100">{methodName}</span>
