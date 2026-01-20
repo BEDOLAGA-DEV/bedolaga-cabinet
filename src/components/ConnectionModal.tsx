@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { subscriptionApi } from '../api/subscription'
@@ -205,6 +205,7 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
   const [copied, setCopied] = useState(false)
   const [detectedPlatform, setDetectedPlatform] = useState<string | null>(null)
   const [showAppSelector, setShowAppSelector] = useState(false)
+  const modalContentRef = useRef<HTMLDivElement>(null)
 
   const { data: appConfig, isLoading, error } = useQuery<AppConfig>({
     queryKey: ['appConfig'],
@@ -230,6 +231,11 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
       setSelectedApp(app)
     }
   }, [appConfig, detectedPlatform, selectedApp])
+
+  // Scroll modal content to top when switching views
+  useEffect(() => {
+    modalContentRef.current?.scrollTo({ top: 0, behavior: 'instant' })
+  }, [showAppSelector])
 
   // Scroll lock when modal is open (cross-platform)
   useEffect(() => {
@@ -342,16 +348,17 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
   // Modal wrapper - top aligned with auto-focus
   const ModalWrapper = ({ children }: { children: React.ReactNode }) => (
     <div
-      className="fixed inset-0 bg-black/70 z-[60] flex items-start justify-center pt-8 sm:pt-12"
+      className="fixed inset-0 bg-black/70 z-[60] flex items-start justify-center"
       style={{ paddingTop: `calc(2rem + env(safe-area-inset-top, 0px))` }}
       onClick={onClose}
     >
       <div
-        ref={(el) => el?.focus()}
+        ref={modalContentRef}
         tabIndex={-1}
-        className="w-[calc(100%-2rem)] max-w-sm bg-dark-900 rounded-2xl border border-dark-700/50 overflow-hidden animate-scale-in shadow-2xl flex flex-col outline-none"
+        className="w-[calc(100%-2rem)] max-w-sm bg-dark-900 rounded-2xl border border-dark-700/50 overflow-y-auto overscroll-contain animate-scale-in shadow-2xl flex flex-col outline-none"
         style={{
           maxHeight: 'calc(100dvh - 6rem)',
+          WebkitOverflowScrolling: 'touch',
         }}
         onClick={(e) => e.stopPropagation()}
       >
