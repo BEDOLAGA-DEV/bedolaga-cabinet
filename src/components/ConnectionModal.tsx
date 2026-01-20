@@ -130,11 +130,13 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
   const [detectedPlatform, setDetectedPlatform] = useState<string | null>(null)
   const [showAppSelector, setShowAppSelector] = useState(false)
 
-  const { isTelegramWebApp, safeAreaInset, contentSafeAreaInset } = useTelegramWebApp()
+  const { isTelegramWebApp, isFullscreen, safeAreaInset, contentSafeAreaInset } = useTelegramWebApp()
   const isMobileScreen = useIsMobile()
   const isMobile = isMobileScreen || isTelegramWebApp
 
   const safeBottom = isTelegramWebApp ? Math.max(safeAreaInset.bottom, contentSafeAreaInset.bottom) : 0
+  // In fullscreen mode, add +45px for Telegram native controls (close/menu buttons in corners)
+  const safeTop = isTelegramWebApp ? Math.max(safeAreaInset.top, contentSafeAreaInset.top) + (isFullscreen ? 45 : 0) : 0
 
   const { data: appConfig, isLoading, error } = useQuery<AppConfig>({
     queryKey: ['appConfig'],
@@ -226,13 +228,15 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
         <div
           className="fixed inset-0 z-[9999] bg-dark-900 flex flex-col animate-slide-up"
           style={{
+            paddingTop: safeTop ? `${safeTop}px` : 'env(safe-area-inset-top, 0px)',
             paddingBottom: safeBottom ? `${safeBottom}px` : 'env(safe-area-inset-bottom, 0px)'
           }}
         >
           {/* Close button */}
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 z-10 p-2.5 rounded-full bg-dark-800/80 text-dark-200 active:bg-dark-700"
+            className="absolute right-4 z-10 p-2.5 rounded-full bg-dark-800/80 text-dark-200 active:bg-dark-700"
+            style={{ top: safeTop ? `${safeTop + 16}px` : 'calc(env(safe-area-inset-top, 0px) + 16px)' }}
           >
             <CloseIcon />
           </button>
