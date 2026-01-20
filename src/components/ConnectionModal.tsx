@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { subscriptionApi } from '../api/subscription'
+import { useTelegramWebApp } from '../hooks/useTelegramWebApp'
 import type { AppInfo, AppConfig, LocalizedText } from '../types'
 
 interface ConnectionModalProps {
@@ -207,6 +208,17 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
   const [showAppSelector, setShowAppSelector] = useState(false)
   const modalContentRef = useRef<HTMLDivElement>(null)
 
+  // Telegram Mini App support
+  const { isTelegramWebApp, safeAreaInset, contentSafeAreaInset } = useTelegramWebApp()
+
+  // Calculate safe area - prefer Telegram values, fallback to CSS env
+  const safeTop = isTelegramWebApp
+    ? Math.max(safeAreaInset.top, contentSafeAreaInset.top)
+    : 0
+  const safeBottom = isTelegramWebApp
+    ? Math.max(safeAreaInset.bottom, contentSafeAreaInset.bottom)
+    : 0
+
   const { data: appConfig, isLoading, error } = useQuery<AppConfig>({
     queryKey: ['appConfig'],
     queryFn: () => subscriptionApi.getAppConfig(),
@@ -342,37 +354,61 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
     window.location.href = redirectUrl
   }
 
-  // Modal wrapper - top aligned with auto-focus
-  const ModalWrapper = ({ children }: { children: React.ReactNode }) => (
-    <div
-      className="fixed inset-0 bg-black/70 z-[60] flex items-start justify-center p-4 pt-8 overflow-hidden"
-      style={{
-        paddingTop: `max(2rem, calc(1rem + env(safe-area-inset-top, 0px)))`,
-        paddingBottom: `max(1rem, env(safe-area-inset-bottom, 0px))`,
-      }}
-      onClick={onClose}
-    >
+  // Modal wrapper - fullscreen on mobile, centered on desktop
+  const ModalWrapper = ({ children }: { children: React.ReactNode }) => {
+    // For Telegram, use JS values; for browser, use CSS env()
+    const closeButtonTop = isTelegramWebApp
+      ? `${12 + safeTop}px`
+      : `calc(0.75rem + env(safe-area-inset-top, 0px))`
+
+    const safeTopStyle = isTelegramWebApp
+      ? `${safeTop}px`
+      : 'env(safe-area-inset-top, 0px)'
+
+    const safeBottomStyle = isTelegramWebApp
+      ? `${safeBottom}px`
+      : 'env(safe-area-inset-bottom, 0px)'
+
+    return (
       <div
-        ref={modalContentRef}
-        data-modal-content
-        tabIndex={-1}
-        className="w-full max-w-sm bg-dark-900 rounded-2xl border border-dark-700/50 overflow-y-auto overscroll-contain animate-scale-in shadow-2xl flex flex-col outline-none"
-        style={{
-          maxHeight: `calc(100vh - 4rem - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px))`,
-          WebkitOverflowScrolling: 'touch',
-        }}
-        onClick={(e) => e.stopPropagation()}
+        className="fixed inset-0 bg-black/70 z-[60] flex items-start justify-center md:p-4 md:pt-8 overflow-hidden"
+        onClick={onClose}
       >
-        {children}
+        {/* Mobile: fullscreen */}
+        <div
+          ref={modalContentRef}
+          data-modal-content
+          tabIndex={-1}
+          className="relative w-full h-full md:h-auto md:max-w-sm bg-dark-900 md:rounded-2xl md:border md:border-dark-700/50 overflow-hidden md:overflow-y-auto overscroll-contain animate-fade-in md:animate-scale-in shadow-2xl flex flex-col outline-none"
+          style={{ WebkitOverflowScrolling: 'touch' }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Mobile close button - fixed top right */}
+          <button
+            onClick={onClose}
+            className="md:hidden absolute right-3 z-10 p-2.5 rounded-full bg-dark-800/90 backdrop-blur-sm text-dark-200 hover:text-dark-100 hover:bg-dark-700 transition-colors"
+            style={{ top: closeButtonTop }}
+          >
+            <CloseIcon />
+          </button>
+
+          {/* Mobile safe area spacer - top */}
+          <div className="md:hidden shrink-0" style={{ height: safeTopStyle }} />
+
+          {children}
+
+          {/* Mobile safe area spacer - bottom */}
+          <div className="md:hidden shrink-0" style={{ height: safeBottomStyle }} />
+        </div>
       </div>
-    </div>
-  )
+    )
+  }
 
   // Loading state
   if (isLoading) {
     return (
       <ModalWrapper>
-        <div className="flex justify-center py-16">
+        <div className="flex-1 flex items-center justify-center">
           <div className="w-10 h-10 border-3 border-accent-500 border-t-transparent rounded-full animate-spin" />
         </div>
       </ModalWrapper>
@@ -383,12 +419,12 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
   if (error || !appConfig) {
     return (
       <ModalWrapper>
-        <div className="text-center p-6">
-          <div className="w-14 h-14 mx-auto mb-3 rounded-2xl bg-error-500/10 flex items-center justify-center">
-            <span className="text-2xl">😕</span>
+        <div className="flex-1 flex flex-col items-center justify-center text-center p-6">
+          <div className="w-16 h-16 md:w-14 md:h-14 mx-auto mb-4 md:mb-3 rounded-2xl bg-error-500/10 flex items-center justify-center">
+            <span className="text-3xl md:text-2xl">😕</span>
           </div>
-          <p className="text-dark-300 mb-4 text-sm">{t('common.error')}</p>
-          <button onClick={onClose} className="btn-primary text-sm px-6">
+          <p className="text-dark-300 mb-5 md:mb-4 text-base md:text-sm">{t('common.error')}</p>
+          <button onClick={onClose} className="btn-primary text-base md:text-sm px-8 md:px-6 py-3 md:py-2">
             {t('common.close')}
           </button>
         </div>
@@ -400,13 +436,13 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
   if (!appConfig.hasSubscription) {
     return (
       <ModalWrapper>
-        <div className="text-center p-6">
-          <div className="w-14 h-14 mx-auto mb-3 rounded-2xl bg-warning-500/10 flex items-center justify-center">
-            <span className="text-2xl">📱</span>
+        <div className="flex-1 flex flex-col items-center justify-center text-center p-6">
+          <div className="w-16 h-16 md:w-14 md:h-14 mx-auto mb-4 md:mb-3 rounded-2xl bg-warning-500/10 flex items-center justify-center">
+            <span className="text-3xl md:text-2xl">📱</span>
           </div>
-          <h3 className="font-semibold text-dark-100 mb-1">{t('subscription.connection.title')}</h3>
-          <p className="text-dark-400 text-sm mb-4">{t('subscription.connection.noSubscription')}</p>
-          <button onClick={onClose} className="btn-primary text-sm px-6">
+          <h3 className="font-semibold text-dark-100 mb-2 md:mb-1 text-lg md:text-base">{t('subscription.connection.title')}</h3>
+          <p className="text-dark-400 text-base md:text-sm mb-5 md:mb-4">{t('subscription.connection.noSubscription')}</p>
+          <button onClick={onClose} className="btn-primary text-base md:text-sm px-8 md:px-6 py-3 md:py-2">
             {t('common.close')}
           </button>
         </div>
@@ -419,7 +455,7 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
     return (
       <ModalWrapper>
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-dark-800">
+        <div className="flex items-center justify-between p-4 pt-10 md:pt-4 border-b border-dark-800 shrink-0">
           <div className="flex items-center gap-2">
             {selectedApp && (
               <button onClick={() => setShowAppSelector(false)} className="p-2 -ml-2 rounded-xl hover:bg-dark-800 text-dark-400">
@@ -427,17 +463,17 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
               </button>
             )}
             <div>
-              <h2 className="font-semibold text-dark-100 text-sm">{t('subscription.connection.selectApp')}</h2>
-              <p className="text-xs text-dark-500">{t('subscription.connection.selectDevice')}</p>
+              <h2 className="font-semibold text-dark-100 text-base md:text-sm">{t('subscription.connection.selectApp')}</h2>
+              <p className="text-sm md:text-xs text-dark-500">{t('subscription.connection.selectDevice')}</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-2 rounded-xl hover:bg-dark-800 text-dark-400">
+          <button onClick={onClose} className="hidden md:block p-2 rounded-xl hover:bg-dark-800 text-dark-400">
             <CloseIcon />
           </button>
         </div>
 
         {/* Apps by platform */}
-        <div className="p-4 space-y-4 max-h-[60vh] overflow-y-auto">
+        <div className="flex-1 p-4 space-y-4 overflow-y-auto md:max-h-[60vh]">
           {allAppsForSelector.map(({ platform, apps }) => {
             const IconComponent = platformIconComponents[platform]
             const isCurrentPlatform = platform === detectedPlatform
@@ -487,10 +523,10 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
         </div>
 
         {/* Copy link */}
-        <div className="p-4 border-t border-dark-800">
+        <div className="p-4 border-t border-dark-800" style={{ paddingBottom: `max(1rem, env(safe-area-inset-bottom, 0px))` }}>
           <button
             onClick={copySubscriptionLink}
-            className={`w-full p-2.5 rounded-xl border-2 border-dashed transition-all flex items-center justify-center gap-2 text-sm ${
+            className={`w-full p-3 md:p-2.5 rounded-xl border-2 border-dashed transition-all flex items-center justify-center gap-2 text-base md:text-sm ${
               copied
                 ? 'border-success-500/50 bg-success-500/10 text-success-400'
                 : 'border-dark-700 hover:border-accent-500/50 text-dark-400'
@@ -508,7 +544,7 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
   return (
     <ModalWrapper>
       {/* Header with app info and change button */}
-      <div className="flex items-center justify-between p-4 border-b border-dark-800">
+      <div className="flex items-center justify-between p-4 pt-10 md:pt-4 border-b border-dark-800 shrink-0">
         <button
           onClick={() => setShowAppSelector(true)}
           className="flex items-center gap-3 p-2 -m-2 rounded-xl hover:bg-dark-800/50 transition-colors"
@@ -517,17 +553,17 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
             {getAppIcon(selectedApp.name, selectedApp.isFeatured)}
           </div>
           <div className="text-left">
-            <h2 className="font-semibold text-dark-100 text-sm">{selectedApp.name}</h2>
-            <p className="text-xs text-accent-400">{t('subscription.connection.changeApp') || 'Сменить'} →</p>
+            <h2 className="font-semibold text-dark-100 text-base md:text-sm">{selectedApp.name}</h2>
+            <p className="text-sm md:text-xs text-accent-400">{t('subscription.connection.changeApp') || 'Сменить'} →</p>
           </div>
         </button>
-        <button onClick={onClose} className="p-2 rounded-xl hover:bg-dark-800 text-dark-400">
+        <button onClick={onClose} className="hidden md:block p-2 rounded-xl hover:bg-dark-800 text-dark-400">
           <CloseIcon />
         </button>
       </div>
 
       {/* Instructions */}
-      <div className="p-4 space-y-3 max-h-[60vh] overflow-y-auto">
+      <div className="flex-1 p-4 space-y-3 overflow-y-auto md:max-h-[60vh]">
         {/* Step 1: Install */}
         {selectedApp.installationStep && (
           <div className="p-3 rounded-xl bg-dark-800/50 border border-dark-700/50">
@@ -614,8 +650,8 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
         )}
       </div>
 
-      {/* Footer */}
-      <div className="p-4 border-t border-dark-800">
+      {/* Footer - hidden on mobile since we have close button on top */}
+      <div className="hidden md:block p-4 border-t border-dark-800">
         <button onClick={onClose} className="btn-secondary w-full text-sm">
           {t('common.close')}
         </button>
