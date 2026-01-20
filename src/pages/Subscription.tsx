@@ -984,6 +984,12 @@ export default function Subscription() {
                       ✅ — подключено  •  ➕ — будет добавлено (платно)  •  ➖ — будет отключено
                     </div>
 
+                    {countriesData.discount_percent > 0 && (
+                      <div className="text-xs text-success-400 p-2 bg-success-500/10 rounded-lg border border-success-500/30">
+                        🎁 Ваша скидка на серверы: -{countriesData.discount_percent}%
+                      </div>
+                    )}
+
                     <div className="space-y-2 max-h-64 overflow-y-auto">
                       {countriesData.countries.map((country) => {
                         const isCurrentlyConnected = country.is_connected
@@ -1017,10 +1023,32 @@ export default function Subscription() {
                                 {willBeAdded ? '➕' : willBeRemoved ? '➖' : isSelected ? '✅' : '⚪'}
                               </span>
                               <div>
-                                <div className="font-medium text-dark-100">{country.name}</div>
+                                <div className="font-medium text-dark-100 flex items-center gap-2">
+                                  {country.name}
+                                  {country.has_discount && !isCurrentlyConnected && (
+                                    <span className="text-xs px-1.5 py-0.5 rounded bg-success-500/20 text-success-400">
+                                      -{country.discount_percent}%
+                                    </span>
+                                  )}
+                                </div>
                                 {willBeAdded && (
                                   <div className="text-xs text-success-400">
-                                    +{formatPrice(country.price_kopeks)}/мес (пропорционально)
+                                    +{formatPrice(country.price_kopeks)} (за {countriesData.days_left} дн.)
+                                    {country.has_discount && (
+                                      <span className="ml-1 line-through text-dark-500">
+                                        {formatPrice(Math.round(country.base_price_kopeks * countriesData.days_left / 30))}
+                                      </span>
+                                    )}
+                                  </div>
+                                )}
+                                {!willBeAdded && !isCurrentlyConnected && (
+                                  <div className="text-xs text-dark-500">
+                                    {formatPrice(country.price_per_month_kopeks)}/мес
+                                    {country.has_discount && (
+                                      <span className="ml-1 line-through text-dark-600">
+                                        {formatPrice(country.base_price_kopeks)}
+                                      </span>
+                                    )}
                                   </div>
                                 )}
                                 {!country.is_available && !isCurrentlyConnected && (
