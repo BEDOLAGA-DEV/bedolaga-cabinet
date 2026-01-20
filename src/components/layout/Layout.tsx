@@ -635,6 +635,7 @@ export default function Layout({ children }: LayoutProps) {
             <Link
               key={item.path}
               to={item.path}
+              onClick={() => setMobileMenuOpen(false)}
               className={isActive(item.path) ? 'bottom-nav-item-active' : 'bottom-nav-item'}
             >
               <item.icon />
