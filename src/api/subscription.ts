@@ -321,4 +321,24 @@ export const subscriptionApi = {
     const response = await apiClient.put('/cabinet/subscription/traffic', { gb })
     return response.data
   },
+
+  // Refresh traffic usage from RemnaWave (rate limited: 1 per 60 seconds)
+  refreshTraffic: async (): Promise<{
+    success: boolean
+    cached: boolean
+    rate_limited?: boolean
+    retry_after_seconds?: number
+    source?: string
+    traffic_used_bytes: number
+    traffic_used_gb: number
+    traffic_limit_bytes: number
+    traffic_limit_gb: number
+    traffic_used_percent: number
+    is_unlimited: boolean
+    lifetime_used_bytes?: number
+    lifetime_used_gb?: number
+  }> => {
+    const response = await apiClient.post('/cabinet/subscription/refresh-traffic')
+    return response.data
+  },
 }
