@@ -155,17 +155,58 @@ export default function Layout({ children }: LayoutProps) {
     }
   }, [])
 
-  // Lock body scroll and scroll to top when mobile menu is open
+  // Lock body scroll when mobile menu is open (cross-platform)
   useEffect(() => {
-    if (mobileMenuOpen) {
-      // Scroll to top so header is visible
-      window.scrollTo({ top: 0, behavior: 'instant' })
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = ''
+    if (!mobileMenuOpen) return
+
+    const scrollY = window.scrollY
+    const body = document.body
+    const html = document.documentElement
+
+    // Save original styles
+    const originalStyles = {
+      bodyOverflow: body.style.overflow,
+      bodyPosition: body.style.position,
+      bodyTop: body.style.top,
+      bodyWidth: body.style.width,
+      bodyHeight: body.style.height,
+      htmlOverflow: html.style.overflow,
+      htmlHeight: html.style.height,
     }
+
+    // Lock scroll - works on iOS, Android, and desktop
+    body.style.overflow = 'hidden'
+    body.style.position = 'fixed'
+    body.style.top = `-${scrollY}px`
+    body.style.width = '100%'
+    body.style.height = '100%'
+    html.style.overflow = 'hidden'
+    html.style.height = '100%'
+
+    // Prevent touchmove on body (extra protection for mobile)
+    const preventScroll = (e: TouchEvent) => {
+      const target = e.target as HTMLElement
+      // Allow scroll inside menu content
+      if (target.closest('.mobile-menu-content')) return
+      e.preventDefault()
+    }
+    document.addEventListener('touchmove', preventScroll, { passive: false })
+
     return () => {
-      document.body.style.overflow = ''
+      // Restore original styles
+      body.style.overflow = originalStyles.bodyOverflow
+      body.style.position = originalStyles.bodyPosition
+      body.style.top = originalStyles.bodyTop
+      body.style.width = originalStyles.bodyWidth
+      body.style.height = originalStyles.bodyHeight
+      html.style.overflow = originalStyles.htmlOverflow
+      html.style.height = originalStyles.htmlHeight
+
+      // Remove touchmove listener
+      document.removeEventListener('touchmove', preventScroll)
+
+      // Restore scroll position
+      window.scrollTo(0, scrollY)
     }
   }, [mobileMenuOpen])
 
@@ -426,9 +467,16 @@ export default function Layout({ children }: LayoutProps) {
 
       </header>
 
-      {/* Mobile menu - fixed overlay */}
+      {/* Mobile menu - fixed overlay below header */}
       {mobileMenuOpen && (
-        <div className="lg:hidden fixed inset-0 z-40 animate-fade-in" style={{ top: '64px' }}>
+        <div
+          className="lg:hidden fixed inset-x-0 bottom-0 z-40 animate-fade-in"
+          style={{
+            top: isFullscreen
+              ? `${64 + Math.max(safeAreaInset.top, contentSafeAreaInset.top) + 45}px`
+              : '64px'
+          }}
+        >
           {/* Backdrop */}
           <div
             className="absolute inset-0 bg-black/50 backdrop-blur-sm"
@@ -436,7 +484,7 @@ export default function Layout({ children }: LayoutProps) {
           />
 
           {/* Menu content */}
-          <div className="absolute inset-x-0 top-0 bottom-0 bg-dark-900 border-t border-dark-800/50 overflow-y-auto pb-[calc(5rem+env(safe-area-inset-bottom,0px))]">
+          <div className="mobile-menu-content absolute inset-x-0 top-0 bottom-0 bg-dark-900 border-t border-dark-800/50 overflow-y-auto overscroll-contain pb-[calc(5rem+env(safe-area-inset-bottom,0px))]" style={{ WebkitOverflowScrolling: 'touch' }}>
             <div className="max-w-6xl mx-auto px-4 py-4">
               {/* User info */}
               <div className="flex items-center justify-between pb-4 mb-4 border-b border-dark-800/50">
