@@ -353,7 +353,7 @@ export default function Layout({ children }: LayoutProps) {
 
       {/* Header */}
       <header
-        className="sticky top-0 z-50 glass border-b border-dark-800/50"
+        className="fixed top-0 left-0 right-0 z-50 glass border-b border-dark-800/50"
         style={{
           // In fullscreen mode, add padding for safe area + Telegram native controls (close/menu buttons in corners)
           paddingTop: isFullscreen ? `${Math.max(safeAreaInset.top, contentSafeAreaInset.top) + 45}px` : undefined,
@@ -499,6 +499,16 @@ export default function Layout({ children }: LayoutProps) {
         </div>
 
       </header>
+
+      {/* Spacer for fixed header - matches header height */}
+      {isFullscreen ? (
+        <div 
+          className="flex-shrink-0"
+          style={{ height: `${64 + Math.max(safeAreaInset.top, contentSafeAreaInset.top) + 45}px` }}
+        />
+      ) : (
+        <div className="flex-shrink-0 h-16 lg:h-20" />
+      )}
 
       {/* Mobile menu - fixed overlay below header */}
       {mobileMenuOpen && (
