@@ -237,7 +237,7 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
     modalContentRef.current?.scrollTo({ top: 0, behavior: 'instant' })
   }, [showAppSelector])
 
-  // Scroll lock when modal is open (cross-platform)
+  // Scroll lock when modal is open (cross-platform including Android)
   useEffect(() => {
     const scrollY = window.scrollY
     const body = document.body
@@ -249,7 +249,10 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
       bodyPosition: body.style.position,
       bodyTop: body.style.top,
       bodyWidth: body.style.width,
+      bodyHeight: body.style.height,
       htmlOverflow: html.style.overflow,
+      htmlHeight: html.style.height,
+      bodyTouchAction: body.style.touchAction,
     }
 
     // Lock scroll
@@ -257,14 +260,30 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
     body.style.position = 'fixed'
     body.style.top = `-${scrollY}px`
     body.style.width = '100%'
+    body.style.height = '100%'
+    body.style.touchAction = 'none'
     html.style.overflow = 'hidden'
+    html.style.height = '100%'
+
+    // Prevent touchmove on backdrop (Android fix)
+    const preventScroll = (e: TouchEvent) => {
+      const target = e.target as HTMLElement
+      // Allow scroll inside modal content
+      if (target.closest('[data-modal-content]')) return
+      e.preventDefault()
+    }
+    document.addEventListener('touchmove', preventScroll, { passive: false })
 
     return () => {
       body.style.overflow = originalStyles.bodyOverflow
       body.style.position = originalStyles.bodyPosition
       body.style.top = originalStyles.bodyTop
       body.style.width = originalStyles.bodyWidth
+      body.style.height = originalStyles.bodyHeight
+      body.style.touchAction = originalStyles.bodyTouchAction
       html.style.overflow = originalStyles.htmlOverflow
+      html.style.height = originalStyles.htmlHeight
+      document.removeEventListener('touchmove', preventScroll)
       window.scrollTo(0, scrollY)
     }
   }, [])
@@ -354,11 +373,13 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
     >
       <div
         ref={modalContentRef}
+        data-modal-content
         tabIndex={-1}
         className="w-[calc(100%-2rem)] max-w-sm bg-dark-900 rounded-2xl border border-dark-700/50 overflow-y-auto overscroll-contain animate-scale-in shadow-2xl flex flex-col outline-none"
         style={{
           maxHeight: 'calc(100dvh - 6rem)',
           WebkitOverflowScrolling: 'touch',
+          touchAction: 'pan-y',
         }}
         onClick={(e) => e.stopPropagation()}
       >
