@@ -135,7 +135,8 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
 
   const { isTelegramWebApp, isFullscreen, safeAreaInset, contentSafeAreaInset } = useTelegramWebApp()
   const isMobileScreen = useIsMobile()
-  const isMobile = isMobileScreen || isTelegramWebApp
+  // Use mobile layout only on small screens, even in Telegram Desktop
+  const isMobile = isMobileScreen
 
   const safeBottom = isTelegramWebApp ? Math.max(safeAreaInset.bottom, contentSafeAreaInset.bottom) : 0
   // In fullscreen mode, add +45px for Telegram native controls (close/menu buttons in corners)
@@ -211,10 +212,23 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
     window.location.href = redirectUrl
   }
 
-  // Desktop modal wrapper
+  // Desktop modal wrapper - compact centered modal with max height
   const DesktopWrapper = ({ children }: { children: React.ReactNode }) => (
-    <div className="fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4" onClick={onClose}>
-      <div className="w-full max-w-md bg-dark-900 rounded-2xl border border-dark-700/50 shadow-2xl" onClick={e => e.stopPropagation()}>
+    <div
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4 animate-fade-in"
+      onClick={onClose}
+    >
+      <div
+        className="relative w-full max-w-md max-h-[85vh] bg-dark-900 rounded-2xl border border-dark-700/50 shadow-2xl flex flex-col overflow-hidden animate-scale-in"
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Desktop close button */}
+        <button
+          onClick={onClose}
+          className="absolute top-3 right-3 z-10 p-2 rounded-xl bg-dark-800/80 hover:bg-dark-700 text-dark-400 hover:text-dark-200 transition-colors"
+        >
+          <CloseIcon />
+        </button>
         {children}
       </div>
     </div>
@@ -260,7 +274,7 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
   if (isLoading) {
     return (
       <Wrapper>
-        <div className="flex-1 flex items-center justify-center p-8">
+        <div className={`${isMobile ? 'flex-1' : ''} flex items-center justify-center p-12`}>
           <div className="w-10 h-10 border-3 border-accent-500 border-t-transparent rounded-full animate-spin" />
         </div>
       </Wrapper>
@@ -271,7 +285,7 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
   if (error || !appConfig) {
     return (
       <Wrapper>
-        <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
+        <div className={`${isMobile ? 'flex-1' : ''} flex flex-col items-center justify-center p-8 text-center`}>
           <div className="text-5xl mb-4">😕</div>
           <p className="text-dark-300 text-lg mb-6">{t('common.error')}</p>
           <button onClick={onClose} className="btn-primary px-8 py-3 text-base">{t('common.close')}</button>
@@ -284,7 +298,7 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
   if (!appConfig.hasSubscription) {
     return (
       <Wrapper>
-        <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
+        <div className={`${isMobile ? 'flex-1' : ''} flex flex-col items-center justify-center p-8 text-center`}>
           <div className="text-5xl mb-4">📱</div>
           <h3 className="font-bold text-dark-100 text-xl mb-2">{t('subscription.connection.title')}</h3>
           <p className="text-dark-400 mb-6">{t('subscription.connection.noSubscription')}</p>
@@ -317,7 +331,7 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
         </div>
 
         {/* Apps grouped by platform */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-5">
+        <div className={`${isMobile ? 'flex-1' : 'max-h-[60vh]'} overflow-y-auto p-4 space-y-5`}>
           {availablePlatforms.map(platform => {
             const apps = appConfig.platforms[platform]
             if (!apps?.length) return null
@@ -390,7 +404,7 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className={`${isMobile ? 'flex-1' : 'max-h-[60vh]'} overflow-y-auto p-4 space-y-4`}>
         {/* Step 1 */}
         {selectedApp?.installationStep && (
           <div className="p-4 rounded-2xl bg-dark-800/30">
@@ -464,12 +478,6 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
         )}
       </div>
 
-      {/* Desktop footer */}
-      {!isMobile && (
-        <div className="p-4 border-t border-dark-800">
-          <button onClick={onClose} className="btn-secondary w-full py-3 text-base">{t('common.close')}</button>
-        </div>
-      )}
     </Wrapper>
   )
 }
