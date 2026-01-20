@@ -31,7 +31,8 @@
     "contests": "活动",
     "polls": "问卷",
     "info": "信息",
-    "wheel": "幸运转盘"
+    "wheel": "幸运转盘",
+    "menu": "菜单"
   },
   "notifications": {
     "ticketNotifications": "工单通知",
@@ -793,6 +794,25 @@
       "days": "天",
       "hours": "时",
       "minutes": "分"
+    }
+  },
+  "blocking": {
+    "maintenance": {
+      "title": "系统维护",
+      "defaultMessage": "服务暂时不可用。正在进行系统维护。",
+      "reason": "原因",
+      "waitMessage": "请稍候..."
+    },
+    "channel": {
+      "title": "频道订阅",
+      "defaultMessage": "请订阅我们的频道以继续",
+      "openChannel": "打开频道",
+      "checkSubscription": "检查订阅",
+      "checking": "检查中...",
+      "waitSeconds": "请等待 {{seconds}} 秒",
+      "hint": "订阅后点击检查按钮",
+      "notSubscribed": "您还没有订阅该频道",
+      "checkError": "检查失败。请稍后重试。"
     }
   }
 }
