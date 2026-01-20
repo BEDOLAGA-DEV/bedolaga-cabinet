@@ -25,12 +25,13 @@ export const setCachedFullscreenEnabled = (enabled: boolean) => {
  * Provides fullscreen mode, safe area insets, and other WebApp features
  */
 export function useTelegramWebApp() {
-  const [isFullscreen, setIsFullscreen] = useState(false)
-  const [isTelegramWebApp, setIsTelegramWebApp] = useState(false)
-  const [safeAreaInset, setSafeAreaInset] = useState({ top: 0, bottom: 0, left: 0, right: 0 })
-  const [contentSafeAreaInset, setContentSafeAreaInset] = useState({ top: 0, bottom: 0, left: 0, right: 0 })
-
+  // Initialize synchronously to avoid flash/flicker on first render
   const webApp = typeof window !== 'undefined' ? window.Telegram?.WebApp : undefined
+
+  const [isFullscreen, setIsFullscreen] = useState(() => webApp?.isFullscreen || false)
+  const [isTelegramWebApp, setIsTelegramWebApp] = useState(() => !!webApp)
+  const [safeAreaInset, setSafeAreaInset] = useState(() => webApp?.safeAreaInset || { top: 0, bottom: 0, left: 0, right: 0 })
+  const [contentSafeAreaInset, setContentSafeAreaInset] = useState(() => webApp?.contentSafeAreaInset || { top: 0, bottom: 0, left: 0, right: 0 })
 
   useEffect(() => {
     if (!webApp) {

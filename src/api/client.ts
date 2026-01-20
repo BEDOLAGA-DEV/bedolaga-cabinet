@@ -1,5 +1,6 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios'
 import { tokenStorage, isTokenExpired, tokenRefreshManager, safeRedirectToLogin } from '../utils/token'
+import { useBlockingStore } from '../store/blocking'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api'
 
@@ -87,11 +88,56 @@ apiClient.interceptors.request.use(async (config: InternalAxiosRequestConfig) =>
   return config
 })
 
-// Response interceptor - handle 401 as fallback
+// Custom error types for special handling
+export interface MaintenanceError {
+  code: 'maintenance'
+  message: string
+  reason?: string
+}
+
+export interface ChannelSubscriptionError {
+  code: 'channel_subscription_required'
+  message: string
+  channel_link?: string
+}
+
+export function isMaintenanceError(error: unknown): error is { response: { status: 503, data: { detail: MaintenanceError } } } {
+  if (!error || typeof error !== 'object') return false
+  const err = error as AxiosError<{ detail: MaintenanceError }>
+  return err.response?.status === 503 && err.response?.data?.detail?.code === 'maintenance'
+}
+
+export function isChannelSubscriptionError(error: unknown): error is { response: { status: 403, data: { detail: ChannelSubscriptionError } } } {
+  if (!error || typeof error !== 'object') return false
+  const err = error as AxiosError<{ detail: ChannelSubscriptionError }>
+  return err.response?.status === 403 && err.response?.data?.detail?.code === 'channel_subscription_required'
+}
+
+// Response interceptor - handle 401, 503 (maintenance), 403 (channel subscription)
 apiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean }
+
+    // Handle maintenance mode (503)
+    if (isMaintenanceError(error)) {
+      const detail = (error.response?.data as { detail: MaintenanceError }).detail
+      useBlockingStore.getState().setMaintenance({
+        message: detail.message,
+        reason: detail.reason,
+      })
+      return Promise.reject(error)
+    }
+
+    // Handle channel subscription required (403)
+    if (isChannelSubscriptionError(error)) {
+      const detail = (error.response?.data as { detail: ChannelSubscriptionError }).detail
+      useBlockingStore.getState().setChannelSubscription({
+        message: detail.message,
+        channel_link: detail.channel_link,
+      })
+      return Promise.reject(error)
+    }
 
     // Если получили 401 и ещё не пробовали refresh (на случай если проверка exp не сработала)
     if (error.response?.status === 401 && !originalRequest._retry) {

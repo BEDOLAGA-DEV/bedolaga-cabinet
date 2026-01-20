@@ -1,8 +1,10 @@
 import { lazy, Suspense } from 'react'
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { useAuthStore } from './store/auth'
+import { useBlockingStore } from './store/blocking'
 import Layout from './components/layout/Layout'
 import PageLoader from './components/common/PageLoader'
+import { MaintenanceScreen, ChannelSubscriptionScreen } from './components/blocking'
 import { saveReturnUrl } from './utils/token'
 
 // Auth pages - load immediately (small)
@@ -89,9 +91,25 @@ function LazyPage({ children }: { children: React.ReactNode }) {
   )
 }
 
+function BlockingOverlay() {
+  const { blockingType } = useBlockingStore()
+
+  if (blockingType === 'maintenance') {
+    return <MaintenanceScreen />
+  }
+
+  if (blockingType === 'channel_subscription') {
+    return <ChannelSubscriptionScreen />
+  }
+
+  return null
+}
+
 function App() {
   return (
-    <Routes>
+    <>
+      <BlockingOverlay />
+      <Routes>
       {/* Public routes */}
       <Route path="/login" element={<Login />} />
       <Route path="/auth/telegram/callback" element={<TelegramCallback />} />
@@ -316,6 +334,7 @@ function App() {
       {/* Catch all */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    </>
   )
 }
 

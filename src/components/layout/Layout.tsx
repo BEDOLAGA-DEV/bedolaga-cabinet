@@ -15,6 +15,7 @@ import { themeColorsApi } from '../../api/themeColors'
 import { promoApi } from '../../api/promo'
 import { useTheme } from '../../hooks/useTheme'
 import { useTelegramWebApp } from '../../hooks/useTelegramWebApp'
+import { usePullToRefresh } from '../../hooks/usePullToRefresh'
 
 // Fallback branding from environment variables
 const FALLBACK_NAME = import.meta.env.VITE_APP_NAME || 'Cabinet'
@@ -132,6 +133,12 @@ export default function Layout({ children }: LayoutProps) {
   const [userPhotoUrl, setUserPhotoUrl] = useState<string | null>(null)
   const { isFullscreen, safeAreaInset, contentSafeAreaInset } = useTelegramWebApp()
 
+  // Pull to refresh (disabled when mobile menu is open)
+  const { isPulling, pullDistance, isRefreshing, progress } = usePullToRefresh({
+    disabled: mobileMenuOpen,
+    threshold: 80,
+  })
+
   // Fetch enabled themes from API - same source of truth as AdminSettings
   const { data: enabledThemes } = useQuery({
     queryKey: ['enabled-themes'],
@@ -155,17 +162,50 @@ export default function Layout({ children }: LayoutProps) {
     }
   }, [])
 
-  // Lock body scroll and scroll to top when mobile menu is open
+  // Lock body scroll when mobile menu is open (cross-platform)
+  // Note: We avoid using body position:fixed with top:-scrollY as it causes issues
+  // in Telegram Mini App where the menu disappears when opened from scrolled position
   useEffect(() => {
-    if (mobileMenuOpen) {
-      // Scroll to top so header is visible
-      window.scrollTo({ top: 0, behavior: 'instant' })
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = ''
+    if (!mobileMenuOpen) return
+
+    const body = document.body
+    const html = document.documentElement
+
+    // Save original styles
+    const originalStyles = {
+      bodyOverflow: body.style.overflow,
+      htmlOverflow: html.style.overflow,
     }
+
+    // Lock scroll - simple approach without body position manipulation
+    body.style.overflow = 'hidden'
+    html.style.overflow = 'hidden'
+
+    // Prevent touchmove on body (critical for mobile, especially Telegram Mini App)
+    const preventScroll = (e: TouchEvent) => {
+      const target = e.target as HTMLElement
+      // Allow scroll inside menu content
+      if (target.closest('.mobile-menu-content')) return
+      e.preventDefault()
+    }
+    document.addEventListener('touchmove', preventScroll, { passive: false })
+
+    // Also prevent wheel scroll on desktop
+    const preventWheel = (e: WheelEvent) => {
+      const target = e.target as HTMLElement
+      if (target.closest('.mobile-menu-content')) return
+      e.preventDefault()
+    }
+    document.addEventListener('wheel', preventWheel, { passive: false })
+
     return () => {
-      document.body.style.overflow = ''
+      // Restore original styles
+      body.style.overflow = originalStyles.bodyOverflow
+      html.style.overflow = originalStyles.htmlOverflow
+
+      // Remove listeners
+      document.removeEventListener('touchmove', preventScroll)
+      document.removeEventListener('wheel', preventWheel)
     }
   }, [mobileMenuOpen])
 
@@ -287,18 +327,42 @@ export default function Layout({ children }: LayoutProps) {
       {/* Animated Background */}
       <AnimatedBackground />
 
+      {/* Pull to refresh indicator */}
+      {(isPulling || isRefreshing) && (
+        <div
+          className="fixed left-1/2 -translate-x-1/2 z-[100] flex items-center justify-center transition-all duration-200"
+          style={{
+            top: `calc(${Math.max(pullDistance, isRefreshing ? 40 : 0)}px + env(safe-area-inset-top, 0px) + 0.5rem)`,
+            opacity: isRefreshing ? 1 : progress,
+          }}
+        >
+          <div className={`w-10 h-10 rounded-full bg-dark-800 border border-dark-700 shadow-lg flex items-center justify-center ${isRefreshing ? 'animate-pulse' : ''}`}>
+            <svg
+              className={`w-5 h-5 text-accent-400 transition-transform duration-200 ${isRefreshing ? 'animate-spin' : ''}`}
+              style={{ transform: isRefreshing ? undefined : `rotate(${progress * 360}deg)` }}
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <header
-        className="sticky top-0 z-50 glass border-b border-dark-800/50"
+        className="fixed top-0 left-0 right-0 z-50 glass border-b border-dark-800/50"
         style={{
           // In fullscreen mode, add padding for safe area + Telegram native controls (close/menu buttons in corners)
           paddingTop: isFullscreen ? `${Math.max(safeAreaInset.top, contentSafeAreaInset.top) + 45}px` : undefined,
         }}
       >
-        <div className="w-full mx-auto px-4 sm:px-6">
+        <div className="w-full mx-auto px-4 sm:px-6" onClick={() => mobileMenuOpen && setMobileMenuOpen(false)}>
           <div className="flex justify-between items-center h-16 lg:h-20">
             {/* Logo */}
-            <Link to="/" className={`flex items-center gap-2.5 flex-shrink-0 ${!appName ? 'lg:mr-4' : ''}`}>
+            <Link to="/" onClick={() => setMobileMenuOpen(false)} className={`flex items-center gap-2.5 flex-shrink-0 ${!appName ? 'lg:mr-4' : ''}`}>
               <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 rounded-xl bg-gradient-to-br from-accent-400 to-accent-600 flex items-center justify-center overflow-hidden shadow-lg shadow-accent-500/20 flex-shrink-0 relative">
                 {/* Always show letter as fallback */}
                 <span className={`text-white font-bold text-lg sm:text-xl lg:text-2xl absolute transition-opacity duration-200 ${hasCustomLogo && logoLoaded ? 'opacity-0' : 'opacity-100'}`}>
@@ -363,7 +427,10 @@ export default function Layout({ children }: LayoutProps) {
               {/* Theme toggle button - only show if both themes are enabled */}
               {canToggle && (
                 <button
-                  onClick={toggleTheme}
+                  onClick={() => {
+                    toggleTheme()
+                    setMobileMenuOpen(false)
+                  }}
                   className="relative p-2.5 rounded-xl transition-all duration-300 hover:scale-110 active:scale-95
                              dark:text-dark-400 dark:hover:text-dark-100 dark:hover:bg-dark-800
                              text-champagne-500 hover:text-champagne-800 hover:bg-champagne-200/50"
@@ -381,10 +448,14 @@ export default function Layout({ children }: LayoutProps) {
                 </button>
               )}
 
-              <PromoDiscountBadge />
-              <TicketNotificationBell isAdmin={isAdminActive()} />
+              <div onClick={() => setMobileMenuOpen(false)}>
+                <PromoDiscountBadge />
+              </div>
+              <div onClick={() => setMobileMenuOpen(false)}>
+                <TicketNotificationBell isAdmin={isAdminActive()} />
+              </div>
               {/* Hide language switcher on mobile when promo is active */}
-              <div className={isPromoActive ? 'hidden sm:block' : ''}>
+              <div className={isPromoActive ? 'hidden sm:block' : ''} onClick={() => setMobileMenuOpen(false)}>
                 <LanguageSwitcher />
               </div>
 
@@ -413,7 +484,10 @@ export default function Layout({ children }: LayoutProps) {
 
               {/* Mobile menu button */}
               <button
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setMobileMenuOpen(!mobileMenuOpen)
+                }}
                 className="lg:hidden btn-icon"
                 aria-label={mobileMenuOpen ? t('common.close') || 'Close menu' : t('nav.menu') || 'Open menu'}
                 aria-expanded={mobileMenuOpen}
@@ -426,9 +500,26 @@ export default function Layout({ children }: LayoutProps) {
 
       </header>
 
-      {/* Mobile menu - fixed overlay */}
+      {/* Spacer for fixed header - matches header height */}
+      {isFullscreen ? (
+        <div 
+          className="flex-shrink-0"
+          style={{ height: `${64 + Math.max(safeAreaInset.top, contentSafeAreaInset.top) + 45}px` }}
+        />
+      ) : (
+        <div className="flex-shrink-0 h-16 lg:h-20" />
+      )}
+
+      {/* Mobile menu - fixed overlay below header */}
       {mobileMenuOpen && (
-        <div className="lg:hidden fixed inset-0 z-40 animate-fade-in" style={{ top: '64px' }}>
+        <div
+          className="lg:hidden fixed inset-x-0 bottom-0 z-40 animate-fade-in"
+          style={{
+            top: isFullscreen
+              ? `${64 + Math.max(safeAreaInset.top, contentSafeAreaInset.top) + 45}px`
+              : '64px'
+          }}
+        >
           {/* Backdrop */}
           <div
             className="absolute inset-0 bg-black/50 backdrop-blur-sm"
@@ -436,7 +527,7 @@ export default function Layout({ children }: LayoutProps) {
           />
 
           {/* Menu content */}
-          <div className="absolute inset-x-0 top-0 bottom-0 bg-dark-900 border-t border-dark-800/50 overflow-y-auto pb-[calc(5rem+env(safe-area-inset-bottom,0px))]">
+          <div className="mobile-menu-content absolute inset-x-0 top-0 bottom-0 bg-dark-900 border-t border-dark-800/50 overflow-y-auto overscroll-contain pb-[calc(5rem+env(safe-area-inset-bottom,0px))]" style={{ WebkitOverflowScrolling: 'touch' }}>
             <div className="max-w-6xl mx-auto px-4 py-4">
               {/* User info */}
               <div className="flex items-center justify-between pb-4 mb-4 border-b border-dark-800/50">
@@ -546,6 +637,7 @@ export default function Layout({ children }: LayoutProps) {
             <Link
               key={item.path}
               to={item.path}
+              onClick={() => setMobileMenuOpen(false)}
               className={isActive(item.path) ? 'bottom-nav-item-active' : 'bottom-nav-item'}
             >
               <item.icon />

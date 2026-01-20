@@ -97,6 +97,8 @@ export default function Subscription() {
   const [devicesToAdd, setDevicesToAdd] = useState(1)
   const [showTrafficTopup, setShowTrafficTopup] = useState(false)
   const [selectedTrafficPackage, setSelectedTrafficPackage] = useState<number | null>(null)
+  const [showServerManagement, setShowServerManagement] = useState(false)
+  const [selectedServersToUpdate, setSelectedServersToUpdate] = useState<string[]>([])
 
   const { data: subscription, isLoading } = useQuery({
     queryKey: ['subscription'],
@@ -296,6 +298,31 @@ export default function Subscription() {
       queryClient.invalidateQueries({ queryKey: ['subscription'] })
       setShowTrafficTopup(false)
       setSelectedTrafficPackage(null)
+    },
+  })
+
+  // Countries/servers query
+  const { data: countriesData, isLoading: countriesLoading } = useQuery({
+    queryKey: ['countries'],
+    queryFn: subscriptionApi.getCountries,
+    enabled: showServerManagement && !!subscription && !subscription.is_trial,
+  })
+
+  // Initialize selected servers when data loads
+  useEffect(() => {
+    if (countriesData && showServerManagement) {
+      const connected = countriesData.countries.filter(c => c.is_connected).map(c => c.uuid)
+      setSelectedServersToUpdate(connected)
+    }
+  }, [countriesData, showServerManagement])
+
+  // Countries update mutation
+  const updateCountriesMutation = useMutation({
+    mutationFn: (countries: string[]) => subscriptionApi.updateCountries(countries),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['subscription'] })
+      queryClient.invalidateQueries({ queryKey: ['countries'] })
+      setShowServerManagement(false)
     },
   })
 
@@ -911,6 +938,212 @@ export default function Subscription() {
                 </div>
               )}
             </div>
+          )}
+
+          {/* Server Management - only in classic mode */}
+          {!isTariffsMode && (
+            <div className="mt-4">
+              {!showServerManagement ? (
+              <button
+                onClick={() => setShowServerManagement(true)}
+                className="w-full p-4 rounded-xl bg-dark-800/30 border border-dark-700/50 text-left hover:border-dark-600 transition-colors"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="font-medium text-dark-100">Управление серверами</div>
+                    <div className="text-sm text-dark-400 mt-1">
+                      Подключено серверов: {subscription.servers?.length || 0}
+                    </div>
+                  </div>
+                  <svg className="w-5 h-5 text-dark-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
+              </button>
+            ) : (
+              <div className="bg-dark-800/30 rounded-xl p-5 border border-dark-700/50">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-medium text-dark-100">Управление серверами</h3>
+                  <button
+                    onClick={() => {
+                      setShowServerManagement(false)
+                      setSelectedServersToUpdate([])
+                    }}
+                    className="text-dark-400 hover:text-dark-200 text-sm"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                {countriesLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <div className="w-8 h-8 border-2 border-accent-500 border-t-transparent rounded-full animate-spin" />
+                  </div>
+                ) : countriesData && countriesData.countries.length > 0 ? (
+                  <div className="space-y-4">
+                    <div className="text-xs text-dark-500 p-2 bg-dark-700/30 rounded-lg">
+                      ✅ — подключено  •  ➕ — будет добавлено (платно)  •  ➖ — будет отключено
+                    </div>
+
+                    {countriesData.discount_percent > 0 && (
+                      <div className="text-xs text-success-400 p-2 bg-success-500/10 rounded-lg border border-success-500/30">
+                        🎁 Ваша скидка на серверы: -{countriesData.discount_percent}%
+                      </div>
+                    )}
+
+                    <div className="space-y-2 max-h-64 overflow-y-auto">
+                      {countriesData.countries.map((country) => {
+                        const isCurrentlyConnected = country.is_connected
+                        const isSelected = selectedServersToUpdate.includes(country.uuid)
+                        const willBeAdded = !isCurrentlyConnected && isSelected
+                        const willBeRemoved = isCurrentlyConnected && !isSelected
+
+                        return (
+                          <button
+                            key={country.uuid}
+                            onClick={() => {
+                              if (isSelected) {
+                                setSelectedServersToUpdate(prev => prev.filter(u => u !== country.uuid))
+                              } else {
+                                setSelectedServersToUpdate(prev => [...prev, country.uuid])
+                              }
+                            }}
+                            disabled={!country.is_available && !isCurrentlyConnected}
+                            className={`w-full p-3 rounded-xl border text-left transition-all flex items-center justify-between ${
+                              isSelected
+                                ? willBeAdded
+                                  ? 'border-success-500 bg-success-500/10'
+                                  : 'border-accent-500 bg-accent-500/10'
+                                : willBeRemoved
+                                  ? 'border-error-500/50 bg-error-500/5'
+                                  : 'border-dark-700/50 hover:border-dark-600 bg-dark-800/30'
+                            } ${!country.is_available && !isCurrentlyConnected ? 'opacity-50 cursor-not-allowed' : ''}`}
+                          >
+                            <div className="flex items-center gap-3">
+                              <span className="text-lg">
+                                {willBeAdded ? '➕' : willBeRemoved ? '➖' : isSelected ? '✅' : '⚪'}
+                              </span>
+                              <div>
+                                <div className="font-medium text-dark-100 flex items-center gap-2">
+                                  {country.name}
+                                  {country.has_discount && !isCurrentlyConnected && (
+                                    <span className="text-xs px-1.5 py-0.5 rounded bg-success-500/20 text-success-400">
+                                      -{country.discount_percent}%
+                                    </span>
+                                  )}
+                                </div>
+                                {willBeAdded && (
+                                  <div className="text-xs text-success-400">
+                                    +{formatPrice(country.price_kopeks)} (за {countriesData.days_left} дн.)
+                                    {country.has_discount && (
+                                      <span className="ml-1 line-through text-dark-500">
+                                        {formatPrice(Math.round(country.base_price_kopeks * countriesData.days_left / 30))}
+                                      </span>
+                                    )}
+                                  </div>
+                                )}
+                                {!willBeAdded && !isCurrentlyConnected && (
+                                  <div className="text-xs text-dark-500">
+                                    {formatPrice(country.price_per_month_kopeks)}/мес
+                                    {country.has_discount && (
+                                      <span className="ml-1 line-through text-dark-600">
+                                        {formatPrice(country.base_price_kopeks)}
+                                      </span>
+                                    )}
+                                  </div>
+                                )}
+                                {!country.is_available && !isCurrentlyConnected && (
+                                  <div className="text-xs text-dark-500">Недоступен</div>
+                                )}
+                              </div>
+                            </div>
+                            {country.country_code && (
+                              <span className="text-xl">{getFlagEmoji(country.country_code)}</span>
+                            )}
+                          </button>
+                        )
+                      })}
+                    </div>
+
+                    {(() => {
+                      const currentConnected = countriesData.countries.filter(c => c.is_connected).map(c => c.uuid)
+                      const added = selectedServersToUpdate.filter(u => !currentConnected.includes(u))
+                      const removed = currentConnected.filter(u => !selectedServersToUpdate.includes(u))
+                      const hasChanges = added.length > 0 || removed.length > 0
+
+                      // Calculate cost for added servers
+                      const addedServers = countriesData.countries.filter(c => added.includes(c.uuid))
+                      const totalCost = addedServers.reduce((sum, s) => sum + s.price_kopeks, 0)
+                      const hasEnoughBalance = !purchaseOptions || totalCost <= purchaseOptions.balance_kopeks
+                      const missingAmount = purchaseOptions ? totalCost - purchaseOptions.balance_kopeks : 0
+
+                      return hasChanges ? (
+                        <div className="space-y-3 pt-3 border-t border-dark-700/50">
+                          {added.length > 0 && (
+                            <div className="text-sm">
+                              <span className="text-success-400">Добавить:</span>{' '}
+                              <span className="text-dark-300">
+                                {addedServers.map(s => s.name).join(', ')}
+                              </span>
+                            </div>
+                          )}
+                          {removed.length > 0 && (
+                            <div className="text-sm">
+                              <span className="text-error-400">Отключить:</span>{' '}
+                              <span className="text-dark-300">
+                                {countriesData.countries.filter(c => removed.includes(c.uuid)).map(s => s.name).join(', ')}
+                              </span>
+                            </div>
+                          )}
+                          {totalCost > 0 && (
+                            <div className="text-center">
+                              <div className="text-sm text-dark-400">К оплате (пропорционально оставшимся дням):</div>
+                              <div className="text-xl font-bold text-accent-400">{formatPrice(totalCost)}</div>
+                            </div>
+                          )}
+
+                          {totalCost > 0 && !hasEnoughBalance && missingAmount > 0 && (
+                            <InsufficientBalancePrompt
+                              missingAmountKopeks={missingAmount}
+                              compact
+                            />
+                          )}
+
+                          <button
+                            onClick={() => updateCountriesMutation.mutate(selectedServersToUpdate)}
+                            disabled={updateCountriesMutation.isPending || selectedServersToUpdate.length === 0 || (totalCost > 0 && !hasEnoughBalance)}
+                            className="btn-primary w-full py-3"
+                          >
+                            {updateCountriesMutation.isPending ? (
+                              <span className="flex items-center justify-center gap-2">
+                                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                              </span>
+                            ) : (
+                              'Применить изменения'
+                            )}
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="text-sm text-dark-500 text-center py-2">
+                          Выберите серверы для подключения или отключения
+                        </div>
+                      )
+                    })()}
+
+                    {updateCountriesMutation.isError && (
+                      <div className="text-sm text-error-400 text-center">
+                        {getErrorMessage(updateCountriesMutation.error)}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-sm text-dark-400 text-center py-4">
+                    Нет доступных серверов для управления
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
           )}
         </div>
       )}
