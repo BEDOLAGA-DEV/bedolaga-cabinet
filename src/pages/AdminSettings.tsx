@@ -7,7 +7,7 @@ import { brandingApi, setCachedBranding } from '../api/branding'
 import { setCachedAnimationEnabled } from '../components/AnimatedBackground'
 import { setCachedFullscreenEnabled } from '../hooks/useTelegramWebApp'
 import { themeColorsApi } from '../api/themeColors'
-import { DEFAULT_THEME_COLORS, DEFAULT_ENABLED_THEMES } from '../types/theme'
+import { ThemeColors, DEFAULT_THEME_COLORS, DEFAULT_ENABLED_THEMES } from '../types/theme'
 import { ColorPicker } from '../components/ColorPicker'
 import { applyThemeColors } from '../hooks/useThemeColors'
 import { updateEnabledThemesCache } from '../hooks/useTheme'
@@ -130,6 +130,133 @@ const META_CATEGORIES: Record<string, { label: string; emoji: string; categories
     categories: ['SUPPORT', 'LOCALIZATION', 'CHANNEL', 'TIMEZONE', 'REFERRAL', 'MODERATION'],
   },
 }
+
+// Theme presets - predefined color schemes
+const THEME_PRESETS: { name: string; colors: ThemeColors }[] = [
+  {
+    name: 'Default Blue',
+    colors: DEFAULT_THEME_COLORS,
+  },
+  {
+    name: 'Ocean',
+    colors: {
+      accent: '#0ea5e9',
+      darkBackground: '#0c1222',
+      darkSurface: '#1e293b',
+      darkText: '#f1f5f9',
+      darkTextSecondary: '#94a3b8',
+      lightBackground: '#e0f2fe',
+      lightSurface: '#f0f9ff',
+      lightText: '#0c4a6e',
+      lightTextSecondary: '#0369a1',
+      success: '#22c55e',
+      warning: '#f59e0b',
+      error: '#ef4444',
+    },
+  },
+  {
+    name: 'Forest',
+    colors: {
+      accent: '#22c55e',
+      darkBackground: '#0a1a0f',
+      darkSurface: '#14532d',
+      darkText: '#f0fdf4',
+      darkTextSecondary: '#86efac',
+      lightBackground: '#dcfce7',
+      lightSurface: '#f0fdf4',
+      lightText: '#14532d',
+      lightTextSecondary: '#166534',
+      success: '#22c55e',
+      warning: '#f59e0b',
+      error: '#ef4444',
+    },
+  },
+  {
+    name: 'Sunset',
+    colors: {
+      accent: '#f97316',
+      darkBackground: '#1c1009',
+      darkSurface: '#2d1a0e',
+      darkText: '#fff7ed',
+      darkTextSecondary: '#fdba74',
+      lightBackground: '#ffedd5',
+      lightSurface: '#fff7ed',
+      lightText: '#7c2d12',
+      lightTextSecondary: '#c2410c',
+      success: '#22c55e',
+      warning: '#f59e0b',
+      error: '#ef4444',
+    },
+  },
+  {
+    name: 'Purple',
+    colors: {
+      accent: '#a855f7',
+      darkBackground: '#0f0a1a',
+      darkSurface: '#1e1b2e',
+      darkText: '#faf5ff',
+      darkTextSecondary: '#c4b5fd',
+      lightBackground: '#f3e8ff',
+      lightSurface: '#faf5ff',
+      lightText: '#581c87',
+      lightTextSecondary: '#7e22ce',
+      success: '#22c55e',
+      warning: '#f59e0b',
+      error: '#ef4444',
+    },
+  },
+  {
+    name: 'Rose',
+    colors: {
+      accent: '#f43f5e',
+      darkBackground: '#1a0a10',
+      darkSurface: '#2d1520',
+      darkText: '#fff1f2',
+      darkTextSecondary: '#fda4af',
+      lightBackground: '#ffe4e6',
+      lightSurface: '#fff1f2',
+      lightText: '#881337',
+      lightTextSecondary: '#be123c',
+      success: '#22c55e',
+      warning: '#f59e0b',
+      error: '#ef4444',
+    },
+  },
+  {
+    name: 'Midnight',
+    colors: {
+      accent: '#6366f1',
+      darkBackground: '#030712',
+      darkSurface: '#111827',
+      darkText: '#f9fafb',
+      darkTextSecondary: '#9ca3af',
+      lightBackground: '#e5e7eb',
+      lightSurface: '#f3f4f6',
+      lightText: '#111827',
+      lightTextSecondary: '#4b5563',
+      success: '#22c55e',
+      warning: '#f59e0b',
+      error: '#ef4444',
+    },
+  },
+  {
+    name: 'Teal',
+    colors: {
+      accent: '#14b8a6',
+      darkBackground: '#0a1614',
+      darkSurface: '#134e4a',
+      darkText: '#f0fdfa',
+      darkTextSecondary: '#5eead4',
+      lightBackground: '#ccfbf1',
+      lightSurface: '#f0fdfa',
+      lightText: '#134e4a',
+      lightTextSecondary: '#0f766e',
+      success: '#22c55e',
+      warning: '#f59e0b',
+      error: '#ef4444',
+    },
+  },
+]
 
 // Setting translations (name + description) - comprehensive list
 const SETTING_TRANSLATIONS: Record<string, { name: string; description: string }> = {
@@ -1355,6 +1482,61 @@ export default function AdminSettings() {
               Включите нужные темы для пользователей. Минимум одна тема должна быть активна.
             </p>
           </div>
+
+          {/* Quick Presets */}
+          <div className="pb-6 border-b border-dark-700/50">
+            <label className="label mb-3">Quick Presets</label>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {THEME_PRESETS.map((preset) => (
+                <button
+                  key={preset.name}
+                  onClick={() => updateColorsMutation.mutate(preset.colors)}
+                  disabled={updateColorsMutation.isPending}
+                  className="group relative p-3 rounded-xl border border-dark-700 hover:border-dark-500 transition-all hover:scale-[1.02]"
+                  style={{ backgroundColor: preset.colors.darkBackground }}
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    <div
+                      className="w-4 h-4 rounded-full ring-2 ring-white/20"
+                      style={{ backgroundColor: preset.colors.accent }}
+                    />
+                    <span
+                      className="text-xs font-medium truncate"
+                      style={{ color: preset.colors.darkText }}
+                    >
+                      {preset.name}
+                    </span>
+                  </div>
+                  <div className="flex gap-1">
+                    <div
+                      className="w-3 h-3 rounded"
+                      style={{ backgroundColor: preset.colors.darkSurface }}
+                      title="Surface"
+                    />
+                    <div
+                      className="w-3 h-3 rounded"
+                      style={{ backgroundColor: preset.colors.success }}
+                      title="Success"
+                    />
+                    <div
+                      className="w-3 h-3 rounded"
+                      style={{ backgroundColor: preset.colors.warning }}
+                      title="Warning"
+                    />
+                    <div
+                      className="w-3 h-3 rounded"
+                      style={{ backgroundColor: preset.colors.error }}
+                      title="Error"
+                    />
+                  </div>
+                </button>
+              ))}
+            </div>
+            <p className="text-xs text-dark-500 mt-2">
+              Выберите готовую цветовую схему. Изменения сохраняются автоматически.
+            </p>
+          </div>
+
           {/* Accent Color */}
           <ColorPicker
             label={t('theme.accent')}

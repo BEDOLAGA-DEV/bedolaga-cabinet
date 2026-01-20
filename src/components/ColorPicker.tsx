@@ -341,18 +341,18 @@ export function ColorPicker({ value, onChange, label, description, disabled }: C
   ) : null
 
   return (
-    <div className="relative">
-      <label className="block text-sm font-medium text-dark-200 mb-1">{label}</label>
-      {description && <p className="text-xs text-dark-500 mb-2">{description}</p>}
+    <div className="relative min-w-0 overflow-hidden">
+      <label className="block text-sm font-medium text-dark-200 mb-1 truncate">{label}</label>
+      {description && <p className="text-xs text-dark-500 mb-2 truncate">{description}</p>}
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2">
         {/* Color preview button */}
         <button
           ref={buttonRef}
           type="button"
           onClick={handleOpen}
           disabled={disabled}
-          className="w-11 h-11 rounded-xl border-2 border-dark-700 shadow-inner transition-all hover:scale-105 hover:border-dark-600 disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
+          className="w-10 h-10 rounded-xl border-2 border-dark-700 shadow-inner transition-all hover:scale-105 hover:border-dark-600 disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
           style={{ backgroundColor: localValue || '#000000' }}
           title={localValue}
         />
@@ -363,7 +363,7 @@ export function ColorPicker({ value, onChange, label, description, disabled }: C
           value={localValue}
           onChange={handleHexInputChange}
           disabled={disabled}
-          className="w-28 h-11 px-3 font-mono text-sm uppercase bg-dark-800 border border-dark-700 rounded-xl text-dark-100 focus:outline-none focus:border-accent-500 disabled:opacity-50"
+          className="flex-1 min-w-0 h-10 px-2 font-mono text-sm uppercase bg-dark-800 border border-dark-700 rounded-xl text-dark-100 focus:outline-none focus:border-accent-500 disabled:opacity-50"
           placeholder="#000000"
           maxLength={7}
         />
@@ -383,7 +383,7 @@ export function ColorPicker({ value, onChange, label, description, disabled }: C
               type="button"
               onClick={() => colorInputRef.current?.click()}
               disabled={disabled}
-              className="w-11 h-11 flex items-center justify-center rounded-xl bg-dark-800 border border-dark-700 text-dark-400 hover:text-dark-200 hover:bg-dark-700 transition-colors disabled:opacity-50"
+              className="w-10 h-10 flex items-center justify-center rounded-xl bg-dark-800 border border-dark-700 text-dark-400 hover:text-dark-200 hover:bg-dark-700 transition-colors disabled:opacity-50 flex-shrink-0"
               title="System color picker"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
