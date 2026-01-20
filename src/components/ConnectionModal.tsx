@@ -274,7 +274,7 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
 
     // Desktop centered
     return (
-      <div className="fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4" onClick={handleClose}>
+      <div className="fixed inset-0 bg-black/60 z-[60] flex items-start justify-center p-4 pt-[8vh]" onClick={handleClose}>
         <div
           className="relative w-full max-w-md max-h-[85vh] bg-dark-900 rounded-2xl border border-dark-700/50 shadow-2xl flex flex-col overflow-hidden"
           onClick={e => e.stopPropagation()}
