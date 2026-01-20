@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { subscriptionApi } from '../api/subscription'
@@ -9,40 +9,44 @@ interface ConnectionModalProps {
   onClose: () => void
 }
 
-// Icons
 const CloseIcon = () => (
-  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
   </svg>
 )
 
 const CopyIcon = () => (
-  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
   </svg>
 )
 
 const CheckIcon = () => (
-  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
   </svg>
 )
 
 const LinkIcon = () => (
-  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
   </svg>
 )
 
-const ChevronDownIcon = () => (
+const ChevronIcon = () => (
   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
   </svg>
 )
 
-// App icons
+const BackIcon = () => (
+  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+  </svg>
+)
+
 const HappIcon = () => (
-  <svg className="w-5 h-5" viewBox="0 0 50 50" fill="currentColor">
+  <svg className="w-6 h-6" viewBox="0 0 50 50" fill="currentColor">
     <path d="M22.3264 3H12.3611L9.44444 20.1525L21.3542 8.22034L22.3264 3Z"/>
     <path d="M10.9028 20.1525L22.8125 8.22034L20.8681 21.1469H28.4028L27.9167 21.6441L20.8681 28.8531H19.4097V30.5932L7.5 42.5254L10.9028 20.1525Z"/>
     <path d="M41.0417 8.22034L28.8889 20.1525L31.684 3H41.7708L41.0417 8.22034Z"/>
@@ -53,20 +57,20 @@ const HappIcon = () => (
 )
 
 const ClashMetaIcon = () => (
-  <svg className="w-5 h-5" viewBox="0 0 50 50" fill="currentColor">
+  <svg className="w-6 h-6" viewBox="0 0 50 50" fill="currentColor">
     <path fillRule="evenodd" clipRule="evenodd" d="M4.99239 5.21742C4.0328 5.32232 3.19446 5.43999 3.12928 5.47886C2.94374 5.58955 2.96432 33.4961 3.14997 33.6449C3.2266 33.7062 4.44146 34.002 5.84976 34.3022C7.94234 34.7483 8.60505 34.8481 9.47521 34.8481C10.3607 34.8481 10.5706 34.8154 10.7219 34.6541C10.8859 34.479 10.9066 33.7222 10.9338 26.9143L10.9638 19.3685L11.2759 19.1094C11.6656 18.7859 12.1188 18.7789 12.5285 19.0899C12.702 19.2216 14.319 20.624 16.1219 22.2061C17.9247 23.7883 19.5136 25.1104 19.6527 25.144C19.7919 25.1777 20.3714 25.105 20.9406 24.9825C22.6144 24.6221 23.3346 24.5424 24.9233 24.5421C26.4082 24.5417 27.8618 24.71 29.2219 25.0398C29.6074 25.1333 30.0523 25.1784 30.2107 25.1399C30.369 25.1016 31.1086 24.5336 31.8543 23.8777C33.3462 22.5653 33.6461 22.3017 35.4359 20.7293C36.1082 20.1388 36.6831 19.6313 36.7137 19.6017C37.5681 18.7742 38.0857 18.6551 38.6132 19.1642L38.9383 19.478V34.5138L39.1856 34.6809C39.6343 34.9843 41.2534 34.9022 43.195 34.4775C44.1268 34.2737 45.2896 34.0291 45.779 33.9339C46.2927 33.8341 46.7276 33.687 46.8079 33.5861C47.0172 33.3228 47.0109 5.87708 46.8014 5.6005C46.6822 5.4431 46.2851 5.37063 44.605 5.1996C43.477 5.08482 42.2972 5.00505 41.983 5.02223L41.4121 5.05368L35.4898 10.261C27.3144 17.4495 27.7989 17.0418 27.5372 16.9533C27.4148 16.912 26.1045 16.8746 24.6253 16.8702C22.0674 16.8626 21.9233 16.8513 21.6777 16.6396C21.0693 16.115 17.2912 12.8028 14.5726 10.4108C12.9548 8.98729 10.9055 7.18761 10.0186 6.41134L8.40584 5L7.5715 5.01331C7.11256 5.02072 5.95198 5.11252 4.99239 5.21742Z"/>
   </svg>
 )
 
 const ShadowrocketIcon = () => (
-  <svg className="w-5 h-5" viewBox="0 0 50 50" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+  <svg className="w-6 h-6" viewBox="0 0 50 50" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
     <path d="M21.2394 36.832L16.5386 39.568C16.5386 39.568 13.7182 36.832 11.8379 33.184C9.95756 29.536 16.5386 23.152 16.5386 23.152M21.2394 36.832H28.7606M21.2394 36.832C21.2394 36.832 15.5985 24.064 17.4788 16.768C19.3591 9.472 25 4 25 4C25 4 30.6409 9.472 32.5212 16.768C34.4015 24.064 28.7606 36.832 28.7606 36.832M28.7606 36.832L33.4614 39.568C33.4614 39.568 36.2818 36.832 38.1621 33.184C40.0424 29.536 33.4614 23.152 33.4614 23.152M25 46L26.8803 40.528H23.1197L25 46ZM25.9402 17.68C26.4594 18.1837 26.4594 19.0003 25.9402 19.504C25.4209 20.0077 24.5791 20.0077 24.0598 19.504C23.5406 19.0003 23.5406 18.1837 24.0598 17.68C24.5791 17.1763 25.4209 17.1763 25.9402 17.68Z"/>
   </svg>
 )
 
 const StreisandIcon = () => (
-  <svg className="w-5 h-5" viewBox="0 0 50 50" fill="currentColor">
-    <path d="M25 46L24.2602 47.0076C24.7027 47.3325 25.3054 47.3306 25.7459 47.0031L25 46ZM6.14773 32.1591H4.89773C4.89773 32.557 5.0872 32.9312 5.40797 33.1667L6.14773 32.1591ZM43.6136 32.1591L44.3595 33.1622C44.6767 32.9263 44.8636 32.5543 44.8636 32.1591H43.6136ZM6.14773 19.9886L5.42485 18.9689C5.09421 19.2032 4.89773 19.5834 4.89773 19.9886H6.14773ZM25 6.625L25.729 5.6096L25.0046 5.08952L24.2771 5.60522L25 6.625ZM43.6136 19.9886H44.8636C44.8636 19.586 44.6697 19.208 44.3426 18.9732L43.6136 19.9886ZM25 46L25.7398 44.9924L6.88748 31.1515L6.14773 32.1591L5.40797 33.1667L24.2602 47.0076L25 46ZM43.6136 32.1591L42.8678 31.156L24.2541 44.9969L25 46L25.7459 47.0031L44.3595 33.1622L43.6136 32.1591ZM25 33.8295L25.7398 32.8219L6.88748 18.981L6.14773 19.9886L5.40797 20.9962L24.2602 34.8371L25 33.8295ZM6.14773 19.9886L6.87061 21.0084L25.7229 7.64478L25 6.625L24.2771 5.60522L5.42485 18.9689L6.14773 19.9886ZM25 6.625L24.271 7.6404L42.8846 21.004L43.6136 19.9886L44.3426 18.9732L25.729 5.6096L25 6.625ZM43.6136 19.9886L42.8678 18.9856L24.2541 32.8265L25 33.8295L25.7459 34.8326L44.3595 20.9917L43.6136 19.9886ZM43.6136 32.1591H44.8636V19.9886H43.6136H42.3636V32.1591H43.6136ZM25 33.8295H23.75V46H25H26.25V33.8295H25ZM6.14773 32.1591H7.39773V19.9886H6.14773H4.89773V32.1591H6.14773Z"/>
+  <svg className="w-6 h-6" viewBox="0 0 50 50" fill="currentColor">
+    <path d="M25 46L24.2602 47.0076C24.7027 47.3325 25.3054 47.3306 25.7459 47.0031L25 46ZM6.14773 32.1591H4.89773C4.89773 32.557 5.0872 32.9312 5.40797 33.1667L6.14773 32.1591ZM43.6136 32.1591L44.3595 33.1622C44.6767 32.9263 44.8636 32.5543 44.8636 32.1591H43.6136ZM6.14773 19.9886L5.42485 18.9689C5.09421 19.2032 4.89773 19.5834 4.89773 19.9886H6.14773ZM25 6.625L25.729 5.6096L25.0046 5.08952L24.2771 5.60522L25 6.625ZM43.6136 19.9886H44.8636C44.8636 19.586 44.6697 19.208 44.3426 18.9732L43.6136 19.9886ZM25 46L25.7398 44.9924L6.88748 31.1515L6.14773 32.1591L5.40797 33.1667L24.2602 47.0076L25 46ZM43.6136 32.1591L42.8678 31.156L24.2541 44.9969L25 46L25.7459 47.0031L44.3595 33.1622L43.6136 32.1591Z"/>
   </svg>
 )
 
@@ -76,11 +80,10 @@ const getAppIcon = (appName: string): React.ReactNode => {
   if (name.includes('shadowrocket') || name.includes('rocket')) return <ShadowrocketIcon />
   if (name.includes('streisand')) return <StreisandIcon />
   if (name.includes('clash') || name.includes('meta') || name.includes('verge')) return <ClashMetaIcon />
-  return <span className="text-sm">📦</span>
+  return <span className="text-lg">📦</span>
 }
 
 const platformOrder = ['ios', 'android', 'windows', 'macos', 'linux', 'androidTV', 'appleTV']
-
 const dangerousSchemes = ['javascript:', 'data:', 'vbscript:', 'file:']
 
 function isValidExternalUrl(url: string | undefined): boolean {
@@ -108,9 +111,15 @@ function detectPlatform(): string | null {
   return null
 }
 
-function isMobile(): boolean {
-  if (typeof window === 'undefined') return false
-  return window.innerWidth < 768
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false)
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768)
+    check()
+    window.addEventListener('resize', check)
+    return () => window.removeEventListener('resize', check)
+  }, [])
+  return isMobile
 }
 
 export default function ConnectionModal({ onClose }: ConnectionModalProps) {
@@ -119,13 +128,13 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
   const [copied, setCopied] = useState(false)
   const [detectedPlatform, setDetectedPlatform] = useState<string | null>(null)
   const [showAppSelector, setShowAppSelector] = useState(false)
-  const modalRef = useRef<HTMLDivElement>(null)
 
   const { isTelegramWebApp, safeAreaInset, contentSafeAreaInset } = useTelegramWebApp()
+  const isMobileScreen = useIsMobile()
+  const isMobile = isMobileScreen || isTelegramWebApp
 
-  const safeBottom = isTelegramWebApp
-    ? Math.max(safeAreaInset.bottom, contentSafeAreaInset.bottom, 16)
-    : 16
+  const safeTop = isTelegramWebApp ? Math.max(safeAreaInset.top, contentSafeAreaInset.top) : 0
+  const safeBottom = isTelegramWebApp ? Math.max(safeAreaInset.bottom, contentSafeAreaInset.bottom) : 0
 
   const { data: appConfig, isLoading, error } = useQuery<AppConfig>({
     queryKey: ['appConfig'],
@@ -207,202 +216,222 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
     window.location.href = redirectUrl
   }
 
-  const mobile = isMobile() || isTelegramWebApp
+  // Desktop modal wrapper
+  const DesktopWrapper = ({ children }: { children: React.ReactNode }) => (
+    <div className="fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4" onClick={onClose}>
+      <div className="w-full max-w-md bg-dark-900 rounded-2xl border border-dark-700/50 shadow-2xl" onClick={e => e.stopPropagation()}>
+        {children}
+      </div>
+    </div>
+  )
+
+  // Mobile fullscreen wrapper - like React Native Modal with animationType="slide"
+  const MobileWrapper = ({ children }: { children: React.ReactNode }) => (
+    <>
+      {/* Backdrop */}
+      <div className="fixed inset-0 z-[9998] bg-black/50 animate-fade-in" onClick={onClose} />
+      {/* Modal - slides from bottom */}
+      <div
+        className="fixed inset-0 z-[9999] bg-dark-900 flex flex-col animate-slide-up"
+        style={{
+          paddingTop: safeTop ? `${safeTop}px` : 'env(safe-area-inset-top, 0px)',
+          paddingBottom: safeBottom ? `${safeBottom}px` : 'env(safe-area-inset-bottom, 0px)'
+        }}
+      >
+        {/* Close button */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 z-10 p-2.5 rounded-full bg-dark-800/80 text-dark-200 active:bg-dark-700"
+          style={{ marginTop: safeTop ? `${safeTop}px` : 'env(safe-area-inset-top, 0px)' }}
+        >
+          <CloseIcon />
+        </button>
+        {children}
+      </div>
+    </>
+  )
+
+  const Wrapper = isMobile ? MobileWrapper : DesktopWrapper
 
   // Loading
   if (isLoading) {
     return (
-      <div className="fixed inset-0 bg-black/60 z-[60] flex items-end md:items-center justify-center" onClick={onClose}>
-        <div className={`${mobile ? 'w-full rounded-t-3xl' : 'w-full max-w-sm rounded-2xl mx-4'} bg-dark-900 p-8 flex justify-center`} onClick={e => e.stopPropagation()}>
-          <div className="w-8 h-8 border-2 border-accent-500 border-t-transparent rounded-full animate-spin" />
+      <Wrapper>
+        <div className="flex-1 flex items-center justify-center p-8">
+          <div className="w-10 h-10 border-3 border-accent-500 border-t-transparent rounded-full animate-spin" />
         </div>
-      </div>
+      </Wrapper>
     )
   }
 
-  // Error or no config
+  // Error
   if (error || !appConfig) {
     return (
-      <div className="fixed inset-0 bg-black/60 z-[60] flex items-end md:items-center justify-center" onClick={onClose}>
-        <div className={`${mobile ? 'w-full rounded-t-3xl' : 'w-full max-w-sm rounded-2xl mx-4'} bg-dark-900 p-6 text-center`} onClick={e => e.stopPropagation()}>
-          <div className="text-4xl mb-3">😕</div>
-          <p className="text-dark-300 mb-4">{t('common.error')}</p>
-          <button onClick={onClose} className="btn-primary px-6 py-2">{t('common.close')}</button>
+      <Wrapper>
+        <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
+          <div className="text-5xl mb-4">😕</div>
+          <p className="text-dark-300 text-lg mb-6">{t('common.error')}</p>
+          <button onClick={onClose} className="btn-primary px-8 py-3 text-base">{t('common.close')}</button>
         </div>
-      </div>
+      </Wrapper>
     )
   }
 
   // No subscription
   if (!appConfig.hasSubscription) {
     return (
-      <div className="fixed inset-0 bg-black/60 z-[60] flex items-end md:items-center justify-center" onClick={onClose}>
-        <div className={`${mobile ? 'w-full rounded-t-3xl' : 'w-full max-w-sm rounded-2xl mx-4'} bg-dark-900 p-6 text-center`} onClick={e => e.stopPropagation()}>
-          <div className="text-4xl mb-3">📱</div>
-          <h3 className="font-semibold text-dark-100 mb-1">{t('subscription.connection.title')}</h3>
-          <p className="text-dark-400 text-sm mb-4">{t('subscription.connection.noSubscription')}</p>
-          <button onClick={onClose} className="btn-primary px-6 py-2">{t('common.close')}</button>
+      <Wrapper>
+        <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
+          <div className="text-5xl mb-4">📱</div>
+          <h3 className="font-bold text-dark-100 text-xl mb-2">{t('subscription.connection.title')}</h3>
+          <p className="text-dark-400 mb-6">{t('subscription.connection.noSubscription')}</p>
+          <button onClick={onClose} className="btn-primary px-8 py-3 text-base">{t('common.close')}</button>
         </div>
-      </div>
+      </Wrapper>
     )
   }
 
-  // App selector dropdown
+  // App selector
   if (showAppSelector) {
     return (
-      <div className="fixed inset-0 bg-black/60 z-[60] flex items-end md:items-center justify-center" onClick={onClose}>
-        <div
-          ref={modalRef}
-          className={`${mobile ? 'w-full rounded-t-3xl max-h-[70vh]' : 'w-full max-w-sm rounded-2xl mx-4 max-h-[80vh]'} bg-dark-900 flex flex-col animate-slide-up`}
-          style={{ paddingBottom: mobile ? safeBottom : 16 }}
-          onClick={e => e.stopPropagation()}
-        >
-          {/* Handle bar for mobile */}
-          {mobile && <div className="flex justify-center pt-3 pb-2"><div className="w-10 h-1 bg-dark-600 rounded-full" /></div>}
-
-          {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-dark-800">
-            <h2 className="font-semibold text-dark-100">{t('subscription.connection.selectApp')}</h2>
-            <button onClick={() => setShowAppSelector(false)} className="p-1.5 rounded-lg hover:bg-dark-800 text-dark-400">
-              <CloseIcon />
-            </button>
-          </div>
-
-          {/* Apps list */}
-          <div className="flex-1 overflow-y-auto p-3 space-y-1">
-            {allApps.map(app => (
-              <button
-                key={app.id}
-                onClick={() => { setSelectedApp(app); setShowAppSelector(false) }}
-                className={`w-full p-3 rounded-xl flex items-center gap-3 transition-all ${
-                  selectedApp?.id === app.id
-                    ? 'bg-accent-500/15 ring-1 ring-accent-500/50'
-                    : 'hover:bg-dark-800/70'
-                }`}
-              >
-                <div className="w-9 h-9 rounded-xl bg-dark-700 flex items-center justify-center text-dark-200">
-                  {getAppIcon(app.name)}
-                </div>
-                <span className="font-medium text-dark-100 flex-1 text-left">{app.name}</span>
-                {app.isFeatured && (
-                  <span className="px-2 py-0.5 rounded-md text-[10px] font-medium bg-accent-500/20 text-accent-400">
-                    {t('subscription.connection.featured')}
-                  </span>
-                )}
-              </button>
-            ))}
-          </div>
+      <Wrapper>
+        {/* Header */}
+        <div className="flex items-center gap-3 p-4 border-b border-dark-800">
+          <button onClick={() => setShowAppSelector(false)} className="p-2 -ml-2 rounded-xl hover:bg-dark-800 text-dark-300">
+            <BackIcon />
+          </button>
+          <h2 className="font-bold text-dark-100 text-lg">{t('subscription.connection.selectApp')}</h2>
         </div>
-      </div>
+
+        {/* Apps list */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-2">
+          {allApps.map(app => (
+            <button
+              key={app.id}
+              onClick={() => { setSelectedApp(app); setShowAppSelector(false) }}
+              className={`w-full p-4 rounded-2xl flex items-center gap-4 transition-all ${
+                selectedApp?.id === app.id
+                  ? 'bg-accent-500/15 ring-2 ring-accent-500/50'
+                  : 'bg-dark-800/50 hover:bg-dark-800'
+              }`}
+            >
+              <div className="w-12 h-12 rounded-xl bg-dark-700 flex items-center justify-center text-dark-200">
+                {getAppIcon(app.name)}
+              </div>
+              <span className="font-semibold text-dark-100 text-lg flex-1 text-left">{app.name}</span>
+              {app.isFeatured && (
+                <span className="px-3 py-1 rounded-lg text-xs font-bold bg-accent-500/20 text-accent-400">
+                  {t('subscription.connection.featured')}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+      </Wrapper>
     )
   }
 
-  // Main view - Instructions
+  // Main view
   return (
-    <div className="fixed inset-0 bg-black/60 z-[60] flex items-end md:items-center justify-center" onClick={onClose}>
-      <div
-        ref={modalRef}
-        className={`${mobile ? 'w-full rounded-t-3xl' : 'w-full max-w-sm rounded-2xl mx-4'} bg-dark-900 flex flex-col animate-slide-up`}
-        style={{ paddingBottom: mobile ? safeBottom : 16 }}
-        onClick={e => e.stopPropagation()}
-      >
-        {/* Handle bar for mobile */}
-        {mobile && <div className="flex justify-center pt-3 pb-1"><div className="w-10 h-1 bg-dark-600 rounded-full" /></div>}
+    <Wrapper>
+      {/* Header - app selector */}
+      <div className="p-4 border-b border-dark-800">
+        <button
+          onClick={() => setShowAppSelector(true)}
+          className="w-full flex items-center gap-4 p-3 rounded-2xl bg-dark-800/50 hover:bg-dark-800 transition-colors"
+        >
+          <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-accent-500/30 to-accent-600/10 flex items-center justify-center text-accent-400">
+            {selectedApp && getAppIcon(selectedApp.name)}
+          </div>
+          <div className="flex-1 text-left">
+            <div className="font-bold text-dark-100 text-lg">{selectedApp?.name}</div>
+            <div className="text-sm text-accent-400">{t('subscription.connection.changeApp') || 'Сменить приложение'}</div>
+          </div>
+          <ChevronIcon />
+        </button>
+      </div>
 
-        {/* Header with app selector */}
-        <div className="px-4 py-3 flex items-center justify-between">
-          <button
-            onClick={() => setShowAppSelector(true)}
-            className="flex items-center gap-3 p-2 -m-2 rounded-xl hover:bg-dark-800/50 transition-colors"
-          >
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-accent-500/20 to-accent-600/10 flex items-center justify-center text-accent-400">
-              {selectedApp && getAppIcon(selectedApp.name)}
+      {/* Content */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {/* Step 1 */}
+        {selectedApp?.installationStep && (
+          <div className="p-4 rounded-2xl bg-dark-800/30">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-8 h-8 rounded-full bg-accent-500/20 flex items-center justify-center text-sm font-bold text-accent-400">1</div>
+              <h3 className="font-semibold text-dark-100">{t('subscription.connection.installApp')}</h3>
             </div>
-            <div className="text-left">
-              <div className="font-semibold text-dark-100">{selectedApp?.name}</div>
-              <div className="text-xs text-accent-400 flex items-center gap-1">
-                {t('subscription.connection.changeApp') || 'Сменить'} <ChevronDownIcon />
-              </div>
-            </div>
-          </button>
-          {!mobile && (
-            <button onClick={onClose} className="p-2 rounded-xl hover:bg-dark-800 text-dark-400">
-              <CloseIcon />
-            </button>
-          )}
-        </div>
-
-        {/* Content */}
-        <div className="px-4 pb-2 space-y-3">
-          {/* Step 1: Install (compact) */}
-          {selectedApp?.installationStep && (
-            <div className="flex items-start gap-3 p-3 rounded-xl bg-dark-800/40">
-              <div className="w-6 h-6 rounded-full bg-accent-500/20 flex items-center justify-center text-xs font-bold text-accent-400 shrink-0">1</div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm text-dark-200 leading-snug">
-                  {getLocalizedText(selectedApp.installationStep.description)}
-                </p>
-                {selectedApp.installationStep.buttons && selectedApp.installationStep.buttons.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {selectedApp.installationStep.buttons.filter(btn => isValidExternalUrl(btn.buttonLink)).map((btn, idx) => (
-                      <a
-                        key={idx}
-                        href={btn.buttonLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-dark-700 text-dark-200 text-xs font-medium hover:bg-dark-600 transition-colors"
-                      >
-                        <LinkIcon />
-                        {getLocalizedText(btn.buttonText)}
-                      </a>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Step 2: Connect (main action) */}
-          {selectedApp?.addSubscriptionStep && (
-            <div className="flex items-start gap-3 p-3 rounded-xl bg-dark-800/40">
-              <div className="w-6 h-6 rounded-full bg-accent-500/20 flex items-center justify-center text-xs font-bold text-accent-400 shrink-0">2</div>
-              <div className="flex-1 min-w-0 space-y-2">
-                <p className="text-sm text-dark-200 leading-snug">
-                  {getLocalizedText(selectedApp.addSubscriptionStep.description)}
-                </p>
-                {selectedApp.deepLink && (
-                  <button
-                    onClick={() => handleConnect(selectedApp)}
-                    className="btn-primary w-full py-2.5 text-sm font-medium flex items-center justify-center gap-2"
+            <p className="text-dark-300 mb-3 leading-relaxed">{getLocalizedText(selectedApp.installationStep.description)}</p>
+            {selectedApp.installationStep.buttons && selectedApp.installationStep.buttons.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {selectedApp.installationStep.buttons.filter(btn => isValidExternalUrl(btn.buttonLink)).map((btn, idx) => (
+                  <a
+                    key={idx}
+                    href={btn.buttonLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-dark-700 text-dark-200 text-sm font-medium hover:bg-dark-600 transition-colors"
                   >
                     <LinkIcon />
-                    {t('subscription.connection.addToApp', { appName: selectedApp.name })}
-                  </button>
-                )}
-                <button
-                  onClick={copySubscriptionLink}
-                  className={`w-full py-2 rounded-xl border transition-all flex items-center justify-center gap-2 text-sm ${
-                    copied
-                      ? 'border-success-500/50 bg-success-500/10 text-success-400'
-                      : 'border-dark-600 hover:border-dark-500 text-dark-300'
-                  }`}
-                >
-                  {copied ? <CheckIcon /> : <CopyIcon />}
-                  {copied ? t('subscription.connection.copied') : t('subscription.connection.copyLink')}
-                </button>
+                    {getLocalizedText(btn.buttonText)}
+                  </a>
+                ))}
               </div>
-            </div>
-          )}
+            )}
+          </div>
+        )}
 
-          {/* Step 3: Ready (minimal) */}
-          {selectedApp?.connectAndUseStep && (
-            <div className="flex items-center gap-3 p-3 rounded-xl bg-success-500/5 border border-success-500/20">
-              <div className="w-6 h-6 rounded-full bg-success-500/20 flex items-center justify-center text-xs font-bold text-success-400 shrink-0">3</div>
-              <p className="text-sm text-dark-300">{getLocalizedText(selectedApp.connectAndUseStep.description)}</p>
+        {/* Step 2 */}
+        {selectedApp?.addSubscriptionStep && (
+          <div className="p-4 rounded-2xl bg-dark-800/30">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-8 h-8 rounded-full bg-accent-500/20 flex items-center justify-center text-sm font-bold text-accent-400">2</div>
+              <h3 className="font-semibold text-dark-100">{t('subscription.connection.addSubscription')}</h3>
             </div>
-          )}
-        </div>
+            <p className="text-dark-300 mb-4 leading-relaxed">{getLocalizedText(selectedApp.addSubscriptionStep.description)}</p>
+
+            <div className="space-y-3">
+              {selectedApp.deepLink && (
+                <button
+                  onClick={() => handleConnect(selectedApp)}
+                  className="btn-primary w-full py-3 text-base font-semibold flex items-center justify-center gap-2"
+                >
+                  <LinkIcon />
+                  {t('subscription.connection.addToApp', { appName: selectedApp.name })}
+                </button>
+              )}
+              <button
+                onClick={copySubscriptionLink}
+                className={`w-full py-3 rounded-xl border-2 transition-all flex items-center justify-center gap-2 text-base font-medium ${
+                  copied
+                    ? 'border-success-500 bg-success-500/10 text-success-400'
+                    : 'border-dark-600 hover:border-dark-500 text-dark-300 hover:text-dark-200'
+                }`}
+              >
+                {copied ? <CheckIcon /> : <CopyIcon />}
+                {copied ? t('subscription.connection.copied') : t('subscription.connection.copyLink')}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Step 3 */}
+        {selectedApp?.connectAndUseStep && (
+          <div className="p-4 rounded-2xl bg-success-500/5 border border-success-500/20">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-8 h-8 rounded-full bg-success-500/20 flex items-center justify-center text-sm font-bold text-success-400">3</div>
+              <h3 className="font-semibold text-dark-100">{t('subscription.connection.connectVpn')}</h3>
+            </div>
+            <p className="text-dark-300 leading-relaxed">{getLocalizedText(selectedApp.connectAndUseStep.description)}</p>
+          </div>
+        )}
       </div>
-    </div>
+
+      {/* Desktop footer */}
+      {!isMobile && (
+        <div className="p-4 border-t border-dark-800">
+          <button onClick={onClose} className="btn-secondary w-full py-3 text-base">{t('common.close')}</button>
+        </div>
+      )}
+    </Wrapper>
   )
 }
