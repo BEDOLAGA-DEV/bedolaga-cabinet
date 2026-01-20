@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import { useMutation } from '@tanstack/react-query'
 import { balanceApi } from '../api/balance'
@@ -169,11 +170,10 @@ export default function TopUpModal({ method, onClose, initialAmountRubles }: Top
     return () => clearTimeout(timer)
   }, [])
 
-  return (
+  const modalContent = (
     <div
-      className="fixed inset-0 bg-black/70 z-[60] flex items-start justify-center p-4 pt-8 overflow-hidden"
+      className="fixed inset-0 bg-black/70 z-[60] flex items-start justify-center p-4 pt-4 overflow-hidden"
       style={{
-        paddingTop: `max(2rem, calc(1rem + env(safe-area-inset-top, 0px)))`,
         paddingBottom: `max(1rem, env(safe-area-inset-bottom, 0px))`,
       }}
       onClick={onClose}
@@ -279,4 +279,9 @@ export default function TopUpModal({ method, onClose, initialAmountRubles }: Top
       </div>
     </div>
   )
+
+  if (typeof document !== 'undefined') {
+    return createPortal(modalContent, document.body)
+  }
+  return modalContent
 }

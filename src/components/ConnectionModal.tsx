@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { subscriptionApi } from '../api/subscription'
@@ -133,7 +134,6 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
   const isMobileScreen = useIsMobile()
   const isMobile = isMobileScreen || isTelegramWebApp
 
-  const safeTop = isTelegramWebApp ? Math.max(safeAreaInset.top, contentSafeAreaInset.top) : 0
   const safeBottom = isTelegramWebApp ? Math.max(safeAreaInset.bottom, contentSafeAreaInset.bottom) : 0
 
   const { data: appConfig, isLoading, error } = useQuery<AppConfig>({
@@ -216,30 +216,36 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
   )
 
   // Mobile fullscreen wrapper - like React Native Modal with animationType="slide"
-  const MobileWrapper = ({ children }: { children: React.ReactNode }) => (
-    <>
-      {/* Backdrop */}
-      <div className="fixed inset-0 z-[9998] bg-black/50 animate-fade-in" onClick={onClose} />
-      {/* Modal - slides from bottom */}
-      <div
-        className="fixed inset-0 z-[9999] bg-dark-900 flex flex-col animate-slide-up"
-        style={{
-          paddingTop: safeTop ? `${safeTop}px` : 'env(safe-area-inset-top, 0px)',
-          paddingBottom: safeBottom ? `${safeBottom}px` : 'env(safe-area-inset-bottom, 0px)'
-        }}
-      >
-        {/* Close button */}
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 z-10 p-2.5 rounded-full bg-dark-800/80 text-dark-200 active:bg-dark-700"
-          style={{ marginTop: safeTop ? `${safeTop}px` : 'env(safe-area-inset-top, 0px)' }}
+  // Use portal to render directly in body, avoiding transform/filter issues with fixed positioning
+  const MobileWrapper = ({ children }: { children: React.ReactNode }) => {
+    const content = (
+      <>
+        {/* Backdrop */}
+        <div className="fixed inset-0 z-[9998] bg-black/50 animate-fade-in" onClick={onClose} />
+        {/* Modal - fullscreen overlay */}
+        <div
+          className="fixed inset-0 z-[9999] bg-dark-900 flex flex-col animate-slide-up"
+          style={{
+            paddingBottom: safeBottom ? `${safeBottom}px` : 'env(safe-area-inset-bottom, 0px)'
+          }}
         >
-          <CloseIcon />
-        </button>
-        {children}
-      </div>
-    </>
-  )
+          {/* Close button */}
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 z-10 p-2.5 rounded-full bg-dark-800/80 text-dark-200 active:bg-dark-700"
+          >
+            <CloseIcon />
+          </button>
+          {children}
+        </div>
+      </>
+    )
+    
+    if (typeof document !== 'undefined') {
+      return createPortal(content, document.body)
+    }
+    return content
+  }
 
   const Wrapper = isMobile ? MobileWrapper : DesktopWrapper
 
