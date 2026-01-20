@@ -129,6 +129,7 @@ export default function Layout({ children }: LayoutProps) {
   const location = useLocation()
   const { user, logout, isAdmin, isAuthenticated } = useAuthStore()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [isKeyboardOpen, setIsKeyboardOpen] = useState(false)
   const { toggleTheme, isDark } = useTheme()
   const [userPhotoUrl, setUserPhotoUrl] = useState<string | null>(null)
   const { isFullscreen, safeAreaInset, contentSafeAreaInset } = useTelegramWebApp()
@@ -208,6 +209,26 @@ export default function Layout({ children }: LayoutProps) {
       document.removeEventListener('wheel', preventWheel)
     }
   }, [mobileMenuOpen])
+
+  // Detect virtual keyboard open/close using visualViewport API
+  useEffect(() => {
+    const viewport = window.visualViewport
+    if (!viewport) return
+
+    const handleResize = () => {
+      // Keyboard is considered open if viewport height is significantly smaller than window height
+      const heightDiff = window.innerHeight - viewport.height
+      setIsKeyboardOpen(heightDiff > 150)
+    }
+
+    viewport.addEventListener('resize', handleResize)
+    viewport.addEventListener('scroll', handleResize)
+
+    return () => {
+      viewport.removeEventListener('resize', handleResize)
+      viewport.removeEventListener('scroll', handleResize)
+    }
+  }, [])
 
   // State to track if logo image has loaded
   const [logoLoaded, setLogoLoaded] = useState(false)
@@ -629,8 +650,8 @@ export default function Layout({ children }: LayoutProps) {
 
       </main>
 
-      {/* Mobile Bottom Navigation - only core items */}
-      <nav className="bottom-nav lg:hidden">
+      {/* Mobile Bottom Navigation - only core items, hidden when keyboard is open */}
+      <nav className={`bottom-nav lg:hidden transition-opacity duration-200 ${isKeyboardOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
         <div className="flex justify-around">
           {navItems.filter(item =>
             ['/', '/subscription', '/balance', '/referral', '/support'].includes(item.path)
