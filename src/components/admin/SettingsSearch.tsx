@@ -4,10 +4,10 @@ import { SearchIcon, CloseIcon } from './icons'
 interface SettingsSearchProps {
   searchQuery: string
   setSearchQuery: (query: string) => void
-  resultsCount: number
+  resultsCount?: number
 }
 
-export function SettingsSearch({ searchQuery, setSearchQuery, resultsCount }: SettingsSearchProps) {
+export function SettingsSearch({ searchQuery, setSearchQuery }: SettingsSearchProps) {
   const { t } = useTranslation()
 
   return (

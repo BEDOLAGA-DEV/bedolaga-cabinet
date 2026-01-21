@@ -7,6 +7,8 @@ export * from './BrandingTab'
 export * from './ThemeTab'
 export * from './FavoritesTab'
 export * from './SettingsTab'
+export * from './SettingsSidebar'
+export * from './SettingsSearch'
 
 // Constants and utils
 export * from './constants'
