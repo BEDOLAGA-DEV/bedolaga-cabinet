@@ -104,6 +104,38 @@ const MenuIcon = () => (
   </svg>
 )
 
+// ============ HELPER FUNCTIONS ============
+// Форматирование названия настройки (Snake_Case / CamelCase -> читаемый текст)
+function formatSettingName(name: string): string {
+  if (!name) return ''
+
+  // Убираем префиксы типа "Miniapp ", "Happ " и т.д.
+  let formatted = name
+    // CamelCase -> пробелы
+    .replace(/([a-z])([A-Z])/g, '$1 $2')
+    // snake_case -> пробелы
+    .replace(/_/g, ' ')
+    // Убираем лишние пробелы
+    .replace(/\s+/g, ' ')
+    .trim()
+
+  // Делаем первую букву заглавной, остальные как есть
+  return formatted.charAt(0).toUpperCase() + formatted.slice(1)
+}
+
+// Очистка HTML тегов из описания
+function stripHtml(html: string): string {
+  if (!html) return ''
+  return html
+    .replace(/<[^>]*>/g, '')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .trim()
+}
+
 // ============ SIDEBAR MENU ITEMS ============
 interface MenuItem {
   id: string
@@ -379,31 +411,34 @@ export default function AdminSettings() {
 
   const renderSettingRow = (setting: SettingDefinition) => {
     const isFav = isFavorite(setting.key)
+    const displayName = formatSettingName(setting.name || setting.key)
+    const description = setting.hint?.description ? stripHtml(setting.hint.description) : null
 
     return (
       <div
         key={setting.key}
-        className="group flex items-center justify-between p-4 rounded-xl bg-dark-800/30 border border-dark-700/30 hover:border-dark-600/50 transition-all"
+        className="group p-4 rounded-xl bg-dark-800/30 border border-dark-700/30 hover:border-dark-600/50 transition-all"
       >
-        <div className="flex-1 min-w-0 mr-4">
-          <div className="flex items-center gap-2">
-            <span className="font-medium text-dark-100 truncate">{setting.name || setting.key}</span>
-            {setting.has_override && (
-              <span className="px-1.5 py-0.5 text-xs rounded bg-warning-500/20 text-warning-400">
-                {t('admin.settings.modified')}
-              </span>
+        {/* Top row - name and badge */}
+        <div className="flex items-start justify-between gap-3 mb-2">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="font-medium text-dark-100">{displayName}</span>
+              {setting.has_override && (
+                <span className="px-1.5 py-0.5 text-xs rounded bg-warning-500/20 text-warning-400">
+                  {t('admin.settings.modified')}
+                </span>
+              )}
+            </div>
+            {description && (
+              <p className="text-sm text-dark-400 mt-1 line-clamp-2">{description}</p>
             )}
           </div>
-          {setting.hint?.description && (
-            <p className="text-sm text-dark-400 truncate mt-0.5">{setting.hint.description}</p>
-          )}
-        </div>
 
-        <div className="flex items-center gap-2 flex-shrink-0">
           {/* Favorite button */}
           <button
             onClick={() => toggleFavorite(setting.key)}
-            className={`p-1.5 rounded-lg transition-all ${
+            className={`p-1.5 rounded-lg transition-all flex-shrink-0 ${
               isFav
                 ? 'text-warning-400 bg-warning-500/10'
                 : 'text-dark-500 hover:text-dark-300 opacity-0 group-hover:opacity-100'
@@ -411,41 +446,48 @@ export default function AdminSettings() {
           >
             <StarIcon filled={isFav} />
           </button>
+        </div>
 
-          {/* Setting control */}
-          {setting.read_only ? (
-            <div className="flex items-center gap-2 text-dark-400">
-              <LockIcon />
-              <span className="font-mono text-sm">{String(setting.current ?? '-')}</span>
-            </div>
-          ) : setting.type === 'bool' ? (
-            renderToggle(
-              setting.current === true || setting.current === 'true',
-              () => updateSettingMutation.mutate({
-                key: setting.key,
-                value: setting.current === true || setting.current === 'true' ? 'false' : 'true'
-              }),
-              updateSettingMutation.isPending
-            )
-          ) : (
-            <SettingInput
-              setting={setting}
-              onUpdate={(value) => updateSettingMutation.mutate({ key: setting.key, value })}
-              disabled={updateSettingMutation.isPending}
-            />
-          )}
+        {/* Bottom row - control */}
+        <div className="flex items-center justify-between gap-3 mt-3 pt-3 border-t border-dark-700/30">
+          <span className="text-xs text-dark-500 font-mono truncate max-w-[200px]">{setting.key}</span>
 
-          {/* Reset button */}
-          {setting.has_override && !setting.read_only && (
-            <button
-              onClick={() => resetSettingMutation.mutate(setting.key)}
-              disabled={resetSettingMutation.isPending}
-              className="p-1.5 rounded-lg text-dark-400 hover:text-dark-200 hover:bg-dark-700 transition-colors"
-              title={t('admin.settings.reset')}
-            >
-              <RefreshIcon />
-            </button>
-          )}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            {/* Setting control */}
+            {setting.read_only ? (
+              <div className="flex items-center gap-2 text-dark-400">
+                <LockIcon />
+                <span className="font-mono text-sm max-w-[150px] truncate">{String(setting.current ?? '-')}</span>
+              </div>
+            ) : setting.type === 'bool' ? (
+              renderToggle(
+                setting.current === true || setting.current === 'true',
+                () => updateSettingMutation.mutate({
+                  key: setting.key,
+                  value: setting.current === true || setting.current === 'true' ? 'false' : 'true'
+                }),
+                updateSettingMutation.isPending
+              )
+            ) : (
+              <SettingInput
+                setting={setting}
+                onUpdate={(value) => updateSettingMutation.mutate({ key: setting.key, value })}
+                disabled={updateSettingMutation.isPending}
+              />
+            )}
+
+            {/* Reset button */}
+            {setting.has_override && !setting.read_only && (
+              <button
+                onClick={() => resetSettingMutation.mutate(setting.key)}
+                disabled={resetSettingMutation.isPending}
+                className="p-1.5 rounded-lg text-dark-400 hover:text-dark-200 hover:bg-dark-700 transition-colors"
+                title={t('admin.settings.reset')}
+              >
+                <RefreshIcon />
+              </button>
+            )}
+          </div>
         </div>
       </div>
     )
@@ -800,7 +842,9 @@ export default function AdminSettings() {
           <p className="text-dark-500 text-sm mt-1">{t('admin.settings.favoritesHint')}</p>
         </div>
       ) : (
-        favoriteSettings.map(renderSettingRow)
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+          {favoriteSettings.map(renderSettingRow)}
+        </div>
       )}
     </div>
   )
@@ -809,15 +853,15 @@ export default function AdminSettings() {
     <div className="space-y-4">
       {/* Sub-categories navigation */}
       {currentCategories.length > 1 && !activeSubCategory && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mb-6">
           {currentCategories.map((cat) => (
             <button
               key={cat.key}
               onClick={() => setActiveSubCategory(cat.key)}
-              className="p-4 rounded-xl bg-dark-800/50 border border-dark-700/50 hover:border-dark-600 transition-all text-left"
+              className="p-4 rounded-xl bg-dark-800/50 border border-dark-700/50 hover:border-dark-600 hover:bg-dark-800/70 transition-all text-left"
             >
               <div className="flex items-center justify-between">
-                <span className="font-medium text-dark-200">{cat.label}</span>
+                <span className="font-medium text-dark-200 truncate">{cat.label}</span>
                 <ChevronRightIcon />
               </div>
               <span className="text-sm text-dark-500">{cat.settings.length} {t('admin.settings.settingsCount')}</span>
@@ -837,13 +881,15 @@ export default function AdminSettings() {
         </button>
       )}
 
-      {/* Settings list */}
+      {/* Settings grid/list */}
       {filteredSettings.length === 0 ? (
         <div className="p-12 rounded-2xl bg-dark-800/30 border border-dark-700/30 text-center">
           <p className="text-dark-400">{t('admin.settings.noSettings')}</p>
         </div>
       ) : (
-        filteredSettings.map(renderSettingRow)
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+          {filteredSettings.map(renderSettingRow)}
+        </div>
       )}
     </div>
   )
