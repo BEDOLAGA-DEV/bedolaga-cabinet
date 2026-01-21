@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
@@ -145,18 +145,19 @@ export default function Dashboard() {
         traffic_used_percent: data.traffic_used_percent,
         is_unlimited: data.is_unlimited,
       })
+      // Save last refresh timestamp to localStorage
+      localStorage.setItem('traffic_refresh_ts', Date.now().toString())
       if (data.rate_limited && data.retry_after_seconds) {
         setTrafficRefreshCooldown(data.retry_after_seconds)
       } else {
-        setTrafficRefreshCooldown(60)
+        setTrafficRefreshCooldown(30)
       }
-      // Also update subscription query cache
       queryClient.invalidateQueries({ queryKey: ['subscription'] })
     },
     onError: (error: { response?: { status?: number; headers?: { get?: (key: string) => string } } }) => {
       if (error.response?.status === 429) {
         const retryAfter = error.response.headers?.get?.('Retry-After')
-        setTrafficRefreshCooldown(retryAfter ? parseInt(retryAfter, 10) : 60)
+        setTrafficRefreshCooldown(retryAfter ? parseInt(retryAfter, 10) : 30)
       }
     },
   })
@@ -169,6 +170,31 @@ export default function Dashboard() {
     }, 1000)
     return () => clearInterval(timer)
   }, [trafficRefreshCooldown])
+
+  // Track if we've already triggered auto-refresh this session
+  const hasAutoRefreshed = useRef(false)
+
+  // Auto-refresh traffic on mount (with 30s caching)
+  useEffect(() => {
+    if (!subscription) return
+    if (hasAutoRefreshed.current) return
+    hasAutoRefreshed.current = true
+
+    const lastRefresh = localStorage.getItem('traffic_refresh_ts')
+    const now = Date.now()
+    const cacheMs = 30 * 1000
+
+    if (lastRefresh && now - parseInt(lastRefresh, 10) < cacheMs) {
+      const elapsed = now - parseInt(lastRefresh, 10)
+      const remaining = Math.ceil((cacheMs - elapsed) / 1000)
+      if (remaining > 0) {
+        setTrafficRefreshCooldown(remaining)
+      }
+      return
+    }
+
+    refreshTrafficMutation.mutate()
+  }, [subscription])
 
   const hasNoSubscription = !subscription && !subLoading && subError
 
