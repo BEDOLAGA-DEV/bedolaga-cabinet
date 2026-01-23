@@ -1,7 +1,7 @@
 // User types
 export interface User {
   id: number
-  telegram_id: number
+  telegram_id: number | null  // Nullable для email-only пользователей
   username: string | null
   first_name: string | null
   last_name: string | null
@@ -12,6 +12,7 @@ export interface User {
   referral_code: string | null
   language: string
   created_at: string
+  auth_type: 'telegram' | 'email'  // Тип аутентификации
 }
 
 // Auth types
