@@ -1,5 +1,5 @@
 import apiClient from './client'
-import type { AuthResponse, TokenResponse, User } from '../types'
+import type { AuthResponse, RegisterResponse, TokenResponse, User } from '../types'
 
 export const authApi = {
   // Telegram WebApp authentication
@@ -43,20 +43,21 @@ export const authApi = {
   },
 
   // Register standalone email account (no Telegram required)
+  // Returns message - user must verify email before login
   registerEmailStandalone: async (data: {
     email: string
     password: string
     first_name?: string
     language?: string
     referral_code?: string
-  }): Promise<AuthResponse> => {
-    const response = await apiClient.post<AuthResponse>('/cabinet/auth/email/register/standalone', data)
+  }): Promise<RegisterResponse> => {
+    const response = await apiClient.post<RegisterResponse>('/cabinet/auth/email/register/standalone', data)
     return response.data
   },
 
-  // Verify email
-  verifyEmail: async (token: string): Promise<{ message: string }> => {
-    const response = await apiClient.post('/cabinet/auth/email/verify', { token })
+  // Verify email and get auth tokens
+  verifyEmail: async (token: string): Promise<AuthResponse> => {
+    const response = await apiClient.post<AuthResponse>('/cabinet/auth/email/verify', { token })
     return response.data
   },
 
