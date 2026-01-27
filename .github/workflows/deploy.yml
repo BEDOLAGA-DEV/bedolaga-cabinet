@@ -1,4 +1,4 @@
-name: Build and Push Docker Image
+name: CI/CD Pipeline
 
 on:
   push:
@@ -6,7 +6,31 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  # ЭТАП 1: Проверка кода (из твоего старого ci.yml)
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint (Проверка стиля кода)
+        run: npm run lint
+
+      - name: Run TypeScript check (Проверка типов)
+        run: npx tsc --noEmit
+
+  # ЭТАП 2: Сборка и пуш (выполнится только если ЭТАП 1 прошел успешно)
+  build-and-push:
+    needs: validate
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -29,7 +53,7 @@ jobs:
           context: .
           push: true
           tags: ghcr.io/${{ github.repository }}:latest
-          # Вот здесь мы прокидываем твои секреты в Dockerfile
+          # Вшиваем все твои секреты прямо в билд
           build-args: |
             VITE_API_URL=${{ secrets.VITE_API_URL }}
             VITE_APP_LOGO=${{ secrets.VITE_APP_LOGO }}
