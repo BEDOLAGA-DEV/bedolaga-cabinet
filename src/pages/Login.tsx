@@ -19,9 +19,6 @@ export default function Login() {
   // Extract referral code from URL
   const referralCode = searchParams.get('ref') || ''
 
-  const [activeTab, setActiveTab] = useState<'telegram' | 'email'>(() =>
-    referralCode ? 'email' : 'telegram'
-  )
   const [authMode, setAuthMode] = useState<'login' | 'register'>(() =>
     referralCode ? 'register' : 'login'
   )
@@ -88,12 +85,6 @@ export default function Login() {
     }
   }, [referralCode, emailAuthConfig, botUsername])
 
-  // If email auth is disabled but we initially set to email tab, switch back to telegram
-  useEffect(() => {
-    if (!isEmailAuthEnabled && activeTab === 'email') {
-      setActiveTab('telegram')
-    }
-  }, [isEmailAuthEnabled, activeTab])
   const appName = branding ? branding.name : (import.meta.env.VITE_APP_NAME || 'VPN')
   const appLogo = branding?.logo_letter || import.meta.env.VITE_APP_LOGO || 'V'
   const logoUrl = branding ? brandingApi.getLogoUrl(branding) : null
@@ -304,195 +295,176 @@ export default function Login() {
         ) : (
         /* Card */
         <div className="card">
-          {/* Tabs */}
-          {isEmailAuthEnabled ? (
-            <div className="flex mb-6">
-              <button
-                className={`flex-1 py-3 text-sm font-medium transition-all border-b-2 ${
-                  activeTab === 'telegram'
-                    ? 'border-accent-500 text-accent-400'
-                    : 'border-transparent text-dark-500 hover:text-dark-300'
-                }`}
-                onClick={() => setActiveTab('telegram')}
-              >
-                Telegram
-              </button>
-              <button
-                className={`flex-1 py-3 text-sm font-medium transition-all border-b-2 ${
-                  activeTab === 'email'
-                    ? 'border-accent-500 text-accent-400'
-                    : 'border-transparent text-dark-500 hover:text-dark-300'
-                }`}
-                onClick={() => setActiveTab('email')}
-              >
-                Email
-              </button>
-            </div>
-          ) : (
-            <div className="mb-6 pb-3 border-b border-dark-700">
-              <h2 className="text-lg font-medium text-dark-200 text-center">Telegram</h2>
-            </div>
-          )}
-
           {error && (
             <div className="bg-error-500/10 border border-error-500/30 text-error-400 px-4 py-3 rounded-xl text-sm mb-6">
               {error}
             </div>
           )}
 
-          {activeTab === 'telegram' || !isEmailAuthEnabled ? (
-            <div className="space-y-6">
-              <p className="text-center text-sm text-dark-400">
-                {t('auth.registerHint')}
-              </p>
+          {/* Telegram auth — always visible */}
+          <div className="space-y-6">
+            <p className="text-center text-sm text-dark-400">
+              {t('auth.registerHint')}
+            </p>
 
-              {isLoading && isTelegramWebApp ? (
-                <div className="text-center py-8">
-                  <div className="w-8 h-8 border-2 border-accent-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-                  <p className="text-sm text-dark-400">{t('auth.authenticating')}</p>
-                </div>
-              ) : (
-                <TelegramLoginButton botUsername={botUsername} />
-              )}
-            </div>
-          ) : (
-            <div className="space-y-5">
-              {/* Login / Register toggle */}
-              <div className="flex bg-dark-800 rounded-lg p-1">
-                <button
-                  type="button"
-                  className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${
-                    authMode === 'login'
-                      ? 'bg-accent-500 text-white'
-                      : 'text-dark-400 hover:text-dark-200'
-                  }`}
-                  onClick={() => setAuthMode('login')}
-                >
-                  {t('auth.login')}
-                </button>
-                <button
-                  type="button"
-                  className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${
-                    authMode === 'register'
-                      ? 'bg-accent-500 text-white'
-                      : 'text-dark-400 hover:text-dark-200'
-                  }`}
-                  onClick={() => setAuthMode('register')}
-                >
-                  {t('auth.register', 'Register')}
-                </button>
+            {isLoading && isTelegramWebApp ? (
+              <div className="text-center py-8">
+                <div className="w-8 h-8 border-2 border-accent-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+                <p className="text-sm text-dark-400">{t('auth.authenticating')}</p>
+              </div>
+            ) : (
+              <TelegramLoginButton botUsername={botUsername} />
+            )}
+          </div>
+
+          {/* Email auth — only when enabled */}
+          {isEmailAuthEnabled && (
+            <>
+              {/* Divider */}
+              <div className="flex items-center gap-3 my-6">
+                <div className="flex-1 h-px bg-dark-700" />
+                <span className="text-xs text-dark-500 uppercase">{t('auth.or', 'or')}</span>
+                <div className="flex-1 h-px bg-dark-700" />
               </div>
 
-              <form className="space-y-4" onSubmit={handleEmailSubmit}>
-                {/* First name field - only for registration */}
-                {authMode === 'register' && (
+              <div className="space-y-5">
+                {/* Login / Register toggle */}
+                <div className="flex bg-dark-800 rounded-lg p-1">
+                  <button
+                    type="button"
+                    className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${
+                      authMode === 'login'
+                        ? 'bg-accent-500 text-white'
+                        : 'text-dark-400 hover:text-dark-200'
+                    }`}
+                    onClick={() => setAuthMode('login')}
+                  >
+                    {t('auth.login')}
+                  </button>
+                  <button
+                    type="button"
+                    className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${
+                      authMode === 'register'
+                        ? 'bg-accent-500 text-white'
+                        : 'text-dark-400 hover:text-dark-200'
+                    }`}
+                    onClick={() => setAuthMode('register')}
+                  >
+                    {t('auth.register', 'Register')}
+                  </button>
+                </div>
+
+                <form className="space-y-4" onSubmit={handleEmailSubmit}>
+                  {/* First name field - only for registration */}
+                  {authMode === 'register' && (
+                    <div>
+                      <label htmlFor="firstName" className="label">
+                        {t('auth.firstName', 'First Name')}
+                      </label>
+                      <input
+                        id="firstName"
+                        name="firstName"
+                        type="text"
+                        autoComplete="given-name"
+                        className="input"
+                        placeholder={t('auth.firstNamePlaceholder', 'Your name (optional)')}
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
+                      />
+                    </div>
+                  )}
+
                   <div>
-                    <label htmlFor="firstName" className="label">
-                      {t('auth.firstName', 'First Name')}
+                    <label htmlFor="email" className="label">
+                      {t('auth.email')}
                     </label>
                     <input
-                      id="firstName"
-                      name="firstName"
-                      type="text"
-                      autoComplete="given-name"
+                      id="email"
+                      name="email"
+                      type="email"
+                      autoComplete="email"
+                      required
                       className="input"
-                      placeholder={t('auth.firstNamePlaceholder', 'Your name (optional)')}
-                      value={firstName}
-                      onChange={(e) => setFirstName(e.target.value)}
+                      placeholder="you@example.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
                     />
                   </div>
-                )}
 
-                <div>
-                  <label htmlFor="email" className="label">
-                    {t('auth.email')}
-                  </label>
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    autoComplete="email"
-                    required
-                    className="input"
-                    placeholder="you@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="password" className="label">
-                    {t('auth.password')}
-                  </label>
-                  <input
-                    id="password"
-                    name="password"
-                    type="password"
-                    autoComplete={authMode === 'login' ? 'current-password' : 'new-password'}
-                    required
-                    className="input"
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-                </div>
-
-                {/* Confirm password - only for registration */}
-                {authMode === 'register' && (
                   <div>
-                    <label htmlFor="confirmPassword" className="label">
-                      {t('auth.confirmPassword', 'Confirm Password')}
+                    <label htmlFor="password" className="label">
+                      {t('auth.password')}
                     </label>
                     <input
-                      id="confirmPassword"
-                      name="confirmPassword"
+                      id="password"
+                      name="password"
                       type="password"
-                      autoComplete="new-password"
+                      autoComplete={authMode === 'login' ? 'current-password' : 'new-password'}
                       required
                       className="input"
                       placeholder="••••••••"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
                     />
                   </div>
+
+                  {/* Confirm password - only for registration */}
+                  {authMode === 'register' && (
+                    <div>
+                      <label htmlFor="confirmPassword" className="label">
+                        {t('auth.confirmPassword', 'Confirm Password')}
+                      </label>
+                      <input
+                        id="confirmPassword"
+                        name="confirmPassword"
+                        type="password"
+                        autoComplete="new-password"
+                        required
+                        className="input"
+                        placeholder="••••••••"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                      />
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="btn-primary w-full py-3"
+                  >
+                    {isLoading ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        {t('common.loading')}
+                      </span>
+                    ) : (
+                      authMode === 'login' ? t('auth.login') : t('auth.register', 'Register')
+                    )}
+                  </button>
+                </form>
+
+                {/* Verification notice for registration */}
+                {authMode === 'register' && (
+                  <p className="text-center text-xs text-dark-500">
+                    {t('auth.verificationEmailNotice', 'After registration, a verification email will be sent to your address')}
+                  </p>
                 )}
 
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="btn-primary w-full py-3"
-                >
-                  {isLoading ? (
-                    <span className="flex items-center justify-center gap-2">
-                      <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      {t('common.loading')}
-                    </span>
-                  ) : (
-                    authMode === 'login' ? t('auth.login') : t('auth.register', 'Register')
-                  )}
-                </button>
-              </form>
-
-              {/* Verification notice for registration */}
-              {authMode === 'register' && (
-                <p className="text-center text-xs text-dark-500">
-                  {t('auth.verificationEmailNotice', 'After registration, a verification email will be sent to your address')}
-                </p>
-              )}
-
-              {/* Forgot password link - only for login */}
-              {authMode === 'login' && (
-                <div className="text-center space-y-2">
-                  <button
-                    type="button"
-                    onClick={() => setShowForgotPassword(true)}
-                    className="text-sm text-accent-400 hover:text-accent-300 transition-colors"
-                  >
-                    {t('auth.forgotPassword', 'Forgot password?')}
-                  </button>
-                </div>
-              )}
-            </div>
+                {/* Forgot password link - only for login */}
+                {authMode === 'login' && (
+                  <div className="text-center space-y-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowForgotPassword(true)}
+                      className="text-sm text-accent-400 hover:text-accent-300 transition-colors"
+                    >
+                      {t('auth.forgotPassword', 'Forgot password?')}
+                    </button>
+                  </div>
+                )}
+              </div>
+            </>
           )}
         </div>
         )}

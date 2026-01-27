@@ -65,6 +65,7 @@
     "loginWithEmail": "通过邮箱登录",
     "noAccount": "没有账户？",
     "hasAccount": "已有账户？",
+    "or": "或",
     "registerHint": "要通过邮箱注册，请先通过Telegram登录，然后在设置中绑定邮箱。",
     "telegramRequired": "需要Telegram授权",
     "telegramNotConfigured": "Telegram机器人未配置",

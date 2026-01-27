@@ -69,6 +69,7 @@
     "loginWithEmail": "Login with Email",
     "noAccount": "Don't have an account?",
     "hasAccount": "Already have an account?",
+    "or": "or",
     "registerHint": "To register with email, first log in via Telegram, then link your email in settings.",
     "telegramRequired": "Telegram authorization required",
     "telegramNotConfigured": "Telegram bot is not configured",

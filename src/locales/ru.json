@@ -69,6 +69,7 @@
     "loginWithEmail": "Войти по Email",
     "noAccount": "Нет аккаунта?",
     "hasAccount": "Уже есть аккаунт?",
+    "or": "или",
     "registerHint": "Для регистрации по email сначала авторизуйтесь через Telegram, затем привяжите email в настройках.",
     "telegramRequired": "Требуется авторизация через Telegram",
     "telegramNotConfigured": "Telegram бот не настроен",

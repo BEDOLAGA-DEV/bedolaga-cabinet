@@ -270,6 +270,17 @@ export default function Layout({ children }: LayoutProps) {
     document.title = appName || 'VPN'  // Fallback title if name is empty
   }, [appName])
 
+  // Update favicon
+  useEffect(() => {
+    if (!logoUrl) return
+
+    const link = document.querySelector<HTMLLinkElement>("link[rel*='icon']") || document.createElement('link')
+    link.type = 'image/x-icon'
+    link.rel = 'shortcut icon'
+    link.href = logoUrl
+    document.getElementsByTagName('head')[0].appendChild(link)
+  }, [logoUrl])
+
   // Fetch contests and polls counts to determine if they should be shown
   const { data: contestsCount } = useQuery({
     queryKey: ['contests-count'],
