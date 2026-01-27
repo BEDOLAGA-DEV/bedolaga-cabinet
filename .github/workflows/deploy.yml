@@ -16,15 +16,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 1. Создаем .env файл со всеми твоими переменными из скрина
-      - name: Create .env file
-        run: |
-          echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" >> .env
-          echo "VITE_APP_LOGO=${{ secrets.VITE_APP_LOGO }}" >> .env
-          echo "VITE_APP_NAME=${{ secrets.VITE_APP_NAME }}" >> .env
-          echo "VITE_TELEGRAM_BOT_USERNAME=${{ secrets.VITE_TELEGRAM_BOT_USERNAME }}" >> .env
-
-      # 2. Логинимся в реестр пакетов GitHub
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
@@ -32,11 +23,15 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # 3. Собираем образ и пушим его
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          # Образ будет называться по имени твоего репозитория
           tags: ghcr.io/${{ github.repository }}:latest
+          # Вот здесь мы прокидываем твои секреты в Dockerfile
+          build-args: |
+            VITE_API_URL=${{ secrets.VITE_API_URL }}
+            VITE_APP_LOGO=${{ secrets.VITE_APP_LOGO }}
+            VITE_APP_NAME=${{ secrets.VITE_APP_NAME }}
+            VITE_TELEGRAM_BOT_USERNAME=${{ secrets.VITE_TELEGRAM_BOT_USERNAME }}
