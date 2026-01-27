@@ -1,3 +1,5 @@
+name: CI
+
 on:
   push:
     branches: [main, dev]
@@ -5,7 +7,11 @@ on:
     branches: [main, dev]
 
 jobs:
-  lint-and-build:
+  lint:
+    uses: ./.github/workflows/lint.yml
+
+  build:
+    needs: lint
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -19,12 +25,6 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
-
-      - name: Run ESLint
-        run: npm run lint
-
-      - name: Run TypeScript check
-        run: npx tsc --noEmit
 
       - name: Build
         run: npm run build

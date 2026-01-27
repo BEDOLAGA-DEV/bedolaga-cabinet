@@ -1,124 +1,130 @@
-import { useState, useRef } from 'react'
-import { useTranslation } from 'react-i18next'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { brandingApi, setCachedBranding } from '../../api/branding'
-import { setCachedAnimationEnabled } from '../AnimatedBackground'
-import { setCachedFullscreenEnabled } from '../../hooks/useTelegramWebApp'
-import { UploadIcon, TrashIcon, PencilIcon, CheckIcon, CloseIcon } from './icons'
-import { Toggle } from './Toggle'
+import { useState, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { brandingApi, setCachedBranding } from '../../api/branding';
+import { setCachedAnimationEnabled } from '../AnimatedBackground';
+import { setCachedFullscreenEnabled } from '../../hooks/useTelegramWebApp';
+import { UploadIcon, TrashIcon, PencilIcon, CheckIcon, CloseIcon } from './icons';
+import { Toggle } from './Toggle';
 
 interface BrandingTabProps {
-  accentColor?: string
+  accentColor?: string;
 }
 
 export function BrandingTab({ accentColor = '#3b82f6' }: BrandingTabProps) {
-  const { t } = useTranslation()
-  const queryClient = useQueryClient()
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [editingName, setEditingName] = useState(false)
-  const [newName, setNewName] = useState('')
+  const [editingName, setEditingName] = useState(false);
+  const [newName, setNewName] = useState('');
 
   // Queries
   const { data: branding } = useQuery({
     queryKey: ['branding'],
     queryFn: brandingApi.getBranding,
-  })
+  });
 
   const { data: animationSettings } = useQuery({
     queryKey: ['animation-enabled'],
     queryFn: brandingApi.getAnimationEnabled,
-  })
+  });
 
   const { data: fullscreenSettings } = useQuery({
     queryKey: ['fullscreen-enabled'],
     queryFn: brandingApi.getFullscreenEnabled,
-  })
+  });
 
   const { data: emailAuthSettings } = useQuery({
     queryKey: ['email-auth-enabled'],
     queryFn: brandingApi.getEmailAuthEnabled,
-  })
+  });
 
   // Mutations
   const updateBrandingMutation = useMutation({
     mutationFn: brandingApi.updateName,
     onSuccess: (data) => {
-      setCachedBranding(data)
-      queryClient.invalidateQueries({ queryKey: ['branding'] })
-      setEditingName(false)
+      setCachedBranding(data);
+      queryClient.invalidateQueries({ queryKey: ['branding'] });
+      setEditingName(false);
     },
-  })
+  });
 
   const uploadLogoMutation = useMutation({
     mutationFn: brandingApi.uploadLogo,
     onSuccess: (data) => {
-      setCachedBranding(data)
-      queryClient.invalidateQueries({ queryKey: ['branding'] })
+      setCachedBranding(data);
+      queryClient.invalidateQueries({ queryKey: ['branding'] });
     },
-  })
+  });
 
   const deleteLogoMutation = useMutation({
     mutationFn: brandingApi.deleteLogo,
     onSuccess: (data) => {
-      setCachedBranding(data)
-      queryClient.invalidateQueries({ queryKey: ['branding'] })
+      setCachedBranding(data);
+      queryClient.invalidateQueries({ queryKey: ['branding'] });
     },
-  })
+  });
 
   const updateAnimationMutation = useMutation({
     mutationFn: (enabled: boolean) => brandingApi.updateAnimationEnabled(enabled),
     onSuccess: (data) => {
-      setCachedAnimationEnabled(data.enabled)
-      queryClient.invalidateQueries({ queryKey: ['animation-enabled'] })
+      setCachedAnimationEnabled(data.enabled);
+      queryClient.invalidateQueries({ queryKey: ['animation-enabled'] });
     },
-  })
+  });
 
   const updateFullscreenMutation = useMutation({
     mutationFn: (enabled: boolean) => brandingApi.updateFullscreenEnabled(enabled),
     onSuccess: (data) => {
-      setCachedFullscreenEnabled(data.enabled)
-      queryClient.invalidateQueries({ queryKey: ['fullscreen-enabled'] })
+      setCachedFullscreenEnabled(data.enabled);
+      queryClient.invalidateQueries({ queryKey: ['fullscreen-enabled'] });
     },
-  })
+  });
 
   const updateEmailAuthMutation = useMutation({
     mutationFn: (enabled: boolean) => brandingApi.updateEmailAuthEnabled(enabled),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['email-auth-enabled'] })
+      queryClient.invalidateQueries({ queryKey: ['email-auth-enabled'] });
     },
-  })
+  });
 
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
+    const file = e.target.files?.[0];
     if (file) {
-      uploadLogoMutation.mutate(file)
+      uploadLogoMutation.mutate(file);
     }
-  }
+  };
 
   return (
     <div className="space-y-6">
       {/* Logo & Name */}
-      <div className="p-6 rounded-2xl bg-dark-800/50 border border-dark-700/50">
-        <h3 className="text-lg font-semibold text-dark-100 mb-4">{t('admin.settings.logoAndName')}</h3>
+      <div className="rounded-2xl border border-dark-700/50 bg-dark-800/50 p-6">
+        <h3 className="mb-4 text-lg font-semibold text-dark-100">
+          {t('admin.settings.logoAndName')}
+        </h3>
 
         <div className="flex items-start gap-6">
           {/* Logo */}
           <div className="flex-shrink-0">
             <div
-              className="w-20 h-20 rounded-2xl flex items-center justify-center text-3xl font-bold text-white overflow-hidden"
+              className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-2xl text-3xl font-bold text-white"
               style={{
-                background: `linear-gradient(135deg, ${accentColor}, ${accentColor}dd)`
+                background: `linear-gradient(135deg, ${accentColor}, ${accentColor}dd)`,
               }}
             >
               {branding?.has_custom_logo ? (
-                <img src={brandingApi.getLogoUrl(branding) ?? undefined} alt="Logo" className="w-full h-full object-cover" />
+                <img
+                  src={brandingApi.getLogoUrl(branding) ?? undefined}
+                  alt="Logo"
+                  className="h-full w-full object-cover"
+                />
               ) : (
                 branding?.logo_letter || 'V'
               )}
             </div>
 
-            <div className="flex gap-2 mt-3">
+            <div className="mt-3 flex gap-2">
               <input
                 ref={fileInputRef}
                 type="file"
@@ -129,7 +135,7 @@ export function BrandingTab({ accentColor = '#3b82f6' }: BrandingTabProps) {
               <button
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploadLogoMutation.isPending}
-                className="flex-1 flex items-center justify-center gap-1 px-3 py-2 rounded-xl bg-dark-700 hover:bg-dark-600 text-dark-200 text-sm transition-colors disabled:opacity-50"
+                className="flex flex-1 items-center justify-center gap-1 rounded-xl bg-dark-700 px-3 py-2 text-sm text-dark-200 transition-colors hover:bg-dark-600 disabled:opacity-50"
               >
                 <UploadIcon />
               </button>
@@ -137,7 +143,7 @@ export function BrandingTab({ accentColor = '#3b82f6' }: BrandingTabProps) {
                 <button
                   onClick={() => deleteLogoMutation.mutate()}
                   disabled={deleteLogoMutation.isPending}
-                  className="px-3 py-2 rounded-xl bg-dark-700 hover:bg-error-500/20 text-dark-400 hover:text-error-400 transition-colors disabled:opacity-50"
+                  className="rounded-xl bg-dark-700 px-3 py-2 text-dark-400 transition-colors hover:bg-error-500/20 hover:text-error-400 disabled:opacity-50"
                 >
                   <TrashIcon />
                 </button>
@@ -147,39 +153,43 @@ export function BrandingTab({ accentColor = '#3b82f6' }: BrandingTabProps) {
 
           {/* Name */}
           <div className="flex-1">
-            <label className="block text-sm font-medium text-dark-300 mb-2">{t('admin.settings.projectName')}</label>
+            <label className="mb-2 block text-sm font-medium text-dark-300">
+              {t('admin.settings.projectName')}
+            </label>
             {editingName ? (
               <div className="flex gap-2">
                 <input
                   type="text"
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
-                  className="flex-1 px-4 py-2 rounded-xl bg-dark-700 border border-dark-600 text-dark-100 focus:outline-none focus:border-accent-500"
+                  className="flex-1 rounded-xl border border-dark-600 bg-dark-700 px-4 py-2 text-dark-100 focus:border-accent-500 focus:outline-none"
                   maxLength={50}
                 />
                 <button
                   onClick={() => updateBrandingMutation.mutate(newName)}
                   disabled={updateBrandingMutation.isPending}
-                  className="px-4 py-2 rounded-xl bg-accent-500 text-white hover:bg-accent-600 transition-colors disabled:opacity-50"
+                  className="rounded-xl bg-accent-500 px-4 py-2 text-white transition-colors hover:bg-accent-600 disabled:opacity-50"
                 >
                   <CheckIcon />
                 </button>
                 <button
                   onClick={() => setEditingName(false)}
-                  className="px-4 py-2 rounded-xl bg-dark-700 text-dark-300 hover:bg-dark-600 transition-colors"
+                  className="rounded-xl bg-dark-700 px-4 py-2 text-dark-300 transition-colors hover:bg-dark-600"
                 >
                   <CloseIcon />
                 </button>
               </div>
             ) : (
               <div className="flex items-center gap-2">
-                <span className="text-lg text-dark-100">{branding?.name || t('admin.settings.notSpecified')}</span>
+                <span className="text-lg text-dark-100">
+                  {branding?.name || t('admin.settings.notSpecified')}
+                </span>
                 <button
                   onClick={() => {
-                    setNewName(branding?.name ?? '')
-                    setEditingName(true)
+                    setNewName(branding?.name ?? '');
+                    setEditingName(true);
                   }}
-                  className="p-1.5 rounded-lg text-dark-400 hover:text-dark-200 hover:bg-dark-700 transition-colors"
+                  className="rounded-lg p-1.5 text-dark-400 transition-colors hover:bg-dark-700 hover:text-dark-200"
                 >
                   <PencilIcon />
                 </button>
@@ -190,13 +200,17 @@ export function BrandingTab({ accentColor = '#3b82f6' }: BrandingTabProps) {
       </div>
 
       {/* Animation & Fullscreen toggles */}
-      <div className="p-6 rounded-2xl bg-dark-800/50 border border-dark-700/50">
-        <h3 className="text-lg font-semibold text-dark-100 mb-4">{t('admin.settings.interfaceOptions')}</h3>
+      <div className="rounded-2xl border border-dark-700/50 bg-dark-800/50 p-6">
+        <h3 className="mb-4 text-lg font-semibold text-dark-100">
+          {t('admin.settings.interfaceOptions')}
+        </h3>
 
         <div className="space-y-4">
-          <div className="flex items-center justify-between p-4 rounded-xl bg-dark-700/30">
+          <div className="flex items-center justify-between rounded-xl bg-dark-700/30 p-4">
             <div>
-              <span className="font-medium text-dark-100">{t('admin.settings.animatedBackground')}</span>
+              <span className="font-medium text-dark-100">
+                {t('admin.settings.animatedBackground')}
+              </span>
               <p className="text-sm text-dark-400">{t('admin.settings.animatedBackgroundDesc')}</p>
             </div>
             <Toggle
@@ -206,19 +220,23 @@ export function BrandingTab({ accentColor = '#3b82f6' }: BrandingTabProps) {
             />
           </div>
 
-          <div className="flex items-center justify-between p-4 rounded-xl bg-dark-700/30">
+          <div className="flex items-center justify-between rounded-xl bg-dark-700/30 p-4">
             <div>
-              <span className="font-medium text-dark-100">{t('admin.settings.autoFullscreen')}</span>
+              <span className="font-medium text-dark-100">
+                {t('admin.settings.autoFullscreen')}
+              </span>
               <p className="text-sm text-dark-400">{t('admin.settings.autoFullscreenDesc')}</p>
             </div>
             <Toggle
               checked={fullscreenSettings?.enabled ?? false}
-              onChange={() => updateFullscreenMutation.mutate(!(fullscreenSettings?.enabled ?? false))}
+              onChange={() =>
+                updateFullscreenMutation.mutate(!(fullscreenSettings?.enabled ?? false))
+              }
               disabled={updateFullscreenMutation.isPending}
             />
           </div>
 
-          <div className="flex items-center justify-between p-4 rounded-xl bg-dark-700/30">
+          <div className="flex items-center justify-between rounded-xl bg-dark-700/30 p-4">
             <div>
               <span className="font-medium text-dark-100">{t('admin.settings.emailAuth')}</span>
               <p className="text-sm text-dark-400">{t('admin.settings.emailAuthDesc')}</p>
@@ -232,5 +250,5 @@ export function BrandingTab({ accentColor = '#3b82f6' }: BrandingTabProps) {
         </div>
       </div>
     </div>
-  )
+  );
 }

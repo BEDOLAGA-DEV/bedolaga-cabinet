@@ -1,10 +1,10 @@
-import { useEffect, useState, useCallback, useRef } from 'react'
-import { useSearchParams, useNavigate } from 'react-router-dom'
-import { useTranslation } from 'react-i18next'
-import { useQuery } from '@tanstack/react-query'
-import { brandingApi } from '../api/branding'
+import { useEffect, useState, useCallback, useRef } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { useQuery } from '@tanstack/react-query';
+import { brandingApi } from '../api/branding';
 
-type Status = 'countdown' | 'fallback' | 'error'
+type Status = 'countdown' | 'fallback' | 'error';
 
 // App schemes configuration - same as miniapp
 const appSchemes = [
@@ -22,55 +22,56 @@ const appSchemes = [
   { scheme: 'loon://', icon: 'L', name: 'Loon' },
   { scheme: 'nekobox://', icon: 'N', name: 'NekoBox' },
   { scheme: 'v2box://', icon: 'V', name: 'V2Box' },
-]
+];
 
-const COUNTDOWN_SECONDS = 5
+const COUNTDOWN_SECONDS = 5;
 
 // Validate deep link to prevent javascript: and other dangerous schemes
 const isValidDeepLink = (url: string): boolean => {
-  if (!url) return false
-  const lowerUrl = url.toLowerCase().trim()
+  if (!url) return false;
+  const lowerUrl = url.toLowerCase().trim();
   // Block dangerous schemes
-  const dangerousSchemes = ['javascript:', 'data:', 'vbscript:', 'file:']
-  if (dangerousSchemes.some(scheme => lowerUrl.startsWith(scheme))) {
-    return false
+  // eslint-disable-next-line no-script-url -- listing dangerous schemes to block them
+  const dangerousSchemes = ['javascript:', 'data:', 'vbscript:', 'file:'];
+  if (dangerousSchemes.some((scheme) => lowerUrl.startsWith(scheme))) {
+    return false;
   }
   // Only allow known app schemes
-  return appSchemes.some(app => lowerUrl.startsWith(app.scheme))
-}
+  return appSchemes.some((app) => lowerUrl.startsWith(app.scheme));
+};
 
 export default function DeepLinkRedirect() {
-  const { i18n } = useTranslation()
-  const navigate = useNavigate()
-  const [searchParams] = useSearchParams()
-  const [status, setStatus] = useState<Status>('countdown')
-  const [countdown, setCountdown] = useState(COUNTDOWN_SECONDS)
-  const [copied, setCopied] = useState(false)
-  const fallbackTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const copiedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const { i18n } = useTranslation();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const [status, setStatus] = useState<Status>('countdown');
+  const [countdown, setCountdown] = useState(COUNTDOWN_SECONDS);
+  const [copied, setCopied] = useState(false);
+  const fallbackTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const copiedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Get branding
   const { data: branding } = useQuery({
     queryKey: ['branding'],
     queryFn: brandingApi.getBranding,
     staleTime: 60000,
-  })
+  });
 
-  const projectName = branding ? branding.name : (import.meta.env.VITE_APP_NAME || 'VPN')
-  const logoLetter = branding?.logo_letter || import.meta.env.VITE_APP_LOGO || 'V'
-  const logoUrl = branding ? brandingApi.getLogoUrl(branding) : null
+  const projectName = branding ? branding.name : import.meta.env.VITE_APP_NAME || 'VPN';
+  const logoLetter = branding?.logo_letter || import.meta.env.VITE_APP_LOGO || 'V';
+  const logoUrl = branding ? brandingApi.getLogoUrl(branding) : null;
 
   // Get parameters
-  const deepLink = searchParams.get('url') || searchParams.get('deeplink') || ''
-  const subscriptionUrl = searchParams.get('sub') || ''
-  const appParam = searchParams.get('app') || ''
+  const deepLink = searchParams.get('url') || searchParams.get('deeplink') || '';
+  const subscriptionUrl = searchParams.get('sub') || '';
+  const appParam = searchParams.get('app') || '';
 
   // Detect app from deep link
   const appInfo = deepLink
-    ? appSchemes.find(a => deepLink.toLowerCase().startsWith(a.scheme))
-    : null
-  const appName = appInfo?.name || appParam || 'VPN'
-  const appIcon = appInfo?.icon || appName[0]?.toUpperCase() || 'V'
+    ? appSchemes.find((a) => deepLink.toLowerCase().startsWith(a.scheme))
+    : null;
+  const appName = appInfo?.name || appParam || 'VPN';
+  const appIcon = appInfo?.icon || appName[0]?.toUpperCase() || 'V';
 
   // Translations
   const texts = {
@@ -111,120 +112,122 @@ export default function DeepLinkRedirect() {
       step2: 'Откройте приложение',
       step3: 'Найдите "+" или "Добавить подписку"',
       step4: 'Выберите "Из буфера" или "Вставить ссылку"',
-    }
-  }
+    },
+  };
 
-  const lang = i18n.language?.startsWith('ru') ? 'ru' : 'en'
-  const txt = texts[lang]
+  const lang = i18n.language?.startsWith('ru') ? 'ru' : 'en';
+  const txt = texts[lang];
 
   // Open deep link - same as miniapp, just window.location.href
   const openDeepLink = useCallback(() => {
-    if (!deepLink || !isValidDeepLink(deepLink)) return
-    window.location.href = deepLink
-  }, [deepLink])
+    if (!deepLink || !isValidDeepLink(deepLink)) return;
+    window.location.href = deepLink;
+  }, [deepLink]);
 
   // Countdown timer effect
   useEffect(() => {
     if (!deepLink || !isValidDeepLink(deepLink)) {
-      setStatus('error')
-      return
+      setStatus('error');
+      return;
     }
 
-    if (status !== 'countdown') return
+    if (status !== 'countdown') return;
 
     const timer = setInterval(() => {
-      setCountdown(prev => {
+      setCountdown((prev) => {
         if (prev <= 1) {
-          clearInterval(timer)
-          openDeepLink()
+          clearInterval(timer);
+          openDeepLink();
           // Show fallback after a delay - store ref for cleanup
-          fallbackTimeoutRef.current = setTimeout(() => setStatus('fallback'), 2000)
-          return 0
+          fallbackTimeoutRef.current = setTimeout(() => setStatus('fallback'), 2000);
+          return 0;
         }
-        return prev - 1
-      })
-    }, 1000)
+        return prev - 1;
+      });
+    }, 1000);
 
     return () => {
-      clearInterval(timer)
+      clearInterval(timer);
       // Cleanup fallback timeout on unmount
       if (fallbackTimeoutRef.current) {
-        clearTimeout(fallbackTimeoutRef.current)
-        fallbackTimeoutRef.current = null
+        clearTimeout(fallbackTimeoutRef.current);
+        fallbackTimeoutRef.current = null;
       }
-    }
-  }, [deepLink, status, openDeepLink])
+    };
+  }, [deepLink, status, openDeepLink]);
 
   const handleCopyLink = async () => {
-    const linkToCopy = subscriptionUrl || deepLink
+    const linkToCopy = subscriptionUrl || deepLink;
     // Clear previous timeout to prevent stacking
     if (copiedTimeoutRef.current) {
-      clearTimeout(copiedTimeoutRef.current)
+      clearTimeout(copiedTimeoutRef.current);
     }
     try {
-      await navigator.clipboard.writeText(linkToCopy)
-      setCopied(true)
-      copiedTimeoutRef.current = setTimeout(() => setCopied(false), 2000)
+      await navigator.clipboard.writeText(linkToCopy);
+      setCopied(true);
+      copiedTimeoutRef.current = setTimeout(() => setCopied(false), 2000);
     } catch {
-      const textarea = document.createElement('textarea')
-      textarea.value = linkToCopy
-      document.body.appendChild(textarea)
-      textarea.select()
-      document.execCommand('copy')
-      document.body.removeChild(textarea)
-      setCopied(true)
-      copiedTimeoutRef.current = setTimeout(() => setCopied(false), 2000)
+      const textarea = document.createElement('textarea');
+      textarea.value = linkToCopy;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+      setCopied(true);
+      copiedTimeoutRef.current = setTimeout(() => setCopied(false), 2000);
     }
-  }
+  };
 
   // Cleanup copied timeout on unmount
   useEffect(() => {
     return () => {
       if (copiedTimeoutRef.current) {
-        clearTimeout(copiedTimeoutRef.current)
+        clearTimeout(copiedTimeoutRef.current);
       }
-    }
-  }, [])
+    };
+  }, []);
 
   // Progress percentage
-  const progress = ((COUNTDOWN_SECONDS - countdown) / COUNTDOWN_SECONDS) * 100
+  const progress = ((COUNTDOWN_SECONDS - countdown) / COUNTDOWN_SECONDS) * 100;
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
+    <div className="flex min-h-screen items-center justify-center p-4">
       {/* Background */}
       <div className="fixed inset-0 bg-gradient-to-br from-dark-950 via-dark-900 to-dark-950" />
       <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-accent-500/10 via-transparent to-transparent" />
 
-      <div className="relative text-center max-w-sm w-full">
+      <div className="relative w-full max-w-sm text-center">
         {/* Logo with pulse animation */}
-        <div className="mx-auto w-20 h-20 rounded-2xl bg-gradient-to-br from-accent-400 to-accent-600 flex items-center justify-center mb-6 shadow-lg shadow-accent-500/30 overflow-hidden animate-pulse">
+        <div className="mx-auto mb-6 flex h-20 w-20 animate-pulse items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-accent-400 to-accent-600 shadow-lg shadow-accent-500/30">
           {branding?.has_custom_logo && logoUrl ? (
-            <img src={logoUrl} alt={projectName || 'Logo'} className="w-full h-full object-cover" />
+            <img src={logoUrl} alt={projectName || 'Logo'} className="h-full w-full object-cover" />
           ) : (
-            <span className="text-white font-bold text-3xl">{logoLetter}</span>
+            <span className="text-3xl font-bold text-white">{logoLetter}</span>
           )}
         </div>
 
-        <h1 className="text-2xl font-bold text-dark-50 mb-1">{projectName || 'VPN'}</h1>
+        <h1 className="mb-1 text-2xl font-bold text-dark-50">{projectName || 'VPN'}</h1>
 
         {status !== 'error' && (
-          <p className="text-dark-400 mb-6">{txt.connecting} {appName}...</p>
+          <p className="mb-6 text-dark-400">
+            {txt.connecting} {appName}...
+          </p>
         )}
 
         {/* Countdown State */}
         {status === 'countdown' && (
-          <div className="card !bg-dark-800/80 backdrop-blur-sm p-6">
+          <div className="card !bg-dark-800/80 p-6 backdrop-blur-sm">
             {/* App icon */}
-            <div className="w-16 h-16 rounded-2xl bg-accent-500/20 flex items-center justify-center mx-auto mb-4">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-accent-500/20">
               <span className="text-2xl font-bold text-accent-400">{appIcon}</span>
             </div>
 
             {/* Spinner */}
-            <div className="w-12 h-12 border-3 border-dark-700 border-t-accent-500 rounded-full animate-spin mx-auto mb-4" />
+            <div className="border-3 mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-dark-700 border-t-accent-500" />
 
             {/* Timer */}
             <div className="mb-4">
-              <p className="text-sm text-dark-500 mb-2">{txt.redirecting}</p>
+              <p className="mb-2 text-sm text-dark-500">{txt.redirecting}</p>
               <div className="flex items-center justify-center gap-2">
                 <span className="text-4xl font-bold text-accent-400">{countdown}</span>
                 <span className="text-dark-400">{txt.seconds}</span>
@@ -232,22 +235,32 @@ export default function DeepLinkRedirect() {
             </div>
 
             {/* Progress bar */}
-            <div className="w-full h-1.5 bg-dark-700 rounded-full overflow-hidden mb-4">
+            <div className="mb-4 h-1.5 w-full overflow-hidden rounded-full bg-dark-700">
               <div
-                className="h-full bg-gradient-to-r from-accent-400 to-accent-600 rounded-full transition-all duration-1000 ease-linear"
+                className="h-full rounded-full bg-gradient-to-r from-accent-400 to-accent-600 transition-all duration-1000 ease-linear"
                 style={{ width: `${progress}%` }}
               />
             </div>
 
-            <p className="text-sm text-dark-500 mb-4">{txt.manual}</p>
+            <p className="mb-4 text-sm text-dark-500">{txt.manual}</p>
 
             {/* Open now button */}
             <button
               onClick={openDeepLink}
-              className="btn-primary w-full py-3 flex items-center justify-center gap-2"
+              className="btn-primary flex w-full items-center justify-center gap-2 py-3"
             >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+              <svg
+                className="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
+                />
               </svg>
               {txt.openApp}
             </button>
@@ -256,9 +269,9 @@ export default function DeepLinkRedirect() {
 
         {/* Fallback State - App didn't open */}
         {status === 'fallback' && (
-          <div className="card !bg-dark-800/80 backdrop-blur-sm p-6">
+          <div className="card !bg-dark-800/80 p-6 backdrop-blur-sm">
             {/* App icon */}
-            <div className="w-16 h-16 rounded-2xl bg-accent-500/20 flex items-center justify-center mx-auto mb-4">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-accent-500/20">
               <span className="text-2xl font-bold text-accent-400">{appIcon}</span>
             </div>
 
@@ -266,19 +279,39 @@ export default function DeepLinkRedirect() {
               {/* Copy subscription link */}
               <button
                 onClick={handleCopyLink}
-                className="btn-primary w-full py-3 flex items-center justify-center gap-2"
+                className="btn-primary flex w-full items-center justify-center gap-2 py-3"
               >
                 {copied ? (
                   <>
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                    <svg
+                      className="h-5 w-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M4.5 12.75l6 6 9-13.5"
+                      />
                     </svg>
                     {txt.copied}
                   </>
                 ) : (
                   <>
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    <svg
+                      className="h-5 w-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={1.5}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                      />
                     </svg>
                     {txt.copyLink}
                   </>
@@ -288,10 +321,20 @@ export default function DeepLinkRedirect() {
               {/* Try again button */}
               <button
                 onClick={openDeepLink}
-                className="btn-secondary w-full flex items-center justify-center gap-2"
+                className="btn-secondary flex w-full items-center justify-center gap-2"
               >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                <svg
+                  className="h-5 w-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
+                  />
                 </svg>
                 {txt.tryAgain}
               </button>
@@ -299,18 +342,20 @@ export default function DeepLinkRedirect() {
               {/* Back to cabinet */}
               <button
                 onClick={() => navigate('/subscription')}
-                className="w-full text-sm text-dark-500 hover:text-dark-300 transition-colors py-2"
+                className="w-full py-2 text-sm text-dark-500 transition-colors hover:text-dark-300"
               >
                 {txt.backToCabinet}
               </button>
             </div>
 
             {/* Instructions */}
-            <div className="mt-6 p-4 rounded-xl bg-dark-900/50 border border-dark-700 text-left">
-              <h3 className="text-sm font-medium text-dark-200 mb-2">{txt.howToAdd}</h3>
-              <ol className="text-xs text-dark-400 space-y-1.5 list-decimal list-inside">
+            <div className="mt-6 rounded-xl border border-dark-700 bg-dark-900/50 p-4 text-left">
+              <h3 className="mb-2 text-sm font-medium text-dark-200">{txt.howToAdd}</h3>
+              <ol className="list-inside list-decimal space-y-1.5 text-xs text-dark-400">
                 <li>{txt.step1}</li>
-                <li>{txt.step2} {appName}</li>
+                <li>
+                  {txt.step2} {appName}
+                </li>
                 <li>{txt.step3}</li>
                 <li>{txt.step4}</li>
               </ol>
@@ -320,18 +365,25 @@ export default function DeepLinkRedirect() {
 
         {/* Error State */}
         {status === 'error' && (
-          <div className="card !bg-dark-800/80 backdrop-blur-sm p-6">
-            <div className="w-16 h-16 rounded-full bg-error-500/20 flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-error-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+          <div className="card !bg-dark-800/80 p-6 backdrop-blur-sm">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-error-500/20">
+              <svg
+                className="h-8 w-8 text-error-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
+                />
               </svg>
             </div>
-            <p className="text-dark-200 font-medium mb-2">{txt.errorTitle}</p>
-            <p className="text-sm text-dark-400 mb-6">{txt.errorDesc}</p>
-            <button
-              onClick={() => navigate('/subscription')}
-              className="btn-primary w-full"
-            >
+            <p className="mb-2 font-medium text-dark-200">{txt.errorTitle}</p>
+            <p className="mb-6 text-sm text-dark-400">{txt.errorDesc}</p>
+            <button onClick={() => navigate('/subscription')} className="btn-primary w-full">
               {txt.goToSubscription}
             </button>
           </div>
@@ -339,12 +391,22 @@ export default function DeepLinkRedirect() {
 
         {/* Footer */}
         <div className="mt-8 flex items-center justify-center gap-2 text-dark-600">
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
+          <svg
+            className="h-4 w-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={1.5}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"
+            />
           </svg>
           <span className="text-xs">VPN Config Redirect</span>
         </div>
       </div>
     </div>
-  )
+  );
 }

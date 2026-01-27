@@ -1,24 +1,24 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback } from 'react';
 
-const FULLSCREEN_CACHE_KEY = 'cabinet_fullscreen_enabled'
+const FULLSCREEN_CACHE_KEY = 'cabinet_fullscreen_enabled';
 
 // Get cached fullscreen setting
 export const getCachedFullscreenEnabled = (): boolean => {
   try {
-    return localStorage.getItem(FULLSCREEN_CACHE_KEY) === 'true'
+    return localStorage.getItem(FULLSCREEN_CACHE_KEY) === 'true';
   } catch {
-    return false
+    return false;
   }
-}
+};
 
 // Set cached fullscreen setting
 export const setCachedFullscreenEnabled = (enabled: boolean) => {
   try {
-    localStorage.setItem(FULLSCREEN_CACHE_KEY, String(enabled))
+    localStorage.setItem(FULLSCREEN_CACHE_KEY, String(enabled));
   } catch {
     // localStorage not available
   }
-}
+};
 
 /**
  * Hook for Telegram WebApp API integration
@@ -26,102 +26,112 @@ export const setCachedFullscreenEnabled = (enabled: boolean) => {
  */
 export function useTelegramWebApp() {
   // Initialize synchronously to avoid flash/flicker on first render
-  const webApp = typeof window !== 'undefined' ? window.Telegram?.WebApp : undefined
+  const webApp = typeof window !== 'undefined' ? window.Telegram?.WebApp : undefined;
 
-  const [isFullscreen, setIsFullscreen] = useState(() => webApp?.isFullscreen || false)
-  const [isTelegramWebApp, setIsTelegramWebApp] = useState(() => !!webApp)
-  const [safeAreaInset, setSafeAreaInset] = useState(() => webApp?.safeAreaInset || { top: 0, bottom: 0, left: 0, right: 0 })
-  const [contentSafeAreaInset, setContentSafeAreaInset] = useState(() => webApp?.contentSafeAreaInset || { top: 0, bottom: 0, left: 0, right: 0 })
+  const [isFullscreen, setIsFullscreen] = useState(() => webApp?.isFullscreen || false);
+  const [isTelegramWebApp, setIsTelegramWebApp] = useState(() => !!webApp);
+  const [safeAreaInset, setSafeAreaInset] = useState(
+    () => webApp?.safeAreaInset || { top: 0, bottom: 0, left: 0, right: 0 },
+  );
+  const [contentSafeAreaInset, setContentSafeAreaInset] = useState(
+    () => webApp?.contentSafeAreaInset || { top: 0, bottom: 0, left: 0, right: 0 },
+  );
 
   useEffect(() => {
     if (!webApp) {
-      setIsTelegramWebApp(false)
-      return
+      setIsTelegramWebApp(false);
+      return;
     }
 
-    setIsTelegramWebApp(true)
-    setIsFullscreen(webApp.isFullscreen || false)
-    setSafeAreaInset(webApp.safeAreaInset || { top: 0, bottom: 0, left: 0, right: 0 })
-    setContentSafeAreaInset(webApp.contentSafeAreaInset || { top: 0, bottom: 0, left: 0, right: 0 })
+    setIsTelegramWebApp(true);
+    setIsFullscreen(webApp.isFullscreen || false);
+    setSafeAreaInset(webApp.safeAreaInset || { top: 0, bottom: 0, left: 0, right: 0 });
+    setContentSafeAreaInset(
+      webApp.contentSafeAreaInset || { top: 0, bottom: 0, left: 0, right: 0 },
+    );
 
     // Expand WebApp to full height
-    webApp.expand()
-    webApp.ready()
+    webApp.expand();
+    webApp.ready();
 
     // Listen for fullscreen changes
     const handleFullscreenChanged = () => {
-      setIsFullscreen(webApp.isFullscreen || false)
-      setSafeAreaInset(webApp.safeAreaInset || { top: 0, bottom: 0, left: 0, right: 0 })
-      setContentSafeAreaInset(webApp.contentSafeAreaInset || { top: 0, bottom: 0, left: 0, right: 0 })
-    }
+      setIsFullscreen(webApp.isFullscreen || false);
+      setSafeAreaInset(webApp.safeAreaInset || { top: 0, bottom: 0, left: 0, right: 0 });
+      setContentSafeAreaInset(
+        webApp.contentSafeAreaInset || { top: 0, bottom: 0, left: 0, right: 0 },
+      );
+    };
 
     // Listen for safe area changes
     const handleSafeAreaChanged = () => {
-      setSafeAreaInset(webApp.safeAreaInset || { top: 0, bottom: 0, left: 0, right: 0 })
-      setContentSafeAreaInset(webApp.contentSafeAreaInset || { top: 0, bottom: 0, left: 0, right: 0 })
-    }
+      setSafeAreaInset(webApp.safeAreaInset || { top: 0, bottom: 0, left: 0, right: 0 });
+      setContentSafeAreaInset(
+        webApp.contentSafeAreaInset || { top: 0, bottom: 0, left: 0, right: 0 },
+      );
+    };
 
-    webApp.onEvent('fullscreenChanged', handleFullscreenChanged)
-    webApp.onEvent('safeAreaChanged', handleSafeAreaChanged)
-    webApp.onEvent('contentSafeAreaChanged', handleSafeAreaChanged)
+    webApp.onEvent('fullscreenChanged', handleFullscreenChanged);
+    webApp.onEvent('safeAreaChanged', handleSafeAreaChanged);
+    webApp.onEvent('contentSafeAreaChanged', handleSafeAreaChanged);
 
     return () => {
-      webApp.offEvent('fullscreenChanged', handleFullscreenChanged)
-      webApp.offEvent('safeAreaChanged', handleSafeAreaChanged)
-      webApp.offEvent('contentSafeAreaChanged', handleSafeAreaChanged)
-    }
-  }, [webApp])
+      webApp.offEvent('fullscreenChanged', handleFullscreenChanged);
+      webApp.offEvent('safeAreaChanged', handleSafeAreaChanged);
+      webApp.offEvent('contentSafeAreaChanged', handleSafeAreaChanged);
+    };
+  }, [webApp]);
 
   const requestFullscreen = useCallback(() => {
     if (webApp?.requestFullscreen) {
       try {
-        webApp.requestFullscreen()
+        webApp.requestFullscreen();
       } catch (e) {
-        console.warn('Fullscreen not supported:', e)
+        console.warn('Fullscreen not supported:', e);
       }
     }
-  }, [webApp])
+  }, [webApp]);
 
   const exitFullscreen = useCallback(() => {
     if (webApp?.exitFullscreen) {
       try {
-        webApp.exitFullscreen()
+        webApp.exitFullscreen();
       } catch (e) {
-        console.warn('Exit fullscreen failed:', e)
+        console.warn('Exit fullscreen failed:', e);
       }
     }
-  }, [webApp])
+  }, [webApp]);
 
   const toggleFullscreen = useCallback(() => {
     if (isFullscreen) {
-      exitFullscreen()
+      exitFullscreen();
     } else {
-      requestFullscreen()
+      requestFullscreen();
     }
-  }, [isFullscreen, requestFullscreen, exitFullscreen])
+  }, [isFullscreen, requestFullscreen, exitFullscreen]);
 
   const disableVerticalSwipes = useCallback(() => {
     try {
       if (webApp?.disableVerticalSwipes && webApp.version && webApp.version >= '7.7') {
-        webApp.disableVerticalSwipes()
+        webApp.disableVerticalSwipes();
       }
     } catch {
       // Not supported in this version
     }
-  }, [webApp])
+  }, [webApp]);
 
   const enableVerticalSwipes = useCallback(() => {
     try {
       if (webApp?.enableVerticalSwipes && webApp.version && webApp.version >= '7.7') {
-        webApp.enableVerticalSwipes()
+        webApp.enableVerticalSwipes();
       }
     } catch {
       // Not supported in this version
     }
-  }, [webApp])
+  }, [webApp]);
 
   // Check if fullscreen is supported (Bot API 8.0+)
-  const isFullscreenSupported = Boolean(webApp?.requestFullscreen)
+  const isFullscreenSupported = Boolean(webApp?.requestFullscreen);
 
   return {
     isTelegramWebApp,
@@ -135,7 +145,7 @@ export function useTelegramWebApp() {
     disableVerticalSwipes,
     enableVerticalSwipes,
     webApp,
-  }
+  };
 }
 
 /**
@@ -143,27 +153,27 @@ export function useTelegramWebApp() {
  * Call this in main.tsx or App.tsx
  */
 export function initTelegramWebApp() {
-  const webApp = window.Telegram?.WebApp
+  const webApp = window.Telegram?.WebApp;
   if (webApp) {
-    webApp.ready()
-    webApp.expand()
+    webApp.ready();
+    webApp.expand();
 
     // Disable vertical swipes to prevent accidental closing (requires Bot API 7.7+)
     try {
       if (webApp.disableVerticalSwipes && webApp.version && webApp.version >= '7.7') {
-        webApp.disableVerticalSwipes()
+        webApp.disableVerticalSwipes();
       }
     } catch {
       // Swipe control not supported in this version
     }
 
     // Auto-enter fullscreen if enabled in settings (use cached value for instant response)
-    const fullscreenEnabled = getCachedFullscreenEnabled()
+    const fullscreenEnabled = getCachedFullscreenEnabled();
     if (fullscreenEnabled && webApp.requestFullscreen && !webApp.isFullscreen) {
       try {
-        webApp.requestFullscreen()
+        webApp.requestFullscreen();
       } catch (e) {
-        console.warn('Auto-fullscreen failed:', e)
+        console.warn('Auto-fullscreen failed:', e);
       }
     }
   }

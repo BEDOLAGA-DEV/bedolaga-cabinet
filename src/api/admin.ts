@@ -1,306 +1,310 @@
-import apiClient from './client'
+import apiClient from './client';
 
 export interface AdminTicketUser {
-  id: number
-  telegram_id: number
-  username: string | null
-  first_name: string | null
-  last_name: string | null
+  id: number;
+  telegram_id: number;
+  username: string | null;
+  first_name: string | null;
+  last_name: string | null;
 }
 
 export interface AdminTicketMessage {
-  id: number
-  message_text: string
-  is_from_admin: boolean
-  has_media: boolean
-  media_type: string | null
-  media_file_id: string | null
-  media_caption: string | null
-  created_at: string
+  id: number;
+  message_text: string;
+  is_from_admin: boolean;
+  has_media: boolean;
+  media_type: string | null;
+  media_file_id: string | null;
+  media_caption: string | null;
+  created_at: string;
 }
 
 export interface AdminTicket {
-  id: number
-  title: string
-  status: string
-  priority: string
-  created_at: string
-  updated_at: string
-  closed_at: string | null
-  messages_count: number
-  user: AdminTicketUser | null
-  last_message: AdminTicketMessage | null
+  id: number;
+  title: string;
+  status: string;
+  priority: string;
+  created_at: string;
+  updated_at: string;
+  closed_at: string | null;
+  messages_count: number;
+  user: AdminTicketUser | null;
+  last_message: AdminTicketMessage | null;
 }
 
 export interface AdminTicketDetail {
-  id: number
-  title: string
-  status: string
-  priority: string
-  created_at: string
-  updated_at: string
-  closed_at: string | null
-  is_reply_blocked: boolean
-  user: AdminTicketUser | null
-  messages: AdminTicketMessage[]
+  id: number;
+  title: string;
+  status: string;
+  priority: string;
+  created_at: string;
+  updated_at: string;
+  closed_at: string | null;
+  is_reply_blocked: boolean;
+  user: AdminTicketUser | null;
+  messages: AdminTicketMessage[];
 }
 
 export interface AdminTicketStats {
-  total: number
-  open: number
-  pending: number
-  answered: number
-  closed: number
+  total: number;
+  open: number;
+  pending: number;
+  answered: number;
+  closed: number;
 }
 
 export interface TicketSettings {
-  sla_enabled: boolean
-  sla_minutes: number
-  sla_check_interval_seconds: number
-  sla_reminder_cooldown_minutes: number
-  support_system_mode: string  // tickets, contact, both
-  cabinet_user_notifications_enabled: boolean
-  cabinet_admin_notifications_enabled: boolean
+  sla_enabled: boolean;
+  sla_minutes: number;
+  sla_check_interval_seconds: number;
+  sla_reminder_cooldown_minutes: number;
+  support_system_mode: string; // tickets, contact, both
+  cabinet_user_notifications_enabled: boolean;
+  cabinet_admin_notifications_enabled: boolean;
 }
 
 export interface TicketSettingsUpdate {
-  sla_enabled?: boolean
-  sla_minutes?: number
-  sla_check_interval_seconds?: number
-  sla_reminder_cooldown_minutes?: number
-  support_system_mode?: string
-  cabinet_user_notifications_enabled?: boolean
-  cabinet_admin_notifications_enabled?: boolean
+  sla_enabled?: boolean;
+  sla_minutes?: number;
+  sla_check_interval_seconds?: number;
+  sla_reminder_cooldown_minutes?: number;
+  support_system_mode?: string;
+  cabinet_user_notifications_enabled?: boolean;
+  cabinet_admin_notifications_enabled?: boolean;
 }
 
 export interface AdminTicketListResponse {
-  items: AdminTicket[]
-  total: number
-  page: number
-  per_page: number
-  pages: number
+  items: AdminTicket[];
+  total: number;
+  page: number;
+  per_page: number;
+  pages: number;
 }
 
 export const adminApi = {
   // Check if current user is admin
   checkIsAdmin: async (): Promise<{ is_admin: boolean }> => {
-    const response = await apiClient.get('/cabinet/auth/me/is-admin')
-    return response.data
+    const response = await apiClient.get('/cabinet/auth/me/is-admin');
+    return response.data;
   },
 
   // Get ticket statistics
   getTicketStats: async (): Promise<AdminTicketStats> => {
-    const response = await apiClient.get('/cabinet/admin/tickets/stats')
-    return response.data
+    const response = await apiClient.get('/cabinet/admin/tickets/stats');
+    return response.data;
   },
 
   // Get all tickets
-  getTickets: async (params: {
-    page?: number
-    per_page?: number
-    status?: string
-    priority?: string
-  } = {}): Promise<AdminTicketListResponse> => {
-    const response = await apiClient.get('/cabinet/admin/tickets', { params })
-    return response.data
+  getTickets: async (
+    params: {
+      page?: number;
+      per_page?: number;
+      status?: string;
+      priority?: string;
+    } = {},
+  ): Promise<AdminTicketListResponse> => {
+    const response = await apiClient.get('/cabinet/admin/tickets', { params });
+    return response.data;
   },
 
   // Get single ticket with messages
   getTicket: async (ticketId: number): Promise<AdminTicketDetail> => {
-    const response = await apiClient.get(`/cabinet/admin/tickets/${ticketId}`)
-    return response.data
+    const response = await apiClient.get(`/cabinet/admin/tickets/${ticketId}`);
+    return response.data;
   },
 
   // Reply to ticket
   replyToTicket: async (ticketId: number, message: string): Promise<AdminTicketMessage> => {
-    const response = await apiClient.post(`/cabinet/admin/tickets/${ticketId}/reply`, { message })
-    return response.data
+    const response = await apiClient.post(`/cabinet/admin/tickets/${ticketId}/reply`, { message });
+    return response.data;
   },
 
   // Update ticket status
   updateTicketStatus: async (ticketId: number, status: string): Promise<AdminTicketDetail> => {
-    const response = await apiClient.post(`/cabinet/admin/tickets/${ticketId}/status`, { status })
-    return response.data
+    const response = await apiClient.post(`/cabinet/admin/tickets/${ticketId}/status`, { status });
+    return response.data;
   },
 
   // Update ticket priority
   updateTicketPriority: async (ticketId: number, priority: string): Promise<AdminTicketDetail> => {
-    const response = await apiClient.post(`/cabinet/admin/tickets/${ticketId}/priority`, { priority })
-    return response.data
+    const response = await apiClient.post(`/cabinet/admin/tickets/${ticketId}/priority`, {
+      priority,
+    });
+    return response.data;
   },
 
   // Get ticket settings
   getTicketSettings: async (): Promise<TicketSettings> => {
-    const response = await apiClient.get('/cabinet/admin/tickets/settings')
-    return response.data
+    const response = await apiClient.get('/cabinet/admin/tickets/settings');
+    return response.data;
   },
 
   // Update ticket settings
   updateTicketSettings: async (settings: TicketSettingsUpdate): Promise<TicketSettings> => {
-    const response = await apiClient.patch('/cabinet/admin/tickets/settings', settings)
-    return response.data
+    const response = await apiClient.patch('/cabinet/admin/tickets/settings', settings);
+    return response.data;
   },
-}
+};
 
 // ============ Dashboard Stats Types ============
 
 export interface NodeStatus {
-  uuid: string
-  name: string
-  address: string
-  is_connected: boolean
-  is_disabled: boolean
-  users_online: number
-  traffic_used_bytes?: number
-  uptime?: string
-  xray_version?: string
-  node_version?: string
-  last_status_message?: string
-  xray_uptime?: string
-  is_xray_running?: boolean
-  cpu_count?: number
-  cpu_model?: string
-  total_ram?: string
-  country_code?: string
+  uuid: string;
+  name: string;
+  address: string;
+  is_connected: boolean;
+  is_disabled: boolean;
+  users_online: number;
+  traffic_used_bytes?: number;
+  uptime?: string;
+  xray_version?: string;
+  node_version?: string;
+  last_status_message?: string;
+  xray_uptime?: string;
+  is_xray_running?: boolean;
+  cpu_count?: number;
+  cpu_model?: string;
+  total_ram?: string;
+  country_code?: string;
 }
 
 export interface NodesOverview {
-  total: number
-  online: number
-  offline: number
-  disabled: number
-  total_users_online: number
-  nodes: NodeStatus[]
+  total: number;
+  online: number;
+  offline: number;
+  disabled: number;
+  total_users_online: number;
+  nodes: NodeStatus[];
 }
 
 export interface RevenueData {
-  date: string
-  amount_kopeks: number
-  amount_rubles: number
+  date: string;
+  amount_kopeks: number;
+  amount_rubles: number;
 }
 
 export interface SubscriptionStats {
-  total: number
-  active: number
-  trial: number
-  paid: number
-  expired: number
-  purchased_today: number
-  purchased_week: number
-  purchased_month: number
-  trial_to_paid_conversion: number
+  total: number;
+  active: number;
+  trial: number;
+  paid: number;
+  expired: number;
+  purchased_today: number;
+  purchased_week: number;
+  purchased_month: number;
+  trial_to_paid_conversion: number;
 }
 
 export interface FinancialStats {
-  income_today_kopeks: number
-  income_today_rubles: number
-  income_month_kopeks: number
-  income_month_rubles: number
-  income_total_kopeks: number
-  income_total_rubles: number
-  subscription_income_kopeks: number
-  subscription_income_rubles: number
+  income_today_kopeks: number;
+  income_today_rubles: number;
+  income_month_kopeks: number;
+  income_month_rubles: number;
+  income_total_kopeks: number;
+  income_total_rubles: number;
+  subscription_income_kopeks: number;
+  subscription_income_rubles: number;
 }
 
 export interface ServerStats {
-  total_servers: number
-  available_servers: number
-  servers_with_connections: number
-  total_revenue_kopeks: number
-  total_revenue_rubles: number
+  total_servers: number;
+  available_servers: number;
+  servers_with_connections: number;
+  total_revenue_kopeks: number;
+  total_revenue_rubles: number;
 }
 
 export interface TariffStatItem {
-  tariff_id: number
-  tariff_name: string
-  active_subscriptions: number
-  trial_subscriptions: number
-  purchased_today: number
-  purchased_week: number
-  purchased_month: number
+  tariff_id: number;
+  tariff_name: string;
+  active_subscriptions: number;
+  trial_subscriptions: number;
+  purchased_today: number;
+  purchased_week: number;
+  purchased_month: number;
 }
 
 export interface TariffStats {
-  tariffs: TariffStatItem[]
-  total_tariff_subscriptions: number
+  tariffs: TariffStatItem[];
+  total_tariff_subscriptions: number;
 }
 
 export interface DashboardStats {
-  nodes: NodesOverview
-  subscriptions: SubscriptionStats
-  financial: FinancialStats
-  servers: ServerStats
-  revenue_chart: RevenueData[]
-  tariff_stats?: TariffStats
+  nodes: NodesOverview;
+  subscriptions: SubscriptionStats;
+  financial: FinancialStats;
+  servers: ServerStats;
+  revenue_chart: RevenueData[];
+  tariff_stats?: TariffStats;
 }
 
 // ============ Extended Stats Types ============
 
 export interface TopReferrerItem {
-  user_id: number
-  telegram_id: number
-  username?: string
-  display_name: string
-  invited_count: number
-  invited_today: number
-  invited_week: number
-  invited_month: number
-  earnings_today_kopeks: number
-  earnings_week_kopeks: number
-  earnings_month_kopeks: number
-  earnings_total_kopeks: number
+  user_id: number;
+  telegram_id: number;
+  username?: string;
+  display_name: string;
+  invited_count: number;
+  invited_today: number;
+  invited_week: number;
+  invited_month: number;
+  earnings_today_kopeks: number;
+  earnings_week_kopeks: number;
+  earnings_month_kopeks: number;
+  earnings_total_kopeks: number;
 }
 
 export interface TopReferrersResponse {
-  by_earnings: TopReferrerItem[]
-  by_invited: TopReferrerItem[]
-  total_referrers: number
-  total_referrals: number
-  total_earnings_kopeks: number
+  by_earnings: TopReferrerItem[];
+  by_invited: TopReferrerItem[];
+  total_referrers: number;
+  total_referrals: number;
+  total_earnings_kopeks: number;
 }
 
 export interface TopCampaignItem {
-  id: number
-  name: string
-  start_parameter: string
-  bonus_type: string
-  is_active: boolean
-  registrations: number
-  conversions: number
-  conversion_rate: number
-  total_revenue_kopeks: number
-  avg_revenue_per_user_kopeks: number
-  created_at?: string
+  id: number;
+  name: string;
+  start_parameter: string;
+  bonus_type: string;
+  is_active: boolean;
+  registrations: number;
+  conversions: number;
+  conversion_rate: number;
+  total_revenue_kopeks: number;
+  avg_revenue_per_user_kopeks: number;
+  created_at?: string;
 }
 
 export interface TopCampaignsResponse {
-  campaigns: TopCampaignItem[]
-  total_campaigns: number
-  total_registrations: number
-  total_revenue_kopeks: number
+  campaigns: TopCampaignItem[];
+  total_campaigns: number;
+  total_registrations: number;
+  total_revenue_kopeks: number;
 }
 
 export interface RecentPaymentItem {
-  id: number
-  user_id: number
-  telegram_id: number
-  username?: string
-  display_name: string
-  amount_kopeks: number
-  amount_rubles: number
-  type: string
-  type_display: string
-  payment_method?: string
-  description?: string
-  created_at: string
-  is_completed: boolean
+  id: number;
+  user_id: number;
+  telegram_id: number;
+  username?: string;
+  display_name: string;
+  amount_kopeks: number;
+  amount_rubles: number;
+  type: string;
+  type_display: string;
+  payment_method?: string;
+  description?: string;
+  created_at: string;
+  is_completed: boolean;
 }
 
 export interface RecentPaymentsResponse {
-  payments: RecentPaymentItem[]
-  total_count: number
-  total_today_kopeks: number
-  total_week_kopeks: number
+  payments: RecentPaymentItem[];
+  total_count: number;
+  total_today_kopeks: number;
+  total_week_kopeks: number;
 }
 
 // ============ Dashboard Stats API ============
@@ -308,43 +312,51 @@ export interface RecentPaymentsResponse {
 export const statsApi = {
   // Get complete dashboard stats
   getDashboardStats: async (): Promise<DashboardStats> => {
-    const response = await apiClient.get('/cabinet/admin/stats/dashboard')
-    return response.data
+    const response = await apiClient.get('/cabinet/admin/stats/dashboard');
+    return response.data;
   },
 
   // Get nodes status
   getNodesStatus: async (): Promise<NodesOverview> => {
-    const response = await apiClient.get('/cabinet/admin/stats/nodes')
-    return response.data
+    const response = await apiClient.get('/cabinet/admin/stats/nodes');
+    return response.data;
   },
 
   // Restart a node
   restartNode: async (nodeUuid: string): Promise<{ success: boolean; message: string }> => {
-    const response = await apiClient.post(`/cabinet/admin/stats/nodes/${nodeUuid}/restart`)
-    return response.data
+    const response = await apiClient.post(`/cabinet/admin/stats/nodes/${nodeUuid}/restart`);
+    return response.data;
   },
 
   // Toggle node (enable/disable)
-  toggleNode: async (nodeUuid: string): Promise<{ success: boolean; message: string; is_disabled: boolean }> => {
-    const response = await apiClient.post(`/cabinet/admin/stats/nodes/${nodeUuid}/toggle`)
-    return response.data
+  toggleNode: async (
+    nodeUuid: string,
+  ): Promise<{ success: boolean; message: string; is_disabled: boolean }> => {
+    const response = await apiClient.post(`/cabinet/admin/stats/nodes/${nodeUuid}/toggle`);
+    return response.data;
   },
 
   // Get top referrers
   getTopReferrers: async (limit: number = 20): Promise<TopReferrersResponse> => {
-    const response = await apiClient.get('/cabinet/admin/stats/referrals/top', { params: { limit } })
-    return response.data
+    const response = await apiClient.get('/cabinet/admin/stats/referrals/top', {
+      params: { limit },
+    });
+    return response.data;
   },
 
   // Get top campaigns
   getTopCampaigns: async (limit: number = 20): Promise<TopCampaignsResponse> => {
-    const response = await apiClient.get('/cabinet/admin/stats/campaigns/top', { params: { limit } })
-    return response.data
+    const response = await apiClient.get('/cabinet/admin/stats/campaigns/top', {
+      params: { limit },
+    });
+    return response.data;
   },
 
   // Get recent payments
   getRecentPayments: async (limit: number = 50): Promise<RecentPaymentsResponse> => {
-    const response = await apiClient.get('/cabinet/admin/stats/payments/recent', { params: { limit } })
-    return response.data
+    const response = await apiClient.get('/cabinet/admin/stats/payments/recent', {
+      params: { limit },
+    });
+    return response.data;
   },
-}
+};

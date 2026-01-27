@@ -1,18 +1,18 @@
-import { useTranslation } from 'react-i18next'
-import { useBlockingStore } from '../../store/blocking'
+import { useTranslation } from 'react-i18next';
+import { useBlockingStore } from '../../store/blocking';
 
 export default function MaintenanceScreen() {
-  const { t } = useTranslation()
-  const { maintenanceInfo } = useBlockingStore()
+  const { t } = useTranslation();
+  const { maintenanceInfo } = useBlockingStore();
 
   return (
-    <div className="fixed inset-0 z-[100] bg-dark-950 flex flex-col items-center justify-center p-6">
+    <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-dark-950 p-6">
       <div className="w-full max-w-md text-center">
         {/* Icon */}
         <div className="mb-8">
-          <div className="w-24 h-24 mx-auto rounded-full bg-dark-800 flex items-center justify-center">
+          <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-dark-800">
             <svg
-              className="w-12 h-12 text-amber-500"
+              className="h-12 w-12 text-amber-500"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -28,38 +28,49 @@ export default function MaintenanceScreen() {
         </div>
 
         {/* Title */}
-        <h1 className="text-2xl font-bold text-white mb-4">
+        <h1 className="mb-4 text-2xl font-bold text-white">
           {t('blocking.maintenance.title', 'Технические работы')}
         </h1>
 
         {/* Message */}
-        <p className="text-gray-400 mb-6 text-lg">
-          {maintenanceInfo?.message || t('blocking.maintenance.defaultMessage', 'Сервис временно недоступен. Проводятся технические работы.')}
+        <p className="mb-6 text-lg text-gray-400">
+          {maintenanceInfo?.message ||
+            t(
+              'blocking.maintenance.defaultMessage',
+              'Сервис временно недоступен. Проводятся технические работы.',
+            )}
         </p>
 
         {/* Reason */}
         {maintenanceInfo?.reason && (
-          <div className="bg-dark-800/50 rounded-xl p-4 mb-6">
-            <p className="text-gray-500 text-sm mb-1">
+          <div className="mb-6 rounded-xl bg-dark-800/50 p-4">
+            <p className="mb-1 text-sm text-gray-500">
               {t('blocking.maintenance.reason', 'Причина')}:
             </p>
-            <p className="text-gray-300">
-              {maintenanceInfo.reason}
-            </p>
+            <p className="text-gray-300">{maintenanceInfo.reason}</p>
           </div>
         )}
 
         {/* Decorative dots */}
-        <div className="flex items-center justify-center gap-2 mt-8">
-          <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" style={{ animationDelay: '0ms' }} />
-          <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" style={{ animationDelay: '300ms' }} />
-          <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" style={{ animationDelay: '600ms' }} />
+        <div className="mt-8 flex items-center justify-center gap-2">
+          <div
+            className="h-2 w-2 animate-pulse rounded-full bg-amber-500"
+            style={{ animationDelay: '0ms' }}
+          />
+          <div
+            className="h-2 w-2 animate-pulse rounded-full bg-amber-500"
+            style={{ animationDelay: '300ms' }}
+          />
+          <div
+            className="h-2 w-2 animate-pulse rounded-full bg-amber-500"
+            style={{ animationDelay: '600ms' }}
+          />
         </div>
 
-        <p className="text-gray-500 text-sm mt-4">
+        <p className="mt-4 text-sm text-gray-500">
           {t('blocking.maintenance.waitMessage', 'Пожалуйста, подождите...')}
         </p>
       </div>
     </div>
-  )
+  );
 }

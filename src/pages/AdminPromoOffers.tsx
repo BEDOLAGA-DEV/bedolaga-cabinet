@@ -1,77 +1,104 @@
-import { useState } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Link } from 'react-router-dom'
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Link } from 'react-router-dom';
 import {
   promoOffersApi,
   PromoOfferTemplate,
   PromoOfferTemplateUpdateRequest,
+  PromoOfferBroadcastRequest,
   PromoOfferLog,
   TARGET_SEGMENTS,
   TargetSegment,
   OFFER_TYPE_CONFIG,
   OfferType,
-} from '../api/promoOffers'
+} from '../api/promoOffers';
 
 // Icons
 const BackIcon = () => (
-  <svg className="w-5 h-5 text-dark-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+  <svg
+    className="h-5 w-5 text-dark-400"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    strokeWidth={2}
+  >
     <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
   </svg>
-)
+);
 
 const EditIcon = () => (
-  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"
+    />
   </svg>
-)
+);
 
 const XIcon = () => (
-  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
   </svg>
-)
+);
 
 const SendIcon = () => (
-  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"
+    />
   </svg>
-)
+);
 
 const ClockIcon = () => (
-  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
+    />
   </svg>
-)
+);
 
 const UserIcon = () => (
-  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"
+    />
   </svg>
-)
+);
 
 const CheckIcon = () => (
-  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
   </svg>
-)
+);
 
 const UsersIcon = () => (
-  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"
+    />
   </svg>
-)
+);
 
 // Helper functions
 const formatDateTime = (date: string | null): string => {
-  if (!date) return '-'
+  if (!date) return '-';
   return new Date(date).toLocaleString('ru-RU', {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
-  })
-}
+  });
+};
 
 const getActionLabel = (action: string): string => {
   const labels: Record<string, string> = {
@@ -79,9 +106,9 @@ const getActionLabel = (action: string): string => {
     claimed: 'Активировано',
     consumed: 'Использовано',
     disabled: 'Деактивировано',
-  }
-  return labels[action] || action
-}
+  };
+  return labels[action] || action;
+};
 
 const getActionColor = (action: string): string => {
   const colors: Record<string, string> = {
@@ -89,37 +116,39 @@ const getActionColor = (action: string): string => {
     claimed: 'bg-emerald-500/20 text-emerald-400',
     consumed: 'bg-purple-500/20 text-purple-400',
     disabled: 'bg-dark-600 text-dark-400',
-  }
-  return colors[action] || 'bg-dark-600 text-dark-400'
-}
+  };
+  return colors[action] || 'bg-dark-600 text-dark-400';
+};
 
 const getOfferTypeIcon = (offerType: string): string => {
-  return OFFER_TYPE_CONFIG[offerType as OfferType]?.icon || '🎁'
-}
+  return OFFER_TYPE_CONFIG[offerType as OfferType]?.icon || '🎁';
+};
 
 const getOfferTypeLabel = (offerType: string): string => {
-  return OFFER_TYPE_CONFIG[offerType as OfferType]?.label || offerType
-}
+  return OFFER_TYPE_CONFIG[offerType as OfferType]?.label || offerType;
+};
 
 // Template Edit Modal
 interface TemplateEditModalProps {
-  template: PromoOfferTemplate
-  onSave: (data: PromoOfferTemplateUpdateRequest) => void
-  onClose: () => void
-  isLoading?: boolean
+  template: PromoOfferTemplate;
+  onSave: (data: PromoOfferTemplateUpdateRequest) => void;
+  onClose: () => void;
+  isLoading?: boolean;
 }
 
 function TemplateEditModal({ template, onSave, onClose, isLoading }: TemplateEditModalProps) {
-  const [name, setName] = useState(template.name)
-  const [messageText, setMessageText] = useState(template.message_text)
-  const [buttonText, setButtonText] = useState(template.button_text)
-  const [validHours, setValidHours] = useState(template.valid_hours)
-  const [discountPercent, setDiscountPercent] = useState(template.discount_percent)
-  const [activeDiscountHours, setActiveDiscountHours] = useState(template.active_discount_hours || 0)
-  const [testDurationHours, setTestDurationHours] = useState(template.test_duration_hours || 0)
-  const [isActive, setIsActive] = useState(template.is_active)
+  const [name, setName] = useState(template.name);
+  const [messageText, setMessageText] = useState(template.message_text);
+  const [buttonText, setButtonText] = useState(template.button_text);
+  const [validHours, setValidHours] = useState(template.valid_hours);
+  const [discountPercent, setDiscountPercent] = useState(template.discount_percent);
+  const [activeDiscountHours, setActiveDiscountHours] = useState(
+    template.active_discount_hours || 0,
+  );
+  const [testDurationHours, setTestDurationHours] = useState(template.test_duration_hours || 0);
+  const [isActive, setIsActive] = useState(template.is_active);
 
-  const isTestAccess = template.offer_type === 'test_access'
+  const isTestAccess = template.offer_type === 'test_access';
 
   const handleSubmit = () => {
     const data: PromoOfferTemplateUpdateRequest = {
@@ -129,84 +158,84 @@ function TemplateEditModal({ template, onSave, onClose, isLoading }: TemplateEdi
       valid_hours: validHours,
       discount_percent: discountPercent,
       is_active: isActive,
-    }
+    };
     if (isTestAccess) {
-      data.test_duration_hours = testDurationHours > 0 ? testDurationHours : undefined
+      data.test_duration_hours = testDurationHours > 0 ? testDurationHours : undefined;
     } else {
-      data.active_discount_hours = activeDiscountHours > 0 ? activeDiscountHours : undefined
+      data.active_discount_hours = activeDiscountHours > 0 ? activeDiscountHours : undefined;
     }
-    onSave(data)
-  }
+    onSave(data);
+  };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
-      <div className="bg-dark-800 rounded-xl w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-xl bg-dark-800">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-dark-700">
+        <div className="flex items-center justify-between border-b border-dark-700 p-4">
           <div className="flex items-center gap-3">
             <span className="text-2xl">{getOfferTypeIcon(template.offer_type)}</span>
-            <h2 className="text-lg font-semibold text-dark-100">
-              Редактирование шаблона
-            </h2>
+            <h2 className="text-lg font-semibold text-dark-100">Редактирование шаблона</h2>
           </div>
-          <button onClick={onClose} className="p-1 hover:bg-dark-700 rounded-lg transition-colors">
+          <button onClick={onClose} className="rounded-lg p-1 transition-colors hover:bg-dark-700">
             <XIcon />
           </button>
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        <div className="flex-1 space-y-4 overflow-y-auto p-4">
           <div>
-            <label className="block text-sm text-dark-300 mb-1">Название шаблона</label>
+            <label className="mb-1 block text-sm text-dark-300">Название шаблона</label>
             <input
               type="text"
               value={name}
-              onChange={e => setName(e.target.value)}
-              className="w-full px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-dark-100 focus:outline-none focus:border-accent-500"
+              onChange={(e) => setName(e.target.value)}
+              className="w-full rounded-lg border border-dark-600 bg-dark-700 px-3 py-2 text-dark-100 focus:border-accent-500 focus:outline-none"
             />
           </div>
 
           <div>
-            <label className="block text-sm text-dark-300 mb-1">Текст сообщения</label>
+            <label className="mb-1 block text-sm text-dark-300">Текст сообщения</label>
             <textarea
               value={messageText}
-              onChange={e => setMessageText(e.target.value)}
+              onChange={(e) => setMessageText(e.target.value)}
               rows={4}
-              className="w-full px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-dark-100 focus:outline-none focus:border-accent-500 resize-none"
+              className="w-full resize-none rounded-lg border border-dark-600 bg-dark-700 px-3 py-2 text-dark-100 focus:border-accent-500 focus:outline-none"
             />
           </div>
 
           <div>
-            <label className="block text-sm text-dark-300 mb-1">Текст кнопки</label>
+            <label className="mb-1 block text-sm text-dark-300">Текст кнопки</label>
             <input
               type="text"
               value={buttonText}
-              onChange={e => setButtonText(e.target.value)}
-              className="w-full px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-dark-100 focus:outline-none focus:border-accent-500"
+              onChange={(e) => setButtonText(e.target.value)}
+              className="w-full rounded-lg border border-dark-600 bg-dark-700 px-3 py-2 text-dark-100 focus:border-accent-500 focus:outline-none"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm text-dark-300 mb-1">Срок предложения (часы)</label>
+              <label className="mb-1 block text-sm text-dark-300">Срок предложения (часы)</label>
               <input
                 type="number"
                 value={validHours}
-                onChange={e => setValidHours(Math.max(1, parseInt(e.target.value) || 1))}
-                className="w-full px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-dark-100 focus:outline-none focus:border-accent-500"
+                onChange={(e) => setValidHours(Math.max(1, parseInt(e.target.value) || 1))}
+                className="w-full rounded-lg border border-dark-600 bg-dark-700 px-3 py-2 text-dark-100 focus:border-accent-500 focus:outline-none"
                 min={1}
               />
-              <p className="text-xs text-dark-500 mt-1">Время на активацию</p>
+              <p className="mt-1 text-xs text-dark-500">Время на активацию</p>
             </div>
 
             {!isTestAccess && (
               <div>
-                <label className="block text-sm text-dark-300 mb-1">Скидка (%)</label>
+                <label className="mb-1 block text-sm text-dark-300">Скидка (%)</label>
                 <input
                   type="number"
                   value={discountPercent}
-                  onChange={e => setDiscountPercent(Math.min(100, Math.max(0, parseInt(e.target.value) || 0)))}
-                  className="w-full px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-dark-100 focus:outline-none focus:border-accent-500"
+                  onChange={(e) =>
+                    setDiscountPercent(Math.min(100, Math.max(0, parseInt(e.target.value) || 0)))
+                  }
+                  className="w-full rounded-lg border border-dark-600 bg-dark-700 px-3 py-2 text-dark-100 focus:border-accent-500 focus:outline-none"
                   min={0}
                   max={100}
                 />
@@ -216,40 +245,42 @@ function TemplateEditModal({ template, onSave, onClose, isLoading }: TemplateEdi
 
           {isTestAccess ? (
             <div>
-              <label className="block text-sm text-dark-300 mb-1">Длительность доступа (часы)</label>
+              <label className="mb-1 block text-sm text-dark-300">
+                Длительность доступа (часы)
+              </label>
               <input
                 type="number"
                 value={testDurationHours}
-                onChange={e => setTestDurationHours(Math.max(0, parseInt(e.target.value) || 0))}
-                className="w-full px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-dark-100 focus:outline-none focus:border-accent-500"
+                onChange={(e) => setTestDurationHours(Math.max(0, parseInt(e.target.value) || 0))}
+                className="w-full rounded-lg border border-dark-600 bg-dark-700 px-3 py-2 text-dark-100 focus:border-accent-500 focus:outline-none"
                 min={0}
               />
-              <p className="text-xs text-dark-500 mt-1">0 = по умолчанию</p>
+              <p className="mt-1 text-xs text-dark-500">0 = по умолчанию</p>
             </div>
           ) : (
             <div>
-              <label className="block text-sm text-dark-300 mb-1">Действие скидки (часы)</label>
+              <label className="mb-1 block text-sm text-dark-300">Действие скидки (часы)</label>
               <input
                 type="number"
                 value={activeDiscountHours}
-                onChange={e => setActiveDiscountHours(Math.max(0, parseInt(e.target.value) || 0))}
-                className="w-full px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-dark-100 focus:outline-none focus:border-accent-500"
+                onChange={(e) => setActiveDiscountHours(Math.max(0, parseInt(e.target.value) || 0))}
+                className="w-full rounded-lg border border-dark-600 bg-dark-700 px-3 py-2 text-dark-100 focus:border-accent-500 focus:outline-none"
                 min={0}
               />
-              <p className="text-xs text-dark-500 mt-1">Сколько действует скидка после активации</p>
+              <p className="mt-1 text-xs text-dark-500">Сколько действует скидка после активации</p>
             </div>
           )}
 
-          <label className="flex items-center gap-3 cursor-pointer">
+          <label className="flex cursor-pointer items-center gap-3">
             <button
               type="button"
               onClick={() => setIsActive(!isActive)}
-              className={`w-10 h-6 rounded-full transition-colors relative ${
+              className={`relative h-6 w-10 rounded-full transition-colors ${
                 isActive ? 'bg-accent-500' : 'bg-dark-600'
               }`}
             >
               <span
-                className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${
+                className={`absolute top-1 h-4 w-4 rounded-full bg-white transition-transform ${
                   isActive ? 'left-5' : 'left-1'
                 }`}
               />
@@ -259,89 +290,89 @@ function TemplateEditModal({ template, onSave, onClose, isLoading }: TemplateEdi
         </div>
 
         {/* Footer */}
-        <div className="flex justify-end gap-3 p-4 border-t border-dark-700">
+        <div className="flex justify-end gap-3 border-t border-dark-700 p-4">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-dark-300 hover:text-dark-100 transition-colors"
+            className="px-4 py-2 text-dark-300 transition-colors hover:text-dark-100"
           >
             Отмена
           </button>
           <button
             onClick={handleSubmit}
             disabled={!name.trim() || isLoading}
-            className="px-4 py-2 bg-accent-500 text-white rounded-lg hover:bg-accent-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="rounded-lg bg-accent-500 px-4 py-2 text-white transition-colors hover:bg-accent-600 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isLoading ? 'Сохранение...' : 'Сохранить'}
           </button>
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 // Send Offer Modal
 interface SendOfferModalProps {
-  templates: PromoOfferTemplate[]
-  onSend: (templateId: number, target: string | null, userId: number | null) => void
-  onClose: () => void
-  isLoading?: boolean
+  templates: PromoOfferTemplate[];
+  onSend: (templateId: number, target: string | null, userId: number | null) => void;
+  onClose: () => void;
+  isLoading?: boolean;
 }
 
 function SendOfferModal({ templates, onSend, onClose, isLoading }: SendOfferModalProps) {
-  const [selectedTemplateId, setSelectedTemplateId] = useState<number | null>(templates[0]?.id || null)
-  const [sendMode, setSendMode] = useState<'segment' | 'user'>('segment')
-  const [selectedTarget, setSelectedTarget] = useState<TargetSegment>('active')
-  const [userId, setUserId] = useState('')
+  const [selectedTemplateId, setSelectedTemplateId] = useState<number | null>(
+    templates[0]?.id || null,
+  );
+  const [sendMode, setSendMode] = useState<'segment' | 'user'>('segment');
+  const [selectedTarget, setSelectedTarget] = useState<TargetSegment>('active');
+  const [userId, setUserId] = useState('');
 
-  const selectedTemplate = templates.find(t => t.id === selectedTemplateId)
-  const activeTemplates = templates.filter(t => t.is_active)
+  const selectedTemplate = templates.find((t) => t.id === selectedTemplateId);
+  const activeTemplates = templates.filter((t) => t.is_active);
 
   const handleSubmit = () => {
-    if (!selectedTemplateId) return
+    if (!selectedTemplateId) return;
     if (sendMode === 'user') {
-      const id = parseInt(userId)
-      if (!id) return
-      onSend(selectedTemplateId, null, id)
+      const id = parseInt(userId);
+      if (!id) return;
+      onSend(selectedTemplateId, null, id);
     } else {
-      onSend(selectedTemplateId, selectedTarget, null)
+      onSend(selectedTemplateId, selectedTarget, null);
     }
-  }
+  };
 
   const isValid = () => {
-    if (!selectedTemplateId) return false
-    if (sendMode === 'user' && !userId.trim()) return false
-    return true
-  }
+    if (!selectedTemplateId) return false;
+    if (sendMode === 'user' && !userId.trim()) return false;
+    return true;
+  };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
-      <div className="bg-dark-800 rounded-xl w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-xl bg-dark-800">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-dark-700">
+        <div className="flex items-center justify-between border-b border-dark-700 p-4">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-accent-500/20 rounded-lg">
+            <div className="rounded-lg bg-accent-500/20 p-2">
               <SendIcon />
             </div>
-            <h2 className="text-lg font-semibold text-dark-100">
-              Отправка промопредложения
-            </h2>
+            <h2 className="text-lg font-semibold text-dark-100">Отправка промопредложения</h2>
           </div>
-          <button onClick={onClose} className="p-1 hover:bg-dark-700 rounded-lg transition-colors">
+          <button onClick={onClose} className="rounded-lg p-1 transition-colors hover:bg-dark-700">
             <XIcon />
           </button>
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        <div className="flex-1 space-y-4 overflow-y-auto p-4">
           {/* Template Selection */}
           <div>
-            <label className="block text-sm text-dark-300 mb-2">Шаблон предложения</label>
+            <label className="mb-2 block text-sm text-dark-300">Шаблон предложения</label>
             <div className="space-y-2">
-              {activeTemplates.map(template => (
+              {activeTemplates.map((template) => (
                 <button
                   key={template.id}
                   onClick={() => setSelectedTemplateId(template.id)}
-                  className={`w-full p-3 rounded-lg border text-left transition-colors ${
+                  className={`w-full rounded-lg border p-3 text-left transition-colors ${
                     selectedTemplateId === template.id
                       ? 'border-accent-500 bg-accent-500/10'
                       : 'border-dark-600 bg-dark-700 hover:border-dark-500'
@@ -358,9 +389,7 @@ function SendOfferModal({ templates, onSend, onClose, isLoading }: SendOfferModa
                         {template.valid_hours}ч на активацию
                       </div>
                     </div>
-                    {selectedTemplateId === template.id && (
-                      <CheckIcon />
-                    )}
+                    {selectedTemplateId === template.id && <CheckIcon />}
                   </div>
                 </button>
               ))}
@@ -369,11 +398,11 @@ function SendOfferModal({ templates, onSend, onClose, isLoading }: SendOfferModa
 
           {/* Send Mode */}
           <div>
-            <label className="block text-sm text-dark-300 mb-2">Кому отправить</label>
-            <div className="flex gap-2 mb-3">
+            <label className="mb-2 block text-sm text-dark-300">Кому отправить</label>
+            <div className="mb-3 flex gap-2">
               <button
                 onClick={() => setSendMode('segment')}
-                className={`flex-1 py-2 rounded-lg border text-sm font-medium transition-colors ${
+                className={`flex-1 rounded-lg border py-2 text-sm font-medium transition-colors ${
                   sendMode === 'segment'
                     ? 'border-accent-500 bg-accent-500/10 text-accent-400'
                     : 'border-dark-600 text-dark-400 hover:text-dark-200'
@@ -384,7 +413,7 @@ function SendOfferModal({ templates, onSend, onClose, isLoading }: SendOfferModa
               </button>
               <button
                 onClick={() => setSendMode('user')}
-                className={`flex-1 py-2 rounded-lg border text-sm font-medium transition-colors ${
+                className={`flex-1 rounded-lg border py-2 text-sm font-medium transition-colors ${
                   sendMode === 'user'
                     ? 'border-accent-500 bg-accent-500/10 text-accent-400'
                     : 'border-dark-600 text-dark-400 hover:text-dark-200'
@@ -398,33 +427,35 @@ function SendOfferModal({ templates, onSend, onClose, isLoading }: SendOfferModa
             {sendMode === 'segment' ? (
               <select
                 value={selectedTarget}
-                onChange={e => setSelectedTarget(e.target.value as TargetSegment)}
-                className="w-full px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-dark-100 focus:outline-none focus:border-accent-500"
+                onChange={(e) => setSelectedTarget(e.target.value as TargetSegment)}
+                className="w-full rounded-lg border border-dark-600 bg-dark-700 px-3 py-2 text-dark-100 focus:border-accent-500 focus:outline-none"
               >
                 {Object.entries(TARGET_SEGMENTS).map(([key, label]) => (
-                  <option key={key} value={key}>{label}</option>
+                  <option key={key} value={key}>
+                    {label}
+                  </option>
                 ))}
               </select>
             ) : (
               <input
                 type="text"
                 value={userId}
-                onChange={e => setUserId(e.target.value)}
+                onChange={(e) => setUserId(e.target.value)}
                 placeholder="Telegram ID или User ID"
-                className="w-full px-3 py-2 bg-dark-700 border border-dark-600 rounded-lg text-dark-100 focus:outline-none focus:border-accent-500"
+                className="w-full rounded-lg border border-dark-600 bg-dark-700 px-3 py-2 text-dark-100 focus:border-accent-500 focus:outline-none"
               />
             )}
           </div>
 
           {/* Preview */}
           {selectedTemplate && (
-            <div className="p-4 bg-dark-700/50 rounded-lg">
-              <h4 className="text-sm font-medium text-dark-300 mb-2">Предпросмотр</h4>
-              <div className="text-sm text-dark-200 whitespace-pre-wrap">
+            <div className="rounded-lg bg-dark-700/50 p-4">
+              <h4 className="mb-2 text-sm font-medium text-dark-300">Предпросмотр</h4>
+              <div className="whitespace-pre-wrap text-sm text-dark-200">
                 {selectedTemplate.message_text}
               </div>
               <div className="mt-3">
-                <span className="inline-block px-3 py-1.5 bg-accent-500 text-white text-sm rounded-lg">
+                <span className="inline-block rounded-lg bg-accent-500 px-3 py-1.5 text-sm text-white">
                   {selectedTemplate.button_text}
                 </span>
               </div>
@@ -433,17 +464,17 @@ function SendOfferModal({ templates, onSend, onClose, isLoading }: SendOfferModa
         </div>
 
         {/* Footer */}
-        <div className="flex justify-end gap-3 p-4 border-t border-dark-700">
+        <div className="flex justify-end gap-3 border-t border-dark-700 p-4">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-dark-300 hover:text-dark-100 transition-colors"
+            className="px-4 py-2 text-dark-300 transition-colors hover:text-dark-100"
           >
             Отмена
           </button>
           <button
             onClick={handleSubmit}
             disabled={!isValid() || isLoading}
-            className="px-4 py-2 bg-accent-500 text-white rounded-lg hover:bg-accent-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            className="flex items-center gap-2 rounded-lg bg-accent-500 px-4 py-2 text-white transition-colors hover:bg-accent-600 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <SendIcon />
             {isLoading ? 'Отправка...' : 'Отправить'}
@@ -451,88 +482,106 @@ function SendOfferModal({ templates, onSend, onClose, isLoading }: SendOfferModa
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 // Result Modal
 interface ResultModalProps {
-  title: string
-  message: string
-  isSuccess: boolean
-  onClose: () => void
+  title: string;
+  message: string;
+  isSuccess: boolean;
+  onClose: () => void;
 }
 
 function ResultModal({ title, message, isSuccess, onClose }: ResultModalProps) {
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
-      <div className="bg-dark-800 rounded-xl p-6 max-w-sm w-full text-center">
-        <div className={`w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center ${
-          isSuccess ? 'bg-emerald-500/20' : 'bg-error-500/20'
-        }`}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="w-full max-w-sm rounded-xl bg-dark-800 p-6 text-center">
+        <div
+          className={`mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full ${
+            isSuccess ? 'bg-emerald-500/20' : 'bg-error-500/20'
+          }`}
+        >
           {isSuccess ? (
-            <svg className="w-8 h-8 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg
+              className="h-8 w-8 text-emerald-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
               <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
             </svg>
           ) : (
-            <svg className="w-8 h-8 text-error-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg
+              className="h-8 w-8 text-error-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
           )}
         </div>
-        <h3 className="text-lg font-semibold text-dark-100 mb-2">{title}</h3>
-        <p className="text-dark-400 mb-6">{message}</p>
+        <h3 className="mb-2 text-lg font-semibold text-dark-100">{title}</h3>
+        <p className="mb-6 text-dark-400">{message}</p>
         <button
           onClick={onClose}
-          className="px-6 py-2 bg-accent-500 text-white rounded-lg hover:bg-accent-600 transition-colors"
+          className="rounded-lg bg-accent-500 px-6 py-2 text-white transition-colors hover:bg-accent-600"
         >
           Закрыть
         </button>
       </div>
     </div>
-  )
+  );
 }
 
 export default function AdminPromoOffers() {
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
-  const [activeTab, setActiveTab] = useState<'templates' | 'send' | 'logs'>('templates')
-  const [editingTemplate, setEditingTemplate] = useState<PromoOfferTemplate | null>(null)
-  const [showSendModal, setShowSendModal] = useState(false)
-  const [resultModal, setResultModal] = useState<{ title: string; message: string; isSuccess: boolean } | null>(null)
+  const [activeTab, setActiveTab] = useState<'templates' | 'send' | 'logs'>('templates');
+  const [editingTemplate, setEditingTemplate] = useState<PromoOfferTemplate | null>(null);
+  const [showSendModal, setShowSendModal] = useState(false);
+  const [resultModal, setResultModal] = useState<{
+    title: string;
+    message: string;
+    isSuccess: boolean;
+  } | null>(null);
 
   // Queries
   const { data: templatesData, isLoading: templatesLoading } = useQuery({
     queryKey: ['admin-promo-templates'],
     queryFn: promoOffersApi.getTemplates,
-  })
+  });
 
   const { data: logsData, isLoading: logsLoading } = useQuery({
     queryKey: ['admin-promo-logs'],
     queryFn: () => promoOffersApi.getLogs({ limit: 100 }),
     enabled: activeTab === 'logs',
-  })
+  });
 
   // Mutations
   const updateTemplateMutation = useMutation({
     mutationFn: ({ id, data }: { id: number; data: PromoOfferTemplateUpdateRequest }) =>
       promoOffersApi.updateTemplate(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-promo-templates'] })
-      setEditingTemplate(null)
+      queryClient.invalidateQueries({ queryKey: ['admin-promo-templates'] });
+      setEditingTemplate(null);
     },
-  })
+  });
 
   const broadcastMutation = useMutation({
     mutationFn: promoOffersApi.broadcastOffer,
     onSuccess: (result) => {
-      queryClient.invalidateQueries({ queryKey: ['admin-promo-logs'] })
-      setShowSendModal(false)
+      queryClient.invalidateQueries({ queryKey: ['admin-promo-logs'] });
+      setShowSendModal(false);
 
-      let message = `Создано предложений: ${result.created_offers}`
+      let message = `Создано предложений: ${result.created_offers}`;
       if (result.notifications_sent > 0 || result.notifications_failed > 0) {
-        message += `\nУведомлений отправлено: ${result.notifications_sent}`
+        message += `\nУведомлений отправлено: ${result.notifications_sent}`;
         if (result.notifications_failed > 0) {
-          message += ` (не доставлено: ${result.notifications_failed})`
+          message += ` (не доставлено: ${result.notifications_failed})`;
         }
       }
 
@@ -540,22 +589,23 @@ export default function AdminPromoOffers() {
         title: 'Отправлено!',
         message,
         isSuccess: true,
-      })
+      });
     },
-    onError: (error: any) => {
+    onError: (error: unknown) => {
+      const axiosErr = error as { response?: { data?: { detail?: string } } };
       setResultModal({
         title: 'Ошибка',
-        message: error.response?.data?.detail || 'Не удалось отправить предложение',
+        message: axiosErr.response?.data?.detail || 'Не удалось отправить предложение',
         isSuccess: false,
-      })
+      });
     },
-  })
+  });
 
   const handleSendOffer = (templateId: number, target: string | null, userId: number | null) => {
-    const template = templatesData?.items.find(t => t.id === templateId)
-    if (!template) return
+    const template = templatesData?.items.find((t) => t.id === templateId);
+    if (!template) return;
 
-    const data: any = {
+    const data: PromoOfferBroadcastRequest = {
       notification_type: template.offer_type,
       valid_hours: template.valid_hours,
       discount_percent: template.discount_percent,
@@ -570,29 +620,24 @@ export default function AdminPromoOffers() {
       send_notification: true,
       message_text: template.message_text,
       button_text: template.button_text,
-    }
+      ...(target ? { target } : {}),
+      ...(userId ? { telegram_id: userId } : {}),
+    };
 
-    if (target) {
-      data.target = target
-    }
-    if (userId) {
-      data.telegram_id = userId
-    }
+    broadcastMutation.mutate(data);
+  };
 
-    broadcastMutation.mutate(data)
-  }
-
-  const templates = templatesData?.items || []
-  const logs = logsData?.items || []
+  const templates = templatesData?.items || [];
+  const logs = logsData?.items || [];
 
   return (
     <div className="animate-fade-in">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Link
             to="/admin"
-            className="w-10 h-10 flex items-center justify-center rounded-xl bg-dark-800 border border-dark-700 hover:border-dark-600 transition-colors"
+            className="flex h-10 w-10 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
           >
             <BackIcon />
           </Link>
@@ -603,7 +648,7 @@ export default function AdminPromoOffers() {
         </div>
         <button
           onClick={() => setShowSendModal(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-accent-500 text-white rounded-lg hover:bg-accent-600 transition-colors"
+          className="flex items-center gap-2 rounded-lg bg-accent-500 px-4 py-2 text-white transition-colors hover:bg-accent-600"
         >
           <SendIcon />
           Отправить
@@ -611,10 +656,10 @@ export default function AdminPromoOffers() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 mb-6 p-1 bg-dark-800 rounded-lg w-fit">
+      <div className="mb-6 flex w-fit gap-1 rounded-lg bg-dark-800 p-1">
         <button
           onClick={() => setActiveTab('templates')}
-          className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+          className={`rounded-md px-4 py-2 text-sm font-medium transition-colors ${
             activeTab === 'templates'
               ? 'bg-dark-700 text-dark-100'
               : 'text-dark-400 hover:text-dark-200'
@@ -624,10 +669,8 @@ export default function AdminPromoOffers() {
         </button>
         <button
           onClick={() => setActiveTab('logs')}
-          className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-            activeTab === 'logs'
-              ? 'bg-dark-700 text-dark-100'
-              : 'text-dark-400 hover:text-dark-200'
+          className={`rounded-md px-4 py-2 text-sm font-medium transition-colors ${
+            activeTab === 'logs' ? 'bg-dark-700 text-dark-100' : 'text-dark-400 hover:text-dark-200'
           }`}
         >
           Логи
@@ -639,10 +682,10 @@ export default function AdminPromoOffers() {
         <>
           {templatesLoading ? (
             <div className="flex items-center justify-center py-12">
-              <div className="w-8 h-8 border-2 border-accent-500 border-t-transparent rounded-full animate-spin" />
+              <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
             </div>
           ) : templates.length === 0 ? (
-            <div className="text-center py-12">
+            <div className="py-12 text-center">
               <p className="text-dark-400">Нет шаблонов</p>
             </div>
           ) : (
@@ -650,21 +693,23 @@ export default function AdminPromoOffers() {
               {templates.map((template) => (
                 <div
                   key={template.id}
-                  className={`p-4 bg-dark-800 rounded-xl border transition-colors ${
+                  className={`rounded-xl border bg-dark-800 p-4 transition-colors ${
                     template.is_active ? 'border-dark-700' : 'border-dark-700/50 opacity-60'
                   }`}
                 >
-                  <div className="flex items-start justify-between mb-3">
+                  <div className="mb-3 flex items-start justify-between">
                     <div className="flex items-center gap-2">
                       <span className="text-2xl">{getOfferTypeIcon(template.offer_type)}</span>
                       <div>
                         <h3 className="font-medium text-dark-100">{template.name}</h3>
-                        <span className="text-xs text-dark-500">{getOfferTypeLabel(template.offer_type)}</span>
+                        <span className="text-xs text-dark-500">
+                          {getOfferTypeLabel(template.offer_type)}
+                        </span>
                       </div>
                     </div>
                     <button
                       onClick={() => setEditingTemplate(template)}
-                      className="p-2 bg-dark-700 text-dark-300 rounded-lg hover:bg-dark-600 hover:text-dark-100 transition-colors"
+                      className="rounded-lg bg-dark-700 p-2 text-dark-300 transition-colors hover:bg-dark-600 hover:text-dark-100"
                     >
                       <EditIcon />
                     </button>
@@ -674,7 +719,9 @@ export default function AdminPromoOffers() {
                     {template.discount_percent > 0 && (
                       <div className="flex justify-between">
                         <span className="text-dark-400">Скидка:</span>
-                        <span className="text-accent-400 font-medium">{template.discount_percent}%</span>
+                        <span className="font-medium text-accent-400">
+                          {template.discount_percent}%
+                        </span>
                       </div>
                     )}
                     <div className="flex justify-between">
@@ -695,14 +742,14 @@ export default function AdminPromoOffers() {
                     )}
                   </div>
 
-                  <div className="mt-3 pt-3 border-t border-dark-700">
+                  <div className="mt-3 border-t border-dark-700 pt-3">
                     <div className="flex items-center gap-2">
                       {template.is_active ? (
-                        <span className="px-2 py-0.5 text-xs bg-emerald-500/20 text-emerald-400 rounded">
+                        <span className="rounded bg-emerald-500/20 px-2 py-0.5 text-xs text-emerald-400">
                           Активен
                         </span>
                       ) : (
-                        <span className="px-2 py-0.5 text-xs bg-dark-600 text-dark-400 rounded">
+                        <span className="rounded bg-dark-600 px-2 py-0.5 text-xs text-dark-400">
                           Неактивен
                         </span>
                       )}
@@ -720,37 +767,34 @@ export default function AdminPromoOffers() {
         <>
           {logsLoading ? (
             <div className="flex items-center justify-center py-12">
-              <div className="w-8 h-8 border-2 border-accent-500 border-t-transparent rounded-full animate-spin" />
+              <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
             </div>
           ) : logs.length === 0 ? (
-            <div className="text-center py-12">
+            <div className="py-12 text-center">
               <p className="text-dark-400">Нет записей</p>
             </div>
           ) : (
             <div className="space-y-3">
               {logs.map((log: PromoOfferLog) => (
-                <div
-                  key={log.id}
-                  className="p-4 bg-dark-800 rounded-xl border border-dark-700"
-                >
+                <div key={log.id} className="rounded-xl border border-dark-700 bg-dark-800 p-4">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-dark-700 rounded-full flex items-center justify-center">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-dark-700">
                         <UserIcon />
                       </div>
                       <div>
-                        <div className="flex items-center gap-2 mb-1">
+                        <div className="mb-1 flex items-center gap-2">
                           <span className="font-medium text-dark-100">
                             {log.user?.full_name || log.user?.username || `User #${log.user_id}`}
                           </span>
-                          <span className={`px-2 py-0.5 text-xs rounded ${getActionColor(log.action)}`}>
+                          <span
+                            className={`rounded px-2 py-0.5 text-xs ${getActionColor(log.action)}`}
+                          >
                             {getActionLabel(log.action)}
                           </span>
                         </div>
                         <div className="text-sm text-dark-400">
-                          {log.source && (
-                            <span>{getOfferTypeLabel(log.source)}</span>
-                          )}
+                          {log.source && <span>{getOfferTypeLabel(log.source)}</span>}
                           {log.percent && log.percent > 0 && (
                             <span className="ml-2 text-accent-400">{log.percent}%</span>
                           )}
@@ -799,5 +843,5 @@ export default function AdminPromoOffers() {
         />
       )}
     </div>
-  )
+  );
 }

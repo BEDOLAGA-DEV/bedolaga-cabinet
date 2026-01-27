@@ -1,17 +1,17 @@
-import { ThemeColors } from '../types/theme'
+import { ThemeColors } from '../types/theme';
 
 export interface ColorPreset {
-  id: string
-  name: string
-  nameRu: string
-  description: string
-  descriptionRu: string
-  colors: ThemeColors
+  id: string;
+  name: string;
+  nameRu: string;
+  description: string;
+  descriptionRu: string;
+  colors: ThemeColors;
   preview: {
-    background: string
-    accent: string
-    text: string
-  }
+    background: string;
+    accent: string;
+    text: string;
+  };
 }
 
 export const COLOR_PRESETS: ColorPreset[] = [
@@ -275,8 +275,8 @@ export const COLOR_PRESETS: ColorPreset[] = [
       text: '#f1f5f9',
     },
   },
-]
+];
 
 export function getPresetById(id: string): ColorPreset | undefined {
-  return COLOR_PRESETS.find((preset) => preset.id === id)
+  return COLOR_PRESETS.find((preset) => preset.id === id);
 }

@@ -1,43 +1,44 @@
-import { useEffect, useState, memo } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { brandingApi } from '../api/branding'
+import { useEffect, useState, memo } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { brandingApi } from '../api/branding';
 
-const ANIMATION_CACHE_KEY = 'cabinet_animation_enabled'
+const ANIMATION_CACHE_KEY = 'cabinet_animation_enabled';
 
 // Detect if user prefers reduced motion
 const isLowPerformance = (): boolean => {
   // Only check for reduced motion preference - let animation run everywhere else
-  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  return prefersReducedMotion
-}
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  return prefersReducedMotion;
+};
 
 // Get cached value from localStorage
 const getCachedAnimationEnabled = (): boolean | null => {
   try {
-    const cached = localStorage.getItem(ANIMATION_CACHE_KEY)
+    const cached = localStorage.getItem(ANIMATION_CACHE_KEY);
     if (cached !== null) {
-      return cached === 'true'
+      return cached === 'true';
     }
   } catch {
     // localStorage not available
   }
-  return null
-}
+  return null;
+};
 
 // Update cache in localStorage
+// eslint-disable-next-line react-refresh/only-export-components
 export const setCachedAnimationEnabled = (enabled: boolean) => {
   try {
-    localStorage.setItem(ANIMATION_CACHE_KEY, String(enabled))
+    localStorage.setItem(ANIMATION_CACHE_KEY, String(enabled));
   } catch {
     // localStorage not available
   }
-}
+};
 
 // Memoized background component to prevent re-renders
 const AnimatedBackground = memo(function AnimatedBackground() {
   // Start with cached value (null means unknown yet)
-  const [isEnabled, setIsEnabled] = useState<boolean | null>(() => getCachedAnimationEnabled())
-  const [isLowPerf] = useState(() => isLowPerformance())
+  const [isEnabled, setIsEnabled] = useState<boolean | null>(() => getCachedAnimationEnabled());
+  const [isLowPerf] = useState(() => isLowPerformance());
 
   const { data: animationSettings } = useQuery({
     queryKey: ['animation-enabled'],
@@ -45,24 +46,24 @@ const AnimatedBackground = memo(function AnimatedBackground() {
     staleTime: 1000 * 60 * 5, // 5 minutes - reduce API calls
     refetchOnWindowFocus: false, // Don't refetch on focus - save resources
     retry: false,
-  })
+  });
 
   // Update state and cache when data arrives
   useEffect(() => {
     if (animationSettings !== undefined) {
-      const enabled = animationSettings.enabled
-      setIsEnabled(enabled)
-      setCachedAnimationEnabled(enabled)
+      const enabled = animationSettings.enabled;
+      setIsEnabled(enabled);
+      setCachedAnimationEnabled(enabled);
     }
-  }, [animationSettings])
+  }, [animationSettings]);
 
   // Don't render if disabled or on low-performance devices
   if (isEnabled !== true || isLowPerf) {
-    return null
+    return null;
   }
 
   // Render only 2 blobs on mobile for better performance
-  const isMobile = window.innerWidth < 768
+  const isMobile = window.innerWidth < 768;
 
   return (
     <div className="wave-bg-container">
@@ -75,7 +76,7 @@ const AnimatedBackground = memo(function AnimatedBackground() {
         </>
       )}
     </div>
-  )
-})
+  );
+});
 
-export default AnimatedBackground
+export default AnimatedBackground;

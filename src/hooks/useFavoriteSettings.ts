@@ -1,49 +1,52 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react';
 
-const STORAGE_KEY = 'admin_favorite_settings'
+const STORAGE_KEY = 'admin_favorite_settings';
 
 export function useFavoriteSettings() {
   const [favorites, setFavorites] = useState<string[]>(() => {
     try {
-      const stored = localStorage.getItem(STORAGE_KEY)
-      return stored ? JSON.parse(stored) : []
+      const stored = localStorage.getItem(STORAGE_KEY);
+      return stored ? JSON.parse(stored) : [];
     } catch {
-      return []
+      return [];
     }
-  })
+  });
 
   // Sync to localStorage
   useEffect(() => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(favorites))
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(favorites));
     } catch {
       // Ignore storage errors
     }
-  }, [favorites])
+  }, [favorites]);
 
   const toggleFavorite = useCallback((settingKey: string) => {
-    setFavorites(prev => {
+    setFavorites((prev) => {
       if (prev.includes(settingKey)) {
-        return prev.filter(key => key !== settingKey)
+        return prev.filter((key) => key !== settingKey);
       } else {
-        return [...prev, settingKey]
+        return [...prev, settingKey];
       }
-    })
-  }, [])
+    });
+  }, []);
 
-  const isFavorite = useCallback((settingKey: string) => {
-    return favorites.includes(settingKey)
-  }, [favorites])
+  const isFavorite = useCallback(
+    (settingKey: string) => {
+      return favorites.includes(settingKey);
+    },
+    [favorites],
+  );
 
   const clearFavorites = useCallback(() => {
-    setFavorites([])
-  }, [])
+    setFavorites([]);
+  }, []);
 
   return {
     favorites,
     toggleFavorite,
     isFavorite,
     clearFavorites,
-    count: favorites.length
-  }
+    count: favorites.length,
+  };
 }

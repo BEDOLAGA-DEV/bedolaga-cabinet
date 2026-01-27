@@ -1,19 +1,19 @@
-import { useEffect, useRef, useState, useMemo, memo } from 'react'
-import type { WheelPrize } from '../../api/wheel'
+import { useEffect, useRef, useState, useMemo, memo } from 'react';
+import type { WheelPrize } from '../../api/wheel';
 
 interface FortuneWheelProps {
-  prizes: WheelPrize[]
-  isSpinning: boolean
-  targetRotation: number | null
-  onSpinComplete: () => void
+  prizes: WheelPrize[];
+  isSpinning: boolean;
+  targetRotation: number | null;
+  onSpinComplete: () => void;
 }
 
 // Pre-generate sparkle positions to avoid recalculating on each render
 const SPARKLE_POSITIONS = Array.from({ length: 8 }, (_, i) => ({
-  top: `${20 + (i * 10) % 60}%`,
-  left: `${15 + (i * 13) % 70}%`,
+  top: `${20 + ((i * 10) % 60)}%`,
+  left: `${15 + ((i * 13) % 70)}%`,
   delay: `${i * 0.15}s`,
-}))
+}));
 
 const FortuneWheel = memo(function FortuneWheel({
   prizes,
@@ -21,141 +21,150 @@ const FortuneWheel = memo(function FortuneWheel({
   targetRotation,
   onSpinComplete,
 }: FortuneWheelProps) {
-  const wheelRef = useRef<SVGGElement>(null)
-  const [currentRotation, setCurrentRotation] = useState(0)
-  const [lightPhase, setLightPhase] = useState(0)
+  const wheelRef = useRef<SVGGElement>(null);
+  const [currentRotation, setCurrentRotation] = useState(0);
+  const [lightPhase, setLightPhase] = useState(0);
 
   // Animated lights effect - use phase instead of random array (less re-renders)
   useEffect(() => {
     if (isSpinning) {
       const interval = setInterval(() => {
-        setLightPhase(p => (p + 1) % 3) // Just toggle phase 0-1-2
-      }, 250) // Slower interval = better performance
-      return () => clearInterval(interval)
+        setLightPhase((p) => (p + 1) % 3); // Just toggle phase 0-1-2
+      }, 250); // Slower interval = better performance
+      return () => clearInterval(interval);
     } else {
-      setLightPhase(0)
+      setLightPhase(0);
     }
-  }, [isSpinning])
+  }, [isSpinning]);
 
   useEffect(() => {
     if (isSpinning && targetRotation !== null && wheelRef.current) {
-      setCurrentRotation(targetRotation)
+      setCurrentRotation(targetRotation);
 
       const timeout = setTimeout(() => {
-        onSpinComplete()
-      }, 5000)
+        onSpinComplete();
+      }, 5000);
 
-      return () => clearTimeout(timeout)
+      return () => clearTimeout(timeout);
     }
-  }, [isSpinning, targetRotation, onSpinComplete])
+  }, [isSpinning, targetRotation, onSpinComplete]);
 
   // Memoize light pattern calculation
   const lightPattern = useMemo(() => {
     return Array.from({ length: 20 }, (_, i) => {
-      if (!isSpinning) return i % 2 === 0
-      return (i + lightPhase) % 3 !== 0
-    })
-  }, [isSpinning, lightPhase])
+      if (!isSpinning) return i % 2 === 0;
+      return (i + lightPhase) % 3 !== 0;
+    });
+  }, [isSpinning, lightPhase]);
 
   if (prizes.length === 0) {
     return (
-      <div className="w-full max-w-md mx-auto aspect-square flex items-center justify-center">
+      <div className="mx-auto flex aspect-square w-full max-w-md items-center justify-center">
         <p className="text-dark-400">No prizes configured</p>
       </div>
-    )
+    );
   }
 
-  const size = 400
-  const center = size / 2
-  const outerRadius = size / 2 - 20
-  const innerRadius = outerRadius - 15
-  const prizeRadius = innerRadius - 5
-  const sectorAngle = 360 / prizes.length
-  const hubRadius = 45
+  const size = 400;
+  const center = size / 2;
+  const outerRadius = size / 2 - 20;
+  const innerRadius = outerRadius - 15;
+  const prizeRadius = innerRadius - 5;
+  const sectorAngle = 360 / prizes.length;
+  const hubRadius = 45;
 
   const createSectorPath = (index: number) => {
-    const startAngle = (index * sectorAngle - 90) * (Math.PI / 180)
-    const endAngle = ((index + 1) * sectorAngle - 90) * (Math.PI / 180)
+    const startAngle = (index * sectorAngle - 90) * (Math.PI / 180);
+    const endAngle = ((index + 1) * sectorAngle - 90) * (Math.PI / 180);
 
-    const x1 = center + prizeRadius * Math.cos(startAngle)
-    const y1 = center + prizeRadius * Math.sin(startAngle)
-    const x2 = center + prizeRadius * Math.cos(endAngle)
-    const y2 = center + prizeRadius * Math.sin(endAngle)
+    const x1 = center + prizeRadius * Math.cos(startAngle);
+    const y1 = center + prizeRadius * Math.sin(startAngle);
+    const x2 = center + prizeRadius * Math.cos(endAngle);
+    const y2 = center + prizeRadius * Math.sin(endAngle);
 
-    const x1Inner = center + hubRadius * Math.cos(startAngle)
-    const y1Inner = center + hubRadius * Math.sin(startAngle)
-    const x2Inner = center + hubRadius * Math.cos(endAngle)
-    const y2Inner = center + hubRadius * Math.sin(endAngle)
+    const x1Inner = center + hubRadius * Math.cos(startAngle);
+    const y1Inner = center + hubRadius * Math.sin(startAngle);
+    const x2Inner = center + hubRadius * Math.cos(endAngle);
+    const y2Inner = center + hubRadius * Math.sin(endAngle);
 
-    const largeArc = sectorAngle > 180 ? 1 : 0
+    const largeArc = sectorAngle > 180 ? 1 : 0;
 
     return `M ${x1Inner} ${y1Inner}
             L ${x1} ${y1}
             A ${prizeRadius} ${prizeRadius} 0 ${largeArc} 1 ${x2} ${y2}
             L ${x2Inner} ${y2Inner}
-            A ${hubRadius} ${hubRadius} 0 ${largeArc} 0 ${x1Inner} ${y1Inner} Z`
-  }
+            A ${hubRadius} ${hubRadius} 0 ${largeArc} 0 ${x1Inner} ${y1Inner} Z`;
+  };
 
   // Position for emoji - closer to outer edge
   const getEmojiPosition = (index: number) => {
-    const angle = ((index * sectorAngle + sectorAngle / 2) - 90) * (Math.PI / 180)
-    const emojiRadius = prizeRadius * 0.75
+    const angle = (index * sectorAngle + sectorAngle / 2 - 90) * (Math.PI / 180);
+    const emojiRadius = prizeRadius * 0.75;
     return {
       x: center + emojiRadius * Math.cos(angle),
       y: center + emojiRadius * Math.sin(angle),
       rotation: index * sectorAngle + sectorAngle / 2,
-    }
-  }
+    };
+  };
 
   // Position for text - between hub and emoji
   const getTextPosition = (index: number) => {
-    const angle = ((index * sectorAngle + sectorAngle / 2) - 90) * (Math.PI / 180)
-    const textRadius = prizeRadius * 0.45
+    const angle = (index * sectorAngle + sectorAngle / 2 - 90) * (Math.PI / 180);
+    const textRadius = prizeRadius * 0.45;
     return {
       x: center + textRadius * Math.cos(angle),
       y: center + textRadius * Math.sin(angle),
       rotation: index * sectorAngle + sectorAngle / 2,
-    }
-  }
+    };
+  };
 
   // Alternate colors for sectors
   const getSectorColors = (index: number, baseColor?: string) => {
-    if (baseColor) return baseColor
+    if (baseColor) return baseColor;
     const colors = [
-      '#8B5CF6', '#EC4899', '#3B82F6', '#10B981',
-      '#F59E0B', '#EF4444', '#6366F1', '#14B8A6'
-    ]
-    return colors[index % colors.length]
-  }
+      '#8B5CF6',
+      '#EC4899',
+      '#3B82F6',
+      '#10B981',
+      '#F59E0B',
+      '#EF4444',
+      '#6366F1',
+      '#14B8A6',
+    ];
+    return colors[index % colors.length];
+  };
 
   // Truncate text intelligently
   const truncateText = (text: string, maxLen: number) => {
-    if (text.length <= maxLen) return text
-    return text.substring(0, maxLen - 1) + '..'
-  }
+    if (text.length <= maxLen) return text;
+    return text.substring(0, maxLen - 1) + '..';
+  };
 
   // Calculate max text length based on number of sectors
-  const maxTextLength = prizes.length <= 4 ? 12 : prizes.length <= 6 ? 10 : 8
+  const maxTextLength = prizes.length <= 4 ? 12 : prizes.length <= 6 ? 10 : 8;
 
   return (
-    <div className="relative w-full max-w-[380px] mx-auto select-none">
+    <div className="relative mx-auto w-full max-w-[380px] select-none">
       {/* Outer glow effect */}
       <div
         className={`absolute inset-[-30px] rounded-full transition-all duration-500 ${
-          isSpinning ? 'opacity-100 scale-105' : 'opacity-60'
+          isSpinning ? 'scale-105 opacity-100' : 'opacity-60'
         }`}
         style={{
-          background: 'radial-gradient(circle, rgba(139, 92, 246, 0.4) 0%, rgba(236, 72, 153, 0.2) 40%, transparent 70%)',
+          background:
+            'radial-gradient(circle, rgba(139, 92, 246, 0.4) 0%, rgba(236, 72, 153, 0.2) 40%, transparent 70%)',
           filter: 'blur(25px)',
         }}
       />
 
       {/* Pointer */}
-      <div className="absolute top-[-12px] left-1/2 -translate-x-1/2 z-20">
+      <div className="absolute left-1/2 top-[-12px] z-20 -translate-x-1/2">
         <div className="relative">
           <div
             className={`absolute inset-[-10px] blur-lg transition-opacity ${isSpinning ? 'opacity-100' : 'opacity-70'}`}
-            style={{ background: 'radial-gradient(circle, rgba(251, 191, 36, 0.9) 0%, transparent 60%)' }}
+            style={{
+              background: 'radial-gradient(circle, rgba(251, 191, 36, 0.9) 0%, transparent 60%)',
+            }}
           />
           <svg width="44" height="56" viewBox="0 0 44 56" className="relative drop-shadow-2xl">
             <defs>
@@ -166,7 +175,13 @@ const FortuneWheel = memo(function FortuneWheel({
                 <stop offset="100%" stopColor="#D97706" />
               </linearGradient>
               <filter id="pointerGlow">
-                <feDropShadow dx="0" dy="2" stdDeviation="3" floodColor="#F59E0B" floodOpacity="0.6"/>
+                <feDropShadow
+                  dx="0"
+                  dy="2"
+                  stdDeviation="3"
+                  floodColor="#F59E0B"
+                  floodOpacity="0.6"
+                />
               </filter>
             </defs>
             <polygon
@@ -174,35 +189,35 @@ const FortuneWheel = memo(function FortuneWheel({
               fill="url(#pointerGold)"
               filter="url(#pointerGlow)"
             />
-            <polygon
-              points="22,50 6,16 22,4"
-              fill="rgba(255,255,255,0.3)"
-            />
-            <circle cx="22" cy="24" r="8" fill="#FEF3C7"/>
-            <circle cx="22" cy="24" r="5" fill="#FBBF24"/>
-            <circle cx="19" cy="21" r="2" fill="white" opacity="0.8"/>
+            <polygon points="22,50 6,16 22,4" fill="rgba(255,255,255,0.3)" />
+            <circle cx="22" cy="24" r="8" fill="#FEF3C7" />
+            <circle cx="22" cy="24" r="5" fill="#FBBF24" />
+            <circle cx="19" cy="21" r="2" fill="white" opacity="0.8" />
           </svg>
         </div>
       </div>
 
       {/* Main Wheel */}
       <div className="relative aspect-square">
-        <svg viewBox={`0 0 ${size} ${size}`} className="w-full h-full">
+        <svg viewBox={`0 0 ${size} ${size}`} className="h-full w-full">
           <defs>
             {/* Sector gradients */}
             {prizes.map((prize, index) => {
-              const color = getSectorColors(index, prize.color)
+              const color = getSectorColors(index, prize.color);
               return (
                 <linearGradient
                   key={`grad-${index}`}
                   id={`sectorGrad-${index}`}
-                  x1="0%" y1="0%" x2="100%" y2="100%"
+                  x1="0%"
+                  y1="0%"
+                  x2="100%"
+                  y2="100%"
                 >
                   <stop offset="0%" stopColor={color} stopOpacity="1" />
                   <stop offset="50%" stopColor={color} stopOpacity="0.85" />
                   <stop offset="100%" stopColor={color} stopOpacity="0.7" />
                 </linearGradient>
-              )
+              );
             })}
 
             {/* Outer ring gradient */}
@@ -223,7 +238,7 @@ const FortuneWheel = memo(function FortuneWheel({
 
             {/* Text shadow filter */}
             <filter id="textShadow" x="-20%" y="-20%" width="140%" height="140%">
-              <feDropShadow dx="0" dy="1" stdDeviation="1" floodColor="#000" floodOpacity="0.7"/>
+              <feDropShadow dx="0" dy="1" stdDeviation="1" floodColor="#000" floodOpacity="0.7" />
             </filter>
           </defs>
 
@@ -252,10 +267,10 @@ const FortuneWheel = memo(function FortuneWheel({
 
           {/* LED lights on outer ring */}
           {Array.from({ length: 20 }).map((_, i) => {
-            const angle = (i * 18 - 90) * (Math.PI / 180)
-            const dotX = center + outerRadius * Math.cos(angle)
-            const dotY = center + outerRadius * Math.sin(angle)
-            const isLit = lightPattern[i] ?? (i % 2 === 0)
+            const angle = (i * 18 - 90) * (Math.PI / 180);
+            const dotX = center + outerRadius * Math.cos(angle);
+            const dotY = center + outerRadius * Math.sin(angle);
+            const isLit = lightPattern[i] ?? i % 2 === 0;
             return (
               <g key={`led-${i}`}>
                 {isLit && (
@@ -277,7 +292,7 @@ const FortuneWheel = memo(function FortuneWheel({
                   strokeWidth="1"
                 />
               </g>
-            )
+            );
           })}
 
           {/* Rotating wheel group */}
@@ -286,9 +301,7 @@ const FortuneWheel = memo(function FortuneWheel({
             style={{
               transformOrigin: `${center}px ${center}px`,
               transform: `rotate(${currentRotation}deg)`,
-              transition: isSpinning
-                ? 'transform 5s cubic-bezier(0.15, 0.6, 0.1, 1)'
-                : 'none',
+              transition: isSpinning ? 'transform 5s cubic-bezier(0.15, 0.6, 0.1, 1)' : 'none',
             }}
           >
             {/* Sectors */}
@@ -304,11 +317,11 @@ const FortuneWheel = memo(function FortuneWheel({
 
             {/* Sector dividers */}
             {prizes.map((_, index) => {
-              const angle = (index * sectorAngle - 90) * (Math.PI / 180)
-              const x1 = center + hubRadius * Math.cos(angle)
-              const y1 = center + hubRadius * Math.sin(angle)
-              const x2 = center + prizeRadius * Math.cos(angle)
-              const y2 = center + prizeRadius * Math.sin(angle)
+              const angle = (index * sectorAngle - 90) * (Math.PI / 180);
+              const x1 = center + hubRadius * Math.cos(angle);
+              const y1 = center + hubRadius * Math.sin(angle);
+              const x2 = center + prizeRadius * Math.cos(angle);
+              const y2 = center + prizeRadius * Math.sin(angle);
               return (
                 <line
                   key={`divider-${index}`}
@@ -319,12 +332,12 @@ const FortuneWheel = memo(function FortuneWheel({
                   stroke="rgba(255,255,255,0.25)"
                   strokeWidth="2"
                 />
-              )
+              );
             })}
 
             {/* Prize content - Emoji */}
             {prizes.map((prize, index) => {
-              const pos = getEmojiPosition(index)
+              const pos = getEmojiPosition(index);
               return (
                 <text
                   key={`emoji-${prize.id}`}
@@ -332,19 +345,19 @@ const FortuneWheel = memo(function FortuneWheel({
                   y={pos.y}
                   textAnchor="middle"
                   dominantBaseline="middle"
-                  fontSize={prizes.length <= 6 ? "32" : "26"}
+                  fontSize={prizes.length <= 6 ? '32' : '26'}
                   transform={`rotate(${pos.rotation}, ${pos.x}, ${pos.y})`}
                   style={{ filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.5))' }}
                 >
                   {prize.emoji}
                 </text>
-              )
+              );
             })}
 
             {/* Prize content - Text */}
             {prizes.map((prize, index) => {
-              const pos = getTextPosition(index)
-              const displayText = truncateText(prize.display_name, maxTextLength)
+              const pos = getTextPosition(index);
+              const displayText = truncateText(prize.display_name, maxTextLength);
               return (
                 <text
                   key={`text-${prize.id}`}
@@ -352,7 +365,7 @@ const FortuneWheel = memo(function FortuneWheel({
                   y={pos.y}
                   textAnchor="middle"
                   dominantBaseline="middle"
-                  fontSize={prizes.length <= 4 ? "13" : prizes.length <= 6 ? "11" : "9"}
+                  fontSize={prizes.length <= 4 ? '13' : prizes.length <= 6 ? '11' : '9'}
                   fontWeight="700"
                   fill="#FFFFFF"
                   transform={`rotate(${pos.rotation}, ${pos.x}, ${pos.y})`}
@@ -361,7 +374,7 @@ const FortuneWheel = memo(function FortuneWheel({
                 >
                   {displayText}
                 </text>
-              )
+              );
             })}
           </g>
 
@@ -386,13 +399,7 @@ const FortuneWheel = memo(function FortuneWheel({
           />
 
           {/* Hub shine */}
-          <ellipse
-            cx={center - 10}
-            cy={center - 12}
-            rx={15}
-            ry={10}
-            fill="rgba(255,255,255,0.2)"
-          />
+          <ellipse cx={center - 10} cy={center - 12} rx={15} ry={10} fill="rgba(255,255,255,0.2)" />
 
           {/* Center button */}
           <circle
@@ -422,7 +429,7 @@ const FortuneWheel = memo(function FortuneWheel({
         {/* Spinning overlay glow */}
         {isSpinning && (
           <div
-            className="absolute inset-0 rounded-full pointer-events-none"
+            className="pointer-events-none absolute inset-0 rounded-full"
             style={{
               background: 'radial-gradient(circle, rgba(168, 85, 247, 0.25) 0%, transparent 50%)',
               animation: 'pulse 0.5s ease-in-out infinite',
@@ -433,11 +440,11 @@ const FortuneWheel = memo(function FortuneWheel({
 
       {/* Sparkle effects when spinning - optimized with pre-calculated positions */}
       {isSpinning && (
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
           {SPARKLE_POSITIONS.map((pos, i) => (
             <div
               key={`sparkle-${i}`}
-              className="absolute w-2 h-2 bg-yellow-300 rounded-full animate-ping"
+              className="absolute h-2 w-2 animate-ping rounded-full bg-yellow-300"
               style={{
                 top: pos.top,
                 left: pos.left,
@@ -450,7 +457,7 @@ const FortuneWheel = memo(function FortuneWheel({
         </div>
       )}
     </div>
-  )
-})
+  );
+});
 
-export default FortuneWheel
+export default FortuneWheel;

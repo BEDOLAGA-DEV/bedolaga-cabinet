@@ -9,7 +9,11 @@ permissions:
   contents: write
 
 jobs:
+  lint:
+    uses: ./.github/workflows/lint.yml
+
   create-release:
+    needs: lint
     runs-on: ubuntu-latest
 
     steps:

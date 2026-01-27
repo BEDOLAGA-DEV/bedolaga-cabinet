@@ -1,156 +1,159 @@
-import { useEffect, useRef, useCallback, useState } from 'react'
-import { useAuthStore } from '../store/auth'
+import { useEffect, useRef, useCallback, useState } from 'react';
+import { useAuthStore } from '../store/auth';
 
-const isDev = import.meta.env.DEV
+const isDev = import.meta.env.DEV;
 
 export interface WSMessage {
-  type: string
-  ticket_id?: number
-  message?: string
-  title?: string
-  user_id?: number
-  is_admin?: boolean
+  type: string;
+  ticket_id?: number;
+  message?: string;
+  title?: string;
+  user_id?: number;
+  is_admin?: boolean;
 }
 
 interface UseWebSocketOptions {
-  onMessage?: (message: WSMessage) => void
-  onConnect?: () => void
-  onDisconnect?: () => void
+  onMessage?: (message: WSMessage) => void;
+  onConnect?: () => void;
+  onDisconnect?: () => void;
 }
 
 export function useWebSocket(options: UseWebSocketOptions = {}) {
-  const { accessToken, isAuthenticated } = useAuthStore()
-  const wsRef = useRef<WebSocket | null>(null)
-  const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const pingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
-  const [isConnected, setIsConnected] = useState(false)
-  const reconnectAttemptsRef = useRef(0)
-  const maxReconnectAttempts = 5
-  const optionsRef = useRef(options)
+  const { accessToken, isAuthenticated } = useAuthStore();
+  const wsRef = useRef<WebSocket | null>(null);
+  const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
+  const reconnectAttemptsRef = useRef(0);
+  const maxReconnectAttempts = 5;
+  const optionsRef = useRef(options);
 
   // Update options ref when they change
   useEffect(() => {
-    optionsRef.current = options
-  }, [options])
+    optionsRef.current = options;
+  }, [options]);
 
   const cleanup = useCallback(() => {
     if (reconnectTimeoutRef.current) {
-      clearTimeout(reconnectTimeoutRef.current)
-      reconnectTimeoutRef.current = null
+      clearTimeout(reconnectTimeoutRef.current);
+      reconnectTimeoutRef.current = null;
     }
     if (pingIntervalRef.current) {
-      clearInterval(pingIntervalRef.current)
-      pingIntervalRef.current = null
+      clearInterval(pingIntervalRef.current);
+      pingIntervalRef.current = null;
     }
     if (wsRef.current) {
-      wsRef.current.close()
-      wsRef.current = null
+      wsRef.current.close();
+      wsRef.current = null;
     }
-  }, [])
+  }, []);
 
   const connect = useCallback(() => {
     if (!accessToken || !isAuthenticated) {
-      return
+      return;
     }
 
     // Don't reconnect if already connected
     if (wsRef.current?.readyState === WebSocket.OPEN) {
-      return
+      return;
     }
 
-    cleanup()
+    cleanup();
 
     // Build WebSocket URL
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
-    let host = window.location.host
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    let host = window.location.host;
 
     // Handle VITE_API_URL - can be absolute URL or relative path
-    const apiUrl = import.meta.env.VITE_API_URL
+    const apiUrl = import.meta.env.VITE_API_URL;
     if (apiUrl && (apiUrl.startsWith('http://') || apiUrl.startsWith('https://'))) {
       try {
-        host = new URL(apiUrl).host
+        host = new URL(apiUrl).host;
       } catch {
         // If URL parsing fails, use window.location.host
       }
     }
     // If apiUrl is relative (like /api), use window.location.host
 
-    const wsUrl = `${protocol}//${host}/cabinet/ws?token=${accessToken}`
+    const wsUrl = `${protocol}//${host}/cabinet/ws?token=${accessToken}`;
 
     try {
-      const ws = new WebSocket(wsUrl)
-      wsRef.current = ws
+      const ws = new WebSocket(wsUrl);
+      wsRef.current = ws;
 
       ws.onopen = () => {
-        if (isDev) console.log('[WS] Connected')
-        setIsConnected(true)
-        reconnectAttemptsRef.current = 0
-        optionsRef.current.onConnect?.()
+        if (isDev) console.log('[WS] Connected');
+        setIsConnected(true);
+        reconnectAttemptsRef.current = 0;
+        optionsRef.current.onConnect?.();
 
         // Setup ping interval (every 25 seconds)
         pingIntervalRef.current = setInterval(() => {
           if (ws.readyState === WebSocket.OPEN) {
-            ws.send(JSON.stringify({ type: 'ping' }))
+            ws.send(JSON.stringify({ type: 'ping' }));
           }
-        }, 25000)
-      }
+        }, 25000);
+      };
 
       ws.onmessage = (event) => {
         try {
-          const message = JSON.parse(event.data) as WSMessage
+          const message = JSON.parse(event.data) as WSMessage;
 
           // Ignore pong messages
           if (message.type === 'pong' || message.type === 'connected') {
-            return
+            return;
           }
 
-          optionsRef.current.onMessage?.(message)
+          optionsRef.current.onMessage?.(message);
         } catch (e) {
-          if (isDev) console.error('[WS] Failed to parse message:', e)
+          if (isDev) console.error('[WS] Failed to parse message:', e);
         }
-      }
+      };
 
       ws.onclose = (event) => {
-        if (isDev) console.log('[WS] Disconnected:', event.code, event.reason)
-        setIsConnected(false)
-        optionsRef.current.onDisconnect?.()
+        if (isDev) console.log('[WS] Disconnected:', event.code, event.reason);
+        setIsConnected(false);
+        optionsRef.current.onDisconnect?.();
 
         if (pingIntervalRef.current) {
-          clearInterval(pingIntervalRef.current)
-          pingIntervalRef.current = null
+          clearInterval(pingIntervalRef.current);
+          pingIntervalRef.current = null;
         }
 
         // Attempt to reconnect if not closed intentionally
         if (event.code !== 1000 && reconnectAttemptsRef.current < maxReconnectAttempts) {
-          const delay = Math.min(1000 * Math.pow(2, reconnectAttemptsRef.current), 30000)
-          if (isDev) console.log(`[WS] Reconnecting in ${delay}ms (attempt ${reconnectAttemptsRef.current + 1})`)
+          const delay = Math.min(1000 * Math.pow(2, reconnectAttemptsRef.current), 30000);
+          if (isDev)
+            console.log(
+              `[WS] Reconnecting in ${delay}ms (attempt ${reconnectAttemptsRef.current + 1})`,
+            );
 
           reconnectTimeoutRef.current = setTimeout(() => {
-            reconnectAttemptsRef.current++
-            connect()
-          }, delay)
+            reconnectAttemptsRef.current++;
+            connect();
+          }, delay);
         }
-      }
+      };
 
       ws.onerror = (error) => {
-        if (isDev) console.error('[WS] Error:', error)
-      }
+        if (isDev) console.error('[WS] Error:', error);
+      };
     } catch (e) {
-      if (isDev) console.error('[WS] Failed to connect:', e)
+      if (isDev) console.error('[WS] Failed to connect:', e);
     }
-  }, [accessToken, isAuthenticated, cleanup])
+  }, [accessToken, isAuthenticated, cleanup]);
 
   // Connect when authenticated
   useEffect(() => {
     if (isAuthenticated && accessToken) {
-      connect()
+      connect();
     } else {
-      cleanup()
-      setIsConnected(false)
+      cleanup();
+      setIsConnected(false);
     }
 
-    return cleanup
-  }, [isAuthenticated, accessToken, connect, cleanup])
+    return cleanup;
+  }, [isAuthenticated, accessToken, connect, cleanup]);
 
-  return { isConnected }
+  return { isConnected };
 }

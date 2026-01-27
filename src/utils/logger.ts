@@ -3,29 +3,29 @@
  * В production логи не выводятся
  */
 
-const isDev = import.meta.env.DEV
+const isDev = import.meta.env.DEV;
 
 export const logger = {
   log: (...args: unknown[]): void => {
     if (isDev) {
-      console.log(...args)
+      console.log(...args);
     }
   },
 
   warn: (...args: unknown[]): void => {
     if (isDev) {
-      console.warn(...args)
+      console.warn(...args);
     }
   },
 
   error: (...args: unknown[]): void => {
     // Ошибки логируем всегда (важно для отладки в production)
-    console.error(...args)
+    console.error(...args);
   },
 
   debug: (...args: unknown[]): void => {
     if (isDev) {
-      console.debug(...args)
+      console.debug(...args);
     }
   },
 
@@ -35,23 +35,23 @@ export const logger = {
   createLogger: (prefix: string) => ({
     log: (...args: unknown[]): void => {
       if (isDev) {
-        console.log(`[${prefix}]`, ...args)
+        console.log(`[${prefix}]`, ...args);
       }
     },
     warn: (...args: unknown[]): void => {
       if (isDev) {
-        console.warn(`[${prefix}]`, ...args)
+        console.warn(`[${prefix}]`, ...args);
       }
     },
     error: (...args: unknown[]): void => {
-      console.error(`[${prefix}]`, ...args)
+      console.error(`[${prefix}]`, ...args);
     },
     debug: (...args: unknown[]): void => {
       if (isDev) {
-        console.debug(`[${prefix}]`, ...args)
+        console.debug(`[${prefix}]`, ...args);
       }
     },
   }),
-}
+};
 
-export default logger
+export default logger;

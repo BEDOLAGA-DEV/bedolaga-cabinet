@@ -1,285 +1,345 @@
-import { useState, useRef, useEffect, useCallback } from 'react'
-import { createPortal } from 'react-dom'
-import { useTranslation } from 'react-i18next'
-import { useMutation } from '@tanstack/react-query'
-import { balanceApi } from '../api/balance'
-import { useCurrency } from '../hooks/useCurrency'
-import { useTelegramWebApp } from '../hooks/useTelegramWebApp'
-import { checkRateLimit, getRateLimitResetTime, RATE_LIMIT_KEYS } from '../utils/rateLimit'
-import type { PaymentMethod } from '../types'
-import BentoCard from './ui/BentoCard'
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
+import { useTranslation } from 'react-i18next';
+import { useMutation } from '@tanstack/react-query';
+import { balanceApi } from '../api/balance';
+import { useCurrency } from '../hooks/useCurrency';
+import { useTelegramWebApp } from '../hooks/useTelegramWebApp';
+import { checkRateLimit, getRateLimitResetTime, RATE_LIMIT_KEYS } from '../utils/rateLimit';
+import type { PaymentMethod } from '../types';
+import BentoCard from './ui/BentoCard';
 
 // Icons
 const CloseIcon = () => (
-  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
   </svg>
-)
+);
 
 const WalletIcon = () => (
-  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a2.25 2.25 0 00-2.25-2.25H15a3 3 0 11-6 0H5.25A2.25 2.25 0 003 12m18 0v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6m18 0V9M3 12V9m18 0a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 9m18 0V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v3" />
+  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M21 12a2.25 2.25 0 00-2.25-2.25H15a3 3 0 11-6 0H5.25A2.25 2.25 0 003 12m18 0v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6m18 0V9M3 12V9m18 0a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 9m18 0V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v3"
+    />
   </svg>
-)
+);
 
 const StarIcon = () => (
-  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+  <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
     <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
   </svg>
-)
+);
 
 const CardIcon = () => (
-  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
+  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"
+    />
   </svg>
-)
+);
 
 const CryptoIcon = () => (
-  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" />
+  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125"
+    />
   </svg>
-)
+);
 
 const SparklesIcon = () => (
-  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+  <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
     <path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
   </svg>
-)
+);
 
 const ExternalLinkIcon = () => (
-  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
+    />
   </svg>
-)
+);
 
 const CopyIcon = () => (
-  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184" />
+  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184"
+    />
   </svg>
-)
+);
 
 const CheckIcon = () => (
-  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
   </svg>
-)
+);
 
 interface TopUpModalProps {
-  method: PaymentMethod
-  onClose: () => void
-  initialAmountRubles?: number
+  method: PaymentMethod;
+  onClose: () => void;
+  initialAmountRubles?: number;
 }
 
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(() => {
-    if (typeof window === 'undefined') return false
-    return window.innerWidth < 640
-  })
+    if (typeof window === 'undefined') return false;
+    return window.innerWidth < 640;
+  });
   useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 640)
-    window.addEventListener('resize', check)
-    return () => window.removeEventListener('resize', check)
-  }, [])
-  return isMobile
+    const check = () => setIsMobile(window.innerWidth < 640);
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
+  return isMobile;
 }
 
 // Get method icon based on method type
 const getMethodIcon = (methodId: string) => {
-  const id = methodId.toLowerCase()
-  if (id.includes('stars')) return <StarIcon />
-  if (id.includes('crypto') || id.includes('ton') || id.includes('usdt')) return <CryptoIcon />
-  return <CardIcon />
-}
+  const id = methodId.toLowerCase();
+  if (id.includes('stars')) return <StarIcon />;
+  if (id.includes('crypto') || id.includes('ton') || id.includes('usdt')) return <CryptoIcon />;
+  return <CardIcon />;
+};
 
 export default function TopUpModal({ method, onClose, initialAmountRubles }: TopUpModalProps) {
-  const { t } = useTranslation()
-  const { formatAmount, currencySymbol, convertAmount, convertToRub, targetCurrency } = useCurrency()
-  const { isTelegramWebApp, safeAreaInset, contentSafeAreaInset, webApp } = useTelegramWebApp()
-  const inputRef = useRef<HTMLInputElement>(null)
-  const isMobileScreen = useIsMobile()
+  const { t } = useTranslation();
+  const { formatAmount, currencySymbol, convertAmount, convertToRub, targetCurrency } =
+    useCurrency();
+  const { isTelegramWebApp, safeAreaInset, contentSafeAreaInset, webApp } = useTelegramWebApp();
+  const inputRef = useRef<HTMLInputElement>(null);
+  const isMobileScreen = useIsMobile();
 
-  const safeBottom = isTelegramWebApp ? Math.max(safeAreaInset.bottom, contentSafeAreaInset.bottom) : 0
+  const safeBottom = isTelegramWebApp
+    ? Math.max(safeAreaInset.bottom, contentSafeAreaInset.bottom)
+    : 0;
 
   const getInitialAmount = (): string => {
-    if (!initialAmountRubles || initialAmountRubles <= 0) return ''
-    const converted = convertAmount(initialAmountRubles)
-    return (targetCurrency === 'IRR' || targetCurrency === 'RUB')
+    if (!initialAmountRubles || initialAmountRubles <= 0) return '';
+    const converted = convertAmount(initialAmountRubles);
+    return targetCurrency === 'IRR' || targetCurrency === 'RUB'
       ? Math.ceil(converted).toString()
-      : converted.toFixed(2)
-  }
+      : converted.toFixed(2);
+  };
 
-  const [amount, setAmount] = useState(getInitialAmount)
-  const [error, setError] = useState<string | null>(null)
+  const [amount, setAmount] = useState(getInitialAmount);
+  const [error, setError] = useState<string | null>(null);
   const [selectedOption, setSelectedOption] = useState<string | null>(
-    method.options && method.options.length > 0 ? method.options[0].id : null
-  )
-  const [paymentUrl, setPaymentUrl] = useState<string | null>(null)
-  const [copied, setCopied] = useState(false)
-  const [isInputFocused, setIsInputFocused] = useState(false)
+    method.options && method.options.length > 0 ? method.options[0].id : null,
+  );
+  const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+  const [isInputFocused, setIsInputFocused] = useState(false);
 
   const handleClose = useCallback(() => {
-    onClose()
-  }, [onClose])
+    onClose();
+  }, [onClose]);
 
   // Keyboard: Escape to close (PC)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        e.preventDefault()
-        handleClose()
+        e.preventDefault();
+        handleClose();
       }
-    }
-    document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [handleClose])
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [handleClose]);
 
   // Telegram back button (Android)
   useEffect(() => {
-    if (!webApp?.BackButton) return
-    webApp.BackButton.show()
-    webApp.BackButton.onClick(handleClose)
+    if (!webApp?.BackButton) return;
+    webApp.BackButton.show();
+    webApp.BackButton.onClick(handleClose);
     return () => {
-      webApp.BackButton.offClick(handleClose)
-      webApp.BackButton.hide()
-    }
-  }, [webApp, handleClose])
+      webApp.BackButton.offClick(handleClose);
+      webApp.BackButton.hide();
+    };
+  }, [webApp, handleClose]);
 
   // Scroll lock
   useEffect(() => {
-    const scrollY = window.scrollY
+    const scrollY = window.scrollY;
     const preventScroll = (e: TouchEvent) => {
-      const target = e.target as HTMLElement
-      if (target.closest('[data-modal-content]')) return
-      e.preventDefault()
-    }
+      const target = e.target as HTMLElement;
+      if (target.closest('[data-modal-content]')) return;
+      e.preventDefault();
+    };
     const preventWheel = (e: WheelEvent) => {
-      const target = e.target as HTMLElement
-      if (target.closest('[data-modal-content]')) return
-      e.preventDefault()
-    }
-    document.addEventListener('touchmove', preventScroll, { passive: false })
-    document.addEventListener('wheel', preventWheel, { passive: false })
-    document.body.style.overflow = 'hidden'
+      const target = e.target as HTMLElement;
+      if (target.closest('[data-modal-content]')) return;
+      e.preventDefault();
+    };
+    document.addEventListener('touchmove', preventScroll, { passive: false });
+    document.addEventListener('wheel', preventWheel, { passive: false });
+    document.body.style.overflow = 'hidden';
     return () => {
-      document.removeEventListener('touchmove', preventScroll)
-      document.removeEventListener('wheel', preventWheel)
-      document.body.style.overflow = ''
-      window.scrollTo(0, scrollY)
-    }
-  }, [])
+      document.removeEventListener('touchmove', preventScroll);
+      document.removeEventListener('wheel', preventWheel);
+      document.body.style.overflow = '';
+      window.scrollTo(0, scrollY);
+    };
+  }, []);
 
-  const hasOptions = method.options && method.options.length > 0
-  const minRubles = method.min_amount_kopeks / 100
-  const maxRubles = method.max_amount_kopeks / 100
-  const methodKey = method.id.toLowerCase().replace(/-/g, '_')
-  const isStarsMethod = methodKey.includes('stars')
-  const methodName = t(`balance.paymentMethods.${methodKey}.name`, { defaultValue: '' }) || method.name
+  const hasOptions = method.options && method.options.length > 0;
+  const minRubles = method.min_amount_kopeks / 100;
+  const maxRubles = method.max_amount_kopeks / 100;
+  const methodKey = method.id.toLowerCase().replace(/-/g, '_');
+  const isStarsMethod = methodKey.includes('stars');
+  const methodName =
+    t(`balance.paymentMethods.${methodKey}.name`, { defaultValue: '' }) || method.name;
 
   const starsPaymentMutation = useMutation({
     mutationFn: (amountKopeks: number) => balanceApi.createStarsInvoice(amountKopeks),
     onSuccess: (data) => {
-      const webApp = window.Telegram?.WebApp
-      if (!data.invoice_url) { setError('Сервер не вернул ссылку на оплату'); return }
-      if (!webApp?.openInvoice) { setError('Оплата Stars доступна только в Telegram Mini App'); return }
+      const webApp = window.Telegram?.WebApp;
+      if (!data.invoice_url) {
+        setError('Сервер не вернул ссылку на оплату');
+        return;
+      }
+      if (!webApp?.openInvoice) {
+        setError('Оплата Stars доступна только в Telegram Mini App');
+        return;
+      }
       try {
         webApp.openInvoice(data.invoice_url, (status) => {
-          if (status === 'paid') { setError(null); onClose() }
-          else if (status === 'failed') { setError(t('wheel.starsPaymentFailed')) }
-        })
-      } catch (e) { setError('Ошибка: ' + String(e)) }
-    },
-    onError: (err: unknown) => {
-      const axiosError = err as { response?: { data?: { detail?: string }, status?: number } }
-      setError(`Ошибка: ${axiosError?.response?.data?.detail || 'Не удалось создать счёт'}`)
-    },
-  })
-
-  const topUpMutation = useMutation<{
-    payment_id: string; payment_url?: string; invoice_url?: string
-    amount_kopeks: number; amount_rubles: number; status: string; expires_at: string | null
-  }, unknown, number>({
-    mutationFn: (amountKopeks: number) => balanceApi.createTopUp(amountKopeks, method.id, selectedOption || undefined),
-    onSuccess: (data) => {
-      const redirectUrl = data.payment_url || (data as any).invoice_url
-      if (redirectUrl) {
-        // Always show the payment link for user to click manually
-        // This ensures it works on all platforms including iOS Safari
-        setPaymentUrl(redirectUrl)
+          if (status === 'paid') {
+            setError(null);
+            onClose();
+          } else if (status === 'failed') {
+            setError(t('wheel.starsPaymentFailed'));
+          }
+        });
+      } catch (e) {
+        setError('Ошибка: ' + String(e));
       }
     },
     onError: (err: unknown) => {
-      const detail = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail || ''
-      setError(detail.includes('not yet implemented') ? t('balance.useBot') : (detail || t('common.error')))
+      const axiosError = err as { response?: { data?: { detail?: string }; status?: number } };
+      setError(`Ошибка: ${axiosError?.response?.data?.detail || 'Не удалось создать счёт'}`);
     },
-  })
+  });
+
+  const topUpMutation = useMutation<
+    {
+      payment_id: string;
+      payment_url?: string;
+      invoice_url?: string;
+      amount_kopeks: number;
+      amount_rubles: number;
+      status: string;
+      expires_at: string | null;
+    },
+    unknown,
+    number
+  >({
+    mutationFn: (amountKopeks: number) =>
+      balanceApi.createTopUp(amountKopeks, method.id, selectedOption || undefined),
+    onSuccess: (data) => {
+      const redirectUrl = data.payment_url || data.invoice_url;
+      if (redirectUrl) {
+        // Always show the payment link for user to click manually
+        // This ensures it works on all platforms including iOS Safari
+        setPaymentUrl(redirectUrl);
+      }
+    },
+    onError: (err: unknown) => {
+      const detail =
+        (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail || '';
+      setError(
+        detail.includes('not yet implemented') ? t('balance.useBot') : detail || t('common.error'),
+      );
+    },
+  });
 
   const handleSubmit = () => {
-    setError(null)
-    setPaymentUrl(null)
-    inputRef.current?.blur()
+    setError(null);
+    setPaymentUrl(null);
+    inputRef.current?.blur();
 
     if (!checkRateLimit(RATE_LIMIT_KEYS.PAYMENT, 3, 30000)) {
-      setError('Подождите ' + getRateLimitResetTime(RATE_LIMIT_KEYS.PAYMENT) + ' сек.')
-      return
+      setError('Подождите ' + getRateLimitResetTime(RATE_LIMIT_KEYS.PAYMENT) + ' сек.');
+      return;
     }
-    if (hasOptions && !selectedOption) { setError('Выберите способ'); return }
-    const amountCurrency = parseFloat(amount)
-    if (isNaN(amountCurrency) || amountCurrency <= 0) { setError('Введите сумму'); return }
-    const amountRubles = convertToRub(amountCurrency)
+    if (hasOptions && !selectedOption) {
+      setError('Выберите способ');
+      return;
+    }
+    const amountCurrency = parseFloat(amount);
+    if (isNaN(amountCurrency) || amountCurrency <= 0) {
+      setError('Введите сумму');
+      return;
+    }
+    const amountRubles = convertToRub(amountCurrency);
     if (amountRubles < minRubles || amountRubles > maxRubles) {
-      setError(`Сумма: ${minRubles} – ${maxRubles} ₽`); return
+      setError(`Сумма: ${minRubles} – ${maxRubles} ₽`);
+      return;
     }
 
-    const amountKopeks = Math.round(amountRubles * 100)
-    if (isStarsMethod) { starsPaymentMutation.mutate(amountKopeks) }
-    else { topUpMutation.mutate(amountKopeks) }
-  }
+    const amountKopeks = Math.round(amountRubles * 100);
+    if (isStarsMethod) {
+      starsPaymentMutation.mutate(amountKopeks);
+    } else {
+      topUpMutation.mutate(amountKopeks);
+    }
+  };
 
-  const quickAmounts = [100, 300, 500, 1000].filter((a) => a >= minRubles && a <= maxRubles)
-  const currencyDecimals = (targetCurrency === 'IRR' || targetCurrency === 'RUB') ? 0 : 2
-  const getQuickValue = (rub: number) => (targetCurrency === 'IRR')
-    ? Math.round(convertAmount(rub)).toString()
-    : convertAmount(rub).toFixed(currencyDecimals)
-  const isPending = topUpMutation.isPending || starsPaymentMutation.isPending
+  const quickAmounts = [100, 300, 500, 1000].filter((a) => a >= minRubles && a <= maxRubles);
+  const currencyDecimals = targetCurrency === 'IRR' || targetCurrency === 'RUB' ? 0 : 2;
+  const getQuickValue = (rub: number) =>
+    targetCurrency === 'IRR'
+      ? Math.round(convertAmount(rub)).toString()
+      : convertAmount(rub).toFixed(currencyDecimals);
+  const isPending = topUpMutation.isPending || starsPaymentMutation.isPending;
 
   const handleCopyUrl = async () => {
-    if (!paymentUrl) return
+    if (!paymentUrl) return;
     try {
-      await navigator.clipboard.writeText(paymentUrl)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
+      await navigator.clipboard.writeText(paymentUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     } catch (e) {
-      console.warn('Failed to copy:', e)
+      console.warn('Failed to copy:', e);
     }
-  }
-
+  };
 
   // Auto-focus input - works on mobile in Telegram WebApp
   useEffect(() => {
     const timer = setTimeout(() => {
       if (inputRef.current) {
-        inputRef.current.focus()
+        inputRef.current.focus();
         if (isMobileScreen) {
-          inputRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          inputRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
       }
-    }, 100)
-    return () => clearTimeout(timer)
-  }, [])
+    }, 100);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Content JSX - shared between mobile and desktop
   const contentJSX = (
     <div className="space-y-5">
       {/* Header icon and method */}
       <div className="flex items-center gap-4 pb-1">
-        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${
-          isStarsMethod
-            ? 'bg-gradient-to-br from-yellow-500/20 to-orange-500/20 text-yellow-400'
-            : 'bg-gradient-to-br from-accent-500/20 to-accent-600/20 text-accent-400'
-        }`}>
-          <div className="w-7 h-7 flex items-center justify-center">
-            {getMethodIcon(method.id)}
-          </div>
+        <div
+          className={`flex h-14 w-14 items-center justify-center rounded-2xl ${
+            isStarsMethod
+              ? 'bg-gradient-to-br from-yellow-500/20 to-orange-500/20 text-yellow-400'
+              : 'bg-gradient-to-br from-accent-500/20 to-accent-600/20 text-accent-400'
+          }`}
+        >
+          <div className="flex h-7 w-7 items-center justify-center">{getMethodIcon(method.id)}</div>
         </div>
         <div className="flex-1">
           <h3 className="text-lg font-bold text-dark-100">{methodName}</h3>
@@ -299,16 +359,16 @@ export default function TopUpModal({ method, onClose, initialAmountRubles }: Top
                 key={opt.id}
                 type="button"
                 onClick={() => setSelectedOption(opt.id)}
-                className={`relative py-3 px-4 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                className={`relative rounded-xl px-4 py-3 text-sm font-semibold transition-all duration-200 ${
                   selectedOption === opt.id
                     ? 'bg-accent-500/15 text-accent-400 ring-2 ring-accent-500/40'
-                    : 'bg-dark-800/70 text-dark-300 hover:bg-dark-700/70 border border-dark-700/50'
+                    : 'border border-dark-700/50 bg-dark-800/70 text-dark-300 hover:bg-dark-700/70'
                 }`}
               >
                 {opt.name}
                 {selectedOption === opt.id && (
-                  <span className="absolute top-1.5 right-1.5">
-                    <span className="w-2 h-2 rounded-full bg-accent-500 block" />
+                  <span className="absolute right-1.5 top-1.5">
+                    <span className="block h-2 w-2 rounded-full bg-accent-500" />
                   </span>
                 )}
               </button>
@@ -321,11 +381,13 @@ export default function TopUpModal({ method, onClose, initialAmountRubles }: Top
       <div className="space-y-2">
         <label className="text-sm font-medium text-dark-400">{t('balance.enterAmount')}</label>
         <div className="flex gap-2">
-          <div className={`relative flex-1 rounded-2xl transition-all duration-200 ${
-            isInputFocused
-              ? 'ring-2 ring-accent-500/50 bg-dark-800'
-              : 'bg-dark-800/70 border border-dark-700/50'
-          }`}>
+          <div
+            className={`relative flex-1 rounded-2xl transition-all duration-200 ${
+              isInputFocused
+                ? 'bg-dark-800 ring-2 ring-accent-500/50'
+                : 'border border-dark-700/50 bg-dark-800/70'
+            }`}
+          >
             <input
               ref={inputRef}
               type="number"
@@ -335,9 +397,14 @@ export default function TopUpModal({ method, onClose, initialAmountRubles }: Top
               onChange={(e) => setAmount(e.target.value)}
               onFocus={() => setIsInputFocused(true)}
               onBlur={() => setIsInputFocused(false)}
-              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleSubmit() } }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  handleSubmit();
+                }
+              }}
               placeholder="0"
-              className="w-full h-14 px-4 pr-12 text-xl font-bold bg-transparent text-dark-100 placeholder:text-dark-600 focus:outline-none"
+              className="h-14 w-full bg-transparent px-4 pr-12 text-xl font-bold text-dark-100 placeholder:text-dark-600 focus:outline-none"
               autoComplete="off"
               autoFocus
             />
@@ -349,16 +416,16 @@ export default function TopUpModal({ method, onClose, initialAmountRubles }: Top
             type="button"
             onClick={handleSubmit}
             disabled={isPending || !amount || parseFloat(amount) <= 0}
-            className={`shrink-0 h-14 px-6 rounded-2xl text-base font-bold transition-colors duration-200 overflow-hidden flex items-center justify-center gap-2 ${
+            className={`flex h-14 shrink-0 items-center justify-center gap-2 overflow-hidden rounded-2xl px-6 text-base font-bold transition-colors duration-200 ${
               isPending || !amount || parseFloat(amount) <= 0
-                ? 'bg-dark-700 text-dark-500 cursor-not-allowed'
+                ? 'cursor-not-allowed bg-dark-700 text-dark-500'
                 : isStarsMethod
                   ? 'bg-gradient-to-r from-yellow-500 to-orange-500 text-white shadow-lg shadow-yellow-500/25 hover:from-yellow-400 hover:to-orange-400 active:from-yellow-600 active:to-orange-600'
                   : 'bg-gradient-to-r from-accent-500 to-accent-600 text-white shadow-lg shadow-accent-500/25 hover:from-accent-400 hover:to-accent-500 active:from-accent-600 active:to-accent-700'
             }`}
           >
             {isPending ? (
-              <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              <span className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
             ) : (
               <>
                 <SparklesIcon />
@@ -373,39 +440,54 @@ export default function TopUpModal({ method, onClose, initialAmountRubles }: Top
       {quickAmounts.length > 0 && (
         <div className="grid grid-cols-4 gap-2">
           {quickAmounts.map((a) => {
-            const val = getQuickValue(a)
-            const isSelected = amount === val
+            const val = getQuickValue(a);
+            const isSelected = amount === val;
             return (
               <BentoCard
                 key={a}
                 as="button"
                 type="button"
-                onClick={() => { setAmount(val); inputRef.current?.blur() }}
+                onClick={() => {
+                  setAmount(val);
+                  inputRef.current?.blur();
+                }}
                 hover
                 glow={isSelected}
-                className={`flex flex-col items-center justify-center py-3 px-2 ${
-                  isSelected
-                    ? 'border-accent-500/50 bg-accent-500/10'
-                    : ''
+                className={`flex flex-col items-center justify-center px-2 py-3 ${
+                  isSelected ? 'border-accent-500/50 bg-accent-500/10' : ''
                 }`}
               >
-                <span className={`text-base font-bold ${isSelected ? 'text-accent-400' : 'text-dark-200'}`}>
+                <span
+                  className={`text-base font-bold ${isSelected ? 'text-accent-400' : 'text-dark-200'}`}
+                >
                   {formatAmount(a, 0)}
                 </span>
-                <span className={`text-xs mt-0.5 ${isSelected ? 'text-accent-400/70' : 'text-dark-500'}`}>
+                <span
+                  className={`mt-0.5 text-xs ${isSelected ? 'text-accent-400/70' : 'text-dark-500'}`}
+                >
                   {currencySymbol}
                 </span>
               </BentoCard>
-            )
+            );
           })}
         </div>
       )}
 
       {/* Error message */}
       {error && (
-        <div className="flex items-center gap-2 p-3 rounded-xl bg-error-500/10 border border-error-500/20">
-          <svg className="w-5 h-5 text-error-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        <div className="flex items-center gap-2 rounded-xl border border-error-500/20 bg-error-500/10 p-3">
+          <svg
+            className="h-5 w-5 shrink-0 text-error-400"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
           </svg>
           <span className="text-sm text-error-400">{error}</span>
         </div>
@@ -413,14 +495,19 @@ export default function TopUpModal({ method, onClose, initialAmountRubles }: Top
 
       {/* Payment link display - shown when URL is received */}
       {paymentUrl && (
-        <div className="space-y-3 p-4 rounded-2xl bg-success-500/10 border border-success-500/20">
+        <div className="space-y-3 rounded-2xl border border-success-500/20 bg-success-500/10 p-4">
           <div className="flex items-center gap-2 text-success-400">
             <CheckIcon />
-            <span className="font-semibold">{t('balance.paymentReady', 'Ссылка на оплату готова')}</span>
+            <span className="font-semibold">
+              {t('balance.paymentReady', 'Ссылка на оплату готова')}
+            </span>
           </div>
 
           <p className="text-sm text-dark-400">
-            {t('balance.clickToOpenPayment', 'Нажмите кнопку ниже, чтобы открыть страницу оплаты в новой вкладке')}
+            {t(
+              'balance.clickToOpenPayment',
+              'Нажмите кнопку ниже, чтобы открыть страницу оплаты в новой вкладке',
+            )}
           </p>
 
           {/* Main open button - NO preventDefault, let <a> work natively for iOS Safari */}
@@ -428,7 +515,7 @@ export default function TopUpModal({ method, onClose, initialAmountRubles }: Top
             href={paymentUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-center gap-2 w-full h-12 rounded-xl bg-success-500 text-white font-bold hover:bg-success-400 active:bg-success-600 transition-colors"
+            className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-success-500 font-bold text-white transition-colors hover:bg-success-400 active:bg-success-600"
           >
             <ExternalLinkIcon />
             <span>{t('balance.openPaymentPage', 'Открыть страницу оплаты')}</span>
@@ -436,13 +523,13 @@ export default function TopUpModal({ method, onClose, initialAmountRubles }: Top
 
           {/* Copy and link display */}
           <div className="flex items-center gap-2">
-            <div className="flex-1 min-w-0 px-3 py-2 rounded-lg bg-dark-800/70 border border-dark-700/50">
-              <p className="text-xs text-dark-500 truncate">{paymentUrl}</p>
+            <div className="min-w-0 flex-1 rounded-lg border border-dark-700/50 bg-dark-800/70 px-3 py-2">
+              <p className="truncate text-xs text-dark-500">{paymentUrl}</p>
             </div>
             <button
               type="button"
               onClick={handleCopyUrl}
-              className={`shrink-0 p-2.5 rounded-lg transition-colors ${
+              className={`shrink-0 rounded-lg p-2.5 transition-colors ${
                 copied
                   ? 'bg-success-500/20 text-success-400'
                   : 'bg-dark-800/70 text-dark-400 hover:bg-dark-700 hover:text-dark-200'
@@ -455,49 +542,48 @@ export default function TopUpModal({ method, onClose, initialAmountRubles }: Top
         </div>
       )}
     </div>
-  )
+  );
 
   // Render modal based on screen size - NO nested components!
   const modalContent = isMobileScreen ? (
     <>
       {/* Backdrop */}
-      <div
-        className="fixed inset-0 z-[9998] bg-black/70"
-        onClick={handleClose}
-      />
+      <div className="fixed inset-0 z-[9998] bg-black/70" onClick={handleClose} />
       {/* Bottom sheet */}
       <div
         data-modal-content
-        className="fixed inset-x-0 bottom-0 z-[9999] bg-dark-900 rounded-t-3xl max-h-[90vh] flex flex-col overflow-hidden"
-        style={{ paddingBottom: safeBottom ? `${safeBottom + 20}px` : 'max(20px, env(safe-area-inset-bottom))' }}
+        className="fixed inset-x-0 bottom-0 z-[9999] flex max-h-[90vh] flex-col overflow-hidden rounded-t-3xl bg-dark-900"
+        style={{
+          paddingBottom: safeBottom
+            ? `${safeBottom + 20}px`
+            : 'max(20px, env(safe-area-inset-bottom))',
+        }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Handle bar */}
-        <div className="flex justify-center pt-3 pb-1">
-          <div className="w-10 h-1 rounded-full bg-dark-600" />
+        <div className="flex justify-center pb-1 pt-3">
+          <div className="h-1 w-10 rounded-full bg-dark-600" />
         </div>
 
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-2">
           <div className="flex items-center gap-2">
             <WalletIcon />
-            <span className="font-bold text-dark-100 text-lg">{t('balance.topUp')}</span>
+            <span className="text-lg font-bold text-dark-100">{t('balance.topUp')}</span>
           </div>
           <button
             onClick={handleClose}
-            className="p-2 -mr-2 rounded-xl hover:bg-dark-800 text-dark-400 transition-colors"
+            className="-mr-2 rounded-xl p-2 text-dark-400 transition-colors hover:bg-dark-800"
           >
             <CloseIcon />
           </button>
         </div>
 
         {/* Divider */}
-        <div className="h-px bg-gradient-to-r from-transparent via-dark-700 to-transparent mx-5" />
+        <div className="mx-5 h-px bg-gradient-to-r from-transparent via-dark-700 to-transparent" />
 
         {/* Content */}
-        <div className="px-5 py-5 overflow-y-auto">
-          {contentJSX}
-        </div>
+        <div className="overflow-y-auto px-5 py-5">{contentJSX}</div>
       </div>
     </>
   ) : (
@@ -507,35 +593,33 @@ export default function TopUpModal({ method, onClose, initialAmountRubles }: Top
     >
       <div
         data-modal-content
-        className="w-full max-w-md bg-dark-900 rounded-3xl border border-dark-700/50 shadow-2xl overflow-hidden"
+        className="w-full max-w-md overflow-hidden rounded-3xl border border-dark-700/50 bg-dark-900 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-dark-800/80 to-dark-800/40 border-b border-dark-700/50">
+        <div className="flex items-center justify-between border-b border-dark-700/50 bg-gradient-to-r from-dark-800/80 to-dark-800/40 px-6 py-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-accent-500/10 flex items-center justify-center text-accent-400">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent-500/10 text-accent-400">
               <WalletIcon />
             </div>
-            <span className="font-bold text-dark-100 text-lg">{t('balance.topUp')}</span>
+            <span className="text-lg font-bold text-dark-100">{t('balance.topUp')}</span>
           </div>
           <button
             onClick={handleClose}
-            className="p-2 -mr-1 rounded-xl hover:bg-dark-700 text-dark-400 transition-colors"
+            className="-mr-1 rounded-xl p-2 text-dark-400 transition-colors hover:bg-dark-700"
           >
             <CloseIcon />
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-6">
-          {contentJSX}
-        </div>
+        <div className="p-6">{contentJSX}</div>
       </div>
     </div>
-  )
+  );
 
   if (typeof document !== 'undefined') {
-    return createPortal(modalContent, document.body)
+    return createPortal(modalContent, document.body);
   }
-  return modalContent
+  return modalContent;
 }
