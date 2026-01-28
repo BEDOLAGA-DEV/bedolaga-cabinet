@@ -597,6 +597,7 @@
     "starsPaymentSuccess": "Payment successful! Spin result sent to Telegram.",
     "starsPaymentSuccessCheckHistory": "Payment successful! Check history or Telegram for the result.",
     "starsPaymentFailed": "Payment failed. Please try again.",
+    "starsPaymentRedirected": "Telegram will open for payment. Refresh the page after payment.",
     "youWon": "You won",
     "noPrize": "No luck this time...",
     "noHistory": "No spin history yet",

@@ -522,6 +522,7 @@
     "processingPayment": "处理中...",
     "starsPaymentSuccess": "支付成功！抽奖结果已发送到Telegram。",
     "starsPaymentFailed": "支付失败。请重试。",
+    "starsPaymentRedirected": "将打开Telegram进行支付。支付后请刷新页面。",
     "noHistory": "暂无抽奖记录",
     "banner": {
       "title": "试试运气！",

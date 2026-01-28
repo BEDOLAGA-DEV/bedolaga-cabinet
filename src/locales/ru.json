@@ -620,6 +620,7 @@
     "starsPaymentSuccess": "Оплата прошла! Результат спина отправлен в Telegram.",
     "starsPaymentSuccessCheckHistory": "Оплата прошла! Проверьте историю или Telegram для результата.",
     "starsPaymentFailed": "Ошибка оплаты. Попробуйте еще раз.",
+    "starsPaymentRedirected": "Откроется Telegram для оплаты. После оплаты обновите страницу.",
     "youWon": "Вы выиграли",
     "noPrize": "В этот раз не повезло...",
     "noHistory": "История вращений пуста",
