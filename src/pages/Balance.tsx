@@ -1,10 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/auth';
 import { balanceApi } from '../api/balance';
 import TopUpModal from '../components/TopUpModal';
 import { useCurrency } from '../hooks/useCurrency';
+import { useToast } from '../components/Toast';
 import type { PaymentMethod, PaginatedResponse, Transaction } from '../types';
 
 export default function Balance() {
@@ -12,6 +14,10 @@ export default function Balance() {
   const { refreshUser } = useAuthStore();
   const queryClient = useQueryClient();
   const { formatAmount, currencySymbol } = useCurrency();
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const { showToast } = useToast();
+  const paymentHandledRef = useRef(false);
 
   // Fetch balance directly from API with no caching
   const { data: balanceData, refetch: refetchBalance } = useQuery({
@@ -26,6 +32,39 @@ export default function Balance() {
     refreshUser();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Handle payment return from payment gateway
+  useEffect(() => {
+    // Prevent duplicate handling in StrictMode
+    if (paymentHandledRef.current) return;
+
+    const paymentStatus = searchParams.get('payment') || searchParams.get('status');
+    const isSuccess =
+      paymentStatus === 'success' ||
+      paymentStatus === 'paid' ||
+      paymentStatus === 'completed' ||
+      searchParams.get('success') === 'true';
+
+    if (isSuccess) {
+      paymentHandledRef.current = true;
+
+      // Refetch balance and user data
+      refetchBalance();
+      refreshUser();
+      queryClient.invalidateQueries({ queryKey: ['transactions'] });
+
+      // Show success toast
+      showToast({
+        type: 'success',
+        title: t('balance.paymentSuccess.title'),
+        message: t('balance.paymentSuccess.message'),
+        duration: 6000,
+      });
+
+      // Clean URL from query params
+      navigate('/balance', { replace: true });
+    }
+  }, [searchParams, navigate, refetchBalance, refreshUser, queryClient, showToast, t]);
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod | null>(null);
   const [promocode, setPromocode] = useState('');
   const [promocodeLoading, setPromocodeLoading] = useState(false);
