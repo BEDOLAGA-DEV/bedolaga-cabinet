@@ -31,13 +31,18 @@ const getErrorMessage = (error: unknown): string => {
 // Helper to extract insufficient balance error details
 const getInsufficientBalanceError = (
   error: unknown,
-): { required: number; balance: number } | null => {
+): { required: number; balance: number; missingAmount?: number } | null => {
   if (error instanceof AxiosError) {
     const detail = error.response?.data?.detail;
-    if (typeof detail === 'object' && detail?.code === 'insufficient_balance') {
+    // Support both 'insufficient_balance' and 'insufficient_funds' codes
+    if (
+      typeof detail === 'object' &&
+      (detail?.code === 'insufficient_balance' || detail?.code === 'insufficient_funds')
+    ) {
       return {
-        required: detail.required || 0,
+        required: detail.required || detail.total_price || 0,
         balance: detail.balance || 0,
+        missingAmount: detail.missing_amount || detail.missingAmount || 0,
       };
     }
   }
@@ -2118,7 +2123,7 @@ export default function Subscription() {
 
                           <button
                             onClick={() => tariffPurchaseMutation.mutate()}
-                            disabled={tariffPurchaseMutation.isPending || !hasEnoughBalance}
+                            disabled={tariffPurchaseMutation.isPending}
                             className="btn-primary w-full py-3"
                           >
                             {tariffPurchaseMutation.isPending ? (
@@ -2133,11 +2138,25 @@ export default function Subscription() {
                             )}
                           </button>
 
-                          {tariffPurchaseMutation.isError && (
-                            <div className="mt-3 text-center text-sm text-error-400">
-                              {getErrorMessage(tariffPurchaseMutation.error)}
-                            </div>
-                          )}
+                          {tariffPurchaseMutation.isError &&
+                            !getInsufficientBalanceError(tariffPurchaseMutation.error) && (
+                              <div className="mt-3 text-center text-sm text-error-400">
+                                {getErrorMessage(tariffPurchaseMutation.error)}
+                              </div>
+                            )}
+                          {tariffPurchaseMutation.isError &&
+                            getInsufficientBalanceError(tariffPurchaseMutation.error) && (
+                              <div className="mt-3">
+                                <InsufficientBalancePrompt
+                                  missingAmountKopeks={
+                                    getInsufficientBalanceError(tariffPurchaseMutation.error)
+                                      ?.missingAmount ||
+                                    dailyPrice - (purchaseOptions?.balance_kopeks || 0)
+                                  }
+                                  compact
+                                />
+                              </div>
+                            )}
                         </div>
                       );
                     })()}
@@ -2540,17 +2559,9 @@ export default function Subscription() {
                                 </div>
                               </div>
 
-                              {purchaseOptions && !hasEnoughBalance && (
-                                <InsufficientBalancePrompt
-                                  missingAmountKopeks={totalPrice - purchaseOptions.balance_kopeks}
-                                  compact
-                                  className="mb-4"
-                                />
-                              )}
-
                               <button
                                 onClick={() => tariffPurchaseMutation.mutate()}
-                                disabled={tariffPurchaseMutation.isPending || !hasEnoughBalance}
+                                disabled={tariffPurchaseMutation.isPending}
                                 className="btn-primary w-full py-3"
                               >
                                 {tariffPurchaseMutation.isPending ? (
@@ -2566,11 +2577,24 @@ export default function Subscription() {
                           );
                         })()}
 
-                        {tariffPurchaseMutation.isError && (
-                          <div className="mt-3 text-center text-sm text-error-400">
-                            {getErrorMessage(tariffPurchaseMutation.error)}
-                          </div>
-                        )}
+                        {tariffPurchaseMutation.isError &&
+                          !getInsufficientBalanceError(tariffPurchaseMutation.error) && (
+                            <div className="mt-3 text-center text-sm text-error-400">
+                              {getErrorMessage(tariffPurchaseMutation.error)}
+                            </div>
+                          )}
+                        {tariffPurchaseMutation.isError &&
+                          getInsufficientBalanceError(tariffPurchaseMutation.error) && (
+                            <div className="mt-3">
+                              <InsufficientBalancePrompt
+                                missingAmountKopeks={
+                                  getInsufficientBalanceError(tariffPurchaseMutation.error)
+                                    ?.missingAmount || 0
+                                }
+                                compact
+                              />
+                            </div>
+                          )}
                       </div>
                     )}
                   </>
