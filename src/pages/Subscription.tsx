@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
@@ -15,6 +15,7 @@ import type {
 import ConnectionModal from '../components/ConnectionModal';
 import InsufficientBalancePrompt from '../components/InsufficientBalancePrompt';
 import { useCurrency } from '../hooks/useCurrency';
+import { useCloseOnSuccessNotification } from '../store/successNotification';
 import i18n from '../i18n';
 
 // Helper to extract error message from axios/api errors
@@ -279,6 +280,21 @@ export default function Subscription() {
 
   // Tariff switch preview
   const [switchTariffId, setSwitchTariffId] = useState<number | null>(null);
+
+  // Auto-close all modals/forms when success notification appears (e.g., subscription purchased via WebSocket)
+  const handleCloseAllModals = useCallback(() => {
+    setShowConnectionModal(false);
+    setShowPurchaseForm(false);
+    setShowTariffPurchase(false);
+    setShowDeviceTopup(false);
+    setShowTrafficTopup(false);
+    setShowServerManagement(false);
+    setSwitchTariffId(null);
+    setSelectedTariff(null);
+    setSelectedTariffPeriod(null);
+  }, []);
+  useCloseOnSuccessNotification(handleCloseAllModals);
+
   const { data: switchPreview, isLoading: switchPreviewLoading } = useQuery({
     queryKey: ['tariff-switch-preview', switchTariffId],
     queryFn: () => subscriptionApi.previewTariffSwitch(switchTariffId!),

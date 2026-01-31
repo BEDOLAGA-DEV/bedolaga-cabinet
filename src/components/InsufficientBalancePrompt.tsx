@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { balanceApi } from '../api/balance';
 import { useCurrency } from '../hooks/useCurrency';
+import { useCloseOnSuccessNotification } from '../store/successNotification';
 import TopUpModal from './TopUpModal';
 import type { PaymentMethod } from '../types';
 
@@ -27,6 +28,13 @@ export default function InsufficientBalancePrompt({
   const { formatAmount, currencySymbol } = useCurrency();
   const [showMethodSelect, setShowMethodSelect] = useState(false);
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod | null>(null);
+
+  // Auto-close modals when success notification appears
+  const handleCloseAll = useCallback(() => {
+    setShowMethodSelect(false);
+    setSelectedMethod(null);
+  }, []);
+  useCloseOnSuccessNotification(handleCloseAll);
 
   const { data: paymentMethods } = useQuery({
     queryKey: ['payment-methods'],

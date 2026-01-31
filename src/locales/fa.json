@@ -62,6 +62,79 @@
     "newUserReply": "کاربر در تیکت پاسخ داد: {{title}}",
     "newUserReplyTitle": "پاسخ کاربر"
   },
+  "wsNotifications": {
+    "balance": {
+      "topupTitle": "موجودی شارژ شد",
+      "topupMessage": "موجودی شما {{amount}} {{currency}} شارژ شد",
+      "changeTitle": "موجودی به‌روز شد",
+      "changeMessage": "موجودی شما {{amount}} {{currency}} تغییر کرد"
+    },
+    "subscription": {
+      "activatedTitle": "اشتراک فعال شد",
+      "activatedMessage": "اشتراک شما اکنون فعال است!",
+      "activatedWithTariff": "اشتراک «{{tariff}}» شما اکنون فعال است!",
+      "renewedTitle": "اشتراک تمدید شد",
+      "renewedMessage": "اشتراک شما تمدید شد!",
+      "renewedWithAmount": "اشتراک شما با {{amount}} {{currency}} تمدید شد",
+      "expiringTitle": "اشتراک به زودی منقضی می‌شود",
+      "expiringMessage": "اشتراک شما {{days}} روز دیگر منقضی می‌شود",
+      "expiredTitle": "اشتراک منقضی شد",
+      "expiredMessage": "اشتراک شما منقضی شده است. برای ادامه استفاده تمدید کنید.",
+      "dailyDebitTitle": "کسر روزانه",
+      "dailyDebitMessage": "هزینه روزانه اشتراک: {{amount}} {{currency}}",
+      "trafficResetTitle": "ترافیک بازنشانی شد",
+      "trafficResetMessage": "محدودیت ترافیک شما بازنشانی شد"
+    },
+    "autopay": {
+      "successTitle": "تمدید خودکار موفق",
+      "successMessage": "اشتراک شما به صورت خودکار با {{amount}} {{currency}} تمدید شد",
+      "failedTitle": "خطا در تمدید خودکار",
+      "failedMessage": "تمدید خودکار اشتراک شما ناموفق بود",
+      "insufficientTitle": "موجودی ناکافی",
+      "insufficientMessage": "برای تمدید {{required}} {{currency}} لازم است، موجودی فعلی {{balance}} {{currency}}"
+    },
+    "account": {
+      "bannedTitle": "حساب مسدود شد",
+      "bannedMessage": "حساب شما مسدود شده است",
+      "unbannedTitle": "حساب رفع مسدودی شد",
+      "unbannedMessage": "حساب شما رفع مسدودی شد",
+      "warningTitle": "هشدار",
+      "warningMessage": "شما یک هشدار دریافت کردید"
+    },
+    "referral": {
+      "bonusTitle": "پاداش معرفی",
+      "bonusMessage": "شما {{amount}} {{currency}} پاداش معرفی دریافت کردید!",
+      "bonusWithName": "شما از {{name}} پاداش {{amount}} {{currency}} دریافت کردید!",
+      "registeredTitle": "معرفی جدید",
+      "registeredMessage": "کسی با لینک معرفی شما ثبت نام کرد!",
+      "registeredWithName": "{{name}} با لینک معرفی شما ثبت نام کرد!"
+    },
+    "payment": {
+      "receivedTitle": "پرداخت دریافت شد",
+      "receivedMessage": "پرداخت {{amount}} {{currency}} دریافت شد"
+    }
+  },
+  "successNotification": {
+    "balanceTopup": {
+      "title": "موجودی شارژ شد!"
+    },
+    "subscriptionActivated": {
+      "title": "اشتراک فعال شد!"
+    },
+    "subscriptionRenewed": {
+      "title": "اشتراک تمدید شد!"
+    },
+    "subscriptionPurchased": {
+      "title": "اشتراک خریداری شد!"
+    },
+    "amount": "مبلغ",
+    "price": "قیمت",
+    "newBalance": "موجودی جدید",
+    "tariff": "تعرفه",
+    "validUntil": "معتبر تا",
+    "goToSubscription": "رفتن به اشتراک",
+    "goToBalance": "رفتن به موجودی"
+  },
   "auth": {
     "login": "ورود",
     "register": "ثبت نام",

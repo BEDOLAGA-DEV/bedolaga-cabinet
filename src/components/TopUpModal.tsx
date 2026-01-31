@@ -6,6 +6,7 @@ import { balanceApi } from '../api/balance';
 import { useCurrency } from '../hooks/useCurrency';
 import { useTelegramWebApp } from '../hooks/useTelegramWebApp';
 import { checkRateLimit, getRateLimitResetTime, RATE_LIMIT_KEYS } from '../utils/rateLimit';
+import { useCloseOnSuccessNotification } from '../store/successNotification';
 import type { PaymentMethod } from '../types';
 import BentoCard from './ui/BentoCard';
 
@@ -143,6 +144,9 @@ export default function TopUpModal({ method, onClose, initialAmountRubles }: Top
   const handleClose = useCallback(() => {
     onClose();
   }, [onClose]);
+
+  // Auto-close when success notification appears (e.g., balance topped up via WebSocket)
+  useCloseOnSuccessNotification(handleClose);
 
   // Keyboard: Escape to close (PC)
   useEffect(() => {

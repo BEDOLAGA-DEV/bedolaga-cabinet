@@ -79,7 +79,7 @@ CABINET_PORT=3020
 docker compose up -d --build
 ```
 
-Приложение будет доступно на `http://localhost:3000`
+Приложение будет доступно на `http://localhost:3020`
 
 ## Настройка backend
 
@@ -93,7 +93,7 @@ CABINET_ENABLED=true
 CABINET_JWT_SECRET=your_random_secret_key_here
 
 # Разрешенные origins для CORS
-CABINET_ALLOWED_ORIGINS=http://localhost:3000,https://cabinet.yourdomain.com
+CABINET_ALLOWED_ORIGINS=http://localhost:3020,https://cabinet.yourdomain.com
 ```
 
 После изменений перезапустите бота.
@@ -134,6 +134,21 @@ cabinet.yourdomain.com {
         uri strip_prefix /api
         reverse_proxy backend_bot:8080
     }
+    @websockets {
+        header_regexp Connection *Upgrade*
+        header        Upgrade websocket
+    }
+
+    # WebSocket соединения
+    handle /cabinet/ws {
+        uri strip_prefix /api
+        reverse_proxy backend_bot:8080 {
+            transport http {
+                read_timeout 0
+                write_timeout 0
+            }
+        }
+    }
 
     # Статические файлы
     handle {
@@ -141,6 +156,7 @@ cabinet.yourdomain.com {
         file_server
     }
 }
+
 ```
 
 docker-compose.yml для Caddy:
@@ -283,7 +299,7 @@ services:
     restart: unless-stopped
     # Можно открыть порт для прямого доступа (для тестирования)
     # ports:
-    #   - "3000:80"
+    #   - "3020:80"
     networks:
       - web
 
@@ -309,7 +325,7 @@ networks:
 
 | Переменная     | Описание        | По умолчанию |
 | -------------- | --------------- | ------------ |
-| `CABINET_PORT` | Порт контейнера | `3000`       |
+| `CABINET_PORT` | Порт контейнера | `3020`       |
 
 ## Структура проекта
 

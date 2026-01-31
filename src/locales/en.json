@@ -68,6 +68,79 @@
     "newUserReply": "User replied in ticket: {{title}}",
     "newUserReplyTitle": "User Reply"
   },
+  "wsNotifications": {
+    "balance": {
+      "topupTitle": "Balance topped up",
+      "topupMessage": "Your balance has been topped up by {{amount}} {{currency}}",
+      "changeTitle": "Balance updated",
+      "changeMessage": "Your balance has changed by {{amount}} {{currency}}"
+    },
+    "subscription": {
+      "activatedTitle": "Subscription activated",
+      "activatedMessage": "Your subscription is now active!",
+      "activatedWithTariff": "Your subscription \"{{tariff}}\" is now active!",
+      "renewedTitle": "Subscription renewed",
+      "renewedMessage": "Your subscription has been renewed!",
+      "renewedWithAmount": "Your subscription has been renewed for {{amount}} {{currency}}",
+      "expiringTitle": "Subscription expiring soon",
+      "expiringMessage": "Your subscription expires in {{days}} days",
+      "expiredTitle": "Subscription expired",
+      "expiredMessage": "Your subscription has expired. Renew to continue using the service.",
+      "dailyDebitTitle": "Daily charge",
+      "dailyDebitMessage": "Daily subscription fee: {{amount}} {{currency}}",
+      "trafficResetTitle": "Traffic reset",
+      "trafficResetMessage": "Your traffic limit has been reset"
+    },
+    "autopay": {
+      "successTitle": "Auto-renewal successful",
+      "successMessage": "Your subscription was auto-renewed for {{amount}} {{currency}}",
+      "failedTitle": "Auto-renewal failed",
+      "failedMessage": "Failed to auto-renew your subscription",
+      "insufficientTitle": "Insufficient funds",
+      "insufficientMessage": "Need {{required}} {{currency}} for renewal, but balance is {{balance}} {{currency}}"
+    },
+    "account": {
+      "bannedTitle": "Account blocked",
+      "bannedMessage": "Your account has been blocked",
+      "unbannedTitle": "Account unblocked",
+      "unbannedMessage": "Your account has been unblocked",
+      "warningTitle": "Warning",
+      "warningMessage": "You have received a warning"
+    },
+    "referral": {
+      "bonusTitle": "Referral bonus",
+      "bonusMessage": "You received {{amount}} {{currency}} referral bonus!",
+      "bonusWithName": "You received {{amount}} {{currency}} bonus from {{name}}!",
+      "registeredTitle": "New referral",
+      "registeredMessage": "Someone joined using your referral link!",
+      "registeredWithName": "{{name}} joined using your referral link!"
+    },
+    "payment": {
+      "receivedTitle": "Payment received",
+      "receivedMessage": "Payment of {{amount}} {{currency}} received"
+    }
+  },
+  "successNotification": {
+    "balanceTopup": {
+      "title": "Balance topped up!"
+    },
+    "subscriptionActivated": {
+      "title": "Subscription activated!"
+    },
+    "subscriptionRenewed": {
+      "title": "Subscription renewed!"
+    },
+    "subscriptionPurchased": {
+      "title": "Subscription purchased!"
+    },
+    "amount": "Amount",
+    "price": "Price",
+    "newBalance": "New balance",
+    "tariff": "Tariff",
+    "validUntil": "Valid until",
+    "goToSubscription": "Go to Subscription",
+    "goToBalance": "Go to Balance"
+  },
   "auth": {
     "login": "Login",
     "register": "Register",

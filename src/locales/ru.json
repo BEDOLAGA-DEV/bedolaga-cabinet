@@ -71,6 +71,79 @@
     "newUserReply": "Ответ пользователя в тикете: {{title}}",
     "newUserReplyTitle": "Ответ пользователя"
   },
+  "wsNotifications": {
+    "balance": {
+      "topupTitle": "Баланс пополнен",
+      "topupMessage": "Ваш баланс пополнен на {{amount}} {{currency}}",
+      "changeTitle": "Баланс изменён",
+      "changeMessage": "Ваш баланс изменился на {{amount}} {{currency}}"
+    },
+    "subscription": {
+      "activatedTitle": "Подписка активирована",
+      "activatedMessage": "Ваша подписка теперь активна!",
+      "activatedWithTariff": "Ваша подписка «{{tariff}}» теперь активна!",
+      "renewedTitle": "Подписка продлена",
+      "renewedMessage": "Ваша подписка была продлена!",
+      "renewedWithAmount": "Ваша подписка продлена за {{amount}} {{currency}}",
+      "expiringTitle": "Подписка скоро истекает",
+      "expiringMessage": "Ваша подписка истекает через {{days}} дн.",
+      "expiredTitle": "Подписка истекла",
+      "expiredMessage": "Ваша подписка истекла. Продлите для продолжения использования.",
+      "dailyDebitTitle": "Ежедневное списание",
+      "dailyDebitMessage": "Списание за подписку: {{amount}} {{currency}}",
+      "trafficResetTitle": "Трафик сброшен",
+      "trafficResetMessage": "Ваш лимит трафика был сброшен"
+    },
+    "autopay": {
+      "successTitle": "Автопродление успешно",
+      "successMessage": "Подписка автоматически продлена за {{amount}} {{currency}}",
+      "failedTitle": "Ошибка автопродления",
+      "failedMessage": "Не удалось автоматически продлить подписку",
+      "insufficientTitle": "Недостаточно средств",
+      "insufficientMessage": "Для продления нужно {{required}} {{currency}}, на балансе {{balance}} {{currency}}"
+    },
+    "account": {
+      "bannedTitle": "Аккаунт заблокирован",
+      "bannedMessage": "Ваш аккаунт был заблокирован",
+      "unbannedTitle": "Аккаунт разблокирован",
+      "unbannedMessage": "Ваш аккаунт был разблокирован",
+      "warningTitle": "Предупреждение",
+      "warningMessage": "Вы получили предупреждение"
+    },
+    "referral": {
+      "bonusTitle": "Реферальный бонус",
+      "bonusMessage": "Вы получили реферальный бонус {{amount}} {{currency}}!",
+      "bonusWithName": "Вы получили бонус {{amount}} {{currency}} от {{name}}!",
+      "registeredTitle": "Новый реферал",
+      "registeredMessage": "Кто-то зарегистрировался по вашей ссылке!",
+      "registeredWithName": "{{name}} зарегистрировался по вашей ссылке!"
+    },
+    "payment": {
+      "receivedTitle": "Платёж получен",
+      "receivedMessage": "Получен платёж на сумму {{amount}} {{currency}}"
+    }
+  },
+  "successNotification": {
+    "balanceTopup": {
+      "title": "Баланс пополнен!"
+    },
+    "subscriptionActivated": {
+      "title": "Подписка активирована!"
+    },
+    "subscriptionRenewed": {
+      "title": "Подписка продлена!"
+    },
+    "subscriptionPurchased": {
+      "title": "Подписка оплачена!"
+    },
+    "amount": "Сумма",
+    "price": "Стоимость",
+    "newBalance": "Новый баланс",
+    "tariff": "Тариф",
+    "validUntil": "Действует до",
+    "goToSubscription": "Перейти к подписке",
+    "goToBalance": "Перейти к балансу"
+  },
   "auth": {
     "login": "Вход",
     "register": "Регистрация",

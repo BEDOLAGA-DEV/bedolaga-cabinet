@@ -5,11 +5,37 @@ const isDev = import.meta.env.DEV;
 
 export interface WSMessage {
   type: string;
+  // Ticket events
   ticket_id?: number;
-  message?: string;
   title?: string;
+  // Common
+  message?: string;
   user_id?: number;
   is_admin?: boolean;
+  // Balance events
+  amount_kopeks?: number;
+  amount_rubles?: number;
+  new_balance_kopeks?: number;
+  new_balance_rubles?: number;
+  description?: string;
+  // Subscription events
+  expires_at?: string;
+  new_expires_at?: string;
+  tariff_name?: string;
+  days_left?: number;
+  // Autopay events
+  required_kopeks?: number;
+  required_rubles?: number;
+  balance_kopeks?: number;
+  balance_rubles?: number;
+  reason?: string;
+  // Account events (ban/warning)
+  // Referral events
+  bonus_kopeks?: number;
+  bonus_rubles?: number;
+  referral_name?: string;
+  // Payment events
+  payment_method?: string;
 }
 
 interface UseWebSocketOptions {

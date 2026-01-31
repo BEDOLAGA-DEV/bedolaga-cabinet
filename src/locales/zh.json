@@ -62,6 +62,79 @@
     "newUserReply": "用户回复了工单：{{title}}",
     "newUserReplyTitle": "用户回复"
   },
+  "wsNotifications": {
+    "balance": {
+      "topupTitle": "余额已充值",
+      "topupMessage": "您的余额已充值 {{amount}} {{currency}}",
+      "changeTitle": "余额已更新",
+      "changeMessage": "您的余额已变动 {{amount}} {{currency}}"
+    },
+    "subscription": {
+      "activatedTitle": "订阅已激活",
+      "activatedMessage": "您的订阅现已激活！",
+      "activatedWithTariff": "您的订阅「{{tariff}}」现已激活！",
+      "renewedTitle": "订阅已续期",
+      "renewedMessage": "您的订阅已续期！",
+      "renewedWithAmount": "您的订阅已续期，费用 {{amount}} {{currency}}",
+      "expiringTitle": "订阅即将到期",
+      "expiringMessage": "您的订阅将在 {{days}} 天后到期",
+      "expiredTitle": "订阅已过期",
+      "expiredMessage": "您的订阅已过期。请续期以继续使用服务。",
+      "dailyDebitTitle": "每日扣费",
+      "dailyDebitMessage": "每日订阅费：{{amount}} {{currency}}",
+      "trafficResetTitle": "流量已重置",
+      "trafficResetMessage": "您的流量限制已重置"
+    },
+    "autopay": {
+      "successTitle": "自动续期成功",
+      "successMessage": "您的订阅已自动续期，费用 {{amount}} {{currency}}",
+      "failedTitle": "自动续期失败",
+      "failedMessage": "自动续期订阅失败",
+      "insufficientTitle": "余额不足",
+      "insufficientMessage": "续期需要 {{required}} {{currency}}，当前余额 {{balance}} {{currency}}"
+    },
+    "account": {
+      "bannedTitle": "账户已封禁",
+      "bannedMessage": "您的账户已被封禁",
+      "unbannedTitle": "账户已解封",
+      "unbannedMessage": "您的账户已解封",
+      "warningTitle": "警告",
+      "warningMessage": "您收到了一条警告"
+    },
+    "referral": {
+      "bonusTitle": "推荐奖励",
+      "bonusMessage": "您获得了 {{amount}} {{currency}} 推荐奖励！",
+      "bonusWithName": "您从 {{name}} 获得了 {{amount}} {{currency}} 奖励！",
+      "registeredTitle": "新推荐用户",
+      "registeredMessage": "有人通过您的推荐链接注册了！",
+      "registeredWithName": "{{name}} 通过您的推荐链接注册了！"
+    },
+    "payment": {
+      "receivedTitle": "已收到付款",
+      "receivedMessage": "收到付款 {{amount}} {{currency}}"
+    }
+  },
+  "successNotification": {
+    "balanceTopup": {
+      "title": "余额已充值！"
+    },
+    "subscriptionActivated": {
+      "title": "订阅已激活！"
+    },
+    "subscriptionRenewed": {
+      "title": "订阅已续期！"
+    },
+    "subscriptionPurchased": {
+      "title": "订阅已购买！"
+    },
+    "amount": "金额",
+    "price": "价格",
+    "newBalance": "新余额",
+    "tariff": "套餐",
+    "validUntil": "有效期至",
+    "goToSubscription": "查看订阅",
+    "goToBalance": "查看余额"
+  },
   "auth": {
     "login": "登录",
     "register": "注册",
