@@ -756,6 +756,9 @@
       "filter": "فیلتر",
       "message": "پیام",
       "unknownAdmin": "نامعلوم",
+      "detail": "جزئیات پخش",
+      "createdBy": "ایجاد شده توسط",
+      "notFound": "پخش یافت نشد",
       "prev": "قبلی",
       "next": "بعدی",
       "status": {

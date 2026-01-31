@@ -808,6 +808,9 @@
       "filter": "筛选",
       "message": "消息",
       "unknownAdmin": "未知",
+      "detail": "群发详情",
+      "createdBy": "创建者",
+      "notFound": "未找到群发",
       "prev": "上一页",
       "next": "下一页",
       "status": {

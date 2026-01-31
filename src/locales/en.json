@@ -956,6 +956,9 @@
       "filter": "Filter",
       "message": "Message",
       "unknownAdmin": "Unknown",
+      "detail": "Broadcast",
+      "createdBy": "Created by",
+      "notFound": "Broadcast not found",
       "prev": "Previous",
       "next": "Next",
       "status": {

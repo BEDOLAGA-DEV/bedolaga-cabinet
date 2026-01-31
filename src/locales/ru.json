@@ -973,6 +973,9 @@
       "filter": "Фильтр",
       "message": "Сообщение",
       "unknownAdmin": "Неизвестный админ",
+      "detail": "Рассылка",
+      "createdBy": "Создал",
+      "notFound": "Рассылка не найдена",
       "prev": "Назад",
       "next": "Далее",
       "status": {
