@@ -134,27 +134,26 @@ function getAccentColorFromCSS(): string {
 function generateColorStops(baseColor: string): string[] {
   const [r, g, b] = hexToRgb(baseColor);
 
-  // Create variations: darker, base, lighter (all very dark for background)
-  const darkerR = Math.max(0, Math.round(r * 255 * 0.15));
-  const darkerG = Math.max(0, Math.round(g * 255 * 0.15));
-  const darkerB = Math.max(0, Math.round(b * 255 * 0.15));
+  // Create vibrant color stops for aurora effect
+  // Color 1: Very dark background
+  const color1 = '#0a0a0a';
 
-  const baseR = Math.round(r * 255 * 0.25);
-  const baseG = Math.round(g * 255 * 0.25);
-  const baseB = Math.round(b * 255 * 0.25);
+  // Color 2: Accent at ~50% intensity (main aurora color)
+  const midR = Math.round(r * 255 * 0.5);
+  const midG = Math.round(g * 255 * 0.5);
+  const midB = Math.round(b * 255 * 0.5);
+  const color2 = `#${midR.toString(16).padStart(2, '0')}${midG.toString(16).padStart(2, '0')}${midB.toString(16).padStart(2, '0')}`;
 
-  const lighterR = Math.round(r * 255 * 0.35);
-  const lighterG = Math.round(g * 255 * 0.35);
-  const lighterB = Math.round(b * 255 * 0.35);
+  // Color 3: Accent at full intensity (bright aurora edge)
+  const brightR = Math.round(r * 255);
+  const brightG = Math.round(g * 255);
+  const brightB = Math.round(b * 255);
+  const color3 = `#${brightR.toString(16).padStart(2, '0')}${brightG.toString(16).padStart(2, '0')}${brightB.toString(16).padStart(2, '0')}`;
 
-  return [
-    `#${darkerR.toString(16).padStart(2, '0')}${darkerG.toString(16).padStart(2, '0')}${darkerB.toString(16).padStart(2, '0')}`,
-    `#${baseR.toString(16).padStart(2, '0')}${baseG.toString(16).padStart(2, '0')}${baseB.toString(16).padStart(2, '0')}`,
-    `#${lighterR.toString(16).padStart(2, '0')}${lighterG.toString(16).padStart(2, '0')}${lighterB.toString(16).padStart(2, '0')}`,
-  ];
+  return [color1, color2, color3];
 }
 
-export function Aurora({ amplitude = 1.0, blend = 0.5, speed = 0.5 }: AuroraProps) {
+export function Aurora({ amplitude = 1.0, blend = 1.0, speed = 1.0 }: AuroraProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const animationFrameRef = useRef<number>(0);
   const rendererRef = useRef<Renderer | null>(null);
