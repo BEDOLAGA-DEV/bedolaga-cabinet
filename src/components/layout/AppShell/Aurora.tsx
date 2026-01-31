@@ -1,7 +1,8 @@
-import { useEffect, useRef, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useEffect, useRef } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Renderer, Program, Mesh, Color, Triangle } from 'ogl';
 import { brandingApi } from '@/api/branding';
+import { ThemeSettings, DEFAULT_THEME_COLORS } from '@/types/theme';
 
 const VERT = /* glsl */ `#version 300 es
   in vec2 position;
@@ -77,7 +78,6 @@ const FRAG = /* glsl */ `#version 300 es
   void main() {
     vec2 uv = gl_FragCoord.xy / uResolution;
 
-    // Build color stops with fixed positions - optimized for visual appeal
     ColorStop cyclingColors[3];
     cyclingColors[0] = ColorStop(uColorStops[0], 0.0);
     cyclingColors[1] = ColorStop(uColorStops[1], 0.5);
@@ -91,13 +91,6 @@ const FRAG = /* glsl */ `#version 300 es
     fragColor = vec4(rampColor, uBlend);
   }
 `;
-
-interface AuroraProps {
-  colorStops?: string[];
-  amplitude?: number;
-  blend?: number;
-  speed?: number;
-}
 
 function hexToRgb(hex: string): [number, number, number] {
   hex = hex.replace('#', '');
@@ -113,51 +106,34 @@ function hexToRgb(hex: string): [number, number, number] {
   return [r, g, b];
 }
 
-function getAccentColorFromCSS(): string {
-  // Get accent-500 RGB value from CSS variable
-  const root = document.documentElement;
-  const accentRgb = getComputedStyle(root).getPropertyValue('--color-accent-500').trim();
+function generateColorStops(accent: string, background: string): string[] {
+  const [ar, ag, ab] = hexToRgb(accent);
 
-  if (accentRgb) {
-    // Convert "r g b" format to hex
-    const parts = accentRgb.split(' ').map(Number);
-    if (parts.length === 3 && parts.every((n) => !isNaN(n))) {
-      const hex = parts.map((n) => Math.round(n).toString(16).padStart(2, '0')).join('');
-      return `#${hex}`;
-    }
-  }
+  // Color 1: Dark background
+  const color1 = background;
 
-  // Default accent color fallback
-  return '#a78bfa';
-}
-
-function generateColorStops(baseColor: string): string[] {
-  const [r, g, b] = hexToRgb(baseColor);
-
-  // Create vibrant color stops for aurora effect
-  // Color 1: Very dark background
-  const color1 = '#0a0a0a';
-
-  // Color 2: Accent at ~50% intensity (main aurora color)
-  const midR = Math.round(r * 255 * 0.5);
-  const midG = Math.round(g * 255 * 0.5);
-  const midB = Math.round(b * 255 * 0.5);
+  // Color 2: Accent at 40% intensity
+  const midR = Math.round(ar * 255 * 0.4);
+  const midG = Math.round(ag * 255 * 0.4);
+  const midB = Math.round(ab * 255 * 0.4);
   const color2 = `#${midR.toString(16).padStart(2, '0')}${midG.toString(16).padStart(2, '0')}${midB.toString(16).padStart(2, '0')}`;
 
-  // Color 3: Accent at full intensity (bright aurora edge)
-  const brightR = Math.round(r * 255);
-  const brightG = Math.round(g * 255);
-  const brightB = Math.round(b * 255);
+  // Color 3: Accent at 70% intensity
+  const brightR = Math.round(ar * 255 * 0.7);
+  const brightG = Math.round(ag * 255 * 0.7);
+  const brightB = Math.round(ab * 255 * 0.7);
   const color3 = `#${brightR.toString(16).padStart(2, '0')}${brightG.toString(16).padStart(2, '0')}${brightB.toString(16).padStart(2, '0')}`;
 
   return [color1, color2, color3];
 }
 
-export function Aurora({ amplitude = 1.0, blend = 1.0, speed = 1.0 }: AuroraProps) {
+export function Aurora() {
   const containerRef = useRef<HTMLDivElement>(null);
   const animationFrameRef = useRef<number>(0);
   const rendererRef = useRef<Renderer | null>(null);
   const programRef = useRef<Program | null>(null);
+
+  const queryClient = useQueryClient();
 
   // Fetch animation setting
   const { data: animationSetting } = useQuery({
@@ -168,12 +144,9 @@ export function Aurora({ amplitude = 1.0, blend = 1.0, speed = 1.0 }: AuroraProp
 
   const isEnabled = animationSetting?.enabled ?? false;
 
-  // Get color stops based on theme
-  const colorStops = useMemo(() => {
-    if (typeof window === 'undefined') return ['#0a0a0a', '#1a1a2e', '#0a0a0a'];
-    const accent = getAccentColorFromCSS();
-    return generateColorStops(accent);
-  }, []);
+  // Get theme colors from cache (already fetched by ThemeColorsProvider)
+  const themeColors =
+    queryClient.getQueryData<ThemeSettings>(['theme-colors']) || DEFAULT_THEME_COLORS;
 
   useEffect(() => {
     if (!isEnabled || !containerRef.current) return;
@@ -195,6 +168,7 @@ export function Aurora({ amplitude = 1.0, blend = 1.0, speed = 1.0 }: AuroraProp
 
     const geometry = new Triangle(gl);
 
+    const colorStops = generateColorStops(themeColors.accent, themeColors.darkBackground);
     const colorStopsArray = colorStops
       .map((hex) => {
         const c = new Color(hex);
@@ -207,10 +181,10 @@ export function Aurora({ amplitude = 1.0, blend = 1.0, speed = 1.0 }: AuroraProp
       fragment: FRAG,
       uniforms: {
         uTime: { value: 0 },
-        uAmplitude: { value: amplitude },
+        uAmplitude: { value: 1.0 },
         uColorStops: { value: colorStopsArray },
         uResolution: { value: [container.offsetWidth, container.offsetHeight] },
-        uBlend: { value: blend },
+        uBlend: { value: 1.0 },
       },
     });
     programRef.current = program;
@@ -229,8 +203,9 @@ export function Aurora({ amplitude = 1.0, blend = 1.0, speed = 1.0 }: AuroraProp
     resize();
 
     let lastTime = 0;
-    const targetFPS = 30; // Limit to 30fps for performance
+    const targetFPS = 30;
     const frameInterval = 1000 / targetFPS;
+    const speed = 0.3; // Slow and smooth
 
     function animate(currentTime: number) {
       animationFrameRef.current = requestAnimationFrame(animate);
@@ -256,17 +231,33 @@ export function Aurora({ amplitude = 1.0, blend = 1.0, speed = 1.0 }: AuroraProp
       rendererRef.current = null;
       programRef.current = null;
     };
-  }, [isEnabled, colorStops, amplitude, blend, speed]);
+  }, [isEnabled, themeColors.accent, themeColors.darkBackground]);
 
   if (!isEnabled) {
     return null;
   }
 
+  // Blur overlay color from accent (very subtle)
+  const [r, g, b] = hexToRgb(themeColors.accent);
+  const blurColor = `rgba(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)}, 0.03)`;
+
   return (
-    <div
-      ref={containerRef}
-      className="pointer-events-none fixed inset-0 z-0"
-      style={{ width: '100%', height: '100%' }}
-    />
+    <>
+      {/* WebGL Aurora canvas */}
+      <div
+        ref={containerRef}
+        className="pointer-events-none fixed inset-0 z-0"
+        style={{ width: '100%', height: '100%' }}
+      />
+      {/* Blur overlay */}
+      <div
+        className="pointer-events-none fixed inset-0 z-0"
+        style={{
+          backdropFilter: 'blur(80px)',
+          WebkitBackdropFilter: 'blur(80px)',
+          backgroundColor: blurColor,
+        }}
+      />
+    </>
   );
 }
