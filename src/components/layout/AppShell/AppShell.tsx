@@ -28,6 +28,7 @@ import TicketNotificationBell from '@/components/TicketNotificationBell';
 
 import { MobileBottomNav } from './MobileBottomNav';
 import { AppHeader } from './AppHeader';
+import { MovingGradient } from './MovingGradient';
 
 import { slideUp, slideUpTransition } from '@/components/motion/transitions';
 
@@ -360,7 +361,10 @@ export function AppShell({ children }: AppShellProps) {
     : 64;
 
   return (
-    <div className="min-h-screen bg-dark-950">
+    <div className="min-h-screen">
+      {/* Animated background */}
+      <MovingGradient />
+
       {/* Global components */}
       <WebSocketNotifications />
       <SuccessNotificationModal />
