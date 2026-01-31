@@ -1,7 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
 import {
   adminRemnawaveApi,
   NodeInfo,
@@ -9,6 +8,7 @@ import {
   SystemStatsResponse,
   AutoSyncStatus,
 } from '../api/adminRemnawave';
+import { AdminBackButton } from '../components/admin';
 
 // ============ Icons ============
 
@@ -144,18 +144,6 @@ const ArrowPathIcon = ({ className = 'w-4 h-4' }: { className?: string }) => (
   </svg>
 );
 
-const ChevronLeftIcon = () => (
-  <svg
-    className="h-5 w-5 text-dark-400"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={2}
-  >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-  </svg>
-);
-
 // ============ Helpers ============
 
 const formatBytes = (bytes: number): string => {
@@ -232,11 +220,11 @@ interface StatCardProps {
 function StatCard({ label, value, icon, color = 'accent', subValue }: StatCardProps) {
   const colorClasses: Record<string, string> = {
     accent: 'bg-accent-500/20 text-accent-400',
-    green: 'bg-emerald-500/20 text-emerald-400',
-    blue: 'bg-blue-500/20 text-blue-400',
-    orange: 'bg-orange-500/20 text-orange-400',
-    red: 'bg-red-500/20 text-red-400',
-    purple: 'bg-purple-500/20 text-purple-400',
+    green: 'bg-success-500/20 text-success-400',
+    blue: 'bg-accent-500/20 text-accent-400',
+    orange: 'bg-warning-500/20 text-warning-400',
+    red: 'bg-error-500/20 text-error-400',
+    purple: 'bg-accent-500/20 text-accent-400',
   };
 
   return (
@@ -265,8 +253,8 @@ function NodeCard({ node, onAction, isLoading }: NodeCardProps) {
   const statusColor = node.is_disabled
     ? 'text-dark-500'
     : node.is_connected && node.is_node_online
-      ? 'text-emerald-400'
-      : 'text-red-400';
+      ? 'text-success-400'
+      : 'text-error-400';
 
   const statusText = node.is_disabled
     ? t('admin.remnawave.nodes.disabled', 'Disabled')
@@ -313,8 +301,8 @@ function NodeCard({ node, onAction, isLoading }: NodeCardProps) {
             disabled={isLoading}
             className={`rounded-lg p-2 transition-colors disabled:opacity-50 ${
               node.is_disabled
-                ? 'bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30'
-                : 'bg-red-500/20 text-red-400 hover:bg-red-500/30'
+                ? 'bg-success-500/20 text-success-400 hover:bg-success-500/30'
+                : 'bg-error-500/20 text-error-400 hover:bg-error-500/30'
             }`}
             title={
               node.is_disabled
@@ -351,11 +339,11 @@ function SquadCard({ squad, onSelect }: SquadCardProps) {
               {squad.display_name || squad.name}
             </h3>
             {squad.is_synced ? (
-              <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs text-emerald-400">
+              <span className="rounded-full bg-success-500/20 px-2 py-0.5 text-xs text-success-400">
                 {t('admin.remnawave.squads.synced', 'Synced')}
               </span>
             ) : (
-              <span className="rounded-full bg-orange-500/20 px-2 py-0.5 text-xs text-orange-400">
+              <span className="rounded-full bg-warning-500/20 px-2 py-0.5 text-xs text-warning-400">
                 {t('admin.remnawave.squads.notSynced', 'Not synced')}
               </span>
             )}
@@ -374,7 +362,7 @@ function SquadCard({ squad, onSelect }: SquadCardProps) {
             )}
             <span>{squad.inbounds_count} inbounds</span>
             {squad.is_available !== undefined && (
-              <span className={squad.is_available ? 'text-emerald-400' : 'text-red-400'}>
+              <span className={squad.is_available ? 'text-success-400' : 'text-error-400'}>
                 {squad.is_available ? '✓ Available' : '✗ Unavailable'}
               </span>
             )}
@@ -412,7 +400,7 @@ function SyncCard({ title, description, onAction, isLoading, lastResult }: SyncC
           <p className="mt-1 text-xs text-dark-400">{description}</p>
           {lastResult && (
             <p
-              className={`mt-2 text-xs ${lastResult.success ? 'text-emerald-400' : 'text-red-400'}`}
+              className={`mt-2 text-xs ${lastResult.success ? 'text-success-400' : 'text-error-400'}`}
             >
               {lastResult.message}
             </p>
@@ -678,7 +666,7 @@ function NodesTab({
         <button
           onClick={onRestartAll}
           disabled={isActionLoading}
-          className="flex items-center gap-2 rounded-lg bg-orange-500/20 px-3 py-1.5 text-orange-400 transition-colors hover:bg-orange-500/30 disabled:opacity-50"
+          className="flex items-center gap-2 rounded-lg bg-warning-500/20 px-3 py-1.5 text-warning-400 transition-colors hover:bg-warning-500/30 disabled:opacity-50"
         >
           <ArrowPathIcon />
           {t('admin.remnawave.nodes.restartAll', 'Restart All')}
@@ -830,7 +818,7 @@ function SyncTab({
             <span
               className={`rounded-full px-2 py-0.5 text-xs ${
                 autoSyncStatus.enabled
-                  ? 'bg-emerald-500/20 text-emerald-400'
+                  ? 'bg-success-500/20 text-success-400'
                   : 'bg-dark-600 text-dark-400'
               }`}
             >
@@ -864,9 +852,9 @@ function SyncTab({
               <p
                 className={
                   autoSyncStatus.is_running
-                    ? 'text-orange-400'
+                    ? 'text-warning-400'
                     : autoSyncStatus.last_run_success
-                      ? 'text-emerald-400'
+                      ? 'text-success-400'
                       : 'text-dark-200'
                 }
               >
@@ -1104,14 +1092,9 @@ export default function AdminRemnawave() {
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Link
-            to="/admin"
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
-          >
-            <ChevronLeftIcon />
-          </Link>
-          <div className="rounded-lg bg-purple-500/20 p-2">
-            <ServerIcon className="h-6 w-6 text-purple-400" />
+          <AdminBackButton />
+          <div className="rounded-lg bg-accent-500/20 p-2">
+            <ServerIcon className="h-6 w-6 text-accent-400" />
           </div>
           <div>
             <h1 className="text-xl font-semibold text-dark-100">
@@ -1126,11 +1109,11 @@ export default function AdminRemnawave() {
         {/* Connection Status Badge */}
         <div
           className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs ${
-            isConfigured ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'
+            isConfigured ? 'bg-success-500/20 text-success-400' : 'bg-error-500/20 text-error-400'
           }`}
         >
           <span
-            className={`h-2 w-2 rounded-full ${isConfigured ? 'bg-emerald-400' : 'bg-red-400'}`}
+            className={`h-2 w-2 rounded-full ${isConfigured ? 'bg-success-400' : 'bg-error-400'}`}
           />
           {isConfigured
             ? t('admin.remnawave.connected', 'Connected')
@@ -1140,8 +1123,8 @@ export default function AdminRemnawave() {
 
       {/* Configuration Error */}
       {status?.configuration_error && (
-        <div className="mb-4 rounded-xl border border-red-500/30 bg-red-500/10 p-4">
-          <p className="text-sm text-red-400">{status.configuration_error}</p>
+        <div className="mb-4 rounded-xl border border-error-500/30 bg-error-500/10 p-4">
+          <p className="text-sm text-error-400">{status.configuration_error}</p>
         </div>
       )}
 
@@ -1275,7 +1258,9 @@ export default function AdminRemnawave() {
                     <div>
                       <p className="text-dark-500">Available</p>
                       <p
-                        className={selectedSquad.is_available ? 'text-emerald-400' : 'text-red-400'}
+                        className={
+                          selectedSquad.is_available ? 'text-success-400' : 'text-error-400'
+                        }
                       >
                         {selectedSquad.is_available ? 'Yes' : 'No'}
                       </p>
@@ -1284,7 +1269,7 @@ export default function AdminRemnawave() {
                       <p className="text-dark-500">Trial Eligible</p>
                       <p
                         className={
-                          selectedSquad.is_trial_eligible ? 'text-emerald-400' : 'text-dark-400'
+                          selectedSquad.is_trial_eligible ? 'text-success-400' : 'text-dark-400'
                         }
                       >
                         {selectedSquad.is_trial_eligible ? 'Yes' : 'No'}

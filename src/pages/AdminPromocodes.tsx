@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
 import i18n from '../i18n';
 import {
   promocodesApi,
@@ -14,19 +13,9 @@ import {
   PromoGroupCreateRequest,
   PromoGroupUpdateRequest,
 } from '../api/promocodes';
+import { AdminBackButton } from '../components/admin';
 
 // Icons
-const BackIcon = () => (
-  <svg
-    className="h-5 w-5 text-dark-400"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={2}
-  >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-  </svg>
-);
 
 const PlusIcon = () => (
   <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -130,10 +119,10 @@ const getTypeLabel = (type: PromoCodeType): string => {
 
 const getTypeColor = (type: PromoCodeType): string => {
   const colors: Record<PromoCodeType, string> = {
-    balance: 'bg-emerald-500/20 text-emerald-400',
-    subscription_days: 'bg-blue-500/20 text-blue-400',
-    trial_subscription: 'bg-purple-500/20 text-purple-400',
-    promo_group: 'bg-amber-500/20 text-amber-400',
+    balance: 'bg-success-500/20 text-success-400',
+    subscription_days: 'bg-accent-500/20 text-accent-400',
+    trial_subscription: 'bg-accent-500/20 text-accent-400',
+    promo_group: 'bg-warning-500/20 text-warning-400',
     discount: 'bg-pink-500/20 text-pink-400',
   };
   return colors[type] || 'bg-dark-600 text-dark-300';
@@ -830,7 +819,7 @@ function PromocodeStatsModal({ promocode, onClose, onEdit }: PromocodeStatsModal
               <div className="text-sm text-dark-400">{t('admin.promocodes.stats.totalUses')}</div>
             </div>
             <div className="rounded-xl bg-dark-700/50 p-4 text-center">
-              <div className="mb-1 text-3xl font-bold text-emerald-400">{promocode.today_uses}</div>
+              <div className="mb-1 text-3xl font-bold text-success-400">{promocode.today_uses}</div>
               <div className="text-sm text-dark-400">{t('admin.promocodes.stats.today')}</div>
             </div>
             <div className="rounded-xl bg-dark-700/50 p-4 text-center">
@@ -854,7 +843,7 @@ function PromocodeStatsModal({ promocode, onClose, onEdit }: PromocodeStatsModal
               {promocode.type === 'balance' && (
                 <div className="flex justify-between">
                   <span className="text-dark-400">{t('admin.promocodes.stats.bonus')}:</span>
-                  <span className="text-emerald-400">
+                  <span className="text-success-400">
                     +{promocode.balance_bonus_rubles} {t('admin.promocodes.form.rub')}
                   </span>
                 </div>
@@ -863,7 +852,7 @@ function PromocodeStatsModal({ promocode, onClose, onEdit }: PromocodeStatsModal
                 promocode.type === 'trial_subscription') && (
                 <div className="flex justify-between">
                   <span className="text-dark-400">{t('admin.promocodes.stats.daysLabel')}:</span>
-                  <span className="text-blue-400">+{promocode.subscription_days}</span>
+                  <span className="text-accent-400">+{promocode.subscription_days}</span>
                 </div>
               )}
               {promocode.type === 'discount' && (
@@ -892,7 +881,7 @@ function PromocodeStatsModal({ promocode, onClose, onEdit }: PromocodeStatsModal
               </div>
               <div className="flex justify-between">
                 <span className="text-dark-400">{t('admin.promocodes.stats.status')}:</span>
-                <span className={promocode.is_valid ? 'text-emerald-400' : 'text-error-400'}>
+                <span className={promocode.is_valid ? 'text-success-400' : 'text-error-400'}>
                   {promocode.is_valid
                     ? t('admin.promocodes.stats.active')
                     : t('admin.promocodes.stats.inactive')}
@@ -913,7 +902,7 @@ function PromocodeStatsModal({ promocode, onClose, onEdit }: PromocodeStatsModal
               {promocode.first_purchase_only && (
                 <div className="col-span-2 flex justify-between">
                   <span className="text-dark-400">{t('admin.promocodes.stats.restriction')}:</span>
-                  <span className="text-amber-400">
+                  <span className="text-warning-400">
                     {t('admin.promocodes.stats.firstPurchaseOnly')}
                   </span>
                 </div>
@@ -1119,12 +1108,7 @@ export default function AdminPromocodes() {
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Link
-            to="/admin"
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
-          >
-            <BackIcon />
-          </Link>
+          <AdminBackButton />
           <div>
             <h1 className="text-xl font-semibold text-dark-100">{t('admin.promocodes.title')}</h1>
             <p className="text-sm text-dark-400">{t('admin.promocodes.subtitle')}</p>
@@ -1159,7 +1143,7 @@ export default function AdminPromocodes() {
             </div>
           </div>
           <div className="rounded-xl border border-dark-700 bg-dark-800 p-4">
-            <div className="text-2xl font-bold text-emerald-400">
+            <div className="text-2xl font-bold text-success-400">
               {promocodes.filter((p) => p.is_active && p.is_valid).length}
             </div>
             <div className="text-xs text-dark-400">{t('admin.promocodes.stats.activeCount')}</div>
@@ -1171,7 +1155,7 @@ export default function AdminPromocodes() {
             <div className="text-xs text-dark-400">{t('admin.promocodes.stats.usagesCount')}</div>
           </div>
           <div className="rounded-xl border border-dark-700 bg-dark-800 p-4">
-            <div className="text-2xl font-bold text-amber-400">
+            <div className="text-2xl font-bold text-warning-400">
               {promocodes.filter((p) => p.uses_left === 0 && p.max_uses > 0).length}
             </div>
             <div className="text-xs text-dark-400">{t('admin.promocodes.stats.exhausted')}</div>
@@ -1242,20 +1226,20 @@ export default function AdminPromocodes() {
                           </span>
                         )}
                         {promo.first_purchase_only && (
-                          <span className="rounded bg-amber-500/20 px-2 py-0.5 text-xs text-amber-400">
+                          <span className="rounded bg-warning-500/20 px-2 py-0.5 text-xs text-warning-400">
                             {t('admin.promocodes.firstPurchase')}
                           </span>
                         )}
                       </div>
                       <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-dark-400">
                         {promo.type === 'balance' && (
-                          <span className="text-emerald-400">
+                          <span className="text-success-400">
                             +{promo.balance_bonus_rubles} {t('admin.promocodes.form.rub')}
                           </span>
                         )}
                         {(promo.type === 'subscription_days' ||
                           promo.type === 'trial_subscription') && (
-                          <span className="text-blue-400">
+                          <span className="text-accent-400">
                             +{promo.subscription_days} {t('admin.promocodes.form.days')}
                           </span>
                         )}
@@ -1363,7 +1347,7 @@ export default function AdminPromocodes() {
                           ))}
                         {group.auto_assign_total_spent_kopeks &&
                           group.auto_assign_total_spent_kopeks > 0 && (
-                            <span className="text-amber-400">
+                            <span className="text-warning-400">
                               {t('admin.promocodes.groups.autoFrom', {
                                 amount: group.auto_assign_total_spent_kopeks / 100,
                               })}

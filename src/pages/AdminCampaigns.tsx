@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
 import i18n from '../i18n';
 import {
   campaignsApi,
@@ -15,19 +14,9 @@ import {
   TariffListItem,
   CampaignRegistrationItem,
 } from '../api/campaigns';
+import { AdminBackButton } from '../components/admin';
 
 // Icons
-const BackIcon = () => (
-  <svg
-    className="h-5 w-5 text-dark-400"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={2}
-  >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-  </svg>
-);
 
 const PlusIcon = () => (
   <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -114,23 +103,23 @@ const bonusTypeConfig: Record<
 > = {
   balance: {
     labelKey: 'admin.campaigns.bonusType.balance',
-    color: 'text-emerald-400',
-    bgColor: 'bg-emerald-500/20',
+    color: 'text-success-400',
+    bgColor: 'bg-success-500/20',
   },
   subscription: {
     labelKey: 'admin.campaigns.bonusType.subscription',
-    color: 'text-blue-400',
-    bgColor: 'bg-blue-500/20',
+    color: 'text-accent-400',
+    bgColor: 'bg-accent-500/20',
   },
   tariff: {
     labelKey: 'admin.campaigns.bonusType.tariff',
-    color: 'text-purple-400',
-    bgColor: 'bg-purple-500/20',
+    color: 'text-accent-400',
+    bgColor: 'bg-accent-500/20',
   },
   none: {
     labelKey: 'admin.campaigns.bonusType.none',
-    color: 'text-gray-400',
-    bgColor: 'bg-gray-500/20',
+    color: 'text-dark-400',
+    bgColor: 'bg-dark-500/20',
   },
 };
 
@@ -310,8 +299,8 @@ function CampaignModal({
 
           {/* Bonus Settings */}
           {bonusType === 'balance' && (
-            <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-4">
-              <label className="mb-2 block text-sm font-medium text-emerald-400">
+            <div className="rounded-lg border border-success-500/30 bg-success-500/10 p-4">
+              <label className="mb-2 block text-sm font-medium text-success-400">
                 {t('admin.campaigns.form.balanceBonus')}
               </label>
               <div className="flex items-center gap-2">
@@ -321,7 +310,7 @@ function CampaignModal({
                   onChange={(e) =>
                     setBalanceBonusRubles(Math.max(0, parseFloat(e.target.value) || 0))
                   }
-                  className="w-32 rounded-lg border border-dark-600 bg-dark-700 px-3 py-2 text-dark-100 focus:border-emerald-500 focus:outline-none"
+                  className="w-32 rounded-lg border border-dark-600 bg-dark-700 px-3 py-2 text-dark-100 focus:border-success-500 focus:outline-none"
                   min={0}
                   step={1}
                 />
@@ -331,8 +320,8 @@ function CampaignModal({
           )}
 
           {bonusType === 'subscription' && (
-            <div className="space-y-3 rounded-lg border border-blue-500/30 bg-blue-500/10 p-4">
-              <label className="block text-sm font-medium text-blue-400">
+            <div className="space-y-3 rounded-lg border border-accent-500/30 bg-accent-500/10 p-4">
+              <label className="block text-sm font-medium text-accent-400">
                 {t('admin.campaigns.form.trialSubscription')}
               </label>
               <div className="grid grid-cols-3 gap-3">
@@ -346,7 +335,7 @@ function CampaignModal({
                     onChange={(e) =>
                       setSubscriptionDays(Math.max(1, parseInt(e.target.value) || 1))
                     }
-                    className="w-full rounded-lg border border-dark-600 bg-dark-700 px-3 py-2 text-dark-100 focus:border-blue-500 focus:outline-none"
+                    className="w-full rounded-lg border border-dark-600 bg-dark-700 px-3 py-2 text-dark-100 focus:border-accent-500 focus:outline-none"
                     min={1}
                   />
                 </div>
@@ -360,7 +349,7 @@ function CampaignModal({
                     onChange={(e) =>
                       setSubscriptionTraffic(Math.max(0, parseInt(e.target.value) || 0))
                     }
-                    className="w-full rounded-lg border border-dark-600 bg-dark-700 px-3 py-2 text-dark-100 focus:border-blue-500 focus:outline-none"
+                    className="w-full rounded-lg border border-dark-600 bg-dark-700 px-3 py-2 text-dark-100 focus:border-accent-500 focus:outline-none"
                     min={0}
                   />
                 </div>
@@ -374,7 +363,7 @@ function CampaignModal({
                     onChange={(e) =>
                       setSubscriptionDevices(Math.max(1, parseInt(e.target.value) || 1))
                     }
-                    className="w-full rounded-lg border border-dark-600 bg-dark-700 px-3 py-2 text-dark-100 focus:border-blue-500 focus:outline-none"
+                    className="w-full rounded-lg border border-dark-600 bg-dark-700 px-3 py-2 text-dark-100 focus:border-accent-500 focus:outline-none"
                     min={1}
                   />
                 </div>
@@ -392,14 +381,14 @@ function CampaignModal({
                         onClick={() => toggleServer(server.squad_uuid)}
                         className={`flex w-full items-center gap-2 rounded-lg p-2 text-left transition-colors ${
                           selectedSquads.includes(server.squad_uuid)
-                            ? 'bg-blue-500/20 text-blue-300'
+                            ? 'bg-accent-500/20 text-accent-300'
                             : 'bg-dark-600 text-dark-300 hover:bg-dark-500'
                         }`}
                       >
                         <div
                           className={`flex h-4 w-4 items-center justify-center rounded ${
                             selectedSquads.includes(server.squad_uuid)
-                              ? 'bg-blue-500 text-white'
+                              ? 'bg-accent-500 text-white'
                               : 'bg-dark-500'
                           }`}
                         >
@@ -415,8 +404,8 @@ function CampaignModal({
           )}
 
           {bonusType === 'tariff' && (
-            <div className="space-y-3 rounded-lg border border-purple-500/30 bg-purple-500/10 p-4">
-              <label className="block text-sm font-medium text-purple-400">
+            <div className="space-y-3 rounded-lg border border-accent-500/30 bg-accent-500/10 p-4">
+              <label className="block text-sm font-medium text-accent-400">
                 {t('admin.campaigns.form.tariff')}
               </label>
               <div>
@@ -426,7 +415,7 @@ function CampaignModal({
                 <select
                   value={tariffId || ''}
                   onChange={(e) => setTariffId(e.target.value ? parseInt(e.target.value) : null)}
-                  className="w-full rounded-lg border border-dark-600 bg-dark-700 px-3 py-2 text-dark-100 focus:border-purple-500 focus:outline-none"
+                  className="w-full rounded-lg border border-dark-600 bg-dark-700 px-3 py-2 text-dark-100 focus:border-accent-500 focus:outline-none"
                 >
                   <option value="">{t('admin.campaigns.form.notSelected')}</option>
                   {tariffs.map((tariff) => (
@@ -449,7 +438,7 @@ function CampaignModal({
                   type="number"
                   value={tariffDays}
                   onChange={(e) => setTariffDays(Math.max(1, parseInt(e.target.value) || 1))}
-                  className="w-full rounded-lg border border-dark-600 bg-dark-700 px-3 py-2 text-dark-100 focus:border-purple-500 focus:outline-none"
+                  className="w-full rounded-lg border border-dark-600 bg-dark-700 px-3 py-2 text-dark-100 focus:border-accent-500 focus:outline-none"
                   min={1}
                 />
               </div>
@@ -457,7 +446,7 @@ function CampaignModal({
           )}
 
           {bonusType === 'none' && (
-            <div className="rounded-lg border border-gray-500/30 bg-gray-500/10 p-4">
+            <div className="rounded-lg border border-dark-500/30 bg-dark-500/10 p-4">
               <p className="text-sm text-dark-400">
                 {t('admin.campaigns.form.noBonusDescription')}
               </p>
@@ -584,17 +573,17 @@ function StatsModal({ stats, onClose, onViewUsers }: StatsModalProps) {
               </div>
             </div>
             <div className="rounded-lg bg-dark-700 p-3 text-center">
-              <div className="text-2xl font-bold text-emerald-400">
+              <div className="text-2xl font-bold text-success-400">
                 {formatRubles(stats.total_revenue_kopeks)}
               </div>
               <div className="text-xs text-dark-500">{t('admin.campaigns.stats.revenue')}</div>
             </div>
             <div className="rounded-lg bg-dark-700 p-3 text-center">
-              <div className="text-2xl font-bold text-blue-400">{stats.paid_users_count}</div>
+              <div className="text-2xl font-bold text-accent-400">{stats.paid_users_count}</div>
               <div className="text-xs text-dark-500">{t('admin.campaigns.stats.paidUsers')}</div>
             </div>
             <div className="rounded-lg bg-dark-700 p-3 text-center">
-              <div className="text-2xl font-bold text-purple-400">{stats.conversion_rate}%</div>
+              <div className="text-2xl font-bold text-accent-400">{stats.conversion_rate}%</div>
               <div className="text-xs text-dark-500">{t('admin.campaigns.stats.conversion')}</div>
             </div>
           </div>
@@ -606,19 +595,19 @@ function StatsModal({ stats, onClose, onViewUsers }: StatsModalProps) {
                 {t('admin.campaigns.stats.bonusesIssued')}
               </div>
               {stats.bonus_type === 'balance' && (
-                <div className="text-lg font-medium text-emerald-400">
+                <div className="text-lg font-medium text-success-400">
                   {formatRubles(stats.balance_issued_kopeks)}
                 </div>
               )}
               {stats.bonus_type === 'subscription' && (
-                <div className="text-lg font-medium text-blue-400">
+                <div className="text-lg font-medium text-accent-400">
                   {t('admin.campaigns.stats.subscriptionsIssued', {
                     count: stats.subscription_issued,
                   })}
                 </div>
               )}
               {stats.bonus_type === 'tariff' && (
-                <div className="text-lg font-medium text-purple-400">
+                <div className="text-lg font-medium text-accent-400">
                   {t('admin.campaigns.stats.tariffsIssued', { count: stats.subscription_issued })}
                 </div>
               )}
@@ -792,12 +781,12 @@ function UsersModal({ campaignId, campaignName, onClose }: UsersModalProps) {
                     <td className="p-3">
                       <div className="flex gap-1">
                         {reg.has_subscription && (
-                          <span className="rounded bg-blue-500/20 px-1.5 py-0.5 text-xs text-blue-400">
+                          <span className="rounded bg-accent-500/20 px-1.5 py-0.5 text-xs text-accent-400">
                             VPN
                           </span>
                         )}
                         {reg.has_paid && (
-                          <span className="rounded bg-emerald-500/20 px-1.5 py-0.5 text-xs text-emerald-400">
+                          <span className="rounded bg-success-500/20 px-1.5 py-0.5 text-xs text-success-400">
                             {t('admin.campaigns.users.paid')}
                           </span>
                         )}
@@ -945,12 +934,7 @@ export default function AdminCampaigns() {
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Link
-            to="/admin"
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
-          >
-            <BackIcon />
-          </Link>
+          <AdminBackButton />
           <div>
             <h1 className="text-xl font-semibold text-dark-100">{t('admin.campaigns.title')}</h1>
             <p className="text-sm text-dark-400">{t('admin.campaigns.subtitle')}</p>
@@ -982,13 +966,13 @@ export default function AdminCampaigns() {
             <div className="text-sm text-dark-400">{t('admin.campaigns.overview.active')}</div>
           </div>
           <div className="rounded-xl border border-dark-700 bg-dark-800 p-4">
-            <div className="text-2xl font-bold text-blue-400">{overview.total_registrations}</div>
+            <div className="text-2xl font-bold text-accent-400">{overview.total_registrations}</div>
             <div className="text-sm text-dark-400">
               {t('admin.campaigns.overview.registrations')}
             </div>
           </div>
           <div className="rounded-xl border border-dark-700 bg-dark-800 p-4">
-            <div className="text-2xl font-bold text-emerald-400">
+            <div className="text-2xl font-bold text-success-400">
               {formatRubles(overview.total_balance_issued_kopeks)}
             </div>
             <div className="text-sm text-dark-400">

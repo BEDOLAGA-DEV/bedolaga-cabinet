@@ -1,21 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
 import { adminApi, AdminTicket, AdminTicketDetail, AdminTicketMessage } from '../api/admin';
 import { ticketsApi } from '../api/tickets';
-
-const BackIcon = () => (
-  <svg
-    className="h-5 w-5 text-dark-400"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={2}
-  >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-  </svg>
-);
+import { AdminBackButton } from '../components/admin';
 
 function AdminMessageMedia({
   message,
@@ -220,12 +208,7 @@ export default function AdminTickets() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Link
-            to="/admin"
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
-          >
-            <BackIcon />
-          </Link>
+          <AdminBackButton />
           <h1 className="text-2xl font-bold text-dark-50 sm:text-3xl">
             {t('admin.tickets.title')}
           </h1>

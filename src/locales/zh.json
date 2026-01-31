@@ -25,6 +25,7 @@
     "refresh": "刷新",
     "retry": "重试",
     "saving": "保存中...",
+    "understand": "明白了",
     "units": {
       "gb": "GB",
       "perGb": "/GB"
@@ -705,7 +706,9 @@
       "resetted": "模板已恢复默认",
       "testSent": "测试邮件已发送",
       "variables": "可用变量",
-      "clickToCopy": "点击复制"
+      "clickToCopy": "点击复制",
+      "previewDesktopOnly": "预览仅在桌面网页版可用",
+      "previewNotAvailable": "预览不可用"
     },
     "payments": {
       "title": "支付验证",

@@ -299,10 +299,10 @@ export default function AdminPanel() {
       id: 'analytics',
       title: t('admin.groups.analytics'),
       icon: <AnalyticsGroupIcon />,
-      gradient: 'from-emerald-500/10 to-emerald-500/5',
-      borderColor: 'border-emerald-500/20',
-      iconBg: 'bg-emerald-500/20',
-      iconColor: 'text-emerald-400',
+      gradient: 'from-success-500/10 to-success-500/5',
+      borderColor: 'border-success-500/20',
+      iconBg: 'bg-success-500/20',
+      iconColor: 'text-success-400',
       items: [
         {
           to: '/admin/dashboard',
@@ -322,10 +322,10 @@ export default function AdminPanel() {
       id: 'users',
       title: t('admin.groups.users'),
       icon: <UsersGroupIcon />,
-      gradient: 'from-blue-500/10 to-blue-500/5',
-      borderColor: 'border-blue-500/20',
-      iconBg: 'bg-blue-500/20',
-      iconColor: 'text-blue-400',
+      gradient: 'from-accent-500/10 to-accent-500/5',
+      borderColor: 'border-accent-500/20',
+      iconBg: 'bg-accent-500/20',
+      iconColor: 'text-accent-400',
       items: [
         {
           to: '/admin/users',
@@ -351,10 +351,10 @@ export default function AdminPanel() {
       id: 'tariffs',
       title: t('admin.groups.tariffs'),
       icon: <TariffsGroupIcon />,
-      gradient: 'from-amber-500/10 to-amber-500/5',
-      borderColor: 'border-amber-500/20',
-      iconBg: 'bg-amber-500/20',
-      iconColor: 'text-amber-400',
+      gradient: 'from-warning-500/10 to-warning-500/5',
+      borderColor: 'border-warning-500/20',
+      iconBg: 'bg-warning-500/20',
+      iconColor: 'text-warning-400',
       items: [
         {
           to: '/admin/tariffs',
@@ -386,10 +386,10 @@ export default function AdminPanel() {
       id: 'marketing',
       title: t('admin.groups.marketing'),
       icon: <MarketingGroupIcon />,
-      gradient: 'from-rose-500/10 to-rose-500/5',
-      borderColor: 'border-rose-500/20',
-      iconBg: 'bg-rose-500/20',
-      iconColor: 'text-rose-400',
+      gradient: 'from-error-500/10 to-error-500/5',
+      borderColor: 'border-error-500/20',
+      iconBg: 'bg-error-500/20',
+      iconColor: 'text-error-400',
       items: [
         {
           to: '/admin/campaigns',

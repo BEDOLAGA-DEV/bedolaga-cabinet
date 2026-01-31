@@ -1,28 +1,16 @@
 import { useState, useRef, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
 import {
   adminBroadcastsApi,
-  Broadcast,
   BroadcastFilter,
   TariffFilter,
-  BroadcastChannel,
-  CombinedBroadcastCreateRequest,
+  BroadcastCreateRequest,
 } from '../api/adminBroadcasts';
+import { AdminBackButton } from '../components/admin';
 
 // Icons
-const BackIcon = () => (
-  <svg
-    className="h-5 w-5 text-dark-400"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={2}
-  >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-  </svg>
-);
 
 const BroadcastIcon = () => (
   <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -52,16 +40,6 @@ const RefreshIcon = () => (
       strokeLinecap="round"
       strokeLinejoin="round"
       d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"
-    />
-  </svg>
-);
-
-const StopIcon = () => (
-  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M5.25 7.5A2.25 2.25 0 017.5 5.25h9a2.25 2.25 0 012.25 2.25v9a2.25 2.25 0 01-2.25 2.25h-9a2.25 2.25 0 01-2.25-2.25v-9z"
     />
   </svg>
 );
@@ -112,53 +90,41 @@ const ChevronDownIcon = () => (
   </svg>
 );
 
-const TelegramIcon = () => (
-  <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z" />
-  </svg>
-);
-
-const EmailIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"
-    />
-  </svg>
-);
-
 // Status badge component
 const statusConfig: Record<string, { bg: string; text: string; labelKey: string }> = {
   queued: {
-    bg: 'bg-yellow-500/20',
-    text: 'text-yellow-400',
+    bg: 'bg-warning-500/20',
+    text: 'text-warning-400',
     labelKey: 'admin.broadcasts.status.queued',
   },
   in_progress: {
-    bg: 'bg-blue-500/20',
-    text: 'text-blue-400',
+    bg: 'bg-accent-500/20',
+    text: 'text-accent-400',
     labelKey: 'admin.broadcasts.status.inProgress',
   },
   completed: {
-    bg: 'bg-green-500/20',
-    text: 'text-green-400',
+    bg: 'bg-success-500/20',
+    text: 'text-success-400',
     labelKey: 'admin.broadcasts.status.completed',
   },
   partial: {
-    bg: 'bg-orange-500/20',
-    text: 'text-orange-400',
+    bg: 'bg-warning-500/20',
+    text: 'text-warning-400',
     labelKey: 'admin.broadcasts.status.partial',
   },
-  failed: { bg: 'bg-red-500/20', text: 'text-red-400', labelKey: 'admin.broadcasts.status.failed' },
+  failed: {
+    bg: 'bg-error-500/20',
+    text: 'text-error-400',
+    labelKey: 'admin.broadcasts.status.failed',
+  },
   cancelled: {
-    bg: 'bg-gray-500/20',
-    text: 'text-gray-400',
+    bg: 'bg-dark-500/20',
+    text: 'text-dark-400',
     labelKey: 'admin.broadcasts.status.cancelled',
   },
   cancelling: {
-    bg: 'bg-yellow-500/20',
-    text: 'text-yellow-400',
+    bg: 'bg-warning-500/20',
+    text: 'text-warning-400',
     labelKey: 'admin.broadcasts.status.cancelling',
   },
 };
@@ -173,38 +139,6 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
-// Channel badge component
-function ChannelBadge({ channel }: { channel?: BroadcastChannel }) {
-  const { t } = useTranslation();
-
-  if (!channel || channel === 'telegram') {
-    return (
-      <span className="flex items-center gap-1 rounded-full bg-blue-500/20 px-2 py-0.5 text-xs text-blue-400">
-        <TelegramIcon />
-        <span className="hidden sm:inline">Telegram</span>
-      </span>
-    );
-  }
-
-  if (channel === 'email') {
-    return (
-      <span className="flex items-center gap-1 rounded-full bg-purple-500/20 px-2 py-0.5 text-xs text-purple-400">
-        <EmailIcon />
-        <span className="hidden sm:inline">Email</span>
-      </span>
-    );
-  }
-
-  return (
-    <span className="flex items-center gap-1 rounded-full bg-green-500/20 px-2 py-0.5 text-xs text-green-400">
-      <TelegramIcon />
-      <span className="mx-0.5">+</span>
-      <EmailIcon />
-      <span className="hidden sm:inline">{t('admin.broadcasts.channel.both')}</span>
-    </span>
-  );
-}
-
 // Filter labels (labelKey pattern: store i18n keys, resolve at render time with t())
 const FILTER_GROUP_LABEL_KEYS: Record<string, string> = {
   basic: 'admin.broadcasts.filterGroups.basic',
@@ -214,7 +148,6 @@ const FILTER_GROUP_LABEL_KEYS: Record<string, string> = {
   activity: 'admin.broadcasts.filterGroups.activity',
   source: 'admin.broadcasts.filterGroups.source',
   tariff: 'admin.broadcasts.filterGroups.tariff',
-  email: 'admin.broadcasts.filterGroups.email',
 };
 
 // Create broadcast modal
@@ -228,14 +161,7 @@ function CreateBroadcastModal({ onClose, onSuccess }: CreateModalProps) {
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Channel selection
-  const [channel, setChannel] = useState<BroadcastChannel>('telegram');
-
-  // Common fields
   const [target, setTarget] = useState('');
-  const [emailTarget, setEmailTarget] = useState('');
-
-  // Telegram fields
   const [messageText, setMessageText] = useState('');
   const [selectedButtons, setSelectedButtons] = useState<string[]>(['home']);
   const [mediaFile, setMediaFile] = useState<File | null>(null);
@@ -243,48 +169,28 @@ function CreateBroadcastModal({ onClose, onSuccess }: CreateModalProps) {
   const [mediaPreview, setMediaPreview] = useState<string | null>(null);
   const [uploadedFileId, setUploadedFileId] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
-
-  // Email fields
-  const [emailSubject, setEmailSubject] = useState('');
-  const [emailHtmlContent, setEmailHtmlContent] = useState('');
-
-  // UI state
   const [showFilters, setShowFilters] = useState(false);
-  const [showEmailFilters, setShowEmailFilters] = useState(false);
 
-  // Fetch Telegram filters
+  // Fetch filters
   const { data: filtersData, isLoading: filtersLoading } = useQuery({
     queryKey: ['admin', 'broadcasts', 'filters'],
     queryFn: adminBroadcastsApi.getFilters,
-    enabled: channel === 'telegram' || channel === 'both',
-  });
-
-  // Fetch Email filters
-  const { data: emailFiltersData, isLoading: emailFiltersLoading } = useQuery({
-    queryKey: ['admin', 'broadcasts', 'email-filters'],
-    queryFn: adminBroadcastsApi.getEmailFilters,
-    enabled: channel === 'email' || channel === 'both',
   });
 
   // Fetch buttons
   const { data: buttonsData } = useQuery({
     queryKey: ['admin', 'broadcasts', 'buttons'],
     queryFn: adminBroadcastsApi.getButtons,
-    enabled: channel === 'telegram' || channel === 'both',
   });
 
-  // Preview mutations
+  // Preview mutation
   const previewMutation = useMutation({
     mutationFn: adminBroadcastsApi.preview,
   });
 
-  const previewEmailMutation = useMutation({
-    mutationFn: adminBroadcastsApi.previewEmail,
-  });
-
   // Create mutation
   const createMutation = useMutation({
-    mutationFn: adminBroadcastsApi.createCombined,
+    mutationFn: adminBroadcastsApi.create,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'broadcasts'] });
       onSuccess();
@@ -319,20 +225,6 @@ function CreateBroadcastModal({ onClose, onSuccess }: CreateModalProps) {
     return groups;
   }, [filtersData]);
 
-  // Group email filters
-  const groupedEmailFilters = useMemo(() => {
-    if (!emailFiltersData) return {};
-    const groups: Record<string, BroadcastFilter[]> = {};
-
-    emailFiltersData.filters.forEach((f) => {
-      const group = f.group || 'email';
-      if (!groups[group]) groups[group] = [];
-      groups[group].push(f);
-    });
-
-    return groups;
-  }, [emailFiltersData]);
-
   // Selected filter info
   const selectedFilter = useMemo(() => {
     if (!target || !filtersData) return null;
@@ -343,11 +235,6 @@ function CreateBroadcastModal({ onClose, onSuccess }: CreateModalProps) {
     ];
     return all.find((f) => f.key === target);
   }, [target, filtersData]);
-
-  const selectedEmailFilter = useMemo(() => {
-    if (!emailTarget || !emailFiltersData) return null;
-    return emailFiltersData.filters.find((f) => f.key === emailTarget);
-  }, [emailTarget, emailFiltersData]);
 
   // Handle file selection
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -399,77 +286,30 @@ function CreateBroadcastModal({ onClose, onSuccess }: CreateModalProps) {
     );
   };
 
-  // Validation
-  const canSubmit = useMemo(() => {
-    if (createMutation.isPending || isUploading) return false;
-
-    if (channel === 'telegram') {
-      return !!target && !!messageText.trim();
-    }
-
-    if (channel === 'email') {
-      return !!emailTarget && !!emailSubject.trim() && !!emailHtmlContent.trim();
-    }
-
-    // Both
-    return (
-      !!target &&
-      !!messageText.trim() &&
-      !!emailTarget &&
-      !!emailSubject.trim() &&
-      !!emailHtmlContent.trim()
-    );
-  }, [
-    channel,
-    target,
-    messageText,
-    emailTarget,
-    emailSubject,
-    emailHtmlContent,
-    createMutation.isPending,
-    isUploading,
-  ]);
-
   // Submit
   const handleSubmit = () => {
-    if (!canSubmit) return;
+    if (!target || !messageText.trim()) return;
 
-    const data: CombinedBroadcastCreateRequest = {
-      channel,
-      target: channel === 'email' ? emailTarget : target,
+    const data: BroadcastCreateRequest = {
+      target,
+      message_text: messageText,
+      selected_buttons: selectedButtons,
     };
 
-    // Telegram data
-    if (channel === 'telegram' || channel === 'both') {
-      data.message_text = messageText;
-      data.selected_buttons = selectedButtons;
-
-      if (uploadedFileId) {
-        data.media = {
-          type: mediaType,
-          file_id: uploadedFileId,
-        };
-      }
-    }
-
-    // Email data
-    if (channel === 'email' || channel === 'both') {
-      data.email_subject = emailSubject;
-      data.email_html_content = emailHtmlContent;
-      if (channel === 'both') {
-        data.target = target; // Use Telegram target as primary
-      }
+    if (uploadedFileId) {
+      data.media = {
+        type: mediaType,
+        file_id: uploadedFileId,
+      };
     }
 
     createMutation.mutate(data);
   };
 
-  const telegramRecipientsCount = previewMutation.data?.count ?? selectedFilter?.count ?? null;
-  const emailRecipientsCount =
-    previewEmailMutation.data?.count ?? selectedEmailFilter?.count ?? null;
+  const recipientsCount = previewMutation.data?.count ?? selectedFilter?.count ?? null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50 p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-4">
       <div className="my-4 w-full max-w-2xl rounded-xl bg-dark-800">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-dark-700 p-4">
@@ -486,346 +326,177 @@ function CreateBroadcastModal({ onClose, onSuccess }: CreateModalProps) {
 
         {/* Content */}
         <div className="max-h-[70vh] space-y-4 overflow-y-auto p-4">
-          {/* Channel selection */}
+          {/* Filter selection */}
           <div>
             <label className="mb-2 block text-sm font-medium text-dark-300">
-              {t('admin.broadcasts.selectChannel')}
+              {t('admin.broadcasts.selectFilter')}
             </label>
-            <div className="flex gap-2">
+            <div className="relative">
               <button
-                onClick={() => setChannel('telegram')}
-                className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-3 transition-colors ${
-                  channel === 'telegram'
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-dark-700 text-dark-300 hover:bg-dark-600'
-                }`}
+                onClick={() => setShowFilters(!showFilters)}
+                className="flex w-full items-center justify-between rounded-lg bg-dark-700 p-3 text-left transition-colors hover:bg-dark-600"
               >
-                <TelegramIcon />
-                <span>Telegram</span>
+                <div className="flex items-center gap-2">
+                  <UsersIcon />
+                  <span className={selectedFilter ? 'text-dark-100' : 'text-dark-400'}>
+                    {selectedFilter
+                      ? selectedFilter.label
+                      : t('admin.broadcasts.selectFilterPlaceholder')}
+                  </span>
+                  {recipientsCount !== null && (
+                    <span className="rounded-full bg-accent-500/20 px-2 py-0.5 text-xs text-accent-400">
+                      {recipientsCount} {t('admin.broadcasts.recipients')}
+                    </span>
+                  )}
+                </div>
+                <ChevronDownIcon />
               </button>
-              <button
-                onClick={() => setChannel('email')}
-                className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-3 transition-colors ${
-                  channel === 'email'
-                    ? 'bg-purple-500 text-white'
-                    : 'bg-dark-700 text-dark-300 hover:bg-dark-600'
-                }`}
-              >
-                <EmailIcon />
-                <span>Email</span>
-              </button>
-              <button
-                onClick={() => setChannel('both')}
-                className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-3 transition-colors ${
-                  channel === 'both'
-                    ? 'bg-green-500 text-white'
-                    : 'bg-dark-700 text-dark-300 hover:bg-dark-600'
-                }`}
-              >
-                <TelegramIcon />
-                <span>+</span>
-                <EmailIcon />
-              </button>
+
+              {showFilters && (
+                <div className="absolute left-0 right-0 top-full z-10 mt-1 max-h-64 overflow-y-auto rounded-lg bg-dark-700 shadow-xl">
+                  {filtersLoading ? (
+                    <div className="p-4 text-center text-dark-400">Loading...</div>
+                  ) : (
+                    Object.entries(groupedFilters).map(([group, filters]) => (
+                      <div key={group}>
+                        <div className="sticky top-0 bg-dark-800 px-3 py-2 text-xs font-medium text-dark-400">
+                          {FILTER_GROUP_LABEL_KEYS[group]
+                            ? t(FILTER_GROUP_LABEL_KEYS[group])
+                            : group}
+                        </div>
+                        {filters.map((filter) => (
+                          <button
+                            key={filter.key}
+                            onClick={() => {
+                              setTarget(filter.key);
+                              setShowFilters(false);
+                              previewMutation.mutate(filter.key);
+                            }}
+                            className={`flex w-full items-center justify-between px-3 py-2 text-left transition-colors hover:bg-dark-600 ${
+                              target === filter.key ? 'bg-accent-500/20' : ''
+                            }`}
+                          >
+                            <span className="text-dark-100">{filter.label}</span>
+                            {filter.count !== null && filter.count !== undefined && (
+                              <span className="text-xs text-dark-400">{filter.count}</span>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Telegram Section */}
-          {(channel === 'telegram' || channel === 'both') && (
-            <div className="space-y-4 rounded-lg border border-blue-500/30 bg-blue-500/5 p-4">
-              <div className="flex items-center gap-2 text-blue-400">
-                <TelegramIcon />
-                <span className="font-medium">{t('admin.broadcasts.telegramSection')}</span>
-              </div>
+          {/* Message text */}
+          <div>
+            <label className="mb-2 block text-sm font-medium text-dark-300">
+              {t('admin.broadcasts.messageText')}
+            </label>
+            <textarea
+              value={messageText}
+              onChange={(e) => setMessageText(e.target.value)}
+              placeholder={t('admin.broadcasts.messageTextPlaceholder')}
+              rows={5}
+              maxLength={4000}
+              className="w-full resize-none rounded-lg bg-dark-700 p-3 text-dark-100 placeholder-dark-400 focus:outline-none focus:ring-2 focus:ring-accent-500"
+            />
+            <div className="mt-1 text-right text-xs text-dark-400">{messageText.length}/4000</div>
+          </div>
 
-              {/* Filter selection */}
-              <div>
-                <label className="mb-2 block text-sm font-medium text-dark-300">
-                  {t('admin.broadcasts.selectFilter')}
-                </label>
-                <div className="relative">
-                  <button
-                    onClick={() => setShowFilters(!showFilters)}
-                    className="flex w-full items-center justify-between rounded-lg bg-dark-700 p-3 text-left transition-colors hover:bg-dark-600"
-                  >
-                    <div className="flex items-center gap-2">
-                      <UsersIcon />
-                      <span className={selectedFilter ? 'text-dark-100' : 'text-dark-400'}>
-                        {selectedFilter
-                          ? selectedFilter.label
-                          : t('admin.broadcasts.selectFilterPlaceholder')}
-                      </span>
-                      {telegramRecipientsCount !== null && (
-                        <span className="rounded-full bg-accent-500/20 px-2 py-0.5 text-xs text-accent-400">
-                          {telegramRecipientsCount} {t('admin.broadcasts.recipients')}
-                        </span>
-                      )}
+          {/* Media upload */}
+          <div>
+            <label className="mb-2 block text-sm font-medium text-dark-300">
+              {t('admin.broadcasts.media')}
+            </label>
+            {mediaFile ? (
+              <div className="rounded-lg bg-dark-700 p-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    {mediaType === 'photo' && <PhotoIcon />}
+                    {mediaType === 'video' && <VideoIcon />}
+                    {mediaType === 'document' && <DocumentIcon />}
+                    <div>
+                      <p className="text-sm text-dark-100">{mediaFile.name}</p>
+                      <p className="text-xs text-dark-400">
+                        {(mediaFile.size / 1024 / 1024).toFixed(2)} MB
+                      </p>
                     </div>
-                    <ChevronDownIcon />
-                  </button>
-
-                  {showFilters && (
-                    <div className="absolute left-0 right-0 top-full z-10 mt-1 max-h-64 overflow-y-auto rounded-lg bg-dark-700 shadow-xl">
-                      {filtersLoading ? (
-                        <div className="p-4 text-center text-dark-400">Loading...</div>
-                      ) : (
-                        Object.entries(groupedFilters).map(([group, filters]) => (
-                          <div key={group}>
-                            <div className="sticky top-0 bg-dark-800 px-3 py-2 text-xs font-medium text-dark-400">
-                              {FILTER_GROUP_LABEL_KEYS[group]
-                                ? t(FILTER_GROUP_LABEL_KEYS[group])
-                                : group}
-                            </div>
-                            {filters.map((filter) => (
-                              <button
-                                key={filter.key}
-                                onClick={() => {
-                                  setTarget(filter.key);
-                                  setShowFilters(false);
-                                  previewMutation.mutate(filter.key);
-                                }}
-                                className={`flex w-full items-center justify-between px-3 py-2 text-left transition-colors hover:bg-dark-600 ${
-                                  target === filter.key ? 'bg-accent-500/20' : ''
-                                }`}
-                              >
-                                <span className="text-dark-100">{filter.label}</span>
-                                {filter.count !== null && filter.count !== undefined && (
-                                  <span className="text-xs text-dark-400">{filter.count}</span>
-                                )}
-                              </button>
-                            ))}
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Message text */}
-              <div>
-                <label className="mb-2 block text-sm font-medium text-dark-300">
-                  {t('admin.broadcasts.messageText')}
-                </label>
-                <textarea
-                  value={messageText}
-                  onChange={(e) => setMessageText(e.target.value)}
-                  placeholder={t('admin.broadcasts.messageTextPlaceholder')}
-                  rows={5}
-                  maxLength={4000}
-                  className="w-full resize-none rounded-lg bg-dark-700 p-3 text-dark-100 placeholder-dark-400 focus:outline-none focus:ring-2 focus:ring-accent-500"
-                />
-                <div className="mt-1 text-right text-xs text-dark-400">
-                  {messageText.length}/4000
-                </div>
-              </div>
-
-              {/* Media upload */}
-              <div>
-                <label className="mb-2 block text-sm font-medium text-dark-300">
-                  {t('admin.broadcasts.media')}
-                </label>
-                {mediaFile ? (
-                  <div className="rounded-lg bg-dark-700 p-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        {mediaType === 'photo' && <PhotoIcon />}
-                        {mediaType === 'video' && <VideoIcon />}
-                        {mediaType === 'document' && <DocumentIcon />}
-                        <div>
-                          <p className="text-sm text-dark-100">{mediaFile.name}</p>
-                          <p className="text-xs text-dark-400">
-                            {(mediaFile.size / 1024 / 1024).toFixed(2)} MB
-                          </p>
-                        </div>
-                      </div>
-                      <button
-                        onClick={handleRemoveMedia}
-                        className="rounded-lg p-2 text-dark-400 hover:bg-dark-600 hover:text-red-400"
-                        disabled={isUploading}
-                      >
-                        <XIcon />
-                      </button>
-                    </div>
-                    {mediaPreview && (
-                      <img
-                        src={mediaPreview}
-                        alt="Preview"
-                        className="mt-3 max-h-40 rounded-lg object-cover"
-                      />
-                    )}
-                    {isUploading && (
-                      <div className="mt-2 text-sm text-accent-400">
-                        {t('admin.broadcasts.uploading')}
-                      </div>
-                    )}
                   </div>
-                ) : (
-                  <div className="flex gap-2">
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="image/*,video/*,application/*"
-                      onChange={handleFileSelect}
-                      className="hidden"
-                    />
-                    <button
-                      onClick={() => fileInputRef.current?.click()}
-                      className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-dark-700 p-3 text-dark-400 transition-colors hover:bg-dark-600 hover:text-dark-100"
-                    >
-                      <PhotoIcon />
-                      <span>{t('admin.broadcasts.addMedia')}</span>
-                    </button>
+                  <button
+                    onClick={handleRemoveMedia}
+                    className="rounded-lg p-2 text-dark-400 hover:bg-dark-600 hover:text-error-400"
+                    disabled={isUploading}
+                  >
+                    <XIcon />
+                  </button>
+                </div>
+                {mediaPreview && (
+                  <img
+                    src={mediaPreview}
+                    alt="Preview"
+                    className="mt-3 max-h-40 rounded-lg object-cover"
+                  />
+                )}
+                {isUploading && (
+                  <div className="mt-2 text-sm text-accent-400">
+                    {t('admin.broadcasts.uploading')}
                   </div>
                 )}
               </div>
-
-              {/* Buttons selection */}
-              <div>
-                <label className="mb-2 block text-sm font-medium text-dark-300">
-                  {t('admin.broadcasts.buttons')}
-                </label>
-                <div className="flex flex-wrap gap-2">
-                  {buttonsData?.buttons.map((button) => (
-                    <button
-                      key={button.key}
-                      onClick={() => toggleButton(button.key)}
-                      className={`rounded-lg px-3 py-2 text-sm transition-colors ${
-                        selectedButtons.includes(button.key)
-                          ? 'bg-accent-500 text-white'
-                          : 'bg-dark-700 text-dark-300 hover:bg-dark-600'
-                      }`}
-                    >
-                      {button.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Email Section */}
-          {(channel === 'email' || channel === 'both') && (
-            <div className="space-y-4 rounded-lg border border-purple-500/30 bg-purple-500/5 p-4">
-              <div className="flex items-center gap-2 text-purple-400">
-                <EmailIcon />
-                <span className="font-medium">{t('admin.broadcasts.emailSection')}</span>
-              </div>
-
-              {/* Email filter selection */}
-              <div>
-                <label className="mb-2 block text-sm font-medium text-dark-300">
-                  {t('admin.broadcasts.selectEmailFilter')}
-                </label>
-                <div className="relative">
-                  <button
-                    onClick={() => setShowEmailFilters(!showEmailFilters)}
-                    className="flex w-full items-center justify-between rounded-lg bg-dark-700 p-3 text-left transition-colors hover:bg-dark-600"
-                  >
-                    <div className="flex items-center gap-2">
-                      <UsersIcon />
-                      <span className={selectedEmailFilter ? 'text-dark-100' : 'text-dark-400'}>
-                        {selectedEmailFilter
-                          ? selectedEmailFilter.label
-                          : t('admin.broadcasts.selectEmailFilterPlaceholder')}
-                      </span>
-                      {emailRecipientsCount !== null && (
-                        <span className="rounded-full bg-purple-500/20 px-2 py-0.5 text-xs text-purple-400">
-                          {emailRecipientsCount} {t('admin.broadcasts.recipients')}
-                        </span>
-                      )}
-                    </div>
-                    <ChevronDownIcon />
-                  </button>
-
-                  {showEmailFilters && (
-                    <div className="absolute left-0 right-0 top-full z-10 mt-1 max-h-64 overflow-y-auto rounded-lg bg-dark-700 shadow-xl">
-                      {emailFiltersLoading ? (
-                        <div className="p-4 text-center text-dark-400">Loading...</div>
-                      ) : (
-                        Object.entries(groupedEmailFilters).map(([group, filters]) => (
-                          <div key={group}>
-                            <div className="sticky top-0 bg-dark-800 px-3 py-2 text-xs font-medium text-dark-400">
-                              {FILTER_GROUP_LABEL_KEYS[group]
-                                ? t(FILTER_GROUP_LABEL_KEYS[group])
-                                : group}
-                            </div>
-                            {filters.map((filter) => (
-                              <button
-                                key={filter.key}
-                                onClick={() => {
-                                  setEmailTarget(filter.key);
-                                  setShowEmailFilters(false);
-                                  previewEmailMutation.mutate(filter.key);
-                                }}
-                                className={`flex w-full items-center justify-between px-3 py-2 text-left transition-colors hover:bg-dark-600 ${
-                                  emailTarget === filter.key ? 'bg-purple-500/20' : ''
-                                }`}
-                              >
-                                <span className="text-dark-100">{filter.label}</span>
-                                {filter.count !== null && filter.count !== undefined && (
-                                  <span className="text-xs text-dark-400">{filter.count}</span>
-                                )}
-                              </button>
-                            ))}
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Email subject */}
-              <div>
-                <label className="mb-2 block text-sm font-medium text-dark-300">
-                  {t('admin.broadcasts.emailSubject')}
-                </label>
+            ) : (
+              <div className="flex gap-2">
                 <input
-                  type="text"
-                  value={emailSubject}
-                  onChange={(e) => setEmailSubject(e.target.value)}
-                  placeholder={t('admin.broadcasts.emailSubjectPlaceholder')}
-                  maxLength={200}
-                  className="w-full rounded-lg bg-dark-700 p-3 text-dark-100 placeholder-dark-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*,video/*,application/*"
+                  onChange={handleFileSelect}
+                  className="hidden"
                 />
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-dark-700 p-3 text-dark-400 transition-colors hover:bg-dark-600 hover:text-dark-100"
+                >
+                  <PhotoIcon />
+                  <span>{t('admin.broadcasts.addMedia')}</span>
+                </button>
               </div>
+            )}
+          </div>
 
-              {/* Email HTML content */}
-              <div>
-                <label className="mb-2 block text-sm font-medium text-dark-300">
-                  {t('admin.broadcasts.emailContent')}
-                  <span className="ml-2 text-xs text-dark-400">
-                    {t('admin.broadcasts.emailContentHint')}
-                  </span>
-                </label>
-                <textarea
-                  value={emailHtmlContent}
-                  onChange={(e) => setEmailHtmlContent(e.target.value)}
-                  placeholder={t('admin.broadcasts.emailContentPlaceholder')}
-                  rows={8}
-                  className="w-full resize-none rounded-lg bg-dark-700 p-3 font-mono text-sm text-dark-100 placeholder-dark-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                />
-                <div className="mt-2 text-xs text-dark-400">
-                  {t('admin.broadcasts.emailVariables')}: {'{{user_name}}, {{email}}'}
-                </div>
-              </div>
+          {/* Buttons selection */}
+          <div>
+            <label className="mb-2 block text-sm font-medium text-dark-300">
+              {t('admin.broadcasts.buttons')}
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {buttonsData?.buttons.map((button) => (
+                <button
+                  key={button.key}
+                  onClick={() => toggleButton(button.key)}
+                  className={`rounded-lg px-3 py-2 text-sm transition-colors ${
+                    selectedButtons.includes(button.key)
+                      ? 'bg-accent-500 text-white'
+                      : 'bg-dark-700 text-dark-300 hover:bg-dark-600'
+                  }`}
+                >
+                  {button.label}
+                </button>
+              ))}
             </div>
-          )}
+          </div>
         </div>
 
         {/* Footer */}
         <div className="flex items-center justify-between border-t border-dark-700 p-4">
-          <div className="flex items-center gap-4 text-sm text-dark-400">
-            {(channel === 'telegram' || channel === 'both') && telegramRecipientsCount !== null && (
-              <span className="flex items-center gap-1">
-                <TelegramIcon />
-                <strong className="text-blue-400">{telegramRecipientsCount}</strong>
-              </span>
-            )}
-            {(channel === 'email' || channel === 'both') && emailRecipientsCount !== null && (
-              <span className="flex items-center gap-1">
-                <EmailIcon />
-                <strong className="text-purple-400">{emailRecipientsCount}</strong>
+          <div className="text-sm text-dark-400">
+            {recipientsCount !== null && (
+              <span>
+                {t('admin.broadcasts.willBeSent')}:{' '}
+                <strong className="text-accent-400">{recipientsCount}</strong>{' '}
+                {t('admin.broadcasts.users')}
               </span>
             )}
           </div>
@@ -838,7 +509,7 @@ function CreateBroadcastModal({ onClose, onSuccess }: CreateModalProps) {
             </button>
             <button
               onClick={handleSubmit}
-              disabled={!canSubmit}
+              disabled={!target || !messageText.trim() || createMutation.isPending || isUploading}
               className="flex items-center gap-2 rounded-lg bg-accent-500 px-4 py-2 text-white transition-colors hover:bg-accent-600 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {createMutation.isPending ? <RefreshIcon /> : <BroadcastIcon />}
@@ -851,154 +522,12 @@ function CreateBroadcastModal({ onClose, onSuccess }: CreateModalProps) {
   );
 }
 
-// Broadcast detail modal
-interface DetailModalProps {
-  broadcast: Broadcast;
-  onClose: () => void;
-  onStop: () => void;
-  isStopping: boolean;
-}
-
-function BroadcastDetailModal({ broadcast, onClose, onStop, isStopping }: DetailModalProps) {
-  const { t } = useTranslation();
-  const isRunning = ['queued', 'in_progress', 'cancelling'].includes(broadcast.status);
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-lg rounded-xl bg-dark-800">
-        {/* Header */}
-        <div className="flex items-center justify-between border-b border-dark-700 p-4">
-          <div className="flex items-center gap-3">
-            <StatusBadge status={broadcast.status} />
-            <ChannelBadge channel={broadcast.channel} />
-            <span className="text-dark-400">#{broadcast.id}</span>
-          </div>
-          <button onClick={onClose} className="rounded-lg p-2 transition-colors hover:bg-dark-700">
-            <XIcon />
-          </button>
-        </div>
-
-        {/* Content */}
-        <div className="max-h-[60vh] space-y-4 overflow-y-auto p-4">
-          {/* Progress */}
-          {isRunning && (
-            <div>
-              <div className="mb-1 flex justify-between text-sm">
-                <span className="text-dark-400">{t('admin.broadcasts.progress')}</span>
-                <span className="text-dark-100">{broadcast.progress_percent.toFixed(1)}%</span>
-              </div>
-              <div className="h-2 overflow-hidden rounded-full bg-dark-700">
-                <div
-                  className="h-full bg-accent-500 transition-all duration-300"
-                  style={{ width: `${broadcast.progress_percent}%` }}
-                />
-              </div>
-            </div>
-          )}
-
-          {/* Stats */}
-          <div className="grid grid-cols-3 gap-3">
-            <div className="rounded-lg bg-dark-700 p-3 text-center">
-              <p className="text-2xl font-bold text-dark-100">{broadcast.total_count}</p>
-              <p className="text-xs text-dark-400">{t('admin.broadcasts.total')}</p>
-            </div>
-            <div className="rounded-lg bg-dark-700 p-3 text-center">
-              <p className="text-2xl font-bold text-green-400">{broadcast.sent_count}</p>
-              <p className="text-xs text-dark-400">{t('admin.broadcasts.sent')}</p>
-            </div>
-            <div className="rounded-lg bg-dark-700 p-3 text-center">
-              <p className="text-2xl font-bold text-red-400">{broadcast.failed_count}</p>
-              <p className="text-xs text-dark-400">{t('admin.broadcasts.failed')}</p>
-            </div>
-          </div>
-
-          {/* Target */}
-          <div>
-            <p className="mb-1 text-sm text-dark-400">{t('admin.broadcasts.filter')}</p>
-            <p className="text-dark-100">{broadcast.target_type}</p>
-          </div>
-
-          {/* Telegram Message */}
-          {broadcast.message_text && (
-            <div>
-              <p className="mb-1 flex items-center gap-1 text-sm text-dark-400">
-                <TelegramIcon />
-                {t('admin.broadcasts.message')}
-              </p>
-              <div className="max-h-40 overflow-y-auto whitespace-pre-wrap rounded-lg bg-dark-700 p-3 text-sm text-dark-100">
-                {broadcast.message_text}
-              </div>
-            </div>
-          )}
-
-          {/* Email Subject */}
-          {broadcast.email_subject && (
-            <div>
-              <p className="mb-1 flex items-center gap-1 text-sm text-dark-400">
-                <EmailIcon />
-                {t('admin.broadcasts.emailSubject')}
-              </p>
-              <div className="rounded-lg bg-dark-700 p-3 text-sm text-dark-100">
-                {broadcast.email_subject}
-              </div>
-            </div>
-          )}
-
-          {/* Email Content Preview */}
-          {broadcast.email_html_content && (
-            <div>
-              <p className="mb-1 text-sm text-dark-400">{t('admin.broadcasts.emailContent')}</p>
-              <div className="max-h-40 overflow-y-auto whitespace-pre-wrap rounded-lg bg-dark-700 p-3 font-mono text-xs text-dark-100">
-                {broadcast.email_html_content}
-              </div>
-            </div>
-          )}
-
-          {/* Media */}
-          {broadcast.has_media && (
-            <div>
-              <p className="mb-1 text-sm text-dark-400">{t('admin.broadcasts.media')}</p>
-              <div className="flex items-center gap-2 text-dark-100">
-                {broadcast.media_type === 'photo' && <PhotoIcon />}
-                {broadcast.media_type === 'video' && <VideoIcon />}
-                {broadcast.media_type === 'document' && <DocumentIcon />}
-                <span className="capitalize">{broadcast.media_type}</span>
-              </div>
-            </div>
-          )}
-
-          {/* Admin & Time */}
-          <div className="flex justify-between text-sm text-dark-400">
-            <span>{broadcast.admin_name || t('admin.broadcasts.unknownAdmin')}</span>
-            <span>{new Date(broadcast.created_at).toLocaleString()}</span>
-          </div>
-        </div>
-
-        {/* Footer */}
-        {isRunning && broadcast.status !== 'cancelling' && (
-          <div className="border-t border-dark-700 p-4">
-            <button
-              onClick={onStop}
-              disabled={isStopping}
-              className="flex w-full items-center justify-center gap-2 rounded-lg bg-red-500/20 py-2 text-red-400 transition-colors hover:bg-red-500/30 disabled:opacity-50"
-            >
-              <StopIcon />
-              {t('admin.broadcasts.stop')}
-            </button>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
 // Main component
 export default function AdminBroadcasts() {
   const { t } = useTranslation();
-  const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [selectedBroadcast, setSelectedBroadcast] = useState<Broadcast | null>(null);
   const [page, setPage] = useState(0);
   const limit = 20;
 
@@ -1009,158 +538,128 @@ export default function AdminBroadcasts() {
     refetchInterval: 5000, // Auto refresh every 5s
   });
 
-  // Stop mutation
-  const stopMutation = useMutation({
-    mutationFn: adminBroadcastsApi.stop,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin', 'broadcasts'] });
-      setSelectedBroadcast(null);
-    },
-  });
-
   const broadcasts = data?.items || [];
   const total = data?.total || 0;
   const totalPages = Math.ceil(total / limit);
 
   return (
-    <div className="min-h-screen bg-dark-900 p-4 pb-20 md:pb-4">
-      <div className="mx-auto max-w-4xl">
-        {/* Header */}
-        <div className="mb-6 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link
-              to="/admin"
-              className="flex h-10 w-10 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
-            >
-              <BackIcon />
-            </Link>
-            <div>
-              <h1 className="text-xl font-bold text-dark-100">{t('admin.broadcasts.title')}</h1>
-              <p className="text-sm text-dark-400">{t('admin.broadcasts.subtitle')}</p>
-            </div>
-          </div>
-          <div className="flex gap-2">
-            <button
-              onClick={() => refetch()}
-              className="rounded-lg bg-dark-800 p-2 text-dark-400 transition-colors hover:text-dark-100"
-            >
-              <RefreshIcon />
-            </button>
-            <button
-              onClick={() => setShowCreateModal(true)}
-              className="flex items-center gap-2 rounded-lg bg-accent-500 px-4 py-2 text-white transition-colors hover:bg-accent-600"
-            >
-              <PlusIcon />
-              <span className="hidden sm:inline">{t('admin.broadcasts.create')}</span>
-            </button>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <AdminBackButton />
+          <div>
+            <h1 className="text-xl font-bold text-dark-100">{t('admin.broadcasts.title')}</h1>
+            <p className="text-sm text-dark-400">{t('admin.broadcasts.subtitle')}</p>
           </div>
         </div>
-
-        {/* Broadcasts list */}
-        <div className="overflow-hidden rounded-xl bg-dark-800">
-          {isLoading ? (
-            <div className="p-8 text-center text-dark-400">
-              <RefreshIcon />
-              <p className="mt-2">{t('common.loading')}</p>
-            </div>
-          ) : broadcasts.length === 0 ? (
-            <div className="p-8 text-center text-dark-400">
-              <BroadcastIcon />
-              <p className="mt-2">{t('admin.broadcasts.empty')}</p>
-            </div>
-          ) : (
-            <div className="divide-y divide-dark-700">
-              {broadcasts.map((broadcast) => (
-                <button
-                  key={broadcast.id}
-                  onClick={() => setSelectedBroadcast(broadcast)}
-                  className="w-full p-4 text-left transition-colors hover:bg-dark-700/50"
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="min-w-0 flex-1">
-                      <div className="mb-1 flex flex-wrap items-center gap-2">
-                        <StatusBadge status={broadcast.status} />
-                        <ChannelBadge channel={broadcast.channel} />
-                        <span className="text-xs text-dark-400">#{broadcast.id}</span>
-                        {broadcast.has_media && (
-                          <span className="text-dark-400">
-                            {broadcast.media_type === 'photo' && <PhotoIcon />}
-                            {broadcast.media_type === 'video' && <VideoIcon />}
-                            {broadcast.media_type === 'document' && <DocumentIcon />}
-                          </span>
-                        )}
-                      </div>
-                      <p className="truncate text-sm text-dark-100">
-                        {broadcast.message_text || broadcast.email_subject || '-'}
-                      </p>
-                      <div className="mt-2 flex items-center gap-4 text-xs text-dark-400">
-                        <span>{broadcast.target_type}</span>
-                        <span>
-                          {broadcast.sent_count}/{broadcast.total_count}
-                        </span>
-                        <span>{new Date(broadcast.created_at).toLocaleDateString()}</span>
-                      </div>
-                    </div>
-                    {['queued', 'in_progress'].includes(broadcast.status) && (
-                      <div className="w-16">
-                        <div className="h-1.5 overflow-hidden rounded-full bg-dark-600">
-                          <div
-                            className="h-full bg-accent-500"
-                            style={{ width: `${broadcast.progress_percent}%` }}
-                          />
-                        </div>
-                        <p className="mt-1 text-center text-xs text-dark-400">
-                          {broadcast.progress_percent.toFixed(0)}%
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </button>
-              ))}
-            </div>
-          )}
-
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-2 border-t border-dark-700 p-4">
-              <button
-                onClick={() => setPage((p) => Math.max(0, p - 1))}
-                disabled={page === 0}
-                className="rounded-lg bg-dark-700 px-3 py-1 text-dark-300 hover:bg-dark-600 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {t('admin.broadcasts.prev')}
-              </button>
-              <span className="text-dark-400">
-                {page + 1} / {totalPages}
-              </span>
-              <button
-                onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
-                disabled={page >= totalPages - 1}
-                className="rounded-lg bg-dark-700 px-3 py-1 text-dark-300 hover:bg-dark-600 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {t('admin.broadcasts.next')}
-              </button>
-            </div>
-          )}
+        <div className="flex gap-2">
+          <button
+            onClick={() => refetch()}
+            className="rounded-lg bg-dark-800 p-2 text-dark-400 transition-colors hover:text-dark-100"
+          >
+            <RefreshIcon />
+          </button>
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="flex items-center gap-2 rounded-lg bg-accent-500 px-4 py-2 text-white transition-colors hover:bg-accent-600"
+          >
+            <PlusIcon />
+            <span className="hidden sm:inline">{t('admin.broadcasts.create')}</span>
+          </button>
         </div>
       </div>
 
-      {/* Modals */}
+      {/* Broadcasts list */}
+      {isLoading ? (
+        <div className="rounded-xl border border-dark-700 bg-dark-800/50 p-8 text-center text-dark-400">
+          <RefreshIcon />
+          <p className="mt-2">{t('common.loading')}</p>
+        </div>
+      ) : broadcasts.length === 0 ? (
+        <div className="rounded-xl border border-dark-700 bg-dark-800/50 p-8 text-center text-dark-400">
+          <BroadcastIcon />
+          <p className="mt-2">{t('admin.broadcasts.empty')}</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {broadcasts.map((broadcast) => (
+            <button
+              key={broadcast.id}
+              onClick={() => navigate(`/admin/broadcasts/${broadcast.id}`)}
+              className="w-full rounded-xl border border-dark-700 bg-dark-800/50 p-4 text-left transition-all hover:border-dark-600 hover:bg-dark-800"
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div className="min-w-0 flex-1">
+                  <div className="mb-1 flex items-center gap-2">
+                    <StatusBadge status={broadcast.status} />
+                    <span className="text-xs text-dark-400">#{broadcast.id}</span>
+                    {broadcast.has_media && (
+                      <span className="text-dark-400">
+                        {broadcast.media_type === 'photo' && <PhotoIcon />}
+                        {broadcast.media_type === 'video' && <VideoIcon />}
+                        {broadcast.media_type === 'document' && <DocumentIcon />}
+                      </span>
+                    )}
+                  </div>
+                  <p className="truncate text-sm text-dark-100">{broadcast.message_text}</p>
+                  <div className="mt-2 flex items-center gap-4 text-xs text-dark-400">
+                    <span>{broadcast.target_type}</span>
+                    <span>
+                      {broadcast.sent_count}/{broadcast.total_count}
+                    </span>
+                    <span>{new Date(broadcast.created_at).toLocaleDateString()}</span>
+                  </div>
+                </div>
+                {['queued', 'in_progress'].includes(broadcast.status) && (
+                  <div className="w-16">
+                    <div className="h-1.5 overflow-hidden rounded-full bg-dark-600">
+                      <div
+                        className="h-full bg-accent-500"
+                        style={{ width: `${broadcast.progress_percent}%` }}
+                      />
+                    </div>
+                    <p className="mt-1 text-center text-xs text-dark-400">
+                      {broadcast.progress_percent.toFixed(0)}%
+                    </p>
+                  </div>
+                )}
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2 rounded-xl border border-dark-700 bg-dark-800/50 p-4">
+          <button
+            onClick={() => setPage((p) => Math.max(0, p - 1))}
+            disabled={page === 0}
+            className="rounded-lg bg-dark-700 px-3 py-1 text-dark-300 hover:bg-dark-600 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {t('admin.broadcasts.prev')}
+          </button>
+          <span className="text-dark-400">
+            {page + 1} / {totalPages}
+          </span>
+          <button
+            onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+            disabled={page >= totalPages - 1}
+            className="rounded-lg bg-dark-700 px-3 py-1 text-dark-300 hover:bg-dark-600 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {t('admin.broadcasts.next')}
+          </button>
+        </div>
+      )}
+
+      {/* Create Modal */}
       {showCreateModal && (
         <CreateBroadcastModal
           onClose={() => setShowCreateModal(false)}
           onSuccess={() => {
             refetch();
           }}
-        />
-      )}
-
-      {selectedBroadcast && (
-        <BroadcastDetailModal
-          broadcast={selectedBroadcast}
-          onClose={() => setSelectedBroadcast(null)}
-          onStop={() => stopMutation.mutate(selectedBroadcast.id)}
-          isStopping={stopMutation.isPending}
         />
       )}
     </div>

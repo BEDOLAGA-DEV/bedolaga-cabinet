@@ -7,6 +7,7 @@ import { useCurrency } from '../hooks/useCurrency';
 import { useTelegramWebApp } from '../hooks/useTelegramWebApp';
 import { checkRateLimit, getRateLimitResetTime, RATE_LIMIT_KEYS } from '../utils/rateLimit';
 import { useCloseOnSuccessNotification } from '../store/successNotification';
+import { useBackButton, useMainButton, useHaptic, usePlatform } from '@/platform';
 import type { PaymentMethod } from '../types';
 import BentoCard from './ui/BentoCard';
 
@@ -116,7 +117,9 @@ export default function TopUpModal({ method, onClose, initialAmountRubles }: Top
   const { t } = useTranslation();
   const { formatAmount, currencySymbol, convertAmount, convertToRub, targetCurrency } =
     useCurrency();
-  const { isTelegramWebApp, safeAreaInset, contentSafeAreaInset, webApp } = useTelegramWebApp();
+  const { isTelegramWebApp, safeAreaInset, contentSafeAreaInset } = useTelegramWebApp();
+  const { openInvoice } = usePlatform();
+  const haptic = useHaptic();
   const inputRef = useRef<HTMLInputElement>(null);
   const isMobileScreen = useIsMobile();
 
@@ -160,16 +163,8 @@ export default function TopUpModal({ method, onClose, initialAmountRubles }: Top
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [handleClose]);
 
-  // Telegram back button (Android)
-  useEffect(() => {
-    if (!webApp?.BackButton) return;
-    webApp.BackButton.show();
-    webApp.BackButton.onClick(handleClose);
-    return () => {
-      webApp.BackButton.offClick(handleClose);
-      webApp.BackButton.hide();
-    };
-  }, [webApp, handleClose]);
+  // Telegram back button - using platform hook
+  useBackButton(handleClose);
 
   // Scroll lock
   useEffect(() => {
@@ -205,35 +200,29 @@ export default function TopUpModal({ method, onClose, initialAmountRubles }: Top
 
   const starsPaymentMutation = useMutation({
     mutationFn: (amountKopeks: number) => balanceApi.createStarsInvoice(amountKopeks),
-    onSuccess: (data) => {
-      const webApp = window.Telegram?.WebApp;
+    onSuccess: async (data) => {
       if (!data.invoice_url) {
         setError(t('balance.errors.noPaymentLink'));
         return;
       }
-      // openInvoice requires WebApp version 6.1+
-      const supportsInvoice =
-        webApp?.openInvoice && webApp?.isVersionAtLeast && webApp.isVersionAtLeast('6.1');
-      if (supportsInvoice) {
-        try {
-          webApp.openInvoice(data.invoice_url, (status) => {
-            if (status === 'paid') {
-              setError(null);
-              onClose();
-            } else if (status === 'failed') {
-              setError(t('wheel.starsPaymentFailed'));
-            }
-          });
-        } catch (e) {
-          setError(t('balance.errors.generic', { details: String(e) }));
+      try {
+        // Use platform-agnostic invoice opening
+        const status = await openInvoice(data.invoice_url);
+        if (status === 'paid') {
+          haptic.notification('success');
+          setError(null);
+          onClose();
+        } else if (status === 'failed') {
+          haptic.notification('error');
+          setError(t('wheel.starsPaymentFailed'));
         }
-      } else {
-        // Fallback: open invoice URL in Telegram (browser or unsupported WebApp version)
-        window.open(data.invoice_url, '_blank', 'noopener,noreferrer');
-        onClose();
+        // 'pending' and 'cancelled' just close without action
+      } catch (e) {
+        setError(t('balance.errors.generic', { details: String(e) }));
       }
     },
     onError: (err: unknown) => {
+      haptic.notification('error');
       const axiosError = err as { response?: { data?: { detail?: string }; status?: number } };
       setError(axiosError?.response?.data?.detail || t('balance.errors.invoiceFailed'));
     },
@@ -312,6 +301,24 @@ export default function TopUpModal({ method, onClose, initialAmountRubles }: Top
       ? Math.round(convertAmount(rub)).toString()
       : convertAmount(rub).toFixed(currencyDecimals);
   const isPending = topUpMutation.isPending || starsPaymentMutation.isPending;
+
+  // Check if form is valid for MainButton
+  const amountNum = parseFloat(amount);
+  const amountRubles = !isNaN(amountNum) && amountNum > 0 ? convertToRub(amountNum) : 0;
+  const isFormValid =
+    !isPending &&
+    !paymentUrl &&
+    amountRubles >= minRubles &&
+    amountRubles <= maxRubles &&
+    (!hasOptions || !!selectedOption);
+
+  // Telegram MainButton integration - shows "Top Up" action
+  useMainButton(isFormValid && !isInputFocused ? handleSubmit : null, {
+    text: t('balance.topUp'),
+    isLoading: isPending,
+    isActive: isFormValid,
+    visible: !paymentUrl && isMobileScreen,
+  });
 
   const handleCopyUrl = async () => {
     if (!paymentUrl) return;

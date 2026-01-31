@@ -2,6 +2,19 @@ import { useEffect, useState, useCallback } from 'react';
 
 const FULLSCREEN_CACHE_KEY = 'cabinet_fullscreen_enabled';
 
+/**
+ * Check if running on mobile Telegram client (iOS/Android)
+ * Fullscreen mode should only be applied on mobile platforms
+ */
+export function isTelegramMobile(): boolean {
+  const webApp = typeof window !== 'undefined' ? window.Telegram?.WebApp : undefined;
+  if (!webApp?.platform) return false;
+
+  // Only iOS and Android are mobile platforms
+  // tdesktop, macos, web, unknown - all are desktop/non-mobile
+  return webApp.platform === 'ios' || webApp.platform === 'android';
+}
+
 // Get cached fullscreen setting
 export const getCachedFullscreenEnabled = (): boolean => {
   try {
@@ -27,18 +40,29 @@ export const setCachedFullscreenEnabled = (enabled: boolean) => {
 export function useTelegramWebApp() {
   // Initialize synchronously to avoid flash/flicker on first render
   const webApp = typeof window !== 'undefined' ? window.Telegram?.WebApp : undefined;
+  const inTelegram = isInTelegramWebApp();
 
-  const [isFullscreen, setIsFullscreen] = useState(() => webApp?.isFullscreen || false);
-  const [isTelegramWebApp, setIsTelegramWebApp] = useState(() => !!webApp);
+  const [isFullscreen, setIsFullscreen] = useState(
+    () => (inTelegram && webApp?.isFullscreen) || false,
+  );
+  const [isTelegramWebApp, setIsTelegramWebApp] = useState(() => inTelegram);
   const [safeAreaInset, setSafeAreaInset] = useState(
-    () => webApp?.safeAreaInset || { top: 0, bottom: 0, left: 0, right: 0 },
+    () => (inTelegram && webApp?.safeAreaInset) || { top: 0, bottom: 0, left: 0, right: 0 },
   );
   const [contentSafeAreaInset, setContentSafeAreaInset] = useState(
-    () => webApp?.contentSafeAreaInset || { top: 0, bottom: 0, left: 0, right: 0 },
+    () =>
+      (inTelegram && webApp?.contentSafeAreaInset) || {
+        top: 0,
+        bottom: 0,
+        left: 0,
+        right: 0,
+      },
   );
 
   useEffect(() => {
-    if (!webApp) {
+    // Only run Telegram-specific code if we're actually in Telegram
+    const isActuallyInTelegram = isInTelegramWebApp();
+    if (!webApp || !isActuallyInTelegram) {
       setIsTelegramWebApp(false);
       return;
     }
@@ -149,32 +173,46 @@ export function useTelegramWebApp() {
 }
 
 /**
+ * Check if we're actually running inside Telegram Mini App
+ * (not just the script loaded on a regular webpage)
+ */
+export function isInTelegramWebApp(): boolean {
+  const webApp = window.Telegram?.WebApp;
+  // Check if initData exists - it's empty when not in Telegram
+  return Boolean(webApp?.initData && webApp.initData.length > 0);
+}
+
+/**
  * Initialize Telegram WebApp on app start
  * Call this in main.tsx or App.tsx
  */
 export function initTelegramWebApp() {
   const webApp = window.Telegram?.WebApp;
-  if (webApp) {
-    webApp.ready();
-    webApp.expand();
+  // Only initialize if we're actually in Telegram
+  if (!webApp || !isInTelegramWebApp()) {
+    return;
+  }
 
-    // Disable vertical swipes to prevent accidental closing (requires Bot API 7.7+)
-    try {
-      if (webApp.disableVerticalSwipes && webApp.version && webApp.version >= '7.7') {
-        webApp.disableVerticalSwipes();
-      }
-    } catch {
-      // Swipe control not supported in this version
+  webApp.ready();
+  webApp.expand();
+
+  // Disable vertical swipes to prevent accidental closing (requires Bot API 7.7+)
+  try {
+    if (webApp.disableVerticalSwipes && webApp.version && webApp.version >= '7.7') {
+      webApp.disableVerticalSwipes();
     }
+  } catch {
+    // Swipe control not supported in this version
+  }
 
-    // Auto-enter fullscreen if enabled in settings (use cached value for instant response)
-    const fullscreenEnabled = getCachedFullscreenEnabled();
-    if (fullscreenEnabled && webApp.requestFullscreen && !webApp.isFullscreen) {
-      try {
-        webApp.requestFullscreen();
-      } catch (e) {
-        console.warn('Auto-fullscreen failed:', e);
-      }
+  // Auto-enter fullscreen if enabled in settings (use cached value for instant response)
+  // Only apply fullscreen on mobile Telegram (iOS/Android) - desktop doesn't need it
+  const fullscreenEnabled = getCachedFullscreenEnabled();
+  if (fullscreenEnabled && isTelegramMobile() && webApp.requestFullscreen && !webApp.isFullscreen) {
+    try {
+      webApp.requestFullscreen();
+    } catch (e) {
+      console.warn('Auto-fullscreen failed:', e);
     }
   }
 }

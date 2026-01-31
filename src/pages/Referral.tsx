@@ -138,8 +138,8 @@ export default function Referral() {
       <h1 className="text-2xl font-bold text-dark-50 sm:text-3xl">{t('referral.title')}</h1>
 
       {/* Stats Cards */}
-      <div className="bento-grid">
-        <div className="bento-card-hover">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4">
+        <div className="bento-card-hover col-span-2 md:col-span-1">
           <div className="text-sm text-dark-400">{t('referral.stats.totalReferrals')}</div>
           <div className="stat-value mt-1">{info?.total_referrals || 0}</div>
           <div className="mt-1 text-sm text-dark-500">
@@ -152,7 +152,7 @@ export default function Referral() {
             {formatPositive(info?.total_earnings_rubles || 0)}
           </div>
         </div>
-        <div className="bento-card-hover col-span-2 sm:col-span-1">
+        <div className="bento-card-hover">
           <div className="text-sm text-dark-400">{t('referral.stats.commissionRate')}</div>
           <div className="stat-value mt-1 text-accent-400">{info?.commission_percent || 0}%</div>
         </div>

@@ -241,7 +241,11 @@ export default function TicketNotificationBell({ isAdmin = false }: TicketNotifi
       {/* Bell button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative rounded-xl border border-dark-700/50 bg-dark-800/50 p-2 text-dark-400 transition-all duration-200 hover:bg-dark-700 hover:text-accent-400"
+        className={`relative rounded-xl border p-2 transition-all duration-200 ${
+          isOpen
+            ? 'border-dark-600 bg-dark-700 text-accent-400'
+            : 'border-dark-700/50 bg-dark-800/50 text-dark-400 hover:bg-dark-700 hover:text-accent-400'
+        }`}
         title={t('notifications.ticketNotifications', 'Ticket notifications')}
       >
         <BellIcon />

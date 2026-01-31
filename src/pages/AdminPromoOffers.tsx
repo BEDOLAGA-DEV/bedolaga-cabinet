@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
 import i18n from '../i18n';
 import {
   promoOffersApi,
@@ -14,19 +13,9 @@ import {
   OFFER_TYPE_CONFIG,
   OfferType,
 } from '../api/promoOffers';
+import { AdminBackButton } from '../components/admin';
 
 // Icons
-const BackIcon = () => (
-  <svg
-    className="h-5 w-5 text-dark-400"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={2}
-  >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-  </svg>
-);
 
 const EditIcon = () => (
   <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -116,9 +105,9 @@ const getActionLabel = (action: string): string => {
 
 const getActionColor = (action: string): string => {
   const colors: Record<string, string> = {
-    created: 'bg-blue-500/20 text-blue-400',
-    claimed: 'bg-emerald-500/20 text-emerald-400',
-    consumed: 'bg-purple-500/20 text-purple-400',
+    created: 'bg-accent-500/20 text-accent-400',
+    claimed: 'bg-success-500/20 text-success-400',
+    consumed: 'bg-accent-500/20 text-accent-400',
     disabled: 'bg-dark-600 text-dark-400',
   };
   return colors[action] || 'bg-dark-600 text-dark-400';
@@ -545,12 +534,12 @@ function ResultModal({ title, message, isSuccess, onClose }: ResultModalProps) {
       <div className="w-full max-w-sm rounded-xl bg-dark-800 p-6 text-center">
         <div
           className={`mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full ${
-            isSuccess ? 'bg-emerald-500/20' : 'bg-error-500/20'
+            isSuccess ? 'bg-success-500/20' : 'bg-error-500/20'
           }`}
         >
           {isSuccess ? (
             <svg
-              className="h-8 w-8 text-emerald-400"
+              className="h-8 w-8 text-success-400"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -688,12 +677,7 @@ export default function AdminPromoOffers() {
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Link
-            to="/admin"
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
-          >
-            <BackIcon />
-          </Link>
+          <AdminBackButton />
           <div>
             <h1 className="text-xl font-semibold text-dark-100">{t('admin.promoOffers.title')}</h1>
             <p className="text-sm text-dark-400">{t('admin.promoOffers.subtitle')}</p>
@@ -816,7 +800,7 @@ export default function AdminPromoOffers() {
                   <div className="mt-3 border-t border-dark-700 pt-3">
                     <div className="flex items-center gap-2">
                       {template.is_active ? (
-                        <span className="rounded bg-emerald-500/20 px-2 py-0.5 text-xs text-emerald-400">
+                        <span className="rounded bg-success-500/20 px-2 py-0.5 text-xs text-success-400">
                           {t('admin.promoOffers.status.active')}
                         </span>
                       ) : (

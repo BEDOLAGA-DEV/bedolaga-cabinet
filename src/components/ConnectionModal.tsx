@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { subscriptionApi } from '../api/subscription';
 import { useTelegramWebApp } from '../hooks/useTelegramWebApp';
+import { useBackButton, useHaptic } from '@/platform';
 import type { AppInfo, AppConfig, LocalizedText } from '../types';
 
 interface ConnectionModalProps {
@@ -156,14 +157,18 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
   const [showAppSelector, setShowAppSelector] = useState(false);
   const [selectedPlatform, setSelectedPlatform] = useState<string | null>(null);
 
-  const { isTelegramWebApp, isFullscreen, safeAreaInset, contentSafeAreaInset, webApp } =
+  const { isTelegramWebApp, isFullscreen, safeAreaInset, contentSafeAreaInset } =
     useTelegramWebApp();
+  const { impact: hapticImpact } = useHaptic();
   const isMobileScreen = useIsMobile();
   const isMobile = isMobileScreen;
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Ref для хранения актуального обработчика BackButton (фикс мигания)
   const backButtonHandlerRef = useRef<() => void>(() => {});
+  // Ref for haptic to avoid recreating handleBackButton
+  const hapticRef = useRef(hapticImpact);
+  hapticRef.current = hapticImpact;
 
   // Prevent scroll events from bubbling to parent/Telegram
   const handleScrollContainerWheel = useCallback((e: React.WheelEvent) => {
@@ -237,23 +242,13 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
     backButtonHandlerRef.current = showAppSelector ? handleBack : handleClose;
   }, [showAppSelector, handleBack, handleClose]);
 
-  // Управление BackButton — эффект запускается только при mount/unmount
-  // Используем стабильный обработчик через ref, чтобы избежать мигания
-  useEffect(() => {
-    if (!webApp?.BackButton) return;
+  // BackButton using platform hook - always close/back, ref provides current handler
+  const handleBackButton = useCallback(() => {
+    hapticRef.current('light');
+    backButtonHandlerRef.current();
+  }, []);
 
-    const stableHandler = () => {
-      backButtonHandlerRef.current();
-    };
-
-    webApp.BackButton.show();
-    webApp.BackButton.onClick(stableHandler);
-
-    return () => {
-      webApp.BackButton.offClick(stableHandler);
-      webApp.BackButton.hide();
-    };
-  }, [webApp]); // Только webApp в зависимостях!
+  useBackButton(handleBackButton);
 
   useEffect(() => {
     document.body.style.overflow = 'hidden';
@@ -446,12 +441,14 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
       return (
         <Wrapper>
           <div className="flex items-center gap-3 border-b border-dark-800 p-4">
-            <button
-              onClick={handleBack}
-              className="-ml-2 rounded-xl p-2 text-dark-300 hover:bg-dark-800"
-            >
-              <BackIcon />
-            </button>
+            {!isTelegramWebApp && (
+              <button
+                onClick={handleBack}
+                className="-ml-2 rounded-xl p-2 text-dark-300 hover:bg-dark-800"
+              >
+                <BackIcon />
+              </button>
+            )}
             <h2 className="text-lg font-bold text-dark-100">
               {t('subscription.connection.selectPlatform')}
             </h2>
@@ -518,12 +515,14 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
     return (
       <Wrapper>
         <div className="flex items-center gap-3 border-b border-dark-800 p-4">
-          <button
-            onClick={handleBack}
-            className="-ml-2 rounded-xl p-2 text-dark-300 hover:bg-dark-800"
-          >
-            <BackIcon />
-          </button>
+          {!isTelegramWebApp && (
+            <button
+              onClick={handleBack}
+              className="-ml-2 rounded-xl p-2 text-dark-300 hover:bg-dark-800"
+            >
+              <BackIcon />
+            </button>
+          )}
           <div className="flex-1">
             <h2 className="text-lg font-bold text-dark-100">
               {platformNames[selectedPlatform] || selectedPlatform}
@@ -607,12 +606,14 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
       <div className="border-b border-dark-800 p-4">
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-lg font-bold text-dark-100">{t('subscription.connection.title')}</h2>
-          <button
-            onClick={handleClose}
-            className="-mr-2 rounded-xl p-2 text-dark-400 hover:bg-dark-800"
-          >
-            <CloseIcon />
-          </button>
+          {!isTelegramWebApp && (
+            <button
+              onClick={handleClose}
+              className="-mr-2 rounded-xl p-2 text-dark-400 hover:bg-dark-800"
+            >
+              <CloseIcon />
+            </button>
+          )}
         </div>
         <button
           onClick={() => setShowAppSelector(true)}

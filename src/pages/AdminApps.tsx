@@ -1,7 +1,6 @@
 import { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
 import {
   adminAppsApi,
   AppDefinition,
@@ -13,19 +12,9 @@ import {
   RemnawaveConfig,
   importFromRemnawaveFormat as convertRemnawave,
 } from '../api/adminApps';
+import { AdminBackButton } from '../components/admin';
 
 // Icons
-const BackIcon = () => (
-  <svg
-    className="h-5 w-5 text-dark-400"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={2}
-  >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-  </svg>
-);
 
 const AppsIcon = () => (
   <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -87,7 +76,7 @@ const CopyIcon = () => (
 
 const StarIcon = ({ filled }: { filled: boolean }) => (
   <svg
-    className={`h-4 w-4 ${filled ? 'fill-yellow-400 text-yellow-400' : 'text-dark-500'}`}
+    className={`h-4 w-4 ${filled ? 'fill-warning-400 text-warning-400' : 'text-dark-500'}`}
     viewBox="0 0 24 24"
     stroke="currentColor"
     strokeWidth={2}
@@ -816,12 +805,7 @@ export default function AdminApps() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <Link
-            to="/admin"
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
-          >
-            <BackIcon />
-          </Link>
+          <AdminBackButton />
           <h1 className="text-2xl font-bold text-dark-50 sm:text-3xl">{t('admin.apps.title')}</h1>
         </div>
 

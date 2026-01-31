@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { useSuccessNotification } from '../store/successNotification';
 import { useCurrency } from '../hooks/useCurrency';
 import { useTelegramWebApp } from '../hooks/useTelegramWebApp';
+import { useBackButton, useHaptic } from '@/platform';
 
 // Icons
 const CheckCircleIcon = () => (
@@ -79,7 +80,8 @@ export default function SuccessNotificationModal() {
   const navigate = useNavigate();
   const { isOpen, data, hide } = useSuccessNotification();
   const { formatAmount, currencySymbol } = useCurrency();
-  const { webApp, safeAreaInset, contentSafeAreaInset, isTelegramWebApp } = useTelegramWebApp();
+  const { safeAreaInset, contentSafeAreaInset, isTelegramWebApp } = useTelegramWebApp();
+  const haptic = useHaptic();
 
   const safeBottom = isTelegramWebApp
     ? Math.max(safeAreaInset.bottom, contentSafeAreaInset.bottom)
@@ -104,18 +106,15 @@ export default function SuccessNotificationModal() {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, handleClose]);
 
-  // Telegram back button
+  // Telegram back button - using platform hook
+  useBackButton(isOpen ? handleClose : null);
+
+  // Haptic feedback on open
   useEffect(() => {
-    if (!isOpen || !webApp?.BackButton) return;
-
-    webApp.BackButton.show();
-    webApp.BackButton.onClick(handleClose);
-
-    return () => {
-      webApp.BackButton.offClick(handleClose);
-      webApp.BackButton.hide();
-    };
-  }, [isOpen, webApp, handleClose]);
+    if (isOpen) {
+      haptic.notification('success');
+    }
+  }, [isOpen, haptic]);
 
   // Scroll lock
   useEffect(() => {

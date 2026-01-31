@@ -7,7 +7,6 @@ import PageLoader from './components/common/PageLoader';
 import { MaintenanceScreen, ChannelSubscriptionScreen } from './components/blocking';
 import { saveReturnUrl } from './utils/token';
 import { useAnalyticsCounters } from './hooks/useAnalyticsCounters';
-
 // Auth pages - load immediately (small)
 import Login from './pages/Login';
 import TelegramCallback from './pages/TelegramCallback';
@@ -47,6 +46,9 @@ const AdminPaymentMethods = lazy(() => import('./pages/AdminPaymentMethods'));
 const AdminPromoOffers = lazy(() => import('./pages/AdminPromoOffers'));
 const AdminRemnawave = lazy(() => import('./pages/AdminRemnawave'));
 const AdminEmailTemplates = lazy(() => import('./pages/AdminEmailTemplates'));
+const AdminUserDetail = lazy(() => import('./pages/AdminUserDetail'));
+const AdminBroadcastDetail = lazy(() => import('./pages/AdminBroadcastDetail'));
+const AdminEmailTemplatePreview = lazy(() => import('./pages/AdminEmailTemplatePreview'));
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuthStore();
@@ -401,6 +403,36 @@ function App() {
             <AdminRoute>
               <LazyPage>
                 <AdminEmailTemplates />
+              </LazyPage>
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/users/:id"
+          element={
+            <AdminRoute>
+              <LazyPage>
+                <AdminUserDetail />
+              </LazyPage>
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/broadcasts/:id"
+          element={
+            <AdminRoute>
+              <LazyPage>
+                <AdminBroadcastDetail />
+              </LazyPage>
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/email-templates/preview/:type/:lang"
+          element={
+            <AdminRoute>
+              <LazyPage>
+                <AdminEmailTemplatePreview />
               </LazyPage>
             </AdminRoute>
           }

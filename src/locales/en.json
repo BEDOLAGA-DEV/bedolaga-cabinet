@@ -28,7 +28,8 @@
       "perGb": "/GB"
     },
     "retry": "Retry",
-    "saving": "Saving..."
+    "saving": "Saving...",
+    "understand": "Got it"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -751,7 +752,9 @@
       "resetted": "Template reset to default",
       "testSent": "Test email sent",
       "variables": "Available Variables",
-      "clickToCopy": "Click to copy"
+      "clickToCopy": "Click to copy",
+      "previewDesktopOnly": "Preview is only available in the desktop web version",
+      "previewNotAvailable": "Preview not available"
     },
     "payments": {
       "title": "Payment verification",

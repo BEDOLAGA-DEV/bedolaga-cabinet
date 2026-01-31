@@ -3,8 +3,10 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import App from './App';
+import { PlatformProvider } from './platform/PlatformProvider';
 import { ThemeColorsProvider } from './providers/ThemeColorsProvider';
 import { ToastProvider } from './components/Toast';
+import { TooltipProvider } from './components/primitives/Tooltip';
 import { initLogoPreload } from './api/branding';
 import { initTelegramWebApp } from './hooks/useTelegramWebApp';
 import './i18n';
@@ -29,11 +31,15 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <ThemeColorsProvider>
-          <ToastProvider>
-            <App />
-          </ToastProvider>
-        </ThemeColorsProvider>
+        <PlatformProvider>
+          <ThemeColorsProvider>
+            <TooltipProvider>
+              <ToastProvider>
+                <App />
+              </ToastProvider>
+            </TooltipProvider>
+          </ThemeColorsProvider>
+        </PlatformProvider>
       </BrowserRouter>
     </QueryClientProvider>
   </React.StrictMode>,

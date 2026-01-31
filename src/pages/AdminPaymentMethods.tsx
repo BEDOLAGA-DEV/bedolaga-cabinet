@@ -1,13 +1,10 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
 import {
   DndContext,
-  closestCenter,
   KeyboardSensor,
   PointerSensor,
-  TouchSensor,
   useSensor,
   useSensors,
   type DragEndEvent,
@@ -21,21 +18,10 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { adminPaymentMethodsApi } from '../api/adminPaymentMethods';
+import { AdminBackButton } from '../components/admin';
 import type { PaymentMethodConfig, PromoGroupSimple } from '../types';
 
 // ============ Icons ============
-
-const BackIcon = () => (
-  <svg
-    className="h-5 w-5 text-dark-400"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={2}
-  >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-  </svg>
-);
 
 const GripIcon = () => (
   <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -120,11 +106,11 @@ function SortablePaymentCard({ config, onClick }: SortableCardProps) {
     id: config.method_id,
   });
 
-  const style = {
+  const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
     transition,
     zIndex: isDragging ? 50 : undefined,
-    opacity: isDragging ? 0.85 : 1,
+    position: isDragging ? 'relative' : undefined,
   };
 
   const displayName = config.display_name || config.default_display_name;
@@ -159,19 +145,19 @@ function SortablePaymentCard({ config, onClick }: SortableCardProps) {
     <div
       ref={setNodeRef}
       style={style}
-      className={`group flex items-center gap-3 rounded-xl border p-4 transition-all ${
+      className={`group flex items-center gap-3 rounded-xl border p-4 ${
         isDragging
-          ? 'border-accent-500/50 bg-dark-700/80 shadow-xl shadow-accent-500/10'
+          ? 'border-accent-500/50 bg-dark-800 shadow-xl shadow-accent-500/20'
           : config.is_enabled
             ? 'border-dark-700/50 bg-dark-800/50 hover:border-dark-600'
             : 'border-dark-800/50 bg-dark-900/30 opacity-60'
       }`}
     >
-      {/* Drag handle */}
+      {/* Drag handle - larger touch target for mobile */}
       <button
         {...attributes}
         {...listeners}
-        className="flex-shrink-0 cursor-grab touch-manipulation rounded-lg p-1.5 text-dark-500 hover:bg-dark-700/50 hover:text-dark-300 active:cursor-grabbing"
+        className="flex-shrink-0 cursor-grab touch-none rounded-lg p-2.5 text-dark-500 hover:bg-dark-700/50 hover:text-dark-300 active:cursor-grabbing sm:p-1.5"
         title={t('admin.paymentMethods.dragToReorder')}
       >
         <GripIcon />
@@ -682,10 +668,9 @@ export default function AdminPaymentMethods() {
     },
   });
 
-  // DnD sensors
+  // DnD sensors - PointerSensor handles both mouse and touch
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
-    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 5 } }),
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
 
@@ -717,12 +702,7 @@ export default function AdminPaymentMethods() {
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <Link
-            to="/admin"
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
-          >
-            <BackIcon />
-          </Link>
+          <AdminBackButton />
           <div>
             <h1 className="text-2xl font-bold text-dark-50">{t('admin.paymentMethods.title')}</h1>
             <p className="text-sm text-dark-400">{t('admin.paymentMethods.description')}</p>
@@ -757,11 +737,7 @@ export default function AdminPaymentMethods() {
             <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
           </div>
         ) : methods.length > 0 ? (
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragEnd={handleDragEnd}
-          >
+          <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
             <SortableContext
               items={methods.map((m) => m.method_id)}
               strategy={verticalListSortingStrategy}

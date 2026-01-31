@@ -1,11 +1,16 @@
 import { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import { motion } from 'framer-motion';
 import { ticketsApi } from '../api/tickets';
 import { infoApi } from '../api/info';
+import { useAuthStore } from '../store/auth';
 import { logger } from '../utils/logger';
 import { checkRateLimit, getRateLimitResetTime, RATE_LIMIT_KEYS } from '../utils/rateLimit';
 import type { TicketDetail, TicketMessage } from '../types';
+import { Card } from '@/components/data-display/Card';
+import { Button } from '@/components/primitives/Button';
+import { staggerContainer, staggerItem } from '@/components/motion/transitions';
 
 const log = logger.createLogger('Support');
 
@@ -145,6 +150,7 @@ export default function Support() {
   log.debug('Component loaded');
 
   const { t } = useTranslation();
+  const { isAdmin } = useAuthStore();
   const queryClient = useQueryClient();
   const [selectedTicket, setSelectedTicket] = useState<TicketDetail | null>(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -303,7 +309,7 @@ export default function Support() {
         const supportUsername = supportConfig.support_username || '@support';
         log.debug('Opening profile:', supportUsername);
         return {
-          title: t('support.ticketsDisabled'),
+          title: isAdmin ? t('support.ticketsDisabled') : t('support.title'),
           message: t('support.contactSupport', { username: supportUsername }),
           buttonText: t('support.contactUs'),
           buttonAction: () => {
@@ -352,7 +358,7 @@ export default function Support() {
 
       if (supportConfig.support_type === 'url' && supportConfig.support_url) {
         return {
-          title: t('support.ticketsDisabled'),
+          title: isAdmin ? t('support.ticketsDisabled') : t('support.title'),
           message: t('support.useExternalLink'),
           buttonText: t('support.openSupport'),
           buttonAction: () => {
@@ -370,7 +376,7 @@ export default function Support() {
       const supportUsername = supportConfig.support_username || '@support';
       log.debug('Fallback: Opening profile:', supportUsername);
       return {
-        title: t('support.ticketsDisabled'),
+        title: isAdmin ? t('support.ticketsDisabled') : t('support.title'),
         message: t('support.contactSupport', { username: supportUsername }),
         buttonText: t('support.contactUs'),
         buttonAction: () => {
@@ -403,7 +409,7 @@ export default function Support() {
 
     return (
       <div className="mx-auto mt-12 max-w-md">
-        <div className="bento-card text-center">
+        <Card className="text-center">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-dark-800">
             <svg
               className="h-8 w-8 text-dark-400"
@@ -421,10 +427,10 @@ export default function Support() {
           </div>
           <h2 className="mb-2 text-xl font-semibold text-dark-100">{supportMessage.title}</h2>
           <p className="mb-6 text-dark-400">{supportMessage.message}</p>
-          <button onClick={supportMessage.buttonAction} className="btn-primary w-full">
+          <Button onClick={supportMessage.buttonAction} fullWidth>
             {supportMessage.buttonText}
-          </button>
-        </div>
+          </Button>
+        </Card>
       </div>
     );
   }
@@ -462,25 +468,32 @@ export default function Support() {
   );
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <motion.div
+      className="space-y-6"
+      variants={staggerContainer}
+      initial="initial"
+      animate="animate"
+    >
+      <motion.div
+        variants={staggerItem}
+        className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+      >
         <h1 className="text-2xl font-bold text-dark-50 sm:text-3xl">{t('support.title')}</h1>
-        <button
+        <Button
           onClick={() => {
             setShowCreateForm(true);
             setSelectedTicket(null);
             setCreateAttachment(null);
           }}
-          className="btn-primary"
         >
           <PlusIcon />
-          {t('support.newTicket')}
-        </button>
-      </div>
+          <span className="ml-2">{t('support.newTicket')}</span>
+        </Button>
+      </motion.div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <motion.div variants={staggerItem} className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Tickets List */}
-        <div className="bento-card lg:col-span-1">
+        <Card className="lg:col-span-1">
           <h2 className="mb-4 text-lg font-semibold text-dark-100">{t('support.yourTickets')}</h2>
 
           {isLoading ? (
@@ -535,10 +548,10 @@ export default function Support() {
               <div className="text-dark-400">{t('support.noTickets')}</div>
             </div>
           )}
-        </div>
+        </Card>
 
         {/* Ticket Detail / Create Form */}
-        <div className="bento-card lg:col-span-2">
+        <Card className="lg:col-span-2">
           {showCreateForm ? (
             <div>
               <h2 className="mb-6 text-lg font-semibold text-dark-100">
@@ -621,33 +634,24 @@ export default function Support() {
                 )}
 
                 <div className="flex gap-3">
-                  <button
+                  <Button
                     type="submit"
-                    disabled={createMutation.isPending || createAttachment?.uploading}
-                    className="btn-primary"
+                    disabled={createAttachment?.uploading}
+                    loading={createMutation.isPending}
                   >
-                    {createMutation.isPending ? (
-                      <span className="flex items-center gap-2">
-                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                        {t('support.creating')}
-                      </span>
-                    ) : (
-                      <>
-                        <SendIcon />
-                        {t('support.send')}
-                      </>
-                    )}
-                  </button>
-                  <button
+                    <SendIcon />
+                    <span className="ml-2">{t('support.send')}</span>
+                  </Button>
+                  <Button
                     type="button"
+                    variant="secondary"
                     onClick={() => {
                       setShowCreateForm(false);
                       setCreateAttachment(null);
                     }}
-                    className="btn-secondary"
                   >
                     {t('common.cancel')}
-                  </button>
+                  </Button>
                 </div>
               </form>
             </div>
@@ -764,21 +768,13 @@ export default function Support() {
                         )}
                       </div>
 
-                      <button
+                      <Button
                         type="submit"
-                        disabled={
-                          replyMutation.isPending ||
-                          !replyMessage.trim() ||
-                          replyAttachment?.uploading
-                        }
-                        className="btn-primary"
+                        disabled={!replyMessage.trim() || replyAttachment?.uploading}
+                        loading={replyMutation.isPending}
                       >
-                        {replyMutation.isPending ? (
-                          <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                        ) : (
-                          <SendIcon />
-                        )}
-                      </button>
+                        <SendIcon />
+                      </Button>
                     </div>
                     {rateLimitError && (
                       <div className="mt-2 rounded-lg border border-error-500/30 bg-error-500/10 p-2 text-sm text-error-400">
@@ -815,8 +811,8 @@ export default function Support() {
               <div className="text-dark-400">{t('support.selectTicket')}</div>
             </div>
           )}
-        </div>
-      </div>
-    </div>
+        </Card>
+      </motion.div>
+    </motion.div>
   );
 }

@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
 import {
   tariffsApi,
   TariffListItem,
@@ -11,19 +10,9 @@ import {
   PeriodPrice,
   ServerInfo,
 } from '../api/tariffs';
+import { AdminBackButton } from '../components/admin';
 
 // Icons
-const BackIcon = () => (
-  <svg
-    className="h-5 w-5 text-dark-400"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={2}
-  >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-  </svg>
-);
 
 const PlusIcon = () => (
   <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -130,7 +119,7 @@ function TariffTypeSelect({ onSelect, onClose }: TariffTypeSelectProps) {
             className="group w-full rounded-xl bg-dark-700 p-4 text-left transition-colors hover:bg-dark-600"
           >
             <div className="flex items-center gap-4">
-              <div className="rounded-lg bg-amber-500/20 p-3 text-amber-400 group-hover:bg-amber-500/30">
+              <div className="rounded-lg bg-warning-500/20 p-3 text-warning-400 group-hover:bg-warning-500/30">
                 <SunIcon />
               </div>
               <div>
@@ -962,7 +951,7 @@ function DailyTariffModal({ tariff, servers, onSave, onClose, isLoading }: Daily
         {/* Header */}
         <div className="flex items-center justify-between border-b border-dark-700 p-4">
           <div className="flex items-center gap-3">
-            <div className="rounded-lg bg-amber-500/20 p-2 text-amber-400">
+            <div className="rounded-lg bg-warning-500/20 p-2 text-warning-400">
               <SunIcon />
             </div>
             <div>
@@ -985,7 +974,7 @@ function DailyTariffModal({ tariff, servers, onSave, onClose, isLoading }: Daily
               onClick={() => setActiveTab(tab)}
               className={`px-4 py-2 text-sm font-medium transition-colors ${
                 activeTab === tab
-                  ? 'border-b-2 border-amber-400 text-amber-400'
+                  ? 'border-b-2 border-warning-400 text-warning-400'
                   : 'text-dark-400 hover:text-dark-200'
               }`}
             >
@@ -1009,7 +998,7 @@ function DailyTariffModal({ tariff, servers, onSave, onClose, isLoading }: Daily
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full rounded-lg border border-dark-600 bg-dark-700 px-3 py-2 text-dark-100 focus:border-amber-500 focus:outline-none"
+                  className="w-full rounded-lg border border-dark-600 bg-dark-700 px-3 py-2 text-dark-100 focus:border-accent-500 focus:outline-none"
                   placeholder={t('admin.tariffs.nameExampleDaily')}
                 />
               </div>
@@ -1022,15 +1011,15 @@ function DailyTariffModal({ tariff, servers, onSave, onClose, isLoading }: Daily
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  className="w-full resize-none rounded-lg border border-dark-600 bg-dark-700 px-3 py-2 text-dark-100 focus:border-amber-500 focus:outline-none"
+                  className="w-full resize-none rounded-lg border border-dark-600 bg-dark-700 px-3 py-2 text-dark-100 focus:border-accent-500 focus:outline-none"
                   rows={2}
                   placeholder={t('admin.tariffs.descriptionPlaceholder')}
                 />
               </div>
 
               {/* Daily Price */}
-              <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4">
-                <label className="mb-2 block text-sm font-medium text-amber-400">
+              <div className="rounded-lg border border-warning-500/30 bg-warning-500/10 p-4">
+                <label className="mb-2 block text-sm font-medium text-warning-400">
                   {t('admin.tariffs.dailyPriceLabel')}
                 </label>
                 <div className="flex items-center gap-2">
@@ -1040,7 +1029,7 @@ function DailyTariffModal({ tariff, servers, onSave, onClose, isLoading }: Daily
                     onChange={(e) =>
                       setDailyPriceKopeks(Math.max(0, parseFloat(e.target.value) || 0) * 100)
                     }
-                    className="w-32 rounded-lg border border-dark-600 bg-dark-700 px-3 py-2 text-dark-100 focus:border-amber-500 focus:outline-none"
+                    className="w-32 rounded-lg border border-dark-600 bg-dark-700 px-3 py-2 text-dark-100 focus:border-accent-500 focus:outline-none"
                     min={0}
                     step={0.1}
                   />
@@ -1061,7 +1050,7 @@ function DailyTariffModal({ tariff, servers, onSave, onClose, isLoading }: Daily
                     type="number"
                     value={trafficLimitGb}
                     onChange={(e) => setTrafficLimitGb(Math.max(0, parseInt(e.target.value) || 0))}
-                    className="w-32 rounded-lg border border-dark-600 bg-dark-700 px-3 py-2 text-dark-100 focus:border-amber-500 focus:outline-none"
+                    className="w-32 rounded-lg border border-dark-600 bg-dark-700 px-3 py-2 text-dark-100 focus:border-accent-500 focus:outline-none"
                     min={0}
                   />
                   <span className="text-dark-400">{t('admin.tariffs.gbUnit')}</span>
@@ -1083,7 +1072,7 @@ function DailyTariffModal({ tariff, servers, onSave, onClose, isLoading }: Daily
                   type="number"
                   value={deviceLimit}
                   onChange={(e) => setDeviceLimit(Math.max(1, parseInt(e.target.value) || 1))}
-                  className="w-32 rounded-lg border border-dark-600 bg-dark-700 px-3 py-2 text-dark-100 focus:border-amber-500 focus:outline-none"
+                  className="w-32 rounded-lg border border-dark-600 bg-dark-700 px-3 py-2 text-dark-100 focus:border-accent-500 focus:outline-none"
                   min={1}
                 />
               </div>
@@ -1099,7 +1088,7 @@ function DailyTariffModal({ tariff, servers, onSave, onClose, isLoading }: Daily
                   onChange={(e) =>
                     setTierLevel(Math.min(10, Math.max(1, parseInt(e.target.value) || 1)))
                   }
-                  className="w-32 rounded-lg border border-dark-600 bg-dark-700 px-3 py-2 text-dark-100 focus:border-amber-500 focus:outline-none"
+                  className="w-32 rounded-lg border border-dark-600 bg-dark-700 px-3 py-2 text-dark-100 focus:border-accent-500 focus:outline-none"
                   min={1}
                   max={10}
                 />
@@ -1123,14 +1112,14 @@ function DailyTariffModal({ tariff, servers, onSave, onClose, isLoading }: Daily
                       onClick={() => toggleServer(server.squad_uuid)}
                       className={`cursor-pointer rounded-lg p-3 transition-colors ${
                         isSelected
-                          ? 'border border-amber-500/50 bg-amber-500/20'
+                          ? 'border border-warning-500/50 bg-warning-500/20'
                           : 'border border-transparent bg-dark-700 hover:bg-dark-600'
                       }`}
                     >
                       <div className="flex items-center gap-3">
                         <div
                           className={`flex h-5 w-5 items-center justify-center rounded ${
-                            isSelected ? 'bg-amber-500 text-white' : 'bg-dark-600'
+                            isSelected ? 'bg-accent-500 text-white' : 'bg-dark-600'
                           }`}
                         >
                           {isSelected && <CheckIcon />}
@@ -1165,7 +1154,7 @@ function DailyTariffModal({ tariff, servers, onSave, onClose, isLoading }: Daily
                       onChange={(e) =>
                         setDevicePriceKopeks(Math.max(0, parseFloat(e.target.value) || 0) * 100)
                       }
-                      className="w-24 rounded-lg border border-dark-500 bg-dark-600 px-3 py-2 text-dark-100 focus:border-amber-500 focus:outline-none"
+                      className="w-24 rounded-lg border border-dark-500 bg-dark-600 px-3 py-2 text-dark-100 focus:border-accent-500 focus:outline-none"
                       min={0}
                       step={1}
                     />
@@ -1182,7 +1171,7 @@ function DailyTariffModal({ tariff, servers, onSave, onClose, isLoading }: Daily
                       onChange={(e) =>
                         setMaxDeviceLimit(Math.max(0, parseInt(e.target.value) || 0))
                       }
-                      className="w-24 rounded-lg border border-dark-500 bg-dark-600 px-3 py-2 text-dark-100 focus:border-amber-500 focus:outline-none"
+                      className="w-24 rounded-lg border border-dark-500 bg-dark-600 px-3 py-2 text-dark-100 focus:border-accent-500 focus:outline-none"
                       min={0}
                     />
                   </div>
@@ -1200,7 +1189,7 @@ function DailyTariffModal({ tariff, servers, onSave, onClose, isLoading }: Daily
                     type="button"
                     onClick={() => setTrafficTopupEnabled(!trafficTopupEnabled)}
                     className={`relative h-6 w-10 rounded-full transition-colors ${
-                      trafficTopupEnabled ? 'bg-amber-500' : 'bg-dark-600'
+                      trafficTopupEnabled ? 'bg-warning-500' : 'bg-dark-600'
                     }`}
                   >
                     <span
@@ -1222,7 +1211,7 @@ function DailyTariffModal({ tariff, servers, onSave, onClose, isLoading }: Daily
                         onChange={(e) =>
                           setMaxTopupTrafficGb(Math.max(0, parseInt(e.target.value) || 0))
                         }
-                        className="w-24 rounded-lg border border-dark-500 bg-dark-600 px-3 py-2 text-dark-100 focus:border-amber-500 focus:outline-none"
+                        className="w-24 rounded-lg border border-dark-500 bg-dark-600 px-3 py-2 text-dark-100 focus:border-accent-500 focus:outline-none"
                         min={0}
                       />
                       <span className="text-dark-400">{t('admin.tariffs.gbUnit')}</span>
@@ -1250,7 +1239,7 @@ function DailyTariffModal({ tariff, servers, onSave, onClose, isLoading }: Daily
                                   [String(gb)]: price,
                                 }));
                               }}
-                              className="w-20 rounded border border-dark-500 bg-dark-600 px-2 py-1 text-sm text-dark-100 focus:border-amber-500 focus:outline-none"
+                              className="w-20 rounded border border-dark-500 bg-dark-600 px-2 py-1 text-sm text-dark-100 focus:border-accent-500 focus:outline-none"
                               min={0}
                               step={1}
                             />
@@ -1310,7 +1299,7 @@ function DailyTariffModal({ tariff, servers, onSave, onClose, isLoading }: Daily
                       onClick={() => setTrafficResetMode(option.value)}
                       className={`w-full rounded-lg p-3 text-left transition-colors ${
                         trafficResetMode === option.value
-                          ? 'border border-amber-500 bg-amber-500/20'
+                          ? 'border border-warning-500 bg-warning-500/20'
                           : 'border border-dark-500 bg-dark-600 hover:border-dark-400'
                       }`}
                     >
@@ -1322,7 +1311,7 @@ function DailyTariffModal({ tariff, servers, onSave, onClose, isLoading }: Daily
                           <p className="mt-0.5 text-xs text-dark-400">{t(option.descKey)}</p>
                         </div>
                         {trafficResetMode === option.value && (
-                          <span className="text-amber-400">
+                          <span className="text-warning-400">
                             <CheckIcon />
                           </span>
                         )}
@@ -1346,7 +1335,7 @@ function DailyTariffModal({ tariff, servers, onSave, onClose, isLoading }: Daily
           <button
             onClick={handleSubmit}
             disabled={!name || dailyPriceKopeks <= 0 || isLoading}
-            className="rounded-lg bg-amber-500 px-4 py-2 text-white transition-colors hover:bg-amber-600 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-lg bg-accent-500 px-4 py-2 text-white transition-colors hover:bg-accent-600 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isLoading ? t('admin.tariffs.savingButton') : t('admin.tariffs.saveButton')}
           </button>
@@ -1465,12 +1454,7 @@ export default function AdminTariffs() {
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Link
-            to="/admin"
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
-          >
-            <BackIcon />
-          </Link>
+          <AdminBackButton />
           <div>
             <h1 className="text-xl font-semibold text-dark-100">{t('admin.tariffs.title')}</h1>
             <p className="text-sm text-dark-400">{t('admin.tariffs.subtitle')}</p>
@@ -1511,7 +1495,7 @@ export default function AdminTariffs() {
                   <div className="mb-1 flex items-center gap-2">
                     <h3 className="truncate font-medium text-dark-100">{tariff.name}</h3>
                     {tariff.is_daily ? (
-                      <span className="rounded bg-amber-500/20 px-2 py-0.5 text-xs text-amber-400">
+                      <span className="rounded bg-warning-500/20 px-2 py-0.5 text-xs text-warning-400">
                         {t('admin.tariffs.dailyType')}
                       </span>
                     ) : (
@@ -1532,7 +1516,7 @@ export default function AdminTariffs() {
                   </div>
                   <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-dark-400">
                     {tariff.is_daily && tariff.daily_price_kopeks > 0 && (
-                      <span className="text-amber-400">
+                      <span className="text-warning-400">
                         {(tariff.daily_price_kopeks / 100).toFixed(2)}{' '}
                         {t('admin.tariffs.currencyPerDay')}
                       </span>

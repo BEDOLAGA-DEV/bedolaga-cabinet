@@ -16,6 +16,26 @@
     --bento-padding: 24px;
     --bento-padding-lg: 32px;
 
+    /* Linear Design Tokens */
+    --linear-radius: 8px;
+    --linear-radius-lg: 12px;
+    --linear-blur: 12px;
+    --linear-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --linear-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+    --linear-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+
+    /* Border radius scale (used by user preferences) */
+    --radius-none: 0px;
+    --radius-small: 8px;
+    --radius-medium: 16px;
+    --radius-large: 24px;
+    --radius-pill: 9999px;
+
+    /* Spacing scale */
+    --spacing-compact: 12px;
+    --spacing-comfortable: 16px;
+    --spacing-spacious: 24px;
+
     /* Theme colors - RGB format for opacity support */
     /* Dark palette (RGB values) */
     --color-dark-50: 248, 250, 252;
@@ -556,27 +576,27 @@
 
   /* Buttons - Dark */
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-medium transition-all duration-300 ease-smooth hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-dark-900 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-medium transition-all duration-300 ease-smooth hover:scale-[1.02] focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-dark-900 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
   }
 
   .btn-primary {
-    @apply btn bg-accent-500 text-white shadow-lg shadow-accent-500/25 hover:bg-accent-400 hover:shadow-xl hover:shadow-accent-500/30 focus:ring-accent-500 active:bg-accent-600;
+    @apply btn bg-accent-500 text-white shadow-lg shadow-accent-500/25 hover:bg-accent-400 hover:shadow-xl hover:shadow-accent-500/30 focus-visible:ring-accent-500 active:bg-accent-600;
   }
 
   .btn-secondary {
-    @apply btn border border-dark-700 bg-dark-800 text-dark-200 hover:border-dark-600 hover:bg-dark-700 hover:text-dark-100 focus:ring-dark-500 active:bg-dark-600;
+    @apply btn border border-dark-700 bg-dark-800 text-dark-200 hover:border-dark-600 hover:bg-dark-700 hover:text-dark-100 focus-visible:ring-dark-500 active:bg-dark-600;
   }
 
   .btn-ghost {
-    @apply btn text-dark-400 hover:bg-dark-800 hover:text-dark-100 focus:ring-dark-500;
+    @apply btn text-dark-400 hover:bg-dark-800 hover:text-dark-100 focus-visible:ring-dark-500;
   }
 
   .btn-danger {
-    @apply btn border border-error-500/30 bg-error-500/10 text-error-400 hover:border-error-500/50 hover:bg-error-500/20 focus:ring-error-500 active:bg-error-500/30;
+    @apply btn border border-error-500/30 bg-error-500/10 text-error-400 hover:border-error-500/50 hover:bg-error-500/20 focus-visible:ring-error-500 active:bg-error-500/30;
   }
 
   .btn-icon {
-    @apply rounded-xl p-2.5 text-dark-400 transition-all duration-300 hover:scale-110 hover:bg-dark-800 hover:text-dark-100 active:scale-95;
+    @apply rounded-xl p-2.5 text-dark-400 transition-all duration-300 hover:scale-110 hover:bg-dark-800 hover:text-dark-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/50 active:scale-95;
   }
 
   /* Highlighted button for onboarding */
@@ -591,6 +611,27 @@
 
   .input-error {
     @apply input border-error-500/50 focus:border-error-500 focus:ring-error-500/20;
+  }
+
+  /* Remove tap highlight and focus outline on mobile */
+  button,
+  a,
+  [role='button'] {
+    -webkit-tap-highlight-color: transparent;
+    outline: none;
+  }
+
+  /* Only show focus ring for keyboard navigation */
+  button:focus-visible,
+  a:focus-visible,
+  [role='button']:focus-visible {
+    @apply ring-2 ring-accent-500/50 ring-offset-2 ring-offset-dark-900;
+  }
+
+  .light button:focus-visible,
+  .light a:focus-visible,
+  .light [role='button']:focus-visible {
+    @apply ring-offset-champagne-100;
   }
 
   .label {
@@ -736,19 +777,19 @@
 
   /* Buttons - Light */
   .light .btn {
-    @apply focus:ring-offset-champagne-100;
+    @apply focus-visible:ring-offset-champagne-100;
   }
 
   .light .btn-primary {
-    @apply bg-champagne-700 text-white shadow-lg shadow-champagne-500/20 hover:bg-champagne-600 hover:shadow-xl hover:shadow-champagne-500/30 focus:ring-champagne-500 active:bg-champagne-800;
+    @apply bg-champagne-700 text-white shadow-lg shadow-champagne-500/20 hover:bg-champagne-600 hover:shadow-xl hover:shadow-champagne-500/30 focus-visible:ring-champagne-500 active:bg-champagne-800;
   }
 
   .light .btn-secondary {
-    @apply border border-champagne-300 bg-white text-champagne-800 hover:border-champagne-400 hover:bg-champagne-50 hover:text-champagne-900 focus:ring-champagne-400 active:bg-champagne-100;
+    @apply border border-champagne-300 bg-white text-champagne-800 hover:border-champagne-400 hover:bg-champagne-50 hover:text-champagne-900 focus-visible:ring-champagne-400 active:bg-champagne-100;
   }
 
   .light .btn-ghost {
-    @apply text-champagne-600 hover:bg-champagne-200/50 hover:text-champagne-900 focus:ring-champagne-400;
+    @apply text-champagne-600 hover:bg-champagne-200/50 hover:text-champagne-900 focus-visible:ring-champagne-400;
   }
 
   .light .btn-danger {
@@ -1609,4 +1650,100 @@ input[type='number'] {
   .wave-blob {
     animation: none !important;
   }
+}
+
+/* User preference: reduce motion */
+.reduce-motion,
+.reduce-motion * {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* ========== SHEET MODAL STYLES ========== */
+
+/* Sheet animations */
+@keyframes sheetSlideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes sheetSlideDown {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes backdropFadeIn {
+  from {
+    opacity: 0;
+    backdrop-filter: blur(0);
+  }
+  to {
+    opacity: 1;
+    backdrop-filter: blur(8px);
+  }
+}
+
+@keyframes backdropFadeOut {
+  from {
+    opacity: 1;
+    backdrop-filter: blur(8px);
+  }
+  to {
+    opacity: 0;
+    backdrop-filter: blur(0);
+  }
+}
+
+/* Page transitions */
+@keyframes pageEnter {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pageExit {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+}
+
+.page-enter {
+  animation: pageEnter 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.page-exit {
+  animation: pageExit 0.2s ease-in both;
+}
+
+/* Light theme sheet overrides */
+.light .sheet-backdrop {
+  @apply bg-black/40;
+}
+
+.light .sheet-container {
+  @apply bg-champagne-100;
+}
+
+.light .sheet-handle {
+  @apply bg-champagne-400;
 }

@@ -1,21 +1,10 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
 import { adminWheelApi, type WheelPrizeAdmin, type CreateWheelPrizeData } from '../api/wheel';
+import { AdminBackButton } from '../components/admin';
 
 // Icons
-const BackIcon = () => (
-  <svg
-    className="h-5 w-5 text-dark-400"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={2}
-  >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-  </svg>
-);
 
 const CogIcon = () => (
   <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -143,18 +132,15 @@ export default function AdminWheel() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Link
-            to="/admin"
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
-          >
-            <BackIcon />
-          </Link>
+          <AdminBackButton />
           <h1 className="text-2xl font-bold text-dark-50 sm:text-3xl">{t('admin.wheel.title')}</h1>
         </div>
         <div className="flex items-center gap-2">
           <span
             className={`rounded-full px-3 py-1 text-sm ${
-              config.is_enabled ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
+              config.is_enabled
+                ? 'bg-success-500/20 text-success-400'
+                : 'bg-error-500/20 text-error-400'
             }`}
           >
             {config.is_enabled ? t('admin.wheel.enabled') : t('admin.wheel.disabled')}
@@ -404,7 +390,7 @@ export default function AdminWheel() {
                           deletePrizeMutation.mutate(prize.id);
                         }
                       }}
-                      className="btn-ghost text-red-400"
+                      className="btn-ghost text-error-400"
                     >
                       <TrashIcon />
                     </button>
@@ -432,13 +418,13 @@ export default function AdminWheel() {
               <div className="text-sm text-dark-400">{t('admin.wheel.statistics.totalSpins')}</div>
             </div>
             <div className="card p-4 text-center">
-              <div className="text-3xl font-bold text-green-400">
+              <div className="text-3xl font-bold text-success-400">
                 {(stats.total_revenue_kopeks / 100).toFixed(0)}₽
               </div>
               <div className="text-sm text-dark-400">{t('admin.wheel.statistics.revenue')}</div>
             </div>
             <div className="card p-4 text-center">
-              <div className="text-3xl font-bold text-yellow-400">
+              <div className="text-3xl font-bold text-warning-400">
                 {(stats.total_payout_kopeks / 100).toFixed(0)}₽
               </div>
               <div className="text-sm text-dark-400">{t('admin.wheel.statistics.payouts')}</div>
@@ -447,8 +433,8 @@ export default function AdminWheel() {
               <div
                 className={`text-3xl font-bold ${
                   stats.actual_rtp_percent <= stats.configured_rtp_percent
-                    ? 'text-green-400'
-                    : 'text-red-400'
+                    ? 'text-success-400'
+                    : 'text-error-400'
                 }`}
               >
                 {stats.actual_rtp_percent.toFixed(1)}%
