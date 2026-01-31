@@ -306,6 +306,7 @@ export const adminUsersApi = {
       offset?: number;
       limit?: number;
       search?: string;
+      email?: string;
       status?: 'active' | 'blocked' | 'deleted';
       sort_by?:
         | 'created_at'
