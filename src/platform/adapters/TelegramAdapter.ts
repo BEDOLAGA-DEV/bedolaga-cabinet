@@ -29,18 +29,26 @@ function getTelegram(): TelegramWebApp | null {
   return window.Telegram?.WebApp ?? null;
 }
 
+function safeIsSupported(checkFn: () => boolean): boolean {
+  try {
+    return checkFn();
+  } catch {
+    return false;
+  }
+}
+
 function createCapabilities(): PlatformCapabilities {
   const tg = getTelegram();
   const inTelegram = isInTelegramWebApp();
 
   return {
-    hasBackButton: inTelegram && backButton.isSupported(),
+    hasBackButton: inTelegram && safeIsSupported(() => backButton.isSupported()),
     hasMainButton: inTelegram,
-    hasHapticFeedback: inTelegram && hapticFeedback.isSupported(),
-    hasNativeDialogs: inTelegram && popup.isSupported(),
+    hasHapticFeedback: inTelegram && safeIsSupported(() => hapticFeedback.isSupported()),
+    hasNativeDialogs: inTelegram && safeIsSupported(() => popup.isSupported()),
     hasThemeSync: inTelegram,
     hasInvoice: !!tg?.openInvoice,
-    hasCloudStorage: inTelegram && cloudStorage.isSupported(),
+    hasCloudStorage: inTelegram && safeIsSupported(() => cloudStorage.isSupported()),
     hasShare: true,
     version: tg?.version,
   };
@@ -53,7 +61,7 @@ function createBackButtonController(): BackButtonController {
   // Mount back button on first use
   let mounted = false;
   const ensureMounted = () => {
-    if (!mounted && inTelegram && backButton.isSupported()) {
+    if (!mounted && inTelegram && safeIsSupported(() => backButton.isSupported())) {
       try {
         backButton.mount();
         mounted = true;
@@ -74,7 +82,7 @@ function createBackButtonController(): BackButtonController {
     },
 
     show(onClick: () => void) {
-      if (!inTelegram || !backButton.isSupported()) return;
+      if (!inTelegram || !safeIsSupported(() => backButton.isSupported())) return;
 
       ensureMounted();
 
@@ -89,7 +97,7 @@ function createBackButtonController(): BackButtonController {
     },
 
     hide() {
-      if (!inTelegram || !backButton.isSupported()) return;
+      if (!inTelegram || !safeIsSupported(() => backButton.isSupported())) return;
 
       if (removeClickListener) {
         removeClickListener();
@@ -193,7 +201,7 @@ function createMainButtonController(): MainButtonController {
 
 function createHapticController(): HapticController {
   const inTelegram = isInTelegramWebApp();
-  const isSupported = inTelegram && hapticFeedback.isSupported();
+  const isSupported = inTelegram && safeIsSupported(() => hapticFeedback.isSupported());
 
   return {
     impact(style: HapticImpactStyle = 'medium') {
@@ -215,7 +223,7 @@ function createHapticController(): HapticController {
 
 function createDialogController(): DialogController {
   const inTelegram = isInTelegramWebApp();
-  const isSupported = inTelegram && popup.isSupported();
+  const isSupported = inTelegram && safeIsSupported(() => popup.isSupported());
 
   return {
     alert(message: string, _title?: string): Promise<void> {
@@ -337,7 +345,7 @@ function createThemeController(): ThemeController {
 
 function createCloudStorageController(): CloudStorageController | null {
   const inTelegram = isInTelegramWebApp();
-  if (!inTelegram || !cloudStorage.isSupported()) return null;
+  if (!inTelegram || !safeIsSupported(() => cloudStorage.isSupported())) return null;
 
   return {
     async getItem(key: string): Promise<string | null> {

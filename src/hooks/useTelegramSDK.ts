@@ -88,9 +88,13 @@ export function initTelegramSDK() {
     }
 
     // Disable vertical swipes if supported (sync)
-    if (swipeBehavior.isSupported()) {
-      swipeBehavior.mount();
-      swipeBehavior.disableVertical();
+    try {
+      if (swipeBehavior.isSupported()) {
+        swipeBehavior.mount();
+        swipeBehavior.disableVertical();
+      }
+    } catch {
+      // Swipe behavior not available
     }
 
     // Mount viewport and bind CSS variables (async)
@@ -233,20 +237,32 @@ export function useTelegramSDK() {
 
   const expand = useCallback(() => {
     if (!isReady) return;
-    viewport.expand();
+    try {
+      viewport.expand();
+    } catch {
+      // Viewport not available
+    }
   }, [isReady]);
 
   const disableVerticalSwipes = useCallback(() => {
     if (!isReady) return;
-    if (swipeBehavior.isSupported()) {
-      swipeBehavior.disableVertical();
+    try {
+      if (swipeBehavior.isSupported()) {
+        swipeBehavior.disableVertical();
+      }
+    } catch {
+      // Swipe behavior not available
     }
   }, [isReady]);
 
   const enableVerticalSwipes = useCallback(() => {
     if (!isReady) return;
-    if (swipeBehavior.isSupported()) {
-      swipeBehavior.enableVertical();
+    try {
+      if (swipeBehavior.isSupported()) {
+        swipeBehavior.enableVertical();
+      }
+    } catch {
+      // Swipe behavior not available
     }
   }, [isReady]);
 
