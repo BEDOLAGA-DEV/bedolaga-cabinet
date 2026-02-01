@@ -34,6 +34,7 @@ const AdminSettings = lazy(() => import('./pages/AdminSettings'));
 const AdminApps = lazy(() => import('./pages/AdminApps'));
 const AdminWheel = lazy(() => import('./pages/AdminWheel'));
 const AdminTariffs = lazy(() => import('./pages/AdminTariffs'));
+const AdminTariffCreate = lazy(() => import('./pages/AdminTariffCreate'));
 const AdminServers = lazy(() => import('./pages/AdminServers'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 const AdminBanSystem = lazy(() => import('./pages/AdminBanSystem'));
@@ -285,6 +286,26 @@ function App() {
             <AdminRoute>
               <LazyPage>
                 <AdminTariffs />
+              </LazyPage>
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/tariffs/create"
+          element={
+            <AdminRoute>
+              <LazyPage>
+                <AdminTariffCreate />
+              </LazyPage>
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/tariffs/:id/edit"
+          element={
+            <AdminRoute>
+              <LazyPage>
+                <AdminTariffCreate />
               </LazyPage>
             </AdminRoute>
           }

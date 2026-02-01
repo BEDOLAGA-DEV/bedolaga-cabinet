@@ -1040,6 +1040,7 @@
       "serversHint": "选择此套餐可用的服务器",
       "noServers": "暂无可用服务器",
       "selectType": "选择套餐类型",
+      "selectTypeDesc": "为新套餐选择计费方式",
       "periodTariff": "周期套餐",
       "periodTariffDesc": "按周期付款（7、30、90天等）。灵活的周期和价格。",
       "dailyTariff": "日套餐",

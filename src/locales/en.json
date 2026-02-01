@@ -1232,6 +1232,7 @@
       "serverTrafficLimit": "Traffic limit",
       "useDefault": "default",
       "selectType": "Select tariff type",
+      "selectTypeDesc": "Choose the billing method for your new tariff",
       "periodTariff": "Period-based tariff",
       "periodTariffDesc": "Payment for period (7, 30, 90 days, etc.). Flexible periods and prices.",
       "dailyTariff": "Daily tariff",
