@@ -421,6 +421,9 @@ export default function Dashboard() {
         </div>
       ) : null}
 
+      {/* Promo Offers - показываем сразу после карточки подписки */}
+      <PromoOffersSection />
+
       {/* Stats Grid */}
       <div className="bento-grid">
         {/* Balance */}
@@ -614,9 +617,6 @@ export default function Dashboard() {
           </div>
         </div>
       )}
-
-      {/* Promo Offers */}
-      <PromoOffersSection />
 
       {/* Fortune Wheel Banner */}
       {wheelConfig?.is_enabled && (
