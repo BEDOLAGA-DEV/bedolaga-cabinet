@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { adminSettingsApi, SettingDefinition } from '../api/adminSettings';
@@ -16,6 +16,18 @@ import {
   SettingsSearchMobile,
   SettingsSearchResults,
 } from '../components/admin/SettingsSearch';
+
+// Find section ID by category key
+function findSectionByCategory(categoryKey: string): string | null {
+  for (const section of MENU_SECTIONS) {
+    for (const item of section.items) {
+      if (item.categories?.includes(categoryKey)) {
+        return item.id;
+      }
+    }
+  }
+  return null;
+}
 
 export default function AdminSettings() {
   const { t } = useTranslation();
@@ -110,6 +122,19 @@ export default function AdminSettings() {
     return allSettings.filter((s: SettingDefinition) => favorites.includes(s.key));
   }, [allSettings, favorites]);
 
+  // Handle setting selection from autocomplete
+  const handleSelectSetting = useCallback(
+    (setting: SettingDefinition) => {
+      const sectionId = findSectionByCategory(setting.category.key);
+      if (sectionId) {
+        setActiveSection(sectionId);
+      }
+      // Set search to setting key to filter to just this setting
+      setSearchQuery(setting.key);
+    },
+    [setActiveSection, setSearchQuery],
+  );
+
   // Render content based on active section
   const renderContent = () => {
     // If searching, always show search results regardless of active section
@@ -175,7 +200,12 @@ export default function AdminSettings() {
           setActiveSection={setActiveSection}
           favoritesCount={favorites.length}
         />
-        <SettingsSearchMobile searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+        <SettingsSearchMobile
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          allSettings={allSettings}
+          onSelectSetting={handleSelectSetting}
+        />
         <SettingsSearchResults searchQuery={searchQuery} resultsCount={filteredSettings.length} />
         {renderContent()}
       </div>
@@ -247,6 +277,8 @@ export default function AdminSettings() {
               searchQuery={searchQuery}
               setSearchQuery={setSearchQuery}
               resultsCount={filteredSettings.length}
+              allSettings={allSettings}
+              onSelectSetting={handleSelectSetting}
             />
           </div>
           <SettingsSearchResults searchQuery={searchQuery} resultsCount={filteredSettings.length} />
