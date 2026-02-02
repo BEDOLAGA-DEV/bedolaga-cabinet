@@ -664,9 +664,6 @@ interface SyncTabProps {
   onRunAutoSync: () => void;
   onSyncFromPanel: () => void;
   onSyncToPanel: () => void;
-  onValidate: () => void;
-  onCleanup: () => void;
-  onSyncStatuses: () => void;
   syncResults: Record<string, { success: boolean; message?: string } | null>;
   loadingStates: Record<string, boolean>;
 }
@@ -677,9 +674,6 @@ function SyncTab({
   onRunAutoSync,
   onSyncFromPanel,
   onSyncToPanel,
-  onValidate,
-  onCleanup,
-  onSyncStatuses,
   syncResults,
   loadingStates,
 }: SyncTabProps) {
@@ -703,135 +697,98 @@ function SyncTab({
               <SyncIcon />
               {t('admin.remnawave.sync.autoSync', 'Auto Sync')}
             </h3>
-            <span
-              className={`rounded-full px-2 py-0.5 text-xs ${
-                autoSyncStatus.enabled
-                  ? 'bg-success-500/20 text-success-400'
-                  : 'bg-dark-600 text-dark-400'
-              }`}
-            >
-              {autoSyncStatus.enabled ? 'Enabled' : 'Disabled'}
-            </span>
+            <div className="flex items-center gap-2">
+              <span
+                className={`rounded-full px-2 py-0.5 text-xs ${
+                  autoSyncStatus.enabled
+                    ? 'bg-success-500/20 text-success-400'
+                    : 'bg-dark-600 text-dark-400'
+                }`}
+              >
+                {autoSyncStatus.enabled ? 'Enabled' : 'Disabled'}
+              </span>
+              <button
+                onClick={onRunAutoSync}
+                disabled={loadingStates.autoSync || autoSyncStatus.is_running}
+                className="flex items-center gap-1.5 rounded-lg bg-accent-500/20 px-3 py-1.5 text-sm text-accent-400 transition-colors hover:bg-accent-500/30 disabled:opacity-50"
+              >
+                <RefreshIcon spinning={loadingStates.autoSync || autoSyncStatus.is_running} />
+                {t('admin.remnawave.sync.runNow', 'Run Now')}
+              </button>
+            </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 text-sm lg:grid-cols-4">
-            <div>
-              <p className="text-dark-500">Schedule</p>
-              <p className="text-dark-200">
+          <div className="grid grid-cols-2 gap-3 text-sm lg:grid-cols-4">
+            <div className="rounded-lg bg-dark-700/50 p-3">
+              <p className="text-xs text-dark-500">
+                {t('admin.remnawave.sync.schedule', 'Schedule')}
+              </p>
+              <p className="mt-1 text-dark-200">
                 {autoSyncStatus.times.length > 0 ? autoSyncStatus.times.join(', ') : '—'}
               </p>
             </div>
-            <div>
-              <p className="text-dark-500">Next Run</p>
-              <p className="text-dark-200">
+            <div className="rounded-lg bg-dark-700/50 p-3">
+              <p className="text-xs text-dark-500">
+                {t('admin.remnawave.sync.nextRun', 'Next Run')}
+              </p>
+              <p className="mt-1 text-dark-200">
                 {autoSyncStatus.next_run ? new Date(autoSyncStatus.next_run).toLocaleString() : '—'}
               </p>
             </div>
-            <div>
-              <p className="text-dark-500">Last Run</p>
-              <p className="text-dark-200">
+            <div className="rounded-lg bg-dark-700/50 p-3">
+              <p className="text-xs text-dark-500">
+                {t('admin.remnawave.sync.lastRun', 'Last Run')}
+              </p>
+              <p className="mt-1 text-dark-200">
                 {autoSyncStatus.last_run_finished_at
                   ? new Date(autoSyncStatus.last_run_finished_at).toLocaleString()
                   : '—'}
               </p>
             </div>
-            <div>
-              <p className="text-dark-500">Status</p>
+            <div className="rounded-lg bg-dark-700/50 p-3">
+              <p className="text-xs text-dark-500">{t('admin.remnawave.sync.status', 'Status')}</p>
               <p
-                className={
+                className={`mt-1 ${
                   autoSyncStatus.is_running
                     ? 'text-warning-400'
                     : autoSyncStatus.last_run_success
                       ? 'text-success-400'
                       : 'text-dark-200'
-                }
+                }`}
               >
                 {autoSyncStatus.is_running
-                  ? 'Running...'
+                  ? t('admin.remnawave.sync.running', 'Running...')
                   : autoSyncStatus.last_run_success
-                    ? 'Success'
+                    ? t('admin.remnawave.sync.success', 'Success')
                     : autoSyncStatus.last_run_error || '—'}
               </p>
             </div>
           </div>
-
-          <button
-            onClick={onRunAutoSync}
-            disabled={loadingStates.autoSync || autoSyncStatus.is_running}
-            className="mt-4 flex items-center gap-2 rounded-lg bg-accent-500/20 px-4 py-2 text-accent-400 transition-colors hover:bg-accent-500/30 disabled:opacity-50"
-          >
-            <RefreshIcon spinning={loadingStates.autoSync || autoSyncStatus.is_running} />
-            {t('admin.remnawave.sync.runNow', 'Run Now')}
-          </button>
         </div>
       )}
 
-      {/* Manual Sync Options */}
-      <div>
-        <h3 className="mb-3 text-sm font-medium text-dark-300">
-          {t('admin.remnawave.sync.manual', 'Manual Sync')}
-        </h3>
-        <div className="space-y-3">
-          <SyncCard
-            title={t('admin.remnawave.sync.fromPanel', 'Sync from Panel')}
-            description={t(
-              'admin.remnawave.sync.fromPanelDesc',
-              'Import users from RemnaWave panel to bot database',
-            )}
-            onAction={onSyncFromPanel}
-            isLoading={loadingStates.fromPanel}
-            lastResult={syncResults.fromPanel}
-          />
-          <SyncCard
-            title={t('admin.remnawave.sync.toPanel', 'Sync to Panel')}
-            description={t(
-              'admin.remnawave.sync.toPanelDesc',
-              'Export users from bot database to RemnaWave panel',
-            )}
-            onAction={onSyncToPanel}
-            isLoading={loadingStates.toPanel}
-            lastResult={syncResults.toPanel}
-          />
-        </div>
-      </div>
-
-      {/* Subscriptions */}
-      <div>
-        <h3 className="mb-3 text-sm font-medium text-dark-300">
-          {t('admin.remnawave.sync.subscriptions', 'Subscriptions')}
-        </h3>
-        <div className="space-y-3">
-          <SyncCard
-            title={t('admin.remnawave.sync.validate', 'Validate')}
-            description={t(
-              'admin.remnawave.sync.validateDesc',
-              'Check and fix subscription inconsistencies',
-            )}
-            onAction={onValidate}
-            isLoading={loadingStates.validate}
-            lastResult={syncResults.validate}
-          />
-          <SyncCard
-            title={t('admin.remnawave.sync.cleanup', 'Cleanup')}
-            description={t(
-              'admin.remnawave.sync.cleanupDesc',
-              'Remove orphaned subscriptions without users',
-            )}
-            onAction={onCleanup}
-            isLoading={loadingStates.cleanup}
-            lastResult={syncResults.cleanup}
-          />
-          <SyncCard
-            title={t('admin.remnawave.sync.statuses', 'Sync Statuses')}
-            description={t(
-              'admin.remnawave.sync.statusesDesc',
-              'Synchronize subscription statuses with panel',
-            )}
-            onAction={onSyncStatuses}
-            isLoading={loadingStates.statuses}
-            lastResult={syncResults.statuses}
-          />
-        </div>
+      {/* Manual Sync */}
+      <div className="grid gap-3 sm:grid-cols-2">
+        <SyncCard
+          title={t('admin.remnawave.sync.fromPanel', 'Sync from Panel')}
+          description={t(
+            'admin.remnawave.sync.fromPanelDesc',
+            'Import users from RemnaWave panel to bot',
+          )}
+          onAction={onSyncFromPanel}
+          isLoading={loadingStates.fromPanel}
+          lastResult={syncResults.fromPanel}
+        />
+        <SyncCard
+          title={t('admin.remnawave.sync.toPanel', 'Sync to Panel')}
+          description={t(
+            'admin.remnawave.sync.toPanelDesc',
+            'Export users from bot to RemnaWave panel',
+          )}
+          onAction={onSyncToPanel}
+          isLoading={loadingStates.toPanel}
+          lastResult={syncResults.toPanel}
+        />
       </div>
     </div>
   );
@@ -1074,11 +1031,6 @@ export default function AdminRemnawave() {
             handleSyncAction('fromPanel', () => adminRemnawaveApi.syncFromPanel('all'))
           }
           onSyncToPanel={() => handleSyncAction('toPanel', adminRemnawaveApi.syncToPanel)}
-          onValidate={() => handleSyncAction('validate', adminRemnawaveApi.validateSubscriptions)}
-          onCleanup={() => handleSyncAction('cleanup', adminRemnawaveApi.cleanupSubscriptions)}
-          onSyncStatuses={() =>
-            handleSyncAction('statuses', adminRemnawaveApi.syncSubscriptionStatuses)
-          }
           syncResults={syncResults}
           loadingStates={loadingStates}
         />
