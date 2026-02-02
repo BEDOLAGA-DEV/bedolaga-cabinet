@@ -1125,6 +1125,11 @@
       "dailyDeductionDesc": "每天从用户余额中扣除",
       "dailyPriceRequired": "请输入大于0的每日价格",
       "cannotSave": "无法保存套餐：",
+      "statusTitle": "套餐状态",
+      "isActiveLabel": "已激活",
+      "isActiveHint": "未激活的套餐不会显示给用户",
+      "isTrialLabel": "试用套餐",
+      "isTrialHint": "可用于免费试用期",
       "validation": {
         "nameRequired": "请输入套餐名称",
         "nameLength": "名称必须为2到50个字符",

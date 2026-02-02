@@ -1318,6 +1318,11 @@
       "dailyDeductionDesc": "Charged daily from user's balance",
       "dailyPriceRequired": "Enter a price per day greater than 0",
       "cannotSave": "Cannot save tariff:",
+      "statusTitle": "Tariff Status",
+      "isActiveLabel": "Active",
+      "isActiveHint": "Inactive tariffs are not shown to users",
+      "isTrialLabel": "Trial tariff",
+      "isTrialHint": "Available for free trial period",
       "validation": {
         "nameRequired": "Enter tariff name",
         "nameLength": "Name must be 2 to 50 characters",

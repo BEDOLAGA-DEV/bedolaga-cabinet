@@ -1088,6 +1088,11 @@
       "dailyDeductionDesc": "هر روز از موجودی کاربر کسر می‌شود",
       "dailyPriceRequired": "قیمت روزانه بزرگتر از 0 را وارد کنید",
       "cannotSave": "امکان ذخیره تعرفه وجود ندارد:",
+      "statusTitle": "وضعیت تعرفه",
+      "isActiveLabel": "فعال",
+      "isActiveHint": "تعرفه‌های غیرفعال به کاربران نمایش داده نمی‌شوند",
+      "isTrialLabel": "تعرفه آزمایشی",
+      "isTrialHint": "برای دوره آزمایشی رایگان در دسترس است",
       "validation": {
         "nameRequired": "نام تعرفه را وارد کنید",
         "nameLength": "نام باید ۲ تا ۵۰ کاراکتر باشد",

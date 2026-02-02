@@ -97,6 +97,7 @@ export default function AdminTariffCreate() {
   // Form state - matches bot fields
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const [isActive, setIsActive] = useState(true);
   const [trafficLimitGb, setTrafficLimitGb] = useState<number | ''>(100);
   const [deviceLimit, setDeviceLimit] = useState<number | ''>(1);
   const [devicePriceKopeks, setDevicePriceKopeks] = useState<number | ''>(0);
@@ -156,6 +157,7 @@ export default function AdminTariffCreate() {
       setTariffType(data.is_daily ? 'daily' : 'period');
       setName(data.name);
       setDescription(data.description || '');
+      setIsActive(data.is_active ?? true);
       setTrafficLimitGb(data.traffic_limit_gb ?? 100);
       setDeviceLimit(data.device_limit || 1);
       setDevicePriceKopeks(data.device_price_kopeks || 0);
@@ -200,6 +202,7 @@ export default function AdminTariffCreate() {
     const data: TariffCreateRequest | TariffUpdateRequest = {
       name,
       description: description || undefined,
+      is_active: isActive,
       traffic_limit_gb: toNumber(trafficLimitGb, 100),
       device_limit: toNumber(deviceLimit, 1),
       device_price_kopeks:
@@ -703,50 +706,6 @@ export default function AdminTariffCreate() {
               </div>
             )}
           </div>
-
-          {/* Promo Groups */}
-          <div className="card space-y-4">
-            <h4 className="text-sm font-medium text-dark-200">
-              {t('admin.tariffs.promoGroupsTitle')}
-            </h4>
-            <p className="text-sm text-dark-400">{t('admin.tariffs.promoGroupsHint')}</p>
-            {promoGroups.length === 0 ? (
-              <p className="py-4 text-center text-dark-500">{t('admin.tariffs.noPromoGroups')}</p>
-            ) : (
-              <div className="max-h-48 space-y-2 overflow-y-auto">
-                {promoGroups.map((group) => {
-                  const isSelected = selectedPromoGroups.includes(group.id);
-                  return (
-                    <button
-                      key={group.id}
-                      type="button"
-                      onClick={() => togglePromoGroup(group.id)}
-                      className={`flex w-full items-center gap-3 rounded-lg p-3 text-left transition-colors ${
-                        isSelected
-                          ? isDaily
-                            ? 'bg-warning-500/20 text-warning-300'
-                            : 'bg-accent-500/20 text-accent-300'
-                          : 'bg-dark-800 text-dark-300 hover:bg-dark-700'
-                      }`}
-                    >
-                      <div
-                        className={`flex h-5 w-5 items-center justify-center rounded ${
-                          isSelected
-                            ? isDaily
-                              ? 'bg-warning-500 text-white'
-                              : 'bg-accent-500 text-white'
-                            : 'bg-dark-600'
-                        }`}
-                      >
-                        {isSelected && <CheckIcon />}
-                      </div>
-                      <span className="flex-1 text-sm font-medium">{group.name}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
         </div>
       )}
 
@@ -1001,6 +960,77 @@ export default function AdminTariffCreate() {
                   {option.emoji} {t(option.labelKey)}
                 </button>
               ))}
+            </div>
+          </div>
+
+          {/* Promo Groups */}
+          <div className="card space-y-4">
+            <h4 className="text-sm font-medium text-dark-200">
+              {t('admin.tariffs.promoGroupsTitle')}
+            </h4>
+            <p className="text-sm text-dark-400">{t('admin.tariffs.promoGroupsHint')}</p>
+            {promoGroups.length === 0 ? (
+              <p className="py-4 text-center text-dark-500">{t('admin.tariffs.noPromoGroups')}</p>
+            ) : (
+              <div className="max-h-48 space-y-2 overflow-y-auto">
+                {promoGroups.map((group) => {
+                  const isSelected = selectedPromoGroups.includes(group.id);
+                  return (
+                    <button
+                      key={group.id}
+                      type="button"
+                      onClick={() => togglePromoGroup(group.id)}
+                      className={`flex w-full items-center gap-3 rounded-lg p-3 text-left transition-colors ${
+                        isSelected
+                          ? isDaily
+                            ? 'bg-warning-500/20 text-warning-300'
+                            : 'bg-accent-500/20 text-accent-300'
+                          : 'bg-dark-800 text-dark-300 hover:bg-dark-700'
+                      }`}
+                    >
+                      <div
+                        className={`flex h-5 w-5 items-center justify-center rounded ${
+                          isSelected
+                            ? isDaily
+                              ? 'bg-warning-500 text-white'
+                              : 'bg-accent-500 text-white'
+                            : 'bg-dark-600'
+                        }`}
+                      >
+                        {isSelected && <CheckIcon />}
+                      </div>
+                      <span className="flex-1 text-sm font-medium">{group.name}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Tariff status */}
+          <div className="card space-y-3">
+            <h4 className="text-sm font-medium text-dark-200">{t('admin.tariffs.statusTitle')}</h4>
+            {/* Active toggle */}
+            <div className="flex items-center justify-between rounded-lg bg-dark-800 p-3">
+              <div>
+                <span className="text-sm font-medium text-dark-200">
+                  {t('admin.tariffs.isActiveLabel')}
+                </span>
+                <p className="text-xs text-dark-500">{t('admin.tariffs.isActiveHint')}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsActive(!isActive)}
+                className={`relative h-6 w-11 rounded-full transition-colors ${
+                  isActive ? 'bg-success-500' : 'bg-dark-600'
+                }`}
+              >
+                <span
+                  className={`absolute top-1 h-4 w-4 rounded-full bg-white transition-transform ${
+                    isActive ? 'left-6' : 'left-1'
+                  }`}
+                />
+              </button>
             </div>
           </div>
         </div>
