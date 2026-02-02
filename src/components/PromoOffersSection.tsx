@@ -219,7 +219,7 @@ export default function PromoOffersSection({ className = '' }: PromoOffersSectio
                     )}
                   </div>
                   <p className="mb-3 text-sm text-dark-400">{getOfferDescription(offer, t)}</p>
-                  <div className="flex items-center justify-between gap-4">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex items-center gap-1 text-xs text-dark-500">
                       <ClockIcon />
                       <span>
@@ -229,7 +229,7 @@ export default function PromoOffersSection({ className = '' }: PromoOffersSectio
                     <button
                       onClick={() => handleClaim(offer.id)}
                       disabled={claimingId === offer.id}
-                      className="group relative flex items-center gap-2 overflow-hidden rounded-lg bg-gradient-to-r from-orange-500 to-amber-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-orange-500/25 transition-all hover:scale-105 hover:shadow-xl hover:shadow-orange-500/30 active:scale-100 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
+                      className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-lg bg-gradient-to-r from-orange-500 to-amber-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-orange-500/25 transition-all hover:scale-105 hover:shadow-xl hover:shadow-orange-500/30 active:scale-100 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 sm:w-auto"
                     >
                       {/* Shimmer effect */}
                       <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-1000 group-hover:translate-x-full" />
