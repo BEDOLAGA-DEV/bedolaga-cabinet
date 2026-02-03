@@ -302,24 +302,31 @@ function UserRow({ user, onClick, onAction, formatAmount }: UserRowProps) {
   return (
     <div
       onClick={onClick}
-      className="flex cursor-pointer items-center gap-4 rounded-xl border border-dark-700 bg-dark-800/50 p-4 transition-all hover:border-dark-600 hover:bg-dark-800"
+      className="flex cursor-pointer items-start gap-3 rounded-xl border border-dark-700 bg-dark-800/50 p-3 transition-all hover:border-dark-600 hover:bg-dark-800 sm:items-center sm:gap-4 sm:p-4"
     >
       {/* Avatar */}
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-accent-500 to-accent-700 font-medium text-white">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-accent-500 to-accent-700 text-sm font-medium text-white sm:text-base">
         {user.first_name?.[0] || user.username?.[0] || '?'}
       </div>
 
-      {/* Info */}
+      {/* Info - flex column on mobile, row on desktop */}
       <div className="min-w-0 flex-1">
-        <div className="mb-1 flex items-center gap-2">
+        {/* Name and username */}
+        <div className="mb-1 flex flex-col gap-0.5 sm:flex-row sm:items-center sm:gap-2">
           <span className="truncate font-medium text-dark-100">{user.full_name}</span>
-          {user.username && <span className="text-xs text-dark-500">@{user.username}</span>}
+          {user.username && (
+            <span className="truncate text-xs text-dark-500 sm:text-xs">@{user.username}</span>
+          )}
         </div>
-        <div className="flex items-center gap-3 text-xs text-dark-400">
-          <span className="flex items-center gap-1">
-            <TelegramIcon />
-            {user.telegram_id}
-          </span>
+
+        {/* Telegram ID - full width on mobile */}
+        <div className="mb-1 flex items-center gap-1 text-xs text-dark-400 sm:mb-0">
+          <TelegramIcon />
+          <span className="truncate">{user.telegram_id}</span>
+        </div>
+
+        {/* Status badges - wrap on mobile */}
+        <div className="mt-1 flex flex-wrap items-center gap-1.5">
           {user.status !== 'active' && <StatusBadge status={user.status} />}
           {user.has_subscription && user.subscription_status && (
             <span
@@ -341,20 +348,24 @@ function UserRow({ user, onClick, onAction, formatAmount }: UserRowProps) {
         </div>
       </div>
 
-      {/* Balance */}
+      {/* Balance - smaller on mobile, show inline */}
       <div className="shrink-0 text-right">
-        <div className="font-medium text-dark-100">{formatAmount(user.balance_rubles)}</div>
-        <div className="text-xs text-dark-500">
+        <div className="text-sm font-medium text-dark-100 sm:text-base">
+          {formatAmount(user.balance_rubles)}
+        </div>
+        <div className="hidden text-xs text-dark-500 sm:block">
           {user.purchase_count > 0
             ? t('admin.users.purchaseCount', { count: user.purchase_count })
             : t('admin.users.noPurchases')}
         </div>
       </div>
 
-      {/* Actions Menu */}
+      {/* Actions Menu - hide chevron on mobile, show only dots */}
       <UserActionsMenu user={user} onAction={onAction} />
 
-      <ChevronRightIcon />
+      <div className="hidden sm:block">
+        <ChevronRightIcon />
+      </div>
     </div>
   );
 }
