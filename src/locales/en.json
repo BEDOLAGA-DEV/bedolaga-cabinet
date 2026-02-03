@@ -322,6 +322,10 @@
       "title": "Choose a plan to continue",
       "description": "Your trial period is ending soon. Select a plan to continue using VPN without restrictions."
     },
+    "expired": {
+      "title": "Subscription expired",
+      "selectTariff": "Your subscription has expired. Choose a plan below to restore access to VPN."
+    },
     "connection": {
       "title": "Connect VPN",
       "selectDevice": "Select your device",
@@ -1763,6 +1767,35 @@
       },
       "confirm": {
         "block": "Block this user?"
+      },
+      "userActions": {
+        "delete": "Delete user",
+        "resetTrial": "Reset trial",
+        "resetSubscription": "Reset subscription",
+        "disable": "Disable user",
+        "error": "Failed to perform action",
+        "success": {
+          "delete": "User successfully deleted",
+          "resetTrial": "Trial successfully reset",
+          "resetSubscription": "Subscription successfully reset",
+          "disable": "User successfully disabled"
+        },
+        "confirmDelete": {
+          "title": "Delete user?",
+          "message": "Are you sure? This action is irreversible. All user data will be deleted."
+        },
+        "confirmResetTrial": {
+          "title": "Reset trial?",
+          "message": "The user will be able to use the trial period again."
+        },
+        "confirmResetSubscription": {
+          "title": "Reset subscription?",
+          "message": "The user's current subscription will be cancelled."
+        },
+        "confirmDisable": {
+          "title": "Disable user?",
+          "message": "The user will not be able to use the service until reactivated."
+        }
       },
       "detail": {
         "tabs": {

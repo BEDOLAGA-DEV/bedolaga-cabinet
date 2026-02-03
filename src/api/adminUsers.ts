@@ -476,4 +476,22 @@ export const adminUsersApi = {
     const response = await apiClient.post(`/cabinet/admin/users/${userId}/sync/to-panel`, data);
     return response.data;
   },
+
+  // Reset trial
+  resetTrial: async (userId: number): Promise<{ success: boolean; message: string }> => {
+    const response = await apiClient.post(`/cabinet/admin/users/${userId}/reset-trial`);
+    return response.data;
+  },
+
+  // Reset subscription
+  resetSubscription: async (userId: number): Promise<{ success: boolean; message: string }> => {
+    const response = await apiClient.post(`/cabinet/admin/users/${userId}/reset-subscription`);
+    return response.data;
+  },
+
+  // Disable user
+  disableUser: async (userId: number): Promise<{ success: boolean; message: string }> => {
+    const response = await apiClient.post(`/cabinet/admin/users/${userId}/disable`);
+    return response.data;
+  },
 };

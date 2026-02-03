@@ -312,6 +312,28 @@ export default function Subscription() {
       queryClient.invalidateQueries({ queryKey: ['purchase-options'] });
       setSwitchTariffId(null);
     },
+    onError: (error: unknown) => {
+      // Handle subscription_expired error - redirect to purchase flow
+      if (error instanceof AxiosError) {
+        const detail = error.response?.data?.detail;
+        if (
+          typeof detail === 'object' &&
+          detail?.error_code === 'subscription_expired' &&
+          detail?.use_purchase_flow === true
+        ) {
+          // Find the tariff user was trying to switch to and open purchase form
+          const targetTariff = tariffs.find((t) => t.id === switchTariffId);
+          if (targetTariff) {
+            setSwitchTariffId(null);
+            setSelectedTariff(targetTariff);
+            setSelectedTariffPeriod(targetTariff.periods[0] || null);
+            setShowTariffPurchase(true);
+            // Refetch purchase-options to get updated expired status
+            queryClient.invalidateQueries({ queryKey: ['purchase-options'] });
+          }
+        }
+      }
+    },
   });
 
   // Tariff purchase mutation
@@ -1956,6 +1978,40 @@ export default function Subscription() {
             </div>
           )}
 
+          {/* Expired subscription notice - prompt to purchase new tariff */}
+          {isTariffsMode &&
+            purchaseOptions &&
+            'subscription_is_expired' in purchaseOptions &&
+            purchaseOptions.subscription_is_expired && (
+              <div className="mb-6 rounded-xl border border-error-500/30 bg-gradient-to-r from-error-500/10 to-warning-500/10 p-4">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-error-500/20">
+                    <svg
+                      className="h-5 w-5 text-error-400"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={1.5}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
+                      />
+                    </svg>
+                  </div>
+                  <div>
+                    <div className="font-medium text-error-300">
+                      {t('subscription.expired.title')}
+                    </div>
+                    <div className="mt-1 text-sm text-dark-400">
+                      {t('subscription.expired.selectTariff')}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
           {/* Legacy subscription notice - if user has subscription without tariff */}
           {subscription && !subscription.is_trial && !subscription.tariff_id && (
             <div className="mb-6 rounded-xl border border-accent-500/30 bg-accent-500/10 p-4">
@@ -2067,6 +2123,27 @@ export default function Subscription() {
                           t('subscription.switchTariff.switch')
                         )}
                       </button>
+
+                      {/* Show error (except subscription_expired which redirects to purchase) */}
+                      {switchTariffMutation.isError &&
+                        (() => {
+                          const detail =
+                            switchTariffMutation.error instanceof AxiosError
+                              ? switchTariffMutation.error.response?.data?.detail
+                              : null;
+                          // Skip displaying if it's subscription_expired (handled by redirect)
+                          if (
+                            typeof detail === 'object' &&
+                            detail?.error_code === 'subscription_expired'
+                          ) {
+                            return null;
+                          }
+                          return (
+                            <div className="mt-3 text-center text-sm text-error-400">
+                              {getErrorMessage(switchTariffMutation.error)}
+                            </div>
+                          );
+                        })()}
                     </>
                   );
                 })()
@@ -2126,11 +2203,20 @@ export default function Subscription() {
                   .map((tariff) => {
                     const isCurrentTariff =
                       tariff.is_current || tariff.id === subscription?.tariff_id;
+                    // Check if subscription is expired from purchaseOptions
+                    const isSubscriptionExpired =
+                      isTariffsMode &&
+                      purchaseOptions &&
+                      'subscription_is_expired' in purchaseOptions &&
+                      purchaseOptions.subscription_is_expired === true;
+                    // canSwitch only if subscription is active (not expired, not trial)
                     const canSwitch =
                       subscription &&
                       subscription.tariff_id &&
                       !isCurrentTariff &&
-                      !subscription.is_trial;
+                      !subscription.is_trial &&
+                      !isSubscriptionExpired &&
+                      subscription.is_active;
                     // Если есть подписка БЕЗ tariff_id (классическая) - разрешить выбрать тариф
                     const isLegacySubscription =
                       subscription && !subscription.is_trial && !subscription.tariff_id;
