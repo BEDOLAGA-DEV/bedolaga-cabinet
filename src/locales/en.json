@@ -2380,6 +2380,15 @@
       "activating": "Activating...",
       "activate": "Activate",
       "serverAccess": "Server access"
+    },
+    "deactivate": {
+      "button": "Cancel promo code",
+      "confirmTitle": "Cancel promo code?",
+      "confirmDescription": "Are you sure you want to cancel the {{percent}}% discount? After cancellation, you will be able to activate another promo code.",
+      "warning": "A cancelled promo code cannot be reused. The discount will stop working immediately.",
+      "confirm": "Cancel discount",
+      "deactivating": "Cancelling...",
+      "error": "Failed to cancel promo code. Please try again later."
     }
   },
   "telegramRedirect": {
