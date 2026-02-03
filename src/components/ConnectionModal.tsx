@@ -297,13 +297,20 @@ export default function ConnectionModal({ onClose }: ConnectionModalProps) {
 
   const handleConnect = (app: AppInfo) => {
     if (!app.deepLink || !isValidDeepLink(app.deepLink)) return;
-    const lang = i18n.language?.startsWith('ru') ? 'ru' : 'en';
-    const redirectUrl = `${window.location.origin}/miniapp/redirect.html?url=${encodeURIComponent(app.deepLink)}&lang=${lang}`;
+    const deepLink = app.deepLink;
+
+    // All deep links (including custom schemes like happ://, clash://, etc.)
+    // go through redirect.html. Telegram's openLink opens the redirect page
+    // in an external browser, which then performs window.location.href to the
+    // actual deep link URL. This works for both http(s) and custom schemes.
+    const redirectUrl = `${window.location.origin}/miniapp/redirect.html?url=${encodeURIComponent(deepLink)}&lang=${i18n.language || 'en'}`;
+
     const tg = (
       window as unknown as {
         Telegram?: { WebApp?: { openLink?: (url: string, options?: object) => void } };
       }
     ).Telegram?.WebApp;
+
     if (tg?.openLink) {
       try {
         tg.openLink(redirectUrl, { try_instant_view: false, try_browser: true });
