@@ -72,6 +72,7 @@ export default function Wheel() {
   );
   const [isPayingStars, setIsPayingStars] = useState(false);
   const [historyExpanded, setHistoryExpanded] = useState(false);
+  const paymentTypeInitialized = useRef(false);
 
   // Check if we're in Telegram Mini App environment
   const isTelegramMiniApp = platform === 'telegram';
@@ -90,9 +91,10 @@ export default function Wheel() {
     queryFn: () => wheelApi.getHistory(1, 10),
   });
 
-  // Auto-select payment type based on availability
+  // Auto-select payment type based on availability (only on initial load)
   useEffect(() => {
-    if (!config) return;
+    if (!config || paymentTypeInitialized.current) return;
+    paymentTypeInitialized.current = true;
 
     const starsEnabled = config.spin_cost_stars_enabled && config.spin_cost_stars;
     const daysEnabled = config.spin_cost_days_enabled && config.spin_cost_days;
