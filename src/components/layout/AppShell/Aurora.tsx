@@ -107,8 +107,23 @@ function hexToRgb(hex: string): [number, number, number] {
   return [r, g, b];
 }
 
+// Reduce lightness of a hex color for subdued background blobs
+function dimAccent(hex: string, factor = 0.45): string {
+  hex = hex.replace('#', '');
+  if (hex.length === 3) {
+    hex = hex
+      .split('')
+      .map((c) => c + c)
+      .join('');
+  }
+  const r = Math.round(parseInt(hex.substring(0, 2), 16) * factor);
+  const g = Math.round(parseInt(hex.substring(2, 4), 16) * factor);
+  const b = Math.round(parseInt(hex.substring(4, 6), 16) * factor);
+  return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+}
+
 function generateColorStops(background: string, surface: string, accent: string): string[] {
-  return [background, surface, accent];
+  return [background, surface, dimAccent(accent)];
 }
 
 export function Aurora() {

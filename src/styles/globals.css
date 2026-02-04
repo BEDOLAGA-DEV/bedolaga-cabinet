@@ -1436,7 +1436,7 @@ input[type='checkbox']:hover:not(:checked) {
 .wave-blob-1 {
   width: 400px;
   height: 400px;
-  background: radial-gradient(circle, rgba(var(--color-accent-500), 0.6) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(var(--color-accent-800), 0.6) 0%, transparent 70%);
   top: -15%;
   left: -10%;
   animation: wave1 20s ease-in-out infinite; /* Slower = less CPU */
@@ -1517,7 +1517,7 @@ input[type='checkbox']:hover:not(:checked) {
 }
 
 .light .wave-blob-1 {
-  background: radial-gradient(circle, rgba(var(--color-accent-500), 0.7) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(var(--color-accent-800), 0.7) 0%, transparent 70%);
 }
 
 /* Mobile: brighter and faster animations */
@@ -1530,7 +1530,7 @@ input[type='checkbox']:hover:not(:checked) {
   .wave-blob-1 {
     width: 300px;
     height: 300px;
-    background: radial-gradient(circle, rgba(var(--color-accent-500), 0.8) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(var(--color-accent-800), 0.8) 0%, transparent 70%);
     animation: wave1-mobile 12s ease-in-out infinite;
   }
 
