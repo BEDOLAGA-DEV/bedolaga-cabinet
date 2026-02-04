@@ -4,10 +4,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import {
   DndContext,
-  closestCenter,
   KeyboardSensor,
   PointerSensor,
-  TouchSensor,
   useSensor,
   useSensors,
   type DragEndEvent,
@@ -101,11 +99,11 @@ function SortablePaymentCard({ config, onClick }: SortableCardProps) {
     id: config.method_id,
   });
 
-  const style = {
+  const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
     transition,
     zIndex: isDragging ? 50 : undefined,
-    opacity: isDragging ? 0.85 : 1,
+    position: isDragging ? 'relative' : undefined,
   };
 
   const displayName = config.display_name || config.default_display_name;
@@ -140,19 +138,20 @@ function SortablePaymentCard({ config, onClick }: SortableCardProps) {
     <div
       ref={setNodeRef}
       style={style}
-      className={`group flex items-center gap-3 rounded-xl border p-4 transition-all ${
+      className={`group flex items-center gap-3 rounded-xl border p-4 ${
         isDragging
-          ? 'border-accent-500/50 bg-dark-700/80 shadow-xl shadow-accent-500/10'
+          ? 'border-accent-500/50 bg-dark-800 shadow-xl shadow-accent-500/20'
           : config.is_enabled
             ? 'border-dark-700/50 bg-dark-800/50 hover:border-dark-600'
             : 'border-dark-800/50 bg-dark-900/30 opacity-60'
       }`}
     >
       {/* Drag handle */}
+      {/* Drag handle - larger touch target for mobile */}
       <button
         {...attributes}
         {...listeners}
-        className="flex-shrink-0 cursor-grab touch-manipulation rounded-lg p-1.5 text-dark-500 hover:bg-dark-700/50 hover:text-dark-300 active:cursor-grabbing"
+        className="flex-shrink-0 cursor-grab touch-none rounded-lg p-2.5 text-dark-500 hover:bg-dark-700/50 hover:text-dark-300 active:cursor-grabbing sm:p-1.5"
         title={t('admin.paymentMethods.dragToReorder')}
       >
         <GripIcon />
@@ -267,10 +266,9 @@ export default function AdminPaymentMethods() {
     },
   });
 
-  // DnD sensors
+  // DnD sensors - PointerSensor handles both mouse and touch
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
-    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 5 } }),
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
 
@@ -362,7 +360,6 @@ export default function AdminPaymentMethods() {
         ) : methods.length > 0 ? (
           <DndContext
             sensors={sensors}
-            collisionDetection={closestCenter}
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
             onDragCancel={handleDragCancel}
