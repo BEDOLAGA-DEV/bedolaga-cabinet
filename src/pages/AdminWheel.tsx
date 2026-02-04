@@ -21,7 +21,9 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { adminWheelApi, type WheelPrizeAdmin, type CreateWheelPrizeData } from '../api/wheel';
+import { adminPaymentMethodsApi } from '../api/adminPaymentMethods';
 import { useDestructiveConfirm } from '@/platform';
+import { useNotify } from '@/platform/hooks/useNotify';
 import FortuneWheel from '../components/wheel/FortuneWheel';
 import { ColorPicker } from '@/components/ColorPicker';
 import { useBackButton } from '../platform/hooks/useBackButton';
@@ -291,6 +293,7 @@ export default function AdminWheel() {
   const queryClient = useQueryClient();
   const confirmDelete = useDestructiveConfirm();
   const { capabilities } = usePlatform();
+  const notify = useNotify();
 
   // Use native Telegram back button in Mini App
   useBackButton(() => navigate('/admin'));
@@ -794,10 +797,21 @@ export default function AdminWheel() {
           {hasSettingsChanges && (
             <div className="flex justify-end border-t border-dark-700 pt-6">
               <button
-                onClick={() => {
-                  if (settingsForm) {
-                    updateConfigMutation.mutate(settingsForm);
+                onClick={async () => {
+                  if (!settingsForm) return;
+                  if (settingsForm.spin_cost_stars_enabled) {
+                    try {
+                      const methods = await adminPaymentMethodsApi.getAll();
+                      const starsMethod = methods.find((m) => m.method_id === 'telegram_stars');
+                      if (!starsMethod?.is_enabled) {
+                        notify.warning(t('admin.wheel.starsNotEnabledGlobally'));
+                        return;
+                      }
+                    } catch {
+                      // If we can't check, allow saving
+                    }
                   }
+                  updateConfigMutation.mutate(settingsForm);
                 }}
                 disabled={updateConfigMutation.isPending}
                 className="btn-primary flex items-center gap-2"

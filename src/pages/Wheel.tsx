@@ -7,6 +7,7 @@ import WheelLegend from '../components/wheel/WheelLegend';
 import InsufficientBalancePrompt from '../components/InsufficientBalancePrompt';
 import { usePlatform, useHaptic } from '@/platform';
 import { useNotify } from '@/platform/hooks/useNotify';
+import { useNativeDialog } from '@/platform/hooks/useNativeDialog';
 import { Card } from '@/components/data-display/Card/Card';
 import { Button } from '@/components/primitives/Button/Button';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -63,6 +64,7 @@ export default function Wheel() {
   const { openInvoice, capabilities } = usePlatform();
   const haptic = useHaptic();
   const notify = useNotify();
+  const dialog = useNativeDialog();
 
   const [isSpinning, setIsSpinning] = useState(false);
   const [targetRotation, setTargetRotation] = useState<number | null>(null);
@@ -306,7 +308,12 @@ export default function Wheel() {
     },
   });
 
-  const handleDirectStarsPay = () => {
+  const handleDirectStarsPay = async () => {
+    const confirmed = await dialog.confirm(
+      t('wheel.confirmStarsPayment'),
+      t('wheel.confirmStarsTitle'),
+    );
+    if (!confirmed) return;
     setIsPayingStars(true);
     starsInvoiceMutation.mutate();
   };

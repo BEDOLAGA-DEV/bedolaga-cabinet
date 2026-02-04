@@ -604,6 +604,8 @@
     "starsPaymentFailed": "支付失败。请重试。",
     "starsPaymentRedirected": "将打开Telegram进行支付。支付后请刷新页面。",
     "starsNotAvailable": "星星支付暂不可用。请联系客服。",
+    "confirmStarsTitle": "星星支付",
+    "confirmStarsPayment": "您将被重定向到Telegram进行一次转盘支付。继续吗？",
     "noHistory": "暂无抽奖记录",
     "banner": {
       "title": "试试运气！",
@@ -752,6 +754,7 @@
         "limitsAndRtp": "限制和RTP",
         "promocodes": "促销码"
       },
+      "starsNotEnabledGlobally": "星星支付未在支付方式中启用。请在「支付方式」中启用「Telegram Stars」。",
       "prizes": {
         "addPrize": "添加奖品",
         "editPrize": "编辑奖品",
