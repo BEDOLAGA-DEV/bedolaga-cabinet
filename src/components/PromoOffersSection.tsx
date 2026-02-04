@@ -1,11 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { createPortal } from 'react-dom';
 import { promoApi, PromoOffer } from '../api/promo';
 import { ClockIcon, CheckIcon } from './icons';
-import { useTelegramSDK } from '../hooks/useTelegramSDK';
+import { useDestructiveConfirm } from '@/platform/hooks/useNativeDialog';
 
 // Helper functions
 const formatTimeLeft = (
@@ -81,140 +80,6 @@ const XCircleIcon = () => (
   </svg>
 );
 
-const WarningIcon = () => (
-  <svg
-    className="h-12 w-12"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={1.5}
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"
-    />
-  </svg>
-);
-
-// ------- Confirmation Modal -------
-
-interface DeactivateConfirmModalProps {
-  isOpen: boolean;
-  discountPercent: number;
-  isDeactivating: boolean;
-  onConfirm: () => void;
-  onCancel: () => void;
-}
-
-function DeactivateConfirmModal({
-  isOpen,
-  discountPercent,
-  isDeactivating,
-  onConfirm,
-  onCancel,
-}: DeactivateConfirmModalProps) {
-  const { t } = useTranslation();
-
-  // Escape key to close
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && !isDeactivating) {
-        e.preventDefault();
-        onCancel();
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, isDeactivating, onCancel]);
-
-  // Scroll lock
-  useEffect(() => {
-    if (!isOpen) return;
-
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [isOpen]);
-
-  if (!isOpen) return null;
-
-  const modalContent = (
-    <div
-      className="fixed inset-0 z-[100] flex items-center justify-center"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="deactivate-modal-title"
-    >
-      {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-black/70 backdrop-blur-sm"
-        onClick={isDeactivating ? undefined : onCancel}
-      />
-
-      {/* Modal */}
-      <div
-        className="relative mx-4 w-full max-w-sm overflow-hidden rounded-2xl border border-dark-700/50 bg-dark-900 shadow-2xl"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Warning header */}
-        <div className="flex flex-col items-center bg-gradient-to-br from-warning-500/20 to-red-500/20 px-6 pb-6 pt-8">
-          <div className="mb-3 text-warning-400">
-            <WarningIcon />
-          </div>
-          <h2 id="deactivate-modal-title" className="text-center text-lg font-bold text-dark-100">
-            {t('promo.deactivate.confirmTitle')}
-          </h2>
-          <p className="mt-2 text-center text-sm text-dark-300">
-            {t('promo.deactivate.confirmDescription', { percent: discountPercent })}
-          </p>
-        </div>
-
-        {/* Warning text */}
-        <div className="px-6 py-4">
-          <div className="rounded-lg border border-warning-500/20 bg-warning-500/10 px-4 py-3">
-            <p className="text-center text-sm text-warning-400">{t('promo.deactivate.warning')}</p>
-          </div>
-        </div>
-
-        {/* Action buttons */}
-        <div className="flex gap-3 px-6 pb-6">
-          <button
-            onClick={onCancel}
-            disabled={isDeactivating}
-            className="flex-1 rounded-xl bg-dark-800 py-3 font-semibold text-dark-300 transition-colors hover:bg-dark-700 hover:text-dark-100 disabled:opacity-50"
-          >
-            {t('common.cancel')}
-          </button>
-          <button
-            onClick={onConfirm}
-            disabled={isDeactivating}
-            className="flex-1 rounded-xl bg-gradient-to-r from-red-500 to-red-600 py-3 font-semibold text-white shadow-lg shadow-red-500/25 transition-all hover:from-red-400 hover:to-red-500 active:from-red-600 active:to-red-700 disabled:opacity-50"
-          >
-            {isDeactivating ? (
-              <span className="flex items-center justify-center gap-2">
-                <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                {t('promo.deactivate.deactivating')}
-              </span>
-            ) : (
-              t('promo.deactivate.confirm')
-            )}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-
-  if (typeof document !== 'undefined') {
-    return createPortal(modalContent, document.body);
-  }
-  return modalContent;
-}
-
 // ------- Main Component -------
 
 interface PromoOffersSectionProps {
@@ -225,11 +90,10 @@ export default function PromoOffersSection({ className = '' }: PromoOffersSectio
   const { t } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { isTelegramWebApp } = useTelegramSDK();
+  const destructiveConfirm = useDestructiveConfirm();
   const [claimingId, setClaimingId] = useState<number | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   // Fetch available offers
   const { data: offers = [], isLoading: offersLoading } = useQuery({
@@ -272,14 +136,14 @@ export default function PromoOffersSection({ className = '' }: PromoOffersSectio
       queryClient.invalidateQueries({ queryKey: ['promo-offers'] });
       queryClient.invalidateQueries({ queryKey: ['subscription'] });
       queryClient.invalidateQueries({ queryKey: ['purchase-options'] });
-      setShowConfirmModal(false);
+
       setSuccessMessage(t('promo.deactivate.success'));
       setTimeout(() => setSuccessMessage(null), 5000);
     },
     onError: (error: unknown) => {
       const axiosErr = error as { response?: { data?: { detail?: string } } };
       setErrorMessage(axiosErr.response?.data?.detail || t('promo.deactivate.error'));
-      setShowConfirmModal(false);
+
       setTimeout(() => setErrorMessage(null), 5000);
     },
   });
@@ -295,42 +159,20 @@ export default function PromoOffersSection({ className = '' }: PromoOffersSectio
     navigate('/subscription', { state: { scrollToExtend: true } });
   };
 
-  const handleDeactivateClick = () => {
+  const handleDeactivateClick = async () => {
     setErrorMessage(null);
     setSuccessMessage(null);
 
-    // Use Telegram native popup in Mini App
-    if (isTelegramWebApp && window.Telegram?.WebApp?.showPopup) {
-      window.Telegram.WebApp.showPopup(
-        {
-          title: t('promo.deactivate.confirmTitle'),
-          message: t('promo.deactivate.confirmDescription', {
-            percent: activeDiscount?.discount_percent || 0,
-          }),
-          buttons: [
-            { id: 'cancel', type: 'cancel' },
-            { id: 'confirm', type: 'destructive', text: t('promo.deactivate.confirm') },
-          ],
-        },
-        (button_id: string) => {
-          if (button_id === 'confirm') {
-            deactivateMutation.mutate();
-          }
-        },
-      );
-    } else {
-      // Fallback to modal for web
-      setShowConfirmModal(true);
-    }
-  };
+    const confirmed = await destructiveConfirm(
+      t('promo.deactivate.confirmDescription', {
+        percent: activeDiscount?.discount_percent || 0,
+      }),
+      t('promo.deactivate.confirm'),
+      t('promo.deactivate.confirmTitle'),
+    );
 
-  const handleConfirmDeactivate = () => {
-    deactivateMutation.mutate();
-  };
-
-  const handleCloseConfirmModal = () => {
-    if (!deactivateMutation.isPending) {
-      setShowConfirmModal(false);
+    if (confirmed) {
+      deactivateMutation.mutate();
     }
   };
 
@@ -484,17 +326,6 @@ export default function PromoOffersSection({ className = '' }: PromoOffersSectio
             </div>
           </div>
         </div>
-      )}
-
-      {/* Deactivation Confirmation Modal */}
-      {activeDiscount && (
-        <DeactivateConfirmModal
-          isOpen={showConfirmModal}
-          discountPercent={activeDiscount.discount_percent || 0}
-          isDeactivating={deactivateMutation.isPending}
-          onConfirm={handleConfirmDeactivate}
-          onCancel={handleCloseConfirmModal}
-        />
       )}
     </div>
   );

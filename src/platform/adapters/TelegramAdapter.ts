@@ -183,58 +183,69 @@ function createHapticController(): HapticController {
 function createDialogController(): DialogController {
   const tg = getTelegram();
   const inTelegram = isInTelegramWebApp();
+  let popupOpen = false;
+
+  function showPopupSafe<T>(
+    params: Parameters<NonNullable<TelegramWebApp['showPopup']>>[0],
+    mapResult: (buttonId: string) => T,
+    fallback: () => T,
+  ): Promise<T> {
+    if (!inTelegram || !tg?.showPopup) {
+      return Promise.resolve(fallback());
+    }
+
+    if (popupOpen) {
+      return Promise.resolve(mapResult(''));
+    }
+
+    return new Promise((resolve) => {
+      popupOpen = true;
+      tg.showPopup(params, (buttonId) => {
+        popupOpen = false;
+        resolve(mapResult(buttonId));
+      });
+    });
+  }
 
   return {
     alert(message: string, _title?: string): Promise<void> {
-      return new Promise((resolve) => {
-        if (inTelegram && tg?.showPopup) {
-          tg.showPopup({ message, buttons: [{ type: 'ok' }] }, () => resolve());
-        } else {
+      return showPopupSafe(
+        { message, buttons: [{ type: 'ok' }] },
+        () => undefined,
+        () => {
           window.alert(message);
-          resolve();
-        }
-      });
+        },
+      );
     },
 
     confirm(message: string, _title?: string): Promise<boolean> {
-      return new Promise((resolve) => {
-        if (inTelegram && tg?.showPopup) {
-          tg.showPopup(
-            {
-              message,
-              buttons: [
-                { id: 'ok', type: 'ok' },
-                { id: 'cancel', type: 'cancel' },
-              ],
-            },
-            (buttonId) => resolve(buttonId === 'ok'),
-          );
-        } else {
-          resolve(window.confirm(message));
-        }
-      });
+      return showPopupSafe(
+        {
+          message,
+          buttons: [
+            { id: 'ok', type: 'ok' },
+            { id: 'cancel', type: 'cancel' },
+          ],
+        },
+        (buttonId) => buttonId === 'ok',
+        () => window.confirm(message),
+      );
     },
 
     popup(options: PopupOptions): Promise<string | null> {
-      return new Promise((resolve) => {
-        if (inTelegram && tg?.showPopup) {
-          tg.showPopup(
-            {
-              title: options.title,
-              message: options.message,
-              buttons: options.buttons?.map((btn) => ({
-                id: btn.id,
-                type: btn.type,
-                text: btn.text,
-              })),
-            },
-            (buttonId) => resolve(buttonId ?? null),
-          );
-        } else {
-          const confirmed = window.confirm(options.message);
-          resolve(confirmed ? 'ok' : null);
-        }
-      });
+      return showPopupSafe(
+        {
+          title: options.title,
+          message: options.message,
+          buttons: options.buttons?.map((btn) => ({
+            id: btn.id,
+            type: btn.type,
+            text: btn.text,
+          })),
+        },
+        (buttonId) => buttonId || null,
+        () => (window.confirm(options.message) ? 'ok' : null),
+      );
     },
   };
 }
