@@ -97,28 +97,32 @@ function ToastItem({ toast, onClose }: { toast: Toast; onClose: () => void }) {
 
   const typeStyles = {
     success: {
-      bg: 'bg-gradient-to-r from-success-500/20 to-success-600/10',
-      border: 'border-success-500/30',
+      bg: 'bg-dark-800',
+      accent: 'bg-gradient-to-r from-success-500/50 to-transparent',
+      border: 'border-success-500/70',
       icon: 'text-success-400',
-      iconBg: 'bg-success-500/20',
+      iconBg: 'bg-success-500/30',
     },
     error: {
-      bg: 'bg-gradient-to-r from-error-500/20 to-error-600/10',
-      border: 'border-error-500/30',
+      bg: 'bg-dark-800',
+      accent: 'bg-gradient-to-r from-error-500/50 to-transparent',
+      border: 'border-error-500/70',
       icon: 'text-error-400',
-      iconBg: 'bg-error-500/20',
+      iconBg: 'bg-error-500/30',
     },
     warning: {
-      bg: 'bg-gradient-to-r from-warning-500/20 to-warning-600/10',
-      border: 'border-warning-500/30',
+      bg: 'bg-dark-800',
+      accent: 'bg-gradient-to-r from-warning-500/50 to-transparent',
+      border: 'border-warning-500/70',
       icon: 'text-warning-400',
-      iconBg: 'bg-warning-500/20',
+      iconBg: 'bg-warning-500/30',
     },
     info: {
-      bg: 'bg-gradient-to-r from-accent-500/20 to-accent-600/10',
-      border: 'border-accent-500/30',
+      bg: 'bg-dark-800',
+      accent: 'bg-gradient-to-r from-accent-500/50 to-transparent',
+      border: 'border-accent-500/70',
       icon: 'text-accent-400',
-      iconBg: 'bg-accent-500/20',
+      iconBg: 'bg-accent-500/30',
     },
   };
 
@@ -181,11 +185,11 @@ function ToastItem({ toast, onClose }: { toast: Toast; onClose: () => void }) {
 
   return (
     <div
-      className={`pointer-events-auto w-80 sm:w-96 ${style.bg} border backdrop-blur-xl ${style.border} animate-slide-in-right overflow-hidden rounded-2xl shadow-2xl shadow-black/20 ${toast.onClick ? 'cursor-pointer hover:scale-[1.02] active:scale-[0.98]' : ''} transition-transform duration-200`}
+      className={`pointer-events-auto w-80 sm:w-96 ${style.bg} border ${style.border} animate-slide-in-right overflow-hidden rounded-2xl shadow-2xl shadow-black/40 ${toast.onClick ? 'cursor-pointer hover:scale-[1.02] active:scale-[0.98]' : ''} transition-transform duration-200`}
       onClick={handleClick}
     >
-      {/* Glow effect */}
-      <div className={`absolute inset-0 ${style.bg} opacity-50 blur-xl`} />
+      {/* Color accent */}
+      <div className={`absolute inset-0 ${style.accent}`} />
 
       <div className="relative p-4">
         <div className="flex gap-3">

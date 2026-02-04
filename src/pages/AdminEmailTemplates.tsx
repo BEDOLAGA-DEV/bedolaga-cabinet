@@ -1,26 +1,34 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
 import {
   adminEmailTemplatesApi,
   EmailTemplateType,
   EmailTemplateDetail,
   EmailTemplateLanguageData,
 } from '../api/adminEmailTemplates';
+import { AdminBackButton, BackIcon } from '../components/admin';
+import { useIsTelegram } from '../platform/hooks/usePlatform';
+import { useNotify } from '@/platform';
+
+// Hook to check if on mobile
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return window.innerWidth < 1024;
+  });
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 1024);
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
+
+  return isMobile;
+}
 
 // Icons
-const BackIcon = () => (
-  <svg
-    className="h-5 w-5 text-dark-400"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={2}
-  >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-  </svg>
-);
 
 const MailIcon = () => (
   <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -66,12 +74,6 @@ const ResetIcon = () => (
       strokeLinejoin="round"
       d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"
     />
-  </svg>
-);
-
-const XIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
   </svg>
 );
 
@@ -156,16 +158,22 @@ function TemplateEditor({
   currentLang: string;
 }) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const notify = useNotify();
+  const isTelegram = useIsTelegram();
+  const isMobile = useIsMobile();
+  const isPreviewDisabled = isTelegram || isMobile;
+
   const [activeLang, setActiveLang] = useState('ru');
   const [editSubject, setEditSubject] = useState('');
   const [editBody, setEditBody] = useState('');
   const [isDirty, setIsDirty] = useState(false);
-  const [showPreview, setShowPreview] = useState(false);
-  const [previewHtml, setPreviewHtml] = useState('');
-  const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [toast, setToast] = useState<{
+    type: 'success' | 'error' | 'info';
+    message: string;
+  } | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
 
   const langData: EmailTemplateLanguageData | undefined = detail.languages[activeLang];
 
@@ -178,7 +186,7 @@ function TemplateEditor({
     }
   }, [activeLang, langData]);
 
-  const showToast = useCallback((type: 'success' | 'error', message: string) => {
+  const showToast = useCallback((type: 'success' | 'error' | 'info', message: string) => {
     setToast({ type, message });
     setTimeout(() => setToast(null), 3000);
   }, []);
@@ -245,23 +253,6 @@ function TemplateEditor({
     },
   });
 
-  // Preview mutation
-  const previewMutation = useMutation({
-    mutationFn: () =>
-      adminEmailTemplatesApi.previewTemplate(detail.notification_type, {
-        language: activeLang,
-        subject: editSubject,
-        body_html: editBody,
-      }),
-    onSuccess: (data) => {
-      setPreviewHtml(data.body_html);
-      setShowPreview(true);
-    },
-    onError: () => {
-      showToast('error', t('common.error'));
-    },
-  });
-
   // Send test mutation
   const testMutation = useMutation({
     mutationFn: () =>
@@ -275,18 +266,6 @@ function TemplateEditor({
       showToast('error', t('common.error'));
     },
   });
-
-  // Write preview HTML into iframe
-  useEffect(() => {
-    if (showPreview && iframeRef.current && previewHtml) {
-      const doc = iframeRef.current.contentDocument;
-      if (doc) {
-        doc.open();
-        doc.write(previewHtml);
-        doc.close();
-      }
-    }
-  }, [showPreview, previewHtml]);
 
   const handleSubjectChange = (value: string) => {
     setEditSubject(value);
@@ -421,9 +400,22 @@ function TemplateEditor({
           </button>
 
           <button
-            onClick={() => previewMutation.mutate()}
-            disabled={previewMutation.isPending}
-            className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-dark-700 px-3 py-2.5 text-sm font-medium text-dark-200 transition-colors hover:bg-dark-600 disabled:opacity-40 sm:px-4 sm:py-2"
+            onClick={() => {
+              if (isPreviewDisabled) {
+                notify.warning(
+                  t('admin.emailTemplates.previewDesktopOnly'),
+                  t('admin.emailTemplates.previewNotAvailable'),
+                );
+                return;
+              }
+              navigate(`/admin/email-templates/preview/${detail.notification_type}/${activeLang}`, {
+                state: {
+                  subject: editSubject,
+                  body_html: editBody,
+                },
+              });
+            }}
+            className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-dark-700 px-3 py-2.5 text-sm font-medium text-dark-200 transition-colors hover:bg-dark-600 sm:px-4 sm:py-2"
           >
             <EyeIcon />
             {t('admin.emailTemplates.preview')}
@@ -460,38 +452,15 @@ function TemplateEditor({
       {/* Toast */}
       {toast && (
         <div
-          className={`fixed bottom-4 left-4 right-4 z-50 animate-fade-in rounded-xl px-4 py-3 text-center text-sm font-medium shadow-lg sm:bottom-6 sm:left-auto sm:right-6 sm:text-left ${
-            toast.type === 'success' ? 'bg-emerald-500/90 text-white' : 'bg-red-500/90 text-white'
+          className={`fixed left-4 right-4 top-32 z-[100] mx-auto max-w-sm animate-fade-in rounded-xl px-4 py-3 text-center text-sm font-medium shadow-lg sm:left-1/2 sm:right-auto sm:-translate-x-1/2 ${
+            toast.type === 'success'
+              ? 'bg-success-500 text-white'
+              : toast.type === 'info'
+                ? 'bg-dark-700 text-dark-100 ring-1 ring-dark-600'
+                : 'bg-error-500 text-white'
           }`}
         >
           {toast.message}
-        </div>
-      )}
-
-      {/* Preview Modal */}
-      {showPreview && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-sm sm:items-center sm:p-4">
-          <div className="flex max-h-[90vh] w-full flex-col rounded-t-2xl border border-dark-600 bg-dark-800 shadow-2xl sm:max-h-[85vh] sm:max-w-2xl sm:rounded-2xl">
-            <div className="flex items-center justify-between border-b border-dark-700 px-4 py-3 sm:px-5 sm:py-4">
-              <h3 className="text-base font-semibold text-dark-100">
-                {t('admin.emailTemplates.preview')}
-              </h3>
-              <button
-                onClick={() => setShowPreview(false)}
-                className="rounded-lg p-1.5 transition-colors hover:bg-dark-700"
-              >
-                <XIcon />
-              </button>
-            </div>
-            <div className="flex-1 overflow-hidden p-1">
-              <iframe
-                ref={iframeRef}
-                className="h-full min-h-[50vh] w-full rounded-lg bg-white sm:min-h-[400px]"
-                sandbox="allow-same-origin"
-                title="Email Preview"
-              />
-            </div>
-          </div>
         </div>
       )}
     </div>
@@ -522,14 +491,9 @@ export default function AdminEmailTemplates() {
     <div className="mx-auto max-w-4xl space-y-4 px-3 py-4 sm:space-y-6 sm:px-4 sm:py-6">
       {/* Page Header */}
       <div className="flex items-center gap-2 sm:gap-3">
-        <Link
-          to="/admin"
-          className="flex-shrink-0 rounded-xl border border-dark-700 bg-dark-800 p-1.5 transition-colors hover:bg-dark-700 sm:p-2"
-        >
-          <BackIcon />
-        </Link>
+        <AdminBackButton className="flex-shrink-0 rounded-xl border border-dark-700 bg-dark-800 p-1.5 transition-colors hover:bg-dark-700 sm:p-2" />
         <div className="flex min-w-0 items-center gap-2 sm:gap-2.5">
-          <div className="flex-shrink-0 rounded-xl bg-gradient-to-br from-blue-500/20 to-blue-600/10 p-1.5 text-blue-400 sm:p-2">
+          <div className="flex-shrink-0 rounded-xl bg-gradient-to-br from-accent-500/20 to-accent-600/10 p-1.5 text-accent-400 sm:p-2">
             <MailIcon />
           </div>
           <div className="min-w-0">

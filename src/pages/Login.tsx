@@ -14,6 +14,7 @@ import {
   type EmailAuthEnabled,
 } from '../api/branding';
 import { getAndClearReturnUrl } from '../utils/token';
+import { isInTelegramWebApp, getTelegramInitData } from '../hooks/useTelegramSDK';
 import LanguageSwitcher from '../components/LanguageSwitcher';
 import TelegramLoginButton from '../components/TelegramLoginButton';
 
@@ -111,14 +112,13 @@ export default function Login() {
   // Try Telegram WebApp authentication on mount
   useEffect(() => {
     const tryTelegramAuth = async () => {
-      const tg = window.Telegram?.WebApp;
-      if (tg?.initData) {
+      const initData = getTelegramInitData();
+      if (isInTelegramWebApp() && initData) {
         setIsTelegramWebApp(true);
-        tg.ready();
-        tg.expand();
+        // Note: ready() and expand() are already called by SDK init in main.tsx
         setIsLoading(true);
         try {
-          await loginWithTelegram(tg.initData);
+          await loginWithTelegram(initData);
           navigate(getReturnUrl(), { replace: true });
         } catch (err) {
           // Log only status code to avoid leaking sensitive data

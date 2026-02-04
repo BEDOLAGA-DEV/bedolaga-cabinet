@@ -236,4 +236,10 @@ export const tariffsApi = {
     const response = await apiClient.get('/cabinet/admin/tariffs/available-servers');
     return response.data;
   },
+
+  // Get available promo groups for selection
+  getAvailablePromoGroups: async (): Promise<{ id: number; name: string }[]> => {
+    const response = await apiClient.get('/cabinet/admin/payment-methods/promo-groups');
+    return response.data;
+  },
 };

@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { useSuccessNotification } from '../store/successNotification';
 import { useCurrency } from '../hooks/useCurrency';
 import { useTelegramWebApp } from '../hooks/useTelegramWebApp';
+import { useBackButton, useHaptic } from '@/platform';
 
 // Icons
 const CheckCircleIcon = () => (
@@ -48,6 +49,26 @@ const RocketIcon = () => (
   </svg>
 );
 
+const DevicesIcon = () => (
+  <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3"
+    />
+  </svg>
+);
+
+const TrafficIcon = () => (
+  <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"
+    />
+  </svg>
+);
+
 const CloseIcon = () => (
   <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -59,7 +80,8 @@ export default function SuccessNotificationModal() {
   const navigate = useNavigate();
   const { isOpen, data, hide } = useSuccessNotification();
   const { formatAmount, currencySymbol } = useCurrency();
-  const { webApp, safeAreaInset, contentSafeAreaInset, isTelegramWebApp } = useTelegramWebApp();
+  const { safeAreaInset, contentSafeAreaInset, isTelegramWebApp } = useTelegramWebApp();
+  const haptic = useHaptic();
 
   const safeBottom = isTelegramWebApp
     ? Math.max(safeAreaInset.bottom, contentSafeAreaInset.bottom)
@@ -84,18 +106,15 @@ export default function SuccessNotificationModal() {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, handleClose]);
 
-  // Telegram back button
+  // Telegram back button - using platform hook
+  useBackButton(isOpen ? handleClose : null);
+
+  // Haptic feedback on open
   useEffect(() => {
-    if (!isOpen || !webApp?.BackButton) return;
-
-    webApp.BackButton.show();
-    webApp.BackButton.onClick(handleClose);
-
-    return () => {
-      webApp.BackButton.offClick(handleClose);
-      webApp.BackButton.hide();
-    };
-  }, [isOpen, webApp, handleClose]);
+    if (isOpen) {
+      haptic.notification('success');
+    }
+  }, [isOpen, haptic]);
 
   // Scroll lock
   useEffect(() => {
@@ -114,6 +133,8 @@ export default function SuccessNotificationModal() {
     data.type === 'subscription_activated' ||
     data.type === 'subscription_renewed' ||
     data.type === 'subscription_purchased';
+  const isDevicesPurchased = data.type === 'devices_purchased';
+  const isTrafficPurchased = data.type === 'traffic_purchased';
 
   // Format amount
   const formattedAmount = data.amountKopeks
@@ -158,6 +179,14 @@ export default function SuccessNotificationModal() {
       title = t('successNotification.subscriptionPurchased.title', 'Subscription purchased!');
       icon = <RocketIcon />;
       gradientClass = 'from-accent-500 to-purple-600';
+    } else if (data.type === 'devices_purchased') {
+      title = t('successNotification.devicesPurchased.title', 'Devices added!');
+      icon = <DevicesIcon />;
+      gradientClass = 'from-blue-500 to-cyan-600';
+    } else if (data.type === 'traffic_purchased') {
+      title = t('successNotification.trafficPurchased.title', 'Traffic added!');
+      icon = <TrafficIcon />;
+      gradientClass = 'from-emerald-500 to-teal-600';
     }
   }
 
@@ -211,7 +240,50 @@ export default function SuccessNotificationModal() {
                   ? t('successNotification.amount', 'Amount')
                   : t('successNotification.price', 'Price')}
               </span>
-              <span className="text-lg font-bold text-success-400">+{formattedAmount}</span>
+              <span
+                className={`text-lg font-bold ${isDevicesPurchased || isTrafficPurchased ? 'text-dark-100' : 'text-success-400'}`}
+              >
+                {isDevicesPurchased || isTrafficPurchased ? '' : '+'}
+                {formattedAmount}
+              </span>
+            </div>
+          )}
+
+          {/* Devices info (for devices purchase) */}
+          {isDevicesPurchased && data.devicesAdded && (
+            <div className="flex items-center justify-between rounded-xl bg-dark-800/50 px-4 py-3">
+              <span className="text-dark-400">
+                {t('successNotification.devicesAdded', 'Devices added')}
+              </span>
+              <span className="text-lg font-bold text-blue-400">+{data.devicesAdded}</span>
+            </div>
+          )}
+
+          {isDevicesPurchased && data.newDeviceLimit && (
+            <div className="flex items-center justify-between rounded-xl bg-dark-800/50 px-4 py-3">
+              <span className="text-dark-400">
+                {t('successNotification.totalDevices', 'Total devices')}
+              </span>
+              <span className="font-semibold text-dark-100">{data.newDeviceLimit}</span>
+            </div>
+          )}
+
+          {/* Traffic info (for traffic purchase) */}
+          {isTrafficPurchased && data.trafficGbAdded && (
+            <div className="flex items-center justify-between rounded-xl bg-dark-800/50 px-4 py-3">
+              <span className="text-dark-400">
+                {t('successNotification.trafficAdded', 'Traffic added')}
+              </span>
+              <span className="text-lg font-bold text-emerald-400">+{data.trafficGbAdded} GB</span>
+            </div>
+          )}
+
+          {isTrafficPurchased && data.newTrafficLimitGb && (
+            <div className="flex items-center justify-between rounded-xl bg-dark-800/50 px-4 py-3">
+              <span className="text-dark-400">
+                {t('successNotification.totalTraffic', 'Total traffic')}
+              </span>
+              <span className="font-semibold text-dark-100">{data.newTrafficLimitGb} GB</span>
             </div>
           )}
 
@@ -262,6 +334,26 @@ export default function SuccessNotificationModal() {
               >
                 <WalletIcon />
                 <span>{t('successNotification.goToBalance', 'Go to Balance')}</span>
+              </button>
+            )}
+
+            {isDevicesPurchased && (
+              <button
+                onClick={handleGoToSubscription}
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-600 py-3.5 font-bold text-white shadow-lg shadow-blue-500/25 transition-all hover:from-blue-400 hover:to-cyan-500 active:from-blue-600 active:to-cyan-700"
+              >
+                <DevicesIcon />
+                <span>{t('successNotification.goToSubscription', 'Go to Subscription')}</span>
+              </button>
+            )}
+
+            {isTrafficPurchased && (
+              <button
+                onClick={handleGoToSubscription}
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 py-3.5 font-bold text-white shadow-lg shadow-emerald-500/25 transition-all hover:from-emerald-400 hover:to-teal-500 active:from-emerald-600 active:to-teal-700"
+              >
+                <TrafficIcon />
+                <span>{t('successNotification.goToSubscription', 'Go to Subscription')}</span>
               </button>
             )}
 

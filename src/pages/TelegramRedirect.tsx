@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '../store/auth';
 import { brandingApi } from '../api/branding';
+import { isInTelegramWebApp, getTelegramInitData } from '../hooks/useTelegramSDK';
 
 // Validate redirect URL to prevent open redirect attacks
 const getSafeRedirectUrl = (url: string | null): string => {
@@ -64,33 +65,19 @@ export default function TelegramRedirect() {
 
     const initTelegram = async () => {
       // Check if running in Telegram WebApp
-      const tg = window.Telegram?.WebApp;
+      const initData = getTelegramInitData();
 
-      if (!tg?.initData) {
+      if (!isInTelegramWebApp() || !initData) {
         // Not in Telegram, show message and redirect to login
         setStatus('not-telegram');
         setTimeout(() => navigate('/login'), 2000);
         return;
       }
 
-      // Initialize Telegram WebApp
-      tg.ready();
-      tg.expand();
-
-      // Set theme colors if available
-      if (tg.themeParams) {
-        document.documentElement.style.setProperty(
-          '--tg-theme-bg-color',
-          tg.themeParams.bg_color || '#1a1a2e',
-        );
-        document.documentElement.style.setProperty(
-          '--tg-theme-text-color',
-          tg.themeParams.text_color || '#ffffff',
-        );
-      }
+      // Note: ready(), expand(), and theme CSS vars are already handled by SDK init in main.tsx
 
       try {
-        await loginWithTelegram(tg.initData);
+        await loginWithTelegram(initData);
         setStatus('success');
 
         // Small delay for nice UX

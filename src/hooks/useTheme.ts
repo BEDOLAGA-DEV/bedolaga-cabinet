@@ -42,8 +42,9 @@ function getCachedEnabledThemes(): EnabledThemes {
   return DEFAULT_ENABLED_THEMES;
 }
 
-// Custom event for same-tab updates
+// Custom events for same-tab updates
 const ENABLED_THEMES_CHANGED_EVENT = 'enabledThemesChanged';
+const THEME_CHANGED_EVENT = 'themeChanged';
 
 // Update cache (called from admin settings)
 export function updateEnabledThemesCache(themes: EnabledThemes) {
@@ -161,7 +162,20 @@ export function useTheme() {
     }
 
     localStorage.setItem(THEME_KEY, theme);
+    // Notify other useTheme() instances in the same tab
+    window.dispatchEvent(new CustomEvent(THEME_CHANGED_EVENT, { detail: theme }));
   }, [theme, enabledThemes]);
+
+  // Listen for same-tab theme changes (from other useTheme() instances)
+  useEffect(() => {
+    const handleThemeChange = (e: CustomEvent<Theme>) => {
+      setThemeState(e.detail);
+    };
+
+    window.addEventListener(THEME_CHANGED_EVENT, handleThemeChange as EventListener);
+    return () =>
+      window.removeEventListener(THEME_CHANGED_EVENT, handleThemeChange as EventListener);
+  }, []);
 
   // Listen for system theme changes
   useEffect(() => {

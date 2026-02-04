@@ -1,17 +1,19 @@
 import { useState, useCallback, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
+import { useBackButton } from '../platform/hooks/useBackButton';
+import { usePlatform } from '../platform/hooks/usePlatform';
 import {
   DndContext,
-  closestCenter,
   KeyboardSensor,
   PointerSensor,
-  TouchSensor,
   useSensor,
   useSensors,
   type DragEndEvent,
+  type DragStartEvent,
 } from '@dnd-kit/core';
+import { useTelegramDnd } from '../hooks/useTelegramDnd';
 import {
   arrayMove,
   SortableContext,
@@ -21,7 +23,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { adminPaymentMethodsApi } from '../api/adminPaymentMethods';
-import type { PaymentMethodConfig, PromoGroupSimple } from '../types';
+import type { PaymentMethodConfig } from '../types';
 
 // ============ Icons ============
 
@@ -50,12 +52,6 @@ const GripIcon = () => (
 const ChevronRightIcon = () => (
   <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-  </svg>
-);
-
-const CloseIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
   </svg>
 );
 
@@ -120,11 +116,11 @@ function SortablePaymentCard({ config, onClick }: SortableCardProps) {
     id: config.method_id,
   });
 
-  const style = {
+  const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
     transition,
     zIndex: isDragging ? 50 : undefined,
-    opacity: isDragging ? 0.85 : 1,
+    position: isDragging ? 'relative' : undefined,
   };
 
   const displayName = config.display_name || config.default_display_name;
@@ -159,19 +155,20 @@ function SortablePaymentCard({ config, onClick }: SortableCardProps) {
     <div
       ref={setNodeRef}
       style={style}
-      className={`group flex items-center gap-3 rounded-xl border p-4 transition-all ${
+      className={`group flex items-center gap-3 rounded-xl border p-4 ${
         isDragging
-          ? 'border-accent-500/50 bg-dark-700/80 shadow-xl shadow-accent-500/10'
+          ? 'border-accent-500/50 bg-dark-800 shadow-xl shadow-accent-500/20'
           : config.is_enabled
             ? 'border-dark-700/50 bg-dark-800/50 hover:border-dark-600'
             : 'border-dark-800/50 bg-dark-900/30 opacity-60'
       }`}
     >
       {/* Drag handle */}
+      {/* Drag handle - larger touch target for mobile */}
       <button
         {...attributes}
         {...listeners}
-        className="flex-shrink-0 cursor-grab touch-manipulation rounded-lg p-1.5 text-dark-500 hover:bg-dark-700/50 hover:text-dark-300 active:cursor-grabbing"
+        className="flex-shrink-0 cursor-grab touch-none rounded-lg p-2.5 text-dark-500 hover:bg-dark-700/50 hover:text-dark-300 active:cursor-grabbing sm:p-1.5"
         title={t('admin.paymentMethods.dragToReorder')}
       >
         <GripIcon />
@@ -233,382 +230,6 @@ function SortablePaymentCard({ config, onClick }: SortableCardProps) {
   );
 }
 
-// ============ Detail Modal ============
-
-interface DetailModalProps {
-  config: PaymentMethodConfig;
-  promoGroups: PromoGroupSimple[];
-  onClose: () => void;
-  onSave: (methodId: string, data: Record<string, unknown>) => void;
-  isSaving: boolean;
-}
-
-function PaymentMethodDetailModal({
-  config,
-  promoGroups,
-  onClose,
-  onSave,
-  isSaving,
-}: DetailModalProps) {
-  const { t } = useTranslation();
-  const displayName = config.display_name || config.default_display_name;
-  const icon = METHOD_ICONS[config.method_id] || '\uD83D\uDCB3';
-
-  // Local state for editing
-  const [isEnabled, setIsEnabled] = useState(config.is_enabled);
-  const [customName, setCustomName] = useState(config.display_name || '');
-  const [subOptions, setSubOptions] = useState<Record<string, boolean>>(config.sub_options || {});
-  const [minAmount, setMinAmount] = useState(config.min_amount_kopeks?.toString() || '');
-  const [maxAmount, setMaxAmount] = useState(config.max_amount_kopeks?.toString() || '');
-  const [userTypeFilter, setUserTypeFilter] = useState(config.user_type_filter);
-  const [firstTopupFilter, setFirstTopupFilter] = useState(config.first_topup_filter);
-  const [promoGroupFilterMode, setPromoGroupFilterMode] = useState(config.promo_group_filter_mode);
-  const [selectedPromoGroupIds, setSelectedPromoGroupIds] = useState<number[]>(
-    config.allowed_promo_group_ids,
-  );
-
-  // Escape to close
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [onClose]);
-
-  // Scroll lock
-  useEffect(() => {
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, []);
-
-  const handleSave = () => {
-    const data: Record<string, unknown> = {
-      is_enabled: isEnabled,
-      user_type_filter: userTypeFilter,
-      first_topup_filter: firstTopupFilter,
-      promo_group_filter_mode: promoGroupFilterMode,
-      allowed_promo_group_ids: promoGroupFilterMode === 'selected' ? selectedPromoGroupIds : [],
-    };
-
-    // Display name
-    if (customName.trim()) {
-      data.display_name = customName.trim();
-    } else {
-      data.reset_display_name = true;
-    }
-
-    // Sub-options
-    if (config.available_sub_options) {
-      data.sub_options = subOptions;
-    }
-
-    // Amounts
-    if (minAmount.trim()) {
-      data.min_amount_kopeks = parseInt(minAmount, 10) || null;
-    } else {
-      data.reset_min_amount = true;
-    }
-    if (maxAmount.trim()) {
-      data.max_amount_kopeks = parseInt(maxAmount, 10) || null;
-    } else {
-      data.reset_max_amount = true;
-    }
-
-    onSave(config.method_id, data);
-  };
-
-  const togglePromoGroup = (id: number) => {
-    setSelectedPromoGroupIds((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
-    );
-  };
-
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-start justify-center sm:items-center"
-      onClick={onClose}
-    >
-      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" />
-      <div
-        className="relative m-4 max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-dark-700 bg-dark-800 shadow-2xl"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="sticky top-0 z-10 flex items-center justify-between rounded-t-2xl border-b border-dark-700 bg-dark-800 p-5">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-dark-700/50 text-xl">
-              {icon}
-            </div>
-            <div>
-              <h2 className="text-lg font-bold text-dark-50">{displayName}</h2>
-              <p className="text-xs text-dark-500">
-                {METHOD_LABELS[config.method_id] || config.method_id}
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={onClose}
-            className="rounded-lg p-2 text-dark-400 transition-colors hover:bg-dark-700 hover:text-dark-200"
-          >
-            <CloseIcon />
-          </button>
-        </div>
-
-        <div className="space-y-6 p-5">
-          {/* Enable toggle */}
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-sm font-medium text-dark-200">
-                {t('admin.paymentMethods.methodEnabled')}
-              </div>
-              {!config.is_provider_configured && (
-                <div className="mt-0.5 text-xs text-warning-400">
-                  {t('admin.paymentMethods.providerNotConfigured')}
-                </div>
-              )}
-            </div>
-            <button
-              onClick={() => setIsEnabled(!isEnabled)}
-              className={`relative h-7 w-12 rounded-full transition-colors ${
-                isEnabled ? 'bg-accent-500' : 'bg-dark-600'
-              }`}
-            >
-              <span
-                className={`absolute top-0.5 h-6 w-6 rounded-full bg-white shadow transition-transform ${
-                  isEnabled ? 'left-[calc(100%-1.625rem)]' : 'left-0.5'
-                }`}
-              />
-            </button>
-          </div>
-
-          {/* Display name */}
-          <div>
-            <label className="mb-2 block text-sm font-medium text-dark-200">
-              {t('admin.paymentMethods.displayName')}
-            </label>
-            <input
-              type="text"
-              value={customName}
-              onChange={(e) => setCustomName(e.target.value)}
-              placeholder={config.default_display_name}
-              className="w-full rounded-xl border border-dark-700 bg-dark-900/50 px-4 py-2.5 text-dark-100 transition-colors placeholder:text-dark-500 focus:border-accent-500/50 focus:outline-none"
-            />
-            <p className="mt-1 text-xs text-dark-500">
-              {t('admin.paymentMethods.displayNameHint')}: {config.default_display_name}
-            </p>
-          </div>
-
-          {/* Sub-options */}
-          {config.available_sub_options && config.available_sub_options.length > 0 && (
-            <div>
-              <label className="mb-2 block text-sm font-medium text-dark-200">
-                {t('admin.paymentMethods.subOptions')}
-              </label>
-              <div className="space-y-2">
-                {config.available_sub_options.map((opt) => {
-                  const enabled = subOptions[opt.id] !== false;
-                  return (
-                    <button
-                      key={opt.id}
-                      onClick={() => setSubOptions((prev) => ({ ...prev, [opt.id]: !enabled }))}
-                      className={`flex w-full items-center justify-between rounded-xl border p-3 transition-all ${
-                        enabled
-                          ? 'border-accent-500/30 bg-dark-700/30 text-dark-100'
-                          : 'border-dark-800 bg-dark-900/30 text-dark-500'
-                      }`}
-                    >
-                      <span className="text-sm">{opt.name}</span>
-                      <div
-                        className={`flex h-5 w-5 items-center justify-center rounded ${
-                          enabled
-                            ? 'bg-accent-500 text-white'
-                            : 'border border-dark-600 bg-dark-700'
-                        }`}
-                      >
-                        {enabled && <CheckIcon />}
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Min/Max amounts */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="mb-2 block text-sm font-medium text-dark-200">
-                {t('admin.paymentMethods.minAmount')}
-              </label>
-              <input
-                type="number"
-                value={minAmount}
-                onChange={(e) => setMinAmount(e.target.value)}
-                placeholder={config.default_min_amount_kopeks.toString()}
-                className="w-full rounded-xl border border-dark-700 bg-dark-900/50 px-4 py-2.5 text-dark-100 transition-colors placeholder:text-dark-500 focus:border-accent-500/50 focus:outline-none"
-              />
-            </div>
-            <div>
-              <label className="mb-2 block text-sm font-medium text-dark-200">
-                {t('admin.paymentMethods.maxAmount')}
-              </label>
-              <input
-                type="number"
-                value={maxAmount}
-                onChange={(e) => setMaxAmount(e.target.value)}
-                placeholder={config.default_max_amount_kopeks.toString()}
-                className="w-full rounded-xl border border-dark-700 bg-dark-900/50 px-4 py-2.5 text-dark-100 transition-colors placeholder:text-dark-500 focus:border-accent-500/50 focus:outline-none"
-              />
-            </div>
-          </div>
-
-          {/* Display conditions */}
-          <div className="border-t border-dark-700 pt-3">
-            <h3 className="mb-4 text-sm font-semibold text-dark-200">
-              {t('admin.paymentMethods.conditions')}
-            </h3>
-
-            {/* User type filter */}
-            <div className="mb-4">
-              <label className="mb-2 block text-sm text-dark-300">
-                {t('admin.paymentMethods.userTypeFilter')}
-              </label>
-              <div className="flex gap-2">
-                {(['all', 'telegram', 'email'] as const).map((val) => (
-                  <button
-                    key={val}
-                    onClick={() => setUserTypeFilter(val)}
-                    className={`flex-1 rounded-xl px-3 py-2 text-sm font-medium transition-all ${
-                      userTypeFilter === val
-                        ? 'border border-accent-500/40 bg-accent-500/20 text-accent-300'
-                        : 'border border-dark-700 bg-dark-900/50 text-dark-400 hover:border-dark-600'
-                    }`}
-                  >
-                    {val === 'all'
-                      ? t('admin.paymentMethods.userTypeAll')
-                      : val === 'telegram'
-                        ? 'Telegram'
-                        : 'Email'}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* First topup filter */}
-            <div className="mb-4">
-              <label className="mb-2 block text-sm text-dark-300">
-                {t('admin.paymentMethods.firstTopupFilter')}
-              </label>
-              <div className="flex gap-2">
-                {(['any', 'yes', 'no'] as const).map((val) => (
-                  <button
-                    key={val}
-                    onClick={() => setFirstTopupFilter(val)}
-                    className={`flex-1 rounded-xl px-3 py-2 text-sm font-medium transition-all ${
-                      firstTopupFilter === val
-                        ? 'border border-accent-500/40 bg-accent-500/20 text-accent-300'
-                        : 'border border-dark-700 bg-dark-900/50 text-dark-400 hover:border-dark-600'
-                    }`}
-                  >
-                    {val === 'any'
-                      ? t('admin.paymentMethods.firstTopupAny')
-                      : val === 'yes'
-                        ? t('admin.paymentMethods.firstTopupWas')
-                        : t('admin.paymentMethods.firstTopupWasNot')}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Promo groups filter */}
-            <div>
-              <label className="mb-2 block text-sm text-dark-300">
-                {t('admin.paymentMethods.promoGroupFilter')}
-              </label>
-              <div className="mb-3 flex gap-2">
-                {(['all', 'selected'] as const).map((val) => (
-                  <button
-                    key={val}
-                    onClick={() => setPromoGroupFilterMode(val)}
-                    className={`flex-1 rounded-xl px-3 py-2 text-sm font-medium transition-all ${
-                      promoGroupFilterMode === val
-                        ? 'border border-accent-500/40 bg-accent-500/20 text-accent-300'
-                        : 'border border-dark-700 bg-dark-900/50 text-dark-400 hover:border-dark-600'
-                    }`}
-                  >
-                    {val === 'all'
-                      ? t('admin.paymentMethods.promoGroupAll')
-                      : t('admin.paymentMethods.promoGroupSelected')}
-                  </button>
-                ))}
-              </div>
-
-              {promoGroupFilterMode === 'selected' && (
-                <div className="max-h-48 space-y-1.5 overflow-y-auto rounded-xl border border-dark-700/50 bg-dark-900/30 p-3">
-                  {promoGroups.length === 0 ? (
-                    <p className="py-2 text-center text-sm text-dark-500">
-                      {t('admin.paymentMethods.noPromoGroups')}
-                    </p>
-                  ) : (
-                    promoGroups.map((group) => {
-                      const selected = selectedPromoGroupIds.includes(group.id);
-                      return (
-                        <button
-                          key={group.id}
-                          onClick={() => togglePromoGroup(group.id)}
-                          className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm transition-all ${
-                            selected
-                              ? 'bg-accent-500/15 text-accent-300'
-                              : 'text-dark-400 hover:bg-dark-800/50'
-                          }`}
-                        >
-                          <span>{group.name}</span>
-                          <div
-                            className={`flex h-4 w-4 items-center justify-center rounded ${
-                              selected ? 'bg-accent-500 text-white' : 'border border-dark-600'
-                            }`}
-                          >
-                            {selected && <CheckIcon />}
-                          </div>
-                        </button>
-                      );
-                    })
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="sticky bottom-0 flex items-center gap-3 rounded-b-2xl border-t border-dark-700 bg-dark-800 p-5">
-          <button
-            onClick={onClose}
-            className="flex-1 rounded-xl bg-dark-700 px-4 py-2.5 font-medium text-dark-300 transition-colors hover:bg-dark-600"
-          >
-            {t('admin.paymentMethods.cancelButton')}
-          </button>
-          <button
-            onClick={handleSave}
-            disabled={isSaving}
-            className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-accent-500 px-4 py-2.5 font-medium text-white transition-colors hover:bg-accent-400 disabled:opacity-50"
-          >
-            {isSaving ? (
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-            ) : (
-              <SaveIcon />
-            )}
-            {t('admin.paymentMethods.saveButton')}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 // ============ Toast ============
 
 function Toast({ message, onClose }: { message: string; onClose: () => void }) {
@@ -629,10 +250,14 @@ function Toast({ message, onClose }: { message: string; onClose: () => void }) {
 
 export default function AdminPaymentMethods() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { capabilities } = usePlatform();
+
+  // Use native Telegram back button in Mini App
+  useBackButton(() => navigate('/admin'));
 
   const [methods, setMethods] = useState<PaymentMethodConfig[]>([]);
-  const [selectedMethod, setSelectedMethod] = useState<PaymentMethodConfig | null>(null);
   const [orderChanged, setOrderChanged] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -640,12 +265,6 @@ export default function AdminPaymentMethods() {
   const { data: fetchedMethods, isLoading } = useQuery({
     queryKey: ['admin-payment-methods'],
     queryFn: adminPaymentMethodsApi.getAll,
-  });
-
-  // Fetch promo groups
-  const { data: promoGroups = [] } = useQuery({
-    queryKey: ['admin-payment-methods-promo-groups'],
-    queryFn: adminPaymentMethodsApi.getPromoGroups,
   });
 
   // Sync fetched data to local state
@@ -668,46 +287,49 @@ export default function AdminPaymentMethods() {
     },
   });
 
-  // Update method mutation
-  const updateMethodMutation = useMutation({
-    mutationFn: ({ methodId, data }: { methodId: string; data: Record<string, unknown> }) =>
-      adminPaymentMethodsApi.update(methodId, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-payment-methods'] });
-      setSelectedMethod(null);
-      setToastMessage(t('admin.paymentMethods.saved'));
-    },
-    onError: () => {
-      setToastMessage(t('common.error'));
-    },
-  });
-
-  // DnD sensors
+  // DnD sensors - PointerSensor handles both mouse and touch
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
-    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 5 } }),
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   );
 
-  const handleDragEnd = useCallback((event: DragEndEvent) => {
-    const { active, over } = event;
-    if (over && active.id !== over.id) {
-      setMethods((prev) => {
-        const oldIndex = prev.findIndex((m) => m.method_id === active.id);
-        const newIndex = prev.findIndex((m) => m.method_id === over.id);
-        if (oldIndex === -1 || newIndex === -1) return prev;
-        return arrayMove(prev, oldIndex, newIndex);
-      });
-      setOrderChanged(true);
-    }
-  }, []);
+  // Telegram swipe behavior for drag-and-drop
+  const {
+    onDragStart: onTelegramDragStart,
+    onDragEnd: onTelegramDragEnd,
+    onDragCancel: onTelegramDragCancel,
+  } = useTelegramDnd();
+
+  const handleDragStart = useCallback(
+    (_event: DragStartEvent) => {
+      onTelegramDragStart();
+    },
+    [onTelegramDragStart],
+  );
+
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      onTelegramDragEnd();
+      const { active, over } = event;
+      if (over && active.id !== over.id) {
+        setMethods((prev) => {
+          const oldIndex = prev.findIndex((m) => m.method_id === active.id);
+          const newIndex = prev.findIndex((m) => m.method_id === over.id);
+          if (oldIndex === -1 || newIndex === -1) return prev;
+          return arrayMove(prev, oldIndex, newIndex);
+        });
+        setOrderChanged(true);
+      }
+    },
+    [onTelegramDragEnd],
+  );
+
+  const handleDragCancel = useCallback(() => {
+    onTelegramDragCancel();
+  }, [onTelegramDragCancel]);
 
   const handleSaveOrder = () => {
     saveOrderMutation.mutate(methods.map((m) => m.method_id));
-  };
-
-  const handleSaveMethod = (methodId: string, data: Record<string, unknown>) => {
-    updateMethodMutation.mutate({ methodId, data });
   };
 
   const handleCloseToast = useCallback(() => setToastMessage(null), []);
@@ -717,12 +339,15 @@ export default function AdminPaymentMethods() {
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <Link
-            to="/admin"
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
-          >
-            <BackIcon />
-          </Link>
+          {/* Show back button only on web, not in Telegram Mini App */}
+          {!capabilities.hasBackButton && (
+            <button
+              onClick={() => navigate('/admin')}
+              className="flex h-10 w-10 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
+            >
+              <BackIcon />
+            </button>
+          )}
           <div>
             <h1 className="text-2xl font-bold text-dark-50">{t('admin.paymentMethods.title')}</h1>
             <p className="text-sm text-dark-400">{t('admin.paymentMethods.description')}</p>
@@ -759,8 +384,9 @@ export default function AdminPaymentMethods() {
         ) : methods.length > 0 ? (
           <DndContext
             sensors={sensors}
-            collisionDetection={closestCenter}
+            onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
+            onDragCancel={handleDragCancel}
           >
             <SortableContext
               items={methods.map((m) => m.method_id)}
@@ -771,7 +397,7 @@ export default function AdminPaymentMethods() {
                   <SortablePaymentCard
                     key={config.method_id}
                     config={config}
-                    onClick={() => setSelectedMethod(config)}
+                    onClick={() => navigate(`/admin/payment-methods/${config.method_id}/edit`)}
                   />
                 ))}
               </div>
@@ -786,17 +412,6 @@ export default function AdminPaymentMethods() {
           </div>
         )}
       </div>
-
-      {/* Detail Modal */}
-      {selectedMethod && (
-        <PaymentMethodDetailModal
-          config={selectedMethod}
-          promoGroups={promoGroups}
-          onClose={() => setSelectedMethod(null)}
-          onSave={handleSaveMethod}
-          isSaving={updateMethodMutation.isPending}
-        />
-      )}
 
       {/* Toast */}
       {toastMessage && <Toast message={toastMessage} onClose={handleCloseToast} />}

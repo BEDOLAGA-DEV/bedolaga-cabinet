@@ -98,6 +98,44 @@ export const subscriptionApi = {
     return response.data;
   },
 
+  // Save devices cart for later purchase after top-up
+  saveDevicesCart: async (devices: number): Promise<void> => {
+    await apiClient.post('/cabinet/subscription/devices/save-cart', { devices });
+  },
+
+  // Get device reduction info (for reducing device limit)
+  getDeviceReductionInfo: async (): Promise<{
+    available: boolean;
+    reason?: string;
+    current_device_limit: number;
+    min_device_limit: number;
+    can_reduce: number;
+    connected_devices_count: number;
+  }> => {
+    const response = await apiClient.get('/cabinet/subscription/devices/reduction-info');
+    return response.data;
+  },
+
+  // Reduce device limit
+  reduceDevices: async (
+    newDeviceLimit: number,
+  ): Promise<{
+    success: boolean;
+    message: string;
+    old_device_limit: number;
+    new_device_limit: number;
+  }> => {
+    const response = await apiClient.post('/cabinet/subscription/devices/reduce', {
+      new_device_limit: newDeviceLimit,
+    });
+    return response.data;
+  },
+
+  // Save traffic cart for later purchase after top-up
+  saveTrafficCart: async (trafficGb: number): Promise<void> => {
+    await apiClient.post('/cabinet/subscription/traffic/save-cart', { gb: trafficGb });
+  },
+
   // Update autopay settings
   updateAutopay: async (
     enabled: boolean,

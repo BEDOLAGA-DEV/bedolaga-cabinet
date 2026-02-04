@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 
 interface ColorPickerProps {
@@ -8,11 +8,6 @@ interface ColorPickerProps {
   description?: string;
   disabled?: boolean;
 }
-
-// Check if running in Telegram WebApp
-const isTelegramWebApp = (): boolean => {
-  return !!(window as unknown as { Telegram?: { WebApp?: unknown } }).Telegram?.WebApp;
-};
 
 // Convert hex to RGB
 const hexToRgb = (hex: string): { r: number; g: number; b: number } => {
@@ -115,9 +110,6 @@ export function ColorPicker({ value, onChange, label, description, disabled }: C
 
   const buttonRef = useRef<HTMLButtonElement>(null);
   const pickerRef = useRef<HTMLDivElement>(null);
-  const colorInputRef = useRef<HTMLInputElement>(null);
-
-  const isTelegram = useMemo(() => isTelegramWebApp(), []);
 
   // Sync with external value
   useEffect(() => {
@@ -181,18 +173,15 @@ export function ColorPicker({ value, onChange, label, description, disabled }: C
       }
     };
 
-    const handleScroll = () => handleClose();
     const handleResize = () => updatePosition();
 
     document.addEventListener('mousedown', handleClickOutside);
     document.addEventListener('touchstart', handleClickOutside as EventListener);
-    window.addEventListener('scroll', handleScroll, true);
     window.addEventListener('resize', handleResize);
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('touchstart', handleClickOutside as EventListener);
-      window.removeEventListener('scroll', handleScroll, true);
       window.removeEventListener('resize', handleResize);
     };
   }, [isOpen, handleClose, updatePosition]);
@@ -231,18 +220,6 @@ export function ColorPicker({ value, onChange, label, description, disabled }: C
       updateColorFromHsl({ ...hsl, l: parseInt(e.target.value) });
     },
     [hsl, updateColorFromHsl],
-  );
-
-  // Handle native color input
-  const handleColorInputChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const newColor = e.target.value;
-      setLocalValue(newColor);
-      const rgb = hexToRgb(newColor);
-      setHsl(rgbToHsl(rgb.r, rgb.g, rgb.b));
-      onChange(newColor);
-    },
-    [onChange],
   );
 
   // Handle hex input
@@ -413,41 +390,6 @@ export function ColorPicker({ value, onChange, label, description, disabled }: C
           placeholder="#000000"
           maxLength={7}
         />
-
-        {/* Native color picker button (hidden in Telegram) */}
-        {!isTelegram && (
-          <>
-            <input
-              ref={colorInputRef}
-              type="color"
-              value={localValue || '#000000'}
-              onChange={handleColorInputChange}
-              disabled={disabled}
-              className="sr-only"
-            />
-            <button
-              type="button"
-              onClick={() => colorInputRef.current?.click()}
-              disabled={disabled}
-              className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 text-dark-400 transition-colors hover:bg-dark-700 hover:text-dark-200 disabled:opacity-50"
-              title="System color picker"
-            >
-              <svg
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={1.5}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M4.098 19.902a3.75 3.75 0 005.304 0l6.401-6.402M6.75 21A3.75 3.75 0 013 17.25V4.125C3 3.504 3.504 3 4.125 3h5.25c.621 0 1.125.504 1.125 1.125v4.072M6.75 21a3.75 3.75 0 003.75-3.75V8.197M6.75 21h13.125c.621 0 1.125-.504 1.125-1.125v-5.25c0-.621-.504-1.125-1.125-1.125h-4.072M10.5 8.197l2.88-2.88c.438-.439 1.15-.439 1.59 0l3.712 3.713c.44.44.44 1.152 0 1.59l-2.879 2.88M6.75 17.25h.008v.008H6.75v-.008z"
-                />
-              </svg>
-            </button>
-          </>
-        )}
       </div>
 
       {/* Render picker in portal */}

@@ -1,32 +1,19 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
-import { useMutation } from '@tanstack/react-query';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { motion } from 'framer-motion';
+
 import { balanceApi } from '../api/balance';
 import { useCurrency } from '../hooks/useCurrency';
-import { useTelegramWebApp } from '../hooks/useTelegramWebApp';
 import { checkRateLimit, getRateLimitResetTime, RATE_LIMIT_KEYS } from '../utils/rateLimit';
 import { useCloseOnSuccessNotification } from '../store/successNotification';
+import { useBackButton, useHaptic, usePlatform } from '@/platform';
+import { staggerContainer, staggerItem } from '@/components/motion/transitions';
 import type { PaymentMethod } from '../types';
-import BentoCard from './ui/BentoCard';
+import BentoCard from '../components/ui/BentoCard';
 
 // Icons
-const CloseIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-  </svg>
-);
-
-const WalletIcon = () => (
-  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M21 12a2.25 2.25 0 00-2.25-2.25H15a3 3 0 11-6 0H5.25A2.25 2.25 0 003 12m18 0v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6m18 0V9M3 12V9m18 0a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 9m18 0V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v3"
-    />
-  </svg>
-);
-
 const StarIcon = () => (
   <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
     <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
@@ -85,26 +72,6 @@ const CheckIcon = () => (
   </svg>
 );
 
-interface TopUpModalProps {
-  method: PaymentMethod;
-  onClose: () => void;
-  initialAmountRubles?: number;
-}
-
-function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    return window.innerWidth < 640;
-  });
-  useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 640);
-    window.addEventListener('resize', check);
-    return () => window.removeEventListener('resize', check);
-  }, []);
-  return isMobile;
-}
-
-// Get method icon based on method type
 const getMethodIcon = (methodId: string) => {
   const id = methodId.toLowerCase();
   if (id.includes('stars')) return <StarIcon />;
@@ -112,17 +79,52 @@ const getMethodIcon = (methodId: string) => {
   return <CardIcon />;
 };
 
-export default function TopUpModal({ method, onClose, initialAmountRubles }: TopUpModalProps) {
+export default function TopUpAmount() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { methodId } = useParams<{ methodId: string }>();
+  const [searchParams] = useSearchParams();
+  const queryClient = useQueryClient();
   const { formatAmount, currencySymbol, convertAmount, convertToRub, targetCurrency } =
     useCurrency();
-  const { isTelegramWebApp, safeAreaInset, contentSafeAreaInset, webApp } = useTelegramWebApp();
+  const { openInvoice } = usePlatform();
+  const haptic = useHaptic();
   const inputRef = useRef<HTMLInputElement>(null);
-  const isMobileScreen = useIsMobile();
 
-  const safeBottom = isTelegramWebApp
-    ? Math.max(safeAreaInset.bottom, contentSafeAreaInset.bottom)
-    : 0;
+  const returnTo = searchParams.get('returnTo');
+  const initialAmountRubles = searchParams.get('amount')
+    ? parseFloat(searchParams.get('amount')!)
+    : undefined;
+
+  // Get method from cached payment-methods query
+  const cachedMethods = queryClient.getQueryData<PaymentMethod[]>(['payment-methods']);
+  const method = cachedMethods?.find((m) => m.id === methodId);
+
+  const handleNavigateBack = useCallback(() => {
+    navigate(-1);
+  }, [navigate]);
+
+  const handleSuccess = useCallback(() => {
+    navigate(returnTo || '/balance', { replace: true });
+  }, [navigate, returnTo]);
+
+  // Telegram back button
+  useBackButton(handleNavigateBack);
+
+  // Keyboard: Escape to go back
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        handleNavigateBack();
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [handleNavigateBack]);
+
+  // Auto-redirect when success notification appears (e.g., balance topped up via WebSocket)
+  useCloseOnSuccessNotification(handleSuccess);
 
   const getInitialAmount = (): string => {
     if (!initialAmountRubles || initialAmountRubles <= 0) return '';
@@ -135,105 +137,48 @@ export default function TopUpModal({ method, onClose, initialAmountRubles }: Top
   const [amount, setAmount] = useState(getInitialAmount);
   const [error, setError] = useState<string | null>(null);
   const [selectedOption, setSelectedOption] = useState<string | null>(
-    method.options && method.options.length > 0 ? method.options[0].id : null,
+    method?.options && method.options.length > 0 ? method.options[0].id : null,
   );
   const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [isInputFocused, setIsInputFocused] = useState(false);
 
-  const handleClose = useCallback(() => {
-    onClose();
-  }, [onClose]);
-
-  // Auto-close when success notification appears (e.g., balance topped up via WebSocket)
-  useCloseOnSuccessNotification(handleClose);
-
-  // Keyboard: Escape to close (PC)
+  // If method not found in cache, redirect to method selection
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        e.preventDefault();
-        handleClose();
-      }
-    };
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [handleClose]);
-
-  // Telegram back button (Android)
-  useEffect(() => {
-    if (!webApp?.BackButton) return;
-    webApp.BackButton.show();
-    webApp.BackButton.onClick(handleClose);
-    return () => {
-      webApp.BackButton.offClick(handleClose);
-      webApp.BackButton.hide();
-    };
-  }, [webApp, handleClose]);
-
-  // Scroll lock
-  useEffect(() => {
-    const scrollY = window.scrollY;
-    const preventScroll = (e: TouchEvent) => {
-      const target = e.target as HTMLElement;
-      if (target.closest('[data-modal-content]')) return;
-      e.preventDefault();
-    };
-    const preventWheel = (e: WheelEvent) => {
-      const target = e.target as HTMLElement;
-      if (target.closest('[data-modal-content]')) return;
-      e.preventDefault();
-    };
-    document.addEventListener('touchmove', preventScroll, { passive: false });
-    document.addEventListener('wheel', preventWheel, { passive: false });
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.removeEventListener('touchmove', preventScroll);
-      document.removeEventListener('wheel', preventWheel);
-      document.body.style.overflow = '';
-      window.scrollTo(0, scrollY);
-    };
-  }, []);
-
-  const hasOptions = method.options && method.options.length > 0;
-  const minRubles = method.min_amount_kopeks / 100;
-  const maxRubles = method.max_amount_kopeks / 100;
-  const methodKey = method.id.toLowerCase().replace(/-/g, '_');
-  const isStarsMethod = methodKey.includes('stars');
-  const methodName =
-    t(`balance.paymentMethods.${methodKey}.name`, { defaultValue: '' }) || method.name;
+    if (cachedMethods && !method) {
+      const params = new URLSearchParams();
+      const amount = searchParams.get('amount');
+      const rt = searchParams.get('returnTo');
+      if (amount) params.set('amount', amount);
+      if (rt) params.set('returnTo', rt);
+      const qs = params.toString();
+      navigate(`/balance/top-up${qs ? `?${qs}` : ''}`, { replace: true });
+    }
+  }, [cachedMethods, method, navigate, searchParams]);
 
   const starsPaymentMutation = useMutation({
     mutationFn: (amountKopeks: number) => balanceApi.createStarsInvoice(amountKopeks),
-    onSuccess: (data) => {
-      const webApp = window.Telegram?.WebApp;
+    onSuccess: async (data) => {
       if (!data.invoice_url) {
         setError(t('balance.errors.noPaymentLink'));
         return;
       }
-      // openInvoice requires WebApp version 6.1+
-      const supportsInvoice =
-        webApp?.openInvoice && webApp?.isVersionAtLeast && webApp.isVersionAtLeast('6.1');
-      if (supportsInvoice) {
-        try {
-          webApp.openInvoice(data.invoice_url, (status) => {
-            if (status === 'paid') {
-              setError(null);
-              onClose();
-            } else if (status === 'failed') {
-              setError(t('wheel.starsPaymentFailed'));
-            }
-          });
-        } catch (e) {
-          setError(t('balance.errors.generic', { details: String(e) }));
+      try {
+        const status = await openInvoice(data.invoice_url);
+        if (status === 'paid') {
+          haptic.notification('success');
+          setError(null);
+          handleSuccess();
+        } else if (status === 'failed') {
+          haptic.notification('error');
+          setError(t('wheel.starsPaymentFailed'));
         }
-      } else {
-        // Fallback: open invoice URL in Telegram (browser or unsupported WebApp version)
-        window.open(data.invoice_url, '_blank', 'noopener,noreferrer');
-        onClose();
+      } catch (e) {
+        setError(t('balance.errors.generic', { details: String(e) }));
       }
     },
     onError: (err: unknown) => {
+      haptic.notification('error');
       const axiosError = err as { response?: { data?: { detail?: string }; status?: number } };
       setError(axiosError?.response?.data?.detail || t('balance.errors.invoiceFailed'));
     },
@@ -252,13 +197,13 @@ export default function TopUpModal({ method, onClose, initialAmountRubles }: Top
     unknown,
     number
   >({
-    mutationFn: (amountKopeks: number) =>
-      balanceApi.createTopUp(amountKopeks, method.id, selectedOption || undefined),
+    mutationFn: (amountKopeks: number) => {
+      if (!method) throw new Error('Method not loaded');
+      return balanceApi.createTopUp(amountKopeks, method.id, selectedOption || undefined);
+    },
     onSuccess: (data) => {
       const redirectUrl = data.payment_url || data.invoice_url;
       if (redirectUrl) {
-        // Always show the payment link for user to click manually
-        // This ensures it works on all platforms including iOS Safari
         setPaymentUrl(redirectUrl);
       }
     },
@@ -270,6 +215,32 @@ export default function TopUpModal({ method, onClose, initialAmountRubles }: Top
       );
     },
   });
+
+  // Auto-focus input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (inputRef.current) {
+        inputRef.current.focus();
+      }
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (!method) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
+      </div>
+    );
+  }
+
+  const hasOptions = method.options && method.options.length > 0;
+  const minRubles = method.min_amount_kopeks / 100;
+  const maxRubles = method.max_amount_kopeks / 100;
+  const methodKey = method.id.toLowerCase().replace(/-/g, '_');
+  const isStarsMethod = methodKey.includes('stars');
+  const methodName =
+    t(`balance.paymentMethods.${methodKey}.name`, { defaultValue: '' }) || method.name;
 
   const handleSubmit = () => {
     setError(null);
@@ -324,25 +295,15 @@ export default function TopUpModal({ method, onClose, initialAmountRubles }: Top
     }
   };
 
-  // Auto-focus input - works on mobile in Telegram WebApp
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (inputRef.current) {
-        inputRef.current.focus();
-        if (isMobileScreen) {
-          inputRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-      }
-    }, 100);
-    return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Content JSX - shared between mobile and desktop
-  const contentJSX = (
-    <div className="space-y-5">
+  return (
+    <motion.div
+      className="mx-auto max-w-lg space-y-5"
+      variants={staggerContainer}
+      initial="initial"
+      animate="animate"
+    >
       {/* Header icon and method */}
-      <div className="flex items-center gap-4 pb-1">
+      <motion.div variants={staggerItem} className="flex items-center gap-4 pb-1">
         <div
           className={`flex h-14 w-14 items-center justify-center rounded-2xl ${
             isStarsMethod
@@ -358,11 +319,11 @@ export default function TopUpModal({ method, onClose, initialAmountRubles }: Top
             {formatAmount(minRubles, 0)} – {formatAmount(maxRubles, 0)} {currencySymbol}
           </p>
         </div>
-      </div>
+      </motion.div>
 
       {/* Payment options (if any) */}
       {hasOptions && method.options && (
-        <div className="space-y-2">
+        <motion.div variants={staggerItem} className="space-y-2">
           <label className="text-sm font-medium text-dark-400">{t('balance.paymentMethod')}</label>
           <div className="grid grid-cols-2 gap-2">
             {method.options.map((opt) => (
@@ -385,11 +346,11 @@ export default function TopUpModal({ method, onClose, initialAmountRubles }: Top
               </button>
             ))}
           </div>
-        </div>
+        </motion.div>
       )}
 
       {/* Amount input + Submit button - inline */}
-      <div className="space-y-2">
+      <motion.div variants={staggerItem} className="space-y-2">
         <label className="text-sm font-medium text-dark-400">{t('balance.enterAmount')}</label>
         <div className="flex gap-2">
           <div
@@ -445,11 +406,11 @@ export default function TopUpModal({ method, onClose, initialAmountRubles }: Top
             )}
           </button>
         </div>
-      </div>
+      </motion.div>
 
       {/* Quick amount buttons */}
       {quickAmounts.length > 0 && (
-        <div className="grid grid-cols-4 gap-2">
+        <motion.div variants={staggerItem} className="grid grid-cols-4 gap-2">
           {quickAmounts.map((a) => {
             const val = getQuickValue(a);
             const isSelected = amount === val;
@@ -481,12 +442,15 @@ export default function TopUpModal({ method, onClose, initialAmountRubles }: Top
               </BentoCard>
             );
           })}
-        </div>
+        </motion.div>
       )}
 
       {/* Error message */}
       {error && (
-        <div className="flex items-center gap-2 rounded-xl border border-error-500/20 bg-error-500/10 p-3">
+        <motion.div
+          variants={staggerItem}
+          className="flex items-center gap-2 rounded-xl border border-error-500/20 bg-error-500/10 p-3"
+        >
           <svg
             className="h-5 w-5 shrink-0 text-error-400"
             fill="none"
@@ -501,12 +465,15 @@ export default function TopUpModal({ method, onClose, initialAmountRubles }: Top
             />
           </svg>
           <span className="text-sm text-error-400">{error}</span>
-        </div>
+        </motion.div>
       )}
 
       {/* Payment link display - shown when URL is received */}
       {paymentUrl && (
-        <div className="space-y-3 rounded-2xl border border-success-500/20 bg-success-500/10 p-4">
+        <motion.div
+          variants={staggerItem}
+          className="space-y-3 rounded-2xl border border-success-500/20 bg-success-500/10 p-4"
+        >
           <div className="flex items-center gap-2 text-success-400">
             <CheckIcon />
             <span className="font-semibold">{t('balance.paymentReady')}</span>
@@ -514,7 +481,6 @@ export default function TopUpModal({ method, onClose, initialAmountRubles }: Top
 
           <p className="text-sm text-dark-400">{t('balance.clickToOpenPayment')}</p>
 
-          {/* Main open button - NO preventDefault, let <a> work natively for iOS Safari */}
           <a
             href={paymentUrl}
             target="_blank"
@@ -525,7 +491,6 @@ export default function TopUpModal({ method, onClose, initialAmountRubles }: Top
             <span>{t('balance.openPaymentPage')}</span>
           </a>
 
-          {/* Copy and link display */}
           <div className="flex items-center gap-2">
             <div className="min-w-0 flex-1 rounded-lg border border-dark-700/50 bg-dark-800/70 px-3 py-2">
               <p className="truncate text-xs text-dark-500">{paymentUrl}</p>
@@ -543,87 +508,8 @@ export default function TopUpModal({ method, onClose, initialAmountRubles }: Top
               {copied ? <CheckIcon /> : <CopyIcon />}
             </button>
           </div>
-        </div>
+        </motion.div>
       )}
-    </div>
+    </motion.div>
   );
-
-  // Render modal based on screen size - NO nested components!
-  const modalContent = isMobileScreen ? (
-    <>
-      {/* Backdrop */}
-      <div className="fixed inset-0 z-[9998] bg-black/70" onClick={handleClose} />
-      {/* Bottom sheet */}
-      <div
-        data-modal-content
-        className="fixed inset-x-0 bottom-0 z-[9999] flex max-h-[90vh] flex-col overflow-hidden rounded-t-3xl bg-dark-900"
-        style={{
-          paddingBottom: safeBottom
-            ? `${safeBottom + 20}px`
-            : 'max(20px, env(safe-area-inset-bottom))',
-        }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Handle bar */}
-        <div className="flex justify-center pb-1 pt-3">
-          <div className="h-1 w-10 rounded-full bg-dark-600" />
-        </div>
-
-        {/* Header */}
-        <div className="flex items-center justify-between px-5 py-2">
-          <div className="flex items-center gap-2">
-            <WalletIcon />
-            <span className="text-lg font-bold text-dark-100">{t('balance.topUp')}</span>
-          </div>
-          <button
-            onClick={handleClose}
-            className="-mr-2 rounded-xl p-2 text-dark-400 transition-colors hover:bg-dark-800"
-          >
-            <CloseIcon />
-          </button>
-        </div>
-
-        {/* Divider */}
-        <div className="mx-5 h-px bg-gradient-to-r from-transparent via-dark-700 to-transparent" />
-
-        {/* Content */}
-        <div className="overflow-y-auto px-5 py-5">{contentJSX}</div>
-      </div>
-    </>
-  ) : (
-    <div
-      className="fixed inset-0 z-[60] flex items-start justify-center p-4 pt-[10vh]"
-      onClick={handleClose}
-    >
-      <div
-        data-modal-content
-        className="w-full max-w-md overflow-hidden rounded-3xl border border-dark-700/50 bg-dark-900 shadow-2xl"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between border-b border-dark-700/50 bg-gradient-to-r from-dark-800/80 to-dark-800/40 px-6 py-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent-500/10 text-accent-400">
-              <WalletIcon />
-            </div>
-            <span className="text-lg font-bold text-dark-100">{t('balance.topUp')}</span>
-          </div>
-          <button
-            onClick={handleClose}
-            className="-mr-1 rounded-xl p-2 text-dark-400 transition-colors hover:bg-dark-700"
-          >
-            <CloseIcon />
-          </button>
-        </div>
-
-        {/* Content */}
-        <div className="p-6">{contentJSX}</div>
-      </div>
-    </div>
-  );
-
-  if (typeof document !== 'undefined') {
-    return createPortal(modalContent, document.body);
-  }
-  return modalContent;
 }

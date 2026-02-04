@@ -132,7 +132,7 @@ cabinet.yourdomain.com {
     # API запросы на backend
     handle /api/* {
         uri strip_prefix /api
-        reverse_proxy backend_bot:8080
+        reverse_proxy remnawave_bot:8080
     }
     @websockets {
         header_regexp Connection *Upgrade*
@@ -142,7 +142,7 @@ cabinet.yourdomain.com {
     # WebSocket соединения
     handle /cabinet/ws {
         uri strip_prefix /api
-        reverse_proxy backend_bot:8080 {
+        reverse_proxy remnawave_bot:8080 {
             transport http {
                 read_timeout 0
                 write_timeout 0
@@ -237,7 +237,7 @@ cabinet.yourdomain.com {
     # API на backend
     handle /api/* {
         uri strip_prefix /api
-        reverse_proxy backend_bot:8080
+        reverse_proxy remnawave_bot:8080
     }
 
     # Frontend контейнер (nginx внутри на порту 80)
@@ -260,7 +260,7 @@ server {
     # API на backend
     location /api/ {
         rewrite ^/api/(.*) /$1 break;
-        proxy_pass http://backend_bot:8080;
+        proxy_pass http://remnawave_bot:8080;
         proxy_http_version 1.1;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
@@ -371,7 +371,7 @@ bedolaga-cabinet/
 docker exec <caddy_container> wget -qO- http://cabinet_frontend:80
 
 # Проверить что backend доступен
-docker exec <caddy_container> wget -qO- http://backend_bot:8080/health
+docker exec <caddy_container> wget -qO- http://remnawave_bot:8080/health
 
 # Проверить в какой сети находятся контейнеры
 docker inspect cabinet_frontend | grep -A 10 Networks

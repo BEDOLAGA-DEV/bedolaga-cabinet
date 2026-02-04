@@ -1,6 +1,8 @@
 import apiClient from './client';
 
 // Types
+export type BroadcastChannel = 'telegram' | 'email' | 'both';
+
 export interface BroadcastFilter {
   key: string;
   label: string;
@@ -19,6 +21,10 @@ export interface BroadcastFiltersResponse {
   filters: BroadcastFilter[];
   tariff_filters: TariffFilter[];
   custom_filters: BroadcastFilter[];
+}
+
+export interface EmailFiltersResponse {
+  filters: BroadcastFilter[];
 }
 
 export interface TariffForBroadcast {
@@ -55,6 +61,24 @@ export interface BroadcastCreateRequest {
   media?: BroadcastMedia;
 }
 
+export interface EmailBroadcastCreateRequest {
+  target: string;
+  subject: string;
+  html_content: string;
+}
+
+export interface CombinedBroadcastCreateRequest {
+  channel: BroadcastChannel;
+  target: string;
+  // Telegram fields
+  message_text?: string;
+  selected_buttons?: string[];
+  media?: BroadcastMedia;
+  // Email fields
+  email_subject?: string;
+  email_html_content?: string;
+}
+
 export interface Broadcast {
   id: number;
   target_type: string;
@@ -79,6 +103,10 @@ export interface Broadcast {
   created_at: string;
   completed_at: string | null;
   progress_percent: number;
+  // New fields for channel support
+  channel?: BroadcastChannel;
+  email_subject?: string | null;
+  email_html_content?: string | null;
 }
 
 export interface BroadcastListResponse {
@@ -105,10 +133,18 @@ export interface MediaUploadResponse {
 }
 
 export const adminBroadcastsApi = {
-  // Get all available filters with counts
+  // Get all available filters with counts (for Telegram)
   getFilters: async (): Promise<BroadcastFiltersResponse> => {
     const response = await apiClient.get<BroadcastFiltersResponse>(
       '/cabinet/admin/broadcasts/filters',
+    );
+    return response.data;
+  },
+
+  // Get email filters with counts
+  getEmailFilters: async (): Promise<EmailFiltersResponse> => {
+    const response = await apiClient.get<EmailFiltersResponse>(
+      '/cabinet/admin/broadcasts/email-filters',
     );
     return response.data;
   },
@@ -140,9 +176,32 @@ export const adminBroadcastsApi = {
     return response.data;
   },
 
-  // Create and start broadcast
+  // Preview email broadcast (get recipients count)
+  previewEmail: async (target: string): Promise<BroadcastPreviewResponse> => {
+    const response = await apiClient.post<BroadcastPreviewResponse>(
+      '/cabinet/admin/broadcasts/email-preview',
+      {
+        target,
+      },
+    );
+    return response.data;
+  },
+
+  // Create and start broadcast (Telegram only - legacy)
   create: async (data: BroadcastCreateRequest): Promise<Broadcast> => {
     const response = await apiClient.post<Broadcast>('/cabinet/admin/broadcasts', data);
+    return response.data;
+  },
+
+  // Create email broadcast
+  createEmail: async (data: EmailBroadcastCreateRequest): Promise<Broadcast> => {
+    const response = await apiClient.post<Broadcast>('/cabinet/admin/broadcasts/email', data);
+    return response.data;
+  },
+
+  // Create combined broadcast (Telegram, Email, or Both)
+  createCombined: async (data: CombinedBroadcastCreateRequest): Promise<Broadcast> => {
+    const response = await apiClient.post<Broadcast>('/cabinet/admin/broadcasts/send', data);
     return response.data;
   },
 

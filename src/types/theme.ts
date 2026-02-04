@@ -68,3 +68,49 @@ export type ShadeLevel = (typeof SHADE_LEVELS)[number];
 export type ExtendedShadeLevel = (typeof EXTENDED_SHADE_LEVELS)[number];
 
 export type ColorPalette = Record<ShadeLevel | 850, string>;
+
+// Extended theme settings for user preferences
+export type BorderRadiusPreset = 'none' | 'small' | 'medium' | 'large' | 'pill';
+export type SpacingPreset = 'compact' | 'comfortable' | 'spacious';
+export type ThemeMode = 'dark' | 'light' | 'system';
+
+export interface UserThemePreferences {
+  /**
+   * Theme mode preference
+   * @default 'system'
+   */
+  theme: ThemeMode;
+
+  /**
+   * Border radius preset
+   * @default 'large'
+   */
+  borderRadius: BorderRadiusPreset;
+
+  /**
+   * Whether animations are enabled
+   * @default true
+   */
+  animationsEnabled: boolean;
+}
+
+export const DEFAULT_USER_PREFERENCES: UserThemePreferences = {
+  theme: 'system',
+  borderRadius: 'large',
+  animationsEnabled: true,
+};
+
+// CSS variable values for each preset
+export const BORDER_RADIUS_VALUES: Record<BorderRadiusPreset, string> = {
+  none: '0px',
+  small: '8px',
+  medium: '16px',
+  large: '24px',
+  pill: '9999px',
+};
+
+export const SPACING_VALUES: Record<SpacingPreset, { padding: string; gap: string }> = {
+  compact: { padding: '12px', gap: '12px' },
+  comfortable: { padding: '16px', gap: '16px' },
+  spacious: { padding: '24px', gap: '24px' },
+};

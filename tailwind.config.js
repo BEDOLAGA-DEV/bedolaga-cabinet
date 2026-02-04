@@ -111,10 +111,22 @@ export default {
       borderRadius: {
         'bento': '24px',
         '4xl': '32px',
+        // Linear design tokens
+        'linear': '8px',
+        'linear-lg': '12px',
       },
       spacing: {
         'bento': '16px',
         'bento-lg': '24px',
+        // Linear design tokens
+        'linear-xs': '4px',
+        'linear-sm': '8px',
+        'linear-md': '16px',
+        'linear-lg': '24px',
+        'linear-xl': '32px',
+      },
+      backdropBlur: {
+        'linear': '12px',
       },
       fontSize: {
         '2xs': ['0.625rem', { lineHeight: '0.875rem' }],
@@ -124,6 +136,11 @@ export default {
         'glow-lg': '0 0 40px rgba(var(--color-accent-500), 0.2)',
         'soft': '0 2px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -4px rgba(0, 0, 0, 0.2)',
         'card': '0 4px 24px -4px rgba(0, 0, 0, 0.4)',
+        // Linear design tokens
+        'linear-sm': '0 1px 2px rgba(0, 0, 0, 0.05)',
+        'linear': '0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06)',
+        'linear-lg': '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+        'linear-glow': '0 0 0 1px rgba(var(--color-accent-500), 0.3)',
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',

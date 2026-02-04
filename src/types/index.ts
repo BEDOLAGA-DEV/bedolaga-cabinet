@@ -300,6 +300,10 @@ export interface TariffsPurchaseOptions {
   current_tariff_id: number | null;
   balance_kopeks: number;
   balance_label: string;
+  // New fields for expired subscription handling
+  subscription_status?: string;
+  subscription_is_expired?: boolean;
+  has_subscription?: boolean;
 }
 
 export interface ClassicPurchaseOptions {

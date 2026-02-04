@@ -28,7 +28,9 @@
     "add": "افزودن",
     "refresh": "بازخوانی",
     "retry": "تلاش مجدد",
-    "saving": "در حال ذخیره..."
+    "saving": "در حال ذخیره...",
+    "understand": "متوجه شدم",
+    "collapse": "جمع کردن"
   },
   "nav": {
     "dashboard": "داشبورد",
@@ -301,7 +303,7 @@
     "additionalOptions": {
       "title": "گزینه‌های اضافی",
       "buyDevices": "خرید دستگاه بیشتر",
-      "currentDeviceLimit": "محدودیت فعلی: {{count}} دستگاه",
+      "currentDeviceLimit_other": "محدودیت فعلی: {{count}} دستگاه",
       "maxDevices": "حداکثر {{count}}",
       "devicesUnavailable": "خرید دستگاه در دسترس نیست",
       "devicesUnit": "دستگاه",
@@ -565,6 +567,7 @@
   "wheel": {
     "title": "چرخ شانس",
     "disabled": "چرخ شانس فعلاً در دسترس نیست",
+    "prizes": "جوایز",
     "spinsRemaining": "تعداد چرخش باقی‌مانده امروز",
     "choosePayment": "روش پرداخت را انتخاب کنید",
     "stars": "Stars",
@@ -596,6 +599,9 @@
     "starsPaymentSuccess": "پرداخت موفق! نتیجه به تلگرام ارسال شد.",
     "starsPaymentFailed": "پرداخت ناموفق. دوباره تلاش کنید.",
     "starsPaymentRedirected": "تلگرام برای پرداخت باز می‌شود. پس از پرداخت صفحه را بازخوانی کنید.",
+    "starsNotAvailable": "پرداخت با ستاره در حال حاضر در دسترس نیست. با پشتیبانی تماس بگیرید.",
+    "confirmStarsPayment": "شما به تلگرام برای پرداخت یک چرخش منتقل خواهید شد.",
+    "payStars": "پرداخت {{count}} ⭐",
     "noHistory": "هنوز تاریخچه‌ای نیست",
     "banner": {
       "title": "شانس خود را امتحان کنید!",
@@ -625,6 +631,7 @@
       "payments": "پرداخت‌ها",
       "promoOffers": "پیشنهادات تبلیغاتی",
       "promocodes": "کدهای تخفیف",
+      "promoGroups": "گروه‌های تخفیف",
       "remnawave": "RemnaWave",
       "users": "کاربران"
     },
@@ -646,6 +653,7 @@
       "paymentsDesc": "تأیید پرداخت",
       "promoOffersDesc": "تخفیف‌های شخصی",
       "promocodesDesc": "مدیریت کدهای تخفیف",
+      "promoGroupsDesc": "گروه‌های تخفیف برای کاربران",
       "remnawaveDesc": "مدیریت پنل و آمار",
       "usersDesc": "مدیریت کاربران ربات"
     },
@@ -667,10 +675,13 @@
       "resetted": "قالب به پیش‌فرض بازگردانده شد",
       "testSent": "ایمیل آزمایشی ارسال شد",
       "variables": "متغیرهای موجود",
-      "clickToCopy": "برای کپی کلیک کنید"
+      "clickToCopy": "برای کپی کلیک کنید",
+      "previewDesktopOnly": "پیش‌نمایش فقط در نسخه وب دسکتاپ در دسترس است",
+      "previewNotAvailable": "پیش‌نمایش در دسترس نیست"
     },
     "wheel": {
       "title": "تنظیمات چرخ شانس",
+      "preview": "پیش‌نمایش",
       "enabled": "فعال",
       "disabled": "غیرفعال",
       "tabs": {
@@ -686,13 +697,21 @@
         "rtpPercent": "درصد RTP",
         "dailyLimit": "محدودیت روزانه (0 = نامحدود)",
         "minSubDays": "حداقل روز اشتراک برای پرداخت روزانه",
-        "promoPrefix": "پیشوند کد تخفیف"
+        "promoPrefix": "پیشوند کد تخفیف",
+        "spinCost": "هزینه چرخش",
+        "limitsAndRtp": "محدودیت‌ها و RTP",
+        "promocodes": "کدهای تخفیف"
       },
+      "starsNotEnabledGlobally": "پرداخت با ستاره در روش‌های پرداخت فعال نیست. «Telegram Stars» را در بخش «روش‌های پرداخت» فعال کنید.",
       "prizes": {
         "addPrize": "افزودن جایزه",
         "editPrize": "ویرایش جایزه",
         "noPrizes": "جایزه‌ای تنظیم نشده. برای فعال‌سازی چرخ جایزه اضافه کنید.",
         "deletePrize": "این جایزه حذف شود؟",
+        "dragToReorder": "کشیدن برای مرتب‌سازی",
+        "unsavedOrder": "تغییرات ترتیب ذخیره نشده",
+        "unsavedOrderHint": "تغییرات را ذخیره یا لغو کنید",
+        "confirmDelete": "آیا از حذف این جایزه مطمئن هستید؟",
         "types": {
           "subscription_days": "روز اشتراک",
           "balance_bonus": "جایزه موجودی",
@@ -753,6 +772,9 @@
       "filter": "فیلتر",
       "message": "پیام",
       "unknownAdmin": "نامعلوم",
+      "detail": "جزئیات پخش",
+      "createdBy": "ایجاد شده توسط",
+      "notFound": "پخش یافت نشد",
       "prev": "قبلی",
       "next": "بعدی",
       "status": {
@@ -933,6 +955,8 @@
       "replyPlaceholder": "پاسخ خود را بنویسید...",
       "sendReply": "ارسال پاسخ",
       "settings": "تنظیمات",
+      "settingsSubtitle": "پیکربندی سیستم تیکت و SLA",
+      "settingsLoadError": "خطا در بارگذاری تنظیمات",
       "supportMode": "حالت پشتیبانی",
       "supportModeDesc": "انتخاب کنید کاربران چگونه می‌توانند با پشتیبانی تماس بگیرند",
       "modeBoth": "تیکت و تماس",
@@ -985,6 +1009,8 @@
       "delete": "حذف",
       "confirmDelete": "تعرفه حذف شود؟",
       "confirmDeleteText": "این عمل قابل بازگشت نیست. تعرفه برای همیشه حذف می‌شود.",
+      "confirmDeleteWithSubscriptions": "این تعرفه {{count}} اشتراک فعال دارد. پس از حذف، کاربران هنگام تمدید باید تعرفه جدید انتخاب کنند.",
+      "deleteSuccess": "تعرفه با موفقیت حذف شد",
       "days": "روز",
       "days_other": "{{count}} روز",
       "tabs": {
@@ -996,6 +1022,7 @@
       "serversHint": "سرورهای موجود برای این تعرفه را انتخاب کنید",
       "noServers": "سرور موجود نیست",
       "selectType": "نوع تعرفه را انتخاب کنید",
+      "selectTypeDesc": "روش صورتحساب برای تعرفه جدید را انتخاب کنید",
       "periodTariff": "تعرفه دوره‌ای",
       "periodTariffDesc": "پرداخت برای دوره (7، 30، 90 روز و غیره). دوره‌ها و قیمت‌های انعطاف‌پذیر.",
       "dailyTariff": "تعرفه روزانه",
@@ -1012,6 +1039,7 @@
       "nameLabel": "نام تعرفه",
       "nameExamplePeriod": "مثال: استاندارد",
       "nameExampleDaily": "مثال: روزانه",
+      "nameHint": "۲ تا ۵۰ کاراکتر",
       "descriptionLabel": "توضیحات",
       "descriptionPlaceholder2": "توضیح مختصر تعرفه",
       "trafficLimitLabel": "محدودیت ترافیک",
@@ -1020,6 +1048,7 @@
       "deviceLimitLabel": "دستگاه‌ها در تعرفه",
       "tierLevelLabel": "سطح تعرفه",
       "tierLevelHint": "بر دسترسی ارتقا بین تعرفه‌ها تأثیر می‌گذارد",
+      "fieldRequired": "فیلد اجباری",
       "periodsTabHint": "دوره‌ها و قیمت‌ها را برای تعرفه اضافه کنید. کاربران می‌توانند از دوره‌های اضافه شده انتخاب کنند.",
       "addPeriodTitle": "افزودن دوره",
       "daysLabel": "روز",
@@ -1027,8 +1056,12 @@
       "addButton": "افزودن",
       "noPeriodsHint": "هیچ دوره‌ای اضافه نشده. حداقل یک دوره اضافه کنید.",
       "daysShort": "روز",
+      "serversTitle": "سرورها",
       "serversTabHint": "سرورهای موجود در این تعرفه را انتخاب کنید.",
       "noServersAvailable": "هیچ سروری در دسترس نیست",
+      "promoGroupsTitle": "گروه‌های تبلیغاتی",
+      "promoGroupsHint": "گروه‌های تبلیغاتی که به این تعرفه دسترسی دارند را انتخاب کنید. اگر هیچ‌کدام انتخاب نشود، همه دسترسی دارند.",
+      "noPromoGroups": "هیچ گروه تبلیغاتی وجود ندارد",
       "extraDeviceTitle": "دستگاه‌های اضافی",
       "devicePriceLabel": "قیمت دستگاه (30 روز):",
       "devicePriceHint": "0 = خرید دستگاه در دسترس نیست",
@@ -1038,6 +1071,8 @@
       "trafficMaxLimitLabel": "حداکثر محدودیت:",
       "trafficLimitHint2": "(0 = بدون محدودیت)",
       "trafficPackagesLabel": "بسته‌های ترافیک:",
+      "addPackageTitle": "افزودن بسته",
+      "noPackagesHint": "هیچ بسته‌ای اضافه نشده است. حداقل یک بسته اضافه کنید.",
       "gbPackageUnit": "GB:",
       "customDaysTitle": "تعداد روزهای سفارشی",
       "customDaysDesc": "کاربر مدت اشتراک را انتخاب می‌کند",
@@ -1068,7 +1103,24 @@
       "periodType": "دوره‌ای",
       "dailyPriceLabel": "قیمت روزانه",
       "currencyPerDay": "₽/روز",
-      "dailyDeductionDesc": "هر روز از موجودی کاربر کسر می‌شود"
+      "dailyDeductionDesc": "هر روز از موجودی کاربر کسر می‌شود",
+      "dailyPriceRequired": "قیمت روزانه بزرگتر از 0 را وارد کنید",
+      "cannotSave": "امکان ذخیره تعرفه وجود ندارد:",
+      "statusTitle": "وضعیت تعرفه",
+      "isActiveLabel": "فعال",
+      "isActiveHint": "تعرفه‌های غیرفعال به کاربران نمایش داده نمی‌شوند",
+      "isTrialLabel": "تعرفه آزمایشی",
+      "isTrialHint": "برای دوره آزمایشی رایگان در دسترس است",
+      "validation": {
+        "nameRequired": "نام تعرفه را وارد کنید",
+        "nameLength": "نام باید ۲ تا ۵۰ کاراکتر باشد",
+        "deviceLimitRequired": "تعداد دستگاه‌ها را مشخص کنید (حداقل ۱)",
+        "tierLevelInvalid": "سطح تعرفه باید بین ۱ تا ۱۰ باشد",
+        "fieldsRequired": "فیلدهای اجباری را پر کنید (دستگاه‌ها، سطح)",
+        "periodsRequired": "حداقل یک دوره اضافه کنید",
+        "dailyPriceRequired": "قیمت روزانه بزرگتر از 0 را وارد کنید",
+        "trafficPackagesRequired": "حداقل یک بسته ترافیک اضافه کنید (یا خرید ترافیک را غیرفعال کنید)"
+      }
     },
     "servers": {
       "title": "مدیریت سرورها",
@@ -1099,7 +1151,10 @@
       "enable": "فعال",
       "disable": "غیرفعال",
       "toggleTrial": "تغییر آزمایشی",
-      "loadError": "بارگذاری سرور ناموفق بود"
+      "loadError": "بارگذاری سرور ناموفق بود",
+      "mainSettings": "تنظیمات اصلی",
+      "pricingAndLimits": "قیمت‌گذاری و محدودیت‌ها",
+      "updateError": "ذخیره تغییرات ناموفق بود"
     },
     "paymentMethods": {
       "title": "روش‌های پرداخت",
@@ -1158,7 +1213,7 @@
       },
       "table": {
         "inactive": "غیرفعال",
-        "registrations": "{{count}} ثبت‌نام",
+        "registrations_other": "{{count}} ثبت‌نام",
         "revenue": "{{amount}} درآمد",
         "conversion": "{{rate}}% تبدیل",
         "statistics": "آمار",
@@ -1196,13 +1251,16 @@
         "saving": "در حال ذخیره..."
       },
       "stats": {
+        "title": "آمار کمپین",
+        "loadError": "خطا در بارگذاری آمار",
+        "detailedStats": "آمار دقیق",
         "registrations": "ثبت‌نام‌ها",
         "revenue": "درآمد",
         "paidUsers": "پرداخت کرده",
         "conversion": "نرخ تبدیل",
         "bonusesIssued": "پاداش‌های صادر شده",
-        "subscriptionsIssued": "{{count}} اشتراک",
-        "tariffsIssued": "{{count}} تعرفه",
+        "subscriptionsIssued_other": "{{count}} اشتراک",
+        "tariffsIssued_other": "{{count}} تعرفه",
         "avgRevenuePerUser": "میانگین درآمد هر کاربر",
         "avgFirstPayment": "میانگین اولین پرداخت",
         "trialSubscriptions": "اشتراک‌های آزمایشی",
@@ -1213,7 +1271,10 @@
         "inactive": "غیرفعال",
         "copy": "کپی",
         "copied": "کپی شد!",
-        "users": "کاربران"
+        "users": "کاربران",
+        "noUsers": "کاربر ثبت‌نام شده‌ای وجود ندارد",
+        "paid": "پرداخت کرده",
+        "hasSub": "دارای اشتراک"
       },
       "users": {
         "title": "کاربران کمپین",
@@ -1235,7 +1296,9 @@
         "deleteText": "این عمل قابل بازگشت نیست. کمپین‌هایی که ثبت‌نام دارند قابل حذف نیستند.",
         "cancel": "لغو",
         "delete": "حذف"
-      }
+      },
+      "loadError": "بارگذاری کمپین ناموفق بود",
+      "updateError": "ذخیره تغییرات ناموفق بود"
     },
     "promocodes": {
       "title": "کدهای تخفیف",
@@ -1249,8 +1312,8 @@
       "until": "تا",
       "discountForHours": "-{{percent}}% برای {{hours}} ساعت",
       "tabs": {
-        "promocodes": "کدهای تخفیف ({{count}})",
-        "groups": "گروه‌های تخفیف ({{count}})"
+        "promocodes_other": "کدهای تخفیف ({{count}})",
+        "groups_other": "گروه‌های تخفیف ({{count}})"
       },
       "type": {
         "balance": "موجودی",
@@ -1297,6 +1360,8 @@
         "save": "ذخیره"
       },
       "stats": {
+        "title": "آمار کد تخفیف",
+        "notFound": "کد تخفیف یافت نشد",
         "totalUses": "کل استفاده‌ها",
         "today": "امروز",
         "remaining": "باقی‌مانده",
@@ -1306,7 +1371,7 @@
         "daysLabel": "روزها",
         "discountLabel": "تخفیف",
         "validFor": "معتبر برای",
-        "hoursValue": "{{count}} ساعت",
+        "hoursValue_other": "{{count}} ساعت",
         "limit": "محدودیت",
         "status": "وضعیت",
         "active": "فعال",
@@ -1347,7 +1412,7 @@
         "default": "پیش‌فرض",
         "daysShort": "{{days}} روز",
         "autoFrom": "خودکار از {{amount}} روبل",
-        "members": "{{count}} عضو"
+        "members_other": "{{count}} عضو"
       },
       "confirm": {
         "deletePromocode": "کد تخفیف حذف شود؟",
@@ -1355,14 +1420,71 @@
         "deletePromocodeText": "کد تخفیف به طور دائم حذف خواهد شد.",
         "deleteGroupText": "گروه حذف خواهد شد. کاربران تخفیف‌های این گروه را از دست خواهند داد.",
         "deleteButton": "حذف"
+      },
+      "validation": {
+        "codeRequired": "کد تخفیف را وارد کنید",
+        "balanceRequired": "مبلغ پاداش باید بیشتر از 0 باشد",
+        "daysRequired": "تعداد روزها باید بیشتر از 0 باشد",
+        "groupRequired": "یک گروه تخفیف انتخاب کنید",
+        "discountPercentInvalid": "درصد تخفیف باید بین 1 تا 100 باشد",
+        "discountHoursRequired": "مدت اعتبار تخفیف را به ساعت مشخص کنید"
+      }
+    },
+    "promoGroups": {
+      "title": "گروه‌های تخفیف",
+      "subtitle": "مدیریت گروه‌های تخفیف برای کاربران",
+      "addGroup": "افزودن گروه",
+      "noGroups": "گروه تخفیفی وجود ندارد",
+      "default": "پیش‌فرض",
+      "servers": "سرورها",
+      "traffic": "ترافیک",
+      "devices": "دستگاه‌ها",
+      "daysShort": "{{days}} روز",
+      "autoFrom": "خودکار از {{amount}} روبل",
+      "members": "{{count}} عضو",
+      "createTitle": "ایجاد گروه تخفیف",
+      "editTitle": "ویرایش گروه",
+      "stats": {
+        "total": "کل گروه‌ها",
+        "members": "اعضا",
+        "autoAssign": "با تخصیص خودکار"
+      },
+      "actions": {
+        "edit": "ویرایش",
+        "delete": "حذف"
+      },
+      "confirm": {
+        "title": "گروه حذف شود؟",
+        "text": "گروه حذف خواهد شد. کاربران تخفیف‌های این گروه را از دست خواهند داد.",
+        "cancel": "انصراف",
+        "delete": "حذف"
+      },
+      "form": {
+        "name": "نام گروه",
+        "namePlaceholder": "مشتریان VIP",
+        "categoryDiscounts": "تخفیف‌های دسته‌بندی",
+        "periodDiscounts": "تخفیف‌های دوره‌ای",
+        "add": "افزودن",
+        "periodHint": "تخفیف هنگام خرید اشتراک برای تعداد روز مشخص شده اعمال می‌شود",
+        "noPeriods": "تخفیف دوره‌ای وجود ندارد",
+        "daysPlaceholder": "روز",
+        "arrow": "روز ←",
+        "autoAssign": "تخصیص خودکار هنگام هزینه از",
+        "rub": "روبل",
+        "autoAssignHint": "0 = تخصیص خودکار نشود",
+        "applyToAddons": "اعمال به خدمات اضافی",
+        "cancel": "انصراف",
+        "saving": "در حال ذخیره...",
+        "save": "ذخیره"
       }
     },
     "users": {
       "title": "کاربران",
       "subtitle": "مدیریت کاربران ربات",
       "search": "جستجو بر اساس شناسه، نام، نام کاربری...",
+      "searchEmail": "جستجو بر اساس ایمیل...",
       "noData": "کاربری یافت نشد",
-      "purchaseCount": "{{count}} خرید",
+      "purchaseCount_other": "{{count}} خرید",
       "noPurchases": "بدون خرید",
       "stats": {
         "total": "کل",
@@ -1473,7 +1595,7 @@
       "subtitle": "قالب‌ها، ارسال گروهی و گزارش پیشنهادات",
       "sendButton": "ارسال",
       "tabs": {
-        "templates": "قالب‌ها ({{count}})",
+        "templates_other": "قالب‌ها ({{count}})",
         "logs": "گزارش‌ها"
       },
       "noData": {
@@ -1515,17 +1637,24 @@
         "segment": "بخش",
         "user": "کاربر",
         "userIdPlaceholder": "شناسه تلگرام یا شناسه کاربر",
+        "searchUserPlaceholder": "جستجو بر اساس نام، نام کاربری یا شناسه تلگرام...",
+        "noUsersFound": "کاربری یافت نشد",
+        "hasSubscription": "اشتراک",
         "preview": "پیش‌نمایش",
         "sending": "در حال ارسال...",
         "sendButton": "ارسال"
       },
       "result": {
         "sentTitle": "ارسال شد!",
-        "offersCreated": "پیشنهادات ایجاد شده: {{count}}",
-        "notificationsSent": "اعلان‌های ارسال شده: {{count}}",
+        "offersCreated_other": "پیشنهادات ایجاد شده: {{count}}",
+        "notificationsSent_other": "اعلان‌های ارسال شده: {{count}}",
         "notificationsFailed": "(ناموفق: {{count}})",
         "sendError": "ارسال پیشنهاد ناموفق بود"
       },
+      "notFound": "قالب یافت نشد",
+      "noActiveTemplates": "قالب فعالی وجود ندارد",
+      "backToList": "بازگشت به لیست پیشنهادات",
+      "sendAnother": "ارسال دیگری",
       "actions": {
         "created": "ایجاد شده",
         "claimed": "فعال شده",
@@ -1587,7 +1716,18 @@
         "offline": "آفلاین",
         "online": "آنلاین",
         "restart": "راه‌اندازی مجدد",
-        "restartAll": "راه‌اندازی مجدد همه"
+        "restartAll": "راه‌اندازی مجدد همه",
+        "usersOnline": "آنلاین",
+        "usersOnlineCount_other": "{{count}} آنلاین",
+        "trafficUsed": "استفاده شده",
+        "uptimeLabel": "زمان فعالیت",
+        "stats": {
+          "total": "کل",
+          "online": "آنلاین",
+          "offline": "آفلاین",
+          "disabled": "غیرفعال",
+          "users": "کاربران"
+        }
       },
       "overview": {
         "bandwidth": "پهنای باند لحظه‌ای",
@@ -1601,6 +1741,11 @@
         "total": "کل",
         "totalUsers": "کل کاربران",
         "traffic": "آمار ترافیک",
+        "traffic2days": "۲ روز",
+        "traffic7days": "۷ روز",
+        "traffic30days": "۳۰ روز",
+        "trafficMonth": "ماه",
+        "trafficYear": "سال",
         "upload": "آپلود",
         "uptime": "زمان فعالیت",
         "usersByStatus": "کاربران بر اساس وضعیت",
@@ -1610,23 +1755,48 @@
         "noSquads": "گروهی یافت نشد",
         "notSynced": "همگام نشده",
         "syncServers": "همگام‌سازی سرورها",
-        "synced": "همگام شده"
+        "synced": "همگام شده",
+        "members": "اعضا",
+        "membersCount_other": "{{count}} عضو",
+        "inbounds": "ورودی‌ها",
+        "inboundsCount_other": "{{count}} ورودی",
+        "available": "در دسترس",
+        "unavailable": "در دسترس نیست",
+        "stats": {
+          "total": "کل",
+          "synced": "همگام",
+          "available": "در دسترس",
+          "members": "اعضا"
+        },
+        "detail": "جزئیات گروه",
+        "loadError": "بارگذاری گروه ناموفق بود",
+        "info": "اطلاعات",
+        "originalName": "نام اصلی",
+        "countryCode": "کشور",
+        "statsTitle": "آمار",
+        "inboundsList": "لیست ورودی‌ها",
+        "localSettings": "تنظیمات محلی",
+        "trialEligible": "واجد شرایط آزمایشی",
+        "price": "قیمت",
+        "users": "کاربران"
       },
       "sync": {
         "autoSync": "همگام‌سازی خودکار",
-        "cleanup": "پاکسازی",
-        "cleanupDesc": "حذف اشتراک‌های بدون کاربر",
-        "fromPanel": "همگام‌سازی از پنل",
-        "fromPanelDesc": "وارد کردن کاربران از پنل RemnaWave به پایگاه داده ربات",
-        "manual": "همگام‌سازی دستی",
-        "runNow": "اجرای فوری",
-        "statuses": "همگام‌سازی وضعیت‌ها",
-        "statusesDesc": "همگام‌سازی وضعیت اشتراک‌ها با پنل",
-        "subscriptions": "اشتراک‌ها",
-        "toPanel": "همگام‌سازی به پنل",
-        "toPanelDesc": "صادر کردن کاربران از پایگاه داده ربات به پنل RemnaWave",
-        "validate": "اعتبارسنجی",
-        "validateDesc": "بررسی و رفع ناسازگاری‌های اشتراک"
+        "runNow": "اجرا",
+        "run": "اجرا",
+        "running": "در حال اجرا...",
+        "schedule": "برنامه",
+        "status": "وضعیت",
+        "lastRun": "آخرین اجرا",
+        "nextRun": "اجرای بعدی",
+        "enabled": "فعال",
+        "disabled": "غیرفعال",
+        "success": "موفق",
+        "runAutoSyncNow": "اجرای همگام‌سازی خودکار",
+        "fromPanel": "از پنل",
+        "fromPanelDesc": "وارد کردن کاربران از RemnaWave به ربات",
+        "toPanel": "به پنل",
+        "toPanelDesc": "صادر کردن کاربران از ربات به RemnaWave"
       }
     },
     "theme": {
@@ -1664,7 +1834,7 @@
       "enable": "فعال",
       "disable": "غیرفعال",
       "hide": "پنهان کردن ({{count}})",
-      "showMore": "نمایش {{count}} گره بیشتر"
+      "showMore_other": "نمایش {{count}} گره بیشتر"
     },
     "revenue": {
       "title": "درآمد",
@@ -1927,6 +2097,15 @@
       "test": "آزمایشی",
       "activating": "در حال فعال‌سازی...",
       "activate": "فعال‌سازی"
+    },
+    "deactivate": {
+      "button": "لغو کد تخفیف",
+      "confirmTitle": "لغو کد تخفیف؟",
+      "confirmDescription": "آیا مطمئنید که می‌خواهید تخفیف {{percent}}% را لغو کنید؟ پس از لغو می‌توانید کد تخفیف دیگری فعال کنید.",
+      "warning": "کد تخفیف لغو شده قابل استفاده مجدد نیست. تخفیف بلافاصله متوقف می‌شود.",
+      "confirm": "لغو تخفیف",
+      "deactivating": "در حال لغو...",
+      "error": "لغو کد تخفیف ناموفق بود. لطفاً بعداً دوباره امتحان کنید."
     }
   },
   "telegramRedirect": {

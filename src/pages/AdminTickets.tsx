@@ -1,21 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
 import { adminApi, AdminTicket, AdminTicketDetail, AdminTicketMessage } from '../api/admin';
 import { ticketsApi } from '../api/tickets';
-
-const BackIcon = () => (
-  <svg
-    className="h-5 w-5 text-dark-400"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={2}
-  >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-  </svg>
-);
+import { useBackButton } from '../platform/hooks/useBackButton';
+import { usePlatform } from '../platform/hooks/usePlatform';
 
 function AdminMessageMedia({
   message,
@@ -114,14 +104,32 @@ function AdminMessageMedia({
   );
 }
 
+// BackIcon
+const BackIcon = () => (
+  <svg
+    className="h-5 w-5 text-dark-400"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    strokeWidth={2}
+  >
+    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+  </svg>
+);
+
 export default function AdminTickets() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { capabilities } = usePlatform();
+
+  // Use native Telegram back button in Mini App
+  useBackButton(() => navigate('/admin'));
+
   const [selectedTicketId, setSelectedTicketId] = useState<number | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [replyText, setReplyText] = useState('');
   const [page, setPage] = useState(1);
-  const [showSettings, setShowSettings] = useState(false);
 
   const { data: stats } = useQuery({
     queryKey: ['admin-ticket-stats'],
@@ -220,18 +228,21 @@ export default function AdminTickets() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Link
-            to="/admin"
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
-          >
-            <BackIcon />
-          </Link>
+          {/* Show back button only on web, not in Telegram Mini App */}
+          {!capabilities.hasBackButton && (
+            <button
+              onClick={() => navigate('/admin')}
+              className="flex h-10 w-10 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
+            >
+              <BackIcon />
+            </button>
+          )}
           <h1 className="text-2xl font-bold text-dark-50 sm:text-3xl">
             {t('admin.tickets.title')}
           </h1>
         </div>
         <button
-          onClick={() => setShowSettings(true)}
+          onClick={() => navigate('/admin/tickets/settings')}
           className="btn-secondary flex items-center gap-2"
         >
           <svg
@@ -521,273 +532,6 @@ export default function AdminTickets() {
             </div>
           ) : null}
         </div>
-      </div>
-
-      {/* Settings Modal */}
-      {showSettings && <TicketSettingsModal onClose={() => setShowSettings(false)} />}
-    </div>
-  );
-}
-
-function TicketSettingsModal({ onClose }: { onClose: () => void }) {
-  const { t } = useTranslation();
-  const queryClient = useQueryClient();
-
-  const { data: settings, isLoading } = useQuery({
-    queryKey: ['ticket-settings'],
-    queryFn: adminApi.getTicketSettings,
-  });
-
-  const [formData, setFormData] = useState({
-    sla_enabled: settings?.sla_enabled ?? true,
-    sla_minutes: settings?.sla_minutes ?? 5,
-    sla_check_interval_seconds: settings?.sla_check_interval_seconds ?? 60,
-    sla_reminder_cooldown_minutes: settings?.sla_reminder_cooldown_minutes ?? 15,
-    support_system_mode: settings?.support_system_mode ?? 'both',
-    cabinet_user_notifications_enabled: settings?.cabinet_user_notifications_enabled ?? true,
-    cabinet_admin_notifications_enabled: settings?.cabinet_admin_notifications_enabled ?? true,
-  });
-
-  // Update form when settings load
-  useEffect(() => {
-    if (settings) {
-      setFormData({
-        sla_enabled: settings.sla_enabled,
-        sla_minutes: settings.sla_minutes,
-        sla_check_interval_seconds: settings.sla_check_interval_seconds,
-        sla_reminder_cooldown_minutes: settings.sla_reminder_cooldown_minutes,
-        support_system_mode: settings.support_system_mode,
-        cabinet_user_notifications_enabled: settings.cabinet_user_notifications_enabled ?? true,
-        cabinet_admin_notifications_enabled: settings.cabinet_admin_notifications_enabled ?? true,
-      });
-    }
-  }, [settings]);
-
-  const updateMutation = useMutation({
-    mutationFn: adminApi.updateTicketSettings,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['ticket-settings'] });
-      onClose();
-    },
-  });
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    updateMutation.mutate(formData);
-  };
-
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-      onClick={onClose}
-    >
-      <div
-        className="card max-h-[90vh] w-full max-w-2xl overflow-y-auto"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-xl font-bold text-dark-50">{t('admin.tickets.settings')}</h2>
-          <button onClick={onClose} className="text-dark-400 transition-colors hover:text-dark-200">
-            <svg
-              className="h-6 w-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={1.5}
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-
-        {isLoading ? (
-          <div className="flex justify-center py-12">
-            <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-          </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Support System Mode */}
-            <div>
-              <label className="mb-2 block text-sm font-medium text-dark-100">
-                {t('admin.tickets.supportMode')}
-              </label>
-              <select
-                value={formData.support_system_mode}
-                onChange={(e) => setFormData({ ...formData, support_system_mode: e.target.value })}
-                className="input"
-              >
-                <option value="both">{t('admin.tickets.modeBoth')}</option>
-                <option value="tickets">{t('admin.tickets.modeTickets')}</option>
-                <option value="contact">{t('admin.tickets.modeContact')}</option>
-              </select>
-              <p className="mt-1 text-xs text-dark-500">{t('admin.tickets.supportModeDesc')}</p>
-            </div>
-
-            {/* Cabinet Notifications */}
-            <div className="border-t border-dark-800/50 pt-6">
-              <h3 className="mb-4 text-lg font-semibold text-dark-100">
-                {t('admin.tickets.cabinetNotifications')}
-              </h3>
-
-              {/* User Notifications */}
-              <div className="mb-4">
-                <label className="flex cursor-pointer items-center gap-3">
-                  <input
-                    type="checkbox"
-                    checked={formData.cabinet_user_notifications_enabled}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        cabinet_user_notifications_enabled: e.target.checked,
-                      })
-                    }
-                    className="h-5 w-5 rounded border-dark-700 bg-dark-800 text-accent-500 focus:ring-2 focus:ring-accent-500 focus:ring-offset-0"
-                  />
-                  <div>
-                    <div className="font-medium text-dark-100">
-                      {t('admin.tickets.userNotificationsEnabled')}
-                    </div>
-                    <div className="text-sm text-dark-500">
-                      {t('admin.tickets.userNotificationsEnabledDesc')}
-                    </div>
-                  </div>
-                </label>
-              </div>
-
-              {/* Admin Notifications */}
-              <div>
-                <label className="flex cursor-pointer items-center gap-3">
-                  <input
-                    type="checkbox"
-                    checked={formData.cabinet_admin_notifications_enabled}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        cabinet_admin_notifications_enabled: e.target.checked,
-                      })
-                    }
-                    className="h-5 w-5 rounded border-dark-700 bg-dark-800 text-accent-500 focus:ring-2 focus:ring-accent-500 focus:ring-offset-0"
-                  />
-                  <div>
-                    <div className="font-medium text-dark-100">
-                      {t('admin.tickets.adminNotificationsEnabled')}
-                    </div>
-                    <div className="text-sm text-dark-500">
-                      {t('admin.tickets.adminNotificationsEnabledDesc')}
-                    </div>
-                  </div>
-                </label>
-              </div>
-            </div>
-
-            <div className="border-t border-dark-800/50 pt-6">
-              <h3 className="mb-4 text-lg font-semibold text-dark-100">
-                {t('admin.tickets.slaSettings')}
-              </h3>
-
-              {/* SLA Enabled */}
-              <div>
-                <label className="flex cursor-pointer items-center gap-3">
-                  <input
-                    type="checkbox"
-                    checked={formData.sla_enabled}
-                    onChange={(e) => setFormData({ ...formData, sla_enabled: e.target.checked })}
-                    className="h-5 w-5 rounded border-dark-700 bg-dark-800 text-accent-500 focus:ring-2 focus:ring-accent-500 focus:ring-offset-0"
-                  />
-                  <div>
-                    <div className="font-medium text-dark-100">{t('admin.tickets.slaEnabled')}</div>
-                    <div className="text-sm text-dark-500">{t('admin.tickets.slaEnabledDesc')}</div>
-                  </div>
-                </label>
-              </div>
-            </div>
-
-            {/* SLA Minutes */}
-            <div>
-              <label className="mb-2 block text-sm font-medium text-dark-100">
-                {t('admin.tickets.slaMinutes')}
-              </label>
-              <input
-                type="number"
-                min="1"
-                max="1440"
-                value={formData.sla_minutes}
-                onChange={(e) =>
-                  setFormData({ ...formData, sla_minutes: parseInt(e.target.value) })
-                }
-                className="input"
-                disabled={!formData.sla_enabled}
-              />
-              <p className="mt-1 text-xs text-dark-500">{t('admin.tickets.slaMinutesDesc')}</p>
-            </div>
-
-            {/* Check Interval */}
-            <div>
-              <label className="mb-2 block text-sm font-medium text-dark-100">
-                {t('admin.tickets.checkInterval')}
-              </label>
-              <input
-                type="number"
-                min="30"
-                max="600"
-                value={formData.sla_check_interval_seconds}
-                onChange={(e) =>
-                  setFormData({ ...formData, sla_check_interval_seconds: parseInt(e.target.value) })
-                }
-                className="input"
-                disabled={!formData.sla_enabled}
-              />
-              <p className="mt-1 text-xs text-dark-500">{t('admin.tickets.checkIntervalDesc')}</p>
-            </div>
-
-            {/* Reminder Cooldown */}
-            <div>
-              <label className="mb-2 block text-sm font-medium text-dark-100">
-                {t('admin.tickets.reminderCooldown')}
-              </label>
-              <input
-                type="number"
-                min="1"
-                max="120"
-                value={formData.sla_reminder_cooldown_minutes}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    sla_reminder_cooldown_minutes: parseInt(e.target.value),
-                  })
-                }
-                className="input"
-                disabled={!formData.sla_enabled}
-              />
-              <p className="mt-1 text-xs text-dark-500">
-                {t('admin.tickets.reminderCooldownDesc')}
-              </p>
-            </div>
-
-            {/* Buttons */}
-            <div className="flex justify-end gap-3 border-t border-dark-800/50 pt-4">
-              <button type="button" onClick={onClose} className="btn-secondary">
-                {t('common.cancel')}
-              </button>
-              <button type="submit" disabled={updateMutation.isPending} className="btn-primary">
-                {updateMutation.isPending ? (
-                  <span className="flex items-center gap-2">
-                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                    {t('common.saving')}
-                  </span>
-                ) : (
-                  t('common.save')
-                )}
-              </button>
-            </div>
-
-            {updateMutation.isError && (
-              <div className="rounded-lg border border-error-500/30 bg-error-500/10 p-3 text-sm text-error-400">
-                {t('admin.tickets.settingsUpdateError')}
-              </div>
-            )}
-          </form>
-        )}
       </div>
     </div>
   );

@@ -22,24 +22,32 @@ const FortuneWheel = memo(function FortuneWheel({
   onSpinComplete,
 }: FortuneWheelProps) {
   const wheelRef = useRef<SVGGElement>(null);
-  const [currentRotation, setCurrentRotation] = useState(0);
+  const accumulatedRotation = useRef(0);
+  const [displayRotation, setDisplayRotation] = useState(0);
   const [lightPhase, setLightPhase] = useState(0);
 
-  // Animated lights effect - use phase instead of random array (less re-renders)
+  // Animated lights effect - always running, speed depends on spinning state
   useEffect(() => {
-    if (isSpinning) {
-      const interval = setInterval(() => {
-        setLightPhase((p) => (p + 1) % 3); // Just toggle phase 0-1-2
-      }, 250); // Slower interval = better performance
-      return () => clearInterval(interval);
-    } else {
-      setLightPhase(0);
-    }
+    // Faster animation when spinning, slower when idle
+    const interval = setInterval(
+      () => {
+        setLightPhase((p) => (p + 1) % 20);
+      },
+      isSpinning ? 100 : 300,
+    ); // 100ms when spinning, 300ms when idle
+
+    return () => clearInterval(interval);
   }, [isSpinning]);
 
   useEffect(() => {
     if (isSpinning && targetRotation !== null && wheelRef.current) {
-      setCurrentRotation(targetRotation);
+      const currentPos = accumulatedRotation.current % 360;
+      let delta = targetRotation - currentPos;
+      // Normalize delta to positive
+      while (delta < 0) delta += 360;
+      const newRotation = accumulatedRotation.current + 1800 + delta;
+      accumulatedRotation.current = newRotation;
+      setDisplayRotation(newRotation);
 
       const timeout = setTimeout(() => {
         onSpinComplete();
@@ -51,9 +59,13 @@ const FortuneWheel = memo(function FortuneWheel({
 
   // Memoize light pattern calculation
   const lightPattern = useMemo(() => {
+    const numLights = isSpinning ? 3 : 4; // 3 lights when spinning, 4 when idle
+
     return Array.from({ length: 20 }, (_, i) => {
-      if (!isSpinning) return i % 2 === 0;
-      return (i + lightPhase) % 3 !== 0;
+      // Calculate distance from current lightPhase
+      const distance = (i - lightPhase + 20) % 20;
+      // Light is on if within range [0, numLights)
+      return distance < numLights;
     });
   }, [isSpinning, lightPhase]);
 
@@ -107,17 +119,6 @@ const FortuneWheel = memo(function FortuneWheel({
     };
   };
 
-  // Position for text - between hub and emoji
-  const getTextPosition = (index: number) => {
-    const angle = (index * sectorAngle + sectorAngle / 2 - 90) * (Math.PI / 180);
-    const textRadius = prizeRadius * 0.45;
-    return {
-      x: center + textRadius * Math.cos(angle),
-      y: center + textRadius * Math.sin(angle),
-      rotation: index * sectorAngle + sectorAngle / 2,
-    };
-  };
-
   // Alternate colors for sectors
   const getSectorColors = (index: number, baseColor?: string) => {
     if (baseColor) return baseColor;
@@ -133,15 +134,6 @@ const FortuneWheel = memo(function FortuneWheel({
     ];
     return colors[index % colors.length];
   };
-
-  // Truncate text intelligently
-  const truncateText = (text: string, maxLen: number) => {
-    if (text.length <= maxLen) return text;
-    return text.substring(0, maxLen - 1) + '..';
-  };
-
-  // Calculate max text length based on number of sectors
-  const maxTextLength = prizes.length <= 4 ? 12 : prizes.length <= 6 ? 10 : 8;
 
   return (
     <div className="relative mx-auto w-full max-w-[380px] select-none">
@@ -265,11 +257,12 @@ const FortuneWheel = memo(function FortuneWheel({
             strokeWidth="2"
           />
 
-          {/* LED lights on outer ring */}
+          {/* LED lights on outer ring - positioned toward outer edge to avoid bleeding into sectors */}
           {Array.from({ length: 20 }).map((_, i) => {
             const angle = (i * 18 - 90) * (Math.PI / 180);
-            const dotX = center + outerRadius * Math.cos(angle);
-            const dotY = center + outerRadius * Math.sin(angle);
+            const ledRadius = outerRadius + 3;
+            const dotX = center + ledRadius * Math.cos(angle);
+            const dotY = center + ledRadius * Math.sin(angle);
             const isLit = lightPattern[i] ?? i % 2 === 0;
             return (
               <g key={`led-${i}`}>
@@ -277,16 +270,16 @@ const FortuneWheel = memo(function FortuneWheel({
                   <circle
                     cx={dotX}
                     cy={dotY}
-                    r={6}
+                    r={5}
                     fill="#FEF08A"
-                    opacity={0.5}
-                    style={{ filter: 'blur(3px)' }}
+                    opacity={0.4}
+                    style={{ filter: 'blur(2px)' }}
                   />
                 )}
                 <circle
                   cx={dotX}
                   cy={dotY}
-                  r={4}
+                  r={3.5}
                   fill={isLit ? '#FEF08A' : '#374151'}
                   stroke={isLit ? '#FDE047' : '#1F2937'}
                   strokeWidth="1"
@@ -300,7 +293,7 @@ const FortuneWheel = memo(function FortuneWheel({
             ref={wheelRef}
             style={{
               transformOrigin: `${center}px ${center}px`,
-              transform: `rotate(${currentRotation}deg)`,
+              transform: `rotate(${displayRotation}deg)`,
               transition: isSpinning ? 'transform 5s cubic-bezier(0.15, 0.6, 0.1, 1)' : 'none',
             }}
           >
@@ -354,28 +347,7 @@ const FortuneWheel = memo(function FortuneWheel({
               );
             })}
 
-            {/* Prize content - Text */}
-            {prizes.map((prize, index) => {
-              const pos = getTextPosition(index);
-              const displayText = truncateText(prize.display_name, maxTextLength);
-              return (
-                <text
-                  key={`text-${prize.id}`}
-                  x={pos.x}
-                  y={pos.y}
-                  textAnchor="middle"
-                  dominantBaseline="middle"
-                  fontSize={prizes.length <= 4 ? '13' : prizes.length <= 6 ? '11' : '9'}
-                  fontWeight="700"
-                  fill="#FFFFFF"
-                  transform={`rotate(${pos.rotation}, ${pos.x}, ${pos.y})`}
-                  filter="url(#textShadow)"
-                  style={{ letterSpacing: '0.03em' }}
-                >
-                  {displayText}
-                </text>
-              );
-            })}
+            {/* Prize content - Text removed, only emoji visible on wheel */}
           </g>
 
           {/* Center hub */}

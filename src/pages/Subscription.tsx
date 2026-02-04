@@ -131,6 +131,8 @@ export default function Subscription() {
   // Device/traffic topup state
   const [showDeviceTopup, setShowDeviceTopup] = useState(false);
   const [devicesToAdd, setDevicesToAdd] = useState(1);
+  const [showDeviceReduction, setShowDeviceReduction] = useState(false);
+  const [targetDeviceLimit, setTargetDeviceLimit] = useState<number>(1);
   const [showTrafficTopup, setShowTrafficTopup] = useState(false);
   const [selectedTrafficPackage, setSelectedTrafficPackage] = useState<number | null>(null);
   const [showServerManagement, setShowServerManagement] = useState(false);
@@ -179,7 +181,10 @@ export default function Subscription() {
     if (selectedPeriod?.traffic.selectable && (selectedPeriod.traffic.options?.length ?? 0) > 0) {
       result.push('traffic');
     }
-    if (selectedPeriod && (selectedPeriod.servers.options?.length ?? 0) > 0) {
+    if (
+      selectedPeriod &&
+      (selectedPeriod.servers.options?.filter((s) => s.is_available).length ?? 0) > 0
+    ) {
       result.push('servers');
     }
     if (selectedPeriod && selectedPeriod.devices.max > selectedPeriod.devices.min) {
@@ -201,7 +206,12 @@ export default function Subscription() {
         classicOptions.periods[0];
       setSelectedPeriod(defaultPeriod);
       setSelectedTraffic(classicOptions.selection.traffic_value);
-      setSelectedServers(classicOptions.selection.servers);
+      const availableServerUuids = new Set(
+        defaultPeriod.servers.options?.filter((s) => s.is_available).map((s) => s.uuid) ?? [],
+      );
+      setSelectedServers(
+        classicOptions.selection.servers.filter((uuid) => availableServerUuids.has(uuid)),
+      );
       setSelectedDevices(classicOptions.selection.devices);
     }
   }, [classicOptions, selectedPeriod]);
@@ -287,6 +297,7 @@ export default function Subscription() {
     setShowPurchaseForm(false);
     setShowTariffPurchase(false);
     setShowDeviceTopup(false);
+    setShowDeviceReduction(false);
     setShowTrafficTopup(false);
     setShowServerManagement(false);
     setSwitchTariffId(null);
@@ -308,6 +319,28 @@ export default function Subscription() {
       queryClient.invalidateQueries({ queryKey: ['subscription'] });
       queryClient.invalidateQueries({ queryKey: ['purchase-options'] });
       setSwitchTariffId(null);
+    },
+    onError: (error: unknown) => {
+      // Handle subscription_expired error - redirect to purchase flow
+      if (error instanceof AxiosError) {
+        const detail = error.response?.data?.detail;
+        if (
+          typeof detail === 'object' &&
+          detail?.error_code === 'subscription_expired' &&
+          detail?.use_purchase_flow === true
+        ) {
+          // Find the tariff user was trying to switch to and open purchase form
+          const targetTariff = tariffs.find((t) => t.id === switchTariffId);
+          if (targetTariff) {
+            setSwitchTariffId(null);
+            setSelectedTariff(targetTariff);
+            setSelectedTariffPeriod(targetTariff.periods[0] || null);
+            setShowTariffPurchase(true);
+            // Refetch purchase-options to get updated expired status
+            queryClient.invalidateQueries({ queryKey: ['purchase-options'] });
+          }
+        }
+      }
     },
   });
 
@@ -356,6 +389,36 @@ export default function Subscription() {
       queryClient.invalidateQueries({ queryKey: ['devices'] });
       setShowDeviceTopup(false);
       setDevicesToAdd(1);
+    },
+  });
+
+  // Device reduction info query
+  const { data: deviceReductionInfo } = useQuery({
+    queryKey: ['device-reduction-info'],
+    queryFn: subscriptionApi.getDeviceReductionInfo,
+    enabled: showDeviceReduction && !!subscription,
+  });
+
+  // Initialize target device limit when reduction info loads
+  useEffect(() => {
+    if (deviceReductionInfo && showDeviceReduction) {
+      setTargetDeviceLimit(
+        Math.max(
+          deviceReductionInfo.min_device_limit,
+          deviceReductionInfo.current_device_limit - 1,
+        ),
+      );
+    }
+  }, [deviceReductionInfo, showDeviceReduction]);
+
+  // Device reduction mutation
+  const deviceReductionMutation = useMutation({
+    mutationFn: () => subscriptionApi.reduceDevices(targetDeviceLimit),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['subscription'] });
+      queryClient.invalidateQueries({ queryKey: ['devices'] });
+      queryClient.invalidateQueries({ queryKey: ['device-reduction-info'] });
+      setShowDeviceReduction(false);
     },
   });
 
@@ -486,15 +549,16 @@ export default function Subscription() {
   // Auto-scroll to tariffs section when coming from Dashboard "Продлить" button
   useEffect(() => {
     const state = location.state as { scrollToExtend?: boolean } | null;
-    if (state?.scrollToExtend && tariffsCardRef.current) {
+    // Wait for tariffs to load before scrolling
+    if (state?.scrollToExtend && tariffsCardRef.current && tariffs.length > 0) {
       const timer = setTimeout(() => {
-        tariffsCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }, 300);
+        tariffsCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
       // Clear the state to prevent re-scrolling on subsequent renders
       window.history.replaceState({}, document.title);
       return () => clearTimeout(timer);
     }
-  }, [location.state]);
+  }, [location.state, tariffs.length]);
 
   const copyUrl = () => {
     if (subscription?.subscription_url) {
@@ -568,7 +632,9 @@ export default function Subscription() {
 
       {/* Current Subscription */}
       {subscription ? (
-        <div className="bento-card">
+        <div
+          className={`bento-card ${subscription.is_trial ? 'border-warning-500/30 bg-gradient-to-br from-warning-500/5 to-transparent' : ''}`}
+        >
           <div className="mb-6 flex items-center justify-between">
             <div>
               <h2 className="text-lg font-semibold text-dark-100">
@@ -594,6 +660,57 @@ export default function Subscription() {
                   : t('subscription.expired')}
             </span>
           </div>
+
+          {/* Trial Period Info Banner */}
+          {subscription.is_trial && subscription.is_active && (
+            <div className="mb-6 rounded-xl border border-warning-500/30 bg-warning-500/10 p-4">
+              <div className="flex items-start gap-3">
+                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-warning-500/20 text-lg">
+                  <svg
+                    className="h-5 w-5 text-warning-400"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={1.5}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <div className="font-medium text-warning-300">
+                    {t('subscription.trialInfo.title')}
+                  </div>
+                  <div className="mt-1 text-sm text-dark-400">
+                    {t('subscription.trialInfo.description')}
+                  </div>
+                  <div className="mt-3 flex flex-wrap gap-4 text-sm">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-warning-400">
+                        {subscription.days_left > 0
+                          ? t('subscription.days', { count: subscription.days_left })
+                          : `${subscription.hours_left}${t('subscription.hours')} ${subscription.minutes_left}${t('subscription.minutes')}`}
+                      </span>
+                      <span className="text-dark-500">{t('subscription.trialInfo.remaining')}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-warning-400">
+                        {subscription.traffic_limit_gb || '∞'} GB
+                      </span>
+                      <span className="text-dark-500">{t('subscription.traffic')}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-warning-400">{subscription.device_limit}</span>
+                      <span className="text-dark-500">{t('subscription.devices')}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Connection Data - Top Priority */}
           {subscription.subscription_url && (
@@ -1117,6 +1234,9 @@ export default function Subscription() {
                           devicePriceData.total_price_kopeks - purchaseOptions.balance_kopeks
                         }
                         compact
+                        onBeforeTopUp={async () => {
+                          await subscriptionApi.saveDevicesCart(devicesToAdd);
+                        }}
                       />
                     )}
 
@@ -1151,6 +1271,174 @@ export default function Subscription() {
               )}
             </div>
           )}
+
+          {/* Reduce Devices */}
+          <div className="mt-4">
+            {!showDeviceReduction ? (
+              <button
+                onClick={() => setShowDeviceReduction(true)}
+                className="w-full rounded-xl border border-dark-700/50 bg-dark-800/30 p-4 text-left transition-colors hover:border-dark-600"
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="font-medium text-dark-100">
+                      {t('subscription.additionalOptions.reduceDevices')}
+                    </div>
+                    <div className="mt-1 text-sm text-dark-400">
+                      {t('subscription.additionalOptions.reduceDevicesDescription')}
+                    </div>
+                  </div>
+                  <svg
+                    className="h-5 w-5 text-dark-400"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
+              </button>
+            ) : (
+              <div className="rounded-xl border border-dark-700/50 bg-dark-800/30 p-5">
+                <div className="mb-4 flex items-center justify-between">
+                  <h3 className="font-medium text-dark-100">
+                    {t('subscription.additionalOptions.reduceDevicesTitle')}
+                  </h3>
+                  <button
+                    onClick={() => setShowDeviceReduction(false)}
+                    className="text-sm text-dark-400 hover:text-dark-200"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                {deviceReductionInfo?.available === false ? (
+                  <div className="py-4 text-center text-sm text-dark-400">
+                    {deviceReductionInfo.reason ||
+                      t('subscription.additionalOptions.reduceUnavailable')}
+                  </div>
+                ) : deviceReductionInfo ? (
+                  <div className="space-y-4">
+                    {/* Device limit selector */}
+                    <div className="flex items-center justify-center gap-6">
+                      <button
+                        onClick={() =>
+                          setTargetDeviceLimit(
+                            Math.max(
+                              Math.max(
+                                deviceReductionInfo.min_device_limit,
+                                deviceReductionInfo.connected_devices_count,
+                              ),
+                              targetDeviceLimit - 1,
+                            ),
+                          )
+                        }
+                        disabled={
+                          targetDeviceLimit <=
+                          Math.max(
+                            deviceReductionInfo.min_device_limit,
+                            deviceReductionInfo.connected_devices_count,
+                          )
+                        }
+                        className="btn-secondary flex h-12 w-12 items-center justify-center !p-0 text-2xl"
+                      >
+                        -
+                      </button>
+                      <div className="text-center">
+                        <div className="text-4xl font-bold text-dark-100">{targetDeviceLimit}</div>
+                        <div className="text-sm text-dark-500">
+                          {t('subscription.additionalOptions.devicesUnit')}
+                        </div>
+                      </div>
+                      <button
+                        onClick={() =>
+                          setTargetDeviceLimit(
+                            Math.min(
+                              deviceReductionInfo.current_device_limit - 1,
+                              targetDeviceLimit + 1,
+                            ),
+                          )
+                        }
+                        disabled={targetDeviceLimit >= deviceReductionInfo.current_device_limit - 1}
+                        className="btn-secondary flex h-12 w-12 items-center justify-center !p-0 text-2xl"
+                      >
+                        +
+                      </button>
+                    </div>
+
+                    {/* Info */}
+                    <div className="space-y-1 text-center text-sm text-dark-400">
+                      <div>
+                        {t('subscription.additionalOptions.currentDeviceLimit', {
+                          count: deviceReductionInfo.current_device_limit,
+                        })}
+                      </div>
+                      <div>
+                        {t('subscription.additionalOptions.minDeviceLimit', {
+                          count: deviceReductionInfo.min_device_limit,
+                        })}
+                      </div>
+                      <div>
+                        {t('subscription.additionalOptions.connectedDevices', {
+                          count: deviceReductionInfo.connected_devices_count,
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Warning if connected devices block reduction */}
+                    {deviceReductionInfo.connected_devices_count >
+                      deviceReductionInfo.min_device_limit && (
+                      <div className="rounded-lg bg-warning-500/10 p-3 text-center text-sm text-warning-400">
+                        {t('subscription.additionalOptions.disconnectDevicesFirst', {
+                          count: deviceReductionInfo.connected_devices_count,
+                        })}
+                      </div>
+                    )}
+
+                    {/* New limit preview */}
+                    <div className="text-center">
+                      <div className="text-sm text-dark-400">
+                        {t('subscription.additionalOptions.newDeviceLimit', {
+                          count: targetDeviceLimit,
+                        })}
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => deviceReductionMutation.mutate()}
+                      disabled={
+                        deviceReductionMutation.isPending ||
+                        targetDeviceLimit >= deviceReductionInfo.current_device_limit ||
+                        targetDeviceLimit < deviceReductionInfo.min_device_limit ||
+                        targetDeviceLimit < deviceReductionInfo.connected_devices_count
+                      }
+                      className="btn-primary w-full py-3"
+                    >
+                      {deviceReductionMutation.isPending ? (
+                        <span className="flex items-center justify-center gap-2">
+                          <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                          {t('subscription.additionalOptions.reducing')}
+                        </span>
+                      ) : (
+                        t('subscription.additionalOptions.reduce')
+                      )}
+                    </button>
+
+                    {deviceReductionMutation.isError && (
+                      <div className="text-center text-sm text-error-400">
+                        {getErrorMessage(deviceReductionMutation.error)}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center py-4">
+                    <span className="h-5 w-5 animate-spin rounded-full border-2 border-accent-400/30 border-t-accent-400" />
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
 
           {/* Buy Traffic */}
           {subscription.traffic_limit_gb > 0 && (
@@ -1254,6 +1542,9 @@ export default function Subscription() {
                                   missingAmountKopeks={missingAmount}
                                   compact
                                   className="mb-3"
+                                  onBeforeTopUp={async () => {
+                                    await subscriptionApi.saveTrafficCart(selectedTrafficPackage);
+                                  }}
                                 />
                               )}
                               <button
@@ -1354,99 +1645,101 @@ export default function Subscription() {
                       )}
 
                       <div className="max-h-64 space-y-2 overflow-y-auto">
-                        {countriesData.countries.map((country) => {
-                          const isCurrentlyConnected = country.is_connected;
-                          const isSelected = selectedServersToUpdate.includes(country.uuid);
-                          const willBeAdded = !isCurrentlyConnected && isSelected;
-                          const willBeRemoved = isCurrentlyConnected && !isSelected;
+                        {countriesData.countries
+                          .filter((country) => country.is_available || country.is_connected)
+                          .map((country) => {
+                            const isCurrentlyConnected = country.is_connected;
+                            const isSelected = selectedServersToUpdate.includes(country.uuid);
+                            const willBeAdded = !isCurrentlyConnected && isSelected;
+                            const willBeRemoved = isCurrentlyConnected && !isSelected;
 
-                          return (
-                            <button
-                              key={country.uuid}
-                              onClick={() => {
-                                if (isSelected) {
-                                  setSelectedServersToUpdate((prev) =>
-                                    prev.filter((u) => u !== country.uuid),
-                                  );
-                                } else {
-                                  setSelectedServersToUpdate((prev) => [...prev, country.uuid]);
-                                }
-                              }}
-                              disabled={!country.is_available && !isCurrentlyConnected}
-                              className={`flex w-full items-center justify-between rounded-xl border p-3 text-left transition-all ${
-                                isSelected
-                                  ? willBeAdded
-                                    ? 'border-success-500 bg-success-500/10'
-                                    : 'border-accent-500 bg-accent-500/10'
-                                  : willBeRemoved
-                                    ? 'border-error-500/50 bg-error-500/5'
-                                    : 'border-dark-700/50 bg-dark-800/30 hover:border-dark-600'
-                              } ${!country.is_available && !isCurrentlyConnected ? 'cursor-not-allowed opacity-50' : ''}`}
-                            >
-                              <div className="flex items-center gap-3">
-                                <span className="text-lg">
-                                  {willBeAdded
-                                    ? '➕'
+                            return (
+                              <button
+                                key={country.uuid}
+                                onClick={() => {
+                                  if (isSelected) {
+                                    setSelectedServersToUpdate((prev) =>
+                                      prev.filter((u) => u !== country.uuid),
+                                    );
+                                  } else {
+                                    setSelectedServersToUpdate((prev) => [...prev, country.uuid]);
+                                  }
+                                }}
+                                disabled={!country.is_available && !isCurrentlyConnected}
+                                className={`flex w-full items-center justify-between rounded-xl border p-3 text-left transition-all ${
+                                  isSelected
+                                    ? willBeAdded
+                                      ? 'border-success-500 bg-success-500/10'
+                                      : 'border-accent-500 bg-accent-500/10'
                                     : willBeRemoved
-                                      ? '➖'
-                                      : isSelected
-                                        ? '✅'
-                                        : '⚪'}
-                                </span>
-                                <div>
-                                  <div className="flex items-center gap-2 font-medium text-dark-100">
-                                    {country.name}
-                                    {country.has_discount && !isCurrentlyConnected && (
-                                      <span className="rounded bg-success-500/20 px-1.5 py-0.5 text-xs text-success-400">
-                                        -{country.discount_percent}%
-                                      </span>
+                                      ? 'border-error-500/50 bg-error-500/5'
+                                      : 'border-dark-700/50 bg-dark-800/30 hover:border-dark-600'
+                                } ${!country.is_available && !isCurrentlyConnected ? 'cursor-not-allowed opacity-50' : ''}`}
+                              >
+                                <div className="flex items-center gap-3">
+                                  <span className="text-lg">
+                                    {willBeAdded
+                                      ? '➕'
+                                      : willBeRemoved
+                                        ? '➖'
+                                        : isSelected
+                                          ? '✅'
+                                          : '⚪'}
+                                  </span>
+                                  <div>
+                                    <div className="flex items-center gap-2 font-medium text-dark-100">
+                                      {country.name}
+                                      {country.has_discount && !isCurrentlyConnected && (
+                                        <span className="rounded bg-success-500/20 px-1.5 py-0.5 text-xs text-success-400">
+                                          -{country.discount_percent}%
+                                        </span>
+                                      )}
+                                    </div>
+                                    {willBeAdded && (
+                                      <div className="text-xs text-success-400">
+                                        +{formatPrice(country.price_kopeks)}{' '}
+                                        {t('subscription.serverManagement.forDays', {
+                                          days: countriesData.days_left,
+                                        })}
+                                        {country.has_discount && (
+                                          <span className="ml-1 text-dark-500 line-through">
+                                            {formatPrice(
+                                              Math.round(
+                                                (country.base_price_kopeks *
+                                                  countriesData.days_left) /
+                                                  30,
+                                              ),
+                                            )}
+                                          </span>
+                                        )}
+                                      </div>
+                                    )}
+                                    {!willBeAdded && !isCurrentlyConnected && (
+                                      <div className="text-xs text-dark-500">
+                                        {formatPrice(country.price_per_month_kopeks)}
+                                        {t('subscription.serverManagement.perMonth')}
+                                        {country.has_discount && (
+                                          <span className="ml-1 text-dark-600 line-through">
+                                            {formatPrice(country.base_price_kopeks)}
+                                          </span>
+                                        )}
+                                      </div>
+                                    )}
+                                    {!country.is_available && !isCurrentlyConnected && (
+                                      <div className="text-xs text-dark-500">
+                                        {t('subscription.serverManagement.unavailable')}
+                                      </div>
                                     )}
                                   </div>
-                                  {willBeAdded && (
-                                    <div className="text-xs text-success-400">
-                                      +{formatPrice(country.price_kopeks)}{' '}
-                                      {t('subscription.serverManagement.forDays', {
-                                        days: countriesData.days_left,
-                                      })}
-                                      {country.has_discount && (
-                                        <span className="ml-1 text-dark-500 line-through">
-                                          {formatPrice(
-                                            Math.round(
-                                              (country.base_price_kopeks *
-                                                countriesData.days_left) /
-                                                30,
-                                            ),
-                                          )}
-                                        </span>
-                                      )}
-                                    </div>
-                                  )}
-                                  {!willBeAdded && !isCurrentlyConnected && (
-                                    <div className="text-xs text-dark-500">
-                                      {formatPrice(country.price_per_month_kopeks)}
-                                      {t('subscription.serverManagement.perMonth')}
-                                      {country.has_discount && (
-                                        <span className="ml-1 text-dark-600 line-through">
-                                          {formatPrice(country.base_price_kopeks)}
-                                        </span>
-                                      )}
-                                    </div>
-                                  )}
-                                  {!country.is_available && !isCurrentlyConnected && (
-                                    <div className="text-xs text-dark-500">
-                                      {t('subscription.serverManagement.unavailable')}
-                                    </div>
-                                  )}
                                 </div>
-                              </div>
-                              {country.country_code && (
-                                <span className="text-xl">
-                                  {getFlagEmoji(country.country_code)}
-                                </span>
-                              )}
-                            </button>
-                          );
-                        })}
+                                {country.country_code && (
+                                  <span className="text-xl">
+                                    {getFlagEmoji(country.country_code)}
+                                  </span>
+                                )}
+                              </button>
+                            );
+                          })}
                       </div>
 
                       {(() => {
@@ -1664,17 +1957,82 @@ export default function Subscription() {
             </h2>
           </div>
 
+          {/* Trial upgrade prompt */}
+          {subscription?.is_trial && (
+            <div className="mb-6 rounded-xl border border-warning-500/30 bg-gradient-to-r from-warning-500/10 to-accent-500/10 p-4">
+              <div className="flex items-start gap-3">
+                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-warning-500/20">
+                  <svg
+                    className="h-5 w-5 text-warning-400"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={1.5}
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <div className="font-medium text-warning-300">
+                    {t('subscription.trialUpgrade.title')}
+                  </div>
+                  <div className="mt-1 text-sm text-dark-400">
+                    {t('subscription.trialUpgrade.description')}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Expired subscription notice - prompt to purchase new tariff */}
+          {isTariffsMode &&
+            purchaseOptions &&
+            'subscription_is_expired' in purchaseOptions &&
+            purchaseOptions.subscription_is_expired && (
+              <div className="mb-6 rounded-xl border border-error-500/30 bg-gradient-to-r from-error-500/10 to-warning-500/10 p-4">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-error-500/20">
+                    <svg
+                      className="h-5 w-5 text-error-400"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={1.5}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
+                      />
+                    </svg>
+                  </div>
+                  <div>
+                    <div className="font-medium text-error-300">
+                      {t('subscription.expiredBanner.title')}
+                    </div>
+                    <div className="mt-1 text-sm text-dark-400">
+                      {t('subscription.expiredBanner.selectTariff')}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
           {/* Legacy subscription notice - if user has subscription without tariff */}
           {subscription && !subscription.is_trial && !subscription.tariff_id && (
             <div className="mb-6 rounded-xl border border-accent-500/30 bg-accent-500/10 p-4">
               <div className="mb-2 font-medium text-accent-400">
-                📦 {t('subscription.legacy.selectTariffTitle')}
+                {t('subscription.legacy.selectTariffTitle')}
               </div>
               <div className="text-sm text-dark-300">
                 {t('subscription.legacy.selectTariffDescription')}
               </div>
               <div className="mt-2 text-xs text-dark-500">
-                ⚠️ {t('subscription.legacy.currentSubContinues')}
+                {t('subscription.legacy.currentSubContinues')}
               </div>
             </div>
           )}
@@ -1775,6 +2133,27 @@ export default function Subscription() {
                           t('subscription.switchTariff.switch')
                         )}
                       </button>
+
+                      {/* Show error (except subscription_expired which redirects to purchase) */}
+                      {switchTariffMutation.isError &&
+                        (() => {
+                          const detail =
+                            switchTariffMutation.error instanceof AxiosError
+                              ? switchTariffMutation.error.response?.data?.detail
+                              : null;
+                          // Skip displaying if it's subscription_expired (handled by redirect)
+                          if (
+                            typeof detail === 'object' &&
+                            detail?.error_code === 'subscription_expired'
+                          ) {
+                            return null;
+                          }
+                          return (
+                            <div className="mt-3 text-center text-sm text-error-400">
+                              {getErrorMessage(switchTariffMutation.error)}
+                            </div>
+                          );
+                        })()}
                     </>
                   );
                 })()
@@ -1834,11 +2213,20 @@ export default function Subscription() {
                   .map((tariff) => {
                     const isCurrentTariff =
                       tariff.is_current || tariff.id === subscription?.tariff_id;
+                    // Check if subscription is expired from purchaseOptions
+                    const isSubscriptionExpired =
+                      isTariffsMode &&
+                      purchaseOptions &&
+                      'subscription_is_expired' in purchaseOptions &&
+                      purchaseOptions.subscription_is_expired === true;
+                    // canSwitch only if subscription is active (not expired, not trial)
                     const canSwitch =
                       subscription &&
                       subscription.tariff_id &&
                       !isCurrentTariff &&
-                      !subscription.is_trial;
+                      !subscription.is_trial &&
+                      !isSubscriptionExpired &&
+                      subscription.is_active;
                     // Если есть подписка БЕЗ tariff_id (классическая) - разрешить выбрать тариф
                     const isLegacySubscription =
                       subscription && !subscription.is_trial && !subscription.tariff_id;
@@ -1863,20 +2251,64 @@ export default function Subscription() {
                             </span>
                           )}
                         </div>
-                        <div className="flex flex-wrap gap-3 text-sm text-dark-300">
-                          <span className="flex items-center gap-1">
-                            <span className="text-accent-400">{tariff.traffic_limit_label}</span>
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <span className="text-dark-400">
+                        <div className="flex flex-wrap gap-4 text-sm">
+                          {/* Traffic */}
+                          <div className="flex items-center gap-1.5">
+                            <svg
+                              className="h-4 w-4 text-accent-400"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                              strokeWidth={1.5}
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"
+                              />
+                            </svg>
+                            <span className="font-medium text-dark-200">
+                              {tariff.traffic_limit_label}
+                            </span>
+                          </div>
+                          {/* Devices */}
+                          <div className="flex items-center gap-1.5">
+                            <svg
+                              className="h-4 w-4 text-dark-400"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                              strokeWidth={1.5}
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3"
+                              />
+                            </svg>
+                            <span className="text-dark-300">
                               {t('subscription.devices', { count: tariff.device_limit })}
                             </span>
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <span className="text-dark-400">
+                          </div>
+                          {/* Servers */}
+                          <div className="flex items-center gap-1.5">
+                            <svg
+                              className="h-4 w-4 text-dark-400"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                              strokeWidth={1.5}
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418"
+                              />
+                            </svg>
+                            <span className="text-dark-300">
                               {t('subscription.servers', { count: tariff.servers_count })}
                             </span>
-                          </span>
+                          </div>
                         </div>
                         {/* Price info - daily or period-based */}
                         <div className="mt-3 border-t border-dark-700/50 pt-3 text-sm text-dark-400">
@@ -2687,7 +3119,14 @@ export default function Subscription() {
                             setSelectedTraffic(period.traffic.current);
                           }
                           if (period.servers.selected) {
-                            setSelectedServers(period.servers.selected);
+                            const availUuids = new Set(
+                              period.servers.options
+                                ?.filter((s) => s.is_available)
+                                .map((s) => s.uuid) ?? [],
+                            );
+                            setSelectedServers(
+                              period.servers.selected.filter((uuid) => availUuids.has(uuid)),
+                            );
                           }
                           if (period.devices.current) {
                             setSelectedDevices(period.devices.current);
@@ -2701,7 +3140,7 @@ export default function Subscription() {
                       >
                         {displayDiscount && displayDiscount > 0 && (
                           <div
-                            className={`absolute -right-2 -top-2 rounded-full px-2 py-0.5 text-xs font-medium text-white ${
+                            className={`absolute right-2 top-2 z-10 rounded-full px-2 py-0.5 text-xs font-medium text-white shadow-sm ${
                               hasExistingDiscount ? 'bg-success-500' : 'bg-orange-500'
                             }`}
                           >
@@ -2709,7 +3148,7 @@ export default function Subscription() {
                           </div>
                         )}
                         <div className="text-lg font-semibold text-dark-100">{period.label}</div>
-                        <div className="flex items-center gap-2">
+                        <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
                           <span className="font-medium text-accent-400">
                             {formatPrice(promoPeriod.price)}
                           </span>
@@ -2748,20 +3187,41 @@ export default function Subscription() {
                             : ''
                         } ${!option.is_available ? 'cursor-not-allowed opacity-50' : ''}`}
                       >
-                        {promoTraffic.percent && (
-                          <div className="absolute -right-2 -top-2 rounded-full bg-orange-500 px-2 py-0.5 text-xs font-medium text-white">
-                            -{promoTraffic.percent}%
-                          </div>
-                        )}
-                        <div className="text-lg font-semibold text-dark-100">{option.label}</div>
-                        <div className="flex items-center justify-center gap-2">
-                          <span className="text-accent-400">{formatPrice(promoTraffic.price)}</span>
-                          {promoTraffic.original && (
-                            <span className="text-xs text-dark-500 line-through">
-                              {formatPrice(promoTraffic.original)}
-                            </span>
-                          )}
-                        </div>
+                        {(() => {
+                          const trafficDisplayDiscount = hasExistingDiscount
+                            ? option.discount_percent
+                            : promoTraffic.percent;
+                          const trafficDisplayOriginal = hasExistingDiscount
+                            ? option.original_price_kopeks
+                            : promoTraffic.original;
+                          return (
+                            <>
+                              {trafficDisplayDiscount && trafficDisplayDiscount > 0 && (
+                                <div
+                                  className={`absolute right-2 top-2 z-10 rounded-full px-2 py-0.5 text-xs font-medium text-white shadow-sm ${
+                                    hasExistingDiscount ? 'bg-success-500' : 'bg-orange-500'
+                                  }`}
+                                >
+                                  -{trafficDisplayDiscount}%
+                                </div>
+                              )}
+                              <div className="text-lg font-semibold text-dark-100">
+                                {option.label}
+                              </div>
+                              <div className="mt-1 flex flex-wrap items-center justify-center gap-x-2 gap-y-1">
+                                <span className="text-accent-400">
+                                  {formatPrice(promoTraffic.price)}
+                                </span>
+                                {trafficDisplayOriginal &&
+                                  trafficDisplayOriginal > promoTraffic.price && (
+                                    <span className="text-xs text-dark-500 line-through">
+                                      {formatPrice(trafficDisplayOriginal)}
+                                    </span>
+                                  )}
+                              </div>
+                            </>
+                          );
+                        })()}
                       </button>
                     );
                   })}
@@ -2772,8 +3232,9 @@ export default function Subscription() {
               {currentStep === 'servers' && selectedPeriod?.servers.options && (
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                   {selectedPeriod.servers.options
-                    // Hide Trial server for users who already have trial subscription
+                    // Hide unavailable (disabled) servers and trial servers for existing trial users
                     .filter((server) => {
+                      if (!server.is_available) return false;
                       if (subscription?.is_trial && server.name.toLowerCase().includes('trial')) {
                         return false;
                       }
@@ -2801,11 +3262,20 @@ export default function Subscription() {
                                 : 'cursor-not-allowed border-dark-800/30 bg-dark-900/30 opacity-50'
                           }`}
                         >
-                          {promoServer.percent && (
-                            <div className="absolute -right-2 -top-2 rounded-full bg-orange-500 px-2 py-0.5 text-xs font-medium text-white">
-                              -{promoServer.percent}%
-                            </div>
-                          )}
+                          {(() => {
+                            const serverDisplayDiscount = hasExistingDiscount
+                              ? server.discount_percent
+                              : promoServer.percent;
+                            return serverDisplayDiscount && serverDisplayDiscount > 0 ? (
+                              <div
+                                className={`absolute right-2 top-2 z-10 rounded-full px-2 py-0.5 text-xs font-medium text-white shadow-sm ${
+                                  hasExistingDiscount ? 'bg-success-500' : 'bg-orange-500'
+                                }`}
+                              >
+                                -{serverDisplayDiscount}%
+                              </div>
+                            ) : null;
+                          })()}
                           <div className="flex items-center gap-3">
                             <div
                               className={`flex h-5 w-5 flex-shrink-0 items-center justify-center rounded border-2 ${
@@ -2818,16 +3288,21 @@ export default function Subscription() {
                             </div>
                             <div>
                               <div className="font-medium text-dark-100">{server.name}</div>
-                              <div className="flex items-center gap-2">
+                              <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                                 <span className="text-sm text-accent-400">
                                   {formatPrice(promoServer.price)}
                                   {t('subscription.perMonth')}
                                 </span>
-                                {promoServer.original && (
-                                  <span className="text-xs text-dark-500 line-through">
-                                    {formatPrice(promoServer.original)}
-                                  </span>
-                                )}
+                                {(() => {
+                                  const serverOriginal = hasExistingDiscount
+                                    ? server.original_price_kopeks
+                                    : promoServer.original;
+                                  return serverOriginal && serverOriginal > promoServer.price ? (
+                                    <span className="text-xs text-dark-500 line-through">
+                                      {formatPrice(serverOriginal)}
+                                    </span>
+                                  ) : null;
+                                })()}
                               </div>
                             </div>
                           </div>

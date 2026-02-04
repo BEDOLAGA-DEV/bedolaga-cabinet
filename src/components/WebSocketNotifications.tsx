@@ -170,6 +170,36 @@ export default function WebSocketNotifications() {
         return;
       }
 
+      if (type === 'subscription.devices_purchased') {
+        // Show prominent success modal for device purchase
+        showSuccessModal({
+          type: 'devices_purchased',
+          amountKopeks: message.amount_kopeks,
+          devicesAdded: message.devices_added,
+          newDeviceLimit: message.new_device_limit,
+        });
+        queryClient.invalidateQueries({ queryKey: ['subscription'] });
+        queryClient.invalidateQueries({ queryKey: ['balance'] });
+        queryClient.invalidateQueries({ queryKey: ['transactions'] });
+        refreshUser();
+        return;
+      }
+
+      if (type === 'subscription.traffic_purchased') {
+        // Show prominent success modal for traffic purchase
+        showSuccessModal({
+          type: 'traffic_purchased',
+          amountKopeks: message.amount_kopeks,
+          trafficGbAdded: message.traffic_gb_added,
+          newTrafficLimitGb: message.new_traffic_limit_gb,
+        });
+        queryClient.invalidateQueries({ queryKey: ['subscription'] });
+        queryClient.invalidateQueries({ queryKey: ['balance'] });
+        queryClient.invalidateQueries({ queryKey: ['transactions'] });
+        refreshUser();
+        return;
+      }
+
       // Autopay events
       if (type === 'autopay.success') {
         const amount = message.amount_rubles ?? (message.amount_kopeks ?? 0) / 100;

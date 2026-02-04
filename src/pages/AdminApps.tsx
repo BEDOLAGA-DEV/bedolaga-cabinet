@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
 import {
   adminAppsApi,
   AppDefinition,
@@ -13,8 +13,11 @@ import {
   RemnawaveConfig,
   importFromRemnawaveFormat as convertRemnawave,
 } from '../api/adminApps';
+import { useBackButton } from '../platform/hooks/useBackButton';
+import { usePlatform } from '../platform/hooks/usePlatform';
 
 // Icons
+
 const BackIcon = () => (
   <svg
     className="h-5 w-5 text-dark-400"
@@ -87,7 +90,7 @@ const CopyIcon = () => (
 
 const StarIcon = ({ filled }: { filled: boolean }) => (
   <svg
-    className={`h-4 w-4 ${filled ? 'fill-yellow-400 text-yellow-400' : 'text-dark-500'}`}
+    className={`h-4 w-4 ${filled ? 'fill-warning-400 text-warning-400' : 'text-dark-500'}`}
     viewBox="0 0 24 24"
     stroke="currentColor"
     strokeWidth={2}
@@ -582,7 +585,13 @@ function AppEditorModal({ app, platform, isNew, onSave, onClose }: AppEditorModa
 
 export default function AdminApps() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { capabilities } = usePlatform();
+
+  // Use native Telegram back button in Mini App
+  useBackButton(() => navigate('/admin'));
+
   const [selectedPlatform, setSelectedPlatform] = useState<string>('ios');
   const [editingApp, setEditingApp] = useState<{ app: AppDefinition; isNew: boolean } | null>(null);
   const [copyTarget, setCopyTarget] = useState<{ appId: string; platform: string } | null>(null);
@@ -816,12 +825,15 @@ export default function AdminApps() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <Link
-            to="/admin"
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
-          >
-            <BackIcon />
-          </Link>
+          {/* Show back button only on web, not in Telegram Mini App */}
+          {!capabilities.hasBackButton && (
+            <button
+              onClick={() => navigate('/admin')}
+              className="flex h-10 w-10 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
+            >
+              <BackIcon />
+            </button>
+          )}
           <h1 className="text-2xl font-bold text-dark-50 sm:text-3xl">{t('admin.apps.title')}</h1>
         </div>
 

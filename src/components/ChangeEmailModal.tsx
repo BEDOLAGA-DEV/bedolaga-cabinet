@@ -5,6 +5,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { authApi } from '../api/auth';
 import { useAuthStore } from '../store/auth';
 import { useTelegramWebApp } from '../hooks/useTelegramWebApp';
+import { useBackButton } from '@/platform';
 
 // Icons
 const CloseIcon = () => (
@@ -55,7 +56,7 @@ export default function ChangeEmailModal({ onClose, currentEmail }: ChangeEmailM
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { setUser } = useAuthStore();
-  const { isTelegramWebApp, safeAreaInset, contentSafeAreaInset, webApp } = useTelegramWebApp();
+  const { isTelegramWebApp, safeAreaInset, contentSafeAreaInset } = useTelegramWebApp();
   const isMobileScreen = useIsMobile();
 
   const emailInputRef = useRef<HTMLInputElement>(null);
@@ -87,16 +88,8 @@ export default function ChangeEmailModal({ onClose, currentEmail }: ChangeEmailM
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [handleClose]);
 
-  // Telegram back button
-  useEffect(() => {
-    if (!webApp?.BackButton) return;
-    webApp.BackButton.show();
-    webApp.BackButton.onClick(handleClose);
-    return () => {
-      webApp.BackButton.offClick(handleClose);
-      webApp.BackButton.hide();
-    };
-  }, [webApp, handleClose]);
+  // Telegram back button - using platform hook
+  useBackButton(handleClose);
 
   // Scroll lock
   useEffect(() => {

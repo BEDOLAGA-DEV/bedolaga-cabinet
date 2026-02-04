@@ -1,15 +1,35 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
 import { adminPaymentsApi } from '../api/adminPayments';
 import { useCurrency } from '../hooks/useCurrency';
 import type { PendingPayment, PaginatedResponse } from '../types';
+import { useBackButton } from '../platform/hooks/useBackButton';
+import { usePlatform } from '../platform/hooks/usePlatform';
+
+// BackIcon
+const BackIcon = () => (
+  <svg
+    className="h-5 w-5 text-dark-400"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    strokeWidth={2}
+  >
+    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+  </svg>
+);
 
 export default function AdminPayments() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { formatAmount, currencySymbol } = useCurrency();
+  const { capabilities } = usePlatform();
+
+  // Use native Telegram back button in Mini App
+  useBackButton(() => navigate('/admin'));
 
   const [page, setPage] = useState(1);
   const [methodFilter, setMethodFilter] = useState<string>('');
@@ -68,20 +88,15 @@ export default function AdminPayments() {
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <Link
-            to="/admin"
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
-          >
-            <svg
-              className="h-5 w-5 text-dark-400"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
+          {/* Show back button only on web, not in Telegram Mini App */}
+          {!capabilities.hasBackButton && (
+            <button
+              onClick={() => navigate('/admin')}
+              className="flex h-10 w-10 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-            </svg>
-          </Link>
+              <BackIcon />
+            </button>
+          )}
           <div>
             <h1 className="text-2xl font-bold text-dark-50">{t('admin.payments.title')}</h1>
             <p className="text-sm text-dark-400">{t('admin.payments.description')}</p>

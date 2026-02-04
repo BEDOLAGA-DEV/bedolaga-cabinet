@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { RemnawaveIcon } from '../components/icons';
 
 // Group header icons
 const AnalyticsGroupIcon = () => (
@@ -134,6 +135,16 @@ const GiftIcon = () => (
   </svg>
 );
 
+const UserGroupIcon = () => (
+  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"
+    />
+  </svg>
+);
+
 const MegaphoneIcon = () => (
   <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
     <path
@@ -201,16 +212,6 @@ const EnvelopeIcon = () => (
       strokeLinecap="round"
       strokeLinejoin="round"
       d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"
-    />
-  </svg>
-);
-
-const CubeTransparentIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M21 7.5l-2.25-1.313M21 7.5v2.25m0-2.25l-2.25 1.313M3 7.5l2.25-1.313M3 7.5l2.25 1.313M3 7.5v2.25m9 3l2.25-1.313M12 12.75l-2.25-1.313M12 12.75V15m0 6.75l2.25-1.313M12 21.75V19.5m0 2.25l-2.25-1.313m0-16.875L12 2.25l2.25 1.313M21 14.25v2.25l-2.25 1.313m-13.5 0L3 16.5v-2.25"
     />
   </svg>
 );
@@ -299,10 +300,10 @@ export default function AdminPanel() {
       id: 'analytics',
       title: t('admin.groups.analytics'),
       icon: <AnalyticsGroupIcon />,
-      gradient: 'from-emerald-500/10 to-emerald-500/5',
-      borderColor: 'border-emerald-500/20',
-      iconBg: 'bg-emerald-500/20',
-      iconColor: 'text-emerald-400',
+      gradient: 'from-success-500/10 to-success-500/5',
+      borderColor: 'border-success-500/20',
+      iconBg: 'bg-success-500/20',
+      iconColor: 'text-success-400',
       items: [
         {
           to: '/admin/dashboard',
@@ -322,10 +323,10 @@ export default function AdminPanel() {
       id: 'users',
       title: t('admin.groups.users'),
       icon: <UsersGroupIcon />,
-      gradient: 'from-blue-500/10 to-blue-500/5',
-      borderColor: 'border-blue-500/20',
-      iconBg: 'bg-blue-500/20',
-      iconColor: 'text-blue-400',
+      gradient: 'from-accent-500/10 to-accent-500/5',
+      borderColor: 'border-accent-500/20',
+      iconBg: 'bg-accent-500/20',
+      iconColor: 'text-accent-400',
       items: [
         {
           to: '/admin/users',
@@ -351,10 +352,10 @@ export default function AdminPanel() {
       id: 'tariffs',
       title: t('admin.groups.tariffs'),
       icon: <TariffsGroupIcon />,
-      gradient: 'from-amber-500/10 to-amber-500/5',
-      borderColor: 'border-amber-500/20',
-      iconBg: 'bg-amber-500/20',
-      iconColor: 'text-amber-400',
+      gradient: 'from-warning-500/10 to-warning-500/5',
+      borderColor: 'border-warning-500/20',
+      iconBg: 'bg-warning-500/20',
+      iconColor: 'text-warning-400',
       items: [
         {
           to: '/admin/tariffs',
@@ -367,6 +368,12 @@ export default function AdminPanel() {
           icon: <TicketIcon />,
           title: t('admin.nav.promocodes'),
           description: t('admin.panel.promocodesDesc'),
+        },
+        {
+          to: '/admin/promo-groups',
+          icon: <UserGroupIcon />,
+          title: t('admin.nav.promoGroups'),
+          description: t('admin.panel.promoGroupsDesc'),
         },
         {
           to: '/admin/promo-offers',
@@ -386,10 +393,10 @@ export default function AdminPanel() {
       id: 'marketing',
       title: t('admin.groups.marketing'),
       icon: <MarketingGroupIcon />,
-      gradient: 'from-rose-500/10 to-rose-500/5',
-      borderColor: 'border-rose-500/20',
-      iconBg: 'bg-rose-500/20',
-      iconColor: 'text-rose-400',
+      gradient: 'from-error-500/10 to-error-500/5',
+      borderColor: 'border-error-500/20',
+      iconBg: 'bg-error-500/20',
+      iconColor: 'text-error-400',
       items: [
         {
           to: '/admin/campaigns',
@@ -440,7 +447,7 @@ export default function AdminPanel() {
         },
         {
           to: '/admin/remnawave',
-          icon: <CubeTransparentIcon />,
+          icon: <RemnawaveIcon />,
           title: t('admin.nav.remnawave'),
           description: t('admin.panel.remnawaveDesc'),
         },

@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
 import {
   adminRemnawaveApi,
   NodeInfo,
@@ -9,142 +9,24 @@ import {
   SystemStatsResponse,
   AutoSyncStatus,
 } from '../api/adminRemnawave';
+import { useBackButton } from '../platform/hooks/useBackButton';
+import { usePlatform } from '../platform/hooks/usePlatform';
+import {
+  ServerIcon,
+  ChartIcon,
+  GlobeIcon,
+  UsersIcon,
+  SyncIcon,
+  RefreshIcon,
+  PlayIcon,
+  StopIcon,
+  ArrowPathIcon,
+  RemnawaveIcon,
+} from '../components/icons';
 
 // ============ Icons ============
 
-const ServerIcon = ({ className = 'w-6 h-6' }: { className?: string }) => (
-  <svg
-    className={className}
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={1.5}
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M5.25 14.25h13.5m-13.5 0a3 3 0 01-3-3m3 3a3 3 0 100 6h13.5a3 3 0 100-6m-16.5-3a3 3 0 013-3h13.5a3 3 0 013 3m-19.5 0a4.5 4.5 0 01.9-2.7L5.737 5.1a3.375 3.375 0 012.7-1.35h7.126c1.062 0 2.062.5 2.7 1.35l2.587 3.45a4.5 4.5 0 01.9 2.7m0 0a3 3 0 01-3 3m0 3h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008zm-3 6h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008z"
-    />
-  </svg>
-);
-
-const ChartIcon = ({ className = 'w-5 h-5' }: { className?: string }) => (
-  <svg
-    className={className}
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={1.5}
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"
-    />
-  </svg>
-);
-
-const GlobeIcon = ({ className = 'w-5 h-5' }: { className?: string }) => (
-  <svg
-    className={className}
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={1.5}
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418"
-    />
-  </svg>
-);
-
-const UsersIcon = ({ className = 'w-5 h-5' }: { className?: string }) => (
-  <svg
-    className={className}
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={1.5}
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"
-    />
-  </svg>
-);
-
-const SyncIcon = ({ className = 'w-5 h-5' }: { className?: string }) => (
-  <svg
-    className={className}
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={1.5}
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"
-    />
-  </svg>
-);
-
-const RefreshIcon = ({
-  className = 'w-4 h-4',
-  spinning = false,
-}: {
-  className?: string;
-  spinning?: boolean;
-}) => (
-  <svg
-    className={`${className} ${spinning ? 'animate-spin' : ''}`}
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={2}
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-    />
-  </svg>
-);
-
-const PlayIcon = ({ className = 'w-4 h-4' }: { className?: string }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z"
-    />
-  </svg>
-);
-
-const StopIcon = ({ className = 'w-4 h-4' }: { className?: string }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M5.25 7.5A2.25 2.25 0 017.5 5.25h9a2.25 2.25 0 012.25 2.25v9a2.25 2.25 0 01-2.25 2.25h-9a2.25 2.25 0 01-2.25-2.25v-9z"
-    />
-  </svg>
-);
-
-const ArrowPathIcon = ({ className = 'w-4 h-4' }: { className?: string }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"
-    />
-  </svg>
-);
-
-const ChevronLeftIcon = () => (
+const BackIcon = () => (
   <svg
     className="h-5 w-5 text-dark-400"
     fill="none"
@@ -232,11 +114,11 @@ interface StatCardProps {
 function StatCard({ label, value, icon, color = 'accent', subValue }: StatCardProps) {
   const colorClasses: Record<string, string> = {
     accent: 'bg-accent-500/20 text-accent-400',
-    green: 'bg-emerald-500/20 text-emerald-400',
-    blue: 'bg-blue-500/20 text-blue-400',
-    orange: 'bg-orange-500/20 text-orange-400',
-    red: 'bg-red-500/20 text-red-400',
-    purple: 'bg-purple-500/20 text-purple-400',
+    green: 'bg-success-500/20 text-success-400',
+    blue: 'bg-accent-500/20 text-accent-400',
+    orange: 'bg-warning-500/20 text-warning-400',
+    red: 'bg-error-500/20 text-error-400',
+    purple: 'bg-accent-500/20 text-accent-400',
   };
 
   return (
@@ -265,8 +147,8 @@ function NodeCard({ node, onAction, isLoading }: NodeCardProps) {
   const statusColor = node.is_disabled
     ? 'text-dark-500'
     : node.is_connected && node.is_node_online
-      ? 'text-emerald-400'
-      : 'text-red-400';
+      ? 'text-success-400'
+      : 'text-error-400';
 
   const statusText = node.is_disabled
     ? t('admin.remnawave.nodes.disabled', 'Disabled')
@@ -290,12 +172,21 @@ function NodeCard({ node, onAction, isLoading }: NodeCardProps) {
           <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-dark-400">
             <span className="flex items-center gap-1">
               <UsersIcon className="h-3.5 w-3.5" />
-              {node.users_online ?? 0} online
+              {t('admin.remnawave.nodes.usersOnlineCount', '{{count}} online', {
+                count: node.users_online ?? 0,
+              })}
             </span>
             {node.traffic_used_bytes !== undefined && (
-              <span>{formatBytes(node.traffic_used_bytes)} used</span>
+              <span>
+                {formatBytes(node.traffic_used_bytes)}{' '}
+                {t('admin.remnawave.nodes.trafficUsed', 'used')}
+              </span>
             )}
-            {node.xray_uptime && <span>Uptime: {node.xray_uptime}</span>}
+            {node.xray_uptime && (
+              <span>
+                {t('admin.remnawave.nodes.uptimeLabel', 'Uptime')}: {node.xray_uptime}
+              </span>
+            )}
           </div>
         </div>
 
@@ -313,8 +204,8 @@ function NodeCard({ node, onAction, isLoading }: NodeCardProps) {
             disabled={isLoading}
             className={`rounded-lg p-2 transition-colors disabled:opacity-50 ${
               node.is_disabled
-                ? 'bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30'
-                : 'bg-red-500/20 text-red-400 hover:bg-red-500/30'
+                ? 'bg-success-500/20 text-success-400 hover:bg-success-500/30'
+                : 'bg-error-500/20 text-error-400 hover:bg-error-500/30'
             }`}
             title={
               node.is_disabled
@@ -332,15 +223,15 @@ function NodeCard({ node, onAction, isLoading }: NodeCardProps) {
 
 interface SquadCardProps {
   squad: SquadWithLocalInfo;
-  onSelect: (squad: SquadWithLocalInfo) => void;
+  onClick: () => void;
 }
 
-function SquadCard({ squad, onSelect }: SquadCardProps) {
+function SquadCard({ squad, onClick }: SquadCardProps) {
   const { t } = useTranslation();
 
   return (
     <div
-      onClick={() => onSelect(squad)}
+      onClick={onClick}
       className="cursor-pointer rounded-xl border border-dark-700 bg-dark-800/50 p-4 transition-colors hover:border-dark-600"
     >
       <div className="flex items-start justify-between gap-3">
@@ -351,11 +242,11 @@ function SquadCard({ squad, onSelect }: SquadCardProps) {
               {squad.display_name || squad.name}
             </h3>
             {squad.is_synced ? (
-              <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs text-emerald-400">
+              <span className="rounded-full bg-success-500/20 px-2 py-0.5 text-xs text-success-400">
                 {t('admin.remnawave.squads.synced', 'Synced')}
               </span>
             ) : (
-              <span className="rounded-full bg-orange-500/20 px-2 py-0.5 text-xs text-orange-400">
+              <span className="rounded-full bg-warning-500/20 px-2 py-0.5 text-xs text-warning-400">
                 {t('admin.remnawave.squads.notSynced', 'Not synced')}
               </span>
             )}
@@ -365,17 +256,25 @@ function SquadCard({ squad, onSelect }: SquadCardProps) {
           <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-dark-400">
             <span className="flex items-center gap-1">
               <UsersIcon className="h-3.5 w-3.5" />
-              {squad.members_count} members
+              {t('admin.remnawave.squads.membersCount', '{{count}} members', {
+                count: squad.members_count,
+              })}
             </span>
             {squad.current_users !== undefined && (
               <span>
                 {squad.current_users} / {squad.max_users ?? '∞'}
               </span>
             )}
-            <span>{squad.inbounds_count} inbounds</span>
+            <span>
+              {t('admin.remnawave.squads.inboundsCount', '{{count}} inbounds', {
+                count: squad.inbounds_count,
+              })}
+            </span>
             {squad.is_available !== undefined && (
-              <span className={squad.is_available ? 'text-emerald-400' : 'text-red-400'}>
-                {squad.is_available ? '✓ Available' : '✗ Unavailable'}
+              <span className={squad.is_available ? 'text-success-400' : 'text-error-400'}>
+                {squad.is_available
+                  ? `✓ ${t('admin.remnawave.squads.available', 'Available')}`
+                  : `✗ ${t('admin.remnawave.squads.unavailable', 'Unavailable')}`}
               </span>
             )}
           </div>
@@ -404,6 +303,8 @@ interface SyncCardProps {
 }
 
 function SyncCard({ title, description, onAction, isLoading, lastResult }: SyncCardProps) {
+  const { t } = useTranslation();
+
   return (
     <div className="rounded-xl border border-dark-700 bg-dark-800/50 p-4">
       <div className="flex items-start justify-between gap-3">
@@ -412,7 +313,7 @@ function SyncCard({ title, description, onAction, isLoading, lastResult }: SyncC
           <p className="mt-1 text-xs text-dark-400">{description}</p>
           {lastResult && (
             <p
-              className={`mt-2 text-xs ${lastResult.success ? 'text-emerald-400' : 'text-red-400'}`}
+              className={`mt-2 text-xs ${lastResult.success ? 'text-success-400' : 'text-error-400'}`}
             >
               {lastResult.message}
             </p>
@@ -424,7 +325,9 @@ function SyncCard({ title, description, onAction, isLoading, lastResult }: SyncC
           className="flex shrink-0 items-center gap-2 rounded-lg bg-accent-500/20 px-3 py-1.5 text-accent-400 transition-colors hover:bg-accent-500/30 disabled:opacity-50"
         >
           <RefreshIcon spinning={isLoading} />
-          {isLoading ? 'Running...' : 'Run'}
+          {isLoading
+            ? t('admin.remnawave.sync.running', 'Running...')
+            : t('admin.remnawave.sync.run', 'Run')}
         </button>
       </div>
     </div>
@@ -507,7 +410,7 @@ function OverviewTab({ stats, isLoading, onRefresh }: OverviewTabProps) {
         <h3 className="mb-3 text-sm font-medium text-dark-300">
           {t('admin.remnawave.overview.bandwidth', 'Realtime Bandwidth')}
         </h3>
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           <StatCard
             label={t('admin.remnawave.overview.download', 'Download')}
             value={formatBytes(stats.bandwidth.realtime_download) + '/s'}
@@ -564,31 +467,31 @@ function OverviewTab({ stats, isLoading, onRefresh }: OverviewTabProps) {
         </h3>
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
           <StatCard
-            label="2 days"
+            label={t('admin.remnawave.overview.traffic2days', '2 days')}
             value={formatBytes(stats.traffic_periods.last_2_days.current)}
             icon={<span className="text-xs">📊</span>}
             color="accent"
           />
           <StatCard
-            label="7 days"
+            label={t('admin.remnawave.overview.traffic7days', '7 days')}
             value={formatBytes(stats.traffic_periods.last_7_days.current)}
             icon={<span className="text-xs">📊</span>}
             color="blue"
           />
           <StatCard
-            label="30 days"
+            label={t('admin.remnawave.overview.traffic30days', '30 days')}
             value={formatBytes(stats.traffic_periods.last_30_days.current)}
             icon={<span className="text-xs">📊</span>}
             color="green"
           />
           <StatCard
-            label="Month"
+            label={t('admin.remnawave.overview.trafficMonth', 'Month')}
             value={formatBytes(stats.traffic_periods.current_month.current)}
             icon={<span className="text-xs">📊</span>}
             color="purple"
           />
           <StatCard
-            label="Year"
+            label={t('admin.remnawave.overview.trafficYear', 'Year')}
             value={formatBytes(stats.traffic_periods.current_year.current)}
             icon={<span className="text-xs">📊</span>}
             color="orange"
@@ -659,11 +562,36 @@ function NodesTab({
     <div className="space-y-4">
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
-        <StatCard label="Total" value={stats.total} icon={<GlobeIcon />} color="accent" />
-        <StatCard label="Online" value={stats.online} icon={<GlobeIcon />} color="green" />
-        <StatCard label="Offline" value={stats.offline} icon={<GlobeIcon />} color="red" />
-        <StatCard label="Disabled" value={stats.disabled} icon={<GlobeIcon />} color="accent" />
-        <StatCard label="Users" value={stats.totalUsers} icon={<UsersIcon />} color="blue" />
+        <StatCard
+          label={t('admin.remnawave.nodes.stats.total', 'Total')}
+          value={stats.total}
+          icon={<GlobeIcon />}
+          color="accent"
+        />
+        <StatCard
+          label={t('admin.remnawave.nodes.stats.online', 'Online')}
+          value={stats.online}
+          icon={<GlobeIcon />}
+          color="green"
+        />
+        <StatCard
+          label={t('admin.remnawave.nodes.stats.offline', 'Offline')}
+          value={stats.offline}
+          icon={<GlobeIcon />}
+          color="red"
+        />
+        <StatCard
+          label={t('admin.remnawave.nodes.stats.disabled', 'Disabled')}
+          value={stats.disabled}
+          icon={<GlobeIcon />}
+          color="accent"
+        />
+        <StatCard
+          label={t('admin.remnawave.nodes.stats.users', 'Users')}
+          value={stats.totalUsers}
+          icon={<UsersIcon />}
+          color="blue"
+        />
       </div>
 
       {/* Actions */}
@@ -678,7 +606,7 @@ function NodesTab({
         <button
           onClick={onRestartAll}
           disabled={isActionLoading}
-          className="flex items-center gap-2 rounded-lg bg-orange-500/20 px-3 py-1.5 text-orange-400 transition-colors hover:bg-orange-500/30 disabled:opacity-50"
+          className="flex items-center gap-2 rounded-lg bg-warning-500/20 px-3 py-1.5 text-warning-400 transition-colors hover:bg-warning-500/30 disabled:opacity-50"
         >
           <ArrowPathIcon />
           {t('admin.remnawave.nodes.restartAll', 'Restart All')}
@@ -705,12 +633,19 @@ interface SquadsTabProps {
   squads: SquadWithLocalInfo[];
   isLoading: boolean;
   onRefresh: () => void;
-  onSelect: (squad: SquadWithLocalInfo) => void;
+  onNavigate: (uuid: string) => void;
   onSync: () => void;
   isSyncing: boolean;
 }
 
-function SquadsTab({ squads, isLoading, onRefresh, onSelect, onSync, isSyncing }: SquadsTabProps) {
+function SquadsTab({
+  squads,
+  isLoading,
+  onRefresh,
+  onNavigate,
+  onSync,
+  isSyncing,
+}: SquadsTabProps) {
   const { t } = useTranslation();
 
   const stats = useMemo(() => {
@@ -734,19 +669,29 @@ function SquadsTab({ squads, isLoading, onRefresh, onSelect, onSync, isSyncing }
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <StatCard
-          label="Total"
+          label={t('admin.remnawave.squads.stats.total', 'Total')}
           value={stats.total}
           icon={<ServerIcon className="h-5 w-5" />}
           color="accent"
         />
-        <StatCard label="Synced" value={stats.synced} icon={<SyncIcon />} color="green" />
         <StatCard
-          label="Available"
+          label={t('admin.remnawave.squads.stats.synced', 'Synced')}
+          value={stats.synced}
+          icon={<SyncIcon />}
+          color="green"
+        />
+        <StatCard
+          label={t('admin.remnawave.squads.stats.available', 'Available')}
           value={stats.available}
           icon={<ServerIcon className="h-5 w-5" />}
           color="blue"
         />
-        <StatCard label="Members" value={stats.totalMembers} icon={<UsersIcon />} color="purple" />
+        <StatCard
+          label={t('admin.remnawave.squads.stats.members', 'Members')}
+          value={stats.totalMembers}
+          icon={<UsersIcon />}
+          color="purple"
+        />
       </div>
 
       {/* Actions */}
@@ -775,7 +720,9 @@ function SquadsTab({ squads, isLoading, onRefresh, onSelect, onSync, isSyncing }
             {t('admin.remnawave.squads.noSquads', 'No squads found')}
           </p>
         ) : (
-          squads.map((squad) => <SquadCard key={squad.uuid} squad={squad} onSelect={onSelect} />)
+          squads.map((squad) => (
+            <SquadCard key={squad.uuid} squad={squad} onClick={() => onNavigate(squad.uuid)} />
+          ))
         )}
       </div>
     </div>
@@ -788,9 +735,6 @@ interface SyncTabProps {
   onRunAutoSync: () => void;
   onSyncFromPanel: () => void;
   onSyncToPanel: () => void;
-  onValidate: () => void;
-  onCleanup: () => void;
-  onSyncStatuses: () => void;
   syncResults: Record<string, { success: boolean; message?: string } | null>;
   loadingStates: Record<string, boolean>;
 }
@@ -801,9 +745,6 @@ function SyncTab({
   onRunAutoSync,
   onSyncFromPanel,
   onSyncToPanel,
-  onValidate,
-  onCleanup,
-  onSyncStatuses,
   syncResults,
   loadingStates,
 }: SyncTabProps) {
@@ -822,7 +763,7 @@ function SyncTab({
       {/* Auto Sync Status */}
       {autoSyncStatus && (
         <div className="rounded-xl border border-dark-700 bg-dark-800/50 p-4">
-          <div className="mb-4 flex items-center justify-between">
+          <div className="mb-3 flex items-center justify-between">
             <h3 className="flex items-center gap-2 font-medium text-dark-100">
               <SyncIcon />
               {t('admin.remnawave.sync.autoSync', 'Auto Sync')}
@@ -830,51 +771,59 @@ function SyncTab({
             <span
               className={`rounded-full px-2 py-0.5 text-xs ${
                 autoSyncStatus.enabled
-                  ? 'bg-emerald-500/20 text-emerald-400'
+                  ? 'bg-success-500/20 text-success-400'
                   : 'bg-dark-600 text-dark-400'
               }`}
             >
-              {autoSyncStatus.enabled ? 'Enabled' : 'Disabled'}
+              {autoSyncStatus.enabled
+                ? t('admin.remnawave.sync.enabled', 'Enabled')
+                : t('admin.remnawave.sync.disabled', 'Disabled')}
             </span>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 text-sm lg:grid-cols-4">
-            <div>
-              <p className="text-dark-500">Schedule</p>
-              <p className="text-dark-200">
+          <div className="grid grid-cols-2 gap-3 text-sm">
+            <div className="rounded-lg bg-dark-700/50 p-3">
+              <p className="text-xs text-dark-500">
+                {t('admin.remnawave.sync.schedule', 'Schedule')}
+              </p>
+              <p className="mt-1 text-dark-200">
                 {autoSyncStatus.times.length > 0 ? autoSyncStatus.times.join(', ') : '—'}
               </p>
             </div>
-            <div>
-              <p className="text-dark-500">Next Run</p>
-              <p className="text-dark-200">
-                {autoSyncStatus.next_run ? new Date(autoSyncStatus.next_run).toLocaleString() : '—'}
+            <div className="rounded-lg bg-dark-700/50 p-3">
+              <p className="text-xs text-dark-500">{t('admin.remnawave.sync.status', 'Status')}</p>
+              <p
+                className={`mt-1 ${
+                  autoSyncStatus.is_running
+                    ? 'text-warning-400'
+                    : autoSyncStatus.last_run_success
+                      ? 'text-success-400'
+                      : 'text-dark-200'
+                }`}
+              >
+                {autoSyncStatus.is_running
+                  ? t('admin.remnawave.sync.running', 'Running...')
+                  : autoSyncStatus.last_run_success
+                    ? t('admin.remnawave.sync.success', 'Success')
+                    : autoSyncStatus.last_run_error || '—'}
               </p>
             </div>
-            <div>
-              <p className="text-dark-500">Last Run</p>
-              <p className="text-dark-200">
+            <div className="rounded-lg bg-dark-700/50 p-3">
+              <p className="text-xs text-dark-500">
+                {t('admin.remnawave.sync.lastRun', 'Last Run')}
+              </p>
+              <p className="mt-1 text-dark-200">
                 {autoSyncStatus.last_run_finished_at
                   ? new Date(autoSyncStatus.last_run_finished_at).toLocaleString()
                   : '—'}
               </p>
             </div>
-            <div>
-              <p className="text-dark-500">Status</p>
-              <p
-                className={
-                  autoSyncStatus.is_running
-                    ? 'text-orange-400'
-                    : autoSyncStatus.last_run_success
-                      ? 'text-emerald-400'
-                      : 'text-dark-200'
-                }
-              >
-                {autoSyncStatus.is_running
-                  ? 'Running...'
-                  : autoSyncStatus.last_run_success
-                    ? 'Success'
-                    : autoSyncStatus.last_run_error || '—'}
+            <div className="rounded-lg bg-dark-700/50 p-3">
+              <p className="text-xs text-dark-500">
+                {t('admin.remnawave.sync.nextRun', 'Next Run')}
+              </p>
+              <p className="mt-1 text-dark-200">
+                {autoSyncStatus.next_run ? new Date(autoSyncStatus.next_run).toLocaleString() : '—'}
               </p>
             </div>
           </div>
@@ -882,80 +831,38 @@ function SyncTab({
           <button
             onClick={onRunAutoSync}
             disabled={loadingStates.autoSync || autoSyncStatus.is_running}
-            className="mt-4 flex items-center gap-2 rounded-lg bg-accent-500/20 px-4 py-2 text-accent-400 transition-colors hover:bg-accent-500/30 disabled:opacity-50"
+            className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg bg-accent-500/20 px-4 py-2.5 text-sm font-medium text-accent-400 transition-colors hover:bg-accent-500/30 disabled:opacity-50"
           >
             <RefreshIcon spinning={loadingStates.autoSync || autoSyncStatus.is_running} />
-            {t('admin.remnawave.sync.runNow', 'Run Now')}
+            {autoSyncStatus.is_running
+              ? t('admin.remnawave.sync.running', 'Running...')
+              : t('admin.remnawave.sync.runAutoSyncNow', 'Run Auto Sync Now')}
           </button>
         </div>
       )}
 
-      {/* Manual Sync Options */}
-      <div>
-        <h3 className="mb-3 text-sm font-medium text-dark-300">
-          {t('admin.remnawave.sync.manual', 'Manual Sync')}
-        </h3>
-        <div className="space-y-3">
-          <SyncCard
-            title={t('admin.remnawave.sync.fromPanel', 'Sync from Panel')}
-            description={t(
-              'admin.remnawave.sync.fromPanelDesc',
-              'Import users from RemnaWave panel to bot database',
-            )}
-            onAction={onSyncFromPanel}
-            isLoading={loadingStates.fromPanel}
-            lastResult={syncResults.fromPanel}
-          />
-          <SyncCard
-            title={t('admin.remnawave.sync.toPanel', 'Sync to Panel')}
-            description={t(
-              'admin.remnawave.sync.toPanelDesc',
-              'Export users from bot database to RemnaWave panel',
-            )}
-            onAction={onSyncToPanel}
-            isLoading={loadingStates.toPanel}
-            lastResult={syncResults.toPanel}
-          />
-        </div>
-      </div>
-
-      {/* Subscriptions */}
-      <div>
-        <h3 className="mb-3 text-sm font-medium text-dark-300">
-          {t('admin.remnawave.sync.subscriptions', 'Subscriptions')}
-        </h3>
-        <div className="space-y-3">
-          <SyncCard
-            title={t('admin.remnawave.sync.validate', 'Validate')}
-            description={t(
-              'admin.remnawave.sync.validateDesc',
-              'Check and fix subscription inconsistencies',
-            )}
-            onAction={onValidate}
-            isLoading={loadingStates.validate}
-            lastResult={syncResults.validate}
-          />
-          <SyncCard
-            title={t('admin.remnawave.sync.cleanup', 'Cleanup')}
-            description={t(
-              'admin.remnawave.sync.cleanupDesc',
-              'Remove orphaned subscriptions without users',
-            )}
-            onAction={onCleanup}
-            isLoading={loadingStates.cleanup}
-            lastResult={syncResults.cleanup}
-          />
-          <SyncCard
-            title={t('admin.remnawave.sync.statuses', 'Sync Statuses')}
-            description={t(
-              'admin.remnawave.sync.statusesDesc',
-              'Synchronize subscription statuses with panel',
-            )}
-            onAction={onSyncStatuses}
-            isLoading={loadingStates.statuses}
-            lastResult={syncResults.statuses}
-          />
-        </div>
+      {/* Manual Sync */}
+      <div className="grid gap-3 sm:grid-cols-2">
+        <SyncCard
+          title={t('admin.remnawave.sync.fromPanel', 'Sync from Panel')}
+          description={t(
+            'admin.remnawave.sync.fromPanelDesc',
+            'Import users from RemnaWave panel to bot',
+          )}
+          onAction={onSyncFromPanel}
+          isLoading={loadingStates.fromPanel}
+          lastResult={syncResults.fromPanel}
+        />
+        <SyncCard
+          title={t('admin.remnawave.sync.toPanel', 'Sync to Panel')}
+          description={t(
+            'admin.remnawave.sync.toPanelDesc',
+            'Export users from bot to RemnaWave panel',
+          )}
+          onAction={onSyncToPanel}
+          isLoading={loadingStates.toPanel}
+          lastResult={syncResults.toPanel}
+        />
       </div>
     </div>
   );
@@ -967,11 +874,15 @@ type TabType = 'overview' | 'nodes' | 'squads' | 'sync';
 
 export default function AdminRemnawave() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { capabilities } = usePlatform();
+
+  // Use native Telegram back button in Mini App
+  useBackButton(() => navigate('/admin'));
 
   // State
   const [activeTab, setActiveTab] = useState<TabType>('overview');
-  const [selectedSquad, setSelectedSquad] = useState<SquadWithLocalInfo | null>(null);
   const [syncResults, setSyncResults] = useState<
     Record<string, { success: boolean; message?: string } | null>
   >({});
@@ -1104,14 +1015,17 @@ export default function AdminRemnawave() {
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Link
-            to="/admin"
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
-          >
-            <ChevronLeftIcon />
-          </Link>
-          <div className="rounded-lg bg-purple-500/20 p-2">
-            <ServerIcon className="h-6 w-6 text-purple-400" />
+          {/* Show back button only on web, not in Telegram Mini App */}
+          {!capabilities.hasBackButton && (
+            <button
+              onClick={() => navigate('/admin')}
+              className="flex h-10 w-10 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
+            >
+              <BackIcon />
+            </button>
+          )}
+          <div className="rounded-lg bg-accent-500/20 p-2">
+            <RemnawaveIcon className="h-6 w-6 text-accent-400" />
           </div>
           <div>
             <h1 className="text-xl font-semibold text-dark-100">
@@ -1126,11 +1040,11 @@ export default function AdminRemnawave() {
         {/* Connection Status Badge */}
         <div
           className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs ${
-            isConfigured ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'
+            isConfigured ? 'bg-success-500/20 text-success-400' : 'bg-error-500/20 text-error-400'
           }`}
         >
           <span
-            className={`h-2 w-2 rounded-full ${isConfigured ? 'bg-emerald-400' : 'bg-red-400'}`}
+            className={`h-2 w-2 rounded-full ${isConfigured ? 'bg-success-400' : 'bg-error-400'}`}
           />
           {isConfigured
             ? t('admin.remnawave.connected', 'Connected')
@@ -1140,8 +1054,8 @@ export default function AdminRemnawave() {
 
       {/* Configuration Error */}
       {status?.configuration_error && (
-        <div className="mb-4 rounded-xl border border-red-500/30 bg-red-500/10 p-4">
-          <p className="text-sm text-red-400">{status.configuration_error}</p>
+        <div className="mb-4 rounded-xl border border-error-500/30 bg-error-500/10 p-4">
+          <p className="text-sm text-error-400">{status.configuration_error}</p>
         </div>
       )}
 
@@ -1188,7 +1102,7 @@ export default function AdminRemnawave() {
           squads={squadsData?.items || []}
           isLoading={isLoadingSquads}
           onRefresh={() => refetchSquads()}
-          onSelect={setSelectedSquad}
+          onNavigate={(uuid) => navigate(`/admin/remnawave/squads/${uuid}`)}
           onSync={handleSyncServers}
           isSyncing={syncServersMutation.isPending}
         />
@@ -1203,123 +1117,9 @@ export default function AdminRemnawave() {
             handleSyncAction('fromPanel', () => adminRemnawaveApi.syncFromPanel('all'))
           }
           onSyncToPanel={() => handleSyncAction('toPanel', adminRemnawaveApi.syncToPanel)}
-          onValidate={() => handleSyncAction('validate', adminRemnawaveApi.validateSubscriptions)}
-          onCleanup={() => handleSyncAction('cleanup', adminRemnawaveApi.cleanupSubscriptions)}
-          onSyncStatuses={() =>
-            handleSyncAction('statuses', adminRemnawaveApi.syncSubscriptionStatuses)
-          }
           syncResults={syncResults}
           loadingStates={loadingStates}
         />
-      )}
-
-      {/* Squad Detail Modal */}
-      {selectedSquad && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          onClick={() => setSelectedSquad(null)}
-        >
-          <div
-            className="max-h-[80vh] w-full max-w-lg overflow-auto rounded-xl bg-dark-800"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Header */}
-            <div className="sticky top-0 flex items-center justify-between border-b border-dark-700 bg-dark-800 p-4">
-              <div className="flex items-center gap-2">
-                <span className="text-xl">{getCountryFlag(selectedSquad.country_code)}</span>
-                <h2 className="text-lg font-semibold text-dark-100">
-                  {selectedSquad.display_name || selectedSquad.name}
-                </h2>
-              </div>
-              <button
-                onClick={() => setSelectedSquad(null)}
-                className="rounded-lg p-1 text-dark-400 hover:bg-dark-700"
-              >
-                ✕
-              </button>
-            </div>
-
-            {/* Content */}
-            <div className="space-y-4 p-4">
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  <p className="text-dark-500">UUID</p>
-                  <p className="break-all font-mono text-xs text-dark-200">{selectedSquad.uuid}</p>
-                </div>
-                <div>
-                  <p className="text-dark-500">Original Name</p>
-                  <p className="text-dark-200">{selectedSquad.name}</p>
-                </div>
-                <div>
-                  <p className="text-dark-500">Members</p>
-                  <p className="text-dark-200">{selectedSquad.members_count}</p>
-                </div>
-                <div>
-                  <p className="text-dark-500">Inbounds</p>
-                  <p className="text-dark-200">{selectedSquad.inbounds_count}</p>
-                </div>
-                {selectedSquad.is_synced && (
-                  <>
-                    <div>
-                      <p className="text-dark-500">Price</p>
-                      <p className="text-dark-200">
-                        {((selectedSquad.price_kopeks ?? 0) / 100).toFixed(2)} ₽
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-dark-500">Users</p>
-                      <p className="text-dark-200">
-                        {selectedSquad.current_users ?? 0} / {selectedSquad.max_users ?? '∞'}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-dark-500">Available</p>
-                      <p
-                        className={selectedSquad.is_available ? 'text-emerald-400' : 'text-red-400'}
-                      >
-                        {selectedSquad.is_available ? 'Yes' : 'No'}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-dark-500">Trial Eligible</p>
-                      <p
-                        className={
-                          selectedSquad.is_trial_eligible ? 'text-emerald-400' : 'text-dark-400'
-                        }
-                      >
-                        {selectedSquad.is_trial_eligible ? 'Yes' : 'No'}
-                      </p>
-                    </div>
-                  </>
-                )}
-              </div>
-
-              {/* Inbounds */}
-              {selectedSquad.inbounds.length > 0 && (
-                <div>
-                  <p className="mb-2 text-sm text-dark-500">Inbounds</p>
-                  <div className="space-y-1">
-                    {selectedSquad.inbounds.map((inbound: Record<string, unknown>, idx) => (
-                      <div
-                        key={idx}
-                        className="rounded bg-dark-700/50 px-2 py-1 text-xs text-dark-300"
-                      >
-                        {String(inbound.tag || inbound.uuid || `Inbound ${idx + 1}`)}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Footer */}
-            <div className="flex justify-end gap-2 border-t border-dark-700 p-4">
-              <button onClick={() => setSelectedSquad(null)} className="btn-secondary">
-                {t('common.close', 'Close')}
-              </button>
-            </div>
-          </div>
-        </div>
       )}
     </div>
   );

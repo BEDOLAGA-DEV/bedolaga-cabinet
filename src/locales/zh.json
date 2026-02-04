@@ -25,6 +25,8 @@
     "refresh": "刷新",
     "retry": "重试",
     "saving": "保存中...",
+    "understand": "明白了",
+    "collapse": "收起",
     "units": {
       "gb": "GB",
       "perGb": "/GB"
@@ -301,7 +303,7 @@
     "additionalOptions": {
       "title": "附加选项",
       "buyDevices": "购买更多设备",
-      "currentDeviceLimit": "当前限制：{{count}} 台设备",
+      "currentDeviceLimit_other": "当前限制：{{count}} 台设备",
       "maxDevices": "最多 {{count}} 台",
       "devicesUnavailable": "设备购买不可用",
       "devicesUnit": "台设备",
@@ -565,6 +567,7 @@
   "wheel": {
     "title": "幸运转盘",
     "disabled": "幸运转盘暂时不可用",
+    "prizes": "奖品",
     "spinsRemaining": "今日剩余次数",
     "choosePayment": "选择支付方式",
     "stars": "Stars",
@@ -600,6 +603,9 @@
     "starsPaymentSuccess": "支付成功！抽奖结果已发送到Telegram。",
     "starsPaymentFailed": "支付失败。请重试。",
     "starsPaymentRedirected": "将打开Telegram进行支付。支付后请刷新页面。",
+    "starsNotAvailable": "星星支付暂不可用。请联系客服。",
+    "confirmStarsPayment": "您将被重定向到Telegram进行一次转盘支付。",
+    "payStars": "支付 {{count}} ⭐",
     "noHistory": "暂无抽奖记录",
     "banner": {
       "title": "试试运气！",
@@ -625,6 +631,7 @@
       "payments": "支付",
       "promoOffers": "促销优惠",
       "promocodes": "促销码",
+      "promoGroups": "折扣组",
       "remnawave": "RemnaWave",
       "users": "用户"
     },
@@ -646,6 +653,7 @@
       "paymentsDesc": "支付验证",
       "promoOffersDesc": "个性化折扣",
       "promocodesDesc": "管理促销码",
+      "promoGroupsDesc": "用户折扣组",
       "remnawaveDesc": "面板管理和统计",
       "usersDesc": "管理机器人用户"
     },
@@ -705,7 +713,9 @@
       "resetted": "模板已恢复默认",
       "testSent": "测试邮件已发送",
       "variables": "可用变量",
-      "clickToCopy": "点击复制"
+      "clickToCopy": "点击复制",
+      "previewDesktopOnly": "预览仅在桌面网页版可用",
+      "previewNotAvailable": "预览不可用"
     },
     "payments": {
       "title": "支付验证",
@@ -723,6 +733,7 @@
     },
     "wheel": {
       "title": "幸运转盘设置",
+      "preview": "预览",
       "enabled": "已启用",
       "disabled": "已禁用",
       "tabs": {
@@ -738,13 +749,21 @@
         "rtpPercent": "RTP (返还率) %",
         "dailyLimit": "每日限制 (0 = 无限)",
         "minSubDays": "天数支付最低订阅天数",
-        "promoPrefix": "优惠码前缀"
+        "promoPrefix": "优惠码前缀",
+        "spinCost": "旋转费用",
+        "limitsAndRtp": "限制和RTP",
+        "promocodes": "促销码"
       },
+      "starsNotEnabledGlobally": "星星支付未在支付方式中启用。请在「支付方式」中启用「Telegram Stars」。",
       "prizes": {
         "addPrize": "添加奖品",
         "editPrize": "编辑奖品",
         "noPrizes": "未配置奖品。添加奖品以启用转盘。",
         "deletePrize": "删除此奖品？",
+        "dragToReorder": "拖动排序",
+        "unsavedOrder": "有未保存的顺序更改",
+        "unsavedOrderHint": "保存或放弃更改",
+        "confirmDelete": "确定要删除这个奖品吗？",
         "types": {
           "subscription_days": "订阅天数",
           "balance_bonus": "余额奖励",
@@ -805,6 +824,9 @@
       "filter": "筛选",
       "message": "消息",
       "unknownAdmin": "未知",
+      "detail": "群发详情",
+      "createdBy": "创建者",
+      "notFound": "未找到群发",
       "prev": "上一页",
       "next": "下一页",
       "status": {
@@ -971,6 +993,8 @@
       "replyPlaceholder": "输入您的回复...",
       "sendReply": "发送回复",
       "settings": "设置",
+      "settingsSubtitle": "配置工单系统和SLA",
+      "settingsLoadError": "加载设置失败",
       "supportMode": "支持模式",
       "supportModeDesc": "选择用户如何联系支持",
       "modeBoth": "工单和联系方式",
@@ -1023,6 +1047,8 @@
       "delete": "删除",
       "confirmDelete": "删除套餐？",
       "confirmDeleteText": "此操作不可撤销。套餐将被永久删除。",
+      "confirmDeleteWithSubscriptions": "此套餐有 {{count}} 个活跃订阅。删除后，用户续订时需要选择新套餐。",
+      "deleteSuccess": "套餐删除成功",
       "days": "天",
       "days_other": "{{count}} 天",
       "tabs": {
@@ -1034,6 +1060,7 @@
       "serversHint": "选择此套餐可用的服务器",
       "noServers": "暂无可用服务器",
       "selectType": "选择套餐类型",
+      "selectTypeDesc": "为新套餐选择计费方式",
       "periodTariff": "周期套餐",
       "periodTariffDesc": "按周期付款（7、30、90天等）。灵活的周期和价格。",
       "dailyTariff": "日套餐",
@@ -1050,6 +1077,7 @@
       "nameLabel": "套餐名称",
       "nameExamplePeriod": "例如：标准",
       "nameExampleDaily": "例如：日套餐",
+      "nameHint": "2到50个字符",
       "descriptionLabel": "描述",
       "trafficLimitLabel": "流量限制",
       "gbUnit": "GB",
@@ -1057,6 +1085,7 @@
       "deviceLimitLabel": "套餐中的设备数",
       "tierLevelLabel": "套餐等级",
       "tierLevelHint": "影响套餐之间的升级可用性",
+      "fieldRequired": "必填字段",
       "periodsTabHint": "为套餐添加周期和价格。用户将能够从添加的周期中选择。",
       "addPeriodTitle": "添加周期",
       "daysLabel": "天",
@@ -1064,8 +1093,12 @@
       "addButton": "添加",
       "noPeriodsHint": "没有添加的周期。请至少添加一个周期。",
       "daysShort": "天",
+      "serversTitle": "服务器",
       "serversTabHint": "选择此套餐上可用的服务器。",
       "noServersAvailable": "没有可用的服务器",
+      "promoGroupsTitle": "促销组",
+      "promoGroupsHint": "选择可以访问此套餐的促销组。如果未选择任何组，则所有人都可以访问。",
+      "noPromoGroups": "没有促销组",
       "extraDeviceTitle": "额外设备",
       "devicePriceLabel": "设备价格（30天）：",
       "devicePriceHint": "0 = 无法购买设备",
@@ -1075,6 +1108,8 @@
       "trafficMaxLimitLabel": "最大限制：",
       "trafficLimitHint2": "（0 = 无限制）",
       "trafficPackagesLabel": "流量包：",
+      "addPackageTitle": "添加流量包",
+      "noPackagesHint": "没有添加流量包。请至少添加一个流量包。",
       "gbPackageUnit": "GB：",
       "customDaysTitle": "自定义天数",
       "customDaysDesc": "用户自行选择订阅期限",
@@ -1105,7 +1140,24 @@
       "periodType": "周期套餐",
       "dailyPriceLabel": "每天价格",
       "currencyPerDay": "₽/天",
-      "dailyDeductionDesc": "每天从用户余额中扣除"
+      "dailyDeductionDesc": "每天从用户余额中扣除",
+      "dailyPriceRequired": "请输入大于0的每日价格",
+      "cannotSave": "无法保存套餐：",
+      "statusTitle": "套餐状态",
+      "isActiveLabel": "已激活",
+      "isActiveHint": "未激活的套餐不会显示给用户",
+      "isTrialLabel": "试用套餐",
+      "isTrialHint": "可用于免费试用期",
+      "validation": {
+        "nameRequired": "请输入套餐名称",
+        "nameLength": "名称必须为2到50个字符",
+        "deviceLimitRequired": "请指定设备数量（至少1个）",
+        "tierLevelInvalid": "等级必须在1到10之间",
+        "fieldsRequired": "请填写必填字段（设备数、等级）",
+        "periodsRequired": "请添加至少一个期限",
+        "dailyPriceRequired": "请输入大于0的每日价格",
+        "trafficPackagesRequired": "请添加至少一个流量包（或关闭流量购买）"
+      }
     },
     "servers": {
       "title": "服务器管理",
@@ -1136,7 +1188,10 @@
       "enable": "启用",
       "disable": "禁用",
       "toggleTrial": "切换试用",
-      "loadError": "加载服务器失败"
+      "loadError": "加载服务器失败",
+      "mainSettings": "基本设置",
+      "pricingAndLimits": "价格和限制",
+      "updateError": "保存更改失败"
     },
     "campaigns": {
       "title": "广告活动",
@@ -1157,7 +1212,7 @@
       },
       "table": {
         "inactive": "未激活",
-        "registrations": "{{count}} 次注册",
+        "registrations_other": "{{count}} 次注册",
         "revenue": "{{amount}} 收入",
         "conversion": "{{rate}}% 转化",
         "statistics": "统计",
@@ -1195,13 +1250,16 @@
         "saving": "保存中..."
       },
       "stats": {
+        "title": "活动统计",
+        "loadError": "加载统计失败",
+        "detailedStats": "详细统计",
         "registrations": "注册数",
         "revenue": "收入",
         "paidUsers": "已付费",
         "conversion": "转化率",
         "bonusesIssued": "已发放奖励",
-        "subscriptionsIssued": "{{count}} 个订阅",
-        "tariffsIssued": "{{count}} 个套餐",
+        "subscriptionsIssued_other": "{{count}} 个订阅",
+        "tariffsIssued_other": "{{count}} 个套餐",
         "avgRevenuePerUser": "每用户平均收入",
         "avgFirstPayment": "平均首次付款",
         "trialSubscriptions": "试用订阅",
@@ -1212,7 +1270,10 @@
         "inactive": "未激活",
         "copy": "复制",
         "copied": "已复制！",
-        "users": "用户"
+        "users": "用户",
+        "noUsers": "没有注册用户",
+        "paid": "已付费",
+        "hasSub": "有订阅"
       },
       "users": {
         "title": "活动用户",
@@ -1234,7 +1295,9 @@
         "deleteText": "此操作不可撤销。有注册记录的活动无法删除。",
         "cancel": "取消",
         "delete": "删除"
-      }
+      },
+      "loadError": "加载活动失败",
+      "updateError": "保存更改失败"
     },
     "promocodes": {
       "title": "促销码",
@@ -1248,8 +1311,8 @@
       "until": "有效期至",
       "discountForHours": "-{{percent}}% {{hours}}小时",
       "tabs": {
-        "promocodes": "促销码 ({{count}})",
-        "groups": "折扣组 ({{count}})"
+        "promocodes_other": "促销码 ({{count}})",
+        "groups_other": "折扣组 ({{count}})"
       },
       "type": {
         "balance": "余额",
@@ -1296,6 +1359,8 @@
         "save": "保存"
       },
       "stats": {
+        "title": "促销码统计",
+        "notFound": "未找到促销码",
         "totalUses": "总使用次数",
         "today": "今天",
         "remaining": "剩余",
@@ -1305,7 +1370,7 @@
         "daysLabel": "天数",
         "discountLabel": "折扣",
         "validFor": "有效期",
-        "hoursValue": "{{count}} 小时",
+        "hoursValue_other": "{{count}} 小时",
         "limit": "限制",
         "status": "状态",
         "active": "活跃",
@@ -1346,7 +1411,7 @@
         "default": "默认",
         "daysShort": "{{days}} 天",
         "autoFrom": "自动 从 {{amount}} 卢布",
-        "members": "{{count}} 名成员"
+        "members_other": "{{count}} 名成员"
       },
       "confirm": {
         "deletePromocode": "删除促销码？",
@@ -1354,14 +1419,71 @@
         "deletePromocodeText": "促销码将被永久删除。",
         "deleteGroupText": "该组将被删除。用户将失去该组的折扣。",
         "deleteButton": "删除"
+      },
+      "validation": {
+        "codeRequired": "请输入促销码",
+        "balanceRequired": "奖金金额必须大于0",
+        "daysRequired": "天数必须大于0",
+        "groupRequired": "请选择折扣组",
+        "discountPercentInvalid": "折扣百分比必须在1到100之间",
+        "discountHoursRequired": "请指定折扣有效期（小时）"
+      }
+    },
+    "promoGroups": {
+      "title": "折扣组",
+      "subtitle": "管理用户折扣组",
+      "addGroup": "添加组",
+      "noGroups": "没有折扣组",
+      "default": "默认",
+      "servers": "服务器",
+      "traffic": "流量",
+      "devices": "设备",
+      "daysShort": "{{days}} 天",
+      "autoFrom": "自动 从 {{amount}} 卢布",
+      "members": "{{count}} 名成员",
+      "createTitle": "创建折扣组",
+      "editTitle": "编辑组",
+      "stats": {
+        "total": "组总数",
+        "members": "成员",
+        "autoAssign": "自动分配"
+      },
+      "actions": {
+        "edit": "编辑",
+        "delete": "删除"
+      },
+      "confirm": {
+        "title": "删除组？",
+        "text": "该组将被删除。用户将失去该组的折扣。",
+        "cancel": "取消",
+        "delete": "删除"
+      },
+      "form": {
+        "name": "组名称",
+        "namePlaceholder": "VIP客户",
+        "categoryDiscounts": "分类折扣",
+        "periodDiscounts": "期间折扣",
+        "add": "添加",
+        "periodHint": "购买指定天数订阅时应用折扣",
+        "noPeriods": "没有期间折扣",
+        "daysPlaceholder": "天",
+        "arrow": "天 →",
+        "autoAssign": "消费满额自动分配",
+        "rub": "卢布",
+        "autoAssignHint": "0 = 不自动分配",
+        "applyToAddons": "应用于附加服务",
+        "cancel": "取消",
+        "saving": "保存中...",
+        "save": "保存"
       }
     },
     "users": {
       "title": "用户",
       "subtitle": "机器人用户管理",
       "search": "按ID、姓名、用户名搜索...",
+      "searchEmail": "按邮箱搜索...",
       "noData": "未找到用户",
-      "purchaseCount": "{{count}} 次购买",
+      "purchaseCount_other": "{{count}} 次购买",
       "noPurchases": "无购买记录",
       "stats": {
         "total": "总计",
@@ -1472,7 +1594,7 @@
       "subtitle": "模板、群发和优惠日志",
       "sendButton": "发送",
       "tabs": {
-        "templates": "模板 ({{count}})",
+        "templates_other": "模板 ({{count}})",
         "logs": "日志"
       },
       "noData": {
@@ -1514,17 +1636,24 @@
         "segment": "分组",
         "user": "用户",
         "userIdPlaceholder": "Telegram ID 或 User ID",
+        "searchUserPlaceholder": "按姓名、用户名或Telegram ID搜索...",
+        "noUsersFound": "未找到用户",
+        "hasSubscription": "订阅",
         "preview": "预览",
         "sending": "发送中...",
         "sendButton": "发送"
       },
       "result": {
         "sentTitle": "已发送！",
-        "offersCreated": "已创建优惠: {{count}}",
-        "notificationsSent": "已发送通知: {{count}}",
+        "offersCreated_other": "已创建优惠: {{count}}",
+        "notificationsSent_other": "已发送通知: {{count}}",
         "notificationsFailed": "（失败: {{count}}）",
         "sendError": "发送优惠失败"
       },
+      "notFound": "未找到模板",
+      "noActiveTemplates": "没有活跃的模板",
+      "backToList": "返回优惠列表",
+      "sendAnother": "再发送一个",
       "actions": {
         "created": "已创建",
         "claimed": "已领取",
@@ -1595,7 +1724,18 @@
         "offline": "离线",
         "online": "在线",
         "restart": "重启",
-        "restartAll": "全部重启"
+        "restartAll": "全部重启",
+        "usersOnline": "在线",
+        "usersOnlineCount_other": "{{count}} 在线",
+        "trafficUsed": "已使用",
+        "uptimeLabel": "运行时间",
+        "stats": {
+          "total": "总计",
+          "online": "在线",
+          "offline": "离线",
+          "disabled": "已禁用",
+          "users": "用户"
+        }
       },
       "overview": {
         "bandwidth": "实时带宽",
@@ -1609,6 +1749,11 @@
         "total": "总计",
         "totalUsers": "总用户数",
         "traffic": "流量统计",
+        "traffic2days": "2天",
+        "traffic7days": "7天",
+        "traffic30days": "30天",
+        "trafficMonth": "本月",
+        "trafficYear": "本年",
         "upload": "上传",
         "uptime": "运行时间",
         "usersByStatus": "按状态分类的用户",
@@ -1618,23 +1763,48 @@
         "noSquads": "未找到小队",
         "notSynced": "未同步",
         "syncServers": "同步服务器",
-        "synced": "已同步"
+        "synced": "已同步",
+        "members": "成员",
+        "membersCount_other": "{{count}} 成员",
+        "inbounds": "入站",
+        "inboundsCount_other": "{{count}} 入站",
+        "available": "可用",
+        "unavailable": "不可用",
+        "stats": {
+          "total": "总计",
+          "synced": "已同步",
+          "available": "可用",
+          "members": "成员"
+        },
+        "detail": "小队详情",
+        "loadError": "加载小队失败",
+        "info": "信息",
+        "originalName": "原始名称",
+        "countryCode": "国家",
+        "statsTitle": "统计",
+        "inboundsList": "入站列表",
+        "localSettings": "本地设置",
+        "trialEligible": "可试用",
+        "price": "价格",
+        "users": "用户"
       },
       "sync": {
         "autoSync": "自动同步",
-        "cleanup": "清理",
-        "cleanupDesc": "删除无用户的孤立订阅",
-        "fromPanel": "从面板同步",
-        "fromPanelDesc": "从RemnaWave面板导入用户到机器人数据库",
-        "manual": "手动同步",
-        "runNow": "立即运行",
-        "statuses": "同步状态",
-        "statusesDesc": "与面板同步订阅状态",
-        "subscriptions": "订阅",
-        "toPanel": "同步到面板",
-        "toPanelDesc": "从机器人数据库导出用户到RemnaWave面板",
-        "validate": "验证",
-        "validateDesc": "检查并修复订阅不一致"
+        "runNow": "运行",
+        "run": "运行",
+        "running": "运行中...",
+        "schedule": "计划",
+        "status": "状态",
+        "lastRun": "上次运行",
+        "nextRun": "下次运行",
+        "enabled": "已启用",
+        "disabled": "已禁用",
+        "success": "成功",
+        "runAutoSyncNow": "立即运行自动同步",
+        "fromPanel": "从面板",
+        "fromPanelDesc": "从RemnaWave导入用户到机器人",
+        "toPanel": "到面板",
+        "toPanelDesc": "从机器人导出用户到RemnaWave"
       }
     }
   },
@@ -1663,7 +1833,7 @@
       "enable": "启用",
       "disable": "禁用",
       "hide": "隐藏 ({{count}})",
-      "showMore": "显示更多 {{count}} 个节点"
+      "showMore_other": "显示更多 {{count}} 个节点"
     },
     "revenue": {
       "title": "收入",
@@ -1926,6 +2096,15 @@
       "test": "测试",
       "activating": "激活中...",
       "activate": "激活"
+    },
+    "deactivate": {
+      "button": "取消优惠码",
+      "confirmTitle": "取消优惠码？",
+      "confirmDescription": "您确定要取消 {{percent}}% 的折扣吗？取消后您可以激活其他优惠码。",
+      "warning": "已取消的优惠码无法重新使用。折扣将立即失效。",
+      "confirm": "取消折扣",
+      "deactivating": "取消中...",
+      "error": "取消优惠码失败，请稍后重试。"
     }
   },
   "telegramRedirect": {

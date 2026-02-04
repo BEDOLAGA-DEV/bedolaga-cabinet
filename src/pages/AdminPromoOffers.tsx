@@ -1,19 +1,11 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import i18n from '../i18n';
-import {
-  promoOffersApi,
-  PromoOfferTemplate,
-  PromoOfferTemplateUpdateRequest,
-  PromoOfferBroadcastRequest,
-  PromoOfferLog,
-  TARGET_SEGMENTS,
-  TargetSegment,
-  OFFER_TYPE_CONFIG,
-  OfferType,
-} from '../api/promoOffers';
+import { promoOffersApi, PromoOfferLog, OFFER_TYPE_CONFIG, OfferType } from '../api/promoOffers';
+import { useBackButton } from '../platform/hooks/useBackButton';
+import { usePlatform } from '../platform/hooks/usePlatform';
 
 // Icons
 const BackIcon = () => (
@@ -35,12 +27,6 @@ const EditIcon = () => (
       strokeLinejoin="round"
       d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"
     />
-  </svg>
-);
-
-const XIcon = () => (
-  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
   </svg>
 );
 
@@ -74,22 +60,6 @@ const UserIcon = () => (
   </svg>
 );
 
-const CheckIcon = () => (
-  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-  </svg>
-);
-
-const UsersIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"
-    />
-  </svg>
-);
-
 // Helper functions
 const formatDateTime = (date: string | null): string => {
   if (!date) return '-';
@@ -116,9 +86,9 @@ const getActionLabel = (action: string): string => {
 
 const getActionColor = (action: string): string => {
   const colors: Record<string, string> = {
-    created: 'bg-blue-500/20 text-blue-400',
-    claimed: 'bg-emerald-500/20 text-emerald-400',
-    consumed: 'bg-purple-500/20 text-purple-400',
+    created: 'bg-accent-500/20 text-accent-400',
+    claimed: 'bg-success-500/20 text-success-400',
+    consumed: 'bg-accent-500/20 text-accent-400',
     disabled: 'bg-dark-600 text-dark-400',
   };
   return colors[action] || 'bg-dark-600 text-dark-400';
@@ -133,468 +103,15 @@ const getOfferTypeLabel = (offerType: string): string => {
   return config ? i18n.t(config.labelKey) : offerType;
 };
 
-// Template Edit Modal
-interface TemplateEditModalProps {
-  template: PromoOfferTemplate;
-  onSave: (data: PromoOfferTemplateUpdateRequest) => void;
-  onClose: () => void;
-  isLoading?: boolean;
-}
-
-function TemplateEditModal({ template, onSave, onClose, isLoading }: TemplateEditModalProps) {
-  const { t } = useTranslation();
-  const [name, setName] = useState(template.name);
-  const [messageText, setMessageText] = useState(template.message_text);
-  const [buttonText, setButtonText] = useState(template.button_text);
-  const [validHours, setValidHours] = useState(template.valid_hours);
-  const [discountPercent, setDiscountPercent] = useState(template.discount_percent);
-  const [activeDiscountHours, setActiveDiscountHours] = useState(
-    template.active_discount_hours || 0,
-  );
-  const [testDurationHours, setTestDurationHours] = useState(template.test_duration_hours || 0);
-  const [isActive, setIsActive] = useState(template.is_active);
-
-  const isTestAccess = template.offer_type === 'test_access';
-
-  const handleSubmit = () => {
-    const data: PromoOfferTemplateUpdateRequest = {
-      name,
-      message_text: messageText,
-      button_text: buttonText,
-      valid_hours: validHours,
-      discount_percent: discountPercent,
-      is_active: isActive,
-    };
-    if (isTestAccess) {
-      data.test_duration_hours = testDurationHours > 0 ? testDurationHours : undefined;
-    } else {
-      data.active_discount_hours = activeDiscountHours > 0 ? activeDiscountHours : undefined;
-    }
-    onSave(data);
-  };
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-xl bg-dark-800">
-        {/* Header */}
-        <div className="flex items-center justify-between border-b border-dark-700 p-4">
-          <div className="flex items-center gap-3">
-            <span className="text-2xl">{getOfferTypeIcon(template.offer_type)}</span>
-            <h2 className="text-lg font-semibold text-dark-100">
-              {t('admin.promoOffers.form.editTemplate')}
-            </h2>
-          </div>
-          <button onClick={onClose} className="rounded-lg p-1 transition-colors hover:bg-dark-700">
-            <XIcon />
-          </button>
-        </div>
-
-        {/* Content */}
-        <div className="flex-1 space-y-4 overflow-y-auto p-4">
-          <div>
-            <label className="mb-1 block text-sm text-dark-300">
-              {t('admin.promoOffers.form.templateName')}
-            </label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full rounded-lg border border-dark-600 bg-dark-700 px-3 py-2 text-dark-100 focus:border-accent-500 focus:outline-none"
-            />
-          </div>
-
-          <div>
-            <label className="mb-1 block text-sm text-dark-300">
-              {t('admin.promoOffers.form.messageText')}
-            </label>
-            <textarea
-              value={messageText}
-              onChange={(e) => setMessageText(e.target.value)}
-              rows={4}
-              className="w-full resize-none rounded-lg border border-dark-600 bg-dark-700 px-3 py-2 text-dark-100 focus:border-accent-500 focus:outline-none"
-            />
-          </div>
-
-          <div>
-            <label className="mb-1 block text-sm text-dark-300">
-              {t('admin.promoOffers.form.buttonText')}
-            </label>
-            <input
-              type="text"
-              value={buttonText}
-              onChange={(e) => setButtonText(e.target.value)}
-              className="w-full rounded-lg border border-dark-600 bg-dark-700 px-3 py-2 text-dark-100 focus:border-accent-500 focus:outline-none"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="mb-1 block text-sm text-dark-300">
-                {t('admin.promoOffers.form.validHours')}
-              </label>
-              <input
-                type="number"
-                value={validHours}
-                onChange={(e) => setValidHours(Math.max(1, parseInt(e.target.value) || 1))}
-                className="w-full rounded-lg border border-dark-600 bg-dark-700 px-3 py-2 text-dark-100 focus:border-accent-500 focus:outline-none"
-                min={1}
-              />
-              <p className="mt-1 text-xs text-dark-500">
-                {t('admin.promoOffers.form.activationTime')}
-              </p>
-            </div>
-
-            {!isTestAccess && (
-              <div>
-                <label className="mb-1 block text-sm text-dark-300">
-                  {t('admin.promoOffers.form.discountPercent')}
-                </label>
-                <input
-                  type="number"
-                  value={discountPercent}
-                  onChange={(e) =>
-                    setDiscountPercent(Math.min(100, Math.max(0, parseInt(e.target.value) || 0)))
-                  }
-                  className="w-full rounded-lg border border-dark-600 bg-dark-700 px-3 py-2 text-dark-100 focus:border-accent-500 focus:outline-none"
-                  min={0}
-                  max={100}
-                />
-              </div>
-            )}
-          </div>
-
-          {isTestAccess ? (
-            <div>
-              <label className="mb-1 block text-sm text-dark-300">
-                {t('admin.promoOffers.form.testDurationHours')}
-              </label>
-              <input
-                type="number"
-                value={testDurationHours}
-                onChange={(e) => setTestDurationHours(Math.max(0, parseInt(e.target.value) || 0))}
-                className="w-full rounded-lg border border-dark-600 bg-dark-700 px-3 py-2 text-dark-100 focus:border-accent-500 focus:outline-none"
-                min={0}
-              />
-              <p className="mt-1 text-xs text-dark-500">
-                {t('admin.promoOffers.form.defaultZero')}
-              </p>
-            </div>
-          ) : (
-            <div>
-              <label className="mb-1 block text-sm text-dark-300">
-                {t('admin.promoOffers.form.activeDiscountHours')}
-              </label>
-              <input
-                type="number"
-                value={activeDiscountHours}
-                onChange={(e) => setActiveDiscountHours(Math.max(0, parseInt(e.target.value) || 0))}
-                className="w-full rounded-lg border border-dark-600 bg-dark-700 px-3 py-2 text-dark-100 focus:border-accent-500 focus:outline-none"
-                min={0}
-              />
-              <p className="mt-1 text-xs text-dark-500">
-                {t('admin.promoOffers.form.discountDurationHint')}
-              </p>
-            </div>
-          )}
-
-          <label className="flex cursor-pointer items-center gap-3">
-            <button
-              type="button"
-              onClick={() => setIsActive(!isActive)}
-              className={`relative h-6 w-10 rounded-full transition-colors ${
-                isActive ? 'bg-accent-500' : 'bg-dark-600'
-              }`}
-            >
-              <span
-                className={`absolute top-1 h-4 w-4 rounded-full bg-white transition-transform ${
-                  isActive ? 'left-5' : 'left-1'
-                }`}
-              />
-            </button>
-            <span className="text-sm text-dark-200">
-              {t('admin.promoOffers.form.templateActive')}
-            </span>
-          </label>
-        </div>
-
-        {/* Footer */}
-        <div className="flex justify-end gap-3 border-t border-dark-700 p-4">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 text-dark-300 transition-colors hover:text-dark-100"
-          >
-            {t('common.cancel')}
-          </button>
-          <button
-            onClick={handleSubmit}
-            disabled={!name.trim() || isLoading}
-            className="rounded-lg bg-accent-500 px-4 py-2 text-white transition-colors hover:bg-accent-600 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {isLoading ? t('admin.promoOffers.form.saving') : t('common.save')}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// Send Offer Modal
-interface SendOfferModalProps {
-  templates: PromoOfferTemplate[];
-  onSend: (templateId: number, target: string | null, userId: number | null) => void;
-  onClose: () => void;
-  isLoading?: boolean;
-}
-
-function SendOfferModal({ templates, onSend, onClose, isLoading }: SendOfferModalProps) {
-  const { t } = useTranslation();
-  const [selectedTemplateId, setSelectedTemplateId] = useState<number | null>(
-    templates[0]?.id || null,
-  );
-  const [sendMode, setSendMode] = useState<'segment' | 'user'>('segment');
-  const [selectedTarget, setSelectedTarget] = useState<TargetSegment>('active');
-  const [userId, setUserId] = useState('');
-
-  const selectedTemplate = templates.find((t) => t.id === selectedTemplateId);
-  const activeTemplates = templates.filter((t) => t.is_active);
-
-  const handleSubmit = () => {
-    if (!selectedTemplateId) return;
-    if (sendMode === 'user') {
-      const id = parseInt(userId);
-      if (!id) return;
-      onSend(selectedTemplateId, null, id);
-    } else {
-      onSend(selectedTemplateId, selectedTarget, null);
-    }
-  };
-
-  const isValid = () => {
-    if (!selectedTemplateId) return false;
-    if (sendMode === 'user' && !userId.trim()) return false;
-    return true;
-  };
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-xl bg-dark-800">
-        {/* Header */}
-        <div className="flex items-center justify-between border-b border-dark-700 p-4">
-          <div className="flex items-center gap-3">
-            <div className="rounded-lg bg-accent-500/20 p-2">
-              <SendIcon />
-            </div>
-            <h2 className="text-lg font-semibold text-dark-100">
-              {t('admin.promoOffers.send.title')}
-            </h2>
-          </div>
-          <button onClick={onClose} className="rounded-lg p-1 transition-colors hover:bg-dark-700">
-            <XIcon />
-          </button>
-        </div>
-
-        {/* Content */}
-        <div className="flex-1 space-y-4 overflow-y-auto p-4">
-          {/* Template Selection */}
-          <div>
-            <label className="mb-2 block text-sm text-dark-300">
-              {t('admin.promoOffers.send.offerTemplate')}
-            </label>
-            <div className="space-y-2">
-              {activeTemplates.map((template) => (
-                <button
-                  key={template.id}
-                  onClick={() => setSelectedTemplateId(template.id)}
-                  className={`w-full rounded-lg border p-3 text-left transition-colors ${
-                    selectedTemplateId === template.id
-                      ? 'border-accent-500 bg-accent-500/10'
-                      : 'border-dark-600 bg-dark-700 hover:border-dark-500'
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="text-xl">{getOfferTypeIcon(template.offer_type)}</span>
-                    <div className="flex-1">
-                      <div className="font-medium text-dark-100">{template.name}</div>
-                      <div className="text-sm text-dark-400">
-                        {template.discount_percent > 0 &&
-                          t('admin.promoOffers.send.discountLabel', {
-                            percent: template.discount_percent,
-                          })}
-                        {template.offer_type === 'test_access' &&
-                          t('admin.promoOffers.offerType.testAccess')}
-                        <span className="mx-1">•</span>
-                        {t('admin.promoOffers.send.hoursToActivate', {
-                          hours: template.valid_hours,
-                        })}
-                      </div>
-                    </div>
-                    {selectedTemplateId === template.id && <CheckIcon />}
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Send Mode */}
-          <div>
-            <label className="mb-2 block text-sm text-dark-300">
-              {t('admin.promoOffers.send.sendTo')}
-            </label>
-            <div className="mb-3 flex gap-2">
-              <button
-                onClick={() => setSendMode('segment')}
-                className={`flex-1 rounded-lg border py-2 text-sm font-medium transition-colors ${
-                  sendMode === 'segment'
-                    ? 'border-accent-500 bg-accent-500/10 text-accent-400'
-                    : 'border-dark-600 text-dark-400 hover:text-dark-200'
-                }`}
-              >
-                <UsersIcon />
-                <span className="ml-2">{t('admin.promoOffers.send.segment')}</span>
-              </button>
-              <button
-                onClick={() => setSendMode('user')}
-                className={`flex-1 rounded-lg border py-2 text-sm font-medium transition-colors ${
-                  sendMode === 'user'
-                    ? 'border-accent-500 bg-accent-500/10 text-accent-400'
-                    : 'border-dark-600 text-dark-400 hover:text-dark-200'
-                }`}
-              >
-                <UserIcon />
-                <span className="ml-2">{t('admin.promoOffers.send.user')}</span>
-              </button>
-            </div>
-
-            {sendMode === 'segment' ? (
-              <select
-                value={selectedTarget}
-                onChange={(e) => setSelectedTarget(e.target.value as TargetSegment)}
-                className="w-full rounded-lg border border-dark-600 bg-dark-700 px-3 py-2 text-dark-100 focus:border-accent-500 focus:outline-none"
-              >
-                {Object.entries(TARGET_SEGMENTS).map(([key, labelKey]) => (
-                  <option key={key} value={key}>
-                    {t(labelKey)}
-                  </option>
-                ))}
-              </select>
-            ) : (
-              <input
-                type="text"
-                value={userId}
-                onChange={(e) => setUserId(e.target.value)}
-                placeholder={t('admin.promoOffers.send.userIdPlaceholder')}
-                className="w-full rounded-lg border border-dark-600 bg-dark-700 px-3 py-2 text-dark-100 focus:border-accent-500 focus:outline-none"
-              />
-            )}
-          </div>
-
-          {/* Preview */}
-          {selectedTemplate && (
-            <div className="rounded-lg bg-dark-700/50 p-4">
-              <h4 className="mb-2 text-sm font-medium text-dark-300">
-                {t('admin.promoOffers.send.preview')}
-              </h4>
-              <div className="whitespace-pre-wrap text-sm text-dark-200">
-                {selectedTemplate.message_text}
-              </div>
-              <div className="mt-3">
-                <span className="inline-block rounded-lg bg-accent-500 px-3 py-1.5 text-sm text-white">
-                  {selectedTemplate.button_text}
-                </span>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Footer */}
-        <div className="flex justify-end gap-3 border-t border-dark-700 p-4">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 text-dark-300 transition-colors hover:text-dark-100"
-          >
-            {t('common.cancel')}
-          </button>
-          <button
-            onClick={handleSubmit}
-            disabled={!isValid() || isLoading}
-            className="flex items-center gap-2 rounded-lg bg-accent-500 px-4 py-2 text-white transition-colors hover:bg-accent-600 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            <SendIcon />
-            {isLoading
-              ? t('admin.promoOffers.send.sending')
-              : t('admin.promoOffers.send.sendButton')}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// Result Modal
-interface ResultModalProps {
-  title: string;
-  message: string;
-  isSuccess: boolean;
-  onClose: () => void;
-}
-
-function ResultModal({ title, message, isSuccess, onClose }: ResultModalProps) {
-  const { t } = useTranslation();
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-sm rounded-xl bg-dark-800 p-6 text-center">
-        <div
-          className={`mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full ${
-            isSuccess ? 'bg-emerald-500/20' : 'bg-error-500/20'
-          }`}
-        >
-          {isSuccess ? (
-            <svg
-              className="h-8 w-8 text-emerald-400"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-            </svg>
-          ) : (
-            <svg
-              className="h-8 w-8 text-error-400"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          )}
-        </div>
-        <h3 className="mb-2 text-lg font-semibold text-dark-100">{title}</h3>
-        <p className="mb-6 text-dark-400">{message}</p>
-        <button
-          onClick={onClose}
-          className="rounded-lg bg-accent-500 px-6 py-2 text-white transition-colors hover:bg-accent-600"
-        >
-          {t('common.close')}
-        </button>
-      </div>
-    </div>
-  );
-}
-
 export default function AdminPromoOffers() {
   const { t } = useTranslation();
-  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const { capabilities } = usePlatform();
 
-  const [activeTab, setActiveTab] = useState<'templates' | 'send' | 'logs'>('templates');
-  const [editingTemplate, setEditingTemplate] = useState<PromoOfferTemplate | null>(null);
-  const [showSendModal, setShowSendModal] = useState(false);
-  const [resultModal, setResultModal] = useState<{
-    title: string;
-    message: string;
-    isSuccess: boolean;
-  } | null>(null);
+  // Use native Telegram back button in Mini App
+  useBackButton(() => navigate('/admin'));
+
+  const [activeTab, setActiveTab] = useState<'templates' | 'logs'>('templates');
 
   // Queries
   const { data: templatesData, isLoading: templatesLoading } = useQuery({
@@ -608,100 +125,31 @@ export default function AdminPromoOffers() {
     enabled: activeTab === 'logs',
   });
 
-  // Mutations
-  const updateTemplateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: number; data: PromoOfferTemplateUpdateRequest }) =>
-      promoOffersApi.updateTemplate(id, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-promo-templates'] });
-      setEditingTemplate(null);
-    },
-  });
-
-  const broadcastMutation = useMutation({
-    mutationFn: promoOffersApi.broadcastOffer,
-    onSuccess: (result) => {
-      queryClient.invalidateQueries({ queryKey: ['admin-promo-logs'] });
-      setShowSendModal(false);
-
-      let message = t('admin.promoOffers.result.offersCreated', { count: result.created_offers });
-      if (result.notifications_sent > 0 || result.notifications_failed > 0) {
-        message +=
-          '\n' +
-          t('admin.promoOffers.result.notificationsSent', { count: result.notifications_sent });
-        if (result.notifications_failed > 0) {
-          message +=
-            ' ' +
-            t('admin.promoOffers.result.notificationsFailed', {
-              count: result.notifications_failed,
-            });
-        }
-      }
-
-      setResultModal({
-        title: t('admin.promoOffers.result.sentTitle'),
-        message,
-        isSuccess: true,
-      });
-    },
-    onError: (error: unknown) => {
-      const axiosErr = error as { response?: { data?: { detail?: string } } };
-      setResultModal({
-        title: t('common.error'),
-        message: axiosErr.response?.data?.detail || t('admin.promoOffers.result.sendError'),
-        isSuccess: false,
-      });
-    },
-  });
-
-  const handleSendOffer = (templateId: number, target: string | null, userId: number | null) => {
-    const template = templatesData?.items.find((t) => t.id === templateId);
-    if (!template) return;
-
-    const data: PromoOfferBroadcastRequest = {
-      notification_type: template.offer_type,
-      valid_hours: template.valid_hours,
-      discount_percent: template.discount_percent,
-      effect_type: template.offer_type === 'test_access' ? 'test_access' : 'percent_discount',
-      extra_data: {
-        template_id: template.id,
-        active_discount_hours: template.active_discount_hours,
-        test_duration_hours: template.test_duration_hours,
-        test_squad_uuids: template.test_squad_uuids,
-      },
-      // Send Telegram notification with template text
-      send_notification: true,
-      message_text: template.message_text,
-      button_text: template.button_text,
-      ...(target ? { target } : {}),
-      ...(userId ? { telegram_id: userId } : {}),
-    };
-
-    broadcastMutation.mutate(data);
-  };
-
   const templates = templatesData?.items || [];
   const logs = logsData?.items || [];
 
   return (
     <div className="animate-fade-in">
       {/* Header */}
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
-          <Link
-            to="/admin"
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
-          >
-            <BackIcon />
-          </Link>
+          {/* Show back button only on web, not in Telegram Mini App */}
+          {!capabilities.hasBackButton && (
+            <button
+              onClick={() => navigate('/admin')}
+              className="flex h-10 w-10 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
+            >
+              <BackIcon />
+            </button>
+          )}
           <div>
             <h1 className="text-xl font-semibold text-dark-100">{t('admin.promoOffers.title')}</h1>
             <p className="text-sm text-dark-400">{t('admin.promoOffers.subtitle')}</p>
           </div>
         </div>
         <button
-          onClick={() => setShowSendModal(true)}
-          className="flex items-center gap-2 rounded-lg bg-accent-500 px-4 py-2 text-white transition-colors hover:bg-accent-600"
+          onClick={() => navigate('/admin/promo-offers/send')}
+          className="flex items-center justify-center gap-2 rounded-lg bg-accent-500 px-4 py-2 text-white transition-colors hover:bg-accent-600"
         >
           <SendIcon />
           {t('admin.promoOffers.sendButton')}
@@ -761,7 +209,7 @@ export default function AdminPromoOffers() {
                       </div>
                     </div>
                     <button
-                      onClick={() => setEditingTemplate(template)}
+                      onClick={() => navigate(`/admin/promo-offers/templates/${template.id}/edit`)}
                       className="rounded-lg bg-dark-700 p-2 text-dark-300 transition-colors hover:bg-dark-600 hover:text-dark-100"
                     >
                       <EditIcon />
@@ -816,7 +264,7 @@ export default function AdminPromoOffers() {
                   <div className="mt-3 border-t border-dark-700 pt-3">
                     <div className="flex items-center gap-2">
                       {template.is_active ? (
-                        <span className="rounded bg-emerald-500/20 px-2 py-0.5 text-xs text-emerald-400">
+                        <span className="rounded bg-success-500/20 px-2 py-0.5 text-xs text-success-400">
                           {t('admin.promoOffers.status.active')}
                         </span>
                       ) : (
@@ -848,13 +296,13 @@ export default function AdminPromoOffers() {
             <div className="space-y-3">
               {logs.map((log: PromoOfferLog) => (
                 <div key={log.id} className="rounded-xl border border-dark-700 bg-dark-800 p-4">
-                  <div className="flex items-start justify-between gap-4">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-dark-700">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-dark-700">
                         <UserIcon />
                       </div>
-                      <div>
-                        <div className="mb-1 flex items-center gap-2">
+                      <div className="min-w-0">
+                        <div className="mb-1 flex flex-wrap items-center gap-2">
                           <span className="font-medium text-dark-100">
                             {log.user?.full_name || log.user?.username || `User #${log.user_id}`}
                           </span>
@@ -872,7 +320,7 @@ export default function AdminPromoOffers() {
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-1 text-xs text-dark-500">
+                    <div className="pl-13 flex items-center gap-1 text-xs text-dark-500 sm:pl-0">
                       <ClockIcon />
                       {formatDateTime(log.created_at)}
                     </div>
@@ -882,36 +330,6 @@ export default function AdminPromoOffers() {
             </div>
           )}
         </>
-      )}
-
-      {/* Template Edit Modal */}
-      {editingTemplate && (
-        <TemplateEditModal
-          template={editingTemplate}
-          onSave={(data) => updateTemplateMutation.mutate({ id: editingTemplate.id, data })}
-          onClose={() => setEditingTemplate(null)}
-          isLoading={updateTemplateMutation.isPending}
-        />
-      )}
-
-      {/* Send Offer Modal */}
-      {showSendModal && (
-        <SendOfferModal
-          templates={templates}
-          onSend={handleSendOffer}
-          onClose={() => setShowSendModal(false)}
-          isLoading={broadcastMutation.isPending}
-        />
-      )}
-
-      {/* Result Modal */}
-      {resultModal && (
-        <ResultModal
-          title={resultModal.title}
-          message={resultModal.message}
-          isSuccess={resultModal.isSuccess}
-          onClose={() => setResultModal(null)}
-        />
       )}
     </div>
   );

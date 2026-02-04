@@ -1,42 +1,9 @@
-import { useEffect, useRef, useCallback, useState } from 'react';
-import { useAuthStore } from '../store/auth';
+import { useEffect, useRef } from 'react';
+import { useWebSocketContext } from '../providers/useWebSocketContext';
+import { WSMessage } from '../providers/WebSocketProvider';
 
-const isDev = import.meta.env.DEV;
-
-export interface WSMessage {
-  type: string;
-  // Ticket events
-  ticket_id?: number;
-  title?: string;
-  // Common
-  message?: string;
-  user_id?: number;
-  is_admin?: boolean;
-  // Balance events
-  amount_kopeks?: number;
-  amount_rubles?: number;
-  new_balance_kopeks?: number;
-  new_balance_rubles?: number;
-  description?: string;
-  // Subscription events
-  expires_at?: string;
-  new_expires_at?: string;
-  tariff_name?: string;
-  days_left?: number;
-  // Autopay events
-  required_kopeks?: number;
-  required_rubles?: number;
-  balance_kopeks?: number;
-  balance_rubles?: number;
-  reason?: string;
-  // Account events (ban/warning)
-  // Referral events
-  bonus_kopeks?: number;
-  bonus_rubles?: number;
-  referral_name?: string;
-  // Payment events
-  payment_method?: string;
-}
+// Re-export WSMessage type for convenience
+export type { WSMessage };
 
 interface UseWebSocketOptions {
   onMessage?: (message: WSMessage) => void;
@@ -45,141 +12,39 @@ interface UseWebSocketOptions {
 }
 
 export function useWebSocket(options: UseWebSocketOptions = {}) {
-  const { accessToken, isAuthenticated } = useAuthStore();
-  const wsRef = useRef<WebSocket | null>(null);
-  const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const pingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const [isConnected, setIsConnected] = useState(false);
-  const reconnectAttemptsRef = useRef(0);
-  const maxReconnectAttempts = 5;
+  const { isConnected, subscribe } = useWebSocketContext();
   const optionsRef = useRef(options);
+  const wasConnectedRef = useRef(false);
 
   // Update options ref when they change
   useEffect(() => {
     optionsRef.current = options;
   }, [options]);
 
-  const cleanup = useCallback(() => {
-    if (reconnectTimeoutRef.current) {
-      clearTimeout(reconnectTimeoutRef.current);
-      reconnectTimeoutRef.current = null;
-    }
-    if (pingIntervalRef.current) {
-      clearInterval(pingIntervalRef.current);
-      pingIntervalRef.current = null;
-    }
-    if (wsRef.current) {
-      wsRef.current.close();
-      wsRef.current = null;
-    }
-  }, []);
-
-  const connect = useCallback(() => {
-    if (!accessToken || !isAuthenticated) {
-      return;
-    }
-
-    // Don't reconnect if already connected
-    if (wsRef.current?.readyState === WebSocket.OPEN) {
-      return;
-    }
-
-    cleanup();
-
-    // Build WebSocket URL
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    let host = window.location.host;
-
-    // Handle VITE_API_URL - can be absolute URL or relative path
-    const apiUrl = import.meta.env.VITE_API_URL;
-    if (apiUrl && (apiUrl.startsWith('http://') || apiUrl.startsWith('https://'))) {
-      try {
-        host = new URL(apiUrl).host;
-      } catch {
-        // If URL parsing fails, use window.location.host
-      }
-    }
-    // If apiUrl is relative (like /api), use window.location.host
-
-    const wsUrl = `${protocol}//${host}/cabinet/ws?token=${accessToken}`;
-
-    try {
-      const ws = new WebSocket(wsUrl);
-      wsRef.current = ws;
-
-      ws.onopen = () => {
-        if (isDev) console.log('[WS] Connected');
-        setIsConnected(true);
-        reconnectAttemptsRef.current = 0;
-        optionsRef.current.onConnect?.();
-
-        // Setup ping interval (every 25 seconds)
-        pingIntervalRef.current = setInterval(() => {
-          if (ws.readyState === WebSocket.OPEN) {
-            ws.send(JSON.stringify({ type: 'ping' }));
-          }
-        }, 25000);
-      };
-
-      ws.onmessage = (event) => {
-        try {
-          const message = JSON.parse(event.data) as WSMessage;
-
-          // Ignore pong messages
-          if (message.type === 'pong' || message.type === 'connected') {
-            return;
-          }
-
-          optionsRef.current.onMessage?.(message);
-        } catch (e) {
-          if (isDev) console.error('[WS] Failed to parse message:', e);
-        }
-      };
-
-      ws.onclose = (event) => {
-        if (isDev) console.log('[WS] Disconnected:', event.code, event.reason);
-        setIsConnected(false);
-        optionsRef.current.onDisconnect?.();
-
-        if (pingIntervalRef.current) {
-          clearInterval(pingIntervalRef.current);
-          pingIntervalRef.current = null;
-        }
-
-        // Attempt to reconnect if not closed intentionally
-        if (event.code !== 1000 && reconnectAttemptsRef.current < maxReconnectAttempts) {
-          const delay = Math.min(1000 * Math.pow(2, reconnectAttemptsRef.current), 30000);
-          if (isDev)
-            console.log(
-              `[WS] Reconnecting in ${delay}ms (attempt ${reconnectAttemptsRef.current + 1})`,
-            );
-
-          reconnectTimeoutRef.current = setTimeout(() => {
-            reconnectAttemptsRef.current++;
-            connect();
-          }, delay);
-        }
-      };
-
-      ws.onerror = (error) => {
-        if (isDev) console.error('[WS] Error:', error);
-      };
-    } catch (e) {
-      if (isDev) console.error('[WS] Failed to connect:', e);
-    }
-  }, [accessToken, isAuthenticated, cleanup]);
-
-  // Connect when authenticated
+  // Handle connection state changes
   useEffect(() => {
-    if (isAuthenticated && accessToken) {
-      connect();
-    } else {
-      cleanup();
-      setIsConnected(false);
+    if (isConnected && !wasConnectedRef.current) {
+      wasConnectedRef.current = true;
+      optionsRef.current.onConnect?.();
+    } else if (!isConnected && wasConnectedRef.current) {
+      wasConnectedRef.current = false;
+      optionsRef.current.onDisconnect?.();
+    }
+  }, [isConnected]);
+
+  // Subscribe to messages
+  useEffect(() => {
+    if (!optionsRef.current.onMessage) {
+      return;
     }
 
-    return cleanup;
-  }, [isAuthenticated, accessToken, connect, cleanup]);
+    const handler = (message: WSMessage) => {
+      optionsRef.current.onMessage?.(message);
+    };
+
+    const unsubscribe = subscribe(handler);
+    return unsubscribe;
+  }, [subscribe]);
 
   return { isConnected };
 }

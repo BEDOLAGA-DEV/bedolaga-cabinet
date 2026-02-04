@@ -1,4 +1,5 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
+import { retrieveRawInitData } from '@telegram-apps/sdk-react';
 import {
   tokenStorage,
   isTokenExpired,
@@ -41,10 +42,14 @@ function ensureCsrfToken(): string {
 const getTelegramInitData = (): string | null => {
   if (typeof window === 'undefined') return null;
 
-  const initData = window.Telegram?.WebApp?.initData;
-  if (initData) {
-    tokenStorage.setTelegramInitData(initData);
-    return initData;
+  try {
+    const raw = retrieveRawInitData();
+    if (raw) {
+      tokenStorage.setTelegramInitData(raw);
+      return raw;
+    }
+  } catch {
+    // Not in Telegram or SDK not initialized
   }
 
   return tokenStorage.getTelegramInitData();
@@ -153,6 +158,20 @@ apiClient.interceptors.response.use(
 
     // Если получили 401 и ещё не пробовали refresh (на случай если проверка exp не сработала)
     if (error.response?.status === 401 && !originalRequest._retry) {
+      // Не обрабатываем 401 для авторизационных endpoints - пусть ошибка дойдет до компонента
+      const authEndpoints = [
+        '/cabinet/auth/email/login',
+        '/cabinet/auth/telegram',
+        '/cabinet/auth/telegram/widget',
+      ];
+      const requestUrl = originalRequest.url || '';
+      const isAuthEndpoint = authEndpoints.some((endpoint) => requestUrl.includes(endpoint));
+
+      if (isAuthEndpoint) {
+        // Пробрасываем ошибку в компонент для показа сообщения пользователю
+        return Promise.reject(error);
+      }
+
       originalRequest._retry = true;
 
       const newToken = await tokenRefreshManager.refreshAccessToken();

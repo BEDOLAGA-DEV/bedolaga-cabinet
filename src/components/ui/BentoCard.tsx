@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
-import { forwardRef } from 'react';
+import { forwardRef, useCallback } from 'react';
+import { useHaptic } from '@/platform';
 
 export type BentoSize = 'sm' | 'md' | 'lg' | 'xl';
 
@@ -63,6 +64,7 @@ const glowClasses = `
 
 export const BentoCard = forwardRef<HTMLDivElement, BentoCardProps>((props, ref) => {
   const { size = 'sm', children, className = '', hover = false, glow = false } = props;
+  const haptic = useHaptic();
 
   const classes = [
     baseClasses,
@@ -74,10 +76,27 @@ export const BentoCard = forwardRef<HTMLDivElement, BentoCardProps>((props, ref)
     .filter(Boolean)
     .join(' ');
 
+  // Wrap click handlers to trigger haptic feedback when hover is enabled
+  const withHaptic = useCallback(
+    (onClick?: () => void) => {
+      if (!hover || !onClick) return onClick;
+      return () => {
+        haptic.impact('light');
+        onClick();
+      };
+    },
+    [hover, haptic],
+  );
+
   if (props.as === 'link') {
     const { to, state } = props as BentoCardLinkProps;
     return (
-      <Link to={to} state={state} className={classes}>
+      <Link
+        to={to}
+        state={state}
+        className={classes}
+        onClick={hover ? () => haptic.impact('light') : undefined}
+      >
         {children}
       </Link>
     );
@@ -89,7 +108,7 @@ export const BentoCard = forwardRef<HTMLDivElement, BentoCardProps>((props, ref)
       <button
         ref={ref as React.Ref<HTMLButtonElement>}
         type={type}
-        onClick={onClick}
+        onClick={withHaptic(onClick)}
         disabled={disabled}
         className={classes}
       >
@@ -100,7 +119,7 @@ export const BentoCard = forwardRef<HTMLDivElement, BentoCardProps>((props, ref)
 
   const { onClick } = props as BentoCardDivProps;
   return (
-    <div ref={ref} onClick={onClick} className={classes}>
+    <div ref={ref} onClick={withHaptic(onClick)} className={classes}>
       {children}
     </div>
   );

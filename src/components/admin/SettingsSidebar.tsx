@@ -1,6 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
-import { BackIcon, StarIcon, CloseIcon, MENU_SECTIONS } from './index';
+import { AdminBackButton, StarIcon, CloseIcon, MENU_SECTIONS } from './index';
 
 interface SettingsSidebarProps {
   activeSection: string;
@@ -26,12 +25,7 @@ export function SettingsSidebar({
       {/* Header */}
       <div className="border-b border-dark-700/50 p-4">
         <div className="flex items-center gap-3">
-          <Link
-            to="/admin"
-            className="rounded-xl bg-dark-800 p-2 transition-colors hover:bg-dark-700"
-          >
-            <BackIcon />
-          </Link>
+          <AdminBackButton className="rounded-xl bg-dark-800 p-2 transition-colors hover:bg-dark-700" />
           <h1 className="text-lg font-bold text-dark-100">{t('admin.settings.title')}</h1>
           <button
             onClick={() => setMobileMenuOpen(false)}
