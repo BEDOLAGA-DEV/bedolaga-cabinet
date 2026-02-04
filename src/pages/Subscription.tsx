@@ -181,7 +181,10 @@ export default function Subscription() {
     if (selectedPeriod?.traffic.selectable && (selectedPeriod.traffic.options?.length ?? 0) > 0) {
       result.push('traffic');
     }
-    if (selectedPeriod && (selectedPeriod.servers.options?.length ?? 0) > 0) {
+    if (
+      selectedPeriod &&
+      (selectedPeriod.servers.options?.filter((s) => s.is_available).length ?? 0) > 0
+    ) {
       result.push('servers');
     }
     if (selectedPeriod && selectedPeriod.devices.max > selectedPeriod.devices.min) {
@@ -203,7 +206,12 @@ export default function Subscription() {
         classicOptions.periods[0];
       setSelectedPeriod(defaultPeriod);
       setSelectedTraffic(classicOptions.selection.traffic_value);
-      setSelectedServers(classicOptions.selection.servers);
+      const availableServerUuids = new Set(
+        defaultPeriod.servers.options?.filter((s) => s.is_available).map((s) => s.uuid) ?? [],
+      );
+      setSelectedServers(
+        classicOptions.selection.servers.filter((uuid) => availableServerUuids.has(uuid)),
+      );
       setSelectedDevices(classicOptions.selection.devices);
     }
   }, [classicOptions, selectedPeriod]);
@@ -1637,99 +1645,101 @@ export default function Subscription() {
                       )}
 
                       <div className="max-h-64 space-y-2 overflow-y-auto">
-                        {countriesData.countries.map((country) => {
-                          const isCurrentlyConnected = country.is_connected;
-                          const isSelected = selectedServersToUpdate.includes(country.uuid);
-                          const willBeAdded = !isCurrentlyConnected && isSelected;
-                          const willBeRemoved = isCurrentlyConnected && !isSelected;
+                        {countriesData.countries
+                          .filter((country) => country.is_available || country.is_connected)
+                          .map((country) => {
+                            const isCurrentlyConnected = country.is_connected;
+                            const isSelected = selectedServersToUpdate.includes(country.uuid);
+                            const willBeAdded = !isCurrentlyConnected && isSelected;
+                            const willBeRemoved = isCurrentlyConnected && !isSelected;
 
-                          return (
-                            <button
-                              key={country.uuid}
-                              onClick={() => {
-                                if (isSelected) {
-                                  setSelectedServersToUpdate((prev) =>
-                                    prev.filter((u) => u !== country.uuid),
-                                  );
-                                } else {
-                                  setSelectedServersToUpdate((prev) => [...prev, country.uuid]);
-                                }
-                              }}
-                              disabled={!country.is_available && !isCurrentlyConnected}
-                              className={`flex w-full items-center justify-between rounded-xl border p-3 text-left transition-all ${
-                                isSelected
-                                  ? willBeAdded
-                                    ? 'border-success-500 bg-success-500/10'
-                                    : 'border-accent-500 bg-accent-500/10'
-                                  : willBeRemoved
-                                    ? 'border-error-500/50 bg-error-500/5'
-                                    : 'border-dark-700/50 bg-dark-800/30 hover:border-dark-600'
-                              } ${!country.is_available && !isCurrentlyConnected ? 'cursor-not-allowed opacity-50' : ''}`}
-                            >
-                              <div className="flex items-center gap-3">
-                                <span className="text-lg">
-                                  {willBeAdded
-                                    ? '➕'
+                            return (
+                              <button
+                                key={country.uuid}
+                                onClick={() => {
+                                  if (isSelected) {
+                                    setSelectedServersToUpdate((prev) =>
+                                      prev.filter((u) => u !== country.uuid),
+                                    );
+                                  } else {
+                                    setSelectedServersToUpdate((prev) => [...prev, country.uuid]);
+                                  }
+                                }}
+                                disabled={!country.is_available && !isCurrentlyConnected}
+                                className={`flex w-full items-center justify-between rounded-xl border p-3 text-left transition-all ${
+                                  isSelected
+                                    ? willBeAdded
+                                      ? 'border-success-500 bg-success-500/10'
+                                      : 'border-accent-500 bg-accent-500/10'
                                     : willBeRemoved
-                                      ? '➖'
-                                      : isSelected
-                                        ? '✅'
-                                        : '⚪'}
-                                </span>
-                                <div>
-                                  <div className="flex items-center gap-2 font-medium text-dark-100">
-                                    {country.name}
-                                    {country.has_discount && !isCurrentlyConnected && (
-                                      <span className="rounded bg-success-500/20 px-1.5 py-0.5 text-xs text-success-400">
-                                        -{country.discount_percent}%
-                                      </span>
+                                      ? 'border-error-500/50 bg-error-500/5'
+                                      : 'border-dark-700/50 bg-dark-800/30 hover:border-dark-600'
+                                } ${!country.is_available && !isCurrentlyConnected ? 'cursor-not-allowed opacity-50' : ''}`}
+                              >
+                                <div className="flex items-center gap-3">
+                                  <span className="text-lg">
+                                    {willBeAdded
+                                      ? '➕'
+                                      : willBeRemoved
+                                        ? '➖'
+                                        : isSelected
+                                          ? '✅'
+                                          : '⚪'}
+                                  </span>
+                                  <div>
+                                    <div className="flex items-center gap-2 font-medium text-dark-100">
+                                      {country.name}
+                                      {country.has_discount && !isCurrentlyConnected && (
+                                        <span className="rounded bg-success-500/20 px-1.5 py-0.5 text-xs text-success-400">
+                                          -{country.discount_percent}%
+                                        </span>
+                                      )}
+                                    </div>
+                                    {willBeAdded && (
+                                      <div className="text-xs text-success-400">
+                                        +{formatPrice(country.price_kopeks)}{' '}
+                                        {t('subscription.serverManagement.forDays', {
+                                          days: countriesData.days_left,
+                                        })}
+                                        {country.has_discount && (
+                                          <span className="ml-1 text-dark-500 line-through">
+                                            {formatPrice(
+                                              Math.round(
+                                                (country.base_price_kopeks *
+                                                  countriesData.days_left) /
+                                                  30,
+                                              ),
+                                            )}
+                                          </span>
+                                        )}
+                                      </div>
+                                    )}
+                                    {!willBeAdded && !isCurrentlyConnected && (
+                                      <div className="text-xs text-dark-500">
+                                        {formatPrice(country.price_per_month_kopeks)}
+                                        {t('subscription.serverManagement.perMonth')}
+                                        {country.has_discount && (
+                                          <span className="ml-1 text-dark-600 line-through">
+                                            {formatPrice(country.base_price_kopeks)}
+                                          </span>
+                                        )}
+                                      </div>
+                                    )}
+                                    {!country.is_available && !isCurrentlyConnected && (
+                                      <div className="text-xs text-dark-500">
+                                        {t('subscription.serverManagement.unavailable')}
+                                      </div>
                                     )}
                                   </div>
-                                  {willBeAdded && (
-                                    <div className="text-xs text-success-400">
-                                      +{formatPrice(country.price_kopeks)}{' '}
-                                      {t('subscription.serverManagement.forDays', {
-                                        days: countriesData.days_left,
-                                      })}
-                                      {country.has_discount && (
-                                        <span className="ml-1 text-dark-500 line-through">
-                                          {formatPrice(
-                                            Math.round(
-                                              (country.base_price_kopeks *
-                                                countriesData.days_left) /
-                                                30,
-                                            ),
-                                          )}
-                                        </span>
-                                      )}
-                                    </div>
-                                  )}
-                                  {!willBeAdded && !isCurrentlyConnected && (
-                                    <div className="text-xs text-dark-500">
-                                      {formatPrice(country.price_per_month_kopeks)}
-                                      {t('subscription.serverManagement.perMonth')}
-                                      {country.has_discount && (
-                                        <span className="ml-1 text-dark-600 line-through">
-                                          {formatPrice(country.base_price_kopeks)}
-                                        </span>
-                                      )}
-                                    </div>
-                                  )}
-                                  {!country.is_available && !isCurrentlyConnected && (
-                                    <div className="text-xs text-dark-500">
-                                      {t('subscription.serverManagement.unavailable')}
-                                    </div>
-                                  )}
                                 </div>
-                              </div>
-                              {country.country_code && (
-                                <span className="text-xl">
-                                  {getFlagEmoji(country.country_code)}
-                                </span>
-                              )}
-                            </button>
-                          );
-                        })}
+                                {country.country_code && (
+                                  <span className="text-xl">
+                                    {getFlagEmoji(country.country_code)}
+                                  </span>
+                                )}
+                              </button>
+                            );
+                          })}
                       </div>
 
                       {(() => {
@@ -2002,10 +2012,10 @@ export default function Subscription() {
                   </div>
                   <div>
                     <div className="font-medium text-error-300">
-                      {t('subscription.expired.title')}
+                      {t('subscription.expiredBanner.title')}
                     </div>
                     <div className="mt-1 text-sm text-dark-400">
-                      {t('subscription.expired.selectTariff')}
+                      {t('subscription.expiredBanner.selectTariff')}
                     </div>
                   </div>
                 </div>
@@ -3109,7 +3119,14 @@ export default function Subscription() {
                             setSelectedTraffic(period.traffic.current);
                           }
                           if (period.servers.selected) {
-                            setSelectedServers(period.servers.selected);
+                            const availUuids = new Set(
+                              period.servers.options
+                                ?.filter((s) => s.is_available)
+                                .map((s) => s.uuid) ?? [],
+                            );
+                            setSelectedServers(
+                              period.servers.selected.filter((uuid) => availUuids.has(uuid)),
+                            );
                           }
                           if (period.devices.current) {
                             setSelectedDevices(period.devices.current);
@@ -3123,7 +3140,7 @@ export default function Subscription() {
                       >
                         {displayDiscount && displayDiscount > 0 && (
                           <div
-                            className={`absolute -right-2 -top-2 rounded-full px-2 py-0.5 text-xs font-medium text-white ${
+                            className={`absolute right-2 top-2 z-10 rounded-full px-2 py-0.5 text-xs font-medium text-white shadow-sm ${
                               hasExistingDiscount ? 'bg-success-500' : 'bg-orange-500'
                             }`}
                           >
@@ -3131,7 +3148,7 @@ export default function Subscription() {
                           </div>
                         )}
                         <div className="text-lg font-semibold text-dark-100">{period.label}</div>
-                        <div className="flex items-center gap-2">
+                        <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
                           <span className="font-medium text-accent-400">
                             {formatPrice(promoPeriod.price)}
                           </span>
@@ -3170,20 +3187,41 @@ export default function Subscription() {
                             : ''
                         } ${!option.is_available ? 'cursor-not-allowed opacity-50' : ''}`}
                       >
-                        {promoTraffic.percent && (
-                          <div className="absolute -right-2 -top-2 rounded-full bg-orange-500 px-2 py-0.5 text-xs font-medium text-white">
-                            -{promoTraffic.percent}%
-                          </div>
-                        )}
-                        <div className="text-lg font-semibold text-dark-100">{option.label}</div>
-                        <div className="flex items-center justify-center gap-2">
-                          <span className="text-accent-400">{formatPrice(promoTraffic.price)}</span>
-                          {promoTraffic.original && (
-                            <span className="text-xs text-dark-500 line-through">
-                              {formatPrice(promoTraffic.original)}
-                            </span>
-                          )}
-                        </div>
+                        {(() => {
+                          const trafficDisplayDiscount = hasExistingDiscount
+                            ? option.discount_percent
+                            : promoTraffic.percent;
+                          const trafficDisplayOriginal = hasExistingDiscount
+                            ? option.original_price_kopeks
+                            : promoTraffic.original;
+                          return (
+                            <>
+                              {trafficDisplayDiscount && trafficDisplayDiscount > 0 && (
+                                <div
+                                  className={`absolute right-2 top-2 z-10 rounded-full px-2 py-0.5 text-xs font-medium text-white shadow-sm ${
+                                    hasExistingDiscount ? 'bg-success-500' : 'bg-orange-500'
+                                  }`}
+                                >
+                                  -{trafficDisplayDiscount}%
+                                </div>
+                              )}
+                              <div className="text-lg font-semibold text-dark-100">
+                                {option.label}
+                              </div>
+                              <div className="mt-1 flex flex-wrap items-center justify-center gap-x-2 gap-y-1">
+                                <span className="text-accent-400">
+                                  {formatPrice(promoTraffic.price)}
+                                </span>
+                                {trafficDisplayOriginal &&
+                                  trafficDisplayOriginal > promoTraffic.price && (
+                                    <span className="text-xs text-dark-500 line-through">
+                                      {formatPrice(trafficDisplayOriginal)}
+                                    </span>
+                                  )}
+                              </div>
+                            </>
+                          );
+                        })()}
                       </button>
                     );
                   })}
@@ -3194,8 +3232,9 @@ export default function Subscription() {
               {currentStep === 'servers' && selectedPeriod?.servers.options && (
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                   {selectedPeriod.servers.options
-                    // Hide Trial server for users who already have trial subscription
+                    // Hide unavailable (disabled) servers and trial servers for existing trial users
                     .filter((server) => {
+                      if (!server.is_available) return false;
                       if (subscription?.is_trial && server.name.toLowerCase().includes('trial')) {
                         return false;
                       }
@@ -3223,11 +3262,20 @@ export default function Subscription() {
                                 : 'cursor-not-allowed border-dark-800/30 bg-dark-900/30 opacity-50'
                           }`}
                         >
-                          {promoServer.percent && (
-                            <div className="absolute -right-2 -top-2 rounded-full bg-orange-500 px-2 py-0.5 text-xs font-medium text-white">
-                              -{promoServer.percent}%
-                            </div>
-                          )}
+                          {(() => {
+                            const serverDisplayDiscount = hasExistingDiscount
+                              ? server.discount_percent
+                              : promoServer.percent;
+                            return serverDisplayDiscount && serverDisplayDiscount > 0 ? (
+                              <div
+                                className={`absolute right-2 top-2 z-10 rounded-full px-2 py-0.5 text-xs font-medium text-white shadow-sm ${
+                                  hasExistingDiscount ? 'bg-success-500' : 'bg-orange-500'
+                                }`}
+                              >
+                                -{serverDisplayDiscount}%
+                              </div>
+                            ) : null;
+                          })()}
                           <div className="flex items-center gap-3">
                             <div
                               className={`flex h-5 w-5 flex-shrink-0 items-center justify-center rounded border-2 ${
@@ -3240,16 +3288,21 @@ export default function Subscription() {
                             </div>
                             <div>
                               <div className="font-medium text-dark-100">{server.name}</div>
-                              <div className="flex items-center gap-2">
+                              <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                                 <span className="text-sm text-accent-400">
                                   {formatPrice(promoServer.price)}
                                   {t('subscription.perMonth')}
                                 </span>
-                                {promoServer.original && (
-                                  <span className="text-xs text-dark-500 line-through">
-                                    {formatPrice(promoServer.original)}
-                                  </span>
-                                )}
+                                {(() => {
+                                  const serverOriginal = hasExistingDiscount
+                                    ? server.original_price_kopeks
+                                    : promoServer.original;
+                                  return serverOriginal && serverOriginal > promoServer.price ? (
+                                    <span className="text-xs text-dark-500 line-through">
+                                      {formatPrice(serverOriginal)}
+                                    </span>
+                                  ) : null;
+                                })()}
                               </div>
                             </div>
                           </div>

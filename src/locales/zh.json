@@ -2092,6 +2092,15 @@
       "test": "测试",
       "activating": "激活中...",
       "activate": "激活"
+    },
+    "deactivate": {
+      "button": "取消优惠码",
+      "confirmTitle": "取消优惠码？",
+      "confirmDescription": "您确定要取消 {{percent}}% 的折扣吗？取消后您可以激活其他优惠码。",
+      "warning": "已取消的优惠码无法重新使用。折扣将立即失效。",
+      "confirm": "取消折扣",
+      "deactivating": "取消中...",
+      "error": "取消优惠码失败，请稍后重试。"
     }
   },
   "telegramRedirect": {

@@ -35,6 +35,10 @@ export interface ClaimOfferResponse {
   expires_at: string | null;
 }
 
+export interface DeactivateDiscountResponse {
+  success: boolean;
+}
+
 export interface LoyaltyTierInfo {
   id: number;
   name: string;
@@ -92,6 +96,12 @@ export const promoApi = {
   // Clear active discount
   clearActiveDiscount: async (): Promise<{ message: string }> => {
     const response = await apiClient.delete<{ message: string }>('/cabinet/promo/active-discount');
+    return response.data;
+  },
+
+  // Deactivate current active promo discount
+  deactivateDiscount: async (): Promise<DeactivateDiscountResponse> => {
+    const response = await apiClient.post<DeactivateDiscountResponse>('/cabinet/promo/deactivate');
     return response.data;
   },
 };
