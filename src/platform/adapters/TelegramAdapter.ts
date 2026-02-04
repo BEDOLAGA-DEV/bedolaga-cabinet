@@ -181,7 +181,6 @@ function createHapticController(): HapticController {
 }
 
 function createDialogController(): DialogController {
-  const tg = getTelegram();
   const inTelegram = isInTelegramWebApp();
   let popupOpen = false;
 
@@ -190,6 +189,8 @@ function createDialogController(): DialogController {
     mapResult: (buttonId: string) => T,
     fallback: () => T,
   ): Promise<T> {
+    const tg = getTelegram();
+
     if (!inTelegram || !tg?.showPopup) {
       return Promise.resolve(fallback());
     }
