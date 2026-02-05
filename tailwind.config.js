@@ -4,17 +4,14 @@
 const withOpacity = (variableName, fallback) => {
   return ({ opacityValue }) => {
     if (opacityValue !== undefined) {
-      return `rgba(var(${variableName}), ${opacityValue})`
+      return `rgba(var(${variableName}), ${opacityValue})`;
     }
-    return `rgb(var(${variableName}))`
-  }
-}
+    return `rgb(var(${variableName}))`;
+  };
+};
 
 export default {
-  content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
-  ],
+  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   darkMode: 'class',
   theme: {
     extend: {
@@ -106,17 +103,25 @@ export default {
         },
       },
       fontFamily: {
-        sans: ['Manrope', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+        sans: [
+          'Manrope',
+          'system-ui',
+          '-apple-system',
+          'BlinkMacSystemFont',
+          'Segoe UI',
+          'Roboto',
+          'sans-serif',
+        ],
       },
       borderRadius: {
-        'bento': '24px',
+        bento: '24px',
         '4xl': '32px',
         // Linear design tokens
-        'linear': '8px',
+        linear: '8px',
         'linear-lg': '12px',
       },
       spacing: {
-        'bento': '16px',
+        bento: '16px',
         'bento-lg': '24px',
         // Linear design tokens
         'linear-xs': '4px',
@@ -126,19 +131,19 @@ export default {
         'linear-xl': '32px',
       },
       backdropBlur: {
-        'linear': '12px',
+        linear: '12px',
       },
       fontSize: {
         '2xs': ['0.625rem', { lineHeight: '0.875rem' }],
       },
       boxShadow: {
-        'glow': '0 0 20px rgba(var(--color-accent-500), 0.15)',
+        glow: '0 0 20px rgba(var(--color-accent-500), 0.15)',
         'glow-lg': '0 0 40px rgba(var(--color-accent-500), 0.2)',
-        'soft': '0 2px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -4px rgba(0, 0, 0, 0.2)',
-        'card': '0 4px 24px -4px rgba(0, 0, 0, 0.4)',
+        soft: '0 2px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -4px rgba(0, 0, 0, 0.2)',
+        card: '0 4px 24px -4px rgba(0, 0, 0, 0.4)',
         // Linear design tokens
         'linear-sm': '0 1px 2px rgba(0, 0, 0, 0.05)',
-        'linear': '0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06)',
+        linear: '0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06)',
         'linear-lg': '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
         'linear-glow': '0 0 0 1px rgba(var(--color-accent-500), 0.3)',
       },
@@ -156,9 +161,9 @@ export default {
         'scale-in': 'scaleIn 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
         'scale-in-bounce': 'scaleInBounce 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)',
         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-        'float': 'float 3s ease-in-out infinite',
+        float: 'float 3s ease-in-out infinite',
         'glow-pulse': 'glowPulse 2s ease-in-out infinite',
-        'spotlight': 'spotlight 2s ease-in-out infinite',
+        spotlight: 'spotlight 2s ease-in-out infinite',
       },
       keyframes: {
         fadeIn: {
@@ -199,14 +204,20 @@ export default {
           '50%': { boxShadow: '0 0 40px rgba(var(--color-accent-500), 0.6)' },
         },
         spotlight: {
-          '0%, 100%': { boxShadow: '0 0 0 4px rgba(var(--color-accent-500), 0.4), 0 0 20px rgba(var(--color-accent-500), 0.3)' },
-          '50%': { boxShadow: '0 0 0 8px rgba(var(--color-accent-500), 0.2), 0 0 40px rgba(var(--color-accent-500), 0.5)' },
+          '0%, 100%': {
+            boxShadow:
+              '0 0 0 4px rgba(var(--color-accent-500), 0.4), 0 0 20px rgba(var(--color-accent-500), 0.3)',
+          },
+          '50%': {
+            boxShadow:
+              '0 0 0 8px rgba(var(--color-accent-500), 0.2), 0 0 40px rgba(var(--color-accent-500), 0.5)',
+          },
         },
       },
       transitionTimingFunction: {
-        'smooth': 'cubic-bezier(0.4, 0, 0.2, 1)',
+        smooth: 'cubic-bezier(0.4, 0, 0.2, 1)',
       },
     },
   },
   plugins: [],
-}
+};
