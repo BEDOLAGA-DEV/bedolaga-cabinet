@@ -2152,6 +2152,12 @@
       "hint": "订阅后点击检查按钮",
       "notSubscribed": "您还没有订阅该频道",
       "checkError": "检查失败。请稍后重试。"
+    },
+    "blacklisted": {
+      "title": "访问被拒绝",
+      "defaultMessage": "您的帐户已被封锁。",
+      "reason": "原因",
+      "contactSupport": "如果您认为这是错误，请联系客服。"
     }
   },
   "banSystem": {

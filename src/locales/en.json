@@ -2627,6 +2627,12 @@
       "hint": "Click check button after subscribing",
       "notSubscribed": "You haven't subscribed to the channel yet",
       "checkError": "Check failed. Please try again later."
+    },
+    "blacklisted": {
+      "title": "Access Denied",
+      "defaultMessage": "Your account has been blocked.",
+      "reason": "Reason",
+      "contactSupport": "If you believe this is an error, please contact support."
     }
   }
 }

@@ -111,6 +111,11 @@ export interface ChannelSubscriptionError {
   channel_link?: string;
 }
 
+export interface BlacklistedError {
+  code: 'blacklisted';
+  message: string;
+}
+
 export function isMaintenanceError(
   error: unknown,
 ): error is { response: { status: 503; data: { detail: MaintenanceError } } } {
@@ -128,6 +133,14 @@ export function isChannelSubscriptionError(
     err.response?.status === 403 &&
     err.response?.data?.detail?.code === 'channel_subscription_required'
   );
+}
+
+export function isBlacklistedError(
+  error: unknown,
+): error is { response: { status: 403; data: { detail: BlacklistedError } } } {
+  if (!error || typeof error !== 'object') return false;
+  const err = error as AxiosError<{ detail: BlacklistedError }>;
+  return err.response?.status === 403 && err.response?.data?.detail?.code === 'blacklisted';
 }
 
 // Response interceptor - handle 401, 503 (maintenance), 403 (channel subscription)
@@ -152,6 +165,15 @@ apiClient.interceptors.response.use(
       useBlockingStore.getState().setChannelSubscription({
         message: detail.message,
         channel_link: detail.channel_link,
+      });
+      return Promise.reject(error);
+    }
+
+    // Handle blacklisted user (403)
+    if (isBlacklistedError(error)) {
+      const detail = (error.response?.data as { detail: BlacklistedError }).detail;
+      useBlockingStore.getState().setBlacklisted({
+        message: detail.message,
       });
       return Promise.reject(error);
     }

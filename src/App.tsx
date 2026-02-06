@@ -4,7 +4,11 @@ import { useAuthStore } from './store/auth';
 import { useBlockingStore } from './store/blocking';
 import Layout from './components/layout/Layout';
 import PageLoader from './components/common/PageLoader';
-import { MaintenanceScreen, ChannelSubscriptionScreen } from './components/blocking';
+import {
+  MaintenanceScreen,
+  ChannelSubscriptionScreen,
+  BlacklistedScreen,
+} from './components/blocking';
 import { saveReturnUrl } from './utils/token';
 import { useAnalyticsCounters } from './hooks/useAnalyticsCounters';
 // Auth pages - load immediately (small)
@@ -120,6 +124,10 @@ function BlockingOverlay() {
 
   if (blockingType === 'channel_subscription') {
     return <ChannelSubscriptionScreen />;
+  }
+
+  if (blockingType === 'blacklisted') {
+    return <BlacklistedScreen />;
   }
 
   return null;
