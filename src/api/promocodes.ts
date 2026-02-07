@@ -183,4 +183,12 @@ export const promocodesApi = {
   deletePromoGroup: async (id: number): Promise<void> => {
     await apiClient.delete(`/cabinet/admin/promo-groups/${id}`);
   },
+
+  // Deactivate user's active discount (admin)
+  deactivateDiscount: async (userId: number): Promise<{ success: boolean; message: string }> => {
+    const response = await apiClient.post(
+      `/cabinet/admin/promocodes/deactivate-discount/${userId}`,
+    );
+    return response.data;
+  },
 };

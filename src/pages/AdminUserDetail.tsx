@@ -15,6 +15,8 @@ import {
   type UpdateSubscriptionRequest,
 } from '../api/adminUsers';
 import { adminApi, type AdminTicket, type AdminTicketDetail } from '../api/admin';
+import { promocodesApi, type PromoGroup } from '../api/promocodes';
+import { promoOffersApi } from '../api/promoOffers';
 import { ticketsApi } from '../api/tickets';
 import { AdminBackButton } from '../components/admin';
 import { createNumberInputHandler, toNumber } from '../utils/inputHelpers';
@@ -180,6 +182,15 @@ export default function AdminUserDetail() {
   const [subDays, setSubDays] = useState<number | ''>(30);
   const [selectedTariffId, setSelectedTariffId] = useState<number | null>(null);
 
+  // Promo group
+  const [promoGroups, setPromoGroups] = useState<PromoGroup[]>([]);
+  const [editingPromoGroup, setEditingPromoGroup] = useState(false);
+
+  // Send promo offer
+  const [offerDiscountPercent, setOfferDiscountPercent] = useState<number | ''>('');
+  const [offerValidHours, setOfferValidHours] = useState<number | ''>(24);
+  const [offerSending, setOfferSending] = useState(false);
+
   const userId = id ? parseInt(id, 10) : null;
 
   const loadUser = useCallback(async () => {
@@ -282,6 +293,15 @@ export default function AdminUserDetail() {
     await Promise.all([loadPanelInfo(), loadNodeUsage()]);
   }, [loadPanelInfo, loadNodeUsage]);
 
+  const loadPromoGroups = useCallback(async () => {
+    try {
+      const data = await promocodesApi.getPromoGroups({ limit: 100 });
+      setPromoGroups(data.items);
+    } catch {
+      // ignore
+    }
+  }, []);
+
   const handleTicketReply = async () => {
     if (!selectedTicketId || !replyText.trim()) return;
     setReplySending(true);
@@ -332,14 +352,25 @@ export default function AdminUserDetail() {
   }, [userId, loadUser, navigate]);
 
   useEffect(() => {
-    if (activeTab === 'info') loadReferrals();
+    if (activeTab === 'info') {
+      loadReferrals();
+      loadPromoGroups();
+    }
     if (activeTab === 'sync') loadSyncStatus();
     if (activeTab === 'subscription') {
       loadTariffs();
       loadSubscriptionData();
     }
     if (activeTab === 'tickets') loadTickets();
-  }, [activeTab, loadSyncStatus, loadTariffs, loadTickets, loadReferrals, loadSubscriptionData]);
+  }, [
+    activeTab,
+    loadSyncStatus,
+    loadTariffs,
+    loadTickets,
+    loadReferrals,
+    loadSubscriptionData,
+    loadPromoGroups,
+  ]);
 
   const handleUpdateBalance = async (isAdd: boolean) => {
     if (balanceAmount === '' || !userId) return;
@@ -364,17 +395,16 @@ export default function AdminUserDetail() {
     }
   };
 
-  const handleUpdateSubscription = async () => {
+  const handleUpdateSubscription = async (overrideAction?: string) => {
     if (!userId) return;
     setActionLoading(true);
     try {
+      const action = overrideAction || subAction;
       const data: UpdateSubscriptionRequest = {
-        action: subAction as UpdateSubscriptionRequest['action'],
-        ...(subAction === 'extend' ? { days: toNumber(subDays, 30) } : {}),
-        ...(subAction === 'change_tariff' && selectedTariffId
-          ? { tariff_id: selectedTariffId }
-          : {}),
-        ...(subAction === 'create'
+        action: action as UpdateSubscriptionRequest['action'],
+        ...(action === 'extend' ? { days: toNumber(subDays, 30) } : {}),
+        ...(action === 'change_tariff' && selectedTariffId ? { tariff_id: selectedTariffId } : {}),
+        ...(action === 'create'
           ? {
               days: toNumber(subDays, 30),
               ...(selectedTariffId ? { tariff_id: selectedTariffId } : {}),
@@ -451,11 +481,62 @@ export default function AdminUserDetail() {
     if (confirmingAction === actionKey) {
       if (confirmTimerRef.current) clearTimeout(confirmTimerRef.current);
       setConfirmingAction(null);
-      executeFn();
+      executeFn().catch(() => {});
     } else {
       if (confirmTimerRef.current) clearTimeout(confirmTimerRef.current);
       setConfirmingAction(actionKey);
       confirmTimerRef.current = setTimeout(() => setConfirmingAction(null), 3000);
+    }
+  };
+
+  const handleChangePromoGroup = async (groupId: number | null) => {
+    if (!userId) return;
+    setActionLoading(true);
+    try {
+      await adminUsersApi.updatePromoGroup(userId, groupId);
+      await loadUser();
+      setEditingPromoGroup(false);
+    } catch {
+      notify.error(t('admin.users.userActions.error'), t('common.error'));
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleDeactivateOffer = async () => {
+    if (!userId) return;
+    setActionLoading(true);
+    try {
+      await promocodesApi.deactivateDiscount(userId);
+      notify.success(t('admin.users.detail.offerDeactivated'), t('common.success'));
+      await loadUser();
+    } catch {
+      notify.error(t('admin.users.userActions.error'), t('common.error'));
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleSendOffer = async () => {
+    if (!userId || offerDiscountPercent === '' || offerValidHours === '') return;
+    setOfferSending(true);
+    try {
+      await promoOffersApi.broadcastOffer({
+        user_id: userId,
+        notification_type: 'admin_personal',
+        discount_percent: toNumber(offerDiscountPercent),
+        valid_hours: toNumber(offerValidHours, 24),
+        effect_type: 'percent_discount',
+        send_notification: true,
+      });
+      notify.success(t('admin.users.detail.offerSent'), t('common.success'));
+      setOfferDiscountPercent('');
+      setOfferValidHours(24);
+      await loadUser();
+    } catch {
+      notify.error(t('admin.users.detail.offerSendError'), t('common.error'));
+    } finally {
+      setOfferSending(false);
     }
   };
 
@@ -716,6 +797,56 @@ export default function AdminUserDetail() {
                 <div className="text-sm font-medium text-accent-400">{user.campaign_name}</div>
               </div>
             )}
+
+            {/* Promo Group */}
+            <div className="rounded-xl bg-dark-800/50 p-3">
+              <div className="mb-1 flex items-center justify-between">
+                <span className="text-xs text-dark-500">{t('admin.users.detail.promoGroup')}</span>
+                <button
+                  onClick={() => setEditingPromoGroup(!editingPromoGroup)}
+                  className="text-xs text-accent-400 transition-colors hover:text-accent-300"
+                >
+                  {editingPromoGroup
+                    ? t('common.cancel')
+                    : t('admin.users.detail.changePromoGroup')}
+                </button>
+              </div>
+              {editingPromoGroup ? (
+                <div className="mt-2 space-y-2">
+                  <select
+                    value={user.promo_group?.id ?? ''}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      handleChangePromoGroup(val ? parseInt(val, 10) : null);
+                    }}
+                    disabled={actionLoading}
+                    className="input text-sm"
+                  >
+                    <option value="">{t('admin.users.detail.selectPromoGroup')}</option>
+                    {promoGroups.map((g) => (
+                      <option key={g.id} value={g.id}>
+                        {g.name}
+                      </option>
+                    ))}
+                  </select>
+                  {user.promo_group && (
+                    <button
+                      onClick={() => handleChangePromoGroup(null)}
+                      disabled={actionLoading}
+                      className="w-full rounded-lg bg-dark-700 py-1.5 text-xs text-dark-300 transition-colors hover:bg-dark-600"
+                    >
+                      {t('admin.users.detail.removePromoGroup')}
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <div className="text-sm font-medium text-dark-100">
+                  {user.promo_group?.name || (
+                    <span className="text-dark-500">{t('admin.users.detail.noPromoGroup')}</span>
+                  )}
+                </div>
+              )}
+            </div>
 
             {/* Referral */}
             <div className="rounded-xl bg-dark-800/50 p-3">
@@ -982,7 +1113,7 @@ export default function AdminUserDetail() {
                     )}
 
                     <button
-                      onClick={handleUpdateSubscription}
+                      onClick={() => handleUpdateSubscription()}
                       disabled={actionLoading}
                       className="btn-primary w-full"
                     >
@@ -1023,10 +1154,7 @@ export default function AdminUserDetail() {
                     max={3650}
                   />
                   <button
-                    onClick={() => {
-                      setSubAction('create');
-                      handleUpdateSubscription();
-                    }}
+                    onClick={() => handleUpdateSubscription('create')}
                     disabled={actionLoading}
                     className="btn-primary w-full"
                   >
@@ -1310,6 +1438,86 @@ export default function AdminUserDetail() {
                   className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-error-500 py-2 text-white transition-colors hover:bg-error-600 disabled:opacity-50"
                 >
                   <MinusIcon /> {t('admin.users.detail.balance.subtract')}
+                </button>
+              </div>
+            </div>
+
+            {/* Active promo offer */}
+            {user.promo_offer_discount_percent > 0 && (
+              <div className="rounded-xl border border-accent-500/20 bg-accent-500/5 p-4">
+                <div className="mb-3 flex items-center justify-between">
+                  <span className="text-sm font-medium text-accent-400">
+                    {t('admin.users.detail.activePromoOffer')}
+                  </span>
+                  <button
+                    onClick={() => handleInlineConfirm('deactivateOffer', handleDeactivateOffer)}
+                    disabled={actionLoading}
+                    className={`rounded-lg px-3 py-1 text-xs font-medium transition-all disabled:opacity-50 ${
+                      confirmingAction === 'deactivateOffer'
+                        ? 'bg-error-500 text-white'
+                        : 'bg-error-500/15 text-error-400 hover:bg-error-500/25'
+                    }`}
+                  >
+                    {confirmingAction === 'deactivateOffer'
+                      ? t('admin.users.detail.actions.areYouSure')
+                      : t('admin.users.detail.deactivateOffer')}
+                  </button>
+                </div>
+                <div className="grid grid-cols-3 gap-3 text-center">
+                  <div>
+                    <div className="text-lg font-bold text-dark-100">
+                      {user.promo_offer_discount_percent}%
+                    </div>
+                    <div className="text-xs text-dark-500">{t('admin.users.detail.discount')}</div>
+                  </div>
+                  <div>
+                    <div className="text-sm font-medium text-dark-100">
+                      {user.promo_offer_discount_source || '-'}
+                    </div>
+                    <div className="text-xs text-dark-500">{t('admin.users.detail.source')}</div>
+                  </div>
+                  <div>
+                    <div className="text-sm font-medium text-dark-100">
+                      {user.promo_offer_discount_expires_at
+                        ? formatDate(user.promo_offer_discount_expires_at)
+                        : '-'}
+                    </div>
+                    <div className="text-xs text-dark-500">{t('admin.users.detail.expiresAt')}</div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Send promo offer */}
+            <div className="rounded-xl bg-dark-800/50 p-4">
+              <div className="mb-3 text-sm font-medium text-dark-200">
+                {t('admin.users.detail.sendOffer')}
+              </div>
+              <div className="space-y-3">
+                <input
+                  type="number"
+                  value={offerDiscountPercent}
+                  onChange={createNumberInputHandler(setOfferDiscountPercent, 1)}
+                  placeholder={t('admin.users.detail.discountPercent')}
+                  className="input"
+                  min={1}
+                  max={100}
+                />
+                <input
+                  type="number"
+                  value={offerValidHours}
+                  onChange={createNumberInputHandler(setOfferValidHours, 1)}
+                  placeholder={t('admin.users.detail.validHours')}
+                  className="input"
+                  min={1}
+                  max={8760}
+                />
+                <button
+                  onClick={handleSendOffer}
+                  disabled={offerSending || offerDiscountPercent === '' || offerValidHours === ''}
+                  className="btn-primary w-full disabled:opacity-50"
+                >
+                  {offerSending ? t('common.loading') : t('admin.users.detail.sendOffer')}
                 </button>
               </div>
             </div>

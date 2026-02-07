@@ -2408,6 +2408,22 @@
           "subscription": "• Запрет покупки подписки",
           "reason": "Причина"
         },
+        "promoGroup": "Промо-группа",
+        "noPromoGroup": "Не задана",
+        "changePromoGroup": "Изменить",
+        "selectPromoGroup": "Выберите группу",
+        "removePromoGroup": "Убрать",
+        "activePromoOffer": "Активное промо-предложение",
+        "discount": "Скидка",
+        "source": "Источник",
+        "expiresAt": "Истекает",
+        "deactivateOffer": "Отключить",
+        "sendOffer": "Отправить предложение",
+        "discountPercent": "Скидка %",
+        "validHours": "Срок действия (часы)",
+        "offerSent": "Предложение отправлено",
+        "offerSendError": "Ошибка отправки предложения",
+        "offerDeactivated": "Предложение отключено",
         "actions": {
           "title": "Действия",
           "areYouSure": "Уверены?"
@@ -2955,164 +2971,6 @@
       "unhealthy": "Проблема",
       "components": "Компоненты",
       "uptime": "Аптайм"
-    }
-  },
-  "adminUsers": {
-    "title": "Пользователи",
-    "subtitle": "Управление пользователями",
-    "searchPlaceholder": "Поиск по ID, username, имени...",
-    "filters": {
-      "all": "Все",
-      "active": "Активные",
-      "blocked": "Заблокированные",
-      "deleted": "Удалённые"
-    },
-    "sort": {
-      "created_at": "Дата регистрации",
-      "balance": "Баланс",
-      "traffic": "Трафик",
-      "last_activity": "Активность",
-      "total_spent": "Потрачено",
-      "purchase_count": "Покупки"
-    },
-    "stats": {
-      "totalUsers": "Всего пользователей",
-      "activeUsers": "Активных",
-      "blockedUsers": "Заблокировано",
-      "withSubscription": "С подпиской",
-      "newToday": "Новых сегодня",
-      "newWeek": "За неделю",
-      "newMonth": "За месяц",
-      "totalBalance": "Общий баланс",
-      "activeToday": "Активны сегодня",
-      "activeWeek": "За неделю",
-      "activeMonth": "За месяц"
-    },
-    "table": {
-      "user": "Пользователь",
-      "status": "Статус",
-      "balance": "Баланс",
-      "subscription": "Подписка",
-      "spent": "Потрачено",
-      "registered": "Регистрация",
-      "activity": "Активность",
-      "noUsers": "Пользователи не найдены"
-    },
-    "userStatus": {
-      "active": "Активен",
-      "blocked": "Заблокирован",
-      "deleted": "Удалён"
-    },
-    "subscriptionStatus": {
-      "active": "Активна",
-      "trial": "Триал",
-      "expired": "Истекла",
-      "none": "Нет подписки"
-    },
-    "detail": {
-      "title": "Информация о пользователе",
-      "tabs": {
-        "info": "Инфо",
-        "subscription": "Подписка",
-        "balance": "Баланс",
-        "sync": "Синхронизация"
-      },
-      "telegramId": "Telegram ID",
-      "username": "Username",
-      "fullName": "Имя",
-      "email": "Email",
-      "emailVerified": "Подтверждён",
-      "emailNotVerified": "Не подтверждён",
-      "language": "Язык",
-      "registeredAt": "Регистрация",
-      "lastActivity": "Последняя активность",
-      "cabinetLogin": "Вход в кабинет",
-      "referralCode": "Реферальный код",
-      "referralsCount": "Рефералов",
-      "referralEarnings": "Заработано",
-      "referredBy": "Приглашён",
-      "promoGroup": "Промо-группа",
-      "noPromoGroup": "Не задана",
-      "restrictions": "Ограничения",
-      "restrictionTopup": "Пополнение баланса",
-      "restrictionSubscription": "Покупка подписки",
-      "restrictionReason": "Причина",
-      "noRestrictions": "Нет ограничений",
-      "totalSpent": "Всего потрачено",
-      "purchaseCount": "Покупок",
-      "usedPromocodes": "Использовано промокодов",
-      "lifetimeTraffic": "Трафик за всё время",
-      "recentTransactions": "Последние транзакции",
-      "noTransactions": "Нет транзакций"
-    },
-    "subscription": {
-      "noSubscription": "Подписка отсутствует",
-      "currentTariff": "Текущий тариф",
-      "status": "Статус",
-      "endDate": "Окончание",
-      "daysRemaining": "Осталось дней",
-      "trafficUsed": "Использовано трафика",
-      "deviceLimit": "Лимит устройств",
-      "autopay": "Автоплатёж",
-      "enabled": "Включён",
-      "disabled": "Отключён",
-      "actions": {
-        "extend": "Продлить",
-        "changeTariff": "Сменить тариф",
-        "setTraffic": "Установить трафик",
-        "toggleAutopay": "Вкл/выкл автоплатёж",
-        "cancel": "Отменить подписку",
-        "create": "Создать подписку"
-      },
-      "extendDays": "Дней",
-      "selectTariff": "Выберите тариф",
-      "trafficLimitGb": "Лимит ГБ",
-      "trafficUsedGb": "Использовано ГБ",
-      "isTrial": "Пробный период"
-    },
-    "balance": {
-      "currentBalance": "Текущий баланс",
-      "addFunds": "Пополнить",
-      "deductFunds": "Списать",
-      "amount": "Сумма",
-      "description": "Описание",
-      "createTransaction": "Создать транзакцию",
-      "transactionHistory": "История транзакций"
-    },
-    "sync": {
-      "title": "Синхронизация с панелью",
-      "status": "Статус синхронизации",
-      "lastSync": "Последняя синхронизация",
-      "neverSynced": "Никогда",
-      "botData": "Данные бота",
-      "panelData": "Данные панели",
-      "notFound": "Не найден в панели",
-      "differences": "Различия",
-      "noDifferences": "Различий нет",
-      "syncFromPanel": "Синхронизировать из панели",
-      "syncToPanel": "Синхронизировать в панель",
-      "remawave_uuid": "Remnawave UUID",
-      "notLinked": "Не привязан"
-    },
-    "actions": {
-      "block": "Заблокировать",
-      "unblock": "Разблокировать",
-      "delete": "Удалить",
-      "blockReason": "Причина блокировки",
-      "confirmBlock": "Подтвердить блокировку",
-      "confirmDelete": "Подтвердить удаление"
-    },
-    "messages": {
-      "loadError": "Не удалось загрузить пользователей",
-      "userLoadError": "Не удалось загрузить пользователя",
-      "balanceUpdated": "Баланс обновлён",
-      "balanceError": "Ошибка обновления баланса",
-      "subscriptionUpdated": "Подписка обновлена",
-      "subscriptionError": "Ошибка обновления подписки",
-      "statusUpdated": "Статус обновлён",
-      "statusError": "Ошибка обновления статуса",
-      "syncSuccess": "Синхронизация выполнена",
-      "syncError": "Ошибка синхронизации"
     }
   },
   "profile": {
