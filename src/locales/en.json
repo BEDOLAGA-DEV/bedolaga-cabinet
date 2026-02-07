@@ -803,7 +803,8 @@
       "noData": "No traffic data",
       "loading": "Loading traffic data...",
       "noTariff": "\u2014",
-      "search": "Search by name or username"
+      "search": "Search by name or username",
+      "allTariffs": "All tariffs"
     },
     "emailTemplates": {
       "title": "Email Templates",

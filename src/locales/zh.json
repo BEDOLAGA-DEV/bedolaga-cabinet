@@ -684,7 +684,8 @@
       "noData": "无流量数据",
       "loading": "正在加载流量数据...",
       "noTariff": "\u2014",
-      "search": "按名称或用户名搜索"
+      "search": "按名称或用户名搜索",
+      "allTariffs": "所有套餐"
     },
     "paymentMethods": {
       "title": "支付方法",

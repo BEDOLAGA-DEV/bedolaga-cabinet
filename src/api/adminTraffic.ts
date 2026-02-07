@@ -26,6 +26,7 @@ export interface TrafficUsageResponse {
   offset: number;
   limit: number;
   period_days: number;
+  available_tariffs: string[];
 }
 
 export interface ExportCsvResponse {
@@ -41,6 +42,7 @@ export const adminTrafficApi = {
     search?: string;
     sort_by?: string;
     sort_desc?: boolean;
+    tariffs?: string;
   }): Promise<TrafficUsageResponse> => {
     const response = await apiClient.get('/cabinet/admin/traffic', { params });
     return response.data;

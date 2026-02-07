@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import {
@@ -42,7 +42,6 @@ const getFlagEmoji = (countryCode: string): string => {
   return String.fromCodePoint(...codePoints);
 };
 
-/** Map TanStack column IDs to backend sort_by field names. */
 const toBackendSortField = (columnId: string): string => {
   if (columnId === 'user') return 'full_name';
   return columnId;
@@ -114,6 +113,22 @@ const SortIcon = ({ direction }: { direction: false | 'asc' | 'desc' }) => (
   </svg>
 );
 
+const FilterIcon = () => (
+  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 01-.659 1.591l-5.432 5.432a2.25 2.25 0 00-.659 1.591v2.927a2.25 2.25 0 01-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 00-.659-1.591L3.659 7.409A2.25 2.25 0 013 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0112 3z"
+    />
+  </svg>
+);
+
+const ChevronDownIcon = () => (
+  <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+  </svg>
+);
+
 // ============ Components ============
 
 const PERIODS = [1, 3, 7, 14, 30] as const;
@@ -151,6 +166,135 @@ function PeriodSelector({
   );
 }
 
+function TariffFilter({
+  available,
+  selected,
+  onChange,
+}: {
+  available: string[];
+  selected: Set<string>;
+  onChange: (next: Set<string>) => void;
+}) {
+  const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  if (available.length === 0) return null;
+
+  const allSelected = selected.size === 0;
+  const activeCount = selected.size;
+
+  const toggle = (tariff: string) => {
+    const next = new Set(selected);
+    if (next.has(tariff)) {
+      next.delete(tariff);
+    } else {
+      next.add(tariff);
+    }
+    onChange(next);
+  };
+
+  const selectAll = () => onChange(new Set());
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        onClick={() => setOpen(!open)}
+        className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors ${
+          activeCount > 0
+            ? 'border-accent-500/50 bg-accent-500/10 text-accent-400'
+            : 'border-dark-700 bg-dark-800 text-dark-200 hover:border-dark-600 hover:bg-dark-700'
+        }`}
+      >
+        <FilterIcon />
+        {t('admin.trafficUsage.tariff')}
+        {activeCount > 0 && (
+          <span className="rounded-full bg-accent-500 px-1.5 text-[10px] text-white">
+            {activeCount}
+          </span>
+        )}
+        <ChevronDownIcon />
+      </button>
+
+      {open && (
+        <div className="absolute left-0 top-full z-30 mt-1 w-56 rounded-xl border border-dark-700 bg-dark-800 py-1 shadow-xl">
+          <button
+            onClick={selectAll}
+            className={`flex w-full items-center gap-2 px-3 py-2 text-left text-xs transition-colors hover:bg-dark-700 ${
+              allSelected ? 'text-accent-400' : 'text-dark-300'
+            }`}
+          >
+            <span
+              className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border ${
+                allSelected ? 'border-accent-500 bg-accent-500' : 'border-dark-600'
+              }`}
+            >
+              {allSelected && (
+                <svg
+                  className="h-3 w-3 text-white"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={3}
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+              )}
+            </span>
+            {t('admin.trafficUsage.allTariffs')}
+          </button>
+
+          <div className="mx-2 border-t border-dark-700" />
+
+          <div className="max-h-48 overflow-y-auto">
+            {available.map((tariff) => {
+              const checked = selected.has(tariff);
+              return (
+                <button
+                  key={tariff}
+                  onClick={() => toggle(tariff)}
+                  className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs text-dark-300 transition-colors hover:bg-dark-700"
+                >
+                  <span
+                    className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border ${
+                      checked ? 'border-accent-500 bg-accent-500' : 'border-dark-600'
+                    }`}
+                  >
+                    {checked && (
+                      <svg
+                        className="h-3 w-3 text-white"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={3}
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M4.5 12.75l6 6 9-13.5"
+                        />
+                      </svg>
+                    )}
+                  </span>
+                  {tariff}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ============ Main Page ============
 
 export default function AdminTrafficUsage() {
@@ -160,20 +304,24 @@ export default function AdminTrafficUsage() {
 
   const [items, setItems] = useState<UserTrafficItem[]>([]);
   const [nodes, setNodes] = useState<TrafficNodeInfo[]>([]);
+  const [availableTariffs, setAvailableTariffs] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState(30);
   const [searchInput, setSearchInput] = useState('');
   const [committedSearch, setCommittedSearch] = useState('');
+  const [selectedTariffs, setSelectedTariffs] = useState<Set<string>>(new Set());
   const [offset, setOffset] = useState(0);
   const [total, setTotal] = useState(0);
   const [exporting, setExporting] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [sorting, setSorting] = useState<SortingState>([{ id: 'total_bytes', desc: true }]);
+  const [columnSizing, setColumnSizing] = useState<Record<string, number>>({});
 
   const limit = 50;
 
   const sortBy = sorting[0] ? toBackendSortField(sorting[0].id) : 'total_bytes';
   const sortDesc = sorting[0]?.desc ?? true;
+  const tariffsParam = selectedTariffs.size > 0 ? [...selectedTariffs].join(',') : undefined;
 
   const loadData = useCallback(async () => {
     try {
@@ -185,16 +333,18 @@ export default function AdminTrafficUsage() {
         search: committedSearch || undefined,
         sort_by: sortBy,
         sort_desc: sortDesc,
+        tariffs: tariffsParam,
       });
       setItems(data.items);
       setNodes(data.nodes);
       setTotal(data.total);
+      setAvailableTariffs(data.available_tariffs);
     } catch {
-      // silently fail — toast could be added if needed
+      // silently fail
     } finally {
       setLoading(false);
     }
-  }, [period, offset, committedSearch, sortBy, sortDesc]);
+  }, [period, offset, committedSearch, sortBy, sortDesc, tariffsParam]);
 
   useEffect(() => {
     loadData();
@@ -236,7 +386,11 @@ export default function AdminTrafficUsage() {
     setOffset(0);
   };
 
-  // Build columns dynamically based on nodes
+  const handleTariffChange = (next: Set<string>) => {
+    setSelectedTariffs(next);
+    setOffset(0);
+  };
+
   const columns = useMemo<ColumnDef<UserTrafficItem>[]>(() => {
     const cols: ColumnDef<UserTrafficItem>[] = [
       {
@@ -244,6 +398,8 @@ export default function AdminTrafficUsage() {
         accessorFn: (row) => row.full_name,
         header: t('admin.trafficUsage.user'),
         enableSorting: true,
+        size: 200,
+        minSize: 140,
         cell: ({ row }) => {
           const item = row.original;
           return (
@@ -266,6 +422,8 @@ export default function AdminTrafficUsage() {
         accessorKey: 'tariff_name',
         header: t('admin.trafficUsage.tariff'),
         enableSorting: true,
+        size: 120,
+        minSize: 80,
         cell: ({ getValue }) => (
           <span className="text-xs text-dark-300">
             {(getValue() as string | null) || t('admin.trafficUsage.noTariff')}
@@ -276,6 +434,8 @@ export default function AdminTrafficUsage() {
         accessorKey: 'device_limit',
         header: t('admin.trafficUsage.devices'),
         enableSorting: true,
+        size: 80,
+        minSize: 60,
         meta: { align: 'center' as const },
         cell: ({ getValue }) => (
           <span className="text-xs text-dark-300">{getValue() as number}</span>
@@ -285,19 +445,22 @@ export default function AdminTrafficUsage() {
         accessorKey: 'traffic_limit_gb',
         header: t('admin.trafficUsage.trafficLimit'),
         enableSorting: true,
+        size: 80,
+        minSize: 60,
         meta: { align: 'center' as const },
         cell: ({ getValue }) => {
           const gb = getValue() as number;
           return <span className="text-xs text-dark-300">{gb > 0 ? `${gb} GB` : '\u221E'}</span>;
         },
       },
-      // Dynamic node columns
       ...nodes.map(
         (node): ColumnDef<UserTrafficItem> => ({
           id: `node_${node.node_uuid}`,
           accessorFn: (row) => row.node_traffic[node.node_uuid] || 0,
           header: `${getFlagEmoji(node.country_code)} ${node.node_name}`,
           enableSorting: true,
+          size: 110,
+          minSize: 80,
           meta: { align: 'center' as const },
           cell: ({ getValue }) => {
             const bytes = getValue() as number;
@@ -313,6 +476,8 @@ export default function AdminTrafficUsage() {
         accessorKey: 'total_bytes',
         header: t('admin.trafficUsage.total'),
         enableSorting: true,
+        size: 110,
+        minSize: 80,
         meta: { align: 'center' as const, bold: true },
         cell: ({ getValue }) => {
           const bytes = getValue() as number;
@@ -330,11 +495,14 @@ export default function AdminTrafficUsage() {
   const table = useReactTable({
     data: items,
     columns,
-    state: { sorting },
+    state: { sorting, columnSizing },
     onSortingChange: handleSortingChange,
+    onColumnSizingChange: setColumnSizing,
     getCoreRowModel: getCoreRowModel(),
     manualSorting: true,
     enableSortingRemoval: false,
+    enableColumnResizing: true,
+    columnResizeMode: 'onChange',
   });
 
   const totalPages = Math.ceil(total / limit);
@@ -376,13 +544,18 @@ export default function AdminTrafficUsage() {
         </button>
       </div>
 
-      {/* Controls: period + export + search */}
+      {/* Controls */}
       <div className="mb-4 flex flex-col gap-3">
         <div className="flex flex-wrap items-center gap-3">
           <PeriodSelector
             value={period}
             onChange={handlePeriodChange}
             label={t('admin.trafficUsage.period')}
+          />
+          <TariffFilter
+            available={availableTariffs}
+            selected={selectedTariffs}
+            onChange={handleTariffChange}
           />
           <button
             onClick={handleExport}
@@ -419,7 +592,7 @@ export default function AdminTrafficUsage() {
         <div className="py-12 text-center text-dark-400">{t('admin.trafficUsage.noData')}</div>
       ) : (
         <div className="overflow-x-auto rounded-xl border border-dark-700">
-          <table className="w-full min-w-[600px] text-left text-sm">
+          <table className="text-left text-sm" style={{ width: table.getCenterTotalSize() }}>
             <thead>
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id} className="border-b border-dark-700 bg-dark-800/80">
@@ -432,17 +605,28 @@ export default function AdminTrafficUsage() {
                     return (
                       <th
                         key={header.id}
-                        className={`px-3 py-2 text-xs font-medium ${
+                        className={`relative px-3 py-2 text-xs font-medium ${
                           isBold ? 'font-semibold text-dark-200' : 'text-dark-400'
                         } ${align} ${
                           isSticky ? 'sticky left-0 z-10 bg-dark-800' : ''
                         } ${header.column.getCanSort() ? 'cursor-pointer select-none hover:text-dark-200' : ''}`}
+                        style={{ width: header.getSize() }}
                         onClick={header.column.getToggleSortingHandler()}
                       >
                         {flexRender(header.column.columnDef.header, header.getContext())}
                         {header.column.getCanSort() && (
                           <SortIcon direction={header.column.getIsSorted()} />
                         )}
+                        <div
+                          onMouseDown={header.getResizeHandler()}
+                          onTouchStart={header.getResizeHandler()}
+                          onClick={(e) => e.stopPropagation()}
+                          className={`absolute right-0 top-0 h-full w-1 cursor-col-resize touch-none select-none ${
+                            header.column.getIsResizing()
+                              ? 'bg-accent-500'
+                              : 'bg-transparent hover:bg-dark-500'
+                          }`}
+                        />
                       </th>
                     );
                   })}
@@ -467,6 +651,7 @@ export default function AdminTrafficUsage() {
                         className={`px-3 py-2 ${align} ${
                           isSticky ? 'sticky left-0 z-10 bg-dark-900' : ''
                         }`}
+                        style={{ width: cell.column.getSize() }}
                       >
                         {flexRender(cell.column.columnDef.cell, cell.getContext())}
                       </td>
