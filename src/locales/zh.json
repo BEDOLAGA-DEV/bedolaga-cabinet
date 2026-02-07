@@ -1028,6 +1028,7 @@
       "adminNotificationsEnabledDesc": "向管理员发送新工单和回复通知",
       "cabinetNotifications": "面板通知",
       "copyTelegramId": "点击复制Telegram ID",
+      "viewUser": "用户",
       "userNotificationsEnabled": "用户通知",
       "userNotificationsEnabledDesc": "向用户发送管理员回复通知"
     },

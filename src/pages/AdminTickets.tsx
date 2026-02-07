@@ -434,19 +434,29 @@ export default function AdminTickets() {
                     </span>
                   </div>
                 </div>
-                <div className="mb-4 text-sm text-dark-500">
-                  {t('admin.tickets.from')}: {formatUser(selectedTicket)}
-                  {selectedTicket.user?.telegram_id && (
+                <div className="mb-4 flex items-center gap-2 text-sm text-dark-500">
+                  <span>
+                    {t('admin.tickets.from')}: {formatUser(selectedTicket)}
+                    {selectedTicket.user?.telegram_id && (
+                      <button
+                        onClick={() => copyToClipboard(String(selectedTicket.user!.telegram_id))}
+                        className="ml-1 rounded bg-dark-700 px-2 py-0.5 text-xs transition-colors hover:bg-dark-600"
+                        title={t('admin.tickets.copyTelegramId')}
+                      >
+                        TG: {selectedTicket.user!.telegram_id}
+                      </button>
+                    )}{' '}
+                    | {t('admin.tickets.created')}:{' '}
+                    {new Date(selectedTicket.created_at).toLocaleString()}
+                  </span>
+                  {selectedTicket.user && (
                     <button
-                      onClick={() => copyToClipboard(String(selectedTicket.user!.telegram_id))}
-                      className="ml-1 rounded bg-dark-700 px-2 py-0.5 text-xs transition-colors hover:bg-dark-600"
-                      title={t('admin.tickets.copyTelegramId')}
+                      onClick={() => navigate(`/admin/users/${selectedTicket.user!.id}`)}
+                      className="shrink-0 rounded-lg border border-accent-500/30 bg-accent-500/10 px-2 py-0.5 text-xs text-accent-400 transition-colors hover:bg-accent-500/20"
                     >
-                      TG: {selectedTicket.user!.telegram_id}
+                      {t('admin.tickets.viewUser')}
                     </button>
-                  )}{' '}
-                  | {t('admin.tickets.created')}:{' '}
-                  {new Date(selectedTicket.created_at).toLocaleString()}
+                  )}
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {['open', 'pending', 'answered', 'closed'].map((s) => (
