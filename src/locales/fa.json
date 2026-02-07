@@ -685,7 +685,18 @@
       "loading": "در حال بارگذاری داده‌های ترافیک...",
       "noTariff": "\u2014",
       "search": "جستجو بر اساس نام یا نام کاربری",
-      "allTariffs": "همه تعرفه‌ها"
+      "allTariffs": "همه تعرفه‌ها",
+      "nodes": "نودها",
+      "allNodes": "همه نودها",
+      "status": "وضعیت",
+      "allStatuses": "همه",
+      "statusActive": "فعال",
+      "statusTrial": "آزمایشی",
+      "statusExpired": "منقضی",
+      "statusDisabled": "غیرفعال",
+      "customDates": "تاریخ",
+      "dateFrom": "از",
+      "dateTo": "تا"
     },
     "emailTemplates": {
       "title": "قالب‌های ایمیل",

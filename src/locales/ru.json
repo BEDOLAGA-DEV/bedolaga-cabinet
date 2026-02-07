@@ -825,7 +825,18 @@
       "loading": "Загрузка данных о трафике...",
       "noTariff": "\u2014",
       "search": "Поиск по имени или юзернейму",
-      "allTariffs": "Все тарифы"
+      "allTariffs": "Все тарифы",
+      "nodes": "Ноды",
+      "allNodes": "Все ноды",
+      "status": "Статус",
+      "allStatuses": "Все",
+      "statusActive": "Активная",
+      "statusTrial": "Пробная",
+      "statusExpired": "Истекла",
+      "statusDisabled": "Отключена",
+      "customDates": "Даты",
+      "dateFrom": "От",
+      "dateTo": "До"
     },
     "emailTemplates": {
       "title": "Email-шаблоны",

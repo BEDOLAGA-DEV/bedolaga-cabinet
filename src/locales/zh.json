@@ -685,7 +685,18 @@
       "loading": "正在加载流量数据...",
       "noTariff": "\u2014",
       "search": "按名称或用户名搜索",
-      "allTariffs": "所有套餐"
+      "allTariffs": "所有套餐",
+      "nodes": "节点",
+      "allNodes": "所有节点",
+      "status": "状态",
+      "allStatuses": "全部",
+      "statusActive": "活跃",
+      "statusTrial": "试用",
+      "statusExpired": "已过期",
+      "statusDisabled": "已禁用",
+      "customDates": "日期",
+      "dateFrom": "从",
+      "dateTo": "到"
     },
     "paymentMethods": {
       "title": "支付方法",
