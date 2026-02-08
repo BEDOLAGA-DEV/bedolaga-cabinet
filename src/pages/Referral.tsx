@@ -38,10 +38,29 @@ export default function Referral() {
     queryFn: referralApi.getReferralInfo,
   });
 
-  // Build referral link for cabinet registration
-  const referralLink = info?.referral_code
-    ? `${window.location.origin}/login?ref=${info.referral_code}`
-    : '';
+  // Build referral link based on VITE_REFERRAL_LINK_MODE setting
+  // Modes: 'api' (default) - use link from backend API (points to bot)
+  //        'bot' - build bot link using VITE_TELEGRAM_BOT_USERNAME
+  //        'cabinet' - build cabinet registration link
+  const referralLink = (() => {
+    if (!info?.referral_code) return '';
+
+    const mode = import.meta.env.VITE_REFERRAL_LINK_MODE || 'api';
+    const botUsername = import.meta.env.VITE_TELEGRAM_BOT_USERNAME;
+
+    switch (mode) {
+      case 'cabinet':
+        return `${window.location.origin}/login?ref=${info.referral_code}`;
+      case 'bot':
+        return botUsername
+          ? `https://t.me/${botUsername}?start=${info.referral_code}`
+          : info.referral_link || '';
+      case 'api':
+      default:
+        // Use referral_link from API if available, fallback to cabinet link
+        return info.referral_link || `${window.location.origin}/login?ref=${info.referral_code}`;
+    }
+  })();
 
   const { data: terms } = useQuery({
     queryKey: ['referral-terms'],
