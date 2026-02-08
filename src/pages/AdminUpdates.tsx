@@ -1,6 +1,8 @@
+import { useMemo } from 'react';
 import { useNavigate } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import DOMPurify from 'dompurify';
 import { adminUpdatesApi, ReleaseItem, ProjectReleasesInfo } from '../api/adminUpdates';
 
 declare const __APP_VERSION__: string;
@@ -107,6 +109,65 @@ function stripVPrefix(tag: string): string {
   return tag.replace(/^v/, '');
 }
 
+function renderMarkdown(md: string): string {
+  const html = md
+    // Headers: ### Title -> <h3>Title</h3>
+    .replace(/^#### (.+)$/gm, '<h4>$1</h4>')
+    .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+    .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+    // Bold: **text** -> <strong>text</strong>
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    // Inline code: `text` -> <code>text</code>
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    // Links: [text](url) -> <a>text</a>
+    .replace(
+      /\[([^\]]+)\]\(([^)]+)\)/g,
+      '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>',
+    );
+
+  // Process lines into blocks
+  const lines = html.split('\n');
+  const blocks: string[] = [];
+  let listItems: string[] = [];
+
+  const flushList = () => {
+    if (listItems.length > 0) {
+      blocks.push(`<ul>${listItems.join('')}</ul>`);
+      listItems = [];
+    }
+  };
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) {
+      flushList();
+      continue;
+    }
+    // List item: * text or - text
+    const listMatch = trimmed.match(/^[*-]\s+(.+)$/);
+    if (listMatch) {
+      listItems.push(`<li>${listMatch[1]}</li>`);
+      continue;
+    }
+    // Already an HTML block element from header replacement
+    if (/^<h[1-4]>/.test(trimmed)) {
+      flushList();
+      blocks.push(trimmed);
+      continue;
+    }
+    // Regular line
+    flushList();
+    blocks.push(`<p>${trimmed}</p>`);
+  }
+  flushList();
+
+  return DOMPurify.sanitize(blocks.join(''), {
+    ALLOWED_TAGS: ['h1', 'h2', 'h3', 'h4', 'p', 'ul', 'li', 'strong', 'em', 'code', 'a', 'br'],
+    ALLOWED_ATTR: ['href', 'target', 'rel'],
+  });
+}
+
 // ============ Components ============
 
 function VersionBadge({ hasUpdate }: { hasUpdate: boolean }) {
@@ -131,6 +192,11 @@ function VersionBadge({ hasUpdate }: { hasUpdate: boolean }) {
 
 function ReleaseCard({ release }: { release: ReleaseItem }) {
   const { t } = useTranslation();
+  // Content is sanitized via DOMPurify in renderMarkdown — safe for innerHTML
+  const bodyHtml = useMemo(
+    () => (release.body ? renderMarkdown(release.body) : ''),
+    [release.body],
+  );
 
   return (
     <div className="border-b border-dark-700/30 px-4 py-3 last:border-b-0">
@@ -152,10 +218,11 @@ function ReleaseCard({ release }: { release: ReleaseItem }) {
           <span className="text-xs">{formatDate(release.published_at)}</span>
         </div>
       </div>
-      {release.body ? (
-        <pre className="max-h-48 overflow-auto whitespace-pre-wrap break-words rounded-lg bg-dark-900/50 p-3 font-mono text-xs leading-relaxed text-dark-300">
-          {release.body}
-        </pre>
+      {bodyHtml ? (
+        <div
+          className="release-body max-h-48 overflow-auto rounded-lg bg-dark-900/50 p-3 text-xs leading-relaxed text-dark-300 [&_a]:text-accent-400 [&_a]:underline [&_a]:underline-offset-2 hover:[&_a]:text-accent-300 [&_code]:rounded [&_code]:bg-dark-700/50 [&_code]:px-1 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-dark-200 [&_h2]:mb-1.5 [&_h2]:mt-2 [&_h2]:text-sm [&_h2]:font-semibold [&_h2]:text-dark-200 first:[&_h2]:mt-0 [&_h3]:mb-1 [&_h3]:mt-2 [&_h3]:text-xs [&_h3]:font-semibold [&_h3]:text-dark-200 first:[&_h3]:mt-0 [&_h4]:mb-0.5 [&_h4]:mt-1.5 [&_h4]:text-xs [&_h4]:font-medium [&_h4]:text-dark-300 [&_li]:ml-4 [&_li]:list-disc [&_li]:py-0.5 [&_p]:my-1"
+          dangerouslySetInnerHTML={{ __html: bodyHtml }}
+        />
       ) : null}
     </div>
   );
