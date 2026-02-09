@@ -355,7 +355,11 @@
       "selectPlatform": "Select platform",
       "app": "app",
       "apps": "apps",
-      "tutorial": "Tutorial"
+      "tutorial": "Tutorial",
+      "notConfigured": "Connection methods are not configured yet",
+      "notConfiguredUser": "Connection setup is in progress. Please check back later.",
+      "notConfiguredAdmin": "No connection apps have been configured. Set them up in the Apps settings.",
+      "goToApps": "Go to Apps settings"
     },
     "myDevices": "My Devices",
     "noDevices": "No connected devices",

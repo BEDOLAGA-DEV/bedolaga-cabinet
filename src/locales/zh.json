@@ -307,7 +307,11 @@
       "selectPlatform": "选择平台",
       "app": "个应用",
       "apps": "个应用",
-      "tutorial": "教程"
+      "tutorial": "教程",
+      "notConfigured": "连接方式尚未配置",
+      "notConfiguredUser": "连接设置正在进行中，请稍后再来查看。",
+      "notConfiguredAdmin": "尚未配置连接应用。请在应用设置中进行配置。",
+      "goToApps": "前往应用设置"
     },
     "additionalOptions": {
       "title": "附加选项",

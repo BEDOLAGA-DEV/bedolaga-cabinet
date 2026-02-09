@@ -36,6 +36,7 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks(id) {
+          if (id.includes('/src/locales/')) return 'locales';
           if (!id.includes('node_modules')) return;
           if (
             id.includes('react-dom') ||
@@ -44,13 +45,17 @@ export default defineConfig({
           )
             return 'vendor-react';
           if (id.includes('@tanstack/react-query')) return 'vendor-query';
+          if (id.includes('@tanstack/react-table')) return 'vendor-table';
           if (id.includes('i18next') || id.includes('react-i18next')) return 'vendor-i18n';
           if (id.includes('framer-motion')) return 'vendor-motion';
           if (id.includes('@radix-ui/')) return 'vendor-radix';
           if (id.includes('@dnd-kit/')) return 'vendor-dnd';
-          if (id.includes('@telegram-apps/')) return 'vendor-telegram';
+          if (id.includes('@telegram-apps/') || id.includes('/@tma.js/')) return 'vendor-telegram';
           if (id.includes('/ogl/')) return 'vendor-webgl';
           if (id.includes('/cmdk/')) return 'vendor-cmdk';
+          if (id.includes('twemoji') || id.includes('@twemoji/')) return 'vendor-twemoji';
+          if (id.includes('/jsencrypt/') || id.includes('@kastov/')) return 'vendor-crypto';
+          if (id.includes('@lottiefiles/')) return 'vendor-lottie';
           if (
             id.includes('/axios/') ||
             id.includes('/zustand/') ||
