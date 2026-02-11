@@ -551,154 +551,242 @@ export default function Login() {
                   className={`grid transition-[grid-template-rows] duration-300 ease-in-out ${
                     showEmailForm ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'
                   }`}
+                  style={{ transform: 'translateZ(0)' }}
                 >
-                  <div
-                    className={`overflow-hidden transition-opacity duration-300 ${
-                      showEmailForm ? 'opacity-100' : 'opacity-0'
-                    }`}
-                  >
+                  <div className="overflow-hidden">
                     <div className="space-y-4 pb-1 pt-1">
-                      {/* Login / Register toggle */}
-                      <div className="flex rounded-lg bg-dark-800 p-1">
-                        <button
-                          type="button"
-                          className={`flex-1 rounded-md py-2 text-sm font-medium transition-all ${
-                            authMode === 'login'
-                              ? 'bg-accent-500 text-white'
-                              : 'text-dark-400 hover:text-dark-200'
-                          }`}
-                          onClick={() => setAuthMode('login')}
-                        >
-                          {t('auth.login')}
-                        </button>
-                        <button
-                          type="button"
-                          className={`flex-1 rounded-md py-2 text-sm font-medium transition-all ${
-                            authMode === 'register'
-                              ? 'bg-accent-500 text-white'
-                              : 'text-dark-400 hover:text-dark-200'
-                          }`}
-                          onClick={() => setAuthMode('register')}
-                        >
-                          {t('auth.register', 'Register')}
-                        </button>
-                      </div>
-
-                      <form className="space-y-3" onSubmit={handleEmailSubmit}>
-                        {/* First name field - only for registration */}
-                        {authMode === 'register' && (
-                          <div>
-                            <label htmlFor="firstName" className="label">
-                              {t('auth.firstName', 'First Name')}
-                            </label>
-                            <input
-                              id="firstName"
-                              name="firstName"
-                              type="text"
-                              autoComplete="given-name"
-                              className="input"
-                              placeholder={t('auth.firstNamePlaceholder', 'Your name (optional)')}
-                              value={firstName}
-                              onChange={(e) => setFirstName(e.target.value)}
-                            />
+                      {showForgotPassword ? (
+                        /* Forgot password screen - replaces login/register */
+                        forgotPasswordSent ? (
+                          <div className="space-y-4 text-center">
+                            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-success-500/20">
+                              <svg
+                                className="h-6 w-6 text-success-400"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                strokeWidth={1.5}
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"
+                                />
+                              </svg>
+                            </div>
+                            <p className="text-sm font-medium text-dark-100">
+                              {t('auth.checkEmail', 'Check your email')}
+                            </p>
+                            <p className="text-xs text-dark-400">
+                              {t(
+                                'auth.passwordResetSent',
+                                'If an account exists with this email, we sent password reset instructions.',
+                              )}
+                            </p>
+                            <button
+                              type="button"
+                              onClick={closeForgotPasswordModal}
+                              className="text-sm text-accent-400 transition-colors hover:text-accent-300"
+                            >
+                              {t('common.back', 'Back')}
+                            </button>
                           </div>
-                        )}
-
-                        <div>
-                          <label htmlFor="email" className="label">
-                            {t('auth.email')}
-                          </label>
-                          <input
-                            id="email"
-                            name="email"
-                            type="email"
-                            autoComplete="email"
-                            required
-                            className="input"
-                            placeholder="you@example.com"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                          />
-                        </div>
-
-                        <div>
-                          <label htmlFor="password" className="label">
-                            {t('auth.password')}
-                          </label>
-                          <input
-                            id="password"
-                            name="password"
-                            type="password"
-                            autoComplete={
-                              authMode === 'login' ? 'current-password' : 'new-password'
-                            }
-                            required
-                            className="input"
-                            placeholder="••••••••"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                          />
-                        </div>
-
-                        {/* Confirm password - only for registration */}
-                        {authMode === 'register' && (
-                          <div>
-                            <label htmlFor="confirmPassword" className="label">
-                              {t('auth.confirmPassword', 'Confirm Password')}
-                            </label>
-                            <input
-                              id="confirmPassword"
-                              name="confirmPassword"
-                              type="password"
-                              autoComplete="new-password"
-                              required
-                              className="input"
-                              placeholder="••••••••"
-                              value={confirmPassword}
-                              onChange={(e) => setConfirmPassword(e.target.value)}
-                            />
+                        ) : (
+                          <div className="space-y-4">
+                            <p className="text-center text-sm text-dark-400">
+                              {t(
+                                'auth.forgotPasswordHint',
+                                'Enter your email and we will send you instructions to reset your password.',
+                              )}
+                            </p>
+                            <form onSubmit={handleForgotPassword} className="space-y-3">
+                              <div>
+                                <label htmlFor="forgotEmail" className="label">
+                                  Email
+                                </label>
+                                <input
+                                  id="forgotEmail"
+                                  type="email"
+                                  value={forgotPasswordEmail}
+                                  onChange={(e) => setForgotPasswordEmail(e.target.value)}
+                                  placeholder="you@example.com"
+                                  className="input"
+                                  autoFocus
+                                />
+                              </div>
+                              {forgotPasswordError && (
+                                <p className="text-sm text-error-400">{forgotPasswordError}</p>
+                              )}
+                              <button
+                                type="submit"
+                                disabled={forgotPasswordLoading}
+                                className="btn-primary w-full py-2.5"
+                              >
+                                {forgotPasswordLoading ? (
+                                  <span className="flex items-center justify-center gap-2">
+                                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                                    {t('common.loading')}
+                                  </span>
+                                ) : (
+                                  t('auth.sendResetLink', 'Send reset link')
+                                )}
+                              </button>
+                            </form>
+                            <div className="text-center">
+                              <button
+                                type="button"
+                                onClick={closeForgotPasswordModal}
+                                className="text-sm text-dark-400 transition-colors hover:text-dark-200"
+                              >
+                                {t('common.back', 'Back')}
+                              </button>
+                            </div>
                           </div>
-                        )}
+                        )
+                      ) : (
+                        /* Normal login / register */
+                        <>
+                          <div className="flex rounded-lg bg-dark-800 p-1">
+                            <button
+                              type="button"
+                              className={`flex-1 rounded-md py-2 text-sm font-medium transition-all ${
+                                authMode === 'login'
+                                  ? 'bg-accent-500 text-white'
+                                  : 'text-dark-400 hover:text-dark-200'
+                              }`}
+                              onClick={() => setAuthMode('login')}
+                            >
+                              {t('auth.login')}
+                            </button>
+                            <button
+                              type="button"
+                              className={`flex-1 rounded-md py-2 text-sm font-medium transition-all ${
+                                authMode === 'register'
+                                  ? 'bg-accent-500 text-white'
+                                  : 'text-dark-400 hover:text-dark-200'
+                              }`}
+                              onClick={() => setAuthMode('register')}
+                            >
+                              {t('auth.register', 'Register')}
+                            </button>
+                          </div>
 
-                        <button
-                          type="submit"
-                          disabled={isLoading}
-                          className="btn-primary w-full py-2.5"
-                        >
-                          {isLoading ? (
-                            <span className="flex items-center justify-center gap-2">
-                              <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                              {t('common.loading')}
-                            </span>
-                          ) : authMode === 'login' ? (
-                            t('auth.login')
-                          ) : (
-                            t('auth.register', 'Register')
+                          <form className="space-y-3" onSubmit={handleEmailSubmit}>
+                            {authMode === 'register' && (
+                              <div>
+                                <label htmlFor="firstName" className="label">
+                                  {t('auth.firstName', 'First Name')}
+                                </label>
+                                <input
+                                  id="firstName"
+                                  name="firstName"
+                                  type="text"
+                                  autoComplete="given-name"
+                                  className="input"
+                                  placeholder={t(
+                                    'auth.firstNamePlaceholder',
+                                    'Your name (optional)',
+                                  )}
+                                  value={firstName}
+                                  onChange={(e) => setFirstName(e.target.value)}
+                                />
+                              </div>
+                            )}
+
+                            <div>
+                              <label htmlFor="email" className="label">
+                                {t('auth.email')}
+                              </label>
+                              <input
+                                id="email"
+                                name="email"
+                                type="email"
+                                autoComplete="email"
+                                required
+                                className="input"
+                                placeholder="you@example.com"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                              />
+                            </div>
+
+                            <div>
+                              <label htmlFor="password" className="label">
+                                {t('auth.password')}
+                              </label>
+                              <input
+                                id="password"
+                                name="password"
+                                type="password"
+                                autoComplete={
+                                  authMode === 'login' ? 'current-password' : 'new-password'
+                                }
+                                required
+                                className="input"
+                                placeholder="••••••••"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                              />
+                            </div>
+
+                            {authMode === 'register' && (
+                              <div>
+                                <label htmlFor="confirmPassword" className="label">
+                                  {t('auth.confirmPassword', 'Confirm Password')}
+                                </label>
+                                <input
+                                  id="confirmPassword"
+                                  name="confirmPassword"
+                                  type="password"
+                                  autoComplete="new-password"
+                                  required
+                                  className="input"
+                                  placeholder="••••••••"
+                                  value={confirmPassword}
+                                  onChange={(e) => setConfirmPassword(e.target.value)}
+                                />
+                              </div>
+                            )}
+
+                            <button
+                              type="submit"
+                              disabled={isLoading}
+                              className="btn-primary w-full py-2.5"
+                            >
+                              {isLoading ? (
+                                <span className="flex items-center justify-center gap-2">
+                                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                                  {t('common.loading')}
+                                </span>
+                              ) : authMode === 'login' ? (
+                                t('auth.login')
+                              ) : (
+                                t('auth.register', 'Register')
+                              )}
+                            </button>
+                          </form>
+
+                          {authMode === 'register' && (
+                            <p className="text-center text-xs text-dark-500">
+                              {t(
+                                'auth.verificationEmailNotice',
+                                'After registration, a verification email will be sent to your address',
+                              )}
+                            </p>
                           )}
-                        </button>
-                      </form>
 
-                      {/* Verification notice for registration */}
-                      {authMode === 'register' && (
-                        <p className="text-center text-xs text-dark-500">
-                          {t(
-                            'auth.verificationEmailNotice',
-                            'After registration, a verification email will be sent to your address',
+                          {authMode === 'login' && (
+                            <div className="text-center">
+                              <button
+                                type="button"
+                                onClick={() => setShowForgotPassword(true)}
+                                className="text-sm text-accent-400 transition-colors hover:text-accent-300"
+                              >
+                                {t('auth.forgotPassword', 'Forgot password?')}
+                              </button>
+                            </div>
                           )}
-                        </p>
-                      )}
-
-                      {/* Forgot password link - only for login */}
-                      {authMode === 'login' && (
-                        <div className="text-center">
-                          <button
-                            type="button"
-                            onClick={() => setShowForgotPassword(true)}
-                            className="text-sm text-accent-400 transition-colors hover:text-accent-300"
-                          >
-                            {t('auth.forgotPassword', 'Forgot password?')}
-                          </button>
-                        </div>
+                        </>
                       )}
                     </div>
                   </div>
@@ -708,111 +796,6 @@ export default function Login() {
           </div>
         )}
       </div>
-
-      {/* Forgot Password Modal */}
-      {showForgotPassword && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/60" onClick={closeForgotPasswordModal} />
-          <div className="relative w-full max-w-sm rounded-2xl border border-dark-700 bg-dark-900 p-5">
-            <button
-              onClick={closeForgotPasswordModal}
-              className="absolute right-3 top-3 text-dark-400 transition-colors hover:text-dark-200"
-            >
-              <svg
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-
-            {forgotPasswordSent ? (
-              <div className="text-center">
-                <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-success-500/20">
-                  <svg
-                    className="h-7 w-7 text-success-400"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={1.5}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"
-                    />
-                  </svg>
-                </div>
-                <h3 className="mb-2 text-lg font-bold text-dark-50">
-                  {t('auth.checkEmail', 'Check your email')}
-                </h3>
-                <p className="mb-4 text-sm text-dark-400">
-                  {t(
-                    'auth.passwordResetSent',
-                    'If an account exists with this email, we sent password reset instructions.',
-                  )}
-                </p>
-                <button onClick={closeForgotPasswordModal} className="btn-primary w-full">
-                  {t('common.close', 'Close')}
-                </button>
-              </div>
-            ) : (
-              <>
-                <h3 className="mb-2 text-lg font-bold text-dark-50">
-                  {t('auth.forgotPassword', 'Forgot password?')}
-                </h3>
-                <p className="mb-4 text-sm text-dark-400">
-                  {t(
-                    'auth.forgotPasswordHint',
-                    'Enter your email and we will send you instructions to reset your password.',
-                  )}
-                </p>
-
-                <form onSubmit={handleForgotPassword} className="space-y-3">
-                  <div>
-                    <label htmlFor="forgotEmail" className="label">
-                      Email
-                    </label>
-                    <input
-                      id="forgotEmail"
-                      type="email"
-                      value={forgotPasswordEmail}
-                      onChange={(e) => setForgotPasswordEmail(e.target.value)}
-                      placeholder="you@example.com"
-                      className="input"
-                      autoFocus
-                    />
-                  </div>
-
-                  {forgotPasswordError && (
-                    <div className="rounded-xl border border-error-500/30 bg-error-500/10 px-4 py-2.5 text-sm text-error-400">
-                      {forgotPasswordError}
-                    </div>
-                  )}
-
-                  <button
-                    type="submit"
-                    disabled={forgotPasswordLoading}
-                    className="btn-primary w-full"
-                  >
-                    {forgotPasswordLoading ? (
-                      <span className="flex items-center justify-center gap-2">
-                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                        {t('common.loading')}
-                      </span>
-                    ) : (
-                      t('auth.sendResetLink', 'Send reset link')
-                    )}
-                  </button>
-                </form>
-              </>
-            )}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
