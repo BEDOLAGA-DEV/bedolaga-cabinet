@@ -138,7 +138,7 @@ export const authApi = {
     provider: string,
   ): Promise<{ authorize_url: string; state: string }> => {
     const response = await apiClient.get<{ authorize_url: string; state: string }>(
-      `/cabinet/auth/oauth/${provider}/authorize`,
+      `/cabinet/auth/oauth/${encodeURIComponent(provider)}/authorize`,
     );
     return response.data;
   },
@@ -146,7 +146,7 @@ export const authApi = {
   // OAuth: callback (exchange code for tokens)
   oauthCallback: async (provider: string, code: string, state: string): Promise<AuthResponse> => {
     const response = await apiClient.post<AuthResponse>(
-      `/cabinet/auth/oauth/${provider}/callback`,
+      `/cabinet/auth/oauth/${encodeURIComponent(provider)}/callback`,
       { code, state },
     );
     return response.data;

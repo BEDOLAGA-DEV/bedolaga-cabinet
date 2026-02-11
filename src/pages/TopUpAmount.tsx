@@ -87,7 +87,7 @@ export default function TopUpAmount() {
   const queryClient = useQueryClient();
   const { formatAmount, currencySymbol, convertAmount, convertToRub, targetCurrency } =
     useCurrency();
-  const { openInvoice } = usePlatform();
+  const { openInvoice, openTelegramLink, openLink } = usePlatform();
   const haptic = useHaptic();
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -280,6 +280,15 @@ export default function TopUpAmount() {
       ? Math.round(convertAmount(rub)).toString()
       : convertAmount(rub).toFixed(currencyDecimals);
   const isPending = topUpMutation.isPending || starsPaymentMutation.isPending;
+
+  const handleOpenPayment = () => {
+    if (!paymentUrl) return;
+    if (paymentUrl.includes('t.me/')) {
+      openTelegramLink(paymentUrl);
+    } else {
+      openLink(paymentUrl);
+    }
+  };
 
   const handleCopyUrl = async () => {
     if (!paymentUrl) return;
@@ -478,15 +487,14 @@ export default function TopUpAmount() {
 
           <p className="text-sm text-dark-400">{t('balance.clickToOpenPayment')}</p>
 
-          <a
-            href={paymentUrl}
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
+            type="button"
+            onClick={handleOpenPayment}
             className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-success-500 font-bold text-white transition-colors hover:bg-success-400 active:bg-success-600"
           >
             <ExternalLinkIcon />
             <span>{t('balance.openPaymentPage')}</span>
-          </a>
+          </button>
 
           <div className="flex items-center gap-2">
             <div className="min-w-0 flex-1 rounded-lg border border-dark-700/50 bg-dark-800/70 px-3 py-2">

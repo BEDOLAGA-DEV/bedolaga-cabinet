@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '../store/auth';
 import { authApi } from '../api/auth';
 import { isValidEmail } from '../utils/validation';
@@ -13,7 +13,7 @@ import {
 } from '../api/notifications';
 import { referralApi } from '../api/referral';
 import { brandingApi, type EmailAuthEnabled } from '../api/branding';
-import ChangeEmailModal from '../components/ChangeEmailModal';
+import { UI } from '../config/constants';
 import { Card } from '@/components/data-display/Card';
 import { Button } from '@/components/primitives/Button';
 import { Switch } from '@/components/primitives/Switch';
@@ -70,7 +70,15 @@ export default function Profile() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
-  const [showChangeEmailModal, setShowChangeEmailModal] = useState(false);
+
+  // Inline email change flow
+  const [changeEmailStep, setChangeEmailStep] = useState<'email' | 'code' | 'success' | null>(null);
+  const [newEmail, setNewEmail] = useState('');
+  const [changeCode, setChangeCode] = useState('');
+  const [changeError, setChangeError] = useState<string | null>(null);
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const newEmailInputRef = useRef<HTMLInputElement>(null);
+  const codeInputRef = useRef<HTMLInputElement>(null);
 
   // Referral data
   const { data: referralInfo } = useQuery({
@@ -169,6 +177,117 @@ export default function Profile() {
       setSuccess(null);
     },
   });
+
+  // Email change mutations
+  const requestEmailChangeMutation = useMutation({
+    mutationFn: (emailAddr: string) => authApi.requestEmailChange(emailAddr),
+    onSuccess: () => {
+      setChangeError(null);
+      setChangeEmailStep('code');
+      setResendCooldown(UI.RESEND_COOLDOWN_SEC);
+    },
+    onError: (err: { response?: { data?: { detail?: string } } }) => {
+      const detail = err.response?.data?.detail;
+      if (detail?.includes('already registered') || detail?.includes('already in use')) {
+        setChangeError(t('profile.changeEmail.emailAlreadyUsed'));
+      } else if (detail?.includes('same as current')) {
+        setChangeError(t('profile.changeEmail.sameEmail'));
+      } else if (detail?.includes('rate limit') || detail?.includes('too many')) {
+        setChangeError(t('profile.changeEmail.tooManyRequests'));
+      } else {
+        setChangeError(detail || t('common.error'));
+      }
+    },
+  });
+
+  const verifyEmailChangeMutation = useMutation({
+    mutationFn: (verificationCode: string) => authApi.verifyEmailChange(verificationCode),
+    onSuccess: async () => {
+      setChangeError(null);
+      setChangeEmailStep('success');
+      const updatedUser = await authApi.getMe();
+      setUser(updatedUser);
+      queryClient.invalidateQueries({ queryKey: ['user'] });
+    },
+    onError: (err: { response?: { data?: { detail?: string } } }) => {
+      const detail = err.response?.data?.detail;
+      if (detail?.includes('invalid') || detail?.includes('wrong')) {
+        setChangeError(t('profile.changeEmail.invalidCode'));
+      } else if (detail?.includes('expired')) {
+        setChangeError(t('profile.changeEmail.codeExpired'));
+      } else {
+        setChangeError(detail || t('common.error'));
+      }
+    },
+  });
+
+  // Resend cooldown timer
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = setInterval(() => {
+      setResendCooldown((prev) => Math.max(0, prev - 1));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [resendCooldown]);
+
+  // Auto-focus inputs on step change
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (changeEmailStep === 'email') newEmailInputRef.current?.focus();
+      else if (changeEmailStep === 'code') codeInputRef.current?.focus();
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [changeEmailStep]);
+
+  // Auto-close success after 3s
+  useEffect(() => {
+    if (changeEmailStep !== 'success') return;
+    const timer = setTimeout(() => resetChangeEmail(), 3000);
+    return () => clearTimeout(timer);
+  }, [changeEmailStep]);
+
+  const resetChangeEmail = () => {
+    setChangeEmailStep(null);
+    setNewEmail('');
+    setChangeCode('');
+    setChangeError(null);
+    setResendCooldown(0);
+  };
+
+  const handleSendChangeCode = () => {
+    setChangeError(null);
+    if (!newEmail.trim()) {
+      setChangeError(t('profile.emailRequired'));
+      return;
+    }
+    if (!isValidEmail(newEmail.trim())) {
+      setChangeError(t('profile.invalidEmail'));
+      return;
+    }
+    if (user?.email && newEmail.toLowerCase().trim() === user.email.toLowerCase()) {
+      setChangeError(t('profile.changeEmail.sameEmail'));
+      return;
+    }
+    requestEmailChangeMutation.mutate(newEmail.trim());
+  };
+
+  const handleVerifyChangeCode = () => {
+    setChangeError(null);
+    if (!changeCode.trim()) {
+      setChangeError(t('profile.changeEmail.enterCode'));
+      return;
+    }
+    if (changeCode.trim().length < 4) {
+      setChangeError(t('profile.changeEmail.invalidCode'));
+      return;
+    }
+    verifyEmailChangeMutation.mutate(changeCode.trim());
+  };
+
+  const handleResendChangeCode = () => {
+    if (resendCooldown > 0) return;
+    requestEmailChangeMutation.mutate(newEmail.trim());
+  };
 
   const { data: notificationSettings, isLoading: notificationsLoading } = useQuery({
     queryKey: ['notification-settings'],
@@ -324,27 +443,179 @@ export default function Profile() {
                     <p className="mb-4 text-sm text-warning-400">
                       {t('profile.verificationRequired')}
                     </p>
-                    <Button
-                      onClick={() => resendVerificationMutation.mutate()}
-                      loading={resendVerificationMutation.isPending}
-                    >
-                      {t('profile.resendVerification')}
-                    </Button>
+                    <div className="flex items-center gap-3">
+                      <Button
+                        onClick={() => resendVerificationMutation.mutate()}
+                        loading={resendVerificationMutation.isPending}
+                      >
+                        {t('profile.resendVerification')}
+                      </Button>
+                      {(user.auth_type === 'telegram' || user.auth_type === 'email') && (
+                        <button
+                          onClick={() => setChangeEmailStep('email')}
+                          className="text-sm text-accent-400 transition-colors hover:text-accent-300"
+                        >
+                          {t('profile.changeEmail.button')}
+                        </button>
+                      )}
+                    </div>
                   </div>
                 )}
 
-                {user.email_verified && (
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm text-dark-400">{t('profile.canLoginWithEmail')}</p>
-                    <button
-                      onClick={() => setShowChangeEmailModal(true)}
-                      className="flex items-center gap-2 text-sm text-accent-400 transition-colors hover:text-accent-300"
+                {user.email_verified &&
+                  (user.auth_type === 'telegram' || user.auth_type === 'email') && (
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm text-dark-400">{t('profile.canLoginWithEmail')}</p>
+                      <button
+                        onClick={() => setChangeEmailStep('email')}
+                        className="flex items-center gap-2 text-sm text-accent-400 transition-colors hover:text-accent-300"
+                      >
+                        <PencilIcon />
+                        <span>{t('profile.changeEmail.button')}</span>
+                      </button>
+                    </div>
+                  )}
+
+                {/* Inline email change flow */}
+                <AnimatePresence>
+                  {changeEmailStep === 'email' && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="overflow-hidden"
                     >
-                      <PencilIcon />
-                      <span>{t('profile.changeEmail.button')}</span>
-                    </button>
-                  </div>
-                )}
+                      <div className="space-y-3 border-t border-dark-800/50 pt-4">
+                        <label className="block text-sm font-medium text-dark-400">
+                          {t('profile.changeEmail.newEmail')}
+                        </label>
+                        <input
+                          ref={newEmailInputRef}
+                          type="email"
+                          value={newEmail}
+                          onChange={(e) => setNewEmail(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              handleSendChangeCode();
+                            }
+                          }}
+                          placeholder="new@email.com"
+                          className="input w-full"
+                          autoComplete="email"
+                        />
+                        {changeError && <p className="text-sm text-error-400">{changeError}</p>}
+                        <div className="flex items-center gap-3">
+                          <Button
+                            onClick={handleSendChangeCode}
+                            loading={requestEmailChangeMutation.isPending}
+                            disabled={!newEmail.trim()}
+                          >
+                            {t('profile.changeEmail.sendCode')}
+                          </Button>
+                          <button
+                            onClick={resetChangeEmail}
+                            className="text-sm text-dark-400 hover:text-dark-200"
+                          >
+                            {t('common.cancel')}
+                          </button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {changeEmailStep === 'code' && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="space-y-3 border-t border-dark-800/50 pt-4">
+                        <div className="rounded-linear border border-accent-500/30 bg-accent-500/10 p-3">
+                          <p className="text-sm text-accent-400">
+                            {t('profile.changeEmail.codeSentTo', { email: newEmail })}
+                          </p>
+                        </div>
+                        <label className="block text-sm font-medium text-dark-400">
+                          {t('profile.changeEmail.verificationCode')}
+                        </label>
+                        <input
+                          ref={codeInputRef}
+                          type="text"
+                          inputMode="numeric"
+                          value={changeCode}
+                          onChange={(e) => setChangeCode(e.target.value.replace(/\D/g, ''))}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              handleVerifyChangeCode();
+                            }
+                          }}
+                          placeholder="000000"
+                          maxLength={6}
+                          className="input w-full text-center text-2xl tracking-[0.5em]"
+                          autoComplete="one-time-code"
+                        />
+                        {changeError && <p className="text-sm text-error-400">{changeError}</p>}
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <Button
+                              onClick={handleVerifyChangeCode}
+                              loading={verifyEmailChangeMutation.isPending}
+                              disabled={!changeCode.trim()}
+                            >
+                              {t('profile.changeEmail.verify')}
+                            </Button>
+                            <button
+                              onClick={() => {
+                                setChangeEmailStep('email');
+                                setChangeCode('');
+                                setChangeError(null);
+                              }}
+                              className="text-sm text-dark-400 hover:text-dark-200"
+                            >
+                              {t('common.back')}
+                            </button>
+                          </div>
+                          <button
+                            onClick={handleResendChangeCode}
+                            disabled={resendCooldown > 0 || requestEmailChangeMutation.isPending}
+                            className={`text-sm ${resendCooldown > 0 ? 'text-dark-500' : 'text-accent-400 hover:text-accent-300'}`}
+                          >
+                            {resendCooldown > 0
+                              ? t('profile.changeEmail.resendIn', { seconds: resendCooldown })
+                              : t('profile.changeEmail.resendCode')}
+                          </button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {changeEmailStep === 'success' && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="overflow-hidden"
+                    >
+                      <div className="border-t border-dark-800/50 pt-4">
+                        <div className="flex items-center gap-3 rounded-linear border border-success-500/30 bg-success-500/10 p-4">
+                          <CheckIcon />
+                          <div>
+                            <p className="font-medium text-success-400">
+                              {t('profile.changeEmail.success')}
+                            </p>
+                            <p className="text-sm text-dark-400">{newEmail}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             ) : (
               <div>
@@ -586,14 +857,6 @@ export default function Profile() {
           )}
         </Card>
       </motion.div>
-
-      {/* Change Email Modal */}
-      {showChangeEmailModal && user?.email && (
-        <ChangeEmailModal
-          onClose={() => setShowChangeEmailModal(false)}
-          currentEmail={user.email}
-        />
-      )}
     </motion.div>
   );
 }
