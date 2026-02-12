@@ -6,6 +6,7 @@ export * from './SettingInput';
 export * from './SettingRow';
 export * from './AnalyticsTab';
 export * from './BrandingTab';
+export * from './ButtonsTab';
 export * from './ThemeTab';
 export * from './FavoritesTab';
 export * from './SettingsTab';

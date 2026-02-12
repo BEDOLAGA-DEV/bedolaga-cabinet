@@ -21,6 +21,7 @@ export const MENU_SECTIONS: MenuSection[] = [
       { id: 'branding', iconType: null },
       { id: 'theme', iconType: null },
       { id: 'analytics', iconType: null },
+      { id: 'buttons', iconType: null },
     ],
   },
   {
