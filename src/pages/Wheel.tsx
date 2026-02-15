@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { wheelApi, type SpinResult, type SpinHistoryItem } from '../api/wheel';
+import { wheelApi, type WheelPrize, type SpinResult, type SpinHistoryItem } from '../api/wheel';
 import FortuneWheel from '../components/wheel/FortuneWheel';
 import WheelLegend from '../components/wheel/WheelLegend';
 import { usePlatform, useHaptic } from '@/platform';
@@ -55,6 +55,41 @@ const ChevronIcon = ({ expanded }: { expanded: boolean }) => (
     <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
   </svg>
 );
+
+/**
+ * Calculate rotation degrees for a prize based on its position on the wheel.
+ * Mirrors the backend _calculate_rotation logic in wheel_service.py.
+ */
+function calculateRotationForPrize(prizes: WheelPrize[], result: SpinResult): number {
+  // Find prize index by matching display_name + emoji (both must match for safety)
+  let prizeIndex = prizes.findIndex(
+    (p) => p.display_name === result.prize_display_name && p.emoji === result.emoji,
+  );
+
+  // Fallback: match by display_name only
+  if (prizeIndex === -1) {
+    prizeIndex = prizes.findIndex((p) => p.display_name === result.prize_display_name);
+  }
+
+  // Fallback: match by emoji + prize_type
+  if (prizeIndex === -1) {
+    prizeIndex = prizes.findIndex(
+      (p) => p.emoji === result.emoji && p.prize_type === result.prize_type,
+    );
+  }
+
+  if (prizeIndex === -1) {
+    // Can't determine prize position — random angle
+    return Math.random() * 360;
+  }
+
+  const sectorAngle = 360 / prizes.length;
+  const baseAngle = prizeIndex * sectorAngle + sectorAngle / 2;
+  const offset = (Math.random() - 0.5) * sectorAngle * 0.6; // ±30% of sector
+  const stopAngle = 360 - baseAngle + offset;
+
+  return stopAngle;
+}
 
 export default function Wheel() {
   const { t } = useTranslation();
@@ -198,15 +233,9 @@ export default function Wheel() {
           }
           pollingAbortRef.current = new AbortController();
 
-          // Payment done - reset paying state immediately
-          setIsPayingStars(false);
-
-          // Start spinning animation (5 seconds duration in FortuneWheel)
-          setIsSpinning(true);
-          setTargetRotation(360 * 5 + Math.random() * 360);
-
-          // Poll for the result in the background - don't await here!
-          // The result will be stored and shown when animation completes
+          // Keep isPayingStars=true to show loading state while polling for result.
+          // We poll FIRST to get the actual prize, then calculate the correct
+          // rotation angle so the wheel visually lands on the right sector.
           const abortSignal = pollingAbortRef.current.signal;
           pollForSpinResult(abortSignal)
             .then((result) => {
@@ -215,10 +244,17 @@ export default function Wheel() {
               queryClient.invalidateQueries({ queryKey: ['wheel-config'] });
               queryClient.invalidateQueries({ queryKey: ['wheel-history'] });
 
+              setIsPayingStars(false);
+
               if (result) {
                 pendingStarsResultRef.current = result;
+                // Calculate rotation so the wheel lands on the correct prize sector
+                const rotation = config?.prizes
+                  ? calculateRotationForPrize(config.prizes, result)
+                  : Math.random() * 360;
+                setTargetRotation(rotation);
               } else {
-                // Fallback: couldn't get result
+                // Fallback: couldn't get result — use random rotation
                 pendingStarsResultRef.current = {
                   success: true,
                   prize_id: null,
@@ -232,12 +268,17 @@ export default function Wheel() {
                   promocode: null,
                   error: null,
                 };
+                setTargetRotation(Math.random() * 360);
               }
+
+              setIsSpinning(true);
             })
             .catch(() => {
               if (abortSignal.aborted) return;
 
-              // Error polling, show generic success
+              setIsPayingStars(false);
+
+              // Error polling — spin with random rotation and show generic message
               pendingStarsResultRef.current = {
                 success: true,
                 prize_id: null,
@@ -251,6 +292,8 @@ export default function Wheel() {
                 promocode: null,
                 error: null,
               };
+              setTargetRotation(Math.random() * 360);
+              setIsSpinning(true);
             });
         } else if (status !== 'cancelled') {
           setIsPayingStars(false);

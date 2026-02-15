@@ -935,6 +935,7 @@
       "noSearchResults": "چیزی یافت نشد",
       "example": "مثال",
       "analytics": "تحلیل‌ها",
+      "buttons": "دکمه‌ها",
       "notConfigured": "پیکربندی نشده",
       "counterActive": "فعال",
       "counterInactive": "غیرفعال",
@@ -994,6 +995,41 @@
       "quickPresets": "پیش‌تنظیم‌های سریع",
       "resetAllColors": "بازنشانی همه رنگ‌ها",
       "statusColors": "رنگ‌های وضعیت"
+    },
+    "buttons": {
+      "color": "رنگ دکمه",
+      "emojiId": "شناسه ایموجی سفارشی",
+      "emojiPlaceholder": "شناسه ایموجی سفارشی (اختیاری)",
+      "resetAll": "بازنشانی همه سبک‌ها",
+      "resetConfirm": "همه سبک‌های دکمه به حالت پیش‌فرض بازنشانی شوند؟",
+      "hidden": "پنهان",
+      "customLabels": "نام‌های دکمه",
+      "labelPlaceholder": "متن سفارشی دکمه",
+      "labelsHint": "خالی = نام پیش‌فرض",
+      "sections": {
+        "home": "صفحه اصلی",
+        "subscription": "اشتراک",
+        "balance": "موجودی",
+        "referral": "معرفی",
+        "support": "پشتیبانی",
+        "info": "اطلاعات",
+        "admin": "پنل مدیریت"
+      },
+      "descriptions": {
+        "home": "دکمه کابینت شخصی",
+        "subscription": "مدیریت اشتراک",
+        "balance": "شارژ و موجودی",
+        "referral": "برنامه معرفی",
+        "support": "تیکت‌های پشتیبانی",
+        "info": "بخش اطلاعات",
+        "admin": "پنل مدیریت وب"
+      },
+      "styles": {
+        "default": "بدون رنگ",
+        "primary": "آبی",
+        "success": "سبز",
+        "danger": "قرمز"
+      }
     },
     "apps": {
       "title": "مدیریت برنامه‌ها",

@@ -1260,6 +1260,7 @@
       "branding": "Брендинг",
       "theme": "Тема",
       "analytics": "Аналитика",
+      "buttons": "Кнопки",
       "payments": "Платежи",
       "subscriptions": "Подписки",
       "interface": "Интерфейс",
@@ -1799,6 +1800,41 @@
         "TIMEZONE": "Часовой пояс",
         "REFERRAL": "Реферальная система",
         "MODERATION": "Модерация"
+      }
+    },
+    "buttons": {
+      "color": "Цвет кнопки",
+      "emojiId": "Custom Emoji ID",
+      "emojiPlaceholder": "ID кастомного эмодзи (необязательно)",
+      "resetAll": "Сбросить все стили",
+      "resetConfirm": "Сбросить все стили кнопок к значениям по умолчанию?",
+      "hidden": "Скрыта",
+      "customLabels": "Названия кнопки",
+      "labelPlaceholder": "Свой текст кнопки",
+      "labelsHint": "Пустое поле = название по умолчанию",
+      "sections": {
+        "home": "Главная",
+        "subscription": "Подписка",
+        "balance": "Баланс",
+        "referral": "Рефералы",
+        "support": "Поддержка",
+        "info": "Информация",
+        "admin": "Админка"
+      },
+      "descriptions": {
+        "home": "Кнопка личного кабинета",
+        "subscription": "Управление подпиской",
+        "balance": "Пополнение и баланс",
+        "referral": "Реферальная программа",
+        "support": "Обращения в поддержку",
+        "info": "Информационный раздел",
+        "admin": "Веб-админка"
+      },
+      "styles": {
+        "default": "Без цвета",
+        "primary": "Синий",
+        "success": "Зелёный",
+        "danger": "Красный"
       }
     },
     "apps": {

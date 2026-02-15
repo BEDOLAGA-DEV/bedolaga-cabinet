@@ -1217,6 +1217,7 @@
       "noSearchResults": "Nothing found",
       "example": "Example",
       "analytics": "Analytics",
+      "buttons": "Buttons",
       "notConfigured": "Not configured",
       "counterActive": "Active",
       "counterInactive": "Inactive",
@@ -1285,6 +1286,41 @@
       "lightness": "Lightness",
       "quickPresets": "Quick presets",
       "saturation": "Saturation"
+    },
+    "buttons": {
+      "color": "Button color",
+      "emojiId": "Custom Emoji ID",
+      "emojiPlaceholder": "Custom emoji ID (optional)",
+      "resetAll": "Reset all styles",
+      "resetConfirm": "Reset all button styles to defaults?",
+      "hidden": "Hidden",
+      "customLabels": "Button labels",
+      "labelPlaceholder": "Custom button text",
+      "labelsHint": "Empty = default label",
+      "sections": {
+        "home": "Home",
+        "subscription": "Subscription",
+        "balance": "Balance",
+        "referral": "Referrals",
+        "support": "Support",
+        "info": "Info",
+        "admin": "Admin Panel"
+      },
+      "descriptions": {
+        "home": "Personal cabinet button",
+        "subscription": "Subscription management",
+        "balance": "Top-up and balance",
+        "referral": "Referral program",
+        "support": "Support tickets",
+        "info": "Information section",
+        "admin": "Web admin panel"
+      },
+      "styles": {
+        "default": "No color",
+        "primary": "Blue",
+        "success": "Green",
+        "danger": "Red"
+      }
     },
     "apps": {
       "title": "App Management",

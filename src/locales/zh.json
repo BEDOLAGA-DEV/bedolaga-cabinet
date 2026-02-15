@@ -973,6 +973,7 @@
       "noSearchResults": "未找到结果",
       "example": "示例",
       "analytics": "分析",
+      "buttons": "按钮",
       "notConfigured": "未配置",
       "counterActive": "已启用",
       "counterInactive": "未启用",
@@ -1032,6 +1033,41 @@
       "quickPresets": "快速预设",
       "resetAllColors": "重置所有颜色",
       "statusColors": "状态颜色"
+    },
+    "buttons": {
+      "color": "按钮颜色",
+      "emojiId": "自定义表情 ID",
+      "emojiPlaceholder": "自定义表情 ID（可选）",
+      "resetAll": "重置所有样式",
+      "resetConfirm": "将所有按钮样式重置为默认值？",
+      "hidden": "已隐藏",
+      "customLabels": "按钮名称",
+      "labelPlaceholder": "自定义按钮文本",
+      "labelsHint": "留空 = 默认名称",
+      "sections": {
+        "home": "主页",
+        "subscription": "订阅",
+        "balance": "余额",
+        "referral": "推荐",
+        "support": "支持",
+        "info": "信息",
+        "admin": "管理面板"
+      },
+      "descriptions": {
+        "home": "个人中心按钮",
+        "subscription": "订阅管理",
+        "balance": "充值和余额",
+        "referral": "推荐计划",
+        "support": "支持工单",
+        "info": "信息板块",
+        "admin": "网页管理面板"
+      },
+      "styles": {
+        "default": "无颜色",
+        "primary": "蓝色",
+        "success": "绿色",
+        "danger": "红色"
+      }
     },
     "apps": {
       "title": "应用管理",
