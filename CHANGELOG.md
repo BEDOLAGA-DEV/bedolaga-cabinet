@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.16.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.15.0...v1.16.0) (2026-02-15)
+
+
+### Features
+
+* add 'no color' option for button style customization ([e586129](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/e586129c37d9152122899d3fea8034ceb03b3993))
+* add ButtonsTab for per-section button style customization ([b289873](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/b2898730b98b3bf73d075158a9f59ef5bf1f6e54))
+* add per-button enable/disable toggle and custom labels per locale ([1a0a5ff](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/1a0a5ff45313da383ed402b09a630e2774d2ae04))
+
+
+### Bug Fixes
+
+* normalize all API responses, add error handling and reset confirmation ([150a1b2](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/150a1b2dbaeffbf39e00c6f75b2761a854821b09))
+* prevent button settings cards from overflowing in admin panel ([54f1483](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/54f1483312e776f3c02cdcd797fe392482ed3e1d))
+* wheel lands on correct prize sector for Stars payment spins ([22bda66](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/22bda66e81714a2ff3e8de02b216af70509ced3e))
+
 ## [1.15.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.14.1...v1.15.0) (2026-02-12)
 
 
