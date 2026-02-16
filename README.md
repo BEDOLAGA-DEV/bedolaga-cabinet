@@ -78,7 +78,7 @@ VITE_APP_LOGO=V
 
 ```bash
 docker compose build
-docker create --name tmp_cabinet cabinet_frontend
+docker create --name tmp_cabinet bedolaga-cabinet-cabinet-frontend:latest
 docker cp tmp_cabinet:/usr/share/nginx/html ./cabinet-dist
 docker rm tmp_cabinet
 ```
