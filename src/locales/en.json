@@ -70,6 +70,12 @@
     "newUserReply": "User replied in ticket: {{title}}",
     "newUserReplyTitle": "User Reply"
   },
+  "campaignBonus": {
+    "title": "Bonus activated!",
+    "balance": "You received {{amount}} RUB from campaign \"{{name}}\"",
+    "subscription": "You received a {{days}}-day subscription from campaign \"{{name}}\"",
+    "tariff": "You received tariff \"{{tariff}}\" from campaign \"{{name}}\""
+  },
   "wsNotifications": {
     "balance": {
       "topupTitle": "Balance topped up",
@@ -1684,6 +1690,8 @@
         "inactive": "Inactive",
         "copy": "Copy",
         "copied": "Copied!",
+        "botLink": "Bot link",
+        "webLink": "Web link",
         "users": "Users",
         "noUsers": "No registered users",
         "paid": "Paid",

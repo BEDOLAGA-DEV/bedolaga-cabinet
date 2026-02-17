@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import i18n from '../i18n';
 import { campaignsApi, CampaignBonusType } from '../api/campaigns';
 import { AdminBackButton } from '../components/admin';
 
@@ -74,14 +75,18 @@ const bonusTypeConfig: Record<
 };
 
 // Helper functions
+const localeMap: Record<string, string> = { ru: 'ru-RU', en: 'en-US', zh: 'zh-CN', fa: 'fa-IR' };
+
 const formatRubles = (kopeks: number): string => {
   const rubles = kopeks / 100;
-  return `${rubles.toLocaleString('ru-RU')} ₽`;
+  const locale = localeMap[i18n.language] || 'ru-RU';
+  return `${rubles.toLocaleString(locale)} ₽`;
 };
 
 const formatDate = (date: string | null): string => {
   if (!date) return '-';
-  return new Date(date).toLocaleDateString('ru-RU', {
+  const locale = localeMap[i18n.language] || 'ru-RU';
+  return new Date(date).toLocaleDateString(locale, {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
@@ -94,8 +99,18 @@ export default function AdminCampaignStats() {
   const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [copied, setCopied] = useState(false);
+  const [copiedBot, setCopiedBot] = useState(false);
+  const [copiedWeb, setCopiedWeb] = useState(false);
   const [showUsers, setShowUsers] = useState(false);
+  const copyBotTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const copyWebTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  useEffect(() => {
+    return () => {
+      clearTimeout(copyBotTimer.current);
+      clearTimeout(copyWebTimer.current);
+    };
+  }, []);
 
   // Fetch stats
   const {
@@ -115,11 +130,29 @@ export default function AdminCampaignStats() {
     enabled: !!id && showUsers,
   });
 
-  const copyLink = () => {
+  const copyBotLink = async () => {
     if (stats?.deep_link) {
-      navigator.clipboard.writeText(stats.deep_link);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      try {
+        await navigator.clipboard.writeText(stats.deep_link);
+        setCopiedBot(true);
+        clearTimeout(copyBotTimer.current);
+        copyBotTimer.current = setTimeout(() => setCopiedBot(false), 2000);
+      } catch {
+        // Clipboard not available
+      }
+    }
+  };
+
+  const copyWebLink = async () => {
+    if (stats?.web_link) {
+      try {
+        await navigator.clipboard.writeText(stats.web_link);
+        setCopiedWeb(true);
+        clearTimeout(copyWebTimer.current);
+        copyWebTimer.current = setTimeout(() => setCopiedWeb(false), 2000);
+      } catch {
+        // Clipboard not available
+      }
     }
   };
 
@@ -185,24 +218,57 @@ export default function AdminCampaignStats() {
       </div>
 
       <div className="space-y-6">
-        {/* Deep Link */}
-        {stats.deep_link && (
-          <div className="rounded-xl border border-dark-700 bg-dark-800 p-4">
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex min-w-0 items-center gap-2">
-                <LinkIcon />
-                <span className="truncate text-sm text-dark-300">{stats.deep_link}</span>
+        {/* Links */}
+        {(stats.deep_link || stats.web_link) && (
+          <div className="space-y-3">
+            {stats.deep_link && (
+              <div className="rounded-xl border border-dark-700 bg-dark-800 p-4">
+                <div className="mb-1 text-xs font-medium text-dark-500">
+                  {t('admin.campaigns.stats.botLink')}
+                </div>
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <LinkIcon />
+                    <span className="truncate text-sm text-dark-300">{stats.deep_link}</span>
+                  </div>
+                  <button
+                    onClick={copyBotLink}
+                    className="flex shrink-0 items-center gap-1 rounded-lg bg-dark-700 px-3 py-1.5 text-dark-300 transition-colors hover:bg-dark-600"
+                  >
+                    <CopyIcon />
+                    <span className="text-sm">
+                      {copiedBot
+                        ? t('admin.campaigns.stats.copied')
+                        : t('admin.campaigns.stats.copy')}
+                    </span>
+                  </button>
+                </div>
               </div>
-              <button
-                onClick={copyLink}
-                className="flex shrink-0 items-center gap-1 rounded-lg bg-dark-700 px-3 py-1.5 text-dark-300 transition-colors hover:bg-dark-600"
-              >
-                <CopyIcon />
-                <span className="text-sm">
-                  {copied ? t('admin.campaigns.stats.copied') : t('admin.campaigns.stats.copy')}
-                </span>
-              </button>
-            </div>
+            )}
+            {stats.web_link && (
+              <div className="rounded-xl border border-dark-700 bg-dark-800 p-4">
+                <div className="mb-1 text-xs font-medium text-dark-500">
+                  {t('admin.campaigns.stats.webLink')}
+                </div>
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <LinkIcon />
+                    <span className="truncate text-sm text-dark-300">{stats.web_link}</span>
+                  </div>
+                  <button
+                    onClick={copyWebLink}
+                    className="flex shrink-0 items-center gap-1 rounded-lg bg-dark-700 px-3 py-1.5 text-dark-300 transition-colors hover:bg-dark-600"
+                  >
+                    <CopyIcon />
+                    <span className="text-sm">
+                      {copiedWeb
+                        ? t('admin.campaigns.stats.copied')
+                        : t('admin.campaigns.stats.copy')}
+                    </span>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
 

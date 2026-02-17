@@ -64,6 +64,12 @@
     "newUserReply": "کاربر در تیکت پاسخ داد: {{title}}",
     "newUserReplyTitle": "پاسخ کاربر"
   },
+  "campaignBonus": {
+    "title": "!پاداش فعال شد",
+    "balance": "شما {{amount}} روبل از کمپین «{{name}}» دریافت کردید",
+    "subscription": "شما اشتراک {{days}} روزه از کمپین «{{name}}» دریافت کردید",
+    "tariff": "شما تعرفه «{{tariff}}» از کمپین «{{name}}» دریافت کردید"
+  },
   "wsNotifications": {
     "balance": {
       "topupTitle": "موجودی شارژ شد",
@@ -1421,6 +1427,8 @@
         "inactive": "غیرفعال",
         "copy": "کپی",
         "copied": "کپی شد!",
+        "botLink": "لینک ربات",
+        "webLink": "لینک وب",
         "users": "کاربران",
         "noUsers": "کاربر ثبت‌نام شده‌ای وجود ندارد",
         "paid": "پرداخت کرده",

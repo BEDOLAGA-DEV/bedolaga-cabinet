@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSearchParams, Link, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { authApi } from '../api/auth';
 import { useAuthStore } from '../store/auth';
+import { consumeCampaignSlug } from '../utils/campaign';
 import { tokenStorage } from '../utils/token';
 import LanguageSwitcher from '../components/LanguageSwitcher';
 
@@ -13,8 +14,11 @@ export default function VerifyEmail() {
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [error, setError] = useState('');
   const { setTokens, setUser, checkAdminStatus } = useAuthStore();
+  const hasVerified = useRef(false);
 
   useEffect(() => {
+    if (hasVerified.current) return;
+
     const token = searchParams.get('token');
 
     if (!token) {
@@ -23,17 +27,24 @@ export default function VerifyEmail() {
       return;
     }
 
+    hasVerified.current = true;
+    let redirectTimer: ReturnType<typeof setTimeout>;
+
     const verify = async () => {
       try {
-        const response = await authApi.verifyEmail(token);
+        const campaignSlug = consumeCampaignSlug();
+        const response = await authApi.verifyEmail(token, campaignSlug);
         // Save tokens and log user in
         tokenStorage.setTokens(response.access_token, response.refresh_token);
         setTokens(response.access_token, response.refresh_token);
         setUser(response.user);
+        if (response.campaign_bonus) {
+          useAuthStore.setState({ pendingCampaignBonus: response.campaign_bonus });
+        }
         checkAdminStatus();
         setStatus('success');
         // Redirect to dashboard after short delay
-        setTimeout(() => navigate('/', { replace: true }), 1500);
+        redirectTimer = setTimeout(() => navigate('/', { replace: true }), 1500);
       } catch (err: unknown) {
         setStatus('error');
         const error = err as { response?: { data?: { detail?: string } } };
@@ -42,6 +53,8 @@ export default function VerifyEmail() {
     };
 
     verify();
+
+    return () => clearTimeout(redirectTimer);
   }, [searchParams, t, navigate, setTokens, setUser, checkAdminStatus]);
 
   return (

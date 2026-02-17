@@ -44,6 +44,7 @@ export interface CampaignDetail {
   created_at: string;
   updated_at: string | null;
   deep_link: string | null;
+  web_link: string | null;
 }
 
 export interface CampaignCreateRequest {
@@ -104,6 +105,7 @@ export interface CampaignStatistics {
   conversion_rate: number;
   trial_conversion_rate: number;
   deep_link: string | null;
+  web_link: string | null;
 }
 
 export interface CampaignRegistrationItem {

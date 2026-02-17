@@ -64,6 +64,12 @@
     "newUserReply": "用户回复了工单：{{title}}",
     "newUserReplyTitle": "用户回复"
   },
+  "campaignBonus": {
+    "title": "奖励已激活！",
+    "balance": "您从活动「{{name}}」获得了 {{amount}} 卢布",
+    "subscription": "您从活动「{{name}}」获得了 {{days}} 天订阅",
+    "tariff": "您从活动「{{name}}」获得了套餐「{{tariff}}」"
+  },
   "wsNotifications": {
     "balance": {
       "topupTitle": "余额已充值",
@@ -1420,6 +1426,8 @@
         "inactive": "未激活",
         "copy": "复制",
         "copied": "已复制！",
+        "botLink": "机器人链接",
+        "webLink": "网页链接",
         "users": "用户",
         "noUsers": "没有注册用户",
         "paid": "已付费",

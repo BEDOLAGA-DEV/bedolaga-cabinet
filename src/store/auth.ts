@@ -1,8 +1,9 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { RegisterResponse, User } from '../types';
+import type { CampaignBonusInfo, RegisterResponse, User } from '../types';
 import { authApi } from '../api/auth';
 import { apiClient } from '../api/client';
+import { captureCampaignFromUrl, consumeCampaignSlug } from '../utils/campaign';
 import { tokenStorage, isTokenValid, tokenRefreshManager } from '../utils/token';
 
 export interface TelegramWidgetData {
@@ -22,10 +23,12 @@ interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   isAdmin: boolean;
+  pendingCampaignBonus: CampaignBonusInfo | null;
 
   setTokens: (accessToken: string, refreshToken: string) => void;
   setUser: (user: User) => void;
   setIsAdmin: (isAdmin: boolean) => void;
+  clearCampaignBonus: () => void;
   logout: () => void;
   initialize: () => Promise<void>;
   refreshUser: () => Promise<void>;
@@ -59,6 +62,9 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
       isLoading: true,
       isAdmin: false,
+      pendingCampaignBonus: null,
+
+      clearCampaignBonus: () => set({ pendingCampaignBonus: null }),
 
       setTokens: (accessToken, refreshToken) => {
         tokenStorage.setTokens(accessToken, refreshToken);
@@ -235,49 +241,57 @@ export const useAuthStore = create<AuthState>()(
       },
 
       loginWithTelegram: async (initData) => {
-        const response = await authApi.loginTelegram(initData);
+        const campaignSlug = consumeCampaignSlug();
+        const response = await authApi.loginTelegram(initData, campaignSlug);
         tokenStorage.setTokens(response.access_token, response.refresh_token);
         set({
           accessToken: response.access_token,
           refreshToken: response.refresh_token,
           user: response.user,
           isAuthenticated: true,
+          pendingCampaignBonus: response.campaign_bonus || null,
         });
         await get().checkAdminStatus();
       },
 
       loginWithTelegramWidget: async (data) => {
-        const response = await authApi.loginTelegramWidget(data);
+        const campaignSlug = consumeCampaignSlug();
+        const response = await authApi.loginTelegramWidget(data, campaignSlug);
         tokenStorage.setTokens(response.access_token, response.refresh_token);
         set({
           accessToken: response.access_token,
           refreshToken: response.refresh_token,
           user: response.user,
           isAuthenticated: true,
+          pendingCampaignBonus: response.campaign_bonus || null,
         });
         await get().checkAdminStatus();
       },
 
       loginWithEmail: async (email, password) => {
-        const response = await authApi.loginEmail(email, password);
+        const campaignSlug = consumeCampaignSlug();
+        const response = await authApi.loginEmail(email, password, campaignSlug);
         tokenStorage.setTokens(response.access_token, response.refresh_token);
         set({
           accessToken: response.access_token,
           refreshToken: response.refresh_token,
           user: response.user,
           isAuthenticated: true,
+          pendingCampaignBonus: response.campaign_bonus || null,
         });
         await get().checkAdminStatus();
       },
 
       loginWithOAuth: async (provider, code, state) => {
-        const response = await authApi.oauthCallback(provider, code, state);
+        const campaignSlug = consumeCampaignSlug();
+        const response = await authApi.oauthCallback(provider, code, state, campaignSlug);
         tokenStorage.setTokens(response.access_token, response.refresh_token);
         set({
           accessToken: response.access_token,
           refreshToken: response.refresh_token,
           user: response.user,
           isAuthenticated: true,
+          pendingCampaignBonus: response.campaign_bonus || null,
         });
         await get().checkAdminStatus();
       },
@@ -285,6 +299,7 @@ export const useAuthStore = create<AuthState>()(
       registerWithEmail: async (email, password, firstName, referralCode) => {
         // Registration now returns message, not tokens
         // User must verify email before they can login
+        // Campaign slug stays in localStorage — consumed during verify_email step
         const response = await authApi.registerEmailStandalone({
           email,
           password,
@@ -305,6 +320,9 @@ export const useAuthStore = create<AuthState>()(
     },
   ),
 );
+
+// Capture campaign slug from URL before auth initialization
+captureCampaignFromUrl();
 
 // Initialize auth on app load
 useAuthStore.getState().initialize();

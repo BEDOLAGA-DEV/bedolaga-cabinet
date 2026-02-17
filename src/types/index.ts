@@ -21,6 +21,15 @@ export interface OAuthProvider {
   display_name: string;
 }
 
+// Campaign bonus info (returned during auth)
+export interface CampaignBonusInfo {
+  campaign_name: string;
+  bonus_type: 'balance' | 'subscription' | 'tariff' | 'none';
+  balance_kopeks: number;
+  subscription_days: number | null;
+  tariff_name: string | null;
+}
+
 // Auth types
 export interface AuthResponse {
   access_token: string;
@@ -28,6 +37,7 @@ export interface AuthResponse {
   token_type: string;
   expires_in: number;
   user: User;
+  campaign_bonus?: CampaignBonusInfo | null;
 }
 
 export interface TokenResponse {
