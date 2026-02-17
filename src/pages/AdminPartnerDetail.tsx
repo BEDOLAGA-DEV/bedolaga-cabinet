@@ -29,6 +29,12 @@ const statusConfig: Record<string, { labelKey: string; color: string; bgColor: s
   },
 };
 
+const unknownStatus = {
+  labelKey: 'admin.partnerDetail.status.none',
+  color: 'text-dark-400',
+  bgColor: 'bg-dark-600',
+};
+
 export default function AdminPartnerDetail() {
   const { t } = useTranslation();
   const { userId } = useParams<{ userId: string }>();
@@ -82,7 +88,7 @@ export default function AdminPartnerDetail() {
     );
   }
 
-  const badge = statusConfig[partner.partner_status] || statusConfig.none;
+  const badge = statusConfig[partner.partner_status] || unknownStatus;
 
   return (
     <div className="animate-fade-in">

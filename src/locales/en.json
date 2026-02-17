@@ -1825,7 +1825,8 @@
         "approved": "Approved",
         "rejected": "Rejected",
         "completed": "Completed",
-        "cancelled": "Cancelled"
+        "cancelled": "Cancelled",
+        "unknown": "Unknown"
       },
       "detail": {
         "title": "Withdrawal",

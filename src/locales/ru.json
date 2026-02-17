@@ -2347,7 +2347,8 @@
         "approved": "Одобрено",
         "rejected": "Отклонено",
         "completed": "Выполнено",
-        "cancelled": "Отменено"
+        "cancelled": "Отменено",
+        "unknown": "Неизвестно"
       },
       "detail": {
         "title": "Заявка на вывод",
