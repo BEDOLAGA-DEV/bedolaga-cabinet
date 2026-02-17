@@ -671,10 +671,18 @@
       "submitApplication": "Submit Application",
       "applyError": "Failed to submit application. Please try again.",
       "yourCampaigns": "Your campaigns",
+      "campaignLinks": {
+        "bot": "Bot link",
+        "web": "Cabinet link"
+      },
       "campaignBonus": {
+        "title": "Referral bonus",
         "balance": "+{{amount}} to balance",
+        "balanceDesc": "{{amount}} credited on signup",
         "subscription": "{{days}} days subscription",
-        "tariff": "Bonus tariff"
+        "subscriptionDesc": "{{days}} days free subscription",
+        "tariff": "Bonus tariff",
+        "tariffDesc": "Free tariff plan"
       },
       "fields": {
         "companyName": "Company Name",

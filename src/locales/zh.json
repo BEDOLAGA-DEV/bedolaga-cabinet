@@ -562,10 +562,18 @@
       "submitApplication": "提交申请",
       "applyError": "提交申请失败，请重试。",
       "yourCampaigns": "您的活动",
+      "campaignLinks": {
+        "bot": "机器人链接",
+        "web": "网页链接"
+      },
       "campaignBonus": {
+        "title": "推荐奖励",
         "balance": "+{{amount}} 余额",
+        "balanceDesc": "注册时充值 {{amount}}",
         "subscription": "{{days}} 天订阅",
-        "tariff": "奖励套餐"
+        "subscriptionDesc": "{{days}} 天免费订阅",
+        "tariff": "奖励套餐",
+        "tariffDesc": "免费套餐方案"
       },
       "fields": {
         "companyName": "公司名称",

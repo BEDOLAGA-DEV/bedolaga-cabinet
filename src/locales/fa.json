@@ -562,10 +562,18 @@
       "submitApplication": "ارسال درخواست",
       "applyError": "ارسال درخواست ناموفق بود. لطفاً دوباره تلاش کنید.",
       "yourCampaigns": "کمپین‌های شما",
+      "campaignLinks": {
+        "bot": "لینک ربات",
+        "web": "لینک کابینت"
+      },
       "campaignBonus": {
+        "title": "جایزه معرفی",
         "balance": "+{{amount}} به موجودی",
+        "balanceDesc": "{{amount}} هنگام ثبت‌نام",
         "subscription": "{{days}} روز اشتراک",
-        "tariff": "تعرفه جایزه"
+        "subscriptionDesc": "{{days}} روز اشتراک رایگان",
+        "tariff": "تعرفه جایزه",
+        "tariffDesc": "طرح تعرفه رایگان"
       },
       "fields": {
         "companyName": "نام شرکت",

@@ -33,8 +33,7 @@ export default function AdminPartnerCampaignAssign() {
   });
 
   const assignedIds = new Set(partner?.campaigns.map((c) => c.id) ?? []);
-  const available =
-    campaignsData?.campaigns.filter((c) => !assignedIds.has(c.id) && c.is_active) ?? [];
+  const available = campaignsData?.campaigns.filter((c) => !assignedIds.has(c.id)) ?? [];
 
   const partnerName = partner
     ? partner.first_name || partner.username || `#${partner.user_id}`
@@ -75,7 +74,14 @@ export default function AdminPartnerCampaignAssign() {
             <div key={campaign.id} className="rounded-xl border border-dark-700 bg-dark-800 p-4">
               <div className="flex items-center justify-between gap-4">
                 <div className="min-w-0 flex-1">
-                  <div className="font-medium text-dark-100">{campaign.name}</div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium text-dark-100">{campaign.name}</span>
+                    {!campaign.is_active && (
+                      <span className="rounded bg-dark-600 px-1.5 py-0.5 text-xs text-dark-400">
+                        {t('admin.campaigns.status.inactive')}
+                      </span>
+                    )}
+                  </div>
                   <div className="mt-1 flex items-center gap-3 text-xs text-dark-500">
                     <span className="font-mono">?start={campaign.start_parameter}</span>
                     <span>

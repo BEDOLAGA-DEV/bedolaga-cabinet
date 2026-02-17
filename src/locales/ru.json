@@ -698,10 +698,18 @@
       "submitApplication": "Отправить заявку",
       "applyError": "Не удалось отправить заявку. Попробуйте снова.",
       "yourCampaigns": "Ваши кампании",
+      "campaignLinks": {
+        "bot": "Ссылка в бот",
+        "web": "Ссылка в кабинет"
+      },
       "campaignBonus": {
+        "title": "Бонус для реферала",
         "balance": "+{{amount}} на баланс",
+        "balanceDesc": "{{amount}} на баланс при регистрации",
         "subscription": "{{days}} дн. подписки",
-        "tariff": "Бонусный тариф"
+        "subscriptionDesc": "{{days}} дней бесплатной подписки",
+        "tariff": "Бонусный тариф",
+        "tariffDesc": "Бесплатный тарифный план"
       },
       "fields": {
         "companyName": "Название компании",
