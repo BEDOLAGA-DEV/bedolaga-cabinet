@@ -1,7 +1,7 @@
 {
   "name": "cabinet-frontend",
   "private": true,
-  "version": "1.17.0",
+  "version": "1.18.0",
   "description": "Remnawave Bedolaga Web App",
   "license": "AGPL-3.0",
   "type": "module",

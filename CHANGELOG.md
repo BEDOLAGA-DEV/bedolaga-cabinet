@@ -1,5 +1,32 @@
 # Changelog
 
+## [1.18.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.17.0...v1.18.0) (2026-02-18)
+
+
+### Features
+
+* add partner management and withdrawal admin pages ([779fbf0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/779fbf0dc61b5963e2ac48162b02a292155457a5))
+* admin partner settings page, partner section visibility toggle, custom requisites text ([76d20fd](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/76d20fdb1aa374b2de3f075bda4672484b8b8de6))
+* partner-campaign integration in admin UI ([959f892](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/959f89266bd7fe6e8a38d218c7d34e14c509a21b))
+* show blocked_count in broadcast admin UI ([9cf8e09](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/9cf8e095b8ce45ea92f6289bf275cd82e264dcde))
+* show partner campaign links with bonuses on referral page ([8b33d82](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/8b33d8224d63509408f96919d702d1eb21bc050a))
+* show traffic reset info in subscription card ([271a005](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/271a005e87d21f6a82aad7272c92775a6e1aec6c))
+* show traffic reset period on tariff cards ([cfe9f64](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/cfe9f642d842fc0696e379ef59934b300c363a24))
+
+
+### Bug Fixes
+
+* add missing cancelled filter key to withdrawal i18n in all locales ([9b2742f](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/9b2742ff3afc627bfe382859e9239b5ba9104ea4))
+* hide empty blocks in connection installation guide ([96f9a71](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/96f9a719fd02d5f21c2bd3753c4eb8afd36887c6))
+* reduce campaigns fetch limit to 100 (backend max) ([be168a7](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/be168a75df500757e0e2f5fbad19c178e3e817db))
+* remove duplicate min withdrawal amount on referral page ([98ab109](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/98ab1099b9f9b639221b431205bd7eb9e8432d34))
+* remove server/location count from tariff cards and confirmation ([0fac368](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/0fac3689e57eee63489a379a966e89825f1a5854))
+* rename Серверы to Локации in subscription card ([19e62fc](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/19e62fccf1efbb0c17a160348c75f9e695691bf1))
+* show all campaigns in assign list, add dual links and bonus details ([a72042d](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/a72042d8075000db204b0f57c893928cadc68cef))
+* show locations count instead of servers on tariff cards ([ecc089d](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/ecc089da641c3b40739fbc4e77a997c27529b582))
+* stop WS reconnect loop on auth rejection (code 1008) ([2efce0e](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/2efce0eb03c9511e7cd0aa814c364f6216e89e28))
+* use correct translation key for inactive campaign badge ([8207368](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/8207368ef77a772fdcf70d7ec798ddbbbfd9e63c))
+
 ## [1.17.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.16.1...v1.17.0) (2026-02-17)
 
 
