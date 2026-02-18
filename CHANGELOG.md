@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.19.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.18.0...v1.19.0) (2026-02-18)
+
+
+### Features
+
+* add referral code persistence across all auth methods ([2b2ead8](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/2b2ead837c457a02c8a153d6b25cae492aa5e617))
+
 ## [1.18.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.17.0...v1.18.0) (2026-02-18)
 
 
