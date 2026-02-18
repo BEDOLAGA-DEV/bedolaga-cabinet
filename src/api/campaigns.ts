@@ -17,6 +17,8 @@ export interface CampaignListItem {
   registrations_count: number;
   total_revenue_kopeks: number;
   conversion_rate: number;
+  partner_user_id: number | null;
+  partner_name: string | null;
   created_at: string;
 }
 
@@ -40,6 +42,8 @@ export interface CampaignDetail {
   tariff_id: number | null;
   tariff_duration_days: number | null;
   tariff: TariffInfo | null;
+  partner_user_id: number | null;
+  partner_name: string | null;
   created_by: number | null;
   created_at: string;
   updated_at: string | null;
@@ -59,6 +63,7 @@ export interface CampaignCreateRequest {
   subscription_squads?: string[];
   tariff_id?: number;
   tariff_duration_days?: number;
+  partner_user_id?: number | null;
 }
 
 export interface CampaignUpdateRequest {
@@ -73,6 +78,7 @@ export interface CampaignUpdateRequest {
   subscription_squads?: string[];
   tariff_id?: number;
   tariff_duration_days?: number;
+  partner_user_id?: number | null;
 }
 
 export interface CampaignToggleResponse {
@@ -159,6 +165,12 @@ export interface TariffListItem {
   device_limit: number;
 }
 
+export interface AvailablePartner {
+  user_id: number;
+  username: string | null;
+  first_name: string | null;
+}
+
 export const campaignsApi = {
   // Get campaigns overview
   getOverview: async (): Promise<CampaignsOverview> => {
@@ -238,6 +250,12 @@ export const campaignsApi = {
   // Get available tariffs for tariff bonus
   getAvailableTariffs: async (): Promise<TariffListItem[]> => {
     const response = await apiClient.get('/cabinet/admin/campaigns/available-tariffs');
+    return response.data;
+  },
+
+  // Get available partners for campaign assignment
+  getAvailablePartners: async (): Promise<AvailablePartner[]> => {
+    const response = await apiClient.get('/cabinet/admin/campaigns/available-partners');
     return response.data;
   },
 };

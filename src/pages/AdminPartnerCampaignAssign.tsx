@@ -33,7 +33,12 @@ export default function AdminPartnerCampaignAssign() {
   });
 
   const assignedIds = new Set(partner?.campaigns.map((c) => c.id) ?? []);
-  const available = campaignsData?.campaigns.filter((c) => !assignedIds.has(c.id)) ?? [];
+  const available =
+    campaignsData?.campaigns.filter((c) => !assignedIds.has(c.id) && c.partner_user_id === null) ??
+    [];
+  const takenByOthers =
+    campaignsData?.campaigns.filter((c) => !assignedIds.has(c.id) && c.partner_user_id !== null) ??
+    [];
 
   const partnerName = partner
     ? partner.first_name || partner.username || `#${partner.user_id}`
@@ -62,7 +67,7 @@ export default function AdminPartnerCampaignAssign() {
             {t('admin.partnerDetail.campaigns.noAvailable')}
           </div>
           <button
-            onClick={() => navigate(`/admin/partners/${userId}/campaigns/create`)}
+            onClick={() => navigate(`/admin/campaigns/create?partnerId=${userId}`)}
             className="mt-2 w-full rounded-lg bg-accent-500 px-4 py-3 font-medium text-white transition-colors hover:bg-accent-600"
           >
             {t('admin.partnerDetail.campaigns.createNew')}
@@ -97,6 +102,28 @@ export default function AdminPartnerCampaignAssign() {
                 >
                   {t('admin.partnerDetail.campaigns.assign')}
                 </button>
+              </div>
+            </div>
+          ))}
+
+          {/* Show campaigns assigned to other partners as greyed out */}
+          {takenByOthers.map((campaign) => (
+            <div
+              key={campaign.id}
+              className="rounded-xl border border-dark-700/50 bg-dark-800 p-4 opacity-50"
+            >
+              <div className="flex items-center justify-between gap-4">
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium text-dark-300">{campaign.name}</span>
+                    <span className="rounded bg-purple-500/20 px-1.5 py-0.5 text-xs text-purple-400">
+                      {campaign.partner_name}
+                    </span>
+                  </div>
+                  <div className="mt-1 flex items-center gap-3 text-xs text-dark-500">
+                    <span className="font-mono">?start={campaign.start_parameter}</span>
+                  </div>
+                </div>
               </div>
             </div>
           ))}

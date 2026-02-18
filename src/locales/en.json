@@ -1747,7 +1747,11 @@
         "active": "Active",
         "cancel": "Cancel",
         "save": "Save",
-        "saving": "Saving..."
+        "saving": "Saving...",
+        "partner": "Partner",
+        "noPartner": "No partner",
+        "selectPartner": "Select partner",
+        "partnerAutoAssign": "Campaign will be automatically assigned to partner {{name}}"
       },
       "stats": {
         "title": "Campaign Statistics",

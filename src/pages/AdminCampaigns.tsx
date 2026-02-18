@@ -183,6 +183,11 @@ export default function AdminCampaigns() {
                     >
                       {t(bonusTypeConfig[campaign.bonus_type].labelKey)}
                     </span>
+                    {campaign.partner_name && (
+                      <span className="rounded bg-purple-500/20 px-2 py-0.5 text-xs text-purple-400">
+                        {campaign.partner_name}
+                      </span>
+                    )}
                     {!campaign.is_active && (
                       <span className="rounded bg-dark-600 px-2 py-0.5 text-xs text-dark-400">
                         {t('admin.campaigns.table.inactive')}

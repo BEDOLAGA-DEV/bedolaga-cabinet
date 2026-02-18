@@ -8,6 +8,7 @@ import {
   CampaignBonusType,
   ServerSquadInfo,
   TariffListItem,
+  AvailablePartner,
 } from '../api/campaigns';
 import { AdminBackButton } from '../components/admin';
 import { CheckIcon, CampaignIcon } from '../components/icons';
@@ -124,6 +125,40 @@ function TariffSelector({
   );
 }
 
+// Partner selector component
+function PartnerSelector({
+  partners,
+  value,
+  onChange,
+}: {
+  partners: AvailablePartner[];
+  value: number | null;
+  onChange: (id: number | null) => void;
+}) {
+  const { t } = useTranslation();
+
+  return (
+    <div>
+      <label className="mb-2 block text-sm font-medium text-dark-300">
+        {t('admin.campaigns.form.partner')}
+      </label>
+      <select
+        value={value || ''}
+        onChange={(e) => onChange(e.target.value ? parseInt(e.target.value) : null)}
+        className="input"
+      >
+        <option value="">{t('admin.campaigns.form.noPartner')}</option>
+        {partners.map((p) => (
+          <option key={p.user_id} value={p.user_id}>
+            {p.first_name || p.username || `#${p.user_id}`}
+            {p.username ? ` (@${p.username})` : ''}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
 export default function AdminCampaignEdit() {
   const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
@@ -155,6 +190,12 @@ export default function AdminCampaignEdit() {
     queryFn: () => campaignsApi.getAvailableTariffs(),
   });
 
+  // Fetch partners
+  const { data: partners = [] } = useQuery({
+    queryKey: ['admin-campaigns-partners'],
+    queryFn: () => campaignsApi.getAvailablePartners(),
+  });
+
   // Form state
   const [name, setName] = useState('');
   const [startParameter, setStartParameter] = useState('');
@@ -174,6 +215,10 @@ export default function AdminCampaignEdit() {
   const [tariffId, setTariffId] = useState<number | null>(null);
   const [tariffDays, setTariffDays] = useState<number | ''>(30);
 
+  // Partner
+  const [partnerUserId, setPartnerUserId] = useState<number | null>(null);
+  const [initialPartnerUserId, setInitialPartnerUserId] = useState<number | null>(null);
+
   // Initialize form when campaign loads
   useEffect(() => {
     if (campaign) {
@@ -188,6 +233,8 @@ export default function AdminCampaignEdit() {
       setSelectedSquads(campaign.subscription_squads || []);
       setTariffId(campaign.tariff_id || null);
       setTariffDays(campaign.tariff_duration_days || 30);
+      setPartnerUserId(campaign.partner_user_id ?? null);
+      setInitialPartnerUserId(campaign.partner_user_id ?? null);
     }
   }, [campaign]);
 
@@ -214,6 +261,11 @@ export default function AdminCampaignEdit() {
       bonus_type: bonusType,
       is_active: isActive,
     };
+
+    // Only send partner_user_id when it was actually changed
+    if (partnerUserId !== initialPartnerUserId) {
+      data.partner_user_id = partnerUserId;
+    }
 
     if (bonusType === 'balance') {
       data.balance_bonus_kopeks = Math.round(toNumber(balanceBonusRubles) * 100);
@@ -344,6 +396,11 @@ export default function AdminCampaignEdit() {
             />
           </button>
         </div>
+
+        {/* Partner */}
+        {partners.length > 0 && (
+          <PartnerSelector partners={partners} value={partnerUserId} onChange={setPartnerUserId} />
+        )}
       </div>
 
       {/* Bonus Type */}

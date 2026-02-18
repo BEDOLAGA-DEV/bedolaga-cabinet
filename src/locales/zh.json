@@ -1485,7 +1485,11 @@
         "active": "启用",
         "cancel": "取消",
         "save": "保存",
-        "saving": "保存中..."
+        "saving": "保存中...",
+        "partner": "合作伙伴",
+        "noPartner": "无合作伙伴",
+        "selectPartner": "选择合作伙伴",
+        "partnerAutoAssign": "活动将自动分配给合作伙伴 {{name}}"
       },
       "stats": {
         "title": "活动统计",

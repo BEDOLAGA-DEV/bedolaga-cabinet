@@ -66,7 +66,6 @@ const AdminApplicationReview = lazy(() => import('./pages/AdminApplicationReview
 const AdminPartnerCommission = lazy(() => import('./pages/AdminPartnerCommission'));
 const AdminPartnerRevoke = lazy(() => import('./pages/AdminPartnerRevoke'));
 const AdminPartnerCampaignAssign = lazy(() => import('./pages/AdminPartnerCampaignAssign'));
-const AdminPartnerCampaignCreate = lazy(() => import('./pages/AdminPartnerCampaignCreate'));
 const AdminWithdrawals = lazy(() => import('./pages/AdminWithdrawals'));
 const AdminWithdrawalDetail = lazy(() => import('./pages/AdminWithdrawalDetail'));
 const AdminWithdrawalReject = lazy(() => import('./pages/AdminWithdrawalReject'));
@@ -638,16 +637,6 @@ function App() {
             <AdminRoute>
               <LazyPage>
                 <AdminPartnerCampaignAssign />
-              </LazyPage>
-            </AdminRoute>
-          }
-        />
-        <Route
-          path="/admin/partners/:userId/campaigns/create"
-          element={
-            <AdminRoute>
-              <LazyPage>
-                <AdminPartnerCampaignCreate />
               </LazyPage>
             </AdminRoute>
           }

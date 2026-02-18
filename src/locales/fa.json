@@ -1486,7 +1486,11 @@
         "active": "فعال",
         "cancel": "لغو",
         "save": "ذخیره",
-        "saving": "در حال ذخیره..."
+        "saving": "در حال ذخیره...",
+        "partner": "شریک",
+        "noPartner": "بدون شریک",
+        "selectPartner": "انتخاب شریک",
+        "partnerAutoAssign": "کمپین به طور خودکار به شریک {{name}} اختصاص داده می‌شود"
       },
       "stats": {
         "title": "آمار کمپین",

@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router';
+import { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import {
@@ -9,6 +9,7 @@ import {
   ServerSquadInfo,
   TariffListItem,
 } from '../api/campaigns';
+import { partnerApi } from '../api/partners';
 import { AdminBackButton } from '../components/admin';
 import { createNumberInputHandler, toNumber } from '../utils/inputHelpers';
 // Icons
@@ -149,16 +150,44 @@ function TariffSelector({
   );
 }
 
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/gi, '_')
+    .replace(/^_|_$/g, '')
+    .slice(0, 30);
+}
+
 export default function AdminCampaignCreate() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [searchParams] = useSearchParams();
+  const partnerId = searchParams.get('partnerId');
+
+  // Fetch partner info if creating for a partner
+  const { data: partner } = useQuery({
+    queryKey: ['admin-partner-detail', partnerId],
+    queryFn: () => partnerApi.getPartnerDetail(Number(partnerId)),
+    enabled: !!partnerId,
+  });
 
   // Form state
   const [name, setName] = useState('');
   const [startParameter, setStartParameter] = useState('');
   const [bonusType, setBonusType] = useState<CampaignBonusType>('balance');
   const [isActive, setIsActive] = useState(true);
+
+  // Auto-fill from partner
+  const [autoFilled, setAutoFilled] = useState(false);
+  useEffect(() => {
+    if (partner && !autoFilled) {
+      const partnerName = partner.first_name || partner.username || '';
+      if (!name && partnerName) setName(partnerName);
+      if (!startParameter && partnerName) setStartParameter(`partner_${slugify(partnerName)}`);
+      setAutoFilled(true);
+    }
+  }, [partner, autoFilled, name, startParameter]);
 
   // Balance bonus
   const [balanceBonusRubles, setBalanceBonusRubles] = useState<number | ''>(0);
@@ -191,7 +220,12 @@ export default function AdminCampaignCreate() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-campaigns'] });
       queryClient.invalidateQueries({ queryKey: ['admin-campaigns-overview'] });
-      navigate('/admin/campaigns');
+      if (partnerId) {
+        queryClient.invalidateQueries({ queryKey: ['admin-partner-detail', partnerId] });
+        navigate(`/admin/partners/${partnerId}`);
+      } else {
+        navigate('/admin/campaigns');
+      }
     },
   });
 
@@ -221,6 +255,10 @@ export default function AdminCampaignCreate() {
       data.tariff_duration_days = toNumber(tariffDays, 30);
     }
 
+    if (partnerId) {
+      data.partner_user_id = Number(partnerId);
+    }
+
     createMutation.mutate(data);
   };
 
@@ -246,6 +284,32 @@ export default function AdminCampaignCreate() {
           </div>
         </div>
       </div>
+
+      {/* Partner info banner */}
+      {partnerId && partner && (
+        <div className="rounded-xl border border-accent-500/20 bg-accent-500/5 p-4">
+          <div className="flex items-start gap-3">
+            <svg
+              className="mt-0.5 h-5 w-5 shrink-0 text-accent-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={1.5}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"
+              />
+            </svg>
+            <p className="text-sm text-accent-300">
+              {t('admin.campaigns.form.partnerAutoAssign', {
+                name: partner.first_name || partner.username || `#${partnerId}`,
+              })}
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Basic Info */}
       <div className="card space-y-4">
@@ -442,7 +506,10 @@ export default function AdminCampaignCreate() {
 
       {/* Footer */}
       <div className="card flex items-center justify-end gap-3">
-        <button onClick={() => navigate('/admin/campaigns')} className="btn-secondary">
+        <button
+          onClick={() => navigate(partnerId ? `/admin/partners/${partnerId}` : '/admin/campaigns')}
+          className="btn-secondary"
+        >
           {t('common.cancel')}
         </button>
         <button
