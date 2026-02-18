@@ -100,6 +100,7 @@ export interface Subscription {
   // Tariff info
   tariff_id?: number;
   tariff_name?: string;
+  traffic_reset_mode?: string;
 }
 
 // Response wrapper for subscription status endpoint

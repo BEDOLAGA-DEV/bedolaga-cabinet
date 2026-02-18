@@ -822,6 +822,12 @@ export default function Subscription() {
                 {(trafficData?.traffic_used_gb ?? subscription.traffic_used_gb).toFixed(1)} /{' '}
                 {subscription.traffic_limit_gb || '∞'} GB
               </div>
+              {subscription.traffic_reset_mode &&
+                subscription.traffic_reset_mode !== 'NO_RESET' && (
+                  <div className="mt-0.5 text-xs text-dark-500">
+                    {t(`subscription.trafficReset.${subscription.traffic_reset_mode}`)}
+                  </div>
+                )}
             </div>
             <div>
               <div className="mb-1 text-sm text-dark-500">{t('subscription.devices')}</div>
