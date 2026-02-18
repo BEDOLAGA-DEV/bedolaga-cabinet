@@ -692,17 +692,18 @@ export default function Referral() {
                 >
                   {t('referral.withdrawal.requestButton')}
                 </button>
-                {!withdrawalBalance.can_request && withdrawalBalance.cannot_request_reason && (
+                {!withdrawalBalance.can_request && withdrawalBalance.cannot_request_reason ? (
                   <p className="mt-2 text-xs text-dark-500">
                     {withdrawalBalance.cannot_request_reason}
                   </p>
-                )}
-                {withdrawalBalance.min_amount_kopeks > 0 && (
-                  <p className="mt-2 text-xs text-dark-500">
-                    {t('referral.withdrawal.minAmount', {
-                      amount: formatWithCurrency(withdrawalBalance.min_amount_kopeks / 100),
-                    })}
-                  </p>
+                ) : (
+                  withdrawalBalance.min_amount_kopeks > 0 && (
+                    <p className="mt-2 text-xs text-dark-500">
+                      {t('referral.withdrawal.minAmount', {
+                        amount: formatWithCurrency(withdrawalBalance.min_amount_kopeks / 100),
+                      })}
+                    </p>
+                  )
                 )}
               </div>
             </div>
