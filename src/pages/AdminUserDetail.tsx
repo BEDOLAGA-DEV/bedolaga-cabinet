@@ -19,6 +19,7 @@ import { promocodesApi, type PromoGroup } from '../api/promocodes';
 import { promoOffersApi } from '../api/promoOffers';
 import { ticketsApi } from '../api/tickets';
 import { AdminBackButton } from '../components/admin';
+import { CheckIcon, XIcon } from '../components/icons';
 import { createNumberInputHandler, toNumber } from '../utils/inputHelpers';
 
 // ============ Helpers ============
@@ -884,7 +885,24 @@ export default function AdminUserDetail() {
             <div className="grid grid-cols-2 gap-3">
               <div className="rounded-xl bg-dark-800/50 p-3">
                 <div className="mb-1 text-xs text-dark-500">Email</div>
-                <div className="text-dark-100">{user.email || '-'}</div>
+                <div className="flex items-center gap-2">
+                  <div className="min-w-0 flex-1 truncate text-dark-100">{user.email || '-'}</div>
+                  {user.email && (
+                    <span
+                      className={`flex shrink-0 items-center justify-center rounded-full p-1 ${
+                        user.email_verified
+                          ? 'bg-success-500/20'
+                          : 'bg-error-500/20'
+                      }`}
+                    >
+                      {user.email_verified ? (
+                        <CheckIcon className="h-3 w-3 text-success-400" />
+                      ) : (
+                        <XIcon className="h-3 w-3 text-error-400" />
+                      )}
+                    </span>
+                  )}
+                </div>
               </div>
               <div className="rounded-xl bg-dark-800/50 p-3">
                 <div className="mb-1 text-xs text-dark-500">{t('admin.users.detail.language')}</div>
