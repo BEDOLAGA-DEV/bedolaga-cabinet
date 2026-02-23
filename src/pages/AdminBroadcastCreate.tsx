@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo } from 'react';
+import { useState, useRef, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -135,6 +135,14 @@ export default function AdminBroadcastCreate() {
   const [mediaPreview, setMediaPreview] = useState<string | null>(null);
   const [uploadedFileId, setUploadedFileId] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const mediaPreviewRef = useRef<string | null>(null);
+
+  // Revoke blob URLs on unmount to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      if (mediaPreviewRef.current) URL.revokeObjectURL(mediaPreviewRef.current);
+    };
+  }, []);
 
   // Email-specific state
   const [emailSubject, setEmailSubject] = useState('');
@@ -271,7 +279,10 @@ export default function AdminBroadcastCreate() {
 
     if (file.type.startsWith('image/')) {
       setMediaType('photo');
-      setMediaPreview(URL.createObjectURL(file));
+      if (mediaPreviewRef.current) URL.revokeObjectURL(mediaPreviewRef.current);
+      const url = URL.createObjectURL(file);
+      mediaPreviewRef.current = url;
+      setMediaPreview(url);
     } else if (file.type.startsWith('video/')) {
       setMediaType('video');
       setMediaPreview(null);
@@ -295,6 +306,10 @@ export default function AdminBroadcastCreate() {
 
   // Remove media
   const handleRemoveMedia = () => {
+    if (mediaPreviewRef.current) {
+      URL.revokeObjectURL(mediaPreviewRef.current);
+      mediaPreviewRef.current = null;
+    }
     setMediaFile(null);
     setMediaPreview(null);
     setUploadedFileId(null);

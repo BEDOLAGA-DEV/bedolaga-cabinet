@@ -63,6 +63,7 @@ export type TrafficParams = {
 };
 
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+const MAX_CACHE_ENTRIES = 20;
 
 const trafficCache = new Map<string, { data: TrafficUsageResponse; timestamp: number }>();
 
@@ -105,6 +106,16 @@ export const adminTrafficApi = {
     const data: TrafficUsageResponse = response.data;
 
     trafficCache.set(key, { data, timestamp: Date.now() });
+
+    // Evict oldest entries to prevent unbounded memory growth
+    if (trafficCache.size > MAX_CACHE_ENTRIES) {
+      const iterator = trafficCache.keys();
+      while (trafficCache.size > MAX_CACHE_ENTRIES) {
+        const oldest = iterator.next();
+        if (oldest.done) break;
+        trafficCache.delete(oldest.value);
+      }
+    }
 
     return data;
   },

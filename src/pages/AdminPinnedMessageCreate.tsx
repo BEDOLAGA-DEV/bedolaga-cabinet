@@ -86,6 +86,14 @@ export default function AdminPinnedMessageCreate() {
   const [uploadedFileId, setUploadedFileId] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [existingMediaType, setExistingMediaType] = useState<'photo' | 'video' | null>(null);
+  const mediaPreviewRef = useRef<string | null>(null);
+
+  // Revoke blob URLs on unmount to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      if (mediaPreviewRef.current) URL.revokeObjectURL(mediaPreviewRef.current);
+    };
+  }, []);
 
   // Load existing message for editing
   const { data: existingMessage, isLoading: isLoadingMessage } = useQuery({
@@ -138,7 +146,10 @@ export default function AdminPinnedMessageCreate() {
     let detectedType: 'photo' | 'video' = 'photo';
     if (file.type.startsWith('image/')) {
       detectedType = 'photo';
-      setMediaPreview(URL.createObjectURL(file));
+      if (mediaPreviewRef.current) URL.revokeObjectURL(mediaPreviewRef.current);
+      const url = URL.createObjectURL(file);
+      mediaPreviewRef.current = url;
+      setMediaPreview(url);
     } else if (file.type.startsWith('video/')) {
       detectedType = 'video';
       setMediaPreview(null);
@@ -159,6 +170,10 @@ export default function AdminPinnedMessageCreate() {
 
   // Remove media
   const handleRemoveMedia = () => {
+    if (mediaPreviewRef.current) {
+      URL.revokeObjectURL(mediaPreviewRef.current);
+      mediaPreviewRef.current = null;
+    }
     setMediaFile(null);
     setMediaPreview(null);
     setUploadedFileId(null);
