@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.20.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.19.1...v1.20.0) (2026-02-24)
+
+
+### Features
+
+* add channel edit in admin, hide subscribed channels in blocking screen ([5a55892](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/5a5589214529e42fd08a3b41929cddd974d52420))
+* add multi-channel subscription blocking UI and admin management ([a767fe9](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/a767fe96d3992f91b5c1b722de132ea67f975432))
+
 ## [1.19.1](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.19.0...v1.19.1) (2026-02-23)
 
 
