@@ -2,6 +2,42 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Animated gradient border — @property enables CSS-only angle animation */
+@property --border-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.hover-border-gradient {
+  --_bg: rgb(var(--color-dark-900));
+  --_accent: rgb(var(--color-accent-400));
+  border: 1.5px solid transparent;
+  padding: 10px 16px;
+  background:
+    linear-gradient(var(--_bg), var(--_bg)) padding-box,
+    conic-gradient(
+        from var(--border-angle),
+        var(--_accent) 0%,
+        transparent 25%,
+        transparent 75%,
+        var(--_accent) 100%
+      )
+      border-box;
+  animation: border-rotate 3s linear infinite;
+  transition: box-shadow 0.3s ease;
+}
+
+.hover-border-gradient:hover {
+  box-shadow: 0 0 16px rgba(var(--color-accent-400), 0.3);
+}
+
+@keyframes border-rotate {
+  to {
+    --border-angle: 360deg;
+  }
+}
+
 /* Aceternity UI background CSS variables */
 :root {
   --blue-500: #3b82f6;

@@ -173,13 +173,8 @@ export default {
         'move-horizontal': 'moveHorizontal 40s ease infinite',
         'move-in-circle-fast': 'moveInCircle 20s ease infinite',
         'spotlight-ace': 'spotlightAce 2s ease 0.75s 1 forwards',
-        'border-spin': 'borderSpin 3s linear infinite',
       },
       keyframes: {
-        borderSpin: {
-          '0%': { transform: 'rotate(0deg)' },
-          '100%': { transform: 'rotate(360deg)' },
-        },
         fadeIn: {
           '0%': { opacity: '0' },
           '100%': { opacity: '1' },

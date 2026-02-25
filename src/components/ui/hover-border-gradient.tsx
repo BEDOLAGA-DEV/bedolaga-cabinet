@@ -17,28 +17,14 @@ export function HoverBorderGradient({
   return (
     <Tag
       className={cn(
-        'group relative flex items-center justify-center overflow-hidden rounded-xl p-[1.5px]',
+        'hover-border-gradient group flex items-center justify-center rounded-xl text-sm font-medium text-white',
         containerClassName,
       )}
       {...props}
     >
-      {/* Rotating conic gradient — pure CSS transform, always smooth */}
-      <div
-        className="absolute inset-[-50%] z-0 animate-border-spin"
-        style={{
-          background:
-            'conic-gradient(from 0deg, transparent 0%, transparent 40%, rgb(var(--color-accent-400)) 50%, transparent 60%, transparent 100%)',
-        }}
-      />
-      {/* Inner content */}
-      <div
-        className={cn(
-          'relative z-10 w-auto rounded-[inherit] bg-dark-900 px-4 py-2.5 text-sm font-medium text-white transition-colors duration-300 group-hover:bg-dark-850',
-          className,
-        )}
-      >
+      <span className={cn('relative z-10 flex items-center justify-center', className)}>
         {children}
-      </div>
+      </span>
     </Tag>
   );
 }
