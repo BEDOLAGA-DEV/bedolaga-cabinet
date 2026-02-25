@@ -2618,7 +2618,12 @@
           "manage": "Manage",
           "ban": "Ban",
           "unban": "Unban",
-          "assign": "Assign"
+          "assign": "Assign",
+          "promo_group": "Promo group",
+          "balance": "Balance",
+          "subscription": "Subscription",
+          "send_offer": "Send offer",
+          "referral": "Referral %"
         },
         "toggleSection": "Toggle all {{section}} permissions",
         "selectedPermissions_one": "{{count}} permission selected",

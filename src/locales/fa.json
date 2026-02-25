@@ -2407,7 +2407,12 @@
           "manage": "مدیریت",
           "ban": "مسدود کردن",
           "unban": "رفع مسدودیت",
-          "assign": "اختصاص"
+          "assign": "اختصاص",
+          "promo_group": "گروه تبلیغاتی",
+          "balance": "موجودی",
+          "subscription": "اشتراک",
+          "send_offer": "ارسال پیشنهاد",
+          "referral": "درصد ارجاع"
         },
         "toggleSection": "تغییر وضعیت تمام مجوزهای {{section}}",
         "selectedPermissions_other": "{{count}} مجوز انتخاب شده",

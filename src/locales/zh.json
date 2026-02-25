@@ -2406,7 +2406,12 @@
           "manage": "管理",
           "ban": "封禁",
           "unban": "解封",
-          "assign": "分配"
+          "assign": "分配",
+          "promo_group": "促销组",
+          "balance": "余额",
+          "subscription": "订阅",
+          "send_offer": "发送优惠",
+          "referral": "推荐佣金"
         },
         "toggleSection": "切换所有 {{section}} 权限",
         "selectedPermissions_other": "已选择 {{count}} 个权限",

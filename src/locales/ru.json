@@ -3166,7 +3166,12 @@
           "manage": "Управление",
           "ban": "Бан",
           "unban": "Разбан",
-          "assign": "Назначение"
+          "assign": "Назначение",
+          "promo_group": "Промо-группа",
+          "balance": "Баланс",
+          "subscription": "Подписка",
+          "send_offer": "Промо-предложение",
+          "referral": "Реф. процент"
         },
         "toggleSection": "Переключить все права {{section}}",
         "selectedPermissions_one": "{{count}} разрешение выбрано",

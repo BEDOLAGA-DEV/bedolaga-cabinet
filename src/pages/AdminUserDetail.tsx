@@ -386,7 +386,7 @@ export default function AdminUserDetail() {
   useEffect(() => {
     if (activeTab === 'info') {
       loadReferrals();
-      if (hasPermission('promo_groups:read')) loadPromoGroups();
+      if (hasPermission('users:promo_group')) loadPromoGroups();
     }
     if (activeTab === 'sync' && hasPermission('users:sync')) loadSyncStatus();
     if (activeTab === 'subscription') {
@@ -935,7 +935,7 @@ export default function AdminUserDetail() {
             <div className="rounded-xl bg-dark-800/50 p-3">
               <div className="mb-1 flex items-center justify-between">
                 <span className="text-xs text-dark-500">{t('admin.users.detail.promoGroup')}</span>
-                {hasPermission('promo_groups:read') && (
+                {hasPermission('users:promo_group') && (
                   <button
                     onClick={() => setEditingPromoGroup(!editingPromoGroup)}
                     className="text-xs text-accent-400 transition-colors hover:text-accent-300"
@@ -989,17 +989,19 @@ export default function AdminUserDetail() {
                 <span className="text-sm font-medium text-dark-200">
                   {t('admin.users.detail.referral.title')}
                 </span>
-                <button
-                  onClick={() => {
-                    if (!editingReferralCommission) {
-                      setReferralCommissionValue(user.referral.commission_percent ?? '');
-                    }
-                    setEditingReferralCommission(!editingReferralCommission);
-                  }}
-                  className="text-xs text-accent-400 transition-colors hover:text-accent-300"
-                >
-                  {editingReferralCommission ? t('common.cancel') : t('common.edit')}
-                </button>
+                {hasPermission('users:referral') && (
+                  <button
+                    onClick={() => {
+                      if (!editingReferralCommission) {
+                        setReferralCommissionValue(user.referral.commission_percent ?? '');
+                      }
+                      setEditingReferralCommission(!editingReferralCommission);
+                    }}
+                    className="text-xs text-accent-400 transition-colors hover:text-accent-300"
+                  >
+                    {editingReferralCommission ? t('common.cancel') : t('common.edit')}
+                  </button>
+                )}
               </div>
               <div className="grid grid-cols-3 gap-3 text-center">
                 <div>
@@ -1358,72 +1360,78 @@ export default function AdminUserDetail() {
                   )}
 
                 {/* Actions */}
-                <div className="rounded-xl bg-dark-800/50 p-4">
-                  <div className="mb-3 font-medium text-dark-200">
-                    {t('admin.users.detail.subscription.actions')}
-                  </div>
-                  <div className="space-y-3">
-                    <select
-                      value={subAction}
-                      onChange={(e) => setSubAction(e.target.value)}
-                      className="input"
-                    >
-                      <option value="extend">{t('admin.users.detail.subscription.extend')}</option>
-                      <option value="change_tariff">
-                        {t('admin.users.detail.subscription.changeTariff')}
-                      </option>
-                      <option value="cancel">{t('admin.users.detail.subscription.cancel')}</option>
-                      <option value="activate">
-                        {t('admin.users.detail.subscription.activate')}
-                      </option>
-                    </select>
-
-                    {subAction === 'extend' && (
-                      <input
-                        type="number"
-                        value={subDays}
-                        onChange={createNumberInputHandler(setSubDays, 1)}
-                        placeholder={t('admin.users.detail.subscription.days')}
-                        className="input"
-                        min={1}
-                        max={3650}
-                      />
-                    )}
-
-                    {subAction === 'change_tariff' && (
+                {hasPermission('users:subscription') && (
+                  <div className="rounded-xl bg-dark-800/50 p-4">
+                    <div className="mb-3 font-medium text-dark-200">
+                      {t('admin.users.detail.subscription.actions')}
+                    </div>
+                    <div className="space-y-3">
                       <select
-                        value={selectedTariffId || ''}
-                        onChange={(e) =>
-                          setSelectedTariffId(e.target.value ? parseInt(e.target.value) : null)
-                        }
+                        value={subAction}
+                        onChange={(e) => setSubAction(e.target.value)}
                         className="input"
                       >
-                        <option value="">
-                          {t('admin.users.detail.subscription.selectTariff')}
+                        <option value="extend">
+                          {t('admin.users.detail.subscription.extend')}
                         </option>
-                        {tariffs.map((tariffItem) => (
-                          <option key={tariffItem.id} value={tariffItem.id}>
-                            {tariffItem.name}{' '}
-                            {!tariffItem.is_available &&
-                              t('admin.users.detail.subscription.unavailable')}
-                          </option>
-                        ))}
+                        <option value="change_tariff">
+                          {t('admin.users.detail.subscription.changeTariff')}
+                        </option>
+                        <option value="cancel">
+                          {t('admin.users.detail.subscription.cancel')}
+                        </option>
+                        <option value="activate">
+                          {t('admin.users.detail.subscription.activate')}
+                        </option>
                       </select>
-                    )}
 
-                    <button
-                      onClick={() => handleUpdateSubscription()}
-                      disabled={actionLoading}
-                      className="btn-primary w-full"
-                    >
-                      {actionLoading
-                        ? t('admin.users.actions.applying')
-                        : t('admin.users.actions.apply')}
-                    </button>
+                      {subAction === 'extend' && (
+                        <input
+                          type="number"
+                          value={subDays}
+                          onChange={createNumberInputHandler(setSubDays, 1)}
+                          placeholder={t('admin.users.detail.subscription.days')}
+                          className="input"
+                          min={1}
+                          max={3650}
+                        />
+                      )}
+
+                      {subAction === 'change_tariff' && (
+                        <select
+                          value={selectedTariffId || ''}
+                          onChange={(e) =>
+                            setSelectedTariffId(e.target.value ? parseInt(e.target.value) : null)
+                          }
+                          className="input"
+                        >
+                          <option value="">
+                            {t('admin.users.detail.subscription.selectTariff')}
+                          </option>
+                          {tariffs.map((tariffItem) => (
+                            <option key={tariffItem.id} value={tariffItem.id}>
+                              {tariffItem.name}{' '}
+                              {!tariffItem.is_available &&
+                                t('admin.users.detail.subscription.unavailable')}
+                            </option>
+                          ))}
+                        </select>
+                      )}
+
+                      <button
+                        onClick={() => handleUpdateSubscription()}
+                        disabled={actionLoading}
+                        className="btn-primary w-full"
+                      >
+                        {actionLoading
+                          ? t('admin.users.actions.applying')
+                          : t('admin.users.actions.apply')}
+                      </button>
+                    </div>
                   </div>
-                </div>
+                )}
               </>
-            ) : (
+            ) : hasPermission('users:subscription') ? (
               <div className="rounded-xl bg-dark-800/50 p-4">
                 <div className="mb-4 text-center text-dark-400">
                   {t('admin.users.detail.subscription.noActive')}
@@ -1461,6 +1469,12 @@ export default function AdminUserDetail() {
                       ? t('admin.users.detail.subscription.creating')
                       : t('admin.users.detail.subscription.create')}
                   </button>
+                </div>
+              </div>
+            ) : (
+              <div className="rounded-xl bg-dark-800/50 p-4">
+                <div className="text-center text-dark-400">
+                  {t('admin.users.detail.subscription.noActive')}
                 </div>
               </div>
             )}
@@ -1788,39 +1802,41 @@ export default function AdminUserDetail() {
             </div>
 
             {/* Add/subtract form */}
-            <div className="space-y-3 rounded-xl bg-dark-800/50 p-4">
-              <input
-                type="number"
-                value={balanceAmount}
-                onChange={createNumberInputHandler(setBalanceAmount)}
-                placeholder={t('admin.users.detail.balance.amountPlaceholder')}
-                className="input"
-              />
-              <input
-                type="text"
-                value={balanceDescription}
-                onChange={(e) => setBalanceDescription(e.target.value)}
-                placeholder={t('admin.users.detail.balance.descriptionPlaceholder')}
-                className="input"
-                maxLength={500}
-              />
-              <div className="flex gap-2">
-                <button
-                  onClick={() => handleUpdateBalance(true)}
-                  disabled={actionLoading || balanceAmount === ''}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-success-500 py-2 text-white transition-colors hover:bg-success-600 disabled:opacity-50"
-                >
-                  <PlusIcon /> {t('admin.users.detail.balance.add')}
-                </button>
-                <button
-                  onClick={() => handleUpdateBalance(false)}
-                  disabled={actionLoading || balanceAmount === ''}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-error-500 py-2 text-white transition-colors hover:bg-error-600 disabled:opacity-50"
-                >
-                  <MinusIcon /> {t('admin.users.detail.balance.subtract')}
-                </button>
+            {hasPermission('users:balance') && (
+              <div className="space-y-3 rounded-xl bg-dark-800/50 p-4">
+                <input
+                  type="number"
+                  value={balanceAmount}
+                  onChange={createNumberInputHandler(setBalanceAmount)}
+                  placeholder={t('admin.users.detail.balance.amountPlaceholder')}
+                  className="input"
+                />
+                <input
+                  type="text"
+                  value={balanceDescription}
+                  onChange={(e) => setBalanceDescription(e.target.value)}
+                  placeholder={t('admin.users.detail.balance.descriptionPlaceholder')}
+                  className="input"
+                  maxLength={500}
+                />
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleUpdateBalance(true)}
+                    disabled={actionLoading || balanceAmount === ''}
+                    className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-success-500 py-2 text-white transition-colors hover:bg-success-600 disabled:opacity-50"
+                  >
+                    <PlusIcon /> {t('admin.users.detail.balance.add')}
+                  </button>
+                  <button
+                    onClick={() => handleUpdateBalance(false)}
+                    disabled={actionLoading || balanceAmount === ''}
+                    className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-error-500 py-2 text-white transition-colors hover:bg-error-600 disabled:opacity-50"
+                  >
+                    <MinusIcon /> {t('admin.users.detail.balance.subtract')}
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Active promo offer */}
             {user.promo_offer_discount_percent > 0 && (
@@ -1869,38 +1885,40 @@ export default function AdminUserDetail() {
             )}
 
             {/* Send promo offer */}
-            <div className="rounded-xl bg-dark-800/50 p-4">
-              <div className="mb-3 text-sm font-medium text-dark-200">
-                {t('admin.users.detail.sendOffer')}
+            {hasPermission('users:send_offer') && (
+              <div className="rounded-xl bg-dark-800/50 p-4">
+                <div className="mb-3 text-sm font-medium text-dark-200">
+                  {t('admin.users.detail.sendOffer')}
+                </div>
+                <div className="space-y-3">
+                  <input
+                    type="number"
+                    value={offerDiscountPercent}
+                    onChange={createNumberInputHandler(setOfferDiscountPercent, 1)}
+                    placeholder={t('admin.users.detail.discountPercent')}
+                    className="input"
+                    min={1}
+                    max={100}
+                  />
+                  <input
+                    type="number"
+                    value={offerValidHours}
+                    onChange={createNumberInputHandler(setOfferValidHours, 1)}
+                    placeholder={t('admin.users.detail.validHours')}
+                    className="input"
+                    min={1}
+                    max={8760}
+                  />
+                  <button
+                    onClick={handleSendOffer}
+                    disabled={offerSending || offerDiscountPercent === '' || offerValidHours === ''}
+                    className="btn-primary w-full disabled:opacity-50"
+                  >
+                    {offerSending ? t('common.loading') : t('admin.users.detail.sendOffer')}
+                  </button>
+                </div>
               </div>
-              <div className="space-y-3">
-                <input
-                  type="number"
-                  value={offerDiscountPercent}
-                  onChange={createNumberInputHandler(setOfferDiscountPercent, 1)}
-                  placeholder={t('admin.users.detail.discountPercent')}
-                  className="input"
-                  min={1}
-                  max={100}
-                />
-                <input
-                  type="number"
-                  value={offerValidHours}
-                  onChange={createNumberInputHandler(setOfferValidHours, 1)}
-                  placeholder={t('admin.users.detail.validHours')}
-                  className="input"
-                  min={1}
-                  max={8760}
-                />
-                <button
-                  onClick={handleSendOffer}
-                  disabled={offerSending || offerDiscountPercent === '' || offerValidHours === ''}
-                  className="btn-primary w-full disabled:opacity-50"
-                >
-                  {offerSending ? t('common.loading') : t('admin.users.detail.sendOffer')}
-                </button>
-              </div>
-            </div>
+            )}
 
             {/* Recent transactions */}
             {user.recent_transactions.length > 0 && (
