@@ -67,6 +67,11 @@ function seededRandom(seed: number) {
   return x - Math.floor(x);
 }
 
+// Animate only every 3rd path (17 beams) — enough visual density, 3x fewer repaints
+const animatedPaths = paths
+  .map((path, i) => ({ path, paramIndex: i }))
+  .filter((_, i) => i % 3 === 0);
+
 // Pre-compute beam animation params at module level (stable across renders)
 const beamParams = paths.map((_, i) => ({
   duration: 10 + seededRandom(i) * 10, // 10-20s
@@ -81,12 +86,13 @@ function ensureStyles() {
 
   const style = document.createElement('style');
   style.id = STYLE_ID;
+  // Only animate stroke-dashoffset — no opacity changes = no repaints
+  // The beam appears when dashoffset brings the segment into view
+  // and disappears when it exits — pure compositor work
   style.textContent = `
     @keyframes beamDash {
-      0% { stroke-dashoffset: 1; opacity: 0; }
-      2% { opacity: 1; }
-      80% { opacity: 1; }
-      100% { stroke-dashoffset: -1; opacity: 0; }
+      0% { stroke-dashoffset: 1; }
+      100% { stroke-dashoffset: -1; }
     }
   `;
   document.head.appendChild(style);
@@ -99,7 +105,10 @@ export default React.memo(function BackgroundBeams({ settings: _settings }: Prop
   }, []);
 
   return (
-    <div className="absolute inset-0 overflow-hidden">
+    <div
+      className="absolute inset-0 overflow-hidden"
+      style={{ contain: 'strict', willChange: 'transform' }}
+    >
       <svg
         className="pointer-events-none absolute inset-0 h-full w-full"
         width="100%"
@@ -116,19 +125,19 @@ export default React.memo(function BackgroundBeams({ settings: _settings }: Prop
           strokeWidth="0.5"
         />
 
-        {/* Animated beams — CSS stroke-dashoffset animation, GPU composited */}
-        {paths.map((path, i) => (
+        {/* Animated beams — only every 3rd path (17 beams), pure stroke-dashoffset */}
+        {animatedPaths.map(({ path, paramIndex }) => (
           <path
-            key={i}
+            key={paramIndex}
             d={path}
             stroke="url(#beamGradient)"
             strokeWidth="0.5"
-            strokeOpacity="0.5"
+            strokeOpacity="0.4"
             pathLength={1}
-            strokeDasharray="0.15 0.85"
+            strokeDasharray="0.12 0.88"
             strokeDashoffset="1"
             style={{
-              animation: `beamDash ${beamParams[i].duration}s ease-in-out ${beamParams[i].delay}s infinite`,
+              animation: `beamDash ${beamParams[paramIndex].duration}s ease-in-out ${beamParams[paramIndex].delay}s infinite`,
             }}
           />
         ))}
