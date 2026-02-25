@@ -112,6 +112,8 @@ export default {
           'Roboto',
           'sans-serif',
         ],
+        display: ['Outfit', 'Manrope', 'system-ui', 'sans-serif'],
+        mono: ['IBM Plex Mono', 'ui-monospace', 'monospace'],
       },
       borderRadius: {
         bento: '24px',
@@ -173,6 +175,11 @@ export default {
         'move-horizontal': 'moveHorizontal 40s ease infinite',
         'move-in-circle-fast': 'moveInCircle 20s ease infinite',
         'spotlight-ace': 'spotlightAce 2s ease 0.75s 1 forwards',
+        // Dashboard traffic animations
+        'traffic-shimmer': 'trafficShimmer 2s ease-in-out infinite',
+        'unlimited-flow': 'unlimitedFlow 3s linear infinite',
+        'unlimited-pulse': 'unlimitedPulse 2s ease-in-out infinite',
+        'trial-glow': 'trialGlow 2s ease-in-out infinite',
       },
       keyframes: {
         fadeIn: {
@@ -250,6 +257,23 @@ export default {
         spotlightAce: {
           '0%': { opacity: '0', transform: 'translate(-72%, -62%) scale(0.5)' },
           '100%': { opacity: '1', transform: 'translate(-50%, -40%) scale(1)' },
+        },
+        // Dashboard traffic keyframes
+        trafficShimmer: {
+          '0%': { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(200%)' },
+        },
+        unlimitedFlow: {
+          '0%': { backgroundPosition: '0% 50%' },
+          '100%': { backgroundPosition: '200% 50%' },
+        },
+        unlimitedPulse: {
+          '0%, 100%': { opacity: '0.6', transform: 'scale(1)' },
+          '50%': { opacity: '1', transform: 'scale(1.3)' },
+        },
+        trialGlow: {
+          '0%, 100%': { boxShadow: '0 0 15px rgba(var(--color-warning-500), 0.2)' },
+          '50%': { boxShadow: '0 0 30px rgba(var(--color-warning-500), 0.4)' },
         },
       },
       transitionTimingFunction: {
