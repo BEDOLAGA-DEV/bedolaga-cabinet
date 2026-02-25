@@ -360,12 +360,17 @@ export default function AdminPolicies() {
 
                     {/* Resource + actions */}
                     <div className="mb-2 flex flex-wrap items-center gap-2 text-sm">
-                      <span className="rounded bg-dark-700 px-2 py-0.5 font-mono text-xs text-accent-400">
-                        {policy.resource}
+                      <span className="rounded bg-dark-700 px-2 py-0.5 text-xs text-accent-400">
+                        {t(
+                          `admin.roles.form.permissionSections.${policy.resource}`,
+                          policy.resource,
+                        )}
                       </span>
                       <span className="text-dark-500">:</span>
-                      <span className="font-mono text-xs text-dark-300">
-                        {(policy.actions ?? []).join(', ')}
+                      <span className="text-xs text-dark-300">
+                        {(policy.actions ?? [])
+                          .map((a) => t(`admin.roles.form.permissionActions.${a}`, a))
+                          .join(', ')}
                       </span>
                     </div>
 

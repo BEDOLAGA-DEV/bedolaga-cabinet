@@ -174,7 +174,9 @@ function PermissionMatrix({
                   onClick={() => toggleExpand(section.section)}
                   className="flex flex-1 items-center justify-between"
                 >
-                  <span className="text-sm font-medium text-dark-200">{section.section}</span>
+                  <span className="text-sm font-medium text-dark-200">
+                    {t(`admin.roles.form.permissionSections.${section.section}`, section.section)}
+                  </span>
                   <div className="flex items-center gap-2">
                     <span className="text-xs text-dark-500">
                       {section.actions.filter((a) => isPermSelected(section.section, a)).length}/
@@ -208,7 +210,7 @@ function PermissionMatrix({
                           }`}
                           aria-pressed={selected}
                         >
-                          {action}
+                          {t(`admin.roles.form.permissionActions.${action}`, action)}
                         </button>
                       );
                     })}

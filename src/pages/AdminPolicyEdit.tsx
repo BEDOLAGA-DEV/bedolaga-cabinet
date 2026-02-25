@@ -473,7 +473,7 @@ export default function AdminPolicyEdit() {
                 <option value="">{t('admin.policies.form.selectResource')}</option>
                 {permissionRegistry?.map((section) => (
                   <option key={section.section} value={section.section}>
-                    {section.section}
+                    {t(`admin.roles.form.permissionSections.${section.section}`, section.section)}
                   </option>
                 ))}
               </select>
@@ -500,7 +500,7 @@ export default function AdminPolicyEdit() {
                         }`}
                         aria-pressed={selected}
                       >
-                        {action}
+                        {t(`admin.roles.form.permissionActions.${action}`, action)}
                       </button>
                     );
                   })}
