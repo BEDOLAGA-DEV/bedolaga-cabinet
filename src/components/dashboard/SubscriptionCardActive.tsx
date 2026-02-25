@@ -148,17 +148,6 @@ export default function SubscriptionCardActive({
           <h2 className="text-lg font-bold tracking-tight text-white">
             {t('dashboard.trafficUsageTitle')}
           </h2>
-
-          {/* Tariff info line */}
-          <span className="text-xs text-white/35">
-            {subscription.tariff_name && (
-              <>
-                {t('dashboard.tariff')} {subscription.tariff_name} ·{' '}
-              </>
-            )}
-            {t('dashboard.validUntil', { date: formattedDate })} · {subscription.device_limit}{' '}
-            {t('dashboard.devicesShort')}
-          </span>
         </div>
 
         {/* Big percentage / infinity */}
@@ -261,8 +250,9 @@ export default function SubscriptionCardActive({
 
       {/* ─── Stats row: Tariff + Days Left ─── */}
       <div className="mb-5 flex gap-2.5">
-        {/* Tariff badge */}
-        <div
+        {/* Tariff badge — clickable */}
+        <Link
+          to="/subscription"
           className="flex-1 rounded-[14px] p-3.5 transition-all duration-500"
           style={{
             background: `linear-gradient(135deg, ${zone.mainHex}12, ${zone.mainHex}06)`,
@@ -281,7 +271,7 @@ export default function SubscriptionCardActive({
           <div className="mt-0.5 font-mono text-[10px] text-white/30">
             {t('dashboard.validUntil', { date: formattedDate })}
           </div>
-        </div>
+        </Link>
 
         {/* Days remaining */}
         <div
