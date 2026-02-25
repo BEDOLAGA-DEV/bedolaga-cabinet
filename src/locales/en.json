@@ -225,7 +225,41 @@
     "noActiveSubscription": "No active subscription",
     "devicesUsed": "Devices: {{used}} of {{total}}",
     "trafficUsed": "Traffic: {{used}} of {{total}} GB",
-    "unlimitedTraffic": "Unlimited traffic"
+    "unlimitedTraffic": "Unlimited traffic",
+    "zone": {
+      "normal": "Normal",
+      "warning": "Moderate",
+      "danger": "High",
+      "critical": "Critical"
+    },
+    "connectDevice": "Connect Device",
+    "devicesConnected": "{{count}} connected",
+    "trafficUsage": "{{used}} / {{limit}} GB",
+    "unlimited": "Unlimited",
+    "tariff": "Tariff",
+    "validUntil": "until {{date}}",
+    "daysRemaining": "Days left",
+    "expired": {
+      "title": "Subscription Expired",
+      "trialTitle": "Trial Expired",
+      "renew": "Renew",
+      "tariffs": "View Tariffs",
+      "traffic": "Traffic",
+      "devices": "Devices",
+      "expiredDate": "Expired"
+    },
+    "trialOffer": {
+      "freeTitle": "Free Trial Available",
+      "paidTitle": "Trial Subscription",
+      "freeDesc": "Try our VPN for free — no commitment required",
+      "paidDesc": "Get started with a trial subscription"
+    },
+    "stats": {
+      "balance": "Balance",
+      "subscription": "Subscription",
+      "referrals": "Referrals",
+      "earnings": "Earnings"
+    }
   },
   "subscription": {
     "title": "Subscription",

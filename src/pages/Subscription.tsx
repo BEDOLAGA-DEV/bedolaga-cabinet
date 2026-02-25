@@ -6,6 +6,7 @@ import { AxiosError } from 'axios';
 import { subscriptionApi } from '../api/subscription';
 import { promoApi } from '../api/promo';
 import { HoverBorderGradient } from '../components/ui/hover-border-gradient';
+import TrafficProgressBar from '../components/dashboard/TrafficProgressBar';
 import type {
   PurchaseSelection,
   PeriodOption,
@@ -605,12 +606,6 @@ export default function Subscription() {
     }
   };
 
-  const getTrafficColor = (percent: number) => {
-    if (percent > 90) return 'bg-error-500';
-    if (percent > 70) return 'bg-warning-500';
-    return 'bg-success-500';
-  };
-
   const toggleServer = (uuid: string) => {
     if (selectedServers.includes(uuid)) {
       if (selectedServers.length > 1) {
@@ -756,11 +751,11 @@ export default function Subscription() {
                 {t('subscription.connectionInfo')}
               </div>
 
-              {/* Get Config Button */}
+              {/* Get Config Button with device indicator */}
               <HoverBorderGradient
                 onClick={() => navigate('/connection')}
                 containerClassName="mb-3 w-full"
-                className="flex w-full items-center justify-center gap-2 py-3"
+                className="flex w-full items-center justify-center gap-3 py-3"
               >
                 <svg
                   className="h-5 w-5"
@@ -772,11 +767,29 @@ export default function Subscription() {
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"
+                    d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3"
                   />
                 </svg>
-                {t('subscription.getConfig')}
+                <span>{t('subscription.getConfig')}</span>
+                <div className="flex gap-1">
+                  {Array.from({ length: Math.min(subscription.device_limit, 5) }).map((_, i) => (
+                    <div key={i} className="h-1.5 w-1.5 rounded-full bg-accent-400/60" />
+                  ))}
+                </div>
               </HoverBorderGradient>
+
+              {/* Compact traffic progress bar */}
+              <div className="mb-3">
+                <TrafficProgressBar
+                  usedGb={trafficData?.traffic_used_gb ?? subscription.traffic_used_gb}
+                  limitGb={subscription.traffic_limit_gb}
+                  percent={trafficData?.traffic_used_percent ?? subscription.traffic_used_percent}
+                  isUnlimited={
+                    (trafficData?.is_unlimited ?? false) || subscription.traffic_limit_gb === 0
+                  }
+                  compact
+                />
+              </div>
 
               {/* Subscription URL - hidden when hide_subscription_link is true */}
               {!subscription.hide_subscription_link && (
@@ -885,21 +898,20 @@ export default function Subscription() {
             <div className="mb-6">
               <div className="mb-2 flex justify-between text-sm">
                 <span className="text-dark-400">{t('subscription.trafficUsed')}</span>
-                <span className="text-dark-300">
+                <span className="font-mono text-dark-300">
                   {(trafficData?.traffic_used_percent ?? subscription.traffic_used_percent).toFixed(
                     1,
                   )}
                   %
                 </span>
               </div>
-              <div className="progress-bar">
-                <div
-                  className={`progress-fill ${getTrafficColor(trafficData?.traffic_used_percent ?? subscription.traffic_used_percent)}`}
-                  style={{
-                    width: `${Math.min(trafficData?.traffic_used_percent ?? subscription.traffic_used_percent, 100)}%`,
-                  }}
-                />
-              </div>
+              <TrafficProgressBar
+                usedGb={trafficData?.traffic_used_gb ?? subscription.traffic_used_gb}
+                limitGb={subscription.traffic_limit_gb}
+                percent={trafficData?.traffic_used_percent ?? subscription.traffic_used_percent}
+                isUnlimited={false}
+                compact
+              />
             </div>
           )}
 

@@ -237,7 +237,41 @@
     "noActiveSubscription": "Нет активной подписки",
     "devicesUsed": "Устройств: {{used}} из {{total}}",
     "trafficUsed": "Трафик: {{used}} из {{total}} ГБ",
-    "unlimitedTraffic": "Безлимитный трафик"
+    "unlimitedTraffic": "Безлимитный трафик",
+    "zone": {
+      "normal": "Норма",
+      "warning": "Умеренный",
+      "danger": "Высокий",
+      "critical": "Критический"
+    },
+    "connectDevice": "Подключить устройство",
+    "devicesConnected": "{{count}} подключено",
+    "trafficUsage": "{{used}} / {{limit}} ГБ",
+    "unlimited": "Безлимит",
+    "tariff": "Тариф",
+    "validUntil": "до {{date}}",
+    "daysRemaining": "Дней осталось",
+    "expired": {
+      "title": "Подписка истекла",
+      "trialTitle": "Пробный период истёк",
+      "renew": "Продлить",
+      "tariffs": "Тарифы",
+      "traffic": "Трафик",
+      "devices": "Устройства",
+      "expiredDate": "Истекла"
+    },
+    "trialOffer": {
+      "freeTitle": "Бесплатный пробный период",
+      "paidTitle": "Пробная подписка",
+      "freeDesc": "Попробуйте наш VPN бесплатно — без обязательств",
+      "paidDesc": "Начните с пробной подписки"
+    },
+    "stats": {
+      "balance": "Баланс",
+      "subscription": "Подписка",
+      "referrals": "Рефералы",
+      "earnings": "Заработок"
+    }
   },
   "subscription": {
     "title": "Подписка",
