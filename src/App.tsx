@@ -91,8 +91,10 @@ const AdminPinnedMessageCreate = lazy(() => import('./pages/AdminPinnedMessageCr
 const AdminChannelSubscriptions = lazy(() => import('./pages/AdminChannelSubscriptions'));
 const AdminEmailTemplatePreview = lazy(() => import('./pages/AdminEmailTemplatePreview'));
 const AdminRoles = lazy(() => import('./pages/AdminRoles'));
+const AdminRoleEdit = lazy(() => import('./pages/AdminRoleEdit'));
 const AdminRoleAssign = lazy(() => import('./pages/AdminRoleAssign'));
 const AdminPolicies = lazy(() => import('./pages/AdminPolicies'));
+const AdminPolicyEdit = lazy(() => import('./pages/AdminPolicyEdit'));
 const AdminAuditLog = lazy(() => import('./pages/AdminAuditLog'));
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -893,6 +895,26 @@ function App() {
           }
         />
         <Route
+          path="/admin/roles/create"
+          element={
+            <PermissionRoute permission="roles:create">
+              <LazyPage>
+                <AdminRoleEdit />
+              </LazyPage>
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="/admin/roles/:id/edit"
+          element={
+            <PermissionRoute permission="roles:edit">
+              <LazyPage>
+                <AdminRoleEdit />
+              </LazyPage>
+            </PermissionRoute>
+          }
+        />
+        <Route
           path="/admin/roles/assign"
           element={
             <PermissionRoute permission="roles:assign">
@@ -908,6 +930,26 @@ function App() {
             <PermissionRoute permission="roles:read">
               <LazyPage>
                 <AdminPolicies />
+              </LazyPage>
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="/admin/policies/create"
+          element={
+            <PermissionRoute permission="roles:create">
+              <LazyPage>
+                <AdminPolicyEdit />
+              </LazyPage>
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="/admin/policies/:id/edit"
+          element={
+            <PermissionRoute permission="roles:edit">
+              <LazyPage>
+                <AdminPolicyEdit />
               </LazyPage>
             </PermissionRoute>
           }
