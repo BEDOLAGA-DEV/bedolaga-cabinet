@@ -5,6 +5,7 @@ import { useLocation, useNavigate } from 'react-router';
 import { AxiosError } from 'axios';
 import { subscriptionApi } from '../api/subscription';
 import { promoApi } from '../api/promo';
+import { HoverBorderGradient } from '../components/ui/hover-border-gradient';
 import type {
   PurchaseSelection,
   PeriodOption,
@@ -756,9 +757,10 @@ export default function Subscription() {
               </div>
 
               {/* Get Config Button */}
-              <button
+              <HoverBorderGradient
                 onClick={() => navigate('/connection')}
-                className="btn-primary mb-3 flex w-full items-center justify-center gap-2 py-3"
+                containerClassName="mb-3 w-full"
+                className="flex w-full items-center justify-center gap-2 py-3"
               >
                 <svg
                   className="h-5 w-5"
@@ -774,7 +776,7 @@ export default function Subscription() {
                   />
                 </svg>
                 {t('subscription.getConfig')}
-              </button>
+              </HoverBorderGradient>
 
               {/* Subscription URL - hidden when hide_subscription_link is true */}
               {!subscription.hide_subscription_link && (

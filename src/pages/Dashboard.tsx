@@ -10,6 +10,7 @@ import { balanceApi } from '../api/balance';
 import { wheelApi } from '../api/wheel';
 import Onboarding, { useOnboarding } from '../components/Onboarding';
 import PromoOffersSection from '../components/PromoOffersSection';
+import { HoverBorderGradient } from '../components/ui/hover-border-gradient';
 import { useCurrency } from '../hooks/useCurrency';
 import { API } from '../config/constants';
 
@@ -411,13 +412,14 @@ export default function Dashboard() {
               {t('dashboard.viewSubscription')}
             </Link>
             {subscription.subscription_url && (
-              <button
+              <HoverBorderGradient
                 onClick={() => navigate('/connection')}
-                className="btn-secondary py-2.5 text-sm"
+                containerClassName="w-full"
+                className="flex w-full items-center justify-center py-2.5 text-sm"
                 data-onboarding="connect-devices"
               >
                 {t('subscription.getConfig')}
-              </button>
+              </HoverBorderGradient>
             )}
           </div>
         </div>
@@ -590,30 +592,30 @@ export default function Dashboard() {
 
               {trialInfo.requires_payment && trialInfo.price_kopeks > 0 ? (
                 (balanceData?.balance_kopeks || 0) >= trialInfo.price_kopeks ? (
-                  <button
+                  <HoverBorderGradient
                     onClick={() => activateTrialMutation.mutate()}
-                    disabled={activateTrialMutation.isPending}
-                    className="btn-primary w-full"
+                    containerClassName={`w-full ${activateTrialMutation.isPending ? 'pointer-events-none opacity-50' : ''}`}
+                    className="flex w-full items-center justify-center"
                   >
                     {activateTrialMutation.isPending
                       ? t('common.loading', 'Loading...')
                       : t('subscription.trial.payAndActivate', 'Pay from Balance & Activate')}
-                  </button>
+                  </HoverBorderGradient>
                 ) : (
                   <Link to="/balance" className="btn-primary block w-full text-center">
                     {t('subscription.trial.topUpToActivate', 'Top Up Balance')}
                   </Link>
                 )
               ) : (
-                <button
+                <HoverBorderGradient
                   onClick={() => activateTrialMutation.mutate()}
-                  disabled={activateTrialMutation.isPending}
-                  className="btn-primary w-full"
+                  containerClassName={`w-full ${activateTrialMutation.isPending ? 'pointer-events-none opacity-50' : ''}`}
+                  className="flex w-full items-center justify-center"
                 >
                   {activateTrialMutation.isPending
                     ? t('common.loading', 'Loading...')
                     : t('subscription.trial.activate', 'Activate Free Trial')}
-                </button>
+                </HoverBorderGradient>
               )}
             </div>
           </div>
