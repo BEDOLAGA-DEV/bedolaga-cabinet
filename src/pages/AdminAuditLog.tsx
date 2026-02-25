@@ -476,11 +476,8 @@ export default function AdminAuditLog() {
     setPage(0);
   }, []);
 
-  // Filter status entries client-side (status is derived from details, not a backend field)
-  const filteredEntries = useMemo(() => {
-    if (!appliedFilters.status) return entries;
-    return entries.filter((entry) => entry.status === appliedFilters.status);
-  }, [entries, appliedFilters.status]);
+  // Status is filtered server-side via query params
+  const filteredEntries = entries;
 
   const hasActiveFilters = useMemo(() => {
     return (

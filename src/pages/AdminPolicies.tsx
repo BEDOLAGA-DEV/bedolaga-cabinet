@@ -430,9 +430,6 @@ export default function AdminPolicies() {
   const openEditModal = useCallback((policy: AccessPolicy) => {
     const parsed = parseConditions(policy.conditions);
 
-    // Determine the role_id from conditions if present
-    const roleId = typeof policy.conditions.role_id === 'number' ? policy.conditions.role_id : null;
-
     const actions = Array.isArray(policy.actions) ? policy.actions : [];
 
     setEditingPolicy(policy);
@@ -442,7 +439,7 @@ export default function AdminPolicies() {
       effect: policy.effect,
       resource: policy.resource,
       actions,
-      role_id: roleId,
+      role_id: policy.role_id ?? null,
       priority: policy.priority,
       conditions: {
         time_range: parsed.time_range ?? { start: '09:00', end: '18:00' },
@@ -499,10 +496,6 @@ export default function AdminPolicies() {
         formData.conditions,
         formData.conditionsEnabled,
       );
-
-      if (formData.role_id !== null) {
-        conditionsPayload.role_id = formData.role_id;
-      }
 
       if (editingPolicy) {
         const payload: UpdatePolicyPayload = {
@@ -586,10 +579,10 @@ export default function AdminPolicies() {
   );
 
   const getRoleName = useCallback(
-    (conditions: Record<string, unknown>): string => {
-      const roleId = typeof conditions.role_id === 'number' ? conditions.role_id : null;
-      if (roleId === null) return t('admin.policies.global');
-      const role = rolesMap.get(roleId);
+    (policy: AccessPolicy): string => {
+      if (policy.role_name) return policy.role_name;
+      if (policy.role_id === null) return t('admin.policies.global');
+      const role = rolesMap.get(policy.role_id);
       return role?.name ?? t('admin.policies.unknownRole');
     },
     [rolesMap, t],
@@ -613,7 +606,7 @@ export default function AdminPolicies() {
             <p className="text-sm text-dark-400">{t('admin.policies.subtitle')}</p>
           </div>
         </div>
-        <PermissionGate permission="policies:create">
+        <PermissionGate permission="roles:create">
           <button
             onClick={openCreateModal}
             className="flex items-center justify-center gap-2 rounded-lg bg-accent-500 px-4 py-2 text-white transition-colors hover:bg-accent-600"
@@ -670,7 +663,7 @@ export default function AdminPolicies() {
         <div className="space-y-3">
           {sortedPolicies.map((policy) => {
             const conditionIcons = renderConditionIcons(policy.conditions);
-            const roleName = getRoleName(policy.conditions);
+            const roleName = getRoleName(policy);
 
             return (
               <div
@@ -721,7 +714,7 @@ export default function AdminPolicies() {
 
                   {/* Actions */}
                   <div className="flex items-center gap-2 border-t border-dark-700 pt-3 sm:border-0 sm:pt-0">
-                    <PermissionGate permission="policies:edit">
+                    <PermissionGate permission="roles:edit">
                       <button
                         onClick={() => openEditModal(policy)}
                         className="flex-1 rounded-lg bg-dark-700 p-2 text-dark-300 transition-colors hover:bg-dark-600 hover:text-dark-100 sm:flex-none"
@@ -730,7 +723,7 @@ export default function AdminPolicies() {
                         <EditIcon />
                       </button>
                     </PermissionGate>
-                    <PermissionGate permission="policies:delete">
+                    <PermissionGate permission="roles:delete">
                       <button
                         onClick={() => setDeleteConfirm(policy.id)}
                         className="flex-1 rounded-lg bg-dark-700 p-2 text-dark-300 transition-colors hover:bg-error-500/20 hover:text-error-400 sm:flex-none"
