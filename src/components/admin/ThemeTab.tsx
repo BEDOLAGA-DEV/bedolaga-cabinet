@@ -149,24 +149,47 @@ export function ThemeTab() {
     },
   });
 
-  // Update a single color in the draft and apply preview instantly
+  // Throttle applyThemeColors to once per animation frame
+  const rafRef = useRef(0);
+  const querySyncRef = useRef(0);
+
   const updateDraftColor = useCallback(
     (key: keyof ThemeColors, value: string) => {
       setDraftColors((prev) => {
         const next = { ...prev, [key]: value };
-        applyThemeColors(next);
-        queryClient.setQueryData(['theme-colors'], next);
+
+        // Throttle CSS variable updates to 1x per frame
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = requestAnimationFrame(() => {
+          applyThemeColors(next);
+        });
+
+        // Debounce query cache update (triggers re-renders of other components)
+        clearTimeout(querySyncRef.current);
+        querySyncRef.current = window.setTimeout(() => {
+          queryClient.setQueryData(['theme-colors'], next);
+        }, 150);
+
         return next;
       });
     },
     [queryClient],
   );
 
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      cancelAnimationFrame(rafRef.current);
+      clearTimeout(querySyncRef.current);
+    };
+  }, []);
+
   // Apply a full preset and auto-save to server
   const applyPreset = useCallback(
     (colors: Partial<ThemeColors>) => {
       setDraftColors((prev) => {
         const next = { ...prev, ...colors };
+        // Preset is a one-shot action — apply immediately (no throttle needed)
         applyThemeColors(next);
         queryClient.setQueryData(['theme-colors'], next);
         // Auto-save preset to server so it persists across navigation
