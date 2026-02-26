@@ -184,7 +184,7 @@ export default function Support() {
       URL.revokeObjectURL(createPreviewRef.current);
       createPreviewRef.current = null;
     }
-    clearCreateAttachment();
+    setCreateAttachment(null);
   };
 
   const clearReplyAttachment = () => {
@@ -192,7 +192,7 @@ export default function Support() {
       URL.revokeObjectURL(replyPreviewRef.current);
       replyPreviewRef.current = null;
     }
-    clearReplyAttachment();
+    setReplyAttachment(null);
   };
 
   // Get support configuration
