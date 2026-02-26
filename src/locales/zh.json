@@ -698,7 +698,8 @@
       "cannotSpin": "当前无法抽奖",
       "insufficientBalance": "余额不足",
       "topUpRequired": "请充值以支付抽奖费用",
-      "starsNotAvailable": "Stars支付不可用。请通过Telegram打开应用。"
+      "starsNotAvailable": "Stars支付不可用。请通过Telegram打开应用。",
+      "noSubscription": "需要有效订阅才能转动轮盘。请先激活订阅。"
     },
     "payWithStars": "支付 {stars} Stars",
     "processingPayment": "处理中...",

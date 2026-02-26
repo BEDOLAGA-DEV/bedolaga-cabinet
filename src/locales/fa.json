@@ -694,7 +694,8 @@
       "cannotSpin": "فعلاً امکان چرخش نیست",
       "insufficientBalance": "موجودی کافی نیست",
       "topUpRequired": "برای پرداخت شارژ کنید",
-      "starsNotAvailable": "پرداخت Stars در دسترس نیست. برنامه را از طریق تلگرام باز کنید."
+      "starsNotAvailable": "پرداخت Stars در دسترس نیست. برنامه را از طریق تلگرام باز کنید.",
+      "noSubscription": "برای چرخاندن گردونه نیاز به اشتراک فعال دارید. ابتدا اشتراک خود را فعال کنید."
     },
     "payWithStars": "پرداخت {stars} Stars",
     "processingPayment": "در حال پردازش...",

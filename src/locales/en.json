@@ -858,7 +858,8 @@
       "cannotSpin": "Cannot spin right now",
       "insufficientBalance": "Insufficient balance",
       "topUpRequired": "Top up your balance to pay for spin",
-      "starsNotAvailable": "Stars payment not available. Open the app via Telegram."
+      "starsNotAvailable": "Stars payment not available. Open the app via Telegram.",
+      "noSubscription": "An active subscription is required to spin the wheel. Activate your subscription first."
     },
     "payWithStars": "Pay with Stars",
     "payWithDays": "Pay with days",

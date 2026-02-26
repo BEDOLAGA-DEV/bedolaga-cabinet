@@ -26,6 +26,7 @@ export interface WheelConfig {
   can_pay_days: boolean;
   user_balance_kopeks: number;
   required_balance_kopeks: number;
+  has_subscription: boolean;
 }
 
 export interface SpinAvailability {

@@ -887,7 +887,8 @@
       "cannotSpin": "Сейчас нельзя крутить",
       "insufficientBalance": "Недостаточно средств на балансе",
       "topUpRequired": "Пополните баланс для оплаты спина",
-      "starsNotAvailable": "Оплата Stars недоступна. Откройте приложение через Telegram."
+      "starsNotAvailable": "Оплата Stars недоступна. Откройте приложение через Telegram.",
+      "noSubscription": "Для вращения колеса необходима активная подписка. Активируйте подписку в разделе «Подписка»."
     },
     "payWithStars": "Оплатить Stars",
     "payWithDays": "Оплатить днями",
