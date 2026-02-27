@@ -1,5 +1,4 @@
 import React, { useMemo } from 'react';
-import { motion } from 'framer-motion';
 import { sanitizeColor, clampNumber } from './types';
 
 interface Props {
@@ -37,6 +36,13 @@ export default React.memo(function BackgroundBoxes({ settings }: Props) {
 
   return (
     <div className="absolute inset-0 overflow-hidden">
+      {/* CSS keyframes for box fade — runs on compositor thread, zero main-thread cost */}
+      <style>{`
+        @keyframes boxFade {
+          0%, 100% { opacity: 0; }
+          50% { opacity: 0.15; }
+        }
+      `}</style>
       <div
         style={{
           position: 'absolute',
@@ -49,21 +55,18 @@ export default React.memo(function BackgroundBoxes({ settings }: Props) {
           gridTemplateColumns: `repeat(${cols}, 1fr)`,
           transform: 'skewX(-48deg) skewY(14deg) scale(0.675) translateZ(0)',
           transformOrigin: 'center center',
+          contain: 'strict',
         }}
       >
         {cells.map((cell, i) => (
-          <motion.div
+          <div
             key={i}
             className="border border-slate-700/50"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: [0, 0.15, 0] }}
-            transition={{
-              duration: cell.duration,
-              delay: cell.delay,
-              repeat: Infinity,
-              ease: 'easeInOut',
+            style={{
+              backgroundColor: cell.color,
+              animation: `boxFade ${cell.duration}s ${cell.delay}s ease-in-out infinite`,
+              opacity: 0,
             }}
-            style={{ backgroundColor: cell.color }}
           />
         ))}
       </div>
