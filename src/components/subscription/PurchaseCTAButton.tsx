@@ -32,10 +32,10 @@ export default function PurchaseCTAButton({ subscription }: PurchaseCTAButtonPro
       <HoverBorderGradient
         accentColor={accentColor}
         duration={4}
-        className="group relative w-full cursor-pointer overflow-hidden rounded-2xl p-[1.5px]"
+        className="group relative w-full cursor-pointer overflow-hidden rounded-2xl"
       >
         <div
-          className="relative flex items-center justify-between rounded-[14px] px-5 py-4 transition-all duration-300"
+          className="relative flex items-center justify-between rounded-[14px] px-5 py-4 transition-colors duration-300"
           style={{
             background: isExpired
               ? 'linear-gradient(135deg, rgba(255,59,92,0.08), rgba(255,107,53,0.06))'

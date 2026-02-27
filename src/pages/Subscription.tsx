@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, memo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
@@ -19,6 +19,146 @@ import {
   getInsufficientBalanceError,
   getFlagEmoji,
 } from '../utils/subscriptionHelpers';
+
+/** Isolated countdown so 1s interval doesn't re-render the whole page */
+const CountdownTimer = memo(function CountdownTimer({
+  endDate,
+  isActive,
+  glassColors: g,
+}: {
+  endDate: string;
+  isActive: boolean;
+  glassColors: ReturnType<typeof getGlassColors>;
+}) {
+  const { t } = useTranslation();
+  const [countdown, setCountdown] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+
+  useEffect(() => {
+    const endTime = new Date(endDate).getTime();
+    const tick = () => {
+      const diff = Math.max(0, endTime - Date.now());
+      setCountdown({
+        days: Math.floor(diff / 86_400_000),
+        hours: Math.floor((diff % 86_400_000) / 3_600_000),
+        minutes: Math.floor((diff % 3_600_000) / 60_000),
+        seconds: Math.floor((diff % 60_000) / 1_000),
+      });
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [endDate]);
+
+  const isExpired = !isActive;
+  const isUrgent = countdown.days <= 3;
+
+  const formattedDate = new Date(endDate).toLocaleDateString(undefined, {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
+
+  return (
+    <div
+      className="rounded-[14px] p-3.5"
+      style={{
+        background: isExpired
+          ? 'rgba(255,59,92,0.06)'
+          : isUrgent
+            ? 'rgba(255,184,0,0.06)'
+            : g.innerBg,
+        border: isExpired
+          ? '1px solid rgba(255,59,92,0.15)'
+          : isUrgent
+            ? '1px solid rgba(255,184,0,0.15)'
+            : `1px solid ${g.innerBorder}`,
+      }}
+    >
+      <div className="mb-2 flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-wider text-dark-50/35">
+        <div
+          className="flex h-6 w-6 items-center justify-center rounded-[7px]"
+          style={{
+            background: isExpired
+              ? 'rgba(255,59,92,0.1)'
+              : isUrgent
+                ? 'rgba(255,184,0,0.1)'
+                : g.hoverBg,
+          }}
+        >
+          <svg
+            width="13"
+            height="13"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke={isExpired ? '#FF3B5C' : isUrgent ? '#FFB800' : g.textSecondary}
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <rect x="3" y="4" width="18" height="18" rx="2" />
+            <path d="M16 2v4M8 2v4M3 10h18" />
+          </svg>
+        </div>
+        {t('dashboard.remaining')}
+      </div>
+      {isExpired ? (
+        <div className="text-[18px] font-bold tracking-tight" style={{ color: '#FF3B5C' }}>
+          {t('subscription.expired')}
+        </div>
+      ) : (
+        <div className="flex items-baseline gap-1 font-mono tabular-nums">
+          {countdown.days > 0 && (
+            <>
+              <span
+                className="text-[20px] font-bold tracking-tight"
+                style={{ color: isUrgent ? '#FFB800' : g.text }}
+              >
+                {countdown.days}
+              </span>
+              <span className="mr-1 text-[10px] font-medium text-dark-50/25">
+                {t('subscription.daysShort')}
+              </span>
+            </>
+          )}
+          <span
+            className="text-[20px] font-bold tracking-tight"
+            style={{ color: isUrgent ? '#FFB800' : g.text }}
+          >
+            {String(countdown.hours).padStart(2, '0')}
+          </span>
+          <span
+            className="mx-[-1px] text-[16px] font-bold opacity-30"
+            style={{ color: isUrgent ? '#FFB800' : g.text }}
+          >
+            :
+          </span>
+          <span
+            className="text-[20px] font-bold tracking-tight"
+            style={{ color: isUrgent ? '#FFB800' : g.text }}
+          >
+            {String(countdown.minutes).padStart(2, '0')}
+          </span>
+          <span
+            className="mx-[-1px] text-[16px] font-bold opacity-30"
+            style={{ color: isUrgent ? '#FFB800' : g.text }}
+          >
+            :
+          </span>
+          <span
+            className="text-[20px] font-bold tracking-tight"
+            style={{ color: isUrgent ? '#FFB800' : g.text }}
+          >
+            {String(countdown.seconds).padStart(2, '0')}
+          </span>
+        </div>
+      )}
+      <div className="mt-1 text-[10px] font-medium text-dark-50/25">
+        {t('subscription.expiresAt')}: {formattedDate}
+      </div>
+    </div>
+  );
+});
 
 export default function Subscription() {
   const { t } = useTranslation();
@@ -60,25 +200,6 @@ export default function Subscription() {
 
   // Extract subscription from response (null if no subscription)
   const subscription = subscriptionResponse?.subscription ?? null;
-
-  // Live countdown timer
-  const [countdown, setCountdown] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-  useEffect(() => {
-    if (!subscription?.end_date) return;
-    const endTime = new Date(subscription.end_date).getTime();
-    const tick = () => {
-      const diff = Math.max(0, endTime - Date.now());
-      setCountdown({
-        days: Math.floor(diff / 86_400_000),
-        hours: Math.floor((diff % 86_400_000) / 3_600_000),
-        minutes: Math.floor((diff % 3_600_000) / 60_000),
-        seconds: Math.floor((diff % 60_000) / 1_000),
-      });
-    };
-    tick();
-    const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
-  }, [subscription?.end_date]);
 
   // Purchase options (needed for balance_kopeks in device/traffic/server management)
   const { data: purchaseOptions } = useQuery({
@@ -316,7 +437,6 @@ export default function Subscription() {
             (trafficData?.is_unlimited ?? false) || subscription.traffic_limit_gb === 0;
           const zone = getTrafficZone(usedPercent);
           const connectedDevices = devicesData?.total ?? 0;
-          const formattedDate = new Date(subscription.end_date).toLocaleDateString();
 
           return (
             <div
@@ -576,7 +696,7 @@ export default function Subscription() {
                     {Array.from({ length: subscription.device_limit }, (_, i) => (
                       <div
                         key={i}
-                        className="h-[7px] w-[7px] rounded-full transition-all duration-300"
+                        className="h-[7px] w-[7px] rounded-full transition-[background-color,box-shadow] duration-300"
                         style={{
                           background: i < connectedDevices ? zone.mainHex : g.textGhost,
                           boxShadow: i < connectedDevices ? `0 0 6px ${zone.mainHex}50` : 'none',
@@ -601,7 +721,7 @@ export default function Subscription() {
                   </code>
                   <button
                     onClick={copyUrl}
-                    className="flex h-auto items-center rounded-[10px] px-3 transition-all duration-300"
+                    className="flex h-auto items-center rounded-[10px] px-3 transition-colors duration-300"
                     style={{
                       background: copied ? 'rgba(62,219,176,0.12)' : g.innerBorder,
                       border: copied ? '1px solid rgba(62,219,176,0.2)' : `1px solid ${g.trackBg}`,
@@ -616,114 +736,12 @@ export default function Subscription() {
 
               {/* ─── Stats Row ─── */}
               <div className="mb-5 grid grid-cols-2 gap-2.5">
-                {/* Countdown timer */}
-                {(() => {
-                  const isUrgent = countdown.days <= 3;
-                  const isExpired = !subscription.is_active;
-                  return (
-                    <div
-                      className="rounded-[14px] p-3.5"
-                      style={{
-                        background: isExpired
-                          ? 'rgba(255,59,92,0.06)'
-                          : isUrgent
-                            ? 'rgba(255,184,0,0.06)'
-                            : g.innerBg,
-                        border: isExpired
-                          ? '1px solid rgba(255,59,92,0.15)'
-                          : isUrgent
-                            ? '1px solid rgba(255,184,0,0.15)'
-                            : `1px solid ${g.innerBorder}`,
-                      }}
-                    >
-                      <div className="mb-2 flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-wider text-dark-50/35">
-                        <div
-                          className="flex h-6 w-6 items-center justify-center rounded-[7px]"
-                          style={{
-                            background: isExpired
-                              ? 'rgba(255,59,92,0.1)'
-                              : isUrgent
-                                ? 'rgba(255,184,0,0.1)'
-                                : g.hoverBg,
-                          }}
-                        >
-                          <svg
-                            width="13"
-                            height="13"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke={isExpired ? '#FF3B5C' : isUrgent ? '#FFB800' : g.textSecondary}
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            aria-hidden="true"
-                          >
-                            <rect x="3" y="4" width="18" height="18" rx="2" />
-                            <path d="M16 2v4M8 2v4M3 10h18" />
-                          </svg>
-                        </div>
-                        {t('dashboard.remaining')}
-                      </div>
-                      {isExpired ? (
-                        <div
-                          className="text-[18px] font-bold tracking-tight"
-                          style={{ color: '#FF3B5C' }}
-                        >
-                          {t('subscription.expired')}
-                        </div>
-                      ) : (
-                        <div className="flex items-baseline gap-1 font-mono tabular-nums">
-                          {countdown.days > 0 && (
-                            <>
-                              <span
-                                className="text-[20px] font-bold tracking-tight"
-                                style={{ color: isUrgent ? '#FFB800' : g.text }}
-                              >
-                                {countdown.days}
-                              </span>
-                              <span className="mr-1 text-[10px] font-medium text-dark-50/25">
-                                {t('subscription.daysShort')}
-                              </span>
-                            </>
-                          )}
-                          <span
-                            className="text-[20px] font-bold tracking-tight"
-                            style={{ color: isUrgent ? '#FFB800' : g.text }}
-                          >
-                            {String(countdown.hours).padStart(2, '0')}
-                          </span>
-                          <span
-                            className="mx-[-1px] text-[16px] font-bold opacity-30"
-                            style={{ color: isUrgent ? '#FFB800' : g.text }}
-                          >
-                            :
-                          </span>
-                          <span
-                            className="text-[20px] font-bold tracking-tight"
-                            style={{ color: isUrgent ? '#FFB800' : g.text }}
-                          >
-                            {String(countdown.minutes).padStart(2, '0')}
-                          </span>
-                          <span
-                            className="mx-[-1px] text-[16px] font-bold opacity-30"
-                            style={{ color: isUrgent ? '#FFB800' : g.text }}
-                          >
-                            :
-                          </span>
-                          <span
-                            className="text-[20px] font-bold tracking-tight"
-                            style={{ color: isUrgent ? '#FFB800' : g.text }}
-                          >
-                            {String(countdown.seconds).padStart(2, '0')}
-                          </span>
-                        </div>
-                      )}
-                      <div className="mt-1 text-[10px] font-medium text-dark-50/25">
-                        {t('subscription.expiresAt')}: {formattedDate}
-                      </div>
-                    </div>
-                  );
-                })()}
+                {/* Countdown timer — isolated to prevent 1s re-renders of entire page */}
+                <CountdownTimer
+                  endDate={subscription.end_date}
+                  isActive={subscription.is_active}
+                  glassColors={g}
+                />
 
                 {/* Devices */}
                 <div
@@ -858,7 +876,7 @@ export default function Subscription() {
                           style={{ background: g.trackBg }}
                         >
                           <div
-                            className="absolute inset-0 rounded-full transition-all duration-500"
+                            className="absolute inset-0 rounded-full transition-[width] duration-500"
                             style={{
                               width: `${purchase.progress_percent}%`,
                               background: `linear-gradient(90deg, ${zone.mainHex}, ${zone.mainHex}80)`,
@@ -897,13 +915,13 @@ export default function Subscription() {
                   <button
                     onClick={() => autopayMutation.mutate(!subscription.autopay_enabled)}
                     disabled={autopayMutation.isPending}
-                    className="relative h-7 w-[52px] rounded-full transition-all duration-300"
+                    className="relative h-7 w-[52px] rounded-full transition-colors duration-300"
                     style={{
                       background: subscription.autopay_enabled ? zone.mainHex : g.textGhost,
                     }}
                   >
                     <span
-                      className="absolute top-[3px] h-[22px] w-[22px] rounded-full bg-white transition-all duration-300"
+                      className="absolute top-[3px] h-[22px] w-[22px] rounded-full bg-white transition-[left] duration-300"
                       style={{
                         left: subscription.autopay_enabled ? '26px' : '3px',
                         boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
@@ -973,7 +991,7 @@ export default function Subscription() {
             <button
               onClick={() => pauseMutation.mutate()}
               disabled={pauseMutation.isPending}
-              className="rounded-[10px] px-4 py-2 text-sm font-semibold transition-all duration-300"
+              className="rounded-[10px] px-4 py-2 text-sm font-semibold transition-colors duration-300"
               style={{
                 background: subscription.is_daily_paused
                   ? 'rgba(62,219,176,0.12)'
@@ -1084,7 +1102,7 @@ export default function Subscription() {
                     style={{ background: g.trackBg }}
                   >
                     <div
-                      className="absolute inset-0 rounded-full transition-all duration-500"
+                      className="absolute inset-0 rounded-full transition-[width] duration-500"
                       style={{
                         width: `${progress}%`,
                         background: 'linear-gradient(90deg, #00E5A0, #00C987)',
