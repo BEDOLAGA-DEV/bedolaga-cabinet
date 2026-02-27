@@ -1104,6 +1104,9 @@ export default function Subscription() {
         </div>
       )}
 
+      {/* Purchase / Renewal CTA */}
+      <PurchaseCTAButton subscription={subscription} />
+
       {/* Additional Options (Buy Devices) */}
       {subscription && subscription.is_active && !subscription.is_trial && (
         <div
@@ -2027,9 +2030,6 @@ export default function Subscription() {
           )}
         </div>
       )}
-
-      {/* Purchase / Renewal CTA */}
-      <PurchaseCTAButton subscription={subscription} />
     </div>
   );
 }
