@@ -107,55 +107,57 @@ const CountdownTimer = memo(function CountdownTimer({
           {t('subscription.expired')}
         </div>
       ) : (
-        <div className="flex items-baseline gap-0.5 font-mono tabular-nums sm:gap-1">
-          {countdown.days > 0 && (
-            <>
-              <span
-                className="text-[18px] font-bold tracking-tight sm:text-[20px]"
-                style={{ color: isUrgent ? '#FFB800' : g.text }}
-              >
-                {countdown.days}
-              </span>
-              <span className="mr-0.5 text-[10px] font-medium text-dark-50/25 sm:mr-1">
-                {t('subscription.daysShort')}
-              </span>
-            </>
-          )}
-          <span
-            className="text-[18px] font-bold tracking-tight sm:text-[20px]"
-            style={{ color: isUrgent ? '#FFB800' : g.text }}
-          >
-            {String(countdown.hours).padStart(2, '0')}
-          </span>
-          <span
-            className="mx-[-2px] text-[14px] font-bold opacity-30 sm:mx-[-1px] sm:text-[16px]"
-            style={{ color: isUrgent ? '#FFB800' : g.text }}
-          >
-            :
-          </span>
-          <span
-            className="text-[18px] font-bold tracking-tight sm:text-[20px]"
-            style={{ color: isUrgent ? '#FFB800' : g.text }}
-          >
-            {String(countdown.minutes).padStart(2, '0')}
-          </span>
-          <span
-            className="mx-[-2px] text-[14px] font-bold opacity-30 sm:mx-[-1px] sm:text-[16px]"
-            style={{ color: isUrgent ? '#FFB800' : g.text }}
-          >
-            :
-          </span>
-          <span
-            className="text-[18px] font-bold tracking-tight sm:text-[20px]"
-            style={{ color: isUrgent ? '#FFB800' : g.text }}
-          >
-            {String(countdown.seconds).padStart(2, '0')}
-          </span>
+        <div className="flex items-baseline justify-between">
+          <div className="flex items-baseline gap-1 font-mono tabular-nums">
+            {countdown.days > 0 && (
+              <>
+                <span
+                  className="text-[20px] font-bold tracking-tight"
+                  style={{ color: isUrgent ? '#FFB800' : g.text }}
+                >
+                  {countdown.days}
+                </span>
+                <span className="mr-1 text-[10px] font-medium text-dark-50/25">
+                  {t('subscription.daysShort')}
+                </span>
+              </>
+            )}
+            <span
+              className="text-[20px] font-bold tracking-tight"
+              style={{ color: isUrgent ? '#FFB800' : g.text }}
+            >
+              {String(countdown.hours).padStart(2, '0')}
+            </span>
+            <span
+              className="mx-[-1px] text-[16px] font-bold opacity-30"
+              style={{ color: isUrgent ? '#FFB800' : g.text }}
+            >
+              :
+            </span>
+            <span
+              className="text-[20px] font-bold tracking-tight"
+              style={{ color: isUrgent ? '#FFB800' : g.text }}
+            >
+              {String(countdown.minutes).padStart(2, '0')}
+            </span>
+            <span
+              className="mx-[-1px] text-[16px] font-bold opacity-30"
+              style={{ color: isUrgent ? '#FFB800' : g.text }}
+            >
+              :
+            </span>
+            <span
+              className="text-[20px] font-bold tracking-tight"
+              style={{ color: isUrgent ? '#FFB800' : g.text }}
+            >
+              {String(countdown.seconds).padStart(2, '0')}
+            </span>
+          </div>
+          <div className="text-[10px] font-medium text-dark-50/25">
+            {t('subscription.expiresAt')}: {formattedDate}
+          </div>
         </div>
       )}
-      <div className="mt-1 text-[10px] font-medium text-dark-50/25">
-        {t('subscription.expiresAt')}: {formattedDate}
-      </div>
     </div>
   );
 });
@@ -753,54 +755,13 @@ export default function Subscription() {
                 </div>
               )}
 
-              {/* ─── Stats Row ─── */}
-              <div className="mb-5 grid grid-cols-2 gap-2.5">
-                {/* Countdown timer — isolated to prevent 1s re-renders of entire page */}
+              {/* ─── Countdown ─── */}
+              <div className="mb-5">
                 <CountdownTimer
                   endDate={subscription.end_date}
                   isActive={subscription.is_active}
                   glassColors={g}
                 />
-
-                {/* Devices */}
-                <div
-                  className="rounded-[14px] p-3.5"
-                  style={{
-                    background: g.innerBg,
-                    border: `1px solid ${g.innerBorder}`,
-                  }}
-                >
-                  <div className="mb-2 flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-wider text-dark-50/35">
-                    <div
-                      className="flex h-6 w-6 items-center justify-center rounded-[7px]"
-                      style={{ background: `${zone.mainHex}12` }}
-                    >
-                      <svg
-                        width="13"
-                        height="13"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke={zone.mainHex}
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        aria-hidden="true"
-                      >
-                        <rect x="2" y="3" width="20" height="14" rx="2" />
-                        <path d="M12 17v4M8 21h8" />
-                      </svg>
-                    </div>
-                    {t('subscription.devices')}
-                  </div>
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-[22px] font-bold tracking-tight text-dark-50">
-                      {connectedDevices}
-                    </span>
-                    <span className="text-xs font-medium text-dark-50/25">
-                      / {subscription.device_limit}
-                    </span>
-                  </div>
-                </div>
               </div>
 
               {/* ─── Locations ─── */}
