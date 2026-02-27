@@ -345,7 +345,6 @@ export const subscriptionApi = {
   // Preview tariff switch cost
   previewTariffSwitch: async (
     tariffId: number,
-    resetTraffic?: boolean,
   ): Promise<{
     can_switch: boolean;
     current_tariff_id: number | null;
@@ -365,14 +364,10 @@ export const subscriptionApi = {
     base_upgrade_cost_kopeks?: number;
     discount_percent?: number;
     discount_kopeks?: number;
-    // Traffic reset on switch
-    reset_traffic_available?: boolean;
-    reset_traffic_default?: boolean;
   }> => {
     const response = await apiClient.post('/cabinet/subscription/tariff/switch/preview', {
       tariff_id: tariffId,
-      period_days: 30,
-      ...(resetTraffic !== undefined && { reset_traffic: resetTraffic }),
+      period_days: 30, // Default period for switch
     });
     return response.data;
   },
@@ -380,7 +375,6 @@ export const subscriptionApi = {
   // Switch to a different tariff
   switchTariff: async (
     tariffId: number,
-    resetTraffic?: boolean,
   ): Promise<{
     success: boolean;
     message: string;
@@ -395,7 +389,6 @@ export const subscriptionApi = {
     const response = await apiClient.post('/cabinet/subscription/tariff/switch', {
       tariff_id: tariffId,
       period_days: 30,
-      ...(resetTraffic !== undefined && { reset_traffic: resetTraffic }),
     });
     return response.data;
   },

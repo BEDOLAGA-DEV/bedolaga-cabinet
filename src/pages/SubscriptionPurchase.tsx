@@ -128,14 +128,13 @@ export default function SubscriptionPurchase() {
 
   // Tariff switch
   const [switchTariffId, setSwitchTariffId] = useState<number | null>(null);
-  const [resetTrafficOnSwitch, setResetTrafficOnSwitch] = useState(false);
 
   // Auto-close all modals on success notification
   const handleCloseAllModals = () => {
     setShowPurchaseForm(false);
     setShowTariffPurchase(false);
     setSwitchTariffId(null);
-    setResetTrafficOnSwitch(false);
+
     setSelectedTariff(null);
     setSelectedTariffPeriod(null);
   };
@@ -232,21 +231,14 @@ export default function SubscriptionPurchase() {
     enabled: !!switchTariffId,
   });
 
-  // Initialize reset traffic toggle from server default
-  useEffect(() => {
-    if (switchPreview?.reset_traffic_default !== undefined) {
-      setResetTrafficOnSwitch(switchPreview.reset_traffic_default);
-    }
-  }, [switchPreview?.reset_traffic_default]);
-
   // Tariff switch mutation
   const switchTariffMutation = useMutation({
-    mutationFn: (tariffId: number) => subscriptionApi.switchTariff(tariffId, resetTrafficOnSwitch),
+    mutationFn: (tariffId: number) => subscriptionApi.switchTariff(tariffId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['subscription'] });
       queryClient.invalidateQueries({ queryKey: ['purchase-options'] });
       setSwitchTariffId(null);
-      setResetTrafficOnSwitch(false);
+
       navigate('/subscription', { replace: true });
     },
     onError: (error: unknown) => {
@@ -260,7 +252,7 @@ export default function SubscriptionPurchase() {
           const targetTariff = tariffs.find((tariff) => tariff.id === switchTariffId);
           if (targetTariff) {
             setSwitchTariffId(null);
-            setResetTrafficOnSwitch(false);
+
             setSelectedTariff(targetTariff);
             setSelectedTariffPeriod(targetTariff.periods[0] || null);
             setShowTariffPurchase(true);
@@ -608,35 +600,6 @@ export default function SubscriptionPurchase() {
                           </span>
                         </div>
                       </div>
-
-                      {/* Reset traffic toggle */}
-                      {switchPreview.reset_traffic_available && (
-                        <label className="flex cursor-pointer items-center justify-between rounded-lg border border-dark-700/50 bg-dark-800/50 px-3 py-2.5">
-                          <div>
-                            <div className="text-sm font-medium text-dark-100">
-                              {t('subscription.switchTariff.resetTraffic')}
-                            </div>
-                            <div className="text-xs text-dark-400">
-                              {t('subscription.switchTariff.resetTrafficHint')}
-                            </div>
-                          </div>
-                          <button
-                            type="button"
-                            role="switch"
-                            aria-checked={resetTrafficOnSwitch}
-                            onClick={() => setResetTrafficOnSwitch((prev) => !prev)}
-                            className={`relative h-6 w-11 flex-shrink-0 rounded-full transition-colors duration-200 ${
-                              resetTrafficOnSwitch ? 'bg-accent-500' : 'bg-dark-600'
-                            }`}
-                          >
-                            <span
-                              className={`absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform duration-200 ${
-                                resetTrafficOnSwitch ? 'translate-x-5' : 'translate-x-0'
-                              }`}
-                            />
-                          </button>
-                        </label>
-                      )}
 
                       {!switchPreview.has_enough_balance &&
                         switchPreview.upgrade_cost_kopeks > 0 && (

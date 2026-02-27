@@ -483,9 +483,7 @@
       "switched": "Tariff switched",
       "notEnoughBalance": "Insufficient balance",
       "dailyPayment": "Daily payment",
-      "dailyChargeDescription": "Charged daily from your balance",
-      "resetTraffic": "Reset traffic",
-      "resetTrafficHint": "Reset used traffic when switching tariff"
+      "dailyChargeDescription": "Charged daily from your balance"
     },
     "switchTraffic": {
       "title": "Change Traffic",

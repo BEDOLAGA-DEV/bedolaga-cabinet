@@ -378,9 +378,7 @@
       "remainingDays": "روزهای باقی‌مانده",
       "switch": "تغییر",
       "title": "تغییر تعرفه",
-      "upgradeCost": "هزینه ارتقا",
-      "resetTraffic": "بازنشانی ترافیک",
-      "resetTrafficHint": "بازنشانی ترافیک مصرفی هنگام تغییر تعرفه"
+      "upgradeCost": "هزینه ارتقا"
     },
     "promoGroup": {
       "yourGroup": "گروه شما: {{name}}",
