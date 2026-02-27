@@ -692,18 +692,37 @@ export default function Subscription() {
                       })}
                     </div>
                   </div>
-                  <div className="flex flex-shrink-0 gap-1.5" aria-hidden="true">
-                    {Array.from({ length: subscription.device_limit }, (_, i) => (
+                  {subscription.device_limit <= 10 ? (
+                    <div className="flex flex-shrink-0 gap-1.5" aria-hidden="true">
+                      {Array.from({ length: subscription.device_limit }, (_, i) => (
+                        <div
+                          key={i}
+                          className="h-[7px] w-[7px] rounded-full transition-[background-color,box-shadow] duration-300"
+                          style={{
+                            background: i < connectedDevices ? zone.mainHex : g.textGhost,
+                            boxShadow: i < connectedDevices ? `0 0 6px ${zone.mainHex}50` : 'none',
+                          }}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="flex w-16 flex-shrink-0 items-center" aria-hidden="true">
                       <div
-                        key={i}
-                        className="h-[7px] w-[7px] rounded-full transition-[background-color,box-shadow] duration-300"
-                        style={{
-                          background: i < connectedDevices ? zone.mainHex : g.textGhost,
-                          boxShadow: i < connectedDevices ? `0 0 6px ${zone.mainHex}50` : 'none',
-                        }}
-                      />
-                    ))}
-                  </div>
+                        className="h-[6px] w-full overflow-hidden rounded-full"
+                        style={{ background: g.textGhost }}
+                      >
+                        <div
+                          className="h-full rounded-full transition-[width] duration-500"
+                          style={{
+                            width: `${Math.round((connectedDevices / subscription.device_limit) * 100)}%`,
+                            background: zone.mainHex,
+                            boxShadow: `0 0 8px ${zone.mainHex}40`,
+                            minWidth: connectedDevices > 0 ? '4px' : '0px',
+                          }}
+                        />
+                      </div>
+                    </div>
+                  )}
                 </HoverBorderGradient>
               )}
 
