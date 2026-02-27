@@ -268,10 +268,10 @@
     }
   }
 
-  /* Optimize main scrollable content */
+  /* Main content — containment removed to avoid GPU layer conflicts
+     with isolation: isolate on content wrapper */
   main {
-    /* Prevent layout shifts during scroll */
-    contain: layout style;
+    contain: content;
   }
 
   /* Light theme - Champagne */

@@ -90,6 +90,8 @@ export function BackgroundRenderer() {
         opacity: effectiveConfig.opacity,
         filter: effectiveConfig.blur > 0 ? `blur(${effectiveConfig.blur}px)` : undefined,
         contain: 'strict',
+        willChange: 'transform',
+        transform: 'translateZ(0)',
       }}
     >
       <Suspense fallback={null}>

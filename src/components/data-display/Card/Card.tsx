@@ -11,7 +11,7 @@ const cardVariants = cva(
     'relative overflow-hidden',
     'border border-dark-700/40 bg-dark-900/70',
     'rounded-[var(--bento-radius)]',
-    'transition-all duration-200',
+    'transition-[border-color,background-color,box-shadow,transform,opacity] duration-200',
     // GPU acceleration
     'transform-gpu',
     // Glass border inset
