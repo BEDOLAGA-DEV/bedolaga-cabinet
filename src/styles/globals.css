@@ -349,7 +349,6 @@ img.twemoji {
     @apply border border-dark-700/40 bg-dark-900/70;
     border-radius: var(--bento-radius);
     padding: var(--bento-padding);
-    transform: translateZ(0);
     /* Glass Border - Inset Highlight */
     box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
     /* Stagger animation support */
@@ -485,7 +484,6 @@ img.twemoji {
   .card {
     @apply border border-dark-700/40 bg-dark-900/70 p-5 transition-colors duration-200 sm:p-6;
     border-radius: var(--bento-radius);
-    transform: translateZ(0);
     box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
   }
 
@@ -511,7 +509,6 @@ img.twemoji {
   /* Glass effect - Dark (optimized for mobile) */
   .glass {
     @apply border border-dark-700/30 bg-dark-900/80;
-    transform: translateZ(0);
   }
 
   /* Enable backdrop-blur only on desktop where it's performant */
@@ -695,7 +692,6 @@ img.twemoji {
   .light .card {
     @apply border-champagne-300/50 bg-champagne-50/90 p-5 shadow-sm sm:p-6;
     border-radius: var(--bento-radius);
-    transform: translateZ(0);
     box-shadow: inset 0 1px 0 0 rgba(0, 0, 0, 0.03);
   }
 
@@ -716,7 +712,6 @@ img.twemoji {
   /* Glass effect - Light (optimized for mobile) */
   .light .glass {
     @apply border border-champagne-300/40 bg-champagne-50/90;
-    transform: translateZ(0);
   }
 
   @media (min-width: 1024px) {
@@ -1110,7 +1105,7 @@ img.twemoji {
   }
   100% {
     opacity: 1;
-    transform: translateY(0);
+    transform: none;
   }
 }
 
