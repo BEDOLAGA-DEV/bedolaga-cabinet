@@ -92,7 +92,7 @@ export function BackgroundRenderer() {
     <div
       className="pointer-events-none fixed inset-0"
       style={{
-        zIndex: -1,
+        zIndex: -2,
         opacity: effectiveConfig.opacity,
         filter: effectiveConfig.blur > 0 ? `blur(${effectiveConfig.blur}px)` : undefined,
         contain: 'strict',

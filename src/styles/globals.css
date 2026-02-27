@@ -360,7 +360,7 @@ img.twemoji {
 
   @media (min-width: 1024px) {
     .bento-card {
-      @apply bg-dark-900/50 backdrop-blur-sm;
+      @apply bg-dark-900/60;
     }
   }
 
@@ -455,7 +455,7 @@ img.twemoji {
 
   @media (min-width: 1024px) {
     .light .bento-card {
-      @apply bg-champagne-50/80 backdrop-blur-sm;
+      @apply bg-champagne-50/85;
     }
   }
 
@@ -487,10 +487,9 @@ img.twemoji {
     box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
   }
 
-  /* Enable backdrop-blur only on desktop */
   @media (min-width: 1024px) {
     .card {
-      @apply bg-dark-900/50 backdrop-blur-sm;
+      @apply bg-dark-900/60;
     }
   }
 
@@ -520,7 +519,8 @@ img.twemoji {
 
   /* Buttons - Dark */
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 ease-smooth focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-dark-900 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium duration-200 ease-smooth focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-dark-900 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
+    transition-property: color, background-color, border-color, box-shadow, transform, opacity;
   }
 
   .btn-primary {
@@ -540,7 +540,8 @@ img.twemoji {
   }
 
   .btn-icon {
-    @apply rounded-lg p-2 text-dark-400 transition-all duration-200 hover:bg-dark-800 hover:text-dark-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/50 active:scale-95;
+    @apply rounded-lg p-2 text-dark-400 duration-200 hover:bg-dark-800 hover:text-dark-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/50 active:scale-95;
+    transition-property: color, background-color, transform;
   }
 
   /* Highlighted button for onboarding */
@@ -550,7 +551,8 @@ img.twemoji {
 
   /* Inputs - Dark */
   .input {
-    @apply w-full rounded-xl border border-dark-700/50 bg-dark-800/50 px-4 py-3 text-sm text-dark-100 placeholder-dark-500 transition-all duration-200 focus:border-accent-500/50 focus:outline-none focus:ring-2 focus:ring-accent-500/20;
+    @apply w-full rounded-xl border border-dark-700/50 bg-dark-800/50 px-4 py-3 text-sm text-dark-100 placeholder-dark-500 duration-200 focus:border-accent-500/50 focus:outline-none focus:ring-2 focus:ring-accent-500/20;
+    transition-property: color, background-color, border-color, box-shadow;
   }
 
   .input-error {
@@ -613,7 +615,8 @@ img.twemoji {
   }
 
   .progress-fill {
-    @apply h-full rounded-full transition-all duration-500 ease-smooth;
+    @apply h-full rounded-full duration-500 ease-smooth;
+    transition-property: width, background-color;
   }
 
   /* Stat card - Dark */
@@ -627,7 +630,8 @@ img.twemoji {
 
   /* Navigation - Dark */
   .nav-item {
-    @apply flex items-center gap-3 rounded-xl px-4 py-3 text-dark-400 transition-all duration-200 hover:bg-dark-800/50 hover:text-dark-100;
+    @apply flex items-center gap-3 rounded-xl px-4 py-3 text-dark-400 duration-200 hover:bg-dark-800/50 hover:text-dark-100;
+    transition-property: color, background-color;
   }
 
   .nav-item-active {
@@ -654,7 +658,8 @@ img.twemoji {
   }
 
   .bottom-nav-item {
-    @apply flex min-w-[56px] flex-1 shrink-0 flex-col items-center justify-center rounded-2xl px-3 py-2.5 text-dark-500 transition-all duration-200;
+    @apply flex min-w-[56px] flex-1 shrink-0 flex-col items-center justify-center rounded-2xl px-3 py-2.5 text-dark-500 duration-200;
+    transition-property: color, background-color;
   }
 
   .bottom-nav-item:hover {
@@ -662,7 +667,8 @@ img.twemoji {
   }
 
   .bottom-nav-item-active {
-    @apply flex min-w-[56px] flex-1 shrink-0 flex-col items-center justify-center rounded-2xl bg-accent-500/15 px-3 py-2.5 text-accent-400 transition-all duration-200;
+    @apply flex min-w-[56px] flex-1 shrink-0 flex-col items-center justify-center rounded-2xl bg-accent-500/15 px-3 py-2.5 text-accent-400 duration-200;
+    transition-property: color, background-color;
   }
 
   /* Divider - Dark */
@@ -697,7 +703,7 @@ img.twemoji {
 
   @media (min-width: 1024px) {
     .light .card {
-      @apply bg-champagne-50/80 backdrop-blur-sm;
+      @apply bg-champagne-50/85;
     }
   }
 
@@ -1252,7 +1258,9 @@ input[type='checkbox'] {
   border-radius: 0.375rem;
   background-color: rgb(var(--color-dark-700));
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease;
   position: relative;
   flex-shrink: 0;
 }
