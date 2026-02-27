@@ -139,8 +139,7 @@ export default function SubscriptionCardExpired({ subscription }: SubscriptionCa
       {/* Action buttons */}
       <div className="flex gap-2.5">
         <Link
-          to="/subscription"
-          state={{ scrollToExtend: true }}
+          to="/subscription/purchase"
           className="flex flex-1 items-center justify-center rounded-[14px] py-3.5 text-[15px] font-semibold tracking-tight text-white transition-all duration-300"
           style={{
             background: 'linear-gradient(135deg, #FF3B5C, #FF6B35)',

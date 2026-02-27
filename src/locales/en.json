@@ -318,6 +318,11 @@
     "price": "Price",
     "noSubscription": "You don't have an active subscription",
     "getSubscription": "Get Subscription",
+    "cta": {
+      "expiredHint": "Choose a plan and pay",
+      "trialHint": "More traffic and devices",
+      "activeHint": "Renewal and plan change"
+    },
     "connectionInfo": "Connection Info",
     "copyLink": "Copy Link",
     "copied": "Copied!",

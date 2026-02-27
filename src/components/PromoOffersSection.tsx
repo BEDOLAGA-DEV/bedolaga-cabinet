@@ -156,7 +156,7 @@ export default function PromoOffersSection({ className = '' }: PromoOffersSectio
   };
 
   const handleUseNow = () => {
-    navigate('/subscription', { state: { scrollToExtend: true } });
+    navigate('/subscription/purchase');
   };
 
   const handleDeactivateClick = () => {
