@@ -242,6 +242,12 @@ export default function AdminPartners() {
                         {app.expected_monthly_referrals}
                       </div>
                     )}
+                    {app.desired_commission_percent != null && (
+                      <div>
+                        {t('admin.partners.applicationFields.desiredCommission')}:{' '}
+                        {app.desired_commission_percent}%
+                      </div>
+                    )}
                   </div>
 
                   {/* Actions */}

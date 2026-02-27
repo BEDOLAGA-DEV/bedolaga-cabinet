@@ -42,7 +42,7 @@ export default function ReferralWithdrawalRequest() {
     if (form.payment_details.length < 5) return;
     if (form.amount_rubles <= 0) return;
     withdrawMutation.mutate({
-      amount_kopeks: form.amount_rubles * 100,
+      amount_kopeks: Math.round(form.amount_rubles * 100),
       payment_details: form.payment_details,
     });
   };

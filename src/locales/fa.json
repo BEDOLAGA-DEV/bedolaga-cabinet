@@ -618,7 +618,7 @@
       "requestError": "ایجاد درخواست برداشت ناموفق بود. لطفاً دوباره تلاش کنید.",
       "fields": {
         "amount": "مبلغ",
-        "amountPlaceholder": "مبلغ را وارد کنید",
+        "amountPlaceholder": "مبلغ را به {{currency}} وارد کنید",
         "amountHint": "حداقل: {{min}} {{currency}}",
         "paymentDetails": "اطلاعات پرداخت",
         "paymentDetailsPlaceholder": "شماره کارت، آدرس کیف پول یا سایر اطلاعات پرداخت..."
