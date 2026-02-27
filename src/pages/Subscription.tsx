@@ -60,7 +60,7 @@ const CountdownTimer = memo(function CountdownTimer({
 
   return (
     <div
-      className="rounded-[14px] p-3.5"
+      className="min-w-0 overflow-hidden rounded-[14px] p-3.5"
       style={{
         background: isExpired
           ? 'rgba(255,59,92,0.06)'
@@ -107,46 +107,46 @@ const CountdownTimer = memo(function CountdownTimer({
           {t('subscription.expired')}
         </div>
       ) : (
-        <div className="flex items-baseline gap-1 font-mono tabular-nums">
+        <div className="flex items-baseline gap-0.5 font-mono tabular-nums sm:gap-1">
           {countdown.days > 0 && (
             <>
               <span
-                className="text-[20px] font-bold tracking-tight"
+                className="text-[18px] font-bold tracking-tight sm:text-[20px]"
                 style={{ color: isUrgent ? '#FFB800' : g.text }}
               >
                 {countdown.days}
               </span>
-              <span className="mr-1 text-[10px] font-medium text-dark-50/25">
+              <span className="mr-0.5 text-[10px] font-medium text-dark-50/25 sm:mr-1">
                 {t('subscription.daysShort')}
               </span>
             </>
           )}
           <span
-            className="text-[20px] font-bold tracking-tight"
+            className="text-[18px] font-bold tracking-tight sm:text-[20px]"
             style={{ color: isUrgent ? '#FFB800' : g.text }}
           >
             {String(countdown.hours).padStart(2, '0')}
           </span>
           <span
-            className="mx-[-1px] text-[16px] font-bold opacity-30"
+            className="mx-[-2px] text-[14px] font-bold opacity-30 sm:mx-[-1px] sm:text-[16px]"
             style={{ color: isUrgent ? '#FFB800' : g.text }}
           >
             :
           </span>
           <span
-            className="text-[20px] font-bold tracking-tight"
+            className="text-[18px] font-bold tracking-tight sm:text-[20px]"
             style={{ color: isUrgent ? '#FFB800' : g.text }}
           >
             {String(countdown.minutes).padStart(2, '0')}
           </span>
           <span
-            className="mx-[-1px] text-[16px] font-bold opacity-30"
+            className="mx-[-2px] text-[14px] font-bold opacity-30 sm:mx-[-1px] sm:text-[16px]"
             style={{ color: isUrgent ? '#FFB800' : g.text }}
           >
             :
           </span>
           <span
-            className="text-[20px] font-bold tracking-tight"
+            className="text-[18px] font-bold tracking-tight sm:text-[20px]"
             style={{ color: isUrgent ? '#FFB800' : g.text }}
           >
             {String(countdown.seconds).padStart(2, '0')}
