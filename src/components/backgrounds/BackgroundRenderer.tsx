@@ -1,4 +1,5 @@
 import { Suspense, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { useQuery } from '@tanstack/react-query';
 import { brandingApi } from '@/api/branding';
 import type { AnimationConfig, BackgroundType } from '@/components/ui/backgrounds/types';
@@ -83,20 +84,25 @@ export function BackgroundRenderer() {
       ? reduceMobileSettings(effectiveConfig.settings)
       : effectiveConfig.settings;
 
-  return (
+  // Render via portal on document.body with z-index: -1.
+  // This places the animated background BELOW the root stacking context,
+  // preventing Chrome's implicit compositing from promoting every
+  // overlapping element to its own GPU layer (the root cause of flickering).
+  return createPortal(
     <div
-      className="pointer-events-none fixed inset-0 z-0"
+      className="pointer-events-none fixed inset-0"
       style={{
+        zIndex: -1,
         opacity: effectiveConfig.opacity,
         filter: effectiveConfig.blur > 0 ? `blur(${effectiveConfig.blur}px)` : undefined,
         contain: 'strict',
-        willChange: 'transform',
-        transform: 'translateZ(0)',
+        backfaceVisibility: 'hidden',
       }}
     >
       <Suspense fallback={null}>
         <Component settings={settings} />
       </Suspense>
-    </div>
+    </div>,
+    document.body,
   );
 }

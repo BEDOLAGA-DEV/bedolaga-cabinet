@@ -280,162 +280,158 @@ export function AppShell({ children }: AppShellProps) {
 
   return (
     <div className="min-h-screen">
-      {/* Animated background — on its own GPU layer, below everything */}
+      {/* Animated background renders via portal on document.body at z-index: -1 */}
       <BackgroundRenderer />
 
-      {/* Content layer — isolated from background to prevent backdrop-filter
-          from resampling the animated background every frame (Chromium bug) */}
-      <div className="relative z-10" style={{ isolation: 'isolate' }}>
-        {/* Global components */}
-        <WebSocketNotifications />
-        <CampaignBonusNotifier />
-        <SuccessNotificationModal />
+      {/* Global components */}
+      <WebSocketNotifications />
+      <CampaignBonusNotifier />
+      <SuccessNotificationModal />
 
-        {/* Desktop Header */}
-        <header className="fixed left-0 right-0 top-0 z-50 hidden border-b border-dark-800/50 bg-dark-950/80 backdrop-blur-xl lg:block">
-          <div className="mx-auto grid h-14 max-w-6xl grid-cols-[auto_1fr_auto] items-center gap-4 px-6">
-            {/* Logo */}
-            <Link to="/" className="flex items-center gap-2.5" onClick={handleNavClick}>
-              <div className="relative flex h-8 w-8 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg bg-dark-800">
-                <span
-                  className={cn(
-                    'absolute text-sm font-bold text-accent-400 transition-opacity duration-200',
-                    hasCustomLogo && isLogoPreloaded() ? 'opacity-0' : 'opacity-100',
-                  )}
-                >
-                  {logoLetter}
-                </span>
-                {hasCustomLogo && logoUrl && (
-                  <img
-                    src={logoUrl}
-                    alt={appName || 'Logo'}
-                    className={cn(
-                      'absolute h-full w-full object-contain transition-opacity duration-200',
-                      isLogoPreloaded() ? 'opacity-100' : 'opacity-0',
-                    )}
-                  />
-                )}
-              </div>
-              <span className="text-base font-semibold text-dark-100">{appName}</span>
-            </Link>
-
-            {/* Center Navigation */}
-            <nav className="flex items-center justify-center gap-1">
-              {desktopNavItems.map((item) => (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  onClick={handleNavClick}
-                  className={cn(
-                    'flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-                    isActive(item.path)
-                      ? 'bg-dark-800 text-dark-50'
-                      : 'text-dark-400 hover:bg-dark-800/50 hover:text-dark-200',
-                  )}
-                >
-                  <item.icon className="h-4 w-4" />
-                  <span>{item.label}</span>
-                </Link>
-              ))}
-              {referralEnabled && (
-                <Link
-                  to="/referral"
-                  onClick={handleNavClick}
-                  className={cn(
-                    'flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-                    isActive('/referral')
-                      ? 'bg-dark-800 text-dark-50'
-                      : 'text-dark-400 hover:bg-dark-800/50 hover:text-dark-200',
-                  )}
-                >
-                  <UsersIcon className="h-4 w-4" />
-                  <span>{t('nav.referral')}</span>
-                </Link>
-              )}
-              {isAdmin && (
-                <>
-                  {/* Separator before admin */}
-                  <div className="mx-2 h-5 w-px bg-dark-700" />
-                  <Link
-                    to="/admin"
-                    onClick={handleNavClick}
-                    className={cn(
-                      'flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-                      location.pathname.startsWith('/admin')
-                        ? 'bg-warning-500/10 text-warning-400'
-                        : 'text-warning-500/70 hover:bg-warning-500/10 hover:text-warning-400',
-                    )}
-                  >
-                    <ShieldIcon className="h-4 w-4" />
-                    <span>{t('admin.nav.title')}</span>
-                  </Link>
-                </>
-              )}
-            </nav>
-
-            {/* Right side actions */}
-            <div className="flex items-center justify-end gap-2">
-              <button
-                onClick={() => {
-                  haptic.impact('light');
-                  toggleTheme();
-                }}
+      {/* Desktop Header */}
+      <header className="fixed left-0 right-0 top-0 z-50 hidden border-b border-dark-800/50 bg-dark-950/95 lg:block">
+        <div className="mx-auto grid h-14 max-w-6xl grid-cols-[auto_1fr_auto] items-center gap-4 px-6">
+          {/* Logo */}
+          <Link to="/" className="flex items-center gap-2.5" onClick={handleNavClick}>
+            <div className="relative flex h-8 w-8 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg bg-dark-800">
+              <span
                 className={cn(
-                  'rounded-xl border border-dark-700/50 bg-dark-800/50 p-2 text-dark-400 transition-all duration-200 hover:bg-dark-700 hover:text-accent-400',
-                  !canToggleTheme && 'pointer-events-none invisible',
+                  'absolute text-sm font-bold text-accent-400 transition-opacity duration-200',
+                  hasCustomLogo && isLogoPreloaded() ? 'opacity-0' : 'opacity-100',
                 )}
-                title={isDark ? t('theme.light') || 'Light mode' : t('theme.dark') || 'Dark mode'}
               >
-                {isDark ? <MoonIcon className="h-5 w-5" /> : <SunIcon className="h-5 w-5" />}
-              </button>
-              <TicketNotificationBell isAdmin={location.pathname.startsWith('/admin')} />
-              <LanguageSwitcher />
-              <button
-                onClick={() => {
-                  haptic.impact('light');
-                  logout();
-                }}
-                className="rounded-xl border border-dark-700/50 bg-dark-800/50 p-2 text-dark-400 transition-all duration-200 hover:bg-dark-700 hover:text-accent-400"
-                title={t('nav.logout')}
-              >
-                <LogoutIcon className="h-5 w-5" />
-              </button>
+                {logoLetter}
+              </span>
+              {hasCustomLogo && logoUrl && (
+                <img
+                  src={logoUrl}
+                  alt={appName || 'Logo'}
+                  className={cn(
+                    'absolute h-full w-full object-contain transition-opacity duration-200',
+                    isLogoPreloaded() ? 'opacity-100' : 'opacity-0',
+                  )}
+                />
+              )}
             </div>
+            <span className="text-base font-semibold text-dark-100">{appName}</span>
+          </Link>
+
+          {/* Center Navigation */}
+          <nav className="flex items-center justify-center gap-1">
+            {desktopNavItems.map((item) => (
+              <Link
+                key={item.path}
+                to={item.path}
+                onClick={handleNavClick}
+                className={cn(
+                  'flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+                  isActive(item.path)
+                    ? 'bg-dark-800 text-dark-50'
+                    : 'text-dark-400 hover:bg-dark-800/50 hover:text-dark-200',
+                )}
+              >
+                <item.icon className="h-4 w-4" />
+                <span>{item.label}</span>
+              </Link>
+            ))}
+            {referralEnabled && (
+              <Link
+                to="/referral"
+                onClick={handleNavClick}
+                className={cn(
+                  'flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+                  isActive('/referral')
+                    ? 'bg-dark-800 text-dark-50'
+                    : 'text-dark-400 hover:bg-dark-800/50 hover:text-dark-200',
+                )}
+              >
+                <UsersIcon className="h-4 w-4" />
+                <span>{t('nav.referral')}</span>
+              </Link>
+            )}
+            {isAdmin && (
+              <>
+                {/* Separator before admin */}
+                <div className="mx-2 h-5 w-px bg-dark-700" />
+                <Link
+                  to="/admin"
+                  onClick={handleNavClick}
+                  className={cn(
+                    'flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+                    location.pathname.startsWith('/admin')
+                      ? 'bg-warning-500/10 text-warning-400'
+                      : 'text-warning-500/70 hover:bg-warning-500/10 hover:text-warning-400',
+                  )}
+                >
+                  <ShieldIcon className="h-4 w-4" />
+                  <span>{t('admin.nav.title')}</span>
+                </Link>
+              </>
+            )}
+          </nav>
+
+          {/* Right side actions */}
+          <div className="flex items-center justify-end gap-2">
+            <button
+              onClick={() => {
+                haptic.impact('light');
+                toggleTheme();
+              }}
+              className={cn(
+                'rounded-xl border border-dark-700/50 bg-dark-800/50 p-2 text-dark-400 transition-colors duration-200 hover:bg-dark-700 hover:text-accent-400',
+                !canToggleTheme && 'pointer-events-none invisible',
+              )}
+              title={isDark ? t('theme.light') || 'Light mode' : t('theme.dark') || 'Dark mode'}
+            >
+              {isDark ? <MoonIcon className="h-5 w-5" /> : <SunIcon className="h-5 w-5" />}
+            </button>
+            <TicketNotificationBell isAdmin={location.pathname.startsWith('/admin')} />
+            <LanguageSwitcher />
+            <button
+              onClick={() => {
+                haptic.impact('light');
+                logout();
+              }}
+              className="rounded-xl border border-dark-700/50 bg-dark-800/50 p-2 text-dark-400 transition-colors duration-200 hover:bg-dark-700 hover:text-accent-400"
+              title={t('nav.logout')}
+            >
+              <LogoutIcon className="h-5 w-5" />
+            </button>
           </div>
-        </header>
+        </div>
+      </header>
 
-        {/* Mobile Header */}
-        <AppHeader
-          mobileMenuOpen={mobileMenuOpen}
-          setMobileMenuOpen={setMobileMenuOpen}
-          onCommandPaletteOpen={() => {}}
-          headerHeight={headerHeight}
-          isFullscreen={isMobileFullscreen}
-          safeAreaInset={safeAreaInset}
-          contentSafeAreaInset={contentSafeAreaInset}
-          telegramPlatform={platform}
-          wheelEnabled={wheelEnabled}
-          referralEnabled={referralEnabled}
-          hasContests={hasContests}
-          hasPolls={hasPolls}
-        />
+      {/* Mobile Header */}
+      <AppHeader
+        mobileMenuOpen={mobileMenuOpen}
+        setMobileMenuOpen={setMobileMenuOpen}
+        onCommandPaletteOpen={() => {}}
+        headerHeight={headerHeight}
+        isFullscreen={isMobileFullscreen}
+        safeAreaInset={safeAreaInset}
+        contentSafeAreaInset={contentSafeAreaInset}
+        telegramPlatform={platform}
+        wheelEnabled={wheelEnabled}
+        referralEnabled={referralEnabled}
+        hasContests={hasContests}
+        hasPolls={hasPolls}
+      />
 
-        {/* Desktop spacer */}
-        <div className="hidden h-14 lg:block" />
+      {/* Desktop spacer */}
+      <div className="hidden h-14 lg:block" />
 
-        {/* Mobile spacer */}
-        <div className="lg:hidden" style={{ height: headerHeight }} />
+      {/* Mobile spacer */}
+      <div className="lg:hidden" style={{ height: headerHeight }} />
 
-        {/* Main content */}
-        <main className="mx-auto max-w-6xl px-4 py-6 pb-28 lg:px-6 lg:pb-8">{children}</main>
+      {/* Main content */}
+      <main className="mx-auto max-w-6xl px-4 py-6 pb-28 lg:px-6 lg:pb-8">{children}</main>
 
-        {/* Mobile Bottom Navigation */}
-        <MobileBottomNav
-          isKeyboardOpen={isKeyboardOpen}
-          referralEnabled={referralEnabled}
-          wheelEnabled={wheelEnabled}
-        />
-      </div>
+      {/* Mobile Bottom Navigation */}
+      <MobileBottomNav
+        isKeyboardOpen={isKeyboardOpen}
+        referralEnabled={referralEnabled}
+        wheelEnabled={wheelEnabled}
+      />
     </div>
   );
 }
