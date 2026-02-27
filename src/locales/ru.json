@@ -783,7 +783,9 @@
         "description": "Описание",
         "descriptionPlaceholder": "Расскажите о вашей аудитории и планах продвижения...",
         "expectedReferrals": "Ожидаемое количество рефералов в месяц",
-        "expectedReferralsPlaceholder": "Примерное количество в месяц"
+        "expectedReferralsPlaceholder": "Примерное количество в месяц",
+        "desiredCommission": "Желаемый процент комиссии",
+        "desiredCommissionPlaceholder": "От 1 до 100%"
       }
     },
     "withdrawal": {
@@ -804,9 +806,9 @@
       "submitRequest": "Отправить запрос",
       "requestError": "Не удалось создать запрос на вывод. Попробуйте снова.",
       "fields": {
-        "amount": "Сумма (копейки)",
-        "amountPlaceholder": "Введите сумму в копейках",
-        "amountHint": "Введите сумму в копейках (100 копеек = 1 {{currency}})",
+        "amount": "Сумма",
+        "amountPlaceholder": "Введите сумму в {{currency}}",
+        "amountHint": "Минимум: {{min}} {{currency}}",
         "paymentDetails": "Реквизиты для оплаты",
         "paymentDetailsPlaceholder": "Номер карты, адрес кошелька или другие реквизиты..."
       },
@@ -2567,6 +2569,7 @@
         "balance": "Баланс",
         "totalReferrals": "Всего рефералов",
         "totalEarnings": "Общий заработок",
+        "requestedAmount": "Запрошенная сумма",
         "createdAt": "Создано",
         "paymentDetails": "Реквизиты для оплаты",
         "noPaymentDetails": "Реквизиты не указаны",
@@ -2622,7 +2625,8 @@
         "website": "Сайт",
         "channel": "Канал",
         "description": "Описание",
-        "expectedReferrals": "Ожидаемых рефералов/мес"
+        "expectedReferrals": "Ожидаемых рефералов/мес",
+        "desiredCommission": "Желаемая комиссия"
       },
       "approveDialog": {
         "title": "Одобрить заявку",

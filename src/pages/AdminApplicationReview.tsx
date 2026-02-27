@@ -136,6 +136,14 @@ export default function AdminApplicationReview() {
                   <span className="text-dark-200">{app.expected_monthly_referrals}</span>
                 </div>
               )}
+              {app.desired_commission_percent != null && (
+                <div className="rounded-lg bg-dark-700/50 p-3">
+                  <span className="text-dark-500">
+                    {t('admin.partners.applicationFields.desiredCommission')}:
+                  </span>{' '}
+                  <span className="text-dark-200">{app.desired_commission_percent}%</span>
+                </div>
+              )}
             </div>
           </div>
         </div>

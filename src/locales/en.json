@@ -755,7 +755,9 @@
         "description": "Description",
         "descriptionPlaceholder": "Tell us about your audience and how you plan to promote...",
         "expectedReferrals": "Expected Monthly Referrals",
-        "expectedReferralsPlaceholder": "Estimated number per month"
+        "expectedReferralsPlaceholder": "Estimated number per month",
+        "desiredCommission": "Desired Commission (%)",
+        "desiredCommissionPlaceholder": "From 1 to 100%"
       }
     },
     "withdrawal": {
@@ -776,9 +778,9 @@
       "submitRequest": "Submit Request",
       "requestError": "Failed to create withdrawal request. Please try again.",
       "fields": {
-        "amount": "Amount (kopeks)",
-        "amountPlaceholder": "Enter amount in kopeks",
-        "amountHint": "Enter the amount in kopeks (100 kopeks = 1 {{currency}})",
+        "amount": "Amount",
+        "amountPlaceholder": "Enter amount in {{currency}}",
+        "amountHint": "Minimum: {{min}} {{currency}}",
         "paymentDetails": "Payment Details",
         "paymentDetailsPlaceholder": "Card number, wallet address, or other payment info..."
       },
@@ -2046,6 +2048,7 @@
         "balance": "Balance",
         "totalReferrals": "Total referrals",
         "totalEarnings": "Total earnings",
+        "requestedAmount": "Requested Amount",
         "createdAt": "Created",
         "paymentDetails": "Payment Details",
         "noPaymentDetails": "No payment details provided",
@@ -2101,7 +2104,8 @@
         "website": "Website",
         "channel": "Channel",
         "description": "Description",
-        "expectedReferrals": "Expected referrals/mo"
+        "expectedReferrals": "Expected referrals/mo",
+        "desiredCommission": "Desired commission"
       },
       "approveDialog": {
         "title": "Approve Application",

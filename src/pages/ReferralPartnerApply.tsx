@@ -15,6 +15,7 @@ export default function ReferralPartnerApply() {
     telegram_channel: '',
     description: '',
     expected_monthly_referrals: undefined,
+    desired_commission_percent: undefined,
   });
 
   // Guard: redirect if already approved or pending
@@ -49,6 +50,9 @@ export default function ReferralPartnerApply() {
     if (form.description) payload.description = form.description;
     if (form.expected_monthly_referrals) {
       payload.expected_monthly_referrals = form.expected_monthly_referrals;
+    }
+    if (form.desired_commission_percent) {
+      payload.desired_commission_percent = form.desired_commission_percent;
     }
     applyMutation.mutate(payload);
   };
@@ -124,6 +128,25 @@ export default function ReferralPartnerApply() {
                 })
               }
               placeholder={t('referral.partner.fields.expectedReferralsPlaceholder')}
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-sm font-medium text-dark-300">
+              {t('referral.partner.fields.desiredCommission')}
+            </label>
+            <input
+              type="number"
+              min={1}
+              max={100}
+              className="input w-full"
+              value={form.desired_commission_percent ?? ''}
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  desired_commission_percent: e.target.value ? Number(e.target.value) : undefined,
+                })
+              }
+              placeholder={t('referral.partner.fields.desiredCommissionPlaceholder')}
             />
           </div>
         </div>

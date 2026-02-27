@@ -594,7 +594,9 @@
         "description": "描述",
         "descriptionPlaceholder": "请介绍您的受众以及推广计划...",
         "expectedReferrals": "预计每月推荐数",
-        "expectedReferralsPlaceholder": "每月预估数量"
+        "expectedReferralsPlaceholder": "每月预估数量",
+        "desiredCommission": "期望佣金比例 (%)",
+        "desiredCommissionPlaceholder": "1 到 100%"
       }
     },
     "withdrawal": {
@@ -615,9 +617,9 @@
       "submitRequest": "提交请求",
       "requestError": "创建提现请求失败，请重试。",
       "fields": {
-        "amount": "金额（戈比）",
-        "amountPlaceholder": "输入金额（戈比）",
-        "amountHint": "请输入戈比金额（100戈比 = 1 {{currency}}）",
+        "amount": "金额",
+        "amountPlaceholder": "输入金额（{{currency}}）",
+        "amountHint": "最低：{{min}} {{currency}}",
         "paymentDetails": "付款信息",
         "paymentDetailsPlaceholder": "银行卡号、钱包地址或其他付款信息..."
       },
@@ -1728,6 +1730,7 @@
         "balance": "余额",
         "totalReferrals": "总推荐数",
         "totalEarnings": "总收益",
+        "requestedAmount": "请求金额",
         "createdAt": "创建时间",
         "paymentDetails": "付款信息",
         "noPaymentDetails": "未提供付款信息",
@@ -1783,7 +1786,8 @@
         "website": "网站",
         "channel": "频道",
         "description": "描述",
-        "expectedReferrals": "预计每月推荐数"
+        "expectedReferrals": "预计每月推荐数",
+        "desiredCommission": "期望佣金"
       },
       "approveDialog": {
         "title": "批准申请",

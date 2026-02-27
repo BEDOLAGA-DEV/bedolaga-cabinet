@@ -594,7 +594,9 @@
         "description": "توضیحات",
         "descriptionPlaceholder": "درباره مخاطبان خود و نحوه تبلیغ بگویید...",
         "expectedReferrals": "تعداد معرفی ماهانه مورد انتظار",
-        "expectedReferralsPlaceholder": "تعداد تخمینی در ماه"
+        "expectedReferralsPlaceholder": "تعداد تخمینی در ماه",
+        "desiredCommission": "درصد کمیسیون مورد نظر",
+        "desiredCommissionPlaceholder": "از ۱ تا ۱۰۰٪"
       }
     },
     "withdrawal": {
@@ -615,9 +617,9 @@
       "submitRequest": "ارسال درخواست",
       "requestError": "ایجاد درخواست برداشت ناموفق بود. لطفاً دوباره تلاش کنید.",
       "fields": {
-        "amount": "مبلغ (کوپک)",
-        "amountPlaceholder": "مبلغ را به کوپک وارد کنید",
-        "amountHint": "مبلغ را به کوپک وارد کنید (۱۰۰ کوپک = ۱ {{currency}})",
+        "amount": "مبلغ",
+        "amountPlaceholder": "مبلغ را وارد کنید",
+        "amountHint": "حداقل: {{min}} {{currency}}",
         "paymentDetails": "اطلاعات پرداخت",
         "paymentDetailsPlaceholder": "شماره کارت، آدرس کیف پول یا سایر اطلاعات پرداخت..."
       },
@@ -1729,6 +1731,7 @@
         "balance": "موجودی",
         "totalReferrals": "مجموع معرفی‌ها",
         "totalEarnings": "مجموع درآمد",
+        "requestedAmount": "مبلغ درخواستی",
         "createdAt": "تاریخ ایجاد",
         "paymentDetails": "اطلاعات پرداخت",
         "noPaymentDetails": "اطلاعات پرداختی ارائه نشده",
@@ -1784,7 +1787,8 @@
         "website": "وب‌سایت",
         "channel": "کانال",
         "description": "توضیحات",
-        "expectedReferrals": "معرفی مورد انتظار/ماه"
+        "expectedReferrals": "معرفی مورد انتظار/ماه",
+        "desiredCommission": "کمیسیون مورد نظر"
       },
       "approveDialog": {
         "title": "تأیید درخواست",

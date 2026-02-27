@@ -10,6 +10,7 @@ export interface PartnerApplicationInfo {
   telegram_channel: string | null;
   description: string | null;
   expected_monthly_referrals: number | null;
+  desired_commission_percent: number | null;
   admin_comment: string | null;
   approved_commission_percent: number | null;
   created_at: string;
@@ -41,6 +42,7 @@ export interface PartnerApplicationRequest {
   telegram_channel?: string;
   description?: string;
   expected_monthly_referrals?: number;
+  desired_commission_percent?: number;
 }
 
 // ==================== Admin-facing types ====================
@@ -56,6 +58,7 @@ export interface AdminPartnerApplicationItem {
   telegram_channel: string | null;
   description: string | null;
   expected_monthly_referrals: number | null;
+  desired_commission_percent: number | null;
   status: string;
   admin_comment: string | null;
   approved_commission_percent: number | null;
