@@ -45,7 +45,8 @@ const baseClasses = `
   p-[var(--bento-padding)]
   bg-dark-900/70
   border border-dark-700/40
-  transition-all duration-300 ease-smooth
+  duration-300 ease-smooth
+  transition-[border-color,background-color,box-shadow,transform]
 `;
 
 const hoverClasses = `
