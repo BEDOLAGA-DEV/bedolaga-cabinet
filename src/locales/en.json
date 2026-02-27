@@ -422,7 +422,10 @@
       "notConfigured": "Connection methods are not configured yet",
       "notConfiguredUser": "Connection setup is in progress. Please check back later.",
       "notConfiguredAdmin": "No connection apps have been configured. Set them up in the Apps settings.",
-      "goToApps": "Go to Apps settings"
+      "goToApps": "Go to Apps settings",
+      "qrTitle": "Subscription QR Code",
+      "qrScanHint": "Scan to connect",
+      "qrButton": "QR Code"
     },
     "myDevices": "My Devices",
     "noDevices": "No connected devices",

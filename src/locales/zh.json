@@ -327,7 +327,10 @@
       "notConfigured": "连接方式尚未配置",
       "notConfiguredUser": "连接设置正在进行中，请稍后再来查看。",
       "notConfiguredAdmin": "尚未配置连接应用。请在应用设置中进行配置。",
-      "goToApps": "前往应用设置"
+      "goToApps": "前往应用设置",
+      "qrTitle": "订阅二维码",
+      "qrScanHint": "使用相机扫描以连接",
+      "qrButton": "二维码"
     },
     "additionalOptions": {
       "title": "附加选项",

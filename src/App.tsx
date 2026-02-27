@@ -35,6 +35,7 @@ const Polls = lazy(() => import('./pages/Polls'));
 const Info = lazy(() => import('./pages/Info'));
 const Wheel = lazy(() => import('./pages/Wheel'));
 const Connection = lazy(() => import('./pages/Connection'));
+const ConnectionQR = lazy(() => import('./pages/ConnectionQR'));
 const TopUpMethodSelect = lazy(() => import('./pages/TopUpMethodSelect'));
 const TopUpAmount = lazy(() => import('./pages/TopUpAmount'));
 
@@ -320,6 +321,14 @@ function App() {
                 <Wheel />
               </LazyPage>
             </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/connection/qr"
+          element={
+            <LazyPage>
+              <ConnectionQR />
+            </LazyPage>
           }
         />
         <Route
