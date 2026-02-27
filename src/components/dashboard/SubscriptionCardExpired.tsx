@@ -77,7 +77,9 @@ export default function SubscriptionCardExpired({ subscription }: SubscriptionCa
           </div>
           <div>
             <h2 className="text-lg font-bold tracking-tight text-dark-50">
-              {t('dashboard.expired.title')}
+              {subscription.is_trial
+                ? t('dashboard.expired.trialTitle')
+                : t('dashboard.expired.title')}
             </h2>
             <span className="text-xs text-dark-50/35">
               {subscription.is_trial
@@ -117,27 +119,21 @@ export default function SubscriptionCardExpired({ subscription }: SubscriptionCa
         </div>
       </div>
 
-      {/* Expired info grid */}
+      {/* Expired date */}
       <div
-        className="mb-5 flex justify-around rounded-[14px] text-center"
+        className="mb-5 flex items-center justify-center rounded-[14px]"
         style={{
           background: 'rgba(255,59,92,0.04)',
           border: '1px solid rgba(255,59,92,0.08)',
-          padding: '16px 18px',
+          padding: '14px 18px',
         }}
       >
-        {[
-          { label: t('dashboard.expired.traffic'), value: '0 GB' },
-          { label: t('dashboard.expired.devices'), value: '0' },
-          { label: t('dashboard.expired.expiredDate'), value: formattedDate },
-        ].map((item, i) => (
-          <div key={i}>
-            <div className="mb-1 font-mono text-[10px] font-medium uppercase tracking-wider text-dark-50/30">
-              {item.label}
-            </div>
-            <div className="text-base font-bold tracking-tight text-dark-50/50">{item.value}</div>
-          </div>
-        ))}
+        <div className="mb-0.5 font-mono text-[10px] font-medium uppercase tracking-wider text-dark-50/30">
+          {t('dashboard.expired.expiredDate')}
+        </div>
+        <div className="ml-3 text-base font-bold tracking-tight text-dark-50/50">
+          {formattedDate}
+        </div>
       </div>
 
       {/* Action buttons */}

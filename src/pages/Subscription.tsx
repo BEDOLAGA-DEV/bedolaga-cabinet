@@ -187,6 +187,25 @@ export default function Subscription() {
   // Extract subscription from response (null if no subscription)
   const subscription = subscriptionResponse?.subscription ?? null;
 
+  // Live countdown timer
+  const [countdown, setCountdown] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+  useEffect(() => {
+    if (!subscription?.end_date) return;
+    const endTime = new Date(subscription.end_date).getTime();
+    const tick = () => {
+      const diff = Math.max(0, endTime - Date.now());
+      setCountdown({
+        days: Math.floor(diff / 86_400_000),
+        hours: Math.floor((diff % 86_400_000) / 3_600_000),
+        minutes: Math.floor((diff % 3_600_000) / 60_000),
+        seconds: Math.floor((diff % 60_000) / 1_000),
+      });
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [subscription?.end_date]);
+
   const { data: purchaseOptions, isLoading: optionsLoading } = useQuery({
     queryKey: ['purchase-options'],
     queryFn: subscriptionApi.getPurchaseOptions,
@@ -679,7 +698,6 @@ export default function Subscription() {
           const zone = getTrafficZone(usedPercent);
           const connectedDevices = devicesData?.total ?? 0;
           const formattedDate = new Date(subscription.end_date).toLocaleDateString();
-          const daysLeft = subscription.days_left;
 
           return (
             <div
@@ -736,19 +754,6 @@ export default function Subscription() {
                     >
                       {isUnlimited ? t('dashboard.unlimited') : t(zone.labelKey)}
                     </span>
-                    {subscription.is_trial && (
-                      <span
-                        className="inline-flex animate-trial-glow items-center gap-1 rounded-md px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-widest"
-                        style={{
-                          background:
-                            'linear-gradient(135deg, rgba(62,219,176,0.15), rgba(62,219,176,0.06))',
-                          border: '1px solid rgba(62,219,176,0.2)',
-                          color: '#3EDBB0',
-                        }}
-                      >
-                        {t('subscription.trialStatus')}
-                      </span>
-                    )}
                   </div>
 
                   {/* Plan name */}
@@ -770,11 +775,11 @@ export default function Subscription() {
                     color: subscription.is_active ? zone.mainHex : '#FF3B5C',
                   }}
                 >
-                  {subscription.is_trial
-                    ? t('subscription.trialStatus')
-                    : subscription.is_active
-                      ? t('subscription.active')
-                      : t('subscription.expired')}
+                  {subscription.is_active
+                    ? subscription.is_trial
+                      ? t('subscription.trialStatus')
+                      : t('subscription.active')
+                    : t('subscription.expired')}
                 </span>
               </div>
 
@@ -992,57 +997,114 @@ export default function Subscription() {
 
               {/* ─── Stats Row ─── */}
               <div className="mb-5 grid grid-cols-2 gap-2.5">
-                {/* Days left */}
-                <div
-                  className="rounded-[14px] p-3.5"
-                  style={{
-                    background: daysLeft <= 3 ? 'rgba(255,184,0,0.06)' : g.innerBg,
-                    border:
-                      daysLeft <= 3
-                        ? '1px solid rgba(255,184,0,0.15)'
-                        : `1px solid ${g.innerBorder}`,
-                  }}
-                >
-                  <div className="mb-1 flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-wider text-dark-50/35">
+                {/* Countdown timer */}
+                {(() => {
+                  const isUrgent = countdown.days <= 3;
+                  const isExpired = !subscription.is_active;
+                  return (
                     <div
-                      className="flex h-6 w-6 items-center justify-center rounded-[7px]"
+                      className="rounded-[14px] p-3.5"
                       style={{
-                        background: daysLeft <= 3 ? 'rgba(255,184,0,0.1)' : g.hoverBg,
+                        background: isExpired
+                          ? 'rgba(255,59,92,0.06)'
+                          : isUrgent
+                            ? 'rgba(255,184,0,0.06)'
+                            : g.innerBg,
+                        border: isExpired
+                          ? '1px solid rgba(255,59,92,0.15)'
+                          : isUrgent
+                            ? '1px solid rgba(255,184,0,0.15)'
+                            : `1px solid ${g.innerBorder}`,
                       }}
                     >
-                      <svg
-                        width="13"
-                        height="13"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke={daysLeft <= 3 ? '#FFB800' : g.textSecondary}
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        aria-hidden="true"
-                      >
-                        <rect x="3" y="4" width="18" height="18" rx="2" />
-                        <path d="M16 2v4M8 2v4M3 10h18" />
-                      </svg>
+                      <div className="mb-2 flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-wider text-dark-50/35">
+                        <div
+                          className="flex h-6 w-6 items-center justify-center rounded-[7px]"
+                          style={{
+                            background: isExpired
+                              ? 'rgba(255,59,92,0.1)'
+                              : isUrgent
+                                ? 'rgba(255,184,0,0.1)'
+                                : g.hoverBg,
+                          }}
+                        >
+                          <svg
+                            width="13"
+                            height="13"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke={isExpired ? '#FF3B5C' : isUrgent ? '#FFB800' : g.textSecondary}
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            aria-hidden="true"
+                          >
+                            <rect x="3" y="4" width="18" height="18" rx="2" />
+                            <path d="M16 2v4M8 2v4M3 10h18" />
+                          </svg>
+                        </div>
+                        {t('dashboard.remaining')}
+                      </div>
+                      {isExpired ? (
+                        <div
+                          className="text-[18px] font-bold tracking-tight"
+                          style={{ color: '#FF3B5C' }}
+                        >
+                          {t('subscription.expired')}
+                        </div>
+                      ) : (
+                        <div className="flex items-baseline gap-1 font-mono tabular-nums">
+                          {countdown.days > 0 && (
+                            <>
+                              <span
+                                className="text-[20px] font-bold tracking-tight"
+                                style={{ color: isUrgent ? '#FFB800' : g.text }}
+                              >
+                                {countdown.days}
+                              </span>
+                              <span className="mr-1 text-[10px] font-medium text-dark-50/25">
+                                {t('subscription.daysShort')}
+                              </span>
+                            </>
+                          )}
+                          <span
+                            className="text-[20px] font-bold tracking-tight"
+                            style={{ color: isUrgent ? '#FFB800' : g.text }}
+                          >
+                            {String(countdown.hours).padStart(2, '0')}
+                          </span>
+                          <span
+                            className="mx-[-1px] text-[16px] font-bold opacity-30"
+                            style={{ color: isUrgent ? '#FFB800' : g.text }}
+                          >
+                            :
+                          </span>
+                          <span
+                            className="text-[20px] font-bold tracking-tight"
+                            style={{ color: isUrgent ? '#FFB800' : g.text }}
+                          >
+                            {String(countdown.minutes).padStart(2, '0')}
+                          </span>
+                          <span
+                            className="mx-[-1px] text-[16px] font-bold opacity-30"
+                            style={{ color: isUrgent ? '#FFB800' : g.text }}
+                          >
+                            :
+                          </span>
+                          <span
+                            className="text-[20px] font-bold tracking-tight"
+                            style={{ color: isUrgent ? '#FFB800' : g.text }}
+                          >
+                            {String(countdown.seconds).padStart(2, '0')}
+                          </span>
+                        </div>
+                      )}
+                      <div className="mt-1 text-[10px] font-medium text-dark-50/25">
+                        {t('subscription.expiresAt')}: {formattedDate}
+                      </div>
                     </div>
-                    {t('dashboard.remaining')}
-                  </div>
-                  <div className="flex items-baseline gap-1">
-                    <span
-                      className="text-[22px] font-bold tracking-tight"
-                      style={{ color: daysLeft <= 3 ? '#FFB800' : g.text }}
-                    >
-                      {daysLeft > 0
-                        ? daysLeft
-                        : subscription.hours_left > 0
-                          ? `${subscription.hours_left}h`
-                          : `${subscription.minutes_left}m`}
-                    </span>
-                    <span className="text-xs font-medium text-dark-50/25">
-                      {daysLeft > 0 ? t('subscription.daysShort') : ''}
-                    </span>
-                  </div>
-                </div>
+                  );
+                })()}
 
                 {/* Devices */}
                 <div
@@ -1052,7 +1114,7 @@ export default function Subscription() {
                     border: `1px solid ${g.innerBorder}`,
                   }}
                 >
-                  <div className="mb-1 flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-wider text-dark-50/35">
+                  <div className="mb-2 flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-wider text-dark-50/35">
                     <div
                       className="flex h-6 w-6 items-center justify-center rounded-[7px]"
                       style={{ background: `${zone.mainHex}12` }}
@@ -1081,41 +1143,6 @@ export default function Subscription() {
                     <span className="text-xs font-medium text-dark-50/25">
                       / {subscription.device_limit}
                     </span>
-                  </div>
-                </div>
-
-                {/* Expires */}
-                <div
-                  className="rounded-[14px] p-3.5"
-                  style={{
-                    background: g.innerBg,
-                    border: `1px solid ${g.innerBorder}`,
-                  }}
-                >
-                  <div className="mb-1 text-[10px] font-medium uppercase tracking-wider text-dark-50/35">
-                    {t('subscription.expiresAt')}
-                  </div>
-                  <div className="text-sm font-semibold tracking-tight text-dark-50">
-                    {formattedDate}
-                  </div>
-                </div>
-
-                {/* Traffic */}
-                <div
-                  className="rounded-[14px] p-3.5"
-                  style={{
-                    background: `linear-gradient(135deg, ${zone.mainHex}08, ${zone.mainHex}03)`,
-                    border: `1px solid ${zone.mainHex}12`,
-                  }}
-                >
-                  <div
-                    className="mb-1 text-[10px] font-semibold uppercase tracking-wider opacity-70"
-                    style={{ color: zone.mainHex }}
-                  >
-                    {t('subscription.traffic')}
-                  </div>
-                  <div className="text-sm font-semibold tracking-tight text-dark-50">
-                    {isUnlimited ? '∞' : `${usedPercent.toFixed(0)}%`}
                   </div>
                 </div>
               </div>
