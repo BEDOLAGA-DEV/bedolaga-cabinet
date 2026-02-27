@@ -50,73 +50,33 @@ export default function SubscriptionCardExpired({ subscription }: SubscriptionCa
       />
 
       {/* Header */}
-      <div className="mb-5 flex items-start justify-between">
-        <div className="flex items-center gap-3">
-          {/* Clock icon */}
-          <div
-            className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-[14px]"
-            style={{
-              background: 'rgba(255,59,92,0.1)',
-              border: '1px solid rgba(255,59,92,0.15)',
-            }}
-          >
-            <svg
-              width="22"
-              height="22"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#FF3B5C"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <circle cx="12" cy="12" r="10" />
-              <path d="M12 6v6l4 2" />
-            </svg>
-          </div>
-          <div>
-            <h2 className="text-lg font-bold tracking-tight text-dark-50">
-              {subscription.is_trial
-                ? t('dashboard.expired.trialTitle')
-                : t('dashboard.expired.title')}
-            </h2>
-            <span className="text-xs text-dark-50/35">
-              {subscription.is_trial
-                ? t('dashboard.expired.trialSubtitle')
-                : t('dashboard.expired.paidSubtitle')}
-            </span>
-          </div>
-        </div>
-
-        {/* Badge */}
+      <div className="mb-5 flex items-center gap-3">
+        {/* Clock icon */}
         <div
-          className="flex items-center gap-1 rounded-full px-3 py-1 text-[11px] font-semibold"
+          className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-[14px]"
           style={{
             background: 'rgba(255,59,92,0.1)',
-            border: '1px solid rgba(255,59,92,0.2)',
-            color: '#FF3B5C',
+            border: '1px solid rgba(255,59,92,0.15)',
           }}
         >
-          {subscription.is_trial && (
-            <svg
-              width="12"
-              height="12"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              aria-hidden="true"
-            >
-              <path
-                d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          )}
-          {subscription.is_trial ? t('subscription.trialStatus') : t('subscription.expired')}
+          <svg
+            width="22"
+            height="22"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="#FF3B5C"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 6v6l4 2" />
+          </svg>
         </div>
+        <h2 className="text-lg font-bold tracking-tight text-dark-50">
+          {subscription.is_trial ? t('dashboard.expired.trialTitle') : t('dashboard.expired.title')}
+        </h2>
       </div>
 
       {/* Expired date */}
@@ -149,7 +109,7 @@ export default function SubscriptionCardExpired({ subscription }: SubscriptionCa
           {t('dashboard.expired.renew')}
         </Link>
         <Link
-          to="/subscription"
+          to="/subscription/purchase"
           className="flex items-center justify-center rounded-[14px] px-5 py-3.5 text-[15px] font-semibold tracking-tight text-dark-50/50 transition-colors duration-200"
           style={{
             background: g.innerBg,
