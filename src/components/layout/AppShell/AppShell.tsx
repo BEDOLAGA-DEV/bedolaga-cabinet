@@ -20,6 +20,7 @@ import CampaignBonusNotifier from '@/components/CampaignBonusNotifier';
 import SuccessNotificationModal from '@/components/SuccessNotificationModal';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import TicketNotificationBell from '@/components/TicketNotificationBell';
+import { SubscriptionIcon } from '@/components/icons';
 
 import { MobileBottomNav } from './MobileBottomNav';
 import { AppHeader } from './AppHeader';
@@ -252,6 +253,7 @@ export function AppShell({ children }: AppShellProps) {
   // Desktop navigation items
   const desktopNavItems = [
     { path: '/', label: t('nav.dashboard'), icon: HomeIcon },
+    { path: '/subscription', label: t('nav.subscription'), icon: SubscriptionIcon },
     { path: '/balance', label: t('nav.balance'), icon: CreditCardIcon },
     { path: '/support', label: t('nav.support'), icon: ChatIcon },
     { path: '/info', label: t('nav.info'), icon: InfoIcon },

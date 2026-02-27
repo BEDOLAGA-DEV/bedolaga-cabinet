@@ -42,7 +42,7 @@ export default function StatsGrid({
   refLoading,
 }: StatsGridProps) {
   const { t } = useTranslation();
-  const { formatAmount, currencySymbol, formatPositive } = useCurrency();
+  const { formatAmount, currencySymbol } = useCurrency();
   const { isDark } = useTheme();
   const g = getGlassColors(isDark);
 
@@ -83,7 +83,7 @@ export default function StatsGrid({
       label: t('dashboard.stats.referrals'),
       value: `${referralCount}`,
       valueColor: g.text,
-      subtitle: `${formatPositive(earningsRubles)} ${currencySymbol}`,
+      subtitle: `${formatAmount(earningsRubles)} ${currencySymbol}`,
       subtitleColor: zone.mainHex,
       to: '/referral',
       icon: (color: string) => (
