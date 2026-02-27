@@ -506,7 +506,9 @@
       "switched": "Тариф изменён",
       "notEnoughBalance": "Недостаточно средств",
       "dailyPayment": "Оплата за день",
-      "dailyChargeDescription": "Списывается ежедневно с баланса"
+      "dailyChargeDescription": "Списывается ежедневно с баланса",
+      "resetTraffic": "Сбросить трафик",
+      "resetTrafficHint": "Обнулить использованный трафик при смене тарифа"
     },
     "switchTraffic": {
       "title": "Изменить трафик",

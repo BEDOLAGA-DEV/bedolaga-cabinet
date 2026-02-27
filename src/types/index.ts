@@ -143,6 +143,9 @@ export interface TariffSwitchPreview {
   base_upgrade_cost_kopeks?: number;
   discount_percent?: number;
   discount_kopeks?: number;
+  // Traffic reset on switch
+  reset_traffic_available?: boolean;
+  reset_traffic_default?: boolean;
 }
 
 export interface RenewalOption {

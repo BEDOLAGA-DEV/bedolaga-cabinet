@@ -378,7 +378,9 @@
       "remainingDays": "剩余天数",
       "switch": "切换",
       "title": "切换套餐",
-      "upgradeCost": "升级费用"
+      "upgradeCost": "升级费用",
+      "resetTraffic": "重置流量",
+      "resetTrafficHint": "切换套餐时重置已使用流量"
     },
     "promoGroup": {
       "yourGroup": "您的组：{{name}}",
