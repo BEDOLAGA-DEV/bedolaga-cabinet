@@ -447,8 +447,12 @@ export default function Subscription() {
                 background: g.cardBg,
                 border: subscription.is_trial
                   ? '1px solid rgba(62,219,176,0.15)'
-                  : `1px solid ${g.cardBorder}`,
-                boxShadow: g.shadow,
+                  : isDark
+                    ? `1px solid ${g.cardBorder}`
+                    : `1px solid ${zone.mainHex}25`,
+                boxShadow: isDark
+                  ? g.shadow
+                  : `0 2px 16px ${zone.mainHex}12, 0 0 0 1px ${zone.mainHex}08`,
                 padding: '28px 28px 24px',
               }}
             >

@@ -8,8 +8,8 @@ export function getGlassColors(isDark: boolean) {
     // Card container
     cardBg: isDark
       ? 'linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)'
-      : 'linear-gradient(145deg, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.6) 100%)',
-    cardBorder: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.08)',
+      : 'linear-gradient(145deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.88) 100%)',
+    cardBorder: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.1)',
 
     // Inner sections (cards within cards)
     innerBg: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)',
@@ -38,6 +38,6 @@ export function getGlassColors(isDark: boolean) {
     glowAlpha: isDark ? '15' : '08',
 
     // Shadows for light mode depth
-    shadow: isDark ? 'none' : '0 2px 12px rgba(0,0,0,0.06)',
+    shadow: isDark ? 'none' : '0 2px 16px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.03)',
   };
 }

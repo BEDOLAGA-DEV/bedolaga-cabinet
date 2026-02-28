@@ -20,8 +20,10 @@ export default function SubscriptionCardExpired({ subscription }: SubscriptionCa
       className="relative overflow-hidden rounded-3xl"
       style={{
         background: g.cardBg,
-        border: '1px solid rgba(255,70,70,0.12)',
-        boxShadow: g.shadow,
+        border: isDark ? '1px solid rgba(255,70,70,0.12)' : '1px solid rgba(255,59,92,0.2)',
+        boxShadow: isDark
+          ? g.shadow
+          : '0 2px 16px rgba(255,59,92,0.1), 0 0 0 1px rgba(255,59,92,0.06)',
         padding: '28px 28px 24px',
       }}
     >
@@ -40,10 +42,14 @@ export default function SubscriptionCardExpired({ subscription }: SubscriptionCa
       />
       {/* Grid pattern */}
       <div
-        className="pointer-events-none absolute inset-0 opacity-[0.02]"
+        className="pointer-events-none absolute inset-0"
         style={{
-          backgroundImage: `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
-                            linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`,
+          opacity: isDark ? 0.02 : 0.04,
+          backgroundImage: isDark
+            ? `linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
+               linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)`
+            : `linear-gradient(rgba(0,0,0,0.06) 1px, transparent 1px),
+               linear-gradient(90deg, rgba(0,0,0,0.06) 1px, transparent 1px)`,
           backgroundSize: '40px 40px',
         }}
         aria-hidden="true"

@@ -83,7 +83,7 @@ export default function StatsGrid({
       label: t('dashboard.stats.referrals'),
       value: `${referralCount}`,
       valueColor: g.text,
-      subtitle: `${formatAmount(earningsRubles)} ${currencySymbol}`,
+      subtitle: `+${formatAmount(earningsRubles)} ${currencySymbol}`,
       subtitleColor: zone.mainHex,
       to: '/referral',
       icon: (color: string) => (
