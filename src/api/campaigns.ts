@@ -2,6 +2,7 @@ import apiClient from './client';
 
 // Types
 export type CampaignBonusType = 'balance' | 'subscription' | 'none' | 'tariff';
+export type CampaignStatsPeriod = 'day' | 'week' | 'month' | 'previous_month' | 'year';
 
 export interface TariffInfo {
   id: number;
@@ -97,6 +98,7 @@ export interface CampaignStatistics {
   balance_issued_kopeks: number;
   balance_issued_rubles: number;
   subscription_issued: number;
+  tariff_issued?: number;
   last_registration: string | null;
   total_revenue_kopeks: number;
   total_revenue_rubles: number;
@@ -112,6 +114,9 @@ export interface CampaignStatistics {
   trial_conversion_rate: number;
   deep_link: string | null;
   web_link: string | null;
+  period?: CampaignStatsPeriod | null;
+  period_started_at?: string | null;
+  period_ended_at?: string | null;
 }
 
 export interface CampaignRegistrationItem {
@@ -147,6 +152,9 @@ export interface CampaignsOverview {
   total_balance_issued_rubles: number;
   total_subscription_issued: number;
   total_tariff_issued: number;
+  period?: CampaignStatsPeriod | null;
+  period_started_at?: string | null;
+  period_ended_at?: string | null;
 }
 
 export interface ServerSquadInfo {
@@ -173,8 +181,10 @@ export interface AvailablePartner {
 
 export const campaignsApi = {
   // Get campaigns overview
-  getOverview: async (): Promise<CampaignsOverview> => {
-    const response = await apiClient.get('/cabinet/admin/campaigns/overview');
+  getOverview: async (period?: CampaignStatsPeriod): Promise<CampaignsOverview> => {
+    const response = await apiClient.get('/cabinet/admin/campaigns/overview', {
+      params: period ? { period } : undefined,
+    });
     return response.data;
   },
 
@@ -197,8 +207,13 @@ export const campaignsApi = {
   },
 
   // Get campaign statistics
-  getCampaignStats: async (campaignId: number): Promise<CampaignStatistics> => {
-    const response = await apiClient.get(`/cabinet/admin/campaigns/${campaignId}/stats`);
+  getCampaignStats: async (
+    campaignId: number,
+    period?: CampaignStatsPeriod,
+  ): Promise<CampaignStatistics> => {
+    const response = await apiClient.get(`/cabinet/admin/campaigns/${campaignId}/stats`, {
+      params: period ? { period } : undefined,
+    });
     return response.data;
   },
 
