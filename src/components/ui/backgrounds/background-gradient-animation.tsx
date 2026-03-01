@@ -1,10 +1,13 @@
 import { useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
-import { sanitizeColor } from './types';
+import { sanitizeColor, safeBoolean, safeSelect } from './types';
+import { useAnimationPause } from '@/hooks/useAnimationLoop';
 
 interface Props {
   settings: Record<string, unknown>;
 }
+
+const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
 function hexToRgbString(hex: string): string {
   hex = hex.replace('#', '');
@@ -22,23 +25,29 @@ function hexToRgbString(hex: string): string {
 
 export default function BackgroundGradientAnimation({ settings }: Props) {
   const interactiveRef = useRef<HTMLDivElement>(null);
+  const paused = useAnimationPause();
 
   const firstColor = hexToRgbString(sanitizeColor(settings.firstColor, '#1271FF'));
   const secondColor = hexToRgbString(sanitizeColor(settings.secondColor, '#DD4AFF'));
   const thirdColor = hexToRgbString(sanitizeColor(settings.thirdColor, '#64DCFF'));
   const fourthColor = hexToRgbString(sanitizeColor(settings.fourthColor, '#C83232'));
   const fifthColor = hexToRgbString(sanitizeColor(settings.fifthColor, '#B4B432'));
-  const interactive = (settings.interactive as boolean) ?? true;
-  const size = (settings.size as string) ?? '80%';
+  const interactive = safeBoolean(settings.interactive, true);
+  const size = safeSelect(settings.size, ['60%', '80%', '100%'] as const, '80%');
 
   useEffect(() => {
-    if (!interactive || !interactiveRef.current) return;
+    // Interactive mouse tracking — DESKTOP ONLY
+    if (!interactive || !interactiveRef.current || isMobile) return;
 
     let curX = 0;
     let curY = 0;
     let tgX = 0;
     let tgY = 0;
     let animId = 0;
+    let docHidden = document.hidden;
+    let tgInactive = false;
+
+    const isHidden = () => docHidden || tgInactive;
 
     const move = () => {
       curX += (tgX - curX) / 20;
@@ -49,19 +58,61 @@ export default function BackgroundGradientAnimation({ settings }: Props) {
       animId = requestAnimationFrame(move);
     };
 
+    const start = () => {
+      if (animId) return;
+      animId = requestAnimationFrame(move);
+    };
+
+    const stop = () => {
+      if (animId) {
+        cancelAnimationFrame(animId);
+        animId = 0;
+      }
+    };
+
     const handleMouse = (e: MouseEvent) => {
       tgX = e.clientX;
       tgY = e.clientY;
     };
 
+    const onVisibility = () => {
+      docHidden = document.hidden;
+      if (isHidden()) stop();
+      else start();
+    };
+
+    const tg = window.Telegram?.WebApp;
+    const onActivated = () => {
+      tgInactive = false;
+      if (!isHidden()) start();
+    };
+    const onDeactivated = () => {
+      tgInactive = true;
+      stop();
+    };
+
     window.addEventListener('mousemove', handleMouse);
-    animId = requestAnimationFrame(move);
+    document.addEventListener('visibilitychange', onVisibility);
+    if (tg) {
+      tg.onEvent?.('activated', onActivated);
+      tg.onEvent?.('deactivated', onDeactivated);
+    }
+    if (!isHidden()) start();
 
     return () => {
+      stop();
       window.removeEventListener('mousemove', handleMouse);
-      cancelAnimationFrame(animId);
+      document.removeEventListener('visibilitychange', onVisibility);
+      if (tg) {
+        tg.offEvent?.('activated', onActivated);
+        tg.offEvent?.('deactivated', onDeactivated);
+      }
     };
   }, [interactive]);
+
+  // Mobile: use simpler blur (just CSS blur, no SVG filter)
+  // Desktop: keep the goo SVG filter + CSS blur for full effect
+  const filterStyle = isMobile ? 'blur(20px)' : 'url(#blurMe) blur(40px)';
 
   return (
     <div
@@ -74,26 +125,28 @@ export default function BackgroundGradientAnimation({ settings }: Props) {
           '--fourth-color': fourthColor,
           '--fifth-color': fifthColor,
           '--size': size,
-          '--blending': 'hard-light',
           background: `linear-gradient(40deg, rgb(${firstColor}), rgb(${fifthColor}))`,
         } as React.CSSProperties
       }
     >
-      <svg className="hidden">
-        <defs>
-          <filter id="blurMe">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
-            <feColorMatrix
-              in="blur"
-              mode="matrix"
-              values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -8"
-              result="goo"
-            />
-            <feBlend in="SourceGraphic" in2="goo" />
-          </filter>
-        </defs>
-      </svg>
-      <div className="absolute inset-0" style={{ filter: 'url(#blurMe) blur(40px)' }}>
+      {/* SVG filter only rendered on desktop */}
+      {!isMobile && (
+        <svg className="hidden">
+          <defs>
+            <filter id="blurMe">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
+              <feColorMatrix
+                in="blur"
+                mode="matrix"
+                values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -8"
+                result="goo"
+              />
+              <feBlend in="SourceGraphic" in2="goo" />
+            </filter>
+          </defs>
+        </svg>
+      )}
+      <div className="absolute inset-0" style={{ filter: filterStyle }}>
         {[
           { color: firstColor, anim: 'animate-move-vertical' },
           { color: secondColor, anim: 'animate-move-in-circle' },
@@ -104,15 +157,17 @@ export default function BackgroundGradientAnimation({ settings }: Props) {
           <div
             key={i}
             className={cn(
-              'absolute left-[calc(50%-var(--size)/2)] top-[calc(50%-var(--size)/2)] h-[var(--size)] w-[var(--size)] rounded-full opacity-100 mix-blend-hard-light',
+              'absolute left-[calc(50%-var(--size)/2)] top-[calc(50%-var(--size)/2)] h-[var(--size)] w-[var(--size)] rounded-full',
+              isMobile ? 'opacity-50' : 'opacity-100 mix-blend-hard-light',
               blob.anim,
             )}
             style={{
               background: `radial-gradient(circle at center, rgba(${blob.color}, 0.8) 0, rgba(${blob.color}, 0) 50%) no-repeat`,
+              animationPlayState: paused ? 'paused' : 'running',
             }}
           />
         ))}
-        {interactive && (
+        {interactive && !isMobile && (
           <div
             ref={interactiveRef}
             className="absolute left-[calc(50%-var(--size)/2)] top-[calc(50%-var(--size)/2)] h-[var(--size)] w-[var(--size)] rounded-full opacity-70 mix-blend-hard-light"

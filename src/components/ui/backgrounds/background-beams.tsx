@@ -1,4 +1,5 @@
 import React from 'react';
+import { useAnimationPause } from '@/hooks/useAnimationLoop';
 
 interface Props {
   settings: Record<string, unknown>;
@@ -99,16 +100,15 @@ function ensureStyles() {
 }
 
 export default React.memo(function BackgroundBeams({ settings: _settings }: Props) {
+  const paused = useAnimationPause();
+
   // Inject CSS once on first render
   React.useEffect(() => {
     ensureStyles();
   }, []);
 
   return (
-    <div
-      className="absolute inset-0 overflow-hidden"
-      style={{ contain: 'strict', willChange: 'transform' }}
-    >
+    <div className="absolute inset-0 overflow-hidden" style={{ contain: 'strict' }}>
       <svg
         className="pointer-events-none absolute inset-0 h-full w-full"
         width="100%"
@@ -138,6 +138,7 @@ export default React.memo(function BackgroundBeams({ settings: _settings }: Prop
             strokeDashoffset="1"
             style={{
               animation: `beamDash ${beamParams[paramIndex].duration}s ease-in-out ${beamParams[paramIndex].delay}s infinite`,
+              animationPlayState: paused ? 'paused' : 'running',
             }}
           />
         ))}

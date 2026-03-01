@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { sanitizeColor, clampNumber } from './types';
+import { useAnimationPause } from '@/hooks/useAnimationLoop';
 
 interface Props {
   settings: Record<string, unknown>;
@@ -8,6 +9,7 @@ interface Props {
 export default function Meteors({ settings }: Props) {
   const count = clampNumber(settings.count, 1, 50, 20);
   const meteorColor = sanitizeColor(settings.meteorColor, '#ffffff');
+  const paused = useAnimationPause();
 
   const meteors = useMemo(
     () =>
@@ -31,6 +33,7 @@ export default function Meteors({ settings }: Props) {
             left: meteor.left,
             animationDelay: meteor.delay,
             animationDuration: meteor.duration,
+            animationPlayState: paused ? 'paused' : 'running',
             width: meteor.size,
             height: meteor.size,
             boxShadow: `0 0 0 1px rgba(255,255,255,0.05), 0 0 2px 1px ${meteorColor}20, 0 0 20px 2px ${meteorColor}40`,

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useMemo } from 'react';
 import { sanitizeColor, clampNumber } from './types';
+import { useAnimationLoop, getMobileDpr } from '@/hooks/useAnimationLoop';
 
 interface Props {
   settings: Record<string, unknown>;
@@ -27,23 +28,19 @@ interface CellData {
   period: number;
 }
 
-// Pre-computed transform constants for skewX(-48deg) skewY(14deg) scale(0.675)
 const SKEW_X_TAN = Math.tan((-48 * Math.PI) / 180);
 const SKEW_Y_TAN = Math.tan((14 * Math.PI) / 180);
 const GRID_SCALE = 0.675;
 
-/**
- * Animated boxes background rendered on a single <canvas> element.
- *
- * Previous implementation used 225 DOM <div> elements with CSS @keyframes.
- * Chrome's compositor created a separate paint region per div; any hover
- * state change on page content forced Chrome to re-composite all 225 regions,
- * causing visible flickering. A single canvas bypasses the DOM style/layout/paint
- * pipeline entirely — hover interactions on other elements cannot trigger
- * repaints of canvas content.
- */
+interface BoxesState {
+  ctx: CanvasRenderingContext2D;
+  w: number;
+  h: number;
+}
+
 export default React.memo(function BackgroundBoxes({ settings }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const stateRef = useRef<BoxesState | null>(null);
   const rows = clampNumber(settings.rows, 4, 30, 15);
   const cols = clampNumber(settings.cols, 4, 30, 15);
   const boxColor = sanitizeColor(settings.boxColor, '#818cf8');
@@ -61,44 +58,51 @@ export default React.memo(function BackgroundBoxes({ settings }: Props) {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+    const dpr = getMobileDpr();
+    const parent = canvas.parentElement;
+    if (!parent) return;
+    const rect = parent.getBoundingClientRect();
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    let animId = 0;
+    stateRef.current = { ctx, w: canvas.width, h: canvas.height };
 
-    const resize = () => {
-      const dpr = devicePixelRatio || 1;
-      const parent = canvas.parentElement;
-      if (!parent) return;
-      const rect = parent.getBoundingClientRect();
-      canvas.width = rect.width * dpr;
-      canvas.height = rect.height * dpr;
+    const onResize = () => {
+      const r = parent.getBoundingClientRect();
+      canvas.width = r.width * dpr;
+      canvas.height = r.height * dpr;
+      if (stateRef.current) {
+        stateRef.current.w = canvas.width;
+        stateRef.current.h = canvas.height;
+      }
     };
 
-    resize();
-    window.addEventListener('resize', resize);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
 
-    const draw = (now: number) => {
+  useAnimationLoop(
+    (now) => {
+      const state = stateRef.current;
+      if (!state) return;
+
+      const { ctx, w, h } = state;
       const t = now * 0.001;
-      const w = canvas.width;
-      const h = canvas.height;
 
       ctx.clearRect(0, 0, w, h);
       ctx.save();
 
-      // Transform origin: center of viewport
       const cx = w / 2;
       const cy = h / 2;
       ctx.translate(cx, cy);
-
-      // Replicate CSS: skewX(-48deg) skewY(14deg) scale(0.675)
       ctx.transform(1, 0, SKEW_X_TAN, 1, 0, 0);
       ctx.transform(1, SKEW_Y_TAN, 0, 1, 0, 0);
       ctx.scale(GRID_SCALE, GRID_SCALE);
-
       ctx.translate(-cx, -cy);
 
-      // Grid: 300% of viewport, offset by -100% (matches the original CSS layout)
       const gw = w * 3;
       const gh = h * 3;
       const ox = -w;
@@ -106,7 +110,6 @@ export default React.memo(function BackgroundBoxes({ settings }: Props) {
       const cellW = gw / cols;
       const cellH = gh / rows;
 
-      // Draw colored cells
       for (let i = 0; i < cells.length; i++) {
         const cell = cells[i];
         const cycleT = ((t + cell.phase) % cell.period) / cell.period;
@@ -121,7 +124,6 @@ export default React.memo(function BackgroundBoxes({ settings }: Props) {
         ctx.fillRect(ox + col * cellW, oy + row * cellH, cellW, cellH);
       }
 
-      // Draw grid lines as a single batch (much cheaper than 225 individual strokeRects)
       ctx.strokeStyle = 'rgba(51,65,85,0.5)';
       ctx.lineWidth = 1;
       ctx.beginPath();
@@ -139,17 +141,9 @@ export default React.memo(function BackgroundBoxes({ settings }: Props) {
 
       ctx.stroke();
       ctx.restore();
-
-      animId = requestAnimationFrame(draw);
-    };
-
-    animId = requestAnimationFrame(draw);
-
-    return () => {
-      cancelAnimationFrame(animId);
-      window.removeEventListener('resize', resize);
-    };
-  }, [cells, rows, cols]);
+    },
+    [cells, rows, cols],
+  );
 
   return (
     <canvas

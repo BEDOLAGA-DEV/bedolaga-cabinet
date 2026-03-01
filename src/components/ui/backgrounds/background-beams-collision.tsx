@@ -1,6 +1,7 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { useAnimationPause } from '@/hooks/useAnimationLoop';
 
 interface Props {
   settings: Record<string, unknown>;
@@ -71,38 +72,60 @@ function CollisionMechanism({
   const [beamKey, setBeamKey] = useState(0);
   const [cycleCollisionDetected, setCycleCollisionDetected] = useState(false);
 
+  const checkRef = useRef({ cycleDetected: false });
+  checkRef.current.cycleDetected = cycleCollisionDetected;
+
+  const checkCollision = useCallback(() => {
+    if (checkRef.current.cycleDetected) return;
+    if (!beamRef.current || !containerRef.current || !parentRef.current) return;
+
+    const beamRect = beamRef.current.getBoundingClientRect();
+    const containerRect = containerRef.current.getBoundingClientRect();
+    const parentRect = parentRef.current.getBoundingClientRect();
+
+    if (beamRect.bottom >= containerRect.top) {
+      const relativeX = beamRect.left - parentRect.left + beamRect.width / 2;
+      const relativeY = beamRect.bottom - parentRect.top;
+
+      setCollision({ detected: true, coordinates: { x: relativeX, y: relativeY } });
+      setCycleCollisionDetected(true);
+    }
+  }, [containerRef, parentRef]);
+
+  // Throttled collision detection loop.
+  // Parent unmounts this component when paused, so no visibility handling needed here.
   useEffect(() => {
-    const checkCollision = () => {
-      if (beamRef.current && containerRef.current && parentRef.current && !cycleCollisionDetected) {
-        const beamRect = beamRef.current.getBoundingClientRect();
-        const containerRect = containerRef.current.getBoundingClientRect();
-        const parentRect = parentRef.current.getBoundingClientRect();
+    let animId = 0;
+    let lastCheck = 0;
+    const CHECK_INTERVAL = 100;
 
-        if (beamRect.bottom >= containerRect.top) {
-          const relativeX = beamRect.left - parentRect.left + beamRect.width / 2;
-          const relativeY = beamRect.bottom - parentRect.top;
-
-          setCollision({ detected: true, coordinates: { x: relativeX, y: relativeY } });
-          setCycleCollisionDetected(true);
-        }
+    const loop = (time: number) => {
+      if (time - lastCheck >= CHECK_INTERVAL) {
+        lastCheck = time;
+        checkCollision();
       }
+      animId = requestAnimationFrame(loop);
     };
 
-    const interval = setInterval(checkCollision, 50);
-    return () => clearInterval(interval);
-  }, [cycleCollisionDetected, containerRef, parentRef]);
+    animId = requestAnimationFrame(loop);
 
+    return () => {
+      if (animId) cancelAnimationFrame(animId);
+    };
+  }, [checkCollision]);
+
+  // Collision reset with proper timeout cleanup
   useEffect(() => {
-    if (collision.detected && collision.coordinates) {
-      setTimeout(() => {
-        setCollision({ detected: false, coordinates: null });
-        setCycleCollisionDetected(false);
-      }, 2000);
-      setTimeout(() => {
-        setBeamKey((prev) => prev + 1);
-      }, 2000);
-    }
-  }, [collision]);
+    if (!collision.detected || !collision.coordinates) return;
+
+    const timer = setTimeout(() => {
+      setCollision({ detected: false, coordinates: null });
+      setCycleCollisionDetected(false);
+      setBeamKey((prev) => prev + 1);
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, [collision.detected]);
 
   return (
     <>
@@ -154,17 +177,19 @@ function CollisionMechanism({
 export default function BackgroundBeamsCollision({ settings: _settings }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const parentRef = useRef<HTMLDivElement>(null);
+  const paused = useAnimationPause();
 
   return (
     <div ref={parentRef} className="absolute inset-0 overflow-hidden">
-      {BEAMS.map((beam) => (
-        <CollisionMechanism
-          key={`${beam.initialX}-beam`}
-          beamOptions={beam}
-          containerRef={containerRef}
-          parentRef={parentRef}
-        />
-      ))}
+      {!paused &&
+        BEAMS.map((beam) => (
+          <CollisionMechanism
+            key={`${beam.initialX}-beam`}
+            beamOptions={beam}
+            containerRef={containerRef}
+            parentRef={parentRef}
+          />
+        ))}
       {/* Bottom collision line */}
       <div
         ref={containerRef}

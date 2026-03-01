@@ -1,16 +1,28 @@
 import { useEffect, useRef } from 'react';
 import { createNoise3D } from 'simplex-noise';
-import { sanitizeColor, clampNumber } from './types';
+import { sanitizeColor, clampNumber, safeSelect } from './types';
+import { useAnimationLoop, getMobileDpr } from '@/hooks/useAnimationLoop';
 
 interface Props {
   settings: Record<string, unknown>;
 }
 
+const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+
+interface WavyState {
+  ctx: CanvasRenderingContext2D;
+  noise3D: ReturnType<typeof createNoise3D>;
+  nt: number;
+  w: number;
+  h: number;
+  dpr: number;
+}
+
 export default function WavyBackground({ settings }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animationRef = useRef<number>(0);
+  const stateRef = useRef<WavyState | null>(null);
 
-  const speed = (settings.speed as string) ?? 'fast';
+  const speed = safeSelect(settings.speed, ['slow', 'fast'] as const, 'fast');
   const waveWidth = clampNumber(settings.waveWidth, 5, 200, 50);
   const blur = clampNumber(settings.blur, 0, 50, 10);
   const waveOpacity = clampNumber(settings.waveOpacity, 0.05, 1, 0.5);
@@ -21,55 +33,73 @@ export default function WavyBackground({ settings }: Props) {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
+    const dpr = getMobileDpr();
+    const parent = canvas.parentElement;
+    const w = parent?.offsetWidth ?? window.innerWidth;
+    const h = parent?.offsetHeight ?? window.innerHeight;
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    canvas.style.width = `${w}px`;
+    canvas.style.height = `${h}px`;
+
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const noise3D = createNoise3D();
-    let nt = 0;
-    const speedVal = speed === 'slow' ? 0.001 : 0.002;
-    const waveCount = 5;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const effectiveBlur = isMobile ? Math.min(blur, 4) : blur;
+    ctx.filter = effectiveBlur > 0 ? `blur(${effectiveBlur}px)` : 'none';
 
-    const resize = () => {
-      canvas.width = canvas.parentElement?.offsetWidth ?? window.innerWidth;
-      canvas.height = canvas.parentElement?.offsetHeight ?? window.innerHeight;
-      ctx.filter = `blur(${blur}px)`;
-    };
+    stateRef.current = { ctx, noise3D: createNoise3D(), nt: 0, w, h, dpr };
 
-    const drawWave = (_n: number) => {
-      nt += speedVal;
-      for (let i = 0; i < waveCount; i++) {
-        ctx.beginPath();
-        ctx.lineWidth = waveWidth;
-        ctx.strokeStyle = colors[i % colors.length];
-        ctx.globalAlpha = waveOpacity;
-
-        for (let x = 0; x < canvas.width; x += 5) {
-          const y = noise3D(x / 800, 0.3 * i, nt) * 100;
-          ctx.lineTo(x, y + canvas.height * 0.5);
-        }
-
-        ctx.stroke();
-        ctx.closePath();
+    const onResize = () => {
+      const nw = parent?.offsetWidth ?? window.innerWidth;
+      const nh = parent?.offsetHeight ?? window.innerHeight;
+      canvas.width = nw * dpr;
+      canvas.height = nh * dpr;
+      canvas.style.width = `${nw}px`;
+      canvas.style.height = `${nh}px`;
+      if (stateRef.current) {
+        stateRef.current.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        const eb = isMobile ? Math.min(blur, 4) : blur;
+        stateRef.current.ctx.filter = eb > 0 ? `blur(${eb}px)` : 'none';
+        stateRef.current.w = nw;
+        stateRef.current.h = nh;
       }
     };
 
-    const animate = () => {
-      ctx.globalAlpha = 1;
-      ctx.fillStyle = backgroundFill;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, [blur]);
 
-      drawWave(5);
-      animationRef.current = requestAnimationFrame(animate);
-    };
+  const speedVal = speed === 'slow' ? 0.001 : 0.002;
+  const waveCount = isMobile ? 3 : 5;
+  const step = isMobile ? 8 : 5;
 
-    resize();
-    animationRef.current = requestAnimationFrame(animate);
-    window.addEventListener('resize', resize);
+  useAnimationLoop(() => {
+    const state = stateRef.current;
+    if (!state) return;
 
-    return () => {
-      cancelAnimationFrame(animationRef.current);
-      window.removeEventListener('resize', resize);
-    };
+    const { ctx, noise3D, w, h } = state;
+    state.nt += speedVal;
+
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = backgroundFill;
+    ctx.fillRect(0, 0, w, h);
+
+    for (let i = 0; i < waveCount; i++) {
+      ctx.beginPath();
+      ctx.lineWidth = waveWidth;
+      ctx.strokeStyle = colors[i % colors.length];
+      ctx.globalAlpha = waveOpacity;
+
+      for (let x = 0; x < w; x += step) {
+        const y = noise3D(x / 800, 0.3 * i, state.nt) * 100;
+        ctx.lineTo(x, y + h * 0.5);
+      }
+
+      ctx.stroke();
+      ctx.closePath();
+    }
   }, [speed, waveWidth, blur, waveOpacity, backgroundFill]);
 
   return <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />;

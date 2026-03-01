@@ -1,11 +1,11 @@
-import { sanitizeColor, clampNumber } from './types';
+import { sanitizeColor, clampNumber, safeSelect } from './types';
 
 interface Props {
   settings: Record<string, unknown>;
 }
 
 export default function GridBackground({ settings }: Props) {
-  const variant = (settings.variant as string) ?? 'grid';
+  const variant = safeSelect(settings.variant, ['grid', 'dots'] as const, 'grid');
   const gridColor = sanitizeColor(settings.gridColor, 'rgba(255,255,255,0.05)');
   const gridSize = clampNumber(settings.gridSize, 10, 200, 40);
   const dotSize = clampNumber(settings.dotSize, 0.5, 10, 1.5);

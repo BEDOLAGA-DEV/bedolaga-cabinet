@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { sanitizeColor, clampNumber } from './types';
+import { useAnimationLoop, getMobileDpr } from '@/hooks/useAnimationLoop';
 
 interface Props {
   settings: Record<string, unknown>;
@@ -23,9 +24,20 @@ interface BgStar {
   twinkleSpeed: number | null;
 }
 
+interface ShootingState {
+  ctx: CanvasRenderingContext2D;
+  shootingStars: Star[];
+  bgStars: BgStar[];
+  lastShootingTime: number;
+  nextShootingDelay: number;
+  w: number;
+  h: number;
+  dpr: number;
+}
+
 export default function ShootingStarsBackground({ settings }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const animationRef = useRef<number>(0);
+  const stateRef = useRef<ShootingState | null>(null);
 
   const starColor = sanitizeColor(settings.starColor, '#9E00FF');
   const trailColor = sanitizeColor(settings.trailColor, '#2EB9DF');
@@ -37,46 +49,67 @@ export default function ShootingStarsBackground({ settings }: Props) {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
+    const dpr = getMobileDpr();
+    const parent = canvas.parentElement;
+    const w = parent?.offsetWidth ?? window.innerWidth;
+    const h = parent?.offsetHeight ?? window.innerHeight;
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    canvas.style.width = `${w}px`;
+    canvas.style.height = `${h}px`;
+
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    let shootingStars: Star[] = [];
-    let bgStars: BgStar[] = [];
-    let lastShootingTime = 0;
+    const count = Math.floor(w * h * starDensity);
+    const bgStars: BgStar[] = Array.from({ length: count }, () => ({
+      x: Math.random() * w,
+      y: Math.random() * h,
+      radius: Math.random() * 1.2 + 0.3,
+      opacity: Math.random(),
+      twinkleSpeed: Math.random() > 0.3 ? 0.5 + Math.random() * 0.5 : null,
+    }));
 
-    const resize = () => {
-      canvas.width = canvas.parentElement?.offsetWidth ?? window.innerWidth;
-      canvas.height = canvas.parentElement?.offsetHeight ?? window.innerHeight;
-      initBgStars();
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    stateRef.current = {
+      ctx,
+      shootingStars: [],
+      bgStars,
+      lastShootingTime: 0,
+      nextShootingDelay: 4200 + Math.random() * 4500,
+      w,
+      h,
+      dpr,
     };
 
-    const initBgStars = () => {
-      const count = Math.floor(canvas.width * canvas.height * starDensity);
-      bgStars = Array.from({ length: count }, () => ({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        radius: Math.random() * 1.2 + 0.3,
-        opacity: Math.random(),
-        twinkleSpeed: Math.random() > 0.3 ? 0.5 + Math.random() * 0.5 : null,
-      }));
+    const onResize = () => {
+      const nw = parent?.offsetWidth ?? window.innerWidth;
+      const nh = parent?.offsetHeight ?? window.innerHeight;
+      canvas.width = nw * dpr;
+      canvas.height = nh * dpr;
+      canvas.style.width = `${nw}px`;
+      canvas.style.height = `${nh}px`;
+      if (stateRef.current) {
+        stateRef.current.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        stateRef.current.w = nw;
+        stateRef.current.h = nh;
+      }
     };
 
-    const spawnShootingStar = () => {
-      shootingStars.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height * 0.5,
-        angle: Math.PI / 4 + (Math.random() - 0.5) * 0.3,
-        scale: 0.5 + Math.random() * 0.5,
-        speed: minSpeed + Math.random() * (maxSpeed - minSpeed),
-        distance: 0,
-        opacity: 1,
-      });
-    };
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, [starDensity]);
 
-    const animate = (time: number) => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+  useAnimationLoop(
+    (time) => {
+      const state = stateRef.current;
+      if (!state) return;
 
-      // Background stars
+      const { ctx, bgStars, w, h } = state;
+
+      ctx.clearRect(0, 0, w, h);
+
       for (const s of bgStars) {
         let opacity = s.opacity;
         if (s.twinkleSpeed) {
@@ -88,14 +121,21 @@ export default function ShootingStarsBackground({ settings }: Props) {
         ctx.fill();
       }
 
-      // Spawn shooting stars
-      if (time - lastShootingTime > 4200 + Math.random() * 4500) {
-        spawnShootingStar();
-        lastShootingTime = time;
+      if (time - state.lastShootingTime > state.nextShootingDelay) {
+        state.shootingStars.push({
+          x: Math.random() * w,
+          y: Math.random() * h * 0.5,
+          angle: Math.PI / 4 + (Math.random() - 0.5) * 0.3,
+          scale: 0.5 + Math.random() * 0.5,
+          speed: minSpeed + Math.random() * (maxSpeed - minSpeed),
+          distance: 0,
+          opacity: 1,
+        });
+        state.lastShootingTime = time;
+        state.nextShootingDelay = 4200 + Math.random() * 4500;
       }
 
-      // Draw shooting stars
-      shootingStars = shootingStars.filter((star) => {
+      state.shootingStars = state.shootingStars.filter((star) => {
         star.distance += star.speed;
         star.opacity = Math.max(0, 1 - star.distance / 500);
 
@@ -106,36 +146,28 @@ export default function ShootingStarsBackground({ settings }: Props) {
         const tailX = star.x + Math.cos(star.angle) * Math.max(0, star.distance - 80);
         const tailY = star.y + Math.sin(star.angle) * Math.max(0, star.distance - 80);
 
-        const gradient = ctx.createLinearGradient(tailX, tailY, x2, y2);
-        gradient.addColorStop(0, 'transparent');
-        gradient.addColorStop(0.5, trailColor);
-        gradient.addColorStop(1, starColor);
-
-        ctx.save();
-        ctx.strokeStyle = gradient;
+        // Draw trail with flat color (avoids per-frame gradient allocation)
         ctx.lineWidth = star.scale * 2;
-        ctx.globalAlpha = star.opacity;
+        ctx.globalAlpha = star.opacity * 0.4;
+        ctx.strokeStyle = trailColor;
         ctx.beginPath();
         ctx.moveTo(tailX, tailY);
         ctx.lineTo(x2, y2);
         ctx.stroke();
-        ctx.restore();
+
+        // Draw head dot
+        ctx.globalAlpha = star.opacity;
+        ctx.fillStyle = starColor;
+        ctx.beginPath();
+        ctx.arc(x2, y2, star.scale * 1.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalAlpha = 1;
 
         return true;
       });
-
-      animationRef.current = requestAnimationFrame(animate);
-    };
-
-    resize();
-    animationRef.current = requestAnimationFrame(animate);
-    window.addEventListener('resize', resize);
-
-    return () => {
-      cancelAnimationFrame(animationRef.current);
-      window.removeEventListener('resize', resize);
-    };
-  }, [starColor, trailColor, starDensity, minSpeed, maxSpeed]);
+    },
+    [starColor, trailColor, starDensity, minSpeed, maxSpeed],
+  );
 
   return <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />;
 }

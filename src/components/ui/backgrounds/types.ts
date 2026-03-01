@@ -42,16 +42,29 @@ export function sanitizeColor(value: unknown, fallback: string): string {
   if (/^#[0-9a-fA-F]{3,8}$/.test(trimmed)) return trimmed;
   // Allow rgb/rgba/hsl/hsla with numbers, commas, spaces, dots, %
   if (/^(rgb|hsl)a?\([0-9,.\s/%]+\)$/.test(trimmed)) return trimmed;
-  // Allow CSS named colors (alphanumeric only)
-  if (/^[a-zA-Z]{3,30}$/.test(trimmed)) return trimmed;
+  // Allow CSS named colors (alphanumeric only, exclude CSS-wide keywords)
+  if (/^[a-zA-Z]{3,30}$/.test(trimmed) && !CSS_WIDE_KEYWORDS.has(trimmed.toLowerCase()))
+    return trimmed;
   return fallback;
 }
 
 /** Clamp a numeric value within bounds */
 export function clampNumber(value: unknown, min: number, max: number, fallback: number): number {
-  const n = typeof value === 'number' ? value : fallback;
+  const n = typeof value === 'number' && Number.isFinite(value) ? value : fallback;
   return Math.max(min, Math.min(max, n));
 }
+
+/** Safely extract a boolean setting with fallback */
+export function safeBoolean(value: unknown, fallback: boolean): boolean {
+  return typeof value === 'boolean' ? value : fallback;
+}
+
+/** Safely extract a string setting from an allowed set of values */
+export function safeSelect(value: unknown, allowed: readonly string[], fallback: string): string {
+  return typeof value === 'string' && allowed.includes(value) ? value : fallback;
+}
+
+const CSS_WIDE_KEYWORDS = new Set(['inherit', 'initial', 'unset', 'revert', 'revert-layer']);
 
 export interface SettingDefinition {
   key: string;

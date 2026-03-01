@@ -1,13 +1,24 @@
 import { motion } from 'framer-motion';
 import { sanitizeColor, clampNumber } from './types';
+import { useAnimationPause } from '@/hooks/useAnimationLoop';
 
 interface Props {
   settings: Record<string, unknown>;
 }
 
+const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+
 export default function SpotlightBg({ settings }: Props) {
   const spotlightColor = sanitizeColor(settings.spotlightColor, '#818cf8');
   const spotlightSize = clampNumber(settings.spotlightSize, 100, 1000, 400);
+  const paused = useAnimationPause();
+
+  const blur1 = isMobile ? 0 : 60;
+  const blur2 = isMobile ? 0 : 80;
+
+  if (paused) {
+    return <div className="absolute inset-0 overflow-hidden" />;
+  }
 
   return (
     <div className="absolute inset-0 overflow-hidden">
@@ -27,7 +38,7 @@ export default function SpotlightBg({ settings }: Props) {
           height: spotlightSize,
           background: `radial-gradient(circle, ${spotlightColor}40 0%, transparent 70%)`,
           borderRadius: '50%',
-          filter: 'blur(60px)',
+          filter: `blur(${blur1}px)`,
         }}
       />
       <motion.div
@@ -46,7 +57,7 @@ export default function SpotlightBg({ settings }: Props) {
           height: spotlightSize * 0.8,
           background: `radial-gradient(circle, ${spotlightColor}30 0%, transparent 70%)`,
           borderRadius: '50%',
-          filter: 'blur(80px)',
+          filter: `blur(${blur2}px)`,
         }}
       />
     </div>
