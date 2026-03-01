@@ -1588,6 +1588,14 @@
       "subtitle": "管理广告链接",
       "createButton": "创建",
       "noData": "没有广告活动",
+      "period": {
+        "label": "周期",
+        "day": "天",
+        "week": "周",
+        "month": "月",
+        "previousMonth": "上个月",
+        "year": "年"
+      },
       "bonusType": {
         "balance": "余额",
         "subscription": "订阅",

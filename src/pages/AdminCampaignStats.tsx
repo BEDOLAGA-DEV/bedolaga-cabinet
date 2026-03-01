@@ -3,7 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import i18n from '../i18n';
-import { campaignsApi, CampaignBonusType } from '../api/campaigns';
+import { campaignsApi, CampaignBonusType, CampaignStatsPeriod } from '../api/campaigns';
 import { AdminBackButton } from '../components/admin';
 
 // Icons
@@ -76,6 +76,13 @@ const bonusTypeConfig: Record<
 
 // Helper functions
 const localeMap: Record<string, string> = { ru: 'ru-RU', en: 'en-US', zh: 'zh-CN', fa: 'fa-IR' };
+const periodOptions: Array<{ value: CampaignStatsPeriod; labelKey: string }> = [
+  { value: 'day', labelKey: 'admin.campaigns.period.day' },
+  { value: 'week', labelKey: 'admin.campaigns.period.week' },
+  { value: 'month', labelKey: 'admin.campaigns.period.month' },
+  { value: 'previous_month', labelKey: 'admin.campaigns.period.previousMonth' },
+  { value: 'year', labelKey: 'admin.campaigns.period.year' },
+];
 
 const formatRubles = (kopeks: number): string => {
   const rubles = kopeks / 100;
@@ -102,6 +109,7 @@ export default function AdminCampaignStats() {
   const [copiedBot, setCopiedBot] = useState(false);
   const [copiedWeb, setCopiedWeb] = useState(false);
   const [showUsers, setShowUsers] = useState(false);
+  const [period, setPeriod] = useState<CampaignStatsPeriod>('month');
   const copyBotTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const copyWebTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
@@ -118,8 +126,8 @@ export default function AdminCampaignStats() {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ['campaign-stats', id],
-    queryFn: () => campaignsApi.getCampaignStats(Number(id)),
+    queryKey: ['campaign-stats', id, period],
+    queryFn: () => campaignsApi.getCampaignStats(Number(id), period),
     enabled: !!id,
   });
 
@@ -215,6 +223,20 @@ export default function AdminCampaignStats() {
             </div>
           </div>
         </div>
+        <label className="flex items-center gap-2 text-sm text-dark-400">
+          <span>{t('admin.campaigns.period.label')}</span>
+          <select
+            value={period}
+            onChange={(event) => setPeriod(event.target.value as CampaignStatsPeriod)}
+            className="rounded-lg border border-dark-700 bg-dark-800 px-3 py-2 text-sm text-dark-100 outline-none transition-colors focus:border-accent-500"
+          >
+            {periodOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {t(option.labelKey)}
+              </option>
+            ))}
+          </select>
+        </label>
       </div>
 
       <div className="space-y-6">
@@ -318,7 +340,9 @@ export default function AdminCampaignStats() {
               )}
               {stats.bonus_type === 'tariff' && (
                 <div className="text-lg font-medium text-accent-400">
-                  {t('admin.campaigns.stats.tariffsIssued', { count: stats.subscription_issued })}
+                  {t('admin.campaigns.stats.tariffsIssued', {
+                    count: stats.tariff_issued ?? stats.subscription_issued,
+                  })}
                 </div>
               )}
               {stats.bonus_type === 'none' && (

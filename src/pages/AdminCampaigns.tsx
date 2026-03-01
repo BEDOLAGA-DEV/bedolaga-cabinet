@@ -3,7 +3,12 @@ import { useNavigate } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import i18n from '../i18n';
-import { campaignsApi, CampaignListItem, CampaignBonusType } from '../api/campaigns';
+import {
+  campaignsApi,
+  CampaignListItem,
+  CampaignBonusType,
+  CampaignStatsPeriod,
+} from '../api/campaigns';
 import { PlusIcon, EditIcon, TrashIcon, CheckIcon, XIcon, ChartIcon } from '../components/icons';
 import { usePlatform } from '../platform/hooks/usePlatform';
 
@@ -49,6 +54,13 @@ const BackIcon = () => (
 
 // Locale mapping for formatting
 const localeMap: Record<string, string> = { ru: 'ru-RU', en: 'en-US', zh: 'zh-CN', fa: 'fa-IR' };
+const periodOptions: Array<{ value: CampaignStatsPeriod; labelKey: string }> = [
+  { value: 'day', labelKey: 'admin.campaigns.period.day' },
+  { value: 'week', labelKey: 'admin.campaigns.period.week' },
+  { value: 'month', labelKey: 'admin.campaigns.period.month' },
+  { value: 'previous_month', labelKey: 'admin.campaigns.period.previousMonth' },
+  { value: 'year', labelKey: 'admin.campaigns.period.year' },
+];
 
 // Format number as rubles
 const formatRubles = (kopeks: number) => {
@@ -67,6 +79,7 @@ export default function AdminCampaigns() {
   const { capabilities } = usePlatform();
 
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
+  const [period, setPeriod] = useState<CampaignStatsPeriod>('month');
 
   // Queries
   const { data: campaignsData, isLoading } = useQuery({
@@ -75,8 +88,8 @@ export default function AdminCampaigns() {
   });
 
   const { data: overview } = useQuery({
-    queryKey: ['admin-campaigns-overview'],
-    queryFn: () => campaignsApi.getOverview(),
+    queryKey: ['admin-campaigns-overview', period],
+    queryFn: () => campaignsApi.getOverview(period),
   });
 
   // Mutations
@@ -124,6 +137,24 @@ export default function AdminCampaigns() {
           <PlusIcon />
           {t('admin.campaigns.createButton')}
         </button>
+      </div>
+
+      {/* Период аналитики */}
+      <div className="mb-4 flex justify-end">
+        <label className="flex items-center gap-2 text-sm text-dark-400">
+          <span>{t('admin.campaigns.period.label')}</span>
+          <select
+            value={period}
+            onChange={(event) => setPeriod(event.target.value as CampaignStatsPeriod)}
+            className="rounded-lg border border-dark-700 bg-dark-800 px-3 py-2 text-sm text-dark-100 outline-none transition-colors focus:border-accent-500"
+          >
+            {periodOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {t(option.labelKey)}
+              </option>
+            ))}
+          </select>
+        </label>
       </div>
 
       {/* Overview */}

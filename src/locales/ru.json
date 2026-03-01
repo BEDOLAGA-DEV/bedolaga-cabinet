@@ -2425,6 +2425,14 @@
       "subtitle": "Управление рекламными ссылками",
       "createButton": "Создать",
       "noData": "Нет рекламных кампаний",
+      "period": {
+        "label": "Период",
+        "day": "День",
+        "week": "Неделя",
+        "month": "Месяц",
+        "previousMonth": "Прошлый месяц",
+        "year": "Год"
+      },
       "bonusType": {
         "balance": "Баланс",
         "subscription": "Подписка",

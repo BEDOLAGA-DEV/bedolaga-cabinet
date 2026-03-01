@@ -1589,6 +1589,14 @@
       "subtitle": "مدیریت لینک‌های تبلیغاتی",
       "createButton": "ایجاد",
       "noData": "کمپین تبلیغاتی وجود ندارد",
+      "period": {
+        "label": "دوره",
+        "day": "روز",
+        "week": "هفته",
+        "month": "ماه",
+        "previousMonth": "ماه گذشته",
+        "year": "سال"
+      },
       "bonusType": {
         "balance": "موجودی",
         "subscription": "اشتراک",
