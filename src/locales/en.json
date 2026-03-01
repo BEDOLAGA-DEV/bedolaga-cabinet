@@ -1896,6 +1896,14 @@
       "subtitle": "Manage advertising links",
       "createButton": "Create",
       "noData": "No ad campaigns",
+      "period": {
+        "label": "Period",
+        "day": "Day",
+        "week": "Week",
+        "month": "Month",
+        "previousMonth": "Previous month",
+        "year": "Year"
+      },
       "bonusType": {
         "balance": "Balance",
         "subscription": "Subscription",
