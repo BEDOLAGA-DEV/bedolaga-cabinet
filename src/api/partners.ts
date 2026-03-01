@@ -105,7 +105,15 @@ export interface AdminPartnerDetailResponse {
   earnings_week: number;
   earnings_month: number;
   conversion_to_paid: number;
-  campaigns: { id: number; name: string; start_parameter: string; is_active: boolean }[];
+  campaigns: {
+    id: number;
+    name: string;
+    start_parameter: string;
+    is_active: boolean;
+    registrations_count: number;
+    referrals_count: number;
+    earnings_kopeks: number;
+  }[];
   created_at: string;
 }
 

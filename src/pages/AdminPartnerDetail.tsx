@@ -232,46 +232,76 @@ export default function AdminPartnerDetail() {
               {partner.campaigns.map((campaign) => (
                 <div
                   key={campaign.id}
-                  className={`flex items-center justify-between rounded-lg bg-dark-700/50 p-3 ${
+                  className={`rounded-lg bg-dark-700/50 p-3 ${
                     !campaign.is_active ? 'opacity-60' : ''
                   }`}
                 >
-                  <div className="min-w-0 flex-1">
-                    <div className="font-medium text-dark-100">{campaign.name}</div>
-                    <div className="font-mono text-xs text-dark-500">
-                      ?start={campaign.start_parameter}
+                  <div className="flex items-center justify-between">
+                    <div className="min-w-0 flex-1">
+                      <div className="font-medium text-dark-100">{campaign.name}</div>
+                      <div className="font-mono text-xs text-dark-500">
+                        ?start={campaign.start_parameter}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {campaign.is_active ? (
+                        <span className="rounded bg-success-500/20 px-2 py-0.5 text-xs text-success-400">
+                          {t('admin.partnerDetail.campaigns.active')}
+                        </span>
+                      ) : (
+                        <span className="rounded bg-dark-600 px-2 py-0.5 text-xs text-dark-400">
+                          {t('admin.partnerDetail.campaigns.inactive')}
+                        </span>
+                      )}
+                      <button
+                        onClick={() => unassignMutation.mutate(campaign.id)}
+                        disabled={unassignMutation.isPending}
+                        className="rounded p-1 text-dark-500 transition-colors hover:bg-error-500/10 hover:text-error-400"
+                        title={t('admin.partnerDetail.campaigns.unassign')}
+                      >
+                        <svg
+                          className="h-4 w-4"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          strokeWidth={2}
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M6 18L18 6M6 6l12 12"
+                          />
+                        </svg>
+                      </button>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    {campaign.is_active ? (
-                      <span className="rounded bg-success-500/20 px-2 py-0.5 text-xs text-success-400">
-                        {t('admin.partnerDetail.campaigns.active')}
-                      </span>
-                    ) : (
-                      <span className="rounded bg-dark-600 px-2 py-0.5 text-xs text-dark-400">
-                        {t('admin.partnerDetail.campaigns.inactive')}
-                      </span>
-                    )}
-                    <button
-                      onClick={() => unassignMutation.mutate(campaign.id)}
-                      disabled={unassignMutation.isPending}
-                      className="rounded p-1 text-dark-500 transition-colors hover:bg-error-500/10 hover:text-error-400"
-                      title={t('admin.partnerDetail.campaigns.unassign')}
-                    >
-                      <svg
-                        className="h-4 w-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={2}
+                  <div className="mt-2 grid grid-cols-3 gap-2 border-t border-dark-600/50 pt-2">
+                    <div className="text-center">
+                      <div className="text-sm font-medium text-dark-200">
+                        {campaign.registrations_count}
+                      </div>
+                      <div className="text-[10px] text-dark-500">
+                        {t('admin.partnerDetail.campaigns.registrations', 'Регистрации')}
+                      </div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-sm font-medium text-dark-200">
+                        {campaign.referrals_count}
+                      </div>
+                      <div className="text-[10px] text-dark-500">
+                        {t('admin.partnerDetail.campaigns.referrals', 'Рефералы')}
+                      </div>
+                    </div>
+                    <div className="text-center">
+                      <div
+                        className={`text-sm font-medium ${campaign.earnings_kopeks > 0 ? 'text-success-400' : 'text-dark-400'}`}
                       >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M6 18L18 6M6 6l12 12"
-                        />
-                      </svg>
-                    </button>
+                        {formatWithCurrency(campaign.earnings_kopeks / 100)}
+                      </div>
+                      <div className="text-[10px] text-dark-500">
+                        {t('admin.partnerDetail.campaigns.earnings', 'Доход')}
+                      </div>
+                    </div>
                   </div>
                 </div>
               ))}
