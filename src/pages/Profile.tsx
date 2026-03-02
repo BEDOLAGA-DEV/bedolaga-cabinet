@@ -59,6 +59,26 @@ const PencilIcon = () => (
   </svg>
 );
 
+const CheckCircleIcon = () => (
+  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+    />
+  </svg>
+);
+
+const XCircleIcon = () => (
+  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+    />
+  </svg>
+);
+
 export default function Profile() {
   const { t } = useTranslation();
   const user = useAuthStore((state) => state.user);
@@ -446,12 +466,21 @@ export default function Profile() {
               <div className="space-y-4">
                 <div className="flex items-center justify-between border-b border-dark-800/50 py-3">
                   <span className="text-dark-400">Email</span>
-                  <div className="flex items-center gap-3">
-                    <span className="font-medium text-dark-100">{user.email}</span>
+                  <div className="flex items-center gap-2">
+                    <span
+                      className="max-w-[200px] truncate font-medium text-dark-100 sm:max-w-xs"
+                      title={user.email}
+                    >
+                      {user.email}
+                    </span>
                     {user.email_verified ? (
-                      <span className="badge-success">{t('profile.verified')}</span>
+                      <div className="text-success-500" title={t('profile.verified')}>
+                        <CheckCircleIcon />
+                      </div>
                     ) : (
-                      <span className="badge-warning">{t('profile.notVerified')}</span>
+                      <div className="text-warning-500" title={t('profile.notVerified')}>
+                        <XCircleIcon />
+                      </div>
                     )}
                   </div>
                 </div>
