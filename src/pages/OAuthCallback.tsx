@@ -3,20 +3,22 @@ import { useNavigate, useSearchParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../store/auth';
 
-// SessionStorage helpers for OAuth state
+// localStorage helpers for OAuth state
+// Using localStorage instead of sessionStorage because Telegram in-app browser
+// may lose sessionStorage during OAuth redirects to external domains
 const OAUTH_STATE_KEY = 'oauth_state';
 const OAUTH_PROVIDER_KEY = 'oauth_provider';
 
 export function saveOAuthState(state: string, provider: string): void {
-  sessionStorage.setItem(OAUTH_STATE_KEY, state);
-  sessionStorage.setItem(OAUTH_PROVIDER_KEY, provider);
+  localStorage.setItem(OAUTH_STATE_KEY, state);
+  localStorage.setItem(OAUTH_PROVIDER_KEY, provider);
 }
 
 export function getAndClearOAuthState(): { state: string; provider: string } | null {
-  const state = sessionStorage.getItem(OAUTH_STATE_KEY);
-  const provider = sessionStorage.getItem(OAUTH_PROVIDER_KEY);
-  sessionStorage.removeItem(OAUTH_STATE_KEY);
-  sessionStorage.removeItem(OAUTH_PROVIDER_KEY);
+  const state = localStorage.getItem(OAUTH_STATE_KEY);
+  const provider = localStorage.getItem(OAUTH_PROVIDER_KEY);
+  localStorage.removeItem(OAUTH_STATE_KEY);
+  localStorage.removeItem(OAUTH_PROVIDER_KEY);
   if (!state || !provider) return null;
   return { state, provider };
 }
