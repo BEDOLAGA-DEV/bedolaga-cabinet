@@ -199,7 +199,9 @@
     "continueWithDiscord": "Continue with Discord",
     "continueWithVk": "Continue with VK",
     "oauthError": "Authorization was denied or failed",
-    "oauthExpired": "OAuth session expired. Please try again."
+    "oauthExpired": "OAuth session expired. Please try again.",
+    "orUseBot": "Manage your subscription in Telegram",
+    "openBot": "Open bot"
   },
   "emailVerification": {
     "title": "Email Verification",
@@ -241,7 +243,6 @@
     "usedTraffic": "used {{amount}}",
     "usedSuffix": "used",
     "unlimited": "Unlimited",
-    "unlimitedTraffic": "Unlimited traffic",
     "tariff": "Tariff",
     "validUntil": "until {{date}}",
     "remaining": "Remaining",
@@ -612,6 +613,9 @@
       },
       "tribute": {
         "description": "Pay with bank card via Tribute"
+      },
+      "kassa_ai": {
+        "description": "Pay via SBP or bank card"
       }
     },
     "transactionHistory": "Transaction History",
@@ -1679,7 +1683,11 @@
       "projectName": "Project name",
       "quickPresets": "Quick presets",
       "resetAllColors": "Reset all colors",
-      "statusColors": "Status colors"
+      "statusColors": "Status colors",
+      "offlineConv": "Offline Conversions",
+      "offlineConvDesc": "Sending registration, trial and purchase events to Yandex.Metrika via Measurement Protocol",
+      "offlineConvGoals": "Goals",
+      "offlineConvDisabled": "Configure via .env: YANDEX_OFFLINE_CONV_ENABLED, YANDEX_OFFLINE_CONV_MEASUREMENT_SECRET"
     },
     "theme": {
       "accentColor": "Accent color",
