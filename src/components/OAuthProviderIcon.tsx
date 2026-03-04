@@ -68,6 +68,20 @@ export default function OAuthProviderIcon({
         </svg>
       );
 
+    case 'telegram':
+      return (
+        <svg className={className} viewBox="0 0 24 24">
+          <path
+            d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2z"
+            fill="#2AABEE"
+          />
+          <path
+            d="M17.5 7.4l-2.1 9.9c-.15.7-.55.85-1.15.55l-3.15-2.3-1.5 1.45c-.15.17-.3.3-.65.3l.2-3.15 5.75-5.2c.25-.2-.05-.35-.4-.15L8.1 13.1l-3.05-.95c-.65-.2-.65-.65.15-.95l11.9-4.6c.55-.2 1.05.15.85.95l-.45-.15z"
+            fill="#fff"
+          />
+        </svg>
+      );
+
     default:
       return null;
   }

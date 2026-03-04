@@ -193,7 +193,9 @@
     "continueWithDiscord": "通过 Discord 继续",
     "continueWithVk": "通过 VK 继续",
     "oauthError": "授权被拒绝或失败",
-    "oauthExpired": "OAuth 会话已过期。请重试。"
+    "oauthExpired": "OAuth 会话已过期。请重试。",
+    "orUseBot": "在 Telegram 中管理订阅",
+    "openBot": "打开机器人"
   },
   "emailVerification": {
     "title": "邮箱验证",
@@ -454,6 +456,9 @@
       },
       "tribute": {
         "description": "通过Tribute银行卡支付"
+      },
+      "kassa_ai": {
+        "description": "通过SBP或银行卡支付"
       }
     },
     "transactionHistory": "交易记录",
