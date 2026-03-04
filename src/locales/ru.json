@@ -202,7 +202,9 @@
     "continueWithDiscord": "Продолжить через Discord",
     "continueWithVk": "Продолжить через VK",
     "oauthError": "Авторизация отклонена или не удалась",
-    "oauthExpired": "Сессия OAuth истекла. Попробуйте снова."
+    "oauthExpired": "Сессия OAuth истекла. Попробуйте снова.",
+    "orUseBot": "Управляйте подпиской в Telegram",
+    "openBot": "Перейти в бота"
   },
   "emailVerification": {
     "title": "Подтверждение email",
@@ -253,7 +255,6 @@
     "usedTraffic": "использовано {{amount}}",
     "usedSuffix": "израсходовано",
     "unlimited": "Безлимит",
-    "unlimitedTraffic": "Безлимитный трафик",
     "tariff": "Тариф",
     "validUntil": "до {{date}}",
     "remaining": "Осталось",
@@ -640,6 +641,9 @@
       },
       "tribute": {
         "description": "Оплата банковской картой через Tribute"
+      },
+      "kassa_ai": {
+        "description": "Оплата по СБП или банковской картой"
       }
     },
     "transactionHistory": "История операций",
@@ -2203,7 +2207,11 @@
         "TIMEZONE": "Часовой пояс",
         "REFERRAL": "Реферальная система",
         "MODERATION": "Модерация"
-      }
+      },
+      "offlineConv": "Офлайн-конверсии",
+      "offlineConvDesc": "Отправка событий регистрации, триала и покупок в Яндекс.Метрику через Measurement Protocol",
+      "offlineConvGoals": "Цели",
+      "offlineConvDisabled": "Настраивается через .env: YANDEX_OFFLINE_CONV_ENABLED, YANDEX_OFFLINE_CONV_MEASUREMENT_SECRET"
     },
     "buttons": {
       "color": "Цвет кнопки",

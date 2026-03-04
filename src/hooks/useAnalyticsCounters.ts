@@ -26,6 +26,11 @@ function injectYandexMetrika(counterId: string) {
       trackLinks:true,
       accurateTrackBounce:true
     });
+    ym(${counterId}, "getClientID", function(clientID) {
+      if (clientID) {
+        localStorage.setItem('yandex_cid', clientID);
+      }
+    });
   `;
   document.head.appendChild(script);
 }

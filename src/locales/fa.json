@@ -193,7 +193,9 @@
     "continueWithDiscord": "ادامه با Discord",
     "continueWithVk": "ادامه با VK",
     "oauthError": "مجوز رد شد یا ناموفق بود",
-    "oauthExpired": "نشست OAuth منقضی شده است. لطفاً دوباره امتحان کنید."
+    "oauthExpired": "نشست OAuth منقضی شده است. لطفاً دوباره امتحان کنید.",
+    "orUseBot": "مدیریت اشتراک در تلگرام",
+    "openBot": "باز کردن ربات"
   },
   "emailVerification": {
     "title": "تایید ایمیل",
@@ -454,6 +456,9 @@
       },
       "tribute": {
         "description": "پرداخت با کارت بانکی از طریق Tribute"
+      },
+      "kassa_ai": {
+        "description": "پرداخت از طریق SBP یا کارت بانکی"
       }
     },
     "transactionHistory": "تاریخچه تراکنش‌ها",

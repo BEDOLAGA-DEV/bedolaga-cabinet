@@ -1,6 +1,14 @@
 import apiClient from './client';
 import type { AuthResponse, OAuthProvider, RegisterResponse, TokenResponse, User } from '../types';
 
+function getYandexCid(): string | undefined {
+  try {
+    return localStorage.getItem('yandex_cid') || undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 export const authApi = {
   // Telegram WebApp authentication
   loginTelegram: async (
@@ -12,6 +20,7 @@ export const authApi = {
       init_data: initData,
       campaign_slug: campaignSlug || undefined,
       referral_code: referralCode || undefined,
+      yandex_cid: getYandexCid(),
     });
     return response.data;
   },
@@ -34,6 +43,7 @@ export const authApi = {
       ...data,
       campaign_slug: campaignSlug || undefined,
       referral_code: referralCode || undefined,
+      yandex_cid: getYandexCid(),
     });
     return response.data;
   },
@@ -50,6 +60,7 @@ export const authApi = {
       password,
       campaign_slug: campaignSlug || undefined,
       referral_code: referralCode || undefined,
+      yandex_cid: getYandexCid(),
     });
     return response.data;
   },
@@ -77,7 +88,7 @@ export const authApi = {
   }): Promise<RegisterResponse> => {
     const response = await apiClient.post<RegisterResponse>(
       '/cabinet/auth/email/register/standalone',
-      data,
+      { ...data, yandex_cid: getYandexCid() },
     );
     return response.data;
   },
@@ -186,6 +197,7 @@ export const authApi = {
         device_id: deviceId || undefined,
         campaign_slug: campaignSlug || undefined,
         referral_code: referralCode || undefined,
+        yandex_cid: getYandexCid(),
       },
     );
     return response.data;
