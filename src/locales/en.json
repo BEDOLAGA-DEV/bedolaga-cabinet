@@ -661,6 +661,19 @@
       "checkStatus": "Check Status",
       "checking": "Checking..."
     },
+    "savedCards": {
+      "title": "Saved Cards",
+      "card": "Card",
+      "unlink": "Unlink",
+      "confirmUnlink": "Are you sure you want to unlink this card? Automatic balance top-up will no longer be possible.",
+      "unlinkSuccess": "Card unlinked successfully",
+      "unlinkError": "Failed to unlink card",
+      "linkedAt": "Linked {{date}}",
+      "noCards": "Card will be saved automatically on next top-up",
+      "pageTitle": "Saved Cards",
+      "backToBalance": "Back",
+      "empty": "No saved cards. A card will be saved automatically on your next top-up."
+    },
     "paymentReady": "Payment link is ready",
     "clickToOpenPayment": "Click the button below to open the payment page in a new tab",
     "openPaymentPage": "Open payment page",
@@ -2656,6 +2669,7 @@
           "devices": "Devices",
           "actions": "Actions",
           "extend": "Extend",
+          "shorten": "Deduct days",
           "changeTariff": "Change tariff",
           "cancel": "Cancel",
           "activate": "Activate",

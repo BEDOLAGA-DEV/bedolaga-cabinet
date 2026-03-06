@@ -437,6 +437,7 @@ export interface ReferralTerms {
   first_topup_bonus_rubles: number;
   inviter_bonus_kopeks: number;
   inviter_bonus_rubles: number;
+  max_commission_payments: number;
   partner_section_visible?: boolean;
 }
 
@@ -573,6 +574,16 @@ export interface ManualCheckResponse {
   status_changed: boolean;
   old_status: string | null;
   new_status: string | null;
+}
+
+// Saved payment method (card) for recurrent payments
+export interface SavedCard {
+  id: number;
+  method_type: string;
+  card_last4: string | null;
+  card_type: string | null;
+  title: string | null;
+  created_at: string;
 }
 
 // Ticket notifications types

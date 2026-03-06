@@ -29,6 +29,7 @@ import Dashboard from './pages/Dashboard';
 const Subscription = lazy(() => import('./pages/Subscription'));
 const SubscriptionPurchase = lazy(() => import('./pages/SubscriptionPurchase'));
 const Balance = lazy(() => import('./pages/Balance'));
+const SavedCards = lazy(() => import('./pages/SavedCards'));
 const Referral = lazy(() => import('./pages/Referral'));
 const Support = lazy(() => import('./pages/Support'));
 const Profile = lazy(() => import('./pages/Profile'));
@@ -257,6 +258,16 @@ function App() {
             <ProtectedRoute>
               <LazyPage>
                 <Balance />
+              </LazyPage>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/balance/saved-cards"
+          element={
+            <ProtectedRoute>
+              <LazyPage>
+                <SavedCards />
               </LazyPage>
             </ProtectedRoute>
           }

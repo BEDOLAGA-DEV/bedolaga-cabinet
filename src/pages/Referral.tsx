@@ -302,37 +302,56 @@ export default function Referral() {
       </div>
 
       {/* Program Terms */}
-      {terms && (
-        <div className="bento-card">
-          <h2 className="mb-4 text-lg font-semibold text-dark-100">{t('referral.terms.title')}</h2>
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-            <div className="rounded-xl bg-dark-800/30 p-3">
-              <div className="text-sm text-dark-500">{t('referral.terms.commission')}</div>
-              <div className="mt-1 text-lg font-semibold text-dark-100">
-                {terms.commission_percent}%
+      {terms &&
+        (() => {
+          const showNewUserBonus = terms.first_topup_bonus_kopeks > 0;
+          const showInviterBonus = terms.inviter_bonus_kopeks > 0;
+          const cardCount = 2 + (showNewUserBonus ? 1 : 0) + (showInviterBonus ? 1 : 0);
+          const gridCols =
+            cardCount <= 2
+              ? 'md:grid-cols-2'
+              : cardCount === 3
+                ? 'md:grid-cols-3'
+                : 'md:grid-cols-4';
+
+          return (
+            <div className="bento-card">
+              <h2 className="mb-4 text-lg font-semibold text-dark-100">
+                {t('referral.terms.title')}
+              </h2>
+              <div className={`grid grid-cols-2 gap-4 ${gridCols}`}>
+                <div className="rounded-xl bg-dark-800/30 p-3">
+                  <div className="text-sm text-dark-500">{t('referral.terms.commission')}</div>
+                  <div className="mt-1 text-lg font-semibold text-dark-100">
+                    {terms.commission_percent}%
+                  </div>
+                </div>
+                <div className="rounded-xl bg-dark-800/30 p-3">
+                  <div className="text-sm text-dark-500">{t('referral.terms.minTopup')}</div>
+                  <div className="mt-1 text-lg font-semibold text-dark-100">
+                    {formatAmount(terms.minimum_topup_rubles)} {currencySymbol}
+                  </div>
+                </div>
+                {showNewUserBonus && (
+                  <div className="rounded-xl bg-dark-800/30 p-3">
+                    <div className="text-sm text-dark-500">{t('referral.terms.newUserBonus')}</div>
+                    <div className="mt-1 text-lg font-semibold text-success-400">
+                      {formatPositive(terms.first_topup_bonus_rubles)}
+                    </div>
+                  </div>
+                )}
+                {showInviterBonus && (
+                  <div className="rounded-xl bg-dark-800/30 p-3">
+                    <div className="text-sm text-dark-500">{t('referral.terms.inviterBonus')}</div>
+                    <div className="mt-1 text-lg font-semibold text-success-400">
+                      {formatPositive(terms.inviter_bonus_rubles)}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
-            <div className="rounded-xl bg-dark-800/30 p-3">
-              <div className="text-sm text-dark-500">{t('referral.terms.minTopup')}</div>
-              <div className="mt-1 text-lg font-semibold text-dark-100">
-                {formatAmount(terms.minimum_topup_rubles)} {currencySymbol}
-              </div>
-            </div>
-            <div className="rounded-xl bg-dark-800/30 p-3">
-              <div className="text-sm text-dark-500">{t('referral.terms.newUserBonus')}</div>
-              <div className="mt-1 text-lg font-semibold text-success-400">
-                {formatPositive(terms.first_topup_bonus_rubles)}
-              </div>
-            </div>
-            <div className="rounded-xl bg-dark-800/30 p-3">
-              <div className="text-sm text-dark-500">{t('referral.terms.inviterBonus')}</div>
-              <div className="mt-1 text-lg font-semibold text-success-400">
-                {formatPositive(terms.inviter_bonus_rubles)}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+          );
+        })()}
 
       {/* Referrals List */}
       <div className="bento-card">

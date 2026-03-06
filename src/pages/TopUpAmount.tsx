@@ -454,7 +454,8 @@ export default function TopUpAmount() {
       {/* Error message */}
       {error && (
         <motion.div
-          variants={staggerItem}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
           className="flex items-center gap-2 rounded-xl border border-error-500/20 bg-error-500/10 p-3"
         >
           <svg
@@ -477,7 +478,8 @@ export default function TopUpAmount() {
       {/* Payment link display - shown when URL is received */}
       {paymentUrl && (
         <motion.div
-          variants={staggerItem}
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
           className="space-y-3 rounded-2xl border border-success-500/20 bg-success-500/10 p-4"
         >
           <div className="flex items-center gap-2 text-success-400">

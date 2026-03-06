@@ -435,7 +435,7 @@ export default function AdminUserDetail() {
       const action = overrideAction || subAction;
       const data: UpdateSubscriptionRequest = {
         action: action as UpdateSubscriptionRequest['action'],
-        ...(action === 'extend' ? { days: toNumber(subDays, 30) } : {}),
+        ...(action === 'extend' || action === 'shorten' ? { days: toNumber(subDays, 30) } : {}),
         ...(action === 'change_tariff' && selectedTariffId ? { tariff_id: selectedTariffId } : {}),
         ...(action === 'create'
           ? {
@@ -1374,6 +1374,9 @@ export default function AdminUserDetail() {
                         <option value="extend">
                           {t('admin.users.detail.subscription.extend')}
                         </option>
+                        <option value="shorten">
+                          {t('admin.users.detail.subscription.shorten')}
+                        </option>
                         <option value="change_tariff">
                           {t('admin.users.detail.subscription.changeTariff')}
                         </option>
@@ -1385,7 +1388,7 @@ export default function AdminUserDetail() {
                         </option>
                       </select>
 
-                      {subAction === 'extend' && (
+                      {(subAction === 'extend' || subAction === 'shorten') && (
                         <input
                           type="number"
                           value={subDays}

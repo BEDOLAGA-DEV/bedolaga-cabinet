@@ -296,7 +296,8 @@ export interface UpdateSubscriptionRequest {
     | 'create'
     | 'add_traffic'
     | 'remove_traffic'
-    | 'set_device_limit';
+    | 'set_device_limit'
+    | 'shorten';
   days?: number;
   end_date?: string;
   tariff_id?: number;
