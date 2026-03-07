@@ -126,6 +126,8 @@ export interface PurchaseStatus {
   cabinet_email: string | null;
   cabinet_password: string | null;
   auto_login_token: string | null;
+  recipient_in_bot: boolean | null;
+  bot_link: string | null;
 }
 
 // ============================================================

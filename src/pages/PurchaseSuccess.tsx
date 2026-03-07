@@ -218,6 +218,9 @@ function SuccessState({
   periodDays,
   isGift,
   giftMessage,
+  recipientInBot,
+  botLink,
+  contactType,
 }: {
   subscriptionUrl: string | null;
   cryptoLink: string | null;
@@ -227,6 +230,9 @@ function SuccessState({
   periodDays: number | null;
   isGift: boolean;
   giftMessage: string | null;
+  recipientInBot: boolean | null;
+  botLink: string | null;
+  contactType: string | null;
 }) {
   const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
@@ -299,7 +305,13 @@ function SuccessState({
             {tariffName} — {periodDays} {t('landing.daysAccess')}
           </p>
         )}
-        {displayContact && (
+        {isGift && contactType === 'telegram' && recipientInBot === true && (
+          <p className="mt-2 text-sm text-dark-400">{t('landing.giftTelegramSent')}</p>
+        )}
+        {isGift && contactType === 'telegram' && recipientInBot !== true && (
+          <p className="mt-2 text-sm text-dark-400">{t('landing.giftTelegramNotInBot')}</p>
+        )}
+        {!(isGift && contactType === 'telegram') && displayContact && (
           <p className="mt-2 text-sm text-dark-400">
             {isGift
               ? t('landing.giftSentTo', { contact: displayContact })
@@ -312,6 +324,18 @@ function SuccessState({
           </p>
         )}
       </div>
+
+      {/* Bot link for telegram gifts where recipient is not in bot */}
+      {isGift && contactType === 'telegram' && recipientInBot !== true && botLink && (
+        <a
+          href={botLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-accent-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-accent-400"
+        >
+          {t('landing.openBot')}
+        </a>
+      )}
 
       {/* QR Code */}
       {displayUrl && (
@@ -507,11 +531,17 @@ function GiftPendingActivationState({
   periodDays,
   recipientContactValue,
   giftMessage,
+  recipientInBot,
+  botLink,
+  contactType,
 }: {
   tariffName: string | null;
   periodDays: number | null;
   recipientContactValue: string | null;
   giftMessage: string | null;
+  recipientInBot: boolean | null;
+  botLink: string | null;
+  contactType: string | null;
 }) {
   const { t } = useTranslation();
 
@@ -556,18 +586,38 @@ function GiftPendingActivationState({
             {tariffName} — {periodDays} {t('landing.daysAccess')}
           </p>
         )}
-        {recipientContactValue && (
+        {contactType === 'telegram' && recipientInBot === true && (
+          <p className="mt-2 text-sm text-dark-400">{t('landing.giftTelegramPendingSent')}</p>
+        )}
+        {contactType === 'telegram' && recipientInBot !== true && (
+          <p className="mt-2 text-sm text-dark-400">{t('landing.giftTelegramPendingNotInBot')}</p>
+        )}
+        {contactType !== 'telegram' && (
+          <p className="mt-2 text-sm text-dark-400">{t('landing.giftPendingActivationDesc')}</p>
+        )}
+        {contactType !== 'telegram' && recipientContactValue && (
           <p className="mt-2 text-sm text-dark-400">
             {t('landing.giftSentTo', { contact: recipientContactValue })}
           </p>
         )}
-        <p className="mt-2 text-sm text-dark-400">{t('landing.giftPendingActivationDesc')}</p>
         {giftMessage && (
           <p className="mt-2 text-sm italic text-dark-400">
             {t('landing.giftMessage')}: {giftMessage}
           </p>
         )}
       </div>
+
+      {/* Bot link for telegram gifts where recipient is not in bot */}
+      {contactType === 'telegram' && recipientInBot !== true && botLink && (
+        <a
+          href={botLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-accent-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-accent-400"
+        >
+          {t('landing.openBot')}
+        </a>
+      )}
     </motion.div>
   );
 }
@@ -756,6 +806,9 @@ export default function PurchaseSuccess() {
             periodDays={purchaseStatus.period_days}
             isGift={purchaseStatus.is_gift}
             giftMessage={purchaseStatus.gift_message}
+            recipientInBot={purchaseStatus.recipient_in_bot}
+            botLink={purchaseStatus.bot_link}
+            contactType={purchaseStatus.contact_type}
           />
         ) : isGiftPendingActivation ? (
           <GiftPendingActivationState
@@ -763,6 +816,9 @@ export default function PurchaseSuccess() {
             periodDays={purchaseStatus.period_days}
             recipientContactValue={purchaseStatus.recipient_contact_value}
             giftMessage={purchaseStatus.gift_message}
+            recipientInBot={purchaseStatus.recipient_in_bot}
+            botLink={purchaseStatus.bot_link}
+            contactType={purchaseStatus.contact_type}
           />
         ) : isPendingActivation ? (
           <div className="space-y-4">

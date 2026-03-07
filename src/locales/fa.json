@@ -3552,6 +3552,11 @@
     "giftSentSuccess": "هدیه ارسال شد!",
     "giftSentDesc": "گیرنده از طریق ایمیل مطلع خواهد شد",
     "giftPendingActivationDesc": "گیرنده در حال حاضر اشتراک فعال دارد. لینک فعال‌سازی هدیه برای او ارسال خواهد شد.",
+    "giftTelegramSent": "اطلاعیه هدیه از طریق تلگرام به گیرنده ارسال شد",
+    "giftTelegramNotInBot": "گیرنده هنوز ربات را شروع نکرده است. این لینک را برای او ارسال کنید:",
+    "giftTelegramPendingSent": "درخواست فعال‌سازی از طریق تلگرام به گیرنده ارسال شد",
+    "giftTelegramPendingNotInBot": "گیرنده هنوز در ربات نیست. لینک ربات را برایش ارسال کنید تا بتواند هدیه را فعال کند:",
+    "openBot": "باز کردن ربات",
     "autoLoginFailed": "ورود خودکار ناموفق بود",
     "autoLoginProcessing": "در حال ورود...",
     "periodLabels": {

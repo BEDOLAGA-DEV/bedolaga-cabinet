@@ -3551,6 +3551,11 @@
     "giftSentSuccess": "礼物已发送！",
     "giftSentDesc": "收件人将通过邮件收到通知",
     "giftPendingActivationDesc": "收件人已有活跃订阅。他们将收到激活礼物的链接。",
+    "giftTelegramSent": "已通过 Telegram 向收件人发送通知",
+    "giftTelegramNotInBot": "收件人尚未启动机器人。请将此链接发送给他们：",
+    "giftTelegramPendingSent": "已通过 Telegram 向收件人发送激活请求",
+    "giftTelegramPendingNotInBot": "收件人尚未启动机器人。请将机器人链接发送给他们以激活礼物：",
+    "openBot": "打开机器人",
     "autoLoginFailed": "自动登录失败",
     "autoLoginProcessing": "正在登录...",
     "periodLabels": {
