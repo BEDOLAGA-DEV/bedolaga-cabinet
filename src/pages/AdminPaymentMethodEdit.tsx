@@ -33,6 +33,7 @@ const METHOD_LABELS: Record<string, string> = {
   freekassa_card: 'Freekassa Карта',
   cloudpayments: 'CloudPayments',
   kassa_ai: 'Kassa AI',
+  riopay: 'RioPay',
 };
 
 const CheckIcon = () => (

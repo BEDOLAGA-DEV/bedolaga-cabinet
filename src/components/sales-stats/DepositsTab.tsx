@@ -29,6 +29,7 @@ const METHOD_LABELS: Record<string, string> = {
   cloudpayments: 'CloudPayments',
   freekassa: 'FreeKassa',
   kassa_ai: 'Kassa AI',
+  riopay: 'RioPay',
 };
 
 export function DepositsTab({ params }: DepositsTabProps) {
