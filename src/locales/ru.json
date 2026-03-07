@@ -2214,7 +2214,11 @@
         "TIMEZONE": "Часовой пояс",
         "REFERRAL": "Реферальная система",
         "MODERATION": "Модерация"
-      }
+      },
+      "offlineConv": "Офлайн-конверсии",
+      "offlineConvDesc": "Отправка событий регистрации, триала и покупок в Яндекс.Метрику через Measurement Protocol",
+      "offlineConvGoals": "Цели",
+      "offlineConvDisabled": "Настраивается через .env: YANDEX_OFFLINE_CONV_ENABLED, YANDEX_OFFLINE_CONV_MEASUREMENT_SECRET"
     },
     "buttons": {
       "color": "Цвет кнопки",
