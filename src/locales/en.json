@@ -1694,7 +1694,11 @@
         "telegramOidcEnabled": "OIDC Enabled",
         "telegramOidcClientId": "Client ID (Bot ID)",
         "telegramOidcClientSecret": "Client Secret"
-      }
+      },
+      "offlineConv": "Offline Conversions",
+      "offlineConvDesc": "Sending registration, trial and purchase events to Yandex.Metrika via Measurement Protocol",
+      "offlineConvGoals": "Goals",
+      "offlineConvDisabled": "Configure via .env: YANDEX_OFFLINE_CONV_ENABLED, YANDEX_OFFLINE_CONV_MEASUREMENT_SECRET"
     },
     "theme": {
       "accentColor": "Accent color",

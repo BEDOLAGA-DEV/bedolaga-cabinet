@@ -33,10 +33,19 @@ export interface TelegramWidgetConfig {
   oidc_client_id: string;
 }
 
+export interface OfflineConvGoal {
+  name: string;
+  event_id: string;
+  dedup: string;
+}
+
 export interface AnalyticsCounters {
   yandex_metrika_id: string;
   google_ads_id: string;
   google_ads_label: string;
+  offline_conv_enabled?: boolean;
+  offline_conv_counter_id?: string;
+  offline_conv_goals?: OfflineConvGoal[];
 }
 
 const BRANDING_CACHE_KEY = 'cabinet_branding';
