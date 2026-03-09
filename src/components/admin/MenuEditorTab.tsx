@@ -288,18 +288,40 @@ function ButtonChip({
             />
           </div>
 
-          {/* URL input (custom buttons only) */}
+          {/* URL input + open mode (custom buttons only) */}
           {!isBuiltin && (
-            <div>
-              <label className="mb-1.5 block text-xs font-medium text-dark-300">URL</label>
-              <input
-                type="url"
-                value={button.url || ''}
-                onChange={(e) => onUpdate({ url: e.target.value || null })}
-                placeholder="https://..."
-                className="w-full rounded-lg border border-dark-600 bg-dark-700/50 px-3 py-2 text-sm text-dark-100 placeholder-dark-500 transition-colors focus:border-accent-500 focus:outline-none"
-              />
-            </div>
+            <>
+              <div>
+                <label className="mb-1.5 block text-xs font-medium text-dark-300">URL</label>
+                <input
+                  type="url"
+                  value={button.url || ''}
+                  onChange={(e) => onUpdate({ url: e.target.value || null })}
+                  placeholder="https://..."
+                  className="w-full rounded-lg border border-dark-600 bg-dark-700/50 px-3 py-2 text-sm text-dark-100 placeholder-dark-500 transition-colors focus:border-accent-500 focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-xs font-medium text-dark-300">
+                  {t('admin.menuEditor.openIn')}
+                </label>
+                <div className="flex gap-1.5">
+                  {(['external', 'webapp'] as const).map((mode) => (
+                    <button
+                      key={mode}
+                      onClick={() => onUpdate({ open_in: mode })}
+                      className={`flex h-7 items-center gap-1.5 rounded-lg border px-2.5 text-xs font-medium transition-all ${
+                        button.open_in === mode
+                          ? 'border-accent-500 bg-accent-500/10 text-accent-400'
+                          : 'border-dark-600 bg-dark-700/50 text-dark-300 hover:border-dark-500'
+                      }`}
+                    >
+                      {t(`admin.menuEditor.openMode.${mode}`)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </>
           )}
 
           {/* Localized labels */}
@@ -665,6 +687,7 @@ export function MenuEditorTab() {
       enabled: true,
       labels: {},
       url: null,
+      open_in: 'external',
     };
     setDraftConfig((prev) => ({
       ...prev,
@@ -683,6 +706,7 @@ export function MenuEditorTab() {
       enabled: true,
       labels: {},
       url: '',
+      open_in: 'external',
     };
     setDraftConfig((prev) => ({
       ...prev,

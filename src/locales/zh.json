@@ -1481,6 +1481,11 @@
       "customLabelsHint": "每种语言的按钮文本",
       "moveUp": "上移",
       "moveDown": "下移",
+      "openIn": "打开方式",
+      "openMode": {
+        "external": "外部浏览器",
+        "webapp": "Telegram 小程序"
+      },
       "invalidUrl": "请为所有自定义按钮提供有效的URL（http:// 或 https://）"
     },
     "apps": {

@@ -1781,6 +1781,11 @@
       "customLabelsHint": "Empty = default label",
       "moveUp": "Move up",
       "moveDown": "Move down",
+      "openIn": "Open in",
+      "openMode": {
+        "external": "External browser",
+        "webapp": "Telegram miniapp"
+      },
       "invalidUrl": "Please provide a valid URL (http:// or https://) for all custom buttons"
     },
     "apps": {

@@ -2292,6 +2292,11 @@
       "customLabelsHint": "Пустое поле = название по умолчанию",
       "moveUp": "Переместить вверх",
       "moveDown": "Переместить вниз",
+      "openIn": "Открывать в",
+      "openMode": {
+        "external": "Внешний браузер",
+        "webapp": "Telegram miniapp"
+      },
       "invalidUrl": "Укажите корректный URL (http:// или https://) для всех пользовательских кнопок"
     },
     "apps": {

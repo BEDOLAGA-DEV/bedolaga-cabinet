@@ -1,5 +1,7 @@
 import apiClient from './client';
 
+export type OpenIn = 'external' | 'webapp';
+
 export interface MenuButtonConfig {
   id: string;
   type: 'builtin' | 'custom';
@@ -8,6 +10,7 @@ export interface MenuButtonConfig {
   enabled: boolean;
   labels: Record<string, string>;
   url: string | null;
+  open_in: OpenIn;
 }
 
 export interface MenuRowConfig {
@@ -51,6 +54,7 @@ const DEFAULT_BUTTON: Omit<MenuButtonConfig, 'id' | 'type'> = {
   enabled: true,
   labels: {},
   url: null,
+  open_in: 'external',
 };
 
 function normalizeConfig(data: MenuConfig): MenuConfig {
