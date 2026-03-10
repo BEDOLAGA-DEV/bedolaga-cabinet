@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { adminPaymentMethodsApi } from '../api/adminPaymentMethods';
+import { METHOD_LABELS } from '../constants/paymentMethods';
 import type { PromoGroupSimple } from '../types';
 import { usePlatform } from '../platform/hooks/usePlatform';
 import { createNumberInputHandler, toNumber } from '../utils/inputHelpers';
@@ -17,23 +18,6 @@ const BackIcon = () => (
     <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
   </svg>
 );
-
-const METHOD_LABELS: Record<string, string> = {
-  telegram_stars: 'Telegram Stars',
-  tribute: 'Tribute',
-  cryptobot: 'CryptoBot',
-  heleket: 'Heleket',
-  yookassa: 'YooKassa',
-  mulenpay: 'MulenPay',
-  pal24: 'PayPalych',
-  platega: 'Platega',
-  wata: 'WATA',
-  freekassa: 'Freekassa',
-  freekassa_sbp: 'Freekassa СБП',
-  freekassa_card: 'Freekassa Карта',
-  cloudpayments: 'CloudPayments',
-  kassa_ai: 'Kassa AI',
-};
 
 const CheckIcon = () => (
   <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

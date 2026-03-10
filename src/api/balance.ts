@@ -6,6 +6,7 @@ import type {
   PaginatedResponse,
   PendingPayment,
   ManualCheckResponse,
+  SavedCardsResponse,
 } from '../types';
 
 export const balanceApi = {
@@ -128,5 +129,16 @@ export const balanceApi = {
       `/cabinet/balance/pending-payments/${encodeURIComponent(method)}/${encodeURIComponent(paymentId)}/check`,
     );
     return response.data;
+  },
+
+  // Get saved payment methods (cards) for recurrent payments
+  getSavedCards: async (): Promise<SavedCardsResponse> => {
+    const response = await apiClient.get<SavedCardsResponse>('/cabinet/balance/saved-cards');
+    return response.data;
+  },
+
+  // Unlink (delete) a saved payment method
+  deleteSavedCard: async (id: number): Promise<void> => {
+    await apiClient.delete(`/cabinet/balance/saved-cards/${id}`);
   },
 };

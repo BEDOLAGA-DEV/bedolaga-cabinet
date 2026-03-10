@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import type { SalesStatsParams } from '../../api/adminSalesStats';
 import { salesStatsApi } from '../../api/adminSalesStats';
+import { METHOD_LABELS } from '../../constants/paymentMethods';
 import { SALES_STATS } from '../../constants/salesStats';
 import { useCurrency } from '../../hooks/useCurrency';
 import { StatCard } from '../stats';
@@ -15,21 +16,6 @@ import { SimpleBarChart } from './SimpleBarChart';
 interface DepositsTabProps {
   params: SalesStatsParams;
 }
-
-const METHOD_LABELS: Record<string, string> = {
-  telegram_stars: 'Telegram Stars',
-  tribute: 'Tribute',
-  yookassa: 'YooKassa',
-  cryptobot: 'CryptoBot',
-  heleket: 'Heleket',
-  mulenpay: 'Mulenpay',
-  pal24: 'Pal24',
-  wata: 'Wata',
-  platega: 'Platega',
-  cloudpayments: 'CloudPayments',
-  freekassa: 'FreeKassa',
-  kassa_ai: 'Kassa AI',
-};
 
 export function DepositsTab({ params }: DepositsTabProps) {
   const { t } = useTranslation();

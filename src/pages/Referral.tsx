@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -164,6 +164,55 @@ export default function Referral() {
     },
   });
 
+  const programTerms = useMemo(() => {
+    if (!terms) return null;
+    const showNewUserBonus = terms.first_topup_bonus_kopeks > 0;
+    const showInviterBonus = terms.inviter_bonus_kopeks > 0;
+    const cardCount = 2 + (showNewUserBonus ? 1 : 0) + (showInviterBonus ? 1 : 0);
+    const gridColsMap: Record<number, string> = {
+      2: 'md:grid-cols-2',
+      3: 'md:grid-cols-3',
+      4: 'md:grid-cols-4',
+    };
+    const gridCols = gridColsMap[cardCount] ?? 'md:grid-cols-4';
+
+    return (
+      <div className="bento-card">
+        <h2 className="mb-4 text-lg font-semibold text-dark-100">{t('referral.terms.title')}</h2>
+        <div className={`grid grid-cols-2 gap-4 ${gridCols}`}>
+          <div className="rounded-xl bg-dark-800/30 p-3">
+            <div className="text-sm text-dark-500">{t('referral.terms.commission')}</div>
+            <div className="mt-1 text-lg font-semibold text-dark-100">
+              {terms.commission_percent}%
+            </div>
+          </div>
+          <div className="rounded-xl bg-dark-800/30 p-3">
+            <div className="text-sm text-dark-500">{t('referral.terms.minTopup')}</div>
+            <div className="mt-1 text-lg font-semibold text-dark-100">
+              {formatAmount(terms.minimum_topup_rubles)} {currencySymbol}
+            </div>
+          </div>
+          {showNewUserBonus && (
+            <div className="rounded-xl bg-dark-800/30 p-3">
+              <div className="text-sm text-dark-500">{t('referral.terms.newUserBonus')}</div>
+              <div className="mt-1 text-lg font-semibold text-success-400">
+                {formatPositive(terms.first_topup_bonus_rubles)}
+              </div>
+            </div>
+          )}
+          {showInviterBonus && (
+            <div className="rounded-xl bg-dark-800/30 p-3">
+              <div className="text-sm text-dark-500">{t('referral.terms.inviterBonus')}</div>
+              <div className="mt-1 text-lg font-semibold text-success-400">
+                {formatPositive(terms.inviter_bonus_rubles)}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }, [terms, t, formatAmount, formatPositive, currencySymbol]);
+
   const copyLink = async () => {
     if (!referralLink) return;
     try {
@@ -302,37 +351,7 @@ export default function Referral() {
       </div>
 
       {/* Program Terms */}
-      {terms && (
-        <div className="bento-card">
-          <h2 className="mb-4 text-lg font-semibold text-dark-100">{t('referral.terms.title')}</h2>
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-            <div className="rounded-xl bg-dark-800/30 p-3">
-              <div className="text-sm text-dark-500">{t('referral.terms.commission')}</div>
-              <div className="mt-1 text-lg font-semibold text-dark-100">
-                {terms.commission_percent}%
-              </div>
-            </div>
-            <div className="rounded-xl bg-dark-800/30 p-3">
-              <div className="text-sm text-dark-500">{t('referral.terms.minTopup')}</div>
-              <div className="mt-1 text-lg font-semibold text-dark-100">
-                {formatAmount(terms.minimum_topup_rubles)} {currencySymbol}
-              </div>
-            </div>
-            <div className="rounded-xl bg-dark-800/30 p-3">
-              <div className="text-sm text-dark-500">{t('referral.terms.newUserBonus')}</div>
-              <div className="mt-1 text-lg font-semibold text-success-400">
-                {formatPositive(terms.first_topup_bonus_rubles)}
-              </div>
-            </div>
-            <div className="rounded-xl bg-dark-800/30 p-3">
-              <div className="text-sm text-dark-500">{t('referral.terms.inviterBonus')}</div>
-              <div className="mt-1 text-lg font-semibold text-success-400">
-                {formatPositive(terms.inviter_bonus_rubles)}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {programTerms}
 
       {/* Referrals List */}
       <div className="bento-card">

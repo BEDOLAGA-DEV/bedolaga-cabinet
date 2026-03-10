@@ -45,8 +45,8 @@ export interface GiftConfig {
 export interface GiftPurchaseRequest {
   tariff_id: number;
   period_days: number;
-  recipient_type: 'email' | 'telegram';
-  recipient_value: string;
+  recipient_type?: 'email' | 'telegram';
+  recipient_value?: string;
   gift_message?: string;
   payment_mode: 'balance' | 'gateway';
   payment_method?: string;
@@ -70,6 +70,8 @@ export type GiftPurchaseStatusValue =
 export interface GiftPurchaseStatus {
   status: GiftPurchaseStatusValue;
   is_gift: boolean;
+  is_code_only: boolean;
+  purchase_token: string | null;
   recipient_contact_value: string | null;
   gift_message: string | null;
   tariff_name: string | null;
@@ -84,6 +86,35 @@ export interface PendingGift {
   gift_message: string | null;
   sender_display: string | null;
   created_at: string | null;
+}
+
+export interface SentGift {
+  token: string;
+  tariff_name: string | null;
+  period_days: number;
+  device_limit: number;
+  status: string;
+  gift_recipient_value: string | null;
+  gift_message: string | null;
+  activated_by_username: string | null;
+  created_at: string | null;
+}
+
+export interface ReceivedGift {
+  token: string;
+  tariff_name: string | null;
+  period_days: number;
+  device_limit: number;
+  status: string;
+  sender_display: string | null;
+  gift_message: string | null;
+  created_at: string | null;
+}
+
+export interface ActivateGiftResponse {
+  status: string;
+  tariff_name: string | null;
+  period_days: number | null;
 }
 
 // API
@@ -106,6 +137,21 @@ export const giftApi = {
 
   getPendingGifts: async (): Promise<PendingGift[]> => {
     const { data } = await apiClient.get<PendingGift[]>('/cabinet/gift/pending');
+    return data;
+  },
+
+  getSentGifts: async (): Promise<SentGift[]> => {
+    const { data } = await apiClient.get<SentGift[]>('/cabinet/gift/sent');
+    return data;
+  },
+
+  getReceivedGifts: async (): Promise<ReceivedGift[]> => {
+    const { data } = await apiClient.get<ReceivedGift[]>('/cabinet/gift/received');
+    return data;
+  },
+
+  activateGiftCode: async (code: string): Promise<ActivateGiftResponse> => {
+    const { data } = await apiClient.post<ActivateGiftResponse>('/cabinet/gift/activate', { code });
     return data;
   },
 };

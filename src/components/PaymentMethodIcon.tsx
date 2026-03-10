@@ -1,3 +1,5 @@
+import { useId } from 'react';
+
 interface PaymentMethodIconProps {
   method: string;
   className?: string;
@@ -7,6 +9,8 @@ export default function PaymentMethodIcon({
   method,
   className = 'h-8 w-8',
 }: PaymentMethodIconProps) {
+  const uid = useId();
+
   switch (method) {
     case 'telegram_stars':
       return (
@@ -171,16 +175,17 @@ export default function PaymentMethodIcon({
         </svg>
       );
 
-    case 'kassa_ai':
+    case 'kassa_ai': {
+      const kassaGradId = `${uid}-kassaAi`;
       return (
         <svg className={className} viewBox="0 0 40 40">
           <defs>
-            <linearGradient id="kassaAiGrad" x1="0" y1="0" x2="1" y2="1">
+            <linearGradient id={kassaGradId} x1="0" y1="0" x2="1" y2="1">
               <stop offset="0%" stopColor="#6366F1" />
               <stop offset="100%" stopColor="#8B5CF6" />
             </linearGradient>
           </defs>
-          <circle cx="20" cy="20" r="20" fill="url(#kassaAiGrad)" />
+          <circle cx="20" cy="20" r="20" fill={`url(#${kassaGradId})`} />
           <g fill="#fff" fontFamily="Arial,sans-serif" fontWeight="700">
             <text x="20" y="26" textAnchor="middle" fontSize="15">
               AI
@@ -188,6 +193,27 @@ export default function PaymentMethodIcon({
           </g>
         </svg>
       );
+    }
+
+    case 'riopay': {
+      const riopayGradId = `${uid}-riopay`;
+      return (
+        <svg className={className} viewBox="0 0 40 40">
+          <defs>
+            <linearGradient id={riopayGradId} x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="#10B981" />
+              <stop offset="100%" stopColor="#059669" />
+            </linearGradient>
+          </defs>
+          <circle cx="20" cy="20" r="20" fill={`url(#${riopayGradId})`} />
+          <g fill="#fff" fontFamily="Arial,sans-serif" fontWeight="700">
+            <text x="20" y="26" textAnchor="middle" fontSize="14">
+              RP
+            </text>
+          </g>
+        </svg>
+      );
+    }
 
     default:
       return (

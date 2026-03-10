@@ -533,6 +533,26 @@
     "noPaymentMethods": "支付方式不可用",
     "selectPaymentMethod": "选择支付方式",
     "topUpToComplete": "充值以完成购买",
+    "pendingPayments": {
+      "title": "待支付",
+      "pay": "支付",
+      "checkStatus": "检查状态",
+      "checking": "检查中..."
+    },
+    "savedCards": {
+      "title": "已保存的银行卡",
+      "card": "银行卡",
+      "unlink": "解绑",
+      "confirmUnlink": "确定要解绑此卡吗？解绑后将无法自动充值余额。",
+      "unlinkSuccess": "银行卡已成功解绑",
+      "unlinkError": "解绑失败",
+      "linkedAt": "绑定于 {{date}}",
+      "noCards": "银行卡将在下次充值时自动保存",
+      "pageTitle": "已保存的银行卡",
+      "backToBalance": "返回",
+      "empty": "暂无已保存的银行卡。银行卡将在下次充值时自动保存。",
+      "loadError": "加载银行卡失败，请稍后重试。"
+    },
     "paymentSuccess": {
       "title": "支付成功",
       "message": "您的余额已成功充值，资金现已可用。"
@@ -2354,6 +2374,7 @@
           "devices": "设备数",
           "actions": "操作",
           "extend": "延长",
+          "shorten": "扣除天数",
           "changeTariff": "更换套餐",
           "cancel": "取消",
           "activate": "激活",
@@ -2372,7 +2393,8 @@
           "trafficAdded": "流量包已添加",
           "expired": "已过期",
           "daysLeft": "天剩余",
-          "deviceLimitUpdated": "设备限制已更新"
+          "deviceLimitUpdated": "设备限制已更新",
+          "invalidDays": "请输入有效天数（大于0）"
         },
         "balance": {
           "current": "当前余额",

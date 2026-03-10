@@ -7,6 +7,7 @@ import { giftApi } from '../api/gift';
 import { Spinner } from '@/components/ui/Spinner';
 import { AnimatedCheckmark } from '@/components/ui/AnimatedCheckmark';
 import { AnimatedCrossmark } from '@/components/ui/AnimatedCrossmark';
+import { cn } from '@/lib/utils';
 
 const MAX_POLL_MS = 10 * 60 * 1000; // 10 minutes
 
@@ -34,6 +35,153 @@ function PendingState() {
           {t('gift.pendingDesc', 'Please wait while we process your payment')}
         </p>
       </div>
+    </motion.div>
+  );
+}
+
+function CodeOnlySuccessState({
+  purchaseToken,
+  tariffName,
+  periodDays,
+}: {
+  purchaseToken: string;
+  tariffName: string | null;
+  periodDays: number | null;
+}) {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const [copied, setCopied] = useState(false);
+
+  const shortCode = purchaseToken.slice(0, 12);
+  const giftCode = `GIFT-${shortCode}`;
+  const botUsername = import.meta.env.VITE_TELEGRAM_BOT_USERNAME as string | undefined;
+  const botLink = botUsername ? `https://t.me/${botUsername}?start=GIFT_${shortCode}` : null;
+  const cabinetLink = `${window.location.origin}/gift?tab=activate&code=${shortCode}`;
+
+  const fullMessage = [
+    t('gift.shareText', 'I have a gift for you! Activate it here:'),
+    '',
+    botLink ? `${t('gift.shareModalActivateVia', 'Activate via bot:')} ${botLink}` : null,
+    `${t('gift.shareModalActivateViaCabinet', 'Or via website:')} ${cabinetLink}`,
+  ]
+    .filter(Boolean)
+    .join('\n');
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(fullMessage);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // fallback
+    }
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="flex flex-col items-center gap-6 text-center"
+    >
+      <AnimatedCheckmark />
+
+      <div>
+        <h1 className="text-xl font-bold text-dark-50">
+          {t('gift.codeReadyTitle', 'Gift code is ready!')}
+        </h1>
+        {tariffName && periodDays !== null && (
+          <p className="mt-1 text-sm text-dark-300">
+            {tariffName} — {periodDays} {t('gift.days', 'days')}
+          </p>
+        )}
+      </div>
+
+      {/* Gift code display */}
+      <div className="w-full rounded-xl border border-accent-500/20 bg-accent-500/5 p-4">
+        <p className="mb-1 text-xs font-medium uppercase tracking-wider text-dark-400">
+          {t('gift.codeLabel', 'Gift code')}
+        </p>
+        <p className="select-all font-mono text-lg font-bold text-accent-400">{giftCode}</p>
+      </div>
+
+      {/* Share message preview */}
+      <div className="w-full rounded-xl border border-dark-700/30 bg-dark-800/40 p-4 text-left">
+        <p className="mb-3 text-sm font-medium text-dark-100">
+          {t('gift.shareText', 'I have a gift for you! Activate it here:')}
+        </p>
+
+        {botLink && (
+          <div className="mb-2">
+            <p className="mb-1 text-xs font-medium text-dark-400">
+              {t('gift.shareModalActivateVia', 'Activate via bot:')}
+            </p>
+            <p className="truncate rounded-lg bg-dark-900/60 px-3 py-2 text-sm text-accent-400">
+              {botLink}
+            </p>
+          </div>
+        )}
+
+        <div>
+          <p className="mb-1 text-xs font-medium text-dark-400">
+            {t('gift.shareModalActivateViaCabinet', 'Or via website:')}
+          </p>
+          <p className="truncate rounded-lg bg-dark-900/60 px-3 py-2 text-sm text-accent-400">
+            {cabinetLink}
+          </p>
+        </div>
+      </div>
+
+      {/* Copy button */}
+      <button
+        type="button"
+        onClick={handleCopy}
+        className={cn(
+          'flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3.5 text-sm font-bold transition-all duration-200 active:scale-[0.98]',
+          copied
+            ? 'bg-success-500/20 text-success-400'
+            : 'bg-accent-500 text-white shadow-lg shadow-accent-500/25 hover:bg-accent-400',
+        )}
+      >
+        {copied ? (
+          <>
+            <svg
+              className="h-4 w-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+            {t('common.copied', 'Copied!')}
+          </>
+        ) : (
+          <>
+            <svg
+              className="h-4 w-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+              />
+            </svg>
+            {t('gift.copyMessage', 'Copy message')}
+          </>
+        )}
+      </button>
+
+      <button
+        type="button"
+        onClick={() => navigate('/gift?tab=myGifts')}
+        className="w-full rounded-xl border border-dark-700/50 px-6 py-3 text-sm font-medium text-dark-300 transition-colors hover:bg-dark-800/50"
+      >
+        {t('gift.tabMyGifts', 'My Gifts')}
+      </button>
     </motion.div>
   );
 }
@@ -375,9 +523,12 @@ export default function GiftResult() {
       // Balance mode: fetch once, no polling
       if (isBalanceMode) return false;
 
-      const s = query.state.data?.status;
+      const d = query.state.data;
+      const s = d?.status;
       if (s === 'delivered' || s === 'failed' || s === 'pending_activation' || s === 'expired')
         return false;
+      // Code-only gifts stay in 'paid' status — stop polling
+      if (s === 'paid' && d?.is_code_only) return false;
 
       // Check poll timeout
       if (Date.now() - pollStart.current > MAX_POLL_MS) {
@@ -411,6 +562,8 @@ export default function GiftResult() {
     );
   }
 
+  const isCodeOnlyPaid =
+    status?.status === 'paid' && status?.is_code_only && status?.purchase_token != null;
   const isDelivered = status?.status === 'delivered';
   const isPendingActivation = status?.status === 'pending_activation';
   const isFailed = status?.status === 'failed' || status?.status === 'expired';
@@ -429,6 +582,12 @@ export default function GiftResult() {
       >
         {isError ? (
           <PollErrorState />
+        ) : isCodeOnlyPaid ? (
+          <CodeOnlySuccessState
+            purchaseToken={status.purchase_token!}
+            tariffName={status.tariff_name}
+            periodDays={status.period_days}
+          />
         ) : isDelivered ? (
           <DeliveredState
             recipientContact={status.recipient_contact_value}

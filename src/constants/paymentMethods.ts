@@ -1,0 +1,17 @@
+export const METHOD_LABELS: Record<string, string> = {
+  telegram_stars: 'Telegram Stars',
+  tribute: 'Tribute',
+  cryptobot: 'CryptoBot',
+  heleket: 'Heleket',
+  yookassa: 'YooKassa',
+  mulenpay: 'MulenPay',
+  pal24: 'PayPalych',
+  platega: 'Platega',
+  wata: 'WATA',
+  freekassa: 'Freekassa',
+  freekassa_sbp: 'Freekassa СБП',
+  freekassa_card: 'Freekassa Карта',
+  cloudpayments: 'CloudPayments',
+  kassa_ai: 'Kassa AI',
+  riopay: 'RioPay',
+};

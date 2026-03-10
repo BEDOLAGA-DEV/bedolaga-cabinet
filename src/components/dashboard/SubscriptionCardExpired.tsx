@@ -207,79 +207,92 @@ export default function SubscriptionCardExpired({
 
       {/* Action buttons */}
       <div className="flex gap-2.5">
-        {/* Quick Renew or Top Up button */}
-        {hasBalance ? (
-          <button
-            type="button"
-            onClick={handleQuickRenew}
-            disabled={isRenewing}
-            className="flex flex-1 items-center justify-center gap-2 rounded-[14px] py-3.5 text-[15px] font-semibold tracking-tight text-white transition-all duration-300 disabled:opacity-50"
-            style={{
-              background: 'linear-gradient(135deg, #FF3B5C, #FF6B35)',
-              boxShadow: '0 4px 20px rgba(255,59,92,0.2)',
-            }}
-          >
-            {isRenewing ? (
-              <span
-                className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white"
-                aria-hidden="true"
-              />
-            ) : (
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
+        {/* Quick Renew or Top Up button (hidden for expired trials) */}
+        {!subscription.is_trial && (
+          <>
+            {hasBalance ? (
+              <button
+                type="button"
+                onClick={handleQuickRenew}
+                disabled={isRenewing}
+                className="flex flex-1 items-center justify-center gap-2 rounded-[14px] py-3.5 text-[15px] font-semibold tracking-tight text-white transition-all duration-300 disabled:opacity-50"
+                style={{
+                  background: 'linear-gradient(135deg, #FF3B5C, #FF6B35)',
+                  boxShadow: '0 4px 20px rgba(255,59,92,0.2)',
+                }}
               >
-                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-              </svg>
+                {isRenewing ? (
+                  <span
+                    className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white"
+                    aria-hidden="true"
+                  />
+                ) : (
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+                  </svg>
+                )}
+                {isRenewing
+                  ? t('common.loading')
+                  : isDisabledDaily
+                    ? t('dashboard.suspended.resume')
+                    : t('dashboard.expired.quickRenew')}
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={handleTopUp}
+                className="flex flex-1 items-center justify-center gap-2 rounded-[14px] py-3.5 text-[15px] font-semibold tracking-tight text-white transition-all duration-300"
+                style={{
+                  background: 'linear-gradient(135deg, #FF3B5C, #FF6B35)',
+                  boxShadow: '0 4px 20px rgba(255,59,92,0.2)',
+                }}
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M12 4.5v15m7.5-7.5h-15" />
+                </svg>
+                {t('dashboard.expired.topUp')}
+              </button>
             )}
-            {isRenewing
-              ? t('common.loading')
-              : isDisabledDaily
-                ? t('dashboard.suspended.resume')
-                : t('dashboard.expired.quickRenew')}
-          </button>
-        ) : (
-          <button
-            type="button"
-            onClick={handleTopUp}
-            className="flex flex-1 items-center justify-center gap-2 rounded-[14px] py-3.5 text-[15px] font-semibold tracking-tight text-white transition-all duration-300"
-            style={{
-              background: 'linear-gradient(135deg, #FF3B5C, #FF6B35)',
-              boxShadow: '0 4px 20px rgba(255,59,92,0.2)',
-            }}
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <path d="M12 4.5v15m7.5-7.5h-15" />
-            </svg>
-            {t('dashboard.expired.topUp')}
-          </button>
+          </>
         )}
 
-        {/* Renew (go to purchase page) */}
+        {/* Tariffs (go to purchase page) — full-width for trials */}
         <Link
           to="/subscription/purchase"
-          className="flex items-center justify-center rounded-[14px] px-5 py-3.5 text-[15px] font-semibold tracking-tight text-dark-50/50 transition-colors duration-200"
-          style={{
-            background: g.innerBg,
-            border: `1px solid ${g.innerBorder}`,
-          }}
+          className={`flex items-center justify-center rounded-[14px] px-5 py-3.5 text-[15px] font-semibold tracking-tight transition-colors duration-200 ${
+            subscription.is_trial ? 'flex-1 text-white' : 'text-dark-50/50'
+          }`}
+          style={
+            subscription.is_trial
+              ? {
+                  background: 'linear-gradient(135deg, #FF3B5C, #FF6B35)',
+                  boxShadow: '0 4px 20px rgba(255,59,92,0.2)',
+                }
+              : {
+                  background: g.innerBg,
+                  border: `1px solid ${g.innerBorder}`,
+                }
+          }
         >
           {t('dashboard.expired.tariffs')}
         </Link>
