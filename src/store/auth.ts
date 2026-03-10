@@ -1,3 +1,5 @@
+import i18n from '../i18n';
+import { getYandexCid } from '../utils/yandexCid';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { CampaignBonusInfo, RegisterResponse, User } from '../types';
@@ -258,8 +260,9 @@ export const useAuthStore = create<AuthState>()(
 
       loginWithTelegram: async (initData) => {
         const campaignSlug = consumeCampaignSlug();
+        const yandexCid = await getYandexCid();
         const referralCode = consumeReferralCode();
-        const response = await authApi.loginTelegram(initData, campaignSlug, referralCode);
+        const response = await authApi.loginTelegram(initData, campaignSlug, referralCode, yandexCid);
         tokenStorage.setTokens(response.access_token, response.refresh_token);
         set({
           accessToken: response.access_token,
@@ -273,8 +276,9 @@ export const useAuthStore = create<AuthState>()(
 
       loginWithTelegramWidget: async (data) => {
         const campaignSlug = consumeCampaignSlug();
+        const yandexCid = await getYandexCid();
         const referralCode = consumeReferralCode();
-        const response = await authApi.loginTelegramWidget(data, campaignSlug, referralCode);
+        const response = await authApi.loginTelegramWidget(data, campaignSlug, referralCode, yandexCid);
         tokenStorage.setTokens(response.access_token, response.refresh_token);
         set({
           accessToken: response.access_token,
@@ -288,8 +292,9 @@ export const useAuthStore = create<AuthState>()(
 
       loginWithTelegramOIDC: async (idToken) => {
         const campaignSlug = consumeCampaignSlug();
+        const yandexCid = await getYandexCid();
         const referralCode = consumeReferralCode();
-        const response = await authApi.loginTelegramOIDC(idToken, campaignSlug, referralCode);
+        const response = await authApi.loginTelegramOIDC(idToken, campaignSlug, referralCode, yandexCid);
         tokenStorage.setTokens(response.access_token, response.refresh_token);
         set({
           accessToken: response.access_token,
@@ -303,8 +308,9 @@ export const useAuthStore = create<AuthState>()(
 
       loginWithEmail: async (email, password) => {
         const campaignSlug = consumeCampaignSlug();
+        const yandexCid = await getYandexCid();
         const referralCode = consumeReferralCode();
-        const response = await authApi.loginEmail(email, password, campaignSlug, referralCode);
+        const response = await authApi.loginEmail(email, password, campaignSlug, referralCode, yandexCid);
         tokenStorage.setTokens(response.access_token, response.refresh_token);
         set({
           accessToken: response.access_token,
@@ -318,6 +324,7 @@ export const useAuthStore = create<AuthState>()(
 
       loginWithOAuth: async (provider, code, state, deviceId) => {
         const campaignSlug = consumeCampaignSlug();
+        const yandexCid = await getYandexCid();
         const referralCode = consumeReferralCode();
         const response = await authApi.oauthCallback(
           provider,
@@ -326,6 +333,7 @@ export const useAuthStore = create<AuthState>()(
           deviceId,
           campaignSlug,
           referralCode,
+          yandexCid,
         );
         tokenStorage.setTokens(response.access_token, response.refresh_token);
         set({
@@ -343,12 +351,14 @@ export const useAuthStore = create<AuthState>()(
         // User must verify email before they can login
         // Campaign slug stays in localStorage — consumed during verify_email step
         const code = referralCode || consumeReferralCode() || undefined;
+        const yandexCid = await getYandexCid();
         const response = await authApi.registerEmailStandalone({
           email,
           password,
           first_name: firstName,
-          language: navigator.language.split('-')[0] || 'ru',
+          language: i18n.language || 'ru',
           referral_code: code,
+          yandex_cid: yandexCid || undefined,
         });
         return response;
       },

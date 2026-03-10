@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import DOMPurify from 'dompurify';
+import { getYandexCid } from '../utils/yandexCid';
 import { landingApi } from '../api/landings';
 import type {
   LandingConfig,
@@ -724,6 +725,10 @@ export default function QuickPurchase() {
   const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
 
+  // Capture Yandex CID for offline conversions
+  const yandexCidRef = useRef<string | null>(null);
+  useEffect(() => { getYandexCid().then(cid => { yandexCidRef.current = cid; }); }, []);
+
   // Fetch config
   const {
     data: config,
@@ -948,6 +953,7 @@ export default function QuickPurchase() {
       data.gift_message = giftMessage.trim() || undefined;
     }
 
+    data.yandex_cid = yandexCidRef.current || undefined;
     purchaseMutation.mutate(data);
   };
 
