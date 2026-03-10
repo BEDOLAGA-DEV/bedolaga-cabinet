@@ -203,7 +203,8 @@
     "continueWithDiscord": "Продолжить через Discord",
     "continueWithVk": "Продолжить через VK",
     "oauthError": "Авторизация отклонена или не удалась",
-    "oauthExpired": "Сессия OAuth истекла. Попробуйте снова."
+    "oauthExpired": "Сессия OAuth истекла. Попробуйте снова.",
+    "disposableEmail": "Одноразовые email-адреса не допускаются. Используйте постоянный email."
   },
   "emailVerification": {
     "title": "Подтверждение email",
