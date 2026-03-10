@@ -18,11 +18,13 @@ export const authApi = {
     initData: string,
     campaignSlug?: string | null,
     referralCode?: string | null,
+    yandexCid?: string | null,
   ): Promise<AuthResponse> => {
     const response = await apiClient.post<AuthResponse>('/cabinet/auth/telegram', {
       init_data: initData,
       campaign_slug: campaignSlug || undefined,
       referral_code: referralCode || undefined,
+      yandex_cid: yandexCid || undefined,
     });
     return response.data;
   },
@@ -40,11 +42,13 @@ export const authApi = {
     },
     campaignSlug?: string | null,
     referralCode?: string | null,
+    yandexCid?: string | null,
   ): Promise<AuthResponse> => {
     const response = await apiClient.post<AuthResponse>('/cabinet/auth/telegram/widget', {
       ...data,
       campaign_slug: campaignSlug || undefined,
       referral_code: referralCode || undefined,
+      yandex_cid: yandexCid || undefined,
     });
     return response.data;
   },
@@ -54,11 +58,13 @@ export const authApi = {
     idToken: string,
     campaignSlug?: string | null,
     referralCode?: string | null,
+    yandexCid?: string | null,
   ): Promise<AuthResponse> => {
     const response = await apiClient.post<AuthResponse>('/cabinet/auth/telegram/oidc', {
       id_token: idToken,
       campaign_slug: campaignSlug || undefined,
       referral_code: referralCode || undefined,
+      yandex_cid: yandexCid || undefined,
     });
     return response.data;
   },
@@ -68,12 +74,14 @@ export const authApi = {
     email: string,
     password: string,
     campaignSlug?: string | null,
+    yandexCid?: string | null,
     referralCode?: string | null,
   ): Promise<AuthResponse> => {
     const response = await apiClient.post<AuthResponse>('/cabinet/auth/email/login', {
       email,
       password,
       campaign_slug: campaignSlug || undefined,
+      yandex_cid: yandexCid || undefined,
       referral_code: referralCode || undefined,
     });
     return response.data;
@@ -99,6 +107,7 @@ export const authApi = {
     first_name?: string;
     language?: string;
     referral_code?: string;
+    yandex_cid?: string;
   }): Promise<RegisterResponse> => {
     const response = await apiClient.post<RegisterResponse>(
       '/cabinet/auth/email/register/standalone',
@@ -202,6 +211,7 @@ export const authApi = {
     deviceId?: string | null,
     campaignSlug?: string | null,
     referralCode?: string | null,
+    yandexCid?: string | null,
   ): Promise<AuthResponse> => {
     const response = await apiClient.post<AuthResponse>(
       `/cabinet/auth/oauth/${encodeURIComponent(provider)}/callback`,
@@ -211,6 +221,7 @@ export const authApi = {
         device_id: deviceId || undefined,
         campaign_slug: campaignSlug || undefined,
         referral_code: referralCode || undefined,
+        yandex_cid: yandexCid || undefined,
       },
     );
     return response.data;
