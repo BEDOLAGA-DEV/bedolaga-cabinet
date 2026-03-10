@@ -57,7 +57,7 @@ function CodeOnlySuccessState({
   const [copied, setCopied] = useState(false);
 
   const giftCode = formatGiftCode(purchaseToken);
-  const botUsername = import.meta.env.VITE_BOT_USERNAME as string | undefined;
+  const botUsername = import.meta.env.VITE_TELEGRAM_BOT_USERNAME as string | undefined;
   const botLink = botUsername
     ? `https://t.me/${botUsername}?start=GIFTCODE_${purchaseToken}`
     : null;

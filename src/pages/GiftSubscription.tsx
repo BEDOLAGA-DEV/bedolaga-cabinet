@@ -853,11 +853,11 @@ function BuyTabContent({
 function ActivateTabContent({ initialCode }: { initialCode?: string | null }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [code, setCode] = useState(initialCode?.toUpperCase() ?? '');
+  const [code, setCode] = useState(initialCode ?? '');
 
   // Sync when initialCode changes (e.g. URL param update while tab is active)
   useEffect(() => {
-    if (initialCode) setCode(initialCode.toUpperCase());
+    if (initialCode) setCode(initialCode);
   }, [initialCode]);
   const [activateError, setActivateError] = useState<string | null>(null);
 
@@ -916,11 +916,11 @@ function ActivateTabContent({ initialCode }: { initialCode?: string | null }) {
           type="text"
           value={code}
           onChange={(e) => {
-            setCode(e.target.value.toUpperCase());
+            setCode(e.target.value);
             setActivateError(null);
           }}
           placeholder={t('gift.activateCodePlaceholder')}
-          className="w-full rounded-2xl border border-dark-700/50 bg-dark-800/50 px-6 py-4 text-center font-mono text-lg uppercase tracking-widest text-dark-50 placeholder-dark-500 outline-none transition-colors focus:border-accent-500/50 focus:ring-1 focus:ring-accent-500/25"
+          className="w-full rounded-2xl border border-dark-700/50 bg-dark-800/50 px-6 py-4 text-center font-mono text-sm text-dark-50 placeholder-dark-500 outline-none transition-colors focus:border-accent-500/50 focus:ring-1 focus:ring-accent-500/25"
           aria-label={t('gift.activateTitle')}
         />
       </div>
@@ -969,7 +969,20 @@ function ShareModal({ gift, onClose }: { gift: SentGift; onClose: () => void }) 
   const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
 
-  const botUsername = import.meta.env.VITE_BOT_USERNAME as string | undefined;
+  // Escape key + scroll lock
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handler);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', handler);
+      document.body.style.overflow = '';
+    };
+  }, [onClose]);
+
+  const botUsername = import.meta.env.VITE_TELEGRAM_BOT_USERNAME as string | undefined;
   const botLink = botUsername ? `https://t.me/${botUsername}?start=GIFTCODE_${gift.token}` : null;
   const cabinetLink = `${window.location.origin}/gift?tab=activate&code=${gift.token}`;
 
@@ -1006,6 +1019,9 @@ function ShareModal({ gift, onClose }: { gift: SentGift; onClose: () => void }) 
 
       {/* Modal content */}
       <motion.div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="share-modal-title"
         initial={{ opacity: 0, y: 40, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 40, scale: 0.95 }}
@@ -1020,7 +1036,9 @@ function ShareModal({ gift, onClose }: { gift: SentGift; onClose: () => void }) 
               <ShareIcon className="h-4.5 w-4.5 text-accent-400" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-dark-50">{t('gift.shareModalTitle')}</h3>
+              <h3 id="share-modal-title" className="text-base font-bold text-dark-50">
+                {t('gift.shareModalTitle')}
+              </h3>
               <p className="text-xs text-dark-400">{t('gift.shareModalDesc')}</p>
             </div>
           </div>
