@@ -94,9 +94,13 @@ export default function Balance() {
     queryFn: balanceApi.getPaymentMethods,
   });
 
+  // Deferred: only fetch saved cards after payment methods loaded to avoid extra request on first render.
+  // The recurrent_enabled flag is cached for 5 min to prevent refetching on every Balance visit.
   const { data: savedCardsData } = useQuery({
     queryKey: ['saved-cards'],
     queryFn: balanceApi.getSavedCards,
+    enabled: !!paymentMethods,
+    staleTime: 5 * 60 * 1000,
   });
 
   const normalizeType = (type: string) => type?.toUpperCase?.() ?? type;
