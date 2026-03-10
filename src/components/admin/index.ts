@@ -12,6 +12,8 @@ export * from './FavoritesTab';
 export * from './SettingsTab';
 export * from './SettingsMobileTabs';
 export * from './SettingsSearch';
+export * from './LocaleTabs';
+export * from './LocalizedInput';
 
 // Constants and utils
 export * from './constants';

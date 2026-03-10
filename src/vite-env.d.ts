@@ -19,8 +19,23 @@ interface TelegramWebAppGlobal {
   offEvent?: (event: string, callback: () => void) => void;
 }
 
+/** Telegram Login JS SDK — loaded from https://oauth.telegram.org/js/telegram-login.js */
+interface TelegramLoginGlobal {
+  init: (
+    options: {
+      client_id: string | number;
+      request_access?: string[];
+      lang?: string;
+    },
+    callback: (data: { id_token?: string; user?: Record<string, unknown>; error?: string }) => void,
+  ) => void;
+  open: () => void;
+  auth: () => void;
+}
+
 interface Window {
   Telegram?: {
     WebApp?: TelegramWebAppGlobal;
+    Login?: TelegramLoginGlobal;
   };
 }

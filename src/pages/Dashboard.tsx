@@ -14,6 +14,8 @@ import SubscriptionCardActive from '../components/dashboard/SubscriptionCardActi
 import SubscriptionCardExpired from '../components/dashboard/SubscriptionCardExpired';
 import TrialOfferCard from '../components/dashboard/TrialOfferCard';
 import StatsGrid from '../components/dashboard/StatsGrid';
+import { giftApi } from '../api/gift';
+import PendingGiftCard from '../components/dashboard/PendingGiftCard';
 import { API } from '../config/constants';
 
 const ChevronRightIcon = () => (
@@ -80,6 +82,13 @@ export default function Dashboard() {
     retry: false,
   });
 
+  const { data: pendingGifts } = useQuery({
+    queryKey: ['pending-gifts'],
+    queryFn: giftApi.getPendingGifts,
+    staleTime: 30_000,
+    retry: false,
+  });
+
   const activateTrialMutation = useMutation({
     mutationFn: subscriptionApi.activateTrial,
     onSuccess: () => {
@@ -87,6 +96,7 @@ export default function Dashboard() {
       queryClient.invalidateQueries({ queryKey: ['subscription'] });
       queryClient.invalidateQueries({ queryKey: ['trial-info'] });
       queryClient.invalidateQueries({ queryKey: ['balance'] });
+      queryClient.invalidateQueries({ queryKey: ['purchase-options'] });
       refreshUser();
     },
     onError: (error: { response?: { data?: { detail?: string } } }) => {
@@ -220,6 +230,9 @@ export default function Dashboard() {
         <p className="mt-1 text-dark-400">{t('dashboard.yourSubscription')}</p>
       </div>
 
+      {/* Pending Gift Activations */}
+      {pendingGifts && pendingGifts.length > 0 && <PendingGiftCard gifts={pendingGifts} />}
+
       {/* Subscription Status Card */}
       {subLoading ? (
         <div className="bento-card">
@@ -234,8 +247,12 @@ export default function Dashboard() {
             <div className="skeleton h-12 w-full rounded-xl" />
           </div>
         </div>
-      ) : subscription?.is_expired ? (
-        <SubscriptionCardExpired subscription={subscription} />
+      ) : subscription?.is_expired || subscription?.status === 'disabled' ? (
+        <SubscriptionCardExpired
+          subscription={subscription}
+          balanceKopeks={balanceData?.balance_kopeks ?? 0}
+          balanceRubles={balanceData?.balance_rubles ?? 0}
+        />
       ) : subscription ? (
         <SubscriptionCardActive
           subscription={subscription}

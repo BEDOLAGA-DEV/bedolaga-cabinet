@@ -175,7 +175,10 @@ export default function TrialOfferCard({
             value: trialInfo.traffic_limit_gb === 0 ? '∞' : String(trialInfo.traffic_limit_gb),
             label: t('common.units.gb'),
           },
-          { value: String(trialInfo.device_limit), label: t('subscription.trial.devices') },
+          {
+            value: trialInfo.device_limit === 0 ? '∞' : String(trialInfo.device_limit),
+            label: t('subscription.trial.devices'),
+          },
         ].map((stat, i) => (
           <div key={i} className="text-center">
             <div className="text-4xl font-extrabold leading-none tracking-tight text-dark-50">

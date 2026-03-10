@@ -48,6 +48,8 @@ export default function SubscriptionPurchase() {
   const { data: purchaseOptions, isLoading: optionsLoading } = useQuery({
     queryKey: ['purchase-options'],
     queryFn: subscriptionApi.getPurchaseOptions,
+    staleTime: 0,
+    refetchOnMount: 'always',
   });
 
   // Active promo discount
@@ -772,7 +774,9 @@ export default function SubscriptionPurchase() {
                               />
                             </svg>
                             <span className="text-dark-300">
-                              {t('subscription.devices', { count: tariff.device_limit })}
+                              {tariff.device_limit === 0
+                                ? '∞'
+                                : t('subscription.devices', { count: tariff.device_limit })}
                             </span>
                           </div>
                           {tariff.traffic_reset_mode &&
@@ -959,7 +963,7 @@ export default function SubscriptionPurchase() {
                     <div>
                       <span className="text-dark-500">{t('subscription.devices')}:</span>
                       <span className="ml-2 text-dark-200">
-                        {selectedTariff.device_limit}
+                        {selectedTariff.device_limit === 0 ? '∞' : selectedTariff.device_limit}
                         {selectedTariff.extra_devices_count > 0 && (
                           <span className="ml-1 text-xs text-accent-400">
                             (+{selectedTariff.extra_devices_count})
@@ -1118,6 +1122,33 @@ export default function SubscriptionPurchase() {
                           })}
                         </div>
                       )}
+
+                      {/* No periods available fallback */}
+                      {selectedTariff.periods.length === 0 &&
+                        !useCustomDays &&
+                        !(
+                          selectedTariff.custom_days_enabled &&
+                          (selectedTariff.price_per_day_kopeks ?? 0) > 0
+                        ) && (
+                          <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-center">
+                            <div className="mb-2 text-sm font-medium text-amber-400">
+                              {t('subscription.noPeriodsAvailable')}
+                            </div>
+                            <div className="text-xs text-dark-400">
+                              {t('subscription.noPeriodsAvailableHint')}
+                            </div>
+                            <button
+                              onClick={() => {
+                                setShowTariffPurchase(false);
+                                setSelectedTariff(null);
+                                setSelectedTariffPeriod(null);
+                              }}
+                              className="btn-secondary mt-3 px-4 py-2 text-sm"
+                            >
+                              {t('subscription.chooseDifferentTariff')}
+                            </button>
+                          </div>
+                        )}
 
                       {/* Custom days option */}
                       {selectedTariff.custom_days_enabled &&

@@ -61,6 +61,7 @@ export default function AdminPromoGroupCreate() {
   const [trafficDiscount, setTrafficDiscount] = useState<number | ''>(0);
   const [deviceDiscount, setDeviceDiscount] = useState<number | ''>(0);
   const [applyToAddons, setApplyToAddons] = useState(true);
+  const [isDefault, setIsDefault] = useState(false);
   const [autoAssignSpent, setAutoAssignSpent] = useState<number | ''>(0);
   const [periodDiscounts, setPeriodDiscounts] = useState<PeriodDiscount[]>([]);
 
@@ -79,6 +80,7 @@ export default function AdminPromoGroupCreate() {
       setTrafficDiscount(data.traffic_discount_percent || 0);
       setDeviceDiscount(data.device_discount_percent || 0);
       setApplyToAddons(data.apply_discounts_to_addons ?? true);
+      setIsDefault(data.is_default ?? false);
       setAutoAssignSpent(
         data.auto_assign_total_spent_kopeks ? data.auto_assign_total_spent_kopeks / 100 : 0,
       );
@@ -151,7 +153,8 @@ export default function AdminPromoGroupCreate() {
       period_discounts:
         Object.keys(periodDiscountsRecord).length > 0 ? periodDiscountsRecord : undefined,
       apply_discounts_to_addons: applyToAddons,
-      auto_assign_total_spent_kopeks: autoAssignVal > 0 ? Math.round(autoAssignVal * 100) : null,
+      auto_assign_total_spent_kopeks: autoAssignVal > 0 ? Math.round(autoAssignVal * 100) : 0,
+      is_default: isDefault,
     };
 
     if (isEdit) {
@@ -387,6 +390,24 @@ export default function AdminPromoGroupCreate() {
             />
           </button>
           <span className="text-sm text-dark-200">{t('admin.promoGroups.form.applyToAddons')}</span>
+        </label>
+
+        {/* Default group */}
+        <label className="flex cursor-pointer items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setIsDefault(!isDefault)}
+            className={`relative h-6 w-11 rounded-full transition-colors ${
+              isDefault ? 'bg-accent-500' : 'bg-dark-600'
+            }`}
+          >
+            <span
+              className={`absolute top-1 h-4 w-4 rounded-full bg-white transition-transform ${
+                isDefault ? 'left-6' : 'left-1'
+              }`}
+            />
+          </button>
+          <span className="text-sm text-dark-200">{t('admin.promoGroups.form.isDefault')}</span>
         </label>
       </div>
 

@@ -85,6 +85,8 @@ export interface TariffDetail {
   daily_price_kopeks: number;
   // Режим сброса трафика
   traffic_reset_mode: string | null; // 'DAY', 'WEEK', 'MONTH', 'NO_RESET', null = глобальная настройка
+  // Внешний сквад RemnaWave
+  external_squad_uuid: string | null;
   created_at: string;
   updated_at: string | null;
 }
@@ -121,6 +123,14 @@ export interface TariffCreateRequest {
   daily_price_kopeks?: number;
   // Режим сброса трафика
   traffic_reset_mode?: string | null;
+  // Внешний сквад RemnaWave
+  external_squad_uuid?: string | null;
+}
+
+export interface ExternalSquadInfo {
+  uuid: string;
+  name: string;
+  members_count: number;
 }
 
 export interface TariffUpdateRequest {
@@ -156,6 +166,8 @@ export interface TariffUpdateRequest {
   daily_price_kopeks?: number;
   // Режим сброса трафика
   traffic_reset_mode?: string | null;
+  // Внешний сквад RemnaWave
+  external_squad_uuid?: string | null;
 }
 
 export interface TariffToggleResponse {
@@ -247,6 +259,12 @@ export const tariffsApi = {
   // Get available promo groups for selection
   getAvailablePromoGroups: async (): Promise<{ id: number; name: string }[]> => {
     const response = await apiClient.get('/cabinet/admin/payment-methods/promo-groups');
+    return response.data;
+  },
+
+  // Get available external squads from RemnaWave
+  getAvailableExternalSquads: async (): Promise<ExternalSquadInfo[]> => {
+    const response = await apiClient.get('/cabinet/admin/tariffs/available-external-squads');
     return response.data;
   },
 };

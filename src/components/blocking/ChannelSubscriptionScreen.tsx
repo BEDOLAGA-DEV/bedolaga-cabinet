@@ -10,7 +10,7 @@ function safeOpenUrl(url: string | undefined | null): void {
   try {
     const parsed = new URL(url);
     if (parsed.protocol === 'https:' || parsed.protocol === 'http:') {
-      window.open(url, '_blank', 'noopener,noreferrer');
+      window.open(url, '_blank', 'noopener');
     }
   } catch {
     // invalid URL, do nothing

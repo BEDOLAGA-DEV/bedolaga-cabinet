@@ -203,11 +203,11 @@ export function createWebAdapter(): PlatformContext {
     },
 
     openLink(url: string, _options?: { tryInstantView?: boolean }) {
-      window.open(url, '_blank', 'noopener,noreferrer');
+      window.open(url, '_blank', 'noopener');
     },
 
     openTelegramLink(url: string) {
-      window.open(url, '_blank', 'noopener,noreferrer');
+      window.open(url, '_blank', 'noopener');
     },
 
     async share(text: string, url?: string): Promise<boolean> {

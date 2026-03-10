@@ -236,15 +236,24 @@ export default function SubscriptionCardActive({
               {t('dashboard.connectDevice')}
             </div>
             <div className="mt-0.5 text-[11px] text-dark-50/30">
-              {t('dashboard.devicesOfMax', {
-                used: connectedDevices,
-                max: subscription.device_limit,
-              })}
+              {subscription.device_limit === 0
+                ? t('dashboard.devicesConnectedUnlimited', { used: connectedDevices })
+                : t('dashboard.devicesOfMax', {
+                    used: connectedDevices,
+                    max: subscription.device_limit,
+                  })}
             </div>
           </div>
 
           {/* Device indicator */}
-          {subscription.device_limit <= 10 ? (
+          {subscription.device_limit === 0 ? (
+            <div
+              className="flex flex-shrink-0 items-center text-lg text-dark-50/40"
+              aria-hidden="true"
+            >
+              ∞
+            </div>
+          ) : subscription.device_limit <= 10 ? (
             <div className="flex flex-shrink-0 gap-1.5" aria-hidden="true">
               {Array.from({ length: subscription.device_limit }, (_, i) => (
                 <div

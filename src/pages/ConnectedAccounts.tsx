@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { authApi } from '../api/auth';
+import { brandingApi, type TelegramWidgetConfig } from '../api/branding';
 import { useToast } from '../components/Toast';
 import { Card } from '@/components/data-display/Card';
 import { Button } from '@/components/primitives/Button';
@@ -24,45 +25,189 @@ const isLinkableProvider = (provider: string): boolean =>
 // SessionStorage key for Telegram link CSRF state
 export const LINK_TELEGRAM_STATE_KEY = 'link_telegram_state';
 
-/** Compact Telegram Login Widget for account linking (browser only). */
+/** Telegram account linking widget (browser only). Supports OIDC popup and legacy widget. */
 function TelegramLinkWidget() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const botUsername = import.meta.env.VITE_TELEGRAM_BOT_USERNAME || '';
+  const navigate = useNavigate();
+  const { showToast } = useToast();
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  const [oidcLoading, setOidcLoading] = useState(false);
+  const [scriptLoaded, setScriptLoaded] = useState(false);
+  const mountedRef = useRef(true);
+
+  const { data: widgetConfig } = useQuery<TelegramWidgetConfig>({
+    queryKey: ['telegram-widget-config'],
+    queryFn: brandingApi.getTelegramWidgetConfig,
+    staleTime: 60000,
+  });
+
+  const botUsername =
+    widgetConfig?.bot_username || import.meta.env.VITE_TELEGRAM_BOT_USERNAME || '';
+  const isOIDC = Boolean(widgetConfig?.oidc_enabled && widgetConfig?.oidc_client_id);
 
   useEffect(() => {
-    if (!containerRef.current || !botUsername) return;
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
+  // Shared handler for link result
+  const handleLinkResult = async (response: Awaited<ReturnType<typeof authApi.linkTelegram>>) => {
+    if (response.merge_required && response.merge_token) {
+      navigate(`/merge/${response.merge_token}`, { replace: true });
+    } else {
+      queryClient.invalidateQueries({ queryKey: ['linked-providers'] });
+      showToast({ type: 'success', message: t('profile.accounts.linkSuccess') });
+    }
+  };
+
+  // OIDC callback handler (ref pattern to avoid stale closures)
+  const handleOIDCCallbackRef =
+    useRef<(data: { id_token?: string; error?: string }) => void>(undefined);
+
+  handleOIDCCallbackRef.current = async (data: { id_token?: string; error?: string }) => {
+    if (!mountedRef.current) return;
+    if (data.error || !data.id_token) {
+      setOidcLoading(false);
+      showToast({
+        type: 'error',
+        message: data.error || t('profile.accounts.linkError'),
+      });
+      return;
+    }
+    try {
+      setOidcLoading(true);
+      const response = await authApi.linkTelegram({ id_token: data.id_token });
+      if (mountedRef.current) await handleLinkResult(response);
+    } catch (err: unknown) {
+      if (mountedRef.current) {
+        showToast({
+          type: 'error',
+          message: getErrorDetail(err) || t('profile.accounts.linkError'),
+        });
+      }
+    } finally {
+      if (mountedRef.current) setOidcLoading(false);
+    }
+  };
+
+  // Load OIDC script and init
+  useEffect(() => {
+    if (!isOIDC || !widgetConfig?.oidc_client_id) return;
+
+    const scriptId = 'telegram-login-oidc-script';
+    let script = document.getElementById(scriptId) as HTMLScriptElement | null;
+
+    const initTelegramLogin = () => {
+      if (window.Telegram?.Login) {
+        window.Telegram.Login.init(
+          {
+            client_id: Number(widgetConfig.oidc_client_id) || widgetConfig.oidc_client_id,
+            request_access: widgetConfig.request_access ? ['write'] : undefined,
+            lang: document.documentElement.lang || 'en',
+          },
+          (data) => handleOIDCCallbackRef.current?.(data),
+        );
+        setScriptLoaded(true);
+      }
+    };
+
+    if (!script) {
+      script = document.createElement('script');
+      script.id = scriptId;
+      script.src = 'https://oauth.telegram.org/js/telegram-login.js?3';
+      script.async = true;
+      script.onload = () => initTelegramLogin();
+      script.onerror = () => {
+        if (mountedRef.current) {
+          showToast({ type: 'error', message: t('profile.accounts.linkError') });
+        }
+      };
+      document.head.appendChild(script);
+    } else {
+      initTelegramLogin();
+    }
+  }, [isOIDC, widgetConfig?.oidc_client_id, widgetConfig?.request_access]);
+
+  // Legacy widget effect (only when NOT OIDC)
+  useEffect(() => {
+    if (isOIDC || !containerRef.current || !botUsername) return;
 
     const container = containerRef.current;
     while (container.firstChild) {
       container.removeChild(container.firstChild);
     }
 
-    // Generate CSRF state token and store in sessionStorage
-    const csrfState = crypto.randomUUID();
-    sessionStorage.setItem(LINK_TELEGRAM_STATE_KEY, csrfState);
-
-    const redirectUrl = `${window.location.origin}/auth/link/telegram/callback?csrf_state=${encodeURIComponent(csrfState)}`;
+    const callbackName = '__onTelegramLinkAuth';
+    (window as unknown as Record<string, unknown>)[callbackName] = async (
+      user: Record<string, unknown>,
+    ) => {
+      if (!mountedRef.current) return;
+      try {
+        const response = await authApi.linkTelegram({
+          id: user.id as number,
+          first_name: user.first_name as string,
+          last_name: (user.last_name as string) || undefined,
+          username: (user.username as string) || undefined,
+          photo_url: (user.photo_url as string) || undefined,
+          auth_date: user.auth_date as number,
+          hash: user.hash as string,
+        });
+        if (mountedRef.current) await handleLinkResult(response);
+      } catch (err: unknown) {
+        if (mountedRef.current) {
+          showToast({
+            type: 'error',
+            message: getErrorDetail(err) || t('profile.accounts.linkError'),
+          });
+        }
+      }
+    };
 
     const script = document.createElement('script');
-    script.src = 'https://telegram.org/js/telegram-widget.js?22';
+    script.src = 'https://telegram.org/js/telegram-widget.js?23';
     script.setAttribute('data-telegram-login', botUsername);
     script.setAttribute('data-size', 'small');
     script.setAttribute('data-radius', '8');
-    script.setAttribute('data-auth-url', redirectUrl);
+    script.setAttribute('data-onauth', `${callbackName}(user)`);
     script.setAttribute('data-request-access', 'write');
     script.async = true;
 
     container.appendChild(script);
 
     return () => {
+      delete (window as unknown as Record<string, unknown>)[callbackName];
       while (container.firstChild) {
         container.removeChild(container.firstChild);
       }
     };
-  }, [botUsername]);
+  }, [isOIDC, botUsername, navigate, showToast, t, queryClient]);
 
-  if (!botUsername) {
+  if (!botUsername && !isOIDC) {
     return null;
+  }
+
+  if (isOIDC) {
+    return (
+      <Button
+        variant="primary"
+        size="sm"
+        disabled={oidcLoading || !scriptLoaded}
+        loading={oidcLoading}
+        onClick={() => {
+          setOidcLoading(true);
+          if (window.Telegram?.Login) {
+            window.Telegram.Login.open();
+          } else {
+            setOidcLoading(false);
+          }
+        }}
+      >
+        {t('profile.accounts.link')}
+      </Button>
+    );
   }
 
   return <div ref={containerRef} className="flex items-center" />;

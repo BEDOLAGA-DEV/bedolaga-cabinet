@@ -12,6 +12,7 @@ import { useHaptic, usePlatform } from '@/platform';
 import { staggerContainer, staggerItem } from '@/components/motion/transitions';
 import type { PaymentMethod } from '../types';
 import BentoCard from '../components/ui/BentoCard';
+import { saveTopUpPendingInfo } from '../utils/topUpStorage';
 
 // Icons
 const StarIcon = () => (
@@ -202,6 +203,20 @@ export default function TopUpAmount() {
       const redirectUrl = data.payment_url || data.invoice_url;
       if (redirectUrl) {
         setPaymentUrl(redirectUrl);
+
+        // Save payment info for the result page
+        if (method && data.payment_id) {
+          const methodKey = method.id.toLowerCase().replace(/-/g, '_');
+          const displayName =
+            t(`balance.paymentMethods.${methodKey}.name`, { defaultValue: '' }) || method.name;
+          saveTopUpPendingInfo({
+            amount_kopeks: data.amount_kopeks,
+            method_id: method.id,
+            method_name: displayName,
+            payment_id: data.payment_id,
+            created_at: Date.now(),
+          });
+        }
       }
     },
     onError: (err: unknown) => {
@@ -296,8 +311,8 @@ export default function TopUpAmount() {
       await navigator.clipboard.writeText(paymentUrl);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch (e) {
-      console.warn('Failed to copy:', e);
+    } catch {
+      // Clipboard write failed silently
     }
   };
 

@@ -109,7 +109,15 @@ export const balanceApi = {
   // Get specific pending payment details
   getPendingPayment: async (method: string, paymentId: number): Promise<PendingPayment> => {
     const response = await apiClient.get<PendingPayment>(
-      `/cabinet/balance/pending-payments/${method}/${paymentId}`,
+      `/cabinet/balance/pending-payments/${encodeURIComponent(method)}/${encodeURIComponent(paymentId)}`,
+    );
+    return response.data;
+  },
+
+  // Get latest pending payment by method (fallback when sessionStorage unavailable)
+  getLatestPayment: async (method: string): Promise<PendingPayment> => {
+    const response = await apiClient.get<PendingPayment>(
+      `/cabinet/balance/pending-payments/${encodeURIComponent(method)}/latest`,
     );
     return response.data;
   },
@@ -117,7 +125,7 @@ export const balanceApi = {
   // Manually check payment status
   checkPaymentStatus: async (method: string, paymentId: number): Promise<ManualCheckResponse> => {
     const response = await apiClient.post<ManualCheckResponse>(
-      `/cabinet/balance/pending-payments/${method}/${paymentId}/check`,
+      `/cabinet/balance/pending-payments/${encodeURIComponent(method)}/${encodeURIComponent(paymentId)}/check`,
     );
     return response.data;
   },

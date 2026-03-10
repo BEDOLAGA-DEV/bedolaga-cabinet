@@ -67,6 +67,8 @@ export const MENU_SECTIONS: MenuSection[] = [
           'INTERFACE_SUBSCRIPTION',
           'CONNECT_BUTTON',
           'MINIAPP',
+          'TELEGRAM_WIDGET',
+          'TELEGRAM_OIDC',
           'HAPP',
           'SKIP',
           'ADDITIONAL',

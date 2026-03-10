@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -84,6 +84,7 @@ const RESOURCE_TYPES = [
   'users',
   'tickets',
   'stats',
+  'sales_stats',
   'broadcasts',
   'tariffs',
   'promocodes',
@@ -106,6 +107,7 @@ const RESOURCE_TYPES = [
   'apps',
   'email_templates',
   'pinned_messages',
+  'landings',
   'updates',
 ] as const;
 
@@ -116,6 +118,7 @@ const PAGE_SIZE_OPTIONS = [20, 50, 100] as const;
 const AUTO_REFRESH_INTERVAL = 30_000;
 
 interface FiltersState {
+  userId: string;
   action: string;
   resource: string;
   status: string;
@@ -124,6 +127,7 @@ interface FiltersState {
 }
 
 const INITIAL_FILTERS: FiltersState = {
+  userId: '',
   action: '',
   resource: '',
   status: '',
@@ -431,9 +435,6 @@ export default function AdminAuditLog() {
   const [exporting, setExporting] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
 
-  // Auto-refresh interval ref
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
   // Build query params
   const queryParams = useMemo((): AuditLogFilters => {
     const params: AuditLogFilters = {
@@ -441,6 +442,10 @@ export default function AdminAuditLog() {
       offset: page * pageSize,
     };
 
+    const parsedUserId = parseInt(appliedFilters.userId, 10);
+    if (!isNaN(parsedUserId) && parsedUserId > 0) {
+      params.user_id = parsedUserId;
+    }
     if (appliedFilters.action.trim()) {
       params.action = appliedFilters.action.trim();
     }
@@ -467,21 +472,12 @@ export default function AdminAuditLog() {
     refetchInterval: autoRefresh ? AUTO_REFRESH_INTERVAL : false,
   });
 
-  // Auto-refresh visual indicator
-  useEffect(() => {
-    if (autoRefresh) {
-      intervalRef.current = setInterval(() => {
-        // The visual indicator updates are driven by isFetching from react-query
-      }, AUTO_REFRESH_INTERVAL);
-    }
-
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
-    };
-  }, [autoRefresh]);
+  // RBAC users for filter chips
+  const { data: rbacUsers } = useQuery({
+    queryKey: ['rbac-users'],
+    queryFn: () => rbacApi.getRbacUsers(),
+    staleTime: 5 * 60 * 1000,
+  });
 
   const entries = data?.items ?? [];
   const total = data?.total ?? 0;
@@ -517,8 +513,11 @@ export default function AdminAuditLog() {
     setExporting(true);
     try {
       const exportParams: AuditLogFilters = {};
+      const exportUserId = parseInt(appliedFilters.userId, 10);
+      if (!isNaN(exportUserId) && exportUserId > 0) exportParams.user_id = exportUserId;
       if (appliedFilters.action.trim()) exportParams.action = appliedFilters.action.trim();
       if (appliedFilters.resource) exportParams.resource_type = appliedFilters.resource;
+      if (appliedFilters.status) exportParams.status = appliedFilters.status;
       if (appliedFilters.dateFrom) exportParams.date_from = appliedFilters.dateFrom;
       if (appliedFilters.dateTo) exportParams.date_to = appliedFilters.dateTo;
 
@@ -548,6 +547,7 @@ export default function AdminAuditLog() {
 
   const hasActiveFilters = useMemo(() => {
     return (
+      appliedFilters.userId.trim() !== '' ||
       appliedFilters.action.trim() !== '' ||
       appliedFilters.resource !== '' ||
       appliedFilters.status !== '' ||
@@ -649,6 +649,51 @@ export default function AdminAuditLog() {
         {filtersOpen && (
           <div className="border-t border-dark-700 p-4">
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {/* User filter */}
+              {rbacUsers && rbacUsers.length > 0 && (
+                <div className="sm:col-span-2 lg:col-span-3">
+                  <label className="mb-1 block text-sm font-medium text-dark-300">
+                    {t('admin.auditLog.filters.user')}
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {rbacUsers.map((ru) => {
+                      const isSelected = filters.userId === String(ru.user_id);
+                      const displayName =
+                        ru.first_name || ru.email || ru.username || `#${ru.user_id}`;
+                      return (
+                        <button
+                          key={ru.user_id}
+                          type="button"
+                          aria-pressed={isSelected}
+                          onClick={() =>
+                            setFilters((prev) => ({
+                              ...prev,
+                              userId: isSelected ? '' : String(ru.user_id),
+                            }))
+                          }
+                          className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500 focus-visible:ring-offset-1 focus-visible:ring-offset-dark-900 ${
+                            isSelected
+                              ? 'border-accent-500 bg-accent-500/20 text-accent-300'
+                              : 'border-dark-600 bg-dark-900 text-dark-300 hover:border-dark-500 hover:text-dark-200'
+                          }`}
+                        >
+                          <span
+                            className={`flex h-4 w-4 items-center justify-center rounded border text-xs ${
+                              isSelected
+                                ? 'border-accent-500 bg-accent-500 text-white'
+                                : 'border-dark-500 bg-dark-800'
+                            }`}
+                          >
+                            {isSelected && '✓'}
+                          </span>
+                          <span>{displayName}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
               {/* Action search */}
               <div>
                 <label

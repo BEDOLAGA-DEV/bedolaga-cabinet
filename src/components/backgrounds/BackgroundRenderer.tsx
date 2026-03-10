@@ -96,52 +96,35 @@ function reduceMobileSettings(settings: Record<string, unknown>): Record<string,
   return reduced;
 }
 
-export function BackgroundRenderer() {
+/** Renders the background animation into a portal at document.body */
+function RenderBackground({ config }: { config: AnimationConfig }) {
   const prefersReducedMotion = useMemo(
     () => window.matchMedia('(prefers-reduced-motion: reduce)').matches,
     [],
   );
 
-  const { data: config } = useQuery({
-    queryKey: ['animation-config'],
-    queryFn: async () => {
-      const raw = await brandingApi.getAnimationConfig();
-      // Validate and clamp API response same as localStorage
-      const result = validateConfig(raw) ?? DEFAULT_ANIMATION_CONFIG;
-      setCachedConfig(result);
-      return result;
-    },
-    initialData: getCachedConfig() ?? undefined,
-    initialDataUpdatedAt: 0,
-    staleTime: 30_000,
-  });
-
-  const effectiveConfig = config ?? DEFAULT_ANIMATION_CONFIG;
-
-  if (!effectiveConfig.enabled || effectiveConfig.type === 'none' || prefersReducedMotion) {
+  if (!config.enabled || config.type === 'none' || prefersReducedMotion) {
     return null;
   }
 
-  const bgType = effectiveConfig.type as Exclude<BackgroundType, 'none'>;
+  const bgType = config.type as Exclude<BackgroundType, 'none'>;
   const Component = backgroundComponents[bgType];
 
   if (!Component) return null;
 
   const isMobile = window.innerWidth < 768;
   const settings =
-    effectiveConfig.reducedOnMobile && isMobile
-      ? reduceMobileSettings(effectiveConfig.settings)
-      : effectiveConfig.settings;
+    config.reducedOnMobile && isMobile ? reduceMobileSettings(config.settings) : config.settings;
 
   // On mobile, cap blur to 4px max — full blur is extremely GPU-heavy
-  const effectiveBlur = isMobile ? Math.min(effectiveConfig.blur, 4) : effectiveConfig.blur;
+  const effectiveBlur = isMobile ? Math.min(config.blur, 4) : config.blur;
 
   return createPortal(
     <div
       className="pointer-events-none fixed inset-0"
       style={{
         zIndex: -2,
-        opacity: effectiveConfig.opacity,
+        opacity: config.opacity,
         filter: effectiveBlur > 0 ? `blur(${effectiveBlur}px)` : undefined,
         contain: 'strict',
         backfaceVisibility: 'hidden',
@@ -153,4 +136,30 @@ export function BackgroundRenderer() {
     </div>,
     document.body,
   );
+}
+
+/** BackgroundRenderer that fetches config from the branding API (for authenticated app shell) */
+export function BackgroundRenderer() {
+  const { data: config } = useQuery({
+    queryKey: ['animation-config'],
+    queryFn: async () => {
+      const raw = await brandingApi.getAnimationConfig();
+      const result = validateConfig(raw) ?? DEFAULT_ANIMATION_CONFIG;
+      setCachedConfig(result);
+      return result;
+    },
+    initialData: getCachedConfig() ?? undefined,
+    initialDataUpdatedAt: 0,
+    staleTime: 30_000,
+  });
+
+  const effectiveConfig = config ?? DEFAULT_ANIMATION_CONFIG;
+  return <RenderBackground config={effectiveConfig} />;
+}
+
+/** StaticBackgroundRenderer that uses a provided config (for public landing pages) */
+export function StaticBackgroundRenderer({ config }: { config: AnimationConfig }) {
+  const validated = useMemo(() => validateConfig(config), [config]);
+  if (!validated) return null;
+  return <RenderBackground config={validated} />;
 }

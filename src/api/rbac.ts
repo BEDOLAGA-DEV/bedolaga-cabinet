@@ -49,6 +49,16 @@ export interface UserRoleAssignment {
   user_telegram_id: number | null;
 }
 
+export interface AdminWithRoles {
+  user_id: number;
+  telegram_id: number | null;
+  username: string | null;
+  first_name: string | null;
+  last_name: string | null;
+  email: string | null;
+  role_names: string[];
+}
+
 export interface AssignRolePayload {
   user_id: number;
   role_id: number;
@@ -164,6 +174,13 @@ export const rbacApi = {
 
   getPermissionRegistry: async (): Promise<PermissionSection[]> => {
     const response = await apiClient.get<PermissionSection[]>(`${BASE}/permissions`);
+    return response.data;
+  },
+
+  // --- RBAC Users ---
+
+  getRbacUsers: async (): Promise<AdminWithRoles[]> => {
+    const response = await apiClient.get<AdminWithRoles[]>(`${BASE}/users`);
     return response.data;
   },
 

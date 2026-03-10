@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '@/store/auth';
+import { brandingApi } from '@/api/branding';
 import { referralApi } from '@/api/referral';
 import { wheelApi } from '@/api/wheel';
 import { contestsApi } from '@/api/contests';
@@ -40,10 +41,19 @@ export function useFeatureFlags() {
     retry: false,
   });
 
+  const { data: giftConfig } = useQuery({
+    queryKey: ['gift-enabled'],
+    queryFn: brandingApi.getGiftEnabled,
+    enabled: isAuthenticated,
+    staleTime: 60000,
+    retry: false,
+  });
+
   return {
     referralEnabled: referralTerms?.is_enabled,
     wheelEnabled: wheelConfig?.is_enabled,
     hasContests: (contestsCount?.count ?? 0) > 0,
     hasPolls: (pollsCount?.count ?? 0) > 0,
+    giftEnabled: giftConfig?.enabled,
   };
 }

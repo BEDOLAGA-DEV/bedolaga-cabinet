@@ -9,7 +9,7 @@ import { MENU_SECTIONS, MenuItem, formatSettingKey } from '../components/admin';
 import { usePlatform } from '../platform/hooks/usePlatform';
 import { AnalyticsTab } from '../components/admin/AnalyticsTab';
 import { BrandingTab } from '../components/admin/BrandingTab';
-import { ButtonsTab } from '../components/admin/ButtonsTab';
+import { MenuEditorTab } from '../components/admin/MenuEditorTab';
 import { ThemeTab } from '../components/admin/ThemeTab';
 import { FavoritesTab } from '../components/admin/FavoritesTab';
 import { SettingsTab } from '../components/admin/SettingsTab';
@@ -176,7 +176,7 @@ export default function AdminSettings() {
       case 'theme':
         return <ThemeTab />;
       case 'buttons':
-        return <ButtonsTab />;
+        return <MenuEditorTab />;
       case 'favorites':
         return (
           <FavoritesTab

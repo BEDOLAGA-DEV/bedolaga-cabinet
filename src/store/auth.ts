@@ -37,6 +37,7 @@ interface AuthState {
   checkAdminStatus: () => Promise<void>;
   loginWithTelegram: (initData: string) => Promise<void>;
   loginWithTelegramWidget: (data: TelegramWidgetData) => Promise<void>;
+  loginWithTelegramOIDC: (idToken: string) => Promise<void>;
   loginWithEmail: (email: string, password: string) => Promise<void>;
   loginWithOAuth: (
     provider: string,
@@ -274,6 +275,21 @@ export const useAuthStore = create<AuthState>()(
         const campaignSlug = consumeCampaignSlug();
         const referralCode = consumeReferralCode();
         const response = await authApi.loginTelegramWidget(data, campaignSlug, referralCode);
+        tokenStorage.setTokens(response.access_token, response.refresh_token);
+        set({
+          accessToken: response.access_token,
+          refreshToken: response.refresh_token,
+          user: response.user,
+          isAuthenticated: true,
+          pendingCampaignBonus: response.campaign_bonus || null,
+        });
+        await get().checkAdminStatus();
+      },
+
+      loginWithTelegramOIDC: async (idToken) => {
+        const campaignSlug = consumeCampaignSlug();
+        const referralCode = consumeReferralCode();
+        const response = await authApi.loginTelegramOIDC(idToken, campaignSlug, referralCode);
         tokenStorage.setTokens(response.access_token, response.refresh_token);
         set({
           accessToken: response.access_token,

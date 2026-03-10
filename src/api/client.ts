@@ -69,7 +69,7 @@ const AUTH_ENDPOINTS = [
   '/cabinet/auth/telegram',
   '/cabinet/auth/telegram/widget',
   '/cabinet/auth/email/login',
-  '/cabinet/auth/email/register',
+  '/cabinet/auth/email/register/standalone',
   '/cabinet/auth/email/verify',
   '/cabinet/auth/refresh',
   '/cabinet/auth/password/forgot',
@@ -77,6 +77,7 @@ const AUTH_ENDPOINTS = [
   '/cabinet/auth/oauth/',
   '/cabinet/auth/merge/',
   '/cabinet/auth/account/link/server-complete',
+  '/cabinet/landing/',
 ];
 
 function isAuthEndpoint(url: string | undefined): boolean {
@@ -91,17 +92,21 @@ apiClient.interceptors.request.use(async (config: InternalAxiosRequestConfig) =>
   if (!isAuthEndpoint(config.url)) {
     let token = tokenStorage.getAccessToken();
 
-    // Проверяем срок действия токена перед запросом
     if (token && isTokenExpired(token)) {
-      // Используем централизованный менеджер для refresh
+      // Access token expired — try refresh
       const newToken = await tokenRefreshManager.refreshAccessToken();
       if (newToken) {
         token = newToken;
       } else {
-        // Refresh не удался - редирект на логин
         tokenStorage.clearTokens();
         safeRedirectToLogin();
         return config;
+      }
+    } else if (!token && tokenStorage.getRefreshToken()) {
+      // No access token (e.g. tab reopen) but refresh token exists — restore session
+      const newToken = await tokenRefreshManager.refreshAccessToken();
+      if (newToken) {
+        token = newToken;
       }
     }
 

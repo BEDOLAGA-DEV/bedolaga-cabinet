@@ -41,6 +41,7 @@ export default function WebSocketNotifications() {
         });
         // Refresh data
         queryClient.invalidateQueries({ queryKey: ['balance'] });
+        queryClient.invalidateQueries({ queryKey: ['purchase-options'] });
         queryClient.invalidateQueries({ queryKey: ['transactions'] });
         refreshUser();
         return;
@@ -67,6 +68,7 @@ export default function WebSocketNotifications() {
           duration: 5000,
         });
         queryClient.invalidateQueries({ queryKey: ['balance'] });
+        queryClient.invalidateQueries({ queryKey: ['purchase-options'] });
         queryClient.invalidateQueries({ queryKey: ['transactions'] });
         refreshUser();
         return;
@@ -82,6 +84,7 @@ export default function WebSocketNotifications() {
         });
         queryClient.invalidateQueries({ queryKey: ['subscription'] });
         queryClient.invalidateQueries({ queryKey: ['balance'] });
+        queryClient.invalidateQueries({ queryKey: ['purchase-options'] });
         refreshUser();
         return;
       }
@@ -95,6 +98,7 @@ export default function WebSocketNotifications() {
         });
         queryClient.invalidateQueries({ queryKey: ['subscription'] });
         queryClient.invalidateQueries({ queryKey: ['balance'] });
+        queryClient.invalidateQueries({ queryKey: ['purchase-options'] });
         refreshUser();
         return;
       }
@@ -151,6 +155,7 @@ export default function WebSocketNotifications() {
           duration: 5000,
         });
         queryClient.invalidateQueries({ queryKey: ['balance'] });
+        queryClient.invalidateQueries({ queryKey: ['purchase-options'] });
         refreshUser();
         return;
       }
@@ -180,6 +185,7 @@ export default function WebSocketNotifications() {
         });
         queryClient.invalidateQueries({ queryKey: ['subscription'] });
         queryClient.invalidateQueries({ queryKey: ['balance'] });
+        queryClient.invalidateQueries({ queryKey: ['purchase-options'] });
         queryClient.invalidateQueries({ queryKey: ['transactions'] });
         refreshUser();
         return;
@@ -195,6 +201,7 @@ export default function WebSocketNotifications() {
         });
         queryClient.invalidateQueries({ queryKey: ['subscription'] });
         queryClient.invalidateQueries({ queryKey: ['balance'] });
+        queryClient.invalidateQueries({ queryKey: ['purchase-options'] });
         queryClient.invalidateQueries({ queryKey: ['transactions'] });
         refreshUser();
         return;
@@ -220,6 +227,7 @@ export default function WebSocketNotifications() {
         });
         queryClient.invalidateQueries({ queryKey: ['subscription'] });
         queryClient.invalidateQueries({ queryKey: ['balance'] });
+        queryClient.invalidateQueries({ queryKey: ['purchase-options'] });
         refreshUser();
         return;
       }
@@ -329,6 +337,7 @@ export default function WebSocketNotifications() {
           duration: 8000,
         });
         queryClient.invalidateQueries({ queryKey: ['balance'] });
+        queryClient.invalidateQueries({ queryKey: ['purchase-options'] });
         queryClient.invalidateQueries({ queryKey: ['referral-stats'] });
         refreshUser();
         return;
@@ -375,6 +384,7 @@ export default function WebSocketNotifications() {
           duration: 6000,
         });
         queryClient.invalidateQueries({ queryKey: ['balance'] });
+        queryClient.invalidateQueries({ queryKey: ['purchase-options'] });
         queryClient.invalidateQueries({ queryKey: ['transactions'] });
         refreshUser();
         return;

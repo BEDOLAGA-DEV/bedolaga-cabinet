@@ -4,6 +4,7 @@ import { BackIcon } from './icons';
 
 interface AdminBackButtonProps {
   to?: string;
+  replace?: boolean;
   className?: string;
 }
 
@@ -11,7 +12,7 @@ interface AdminBackButtonProps {
  * Back button for admin pages.
  * Hidden in Telegram Mini App since native back button is used instead.
  */
-export function AdminBackButton({ to = '/admin', className }: AdminBackButtonProps) {
+export function AdminBackButton({ to = '/admin', replace, className }: AdminBackButtonProps) {
   const { platform } = usePlatform();
 
   // In Telegram Mini App, we use native back button
@@ -22,6 +23,7 @@ export function AdminBackButton({ to = '/admin', className }: AdminBackButtonPro
   return (
     <Link
       to={to}
+      replace={replace}
       className={
         className ||
         'flex h-10 w-10 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600'

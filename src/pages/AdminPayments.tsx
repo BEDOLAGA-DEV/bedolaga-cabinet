@@ -228,7 +228,7 @@ export default function AdminPayments() {
                         <a
                           href={payment.payment_url}
                           target="_blank"
-                          rel="noopener noreferrer"
+                          rel="noopener"
                           className="btn-secondary px-3 py-1.5 text-xs"
                         >
                           {t('admin.payments.openLink')}

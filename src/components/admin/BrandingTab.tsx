@@ -35,6 +35,11 @@ export function BrandingTab({ accentColor = '#3b82f6' }: BrandingTabProps) {
     queryFn: brandingApi.getEmailAuthEnabled,
   });
 
+  const { data: giftSettings } = useQuery({
+    queryKey: ['gift-enabled'],
+    queryFn: brandingApi.getGiftEnabled,
+  });
+
   // Mutations
   const updateBrandingMutation = useMutation({
     mutationFn: brandingApi.updateName,
@@ -73,6 +78,13 @@ export function BrandingTab({ accentColor = '#3b82f6' }: BrandingTabProps) {
     mutationFn: (enabled: boolean) => brandingApi.updateEmailAuthEnabled(enabled),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['email-auth-enabled'] });
+    },
+  });
+
+  const updateGiftMutation = useMutation({
+    mutationFn: (enabled: boolean) => brandingApi.updateGiftEnabled(enabled),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['gift-enabled'] });
     },
   });
 
@@ -223,6 +235,18 @@ export function BrandingTab({ accentColor = '#3b82f6' }: BrandingTabProps) {
               checked={emailAuthSettings?.enabled ?? true}
               onChange={() => updateEmailAuthMutation.mutate(!(emailAuthSettings?.enabled ?? true))}
               disabled={updateEmailAuthMutation.isPending}
+            />
+          </div>
+
+          <div className="flex items-center justify-between rounded-xl bg-dark-700/30 p-4">
+            <div>
+              <span className="font-medium text-dark-100">{t('admin.settings.giftEnabled')}</span>
+              <p className="text-sm text-dark-400">{t('admin.settings.giftEnabledDesc')}</p>
+            </div>
+            <Toggle
+              checked={giftSettings?.enabled ?? false}
+              onChange={() => updateGiftMutation.mutate(!(giftSettings?.enabled ?? false))}
+              disabled={updateGiftMutation.isPending}
             />
           </div>
         </div>

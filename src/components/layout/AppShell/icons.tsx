@@ -16,6 +16,7 @@ export {
   InfoIcon,
   CogIcon,
   WheelIcon,
+  GiftIcon,
   SearchIcon,
   PlusIcon,
   ArrowRightIcon,

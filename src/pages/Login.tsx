@@ -485,10 +485,7 @@ export default function Login() {
                   </p>
                 </div>
               ) : (
-                <TelegramLoginButton
-                  botUsername={botUsername}
-                  referralCode={referralCode || undefined}
-                />
+                <TelegramLoginButton referralCode={referralCode || undefined} />
               )}
             </div>
 

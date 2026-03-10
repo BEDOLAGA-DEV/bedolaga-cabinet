@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import i18n from '../i18n';
 import { campaignsApi, CampaignListItem, CampaignBonusType } from '../api/campaigns';
 import { PlusIcon, EditIcon, TrashIcon, CheckIcon, XIcon, ChartIcon } from '../components/icons';
 import { usePlatform } from '../platform/hooks/usePlatform';
+
+const PAGE_SIZE = 50;
 
 // Bonus type labels and colors
 const bonusTypeConfig: Record<
@@ -69,9 +71,20 @@ export default function AdminCampaigns() {
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
 
   // Queries
-  const { data: campaignsData, isLoading } = useQuery({
+  const {
+    data: campaignsData,
+    isLoading,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
     queryKey: ['admin-campaigns'],
-    queryFn: () => campaignsApi.getCampaigns(true),
+    queryFn: ({ pageParam = 0 }) => campaignsApi.getCampaigns(true, pageParam, PAGE_SIZE),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      const loaded = allPages.reduce((sum, p) => sum + p.campaigns.length, 0);
+      return loaded < lastPage.total ? loaded : undefined;
+    },
   });
 
   const { data: overview } = useQuery({
@@ -96,7 +109,7 @@ export default function AdminCampaigns() {
     },
   });
 
-  const campaigns = campaignsData?.campaigns || [];
+  const campaigns = campaignsData?.pages.flatMap((p) => p.campaigns) ?? [];
 
   return (
     <div className="animate-fade-in">
@@ -261,6 +274,21 @@ export default function AdminCampaigns() {
               </div>
             </div>
           ))}
+
+          {/* Load more */}
+          {hasNextPage && (
+            <button
+              onClick={() => fetchNextPage()}
+              disabled={isFetchingNextPage}
+              className="flex w-full items-center justify-center gap-2 rounded-xl border border-dark-700 bg-dark-800 py-3 text-sm font-medium text-dark-300 transition-colors hover:border-dark-600 hover:text-dark-100 disabled:opacity-50"
+            >
+              {isFetchingNextPage ? (
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-dark-500 border-t-accent-500" />
+              ) : (
+                t('admin.campaigns.loadMore', 'Load more')
+              )}
+            </button>
+          )}
         </div>
       )}
 
