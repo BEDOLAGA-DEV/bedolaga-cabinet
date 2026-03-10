@@ -201,7 +201,8 @@
     "continueWithDiscord": "Continue with Discord",
     "continueWithVk": "Continue with VK",
     "oauthError": "Authorization was denied or failed",
-    "oauthExpired": "OAuth session expired. Please try again."
+    "oauthExpired": "OAuth session expired. Please try again.",
+    "disposableEmail": "Disposable email addresses are not allowed. Please use a permanent email."
   },
   "emailVerification": {
     "title": "Email Verification",

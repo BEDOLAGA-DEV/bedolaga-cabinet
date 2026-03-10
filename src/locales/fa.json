@@ -195,7 +195,8 @@
     "continueWithDiscord": "ادامه با Discord",
     "continueWithVk": "ادامه با VK",
     "oauthError": "مجوز رد شد یا ناموفق بود",
-    "oauthExpired": "نشست OAuth منقضی شده است. لطفاً دوباره امتحان کنید."
+    "oauthExpired": "نشست OAuth منقضی شده است. لطفاً دوباره امتحان کنید.",
+    "disposableEmail": "آدرس‌های ایمیل یک‌بار مصرف مجاز نیستند. لطفاً از یک ایمیل دائمی استفاده کنید."
   },
   "emailVerification": {
     "title": "تایید ایمیل",
