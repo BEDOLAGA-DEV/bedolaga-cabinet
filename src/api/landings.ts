@@ -105,6 +105,7 @@ export interface PurchaseRequest {
   gift_recipient_type?: 'email' | 'telegram';
   gift_recipient_value?: string;
   gift_message?: string;
+  yandex_cid?: string;
 }
 
 export interface PurchaseResponse {
