@@ -2409,7 +2409,10 @@
       "userNotificationsEnabled": "Уведомления для пользователей",
       "userNotificationsEnabledDesc": "Отправлять уведомления пользователям об ответах админа",
       "adminNotificationsEnabled": "Уведомления для админов",
-      "adminNotificationsEnabledDesc": "Отправлять уведомления админам о новых тикетах и ответах"
+      "adminNotificationsEnabledDesc": "Отправлять уведомления админам о новых тикетах и ответах",
+      "priorityNormal": "Обычный",
+      "priorityHigh": "Высокий",
+      "priorityUrgent": "Срочный"
     },
     "tariffs": {
       "title": "Управление тарифами",

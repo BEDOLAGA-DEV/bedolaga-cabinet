@@ -1604,7 +1604,10 @@
       "copyTelegramId": "点击复制Telegram ID",
       "viewUser": "用户",
       "userNotificationsEnabled": "用户通知",
-      "userNotificationsEnabledDesc": "向用户发送管理员回复通知"
+      "userNotificationsEnabledDesc": "向用户发送管理员回复通知",
+      "priorityNormal": "普通",
+      "priorityHigh": "高",
+      "priorityUrgent": "紧急"
     },
     "tariffs": {
       "title": "套餐管理",

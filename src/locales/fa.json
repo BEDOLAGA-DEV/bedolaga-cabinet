@@ -1566,7 +1566,10 @@
       "copyTelegramId": "برای کپی شناسه تلگرام کلیک کنید",
       "viewUser": "کاربر",
       "userNotificationsEnabled": "اعلان‌های کاربر",
-      "userNotificationsEnabledDesc": "ارسال اعلان به کاربران درباره پاسخ‌های مدیر"
+      "userNotificationsEnabledDesc": "ارسال اعلان به کاربران درباره پاسخ‌های مدیر",
+      "priorityNormal": "عادی",
+      "priorityHigh": "بالا",
+      "priorityUrgent": "فوری"
     },
     "tariffs": {
       "title": "مدیریت تعرفه‌ها",
