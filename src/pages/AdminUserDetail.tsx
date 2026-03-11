@@ -2506,7 +2506,7 @@ export default function AdminUserDetail() {
                           <span
                             className={`rounded-full border px-2 py-0.5 text-xs ${statusStyles[ticket.status] || statusStyles.closed}`}
                           >
-                            {ticket.status}
+                            {t(`admin.tickets.status${ticket.status.charAt(0).toUpperCase() + ticket.status.slice(1)}`)}
                           </span>
                         </div>
                         <div className="flex items-center justify-between text-xs text-dark-500">
