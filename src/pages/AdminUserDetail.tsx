@@ -2336,7 +2336,7 @@ export default function AdminUserDetail() {
                             }[selectedTicket.status] || 'border-dark-500 bg-dark-600 text-dark-400'
                           }`}
                         >
-                          {selectedTicket.status}
+                          {t(`admin.tickets.status${selectedTicket.status.charAt(0).toUpperCase() + selectedTicket.status.slice(1)}`)}
                         </span>
                         <span>{formatDate(selectedTicket.created_at)}</span>
                       </div>
