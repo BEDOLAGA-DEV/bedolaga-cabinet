@@ -3194,7 +3194,15 @@
         "noTickets": "У пользователя нет тикетов",
         "ticketsCount": "тикетов",
         "messagesCount": "сообщений",
-        "status": "Статус",
+        "status": {
+          "label": "Статус",
+          "active": "Активен",
+          "blocked": "Заблокирован",
+          "deleted": "Удалён",
+          "trial": "Пробный",
+          "expired": "Истёк",
+          "disabled": "Отключён"
+        },
         "language": "Язык",
         "registration": "Регистрация",
         "lastActivity": "Последняя активность",

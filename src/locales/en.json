@@ -2672,7 +2672,15 @@
         "noTickets": "No tickets from this user",
         "ticketsCount": "tickets",
         "messagesCount": "messages",
-        "status": "Status",
+        "status": {
+          "label": "Status",
+          "active": "Active",
+          "blocked": "Blocked",
+          "deleted": "Deleted",
+          "trial": "Trial",
+          "expired": "Expired",
+          "disabled": "Disabled"
+        },
         "language": "Language",
         "registration": "Registration",
         "lastActivity": "Last activity",
