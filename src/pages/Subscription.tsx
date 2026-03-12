@@ -268,7 +268,7 @@ export default function Subscription() {
   // Device price query
   const { data: devicePriceData } = useQuery({
     queryKey: ['device-price', devicesToAdd],
-    queryFn: () => subscriptionApi.getDevicePrice(devicesToAdd),
+    queryFn: ({ signal }) => subscriptionApi.getDevicePrice(devicesToAdd, signal),
     enabled: showDeviceTopup && !!subscription,
   });
 
