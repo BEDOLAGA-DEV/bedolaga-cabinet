@@ -270,6 +270,7 @@ export default function Subscription() {
     queryKey: ['device-price', devicesToAdd],
     queryFn: ({ signal }) => subscriptionApi.getDevicePrice(devicesToAdd, signal),
     enabled: showDeviceTopup && !!subscription,
+    placeholderData: (previousData) => previousData,
   });
 
   // Device purchase mutation
