@@ -28,31 +28,59 @@ async function fetchCounterId(): Promise<string | null> {
 
 /**
  * Gets Yandex ClientID with timeout.
- * Returns null if Metrika is not loaded or counter is not configured.
+ * First checks localStorage (set by useAnalyticsCounters on page load),
+ * then falls back to calling ym() directly with a polling wait.
  */
-export async function getYandexCid(timeoutMs = 1500): Promise<string | null> {
+export async function getYandexCid(timeoutMs = 2000): Promise<string | null> {
   if (cachedCid) return cachedCid;
+
+  // Check localStorage first — survives page reloads and OAuth redirects
+  const stored = localStorage.getItem('yandex_cid');
+  if (stored) {
+    cachedCid = stored;
+    return stored;
+  }
 
   const counterId = await fetchCounterId();
   if (!counterId) return null;
 
-  const ym = (window as unknown as Record<string, unknown>).ym as
-    | ((id: number, method: string, cb: (cid: string) => void) => void)
-    | undefined;
-
-  if (typeof ym !== 'function') return null;
-
+  // Wait for ym to become available (async script loading after OAuth redirect)
   return new Promise<string | null>((resolve) => {
-    const timer = setTimeout(() => resolve(null), timeoutMs);
-    try {
-      ym(Number(counterId), 'getClientID', (cid: string) => {
-        clearTimeout(timer);
-        cachedCid = cid;
-        resolve(cid);
-      });
-    } catch {
-      clearTimeout(timer);
-      resolve(null);
+    const deadline = Date.now() + timeoutMs;
+    const pollInterval = 100;
+
+    function tryGetCid() {
+      // Re-check localStorage (Metrika init may have saved it while we waited)
+      const lsCid = localStorage.getItem('yandex_cid');
+      if (lsCid) {
+        cachedCid = lsCid;
+        resolve(lsCid);
+        return;
+      }
+
+      const ym = (window as unknown as Record<string, unknown>).ym as
+        | ((id: number, method: string, cb: (cid: string) => void) => void)
+        | undefined;
+
+      if (typeof ym === 'function') {
+        try {
+          ym(Number(counterId), 'getClientID', (cid: string) => {
+            cachedCid = cid;
+            resolve(cid);
+          });
+        } catch {
+          resolve(null);
+        }
+        return;
+      }
+
+      if (Date.now() < deadline) {
+        setTimeout(tryGetCid, pollInterval);
+      } else {
+        resolve(null);
+      }
     }
+
+    tryGetCid();
   });
 }
