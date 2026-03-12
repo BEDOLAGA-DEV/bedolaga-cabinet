@@ -3,7 +3,9 @@
  * Uses the same counter that useAnalyticsCounters injects.
  */
 
-let cachedCid: string | null = null;
+/** localStorage key shared with useAnalyticsCounters */
+export const YANDEX_CID_STORAGE_KEY = 'yandex_cid';
+
 let cachedCounterId: string | null = null;
 
 /**
@@ -32,14 +34,9 @@ async function fetchCounterId(): Promise<string | null> {
  * then falls back to calling ym() directly with a polling wait.
  */
 export async function getYandexCid(timeoutMs = 2000): Promise<string | null> {
-  if (cachedCid) return cachedCid;
-
   // Check localStorage first — survives page reloads and OAuth redirects
-  const stored = localStorage.getItem('yandex_cid');
-  if (stored) {
-    cachedCid = stored;
-    return stored;
-  }
+  const stored = localStorage.getItem(YANDEX_CID_STORAGE_KEY);
+  if (stored) return stored;
 
   const counterId = await fetchCounterId();
   if (!counterId) return null;
@@ -51,9 +48,8 @@ export async function getYandexCid(timeoutMs = 2000): Promise<string | null> {
 
     function tryGetCid() {
       // Re-check localStorage (Metrika init may have saved it while we waited)
-      const lsCid = localStorage.getItem('yandex_cid');
+      const lsCid = localStorage.getItem(YANDEX_CID_STORAGE_KEY);
       if (lsCid) {
-        cachedCid = lsCid;
         resolve(lsCid);
         return;
       }
@@ -65,7 +61,6 @@ export async function getYandexCid(timeoutMs = 2000): Promise<string | null> {
       if (typeof ym === 'function') {
         try {
           ym(Number(counterId), 'getClientID', (cid: string) => {
-            cachedCid = cid;
             resolve(cid);
           });
         } catch {
