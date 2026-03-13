@@ -184,6 +184,7 @@ function BlockingOverlay() {
   return null;
 }
 
+function CatchAllRedirect() {  const location = useLocation();  return <Navigate to={`/${location.search}`} replace />;}
 function App() {
   useAnalyticsCounters();
 
@@ -1163,7 +1164,7 @@ function App() {
         />
 
         {/* Catch all */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<CatchAllRedirect />} />
       </Routes>
     </>
   );
