@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.33.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.32.0...v1.33.0) (2026-03-13)
+
+
+### Features
+
+* add LIMITED subscription status support with traffic-exhausted UX ([b4f9f33](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/b4f9f332cf714717ed52cd18a82af9d2feb22416))
+
+
+### Performance Improvements
+
+* lazy-load locale files per language instead of bundling all ([9ae9ccc](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/9ae9cccbd96408c05f70163b50a63d7a33061a75))
+
 ## [1.32.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.31.0...v1.32.0) (2026-03-12)
 
 
