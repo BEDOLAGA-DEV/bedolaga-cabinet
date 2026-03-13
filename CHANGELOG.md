@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.33.3](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.33.2...v1.33.3) (2026-03-13)
+
+
+### Bug Fixes
+
+* resolve all 14 ESLint warnings across the codebase ([885524a](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/885524a00f7ea022ba6bb01108557e2e4db1f952))
+* resolve all 14 ESLint warnings across the codebase ([62188b8](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/62188b8d2e3cb090d0b27afe5cf4fcc65b3c68c2))
+
 ## [1.33.2](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.33.1...v1.33.2) (2026-03-13)
 
 
