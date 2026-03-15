@@ -3763,5 +3763,12 @@
     "warning": {
       "telegram_unresolvable": "无法验证此 Telegram 用户名。收件人可能不会收到礼物通知。"
     }
+  },
+  "payment": {
+    "providers": {
+      "kassa_ai": {
+        "description": "通过SBP或银行卡支付"
+      }
+    }
   }
 }
