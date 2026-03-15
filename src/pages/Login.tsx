@@ -141,7 +141,7 @@ export default function Login() {
       saveOAuthState(state, provider);
       window.location.href = authorize_url;
     } catch {
-      setError(t('auth.oauthError', 'Authorization was denied or failed'));
+      setError('auth.oauthError');
       setOauthLoading(null);
     }
   };
@@ -204,7 +204,7 @@ export default function Login() {
           }
 
           // Show backend error detail if available, otherwise generic message
-          setError(detail || t('auth.telegramRequired'));
+          setError(detail || 'auth.telegramRequired');
         }
       }
 
@@ -230,18 +230,18 @@ export default function Login() {
 
     // Валидация email
     if (!email.trim() || !isValidEmail(email.trim())) {
-      setError(t('auth.invalidEmail', 'Please enter a valid email address'));
+      setError('auth.invalidEmail');
       return;
     }
 
     if (authMode === 'register') {
       // Валидация для регистрации
       if (password !== confirmPassword) {
-        setError(t('auth.passwordMismatch', 'Passwords do not match'));
+        setError('auth.passwordMismatch');
         return;
       }
       if (password.length < 8) {
-        setError(t('auth.passwordTooShort', 'Password must be at least 8 characters'));
+        setError('auth.passwordTooShort');
         return;
       }
     }
@@ -267,18 +267,20 @@ export default function Login() {
       const status = error.response?.status;
       const detail = error.response?.data?.detail;
 
-      if (status === 400 && detail?.includes('already registered')) {
-        setError(t('auth.emailAlreadyRegistered', 'This email is already registered'));
+      if (status === 400 && detail?.toLowerCase().includes('disposable')) {
+        setError('auth.disposableEmail');
+      } else if (status === 400 && detail?.includes('already registered')) {
+        setError('auth.emailAlreadyRegistered');
       } else if (status === 401 || status === 403) {
         if (detail?.includes('verify your email')) {
-          setError(t('auth.emailNotVerified', 'Please verify your email first'));
+          setError('auth.emailNotVerified');
         } else {
-          setError(t('auth.invalidCredentials', 'Invalid email or password'));
+          setError('auth.invalidCredentials');
         }
       } else if (status === 429) {
-        setError(t('auth.tooManyAttempts', 'Too many attempts. Please try again later'));
+        setError('auth.tooManyAttempts');
       } else {
-        setError(detail || t('common.error'));
+        setError(detail || 'common.error');
       }
     } finally {
       setIsLoading(false);
@@ -290,7 +292,7 @@ export default function Login() {
     setForgotPasswordError('');
 
     if (!forgotPasswordEmail.trim() || !isValidEmail(forgotPasswordEmail.trim())) {
-      setForgotPasswordError(t('auth.invalidEmail', 'Please enter a valid email address'));
+      setForgotPasswordError('auth.invalidEmail');
       return;
     }
 
@@ -301,7 +303,7 @@ export default function Login() {
     } catch (err: unknown) {
       const error = err as { response?: { status?: number; data?: { detail?: string } } };
       const detail = error.response?.data?.detail;
-      setForgotPasswordError(detail || t('common.error'));
+      setForgotPasswordError(detail || 'common.error');
     } finally {
       setForgotPasswordLoading(false);
     }
@@ -429,7 +431,7 @@ export default function Login() {
           <div className="card">
             {error && (
               <div className="mb-4 rounded-xl border border-error-500/30 bg-error-500/10 px-4 py-2.5 text-sm text-error-400">
-                {error}
+                {t(error, error)}
               </div>
             )}
 
@@ -611,7 +613,7 @@ export default function Login() {
                                 />
                               </div>
                               {forgotPasswordError && (
-                                <p className="text-sm text-error-400">{forgotPasswordError}</p>
+                                <p className="text-sm text-error-400">{t(forgotPasswordError, forgotPasswordError)}</p>
                               )}
                               <button
                                 type="submit"

@@ -204,7 +204,8 @@
     "continueWithDiscord": "Продолжить через Discord",
     "continueWithVk": "Продолжить через VK",
     "oauthError": "Авторизация отклонена или не удалась",
-    "oauthExpired": "Сессия OAuth истекла. Попробуйте снова."
+    "oauthExpired": "Сессия OAuth истекла. Попробуйте снова.",
+    "disposableEmail": "Одноразовые email-адреса не допускаются. Используйте постоянный email."
   },
   "emailVerification": {
     "title": "Подтверждение email",
@@ -2414,7 +2415,10 @@
       "userNotificationsEnabled": "Уведомления для пользователей",
       "userNotificationsEnabledDesc": "Отправлять уведомления пользователям об ответах админа",
       "adminNotificationsEnabled": "Уведомления для админов",
-      "adminNotificationsEnabledDesc": "Отправлять уведомления админам о новых тикетах и ответах"
+      "adminNotificationsEnabledDesc": "Отправлять уведомления админам о новых тикетах и ответах",
+      "priorityNormal": "Обычный",
+      "priorityHigh": "Высокий",
+      "priorityUrgent": "Срочный"
     },
     "tariffs": {
       "title": "Управление тарифами",
@@ -3199,7 +3203,15 @@
         "noTickets": "У пользователя нет тикетов",
         "ticketsCount": "тикетов",
         "messagesCount": "сообщений",
-        "status": "Статус",
+        "status": {
+          "label": "Статус",
+          "active": "Активен",
+          "blocked": "Заблокирован",
+          "deleted": "Удалён",
+          "trial": "Пробный",
+          "expired": "Истёк",
+          "disabled": "Отключён"
+        },
         "language": "Язык",
         "registration": "Регистрация",
         "lastActivity": "Последняя активность",
