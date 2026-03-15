@@ -3768,5 +3768,12 @@
     "warning": {
       "telegram_unresolvable": "نام کاربری تلگرام قابل تأیید نبود. ممکن است گیرنده اعلان هدیه را دریافت نکند."
     }
+  },
+  "payment": {
+    "providers": {
+      "kassa_ai": {
+        "description": "پرداخت از طریق SBP یا کارت بانکی"
+      }
+    }
   }
 }

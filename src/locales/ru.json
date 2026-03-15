@@ -4889,5 +4889,12 @@
     "shareModalActivateViaCabinet": "Или через сайт:",
     "copyMessage": "Скопировать сообщение",
     "shareToastCopied": "Сообщение скопировано"
+  },
+  "payment": {
+    "providers": {
+      "kassa_ai": {
+        "description": "Оплата по СБП или банковской картой"
+      }
+    }
   }
 }

@@ -4314,5 +4314,12 @@
     "shareModalActivateViaCabinet": "Or via website:",
     "copyMessage": "Copy message",
     "shareToastCopied": "Message copied"
+  },
+  "payment": {
+    "providers": {
+      "kassa_ai": {
+        "description": "Pay via SBP or bank card"
+      }
+    }
   }
 }
