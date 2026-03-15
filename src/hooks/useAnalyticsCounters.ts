@@ -1,3 +1,4 @@
+import { YANDEX_CID_STORAGE_KEY } from '../utils/yandexCid';
 import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { brandingApi } from '../api/branding';
@@ -25,6 +26,11 @@ function injectYandexMetrika(counterId: string) {
       clickmap:true,
       trackLinks:true,
       accurateTrackBounce:true
+    });
+    ym(${counterId}, "getClientID", function(clientID) {
+      if (clientID) {
+        localStorage.setItem('${YANDEX_CID_STORAGE_KEY}', clientID);
+      }
     });
   `;
   document.head.appendChild(script);
