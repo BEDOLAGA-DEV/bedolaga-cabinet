@@ -2319,7 +2319,15 @@
         "noTickets": "این کاربر تیکتی ندارد",
         "ticketsCount": "تیکت",
         "messagesCount": "پیام",
-        "status": "وضعیت",
+        "status": {
+          "label": "وضعیت",
+          "active": "فعال",
+          "blocked": "مسدود شده",
+          "deleted": "حذف شده",
+          "trial": "آزمایشی",
+          "expired": "منقضی شده",
+          "disabled": "غیرفعال"
+        },
         "language": "زبان",
         "registration": "ثبت‌نام",
         "lastActivity": "آخرین فعالیت",

@@ -2318,7 +2318,15 @@
         "noTickets": "该用户没有工单",
         "ticketsCount": "个工单",
         "messagesCount": "条消息",
-        "status": "状态",
+        "status": {
+          "label": "状态",
+          "active": "活跃",
+          "blocked": "已封禁",
+          "deleted": "已删除",
+          "trial": "试用",
+          "expired": "已过期",
+          "disabled": "已禁用"
+        },
         "language": "语言",
         "registration": "注册时间",
         "lastActivity": "最后活跃",
