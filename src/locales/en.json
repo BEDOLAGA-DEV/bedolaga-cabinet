@@ -1743,7 +1743,8 @@
         "telegramOidcEnabled": "OIDC Enabled",
         "telegramOidcClientId": "Client ID (Bot ID)",
         "telegramOidcClientSecret": "Client Secret"
-      }
+      },
+      "offlineConv": "Offline Conversions"
     },
     "theme": {
       "accentColor": "Accent color",
