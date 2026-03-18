@@ -10,6 +10,7 @@ import { useTrafficZone } from '../../hooks/useTrafficZone';
 import { formatTraffic } from '../../utils/formatTraffic';
 import { getGlassColors } from '../../utils/glassTheme';
 import { HoverBorderGradient } from '../ui/hover-border-gradient';
+import { useHaptic } from '../../platform';
 import type { Subscription } from '../../types';
 
 interface SubscriptionCardActiveProps {
@@ -58,6 +59,10 @@ export default function SubscriptionCardActive({
   const isUnlimited = trafficData?.is_unlimited ?? subscription.traffic_limit_gb === 0;
   const zone = useTrafficZone(usedPercent);
   const animatedPercent = useAnimatedNumber(usedPercent);
+  const haptic = useHaptic();
+
+  const isAtDeviceLimit =
+    subscription.device_limit > 0 && connectedDevices >= subscription.device_limit;
 
   const formattedDate = new Date(subscription.end_date).toLocaleDateString();
   const daysLeft = subscription.days_left;
@@ -203,8 +208,15 @@ export default function SubscriptionCardActive({
         <HoverBorderGradient
           as="button"
           accentColor={zone.mainHex}
-          onClick={() => navigate('/connection')}
-          className="mb-2.5 flex w-full items-center gap-3.5 rounded-[14px] p-3.5 text-left transition-shadow duration-300"
+          disabled={isAtDeviceLimit}
+          onClick={() => {
+            if (isAtDeviceLimit) {
+              haptic.notification('error');
+              return;
+            }
+            navigate('/connection');
+          }}
+          className={`mb-2.5 flex w-full items-center gap-3.5 rounded-[14px] p-3.5 text-left transition-shadow duration-300${isAtDeviceLimit ? 'cursor-not-allowed opacity-50' : ''}`}
           data-onboarding="connect-devices"
           style={{ fontFamily: 'inherit' }}
         >
@@ -243,6 +255,14 @@ export default function SubscriptionCardActive({
                     max: subscription.device_limit,
                   })}
             </div>
+            {isAtDeviceLimit && (
+              <div
+                className="mt-1 text-[10px] font-medium"
+                style={{ color: 'rgb(var(--color-warning-400))' }}
+              >
+                {t('dashboard.deviceLimitReached')}
+              </div>
+            )}
           </div>
 
           {/* Device indicator */}

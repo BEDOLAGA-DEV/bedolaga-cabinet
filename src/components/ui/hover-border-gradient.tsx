@@ -8,6 +8,8 @@ interface HoverBorderGradientProps extends React.HTMLAttributes<HTMLElement> {
   accentColor?: string;
   /** Full rotation duration in seconds. Default: 3 */
   duration?: number;
+  /** Disables the element (applies to interactive elements like buttons) */
+  disabled?: boolean;
 }
 
 /**

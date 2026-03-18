@@ -266,6 +266,7 @@
     "daysRemaining": "Дней осталось",
     "usageLast14Days": "Расход за 14 дней",
     "maxUsage": "макс {{amount}}",
+    "deviceLimitReached": "Отключите устройства для подключения новых",
     "expired": {
       "title": "Подписка истекла",
       "trialTitle": "Пробный период истёк",

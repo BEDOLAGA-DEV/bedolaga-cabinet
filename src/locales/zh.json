@@ -242,6 +242,7 @@
       "devices": "设备",
       "expiredDate": "过期时间"
     },
+    "deviceLimitReached": "断开设备以添加新设备",
     "suspended": {
       "title": "订阅已暂停",
       "resume": "恢复"

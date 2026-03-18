@@ -254,6 +254,7 @@
     "daysRemaining": "Days left",
     "usageLast14Days": "Usage last 14 days",
     "maxUsage": "max {{amount}}",
+    "deviceLimitReached": "Disconnect devices to add new ones",
     "expired": {
       "title": "Subscription Expired",
       "trialTitle": "Trial Expired",

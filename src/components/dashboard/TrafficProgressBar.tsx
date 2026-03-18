@@ -16,7 +16,7 @@ interface TrafficProgressBarProps {
 const THRESHOLDS = [50, 75, 90];
 
 export default function TrafficProgressBar({
-  usedGb,
+  usedGb: _usedGb,
   limitGb,
   percent,
   isUnlimited,
@@ -83,29 +83,6 @@ export default function TrafficProgressBar({
             aria-hidden="true"
           />
         </div>
-
-        {/* Below bar: label + usage */}
-        {!compact && (
-          <div className="mt-2 flex items-center justify-between px-0.5">
-            <span
-              className="flex items-center gap-1.5 text-[11px] font-semibold"
-              style={{ color: zone.mainVar }}
-            >
-              <span
-                className="inline-block h-1.5 w-1.5 animate-unlimited-pulse rounded-full"
-                style={{
-                  background: zone.mainVar,
-                  boxShadow: `0 0 8px ${zone.mainVar}`,
-                }}
-                aria-hidden="true"
-              />
-              {t('dashboard.unlimitedTraffic')}
-            </span>
-            <span className="font-mono text-[11px] text-dark-50/30">
-              {t('dashboard.usedTraffic', { amount: formatTraffic(usedGb) })}
-            </span>
-          </div>
-        )}
       </div>
     );
   }

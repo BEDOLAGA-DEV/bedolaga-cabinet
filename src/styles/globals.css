@@ -35,6 +35,12 @@
   box-shadow: 0 0 20px var(--accent-glow, rgba(var(--color-accent-400), 0.25));
 }
 
+.hover-border-gradient:disabled,
+.hover-border-gradient[disabled] {
+  box-shadow: none;
+  pointer-events: auto;
+}
+
 .light .hover-border-gradient {
   --_bg: var(--border-inner-bg, rgb(var(--color-champagne-100)));
 }
