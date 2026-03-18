@@ -113,6 +113,7 @@ const TelegramIcon = () => (
 // ============ Components ============
 
 function StatusBadge({ status }: { status: string }) {
+  const { t } = useTranslation();
   const styles: Record<string, string> = {
     active: 'bg-success-500/20 text-success-400 border-success-500/30',
     blocked: 'bg-error-500/20 text-error-400 border-error-500/30',
@@ -123,9 +124,11 @@ function StatusBadge({ status }: { status: string }) {
     disabled: 'bg-dark-600 text-dark-400 border-dark-500',
   };
 
+  const label = t(`admin.users.detail.status.${status}`, { defaultValue: '' }) || status;
+
   return (
     <span className={`rounded-full border px-2 py-0.5 text-xs ${styles[status] || styles.active}`}>
-      {status}
+      {label}
     </span>
   );
 }
@@ -1054,7 +1057,7 @@ export default function AdminUserDetail() {
           <div className="space-y-4">
             {/* Status */}
             <div className="flex items-center justify-between rounded-xl bg-dark-800/50 p-3">
-              <span className="text-dark-400">{t('admin.users.detail.status')}</span>
+              <span className="text-dark-400">{t('admin.users.detail.status.label')}</span>
               <div className="flex items-center gap-2">
                 <StatusBadge status={user.status} />
                 {user.status === 'active' ? (
@@ -2514,7 +2517,7 @@ export default function AdminUserDetail() {
                             }[selectedTicket.status] || 'border-dark-500 bg-dark-600 text-dark-400'
                           }`}
                         >
-                          {selectedTicket.status}
+                          {t(`admin.tickets.status${selectedTicket.status.charAt(0).toUpperCase() + selectedTicket.status.slice(1)}`)}
                         </span>
                         <span>{formatDate(selectedTicket.created_at)}</span>
                       </div>
@@ -2683,7 +2686,7 @@ export default function AdminUserDetail() {
                           <span
                             className={`rounded-full border px-2 py-0.5 text-xs ${statusStyles[ticket.status] || statusStyles.closed}`}
                           >
-                            {ticket.status}
+                            {t(`admin.tickets.status${ticket.status.charAt(0).toUpperCase() + ticket.status.slice(1)}`)}
                           </span>
                         </div>
                         <div className="flex items-center justify-between text-xs text-dark-500">

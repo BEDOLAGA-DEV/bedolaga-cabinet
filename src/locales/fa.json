@@ -202,7 +202,8 @@
     "continueWithDiscord": "ادامه با Discord",
     "continueWithVk": "ادامه با VK",
     "oauthError": "مجوز رد شد یا ناموفق بود",
-    "oauthExpired": "نشست OAuth منقضی شده است. لطفاً دوباره امتحان کنید."
+    "oauthExpired": "نشست OAuth منقضی شده است. لطفاً دوباره امتحان کنید.",
+    "disposableEmail": "آدرس‌های ایمیل یک‌بار مصرف مجاز نیستند. لطفاً از یک ایمیل دائمی استفاده کنید."
   },
   "emailVerification": {
     "title": "تایید ایمیل",
@@ -1728,7 +1729,10 @@
       "copyTelegramId": "برای کپی شناسه تلگرام کلیک کنید",
       "viewUser": "کاربر",
       "userNotificationsEnabled": "اعلان‌های کاربر",
-      "userNotificationsEnabledDesc": "ارسال اعلان به کاربران درباره پاسخ‌های مدیر"
+      "userNotificationsEnabledDesc": "ارسال اعلان به کاربران درباره پاسخ‌های مدیر",
+      "priorityNormal": "عادی",
+      "priorityHigh": "بالا",
+      "priorityUrgent": "فوری"
     },
     "tariffs": {
       "title": "مدیریت تعرفه‌ها",
