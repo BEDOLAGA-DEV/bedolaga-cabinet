@@ -345,6 +345,15 @@ export default function AdminTickets() {
     }
   };
 
+  const getPriorityLabel = (priority: string) => {
+    const labels: Record<string, string> = {
+      normal: t('admin.tickets.priorityNormal', 'Обычный'),
+      high: t('admin.tickets.priorityHigh', 'Высокий'),
+      urgent: t('admin.tickets.priorityUrgent', 'Срочный'),
+    };
+    return labels[priority] || priority;
+  };
+
   const formatUser = (ticket: AdminTicket | AdminTicketDetail) => {
     if (!ticket.user) return 'Unknown';
     const { first_name, last_name, username } = ticket.user;
@@ -583,7 +592,7 @@ export default function AdminTickets() {
                       )}
                     </span>
                     <span className={getPriorityBadge(selectedTicket.priority)}>
-                      {selectedTicket.priority}
+                      {getPriorityLabel(selectedTicket.priority)}
                     </span>
                   </div>
                 </div>
