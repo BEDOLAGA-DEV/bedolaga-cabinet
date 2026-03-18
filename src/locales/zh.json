@@ -199,7 +199,8 @@
     "continueWithDiscord": "通过 Discord 继续",
     "continueWithVk": "通过 VK 继续",
     "oauthError": "授权被拒绝或失败",
-    "oauthExpired": "OAuth 会话已过期。请重试。"
+    "oauthExpired": "OAuth 会话已过期。请重试。",
+    "disposableEmail": "不允许使用一次性电子邮件地址。请使用永久电子邮件。"
   },
   "emailVerification": {
     "title": "邮箱验证",
@@ -1741,7 +1742,10 @@
       "copyTelegramId": "点击复制Telegram ID",
       "viewUser": "用户",
       "userNotificationsEnabled": "用户通知",
-      "userNotificationsEnabledDesc": "向用户发送管理员回复通知"
+      "userNotificationsEnabledDesc": "向用户发送管理员回复通知",
+      "priorityNormal": "普通",
+      "priorityHigh": "高",
+      "priorityUrgent": "紧急"
     },
     "tariffs": {
       "title": "套餐管理",
