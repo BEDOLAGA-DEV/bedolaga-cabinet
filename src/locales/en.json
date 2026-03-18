@@ -208,7 +208,8 @@
     "continueWithDiscord": "Continue with Discord",
     "continueWithVk": "Continue with VK",
     "oauthError": "Authorization was denied or failed",
-    "oauthExpired": "OAuth session expired. Please try again."
+    "oauthExpired": "OAuth session expired. Please try again.",
+    "disposableEmail": "Disposable email addresses are not allowed. Please use a permanent email."
   },
   "emailVerification": {
     "title": "Email Verification",
@@ -2064,7 +2065,10 @@
       "userNotificationsEnabled": "User Notifications",
       "userNotificationsEnabledDesc": "Send notifications to users about admin replies",
       "adminNotificationsEnabled": "Admin Notifications",
-      "adminNotificationsEnabledDesc": "Send notifications to admins about new tickets and replies"
+      "adminNotificationsEnabledDesc": "Send notifications to admins about new tickets and replies",
+      "priorityNormal": "Normal",
+      "priorityHigh": "High",
+      "priorityUrgent": "Urgent"
     },
     "tariffs": {
       "title": "Tariff Management",
