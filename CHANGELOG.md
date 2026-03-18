@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.37.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.36.0...v1.37.0) (2026-03-18)
+
+
+### Features
+
+* блокировка кнопки устройств при лимите + убраны дубли трафика ([8636bd7](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/8636bd7659b6b18cc9e19bce5bf5c6637da21d72))
+* добавлена поддержка SeverPay в кабинете ([246fafd](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/246fafdbfc1db6384d1626ae09e04431c72f61e2))
+* редизайн страницы платежей в админке — поиск, фильтры, статистика ([df73b3f](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/df73b3f77e4fe38715ca74782120f4c52ad0b1b7))
+
+
+### Bug Fixes
+
+* блокировка кнопки устройств на странице подписки ([2d89b5e](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/2d89b5e342b7dbd3f6ae6457a7aba06db962c91c))
+* добавлена подпись «Стоимость вращения» к блоку оплаты спина ([914a802](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/914a802c1bf770be375eeb460ab255681eaf76c0))
+
 ## [1.36.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.35.0...v1.36.0) (2026-03-17)
 
 
