@@ -70,8 +70,8 @@ export const authApi = {
     email: string,
     password: string,
     campaignSlug?: string | null,
-    yandexCid?: string | null,
     referralCode?: string | null,
+    yandexCid?: string | null,
   ): Promise<AuthResponse> => {
     const response = await apiClient.post<AuthResponse>('/cabinet/auth/email/login', {
       email,
