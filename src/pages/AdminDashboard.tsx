@@ -1019,7 +1019,7 @@ export default function AdminDashboard() {
                 </h2>
                 <p className="text-xs text-dark-400 sm:text-sm">
                   {t('adminDashboard.recentPayments.today', {
-                    amount: `${formatAmount(payments.total_today_kopeks / 100)} ${currencySymbol}`,
+                    amount: `${formatAmount((stats?.financial.income_today_kopeks || payments.total_today_kopeks) / 100)} ${currencySymbol}`,
                   })}
                   <span className="hidden sm:inline">
                     {' '}
