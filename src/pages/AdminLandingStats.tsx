@@ -379,8 +379,12 @@ export default function AdminLandingStats() {
           <div className="rounded-xl border border-dark-700 bg-dark-800 p-4 text-center">
             <div className="text-xl font-bold text-accent-400 sm:text-2xl">
               {stats.total_purchases}
+              <span className="text-sm font-normal text-dark-400"> / </span>
+              <span className="text-success-400">{stats.total_successful}</span>
             </div>
-            <div className="text-xs text-dark-500">{t('admin.landings.stats.totalPurchases')}</div>
+            <div className="text-xs text-dark-500">
+              {t('admin.landings.stats.totalPurchases')} / {t('admin.landings.stats.successful', 'Успешных')}
+            </div>
           </div>
           <div className="rounded-xl border border-dark-700 bg-dark-800 p-4 text-center">
             <div className="truncate text-xl font-bold text-success-400 sm:text-2xl">
