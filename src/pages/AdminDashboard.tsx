@@ -1056,7 +1056,7 @@ export default function AdminDashboard() {
                 </tr>
               </thead>
               <tbody>
-                {payments.payments.slice(0, 10).map((payment) => (
+                {payments.payments.slice(0, 20).map((payment) => (
                   <tr
                     key={payment.id}
                     className="border-b border-dark-700/50 transition-colors hover:bg-dark-800/50"
@@ -1111,7 +1111,7 @@ export default function AdminDashboard() {
 
           {/* Mobile Cards */}
           <div className="space-y-2 md:hidden">
-            {payments.payments.slice(0, 10).map((payment) => (
+            {payments.payments.slice(0, 20).map((payment) => (
               <div key={payment.id} className="rounded-lg bg-dark-900/50 p-3">
                 <div className="mb-2 flex items-center justify-between">
                   <div className="flex min-w-0 flex-1 items-center gap-2">
