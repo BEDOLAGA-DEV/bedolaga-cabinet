@@ -280,6 +280,7 @@ export default function AdminLandingStats() {
         month: 'short',
         day: 'numeric',
       }),
+      created: item.created ?? 0,
       purchases: item.purchases,
       revenue: item.revenue_kopeks / CHART_COMMON.KOPEKS_DIVISOR,
       gifts: item.gifts,
@@ -383,7 +384,7 @@ export default function AdminLandingStats() {
               <span className="text-success-400">{stats.total_successful}</span>
             </div>
             <div className="text-xs text-dark-500">
-              {t('admin.landings.stats.totalPurchases')} / {t('admin.landings.stats.successful', 'Успешных')}
+              {t('admin.landings.stats.created', 'Создано')} / {t('admin.landings.stats.paid', 'Оплачено')}
             </div>
           </div>
           <div className="rounded-xl border border-dark-700 bg-dark-800 p-4 text-center">
@@ -405,7 +406,7 @@ export default function AdminLandingStats() {
         </div>
 
         {/* Charts */}
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <div className="space-y-4">
           {/* Daily Purchases & Revenue */}
           <div className="rounded-xl border border-dark-700 bg-dark-800 p-4">
             <h3 className="mb-4 font-medium text-dark-200">
@@ -455,6 +456,24 @@ export default function AdminLandingStats() {
                         stopOpacity={CHART_COMMON.GRADIENT.END_OPACITY}
                       />
                     </linearGradient>
+                    <linearGradient
+                      id={`landingCreatedGrad-${numericId}`}
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
+                    >
+                      <stop
+                        offset={CHART_COMMON.GRADIENT.START_OFFSET}
+                        stopColor="#f59e0b"
+                        stopOpacity={CHART_COMMON.GRADIENT.START_OPACITY}
+                      />
+                      <stop
+                        offset={CHART_COMMON.GRADIENT.END_OFFSET}
+                        stopColor="#f59e0b"
+                        stopOpacity={CHART_COMMON.GRADIENT.END_OPACITY}
+                      />
+                    </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray={CHART_COMMON.GRID_DASH} stroke={colors.grid} />
                   <XAxis
@@ -489,8 +508,17 @@ export default function AdminLandingStats() {
                   <Area
                     yAxisId="left"
                     type="monotone"
+                    dataKey="created"
+                    name={t('admin.landings.stats.created', 'Создано')}
+                    stroke="#f59e0b"
+                    fill={`url(#landingCreatedGrad-${numericId})`}
+                    strokeWidth={CHART_COMMON.STROKE_WIDTH}
+                  />
+                  <Area
+                    yAxisId="left"
+                    type="monotone"
                     dataKey="purchases"
-                    name={t('admin.landings.stats.purchases')}
+                    name={t('admin.landings.stats.paid', 'Оплачено')}
                     stroke={colors.referrals}
                     fill={`url(#landingPurchaseGrad-${numericId})`}
                     strokeWidth={CHART_COMMON.STROKE_WIDTH}
@@ -506,6 +534,86 @@ export default function AdminLandingStats() {
                   />
                 </AreaChart>
               </ResponsiveContainer>
+            )}
+          </div>
+
+          {/* Daily Breakdown List */}
+          <div className="rounded-xl border border-dark-700 bg-dark-800 p-4">
+            <h3 className="mb-4 font-medium text-dark-200">
+              {t('admin.landings.stats.dailyBreakdown', 'По дням')}
+            </h3>
+            {dailyData.length === 0 ? (
+              <div className="flex h-48 items-center justify-center text-sm text-dark-500">
+                {t('admin.landings.stats.noPurchases')}
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {(() => {
+                  const last7 = dailyData.slice(-7).filter((d) => d.created > 0 || d.purchases > 0);
+                  if (last7.length === 0) return <div className="py-4 text-center text-sm text-dark-500">{t('admin.landings.stats.noPurchases')}</div>;
+                  const totalCreated = last7.reduce((s, d) => s + d.created, 0);
+                  const totalPurchases = last7.reduce((s, d) => s + d.purchases, 0);
+                  const totalRevenue = last7.reduce((s, d) => s + d.revenue, 0);
+                  const totalConversion = totalCreated > 0 ? Math.round((totalPurchases / totalCreated) * 100) : 0;
+                  return (
+                    <>
+                      {last7.map((item, idx) => {
+                        const conversionPct = item.created > 0 ? (item.purchases / item.created) * 100 : 0;
+                        return (
+                          <div
+                            key={idx}
+                            className="group relative cursor-default"
+                            title={`${t('admin.landings.stats.created', 'Создано')}: ${item.created}\n${t('admin.landings.stats.paid', 'Оплачено')}: ${item.purchases}\n${t('admin.landings.stats.conversionRate', 'Конверсия')}: ${Math.round(conversionPct)}%\n${t('admin.landings.stats.revenueLabel', 'Доход')}: ${formatWithCurrency(item.revenue)}`}
+                          >
+                            <div className="mb-1 flex items-center justify-between">
+                              <span className="text-sm font-medium text-dark-300">{item.label}</span>
+                              <span className="text-sm text-dark-400">
+                                <span className="font-semibold text-warning-400">{item.created}</span>
+                                <span className="mx-1">/</span>
+                                <span className="font-semibold text-success-400">{item.purchases}</span>
+                                <span className="ml-2 text-dark-100">{formatWithCurrency(item.revenue)}</span>
+                              </span>
+                            </div>
+                            <div className="h-3 overflow-hidden rounded-full bg-warning-500/30">
+                              <div
+                                className="h-full rounded-full bg-gradient-to-r from-success-600 to-success-400 transition-all duration-500"
+                                style={{ width: `${Math.max(conversionPct, 0)}%` }}
+                              />
+                            </div>
+                          </div>
+                        );
+                      })}
+                      <div className="border-t border-dark-700 pt-3">
+                        <div className="mb-1 flex items-center justify-between">
+                          <span className="text-sm font-semibold text-dark-200">{t('common.total', 'Итого')}</span>
+                          <span className="text-sm">
+                            <span className="font-bold text-warning-400">{totalCreated}</span>
+                            <span className="mx-1 text-dark-400">/</span>
+                            <span className="font-bold text-success-400">{totalPurchases}</span>
+                            <span className="ml-2 font-bold text-dark-100">{formatWithCurrency(totalRevenue)}</span>
+                          </span>
+                        </div>
+                        <div className="h-3 overflow-hidden rounded-full bg-warning-500/30">
+                          <div
+                            className="h-full rounded-full bg-gradient-to-r from-success-600 to-success-400 transition-all duration-500"
+                            style={{ width: `${totalConversion}%` }}
+                          />
+                        </div>
+                      </div>
+                    </>
+                  );
+                })()}
+                <div className="flex items-center gap-4 pt-1 text-xs text-dark-500">
+                  <span className="flex items-center gap-1.5">
+                    <span className="inline-block h-2 w-4 rounded-full bg-warning-500/30" />
+                    {t('admin.landings.stats.created', 'Создано')}
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="inline-block h-2 w-4 rounded-full bg-success-400" />
+                    {t('admin.landings.stats.paid', 'Оплачено')}
+                  </span>
+                </div>
+              </div>
             )}
           </div>
 

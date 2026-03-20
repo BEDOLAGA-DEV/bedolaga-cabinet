@@ -261,6 +261,7 @@ export const landingApi = {
 
 export interface LandingDailyStat {
   date: string;
+  created: number;
   purchases: number;
   revenue_kopeks: number;
   gifts: number;
