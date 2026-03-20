@@ -326,7 +326,9 @@ export default function AdminBroadcastCreate() {
   };
 
   // Validate form
-  const isTelegramValid = telegramEnabled && telegramTarget && messageText.trim().length > 0;
+  const maxTextLength = uploadedFileId ? 1024 : 4096;
+  const isTextTooLong = messageText.length > maxTextLength;
+  const isTelegramValid = telegramEnabled && telegramTarget && messageText.trim().length > 0 && !isTextTooLong;
   const isEmailValid =
     emailEnabled && emailTarget && emailSubject.trim().length > 0 && emailContent.trim().length > 0;
 
@@ -567,10 +569,13 @@ export default function AdminBroadcastCreate() {
               onChange={(e) => setMessageText(e.target.value)}
               placeholder={t('admin.broadcasts.messageTextPlaceholder')}
               rows={6}
-              maxLength={4000}
+              maxLength={maxTextLength}
               className="input min-h-[150px] resize-y"
             />
-            <div className="mt-1 text-right text-xs text-dark-400">{messageText.length}/4000</div>
+            <div className={`mt-1 text-right text-xs ${isTextTooLong ? 'font-semibold text-error-400' : 'text-dark-400'}`}>
+              {messageText.length}/{maxTextLength}
+              {isTextTooLong && ` — ${uploadedFileId ? 'с медиа максимум 1024' : 'максимум 4096'}`}
+            </div>
           </div>
 
           {/* Media upload */}
