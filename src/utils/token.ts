@@ -258,6 +258,8 @@ export function getAndClearReturnUrl(): string | null {
 
 export function safeRedirectToLogin(): void {
   if (typeof window !== 'undefined') {
+    // Guard: don't redirect if already on /login to prevent infinite reload loops
+    if (window.location.pathname === '/login') return;
     saveReturnUrl();
     window.location.href = '/login';
   }

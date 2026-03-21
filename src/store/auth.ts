@@ -74,6 +74,9 @@ export const useAuthStore = create<AuthState>()(
       clearCampaignBonus: () => set({ pendingCampaignBonus: null }),
 
       setTokens: (accessToken, refreshToken) => {
+        if (!accessToken || !refreshToken) {
+          throw new Error('Invalid tokens: cannot store empty credentials');
+        }
         tokenStorage.setTokens(accessToken, refreshToken);
         set({
           accessToken,
@@ -321,6 +324,9 @@ export const useAuthStore = create<AuthState>()(
 
       loginWithDeepLink: async (token) => {
         const response = await authApi.pollDeepLinkToken(token);
+        if (!response.access_token || !response.refresh_token) {
+          throw new Error('Invalid auth response: missing tokens');
+        }
         tokenStorage.setTokens(response.access_token, response.refresh_token);
         set({
           accessToken: response.access_token,

@@ -940,7 +940,8 @@
       "policies": "访问策略",
       "auditLog": "审计日志",
       "salesStats": "销售统计",
-      "landings": "落地页"
+      "landings": "落地页",
+      "referralNetwork": "推荐网络"
     },
     "panel": {
       "title": "管理面板",
@@ -974,7 +975,8 @@
       "policiesDesc": "配置ABAC访问控制策略",
       "auditLogDesc": "查看系统活动和访问历史",
       "salesStatsDesc": "销售分析与趋势",
-      "landingsDesc": "快速购买落地页"
+      "landingsDesc": "快速购买落地页",
+      "referralNetworkDesc": "推荐图表和广告活动可视化"
     },
     "salesStats": {
       "title": "销售统计",
@@ -1055,6 +1057,98 @@
         "revenue": "收入"
       },
       "loadError": "加载统计失败"
+    },
+    "referralNetwork": {
+      "title": "推荐网络",
+      "subtitle": "推荐图表和广告活动可视化",
+      "search": {
+        "placeholder": "按TG ID、@用户名、邮箱、活动搜索...",
+        "noResults": "未找到",
+        "resultsCount": "找到: {{count}}",
+        "clear": "清除搜索"
+      },
+      "filters": {
+        "title": "过滤器",
+        "campaigns": "活动",
+        "partnersOnly": "仅合作伙伴",
+        "minReferrals": "最少推荐数",
+        "reset": "重置"
+      },
+      "stats": {
+        "totalUsers": "用户",
+        "totalReferrers": "推荐人",
+        "totalCampaigns": "活动",
+        "totalEarnings": "总收入"
+      },
+      "legend": {
+        "title": "图例",
+        "regularUser": "普通用户",
+        "activeReferrer": "活跃推荐人",
+        "partner": "合作伙伴",
+        "topReferrer": "顶级推荐人 (10+)",
+        "campaignUser": "来自活动",
+        "partnerCampaignEdge": "合作伙伴 → 活动",
+        "campaignNode": "广告活动"
+      },
+      "user": {
+        "tgId": "TG ID",
+        "email": "邮箱",
+        "partner": "合作伙伴",
+        "subscription": "订阅",
+        "validUntil": "有效至 {{date}}",
+        "noSubscription": "无订阅",
+        "personalStats": "个人统计",
+        "totalSpent": "总花费",
+        "referralEarnings": "推荐收入",
+        "referralBranch": "推荐分支",
+        "directReferrals": "直接推荐",
+        "branchSize": "分支总人数",
+        "branchRevenue": "分支收入",
+        "source": "来源",
+        "referredBy": "由...推荐",
+        "fromCampaign": "活动",
+        "organic": "自然流量"
+      },
+      "campaign": {
+        "startParam": "参数",
+        "active": "活跃",
+        "inactive": "非活跃",
+        "directUsers": "直接",
+        "totalNetwork": "总网络",
+        "totalRevenue": "总收入",
+        "conversionRate": "转化率",
+        "avgCheck": "平均金额",
+        "topReferrers": "活动顶级推荐人"
+      },
+      "controls": {
+        "zoomIn": "放大",
+        "zoomOut": "缩小",
+        "resetZoom": "重置缩放",
+        "fullscreen": "全屏"
+      },
+      "scope": {
+        "title": "范围",
+        "campaign": "活动",
+        "partner": "合作伙伴",
+        "user": "用户",
+        "searchPlaceholder": "搜索...",
+        "selectCampaign": "选择活动",
+        "selectPartner": "选择合作伙伴",
+        "selectUser": "搜索用户",
+        "emptyState": "选择活动、合作伙伴或用户以查看其网络",
+        "users": "用户",
+        "campaigns": "活动",
+        "active": "活跃",
+        "inactive": "非活跃",
+        "noResults": "未找到",
+        "removeItem": "移除 {{label}}",
+        "clearAll": "清除所有选择",
+        "addScope": "添加范围",
+        "maxReached": "最多 {{max}} 个项目"
+      },
+      "loading": "加载图表...",
+      "error": "加载网络数据失败",
+      "empty": "无数据显示"
     },
     "trafficUsage": {
       "title": "流量使用",
@@ -1617,6 +1711,12 @@
       "adminLabel": "管理员",
       "replyPlaceholder": "输入您的回复...",
       "sendReply": "发送回复",
+      "attachMedia": "附加媒体",
+      "invalidFileType": "文件类型无效。请使用图片、视频 (MP4, WebM) 或文档 (PDF, DOC, TXT, ZIP)。",
+      "fileTooLarge": "文件太大。最大 10MB。",
+      "uploadFailed": "上传文件失败",
+      "uploading": "上传中...",
+      "uploadComplete": "已上传",
       "settings": "设置",
       "settingsSubtitle": "配置工单系统和SLA",
       "settingsLoadError": "加载设置失败",

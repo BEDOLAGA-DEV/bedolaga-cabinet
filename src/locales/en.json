@@ -1106,7 +1106,8 @@
       "policies": "Access Policies",
       "auditLog": "Audit Log",
       "salesStats": "Sales Statistics",
-      "landings": "Landings"
+      "landings": "Landings",
+      "referralNetwork": "Referral Network"
     },
     "panel": {
       "title": "Admin Panel",
@@ -1140,7 +1141,8 @@
       "policiesDesc": "Configure ABAC access policies",
       "auditLogDesc": "Review system activity and access history",
       "salesStatsDesc": "Sales analytics and trends",
-      "landingsDesc": "Quick purchase landing pages"
+      "landingsDesc": "Quick purchase landing pages",
+      "referralNetworkDesc": "Referral graph and campaign visualization"
     },
     "salesStats": {
       "title": "Sales Statistics",
@@ -1221,6 +1223,98 @@
         "revenue": "Revenue"
       },
       "loadError": "Failed to load statistics"
+    },
+    "referralNetwork": {
+      "title": "Referral Network",
+      "subtitle": "Referral graph and advertising campaign visualization",
+      "search": {
+        "placeholder": "Search by TG ID, @username, email, campaign...",
+        "noResults": "Nothing found",
+        "resultsCount": "Found: {{count}}",
+        "clear": "Clear search"
+      },
+      "filters": {
+        "title": "Filters",
+        "campaigns": "Campaigns",
+        "partnersOnly": "Partners only",
+        "minReferrals": "Min referrals",
+        "reset": "Reset"
+      },
+      "stats": {
+        "totalUsers": "Users",
+        "totalReferrers": "Referrers",
+        "totalCampaigns": "Campaigns",
+        "totalEarnings": "Total earnings"
+      },
+      "legend": {
+        "title": "Legend",
+        "regularUser": "Regular user",
+        "activeReferrer": "Active referrer",
+        "partner": "Partner",
+        "topReferrer": "Top referrer (10+)",
+        "campaignUser": "From campaign",
+        "partnerCampaignEdge": "Partner → Campaign",
+        "campaignNode": "Ad campaign"
+      },
+      "user": {
+        "tgId": "TG ID",
+        "email": "Email",
+        "partner": "Partner",
+        "subscription": "Subscription",
+        "validUntil": "until {{date}}",
+        "noSubscription": "No subscription",
+        "personalStats": "Personal statistics",
+        "totalSpent": "Total spent",
+        "referralEarnings": "Referral earnings",
+        "referralBranch": "Referral branch",
+        "directReferrals": "Direct referrals",
+        "branchSize": "Total in branch",
+        "branchRevenue": "Branch revenue",
+        "source": "Source",
+        "referredBy": "Referred by",
+        "fromCampaign": "Campaign",
+        "organic": "Organic"
+      },
+      "campaign": {
+        "startParam": "Parameter",
+        "active": "Active",
+        "inactive": "Inactive",
+        "directUsers": "Direct",
+        "totalNetwork": "Total network",
+        "totalRevenue": "Total revenue",
+        "conversionRate": "Conversion",
+        "avgCheck": "Avg check",
+        "topReferrers": "Top referrers from campaign"
+      },
+      "controls": {
+        "zoomIn": "Zoom in",
+        "zoomOut": "Zoom out",
+        "resetZoom": "Reset zoom",
+        "fullscreen": "Fullscreen"
+      },
+      "scope": {
+        "title": "Scope",
+        "campaign": "Campaign",
+        "partner": "Partner",
+        "user": "User",
+        "searchPlaceholder": "Search...",
+        "selectCampaign": "Select campaign",
+        "selectPartner": "Select partner",
+        "selectUser": "Search user",
+        "emptyState": "Select a campaign, partner, or user to view their network",
+        "users": "users",
+        "campaigns": "campaigns",
+        "active": "Active",
+        "inactive": "Inactive",
+        "noResults": "Nothing found",
+        "removeItem": "Remove {{label}}",
+        "clearAll": "Clear all selections",
+        "addScope": "Add scope",
+        "maxReached": "Maximum {{max}} items"
+      },
+      "loading": "Loading graph...",
+      "error": "Failed to load network data",
+      "empty": "No data to display"
     },
     "trafficUsage": {
       "title": "Traffic Usage",
@@ -1917,6 +2011,12 @@
       "adminLabel": "Admin",
       "replyPlaceholder": "Type your reply...",
       "sendReply": "Send Reply",
+      "attachMedia": "Attach media",
+      "invalidFileType": "Invalid file type. Use images, videos (MP4, WebM) or documents (PDF, DOC, TXT, ZIP).",
+      "fileTooLarge": "File is too large. Maximum size is 10MB.",
+      "uploadFailed": "Failed to upload file",
+      "uploading": "Uploading...",
+      "uploadComplete": "Uploaded",
       "settings": "Settings",
       "settingsSubtitle": "Configure ticket system and SLA",
       "settingsLoadError": "Failed to load settings",

@@ -1,5 +1,41 @@
 # Changelog
 
+## [1.39.1](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.39.0...v1.39.1) (2026-03-21)
+
+
+### Bug Fixes
+
+* infinite reload loop on login when Telegram widget unavailable ([c34375e](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/c34375e579b159b9a47421c4fddd992d630e74aa))
+
+## [1.39.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.38.0...v1.39.0) (2026-03-20)
+
+
+### Features
+
+* add media attachment support for admin ticket replies ([84f0e4e](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/84f0e4e9b4fd6b73444505696d3dd20a30cc0c82))
+* add partner → campaign edges with distinct color to referral network ([2adb004](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/2adb0047dda970df58ccddbcc00193441680c7e8))
+* add referral network graph visualization page ([235eaec](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/235eaec85f46e46b4b588f325811a448a02dbcc3))
+* multi-select scope for referral network graph ([db76cd0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/db76cd0c647fb7be986bdebad4cf7f56b554334c))
+* redesign referral network with scope selector ([a6faf70](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/a6faf702ec445f899ab0a9b93d668340483c44de))
+
+
+### Bug Fixes
+
+* adapt referral network for Telegram MiniApp safe areas ([33486a0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/33486a09d01b19961e02d4d72b63710e7cf8bc8f))
+* bottom nav overlap and safe area handling in referral network ([94c8e73](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/94c8e73787ac40b73808785a5e12074bd1840bd9))
+* defer Sigma init with requestAnimationFrame to prevent no-height crash ([6f58a0c](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/6f58a0ce5d326eb67a154b6f2687873aac6cd247))
+* fullscreen layout and filter dropdown positioning ([4ebd85b](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/4ebd85b65d7bb2ebdace8eae3efc8b6fd4ef61cc))
+* graph layout, node visibility and FA2 settings ([7c0b8e5](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/7c0b8e571a613173ed9cec6e87af469c6b141ca8))
+* hide trial banner when subscription expired banner is active ([d34f5e8](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/d34f5e85596e7f34804a4e78dcef06e61bd62cd9))
+* improve graph spacing, mobile layout, and Telegram viewport ([818557f](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/818557f57d486a47c2965d4f3dfc0eb385ead7ad))
+* position page below AppShell header, wait for container size ([fd9a47e](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/fd9a47ecda6660903bea54b6cf2a838392fd85cd))
+* redesign top bar and filter panel for mobile ([ea143fd](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/ea143fdbc91243375f2abe2b2250d1666aede769))
+* referral network graph rendering and layout ([b787726](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/b787726d1bbfd0371ae5b1f470777439e0a8c95c))
+* referral network rendering — portal fix and visual tuning ([2b43a30](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/2b43a30ccccbc75e43dcc0fe5483b20e3ec66e04))
+* remove dead store code and add search input maxLength ([0f756d6](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/0f756d633d8d64e11e5738c20bf9e4fdd631a667))
+* resolve Sigma container height error on page load ([3434073](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/3434073d7c327299db8ca80440d6054cf9e8065e))
+* scope selector UX, ARIA, and code quality improvements ([2780898](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/2780898d1c4944d69045a3271c1bbd67ef72c47a))
+
 ## [1.38.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.37.1...v1.38.0) (2026-03-18)
 
 

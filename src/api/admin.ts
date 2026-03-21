@@ -115,8 +115,15 @@ export const adminApi = {
   },
 
   // Reply to ticket
-  replyToTicket: async (ticketId: number, message: string): Promise<AdminTicketMessage> => {
-    const response = await apiClient.post(`/cabinet/admin/tickets/${ticketId}/reply`, { message });
+  replyToTicket: async (
+    ticketId: number,
+    message: string,
+    media?: { media_type?: string; media_file_id?: string; media_caption?: string },
+  ): Promise<AdminTicketMessage> => {
+    const response = await apiClient.post(`/cabinet/admin/tickets/${ticketId}/reply`, {
+      message,
+      ...media,
+    });
     return response.data;
   },
 

@@ -115,6 +115,7 @@ const AdminAuditLog = lazy(() => import('./pages/AdminAuditLog'));
 const AdminLandings = lazy(() => import('./pages/AdminLandings'));
 const AdminLandingEditor = lazy(() => import('./pages/AdminLandingEditor'));
 const AdminLandingStats = lazy(() => import('./pages/AdminLandingStats'));
+const AdminReferralNetwork = lazy(() => import('./pages/ReferralNetwork'));
 
 function ProtectedRoute({
   children,
@@ -915,6 +916,16 @@ function App() {
             <PermissionRoute permission="sales_stats:read">
               <LazyPage>
                 <AdminSalesStats />
+              </LazyPage>
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="/admin/referral-network"
+          element={
+            <PermissionRoute permission="stats:read">
+              <LazyPage>
+                <AdminReferralNetwork />
               </LazyPage>
             </PermissionRoute>
           }

@@ -291,7 +291,17 @@ export const authApi = {
   },
 
   pollDeepLinkToken: async (token: string): Promise<AuthResponse> => {
-    const response = await apiClient.post<AuthResponse>('/cabinet/auth/deeplink/poll', { token });
+    // validateStatus: only treat 200 as success.
+    // Server returns 202 for "pending" and 410 for "expired" —
+    // these must reject so the polling catch-block can handle them.
+    // Without this, axios resolves on 202 (it's 2xx), causing
+    // loginWithDeepLink to set undefined tokens + isAuthenticated=true,
+    // which triggers checkAdminStatus() → 401 → safeRedirectToLogin() → infinite reload.
+    const response = await apiClient.post<AuthResponse>(
+      '/cabinet/auth/deeplink/poll',
+      { token },
+      { validateStatus: (status) => status === 200 },
+    );
     return response.data;
   },
 

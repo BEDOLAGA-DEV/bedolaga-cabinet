@@ -1127,7 +1127,8 @@
       "policies": "Политики доступа",
       "auditLog": "Журнал аудита",
       "salesStats": "Статистика продаж",
-      "landings": "Лендинги"
+      "landings": "Лендинги",
+      "referralNetwork": "Реферальная сеть"
     },
     "panel": {
       "title": "Панель администратора",
@@ -1161,7 +1162,8 @@
       "policiesDesc": "Настройка политик контроля доступа ABAC",
       "auditLogDesc": "Просмотр активности системы и истории доступа",
       "salesStatsDesc": "Аналитика продаж и тренды",
-      "landingsDesc": "Страницы быстрой покупки"
+      "landingsDesc": "Страницы быстрой покупки",
+      "referralNetworkDesc": "Визуализация графа рефералов и РК"
     },
     "salesStats": {
       "title": "Статистика продаж",
@@ -1242,6 +1244,98 @@
         "revenue": "Доход"
       },
       "loadError": "Не удалось загрузить статистику"
+    },
+    "referralNetwork": {
+      "title": "Реферальная сеть",
+      "subtitle": "Визуализация графа рефералов и рекламных кампаний",
+      "search": {
+        "placeholder": "Поиск по TG ID, @username, email, кампании...",
+        "noResults": "Ничего не найдено",
+        "resultsCount": "Найдено: {{count}}",
+        "clear": "Очистить поиск"
+      },
+      "filters": {
+        "title": "Фильтры",
+        "campaigns": "Кампании",
+        "partnersOnly": "Только партнёры",
+        "minReferrals": "Мин. рефералов",
+        "reset": "Сбросить"
+      },
+      "stats": {
+        "totalUsers": "Пользователей",
+        "totalReferrers": "Рефереров",
+        "totalCampaigns": "Кампаний",
+        "totalEarnings": "Общий доход"
+      },
+      "legend": {
+        "title": "Легенда",
+        "regularUser": "Обычный",
+        "activeReferrer": "Активный реферер",
+        "partner": "Партнёр",
+        "topReferrer": "Топ-реферер (10+)",
+        "campaignUser": "Из кампании",
+        "partnerCampaignEdge": "Партнёр → РК",
+        "campaignNode": "Рекламная кампания"
+      },
+      "user": {
+        "tgId": "TG ID",
+        "email": "Email",
+        "partner": "Партнёр",
+        "subscription": "Подписка",
+        "validUntil": "до {{date}}",
+        "noSubscription": "Нет подписки",
+        "personalStats": "Личная статистика",
+        "totalSpent": "Оплачено всего",
+        "referralEarnings": "Реф. доход",
+        "referralBranch": "Реферальная ветка",
+        "directReferrals": "Привёл людей",
+        "branchSize": "Всего в ветке",
+        "branchRevenue": "Доход ветки",
+        "source": "Источник",
+        "referredBy": "Пришёл от",
+        "fromCampaign": "РК",
+        "organic": "Органический"
+      },
+      "campaign": {
+        "startParam": "Параметр",
+        "active": "Активна",
+        "inactive": "Неактивна",
+        "directUsers": "Напрямую",
+        "totalNetwork": "Вся сеть",
+        "totalRevenue": "Общий доход",
+        "conversionRate": "Конверсия",
+        "avgCheck": "Средний чек",
+        "topReferrers": "Топ-рефереры из кампании"
+      },
+      "controls": {
+        "zoomIn": "Приблизить",
+        "zoomOut": "Отдалить",
+        "resetZoom": "Сбросить зум",
+        "fullscreen": "Полный экран"
+      },
+      "scope": {
+        "title": "Область",
+        "campaign": "Кампания",
+        "partner": "Партнёр",
+        "user": "Пользователь",
+        "searchPlaceholder": "Поиск...",
+        "selectCampaign": "Выберите кампанию",
+        "selectPartner": "Выберите партнёра",
+        "selectUser": "Найти пользователя",
+        "emptyState": "Выберите кампанию, партнёра или пользователя для просмотра сети",
+        "users": "пользователей",
+        "campaigns": "кампаний",
+        "active": "Активна",
+        "inactive": "Неактивна",
+        "noResults": "Ничего не найдено",
+        "removeItem": "Удалить {{label}}",
+        "clearAll": "Очистить все выбранные",
+        "addScope": "Добавить область",
+        "maxReached": "Максимум {{max}} элементов"
+      },
+      "loading": "Загрузка графа...",
+      "error": "Ошибка загрузки данных сети",
+      "empty": "Нет данных для отображения"
     },
     "trafficUsage": {
       "title": "Расход трафика",
@@ -2428,6 +2522,12 @@
       "adminLabel": "Админ",
       "replyPlaceholder": "Введите ваш ответ...",
       "sendReply": "Отправить",
+      "attachMedia": "Прикрепить медиа",
+      "invalidFileType": "Неверный тип файла. Используйте изображения, видео (MP4, WebM) или документы (PDF, DOC, TXT, ZIP).",
+      "fileTooLarge": "Файл слишком большой. Максимальный размер 10МБ.",
+      "uploadFailed": "Не удалось загрузить файл",
+      "uploading": "Загрузка...",
+      "uploadComplete": "Загружено",
       "settings": "Настройки",
       "settingsSubtitle": "Настройка тикетной системы и SLA",
       "settingsLoadError": "Не удалось загрузить настройки",

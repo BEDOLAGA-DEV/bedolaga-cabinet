@@ -940,7 +940,8 @@
       "policies": "سیاست‌های دسترسی",
       "auditLog": "گزارش بازرسی",
       "salesStats": "آمار فروش",
-      "landings": "صفحات فرود"
+      "landings": "صفحات فرود",
+      "referralNetwork": "شبکه ارجاع"
     },
     "panel": {
       "title": "پنل مدیریت",
@@ -974,7 +975,8 @@
       "policiesDesc": "تنظیم سیاست‌های کنترل دسترسی ABAC",
       "auditLogDesc": "بررسی فعالیت سیستم و تاریخچه دسترسی",
       "salesStatsDesc": "تحلیل فروش و روندها",
-      "landingsDesc": "صفحات خرید سریع"
+      "landingsDesc": "صفحات خرید سریع",
+      "referralNetworkDesc": "نمایش بصری گراف ارجاعات و کمپین‌ها"
     },
     "salesStats": {
       "title": "آمار فروش",
@@ -1055,6 +1057,98 @@
         "revenue": "درآمد"
       },
       "loadError": "بارگذاری آمار ناموفق بود"
+    },
+    "referralNetwork": {
+      "title": "شبکه ارجاع",
+      "subtitle": "نمایش بصری گراف ارجاعات و کمپین‌های تبلیغاتی",
+      "search": {
+        "placeholder": "جستجو بر اساس TG ID، @نام‌کاربری، ایمیل، کمپین...",
+        "noResults": "نتیجه‌ای یافت نشد",
+        "resultsCount": "یافت شد: {{count}}",
+        "clear": "پاک کردن جستجو"
+      },
+      "filters": {
+        "title": "فیلترها",
+        "campaigns": "کمپین‌ها",
+        "partnersOnly": "فقط شرکا",
+        "minReferrals": "حداقل ارجاعات",
+        "reset": "بازنشانی"
+      },
+      "stats": {
+        "totalUsers": "کاربران",
+        "totalReferrers": "ارجاع‌دهندگان",
+        "totalCampaigns": "کمپین‌ها",
+        "totalEarnings": "درآمد کل"
+      },
+      "legend": {
+        "title": "راهنما",
+        "regularUser": "کاربر عادی",
+        "activeReferrer": "ارجاع‌دهنده فعال",
+        "partner": "شریک",
+        "topReferrer": "ارجاع‌دهنده برتر (+۱۰)",
+        "campaignUser": "از کمپین",
+        "partnerCampaignEdge": "شریک → کمپین",
+        "campaignNode": "کمپین تبلیغاتی"
+      },
+      "user": {
+        "tgId": "شناسه TG",
+        "email": "ایمیل",
+        "partner": "شریک",
+        "subscription": "اشتراک",
+        "validUntil": "تا {{date}}",
+        "noSubscription": "بدون اشتراک",
+        "personalStats": "آمار شخصی",
+        "totalSpent": "مجموع پرداختی",
+        "referralEarnings": "درآمد ارجاع",
+        "referralBranch": "شاخه ارجاع",
+        "directReferrals": "ارجاعات مستقیم",
+        "branchSize": "کل شاخه",
+        "branchRevenue": "درآمد شاخه",
+        "source": "منبع",
+        "referredBy": "معرفی شده توسط",
+        "fromCampaign": "کمپین",
+        "organic": "طبیعی"
+      },
+      "campaign": {
+        "startParam": "پارامتر",
+        "active": "فعال",
+        "inactive": "غیرفعال",
+        "directUsers": "مستقیم",
+        "totalNetwork": "کل شبکه",
+        "totalRevenue": "درآمد کل",
+        "conversionRate": "نرخ تبدیل",
+        "avgCheck": "میانگین مبلغ",
+        "topReferrers": "ارجاع‌دهندگان برتر کمپین"
+      },
+      "controls": {
+        "zoomIn": "بزرگ‌نمایی",
+        "zoomOut": "کوچک‌نمایی",
+        "resetZoom": "بازنشانی زوم",
+        "fullscreen": "تمام‌صفحه"
+      },
+      "scope": {
+        "title": "محدوده",
+        "campaign": "کمپین",
+        "partner": "شریک",
+        "user": "کاربر",
+        "searchPlaceholder": "جستجو...",
+        "selectCampaign": "انتخاب کمپین",
+        "selectPartner": "انتخاب شریک",
+        "selectUser": "جستجوی کاربر",
+        "emptyState": "یک کمپین، شریک یا کاربر را برای مشاهده شبکه انتخاب کنید",
+        "users": "کاربران",
+        "campaigns": "کمپین‌ها",
+        "active": "فعال",
+        "inactive": "غیرفعال",
+        "noResults": "نتیجه‌ای یافت نشد",
+        "removeItem": "حذف {{label}}",
+        "clearAll": "پاک کردن همه انتخاب‌ها",
+        "addScope": "افزودن محدوده",
+        "maxReached": "حداکثر {{max}} مورد"
+      },
+      "loading": "بارگذاری گراف...",
+      "error": "خطا در بارگذاری داده‌های شبکه",
+      "empty": "داده‌ای برای نمایش وجود ندارد"
     },
     "trafficUsage": {
       "title": "مصرف ترافیک",
@@ -1579,6 +1673,12 @@
       "adminLabel": "مدیر",
       "replyPlaceholder": "پاسخ خود را بنویسید...",
       "sendReply": "ارسال پاسخ",
+      "attachMedia": "پیوست رسانه",
+      "invalidFileType": "نوع فایل نامعتبر. از تصاویر، ویدئو (MP4, WebM) یا اسناد (PDF, DOC, TXT, ZIP) استفاده کنید.",
+      "fileTooLarge": "فایل بسیار بزرگ است. حداکثر اندازه ۱۰ مگابایت.",
+      "uploadFailed": "آپلود فایل ناموفق بود",
+      "uploading": "در حال آپلود...",
+      "uploadComplete": "آپلود شد",
       "settings": "تنظیمات",
       "settingsSubtitle": "پیکربندی سیستم تیکت و SLA",
       "settingsLoadError": "خطا در بارگذاری تنظیمات",
