@@ -1096,6 +1096,7 @@
       "promocodes": "Promo Codes",
       "promoGroups": "Discount Groups",
       "trafficUsage": "Traffic Usage",
+      "deviceObservability": "Device Observability",
       "updates": "Updates",
       "pinnedMessages": "Pinned Messages",
       "partners": "Partners",
@@ -1131,6 +1132,7 @@
       "promocodesDesc": "Manage promo codes",
       "promoGroupsDesc": "Discount groups for users",
       "trafficUsageDesc": "Per-user traffic by nodes",
+      "deviceObservabilityDesc": "Device limits vs actual connections",
       "updatesDesc": "Bot & cabinet versions",
       "pinnedMessagesDesc": "Manage pinned messages for users",
       "partnersDesc": "Manage partner applications and commissions",
@@ -1357,6 +1359,70 @@
       "subStart": "Start",
       "subEnd": "End",
       "lastNode": "Last Node"
+    },
+    "deviceObservability": {
+      "title": "Device Observability",
+      "subtitle": "Actual connected devices vs subscription limits",
+      "loadError": "Failed to load device observability data",
+      "loadingProgress": "Loaded {{loaded}} of {{total}} pages",
+      "lastUpdated": "Updated: {{date}}",
+      "subscriptionStatuses": {
+        "active": "Active",
+        "trial": "Trial",
+        "limited": "Limited",
+        "expired": "Expired",
+        "disabled": "Disabled",
+        "unknown": "Unknown"
+      },
+      "stats": {
+        "totalUsers": "Users analyzed",
+        "connectedDevices": "Connected devices",
+        "overLimit": "Over limit",
+        "atLimit": "At limit",
+        "unlimited": "Unlimited plans",
+        "missingFromTraffic": "{{count}} users are present in enrichment but missing in traffic list"
+      },
+      "filters": {
+        "searchPlaceholder": "Search by name, username, user ID or Telegram ID",
+        "all": "All users",
+        "overLimit": "Over limit",
+        "atLimit": "At limit",
+        "withinLimit": "Within limit",
+        "unlimited": "Unlimited only",
+        "withDevices": "With connected devices",
+        "sortConnected": "Connected devices",
+        "sortOverLimit": "Over-limit delta",
+        "sortUsage": "Utilization %",
+        "sortLimit": "Device limit",
+        "sortName": "Name",
+        "direction": "Sort direction",
+        "desc": "DESC",
+        "asc": "ASC",
+        "pageSize": "Rows per page"
+      },
+      "table": {
+        "rank": "#",
+        "user": "User",
+        "subscriptionStatus": "Sub status",
+        "tariff": "Tariff",
+        "limit": "Limit",
+        "connected": "Connected",
+        "delta": "Delta",
+        "usage": "Usage",
+        "openProfile": "Profile",
+        "viewDevices": "Devices",
+        "totalRows": "Rows: {{count}}",
+        "empty": "No users matched the selected filters"
+      },
+      "deviceModal": {
+        "title": "Devices: {{name}}",
+        "subtitle": "Connected: {{connected}} · Limit: {{limit}}",
+        "loadError": "Failed to load user devices",
+        "empty": "No connected devices",
+        "unknownDevice": "Unknown device",
+        "total": "Total devices: {{count}}",
+        "openProfile": "Open profile"
+      }
     },
     "emailTemplates": {
       "title": "Email Templates",

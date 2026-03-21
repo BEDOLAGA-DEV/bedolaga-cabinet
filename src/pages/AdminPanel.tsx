@@ -436,6 +436,13 @@ export default function AdminPanel() {
           permission: 'traffic:read',
         },
         {
+          to: '/admin/device-observability',
+          icon: <DevicePhoneMobileIcon />,
+          title: t('admin.nav.deviceObservability'),
+          description: t('admin.panel.deviceObservabilityDesc'),
+          permission: 'traffic:read',
+        },
+        {
           to: '/admin/sales-stats',
           icon: <ChartBarIcon />,
           title: t('admin.nav.salesStats'),

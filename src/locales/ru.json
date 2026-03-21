@@ -1117,6 +1117,7 @@
       "promocodes": "Промокоды",
       "promoGroups": "Группы скидок",
       "trafficUsage": "Расход трафика",
+      "deviceObservability": "Мониторинг устройств",
       "updates": "Обновления",
       "pinnedMessages": "Закреплённые",
       "partners": "Партнёры",
@@ -1152,6 +1153,7 @@
       "promocodesDesc": "Управление промокодами",
       "promoGroupsDesc": "Группы скидок для пользователей",
       "trafficUsageDesc": "Трафик пользователей по нодам",
+      "deviceObservabilityDesc": "Лимиты устройств и фактические подключения",
       "updatesDesc": "Версии бота и кабинета",
       "pinnedMessagesDesc": "Управление закреплёнными сообщениями",
       "partnersDesc": "Управление заявками партнёров и комиссиями",
@@ -1378,6 +1380,70 @@
       "subStart": "Начало",
       "subEnd": "Конец",
       "lastNode": "Посл. нода"
+    },
+    "deviceObservability": {
+      "title": "Мониторинг устройств",
+      "subtitle": "Фактические подключения устройств против лимитов подписки",
+      "loadError": "Не удалось загрузить данные мониторинга устройств",
+      "loadingProgress": "Загружено страниц: {{loaded}} из {{total}}",
+      "lastUpdated": "Обновлено: {{date}}",
+      "subscriptionStatuses": {
+        "active": "Активна",
+        "trial": "Пробная",
+        "limited": "Ограничена",
+        "expired": "Истекла",
+        "disabled": "Отключена",
+        "unknown": "Неизвестно"
+      },
+      "stats": {
+        "totalUsers": "Пользователей в анализе",
+        "connectedDevices": "Подключённых устройств",
+        "overLimit": "Превысили лимит",
+        "atLimit": "Ровно в лимит",
+        "unlimited": "Безлимитные лимиты",
+        "missingFromTraffic": "{{count}} пользователей есть в enrichment, но нет в списке traffic"
+      },
+      "filters": {
+        "searchPlaceholder": "Поиск по имени, username, ID пользователя или Telegram ID",
+        "all": "Все пользователи",
+        "overLimit": "Превысили лимит",
+        "atLimit": "На лимите",
+        "withinLimit": "В пределах лимита",
+        "unlimited": "Только безлимит",
+        "withDevices": "Только с устройствами",
+        "sortConnected": "Подключено устройств",
+        "sortOverLimit": "Превышение лимита",
+        "sortUsage": "Заполнение лимита %",
+        "sortLimit": "Лимит устройств",
+        "sortName": "Имя",
+        "direction": "Направление сортировки",
+        "desc": "Убыв.",
+        "asc": "Возр.",
+        "pageSize": "Строк на странице"
+      },
+      "table": {
+        "rank": "#",
+        "user": "Пользователь",
+        "subscriptionStatus": "Статус подп.",
+        "tariff": "Тариф",
+        "limit": "Лимит",
+        "connected": "Подключено",
+        "delta": "Дельта",
+        "usage": "Заполнение",
+        "openProfile": "Профиль",
+        "viewDevices": "Устройства",
+        "totalRows": "Строк: {{count}}",
+        "empty": "По выбранным фильтрам пользователей нет"
+      },
+      "deviceModal": {
+        "title": "Устройства: {{name}}",
+        "subtitle": "Подключено: {{connected}} · Лимит: {{limit}}",
+        "loadError": "Не удалось загрузить устройства пользователя",
+        "empty": "Подключённых устройств нет",
+        "unknownDevice": "Неизвестное устройство",
+        "total": "Всего устройств: {{count}}",
+        "openProfile": "Открыть профиль"
+      }
     },
     "emailTemplates": {
       "title": "Email-шаблоны",

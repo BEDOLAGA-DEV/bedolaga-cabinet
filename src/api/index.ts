@@ -19,6 +19,7 @@ export { adminPaymentMethodsApi } from './adminPaymentMethods';
 export { adminPaymentsApi } from './adminPayments';
 export { adminRemnawaveApi } from './adminRemnawave';
 export { adminUsersApi } from './adminUsers';
+export { adminDeviceObservabilityApi } from './adminDeviceObservability';
 export { banSystemApi } from './banSystem';
 export { brandingApi } from './branding';
 export { campaignsApi } from './campaigns';

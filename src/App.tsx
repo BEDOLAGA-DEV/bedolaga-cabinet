@@ -98,6 +98,7 @@ const AdminRemnawave = lazy(() => import('./pages/AdminRemnawave'));
 const AdminRemnawaveSquadDetail = lazy(() => import('./pages/AdminRemnawaveSquadDetail'));
 const AdminEmailTemplates = lazy(() => import('./pages/AdminEmailTemplates'));
 const AdminTrafficUsage = lazy(() => import('./pages/AdminTrafficUsage'));
+const AdminDeviceObservability = lazy(() => import('./pages/AdminDeviceObservability'));
 const AdminSalesStats = lazy(() => import('./pages/AdminSalesStats'));
 const AdminUpdates = lazy(() => import('./pages/AdminUpdates'));
 const AdminUserDetail = lazy(() => import('./pages/AdminUserDetail'));
@@ -906,6 +907,16 @@ function App() {
             <PermissionRoute permission="traffic:read">
               <LazyPage>
                 <AdminTrafficUsage />
+              </LazyPage>
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="/admin/device-observability"
+          element={
+            <PermissionRoute permission="traffic:read">
+              <LazyPage>
+                <AdminDeviceObservability />
               </LazyPage>
             </PermissionRoute>
           }
