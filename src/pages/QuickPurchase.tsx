@@ -940,7 +940,7 @@ export default function QuickPurchase() {
       data.gift_message = giftMessage.trim() || undefined;
     }
 
-    data.yandex_cid = yandexCidRef.current || undefined;
+    data.yandex_cid = getYandexCid() || yandexCidRef.current || undefined;
     purchaseMutation.mutate(data);
   };
 
