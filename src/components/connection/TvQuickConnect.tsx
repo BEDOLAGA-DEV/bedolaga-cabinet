@@ -14,10 +14,18 @@ export default function TvQuickConnect({ subscriptionUrl, isLight }: Props) {
   const [sending, setSending] = useState(false);
   const [toast, setToast] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
   const [scanning, setScanning] = useState(false);
+  const [hasCamera, setHasCamera] = useState(true);
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const scanningRef = useRef(false);
   const toastTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const sendToTVRef = useRef<(code: string) => void>(() => {});
+
+  useEffect(() => {
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setHasCamera(false);
+    }
+  }, []);
 
   const showToast = useCallback((text: string, type: 'success' | 'error') => {
     setToast({ text, type });
@@ -60,6 +68,9 @@ export default function TvQuickConnect({ subscriptionUrl, isLight }: Props) {
     }
   }, [sending, subscriptionUrl, showToast, t]);
 
+  // Keep ref in sync so scanFrame can call latest sendToTV
+  sendToTVRef.current = sendToTV;
+
   const stopScan = useCallback(() => {
     scanningRef.current = false;
     if (streamRef.current) {
@@ -70,67 +81,93 @@ export default function TvQuickConnect({ subscriptionUrl, isLight }: Props) {
     setScanning(false);
   }, []);
 
-  const scanFrame = useCallback(() => {
-    if (!scanningRef.current || !videoRef.current) return;
-    const video = videoRef.current;
-    if (video.readyState !== video.HAVE_ENOUGH_DATA) {
-      requestAnimationFrame(scanFrame);
-      return;
-    }
+  // Start camera when scanning becomes true
+  useEffect(() => {
+    if (!scanning) return;
 
-    const canvas = document.createElement('canvas');
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) { requestAnimationFrame(scanFrame); return; }
-    ctx.drawImage(video, 0, 0);
+    let cancelled = false;
+    let rafId = 0;
 
-    try {
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      // @ts-expect-error jsQR loaded via CDN
-      if (window.jsQR) {
-        // @ts-expect-error jsQR loaded via CDN
-        const result = window.jsQR(imageData.data, imageData.width, imageData.height);
-        if (result?.data) {
-          const parsed = parseQRCode(result.data);
-          if (parsed) {
-            stopScan();
-            setCode(parsed);
-            showToast(`${t('subscription.tvQuickConnect.codeFound')}: ${parsed}`, 'success');
-            setTimeout(() => sendToTV(parsed), 500);
-            return;
+    function scanFrame() {
+      if (cancelled || !scanningRef.current || !videoRef.current) return;
+      const video = videoRef.current;
+      if (!streamRef.current || video.readyState !== video.HAVE_ENOUGH_DATA) {
+        if (streamRef.current) rafId = requestAnimationFrame(scanFrame);
+        return;
+      }
+
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      if (!ctx) { rafId = requestAnimationFrame(scanFrame); return; }
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      try {
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const jsQRFn = (window as any).jsQR;
+        if (jsQRFn) {
+          const qr = jsQRFn(imageData.data, imageData.width, imageData.height);
+          if (qr && qr.data) {
+            const parsed = parseQRCode(qr.data);
+            if (parsed) {
+              scanningRef.current = false;
+              if (streamRef.current) {
+                streamRef.current.getTracks().forEach((tr) => tr.stop());
+                streamRef.current = null;
+              }
+              if (videoRef.current) videoRef.current.srcObject = null;
+              setScanning(false);
+              setCode(parsed);
+              setTimeout(() => sendToTVRef.current(parsed), 500);
+              return;
+            }
           }
         }
-      }
-    } catch { /* continue scanning */ }
+      } catch { /* continue */ }
 
-    requestAnimationFrame(scanFrame);
-  }, [stopScan, showToast, sendToTV, t]);
-
-  const startScan = useCallback(async () => {
-    // Load jsQR if not present
-    // @ts-expect-error jsQR loaded via CDN
-    if (!window.jsQR) {
-      const script = document.createElement('script');
-      script.src = 'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js';
-      document.head.appendChild(script);
-      await new Promise<void>((resolve) => { script.onload = () => resolve(); });
+      rafId = requestAnimationFrame(scanFrame);
     }
 
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-      streamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.play();
+    (async () => {
+      if (cancelled) return;
+
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'environment' },
+        });
+        if (cancelled) {
+          stream.getTracks().forEach((tr) => tr.stop());
+          return;
+        }
+        streamRef.current = stream;
+        const video = videoRef.current;
+        if (video) {
+          video.srcObject = stream;
+          await video.play();
+        }
+        scanningRef.current = true;
+        rafId = requestAnimationFrame(scanFrame);
+      } catch {
+        if (!cancelled) {
+          setScanning(false);
+          setToast({ text: t('subscription.tvQuickConnect.noCamera'), type: 'error' });
+          setTimeout(() => setToast(null), 3000);
+        }
       }
-      scanningRef.current = true;
-      setScanning(true);
-      requestAnimationFrame(scanFrame);
-    } catch {
-      showToast(t('subscription.tvQuickConnect.noCamera'), 'error');
-    }
-  }, [scanFrame, showToast, t]);
+    })();
+
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(rafId);
+      scanningRef.current = false;
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((tr) => tr.stop());
+        streamRef.current = null;
+      }
+    };
+  }, [scanning, t]);
 
   useEffect(() => {
     return () => {
@@ -191,45 +228,53 @@ export default function TvQuickConnect({ subscriptionUrl, isLight }: Props) {
       </div>
 
       {/* QR Scanner */}
-      <div className={cardClass}>
-        <div className="flex items-start gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500/20 to-blue-600/10">
-            <svg className="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
-              <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
-            </svg>
-          </div>
-          <div className="min-w-0 flex-1">
-            <h3 className="font-semibold text-dark-100">{t('subscription.tvQuickConnect.scanTitle')}</h3>
-            <p className="mt-1 text-sm text-dark-400">{t('subscription.tvQuickConnect.scanDescription')}</p>
+      {hasCamera && (
+        <div className={cardClass}>
+          <div className="flex items-start gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500/20 to-blue-600/10">
+              <svg className="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
+              </svg>
+            </div>
+            <div className="min-w-0 flex-1">
+              <h3 className="font-semibold text-dark-100">{t('subscription.tvQuickConnect.scanTitle')}</h3>
+              <p className="mt-1 text-sm text-dark-400">{t('subscription.tvQuickConnect.scanDescription')}</p>
 
-            {!scanning ? (
-              <button
-                onClick={startScan}
-                className="btn-secondary mt-3 w-full justify-center py-3"
-              >
-                <svg className="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
-                </svg>
-                {t('subscription.tvQuickConnect.scanBtn')}
-              </button>
-            ) : (
-              <div className="mt-3 space-y-2">
-                <div className="relative overflow-hidden rounded-xl">
-                  <video ref={videoRef} playsInline className="w-full rounded-xl" />
-                  <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                    <div className="h-48 w-48 rounded-2xl border-2 border-accent-500/60" />
-                  </div>
-                </div>
-                <button onClick={stopScan} className="btn-secondary w-full justify-center py-2.5">
-                  {t('subscription.tvQuickConnect.stopScan')}
+              {!scanning ? (
+                <button
+                  onClick={() => setScanning(true)}
+                  className="btn-secondary mt-3 w-full justify-center py-3"
+                >
+                  <svg className="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z" />
+                  </svg>
+                  {t('subscription.tvQuickConnect.scanBtn')}
                 </button>
-              </div>
-            )}
+              ) : (
+                <div className="mt-3 space-y-2">
+                  <div className="relative overflow-hidden rounded-xl bg-dark-900" style={{ minHeight: 200 }}>
+                    <video
+                      ref={videoRef}
+                      playsInline
+                      muted
+                      autoPlay
+                      className="w-full rounded-xl"
+                    />
+                    <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                      <div className="h-48 w-48 rounded-2xl border-2 border-accent-500/60" />
+                    </div>
+                  </div>
+                  <button onClick={stopScan} className="btn-secondary w-full justify-center py-2.5">
+                    {t('subscription.tvQuickConnect.stopScan')}
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Toast */}
       {toast && (

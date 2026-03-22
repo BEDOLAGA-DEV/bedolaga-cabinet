@@ -2543,6 +2543,7 @@
       "statusOpen": "Открыт",
       "statusPending": "Ожидает",
       "statusAnswered": "Отвечен",
+      "statusResolved": "Решён",
       "statusClosed": "Закрыт",
       "from": "От",
       "created": "Создан",
