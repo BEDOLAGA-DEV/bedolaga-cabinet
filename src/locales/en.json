@@ -3650,6 +3650,11 @@
       "withConnections": "With Connections",
       "revenue": "Revenue"
     },
+    "subscriptionSales": {
+      "title": "Subscription Sales",
+      "subtitle": "Last 7 days",
+      "total": "Total this week"
+    },
     "tariffs": {
       "title": "Tariff Statistics",
       "subtitle": "Subscription distribution by tariffs",

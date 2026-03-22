@@ -235,12 +235,18 @@ export interface TariffStats {
   total_tariff_subscriptions: number;
 }
 
+export interface SubscriptionChartData {
+  date: string;
+  count: number;
+}
+
 export interface DashboardStats {
   nodes: NodesOverview;
   subscriptions: SubscriptionStats;
   financial: FinancialStats;
   servers: ServerStats;
   revenue_chart: RevenueData[];
+  subscription_chart?: SubscriptionChartData[];
   tariff_stats?: TariffStats;
 }
 
