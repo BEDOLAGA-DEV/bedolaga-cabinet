@@ -2046,6 +2046,7 @@
       "statusOpen": "Open",
       "statusPending": "Pending",
       "statusAnswered": "Answered",
+      "statusResolved": "Resolved",
       "statusClosed": "Closed",
       "from": "From",
       "created": "Created",
