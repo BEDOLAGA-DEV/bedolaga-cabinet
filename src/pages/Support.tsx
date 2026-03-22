@@ -175,13 +175,16 @@ export default function Support() {
   const [replyAttachments, setReplyAttachments] = useState<MediaAttachment[]>([]);
   const createFileInputRef = useRef<HTMLInputElement>(null);
   const replyFileInputRef = useRef<HTMLInputElement>(null);
+  const createAttachmentsRef = useRef<MediaAttachment[]>([]);
+  const replyAttachmentsRef = useRef<MediaAttachment[]>([]);
+  useEffect(() => { createAttachmentsRef.current = createAttachments; }, [createAttachments]);
+  useEffect(() => { replyAttachmentsRef.current = replyAttachments; }, [replyAttachments]);
 
   useEffect(() => {
     return () => {
-      createAttachments.forEach((a) => { if (a.preview) URL.revokeObjectURL(a.preview); });
-      replyAttachments.forEach((a) => { if (a.preview) URL.revokeObjectURL(a.preview); });
+      createAttachmentsRef.current.forEach((a) => { if (a.preview) URL.revokeObjectURL(a.preview); });
+      replyAttachmentsRef.current.forEach((a) => { if (a.preview) URL.revokeObjectURL(a.preview); });
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const clearCreateAttachments = () => {
@@ -247,10 +250,17 @@ export default function Support() {
         : undefined;
       const ticket = await ticketsApi.createTicket(newTitle, newMessage, firstMedia);
       // Send additional media as separate messages
+      let failedCount = 0;
       for (let i = 1; i < ready.length; i++) {
         try {
           await ticketsApi.addMessage(ticket.id, '', { media_type: 'photo', media_file_id: ready[i].fileId });
-        } catch { /* ignore */ }
+        } catch (err) {
+          failedCount++;
+          console.error(`[Support] Failed to send attachment ${i + 1}/${ready.length}:`, err);
+        }
+      }
+      if (failedCount > 0) {
+        console.warn(`[Support] ${failedCount} of ${ready.length - 1} additional attachments failed to send`);
       }
       return ticket;
     },
@@ -271,10 +281,17 @@ export default function Support() {
         ? { media_type: 'photo', media_file_id: ready[0].fileId }
         : undefined;
       await ticketsApi.addMessage(selectedTicket!.id, replyMessage, firstMedia);
+      let failedCount = 0;
       for (let i = 1; i < ready.length; i++) {
         try {
           await ticketsApi.addMessage(selectedTicket!.id, '', { media_type: 'photo', media_file_id: ready[i].fileId });
-        } catch { /* ignore */ }
+        } catch (err) {
+          failedCount++;
+          console.error(`[Support] Failed to send reply attachment ${i + 1}/${ready.length}:`, err);
+        }
+      }
+      if (failedCount > 0) {
+        console.warn(`[Support] ${failedCount} of ${ready.length - 1} additional reply attachments failed to send`);
       }
     },
     onSuccess: () => {

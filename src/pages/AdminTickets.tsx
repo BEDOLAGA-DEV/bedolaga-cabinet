@@ -180,6 +180,8 @@ export default function AdminTickets() {
   const [attachments, setAttachments] = useState<MediaAttachment[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const uploadIdRef = useRef(0);
+  const attachmentsRef = useRef<MediaAttachment[]>([]);
+  useEffect(() => { attachmentsRef.current = attachments; }, [attachments]);
 
   // Cleanup blob URLs on unmount
   useEffect(() => {
@@ -187,9 +189,8 @@ export default function AdminTickets() {
     const prevRef = previewRef;
     return () => {
       uploadRef.current++;
-      attachments.forEach((a) => { if (a.preview) URL.revokeObjectURL(a.preview); });
+      attachmentsRef.current.forEach((a) => { if (a.preview) URL.revokeObjectURL(a.preview); });
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const { data: stats } = useQuery({
@@ -214,15 +215,38 @@ export default function AdminTickets() {
   });
 
   const replyMutation = useMutation({
-    mutationFn: ({
+    mutationFn: async ({
       ticketId,
       message,
-      media,
+      readyAttachments,
     }: {
       ticketId: number;
       message: string;
-      media?: { media_type?: string; media_file_id?: string; media_caption?: string };
-    }) => adminApi.replyToTicket(ticketId, message, media),
+      readyAttachments: MediaAttachment[];
+    }) => {
+      const firstMedia = readyAttachments[0]
+        ? { media_type: readyAttachments[0].mediaType, media_file_id: readyAttachments[0].fileId }
+        : undefined;
+      await adminApi.replyToTicket(ticketId, message, firstMedia);
+
+      // Additional media as separate replies
+      let failedCount = 0;
+      for (let i = 1; i < readyAttachments.length; i++) {
+        const att = readyAttachments[i];
+        try {
+          await adminApi.replyToTicket(ticketId, '', {
+            media_type: att.mediaType,
+            media_file_id: att.fileId,
+          });
+        } catch (err) {
+          failedCount++;
+          console.error(`[AdminTickets] Failed to send attachment ${i + 1}/${readyAttachments.length}:`, err);
+        }
+      }
+      if (failedCount > 0) {
+        console.warn(`[AdminTickets] ${failedCount} of ${readyAttachments.length - 1} additional attachments failed to send`);
+      }
+    },
     onSuccess: () => {
       setReplyText('');
       clearAttachments();
@@ -291,31 +315,13 @@ export default function AdminTickets() {
     }
   };
 
-  const handleReply = async (e: React.FormEvent) => {
+  const handleReply = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedTicketId || !replyText.trim()) return;
     if (attachments.some((a) => a.uploading || a.error)) return;
 
     const readyAttachments = attachments.filter((a) => a.fileId);
-
-    // First message: text + first media (if any)
-    const firstMedia = readyAttachments[0];
-    const media = firstMedia
-      ? { media_type: firstMedia.mediaType, media_file_id: firstMedia.fileId }
-      : undefined;
-
-    replyMutation.mutate({ ticketId: selectedTicketId, message: replyText, media });
-
-    // Additional media as separate replies
-    for (let i = 1; i < readyAttachments.length; i++) {
-      const att = readyAttachments[i];
-      try {
-        await adminApi.replyToTicket(selectedTicketId, '', {
-          media_type: att.mediaType,
-          media_file_id: att.fileId,
-        });
-      } catch { /* ignore */ }
-    }
+    replyMutation.mutate({ ticketId: selectedTicketId, message: replyText, readyAttachments });
   };
 
   const getStatusBadge = (status: string) => {
