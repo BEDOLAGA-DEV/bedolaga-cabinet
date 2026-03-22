@@ -471,11 +471,6 @@
       "stopScan": "Close camera",
       "noCamera": "Camera access denied",
       "codeFound": "Code found",
-      "howTitle": "How to get the code",
-      "step1": "Download Happ TV app on your TV from Google Play or AppStore",
-      "step2": "Open the app on TV",
-      "step3": "Go to \"Share via Web\"",
-      "step4": "Enter the code from the left side of the screen or scan the QR code on the right"
     },
     "myDevices": "My Devices",
     "noDevices": "No connected devices",
