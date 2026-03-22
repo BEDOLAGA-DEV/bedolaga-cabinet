@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
-const HAPP_TV_API = 'https://check.happ.su/sendtv';
+const HAPP_TV_API = '/happ-tv';
 
 interface Props {
   subscriptionUrl: string;
@@ -87,6 +87,8 @@ export default function TvQuickConnect({ subscriptionUrl, isLight }: Props) {
 
     let cancelled = false;
     let rafId = 0;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const jsQRFn = (window as any).jsQR;
 
     function scanFrame() {
       if (cancelled || !scanningRef.current || !videoRef.current) return;
@@ -96,17 +98,23 @@ export default function TvQuickConnect({ subscriptionUrl, isLight }: Props) {
         return;
       }
 
+      const w = video.videoWidth;
+      const h = video.videoHeight;
+
+      if (!w || !h) {
+        rafId = requestAnimationFrame(scanFrame);
+        return;
+      }
+
       const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
       const ctx = canvas.getContext('2d');
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
       if (!ctx) { rafId = requestAnimationFrame(scanFrame); return; }
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      ctx.drawImage(video, 0, 0, w, h);
 
       try {
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const jsQRFn = (window as any).jsQR;
+        const imageData = ctx.getImageData(0, 0, w, h);
         if (jsQRFn) {
           const qr = jsQRFn(imageData.data, imageData.width, imageData.height);
           if (qr && qr.data) {
