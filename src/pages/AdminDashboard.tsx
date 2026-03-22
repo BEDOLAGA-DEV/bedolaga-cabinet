@@ -361,6 +361,58 @@ function RevenueChart({ data }: { data: { date: string; amount_rubles: number }[
   );
 }
 
+function SubscriptionSalesChart({ data }: { data: { date: string; count: number }[] }) {
+  const { t } = useTranslation();
+
+  if (!data || data.length === 0) {
+    return (
+      <div className="flex h-48 items-center justify-center text-dark-500">
+        {t('common.noData')}
+      </div>
+    );
+  }
+
+  const last7Days = data.slice(-7);
+  const maxValue = Math.max(...last7Days.map((d) => d.count), 1);
+  const total = last7Days.reduce((sum, d) => sum + d.count, 0);
+
+  return (
+    <div className="space-y-3">
+      {last7Days.map((item) => {
+        const percentage = (item.count / maxValue) * 100;
+        const date = new Date(item.date);
+        const dayName = date.toLocaleDateString('ru-RU', { weekday: 'short' });
+        const dayNum = date.getDate();
+
+        return (
+          <div key={item.date} className="group">
+            <div className="mb-1 flex items-center justify-between">
+              <span className="text-sm font-medium capitalize text-dark-300">
+                {dayName}, {dayNum}
+              </span>
+              <span className="text-sm font-semibold text-dark-100">
+                {item.count}
+              </span>
+            </div>
+            <div className="h-3 overflow-hidden rounded-full bg-dark-700/50">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-accent-600 to-accent-400 transition-all duration-500 ease-out group-hover:from-accent-500 group-hover:to-accent-300"
+                style={{ width: `${Math.max(percentage, 2)}%` }}
+              />
+            </div>
+          </div>
+        );
+      })}
+      <div className="border-t border-dark-700 pt-3">
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-dark-400">{t('adminDashboard.subscriptionSales.total')}</span>
+          <span className="text-lg font-bold text-accent-400">{total}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function AdminDashboard() {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -591,7 +643,7 @@ export default function AdminDashboard() {
         )}
       </div>
 
-      {/* Revenue and Subscriptions */}
+      {/* Revenue and Subscription Sales */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Revenue Chart */}
         <div className="rounded-xl border border-dark-700 bg-dark-800/30 p-5 backdrop-blur">
@@ -627,101 +679,119 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Subscription Stats */}
-        <div className="rounded-xl border border-dark-700 bg-dark-800/30 p-5 backdrop-blur">
-          <div className="mb-4 flex items-center gap-3">
-            <div className="rounded-lg bg-accent-500/20 p-2.5 text-accent-400">
-              <SparklesIcon />
+        {/* Subscription Sales Chart */}
+        {stats?.subscription_chart && stats.subscription_chart.length > 0 && (
+          <div className="rounded-xl border border-dark-700 bg-dark-800/30 p-5 backdrop-blur">
+            <div className="mb-4 flex items-center gap-3">
+              <div className="rounded-lg bg-accent-500/20 p-2.5 text-accent-400">
+                <ChartBarIcon />
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold text-dark-100">
+                  {t('adminDashboard.subscriptionSales.title')}
+                </h2>
+                <p className="text-sm text-dark-400">{t('adminDashboard.subscriptionSales.subtitle')}</p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-lg font-semibold text-dark-100">
-                {t('adminDashboard.subscriptions.title')}
-              </h2>
-              <p className="text-sm text-dark-400">{t('adminDashboard.subscriptions.subtitle')}</p>
+            <SubscriptionSalesChart data={stats.subscription_chart} />
+          </div>
+        )}
+      </div>
+
+      {/* Subscription Stats — full width */}
+      <div className="rounded-xl border border-dark-700 bg-dark-800/30 p-5 backdrop-blur">
+        <div className="mb-4 flex items-center gap-3">
+          <div className="rounded-lg bg-accent-500/20 p-2.5 text-accent-400">
+            <SparklesIcon />
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold text-dark-100">
+              {t('adminDashboard.subscriptions.title')}
+            </h2>
+            <p className="text-sm text-dark-400">{t('adminDashboard.subscriptions.subtitle')}</p>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            <div className="rounded-lg bg-dark-900/50 p-4">
+              <div className="mb-1 text-xs text-dark-500">
+                {t('adminDashboard.subscriptions.active')}
+              </div>
+              <div className="text-2xl font-bold text-success-400">
+                {stats?.subscriptions.active || 0}
+              </div>
+            </div>
+            <div className="rounded-lg bg-dark-900/50 p-4">
+              <div className="mb-1 text-xs text-dark-500">
+                {t('adminDashboard.subscriptions.trial')}
+              </div>
+              <div className="text-2xl font-bold text-warning-400">
+                {stats?.subscriptions.trial || 0}
+              </div>
+            </div>
+            <div className="rounded-lg bg-dark-900/50 p-4">
+              <div className="mb-1 text-xs text-dark-500">
+                {t('adminDashboard.subscriptions.paid')}
+              </div>
+              <div className="text-2xl font-bold text-accent-400">
+                {stats?.subscriptions.paid || 0}
+              </div>
+            </div>
+            <div className="rounded-lg bg-dark-900/50 p-4">
+              <div className="mb-1 text-xs text-dark-500">
+                {t('adminDashboard.subscriptions.expired')}
+              </div>
+              <div className="text-2xl font-bold text-error-400">
+                {stats?.subscriptions.expired || 0}
+              </div>
             </div>
           </div>
 
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="rounded-lg bg-dark-900/50 p-4">
-                <div className="mb-1 text-xs text-dark-500">
-                  {t('adminDashboard.subscriptions.active')}
+          <div className="border-t border-dark-700 pt-4">
+            <div className="mb-3 text-sm font-medium text-dark-300">
+              {t('adminDashboard.subscriptions.newSubscriptions')}
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              <div className="text-center">
+                <div className="text-xl font-bold text-dark-100">
+                  {stats?.subscriptions.purchased_today || 0}
                 </div>
-                <div className="text-2xl font-bold text-success-400">
-                  {stats?.subscriptions.active || 0}
-                </div>
-              </div>
-              <div className="rounded-lg bg-dark-900/50 p-4">
-                <div className="mb-1 text-xs text-dark-500">
-                  {t('adminDashboard.subscriptions.trial')}
-                </div>
-                <div className="text-2xl font-bold text-warning-400">
-                  {stats?.subscriptions.trial || 0}
+                <div className="text-xs text-dark-500">
+                  {t('adminDashboard.subscriptions.today')}
                 </div>
               </div>
-              <div className="rounded-lg bg-dark-900/50 p-4">
-                <div className="mb-1 text-xs text-dark-500">
-                  {t('adminDashboard.subscriptions.paid')}
+              <div className="text-center">
+                <div className="text-xl font-bold text-dark-100">
+                  {stats?.subscriptions.purchased_week || 0}
                 </div>
-                <div className="text-2xl font-bold text-accent-400">
-                  {stats?.subscriptions.paid || 0}
+                <div className="text-xs text-dark-500">
+                  {t('adminDashboard.subscriptions.week')}
                 </div>
               </div>
-              <div className="rounded-lg bg-dark-900/50 p-4">
-                <div className="mb-1 text-xs text-dark-500">
-                  {t('adminDashboard.subscriptions.expired')}
+              <div className="text-center">
+                <div className="text-xl font-bold text-dark-100">
+                  {stats?.subscriptions.purchased_month || 0}
                 </div>
-                <div className="text-2xl font-bold text-error-400">
-                  {stats?.subscriptions.expired || 0}
+                <div className="text-xs text-dark-500">
+                  {t('adminDashboard.subscriptions.month')}
                 </div>
               </div>
             </div>
-
-            <div className="border-t border-dark-700 pt-4">
-              <div className="mb-3 text-sm font-medium text-dark-300">
-                {t('adminDashboard.subscriptions.newSubscriptions')}
-              </div>
-              <div className="grid grid-cols-3 gap-3">
-                <div className="text-center">
-                  <div className="text-xl font-bold text-dark-100">
-                    {stats?.subscriptions.purchased_today || 0}
-                  </div>
-                  <div className="text-xs text-dark-500">
-                    {t('adminDashboard.subscriptions.today')}
-                  </div>
-                </div>
-                <div className="text-center">
-                  <div className="text-xl font-bold text-dark-100">
-                    {stats?.subscriptions.purchased_week || 0}
-                  </div>
-                  <div className="text-xs text-dark-500">
-                    {t('adminDashboard.subscriptions.week')}
-                  </div>
-                </div>
-                <div className="text-center">
-                  <div className="text-xl font-bold text-dark-100">
-                    {stats?.subscriptions.purchased_month || 0}
-                  </div>
-                  <div className="text-xs text-dark-500">
-                    {t('adminDashboard.subscriptions.month')}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {stats?.subscriptions.trial_to_paid_conversion !== undefined && (
-              <div className="rounded-lg border border-accent-500/20 bg-accent-500/10 p-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-dark-300">
-                    {t('adminDashboard.subscriptions.conversion')}
-                  </span>
-                  <span className="text-lg font-bold text-accent-400">
-                    {stats.subscriptions.trial_to_paid_conversion.toFixed(1)}%
-                  </span>
-                </div>
-              </div>
-            )}
           </div>
+
+          {stats?.subscriptions.trial_to_paid_conversion !== undefined && (
+            <div className="rounded-lg border border-accent-500/20 bg-accent-500/10 p-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-dark-300">
+                  {t('adminDashboard.subscriptions.conversion')}
+                </span>
+                <span className="text-lg font-bold text-accent-400">
+                  {stats.subscriptions.trial_to_paid_conversion.toFixed(1)}%
+                </span>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
