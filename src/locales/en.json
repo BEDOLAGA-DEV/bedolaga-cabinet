@@ -470,7 +470,7 @@
       "scanBtn": "Scan QR from TV",
       "stopScan": "Close camera",
       "noCamera": "Camera access denied",
-      "codeFound": "Code found",
+      "codeFound": "Code found"
     },
     "myDevices": "My Devices",
     "noDevices": "No connected devices",
