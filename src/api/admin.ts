@@ -336,7 +336,8 @@ export const statsApi = {
 
   // Get complete dashboard stats
   getDashboardStats: async (): Promise<DashboardStats> => {
-    const response = await apiClient.get('/cabinet/admin/stats/dashboard');
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+    const response = await apiClient.get('/cabinet/admin/stats/dashboard', { params: { tz } });
     return response.data;
   },
 
