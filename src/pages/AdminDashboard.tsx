@@ -316,7 +316,7 @@ function NodeCard({ node, onRestart, onToggle, isLoading }: NodeCardProps) {
 }
 
 function RevenueChart({ data }: { data: { date: string; amount_rubles: number }[] }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { formatAmount, currencySymbol } = useCurrency();
 
   if (!data || data.length === 0) {
@@ -335,7 +335,7 @@ function RevenueChart({ data }: { data: { date: string; amount_rubles: number }[
       {last7Days.map((item) => {
         const percentage = (item.amount_rubles / maxValue) * 100;
         const date = new Date(item.date);
-        const dayName = date.toLocaleDateString('ru-RU', { weekday: 'short' });
+        const dayName = date.toLocaleDateString(i18n.language, { weekday: 'short' });
         const dayNum = date.getDate();
 
         return (
@@ -362,7 +362,7 @@ function RevenueChart({ data }: { data: { date: string; amount_rubles: number }[
 }
 
 function SubscriptionSalesChart({ data }: { data: { date: string; count: number }[] }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   if (!data || data.length === 0) {
     return (
@@ -381,7 +381,7 @@ function SubscriptionSalesChart({ data }: { data: { date: string; count: number 
       {last7Days.map((item) => {
         const percentage = (item.count / maxValue) * 100;
         const date = new Date(item.date);
-        const dayName = date.toLocaleDateString('ru-RU', { weekday: 'short' });
+        const dayName = date.toLocaleDateString(i18n.language, { weekday: 'short' });
         const dayNum = date.getDate();
 
         return (
@@ -414,7 +414,7 @@ function SubscriptionSalesChart({ data }: { data: { date: string; count: number 
 }
 
 export default function AdminDashboard() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { formatAmount, currencySymbol } = useCurrency();
   const { capabilities } = usePlatform();
@@ -1165,7 +1165,7 @@ export default function AdminDashboard() {
                     </td>
                     <td className="px-2 py-3 text-right">
                       <span className="text-xs text-dark-400">
-                        {new Date(payment.created_at).toLocaleString('ru-RU', {
+                        {new Date(payment.created_at).toLocaleString(i18n.language, {
                           day: '2-digit',
                           month: '2-digit',
                           hour: '2-digit',
@@ -1208,7 +1208,7 @@ export default function AdminDashboard() {
                 <div className="flex items-center justify-between text-xs text-dark-500">
                   <span>{payment.payment_method || '-'}</span>
                   <span>
-                    {new Date(payment.created_at).toLocaleString('ru-RU', {
+                    {new Date(payment.created_at).toLocaleString(i18n.language, {
                       day: '2-digit',
                       month: '2-digit',
                       hour: '2-digit',
