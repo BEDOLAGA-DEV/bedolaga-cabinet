@@ -624,10 +624,10 @@ export default function Support() {
                     ref={createFileInputRef}
                     type="file"
                     accept="image/jpeg,image/png,image/gif,image/webp"
+                    multiple
                     className="hidden"
                     onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) handleFileSelect(file, setCreateAttachments);
+                      Array.from(e.target.files || []).forEach((file) => handleFileSelect(file, setCreateAttachments));
                       e.target.value = '';
                     }}
                   />
@@ -768,10 +768,10 @@ export default function Support() {
                         ref={replyFileInputRef}
                         type="file"
                         accept="image/jpeg,image/png,image/gif,image/webp"
+                        multiple
                         className="hidden"
                         onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) handleFileSelect(file, setReplyAttachments);
+                          Array.from(e.target.files || []).forEach((file) => handleFileSelect(file, setReplyAttachments));
                           e.target.value = '';
                         }}
                       />
