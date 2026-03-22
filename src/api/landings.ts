@@ -101,6 +101,7 @@ export interface PurchaseRequest {
   gift_recipient_type?: 'email' | 'telegram';
   gift_recipient_value?: string;
   gift_message?: string;
+  yandex_cid?: string;
 }
 
 export interface PurchaseResponse {
@@ -354,7 +355,8 @@ export const adminLandingsApi = {
   },
 
   getStats: async (id: number): Promise<LandingStatsResponse> => {
-    const response = await apiClient.get(`/cabinet/admin/landings/${id}/stats`);
+    const { USER_TIMEZONE } = await import('../utils/format');
+    const response = await apiClient.get(`/cabinet/admin/landings/${id}/stats`, { params: { tz: USER_TIMEZONE } });
     return response.data;
   },
 
