@@ -355,8 +355,8 @@ export const adminLandingsApi = {
   },
 
   getStats: async (id: number): Promise<LandingStatsResponse> => {
-    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
-    const response = await apiClient.get(`/cabinet/admin/landings/${id}/stats`, { params: { tz } });
+    const { USER_TIMEZONE } = await import('../utils/format');
+    const response = await apiClient.get(`/cabinet/admin/landings/${id}/stats`, { params: { tz: USER_TIMEZONE } });
     return response.data;
   },
 
