@@ -208,7 +208,8 @@
     "continueWithDiscord": "Continue with Discord",
     "continueWithVk": "Continue with VK",
     "oauthError": "Authorization was denied or failed",
-    "oauthExpired": "OAuth session expired. Please try again."
+    "oauthExpired": "OAuth session expired. Please try again.",
+    "disposableEmail": "Disposable email addresses are not allowed. Please use a permanent email."
   },
   "emailVerification": {
     "title": "Email Verification",
@@ -456,6 +457,20 @@
       "qrTitle": "Subscription QR Code",
       "qrScanHint": "Scan to connect",
       "qrButton": "QR Code"
+    },
+    "tvQuickConnect": {
+      "title": "Connect TV",
+      "description": "Enter the 5-character code from your TV screen",
+      "sendBtn": "Send to TV",
+      "badCode": "Enter a 5-character code (letters and digits)",
+      "sent": "Sent to TV!",
+      "error": "Failed to send to TV",
+      "scanTitle": "Scan QR Code",
+      "scanDescription": "Scan the QR code from your TV screen",
+      "scanBtn": "Scan QR from TV",
+      "stopScan": "Close camera",
+      "noCamera": "Camera access denied",
+      "codeFound": "Code found"
     },
     "myDevices": "My Devices",
     "noDevices": "No connected devices",
@@ -2027,6 +2042,7 @@
       "statusOpen": "Open",
       "statusPending": "Pending",
       "statusAnswered": "Answered",
+      "statusResolved": "Resolved",
       "statusClosed": "Closed",
       "from": "From",
       "created": "Created",
@@ -2066,7 +2082,10 @@
       "userNotificationsEnabled": "User Notifications",
       "userNotificationsEnabledDesc": "Send notifications to users about admin replies",
       "adminNotificationsEnabled": "Admin Notifications",
-      "adminNotificationsEnabledDesc": "Send notifications to admins about new tickets and replies"
+      "adminNotificationsEnabledDesc": "Send notifications to admins about new tickets and replies",
+      "priorityNormal": "Normal",
+      "priorityHigh": "High",
+      "priorityUrgent": "Urgent"
     },
     "tariffs": {
       "title": "Tariff Management",
@@ -3649,6 +3668,11 @@
       "available": "Available",
       "withConnections": "With Connections",
       "revenue": "Revenue"
+    },
+    "subscriptionSales": {
+      "title": "Subscription Sales",
+      "subtitle": "Last 7 days",
+      "total": "Total this week"
     },
     "tariffs": {
       "title": "Tariff Statistics",
