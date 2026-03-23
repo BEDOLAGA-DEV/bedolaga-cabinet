@@ -14,7 +14,7 @@ export const VideoExtension = Node.create({
   addAttributes() {
     return {
       src: { default: null },
-      controls: { default: true },
+      controls: { default: '' },
       class: { default: null },
       preload: { default: 'metadata' },
     };
@@ -25,6 +25,6 @@ export const VideoExtension = Node.create({
   },
 
   renderHTML({ HTMLAttributes }) {
-    return ['video', mergeAttributes(HTMLAttributes, { controls: '' })];
+    return ['video', mergeAttributes(HTMLAttributes)];
   },
 });

@@ -164,16 +164,17 @@ const SANITIZE_CONFIG = {
 };
 
 /**
- * Sanitize HTML with scoped DOMPurify hooks.
- *
- * Hooks are registered/removed inside this function to avoid polluting the
- * global DOMPurify instance (other pages use DOMPurify with their own config).
+ * Isolated DOMPurify instance for article content sanitization.
+ * Using a separate instance avoids polluting the global DOMPurify singleton
+ * that other pages may use with their own hooks/config.
  */
+const articlePurify = DOMPurify(window);
+
 function sanitizeHtml(html: string): string {
-  DOMPurify.removeAllHooks();
+  articlePurify.removeAllHooks();
 
   // Hook: strip iframes with disallowed src
-  DOMPurify.addHook('afterSanitizeAttributes', (node) => {
+  articlePurify.addHook('afterSanitizeAttributes', (node) => {
     if (node.tagName === 'IFRAME') {
       const src = node.getAttribute('src') ?? '';
       if (!isAllowedIframeSrc(src)) {
@@ -191,7 +192,7 @@ function sanitizeHtml(html: string): string {
 
   // Hook: validate <video> src — only allow http/https (block javascript:, data:, etc.)
   // HTTP is permitted because request.base_url behind a reverse proxy returns http://
-  DOMPurify.addHook('afterSanitizeAttributes', (node) => {
+  articlePurify.addHook('afterSanitizeAttributes', (node) => {
     if (node.tagName === 'VIDEO') {
       const src = node.getAttribute('src') ?? '';
       try {
@@ -210,7 +211,7 @@ function sanitizeHtml(html: string): string {
   });
 
   // Hook: force safe link attributes
-  DOMPurify.addHook('afterSanitizeAttributes', (node) => {
+  articlePurify.addHook('afterSanitizeAttributes', (node) => {
     if (node.tagName === 'A') {
       node.setAttribute('target', '_blank');
       node.setAttribute('rel', 'noopener noreferrer');
@@ -218,7 +219,7 @@ function sanitizeHtml(html: string): string {
   });
 
   // Hook: restrict inline styles to text-align only (used by TipTap)
-  DOMPurify.addHook('afterSanitizeAttributes', (node) => {
+  articlePurify.addHook('afterSanitizeAttributes', (node) => {
     if (node.hasAttribute('style')) {
       const style = node.getAttribute('style') ?? '';
       const match = style.match(/text-align\s*:\s*(left|center|right|justify)/i);
@@ -230,8 +231,8 @@ function sanitizeHtml(html: string): string {
     }
   });
 
-  const result = DOMPurify.sanitize(html, SANITIZE_CONFIG);
-  DOMPurify.removeAllHooks();
+  const result = articlePurify.sanitize(html, SANITIZE_CONFIG);
+  articlePurify.removeAllHooks();
   return result;
 }
 
@@ -422,7 +423,7 @@ export default function NewsArticlePage() {
           className="overflow-hidden rounded-xl"
         >
           <img
-            src={article.featured_image_url!}
+            src={article.featured_image_url}
             alt={article.title}
             className="h-auto w-full rounded-xl object-cover"
             loading="eager"
