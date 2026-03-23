@@ -7,7 +7,6 @@ import { newsApi } from '../../api/news';
 import { useHapticFeedback } from '../../platform/hooks/useHaptic';
 import { cn } from '../../lib/utils';
 import type { NewsListItem } from '../../types/news';
-import GridBackground from './GridBackground';
 
 // --- Security: hex color validation to prevent CSS injection ---
 const HEX_COLOR_RE = /^#(?:[0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/;
@@ -46,24 +45,6 @@ const ArrowIcon = () => (
 );
 
 // --- Sub-components ---
-
-function ScanLine() {
-  return (
-    <motion.div
-      className="pointer-events-none absolute left-0 right-0 top-0 z-[2] h-[2px]"
-      style={{
-        background:
-          'linear-gradient(90deg, transparent, rgba(var(--color-accent-400), 0.5), transparent)',
-      }}
-      animate={{ y: ['0%', '2000%'] }}
-      transition={{
-        duration: 4,
-        ease: 'easeInOut',
-        repeat: Infinity,
-      }}
-    />
-  );
-}
 
 interface CategoryBadgeProps {
   category: string;
@@ -434,11 +415,8 @@ export default function NewsSection() {
   }
 
   return (
-    <section className="relative -mx-4 overflow-hidden rounded-2xl bg-dark-950 lg:-mx-6">
-      <GridBackground />
-      <ScanLine />
-
-      <div className="relative z-[1] px-5 py-8 sm:px-6 sm:py-10">
+    <section className="relative overflow-hidden rounded-2xl bg-dark-900/50 backdrop-blur-xl">
+      <div className="px-5 py-8 sm:px-6 sm:py-10">
         {/* Header */}
         <motion.div
           variants={fadeSlideUp}
