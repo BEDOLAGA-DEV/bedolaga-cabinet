@@ -6,6 +6,7 @@ import { adminPaymentsApi, type SearchStats } from '../api/adminPayments';
 import { useCurrency } from '../hooks/useCurrency';
 import type { PendingPayment, PaginatedResponse } from '../types';
 import { usePlatform } from '../platform/hooks/usePlatform';
+import { USER_TIMEZONE } from '../utils/format';
 
 // BackIcon
 const BackIcon = () => (
@@ -75,10 +76,10 @@ interface StatCardProps {
 
 function StatCard({ label, value, color, isActive, onClick }: StatCardProps) {
   const colors: Record<string, string> = {
-    blue: 'border-accent-500/30 bg-accent-500/20 text-accent-400',
-    amber: 'border-amber-500/30 bg-amber-500/20 text-amber-400',
-    green: 'border-green-500/30 bg-green-500/20 text-green-400',
-    red: 'border-red-500/30 bg-red-500/20 text-red-400',
+    blue: 'border-accent-500/50 bg-accent-500/25 text-accent-300',
+    amber: 'border-amber-500/50 bg-amber-500/25 text-amber-300',
+    green: 'border-green-400/50 bg-green-400/25 text-green-300',
+    red: 'border-red-500/50 bg-red-500/25 text-red-300',
   };
 
   return (
@@ -107,7 +108,7 @@ export default function AdminPayments() {
   const [searchInput, setSearchInput] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [periodFilter, setPeriodFilter] = useState<string>('24h');
+  const [periodFilter, setPeriodFilter] = useState<string>('today');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [showDateRange, setShowDateRange] = useState(false);
@@ -131,7 +132,7 @@ export default function AdminPayments() {
 
   // Auto-refresh only when filters are at defaults and no search
   const isDefaultFilters =
-    !searchQuery && statusFilter === 'all' && periodFilter === '24h' && !methodFilter;
+    !searchQuery && statusFilter === 'all' && periodFilter === 'today' && !methodFilter;
 
   // Shared query params
   const queryParams = {
@@ -141,6 +142,7 @@ export default function AdminPayments() {
     period: periodFilter === 'custom' ? undefined : periodFilter,
     date_from: periodFilter === 'custom' && dateFrom ? dateFrom : undefined,
     date_to: periodFilter === 'custom' && dateTo ? dateTo : undefined,
+    tz: periodFilter === 'today' ? USER_TIMEZONE : undefined,
   };
 
   // Fetch payments
@@ -210,7 +212,7 @@ export default function AdminPayments() {
 
   // Period filter options
   const periodOptions = [
-    { value: '24h', label: t('admin.payments.period24h') },
+    { value: 'today', label: t('admin.payments.periodToday', 'Сегодня') },
     { value: '7d', label: t('admin.payments.period7d') },
     { value: '30d', label: t('admin.payments.period30d') },
     { value: 'all', label: t('admin.payments.periodAll') },
@@ -456,11 +458,6 @@ export default function AdminPayments() {
                         <span className="font-semibold text-dark-100">
                           {payment.method_display}
                         </span>
-                        {payment.is_paid && (
-                          <span className="rounded-full bg-green-500/20 px-2 py-0.5 text-xs font-medium text-green-400">
-                            {t('admin.payments.paid')}
-                          </span>
-                        )}
                       </div>
 
                       {/* Amount */}
@@ -477,58 +474,6 @@ export default function AdminPayments() {
                         <code className="font-mono text-accent-400">{payment.identifier}</code>
                       </div>
 
-                      {/* User info */}
-                      {(payment.user_username ||
-                        payment.user_telegram_id ||
-                        payment.user_email) && (
-                        <div className="mt-2 text-sm text-dark-400">
-                          <span className="text-dark-500">{t('admin.payments.user')}:</span>{' '}
-                          {payment.user_id ? (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                navigate(`/admin/users/${payment.user_id}`);
-                              }}
-                              className="inline-flex items-center gap-1 transition-colors hover:underline"
-                            >
-                              {payment.user_username && (
-                                <span className="text-accent-400">@{payment.user_username}</span>
-                              )}
-                              {payment.user_username &&
-                                (payment.user_telegram_id || payment.user_email) && (
-                                  <span className="text-dark-500"> &middot; </span>
-                                )}
-                              {payment.user_telegram_id && (
-                                <span className="text-accent-300">
-                                  TG: {payment.user_telegram_id}
-                                </span>
-                              )}
-                              {!payment.user_telegram_id && payment.user_email && (
-                                <span className="text-accent-300">{payment.user_email}</span>
-                              )}
-                            </button>
-                          ) : (
-                            <>
-                              {payment.user_username && (
-                                <span className="text-dark-200">@{payment.user_username}</span>
-                              )}
-                              {payment.user_username &&
-                                (payment.user_telegram_id || payment.user_email) && (
-                                  <span className="text-dark-500"> &middot; </span>
-                                )}
-                              {payment.user_telegram_id && (
-                                <span className="text-dark-300">
-                                  TG: {payment.user_telegram_id}
-                                </span>
-                              )}
-                              {!payment.user_telegram_id && payment.user_email && (
-                                <span className="text-dark-300">{payment.user_email}</span>
-                              )}
-                            </>
-                          )}
-                        </div>
-                      )}
-
                       {/* Timestamp */}
                       <div className="mt-1 text-xs text-dark-500">
                         {new Date(payment.created_at).toLocaleString()}
@@ -536,8 +481,26 @@ export default function AdminPayments() {
                     </div>
 
                     {/* Action buttons */}
-                    <div className="flex flex-col gap-2">
-                      {payment.payment_url && (
+                    <div className="flex flex-col items-end gap-2">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (payment.user_id) {
+                            navigate(`/admin/users/${payment.user_id}`);
+                          } else {
+                            navigate(`/admin/users?search=${encodeURIComponent(payment.identifier)}`);
+                          }
+                        }}
+                        className="flex items-center gap-1.5 rounded-lg border border-dark-600 bg-dark-700/50 px-3 py-1.5 text-xs text-dark-300 transition-colors hover:border-accent-500/50 hover:text-accent-400"
+                        title={t('admin.payments.viewUser', 'Профиль')}
+                      >
+                        <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                          <circle cx="12" cy="7" r="4" />
+                        </svg>
+                        {payment.user_username ? `@${payment.user_username}` : t('admin.payments.viewUser', 'Профиль')}
+                      </button>
+                      {payment.payment_url && !payment.is_paid && (
                         <a
                           href={payment.payment_url}
                           target="_blank"
