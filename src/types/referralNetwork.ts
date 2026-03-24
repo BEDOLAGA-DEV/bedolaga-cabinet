@@ -1,3 +1,5 @@
+export type SubscriptionStatus = 'trial_active' | 'paid_active' | 'trial_expired' | 'paid_expired';
+
 export interface NetworkUserNode {
   id: number;
   tg_id: number | null;
@@ -14,6 +16,7 @@ export interface NetworkUserNode {
   personal_spent_kopeks: number;
   subscription_name: string | null;
   subscription_end: string | null;
+  subscription_status: SubscriptionStatus | null;
   registered_at: string | null;
 }
 
@@ -48,6 +51,7 @@ export interface NetworkGraphData {
   total_referrers: number;
   total_campaigns: number;
   total_earnings_kopeks: number;
+  total_subscription_revenue_kopeks: number;
 }
 
 export interface NetworkUserDetail {
@@ -68,6 +72,7 @@ export interface NetworkUserDetail {
   personal_spent_kopeks: number;
   subscription_name: string | null;
   subscription_end: string | null;
+  subscription_status: SubscriptionStatus | null;
   registered_at: string | null;
 }
 

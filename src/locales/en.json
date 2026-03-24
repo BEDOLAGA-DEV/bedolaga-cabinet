@@ -180,6 +180,9 @@
     "waitingForConfirmation": "Waiting for confirmation...",
     "deepLinkExpired": "Link expired. Please try again.",
     "tryAgain": "Try Again",
+    "scanQrToLogin": "Scan QR code with your phone camera",
+    "orSendCommand": "Or send the bot this command:",
+    "commandCopied": "Command copied",
     "welcomeBack": "Welcome back!",
     "loginTitle": "Login to Cabinet",
     "loginSubtitle": "Sign in with Telegram or use your email",
@@ -1108,7 +1111,8 @@
       "auditLog": "Audit Log",
       "salesStats": "Sales Statistics",
       "landings": "Landings",
-      "referralNetwork": "Referral Network"
+      "referralNetwork": "Referral Network",
+      "news": "News"
     },
     "panel": {
       "title": "Admin Panel",
@@ -1144,7 +1148,8 @@
       "auditLogDesc": "Review system activity and access history",
       "salesStatsDesc": "Sales analytics and trends",
       "landingsDesc": "Quick purchase landing pages",
-      "referralNetworkDesc": "Referral graph and campaign visualization"
+      "referralNetworkDesc": "Referral graph and campaign visualization",
+      "newsDesc": "Manage news articles and publications"
     },
     "salesStats": {
       "title": "Sales Statistics",
@@ -1246,17 +1251,24 @@
         "totalUsers": "Users",
         "totalReferrers": "Referrers",
         "totalCampaigns": "Campaigns",
-        "totalEarnings": "Total earnings"
+        "subscriptionRevenue": "Subscription revenue",
+        "totalEarnings": "Ref. earnings"
       },
       "legend": {
         "title": "Legend",
-        "regularUser": "Regular user",
+        "fillTitle": "Subscription",
+        "borderTitle": "Referral role",
+        "regularUser": "No subscription",
         "activeReferrer": "Active referrer",
         "partner": "Partner",
         "topReferrer": "Top referrer (10+)",
         "campaignUser": "From campaign",
         "partnerCampaignEdge": "Partner → Campaign",
-        "campaignNode": "Ad campaign"
+        "campaignNode": "Ad campaign",
+        "paidActive": "Paid subscription",
+        "trialActive": "Trial",
+        "paidExpired": "Paid expired",
+        "trialExpired": "Trial expired"
       },
       "user": {
         "tgId": "TG ID",
@@ -1275,7 +1287,13 @@
         "source": "Source",
         "referredBy": "Referred by",
         "fromCampaign": "Campaign",
-        "organic": "Organic"
+        "organic": "Organic",
+        "subscriptionStatus": {
+          "trial_active": "Trial",
+          "paid_active": "Paid",
+          "trial_expired": "Trial expired",
+          "paid_expired": "Paid expired"
+        }
       },
       "campaign": {
         "startParam": "Parameter",
@@ -1767,7 +1785,14 @@
       "enableEmail": "Email",
       "sendingBoth": "2 broadcasts will be created",
       "bothCreated": "Broadcasts created",
-      "atLeastOneChannel": "Select at least one channel"
+      "atLeastOneChannel": "Select at least one channel",
+      "customButtons": "Custom buttons",
+      "addCustomButton": "Add button",
+      "customButtonLabelPlaceholder": "Button text",
+      "customButtonTypeCallback": "Callback",
+      "customButtonTypeUrl": "URL",
+      "customButtonCallbackPlaceholder": "callback_data (e.g. back_to_menu)",
+      "customButtonUrlPlaceholder": "https://example.com"
     },
     "pinnedMessages": {
       "title": "Pinned Messages",
@@ -3283,6 +3308,7 @@
       "system": "System",
       "permanent": "Permanent",
       "expired": "expired",
+      "envManaged": "Managed via ADMIN_IDS / ADMIN_EMAILS in env",
       "revoke": "Revoke",
       "revokeAriaLabel": "Revoke role {{role}} from {{user}}",
       "table": {
@@ -4515,5 +4541,76 @@
     "shareModalActivateViaCabinet": "Or via website:",
     "copyMessage": "Copy message",
     "shareToastCopied": "Message copied"
+  },
+  "news": {
+    "title": "News & Updates",
+    "filterAll": "All",
+    "readMore": "Read more",
+    "readTime": "min read",
+    "loadMore": "Load more",
+    "noNews": "No news yet",
+    "backToHome": "Back",
+    "views": "views",
+    "admin": {
+      "title": "News Management",
+      "create": "Create Article",
+      "edit": "Edit",
+      "delete": "Delete",
+      "confirmDelete": "Delete this article?",
+      "published": "Published",
+      "draft": "Draft",
+      "featured": "Featured",
+      "titleLabel": "Title",
+      "slugLabel": "URL Slug",
+      "categoryLabel": "Category",
+      "categoryColorLabel": "Category Color",
+      "tagLabel": "Tag",
+      "excerptLabel": "Short Description",
+      "contentLabel": "Content",
+      "imageLabel": "Featured Image",
+      "readTimeLabel": "Read Time (min)",
+      "save": "Save",
+      "saving": "Saving...",
+      "saveError": "Failed to save article. Please try again.",
+      "saved": "Article saved",
+      "deleted": "Article deleted",
+      "selectColor": "Select color {{color}}",
+      "uploading": "Uploading...",
+      "dropMedia": "Drop image or video here",
+      "uploadError": "Upload failed",
+      "fileTooLarge": "File is too large",
+      "uploadFeaturedImage": "Upload image",
+      "combobox": {
+        "selectCategory": "Select category",
+        "selectTag": "Select tag",
+        "create": "Create",
+        "createNew": "Create new",
+        "searchOrCreate": "Search or create...",
+        "noItems": "Nothing found",
+        "placeholder": "Select...",
+        "clear": "Clear",
+        "delete": "Delete {{name}}"
+      },
+      "toolbar": {
+        "bold": "Bold",
+        "italic": "Italic",
+        "underline": "Underline",
+        "strikethrough": "Strikethrough",
+        "heading1": "Heading 1",
+        "heading2": "Heading 2",
+        "heading3": "Heading 3",
+        "bulletList": "Bullet List",
+        "orderedList": "Ordered List",
+        "blockquote": "Blockquote",
+        "codeBlock": "Code Block",
+        "alignLeft": "Align Left",
+        "alignCenter": "Align Center",
+        "highlight": "Highlight",
+        "link": "Link",
+        "image": "Image",
+        "imageUrlPrompt": "Image URL:",
+        "linkUrlPrompt": "URL:"
+      }
+    }
   }
 }

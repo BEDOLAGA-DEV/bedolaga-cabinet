@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { referralNetworkApi } from '@/api/referralNetwork';
 import { useReferralNetworkStore } from '@/store/referralNetwork';
-import { formatKopeksToRubles } from '../utils';
+import { formatKopeksToRubles, getSubscriptionStatusColor } from '../utils';
 
 interface UserDetailPanelProps {
   userId: number;
@@ -101,7 +101,24 @@ export function UserDetailPanel({ userId, className }: UserDetailPanelProps) {
               </h4>
               {user.subscription_name ? (
                 <div>
-                  <p className="text-sm font-medium text-dark-100">{user.subscription_name}</p>
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-medium text-dark-100">{user.subscription_name}</p>
+                    {user.subscription_status && (
+                      <span className="flex items-center gap-1.5 rounded-full bg-dark-700/50 px-2 py-0.5">
+                        <span
+                          className="h-2 w-2 shrink-0 rounded-full"
+                          style={{
+                            backgroundColor: getSubscriptionStatusColor(user.subscription_status),
+                          }}
+                        />
+                        <span className="text-[10px] font-medium text-dark-300">
+                          {t(
+                            `admin.referralNetwork.user.subscriptionStatus.${user.subscription_status}`,
+                          )}
+                        </span>
+                      </span>
+                    )}
+                  </div>
                   {user.subscription_end && (
                     <p className="mt-0.5 text-xs text-dark-400">
                       {t('admin.referralNetwork.user.validUntil', {

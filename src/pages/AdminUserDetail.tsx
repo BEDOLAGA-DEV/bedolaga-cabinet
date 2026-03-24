@@ -1387,8 +1387,10 @@ export default function AdminUserDetail() {
                         {t('admin.users.detail.subscription.traffic')}
                       </div>
                       <div className="text-dark-100">
-                        {user.subscription.traffic_used_gb.toFixed(1)} /{' '}
-                        {user.subscription.traffic_limit_gb} {t('common.units.gb')}
+                        {panelInfo?.found
+                          ? (panelInfo.used_traffic_bytes / (1024 * 1024 * 1024)).toFixed(1)
+                          : user.subscription.traffic_used_gb.toFixed(1)}{' '}
+                        / {user.subscription.traffic_limit_gb} {t('common.units.gb')}
                       </div>
                     </div>
                     <div>

@@ -2124,7 +2124,12 @@ export default function Subscription() {
                       <div className="text-sm font-semibold text-dark-50">
                         {device.device_model || device.platform}
                       </div>
-                      <div className="text-[11px] text-dark-50/30">{device.platform}</div>
+                      <div className="flex items-center gap-1.5 text-[11px] text-dark-50/30">
+                        <span>{device.platform}</span>
+                        <span className="font-mono text-dark-50/20">
+                          {device.hwid.slice(0, 8).toUpperCase()}
+                        </span>
+                      </div>
                     </div>
                   </div>
                   <button

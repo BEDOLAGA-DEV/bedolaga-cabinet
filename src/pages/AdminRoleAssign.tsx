@@ -79,6 +79,7 @@ const UserPlusIcon = () => (
 // === Constants ===
 
 const PAGE_SIZE = 10;
+const SUPERADMIN_LEVEL = 999;
 
 // === Sub-components ===
 
@@ -278,10 +279,10 @@ export default function AdminRoleAssign() {
     enabled: !!roles && roles.length > 0,
   });
 
-  // Available roles filtered by canManageRole
+  // Available roles filtered by canManageRole (superadmin excluded — env-only)
   const assignableRoles = useMemo(() => {
     if (!roles) return [];
-    return roles.filter((r) => r.is_active && canManageRole(r.level));
+    return roles.filter((r) => r.is_active && r.level < SUPERADMIN_LEVEL && canManageRole(r.level));
   }, [roles, canManageRole]);
 
   // Roles map for quick lookup
@@ -627,20 +628,29 @@ export default function AdminRoleAssign() {
 
                     {/* Actions */}
                     <div className="col-span-1 flex justify-end sm:justify-start">
-                      <PermissionGate permission="roles:assign">
-                        <button
-                          onClick={() => setRevokeConfirm(assignment.id)}
-                          disabled={!canRevoke}
-                          className="rounded-lg p-1.5 text-dark-400 transition-colors hover:bg-error-500/20 hover:text-error-400 disabled:cursor-not-allowed disabled:opacity-40"
-                          title={t('admin.roleAssign.revoke')}
-                          aria-label={t('admin.roleAssign.revokeAriaLabel', {
-                            user: assignment.user_first_name || assignment.user_id,
-                            role: assignment.role_name,
-                          })}
+                      {assignment.role_level >= SUPERADMIN_LEVEL ? (
+                        <span
+                          className="rounded px-1.5 py-0.5 text-[10px] font-medium text-dark-500"
+                          title={t('admin.roleAssign.envManaged')}
                         >
-                          <XCircleIcon />
-                        </button>
-                      </PermissionGate>
+                          ENV
+                        </span>
+                      ) : (
+                        <PermissionGate permission="roles:assign">
+                          <button
+                            onClick={() => setRevokeConfirm(assignment.id)}
+                            disabled={!canRevoke}
+                            className="rounded-lg p-1.5 text-dark-400 transition-colors hover:bg-error-500/20 hover:text-error-400 disabled:cursor-not-allowed disabled:opacity-40"
+                            title={t('admin.roleAssign.revoke')}
+                            aria-label={t('admin.roleAssign.revokeAriaLabel', {
+                              user: assignment.user_first_name || assignment.user_id,
+                              role: assignment.role_name,
+                            })}
+                          >
+                            <XCircleIcon />
+                          </button>
+                        </PermissionGate>
+                      )}
                     </div>
                   </div>
                 );
