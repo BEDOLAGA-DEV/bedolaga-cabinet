@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router';
 import { subscriptionApi } from '../api/subscription';
+import { WebBackButton } from '../components/WebBackButton';
 import TrafficProgressBar from '../components/dashboard/TrafficProgressBar';
 import { HoverBorderGradient } from '../components/ui/hover-border-gradient';
 import { useTrafficZone } from '../hooks/useTrafficZone';
@@ -480,12 +481,15 @@ export default function Subscription() {
 
   return (
     <div className="space-y-6">
-      {/* Page title — native Telegram back button handles navigation */}
-      <h1 className="text-2xl font-bold text-dark-50 sm:text-3xl">
-        {isMultiTariff && subscription?.tariff_name
-          ? subscription.tariff_name
-          : t('subscription.title')}
-      </h1>
+      {/* Page title */}
+      <div className="flex items-center gap-3">
+        <WebBackButton to="/subscriptions" />
+        <h1 className="text-2xl font-bold text-dark-50 sm:text-3xl">
+          {isMultiTariff && subscription?.tariff_name
+            ? subscription.tariff_name
+            : t('subscription.title')}
+        </h1>
+      </div>
 
       {/* Current Subscription */}
       {subscription ? (

@@ -5,6 +5,7 @@ import { useNavigate, useSearchParams } from 'react-router';
 import { AxiosError } from 'axios';
 import { subscriptionApi } from '../api/subscription';
 import { promoApi } from '../api/promo';
+import { WebBackButton } from '../components/WebBackButton';
 import { getGlassColors } from '../utils/glassTheme';
 import { useTheme } from '../hooks/useTheme';
 import type {
@@ -407,16 +408,21 @@ export default function SubscriptionPurchase() {
 
   return (
     <div className="space-y-6">
-      {/* Header — native Telegram back button handles navigation */}
-      <h1 className="text-2xl font-bold text-dark-50 sm:text-3xl">
-        {isMultiTariff && !subscriptionId
-          ? t('subscription.newTariff', 'Новый тариф')
-          : !isMultiTariff && subscription?.is_daily && !subscription?.is_trial
-            ? t('subscription.switchTariff.title')
-            : subscription && !subscription.is_trial
-              ? t('subscription.extend')
-              : t('subscription.getSubscription')}
-      </h1>
+      {/* Header */}
+      <div className="flex items-center gap-3">
+        <WebBackButton
+          to={subscriptionId ? `/subscriptions/${subscriptionId}` : '/subscriptions'}
+        />
+        <h1 className="text-2xl font-bold text-dark-50 sm:text-3xl">
+          {isMultiTariff && !subscriptionId
+            ? t('subscription.newTariff', 'Новый тариф')
+            : !isMultiTariff && subscription?.is_daily && !subscription?.is_trial
+              ? t('subscription.switchTariff.title')
+              : subscription && !subscription.is_trial
+                ? t('subscription.extend')
+                : t('subscription.getSubscription')}
+        </h1>
+      </div>
 
       {/* Tariffs Section */}
       {isTariffsMode && tariffs.length > 0 && (

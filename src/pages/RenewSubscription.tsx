@@ -8,6 +8,7 @@ import { getGlassColors } from '../utils/glassTheme';
 import { useCurrency } from '../hooks/useCurrency';
 import { useHaptic } from '../platform';
 import InsufficientBalancePrompt from '../components/InsufficientBalancePrompt';
+import { WebBackButton } from '../components/WebBackButton';
 
 export default function RenewSubscription() {
   const { subscriptionId } = useParams<{ subscriptionId: string }>();
@@ -97,17 +98,20 @@ export default function RenewSubscription() {
   const missingAmount = insufficientMatch ? Number(insufficientMatch[1]) : null;
 
   return (
-    <div className="mx-auto max-w-lg space-y-5 p-4">
+    <div className="space-y-5">
       {/* Title */}
-      <div>
-        <h1 className="text-2xl font-bold" style={{ color: g.text }}>
-          {t('subscription.extend', 'Продлить подписку')}
-        </h1>
-        {subscription?.tariff_name && (
-          <p className="mt-1 text-sm" style={{ color: g.textSecondary }}>
-            {subscription.tariff_name}
-          </p>
-        )}
+      <div className="flex items-center gap-3">
+        <WebBackButton to={`/subscriptions/${subId}`} />
+        <div>
+          <h1 className="text-2xl font-bold" style={{ color: g.text }}>
+            {t('subscription.extend', 'Продлить подписку')}
+          </h1>
+          {subscription?.tariff_name && (
+            <p className="mt-1 text-sm" style={{ color: g.textSecondary }}>
+              {subscription.tariff_name}
+            </p>
+          )}
+        </div>
       </div>
 
       {/* Balance */}
@@ -134,7 +138,7 @@ export default function RenewSubscription() {
           </p>
         </div>
       ) : (
-        <div className="space-y-2">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {options.map((option) => {
             const isSelected = selectedPeriod === option.period_days;
             const canAfford = balanceKopeks >= option.price_kopeks;
