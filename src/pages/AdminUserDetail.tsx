@@ -443,27 +443,27 @@ export default function AdminUserDetail() {
     if (!userId) return;
     try {
       setPanelInfoLoading(true);
-      const data = await adminUsersApi.getPanelInfo(userId);
+      const data = await adminUsersApi.getPanelInfo(userId, activeSubscriptionId ?? undefined);
       setPanelInfo(data);
     } catch {
     } finally {
       setPanelInfoLoading(false);
     }
-  }, [userId]);
+  }, [userId, activeSubscriptionId]);
 
   const loadNodeUsage = useCallback(async () => {
     if (!userId) return;
     try {
-      const data = await adminUsersApi.getNodeUsage(userId);
+      const data = await adminUsersApi.getNodeUsage(userId, activeSubscriptionId ?? undefined);
       setNodeUsage(data);
     } catch {}
-  }, [userId]);
+  }, [userId, activeSubscriptionId]);
 
   const loadDevices = useCallback(async () => {
     if (!userId) return;
     try {
       setDevicesLoading(true);
-      const data = await adminUsersApi.getUserDevices(userId);
+      const data = await adminUsersApi.getUserDevices(userId, activeSubscriptionId ?? undefined);
       setDevices(data.devices);
       setDevicesTotal(data.total);
       setDeviceLimit(data.device_limit);
@@ -471,7 +471,7 @@ export default function AdminUserDetail() {
     } finally {
       setDevicesLoading(false);
     }
-  }, [userId]);
+  }, [userId, activeSubscriptionId]);
 
   const loadSubscriptionData = useCallback(async () => {
     await Promise.all([loadPanelInfo(), loadNodeUsage(), loadDevices()]);
@@ -697,7 +697,7 @@ export default function AdminUserDetail() {
     if (!userId) return;
     setActionLoading(true);
     try {
-      await adminUsersApi.deleteUserDevice(userId, hwid);
+      await adminUsersApi.deleteUserDevice(userId, hwid, activeSubscriptionId ?? undefined);
       notify.success(t('admin.users.detail.devices.deleted'));
       await loadDevices();
     } catch {
@@ -711,7 +711,7 @@ export default function AdminUserDetail() {
     if (!userId) return;
     setActionLoading(true);
     try {
-      await adminUsersApi.resetUserDevices(userId);
+      await adminUsersApi.resetUserDevices(userId, activeSubscriptionId ?? undefined);
       notify.success(t('admin.users.detail.devices.allDeleted'));
       await loadDevices();
     } catch {
@@ -1681,11 +1681,24 @@ export default function AdminUserDetail() {
                     className="input"
                   >
                     <option value="">{t('admin.users.detail.subscription.selectTariff')}</option>
-                    {tariffs.map((tariffItem) => (
-                      <option key={tariffItem.id} value={tariffItem.id}>
-                        {tariffItem.name}
-                      </option>
-                    ))}
+                    {tariffs
+                      .filter((tariffItem) => {
+                        // In multi-tariff: hide tariffs user already has
+                        if (userSubscriptions.length > 0) {
+                          const purchasedIds = new Set(
+                            userSubscriptions
+                              .filter((s) => s.is_active || s.status === 'trial')
+                              .map((s) => s.tariff_id),
+                          );
+                          return !purchasedIds.has(tariffItem.id);
+                        }
+                        return true;
+                      })
+                      .map((tariffItem) => (
+                        <option key={tariffItem.id} value={tariffItem.id}>
+                          {tariffItem.name}
+                        </option>
+                      ))}
                   </select>
                   <input
                     type="number"
