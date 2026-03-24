@@ -53,6 +53,31 @@ function injectGoogleAds(conversionId: string) {
 }
 
 /**
+ * Fire an analytics event to all configured counters.
+ * Works with both Yandex Metrika (reachGoal) and Google Ads (gtag event).
+ */
+export function fireAnalyticsEvent(goalName: string, params?: Record<string, unknown>) {
+  // Yandex Metrika
+  const ym = (window as any).ym;
+  if (typeof ym === 'function') {
+    try {
+      const counterId = localStorage.getItem('ym_counter_id');
+      if (counterId) {
+        ym(Number(counterId), 'reachGoal', goalName, params);
+      }
+    } catch { /* silent */ }
+  }
+
+  // Google Ads / gtag
+  const gtag = (window as any).gtag;
+  if (typeof gtag === 'function') {
+    try {
+      gtag('event', goalName, params);
+    } catch { /* silent */ }
+  }
+}
+
+/**
  * Fetches analytics counter settings from the API and dynamically
  * injects Yandex Metrika and/or Google Ads scripts into <head>.
  */
@@ -69,6 +94,7 @@ export function useAnalyticsCounters() {
     // Yandex Metrika
     if (data.yandex_metrika_id) {
       injectYandexMetrika(data.yandex_metrika_id);
+      localStorage.setItem('ym_counter_id', data.yandex_metrika_id);
     } else {
       removeElement(YM_SCRIPT_ID);
     }
