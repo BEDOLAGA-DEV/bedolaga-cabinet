@@ -45,9 +45,6 @@ export default function BackgroundGradientAnimation({ settings }: Props) {
     let tgY = 0;
     let animId = 0;
     let docHidden = document.hidden;
-    let tgInactive = false;
-
-    const isHidden = () => docHidden || tgInactive;
 
     const move = () => {
       curX += (tgX - curX) / 20;
@@ -77,36 +74,18 @@ export default function BackgroundGradientAnimation({ settings }: Props) {
 
     const onVisibility = () => {
       docHidden = document.hidden;
-      if (isHidden()) stop();
+      if (docHidden) stop();
       else start();
-    };
-
-    const tg = window.Telegram?.WebApp;
-    const onActivated = () => {
-      tgInactive = false;
-      if (!isHidden()) start();
-    };
-    const onDeactivated = () => {
-      tgInactive = true;
-      stop();
     };
 
     window.addEventListener('mousemove', handleMouse);
     document.addEventListener('visibilitychange', onVisibility);
-    if (tg) {
-      tg.onEvent?.('activated', onActivated);
-      tg.onEvent?.('deactivated', onDeactivated);
-    }
-    if (!isHidden()) start();
+    if (!docHidden) start();
 
     return () => {
       stop();
       window.removeEventListener('mousemove', handleMouse);
       document.removeEventListener('visibilitychange', onVisibility);
-      if (tg) {
-        tg.offEvent?.('activated', onActivated);
-        tg.offEvent?.('deactivated', onDeactivated);
-      }
     };
   }, [interactive]);
 
