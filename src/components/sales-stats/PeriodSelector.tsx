@@ -6,7 +6,10 @@ import { SALES_STATS } from '../../constants/salesStats';
 function dateString(offsetDays = 0): string {
   const d = new Date();
   if (offsetDays) d.setDate(d.getDate() + offsetDays);
-  return d.toISOString().slice(0, 10);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
 }
 
 interface PeriodSelectorProps {
