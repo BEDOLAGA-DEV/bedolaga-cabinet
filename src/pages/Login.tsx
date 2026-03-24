@@ -812,7 +812,11 @@ export default function Login() {
                         if (doc.content) { content = doc.content; break; }
                       } catch { /* try next */ }
                     }
-                    const clean = DOMPurify.sanitize(content);
+                    const clean = DOMPurify.sanitize(content, {
+                      ALLOWED_TAGS: ['p','br','b','i','u','strong','em','a','ul','ol','li','h1','h2','h3','h4','h5','h6','blockquote','code','pre','s','del','ins','span','div'],
+                      ALLOWED_ATTR: ['href','target','rel','class','start'],
+                      ALLOW_DATA_ATTR: false,
+                    });
                     if (clean) setLegalModal({ title: link.title, html: clean });
                   } catch {
                     // silent fail
