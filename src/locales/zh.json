@@ -172,6 +172,9 @@
     "waitingForConfirmation": "等待确认...",
     "deepLinkExpired": "链接已过期，请重试。",
     "tryAgain": "重试",
+    "scanQrToLogin": "用手机相机扫描二维码",
+    "orSendCommand": "或向机器人发送命令：",
+    "commandCopied": "命令已复制",
     "welcomeBack": "欢迎回来！",
     "loginTitle": "登录个人中心",
     "loginSubtitle": "通过Telegram或邮箱登录",
@@ -941,7 +944,8 @@
       "auditLog": "审计日志",
       "salesStats": "销售统计",
       "landings": "落地页",
-      "referralNetwork": "推荐网络"
+      "referralNetwork": "推荐网络",
+      "news": "新闻"
     },
     "panel": {
       "title": "管理面板",
@@ -976,7 +980,8 @@
       "auditLogDesc": "查看系统活动和访问历史",
       "salesStatsDesc": "销售分析与趋势",
       "landingsDesc": "快速购买落地页",
-      "referralNetworkDesc": "推荐图表和广告活动可视化"
+      "referralNetworkDesc": "推荐图表和广告活动可视化",
+      "newsDesc": "管理新闻文章和出版物"
     },
     "salesStats": {
       "title": "销售统计",
@@ -1078,17 +1083,24 @@
         "totalUsers": "用户",
         "totalReferrers": "推荐人",
         "totalCampaigns": "活动",
-        "totalEarnings": "总收入"
+        "subscriptionRevenue": "订阅收入",
+        "totalEarnings": "推荐收入"
       },
       "legend": {
         "title": "图例",
-        "regularUser": "普通用户",
+        "fillTitle": "订阅状态",
+        "borderTitle": "推荐角色",
+        "regularUser": "无订阅",
         "activeReferrer": "活跃推荐人",
         "partner": "合作伙伴",
         "topReferrer": "顶级推荐人 (10+)",
         "campaignUser": "来自活动",
         "partnerCampaignEdge": "合作伙伴 → 活动",
-        "campaignNode": "广告活动"
+        "campaignNode": "广告活动",
+        "paidActive": "付费订阅",
+        "trialActive": "试用",
+        "paidExpired": "付费已过期",
+        "trialExpired": "试用已过期"
       },
       "user": {
         "tgId": "TG ID",
@@ -1107,7 +1119,13 @@
         "source": "来源",
         "referredBy": "由...推荐",
         "fromCampaign": "活动",
-        "organic": "自然流量"
+        "organic": "自然流量",
+        "subscriptionStatus": {
+          "trial_active": "试用",
+          "paid_active": "付费",
+          "trial_expired": "试用已过期",
+          "paid_expired": "付费已过期"
+        }
       },
       "campaign": {
         "startParam": "参数",
@@ -1410,7 +1428,14 @@
       "enableEmail": "Email",
       "sendingBoth": "将创建2个群发",
       "bothCreated": "群发已创建",
-      "atLeastOneChannel": "请至少选择一个渠道"
+      "atLeastOneChannel": "请至少选择一个渠道",
+      "customButtons": "自定义按钮",
+      "addCustomButton": "添加按钮",
+      "customButtonLabelPlaceholder": "按钮文字",
+      "customButtonTypeCallback": "回调",
+      "customButtonTypeUrl": "链接",
+      "customButtonCallbackPlaceholder": "callback_data（例如 back_to_menu）",
+      "customButtonUrlPlaceholder": "https://example.com"
     },
     "pinnedMessages": {
       "title": "置顶消息",
@@ -2957,6 +2982,7 @@
       "system": "系统",
       "permanent": "永久",
       "expired": "已过期",
+      "envManaged": "通过 ADMIN_IDS / ADMIN_EMAILS 环境变量管理",
       "revoke": "撤销",
       "revokeAriaLabel": "撤销 {{user}} 的角色 {{role}}",
       "table": {
@@ -3895,6 +3921,66 @@
     },
     "warning": {
       "telegram_unresolvable": "无法验证此 Telegram 用户名。收件人可能不会收到礼物通知。"
+    }
+  },
+  "news": {
+    "title": "新闻与更新",
+    "filterAll": "全部",
+    "readMore": "阅读更多",
+    "readTime": "分钟阅读",
+    "loadMore": "加载更多",
+    "noNews": "暂无新闻",
+    "backToHome": "返回",
+    "views": "浏览量",
+    "admin": {
+      "title": "新闻管理",
+      "create": "创建文章",
+      "edit": "编辑",
+      "delete": "删除",
+      "confirmDelete": "删除这篇文章？",
+      "published": "已发布",
+      "draft": "草稿",
+      "featured": "精选",
+      "titleLabel": "标题",
+      "slugLabel": "URL标识",
+      "categoryLabel": "分类",
+      "categoryColorLabel": "分类颜色",
+      "tagLabel": "标签",
+      "excerptLabel": "简短描述",
+      "contentLabel": "内容",
+      "imageLabel": "特色图片",
+      "readTimeLabel": "阅读时间（分钟）",
+      "save": "保存",
+      "saving": "保存中...",
+      "saveError": "保存文章失败，请重试。",
+      "saved": "文章已保存",
+      "deleted": "文章已删除",
+      "selectColor": "选择颜色 {{color}}",
+      "uploading": "上传中...",
+      "dropMedia": "将图片或视频拖到这里",
+      "uploadError": "上传失败",
+      "fileTooLarge": "文件太大",
+      "uploadFeaturedImage": "上传图片",
+      "toolbar": {
+        "bold": "粗体",
+        "italic": "斜体",
+        "underline": "下划线",
+        "strikethrough": "删除线",
+        "heading1": "标题 1",
+        "heading2": "标题 2",
+        "heading3": "标题 3",
+        "bulletList": "无序列表",
+        "orderedList": "有序列表",
+        "blockquote": "引用",
+        "codeBlock": "代码块",
+        "alignLeft": "左对齐",
+        "alignCenter": "居中",
+        "highlight": "高亮",
+        "link": "链接",
+        "image": "图片",
+        "imageUrlPrompt": "图片URL：",
+        "linkUrlPrompt": "URL："
+      }
     }
   }
 }

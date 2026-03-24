@@ -82,6 +82,11 @@ function isAuthEndpoint(url: string | undefined): boolean {
 }
 
 apiClient.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
+  // Let axios set the correct multipart/form-data header with boundary for FormData
+  if (config.data instanceof FormData && config.headers) {
+    delete config.headers['Content-Type'];
+  }
+
   if (!isAuthEndpoint(config.url)) {
     let token = tokenStorage.getAccessToken();
 

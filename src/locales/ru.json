@@ -183,6 +183,9 @@
     "waitingForConfirmation": "Ожидание подтверждения...",
     "deepLinkExpired": "Ссылка истекла. Попробуйте снова.",
     "tryAgain": "Попробовать снова",
+    "scanQrToLogin": "Отсканируйте QR-код камерой телефона",
+    "orSendCommand": "Или отправьте боту команду:",
+    "commandCopied": "Команда скопирована",
     "welcomeBack": "Добро пожаловать!",
     "loginTitle": "Вход в личный кабинет",
     "loginSubtitle": "Войдите через Telegram или используйте email",
@@ -1129,7 +1132,8 @@
       "auditLog": "Журнал аудита",
       "salesStats": "Статистика продаж",
       "landings": "Лендинги",
-      "referralNetwork": "Реферальная сеть"
+      "referralNetwork": "Реферальная сеть",
+      "news": "Новости"
     },
     "panel": {
       "title": "Панель администратора",
@@ -1165,7 +1169,8 @@
       "auditLogDesc": "Просмотр активности системы и истории доступа",
       "salesStatsDesc": "Аналитика продаж и тренды",
       "landingsDesc": "Страницы быстрой покупки",
-      "referralNetworkDesc": "Визуализация графа рефералов и РК"
+      "referralNetworkDesc": "Визуализация графа рефералов и РК",
+      "newsDesc": "Управление новостями и статьями"
     },
     "salesStats": {
       "title": "Статистика продаж",
@@ -1267,17 +1272,24 @@
         "totalUsers": "Пользователей",
         "totalReferrers": "Рефереров",
         "totalCampaigns": "Кампаний",
-        "totalEarnings": "Общий доход"
+        "subscriptionRevenue": "Доход с подписок",
+        "totalEarnings": "Реф. доход"
       },
       "legend": {
         "title": "Легенда",
-        "regularUser": "Обычный",
+        "fillTitle": "Подписка",
+        "borderTitle": "Роль реферера",
+        "regularUser": "Без подписки",
         "activeReferrer": "Активный реферер",
         "partner": "Партнёр",
         "topReferrer": "Топ-реферер (10+)",
         "campaignUser": "Из кампании",
         "partnerCampaignEdge": "Партнёр → РК",
-        "campaignNode": "Рекламная кампания"
+        "campaignNode": "Рекламная кампания",
+        "paidActive": "Платная подписка",
+        "trialActive": "Триал",
+        "paidExpired": "Платная истекла",
+        "trialExpired": "Триал истёк"
       },
       "user": {
         "tgId": "TG ID",
@@ -1296,7 +1308,13 @@
         "source": "Источник",
         "referredBy": "Пришёл от",
         "fromCampaign": "РК",
-        "organic": "Органический"
+        "organic": "Органический",
+        "subscriptionStatus": {
+          "trial_active": "Триал",
+          "paid_active": "Платная",
+          "trial_expired": "Триал истёк",
+          "paid_expired": "Платная истекла"
+        }
       },
       "campaign": {
         "startParam": "Параметр",
@@ -1792,7 +1810,14 @@
       "enableEmail": "Email",
       "sendingBoth": "Будет создано 2 рассылки",
       "bothCreated": "Рассылки созданы",
-      "atLeastOneChannel": "Выберите хотя бы один канал"
+      "atLeastOneChannel": "Выберите хотя бы один канал",
+      "customButtons": "Кастомные кнопки",
+      "addCustomButton": "Добавить кнопку",
+      "customButtonLabelPlaceholder": "Текст кнопки",
+      "customButtonTypeCallback": "Callback",
+      "customButtonTypeUrl": "Ссылка",
+      "customButtonCallbackPlaceholder": "callback_data (например, back_to_menu)",
+      "customButtonUrlPlaceholder": "https://example.com"
     },
     "pinnedMessages": {
       "title": "Закреплённые сообщения",
@@ -3829,6 +3854,7 @@
       "system": "Система",
       "permanent": "Бессрочно",
       "expired": "истекло",
+      "envManaged": "Управляется через ADMIN_IDS / ADMIN_EMAILS в env",
       "revoke": "Отозвать",
       "revokeAriaLabel": "Отозвать роль {{role}} у {{user}}",
       "table": {
@@ -5082,5 +5108,76 @@
     "shareModalActivateViaCabinet": "Или через сайт:",
     "copyMessage": "Скопировать сообщение",
     "shareToastCopied": "Сообщение скопировано"
+  },
+  "news": {
+    "title": "Новости и обновления",
+    "filterAll": "Все",
+    "readMore": "Читать подробнее",
+    "readTime": "мин чтения",
+    "loadMore": "Загрузить ещё",
+    "noNews": "Пока нет новостей",
+    "backToHome": "Назад",
+    "views": "просмотров",
+    "admin": {
+      "title": "Управление новостями",
+      "create": "Создать новость",
+      "edit": "Редактировать",
+      "delete": "Удалить",
+      "confirmDelete": "Удалить эту новость?",
+      "published": "Опубликовано",
+      "draft": "Черновик",
+      "featured": "Избранное",
+      "titleLabel": "Заголовок",
+      "slugLabel": "URL-адрес",
+      "categoryLabel": "Категория",
+      "categoryColorLabel": "Цвет категории",
+      "tagLabel": "Тег",
+      "excerptLabel": "Краткое описание",
+      "contentLabel": "Содержание",
+      "imageLabel": "Изображение",
+      "readTimeLabel": "Время чтения (мин)",
+      "save": "Сохранить",
+      "saving": "Сохранение...",
+      "saveError": "Не удалось сохранить статью. Попробуйте ещё раз.",
+      "saved": "Новость сохранена",
+      "deleted": "Новость удалена",
+      "selectColor": "Выбрать цвет {{color}}",
+      "uploading": "Загрузка...",
+      "dropMedia": "Перетащите изображение или видео сюда",
+      "uploadError": "Ошибка загрузки",
+      "fileTooLarge": "Файл слишком большой",
+      "uploadFeaturedImage": "Загрузить изображение",
+      "combobox": {
+        "selectCategory": "Выберите категорию",
+        "selectTag": "Выберите тег",
+        "create": "Создать",
+        "createNew": "Создать новый",
+        "searchOrCreate": "Поиск или создание...",
+        "noItems": "Ничего не найдено",
+        "placeholder": "Выберите...",
+        "clear": "Очистить",
+        "delete": "Удалить {{name}}"
+      },
+      "toolbar": {
+        "bold": "Жирный",
+        "italic": "Курсив",
+        "underline": "Подчёркнутый",
+        "strikethrough": "Зачёркнутый",
+        "heading1": "Заголовок 1",
+        "heading2": "Заголовок 2",
+        "heading3": "Заголовок 3",
+        "bulletList": "Маркированный список",
+        "orderedList": "Нумерованный список",
+        "blockquote": "Цитата",
+        "codeBlock": "Блок кода",
+        "alignLeft": "По левому краю",
+        "alignCenter": "По центру",
+        "highlight": "Выделение",
+        "link": "Ссылка",
+        "image": "Изображение",
+        "imageUrlPrompt": "URL изображения:",
+        "linkUrlPrompt": "URL ссылки:"
+      }
+    }
   }
 }

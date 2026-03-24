@@ -15,14 +15,14 @@ import {
   type BrandingInfo,
   type EmailAuthEnabled,
 } from '../api/branding';
-import { getAndClearReturnUrl } from '../utils/token';
+import { getAndClearReturnUrl, tokenStorage } from '../utils/token';
 import { isInTelegramWebApp, getTelegramInitData, useTelegramSDK } from '../hooks/useTelegramSDK';
 import { closeMiniApp } from '@telegram-apps/sdk-react';
 import LanguageSwitcher from '../components/LanguageSwitcher';
 import TelegramLoginButton from '../components/TelegramLoginButton';
 import OAuthProviderIcon from '../components/OAuthProviderIcon';
 import { saveOAuthState } from '../utils/oauth';
-import { consumeReferralCode, getPendingReferralCode } from '../utils/referral';
+import { getPendingReferralCode } from '../utils/referral';
 
 export default function Login() {
   const { t } = useTranslation();
@@ -146,16 +146,6 @@ export default function Login() {
     }
   };
 
-  const botUsername = import.meta.env.VITE_TELEGRAM_BOT_USERNAME || '';
-
-  // If email auth is disabled but user came with ref param, redirect to bot
-  useEffect(() => {
-    if (referralCode && emailAuthConfig?.enabled === false && botUsername) {
-      consumeReferralCode();
-      window.location.href = `https://t.me/${botUsername}?start=${encodeURIComponent(referralCode)}`;
-    }
-  }, [referralCode, emailAuthConfig, botUsername]);
-
   const appName = branding ? branding.name : import.meta.env.VITE_APP_NAME || 'VPN';
   const appLogo = branding?.logo_letter || import.meta.env.VITE_APP_LOGO || 'V';
   const logoUrl = branding ? brandingApi.getLogoUrl(branding) : null;
@@ -215,11 +205,18 @@ export default function Login() {
   }, [isAuthInitializing, loginWithTelegram, navigate, t, getReturnUrl]);
 
   const handleRetryTelegramAuth = () => {
+    // Clear ALL cached auth state to prevent stale token/initData loops
+    tokenStorage.clearTokens();
+    sessionStorage.removeItem('tapps/launchParams');
+    sessionStorage.removeItem('telegram_init_data');
+    localStorage.removeItem('cabinet-auth');
+    localStorage.removeItem('tg_user_id');
+
     try {
-      sessionStorage.removeItem('tapps/launchParams');
-      sessionStorage.removeItem('telegram_init_data');
+      // Close miniapp — Telegram will provide fresh initData on reopen
       closeMiniApp();
     } catch {
+      // If closeMiniApp fails, force a clean page reload
       window.location.reload();
     }
   };

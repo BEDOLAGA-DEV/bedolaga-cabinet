@@ -7,6 +7,7 @@ import {
   BroadcastFilter,
   TariffFilter,
   CombinedBroadcastCreateRequest,
+  CustomBroadcastButton,
 } from '../api/adminBroadcasts';
 import { AdminBackButton } from '../components/admin';
 
@@ -130,6 +131,11 @@ export default function AdminBroadcastCreate() {
   // Telegram-specific state
   const [messageText, setMessageText] = useState('');
   const [selectedButtons, setSelectedButtons] = useState<string[]>(['home']);
+  const [customButtons, setCustomButtons] = useState<CustomBroadcastButton[]>([]);
+  const [isAddingCustomButton, setIsAddingCustomButton] = useState(false);
+  const [newButtonLabel, setNewButtonLabel] = useState('');
+  const [newButtonActionType, setNewButtonActionType] = useState<'callback' | 'url'>('callback');
+  const [newButtonActionValue, setNewButtonActionValue] = useState('');
   const [mediaFile, setMediaFile] = useState<File | null>(null);
   const [mediaType, setMediaType] = useState<'photo' | 'video' | 'document'>('photo');
   const [mediaPreview, setMediaPreview] = useState<string | null>(null);
@@ -275,28 +281,33 @@ export default function AdminBroadcastCreate() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setMediaFile(file);
-
+    // Determine type locally to avoid stale state in async call
+    let detectedType: 'photo' | 'video' | 'document';
     if (file.type.startsWith('image/')) {
-      setMediaType('photo');
+      detectedType = 'photo';
+    } else if (file.type.startsWith('video/')) {
+      detectedType = 'video';
+    } else {
+      detectedType = 'document';
+    }
+
+    setMediaFile(file);
+    setMediaType(detectedType);
+
+    if (detectedType === 'photo') {
       if (mediaPreviewRef.current) URL.revokeObjectURL(mediaPreviewRef.current);
       const url = URL.createObjectURL(file);
       mediaPreviewRef.current = url;
       setMediaPreview(url);
-    } else if (file.type.startsWith('video/')) {
-      setMediaType('video');
-      setMediaPreview(null);
     } else {
-      setMediaType('document');
       setMediaPreview(null);
     }
 
     setIsUploading(true);
     try {
-      const result = await adminBroadcastsApi.uploadMedia(file, mediaType);
+      const result = await adminBroadcastsApi.uploadMedia(file, detectedType);
       setUploadedFileId(result.file_id);
-    } catch (err) {
-      console.error('Upload failed:', err);
+    } catch {
       setMediaFile(null);
       setMediaPreview(null);
     } finally {
@@ -325,6 +336,39 @@ export default function AdminBroadcastCreate() {
     );
   };
 
+  // Custom button validation
+  const isNewButtonValid = useMemo(() => {
+    if (!newButtonLabel.trim() || !newButtonActionValue.trim()) return false;
+    if (newButtonActionType === 'url') {
+      return /^https:\/\/|^tg:\/\//.test(newButtonActionValue.trim());
+    }
+    if (newButtonActionType === 'callback') {
+      return new TextEncoder().encode(newButtonActionValue.trim()).length <= 64;
+    }
+    return true;
+  }, [newButtonLabel, newButtonActionType, newButtonActionValue]);
+
+  // Custom button handlers
+  const addCustomButton = () => {
+    if (!isNewButtonValid) return;
+    setCustomButtons((prev) => [
+      ...prev,
+      {
+        label: newButtonLabel.trim(),
+        action_type: newButtonActionType,
+        action_value: newButtonActionValue.trim(),
+      },
+    ]);
+    setNewButtonLabel('');
+    setNewButtonActionValue('');
+    setNewButtonActionType('callback');
+    setIsAddingCustomButton(false);
+  };
+
+  const removeCustomButton = (index: number) => {
+    setCustomButtons((prev) => prev.filter((_, i) => i !== index));
+  };
+
   // Validate form
   const isTelegramValid = telegramEnabled && telegramTarget && messageText.trim().length > 0;
   const isEmailValid =
@@ -350,6 +394,7 @@ export default function AdminBroadcastCreate() {
         target: telegramTarget,
         message_text: messageText,
         selected_buttons: selectedButtons,
+        custom_buttons: customButtons.length > 0 ? customButtons : undefined,
       };
       if (uploadedFileId) {
         data.media = { type: mediaType, file_id: uploadedFileId };
@@ -377,6 +422,7 @@ export default function AdminBroadcastCreate() {
         target: telegramTarget,
         message_text: messageText,
         selected_buttons: selectedButtons,
+        custom_buttons: customButtons.length > 0 ? customButtons : undefined,
       };
       if (uploadedFileId) {
         telegramData.media = { type: mediaType, file_id: uploadedFileId };
@@ -654,6 +700,123 @@ export default function AdminBroadcastCreate() {
                 </button>
               ))}
             </div>
+          </div>
+
+          {/* Custom buttons */}
+          <div>
+            <label className="mb-2 block text-sm font-medium text-dark-300">
+              {t('admin.broadcasts.customButtons')}
+            </label>
+
+            {/* Existing custom buttons */}
+            {customButtons.length > 0 && (
+              <div className="mb-3 space-y-2">
+                {customButtons.map((btn, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between rounded-lg border border-dark-700 bg-dark-800 px-3 py-2"
+                  >
+                    <div className="flex items-center gap-2 overflow-hidden">
+                      <span className="shrink-0 rounded bg-dark-700 px-1.5 py-0.5 text-xs text-dark-400">
+                        {btn.action_type === 'url'
+                          ? t('admin.broadcasts.customButtonTypeUrl')
+                          : t('admin.broadcasts.customButtonTypeCallback')}
+                      </span>
+                      <span className="truncate text-sm text-dark-100">{btn.label}</span>
+                      <span className="truncate text-xs text-dark-500">{btn.action_value}</span>
+                    </div>
+                    <button
+                      onClick={() => removeCustomButton(index)}
+                      className="ml-2 shrink-0 rounded p-1 text-dark-400 hover:bg-dark-700 hover:text-error-400"
+                    >
+                      <XIcon />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Inline add form */}
+            {isAddingCustomButton ? (
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  addCustomButton();
+                }}
+                className="space-y-3 rounded-lg border border-dark-600 bg-dark-800/50 p-3"
+              >
+                <input
+                  type="text"
+                  value={newButtonLabel}
+                  onChange={(e) => setNewButtonLabel(e.target.value)}
+                  placeholder={t('admin.broadcasts.customButtonLabelPlaceholder')}
+                  maxLength={64}
+                  className="input"
+                  autoFocus
+                />
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setNewButtonActionType('callback')}
+                    className={`flex-1 rounded-lg px-3 py-2 text-sm transition-colors ${
+                      newButtonActionType === 'callback'
+                        ? 'bg-accent-500 text-white'
+                        : 'border border-dark-700 bg-dark-800 text-dark-300 hover:bg-dark-700'
+                    }`}
+                  >
+                    {t('admin.broadcasts.customButtonTypeCallback')}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setNewButtonActionType('url')}
+                    className={`flex-1 rounded-lg px-3 py-2 text-sm transition-colors ${
+                      newButtonActionType === 'url'
+                        ? 'bg-accent-500 text-white'
+                        : 'border border-dark-700 bg-dark-800 text-dark-300 hover:bg-dark-700'
+                    }`}
+                  >
+                    {t('admin.broadcasts.customButtonTypeUrl')}
+                  </button>
+                </div>
+                <input
+                  type="text"
+                  value={newButtonActionValue}
+                  onChange={(e) => setNewButtonActionValue(e.target.value)}
+                  placeholder={
+                    newButtonActionType === 'url'
+                      ? t('admin.broadcasts.customButtonUrlPlaceholder')
+                      : t('admin.broadcasts.customButtonCallbackPlaceholder')
+                  }
+                  maxLength={newButtonActionType === 'callback' ? 64 : 256}
+                  className="input"
+                />
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsAddingCustomButton(false);
+                      setNewButtonLabel('');
+                      setNewButtonActionValue('');
+                    }}
+                    className="btn-secondary flex-1"
+                  >
+                    {t('common.cancel')}
+                  </button>
+                  <button type="submit" disabled={!isNewButtonValid} className="btn-primary flex-1">
+                    {t('common.add')}
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <button
+                onClick={() => setIsAddingCustomButton(true)}
+                disabled={customButtons.length >= 10}
+                className="flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-dark-600 bg-dark-800/50 px-4 py-3 text-sm text-dark-400 transition-colors hover:border-dark-500 hover:bg-dark-800 hover:text-dark-300"
+              >
+                <span>+</span>
+                <span>{t('admin.broadcasts.addCustomButton')}</span>
+              </button>
+            )}
           </div>
         </div>
       )}

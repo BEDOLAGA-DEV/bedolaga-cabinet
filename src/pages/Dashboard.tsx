@@ -10,6 +10,7 @@ import { balanceApi } from '../api/balance';
 import { wheelApi } from '../api/wheel';
 import Onboarding, { useOnboarding } from '../components/Onboarding';
 import PromoOffersSection from '../components/PromoOffersSection';
+import NewsSection from '../components/news/NewsSection';
 import SubscriptionCardActive from '../components/dashboard/SubscriptionCardActive';
 import SubscriptionCardExpired from '../components/dashboard/SubscriptionCardExpired';
 import TrialOfferCard from '../components/dashboard/TrialOfferCard';
@@ -334,6 +335,9 @@ export default function Dashboard() {
           </div>
         </Link>
       )}
+
+      {/* News Section */}
+      <NewsSection />
 
       {/* Onboarding Tutorial */}
       {showOnboarding && (

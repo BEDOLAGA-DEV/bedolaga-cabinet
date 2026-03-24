@@ -6,6 +6,7 @@ import { useAuthStore } from '../store/auth';
 import { useShallow } from 'zustand/shallow';
 import { brandingApi } from '../api/branding';
 import { isInTelegramWebApp, getTelegramInitData } from '../hooks/useTelegramSDK';
+import { tokenStorage } from '../utils/token';
 
 // Validate redirect URL to prevent open redirect attacks
 const getSafeRedirectUrl = (url: string | null): string => {
@@ -117,6 +118,14 @@ export default function TelegramRedirect() {
     const newCount = retryCount + 1;
     setRetryCount(newCount);
     sessionStorage.setItem(RETRY_COUNT_KEY, String(newCount));
+
+    // Clear all cached auth state to prevent stale token/initData loops
+    tokenStorage.clearTokens();
+    sessionStorage.removeItem('tapps/launchParams');
+    sessionStorage.removeItem('telegram_init_data');
+    localStorage.removeItem('cabinet-auth');
+    localStorage.removeItem('tg_user_id');
+
     setStatus('loading');
     setErrorMessage('');
     window.location.reload();

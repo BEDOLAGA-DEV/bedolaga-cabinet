@@ -153,11 +153,7 @@ export const brandingApi = {
   uploadLogo: async (file: File): Promise<BrandingInfo> => {
     const formData = new FormData();
     formData.append('file', file);
-    const response = await apiClient.post<BrandingInfo>('/cabinet/branding/logo', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+    const response = await apiClient.post<BrandingInfo>('/cabinet/branding/logo', formData);
     // Invalidate cached blob so it gets re-fetched
     if (_logoBlobUrl) {
       URL.revokeObjectURL(_logoBlobUrl);
