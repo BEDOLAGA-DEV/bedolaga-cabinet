@@ -211,7 +211,8 @@
     "continueWithDiscord": "Продолжить через Discord",
     "continueWithVk": "Продолжить через VK",
     "oauthError": "Авторизация отклонена или не удалась",
-    "oauthExpired": "Сессия OAuth истекла. Попробуйте снова."
+    "oauthExpired": "Сессия OAuth истекла. Попробуйте снова.",
+    "disposableEmail": "Одноразовые email-адреса не допускаются. Используйте постоянный email."
   },
   "emailVerification": {
     "title": "Подтверждение email",
@@ -479,6 +480,20 @@
       "qrTitle": "QR-код подписки",
       "qrScanHint": "Отсканируйте для подключения",
       "qrButton": "QR-код"
+    },
+    "tvQuickConnect": {
+      "title": "Подключить TV",
+      "description": "Введите 5-значный код с экрана телевизора",
+      "sendBtn": "Отправить на TV",
+      "badCode": "Введите 5-значный код (буквы и цифры)",
+      "sent": "Отправлено на TV!",
+      "error": "Ошибка отправки на TV",
+      "scanTitle": "Сканировать QR-код",
+      "scanDescription": "Отсканируйте QR-код с экрана телевизора",
+      "scanBtn": "Сканировать QR с TV",
+      "stopScan": "Закрыть камеру",
+      "noCamera": "Нет доступа к камере",
+      "codeFound": "Код найден"
     },
     "myDevices": "Мои устройства",
     "noDevices": "Нет подключенных устройств",
@@ -1131,8 +1146,7 @@
       "auditLog": "Журнал аудита",
       "salesStats": "Статистика продаж",
       "landings": "Лендинги",
-      "referralNetwork": "Реферальная сеть",
-      "news": "Новости"
+      "referralNetwork": "Реферальная сеть"
     },
     "panel": {
       "title": "Панель администратора",
@@ -1167,8 +1181,7 @@
       "auditLogDesc": "Просмотр активности системы и истории доступа",
       "salesStatsDesc": "Аналитика продаж и тренды",
       "landingsDesc": "Страницы быстрой покупки",
-      "referralNetworkDesc": "Визуализация графа рефералов и РК",
-      "newsDesc": "Управление новостями и статьями"
+      "referralNetworkDesc": "Визуализация графа рефералов и РК"
     },
     "salesStats": {
       "title": "Статистика продаж",
@@ -2538,6 +2551,7 @@
       "statusOpen": "Открыт",
       "statusPending": "Ожидает",
       "statusAnswered": "Отвечен",
+      "statusResolved": "Решён",
       "statusClosed": "Закрыт",
       "from": "От",
       "created": "Создан",
@@ -2577,7 +2591,10 @@
       "userNotificationsEnabled": "Уведомления для пользователей",
       "userNotificationsEnabledDesc": "Отправлять уведомления пользователям об ответах админа",
       "adminNotificationsEnabled": "Уведомления для админов",
-      "adminNotificationsEnabledDesc": "Отправлять уведомления админам о новых тикетах и ответах"
+      "adminNotificationsEnabledDesc": "Отправлять уведомления админам о новых тикетах и ответах",
+      "priorityNormal": "Обычный",
+      "priorityHigh": "Высокий",
+      "priorityUrgent": "Срочный"
     },
     "tariffs": {
       "title": "Управление тарифами",
@@ -3362,7 +3379,15 @@
         "noTickets": "У пользователя нет тикетов",
         "ticketsCount": "тикетов",
         "messagesCount": "сообщений",
-        "status": "Статус",
+        "status": {
+          "label": "Статус",
+          "active": "Активен",
+          "blocked": "Заблокирован",
+          "deleted": "Удалён",
+          "trial": "Пробный",
+          "expired": "Истёк",
+          "disabled": "Отключён"
+        },
         "language": "Язык",
         "registration": "Регистрация",
         "lastActivity": "Последняя активность",
@@ -4172,6 +4197,11 @@
       "available": "Доступных",
       "withConnections": "С подключениями",
       "revenue": "Доход"
+    },
+    "subscriptionSales": {
+      "title": "Продажи подписок",
+      "subtitle": "За последние 7 дней",
+      "total": "Итого за неделю"
     },
     "tariffs": {
       "title": "Статистика по тарифам",
@@ -5043,75 +5073,9 @@
     "copyMessage": "Скопировать сообщение",
     "shareToastCopied": "Сообщение скопировано"
   },
-  "news": {
-    "title": "Новости и обновления",
-    "filterAll": "Все",
-    "readMore": "Читать подробнее",
-    "readTime": "мин чтения",
-    "loadMore": "Загрузить ещё",
-    "noNews": "Пока нет новостей",
-    "backToHome": "Назад",
-    "views": "просмотров",
-    "admin": {
-      "title": "Управление новостями",
-      "create": "Создать новость",
-      "edit": "Редактировать",
-      "delete": "Удалить",
-      "confirmDelete": "Удалить эту новость?",
-      "published": "Опубликовано",
-      "draft": "Черновик",
-      "featured": "Избранное",
-      "titleLabel": "Заголовок",
-      "slugLabel": "URL-адрес",
-      "categoryLabel": "Категория",
-      "categoryColorLabel": "Цвет категории",
-      "tagLabel": "Тег",
-      "excerptLabel": "Краткое описание",
-      "contentLabel": "Содержание",
-      "imageLabel": "Изображение",
-      "readTimeLabel": "Время чтения (мин)",
-      "save": "Сохранить",
-      "saving": "Сохранение...",
-      "saveError": "Не удалось сохранить статью. Попробуйте ещё раз.",
-      "saved": "Новость сохранена",
-      "deleted": "Новость удалена",
-      "selectColor": "Выбрать цвет {{color}}",
-      "uploading": "Загрузка...",
-      "dropMedia": "Перетащите изображение или видео сюда",
-      "uploadError": "Ошибка загрузки",
-      "fileTooLarge": "Файл слишком большой",
-      "uploadFeaturedImage": "Загрузить изображение",
-      "combobox": {
-        "selectCategory": "Выберите категорию",
-        "selectTag": "Выберите тег",
-        "create": "Создать",
-        "createNew": "Создать новый",
-        "searchOrCreate": "Поиск или создание...",
-        "noItems": "Ничего не найдено",
-        "placeholder": "Выберите...",
-        "clear": "Очистить",
-        "delete": "Удалить {{name}}"
-      },
-      "toolbar": {
-        "bold": "Жирный",
-        "italic": "Курсив",
-        "underline": "Подчёркнутый",
-        "strikethrough": "Зачёркнутый",
-        "heading1": "Заголовок 1",
-        "heading2": "Заголовок 2",
-        "heading3": "Заголовок 3",
-        "bulletList": "Маркированный список",
-        "orderedList": "Нумерованный список",
-        "blockquote": "Цитата",
-        "codeBlock": "Блок кода",
-        "alignLeft": "По левому краю",
-        "alignCenter": "По центру",
-        "highlight": "Выделение",
-        "link": "Ссылка",
-        "image": "Изображение",
-        "imageUrlPrompt": "URL изображения:",
-        "linkUrlPrompt": "URL ссылки:"
-      }
-    }
+  "legal": {
+    "rules": "Правила",
+    "privacy": "Конфиденциальность",
+    "offer": "Оферта"
   }
 }

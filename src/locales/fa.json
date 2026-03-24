@@ -202,7 +202,8 @@
     "continueWithDiscord": "ادامه با Discord",
     "continueWithVk": "ادامه با VK",
     "oauthError": "مجوز رد شد یا ناموفق بود",
-    "oauthExpired": "نشست OAuth منقضی شده است. لطفاً دوباره امتحان کنید."
+    "oauthExpired": "نشست OAuth منقضی شده است. لطفاً دوباره امتحان کنید.",
+    "disposableEmail": "آدرس‌های ایمیل یک‌بار مصرف مجاز نیستند. لطفاً از یک ایمیل دائمی استفاده کنید."
   },
   "emailVerification": {
     "title": "تایید ایمیل",
@@ -944,8 +945,7 @@
       "auditLog": "گزارش بازرسی",
       "salesStats": "آمار فروش",
       "landings": "صفحات فرود",
-      "referralNetwork": "شبکه ارجاع",
-      "news": "اخبار"
+      "referralNetwork": "شبکه ارجاع"
     },
     "panel": {
       "title": "پنل مدیریت",
@@ -980,8 +980,7 @@
       "auditLogDesc": "بررسی فعالیت سیستم و تاریخچه دسترسی",
       "salesStatsDesc": "تحلیل فروش و روندها",
       "landingsDesc": "صفحات خرید سریع",
-      "referralNetworkDesc": "نمایش بصری گراف ارجاعات و کمپین‌ها",
-      "newsDesc": "مدیریت مقالات خبری و انتشارات"
+      "referralNetworkDesc": "نمایش بصری گراف ارجاعات و کمپین‌ها"
     },
     "salesStats": {
       "title": "آمار فروش",
@@ -1728,7 +1727,10 @@
       "copyTelegramId": "برای کپی شناسه تلگرام کلیک کنید",
       "viewUser": "کاربر",
       "userNotificationsEnabled": "اعلان‌های کاربر",
-      "userNotificationsEnabledDesc": "ارسال اعلان به کاربران درباره پاسخ‌های مدیر"
+      "userNotificationsEnabledDesc": "ارسال اعلان به کاربران درباره پاسخ‌های مدیر",
+      "priorityNormal": "عادی",
+      "priorityHigh": "بالا",
+      "priorityUrgent": "فوری"
     },
     "tariffs": {
       "title": "مدیریت تعرفه‌ها",
@@ -3924,64 +3926,9 @@
       "telegram_unresolvable": "نام کاربری تلگرام قابل تأیید نبود. ممکن است گیرنده اعلان هدیه را دریافت نکند."
     }
   },
-  "news": {
-    "title": "اخبار و به‌روزرسانی‌ها",
-    "filterAll": "همه",
-    "readMore": "ادامه مطلب",
-    "readTime": "دقیقه مطالعه",
-    "loadMore": "بارگذاری بیشتر",
-    "noNews": "هنوز خبری نیست",
-    "backToHome": "بازگشت",
-    "views": "بازدید",
-    "admin": {
-      "title": "مدیریت اخبار",
-      "create": "ایجاد مقاله",
-      "edit": "ویرایش",
-      "delete": "حذف",
-      "confirmDelete": "این مقاله حذف شود؟",
-      "published": "منتشر شده",
-      "draft": "پیش‌نویس",
-      "featured": "ویژه",
-      "titleLabel": "عنوان",
-      "slugLabel": "شناسه URL",
-      "categoryLabel": "دسته‌بندی",
-      "categoryColorLabel": "رنگ دسته‌بندی",
-      "tagLabel": "برچسب",
-      "excerptLabel": "توضیح کوتاه",
-      "contentLabel": "محتوا",
-      "imageLabel": "تصویر ویژه",
-      "readTimeLabel": "زمان مطالعه (دقیقه)",
-      "save": "ذخیره",
-      "saving": "در حال ذخیره...",
-      "saveError": "ذخیره مقاله ناموفق بود. لطفاً دوباره تلاش کنید.",
-      "saved": "مقاله ذخیره شد",
-      "deleted": "مقاله حذف شد",
-      "selectColor": "انتخاب رنگ {{color}}",
-      "uploading": "در حال آپلود...",
-      "dropMedia": "تصویر یا ویدیو را اینجا رها کنید",
-      "uploadError": "آپلود ناموفق بود",
-      "fileTooLarge": "فایل خیلی بزرگ است",
-      "uploadFeaturedImage": "آپلود تصویر",
-      "toolbar": {
-        "bold": "پررنگ",
-        "italic": "کج",
-        "underline": "زیرخط",
-        "strikethrough": "خط‌خورده",
-        "heading1": "عنوان ۱",
-        "heading2": "عنوان ۲",
-        "heading3": "عنوان ۳",
-        "bulletList": "لیست نقطه‌ای",
-        "orderedList": "لیست شماره‌دار",
-        "blockquote": "نقل قول",
-        "codeBlock": "بلوک کد",
-        "alignLeft": "چپ‌چین",
-        "alignCenter": "وسط‌چین",
-        "highlight": "برجسته",
-        "link": "پیوند",
-        "image": "تصویر",
-        "imageUrlPrompt": "آدرس تصویر:",
-        "linkUrlPrompt": "آدرس پیوند:"
-      }
-    }
+  "legal": {
+    "rules": "قوانین استفاده",
+    "privacy": "حریم خصوصی",
+    "offer": "پیشنهاد عمومی"
   }
 }

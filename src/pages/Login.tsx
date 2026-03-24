@@ -23,9 +23,10 @@ import TelegramLoginButton from '../components/TelegramLoginButton';
 import OAuthProviderIcon from '../components/OAuthProviderIcon';
 import { saveOAuthState } from '../utils/oauth';
 import { getPendingReferralCode } from '../utils/referral';
+import DOMPurify from 'dompurify';
 
 export default function Login() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const {
@@ -63,6 +64,8 @@ export default function Login() {
   const [forgotPasswordEmail, setForgotPasswordEmail] = useState('');
   const [forgotPasswordSent, setForgotPasswordSent] = useState(false);
   const [forgotPasswordLoading, setForgotPasswordLoading] = useState(false);
+  const [legalModal, setLegalModal] = useState<{ title: string; html: string } | null>(null);
+  const [legalLoading, setLegalLoading] = useState(false);
   const [forgotPasswordError, setForgotPasswordError] = useState('');
   const [showEmailForm, setShowEmailForm] = useState(() => !!referralCode);
 
@@ -786,6 +789,70 @@ export default function Login() {
                 </div>
               </>
             )}
+          </div>
+        )}
+
+        {/* Legal links from branding config */}
+        {branding?.legal_links?.enabled && branding.legal_links.links.length > 0 && (
+          <div className="mt-6 flex flex-wrap justify-center gap-x-4 gap-y-1 text-xs text-dark-500">
+            {branding.legal_links.links.map((link, idx) => (
+              <button
+                key={idx}
+                type="button"
+                onClick={async () => {
+                  if (!link.slug) return;
+                  setLegalLoading(true);
+                  try {
+                    const lang = i18n.language || 'ru';
+                    // Try current language first, fallback to ru, fallback to base slug
+                    let content = '';
+                    for (const trySlug of [`${link.slug}_${lang}`, `${link.slug}_ru`, link.slug]) {
+                      try {
+                        const doc = await brandingApi.getLegalDoc(trySlug);
+                        if (doc.content) { content = doc.content; break; }
+                      } catch { /* try next */ }
+                    }
+                    const clean = DOMPurify.sanitize(content);
+                    if (clean) setLegalModal({ title: link.title, html: clean });
+                  } catch {
+                    // silent fail
+                  } finally {
+                    setLegalLoading(false);
+                  }
+                }}
+                className="transition-colors hover:text-dark-300 underline decoration-dark-600"
+                disabled={legalLoading}
+              >
+                {t(`legal.${link.slug}`, link.title)}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Legal document modal */}
+        {legalModal && (
+          <div
+            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 p-4"
+            onClick={() => setLegalModal(null)}
+          >
+            <div
+              className="relative max-h-[85vh] w-full max-w-2xl overflow-y-auto rounded-xl border border-dark-700 bg-dark-900 p-6 shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="mb-4 flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-white">{legalModal.title}</h2>
+                <button
+                  onClick={() => setLegalModal(null)}
+                  className="flex h-8 w-8 items-center justify-center rounded-lg bg-dark-800 text-dark-400 transition-colors hover:bg-dark-700 hover:text-white"
+                >
+                  &times;
+                </button>
+              </div>
+              <div
+                className="prose prose-invert prose-sm max-w-none text-dark-300 [&_h1]:text-base [&_h1]:font-semibold [&_h1]:text-white [&_h2]:text-sm [&_h2]:font-medium [&_h2]:text-dark-200 [&_p]:text-sm [&_p]:leading-relaxed [&_li]:text-sm [&_a]:text-accent-400 [&_.highlight]:rounded-lg [&_.highlight]:border [&_.highlight]:border-dark-700 [&_.highlight]:bg-dark-800 [&_.highlight]:p-4"
+                dangerouslySetInnerHTML={{ __html: legalModal.html }}
+              />
+            </div>
           </div>
         )}
       </div>

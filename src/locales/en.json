@@ -208,7 +208,8 @@
     "continueWithDiscord": "Continue with Discord",
     "continueWithVk": "Continue with VK",
     "oauthError": "Authorization was denied or failed",
-    "oauthExpired": "OAuth session expired. Please try again."
+    "oauthExpired": "OAuth session expired. Please try again.",
+    "disposableEmail": "Disposable email addresses are not allowed. Please use a permanent email."
   },
   "emailVerification": {
     "title": "Email Verification",
@@ -456,6 +457,20 @@
       "qrTitle": "Subscription QR Code",
       "qrScanHint": "Scan to connect",
       "qrButton": "QR Code"
+    },
+    "tvQuickConnect": {
+      "title": "Connect TV",
+      "description": "Enter the 5-character code from your TV screen",
+      "sendBtn": "Send to TV",
+      "badCode": "Enter a 5-character code (letters and digits)",
+      "sent": "Sent to TV!",
+      "error": "Failed to send to TV",
+      "scanTitle": "Scan QR Code",
+      "scanDescription": "Scan the QR code from your TV screen",
+      "scanBtn": "Scan QR from TV",
+      "stopScan": "Close camera",
+      "noCamera": "Camera access denied",
+      "codeFound": "Code found"
     },
     "myDevices": "My Devices",
     "noDevices": "No connected devices",
@@ -1110,8 +1125,7 @@
       "auditLog": "Audit Log",
       "salesStats": "Sales Statistics",
       "landings": "Landings",
-      "referralNetwork": "Referral Network",
-      "news": "News"
+      "referralNetwork": "Referral Network"
     },
     "panel": {
       "title": "Admin Panel",
@@ -1146,8 +1160,7 @@
       "auditLogDesc": "Review system activity and access history",
       "salesStatsDesc": "Sales analytics and trends",
       "landingsDesc": "Quick purchase landing pages",
-      "referralNetworkDesc": "Referral graph and campaign visualization",
-      "newsDesc": "Manage news articles and publications"
+      "referralNetworkDesc": "Referral graph and campaign visualization"
     },
     "salesStats": {
       "title": "Sales Statistics",
@@ -2027,6 +2040,7 @@
       "statusOpen": "Open",
       "statusPending": "Pending",
       "statusAnswered": "Answered",
+      "statusResolved": "Resolved",
       "statusClosed": "Closed",
       "from": "From",
       "created": "Created",
@@ -2066,7 +2080,10 @@
       "userNotificationsEnabled": "User Notifications",
       "userNotificationsEnabledDesc": "Send notifications to users about admin replies",
       "adminNotificationsEnabled": "Admin Notifications",
-      "adminNotificationsEnabledDesc": "Send notifications to admins about new tickets and replies"
+      "adminNotificationsEnabledDesc": "Send notifications to admins about new tickets and replies",
+      "priorityNormal": "Normal",
+      "priorityHigh": "High",
+      "priorityUrgent": "Urgent"
     },
     "tariffs": {
       "title": "Tariff Management",
@@ -3650,6 +3667,11 @@
       "withConnections": "With Connections",
       "revenue": "Revenue"
     },
+    "subscriptionSales": {
+      "title": "Subscription Sales",
+      "subtitle": "Last 7 days",
+      "total": "Total this week"
+    },
     "tariffs": {
       "title": "Tariff Statistics",
       "subtitle": "Subscription distribution by tariffs",
@@ -4476,75 +4498,9 @@
     "copyMessage": "Copy message",
     "shareToastCopied": "Message copied"
   },
-  "news": {
-    "title": "News & Updates",
-    "filterAll": "All",
-    "readMore": "Read more",
-    "readTime": "min read",
-    "loadMore": "Load more",
-    "noNews": "No news yet",
-    "backToHome": "Back",
-    "views": "views",
-    "admin": {
-      "title": "News Management",
-      "create": "Create Article",
-      "edit": "Edit",
-      "delete": "Delete",
-      "confirmDelete": "Delete this article?",
-      "published": "Published",
-      "draft": "Draft",
-      "featured": "Featured",
-      "titleLabel": "Title",
-      "slugLabel": "URL Slug",
-      "categoryLabel": "Category",
-      "categoryColorLabel": "Category Color",
-      "tagLabel": "Tag",
-      "excerptLabel": "Short Description",
-      "contentLabel": "Content",
-      "imageLabel": "Featured Image",
-      "readTimeLabel": "Read Time (min)",
-      "save": "Save",
-      "saving": "Saving...",
-      "saveError": "Failed to save article. Please try again.",
-      "saved": "Article saved",
-      "deleted": "Article deleted",
-      "selectColor": "Select color {{color}}",
-      "uploading": "Uploading...",
-      "dropMedia": "Drop image or video here",
-      "uploadError": "Upload failed",
-      "fileTooLarge": "File is too large",
-      "uploadFeaturedImage": "Upload image",
-      "combobox": {
-        "selectCategory": "Select category",
-        "selectTag": "Select tag",
-        "create": "Create",
-        "createNew": "Create new",
-        "searchOrCreate": "Search or create...",
-        "noItems": "Nothing found",
-        "placeholder": "Select...",
-        "clear": "Clear",
-        "delete": "Delete {{name}}"
-      },
-      "toolbar": {
-        "bold": "Bold",
-        "italic": "Italic",
-        "underline": "Underline",
-        "strikethrough": "Strikethrough",
-        "heading1": "Heading 1",
-        "heading2": "Heading 2",
-        "heading3": "Heading 3",
-        "bulletList": "Bullet List",
-        "orderedList": "Ordered List",
-        "blockquote": "Blockquote",
-        "codeBlock": "Code Block",
-        "alignLeft": "Align Left",
-        "alignCenter": "Align Center",
-        "highlight": "Highlight",
-        "link": "Link",
-        "image": "Image",
-        "imageUrlPrompt": "Image URL:",
-        "linkUrlPrompt": "URL:"
-      }
-    }
+  "legal": {
+    "rules": "Terms of Service",
+    "privacy": "Privacy Policy",
+    "offer": "Public Offer"
   }
 }
