@@ -1878,6 +1878,13 @@
       "emailAuthDesc": "Allow login via email",
       "giftEnabled": "Gift subscription",
       "giftEnabledDesc": "Allow users to gift a subscription to another user",
+      "loginForm": {
+        "title": "Login form",
+        "description": "Configure the order and visibility of login sections",
+        "telegram": "Telegram",
+        "oauth": "OAuth",
+        "email": "Email"
+      },
       "favoritesEmpty": "No favorites yet",
       "favoritesHint": "Star settings to add them here",
       "interfaceOptions": "Interface options",

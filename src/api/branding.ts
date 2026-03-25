@@ -44,6 +44,21 @@ export interface AnalyticsCounters {
   google_ads_label: string;
 }
 
+export interface LoginFormSection {
+  type: 'telegram' | 'oauth' | 'email';
+  enabled: boolean;
+  order: number;
+  label?: Record<string, string>;
+}
+
+export interface LoginFormConfig {
+  sections: LoginFormSection[];
+  title?: Record<string, string>;
+  subtitle?: Record<string, string>;
+  show_bot_link?: boolean;
+  show_language_switcher?: boolean;
+}
+
 const BRANDING_CACHE_KEY = 'cabinet_branding';
 const LOGO_PRELOADED_KEY = 'cabinet_logo_preloaded';
 
@@ -302,5 +317,16 @@ export const brandingApi = {
   updateAnalyticsCounters: async (data: Partial<AnalyticsCounters>): Promise<AnalyticsCounters> => {
     const response = await apiClient.patch<AnalyticsCounters>('/cabinet/branding/analytics', data);
     return response.data;
+  },
+
+  // Get login form config (public, no auth required)
+  getLoginFormConfig: async (): Promise<LoginFormConfig> => {
+    const { data } = await apiClient.get<LoginFormConfig>('/cabinet/branding/login-form');
+    return data;
+  },
+
+  // Update login form config (admin only)
+  updateLoginFormConfig: async (config: LoginFormConfig): Promise<void> => {
+    await apiClient.put('/admin/branding/login-form', config);
   },
 };
