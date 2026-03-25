@@ -43,9 +43,10 @@ export default function Connection() {
       state: {
         url: appConfig?.subscriptionUrl,
         hideLink: appConfig?.hideLink ?? false,
+        subscriptionId: subId,
       },
     });
-  }, [navigate, appConfig?.subscriptionUrl, appConfig?.hideLink, isTelegramWebApp]);
+  }, [navigate, appConfig?.subscriptionUrl, appConfig?.hideLink, isTelegramWebApp, subId]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

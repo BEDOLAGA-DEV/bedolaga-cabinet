@@ -391,7 +391,10 @@ export default function Subscription() {
         traffic_used_percent: data.traffic_used_percent,
         is_unlimited: data.is_unlimited,
       });
-      localStorage.setItem('traffic_refresh_ts', Date.now().toString());
+      localStorage.setItem(
+        `traffic_refresh_ts_${subscriptionId ?? 'default'}`,
+        Date.now().toString(),
+      );
       if (data.rate_limited && data.retry_after_seconds) {
         setTrafficRefreshCooldown(data.retry_after_seconds);
       } else {
@@ -427,7 +430,7 @@ export default function Subscription() {
     if (hasAutoRefreshed.current) return;
     hasAutoRefreshed.current = true;
 
-    const lastRefresh = localStorage.getItem('traffic_refresh_ts');
+    const lastRefresh = localStorage.getItem(`traffic_refresh_ts_${subscriptionId ?? 'default'}`);
     const now = Date.now();
     const cacheMs = 30 * 1000;
 
@@ -441,7 +444,7 @@ export default function Subscription() {
     }
 
     refreshTrafficMutation.mutate();
-  }, [subscription, refreshTrafficMutation]);
+  }, [subscription, refreshTrafficMutation, subscriptionId]);
 
   const copyUrl = () => {
     if (subscription?.subscription_url) {

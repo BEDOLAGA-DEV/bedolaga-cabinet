@@ -141,7 +141,10 @@ export default function Dashboard() {
         traffic_used_percent: data.traffic_used_percent,
         is_unlimited: data.is_unlimited,
       });
-      localStorage.setItem('traffic_refresh_ts', Date.now().toString());
+      localStorage.setItem(
+        `traffic_refresh_ts_${subscription?.id ?? 'default'}`,
+        Date.now().toString(),
+      );
       if (data.rate_limited && data.retry_after_seconds) {
         setTrafficRefreshCooldown(data.retry_after_seconds);
       } else {
@@ -176,7 +179,7 @@ export default function Dashboard() {
     if (hasAutoRefreshed.current) return;
     hasAutoRefreshed.current = true;
 
-    const lastRefresh = localStorage.getItem('traffic_refresh_ts');
+    const lastRefresh = localStorage.getItem(`traffic_refresh_ts_${subscription?.id ?? 'default'}`);
     const now = Date.now();
     const cacheMs = API.TRAFFIC_CACHE_MS;
 

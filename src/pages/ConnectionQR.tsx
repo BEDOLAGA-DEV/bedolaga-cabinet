@@ -8,6 +8,7 @@ import { AdminBackButton } from '@/components/admin';
 interface ConnectionQRState {
   url: string;
   hideLink: boolean;
+  subscriptionId?: number;
 }
 
 function isValidState(state: unknown): state is ConnectionQRState {
@@ -24,12 +25,14 @@ export default function ConnectionQR() {
 
   const state = location.state as unknown;
   const validState = isValidState(state) ? state : null;
+  const subId = validState?.subscriptionId;
+  const connectionPath = subId ? `/connection?sub=${subId}` : '/connection';
 
   useEffect(() => {
     if (!validState) {
-      navigate('/connection', { replace: true });
+      navigate(connectionPath, { replace: true });
     }
-  }, [validState, navigate]);
+  }, [validState, navigate, connectionPath]);
 
   if (!validState) {
     return null;
@@ -38,7 +41,7 @@ export default function ConnectionQR() {
   return (
     <div className="animate-fade-in">
       <div className="mb-6 flex items-center gap-3">
-        <AdminBackButton to="/connection" replace />
+        <AdminBackButton to={connectionPath} replace />
         <h1 className="text-2xl font-bold text-dark-100">{t('subscription.connection.qrTitle')}</h1>
       </div>
 
