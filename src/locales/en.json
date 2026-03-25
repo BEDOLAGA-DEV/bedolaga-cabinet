@@ -1727,7 +1727,9 @@
       "customButtonTypeCallback": "Callback",
       "customButtonTypeUrl": "URL",
       "customButtonCallbackPlaceholder": "callback_data (e.g. back_to_menu)",
-      "customButtonUrlPlaceholder": "https://example.com"
+      "customButtonUrlPlaceholder": "https://example.com",
+      "messageLimitWithMedia": "with media max 1024",
+      "messageLimitNoMedia": "max 4096"
     },
     "pinnedMessages": {
       "title": "Pinned Messages",
@@ -2844,7 +2846,15 @@
         "noTickets": "No tickets from this user",
         "ticketsCount": "tickets",
         "messagesCount": "messages",
-        "status": "Status",
+        "status": {
+          "label": "Status",
+          "active": "Active",
+          "blocked": "Blocked",
+          "deleted": "Deleted",
+          "trial": "Trial",
+          "expired": "Expired",
+          "disabled": "Disabled"
+        },
         "language": "Language",
         "registration": "Registration",
         "lastActivity": "Last activity",
