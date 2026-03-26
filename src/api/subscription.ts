@@ -71,6 +71,7 @@ export const subscriptionApi = {
 
   getDevicePrice: async (
     devices: number = 1,
+    signal?: AbortSignal,
   ): Promise<{
     available: boolean;
     reason?: string;
@@ -92,6 +93,7 @@ export const subscriptionApi = {
   }> => {
     const response = await apiClient.get('/cabinet/subscription/devices/price', {
       params: { devices },
+      signal,
     });
     return response.data;
   },

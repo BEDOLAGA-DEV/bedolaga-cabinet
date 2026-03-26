@@ -268,10 +268,11 @@ export default function Subscription() {
   useCloseOnSuccessNotification(handleCloseAllModals);
 
   // Device price query
-  const { data: devicePriceData } = useQuery({
+  const { data: devicePriceData, isFetching: isDevicePriceDataFetching } = useQuery({
     queryKey: ['device-price', devicesToAdd],
-    queryFn: () => subscriptionApi.getDevicePrice(devicesToAdd),
+    queryFn: ({ signal }) => subscriptionApi.getDevicePrice(devicesToAdd, signal),
     enabled: showDeviceTopup && !!subscription,
+    placeholderData: (previousData) => previousData,
   });
 
   // Device purchase mutation
@@ -1389,6 +1390,7 @@ export default function Subscription() {
                     <button
                       onClick={() => devicePurchaseMutation.mutate()}
                       disabled={
+                        isDevicePriceDataFetching ||
                         devicePurchaseMutation.isPending ||
                         !devicePriceData?.available ||
                         !!(
