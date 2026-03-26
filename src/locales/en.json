@@ -208,7 +208,9 @@
     "continueWithDiscord": "Continue with Discord",
     "continueWithVk": "Continue with VK",
     "oauthError": "Authorization was denied or failed",
-    "oauthExpired": "OAuth session expired. Please try again."
+    "oauthExpired": "OAuth session expired. Please try again.",
+    "orSignInWith": "or sign in with",
+    "orUseBot": "Or open the bot in the app"
   },
   "emailVerification": {
     "title": "Email Verification",

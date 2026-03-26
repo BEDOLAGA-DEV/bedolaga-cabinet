@@ -202,7 +202,9 @@
     "continueWithDiscord": "通过 Discord 继续",
     "continueWithVk": "通过 VK 继续",
     "oauthError": "授权被拒绝或失败",
-    "oauthExpired": "OAuth 会话已过期。请重试。"
+    "oauthExpired": "OAuth 会话已过期。请重试。",
+    "orSignInWith": "或通过以下方式登录",
+    "orUseBot": "或在应用中打开机器人"
   },
   "emailVerification": {
     "title": "邮箱验证",
