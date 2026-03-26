@@ -54,6 +54,7 @@ export const balanceApi = {
       amount_kopeks: number;
       payment_method: string;
       payment_option?: string;
+      language?: string;
     } = {
       amount_kopeks: amountKopeks,
       payment_method: paymentMethod,
@@ -61,7 +62,8 @@ export const balanceApi = {
     if (paymentOption) {
       payload.payment_option = paymentOption;
     }
-    const response = await apiClient.post('/cabinet/balance/topup', payload);
+    payload.language = document.documentElement.lang || "ru";
+    const response = await apiClient.post("/cabinet/balance/topup", payload);
     return response.data;
   },
 

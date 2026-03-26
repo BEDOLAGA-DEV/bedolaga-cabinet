@@ -408,7 +408,7 @@ export default function NewsArticlePage() {
           <img
             src={article.featured_image_url}
             alt={article.title}
-            className="h-auto w-full rounded-xl object-cover"
+            className="w-full max-h-96 rounded-xl object-cover"
             loading="eager"
             fetchPriority="high"
           />

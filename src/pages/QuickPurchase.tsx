@@ -927,6 +927,7 @@ export default function QuickPurchase() {
       contact_type: detectContactType(contactValue),
       contact_value: contactValue.trim(),
       payment_method: paymentMethod,
+      language: i18n.language,
       is_gift: isGift,
     };
 

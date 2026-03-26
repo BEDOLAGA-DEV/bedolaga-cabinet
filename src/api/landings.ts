@@ -101,6 +101,7 @@ export interface PurchaseRequest {
   gift_recipient_type?: 'email' | 'telegram';
   gift_recipient_value?: string;
   gift_message?: string;
+  language?: string;
 }
 
 export interface PurchaseResponse {
