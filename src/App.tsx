@@ -10,6 +10,7 @@ import {
   BlacklistedScreen,
 } from './components/blocking';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { PwaInstallBanner } from './components/PwaInstallBanner';
 import { PermissionRoute } from '@/components/auth/PermissionRoute';
 import { saveReturnUrl } from './utils/token';
 import { useAnalyticsCounters } from './hooks/useAnalyticsCounters';
@@ -1223,6 +1224,7 @@ function App() {
         {/* Catch all */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      <PwaInstallBanner />
     </>
   );
 }
