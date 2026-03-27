@@ -24,20 +24,13 @@ export function ReferralNetwork() {
   const { mobile: mobileHeaderHeight, bottomSafeArea } = useHeaderHeight();
 
   const hasScope = scope.length > 0;
-  const isAllUsers = scope.some((s) => s.type === 'all_users');
-
   const {
     data: networkData,
     isLoading,
     isError,
   } = useQuery({
-    queryKey: [
-      'referral-network',
-      isAllUsers ? 'all' : 'scoped',
-      scope.map((s) => `${s.type}:${s.id}`).sort(),
-    ],
-    queryFn: () =>
-      isAllUsers ? referralNetworkApi.getFullGraph() : referralNetworkApi.getScopedGraph(scope),
+    queryKey: ['referral-network', 'scoped', scope.map((s) => `${s.type}:${s.id}`).sort()],
+    queryFn: () => referralNetworkApi.getScopedGraph(scope),
     enabled: hasScope,
     staleTime: 120_000,
   });
