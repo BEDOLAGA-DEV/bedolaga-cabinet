@@ -105,10 +105,18 @@ export function ScopeSelector({ value, onAdd, onRemove, onClear, className }: Sc
   const [searchInput, setSearchInput] = useState('');
   const [debouncedUserQuery, setDebouncedUserQuery] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [showAllUsers, setShowAllUsers] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const isMaxReached = value.length >= MAX_SCOPE_ITEMS;
+
+  const { data: allUsersData, isFetching: isAllUsersFetching } = useQuery({
+    queryKey: ['referral-network', 'all-users'],
+    queryFn: () => referralNetworkApi.getAllNetworkUsers(500, 0),
+    enabled: showAllUsers,
+    staleTime: 60_000,
+  });
 
   const { data: scopeOptions, isLoading: isScopeLoading } = useQuery({
     queryKey: ['referral-network', 'scope-options'],
@@ -189,6 +197,7 @@ export function ScopeSelector({ value, onAdd, onRemove, onClear, className }: Sc
   }, [scopeOptions, searchInput]);
 
   function handleTabChange(tab: ScopeType) {
+    setShowAllUsers(false);
     setActiveTab(tab);
     setSearchInput('');
     setDebouncedUserQuery('');
@@ -361,17 +370,8 @@ export function ScopeSelector({ value, onAdd, onRemove, onClear, className }: Sc
           <div className="border-b border-dark-700/50 px-3 py-1.5">
             <button
               onClick={() => {
-                onClear();
-                if (scopeOptions?.campaigns?.length) {
-                  scopeOptions.campaigns.forEach((campaign) =>
-                    onAdd({ type: 'campaign', id: campaign.id, label: campaign.name }),
-                  );
-                } else if (scopeOptions?.partners?.length) {
-                  scopeOptions.partners.forEach((partner) =>
-                    onAdd({ type: 'partner', id: partner.id, label: partner.display_name }),
-                  );
-                }
-                setIsDropdownOpen(false);
+                setShowAllUsers(true);
+                setIsDropdownOpen(true);
               }}
               className="flex w-full items-center gap-2.5 rounded-lg border border-dark-600/50 px-3 py-2 text-sm text-dark-300 transition-colors hover:border-accent-500/40 hover:bg-accent-500/10 hover:text-accent-300"
             >
@@ -394,9 +394,15 @@ export function ScopeSelector({ value, onAdd, onRemove, onClear, className }: Sc
 
           {/* List */}
           <div className="max-h-64 overflow-y-auto" role="listbox" aria-multiselectable="true">
-            {activeTab === 'campaign' && renderCampaignList()}
-            {activeTab === 'partner' && renderPartnerList()}
-            {activeTab === 'user' && renderUserList()}
+            {showAllUsers ? (
+              renderAllUsersList()
+            ) : (
+              <>
+                {activeTab === 'campaign' && renderCampaignList()}
+                {activeTab === 'partner' && renderPartnerList()}
+                {activeTab === 'user' && renderUserList()}
+              </>
+            )}
           </div>
         </div>
       )}
@@ -493,6 +499,39 @@ export function ScopeSelector({ value, onAdd, onRemove, onClear, className }: Sc
         onClick={() => handleToggle('user', user.id, user.display_name)}
         title={user.display_name}
         subtitle={`${user.username ? `@${user.username}` : ''}${user.tg_id ? ` #${user.tg_id}` : ''}`}
+        badge={
+          user.is_partner ? (
+            <span className="shrink-0 rounded bg-warning-500/20 px-1.5 py-0.5 text-[10px] font-medium text-warning-400">
+              {t('admin.referralNetwork.user.partner')}
+            </span>
+          ) : undefined
+        }
+      />
+    ));
+  }
+  function renderAllUsersList() {
+    if (isAllUsersFetching) {
+      return (
+        <div className="flex items-center justify-center px-4 py-6">
+          <Spinner />
+        </div>
+      );
+    }
+
+    const users = allUsersData?.users ?? [];
+
+    if (users.length === 0) {
+      return <EmptyMessage text={t('admin.referralNetwork.scope.noResults')} />;
+    }
+
+    return users.map((user) => (
+      <ScopeListItem
+        key={user.id}
+        type="user"
+        selected={isSelected('user', user.id)}
+        onClick={() => handleToggle('user', user.id, user.display_name)}
+        title={user.display_name}
+        subtitle={user.username ? '@' + user.username : user.tg_id ? '#' + user.tg_id : ''}
         badge={
           user.is_partner ? (
             <span className="shrink-0 rounded bg-warning-500/20 px-1.5 py-0.5 text-[10px] font-medium text-warning-400">

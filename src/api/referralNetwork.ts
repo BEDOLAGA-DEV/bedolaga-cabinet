@@ -42,8 +42,10 @@ export const referralNetworkApi = {
     return response.data;
   },
 
-  getFullGraph: async (): Promise<NetworkGraphData> => {
-    const response = await apiClient.get('/cabinet/admin/referral-network/scoped');
+  getAllNetworkUsers: async (limit = 500, offset = 0): Promise<NetworkSearchResult> => {
+    const response = await apiClient.get('/cabinet/admin/referral-network/all-users', {
+      params: { limit, offset },
+    });
     return response.data;
   },
 
