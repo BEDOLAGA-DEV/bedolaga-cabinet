@@ -327,6 +327,6 @@ export const brandingApi = {
 
   // Update login form config (admin only)
   updateLoginFormConfig: async (config: LoginFormConfig): Promise<void> => {
-    await apiClient.put('/admin/branding/login-form', config);
+    await apiClient.put('/cabinet/branding/login-form', config);
   },
 };
