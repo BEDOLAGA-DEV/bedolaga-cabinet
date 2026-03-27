@@ -1966,7 +1966,12 @@ export default function SubscriptionPurchase() {
                   </button>
                 ) : (
                   <button
-                    onClick={() => purchaseMutation.mutate()}
+                    onClick={() => {
+                      import('../hooks/useAnalyticsCounters').then(({ fireAnalyticsEvent }) => {
+                        fireAnalyticsEvent('subscription_purchase_click');
+                      }).catch(() => {});
+                      purchaseMutation.mutate();
+                    }}
                     disabled={
                       purchaseMutation.isPending || previewLoading || !preview?.can_purchase
                     }

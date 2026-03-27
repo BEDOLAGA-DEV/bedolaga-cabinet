@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import DOMPurify from 'dompurify';
+import { getYandexCid } from '../utils/yandexCid';
 import { landingApi } from '../api/landings';
 import type {
   LandingConfig,
@@ -712,6 +713,9 @@ export default function QuickPurchase() {
   const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
 
+  // Capture Yandex CID for offline conversions
+  const yandexCidRef = useRef<string | null>(getYandexCid());
+
   // Fetch config
   const {
     data: config,
@@ -908,7 +912,7 @@ export default function QuickPurchase() {
   });
 
   // Submit handler
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!canSubmit || !slug || isSubmitting) return;
 
     setIsSubmitting(true);
@@ -935,6 +939,20 @@ export default function QuickPurchase() {
       data.gift_recipient_value = giftRecipient.trim();
       data.gift_message = giftMessage.trim() || undefined;
     }
+
+    data.yandex_cid = getYandexCid() || yandexCidRef.current || undefined;
+
+    // Fire analytics event on purchase click
+    try {
+      const { fireAnalyticsEvent } = await import('../hooks/useAnalyticsCounters');
+      fireAnalyticsEvent('purchase_click', {
+        landing: slug,
+        tariff_id: selectedTariffId,
+        period_days: selectedPeriodDays,
+        payment_method: paymentMethod,
+        value: (data as any).amount_kopeks ? (data as any).amount_kopeks / 100 : undefined,
+      });
+    } catch { /* silent */ }
 
     purchaseMutation.mutate(data);
   };
