@@ -214,7 +214,7 @@ export function ScopeSelector({ value, onAdd, onRemove, onClear, className }: Sc
       campaign: t('admin.referralNetwork.scope.campaign'),
       partner: t('admin.referralNetwork.scope.partner'),
       user: t('admin.referralNetwork.scope.user'),
-      all_users: t('admin.referralNetwork.scope.allUsers'),
+      all_users: t('admin.referralNetwork.scope.allReferrals'),
     }),
     [t],
   );
@@ -362,11 +362,15 @@ export function ScopeSelector({ value, onAdd, onRemove, onClear, className }: Sc
             <button
               onClick={() => {
                 onClear();
-                onAdd({
-                  type: 'all_users',
-                  id: 0,
-                  label: t('admin.referralNetwork.scope.allUsers'),
-                });
+                if (scopeOptions?.campaigns?.length) {
+                  scopeOptions.campaigns.forEach((campaign) =>
+                    onAdd({ type: 'campaign', id: campaign.id, label: campaign.name }),
+                  );
+                } else if (scopeOptions?.partners?.length) {
+                  scopeOptions.partners.forEach((partner) =>
+                    onAdd({ type: 'partner', id: partner.id, label: partner.display_name }),
+                  );
+                }
                 setIsDropdownOpen(false);
               }}
               className="flex w-full items-center gap-2.5 rounded-lg border border-dark-600/50 px-3 py-2 text-sm text-dark-300 transition-colors hover:border-accent-500/40 hover:bg-accent-500/10 hover:text-accent-300"

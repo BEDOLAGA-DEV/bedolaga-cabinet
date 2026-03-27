@@ -768,7 +768,7 @@
     "noReferrals": "No referrals yet. Share your link to invite friends!",
     "anonymousUser": "User #{{id}}",
     "anonymousReferral": "Referral",
-    "user": "User",
+    "user": "Referrals",
     "joined": "Joined",
     "hasPaid": "Has Paid",
     "status": {
@@ -1312,6 +1312,7 @@
       },
       "scope": {
         "allUsers": "All users",
+        "allReferrals": "All referrals",
         "title": "Scope",
         "campaign": "Campaign",
         "partner": "Partner",
