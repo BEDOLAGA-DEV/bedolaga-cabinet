@@ -1587,6 +1587,13 @@
       "emailAuthDesc": "允许通过邮箱登录",
       "giftEnabled": "赠送订阅",
       "giftEnabledDesc": "允许用户将订阅作为礼物赠送给其他用户",
+      "loginForm": {
+        "title": "登录表单",
+        "description": "配置登录页面各部分的顺序和可见性",
+        "telegram": "Telegram",
+        "oauth": "OAuth",
+        "email": "邮箱"
+      },
       "favoritesEmpty": "暂无收藏",
       "favoritesHint": "点击星标将设置添加到这里",
       "interfaceOptions": "界面选项",

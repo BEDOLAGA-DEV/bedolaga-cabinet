@@ -1888,6 +1888,13 @@
       "emailAuthDesc": "Регистрация и вход через email",
       "giftEnabled": "Подписка в подарок",
       "giftEnabledDesc": "Возможность отправить подписку в подарок другому пользователю",
+      "loginForm": {
+        "title": "Форма входа",
+        "description": "Настройте порядок и видимость секций на странице входа",
+        "telegram": "Telegram",
+        "oauth": "OAuth",
+        "email": "Email"
+      },
       "availableThemes": "Доступные темы",
       "darkTheme": "Тёмная",
       "lightTheme": "Светлая",

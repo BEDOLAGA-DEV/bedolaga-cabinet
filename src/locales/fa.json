@@ -1549,6 +1549,13 @@
       "emailAuthDesc": "اجازه ورود با ایمیل",
       "giftEnabled": "اشتراک هدیه",
       "giftEnabledDesc": "امکان ارسال اشتراک به عنوان هدیه به کاربر دیگر",
+      "loginForm": {
+        "title": "فرم ورود",
+        "description": "ترتیب و نمایش بخش‌های صفحه ورود را پیکربندی کنید",
+        "telegram": "تلگرام",
+        "oauth": "OAuth",
+        "email": "ایمیل"
+      },
       "favoritesEmpty": "هنوز علاقه‌مندی ندارید",
       "favoritesHint": "ستاره بزنید تا تنظیمات اینجا اضافه شوند",
       "interfaceOptions": "گزینه‌های رابط کاربری",
