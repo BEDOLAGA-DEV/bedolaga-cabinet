@@ -67,7 +67,6 @@ export default function Login() {
   const [legalModal, setLegalModal] = useState<{ title: string; html: string } | null>(null);
   const [legalLoading, setLegalLoading] = useState(false);
   const [forgotPasswordError, setForgotPasswordError] = useState('');
-  const [showEmailForm, setShowEmailForm] = useState(true);
 
   // Telegram safe area insets
   const { safeAreaInset, contentSafeAreaInset } = useTelegramSDK();
