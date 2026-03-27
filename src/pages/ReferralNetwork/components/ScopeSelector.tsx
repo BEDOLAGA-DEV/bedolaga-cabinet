@@ -19,6 +19,7 @@ const CHIP_COLORS: Record<ScopeType, string> = {
   campaign: 'bg-success-500/20 text-success-400',
   partner: 'bg-warning-500/20 text-warning-400',
   user: 'bg-accent-500/20 text-accent-400',
+  all_users: 'bg-dark-500/30 text-dark-200',
 };
 
 // Reuse CHIP_COLORS for avatar backgrounds (same palette)
@@ -28,6 +29,7 @@ const AVATAR_LETTERS: Record<ScopeType, string> = {
   campaign: 'C',
   partner: 'P',
   user: 'U',
+  all_users: '*',
 };
 
 function CheckIcon() {
@@ -212,6 +214,7 @@ export function ScopeSelector({ value, onAdd, onRemove, onClear, className }: Sc
       campaign: t('admin.referralNetwork.scope.campaign'),
       partner: t('admin.referralNetwork.scope.partner'),
       user: t('admin.referralNetwork.scope.user'),
+      all_users: t('admin.referralNetwork.scope.allUsers'),
     }),
     [t],
   );
@@ -221,6 +224,7 @@ export function ScopeSelector({ value, onAdd, onRemove, onClear, className }: Sc
       campaign: t('admin.referralNetwork.scope.selectCampaign'),
       partner: t('admin.referralNetwork.scope.selectPartner'),
       user: t('admin.referralNetwork.scope.selectUser'),
+      all_users: '',
     }),
     [t],
   );
