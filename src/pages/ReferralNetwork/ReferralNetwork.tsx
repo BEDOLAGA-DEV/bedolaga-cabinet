@@ -24,7 +24,6 @@ export function ReferralNetwork() {
   const { mobile: mobileHeaderHeight, bottomSafeArea } = useHeaderHeight();
 
   const hasScope = scope.length > 0;
-
   const {
     data: networkData,
     isLoading,
