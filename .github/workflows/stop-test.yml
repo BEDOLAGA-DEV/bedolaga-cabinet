@@ -1,0 +1,19 @@
+name: Stop Test Containers
+
+on:
+  workflow_dispatch:
+
+jobs:
+  stop:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Stop bot and cabinet on VPS
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.TEST_VPS_HOST }}
+          username: ${{ secrets.TEST_VPS_USER }}
+          key: ${{ secrets.TEST_VPS_KEY }}
+          script: |
+            cd /opt/test-stand
+            docker compose stop cabinet bot
+            docker compose ps
