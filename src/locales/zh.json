@@ -368,6 +368,20 @@
       "qrScanHint": "使用相机扫描以连接",
       "qrButton": "二维码"
     },
+    "tvQuickConnect": {
+      "title": "连接电视",
+      "description": "输入电视屏幕上显示的5位代码",
+      "sendBtn": "发送到电视",
+      "badCode": "请输入5位代码（字母和数字）",
+      "sent": "已发送到电视！",
+      "error": "发送到电视失败",
+      "scanTitle": "扫描二维码",
+      "scanDescription": "扫描电视屏幕上的二维码",
+      "scanBtn": "扫描电视二维码",
+      "stopScan": "关闭摄像头",
+      "noCamera": "无法访问摄像头",
+      "codeFound": "找到代码"
+    },
     "additionalOptions": {
       "title": "附加选项",
       "buyDevices": "购买更多设备",
