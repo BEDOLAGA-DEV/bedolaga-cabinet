@@ -202,7 +202,8 @@
     "continueWithDiscord": "ادامه با Discord",
     "continueWithVk": "ادامه با VK",
     "oauthError": "مجوز رد شد یا ناموفق بود",
-    "oauthExpired": "نشست OAuth منقضی شده است. لطفاً دوباره امتحان کنید."
+    "oauthExpired": "نشست OAuth منقضی شده است. لطفاً دوباره امتحان کنید.",
+    "disposableEmail": "آدرس‌های ایمیل یک‌بار مصرف مجاز نیستند. لطفاً از یک ایمیل دائمی استفاده کنید."
   },
   "emailVerification": {
     "title": "تایید ایمیل",
@@ -1362,7 +1363,9 @@
       "customButtonTypeCallback": "Callback",
       "customButtonTypeUrl": "لینک",
       "customButtonCallbackPlaceholder": "callback_data (مثلاً back_to_menu)",
-      "customButtonUrlPlaceholder": "https://example.com"
+      "customButtonUrlPlaceholder": "https://example.com",
+      "messageLimitWithMedia": "with media max 1024",
+      "messageLimitNoMedia": "max 4096"
     },
     "pinnedMessages": {
       "title": "Pinned Messages",
@@ -1729,7 +1732,10 @@
       "copyTelegramId": "برای کپی شناسه تلگرام کلیک کنید",
       "viewUser": "کاربر",
       "userNotificationsEnabled": "اعلان‌های کاربر",
-      "userNotificationsEnabledDesc": "ارسال اعلان به کاربران درباره پاسخ‌های مدیر"
+      "userNotificationsEnabledDesc": "ارسال اعلان به کاربران درباره پاسخ‌های مدیر",
+      "priorityNormal": "عادی",
+      "priorityHigh": "بالا",
+      "priorityUrgent": "فوری"
     },
     "tariffs": {
       "title": "مدیریت تعرفه‌ها",
@@ -2475,7 +2481,15 @@
         "noTickets": "این کاربر تیکتی ندارد",
         "ticketsCount": "تیکت",
         "messagesCount": "پیام",
-        "status": "وضعیت",
+        "status": {
+          "label": "وضعیت",
+          "active": "فعال",
+          "blocked": "مسدود",
+          "deleted": "حذف شده",
+          "trial": "آزمایشی",
+          "expired": "منقضی",
+          "disabled": "غیرفعال"
+        },
         "language": "زبان",
         "registration": "ثبت‌نام",
         "lastActivity": "آخرین فعالیت",
@@ -3274,7 +3288,8 @@
       "enable": "فعال",
       "disable": "غیرفعال",
       "hide": "پنهان کردن ({{count}})",
-      "showMore_other": "نمایش {{count}} گره بیشتر"
+      "showMore_other": "نمایش {{count}} گره بیشتر",
+      "showMore": "{{count}} بیشتر"
     },
     "revenue": {
       "title": "درآمد",
@@ -3302,7 +3317,7 @@
     },
     "topReferrers": {
       "title": "بهترین ارجاع‌دهندگان",
-      "stats": "ارجاع، {{count}} دعوت",
+      "stats": "{{count}} دعوت",
       "byEarnings": "بر اساس درآمد",
       "byInvited": "بر اساس دعوت",
       "invites": "دعوت",
@@ -3315,7 +3330,7 @@
     },
     "topCampaigns": {
       "title": "بهترین لینک‌های کمپین",
-      "stats": "کمپین، {{count}} ثبت نام",
+      "stats": "{{count}} ثبت‌نام",
       "total": "کل از کمپین‌ها"
     },
     "recentPayments": {
@@ -3338,6 +3353,11 @@
       "uptime": "آپتایم",
       "users": "کاربران",
       "activeSubs": "اشتراک‌ها"
+    },
+    "subscriptionSales": {
+      "title": "فروش اشتراک",
+      "subtitle": "پویایی فروش روزانه",
+      "total": "کل فروش"
     }
   },
   "profile": {

@@ -208,7 +208,8 @@
     "continueWithDiscord": "Continue with Discord",
     "continueWithVk": "Continue with VK",
     "oauthError": "Authorization was denied or failed",
-    "oauthExpired": "OAuth session expired. Please try again."
+    "oauthExpired": "OAuth session expired. Please try again.",
+    "disposableEmail": "Disposable email addresses are not allowed. Please use a permanent email."
   },
   "emailVerification": {
     "title": "Email Verification",
@@ -1727,7 +1728,9 @@
       "customButtonTypeCallback": "Callback",
       "customButtonTypeUrl": "URL",
       "customButtonCallbackPlaceholder": "callback_data (e.g. back_to_menu)",
-      "customButtonUrlPlaceholder": "https://example.com"
+      "customButtonUrlPlaceholder": "https://example.com",
+      "messageLimitWithMedia": "with media max 1024",
+      "messageLimitNoMedia": "max 4096"
     },
     "pinnedMessages": {
       "title": "Pinned Messages",
@@ -2067,7 +2070,10 @@
       "userNotificationsEnabled": "User Notifications",
       "userNotificationsEnabledDesc": "Send notifications to users about admin replies",
       "adminNotificationsEnabled": "Admin Notifications",
-      "adminNotificationsEnabledDesc": "Send notifications to admins about new tickets and replies"
+      "adminNotificationsEnabledDesc": "Send notifications to admins about new tickets and replies",
+      "priorityNormal": "Normal",
+      "priorityHigh": "High",
+      "priorityUrgent": "Urgent"
     },
     "tariffs": {
       "title": "Tariff Management",
@@ -2843,7 +2849,15 @@
         "noTickets": "No tickets from this user",
         "ticketsCount": "tickets",
         "messagesCount": "messages",
-        "status": "Status",
+        "status": {
+          "label": "Status",
+          "active": "Active",
+          "blocked": "Blocked",
+          "deleted": "Deleted",
+          "trial": "Trial",
+          "expired": "Expired",
+          "disabled": "Disabled"
+        },
         "language": "Language",
         "registration": "Registration",
         "lastActivity": "Last activity",
@@ -3597,11 +3611,12 @@
       "disable": "Disable",
       "hide": "Hide ({{count}})",
       "showMore_one": "Show {{count}} more node",
-      "showMore_other": "Show {{count}} more nodes"
+      "showMore_other": "Show {{count}} more nodes",
+      "showMore": "{{count}} more"
     },
     "topReferrers": {
       "title": "Top referrers",
-      "stats": "ref., {{count}} invites",
+      "stats": "{{count}} invites",
       "byEarnings": "By earnings",
       "byInvited": "By invites",
       "invites": "invites",
@@ -3614,7 +3629,7 @@
     },
     "topCampaigns": {
       "title": "Top campaign links",
-      "stats": "camp., {{count}} reg.",
+      "stats": "{{count}} registrations",
       "total": "Total from campaigns"
     },
     "recentPayments": {
@@ -3672,6 +3687,11 @@
       "uptime": "Uptime",
       "users": "Users",
       "activeSubs": "Active Subs"
+    },
+    "subscriptionSales": {
+      "title": "Subscription Sales",
+      "subtitle": "Sales dynamics by day",
+      "total": "Total sales"
     }
   },
   "banSystem": {

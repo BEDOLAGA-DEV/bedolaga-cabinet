@@ -202,7 +202,8 @@
     "continueWithDiscord": "通过 Discord 继续",
     "continueWithVk": "通过 VK 继续",
     "oauthError": "授权被拒绝或失败",
-    "oauthExpired": "OAuth 会话已过期。请重试。"
+    "oauthExpired": "OAuth 会话已过期。请重试。",
+    "disposableEmail": "不允许使用一次性电子邮件地址。请使用永久电子邮件。"
   },
   "emailVerification": {
     "title": "邮箱验证",
@@ -1436,7 +1437,9 @@
       "customButtonTypeCallback": "回调",
       "customButtonTypeUrl": "链接",
       "customButtonCallbackPlaceholder": "callback_data（例如 back_to_menu）",
-      "customButtonUrlPlaceholder": "https://example.com"
+      "customButtonUrlPlaceholder": "https://example.com",
+      "messageLimitWithMedia": "with media max 1024",
+      "messageLimitNoMedia": "max 4096"
     },
     "pinnedMessages": {
       "title": "置顶消息",
@@ -1767,7 +1770,10 @@
       "copyTelegramId": "点击复制Telegram ID",
       "viewUser": "用户",
       "userNotificationsEnabled": "用户通知",
-      "userNotificationsEnabledDesc": "向用户发送管理员回复通知"
+      "userNotificationsEnabledDesc": "向用户发送管理员回复通知",
+      "priorityNormal": "普通",
+      "priorityHigh": "高",
+      "priorityUrgent": "紧急"
     },
     "tariffs": {
       "title": "套餐管理",
@@ -2474,7 +2480,15 @@
         "noTickets": "该用户没有工单",
         "ticketsCount": "个工单",
         "messagesCount": "条消息",
-        "status": "状态",
+        "status": {
+          "label": "状态",
+          "active": "活跃",
+          "blocked": "已封禁",
+          "deleted": "已删除",
+          "trial": "试用",
+          "expired": "已过期",
+          "disabled": "已禁用"
+        },
         "language": "语言",
         "registration": "注册时间",
         "lastActivity": "最后活跃",
@@ -3273,7 +3287,8 @@
       "enable": "启用",
       "disable": "禁用",
       "hide": "隐藏 ({{count}})",
-      "showMore_other": "显示更多 {{count}} 个节点"
+      "showMore_other": "显示更多 {{count}} 个节点",
+      "showMore": "还有 {{count}} 个"
     },
     "revenue": {
       "title": "收入",
@@ -3301,7 +3316,7 @@
     },
     "topReferrers": {
       "title": "顶级推荐者",
-      "stats": "推荐者，{{count}} 邀请",
+      "stats": "{{count}} 次邀请",
       "byEarnings": "按收入",
       "byInvited": "按邀请",
       "invites": "邀请",
@@ -3314,7 +3329,7 @@
     },
     "topCampaigns": {
       "title": "顶级活动链接",
-      "stats": "活动，{{count}} 注册",
+      "stats": "{{count}} 次注册",
       "total": "活动总计"
     },
     "recentPayments": {
@@ -3337,6 +3352,11 @@
       "uptime": "运行时间",
       "users": "用户",
       "activeSubs": "订阅"
+    },
+    "subscriptionSales": {
+      "title": "订阅销售",
+      "subtitle": "每日销售动态",
+      "total": "总销售额"
     }
   },
   "profile": {
