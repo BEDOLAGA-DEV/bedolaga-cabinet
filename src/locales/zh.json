@@ -3284,7 +3284,8 @@
       "enable": "启用",
       "disable": "禁用",
       "hide": "隐藏 ({{count}})",
-      "showMore_other": "显示更多 {{count}} 个节点"
+      "showMore_other": "显示更多 {{count}} 个节点",
+      "showMore": "还有 {{count}} 个"
     },
     "revenue": {
       "title": "收入",
@@ -3312,7 +3313,7 @@
     },
     "topReferrers": {
       "title": "顶级推荐者",
-      "stats": "推荐者，{{count}} 邀请",
+      "stats": "{{count}} 次邀请",
       "byEarnings": "按收入",
       "byInvited": "按邀请",
       "invites": "邀请",
@@ -3325,7 +3326,7 @@
     },
     "topCampaigns": {
       "title": "顶级活动链接",
-      "stats": "活动，{{count}} 注册",
+      "stats": "{{count}} 次注册",
       "total": "活动总计"
     },
     "recentPayments": {
@@ -3348,6 +3349,11 @@
       "uptime": "运行时间",
       "users": "用户",
       "activeSubs": "订阅"
+    },
+    "subscriptionSales": {
+      "title": "订阅销售",
+      "subtitle": "每日销售动态",
+      "total": "总销售额"
     }
   },
   "profile": {

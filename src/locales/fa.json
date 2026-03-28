@@ -3285,7 +3285,8 @@
       "enable": "فعال",
       "disable": "غیرفعال",
       "hide": "پنهان کردن ({{count}})",
-      "showMore_other": "نمایش {{count}} گره بیشتر"
+      "showMore_other": "نمایش {{count}} گره بیشتر",
+      "showMore": "{{count}} بیشتر"
     },
     "revenue": {
       "title": "درآمد",
@@ -3313,7 +3314,7 @@
     },
     "topReferrers": {
       "title": "بهترین ارجاع‌دهندگان",
-      "stats": "ارجاع، {{count}} دعوت",
+      "stats": "{{count}} دعوت",
       "byEarnings": "بر اساس درآمد",
       "byInvited": "بر اساس دعوت",
       "invites": "دعوت",
@@ -3326,7 +3327,7 @@
     },
     "topCampaigns": {
       "title": "بهترین لینک‌های کمپین",
-      "stats": "کمپین، {{count}} ثبت نام",
+      "stats": "{{count}} ثبت‌نام",
       "total": "کل از کمپین‌ها"
     },
     "recentPayments": {
@@ -3349,6 +3350,11 @@
       "uptime": "آپتایم",
       "users": "کاربران",
       "activeSubs": "اشتراک‌ها"
+    },
+    "subscriptionSales": {
+      "title": "فروش اشتراک",
+      "subtitle": "پویایی فروش روزانه",
+      "total": "کل فروش"
     }
   },
   "profile": {
