@@ -8,7 +8,6 @@ const FRAME_INTERVAL = 1000 / TARGET_FPS;
  * Shared animation loop hook with built-in performance safeguards:
  * - FPS throttling: 30 FPS on mobile, 60 FPS on desktop
  * - Page Visibility API: fully stops RAF when tab/app is hidden
- * - Telegram Mini App: fully stops RAF when isActive = false
  * - Auto-cleanup on unmount
  */
 export function useAnimationLoop(
@@ -22,9 +21,8 @@ export function useAnimationLoop(
     let animId = 0;
     let lastTime = 0;
     let docHidden = document.hidden;
-    let tgInactive = false;
 
-    const isPaused = () => docHidden || tgInactive;
+    const isPaused = () => docHidden;
 
     const loop = (time: number) => {
       const delta = time - lastTime;
@@ -54,21 +52,7 @@ export function useAnimationLoop(
       else start();
     };
 
-    const tg = window.Telegram?.WebApp;
-    const onTgActivated = () => {
-      tgInactive = false;
-      if (!isPaused()) start();
-    };
-    const onTgDeactivated = () => {
-      tgInactive = true;
-      stop();
-    };
-
     document.addEventListener('visibilitychange', onVisibilityChange);
-    if (tg) {
-      tg.onEvent?.('activated', onTgActivated);
-      tg.onEvent?.('deactivated', onTgDeactivated);
-    }
 
     // Start the loop (only if page is currently visible)
     if (!isPaused()) start();
@@ -76,10 +60,6 @@ export function useAnimationLoop(
     return () => {
       stop();
       document.removeEventListener('visibilitychange', onVisibilityChange);
-      if (tg) {
-        tg.offEvent?.('activated', onTgActivated);
-        tg.offEvent?.('deactivated', onTgDeactivated);
-      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps);
@@ -95,39 +75,10 @@ export function useAnimationPause(): boolean {
   );
 
   useEffect(() => {
-    let docHidden = document.hidden;
-    let tgInactive = false;
-
-    const update = () => setPaused(docHidden || tgInactive);
-
-    const onVisibility = () => {
-      docHidden = document.hidden;
-      update();
-    };
-
-    const tg = window.Telegram?.WebApp;
-    const onActivated = () => {
-      tgInactive = false;
-      update();
-    };
-    const onDeactivated = () => {
-      tgInactive = true;
-      update();
-    };
+    const onVisibility = () => setPaused(document.hidden);
 
     document.addEventListener('visibilitychange', onVisibility);
-    if (tg) {
-      tg.onEvent?.('activated', onActivated);
-      tg.onEvent?.('deactivated', onDeactivated);
-    }
-
-    return () => {
-      document.removeEventListener('visibilitychange', onVisibility);
-      if (tg) {
-        tg.offEvent?.('activated', onActivated);
-        tg.offEvent?.('deactivated', onDeactivated);
-      }
-    };
+    return () => document.removeEventListener('visibilitychange', onVisibility);
   }, []);
 
   return paused;

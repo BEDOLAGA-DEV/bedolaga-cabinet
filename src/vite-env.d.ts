@@ -13,12 +13,6 @@ interface ImportMeta {
   readonly env: ImportMetaEnv;
 }
 
-/** Telegram WebApp global — available when running inside Telegram Mini App */
-interface TelegramWebAppGlobal {
-  onEvent?: (event: string, callback: () => void) => void;
-  offEvent?: (event: string, callback: () => void) => void;
-}
-
 /** Telegram Login JS SDK — loaded from https://oauth.telegram.org/js/telegram-login.js */
 interface TelegramLoginGlobal {
   init: (
@@ -35,7 +29,6 @@ interface TelegramLoginGlobal {
 
 interface Window {
   Telegram?: {
-    WebApp?: TelegramWebAppGlobal;
     Login?: TelegramLoginGlobal;
   };
 }
