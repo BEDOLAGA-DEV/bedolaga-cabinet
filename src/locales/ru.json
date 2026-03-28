@@ -30,7 +30,8 @@
     "units": {
       "gb": "ГБ",
       "perGb": "/ГБ"
-    }
+    },
+    "total": "Всего"
   },
   "nav": {
     "dashboard": "Главная",
@@ -4081,7 +4082,9 @@
         "successful": "Успешных",
         "funnel": "Воронка",
         "loadError": "Не удалось загрузить статистику",
-        "noPurchases": "Нет покупок"
+        "noPurchases": "Нет покупок",
+        "dailyBreakdown": "Разбивка по дням",
+        "paid": "Оплачено"
       },
       "purchases": {
         "title": "Покупки",
@@ -4175,6 +4178,11 @@
       "available": "Доступных",
       "withConnections": "С подключениями",
       "revenue": "Доход"
+    },
+    "subscriptionSales": {
+      "title": "Продажи подписок",
+      "subtitle": "За последние 7 дней",
+      "total": "Итого за неделю"
     },
     "tariffs": {
       "title": "Статистика по тарифам",

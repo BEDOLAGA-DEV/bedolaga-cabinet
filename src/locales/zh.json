@@ -30,7 +30,8 @@
     "units": {
       "gb": "GB",
       "perGb": "/GB"
-    }
+    },
+    "total": "总计"
   },
   "nav": {
     "dashboard": "首页",
@@ -3232,7 +3233,15 @@
       "loadingPeriods": "加载中...",
       "periodDaySuffix": "天",
       "localeTab": "语言",
-      "localeHint": "切换语言以编辑该语言的文本"
+      "localeHint": "切换语言以编辑该语言的文本",
+      "stats": {
+        "dailyBreakdown": "每日明细",
+        "paid": "已支付",
+        "conversionRate": "转化率",
+        "created": "已创建",
+        "noPurchases": "暂无购买",
+        "revenueLabel": "收入"
+      }
     }
   },
   "adminUpdates": {
@@ -3337,6 +3346,11 @@
       "uptime": "运行时间",
       "users": "用户",
       "activeSubs": "订阅"
+    },
+    "subscriptionSales": {
+      "title": "订阅销售",
+      "subtitle": "每日销售动态",
+      "total": "总销售额"
     }
   },
   "profile": {

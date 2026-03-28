@@ -30,7 +30,8 @@
     },
     "retry": "Retry",
     "saving": "Saving...",
-    "understand": "Got it"
+    "understand": "Got it",
+    "total": "Total"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -3529,7 +3530,9 @@
         "successful": "Successful",
         "funnel": "Funnel",
         "loadError": "Failed to load statistics",
-        "noPurchases": "No purchases"
+        "noPurchases": "No purchases",
+        "dailyBreakdown": "Daily breakdown",
+        "paid": "Paid"
       },
       "purchases": {
         "title": "Purchases",
@@ -3652,6 +3655,11 @@
       "available": "Available",
       "withConnections": "With Connections",
       "revenue": "Revenue"
+    },
+    "subscriptionSales": {
+      "title": "Subscription Sales",
+      "subtitle": "Last 7 days",
+      "total": "Total this week"
     },
     "tariffs": {
       "title": "Tariff Statistics",

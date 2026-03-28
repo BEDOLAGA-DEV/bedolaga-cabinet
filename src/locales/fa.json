@@ -30,7 +30,8 @@
     "retry": "تلاش مجدد",
     "saving": "در حال ذخیره...",
     "understand": "متوجه شدم",
-    "collapse": "جمع کردن"
+    "collapse": "جمع کردن",
+    "total": "مجموع"
   },
   "nav": {
     "dashboard": "داشبورد",
@@ -3233,7 +3234,15 @@
       "loadingPeriods": "در حال بارگذاری...",
       "periodDaySuffix": "روز",
       "localeTab": "زبان",
-      "localeHint": "زبان را تغییر دهید تا متن را به آن زبان ویرایش کنید"
+      "localeHint": "زبان را تغییر دهید تا متن را به آن زبان ویرایش کنید",
+      "stats": {
+        "dailyBreakdown": "تفکیک روزانه",
+        "paid": "پرداخت شده",
+        "conversionRate": "نرخ تبدیل",
+        "created": "ایجاد شده",
+        "noPurchases": "خریدی نیست",
+        "revenueLabel": "درآمد"
+      }
     }
   },
   "adminUpdates": {
@@ -3338,6 +3347,11 @@
       "uptime": "آپتایم",
       "users": "کاربران",
       "activeSubs": "اشتراک‌ها"
+    },
+    "subscriptionSales": {
+      "title": "فروش اشتراک",
+      "subtitle": "پویایی فروش روزانه",
+      "total": "کل فروش"
     }
   },
   "profile": {

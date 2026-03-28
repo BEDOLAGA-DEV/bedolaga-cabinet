@@ -235,12 +235,18 @@ export interface TariffStats {
   total_tariff_subscriptions: number;
 }
 
+export interface SubscriptionChartData {
+  date: string;
+  count: number;
+}
+
 export interface DashboardStats {
   nodes: NodesOverview;
   subscriptions: SubscriptionStats;
   financial: FinancialStats;
   servers: ServerStats;
   revenue_chart: RevenueData[];
+  subscription_chart?: SubscriptionChartData[];
   tariff_stats?: TariffStats;
 }
 
@@ -330,7 +336,8 @@ export const statsApi = {
 
   // Get complete dashboard stats
   getDashboardStats: async (): Promise<DashboardStats> => {
-    const response = await apiClient.get('/cabinet/admin/stats/dashboard');
+    const { USER_TIMEZONE } = await import('../utils/format');
+    const response = await apiClient.get('/cabinet/admin/stats/dashboard', { params: { tz: USER_TIMEZONE } });
     return response.data;
   },
 
