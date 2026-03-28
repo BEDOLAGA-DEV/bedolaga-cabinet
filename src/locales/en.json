@@ -458,6 +458,20 @@
       "qrScanHint": "Scan to connect",
       "qrButton": "QR Code"
     },
+    "tvQuickConnect": {
+      "title": "Connect TV",
+      "description": "Enter the 5-character code from your TV screen",
+      "sendBtn": "Send to TV",
+      "badCode": "Enter a 5-character code (letters and digits)",
+      "sent": "Sent to TV!",
+      "error": "Failed to send to TV",
+      "scanTitle": "Scan QR Code",
+      "scanDescription": "Scan the QR code from your TV screen",
+      "scanBtn": "Scan QR from TV",
+      "stopScan": "Close camera",
+      "noCamera": "Camera access denied",
+      "codeFound": "Code found"
+    },
     "myDevices": "My Devices",
     "noDevices": "No connected devices",
     "deleteDevice": "Delete device",
@@ -2028,6 +2042,7 @@
       "statusOpen": "Open",
       "statusPending": "Pending",
       "statusAnswered": "Answered",
+      "statusResolved": "Resolved",
       "statusClosed": "Closed",
       "from": "From",
       "created": "Created",

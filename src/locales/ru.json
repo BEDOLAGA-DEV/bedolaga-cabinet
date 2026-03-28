@@ -481,6 +481,20 @@
       "qrScanHint": "Отсканируйте для подключения",
       "qrButton": "QR-код"
     },
+    "tvQuickConnect": {
+      "title": "Подключить TV",
+      "description": "Введите 5-значный код с экрана телевизора",
+      "sendBtn": "Отправить на TV",
+      "badCode": "Введите 5-значный код (буквы и цифры)",
+      "sent": "Отправлено на TV!",
+      "error": "Ошибка отправки на TV",
+      "scanTitle": "Сканировать QR-код",
+      "scanDescription": "Отсканируйте QR-код с экрана телевизора",
+      "scanBtn": "Сканировать QR с TV",
+      "stopScan": "Закрыть камеру",
+      "noCamera": "Нет доступа к камере",
+      "codeFound": "Код найден"
+    },
     "myDevices": "Мои устройства",
     "noDevices": "Нет подключенных устройств",
     "deleteDevice": "Удалить устройство",
@@ -2539,6 +2553,7 @@
       "statusOpen": "Открыт",
       "statusPending": "Ожидает",
       "statusAnswered": "Отвечен",
+      "statusResolved": "Решён",
       "statusClosed": "Закрыт",
       "from": "От",
       "created": "Создан",

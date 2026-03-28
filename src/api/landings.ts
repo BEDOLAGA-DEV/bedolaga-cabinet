@@ -353,7 +353,8 @@ export const adminLandingsApi = {
   },
 
   getStats: async (id: number): Promise<LandingStatsResponse> => {
-    const response = await apiClient.get(`/cabinet/admin/landings/${id}/stats`);
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+    const response = await apiClient.get(`/cabinet/admin/landings/${id}/stats`, { params: { tz } });
     return response.data;
   },
 
