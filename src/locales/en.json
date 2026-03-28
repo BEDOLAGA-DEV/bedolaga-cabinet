@@ -30,7 +30,8 @@
     },
     "retry": "Retry",
     "saving": "Saving...",
-    "understand": "Got it"
+    "understand": "Got it",
+    "total": "Total"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -3526,7 +3527,9 @@
         "successful": "Successful",
         "funnel": "Funnel",
         "loadError": "Failed to load statistics",
-        "noPurchases": "No purchases"
+        "noPurchases": "No purchases",
+        "dailyBreakdown": "Daily breakdown",
+        "paid": "Paid"
       },
       "purchases": {
         "title": "Purchases",

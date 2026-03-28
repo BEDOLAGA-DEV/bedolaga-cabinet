@@ -30,7 +30,8 @@
     "units": {
       "gb": "ГБ",
       "perGb": "/ГБ"
-    }
+    },
+    "total": "Всего"
   },
   "nav": {
     "dashboard": "Главная",
@@ -4078,7 +4079,9 @@
         "successful": "Успешных",
         "funnel": "Воронка",
         "loadError": "Не удалось загрузить статистику",
-        "noPurchases": "Нет покупок"
+        "noPurchases": "Нет покупок",
+        "dailyBreakdown": "Разбивка по дням",
+        "paid": "Оплачено"
       },
       "purchases": {
         "title": "Покупки",
