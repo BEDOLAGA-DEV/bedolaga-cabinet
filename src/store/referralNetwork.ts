@@ -55,11 +55,15 @@ export const useReferralNetworkStore = create<ReferralNetworkState>()((set) => (
 
   addScope: (item) =>
     set((state) => {
-      const exists = state.scope.some((s) => s.type === item.type && s.id === item.id);
+      if (item.type === 'all_users') {
+        return { scope: [item], ...resetGraphState() };
+      }
+      const filteredScope = state.scope.filter((s) => s.type !== 'all_users');
+      const exists = filteredScope.some((s) => s.type === item.type && s.id === item.id);
       if (exists) return state;
-      if (state.scope.length >= MAX_SCOPE_ITEMS) return state;
+      if (filteredScope.length >= MAX_SCOPE_ITEMS) return state;
       return {
-        scope: [...state.scope, item],
+        scope: [...filteredScope, item],
         ...resetGraphState(),
       };
     }),
