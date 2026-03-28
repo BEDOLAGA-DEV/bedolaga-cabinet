@@ -1570,7 +1570,14 @@
         "telegramOidcEnabled": "فعال‌سازی OIDC",
         "telegramOidcClientId": "Client ID (شناسه ربات)",
         "telegramOidcClientSecret": "Client Secret"
-      }
+      },
+      "editContent": "ویرایش محتوا",
+      "editDocument": "ویرایش سند",
+      "htmlEmpty": "محتوا خالی است",
+      "htmlHint": "پشتیبانی از HTML",
+      "legalLinks": "اسناد حقوقی",
+      "legalLinksDesc": "لینک به قوانین، پیشنهاد و حریم خصوصی",
+      "legalLinksEnabled": "نمایش در صفحه ورود"
     },
     "buttons": {
       "color": "رنگ دکمه",

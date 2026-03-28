@@ -1913,7 +1913,14 @@
         "telegramOidcEnabled": "OIDC Enabled",
         "telegramOidcClientId": "Client ID (Bot ID)",
         "telegramOidcClientSecret": "Client Secret"
-      }
+      },
+      "editContent": "Edit content",
+      "editDocument": "Edit document",
+      "htmlEmpty": "Content is empty",
+      "htmlHint": "HTML markup supported",
+      "legalLinks": "Legal documents",
+      "legalLinksDesc": "Links to terms, offer and privacy policy",
+      "legalLinksEnabled": "Show on login page"
     },
     "theme": {
       "accentColor": "Accent color",
