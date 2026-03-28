@@ -991,7 +991,9 @@
         "month": "۳۰ روز",
         "quarter": "۹۰ روز",
         "all": "همه",
-        "custom": "سفارشی"
+        "custom": "سفارشی",
+        "today": "امروز",
+        "yesterday": "دیروز"
       },
       "tabs": {
         "trials": "آزمایشی",

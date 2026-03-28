@@ -991,7 +991,9 @@
         "month": "30天",
         "quarter": "90天",
         "all": "全部",
-        "custom": "自定义"
+        "custom": "自定义",
+        "today": "今天",
+        "yesterday": "昨天"
       },
       "tabs": {
         "trials": "试用",
