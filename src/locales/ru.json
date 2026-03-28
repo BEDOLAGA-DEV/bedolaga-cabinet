@@ -4159,7 +4159,8 @@
       "hide": "Скрыть ({{count}})",
       "showMore_one": "Показать еще {{count}} ноду",
       "showMore_few": "Показать еще {{count}} ноды",
-      "showMore_many": "Показать еще {{count}} нод"
+      "showMore_many": "Показать еще {{count}} нод",
+      "showMore": "Ещё {{count}}"
     },
     "revenue": {
       "title": "Доходы",
@@ -4204,7 +4205,8 @@
       "byEarnings": "По доходу",
       "byInvited": "По пригл.",
       "invites": "пригл.",
-      "people": "чел."
+      "people": "чел.",
+      "stats": "{{count}} приглашений"
     },
     "period": {
       "today": "Сегодня",
@@ -4216,7 +4218,8 @@
       "stats_one": "камп., {{count}} рег.",
       "stats_few": "камп., {{count}} рег.",
       "stats_many": "камп., {{count}} рег.",
-      "total": "Всего от РК"
+      "total": "Всего от РК",
+      "stats": "{{count}} регистраций"
     },
     "recentPayments": {
       "title": "Последние платежи",
@@ -4238,6 +4241,11 @@
       "uptime": "Аптайм",
       "users": "Юзеров",
       "activeSubs": "Подписок"
+    },
+    "subscriptionSales": {
+      "title": "Продажи подписок",
+      "subtitle": "Динамика продаж по дням",
+      "total": "Всего продаж"
     }
   },
   "banSystem": {
