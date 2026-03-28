@@ -1479,7 +1479,8 @@
       "checking": "در حال بررسی...",
       "prev": "قبلی",
       "next": "بعدی",
-      "checkError": "خطا در بررسی وضعیت"
+      "checkError": "خطا در بررسی وضعیت",
+      "periodToday": "امروز"
     },
     "settings": {
       "title": "تنظیمات سیستم",

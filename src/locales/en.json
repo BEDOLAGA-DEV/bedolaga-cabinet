@@ -1432,7 +1432,8 @@
       "checking": "Checking...",
       "prev": "Prev",
       "next": "Next",
-      "checkError": "Status check failed"
+      "checkError": "Status check failed",
+      "periodToday": "Today"
     },
     "paymentMethods": {
       "title": "Payment Methods",
