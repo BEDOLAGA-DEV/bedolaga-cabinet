@@ -1969,6 +1969,7 @@
         "payments_wata": "Wata",
         "payments_riopay": "RioPay",
         "payments_severpay": "SeverPay",
+        "payments_unitpay": "UnitPay",
         "subs_core": "Основные",
         "subs_trial": "Пробный период",
         "subs_pricing": "Цены",
