@@ -1169,7 +1169,9 @@
         "month": "30 days",
         "quarter": "90 days",
         "all": "All time",
-        "custom": "Custom"
+        "custom": "Custom",
+        "today": "Today",
+        "yesterday": "Yesterday"
       },
       "tabs": {
         "trials": "Trials",
