@@ -984,6 +984,7 @@ export default function AdminUserDetail() {
       return;
     }
     setReferrerSearchLoading(true);
+    setReferrerSearchResults([]);
     let cancelled = false;
     const timer = setTimeout(async () => {
       try {
@@ -1028,6 +1029,7 @@ export default function AdminUserDetail() {
       return;
     }
     setAddReferralSearchLoading(true);
+    setAddReferralSearchResults([]);
     let cancelled = false;
     const timer = setTimeout(async () => {
       try {
@@ -3255,7 +3257,7 @@ export default function AdminUserDetail() {
                   {addReferralSearchQuery.length >= 2 && addReferralSearchResults.length > 0 && (
                     <div className="absolute left-0 right-0 top-full z-50 mt-1 max-h-60 overflow-y-auto rounded-xl border border-dark-700 bg-dark-800 py-1 shadow-xl">
                       {addReferralSearchResults
-                        .filter((u) => u.id !== userId)
+                        .filter((u) => u.id !== userId && !referralsList.some((r) => r.id === u.id))
                         .map((u) => (
                           <button
                             key={u.id}
@@ -3276,7 +3278,9 @@ export default function AdminUserDetail() {
                             </div>
                           </button>
                         ))}
-                      {addReferralSearchResults.filter((u) => u.id !== userId).length === 0 && (
+                      {addReferralSearchResults.filter(
+                        (u) => u.id !== userId && !referralsList.some((r) => r.id === u.id),
+                      ).length === 0 && (
                         <div className="px-3 py-4 text-center text-sm text-dark-500">
                           {t('admin.users.detail.referrals.noUsersFound')}
                         </div>
