@@ -44,6 +44,7 @@ export const adminPaymentsApi = {
     period?: string;
     date_from?: string;
     date_to?: string;
+    tz?: string;
     page?: number;
     per_page?: number;
   }): Promise<PaginatedResponse<PendingPayment>> => {
@@ -62,6 +63,7 @@ export const adminPaymentsApi = {
     period?: string;
     date_from?: string;
     date_to?: string;
+    tz?: string;
   }): Promise<SearchStats> => {
     const response = await apiClient.get<SearchStats>('/cabinet/admin/payments/search/stats', {
       params,

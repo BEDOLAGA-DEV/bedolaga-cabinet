@@ -1465,7 +1465,8 @@
       "checking": "Проверка...",
       "prev": "Назад",
       "next": "Далее",
-      "checkError": "Ошибка проверки статуса"
+      "checkError": "Ошибка проверки статуса",
+      "periodToday": "Сегодня"
     },
     "paymentMethods": {
       "title": "Платёжные методы",

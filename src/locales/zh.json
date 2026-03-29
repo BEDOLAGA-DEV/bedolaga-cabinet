@@ -1316,7 +1316,8 @@
       "checking": "检查中...",
       "prev": "上一页",
       "next": "下一页",
-      "checkError": "状态检查失败"
+      "checkError": "状态检查失败",
+      "periodToday": "今天"
     },
     "wheel": {
       "title": "幸运转盘设置",

@@ -6,6 +6,7 @@ import { adminPaymentsApi, type SearchStats } from '../api/adminPayments';
 import { useCurrency } from '../hooks/useCurrency';
 import type { PendingPayment, PaginatedResponse } from '../types';
 import { usePlatform } from '../platform/hooks/usePlatform';
+import { USER_TIMEZONE } from '../utils/format';
 
 // BackIcon
 const BackIcon = () => (
@@ -107,7 +108,7 @@ export default function AdminPayments() {
   const [searchInput, setSearchInput] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [periodFilter, setPeriodFilter] = useState<string>('24h');
+  const [periodFilter, setPeriodFilter] = useState<string>('today');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [showDateRange, setShowDateRange] = useState(false);
@@ -131,7 +132,7 @@ export default function AdminPayments() {
 
   // Auto-refresh only when filters are at defaults and no search
   const isDefaultFilters =
-    !searchQuery && statusFilter === 'all' && periodFilter === '24h' && !methodFilter;
+    !searchQuery && statusFilter === 'all' && periodFilter === 'today' && !methodFilter;
 
   // Shared query params
   const queryParams = {
@@ -141,6 +142,7 @@ export default function AdminPayments() {
     period: periodFilter === 'custom' ? undefined : periodFilter,
     date_from: periodFilter === 'custom' && dateFrom ? dateFrom : undefined,
     date_to: periodFilter === 'custom' && dateTo ? dateTo : undefined,
+    tz: USER_TIMEZONE,
   };
 
   // Fetch payments
@@ -210,7 +212,7 @@ export default function AdminPayments() {
 
   // Period filter options
   const periodOptions = [
-    { value: '24h', label: t('admin.payments.period24h') },
+    { value: 'today', label: t('admin.payments.periodToday', 'Сегодня') },
     { value: '7d', label: t('admin.payments.period7d') },
     { value: '30d', label: t('admin.payments.period30d') },
     { value: 'all', label: t('admin.payments.periodAll') },
@@ -456,11 +458,6 @@ export default function AdminPayments() {
                         <span className="font-semibold text-dark-100">
                           {payment.method_display}
                         </span>
-                        {payment.is_paid && (
-                          <span className="rounded-full bg-green-500/20 px-2 py-0.5 text-xs font-medium text-green-400">
-                            {t('admin.payments.paid')}
-                          </span>
-                        )}
                       </div>
 
                       {/* Amount */}
@@ -537,7 +534,7 @@ export default function AdminPayments() {
 
                     {/* Action buttons */}
                     <div className="flex flex-col gap-2">
-                      {payment.payment_url && (
+                      {payment.payment_url && !payment.is_paid && (
                         <a
                           href={payment.payment_url}
                           target="_blank"
