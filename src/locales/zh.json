@@ -202,7 +202,8 @@
     "continueWithDiscord": "通过 Discord 继续",
     "continueWithVk": "通过 VK 继续",
     "oauthError": "授权被拒绝或失败",
-    "oauthExpired": "OAuth 会话已过期。请重试。"
+    "oauthExpired": "OAuth 会话已过期。请重试。",
+    "disposableEmail": "不允许使用一次性电子邮件地址。请使用永久电子邮件。"
   },
   "emailVerification": {
     "title": "邮箱验证",
@@ -945,8 +946,7 @@
       "auditLog": "审计日志",
       "salesStats": "销售统计",
       "landings": "落地页",
-      "referralNetwork": "推荐网络",
-      "news": "新闻"
+      "referralNetwork": "推荐网络"
     },
     "panel": {
       "title": "管理面板",
@@ -992,8 +992,7 @@
       "auditLogDesc": "查看系统活动和访问历史",
       "salesStatsDesc": "销售分析与趋势",
       "landingsDesc": "快速购买落地页",
-      "referralNetworkDesc": "推荐图表和广告活动可视化",
-      "newsDesc": "管理新闻文章和出版物"
+      "referralNetworkDesc": "推荐图表和广告活动可视化"
     },
     "salesStats": {
       "title": "销售统计",
@@ -1702,7 +1701,14 @@
         "telegramOidcEnabled": "启用 OIDC",
         "telegramOidcClientId": "Client ID（机器人 ID）",
         "telegramOidcClientSecret": "Client Secret"
-      }
+      },
+      "editContent": "编辑内容",
+      "editDocument": "编辑文档",
+      "htmlEmpty": "内容为空",
+      "htmlHint": "支持HTML标记",
+      "legalLinks": "法律文件",
+      "legalLinksDesc": "条款、报价和隐私政策链接",
+      "legalLinksEnabled": "在登录页面显示"
     },
     "buttons": {
       "color": "按钮颜色",
@@ -1859,7 +1865,10 @@
       "copyTelegramId": "点击复制Telegram ID",
       "viewUser": "用户",
       "userNotificationsEnabled": "用户通知",
-      "userNotificationsEnabledDesc": "向用户发送管理员回复通知"
+      "userNotificationsEnabledDesc": "向用户发送管理员回复通知",
+      "priorityNormal": "普通",
+      "priorityHigh": "高",
+      "priorityUrgent": "紧急"
     },
     "tariffs": {
       "title": "套餐管理",
@@ -4052,64 +4061,9 @@
       "telegram_unresolvable": "无法验证此 Telegram 用户名。收件人可能不会收到礼物通知。"
     }
   },
-  "news": {
-    "title": "新闻与更新",
-    "filterAll": "全部",
-    "readMore": "阅读更多",
-    "readTime": "分钟阅读",
-    "loadMore": "加载更多",
-    "noNews": "暂无新闻",
-    "backToHome": "返回",
-    "views": "浏览量",
-    "admin": {
-      "title": "新闻管理",
-      "create": "创建文章",
-      "edit": "编辑",
-      "delete": "删除",
-      "confirmDelete": "删除这篇文章？",
-      "published": "已发布",
-      "draft": "草稿",
-      "featured": "精选",
-      "titleLabel": "标题",
-      "slugLabel": "URL标识",
-      "categoryLabel": "分类",
-      "categoryColorLabel": "分类颜色",
-      "tagLabel": "标签",
-      "excerptLabel": "简短描述",
-      "contentLabel": "内容",
-      "imageLabel": "特色图片",
-      "readTimeLabel": "阅读时间（分钟）",
-      "save": "保存",
-      "saving": "保存中...",
-      "saveError": "保存文章失败，请重试。",
-      "saved": "文章已保存",
-      "deleted": "文章已删除",
-      "selectColor": "选择颜色 {{color}}",
-      "uploading": "上传中...",
-      "dropMedia": "将图片或视频拖到这里",
-      "uploadError": "上传失败",
-      "fileTooLarge": "文件太大",
-      "uploadFeaturedImage": "上传图片",
-      "toolbar": {
-        "bold": "粗体",
-        "italic": "斜体",
-        "underline": "下划线",
-        "strikethrough": "删除线",
-        "heading1": "标题 1",
-        "heading2": "标题 2",
-        "heading3": "标题 3",
-        "bulletList": "无序列表",
-        "orderedList": "有序列表",
-        "blockquote": "引用",
-        "codeBlock": "代码块",
-        "alignLeft": "左对齐",
-        "alignCenter": "居中",
-        "highlight": "高亮",
-        "link": "链接",
-        "image": "图片",
-        "imageUrlPrompt": "图片URL：",
-        "linkUrlPrompt": "URL："
-      }
-    }
+  "legal": {
+    "rules": "服务条款",
+    "privacy": "隐私政策",
+    "offer": "公开报价"
   }
 }

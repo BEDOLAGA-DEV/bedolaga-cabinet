@@ -4,11 +4,28 @@ import { DEFAULT_ANIMATION_CONFIG } from '@/components/ui/backgrounds/types';
 
 export type { AnimationConfig };
 
+export interface LegalLink {
+  title: string;
+  url: string;
+  slug: string;
+}
+
+export interface LegalDocContent {
+  slug: string;
+  content: string;
+}
+
+export interface LegalLinksConfig {
+  enabled: boolean;
+  links: LegalLink[];
+}
+
 export interface BrandingInfo {
   name: string;
   logo_url: string | null;
   logo_letter: string;
   has_custom_logo: boolean;
+  legal_links?: LegalLinksConfig | null;
 }
 
 export interface AnimationEnabled {
@@ -301,6 +318,30 @@ export const brandingApi = {
   // Update analytics counters (admin only)
   updateAnalyticsCounters: async (data: Partial<AnalyticsCounters>): Promise<AnalyticsCounters> => {
     const response = await apiClient.patch<AnalyticsCounters>('/cabinet/branding/analytics', data);
+    return response.data;
+  },
+
+  // Get legal links config
+  getLegalLinks: async (): Promise<LegalLinksConfig> => {
+    const response = await apiClient.get<LegalLinksConfig>('/cabinet/branding/legal-links');
+    return response.data;
+  },
+
+  // Update legal links config (admin only)
+  updateLegalLinks: async (data: LegalLinksConfig): Promise<LegalLinksConfig> => {
+    const response = await apiClient.put<LegalLinksConfig>('/cabinet/branding/legal-links', data);
+    return response.data;
+  },
+
+  // Get legal document content
+  getLegalDoc: async (slug: string): Promise<LegalDocContent> => {
+    const response = await apiClient.get<LegalDocContent>(`/cabinet/branding/legal-doc/${slug}`);
+    return response.data;
+  },
+
+  // Update legal document content (admin only)
+  updateLegalDoc: async (slug: string, content: string): Promise<LegalDocContent> => {
+    const response = await apiClient.put<LegalDocContent>(`/cabinet/branding/legal-doc/${slug}`, { content });
     return response.data;
   },
 };
