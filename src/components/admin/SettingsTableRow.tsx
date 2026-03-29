@@ -50,7 +50,11 @@ export function SettingsTableRow({
       key.includes('_config') ||
       key.includes('_keywords') ||
       key.includes('_template') ||
-      key.includes('_packages')
+      key.includes('_packages') ||
+      key.includes('_list') ||
+      key.includes('_json') ||
+      key.includes('_periods') ||
+      key.includes('_discounts')
     );
   })();
 
@@ -105,7 +109,11 @@ export function SettingsTableRow({
         <div className={cn('flex items-center gap-2', isLongValue ? 'w-full' : 'flex-shrink-0')}>
           {setting.read_only ? (
             <span className="max-w-[240px] truncate rounded bg-dark-700/30 px-3 py-1.5 font-mono text-xs text-dark-400">
-              {String(setting.current ?? '-')}
+              {isBool
+                ? boolChecked
+                  ? t('admin.settings.enabled')
+                  : t('admin.settings.disabled')
+                : String(setting.current ?? '-')}
             </span>
           ) : isBool ? (
             <Toggle
