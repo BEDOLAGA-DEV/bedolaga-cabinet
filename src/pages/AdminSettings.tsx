@@ -216,6 +216,8 @@ export default function AdminSettings() {
             />
           );
         }
+        // Unknown section — fallback to branding
+        setActiveSection('branding');
         return null;
     }
   };

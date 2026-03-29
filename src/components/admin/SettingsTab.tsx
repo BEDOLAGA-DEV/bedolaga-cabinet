@@ -44,7 +44,7 @@ export function SettingsTab({
   });
 
   // Search mode: flat list of filtered results
-  if (searchQuery) {
+  if (searchQuery.trim()) {
     if (filteredSettings.length === 0) {
       return (
         <div className="rounded-xl border border-dark-700/30 bg-dark-800/30 p-12 text-center">
