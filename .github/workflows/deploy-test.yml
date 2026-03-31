@@ -1,0 +1,42 @@
+name: Deploy to Test
+
+on:
+  push:
+    branches: [dev, test]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login to ghcr.io
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          build-args: |
+            VITE_API_URL=https://test-bot.legacyyy777.ru
+            VITE_TELEGRAM_BOT_USERNAME=testlegacy777_bot
+            VITE_APP_NAME=Cabinet TEST
+            VITE_APP_LOGO=V
+          tags: ghcr.io/legacyyy777/bedolaga-cabinet:test
+
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.TEST_VPS_HOST }}
+          username: ${{ secrets.TEST_VPS_USER }}
+          key: ${{ secrets.TEST_VPS_KEY }}
+          script: |
+            cd /opt/test-stand
+            docker compose pull cabinet
+            docker compose up -d cabinet

@@ -126,7 +126,7 @@ export interface ScopeOptionsData {
   partners: PartnerOption[];
 }
 
-export type ScopeType = 'campaign' | 'partner' | 'user';
+export type ScopeType = 'campaign' | 'partner' | 'user' | 'all_users';
 
 export interface ScopeSelection {
   type: ScopeType;
