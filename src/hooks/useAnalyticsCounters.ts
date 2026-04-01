@@ -52,6 +52,28 @@ function injectGoogleAds(conversionId: string) {
   document.head.appendChild(init);
 }
 
+
+/**
+ * Fire an analytics event to all configured counters.
+ */
+export function fireAnalyticsEvent(goalName: string, params?: Record<string, unknown>) {
+  const ym = (window as any).ym;
+  if (typeof ym === 'function') {
+    try {
+      const counterId = localStorage.getItem('ym_counter_id');
+      if (counterId && /^\d{1,15}$/.test(counterId)) {
+        ym(Number(counterId), 'reachGoal', goalName, params);
+      }
+    } catch { /* silent */ }
+  }
+  const gtag = (window as any).gtag;
+  if (typeof gtag === 'function') {
+    try {
+      gtag('event', goalName, params);
+    } catch { /* silent */ }
+  }
+}
+
 /**
  * Fetches analytics counter settings from the API and dynamically
  * injects Yandex Metrika and/or Google Ads scripts into <head>.

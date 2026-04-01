@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useParams } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import { fireAnalyticsEvent } from '../hooks/useAnalyticsCounters';
 import { motion, AnimatePresence } from 'framer-motion';
 import DOMPurify from 'dompurify';
 import { landingApi } from '../api/landings';
@@ -910,6 +911,8 @@ export default function QuickPurchase() {
   // Submit handler
   const handleSubmit = () => {
     if (!canSubmit || !slug || isSubmitting) return;
+
+    fireAnalyticsEvent('purchase_click');
 
     setIsSubmitting(true);
     setSubmitError(null);
