@@ -1,40 +1,37 @@
 version: "3.8"
 
-networks:
-  remnawave-network:
-    external: true
-
 services:
-  bedolaga-bot:
-    image: ghcr.io/BEDOLAGA-DEV/bedolaga-bot:latest   # см. доку/релизы, при необходимости зафиксируй версию
-    container_name: bedolaga_bot
-    restart: unless-stopped
-    env_file:
-      - .env                                         # тут токен бота, доступы к БД, REMNAWAVE_URL, CABINET_* и т.д.
-    networks:
-      - remnawave-network
-    expose:
-      - "8080"                                       # бот слушает Cabinet API на 8080 (важно: внутри на 0.0.0.0:8080)
-
   cabinet-frontend:
-    image: ghcr.io/BEDOLAGA-DEV/bedolaga-cabinet:latest  # вместо билдов из Dockerfile, для прод проще так [web:27]
+    image: ghcr.io/BEDOLAGA-DEV/bedolaga-cabinet:latest
     container_name: cabinet_frontend
     restart: unless-stopped
+
     env_file:
       - .env
+
     environment:
-      # фронт будет ходить на backend через docker-сервис bedolaga-bot
-      VITE_API_URL: "https://bedolaga.p.itsmywork.vip/api"  # внешний URL, под которым доступен cabinet (можешь поменять)
+      # Кабинет ходит в Web API бота по его docker-имени и порту 8080
+      CABINET_API_URL: "http://remnawave_bot:8080"
+      # если в доке/репо другое имя переменной (например CABINET_BACKEND_URL) — подправь под фактическое [web:17]
+      VITE_API_URL: "/api"
+
       VITE_TELEGRAM_BOT_USERNAME: "${VITE_TELEGRAM_BOT_USERNAME}"
       VITE_APP_NAME: "${VITE_APP_NAME:-Cabinet}"
       VITE_APP_LOGO: "${VITE_APP_LOGO:-V}"
+
     ports:
-      - "${CABINET_PORT:-3020}:80"                   # снаружи http://<сервер>:3020
+      - "${CABINET_PORT:-3020}:80"
+
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/"]
       interval: 30s
       timeout: 3s
       retries: 3
       start_period: 10s
+
     networks:
-      - remnawave-network
+      - remnawave-network     # та же сеть, где уже есть remnawave_bot
+
+networks:
+  remnawave-network:
+    external: true
