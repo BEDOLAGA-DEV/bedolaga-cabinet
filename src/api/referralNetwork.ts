@@ -42,6 +42,13 @@ export const referralNetworkApi = {
     return response.data;
   },
 
+  getAllNetworkUsers: async (limit = 500, offset = 0): Promise<NetworkSearchResult> => {
+    const response = await apiClient.get('/cabinet/admin/referral-network/all-users', {
+      params: { limit, offset },
+    });
+    return response.data;
+  },
+
   search: async (query: string): Promise<NetworkSearchResult> => {
     const response = await apiClient.get('/cabinet/admin/referral-network/search', {
       params: { q: query },

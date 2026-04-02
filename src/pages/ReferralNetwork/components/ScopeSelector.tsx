@@ -19,6 +19,7 @@ const CHIP_COLORS: Record<ScopeType, string> = {
   campaign: 'bg-success-500/20 text-success-400',
   partner: 'bg-warning-500/20 text-warning-400',
   user: 'bg-accent-500/20 text-accent-400',
+  all_users: 'bg-dark-500/30 text-dark-200',
 };
 
 // Reuse CHIP_COLORS for avatar backgrounds (same palette)
@@ -28,6 +29,7 @@ const AVATAR_LETTERS: Record<ScopeType, string> = {
   campaign: 'C',
   partner: 'P',
   user: 'U',
+  all_users: '*',
 };
 
 function CheckIcon() {
@@ -103,10 +105,18 @@ export function ScopeSelector({ value, onAdd, onRemove, onClear, className }: Sc
   const [searchInput, setSearchInput] = useState('');
   const [debouncedUserQuery, setDebouncedUserQuery] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [showAllUsers, setShowAllUsers] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const isMaxReached = value.length >= MAX_SCOPE_ITEMS;
+
+  const { data: allUsersData, isFetching: isAllUsersFetching } = useQuery({
+    queryKey: ['referral-network', 'all-users'],
+    queryFn: () => referralNetworkApi.getAllNetworkUsers(500, 0),
+    enabled: showAllUsers,
+    staleTime: 60_000,
+  });
 
   const { data: scopeOptions, isLoading: isScopeLoading } = useQuery({
     queryKey: ['referral-network', 'scope-options'],
@@ -187,6 +197,7 @@ export function ScopeSelector({ value, onAdd, onRemove, onClear, className }: Sc
   }, [scopeOptions, searchInput]);
 
   function handleTabChange(tab: ScopeType) {
+    setShowAllUsers(false);
     setActiveTab(tab);
     setSearchInput('');
     setDebouncedUserQuery('');
@@ -212,6 +223,7 @@ export function ScopeSelector({ value, onAdd, onRemove, onClear, className }: Sc
       campaign: t('admin.referralNetwork.scope.campaign'),
       partner: t('admin.referralNetwork.scope.partner'),
       user: t('admin.referralNetwork.scope.user'),
+      all_users: t('admin.referralNetwork.scope.allReferrals'),
     }),
     [t],
   );
@@ -221,6 +233,7 @@ export function ScopeSelector({ value, onAdd, onRemove, onClear, className }: Sc
       campaign: t('admin.referralNetwork.scope.selectCampaign'),
       partner: t('admin.referralNetwork.scope.selectPartner'),
       user: t('admin.referralNetwork.scope.selectUser'),
+      all_users: '',
     }),
     [t],
   );
@@ -353,11 +366,45 @@ export function ScopeSelector({ value, onAdd, onRemove, onClear, className }: Sc
             </div>
           </div>
 
+          {/* All users button - only shown in user/referrals tab */}
+          {activeTab === 'user' && (
+            <div className="border-b border-dark-700/50 px-3 py-1.5">
+              <button
+                onClick={() => {
+                  setShowAllUsers(true);
+                  setIsDropdownOpen(true);
+                }}
+                className="flex w-full items-center gap-2.5 rounded-lg border border-dark-600/50 px-3 py-2 text-sm text-dark-300 transition-colors hover:border-accent-500/40 hover:bg-accent-500/10 hover:text-accent-300"
+              >
+                <svg
+                  className="h-4 w-4 shrink-0"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={1.5}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"
+                  />
+                </svg>
+                <span className="font-medium">{t('admin.referralNetwork.scope.allReferrals')}</span>
+              </button>
+            </div>
+          )}
+
           {/* List */}
           <div className="max-h-64 overflow-y-auto" role="listbox" aria-multiselectable="true">
-            {activeTab === 'campaign' && renderCampaignList()}
-            {activeTab === 'partner' && renderPartnerList()}
-            {activeTab === 'user' && renderUserList()}
+            {showAllUsers ? (
+              renderAllUsersList()
+            ) : (
+              <>
+                {activeTab === 'campaign' && renderCampaignList()}
+                {activeTab === 'partner' && renderPartnerList()}
+                {activeTab === 'user' && renderUserList()}
+              </>
+            )}
           </div>
         </div>
       )}
@@ -454,6 +501,39 @@ export function ScopeSelector({ value, onAdd, onRemove, onClear, className }: Sc
         onClick={() => handleToggle('user', user.id, user.display_name)}
         title={user.display_name}
         subtitle={`${user.username ? `@${user.username}` : ''}${user.tg_id ? ` #${user.tg_id}` : ''}`}
+        badge={
+          user.is_partner ? (
+            <span className="shrink-0 rounded bg-warning-500/20 px-1.5 py-0.5 text-[10px] font-medium text-warning-400">
+              {t('admin.referralNetwork.user.partner')}
+            </span>
+          ) : undefined
+        }
+      />
+    ));
+  }
+  function renderAllUsersList() {
+    if (isAllUsersFetching) {
+      return (
+        <div className="flex items-center justify-center px-4 py-6">
+          <Spinner />
+        </div>
+      );
+    }
+
+    const users = allUsersData?.users ?? [];
+
+    if (users.length === 0) {
+      return <EmptyMessage text={t('admin.referralNetwork.scope.noResults')} />;
+    }
+
+    return users.map((user) => (
+      <ScopeListItem
+        key={user.id}
+        type="user"
+        selected={isSelected('user', user.id)}
+        onClick={() => handleToggle('user', user.id, user.display_name)}
+        title={user.display_name}
+        subtitle={user.username ? '@' + user.username : user.tg_id ? '#' + user.tg_id : ''}
         badge={
           user.is_partner ? (
             <span className="shrink-0 rounded bg-warning-500/20 px-1.5 py-0.5 text-[10px] font-medium text-warning-400">
