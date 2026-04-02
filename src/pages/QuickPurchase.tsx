@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useParams } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import { fireAnalyticsEvent } from '../hooks/useAnalyticsCounters';
 import { motion, AnimatePresence } from 'framer-motion';
 import DOMPurify from 'dompurify';
 import { landingApi } from '../api/landings';
@@ -737,6 +738,13 @@ export default function QuickPurchase() {
     if (config?.discount) setDiscountExpired(false);
   }, [config?.discount]);
 
+  // Save document.referrer on mount (before SPA navigation loses it)
+  useEffect(() => {
+    if (document.referrer && !sessionStorage.getItem('landing_referrer')) {
+      sessionStorage.setItem('landing_referrer', document.referrer);
+    }
+  }, []);
+
   // Fire landing-specific view goal on mount
   useEffect(() => {
     if (config?.analytics_view_enabled && config?.analytics_view_goal) {
@@ -924,6 +932,8 @@ export default function QuickPurchase() {
   const handleSubmit = () => {
     if (!canSubmit || !slug || isSubmitting) return;
 
+    fireAnalyticsEvent('purchase_click');
+
     setIsSubmitting(true);
     setSubmitError(null);
 
@@ -942,6 +952,7 @@ export default function QuickPurchase() {
       payment_method: paymentMethod,
       language: i18n.language,
       is_gift: isGift,
+      referrer: sessionStorage.getItem('landing_referrer') || undefined,
     };
 
     if (isGift && giftRecipient) {
@@ -949,6 +960,17 @@ export default function QuickPurchase() {
       data.gift_recipient_value = giftRecipient.trim();
       data.gift_message = giftMessage.trim() || undefined;
     }
+
+    // Get Yandex CID for offline conversions
+    try {
+      const w = window as unknown as Record<string, unknown>;
+      const counterId = localStorage.getItem('ym_counter_id');
+      if (counterId && typeof w.ym === 'function') {
+        (w.ym as Function)(Number(counterId), 'getClientID', (cid: string) => {
+          if (cid) data.yandex_cid = cid;
+        });
+      }
+    } catch {}
 
     // Fire landing-specific click goal
     if (config?.analytics_click_enabled && config?.analytics_click_goal) {

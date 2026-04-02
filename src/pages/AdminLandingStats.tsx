@@ -209,7 +209,7 @@ function PurchaseCard({ item, formatPrice, lang, t }: PurchaseCardProps) {
 
         {/* Referrer */}
         {referrerHost && (
-          <div className="shrink-0 truncate text-xs text-accent-400/70 max-w-[120px]" title={item.referrer || ''}>
+          <div className="shrink-0 truncate rounded bg-accent-500/20 px-1.5 py-0.5 text-xs font-medium text-accent-400 max-w-[140px]" title={item.referrer || ''}>
             {referrerHost}
           </div>
         )}
@@ -293,6 +293,7 @@ export default function AdminLandingStats() {
       purchases: item.purchases,
       revenue: item.revenue_kopeks / CHART_COMMON.KOPEKS_DIVISOR,
       gifts: item.gifts,
+      created: item.created,
     }));
   }, [stats, i18n.language]);
 
@@ -387,13 +388,17 @@ export default function AdminLandingStats() {
         {/* Summary Cards */}
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           <div className="rounded-xl border border-dark-700 bg-dark-800 p-4 text-center">
-            <div className="text-xl font-bold text-accent-400 sm:text-2xl">
-              {stats.total_purchases}
+            <div className="text-xl font-bold sm:text-2xl">
+              <span className="text-warning-400">{stats.total_created}</span>
+              <span className="mx-1 text-dark-600">/</span>
+              <span className="text-success-400">{stats.total_successful}</span>
             </div>
-            <div className="text-xs text-dark-500">{t('admin.landings.stats.totalPurchases')}</div>
+            <div className="text-xs text-dark-500">
+              {t('admin.landings.stats.created', 'Создано')} / {t('admin.landings.stats.paid', 'Оплачено')}
+            </div>
           </div>
           <div className="rounded-xl border border-dark-700 bg-dark-800 p-4 text-center">
-            <div className="truncate text-xl font-bold text-success-400 sm:text-2xl">
+            <div className="truncate text-xl font-bold text-accent-400 sm:text-2xl">
               {formatWithCurrency(stats.total_revenue_kopeks / CHART_COMMON.KOPEKS_DIVISOR)}
             </div>
             <div className="text-xs text-dark-500">{t('admin.landings.stats.revenue')}</div>
@@ -403,7 +408,7 @@ export default function AdminLandingStats() {
             <div className="text-xs text-dark-500">{t('admin.landings.stats.giftPurchases')}</div>
           </div>
           <div className="rounded-xl border border-dark-700 bg-dark-800 p-4 text-center">
-            <div className="text-xl font-bold text-warning-400 sm:text-2xl">
+            <div className="text-xl font-bold text-dark-200 sm:text-2xl">
               {stats.conversion_rate}%
             </div>
             <div className="text-xs text-dark-500">{t('admin.landings.stats.conversionRate')}</div>
@@ -461,6 +466,24 @@ export default function AdminLandingStats() {
                         stopOpacity={CHART_COMMON.GRADIENT.END_OPACITY}
                       />
                     </linearGradient>
+                    <linearGradient
+                      id={`landingCreatedGrad-${numericId}`}
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
+                    >
+                      <stop
+                        offset={CHART_COMMON.GRADIENT.START_OFFSET}
+                        stopColor="#f59e0b"
+                        stopOpacity={CHART_COMMON.GRADIENT.START_OPACITY}
+                      />
+                      <stop
+                        offset={CHART_COMMON.GRADIENT.END_OFFSET}
+                        stopColor="#f59e0b"
+                        stopOpacity={CHART_COMMON.GRADIENT.END_OPACITY}
+                      />
+                    </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray={CHART_COMMON.GRID_DASH} stroke={colors.grid} />
                   <XAxis
@@ -499,6 +522,15 @@ export default function AdminLandingStats() {
                     name={t('admin.landings.stats.purchases')}
                     stroke={colors.referrals}
                     fill={`url(#landingPurchaseGrad-${numericId})`}
+                    strokeWidth={CHART_COMMON.STROKE_WIDTH}
+                  />
+                  <Area
+                    yAxisId="left"
+                    type="monotone"
+                    dataKey="created"
+                    name={t('admin.landings.stats.created', 'Создано')}
+                    stroke="#f59e0b"
+                    fill={`url(#landingCreatedGrad-${numericId})`}
                     strokeWidth={CHART_COMMON.STROKE_WIDTH}
                   />
                   <Area

@@ -106,6 +106,8 @@ export interface PurchaseRequest {
   gift_recipient_value?: string;
   gift_message?: string;
   language?: string;
+  yandex_cid?: string;
+  referrer?: string;
 }
 
 export interface PurchaseResponse {
@@ -279,6 +281,7 @@ export interface LandingDailyStat {
   purchases: number;
   revenue_kopeks: number;
   gifts: number;
+  created: number;
 }
 
 export interface LandingTariffStat {
