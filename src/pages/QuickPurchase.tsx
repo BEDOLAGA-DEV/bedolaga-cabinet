@@ -940,6 +940,16 @@ export default function QuickPurchase() {
       data.gift_message = giftMessage.trim() || undefined;
     }
 
+    try {
+      const w = window as unknown as Record<string, unknown>;
+      const counterId = localStorage.getItem('ym_counter_id');
+      if (counterId && typeof w.ym === 'function') {
+        (w.ym as Function)(Number(counterId), 'getClientID', (cid: string) => {
+          if (cid) data.yandex_cid = cid;
+        });
+      }
+    } catch {}
+
     purchaseMutation.mutate(data);
   };
 
