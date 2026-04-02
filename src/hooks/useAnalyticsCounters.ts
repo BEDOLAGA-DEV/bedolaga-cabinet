@@ -28,6 +28,30 @@ function injectYandexMetrika(counterId: string) {
     });
   `;
   document.head.appendChild(script);
+  localStorage.setItem('ym_counter_id', counterId);
+}
+
+function syncYandexCid(counterId: string) {
+  const SENT_KEY = 'ym_cid_sent';
+  if (localStorage.getItem(SENT_KEY)) return;
+  const w = window as unknown as Record<string, unknown>;
+  const ym = w.ym as ((...args: unknown[]) => void) | undefined;
+  if (typeof ym !== 'function') return;
+  setTimeout(() => {
+    try {
+      (w.ym as (...args: unknown[]) => void)(Number(counterId), 'getClientID', (cid: string) => {
+        if (!cid) return;
+        fetch('/api/cabinet/branding/analytics/yandex-cid', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + (localStorage.getItem('access_token') || ''),
+          },
+          body: JSON.stringify({ cid }),
+        }).then(() => localStorage.setItem(SENT_KEY, '1')).catch(() => {});
+      });
+    } catch {}
+  }, 3000);
 }
 
 function injectGoogleAds(conversionId: string) {
@@ -69,6 +93,7 @@ export function useAnalyticsCounters() {
     // Yandex Metrika
     if (data.yandex_metrika_id) {
       injectYandexMetrika(data.yandex_metrika_id);
+      syncYandexCid(data.yandex_metrika_id);
     } else {
       removeElement(YM_SCRIPT_ID);
     }
