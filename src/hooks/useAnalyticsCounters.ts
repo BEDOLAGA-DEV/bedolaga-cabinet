@@ -11,6 +11,7 @@ function removeElement(id: string) {
 }
 
 function injectYandexMetrika(counterId: string) {
+  localStorage.setItem('ym_counter_id', counterId);
   if (document.getElementById(YM_SCRIPT_ID)) return;
 
   const script = document.createElement('script');
