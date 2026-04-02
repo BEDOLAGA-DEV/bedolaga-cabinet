@@ -4199,7 +4199,8 @@
         "successful": "Успешных",
         "funnel": "Воронка",
         "loadError": "Не удалось загрузить статистику",
-        "noPurchases": "Нет покупок"
+        "noPurchases": "Нет покупок",
+        "paid": "оплачено"
       },
       "purchases": {
         "title": "Покупки",

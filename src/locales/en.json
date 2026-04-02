@@ -3655,7 +3655,8 @@
         "successful": "Successful",
         "funnel": "Funnel",
         "loadError": "Failed to load statistics",
-        "noPurchases": "No purchases"
+        "noPurchases": "No purchases",
+        "paid": "paid"
       },
       "purchases": {
         "title": "Purchases",
