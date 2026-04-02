@@ -1116,7 +1116,7 @@ export default function AdminLandingEditor() {
                   placeholder="landing_view"
                 />
               </div>
-              <Toggle checked={analyticsViewEnabled} onChange={setAnalyticsViewEnabled} />
+              <Toggle checked={analyticsViewEnabled} onChange={() => setAnalyticsViewEnabled(v => !v)} />
             </div>
 
             {/* Click Goal */}
@@ -1134,7 +1134,7 @@ export default function AdminLandingEditor() {
                   placeholder="landing_pay"
                 />
               </div>
-              <Toggle checked={analyticsClickEnabled} onChange={setAnalyticsClickEnabled} />
+              <Toggle checked={analyticsClickEnabled} onChange={() => setAnalyticsClickEnabled(v => !v)} />
             </div>
           </div>
         </Section>
