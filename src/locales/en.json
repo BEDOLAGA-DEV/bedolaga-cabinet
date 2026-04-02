@@ -3635,6 +3635,7 @@
       "discountOverridesHint": "Leave empty to use global discount",
       "discountPreview": "Preview",
       "discountActive": "Discount",
+      "background": "Animated background",
       "analytics": "Analytics",
       "viewGoal": "View goal",
       "clickGoal": "Payment click goal",
