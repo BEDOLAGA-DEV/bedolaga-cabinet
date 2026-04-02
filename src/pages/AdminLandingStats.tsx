@@ -151,6 +151,8 @@ function PurchaseCard({ item, formatPrice, lang, t }: PurchaseCardProps) {
     month: 'short',
     year: 'numeric',
   });
+  const timeStr = new Date(item.created_at).toLocaleTimeString(lang, { hour: '2-digit', minute: '2-digit' });
+  const referrerHost = item.referrer ? (() => { try { return new URL(item.referrer).hostname; } catch { return item.referrer; } })() : null;
 
   return (
     <div className="rounded-xl border border-dark-700/50 bg-dark-800/40 p-3 transition-colors hover:border-dark-600 sm:p-4">
@@ -205,8 +207,16 @@ function PurchaseCard({ item, formatPrice, lang, t }: PurchaseCardProps) {
           </div>
         )}
 
-        {/* Date */}
-        <div className="shrink-0 text-xs text-dark-500">{dateStr}</div>
+        {/* Referrer */}
+        {referrerHost && (
+          <div className="shrink-0 truncate text-xs text-accent-400/70 max-w-[120px]" title={item.referrer || ''}>
+            {referrerHost}
+          </div>
+        )}
+        {/* Date + Time */}
+        <div className="shrink-0 text-xs text-dark-500">
+          {dateStr} <span className="text-dark-600">{timeStr}</span>
+        </div>
       </div>
     </div>
   );
@@ -587,7 +597,7 @@ export default function AdminLandingStats() {
               <span className="text-sm text-dark-500">{t('admin.landings.stats.created')}</span>
               {' / '}
               {stats.total_successful}{' '}
-              <span className="text-sm text-dark-500">{t('admin.landings.stats.successful')}</span>
+              <span className="text-sm text-dark-500">{t('admin.landings.stats.paid', 'Оплачено')}</span>
             </div>
           </div>
         </div>

@@ -311,6 +311,7 @@ export interface LandingPurchaseItem {
   status: PurchaseItemStatus;
   created_at: string;
   paid_at: string | null;
+  referrer: string | null;
 }
 
 export interface LandingPurchaseListResponse {
@@ -354,7 +355,8 @@ export const adminLandingsApi = {
   },
 
   getStats: async (id: number): Promise<LandingStatsResponse> => {
-    const response = await apiClient.get(`/cabinet/admin/landings/${id}/stats`);
+    const { USER_TIMEZONE } = await import('../utils/format');
+    const response = await apiClient.get(`/cabinet/admin/landings/${id}/stats`, { params: { tz: USER_TIMEZONE } });
     return response.data;
   },
 

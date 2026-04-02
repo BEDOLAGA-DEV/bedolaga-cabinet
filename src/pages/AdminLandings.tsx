@@ -180,7 +180,11 @@ function SortableLandingCard({
               </div>
               <div className="text-sm text-dark-400">
                 <span>
-                  {landing.purchase_stats.total} {t('admin.landings.purchaseCount')}
+                  {landing.purchase_stats.total}
+                  <span className="ml-1 text-dark-600">создано</span>
+                  <span className="mx-1 text-dark-600">/</span>
+                  <span className="text-success-400">{landing.purchase_stats.paid + landing.purchase_stats.delivered + landing.purchase_stats.pending_activation}</span>
+                  <span className="ml-1 text-dark-600">оплачено</span>
                 </span>
               </div>
             </div>
