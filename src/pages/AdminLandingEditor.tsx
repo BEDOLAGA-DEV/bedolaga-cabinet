@@ -106,6 +106,7 @@ export default function AdminLandingEditor() {
     methods: false,
     gifts: false,
     background: false,
+    analytics: false,
     footer: false,
   });
 
@@ -136,6 +137,12 @@ export default function AdminLandingEditor() {
     ...DEFAULT_ANIMATION_CONFIG,
     enabled: false,
   });
+
+  // Analytics goals state
+  const [analyticsViewEnabled, setAnalyticsViewEnabled] = useState(false);
+  const [analyticsViewGoal, setAnalyticsViewGoal] = useState('landing_view');
+  const [analyticsClickEnabled, setAnalyticsClickEnabled] = useState(false);
+  const [analyticsClickGoal, setAnalyticsClickGoal] = useState('landing_pay');
 
   // Discount state
   const [discountPercent, setDiscountPercent] = useState<number | null>(null);
@@ -267,6 +274,10 @@ export default function AdminLandingEditor() {
       landingData.discount_ends_at ? isoToDatetimeLocal(landingData.discount_ends_at) : '',
     );
     setDiscountBadgeText(toLocaleDict(landingData.discount_badge_text));
+    setAnalyticsViewEnabled(landingData.analytics_view_enabled ?? false);
+    setAnalyticsViewGoal(landingData.analytics_view_goal || 'landing_view');
+    setAnalyticsClickEnabled(landingData.analytics_click_enabled ?? false);
+    setAnalyticsClickGoal(landingData.analytics_click_goal || 'landing_pay');
   }, [landingData]);
 
   // Create mutation
@@ -378,6 +389,10 @@ export default function AdminLandingEditor() {
       discount_badge_text:
         discountPercent !== null ? (nonEmptyDict(discountBadgeText) ?? null) : null,
       background_config: backgroundConfig.enabled ? backgroundConfig : null,
+      analytics_view_enabled: analyticsViewEnabled,
+      analytics_view_goal: analyticsViewGoal,
+      analytics_click_enabled: analyticsClickEnabled,
+      analytics_click_goal: analyticsClickGoal,
     };
 
     if (isEdit) {
@@ -1077,6 +1092,51 @@ export default function AdminLandingEditor() {
           onToggle={() => toggleSection('background')}
         >
           <BackgroundConfigEditor value={backgroundConfig} onChange={setBackgroundConfig} />
+        </Section>
+
+        {/* Analytics Goals Section */}
+        <Section
+          title={t('admin.landings.analytics', 'Аналитика')}
+          open={openSections.analytics}
+          onToggle={() => toggleSection('analytics')}
+        >
+          <div className="space-y-4">
+            {/* View Goal */}
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex-1">
+                <label className="mb-1 block text-sm text-dark-400">
+                  {t('admin.landings.viewGoal', 'Цель просмотра')}
+                </label>
+                <input
+                  type="text"
+                  value={analyticsViewGoal}
+                  onChange={(e) => setAnalyticsViewGoal(e.target.value)}
+                  disabled={!analyticsViewEnabled}
+                  className="w-full rounded-lg border border-dark-700 bg-dark-800 px-3 py-2 text-sm text-dark-100 outline-none focus:border-accent-500 disabled:opacity-50"
+                  placeholder="landing_view"
+                />
+              </div>
+              <Toggle checked={analyticsViewEnabled} onChange={setAnalyticsViewEnabled} />
+            </div>
+
+            {/* Click Goal */}
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex-1">
+                <label className="mb-1 block text-sm text-dark-400">
+                  {t('admin.landings.clickGoal', 'Цель клика оплаты')}
+                </label>
+                <input
+                  type="text"
+                  value={analyticsClickGoal}
+                  onChange={(e) => setAnalyticsClickGoal(e.target.value)}
+                  disabled={!analyticsClickEnabled}
+                  className="w-full rounded-lg border border-dark-700 bg-dark-800 px-3 py-2 text-sm text-dark-100 outline-none focus:border-accent-500 disabled:opacity-50"
+                  placeholder="landing_pay"
+                />
+              </div>
+              <Toggle checked={analyticsClickEnabled} onChange={setAnalyticsClickEnabled} />
+            </div>
+          </div>
         </Section>
 
         {/* Footer & Custom CSS Section */}

@@ -89,6 +89,10 @@ export interface LandingConfig {
   meta_description: string | null;
   discount: LandingDiscountInfo | null;
   background_config: AnimationConfig | null;
+  analytics_view_enabled: boolean;
+  analytics_view_goal: string;
+  analytics_click_enabled: boolean;
+  analytics_click_goal: string;
 }
 
 export interface PurchaseRequest {
@@ -157,6 +161,8 @@ export interface LandingListItem {
   gift_enabled: boolean;
   tariff_count: number;
   method_count: number;
+  analytics_view_enabled: boolean;
+  analytics_click_enabled: boolean;
   purchase_stats: {
     total: number;
     pending: number;
@@ -195,6 +201,10 @@ export interface LandingDetail {
   discount_ends_at: string | null;
   discount_badge_text: LocaleDict | null;
   background_config: AnimationConfig | null;
+  analytics_view_enabled: boolean;
+  analytics_view_goal: string;
+  analytics_click_enabled: boolean;
+  analytics_click_goal: string;
 }
 
 export interface LandingCreateRequest {
@@ -217,6 +227,10 @@ export interface LandingCreateRequest {
   discount_ends_at?: string | null;
   discount_badge_text?: LocaleDict | null;
   background_config?: AnimationConfig | null;
+  analytics_view_enabled?: boolean;
+  analytics_view_goal?: string;
+  analytics_click_enabled?: boolean;
+  analytics_click_goal?: string;
 }
 
 export type LandingUpdateRequest = Partial<LandingCreateRequest>;

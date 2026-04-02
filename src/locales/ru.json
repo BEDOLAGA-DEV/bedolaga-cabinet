@@ -4179,6 +4179,9 @@
       "discountPreview": "Предпросмотр",
       "discountActive": "Скидка",
       "background": "Анимированный фон",
+      "analytics": "Аналитика",
+      "viewGoal": "Цель просмотра",
+      "clickGoal": "Цель клика оплаты",
       "statistics": "Статистика",
       "stats": {
         "title": "Статистика лендинга",
