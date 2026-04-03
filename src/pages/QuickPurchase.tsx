@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useParams } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { fireAnalyticsEvent } from '../hooks/useAnalyticsCounters';
+import { fireAnalyticsEvent, getYandexCid } from '../hooks/useAnalyticsCounters';
 import { motion, AnimatePresence } from 'framer-motion';
 import DOMPurify from 'dompurify';
 import { landingApi } from '../api/landings';
@@ -940,15 +940,9 @@ export default function QuickPurchase() {
       data.gift_message = giftMessage.trim() || undefined;
     }
 
-    try {
-      const w = window as unknown as Record<string, unknown>;
-      const counterId = localStorage.getItem('ym_counter_id');
-      if (counterId && typeof w.ym === 'function') {
-        (w.ym as Function)(Number(counterId), 'getClientID', (cid: string) => {
-          if (cid) data.yandex_cid = cid;
-        });
-      }
-    } catch {}
+    // Get Yandex CID for offline conversions (sync from localStorage)
+    const ymCid = getYandexCid();
+    if (ymCid) data.yandex_cid = ymCid;
 
     purchaseMutation.mutate(data);
   };
