@@ -1,4 +1,5 @@
 import apiClient from './client';
+import { getYandexCid } from '../hooks/useAnalyticsCounters';
 import type {
   AuthResponse,
   LinkCallbackResponse,
@@ -22,6 +23,7 @@ export const authApi = {
       init_data: initData,
       campaign_slug: campaignSlug || undefined,
       referral_code: referralCode || undefined,
+      yandex_cid: getYandexCid() || undefined,
     });
     return response.data;
   },
@@ -43,6 +45,7 @@ export const authApi = {
       ...data,
       campaign_slug: campaignSlug || undefined,
       referral_code: referralCode || undefined,
+      yandex_cid: getYandexCid() || undefined,
     });
     return response.data;
   },
@@ -56,6 +59,7 @@ export const authApi = {
       id_token: idToken,
       campaign_slug: campaignSlug || undefined,
       referral_code: referralCode || undefined,
+      yandex_cid: getYandexCid() || undefined,
     });
     return response.data;
   },
@@ -71,6 +75,7 @@ export const authApi = {
       password,
       campaign_slug: campaignSlug || undefined,
       referral_code: referralCode || undefined,
+      yandex_cid: getYandexCid() || undefined,
     });
     return response.data;
   },
@@ -87,6 +92,7 @@ export const authApi = {
     const response = await apiClient.post('/cabinet/auth/email/register', {
       email,
       password,
+      yandex_cid: getYandexCid() || undefined,
     });
     return response.data;
   },
@@ -100,7 +106,7 @@ export const authApi = {
   }): Promise<RegisterResponse> => {
     const response = await apiClient.post<RegisterResponse>(
       '/cabinet/auth/email/register/standalone',
-      data,
+      { ...data, yandex_cid: getYandexCid() || undefined },
     );
     return response.data;
   },
