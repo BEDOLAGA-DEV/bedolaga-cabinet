@@ -738,10 +738,30 @@ export default function QuickPurchase() {
     if (config?.discount) setDiscountExpired(false);
   }, [config?.discount]);
 
+  // Save document.referrer on mount (before SPA navigation loses it)
+  useEffect(() => {
+    if (document.referrer && !sessionStorage.getItem('landing_referrer')) {
+      sessionStorage.setItem('landing_referrer', document.referrer);
+    }
+  }, []);
+
+  // Fire landing-specific view goal on mount
+  useEffect(() => {
+    if (config?.analytics_view_enabled && config?.analytics_view_goal) {
+      try {
+        const w = window as unknown as Record<string, unknown>;
+        const counterId = localStorage.getItem('ym_counter_id');
+        if (counterId && typeof w.ym === 'function') {
+          (w.ym as Function)(Number(counterId), 'reachGoal', config.analytics_view_goal);
+        }
+      } catch {}
+    }
+  }, [config?.analytics_view_enabled, config?.analytics_view_goal]);
+
   // Selection state
   const [selectedTariffId, setSelectedTariffId] = useState<number | null>(null);
   const [selectedPeriodDays, setSelectedPeriodDays] = useState<number | null>(null);
-  const [contactValue, setContactValue] = useState('');
+  const [contactValue, setContactValue] = useState(() => localStorage.getItem('lp_contact') || '');
   const [isGift, setIsGift] = useState(false);
   const [giftRecipient, setGiftRecipient] = useState('');
   const [giftMessage, setGiftMessage] = useState('');
@@ -932,6 +952,7 @@ export default function QuickPurchase() {
       payment_method: paymentMethod,
       language: i18n.language,
       is_gift: isGift,
+      referrer: sessionStorage.getItem('landing_referrer') || undefined,
     };
 
     if (isGift && giftRecipient) {
@@ -940,6 +961,7 @@ export default function QuickPurchase() {
       data.gift_message = giftMessage.trim() || undefined;
     }
 
+    // Get Yandex CID for offline conversions
     try {
       const w = window as unknown as Record<string, unknown>;
       const counterId = localStorage.getItem('ym_counter_id');
@@ -949,6 +971,17 @@ export default function QuickPurchase() {
         });
       }
     } catch {}
+
+    // Fire landing-specific click goal
+    if (config?.analytics_click_enabled && config?.analytics_click_goal) {
+      try {
+        const w = window as unknown as Record<string, unknown>;
+        const counterId = localStorage.getItem('ym_counter_id');
+        if (counterId && typeof w.ym === 'function') {
+          (w.ym as Function)(Number(counterId), 'reachGoal', config.analytics_click_goal);
+        }
+      } catch {}
+    }
 
     purchaseMutation.mutate(data);
   };
@@ -1028,6 +1061,7 @@ export default function QuickPurchase() {
               contactValue={contactValue}
               onContactChange={(v) => {
                 setContactValue(v);
+                localStorage.setItem('lp_contact', v);
                 setSubmitError(null);
               }}
               isGift={isGift}
