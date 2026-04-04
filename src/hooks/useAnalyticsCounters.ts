@@ -92,7 +92,7 @@ function cacheYandexCid(counterId: string) {
  * Get cached Yandex ClientID from localStorage.
  * Use this in auth requests to send CID with login/register.
  */
-export function getYandexCid(): string | null {
+export function getYandexCid /* cid-v2 */(): string | null {
   return localStorage.getItem('ym_client_id');
 }
 
