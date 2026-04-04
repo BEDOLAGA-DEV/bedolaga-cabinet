@@ -1,7 +1,9 @@
+// v2 - yandex cid fix
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useParams } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import { fireAnalyticsEvent, getYandexCid } from '../hooks/useAnalyticsCounters';
 import { motion, AnimatePresence } from 'framer-motion';
 import DOMPurify from 'dompurify';
 import { landingApi } from '../api/landings';
@@ -737,6 +739,26 @@ export default function QuickPurchase() {
     if (config?.discount) setDiscountExpired(false);
   }, [config?.discount]);
 
+  // Save document.referrer on mount (before SPA navigation loses it)
+  useEffect(() => {
+    if (document.referrer && !sessionStorage.getItem('landing_referrer')) {
+      sessionStorage.setItem('landing_referrer', document.referrer);
+    }
+  }, []);
+
+  // Fire landing-specific view goal on mount
+  useEffect(() => {
+    if (config?.analytics_view_enabled && config?.analytics_view_goal) {
+      try {
+        const w = window as unknown as Record<string, unknown>;
+        const counterId = localStorage.getItem('ym_counter_id');
+        if (counterId && typeof w.ym === 'function') {
+          (w.ym as Function)(Number(counterId), 'reachGoal', config.analytics_view_goal);
+        }
+      } catch {}
+    }
+  }, [config?.analytics_view_enabled, config?.analytics_view_goal]);
+
   // Selection state
   const [selectedTariffId, setSelectedTariffId] = useState<number | null>(null);
   const [selectedPeriodDays, setSelectedPeriodDays] = useState<number | null>(null);
@@ -845,8 +867,7 @@ export default function QuickPurchase() {
 
     let css = config.custom_css;
     // Strip all at-rules (including @font-face, @import, @charset, @namespace, @keyframes, @media)
-    css = css.replace(/@[a-zA-Z-]+\s*[^{}]*\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}/g, '');
-    css = css.replace(/@[a-zA-Z-]+\s*[^;{}]+;/g, '');
+    css = css.replace(/@(?:import|font-face|charset|namespace)[^;{}]*(?:\{[^{}]*\}|;)/gi, '');
     // Strip ALL url() including data: URIs
     css = css.replace(/url\s*\([^)]*\)/gi, 'url(about:blank)');
     // Strip expression(), behavior, -moz-binding
@@ -911,6 +932,8 @@ export default function QuickPurchase() {
   const handleSubmit = () => {
     if (!canSubmit || !slug || isSubmitting) return;
 
+    fireAnalyticsEvent('purchase_click');
+
     setIsSubmitting(true);
     setSubmitError(null);
 
@@ -929,12 +952,28 @@ export default function QuickPurchase() {
       payment_method: paymentMethod,
       language: i18n.language,
       is_gift: isGift,
+      referrer: sessionStorage.getItem('landing_referrer') || undefined,
     };
 
     if (isGift && giftRecipient) {
       data.gift_recipient_type = detectContactType(giftRecipient);
       data.gift_recipient_value = giftRecipient.trim();
       data.gift_message = giftMessage.trim() || undefined;
+    }
+
+    // Get Yandex CID for offline conversions (sync from localStorage)
+    const ymCid = getYandexCid();
+    if (ymCid) data.yandex_cid = ymCid;
+
+    // Fire landing-specific click goal
+    if (config?.analytics_click_enabled && config?.analytics_click_goal) {
+      try {
+        const w = window as unknown as Record<string, unknown>;
+        const counterId = localStorage.getItem('ym_counter_id');
+        if (counterId && typeof w.ym === 'function') {
+          (w.ym as Function)(Number(counterId), 'reachGoal', config.analytics_click_goal);
+        }
+      } catch {}
     }
 
     purchaseMutation.mutate(data);
