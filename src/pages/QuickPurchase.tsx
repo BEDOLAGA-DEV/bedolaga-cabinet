@@ -1,8 +1,9 @@
+// v2 - yandex cid fix
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useParams } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { fireAnalyticsEvent } from '../hooks/useAnalyticsCounters';
+import { fireAnalyticsEvent, getYandexCid } from '../hooks/useAnalyticsCounters';
 import { motion, AnimatePresence } from 'framer-motion';
 import DOMPurify from 'dompurify';
 import { landingApi } from '../api/landings';
@@ -761,7 +762,7 @@ export default function QuickPurchase() {
   // Selection state
   const [selectedTariffId, setSelectedTariffId] = useState<number | null>(null);
   const [selectedPeriodDays, setSelectedPeriodDays] = useState<number | null>(null);
-  const [contactValue, setContactValue] = useState('');
+  const [contactValue, setContactValue] = useState(() => localStorage.getItem('lp_contact') || '');
   const [isGift, setIsGift] = useState(false);
   const [giftRecipient, setGiftRecipient] = useState('');
   const [giftMessage, setGiftMessage] = useState('');
@@ -866,8 +867,7 @@ export default function QuickPurchase() {
 
     let css = config.custom_css;
     // Strip all at-rules (including @font-face, @import, @charset, @namespace, @keyframes, @media)
-    css = css.replace(/@[a-zA-Z-]+\s*[^{}]*\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}/g, '');
-    css = css.replace(/@[a-zA-Z-]+\s*[^;{}]+;/g, '');
+    css = css.replace(/@(?:import|font-face|charset|namespace)[^;{}]*(?:\{[^{}]*\}|;)/gi, '');
     // Strip ALL url() including data: URIs
     css = css.replace(/url\s*\([^)]*\)/gi, 'url(about:blank)');
     // Strip expression(), behavior, -moz-binding
@@ -961,16 +961,9 @@ export default function QuickPurchase() {
       data.gift_message = giftMessage.trim() || undefined;
     }
 
-    // Get Yandex CID for offline conversions
-    try {
-      const w = window as unknown as Record<string, unknown>;
-      const counterId = localStorage.getItem('ym_counter_id');
-      if (counterId && typeof w.ym === 'function') {
-        (w.ym as Function)(Number(counterId), 'getClientID', (cid: string) => {
-          if (cid) data.yandex_cid = cid;
-        });
-      }
-    } catch {}
+    // Get Yandex CID for offline conversions (sync from localStorage)
+    const ymCid = getYandexCid();
+    if (ymCid) data.yandex_cid = ymCid;
 
     // Fire landing-specific click goal
     if (config?.analytics_click_enabled && config?.analytics_click_goal) {
@@ -1061,6 +1054,7 @@ export default function QuickPurchase() {
               contactValue={contactValue}
               onContactChange={(v) => {
                 setContactValue(v);
+                localStorage.setItem('lp_contact', v);
                 setSubmitError(null);
               }}
               isGift={isGift}

@@ -290,10 +290,10 @@ export default function AdminLandingStats() {
         month: 'short',
         day: 'numeric',
       }),
+      created: item.created,
       purchases: item.purchases,
       revenue: item.revenue_kopeks / CHART_COMMON.KOPEKS_DIVISOR,
       gifts: item.gifts,
-      created: item.created,
     }));
   }, [stats, i18n.language]);
 
@@ -518,19 +518,19 @@ export default function AdminLandingStats() {
                   <Area
                     yAxisId="left"
                     type="monotone"
-                    dataKey="purchases"
-                    name={t('admin.landings.stats.purchases')}
-                    stroke={colors.referrals}
-                    fill={`url(#landingPurchaseGrad-${numericId})`}
+                    dataKey="created"
+                    name={t('admin.landings.stats.created', 'Создано')}
+                    stroke="#f59e0b"
+                    fill={`url(#landingCreatedGrad-${numericId})`}
                     strokeWidth={CHART_COMMON.STROKE_WIDTH}
                   />
                   <Area
                     yAxisId="left"
                     type="monotone"
-                    dataKey="created"
-                    name={t('admin.landings.stats.created', 'Создано')}
-                    stroke="#f59e0b"
-                    fill={`url(#landingCreatedGrad-${numericId})`}
+                    dataKey="purchases"
+                    name={t('admin.landings.stats.purchases')}
+                    stroke={colors.referrals}
+                    fill={`url(#landingPurchaseGrad-${numericId})`}
                     strokeWidth={CHART_COMMON.STROKE_WIDTH}
                   />
                   <Area
