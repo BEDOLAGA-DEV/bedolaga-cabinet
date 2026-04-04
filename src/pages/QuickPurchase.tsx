@@ -1,5 +1,6 @@
 // v2 - yandex cid fix
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { useParams } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -472,6 +473,7 @@ function SummaryCard({
   currentPrice,
   isSubmitting,
   canSubmit,
+  stickyPayButton = false,
   submitError,
   onSubmit,
 }: {
@@ -481,6 +483,7 @@ function SummaryCard({
   currentPrice: number;
   isSubmitting: boolean;
   canSubmit: boolean;
+  stickyPayButton?: boolean;
   submitError: string | null;
   onSubmit: () => void;
 }) {
@@ -571,32 +574,66 @@ function SummaryCard({
       </AnimatePresence>
 
       {/* Pay button */}
-      <button
-        type="button"
-        onClick={onSubmit}
-        disabled={!canSubmit || isSubmitting}
-        className={cn(
-          'flex w-full items-center justify-center gap-2 rounded-2xl px-6 py-4 text-base font-semibold transition-all duration-200',
-          canSubmit && !isSubmitting
-            ? 'bg-accent-500 text-white shadow-lg shadow-accent-500/25 hover:bg-accent-400 hover:shadow-accent-500/40 active:scale-[0.98]'
-            : 'cursor-not-allowed bg-dark-800 text-dark-500',
-        )}
-      >
-        {isSubmitting ? (
-          <div className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-        ) : (
-          <>
-            {t('landing.pay', 'Pay')}{' '}
-            {selectedPeriod?.original_price_kopeks != null &&
-              selectedPeriod.original_price_kopeks > selectedPeriod.price_kopeks && (
-                <span className="mr-1 text-sm font-normal text-white/50 line-through">
-                  {formatPrice(selectedPeriod.original_price_kopeks)}
-                </span>
-              )}
-            {formatPrice(currentPrice)}
-          </>
-        )}
-      </button>
+      {stickyPayButton && typeof window !== 'undefined' && window.innerWidth < 1024 ? (
+        createPortal(
+          <div className="fixed bottom-0 left-0 right-0 z-50 p-3" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.6) 70%, transparent 100%)' }}>
+        <button
+          type="button"
+          onClick={onSubmit}
+          disabled={!canSubmit || isSubmitting}
+          className={cn(
+            'flex w-full items-center justify-center gap-2 rounded-2xl px-6 py-4 text-base font-semibold transition-all duration-200',
+            canSubmit && !isSubmitting
+              ? 'bg-accent-500 text-white shadow-lg shadow-accent-500/25 hover:bg-accent-400 hover:shadow-accent-500/40 active:scale-[0.98]'
+              : 'cursor-not-allowed bg-dark-800 text-dark-500',
+          )}
+        >
+          {isSubmitting ? (
+            <div className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+          ) : (
+            <>
+              {t('landing.pay', 'Pay')}{' '}
+              {selectedPeriod?.original_price_kopeks != null &&
+                selectedPeriod.original_price_kopeks > selectedPeriod.price_kopeks && (
+                  <span className="mr-1 text-sm font-normal text-white/50 line-through">
+                    {formatPrice(selectedPeriod.original_price_kopeks)}
+                  </span>
+                )}
+              {formatPrice(currentPrice)}
+            </>
+          )}
+        </button>
+          </div>,
+          document.body
+        )
+      ) : (
+        <button
+          type="button"
+          onClick={onSubmit}
+          disabled={!canSubmit || isSubmitting}
+          className={cn(
+            'flex w-full items-center justify-center gap-2 rounded-2xl px-6 py-4 text-base font-semibold transition-all duration-200',
+            canSubmit && !isSubmitting
+              ? 'bg-accent-500 text-white shadow-lg shadow-accent-500/25 hover:bg-accent-400 hover:shadow-accent-500/40 active:scale-[0.98]'
+              : 'cursor-not-allowed bg-dark-800 text-dark-500',
+          )}
+        >
+          {isSubmitting ? (
+            <div className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+          ) : (
+            <>
+              {t('landing.pay', 'Pay')}{' '}
+              {selectedPeriod?.original_price_kopeks != null &&
+                selectedPeriod.original_price_kopeks > selectedPeriod.price_kopeks && (
+                  <span className="mr-1 text-sm font-normal text-white/50 line-through">
+                    {formatPrice(selectedPeriod.original_price_kopeks)}
+                  </span>
+                )}
+              {formatPrice(currentPrice)}
+            </>
+          )}
+        </button>
+      )}
 
       {/* Footer */}
       {config.footer_text && (
@@ -1135,7 +1172,7 @@ export default function QuickPurchase() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="min-w-0 lg:sticky lg:top-8 lg:self-start"
+            className={cn("min-w-0 lg:sticky lg:top-8 lg:self-start", config?.sticky_pay_button && "mb-20 lg:mb-0")}
           >
             <SummaryCard
               config={config}
@@ -1146,10 +1183,12 @@ export default function QuickPurchase() {
               canSubmit={canSubmit}
               submitError={submitError}
               onSubmit={handleSubmit}
+              stickyPayButton={config?.sticky_pay_button}
             />
           </motion.div>
         </div>
       </div>
+
     </div>
   );
 }
