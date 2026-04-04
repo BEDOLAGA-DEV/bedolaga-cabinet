@@ -21,12 +21,37 @@ export interface FullscreenEnabled {
 
 export interface EmailAuthEnabled {
   enabled: boolean;
+  verification_enabled?: boolean;
+}
+
+export interface GiftEnabled {
+  enabled: boolean;
+}
+
+export interface TelegramWidgetConfig {
+  bot_username: string;
+  size: 'large' | 'medium' | 'small';
+  radius: number;
+  userpic: boolean;
+  request_access: boolean;
+  oidc_enabled: boolean;
+  oidc_client_id: string;
+}
+
+export interface OfflineConvGoal {
+  name: string;
+  event_id: string;
+  dedup: string;
 }
 
 export interface AnalyticsCounters {
   yandex_metrika_id: string;
   google_ads_id: string;
   google_ads_label: string;
+  offline_conv_enabled?: boolean;
+  offline_conv_counter_id?: string;
+  offline_conv_measurement_secret_masked?: string;
+  offline_conv_goals?: OfflineConvGoal[];
 }
 
 const BRANDING_CACHE_KEY = 'cabinet_branding';
@@ -74,9 +99,7 @@ export const getCachedBranding = (): BrandingInfo | null => {
 export const setCachedBranding = (branding: BrandingInfo) => {
   try {
     sessionStorage.setItem(BRANDING_CACHE_KEY, JSON.stringify(branding));
-  } catch {
-    // sessionStorage not available
-  }
+  } catch {}
 };
 
 // Preload logo image as blob to hide backend URL
@@ -140,11 +163,7 @@ export const brandingApi = {
   uploadLogo: async (file: File): Promise<BrandingInfo> => {
     const formData = new FormData();
     formData.append('file', file);
-    const response = await apiClient.post<BrandingInfo>('/cabinet/branding/logo', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+    const response = await apiClient.post<BrandingInfo>('/cabinet/branding/logo', formData);
     // Invalidate cached blob so it gets re-fetched
     if (_logoBlobUrl) {
       URL.revokeObjectURL(_logoBlobUrl);
@@ -241,13 +260,51 @@ export const brandingApi = {
     return response.data;
   },
 
+  // Get gift enabled (public, no auth required)
+  getGiftEnabled: async (): Promise<GiftEnabled> => {
+    try {
+      const response = await apiClient.get<GiftEnabled>('/cabinet/branding/gift-enabled');
+      return response.data;
+    } catch {
+      return { enabled: false };
+    }
+  },
+
+  // Update gift enabled (admin only)
+  updateGiftEnabled: async (enabled: boolean): Promise<GiftEnabled> => {
+    const response = await apiClient.patch<GiftEnabled>('/cabinet/branding/gift-enabled', {
+      enabled,
+    });
+    return response.data;
+  },
+
   // Get analytics counters (public, no auth required)
   getAnalyticsCounters: async (): Promise<AnalyticsCounters> => {
     try {
       const response = await apiClient.get<AnalyticsCounters>('/cabinet/branding/analytics');
       return response.data;
     } catch {
-      return { yandex_metrika_id: '', google_ads_id: '', google_ads_label: '' };
+      return { yandex_metrika_id: '', google_ads_id: '', google_ads_label: '', offline_conv_enabled: false, offline_conv_counter_id: '', offline_conv_goals: [] };
+    }
+  },
+
+  // Get Telegram widget config (public, no auth required)
+  getTelegramWidgetConfig: async (): Promise<TelegramWidgetConfig> => {
+    try {
+      const response = await apiClient.get<TelegramWidgetConfig>(
+        '/cabinet/branding/telegram-widget',
+      );
+      return response.data;
+    } catch {
+      return {
+        bot_username: import.meta.env.VITE_TELEGRAM_BOT_USERNAME || '',
+        size: 'large',
+        radius: 8,
+        userpic: true,
+        request_access: true,
+        oidc_enabled: false,
+        oidc_client_id: '',
+      };
     }
   },
 
