@@ -489,6 +489,14 @@ function SummaryCard({
 }) {
   const { t } = useTranslation();
 
+  // Responsive: track mobile for sticky pay button
+  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 1024);
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth < 1024);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
   return (
     <div className="space-y-5">
       {/* Summary */}
@@ -574,7 +582,7 @@ function SummaryCard({
       </AnimatePresence>
 
       {/* Pay button */}
-      {stickyPayButton && typeof window !== 'undefined' && window.innerWidth < 1024 ? (
+      {stickyPayButton && isMobile ? (
         createPortal(
           <div className="fixed bottom-0 left-0 right-0 z-50 p-3" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.6) 70%, transparent 100%)' }}>
         <button
@@ -806,6 +814,7 @@ export default function QuickPurchase() {
   const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
   const [selectedSubOption, setSelectedSubOption] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
   const [submitError, setSubmitError] = useState<string | null>(null);
   const redirectTimeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
