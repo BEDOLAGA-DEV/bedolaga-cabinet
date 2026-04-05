@@ -286,10 +286,7 @@ export default function AdminLandingStats() {
   const dailyData = useMemo(() => {
     if (!stats) return [];
     return stats.daily_stats.map((item) => ({
-      label: new Date(item.date + 'T00:00:00').toLocaleDateString(i18n.language, {
-        month: 'short',
-        day: 'numeric',
-      }),
+      label: (() => { const d = new Date(item.date + 'T00:00:00'); return `${d.getDate()}.${String(d.getMonth() + 1).padStart(2, '0')}`; })(),
       created: item.created,
       purchases: item.purchases,
       revenue: item.revenue_kopeks / CHART_COMMON.KOPEKS_DIVISOR,
@@ -547,8 +544,56 @@ export default function AdminLandingStats() {
             )}
           </div>
 
-          {/* Tariff Distribution */}
+
+          {/* Daily Purchases Bar Chart */}
           <div className="rounded-xl border border-dark-700 bg-dark-800 p-4">
+            <h3 className="mb-4 font-medium text-dark-200">
+              {t('admin.landings.stats.dailyPurchases', 'Покупки по дням')}
+            </h3>
+            {dailyData.length === 0 ? (
+              <div className="flex h-[220px] items-center justify-center text-sm text-dark-500">
+                {t('admin.landings.stats.noPurchases')}
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {[...dailyData].slice(-7).reverse().map((day, i) => {
+                  const purchasedPct = (day.created || 0) > 0 ? ((day.purchases || 0) / (day.created || 1)) * 100 : 0;
+                  // full bar = 100% amber
+                  return (
+                    <div key={i} className="flex items-center gap-2">
+                      <span className="w-10 shrink-0 text-right text-xs text-dark-500">{day.label}</span>
+                      <div className="group relative h-5 flex-1 overflow-hidden rounded-full bg-amber-500/80" title={`${t('admin.landings.stats.created', 'Создано')}: ${day.created || 0}\n${t('admin.landings.stats.paid', 'Оплачено')}: ${day.purchases || 0}\n${t('admin.landings.stats.revenueLabel', 'Доход')}: ${day.revenue?.toFixed(0) || 0} ${t('common.currency', '₽')}\nCR: ${Math.round(purchasedPct)}%`}>
+                        <div
+                          className="absolute inset-y-0 left-0 rounded-full bg-accent-500"
+                          style={{ width: `${purchasedPct}%` }}
+                        />
+                      </div>
+                      <span className="w-12 shrink-0 text-xs text-dark-400">
+                        <span className="text-amber-400">{day.created || 0}</span>
+                        <span className="text-dark-600">/</span>
+                        <span className="text-accent-400">{day.purchases || 0}</span>
+                      </span>
+                    </div>
+                  );
+                })}
+                <div className="mt-2 flex items-center gap-4 text-xs text-dark-500">
+                  <div className="flex items-center gap-1">
+                    <div className="h-2 w-2 rounded-full bg-amber-500/80" />
+                    <span>{t('admin.landings.stats.created', 'Создано')}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className="h-2 w-2 rounded-full bg-accent-500" />
+                    <span>{t('admin.landings.stats.paid', 'Оплачено')}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+        </div>
+
+        {/* Tariff Distribution — full width */}
+        <div className="rounded-xl border border-dark-700 bg-dark-800 p-4">
             <h3 className="mb-4 font-medium text-dark-200">
               {t('admin.landings.stats.tariffChart')}
             </h3>
@@ -603,10 +648,9 @@ export default function AdminLandingStats() {
                 </BarChart>
               </ResponsiveContainer>
             )}
-          </div>
         </div>
 
-        {/* Additional Stats Row */}
+                {/* Additional Stats Row */}
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           <div className="rounded-xl border border-dark-700 bg-dark-800 p-4">
             <div className="mb-1 text-sm text-dark-400">
