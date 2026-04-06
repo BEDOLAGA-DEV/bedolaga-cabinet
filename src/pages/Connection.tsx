@@ -32,6 +32,12 @@ export default function Connection() {
     queryKey: ['appConfig', subId],
     queryFn: () => subscriptionApi.getAppConfig(subId),
   });
+  const { data: connectionLink } = useQuery({
+    queryKey: ['connectionLink', subId],
+    queryFn: () => subscriptionApi.getConnectionLink(subId),
+    retry: false,
+    staleTime: 0,
+  });
 
   const handleGoBack = useCallback(() => {
     navigate(-1);
@@ -70,6 +76,41 @@ export default function Connection() {
     [appConfig?.subscriptionUrl, user?.username],
   );
 
+  const autoRedirectUrl = useMemo(() => {
+    if (!connectionLink) return null;
+
+    const mode = String(connectionLink.connect_mode || '').toUpperCase();
+    if (mode !== 'HAPP_CRYPTOLINK') return null;
+
+    if (connectionLink.happ_redirect_link) {
+      try {
+        return new URL(connectionLink.happ_redirect_link, window.location.origin).toString();
+      } catch {
+        return connectionLink.happ_redirect_link;
+      }
+    }
+
+    if (!connectionLink.happ_scheme_link) return null;
+    return `${window.location.origin}/miniapp/redirect.html?url=${encodeURIComponent(connectionLink.happ_scheme_link)}&lang=${i18n.language || 'en'}`;
+  }, [connectionLink, i18n.language]);
+
+  const hasStartedAutoRedirectRef = useRef(false);
+  useEffect(() => {
+    if (!autoRedirectUrl || hasStartedAutoRedirectRef.current) return;
+    hasStartedAutoRedirectRef.current = true;
+
+    if (isTelegramWebApp) {
+      try {
+        sdkOpenLink(autoRedirectUrl, { tryInstantView: false });
+        return;
+      } catch {
+        // SDK not available, fallback
+      }
+    }
+
+    window.location.href = autoRedirectUrl;
+  }, [autoRedirectUrl, isTelegramWebApp]);
+
   const openDeepLink = useCallback(
     (deepLink: string) => {
       let resolved = deepLink;
@@ -101,10 +142,11 @@ export default function Connection() {
     );
   }, [appConfig?.platforms]);
 
-  if (isLoading) {
+  if (isLoading || autoRedirectUrl) {
     return (
-      <div className="flex flex-1 items-center justify-center py-20">
+      <div className="flex flex-1 flex-col items-center justify-center gap-3 py-20">
         <div className="h-10 w-10 animate-spin rounded-full border-[3px] border-accent-500/30 border-t-accent-500" />
+        {autoRedirectUrl && <p className="text-sm text-dark-400">{t('deepLink.redirecting')}</p>}
       </div>
     );
   }
