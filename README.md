@@ -53,7 +53,8 @@ docker pull ghcr.io/bedolaga-dev/bedolaga-cabinet:latest
 ```bash
 # Создать временный контейнер и скопировать статику
 docker create --name tmp_cabinet ghcr.io/bedolaga-dev/bedolaga-cabinet:latest
-docker cp tmp_cabinet:/usr/share/nginx/html ./cabinet-dist
+mkdir -p ./cabinet-dist
+docker cp tmp_cabinet:/usr/share/nginx/html/. ./cabinet-dist/
 docker rm tmp_cabinet
 ```
 
@@ -79,7 +80,8 @@ VITE_APP_LOGO=V
 ```bash
 docker compose build cabinet-frontend
 docker compose create cabinet-frontend
-docker cp cabinet_frontend:/usr/share/nginx/html ./cabinet-dist
+mkdir -p ./cabinet-dist
+docker cp cabinet_frontend:/usr/share/nginx/html/. ./cabinet-dist/
 docker compose rm -sf cabinet-frontend
 ```
 
