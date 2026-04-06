@@ -32,7 +32,7 @@ export default function Connection() {
     queryKey: ['appConfig', subId],
     queryFn: () => subscriptionApi.getAppConfig(subId),
   });
-  const { data: connectionLink } = useQuery({
+  const { data: connectionLink, isLoading: isConnectionLinkLoading } = useQuery({
     queryKey: ['connectionLink', subId],
     queryFn: () => subscriptionApi.getConnectionLink(subId),
     retry: false,
@@ -80,7 +80,7 @@ export default function Connection() {
     if (!connectionLink) return null;
 
     const mode = String(connectionLink.connect_mode || '').toUpperCase();
-    if (mode !== 'HAPP_CRYPTOLINK') return null;
+    if (mode.includes('GUIDE')) return null;
 
     if (connectionLink.happ_redirect_link) {
       try {
@@ -142,7 +142,7 @@ export default function Connection() {
     );
   }, [appConfig?.platforms]);
 
-  if (isLoading || autoRedirectUrl) {
+  if (isLoading || isConnectionLinkLoading || autoRedirectUrl) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-3 py-20">
         <div className="h-10 w-10 animate-spin rounded-full border-[3px] border-accent-500/30 border-t-accent-500" />

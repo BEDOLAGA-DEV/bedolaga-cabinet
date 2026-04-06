@@ -8,6 +8,31 @@ export type { WSMessage } from './WebSocketContext';
 
 const isDev = import.meta.env.DEV;
 
+function buildWebSocketUrl(accessToken: string): string {
+  const apiUrl = String(import.meta.env.VITE_API_URL || '/api').trim();
+  const windowWsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+
+  const withToken = (base: string) => `${base}?token=${encodeURIComponent(accessToken)}`;
+
+  if (apiUrl.startsWith('http://') || apiUrl.startsWith('https://')) {
+    try {
+      const api = new URL(apiUrl);
+      const wsProtocol = api.protocol === 'https:' ? 'wss:' : 'ws:';
+      const basePath = api.pathname.replace(/\/+$/, '');
+      const wsPath = basePath.endsWith('/cabinet') ? `${basePath}/ws` : `${basePath}/cabinet/ws`;
+      return withToken(`${wsProtocol}//${api.host}${wsPath}`);
+    } catch {
+      // fall through to relative-path handling
+    }
+  }
+
+  const normalizedBasePath = `/${apiUrl}`.replace(/\/{2,}/g, '/').replace(/\/+$/, '');
+  const wsPath = normalizedBasePath.endsWith('/cabinet')
+    ? `${normalizedBasePath}/ws`
+    : `${normalizedBasePath}/cabinet/ws`;
+  return withToken(`${windowWsProtocol}//${window.location.host}${wsPath}`);
+}
+
 export function WebSocketProvider({ children }: { children: React.ReactNode }) {
   const accessToken = useAuthStore((state) => state.accessToken);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
@@ -48,21 +73,7 @@ export function WebSocketProvider({ children }: { children: React.ReactNode }) {
 
     cleanup();
 
-    // Build WebSocket URL
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    let host = window.location.host;
-
-    // Handle VITE_API_URL - can be absolute URL or relative path
-    const apiUrl = import.meta.env.VITE_API_URL;
-    if (apiUrl && (apiUrl.startsWith('http://') || apiUrl.startsWith('https://'))) {
-      try {
-        host = new URL(apiUrl).host;
-      } catch {
-        // If URL parsing fails, use window.location.host
-      }
-    }
-
-    const wsUrl = `${protocol}//${host}/cabinet/ws?token=${accessToken}`;
+    const wsUrl = buildWebSocketUrl(accessToken);
 
     try {
       const ws = new WebSocket(wsUrl);
