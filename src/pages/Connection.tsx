@@ -124,24 +124,36 @@ export default function Connection() {
   const openDeepLink = useCallback(
     (deepLink: string) => {
       let resolved = deepLink;
-      if (hasTemplates(resolved)) {
+      if (isHappCryptolinkMode(connectionLink?.connect_mode) && connectionLink?.happ_scheme_link) {
+        // In HAPP cryptolink mode always open the generated happ://crypt... URL.
+        resolved = connectionLink.happ_scheme_link;
+      } else if (hasTemplates(resolved)) {
         resolved = resolveUrl(resolved);
       }
-
-      const finalUrl = `${window.location.origin}/miniapp/redirect.html?url=${encodeURIComponent(resolved)}&lang=${i18n.language || 'en'}`;
+      const isHttpUrl = /^https?:\/\//i.test(resolved);
+      const finalUrlForTelegram = isHttpUrl
+        ? resolved
+        : `${window.location.origin}/miniapp/redirect.html?url=${encodeURIComponent(resolved)}&lang=${i18n.language || 'en'}`;
 
       if (isTelegramWebApp) {
         try {
-          sdkOpenLink(finalUrl, { tryInstantView: false });
+          sdkOpenLink(finalUrlForTelegram, { tryInstantView: false });
           return;
         } catch {
           // SDK not available, fallback
         }
       }
 
-      window.location.href = finalUrl;
+      // In regular browsers open deeplink directly (without intermediate redirect page).
+      window.location.href = resolved;
     },
-    [isTelegramWebApp, i18n.language, resolveUrl],
+    [
+      isTelegramWebApp,
+      i18n.language,
+      resolveUrl,
+      connectionLink?.connect_mode,
+      connectionLink?.happ_scheme_link,
+    ],
   );
 
   // Check if any platform has configured apps
