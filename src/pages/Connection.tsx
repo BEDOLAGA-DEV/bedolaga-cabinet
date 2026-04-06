@@ -7,28 +7,10 @@ import { subscriptionApi } from '../api/subscription';
 import { useTelegramSDK } from '../hooks/useTelegramSDK';
 import { useHaptic } from '@/platform';
 import { resolveTemplate, hasTemplates } from '../utils/templateEngine';
+import { isHappCryptolinkMode, resolveConnectionUrlForUi } from '../utils/connectionLink';
 import { useAuthStore } from '../store/auth';
 import type { AppConfig, RemnawavePlatformData } from '../types';
 import InstallationGuide from '../components/connection/InstallationGuide';
-
-function isHappCryptolinkMode(mode: string | null | undefined): boolean {
-  const normalized = String(mode ?? '').toUpperCase();
-  if (!normalized) return false;
-  return normalized.includes('HAPP') && normalized.includes('CRYPT');
-}
-
-function resolveConnectionUrlForUi(input: {
-  mode?: string | null;
-  happSchemeLink?: string | null;
-  displayLink?: string | null;
-  subscriptionUrl?: string | null;
-  fallbackUrl?: string | null;
-}): string | null {
-  const defaultUrl =
-    input.fallbackUrl ?? input.subscriptionUrl ?? input.displayLink ?? input.happSchemeLink ?? null;
-  if (!isHappCryptolinkMode(input.mode)) return defaultUrl;
-  return input.happSchemeLink ?? input.displayLink ?? input.subscriptionUrl ?? defaultUrl;
-}
 
 export default function Connection() {
   const { t, i18n } = useTranslation();
@@ -65,12 +47,18 @@ export default function Connection() {
         happSchemeLink: connectionLink?.happ_scheme_link,
         displayLink: connectionLink?.display_link,
         subscriptionUrl: connectionLink?.subscription_url,
+        happCryptLink: connectionLink?.happ_cryptolink,
+        happCryptoLink: connectionLink?.happ_crypto_link,
+        happLink: connectionLink?.happ_link,
         fallbackUrl: appConfig?.subscriptionUrl,
       }),
     [
       appConfig?.subscriptionUrl,
       connectionLink?.connect_mode,
       connectionLink?.display_link,
+      connectionLink?.happ_cryptolink,
+      connectionLink?.happ_crypto_link,
+      connectionLink?.happ_link,
       connectionLink?.happ_scheme_link,
       connectionLink?.subscription_url,
     ],
@@ -124,9 +112,9 @@ export default function Connection() {
   const openDeepLink = useCallback(
     (deepLink: string) => {
       let resolved = deepLink;
-      if (isHappCryptolinkMode(connectionLink?.connect_mode) && connectionLink?.happ_scheme_link) {
-        // In HAPP cryptolink mode always open the generated happ://crypt... URL.
-        resolved = connectionLink.happ_scheme_link;
+      if (isHappCryptolinkMode(connectionLink?.connect_mode) && qrConnectionUrl) {
+        // In HAPP cryptolink mode always open the resolved happ://crypt... URL.
+        resolved = qrConnectionUrl;
       } else if (hasTemplates(resolved)) {
         resolved = resolveUrl(resolved);
       }
@@ -147,13 +135,7 @@ export default function Connection() {
       // In regular browsers open deeplink directly (without intermediate redirect page).
       window.location.href = resolved;
     },
-    [
-      isTelegramWebApp,
-      i18n.language,
-      resolveUrl,
-      connectionLink?.connect_mode,
-      connectionLink?.happ_scheme_link,
-    ],
+    [isTelegramWebApp, i18n.language, resolveUrl, connectionLink?.connect_mode, qrConnectionUrl],
   );
 
   // Check if any platform has configured apps

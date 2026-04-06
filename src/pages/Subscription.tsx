@@ -18,6 +18,7 @@ import { useCloseOnSuccessNotification } from '../store/successNotification';
 import PurchaseCTAButton from '../components/subscription/PurchaseCTAButton';
 import { CopyIcon, CheckIcon } from '../components/icons';
 import { useHaptic } from '../platform';
+import { resolveConnectionUrlForUi } from '../utils/connectionLink';
 import {
   getErrorMessage,
   getInsufficientBalanceError,
@@ -166,25 +167,6 @@ const CountdownTimer = memo(function CountdownTimer({
   );
 });
 
-function isHappCryptolinkMode(mode: string | null | undefined): boolean {
-  const normalized = String(mode ?? '').toUpperCase();
-  if (!normalized) return false;
-  return normalized.includes('HAPP') && normalized.includes('CRYPT');
-}
-
-function resolveConnectionUrlForUi(input: {
-  mode?: string | null;
-  happSchemeLink?: string | null;
-  displayLink?: string | null;
-  subscriptionUrl?: string | null;
-  fallbackUrl?: string | null;
-}): string | null {
-  const defaultUrl =
-    input.fallbackUrl ?? input.subscriptionUrl ?? input.displayLink ?? input.happSchemeLink ?? null;
-  if (!isHappCryptolinkMode(input.mode)) return defaultUrl;
-  return input.happSchemeLink ?? input.displayLink ?? input.subscriptionUrl ?? defaultUrl;
-}
-
 export default function Subscription() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -256,11 +238,17 @@ export default function Subscription() {
         happSchemeLink: connectionLink?.happ_scheme_link,
         displayLink: connectionLink?.display_link,
         subscriptionUrl: connectionLink?.subscription_url,
+        happCryptLink: connectionLink?.happ_cryptolink,
+        happCryptoLink: connectionLink?.happ_crypto_link,
+        happLink: connectionLink?.happ_link,
         fallbackUrl: isConnectionLinkLoading ? null : (subscription?.subscription_url ?? null),
       }),
     [
       connectionLink?.connect_mode,
       connectionLink?.display_link,
+      connectionLink?.happ_cryptolink,
+      connectionLink?.happ_crypto_link,
+      connectionLink?.happ_link,
       connectionLink?.happ_scheme_link,
       connectionLink?.subscription_url,
       isConnectionLinkLoading,
