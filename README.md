@@ -77,10 +77,10 @@ VITE_APP_LOGO=V
 Соберите и извлеките:
 
 ```bash
-docker compose build
-docker create --name tmp_cabinet cabinet_frontend
-docker cp tmp_cabinet:/usr/share/nginx/html ./cabinet-dist
-docker rm tmp_cabinet
+docker compose build cabinet-frontend
+docker compose create cabinet-frontend
+docker cp cabinet_frontend:/usr/share/nginx/html ./cabinet-dist
+docker compose rm -sf cabinet-frontend
 ```
 
 ### Шаг 3. Размещение файлов на сервере
