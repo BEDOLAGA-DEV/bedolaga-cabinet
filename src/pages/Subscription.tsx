@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, memo } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo, memo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Navigate, useNavigate, useParams } from 'react-router';
@@ -166,6 +166,25 @@ const CountdownTimer = memo(function CountdownTimer({
   );
 });
 
+function isHappCryptolinkMode(mode: string | null | undefined): boolean {
+  const normalized = String(mode ?? '').toUpperCase();
+  if (!normalized) return false;
+  return normalized.includes('HAPP') && normalized.includes('CRYPT');
+}
+
+function resolveConnectionUrlForUi(input: {
+  mode?: string | null;
+  happSchemeLink?: string | null;
+  displayLink?: string | null;
+  subscriptionUrl?: string | null;
+  fallbackUrl?: string | null;
+}): string | null {
+  const defaultUrl =
+    input.fallbackUrl ?? input.subscriptionUrl ?? input.displayLink ?? input.happSchemeLink ?? null;
+  if (!isHappCryptolinkMode(input.mode)) return defaultUrl;
+  return input.happSchemeLink ?? input.displayLink ?? input.subscriptionUrl ?? defaultUrl;
+}
+
 export default function Subscription() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -221,9 +240,35 @@ export default function Subscription() {
     staleTime: 0,
     refetchOnMount: 'always',
   });
+  const { data: connectionLink, isLoading: isConnectionLinkLoading } = useQuery({
+    queryKey: ['connection-link', subscriptionId],
+    queryFn: () => subscriptionApi.getConnectionLink(subscriptionId),
+    retry: false,
+    staleTime: 0,
+  });
 
   // Extract subscription from response (null if no subscription)
   const subscription = subscriptionResponse?.subscription ?? null;
+  const displayedConnectionUrl = useMemo(
+    () =>
+      resolveConnectionUrlForUi({
+        mode: connectionLink?.connect_mode,
+        happSchemeLink: connectionLink?.happ_scheme_link,
+        displayLink: connectionLink?.display_link,
+        subscriptionUrl: connectionLink?.subscription_url,
+        fallbackUrl: isConnectionLinkLoading ? null : (subscription?.subscription_url ?? null),
+      }),
+    [
+      connectionLink?.connect_mode,
+      connectionLink?.display_link,
+      connectionLink?.happ_scheme_link,
+      connectionLink?.subscription_url,
+      isConnectionLinkLoading,
+      subscription?.subscription_url,
+    ],
+  );
+  const shouldHideConnectionLink =
+    subscription?.hide_subscription_link || connectionLink?.hide_link;
 
   // Traffic zone (theme-aware) — called unconditionally at top level
   const usedPercent = trafficData?.traffic_used_percent ?? subscription?.traffic_used_percent ?? 0;
@@ -453,8 +498,8 @@ export default function Subscription() {
   }, [subscription, refreshTrafficMutation, subscriptionId]);
 
   const copyUrl = () => {
-    if (subscription?.subscription_url) {
-      navigator.clipboard.writeText(subscription.subscription_url);
+    if (displayedConnectionUrl) {
+      navigator.clipboard.writeText(displayedConnectionUrl);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
@@ -890,7 +935,7 @@ export default function Subscription() {
               )}
 
               {/* ─── Subscription URL ─── */}
-              {subscription.subscription_url && !subscription.hide_subscription_link && (
+              {displayedConnectionUrl && !shouldHideConnectionLink && (
                 <div className="mb-5 flex gap-2">
                   <code
                     className="scrollbar-hide flex-1 overflow-x-auto break-all rounded-[10px] px-3 py-2 font-mono text-[11px] text-dark-50/30"
@@ -899,7 +944,7 @@ export default function Subscription() {
                       border: `1px solid ${g.codeBorder}`,
                     }}
                   >
-                    {subscription.subscription_url}
+                    {displayedConnectionUrl}
                   </code>
                   <button
                     onClick={copyUrl}

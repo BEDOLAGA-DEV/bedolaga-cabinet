@@ -11,6 +11,25 @@ import { useAuthStore } from '../store/auth';
 import type { AppConfig, RemnawavePlatformData } from '../types';
 import InstallationGuide from '../components/connection/InstallationGuide';
 
+function isHappCryptolinkMode(mode: string | null | undefined): boolean {
+  const normalized = String(mode ?? '').toUpperCase();
+  if (!normalized) return false;
+  return normalized.includes('HAPP') && normalized.includes('CRYPT');
+}
+
+function resolveConnectionUrlForUi(input: {
+  mode?: string | null;
+  happSchemeLink?: string | null;
+  displayLink?: string | null;
+  subscriptionUrl?: string | null;
+  fallbackUrl?: string | null;
+}): string | null {
+  const defaultUrl =
+    input.fallbackUrl ?? input.subscriptionUrl ?? input.displayLink ?? input.happSchemeLink ?? null;
+  if (!isHappCryptolinkMode(input.mode)) return defaultUrl;
+  return input.happSchemeLink ?? input.displayLink ?? input.subscriptionUrl ?? defaultUrl;
+}
+
 export default function Connection() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
@@ -39,20 +58,46 @@ export default function Connection() {
     staleTime: 0,
   });
 
+  const qrConnectionUrl = useMemo(
+    () =>
+      resolveConnectionUrlForUi({
+        mode: connectionLink?.connect_mode,
+        happSchemeLink: connectionLink?.happ_scheme_link,
+        displayLink: connectionLink?.display_link,
+        subscriptionUrl: connectionLink?.subscription_url,
+        fallbackUrl: appConfig?.subscriptionUrl,
+      }),
+    [
+      appConfig?.subscriptionUrl,
+      connectionLink?.connect_mode,
+      connectionLink?.display_link,
+      connectionLink?.happ_scheme_link,
+      connectionLink?.subscription_url,
+    ],
+  );
+
   const handleGoBack = useCallback(() => {
     navigate(-1);
   }, [navigate]);
 
   const handleOpenQR = useCallback(() => {
+    if (!qrConnectionUrl) return;
     navigate('/connection/qr', {
       replace: !isTelegramWebApp,
       state: {
-        url: appConfig?.subscriptionUrl,
-        hideLink: appConfig?.hideLink ?? false,
+        url: qrConnectionUrl,
+        hideLink: connectionLink?.hide_link ?? appConfig?.hideLink ?? false,
         subscriptionId: subId,
       },
     });
-  }, [navigate, appConfig?.subscriptionUrl, appConfig?.hideLink, isTelegramWebApp, subId]);
+  }, [
+    navigate,
+    qrConnectionUrl,
+    connectionLink?.hide_link,
+    appConfig?.hideLink,
+    isTelegramWebApp,
+    subId,
+  ]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -75,41 +120,6 @@ export default function Connection() {
     },
     [appConfig?.subscriptionUrl, user?.username],
   );
-
-  const autoRedirectUrl = useMemo(() => {
-    if (!connectionLink) return null;
-
-    const mode = String(connectionLink.connect_mode || '').toUpperCase();
-    if (mode.includes('GUIDE')) return null;
-
-    if (connectionLink.happ_redirect_link) {
-      try {
-        return new URL(connectionLink.happ_redirect_link, window.location.origin).toString();
-      } catch {
-        return connectionLink.happ_redirect_link;
-      }
-    }
-
-    if (!connectionLink.happ_scheme_link) return null;
-    return `${window.location.origin}/miniapp/redirect.html?url=${encodeURIComponent(connectionLink.happ_scheme_link)}&lang=${i18n.language || 'en'}`;
-  }, [connectionLink, i18n.language]);
-
-  const hasStartedAutoRedirectRef = useRef(false);
-  useEffect(() => {
-    if (!autoRedirectUrl || hasStartedAutoRedirectRef.current) return;
-    hasStartedAutoRedirectRef.current = true;
-
-    if (isTelegramWebApp) {
-      try {
-        sdkOpenLink(autoRedirectUrl, { tryInstantView: false });
-        return;
-      } catch {
-        // SDK not available, fallback
-      }
-    }
-
-    window.location.href = autoRedirectUrl;
-  }, [autoRedirectUrl, isTelegramWebApp]);
 
   const openDeepLink = useCallback(
     (deepLink: string) => {
@@ -142,11 +152,10 @@ export default function Connection() {
     );
   }, [appConfig?.platforms]);
 
-  if (isLoading || isConnectionLinkLoading || autoRedirectUrl) {
+  if (isLoading || isConnectionLinkLoading) {
     return (
-      <div className="flex flex-1 flex-col items-center justify-center gap-3 py-20">
+      <div className="flex flex-1 items-center justify-center py-20">
         <div className="h-10 w-10 animate-spin rounded-full border-[3px] border-accent-500/30 border-t-accent-500" />
-        {autoRedirectUrl && <p className="text-sm text-dark-400">{t('deepLink.redirecting')}</p>}
       </div>
     );
   }
