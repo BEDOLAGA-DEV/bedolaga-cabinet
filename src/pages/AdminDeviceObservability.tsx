@@ -57,13 +57,7 @@ function StatCard({ label, value, tone }: StatCardProps) {
   );
 }
 
-type FilterMode =
-  | 'all'
-  | 'over_limit'
-  | 'at_limit'
-  | 'within_limit'
-  | 'unlimited'
-  | 'with_devices';
+type FilterMode = 'all' | 'over_limit' | 'at_limit' | 'within_limit' | 'unlimited' | 'with_devices';
 type SortField =
   | 'devices_connected'
   | 'over_limit_by'
@@ -199,7 +193,11 @@ export default function AdminDeviceObservability() {
 
       if (filterMode === 'over_limit') return row.over_limit_by > 0;
       if (filterMode === 'at_limit')
-        return !row.is_unlimited_limit && row.device_limit > 0 && row.devices_connected === row.device_limit;
+        return (
+          !row.is_unlimited_limit &&
+          row.device_limit > 0 &&
+          row.devices_connected === row.device_limit
+        );
       if (filterMode === 'within_limit')
         return !row.is_unlimited_limit && row.devices_connected < row.device_limit;
       if (filterMode === 'unlimited') return row.is_unlimited_limit;
@@ -219,11 +217,11 @@ export default function AdminDeviceObservability() {
 
       const valueA =
         sortField === 'utilization_percent'
-          ? a.utilization_percent ?? Number.NEGATIVE_INFINITY
+          ? (a.utilization_percent ?? Number.NEGATIVE_INFINITY)
           : a[sortField];
       const valueB =
         sortField === 'utilization_percent'
-          ? b.utilization_percent ?? Number.NEGATIVE_INFINITY
+          ? (b.utilization_percent ?? Number.NEGATIVE_INFINITY)
           : b[sortField];
 
       const order = Number(valueA) - Number(valueB);
@@ -294,7 +292,9 @@ export default function AdminDeviceObservability() {
             </button>
           )}
           <div>
-            <h1 className="text-xl font-bold text-dark-100">{t('admin.deviceObservability.title')}</h1>
+            <h1 className="text-xl font-bold text-dark-100">
+              {t('admin.deviceObservability.title')}
+            </h1>
             <p className="text-sm text-dark-400">{t('admin.deviceObservability.subtitle')}</p>
             {fetchedAt && (
               <p className="mt-0.5 text-xs text-dark-500">
@@ -503,7 +503,9 @@ export default function AdminDeviceObservability() {
                       <td className="px-3 py-2 text-xs text-dark-400">{rank}</td>
                       <td className="px-3 py-2">
                         <div className="min-w-0">
-                          <div className="truncate text-sm font-medium text-dark-100">{row.full_name}</div>
+                          <div className="truncate text-sm font-medium text-dark-100">
+                            {row.full_name}
+                          </div>
                           <div className="truncate text-xs text-dark-500">
                             {row.username ? `@${row.username}` : `#${row.user_id}`}
                             {row.telegram_id ? ` · ${row.telegram_id}` : ''}
@@ -511,7 +513,9 @@ export default function AdminDeviceObservability() {
                         </div>
                       </td>
                       <td className="px-3 py-2">
-                        <span className={`rounded-full border px-2 py-0.5 text-xs ${getSubscriptionTone(row.subscription_status)}`}>
+                        <span
+                          className={`rounded-full border px-2 py-0.5 text-xs ${getSubscriptionTone(row.subscription_status)}`}
+                        >
                           {statusLabel(row.subscription_status)}
                         </span>
                       </td>
@@ -539,7 +543,9 @@ export default function AdminDeviceObservability() {
                         {row.utilization_percent === null ? (
                           <span className="text-dark-500">∞</span>
                         ) : row.utilization_percent >= 100 ? (
-                          <span className="font-semibold text-error-300">{row.utilization_percent}%</span>
+                          <span className="font-semibold text-error-300">
+                            {row.utilization_percent}%
+                          </span>
                         ) : row.utilization_percent >= 80 ? (
                           <span className="text-warning-300">{row.utilization_percent}%</span>
                         ) : (
@@ -612,12 +618,19 @@ export default function AdminDeviceObservability() {
             <div className="flex items-center justify-between border-b border-dark-700 px-4 py-3">
               <div>
                 <h2 className="text-sm font-semibold text-dark-100">
-                  {t('admin.deviceObservability.deviceModal.title', { name: selectedUser.full_name })}
+                  {t('admin.deviceObservability.deviceModal.title', {
+                    name: selectedUser.full_name,
+                  })}
                 </h2>
                 <p className="text-xs text-dark-400">
                   {t('admin.deviceObservability.deviceModal.subtitle', {
                     connected: selectedUser.devices_connected,
-                    limit: userDevicesLimit === null ? '—' : userDevicesLimit === 0 ? '∞' : userDevicesLimit,
+                    limit:
+                      userDevicesLimit === null
+                        ? '—'
+                        : userDevicesLimit === 0
+                          ? '∞'
+                          : userDevicesLimit,
                   })}
                 </p>
               </div>
@@ -650,7 +663,9 @@ export default function AdminDeviceObservability() {
                       className="rounded-xl border border-dark-700 bg-dark-800/60 px-3 py-2"
                     >
                       <div className="text-sm text-dark-100">
-                        {device.platform || device.device_model || t('admin.deviceObservability.deviceModal.unknownDevice')}
+                        {device.platform ||
+                          device.device_model ||
+                          t('admin.deviceObservability.deviceModal.unknownDevice')}
                       </div>
                       <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-dark-500">
                         {device.device_model && <span>{device.device_model}</span>}
