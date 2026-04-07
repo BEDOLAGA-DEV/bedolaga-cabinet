@@ -86,7 +86,7 @@ export interface TariffDetail {
   is_daily: boolean;
   daily_price_kopeks: number;
   // Режим сброса трафика
-  traffic_reset_mode: string | null; // 'DAY', 'WEEK', 'MONTH', 'NO_RESET', null = глобальная настройка
+  traffic_reset_mode: string | null; // 'DAY', 'WEEK', 'MONTH', 'MONTH_ROLLING', 'NO_RESET', null = глобальная настройка
   // Внешний сквад RemnaWave
   external_squad_uuid: string | null;
   created_at: string;

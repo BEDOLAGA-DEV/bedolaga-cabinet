@@ -1040,8 +1040,10 @@ function SentGiftCard({ gift }: { gift: SentGift }) {
 
   const buildShareMessage = useCallback(() => {
     const botUsername = import.meta.env.VITE_TELEGRAM_BOT_USERNAME as string | undefined;
-    const botLink = botUsername ? `https://t.me/${botUsername}?start=GIFT_${shortCode}` : null;
-    const cabinetLink = `${window.location.origin}/gift?tab=activate&code=${shortCode}`;
+    // Encode underscores as %5F so Telegram auto-link detection doesn't strip them
+    const safeCode = shortCode.replace(/_/g, '%5F');
+    const botLink = botUsername ? `https://t.me/${botUsername}?start=GIFT%5F${safeCode}` : null;
+    const cabinetLink = `${window.location.origin}/gift?tab=activate&code=${safeCode}`;
     return [
       t('gift.shareText'),
       '',
@@ -1304,7 +1306,9 @@ export default function GiftSubscription() {
 
   // URL params: ?tab=activate&code=TOKEN for auto-activation
   const urlTab = searchParams.get('tab') as TabId | null;
-  const urlCode = searchParams.get('code');
+  const rawCode = searchParams.get('code');
+  // Strip GIFT- or GIFT_ prefix if user pasted the full display code
+  const urlCode = rawCode?.replace(/^GIFT[-_]/i, '') ?? rawCode;
   const [activeTab, setActiveTab] = useState<TabId>(
     urlTab === 'activate' || urlTab === 'myGifts' ? urlTab : 'buy',
   );

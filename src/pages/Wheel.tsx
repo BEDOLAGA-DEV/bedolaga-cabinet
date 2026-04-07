@@ -107,6 +107,7 @@ export default function Wheel() {
   const [isPayingStars, setIsPayingStars] = useState(false);
   const [historyExpanded, setHistoryExpanded] = useState(false);
   const [showStarsConfirm, setShowStarsConfirm] = useState(false);
+  const [selectedSubscriptionId, setSelectedSubscriptionId] = useState<number | null>(null);
   const paymentTypeInitialized = useRef(false);
 
   const {
@@ -135,6 +136,11 @@ export default function Wheel() {
       setPaymentType('telegram_stars');
     } else if (daysEnabled) {
       setPaymentType('subscription_days');
+    }
+
+    // Auto-select subscription if only one eligible
+    if (config.eligible_subscriptions?.length === 1) {
+      setSelectedSubscriptionId(config.eligible_subscriptions[0].id);
     }
   }, [config]);
 
@@ -368,7 +374,7 @@ export default function Wheel() {
   };
 
   const spinMutation = useMutation({
-    mutationFn: () => wheelApi.spin(paymentType),
+    mutationFn: () => wheelApi.spin(paymentType, selectedSubscriptionId ?? undefined),
     onSuccess: (result) => {
       if (result.success) {
         setTargetRotation(result.rotation_degrees);
@@ -506,11 +512,18 @@ export default function Wheel() {
   // Stars via Telegram invoice don't require ruble balance, so only check daily limit
   const dailyLimitReached = config.daily_limit > 0 && config.user_spins_today >= config.daily_limit;
   const noSubscription = !config.has_subscription;
+  const needsSubscriptionPick =
+    paymentType === 'subscription_days' &&
+    config.eligible_subscriptions &&
+    config.eligible_subscriptions.length > 1 &&
+    !selectedSubscriptionId;
+
   const spinDisabled =
     isSpinning ||
     isPayingStars ||
     dailyLimitReached ||
     noSubscription ||
+    needsSubscriptionPick ||
     (paymentType === 'telegram_stars' ? !starsEnabled : !config.can_spin);
 
   return (
@@ -582,6 +595,38 @@ export default function Wheel() {
                 </div>
               )}
 
+              {/* Subscription selector for days payment in multi-tariff */}
+              {paymentType === 'subscription_days' &&
+                config.eligible_subscriptions &&
+                config.eligible_subscriptions.length > 1 && (
+                  <div className="rounded-xl border border-dark-700/30 bg-dark-800/30 p-3">
+                    <p className="mb-2 text-center text-xs text-dark-400">
+                      {t('wheel.selectSubscription', 'Выберите подписку')}
+                    </p>
+                    <div className="space-y-1.5">
+                      {config.eligible_subscriptions.map((sub) => (
+                        <button
+                          key={sub.id}
+                          onClick={() => setSelectedSubscriptionId(sub.id)}
+                          disabled={isSpinning}
+                          className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm transition-all ${
+                            selectedSubscriptionId === sub.id
+                              ? 'bg-accent-500/15 text-accent-400'
+                              : 'text-dark-400 hover:text-dark-200'
+                          }`}
+                        >
+                          <span className="font-medium">
+                            {sub.tariff_name || t('subscription.defaultName', 'Подписка')}
+                          </span>
+                          <span className="text-xs opacity-60">
+                            {sub.days_left} {t('common.units.days', 'дней')}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
               {/* Stars confirmation panel */}
               {showStarsConfirm && !isSpinning && !isPayingStars ? (
                 <div className="space-y-3 rounded-xl border border-accent-500/30 bg-accent-500/5 p-4">
@@ -645,6 +690,14 @@ export default function Wheel() {
                     <p className="text-dark-400">{t('wheel.errors.dailyLimitReached')}</p>
                   </div>
                 )}
+              {/* Subscription selection required hint */}
+              {!isSpinning && needsSubscriptionPick && (
+                <div className="rounded-linear border border-warning-500/30 bg-warning-500/5 p-4 text-center">
+                  <p className="text-warning-400">
+                    {t('wheel.errors.selectSubscription', 'Выберите подписку для списания дней')}
+                  </p>
+                </div>
+              )}
 
               {/* Inline Result Card */}
               {spinResult && !isSpinning && (

@@ -5,13 +5,22 @@ import type { Subscription } from '../../types';
 
 interface PurchaseCTAButtonProps {
   subscription: Subscription | null;
+  /** In multi-tariff mode, link to /subscriptions/:id/renew instead of /subscription/purchase */
+  isMultiTariff?: boolean;
 }
 
-export default function PurchaseCTAButton({ subscription }: PurchaseCTAButtonProps) {
+export default function PurchaseCTAButton({
+  subscription,
+  isMultiTariff = false,
+}: PurchaseCTAButtonProps) {
   const { t } = useTranslation();
 
   const isExpired = !subscription || (!subscription.is_active && !subscription.is_trial);
   const isTrial = subscription?.is_trial;
+  const isDaily = subscription?.is_daily;
+
+  // Daily tariffs renew automatically — no manual renewal button needed in multi-tariff
+  if (isMultiTariff && isDaily && !isExpired) return null;
 
   const accentColor = isExpired ? '#FF3B5C' : 'rgb(var(--color-accent-400))';
 
@@ -25,10 +34,21 @@ export default function PurchaseCTAButton({ subscription }: PurchaseCTAButtonPro
     ? t('subscription.cta.expiredHint')
     : isTrial
       ? t('subscription.cta.trialHint')
-      : t('subscription.cta.activeHint');
+      : isMultiTariff
+        ? t('subscription.cta.renewHint', 'Продление подписки')
+        : t('subscription.cta.activeHint');
+
+  // Trial → purchase page (buy a real tariff, trial can't be renewed)
+  // Multi-tariff active → per-subscription renew page
+  // Otherwise → purchase page
+  const linkTo = isTrial
+    ? '/subscription/purchase'
+    : isMultiTariff && subscription?.id
+      ? `/subscriptions/${subscription.id}/renew`
+      : '/subscription/purchase';
 
   return (
-    <Link to="/subscription/purchase" className="block">
+    <Link to={linkTo} className="block">
       <HoverBorderGradient
         accentColor={accentColor}
         duration={4}

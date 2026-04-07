@@ -25,6 +25,8 @@ export interface PromoCode {
   valid_from: string;
   valid_until: string | null;
   promo_group_id: number | null;
+  tariff_id: number | null;
+  tariff_name: string | null;
   created_by: number | null;
   created_at: string;
   updated_at: string;
@@ -63,6 +65,7 @@ export interface PromoCodeCreateRequest {
   is_active?: boolean;
   first_purchase_only?: boolean;
   promo_group_id?: number | null;
+  tariff_id?: number | null;
 }
 
 export interface PromoCodeUpdateRequest {
@@ -76,6 +79,7 @@ export interface PromoCodeUpdateRequest {
   is_active?: boolean;
   first_purchase_only?: boolean;
   promo_group_id?: number | null;
+  tariff_id?: number | null;
 }
 
 // ============== PromoGroup Types ==============

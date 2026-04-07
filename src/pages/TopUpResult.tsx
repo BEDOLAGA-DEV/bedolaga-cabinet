@@ -305,7 +305,10 @@ export default function TopUpResult() {
       clearTopUpPendingInfo();
       queryClient.invalidateQueries({ queryKey: ['balance'] });
       queryClient.invalidateQueries({ queryKey: ['transactions'] });
-      queryClient.invalidateQueries({ queryKey: ['subscription'] });
+      queryClient.invalidateQueries({
+        predicate: (query) => Array.isArray(query.queryKey) && query.queryKey[0] === 'subscription',
+      });
+      queryClient.invalidateQueries({ queryKey: ['subscriptions-list'] });
       queryClient.invalidateQueries({ queryKey: ['purchase-options'] });
       refreshUser();
     } else if (resolvedFailed) {

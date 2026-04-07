@@ -8,6 +8,7 @@ import {
   OFFER_TYPE_CONFIG,
   OfferType,
 } from '../api/promoOffers';
+import { serversApi } from '../api/servers';
 import { AdminBackButton } from '../components/admin';
 import { createNumberInputHandler, toNumber } from '../utils/inputHelpers';
 
@@ -31,6 +32,14 @@ export default function AdminPromoOfferTemplateEdit() {
   const [testDurationHours, setTestDurationHours] = useState<number | ''>(0);
   const [isActive, setIsActive] = useState(true);
   const [isTestAccess, setIsTestAccess] = useState(false);
+  const [selectedSquadUuids, setSelectedSquadUuids] = useState<string[]>([]);
+
+  // Fetch available servers for test_access squad selection
+  const { data: serversData } = useQuery({
+    queryKey: ['admin-servers-for-promo'],
+    queryFn: () => serversApi.getServers(true),
+    enabled: isTestAccess,
+  });
 
   // Query template
   const { data: templatesData, isLoading } = useQuery({
@@ -52,6 +61,7 @@ export default function AdminPromoOfferTemplateEdit() {
       setTestDurationHours(template.test_duration_hours || 0);
       setIsActive(template.is_active);
       setIsTestAccess(template.offer_type === 'test_access');
+      setSelectedSquadUuids(template.test_squad_uuids || []);
     }
   }, [template]);
 
@@ -78,6 +88,7 @@ export default function AdminPromoOfferTemplateEdit() {
     const discountHours = toNumber(activeDiscountHours);
     if (isTestAccess) {
       data.test_duration_hours = testHours > 0 ? testHours : undefined;
+      data.test_squad_uuids = selectedSquadUuids;
     } else {
       data.active_discount_hours = discountHours > 0 ? discountHours : undefined;
     }
@@ -201,22 +212,70 @@ export default function AdminPromoOfferTemplateEdit() {
             </div>
 
             {isTestAccess ? (
-              <div>
-                <label className="mb-2 block text-sm font-medium text-dark-300">
-                  {t('admin.promoOffers.form.testDurationHours')}
-                </label>
-                <input
-                  type="number"
-                  value={testDurationHours}
-                  onChange={createNumberInputHandler(setTestDurationHours, 0)}
-                  className="input"
-                  min={0}
-                  placeholder="0"
-                />
-                <p className="mt-1 text-xs text-dark-500">
-                  {t('admin.promoOffers.form.defaultZero')}
-                </p>
-              </div>
+              <>
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-dark-300">
+                    {t('admin.promoOffers.form.testDurationHours')}
+                  </label>
+                  <input
+                    type="number"
+                    value={testDurationHours}
+                    onChange={createNumberInputHandler(setTestDurationHours, 0)}
+                    className="input"
+                    min={0}
+                    placeholder="0"
+                  />
+                  <p className="mt-1 text-xs text-dark-500">
+                    {t('admin.promoOffers.form.defaultZero')}
+                  </p>
+                </div>
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-dark-300">
+                    {t('admin.promoOffers.form.testSquads', 'Тестовые серверы')}
+                  </label>
+                  {serversData?.servers && serversData.servers.length > 0 ? (
+                    <div className="space-y-1.5">
+                      {serversData.servers.map((server) => (
+                        <label
+                          key={server.squad_uuid || server.id}
+                          className="flex cursor-pointer items-center gap-2.5 rounded-lg border border-dark-600 bg-dark-700/50 px-3 py-2 text-sm transition-colors hover:border-accent-500/50"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={selectedSquadUuids.includes(server.squad_uuid)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setSelectedSquadUuids([...selectedSquadUuids, server.squad_uuid]);
+                              } else {
+                                setSelectedSquadUuids(
+                                  selectedSquadUuids.filter((u) => u !== server.squad_uuid),
+                                );
+                              }
+                            }}
+                            className="accent-accent-500"
+                          />
+                          <span className="text-dark-200">{server.display_name}</span>
+                          {server.country_code && (
+                            <span className="text-dark-500">{server.country_code}</span>
+                          )}
+                        </label>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-dark-500">
+                      {t('admin.promoOffers.form.noServers', 'Нет доступных серверов')}
+                    </p>
+                  )}
+                  {selectedSquadUuids.length === 0 && (
+                    <p className="mt-1 text-xs text-warning-400">
+                      {t(
+                        'admin.promoOffers.form.selectSquadHint',
+                        'Выберите хотя бы один сервер для тестового доступа',
+                      )}
+                    </p>
+                  )}
+                </div>
+              </>
             ) : (
               <div>
                 <label className="mb-2 block text-sm font-medium text-dark-300">

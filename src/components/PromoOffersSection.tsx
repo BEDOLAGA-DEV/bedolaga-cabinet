@@ -114,6 +114,7 @@ export default function PromoOffersSection({ className = '' }: PromoOffersSectio
       queryClient.invalidateQueries({ queryKey: ['promo-offers'] });
       queryClient.invalidateQueries({ queryKey: ['active-discount'] });
       queryClient.invalidateQueries({ queryKey: ['subscription'] });
+      queryClient.invalidateQueries({ queryKey: ['subscriptions-list'] });
       queryClient.invalidateQueries({ queryKey: ['purchase-options'] });
       queryClient.invalidateQueries({ queryKey: ['balance'] });
       setSuccessMessage(result.message);

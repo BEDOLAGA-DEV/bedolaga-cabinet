@@ -23,7 +23,7 @@ const TWEMOJI_OPTIONS = { className: 'twemoji', folder: 'svg', ext: '.svg' } as 
  * Shows back button on non-root routes, hides on root.
  */
 /** Pages reachable from bottom nav — treat as top-level (no back button). */
-const BOTTOM_NAV_PATHS = ['/', '/subscription', '/balance', '/referral', '/support', '/wheel'];
+const BOTTOM_NAV_PATHS = ['/', '/subscriptions', '/balance', '/referral', '/support', '/wheel'];
 
 function TelegramBackButton() {
   const location = useLocation();

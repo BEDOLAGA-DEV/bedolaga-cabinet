@@ -103,6 +103,7 @@ export interface UserDetailResponse {
   last_activity: string | null;
   cabinet_last_login: string | null;
   subscription: UserSubscriptionInfo | null;
+  subscriptions: UserSubscriptionInfo[];
   promo_group: UserPromoGroupInfo | null;
   referral: UserReferralInfo;
   total_spent_kopeks: number;
@@ -250,6 +251,8 @@ export interface PanelSyncStatusResponse {
   user_id: number;
   telegram_id: number;
   remnawave_uuid: string | null;
+  subscription_id: number | null;
+  subscription_tariff_name: string | null;
   last_sync: string | null;
   bot_subscription_status: string | null;
   bot_subscription_end_date: string | null;
@@ -296,6 +299,7 @@ export interface UpdateSubscriptionRequest {
     | 'remove_traffic'
     | 'set_device_limit'
     | 'shorten';
+  subscription_id?: number;
   days?: number;
   end_date?: string;
   tariff_id?: number;
@@ -532,6 +536,34 @@ export const adminUsersApi = {
     return response.data;
   },
 
+  // Assign a referrer to this user
+  assignReferrer: async (
+    userId: number,
+    referrerId: number,
+  ): Promise<{ success: boolean; message: string }> => {
+    const response = await apiClient.post(`/cabinet/admin/users/${userId}/assign-referrer`, {
+      referrer_id: referrerId,
+    });
+    return response.data;
+  },
+
+  // Remove this user's referrer
+  removeReferrer: async (userId: number): Promise<{ success: boolean; message: string }> => {
+    const response = await apiClient.delete(`/cabinet/admin/users/${userId}/referrer`);
+    return response.data;
+  },
+
+  // Remove a specific referral from this user's list
+  removeReferral: async (
+    userId: number,
+    referralUserId: number,
+  ): Promise<{ success: boolean; message: string }> => {
+    const response = await apiClient.delete(
+      `/cabinet/admin/users/${userId}/referrals/${referralUserId}`,
+    );
+    return response.data;
+  },
+
   // Get referrals
   getReferrals: async (userId: number, offset = 0, limit = 50): Promise<UsersListResponse> => {
     const response = await apiClient.get(`/cabinet/admin/users/${userId}/referrals`, {
@@ -559,8 +591,12 @@ export const adminUsersApi = {
   },
 
   // Sync status
-  getSyncStatus: async (userId: number): Promise<PanelSyncStatusResponse> => {
-    const response = await apiClient.get(`/cabinet/admin/users/${userId}/sync/status`);
+  getSyncStatus: async (
+    userId: number,
+    subscriptionId?: number,
+  ): Promise<PanelSyncStatusResponse> => {
+    const params = subscriptionId != null ? { subscription_id: subscriptionId } : undefined;
+    const response = await apiClient.get(`/cabinet/admin/users/${userId}/sync/status`, { params });
     return response.data;
   },
 
@@ -568,8 +604,12 @@ export const adminUsersApi = {
   syncFromPanel: async (
     userId: number,
     data: SyncFromPanelRequest = {},
+    subscriptionId?: number,
   ): Promise<SyncFromPanelResponse> => {
-    const response = await apiClient.post(`/cabinet/admin/users/${userId}/sync/from-panel`, data);
+    const params = subscriptionId != null ? { subscription_id: subscriptionId } : undefined;
+    const response = await apiClient.post(`/cabinet/admin/users/${userId}/sync/from-panel`, data, {
+      params,
+    });
     return response.data;
   },
 
@@ -577,8 +617,12 @@ export const adminUsersApi = {
   syncToPanel: async (
     userId: number,
     data: SyncToPanelRequest = {},
+    subscriptionId?: number,
   ): Promise<SyncToPanelResponse> => {
-    const response = await apiClient.post(`/cabinet/admin/users/${userId}/sync/to-panel`, data);
+    const params = subscriptionId != null ? { subscription_id: subscriptionId } : undefined;
+    const response = await apiClient.post(`/cabinet/admin/users/${userId}/sync/to-panel`, data, {
+      params,
+    });
     return response.data;
   },
 
@@ -601,26 +645,33 @@ export const adminUsersApi = {
   },
 
   // Get panel info
-  getPanelInfo: async (userId: number): Promise<UserPanelInfo> => {
-    const response = await apiClient.get(`/cabinet/admin/users/${userId}/panel-info`);
+  getPanelInfo: async (userId: number, subscriptionId?: number): Promise<UserPanelInfo> => {
+    const response = await apiClient.get(`/cabinet/admin/users/${userId}/panel-info`, {
+      params: subscriptionId != null ? { subscription_id: subscriptionId } : undefined,
+    });
     return response.data;
   },
 
   // Get node usage (always 30 days with daily breakdown)
-  getNodeUsage: async (userId: number): Promise<UserNodeUsageResponse> => {
-    const response = await apiClient.get(`/cabinet/admin/users/${userId}/node-usage`);
+  getNodeUsage: async (userId: number, subscriptionId?: number): Promise<UserNodeUsageResponse> => {
+    const response = await apiClient.get(`/cabinet/admin/users/${userId}/node-usage`, {
+      params: subscriptionId != null ? { subscription_id: subscriptionId } : undefined,
+    });
     return response.data;
   },
 
   // Get user devices
   getUserDevices: async (
     userId: number,
+    subscriptionId?: number,
   ): Promise<{
     devices: { hwid: string; platform: string; device_model: string; created_at: string | null }[];
     total: number;
     device_limit: number;
   }> => {
-    const response = await apiClient.get(`/cabinet/admin/users/${userId}/devices`);
+    const response = await apiClient.get(`/cabinet/admin/users/${userId}/devices`, {
+      params: subscriptionId != null ? { subscription_id: subscriptionId } : undefined,
+    });
     return response.data;
   },
 
@@ -628,16 +679,22 @@ export const adminUsersApi = {
   deleteUserDevice: async (
     userId: number,
     hwid: string,
+    subscriptionId?: number,
   ): Promise<{ success: boolean; message: string; deleted_hwid: string | null }> => {
-    const response = await apiClient.delete(`/cabinet/admin/users/${userId}/devices/${hwid}`);
+    const response = await apiClient.delete(`/cabinet/admin/users/${userId}/devices/${hwid}`, {
+      params: subscriptionId != null ? { subscription_id: subscriptionId } : undefined,
+    });
     return response.data;
   },
 
   // Reset all devices
   resetUserDevices: async (
     userId: number,
+    subscriptionId?: number,
   ): Promise<{ success: boolean; message: string; deleted_count: number }> => {
-    const response = await apiClient.delete(`/cabinet/admin/users/${userId}/devices`);
+    const response = await apiClient.delete(`/cabinet/admin/users/${userId}/devices`, {
+      params: subscriptionId != null ? { subscription_id: subscriptionId } : undefined,
+    });
     return response.data;
   },
 

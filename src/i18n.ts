@@ -46,6 +46,8 @@ i18n
     react: {
       useSuspense: false,
     },
+
+    showSupportNotice: false,
   });
 
 // Load detected language + fallback on startup

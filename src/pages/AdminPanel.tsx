@@ -1,732 +1,1065 @@
+import { useState, useEffect, useRef, useCallback, useMemo, memo } from 'react';
 import { Link } from 'react-router';
 import { useTranslation } from 'react-i18next';
-import { RemnawaveIcon, ArrowPathIcon } from '../components/icons';
 import { usePermissionStore } from '@/store/permissions';
+import { statsApi, type SystemInfo, type DashboardStats } from '@/api/admin';
+import { useAnimatedNumber } from '@/hooks/useAnimatedNumber';
+import { useTelegramSDK } from '@/hooks/useTelegramSDK';
+import { cn } from '@/lib/utils';
 
-// Group header icons
-const AnalyticsGroupIcon = () => (
-  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5m.75-9l3-3 2.148 2.148A12.061 12.061 0 0116.5 7.605"
-    />
+const CABINET_VERSION = __APP_VERSION__;
+const IS_MAC = /Mac|iPhone|iPod|iPad/i.test(navigator.userAgent);
+
+// ─── Inline SVG Icons (lightweight, no external deps) ───
+
+const SvgIcon = ({
+  children,
+  className,
+  ...props
+}: React.SVGProps<SVGSVGElement> & { children: React.ReactNode }) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={1.7}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+    aria-hidden="true"
+    {...props}
+  >
+    {children}
   </svg>
 );
 
-const UsersGroupIcon = () => (
-  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"
-    />
+// Stats bar icons (16x16 viewBox)
+const StatUptimeIcon = () => (
+  <svg
+    viewBox="0 0 16 16"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.3"
+    strokeLinecap="round"
+    className="h-3.5 w-3.5"
+    aria-hidden="true"
+  >
+    <circle cx="8" cy="8" r="6.5" />
+    <path d="M8 4.5V8l2.5 1.5" />
+  </svg>
+);
+const StatBotIcon = () => (
+  <svg
+    viewBox="0 0 16 16"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.3"
+    strokeLinecap="round"
+    className="h-3.5 w-3.5"
+    aria-hidden="true"
+  >
+    <rect x="3" y="4" width="10" height="8" rx="2" />
+    <path d="M6 8h.01M10 8h.01" />
+    <path d="M8 2v2M4 14h8" />
+  </svg>
+);
+const StatCabinetIcon = () => (
+  <svg
+    viewBox="0 0 16 16"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.3"
+    strokeLinecap="round"
+    className="h-3.5 w-3.5"
+    aria-hidden="true"
+  >
+    <rect x="2" y="3" width="12" height="10" rx="1.5" />
+    <path d="M2 6h12" />
+    <path d="M5 3v3" />
+  </svg>
+);
+const StatTrialIcon = () => (
+  <svg
+    viewBox="0 0 16 16"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.3"
+    strokeLinecap="round"
+    className="h-3.5 w-3.5"
+    aria-hidden="true"
+  >
+    <path d="M8 2v2M8 12v2M4 8H2M14 8h-2" />
+    <circle cx="8" cy="8" r="3" />
+  </svg>
+);
+const StatPaidIcon = () => (
+  <svg
+    viewBox="0 0 16 16"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.3"
+    strokeLinecap="round"
+    className="h-3.5 w-3.5"
+    aria-hidden="true"
+  >
+    <path d="M4 6c0-1.7 1.8-3 4-3s4 1.3 4 3-1.8 3-4 3-4 1.3-4 3 1.8 3 4 3 4-1.3 4-3" />
+    <path d="M8 1v2M8 13v2" />
   </svg>
 );
 
-const TariffsGroupIcon = () => (
-  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-    />
-  </svg>
-);
+// Section nav icons (24x24 viewBox)
+const icons = {
+  'bar-chart': (
+    <SvgIcon>
+      <path d="M3 3v18h18" />
+      <path d="M7 16V8" />
+      <path d="M11 16V11" />
+      <path d="M15 16V5" />
+      <path d="M19 16v-3" />
+    </SvgIcon>
+  ),
+  'credit-card': (
+    <SvgIcon>
+      <rect x="2" y="5" width="20" height="14" rx="2" />
+      <path d="M2 10h20" />
+    </SvgIcon>
+  ),
+  activity: (
+    <SvgIcon>
+      <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+    </SvgIcon>
+  ),
+  trending: (
+    <SvgIcon>
+      <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
+      <polyline points="16 7 22 7 22 13" />
+    </SvgIcon>
+  ),
+  users: (
+    <SvgIcon>
+      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+    </SvgIcon>
+  ),
+  ticket: (
+    <SvgIcon>
+      <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z" />
+      <path d="M13 5v2M13 17v2M13 11v2" />
+    </SvgIcon>
+  ),
+  'shield-alert': (
+    <SvgIcon>
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" />
+      <path d="M12 8v4" />
+      <path d="M12 16h.01" />
+    </SvgIcon>
+  ),
+  tag: (
+    <SvgIcon>
+      <path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z" />
+      <circle cx="7.5" cy="7.5" r=".5" fill="currentColor" />
+    </SvgIcon>
+  ),
+  gift: (
+    <SvgIcon>
+      <rect x="3" y="8" width="18" height="4" rx="1" />
+      <path d="M12 8v13" />
+      <path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7" />
+    </SvgIcon>
+  ),
+  percent: (
+    <SvgIcon>
+      <line x1="19" y1="5" x2="5" y2="19" />
+      <circle cx="6.5" cy="6.5" r="2.5" />
+      <circle cx="17.5" cy="17.5" r="2.5" />
+    </SvgIcon>
+  ),
+  sparkle: (
+    <SvgIcon>
+      <path d="m12 3-1.9 5.8a2 2 0 0 1-1.287 1.288L3 12l5.8 1.9a2 2 0 0 1 1.288 1.287L12 21l1.9-5.8a2 2 0 0 1 1.287-1.288L21 12l-5.8-1.9a2 2 0 0 1-1.288-1.287Z" />
+    </SvgIcon>
+  ),
+  wallet: (
+    <SvgIcon>
+      <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4" />
+      <path d="M3 5v14a2 2 0 0 0 2 2h16v-5" />
+      <path d="M18 12a2 2 0 0 0 0 4h4v-4Z" />
+    </SvgIcon>
+  ),
+  layout: (
+    <SvgIcon>
+      <rect x="3" y="3" width="18" height="18" rx="2" />
+      <path d="M3 9h18" />
+      <path d="M9 21V9" />
+    </SvgIcon>
+  ),
+  newspaper: (
+    <SvgIcon>
+      <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2" />
+      <path d="M18 14h-8M15 18h-5" />
+      <path d="M10 6h8v4h-8V6Z" />
+    </SvgIcon>
+  ),
+  megaphone: (
+    <SvgIcon>
+      <path d="m3 11 18-5v12L3 13v-2z" />
+      <path d="M11.6 16.8a3 3 0 1 1-5.8-1.6" />
+    </SvgIcon>
+  ),
+  send: (
+    <SvgIcon>
+      <path d="m22 2-7 20-4-9-9-4Z" />
+      <path d="M22 2 11 13" />
+    </SvgIcon>
+  ),
+  pin: (
+    <SvgIcon>
+      <line x1="12" y1="17" x2="12" y2="22" />
+      <path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z" />
+    </SvgIcon>
+  ),
+  'circle-dot': (
+    <SvgIcon>
+      <circle cx="12" cy="12" r="10" />
+      <circle cx="12" cy="12" r="1" fill="currentColor" />
+    </SvgIcon>
+  ),
+  handshake: (
+    <SvgIcon>
+      <path d="m11 17 2 2a1 1 0 1 0 3-3" />
+      <path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88" />
+      <path d="m2 12 5.56-5.56a3 3 0 0 1 2.22-.88L12 5.5" />
+      <path d="M22 12 16.44 6.44a3 3 0 0 0-2.22-.88L12 5.5" />
+    </SvgIcon>
+  ),
+  'arrow-up': (
+    <SvgIcon>
+      <path d="m18 9-6-6-6 6" />
+      <path d="M12 3v14" />
+      <path d="M5 21h14" />
+    </SvgIcon>
+  ),
+  network: (
+    <SvgIcon>
+      <rect x="16" y="16" width="6" height="6" rx="1" />
+      <rect x="2" y="16" width="6" height="6" rx="1" />
+      <rect x="9" y="2" width="6" height="6" rx="1" />
+      <path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3" />
+      <path d="M12 12V8" />
+    </SvgIcon>
+  ),
+  radio: (
+    <SvgIcon>
+      <path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9" />
+      <path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.4" />
+      <circle cx="12" cy="12" r="2" />
+      <path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.4" />
+      <path d="M19.1 4.9C23 8.8 23 15.1 19.1 19" />
+    </SvgIcon>
+  ),
+  settings: (
+    <SvgIcon>
+      <circle cx="12" cy="12" r="3" />
+      <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+    </SvgIcon>
+  ),
+  app: (
+    <SvgIcon>
+      <rect x="2" y="4" width="20" height="16" rx="2" />
+      <path d="M10 4v4M2 8h20M6 4v4" />
+    </SvgIcon>
+  ),
+  server: (
+    <SvgIcon>
+      <rect x="2" y="2" width="20" height="8" rx="2" />
+      <rect x="2" y="14" width="20" height="8" rx="2" />
+      <circle cx="6" cy="6" r="1" fill="currentColor" />
+      <circle cx="6" cy="18" r="1" fill="currentColor" />
+    </SvgIcon>
+  ),
+  remnawave: (
+    <svg
+      viewBox="0 0 16 16"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className="h-[13px] w-[13px]"
+      aria-hidden="true"
+    >
+      <path
+        clipRule="evenodd"
+        d="M8 1a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-1.5 0V1.75A.75.75 0 0 1 8 1Zm6 2a.75.75 0 0 1 .75.75v8.5a.75.75 0 0 1-1.5 0v-8.5A.75.75 0 0 1 14 3ZM5 4a.75.75 0 0 1 .75.75v6.5a.75.75 0 0 1-1.5 0v-6.5A.75.75 0 0 1 5 4Zm6 1a.75.75 0 0 1 .75.75v4.5a.75.75 0 0 1-1.5 0v-4.5A.75.75 0 0 1 11 5ZM2 6a.75.75 0 0 1 .75.75v2.5a.75.75 0 0 1-1.5 0v-2.5A.75.75 0 0 1 2 6Z"
+        fill="currentColor"
+        fillRule="evenodd"
+      />
+    </svg>
+  ),
+  mail: (
+    <SvgIcon>
+      <rect x="2" y="4" width="20" height="16" rx="2" />
+      <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+    </SvgIcon>
+  ),
+  refresh: (
+    <SvgIcon>
+      <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+      <path d="M21 3v5h-5" />
+      <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+      <path d="M8 16H3v5" />
+    </SvgIcon>
+  ),
+  shield: (
+    <SvgIcon>
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" />
+    </SvgIcon>
+  ),
+  'user-check': (
+    <SvgIcon>
+      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <polyline points="16 11 18 13 22 9" />
+    </SvgIcon>
+  ),
+  lock: (
+    <SvgIcon>
+      <rect x="3" y="11" width="18" height="11" rx="2" />
+      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+    </SvgIcon>
+  ),
+  scroll: (
+    <SvgIcon>
+      <path d="M8 21h12a2 2 0 0 0 2-2v-2H10v2a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v3h4" />
+      <path d="M19 17V5a2 2 0 0 0-2-2H4" />
+      <path d="M15 8h-5M15 12h-5" />
+    </SvgIcon>
+  ),
+  search: (
+    <SvgIcon>
+      <circle cx="11" cy="11" r="8" />
+      <path d="m21 21-4.3-4.3" />
+    </SvgIcon>
+  ),
+  chevron: (
+    <SvgIcon>
+      <path d="m9 18 6-6-6-6" />
+    </SvgIcon>
+  ),
+  x: (
+    <SvgIcon>
+      <path d="M18 6 6 18" />
+      <path d="m6 6 12 12" />
+    </SvgIcon>
+  ),
+} as const;
 
-const MarketingGroupIcon = () => (
-  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 110-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783.247.55.06 1.21-.463 1.511l-.657.38c-.551.318-1.26.117-1.527-.461a20.845 20.845 0 01-1.44-4.282m3.102.069a18.03 18.03 0 01-.59-4.59c0-1.586.205-3.124.59-4.59m0 9.18a23.848 23.848 0 018.835 2.535M10.34 6.66a23.847 23.847 0 008.835-2.535m0 0A23.74 23.74 0 0018.795 3m.38 1.125a23.91 23.91 0 011.014 5.395m-1.014 8.855c-.118.38-.245.754-.38 1.125m.38-1.125a23.91 23.91 0 001.014-5.395m0-3.46c.495.413.811 1.035.811 1.73 0 .695-.316 1.317-.811 1.73m0-3.46a24.347 24.347 0 010 3.46"
-    />
-  </svg>
-);
+type IconName = keyof typeof icons;
 
-const SystemGroupIcon = () => (
-  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z"
-    />
-    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-  </svg>
-);
+// ─── Section Data ───
 
-// Modern icons with consistent styling
-const ChartBarIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"
-    />
-  </svg>
-);
-
-const BanknotesIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z"
-    />
-  </svg>
-);
-
-const UsersIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"
-    />
-  </svg>
-);
-
-const ChatBubbleIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z"
-    />
-  </svg>
-);
-
-const NoSymbolIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"
-    />
-  </svg>
-);
-
-const CreditCardIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"
-    />
-  </svg>
-);
-
-const TicketIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 010 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 010-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375z"
-    />
-  </svg>
-);
-
-const GiftIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M21 11.25v8.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 109.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1114.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"
-    />
-  </svg>
-);
-
-const UserGroupIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"
-    />
-  </svg>
-);
-
-const MegaphoneIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 110-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783.247.55.06 1.21-.463 1.511l-.657.38c-.551.318-1.26.117-1.527-.461a20.845 20.845 0 01-1.44-4.282m3.102.069a18.03 18.03 0 01-.59-4.59c0-1.586.205-3.124.59-4.59m0 9.18a23.848 23.848 0 018.835 2.535M10.34 6.66a23.847 23.847 0 008.835-2.535m0 0A23.74 23.74 0 0018.795 3m.38 1.125a23.91 23.91 0 011.014 5.395m-1.014 8.855c-.118.38-.245.754-.38 1.125m.38-1.125a23.91 23.91 0 001.014-5.395m0-3.46c.495.413.811 1.035.811 1.73 0 .695-.316 1.317-.811 1.73m0-3.46a24.347 24.347 0 010 3.46"
-    />
-  </svg>
-);
-
-const PinnedMessageIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"
-    />
-    <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
-  </svg>
-);
-
-const PaperAirplaneIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"
-    />
-  </svg>
-);
-
-const SparklesIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z"
-    />
-  </svg>
-);
-
-const HandshakeIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"
-    />
-  </svg>
-);
-
-const CogIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z"
-    />
-    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-  </svg>
-);
-
-const DevicePhoneMobileIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3"
-    />
-  </svg>
-);
-
-const ServerStackIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M5.25 14.25h13.5m-13.5 0a3 3 0 01-3-3m3 3a3 3 0 100 6h13.5a3 3 0 100-6m-16.5-3a3 3 0 013-3h13.5a3 3 0 013 3m-19.5 0a4.5 4.5 0 01.9-2.7L5.737 5.1a3.375 3.375 0 012.7-1.35h7.126c1.062 0 2.062.5 2.7 1.35l2.587 3.45a4.5 4.5 0 01.9 2.7m0 0a3 3 0 01-3 3m0 3h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008zm-3 6h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008z"
-    />
-  </svg>
-);
-
-const EnvelopeIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"
-    />
-  </svg>
-);
-
-const ArrowsUpDownIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M3 7.5L7.5 3m0 0L12 7.5M7.5 3v13.5m13.5 0L16.5 21m0 0L12 16.5m4.5 4.5V7.5"
-    />
-  </svg>
-);
-
-const NetworkGraphIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5"
-    />
-    <circle cx="12" cy="12" r="2" fill="currentColor" stroke="none" />
-  </svg>
-);
-
-const NewspaperIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 01-2.25 2.25M16.5 7.5V18a2.25 2.25 0 002.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 002.25 2.25h13.5M6 7.5h3v3H6v-3z"
-    />
-  </svg>
-);
-
-const ChevronRightIcon = () => (
-  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-  </svg>
-);
-
-const SecurityGroupIcon = () => (
-  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"
-    />
-  </svg>
-);
-
-const ShieldIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"
-    />
-  </svg>
-);
-
-const UserPlusIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 0110.374 21c-2.331 0-4.512-.645-6.374-1.766z"
-    />
-  </svg>
-);
-
-const DocumentCheckIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M10.125 2.25h-4.5c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9zm3.75 11.625l-2.625 2.625-1.125-1.125"
-    />
-  </svg>
-);
-
-const ClipboardDocumentListIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15a2.25 2.25 0 012.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z"
-    />
-  </svg>
-);
-
-const RectangleGroupIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M2.25 7.125C2.25 6.504 2.754 6 3.375 6h6c.621 0 1.125.504 1.125 1.125v3.75c0 .621-.504 1.125-1.125 1.125h-6a1.125 1.125 0 01-1.125-1.125v-3.75zM14.25 8.625c0-.621.504-1.125 1.125-1.125h5.25c.621 0 1.125.504 1.125 1.125v8.25c0 .621-.504 1.125-1.125 1.125h-5.25a1.125 1.125 0 01-1.125-1.125v-8.25zM3.75 16.125c0-.621.504-1.125 1.125-1.125h5.25c.621 0 1.125.504 1.125 1.125v2.25c0 .621-.504 1.125-1.125 1.125h-5.25a1.125 1.125 0 01-1.125-1.125v-2.25z"
-    />
-  </svg>
-);
-
-interface AdminItem {
+interface AdminNavItem {
+  name: string;
+  icon: IconName;
   to: string;
-  icon: React.ReactNode;
-  title: string;
-  description: string;
   permission: string;
 }
 
-interface AdminGroup {
+interface AdminSection {
   id: string;
-  title: string;
-  icon: React.ReactNode;
+  titleKey: string;
+  accent: string;
   gradient: string;
-  borderColor: string;
-  iconBg: string;
-  iconColor: string;
-  items: AdminItem[];
+  items: AdminNavItem[];
 }
 
-function AdminCard({
-  to,
-  icon,
-  title,
-  description,
-  iconBg,
-  iconColor,
-}: AdminItem & { iconBg: string; iconColor: string }) {
+const sections: AdminSection[] = [
+  {
+    id: 'analytics',
+    titleKey: 'admin.groups.analytics',
+    accent: 'rgb(var(--color-success-400))',
+    gradient:
+      'linear-gradient(135deg, rgb(var(--color-success-400)), rgb(var(--color-accent-500)))',
+    items: [
+      {
+        name: 'admin.nav.dashboard',
+        icon: 'bar-chart',
+        to: '/admin/dashboard',
+        permission: 'stats:read',
+      },
+      {
+        name: 'admin.nav.payments',
+        icon: 'credit-card',
+        to: '/admin/payments',
+        permission: 'payments:read',
+      },
+      {
+        name: 'admin.nav.trafficUsage',
+        icon: 'activity',
+        to: '/admin/traffic-usage',
+        permission: 'traffic:read',
+      },
+      {
+        name: 'admin.nav.deviceObservability',
+        icon: 'app',
+        to: '/admin/device-observability',
+        permission: 'traffic:read',
+      },
+      {
+        name: 'admin.nav.salesStats',
+        icon: 'trending',
+        to: '/admin/sales-stats',
+        permission: 'sales_stats:read',
+      },
+    ],
+  },
+  {
+    id: 'users',
+    titleKey: 'admin.groups.users',
+    accent: 'rgb(var(--color-accent-400))',
+    gradient: 'linear-gradient(135deg, rgb(var(--color-accent-400)), rgb(var(--color-error-400)))',
+    items: [
+      { name: 'admin.nav.users', icon: 'users', to: '/admin/users', permission: 'users:read' },
+      {
+        name: 'admin.nav.tickets',
+        icon: 'ticket',
+        to: '/admin/tickets',
+        permission: 'tickets:read',
+      },
+      {
+        name: 'admin.nav.banSystem',
+        icon: 'shield-alert',
+        to: '/admin/ban-system',
+        permission: 'ban_system:read',
+      },
+    ],
+  },
+  {
+    id: 'tariffs',
+    titleKey: 'admin.groups.tariffs',
+    accent: 'rgb(var(--color-warning-400))',
+    gradient: 'linear-gradient(135deg, rgb(var(--color-warning-400)), rgb(var(--color-error-300)))',
+    items: [
+      { name: 'admin.nav.tariffs', icon: 'tag', to: '/admin/tariffs', permission: 'tariffs:read' },
+      {
+        name: 'admin.nav.promocodes',
+        icon: 'gift',
+        to: '/admin/promocodes',
+        permission: 'promocodes:read',
+      },
+      {
+        name: 'admin.nav.promoGroups',
+        icon: 'percent',
+        to: '/admin/promo-groups',
+        permission: 'promo_groups:read',
+      },
+      {
+        name: 'admin.nav.promoOffers',
+        icon: 'sparkle',
+        to: '/admin/promo-offers',
+        permission: 'promo_offers:read',
+      },
+      {
+        name: 'admin.nav.paymentMethods',
+        icon: 'wallet',
+        to: '/admin/payment-methods',
+        permission: 'payment_methods:read',
+      },
+      {
+        name: 'admin.nav.landings',
+        icon: 'layout',
+        to: '/admin/landings',
+        permission: 'landings:read',
+      },
+    ],
+  },
+  {
+    id: 'marketing',
+    titleKey: 'admin.groups.marketing',
+    accent: 'rgb(var(--color-accent-300))',
+    gradient: 'linear-gradient(135deg, rgb(var(--color-accent-300)), rgb(var(--color-accent-600)))',
+    items: [
+      { name: 'admin.nav.news', icon: 'newspaper', to: '/admin/news', permission: 'news:read' },
+      {
+        name: 'admin.nav.campaigns',
+        icon: 'megaphone',
+        to: '/admin/campaigns',
+        permission: 'campaigns:read',
+      },
+      {
+        name: 'admin.nav.broadcasts',
+        icon: 'send',
+        to: '/admin/broadcasts',
+        permission: 'broadcasts:read',
+      },
+      {
+        name: 'admin.nav.pinnedMessages',
+        icon: 'pin',
+        to: '/admin/pinned-messages',
+        permission: 'pinned_messages:read',
+      },
+      { name: 'admin.nav.wheel', icon: 'circle-dot', to: '/admin/wheel', permission: 'wheel:read' },
+      {
+        name: 'admin.nav.partners',
+        icon: 'handshake',
+        to: '/admin/partners',
+        permission: 'partners:read',
+      },
+      {
+        name: 'admin.nav.withdrawals',
+        icon: 'arrow-up',
+        to: '/admin/withdrawals',
+        permission: 'withdrawals:read',
+      },
+      {
+        name: 'admin.nav.referralNetwork',
+        icon: 'network',
+        to: '/admin/referral-network',
+        permission: 'stats:read',
+      },
+    ],
+  },
+  {
+    id: 'system',
+    titleKey: 'admin.groups.system',
+    accent: 'rgb(var(--color-accent-500))',
+    gradient:
+      'linear-gradient(135deg, rgb(var(--color-accent-500)), rgb(var(--color-success-500)))',
+    items: [
+      {
+        name: 'admin.nav.channelSubscriptions',
+        icon: 'radio',
+        to: '/admin/channel-subscriptions',
+        permission: 'channels:read',
+      },
+      {
+        name: 'admin.nav.settings',
+        icon: 'settings',
+        to: '/admin/settings',
+        permission: 'settings:read',
+      },
+      { name: 'admin.nav.apps', icon: 'app', to: '/admin/apps', permission: 'apps:read' },
+      {
+        name: 'admin.nav.servers',
+        icon: 'server',
+        to: '/admin/servers',
+        permission: 'servers:read',
+      },
+      {
+        name: 'admin.nav.remnawave',
+        icon: 'remnawave',
+        to: '/admin/remnawave',
+        permission: 'remnawave:read',
+      },
+      {
+        name: 'admin.nav.emailTemplates',
+        icon: 'mail',
+        to: '/admin/email-templates',
+        permission: 'email_templates:read',
+      },
+      {
+        name: 'admin.nav.updates',
+        icon: 'refresh',
+        to: '/admin/updates',
+        permission: 'updates:read',
+      },
+    ],
+  },
+  {
+    id: 'security',
+    titleKey: 'admin.groups.security',
+    accent: 'rgb(var(--color-error-400))',
+    gradient: 'linear-gradient(135deg, rgb(var(--color-error-400)), rgb(var(--color-accent-600)))',
+    items: [
+      { name: 'admin.nav.roles', icon: 'shield', to: '/admin/roles', permission: 'roles:read' },
+      {
+        name: 'admin.nav.roleAssign',
+        icon: 'user-check',
+        to: '/admin/roles/assign',
+        permission: 'roles:assign',
+      },
+      { name: 'admin.nav.policies', icon: 'lock', to: '/admin/policies', permission: 'roles:read' },
+      {
+        name: 'admin.nav.auditLog',
+        icon: 'scroll',
+        to: '/admin/audit-log',
+        permission: 'audit_log:read',
+      },
+    ],
+  },
+];
+
+// ─── Helpers ───
+
+function formatUptime(seconds: number): string {
+  const d = Math.floor(seconds / 86400);
+  const h = Math.floor((seconds % 86400) / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  if (d > 0) return `${d}d ${h}h ${m}m`;
+  if (h > 0) return `${h}h ${m}m`;
+  return `${m}m`;
+}
+
+// ─── Animated Stat Number ───
+
+function AnimatedStat({ value, suffix }: { value: number; suffix?: string }) {
+  const animated = useAnimatedNumber(value);
   return (
-    <Link
-      to={to}
-      className="group flex items-center gap-3 rounded-xl border border-dark-700/50 bg-dark-800/40 p-3 transition-all duration-200 hover:border-dark-600 hover:bg-dark-800/80"
-    >
-      <div
-        className={`h-10 w-10 rounded-lg ${iconBg} ${iconColor} flex shrink-0 items-center justify-center transition-transform group-hover:scale-105`}
-      >
-        {icon}
-      </div>
-      <div className="min-w-0 flex-1">
-        <h3 className="text-sm font-medium text-dark-100 transition-colors group-hover:text-white">
-          {title}
-        </h3>
-        <p className="truncate text-xs text-dark-500">{description}</p>
-      </div>
-      <div className="text-dark-600 transition-colors group-hover:text-dark-400">
-        <ChevronRightIcon />
-      </div>
-    </Link>
+    <span>
+      {Math.round(animated).toLocaleString()}
+      {suffix}
+    </span>
   );
 }
 
-function GroupSection({ group }: { group: AdminGroup }) {
+// ─── Stats Bar ───
+
+interface StatsBarProps {
+  systemInfo: SystemInfo | null;
+  dashboardStats: DashboardStats | null;
+  loading: boolean;
+}
+
+const StatsBar = memo(function StatsBar({ systemInfo, dashboardStats, loading }: StatsBarProps) {
+  const { t } = useTranslation();
+
+  const stats = useMemo(() => {
+    const uptime = systemInfo?.uptime_seconds ?? 0;
+    const trial = dashboardStats?.subscriptions.trial ?? 0;
+    const paid = dashboardStats?.subscriptions.paid ?? 0;
+    const purchasedToday = dashboardStats?.subscriptions.purchased_today ?? 0;
+
+    return [
+      {
+        icon: <StatUptimeIcon />,
+        label: t('admin.panel.statsUptime'),
+        value: uptime > 0 ? formatUptime(uptime) : '--',
+        colorClass: 'text-success-400 bg-success-400/10 border-success-400/20',
+      },
+      {
+        icon: <StatBotIcon />,
+        label: t('admin.panel.statsBot'),
+        value: systemInfo?.bot_version ?? '--',
+        colorClass: 'text-accent-400 bg-accent-400/10 border-accent-400/20',
+      },
+      {
+        icon: <StatCabinetIcon />,
+        label: t('admin.panel.statsCabinet'),
+        value: `v${CABINET_VERSION}`,
+        colorClass: 'text-accent-300 bg-accent-300/10 border-accent-300/20',
+      },
+      {
+        icon: <StatTrialIcon />,
+        label: t('admin.panel.statsTrials'),
+        numericValue: trial,
+        colorClass: 'text-warning-400 bg-warning-400/10 border-warning-400/20',
+      },
+      {
+        icon: <StatPaidIcon />,
+        label: t('admin.panel.statsPaid'),
+        numericValue: paid,
+        delta: purchasedToday > 0 ? `+${purchasedToday}` : undefined,
+        colorClass: 'text-success-400 bg-success-400/10 border-success-400/20',
+      },
+    ];
+  }, [systemInfo, dashboardStats, t]);
+
+  return (
+    <div className="scrollbar-hide flex w-full gap-2 overflow-x-auto pb-1">
+      {stats.map((s, i) => (
+        <div
+          key={i}
+          className={cn(
+            'flex min-w-0 flex-1 items-center gap-2 rounded-xl border border-dark-700/50 bg-dark-800/40 px-3 py-2 backdrop-blur-lg transition-all duration-200',
+            'light:border-champagne-300/50 light:bg-champagne-100/60',
+            loading && 'animate-pulse',
+          )}
+          style={{ animationDelay: `${i * 60}ms` }}
+        >
+          <div
+            className={cn(
+              'flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border',
+              s.colorClass,
+            )}
+          >
+            {s.icon}
+          </div>
+          <div className="flex min-w-0 flex-col gap-0.5 overflow-hidden">
+            <span className="flex items-center gap-1 font-mono text-xs font-bold text-dark-100 light:text-champagne-900">
+              {'numericValue' in s && s.numericValue !== undefined ? (
+                <AnimatedStat value={s.numericValue} />
+              ) : (
+                <span className="truncate">{s.value}</span>
+              )}
+              {s.delta && (
+                <span className="shrink-0 rounded-md border border-success-400/20 bg-success-400/10 px-1.5 py-px text-2xs font-semibold text-success-400">
+                  {s.delta}
+                </span>
+              )}
+            </span>
+            <span className="truncate text-2xs text-dark-500 light:text-champagne-600">
+              {s.label}
+              {s.delta && ` · ${t('admin.panel.statsToday')}`}
+            </span>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+});
+
+// ─── Glass Card (Section) ───
+
+interface GlassCardProps {
+  section: AdminSection;
+  index: number;
+  searchTerm: string;
+}
+
+const GlassCard = memo(function GlassCard({ section, index, searchTerm }: GlassCardProps) {
+  const { t } = useTranslation();
   const hasPermission = usePermissionStore((state) => state.hasPermission);
-  const visibleItems = group.items.filter((item) => hasPermission(item.permission));
+  const [hoveredItem, setHoveredItem] = useState<number | null>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [tilt, setTilt] = useState({ x: 0, y: 0 });
+  const tiltRef = useRef({ x: 0, y: 0 });
+  const rafRef = useRef(0);
+
+  useEffect(() => () => cancelAnimationFrame(rafRef.current), []);
+
+  const onMouseMove = useCallback((e: React.MouseEvent) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    tiltRef.current = {
+      x: ((e.clientY - rect.top) / rect.height - 0.5) * -2.5,
+      y: ((e.clientX - rect.left) / rect.width - 0.5) * 2.5,
+    };
+    cancelAnimationFrame(rafRef.current);
+    rafRef.current = requestAnimationFrame(() => {
+      setTilt({ ...tiltRef.current });
+    });
+  }, []);
+
+  const onMouseLeave = useCallback(() => {
+    cancelAnimationFrame(rafRef.current);
+    setTilt({ x: 0, y: 0 });
+  }, []);
+
+  const visibleItems = useMemo(
+    () =>
+      section.items.filter((item) => {
+        if (!hasPermission(item.permission)) return false;
+        if (!searchTerm) return true;
+        return t(item.name).toLowerCase().includes(searchTerm.toLowerCase());
+      }),
+    [section.items, hasPermission, searchTerm, t],
+  );
+
+  const highlightMatch = useCallback(
+    (text: string) => {
+      if (!searchTerm) return text;
+      const idx = text.toLowerCase().indexOf(searchTerm.toLowerCase());
+      if (idx === -1) return text;
+      return (
+        <>
+          {text.slice(0, idx)}
+          <mark className="rounded-sm bg-accent-400/30 px-0.5 text-dark-100 light:text-champagne-900">
+            {text.slice(idx, idx + searchTerm.length)}
+          </mark>
+          {text.slice(idx + searchTerm.length)}
+        </>
+      );
+    },
+    [searchTerm],
+  );
 
   if (visibleItems.length === 0) return null;
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-dark-700/50 bg-dark-900/30 backdrop-blur">
-      {/* Group Header */}
-      <div className={`bg-gradient-to-r px-4 py-3 ${group.gradient} border-b ${group.borderColor}`}>
-        <div className="flex items-center gap-2.5">
-          <div className={`rounded-lg p-1.5 ${group.iconBg} ${group.iconColor}`}>{group.icon}</div>
-          <h2 className="text-sm font-semibold text-dark-100">{group.title}</h2>
+    <div
+      ref={cardRef}
+      onMouseMove={onMouseMove}
+      onMouseLeave={onMouseLeave}
+      className="group/card relative overflow-hidden rounded-2xl border border-dark-700/50 bg-dark-800/30 backdrop-blur-xl transition-all duration-300 hover:border-dark-600/80 hover:shadow-lg light:border-champagne-300/50 light:bg-champagne-100/40 light:hover:border-champagne-400/60"
+      style={{
+        transform: `perspective(800px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
+        animation: `adminCardEnter 0.5s cubic-bezier(0.22, 1, 0.36, 1) ${index * 60}ms both`,
+      }}
+    >
+      {/* Top glow line */}
+      <div
+        className="absolute left-0 right-0 top-0 h-px opacity-50 transition-all duration-300 group-hover/card:h-0.5 group-hover/card:opacity-100"
+        style={{ background: section.gradient }}
+      />
+
+      {/* Header */}
+      <div className="flex items-center gap-2.5 border-b border-dark-700/30 px-3.5 py-2.5 light:border-champagne-300/30">
+        <div
+          className="relative flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-lg shadow-md"
+          style={{ background: section.gradient }}
+        >
+          {/* Shine overlay */}
+          <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-white/25" />
+          <span className="relative text-xs font-bold text-white drop-shadow-sm" aria-hidden="true">
+            {visibleItems.length}
+          </span>
         </div>
+        <h2 className="truncate text-[13px] font-semibold text-dark-100 light:text-champagne-900">
+          {t(section.titleKey)}
+        </h2>
       </div>
 
-      {/* Group Items */}
-      <div className="space-y-1.5 p-2">
-        {visibleItems.map((item) => (
-          <AdminCard key={item.to} {...item} iconBg={group.iconBg} iconColor={group.iconColor} />
+      {/* Items */}
+      <div className="flex flex-col gap-px p-1.5">
+        {visibleItems.map((item, i) => (
+          <Link
+            key={item.to}
+            to={item.to}
+            className={cn(
+              'group/item flex items-center gap-2.5 rounded-xl border border-transparent px-2 py-1.5 transition-all duration-150',
+              hoveredItem === i
+                ? 'border-dark-600/50 bg-dark-700/30 light:border-champagne-400/40 light:bg-champagne-200/50'
+                : 'hover:border-dark-600/50 hover:bg-dark-700/30 light:hover:border-champagne-400/40 light:hover:bg-champagne-200/50',
+            )}
+            onMouseEnter={() => setHoveredItem(i)}
+            onMouseLeave={() => setHoveredItem(null)}
+            style={{
+              animation: `adminItemEnter 0.35s cubic-bezier(0.22, 1, 0.36, 1) ${index * 60 + i * 20}ms both`,
+            }}
+          >
+            {/* Icon */}
+            <div
+              className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border border-dark-700/40 bg-dark-800/40 transition-all duration-150 group-hover/item:scale-105 light:border-champagne-400/30 light:bg-champagne-200/50 [&>svg]:h-[13px] [&>svg]:w-[13px]"
+              style={{ color: section.accent }}
+            >
+              {icons[item.icon]}
+            </div>
+
+            {/* Label */}
+            <span className="flex-1 truncate text-xs font-medium text-dark-200 transition-colors group-hover/item:text-dark-50 light:text-champagne-700 light:group-hover/item:text-champagne-950">
+              {highlightMatch(t(item.name))}
+            </span>
+
+            {/* Chevron */}
+            <div className="h-3 w-3 shrink-0 -translate-x-1 text-dark-600 opacity-0 transition-all duration-150 group-hover/item:translate-x-0 group-hover/item:opacity-60 [&>svg]:h-3 [&>svg]:w-3">
+              {icons.chevron}
+            </div>
+          </Link>
         ))}
       </div>
     </div>
   );
-}
+});
+
+// ─── Main Component ───
 
 export default function AdminPanel() {
   const { t } = useTranslation();
+  const [search, setSearch] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
+  const { safeAreaInset, contentSafeAreaInset } = useTelegramSDK();
 
-  const groups: AdminGroup[] = [
-    {
-      id: 'analytics',
-      title: t('admin.groups.analytics'),
-      icon: <AnalyticsGroupIcon />,
-      gradient: 'from-success-500/10 to-success-500/5',
-      borderColor: 'border-success-500/20',
-      iconBg: 'bg-success-500/20',
-      iconColor: 'text-success-400',
-      items: [
-        {
-          to: '/admin/dashboard',
-          icon: <ChartBarIcon />,
-          title: t('admin.nav.dashboard'),
-          description: t('admin.panel.dashboardDesc'),
-          permission: 'stats:read',
-        },
-        {
-          to: '/admin/payments',
-          icon: <BanknotesIcon />,
-          title: t('admin.nav.payments'),
-          description: t('admin.panel.paymentsDesc'),
-          permission: 'payments:read',
-        },
-        {
-          to: '/admin/traffic-usage',
-          icon: <ArrowsUpDownIcon />,
-          title: t('admin.nav.trafficUsage'),
-          description: t('admin.panel.trafficUsageDesc'),
-          permission: 'traffic:read',
-        },
-        {
-          to: '/admin/device-observability',
-          icon: <DevicePhoneMobileIcon />,
-          title: t('admin.nav.deviceObservability'),
-          description: t('admin.panel.deviceObservabilityDesc'),
-          permission: 'traffic:read',
-        },
-        {
-          to: '/admin/sales-stats',
-          icon: <ChartBarIcon />,
-          title: t('admin.nav.salesStats'),
-          description: t('admin.panel.salesStatsDesc'),
-          permission: 'sales_stats:read',
-        },
-      ],
-    },
-    {
-      id: 'users',
-      title: t('admin.groups.users'),
-      icon: <UsersGroupIcon />,
-      gradient: 'from-accent-500/10 to-accent-500/5',
-      borderColor: 'border-accent-500/20',
-      iconBg: 'bg-accent-500/20',
-      iconColor: 'text-accent-400',
-      items: [
-        {
-          to: '/admin/users',
-          icon: <UsersIcon />,
-          title: t('admin.nav.users'),
-          description: t('admin.panel.usersDesc'),
-          permission: 'users:read',
-        },
-        {
-          to: '/admin/tickets',
-          icon: <ChatBubbleIcon />,
-          title: t('admin.nav.tickets'),
-          description: t('admin.panel.ticketsDesc'),
-          permission: 'tickets:read',
-        },
-        {
-          to: '/admin/ban-system',
-          icon: <NoSymbolIcon />,
-          title: t('admin.nav.banSystem'),
-          description: t('admin.panel.banSystemDesc'),
-          permission: 'ban_system:read',
-        },
-      ],
-    },
-    {
-      id: 'tariffs',
-      title: t('admin.groups.tariffs'),
-      icon: <TariffsGroupIcon />,
-      gradient: 'from-warning-500/10 to-warning-500/5',
-      borderColor: 'border-warning-500/20',
-      iconBg: 'bg-warning-500/20',
-      iconColor: 'text-warning-400',
-      items: [
-        {
-          to: '/admin/tariffs',
-          icon: <CreditCardIcon />,
-          title: t('admin.nav.tariffs'),
-          description: t('admin.panel.tariffsDesc'),
-          permission: 'tariffs:read',
-        },
-        {
-          to: '/admin/promocodes',
-          icon: <TicketIcon />,
-          title: t('admin.nav.promocodes'),
-          description: t('admin.panel.promocodesDesc'),
-          permission: 'promocodes:read',
-        },
-        {
-          to: '/admin/promo-groups',
-          icon: <UserGroupIcon />,
-          title: t('admin.nav.promoGroups'),
-          description: t('admin.panel.promoGroupsDesc'),
-          permission: 'promo_groups:read',
-        },
-        {
-          to: '/admin/promo-offers',
-          icon: <GiftIcon />,
-          title: t('admin.nav.promoOffers'),
-          description: t('admin.panel.promoOffersDesc'),
-          permission: 'promo_offers:read',
-        },
-        {
-          to: '/admin/payment-methods',
-          icon: <BanknotesIcon />,
-          title: t('admin.nav.paymentMethods'),
-          description: t('admin.panel.paymentMethodsDesc'),
-          permission: 'payment_methods:read',
-        },
-        {
-          to: '/admin/landings',
-          icon: <RectangleGroupIcon />,
-          title: t('admin.nav.landings'),
-          description: t('admin.panel.landingsDesc'),
-          permission: 'landings:read',
-        },
-      ],
-    },
-    {
-      id: 'marketing',
-      title: t('admin.groups.marketing'),
-      icon: <MarketingGroupIcon />,
-      gradient: 'from-error-500/10 to-error-500/5',
-      borderColor: 'border-error-500/20',
-      iconBg: 'bg-error-500/20',
-      iconColor: 'text-error-400',
-      items: [
-        {
-          to: '/admin/news',
-          icon: <NewspaperIcon />,
-          title: t('admin.nav.news'),
-          description: t('admin.panel.newsDesc'),
-          permission: 'news:read',
-        },
-        {
-          to: '/admin/campaigns',
-          icon: <MegaphoneIcon />,
-          title: t('admin.nav.campaigns'),
-          description: t('admin.panel.campaignsDesc'),
-          permission: 'campaigns:read',
-        },
-        {
-          to: '/admin/broadcasts',
-          icon: <PaperAirplaneIcon />,
-          title: t('admin.nav.broadcasts'),
-          description: t('admin.panel.broadcastsDesc'),
-          permission: 'broadcasts:read',
-        },
-        {
-          to: '/admin/pinned-messages',
-          icon: <PinnedMessageIcon />,
-          title: t('admin.nav.pinnedMessages'),
-          description: t('admin.panel.pinnedMessagesDesc'),
-          permission: 'pinned_messages:read',
-        },
-        {
-          to: '/admin/wheel',
-          icon: <SparklesIcon />,
-          title: t('admin.nav.wheel'),
-          description: t('admin.panel.wheelDesc'),
-          permission: 'wheel:read',
-        },
-        {
-          to: '/admin/partners',
-          icon: <HandshakeIcon />,
-          title: t('admin.nav.partners'),
-          description: t('admin.panel.partnersDesc'),
-          permission: 'partners:read',
-        },
-        {
-          to: '/admin/withdrawals',
-          icon: <BanknotesIcon />,
-          title: t('admin.nav.withdrawals'),
-          description: t('admin.panel.withdrawalsDesc'),
-          permission: 'withdrawals:read',
-        },
-        {
-          to: '/admin/referral-network',
-          icon: <NetworkGraphIcon />,
-          title: t('admin.nav.referralNetwork'),
-          description: t('admin.panel.referralNetworkDesc'),
-          permission: 'stats:read',
-        },
-      ],
-    },
-    {
-      id: 'system',
-      title: t('admin.groups.system'),
-      icon: <SystemGroupIcon />,
-      gradient: 'from-violet-500/10 to-violet-500/5',
-      borderColor: 'border-violet-500/20',
-      iconBg: 'bg-violet-500/20',
-      iconColor: 'text-violet-400',
-      items: [
-        {
-          to: '/admin/channel-subscriptions',
-          icon: <MegaphoneIcon />,
-          title: t('admin.nav.channelSubscriptions'),
-          description: t('admin.panel.channelSubscriptionsDesc'),
-          permission: 'channels:read',
-        },
-        {
-          to: '/admin/settings',
-          icon: <CogIcon />,
-          title: t('admin.nav.settings'),
-          description: t('admin.panel.settingsDesc'),
-          permission: 'settings:read',
-        },
-        {
-          to: '/admin/apps',
-          icon: <DevicePhoneMobileIcon />,
-          title: t('admin.nav.apps'),
-          description: t('admin.panel.appsDesc'),
-          permission: 'apps:read',
-        },
-        {
-          to: '/admin/servers',
-          icon: <ServerStackIcon />,
-          title: t('admin.nav.servers'),
-          description: t('admin.panel.serversDesc'),
-          permission: 'servers:read',
-        },
-        {
-          to: '/admin/remnawave',
-          icon: <RemnawaveIcon />,
-          title: t('admin.nav.remnawave'),
-          description: t('admin.panel.remnawaveDesc'),
-          permission: 'remnawave:read',
-        },
-        {
-          to: '/admin/email-templates',
-          icon: <EnvelopeIcon />,
-          title: t('admin.nav.emailTemplates'),
-          description: t('admin.panel.emailTemplatesDesc'),
-          permission: 'email_templates:read',
-        },
-        {
-          to: '/admin/updates',
-          icon: <ArrowPathIcon className="h-5 w-5" />,
-          title: t('admin.nav.updates'),
-          description: t('admin.panel.updatesDesc'),
-          permission: 'updates:read',
-        },
-      ],
-    },
-    {
-      id: 'security',
-      title: t('admin.groups.security'),
-      icon: <SecurityGroupIcon />,
-      gradient: 'from-red-500/10 to-orange-500/5',
-      borderColor: 'border-red-500/20',
-      iconBg: 'bg-red-500/20',
-      iconColor: 'text-red-400',
-      items: [
-        {
-          to: '/admin/roles',
-          icon: <ShieldIcon />,
-          title: t('admin.nav.roles'),
-          description: t('admin.panel.rolesDesc'),
-          permission: 'roles:read',
-        },
-        {
-          to: '/admin/roles/assign',
-          icon: <UserPlusIcon />,
-          title: t('admin.nav.roleAssign'),
-          description: t('admin.panel.roleAssignDesc'),
-          permission: 'roles:assign',
-        },
-        {
-          to: '/admin/policies',
-          icon: <DocumentCheckIcon />,
-          title: t('admin.nav.policies'),
-          description: t('admin.panel.policiesDesc'),
-          permission: 'roles:read',
-        },
-        {
-          to: '/admin/audit-log',
-          icon: <ClipboardDocumentListIcon />,
-          title: t('admin.nav.auditLog'),
-          description: t('admin.panel.auditLogDesc'),
-          permission: 'audit_log:read',
-        },
-      ],
-    },
-  ];
+  const [systemInfo, setSystemInfo] = useState<SystemInfo | null>(null);
+  const [dashboardStats, setDashboardStats] = useState<DashboardStats | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const safeTop = Math.max(safeAreaInset.top, contentSafeAreaInset.top);
+  const safeBottom = Math.max(safeAreaInset.bottom, contentSafeAreaInset.bottom);
+
+  // Fetch stats
+  useEffect(() => {
+    let cancelled = false;
+    const fetchData = async () => {
+      try {
+        const [sysInfo, stats] = await Promise.all([
+          statsApi.getSystemInfo(),
+          statsApi.getDashboardStats(),
+        ]);
+        if (!cancelled) {
+          setSystemInfo(sysInfo);
+          setDashboardStats(stats);
+          setLoading(false);
+        }
+      } catch {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    fetchData();
+    const interval = setInterval(fetchData, 60_000);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, []);
+
+  // Keyboard shortcuts: Cmd+K to focus search, Escape to clear
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        inputRef.current?.focus();
+      }
+      if (e.key === 'Escape') {
+        setSearch('');
+        inputRef.current?.blur();
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, []);
+
+  // Track which sections have matching items (keeps original section refs for memo stability)
+  const visibleSectionIds = useMemo(() => {
+    if (!search.trim()) return null; // null = show all
+    const lower = search.toLowerCase();
+    return new Set(
+      sections
+        .filter((s) => s.items.some((item) => t(item.name).toLowerCase().includes(lower)))
+        .map((s) => s.id),
+    );
+  }, [search, t]);
 
   return (
-    <div className="animate-fade-in space-y-4">
-      {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-dark-100">{t('admin.panel.title')}</h1>
-        <p className="mt-1 text-sm text-dark-400">{t('admin.panel.subtitle')}</p>
-      </div>
+    <div className="relative flex min-h-0 flex-1 flex-col">
+      <div
+        className="relative z-10 mx-auto flex w-full max-w-[1600px] flex-1 flex-col gap-3 overflow-hidden px-4 sm:px-6"
+        style={{
+          paddingTop: safeTop > 0 ? `${safeTop}px` : 'env(safe-area-inset-top, 0px)',
+          paddingBottom: safeBottom > 0 ? `${safeBottom}px` : 'env(safe-area-inset-bottom, 0px)',
+        }}
+      >
+        {/* Stats Bar */}
+        <div className="hidden shrink-0 sm:flex">
+          <StatsBar systemInfo={systemInfo} dashboardStats={dashboardStats} loading={loading} />
+        </div>
 
-      {/* Groups Grid */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        {groups.map((group) => (
-          <GroupSection key={group.id} group={group} />
-        ))}
+        {/* Mobile: compact 2-column stats */}
+        <div className="grid shrink-0 grid-cols-2 gap-1.5 sm:hidden">
+          {[
+            {
+              icon: <StatUptimeIcon />,
+              label: t('admin.panel.statsUptime'),
+              value: systemInfo?.uptime_seconds ? formatUptime(systemInfo.uptime_seconds) : '--',
+              cls: 'text-success-400',
+            },
+            {
+              icon: <StatBotIcon />,
+              label: t('admin.panel.statsBot'),
+              value: systemInfo?.bot_version ?? '--',
+              cls: 'text-accent-400',
+            },
+            {
+              icon: <StatTrialIcon />,
+              label: t('admin.panel.statsTrials'),
+              value: dashboardStats?.subscriptions.trial?.toLocaleString() ?? '--',
+              cls: 'text-warning-400',
+            },
+            {
+              icon: <StatPaidIcon />,
+              label: t('admin.panel.statsPaid'),
+              value: dashboardStats?.subscriptions.paid?.toLocaleString() ?? '--',
+              delta:
+                (dashboardStats?.subscriptions.purchased_today ?? 0) > 0
+                  ? `+${dashboardStats?.subscriptions.purchased_today}`
+                  : undefined,
+              cls: 'text-success-400',
+            },
+          ].map((s, i) => (
+            <div
+              key={i}
+              className={cn(
+                'flex items-center gap-2 rounded-xl border border-dark-700/50 bg-dark-800/40 px-2.5 py-2 backdrop-blur-lg',
+                'light:border-champagne-300/50 light:bg-champagne-100/60',
+                loading && 'animate-pulse',
+              )}
+            >
+              <div className={cn('shrink-0', s.cls)}>{s.icon}</div>
+              <div className="flex min-w-0 flex-col">
+                <span className="flex items-center gap-1 font-mono text-[11px] font-bold text-dark-100 light:text-champagne-900">
+                  <span className="truncate">{s.value}</span>
+                  {'delta' in s && s.delta && (
+                    <span className="shrink-0 rounded border border-success-400/20 bg-success-400/10 px-1 text-2xs font-semibold text-success-400">
+                      {s.delta}
+                    </span>
+                  )}
+                </span>
+                <span className="truncate text-2xs text-dark-500 light:text-champagne-600">
+                  {s.label}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Hero + Search */}
+        <div className="flex shrink-0 flex-wrap items-center gap-3">
+          <h1 className="bg-gradient-to-r from-dark-50 via-dark-300 to-accent-400 bg-clip-text text-lg font-extrabold tracking-tight text-transparent light:from-champagne-900 light:via-champagne-600 light:to-accent-600 sm:text-xl">
+            {t('admin.panel.title')}
+          </h1>
+          <div className="flex items-center gap-1.5 text-xs text-dark-400 light:text-champagne-500">
+            <div
+              className="h-1.5 w-1.5 rounded-full bg-success-400 shadow-[0_0_10px_rgba(var(--color-success-400),0.6)]"
+              style={{ animation: 'adminPulse 2s ease-in-out infinite' }}
+            />
+            {t('admin.panel.statsOnline')}
+          </div>
+          {/* Search */}
+          <div className="relative ml-auto min-w-[160px] max-w-[360px] flex-1">
+            <div className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-dark-500 [&>svg]:h-3.5 [&>svg]:w-3.5">
+              {icons.search}
+            </div>
+            <input
+              ref={inputRef}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder={t('admin.panel.searchPlaceholder')}
+              aria-label={t('admin.panel.searchPlaceholder')}
+              className="w-full rounded-xl border border-dark-700/50 bg-dark-800/40 py-2 pl-8 pr-16 font-sans text-xs text-dark-100 outline-none backdrop-blur-lg transition-all placeholder:text-dark-500 focus:border-accent-500/40 focus:shadow-[0_0_0_3px_rgba(var(--color-accent-500),0.08)] light:border-champagne-300/50 light:bg-champagne-100/60 light:text-champagne-900 light:placeholder:text-champagne-500 light:focus:border-accent-500/40"
+            />
+            {search && (
+              <button
+                onClick={() => setSearch('')}
+                aria-label={t('admin.panel.searchClear')}
+                className="absolute right-12 top-1/2 -translate-y-1/2 text-dark-500 transition-colors hover:text-dark-300 [&>svg]:h-3.5 [&>svg]:w-3.5"
+              >
+                {icons.x}
+              </button>
+            )}
+            <kbd
+              aria-hidden="true"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-md border border-dark-700/50 bg-dark-800/60 px-1.5 py-0.5 font-mono text-2xs text-dark-500"
+            >
+              {IS_MAC ? '\u2318' : 'Ctrl+'}K
+            </kbd>
+          </div>
+        </div>
+
+        {/* Grid */}
+        <div className="scrollbar-hide min-h-0 flex-1 overflow-auto pb-4">
+          {visibleSectionIds === null || visibleSectionIds.size > 0 ? (
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+              {sections
+                .filter((s) => !visibleSectionIds || visibleSectionIds.has(s.id))
+                .map((section, i) => (
+                  <GlassCard key={section.id} section={section} index={i} searchTerm={search} />
+                ))}
+            </div>
+          ) : (
+            <div
+              className="flex flex-col items-center justify-center py-16"
+              role="status"
+              aria-live="polite"
+            >
+              <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl border border-dark-700/50 bg-dark-800/40 text-dark-500 backdrop-blur-lg [&>svg]:h-6 [&>svg]:w-6">
+                {icons.search}
+              </div>
+              <h3 className="text-sm font-semibold text-dark-200 light:text-champagne-800">
+                {t('admin.panel.searchEmpty')}
+              </h3>
+              <p className="text-xs text-dark-500 light:text-champagne-600">
+                {t('admin.panel.searchEmptyHint')}
+              </p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

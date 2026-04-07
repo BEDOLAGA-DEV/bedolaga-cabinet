@@ -55,8 +55,10 @@ function CodeOnlySuccessState({
   const shortCode = purchaseToken.slice(0, 12);
   const giftCode = `GIFT-${shortCode}`;
   const botUsername = import.meta.env.VITE_TELEGRAM_BOT_USERNAME as string | undefined;
-  const botLink = botUsername ? `https://t.me/${botUsername}?start=GIFT_${shortCode}` : null;
-  const cabinetLink = `${window.location.origin}/gift?tab=activate&code=${shortCode}`;
+  // Encode underscores as %5F so Telegram auto-link detection doesn't strip them
+  const safeCode = shortCode.replace(/_/g, '%5F');
+  const botLink = botUsername ? `https://t.me/${botUsername}?start=GIFT%5F${safeCode}` : null;
+  const cabinetLink = `${window.location.origin}/gift?tab=activate&code=${safeCode}`;
 
   const fullMessage = [
     t('gift.shareText', 'I have a gift for you! Activate it here:'),

@@ -80,6 +80,12 @@ export default function Balance() {
     message: string;
     amount: number;
   } | null>(null);
+  const [promoSelectSubs, setPromoSelectSubs] = useState<Array<{
+    id: number;
+    tariff_name: string;
+    days_left: number;
+  }> | null>(null);
+  const [promoSelectCode, setPromoSelectCode] = useState<string | null>(null);
   const [transactionsPage, setTransactionsPage] = useState(1);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
@@ -135,27 +141,38 @@ export default function Balance() {
     }
   };
 
-  const handlePromocodeActivate = async () => {
-    if (!promocode.trim()) return;
+  const handlePromocodeActivate = async (subscriptionId?: number) => {
+    const code = subscriptionId ? promoSelectCode || '' : promocode.trim();
+    if (!code) return;
 
     setPromocodeLoading(true);
     setPromocodeError(null);
     setPromocodeSuccess(null);
 
     try {
-      const result = await balanceApi.activatePromocode(promocode.trim());
+      const result = await balanceApi.activatePromocode(code, subscriptionId);
+
+      if (result.error === 'select_subscription' && result.eligible_subscriptions) {
+        setPromoSelectSubs(result.eligible_subscriptions);
+        setPromoSelectCode(result.code || code);
+        return;
+      }
+
       if (result.success) {
-        const bonusAmount = result.balance_after - result.balance_before;
+        const bonusAmount = (result.balance_after || 0) - (result.balance_before || 0);
         setPromocodeSuccess({
           message: result.bonus_description || t('balance.promocode.success'),
           amount: bonusAmount,
         });
         setTransactionsPage(1);
         setPromocode('');
+        setPromoSelectSubs(null);
+        setPromoSelectCode(null);
         await refetchBalance();
         await refreshUser();
         queryClient.invalidateQueries({ queryKey: ['transactions'] });
         queryClient.invalidateQueries({ queryKey: ['purchase-options'] });
+        queryClient.invalidateQueries({ queryKey: ['subscriptions-list'] });
       }
     } catch (error: unknown) {
       const axiosError = error as { response?: { data?: { detail?: string } } };
@@ -170,6 +187,8 @@ export default function Balance() {
               ? 'already_used_by_user'
               : 'server_error';
       setPromocodeError(t(`balance.promocode.errors.${errorKey}`));
+      setPromoSelectSubs(null);
+      setPromoSelectCode(null);
     } finally {
       setPromocodeLoading(false);
     }
@@ -214,7 +233,7 @@ export default function Balance() {
               disabled={promocodeLoading}
             />
             <Button
-              onClick={handlePromocodeActivate}
+              onClick={() => handlePromocodeActivate()}
               disabled={!promocode.trim()}
               loading={promocodeLoading}
             >
@@ -250,6 +269,39 @@ export default function Balance() {
               </motion.div>
             )}
           </AnimatePresence>
+          {promoSelectSubs && promoSelectSubs.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-3 space-y-2 rounded-linear border border-accent-500/30 bg-accent-500/10 p-3"
+            >
+              <div className="text-sm font-medium text-dark-200">
+                {t('balance.promocode.selectSubscription', 'К какой подписке применить промокод?')}
+              </div>
+              {promoSelectSubs.map((sub) => (
+                <button
+                  key={sub.id}
+                  onClick={() => handlePromocodeActivate(sub.id)}
+                  disabled={promocodeLoading}
+                  className="flex w-full items-center justify-between rounded-linear border border-dark-600 bg-dark-700 px-3 py-2 text-sm text-dark-200 transition-colors hover:border-accent-500/50 hover:bg-dark-600"
+                >
+                  <span>{sub.tariff_name}</span>
+                  <span className="text-dark-400">
+                    {t('balance.promocode.daysLeft', '{{count}} дн.', { count: sub.days_left })}
+                  </span>
+                </button>
+              ))}
+              <button
+                onClick={() => {
+                  setPromoSelectSubs(null);
+                  setPromoSelectCode(null);
+                }}
+                className="text-xs text-dark-400 hover:text-dark-200"
+              >
+                {t('common.cancel', 'Отмена')}
+              </button>
+            </motion.div>
+          )}
         </Card>
       </motion.div>
 

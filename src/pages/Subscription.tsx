@@ -1,8 +1,11 @@
 import { useState, useEffect, useRef, useCallback, memo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router';
+import { Navigate, useNavigate, useParams } from 'react-router';
 import { subscriptionApi } from '../api/subscription';
+import { WebBackButton } from '../components/WebBackButton';
+import { useDestructiveConfirm } from '../platform/hooks/useNativeDialog';
+import { usePlatform } from '../platform';
 import TrafficProgressBar from '../components/dashboard/TrafficProgressBar';
 import { HoverBorderGradient } from '../components/ui/hover-border-gradient';
 import { useTrafficZone } from '../hooks/useTrafficZone';
@@ -168,13 +171,22 @@ export default function Subscription() {
   const queryClient = useQueryClient();
   const { formatAmount, currencySymbol } = useCurrency();
   const navigate = useNavigate();
+  const { subscriptionId: subIdParam } = useParams<{ subscriptionId?: string }>();
+  const subscriptionId = subIdParam ? parseInt(subIdParam, 10) : undefined;
   const { isDark } = useTheme();
   const g = getGlassColors(isDark);
   const haptic = useHaptic();
   const [copied, setCopied] = useState(false);
+  const [showDeleteSheet, setShowDeleteSheet] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const { platform } = usePlatform();
+  const destructiveConfirm = useDestructiveConfirm();
 
   // Helper to format price from kopeks
-  const formatPrice = (kopeks: number) => `${formatAmount(kopeks / 100)} ${currencySymbol}`;
+  const formatPrice = (kopeks: number) =>
+    kopeks === 0
+      ? t('subscription.free', 'Бесплатно')
+      : `${formatAmount(kopeks / 100)} ${currencySymbol}`;
 
   // Device/traffic topup state
   const [showDeviceTopup, setShowDeviceTopup] = useState(false);
@@ -194,11 +206,19 @@ export default function Subscription() {
     is_unlimited: boolean;
   } | null>(null);
 
+  // Detect multi-tariff mode from cached subscriptions-list
+  const { data: multiSubData } = useQuery({
+    queryKey: ['subscriptions-list'],
+    queryFn: () => subscriptionApi.getSubscriptions(),
+    staleTime: 60_000,
+  });
+  const isMultiTariff = multiSubData?.multi_tariff_enabled ?? false;
+
   const { data: subscriptionResponse, isLoading } = useQuery({
-    queryKey: ['subscription'],
-    queryFn: subscriptionApi.getSubscription,
+    queryKey: ['subscription', subscriptionId],
+    queryFn: () => subscriptionApi.getSubscription(subscriptionId),
     retry: false,
-    staleTime: 0, // Always refetch to get latest data
+    staleTime: 0,
     refetchOnMount: 'always',
   });
 
@@ -211,8 +231,8 @@ export default function Subscription() {
 
   // Purchase options (needed for balance_kopeks in device/traffic/server management)
   const { data: purchaseOptions } = useQuery({
-    queryKey: ['purchase-options'],
-    queryFn: subscriptionApi.getPurchaseOptions,
+    queryKey: ['purchase-options', subscriptionId],
+    queryFn: () => subscriptionApi.getPurchaseOptions(subscriptionId),
     staleTime: 0,
     refetchOnMount: 'always',
   });
@@ -220,40 +240,43 @@ export default function Subscription() {
   const isTariffsMode = purchaseOptions?.sales_mode === 'tariffs';
 
   const autopayMutation = useMutation({
-    mutationFn: (enabled: boolean) => subscriptionApi.updateAutopay(enabled),
+    mutationFn: (enabled: boolean) =>
+      subscriptionApi.updateAutopay(enabled, undefined, subscriptionId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['subscription'] });
+      queryClient.invalidateQueries({ queryKey: ['subscription', subscriptionId] });
+      queryClient.invalidateQueries({ queryKey: ['subscriptions-list'] });
     },
   });
 
   // Devices query
   const { data: devicesData, isLoading: devicesLoading } = useQuery({
-    queryKey: ['devices'],
-    queryFn: subscriptionApi.getDevices,
+    queryKey: ['devices', subscriptionId],
+    queryFn: () => subscriptionApi.getDevices(subscriptionId),
     enabled: !!subscription,
   });
 
   // Delete device mutation
   const deleteDeviceMutation = useMutation({
-    mutationFn: (hwid: string) => subscriptionApi.deleteDevice(hwid),
+    mutationFn: (hwid: string) => subscriptionApi.deleteDevice(hwid, subscriptionId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['devices'] });
+      queryClient.invalidateQueries({ queryKey: ['devices', subscriptionId] });
     },
   });
 
   // Delete all devices mutation
   const deleteAllDevicesMutation = useMutation({
-    mutationFn: () => subscriptionApi.deleteAllDevices(),
+    mutationFn: () => subscriptionApi.deleteAllDevices(subscriptionId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['devices'] });
+      queryClient.invalidateQueries({ queryKey: ['devices', subscriptionId] });
     },
   });
 
   // Pause subscription mutation
   const pauseMutation = useMutation({
-    mutationFn: () => subscriptionApi.togglePause(),
+    mutationFn: () => subscriptionApi.togglePause(subscriptionId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['subscription'] });
+      queryClient.invalidateQueries({ queryKey: ['subscription', subscriptionId] });
+      queryClient.invalidateQueries({ queryKey: ['subscriptions-list'] });
       queryClient.invalidateQueries({ queryKey: ['balance'] });
     },
   });
@@ -269,18 +292,20 @@ export default function Subscription() {
 
   // Device price query
   const { data: devicePriceData } = useQuery({
-    queryKey: ['device-price', devicesToAdd],
-    queryFn: () => subscriptionApi.getDevicePrice(devicesToAdd),
+    queryKey: ['device-price', devicesToAdd, subscriptionId],
+    queryFn: () => subscriptionApi.getDevicePrice(devicesToAdd, subscriptionId),
     enabled: showDeviceTopup && !!subscription,
   });
 
   // Device purchase mutation
   const devicePurchaseMutation = useMutation({
-    mutationFn: () => subscriptionApi.purchaseDevices(devicesToAdd),
+    mutationFn: () => subscriptionApi.purchaseDevices(devicesToAdd, subscriptionId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['subscription'] });
-      queryClient.invalidateQueries({ queryKey: ['devices'] });
+      queryClient.invalidateQueries({ queryKey: ['subscription', subscriptionId] });
+      queryClient.invalidateQueries({ queryKey: ['subscriptions-list'] });
+      queryClient.invalidateQueries({ queryKey: ['devices', subscriptionId] });
       queryClient.invalidateQueries({ queryKey: ['device-price'] });
+      queryClient.invalidateQueries({ queryKey: ['balance'] });
       setShowDeviceTopup(false);
       setDevicesToAdd(1);
     },
@@ -288,8 +313,8 @@ export default function Subscription() {
 
   // Device reduction info query
   const { data: deviceReductionInfo } = useQuery({
-    queryKey: ['device-reduction-info'],
-    queryFn: subscriptionApi.getDeviceReductionInfo,
+    queryKey: ['device-reduction-info', subscriptionId],
+    queryFn: () => subscriptionApi.getDeviceReductionInfo(subscriptionId),
     enabled: showDeviceReduction && !!subscription,
   });
 
@@ -307,27 +332,31 @@ export default function Subscription() {
 
   // Device reduction mutation
   const deviceReductionMutation = useMutation({
-    mutationFn: () => subscriptionApi.reduceDevices(targetDeviceLimit),
+    mutationFn: () => subscriptionApi.reduceDevices(targetDeviceLimit, subscriptionId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['subscription'] });
-      queryClient.invalidateQueries({ queryKey: ['devices'] });
-      queryClient.invalidateQueries({ queryKey: ['device-reduction-info'] });
+      queryClient.invalidateQueries({ queryKey: ['subscription', subscriptionId] });
+      queryClient.invalidateQueries({ queryKey: ['subscriptions-list'] });
+      queryClient.invalidateQueries({ queryKey: ['devices', subscriptionId] });
+      queryClient.invalidateQueries({ queryKey: ['device-reduction-info', subscriptionId] });
       setShowDeviceReduction(false);
     },
   });
 
   // Traffic packages query
   const { data: trafficPackages } = useQuery({
-    queryKey: ['traffic-packages'],
-    queryFn: subscriptionApi.getTrafficPackages,
+    queryKey: ['traffic-packages', subscriptionId],
+    queryFn: () => subscriptionApi.getTrafficPackages(subscriptionId),
     enabled: showTrafficTopup && !!subscription,
   });
 
   // Traffic purchase mutation
   const trafficPurchaseMutation = useMutation({
-    mutationFn: (gb: number) => subscriptionApi.purchaseTraffic(gb),
+    mutationFn: (gb: number) => subscriptionApi.purchaseTraffic(gb, subscriptionId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['subscription'] });
+      queryClient.invalidateQueries({ queryKey: ['subscription', subscriptionId] });
+      queryClient.invalidateQueries({ queryKey: ['subscriptions-list'] });
+      queryClient.invalidateQueries({ queryKey: ['balance'] });
+      queryClient.invalidateQueries({ queryKey: ['traffic-packages', subscriptionId] });
       setShowTrafficTopup(false);
       setSelectedTrafficPackage(null);
     },
@@ -335,8 +364,8 @@ export default function Subscription() {
 
   // Countries/servers query
   const { data: countriesData, isLoading: countriesLoading } = useQuery({
-    queryKey: ['countries'],
-    queryFn: subscriptionApi.getCountries,
+    queryKey: ['countries', subscriptionId],
+    queryFn: () => subscriptionApi.getCountries(subscriptionId),
     enabled: showServerManagement && !!subscription && !subscription.is_trial,
   });
 
@@ -350,30 +379,34 @@ export default function Subscription() {
 
   // Countries update mutation
   const updateCountriesMutation = useMutation({
-    mutationFn: (countries: string[]) => subscriptionApi.updateCountries(countries),
+    mutationFn: (countries: string[]) => subscriptionApi.updateCountries(countries, subscriptionId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['subscription'] });
-      queryClient.invalidateQueries({ queryKey: ['countries'] });
+      queryClient.invalidateQueries({ queryKey: ['subscription', subscriptionId] });
+      queryClient.invalidateQueries({ queryKey: ['subscriptions-list'] });
+      queryClient.invalidateQueries({ queryKey: ['countries', subscriptionId] });
       setShowServerManagement(false);
     },
   });
 
   // Traffic refresh mutation
   const refreshTrafficMutation = useMutation({
-    mutationFn: subscriptionApi.refreshTraffic,
+    mutationFn: () => subscriptionApi.refreshTraffic(subscriptionId),
     onSuccess: (data) => {
       setTrafficData({
         traffic_used_gb: data.traffic_used_gb,
         traffic_used_percent: data.traffic_used_percent,
         is_unlimited: data.is_unlimited,
       });
-      localStorage.setItem('traffic_refresh_ts', Date.now().toString());
+      localStorage.setItem(
+        `traffic_refresh_ts_${subscriptionId ?? 'default'}`,
+        Date.now().toString(),
+      );
       if (data.rate_limited && data.retry_after_seconds) {
         setTrafficRefreshCooldown(data.retry_after_seconds);
       } else {
         setTrafficRefreshCooldown(30);
       }
-      queryClient.invalidateQueries({ queryKey: ['subscription'] });
+      queryClient.invalidateQueries({ queryKey: ['subscription', subscriptionId] });
     },
     onError: (error: {
       response?: { status?: number; headers?: { get?: (key: string) => string } };
@@ -403,7 +436,7 @@ export default function Subscription() {
     if (hasAutoRefreshed.current) return;
     hasAutoRefreshed.current = true;
 
-    const lastRefresh = localStorage.getItem('traffic_refresh_ts');
+    const lastRefresh = localStorage.getItem(`traffic_refresh_ts_${subscriptionId ?? 'default'}`);
     const now = Date.now();
     const cacheMs = 30 * 1000;
 
@@ -417,7 +450,7 @@ export default function Subscription() {
     }
 
     refreshTrafficMutation.mutate();
-  }, [subscription, refreshTrafficMutation]);
+  }, [subscription, refreshTrafficMutation, subscriptionId]);
 
   const copyUrl = () => {
     if (subscription?.subscription_url) {
@@ -427,6 +460,11 @@ export default function Subscription() {
     }
   };
 
+  // In multi-tariff mode without a specific subscription ID, redirect to list
+  if (isMultiTariff && !subscriptionId && !isLoading) {
+    return <Navigate to="/subscriptions" replace />;
+  }
+
   if (isLoading) {
     return (
       <div className="flex min-h-64 items-center justify-center">
@@ -435,9 +473,37 @@ export default function Subscription() {
     );
   }
 
+  if (!subscription && subscriptionId) {
+    return (
+      <div className="mx-auto max-w-lg p-4 text-center">
+        <div className="mb-4 text-4xl">😕</div>
+        <h2 className="mb-2 text-xl font-bold text-dark-50">
+          {t('subscription.notFound', 'Подписка не найдена')}
+        </h2>
+        <p className="mb-4 text-sm text-dark-50/60">
+          {t('subscription.notFoundDesc', 'Возможно, подписка была удалена или не существует')}
+        </p>
+        <button
+          onClick={() => navigate('/subscriptions')}
+          className="rounded-xl bg-accent-500 px-6 py-2.5 text-sm font-medium text-white"
+        >
+          {t('subscription.backToList', 'Мои подписки')}
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-dark-50 sm:text-3xl">{t('subscription.title')}</h1>
+      {/* Page title */}
+      <div className="flex items-center gap-3">
+        <WebBackButton to={isMultiTariff ? '/subscriptions' : '/'} />
+        <h1 className="text-2xl font-bold text-dark-50 sm:text-3xl">
+          {isMultiTariff && subscription?.tariff_name
+            ? subscription.tariff_name
+            : t('subscription.title')}
+        </h1>
+      </div>
 
       {/* Current Subscription */}
       {subscription ? (
@@ -736,7 +802,7 @@ export default function Subscription() {
                       haptic.notification('error');
                       return;
                     }
-                    navigate('/connection');
+                    navigate(subscriptionId ? `/connection?sub=${subscriptionId}` : '/connection');
                   }}
                   className={`mb-5 flex w-full items-center gap-3.5 rounded-[14px] p-3.5 text-left transition-shadow duration-300${isAtDeviceLimit ? 'cursor-not-allowed opacity-50' : ''}`}
                   style={{ fontFamily: 'inherit' }}
@@ -1210,7 +1276,100 @@ export default function Subscription() {
       )}
 
       {/* Purchase / Renewal CTA */}
-      <PurchaseCTAButton subscription={subscription} />
+      <PurchaseCTAButton subscription={subscription} isMultiTariff={isMultiTariff} />
+
+      {/* Delete expired subscription */}
+      {isMultiTariff && subscription && !subscription.is_active && !subscription.is_trial && (
+        <div className="space-y-3">
+          {!showDeleteSheet ? (
+            <button
+              onClick={async () => {
+                if (platform === 'telegram') {
+                  const confirmed = await destructiveConfirm(
+                    t(
+                      'subscription.deleteWarning',
+                      'Подписка будет удалена безвозвратно. Все данные, устройства и настройки будут потеряны.',
+                    ),
+                    t('subscription.confirmDelete', 'Да, удалить'),
+                    t('subscription.deleteTitle', 'Удалить подписку?'),
+                  );
+                  if (!confirmed) return;
+                  setDeleteLoading(true);
+                  try {
+                    await subscriptionApi.deleteSubscription(subscription.id);
+                    queryClient.invalidateQueries({ queryKey: ['subscriptions-list'] });
+                    navigate('/subscriptions', { replace: true });
+                  } catch {
+                    setDeleteLoading(false);
+                  }
+                } else {
+                  setShowDeleteSheet(true);
+                }
+              }}
+              disabled={deleteLoading}
+              className="flex w-full items-center justify-center gap-2 rounded-2xl border border-red-400/20 bg-red-400/5 p-3.5 text-sm font-medium text-red-400 transition-colors hover:bg-red-400/10 disabled:opacity-50"
+            >
+              <svg
+                className="h-4 w-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                />
+              </svg>
+              {t('subscription.delete', 'Удалить подписку')}
+            </button>
+          ) : (
+            <div
+              className="rounded-2xl border border-red-400/20 p-4"
+              style={{ background: 'rgba(255,59,92,0.04)' }}
+            >
+              <div className="mb-3 text-sm font-semibold text-red-400">
+                {t('subscription.deleteTitle', 'Удалить подписку?')}
+              </div>
+              <div className="mb-4 text-xs" style={{ color: g.textSecondary }}>
+                {t(
+                  'subscription.deleteWarning',
+                  'Подписка будет удалена безвозвратно. Все данные, устройства и настройки будут потеряны. Это действие нельзя отменить.',
+                )}
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={async () => {
+                    setDeleteLoading(true);
+                    try {
+                      await subscriptionApi.deleteSubscription(subscription.id);
+                      queryClient.invalidateQueries({ queryKey: ['subscriptions-list'] });
+                      navigate('/subscriptions', { replace: true });
+                    } catch {
+                      setDeleteLoading(false);
+                      setShowDeleteSheet(false);
+                    }
+                  }}
+                  disabled={deleteLoading}
+                  className="flex-1 rounded-xl bg-red-500 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-red-600 disabled:opacity-50"
+                >
+                  {deleteLoading
+                    ? t('common.processing', 'Удаление...')
+                    : t('subscription.confirmDelete', 'Да, удалить')}
+                </button>
+                <button
+                  onClick={() => setShowDeleteSheet(false)}
+                  className="flex-1 rounded-xl border border-dark-700 py-2.5 text-sm font-medium transition-colors hover:bg-dark-700"
+                  style={{ color: g.textSecondary }}
+                >
+                  {t('common.cancel', 'Отмена')}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Additional Options (Buy Devices) */}
       {subscription &&
@@ -1381,7 +1540,7 @@ export default function Subscription() {
                           }
                           compact
                           onBeforeTopUp={async () => {
-                            await subscriptionApi.saveDevicesCart(devicesToAdd);
+                            await subscriptionApi.saveDevicesCart(devicesToAdd, subscriptionId);
                           }}
                         />
                       )}
@@ -1721,7 +1880,10 @@ export default function Subscription() {
                                     compact
                                     className="mb-3"
                                     onBeforeTopUp={async () => {
-                                      await subscriptionApi.saveTrafficCart(selectedTrafficPackage);
+                                      await subscriptionApi.saveTrafficCart(
+                                        selectedTrafficPackage,
+                                        subscriptionId,
+                                      );
                                     }}
                                   />
                                 )}

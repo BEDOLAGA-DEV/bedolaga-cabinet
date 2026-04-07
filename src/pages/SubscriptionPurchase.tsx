@@ -1,10 +1,11 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router';
+import { useNavigate, useSearchParams } from 'react-router';
 import { AxiosError } from 'axios';
 import { subscriptionApi } from '../api/subscription';
 import { promoApi } from '../api/promo';
+import { WebBackButton } from '../components/WebBackButton';
 import { getGlassColors } from '../utils/glassTheme';
 import { useTheme } from '../hooks/useTheme';
 import type {
@@ -28,16 +29,23 @@ export default function SubscriptionPurchase() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const subscriptionId = searchParams.get('subscriptionId')
+    ? parseInt(searchParams.get('subscriptionId')!, 10)
+    : undefined;
   const { formatAmount, currencySymbol } = useCurrency();
   const { isDark } = useTheme();
   const g = getGlassColors(isDark);
 
-  const formatPrice = (kopeks: number) => `${formatAmount(kopeks / 100)} ${currencySymbol}`;
+  const formatPrice = (kopeks: number) =>
+    kopeks === 0
+      ? t('subscription.free', 'Бесплатно')
+      : `${formatAmount(kopeks / 100)} ${currencySymbol}`;
 
   // Subscription query (shares cache with /subscription page)
   const { data: subscriptionResponse, isLoading } = useQuery({
-    queryKey: ['subscription'],
-    queryFn: subscriptionApi.getSubscription,
+    queryKey: ['subscription', subscriptionId],
+    queryFn: () => subscriptionApi.getSubscription(subscriptionId),
     retry: false,
     staleTime: 0,
     refetchOnMount: 'always',
@@ -51,8 +59,8 @@ export default function SubscriptionPurchase() {
     isError: optionsError,
     refetch: refetchOptions,
   } = useQuery({
-    queryKey: ['purchase-options'],
-    queryFn: subscriptionApi.getPurchaseOptions,
+    queryKey: ['purchase-options', subscriptionId],
+    queryFn: () => subscriptionApi.getPurchaseOptions(subscriptionId),
     staleTime: 0,
     refetchOnMount: 'always',
   });
@@ -69,6 +77,14 @@ export default function SubscriptionPurchase() {
   const classicOptions = !isTariffsMode ? (purchaseOptions as ClassicPurchaseOptions) : null;
   const tariffs =
     isTariffsMode && purchaseOptions && 'tariffs' in purchaseOptions ? purchaseOptions.tariffs : [];
+
+  // Multi-tariff: check via subscriptions list query
+  const { data: multiSubData } = useQuery({
+    queryKey: ['subscriptions-list'],
+    queryFn: () => subscriptionApi.getSubscriptions(),
+    staleTime: 60_000,
+  });
+  const isMultiTariff = multiSubData?.multi_tariff_enabled ?? false;
 
   // Helper to apply promo discount
   const applyPromoDiscount = (
@@ -217,36 +233,38 @@ export default function SubscriptionPurchase() {
   // Preview query (classic)
   const { data: preview, isLoading: previewLoading } = useQuery({
     queryKey: ['purchase-preview', currentSelection],
-    queryFn: () => subscriptionApi.previewPurchase(currentSelection),
+    queryFn: () => subscriptionApi.previewPurchase(currentSelection, subscriptionId),
     enabled: !!selectedPeriod && showPurchaseForm && currentStep === 'confirm',
   });
 
   // Classic purchase mutation
   const purchaseMutation = useMutation({
-    mutationFn: () => subscriptionApi.submitPurchase(currentSelection),
+    mutationFn: () => subscriptionApi.submitPurchase(currentSelection, subscriptionId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['subscription'] });
-      queryClient.invalidateQueries({ queryKey: ['purchase-options'] });
-      navigate('/subscription', { replace: true });
+      queryClient.invalidateQueries({ queryKey: ['subscription', subscriptionId] });
+      queryClient.invalidateQueries({ queryKey: ['purchase-options', subscriptionId] });
+      queryClient.invalidateQueries({ queryKey: ['balance'] });
+      queryClient.invalidateQueries({ queryKey: ['subscriptions-list'] });
+      navigate('/subscriptions', { replace: true });
     },
   });
 
   // Switch preview query
   const { data: switchPreview, isLoading: switchPreviewLoading } = useQuery({
     queryKey: ['tariff-switch-preview', switchTariffId],
-    queryFn: () => subscriptionApi.previewTariffSwitch(switchTariffId!),
+    queryFn: () => subscriptionApi.previewTariffSwitch(switchTariffId!, subscriptionId),
     enabled: !!switchTariffId,
   });
 
   // Tariff switch mutation
   const switchTariffMutation = useMutation({
-    mutationFn: (tariffId: number) => subscriptionApi.switchTariff(tariffId),
+    mutationFn: (tariffId: number) => subscriptionApi.switchTariff(tariffId, subscriptionId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['subscription'] });
-      queryClient.invalidateQueries({ queryKey: ['purchase-options'] });
+      queryClient.invalidateQueries({ queryKey: ['subscription', subscriptionId] });
+      queryClient.invalidateQueries({ queryKey: ['purchase-options', subscriptionId] });
       setSwitchTariffId(null);
 
-      navigate('/subscription', { replace: true });
+      navigate('/subscriptions', { replace: true });
     },
     onError: (error: unknown) => {
       if (error instanceof AxiosError) {
@@ -263,7 +281,7 @@ export default function SubscriptionPurchase() {
             setSelectedTariff(targetTariff);
             setSelectedTariffPeriod(targetTariff.periods[0] || null);
             setShowTariffPurchase(true);
-            queryClient.invalidateQueries({ queryKey: ['purchase-options'] });
+            queryClient.invalidateQueries({ queryKey: ['purchase-options', subscriptionId] });
           }
         }
       }
@@ -291,7 +309,8 @@ export default function SubscriptionPurchase() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['subscription'] });
       queryClient.invalidateQueries({ queryKey: ['purchase-options'] });
-      navigate('/subscription', { replace: true });
+      queryClient.invalidateQueries({ queryKey: ['subscriptions-list'] });
+      navigate('/subscriptions', { replace: true });
     },
   });
 
@@ -370,34 +389,7 @@ export default function SubscriptionPurchase() {
   if (optionsError || (!purchaseOptions && !optionsLoading)) {
     return (
       <div className="space-y-6">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => navigate('/subscription')}
-            aria-label="Back"
-            className="flex h-9 w-9 items-center justify-center rounded-xl transition-colors"
-            style={{
-              background: g.innerBg,
-              border: `1px solid ${g.innerBorder}`,
-            }}
-          >
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="text-dark-50/60"
-            >
-              <path d="M19 12H5M12 19l-7-7 7-7" />
-            </svg>
-          </button>
-          <h1 className="text-2xl font-bold text-dark-50 sm:text-3xl">
-            {t('subscription.extend')}
-          </h1>
-        </div>
+        <h1 className="text-2xl font-bold text-dark-50 sm:text-3xl">{t('subscription.extend')}</h1>
         <div
           className="rounded-3xl p-6 text-center"
           style={{
@@ -421,37 +413,19 @@ export default function SubscriptionPurchase() {
 
   return (
     <div className="space-y-6">
-      {/* Header with back link */}
+      {/* Header */}
       <div className="flex items-center gap-3">
-        <button
-          onClick={() => navigate('/subscription')}
-          aria-label="Back"
-          className="flex h-9 w-9 items-center justify-center rounded-xl transition-colors"
-          style={{
-            background: g.innerBg,
-            border: `1px solid ${g.innerBorder}`,
-          }}
-        >
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="text-dark-50/60"
-          >
-            <path d="M19 12H5M12 19l-7-7 7-7" />
-          </svg>
-        </button>
+        <WebBackButton
+          to={subscriptionId ? `/subscriptions/${subscriptionId}` : '/subscriptions'}
+        />
         <h1 className="text-2xl font-bold text-dark-50 sm:text-3xl">
-          {subscription?.is_daily && !subscription?.is_trial
-            ? t('subscription.switchTariff.title')
-            : subscription && !subscription.is_trial
-              ? t('subscription.extend')
-              : t('subscription.getSubscription')}
+          {isMultiTariff && !subscriptionId
+            ? t('subscription.newTariff', 'Новый тариф')
+            : !isMultiTariff && subscription?.is_daily && !subscription?.is_trial
+              ? t('subscription.switchTariff.title')
+              : subscription && !subscription.is_trial
+                ? t('subscription.extend')
+                : t('subscription.getSubscription')}
         </h1>
       </div>
 
@@ -748,9 +722,37 @@ export default function SubscriptionPurchase() {
               )}
 
               {/* Tariff Grid */}
+              {isMultiTariff &&
+                purchaseOptions &&
+                'all_tariffs_purchased' in purchaseOptions &&
+                purchaseOptions.all_tariffs_purchased && (
+                  <div
+                    className="rounded-2xl border p-6 text-center"
+                    style={{ background: g.cardBg, borderColor: g.cardBorder }}
+                  >
+                    <div className="mb-2 text-3xl">✅</div>
+                    <h3 className="mb-1 text-lg font-semibold" style={{ color: g.text }}>
+                      {t('subscription.allTariffsPurchased', 'Все тарифы подключены')}
+                    </h3>
+                    <p className="mb-4 text-sm" style={{ color: g.textSecondary }}>
+                      {t(
+                        'subscription.allTariffsPurchasedDesc',
+                        'Вы уже приобрели все доступные тарифы. Продлить подписку можно на странице тарифа.',
+                      )}
+                    </p>
+                    <button
+                      onClick={() => navigate('/subscriptions')}
+                      className="rounded-xl bg-accent-500 px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-600"
+                    >
+                      {t('subscription.backToList', 'Мои подписки')}
+                    </button>
+                  </div>
+                )}
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 {[...tariffs]
                   .filter((tariff) => {
+                    // In multi-tariff mode: hide already purchased tariffs
+                    if (isMultiTariff && tariff.is_purchased) return false;
                     if (subscription?.is_trial && tariff.name.toLowerCase().includes('trial')) {
                       return false;
                     }
@@ -772,6 +774,7 @@ export default function SubscriptionPurchase() {
                       'subscription_is_expired' in purchaseOptions &&
                       purchaseOptions.subscription_is_expired === true;
                     const canSwitch =
+                      !isMultiTariff &&
                       subscription &&
                       subscription.tariff_id &&
                       !isCurrentTariff &&

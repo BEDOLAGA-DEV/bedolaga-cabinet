@@ -1,5 +1,5 @@
 import { useEffect, useCallback, useMemo, useRef } from 'react';
-import { Link, useNavigate } from 'react-router';
+import { Link, useNavigate, useSearchParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { openLink as sdkOpenLink } from '@telegram-apps/sdk-react';
@@ -14,6 +14,8 @@ import InstallationGuide from '../components/connection/InstallationGuide';
 export default function Connection() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const subId = searchParams.get('sub') ? Number(searchParams.get('sub')) : undefined;
   const user = useAuthStore((state) => state.user);
   const isAdmin = useAuthStore((state) => state.isAdmin);
   const { isTelegramWebApp } = useTelegramSDK();
@@ -27,8 +29,8 @@ export default function Connection() {
     isLoading,
     error,
   } = useQuery<AppConfig>({
-    queryKey: ['appConfig'],
-    queryFn: () => subscriptionApi.getAppConfig(),
+    queryKey: ['appConfig', subId],
+    queryFn: () => subscriptionApi.getAppConfig(subId),
   });
 
   const handleGoBack = useCallback(() => {
@@ -41,9 +43,10 @@ export default function Connection() {
       state: {
         url: appConfig?.subscriptionUrl,
         hideLink: appConfig?.hideLink ?? false,
+        subscriptionId: subId,
       },
     });
-  }, [navigate, appConfig?.subscriptionUrl, appConfig?.hideLink, isTelegramWebApp]);
+  }, [navigate, appConfig?.subscriptionUrl, appConfig?.hideLink, isTelegramWebApp, subId]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

@@ -16,6 +16,7 @@ export interface WSMessage {
   new_balance_rubles?: number;
   description?: string;
   // Subscription events
+  subscription_id?: number;
   expires_at?: string;
   new_expires_at?: string;
   tariff_name?: string;

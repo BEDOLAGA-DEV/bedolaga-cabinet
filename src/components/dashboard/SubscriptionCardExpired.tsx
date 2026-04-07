@@ -57,15 +57,18 @@ export default function SubscriptionCardExpired({
     try {
       if (isDisabledDaily) {
         // Resume daily subscription via toggle pause endpoint
-        await subscriptionApi.togglePause();
+        await subscriptionApi.togglePause(subscription.id);
       } else if (isDaily && subscription.tariff_id) {
         // Expired daily tariff — purchase for 1 day
         await subscriptionApi.purchaseTariff(subscription.tariff_id, 1);
       } else {
-        await subscriptionApi.renewSubscription(30);
+        await subscriptionApi.renewSubscription(30, subscription.id);
       }
       haptic.success();
-      queryClient.invalidateQueries({ queryKey: ['subscription'] });
+      queryClient.invalidateQueries({
+        predicate: (query) => Array.isArray(query.queryKey) && query.queryKey[0] === 'subscription',
+      });
+      queryClient.invalidateQueries({ queryKey: ['subscriptions-list'] });
       queryClient.invalidateQueries({ queryKey: ['balance'] });
       queryClient.invalidateQueries({ queryKey: ['purchase-options'] });
     } catch (err: unknown) {
@@ -257,7 +260,7 @@ export default function SubscriptionCardExpired({
       <div className="flex gap-2.5">
         {isLimited ? (
           <Link
-            to="/subscription"
+            to={`/subscriptions/${subscription.id}`}
             className="flex flex-1 items-center justify-center gap-2 rounded-[14px] py-3.5 text-[15px] font-semibold tracking-tight text-white transition-all duration-300"
             style={{
               background: accent.gradient,

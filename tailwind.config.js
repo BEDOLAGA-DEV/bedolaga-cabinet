@@ -282,5 +282,9 @@ export default {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    function ({ addVariant }) {
+      addVariant('light', '.light &');
+    },
+  ],
 };

@@ -10,6 +10,7 @@ import {
   type TopCampaignsResponse,
   type RecentPaymentsResponse,
 } from '../api/admin';
+import { formatUptime } from '../utils/format';
 
 const CABINET_VERSION = __APP_VERSION__;
 import { useCurrency } from '../hooks/useCurrency';
@@ -254,14 +255,16 @@ function NodeCard({ node, onRestart, onToggle, isLoading }: NodeCardProps) {
       </div>
 
       {/* Xray Version & Uptime */}
-      {(node.xray_version || node.xray_uptime) && (
+      {(node.versions?.xray || node.xray_uptime > 0) && (
         <div className="mb-3 flex items-center gap-3 text-xs">
-          {node.xray_version && (
+          {node.versions?.xray && (
             <span className="rounded bg-dark-700/50 px-2 py-1 text-dark-300">
-              Xray {node.xray_version}
+              Xray {node.versions.xray}
             </span>
           )}
-          {node.xray_uptime && <span className="text-dark-500">Uptime: {node.xray_uptime}</span>}
+          {node.xray_uptime > 0 && (
+            <span className="text-dark-500">Uptime: {formatUptime(node.xray_uptime)}</span>
+          )}
         </div>
       )}
 

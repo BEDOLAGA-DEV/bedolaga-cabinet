@@ -190,7 +190,7 @@ export default function SuccessNotificationModal() {
 
   const handleGoToSubscription = () => {
     hide();
-    navigate('/subscription');
+    navigate('/subscriptions');
   };
 
   const handleGoToBalance = () => {

@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { adminSettingsApi, SettingDefinition } from '../api/adminSettings';
 import { themeColorsApi } from '../api/themeColors';
 import { useFavoriteSettings } from '../hooks/useFavoriteSettings';
-import { MENU_SECTIONS, MenuItem, formatSettingKey } from '../components/admin';
+import { SETTINGS_TREE, findTreeLocation, formatSettingKey } from '../components/admin';
 import { usePlatform } from '../platform/hooks/usePlatform';
 import { AnalyticsTab } from '../components/admin/AnalyticsTab';
 import { BrandingTab } from '../components/admin/BrandingTab';
@@ -13,12 +13,9 @@ import { MenuEditorTab } from '../components/admin/MenuEditorTab';
 import { ThemeTab } from '../components/admin/ThemeTab';
 import { FavoritesTab } from '../components/admin/FavoritesTab';
 import { SettingsTab } from '../components/admin/SettingsTab';
+import { SettingsTreeSidebar } from '../components/admin/SettingsTreeSidebar';
 import { SettingsMobileTabs } from '../components/admin/SettingsMobileTabs';
-import {
-  SettingsSearch,
-  SettingsSearchMobile,
-  SettingsSearchResults,
-} from '../components/admin/SettingsSearch';
+import { SettingsSearchMobile, SettingsSearchResults } from '../components/admin/SettingsSearch';
 
 // BackIcon
 const BackIcon = () => (
@@ -33,17 +30,18 @@ const BackIcon = () => (
   </svg>
 );
 
-// Find section ID by category key
-function findSectionByCategory(categoryKey: string): string | null {
-  for (const section of MENU_SECTIONS) {
-    for (const item of section.items) {
-      if (item.categories?.includes(categoryKey)) {
-        return item.id;
-      }
-    }
-  }
-  return null;
-}
+// ChevronRight for breadcrumbs
+const ChevronRightIcon = () => (
+  <svg
+    className="h-3.5 w-3.5 text-dark-600"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    strokeWidth={2}
+  >
+    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+  </svg>
+);
 
 export default function AdminSettings() {
   const { t } = useTranslation();
@@ -73,23 +71,42 @@ export default function AdminSettings() {
     queryFn: () => adminSettingsApi.getSettings(),
   });
 
-  // Get current menu item configuration
-  const currentMenuItem = useMemo(() => {
-    for (const section of MENU_SECTIONS) {
-      const item = section.items.find((i: MenuItem) => i.id === activeSection);
-      if (item) return item;
+  // Find active tree info (group + child for tree sub-items)
+  // No useMemo needed — SETTINGS_TREE is a static constant, iteration is trivial
+  let activeTreeInfo: {
+    group: (typeof SETTINGS_TREE.groups)[number];
+    child: (typeof SETTINGS_TREE.groups)[number]['children'][number];
+  } | null = null;
+  for (const group of SETTINGS_TREE.groups) {
+    const child = group.children.find((c) => c.id === activeSection);
+    if (child) {
+      activeTreeInfo = { group, child };
+      break;
     }
-    return null;
-  }, [activeSection]);
+  }
 
-  // Get categories for current section
+  // Settings that require SALES_MODE=tariffs to be visible
+  const TARIFF_MODE_SETTINGS = ['MULTI_TARIFF_ENABLED', 'MAX_ACTIVE_SUBSCRIPTIONS'];
+
+  // Check if tariffs mode is active
+  const isTariffsMode = useMemo(() => {
+    if (!allSettings || !Array.isArray(allSettings)) return false;
+    const salesMode = allSettings.find((s: SettingDefinition) => s.key === 'SALES_MODE');
+    return salesMode?.current === 'tariffs';
+  }, [allSettings]);
+
+  // Get categories for current sub-item
   const currentCategories = useMemo(() => {
-    if (!currentMenuItem?.categories || !allSettings || !Array.isArray(allSettings)) return [];
+    if (!activeTreeInfo || !allSettings || !Array.isArray(allSettings)) return [];
 
+    const categoryKeys = activeTreeInfo.child.categories;
     const categoryMap = new Map<string, SettingDefinition[]>();
 
     for (const setting of allSettings) {
-      if (currentMenuItem.categories.includes(setting.category.key)) {
+      if (categoryKeys.includes(setting.category.key)) {
+        // Hide tariff-dependent settings when not in tariffs mode
+        if (!isTariffsMode && TARIFF_MODE_SETTINGS.includes(setting.key)) continue;
+
         if (!categoryMap.has(setting.category.key)) {
           categoryMap.set(setting.category.key, []);
         }
@@ -102,7 +119,8 @@ export default function AdminSettings() {
       label: t(`admin.settings.categories.${key}`, key),
       settings,
     }));
-  }, [currentMenuItem, allSettings, t]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- activeTreeInfo derived from activeSection
+  }, [activeSection, allSettings, isTariffsMode, t]);
 
   // Filter settings for search - GLOBAL search across all settings
   const filteredSettings = useMemo(() => {
@@ -112,27 +130,20 @@ export default function AdminSettings() {
     if (!q) return [];
 
     return allSettings.filter((s: SettingDefinition) => {
-      // Search by key
+      // Hide tariff-dependent settings when not in tariffs mode
+      if (!isTariffsMode && TARIFF_MODE_SETTINGS.includes(s.key)) return false;
+
       if (s.key.toLowerCase().includes(q)) return true;
-
-      // Search by original name
       if (s.name?.toLowerCase().includes(q)) return true;
-
-      // Search by translated name
       const formattedKey = formatSettingKey(s.name || s.key);
       const translatedName = t(`admin.settings.settingNames.${formattedKey}`, formattedKey);
       if (translatedName.toLowerCase().includes(q)) return true;
-
-      // Search by description
       if (s.hint?.description?.toLowerCase().includes(q)) return true;
-
-      // Search by category
       const categoryLabel = t(`admin.settings.categories.${s.category.key}`, s.category.key);
       if (categoryLabel.toLowerCase().includes(q)) return true;
-
       return false;
     });
-  }, [allSettings, searchQuery, t]);
+  }, [allSettings, searchQuery, isTariffsMode, t]);
 
   // Favorite settings
   const favoriteSettings = useMemo(() => {
@@ -140,18 +151,42 @@ export default function AdminSettings() {
     return allSettings.filter((s: SettingDefinition) => favorites.includes(s.key));
   }, [allSettings, favorites]);
 
+  // Count of modified settings
+  const modifiedCount = useMemo(() => {
+    if (!allSettings || !Array.isArray(allSettings)) return 0;
+    return allSettings.filter((s: SettingDefinition) => s.has_override).length;
+  }, [allSettings]);
+
+  // Total settings count
+  const totalCount = useMemo(() => {
+    if (!allSettings || !Array.isArray(allSettings)) return 0;
+    return allSettings.length;
+  }, [allSettings]);
+
   // Handle setting selection from autocomplete
   const handleSelectSetting = useCallback(
     (setting: SettingDefinition) => {
-      const sectionId = findSectionByCategory(setting.category.key);
-      if (sectionId) {
-        setActiveSection(sectionId);
+      const location = findTreeLocation(setting.category.key);
+      if (location) {
+        setActiveSection(location.subItemId);
       }
-      // Set search to setting key to filter to just this setting
       setSearchQuery(setting.key);
     },
     [setActiveSection, setSearchQuery],
   );
+
+  // Get the display title for the current section
+  const sectionTitle = useMemo(() => {
+    // Special items
+    const specialItem = SETTINGS_TREE.specialItems.find((item) => item.id === activeSection);
+    if (specialItem) return t(`admin.settings.${specialItem.id}`);
+
+    // Tree sub-items
+    if (activeTreeInfo) return t(`admin.settings.tree.${activeTreeInfo.child.id}`);
+
+    return t('admin.settings.title');
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- activeTreeInfo derived from activeSection
+  }, [activeSection, t]);
 
   // Render content based on active section
   const renderContent = () => {
@@ -186,17 +221,7 @@ export default function AdminSettings() {
           />
         );
       default:
-        if (
-          [
-            'payments',
-            'subscriptions',
-            'interface',
-            'notifications',
-            'database',
-            'system',
-            'users',
-          ].includes(activeSection)
-        ) {
+        if (activeTreeInfo) {
           return (
             <SettingsTab
               categories={currentCategories}
@@ -207,6 +232,8 @@ export default function AdminSettings() {
             />
           );
         }
+        // Unknown section — fallback to branding
+        setActiveSection('branding');
         return null;
     }
   };
@@ -214,7 +241,7 @@ export default function AdminSettings() {
   return (
     <>
       {/* Mobile Layout */}
-      <div className="space-y-4 lg:hidden">
+      <div className="space-y-4 pb-4 lg:hidden">
         <SettingsMobileTabs
           activeSection={activeSection}
           setActiveSection={setActiveSection}
@@ -233,7 +260,7 @@ export default function AdminSettings() {
       {/* Desktop Layout - fixed sidebar, scrollable content */}
       <div className="hidden h-[calc(100vh-120px)] lg:flex">
         {/* Fixed Sidebar */}
-        <div className="w-64 shrink-0 overflow-y-auto border-r border-dark-700/50">
+        <div className="w-[264px] shrink-0 overflow-y-auto border-r border-dark-700/50">
           <div className="border-b border-dark-700/50 p-4">
             <div className="flex items-center gap-3">
               {/* Show back button only on web, not in Telegram Mini App */}
@@ -241,6 +268,7 @@ export default function AdminSettings() {
                 <button
                   onClick={() => navigate('/admin')}
                   className="flex h-10 w-10 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
+                  aria-label={t('admin.settings.backToAdmin')}
                 >
                   <BackIcon />
                 </button>
@@ -248,67 +276,52 @@ export default function AdminSettings() {
               <h1 className="text-lg font-bold text-dark-100">{t('admin.settings.title')}</h1>
             </div>
           </div>
-          <nav className="space-y-1 p-2">
-            {MENU_SECTIONS.map((section, sectionIdx) => (
-              <div key={section.id}>
-                {sectionIdx > 0 && <div className="my-3 border-t border-dark-700/50" />}
-                {section.items.map((item) => {
-                  const isActive = activeSection === item.id;
-                  const hasIcon = item.iconType === 'star';
-                  return (
-                    <button
-                      key={item.id}
-                      onClick={() => setActiveSection(item.id)}
-                      className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 transition-all ${
-                        isActive
-                          ? 'bg-accent-500/10 text-accent-400'
-                          : 'text-dark-400 hover:bg-dark-800/50 hover:text-dark-200'
-                      }`}
-                    >
-                      {hasIcon && (
-                        <svg
-                          className={`h-4 w-4 ${isActive ? 'fill-current' : ''}`}
-                          fill={isActive ? 'currentColor' : 'none'}
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          strokeWidth={2}
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
-                          />
-                        </svg>
-                      )}
-                      <span className="font-medium">{t(`admin.settings.${item.id}`)}</span>
-                      {item.id === 'favorites' && favorites.length > 0 && (
-                        <span className="ml-auto rounded-full bg-warning-500/20 px-2 py-0.5 text-xs text-warning-400">
-                          {favorites.length}
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            ))}
-          </nav>
+          <SettingsTreeSidebar
+            activeSection={activeSection}
+            onSectionChange={setActiveSection}
+            favoritesCount={favorites.length}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            allSettings={allSettings}
+            onSelectSetting={handleSelectSetting}
+          />
         </div>
 
         {/* Scrollable Content */}
         <div className="min-w-0 flex-1 overflow-y-auto p-6">
+          {/* Breadcrumb for tree sub-items */}
+          {activeTreeInfo && !searchQuery.trim() && (
+            <div className="mb-2 flex items-center gap-1.5 text-xs">
+              <button
+                onClick={() => setActiveSection(activeTreeInfo.group.children[0].id)}
+                className="text-dark-500 transition-colors hover:text-dark-300"
+              >
+                {t(`admin.settings.groups.${activeTreeInfo.group.id}`)}
+              </button>
+              <ChevronRightIcon />
+              <span className="text-dark-300">
+                {t(`admin.settings.tree.${activeTreeInfo.child.id}`)}
+              </span>
+            </div>
+          )}
+
+          {/* Title + count badges */}
           <div className="mb-4 flex items-center gap-3">
-            <h2 className="truncate text-xl font-semibold text-dark-100">
-              {t(`admin.settings.${activeSection}`)}
-            </h2>
-            <div className="flex-1" />
-            <SettingsSearch
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
-              resultsCount={filteredSettings.length}
-              allSettings={allSettings}
-              onSelectSetting={handleSelectSetting}
-            />
+            <h2 className="truncate text-xl font-semibold text-dark-100">{sectionTitle}</h2>
+            {totalCount > 0 && !searchQuery.trim() && activeTreeInfo && (
+              <div className="flex items-center gap-2">
+                <span className="rounded-full bg-dark-700/50 px-2 py-0.5 text-xs text-dark-400">
+                  {t('admin.settings.totalCount', { count: totalCount })}
+                </span>
+                {modifiedCount > 0 && (
+                  <span className="rounded-full bg-warning-500/20 px-2 py-0.5 text-xs text-warning-400">
+                    {t('admin.settings.modifiedCount', { count: modifiedCount })}
+                  </span>
+                )}
+              </div>
+            )}
           </div>
+
           <SettingsSearchResults searchQuery={searchQuery} resultsCount={filteredSettings.length} />
           {renderContent()}
         </div>

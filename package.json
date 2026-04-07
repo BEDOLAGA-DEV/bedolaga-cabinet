@@ -1,7 +1,7 @@
 {
   "name": "cabinet-frontend",
   "private": true,
-  "version": "1.42.0",
+  "version": "1.44.1",
   "description": "Remnawave Bedolaga Web App",
   "license": "AGPL-3.0",
   "type": "module",
@@ -65,7 +65,6 @@
     "react-i18next": "^16.5.4",
     "react-router": "^7.13.0",
     "react-twemoji": "^0.7.2",
-    "reactjs-tiptap-editor": "^1.0.19",
     "recharts": "^3.7.0",
     "sigma": "^3.0.2",
     "simplex-noise": "^4.0.3",

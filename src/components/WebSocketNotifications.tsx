@@ -82,7 +82,11 @@ export default function WebSocketNotifications() {
           expiresAt: message.expires_at,
           tariffName: message.tariff_name,
         });
-        queryClient.invalidateQueries({ queryKey: ['subscription'] });
+        queryClient.invalidateQueries({
+          predicate: (query) =>
+            Array.isArray(query.queryKey) && query.queryKey[0] === 'subscription',
+        });
+        queryClient.invalidateQueries({ queryKey: ['subscriptions-list'] });
         queryClient.invalidateQueries({ queryKey: ['balance'] });
         queryClient.invalidateQueries({ queryKey: ['purchase-options'] });
         refreshUser();
@@ -96,7 +100,11 @@ export default function WebSocketNotifications() {
           amountKopeks: message.amount_kopeks,
           expiresAt: message.new_expires_at,
         });
-        queryClient.invalidateQueries({ queryKey: ['subscription'] });
+        queryClient.invalidateQueries({
+          predicate: (query) =>
+            Array.isArray(query.queryKey) && query.queryKey[0] === 'subscription',
+        });
+        queryClient.invalidateQueries({ queryKey: ['subscriptions-list'] });
         queryClient.invalidateQueries({ queryKey: ['balance'] });
         queryClient.invalidateQueries({ queryKey: ['purchase-options'] });
         refreshUser();
@@ -115,7 +123,7 @@ export default function WebSocketNotifications() {
             },
           ),
           icon: <span className="text-lg">⏰</span>,
-          onClick: () => navigate('/subscription'),
+          onClick: () => navigate('/subscriptions'),
           duration: 10000,
         });
         return;
@@ -130,10 +138,14 @@ export default function WebSocketNotifications() {
             'Your subscription has expired. Renew to continue using the service.',
           ),
           icon: <span className="text-lg">😢</span>,
-          onClick: () => navigate('/subscription'),
+          onClick: () => navigate('/subscriptions'),
           duration: 10000,
         });
-        queryClient.invalidateQueries({ queryKey: ['subscription'] });
+        queryClient.invalidateQueries({
+          predicate: (query) =>
+            Array.isArray(query.queryKey) && query.queryKey[0] === 'subscription',
+        });
+        queryClient.invalidateQueries({ queryKey: ['subscriptions-list'] });
         refreshUser();
         return;
       }
@@ -171,7 +183,11 @@ export default function WebSocketNotifications() {
           icon: <span className="text-lg">🔄</span>,
           duration: 5000,
         });
-        queryClient.invalidateQueries({ queryKey: ['subscription'] });
+        queryClient.invalidateQueries({
+          predicate: (query) =>
+            Array.isArray(query.queryKey) && query.queryKey[0] === 'subscription',
+        });
+        queryClient.invalidateQueries({ queryKey: ['subscriptions-list'] });
         return;
       }
 
@@ -183,7 +199,11 @@ export default function WebSocketNotifications() {
           devicesAdded: message.devices_added,
           newDeviceLimit: message.new_device_limit,
         });
-        queryClient.invalidateQueries({ queryKey: ['subscription'] });
+        queryClient.invalidateQueries({
+          predicate: (query) =>
+            Array.isArray(query.queryKey) && query.queryKey[0] === 'subscription',
+        });
+        queryClient.invalidateQueries({ queryKey: ['subscriptions-list'] });
         queryClient.invalidateQueries({ queryKey: ['balance'] });
         queryClient.invalidateQueries({ queryKey: ['purchase-options'] });
         queryClient.invalidateQueries({ queryKey: ['transactions'] });
@@ -199,7 +219,11 @@ export default function WebSocketNotifications() {
           trafficGbAdded: message.traffic_gb_added,
           newTrafficLimitGb: message.new_traffic_limit_gb,
         });
-        queryClient.invalidateQueries({ queryKey: ['subscription'] });
+        queryClient.invalidateQueries({
+          predicate: (query) =>
+            Array.isArray(query.queryKey) && query.queryKey[0] === 'subscription',
+        });
+        queryClient.invalidateQueries({ queryKey: ['subscriptions-list'] });
         queryClient.invalidateQueries({ queryKey: ['balance'] });
         queryClient.invalidateQueries({ queryKey: ['purchase-options'] });
         queryClient.invalidateQueries({ queryKey: ['transactions'] });
@@ -222,10 +246,14 @@ export default function WebSocketNotifications() {
             },
           ),
           icon: <span className="text-lg">🔁</span>,
-          onClick: () => navigate('/subscription'),
+          onClick: () => navigate('/subscriptions'),
           duration: 8000,
         });
-        queryClient.invalidateQueries({ queryKey: ['subscription'] });
+        queryClient.invalidateQueries({
+          predicate: (query) =>
+            Array.isArray(query.queryKey) && query.queryKey[0] === 'subscription',
+        });
+        queryClient.invalidateQueries({ queryKey: ['subscriptions-list'] });
         queryClient.invalidateQueries({ queryKey: ['balance'] });
         queryClient.invalidateQueries({ queryKey: ['purchase-options'] });
         refreshUser();
@@ -240,7 +268,7 @@ export default function WebSocketNotifications() {
             message.reason ||
             t('wsNotifications.autopay.failedMessage', 'Failed to auto-renew your subscription'),
           icon: <span className="text-lg">❌</span>,
-          onClick: () => navigate('/subscription'),
+          onClick: () => navigate('/subscriptions'),
           duration: 10000,
         });
         return;

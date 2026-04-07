@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../store/auth';
 import { useBlockingStore } from '../store/blocking';
@@ -18,6 +18,7 @@ import StatsGrid from '../components/dashboard/StatsGrid';
 import { giftApi } from '../api/gift';
 import { promoApi } from '../api/promo';
 import PendingGiftCard from '../components/dashboard/PendingGiftCard';
+import SubscriptionListCard from '../components/subscription/SubscriptionListCard';
 import { API } from '../config/constants';
 
 const ChevronRightIcon = () => (
@@ -28,6 +29,7 @@ const ChevronRightIcon = () => (
 
 export default function Dashboard() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
   const refreshUser = useAuthStore((state) => state.refreshUser);
   const queryClient = useQueryClient();
@@ -49,26 +51,35 @@ export default function Dashboard() {
     refetchOnMount: 'always',
   });
 
+  // Multi-tariff: check if user has multiple subscriptions
+  const { data: multiSubData } = useQuery({
+    queryKey: ['subscriptions-list'],
+    queryFn: () => subscriptionApi.getSubscriptions(),
+    staleTime: 60_000,
+  });
+  const isMultiTariff = multiSubData?.multi_tariff_enabled ?? false;
+
   const { data: subscriptionResponse, isLoading: subLoading } = useQuery({
     queryKey: ['subscription'],
-    queryFn: subscriptionApi.getSubscription,
+    queryFn: () => subscriptionApi.getSubscription(),
     retry: false,
     staleTime: API.BALANCE_STALE_TIME_MS,
     refetchOnMount: 'always',
+    enabled: !isMultiTariff,
   });
 
   const subscription = subscriptionResponse?.subscription ?? null;
 
   const { data: trialInfo, isLoading: trialLoading } = useQuery({
     queryKey: ['trial-info'],
-    queryFn: subscriptionApi.getTrialInfo,
+    queryFn: () => subscriptionApi.getTrialInfo(),
     enabled: !subscription && !subLoading,
   });
 
   const { data: devicesData } = useQuery({
     queryKey: ['devices'],
-    queryFn: subscriptionApi.getDevices,
-    enabled: !!subscription,
+    queryFn: () => subscriptionApi.getDevices(),
+    enabled: !!subscription && !isMultiTariff,
     staleTime: API.BALANCE_STALE_TIME_MS,
   });
 
@@ -99,10 +110,11 @@ export default function Dashboard() {
   });
 
   const activateTrialMutation = useMutation({
-    mutationFn: subscriptionApi.activateTrial,
+    mutationFn: () => subscriptionApi.activateTrial(),
     onSuccess: () => {
       setTrialError(null);
       queryClient.invalidateQueries({ queryKey: ['subscription'] });
+      queryClient.invalidateQueries({ queryKey: ['subscriptions-list'] });
       queryClient.invalidateQueries({ queryKey: ['trial-info'] });
       queryClient.invalidateQueries({ queryKey: ['balance'] });
       queryClient.invalidateQueries({ queryKey: ['purchase-options'] });
@@ -122,20 +134,23 @@ export default function Dashboard() {
   } | null>(null);
 
   const refreshTrafficMutation = useMutation({
-    mutationFn: subscriptionApi.refreshTraffic,
+    mutationFn: () => subscriptionApi.refreshTraffic(subscription?.id),
     onSuccess: (data) => {
       setTrafficData({
         traffic_used_gb: data.traffic_used_gb,
         traffic_used_percent: data.traffic_used_percent,
         is_unlimited: data.is_unlimited,
       });
-      localStorage.setItem('traffic_refresh_ts', Date.now().toString());
+      localStorage.setItem(
+        `traffic_refresh_ts_${subscription?.id ?? 'default'}`,
+        Date.now().toString(),
+      );
       if (data.rate_limited && data.retry_after_seconds) {
         setTrafficRefreshCooldown(data.retry_after_seconds);
       } else {
         setTrafficRefreshCooldown(30);
       }
-      queryClient.invalidateQueries({ queryKey: ['subscription'] });
+      queryClient.invalidateQueries({ queryKey: ['subscription', subscription?.id] });
     },
     onError: (error: {
       response?: { status?: number; headers?: { get?: (key: string) => string } };
@@ -164,7 +179,7 @@ export default function Dashboard() {
     if (hasAutoRefreshed.current) return;
     hasAutoRefreshed.current = true;
 
-    const lastRefresh = localStorage.getItem('traffic_refresh_ts');
+    const lastRefresh = localStorage.getItem(`traffic_refresh_ts_${subscription?.id ?? 'default'}`);
     const now = Date.now();
     const cacheMs = API.TRAFFIC_CACHE_MS;
 
@@ -266,37 +281,76 @@ export default function Dashboard() {
       {/* Pending Gift Activations */}
       {pendingGifts && pendingGifts.length > 0 && <PendingGiftCard gifts={pendingGifts} />}
 
-      {/* Subscription Status Card */}
-      {subLoading ? (
-        <div className="bento-card">
-          <div className="mb-4 flex items-center justify-between">
-            <div className="skeleton h-5 w-20" />
-            <div className="skeleton h-6 w-16 rounded-full" />
+      {/* Multi-tariff: show subscription cards (max 3) */}
+      {isMultiTariff && multiSubData?.subscriptions && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between px-1">
+            <span className="text-sm font-medium opacity-60">
+              {t('dashboard.subscriptions', 'Подписки')}
+            </span>
+            <Link to="/subscriptions" className="text-xs text-accent-400 hover:underline">
+              {t('dashboard.manageAll', 'Управление')} →
+            </Link>
           </div>
-          <div className="skeleton mb-3 h-10 w-32" />
-          <div className="skeleton mb-3 h-4 w-40" />
-          <div className="skeleton h-3 w-full rounded-full" />
-          <div className="mt-5">
-            <div className="skeleton h-12 w-full rounded-xl" />
-          </div>
+          {multiSubData.subscriptions.slice(0, 3).map((sub) => (
+            <SubscriptionListCard
+              key={sub.id}
+              subscription={sub}
+              onClick={() => navigate(`/subscriptions/${sub.id}`)}
+            />
+          ))}
+          {multiSubData.subscriptions.length > 3 && (
+            <Link
+              to="/subscriptions"
+              className="flex w-full items-center justify-center rounded-2xl border border-dashed border-white/15 p-3 text-xs opacity-50 transition-opacity hover:opacity-80"
+            >
+              {t('dashboard.showAll', 'Показать все')} ({multiSubData.subscriptions.length})
+            </Link>
+          )}
+          <Link
+            to="/subscription/purchase"
+            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-accent-500/15 p-3.5 text-sm font-medium text-accent-400 transition-all hover:bg-accent-500/25"
+          >
+            <span className="text-base">+</span> {t('subscriptions.buyAnother', 'Купить ещё тариф')}
+          </Link>
         </div>
-      ) : subscription?.is_expired ||
-        subscription?.status === 'disabled' ||
-        subscription?.is_limited ? (
-        <SubscriptionCardExpired
-          subscription={subscription}
-          balanceKopeks={balanceData?.balance_kopeks ?? 0}
-          balanceRubles={balanceData?.balance_rubles ?? 0}
-        />
-      ) : subscription ? (
-        <SubscriptionCardActive
-          subscription={subscription}
-          trafficData={trafficData}
-          refreshTrafficMutation={refreshTrafficMutation}
-          trafficRefreshCooldown={trafficRefreshCooldown}
-          connectedDevices={devicesData?.total ?? 0}
-        />
-      ) : null}
+      )}
+
+      {/* Subscription Status Card — hidden in multi-tariff (managed via /subscriptions) */}
+      {!isMultiTariff && (
+        <>
+          {subLoading ? (
+            <div className="bento-card">
+              <div className="mb-4 flex items-center justify-between">
+                <div className="skeleton h-5 w-20" />
+                <div className="skeleton h-6 w-16 rounded-full" />
+              </div>
+              <div className="skeleton mb-3 h-10 w-32" />
+              <div className="skeleton mb-3 h-4 w-40" />
+              <div className="skeleton h-3 w-full rounded-full" />
+              <div className="mt-5">
+                <div className="skeleton h-12 w-full rounded-xl" />
+              </div>
+            </div>
+          ) : subscription?.is_expired ||
+            subscription?.status === 'disabled' ||
+            subscription?.is_limited ? (
+            <SubscriptionCardExpired
+              subscription={subscription}
+              balanceKopeks={balanceData?.balance_kopeks ?? 0}
+              balanceRubles={balanceData?.balance_rubles ?? 0}
+            />
+          ) : subscription ? (
+            <SubscriptionCardActive
+              subscription={subscription}
+              trafficData={trafficData}
+              refreshTrafficMutation={refreshTrafficMutation}
+              trafficRefreshCooldown={trafficRefreshCooldown}
+              connectedDevices={devicesData?.total ?? 0}
+            />
+          ) : null}
+        </>
+      )}
 
       {/* Trial Activation */}
       {hasNoSubscription && !trialLoading && trialInfo?.is_available && (
