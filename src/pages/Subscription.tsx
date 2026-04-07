@@ -926,11 +926,12 @@ export default function Subscription() {
               {displayedConnectionUrl && !shouldHideConnectionLink && (
                 <div className="mb-5 flex gap-2">
                   <code
-                    className="scrollbar-hide flex-1 overflow-x-auto break-all rounded-[10px] px-3 py-2 font-mono text-[11px] text-dark-50/30"
+                    className="block min-w-0 flex-1 truncate whitespace-nowrap rounded-[10px] px-3 py-2 font-mono text-[11px] text-dark-50/30"
                     style={{
                       background: g.codeBg,
                       border: `1px solid ${g.codeBorder}`,
                     }}
+                    title={displayedConnectionUrl}
                   >
                     {displayedConnectionUrl}
                   </code>
