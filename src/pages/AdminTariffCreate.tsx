@@ -220,7 +220,7 @@ export default function AdminTariffCreate() {
       traffic_limit_gb: toNumber(trafficLimitGb, 100),
       device_limit: toNumber(deviceLimit, 1),
       device_price_kopeks:
-        toNumber(devicePriceKopeks) > 0 ? toNumber(devicePriceKopeks) : undefined,
+        toNumber(devicePriceKopeks) >= 0 ? toNumber(devicePriceKopeks) : undefined,
       max_device_limit: toNumber(maxDeviceLimit) > 0 ? toNumber(maxDeviceLimit) : undefined,
       tier_level: toNumber(tierLevel, 1),
       period_prices: isDaily ? [] : periodPrices.filter((p) => p.price_kopeks >= 0),
@@ -912,7 +912,7 @@ export default function AdminTariffCreate() {
                       onClick={() => {
                         const gb = toNumber(newPackageGb, 0);
                         const price = toNumber(newPackagePrice, 0);
-                        if (gb > 0 && price > 0 && !trafficTopupPackages[String(gb)]) {
+                        if (gb > 0 && price >= 0 && !trafficTopupPackages[String(gb)]) {
                           setTrafficTopupPackages((prev) => ({
                             ...prev,
                             [String(gb)]: price * 100,
@@ -1029,6 +1029,11 @@ export default function AdminTariffCreate() {
                 { value: 'DAY', labelKey: 'admin.tariffs.resetModeDaily', emoji: '📅' },
                 { value: 'WEEK', labelKey: 'admin.tariffs.resetModeWeekly', emoji: '📆' },
                 { value: 'MONTH', labelKey: 'admin.tariffs.resetModeMonthly', emoji: '🗓️' },
+                {
+                  value: 'MONTH_ROLLING',
+                  labelKey: 'admin.tariffs.resetModeMonthRolling',
+                  emoji: '🔄',
+                },
                 { value: 'NO_RESET', labelKey: 'admin.tariffs.resetModeNever', emoji: '🚫' },
               ].map((option) => (
                 <button

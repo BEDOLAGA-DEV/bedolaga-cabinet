@@ -78,7 +78,12 @@ export const authApi = {
   registerEmail: async (
     email: string,
     password: string,
-  ): Promise<{ message: string; email: string }> => {
+  ): Promise<{
+    message: string;
+    email?: string;
+    merge_required?: boolean;
+    merge_token?: string;
+  }> => {
     const response = await apiClient.post('/cabinet/auth/email/register', {
       email,
       password,

@@ -232,8 +232,6 @@ export default function AdminUsers() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    setOffset(0);
-    loadUsers();
   };
 
   const totalPages = Math.ceil(total / limit);
@@ -305,7 +303,10 @@ export default function AdminUsers() {
               <input
                 type="text"
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setOffset(0);
+                }}
                 placeholder={t('admin.users.search')}
                 className="w-full rounded-xl border border-dark-700 bg-dark-800 py-2 pl-10 pr-4 text-dark-100 placeholder-dark-500 focus:border-dark-600 focus:outline-none"
               />
@@ -319,7 +320,10 @@ export default function AdminUsers() {
               <input
                 type="email"
                 value={emailSearch}
-                onChange={(e) => setEmailSearch(e.target.value)}
+                onChange={(e) => {
+                  setEmailSearch(e.target.value);
+                  setOffset(0);
+                }}
                 placeholder={t('admin.users.searchEmail')}
                 className="w-full rounded-xl border border-dark-700 bg-dark-800 py-2 pl-10 pr-4 text-dark-100 placeholder-dark-500 focus:border-dark-600 focus:outline-none"
               />

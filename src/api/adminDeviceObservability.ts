@@ -95,7 +95,10 @@ function toRow(item: UserTrafficItem, enrichment?: TrafficEnrichmentData): Devic
   };
 }
 
-function summarizeRows(rows: DeviceObservabilityRow[], missingFromTraffic: number): DeviceObservabilitySummary {
+function summarizeRows(
+  rows: DeviceObservabilityRow[],
+  missingFromTraffic: number,
+): DeviceObservabilitySummary {
   let totalConnectedDevices = 0;
   let usersWithDevices = 0;
   let usersOverLimit = 0;
@@ -107,7 +110,11 @@ function summarizeRows(rows: DeviceObservabilityRow[], missingFromTraffic: numbe
     totalConnectedDevices += row.devices_connected;
     if (row.devices_connected > 0) usersWithDevices += 1;
     if (row.over_limit_by > 0) usersOverLimit += 1;
-    if (!row.is_unlimited_limit && row.device_limit > 0 && row.devices_connected === row.device_limit) {
+    if (
+      !row.is_unlimited_limit &&
+      row.device_limit > 0 &&
+      row.devices_connected === row.device_limit
+    ) {
       usersAtLimit += 1;
     }
     if (row.is_unlimited_limit) usersWithUnlimitedLimit += 1;
@@ -189,7 +196,12 @@ export const adminDeviceObservabilityApi = {
     const skipCache = options.skipCache === true;
     const cacheKey = buildCacheKey(period, pageSize);
 
-    if (!skipCache && snapshotCache && snapshotCache.key === cacheKey && Date.now() < snapshotCache.expiresAt) {
+    if (
+      !skipCache &&
+      snapshotCache &&
+      snapshotCache.key === cacheKey &&
+      Date.now() < snapshotCache.expiresAt
+    ) {
       return snapshotCache.value;
     }
 
@@ -200,7 +212,12 @@ export const adminDeviceObservabilityApi = {
     };
 
     const enrichmentPromise = adminTrafficApi.getEnrichment({ skipCache });
-    const trafficRows = await loadAllTrafficRows(baseParams, pageSize, skipCache, options.onProgress);
+    const trafficRows = await loadAllTrafficRows(
+      baseParams,
+      pageSize,
+      skipCache,
+      options.onProgress,
+    );
     const enrichmentResponse = await enrichmentPromise;
     const enrichmentMap = enrichmentResponse.data;
 

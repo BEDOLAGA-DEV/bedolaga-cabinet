@@ -14,7 +14,7 @@ interface TelegramLoginButtonProps {
   referralCode?: string;
 }
 
-const SCRIPT_LOAD_TIMEOUT_MS = 8000;
+const SCRIPT_LOAD_TIMEOUT_MS = 2000;
 const DEEPLINK_POLL_INTERVAL_MS = 2500;
 
 export default function TelegramLoginButton({ referralCode }: TelegramLoginButtonProps) {

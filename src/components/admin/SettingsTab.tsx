@@ -1,9 +1,8 @@
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { SettingDefinition, adminSettingsApi } from '../../api/adminSettings';
-import { ChevronDownIcon } from './icons';
-import { SettingRow } from './SettingRow';
+import { QuickToggles } from './QuickToggles';
+import { SettingsTableRow } from './SettingsTableRow';
 
 interface CategoryGroup {
   key: string;
@@ -29,20 +28,6 @@ export function SettingsTab({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
-
-  const toggleSection = (key: string) => {
-    setExpandedSections((prev) => {
-      const next = new Set(prev);
-      if (next.has(key)) {
-        next.delete(key);
-      } else {
-        next.add(key);
-      }
-      return next;
-    });
-  };
-
   const updateSettingMutation = useMutation({
     mutationFn: ({ key, value }: { key: string; value: string }) =>
       adminSettingsApi.updateSetting(key, value),
@@ -58,92 +43,80 @@ export function SettingsTab({
     },
   });
 
-  // If searching, show flat list
-  if (searchQuery) {
+  // Search mode: flat list of filtered results
+  if (searchQuery.trim()) {
+    if (filteredSettings.length === 0) {
+      return (
+        <div className="rounded-xl border border-dark-700/30 bg-dark-800/30 p-12 text-center">
+          <p className="text-dark-400">{t('admin.settings.noSettings')}</p>
+        </div>
+      );
+    }
     return (
-      <div className="space-y-4">
-        {filteredSettings.length === 0 ? (
-          <div className="rounded-2xl border border-dark-700/30 bg-dark-800/30 p-12 text-center">
-            <p className="text-dark-400">{t('admin.settings.noSettings')}</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-            {filteredSettings.map((setting) => (
-              <SettingRow
-                key={setting.key}
-                setting={setting}
-                isFavorite={isFavorite(setting.key)}
-                onToggleFavorite={() => toggleFavorite(setting.key)}
-                onUpdate={(value) => updateSettingMutation.mutate({ key: setting.key, value })}
-                onReset={() => resetSettingMutation.mutate(setting.key)}
-                isUpdating={updateSettingMutation.isPending}
-                isResetting={resetSettingMutation.isPending}
-              />
-            ))}
-          </div>
-        )}
+      <div className="overflow-hidden rounded-xl border border-dark-700/40">
+        {filteredSettings.map((setting, idx) => (
+          <SettingsTableRow
+            key={setting.key}
+            setting={setting}
+            isFavorite={isFavorite(setting.key)}
+            onToggleFavorite={() => toggleFavorite(setting.key)}
+            onUpdate={(value) => updateSettingMutation.mutate({ key: setting.key, value })}
+            onReset={() => resetSettingMutation.mutate(setting.key)}
+            isUpdating={updateSettingMutation.isPending}
+            isResetting={resetSettingMutation.isPending}
+            isLast={idx === filteredSettings.length - 1}
+          />
+        ))}
       </div>
     );
   }
 
-  // Show accordion for subcategories
-  return (
-    <div className="space-y-3">
-      {categories.map((cat) => {
-        const isExpanded = expandedSections.has(cat.key);
-        return (
-          <div
-            key={cat.key}
-            className="overflow-hidden rounded-2xl border border-dark-700/30 bg-dark-800/30"
-          >
-            {/* Accordion header */}
-            <button
-              onClick={() => toggleSection(cat.key)}
-              className="flex w-full items-center justify-between p-4 transition-colors hover:bg-dark-800/50"
-            >
-              <div className="flex items-center gap-3">
-                <span className="font-medium text-dark-100">{cat.label}</span>
-                <span className="rounded-full bg-dark-700 px-2 py-0.5 text-xs text-dark-400">
-                  {cat.settings.length}
-                </span>
-              </div>
-              <div
-                className={`text-dark-400 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
-              >
-                <ChevronDownIcon />
-              </div>
-            </button>
+  // Normal mode: QuickToggles + settings by category
+  const allCategorySettings = categories.flatMap((c) => c.settings);
 
-            {/* Accordion content */}
-            {isExpanded && (
-              <div className="border-t border-dark-700/30 p-4 pt-0">
-                <div className="grid grid-cols-1 gap-4 pt-4 lg:grid-cols-2">
-                  {cat.settings.map((setting) => (
-                    <SettingRow
-                      key={setting.key}
-                      setting={setting}
-                      isFavorite={isFavorite(setting.key)}
-                      onToggleFavorite={() => toggleFavorite(setting.key)}
-                      onUpdate={(value) =>
-                        updateSettingMutation.mutate({ key: setting.key, value })
-                      }
-                      onReset={() => resetSettingMutation.mutate(setting.key)}
-                      isUpdating={updateSettingMutation.isPending}
-                      isResetting={resetSettingMutation.isPending}
-                    />
-                  ))}
-                </div>
+  if (allCategorySettings.length === 0) {
+    return (
+      <div className="rounded-xl border border-dark-700/30 bg-dark-800/30 p-12 text-center">
+        <p className="text-dark-400">{t('admin.settings.noSettings')}</p>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <QuickToggles
+        settings={allCategorySettings}
+        onUpdate={(key, value) => updateSettingMutation.mutate({ key, value })}
+        disabled={updateSettingMutation.isPending}
+      />
+      {categories.map((category) => {
+        if (category.settings.length === 0) return null;
+        return (
+          <div key={category.key} className="mb-4">
+            {categories.length > 1 && (
+              <div className="mb-2 flex items-center gap-2">
+                <h3 className="text-sm font-semibold text-dark-200">{category.label}</h3>
+                <span className="text-xs text-dark-500">{category.settings.length}</span>
               </div>
             )}
+            <div className="overflow-hidden rounded-xl border border-dark-700/40">
+              {category.settings.map((setting, idx) => (
+                <SettingsTableRow
+                  key={setting.key}
+                  setting={setting}
+                  isFavorite={isFavorite(setting.key)}
+                  onToggleFavorite={() => toggleFavorite(setting.key)}
+                  onUpdate={(value) => updateSettingMutation.mutate({ key: setting.key, value })}
+                  onReset={() => resetSettingMutation.mutate(setting.key)}
+                  isUpdating={updateSettingMutation.isPending}
+                  isResetting={resetSettingMutation.isPending}
+                  isLast={idx === category.settings.length - 1}
+                />
+              ))}
+            </div>
           </div>
         );
       })}
-
-      {categories.length === 0 && (
-        <div className="rounded-2xl border border-dark-700/30 bg-dark-800/30 p-12 text-center">
-          <p className="text-dark-400">{t('admin.settings.noSettings')}</p>
-        </div>
-      )}
     </div>
   );
 }

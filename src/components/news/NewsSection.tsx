@@ -369,7 +369,7 @@ export default function NewsSection() {
     gcTime: 10 * 60_000,
   });
 
-  const items = data?.items ?? [];
+  const items = useMemo(() => data?.items ?? [], [data?.items]);
   const total = data?.total ?? 0;
   const categories = data?.categories ?? [];
 

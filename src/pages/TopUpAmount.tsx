@@ -88,7 +88,7 @@ export default function TopUpAmount() {
   const queryClient = useQueryClient();
   const { formatAmount, currencySymbol, convertAmount, convertToRub, targetCurrency } =
     useCurrency();
-  const { openInvoice, openTelegramLink, openLink } = usePlatform();
+  const { openInvoice, openTelegramLink, openLink, platform } = usePlatform();
   const haptic = useHaptic();
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -228,15 +228,16 @@ export default function TopUpAmount() {
     },
   });
 
-  // Auto-focus input
+  // Auto-focus input (only on desktop — mobile keyboard hides bottom nav)
   useEffect(() => {
+    if (platform === 'telegram') return;
     const timer = setTimeout(() => {
       if (inputRef.current) {
         inputRef.current.focus();
       }
     }, 100);
     return () => clearTimeout(timer);
-  }, []);
+  }, [platform]);
 
   if (!method) {
     return (
@@ -399,7 +400,6 @@ export default function TopUpAmount() {
               placeholder="0"
               className="h-14 w-full bg-transparent px-4 pr-12 text-xl font-bold text-dark-100 placeholder:text-dark-600 focus:outline-none"
               autoComplete="off"
-              autoFocus
             />
             <span className="absolute right-4 top-1/2 -translate-y-1/2 text-base font-semibold text-dark-500">
               {currencySymbol}

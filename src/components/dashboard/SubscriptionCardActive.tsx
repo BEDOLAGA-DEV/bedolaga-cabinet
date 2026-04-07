@@ -214,7 +214,7 @@ export default function SubscriptionCardActive({
               haptic.notification('error');
               return;
             }
-            navigate('/connection');
+            navigate(`/connection?sub=${subscription.id}`);
           }}
           className={`mb-2.5 flex w-full items-center gap-3.5 rounded-[14px] p-3.5 text-left transition-shadow duration-300${isAtDeviceLimit ? 'cursor-not-allowed opacity-50' : ''}`}
           data-onboarding="connect-devices"
@@ -312,7 +312,7 @@ export default function SubscriptionCardActive({
       <div className="mb-5 flex gap-2.5">
         {/* Tariff badge — clickable */}
         <Link
-          to="/subscription"
+          to={`/subscriptions/${subscription.id}`}
           className="flex-1 rounded-[14px] p-3.5 transition-all duration-500"
           style={{
             background: `linear-gradient(135deg, rgba(${zone.mainVarRaw}, 0.07), rgba(${zone.mainVarRaw}, 0.02))`,
@@ -396,7 +396,7 @@ export default function SubscriptionCardActive({
           {trafficRefreshCooldown > 0 ? `${trafficRefreshCooldown}s` : t('common.refresh')}
         </button>
         <Link
-          to="/subscription"
+          to={`/subscriptions/${subscription.id}`}
           className="text-[11px] font-medium text-dark-50/25 transition-colors hover:text-dark-50/40"
         >
           {t('dashboard.viewSubscription')} &rarr;

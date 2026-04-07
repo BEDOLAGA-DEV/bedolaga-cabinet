@@ -27,11 +27,16 @@ import { getCachedFullscreenEnabled, isTelegramMobile } from './hooks/useTelegra
 import './i18n';
 import './styles/globals.css';
 
-// HMR guard — prevent double init when Vite hot-reloads the module
+// Only initialize Telegram SDK when running inside Telegram
+const isTelegramEnv =
+  !!(window as unknown as Record<string, unknown>).TelegramWebviewProxy ||
+  location.hash.includes('tgWebApp') ||
+  location.search.includes('tgWebApp');
+
 const HMR_KEY = '__tg_sdk_initialized';
 const alreadyInitialized = (window as unknown as Record<string, unknown>)[HMR_KEY] === true;
 
-if (!alreadyInitialized) {
+if (isTelegramEnv && !alreadyInitialized) {
   (window as unknown as Record<string, unknown>)[HMR_KEY] = true;
 
   try {
@@ -77,6 +82,9 @@ if (!alreadyInitialized) {
 
     miniAppReady();
   } catch {}
+} else if (!isTelegramEnv) {
+  // Outside Telegram — still clear stale session tokens if any
+  clearStaleSessionIfNeeded(null);
 }
 
 if ('requestIdleCallback' in window) {

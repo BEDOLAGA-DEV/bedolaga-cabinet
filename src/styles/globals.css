@@ -1642,3 +1642,82 @@ input[type='checkbox']:hover:not(:checked) {
 .light .sheet-handle {
   @apply bg-champagne-400;
 }
+
+/* ── Admin Panel: Floating Orbs Background ── */
+@keyframes adminOrbFloat {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(30px, -40px) scale(1.05);
+  }
+  66% {
+    transform: translate(-20px, 30px) scale(0.95);
+  }
+  100% {
+    transform: translate(10px, -20px) scale(1.02);
+  }
+}
+
+@keyframes adminPulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(0.85);
+  }
+}
+
+@keyframes adminCardEnter {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes adminItemEnter {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.admin-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+  pointer-events: none;
+  animation: adminOrbFloat 20s ease-in-out infinite alternate;
+}
+
+.light .admin-orb {
+  filter: blur(140px);
+  opacity: 0.15 !important;
+}
+
+/* Mobile: reduce orb count and blur for performance */
+@media (max-width: 1023px) {
+  .admin-orb {
+    filter: blur(80px);
+  }
+  .admin-orb:nth-child(n + 4) {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-orb {
+    animation: none;
+  }
+}

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import i18n from '../i18n';
@@ -296,7 +296,7 @@ export default function AdminUserDetail() {
   const [user, setUser] = useState<UserDetailResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<
-    'info' | 'subscription' | 'balance' | 'sync' | 'tickets' | 'gifts'
+    'info' | 'subscription' | 'balance' | 'sync' | 'tickets' | 'gifts' | 'referrals'
   >('info');
   const [syncStatus, setSyncStatus] = useState<PanelSyncStatusResponse | null>(null);
   const [tariffs, setTariffs] = useState<UserAvailableTariff[]>([]);
@@ -305,6 +305,22 @@ export default function AdminUserDetail() {
   // Referrals
   const [referrals, setReferrals] = useState<UserListItem[]>([]);
   const [referralsLoading, setReferralsLoading] = useState(false);
+
+  // Referrals tab state
+  const [referralsList, setReferralsList] = useState<UserListItem[]>([]);
+  const [referralsTotal, setReferralsTotal] = useState(0);
+  const [referralsListLoading, setReferralsListLoading] = useState(false);
+  const [referrerSearchQuery, setReferrerSearchQuery] = useState('');
+  const [showReferrerSearch, setShowReferrerSearch] = useState(false);
+  const [referrerSearchResults, setReferrerSearchResults] = useState<UserListItem[]>([]);
+  const [referrerSearchLoading, setReferrerSearchLoading] = useState(false);
+  const referrerSearchRef = useRef<HTMLDivElement>(null);
+  // Add referral (bind someone as this user's referral)
+  const [showAddReferral, setShowAddReferral] = useState(false);
+  const [addReferralSearchQuery, setAddReferralSearchQuery] = useState('');
+  const [addReferralSearchResults, setAddReferralSearchResults] = useState<UserListItem[]>([]);
+  const [addReferralSearchLoading, setAddReferralSearchLoading] = useState(false);
+  const addReferralSearchRef = useRef<HTMLDivElement>(null);
 
   // Panel info & node usage
   const [panelInfo, setPanelInfo] = useState<UserPanelInfo | null>(null);
@@ -335,6 +351,9 @@ export default function AdminUserDetail() {
   const [subAction, setSubAction] = useState<string>('extend');
   const [subDays, setSubDays] = useState<number | ''>(30);
   const [selectedTariffId, setSelectedTariffId] = useState<number | null>(null);
+  const [activeSubscriptionId, setActiveSubscriptionId] = useState<number | null>(null);
+  const hasAutoSelectedSub = useRef(false);
+  const [subscriptionDetailView, setSubscriptionDetailView] = useState(false);
 
   // Promo group
   const [promoGroups, setPromoGroups] = useState<PromoGroup[]>([]);
@@ -383,12 +402,12 @@ export default function AdminUserDetail() {
   const loadSyncStatus = useCallback(async () => {
     if (!userId) return;
     try {
-      const data = await adminUsersApi.getSyncStatus(userId);
+      const data = await adminUsersApi.getSyncStatus(userId, activeSubscriptionId ?? undefined);
       setSyncStatus(data);
     } catch (error) {
       console.error('Failed to load sync status:', error);
     }
-  }, [userId]);
+  }, [userId, activeSubscriptionId]);
 
   const loadTariffs = useCallback(async () => {
     if (!userId) return;
@@ -431,10 +450,24 @@ export default function AdminUserDetail() {
     try {
       setReferralsLoading(true);
       const data = await adminUsersApi.getReferrals(userId, 0, 50);
-      setReferrals(data.users);
+      setReferrals(data.users || []);
     } catch {
     } finally {
       setReferralsLoading(false);
+    }
+  }, [userId]);
+
+  const loadReferralsList = useCallback(async () => {
+    if (!userId) return;
+    setReferralsListLoading(true);
+    try {
+      const data = await adminUsersApi.getReferrals(userId, 0, 100);
+      setReferralsList(data.users || []);
+      setReferralsTotal(data.total || 0);
+    } catch {
+      // silent
+    } finally {
+      setReferralsListLoading(false);
     }
   }, [userId]);
 
@@ -442,27 +475,27 @@ export default function AdminUserDetail() {
     if (!userId) return;
     try {
       setPanelInfoLoading(true);
-      const data = await adminUsersApi.getPanelInfo(userId);
+      const data = await adminUsersApi.getPanelInfo(userId, activeSubscriptionId ?? undefined);
       setPanelInfo(data);
     } catch {
     } finally {
       setPanelInfoLoading(false);
     }
-  }, [userId]);
+  }, [userId, activeSubscriptionId]);
 
   const loadNodeUsage = useCallback(async () => {
     if (!userId) return;
     try {
-      const data = await adminUsersApi.getNodeUsage(userId);
+      const data = await adminUsersApi.getNodeUsage(userId, activeSubscriptionId ?? undefined);
       setNodeUsage(data);
     } catch {}
-  }, [userId]);
+  }, [userId, activeSubscriptionId]);
 
   const loadDevices = useCallback(async () => {
     if (!userId) return;
     try {
       setDevicesLoading(true);
-      const data = await adminUsersApi.getUserDevices(userId);
+      const data = await adminUsersApi.getUserDevices(userId, activeSubscriptionId ?? undefined);
       setDevices(data.devices);
       setDevicesTotal(data.total);
       setDeviceLimit(data.device_limit);
@@ -470,7 +503,7 @@ export default function AdminUserDetail() {
     } finally {
       setDevicesLoading(false);
     }
-  }, [userId]);
+  }, [userId, activeSubscriptionId]);
 
   const loadSubscriptionData = useCallback(async () => {
     await Promise.all([loadPanelInfo(), loadNodeUsage(), loadDevices()]);
@@ -556,6 +589,7 @@ export default function AdminUserDetail() {
     }
     if (activeTab === 'tickets') loadTickets();
     if (activeTab === 'gifts') loadGifts();
+    if (activeTab === 'referrals') loadReferralsList();
   }, [
     activeTab,
     loadSyncStatus,
@@ -565,6 +599,7 @@ export default function AdminUserDetail() {
     loadSubscriptionData,
     loadPromoGroups,
     loadGifts,
+    loadReferralsList,
     hasPermission,
   ]);
 
@@ -602,6 +637,9 @@ export default function AdminUserDetail() {
     try {
       const data: UpdateSubscriptionRequest = {
         action: action as UpdateSubscriptionRequest['action'],
+        ...(activeSubscriptionId && action !== 'create'
+          ? { subscription_id: activeSubscriptionId }
+          : {}),
         ...(action === 'extend' || action === 'shorten' ? { days: toNumber(subDays, 30) } : {}),
         ...(action === 'change_tariff' && selectedTariffId ? { tariff_id: selectedTariffId } : {}),
         ...(action === 'create'
@@ -650,10 +688,14 @@ export default function AdminUserDetail() {
     if (!userId) return;
     setActionLoading(true);
     try {
-      await adminUsersApi.syncFromPanel(userId, {
-        update_subscription: true,
-        update_traffic: true,
-      });
+      await adminUsersApi.syncFromPanel(
+        userId,
+        {
+          update_subscription: true,
+          update_traffic: true,
+        },
+        activeSubscriptionId ?? undefined,
+      );
       await loadUser();
       await loadSyncStatus();
     } catch (error) {
@@ -667,7 +709,11 @@ export default function AdminUserDetail() {
     if (!userId) return;
     setActionLoading(true);
     try {
-      await adminUsersApi.syncToPanel(userId, { create_if_missing: true });
+      await adminUsersApi.syncToPanel(
+        userId,
+        { create_if_missing: true },
+        activeSubscriptionId ?? undefined,
+      );
       await loadUser();
       await loadSyncStatus();
     } catch (error) {
@@ -693,7 +739,7 @@ export default function AdminUserDetail() {
     if (!userId) return;
     setActionLoading(true);
     try {
-      await adminUsersApi.deleteUserDevice(userId, hwid);
+      await adminUsersApi.deleteUserDevice(userId, hwid, activeSubscriptionId ?? undefined);
       notify.success(t('admin.users.detail.devices.deleted'));
       await loadDevices();
     } catch {
@@ -707,7 +753,7 @@ export default function AdminUserDetail() {
     if (!userId) return;
     setActionLoading(true);
     try {
-      await adminUsersApi.resetUserDevices(userId);
+      await adminUsersApi.resetUserDevices(userId, activeSubscriptionId ?? undefined);
       notify.success(t('admin.users.detail.devices.allDeleted'));
       await loadDevices();
     } catch {
@@ -721,7 +767,11 @@ export default function AdminUserDetail() {
     if (!userId) return;
     setActionLoading(true);
     try {
-      await adminUsersApi.updateSubscription(userId, { action: 'add_traffic', traffic_gb: gb });
+      await adminUsersApi.updateSubscription(userId, {
+        action: 'add_traffic',
+        traffic_gb: gb,
+        ...(activeSubscriptionId ? { subscription_id: activeSubscriptionId } : {}),
+      });
       notify.success(t('admin.users.detail.subscription.trafficAdded'));
       setSelectedTrafficGb('');
       await loadUser();
@@ -739,6 +789,7 @@ export default function AdminUserDetail() {
       await adminUsersApi.updateSubscription(userId, {
         action: 'remove_traffic',
         traffic_purchase_id: purchaseId,
+        ...(activeSubscriptionId ? { subscription_id: activeSubscriptionId } : {}),
       });
       notify.success(t('admin.users.detail.subscription.trafficRemoved'));
       await loadUser();
@@ -756,6 +807,7 @@ export default function AdminUserDetail() {
       await adminUsersApi.updateSubscription(userId, {
         action: 'set_device_limit',
         device_limit: newLimit,
+        ...(activeSubscriptionId ? { subscription_id: activeSubscriptionId } : {}),
       });
       notify.success(t('admin.users.detail.subscription.deviceLimitUpdated'));
       await loadUser();
@@ -766,7 +818,21 @@ export default function AdminUserDetail() {
     }
   };
 
-  const currentTariff = tariffs.find((t) => t.id === user?.subscription?.tariff_id) || null;
+  // Multi-subscription: pick active subscription or first from list
+  const userSubscriptions = useMemo(() => user?.subscriptions ?? [], [user?.subscriptions]);
+  const selectedSub =
+    userSubscriptions.find((s) => s.id === activeSubscriptionId) ?? user?.subscription ?? null;
+
+  // Auto-select first subscription when user loads (one-time init)
+  useEffect(() => {
+    if (user && userSubscriptions.length > 0 && !hasAutoSelectedSub.current) {
+      const activeSub = userSubscriptions.find((s) => s.is_active) ?? userSubscriptions[0];
+      setActiveSubscriptionId(activeSub.id);
+      hasAutoSelectedSub.current = true;
+    }
+  }, [user, userSubscriptions]);
+
+  const currentTariff = tariffs.find((t) => t.id === selectedSub?.tariff_id) || null;
 
   const handleChangePromoGroup = async (groupId: number | null) => {
     if (!userId) return;
@@ -837,6 +903,171 @@ export default function AdminUserDetail() {
       setOfferSending(false);
     }
   };
+
+  // Referrals tab: assign referrer
+  const handleAssignReferrer = async (referrerId: number) => {
+    if (!userId) return;
+    setActionLoading(true);
+    try {
+      await adminUsersApi.assignReferrer(userId, referrerId);
+      await loadUser();
+      setShowReferrerSearch(false);
+      setReferrerSearchQuery('');
+      setReferrerSearchResults([]);
+      notify.success(t('admin.users.detail.referrals.referrerAssigned'));
+    } catch (error: unknown) {
+      const axiosErr = error as { response?: { data?: { detail?: string } } };
+      notify.error(axiosErr?.response?.data?.detail || t('common.error'));
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // Referrals tab: remove referrer
+  const handleRemoveReferrer = async () => {
+    if (!userId) return;
+    setActionLoading(true);
+    try {
+      await adminUsersApi.removeReferrer(userId);
+      await loadUser();
+      notify.success(t('admin.users.detail.referrals.referrerRemoved'));
+    } catch (error: unknown) {
+      const axiosErr = error as { response?: { data?: { detail?: string } } };
+      notify.error(axiosErr?.response?.data?.detail || t('common.error'));
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // Referrals tab: remove a referral
+  const handleRemoveReferral = async (referralUserId: number) => {
+    if (!userId) return;
+    setActionLoading(true);
+    try {
+      await adminUsersApi.removeReferral(userId, referralUserId);
+      await loadReferralsList();
+      await loadUser();
+      notify.success(t('admin.users.detail.referrals.referralRemoved'));
+    } catch (error: unknown) {
+      const axiosErr = error as { response?: { data?: { detail?: string } } };
+      notify.error(axiosErr?.response?.data?.detail || t('common.error'));
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // Add a referral: assign current user as referrer of selected user
+  const handleAddReferral = async (targetUserId: number) => {
+    if (!userId) return;
+    setActionLoading(true);
+    try {
+      await adminUsersApi.assignReferrer(targetUserId, userId);
+      await loadReferralsList();
+      await loadUser();
+      setShowAddReferral(false);
+      setAddReferralSearchQuery('');
+      setAddReferralSearchResults([]);
+      notify.success(t('admin.users.detail.referrals.referralAdded'));
+    } catch (error: unknown) {
+      const axiosErr = error as { response?: { data?: { detail?: string } } };
+      notify.error(axiosErr?.response?.data?.detail || t('common.error'));
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // Referrals tab: debounced user search for referrer assignment
+  useEffect(() => {
+    if (referrerSearchQuery.length < 2 || !showReferrerSearch) {
+      setReferrerSearchResults([]);
+      setReferrerSearchLoading(false);
+      return;
+    }
+    setReferrerSearchLoading(true);
+    setReferrerSearchResults([]);
+    let cancelled = false;
+    const timer = setTimeout(async () => {
+      try {
+        const data = await adminUsersApi.getUsers({ search: referrerSearchQuery, limit: 10 });
+        if (!cancelled) {
+          setReferrerSearchResults(data.users || []);
+          setReferrerSearchLoading(false);
+        }
+      } catch {
+        if (!cancelled) {
+          setReferrerSearchResults([]);
+          setReferrerSearchLoading(false);
+        }
+      }
+    }, 300);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [referrerSearchQuery, showReferrerSearch]);
+
+  // Referrals tab: close search dropdown on click outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (referrerSearchRef.current && !referrerSearchRef.current.contains(e.target as Node)) {
+        setShowReferrerSearch(false);
+        setReferrerSearchQuery('');
+        setReferrerSearchResults([]);
+      }
+    };
+    if (showReferrerSearch) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showReferrerSearch]);
+
+  // Referrals tab: debounced search for adding referral
+  useEffect(() => {
+    if (addReferralSearchQuery.length < 2 || !showAddReferral) {
+      setAddReferralSearchResults([]);
+      setAddReferralSearchLoading(false);
+      return;
+    }
+    setAddReferralSearchLoading(true);
+    setAddReferralSearchResults([]);
+    let cancelled = false;
+    const timer = setTimeout(async () => {
+      try {
+        const data = await adminUsersApi.getUsers({ search: addReferralSearchQuery, limit: 10 });
+        if (!cancelled) {
+          setAddReferralSearchResults(data.users || []);
+          setAddReferralSearchLoading(false);
+        }
+      } catch {
+        if (!cancelled) {
+          setAddReferralSearchResults([]);
+          setAddReferralSearchLoading(false);
+        }
+      }
+    }, 300);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [addReferralSearchQuery, showAddReferral]);
+
+  // Referrals tab: close add-referral dropdown on click outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        addReferralSearchRef.current &&
+        !addReferralSearchRef.current.contains(e.target as Node)
+      ) {
+        setShowAddReferral(false);
+        setAddReferralSearchQuery('');
+        setAddReferralSearchResults([]);
+      }
+    };
+    if (showAddReferral) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showAddReferral]);
 
   const handleResetTrial = async () => {
     if (!userId) return;
@@ -999,7 +1230,7 @@ export default function AdminUserDetail() {
         className="scrollbar-hide -mx-4 mb-6 flex gap-2 overflow-x-auto px-4 py-1"
         style={{ WebkitOverflowScrolling: 'touch' }}
       >
-        {(['info', 'subscription', 'balance', 'sync', 'tickets', 'gifts'] as const)
+        {(['info', 'subscription', 'balance', 'sync', 'tickets', 'gifts', 'referrals'] as const)
           .filter((tab) => tab !== 'sync' || hasPermission('users:sync'))
           .map((tab) => (
             <button
@@ -1017,6 +1248,7 @@ export default function AdminUserDetail() {
               {tab === 'sync' && t('admin.users.detail.tabs.sync')}
               {tab === 'tickets' && t('admin.users.detail.tabs.tickets')}
               {tab === 'gifts' && t('admin.users.detail.tabs.gifts')}
+              {tab === 'referrals' && t('admin.users.detail.tabs.referrals')}
             </button>
           ))}
       </div>
@@ -1356,15 +1588,143 @@ export default function AdminUserDetail() {
         {/* Subscription Tab */}
         {activeTab === 'subscription' && (
           <div className="space-y-4">
-            {user.subscription ? (
+            {/* Multi-subscription: Level 1 — subscription list */}
+            {userSubscriptions.length > 1 && !subscriptionDetailView && (
               <>
+                <div className="space-y-3">
+                  {userSubscriptions.map((sub) => (
+                    <button
+                      key={sub.id}
+                      onClick={() => {
+                        setActiveSubscriptionId(sub.id);
+                        setSubscriptionDetailView(true);
+                      }}
+                      className="w-full rounded-xl border border-dark-700/50 bg-dark-800/50 p-4 text-left transition-all hover:border-dark-600"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-semibold text-dark-100">
+                            {sub.tariff_name || `#${sub.id}`}
+                          </span>
+                          <StatusBadge status={sub.status} />
+                        </div>
+                        <svg
+                          className="h-4 w-4 text-dark-500"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          strokeWidth={2.5}
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M8.25 4.5l7.5 7.5-7.5 7.5"
+                          />
+                        </svg>
+                      </div>
+                      <div className="mt-2 flex items-center gap-4 text-xs text-dark-400">
+                        <span>
+                          {sub.traffic_used_gb.toFixed(1)} / {sub.traffic_limit_gb}{' '}
+                          {t('common.units.gb')}
+                        </span>
+                        <span>{formatDate(sub.end_date)}</span>
+                        <span>
+                          {sub.device_limit}{' '}
+                          {t('admin.users.detail.subscription.devices', 'устройств')}
+                        </span>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+
+                {/* Create new subscription — at list level */}
+                {hasPermission('users:subscription') && (
+                  <div className="rounded-xl bg-dark-800/50 p-4">
+                    <div className="mb-3 text-sm font-medium text-dark-200">
+                      {t('admin.users.detail.subscription.createNew', 'Создать подписку')}
+                    </div>
+                    <div className="space-y-3">
+                      <select
+                        value={selectedTariffId || ''}
+                        onChange={(e) =>
+                          setSelectedTariffId(e.target.value ? parseInt(e.target.value) : null)
+                        }
+                        className="input"
+                      >
+                        <option value="">
+                          {t('admin.users.detail.subscription.selectTariff')}
+                        </option>
+                        {tariffs
+                          .filter((tariffItem) => {
+                            const purchasedIds = new Set(
+                              userSubscriptions
+                                .filter((s) => s.is_active || s.status === 'trial')
+                                .map((s) => s.tariff_id),
+                            );
+                            return !purchasedIds.has(tariffItem.id);
+                          })
+                          .map((tariffItem) => (
+                            <option key={tariffItem.id} value={tariffItem.id}>
+                              {tariffItem.name}
+                            </option>
+                          ))}
+                      </select>
+                      <input
+                        type="number"
+                        value={subDays}
+                        onChange={createNumberInputHandler(setSubDays, 1)}
+                        placeholder={t('admin.users.detail.subscription.days')}
+                        className="input"
+                        min={1}
+                        max={3650}
+                      />
+                      <button
+                        onClick={() => handleUpdateSubscription('create')}
+                        disabled={actionLoading}
+                        className="btn-primary w-full"
+                      >
+                        {actionLoading
+                          ? t('admin.users.detail.subscription.creating')
+                          : t('admin.users.detail.subscription.create')}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* Level 2 — subscription detail (or single subscription) */}
+            {(subscriptionDetailView || userSubscriptions.length <= 1) && selectedSub ? (
+              <>
+                {/* Back to list (multi-subscription) */}
+                {subscriptionDetailView && userSubscriptions.length > 1 && (
+                  <button
+                    onClick={() => setSubscriptionDetailView(false)}
+                    className="flex items-center gap-1.5 text-sm text-dark-400 transition-colors hover:text-dark-200"
+                  >
+                    <svg
+                      className="h-4 w-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                    </svg>
+                    {t('admin.users.detail.subscription.backToList', 'Все подписки')}
+                  </button>
+                )}
+
                 {/* Current subscription */}
                 <div className="rounded-xl bg-dark-800/50 p-4">
                   <div className="mb-3 flex items-center justify-between">
                     <span className="font-medium text-dark-200">
                       {t('admin.users.detail.subscription.current')}
+                      {userSubscriptions.length > 1 && (
+                        <span className="ml-2 text-xs text-dark-500">#{selectedSub.id}</span>
+                      )}
                     </span>
-                    <StatusBadge status={user.subscription.status} />
+                    <StatusBadge status={selectedSub.status} />
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
@@ -1372,7 +1732,7 @@ export default function AdminUserDetail() {
                         {t('admin.users.detail.subscription.tariff')}
                       </div>
                       <div className="text-dark-100">
-                        {user.subscription.tariff_name ||
+                        {selectedSub.tariff_name ||
                           t('admin.users.detail.subscription.notSpecified')}
                       </div>
                     </div>
@@ -1380,7 +1740,7 @@ export default function AdminUserDetail() {
                       <div className="text-xs text-dark-500">
                         {t('admin.users.detail.subscription.validUntil')}
                       </div>
-                      <div className="text-dark-100">{formatDate(user.subscription.end_date)}</div>
+                      <div className="text-dark-100">{formatDate(selectedSub.end_date)}</div>
                     </div>
                     <div>
                       <div className="text-xs text-dark-500">
@@ -1389,8 +1749,8 @@ export default function AdminUserDetail() {
                       <div className="text-dark-100">
                         {panelInfo?.found
                           ? (panelInfo.used_traffic_bytes / (1024 * 1024 * 1024)).toFixed(1)
-                          : user.subscription.traffic_used_gb.toFixed(1)}{' '}
-                        / {user.subscription.traffic_limit_gb} {t('common.units.gb')}
+                          : selectedSub.traffic_used_gb.toFixed(1)}{' '}
+                        / {selectedSub.traffic_limit_gb} {t('common.units.gb')}
                       </div>
                     </div>
                     <div>
@@ -1399,21 +1759,21 @@ export default function AdminUserDetail() {
                       </div>
                       <div className="flex items-center gap-2">
                         <button
-                          onClick={() => handleSetDeviceLimit(user.subscription!.device_limit - 1)}
-                          disabled={actionLoading || user.subscription.device_limit <= 1}
+                          onClick={() => handleSetDeviceLimit(selectedSub.device_limit - 1)}
+                          disabled={actionLoading || selectedSub.device_limit <= 1}
                           className="flex h-6 w-6 items-center justify-center rounded-md bg-dark-700 text-dark-300 transition-colors hover:bg-dark-600 disabled:opacity-30"
                         >
                           <MinusIcon />
                         </button>
                         <span className="min-w-[2ch] text-center text-dark-100">
-                          {user.subscription.device_limit}
+                          {selectedSub.device_limit}
                         </span>
                         <button
-                          onClick={() => handleSetDeviceLimit(user.subscription!.device_limit + 1)}
+                          onClick={() => handleSetDeviceLimit(selectedSub.device_limit + 1)}
                           disabled={
                             actionLoading ||
                             (currentTariff?.max_device_limit != null &&
-                              user.subscription.device_limit >= currentTariff.max_device_limit)
+                              selectedSub.device_limit >= currentTariff.max_device_limit)
                           }
                           className="flex h-6 w-6 items-center justify-center rounded-md bg-dark-700 text-dark-300 transition-colors hover:bg-dark-600 disabled:opacity-30"
                         >
@@ -1425,66 +1785,65 @@ export default function AdminUserDetail() {
                 </div>
 
                 {/* Traffic Packages */}
-                {user.subscription.traffic_purchases &&
-                  user.subscription.traffic_purchases.length > 0 && (
-                    <div className="rounded-xl bg-dark-800/50 p-4">
-                      <div className="mb-3 flex items-center justify-between">
-                        <span className="text-sm font-medium text-dark-200">
-                          {t('admin.users.detail.subscription.trafficPackages')}
-                          {user.subscription.purchased_traffic_gb > 0 && (
-                            <span className="ml-2 text-xs text-dark-400">
-                              ({user.subscription.purchased_traffic_gb} {t('common.units.gb')})
-                            </span>
-                          )}
-                        </span>
-                      </div>
-                      <div className="space-y-2">
-                        {user.subscription.traffic_purchases.map((tp) => (
-                          <div
-                            key={tp.id}
-                            className={`flex items-center justify-between rounded-lg px-3 py-2 ${
-                              tp.is_expired ? 'bg-dark-700/30 opacity-60' : 'bg-dark-700/50'
-                            }`}
-                          >
-                            <div className="min-w-0 flex-1">
-                              <div className="flex items-center gap-2 text-sm text-dark-200">
-                                <span className="font-medium">
-                                  {tp.traffic_gb} {t('common.units.gb')}
-                                </span>
-                                {tp.is_expired ? (
-                                  <span className="rounded-full bg-error-500/20 px-1.5 py-0.5 text-[10px] text-error-400">
-                                    {t('admin.users.detail.subscription.expired')}
-                                  </span>
-                                ) : (
-                                  <span className="text-xs text-dark-400">
-                                    {tp.days_remaining}{' '}
-                                    {t('admin.users.detail.subscription.daysLeft')}
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                            {!tp.is_expired && (
-                              <button
-                                onClick={() =>
-                                  handleInlineConfirm(`removeTraffic_${tp.id}`, () =>
-                                    handleRemoveTraffic(tp.id),
-                                  )
-                                }
-                                disabled={actionLoading}
-                                className={`ml-2 shrink-0 rounded-lg px-2 py-1 text-xs transition-all disabled:opacity-50 ${
-                                  confirmingAction === `removeTraffic_${tp.id}`
-                                    ? 'bg-error-500 text-white'
-                                    : 'text-dark-500 hover:bg-error-500/15 hover:text-error-400'
-                                }`}
-                              >
-                                {confirmingAction === `removeTraffic_${tp.id}` ? '?' : '\u00D7'}
-                              </button>
-                            )}
-                          </div>
-                        ))}
-                      </div>
+                {selectedSub.traffic_purchases && selectedSub.traffic_purchases.length > 0 && (
+                  <div className="rounded-xl bg-dark-800/50 p-4">
+                    <div className="mb-3 flex items-center justify-between">
+                      <span className="text-sm font-medium text-dark-200">
+                        {t('admin.users.detail.subscription.trafficPackages')}
+                        {selectedSub.purchased_traffic_gb > 0 && (
+                          <span className="ml-2 text-xs text-dark-400">
+                            ({selectedSub.purchased_traffic_gb} {t('common.units.gb')})
+                          </span>
+                        )}
+                      </span>
                     </div>
-                  )}
+                    <div className="space-y-2">
+                      {selectedSub.traffic_purchases.map((tp) => (
+                        <div
+                          key={tp.id}
+                          className={`flex items-center justify-between rounded-lg px-3 py-2 ${
+                            tp.is_expired ? 'bg-dark-700/30 opacity-60' : 'bg-dark-700/50'
+                          }`}
+                        >
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2 text-sm text-dark-200">
+                              <span className="font-medium">
+                                {tp.traffic_gb} {t('common.units.gb')}
+                              </span>
+                              {tp.is_expired ? (
+                                <span className="rounded-full bg-error-500/20 px-1.5 py-0.5 text-[10px] text-error-400">
+                                  {t('admin.users.detail.subscription.expired')}
+                                </span>
+                              ) : (
+                                <span className="text-xs text-dark-400">
+                                  {tp.days_remaining}{' '}
+                                  {t('admin.users.detail.subscription.daysLeft')}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          {!tp.is_expired && (
+                            <button
+                              onClick={() =>
+                                handleInlineConfirm(`removeTraffic_${tp.id}`, () =>
+                                  handleRemoveTraffic(tp.id),
+                                )
+                              }
+                              disabled={actionLoading}
+                              className={`ml-2 shrink-0 rounded-lg px-2 py-1 text-xs transition-all disabled:opacity-50 ${
+                                confirmingAction === `removeTraffic_${tp.id}`
+                                  ? 'bg-error-500 text-white'
+                                  : 'text-dark-500 hover:bg-error-500/15 hover:text-error-400'
+                              }`}
+                            >
+                              {confirmingAction === `removeTraffic_${tp.id}` ? '?' : '\u00D7'}
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {/* Add Traffic */}
                 {currentTariff &&
@@ -1545,9 +1904,11 @@ export default function AdminUserDetail() {
                         <option value="shorten">
                           {t('admin.users.detail.subscription.shorten')}
                         </option>
-                        <option value="change_tariff">
-                          {t('admin.users.detail.subscription.changeTariff')}
-                        </option>
+                        {userSubscriptions.length <= 1 && (
+                          <option value="change_tariff">
+                            {t('admin.users.detail.subscription.changeTariff')}
+                          </option>
+                        )}
                         <option value="cancel">
                           {t('admin.users.detail.subscription.cancel')}
                         </option>
@@ -1602,10 +1963,18 @@ export default function AdminUserDetail() {
                   </div>
                 )}
               </>
-            ) : hasPermission('users:subscription') ? (
+            ) : null}
+
+            {/* Create new subscription — only for single-sub users or no subs */}
+            {hasPermission('users:subscription') && userSubscriptions.length <= 1 && (
               <div className="rounded-xl bg-dark-800/50 p-4">
-                <div className="mb-4 text-center text-dark-400">
-                  {t('admin.users.detail.subscription.noActive')}
+                {userSubscriptions.length === 0 && (
+                  <div className="mb-4 text-center text-dark-400">
+                    {t('admin.users.detail.subscription.noActive')}
+                  </div>
+                )}
+                <div className="mb-3 text-sm font-medium text-dark-200">
+                  {t('admin.users.detail.subscription.createNew', 'Создать подписку')}
                 </div>
                 <div className="space-y-3">
                   <select
@@ -1616,11 +1985,24 @@ export default function AdminUserDetail() {
                     className="input"
                   >
                     <option value="">{t('admin.users.detail.subscription.selectTariff')}</option>
-                    {tariffs.map((tariffItem) => (
-                      <option key={tariffItem.id} value={tariffItem.id}>
-                        {tariffItem.name}
-                      </option>
-                    ))}
+                    {tariffs
+                      .filter((tariffItem) => {
+                        // In multi-tariff: hide tariffs user already has
+                        if (userSubscriptions.length > 0) {
+                          const purchasedIds = new Set(
+                            userSubscriptions
+                              .filter((s) => s.is_active || s.status === 'trial')
+                              .map((s) => s.tariff_id),
+                          );
+                          return !purchasedIds.has(tariffItem.id);
+                        }
+                        return true;
+                      })
+                      .map((tariffItem) => (
+                        <option key={tariffItem.id} value={tariffItem.id}>
+                          {tariffItem.name}
+                        </option>
+                      ))}
                   </select>
                   <input
                     type="number"
@@ -1642,320 +2024,329 @@ export default function AdminUserDetail() {
                   </button>
                 </div>
               </div>
-            ) : (
-              <div className="rounded-xl bg-dark-800/50 p-4">
-                <div className="text-center text-dark-400">
-                  {t('admin.users.detail.subscription.noActive')}
-                </div>
-              </div>
             )}
 
-            {/* Panel Info */}
-            {panelInfoLoading ? (
-              <div className="flex justify-center rounded-xl bg-dark-800/50 py-8">
-                <div className="h-6 w-6 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-              </div>
-            ) : panelInfo && !panelInfo.found ? (
-              <div className="rounded-xl border border-dark-700 bg-dark-800/50 p-4 text-center text-sm text-dark-400">
-                {t('admin.users.detail.panelNotFound')}
-              </div>
-            ) : panelInfo && panelInfo.found ? (
+            {/* Panel Info, Traffic, Devices — only inside subscription detail */}
+            {(subscriptionDetailView || userSubscriptions.length <= 1) && (
               <>
-                {/* Links */}
-                {(panelInfo.subscription_url || panelInfo.happ_link) && (
-                  <div className="rounded-xl bg-dark-800/50 p-4">
-                    <div className="mb-3 text-sm font-medium text-dark-200">
-                      {t('admin.users.detail.subscriptionUrl')} / {t('admin.users.detail.happLink')}
-                    </div>
-                    <div className="space-y-2">
-                      {panelInfo.subscription_url && (
-                        <button
-                          onClick={() => copyToClipboard(panelInfo.subscription_url!)}
-                          className="w-full rounded-lg bg-dark-700/50 p-2 text-left transition-colors hover:bg-dark-700"
-                        >
-                          <div className="mb-0.5 text-xs text-dark-500">
-                            {t('admin.users.detail.subscriptionUrl')}
-                          </div>
-                          <div className="truncate font-mono text-xs text-dark-200">
-                            {panelInfo.subscription_url}
-                          </div>
-                        </button>
-                      )}
-                      {panelInfo.happ_link && (
-                        <button
-                          onClick={() => copyToClipboard(panelInfo.happ_link!)}
-                          className="w-full rounded-lg bg-dark-700/50 p-2 text-left transition-colors hover:bg-dark-700"
-                        >
-                          <div className="mb-0.5 text-xs text-dark-500">
-                            {t('admin.users.detail.happLink')}
-                          </div>
-                          <div className="truncate font-mono text-xs text-dark-200">
-                            {panelInfo.happ_link}
-                          </div>
-                        </button>
-                      )}
-                    </div>
+                {panelInfoLoading ? (
+                  <div className="flex justify-center rounded-xl bg-dark-800/50 py-8">
+                    <div className="h-6 w-6 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
                   </div>
-                )}
-
-                {/* Config */}
-                {(panelInfo.trojan_password || panelInfo.vless_uuid || panelInfo.ss_password) && (
-                  <div className="rounded-xl bg-dark-800/50 p-4">
-                    <div className="mb-3 text-sm font-medium text-dark-200">
-                      {t('admin.users.detail.panelConfig')}
-                    </div>
-                    <div className="space-y-2">
-                      {panelInfo.trojan_password && (
-                        <button
-                          onClick={() => copyToClipboard(panelInfo.trojan_password!)}
-                          className="w-full rounded-lg bg-dark-700/50 p-2 text-left transition-colors hover:bg-dark-700"
-                        >
-                          <div className="mb-0.5 text-xs text-dark-500">
-                            {t('admin.users.detail.trojanPassword')}
-                          </div>
-                          <div className="truncate font-mono text-xs text-dark-200">
-                            {panelInfo.trojan_password}
-                          </div>
-                        </button>
-                      )}
-                      {panelInfo.vless_uuid && (
-                        <button
-                          onClick={() => copyToClipboard(panelInfo.vless_uuid!)}
-                          className="w-full rounded-lg bg-dark-700/50 p-2 text-left transition-colors hover:bg-dark-700"
-                        >
-                          <div className="mb-0.5 text-xs text-dark-500">
-                            {t('admin.users.detail.vlessUuid')}
-                          </div>
-                          <div className="truncate font-mono text-xs text-dark-200">
-                            {panelInfo.vless_uuid}
-                          </div>
-                        </button>
-                      )}
-                      {panelInfo.ss_password && (
-                        <button
-                          onClick={() => copyToClipboard(panelInfo.ss_password!)}
-                          className="w-full rounded-lg bg-dark-700/50 p-2 text-left transition-colors hover:bg-dark-700"
-                        >
-                          <div className="mb-0.5 text-xs text-dark-500">
-                            {t('admin.users.detail.ssPassword')}
-                          </div>
-                          <div className="truncate font-mono text-xs text-dark-200">
-                            {panelInfo.ss_password}
-                          </div>
-                        </button>
-                      )}
-                    </div>
+                ) : panelInfo && !panelInfo.found ? (
+                  <div className="rounded-xl border border-dark-700 bg-dark-800/50 p-4 text-center text-sm text-dark-400">
+                    {t('admin.users.detail.panelNotFound')}
                   </div>
-                )}
-
-                {/* Connection info */}
-                <div className="rounded-xl bg-dark-800/50 p-4">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <div className="text-xs text-dark-500">
-                        {t('admin.users.detail.firstConnected')}
-                      </div>
-                      <div className="text-sm text-dark-100">
-                        {formatDate(panelInfo.first_connected_at)}
-                      </div>
-                    </div>
-                    <div>
-                      <div className="text-xs text-dark-500">
-                        {t('admin.users.detail.lastOnline')}
-                      </div>
-                      <div className="text-sm text-dark-100">{formatDate(panelInfo.online_at)}</div>
-                    </div>
-                    {panelInfo.last_connected_node_name && (
-                      <div className="col-span-2">
-                        <div className="text-xs text-dark-500">
-                          {t('admin.users.detail.lastNode')}
+                ) : panelInfo && panelInfo.found ? (
+                  <>
+                    {/* Links */}
+                    {(panelInfo.subscription_url || panelInfo.happ_link) && (
+                      <div className="rounded-xl bg-dark-800/50 p-4">
+                        <div className="mb-3 text-sm font-medium text-dark-200">
+                          {t('admin.users.detail.subscriptionUrl')} /{' '}
+                          {t('admin.users.detail.happLink')}
                         </div>
-                        <div className="text-sm text-dark-100">
-                          {panelInfo.last_connected_node_name}
+                        <div className="space-y-2">
+                          {panelInfo.subscription_url && (
+                            <button
+                              onClick={() => copyToClipboard(panelInfo.subscription_url!)}
+                              className="w-full rounded-lg bg-dark-700/50 p-2 text-left transition-colors hover:bg-dark-700"
+                            >
+                              <div className="mb-0.5 text-xs text-dark-500">
+                                {t('admin.users.detail.subscriptionUrl')}
+                              </div>
+                              <div className="truncate font-mono text-xs text-dark-200">
+                                {panelInfo.subscription_url}
+                              </div>
+                            </button>
+                          )}
+                          {panelInfo.happ_link && (
+                            <button
+                              onClick={() => copyToClipboard(panelInfo.happ_link!)}
+                              className="w-full rounded-lg bg-dark-700/50 p-2 text-left transition-colors hover:bg-dark-700"
+                            >
+                              <div className="mb-0.5 text-xs text-dark-500">
+                                {t('admin.users.detail.happLink')}
+                              </div>
+                              <div className="truncate font-mono text-xs text-dark-200">
+                                {panelInfo.happ_link}
+                              </div>
+                            </button>
+                          )}
                         </div>
                       </div>
                     )}
-                  </div>
-                </div>
 
-                {/* Live traffic */}
-                <div className="rounded-xl bg-dark-800/50 p-4">
-                  <div className="mb-3 text-sm font-medium text-dark-200">
-                    {t('admin.users.detail.liveTraffic')}
-                  </div>
-                  <div className="mb-2">
-                    <div className="mb-1 flex justify-between text-xs">
-                      <span className="text-dark-400">
-                        {formatBytes(panelInfo.used_traffic_bytes)}
-                      </span>
-                      <span className="text-dark-500">
-                        {panelInfo.traffic_limit_bytes > 0
-                          ? formatBytes(panelInfo.traffic_limit_bytes)
-                          : '∞'}
-                      </span>
-                    </div>
-                    <div className="h-2 overflow-hidden rounded-full bg-dark-700">
-                      <div
-                        className="h-full rounded-full bg-accent-500 transition-all"
-                        style={{
-                          width:
-                            panelInfo.traffic_limit_bytes > 0
-                              ? `${Math.min(100, (panelInfo.used_traffic_bytes / panelInfo.traffic_limit_bytes) * 100)}%`
-                              : '0%',
-                        }}
-                      />
-                    </div>
-                  </div>
-                  <div className="text-xs text-dark-500">
-                    {t('admin.users.detail.lifetime')}:{' '}
-                    {formatBytes(panelInfo.lifetime_used_traffic_bytes)}
-                  </div>
-                </div>
+                    {/* Config */}
+                    {(panelInfo.trojan_password ||
+                      panelInfo.vless_uuid ||
+                      panelInfo.ss_password) && (
+                      <div className="rounded-xl bg-dark-800/50 p-4">
+                        <div className="mb-3 text-sm font-medium text-dark-200">
+                          {t('admin.users.detail.panelConfig')}
+                        </div>
+                        <div className="space-y-2">
+                          {panelInfo.trojan_password && (
+                            <button
+                              onClick={() => copyToClipboard(panelInfo.trojan_password!)}
+                              className="w-full rounded-lg bg-dark-700/50 p-2 text-left transition-colors hover:bg-dark-700"
+                            >
+                              <div className="mb-0.5 text-xs text-dark-500">
+                                {t('admin.users.detail.trojanPassword')}
+                              </div>
+                              <div className="truncate font-mono text-xs text-dark-200">
+                                {panelInfo.trojan_password}
+                              </div>
+                            </button>
+                          )}
+                          {panelInfo.vless_uuid && (
+                            <button
+                              onClick={() => copyToClipboard(panelInfo.vless_uuid!)}
+                              className="w-full rounded-lg bg-dark-700/50 p-2 text-left transition-colors hover:bg-dark-700"
+                            >
+                              <div className="mb-0.5 text-xs text-dark-500">
+                                {t('admin.users.detail.vlessUuid')}
+                              </div>
+                              <div className="truncate font-mono text-xs text-dark-200">
+                                {panelInfo.vless_uuid}
+                              </div>
+                            </button>
+                          )}
+                          {panelInfo.ss_password && (
+                            <button
+                              onClick={() => copyToClipboard(panelInfo.ss_password!)}
+                              className="w-full rounded-lg bg-dark-700/50 p-2 text-left transition-colors hover:bg-dark-700"
+                            >
+                              <div className="mb-0.5 text-xs text-dark-500">
+                                {t('admin.users.detail.ssPassword')}
+                              </div>
+                              <div className="truncate font-mono text-xs text-dark-200">
+                                {panelInfo.ss_password}
+                              </div>
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    )}
 
-                {/* Node usage */}
+                    {/* Connection info */}
+                    <div className="rounded-xl bg-dark-800/50 p-4">
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <div className="text-xs text-dark-500">
+                            {t('admin.users.detail.firstConnected')}
+                          </div>
+                          <div className="text-sm text-dark-100">
+                            {formatDate(panelInfo.first_connected_at)}
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-xs text-dark-500">
+                            {t('admin.users.detail.lastOnline')}
+                          </div>
+                          <div className="text-sm text-dark-100">
+                            {formatDate(panelInfo.online_at)}
+                          </div>
+                        </div>
+                        {panelInfo.last_connected_node_name && (
+                          <div className="col-span-2">
+                            <div className="text-xs text-dark-500">
+                              {t('admin.users.detail.lastNode')}
+                            </div>
+                            <div className="text-sm text-dark-100">
+                              {panelInfo.last_connected_node_name}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Live traffic */}
+                    <div className="rounded-xl bg-dark-800/50 p-4">
+                      <div className="mb-3 text-sm font-medium text-dark-200">
+                        {t('admin.users.detail.liveTraffic')}
+                      </div>
+                      <div className="mb-2">
+                        <div className="mb-1 flex justify-between text-xs">
+                          <span className="text-dark-400">
+                            {formatBytes(panelInfo.used_traffic_bytes)}
+                          </span>
+                          <span className="text-dark-500">
+                            {panelInfo.traffic_limit_bytes > 0
+                              ? formatBytes(panelInfo.traffic_limit_bytes)
+                              : '∞'}
+                          </span>
+                        </div>
+                        <div className="h-2 overflow-hidden rounded-full bg-dark-700">
+                          <div
+                            className="h-full rounded-full bg-accent-500 transition-all"
+                            style={{
+                              width:
+                                panelInfo.traffic_limit_bytes > 0
+                                  ? `${Math.min(100, (panelInfo.used_traffic_bytes / panelInfo.traffic_limit_bytes) * 100)}%`
+                                  : '0%',
+                            }}
+                          />
+                        </div>
+                      </div>
+                      <div className="text-xs text-dark-500">
+                        {t('admin.users.detail.lifetime')}:{' '}
+                        {formatBytes(panelInfo.lifetime_used_traffic_bytes)}
+                      </div>
+                    </div>
+
+                    {/* Node usage */}
+                    <div className="rounded-xl bg-dark-800/50 p-4">
+                      <div className="mb-3 flex items-center justify-between">
+                        <span className="text-sm font-medium text-dark-200">
+                          {t('admin.users.detail.nodeUsage')}
+                        </span>
+                        <div className="flex items-center gap-2">
+                          <div className="flex gap-1">
+                            {[1, 3, 7, 14, 30].map((d) => (
+                              <button
+                                key={d}
+                                onClick={() => setNodeUsageDays(d)}
+                                className={`rounded-lg px-2 py-1 text-xs transition-colors ${
+                                  nodeUsageDays === d
+                                    ? 'bg-accent-500/20 text-accent-400'
+                                    : 'text-dark-500 hover:text-dark-300'
+                                }`}
+                              >
+                                {d}d
+                              </button>
+                            ))}
+                          </div>
+                          <button
+                            onClick={() => loadSubscriptionData()}
+                            className="rounded-lg p-1 text-dark-500 transition-colors hover:text-dark-300"
+                            title={t('common.refresh')}
+                          >
+                            <RefreshIcon className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                      {nodeUsageForPeriod.length > 0 ? (
+                        <div className="space-y-2">
+                          {nodeUsageForPeriod.map((item) => {
+                            const maxBytes = nodeUsageForPeriod[0].total_bytes;
+                            const pct = maxBytes > 0 ? (item.total_bytes / maxBytes) * 100 : 0;
+                            return (
+                              <div key={item.node_uuid}>
+                                <div className="mb-1 flex justify-between text-xs">
+                                  <span className="text-dark-300">
+                                    {item.country_code && (
+                                      <span className="mr-1">
+                                        {getCountryFlag(item.country_code)}
+                                      </span>
+                                    )}
+                                    {item.node_name}
+                                  </span>
+                                  <span className="text-dark-400">
+                                    {formatBytes(item.total_bytes)}
+                                  </span>
+                                </div>
+                                <div className="h-1.5 overflow-hidden rounded-full bg-dark-700">
+                                  <div
+                                    className="h-full rounded-full bg-accent-500/60"
+                                    style={{ width: `${pct}%` }}
+                                  />
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <div className="py-2 text-center text-xs text-dark-500">-</div>
+                      )}
+                    </div>
+                  </>
+                ) : null}
+
+                {/* Devices */}
                 <div className="rounded-xl bg-dark-800/50 p-4">
                   <div className="mb-3 flex items-center justify-between">
                     <span className="text-sm font-medium text-dark-200">
-                      {t('admin.users.detail.nodeUsage')}
+                      {t('admin.users.detail.devices.title')} ({devicesTotal}/{deviceLimit})
                     </span>
                     <div className="flex items-center gap-2">
-                      <div className="flex gap-1">
-                        {[1, 3, 7, 14, 30].map((d) => (
-                          <button
-                            key={d}
-                            onClick={() => setNodeUsageDays(d)}
-                            className={`rounded-lg px-2 py-1 text-xs transition-colors ${
-                              nodeUsageDays === d
-                                ? 'bg-accent-500/20 text-accent-400'
-                                : 'text-dark-500 hover:text-dark-300'
-                            }`}
-                          >
-                            {d}d
-                          </button>
-                        ))}
-                      </div>
                       <button
-                        onClick={() => loadSubscriptionData()}
+                        onClick={() => loadDevices()}
                         className="rounded-lg p-1 text-dark-500 transition-colors hover:text-dark-300"
                         title={t('common.refresh')}
                       >
                         <RefreshIcon className="h-3.5 w-3.5" />
                       </button>
+                      {devices.length > 0 && (
+                        <button
+                          onClick={() => handleInlineConfirm('resetDevices', handleResetDevices)}
+                          disabled={actionLoading}
+                          className={`rounded-lg px-2 py-1 text-xs font-medium transition-all disabled:opacity-50 ${
+                            confirmingAction === 'resetDevices'
+                              ? 'bg-error-500 text-white'
+                              : 'bg-error-500/15 text-error-400 hover:bg-error-500/25'
+                          }`}
+                        >
+                          {confirmingAction === 'resetDevices'
+                            ? t('admin.users.detail.actions.areYouSure')
+                            : t('admin.users.detail.devices.resetAll')}
+                        </button>
+                      )}
                     </div>
                   </div>
-                  {nodeUsageForPeriod.length > 0 ? (
+                  {devicesLoading ? (
+                    <div className="flex justify-center py-4">
+                      <div className="h-5 w-5 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
+                    </div>
+                  ) : devices.length > 0 ? (
                     <div className="space-y-2">
-                      {nodeUsageForPeriod.map((item) => {
-                        const maxBytes = nodeUsageForPeriod[0].total_bytes;
-                        const pct = maxBytes > 0 ? (item.total_bytes / maxBytes) * 100 : 0;
-                        return (
-                          <div key={item.node_uuid}>
-                            <div className="mb-1 flex justify-between text-xs">
-                              <span className="text-dark-300">
-                                {item.country_code && (
-                                  <span className="mr-1">{getCountryFlag(item.country_code)}</span>
-                                )}
-                                {item.node_name}
-                              </span>
-                              <span className="text-dark-400">{formatBytes(item.total_bytes)}</span>
+                      {devices.map((device) => (
+                        <div
+                          key={device.hwid}
+                          className="flex items-center justify-between rounded-lg bg-dark-700/50 px-3 py-2"
+                        >
+                          <div className="min-w-0 flex-1">
+                            <div className="truncate text-xs font-medium text-dark-200">
+                              {device.platform || device.device_model || device.hwid.slice(0, 12)}
                             </div>
-                            <div className="h-1.5 overflow-hidden rounded-full bg-dark-700">
-                              <div
-                                className="h-full rounded-full bg-accent-500/60"
-                                style={{ width: `${pct}%` }}
-                              />
+                            <div className="flex items-center gap-2 text-[10px] text-dark-500">
+                              {device.device_model && device.platform && (
+                                <span>{device.device_model}</span>
+                              )}
+                              <span className="font-mono">{device.hwid.slice(0, 8)}...</span>
+                              {device.created_at && (
+                                <span>
+                                  {new Date(device.created_at).toLocaleDateString(locale)}
+                                </span>
+                              )}
                             </div>
                           </div>
-                        );
-                      })}
+                          <button
+                            onClick={() =>
+                              handleInlineConfirm(`deleteDevice_${device.hwid}`, () =>
+                                handleDeleteDevice(device.hwid),
+                              )
+                            }
+                            disabled={actionLoading}
+                            className={`ml-2 shrink-0 rounded-lg px-2 py-1 text-xs transition-all disabled:opacity-50 ${
+                              confirmingAction === `deleteDevice_${device.hwid}`
+                                ? 'bg-error-500 text-white'
+                                : 'text-dark-500 hover:bg-error-500/15 hover:text-error-400'
+                            }`}
+                          >
+                            {confirmingAction === `deleteDevice_${device.hwid}` ? '?' : '\u00D7'}
+                          </button>
+                        </div>
+                      ))}
                     </div>
                   ) : (
-                    <div className="py-2 text-center text-xs text-dark-500">-</div>
+                    <div className="py-2 text-center text-xs text-dark-500">
+                      {t('admin.users.detail.devices.none')}
+                    </div>
                   )}
                 </div>
               </>
-            ) : null}
-
-            {/* Devices */}
-            <div className="rounded-xl bg-dark-800/50 p-4">
-              <div className="mb-3 flex items-center justify-between">
-                <span className="text-sm font-medium text-dark-200">
-                  {t('admin.users.detail.devices.title')} ({devicesTotal}/{deviceLimit})
-                </span>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => loadDevices()}
-                    className="rounded-lg p-1 text-dark-500 transition-colors hover:text-dark-300"
-                    title={t('common.refresh')}
-                  >
-                    <RefreshIcon className="h-3.5 w-3.5" />
-                  </button>
-                  {devices.length > 0 && (
-                    <button
-                      onClick={() => handleInlineConfirm('resetDevices', handleResetDevices)}
-                      disabled={actionLoading}
-                      className={`rounded-lg px-2 py-1 text-xs font-medium transition-all disabled:opacity-50 ${
-                        confirmingAction === 'resetDevices'
-                          ? 'bg-error-500 text-white'
-                          : 'bg-error-500/15 text-error-400 hover:bg-error-500/25'
-                      }`}
-                    >
-                      {confirmingAction === 'resetDevices'
-                        ? t('admin.users.detail.actions.areYouSure')
-                        : t('admin.users.detail.devices.resetAll')}
-                    </button>
-                  )}
-                </div>
-              </div>
-              {devicesLoading ? (
-                <div className="flex justify-center py-4">
-                  <div className="h-5 w-5 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-                </div>
-              ) : devices.length > 0 ? (
-                <div className="space-y-2">
-                  {devices.map((device) => (
-                    <div
-                      key={device.hwid}
-                      className="flex items-center justify-between rounded-lg bg-dark-700/50 px-3 py-2"
-                    >
-                      <div className="min-w-0 flex-1">
-                        <div className="truncate text-xs font-medium text-dark-200">
-                          {device.platform || device.device_model || device.hwid.slice(0, 12)}
-                        </div>
-                        <div className="flex items-center gap-2 text-[10px] text-dark-500">
-                          {device.device_model && device.platform && (
-                            <span>{device.device_model}</span>
-                          )}
-                          <span className="font-mono">{device.hwid.slice(0, 8)}...</span>
-                          {device.created_at && (
-                            <span>{new Date(device.created_at).toLocaleDateString(locale)}</span>
-                          )}
-                        </div>
-                      </div>
-                      <button
-                        onClick={() =>
-                          handleInlineConfirm(`deleteDevice_${device.hwid}`, () =>
-                            handleDeleteDevice(device.hwid),
-                          )
-                        }
-                        disabled={actionLoading}
-                        className={`ml-2 shrink-0 rounded-lg px-2 py-1 text-xs transition-all disabled:opacity-50 ${
-                          confirmingAction === `deleteDevice_${device.hwid}`
-                            ? 'bg-error-500 text-white'
-                            : 'text-dark-500 hover:bg-error-500/15 hover:text-error-400'
-                        }`}
-                      >
-                        {confirmingAction === `deleteDevice_${device.hwid}` ? '?' : '\u00D7'}
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="py-2 text-center text-xs text-dark-500">
-                  {t('admin.users.detail.devices.none')}
-                </div>
-              )}
-            </div>
+            )}
           </div>
         )}
 
@@ -2124,6 +2515,26 @@ export default function AdminUserDetail() {
         {/* Sync Tab */}
         {activeTab === 'sync' && (
           <div className="space-y-4">
+            {/* Subscription selector for multi-tariff */}
+            {userSubscriptions.length > 1 && (
+              <div className="rounded-xl bg-dark-800/50 p-4">
+                <div className="mb-2 text-sm text-dark-400">
+                  {t('admin.users.detail.sync.selectSubscription')}
+                </div>
+                <select
+                  value={activeSubscriptionId || ''}
+                  onChange={(e) => setActiveSubscriptionId(Number(e.target.value) || null)}
+                  className="w-full rounded-lg border border-dark-600 bg-dark-700 px-3 py-2 text-sm text-dark-100"
+                >
+                  {userSubscriptions.map((sub) => (
+                    <option key={sub.id} value={sub.id}>
+                      {sub.tariff_name || `#${sub.id}`} — {sub.status}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
             {/* Sync status */}
             {syncStatus && (
               <div
@@ -2246,6 +2657,11 @@ export default function AdminUserDetail() {
 
             {/* UUID info */}
             <div className="rounded-xl bg-dark-800/50 p-4">
+              {syncStatus?.subscription_tariff_name && (
+                <div className="mb-2 text-xs text-dark-500">
+                  {syncStatus.subscription_tariff_name}
+                </div>
+              )}
               <div className="mb-1 text-sm text-dark-400">Remnawave UUID</div>
               <div className="break-all font-mono text-sm text-dark-100">
                 {syncStatus?.remnawave_uuid ||
@@ -2643,6 +3059,300 @@ export default function AdminUserDetail() {
                 </div>
               </>
             )}
+          </div>
+        )}
+
+        {/* Referrals Tab */}
+        {activeTab === 'referrals' && user && (
+          <div className="space-y-6">
+            {/* Section 1: Who referred this user */}
+            <div className="rounded-2xl border border-dark-700/30 bg-dark-800/40 p-5">
+              <h3 className="mb-4 text-base font-semibold text-dark-100">
+                {t('admin.users.detail.referrals.referredBy')}
+              </h3>
+
+              {user.referral.referred_by_id ? (
+                <div className="flex items-center justify-between gap-3">
+                  <button
+                    onClick={() => navigate(`/admin/users/${user.referral.referred_by_id}`)}
+                    className="flex items-center gap-3 rounded-xl bg-dark-700/30 px-4 py-3 transition-colors hover:bg-dark-700/50"
+                  >
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent-500/20 text-sm font-bold text-accent-400">
+                      {(user.referral.referred_by_username || '?')[0].toUpperCase()}
+                    </div>
+                    <div>
+                      <div className="text-sm font-medium text-dark-100">
+                        {user.referral.referred_by_username ||
+                          `ID: ${user.referral.referred_by_id}`}
+                      </div>
+                      <div className="text-xs text-dark-500">
+                        ID: {user.referral.referred_by_id}
+                      </div>
+                    </div>
+                  </button>
+                  <button
+                    onClick={handleRemoveReferrer}
+                    disabled={actionLoading}
+                    className="rounded-lg border border-error-500/30 bg-error-500/10 px-3 py-2 text-sm text-error-400 transition-colors hover:bg-error-500/20 disabled:opacity-50"
+                  >
+                    {t('admin.users.detail.referrals.removeReferrer')}
+                  </button>
+                </div>
+              ) : (
+                <div>
+                  {showReferrerSearch ? (
+                    <div ref={referrerSearchRef} className="relative">
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={referrerSearchQuery}
+                          onChange={(e) => setReferrerSearchQuery(e.target.value)}
+                          placeholder={t('admin.users.detail.referrals.searchPlaceholder')}
+                          className="flex-1 rounded-lg border border-dark-600 bg-dark-700 px-3 py-2.5 text-sm text-dark-100 placeholder-dark-500 focus:border-accent-500 focus:outline-none"
+                          autoFocus
+                        />
+                        <button
+                          onClick={() => {
+                            setShowReferrerSearch(false);
+                            setReferrerSearchQuery('');
+                            setReferrerSearchResults([]);
+                          }}
+                          className="rounded-lg bg-dark-700 px-3 py-2.5 text-sm text-dark-400 hover:bg-dark-600"
+                        >
+                          {t('common.cancel')}
+                        </button>
+                      </div>
+                      {referrerSearchQuery.length >= 2 && referrerSearchResults.length > 0 && (
+                        <div className="absolute left-0 right-0 top-full z-50 mt-1 max-h-60 overflow-y-auto rounded-xl border border-dark-700 bg-dark-800 py-1 shadow-xl">
+                          {referrerSearchResults
+                            .filter((u) => u.id !== userId)
+                            .map((u) => (
+                              <button
+                                key={u.id}
+                                onClick={() => handleAssignReferrer(u.id)}
+                                className="flex w-full items-center gap-3 px-3 py-2.5 text-left hover:bg-dark-700/50"
+                              >
+                                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-dark-600/50 text-xs font-bold text-dark-300">
+                                  {(u.full_name || u.username || '?')[0].toUpperCase()}
+                                </div>
+                                <div>
+                                  <div className="text-sm text-dark-100">
+                                    {u.full_name || u.username || `ID: ${u.id}`}
+                                  </div>
+                                  <div className="text-xs text-dark-500">
+                                    {u.telegram_id ? `TG: ${u.telegram_id}` : `ID: ${u.id}`}
+                                  </div>
+                                </div>
+                              </button>
+                            ))}
+                          {referrerSearchResults.filter((u) => u.id !== userId).length === 0 && (
+                            <div className="px-3 py-4 text-center text-sm text-dark-500">
+                              {t('admin.users.detail.referrals.noUsersFound')}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      {referrerSearchQuery.length >= 2 &&
+                        !referrerSearchLoading &&
+                        referrerSearchResults.length === 0 && (
+                          <div className="absolute left-0 right-0 top-full z-50 mt-1 rounded-xl border border-dark-700 bg-dark-800 py-4 text-center text-sm text-dark-500 shadow-xl">
+                            {t('admin.users.detail.referrals.noUsersFound')}
+                          </div>
+                        )}
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-dark-500">
+                        {t('admin.users.detail.referrals.noReferrer')}
+                      </span>
+                      <button
+                        onClick={() => setShowReferrerSearch(true)}
+                        className="rounded-lg bg-accent-500/15 px-3 py-2 text-sm text-accent-400 transition-colors hover:bg-accent-500/25"
+                      >
+                        {t('admin.users.detail.referrals.assignReferrer')}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Section 2: Referral stats */}
+            <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+              <div className="rounded-xl bg-dark-800/40 p-4">
+                <div className="text-xs text-dark-500">
+                  {t('admin.users.detail.referrals.totalReferrals')}
+                </div>
+                <div className="mt-1 text-xl font-bold text-dark-100">
+                  {user.referral.referrals_count}
+                </div>
+              </div>
+              <div className="rounded-xl bg-dark-800/40 p-4">
+                <div className="text-xs text-dark-500">
+                  {t('admin.users.detail.referrals.totalEarnings')}
+                </div>
+                <div className="mt-1 text-xl font-bold text-dark-100">
+                  {formatWithCurrency(user.referral.total_earnings_kopeks / 100)}
+                </div>
+              </div>
+              <div className="rounded-xl bg-dark-800/40 p-4">
+                <div className="text-xs text-dark-500">
+                  {t('admin.users.detail.referrals.commission')}
+                </div>
+                <div className="mt-1 text-xl font-bold text-dark-100">
+                  {user.referral.commission_percent != null
+                    ? `${user.referral.commission_percent}%`
+                    : t('admin.users.detail.referrals.default')}
+                </div>
+              </div>
+              <div className="rounded-xl bg-dark-800/40 p-4">
+                <div className="text-xs text-dark-500">
+                  {t('admin.users.detail.referrals.referralCode')}
+                </div>
+                <div className="mt-1 truncate font-mono text-sm text-dark-100">
+                  {user.referral.referral_code}
+                </div>
+              </div>
+            </div>
+
+            {/* Section 3: Referrals list */}
+            <div className="rounded-2xl border border-dark-700/30 bg-dark-800/40 p-5">
+              <div className="mb-4 flex items-center justify-between">
+                <h3 className="text-base font-semibold text-dark-100">
+                  {t('admin.users.detail.referrals.referralsList')} ({referralsTotal})
+                </h3>
+                {!showAddReferral && (
+                  <button
+                    onClick={() => setShowAddReferral(true)}
+                    className="rounded-lg bg-accent-500/15 px-3 py-2 text-sm text-accent-400 transition-colors hover:bg-accent-500/25"
+                  >
+                    {t('admin.users.detail.referrals.addReferral')}
+                  </button>
+                )}
+              </div>
+
+              {/* Add referral search */}
+              {showAddReferral && (
+                <div ref={addReferralSearchRef} className="relative mb-4">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={addReferralSearchQuery}
+                      onChange={(e) => setAddReferralSearchQuery(e.target.value)}
+                      placeholder={t('admin.users.detail.referrals.searchPlaceholder')}
+                      className="flex-1 rounded-lg border border-dark-600 bg-dark-700 px-3 py-2.5 text-sm text-dark-100 placeholder-dark-500 focus:border-accent-500 focus:outline-none"
+                      autoFocus
+                    />
+                    <button
+                      onClick={() => {
+                        setShowAddReferral(false);
+                        setAddReferralSearchQuery('');
+                        setAddReferralSearchResults([]);
+                      }}
+                      className="rounded-lg bg-dark-700 px-3 py-2.5 text-sm text-dark-400 hover:bg-dark-600"
+                    >
+                      {t('common.cancel')}
+                    </button>
+                  </div>
+                  {addReferralSearchQuery.length >= 2 && addReferralSearchResults.length > 0 && (
+                    <div className="absolute left-0 right-0 top-full z-50 mt-1 max-h-60 overflow-y-auto rounded-xl border border-dark-700 bg-dark-800 py-1 shadow-xl">
+                      {addReferralSearchResults
+                        .filter((u) => u.id !== userId && !referralsList.some((r) => r.id === u.id))
+                        .map((u) => (
+                          <button
+                            key={u.id}
+                            onClick={() => handleAddReferral(u.id)}
+                            disabled={actionLoading}
+                            className="flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors hover:bg-dark-700/50 disabled:opacity-50"
+                          >
+                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-dark-600/50 text-xs font-bold text-dark-300">
+                              {(u.full_name || u.username || '?')[0].toUpperCase()}
+                            </div>
+                            <div>
+                              <div className="text-sm text-dark-100">
+                                {u.full_name || u.username || `ID: ${u.id}`}
+                              </div>
+                              <div className="text-xs text-dark-500">
+                                {u.telegram_id ? `TG: ${u.telegram_id}` : `ID: ${u.id}`}
+                              </div>
+                            </div>
+                          </button>
+                        ))}
+                      {addReferralSearchResults.filter(
+                        (u) => u.id !== userId && !referralsList.some((r) => r.id === u.id),
+                      ).length === 0 && (
+                        <div className="px-3 py-4 text-center text-sm text-dark-500">
+                          {t('admin.users.detail.referrals.noUsersFound')}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  {addReferralSearchQuery.length >= 2 &&
+                    !addReferralSearchLoading &&
+                    addReferralSearchResults.length === 0 && (
+                      <div className="absolute left-0 right-0 top-full z-50 mt-1 rounded-xl border border-dark-700 bg-dark-800 py-4 text-center text-sm text-dark-500 shadow-xl">
+                        {t('admin.users.detail.referrals.noUsersFound')}
+                      </div>
+                    )}
+                </div>
+              )}
+
+              {referralsListLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
+                </div>
+              ) : referralsList.length === 0 ? (
+                <div className="py-8 text-center text-dark-500">
+                  {t('admin.users.detail.referrals.noReferrals')}
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {referralsList.map((ref) => (
+                    <div
+                      key={ref.id}
+                      className="flex items-center justify-between rounded-xl bg-dark-700/20 px-4 py-3"
+                    >
+                      <button
+                        onClick={() => navigate(`/admin/users/${ref.id}`)}
+                        className="flex items-center gap-3 text-left"
+                      >
+                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-dark-600/50 text-sm font-bold text-dark-300">
+                          {(ref.full_name || ref.username || '?')[0].toUpperCase()}
+                        </div>
+                        <div>
+                          <div className="text-sm font-medium text-dark-100">
+                            {ref.full_name || ref.username || `ID: ${ref.id}`}
+                          </div>
+                          <div className="text-xs text-dark-500">
+                            {ref.telegram_id ? `TG: ${ref.telegram_id}` : `ID: ${ref.id}`}
+                          </div>
+                        </div>
+                      </button>
+                      <button
+                        onClick={() => handleRemoveReferral(ref.id)}
+                        disabled={actionLoading}
+                        className="rounded-lg p-2 text-dark-500 transition-colors hover:bg-error-500/10 hover:text-error-400 disabled:opacity-50"
+                        title={t('admin.users.detail.referrals.removeReferral')}
+                      >
+                        <svg
+                          className="h-4 w-4"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          strokeWidth={2}
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M6 18L18 6M6 6l12 12"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>

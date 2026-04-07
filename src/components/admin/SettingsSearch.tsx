@@ -208,7 +208,7 @@ export function SettingsSearchMobile({
   };
 
   return (
-    <div ref={containerRef} className="relative mt-3 sm:hidden">
+    <div ref={containerRef} className="relative mt-3 lg:hidden">
       <input
         type="text"
         value={searchQuery}

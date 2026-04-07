@@ -1,4 +1,5 @@
 ﻿import apiClient from './client';
+import i18n from '../i18n';
 import type {
   Balance,
   Transaction,
@@ -54,6 +55,7 @@ export const balanceApi = {
       amount_kopeks: number;
       payment_method: string;
       payment_option?: string;
+      language?: string;
     } = {
       amount_kopeks: amountKopeks,
       payment_method: paymentMethod,
@@ -61,6 +63,7 @@ export const balanceApi = {
     if (paymentOption) {
       payload.payment_option = paymentOption;
     }
+    payload.language = i18n.language || 'ru';
     const response = await apiClient.post('/cabinet/balance/topup', payload);
     return response.data;
   },
@@ -68,14 +71,21 @@ export const balanceApi = {
   // Activate promo code
   activatePromocode: async (
     code: string,
+    subscriptionId?: number,
   ): Promise<{
     success: boolean;
-    message: string;
-    balance_before: number;
-    balance_after: number;
-    bonus_description: string | null;
+    message?: string;
+    balance_before?: number;
+    balance_after?: number;
+    bonus_description?: string | null;
+    error?: string;
+    eligible_subscriptions?: Array<{ id: number; tariff_name: string; days_left: number }>;
+    code?: string;
   }> => {
-    const response = await apiClient.post('/cabinet/promocode/activate', { code });
+    const response = await apiClient.post('/cabinet/promocode/activate', {
+      code,
+      ...(subscriptionId ? { subscription_id: subscriptionId } : {}),
+    });
     return response.data;
   },
 
