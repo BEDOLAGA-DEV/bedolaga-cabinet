@@ -10,6 +10,14 @@ function isHttpUrl(url: string | null | undefined): url is string {
   return typeof url === 'string' && /^https?:\/\//i.test(url);
 }
 
+function isHappSubscriptionLink(url: string | null | undefined): url is string {
+  return typeof url === 'string' && /^happ:\/\/sub/i.test(url);
+}
+
+function isCryptSourceUrl(url: string | null | undefined): url is string {
+  return isHttpUrl(url) || isHappSubscriptionLink(url);
+}
+
 function isHappCryptDeepLink(url: string | null | undefined): url is string {
   return typeof url === 'string' && /^happ:\/\/crypt/i.test(url);
 }
@@ -44,7 +52,7 @@ export function resolveConnectionUrlForUi(input: ResolveConnectionUrlInput): str
 
   const sourceSubscriptionUrl =
     [input.subscriptionUrl, input.displayLink, input.fallbackUrl].find((value) =>
-      isHttpUrl(value),
+      isCryptSourceUrl(value),
     ) ?? null;
 
   if (sourceSubscriptionUrl) {
