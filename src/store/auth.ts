@@ -3,8 +3,16 @@ import { persist } from 'zustand/middleware';
 import type { CampaignBonusInfo, RegisterResponse, User } from '../types';
 import { authApi } from '../api/auth';
 import { apiClient } from '../api/client';
-import { captureCampaignFromUrl, consumeCampaignSlug } from '../utils/campaign';
-import { captureReferralFromUrl, consumeReferralCode } from '../utils/referral';
+import {
+  captureCampaignFromUrl,
+  consumeCampaignSlug,
+  getPendingCampaignSlug,
+} from '../utils/campaign';
+import {
+  captureReferralFromUrl,
+  consumeReferralCode,
+  getPendingReferralCode,
+} from '../utils/referral';
 import { tokenStorage, isTokenValid, tokenRefreshManager } from '../utils/token';
 import { usePermissionStore } from './permissions';
 
@@ -241,9 +249,12 @@ export const useAuthStore = create<AuthState>()(
       },
 
       loginWithTelegram: async (initData) => {
-        const campaignSlug = consumeCampaignSlug();
-        const referralCode = consumeReferralCode();
+        const campaignSlug = getPendingCampaignSlug();
+        const referralCode = getPendingReferralCode();
         const response = await authApi.loginTelegram(initData, campaignSlug, referralCode);
+        // Clear only after successful auth — retry keeps the slugs
+        consumeCampaignSlug();
+        consumeReferralCode();
         tokenStorage.setTokens(response.access_token, response.refresh_token);
         set({
           accessToken: response.access_token,
@@ -256,9 +267,11 @@ export const useAuthStore = create<AuthState>()(
       },
 
       loginWithTelegramWidget: async (data) => {
-        const campaignSlug = consumeCampaignSlug();
-        const referralCode = consumeReferralCode();
+        const campaignSlug = getPendingCampaignSlug();
+        const referralCode = getPendingReferralCode();
         const response = await authApi.loginTelegramWidget(data, campaignSlug, referralCode);
+        consumeCampaignSlug();
+        consumeReferralCode();
         tokenStorage.setTokens(response.access_token, response.refresh_token);
         set({
           accessToken: response.access_token,
@@ -271,9 +284,11 @@ export const useAuthStore = create<AuthState>()(
       },
 
       loginWithTelegramOIDC: async (idToken) => {
-        const campaignSlug = consumeCampaignSlug();
-        const referralCode = consumeReferralCode();
+        const campaignSlug = getPendingCampaignSlug();
+        const referralCode = getPendingReferralCode();
         const response = await authApi.loginTelegramOIDC(idToken, campaignSlug, referralCode);
+        consumeCampaignSlug();
+        consumeReferralCode();
         tokenStorage.setTokens(response.access_token, response.refresh_token);
         set({
           accessToken: response.access_token,
@@ -286,9 +301,11 @@ export const useAuthStore = create<AuthState>()(
       },
 
       loginWithEmail: async (email, password) => {
-        const campaignSlug = consumeCampaignSlug();
-        const referralCode = consumeReferralCode();
+        const campaignSlug = getPendingCampaignSlug();
+        const referralCode = getPendingReferralCode();
         const response = await authApi.loginEmail(email, password, campaignSlug, referralCode);
+        consumeCampaignSlug();
+        consumeReferralCode();
         tokenStorage.setTokens(response.access_token, response.refresh_token);
         set({
           accessToken: response.access_token,
@@ -301,8 +318,8 @@ export const useAuthStore = create<AuthState>()(
       },
 
       loginWithOAuth: async (provider, code, state, deviceId) => {
-        const campaignSlug = consumeCampaignSlug();
-        const referralCode = consumeReferralCode();
+        const campaignSlug = getPendingCampaignSlug();
+        const referralCode = getPendingReferralCode();
         const response = await authApi.oauthCallback(
           provider,
           code,
@@ -311,6 +328,8 @@ export const useAuthStore = create<AuthState>()(
           campaignSlug,
           referralCode,
         );
+        consumeCampaignSlug();
+        consumeReferralCode();
         tokenStorage.setTokens(response.access_token, response.refresh_token);
         set({
           accessToken: response.access_token,
@@ -339,7 +358,7 @@ export const useAuthStore = create<AuthState>()(
       },
 
       registerWithEmail: async (email, password, firstName, referralCode) => {
-        const code = referralCode || consumeReferralCode() || undefined;
+        const code = referralCode || getPendingReferralCode() || undefined;
         const response = await authApi.registerEmailStandalone({
           email,
           password,
@@ -347,6 +366,7 @@ export const useAuthStore = create<AuthState>()(
           language: navigator.language.split('-')[0] || 'ru',
           referral_code: code,
         });
+        consumeReferralCode();
         return response;
       },
     }),

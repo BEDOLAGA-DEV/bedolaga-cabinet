@@ -873,7 +873,7 @@ export default function SubscriptionPurchase() {
                             const dailyPrice =
                               tariff.daily_price_kopeks ?? tariff.price_per_day_kopeks ?? 0;
                             const originalDailyPrice = tariff.original_daily_price_kopeks || 0;
-                            if (dailyPrice > 0) {
+                            if (dailyPrice > 0 || originalDailyPrice > 0) {
                               const promoDaily = applyPromoDiscount(
                                 dailyPrice,
                                 originalDailyPrice > dailyPrice ? originalDailyPrice : undefined,

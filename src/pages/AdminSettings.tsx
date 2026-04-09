@@ -43,6 +43,9 @@ const ChevronRightIcon = () => (
   </svg>
 );
 
+// Settings that require SALES_MODE=tariffs to be visible
+const TARIFF_MODE_SETTINGS = ['MULTI_TARIFF_ENABLED', 'MAX_ACTIVE_SUBSCRIPTIONS'];
+
 export default function AdminSettings() {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -84,9 +87,6 @@ export default function AdminSettings() {
       break;
     }
   }
-
-  // Settings that require SALES_MODE=tariffs to be visible
-  const TARIFF_MODE_SETTINGS = ['MULTI_TARIFF_ENABLED', 'MAX_ACTIVE_SUBSCRIPTIONS'];
 
   // Check if tariffs mode is active
   const isTariffsMode = useMemo(() => {
