@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.44.2](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.44.1...v1.44.2) (2026-04-08)
+
+
+### Bug Fixes
+
+* batch bug fixes matching backend changes ([e6f6713](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/e6f6713b0e9b854d7eb88f4e2a53b26656637079))
+* batch frontend fixes matching backend changes ([608a752](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/608a75220f19bf64a956601c00fcec7bb974c41a))
+
 ## [1.44.1](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.44.0...v1.44.1) (2026-04-03)
 
 
