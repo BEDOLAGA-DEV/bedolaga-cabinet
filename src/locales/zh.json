@@ -524,6 +524,8 @@
       "errors": {
         "not_found": "优惠码不存在",
         "expired": "优惠码已过期",
+        "inactive": "优惠码已停用",
+        "not_yet_valid": "优惠码尚未生效",
         "used": "优惠码已被使用",
         "already_used_by_user": "您已使用过此优惠码",
         "user_not_found": "用户不存在",

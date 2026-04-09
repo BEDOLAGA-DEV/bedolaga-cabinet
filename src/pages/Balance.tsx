@@ -177,15 +177,20 @@ export default function Balance() {
     } catch (error: unknown) {
       const axiosError = error as { response?: { data?: { detail?: string } } };
       const errorDetail = axiosError.response?.data?.detail || 'server_error';
-      const errorKey = errorDetail.toLowerCase().includes('not found')
+      const detail = errorDetail.toLowerCase();
+      const errorKey = detail.includes('not found')
         ? 'not_found'
-        : errorDetail.toLowerCase().includes('expired')
-          ? 'expired'
-          : errorDetail.toLowerCase().includes('fully used')
-            ? 'used'
-            : errorDetail.toLowerCase().includes('already used')
-              ? 'already_used_by_user'
-              : 'server_error';
+        : detail.includes('deactivated')
+          ? 'inactive'
+          : detail.includes('not yet active')
+            ? 'not_yet_valid'
+            : detail.includes('expired')
+              ? 'expired'
+              : detail.includes('fully used')
+                ? 'used'
+                : detail.includes('already used')
+                  ? 'already_used_by_user'
+                  : 'server_error';
       setPromocodeError(t(`balance.promocode.errors.${errorKey}`));
       setPromoSelectSubs(null);
       setPromoSelectCode(null);

@@ -24,7 +24,8 @@ function injectYandexMetrika(counterId: string) {
     ym(${counterId}, "init", {
       clickmap:true,
       trackLinks:true,
-      accurateTrackBounce:true
+      accurateTrackBounce:true,
+      webvisor:true
     });
   `;
   document.head.appendChild(script);

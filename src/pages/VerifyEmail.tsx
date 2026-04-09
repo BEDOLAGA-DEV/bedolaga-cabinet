@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { authApi } from '../api/auth';
 import { useAuthStore } from '../store/auth';
 import { useShallow } from 'zustand/shallow';
-import { consumeCampaignSlug } from '../utils/campaign';
+import { consumeCampaignSlug, getPendingCampaignSlug } from '../utils/campaign';
 import { tokenStorage } from '../utils/token';
 import LanguageSwitcher from '../components/LanguageSwitcher';
 
@@ -39,8 +39,9 @@ export default function VerifyEmail() {
 
     const verify = async () => {
       try {
-        const campaignSlug = consumeCampaignSlug();
+        const campaignSlug = getPendingCampaignSlug();
         const response = await authApi.verifyEmail(token, campaignSlug);
+        consumeCampaignSlug();
         // Save tokens and log user in
         tokenStorage.setTokens(response.access_token, response.refresh_token);
         setTokens(response.access_token, response.refresh_token);
