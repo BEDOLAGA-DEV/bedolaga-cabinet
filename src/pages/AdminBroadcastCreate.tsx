@@ -128,6 +128,9 @@ export default function AdminBroadcastCreate() {
   const [showTelegramFilters, setShowTelegramFilters] = useState(false);
   const [showEmailFilters, setShowEmailFilters] = useState(false);
 
+  // Broadcast category (system/news/promo)
+  const [category, setCategory] = useState<'system' | 'news' | 'promo'>('system');
+
   // Telegram-specific state
   const [messageText, setMessageText] = useState('');
   const [selectedButtons, setSelectedButtons] = useState<string[]>(['home']);
@@ -395,6 +398,7 @@ export default function AdminBroadcastCreate() {
         message_text: messageText,
         selected_buttons: selectedButtons,
         custom_buttons: customButtons.length > 0 ? customButtons : undefined,
+        category,
       };
       if (uploadedFileId) {
         data.media = { type: mediaType, file_id: uploadedFileId };
@@ -409,6 +413,7 @@ export default function AdminBroadcastCreate() {
         target: emailTarget,
         email_subject: emailSubject,
         email_html_content: emailContent,
+        category,
       };
       createMutation.mutate(data);
       return;
@@ -423,6 +428,7 @@ export default function AdminBroadcastCreate() {
         message_text: messageText,
         selected_buttons: selectedButtons,
         custom_buttons: customButtons.length > 0 ? customButtons : undefined,
+        category,
       };
       if (uploadedFileId) {
         telegramData.media = { type: mediaType, file_id: uploadedFileId };
@@ -433,6 +439,7 @@ export default function AdminBroadcastCreate() {
         target: emailTarget,
         email_subject: emailSubject,
         email_html_content: emailContent,
+        category,
       };
 
       await adminBroadcastsApi.createCombined(telegramData);
@@ -581,6 +588,36 @@ export default function AdminBroadcastCreate() {
         {bothChannels && (
           <p className="mt-2 text-sm text-accent-400">{t('admin.broadcasts.sendingBoth')}</p>
         )}
+      </div>
+
+      {/* Broadcast category */}
+      <div className="card">
+        <label className="mb-3 block text-sm font-medium text-dark-300">
+          {t('admin.broadcasts.category', 'Категория рассылки')}
+        </label>
+        <p className="mb-3 text-xs text-dark-500">
+          {t(
+            'admin.broadcasts.categoryDesc',
+            'Пользователи могут отключить получение новостей и промо в настройках профиля. Системные рассылки доставляются всем.',
+          )}
+        </p>
+        <div className="flex gap-3">
+          {(['system', 'news', 'promo'] as const).map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setCategory(cat)}
+              className={`flex-1 rounded-lg border p-3 text-sm font-medium transition-all ${
+                category === cat
+                  ? 'border-accent-500 bg-accent-500/10 text-accent-400'
+                  : 'border-dark-700 bg-dark-800 text-dark-300 hover:border-dark-600'
+              }`}
+            >
+              {cat === 'system' && t('admin.broadcasts.categorySystem', '⚙️ Системное')}
+              {cat === 'news' && t('admin.broadcasts.categoryNews', '📰 Новости')}
+              {cat === 'promo' && t('admin.broadcasts.categoryPromo', '🎁 Промо')}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Telegram section */}

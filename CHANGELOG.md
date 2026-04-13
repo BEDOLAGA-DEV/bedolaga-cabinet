@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.45.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.44.2...v1.45.0) (2026-04-13)
+
+
+### Features
+
+* add broadcast category selector (system/news/promo) in admin UI ([362a698](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/362a69812fb57a8615750d367f73b3a29fda665b))
+* send campaign_slug during standalone email registration ([a46c89e](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/a46c89e45ee9dee121b589f665330d9ce71483d2))
+
+
+### Bug Fixes
+
+* add back button to AdminBanSystem page ([f787cc2](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/f787cc2de8de094965b83e04032723efe458eda9))
+* add Object.hasOwn polyfill for old iOS/Android WebViews ([7b0e6d8](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/7b0e6d8bc8a3bfb0907c057cade17679a672f643))
+* show API error details in menu editor save + allow tg:// URLs ([30d8d28](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/30d8d28475298a6b620b682a7437022d3b818c80))
+* subscription status badge overflow + inline password validation ([3d0fc76](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/3d0fc76ecda7c29c496ede51acaf931af53634e2))
+
 ## [1.44.2](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.44.1...v1.44.2) (2026-04-08)
 
 

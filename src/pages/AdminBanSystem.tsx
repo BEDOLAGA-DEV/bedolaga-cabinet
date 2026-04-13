@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { AdminBackButton } from '../components/admin/AdminBackButton';
 import {
   banSystemApi,
   type BanSystemStatus,
@@ -557,6 +558,7 @@ export default function AdminBanSystem() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
+          <AdminBackButton />
           <div className="rounded-xl bg-error-500/20 p-3">
             <ShieldIcon />
           </div>

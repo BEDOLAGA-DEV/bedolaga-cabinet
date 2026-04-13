@@ -76,6 +76,8 @@ export interface EmailBroadcastCreateRequest {
 export interface CombinedBroadcastCreateRequest {
   channel: BroadcastChannel;
   target: string;
+  // Broadcast category for user notification preference filtering
+  category?: 'system' | 'news' | 'promo';
   // Telegram fields
   message_text?: string;
   selected_buttons?: string[];
@@ -111,6 +113,8 @@ export interface Broadcast {
   created_at: string;
   completed_at: string | null;
   progress_percent: number;
+  // Broadcast category
+  category?: 'system' | 'news' | 'promo';
   // New fields for channel support
   channel?: BroadcastChannel;
   email_subject?: string | null;
