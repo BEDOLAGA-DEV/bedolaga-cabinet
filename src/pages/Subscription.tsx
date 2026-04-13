@@ -584,7 +584,7 @@ export default function Subscription() {
 
                 {/* Status badge */}
                 <span
-                  className="rounded-full px-3 py-1 font-mono text-[10px] font-semibold uppercase tracking-wider"
+                  className="max-w-[55%] shrink-0 rounded-full px-3 py-1 text-center font-mono text-[10px] font-semibold uppercase tracking-wider"
                   style={{
                     background: subscription.is_active
                       ? `${zone.mainHex}15`

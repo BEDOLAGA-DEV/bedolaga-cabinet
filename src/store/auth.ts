@@ -359,12 +359,14 @@ export const useAuthStore = create<AuthState>()(
 
       registerWithEmail: async (email, password, firstName, referralCode) => {
         const code = referralCode || getPendingReferralCode() || undefined;
+        const campaignSlug = getPendingCampaignSlug() || undefined;
         const response = await authApi.registerEmailStandalone({
           email,
           password,
           first_name: firstName,
           language: navigator.language.split('-')[0] || 'ru',
           referral_code: code,
+          campaign_slug: campaignSlug,
         });
         consumeReferralCode();
         return response;

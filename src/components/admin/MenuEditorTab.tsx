@@ -573,8 +573,10 @@ export function MenuEditorTab() {
       setDraftConfig(data);
       queryClient.setQueryData(['menu-layout'], data);
     },
-    onError: () => {
-      notify.error(t('common.error'));
+    onError: (err: unknown) => {
+      const error = err as { response?: { data?: { detail?: string } } };
+      const detail = error.response?.data?.detail;
+      notify.error(detail || t('common.error'));
     },
   });
 
@@ -748,7 +750,12 @@ export function MenuEditorTab() {
     for (const row of currentDraft.rows) {
       for (const btn of row.buttons) {
         if (btn.type === 'custom') {
-          if (!btn.url || (!btn.url.startsWith('http://') && !btn.url.startsWith('https://'))) {
+          if (
+            !btn.url ||
+            (!btn.url.startsWith('http://') &&
+              !btn.url.startsWith('https://') &&
+              !btn.url.startsWith('tg://'))
+          ) {
             notify.error(t('admin.menuEditor.invalidUrl'));
             return;
           }

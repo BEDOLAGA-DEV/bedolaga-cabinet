@@ -720,6 +720,16 @@ export default function Login() {
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                               />
+                              {authMode === 'register' &&
+                                password.length > 0 &&
+                                password.length < 8 && (
+                                  <p className="mt-1.5 text-xs text-error-400">
+                                    {t(
+                                      'auth.passwordTooShort',
+                                      'Password must be at least 8 characters',
+                                    )}
+                                  </p>
+                                )}
                             </div>
 
                             {authMode === 'register' && (
