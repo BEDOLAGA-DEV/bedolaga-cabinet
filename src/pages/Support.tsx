@@ -3,15 +3,17 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { ticketsApi } from '../api/tickets';
+import { MessageMediaGrid } from '../components/tickets/MessageMediaGrid';
 import { infoApi } from '../api/info';
 import { useAuthStore } from '../store/auth';
 import { logger } from '../utils/logger';
 import { checkRateLimit, getRateLimitResetTime, RATE_LIMIT_KEYS } from '../utils/rateLimit';
-import type { TicketDetail, TicketMessage } from '../types';
+import type { TicketDetail } from '../types';
 import { Card } from '@/components/data-display/Card';
 import { Button } from '@/components/primitives/Button';
 import { staggerContainer, staggerItem } from '@/components/motion/transitions';
 import { usePlatform } from '@/platform';
+import DOMPurify from 'dompurify';
 
 const log = logger.createLogger('Support');
 
@@ -56,96 +58,6 @@ interface MediaAttachment {
   error?: string;
 }
 
-// Message media display component
-function MessageMedia({ message, t }: { message: TicketMessage; t: (key: string) => string }) {
-  const [imageLoaded, setImageLoaded] = useState(false);
-  const [imageError, setImageError] = useState(false);
-  const [showFullImage, setShowFullImage] = useState(false);
-
-  if (!message.has_media || !message.media_file_id) {
-    return null;
-  }
-
-  const mediaUrl = ticketsApi.getMediaUrl(message.media_file_id);
-
-  if (message.media_type === 'photo') {
-    return (
-      <>
-        <div className="relative mt-3">
-          {!imageLoaded && !imageError && (
-            <div className="flex h-48 w-full animate-pulse items-center justify-center rounded-lg bg-dark-700">
-              <div className="h-6 w-6 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-            </div>
-          )}
-          {imageError ? (
-            <div className="flex h-32 w-full items-center justify-center rounded-lg bg-dark-700 text-sm text-dark-400">
-              {t('support.imageLoadFailed')}
-            </div>
-          ) : (
-            <img
-              src={mediaUrl}
-              alt={message.media_caption || 'Attached image'}
-              className={`max-h-64 max-w-full cursor-pointer rounded-lg transition-opacity hover:opacity-90 ${imageLoaded ? '' : 'hidden'}`}
-              onLoad={() => setImageLoaded(true)}
-              onError={() => setImageError(true)}
-              onClick={() => setShowFullImage(true)}
-            />
-          )}
-          {message.media_caption && (
-            <p className="mt-1 text-xs text-dark-400">{message.media_caption}</p>
-          )}
-        </div>
-
-        {/* Full image modal */}
-        {showFullImage && (
-          <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
-            onClick={() => setShowFullImage(false)}
-          >
-            <button
-              className="absolute right-4 top-4 text-white/70 hover:text-white"
-              onClick={() => setShowFullImage(false)}
-            >
-              <CloseIcon />
-            </button>
-            <img
-              src={mediaUrl}
-              alt={message.media_caption || 'Attached image'}
-              className="max-h-full max-w-full object-contain"
-            />
-          </div>
-        )}
-      </>
-    );
-  }
-
-  // For documents/videos - show download link
-  return (
-    <div className="mt-3">
-      <a
-        href={mediaUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="inline-flex items-center gap-2 rounded-lg bg-dark-700 px-3 py-2 text-sm text-dark-200 transition-colors hover:bg-dark-600"
-      >
-        <svg
-          className="h-4 w-4"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          strokeWidth={2}
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m.75 12l3 3m0 0l3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
-          />
-        </svg>
-        {message.media_caption || `Download ${message.media_type}`}
-      </a>
-    </div>
-  );
-}
 
 export default function Support() {
   log.debug('Component loaded');
@@ -161,38 +73,30 @@ export default function Support() {
   const [replyMessage, setReplyMessage] = useState('');
   const [rateLimitError, setRateLimitError] = useState<string | null>(null);
 
-  // Media attachment states
-  const [createAttachment, setCreateAttachment] = useState<MediaAttachment | null>(null);
-  const [replyAttachment, setReplyAttachment] = useState<MediaAttachment | null>(null);
+  // Media attachment states (multi-upload, up to 10)
+  const [createAttachments, setCreateAttachments] = useState<MediaAttachment[]>([]);
+  const [replyAttachments, setReplyAttachments] = useState<MediaAttachment[]>([]);
   const createFileInputRef = useRef<HTMLInputElement>(null);
   const replyFileInputRef = useRef<HTMLInputElement>(null);
-  const createPreviewRef = useRef<string | null>(null);
-  const replyPreviewRef = useRef<string | null>(null);
 
-  // Revoke blob URLs on unmount to prevent memory leaks
   useEffect(() => {
-    const createRef = createPreviewRef;
-    const replyRef = replyPreviewRef;
     return () => {
-      if (createRef.current) URL.revokeObjectURL(createRef.current);
-      if (replyRef.current) URL.revokeObjectURL(replyRef.current);
+      createAttachments.forEach((a) => { if (a.preview) URL.revokeObjectURL(a.preview); });
+      replyAttachments.forEach((a) => { if (a.preview) URL.revokeObjectURL(a.preview); });
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const clearCreateAttachment = () => {
-    if (createPreviewRef.current) {
-      URL.revokeObjectURL(createPreviewRef.current);
-      createPreviewRef.current = null;
-    }
-    clearCreateAttachment();
+  const clearCreateAttachments = () => {
+    createAttachments.forEach((a) => { if (a.preview) URL.revokeObjectURL(a.preview); });
+    setCreateAttachments([]);
+    if (createFileInputRef.current) createFileInputRef.current.value = '';
   };
 
-  const clearReplyAttachment = () => {
-    if (replyPreviewRef.current) {
-      URL.revokeObjectURL(replyPreviewRef.current);
-      replyPreviewRef.current = null;
-    }
-    clearReplyAttachment();
+  const clearReplyAttachments = () => {
+    replyAttachments.forEach((a) => { if (a.preview) URL.revokeObjectURL(a.preview); });
+    setReplyAttachments([]);
+    if (replyFileInputRef.current) replyFileInputRef.current.value = '';
   };
 
   // Get support configuration
@@ -213,67 +117,42 @@ export default function Support() {
     enabled: !!selectedTicket,
   });
 
-  // Handle file selection
+  // Handle file selection (multi-upload)
   const handleFileSelect = async (
     file: File,
-    setAttachment: (a: MediaAttachment | null) => void,
+    setAttachments: React.Dispatch<React.SetStateAction<MediaAttachment[]>>,
   ) => {
-    // Validate file type
     const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-    if (!allowedTypes.includes(file.type)) {
-      setAttachment({
-        file,
-        preview: '',
-        uploading: false,
-        error: t('support.invalidFileType'),
-      });
-      return;
-    }
+    if (!allowedTypes.includes(file.type)) return;
+    if (file.size > 10 * 1024 * 1024) return;
 
-    // Validate file size (10MB)
-    if (file.size > 10 * 1024 * 1024) {
-      setAttachment({
-        file,
-        preview: '',
-        uploading: false,
-        error: t('support.fileTooLarge'),
-      });
-      return;
-    }
-
-    // Revoke old blob URL before creating new one
-    const previewRef = setAttachment === setCreateAttachment ? createPreviewRef : replyPreviewRef;
-    if (previewRef.current) URL.revokeObjectURL(previewRef.current);
     const preview = URL.createObjectURL(file);
-    previewRef.current = preview;
-    setAttachment({ file, preview, uploading: true });
+    const entry: MediaAttachment = { file, preview, uploading: true };
+    setAttachments((prev) => (prev.length >= 10 ? prev : [...prev, entry]));
 
     try {
       const result = await ticketsApi.uploadMedia(file, 'photo');
-      setAttachment({
-        file,
-        preview,
-        uploading: false,
-        fileId: result.file_id,
-      });
+      setAttachments((prev) =>
+        prev.map((a) => (a.file === file ? { ...a, uploading: false, fileId: result.file_id } : a)),
+      );
     } catch {
-      setAttachment({
-        file,
-        preview,
-        uploading: false,
-        error: t('support.uploadFailed'),
-      });
+      setAttachments((prev) =>
+        prev.map((a) => (a.file === file ? { ...a, uploading: false, error: t('support.uploadFailed') } : a)),
+      );
     }
   };
 
   const createMutation = useMutation({
     mutationFn: async () => {
-      const media = createAttachment?.fileId
-        ? {
-            media_type: 'photo',
-            media_file_id: createAttachment.fileId,
-          }
-        : undefined;
+      const ready = createAttachments.filter((a) => a.fileId) as Array<{ fileId: string }>;
+      const media =
+        ready.length > 0
+          ? {
+              media_type: 'photo',
+              media_file_id: ready[0].fileId,
+              media_items: ready.map((a) => ({ type: 'photo' as const, file_id: a.fileId })),
+            }
+          : undefined;
       return ticketsApi.createTicket(newTitle, newMessage, media);
     },
     onSuccess: (ticket) => {
@@ -281,25 +160,28 @@ export default function Support() {
       setShowCreateForm(false);
       setNewTitle('');
       setNewMessage('');
-      clearCreateAttachment();
+      clearCreateAttachments();
       setSelectedTicket(ticket);
     },
   });
 
   const replyMutation = useMutation({
     mutationFn: async () => {
-      const media = replyAttachment?.fileId
-        ? {
-            media_type: 'photo',
-            media_file_id: replyAttachment.fileId,
-          }
-        : undefined;
-      return ticketsApi.addMessage(selectedTicket!.id, replyMessage, media);
+      const ready = replyAttachments.filter((a) => a.fileId) as Array<{ fileId: string }>;
+      const media =
+        ready.length > 0
+          ? {
+              media_type: 'photo',
+              media_file_id: ready[0].fileId,
+              media_items: ready.map((a) => ({ type: 'photo' as const, file_id: a.fileId })),
+            }
+          : undefined;
+      await ticketsApi.addMessage(selectedTicket!.id, replyMessage, media);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['ticket', selectedTicket?.id] });
       setReplyMessage('');
-      clearReplyAttachment();
+      clearReplyAttachments();
     },
   });
 
@@ -427,35 +309,43 @@ export default function Support() {
     );
   }
 
-  // Attachment preview component
-  const AttachmentPreview = ({
-    attachment,
+  // Attachments preview component
+  const AttachmentsPreview = ({
+    items,
     onRemove,
   }: {
-    attachment: MediaAttachment;
-    onRemove: () => void;
-  }) => (
-    <div className="relative mt-2 inline-block">
-      {attachment.preview && (
-        <img
-          src={attachment.preview}
-          alt="Attachment preview"
-          className="h-20 w-auto rounded-lg border border-dark-700"
-        />
-      )}
-      {attachment.uploading && (
-        <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-dark-900/70">
-          <div className="h-5 w-5 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
+    items: MediaAttachment[];
+    onRemove: (idx: number) => void;
+  }) => items.length === 0 ? null : (
+    <div className="mt-2 flex flex-wrap gap-2">
+      {items.map((att, idx) => (
+        <div key={idx} className="relative">
+          {att.preview ? (
+            <img src={att.preview} alt="Preview" className="h-16 w-16 rounded-lg object-cover border border-dark-700" />
+          ) : (
+            <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-dark-700 text-xs text-dark-400">
+              {att.file.name.slice(-6)}
+            </div>
+          )}
+          {att.uploading && (
+            <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/50">
+              <span className="h-4 w-4 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
+            </div>
+          )}
+          {att.error && (
+            <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-red-500/30">
+              <span className="text-xs text-red-300">!</span>
+            </div>
+          )}
+          <button
+            type="button"
+            onClick={() => onRemove(idx)}
+            className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-dark-600 text-dark-300 hover:bg-red-500 hover:text-white"
+          >
+            <CloseIcon />
+          </button>
         </div>
-      )}
-      {attachment.error && <div className="mt-1 text-xs text-red-400">{attachment.error}</div>}
-      <button
-        type="button"
-        onClick={onRemove}
-        className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-white hover:bg-red-600"
-      >
-        <CloseIcon />
-      </button>
+      ))}
     </div>
   );
 
@@ -475,7 +365,7 @@ export default function Support() {
           onClick={() => {
             setShowCreateForm(true);
             setSelectedTicket(null);
-            clearCreateAttachment();
+            clearCreateAttachments();
           }}
         >
           <PlusIcon />
@@ -540,7 +430,7 @@ export default function Support() {
                   onClick={() => {
                     setSelectedTicket(ticket as unknown as TicketDetail);
                     setShowCreateForm(false);
-                    clearReplyAttachment();
+                    clearReplyAttachments();
                   }}
                   className={`w-full rounded-bento border p-4 text-left transition-all ${
                     selectedTicket?.id === ticket.id
@@ -629,32 +519,37 @@ export default function Support() {
                   />
                 </div>
 
-                {/* Image attachment for create */}
+                {/* Image attachments for create */}
                 <div>
                   <input
                     ref={createFileInputRef}
                     type="file"
                     accept="image/jpeg,image/png,image/gif,image/webp"
+                    multiple
                     className="hidden"
                     onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) handleFileSelect(file, setCreateAttachment);
+                      const files = Array.from(e.target.files || []);
+                      files.forEach((file) => handleFileSelect(file, setCreateAttachments));
                       e.target.value = '';
                     }}
                   />
-                  {createAttachment ? (
-                    <AttachmentPreview
-                      attachment={createAttachment}
-                      onRemove={() => clearCreateAttachment()}
-                    />
-                  ) : (
+                  <AttachmentsPreview
+                    items={createAttachments}
+                    onRemove={(idx) => setCreateAttachments((prev) => {
+                      const removed = prev[idx];
+                      if (removed?.preview) URL.revokeObjectURL(removed.preview);
+                      return prev.filter((_, i) => i !== idx);
+                    })}
+                  />
+                  {createAttachments.length < 10 && (
                     <button
                       type="button"
                       onClick={() => createFileInputRef.current?.click()}
-                      className="flex items-center gap-2 text-sm text-dark-400 transition-colors hover:text-dark-200"
+                      disabled={createAttachments.some((a) => a.uploading)}
+                      className="mt-2 flex items-center gap-2 text-sm text-dark-400 transition-colors hover:text-dark-200 disabled:opacity-50"
                     >
                       <ImageIcon />
-                      {t('support.attachImage')}
+                      {t('support.attachImage')} {createAttachments.length > 0 && `(${createAttachments.length}/10)`}
                     </button>
                   )}
                 </div>
@@ -668,7 +563,7 @@ export default function Support() {
                 <div className="flex gap-3">
                   <Button
                     type="submit"
-                    disabled={createAttachment?.uploading}
+                    disabled={createAttachments.some((a) => a.uploading)}
                     loading={createMutation.isPending}
                   >
                     <SendIcon />
@@ -679,7 +574,7 @@ export default function Support() {
                     variant="secondary"
                     onClick={() => {
                       setShowCreateForm(false);
-                      clearCreateAttachment();
+                      clearCreateAttachments();
                     }}
                   >
                     {t('common.cancel')}
@@ -732,9 +627,20 @@ export default function Support() {
                           {new Date(msg.created_at).toLocaleString()}
                         </span>
                       </div>
-                      <div className="whitespace-pre-wrap text-dark-200">{msg.message_text}</div>
+                      <div
+                        className="whitespace-pre-wrap text-dark-200 [&_a]:text-accent-400 [&_a]:underline"
+                        dangerouslySetInnerHTML={{
+                          __html: DOMPurify.sanitize(
+                            msg.message_text.replace(
+                              /(https?:\/\/[^\s<]+)/g,
+                              '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>',
+                            ),
+                            { ADD_ATTR: ['target'] },
+                          ),
+                        }}
+                      />
                       {/* Display media if present */}
-                      <MessageMedia message={msg} t={t} />
+                      <MessageMediaGrid message={msg} translateError={t('support.imageLoadFailed')} />
                     </div>
                   ))}
                 </div>
@@ -769,40 +675,48 @@ export default function Support() {
                       />
                     </div>
 
-                    {/* Image attachment for reply */}
+                    {/* Image attachments for reply */}
+                    <div>
+                      <input
+                        ref={replyFileInputRef}
+                        type="file"
+                        accept="image/jpeg,image/png,image/gif,image/webp"
+                        multiple
+                        className="hidden"
+                        onChange={(e) => {
+                          const files = Array.from(e.target.files || []);
+                          files.forEach((file) => handleFileSelect(file, setReplyAttachments));
+                          e.target.value = '';
+                        }}
+                      />
+                      <AttachmentsPreview
+                        items={replyAttachments}
+                        onRemove={(idx) => setReplyAttachments((prev) => {
+                          const removed = prev[idx];
+                          if (removed?.preview) URL.revokeObjectURL(removed.preview);
+                          return prev.filter((_, i) => i !== idx);
+                        })}
+                      />
+                    </div>
                     <div className="flex items-center justify-between">
-                      <div>
-                        <input
-                          ref={replyFileInputRef}
-                          type="file"
-                          accept="image/jpeg,image/png,image/gif,image/webp"
-                          className="hidden"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) handleFileSelect(file, setReplyAttachment);
-                            e.target.value = '';
-                          }}
-                        />
-                        {replyAttachment ? (
-                          <AttachmentPreview
-                            attachment={replyAttachment}
-                            onRemove={() => clearReplyAttachment()}
-                          />
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={() => replyFileInputRef.current?.click()}
-                            className="flex items-center gap-2 text-sm text-dark-400 transition-colors hover:text-dark-200"
-                          >
-                            <ImageIcon />
-                            {t('support.attachImage')}
-                          </button>
-                        )}
-                      </div>
+                      {replyAttachments.length < 10 && (
+                        <button
+                          type="button"
+                          onClick={() => replyFileInputRef.current?.click()}
+                          disabled={replyAttachments.some((a) => a.uploading)}
+                          className="flex items-center gap-2 text-sm text-dark-400 transition-colors hover:text-dark-200 disabled:opacity-50"
+                        >
+                          <ImageIcon />
+                          {t('support.attachImage')} {replyAttachments.length > 0 && `(${replyAttachments.length}/10)`}
+                        </button>
+                      )}
 
                       <Button
                         type="submit"
-                        disabled={!replyMessage.trim() || replyAttachment?.uploading}
+                        disabled={
+                          (!replyMessage.trim() && replyAttachments.filter((a) => a.fileId).length === 0) ||
+                          replyAttachments.some((a) => a.uploading)
+                        }
                         loading={replyMutation.isPending}
                       >
                         <SendIcon />

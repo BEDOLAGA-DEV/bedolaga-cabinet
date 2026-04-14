@@ -18,10 +18,11 @@ import {
 import { adminApi, type AdminTicket, type AdminTicketDetail } from '../api/admin';
 import { promocodesApi, type PromoGroup } from '../api/promocodes';
 import { promoOffersApi } from '../api/promoOffers';
-import { ticketsApi } from '../api/tickets';
 import { AdminBackButton } from '../components/admin';
 import { createNumberInputHandler, toNumber } from '../utils/inputHelpers';
 import { usePermissionStore } from '../store/permissions';
+import DOMPurify from 'dompurify';
+import { MessageMediaGrid } from '../components/tickets/MessageMediaGrid';
 
 // ============ Helpers ============
 
@@ -2793,32 +2794,19 @@ export default function AdminUserDetail() {
                             {formatDate(msg.created_at)}
                           </span>
                         </div>
-                        <p className="whitespace-pre-wrap text-sm text-dark-200">
-                          {msg.message_text}
-                        </p>
-                        {msg.has_media && msg.media_file_id && (
-                          <div className="mt-2">
-                            {msg.media_type === 'photo' ? (
-                              <img
-                                src={ticketsApi.getMediaUrl(msg.media_file_id)}
-                                alt={msg.media_caption || ''}
-                                className="max-h-48 max-w-full rounded-lg"
-                              />
-                            ) : (
-                              <a
-                                href={ticketsApi.getMediaUrl(msg.media_file_id)}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1 rounded-lg bg-dark-700 px-2 py-1 text-xs text-dark-200 hover:bg-dark-600"
-                              >
-                                {msg.media_caption || msg.media_type}
-                              </a>
-                            )}
-                            {msg.media_caption && msg.media_type === 'photo' && (
-                              <p className="mt-1 text-xs text-dark-400">{msg.media_caption}</p>
-                            )}
-                          </div>
-                        )}
+                        <p
+                          className="whitespace-pre-wrap text-sm text-dark-200 [&_a]:text-accent-400 [&_a]:underline"
+                          dangerouslySetInnerHTML={{
+                            __html: DOMPurify.sanitize(
+                              msg.message_text.replace(
+                                /(https?:\/\/[^\s<]+)/g,
+                                '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>',
+                              ),
+                              { ADD_ATTR: ['target'] },
+                            ),
+                          }}
+                        />
+                        <MessageMediaGrid message={msg} />
                       </div>
                     ))}
                     <div ref={messagesEndRef} />

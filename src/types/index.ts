@@ -473,6 +473,12 @@ export interface ReferralTerms {
 }
 
 // Ticket types
+export interface TicketMediaItem {
+  type: 'photo' | 'video' | 'document';
+  file_id: string;
+  caption?: string | null;
+}
+
 export interface TicketMessage {
   id: number;
   message_text: string;
@@ -481,6 +487,7 @@ export interface TicketMessage {
   media_type: string | null;
   media_file_id: string | null;
   media_caption: string | null;
+  media_items?: TicketMediaItem[] | null;
   created_at: string;
 }
 

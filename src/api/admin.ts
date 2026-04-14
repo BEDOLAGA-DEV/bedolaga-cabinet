@@ -8,6 +8,12 @@ export interface AdminTicketUser {
   last_name: string | null;
 }
 
+export interface AdminTicketMediaItem {
+  type: 'photo' | 'video' | 'document';
+  file_id: string;
+  caption?: string | null;
+}
+
 export interface AdminTicketMessage {
   id: number;
   message_text: string;
@@ -16,6 +22,7 @@ export interface AdminTicketMessage {
   media_type: string | null;
   media_file_id: string | null;
   media_caption: string | null;
+  media_items?: AdminTicketMediaItem[] | null;
   created_at: string;
 }
 
@@ -118,7 +125,12 @@ export const adminApi = {
   replyToTicket: async (
     ticketId: number,
     message: string,
-    media?: { media_type?: string; media_file_id?: string; media_caption?: string },
+    media?: {
+      media_type?: string;
+      media_file_id?: string;
+      media_caption?: string;
+      media_items?: AdminTicketMediaItem[];
+    },
   ): Promise<AdminTicketMessage> => {
     const response = await apiClient.post(`/cabinet/admin/tickets/${ticketId}/reply`, {
       message,

@@ -1,8 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
+import DOMPurify from 'dompurify';
+import { MessageMediaGrid } from '../components/tickets/MessageMediaGrid';
 import { useNavigate } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { adminApi, AdminTicket, AdminTicketDetail, AdminTicketMessage } from '../api/admin';
+import { adminApi, AdminTicket, AdminTicketDetail} from '../api/admin';
 import { ticketsApi } from '../api/tickets';
 import { usePlatform } from '../platform/hooks/usePlatform';
 
@@ -34,123 +36,6 @@ const ALLOWED_FILE_TYPES: Record<string, string> = {
 const ACCEPT_STRING = Object.keys(ALLOWED_FILE_TYPES).join(',');
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
-function AdminMessageMedia({
-  message,
-  t,
-}: {
-  message: AdminTicketMessage;
-  t: (key: string) => string;
-}) {
-  const [imageLoaded, setImageLoaded] = useState(false);
-  const [imageError, setImageError] = useState(false);
-  const [showFullImage, setShowFullImage] = useState(false);
-
-  if (!message.has_media || !message.media_file_id) {
-    return null;
-  }
-
-  const mediaUrl = ticketsApi.getMediaUrl(message.media_file_id);
-
-  if (message.media_type === 'photo') {
-    return (
-      <div className="mt-3">
-        {!imageLoaded && !imageError && (
-          <div className="flex h-40 w-full animate-pulse items-center justify-center rounded-lg bg-dark-800">
-            <div className="h-6 w-6 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-          </div>
-        )}
-        {imageError ? (
-          <div className="flex h-32 w-full items-center justify-center rounded-lg bg-dark-800 text-sm text-dark-400">
-            {t('support.imageLoadFailed')}
-          </div>
-        ) : (
-          <img
-            src={mediaUrl}
-            alt={message.media_caption || 'Attached image'}
-            className={`max-h-64 max-w-full cursor-pointer rounded-lg transition-opacity hover:opacity-90 ${
-              imageLoaded ? '' : 'hidden'
-            }`}
-            onLoad={() => setImageLoaded(true)}
-            onError={() => setImageError(true)}
-            onClick={() => setShowFullImage(true)}
-          />
-        )}
-        {message.media_caption && (
-          <p className="mt-1 text-xs text-dark-400">{message.media_caption}</p>
-        )}
-        {showFullImage && (
-          <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
-            onClick={() => setShowFullImage(false)}
-          >
-            <button
-              className="absolute right-4 top-4 text-white/70 hover:text-white"
-              onClick={() => setShowFullImage(false)}
-            >
-              <svg
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={1.5}
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-            <img
-              src={mediaUrl}
-              alt={message.media_caption || 'Attached image'}
-              className="max-h-full max-w-full object-contain"
-            />
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  if (message.media_type === 'video') {
-    return (
-      <div className="mt-3">
-        <video
-          src={mediaUrl}
-          controls
-          className="max-h-64 max-w-full rounded-lg"
-          preload="metadata"
-        />
-        {message.media_caption && (
-          <p className="mt-1 text-xs text-dark-400">{message.media_caption}</p>
-        )}
-      </div>
-    );
-  }
-
-  return (
-    <div className="mt-3">
-      <a
-        href={mediaUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="inline-flex items-center gap-2 rounded-lg bg-dark-700 px-3 py-2 text-sm text-dark-200 transition-colors hover:bg-dark-600"
-      >
-        <svg
-          className="h-4 w-4"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          strokeWidth={1.5}
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"
-          />
-        </svg>
-        {message.media_caption || `Download ${message.media_type}`}
-      </a>
-    </div>
-  );
-}
-
 // BackIcon
 const BackIcon = () => (
   <svg
@@ -174,21 +59,18 @@ export default function AdminTickets() {
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [replyText, setReplyText] = useState('');
   const [page, setPage] = useState(1);
-  const [attachment, setAttachment] = useState<MediaAttachment | null>(null);
+  const [attachments, setAttachments] = useState<MediaAttachment[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const previewRef = useRef<string | null>(null);
   const uploadIdRef = useRef(0);
 
-  // Cancel in-flight uploads and cleanup blob URL on unmount
+  // Cleanup blob URLs on unmount
   useEffect(() => {
     const uploadRef = uploadIdRef;
-    const prevRef = previewRef;
     return () => {
       uploadRef.current++;
-      if (prevRef.current) {
-        URL.revokeObjectURL(prevRef.current);
-      }
+      attachments.forEach((a) => { if (a.preview) URL.revokeObjectURL(a.preview); });
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const { data: stats } = useQuery({
@@ -224,7 +106,7 @@ export default function AdminTickets() {
     }) => adminApi.replyToTicket(ticketId, message, media),
     onSuccess: () => {
       setReplyText('');
-      clearAttachment();
+      clearAttachments();
       queryClient.invalidateQueries({ queryKey: ['admin-ticket', selectedTicketId] });
       queryClient.invalidateQueries({ queryKey: ['admin-tickets'] });
       queryClient.invalidateQueries({ queryKey: ['admin-ticket-stats'] });
@@ -241,84 +123,93 @@ export default function AdminTickets() {
     },
   });
 
-  const clearAttachment = () => {
+  const clearAttachments = () => {
     uploadIdRef.current++;
-    if (previewRef.current) {
-      URL.revokeObjectURL(previewRef.current);
-      previewRef.current = null;
-    }
-    setAttachment(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
+    attachments.forEach((a) => { if (a.preview) URL.revokeObjectURL(a.preview); });
+    setAttachments([]);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const removeAttachment = (idx: number) => {
+    setAttachments((prev) => {
+      const removed = prev[idx];
+      if (removed?.preview) URL.revokeObjectURL(removed.preview);
+      return prev.filter((_, i) => i !== idx);
+    });
   };
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+    if (fileInputRef.current) fileInputRef.current.value = '';
 
-    // Revoke any existing blob URL before processing new file
-    if (previewRef.current) {
-      URL.revokeObjectURL(previewRef.current);
-      previewRef.current = null;
-    }
+    const remaining = 10 - attachments.length;
+    const toAdd = files.slice(0, remaining);
 
-    const mediaType = ALLOWED_FILE_TYPES[file.type];
-    if (!mediaType) {
-      setAttachment({
-        file,
-        preview: '',
-        uploading: false,
-        mediaType: 'document',
-        error: t('admin.tickets.invalidFileType'),
-      });
-      return;
-    }
+    for (const file of toAdd) {
+      const mediaType = ALLOWED_FILE_TYPES[file.type];
+      if (!mediaType) continue;
+      if (file.size > MAX_FILE_SIZE) continue;
 
-    if (file.size > MAX_FILE_SIZE) {
-      setAttachment({
-        file,
-        preview: '',
-        uploading: false,
-        mediaType,
-        error: t('admin.tickets.fileTooLarge'),
-      });
-      return;
-    }
+      const preview = mediaType === 'photo' ? URL.createObjectURL(file) : '';
+      const entry: MediaAttachment = { file, preview, uploading: true, mediaType };
 
-    const preview = mediaType === 'photo' ? URL.createObjectURL(file) : '';
-    previewRef.current = preview;
+      setAttachments((prev) => [...prev, entry]);
 
-    const currentUploadId = ++uploadIdRef.current;
-    setAttachment({ file, preview, uploading: true, mediaType });
-
-    try {
-      const result = await ticketsApi.uploadMedia(file, mediaType);
-      if (uploadIdRef.current !== currentUploadId) return; // stale upload
-      setAttachment((prev) =>
-        prev ? { ...prev, uploading: false, fileId: result.file_id } : null,
-      );
-    } catch {
-      if (uploadIdRef.current !== currentUploadId) return; // stale upload
-      setAttachment((prev) =>
-        prev ? { ...prev, uploading: false, error: t('admin.tickets.uploadFailed') } : null,
-      );
+      // Upload in background
+      (async () => {
+        try {
+          const result = await ticketsApi.uploadMedia(file, mediaType);
+          setAttachments((prev) =>
+            prev.map((a) => (a.file === file ? { ...a, uploading: false, fileId: result.file_id } : a)),
+          );
+        } catch {
+          setAttachments((prev) =>
+            prev.map((a) => (a.file === file ? { ...a, uploading: false, error: t('admin.tickets.uploadFailed') } : a)),
+          );
+        }
+      })();
     }
   };
 
-  const handleReply = (e: React.FormEvent) => {
+  const handleReply = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedTicketId || !replyText.trim()) return;
-    if (attachment && (attachment.uploading || attachment.error)) return;
+    if (!selectedTicketId) return;
+    if (attachments.some((a) => a.uploading || a.error)) return;
 
-    const media = attachment?.fileId
+    const readyAttachments = attachments.filter((a) => a.fileId) as Array<{
+      fileId: string;
+      mediaType: string;
+    }>;
+
+    const hasText = replyText.trim().length > 0;
+    const hasMedia = readyAttachments.length > 0;
+    if (!hasText && !hasMedia) return;
+
+    const media = hasMedia
       ? {
-          media_type: attachment.mediaType,
-          media_file_id: attachment.fileId,
+          media_type: readyAttachments[0].mediaType,
+          media_file_id: readyAttachments[0].fileId,
+          media_items: readyAttachments.map((a) => ({
+            type: a.mediaType as 'photo' | 'video' | 'document',
+            file_id: a.fileId,
+          })),
         }
       : undefined;
 
-    replyMutation.mutate({ ticketId: selectedTicketId, message: replyText, media });
+    try {
+      await adminApi.replyToTicket(selectedTicketId, replyText, media);
+    } catch (err) {
+      console.error('Ticket reply failed:', err);
+      replyMutation.mutate({ ticketId: selectedTicketId, message: replyText, media });
+      return;
+    }
+
+    setReplyText('');
+    clearAttachments();
+    queryClient.invalidateQueries({ queryKey: ['admin-ticket', selectedTicketId] });
+    queryClient.invalidateQueries({ queryKey: ['admin-tickets'] });
+    queryClient.invalidateQueries({ queryKey: ['admin-ticket-stats'] });
   };
 
   const getStatusBadge = (status: string) => {
@@ -470,7 +361,7 @@ export default function AdminTickets() {
                   onClick={() => {
                     setSelectedTicketId(ticket.id);
                     setReplyText('');
-                    clearAttachment();
+                    clearAttachments();
                   }}
                   className={`w-full rounded-xl border p-4 text-left transition-all ${
                     selectedTicketId === ticket.id
@@ -657,9 +548,20 @@ export default function AdminTickets() {
                       </span>
                     </div>
                     {msg.message_text && (
-                      <p className="whitespace-pre-wrap text-dark-200">{msg.message_text}</p>
+                      <p
+                        className="whitespace-pre-wrap text-dark-200 [&_a]:text-accent-400 [&_a]:underline"
+                        dangerouslySetInnerHTML={{
+                          __html: DOMPurify.sanitize(
+                            msg.message_text.replace(
+                              /(https?:\/\/[^\s<]+)/g,
+                              '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>',
+                            ),
+                            { ADD_ATTR: ['target'] },
+                          ),
+                        }}
+                      />
                     )}
-                    <AdminMessageMedia message={msg} t={t} />
+                    <MessageMediaGrid message={msg} translateError={t('support.imageLoadFailed')} />
                   </div>
                 ))}
               </div>
@@ -675,76 +577,39 @@ export default function AdminTickets() {
                     className="input resize-none"
                   />
 
-                  {/* Attachment preview */}
-                  {attachment && (
-                    <div className="mt-2 flex items-center gap-3 rounded-lg border border-dark-700/50 bg-dark-800/50 p-2">
-                      {attachment.mediaType === 'photo' && attachment.preview ? (
-                        <img
-                          src={attachment.preview}
-                          alt="Preview"
-                          className="h-12 w-12 rounded-lg object-cover"
-                        />
-                      ) : (
-                        <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-dark-700">
-                          <svg
-                            className="h-6 w-6 text-dark-400"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            strokeWidth={1.5}
+                  {/* Attachments preview */}
+                  {attachments.length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {attachments.map((att, idx) => (
+                        <div key={idx} className="relative">
+                          {att.mediaType === 'photo' && att.preview ? (
+                            <img src={att.preview} alt="Preview" className="h-16 w-16 rounded-lg object-cover" />
+                          ) : (
+                            <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-dark-700 text-xs text-dark-400">
+                              {att.file.name.slice(-6)}
+                            </div>
+                          )}
+                          {att.uploading && (
+                            <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/50">
+                              <span className="h-4 w-4 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
+                            </div>
+                          )}
+                          {att.error && (
+                            <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-red-500/30">
+                              <span className="text-xs text-red-300">!</span>
+                            </div>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => removeAttachment(idx)}
+                            className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-dark-600 text-dark-300 hover:bg-red-500 hover:text-white"
                           >
-                            {attachment.mediaType === 'video' ? (
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z"
-                              />
-                            ) : (
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"
-                              />
-                            )}
-                          </svg>
+                            <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
                         </div>
-                      )}
-                      <div className="min-w-0 flex-1">
-                        <div className="truncate text-sm text-dark-200">{attachment.file.name}</div>
-                        {attachment.uploading && (
-                          <div className="flex items-center gap-1.5 text-xs text-accent-400">
-                            <span className="h-3 w-3 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-                            {t('admin.tickets.uploading')}
-                          </div>
-                        )}
-                        {attachment.error && (
-                          <div className="text-xs text-red-400">{attachment.error}</div>
-                        )}
-                        {attachment.fileId && !attachment.uploading && (
-                          <div className="text-xs text-success-400">
-                            {t('admin.tickets.uploadComplete')}
-                          </div>
-                        )}
-                      </div>
-                      <button
-                        type="button"
-                        onClick={clearAttachment}
-                        className="shrink-0 rounded-lg p-1 text-dark-500 transition-colors hover:bg-dark-700 hover:text-dark-200"
-                      >
-                        <svg
-                          className="h-4 w-4"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          strokeWidth={2}
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M6 18L18 6M6 6l12 12"
-                          />
-                        </svg>
-                      </button>
+                      ))}
                     </div>
                   )}
 
@@ -752,6 +617,7 @@ export default function AdminTickets() {
                     ref={fileInputRef}
                     type="file"
                     accept={ACCEPT_STRING}
+                    multiple
                     onChange={handleFileSelect}
                     className="hidden"
                   />
@@ -760,7 +626,7 @@ export default function AdminTickets() {
                     <button
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
-                      disabled={!!attachment?.uploading}
+                      disabled={attachments.length >= 10 || attachments.some((a) => a.uploading)}
                       className="flex items-center gap-2 rounded-lg border border-dark-700/50 px-3 py-2 text-sm text-dark-400 transition-colors hover:border-dark-600 hover:text-dark-200 disabled:opacity-50"
                     >
                       <svg
@@ -776,15 +642,14 @@ export default function AdminTickets() {
                           d="m18.375 12.739-7.693 7.693a4.5 4.5 0 0 1-6.364-6.364l10.94-10.94A3 3 0 1 1 19.5 7.372L8.552 18.32m.009-.01-.01.01m5.699-9.941-7.81 7.81a1.5 1.5 0 0 0 2.112 2.13"
                         />
                       </svg>
-                      {t('admin.tickets.attachMedia')}
+                      {t('admin.tickets.attachMedia')} {attachments.length > 0 && `(${attachments.length}/10)`}
                     </button>
                     <button
                       type="submit"
                       disabled={
                         !replyText.trim() ||
                         replyMutation.isPending ||
-                        !!attachment?.uploading ||
-                        !!attachment?.error
+                        attachments.some((a) => a.uploading || a.error)
                       }
                       className="btn-primary"
                     >
