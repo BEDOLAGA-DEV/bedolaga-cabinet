@@ -677,8 +677,6 @@
       "errors": {
         "not_found": "Promo code not found",
         "expired": "Promo code has expired",
-        "inactive": "Promo code is deactivated",
-        "not_yet_valid": "Promo code is not yet active",
         "used": "Promo code has already been used",
         "already_used_by_user": "You have already used this promo code",
         "user_not_found": "User not found",
@@ -3638,6 +3636,10 @@
       "discountOverridesHint": "Leave empty to use global discount",
       "discountPreview": "Preview",
       "discountActive": "Discount",
+      "background": "Animated background",
+      "analytics": "Analytics",
+      "viewGoal": "View goal",
+      "clickGoal": "Payment click goal",
       "statistics": "Statistics",
       "stats": {
         "title": "Landing Statistics",
@@ -3658,7 +3660,8 @@
         "successful": "Successful",
         "funnel": "Funnel",
         "loadError": "Failed to load statistics",
-        "noPurchases": "No purchases"
+        "noPurchases": "No purchases",
+        "paid": "paid"
       },
       "purchases": {
         "title": "Purchases",

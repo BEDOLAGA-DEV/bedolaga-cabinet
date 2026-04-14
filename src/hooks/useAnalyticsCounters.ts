@@ -11,6 +11,7 @@ function removeElement(id: string) {
 }
 
 function injectYandexMetrika(counterId: string) {
+  localStorage.setItem('ym_counter_id', counterId);
   if (document.getElementById(YM_SCRIPT_ID)) return;
 
   const script = document.createElement('script');
@@ -70,6 +71,8 @@ export function useAnalyticsCounters() {
     // Yandex Metrika
     if (data.yandex_metrika_id) {
       injectYandexMetrika(data.yandex_metrika_id);
+      cacheYandexCid(data.yandex_metrika_id);
+      syncYandexCid(data.yandex_metrika_id);
     } else {
       removeElement(YM_SCRIPT_ID);
     }
@@ -82,4 +85,61 @@ export function useAnalyticsCounters() {
       removeElement(GTAG_INIT_ID);
     }
   }, [data]);
+}
+
+function cacheYandexCid(counterId: string) {
+  const w = window as unknown as Record<string, unknown>;
+  const ym = w.ym as ((...args: unknown[]) => void) | undefined;
+  if (typeof ym !== 'function') return;
+  setTimeout(() => {
+    try {
+      (w.ym as (...args: unknown[]) => void)(Number(counterId), 'getClientID', (cid: string) => {
+        if (cid) localStorage.setItem('ym_client_id', cid);
+      });
+    } catch {}
+  }, 2000);
+}
+
+function syncYandexCid(counterId: string) {
+  const SENT_KEY = 'ym_cid_sent';
+  if (localStorage.getItem(SENT_KEY)) return;
+  const w = window as unknown as Record<string, unknown>;
+  const ym = w.ym as ((...args: unknown[]) => void) | undefined;
+  if (typeof ym !== 'function') return;
+  setTimeout(() => {
+    try {
+      (w.ym as (...args: unknown[]) => void)(Number(counterId), 'getClientID', (cid: string) => {
+        if (!cid) return;
+        localStorage.setItem('ym_client_id', cid);
+        const token = localStorage.getItem('access_token');
+        if (!token) return;
+        fetch('/api/cabinet/branding/analytics/yandex-cid', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+          body: JSON.stringify({ cid }),
+        })
+          .then((res) => {
+            if (res.ok) localStorage.setItem(SENT_KEY, '1');
+          })
+          .catch(() => {});
+      });
+    } catch {}
+  }, 3000);
+}
+
+// Stubs for CID - will be implemented after webvisor test
+export function fireAnalyticsEvent(goalName: string, params?: Record<string, unknown>) {
+  const ym = (window as any).ym;
+  if (typeof ym === 'function') {
+    try {
+      const counterId = localStorage.getItem('ym_counter_id');
+      if (counterId && /^\d{1,15}$/.test(counterId)) {
+        ym(Number(counterId), 'reachGoal', goalName, params);
+      }
+    } catch {}
+  }
+}
+
+export function getYandexCid(): string | null {
+  return localStorage.getItem('ym_client_id');
 }

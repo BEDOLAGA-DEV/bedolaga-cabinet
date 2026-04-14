@@ -665,6 +665,19 @@ export default function PurchaseSuccess() {
   }, [token, queryClient]);
 
   const isSuccess = purchaseStatus?.status === 'delivered';
+
+  // Fire analytics goals on successful delivery (once)
+  useEffect(() => {
+    if (!isSuccess) return;
+    try {
+      const counterId = localStorage.getItem('ym_counter_id');
+      const w = window as unknown as Record<string, unknown>;
+      if (counterId && typeof w.ym === 'function') {
+        (w.ym as (...args: unknown[]) => void)(Number(counterId), 'reachGoal', 'buy_success');
+        (w.ym as (...args: unknown[]) => void)(Number(counterId), 'reachGoal', 'purchase_complete');
+      }
+    } catch { /* analytics error */ }
+  }, [isSuccess]);
   const isPendingActivation = purchaseStatus?.status === 'pending_activation';
   const isFailed = purchaseStatus?.status === 'failed' || purchaseStatus?.status === 'expired';
 

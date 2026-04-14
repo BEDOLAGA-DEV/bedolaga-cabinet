@@ -89,6 +89,11 @@ export interface LandingConfig {
   meta_description: string | null;
   discount: LandingDiscountInfo | null;
   background_config: AnimationConfig | null;
+  analytics_view_enabled: boolean;
+  analytics_view_goal: string;
+  analytics_click_enabled: boolean;
+  analytics_click_goal: string;
+  sticky_pay_button: boolean;
 }
 
 export interface PurchaseRequest {
@@ -102,6 +107,8 @@ export interface PurchaseRequest {
   gift_recipient_value?: string;
   gift_message?: string;
   language?: string;
+  yandex_cid?: string;
+  referrer?: string;
 }
 
 export interface PurchaseResponse {
@@ -157,6 +164,8 @@ export interface LandingListItem {
   gift_enabled: boolean;
   tariff_count: number;
   method_count: number;
+  analytics_view_enabled: boolean;
+  analytics_click_enabled: boolean;
   purchase_stats: {
     total: number;
     pending: number;
@@ -195,6 +204,11 @@ export interface LandingDetail {
   discount_ends_at: string | null;
   discount_badge_text: LocaleDict | null;
   background_config: AnimationConfig | null;
+  analytics_view_enabled: boolean;
+  analytics_view_goal: string;
+  analytics_click_enabled: boolean;
+  analytics_click_goal: string;
+  sticky_pay_button: boolean;
 }
 
 export interface LandingCreateRequest {
@@ -217,6 +231,11 @@ export interface LandingCreateRequest {
   discount_ends_at?: string | null;
   discount_badge_text?: LocaleDict | null;
   background_config?: AnimationConfig | null;
+  analytics_view_enabled?: boolean;
+  analytics_view_goal?: string;
+  analytics_click_enabled?: boolean;
+  analytics_click_goal?: string;
+  sticky_pay_button?: boolean;
 }
 
 export type LandingUpdateRequest = Partial<LandingCreateRequest>;
@@ -262,6 +281,7 @@ export const landingApi = {
 
 export interface LandingDailyStat {
   date: string;
+  created: number;
   purchases: number;
   revenue_kopeks: number;
   gifts: number;
@@ -311,6 +331,7 @@ export interface LandingPurchaseItem {
   status: PurchaseItemStatus;
   created_at: string;
   paid_at: string | null;
+  referrer: string | null;
 }
 
 export interface LandingPurchaseListResponse {
@@ -354,7 +375,8 @@ export const adminLandingsApi = {
   },
 
   getStats: async (id: number): Promise<LandingStatsResponse> => {
-    const response = await apiClient.get(`/cabinet/admin/landings/${id}/stats`);
+    const { USER_TIMEZONE } = await import('../utils/format');
+    const response = await apiClient.get(`/cabinet/admin/landings/${id}/stats`, { params: { tz: USER_TIMEZONE } });
     return response.data;
   },
 
