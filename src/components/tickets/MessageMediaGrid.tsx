@@ -44,7 +44,13 @@ export function MessageMediaGrid({
   translateError?: string;
 }) {
   const items = getItems(message);
+  const photoItems = items.filter((i) => i.type === 'photo');
+  const otherItems = items.filter((i) => i.type !== 'photo');
+
   const [fullscreenIndex, setFullscreenIndex] = useState<number | null>(null);
+
+  const openFullscreen = useCallback((idx: number) => setFullscreenIndex(idx), []);
+  const closeFullscreen = useCallback(() => setFullscreenIndex(null), []);
 
   // Escape + arrow keys for fullscreen nav
   useEffect(() => {
@@ -58,16 +64,10 @@ export function MessageMediaGrid({
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [fullscreenIndex, items]);
+  }, [fullscreenIndex, photoItems.length]);
 
+  // All hooks have been called — safe to early-return now.
   if (items.length === 0) return null;
-
-  // Split into photos (grid + fullscreen) and non-photos (rendered inline)
-  const photoItems = items.filter((i) => i.type === 'photo');
-  const otherItems = items.filter((i) => i.type !== 'photo');
-
-  const openFullscreen = useCallback((idx: number) => setFullscreenIndex(idx), []);
-  const closeFullscreen = useCallback(() => setFullscreenIndex(null), []);
 
   // Grid layout based on photo count
   let gridClass = '';
@@ -89,7 +89,8 @@ export function MessageMediaGrid({
       {photoItems.length > 0 && (
         <div className={`grid gap-1 ${gridClass}`}>
           {visiblePhotos.map((item, visIdx) => {
-            const originalIdx = photoItems.indexOf(item);
+            // visIdx is always the correct index into photoItems (visible prefix)
+            const originalIdx = visIdx;
             const isLastVisible = visIdx === visiblePhotos.length - 1 && hiddenCount > 0;
             return (
               <button

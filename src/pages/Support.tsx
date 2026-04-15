@@ -669,8 +669,6 @@ export default function Support() {
                         placeholder={t('support.replyPlaceholder')}
                         value={replyMessage}
                         onChange={(e) => setReplyMessage(e.target.value)}
-                        required
-                        minLength={1}
                         maxLength={4000}
                       />
                     </div>

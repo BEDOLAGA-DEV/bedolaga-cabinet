@@ -647,7 +647,7 @@ export default function AdminTickets() {
                     <button
                       type="submit"
                       disabled={
-                        !replyText.trim() ||
+                        (!replyText.trim() && attachments.filter((a) => a.fileId).length === 0) ||
                         replyMutation.isPending ||
                         attachments.some((a) => a.uploading || a.error)
                       }
