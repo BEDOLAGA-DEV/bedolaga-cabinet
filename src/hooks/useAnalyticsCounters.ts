@@ -102,7 +102,12 @@ function cacheYandexCid(counterId: string) {
 
 function syncYandexCid(counterId: string) {
   const SENT_KEY = 'ym_cid_sent';
-  if (localStorage.getItem(SENT_KEY)) return;
+  try {
+    if (localStorage.getItem(SENT_KEY)) return;
+  } catch {
+    // localStorage may throw in sandboxed iframes / Safari private mode
+    return;
+  }
   const w = window as unknown as Record<string, unknown>;
   const ym = w.ym as ((...args: unknown[]) => void) | undefined;
   if (typeof ym !== 'function') return;
@@ -110,18 +115,36 @@ function syncYandexCid(counterId: string) {
     try {
       (w.ym as (...args: unknown[]) => void)(Number(counterId), 'getClientID', (cid: string) => {
         if (!cid) return;
-        localStorage.setItem('ym_client_id', cid);
-        const token = localStorage.getItem('access_token');
+        try {
+          localStorage.setItem('ym_client_id', cid);
+        } catch {
+          /* ignore storage errors */
+        }
+        // Only POST when the user is authenticated — guest sessions just store
+        // the CID locally; it will be sent on next login.
+        let token: string | null = null;
+        try {
+          token = localStorage.getItem('access_token');
+        } catch {
+          /* ignore */
+        }
         if (!token) return;
-        fetch('/api/cabinet/branding/analytics/yandex-cid', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
-          body: JSON.stringify({ cid }),
-        })
-          .then((res) => {
-            if (res.ok) localStorage.setItem(SENT_KEY, '1');
-          })
-          .catch(() => {});
+        // Route through apiClient so baseURL, auth refresh, and error handling
+        // all flow through the same interceptors as every other cabinet call.
+        import('../api/branding').then(({ brandingApi }) => {
+          brandingApi
+            .storeYandexCid(cid)
+            .then(() => {
+              try {
+                localStorage.setItem(SENT_KEY, '1');
+              } catch {
+                /* ignore */
+              }
+            })
+            .catch(() => {
+              /* swallow — non-critical, will retry on next login */
+            });
+        });
       });
     } catch {}
   }, 3000);

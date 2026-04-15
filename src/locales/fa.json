@@ -527,7 +527,9 @@
         "used": "کد تخفیف قبلاً استفاده شده",
         "already_used_by_user": "شما قبلاً از این کد استفاده کرده‌اید",
         "user_not_found": "کاربر یافت نشد",
-        "server_error": "خطای سرور"
+        "server_error": "خطای سرور",
+        "inactive": "کد تخفیف غیرفعال شده",
+        "not_yet_valid": "کد تخفیف هنوز فعال نشده"
       }
     },
     "minAmountError": "حداقل مبلغ: {{amount}}",

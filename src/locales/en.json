@@ -680,7 +680,9 @@
         "used": "Promo code has already been used",
         "already_used_by_user": "You have already used this promo code",
         "user_not_found": "User not found",
-        "server_error": "Server error"
+        "server_error": "Server error",
+        "inactive": "Promo code is deactivated",
+        "not_yet_valid": "Promo code is not yet active"
       }
     },
     "minAmountError": "Minimum amount: {{amount}} ₽",

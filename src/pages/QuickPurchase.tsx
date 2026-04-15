@@ -1,4 +1,3 @@
-// v2 - yandex cid fix
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useParams } from 'react-router';
@@ -807,15 +806,17 @@ export default function QuickPurchase() {
     if (config?.discount) setDiscountExpired(false);
   }, [config?.discount]);
 
-  // Save document.referrer on mount (before SPA navigation loses it)
+  // Save document.referrer on mount (before SPA navigation loses it).
+  // Clamp to 500 chars — backend `referrer` column is max_length=500 and would
+  // otherwise reject long ad-click referrers (gclid+gbraid+params) with 422.
   useEffect(() => {
     if (document.referrer && !sessionStorage.getItem('landing_referrer')) {
-      sessionStorage.setItem('landing_referrer', document.referrer);
+      sessionStorage.setItem('landing_referrer', document.referrer.slice(0, 500));
     }
-    // Save subid from URL
+    // Save subid from URL (also clamped to backend limit of 255)
     const urlSubid = new URLSearchParams(window.location.search).get('subid');
     if (urlSubid) {
-      sessionStorage.setItem('landing_subid', urlSubid);
+      sessionStorage.setItem('landing_subid', urlSubid.slice(0, 255));
     }
   }, []);
 
@@ -942,8 +943,12 @@ export default function QuickPurchase() {
     if (!config?.custom_css) return;
 
     let css = config.custom_css;
-    // Strip all at-rules (including @font-face, @import, @charset, @namespace, @keyframes, @media)
-    css = css.replace(/@(?:import|font-face|charset|namespace)[^;{}]*(?:\{[^{}]*\}|;)/gi, '');
+    // Strip ALL @-rules. The previous full-strip regex (block + inline) was
+    // intentionally broad: @media / @keyframes / @supports / @container can
+    // smuggle behaviour the rest of the sanitizer doesn't catch (e.g.
+    // `@container style(--x: url(...))`). Keep both passes.
+    css = css.replace(/@[a-zA-Z-]+\s*[^{}]*\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}/g, '');
+    css = css.replace(/@[a-zA-Z-]+\s*[^;{}]+;/g, '');
     // Strip ALL url() including data: URIs
     css = css.replace(/url\s*\([^)]*\)/gi, 'url(about:blank)');
     // Strip expression(), behavior, -moz-binding
@@ -1007,8 +1012,6 @@ export default function QuickPurchase() {
   // Submit handler
   const handleSubmit = () => {
     if (!canSubmit || !slug || isSubmitting) return;
-
-    fireAnalyticsEvent('purchase_click');
 
     setIsSubmitting(true);
     setSubmitError(null);

@@ -666,18 +666,29 @@ export default function PurchaseSuccess() {
 
   const isSuccess = purchaseStatus?.status === 'delivered';
 
-  // Fire analytics goals on successful delivery (once)
+  // Fire analytics goal on successful delivery (once per purchase).
+  // Idempotency keyed by token so a page refresh doesn't double-count.
   useEffect(() => {
-    if (!isSuccess) return;
+    if (!isSuccess || !token) return;
+    const FIRED_KEY = `ym_buy_success_${token}`;
+    try {
+      if (localStorage.getItem(FIRED_KEY)) return;
+    } catch {
+      /* ignore */
+    }
     try {
       const counterId = localStorage.getItem('ym_counter_id');
       const w = window as unknown as Record<string, unknown>;
       if (counterId && typeof w.ym === 'function') {
         (w.ym as (...args: unknown[]) => void)(Number(counterId), 'reachGoal', 'buy_success');
-        (w.ym as (...args: unknown[]) => void)(Number(counterId), 'reachGoal', 'purchase_complete');
+        try {
+          localStorage.setItem(FIRED_KEY, '1');
+        } catch {
+          /* ignore */
+        }
       }
     } catch { /* analytics error */ }
-  }, [isSuccess]);
+  }, [isSuccess, token]);
   const isPendingActivation = purchaseStatus?.status === 'pending_activation';
   const isFailed = purchaseStatus?.status === 'failed' || purchaseStatus?.status === 'expired';
 
