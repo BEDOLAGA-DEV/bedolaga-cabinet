@@ -1,4 +1,3 @@
-// v2 - yandex cid fix
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useParams } from 'react-router';
@@ -942,8 +941,11 @@ export default function QuickPurchase() {
     if (!config?.custom_css) return;
 
     let css = config.custom_css;
-    // Strip all at-rules (including @font-face, @import, @charset, @namespace, @keyframes, @media)
-    css = css.replace(/@(?:import|font-face|charset|namespace)[^;{}]*(?:\{[^{}]*\}|;)/gi, '');
+    // Strip ALL @-rules (block + inline). The previous full-strip regex was
+    // intentionally broad: @media / @keyframes / @supports / @container can
+    // smuggle behaviour the rest of the sanitizer doesn't catch.
+    css = css.replace(/@[a-zA-Z-]+\s*[^{}]*\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}/g, '');
+    css = css.replace(/@[a-zA-Z-]+\s*[^;{}]+;/g, '');
     // Strip ALL url() including data: URIs
     css = css.replace(/url\s*\([^)]*\)/gi, 'url(about:blank)');
     // Strip expression(), behavior, -moz-binding

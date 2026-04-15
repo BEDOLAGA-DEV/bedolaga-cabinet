@@ -313,4 +313,9 @@ export const brandingApi = {
     const response = await apiClient.patch<AnalyticsCounters>('/cabinet/branding/analytics', data);
     return response.data;
   },
+
+  // Store Yandex Metrika ClientID for the authenticated cabinet user
+  storeYandexCid: async (cid: string): Promise<void> => {
+    await apiClient.post('/cabinet/branding/analytics/yandex-cid', { cid });
+  },
 };

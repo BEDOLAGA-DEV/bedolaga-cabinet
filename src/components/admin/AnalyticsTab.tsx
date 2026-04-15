@@ -187,7 +187,7 @@ export function AnalyticsTab() {
             )}
             {analytics.offline_conv_measurement_secret_masked && (
               <div className="mb-3 flex items-center gap-2">
-                <span className="text-sm text-dark-400">API-ключ:</span>
+                <span className="text-sm text-dark-400">{t('admin.settings.apiKey', 'API-ключ')}:</span>
                 <code className="rounded-md bg-dark-700/50 px-2 py-0.5 font-mono text-sm text-dark-300">{analytics.offline_conv_measurement_secret_masked}</code>
               </div>
             )}

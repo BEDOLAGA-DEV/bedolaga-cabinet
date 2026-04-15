@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { brandingApi } from '../api/branding';
+import { setYandexCid } from '../utils/yandexCid';
 
 const YM_SCRIPT_ID = 'ym-counter-script';
 const GTAG_LOADER_ID = 'gtag-loader-script';
@@ -94,7 +95,7 @@ function cacheYandexCid(counterId: string) {
   setTimeout(() => {
     try {
       (w.ym as (...args: unknown[]) => void)(Number(counterId), 'getClientID', (cid: string) => {
-        if (cid) localStorage.setItem('ym_client_id', cid);
+        if (cid) setYandexCid(cid);
       });
     } catch {}
   }, 2000);
@@ -102,7 +103,11 @@ function cacheYandexCid(counterId: string) {
 
 function syncYandexCid(counterId: string) {
   const SENT_KEY = 'ym_cid_sent';
-  if (localStorage.getItem(SENT_KEY)) return;
+  try {
+    if (localStorage.getItem(SENT_KEY)) return;
+  } catch {
+    return;
+  }
   const w = window as unknown as Record<string, unknown>;
   const ym = w.ym as ((...args: unknown[]) => void) | undefined;
   if (typeof ym !== 'function') return;
@@ -110,24 +115,39 @@ function syncYandexCid(counterId: string) {
     try {
       (w.ym as (...args: unknown[]) => void)(Number(counterId), 'getClientID', (cid: string) => {
         if (!cid) return;
-        localStorage.setItem('ym_client_id', cid);
-        const token = localStorage.getItem('access_token');
+        setYandexCid(cid);
+        // Only POST when the user is authenticated. Guest sessions cache the
+        // CID locally; it gets synced after login by the next mount of this
+        // hook on the cabinet shell.
+        let token: string | null = null;
+        try {
+          token = localStorage.getItem('access_token');
+        } catch {
+          /* ignore */
+        }
         if (!token) return;
-        fetch('/api/cabinet/branding/analytics/yandex-cid', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
-          body: JSON.stringify({ cid }),
-        })
-          .then((res) => {
-            if (res.ok) localStorage.setItem(SENT_KEY, '1');
-          })
-          .catch(() => {});
+        // Route through brandingApi (apiClient) so baseURL, auth refresh, and
+        // error handling all flow through the same interceptors as every other
+        // cabinet API call.
+        import('../api/branding').then(({ brandingApi }) => {
+          brandingApi
+            .storeYandexCid(cid)
+            .then(() => {
+              try {
+                localStorage.setItem(SENT_KEY, '1');
+              } catch {
+                /* ignore */
+              }
+            })
+            .catch(() => {
+              /* swallow — non-critical, will retry on next login */
+            });
+        });
       });
     } catch {}
   }, 3000);
 }
 
-// Stubs for CID - will be implemented after webvisor test
 export function fireAnalyticsEvent(goalName: string, params?: Record<string, unknown>) {
   const ym = (window as any).ym;
   if (typeof ym === 'function') {
@@ -140,6 +160,7 @@ export function fireAnalyticsEvent(goalName: string, params?: Record<string, unk
   }
 }
 
-export function getYandexCid(): string | null {
-  return localStorage.getItem('ym_client_id');
-}
+// Re-export the canonical CID accessor from utils for back-compat with
+// existing imports inside this hook file. New code should import from
+// '../utils/yandexCid' directly to avoid pulling React into api/.
+export { getYandexCid } from '../utils/yandexCid';
