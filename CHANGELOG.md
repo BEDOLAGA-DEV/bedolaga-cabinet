@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.45.1](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.45.0...v1.45.1) (2026-04-15)
+
+
+### Bug Fixes
+
+* period discounts clearing, SBP default, happ cryptolink flow ([e6cf3af](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/e6cf3af846090c0425a059d73a431eaa5f67ae0b))
+
 ## [1.45.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.44.2...v1.45.0) (2026-04-13)
 
 
