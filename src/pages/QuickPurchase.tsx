@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { useParams } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { fireAnalyticsEvent, getYandexCid } from '../hooks/useAnalyticsCounters';
+import { getYandexCid } from '../hooks/useAnalyticsCounters';
 import { motion, AnimatePresence } from 'framer-motion';
 import DOMPurify from 'dompurify';
 import { landingApi } from '../api/landings';
@@ -836,7 +836,10 @@ export default function QuickPurchase() {
   // Selection state
   const [selectedTariffId, setSelectedTariffId] = useState<number | null>(null);
   const [selectedPeriodDays, setSelectedPeriodDays] = useState<number | null>(null);
-  const [contactValue, setContactValue] = useState(() => localStorage.getItem('lp_contact') || '');
+  const contactKey = `lp_contact_${slug ?? ''}`;
+  const [contactValue, setContactValue] = useState(() => {
+    try { return localStorage.getItem(contactKey) || ''; } catch { return ''; }
+  });
   const [isGift, setIsGift] = useState(false);
   const [giftRecipient, setGiftRecipient] = useState('');
   const [giftMessage, setGiftMessage] = useState('');
@@ -1135,7 +1138,7 @@ export default function QuickPurchase() {
               contactValue={contactValue}
               onContactChange={(v) => {
                 setContactValue(v);
-                localStorage.setItem('lp_contact', v);
+                try { localStorage.setItem(contactKey, v); } catch { /* */ }
                 setSubmitError(null);
               }}
               isGift={isGift}
