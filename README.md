@@ -53,7 +53,8 @@ docker pull ghcr.io/bedolaga-dev/bedolaga-cabinet:latest
 ```bash
 # Создать временный контейнер и скопировать статику
 docker create --name tmp_cabinet ghcr.io/bedolaga-dev/bedolaga-cabinet:latest
-docker cp tmp_cabinet:/usr/share/nginx/html ./cabinet-dist
+mkdir -p ./cabinet-dist
+docker cp tmp_cabinet:/usr/share/nginx/html/. ./cabinet-dist/
 docker rm tmp_cabinet
 ```
 
@@ -77,10 +78,11 @@ VITE_APP_LOGO=V
 Соберите и извлеките:
 
 ```bash
-docker compose build
-docker create --name tmp_cabinet cabinet_frontend
-docker cp tmp_cabinet:/usr/share/nginx/html ./cabinet-dist
-docker rm tmp_cabinet
+docker compose build cabinet-frontend
+docker compose create cabinet-frontend
+mkdir -p ./cabinet-dist
+docker cp cabinet_frontend:/usr/share/nginx/html/. ./cabinet-dist/
+docker compose rm -sf cabinet-frontend
 ```
 
 ### Шаг 3. Размещение файлов на сервере
