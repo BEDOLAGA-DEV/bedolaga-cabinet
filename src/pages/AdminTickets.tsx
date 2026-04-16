@@ -58,6 +58,7 @@ export default function AdminTickets() {
   const [selectedTicketId, setSelectedTicketId] = useState<number | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [replyText, setReplyText] = useState('');
+  const [isReplying, setIsReplying] = useState(false);
   const [page, setPage] = useState(1);
   const [attachments, setAttachments] = useState<MediaAttachment[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -94,25 +95,6 @@ export default function AdminTickets() {
     queryKey: ['admin-ticket', selectedTicketId],
     queryFn: () => adminApi.getTicket(selectedTicketId!),
     enabled: !!selectedTicketId,
-  });
-
-  const replyMutation = useMutation({
-    mutationFn: ({
-      ticketId,
-      message,
-      media,
-    }: {
-      ticketId: number;
-      message: string;
-      media?: { media_type?: string; media_file_id?: string; media_caption?: string };
-    }) => adminApi.replyToTicket(ticketId, message, media),
-    onSuccess: () => {
-      setReplyText('');
-      clearAttachments();
-      queryClient.invalidateQueries({ queryKey: ['admin-ticket', selectedTicketId] });
-      queryClient.invalidateQueries({ queryKey: ['admin-tickets'] });
-      queryClient.invalidateQueries({ queryKey: ['admin-ticket-stats'] });
-    },
   });
 
   const statusMutation = useMutation({
@@ -200,15 +182,18 @@ export default function AdminTickets() {
         }
       : undefined;
 
+    setIsReplying(true);
     try {
       await adminApi.replyToTicket(selectedTicketId, replyText, media);
     } catch (err) {
       console.error('Ticket reply failed:', err);
+      setIsReplying(false);
       return;
     }
 
     setReplyText('');
     clearAttachments();
+    setIsReplying(false);
     queryClient.invalidateQueries({ queryKey: ['admin-ticket', selectedTicketId] });
     queryClient.invalidateQueries({ queryKey: ['admin-tickets'] });
     queryClient.invalidateQueries({ queryKey: ['admin-ticket-stats'] });
@@ -650,12 +635,12 @@ export default function AdminTickets() {
                       type="submit"
                       disabled={
                         (!replyText.trim() && attachments.filter((a) => a.fileId).length === 0) ||
-                        replyMutation.isPending ||
+                        isReplying ||
                         attachments.some((a) => a.uploading || a.error)
                       }
                       className="btn-primary"
                     >
-                      {replyMutation.isPending ? (
+                      {isReplying ? (
                         <span className="flex items-center gap-2">
                           <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
                           {t('common.loading')}
