@@ -79,12 +79,13 @@ export default function Support() {
   const createFileInputRef = useRef<HTMLInputElement>(null);
   const replyFileInputRef = useRef<HTMLInputElement>(null);
 
+  const blobUrlsRef = useRef<Set<string>>(new Set());
+
   useEffect(() => {
+    const urls = blobUrlsRef;
     return () => {
-      createAttachments.forEach((a) => { if (a.preview) URL.revokeObjectURL(a.preview); });
-      replyAttachments.forEach((a) => { if (a.preview) URL.revokeObjectURL(a.preview); });
+      urls.current.forEach((u) => URL.revokeObjectURL(u));
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const clearCreateAttachments = () => {
@@ -127,6 +128,7 @@ export default function Support() {
     if (file.size > 10 * 1024 * 1024) return;
 
     const preview = URL.createObjectURL(file);
+    blobUrlsRef.current.add(preview);
     const entry: MediaAttachment = { file, preview, uploading: true };
     setAttachments((prev) => (prev.length >= 10 ? prev : [...prev, entry]));
 
@@ -627,6 +629,7 @@ export default function Support() {
                           {new Date(msg.created_at).toLocaleString()}
                         </span>
                       </div>
+                      {msg.message_text && (
                       <div
                         className="whitespace-pre-wrap text-dark-200 [&_a]:text-accent-400 [&_a]:underline"
                         dangerouslySetInnerHTML={{
@@ -639,6 +642,7 @@ export default function Support() {
                           ),
                         }}
                       />
+                      )}
                       {/* Display media if present */}
                       <MessageMediaGrid message={msg} translateError={t('support.imageLoadFailed')} />
                     </div>

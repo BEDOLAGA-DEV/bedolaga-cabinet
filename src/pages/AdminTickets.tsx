@@ -63,14 +63,16 @@ export default function AdminTickets() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const uploadIdRef = useRef(0);
 
-  // Cleanup blob URLs on unmount
+  // Track all created blob URLs for cleanup on unmount
+  const blobUrlsRef = useRef<Set<string>>(new Set());
+
   useEffect(() => {
     const uploadRef = uploadIdRef;
+    const urls = blobUrlsRef;
     return () => {
       uploadRef.current++;
-      attachments.forEach((a) => { if (a.preview) URL.revokeObjectURL(a.preview); });
+      urls.current.forEach((u) => URL.revokeObjectURL(u));
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const { data: stats } = useQuery({
@@ -152,6 +154,7 @@ export default function AdminTickets() {
       if (file.size > MAX_FILE_SIZE) continue;
 
       const preview = mediaType === 'photo' ? URL.createObjectURL(file) : '';
+      if (preview) blobUrlsRef.current.add(preview);
       const entry: MediaAttachment = { file, preview, uploading: true, mediaType };
 
       setAttachments((prev) => [...prev, entry]);
@@ -201,7 +204,6 @@ export default function AdminTickets() {
       await adminApi.replyToTicket(selectedTicketId, replyText, media);
     } catch (err) {
       console.error('Ticket reply failed:', err);
-      replyMutation.mutate({ ticketId: selectedTicketId, message: replyText, media });
       return;
     }
 
