@@ -449,6 +449,9 @@ export const subscriptionApi = {
     display_link: string | null;
     happ_redirect_link: string | null;
     happ_scheme_link: string | null;
+    happ_cryptolink?: string | null;
+    happ_crypto_link?: string | null;
+    happ_link?: string | null;
     connect_mode: string;
     hide_link: boolean;
     instructions: {

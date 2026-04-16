@@ -135,7 +135,7 @@ export default function AdminPromoGroupCreate() {
     periodDiscounts.forEach((pd) => {
       const days = pd.days === '' ? 0 : pd.days;
       const percent = pd.percent === '' ? 0 : pd.percent;
-      if (days > 0 && percent > 0) {
+      if (days > 0 && percent >= 0) {
         periodDiscountsRecord[days] = percent;
       }
     });
@@ -150,8 +150,7 @@ export default function AdminPromoGroupCreate() {
       server_discount_percent: serverVal,
       traffic_discount_percent: trafficVal,
       device_discount_percent: deviceVal,
-      period_discounts:
-        Object.keys(periodDiscountsRecord).length > 0 ? periodDiscountsRecord : undefined,
+      period_discounts: periodDiscountsRecord,
       apply_discounts_to_addons: applyToAddons,
       auto_assign_total_spent_kopeks: autoAssignVal > 0 ? Math.round(autoAssignVal * 100) : 0,
       is_default: isDefault,

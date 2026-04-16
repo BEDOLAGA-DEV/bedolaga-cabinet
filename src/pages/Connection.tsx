@@ -7,6 +7,7 @@ import { subscriptionApi } from '../api/subscription';
 import { useTelegramSDK } from '../hooks/useTelegramSDK';
 import { useHaptic } from '@/platform';
 import { resolveTemplate, hasTemplates } from '../utils/templateEngine';
+import { isHappCryptolinkMode, resolveConnectionUrlForUi } from '../utils/connectionLink';
 import { useAuthStore } from '../store/auth';
 import type { AppConfig, RemnawavePlatformData } from '../types';
 import InstallationGuide from '../components/connection/InstallationGuide';
@@ -32,21 +33,59 @@ export default function Connection() {
     queryKey: ['appConfig', subId],
     queryFn: () => subscriptionApi.getAppConfig(subId),
   });
+  const { data: connectionLink, isLoading: isConnectionLinkLoading } = useQuery({
+    queryKey: ['connectionLink', subId],
+    queryFn: () => subscriptionApi.getConnectionLink(subId),
+    retry: false,
+    staleTime: 0,
+  });
+
+  const qrConnectionUrl = useMemo(
+    () =>
+      resolveConnectionUrlForUi({
+        mode: connectionLink?.connect_mode,
+        happSchemeLink: connectionLink?.happ_scheme_link,
+        displayLink: connectionLink?.display_link,
+        subscriptionUrl: connectionLink?.subscription_url,
+        happCryptLink: connectionLink?.happ_cryptolink,
+        happCryptoLink: connectionLink?.happ_crypto_link,
+        happLink: connectionLink?.happ_link,
+        fallbackUrl: appConfig?.subscriptionUrl,
+      }),
+    [
+      appConfig?.subscriptionUrl,
+      connectionLink?.connect_mode,
+      connectionLink?.display_link,
+      connectionLink?.happ_cryptolink,
+      connectionLink?.happ_crypto_link,
+      connectionLink?.happ_link,
+      connectionLink?.happ_scheme_link,
+      connectionLink?.subscription_url,
+    ],
+  );
 
   const handleGoBack = useCallback(() => {
     navigate(-1);
   }, [navigate]);
 
   const handleOpenQR = useCallback(() => {
+    if (!qrConnectionUrl) return;
     navigate('/connection/qr', {
       replace: !isTelegramWebApp,
       state: {
-        url: appConfig?.subscriptionUrl,
-        hideLink: appConfig?.hideLink ?? false,
+        url: qrConnectionUrl,
+        hideLink: connectionLink?.hide_link ?? appConfig?.hideLink ?? false,
         subscriptionId: subId,
       },
     });
-  }, [navigate, appConfig?.subscriptionUrl, appConfig?.hideLink, isTelegramWebApp, subId]);
+  }, [
+    navigate,
+    qrConnectionUrl,
+    connectionLink?.hide_link,
+    appConfig?.hideLink,
+    isTelegramWebApp,
+    subId,
+  ]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -73,24 +112,30 @@ export default function Connection() {
   const openDeepLink = useCallback(
     (deepLink: string) => {
       let resolved = deepLink;
-      if (hasTemplates(resolved)) {
+      if (isHappCryptolinkMode(connectionLink?.connect_mode) && qrConnectionUrl) {
+        // In HAPP cryptolink mode always open the resolved happ://crypt... URL.
+        resolved = qrConnectionUrl;
+      } else if (hasTemplates(resolved)) {
         resolved = resolveUrl(resolved);
       }
-
-      const finalUrl = `${window.location.origin}/miniapp/redirect.html?url=${encodeURIComponent(resolved)}&lang=${i18n.language || 'en'}`;
+      const isHttpUrl = /^https?:\/\//i.test(resolved);
+      const finalUrlForTelegram = isHttpUrl
+        ? resolved
+        : `${window.location.origin}/miniapp/redirect.html?url=${encodeURIComponent(resolved)}&lang=${i18n.language || 'en'}`;
 
       if (isTelegramWebApp) {
         try {
-          sdkOpenLink(finalUrl, { tryInstantView: false });
+          sdkOpenLink(finalUrlForTelegram, { tryInstantView: false });
           return;
         } catch {
           // SDK not available, fallback
         }
       }
 
-      window.location.href = finalUrl;
+      // In regular browsers open deeplink directly (without intermediate redirect page).
+      window.location.href = resolved;
     },
-    [isTelegramWebApp, i18n.language, resolveUrl],
+    [isTelegramWebApp, i18n.language, resolveUrl, connectionLink?.connect_mode, qrConnectionUrl],
   );
 
   // Check if any platform has configured apps
@@ -101,7 +146,7 @@ export default function Connection() {
     );
   }, [appConfig?.platforms]);
 
-  if (isLoading) {
+  if (isLoading || isConnectionLinkLoading) {
     return (
       <div className="flex flex-1 items-center justify-center py-20">
         <div className="h-10 w-10 animate-spin rounded-full border-[3px] border-accent-500/30 border-t-accent-500" />
