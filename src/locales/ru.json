@@ -2518,7 +2518,9 @@
         "TIMEZONE": "Часовой пояс",
         "REFERRAL": "Реферальная система",
         "MODERATION": "Модерация"
-      }
+      },
+      "offlineConv": "Офлайн-конверсии",
+      "apiKey": "API-ключ"
     },
     "buttons": {
       "color": "Цвет кнопки",

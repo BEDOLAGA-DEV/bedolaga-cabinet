@@ -1705,7 +1705,9 @@
         "telegramOidcEnabled": "启用 OIDC",
         "telegramOidcClientId": "Client ID（机器人 ID）",
         "telegramOidcClientSecret": "Client Secret"
-      }
+      },
+      "offlineConv": "离线转化",
+      "apiKey": "API 密钥"
     },
     "buttons": {
       "color": "按钮颜色",

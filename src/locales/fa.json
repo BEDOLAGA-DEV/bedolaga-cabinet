@@ -1667,7 +1667,9 @@
         "telegramOidcEnabled": "فعال‌سازی OIDC",
         "telegramOidcClientId": "Client ID (شناسه ربات)",
         "telegramOidcClientSecret": "Client Secret"
-      }
+      },
+      "offlineConv": "تبدیل‌های آفلاین",
+      "apiKey": "کلید API"
     },
     "buttons": {
       "color": "رنگ دکمه",

@@ -2006,7 +2006,9 @@
         "telegramOidcEnabled": "OIDC Enabled",
         "telegramOidcClientId": "Client ID (Bot ID)",
         "telegramOidcClientSecret": "Client Secret"
-      }
+      },
+      "offlineConv": "Offline Conversions",
+      "apiKey": "API Key"
     },
     "theme": {
       "accentColor": "Accent color",
