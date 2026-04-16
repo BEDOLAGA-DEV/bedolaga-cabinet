@@ -630,18 +630,18 @@ export default function Support() {
                         </span>
                       </div>
                       {msg.message_text && (
-                      <div
-                        className="whitespace-pre-wrap text-dark-200 [&_a]:text-accent-400 [&_a]:underline"
-                        dangerouslySetInnerHTML={{
-                          __html: DOMPurify.sanitize(
-                            msg.message_text.replace(
-                              /(https?:\/\/[^\s<]+)/g,
-                              '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>',
+                        <div
+                          className="whitespace-pre-wrap text-dark-200 [&_a]:text-accent-400 [&_a]:underline"
+                          dangerouslySetInnerHTML={{
+                            __html: DOMPurify.sanitize(
+                              msg.message_text.replace(
+                                /(https?:\/\/[^\s<]+)/g,
+                                '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>',
+                              ),
+                              { ADD_ATTR: ['target'] },
                             ),
-                            { ADD_ATTR: ['target'] },
-                          ),
-                        }}
-                      />
+                          }}
+                        />
                       )}
                       {/* Display media if present */}
                       <MessageMediaGrid message={msg} translateError={t('support.imageLoadFailed')} />
