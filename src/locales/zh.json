@@ -1657,6 +1657,7 @@
         "payments_severpay": "SeverPay",
         "payments_paypear": "PayPear",
         "payments_rollypay": "RollyPay",
+        "payments_aurapay": "AuraPay",
         "subs_core": "核心",
         "subs_trial": "试用",
         "subs_pricing": "定价",

@@ -17,5 +17,6 @@ export const METHOD_LABELS: Record<string, string> = {
   severpay: 'SeverPay',
   paypear: 'PayPear',
   rollypay: 'RollyPay',
+  aurapay: 'AuraPay',
   manual: 'Ручное пополнение',
 };

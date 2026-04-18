@@ -54,6 +54,7 @@ export const SETTINGS_TREE: SettingsTreeConfig = {
         { id: 'payments_severpay', categories: ['SEVERPAY'] },
         { id: 'payments_paypear', categories: ['PAYPEAR'] },
         { id: 'payments_rollypay', categories: ['ROLLYPAY'] },
+        { id: 'payments_aurapay', categories: ['AURAPAY'] },
       ],
     },
     {

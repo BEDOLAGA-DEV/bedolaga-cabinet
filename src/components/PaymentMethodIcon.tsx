@@ -275,6 +275,26 @@ export default function PaymentMethodIcon({
       );
     }
 
+    case 'aurapay': {
+      const aurapayGradId = `${uid}-aurapay`;
+      return (
+        <svg className={className} viewBox="0 0 40 40">
+          <defs>
+            <linearGradient id={aurapayGradId} x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="#ec4899" />
+              <stop offset="100%" stopColor="#db2777" />
+            </linearGradient>
+          </defs>
+          <circle cx="20" cy="20" r="20" fill={`url(#${aurapayGradId})`} />
+          <g fill="#fff" fontFamily="Arial,sans-serif" fontWeight="700">
+            <text x="20" y="26" textAnchor="middle" fontSize="14">
+              AP
+            </text>
+          </g>
+        </svg>
+      );
+    }
+
     default:
       return (
         <svg className={className} viewBox="0 0 40 40">
