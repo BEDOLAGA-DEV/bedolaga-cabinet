@@ -15,5 +15,7 @@ export const METHOD_LABELS: Record<string, string> = {
   kassa_ai: 'Kassa AI',
   riopay: 'RioPay',
   severpay: 'SeverPay',
+  paypear: 'PayPear',
+  rollypay: 'RollyPay',
   manual: 'Ручное пополнение',
 };
