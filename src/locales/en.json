@@ -655,6 +655,9 @@
       },
       "rollypay": {
         "description": "Pay via RollyPay (SBP)"
+      },
+      "aurapay": {
+        "description": "Pay via AuraPay"
       }
     },
     "transactionHistory": "Transaction History",
@@ -2030,6 +2033,7 @@
         "payments_severpay": "SeverPay",
         "payments_paypear": "PayPear",
         "payments_rollypay": "RollyPay",
+        "payments_aurapay": "AuraPay",
         "subs_core": "Core",
         "subs_trial": "Trial",
         "subs_pricing": "Pricing",

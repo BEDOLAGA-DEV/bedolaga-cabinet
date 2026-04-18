@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.47.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.46.0...v1.47.0) (2026-04-18)
+
+
+### Features
+
+* add AuraPay payment provider to cabinet frontend ([48827e4](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/48827e430dfc4b499714b7183c9eeeba86456df5))
+
+
+### Bug Fixes
+
+* change aurapay icon to pink gradient to avoid kassa_ai color collision ([996840f](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/996840f62754a3871194841966c44a3c2f810a41))
+
 ## [1.46.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.45.1...v1.46.0) (2026-04-16)
 
 

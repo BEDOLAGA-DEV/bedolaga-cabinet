@@ -683,6 +683,9 @@
       },
       "rollypay": {
         "description": "Оплата через RollyPay (СБП)"
+      },
+      "aurapay": {
+        "description": "Оплата через AuraPay"
       }
     },
     "transactionHistory": "История операций",
@@ -2046,6 +2049,7 @@
         "payments_severpay": "SeverPay",
         "payments_paypear": "PayPear",
         "payments_rollypay": "RollyPay",
+        "payments_aurapay": "AuraPay",
         "subs_core": "Основные",
         "subs_trial": "Пробный период",
         "subs_pricing": "Цены",
