@@ -649,6 +649,12 @@
       },
       "kassa_ai": {
         "description": "Pay via Kassa AI"
+      },
+      "paypear": {
+        "description": "Pay via PayPear"
+      },
+      "rollypay": {
+        "description": "Pay via RollyPay (SBP)"
       }
     },
     "transactionHistory": "Transaction History",
@@ -2022,6 +2028,8 @@
         "payments_wata": "Wata",
         "payments_riopay": "RioPay",
         "payments_severpay": "SeverPay",
+        "payments_paypear": "PayPear",
+        "payments_rollypay": "RollyPay",
         "subs_core": "Core",
         "subs_trial": "Trial",
         "subs_pricing": "Pricing",

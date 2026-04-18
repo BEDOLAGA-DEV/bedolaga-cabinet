@@ -677,6 +677,12 @@
       },
       "kassa_ai": {
         "description": "Оплата через Kassa AI"
+      },
+      "paypear": {
+        "description": "Оплата через PayPear"
+      },
+      "rollypay": {
+        "description": "Оплата через RollyPay (СБП)"
       }
     },
     "transactionHistory": "История операций",
@@ -2038,6 +2044,8 @@
         "payments_wata": "Wata",
         "payments_riopay": "RioPay",
         "payments_severpay": "SeverPay",
+        "payments_paypear": "PayPear",
+        "payments_rollypay": "RollyPay",
         "subs_core": "Основные",
         "subs_trial": "Пробный период",
         "subs_pricing": "Цены",

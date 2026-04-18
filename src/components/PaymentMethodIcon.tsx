@@ -235,6 +235,46 @@ export default function PaymentMethodIcon({
       );
     }
 
+    case 'paypear': {
+      const paypearGradId = `${uid}-paypear`;
+      return (
+        <svg className={className} viewBox="0 0 40 40">
+          <defs>
+            <linearGradient id={paypearGradId} x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="#f59e0b" />
+              <stop offset="100%" stopColor="#d97706" />
+            </linearGradient>
+          </defs>
+          <circle cx="20" cy="20" r="20" fill={`url(#${paypearGradId})`} />
+          <g fill="#fff" fontFamily="Arial,sans-serif" fontWeight="700">
+            <text x="20" y="26" textAnchor="middle" fontSize="14">
+              PP
+            </text>
+          </g>
+        </svg>
+      );
+    }
+
+    case 'rollypay': {
+      const rollypayGradId = `${uid}-rollypay`;
+      return (
+        <svg className={className} viewBox="0 0 40 40">
+          <defs>
+            <linearGradient id={rollypayGradId} x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="#14b8a6" />
+              <stop offset="100%" stopColor="#0d9488" />
+            </linearGradient>
+          </defs>
+          <circle cx="20" cy="20" r="20" fill={`url(#${rollypayGradId})`} />
+          <g fill="#fff" fontFamily="Arial,sans-serif" fontWeight="700">
+            <text x="20" y="26" textAnchor="middle" fontSize="14">
+              RY
+            </text>
+          </g>
+        </svg>
+      );
+    }
+
     default:
       return (
         <svg className={className} viewBox="0 0 40 40">

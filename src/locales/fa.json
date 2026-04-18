@@ -1617,6 +1617,8 @@
         "payments_wata": "Wata",
         "payments_riopay": "RioPay",
         "payments_severpay": "SeverPay",
+        "payments_paypear": "PayPear",
+        "payments_rollypay": "RollyPay",
         "subs_core": "هسته",
         "subs_trial": "آزمایشی",
         "subs_pricing": "قیمت‌گذاری",

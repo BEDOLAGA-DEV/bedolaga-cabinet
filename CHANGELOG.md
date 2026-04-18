@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.46.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.45.1...v1.46.0) (2026-04-16)
+
+
+### Features
+
+* add PayPear payment provider to cabinet frontend ([31ac511](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/31ac511a09fa5f4f62f76b1147f71cae55b438de))
+* add RollyPay payment provider to cabinet frontend ([770a580](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/770a5803d6490199d5ee0dbc22863f8212245a4f))
+
+
+### Bug Fixes
+
+* add paypear payment method description to ru/en locales ([5cbf29a](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/5cbf29a1e89cf32dec2a4c5f1742be19573d5490))
+* differentiate rollypay icon from riopay (teal gradient, RY text) ([4eed0f3](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/4eed0f358ed6f9c094602793ddfdb861a56da369))
+
 ## [1.45.1](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.45.0...v1.45.1) (2026-04-15)
 
 
