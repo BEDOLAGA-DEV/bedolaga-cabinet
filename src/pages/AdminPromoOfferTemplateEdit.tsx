@@ -11,6 +11,7 @@ import {
 import { serversApi } from '../api/servers';
 import { AdminBackButton } from '../components/admin';
 import { createNumberInputHandler, toNumber } from '../utils/inputHelpers';
+import Twemoji from 'react-twemoji';
 
 const getOfferTypeIcon = (offerType: string): string => {
   return OFFER_TYPE_CONFIG[offerType as OfferType]?.icon || '🎁';
@@ -254,7 +255,11 @@ export default function AdminPromoOfferTemplateEdit() {
                             }}
                             className="accent-accent-500"
                           />
-                          <span className="text-dark-200">{server.display_name}</span>
+                          <span className="text-dark-200">
+                            <Twemoji options={{ className: 'twemoji', folder: 'svg', ext: '.svg' }}>
+                              {server.display_name}
+                            </Twemoji>
+                          </span>
                           {server.country_code && (
                             <span className="text-dark-500">{server.country_code}</span>
                           )}

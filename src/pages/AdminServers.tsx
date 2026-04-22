@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { serversApi, ServerListItem } from '../api/servers';
 import { SyncIcon, EditIcon, CheckIcon, XIcon, UsersIcon, GiftIcon } from '../components/icons';
 import { usePlatform } from '../platform/hooks/usePlatform';
+import Twemoji from 'react-twemoji';
 
 // BackIcon
 const BackIcon = () => (
@@ -145,7 +146,11 @@ export default function AdminServers() {
                 <div className="min-w-0 flex-1">
                   <div className="mb-1 flex items-center gap-2">
                     <span className="text-lg">{getCountryFlag(server.country_code)}</span>
-                    <h3 className="truncate font-medium text-dark-100">{server.display_name}</h3>
+                    <h3 className="truncate font-medium text-dark-100">
+                      <Twemoji options={{ className: 'twemoji', folder: 'svg', ext: '.svg' }}>
+                        {server.display_name}
+                      </Twemoji>
+                    </h3>
                     {server.is_trial_eligible && (
                       <span className="rounded bg-success-500/20 px-2 py-0.5 text-xs text-success-400">
                         {t('admin.servers.trial')}

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { adminRemnawaveApi, SquadWithLocalInfo } from '../api/adminRemnawave';
 import { AdminBackButton } from '../components/admin';
 import { ServerIcon, UsersIcon, CheckIcon, XIcon } from '../components/icons';
+import Twemoji from 'react-twemoji';
 // Country flags helper
 const getCountryFlag = (code: string | null | undefined): string => {
   if (!code) return '🌍';
@@ -112,7 +113,9 @@ export default function AdminRemnawaveSquadDetail() {
         </div>
         <div>
           <h1 className="text-xl font-semibold text-dark-100">
-            {squad.display_name || squad.name}
+            <Twemoji options={{ className: 'twemoji', folder: 'svg', ext: '.svg' }}>
+              {squad.display_name || squad.name}
+            </Twemoji>
           </h1>
           <p className="text-sm text-dark-400">{squad.name}</p>
         </div>

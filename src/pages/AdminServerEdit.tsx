@@ -6,6 +6,7 @@ import { serversApi, ServerUpdateRequest } from '../api/servers';
 import { AdminBackButton } from '../components/admin';
 import { ServerIcon } from '../components/icons';
 import { createNumberInputHandler, toNumber } from '../utils/inputHelpers';
+import Twemoji from 'react-twemoji';
 
 // Country flags (simple emoji mapping)
 const getCountryFlag = (code: string | null): string => {
@@ -139,7 +140,11 @@ export default function AdminServerEdit() {
         </div>
         <div>
           <h1 className="text-xl font-semibold text-dark-100">{t('admin.servers.edit')}</h1>
-          <p className="text-sm text-dark-400">{server.display_name}</p>
+          <p className="text-sm text-dark-400">
+            <Twemoji options={{ className: 'twemoji', folder: 'svg', ext: '.svg' }}>
+              {server.display_name}
+            </Twemoji>
+          </p>
         </div>
       </div>
 

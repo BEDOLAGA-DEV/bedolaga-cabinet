@@ -24,6 +24,7 @@ import {
   getInsufficientBalanceError,
   getFlagEmoji,
 } from '../utils/subscriptionHelpers';
+import Twemoji from 'react-twemoji';
 
 /** Isolated countdown so 1s interval doesn't re-render the whole page */
 const CountdownTimer = memo(function CountdownTimer({
@@ -980,7 +981,9 @@ export default function Subscription() {
                         {server.country_code && (
                           <span className="text-xs">{getFlagEmoji(server.country_code)}</span>
                         )}
-                        {server.name}
+                        <Twemoji options={{ className: 'twemoji', folder: 'svg', ext: '.svg' }}>
+                          {server.name}
+                        </Twemoji>
                       </span>
                     ))}
                   </div>

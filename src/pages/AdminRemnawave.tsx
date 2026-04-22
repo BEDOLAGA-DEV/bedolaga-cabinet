@@ -12,6 +12,7 @@ import {
 } from '../api/adminRemnawave';
 import { usePlatform } from '../platform/hooks/usePlatform';
 import { formatUptime } from '../utils/format';
+import Twemoji from 'react-twemoji';
 import {
   ServerIcon,
   ChartIcon,
@@ -225,7 +226,9 @@ function SquadCard({ squad, onClick }: SquadCardProps) {
           <div className="flex items-center gap-2">
             <span className="text-lg">{getCountryFlag(squad.country_code)}</span>
             <h3 className="truncate font-medium text-dark-100">
-              {squad.display_name || squad.name}
+              <Twemoji options={{ className: 'twemoji', folder: 'svg', ext: '.svg' }}>
+                {squad.display_name || squad.name}
+              </Twemoji>
             </h3>
             {squad.is_synced ? (
               <span className="rounded-full bg-success-500/20 px-2 py-0.5 text-xs text-success-400">
