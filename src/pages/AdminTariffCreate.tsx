@@ -13,6 +13,7 @@ import {
 } from '../api/tariffs';
 import { AdminBackButton } from '../components/admin';
 import { createNumberInputHandler, toNumber } from '../utils/inputHelpers';
+import Twemoji from 'react-twemoji';
 
 // Icons
 const PlusIcon = () => (
@@ -782,7 +783,11 @@ export default function AdminTariffCreate() {
                       >
                         {isSelected && <CheckIcon />}
                       </div>
-                      <span className="flex-1 text-sm font-medium">{server.display_name}</span>
+                      <span className="flex-1 text-sm font-medium">
+                        <Twemoji options={{ className: 'twemoji', folder: 'svg', ext: '.svg' }}>
+                          {server.display_name}
+                        </Twemoji>
+                      </span>
                       {server.country_code && (
                         <span className="text-xs text-dark-500">{server.country_code}</span>
                       )}

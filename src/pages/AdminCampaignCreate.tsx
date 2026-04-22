@@ -12,6 +12,7 @@ import {
 import { partnerApi } from '../api/partners';
 import { AdminBackButton } from '../components/admin';
 import { createNumberInputHandler, toNumber } from '../utils/inputHelpers';
+import Twemoji from 'react-twemoji';
 // Icons
 const CampaignIcon = () => (
   <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -108,7 +109,11 @@ function ServerSelector({
             >
               {selected.includes(server.squad_uuid) && <CheckIcon />}
             </div>
-            <span className="text-sm font-medium">{server.display_name}</span>
+            <span className="text-sm font-medium">
+              <Twemoji options={{ className: 'twemoji', folder: 'svg', ext: '.svg' }}>
+                {server.display_name}
+              </Twemoji>
+            </span>
           </button>
         ))}
       </div>

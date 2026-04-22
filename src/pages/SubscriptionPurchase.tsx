@@ -19,6 +19,7 @@ import InsufficientBalancePrompt from '../components/InsufficientBalancePrompt';
 import { useCurrency } from '../hooks/useCurrency';
 import { useCloseOnSuccessNotification } from '../store/successNotification';
 import { CheckIcon } from '../components/icons';
+import Twemoji from 'react-twemoji';
 import {
   getErrorMessage,
   getInsufficientBalanceError,
@@ -1795,7 +1796,13 @@ export default function SubscriptionPurchase() {
                               {selectedServers.includes(server.uuid) && <CheckIcon />}
                             </div>
                             <div>
-                              <div className="font-medium text-dark-100">{server.name}</div>
+                              <div className="font-medium text-dark-100">
+                                <Twemoji
+                                  options={{ className: 'twemoji', folder: 'svg', ext: '.svg' }}
+                                >
+                                  {server.name}
+                                </Twemoji>
+                              </div>
                               <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                                 <span className="text-sm text-accent-400">
                                   {formatPrice(promoServer.price)}

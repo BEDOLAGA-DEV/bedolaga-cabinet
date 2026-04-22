@@ -13,6 +13,7 @@ import {
 import { AdminBackButton } from '../components/admin';
 import { CheckIcon, CampaignIcon } from '../components/icons';
 import { createNumberInputHandler, toNumber } from '../utils/inputHelpers';
+import Twemoji from 'react-twemoji';
 
 // Bonus type config
 const bonusTypeConfig: Record<
@@ -83,7 +84,11 @@ function ServerSelector({
             >
               {selected.includes(server.squad_uuid) && <CheckIcon />}
             </div>
-            <span className="text-sm font-medium">{server.display_name}</span>
+            <span className="text-sm font-medium">
+              <Twemoji options={{ className: 'twemoji', folder: 'svg', ext: '.svg' }}>
+                {server.display_name}
+              </Twemoji>
+            </span>
           </button>
         ))}
       </div>

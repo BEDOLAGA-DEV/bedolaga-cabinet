@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.47.1](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.47.0...v1.47.1) (2026-04-22)
+
+
+### Bug Fixes
+
+* wrap server display names with Twemoji for cross-platform emoji rendering ([d75440b](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/d75440bfe46e3c21d7207b9d823251857c86728e))
+
 ## [1.47.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.46.0...v1.47.0) (2026-04-18)
 
 
