@@ -1406,7 +1406,7 @@
       "title": "Device Observability",
       "subtitle": "Actual connected devices vs subscription limits",
       "loadError": "Failed to load device observability data",
-      "loadingProgress": "Loaded {{loaded}} of {{total}} pages",
+      "loadingProgress": "Processed users: {{loaded}} of {{total}}",
       "lastUpdated": "Updated: {{date}}",
       "subscriptionStatuses": {
         "active": "Active",

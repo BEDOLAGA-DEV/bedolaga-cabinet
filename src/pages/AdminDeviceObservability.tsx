@@ -163,7 +163,10 @@ export default function AdminDeviceObservability() {
       setUserDevicesLoading(true);
 
       try {
-        const data = await adminDeviceObservabilityApi.getUserDevices(row.user_id);
+        const data = await adminDeviceObservabilityApi.getUserDevices(
+          row.user_id,
+          row.subscription_id,
+        );
         setUserDevices(data.devices);
         setUserDevicesTotal(data.total);
         setUserDevicesLimit(data.device_limit);
@@ -186,6 +189,7 @@ export default function AdminDeviceObservability() {
           normalizeString(row.username),
           row.telegram_id ? String(row.telegram_id) : '',
           String(row.user_id),
+          String(row.subscription_id),
         ];
         const matchesSearch = userFields.some((field) => field.includes(searchValue));
         if (!matchesSearch) return false;
@@ -496,7 +500,7 @@ export default function AdminDeviceObservability() {
 
                   return (
                     <tr
-                      key={row.user_id}
+                      key={row.row_key}
                       className={`cursor-pointer border-b border-dark-700/60 transition-colors ${rowClass}`}
                       onClick={() => navigate(`/admin/users/${row.user_id}`)}
                     >
@@ -509,6 +513,7 @@ export default function AdminDeviceObservability() {
                           <div className="truncate text-xs text-dark-500">
                             {row.username ? `@${row.username}` : `#${row.user_id}`}
                             {row.telegram_id ? ` · ${row.telegram_id}` : ''}
+                            {` · sub #${row.subscription_id}`}
                           </div>
                         </div>
                       </td>
@@ -520,7 +525,10 @@ export default function AdminDeviceObservability() {
                         </span>
                       </td>
                       <td className="px-3 py-2 text-xs text-dark-300">
-                        {row.tariff_name || t('admin.trafficUsage.noTariff')}
+                        <div>{row.tariff_name || t('admin.trafficUsage.noTariff')}</div>
+                        <div className="mt-0.5 text-[10px] text-dark-500">
+                          #{row.subscription_id}
+                        </div>
                       </td>
                       <td className="px-3 py-2 text-center text-sm text-dark-200">
                         {row.is_unlimited_limit ? '∞' : row.device_limit}
@@ -632,6 +640,10 @@ export default function AdminDeviceObservability() {
                           ? '∞'
                           : userDevicesLimit,
                   })}
+                </p>
+                <p className="mt-0.5 text-[11px] text-dark-500">
+                  #{selectedUser.subscription_id}
+                  {selectedUser.tariff_name ? ` · ${selectedUser.tariff_name}` : ''}
                 </p>
               </div>
               <button

@@ -1427,7 +1427,7 @@
       "title": "Мониторинг устройств",
       "subtitle": "Фактические подключения устройств против лимитов подписки",
       "loadError": "Не удалось загрузить данные мониторинга устройств",
-      "loadingProgress": "Загружено страниц: {{loaded}} из {{total}}",
+      "loadingProgress": "Обработано пользователей: {{loaded}} из {{total}}",
       "lastUpdated": "Обновлено: {{date}}",
       "subscriptionStatuses": {
         "active": "Активна",

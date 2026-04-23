@@ -1,13 +1,14 @@
 import {
-  adminTrafficApi,
-  type TrafficEnrichmentData,
-  type TrafficParams,
-  type UserTrafficItem,
-} from './adminTraffic';
-import { adminUsersApi } from './adminUsers';
+  adminUsersApi,
+  type UserDetailResponse,
+  type UserListItem,
+  type UserSubscriptionInfo,
+} from './adminUsers';
 
 export interface DeviceObservabilityRow {
+  row_key: string;
   user_id: number;
+  subscription_id: number;
   telegram_id: number | null;
   username: string | null;
   full_name: string;
@@ -19,7 +20,6 @@ export interface DeviceObservabilityRow {
   devices_delta: number | null;
   utilization_percent: number | null;
   is_unlimited_limit: boolean;
-  total_bytes: number;
 }
 
 export interface DeviceObservabilitySummary {
@@ -51,7 +51,8 @@ const SNAPSHOT_TTL_MS = 60 * 1000;
 const DEFAULT_PERIOD = 30;
 const DEFAULT_PAGE_SIZE = 200;
 const MAX_PAGE_SIZE = 500;
-const MAX_CONCURRENT_REQUESTS = 4;
+const MAX_PAGE_FETCH_WORKERS = 4;
+const MAX_USER_PROCESS_WORKERS = 4;
 
 let snapshotCache: { key: string; expiresAt: number; value: DeviceObservabilitySnapshot } | null =
   null;
@@ -66,103 +67,113 @@ function clampPageSize(value: number | undefined): number {
   return Math.max(1, Math.min(MAX_PAGE_SIZE, Math.floor(value)));
 }
 
-function toRow(item: UserTrafficItem, enrichment?: TrafficEnrichmentData): DeviceObservabilityRow {
-  const deviceLimit = normalizeNonNegative(item.device_limit);
-  const devicesConnected = normalizeNonNegative(enrichment?.devices_connected);
+function buildCacheKey(period: number, pageSize: number): string {
+  return JSON.stringify({ period, pageSize });
+}
+
+function getSubscriptions(detail: UserDetailResponse): UserSubscriptionInfo[] {
+  if (Array.isArray(detail.subscriptions) && detail.subscriptions.length > 0) {
+    return detail.subscriptions;
+  }
+
+  return detail.subscription ? [detail.subscription] : [];
+}
+
+function toRow(
+  detail: Pick<UserDetailResponse, 'id' | 'telegram_id' | 'username' | 'full_name'>,
+  subscription: UserSubscriptionInfo,
+  devicesConnected: number,
+): DeviceObservabilityRow {
+  const deviceLimit = normalizeNonNegative(subscription.device_limit);
+  const normalizedConnected = normalizeNonNegative(devicesConnected);
   const isUnlimitedLimit = deviceLimit === 0;
-  const overLimitBy = !isUnlimitedLimit ? Math.max(0, devicesConnected - deviceLimit) : 0;
-  const devicesDelta = !isUnlimitedLimit ? devicesConnected - deviceLimit : null;
+  const overLimitBy = !isUnlimitedLimit ? Math.max(0, normalizedConnected - deviceLimit) : 0;
+  const devicesDelta = !isUnlimitedLimit ? normalizedConnected - deviceLimit : null;
   const utilizationPercent = !isUnlimitedLimit
     ? deviceLimit > 0
-      ? Math.round((devicesConnected / deviceLimit) * 100)
+      ? Math.round((normalizedConnected / deviceLimit) * 100)
       : null
     : null;
 
   return {
-    user_id: item.user_id,
-    telegram_id: item.telegram_id,
-    username: item.username,
-    full_name: item.full_name,
-    tariff_name: item.tariff_name,
-    subscription_status: item.subscription_status,
+    row_key: `${detail.id}:${subscription.id}`,
+    user_id: detail.id,
+    subscription_id: subscription.id,
+    telegram_id: detail.telegram_id,
+    username: detail.username,
+    full_name: detail.full_name,
+    tariff_name: subscription.tariff_name,
+    subscription_status: subscription.status,
     device_limit: deviceLimit,
-    devices_connected: devicesConnected,
+    devices_connected: normalizedConnected,
     over_limit_by: overLimitBy,
     devices_delta: devicesDelta,
     utilization_percent: utilizationPercent,
     is_unlimited_limit: isUnlimitedLimit,
-    total_bytes: normalizeNonNegative(item.total_bytes),
   };
 }
 
-function summarizeRows(
-  rows: DeviceObservabilityRow[],
-  missingFromTraffic: number,
-): DeviceObservabilitySummary {
+function summarizeRows(rows: DeviceObservabilityRow[]): DeviceObservabilitySummary {
+  const uniqueUsers = new Set<number>();
+  const usersWithDevices = new Set<number>();
+  const usersOverLimit = new Set<number>();
+  const usersAtLimit = new Set<number>();
+  const usersWithUnlimitedLimit = new Set<number>();
+
   let totalConnectedDevices = 0;
-  let usersWithDevices = 0;
-  let usersOverLimit = 0;
-  let usersAtLimit = 0;
-  let usersWithUnlimitedLimit = 0;
   let maxConnectedDevices = 0;
 
   for (const row of rows) {
+    uniqueUsers.add(row.user_id);
     totalConnectedDevices += row.devices_connected;
-    if (row.devices_connected > 0) usersWithDevices += 1;
-    if (row.over_limit_by > 0) usersOverLimit += 1;
+
+    if (row.devices_connected > 0) usersWithDevices.add(row.user_id);
+    if (row.over_limit_by > 0) usersOverLimit.add(row.user_id);
+
     if (
       !row.is_unlimited_limit &&
       row.device_limit > 0 &&
       row.devices_connected === row.device_limit
     ) {
-      usersAtLimit += 1;
+      usersAtLimit.add(row.user_id);
     }
-    if (row.is_unlimited_limit) usersWithUnlimitedLimit += 1;
+
+    if (row.is_unlimited_limit) usersWithUnlimitedLimit.add(row.user_id);
     if (row.devices_connected > maxConnectedDevices) {
       maxConnectedDevices = row.devices_connected;
     }
   }
 
   return {
-    total_users: rows.length,
+    total_users: uniqueUsers.size,
     total_connected_devices: totalConnectedDevices,
-    users_with_devices: usersWithDevices,
-    users_over_limit: usersOverLimit,
-    users_at_limit: usersAtLimit,
-    users_with_unlimited_limit: usersWithUnlimitedLimit,
+    users_with_devices: usersWithDevices.size,
+    users_over_limit: usersOverLimit.size,
+    users_at_limit: usersAtLimit.size,
+    users_with_unlimited_limit: usersWithUnlimitedLimit.size,
     max_connected_devices: maxConnectedDevices,
-    missing_from_traffic: missingFromTraffic,
+    missing_from_traffic: 0,
   };
 }
 
-function buildCacheKey(period: number, pageSize: number): string {
-  return JSON.stringify({ period, pageSize });
-}
-
-async function loadAllTrafficRows(
-  params: Omit<TrafficParams, 'offset' | 'limit'>,
+async function loadAllUsers(
   pageSize: number,
-  skipCache: boolean,
   onProgress?: (loadedPages: number, totalPages: number) => void,
-): Promise<UserTrafficItem[]> {
-  const firstPage = await adminTrafficApi.getTrafficUsage(
-    { ...params, offset: 0, limit: pageSize },
-    { skipCache },
-  );
-
+): Promise<UserListItem[]> {
+  const firstPage = await adminUsersApi.getUsers({ offset: 0, limit: pageSize });
   const totalPages = Math.max(1, Math.ceil(firstPage.total / pageSize));
   onProgress?.(1, totalPages);
 
   if (totalPages === 1) {
-    return firstPage.items;
+    return firstPage.users;
   }
 
   const offsets = Array.from({ length: totalPages - 1 }, (_, idx) => (idx + 1) * pageSize);
-  const results: UserTrafficItem[][] = new Array(offsets.length);
+  const results: UserListItem[][] = new Array(offsets.length);
   let nextIndex = 0;
   let loadedPages = 1;
 
-  const workerCount = Math.min(MAX_CONCURRENT_REQUESTS, offsets.length);
+  const workerCount = Math.min(MAX_PAGE_FETCH_WORKERS, offsets.length);
   await Promise.all(
     Array.from({ length: workerCount }, async () => {
       while (true) {
@@ -170,18 +181,73 @@ async function loadAllTrafficRows(
         nextIndex += 1;
         if (currentIndex >= offsets.length) return;
 
-        const data = await adminTrafficApi.getTrafficUsage(
-          { ...params, offset: offsets[currentIndex], limit: pageSize },
-          { skipCache },
-        );
-        results[currentIndex] = data.items;
+        const response = await adminUsersApi.getUsers({
+          offset: offsets[currentIndex],
+          limit: pageSize,
+        });
+        results[currentIndex] = response.users;
         loadedPages += 1;
         onProgress?.(loadedPages, totalPages);
       }
     }),
   );
 
-  return [...firstPage.items, ...results.flat()];
+  return [...firstPage.users, ...results.flat()];
+}
+
+async function mapWithConcurrency<T, R>(
+  items: T[],
+  workerCount: number,
+  mapper: (item: T) => Promise<R>,
+  onItemDone?: (completed: number, total: number) => void,
+): Promise<R[]> {
+  if (items.length === 0) return [];
+
+  const results: R[] = new Array(items.length);
+  let nextIndex = 0;
+  let completed = 0;
+
+  await Promise.all(
+    Array.from({ length: Math.min(workerCount, items.length) }, async () => {
+      while (true) {
+        const currentIndex = nextIndex;
+        nextIndex += 1;
+        if (currentIndex >= items.length) return;
+
+        results[currentIndex] = await mapper(items[currentIndex]);
+        completed += 1;
+        onItemDone?.(completed, items.length);
+      }
+    }),
+  );
+
+  return results;
+}
+
+async function buildRowsForUser(user: UserListItem): Promise<DeviceObservabilityRow[]> {
+  try {
+    const detail = await adminUsersApi.getUser(user.id);
+    const subscriptions = getSubscriptions(detail);
+
+    if (subscriptions.length === 0) {
+      return [];
+    }
+
+    const rows: DeviceObservabilityRow[] = [];
+
+    for (const subscription of subscriptions) {
+      try {
+        const devices = await adminUsersApi.getUserDevices(detail.id, subscription.id);
+        rows.push(toRow(detail, subscription, devices.total));
+      } catch {
+        rows.push(toRow(detail, subscription, 0));
+      }
+    }
+
+    return rows;
+  } catch {
+    return [];
+  }
 }
 
 export const adminDeviceObservabilityApi = {
@@ -205,37 +271,22 @@ export const adminDeviceObservabilityApi = {
       return snapshotCache.value;
     }
 
-    const baseParams: Omit<TrafficParams, 'offset' | 'limit'> = {
-      period,
-      sort_by: 'total_bytes',
-      sort_desc: true,
-    };
+    const users = await loadAllUsers(pageSize);
+    const usersWithSubscriptions = users.filter((user) => user.has_subscription);
 
-    const enrichmentPromise = adminTrafficApi.getEnrichment({ skipCache });
-    const trafficRows = await loadAllTrafficRows(
-      baseParams,
-      pageSize,
-      skipCache,
+    options.onProgress?.(0, usersWithSubscriptions.length);
+
+    const rowBatches = await mapWithConcurrency(
+      usersWithSubscriptions,
+      MAX_USER_PROCESS_WORKERS,
+      buildRowsForUser,
       options.onProgress,
     );
-    const enrichmentResponse = await enrichmentPromise;
-    const enrichmentMap = enrichmentResponse.data;
 
-    const rowsMap = new Map<number, DeviceObservabilityRow>();
-    for (const item of trafficRows) {
-      rowsMap.set(item.user_id, toRow(item, enrichmentMap[item.user_id]));
-    }
-
-    const rows = Array.from(rowsMap.values());
-    const missingFromTraffic = Object.keys(enrichmentMap).reduce((acc, key) => {
-      const userId = Number(key);
-      if (!Number.isFinite(userId)) return acc;
-      return rowsMap.has(userId) ? acc : acc + 1;
-    }, 0);
-
+    const rows = rowBatches.flat();
     const snapshot: DeviceObservabilitySnapshot = {
       rows,
-      summary: summarizeRows(rows, missingFromTraffic),
+      summary: summarizeRows(rows),
       fetched_at: new Date().toISOString(),
       period_days: period,
     };
@@ -253,7 +304,7 @@ export const adminDeviceObservabilityApi = {
     snapshotCache = null;
   },
 
-  getUserDevices: async (userId: number) => {
-    return adminUsersApi.getUserDevices(userId);
+  getUserDevices: async (userId: number, subscriptionId: number) => {
+    return adminUsersApi.getUserDevices(userId, subscriptionId);
   },
 };
