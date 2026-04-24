@@ -957,7 +957,7 @@ export default function Subscription() {
               <div className="mb-5">
                 <CountdownTimer
                   endDate={subscription.end_date}
-                  isActive={subscription.is_active}
+                  isActive={subscription.is_active || subscription.is_limited}
                   glassColors={g}
                 />
               </div>
@@ -1316,68 +1316,25 @@ export default function Subscription() {
       <PurchaseCTAButton subscription={subscription} isMultiTariff={isMultiTariff} />
 
       {/* Delete expired subscription */}
-      {isMultiTariff && subscription && !subscription.is_active && !subscription.is_trial && (
-        <div className="space-y-3">
-          {!showDeleteSheet ? (
-            <button
-              onClick={async () => {
-                if (platform === 'telegram') {
-                  const confirmed = await destructiveConfirm(
-                    t(
-                      'subscription.deleteWarning',
-                      'Подписка будет удалена безвозвратно. Все данные, устройства и настройки будут потеряны.',
-                    ),
-                    t('subscription.confirmDelete', 'Да, удалить'),
-                    t('subscription.deleteTitle', 'Удалить подписку?'),
-                  );
-                  if (!confirmed) return;
-                  setDeleteLoading(true);
-                  try {
-                    await subscriptionApi.deleteSubscription(subscription.id);
-                    queryClient.invalidateQueries({ queryKey: ['subscriptions-list'] });
-                    navigate('/subscriptions', { replace: true });
-                  } catch {
-                    setDeleteLoading(false);
-                  }
-                } else {
-                  setShowDeleteSheet(true);
-                }
-              }}
-              disabled={deleteLoading}
-              className="flex w-full items-center justify-center gap-2 rounded-2xl border border-red-400/20 bg-red-400/5 p-3.5 text-sm font-medium text-red-400 transition-colors hover:bg-red-400/10 disabled:opacity-50"
-            >
-              <svg
-                className="h-4 w-4"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                />
-              </svg>
-              {t('subscription.delete', 'Удалить подписку')}
-            </button>
-          ) : (
-            <div
-              className="rounded-2xl border border-red-400/20 p-4"
-              style={{ background: 'rgba(255,59,92,0.04)' }}
-            >
-              <div className="mb-3 text-sm font-semibold text-red-400">
-                {t('subscription.deleteTitle', 'Удалить подписку?')}
-              </div>
-              <div className="mb-4 text-xs" style={{ color: g.textSecondary }}>
-                {t(
-                  'subscription.deleteWarning',
-                  'Подписка будет удалена безвозвратно. Все данные, устройства и настройки будут потеряны. Это действие нельзя отменить.',
-                )}
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={async () => {
+      {isMultiTariff &&
+        subscription &&
+        !subscription.is_active &&
+        !subscription.is_trial &&
+        !subscription.is_limited && (
+          <div className="space-y-3">
+            {!showDeleteSheet ? (
+              <button
+                onClick={async () => {
+                  if (platform === 'telegram') {
+                    const confirmed = await destructiveConfirm(
+                      t(
+                        'subscription.deleteWarning',
+                        'Подписка будет удалена безвозвратно. Все данные, устройства и настройки будут потеряны.',
+                      ),
+                      t('subscription.confirmDelete', 'Да, удалить'),
+                      t('subscription.deleteTitle', 'Удалить подписку?'),
+                    );
+                    if (!confirmed) return;
                     setDeleteLoading(true);
                     try {
                       await subscriptionApi.deleteSubscription(subscription.id);
@@ -1385,28 +1342,75 @@ export default function Subscription() {
                       navigate('/subscriptions', { replace: true });
                     } catch {
                       setDeleteLoading(false);
-                      setShowDeleteSheet(false);
                     }
-                  }}
-                  disabled={deleteLoading}
-                  className="flex-1 rounded-xl bg-red-500 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-red-600 disabled:opacity-50"
+                  } else {
+                    setShowDeleteSheet(true);
+                  }
+                }}
+                disabled={deleteLoading}
+                className="flex w-full items-center justify-center gap-2 rounded-2xl border border-red-400/20 bg-red-400/5 p-3.5 text-sm font-medium text-red-400 transition-colors hover:bg-red-400/10 disabled:opacity-50"
+              >
+                <svg
+                  className="h-4 w-4"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
                 >
-                  {deleteLoading
-                    ? t('common.processing', 'Удаление...')
-                    : t('subscription.confirmDelete', 'Да, удалить')}
-                </button>
-                <button
-                  onClick={() => setShowDeleteSheet(false)}
-                  className="flex-1 rounded-xl border border-dark-700 py-2.5 text-sm font-medium transition-colors hover:bg-dark-700"
-                  style={{ color: g.textSecondary }}
-                >
-                  {t('common.cancel', 'Отмена')}
-                </button>
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                  />
+                </svg>
+                {t('subscription.delete', 'Удалить подписку')}
+              </button>
+            ) : (
+              <div
+                className="rounded-2xl border border-red-400/20 p-4"
+                style={{ background: 'rgba(255,59,92,0.04)' }}
+              >
+                <div className="mb-3 text-sm font-semibold text-red-400">
+                  {t('subscription.deleteTitle', 'Удалить подписку?')}
+                </div>
+                <div className="mb-4 text-xs" style={{ color: g.textSecondary }}>
+                  {t(
+                    'subscription.deleteWarning',
+                    'Подписка будет удалена безвозвратно. Все данные, устройства и настройки будут потеряны. Это действие нельзя отменить.',
+                  )}
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={async () => {
+                      setDeleteLoading(true);
+                      try {
+                        await subscriptionApi.deleteSubscription(subscription.id);
+                        queryClient.invalidateQueries({ queryKey: ['subscriptions-list'] });
+                        navigate('/subscriptions', { replace: true });
+                      } catch {
+                        setDeleteLoading(false);
+                        setShowDeleteSheet(false);
+                      }
+                    }}
+                    disabled={deleteLoading}
+                    className="flex-1 rounded-xl bg-red-500 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-red-600 disabled:opacity-50"
+                  >
+                    {deleteLoading
+                      ? t('common.processing', 'Удаление...')
+                      : t('subscription.confirmDelete', 'Да, удалить')}
+                  </button>
+                  <button
+                    onClick={() => setShowDeleteSheet(false)}
+                    className="flex-1 rounded-xl border border-dark-700 py-2.5 text-sm font-medium transition-colors hover:bg-dark-700"
+                    style={{ color: g.textSecondary }}
+                  >
+                    {t('common.cancel', 'Отмена')}
+                  </button>
+                </div>
               </div>
-            </div>
-          )}
-        </div>
-      )}
+            )}
+          </div>
+        )}
 
       {/* Additional Options (Buy Devices) */}
       {subscription &&

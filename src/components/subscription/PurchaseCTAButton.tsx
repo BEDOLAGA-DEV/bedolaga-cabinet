@@ -15,7 +15,9 @@ export default function PurchaseCTAButton({
 }: PurchaseCTAButtonProps) {
   const { t } = useTranslation();
 
-  const isExpired = !subscription || (!subscription.is_active && !subscription.is_trial);
+  const isExpired =
+    !subscription ||
+    (!subscription.is_active && !subscription.is_trial && !subscription.is_limited);
   const isTrial = subscription?.is_trial;
   const isDaily = subscription?.is_daily;
 

@@ -186,14 +186,14 @@ export default function AdminServers() {
                     onClick={() => toggleMutation.mutate(server.id)}
                     className={`rounded-lg p-2 transition-colors ${
                       server.is_available
-                        ? 'bg-success-500/20 text-success-400 hover:bg-success-500/30'
-                        : 'bg-dark-700 text-dark-400 hover:bg-dark-600'
+                        ? 'bg-error-500/20 text-error-400 hover:bg-error-500/30'
+                        : 'bg-success-500/20 text-success-400 hover:bg-success-500/30'
                     }`}
                     title={
                       server.is_available ? t('admin.servers.disable') : t('admin.servers.enable')
                     }
                   >
-                    {server.is_available ? <CheckIcon /> : <XIcon />}
+                    {server.is_available ? <XIcon /> : <CheckIcon />}
                   </button>
 
                   {/* Toggle Trial */}
@@ -201,7 +201,7 @@ export default function AdminServers() {
                     onClick={() => toggleTrialMutation.mutate(server.id)}
                     className={`rounded-lg p-2 transition-colors ${
                       server.is_trial_eligible
-                        ? 'bg-accent-500/20 text-accent-400 hover:bg-accent-500/30'
+                        ? 'bg-warning-500/20 text-warning-400 hover:bg-warning-500/30'
                         : 'bg-dark-700 text-dark-400 hover:bg-dark-600'
                     }`}
                     title={t('admin.servers.toggleTrial')}

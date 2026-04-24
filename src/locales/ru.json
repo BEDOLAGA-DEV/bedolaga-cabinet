@@ -284,7 +284,8 @@
       "tariffs": "Тарифы",
       "traffic": "Трафик",
       "devices": "Устройства",
-      "expiredDate": "Истекла"
+      "expiredDate": "Истекла",
+      "activeUntil": "Активна до"
     },
     "suspended": {
       "title": "Подписка приостановлена",
@@ -582,8 +583,8 @@
       "unlimited": "Безлимит",
       "buyTrafficGb": "Купить {{gb}} ГБ",
       "buyUnlimited": "Купить Безлимит",
-      "manageServers": "Управление серверами",
-      "manageServersTitle": "Управление серверами"
+      "manageServers": "Управление сквадами",
+      "manageServersTitle": "Управление сквадами"
     },
     "serverManagement": {
       "statusLegend": "✅ — подключено • ➕ — будет добавлено (платно) • ➖ — будет отключено",
@@ -1120,7 +1121,7 @@
       "apps": "Приложения",
       "wheel": "Колесо",
       "tariffs": "Тарифы",
-      "servers": "Серверы",
+      "servers": "Сквады",
       "banSystem": "Мониторинг банов",
       "broadcasts": "Рассылки",
       "users": "Пользователи",
@@ -1146,7 +1147,9 @@
       "salesStats": "Статистика продаж",
       "landings": "Лендинги",
       "referralNetwork": "Реферальная сеть",
-      "news": "Новости"
+      "news": "Новости",
+      "bulkActions": "Массовые действия",
+      "infoPages": "Инфо-страницы"
     },
     "panel": {
       "title": "Панель администратора",
@@ -2922,8 +2925,8 @@
       }
     },
     "servers": {
-      "title": "Управление серверами",
-      "subtitle": "Настройка серверов VPN",
+      "title": "Управление сквадами",
+      "subtitle": "Настройка сквадов",
       "sync": "Синхронизировать",
       "syncing": "Синхронизация...",
       "syncNow": "Синхронизировать сейчас",
@@ -3834,6 +3837,113 @@
       "users": "Пользователи",
       "security": "Безопасность"
     },
+    "bulkActions": {
+      "title": "Массовые действия",
+      "subtitle": "Управление пользователями",
+      "selectedCount": "Выбрано: {{count}}",
+      "selectAll": "Выбрать всех",
+      "deselectAll": "Снять выделение",
+      "selectUser": "Выбрать пользователя {{name}}",
+      "deselectUser": "Снять выбор пользователя {{name}}",
+      "noResults": "Пользователи не найдены",
+      "perPage": "На странице",
+      "actions": {
+        "extend": "Продлить подписку",
+        "cancel": "Деактивировать подписки",
+        "activate": "Активировать подписки",
+        "changeTariff": "Сменить тариф",
+        "addTraffic": "Начислить трафик",
+        "addBalance": "Начислить баланс",
+        "assignPromoGroup": "Назначить промогруппу",
+        "grantSubscription": "Выдать подписку",
+        "setDevices": "Изменить устройства",
+        "deleteSubscription": "Удалить подписки",
+        "deleteUser": "Удалить пользователей"
+      },
+      "deleteSubscription": {
+        "warning": "Выбранные подписки будут безвозвратно удалены из бота и панели RemnaWave!",
+        "hint": "Пользователи потеряют доступ к VPN по удалённым подпискам. Это действие нельзя отменить."
+      },
+      "deleteUser": {
+        "warning": "Выбранные пользователи будут безвозвратно удалены из бота! Все их подписки, баланс и данные будут потеряны!",
+        "hint": "Это действие нельзя отменить. Пользователям придётся заново запустить бота для создания нового аккаунта.",
+        "deleteFromPanel": "Также удалить из панели RemnaWave"
+      },
+      "params": {
+        "days": "Количество дней",
+        "tariff": "Выберите тариф",
+        "trafficGb": "Объём трафика (ГБ)",
+        "balanceRub": "Сумма (руб.)",
+        "promoGroup": "Промогруппа",
+        "removePromoGroup": "Убрать промогруппу",
+        "deviceLimit": "Кол-во устройств"
+      },
+      "grantSubscription": {
+        "warning": "Пользователи, у которых уже есть подписка на выбранный тариф, будут пропущены"
+      },
+      "confirm": "Применить",
+      "cancel": "Отмена",
+      "executing": "Выполнение...",
+      "complete": "Выполнено",
+      "successCount": "Успешно: {{count}}",
+      "errorCount": "Ошибок: {{count}}",
+      "progress": {
+        "processed": "Обработано: {{current}} / {{total}}",
+        "succeeded": "успешно",
+        "failed": "ошибок",
+        "ok": "ОК",
+        "errorGeneric": "Ошибка",
+        "doNotClose": "Не закрывайте это окно, пока операция выполняется",
+        "summarySuccess": "{{count}} успешно",
+        "summaryErrors": "{{count}} ошибок"
+      },
+      "errors": {
+        "title": "{{count}} ошибок — показать детали"
+      },
+      "filters": {
+        "search": "Поиск по ID, нику, email",
+        "status": "Статус подписки",
+        "tariff": "Тариф",
+        "promoGroup": "Промогруппа",
+        "allStatuses": "Все статусы",
+        "allTariffs": "Все тарифы",
+        "allGroups": "Все группы",
+        "allCampaigns": "Все кампании",
+        "allPartners": "Все партнёры",
+        "trialOnly": "Только триал",
+        "tariffsSelected": "{{count}} тарифов",
+        "selectAll": "Выбрать все",
+        "deselectAll": "Снять все"
+      },
+      "statuses": {
+        "active": "Активна",
+        "expired": "Истекла",
+        "trial": "Триал",
+        "limited": "Ограничена",
+        "disabled": "Отключена"
+      },
+      "columns": {
+        "user": "Пользователь",
+        "status": "Статус",
+        "tariff": "Тариф",
+        "balance": "Баланс",
+        "daysRemaining": "Дни",
+        "promoGroup": "Группа",
+        "spent": "Потрачено"
+      },
+      "subscriptionsSelected": "{{count}} подписок выбрано",
+      "usersSelected": "{{count}} пользователей выбрано",
+      "expandSubscriptions": "Показать подписки",
+      "collapseSubscriptions": "Скрыть подписки",
+      "noSubscriptions": "Нет подписок",
+      "subscriptionTarget": "Цель: подписки",
+      "userTarget": "Цель: пользователи",
+      "daysUnit": "дн.",
+      "trafficOf": "из",
+      "trafficGbUnit": "ГБ",
+      "selectAllSubs": "Выбрать все подписки",
+      "deselectAllSubs": "Снять все подписки"
+    },
     "theme": {
       "accentColor": "Акцентный цвет",
       "customizeColors": "Настроить цвета",
@@ -4306,6 +4416,76 @@
         "page": "Стр. {{current}} из {{total}}",
         "prev": "Назад",
         "next": "Далее"
+      }
+    },
+    "infoPages": {
+      "title": "Информационные страницы",
+      "subtitle": "Управление статическими информационными страницами",
+      "create": "Создать страницу",
+      "createFaq": "Создать FAQ",
+      "edit": "Редактировать",
+      "save": "Сохранить",
+      "saving": "Сохранение...",
+      "saved": "Страница сохранена",
+      "delete": "Удалить",
+      "confirmDelete": "Удалить эту страницу?",
+      "saveError": "Не удалось сохранить страницу. Попробуйте ещё раз.",
+      "noPages": "Информационных страниц пока нет",
+      "notFound": "Страница не найдена",
+      "active": "Активна",
+      "inactive": "Неактивна",
+      "typePage": "Страница",
+      "localeLabel": "Язык контента",
+      "fields": {
+        "slug": "URL-адрес",
+        "title": "Заголовок",
+        "content": "Содержание",
+        "isActive": "Активна",
+        "sortOrder": "Порядок сортировки",
+        "icon": "Иконка (эмодзи)",
+        "pageType": "Тип страницы",
+        "replacesTab": "Заменяет таб"
+      },
+      "replacesTabNone": "Не заменяет",
+      "replacesTabOptions": {
+        "faq": "FAQ",
+        "rules": "Правила",
+        "privacy": "Конфиденциальность",
+        "offer": "Оферта"
+      },
+      "replacesTabConflict": "уже занят",
+      "replacesTabWarning": "Другая страница уже заменяет этот таб. При сохранении она будет снята.",
+      "filter": {
+        "all": "Все",
+        "page": "Страницы",
+        "faq": "FAQ"
+      },
+      "pageTypes": {
+        "page": "Страница",
+        "faq": "FAQ"
+      },
+      "faq": {
+        "questions": "Вопросы и ответы",
+        "questionsCount": "вопросов",
+        "noQuestions": "Вопросов пока нет. Нажмите кнопку ниже, чтобы добавить.",
+        "questionNumber": "Вопрос #{{n}}",
+        "question": "Вопрос",
+        "answer": "Ответ",
+        "questionPlaceholder": "Введите вопрос...",
+        "answerPlaceholder": "Введите ответ (поддерживается HTML)...",
+        "htmlHint": "Поддерживается HTML-разметка",
+        "addQuestion": "Добавить вопрос",
+        "removeQuestion": "Удалить вопрос",
+        "moveUp": "Переместить вверх",
+        "moveDown": "Переместить вниз",
+        "searchPlaceholder": "Поиск по вопросам...",
+        "noResults": "Ничего не найдено"
+      },
+      "locales": {
+        "ru": "Русский",
+        "en": "Английский",
+        "zh": "Китайский",
+        "fa": "Персидский"
       }
     }
   },

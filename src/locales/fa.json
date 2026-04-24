@@ -386,8 +386,8 @@
       "unlimited": "نامحدود",
       "buyTrafficGb": "خرید {{gb}} GB",
       "buyUnlimited": "خرید نامحدود",
-      "manageServers": "مدیریت سرورها",
-      "manageServersTitle": "مدیریت سرورها"
+      "manageServers": "مدیریت اسکوادها",
+      "manageServersTitle": "مدیریت اسکوادها"
     },
     "serverManagement": {
       "statusLegend": "✅ — متصل • ➕ — اضافه خواهد شد (پولی) • ➖ — قطع خواهد شد",
@@ -924,7 +924,7 @@
       "apps": "برنامه‌ها",
       "wheel": "چرخ",
       "tariffs": "تعرفه‌ها",
-      "servers": "سرورها",
+      "servers": "اسکوادها",
       "broadcasts": "پیام‌رسانی",
       "emailTemplates": "قالب‌های ایمیل",
       "paymentMethods": "روش‌های پرداخت",
@@ -949,7 +949,8 @@
       "salesStats": "آمار فروش",
       "landings": "صفحات فرود",
       "referralNetwork": "شبکه ارجاع",
-      "news": "اخبار"
+      "news": "اخبار",
+      "infoPages": "صفحات اطلاعات"
     },
     "panel": {
       "title": "پنل مدیریت",
@@ -1986,8 +1987,8 @@
       }
     },
     "servers": {
-      "title": "مدیریت سرورها",
-      "subtitle": "پیکربندی سرورهای VPN",
+      "title": "مدیریت اسکوادها",
+      "subtitle": "پیکربندی اسکوادها",
       "sync": "همگام‌سازی",
       "syncing": "در حال همگام‌سازی...",
       "syncNow": "همگام‌سازی الان",
@@ -3366,6 +3367,183 @@
       "periodDaySuffix": "روز",
       "localeTab": "زبان",
       "localeHint": "زبان را تغییر دهید تا متن را به آن زبان ویرایش کنید"
+    },
+    "infoPages": {
+      "title": "صفحات اطلاعات",
+      "subtitle": "مدیریت صفحات اطلاعات ثابت",
+      "create": "ایجاد صفحه",
+      "createFaq": "ایجاد FAQ",
+      "edit": "ویرایش",
+      "save": "ذخیره",
+      "saving": "در حال ذخیره...",
+      "saved": "صفحه ذخیره شد",
+      "delete": "حذف",
+      "confirmDelete": "این صفحه حذف شود؟",
+      "saveError": "ذخیره صفحه ناموفق بود. لطفاً دوباره تلاش کنید.",
+      "noPages": "هنوز صفحه اطلاعاتی وجود ندارد",
+      "notFound": "صفحه پیدا نشد",
+      "active": "فعال",
+      "inactive": "غیرفعال",
+      "typePage": "صفحه",
+      "localeLabel": "زبان محتوا",
+      "fields": {
+        "slug": "شناسه URL",
+        "title": "عنوان",
+        "content": "محتوا",
+        "isActive": "فعال",
+        "sortOrder": "ترتیب",
+        "icon": "آیکون (ایموجی)",
+        "pageType": "نوع صفحه",
+        "replacesTab": "جایگزینی تب"
+      },
+      "replacesTabNone": "بدون جایگزینی",
+      "replacesTabOptions": {
+        "faq": "FAQ",
+        "rules": "قوانین",
+        "privacy": "حریم خصوصی",
+        "offer": "پیشنهاد"
+      },
+      "replacesTabConflict": "قبلا اختصاص داده شده",
+      "replacesTabWarning": "صفحه دیگری قبلا این تب را جایگزین کرده است. با ذخیره، آن صفحه حذف خواهد شد.",
+      "filter": {
+        "all": "همه",
+        "page": "صفحات",
+        "faq": "FAQ"
+      },
+      "pageTypes": {
+        "page": "صفحه",
+        "faq": "FAQ"
+      },
+      "faq": {
+        "questions": "سوالات و پاسخ‌ها",
+        "questionsCount": "سوال",
+        "noQuestions": "هنوز سوالی وجود ندارد. روی دکمه زیر کلیک کنید.",
+        "questionNumber": "سوال #{{n}}",
+        "question": "سوال",
+        "answer": "پاسخ",
+        "questionPlaceholder": "سوال را وارد کنید...",
+        "answerPlaceholder": "پاسخ را وارد کنید (HTML پشتیبانی می‌شود)...",
+        "htmlHint": "نشانه‌گذاری HTML پشتیبانی می‌شود",
+        "addQuestion": "افزودن سوال",
+        "removeQuestion": "حذف سوال",
+        "moveUp": "انتقال به بالا",
+        "moveDown": "انتقال به پایین",
+        "searchPlaceholder": "جستجو در سوالات...",
+        "noResults": "نتیجه‌ای یافت نشد"
+      },
+      "locales": {
+        "ru": "روسی",
+        "en": "انگلیسی",
+        "zh": "چینی",
+        "fa": "فارسی"
+      }
+    },
+    "bulkActions": {
+      "title": "عملیات دسته‌ای",
+      "subtitle": "مدیریت کاربران",
+      "selectedCount": "انتخاب شده: {{count}}",
+      "selectAll": "انتخاب همه",
+      "deselectAll": "لغو انتخاب همه",
+      "selectUser": "انتخاب کاربر {{name}}",
+      "deselectUser": "لغو انتخاب کاربر {{name}}",
+      "noResults": "کاربری یافت نشد",
+      "perPage": "در هر صفحه",
+      "actions": {
+        "extend": "تمدید اشتراک",
+        "cancel": "غیرفعال‌سازی اشتراک‌ها",
+        "activate": "فعال‌سازی اشتراک‌ها",
+        "changeTariff": "تغییر تعرفه",
+        "addTraffic": "افزودن ترافیک",
+        "addBalance": "افزودن موجودی",
+        "assignPromoGroup": "اختصاص گروه تبلیغاتی",
+        "grantSubscription": "اعطای اشتراک",
+        "setDevices": "تنظیم دستگاه‌ها",
+        "deleteSubscription": "حذف اشتراک‌ها",
+        "deleteUser": "حذف کاربران"
+      },
+      "deleteSubscription": {
+        "warning": "اشتراک‌های انتخاب شده برای همیشه از ربات و پنل RemnaWave حذف خواهند شد!",
+        "hint": "کاربران دسترسی VPN اشتراک‌های حذف شده را از دست خواهند داد. این عملیات قابل بازگشت نیست."
+      },
+      "deleteUser": {
+        "warning": "کاربران انتخاب شده برای همیشه از ربات حذف خواهند شد! تمام اشتراک‌ها، موجودی و داده‌های آن‌ها از بین خواهد رفت!",
+        "hint": "این عملیات قابل بازگشت نیست. کاربران باید ربات را دوباره راه‌اندازی کنند تا حساب جدید بسازند.",
+        "deleteFromPanel": "همچنین از پنل RemnaWave حذف شود"
+      },
+      "params": {
+        "days": "تعداد روز",
+        "tariff": "انتخاب تعرفه",
+        "trafficGb": "حجم ترافیک (GB)",
+        "balanceRub": "مبلغ (روبل)",
+        "promoGroup": "گروه تبلیغاتی",
+        "removePromoGroup": "حذف گروه تبلیغاتی",
+        "deviceLimit": "تعداد دستگاه"
+      },
+      "grantSubscription": {
+        "warning": "کاربرانی که قبلا اشتراک تعرفه انتخاب شده را دارند رد خواهند شد"
+      },
+      "confirm": "اعمال",
+      "cancel": "انصراف",
+      "executing": "در حال اجرا...",
+      "complete": "انجام شد",
+      "successCount": "موفق: {{count}}",
+      "errorCount": "خطا: {{count}}",
+      "progress": {
+        "processed": "پردازش شده: {{current}} / {{total}}",
+        "succeeded": "موفق",
+        "failed": "ناموفق",
+        "ok": "OK",
+        "errorGeneric": "خطا",
+        "doNotClose": "لطفا تا پایان عملیات این پنجره را نبندید",
+        "summarySuccess": "{{count}} موفق",
+        "summaryErrors": "{{count}} خطا"
+      },
+      "errors": {
+        "title": "{{count}} خطا — نمایش جزئیات"
+      },
+      "filters": {
+        "search": "جستجو بر اساس شناسه، نام کاربری، ایمیل",
+        "status": "وضعیت اشتراک",
+        "tariff": "تعرفه",
+        "promoGroup": "گروه تبلیغاتی",
+        "allStatuses": "همه وضعیت‌ها",
+        "allTariffs": "همه تعرفه‌ها",
+        "allGroups": "همه گروه‌ها",
+        "allCampaigns": "همه کمپین‌ها",
+        "allPartners": "همه شرکا",
+        "trialOnly": "فقط آزمایشی",
+        "tariffsSelected": "{{count}} تعرفه",
+        "selectAll": "انتخاب همه",
+        "deselectAll": "لغو انتخاب همه"
+      },
+      "statuses": {
+        "active": "فعال",
+        "expired": "منقضی",
+        "trial": "آزمایشی",
+        "limited": "محدود",
+        "disabled": "غیرفعال"
+      },
+      "columns": {
+        "user": "کاربر",
+        "status": "وضعیت",
+        "tariff": "تعرفه",
+        "balance": "موجودی",
+        "daysRemaining": "روز",
+        "promoGroup": "گروه",
+        "spent": "خرج شده"
+      },
+      "subscriptionsSelected": "{{count}} اشتراک انتخاب شده",
+      "usersSelected": "{{count}} کاربر انتخاب شده",
+      "expandSubscriptions": "نمایش اشتراک‌ها",
+      "collapseSubscriptions": "پنهان کردن اشتراک‌ها",
+      "noSubscriptions": "بدون اشتراک",
+      "subscriptionTarget": "هدف: اشتراک‌ها",
+      "userTarget": "هدف: کاربران",
+      "daysUnit": "روز",
+      "trafficOf": "از",
+      "trafficGbUnit": "GB",
+      "selectAllSubs": "انتخاب همه اشتراک‌ها",
+      "deselectAllSubs": "لغو انتخاب همه اشتراک‌ها"
     }
   },
   "adminUpdates": {

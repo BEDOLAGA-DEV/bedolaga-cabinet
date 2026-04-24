@@ -7,11 +7,28 @@ export function formatUptime(seconds: number): string {
   return `${minutes}m`;
 }
 
-export function formatPrice(kopeks: number): string {
+import i18next from 'i18next';
+
+const LANG_CURRENCY_MAP: Record<string, { currency: string; locale: string; symbol: string }> = {
+  ru: { currency: 'RUB', locale: 'ru-RU', symbol: '₽' },
+  en: { currency: 'USD', locale: 'en-US', symbol: '$' },
+  zh: { currency: 'CNY', locale: 'zh-CN', symbol: '¥' },
+  fa: { currency: 'IRR', locale: 'fa-IR', symbol: '﷼' },
+};
+
+const DEFAULT_CURRENCY = { currency: 'RUB', locale: 'ru-RU', symbol: '₽' };
+
+export function formatPrice(kopeks: number, lang?: string): string {
+  const resolvedLang = lang || i18next.language || 'ru';
+  const config = LANG_CURRENCY_MAP[resolvedLang] || DEFAULT_CURRENCY;
   const rubles = kopeks / 100;
-  return new Intl.NumberFormat('ru-RU', {
-    style: 'currency',
-    currency: 'RUB',
-    maximumFractionDigits: 0,
-  }).format(rubles);
+  try {
+    return new Intl.NumberFormat(config.locale, {
+      style: 'currency',
+      currency: config.currency,
+      maximumFractionDigits: 0,
+    }).format(rubles);
+  } catch {
+    return `${Math.round(rubles)} ${config.symbol}`;
+  }
 }

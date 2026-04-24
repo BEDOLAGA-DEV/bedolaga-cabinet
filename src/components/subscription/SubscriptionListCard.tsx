@@ -82,7 +82,10 @@ export default function SubscriptionListCard({
   };
 
   const isTrial = subscription.is_trial;
-  const isActive = subscription.status === 'active' || subscription.status === 'trial';
+  const isActive =
+    subscription.status === 'active' ||
+    subscription.status === 'trial' ||
+    subscription.status === 'limited';
   const isExpired = subscription.status === 'expired' || subscription.status === 'disabled';
   const trafficLimit = subscription.traffic_limit_gb;
   const trafficUsed = subscription.traffic_used_gb;
@@ -95,21 +98,25 @@ export default function SubscriptionListCard({
   const trafficColor =
     trafficPercent >= 90 ? 'bg-red-400' : trafficPercent >= 70 ? 'bg-amber-400' : 'bg-emerald-400';
 
-  const borderColor = isTrial
-    ? 'rgba(251,191,36,0.2)'
-    : isExpired
-      ? 'rgba(255,59,92,0.15)'
-      : g.cardBorder;
+  const isLimitedStatus = subscription.status === 'limited';
 
-  const bgColor = isTrial
-    ? isDark
-      ? 'rgba(251,191,36,0.04)'
-      : 'rgba(251,191,36,0.03)'
-    : isExpired
+  const borderColor =
+    isTrial || isLimitedStatus
+      ? 'rgba(251,191,36,0.2)'
+      : isExpired
+        ? 'rgba(255,59,92,0.15)'
+        : g.cardBorder;
+
+  const bgColor =
+    isTrial || isLimitedStatus
       ? isDark
-        ? 'rgba(255,59,92,0.04)'
-        : 'rgba(255,59,92,0.03)'
-      : g.cardBg;
+        ? 'rgba(251,191,36,0.04)'
+        : 'rgba(251,191,36,0.03)'
+      : isExpired
+        ? isDark
+          ? 'rgba(255,59,92,0.04)'
+          : 'rgba(255,59,92,0.03)'
+        : g.cardBg;
 
   return (
     <button

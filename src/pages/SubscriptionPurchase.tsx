@@ -781,7 +781,7 @@ export default function SubscriptionPurchase() {
                       !isCurrentTariff &&
                       !subscription.is_trial &&
                       !isSubscriptionExpired &&
-                      subscription.is_active;
+                      (subscription.is_active || subscription.is_limited);
                     const isLegacySubscription =
                       subscription && !subscription.is_trial && !subscription.tariff_id;
 

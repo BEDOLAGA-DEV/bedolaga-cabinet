@@ -333,10 +333,25 @@ const icons = {
       <path d="M15 8h-5M15 12h-5" />
     </SvgIcon>
   ),
+  'list-checks': (
+    <SvgIcon>
+      <path d="M10 6h11M10 12h11M10 18h11" />
+      <path d="m3 6 1 1 2-2M3 12l1 1 2-2M3 18l1 1 2-2" />
+    </SvgIcon>
+  ),
   search: (
     <SvgIcon>
       <circle cx="11" cy="11" r="8" />
       <path d="m21 21-4.3-4.3" />
+    </SvgIcon>
+  ),
+  'file-text': (
+    <SvgIcon>
+      <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+      <polyline points="14 2 14 8 20 8" />
+      <line x1="16" y1="13" x2="8" y2="13" />
+      <line x1="16" y1="17" x2="8" y2="17" />
+      <line x1="10" y1="9" x2="8" y2="9" />
     </SvgIcon>
   ),
   chevron: (
@@ -418,6 +433,12 @@ const sections: AdminSection[] = [
     gradient: 'linear-gradient(135deg, rgb(var(--color-accent-400)), rgb(var(--color-error-400)))',
     items: [
       { name: 'admin.nav.users', icon: 'users', to: '/admin/users', permission: 'users:read' },
+      {
+        name: 'admin.nav.bulkActions',
+        icon: 'list-checks',
+        to: '/admin/bulk-actions',
+        permission: 'users:read',
+      },
       {
         name: 'admin.nav.tickets',
         icon: 'ticket',
@@ -554,6 +575,12 @@ const sections: AdminSection[] = [
         icon: 'mail',
         to: '/admin/email-templates',
         permission: 'email_templates:read',
+      },
+      {
+        name: 'admin.nav.infoPages',
+        icon: 'file-text',
+        to: '/admin/info-pages',
+        permission: 'settings:read',
       },
       {
         name: 'admin.nav.updates',

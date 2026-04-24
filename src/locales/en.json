@@ -272,7 +272,8 @@
       "tariffs": "Tariffs",
       "traffic": "Traffic",
       "devices": "Devices",
-      "expiredDate": "Expired"
+      "expiredDate": "Expired",
+      "activeUntil": "Active until"
     },
     "suspended": {
       "title": "Subscription Suspended",
@@ -554,8 +555,8 @@
       "unlimited": "Unlimited",
       "buyTrafficGb": "Buy {{gb}} GB",
       "buyUnlimited": "Buy Unlimited",
-      "manageServers": "Server management",
-      "manageServersTitle": "Server management"
+      "manageServers": "Squad management",
+      "manageServersTitle": "Squad management"
     },
     "serverManagement": {
       "statusLegend": "✅ — connected • ➕ — will be added (paid) • ➖ — will be disconnected",
@@ -1099,7 +1100,7 @@
       "apps": "Apps",
       "wheel": "Wheel",
       "tariffs": "Tariffs",
-      "servers": "Servers",
+      "servers": "Squads",
       "banSystem": "Ban Monitoring",
       "broadcasts": "Broadcasts",
       "users": "Users",
@@ -1125,7 +1126,9 @@
       "salesStats": "Sales Statistics",
       "landings": "Landings",
       "referralNetwork": "Referral Network",
-      "news": "News"
+      "news": "News",
+      "bulkActions": "Bulk Actions",
+      "infoPages": "Info Pages"
     },
     "panel": {
       "title": "Admin Panel",
@@ -2086,6 +2089,113 @@
         "telegramOidcClientSecret": "Client Secret"
       }
     },
+    "bulkActions": {
+      "title": "Bulk Actions",
+      "subtitle": "User management",
+      "selectedCount": "Selected: {{count}}",
+      "selectAll": "Select all",
+      "deselectAll": "Deselect all",
+      "selectUser": "Select user {{name}}",
+      "deselectUser": "Deselect user {{name}}",
+      "noResults": "No users found",
+      "perPage": "Per page",
+      "actions": {
+        "extend": "Extend subscription",
+        "cancel": "Deactivate subscriptions",
+        "activate": "Activate subscriptions",
+        "changeTariff": "Change tariff",
+        "addTraffic": "Add traffic",
+        "addBalance": "Add balance",
+        "assignPromoGroup": "Assign promo group",
+        "grantSubscription": "Grant subscription",
+        "setDevices": "Set devices",
+        "deleteSubscription": "Delete subscriptions",
+        "deleteUser": "Delete users"
+      },
+      "deleteSubscription": {
+        "warning": "Selected subscriptions will be permanently deleted from the bot and RemnaWave panel!",
+        "hint": "Users will lose VPN access for deleted subscriptions. This action cannot be undone."
+      },
+      "deleteUser": {
+        "warning": "Selected users will be permanently deleted from the bot! All their subscriptions, balance, and data will be lost!",
+        "hint": "This action cannot be undone. Users will need to restart the bot to create a new account.",
+        "deleteFromPanel": "Also delete from RemnaWave panel"
+      },
+      "params": {
+        "days": "Number of days",
+        "tariff": "Select tariff",
+        "trafficGb": "Traffic amount (GB)",
+        "balanceRub": "Amount (RUB)",
+        "promoGroup": "Promo group",
+        "removePromoGroup": "Remove promo group",
+        "deviceLimit": "Device count"
+      },
+      "grantSubscription": {
+        "warning": "Users who already have a subscription on the selected tariff will be skipped"
+      },
+      "confirm": "Apply",
+      "cancel": "Cancel",
+      "executing": "Executing...",
+      "complete": "Complete",
+      "successCount": "Succeeded: {{count}}",
+      "errorCount": "Errors: {{count}}",
+      "progress": {
+        "processed": "Processed: {{current}} / {{total}}",
+        "succeeded": "succeeded",
+        "failed": "failed",
+        "ok": "OK",
+        "errorGeneric": "Error",
+        "doNotClose": "Please do not close this window while the operation is in progress",
+        "summarySuccess": "{{count}} succeeded",
+        "summaryErrors": "{{count}} errors"
+      },
+      "errors": {
+        "title": "{{count}} errors — show details"
+      },
+      "filters": {
+        "search": "Search by ID, username, email",
+        "status": "Subscription status",
+        "tariff": "Tariff",
+        "promoGroup": "Promo group",
+        "allStatuses": "All statuses",
+        "allTariffs": "All tariffs",
+        "allGroups": "All groups",
+        "allCampaigns": "All campaigns",
+        "allPartners": "All partners",
+        "trialOnly": "Trial only",
+        "tariffsSelected": "{{count}} tariffs",
+        "selectAll": "Select all",
+        "deselectAll": "Deselect all"
+      },
+      "statuses": {
+        "active": "Active",
+        "expired": "Expired",
+        "trial": "Trial",
+        "limited": "Limited",
+        "disabled": "Disabled"
+      },
+      "columns": {
+        "user": "User",
+        "status": "Status",
+        "tariff": "Tariff",
+        "balance": "Balance",
+        "daysRemaining": "Days",
+        "promoGroup": "Group",
+        "spent": "Spent"
+      },
+      "subscriptionsSelected": "{{count}} subscriptions selected",
+      "usersSelected": "{{count}} users selected",
+      "expandSubscriptions": "Show subscriptions",
+      "collapseSubscriptions": "Hide subscriptions",
+      "noSubscriptions": "No subscriptions",
+      "subscriptionTarget": "Target: subscriptions",
+      "userTarget": "Target: users",
+      "daysUnit": "d",
+      "trafficOf": "of",
+      "trafficGbUnit": "GB",
+      "selectAllSubs": "Select all subscriptions",
+      "deselectAllSubs": "Deselect all subscriptions"
+    },
     "theme": {
       "accentColor": "Accent color",
       "customizeColors": "Customize colors",
@@ -2416,8 +2526,8 @@
       }
     },
     "servers": {
-      "title": "Server Management",
-      "subtitle": "Configure VPN servers",
+      "title": "Squad Management",
+      "subtitle": "Configure squads",
       "sync": "Sync",
       "syncing": "Syncing...",
       "syncNow": "Sync now",
@@ -3762,6 +3872,76 @@
         "page": "Page {{current}} of {{total}}",
         "prev": "Previous",
         "next": "Next"
+      }
+    },
+    "infoPages": {
+      "title": "Information Pages",
+      "subtitle": "Manage static information pages",
+      "create": "Create Page",
+      "createFaq": "Create FAQ",
+      "edit": "Edit",
+      "save": "Save",
+      "saving": "Saving...",
+      "saved": "Page saved",
+      "delete": "Delete",
+      "confirmDelete": "Delete this page?",
+      "saveError": "Failed to save page. Please try again.",
+      "noPages": "No information pages yet",
+      "notFound": "Page not found",
+      "active": "Active",
+      "inactive": "Inactive",
+      "typePage": "Page",
+      "localeLabel": "Content Language",
+      "fields": {
+        "slug": "URL Slug",
+        "title": "Title",
+        "content": "Content",
+        "isActive": "Active",
+        "sortOrder": "Sort Order",
+        "icon": "Icon (emoji)",
+        "pageType": "Page Type",
+        "replacesTab": "Replaces Tab"
+      },
+      "replacesTabNone": "None",
+      "replacesTabOptions": {
+        "faq": "FAQ",
+        "rules": "Rules",
+        "privacy": "Privacy",
+        "offer": "Offer"
+      },
+      "replacesTabConflict": "already assigned",
+      "replacesTabWarning": "Another page already replaces this tab. It will be unassigned on save.",
+      "filter": {
+        "all": "All",
+        "page": "Pages",
+        "faq": "FAQ"
+      },
+      "pageTypes": {
+        "page": "Page",
+        "faq": "FAQ"
+      },
+      "faq": {
+        "questions": "Questions & Answers",
+        "questionsCount": "questions",
+        "noQuestions": "No questions yet. Click the button below to add one.",
+        "questionNumber": "Question #{{n}}",
+        "question": "Question",
+        "answer": "Answer",
+        "questionPlaceholder": "Enter question...",
+        "answerPlaceholder": "Enter answer (HTML supported)...",
+        "htmlHint": "HTML markup is supported",
+        "addQuestion": "Add Question",
+        "removeQuestion": "Remove question",
+        "moveUp": "Move up",
+        "moveDown": "Move down",
+        "searchPlaceholder": "Search questions...",
+        "noResults": "No results found"
+      },
+      "locales": {
+        "ru": "Russian",
+        "en": "English",
+        "zh": "Chinese",
+        "fa": "Persian"
       }
     }
   },

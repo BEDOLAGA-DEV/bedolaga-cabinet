@@ -1,5 +1,65 @@
 # Changelog
 
+## [1.49.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.48.0...v1.49.0) (2026-04-24)
+
+
+### Features
+
+* add campaign/partner filters, delete_user action, and fix modal positioning in AdminBulkActions ([b01ffe3](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/b01ffe33099a94e8b0f83e0f2ac700a6d24b696e))
+* admin bulk actions page with TanStack Table ([1772d96](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/1772d9632e868f1f780b5722b04b1954225d591f))
+* bulk actions — live progress, grant subscription, error details ([312e0b4](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/312e0b492707a646fcb6f0ee71b1568389203043))
+* bulk delete subscription + fix sub-rows showing for filtered single subs ([c726d3d](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/c726d3d74e5990b7ad05d2453795000aedde7c78))
+* devices in subscription rows, set_devices action, table columns ([5969c74](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/5969c74f92a34d6f24ee005a4c1b9546bb4d660d))
+* FAQ answer editor — replace textarea with TipTap rich editor ([0adbfa5](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/0adbfa50eb0ff9021e4623b889b95f60e1200c8f))
+* FAQ pages — Q&A builder in admin, accordion view for users ([1ee0f18](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/1ee0f1834315195fca050bcc4e00ec988b703ffb))
+* info pages — tab replacement, custom pages on /info, responsive fixes ([6569469](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/656946952a0351ad6071286b0e12f95e89782360))
+* information pages — admin editor with TipTap, public viewer ([7d6d0ba](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/7d6d0ba3442bf683b6c99d2af2b4b3fb287beb11))
+* multi-select tariff filter, select-all subscriptions, auto-expand ([f13b723](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/f13b7239a55fe0725ede4d1a34595179e073dcf8))
+* multi-tariff bulk actions UI — subscription-level selection ([78b41dc](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/78b41dc33802138941234d7cf0ef78616a6d92d3))
+* second header checkbox for bulk subscription selection ([eeda567](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/eeda567622e0ce17159c251f64126a9c2bc5d962))
+
+
+### Bug Fixes
+
+* align frontend bulk action types with backend API contract ([fc8170f](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/fc8170fa1fab7cde102b26eea4c340276993eec1))
+* bulk actions — add tariff info to user list, fix tariff column display ([161fde4](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/161fde430160a145cbc2c79a616676905d0242ad))
+* bulk actions — modal touch targets, deleteFromPanel reset, remove dupe spacer ([161f630](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/161f630fd8b8a361471b1e402d662d4ce8480cd5))
+* bulk actions frontend — selectedUserIds mapping, debounce cleanup ([ebe9d9b](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/ebe9d9be483f6fc58fd21009f8d14d989e7259b9))
+* bulk progress log shows generic error instead of backend message ([8dd5e49](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/8dd5e4985f60d1eb147130dea9be9ed9e5be34df))
+* campaigns/partners filter 422 — limit=200 exceeds backend max (100) ([5b1892d](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/5b1892ddbb82cc45a28d3832c2db62aad59164be))
+* expand chevron invisible on accent background ([3801c36](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/3801c3626aea5984f56f64a8d468f6a7e327fe35))
+* FAQ answer editor — stable keys, safe setContent, drop handler ([a6850c8](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/a6850c8cbca4e357993ccc9487953e972a33391e))
+* floating action bar covering pagination — add bottom spacer when selection active ([d43638b](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/d43638b34e4ac701a81a0901de19ff77b2545473))
+* floating action bar hidden behind mobile bottom nav — raise z-index + bottom padding ([c32bcfe](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/c32bcfeb9e998408f20b72ba024195826af5f1da))
+* info page — slug collision guard, error resilience, overflow, loyalty responsive ([d6918ee](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/d6918ee438cc89f0a405319049a8aa45d8555cda))
+* info page editor — locale switch no longer resets user edits ([3ef54ad](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/3ef54adb3eb8b3e50629805ed7ef9b53b10f8976))
+* load filters independently — one API failure no longer blocks others ([8e76744](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/8e767443f080d184e60a5fec6be92a8b725913d1))
+* make checkboxes visible on dark theme in bulk actions ([0844144](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/0844144e23b635f7119b0ad92cbe9ea623612fc0))
+* make subscription checkboxes same size as user checkboxes (h-5 w-5) ([9673f26](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/9673f26469fa3d751c6d7cfe78e8001b7891885a))
+* mobile/responsive issues in FAQ and info pages ([c16593a](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/c16593aeeee4b993a1e3112019a98c122d6f34ee))
+* multi-tariff filter now works server-side + trial-only checkbox ([98871af](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/98871af6565adc51fa6892da3755704f9dd2c934))
+* multi-tariff filter shows all users when &gt;1 tariffs selected ([efca40d](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/efca40d9c8324760225e934c20d26e9b73da8a56))
+* persist checkbox selection across page changes and filter switches ([cb148d1](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/cb148d181a55b625c3fa09470b475b0db8f98615))
+* prose content overflow on mobile — add overflow-x-auto ([596f638](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/596f638cdd2d4fe69105685c6a65db871aef946d))
+* regenerate FAQ editor keys on locale switch ([5cfbce0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/5cfbce06638123f3b9429dda76d73c14ee6c704c))
+* select-all subscriptions + per-page selector ([e2706c7](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/e2706c7c265b16378fa0919cebc9f75648858eed))
+* show sub-rows for single-subscription users + fix floating bar position ([3cb1517](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/3cb15177ccaab7c6451b42f80363694691464fe6))
+
+## [1.48.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.47.1...v1.48.0) (2026-04-23)
+
+
+### Features
+
+* improve squad management UX — rename, swap icons, color gift button ([33f3264](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/33f32648f0c070a26ad5c63532465448fa4c8f5c))
+
+
+### Bug Fixes
+
+* complete is_limited status handling across all views ([1d5ce2d](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/1d5ce2d4eac02d51604ae853b776c9c393732f02))
+* gift page shows only 1 tariff when tariffs have different periods ([e6403eb](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/e6403eb7d0973f828d61f485fe98bc1a551b03c0))
+* landing page currency symbol not changing with locale ([2d6815a](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/2d6815a88e49b4a2f19a00d1e1003780ee93dad7))
+* limited (traffic exhausted) subscription shows as expired ([f68b466](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/f68b46699c06accd6b47510ae9d6d3ca4da29817))
+
 ## [1.47.1](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.47.0...v1.47.1) (2026-04-22)
 
 

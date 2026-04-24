@@ -1658,7 +1658,10 @@ export default function AdminUserDetail() {
                           .filter((tariffItem) => {
                             const purchasedIds = new Set(
                               userSubscriptions
-                                .filter((s) => s.is_active || s.status === 'trial')
+                                .filter(
+                                  (s) =>
+                                    s.is_active || s.status === 'trial' || s.status === 'limited',
+                                )
                                 .map((s) => s.tariff_id),
                             );
                             return !purchasedIds.has(tariffItem.id);

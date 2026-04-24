@@ -967,6 +967,9 @@ img.twemoji {
 
   .prose table {
     @apply mb-4 w-full border-collapse;
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .prose th {
@@ -978,7 +981,7 @@ img.twemoji {
   }
 
   .prose img {
-    @apply my-4 max-w-full rounded-xl;
+    @apply my-4 h-auto max-w-full rounded-xl;
   }
 
   .prose mark {
@@ -987,6 +990,10 @@ img.twemoji {
 
   .prose iframe {
     @apply my-4 block aspect-video w-full max-w-2xl rounded-xl;
+  }
+
+  .prose video {
+    @apply my-4 block h-auto w-full max-w-full rounded-xl;
   }
 
   /* Light theme prose styles */
@@ -1067,6 +1074,14 @@ img.twemoji {
   }
 
   .light .prose iframe {
+    @apply border border-champagne-300;
+  }
+
+  .light .prose video {
+    @apply border border-champagne-300;
+  }
+
+  .light .prose img {
     @apply border border-champagne-300;
   }
 

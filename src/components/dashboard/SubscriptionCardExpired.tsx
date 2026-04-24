@@ -228,7 +228,7 @@ export default function SubscriptionCardExpired({
       >
         <div className="flex items-center">
           <div className="mb-0.5 font-mono text-[10px] font-medium uppercase tracking-wider text-dark-50/30">
-            {t('dashboard.expired.expiredDate')}
+            {isLimited ? t('dashboard.expired.activeUntil') : t('dashboard.expired.expiredDate')}
           </div>
           <div className="ml-3 text-base font-bold tracking-tight text-dark-50/50">
             {formattedDate}
@@ -280,7 +280,7 @@ export default function SubscriptionCardExpired({
             >
               <path d="M12 4.5v15m7.5-7.5h-15" />
             </svg>
-            {t('subscription.trafficLimited')}
+            {t('subscription.buyTraffic')}
           </Link>
         ) : (
           <>

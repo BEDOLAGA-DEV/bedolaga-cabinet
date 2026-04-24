@@ -386,8 +386,8 @@
       "unlimited": "无限制",
       "buyTrafficGb": "购买 {{gb}} GB",
       "buyUnlimited": "购买无限流量",
-      "manageServers": "服务器管理",
-      "manageServersTitle": "服务器管理"
+      "manageServers": "小队管理",
+      "manageServersTitle": "小队管理"
     },
     "serverManagement": {
       "statusLegend": "✅ — 已连接 • ➕ — 将添加（付费）• ➖ — 将断开",
@@ -924,7 +924,7 @@
       "apps": "应用",
       "wheel": "转盘",
       "tariffs": "套餐",
-      "servers": "服务器",
+      "servers": "小队",
       "broadcasts": "群发",
       "emailTemplates": "邮件模板",
       "paymentMethods": "支付方式",
@@ -949,7 +949,8 @@
       "salesStats": "销售统计",
       "landings": "落地页",
       "referralNetwork": "推荐网络",
-      "news": "新闻"
+      "news": "新闻",
+      "infoPages": "信息页面"
     },
     "panel": {
       "title": "管理面板",
@@ -3365,6 +3366,183 @@
       "periodDaySuffix": "天",
       "localeTab": "语言",
       "localeHint": "切换语言以编辑该语言的文本"
+    },
+    "infoPages": {
+      "title": "信息页面",
+      "subtitle": "管理静态信息页面",
+      "create": "创建页面",
+      "createFaq": "创建FAQ",
+      "edit": "编辑",
+      "save": "保存",
+      "saving": "保存中...",
+      "saved": "页面已保存",
+      "delete": "删除",
+      "confirmDelete": "确定删除此页面？",
+      "saveError": "保存页面失败，请重试。",
+      "noPages": "暂无信息页面",
+      "notFound": "页面未找到",
+      "active": "已激活",
+      "inactive": "未激活",
+      "typePage": "页面",
+      "localeLabel": "内容语言",
+      "fields": {
+        "slug": "URL标识",
+        "title": "标题",
+        "content": "内容",
+        "isActive": "已激活",
+        "sortOrder": "排序",
+        "icon": "图标（表情）",
+        "pageType": "页面类型",
+        "replacesTab": "替换标签"
+      },
+      "replacesTabNone": "不替换",
+      "replacesTabOptions": {
+        "faq": "FAQ",
+        "rules": "规则",
+        "privacy": "隐私",
+        "offer": "条款"
+      },
+      "replacesTabConflict": "已被占用",
+      "replacesTabWarning": "另一个页面已替换此标签。保存后该页面将被取消替换。",
+      "filter": {
+        "all": "全部",
+        "page": "页面",
+        "faq": "FAQ"
+      },
+      "pageTypes": {
+        "page": "页面",
+        "faq": "FAQ"
+      },
+      "faq": {
+        "questions": "问答",
+        "questionsCount": "个问题",
+        "noQuestions": "暂无问题。点击下方按钮添加。",
+        "questionNumber": "问题 #{{n}}",
+        "question": "问题",
+        "answer": "答案",
+        "questionPlaceholder": "输入问题...",
+        "answerPlaceholder": "输入答案（支持HTML）...",
+        "htmlHint": "支持HTML标记",
+        "addQuestion": "添加问题",
+        "removeQuestion": "删除问题",
+        "moveUp": "上移",
+        "moveDown": "下移",
+        "searchPlaceholder": "搜索问题...",
+        "noResults": "未找到结果"
+      },
+      "locales": {
+        "ru": "俄语",
+        "en": "英语",
+        "zh": "中文",
+        "fa": "波斯语"
+      }
+    },
+    "bulkActions": {
+      "title": "批量操作",
+      "subtitle": "用户管理",
+      "selectedCount": "已选择: {{count}}",
+      "selectAll": "全选",
+      "deselectAll": "取消全选",
+      "selectUser": "选择用户 {{name}}",
+      "deselectUser": "取消选择用户 {{name}}",
+      "noResults": "未找到用户",
+      "perPage": "每页",
+      "actions": {
+        "extend": "延长订阅",
+        "cancel": "停用订阅",
+        "activate": "激活订阅",
+        "changeTariff": "更改套餐",
+        "addTraffic": "添加流量",
+        "addBalance": "添加余额",
+        "assignPromoGroup": "分配促销组",
+        "grantSubscription": "授予订阅",
+        "setDevices": "设置设备数",
+        "deleteSubscription": "删除订阅",
+        "deleteUser": "删除用户"
+      },
+      "deleteSubscription": {
+        "warning": "选中的订阅将从机器人和RemnaWave面板中永久删除！",
+        "hint": "用户将失去已删除订阅的VPN访问权限。此操作无法撤销。"
+      },
+      "deleteUser": {
+        "warning": "选中的用户将从机器人中永久删除！他们的所有订阅、余额和数据将丢失！",
+        "hint": "此操作无法撤销。用户需要重新启动机器人以创建新账户。",
+        "deleteFromPanel": "同时从RemnaWave面板删除"
+      },
+      "params": {
+        "days": "天数",
+        "tariff": "选择套餐",
+        "trafficGb": "流量 (GB)",
+        "balanceRub": "金额 (卢布)",
+        "promoGroup": "促销组",
+        "removePromoGroup": "移除促销组",
+        "deviceLimit": "设备数量"
+      },
+      "grantSubscription": {
+        "warning": "已拥有所选套餐订阅的用户将被跳过"
+      },
+      "confirm": "应用",
+      "cancel": "取消",
+      "executing": "执行中...",
+      "complete": "完成",
+      "successCount": "成功: {{count}}",
+      "errorCount": "错误: {{count}}",
+      "progress": {
+        "processed": "已处理: {{current}} / {{total}}",
+        "succeeded": "成功",
+        "failed": "失败",
+        "ok": "OK",
+        "errorGeneric": "错误",
+        "doNotClose": "操作进行中请勿关闭此窗口",
+        "summarySuccess": "{{count}} 成功",
+        "summaryErrors": "{{count}} 错误"
+      },
+      "errors": {
+        "title": "{{count}} 个错误 — 显示详情"
+      },
+      "filters": {
+        "search": "按ID、用户名、邮箱搜索",
+        "status": "订阅状态",
+        "tariff": "套餐",
+        "promoGroup": "促销组",
+        "allStatuses": "所有状态",
+        "allTariffs": "所有套餐",
+        "allGroups": "所有组",
+        "allCampaigns": "所有活动",
+        "allPartners": "所有合作伙伴",
+        "trialOnly": "仅试用",
+        "tariffsSelected": "{{count}} 个套餐",
+        "selectAll": "全选",
+        "deselectAll": "取消全选"
+      },
+      "statuses": {
+        "active": "活跃",
+        "expired": "已过期",
+        "trial": "试用",
+        "limited": "受限",
+        "disabled": "已禁用"
+      },
+      "columns": {
+        "user": "用户",
+        "status": "状态",
+        "tariff": "套餐",
+        "balance": "余额",
+        "daysRemaining": "天数",
+        "promoGroup": "组",
+        "spent": "已消费"
+      },
+      "subscriptionsSelected": "已选择 {{count}} 个订阅",
+      "usersSelected": "已选择 {{count}} 个用户",
+      "expandSubscriptions": "显示订阅",
+      "collapseSubscriptions": "隐藏订阅",
+      "noSubscriptions": "无订阅",
+      "subscriptionTarget": "目标: 订阅",
+      "userTarget": "目标: 用户",
+      "daysUnit": "天",
+      "trafficOf": "/",
+      "trafficGbUnit": "GB",
+      "selectAllSubs": "选择所有订阅",
+      "deselectAllSubs": "取消选择所有订阅"
     }
   },
   "adminUpdates": {

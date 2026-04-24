@@ -516,35 +516,14 @@ function BuyTabContent({
   const [selectedSubOption, setSelectedSubOption] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  // Collect ALL unique periods across ALL tariffs
-  const allPeriods = useMemo(() => {
-    const periodMap = new Map<number, GiftTariffPeriod>();
-    for (const tariff of config.tariffs) {
-      for (const period of tariff.periods) {
-        if (!periodMap.has(period.days)) {
-          periodMap.set(period.days, period);
-        }
-      }
-    }
-    return Array.from(periodMap.values()).sort((a, b) => a.days - b.days);
-  }, [config]);
-
-  // Filter tariffs to only those that have the selected period
-  const visibleTariffs = useMemo(() => {
-    if (!selectedPeriodDays) return config.tariffs;
-    return config.tariffs.filter((tariff) =>
-      tariff.periods.some((p) => p.days === selectedPeriodDays),
-    );
-  }, [config, selectedPeriodDays]);
-
   // Auto-select first tariff, period, method on config load
   useEffect(() => {
-    if (allPeriods.length > 0 && selectedPeriodDays === null) {
-      setSelectedPeriodDays(allPeriods[0].days);
-    }
-
-    if (visibleTariffs.length > 0 && selectedTariffId === null) {
-      setSelectedTariffId(visibleTariffs[0].id);
+    if (config.tariffs.length > 0 && selectedTariffId === null) {
+      const firstTariff = config.tariffs[0];
+      setSelectedTariffId(firstTariff.id);
+      if (firstTariff.periods.length > 0 && selectedPeriodDays === null) {
+        setSelectedPeriodDays(firstTariff.periods[0].days);
+      }
     }
 
     if (config.payment_methods.length > 0 && selectedMethod === null) {
@@ -556,16 +535,19 @@ function BuyTabContent({
         setSelectedSubOption(null);
       }
     }
-  }, [config, allPeriods, visibleTariffs, selectedTariffId, selectedPeriodDays, selectedMethod]);
+  }, [config, selectedTariffId, selectedPeriodDays, selectedMethod]);
 
-  // When period changes, auto-select first visible tariff if current is hidden
+  // When tariff changes, auto-select its first period
   useEffect(() => {
-    if (!visibleTariffs.length) return;
-    const currentVisible = visibleTariffs.find((tariff) => tariff.id === selectedTariffId);
-    if (!currentVisible) {
-      setSelectedTariffId(visibleTariffs[0].id);
+    if (!selectedTariffId) return;
+    const tariff = config.tariffs.find((t) => t.id === selectedTariffId);
+    if (tariff && tariff.periods.length > 0) {
+      const hasCurrent = tariff.periods.some((p) => p.days === selectedPeriodDays);
+      if (!hasCurrent) {
+        setSelectedPeriodDays(tariff.periods[0].days);
+      }
     }
-  }, [visibleTariffs, selectedTariffId]);
+  }, [selectedTariffId, config.tariffs, selectedPeriodDays]);
 
   // Derived data
   const selectedTariff = useMemo(
@@ -661,15 +643,15 @@ function BuyTabContent({
     return `${t('gift.fromBalance')} (${formatPrice(config.balance_kopeks)})`;
   }, [config, t]);
 
-  const showTariffCards = visibleTariffs.length > 1;
+  const showTariffCards = config.tariffs.length > 1;
 
   // Periods for the selected tariff (for period cards)
   const periodsForDisplay = useMemo(() => {
     if (selectedTariff) {
       return [...selectedTariff.periods].sort((a, b) => a.days - b.days);
     }
-    return allPeriods;
-  }, [selectedTariff, allPeriods]);
+    return [];
+  }, [selectedTariff]);
 
   return (
     <div className="space-y-6">
@@ -680,7 +662,7 @@ function BuyTabContent({
             {t('gift.selectTariff')}
           </h2>
           <div role="radiogroup" aria-label={t('gift.chooseTariff')} className="space-y-2">
-            {visibleTariffs.map((tariff) => (
+            {config.tariffs.map((tariff) => (
               <TariffCard
                 key={tariff.id}
                 tariff={tariff}
