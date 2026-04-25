@@ -89,6 +89,12 @@ export interface LandingConfig {
   meta_description: string | null;
   discount: LandingDiscountInfo | null;
   background_config: AnimationConfig | null;
+  // Per-landing analytics goals + sticky pay button (bot PR #2852 backend fields)
+  analytics_view_enabled?: boolean;
+  analytics_view_goal?: string | null;
+  analytics_click_enabled?: boolean;
+  analytics_click_goal?: string | null;
+  sticky_pay_button?: boolean;
 }
 
 export interface PurchaseRequest {
@@ -102,6 +108,10 @@ export interface PurchaseRequest {
   gift_recipient_value?: string;
   gift_message?: string;
   language?: string;
+  // Yandex offline-conversions linkage (bot PR #2851 backend fields)
+  yandex_cid?: string;
+  referrer?: string;
+  subid?: string;
 }
 
 export interface PurchaseResponse {
