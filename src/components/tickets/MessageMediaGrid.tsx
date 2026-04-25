@@ -66,6 +66,16 @@ export function MessageMediaGrid({
     return () => window.removeEventListener('keydown', onKey);
   }, [fullscreenIndex, photoItems.length]);
 
+  // Lock body scroll while fullscreen overlay is open (mobile mainly).
+  useEffect(() => {
+    if (fullscreenIndex === null) return undefined;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [fullscreenIndex]);
+
   // All hooks have been called — safe to early-return now.
   if (items.length === 0) return null;
 

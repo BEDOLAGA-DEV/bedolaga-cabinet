@@ -21,8 +21,8 @@ import { promoOffersApi } from '../api/promoOffers';
 import { AdminBackButton } from '../components/admin';
 import { createNumberInputHandler, toNumber } from '../utils/inputHelpers';
 import { usePermissionStore } from '../store/permissions';
-import DOMPurify from 'dompurify';
 import { MessageMediaGrid } from '../components/tickets/MessageMediaGrid';
+import { linkifyText } from '../utils/linkify';
 
 // ============ Helpers ============
 
@@ -2794,18 +2794,12 @@ export default function AdminUserDetail() {
                             {formatDate(msg.created_at)}
                           </span>
                         </div>
-                        <p
-                          className="whitespace-pre-wrap text-sm text-dark-200 [&_a]:text-accent-400 [&_a]:underline"
-                          dangerouslySetInnerHTML={{
-                            __html: DOMPurify.sanitize(
-                              msg.message_text.replace(
-                                /(https?:\/\/[^\s<]+)/g,
-                                '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>',
-                              ),
-                              { ADD_ATTR: ['target'] },
-                            ),
-                          }}
-                        />
+                        {msg.message_text && (
+                          <p
+                            className="whitespace-pre-wrap text-sm text-dark-200 [&_a]:text-accent-400 [&_a]:underline"
+                            dangerouslySetInnerHTML={{ __html: linkifyText(msg.message_text) }}
+                          />
+                        )}
                         <MessageMediaGrid message={msg} />
                       </div>
                     ))}

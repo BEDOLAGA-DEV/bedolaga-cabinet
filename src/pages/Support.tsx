@@ -13,7 +13,7 @@ import { Card } from '@/components/data-display/Card';
 import { Button } from '@/components/primitives/Button';
 import { staggerContainer, staggerItem } from '@/components/motion/transitions';
 import { usePlatform } from '@/platform';
-import DOMPurify from 'dompurify';
+import { linkifyText } from '../utils/linkify';
 
 const log = logger.createLogger('Support');
 
@@ -51,6 +51,7 @@ const CloseIcon = () => (
 
 // Media attachment state
 interface MediaAttachment {
+  id: string;
   file: File;
   preview: string;
   uploading: boolean;
@@ -129,17 +130,23 @@ export default function Support() {
 
     const preview = URL.createObjectURL(file);
     blobUrlsRef.current.add(preview);
-    const entry: MediaAttachment = { file, preview, uploading: true };
+    const id =
+      typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+        ? crypto.randomUUID()
+        : `att_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+    const entry: MediaAttachment = { id, file, preview, uploading: true };
     setAttachments((prev) => (prev.length >= 10 ? prev : [...prev, entry]));
 
     try {
       const result = await ticketsApi.uploadMedia(file, 'photo');
       setAttachments((prev) =>
-        prev.map((a) => (a.file === file ? { ...a, uploading: false, fileId: result.file_id } : a)),
+        prev.map((a) => (a.id === id ? { ...a, uploading: false, fileId: result.file_id } : a)),
       );
     } catch {
       setAttachments((prev) =>
-        prev.map((a) => (a.file === file ? { ...a, uploading: false, error: t('support.uploadFailed') } : a)),
+        prev.map((a) =>
+          a.id === id ? { ...a, uploading: false, error: t('support.uploadFailed') } : a,
+        ),
       );
     }
   };
@@ -632,15 +639,7 @@ export default function Support() {
                       {msg.message_text && (
                         <div
                           className="whitespace-pre-wrap text-dark-200 [&_a]:text-accent-400 [&_a]:underline"
-                          dangerouslySetInnerHTML={{
-                            __html: DOMPurify.sanitize(
-                              msg.message_text.replace(
-                                /(https?:\/\/[^\s<]+)/g,
-                                '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>',
-                              ),
-                              { ADD_ATTR: ['target'] },
-                            ),
-                          }}
+                          dangerouslySetInnerHTML={{ __html: linkifyText(msg.message_text) }}
                         />
                       )}
                       {/* Display media if present */}

@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
-import DOMPurify from 'dompurify';
+import logger from '../utils/logger';
+import { linkifyText } from '../utils/linkify';
 import { MessageMediaGrid } from '../components/tickets/MessageMediaGrid';
 import { useNavigate } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -9,6 +10,7 @@ import { ticketsApi } from '../api/tickets';
 import { usePlatform } from '../platform/hooks/usePlatform';
 
 interface MediaAttachment {
+  id: string;
   file: File;
   preview: string;
   uploading: boolean;
@@ -59,6 +61,7 @@ export default function AdminTickets() {
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [replyText, setReplyText] = useState('');
   const [isReplying, setIsReplying] = useState(false);
+  const [replyError, setReplyError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [attachments, setAttachments] = useState<MediaAttachment[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -109,8 +112,15 @@ export default function AdminTickets() {
 
   const clearAttachments = () => {
     uploadIdRef.current++;
-    attachments.forEach((a) => { if (a.preview) URL.revokeObjectURL(a.preview); });
-    setAttachments([]);
+    setAttachments((prev) => {
+      prev.forEach((a) => {
+        if (a.preview) {
+          URL.revokeObjectURL(a.preview);
+          blobUrlsRef.current.delete(a.preview);
+        }
+      });
+      return [];
+    });
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
@@ -137,20 +147,31 @@ export default function AdminTickets() {
 
       const preview = mediaType === 'photo' ? URL.createObjectURL(file) : '';
       if (preview) blobUrlsRef.current.add(preview);
-      const entry: MediaAttachment = { file, preview, uploading: true, mediaType };
+      const id =
+        typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+          ? crypto.randomUUID()
+          : `att_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+      const entry: MediaAttachment = { id, file, preview, uploading: true, mediaType };
+      const uploadToken = uploadIdRef.current;
 
       setAttachments((prev) => [...prev, entry]);
 
-      // Upload in background
+      // Upload in background; ignore the result if user cleared/unmounted in the meantime.
       (async () => {
         try {
           const result = await ticketsApi.uploadMedia(file, mediaType);
+          if (uploadIdRef.current !== uploadToken) return;
           setAttachments((prev) =>
-            prev.map((a) => (a.file === file ? { ...a, uploading: false, fileId: result.file_id } : a)),
+            prev.map((a) => (a.id === id ? { ...a, uploading: false, fileId: result.file_id } : a)),
           );
         } catch {
+          if (uploadIdRef.current !== uploadToken) return;
           setAttachments((prev) =>
-            prev.map((a) => (a.file === file ? { ...a, uploading: false, error: t('admin.tickets.uploadFailed') } : a)),
+            prev.map((a) =>
+              a.id === id
+                ? { ...a, uploading: false, error: t('admin.tickets.uploadFailed') }
+                : a,
+            ),
           );
         }
       })();
@@ -183,10 +204,16 @@ export default function AdminTickets() {
       : undefined;
 
     setIsReplying(true);
+    setReplyError(null);
     try {
       await adminApi.replyToTicket(selectedTicketId, replyText, media);
     } catch (err) {
-      console.error('Ticket reply failed:', err);
+      logger.error('Ticket reply failed:', err);
+      const msg =
+        err instanceof Error
+          ? err.message
+          : t('admin.tickets.replyFailed', 'Failed to send reply');
+      setReplyError(msg);
       setIsReplying(false);
       return;
     }
@@ -537,15 +564,7 @@ export default function AdminTickets() {
                     {msg.message_text && (
                       <p
                         className="whitespace-pre-wrap text-dark-200 [&_a]:text-accent-400 [&_a]:underline"
-                        dangerouslySetInnerHTML={{
-                          __html: DOMPurify.sanitize(
-                            msg.message_text.replace(
-                              /(https?:\/\/[^\s<]+)/g,
-                              '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>',
-                            ),
-                            { ADD_ATTR: ['target'] },
-                          ),
-                        }}
+                        dangerouslySetInnerHTML={{ __html: linkifyText(msg.message_text) }}
                       />
                     )}
                     <MessageMediaGrid message={msg} translateError={t('support.imageLoadFailed')} />
@@ -568,7 +587,7 @@ export default function AdminTickets() {
                   {attachments.length > 0 && (
                     <div className="mt-2 flex flex-wrap gap-2">
                       {attachments.map((att, idx) => (
-                        <div key={idx} className="relative">
+                        <div key={att.id} className="relative">
                           {att.mediaType === 'photo' && att.preview ? (
                             <img src={att.preview} alt="Preview" className="h-16 w-16 rounded-lg object-cover" />
                           ) : (
@@ -608,6 +627,12 @@ export default function AdminTickets() {
                     onChange={handleFileSelect}
                     className="hidden"
                   />
+
+                  {replyError && (
+                    <div className="mt-2 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">
+                      {replyError}
+                    </div>
+                  )}
 
                   <div className="mt-3 flex items-center justify-between">
                     <button
