@@ -472,6 +472,20 @@
       "resumeBtn": "ادامه",
       "title": "توقف اشتراک",
       "willBeCharged": "کسر خواهد شد"
+    },
+    "tvQuickConnect": {
+      "title": "اتصال تلویزیون",
+      "description": "کد ۵ رقمی نمایش داده شده روی صفحه تلویزیون را وارد کنید",
+      "sendBtn": "ارسال به تلویزیون",
+      "badCode": "کد ۵ رقمی وارد کنید (حروف و اعداد)",
+      "sent": "به تلویزیون ارسال شد!",
+      "error": "خطا در ارسال به تلویزیون",
+      "scanTitle": "اسکن کد QR",
+      "scanDescription": "کد QR روی صفحه تلویزیون را اسکن کنید",
+      "scanBtn": "اسکن QR از تلویزیون",
+      "stopScan": "بستن دوربین",
+      "noCamera": "دسترسی به دوربین امکان‌پذیر نیست",
+      "codeFound": "کد پیدا شد"
     }
   },
   "balance": {
@@ -1672,8 +1686,8 @@
         "telegramOidcClientId": "Client ID (شناسه ربات)",
         "telegramOidcClientSecret": "Client Secret"
       },
-      "offlineConv": "\u062a\u0628\u062f\u06cc\u0644\u200c\u0647\u0627\u06cc \u0622\u0641\u0644\u0627\u06cc\u0646",
-      "apiKey": "\u06a9\u0644\u06cc\u062f API"
+      "offlineConv": "تبدیل‌های آفلاین",
+      "apiKey": "کلید API"
     },
     "buttons": {
       "color": "رنگ دکمه",

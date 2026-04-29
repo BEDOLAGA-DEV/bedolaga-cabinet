@@ -1,11 +1,39 @@
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import {
+  openQrScanner,
+  isQrScannerSupported,
+  retrieveLaunchParams,
+} from '@telegram-apps/sdk-react';
+
+const TG_MOBILE_PLATFORMS = new Set(['ios', 'android', 'android_x', 'ios_x']);
+
+function isTelegramMobile(): boolean {
+  try {
+    const platform = retrieveLaunchParams().tgWebAppPlatform;
+    return TG_MOBILE_PLATFORMS.has(platform);
+  } catch {
+    return false;
+  }
+}
 
 const HAPP_TV_API = 'https://check.happ.su/sendtv';
+const HTML5_QRCODE_CDN = 'https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js';
 
 interface Props {
   subscriptionUrl: string;
   isLight: boolean;
+}
+
+interface Html5QrcodeInstance {
+  start: (
+    cameraIdOrConfig: { facingMode: string } | string,
+    config: { fps: number; qrbox: { width: number; height: number } },
+    onSuccess: (decoded: string) => void,
+    onError: () => void,
+  ) => Promise<void>;
+  stop: () => Promise<void>;
+  clear: () => void;
 }
 
 export default function TvQuickConnect({ subscriptionUrl, isLight }: Props) {
@@ -14,10 +42,29 @@ export default function TvQuickConnect({ subscriptionUrl, isLight }: Props) {
   const [sending, setSending] = useState(false);
   const [toast, setToast] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
   const [scanning, setScanning] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const streamRef = useRef<MediaStream | null>(null);
-  const scanningRef = useRef(false);
+  const [tgNative, setTgNative] = useState(false);
   const toastTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const scannerRef = useRef<Html5QrcodeInstance | null>(null);
+
+  useEffect(() => {
+    try {
+      setTgNative(isTelegramMobile() && isQrScannerSupported() && openQrScanner.isAvailable());
+    } catch {
+      setTgNative(false);
+    }
+    return () => {
+      if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+      if (scannerRef.current) {
+        scannerRef.current
+          .stop()
+          .catch(() => undefined)
+          .finally(() => {
+            scannerRef.current?.clear();
+            scannerRef.current = null;
+          });
+      }
+    };
+  }, []);
 
   const showToast = useCallback((text: string, type: 'success' | 'error') => {
     setToast({ text, type });
@@ -64,94 +111,84 @@ export default function TvQuickConnect({ subscriptionUrl, isLight }: Props) {
   );
 
   const stopScan = useCallback(() => {
-    scanningRef.current = false;
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach((tr) => tr.stop());
-      streamRef.current = null;
+    if (scannerRef.current) {
+      scannerRef.current
+        .stop()
+        .catch(() => undefined)
+        .finally(() => {
+          scannerRef.current?.clear();
+          scannerRef.current = null;
+        });
     }
-    if (videoRef.current) videoRef.current.srcObject = null;
     setScanning(false);
   }, []);
 
-  const scanFrame = useCallback(() => {
-    if (!scanningRef.current || !videoRef.current) return;
-    const video = videoRef.current;
-    if (video.readyState !== video.HAVE_ENOUGH_DATA) {
-      requestAnimationFrame(scanFrame);
-      return;
-    }
-
-    const canvas = document.createElement('canvas');
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) {
-      requestAnimationFrame(scanFrame);
-      return;
-    }
-    ctx.drawImage(video, 0, 0);
-
-    try {
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      // @ts-expect-error jsQR loaded via CDN
-      if (window.jsQR) {
-        // @ts-expect-error jsQR loaded via CDN
-        const result = window.jsQR(imageData.data, imageData.width, imageData.height);
-        if (result?.data) {
-          const parsed = parseQRCode(result.data);
-          if (parsed) {
-            stopScan();
-            setCode(parsed);
-            showToast(`${t('subscription.tvQuickConnect.codeFound')}: ${parsed}`, 'success');
-            setTimeout(() => sendToTV(parsed), 500);
-            return;
-          }
-        }
-      }
-    } catch {
-      /* continue scanning */
-    }
-
-    requestAnimationFrame(scanFrame);
-  }, [stopScan, showToast, sendToTV, t]);
+  const onScanDecoded = useCallback(
+    (decoded: string) => {
+      const parsed = parseQRCode(decoded);
+      if (!parsed) return;
+      stopScan();
+      setCode(parsed);
+      showToast(`${t('subscription.tvQuickConnect.codeFound')}: ${parsed}`, 'success');
+      setTimeout(() => sendToTV(parsed), 500);
+    },
+    [stopScan, showToast, sendToTV, t],
+  );
 
   const startScan = useCallback(async () => {
-    // Load jsQR if not present
-    // @ts-expect-error jsQR loaded via CDN
-    if (!window.jsQR) {
+    // Telegram Mini App: native scanner
+    if (tgNative) {
+      try {
+        const qr = await openQrScanner({
+          text: t('subscription.tvQuickConnect.scanDescription'),
+          capture: (s: string) => parseQRCode(s) !== null,
+        });
+        if (qr) {
+          const parsed = parseQRCode(qr);
+          if (parsed) {
+            setCode(parsed);
+            showToast(t('subscription.tvQuickConnect.codeFound'), 'success');
+            sendToTV(parsed);
+          }
+        }
+      } catch {
+        showToast(t('subscription.tvQuickConnect.error'), 'error');
+      }
+      return;
+    }
+
+    // Browser fallback (Mac/iOS Safari, desktop Chrome): html5-qrcode
+    type WindowWithHtml5 = Window & { Html5Qrcode?: new (id: string) => Html5QrcodeInstance };
+    const w = window as WindowWithHtml5;
+    if (!w.Html5Qrcode) {
       const script = document.createElement('script');
-      script.src = 'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js';
+      script.src = HTML5_QRCODE_CDN;
       document.head.appendChild(script);
-      await new Promise<void>((resolve) => {
+      await new Promise<void>((resolve, reject) => {
         script.onload = () => resolve();
-      });
+        script.onerror = () => reject();
+      }).catch(() => undefined);
     }
-
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment' },
-      });
-      streamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.play();
-      }
-      scanningRef.current = true;
-      setScanning(true);
-      requestAnimationFrame(scanFrame);
-    } catch {
+    if (!w.Html5Qrcode) {
       showToast(t('subscription.tvQuickConnect.noCamera'), 'error');
+      return;
     }
-  }, [scanFrame, showToast, t]);
-
-  useEffect(() => {
-    return () => {
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach((tr) => tr.stop());
+    setScanning(true);
+    const scanner = new w.Html5Qrcode('tv-qr-reader');
+    scannerRef.current = scanner;
+    const config = { fps: 10, qrbox: { width: 220, height: 220 } };
+    try {
+      await scanner.start({ facingMode: 'environment' }, config, onScanDecoded, () => undefined);
+    } catch {
+      try {
+        await scanner.start({ facingMode: 'user' }, config, onScanDecoded, () => undefined);
+      } catch {
+        showToast(t('subscription.tvQuickConnect.noCamera'), 'error');
+        scannerRef.current = null;
+        setScanning(false);
       }
-      if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
-    };
-  }, []);
+    }
+  }, [tgNative, sendToTV, showToast, onScanDecoded, t]);
 
   const cardClass = isLight
     ? 'rounded-2xl border border-dark-700/60 bg-white/80 shadow-sm p-4 sm:p-5'
@@ -247,7 +284,7 @@ export default function TvQuickConnect({ subscriptionUrl, isLight }: Props) {
               {t('subscription.tvQuickConnect.scanDescription')}
             </p>
 
-            {!scanning ? (
+            {!scanning && (
               <button onClick={startScan} className="btn-secondary mt-3 w-full justify-center py-3">
                 <svg
                   className="mr-2 h-5 w-5"
@@ -269,19 +306,15 @@ export default function TvQuickConnect({ subscriptionUrl, isLight }: Props) {
                 </svg>
                 {t('subscription.tvQuickConnect.scanBtn')}
               </button>
-            ) : (
-              <div className="mt-3 space-y-2">
-                <div className="relative overflow-hidden rounded-xl">
-                  <video ref={videoRef} playsInline className="w-full rounded-xl" />
-                  <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                    <div className="h-48 w-48 rounded-2xl border-2 border-accent-500/60" />
-                  </div>
-                </div>
+            )}
+            <div className={scanning ? 'mt-3 space-y-2' : 'hidden'}>
+              <div id="tv-qr-reader" className="overflow-hidden rounded-xl" />
+              {scanning && (
                 <button onClick={stopScan} className="btn-secondary w-full justify-center py-2.5">
                   {t('subscription.tvQuickConnect.stopScan')}
                 </button>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </div>
