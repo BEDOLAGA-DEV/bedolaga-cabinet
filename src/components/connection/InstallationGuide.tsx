@@ -11,6 +11,7 @@ import type {
 import { useTheme } from '@/hooks/useTheme';
 import { CardsBlock, TimelineBlock, AccordionBlock, MinimalBlock, BlockButtons } from './blocks';
 import type { BlockRendererProps } from './blocks';
+import TvQuickConnect from './TvQuickConnect';
 
 const platformOrder = ['ios', 'android', 'windows', 'macos', 'linux', 'androidTV', 'appleTV'];
 
@@ -144,6 +145,12 @@ export default function InstallationGuide({
       onOpenDeepLink,
     ],
   );
+
+  const selectedIsTv =
+    (activePlatformKey || availablePlatforms[0]) === 'androidTV' ||
+    (activePlatformKey || availablePlatforms[0]) === 'appleTV';
+  const userIsOnTv = detectedPlatform === 'androidTV' || detectedPlatform === 'appleTV';
+  const isTvPlatform = selectedIsTv && !userIsOnTv;
 
   const currentPlatformKey = activePlatformKey || availablePlatforms[0];
   const currentPlatformData = currentPlatformKey
@@ -328,8 +335,32 @@ export default function InstallationGuide({
         </a>
       )}
 
-      {/* Blocks */}
-      {selectedApp && (
+      {/* Blocks — for TV: first block, Quick Connect, last block */}
+      {selectedApp && isTvPlatform && appConfig.subscriptionUrl ? (
+        <>
+          {selectedApp.blocks.length > 0 && (
+            <Renderer
+              blocks={selectedApp.blocks.slice(0, 1)}
+              isMobile={isMobile}
+              isLight={isLight}
+              getLocalizedText={getLocalizedText}
+              getSvgHtml={getSvgHtml}
+              renderBlockButtons={renderBlockButtons}
+            />
+          )}
+          <TvQuickConnect subscriptionUrl={appConfig.subscriptionUrl} isLight={isLight} />
+          {selectedApp.blocks.length > 1 && (
+            <Renderer
+              blocks={selectedApp.blocks.slice(-1)}
+              isMobile={isMobile}
+              isLight={isLight}
+              getLocalizedText={getLocalizedText}
+              getSvgHtml={getSvgHtml}
+              renderBlockButtons={renderBlockButtons}
+            />
+          )}
+        </>
+      ) : selectedApp ? (
         <Renderer
           blocks={selectedApp.blocks}
           isMobile={isMobile}
@@ -338,7 +369,7 @@ export default function InstallationGuide({
           getSvgHtml={getSvgHtml}
           renderBlockButtons={renderBlockButtons}
         />
-      )}
+      ) : null}
     </div>
   );
 }
