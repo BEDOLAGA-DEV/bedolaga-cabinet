@@ -10,6 +10,7 @@ import {
   CustomBroadcastButton,
 } from '../api/adminBroadcasts';
 import { AdminBackButton } from '../components/admin';
+import { TelegramPreview, EmailPreview } from '../components/broadcasts/BroadcastPreview';
 
 // Icons
 const BroadcastIcon = () => (
@@ -159,6 +160,42 @@ export default function AdminBroadcastCreate() {
 
   // Submitting state for dual send
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Preview modals
+  const [showTelegramPreview, setShowTelegramPreview] = useState(false);
+  const [showEmailPreview, setShowEmailPreview] = useState(false);
+
+  const previewMediaTypeForModal: 'photo' | 'video' | null =
+    mediaType === 'photo' || mediaType === 'video' ? mediaType : null;
+
+  const previewButtonRows = useMemo(() => {
+    const rows: { text: string; url?: string; callback_data?: string }[][] = [];
+    if (selectedButtons.length > 0) {
+      const presetLabels: Record<string, string> = {
+        balance: t('admin.broadcasts.btnBalance', 'Пополнить баланс'),
+        partners: t('admin.broadcasts.btnPartners', 'Партнёрка'),
+        promocode: t('admin.broadcasts.btnPromocode', 'Промокод'),
+        connect: t('admin.broadcasts.btnConnect', 'Подключиться'),
+        subscription: t('admin.broadcasts.btnSubscription', 'Подписка'),
+        support: t('admin.broadcasts.btnSupport', 'Техподдержка'),
+        home: t('admin.broadcasts.btnHome', 'На главную'),
+      };
+      for (const id of selectedButtons) {
+        rows.push([{ text: presetLabels[id] || id, callback_data: id }]);
+      }
+    }
+    for (const cb of customButtons) {
+      rows.push([
+        {
+          text: cb.label,
+          ...(cb.action_type === 'url'
+            ? { url: cb.action_value }
+            : { callback_data: cb.action_value }),
+        },
+      ]);
+    }
+    return rows;
+  }, [selectedButtons, customButtons, t]);
 
   // Fetch Telegram filters
   const { data: filtersData, isLoading: filtersLoading } = useQuery({
@@ -623,9 +660,19 @@ export default function AdminBroadcastCreate() {
       {/* Telegram section */}
       {telegramEnabled && (
         <div className="card space-y-6">
-          <h2 className="text-lg font-semibold text-dark-100">
-            {t('admin.broadcasts.telegramSection')}
-          </h2>
+          <div className="flex items-center justify-between gap-2">
+            <h2 className="text-lg font-semibold text-dark-100">
+              {t('admin.broadcasts.telegramSection')}
+            </h2>
+            <button
+              type="button"
+              onClick={() => setShowTelegramPreview(true)}
+              disabled={messageText.trim().length === 0}
+              className="rounded-lg border border-dark-700 bg-dark-800 px-3 py-1.5 text-sm text-dark-300 transition-colors hover:border-dark-600 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {t('admin.broadcasts.preview', 'Предпросмотр')}
+            </button>
+          </div>
 
           {/* Telegram filter selection */}
           {renderFilterDropdown(
@@ -861,9 +908,19 @@ export default function AdminBroadcastCreate() {
       {/* Email section */}
       {emailEnabled && (
         <div className="card space-y-6">
-          <h2 className="text-lg font-semibold text-dark-100">
-            {t('admin.broadcasts.emailSection')}
-          </h2>
+          <div className="flex items-center justify-between gap-2">
+            <h2 className="text-lg font-semibold text-dark-100">
+              {t('admin.broadcasts.emailSection')}
+            </h2>
+            <button
+              type="button"
+              onClick={() => setShowEmailPreview(true)}
+              disabled={emailContent.trim().length === 0}
+              className="rounded-lg border border-dark-700 bg-dark-800 px-3 py-1.5 text-sm text-dark-300 transition-colors hover:border-dark-600 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {t('admin.broadcasts.preview', 'Предпросмотр')}
+            </button>
+          </div>
 
           {/* Email filter selection */}
           {renderFilterDropdown(
@@ -961,6 +1018,21 @@ export default function AdminBroadcastCreate() {
           </button>
         </div>
       </div>
+
+      <TelegramPreview
+        open={showTelegramPreview}
+        onClose={() => setShowTelegramPreview(false)}
+        text={messageText}
+        mediaUrl={mediaPreview}
+        mediaType={previewMediaTypeForModal}
+        buttons={previewButtonRows}
+      />
+      <EmailPreview
+        open={showEmailPreview}
+        onClose={() => setShowEmailPreview(false)}
+        subject={emailSubject}
+        htmlContent={emailContent}
+      />
     </div>
   );
 }
