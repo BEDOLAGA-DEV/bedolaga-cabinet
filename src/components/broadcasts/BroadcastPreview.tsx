@@ -1,4 +1,5 @@
 import { useMemo, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 
 interface PreviewButton {
@@ -185,9 +186,9 @@ export function TelegramPreview({
   const { t } = useTranslation();
   const rendered = useMemo(() => tokensToReact(tokenize(text)), [text]);
   if (!open) return null;
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 p-4"
       onClick={onClose}
     >
       <div
@@ -239,16 +240,17 @@ export function TelegramPreview({
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 
 export function EmailPreview({ open, onClose, subject, htmlContent }: EmailPreviewProps) {
   const { t } = useTranslation();
   if (!open) return null;
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 p-4"
       onClick={onClose}
     >
       <div
@@ -278,6 +280,7 @@ export function EmailPreview({ open, onClose, subject, htmlContent }: EmailPrevi
           srcDoc={htmlContent || '<p style="color:#999;font-family:sans-serif">— пусто —</p>'}
         />
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
