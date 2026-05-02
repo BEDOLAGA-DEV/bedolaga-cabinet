@@ -24,7 +24,7 @@ import {
   LogoutIcon,
   GamepadIcon,
   ClipboardIcon,
-  InfoIcon,
+  StarIcon,
   CogIcon,
   WheelIcon,
 } from './icons';
@@ -87,7 +87,7 @@ export function DesktopSidebar({
     ...(hasContests ? [{ path: '/contests', label: t('nav.contests'), icon: GamepadIcon }] : []),
     ...(hasPolls ? [{ path: '/polls', label: t('nav.polls'), icon: ClipboardIcon }] : []),
     ...(wheelEnabled ? [{ path: '/wheel', label: t('nav.wheel'), icon: WheelIcon }] : []),
-    { path: '/info', label: t('nav.info'), icon: InfoIcon },
+    { path: '/info', label: 'Статус', icon: StarIcon },
   ];
 
   const handleNavClick = () => {

@@ -313,12 +313,12 @@ export default function Login() {
 
   return (
     <div
-      className="flex min-h-[100dvh] items-center justify-center px-4 sm:px-6 lg:px-8"
+      className="flex min-h-[100dvh] items-center justify-center px-4 pb-20 sm:px-6 lg:px-8"
       style={{
         paddingTop:
           safeTop > 0 ? `${safeTop + 16}px` : 'calc(1rem + env(safe-area-inset-top, 0px))',
         paddingBottom:
-          safeBottom > 0 ? `${safeBottom + 16}px` : 'calc(1rem + env(safe-area-inset-bottom, 0px))',
+          safeBottom > 0 ? `${safeBottom + 80}px` : 'calc(5rem + env(safe-area-inset-bottom, 0px))',
       }}
     >
       {/* Background gradient */}
@@ -798,6 +798,39 @@ export default function Login() {
             )}
           </div>
         )}
+      </div>
+
+      {/* ─── Юридические ссылки ─────────────────────────────────────────── */}
+      <div
+        className="fixed bottom-0 left-0 right-0 z-50 flex flex-wrap items-center justify-center gap-x-5 gap-y-1 bg-dark-950/80 px-4 py-3 backdrop-blur-sm"
+        style={{ paddingBottom: `max(0.75rem, env(safe-area-inset-bottom))` }}
+      >
+        <a
+          href="https://berlin-connection.ru/docs/docs.html#agreement"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-xs text-dark-500 transition-colors hover:text-dark-300"
+        >
+          Пользовательское соглашение
+        </a>
+        <span className="text-xs text-dark-700">·</span>
+        <a
+          href="https://berlin-connection.ru/docs/docs.html#policy"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-xs text-dark-500 transition-colors hover:text-dark-300"
+        >
+          Политика конфиденциальности
+        </a>
+        <span className="text-xs text-dark-700">·</span>
+        <a
+          href="https://berlin-connection.ru/docs/docs.html#soglasie"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-xs text-dark-500 transition-colors hover:text-dark-300"
+        >
+          Согласие на обработку ПДн
+        </a>
       </div>
     </div>
   );
