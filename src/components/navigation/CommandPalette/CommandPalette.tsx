@@ -33,7 +33,6 @@ import {
   UserIcon,
   GamepadIcon,
   ClipboardIcon,
-  InfoIcon,
   StarIcon,
   CogIcon,
   WheelIcon,
