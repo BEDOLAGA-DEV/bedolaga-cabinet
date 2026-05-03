@@ -294,7 +294,9 @@ export function AppShell({ children }: AppShellProps) {
           <Link to="/" className="flex items-center gap-2.5" onClick={handleNavClick}>
             <div
               className="relative flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-dark-800"
-              style={{ boxShadow: '0 0 0 1px var(--color-accent-400), 0 4px 12px rgba(0,0,0,0.4)' }}
+              style={{
+                boxShadow: '0 0 0 1px rgb(var(--color-accent-400)), 0 4px 12px rgba(0,0,0,0.4)',
+              }}
             >
               <span
                 className={cn(
