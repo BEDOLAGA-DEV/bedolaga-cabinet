@@ -97,9 +97,15 @@ export function DesktopSidebar({
   return (
     <aside className="fixed left-0 top-0 z-40 flex h-screen w-60 flex-col border-r border-dark-700/30 bg-dark-950/80 backdrop-blur-linear">
       {/* Logo */}
-      <div className="flex h-16 items-center gap-3 border-b border-dark-700/30 px-4">
+      <div className="flex h-20 items-center gap-3 border-b border-dark-700/30 px-4">
         <Link to="/" className="flex items-center gap-3" onClick={handleNavClick}>
-          <div className="relative flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-linear-lg border border-dark-700/50 bg-dark-800/80">
+          <div
+            className="relative flex h-11 w-11 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-dark-800/80"
+            style={{
+              boxShadow:
+                '0 0 0 1px rgba(var(--color-accent-400), 0.25), 0 4px 12px rgba(0,0,0,0.4)',
+            }}
+          >
             <span
               className={cn(
                 'absolute text-lg font-bold text-accent-400 transition-opacity duration-200',
@@ -120,9 +126,14 @@ export function DesktopSidebar({
             )}
           </div>
           {appName && (
-            <span className="whitespace-nowrap text-base font-semibold text-dark-100">
-              {appName}
-            </span>
+            <div className="flex flex-col">
+              <span className="whitespace-nowrap text-base font-semibold text-dark-100">
+                {appName}
+              </span>
+              <span className="text-[9px] font-bold uppercase tracking-[.14em] text-accent-400">
+                VPN SERVICE
+              </span>
+            </div>
           )}
         </Link>
       </div>
