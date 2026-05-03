@@ -317,7 +317,7 @@ export function AppShell({ children }: AppShellProps) {
             </div>
             <div className="flex flex-col leading-none">
               <span className="text-base font-semibold text-dark-100">{appName}</span>
-              <span className="mt-0.5 text-[9px] font-bold uppercase tracking-[.14em] text-accent-400">
+              <span className="mt-0 text-[9px] font-bold uppercase tracking-[.14em] text-accent-400">
                 VPN SERVICE
               </span>
             </div>

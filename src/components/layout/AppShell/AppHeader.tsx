@@ -193,7 +193,10 @@ export function AppHeader({
               onClick={() => setMobileMenuOpen(false)}
               className={cn('flex flex-shrink-0 items-center gap-2.5', !appName && 'mr-4')}
             >
-              <div className="relative flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-linear-lg border border-dark-700/50 bg-dark-800/80 shadow-md">
+              <div
+                className="relative flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-dark-800/80"
+                style={{ boxShadow: '0 0 0 1px rgba(248,161,13,0.25), 0 4px 12px rgba(0,0,0,0.4)' }}
+              >
                 <span
                   className={cn(
                     'absolute text-lg font-bold text-accent-400 transition-opacity duration-200',
@@ -215,9 +218,14 @@ export function AppHeader({
                 )}
               </div>
               {appName && (
-                <span className="whitespace-nowrap text-base font-semibold text-dark-100">
-                  {appName}
-                </span>
+                <div className="flex flex-col leading-none">
+                  <span className="whitespace-nowrap text-base font-semibold text-dark-100">
+                    {appName}
+                  </span>
+                  <span className="mt-0 text-[9px] font-bold uppercase tracking-[.14em] text-accent-400">
+                    VPN SERVICE
+                  </span>
+                </div>
               )}
             </Link>
 
