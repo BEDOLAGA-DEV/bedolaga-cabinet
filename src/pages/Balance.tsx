@@ -258,8 +258,8 @@ export default function Balance() {
           ) : (
             <div className="flex items-center gap-3 rounded-[var(--bento-radius)] border border-error-500/30 bg-error-500/10 px-4 py-3 text-sm text-error-400">
               <span className="min-w-0 flex-1">
-                {t('balance.renewal.insufficient', 'Для продления на 30 дней не хватает')}{' '}
-                <span className="font-semibold">
+                {t('balance.renewal.insufficient', 'Для продления на 30 дней не хватает')}{' '}
+                <span className="whitespace-nowrap font-semibold">
                   {formatAmount(missingRubles!, 2)} {currencySymbol}
                 </span>
               </span>
