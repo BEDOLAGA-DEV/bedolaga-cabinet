@@ -513,6 +513,12 @@ const sections: AdminSection[] = [
       },
       { name: 'admin.nav.wheel', icon: 'circle-dot', to: '/admin/wheel', permission: 'wheel:read' },
       {
+        name: 'admin.nav.tasks',
+        icon: 'list-checks',
+        to: '/admin/tasks',
+        permission: 'tasks:read',
+      },
+      {
         name: 'admin.nav.partners',
         icon: 'handshake',
         to: '/admin/partners',
