@@ -45,7 +45,31 @@
     "info": "Информация",
     "wheel": "Колесо удачи",
     "menu": "Меню",
-    "gift": "Подарить"
+    "gift": "Подарить",
+    "tasks": "Задания"
+  },
+  "tasks": {
+    "title": "Задания",
+    "subtitle": "Выполняй задания и получай награды",
+    "untitled": "Задание",
+    "level": "Уровень {{level}}",
+    "progress": "{{current}} из {{total}}",
+    "reward": "Награда",
+    "rewardBalance": "{{amount}} ₽ на баланс",
+    "rewardDays": "{{count}} дн. подписки",
+    "claim": "Получить награду",
+    "claiming": "Получаем...",
+    "empty": "Пока нет доступных заданий",
+    "emptyHint": "Заглядывайте чуть позже — возможно, появятся новые задания.",
+    "unclaimedNotice": "У вас {{count}} невостребованных наград — заберите их!",
+    "status": {
+      "available": "Доступно",
+      "completed": "Выполнено",
+      "claimed": "Награда получена"
+    },
+    "chooseSubscription": "Выберите подписку для начисления дней",
+    "chooseSubscriptionHint": "У вас несколько активных платных подписок — выберите, какой добавить бонусные дни.",
+    "noActiveSubs": "Нет активных платных подписок"
   },
   "notifications": {
     "ticketNotifications": "Уведомления о тикетах",
@@ -1063,6 +1087,78 @@
     }
   },
   "admin": {
+    "tasks": {
+      "title": "Задания с наградами",
+      "create": "Создать задание",
+      "save": "Сохранить",
+      "emptyList": "Заданий пока нет",
+      "inactive": "Не активно",
+      "target": "Цель:",
+      "confirmDelete": "Удалить задание?",
+      "channelHint": "Подсказка: используйте channel_id из «Партнёрские каналы»",
+      "fields": {
+        "title_ru": "Название (RU)",
+        "title_en": "Название (EN)",
+        "description_ru": "Описание (RU)",
+        "description_en": "Описание (EN)",
+        "task_type": "Тип задания",
+        "target_value": "Целевое значение",
+        "target_meta_json": "Параметры цели (JSON)",
+        "reward_type": "Тип награды",
+        "reward_value_kopeks": "Сумма (копейки)",
+        "reward_value_days": "Дней подписки",
+        "reward_meta_json": "Параметры награды (JSON)",
+        "allow_user_choice": "Разрешить выбор награды",
+        "user_audience": "Аудитория",
+        "promo_group_id": "Промогруппа (ID)",
+        "parent_task_id": "Предыдущий уровень (ID)",
+        "level": "Уровень",
+        "sort_order": "Порядок",
+        "starts_at": "Начало",
+        "ends_at": "Конец",
+        "icon": "Эмодзи",
+        "is_active": "Активно",
+        "any": "любая",
+        "parent_hint": "не задано (это корень)"
+      },
+      "types": {
+        "purchase_tariff": "Купить конкретный тариф",
+        "subscribe_channel": "Подписаться на партнёрский канал",
+        "traffic_used": "Потратить N ГБ за месяц",
+        "referrals_invited": "Пригласить N рефералов",
+        "purchase_period": "Купить тариф на N+ дней",
+        "spend_amount": "Потратить N ₽ накопительно",
+        "multi_tariff": "Иметь N+ активных тарифов (multi-tariff)",
+        "gift_purchased": "Купить хотя бы 1 подарок",
+        "gifts_count": "Купить N подарков"
+      },
+      "rewards": {
+        "balance": "Деньги на баланс",
+        "subscription_days": "Бонусные дни подписки"
+      },
+      "audience": {
+        "telegram": "Только Telegram-пользователи",
+        "email": "Только email-пользователи",
+        "both": "Все пользователи"
+      },
+      "partnerChannels": {
+        "title": "Партнёрские каналы",
+        "subtitle": "Каналы для заданий типа «Подписаться на канал». Бот должен быть админом в каждом канале.",
+        "addChannel": "Добавить канал",
+        "edit": "Редактировать",
+        "channel_id": "Channel ID (например, -1001234567890)",
+        "title_field": "Название",
+        "channel_link": "Ссылка (https://t.me/...)",
+        "description": "Описание (необязательно)",
+        "is_active": "Активен",
+        "sort_order": "Сортировка",
+        "empty": "Партнёрские каналы не настроены. Добавьте канал, чтобы создавать задания «Подписаться на канал».",
+        "confirmDelete": "Удалить партнёрский канал?",
+        "selectChannel": "Выбрать канал из списка",
+        "selectPlaceholder": "— выберите канал —",
+        "applyChannelHint": "При выборе подставит channel_id в JSON автоматически"
+      }
+    },
     "backgrounds": {
       "title": "Анимированный фон",
       "description": "Выберите тип и настройте параметры анимации",

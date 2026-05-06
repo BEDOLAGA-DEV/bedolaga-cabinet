@@ -153,6 +153,10 @@ const InfoPageView = lazyWithRetry(() => import('./pages/InfoPageView'));
 const AdminInfoPages = lazyWithRetry(() => import('./pages/AdminInfoPages'));
 const AdminInfoPageEditor = lazyWithRetry(() => import('./pages/AdminInfoPageEditor'));
 
+// Tasks
+const Tasks = lazyWithRetry(() => import('./pages/Tasks'));
+const AdminTasks = lazyWithRetry(() => import('./pages/AdminTasks'));
+
 function ProtectedRoute({
   children,
   withLayout = true,
@@ -1291,6 +1295,28 @@ function App() {
             <PermissionRoute permission="news:edit">
               <LazyPage>
                 <AdminNewsCreate />
+              </LazyPage>
+            </PermissionRoute>
+          }
+        />
+
+        {/* Tasks routes */}
+        <Route
+          path="/tasks"
+          element={
+            <ProtectedRoute>
+              <LazyPage>
+                <Tasks />
+              </LazyPage>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/tasks"
+          element={
+            <PermissionRoute permission="tasks:read">
+              <LazyPage>
+                <AdminTasks />
               </LazyPage>
             </PermissionRoute>
           }

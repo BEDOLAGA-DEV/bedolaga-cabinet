@@ -45,7 +45,31 @@
     "info": "信息",
     "wheel": "幸运转盘",
     "menu": "菜单",
-    "gift": "赠送"
+    "gift": "赠送",
+    "tasks": "任务"
+  },
+  "tasks": {
+    "title": "任务",
+    "subtitle": "完成任务获得奖励",
+    "untitled": "任务",
+    "level": "等级 {{level}}",
+    "progress": "{{current}} / {{total}}",
+    "reward": "奖励",
+    "rewardBalance": "{{amount}} ₽ 到余额",
+    "rewardDays": "{{count}} 天订阅",
+    "claim": "领取奖励",
+    "claiming": "领取中...",
+    "empty": "目前没有可用任务",
+    "emptyHint": "稍后再回来查看 — 可能很快就会有新任务。",
+    "unclaimedNotice": "您有 {{count}} 项未领取的奖励 — 快去领取吧!",
+    "status": {
+      "available": "可用",
+      "completed": "已完成",
+      "claimed": "已领取奖励"
+    },
+    "chooseSubscription": "选择要奖励的订阅",
+    "chooseSubscriptionHint": "您有多个有效的付费订阅 — 请选择要延长的订阅。",
+    "noActiveSubs": "没有有效的付费订阅"
   },
   "notifications": {
     "ticketNotifications": "工单通知",

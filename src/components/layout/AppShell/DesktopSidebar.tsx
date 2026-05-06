@@ -38,6 +38,8 @@ interface DesktopSidebarProps {
   referralEnabled?: boolean;
   hasContests?: boolean;
   hasPolls?: boolean;
+  tasksEnabled?: boolean;
+  tasksUnclaimedCount?: number;
 }
 
 export function DesktopSidebar({
@@ -46,6 +48,8 @@ export function DesktopSidebar({
   referralEnabled,
   hasContests,
   hasPolls,
+  tasksEnabled,
+  tasksUnclaimedCount,
 }: DesktopSidebarProps) {
   const { t } = useTranslation();
   const location = useLocation();
@@ -83,6 +87,16 @@ export function DesktopSidebar({
     { path: '/subscriptions', label: t('nav.subscription'), icon: SubscriptionIcon },
     { path: '/balance', label: t('nav.balance'), icon: WalletIcon },
     ...(referralEnabled ? [{ path: '/referral', label: t('nav.referral'), icon: UsersIcon }] : []),
+    ...(tasksEnabled
+      ? [
+          {
+            path: '/tasks',
+            label: t('nav.tasks'),
+            icon: ClipboardIcon,
+            badge: tasksUnclaimedCount && tasksUnclaimedCount > 0 ? tasksUnclaimedCount : undefined,
+          },
+        ]
+      : []),
     { path: '/support', label: t('nav.support'), icon: ChatIcon },
     ...(hasContests ? [{ path: '/contests', label: t('nav.contests'), icon: GamepadIcon }] : []),
     ...(hasPolls ? [{ path: '/polls', label: t('nav.polls'), icon: ClipboardIcon }] : []),
@@ -142,7 +156,12 @@ export function DesktopSidebar({
             )}
           >
             <item.icon className="h-5 w-5 shrink-0" />
-            <span>{item.label}</span>
+            <span className="flex-1">{item.label}</span>
+            {'badge' in item && item.badge ? (
+              <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-accent-500 px-1.5 text-xs font-bold leading-none text-white">
+                {item.badge}
+              </span>
+            ) : null}
             {isActive(item.path) && (
               <motion.div
                 layoutId="sidebar-active-indicator"

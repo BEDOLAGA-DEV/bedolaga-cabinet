@@ -45,7 +45,31 @@
     "info": "اطلاعات",
     "wheel": "چرخ شانس",
     "menu": "منو",
-    "gift": "هدیه"
+    "gift": "هدیه",
+    "tasks": "وظایف"
+  },
+  "tasks": {
+    "title": "وظایف",
+    "subtitle": "وظایف را انجام دهید و پاداش دریافت کنید",
+    "untitled": "وظیفه",
+    "level": "سطح {{level}}",
+    "progress": "{{current}} از {{total}}",
+    "reward": "پاداش",
+    "rewardBalance": "{{amount}} ₽ به موجودی",
+    "rewardDays": "{{count}} روز اشتراک",
+    "claim": "دریافت پاداش",
+    "claiming": "در حال دریافت...",
+    "empty": "در حال حاضر وظیفه‌ای موجود نیست",
+    "emptyHint": "بعداً سر بزنید — وظایف جدید ممکن است اضافه شوند.",
+    "unclaimedNotice": "شما {{count}} پاداش دریافت‌نشده دارید — آن‌ها را بگیرید!",
+    "status": {
+      "available": "در دسترس",
+      "completed": "تکمیل شده",
+      "claimed": "پاداش دریافت شد"
+    },
+    "chooseSubscription": "اشتراک را برای دریافت روزها انتخاب کنید",
+    "chooseSubscriptionHint": "چند اشتراک پولی فعال دارید — یکی را برای تمدید انتخاب کنید.",
+    "noActiveSubs": "اشتراک پولی فعالی وجود ندارد"
   },
   "notifications": {
     "ticketNotifications": "اعلان‌های تیکت",

@@ -89,6 +89,8 @@ export interface TariffDetail {
   traffic_reset_mode: string | null; // 'DAY', 'WEEK', 'MONTH', 'MONTH_ROLLING', 'NO_RESET', null = глобальная настройка
   // Внешний сквад RemnaWave
   external_squad_uuid: string | null;
+  // Бонусные дни для системы Tasks (награда subscription_days)
+  bonus_days_per_purchase?: number;
   created_at: string;
   updated_at: string | null;
 }
@@ -128,6 +130,8 @@ export interface TariffCreateRequest {
   traffic_reset_mode?: string | null;
   // Внешний сквад RemnaWave
   external_squad_uuid?: string | null;
+  // Бонусные дни для Tasks (subscription_days reward)
+  bonus_days_per_purchase?: number;
 }
 
 export interface ExternalSquadInfo {
@@ -172,6 +176,8 @@ export interface TariffUpdateRequest {
   traffic_reset_mode?: string | null;
   // Внешний сквад RemnaWave
   external_squad_uuid?: string | null;
+  // Бонусные дни для Tasks (subscription_days reward)
+  bonus_days_per_purchase?: number;
 }
 
 export interface TariffToggleResponse {

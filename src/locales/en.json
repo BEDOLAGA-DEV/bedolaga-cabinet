@@ -45,7 +45,31 @@
     "info": "Info",
     "wheel": "Fortune Wheel",
     "menu": "Menu",
-    "gift": "Gift"
+    "gift": "Gift",
+    "tasks": "Tasks"
+  },
+  "tasks": {
+    "title": "Tasks",
+    "subtitle": "Complete tasks and earn rewards",
+    "untitled": "Task",
+    "level": "Level {{level}}",
+    "progress": "{{current}} of {{total}}",
+    "reward": "Reward",
+    "rewardBalance": "{{amount}} ₽ to balance",
+    "rewardDays": "{{count}} subscription days",
+    "claim": "Claim reward",
+    "claiming": "Claiming...",
+    "empty": "No tasks available right now",
+    "emptyHint": "Check back later — new tasks may appear soon.",
+    "unclaimedNotice": "You have {{count}} unclaimed rewards — go grab them!",
+    "status": {
+      "available": "Available",
+      "completed": "Completed",
+      "claimed": "Reward claimed"
+    },
+    "chooseSubscription": "Choose a subscription to add days",
+    "chooseSubscriptionHint": "You have multiple active paid subscriptions — pick which one to extend.",
+    "noActiveSubs": "No active paid subscriptions"
   },
   "notifications": {
     "ticketNotifications": "Ticket Notifications",
@@ -1034,6 +1058,78 @@
     }
   },
   "admin": {
+    "tasks": {
+      "title": "Tasks with rewards",
+      "create": "Create task",
+      "save": "Save",
+      "emptyList": "No tasks yet",
+      "inactive": "Inactive",
+      "target": "Target:",
+      "confirmDelete": "Delete this task?",
+      "channelHint": "Tip: use channel_id from «Partner channels»",
+      "fields": {
+        "title_ru": "Title (RU)",
+        "title_en": "Title (EN)",
+        "description_ru": "Description (RU)",
+        "description_en": "Description (EN)",
+        "task_type": "Task type",
+        "target_value": "Target value",
+        "target_meta_json": "Target meta (JSON)",
+        "reward_type": "Reward type",
+        "reward_value_kopeks": "Amount (kopeks)",
+        "reward_value_days": "Subscription days",
+        "reward_meta_json": "Reward meta (JSON)",
+        "allow_user_choice": "Allow user to choose reward",
+        "user_audience": "Audience",
+        "promo_group_id": "Promo group (ID)",
+        "parent_task_id": "Previous level (ID)",
+        "level": "Level",
+        "sort_order": "Sort order",
+        "starts_at": "Starts at",
+        "ends_at": "Ends at",
+        "icon": "Emoji",
+        "is_active": "Active",
+        "any": "any",
+        "parent_hint": "leave empty (this is root)"
+      },
+      "types": {
+        "purchase_tariff": "Purchase a specific tariff",
+        "subscribe_channel": "Subscribe to a partner channel",
+        "traffic_used": "Use N GB this month",
+        "referrals_invited": "Invite N referrals",
+        "purchase_period": "Purchase a tariff for N+ days",
+        "spend_amount": "Spend N ₽ in total",
+        "multi_tariff": "Hold N+ active tariffs (multi-tariff)",
+        "gift_purchased": "Purchase at least 1 gift",
+        "gifts_count": "Purchase N gifts"
+      },
+      "rewards": {
+        "balance": "Money to balance",
+        "subscription_days": "Bonus subscription days"
+      },
+      "audience": {
+        "telegram": "Telegram users only",
+        "email": "Email users only",
+        "both": "All users"
+      },
+      "partnerChannels": {
+        "title": "Partner channels",
+        "subtitle": "Channels for \"Subscribe to channel\" tasks. The bot must be an admin in each channel.",
+        "addChannel": "Add channel",
+        "edit": "Edit",
+        "channel_id": "Channel ID (e.g. -1001234567890)",
+        "title_field": "Title",
+        "channel_link": "Link (https://t.me/...)",
+        "description": "Description (optional)",
+        "is_active": "Active",
+        "sort_order": "Sort order",
+        "empty": "No partner channels configured. Add a channel to create \"Subscribe to channel\" tasks.",
+        "confirmDelete": "Delete partner channel?",
+        "selectChannel": "Pick channel from list",
+        "selectPlaceholder": "— select channel —",
+        "applyChannelHint": "Selecting will set channel_id in JSON automatically"
+      }
+    },
     "backgrounds": {
       "title": "Animated Background",
       "description": "Choose a type and configure animation settings",

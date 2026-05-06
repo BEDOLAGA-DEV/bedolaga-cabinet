@@ -6,18 +6,30 @@ import { cn } from '@/lib/utils';
 import { usePlatform } from '@/platform';
 
 // Icons
-import { HomeIcon, SubscriptionIcon, WalletIcon, UsersIcon, ChatIcon, WheelIcon } from './icons';
+import {
+  HomeIcon,
+  SubscriptionIcon,
+  WalletIcon,
+  UsersIcon,
+  ChatIcon,
+  WheelIcon,
+  ClipboardIcon,
+} from './icons';
 
 interface MobileBottomNavProps {
   isKeyboardOpen: boolean;
   referralEnabled?: boolean;
   wheelEnabled?: boolean;
+  tasksEnabled?: boolean;
+  tasksUnclaimedCount?: number;
 }
 
 export function MobileBottomNav({
   isKeyboardOpen,
   referralEnabled,
   wheelEnabled,
+  tasksEnabled,
+  tasksUnclaimedCount,
 }: MobileBottomNavProps) {
   const { t } = useTranslation();
   const location = useLocation();
@@ -33,6 +45,16 @@ export function MobileBottomNav({
     { path: '/subscriptions', label: t('nav.subscription'), icon: SubscriptionIcon },
     { path: '/balance', label: t('nav.balance'), icon: WalletIcon },
     ...(referralEnabled ? [{ path: '/referral', label: t('nav.referral'), icon: UsersIcon }] : []),
+    ...(tasksEnabled
+      ? [
+          {
+            path: '/tasks',
+            label: t('nav.tasks'),
+            icon: ClipboardIcon,
+            badge: tasksUnclaimedCount && tasksUnclaimedCount > 0 ? tasksUnclaimedCount : undefined,
+          },
+        ]
+      : []),
     ...(wheelEnabled
       ? [{ path: '/wheel', label: t('nav.wheel'), icon: WheelIcon }]
       : [{ path: '/support', label: t('nav.support'), icon: ChatIcon }]),
@@ -77,7 +99,14 @@ export function MobileBottomNav({
                 transition={{ type: 'spring', stiffness: 500, damping: 30 }}
               />
             )}
-            <item.icon className="relative z-10 h-5 w-5" />
+            <div className="relative z-10">
+              <item.icon className="h-5 w-5" />
+              {'badge' in item && item.badge ? (
+                <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent-500 px-1 text-[10px] font-bold leading-none text-white">
+                  {item.badge}
+                </span>
+              ) : null}
+            </div>
             <span className="relative z-10 mt-1 whitespace-nowrap text-2xs">{item.label}</span>
           </Link>
         ))}

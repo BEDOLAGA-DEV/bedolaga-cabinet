@@ -11,6 +11,7 @@ import { useTheme } from '@/hooks/useTheme';
 import { useBranding } from '@/hooks/useBranding';
 import { useFeatureFlags } from '@/hooks/useFeatureFlags';
 import { useScrollRestoration } from '@/hooks/useScrollRestoration';
+import { useTasksAvailability } from '@/hooks/useTasksAvailability';
 import { themeColorsApi } from '@/api/themeColors';
 import { isLogoPreloaded } from '@/api/branding';
 import { cn } from '@/lib/utils';
@@ -205,6 +206,7 @@ export function AppShell({ children }: AppShellProps) {
   // Extracted hooks
   const { appName, logoLetter, hasCustomLogo, logoUrl } = useBranding();
   const { referralEnabled, wheelEnabled, hasContests, hasPolls, giftEnabled } = useFeatureFlags();
+  const { tasksEnabled, unclaimedCount: tasksUnclaimedCount } = useTasksAvailability();
   useScrollRestoration();
 
   // Theme toggle visibility
@@ -369,6 +371,30 @@ export function AppShell({ children }: AppShellProps) {
                 </span>
               </Link>
             )}
+            {tasksEnabled && (
+              <Link
+                to="/tasks"
+                onClick={handleNavClick}
+                className={cn(
+                  'group relative flex items-center rounded-xl px-2.5 py-2 transition-all duration-200',
+                  isActive('/tasks')
+                    ? 'bg-dark-800 text-dark-50'
+                    : 'text-dark-400 hover:bg-dark-800/50 hover:text-dark-200',
+                )}
+              >
+                <span className="text-[16px] leading-none" aria-hidden>
+                  🎯
+                </span>
+                {tasksUnclaimedCount > 0 ? (
+                  <span className="absolute right-1 top-1 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-warning-500 px-1 text-[9px] font-bold leading-none text-dark-950">
+                    {tasksUnclaimedCount}
+                  </span>
+                ) : null}
+                <span className="max-w-0 overflow-hidden whitespace-nowrap text-xs font-medium opacity-0 transition-all duration-200 group-hover:ml-2 group-hover:max-w-40 group-hover:opacity-100">
+                  {t('nav.tasks')}
+                </span>
+              </Link>
+            )}
             {isAdmin && (
               <>
                 <div className="mx-1 h-5 w-px shrink-0 bg-dark-700" />
@@ -453,6 +479,8 @@ export function AppShell({ children }: AppShellProps) {
         isKeyboardOpen={isKeyboardOpen}
         referralEnabled={referralEnabled}
         wheelEnabled={wheelEnabled}
+        tasksEnabled={tasksEnabled}
+        tasksUnclaimedCount={tasksUnclaimedCount}
       />
     </div>
   );
