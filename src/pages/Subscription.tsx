@@ -555,6 +555,24 @@ export default function Subscription() {
     );
   }
 
+  const canShowAdditionalOptions =
+    !!subscription && (subscription.is_active || subscription.is_limited) && !subscription.is_trial;
+  const canBuyDevices = canShowAdditionalOptions && subscription.device_limit !== 0;
+  const canBuyTraffic = canShowAdditionalOptions && subscription.traffic_limit_gb > 0;
+  const deviceTotalPrice = devicePriceData?.total_price_kopeks ?? 0;
+  const deviceMissingAmount =
+    purchaseOptions && devicePriceData?.available
+      ? Math.max(0, deviceTotalPrice - purchaseOptions.balance_kopeks)
+      : 0;
+  const selectedTrafficPackageData =
+    selectedTrafficPackage == null
+      ? null
+      : (trafficPackages?.find((pkg) => pkg.gb === selectedTrafficPackage) ?? null);
+  const trafficMissingAmount =
+    purchaseOptions && selectedTrafficPackageData
+      ? Math.max(0, selectedTrafficPackageData.price_kopeks - purchaseOptions.balance_kopeks)
+      : 0;
+
   return (
     <div className="space-y-6">
       {/* Page title */}
@@ -1417,6 +1435,555 @@ export default function Subscription() {
 
       {/* Purchase / Renewal CTA */}
       <PurchaseCTAButton subscription={subscription} isMultiTariff={isMultiTariff} />
+
+      {/* Additional Options */}
+      {(canBuyDevices || canBuyTraffic) && (
+        <div
+          className="relative overflow-hidden rounded-3xl"
+          style={{
+            background: g.cardBg,
+            border: `1px solid ${g.cardBorder}`,
+            boxShadow: g.shadow,
+            padding: '24px 28px',
+          }}
+        >
+          <h2 className="mb-4 text-base font-bold tracking-tight text-dark-50">
+            {t('subscription.additionalOptions.title', 'Дополнительные опции')}
+          </h2>
+
+          {canBuyDevices && (
+            <>
+              {!showDeviceTopup ? (
+                <button
+                  onClick={() => setShowDeviceTopup(true)}
+                  className={`w-full rounded-xl border p-4 text-left transition-colors ${isDark ? 'border-dark-700/50 bg-dark-800/50 hover:border-dark-600' : 'border-champagne-300/60 bg-champagne-200/40 hover:border-champagne-400'}`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="font-medium text-dark-100">
+                        {t('subscription.additionalOptions.buyDevices', 'Докупить устройства')}
+                      </div>
+                      <div className="mt-1 text-sm text-dark-400">
+                        {t('subscription.additionalOptions.currentDeviceLimit', {
+                          count: subscription.device_limit,
+                          defaultValue: 'Текущий лимит: {{count}} устройств',
+                        })}
+                      </div>
+                    </div>
+                    <svg
+                      className="h-5 w-5 text-dark-400"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                      aria-hidden="true"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                </button>
+              ) : (
+                <div
+                  className={`rounded-xl border p-5 ${isDark ? 'border-dark-700/50 bg-dark-800/50' : 'border-champagne-300/60 bg-champagne-200/40'}`}
+                >
+                  <div className="mb-4 flex items-center justify-between">
+                    <h3 className="font-medium text-dark-100">
+                      {t('subscription.buyDevices', 'Докупить устройства')}
+                    </h3>
+                    <button
+                      onClick={() => setShowDeviceTopup(false)}
+                      className="text-sm text-dark-400 hover:text-dark-200"
+                    >
+                      ✕
+                    </button>
+                  </div>
+
+                  {devicePriceData?.available === false ? (
+                    <div className="py-4 text-center text-sm text-dark-400">
+                      {devicePriceData.reason ||
+                        t(
+                          'subscription.additionalOptions.devicesUnavailable',
+                          'Докупка устройств недоступна',
+                        )}
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-center gap-6">
+                        <button
+                          onClick={() => setDevicesToAdd(Math.max(1, devicesToAdd - 1))}
+                          disabled={devicesToAdd <= 1}
+                          className="btn-secondary flex h-12 w-12 items-center justify-center !p-0 text-2xl"
+                        >
+                          -
+                        </button>
+                        <div className="text-center">
+                          <div className="text-4xl font-bold text-dark-100">{devicesToAdd}</div>
+                          <div className="text-sm text-dark-500">
+                            {t('subscription.additionalOptions.devicesUnit', 'устройств')}
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => setDevicesToAdd(devicesToAdd + 1)}
+                          disabled={
+                            devicePriceData?.max_device_limit
+                              ? (devicePriceData.current_device_limit || 0) + devicesToAdd >=
+                                devicePriceData.max_device_limit
+                              : false
+                          }
+                          className="btn-secondary flex h-12 w-12 items-center justify-center !p-0 text-2xl"
+                        >
+                          +
+                        </button>
+                      </div>
+
+                      {devicePriceData?.max_device_limit && (
+                        <div className="text-center text-sm text-dark-400">
+                          {t('subscription.additionalOptions.currentDeviceLimit', {
+                            count:
+                              devicePriceData.current_device_limit || subscription.device_limit,
+                            defaultValue: 'Текущий лимит: {{count}} устройств',
+                          })}{' '}
+                          /{' '}
+                          {t('subscription.additionalOptions.maxDevices', {
+                            count: devicePriceData.max_device_limit,
+                            defaultValue: 'максимум {{count}}',
+                          })}
+                        </div>
+                      )}
+
+                      {devicePriceData?.available && devicePriceData.price_per_device_label && (
+                        <div className="text-center">
+                          <div className="mb-2 text-sm text-dark-400">
+                            {devicePriceData.discount_percent &&
+                            devicePriceData.discount_percent > 0 ? (
+                              <span>
+                                <span className="text-dark-500 line-through">
+                                  {formatPrice(
+                                    devicePriceData.original_price_per_device_kopeks || 0,
+                                  )}
+                                </span>
+                                <span className="mx-1">
+                                  {devicePriceData.price_per_device_label}
+                                </span>
+                              </span>
+                            ) : (
+                              devicePriceData.price_per_device_label
+                            )}
+                            /{t('subscription.perDevice').replace('/ ', '')} (
+                            {t('subscription.days', { count: devicePriceData.days_left })})
+                          </div>
+                          {devicePriceData.discount_percent &&
+                            devicePriceData.discount_percent > 0 && (
+                              <div className="mb-2">
+                                <span className="inline-block rounded-full bg-success-500/20 px-2.5 py-0.5 text-sm font-medium text-success-400">
+                                  -{devicePriceData.discount_percent}%
+                                </span>
+                              </div>
+                            )}
+                          {devicePriceData.total_price_kopeks === 0 ? (
+                            <div className="text-2xl font-bold text-success-400">
+                              {t('subscription.switchTariff.free', 'Бесплатно')}
+                            </div>
+                          ) : (
+                            <div className="text-2xl font-bold text-accent-400">
+                              {devicePriceData.discount_percent &&
+                                devicePriceData.discount_percent > 0 &&
+                                devicePriceData.base_total_price_kopeks && (
+                                  <span className="mr-2 text-lg text-dark-500 line-through">
+                                    {formatPrice(devicePriceData.base_total_price_kopeks)}
+                                  </span>
+                                )}
+                              {devicePriceData.total_price_label || formatPrice(deviceTotalPrice)}
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {deviceMissingAmount > 0 && (
+                        <InsufficientBalancePrompt
+                          missingAmountKopeks={deviceMissingAmount}
+                          compact
+                          onBeforeTopUp={async () => {
+                            await subscriptionApi.saveDevicesCart(devicesToAdd, subscriptionId);
+                          }}
+                        />
+                      )}
+
+                      <button
+                        onClick={() => devicePurchaseMutation.mutate()}
+                        disabled={
+                          devicePurchaseMutation.isPending ||
+                          !devicePriceData?.available ||
+                          deviceMissingAmount > 0
+                        }
+                        className="btn-primary w-full py-3"
+                      >
+                        {devicePurchaseMutation.isPending ? (
+                          <span className="flex items-center justify-center gap-2">
+                            <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                          </span>
+                        ) : (
+                          t('subscription.additionalOptions.buy', 'Купить')
+                        )}
+                      </button>
+
+                      {devicePurchaseMutation.isError && (
+                        <div className="text-center text-sm text-error-400">
+                          {getErrorMessage(devicePurchaseMutation.error)}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+            </>
+          )}
+
+          {canBuyDevices && (
+            <div className="mt-4">
+              {!showDeviceReduction ? (
+                <button
+                  onClick={() => setShowDeviceReduction(true)}
+                  className={`w-full rounded-xl border p-4 text-left transition-colors ${isDark ? 'border-dark-700/50 bg-dark-800/50 hover:border-dark-600' : 'border-champagne-300/60 bg-champagne-200/40 hover:border-champagne-400'}`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="font-medium text-dark-100">
+                        {t('subscription.additionalOptions.reduceDevices', 'Уменьшить устройства')}
+                      </div>
+                      <div className="mt-1 text-sm text-dark-400">
+                        {t(
+                          'subscription.additionalOptions.reduceDevicesDescription',
+                          'Уменьшить оплачиваемый лимит устройств для будущих продлений',
+                        )}
+                      </div>
+                    </div>
+                    <svg
+                      className="h-5 w-5 text-dark-400"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                      aria-hidden="true"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                </button>
+              ) : (
+                <div
+                  className={`rounded-xl border p-5 ${isDark ? 'border-dark-700/50 bg-dark-800/50' : 'border-champagne-300/60 bg-champagne-200/40'}`}
+                >
+                  <div className="mb-4 flex items-center justify-between">
+                    <h3 className="font-medium text-dark-100">
+                      {t(
+                        'subscription.additionalOptions.reduceDevicesTitle',
+                        'Уменьшить лимит устройств',
+                      )}
+                    </h3>
+                    <button
+                      onClick={() => setShowDeviceReduction(false)}
+                      className="text-sm text-dark-400 hover:text-dark-200"
+                    >
+                      ✕
+                    </button>
+                  </div>
+
+                  {deviceReductionInfo?.available === false ? (
+                    <div className="py-4 text-center text-sm text-dark-400">
+                      {deviceReductionInfo.reason ||
+                        t(
+                          'subscription.additionalOptions.alreadyAtMinDeviceLimit',
+                          'Уже достигнут минимальный лимит устройств для вашего тарифа',
+                        )}
+                    </div>
+                  ) : deviceReductionInfo ? (
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-center gap-6">
+                        <button
+                          onClick={() =>
+                            setTargetDeviceLimit(
+                              Math.max(
+                                Math.max(
+                                  deviceReductionInfo.min_device_limit,
+                                  deviceReductionInfo.connected_devices_count,
+                                ),
+                                targetDeviceLimit - 1,
+                              ),
+                            )
+                          }
+                          disabled={
+                            targetDeviceLimit <=
+                            Math.max(
+                              deviceReductionInfo.min_device_limit,
+                              deviceReductionInfo.connected_devices_count,
+                            )
+                          }
+                          className="btn-secondary flex h-12 w-12 items-center justify-center !p-0 text-2xl"
+                        >
+                          -
+                        </button>
+                        <div className="text-center">
+                          <div className="text-4xl font-bold text-dark-100">
+                            {targetDeviceLimit}
+                          </div>
+                          <div className="text-sm text-dark-500">
+                            {t('subscription.additionalOptions.devicesUnit', 'устройств')}
+                          </div>
+                        </div>
+                        <button
+                          onClick={() =>
+                            setTargetDeviceLimit(
+                              Math.min(
+                                deviceReductionInfo.current_device_limit - 1,
+                                targetDeviceLimit + 1,
+                              ),
+                            )
+                          }
+                          disabled={
+                            targetDeviceLimit >= deviceReductionInfo.current_device_limit - 1
+                          }
+                          className="btn-secondary flex h-12 w-12 items-center justify-center !p-0 text-2xl"
+                        >
+                          +
+                        </button>
+                      </div>
+
+                      <div className="space-y-1 text-center text-sm text-dark-400">
+                        <div>
+                          {t('subscription.additionalOptions.currentDeviceLimit', {
+                            count: deviceReductionInfo.current_device_limit,
+                            defaultValue: 'Текущий лимит: {{count}} устройств',
+                          })}
+                        </div>
+                        <div>
+                          {t('subscription.additionalOptions.minDeviceLimit', {
+                            count: deviceReductionInfo.min_device_limit,
+                            defaultValue: 'Минимум на тарифе: {{count}} устройств',
+                          })}
+                        </div>
+                        <div>
+                          {t('subscription.additionalOptions.connectedDevices', {
+                            count: deviceReductionInfo.connected_devices_count,
+                            defaultValue: 'Подключено устройств: {{count}}',
+                          })}
+                        </div>
+                      </div>
+
+                      {deviceReductionInfo.connected_devices_count >
+                        deviceReductionInfo.min_device_limit && (
+                        <div className="rounded-lg bg-warning-500/10 p-3 text-center text-sm text-warning-400">
+                          {t('subscription.additionalOptions.disconnectDevicesFirst', {
+                            count: deviceReductionInfo.connected_devices_count,
+                            defaultValue:
+                              'Сначала удалите лишние устройства: сейчас подключено {{count}}',
+                          })}
+                        </div>
+                      )}
+
+                      <div className="text-center">
+                        <div className="text-sm text-dark-400">
+                          {t('subscription.additionalOptions.newDeviceLimit', {
+                            count: targetDeviceLimit,
+                            defaultValue: 'Новый лимит: {{count}} устройств',
+                          })}
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() => deviceReductionMutation.mutate()}
+                        disabled={
+                          deviceReductionMutation.isPending ||
+                          targetDeviceLimit >= deviceReductionInfo.current_device_limit ||
+                          targetDeviceLimit < deviceReductionInfo.min_device_limit ||
+                          targetDeviceLimit < deviceReductionInfo.connected_devices_count
+                        }
+                        className="btn-primary w-full py-3"
+                      >
+                        {deviceReductionMutation.isPending ? (
+                          <span className="flex items-center justify-center gap-2">
+                            <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                            {t('subscription.additionalOptions.reducing', 'Уменьшение...')}
+                          </span>
+                        ) : (
+                          t('subscription.additionalOptions.reduce', 'Уменьшить')
+                        )}
+                      </button>
+
+                      {deviceReductionMutation.isError && (
+                        <div className="text-center text-sm text-error-400">
+                          {getErrorMessage(deviceReductionMutation.error)}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center py-4">
+                      <span className="h-5 w-5 animate-spin rounded-full border-2 border-accent-400/30 border-t-accent-400" />
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {canBuyTraffic && (
+            <div className={canBuyDevices ? 'mt-4' : undefined}>
+              {!showTrafficTopup ? (
+                <button
+                  onClick={() => setShowTrafficTopup(true)}
+                  className={`w-full rounded-xl border p-4 text-left transition-colors ${isDark ? 'border-dark-700/50 bg-dark-800/50 hover:border-dark-600' : 'border-champagne-300/60 bg-champagne-200/40 hover:border-champagne-400'}`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="font-medium text-dark-100">
+                        {t('subscription.additionalOptions.buyTraffic', 'Докупить трафик')}
+                      </div>
+                      <div className="mt-1 text-sm text-dark-400">
+                        {t('subscription.additionalOptions.currentTrafficLimit', {
+                          limit: subscription.traffic_limit_gb,
+                          used: subscription.traffic_used_gb.toFixed(1),
+                          defaultValue: 'Текущий лимит: {{limit}} ГБ (использовано {{used}} ГБ)',
+                        })}
+                      </div>
+                    </div>
+                    <svg
+                      className="h-5 w-5 text-dark-400"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                      aria-hidden="true"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                </button>
+              ) : (
+                <div
+                  className={`rounded-xl border p-5 ${isDark ? 'border-dark-700/50 bg-dark-800/50' : 'border-champagne-300/60 bg-champagne-200/40'}`}
+                >
+                  <div className="mb-4 flex items-center justify-between">
+                    <h3 className="font-medium text-dark-100">
+                      {t('subscription.additionalOptions.buyTrafficTitle', 'Докупить трафик')}
+                    </h3>
+                    <button
+                      onClick={() => {
+                        setShowTrafficTopup(false);
+                        setSelectedTrafficPackage(null);
+                      }}
+                      className="text-sm text-dark-400 hover:text-dark-200"
+                    >
+                      ✕
+                    </button>
+                  </div>
+
+                  <div
+                    className={`mb-4 rounded-lg p-2 text-xs ${isDark ? 'bg-dark-700/30 text-dark-500' : 'bg-champagne-300/40 text-champagne-600'}`}
+                  >
+                    ⚠️{' '}
+                    {t(
+                      'subscription.additionalOptions.trafficWarning',
+                      'Докупленный трафик добавляется к текущему лимиту и не переносится на следующий период',
+                    )}
+                  </div>
+
+                  {!trafficPackages || trafficPackages.length === 0 ? (
+                    <div className="py-4 text-center text-sm text-dark-400">
+                      {t(
+                        'subscription.additionalOptions.trafficUnavailable',
+                        'Докупка трафика недоступна для вашего тарифа',
+                      )}
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-2 gap-3">
+                        {trafficPackages.map((pkg) => (
+                          <button
+                            key={pkg.gb}
+                            onClick={() => setSelectedTrafficPackage(pkg.gb)}
+                            className={`rounded-xl border p-4 text-center transition-all ${
+                              selectedTrafficPackage === pkg.gb
+                                ? 'border-accent-500 bg-accent-500/10'
+                                : isDark
+                                  ? 'border-dark-700/50 bg-dark-800/50 hover:border-dark-600'
+                                  : 'border-champagne-300/60 bg-champagne-200/40 hover:border-champagne-400'
+                            }`}
+                          >
+                            <div className="text-lg font-semibold text-dark-100">
+                              {pkg.is_unlimited
+                                ? '♾️ ' + t('subscription.additionalOptions.unlimited', 'Безлимит')
+                                : `${pkg.gb} ${t('common.units.gb', 'ГБ')}`}
+                            </div>
+                            {pkg.discount_percent && pkg.discount_percent > 0 && (
+                              <div className="mb-1">
+                                <span className="inline-block rounded-full bg-success-500/20 px-2 py-0.5 text-xs font-medium text-success-400">
+                                  -{pkg.discount_percent}%
+                                </span>
+                              </div>
+                            )}
+                            <div className="font-medium text-accent-400">
+                              {pkg.discount_percent &&
+                              pkg.discount_percent > 0 &&
+                              pkg.base_price_kopeks ? (
+                                <>
+                                  <span className="mr-1 text-sm text-dark-500 line-through">
+                                    {formatPrice(pkg.base_price_kopeks)}
+                                  </span>
+                                  {formatPrice(pkg.price_kopeks)}
+                                </>
+                              ) : (
+                                formatPrice(pkg.price_kopeks)
+                              )}
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+
+                      {selectedTrafficPackageData && (
+                        <>
+                          {trafficMissingAmount > 0 ? (
+                            <InsufficientBalancePrompt
+                              missingAmountKopeks={trafficMissingAmount}
+                              compact
+                              className="mb-3"
+                              onBeforeTopUp={async () => {
+                                await subscriptionApi.saveTrafficCart(
+                                  selectedTrafficPackageData.gb,
+                                  subscriptionId,
+                                );
+                              }}
+                            />
+                          ) : (
+                            <button
+                              onClick={() =>
+                                trafficPurchaseMutation.mutate(selectedTrafficPackageData.gb)
+                              }
+                              disabled={trafficPurchaseMutation.isPending}
+                              className="btn-primary w-full py-3 text-sm font-semibold disabled:opacity-50"
+                            >
+                              {trafficPurchaseMutation.isPending
+                                ? t('common.processing', 'Обработка...')
+                                : selectedTrafficPackageData.is_unlimited
+                                  ? t(
+                                      'subscription.additionalOptions.buyUnlimited',
+                                      'Купить Безлимит',
+                                    )
+                                  : t('subscription.additionalOptions.buyTrafficGb', {
+                                      gb: selectedTrafficPackageData.gb,
+                                      defaultValue: 'Купить {{gb}} ГБ',
+                                    })}
+                            </button>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Delete expired subscription */}
       {isMultiTariff &&
