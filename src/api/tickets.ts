@@ -1,5 +1,11 @@
 import apiClient from './client';
-import type { Ticket, TicketDetail, TicketMessage, PaginatedResponse } from '../types';
+import type {
+  Ticket,
+  TicketDetail,
+  TicketMessage,
+  TicketMediaItem,
+  PaginatedResponse,
+} from '../types';
 
 // Media upload response type
 interface MediaUploadResponse {
@@ -14,6 +20,7 @@ interface MediaParams {
   media_type?: string;
   media_file_id?: string;
   media_caption?: string;
+  media_items?: TicketMediaItem[];
 }
 
 export const ticketsApi = {

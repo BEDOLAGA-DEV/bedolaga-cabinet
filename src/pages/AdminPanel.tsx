@@ -431,7 +431,7 @@ const sections: AdminSection[] = [
         name: 'admin.nav.bulkActions',
         icon: 'list-checks',
         to: '/admin/bulk-actions',
-        permission: 'users:read',
+        permission: 'bulk_actions:read',
       },
       {
         name: 'admin.nav.tickets',
@@ -574,7 +574,7 @@ const sections: AdminSection[] = [
         name: 'admin.nav.infoPages',
         icon: 'file-text',
         to: '/admin/info-pages',
-        permission: 'settings:read',
+        permission: 'info_pages:read',
       },
       {
         name: 'admin.nav.updates',

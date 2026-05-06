@@ -32,6 +32,7 @@ export interface BulkActionParams {
   promo_group_id?: number | null;
   device_limit?: number;
   delete_from_panel?: boolean;
+  force_delete_active_paid?: boolean;
 }
 
 export interface BulkActionErrorItem {

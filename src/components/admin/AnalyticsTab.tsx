@@ -161,6 +161,65 @@ export function AnalyticsTab() {
           )}
           <p className="text-xs text-dark-500">{t('admin.settings.yandexIdHint')}</p>
         </div>
+        {/* Offline Conversions (inside Yandex block) */}
+        {analytics?.offline_conv_enabled && (
+          <>
+            <div className="my-5 border-t border-dark-700/30" />
+            <div className="mb-4 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <svg className="h-4 w-4 text-orange-400" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z" />
+                </svg>
+                <span className="text-sm font-medium text-dark-200">
+                  {t('admin.settings.offlineConv', 'Offline Conversions')}
+                </span>
+              </div>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-success-500/15 px-2 py-0.5 text-xs font-medium text-success-400">
+                <span className="h-1.5 w-1.5 rounded-full bg-success-400" />
+                {t('admin.settings.counterActive')}
+              </span>
+            </div>
+            {analytics.offline_conv_counter_id && (
+              <div className="mb-2 flex items-center gap-2">
+                <span className="text-sm text-dark-400">{t('admin.settings.counterId')}:</span>
+                <span className="font-mono text-sm text-dark-200">
+                  {analytics.offline_conv_counter_id}
+                </span>
+              </div>
+            )}
+            {analytics.offline_conv_measurement_secret_masked && (
+              <div className="mb-3 flex items-center gap-2">
+                <span className="text-sm text-dark-400">
+                  {t('admin.settings.apiKey', 'API Key')}:
+                </span>
+                <code className="rounded-md bg-dark-700/50 px-2 py-0.5 font-mono text-sm text-dark-300">
+                  {analytics.offline_conv_measurement_secret_masked}
+                </code>
+              </div>
+            )}
+            {analytics.offline_conv_goals && analytics.offline_conv_goals.length > 0 && (
+              <div className="grid gap-2">
+                {analytics.offline_conv_goals.map((goal) => (
+                  <div
+                    key={goal.event_id}
+                    className="flex items-center justify-between rounded-xl border border-dark-700/30 bg-dark-900/40 px-4 py-2.5"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="inline-flex h-2 w-2 rounded-full bg-success-400" />
+                      <span className="text-sm text-dark-200">{goal.name}</span>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <code className="rounded-md bg-dark-700/50 px-2 py-0.5 text-xs text-dark-400">
+                        {goal.event_id}
+                      </code>
+                      <span className="text-xs text-dark-500">{goal.dedup}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
       </div>
 
       {/* Google Ads */}

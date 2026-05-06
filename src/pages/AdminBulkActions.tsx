@@ -741,6 +741,8 @@ interface ActionModalProps {
   selectedCount: number;
   tariffs: TariffListItem[];
   promoGroups: PromoGroup[];
+  users: UserListItem[];
+  selectedSubscriptionIds: number[];
   onClose: () => void;
   onExecute: (params: BulkActionParams) => void;
 }
@@ -750,6 +752,8 @@ function ActionModal({
   selectedCount,
   tariffs,
   promoGroups,
+  users,
+  selectedSubscriptionIds,
   onClose,
   onExecute,
 }: ActionModalProps) {
@@ -763,6 +767,7 @@ function ActionModal({
   const [grantDays, setGrantDays] = useState(30);
   const [deviceLimit, setDeviceLimit] = useState(1);
   const [deleteFromPanel, setDeleteFromPanel] = useState(true);
+  const [forceDeleteActivePaid, setForceDeleteActivePaid] = useState(false);
 
   useEffect(() => {
     if (tariffs.length > 0 && tariffId === 0) {
@@ -779,10 +784,15 @@ function ActionModal({
     }
   }, [promoGroups, promoGroupId]);
 
-  // Reset deleteFromPanel to default when modal opens
+  // Reset modal-specific state when modal opens
   useEffect(() => {
-    if (modal.open && modal.action === 'delete_user') {
-      setDeleteFromPanel(true);
+    if (modal.open) {
+      if (modal.action === 'delete_user') {
+        setDeleteFromPanel(true);
+      }
+      if (modal.action === 'delete_subscription') {
+        setForceDeleteActivePaid(false);
+      }
     }
   }, [modal.open, modal.action]);
 
@@ -797,6 +807,25 @@ function ActionModal({
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [modal.open, modal.loading, onClose]);
+
+  // Count active paid subscriptions among selected ones
+  const activePaidCount = useMemo(() => {
+    if (modal.action !== 'delete_subscription') return 0;
+    const selectedSubIdSet = new Set(selectedSubscriptionIds);
+    let count = 0;
+    for (const user of users) {
+      for (const sub of user.subscriptions ?? []) {
+        if (selectedSubIdSet.has(sub.id) && sub.status === 'active' && !sub.is_trial) {
+          count++;
+        }
+      }
+    }
+    return count;
+  }, [modal.action, selectedSubscriptionIds, users]);
+
+  const isConfirmDisabled =
+    modal.loading ||
+    (modal.action === 'delete_subscription' && activePaidCount > 0 && !forceDeleteActivePaid);
 
   if (!modal.open || !modal.action) return null;
 
@@ -839,6 +868,9 @@ function ActionModal({
         break;
       case 'set_devices':
         params.device_limit = deviceLimit;
+        break;
+      case 'delete_subscription':
+        params.force_delete_active_paid = forceDeleteActivePaid;
         break;
       case 'delete_user':
         params.delete_from_panel = deleteFromPanel;
@@ -982,17 +1014,56 @@ function ActionModal({
             </div>
           </div>
         );
-      case 'delete_subscription':
+      case 'delete_subscription': {
+        const totalSelected = selectedSubscriptionIds.length;
+
         return (
-          <div className="rounded-xl border border-error-500/20 bg-error-500/5 px-3 py-2.5">
-            <p className="text-sm font-medium text-error-400">
-              {t('admin.bulkActions.deleteSubscription.warning')}
-            </p>
-            <p className="mt-1 text-xs text-error-300/70">
-              {t('admin.bulkActions.deleteSubscription.hint')}
-            </p>
+          <div className="space-y-4">
+            <div className="rounded-xl border border-error-500/20 bg-error-500/5 px-3 py-2.5">
+              <p className="text-sm font-medium text-error-400">
+                {t('admin.bulkActions.deleteSubscription.warning')}
+              </p>
+              <p className="mt-1 text-xs text-error-300/70">
+                {t('admin.bulkActions.deleteSubscription.hint')}
+              </p>
+            </div>
+            {activePaidCount > 0 && (
+              <>
+                <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 px-3 py-2.5">
+                  <p className="text-sm font-medium text-amber-400">
+                    {t('admin.bulkActions.deleteSubscription.activePaidWarning', {
+                      count: activePaidCount,
+                      total: totalSelected,
+                    })}
+                  </p>
+                </div>
+                <label className="inline-flex min-h-[44px] cursor-pointer items-center gap-2">
+                  <button
+                    onClick={() => setForceDeleteActivePaid((prev) => !prev)}
+                    className={cn(
+                      'flex h-6 w-6 items-center justify-center rounded-md border-2 transition-all duration-150',
+                      forceDeleteActivePaid
+                        ? 'border-error-500 bg-error-500 shadow-[0_0_8px_rgba(239,68,68,0.4)]'
+                        : 'border-dark-500 bg-dark-700/60 hover:border-error-500/50 hover:bg-dark-600/60',
+                    )}
+                    aria-pressed={forceDeleteActivePaid}
+                  >
+                    {forceDeleteActivePaid && <CheckIcon />}
+                  </button>
+                  <span
+                    className={cn(
+                      'text-sm',
+                      forceDeleteActivePaid ? 'font-medium text-error-400' : 'text-dark-400',
+                    )}
+                  >
+                    {t('admin.bulkActions.deleteSubscription.forceDeleteConfirm')}
+                  </span>
+                </label>
+              </>
+            )}
           </div>
         );
+      }
       case 'delete_user':
         return (
           <div className="space-y-4">
@@ -1158,7 +1229,7 @@ function ActionModal({
               </button>
               <button
                 onClick={handleSubmit}
-                disabled={modal.loading}
+                disabled={isConfirmDisabled}
                 className="flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-xl bg-accent-500 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-accent-600 disabled:opacity-50"
               >
                 {t('admin.bulkActions.confirm')}
@@ -1670,59 +1741,17 @@ export default function AdminBulkActions() {
 
   const getFilteredSubs = useCallback(
     (subs: UserListItemSubscription[]): UserListItemSubscription[] => {
-      if (tariffFilter.length === 0) return subs;
-      return subs.filter((s) => s.tariff_id !== null && tariffFilter.includes(s.tariff_id));
+      let result = subs;
+      if (tariffFilter.length > 0) {
+        result = result.filter((s) => s.tariff_id !== null && tariffFilter.includes(s.tariff_id));
+      }
+      if (trialOnly) {
+        result = result.filter((s) => s.is_trial);
+      }
+      return result;
     },
-    [tariffFilter],
+    [tariffFilter, trialOnly],
   );
-
-  const allVisibleSubscriptionIds = useMemo(() => {
-    const ids: number[] = [];
-    for (const user of users) {
-      const subs = user.subscriptions ?? [];
-      const filtered = getFilteredSubs(subs);
-      for (const sub of filtered) {
-        ids.push(sub.id);
-      }
-    }
-    return ids;
-  }, [users, getFilteredSubs]);
-
-  const toggleAllSubscriptions = useCallback(() => {
-    const allSelected =
-      allVisibleSubscriptionIds.length > 0 &&
-      allVisibleSubscriptionIds.every((id) => subscriptionSelection[id]);
-
-    if (allSelected) {
-      // Deselect all
-      const next: Record<number, boolean> = {};
-      for (const key of Object.keys(subscriptionSelection)) {
-        const id = Number(key);
-        if (!allVisibleSubscriptionIds.includes(id)) {
-          next[id] = subscriptionSelection[id];
-        }
-      }
-      setSubscriptionSelection(next);
-    } else {
-      // Select all visible
-      const next = { ...subscriptionSelection };
-      for (const id of allVisibleSubscriptionIds) {
-        next[id] = true;
-      }
-      setSubscriptionSelection(next);
-    }
-
-    // Auto-expand rows that have filtered subs
-    const expanded: Record<number, boolean> = { ...expandedRows };
-    for (const user of users) {
-      const subs = user.subscriptions ?? [];
-      const filtered = getFilteredSubs(subs);
-      if (filtered.length > 1) {
-        expanded[user.id] = true;
-      }
-    }
-    setExpandedRows(expanded);
-  }, [allVisibleSubscriptionIds, subscriptionSelection, expandedRows, users, getFilteredSubs]);
 
   const handleOpenAction = (type: BulkActionType) => {
     setModal({ open: true, action: type, loading: false, result: null, progress: null });
@@ -2089,6 +2118,54 @@ export default function AdminBulkActions() {
     return result;
   }, [users, trialOnly]);
 
+  const allVisibleSubscriptionIds = useMemo(() => {
+    const ids: number[] = [];
+    for (const user of filteredUsers) {
+      const subs = user.subscriptions ?? [];
+      const filtered = getFilteredSubs(subs);
+      for (const sub of filtered) {
+        ids.push(sub.id);
+      }
+    }
+    return ids;
+  }, [filteredUsers, getFilteredSubs]);
+
+  const toggleAllSubscriptions = useCallback(() => {
+    const allSelected =
+      allVisibleSubscriptionIds.length > 0 &&
+      allVisibleSubscriptionIds.every((id) => subscriptionSelection[id]);
+
+    if (allSelected) {
+      // Deselect all
+      const next: Record<number, boolean> = {};
+      for (const key of Object.keys(subscriptionSelection)) {
+        const id = Number(key);
+        if (!allVisibleSubscriptionIds.includes(id)) {
+          next[id] = subscriptionSelection[id];
+        }
+      }
+      setSubscriptionSelection(next);
+    } else {
+      // Select all visible
+      const next = { ...subscriptionSelection };
+      for (const id of allVisibleSubscriptionIds) {
+        next[id] = true;
+      }
+      setSubscriptionSelection(next);
+    }
+
+    // Auto-expand rows that have filtered subs
+    const expanded: Record<number, boolean> = { ...expandedRows };
+    for (const user of users) {
+      const subs = user.subscriptions ?? [];
+      const filtered = getFilteredSubs(subs);
+      if (filtered.length > 1) {
+        expanded[user.id] = true;
+      }
+    }
+    setExpandedRows(expanded);
+  }, [allVisibleSubscriptionIds, subscriptionSelection, expandedRows, users, getFilteredSubs]);
+
   const table = useReactTable({
     data: filteredUsers,
     columns,
@@ -2417,6 +2494,8 @@ export default function AdminBulkActions() {
         }
         tariffs={tariffs}
         promoGroups={promoGroups}
+        users={users}
+        selectedSubscriptionIds={selectedSubscriptionIds}
         onClose={handleCloseModal}
         onExecute={handleExecuteAction}
       />

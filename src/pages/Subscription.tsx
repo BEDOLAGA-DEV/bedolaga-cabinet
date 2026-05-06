@@ -202,6 +202,9 @@ export default function Subscription() {
 
   // Traffic refresh state
   const [trafficRefreshCooldown, setTrafficRefreshCooldown] = useState(0);
+
+  // Revoke (reissue) cooldown state
+  const [revokeCooldown, setRevokeCooldown] = useState(0);
   const [trafficData, setTrafficData] = useState<{
     traffic_used_gb: number;
     traffic_used_percent: number;
@@ -492,6 +495,41 @@ export default function Subscription() {
     return () => clearInterval(timer);
   }, [trafficRefreshCooldown]);
 
+  // Initialize revoke cooldown from localStorage on mount
+  useEffect(() => {
+    const ts = localStorage.getItem(`revoke_ts_${subscriptionId ?? 'default'}`);
+    if (ts) {
+      const elapsed = Math.floor((Date.now() - parseInt(ts, 10)) / 1000);
+      const remaining = Math.max(0, 900 - elapsed);
+      setRevokeCooldown(remaining);
+    }
+  }, [subscriptionId]);
+
+  // Countdown timer for revoke cooldown
+  useEffect(() => {
+    if (revokeCooldown <= 0) return;
+    const timer = setInterval(() => {
+      setRevokeCooldown((prev) => Math.max(0, prev - 1));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [revokeCooldown]);
+
+  // Revoke (reissue) subscription mutation
+  const revokeMutation = useMutation({
+    mutationFn: () => subscriptionApi.revokeSubscription(subscriptionId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['subscription'] });
+      queryClient.invalidateQueries({ queryKey: ['connection-link', subscriptionId] });
+      queryClient.invalidateQueries({ queryKey: ['subscriptions-list'] });
+      haptic.notification('success');
+      localStorage.setItem(`revoke_ts_${subscriptionId ?? 'default'}`, Date.now().toString());
+      setRevokeCooldown(900);
+    },
+    onError: () => {
+      haptic.notification('error');
+    },
+  });
+
   // Auto-refresh traffic on mount (with 30s caching)
   useEffect(() => {
     if (!subscription) return;
@@ -520,6 +558,16 @@ export default function Subscription() {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
+  };
+
+  const handleRevoke = async () => {
+    const confirmed = await destructiveConfirm(
+      t('subscription.revoke.warning'),
+      t('subscription.revoke.confirmBtn'),
+      t('subscription.revoke.title'),
+    );
+    if (!confirmed) return;
+    revokeMutation.mutate();
   };
 
   // In multi-tariff mode without a specific subscription ID, redirect to list
@@ -559,6 +607,7 @@ export default function Subscription() {
     !!subscription && (subscription.is_active || subscription.is_limited) && !subscription.is_trial;
   const canBuyDevices = canShowAdditionalOptions && subscription.device_limit !== 0;
   const canBuyTraffic = canShowAdditionalOptions && subscription.traffic_limit_gb > 0;
+  const canManageServers = canShowAdditionalOptions && !isTariffsMode;
   const deviceTotalPrice = devicePriceData?.total_price_kopeks ?? 0;
   const deviceMissingAmount =
     purchaseOptions && devicePriceData?.available
@@ -2078,6 +2127,347 @@ export default function Subscription() {
                   </button>
                 </div>
               </div>
+            )}
+          </div>
+        )}
+
+      {/* Server Management */}
+      {canManageServers && (
+        <div
+          className="relative overflow-hidden rounded-3xl"
+          style={{
+            background: g.cardBg,
+            border: `1px solid ${g.cardBorder}`,
+            boxShadow: g.shadow,
+            padding: '24px 28px',
+          }}
+        >
+          <h2 className="mb-4 text-base font-bold tracking-tight text-dark-50">
+            {t('subscription.additionalOptions.manageServers')}
+          </h2>
+          {!showServerManagement ? (
+            <button
+              onClick={() => setShowServerManagement(true)}
+              className={`w-full rounded-xl border p-4 text-left transition-colors ${isDark ? 'border-dark-700/50 bg-dark-800/50 hover:border-dark-600' : 'border-champagne-300/60 bg-champagne-200/40 hover:border-champagne-400'}`}
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="font-medium text-dark-100">
+                    {t('subscription.additionalOptions.manageServers')}
+                  </div>
+                  <div className="mt-1 text-sm text-dark-400">
+                    {t('subscription.servers', { count: subscription.servers?.length || 0 })}
+                  </div>
+                </div>
+                <svg
+                  className="h-5 w-5 text-dark-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+            </button>
+          ) : (
+            <div
+              className={`rounded-xl border p-5 ${isDark ? 'border-dark-700/50 bg-dark-800/50' : 'border-champagne-300/60 bg-champagne-200/40'}`}
+            >
+              <div className="mb-4 flex items-center justify-between">
+                <h3 className="font-medium text-dark-100">
+                  {t('subscription.additionalOptions.manageServersTitle')}
+                </h3>
+                <button
+                  onClick={() => {
+                    setShowServerManagement(false);
+                    setSelectedServersToUpdate([]);
+                  }}
+                  className="text-sm text-dark-400 hover:text-dark-200"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {countriesLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
+                </div>
+              ) : countriesData && countriesData.countries.length > 0 ? (
+                <div className="space-y-4">
+                  <div
+                    className={`rounded-lg p-2 text-xs ${isDark ? 'bg-dark-700/30 text-dark-500' : 'bg-champagne-300/40 text-champagne-600'}`}
+                  >
+                    {t('subscription.serverManagement.statusLegend')}
+                  </div>
+
+                  {countriesData.discount_percent > 0 && (
+                    <div className="rounded-lg border border-success-500/30 bg-success-500/10 p-2 text-xs text-success-400">
+                      🎁{' '}
+                      {t('subscription.serverManagement.discountBanner', {
+                        percent: countriesData.discount_percent,
+                      })}
+                    </div>
+                  )}
+
+                  <div className="max-h-64 space-y-2 overflow-y-auto">
+                    {countriesData.countries
+                      .filter((country) => country.is_available || country.is_connected)
+                      .map((country) => {
+                        const isCurrentlyConnected = country.is_connected;
+                        const isSelected = selectedServersToUpdate.includes(country.uuid);
+                        const willBeAdded = !isCurrentlyConnected && isSelected;
+                        const willBeRemoved = isCurrentlyConnected && !isSelected;
+
+                        return (
+                          <button
+                            key={country.uuid}
+                            onClick={() => {
+                              if (isSelected) {
+                                setSelectedServersToUpdate((prev) =>
+                                  prev.filter((u) => u !== country.uuid),
+                                );
+                              } else {
+                                setSelectedServersToUpdate((prev) => [...prev, country.uuid]);
+                              }
+                            }}
+                            disabled={!country.is_available && !isCurrentlyConnected}
+                            className={`flex w-full items-center justify-between rounded-xl border p-3 text-left transition-all ${
+                              isSelected
+                                ? willBeAdded
+                                  ? 'border-success-500 bg-success-500/10'
+                                  : 'border-accent-500 bg-accent-500/10'
+                                : willBeRemoved
+                                  ? 'border-error-500/50 bg-error-500/5'
+                                  : isDark
+                                    ? 'border-dark-700/50 bg-dark-800/50 hover:border-dark-600'
+                                    : 'border-champagne-300/60 bg-champagne-200/40 hover:border-champagne-400'
+                            } ${!country.is_available && !isCurrentlyConnected ? 'cursor-not-allowed opacity-50' : ''}`}
+                          >
+                            <div className="flex items-center gap-3">
+                              <span className="text-lg">
+                                {willBeAdded
+                                  ? '➕'
+                                  : willBeRemoved
+                                    ? '➖'
+                                    : isSelected
+                                      ? '✅'
+                                      : '⚪'}
+                              </span>
+                              <div>
+                                <div className="flex items-center gap-2 font-medium text-dark-100">
+                                  {country.name}
+                                  {country.has_discount && !isCurrentlyConnected && (
+                                    <span className="rounded bg-success-500/20 px-1.5 py-0.5 text-xs text-success-400">
+                                      -{country.discount_percent}%
+                                    </span>
+                                  )}
+                                </div>
+                                {willBeAdded && (
+                                  <div className="text-xs text-success-400">
+                                    +{formatPrice(country.price_kopeks)}{' '}
+                                    {t('subscription.serverManagement.forDays', {
+                                      days: countriesData.days_left,
+                                    })}
+                                    {country.has_discount && (
+                                      <span className="ml-1 text-dark-500 line-through">
+                                        {formatPrice(
+                                          Math.round(
+                                            (country.base_price_kopeks * countriesData.days_left) /
+                                              30,
+                                          ),
+                                        )}
+                                      </span>
+                                    )}
+                                  </div>
+                                )}
+                                {!willBeAdded && !isCurrentlyConnected && (
+                                  <div className="text-xs text-dark-500">
+                                    {formatPrice(country.price_per_month_kopeks)}
+                                    {t('subscription.serverManagement.perMonth')}
+                                    {country.has_discount && (
+                                      <span className="ml-1 text-dark-600 line-through">
+                                        {formatPrice(country.base_price_kopeks)}
+                                      </span>
+                                    )}
+                                  </div>
+                                )}
+                                {!country.is_available && !isCurrentlyConnected && (
+                                  <div className="text-xs text-dark-500">
+                                    {t('subscription.serverManagement.unavailable')}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                            {country.country_code && (
+                              <span className="text-xl">{getFlagEmoji(country.country_code)}</span>
+                            )}
+                          </button>
+                        );
+                      })}
+                  </div>
+
+                  {(() => {
+                    const currentConnected = countriesData.countries
+                      .filter((c) => c.is_connected)
+                      .map((c) => c.uuid);
+                    const added = selectedServersToUpdate.filter(
+                      (u) => !currentConnected.includes(u),
+                    );
+                    const removed = currentConnected.filter(
+                      (u) => !selectedServersToUpdate.includes(u),
+                    );
+                    const hasChanges = added.length > 0 || removed.length > 0;
+
+                    // Calculate cost for added servers
+                    const addedServers = countriesData.countries.filter((c) =>
+                      added.includes(c.uuid),
+                    );
+                    const totalCost = addedServers.reduce((sum, s) => sum + s.price_kopeks, 0);
+                    const hasEnoughBalance =
+                      !purchaseOptions || totalCost <= purchaseOptions.balance_kopeks;
+                    const missingAmount = purchaseOptions
+                      ? totalCost - purchaseOptions.balance_kopeks
+                      : 0;
+
+                    return hasChanges ? (
+                      <div
+                        className={`space-y-3 border-t pt-3 ${isDark ? 'border-dark-700/50' : 'border-champagne-300/60'}`}
+                      >
+                        {added.length > 0 && (
+                          <div className="text-sm">
+                            <span className="text-success-400">
+                              {t('subscription.serverManagement.toAdd')}
+                            </span>{' '}
+                            <span className="text-dark-300">
+                              {addedServers.map((s) => s.name).join(', ')}
+                            </span>
+                          </div>
+                        )}
+                        {removed.length > 0 && (
+                          <div className="text-sm">
+                            <span className="text-error-400">
+                              {t('subscription.serverManagement.toDisconnect')}
+                            </span>{' '}
+                            <span className="text-dark-300">
+                              {countriesData.countries
+                                .filter((c) => removed.includes(c.uuid))
+                                .map((s) => s.name)
+                                .join(', ')}
+                            </span>
+                          </div>
+                        )}
+                        {totalCost > 0 && (
+                          <div className="text-center">
+                            <div className="text-sm text-dark-400">
+                              {t('subscription.serverManagement.paymentProrated')}
+                            </div>
+                            <div className="text-xl font-bold text-accent-400">
+                              {formatPrice(totalCost)}
+                            </div>
+                          </div>
+                        )}
+
+                        {totalCost > 0 && !hasEnoughBalance && missingAmount > 0 && (
+                          <InsufficientBalancePrompt missingAmountKopeks={missingAmount} compact />
+                        )}
+
+                        <button
+                          onClick={() => updateCountriesMutation.mutate(selectedServersToUpdate)}
+                          disabled={
+                            updateCountriesMutation.isPending ||
+                            selectedServersToUpdate.length === 0 ||
+                            (totalCost > 0 && !hasEnoughBalance)
+                          }
+                          className="btn-primary w-full py-3"
+                        >
+                          {updateCountriesMutation.isPending ? (
+                            <span className="flex items-center justify-center gap-2">
+                              <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                            </span>
+                          ) : (
+                            t('subscription.serverManagement.applyChanges')
+                          )}
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="py-2 text-center text-sm text-dark-500">
+                        {t('subscription.serverManagement.selectServersHint')}
+                      </div>
+                    );
+                  })()}
+
+                  {updateCountriesMutation.isError && (
+                    <div className="text-center text-sm text-error-400">
+                      {getErrorMessage(updateCountriesMutation.error)}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="py-4 text-center text-sm text-dark-400">
+                  {t('subscription.serverManagement.noServersAvailable')}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Reissue Subscription — standalone block, not dependent on device_limit */}
+      {subscription &&
+        (subscription.is_active || subscription.is_limited) &&
+        !subscription.is_trial && (
+          <div
+            className="relative overflow-hidden rounded-3xl"
+            style={{
+              background: g.cardBg,
+              border: `1px solid ${g.cardBorder}`,
+              boxShadow: g.shadow,
+              padding: '16px 20px',
+            }}
+          >
+            <button
+              onClick={handleRevoke}
+              disabled={revokeMutation.isPending || revokeCooldown > 0}
+              className="w-full rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-left transition-colors hover:bg-amber-500/20 disabled:opacity-50"
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="font-medium text-amber-400">
+                    {t('subscription.revoke.button')}
+                  </div>
+                  <div className="mt-1 text-sm text-dark-400">
+                    {revokeCooldown > 0
+                      ? t('subscription.revoke.cooldown', {
+                          minutes: Math.floor(revokeCooldown / 60),
+                          seconds: revokeCooldown % 60,
+                        })
+                      : t('subscription.revoke.description')}
+                  </div>
+                </div>
+                <div className="text-amber-400">
+                  {revokeMutation.isPending ? (
+                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-amber-400/30 border-t-amber-400" />
+                  ) : (
+                    <svg
+                      className="h-5 w-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={1.5}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182"
+                      />
+                    </svg>
+                  )}
+                </div>
+              </div>
+            </button>
+            {revokeMutation.error && (
+              <p className="mt-2 text-sm text-red-400">{getErrorMessage(revokeMutation.error)}</p>
             )}
           </div>
         )}

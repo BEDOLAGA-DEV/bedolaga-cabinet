@@ -1,5 +1,47 @@
 # Changelog
 
+## [1.51.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.50.0...v1.51.0) (2026-05-04)
+
+
+### Features
+
+* add Antilopay payment provider support ([7d94009](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/7d940091fa2b7773eb0be9a7c3c7d48385253ac0))
+* add Apple IAP (apple_iap) payment method support ([5888713](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/58887138fcbe22863cde83d8bf24079ba7925a56))
+* add Etoplatezhi payment provider support ([85a34b1](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/85a34b1947c5e886bd363b57bae557c4fd6021c0))
+* add Jupiter and Donut payment provider support ([7def847](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/7def84718b30060580c732efdc7f1de4cc482786))
+* add Lava payment provider support ([b4eb0fa](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/b4eb0fa859b1c451acb27254939afa7bb8710737))
+* add subscription reissue button with cooldown timer ([f7cc445](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/f7cc445127e010a8e1c1dd471459e87a85996cf5))
+* add TV Quick Connect to connection page for Android TV / Apple TV ([65f9493](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/65f94931c59f081f663d0caefb316a2d15f3f27d))
+* **admin/broadcasts:** add preview buttons for Telegram + Email broadcasts ([d21c663](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/d21c6637bf3a26fe7a6a7822eadc93b0de18de83))
+
+
+### Bug Fixes
+
+* **i18n:** add missing broadcast preview locale keys ([7d29285](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/7d29285ff6bc13a83080716b3c76c53530d908de))
+* move reissue button to standalone block outside device_limit guard ([60c8353](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/60c835301d151f346028a35950081d4f72e247d3))
+
+## [1.50.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.49.0...v1.50.0) (2026-04-29)
+
+
+### Features
+
+* bulk delete subscription protection for active paid subs ([afffab1](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/afffab17d316bc7c37fde10cf6c125320b7828c6))
+* dedicated RBAC permissions for bulk actions, info pages, news ([ae55a18](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/ae55a18fc9217f98e5bcbd6edde0d14b38884a7a))
+* landing analytics goals, daily bar chart, referrer tracking, contact persistence ([020f4c9](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/020f4c95e271d3f582cb907e9aeeef0fe7cc2353))
+* multi-media attachments, linkify URLs, shared MessageMediaGrid ([6d3010b](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/6d3010b6212f41a484dd507535d1dafa28a9160b))
+* show VPN connection info and subscription request history on admin user detail ([e1d2f8c](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/e1d2f8cee403d895508f538ffbc6c9c528f92b05))
+* subscription selector in VPN connection block for multi-tariff ([bc37f31](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/bc37f31350d9865918a8340273fccd4d76d4342f))
+* Yandex Metrika CID tracking, offline conversions UI, sticky pay button ([8005968](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/80059681da8655daa4b79cf3451b87df661b9d1d))
+
+
+### Bug Fixes
+
+* remove stale cabinet_last_login field from user detail ([8fcdbbe](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/8fcdbbe53ef5de8392d752b3c05cb2e3ffadce3d))
+* restore cabinet_last_login in user detail (now shows real data) ([8044b66](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/8044b664c36aea080b7ab8a84ba55aa48578a17e))
+* switch component — replace motion with CSS transition-transform ([9b1e26d](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/9b1e26d4ec146fa1a1e37dde2e9212e4edc5668b))
+* user detail — separate request history sub selector, split mount effects ([853e1c9](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/853e1c9c8477c028a7046e1c83c3089b00847cb9))
+* validate counterId/conversionId before script injection (XSS prevention) ([a50bd39](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/a50bd39df2fbc1fa994249ad24f1a02eb3f4ad8a))
+
 ## [1.49.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.48.0...v1.49.0) (2026-04-24)
 
 

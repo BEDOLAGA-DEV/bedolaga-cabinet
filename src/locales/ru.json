@@ -632,6 +632,14 @@
       "selectServersHint": "Выберите серверы для подключения или отключения",
       "noServersAvailable": "Нет доступных серверов для управления"
     },
+    "revoke": {
+      "title": "Перевыпуск подписки",
+      "button": "Перевыпустить подписку",
+      "description": "Новая ссылка, сброс устройств",
+      "warning": "Это действие сгенерирует новую ссылку подключения, сбросит все подключённые устройства и сделает старую ссылку недействительной. Продолжить?",
+      "confirmBtn": "Перевыпустить",
+      "cooldown": "Доступно через {{minutes}} мин. {{seconds}} сек."
+    },
     "legacy": {
       "selectTariffTitle": "Выберите тариф для продления",
       "selectTariffDescription": "Ваша текущая подписка была создана до введения тарифов. Для продления необходимо выбрать один из доступных тарифов.",
@@ -654,6 +662,20 @@
       "label": "Трафик",
       "selectVolume": "Выбрать объём трафика",
       "default": "По умолчанию: {{label}}"
+    },
+    "tvQuickConnect": {
+      "title": "Подключить TV",
+      "description": "Введите 5-значный код с экрана телевизора",
+      "sendBtn": "Отправить на TV",
+      "badCode": "Введите 5-значный код (буквы и цифры)",
+      "sent": "Отправлено на TV!",
+      "error": "Ошибка отправки на TV",
+      "scanTitle": "Сканировать QR-код",
+      "scanDescription": "Отсканируйте QR-код с экрана телевизора",
+      "scanBtn": "Сканировать QR с TV",
+      "stopScan": "Закрыть камеру",
+      "noCamera": "Нет доступа к камере",
+      "codeFound": "Код найден"
     }
   },
   "balance": {
@@ -720,6 +742,24 @@
       },
       "aurapay": {
         "description": "Оплата через AuraPay"
+      },
+      "etoplatezhi": {
+        "description": "Оплата через Etoplatezhi"
+      },
+      "antilopay": {
+        "description": "Оплата через Antilopay"
+      },
+      "jupiter": {
+        "description": "Оплата СБП через Jupiter (FPGate P2P)"
+      },
+      "donut": {
+        "description": "Оплата картой и СБП через Donut P2P"
+      },
+      "lava": {
+        "description": "Оплата картой и СБП через Lava Business"
+      },
+      "apple_iap": {
+        "description": "Оплата через Apple In-App Purchase"
       }
     },
     "transactionHistory": "История операций",
@@ -1826,7 +1866,17 @@
       "customButtonTypeCallback": "Callback",
       "customButtonTypeUrl": "Ссылка",
       "customButtonCallbackPlaceholder": "callback_data (например, back_to_menu)",
-      "customButtonUrlPlaceholder": "https://example.com"
+      "customButtonUrlPlaceholder": "https://example.com",
+      "preview": "Предпросмотр",
+      "previewEmpty": "— пусто —",
+      "emailSubjectLabel": "Тема",
+      "btnBalance": "Пополнить баланс",
+      "btnPartners": "Партнёрка",
+      "btnPromocode": "Промокод",
+      "btnConnect": "Подключиться",
+      "btnSubscription": "Подписка",
+      "btnSupport": "Техподдержка",
+      "btnHome": "На главную"
     },
     "pinnedMessages": {
       "title": "Закреплённые сообщения",
@@ -2025,6 +2075,12 @@
         "payments_paypear": "PayPear",
         "payments_rollypay": "RollyPay",
         "payments_aurapay": "AuraPay",
+        "payments_etoplatezhi": "Etoplatezhi",
+        "payments_antilopay": "Antilopay",
+        "payments_jupiter": "Jupiter",
+        "payments_donut": "Donut",
+        "payments_lava": "Lava",
+        "payments_apple_iap": "Apple IAP",
         "subs_core": "Основные",
         "subs_trial": "Пробный период",
         "subs_pricing": "Цены",
@@ -2572,7 +2628,9 @@
         "TIMEZONE": "Часовой пояс",
         "REFERRAL": "Реферальная система",
         "MODERATION": "Модерация"
-      }
+      },
+      "offlineConv": "Офлайн-конверсии",
+      "apiKey": "API-ключ"
     },
     "buttons": {
       "color": "Цвет кнопки",
@@ -3522,6 +3580,20 @@
         "language": "Язык",
         "registration": "Регистрация",
         "lastActivity": "Последняя активность",
+        "botActivity": "Активность в боте",
+        "cabinetLastLogin": "Последний вход в кабинет",
+        "vpnConnection": "VPN подключение",
+        "lastConnection": "Последнее подключение",
+        "firstConnection": "Первое подключение",
+        "online": "Онлайн",
+        "noVpnData": "Нет данных о подключении",
+        "requestHistory": "История запросов подписки",
+        "requestHistoryTotal": "Всего запросов",
+        "requestAt": "Дата",
+        "requestIp": "IP адрес",
+        "requestUserAgent": "Устройство",
+        "loadMore": "Показать ещё",
+        "noRequests": "Нет запросов",
         "totalSpent": "Всего потрачено",
         "purchases": "Покупок",
         "campaign": "Рекламная кампания",
@@ -3838,7 +3910,9 @@
       },
       "deleteSubscription": {
         "warning": "Выбранные подписки будут безвозвратно удалены из бота и панели RemnaWave!",
-        "hint": "Пользователи потеряют доступ к VPN по удалённым подпискам. Это действие нельзя отменить."
+        "hint": "Пользователи потеряют доступ к VPN по удалённым подпискам. Это действие нельзя отменить.",
+        "activePaidWarning": "{{count}} из {{total}} выбранных подписок — активные платные",
+        "forceDeleteConfirm": "Подтверждаю удаление активных платных подписок"
       },
       "deleteUser": {
         "warning": "Выбранные пользователи будут безвозвратно удалены из бота! Все их подписки, баланс и данные будут потеряны!",
@@ -4346,6 +4420,9 @@
       "discountPreview": "Предпросмотр",
       "discountActive": "Скидка",
       "background": "Анимированный фон",
+      "analytics": "Аналитика",
+      "viewGoal": "Цель просмотра",
+      "clickGoal": "Цель клика оплаты",
       "statistics": "Статистика",
       "stats": {
         "title": "Статистика лендинга",
@@ -4366,7 +4443,8 @@
         "successful": "Успешных",
         "funnel": "Воронка",
         "loadError": "Не удалось загрузить статистику",
-        "noPurchases": "Нет покупок"
+        "noPurchases": "Нет покупок",
+        "paid": "оплачено"
       },
       "purchases": {
         "title": "Покупки",

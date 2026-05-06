@@ -1,9 +1,7 @@
 import * as SwitchPrimitive from '@radix-ui/react-switch';
-import { motion } from 'framer-motion';
 import { forwardRef, type ComponentPropsWithoutRef } from 'react';
 import { cn } from '@/lib/utils';
 import { usePlatform } from '@/platform';
-import { springTransition } from '../../motion/transitions';
 
 export interface SwitchProps extends Omit<
   ComponentPropsWithoutRef<typeof SwitchPrimitive.Root>,
@@ -42,13 +40,11 @@ export const Switch = forwardRef<HTMLButtonElement, SwitchProps>(
         {...props}
       >
         <SwitchPrimitive.Thumb asChild>
-          <motion.span
+          <span
             className={cn(
-              'pointer-events-none block h-5 w-5 rounded-full bg-white shadow-lg ring-0',
+              'pointer-events-none block h-5 w-5 rounded-full bg-white shadow-lg ring-0 transition-transform duration-200',
               'data-[state=checked]:translate-x-5 data-[state=unchecked]:translate-x-0',
             )}
-            layout
-            transition={springTransition}
           />
         </SwitchPrimitive.Thumb>
       </SwitchPrimitive.Root>

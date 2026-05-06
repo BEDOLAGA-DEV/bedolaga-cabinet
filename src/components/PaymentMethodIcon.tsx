@@ -295,6 +295,175 @@ export default function PaymentMethodIcon({
       );
     }
 
+    case 'etoplatezhi': {
+      const etoplatezhiGradId = `${uid}-etoplatezhi`;
+      return (
+        <svg className={className} viewBox="0 0 40 40">
+          <defs>
+            <linearGradient id={etoplatezhiGradId} x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="#10b981" />
+              <stop offset="100%" stopColor="#059669" />
+            </linearGradient>
+          </defs>
+          <circle cx="20" cy="20" r="20" fill={`url(#${etoplatezhiGradId})`} />
+          <g fill="#fff" fontFamily="Arial,sans-serif" fontWeight="700">
+            <text x="20" y="26" textAnchor="middle" fontSize="14">
+              EP
+            </text>
+          </g>
+        </svg>
+      );
+    }
+
+    case 'antilopay': {
+      const antilopayGradId = `${uid}-antilopay`;
+      return (
+        <svg className={className} viewBox="0 0 40 40">
+          <defs>
+            <linearGradient id={antilopayGradId} x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="#f59e0b" />
+              <stop offset="100%" stopColor="#d97706" />
+            </linearGradient>
+          </defs>
+          <circle cx="20" cy="20" r="20" fill={`url(#${antilopayGradId})`} />
+          <g fill="#fff" fontFamily="Arial,sans-serif" fontWeight="700">
+            <text x="20" y="26" textAnchor="middle" fontSize="14">
+              AL
+            </text>
+          </g>
+        </svg>
+      );
+    }
+
+    case 'jupiter': {
+      const jupiterGradId = `${uid}-jupiter`;
+      const jupiterRingId = `${uid}-jupiter-ring`;
+      return (
+        <svg className={className} viewBox="0 0 40 40">
+          <defs>
+            <linearGradient id={jupiterGradId} x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="#7c3aed" />
+              <stop offset="55%" stopColor="#6366f1" />
+              <stop offset="100%" stopColor="#0ea5e9" />
+            </linearGradient>
+            <linearGradient id={jupiterRingId} x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stopColor="#fde68a" stopOpacity="0.9" />
+              <stop offset="100%" stopColor="#fde68a" stopOpacity="0.45" />
+            </linearGradient>
+          </defs>
+          <circle cx="20" cy="20" r="20" fill={`url(#${jupiterGradId})`} />
+          <ellipse
+            cx="20"
+            cy="22"
+            rx="15"
+            ry="3.4"
+            fill="none"
+            stroke={`url(#${jupiterRingId})`}
+            strokeWidth="2"
+            transform="rotate(-18 20 22)"
+          />
+          <circle cx="20" cy="20" r="6.5" fill="#fde68a" opacity="0.95" />
+        </svg>
+      );
+    }
+
+    case 'donut': {
+      const donutBgGradId = `${uid}-donut-bg`;
+      const donutGlazeGradId = `${uid}-donut-glaze`;
+      return (
+        <svg className={className} viewBox="0 0 40 40">
+          <defs>
+            <linearGradient id={donutBgGradId} x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="#fdf2f8" />
+              <stop offset="100%" stopColor="#fbcfe8" />
+            </linearGradient>
+            <radialGradient id={donutGlazeGradId} cx="50%" cy="40%" r="60%">
+              <stop offset="0%" stopColor="#fb7185" />
+              <stop offset="60%" stopColor="#ec4899" />
+              <stop offset="100%" stopColor="#be185d" />
+            </radialGradient>
+          </defs>
+          <circle cx="20" cy="20" r="20" fill={`url(#${donutBgGradId})`} />
+          <circle cx="20" cy="20" r="13" fill={`url(#${donutGlazeGradId})`} />
+          <circle cx="20" cy="20" r="4.5" fill="#fdf2f8" />
+          <g fill="#fde68a">
+            <rect
+              x="13.5"
+              y="11"
+              width="2.5"
+              height="1"
+              rx="0.5"
+              transform="rotate(-30 14.75 11.5)"
+            />
+            <rect x="22" y="13" width="2.5" height="1" rx="0.5" transform="rotate(20 23.25 13.5)" />
+            <rect
+              x="26"
+              y="20"
+              width="2.5"
+              height="1"
+              rx="0.5"
+              transform="rotate(-15 27.25 20.5)"
+            />
+          </g>
+          <g fill="#a7f3d0">
+            <rect x="11" y="22" width="2.5" height="1" rx="0.5" transform="rotate(40 12.25 22.5)" />
+            <rect
+              x="20"
+              y="26"
+              width="2.5"
+              height="1"
+              rx="0.5"
+              transform="rotate(-30 21.25 26.5)"
+            />
+          </g>
+          <g fill="#bfdbfe">
+            <rect x="16" y="27" width="2.5" height="1" rx="0.5" transform="rotate(15 17.25 27.5)" />
+            <rect x="24" y="9" width="2.5" height="1" rx="0.5" transform="rotate(-25 25.25 9.5)" />
+          </g>
+        </svg>
+      );
+    }
+
+    case 'lava': {
+      const lavaBgGradId = `${uid}-lava-bg`;
+      const lavaFlowGradId = `${uid}-lava-flow`;
+      return (
+        <svg className={className} viewBox="0 0 40 40">
+          <defs>
+            <linearGradient id={lavaBgGradId} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#1f2937" />
+              <stop offset="100%" stopColor="#0b0b0f" />
+            </linearGradient>
+            <linearGradient id={lavaFlowGradId} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#fde047" />
+              <stop offset="35%" stopColor="#fb923c" />
+              <stop offset="75%" stopColor="#ef4444" />
+              <stop offset="100%" stopColor="#7f1d1d" />
+            </linearGradient>
+          </defs>
+          <circle cx="20" cy="20" r="20" fill={`url(#${lavaBgGradId})`} />
+          <path
+            d="M7 27c2.2-1.6 4-3.5 5.4-5.7 1-1.6 1.6-3.4 2-5.2.4-1.7.7-3.5 1.7-4.9 1-1.4 2.6-2.3 4.3-2 1.6.3 2.8 1.6 3.4 3.1.6 1.5.8 3.2 1.6 4.7.9 1.7 2.5 3 4.3 3.6 1.5.5 3.1.5 4.6.6V33H7Z"
+            fill={`url(#${lavaFlowGradId})`}
+          />
+          <circle cx="14" cy="14" r="1.6" fill="#fde047" opacity="0.85" />
+          <circle cx="22" cy="10" r="1.1" fill="#fb923c" opacity="0.8" />
+          <circle cx="29" cy="16" r="1.3" fill="#fde047" opacity="0.7" />
+        </svg>
+      );
+    }
+
+    case 'apple_iap':
+      return (
+        <svg className={className} viewBox="0 0 40 40">
+          <circle cx="20" cy="20" r="20" fill="#000000" />
+          <path
+            d="M25.8 20.2c-.04-3.56 2.9-5.26 3.04-5.36-1.66-2.42-4.24-2.76-5.16-2.8-2.2-.22-4.28 1.3-5.4 1.3-1.12 0-2.84-1.26-4.68-1.22-2.4.04-4.62 1.4-5.86 3.56-2.5 4.34-.64 10.76 1.8 14.28 1.18 1.72 2.6 3.64 4.46 3.58 1.78-.08 2.46-1.16 4.62-1.16 2.16 0 2.78 1.16 4.68 1.12 1.92-.04 3.14-1.74 4.32-3.48 1.36-2 1.92-3.92 1.96-4.02-.04-.02-3.76-1.44-3.78-5.8zM22.24 10.2c.98-1.2 1.64-2.84 1.46-4.5-1.42.06-3.12.94-4.14 2.14-.9 1.06-1.7 2.74-1.48 4.36 1.58.12 3.18-.8 4.16-2z"
+            fill="#fff"
+          />
+        </svg>
+      );
+
     default:
       return (
         <svg className={className} viewBox="0 0 40 40">

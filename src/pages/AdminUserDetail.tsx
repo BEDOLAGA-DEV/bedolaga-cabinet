@@ -14,14 +14,16 @@ import {
   type PanelSyncStatusResponse,
   type UpdateSubscriptionRequest,
   type AdminUserGiftsResponse,
+  type SubscriptionRequestRecord,
 } from '../api/adminUsers';
 import { adminApi, type AdminTicket, type AdminTicketDetail } from '../api/admin';
 import { promocodesApi, type PromoGroup } from '../api/promocodes';
 import { promoOffersApi } from '../api/promoOffers';
-import { ticketsApi } from '../api/tickets';
 import { AdminBackButton } from '../components/admin';
 import { createNumberInputHandler, toNumber } from '../utils/inputHelpers';
 import { usePermissionStore } from '../store/permissions';
+import { MessageMediaGrid } from '../components/tickets/MessageMediaGrid';
+import { linkifyText } from '../utils/linkify';
 
 // ============ Helpers ============
 
@@ -385,6 +387,14 @@ export default function AdminUserDetail() {
   const [giftsData, setGiftsData] = useState<AdminUserGiftsResponse | null>(null);
   const [giftsLoading, setGiftsLoading] = useState(false);
 
+  // Subscription request history
+  const [requestHistory, setRequestHistory] = useState<SubscriptionRequestRecord[]>([]);
+  const [requestHistoryLoading, setRequestHistoryLoading] = useState(false);
+  const [requestHistoryOffset, setRequestHistoryOffset] = useState(0);
+  const [requestHistoryTotal, setRequestHistoryTotal] = useState(0);
+  const [requestHistoryExpanded, setRequestHistoryExpanded] = useState(false);
+  const [requestHistorySubId, setRequestHistorySubId] = useState<number | null>(null);
+
   const userId = id ? parseInt(id, 10) : null;
 
   const loadUser = useCallback(async () => {
@@ -485,6 +495,29 @@ export default function AdminUserDetail() {
     }
   }, [userId, activeSubscriptionId]);
 
+  const loadRequestHistory = useCallback(
+    async (offset = 0, append = false) => {
+      if (!userId) return;
+      try {
+        setRequestHistoryLoading(true);
+        const data = await adminUsersApi.getSubscriptionRequestHistory(
+          userId,
+          requestHistorySubId ?? undefined,
+          offset,
+          20,
+        );
+        setRequestHistory((prev) => (append ? [...prev, ...data.records] : data.records));
+        setRequestHistoryTotal(data.total);
+        setRequestHistoryOffset(offset + data.records.length);
+      } catch {
+        // silent
+      } finally {
+        setRequestHistoryLoading(false);
+      }
+    },
+    [userId, requestHistorySubId],
+  );
+
   const loadNodeUsage = useCallback(async () => {
     if (!userId) return;
     try {
@@ -578,6 +611,21 @@ export default function AdminUserDetail() {
     }
     loadUser();
   }, [userId, loadUser, navigate]);
+
+  // Load panel info when subscription changes (separate from mount to avoid redundant loadUser)
+  useEffect(() => {
+    if (!userId || isNaN(userId)) return;
+    loadPanelInfo();
+  }, [userId, loadPanelInfo]);
+
+  // Reload request history when the request-history subscription selector changes
+  useEffect(() => {
+    if (!requestHistoryExpanded || requestHistorySubId === null) return;
+    setRequestHistory([]);
+    setRequestHistoryOffset(0);
+    setRequestHistoryTotal(0);
+    loadRequestHistory(0);
+  }, [requestHistorySubId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (activeTab === 'info') {
@@ -852,6 +900,7 @@ export default function AdminUserDetail() {
     if (user && userSubscriptions.length > 0 && !hasAutoSelectedSub.current) {
       const activeSub = userSubscriptions.find((s) => s.is_active) ?? userSubscriptions[0];
       setActiveSubscriptionId(activeSub.id);
+      setRequestHistorySubId(activeSub.id);
       hasAutoSelectedSub.current = true;
     }
   }, [user, userSubscriptions]);
@@ -1371,9 +1420,15 @@ export default function AdminUserDetail() {
               </div>
               <div className="rounded-xl bg-dark-800/50 p-3">
                 <div className="mb-1 text-xs text-dark-500">
-                  {t('admin.users.detail.lastActivity')}
+                  {t('admin.users.detail.botActivity')}
                 </div>
                 <div className="text-dark-100">{formatDate(user.last_activity)}</div>
+              </div>
+              <div className="rounded-xl bg-dark-800/50 p-3">
+                <div className="mb-1 text-xs text-dark-500">
+                  {t('admin.users.detail.cabinetLastLogin')}
+                </div>
+                <div className="text-dark-100">{formatDate(user.cabinet_last_login)}</div>
               </div>
               <div className="rounded-xl bg-dark-800/50 p-3">
                 <div className="mb-1 text-xs text-dark-500">
@@ -1390,6 +1445,112 @@ export default function AdminUserDetail() {
                 <div className="text-dark-100">{user.purchase_count}</div>
               </div>
             </div>
+
+            {/* VPN Connection Info */}
+            {(panelInfo || userSubscriptions.length > 0) && (
+              <div className="rounded-xl border border-dark-700/30 bg-dark-800/50 p-4">
+                <div className="mb-3 flex items-center justify-between">
+                  <span className="text-sm font-medium text-dark-200">
+                    {t('admin.users.detail.vpnConnection')}
+                  </span>
+                  {userSubscriptions.length > 1 && (
+                    <select
+                      value={activeSubscriptionId ?? ''}
+                      onChange={(e) => {
+                        const subId = Number(e.target.value);
+                        setActiveSubscriptionId(subId);
+                      }}
+                      className="rounded-lg border border-dark-600 bg-dark-700 px-3 py-1.5 text-xs text-dark-200"
+                    >
+                      {userSubscriptions.map((s) => (
+                        <option key={s.id} value={s.id}>
+                          {s.tariff_name || `#${s.id}`} — {s.status}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                </div>
+                {panelInfoLoading && !panelInfo?.found && (
+                  <div className="flex items-center justify-center py-4">
+                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
+                  </div>
+                )}
+                {panelInfo?.found && (
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="rounded-lg bg-dark-700/30 p-3">
+                      <div className="mb-1 text-xs text-dark-500">
+                        {t('admin.users.detail.lastConnection')}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {panelInfo.online_at &&
+                          (() => {
+                            const onlineDate = new Date(panelInfo.online_at);
+                            const isRecent = Date.now() - onlineDate.getTime() < 5 * 60 * 1000;
+                            return (
+                              <>
+                                <span
+                                  className={`inline-block h-2 w-2 shrink-0 rounded-full ${isRecent ? 'bg-success-400 shadow-[0_0_6px_rgba(74,222,128,0.5)]' : 'bg-dark-500'}`}
+                                  title={isRecent ? t('admin.users.detail.online') : ''}
+                                />
+                                <span
+                                  className={`text-sm ${isRecent ? 'font-medium text-success-400' : 'text-dark-100'}`}
+                                >
+                                  {isRecent
+                                    ? t('admin.users.detail.online')
+                                    : formatDate(panelInfo.online_at)}
+                                </span>
+                              </>
+                            );
+                          })()}
+                        {!panelInfo.online_at && <span className="text-sm text-dark-100">-</span>}
+                      </div>
+                    </div>
+                    <div className="rounded-lg bg-dark-700/30 p-3">
+                      <div className="mb-1 text-xs text-dark-500">
+                        {t('admin.users.detail.firstConnection')}
+                      </div>
+                      <div className="text-sm text-dark-100">
+                        {panelInfo.first_connected_at
+                          ? new Date(panelInfo.first_connected_at).toLocaleDateString(locale, {
+                              day: '2-digit',
+                              month: '2-digit',
+                              year: 'numeric',
+                            })
+                          : '-'}
+                      </div>
+                    </div>
+                    {panelInfo.last_connected_node_name && (
+                      <div className="col-span-2 rounded-lg bg-dark-700/30 p-3">
+                        <div className="mb-1 text-xs text-dark-500">
+                          {t('admin.users.detail.lastNode')}
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-dark-100">
+                          <svg
+                            className="h-4 w-4 shrink-0 text-dark-400"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth={2}
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M5.25 14.25h13.5m-13.5 0a3 3 0 01-3-3m3 3a3 3 0 100 6h13.5a3 3 0 100-6m-16.5-3a3 3 0 013-3h13.5a3 3 0 013 3m-19.5 0a4.5 4.5 0 01.9-2.7L5.737 5.1a3.375 3.375 0 012.7-1.35h7.126c1.062 0 2.062.5 2.7 1.35l2.587 3.45a4.5 4.5 0 01.9 2.7m0 0a3 3 0 01-3 3m0 3h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008zm-3 6h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008z"
+                            />
+                          </svg>
+                          {panelInfo.last_connected_node_name}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+                {!panelInfoLoading && !panelInfo?.found && userSubscriptions.length > 0 && (
+                  <div className="py-2 text-center text-xs text-dark-500">
+                    {t('admin.users.detail.noVpnData')}
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Campaign */}
             {user.campaign_name && (
@@ -2483,6 +2644,142 @@ export default function AdminUserDetail() {
                     </div>
                   )}
                 </div>
+
+                {/* Subscription Request History */}
+                <div className="rounded-xl bg-dark-800/50">
+                  <button
+                    onClick={() => {
+                      const next = !requestHistoryExpanded;
+                      setRequestHistoryExpanded(next);
+                      if (next && requestHistory.length === 0) {
+                        loadRequestHistory(0);
+                      }
+                    }}
+                    className="flex w-full items-center justify-between p-4 text-left"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium text-dark-200">
+                        {t('admin.users.detail.requestHistory')}
+                      </span>
+                      {requestHistoryTotal > 0 && (
+                        <span className="rounded-full bg-accent-500/15 px-2 py-0.5 text-xs font-medium text-accent-400">
+                          {requestHistoryTotal}
+                        </span>
+                      )}
+                    </div>
+                    <svg
+                      className={`h-4 w-4 text-dark-500 transition-transform ${requestHistoryExpanded ? 'rotate-180' : ''}`}
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M19.5 8.25l-7.5 7.5-7.5-7.5"
+                      />
+                    </svg>
+                  </button>
+
+                  {requestHistoryExpanded && (
+                    <div className="border-t border-dark-700/50 px-4 pb-4 pt-3">
+                      {/* Subscription selector for multi-tariff */}
+                      {userSubscriptions.length > 1 && (
+                        <div className="mb-3">
+                          <select
+                            value={requestHistorySubId || ''}
+                            onChange={(e) => {
+                              setRequestHistorySubId(Number(e.target.value) || null);
+                            }}
+                            className="w-full rounded-lg border border-dark-600 bg-dark-700 px-3 py-2 text-sm text-dark-100"
+                          >
+                            {userSubscriptions.map((sub) => (
+                              <option key={sub.id} value={sub.id}>
+                                {sub.tariff_name || `#${sub.id}`} — {sub.status}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      )}
+
+                      {requestHistoryLoading && requestHistory.length === 0 ? (
+                        <div className="flex justify-center py-6">
+                          <div className="h-5 w-5 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
+                        </div>
+                      ) : requestHistory.length === 0 && !requestHistoryLoading ? (
+                        <div className="py-6 text-center text-sm text-dark-500">
+                          {t('admin.users.detail.noRequests')}
+                        </div>
+                      ) : (
+                        <>
+                          <div className="mb-2 text-xs text-dark-500">
+                            {t('admin.users.detail.requestHistoryTotal')}: {requestHistoryTotal}
+                          </div>
+
+                          {/* Table */}
+                          <div className="-mx-4 overflow-x-auto px-4">
+                            <table className="w-full min-w-[480px] text-left text-sm">
+                              <thead>
+                                <tr className="border-b border-dark-700/50 text-xs text-dark-500">
+                                  <th className="pb-2 pr-3 font-medium">
+                                    {t('admin.users.detail.requestAt')}
+                                  </th>
+                                  <th className="pb-2 pr-3 font-medium">
+                                    {t('admin.users.detail.requestIp')}
+                                  </th>
+                                  <th className="pb-2 font-medium">
+                                    {t('admin.users.detail.requestUserAgent')}
+                                  </th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {requestHistory.map((record, idx) => (
+                                  <tr
+                                    key={record.id}
+                                    className={`border-b border-dark-700/30 ${idx % 2 === 0 ? 'bg-dark-800/30' : ''}`}
+                                  >
+                                    <td className="whitespace-nowrap py-2.5 pr-3 text-dark-200">
+                                      {formatDate(record.requestAt)}
+                                    </td>
+                                    <td className="whitespace-nowrap py-2.5 pr-3 font-mono text-xs text-dark-300">
+                                      {record.requestIp || '\u2014'}
+                                    </td>
+                                    <td
+                                      className="max-w-[200px] truncate py-2.5 text-xs text-dark-400"
+                                      title={record.userAgent || ''}
+                                    >
+                                      {record.userAgent
+                                        ? record.userAgent.length > 60
+                                          ? `${record.userAgent.slice(0, 60)}...`
+                                          : record.userAgent
+                                        : '\u2014'}
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+
+                          {/* Load more */}
+                          {requestHistory.length < requestHistoryTotal && (
+                            <button
+                              onClick={() => loadRequestHistory(requestHistoryOffset, true)}
+                              disabled={requestHistoryLoading}
+                              className="mt-3 flex min-h-[44px] w-full items-center justify-center rounded-lg bg-dark-700/50 py-2.5 text-sm text-dark-300 transition-colors hover:bg-dark-700 disabled:opacity-50"
+                            >
+                              {requestHistoryLoading ? (
+                                <div className="h-4 w-4 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
+                              ) : (
+                                t('admin.users.detail.loadMore')
+                              )}
+                            </button>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  )}
+                </div>
               </>
             )}
           </div>
@@ -2931,32 +3228,13 @@ export default function AdminUserDetail() {
                             {formatDate(msg.created_at)}
                           </span>
                         </div>
-                        <p className="whitespace-pre-wrap text-sm text-dark-200">
-                          {msg.message_text}
-                        </p>
-                        {msg.has_media && msg.media_file_id && (
-                          <div className="mt-2">
-                            {msg.media_type === 'photo' ? (
-                              <img
-                                src={ticketsApi.getMediaUrl(msg.media_file_id)}
-                                alt={msg.media_caption || ''}
-                                className="max-h-48 max-w-full rounded-lg"
-                              />
-                            ) : (
-                              <a
-                                href={ticketsApi.getMediaUrl(msg.media_file_id)}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1 rounded-lg bg-dark-700 px-2 py-1 text-xs text-dark-200 hover:bg-dark-600"
-                              >
-                                {msg.media_caption || msg.media_type}
-                              </a>
-                            )}
-                            {msg.media_caption && msg.media_type === 'photo' && (
-                              <p className="mt-1 text-xs text-dark-400">{msg.media_caption}</p>
-                            )}
-                          </div>
+                        {msg.message_text && (
+                          <p
+                            className="whitespace-pre-wrap text-sm text-dark-200 [&_a]:text-accent-400 [&_a]:underline"
+                            dangerouslySetInnerHTML={{ __html: linkifyText(msg.message_text) }}
+                          />
                         )}
+                        <MessageMediaGrid message={msg} />
                       </div>
                     ))}
                     <div ref={messagesEndRef} />

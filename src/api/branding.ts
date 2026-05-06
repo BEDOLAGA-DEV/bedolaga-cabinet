@@ -38,10 +38,20 @@ export interface TelegramWidgetConfig {
   oidc_client_id: string;
 }
 
+export interface OfflineConvGoal {
+  name: string;
+  event_id: string;
+  dedup: string;
+}
+
 export interface AnalyticsCounters {
   yandex_metrika_id: string;
   google_ads_id: string;
   google_ads_label: string;
+  offline_conv_enabled?: boolean;
+  offline_conv_counter_id?: string;
+  offline_conv_measurement_secret_masked?: string;
+  offline_conv_goals?: OfflineConvGoal[];
 }
 
 const BRANDING_CACHE_KEY = 'cabinet_branding';
@@ -261,7 +271,14 @@ export const brandingApi = {
       const response = await apiClient.get<AnalyticsCounters>('/cabinet/branding/analytics');
       return response.data;
     } catch {
-      return { yandex_metrika_id: '', google_ads_id: '', google_ads_label: '' };
+      return {
+        yandex_metrika_id: '',
+        google_ads_id: '',
+        google_ads_label: '',
+        offline_conv_enabled: false,
+        offline_conv_counter_id: '',
+        offline_conv_goals: [],
+      };
     }
   },
 
@@ -289,5 +306,10 @@ export const brandingApi = {
   updateAnalyticsCounters: async (data: Partial<AnalyticsCounters>): Promise<AnalyticsCounters> => {
     const response = await apiClient.patch<AnalyticsCounters>('/cabinet/branding/analytics', data);
     return response.data;
+  },
+
+  // Store Yandex Metrika ClientID for the authenticated cabinet user
+  storeYandexCid: async (cid: string): Promise<void> => {
+    await apiClient.post('/cabinet/branding/analytics/yandex-cid', { cid });
   },
 };

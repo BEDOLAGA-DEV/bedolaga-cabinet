@@ -557,6 +557,17 @@ export const subscriptionApi = {
     return response.data;
   },
 
+  // ── Revoke (reissue) ────────────────────────────────────────────────
+
+  revokeSubscription: async (subscriptionId?: number) => {
+    const response = await apiClient.post(
+      '/cabinet/subscription/revoke',
+      undefined,
+      withSubId(subscriptionId),
+    );
+    return response.data;
+  },
+
   // ── Daily subscription ──────────────────────────────────────────────
 
   togglePause: async (
