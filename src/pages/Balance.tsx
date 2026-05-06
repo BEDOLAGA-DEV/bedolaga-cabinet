@@ -9,7 +9,12 @@ import { balanceApi } from '../api/balance';
 import { subscriptionApi } from '../api/subscription';
 import { useCurrency } from '../hooks/useCurrency';
 import { API } from '../config/constants';
-import type { PaginatedResponse, Transaction } from '../types';
+import type {
+  PaginatedResponse,
+  Transaction,
+  SubscriptionsListResponse,
+  SubscriptionStatusResponse,
+} from '../types';
 
 import { Card } from '@/components/data-display/Card';
 import { Button } from '@/components/primitives/Button';
@@ -106,6 +111,34 @@ export default function Balance() {
     queryFn: () => subscriptionApi.getRenewalOptions(),
     staleTime: 5 * 60 * 1000,
   });
+
+  const { data: multiSubData } = useQuery<SubscriptionsListResponse>({
+    queryKey: ['subscriptions-list'],
+    queryFn: () => subscriptionApi.getSubscriptions(),
+    staleTime: 60_000,
+  });
+  const isMultiTariff = multiSubData?.multi_tariff_enabled ?? false;
+
+  const { data: subscriptionResponse } = useQuery<SubscriptionStatusResponse>({
+    queryKey: ['subscription'],
+    queryFn: () => subscriptionApi.getSubscription(),
+    retry: false,
+    staleTime: API.BALANCE_STALE_TIME_MS,
+    enabled: !isMultiTariff,
+  });
+
+  const minDaysLeft = (() => {
+    if (isMultiTariff && multiSubData?.subscriptions?.length) {
+      const days = multiSubData.subscriptions
+        .filter((s) => s.end_date)
+        .map((s) => Math.ceil((new Date(s.end_date!).getTime() - Date.now()) / 86_400_000));
+      return days.length ? Math.min(...days) : null;
+    }
+    if (!isMultiTariff && subscriptionResponse?.subscription) {
+      return subscriptionResponse.subscription.days_left;
+    }
+    return null;
+  })();
 
   // Deferred: only fetch saved cards after payment methods loaded to avoid extra request on first render.
   // The recurrent_enabled flag is cached for 5 min to prevent refetching on every Balance visit.
@@ -242,7 +275,7 @@ export default function Balance() {
       </motion.div>
 
       {/* Renewal Hint */}
-      {renewal30 !== null && (
+      {renewal30 !== null && minDaysLeft !== null && minDaysLeft < 10 && (
         <motion.div variants={staggerItem}>
           {canRenew ? (
             <div className="rounded-[var(--bento-radius)] border border-success-500/30 bg-success-500/10 px-4 py-3 text-sm text-success-400">
