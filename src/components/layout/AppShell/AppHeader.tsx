@@ -221,14 +221,9 @@ export function AppHeader({
                 )}
               </div>
               {appName && (
-                <div className="flex flex-col leading-none">
-                  <span className="whitespace-nowrap text-base font-semibold text-dark-100">
-                    {appName}
-                  </span>
-                  <span className="mt-0 text-[9px] font-bold uppercase tracking-[.14em] text-accent-400">
-                    VPN SERVICE
-                  </span>
-                </div>
+                <span className="whitespace-nowrap text-base font-semibold text-dark-100">
+                  {appName}
+                </span>
               )}
             </Link>
 
