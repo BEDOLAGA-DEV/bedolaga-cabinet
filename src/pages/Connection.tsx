@@ -229,6 +229,7 @@ export default function Connection() {
       isTelegramWebApp={isTelegramWebApp}
       onGoBack={handleGoBack}
       onOpenQR={handleOpenQR}
+      subscriptionId={subId}
     />
   );
 }

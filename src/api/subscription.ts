@@ -480,6 +480,17 @@ export const subscriptionApi = {
     return response.data;
   },
 
+  sendTvQuickConnect: async (
+    qrData: string,
+    subscriptionId?: number,
+  ): Promise<{ status: string; provider: 'happ' | 'v2raytun' }> => {
+    const response = await apiClient.post(
+      '/cabinet/subscription/tv-quick-connect',
+      ...bodyWithSubId({ qr_data: qrData }, subscriptionId),
+    );
+    return response.data;
+  },
+
   getAppConfig: async (subscriptionId?: number): Promise<AppConfig> => {
     const response = await apiClient.get<AppConfig>(
       '/cabinet/subscription/app-config',

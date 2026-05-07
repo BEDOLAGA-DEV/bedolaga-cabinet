@@ -45,6 +45,7 @@ interface Props {
   isTelegramWebApp: boolean;
   onGoBack: () => void;
   onOpenQR?: () => void;
+  subscriptionId?: number;
 }
 
 export default function InstallationGuide({
@@ -53,6 +54,7 @@ export default function InstallationGuide({
   isTelegramWebApp,
   onGoBack,
   onOpenQR,
+  subscriptionId,
 }: Props) {
   const { t, i18n } = useTranslation();
   const { isLight } = useTheme();
@@ -348,7 +350,7 @@ export default function InstallationGuide({
               renderBlockButtons={renderBlockButtons}
             />
           )}
-          <TvQuickConnect subscriptionUrl={appConfig.subscriptionUrl} isLight={isLight} />
+          <TvQuickConnect isLight={isLight} subscriptionId={subscriptionId} />
           {selectedApp.blocks.length > 1 && (
             <Renderer
               blocks={selectedApp.blocks.slice(-1)}

@@ -628,17 +628,17 @@
     },
     "tvQuickConnect": {
       "title": "Connect TV",
-      "description": "Enter the 5-character code from your TV screen",
+      "description": "Enter the 5-character Happ code from your TV screen",
       "sendBtn": "Send to TV",
       "badCode": "Enter a 5-character code (letters and digits)",
       "sent": "Sent to TV!",
       "error": "Failed to send to TV",
       "scanTitle": "Scan QR Code",
-      "scanDescription": "Scan the QR code from your TV screen",
+      "scanDescription": "Scan the QR code from Happ or v2raytun on your TV screen",
       "scanBtn": "Scan QR from TV",
       "stopScan": "Close camera",
       "noCamera": "Camera access denied",
-      "codeFound": "Code found"
+      "codeFound": "TV QR code found"
     }
   },
   "balance": {

@@ -656,17 +656,17 @@
     },
     "tvQuickConnect": {
       "title": "Подключить TV",
-      "description": "Введите 5-значный код с экрана телевизора",
+      "description": "Введите 5-значный код Happ с экрана телевизора",
       "sendBtn": "Отправить на TV",
       "badCode": "Введите 5-значный код (буквы и цифры)",
       "sent": "Отправлено на TV!",
       "error": "Ошибка отправки на TV",
       "scanTitle": "Сканировать QR-код",
-      "scanDescription": "Отсканируйте QR-код с экрана телевизора",
+      "scanDescription": "Отсканируйте QR-код из Happ или v2raytun на экране телевизора",
       "scanBtn": "Сканировать QR с TV",
       "stopScan": "Закрыть камеру",
       "noCamera": "Нет доступа к камере",
-      "codeFound": "Код найден"
+      "codeFound": "QR-код TV найден"
     }
   },
   "balance": {

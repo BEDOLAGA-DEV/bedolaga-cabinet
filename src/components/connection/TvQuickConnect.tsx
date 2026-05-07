@@ -5,6 +5,7 @@ import {
   isQrScannerSupported,
   retrieveLaunchParams,
 } from '@telegram-apps/sdk-react';
+import { subscriptionApi } from '@/api/subscription';
 
 const TG_MOBILE_PLATFORMS = new Set(['ios', 'android', 'android_x', 'ios_x']);
 
@@ -17,12 +18,11 @@ function isTelegramMobile(): boolean {
   }
 }
 
-const HAPP_TV_API = 'https://check.happ.su/sendtv';
 const HTML5_QRCODE_CDN = 'https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js';
 
 interface Props {
-  subscriptionUrl: string;
   isLight: boolean;
+  subscriptionId?: number;
 }
 
 interface Html5QrcodeInstance {
@@ -36,7 +36,7 @@ interface Html5QrcodeInstance {
   clear: () => void;
 }
 
-export default function TvQuickConnect({ subscriptionUrl, isLight }: Props) {
+export default function TvQuickConnect({ isLight, subscriptionId }: Props) {
   const { t } = useTranslation();
   const [code, setCode] = useState('');
   const [sending, setSending] = useState(false);
@@ -73,42 +73,36 @@ export default function TvQuickConnect({ subscriptionUrl, isLight }: Props) {
   }, []);
 
   const sendToTV = useCallback(
-    async (tvCode: string) => {
+    async (qrData: string) => {
       if (sending) return;
-      const clean = tvCode.trim().toUpperCase();
-      if (!(clean.length === 5 && /^[A-Z0-9]+$/.test(clean))) {
-        showToast(t('subscription.tvQuickConnect.badCode'), 'error');
+      const payload = qrData.trim();
+      if (!payload) {
+        showToast(t('subscription.tvQuickConnect.error'), 'error');
         return;
       }
 
       setSending(true);
       try {
-        const b64 = btoa(unescape(encodeURIComponent(subscriptionUrl)));
-        const ctrl = new AbortController();
-        const timer = setTimeout(() => ctrl.abort(), 10000);
-
-        const res = await fetch(`${HAPP_TV_API}/${encodeURIComponent(clean)}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ data: b64 }),
-          signal: ctrl.signal,
-        });
-        clearTimeout(timer);
-
-        if (res.ok) {
-          showToast(t('subscription.tvQuickConnect.sent'), 'success');
-          setCode('');
-        } else {
-          showToast(t('subscription.tvQuickConnect.error'), 'error');
-        }
+        await subscriptionApi.sendTvQuickConnect(payload, subscriptionId);
+        showToast(t('subscription.tvQuickConnect.sent'), 'success');
+        setCode('');
       } catch {
         showToast(t('subscription.tvQuickConnect.error'), 'error');
       } finally {
         setSending(false);
       }
     },
-    [sending, subscriptionUrl, showToast, t],
+    [sending, subscriptionId, showToast, t],
   );
+
+  const sendManualCode = useCallback(() => {
+    const clean = code.trim().toUpperCase();
+    if (!(clean.length === 5 && /^[A-Z0-9]+$/.test(clean))) {
+      showToast(t('subscription.tvQuickConnect.badCode'), 'error');
+      return;
+    }
+    sendToTV(clean);
+  }, [code, sendToTV, showToast, t]);
 
   const stopScan = useCallback(() => {
     if (scannerRef.current) {
@@ -125,12 +119,18 @@ export default function TvQuickConnect({ subscriptionUrl, isLight }: Props) {
 
   const onScanDecoded = useCallback(
     (decoded: string) => {
-      const parsed = parseQRCode(decoded);
-      if (!parsed) return;
+      const payload = decoded.trim();
+      if (!payload) return;
       stopScan();
-      setCode(parsed);
-      showToast(`${t('subscription.tvQuickConnect.codeFound')}: ${parsed}`, 'success');
-      setTimeout(() => sendToTV(parsed), 500);
+      const happCode = parseHappCode(payload);
+      if (happCode) setCode(happCode);
+      showToast(
+        happCode
+          ? `${t('subscription.tvQuickConnect.codeFound')}: ${happCode}`
+          : t('subscription.tvQuickConnect.codeFound'),
+        'success',
+      );
+      setTimeout(() => sendToTV(payload), 500);
     },
     [stopScan, showToast, sendToTV, t],
   );
@@ -141,15 +141,13 @@ export default function TvQuickConnect({ subscriptionUrl, isLight }: Props) {
       try {
         const qr = await openQrScanner({
           text: t('subscription.tvQuickConnect.scanDescription'),
-          capture: (s: string) => parseQRCode(s) !== null,
+          capture: (s: string) => s.trim().length > 0,
         });
         if (qr) {
-          const parsed = parseQRCode(qr);
-          if (parsed) {
-            setCode(parsed);
-            showToast(t('subscription.tvQuickConnect.codeFound'), 'success');
-            sendToTV(parsed);
-          }
+          const happCode = parseHappCode(qr);
+          if (happCode) setCode(happCode);
+          showToast(t('subscription.tvQuickConnect.codeFound'), 'success');
+          sendToTV(qr);
         }
       } catch {
         showToast(t('subscription.tvQuickConnect.error'), 'error');
@@ -238,7 +236,7 @@ export default function TvQuickConnect({ subscriptionUrl, isLight }: Props) {
                 className={inputClass}
               />
               <button
-                onClick={() => sendToTV(code)}
+                onClick={sendManualCode}
                 disabled={sending || code.length !== 5}
                 className="btn-primary w-full justify-center py-3 disabled:opacity-50"
               >
@@ -333,7 +331,7 @@ export default function TvQuickConnect({ subscriptionUrl, isLight }: Props) {
   );
 }
 
-function parseQRCode(data: string): string | null {
+function parseHappCode(data: string): string | null {
   if (data.length === 5 && /^[A-Z0-9]+$/i.test(data)) {
     return data.toUpperCase();
   }
