@@ -2,6 +2,12 @@ import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { brandingApi } from '../api/branding';
 import { setYandexCid } from '../utils/yandexCid';
+import {
+  capturePartnerClickIdFromUrl,
+  getPartnerClickId,
+  isPartnerClickIdSent,
+  markPartnerClickIdSent,
+} from '../utils/partnerClickId';
 
 const YM_SCRIPT_ID = 'ym-counter-script';
 const GTAG_LOADER_ID = 'gtag-loader-script';
@@ -65,6 +71,37 @@ function injectGoogleAds(conversionId: string) {
  * Fetches analytics counter settings from the API and dynamically
  * injects Yandex Metrika and/or Google Ads scripts into <head>.
  */
+// Capture partner click_id from URL ASAP so it survives the user's navigation
+// to the auth flow.
+function _capturePartnerClickIdOnce() {
+  try {
+    capturePartnerClickIdFromUrl();
+  } catch {
+    /* ignore */
+  }
+}
+_capturePartnerClickIdOnce();
+
+async function _syncPartnerClickIdIfAuthenticated() {
+  try {
+    if (isPartnerClickIdSent()) return;
+    const id = getPartnerClickId();
+    if (!id) return;
+    let token: string | null = null;
+    try {
+      token = localStorage.getItem('access_token');
+    } catch {
+      /* ignore */
+    }
+    if (!token) return;
+    const { brandingApi } = await import('../api/branding');
+    await brandingApi.storePartnerClickId(id);
+    markPartnerClickIdSent();
+  } catch {
+    /* non-critical, retry on next mount */
+  }
+}
+
 export function useAnalyticsCounters() {
   const { data } = useQuery({
     queryKey: ['analytics-counters'],
@@ -91,6 +128,9 @@ export function useAnalyticsCounters() {
       removeElement(GTAG_LOADER_ID);
       removeElement(GTAG_INIT_ID);
     }
+    // Attempt to sync partner click_id (separate from yandex CID) every time
+    // the analytics data refreshes — covers fresh logins.
+    void _syncPartnerClickIdIfAuthenticated();
   }, [data]);
 }
 
