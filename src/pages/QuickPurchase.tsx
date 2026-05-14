@@ -19,6 +19,7 @@ import LanguageSwitcher from '../components/LanguageSwitcher';
 import { cn } from '../lib/utils';
 import { getApiErrorMessage } from '../utils/api-error';
 import { formatPrice } from '../utils/format';
+import { useCurrency } from '../hooks/useCurrency';
 
 function detectContactType(value: string): 'email' | 'telegram' {
   return value.startsWith('@') ? 'telegram' : 'email';
@@ -794,6 +795,10 @@ export default function QuickPurchase() {
   const { slug } = useParams<{ slug: string }>();
   const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
+
+  // Подгружаем курсы валют, чтобы formatPrice конвертировал суммы для не-RU локалей
+  // (хук кладёт rates в глобальный кэш utils/format.ts).
+  useCurrency();
 
   // Fetch config
   const {

@@ -66,6 +66,7 @@ export default function AdminPaymentMethodEdit() {
   const [firstTopupFilter, setFirstTopupFilter] = useState<'any' | 'yes' | 'no'>('any');
   const [promoGroupFilterMode, setPromoGroupFilterMode] = useState<'all' | 'selected'>('all');
   const [selectedPromoGroupIds, setSelectedPromoGroupIds] = useState<number[]>([]);
+  const [openUrlDirect, setOpenUrlDirect] = useState(false);
 
   // Initialize state when config loads
   useEffect(() => {
@@ -79,6 +80,8 @@ export default function AdminPaymentMethodEdit() {
       setFirstTopupFilter(config.first_topup_filter);
       setPromoGroupFilterMode(config.promo_group_filter_mode);
       setSelectedPromoGroupIds(config.allowed_promo_group_ids);
+      // ?? false — защита от stale-config (backend ещё не пришёл с миграцией)
+      setOpenUrlDirect(config.open_url_direct ?? false);
     }
   }, [config]);
 
@@ -100,6 +103,7 @@ export default function AdminPaymentMethodEdit() {
       first_topup_filter: firstTopupFilter,
       promo_group_filter_mode: promoGroupFilterMode,
       allowed_promo_group_ids: promoGroupFilterMode === 'selected' ? selectedPromoGroupIds : [],
+      open_url_direct: openUrlDirect,
     };
 
     // Display name
@@ -210,6 +214,34 @@ export default function AdminPaymentMethodEdit() {
             <span
               className={`absolute top-1 h-4 w-4 rounded-full bg-white transition-transform ${
                 isEnabled ? 'left-6' : 'left-1'
+              }`}
+            />
+          </button>
+        </div>
+
+        {/* Open URL directly toggle */}
+        <div className="flex items-center justify-between border-t border-dark-800 pt-6">
+          <div className="pr-4">
+            <div className="text-sm font-medium text-dark-200">
+              {t('admin.paymentMethods.openUrlDirect', 'Открывать страницу оплаты сразу')}
+            </div>
+            <div className="mt-0.5 text-xs text-dark-500">
+              {t(
+                'admin.paymentMethods.openUrlDirectHint',
+                'Без панели со ссылкой — провайдер открывается внутри MiniApp/вкладки сразу после клика. После оплаты юзер возвращается на /balance/result.',
+              )}
+            </div>
+          </div>
+          <button
+            onClick={() => setOpenUrlDirect(!openUrlDirect)}
+            className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${
+              openUrlDirect ? 'bg-accent-500' : 'bg-dark-600'
+            }`}
+            aria-label={t('admin.paymentMethods.openUrlDirect', 'Open payment page directly')}
+          >
+            <span
+              className={`absolute top-1 h-4 w-4 rounded-full bg-white transition-transform ${
+                openUrlDirect ? 'left-6' : 'left-1'
               }`}
             />
           </button>

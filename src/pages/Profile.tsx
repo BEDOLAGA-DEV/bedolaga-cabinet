@@ -5,6 +5,7 @@ import { usePlatform } from '@/platform';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '../store/auth';
+import { displayName } from '../utils/displayName';
 import { authApi } from '../api/auth';
 import { isValidEmail } from '../utils/validation';
 import {
@@ -333,9 +334,7 @@ export default function Profile() {
             )}
             <div className="flex items-center justify-between border-b border-dark-800/50 py-3">
               <span className="text-dark-400">{t('profile.name')}</span>
-              <span className="font-medium text-dark-100">
-                {user?.first_name} {user?.last_name}
-              </span>
+              <span className="font-medium text-dark-100">{displayName(user)}</span>
             </div>
             <div className="flex items-center justify-between py-3">
               <span className="text-dark-400">{t('profile.registeredAt')}</span>

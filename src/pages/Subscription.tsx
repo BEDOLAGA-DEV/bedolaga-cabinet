@@ -1576,10 +1576,11 @@ export default function Subscription() {
                         <div className="mb-2 text-sm text-dark-400">
                           {/* Show original price with strikethrough if discount */}
                           {devicePriceData.discount_percent &&
-                          devicePriceData.discount_percent > 0 ? (
+                          devicePriceData.discount_percent > 0 &&
+                          devicePriceData.original_price_per_device_kopeks ? (
                             <span>
                               <span className="text-dark-500 line-through">
-                                {formatPrice(devicePriceData.original_price_per_device_kopeks || 0)}
+                                {formatPrice(devicePriceData.original_price_per_device_kopeks)}
                               </span>
                               <span className="mx-1">{devicePriceData.price_per_device_label}</span>
                             </span>
