@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.52.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.51.0...v1.52.0) (2026-05-13)
+
+
+### Features
+
+* **topup:** direct-open payment page when method.open_url_direct is set ([aa8bfc9](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/aa8bfc9d0859bcbe31de60f7127e5e606e146316))
+
+
+### Bug Fixes
+
+* **build:** drop redundant dynamic import of branding api ([7ae2787](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/7ae2787596070b0a4cd3b323cdbf463cc14a1f2c))
+* **cabinet:** show trial offer in multi-tariff mode ([7c10843](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/7c10843d9c318c82c8525949c40ab94861041039))
+* **dashboard:** show full name on welcome, fix gender mismatch on trial-expired card ([4de01cc](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/4de01ccd1df913510aab2368552e6f993e7aa25f))
+* **format:** convert price by exchange rate on landings and gift page ([6ffd0ae](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/6ffd0ae824c3480beb4a2f6f6b2567953741f856))
+* **profile:** use displayName helper for name field ([172850e](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/172850e13a83f0ee57225985b46ffda84b4ba1a4))
+* **subscription:** hide strikethrough free label on device addon price ([1fdafbd](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/1fdafbd0a1a5dbfc34b2ea9044d248487278a335))
+* **topup:** preserve canonical RUB amount to avoid FX round-trip shortfall ([2a342f6](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/2a342f6adc9ee4e2d0c157b69edc7213e1dc2d1b))
+
 ## [1.51.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.50.0...v1.51.0) (2026-05-04)
 
 

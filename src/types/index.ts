@@ -442,6 +442,9 @@ export interface PaymentMethod {
   max_amount_kopeks: number;
   is_available: boolean;
   options?: PaymentMethodOption[] | null;
+  // Если true — после получения payment_url кабинет сразу делает
+  // window.location.href вместо показа панели с кнопкой "Открыть".
+  open_url_direct?: boolean;
 }
 
 // Referral types
@@ -682,6 +685,7 @@ export interface PaymentMethodConfig {
   first_topup_filter: 'any' | 'yes' | 'no';
   promo_group_filter_mode: 'all' | 'selected';
   allowed_promo_group_ids: number[];
+  open_url_direct: boolean;
   is_provider_configured: boolean;
   created_at: string | null;
   updated_at: string | null;

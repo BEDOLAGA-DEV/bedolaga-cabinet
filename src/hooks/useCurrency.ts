@@ -1,7 +1,8 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { currencyApi, type ExchangeRates } from '../api/currency';
+import { setExchangeRates as setGlobalExchangeRates } from '../utils/format';
 
 // Map language to currency
 const LANGUAGE_CURRENCY_MAP: Record<string, keyof ExchangeRates | 'RUB'> = {
@@ -29,6 +30,12 @@ export function useCurrency() {
     refetchOnWindowFocus: false,
     retry: 2,
   });
+
+  // Делимся курсом с синхронным formatPrice из utils/format.ts —
+  // у него нет своего источника rates, а на лендинге его дёргают subcomponents.
+  useEffect(() => {
+    setGlobalExchangeRates(exchangeRates);
+  }, [exchangeRates]);
 
   // Get current language and currency
   const currentLanguage = i18n.language;

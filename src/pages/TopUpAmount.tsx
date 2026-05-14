@@ -170,7 +170,8 @@ export default function TopUpAmount() {
       : converted.toFixed(2);
   };
 
-  const [amount, setAmount] = useState(getInitialAmount);
+  const initialDisplayAmount = getInitialAmount();
+  const [amount, setAmount] = useState(initialDisplayAmount);
   const [error, setError] = useState<string | null>(null);
   const [selectedOption, setSelectedOption] = useState<string | null>(
     getPreferredOptionId(method?.options),
@@ -254,9 +255,8 @@ export default function TopUpAmount() {
     onSuccess: (data) => {
       const redirectUrl = data.payment_url || data.invoice_url;
       if (redirectUrl) {
-        setPaymentUrl(redirectUrl);
-
-        // Save payment info for the result page
+        // Save payment info for the result page (do BEFORE possible redirect,
+        // иначе после window.location.href этот код не выполнится).
         if (method && data.payment_id) {
           const methodKey = method.id.toLowerCase().replace(/-/g, '_');
           const displayName =
@@ -269,6 +269,29 @@ export default function TopUpAmount() {
             created_at: Date.now(),
           });
         }
+
+        // open_url_direct: seamless флоу как при покупке подарка.
+        // window.location.href внутри Telegram MiniApp WebView навигирует
+        // в том же контейнере без открытия внешнего браузера. После
+        // оплаты return_url возвращает на /balance/top-up/result.
+        //
+        // t.me/ URL (Telegram Stars, CryptoBot) — всегда через нативный
+        // handler (openInvoice / openTelegramLink в setPaymentUrl-ветке).
+        // Stars уже отбит раньше через starsPaymentMutation, здесь — защита
+        // на случай CryptoBot и других Telegram-deep-link провайдеров.
+        // toLowerCase для устойчивости к редким провайдерам, которые могут вернуть
+        // URL в нестандартном регистре. Также покрываем tg:// scheme на всякий случай.
+        const lowerUrl = redirectUrl.toLowerCase();
+        const isTelegramDeepLink =
+          lowerUrl.startsWith('https://t.me/') ||
+          lowerUrl.startsWith('http://t.me/') ||
+          lowerUrl.startsWith('tg://');
+        if (method?.open_url_direct && !isTelegramDeepLink) {
+          window.location.href = redirectUrl;
+          return;
+        }
+
+        setPaymentUrl(redirectUrl);
       }
     },
     onError: (err: unknown) => {
@@ -334,7 +357,22 @@ export default function TopUpAmount() {
       return;
     }
 
-    const amountKopeks = Math.round(amountRubles * 100);
+    // Сохраняем canonical RUB amount если юзер НЕ редактировал префилл.
+    // Display-rounding в `.toFixed(2)` теряет точность: 150₽ при rate=90.66 → "1.65" USD
+    // (округление вниз с 1.6545), back-конвертация даёт 1.65 × 90.66 = 149.589₽ < 150₽
+    // → юзер не может купить подписку 150₽. С canonical RUB обходим FX round-trip.
+    //
+    // Math.ceil для не-RUB локалей покрывает остаточные sub-копеечные ошибки
+    // floating-point, когда юзер реально вводит свой amount.
+    const userEditedAmount = amount.trim() !== initialDisplayAmount.trim();
+    let amountKopeks: number;
+    if (!userEditedAmount && initialAmountRubles && initialAmountRubles > 0) {
+      amountKopeks = Math.round(initialAmountRubles * 100);
+    } else if (targetCurrency === 'RUB') {
+      amountKopeks = Math.round(amountRubles * 100);
+    } else {
+      amountKopeks = Math.ceil(amountRubles * 100);
+    }
     if (isStarsMethod) {
       starsPaymentMutation.mutate(amountKopeks);
     } else {

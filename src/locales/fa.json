@@ -2082,6 +2082,8 @@
       "noMethods": "هیچ روش پرداخت پیکربندی‌شده‌ای نیست",
       "methodEnabled": "روش فعال است",
       "providerNotConfigured": "ارائه‌دهنده در env تنظیم نشده",
+      "openUrlDirect": "صفحه پرداخت را مستقیماً باز کن",
+      "openUrlDirectHint": "بدون پنل لینک — ارائه‌دهنده داخل MiniApp/تب بلافاصله پس از کلیک باز می‌شود. پس از پرداخت کاربر به /balance/top-up/result بازمی‌گردد. برای Stars/CryptoBot و سایر لینک‌های t.me/ این پرچم نادیده گرفته می‌شود.",
       "displayName": "نام نمایشی",
       "displayNameHint": "برای نام پیش‌فرض خالی بگذارید",
       "subOptions": "گزینه‌های پرداخت",

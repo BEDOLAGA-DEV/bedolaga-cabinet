@@ -1280,6 +1280,8 @@
       "noMethods": "没有配置的支付方法",
       "methodEnabled": "方法已启用",
       "providerNotConfigured": "提供商未在env中配置",
+      "openUrlDirect": "直接打开支付页面",
+      "openUrlDirectHint": "跳过链接面板 — 点击后提供商在 MiniApp/标签页内直接打开。支付完成后用户返回 /balance/top-up/result。Stars/CryptoBot 和其他 t.me/ 链接忽略此标志。",
       "displayName": "显示名称",
       "displayNameHint": "留空以使用默认名称",
       "subOptions": "支付选项",

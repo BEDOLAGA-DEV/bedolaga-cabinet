@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../store/auth';
+import { displayName } from '../utils/displayName';
 import { useBlockingStore } from '../store/blocking';
 import { subscriptionApi } from '../api/subscription';
 import { referralApi } from '../api/referral';
@@ -195,7 +196,12 @@ export default function Dashboard() {
     refreshTrafficMutation.mutate();
   }, [subscription, refreshTrafficMutation]);
 
-  const hasNoSubscription = subscriptionResponse?.has_subscription === false && !subLoading;
+  // В multi-tariff /cabinet/subscription отключён, поэтому subscriptionResponse=undefined.
+  // Используем список из /cabinet/subscriptions/list — пустой массив означает «нет подписок»,
+  // и тогда показываем TrialOfferCard. Без этой ветки multi-tariff юзер никогда не видел триал.
+  const hasNoSubscription = isMultiTariff
+    ? multiSubData !== undefined && (multiSubData.subscriptions?.length ?? 0) === 0
+    : subscriptionResponse?.has_subscription === false && !subLoading;
 
   // Show onboarding for new users after data loads
   useEffect(() => {
@@ -249,7 +255,7 @@ export default function Dashboard() {
       {/* Header */}
       <div data-onboarding="welcome">
         <h1 className="text-2xl font-bold text-dark-50 sm:text-3xl">
-          {t('dashboard.welcome', { name: user?.first_name || user?.username || '' })}
+          {t('dashboard.welcome', { name: displayName(user) })}
         </h1>
         <div className="mt-1 flex flex-wrap items-center gap-2">
           <p className="text-dark-400">{t('dashboard.yourSubscription')}</p>

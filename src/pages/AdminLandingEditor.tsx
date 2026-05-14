@@ -13,6 +13,7 @@ import {
 } from '../api/landings';
 import { tariffsApi, TariffListItem, PeriodPrice } from '../api/tariffs';
 import { formatPrice } from '../utils/format';
+import { useCurrency } from '../hooks/useCurrency';
 import { adminPaymentMethodsApi } from '../api/adminPaymentMethods';
 import { Toggle, LocaleTabs, LocalizedInput } from '../components/admin';
 import { BackgroundConfigEditor } from '../components/admin/BackgroundConfigEditor';
@@ -96,6 +97,9 @@ export default function AdminLandingEditor() {
   const notify = useNotify();
   const { capabilities } = usePlatform();
   const isEdit = !!id;
+
+  // Прогреваем кэш курсов валют для formatPrice (preview лендинга в не-RU локали).
+  useCurrency();
 
   // Section visibility
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({

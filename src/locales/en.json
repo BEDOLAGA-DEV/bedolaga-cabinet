@@ -1515,6 +1515,8 @@
       "noMethods": "No payment methods configured",
       "methodEnabled": "Method enabled",
       "providerNotConfigured": "Provider not configured in env",
+      "openUrlDirect": "Open payment page directly",
+      "openUrlDirectHint": "Skip the link panel — the provider opens inside the MiniApp/tab right after the click. After payment the user returns to /balance/top-up/result. Ignored for Stars/CryptoBot and other t.me/ links.",
       "displayName": "Display name",
       "displayNameHint": "Leave empty for default name",
       "subOptions": "Payment options",

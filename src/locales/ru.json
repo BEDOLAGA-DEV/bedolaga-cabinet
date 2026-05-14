@@ -285,6 +285,7 @@
       "traffic": "Трафик",
       "devices": "Устройства",
       "expiredDate": "Истекла",
+      "expiredDate_trial": "Истёк",
       "activeUntil": "Активна до"
     },
     "suspended": {
@@ -1536,6 +1537,8 @@
       "noMethods": "Нет настроенных платёжных методов",
       "methodEnabled": "Метод включён",
       "providerNotConfigured": "Провайдер не настроен в env",
+      "openUrlDirect": "Открывать страницу оплаты сразу",
+      "openUrlDirectHint": "Без панели со ссылкой — провайдер открывается внутри MiniApp/вкладки сразу после клика. После оплаты юзер возвращается на /balance/top-up/result. Для Stars/CryptoBot и других t.me/-ссылок флаг игнорируется.",
       "displayName": "Отображаемое имя",
       "displayNameHint": "Оставьте пустым для имени по умолчанию",
       "subOptions": "Варианты оплаты",
