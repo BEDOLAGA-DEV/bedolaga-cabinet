@@ -127,25 +127,6 @@ export default function Login() {
   const handleOAuthLogin = async (provider: string) => {
     setError('');
     setOauthLoading(provider);
-    // #region agent log
-    fetch('http://127.0.0.1:7838/ingest/b66444f4-4002-4c2a-9afb-14fa0c7c2198', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '24d8ec' },
-      body: JSON.stringify({
-        sessionId: '24d8ec',
-        runId: 'initial',
-        hypothesisId: 'H2,H3',
-        location: 'src/pages/Login.tsx:handleOAuthLogin',
-        message: 'oauth login clicked',
-        data: {
-          provider,
-          isTelegramWebApp: isInTelegramWebApp(),
-          loadedProviderNames: oauthProviders.map((item) => item.name),
-        },
-        timestamp: Date.now(),
-      }),
-    }).catch(() => {});
-    // #endregion
 
     if (provider === 'apple' && isInTelegramWebApp()) {
       setError(
@@ -160,32 +141,6 @@ export default function Login() {
         provider,
         provider === 'apple' ? 'web' : undefined,
       );
-      // #region agent log
-      fetch('http://127.0.0.1:7838/ingest/b66444f4-4002-4c2a-9afb-14fa0c7c2198', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '24d8ec' },
-        body: JSON.stringify({
-          sessionId: '24d8ec',
-          runId: 'initial',
-          hypothesisId: 'H3',
-          location: 'src/pages/Login.tsx:authorizeResponse',
-          message: 'oauth authorize response received',
-          data: {
-            provider,
-            hasAuthorizeUrl: Boolean(authorizeResponse.authorize_url),
-            clientType: authorizeResponse.client_type ?? null,
-            hasNonce: Boolean(authorizeResponse.nonce),
-            authorizeHost: authorizeResponse.authorize_url
-              ? new URL(authorizeResponse.authorize_url).host
-              : null,
-            authorizeProtocol: authorizeResponse.authorize_url
-              ? new URL(authorizeResponse.authorize_url).protocol
-              : null,
-          },
-          timestamp: Date.now(),
-        }),
-      }).catch(() => {});
-      // #endregion
 
       if (provider === 'apple') {
         const { code, state, user } = await signInWithApple(authorizeResponse);

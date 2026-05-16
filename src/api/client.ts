@@ -126,31 +126,6 @@ apiClient.interceptors.request.use(async (config: InternalAxiosRequestConfig) =>
     config.headers[CSRF_HEADER_NAME] = ensureCsrfToken();
   }
 
-  if (config.url?.startsWith('/cabinet/auth/')) {
-    // #region agent log
-    fetch('http://127.0.0.1:7838/ingest/b66444f4-4002-4c2a-9afb-14fa0c7c2198', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '24d8ec' },
-      body: JSON.stringify({
-        sessionId: '24d8ec',
-        runId: 'initial',
-        hypothesisId: 'H1,H5',
-        location: 'src/api/client.ts:request',
-        message: 'auth api request prepared',
-        data: {
-          baseURL: config.baseURL,
-          url: config.url,
-          method: config.method,
-          isAuthEndpoint: isAuthEndpoint(config.url),
-          hasAccessToken: Boolean(tokenStorage.getAccessToken()),
-          hasRefreshToken: Boolean(tokenStorage.getRefreshToken()),
-        },
-        timestamp: Date.now(),
-      }),
-    }).catch(() => {});
-    // #endregion
-  }
-
   return config;
 });
 
@@ -223,32 +198,6 @@ apiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
-
-    if (originalRequest?.url?.startsWith('/cabinet/auth/')) {
-      // #region agent log
-      fetch('http://127.0.0.1:7838/ingest/b66444f4-4002-4c2a-9afb-14fa0c7c2198', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '24d8ec' },
-        body: JSON.stringify({
-          sessionId: '24d8ec',
-          runId: 'initial',
-          hypothesisId: 'H1,H5',
-          location: 'src/api/client.ts:response-error',
-          message: 'auth api response error',
-          data: {
-            baseURL: originalRequest.baseURL,
-            url: originalRequest.url,
-            method: originalRequest.method,
-            status: error.response?.status,
-            code: error.code,
-            hasResponse: Boolean(error.response),
-            detailType: typeof (error.response?.data as { detail?: unknown } | undefined)?.detail,
-          },
-          timestamp: Date.now(),
-        }),
-      }).catch(() => {});
-      // #endregion
-    }
 
     if (isMaintenanceError(error)) {
       const detail = (error.response?.data as { detail: MaintenanceError }).detail;
