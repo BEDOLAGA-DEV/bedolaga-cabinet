@@ -176,10 +176,50 @@ export const authApi = {
   },
 
   getOAuthProviders: async (): Promise<{ providers: OAuthProvider[] }> => {
-    const response = await apiClient.get<{ providers: OAuthProvider[] }>(
-      '/cabinet/auth/oauth/providers',
-    );
-    return response.data;
+    try {
+      const response = await apiClient.get<{ providers: OAuthProvider[] }>(
+        '/cabinet/auth/oauth/providers',
+      );
+      // #region agent log
+      fetch('http://127.0.0.1:7838/ingest/b66444f4-4002-4c2a-9afb-14fa0c7c2198', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '24d8ec' },
+        body: JSON.stringify({
+          sessionId: '24d8ec',
+          runId: 'initial',
+          hypothesisId: 'H1,H2',
+          location: 'src/api/auth.ts:getOAuthProviders',
+          message: 'oauth providers loaded',
+          data: {
+            providerNames: response.data.providers.map((provider) => provider.name),
+            providerCount: response.data.providers.length,
+          },
+          timestamp: Date.now(),
+        }),
+      }).catch(() => {});
+      // #endregion
+      return response.data;
+    } catch (error) {
+      // #region agent log
+      fetch('http://127.0.0.1:7838/ingest/b66444f4-4002-4c2a-9afb-14fa0c7c2198', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '24d8ec' },
+        body: JSON.stringify({
+          sessionId: '24d8ec',
+          runId: 'initial',
+          hypothesisId: 'H1,H2',
+          location: 'src/api/auth.ts:getOAuthProviders',
+          message: 'oauth providers failed',
+          data: {
+            status: (error as { response?: { status?: number } }).response?.status,
+            code: (error as { code?: string }).code,
+          },
+          timestamp: Date.now(),
+        }),
+      }).catch(() => {});
+      // #endregion
+      throw error;
+    }
   },
 
   getOAuthAuthorizeUrl: async (

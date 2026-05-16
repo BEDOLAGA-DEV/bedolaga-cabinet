@@ -42,6 +42,26 @@ export default function OAuthCallback() {
     const code = searchParams.get('code');
     const urlState = searchParams.get('state');
     const deviceId = searchParams.get('device_id');
+    // #region agent log
+    fetch('http://127.0.0.1:7838/ingest/b66444f4-4002-4c2a-9afb-14fa0c7c2198', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '24d8ec' },
+      body: JSON.stringify({
+        sessionId: '24d8ec',
+        runId: 'initial',
+        hypothesisId: 'H4',
+        location: 'src/pages/OAuthCallback.tsx:params',
+        message: 'oauth callback params parsed',
+        data: {
+          hasCode: Boolean(code),
+          hasState: Boolean(urlState),
+          hasDeviceId: Boolean(deviceId),
+          searchKeys: Array.from(searchParams.keys()),
+        },
+        timestamp: Date.now(),
+      }),
+    }).catch(() => {});
+    // #endregion
 
     if (!code || !urlState) {
       setError(t('auth.oauthError', 'Authorization was denied or failed'));
@@ -57,6 +77,7 @@ export default function OAuthCallback() {
     let state: string | undefined;
 
     const linkSaved = peekLinkOAuthState();
+    let loginSavedForLog: ReturnType<typeof loadOAuthState> = null;
     if (linkSaved && linkSaved.state === urlState) {
       clearLinkOAuthState();
       mode = 'link-browser';
@@ -64,6 +85,7 @@ export default function OAuthCallback() {
       state = linkSaved.state;
     } else {
       const loginSaved = loadOAuthState();
+      loginSavedForLog = loginSaved;
       if (loginSaved && loginSaved.state === urlState) {
         clearOAuthState();
         mode = 'login';
@@ -71,6 +93,27 @@ export default function OAuthCallback() {
         state = loginSaved.state;
       }
     }
+    // #region agent log
+    fetch('http://127.0.0.1:7838/ingest/b66444f4-4002-4c2a-9afb-14fa0c7c2198', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '24d8ec' },
+      body: JSON.stringify({
+        sessionId: '24d8ec',
+        runId: 'initial',
+        hypothesisId: 'H4',
+        location: 'src/pages/OAuthCallback.tsx:mode',
+        message: 'oauth callback mode selected',
+        data: {
+          mode,
+          provider: provider ?? null,
+          hasResolvedState: Boolean(state),
+          hasLinkSaved: Boolean(linkSaved),
+          hasLoginSaved: Boolean(loginSavedForLog),
+        },
+        timestamp: Date.now(),
+      }),
+    }).catch(() => {});
+    // #endregion
 
     const handle = async () => {
       // Clear sensitive OAuth params (code, state) from URL immediately for all modes

@@ -319,28 +319,92 @@ export const useAuthStore = create<AuthState>()(
       },
 
       loginWithOAuth: async (provider, code, state, deviceId, user) => {
+        // #region agent log
+        fetch('http://127.0.0.1:7838/ingest/b66444f4-4002-4c2a-9afb-14fa0c7c2198', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '24d8ec' },
+          body: JSON.stringify({
+            sessionId: '24d8ec',
+            runId: 'initial',
+            hypothesisId: 'H5',
+            location: 'src/store/auth.ts:loginWithOAuth:start',
+            message: 'oauth token exchange starting',
+            data: {
+              provider,
+              hasCode: Boolean(code),
+              hasState: Boolean(state),
+              hasDeviceId: Boolean(deviceId),
+              hasAppleUserPayload: Boolean(user),
+            },
+            timestamp: Date.now(),
+          }),
+        }).catch(() => {});
+        // #endregion
         const campaignSlug = getPendingCampaignSlug();
         const referralCode = getPendingReferralCode();
-        const response = await authApi.oauthCallback(
-          provider,
-          code,
-          state,
-          deviceId,
-          campaignSlug,
-          referralCode,
-          user,
-        );
-        consumeCampaignSlug();
-        consumeReferralCode();
-        tokenStorage.setTokens(response.access_token, response.refresh_token);
-        set({
-          accessToken: response.access_token,
-          refreshToken: response.refresh_token,
-          user: response.user,
-          isAuthenticated: true,
-          pendingCampaignBonus: response.campaign_bonus || null,
-        });
-        await get().checkAdminStatus();
+        try {
+          const response = await authApi.oauthCallback(
+            provider,
+            code,
+            state,
+            deviceId,
+            campaignSlug,
+            referralCode,
+            user,
+          );
+          consumeCampaignSlug();
+          consumeReferralCode();
+          tokenStorage.setTokens(response.access_token, response.refresh_token);
+          set({
+            accessToken: response.access_token,
+            refreshToken: response.refresh_token,
+            user: response.user,
+            isAuthenticated: true,
+            pendingCampaignBonus: response.campaign_bonus || null,
+          });
+          await get().checkAdminStatus();
+          // #region agent log
+          fetch('http://127.0.0.1:7838/ingest/b66444f4-4002-4c2a-9afb-14fa0c7c2198', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '24d8ec' },
+            body: JSON.stringify({
+              sessionId: '24d8ec',
+              runId: 'initial',
+              hypothesisId: 'H5',
+              location: 'src/store/auth.ts:loginWithOAuth:success',
+              message: 'oauth login completed',
+              data: {
+                provider,
+                hasAccessToken: Boolean(response.access_token),
+                hasRefreshToken: Boolean(response.refresh_token),
+                userAuthType: response.user?.auth_type ?? null,
+              },
+              timestamp: Date.now(),
+            }),
+          }).catch(() => {});
+          // #endregion
+        } catch (error) {
+          // #region agent log
+          fetch('http://127.0.0.1:7838/ingest/b66444f4-4002-4c2a-9afb-14fa0c7c2198', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '24d8ec' },
+            body: JSON.stringify({
+              sessionId: '24d8ec',
+              runId: 'initial',
+              hypothesisId: 'H5',
+              location: 'src/store/auth.ts:loginWithOAuth:error',
+              message: 'oauth login failed',
+              data: {
+                provider,
+                status: (error as { response?: { status?: number } }).response?.status,
+                code: (error as { code?: string }).code,
+              },
+              timestamp: Date.now(),
+            }),
+          }).catch(() => {});
+          // #endregion
+          throw error;
+        }
       },
 
       loginWithDeepLink: async (token, campaignSlug) => {
