@@ -94,7 +94,6 @@ async function _syncPartnerClickIdIfAuthenticated() {
       /* ignore */
     }
     if (!token) return;
-    const { brandingApi } = await import('../api/branding');
     await brandingApi.storePartnerClickId(id);
     markPartnerClickIdSent();
   } catch {
