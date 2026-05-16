@@ -73,7 +73,15 @@ VITE_API_URL=/api
 VITE_TELEGRAM_BOT_USERNAME=your_bot_username
 VITE_APP_NAME=My VPN
 VITE_APP_LOGO=V
+
+# Optional: mobile deeplinks for verify-email/reset-password
+VITE_MOBILE_DEEPLINK_SCHEME=app
+MOBILE_IOS_APP_IDS=TEAM_ID.com.example.app
+MOBILE_ANDROID_PACKAGE_NAME=com.example.app
+MOBILE_ANDROID_SHA256_CERT_FINGERPRINTS=AA:BB:CC:...
 ```
+
+Подробнее о Universal Links/App Links и custom scheme: [`docs/MOBILE_DEEPLINKS.md`](docs/MOBILE_DEEPLINKS.md).
 
 Соберите и извлеките:
 
@@ -148,6 +156,19 @@ server {
 
     gzip on;
     gzip_types text/plain text/css application/json application/javascript text/xml image/svg+xml;
+
+    # Mobile deeplink association files
+    location = /.well-known/apple-app-site-association {
+        default_type application/json;
+        try_files $uri =404;
+        add_header Cache-Control "public, max-age=300";
+    }
+
+    location = /.well-known/assetlinks.json {
+        default_type application/json;
+        try_files $uri =404;
+        add_header Cache-Control "public, max-age=300";
+    }
 
     # API запросы → backend бота
     location /api/ {

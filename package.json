@@ -6,8 +6,8 @@
   "license": "AGPL-3.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
+    "dev": "node scripts/generate-mobile-deeplinks.mjs && vite",
+    "build": "node scripts/generate-mobile-deeplinks.mjs && tsc && vite build",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write \"src/**/*.{ts,tsx,css,json}\"",
