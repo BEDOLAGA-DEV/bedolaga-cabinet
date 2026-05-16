@@ -23,6 +23,7 @@ import TelegramLoginButton from '../components/TelegramLoginButton';
 import OAuthProviderIcon from '../components/OAuthProviderIcon';
 import { saveOAuthState } from '../utils/oauth';
 import { getPendingReferralCode } from '../utils/referral';
+import { signInWithApple } from '../utils/appleSignIn';
 
 export default function Login() {
   const { t } = useTranslation();
@@ -34,6 +35,7 @@ export default function Login() {
     loginWithTelegram,
     loginWithEmail,
     registerWithEmail,
+    loginWithOAuth,
   } = useAuthStore(
     useShallow((state) => ({
       isAuthenticated: state.isAuthenticated,
@@ -41,6 +43,7 @@ export default function Login() {
       loginWithTelegram: state.loginWithTelegram,
       loginWithEmail: state.loginWithEmail,
       registerWithEmail: state.registerWithEmail,
+      loginWithOAuth: state.loginWithOAuth,
     })),
   );
 
@@ -124,8 +127,32 @@ export default function Login() {
   const handleOAuthLogin = async (provider: string) => {
     setError('');
     setOauthLoading(provider);
+
+    if (provider === 'apple' && isInTelegramWebApp()) {
+      setError(
+        t('auth.appleBrowserOnly', 'Sign in with Apple is available in a regular browser only.'),
+      );
+      setOauthLoading(null);
+      return;
+    }
+
     try {
-      const { authorize_url, state } = await authApi.getOAuthAuthorizeUrl(provider);
+      const authorizeResponse = await authApi.getOAuthAuthorizeUrl(
+        provider,
+        provider === 'apple' ? 'web' : undefined,
+      );
+
+      if (provider === 'apple') {
+        const { code, state, user } = await signInWithApple(authorizeResponse);
+        await loginWithOAuth(provider, code, state, undefined, user);
+        navigate(getReturnUrl(), { replace: true });
+        return;
+      }
+
+      const { authorize_url, state } = authorizeResponse;
+      if (!authorize_url) {
+        throw new Error('Invalid OAuth redirect URL');
+      }
 
       // Validate redirect URL — only allow HTTPS to prevent open redirect
       let parsed: URL;

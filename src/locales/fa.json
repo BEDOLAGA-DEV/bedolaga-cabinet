@@ -164,6 +164,7 @@
     "telegramReopenHint": "اگر مشکل ادامه دارد، برنامه را ببندید و دوباره باز کنید",
     "telegramNotConfigured": "ربات تلگرام پیکربندی نشده",
     "telegramUnavailable": "ورود از طریق تلگرام موقتاً در دسترس نیست",
+    "appleBrowserOnly": "ورود با Apple فقط در مرورگر معمولی در دسترس است.",
     "authenticating": "در حال تایید هویت...",
     "orOpenInApp": "یا ربات را در برنامه باز کنید",
     "loginFailed": "ورود ناموفق",
@@ -3872,13 +3873,15 @@
       "openTelegram": "باز کردن تلگرام",
       "continueInBrowser": "ادامه احراز هویت در مرورگر باز شده",
       "pollingTimeout": "بررسی احراز هویت منقضی شد. اگر اتصال را تکمیل کرده‌اید صفحه را بارگذاری مجدد کنید.",
+      "appleBrowserOnly": "اتصال حساب Apple فقط در مرورگر معمولی در دسترس است.",
       "providers": {
         "telegram": "تلگرام",
         "email": "ایمیل",
         "google": "گوگل",
         "yandex": "یاندکس",
         "discord": "دیسکورد",
-        "vk": "VK"
+        "vk": "VK",
+        "apple": "Apple"
       }
     }
   },

@@ -1,11 +1,14 @@
 import apiClient from './client';
 import { getYandexCid } from '../utils/yandexCid';
 import type {
+  AppleOAuthUserPayload,
   AuthResponse,
   LinkCallbackResponse,
   LinkedProvidersResponse,
   MergePreviewResponse,
   MergeResponse,
+  OAuthAuthorizeResponse,
+  OAuthClientType,
   OAuthProvider,
   RegisterResponse,
   ServerCompleteResponse,
@@ -181,9 +184,13 @@ export const authApi = {
 
   getOAuthAuthorizeUrl: async (
     provider: string,
-  ): Promise<{ authorize_url: string; state: string }> => {
-    const response = await apiClient.get<{ authorize_url: string; state: string }>(
+    clientType?: OAuthClientType,
+  ): Promise<OAuthAuthorizeResponse> => {
+    const response = await apiClient.get<OAuthAuthorizeResponse>(
       `/cabinet/auth/oauth/${encodeURIComponent(provider)}/authorize`,
+      {
+        params: clientType ? { client_type: clientType } : undefined,
+      },
     );
     return response.data;
   },
@@ -195,6 +202,7 @@ export const authApi = {
     deviceId?: string | null,
     campaignSlug?: string | null,
     referralCode?: string | null,
+    user?: AppleOAuthUserPayload | string | null,
   ): Promise<AuthResponse> => {
     const response = await apiClient.post<AuthResponse>(
       `/cabinet/auth/oauth/${encodeURIComponent(provider)}/callback`,
@@ -205,6 +213,7 @@ export const authApi = {
         campaign_slug: campaignSlug || undefined,
         referral_code: referralCode || undefined,
         yandex_cid: getYandexCid() || undefined,
+        user: user ?? undefined,
       },
     );
     return response.data;
@@ -217,9 +226,15 @@ export const authApi = {
     return response.data;
   },
 
-  linkProviderInit: async (provider: string): Promise<{ authorize_url: string; state: string }> => {
-    const response = await apiClient.get<{ authorize_url: string; state: string }>(
+  linkProviderInit: async (
+    provider: string,
+    clientType?: OAuthClientType,
+  ): Promise<OAuthAuthorizeResponse> => {
+    const response = await apiClient.get<OAuthAuthorizeResponse>(
       `/cabinet/auth/account/link/${encodeURIComponent(provider)}/init`,
+      {
+        params: clientType ? { client_type: clientType } : undefined,
+      },
     );
     return response.data;
   },
@@ -229,6 +244,7 @@ export const authApi = {
     code: string,
     state: string,
     deviceId?: string,
+    user?: AppleOAuthUserPayload | string | null,
   ): Promise<LinkCallbackResponse> => {
     const response = await apiClient.post<LinkCallbackResponse>(
       `/cabinet/auth/account/link/${encodeURIComponent(provider)}/callback`,
@@ -236,6 +252,7 @@ export const authApi = {
         code,
         state,
         device_id: deviceId,
+        user: user ?? undefined,
       },
     );
     return response.data;
@@ -266,6 +283,7 @@ export const authApi = {
     code: string,
     state: string,
     deviceId?: string,
+    user?: AppleOAuthUserPayload | string | null,
   ): Promise<ServerCompleteResponse> => {
     const response = await apiClient.post<ServerCompleteResponse>(
       '/cabinet/auth/account/link/server-complete',
@@ -273,6 +291,7 @@ export const authApi = {
         code,
         state,
         device_id: deviceId,
+        user: user ?? undefined,
       },
     );
     return response.data;

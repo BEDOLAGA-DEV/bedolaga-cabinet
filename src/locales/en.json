@@ -172,6 +172,7 @@
     "telegramReopenHint": "If the problem persists, close and reopen the app",
     "telegramNotConfigured": "Telegram bot is not configured",
     "telegramUnavailable": "Telegram login is temporarily unavailable",
+    "appleBrowserOnly": "Sign in with Apple is available in a regular browser only.",
     "authenticating": "Authenticating...",
     "orOpenInApp": "Or open the bot in the app",
     "loginFailed": "Login Failed",
@@ -4450,13 +4451,15 @@
       "openTelegram": "Open Telegram",
       "continueInBrowser": "Continue authorization in the opened browser",
       "pollingTimeout": "Authorization check timed out. Refresh the page if you completed linking.",
+      "appleBrowserOnly": "Apple account linking is available in a regular browser only.",
       "providers": {
         "telegram": "Telegram",
         "email": "Email",
         "google": "Google",
         "yandex": "Yandex",
         "discord": "Discord",
-        "vk": "VK"
+        "vk": "VK",
+        "apple": "Apple"
       }
     }
   },
