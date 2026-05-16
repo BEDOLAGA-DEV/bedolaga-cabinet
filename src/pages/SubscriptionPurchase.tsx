@@ -305,7 +305,17 @@ export default function SubscriptionPurchase() {
           : selectedTariffPeriod?.days || 30;
       const trafficGb =
         useCustomTraffic && selectedTariff.custom_traffic_enabled ? customTrafficGb : undefined;
-      return subscriptionApi.purchaseTariff(selectedTariff.id, days, trafficGb);
+      // Forward the subscription_id when the user landed here via the
+      // "Renew this subscription" flow (?subscriptionId=N). The backend
+      // uses it to resolve the exact target row by ID, avoiding the
+      // race with concurrent panel webhooks that would otherwise hit
+      // the partial UNIQUE on uq_subscriptions_user_tariff_active.
+      return subscriptionApi.purchaseTariff(
+        selectedTariff.id,
+        days,
+        trafficGb,
+        subscriptionId ?? undefined,
+      );
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['subscription'] });

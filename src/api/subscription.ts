@@ -398,6 +398,14 @@ export const subscriptionApi = {
     tariffId: number,
     periodDays: number,
     trafficGb?: number,
+    /**
+     * Subscription ID being renewed. Pass this when the user clicked
+     * "Renew" on an existing subscription so the backend can resolve
+     * the target row by ID instead of doing a (user_id, tariff_id)
+     * re-lookup that races with concurrent panel webhooks. Omit when
+     * this is a fresh purchase from the catalog.
+     */
+    subscriptionId?: number,
   ): Promise<{
     success: boolean;
     message: string;
@@ -411,6 +419,7 @@ export const subscriptionApi = {
       tariff_id: tariffId,
       period_days: periodDays,
       traffic_gb: trafficGb,
+      subscription_id: subscriptionId,
     });
     return response.data;
   },
