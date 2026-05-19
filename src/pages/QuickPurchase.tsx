@@ -882,6 +882,7 @@ export default function QuickPurchase() {
   const [selectedSubOption, setSelectedSubOption] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [consentAccepted, setConsentAccepted] = useState(false);
   const redirectTimeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   // Cleanup redirect timeout on unmount
@@ -1020,13 +1021,29 @@ export default function QuickPurchase() {
 
   const currentPrice = selectedPeriod?.price_kopeks ?? 0;
 
+  const selectedMethodConfig = useMemo(
+    () => config?.payment_methods?.find((m) => m.method_id === selectedMethod),
+    [config, selectedMethod],
+  );
+  const needsConsent = Boolean(selectedMethodConfig?.requires_recurring_consent);
+
   // Validation
   const canSubmit = useMemo(() => {
     if (!selectedTariffId || !selectedPeriodDays || !selectedMethod) return false;
     if (!isValidContact(contactValue)) return false;
     if (isGift && !isValidContact(giftRecipient)) return false;
+    if (needsConsent && !consentAccepted) return false;
     return true;
-  }, [selectedTariffId, selectedPeriodDays, selectedMethod, contactValue, isGift, giftRecipient]);
+  }, [
+    selectedTariffId,
+    selectedPeriodDays,
+    selectedMethod,
+    contactValue,
+    isGift,
+    giftRecipient,
+    needsConsent,
+    consentAccepted,
+  ]);
 
   // Purchase mutation
   const purchaseMutation = useMutation({
@@ -1264,6 +1281,47 @@ export default function QuickPurchase() {
                     />
                   ))}
                 </div>
+
+                {needsConsent && (
+                  <label className="mt-3 flex cursor-pointer items-start gap-3 rounded-2xl border border-dark-700 bg-dark-900/50 p-4 transition-colors hover:bg-dark-900">
+                    <input
+                      type="checkbox"
+                      checked={consentAccepted}
+                      onChange={(e) => setConsentAccepted(e.target.checked)}
+                      className="mt-0.5 h-5 w-5 cursor-pointer rounded border-dark-600 bg-dark-800 text-accent-500 focus:ring-2 focus:ring-accent-500"
+                    />
+                    <span className="text-sm leading-relaxed text-dark-200">
+                      {t('landing.recurringConsent', 'Я согласен с')}{' '}
+                      <a
+                        href="/privacy"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-accent-400 underline hover:text-accent-300"
+                      >
+                        {t('landing.consentPrivacy', 'политикой обработки данных')}
+                      </a>
+                      ,{' '}
+                      <a
+                        href="/offer"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-accent-400 underline hover:text-accent-300"
+                      >
+                        {t('landing.consentOffer', 'договором оферты')}
+                      </a>{' '}
+                      {t('landing.consentAnd', 'и')}{' '}
+                      <a
+                        href="/recurrent-payments"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-accent-400 underline hover:text-accent-300"
+                      >
+                        {t('landing.consentRecurrent', 'соглашением о рекуррентных платежах')}
+                      </a>
+                      .
+                    </span>
+                  </label>
+                )}
               </div>
             )}
           </motion.div>

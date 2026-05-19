@@ -46,6 +46,7 @@ export interface LandingPaymentMethod {
   max_amount_kopeks: number | null;
   currency: string | null;
   sub_options: LandingPaymentMethodSubOption[] | null;
+  requires_recurring_consent?: boolean;
 }
 
 /** Payment method as stored/returned by the admin landing API (sub_options is a dict) */
