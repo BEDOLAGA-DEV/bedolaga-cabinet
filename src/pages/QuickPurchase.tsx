@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useParams } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useTranslation } from 'react-i18next';
+import { useTranslation, Trans } from 'react-i18next';
 import { fireAnalyticsEvent, getYandexCid } from '../hooks/useAnalyticsCounters';
 import { motion, AnimatePresence } from 'framer-motion';
 import DOMPurify from 'dompurify';
@@ -454,6 +454,9 @@ function SummaryCard({
   stickyPayButton = false,
   submitError,
   onSubmit,
+  needsConsent = false,
+  consentAccepted = false,
+  onConsentChange,
 }: {
   config: LandingConfig;
   selectedTariff: LandingTariff | undefined;
@@ -464,8 +467,83 @@ function SummaryCard({
   stickyPayButton?: boolean;
   submitError: string | null;
   onSubmit: () => void;
+  /** When true, render the consent checkbox above the Pay button and block submission until ticked. */
+  needsConsent?: boolean;
+  consentAccepted?: boolean;
+  onConsentChange?: (v: boolean) => void;
 }) {
   const { t } = useTranslation();
+
+  // Render consent label. Used twice (sticky portal vs inline) so kept as a
+  // single helper to keep the i18n + link components in one place.
+  const renderConsent = (variant: 'full' | 'compact') => {
+    if (!needsConsent) return null;
+    const isCompact = variant === 'compact';
+    const urls = config.consent_urls ?? {};
+    const linkClass = 'text-accent-400 underline hover:text-accent-300';
+    return (
+      <label
+        className={cn(
+          'flex cursor-pointer items-start border border-dark-700 bg-dark-900/40 transition-colors hover:bg-dark-900',
+          isCompact
+            ? 'gap-2 rounded-xl bg-dark-900/80 p-2.5 backdrop-blur'
+            : 'gap-3 rounded-2xl p-3',
+        )}
+      >
+        <input
+          type="checkbox"
+          checked={consentAccepted}
+          onChange={(e) => onConsentChange?.(e.target.checked)}
+          className={cn(
+            'mt-0.5 shrink-0 cursor-pointer rounded border-dark-600 bg-dark-800 text-accent-500 focus:ring-2 focus:ring-accent-500',
+            isCompact ? 'h-4 w-4' : 'h-5 w-5',
+          )}
+        />
+        <span
+          className={cn(
+            'leading-relaxed text-dark-300',
+            isCompact ? 'text-[11px] leading-snug text-dark-200' : 'text-xs',
+          )}
+        >
+          <Trans
+            i18nKey="landing.consent"
+            components={{
+              privacy: urls.privacy ? (
+                <a
+                  href={urls.privacy}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={linkClass}
+                />
+              ) : (
+                <span />
+              ),
+              offer: urls.offer ? (
+                <a
+                  href={urls.offer}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={linkClass}
+                />
+              ) : (
+                <span />
+              ),
+              recurrent: urls.recurrent ? (
+                <a
+                  href={urls.recurrent}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={linkClass}
+                />
+              ) : (
+                <span />
+              ),
+            }}
+          />
+        </span>
+      </label>
+    );
+  };
 
   // Responsive: track mobile for sticky pay button
   const [isMobile, setIsMobile] = useState(
@@ -553,16 +631,21 @@ function SummaryCard({
         )}
       </AnimatePresence>
 
+      {/* Consent — when sticky+mobile it's rendered inside the portal next to
+          the Pay button so the gating control stays visible alongside the action. */}
+      {!(stickyPayButton && isMobile) && renderConsent('full')}
+
       {/* Pay button */}
       {stickyPayButton && isMobile ? (
         createPortal(
           <div
-            className="fixed bottom-0 left-0 right-0 z-50 p-3"
+            className="fixed bottom-0 left-0 right-0 z-50 space-y-2 p-3"
             style={{
               background:
-                'linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.6) 70%, transparent 100%)',
+                'linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.75) 70%, transparent 100%)',
             }}
           >
+            {renderConsent('compact')}
             <button
               type="button"
               onClick={() => {
@@ -882,6 +965,7 @@ export default function QuickPurchase() {
   const [selectedSubOption, setSelectedSubOption] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [consentAccepted, setConsentAccepted] = useState(false);
   const redirectTimeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   // Cleanup redirect timeout on unmount
@@ -1020,13 +1104,30 @@ export default function QuickPurchase() {
 
   const currentPrice = selectedPeriod?.price_kopeks ?? 0;
 
+  // Active payment method (used for consent gating)
+  const selectedMethodConfig = useMemo(
+    () => config?.payment_methods.find((m) => m.method_id === selectedMethod) ?? null,
+    [config, selectedMethod],
+  );
+  const needsConsent = Boolean(selectedMethodConfig?.requires_recurring_consent);
+
   // Validation
   const canSubmit = useMemo(() => {
     if (!selectedTariffId || !selectedPeriodDays || !selectedMethod) return false;
     if (!isValidContact(contactValue)) return false;
     if (isGift && !isValidContact(giftRecipient)) return false;
+    if (needsConsent && !consentAccepted) return false;
     return true;
-  }, [selectedTariffId, selectedPeriodDays, selectedMethod, contactValue, isGift, giftRecipient]);
+  }, [
+    selectedTariffId,
+    selectedPeriodDays,
+    selectedMethod,
+    contactValue,
+    isGift,
+    giftRecipient,
+    needsConsent,
+    consentAccepted,
+  ]);
 
   // Purchase mutation
   const purchaseMutation = useMutation({
@@ -1288,6 +1389,9 @@ export default function QuickPurchase() {
               submitError={submitError}
               onSubmit={handleSubmit}
               stickyPayButton={config?.sticky_pay_button}
+              needsConsent={needsConsent}
+              consentAccepted={consentAccepted}
+              onConsentChange={setConsentAccepted}
             />
           </motion.div>
         </div>

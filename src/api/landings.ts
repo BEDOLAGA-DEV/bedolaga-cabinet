@@ -46,6 +46,26 @@ export interface LandingPaymentMethod {
   max_amount_kopeks: number | null;
   currency: string | null;
   sub_options: LandingPaymentMethodSubOption[] | null;
+  /**
+   * When true, the landing UI renders an "I agree with the …" checkbox above
+   * the Pay button and blocks submission until the user opts in. Used by
+   * recurring-billing providers that need explicit consent (152-ФЗ, GDPR, etc).
+   * Backend default: false (no consent gate).
+   */
+  requires_recurring_consent?: boolean;
+}
+
+/**
+ * Links shown inside the consent label rendered when any selected payment
+ * method has `requires_recurring_consent: true`. Each URL is optional —
+ * if a value is missing or empty, the corresponding link text falls back
+ * to plain text. The backend may populate these from system settings so
+ * different deployments can point at their own legal pages.
+ */
+export interface LandingConsentUrls {
+  privacy?: string | null;
+  offer?: string | null;
+  recurrent?: string | null;
 }
 
 /** Payment method as stored/returned by the admin landing API (sub_options is a dict) */
@@ -97,6 +117,8 @@ export interface LandingConfig {
   analytics_click_enabled: boolean;
   analytics_click_goal: string;
   sticky_pay_button: boolean;
+  /** Optional URLs used by the recurring-consent label. See LandingConsentUrls. */
+  consent_urls?: LandingConsentUrls;
 }
 
 export interface PurchaseRequest {
