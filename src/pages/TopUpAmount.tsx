@@ -140,6 +140,7 @@ export default function TopUpAmount() {
   const { data: cachedMethods, isLoading: isMethodsLoading } = useQuery<PaymentMethod[]>({
     queryKey: ['payment-methods'],
     queryFn: balanceApi.getPaymentMethods,
+    staleTime: 5 * 60_000,
   });
   const method = cachedMethods?.find((m) => m.id === methodId);
 
