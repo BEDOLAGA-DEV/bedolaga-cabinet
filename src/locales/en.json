@@ -4741,6 +4741,7 @@
     "copy": "Copy",
     "copied": "Copied!",
     "copyLink": "Copy link",
+    "consent": "I agree with the <privacy>privacy policy</privacy>, <offer>terms of service</offer> and <recurrent>recurring payments agreement</recurrent>.",
     "giftToggleLabel": "Purchase type",
     "pollTimedOut": "Taking longer than expected",
     "pollTimedOutDesc": "Payment processing is taking longer than usual. You can try checking again.",

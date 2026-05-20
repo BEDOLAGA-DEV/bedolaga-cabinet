@@ -4278,6 +4278,7 @@
     "copy": "کپی",
     "copied": "کپی شد!",
     "copyLink": "کپی لینک",
+    "consent": "من با <privacy>سیاست حفظ حریم خصوصی</privacy>، <offer>شرایط خدمات</offer> و <recurrent>توافق‌نامه پرداخت‌های تکرارشونده</recurrent> موافقم.",
     "giftToggleLabel": "نوع خرید",
     "pollTimedOut": "زمان بیشتری طول کشید",
     "pollTimedOutDesc": "پردازش پرداخت بیشتر از حد معمول طول کشیده است. می‌توانید دوباره بررسی کنید.",
