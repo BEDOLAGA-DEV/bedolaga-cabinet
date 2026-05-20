@@ -4016,6 +4016,7 @@
       "methodSubOptions": "Payment sub-options",
       "loadingPeriods": "Loading...",
       "periodDaySuffix": "d",
+      "trialPrefix": "Trial",
       "localeTab": "Language",
       "localeHint": "Switch language to edit text in that language",
       "discount": "Discount",
