@@ -474,20 +474,35 @@ function SummaryCard({
 }) {
   const { t } = useTranslation();
 
-  // Render consent label. Used twice (sticky portal vs inline) so kept as a
-  // single helper to keep the i18n + link components in one place.
+  // Stable Trans components — rebuilt only when a URL slot changes. Without
+  // memo, every parent render (e.g. each keystroke in the contact input)
+  // allocates fresh React elements and forces Trans to re-walk i18n nodes.
+  const consentComponents = useMemo(() => {
+    const urls = config.consent_urls ?? {};
+    const linkClass = 'text-accent-400 underline hover:text-accent-300';
+    const linkOrSpan = (href: string | null | undefined) =>
+      href ? (
+        <a href={href} target="_blank" rel="noopener noreferrer" className={linkClass} />
+      ) : (
+        <span />
+      );
+    return {
+      privacy: linkOrSpan(urls.privacy),
+      offer: linkOrSpan(urls.offer),
+      recurrent: linkOrSpan(urls.recurrent),
+    };
+  }, [config.consent_urls]);
+
   const renderConsent = (variant: 'full' | 'compact') => {
     if (!needsConsent) return null;
     const isCompact = variant === 'compact';
-    const urls = config.consent_urls ?? {};
-    const linkClass = 'text-accent-400 underline hover:text-accent-300';
     return (
       <label
         className={cn(
-          'flex cursor-pointer items-start border border-dark-700 bg-dark-900/40 transition-colors hover:bg-dark-900',
+          'flex cursor-pointer items-start border border-dark-700 bg-dark-900/40 leading-relaxed text-dark-300 transition-colors hover:bg-dark-900',
           isCompact
-            ? 'gap-2 rounded-xl bg-dark-900/80 p-2.5 backdrop-blur'
-            : 'gap-3 rounded-2xl p-3',
+            ? 'gap-2 rounded-xl bg-dark-900/80 p-2.5 text-[11px] leading-snug text-dark-200 backdrop-blur'
+            : 'gap-3 rounded-2xl p-3 text-xs',
         )}
       >
         <input
@@ -499,48 +514,7 @@ function SummaryCard({
             isCompact ? 'h-4 w-4' : 'h-5 w-5',
           )}
         />
-        <span
-          className={cn(
-            'leading-relaxed text-dark-300',
-            isCompact ? 'text-[11px] leading-snug text-dark-200' : 'text-xs',
-          )}
-        >
-          <Trans
-            i18nKey="landing.consent"
-            components={{
-              privacy: urls.privacy ? (
-                <a
-                  href={urls.privacy}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={linkClass}
-                />
-              ) : (
-                <span />
-              ),
-              offer: urls.offer ? (
-                <a
-                  href={urls.offer}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={linkClass}
-                />
-              ) : (
-                <span />
-              ),
-              recurrent: urls.recurrent ? (
-                <a
-                  href={urls.recurrent}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={linkClass}
-                />
-              ) : (
-                <span />
-              ),
-            }}
-          />
-        </span>
+        <Trans i18nKey="landing.consent" components={consentComponents} />
       </label>
     );
   };
