@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams, useSearchParams } from 'react-router';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 
 import { balanceApi } from '../api/balance';
@@ -123,7 +123,6 @@ export default function TopUpAmount() {
   const navigate = useNavigate();
   const { methodId } = useParams<{ methodId: string }>();
   const [searchParams] = useSearchParams();
-  const queryClient = useQueryClient();
   const { formatAmount, currencySymbol, convertAmount, convertToRub, targetCurrency } =
     useCurrency();
   const { openInvoice, openTelegramLink, openLink, platform } = usePlatform();
@@ -135,8 +134,13 @@ export default function TopUpAmount() {
     ? parseFloat(searchParams.get('amount')!)
     : undefined;
 
-  // Get method from cached payment-methods query
-  const cachedMethods = queryClient.getQueryData<PaymentMethod[]>(['payment-methods']);
+  // Fetch payment methods (uses the same query key as TopUpMethodSelect, so
+  // cache is reused when navigating from there; falls back to a network
+  // request on direct hits / hard refresh).
+  const { data: cachedMethods, isLoading: isMethodsLoading } = useQuery<PaymentMethod[]>({
+    queryKey: ['payment-methods'],
+    queryFn: balanceApi.getPaymentMethods,
+  });
   const method = cachedMethods?.find((m) => m.id === methodId);
 
   const handleNavigateBack = useCallback(() => {
@@ -180,8 +184,12 @@ export default function TopUpAmount() {
   const [copied, setCopied] = useState(false);
   const [isInputFocused, setIsInputFocused] = useState(false);
 
-  // If method not found in cache, redirect to method selection
+  // Once payment methods are loaded, redirect to method selection if the
+  // requested methodId doesn't exist (e.g. stale link, removed method).
+  // Wait for the query to finish — on direct hit / hard refresh the cache
+  // is empty until the network request returns.
   useEffect(() => {
+    if (isMethodsLoading) return;
     if (cachedMethods && !method) {
       const params = new URLSearchParams();
       const amount = searchParams.get('amount');
@@ -191,7 +199,7 @@ export default function TopUpAmount() {
       const qs = params.toString();
       navigate(`/balance/top-up${qs ? `?${qs}` : ''}`, { replace: true });
     }
-  }, [cachedMethods, method, navigate, searchParams]);
+  }, [cachedMethods, method, isMethodsLoading, navigate, searchParams]);
 
   useEffect(() => {
     if (!method?.options || method.options.length === 0) {
