@@ -772,6 +772,7 @@ export default function AdminLandingEditor() {
                         {tariffPeriodsMap[tariff.id].map((period) => {
                           const override = allowedPeriods[String(tariff.id)];
                           const isAllowed = !override || override.includes(period.days);
+                          const isTrial = Boolean(period.is_trial);
                           return (
                             <button
                               key={period.days}
@@ -784,13 +785,17 @@ export default function AdminLandingEditor() {
                               }
                               className={cn(
                                 'rounded-full px-3 py-1 text-xs font-medium transition-colors',
-                                isAllowed
-                                  ? 'bg-accent-500/20 text-accent-400'
-                                  : 'bg-dark-700/50 text-dark-500 line-through',
+                                !isAllowed
+                                  ? 'bg-dark-700/50 text-dark-500 line-through'
+                                  : isTrial
+                                    ? 'bg-amber-500/20 text-amber-300'
+                                    : 'bg-accent-500/20 text-accent-400',
                               )}
                             >
-                              {period.days}
-                              {t('admin.landings.periodDaySuffix')} —{' '}
+                              {isTrial
+                                ? `${t('admin.landings.trialPrefix', 'Trial')} ${period.days}${t('admin.landings.periodDaySuffix')}`
+                                : `${period.days}${t('admin.landings.periodDaySuffix')}`}
+                              {' — '}
                               {formatPrice(period.price_kopeks)}
                             </button>
                           );
