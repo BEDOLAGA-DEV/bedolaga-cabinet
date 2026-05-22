@@ -4439,5 +4439,13 @@
         "linkUrlPrompt": "URL："
       }
     }
+  },
+  "mobileAppBanner": {
+    "title": "获取 {{appName}} 应用",
+    "description": "更快、更流畅 — 从 {{store}} 安装",
+    "install": "安装",
+    "dismiss": "关闭",
+    "appStore": "App Store",
+    "googlePlay": "Google Play"
   }
 }

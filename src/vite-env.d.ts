@@ -8,6 +8,9 @@ interface ImportMetaEnv {
   readonly VITE_APP_NAME?: string;
   readonly VITE_APP_LOGO?: string;
   readonly VITE_MOBILE_DEEPLINK_SCHEME?: string;
+  readonly VITE_APP_STORE_URL?: string;
+  readonly VITE_PLAY_STORE_URL?: string;
+  readonly VITE_MAC_APP_STORE_URL?: string;
 }
 
 interface ImportMeta {

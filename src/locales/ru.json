@@ -5528,5 +5528,13 @@
         "linkUrlPrompt": "URL ссылки:"
       }
     }
+  },
+  "mobileAppBanner": {
+    "title": "Скачайте приложение {{appName}}",
+    "description": "Быстрее и удобнее — установите из {{store}}",
+    "install": "Установить",
+    "dismiss": "Закрыть",
+    "appStore": "App Store",
+    "googlePlay": "Google Play"
   }
 }

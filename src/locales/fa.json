@@ -4440,5 +4440,13 @@
         "linkUrlPrompt": "آدرس پیوند:"
       }
     }
+  },
+  "mobileAppBanner": {
+    "title": "اپلیکیشن {{appName}} را دریافت کنید",
+    "description": "سریع‌تر و روان‌تر — از {{store}} نصب کنید",
+    "install": "نصب",
+    "dismiss": "بستن",
+    "appStore": "App Store",
+    "googlePlay": "Google Play"
   }
 }

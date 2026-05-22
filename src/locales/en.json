@@ -4969,5 +4969,13 @@
         "linkUrlPrompt": "URL:"
       }
     }
+  },
+  "mobileAppBanner": {
+    "title": "Get the {{appName}} app",
+    "description": "Faster, smoother — install from {{store}}",
+    "install": "Install",
+    "dismiss": "Dismiss",
+    "appStore": "App Store",
+    "googlePlay": "Google Play"
   }
 }
