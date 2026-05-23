@@ -1,6 +1,5 @@
 import { useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useAuthStore } from '@/store/auth';
 import { useTelegramSDK, setCachedFullscreenEnabled } from '@/hooks/useTelegramSDK';
 import {
   brandingApi,
@@ -14,10 +13,11 @@ const FALLBACK_NAME = import.meta.env.VITE_APP_NAME || 'Cabinet';
 const FALLBACK_LOGO = import.meta.env.VITE_APP_LOGO || 'V';
 
 export function useBranding() {
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const { isTelegramWebApp, requestFullscreen, isMobile } = useTelegramSDK();
 
-  // Branding data
+  // Branding data. The /cabinet/branding endpoint is public, so we fetch it
+  // regardless of auth state — this lets unauthenticated surfaces (Login, app
+  // download banner) render branded copy and the correct logo.
   const { data: branding } = useQuery({
     queryKey: ['branding'],
     queryFn: async () => {
@@ -29,7 +29,6 @@ export function useBranding() {
     initialData: getCachedBranding() ?? undefined,
     initialDataUpdatedAt: 0,
     staleTime: 60000,
-    enabled: isAuthenticated,
   });
 
   const appName = branding ? branding.name : FALLBACK_NAME;

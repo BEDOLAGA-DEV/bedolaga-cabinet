@@ -21,6 +21,10 @@ import { closeMiniApp } from '@telegram-apps/sdk-react';
 import LanguageSwitcher from '../components/LanguageSwitcher';
 import TelegramLoginButton from '../components/TelegramLoginButton';
 import OAuthProviderIcon from '../components/OAuthProviderIcon';
+import MobileAppBanner from '../components/MobileAppBanner';
+import PageLoader from '../components/common/PageLoader';
+import { useMobileAppPromo } from '../hooks/useMobileAppPromo';
+import { UI } from '../config/constants';
 import { saveOAuthState } from '../utils/oauth';
 import { getPendingReferralCode } from '../utils/referral';
 import { signInWithApple } from '../utils/appleSignIn';
@@ -73,6 +77,10 @@ export default function Login() {
   const { safeAreaInset, contentSafeAreaInset } = useTelegramSDK();
   const safeTop = Math.max(safeAreaInset.top, contentSafeAreaInset.top);
   const safeBottom = Math.max(safeAreaInset.bottom, contentSafeAreaInset.bottom);
+
+  // Mobile app download banner offset (banner is fixed at top: 0 / z-60).
+  const { show: showAppBanner } = useMobileAppPromo();
+  const appBannerHeight = showAppBanner ? UI.APP_BANNER_HEIGHT_PX : 0;
 
   // Получаем URL для возврата после авторизации
   const getReturnUrl = useCallback(() => {
@@ -338,12 +346,29 @@ export default function Login() {
     setForgotPasswordError('');
   };
 
+  // Hide the form (and the banner) while the auth store is still initializing
+  // or while we're about to redirect an already-authenticated user. This avoids
+  // a flash of the Login UI on returning visits.
+  if (isAuthInitializing || isAuthenticated) {
+    return <PageLoader variant="dark" />;
+  }
+
+  // Build top-padding and language-switcher offsets without `+ 0px` artifacts.
+  const bannerPx = appBannerHeight ? ` + ${appBannerHeight}px` : '';
+  const pageTopPad =
+    safeTop > 0
+      ? `${safeTop + 16 + appBannerHeight}px`
+      : `calc(1rem${bannerPx} + env(safe-area-inset-top, 0px))`;
+  const switcherTop =
+    safeTop > 0
+      ? `${safeTop + 12 + appBannerHeight}px`
+      : `calc(12px${bannerPx} + env(safe-area-inset-top, 0px))`;
+
   return (
     <div
       className="flex min-h-[100dvh] items-center justify-center px-4 sm:px-6 lg:px-8"
       style={{
-        paddingTop:
-          safeTop > 0 ? `${safeTop + 16}px` : 'calc(1rem + env(safe-area-inset-top, 0px))',
+        paddingTop: pageTopPad,
         paddingBottom:
           safeBottom > 0 ? `${safeBottom + 16}px` : 'calc(1rem + env(safe-area-inset-bottom, 0px))',
       }}
@@ -352,13 +377,11 @@ export default function Login() {
       <div className="fixed inset-0 bg-gradient-to-br from-dark-950 via-dark-900 to-dark-950" />
       <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-accent-500/10 via-transparent to-transparent" />
 
+      {/* App download banner (only on supported devices with a configured URL) */}
+      <MobileAppBanner />
+
       {/* Language switcher */}
-      <div
-        className="fixed right-3 z-50"
-        style={{
-          top: safeTop > 0 ? `${safeTop + 12}px` : 'calc(12px + env(safe-area-inset-top, 0px))',
-        }}
-      >
+      <div className="fixed right-3 z-50" style={{ top: switcherTop }}>
         <LanguageSwitcher />
       </div>
 
