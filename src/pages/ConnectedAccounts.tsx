@@ -16,8 +16,9 @@ import { usePlatform, useIsTelegram } from '@/platform/hooks/usePlatform';
 import { useAuthStore } from '../store/auth';
 import { isValidEmail } from '../utils/validation';
 import type { LinkedProvider } from '../types';
+import { signInWithApple } from '../utils/appleSignIn';
 
-const OAUTH_PROVIDERS = ['google', 'yandex', 'discord', 'vk'];
+const OAUTH_PROVIDERS = ['google', 'yandex', 'discord', 'vk', 'apple'];
 
 const isOAuthProvider = (provider: string): boolean => OAUTH_PROVIDERS.includes(provider);
 
@@ -449,8 +450,39 @@ export default function ConnectedAccounts() {
   const handleLinkOAuth = async (provider: string) => {
     if (linkingProvider) return;
     setLinkingProvider(provider);
+
+    if (provider === 'apple' && inTelegram) {
+      showToast({
+        type: 'warning',
+        message: t(
+          'profile.accounts.appleBrowserOnly',
+          'Apple account linking is available in a regular browser only.',
+        ),
+      });
+      setLinkingProvider(null);
+      return;
+    }
+
     try {
-      const { authorize_url, state } = await authApi.linkProviderInit(provider);
+      const authorizeResponse = await authApi.linkProviderInit(
+        provider,
+        provider === 'apple' ? 'web' : undefined,
+      );
+
+      if (provider === 'apple') {
+        const { code, state, user } = await signInWithApple(authorizeResponse);
+        const response = await authApi.linkProviderCallback(provider, code, state, undefined, user);
+        setLinkingProvider(null);
+        if (response.merge_required && response.merge_token) {
+          navigate(`/merge/${response.merge_token}`, { replace: true });
+        } else {
+          queryClient.invalidateQueries({ queryKey: ['linked-providers'] });
+          showToast({ type: 'success', message: t('profile.accounts.linkSuccess') });
+        }
+        return;
+      }
+
+      const { authorize_url, state } = authorizeResponse;
       if (!authorize_url || !state) {
         throw new Error('Invalid response from server');
       }

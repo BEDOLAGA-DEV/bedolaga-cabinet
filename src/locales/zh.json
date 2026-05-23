@@ -164,6 +164,7 @@
     "telegramReopenHint": "如果问题持续存在，请关闭并重新打开应用",
     "telegramNotConfigured": "Telegram机器人未配置",
     "telegramUnavailable": "Telegram登录暂时不可用",
+    "appleBrowserOnly": "Apple 登录仅可在普通浏览器中使用。",
     "authenticating": "正在验证...",
     "orOpenInApp": "或在应用中打开机器人",
     "loginFailed": "登录失败",
@@ -3871,13 +3872,15 @@
       "openTelegram": "打开 Telegram",
       "continueInBrowser": "请在打开的浏览器中继续授权",
       "pollingTimeout": "授权检查超时。如果您已完成关联，请刷新页面。",
+      "appleBrowserOnly": "Apple 账户关联仅可在普通浏览器中使用。",
       "providers": {
         "telegram": "Telegram",
         "email": "邮箱",
         "google": "Google",
         "yandex": "Yandex",
         "discord": "Discord",
-        "vk": "VK"
+        "vk": "VK",
+        "apple": "Apple"
       }
     }
   },
@@ -4436,5 +4439,13 @@
         "linkUrlPrompt": "URL："
       }
     }
+  },
+  "mobileAppBanner": {
+    "title": "获取 {{appName}} 应用",
+    "description": "更快、更流畅 — 从 {{store}} 安装",
+    "install": "安装",
+    "dismiss": "关闭",
+    "appStore": "App Store",
+    "googlePlay": "Google Play"
   }
 }

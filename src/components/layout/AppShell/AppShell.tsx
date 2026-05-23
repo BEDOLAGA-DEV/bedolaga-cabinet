@@ -20,6 +20,9 @@ import CampaignBonusNotifier from '@/components/CampaignBonusNotifier';
 import SuccessNotificationModal from '@/components/SuccessNotificationModal';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import TicketNotificationBell from '@/components/TicketNotificationBell';
+import MobileAppBanner from '@/components/MobileAppBanner';
+import { useMobileAppPromo } from '@/hooks/useMobileAppPromo';
+import { UI } from '@/config/constants';
 import { SubscriptionIcon, GiftIcon } from '@/components/icons';
 
 import { MobileBottomNav } from './MobileBottomNav';
@@ -205,6 +208,8 @@ export function AppShell({ children }: AppShellProps) {
   // Extracted hooks
   const { appName, logoLetter, hasCustomLogo, logoUrl } = useBranding();
   const { referralEnabled, wheelEnabled, hasContests, hasPolls, giftEnabled } = useFeatureFlags();
+  const { show: showMobileAppBanner } = useMobileAppPromo();
+  const appBannerHeight = showMobileAppBanner ? UI.APP_BANNER_HEIGHT_PX : 0;
   useScrollRestoration();
 
   // Theme toggle visibility
@@ -287,8 +292,14 @@ export function AppShell({ children }: AppShellProps) {
       <CampaignBonusNotifier />
       <SuccessNotificationModal />
 
+      {/* App download banner (renders above the mobile and desktop headers) */}
+      <MobileAppBanner />
+
       {/* Desktop Header */}
-      <header className="fixed left-0 right-0 top-0 z-50 hidden border-b border-dark-800/50 bg-dark-950/95 lg:block">
+      <header
+        className="fixed left-0 right-0 z-50 hidden border-b border-dark-800/50 bg-dark-950/95 lg:block"
+        style={{ top: appBannerHeight }}
+      >
         <div className="mx-auto grid h-14 max-w-6xl grid-cols-[auto_1fr_auto] items-center gap-4 px-6">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2.5" onClick={handleNavClick}>
@@ -437,13 +448,17 @@ export function AppShell({ children }: AppShellProps) {
         hasContests={hasContests}
         hasPolls={hasPolls}
         giftEnabled={giftEnabled}
+        topOffset={appBannerHeight}
       />
 
       {/* Desktop spacer */}
-      <div className="hidden h-14 lg:block" />
+      <div
+        className="hidden lg:block"
+        style={{ height: UI.DESKTOP_HEADER_HEIGHT_PX + appBannerHeight }}
+      />
 
       {/* Mobile spacer */}
-      <div className="lg:hidden" style={{ height: headerHeight }} />
+      <div className="lg:hidden" style={{ height: headerHeight + appBannerHeight }} />
 
       {/* Main content */}
       <main className="mx-auto max-w-6xl px-4 py-6 pb-28 lg:px-6 lg:pb-8">{children}</main>

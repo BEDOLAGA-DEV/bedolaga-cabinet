@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { CampaignBonusInfo, RegisterResponse, User } from '../types';
+import type { AppleOAuthUserPayload, CampaignBonusInfo, RegisterResponse, User } from '../types';
 import { authApi } from '../api/auth';
 import { apiClient } from '../api/client';
 import {
@@ -52,6 +52,7 @@ interface AuthState {
     code: string,
     state: string,
     deviceId?: string | null,
+    user?: AppleOAuthUserPayload | string | null,
   ) => Promise<void>;
   loginWithDeepLink: (token: string, campaignSlug?: string | null) => Promise<void>;
   registerWithEmail: (
@@ -317,7 +318,7 @@ export const useAuthStore = create<AuthState>()(
         await get().checkAdminStatus();
       },
 
-      loginWithOAuth: async (provider, code, state, deviceId) => {
+      loginWithOAuth: async (provider, code, state, deviceId, user) => {
         const campaignSlug = getPendingCampaignSlug();
         const referralCode = getPendingReferralCode();
         const response = await authApi.oauthCallback(
@@ -327,6 +328,7 @@ export const useAuthStore = create<AuthState>()(
           deviceId,
           campaignSlug,
           referralCode,
+          user,
         );
         consumeCampaignSlug();
         consumeReferralCode();

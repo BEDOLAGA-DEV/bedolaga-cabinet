@@ -175,6 +175,7 @@
     "telegramReopenHint": "Если проблема повторяется — закройте и откройте приложение заново",
     "telegramNotConfigured": "Telegram бот не настроен",
     "telegramUnavailable": "Вход через Telegram временно недоступен",
+    "appleBrowserOnly": "Вход через Apple доступен только в обычном браузере.",
     "authenticating": "Авторизация...",
     "orOpenInApp": "Или откройте бота в приложении",
     "loginFailed": "Ошибка входа",
@@ -4999,13 +5000,15 @@
       "openTelegram": "Открыть Telegram",
       "continueInBrowser": "Продолжите авторизацию в открывшемся браузере",
       "pollingTimeout": "Проверка авторизации истекла. Обновите страницу, если привязка завершена.",
+      "appleBrowserOnly": "Привязка Apple доступна только в обычном браузере.",
       "providers": {
         "telegram": "Telegram",
         "email": "Email",
         "google": "Google",
         "yandex": "Яндекс",
         "discord": "Discord",
-        "vk": "VK"
+        "vk": "VK",
+        "apple": "Apple"
       }
     }
   },
@@ -5525,5 +5528,13 @@
         "linkUrlPrompt": "URL ссылки:"
       }
     }
+  },
+  "mobileAppBanner": {
+    "title": "Скачайте приложение {{appName}}",
+    "description": "Быстрее и удобнее — установите из {{store}}",
+    "install": "Установить",
+    "dismiss": "Закрыть",
+    "appStore": "App Store",
+    "googlePlay": "Google Play"
   }
 }

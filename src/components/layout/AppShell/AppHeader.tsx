@@ -63,6 +63,8 @@ interface AppHeaderProps {
   hasContests?: boolean;
   hasPolls?: boolean;
   giftEnabled?: boolean;
+  /** Extra top offset in px (used to make room for the mobile app banner). */
+  topOffset?: number;
 }
 
 export function AppHeader({
@@ -79,6 +81,7 @@ export function AppHeader({
   hasContests,
   hasPolls,
   giftEnabled,
+  topOffset = 0,
 }: AppHeaderProps) {
   const { t } = useTranslation();
   const location = useLocation();
@@ -176,8 +179,9 @@ export function AppHeader({
     <>
       {/* Header - only on mobile */}
       <header
-        className="glass fixed left-0 right-0 top-0 z-50 shadow-lg shadow-black/10 lg:hidden"
+        className="glass fixed left-0 right-0 z-50 shadow-lg shadow-black/10 lg:hidden"
         style={{
+          top: topOffset,
           paddingTop: isFullscreen
             ? `${Math.max(safeAreaInset.top, contentSafeAreaInset.top) + (telegramPlatform === 'android' ? 48 : 45)}px`
             : undefined,
@@ -307,7 +311,7 @@ export function AppHeader({
       {mobileMenuOpen && (
         <div
           className="fixed inset-x-0 bottom-0 z-40 animate-fade-in lg:hidden"
-          style={{ top: headerHeight }}
+          style={{ top: headerHeight + topOffset }}
         >
           {/* Backdrop */}
           <div className="absolute inset-0 bg-black/60" onClick={() => setMobileMenuOpen(false)} />

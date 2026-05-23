@@ -7,6 +7,10 @@ interface ImportMetaEnv {
   readonly VITE_TELEGRAM_BOT_USERNAME?: string;
   readonly VITE_APP_NAME?: string;
   readonly VITE_APP_LOGO?: string;
+  readonly VITE_MOBILE_DEEPLINK_SCHEME?: string;
+  readonly VITE_APP_STORE_URL?: string;
+  readonly VITE_PLAY_STORE_URL?: string;
+  readonly VITE_MAC_APP_STORE_URL?: string;
 }
 
 interface ImportMeta {
@@ -33,9 +37,46 @@ interface TelegramLoginGlobal {
   auth: () => void;
 }
 
+/** Apple Sign In JS SDK — loaded from Apple's hosted appleid.auth.js */
+interface AppleSignInUserPayload {
+  name?: {
+    firstName?: string;
+    lastName?: string;
+  };
+  email?: string;
+}
+
+interface AppleSignInResponse {
+  authorization?: {
+    code?: string;
+    id_token?: string;
+    state?: string;
+  };
+  user?: AppleSignInUserPayload | string;
+}
+
+interface AppleSignInInitOptions {
+  clientId: string;
+  scope?: string;
+  redirectURI: string;
+  state: string;
+  nonce?: string;
+  responseType?: string;
+  responseMode?: string;
+  usePopup?: boolean;
+}
+
+interface AppleIDGlobal {
+  auth: {
+    init: (options: AppleSignInInitOptions) => void;
+    signIn: () => Promise<AppleSignInResponse>;
+  };
+}
+
 interface Window {
   Telegram?: {
     WebApp?: TelegramWebAppGlobal;
     Login?: TelegramLoginGlobal;
   };
+  AppleID?: AppleIDGlobal;
 }
