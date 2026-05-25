@@ -517,44 +517,6 @@ export default function Subscription() {
     return () => clearInterval(timer);
   }, [trafficRefreshCooldown]);
 
-  // Initialize revoke cooldown from localStorage on mount
-  useEffect(() => {
-    const ts = localStorage.getItem(`revoke_ts_${subscriptionId ?? 'default'}`);
-    if (ts) {
-      const elapsed = Math.floor((Date.now() - parseInt(ts, 10)) / 1000);
-      const remaining = Math.max(0, 900 - elapsed);
-      setRevokeCooldown(remaining);
-    }
-  }, [subscriptionId]);
-
-  // Countdown timer for revoke cooldown
-  useEffect(() => {
-    if (revokeCooldown <= 0) return;
-    const timer = setInterval(() => {
-      setRevokeCooldown((prev) => Math.max(0, prev - 1));
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [revokeCooldown]);
-
-  // Revoke (reissue) subscription mutation
-  const revokeMutation = useMutation({
-    mutationFn: () => subscriptionApi.revokeSubscription(subscriptionId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['subscription'] });
-      queryClient.invalidateQueries({ queryKey: ['connection-link', subscriptionId] });
-      queryClient.invalidateQueries({ queryKey: ['subscriptions-list'] });
-      // RemnaWave resets device HWIDs on revoke — make sure the cabinet
-      // re-reads the now-empty device list instead of showing the stale cache.
-      queryClient.invalidateQueries({ queryKey: ['devices', subscriptionId] });
-      haptic.notification('success');
-      localStorage.setItem(`revoke_ts_${subscriptionId ?? 'default'}`, Date.now().toString());
-      setRevokeCooldown(900);
-    },
-    onError: () => {
-      haptic.notification('error');
-    },
-  });
-
   // Auto-refresh traffic on mount (with 30s caching)
   useEffect(() => {
     if (!subscription) return;
