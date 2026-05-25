@@ -306,6 +306,7 @@
       "traffic": "Трафик",
       "devices": "Устройства",
       "expiredDate": "Истекла",
+      "expiredDate_trial": "Истёк",
       "activeUntil": "Активна до"
     },
     "suspended": {
@@ -524,6 +525,11 @@
     "confirmDeleteAllDevices": "Удалить все устройства?",
     "deviceDeleted": "Устройство удалено",
     "allDevicesDeleted": "Все устройства удалены",
+    "renameDevice": "Переименовать",
+    "renameDeviceSave": "Сохранить",
+    "renameDeviceCancel": "Отмена",
+    "renameDevicePlaceholder": "Имя устройства",
+    "deviceRenamed": "Имя устройства обновлено",
     "platform": "Платформа",
     "model": "Модель",
     "connectedAt": "Подключено",
@@ -1573,6 +1579,8 @@
       "noMethods": "Нет настроенных платёжных методов",
       "methodEnabled": "Метод включён",
       "providerNotConfigured": "Провайдер не настроен в env",
+      "openUrlDirect": "Открывать страницу оплаты сразу",
+      "openUrlDirectHint": "Без панели со ссылкой — провайдер открывается внутри MiniApp/вкладки сразу после клика. После оплаты юзер возвращается на /balance/top-up/result. Для Stars/CryptoBot и других t.me/-ссылок флаг игнорируется.",
       "displayName": "Отображаемое имя",
       "displayNameHint": "Оставьте пустым для имени по умолчанию",
       "subOptions": "Варианты оплаты",
@@ -3617,7 +3625,10 @@
           "none": "Нет подключённых устройств",
           "resetAll": "Сбросить все",
           "deleted": "Устройство удалено",
-          "allDeleted": "Все устройства сброшены"
+          "allDeleted": "Все устройства сброшены",
+          "rename": "Переименовать",
+          "renameSave": "Сохранить",
+          "renamed": "Имя устройства обновлено"
         },
         "referral": {
           "title": "Реферальная программа",
@@ -5249,6 +5260,13 @@
       "defaultMessage": "Ваш аккаунт заблокирован.",
       "reason": "Причина",
       "contactSupport": "Если вы считаете, что это ошибка, обратитесь в поддержку."
+    },
+    "accountDeleted": {
+      "title": "Аккаунт деактивирован",
+      "description": "Ваш аккаунт был деактивирован за длительную неактивность. Чтобы восстановить доступ, откройте бота в Telegram и отправьте команду /start.",
+      "openBot": "Открыть бота",
+      "retry": "Я нажал /start, попробовать снова",
+      "hint": "После /start вернитесь сюда и нажмите «Попробовать снова»."
     }
   },
   "merge": {

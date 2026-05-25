@@ -19,6 +19,7 @@ import { cn } from '../lib/utils';
 import { copyToClipboard } from '../utils/clipboard';
 import { getApiErrorMessage } from '../utils/api-error';
 import { formatPrice } from '../utils/format';
+import { useCurrency } from '../hooks/useCurrency';
 import { usePlatform, useHaptic } from '@/platform';
 
 function GiftIcon({ className }: { className?: string }) {
@@ -1285,6 +1286,9 @@ const tabContentVariants = {
 export default function GiftSubscription() {
   const { t } = useTranslation();
   const [searchParams] = useSearchParams();
+
+  // Прогреваем кэш курсов валют для formatPrice (см. QuickPurchase).
+  useCurrency();
 
   // URL params: ?tab=activate&code=TOKEN for auto-activation
   const urlTab = searchParams.get('tab') as TabId | null;

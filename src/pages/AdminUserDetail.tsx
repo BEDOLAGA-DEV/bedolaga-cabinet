@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import i18n from '../i18n';
+import { DEVICE_ALIAS_MAX_LENGTH } from '../constants/devices';
 import { useCurrency } from '../hooks/useCurrency';
 import { useNotify } from '../platform/hooks/useNotify';
 import {
@@ -24,51 +25,14 @@ import { createNumberInputHandler, toNumber } from '../utils/inputHelpers';
 import { usePermissionStore } from '../store/permissions';
 import { MessageMediaGrid } from '../components/tickets/MessageMediaGrid';
 import { linkifyText } from '../utils/linkify';
+import { getFlagEmoji } from '../utils/subscriptionHelpers';
 
 // ============ Helpers ============
 
-const getCountryFlag = (code: string | null | undefined): string => {
-  if (!code) return '';
-  const codeMap: Record<string, string> = {
-    RU: '\u{1F1F7}\u{1F1FA}',
-    US: '\u{1F1FA}\u{1F1F8}',
-    DE: '\u{1F1E9}\u{1F1EA}',
-    NL: '\u{1F1F3}\u{1F1F1}',
-    GB: '\u{1F1EC}\u{1F1E7}',
-    UK: '\u{1F1EC}\u{1F1E7}',
-    FR: '\u{1F1EB}\u{1F1F7}',
-    FI: '\u{1F1EB}\u{1F1EE}',
-    SE: '\u{1F1F8}\u{1F1EA}',
-    NO: '\u{1F1F3}\u{1F1F4}',
-    PL: '\u{1F1F5}\u{1F1F1}',
-    TR: '\u{1F1F9}\u{1F1F7}',
-    JP: '\u{1F1EF}\u{1F1F5}',
-    SG: '\u{1F1F8}\u{1F1EC}',
-    HK: '\u{1F1ED}\u{1F1F0}',
-    KR: '\u{1F1F0}\u{1F1F7}',
-    AU: '\u{1F1E6}\u{1F1FA}',
-    CA: '\u{1F1E8}\u{1F1E6}',
-    CH: '\u{1F1E8}\u{1F1ED}',
-    AT: '\u{1F1E6}\u{1F1F9}',
-    IT: '\u{1F1EE}\u{1F1F9}',
-    ES: '\u{1F1EA}\u{1F1F8}',
-    BR: '\u{1F1E7}\u{1F1F7}',
-    IN: '\u{1F1EE}\u{1F1F3}',
-    AE: '\u{1F1E6}\u{1F1EA}',
-    IL: '\u{1F1EE}\u{1F1F1}',
-    KZ: '\u{1F1F0}\u{1F1FF}',
-    UA: '\u{1F1FA}\u{1F1E6}',
-    CZ: '\u{1F1E8}\u{1F1FF}',
-    RO: '\u{1F1F7}\u{1F1F4}',
-    LV: '\u{1F1F1}\u{1F1FB}',
-    LT: '\u{1F1F1}\u{1F1F9}',
-    EE: '\u{1F1EA}\u{1F1EA}',
-    BG: '\u{1F1E7}\u{1F1EC}',
-    HU: '\u{1F1ED}\u{1F1FA}',
-    MD: '\u{1F1F2}\u{1F1E9}',
-  };
-  return codeMap[code.toUpperCase()] || code;
-};
+// Алгоритмический ISO 3166-1 alpha-2 → regional indicator (вместо хардкод-словаря,
+// который не покрывал все страны: например, EE раньше плыл сырым текстом в одних
+// местах, MX/AR/EG до сих пор отсутствуют в других). Единая точка истины в utils.
+const getCountryFlag = (code: string | null | undefined): string => getFlagEmoji(code);
 
 // ============ Icons ============
 
@@ -377,11 +341,20 @@ export default function AdminUserDetail() {
 
   // Devices
   const [devices, setDevices] = useState<
-    { hwid: string; platform: string; device_model: string; created_at: string | null }[]
+    {
+      hwid: string;
+      platform: string;
+      device_model: string;
+      created_at: string | null;
+      local_name?: string | null;
+    }[]
   >([]);
   const [devicesTotal, setDevicesTotal] = useState(0);
   const [deviceLimit, setDeviceLimit] = useState(0);
   const [devicesLoading, setDevicesLoading] = useState(false);
+  const [editingDeviceHwid, setEditingDeviceHwid] = useState<string | null>(null);
+  const [editingDeviceName, setEditingDeviceName] = useState('');
+  const [renameSaving, setRenameSaving] = useState(false);
 
   // Gifts
   const [giftsData, setGiftsData] = useState<AdminUserGiftsResponse | null>(null);
@@ -796,6 +769,29 @@ export default function AdminUserDetail() {
       notify.error(t('admin.users.userActions.error'), t('common.error'));
     } finally {
       setActionLoading(false);
+    }
+  };
+
+  // Admin renames a device on behalf of the user. Empty/whitespace input
+  // clears the alias and falls back to the platform/model default.
+  const handleRenameDevice = async (hwid: string) => {
+    if (!userId) return;
+    setRenameSaving(true);
+    // Snapshot inputs BEFORE the await so a fast click on another device
+    // mid-flight doesn't smuggle a different alias into this hwid's request.
+    const snapshotName = editingDeviceName.trim();
+    try {
+      await adminUsersApi.renameUserDevice(userId, hwid, snapshotName || null);
+      notify.success(t('admin.users.detail.devices.renamed', 'Имя устройства обновлено'));
+      // Reset edit state only if user is still on the saved row.
+      setEditingDeviceHwid((current) => (current === hwid ? null : current));
+      await loadDevices();
+    } catch (err) {
+      const apiMessage = (err as { response?: { data?: { detail?: string } } })?.response?.data
+        ?.detail;
+      notify.error(apiMessage || t('admin.users.userActions.error'), t('common.error'));
+    } finally {
+      setRenameSaving(false);
     }
   };
 
@@ -2599,44 +2595,183 @@ export default function AdminUserDetail() {
                     </div>
                   ) : devices.length > 0 ? (
                     <div className="space-y-2">
-                      {devices.map((device) => (
-                        <div
-                          key={device.hwid}
-                          className="flex items-center justify-between rounded-lg bg-dark-700/50 px-3 py-2"
-                        >
-                          <div className="min-w-0 flex-1">
-                            <div className="truncate text-xs font-medium text-dark-200">
-                              {device.platform || device.device_model || device.hwid.slice(0, 12)}
-                            </div>
-                            <div className="flex items-center gap-2 text-[10px] text-dark-500">
-                              {device.device_model && device.platform && (
-                                <span>{device.device_model}</span>
+                      {devices.map((device) => {
+                        const isEditing = editingDeviceHwid === device.hwid;
+                        // Display priority: alias \u2192 model \u2192 platform \u2192 hwid prefix.
+                        const displayName =
+                          (device.local_name && device.local_name.trim()) ||
+                          device.platform ||
+                          device.device_model ||
+                          device.hwid.slice(0, 12);
+
+                        return (
+                          <div
+                            key={device.hwid}
+                            className="flex items-center justify-between rounded-lg bg-dark-700/50 px-3 py-2"
+                          >
+                            <div className="min-w-0 flex-1">
+                              {isEditing ? (
+                                <input
+                                  type="text"
+                                  autoFocus
+                                  value={editingDeviceName}
+                                  maxLength={DEVICE_ALIAS_MAX_LENGTH}
+                                  placeholder={
+                                    device.platform ||
+                                    device.device_model ||
+                                    device.hwid.slice(0, 12)
+                                  }
+                                  onChange={(e) => setEditingDeviceName(e.target.value)}
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                      e.preventDefault();
+                                      handleRenameDevice(device.hwid);
+                                    } else if (e.key === 'Escape') {
+                                      e.preventDefault();
+                                      setEditingDeviceHwid(null);
+                                      setEditingDeviceName('');
+                                    }
+                                  }}
+                                  className="w-full rounded-md bg-dark-900/70 px-2 py-1 text-xs font-medium text-dark-50 outline-none ring-1 ring-dark-600/60 focus:ring-accent-500/50"
+                                />
+                              ) : (
+                                <div className="truncate text-xs font-medium text-dark-200">
+                                  {displayName}
+                                </div>
                               )}
-                              <span className="font-mono">{device.hwid.slice(0, 8)}...</span>
-                              {device.created_at && (
-                                <span>
-                                  {new Date(device.created_at).toLocaleDateString(locale)}
-                                </span>
+                              <div className="mt-0.5 flex items-center gap-2 text-[10px] text-dark-500">
+                                {device.device_model && device.platform && (
+                                  <span>{device.device_model}</span>
+                                )}
+                                <span className="font-mono">{device.hwid.slice(0, 8)}...</span>
+                                {device.created_at && (
+                                  <span>
+                                    {new Date(device.created_at).toLocaleDateString(locale)}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <div className="ml-2 flex shrink-0 items-center gap-1">
+                              {isEditing ? (
+                                <>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleRenameDevice(device.hwid)}
+                                    disabled={renameSaving}
+                                    className="rounded-lg px-2 py-1 text-success-400 transition-all hover:bg-success-500/15 disabled:opacity-50"
+                                    title={t(
+                                      'admin.users.detail.devices.renameSave',
+                                      t(
+                                        'common.save',
+                                        '\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C',
+                                      ),
+                                    )}
+                                    aria-label={t(
+                                      'admin.users.detail.devices.renameSave',
+                                      '\u0421\u043E\u0445\u0440\u0430\u043D\u0438\u0442\u044C',
+                                    )}
+                                  >
+                                    <svg
+                                      width="14"
+                                      height="14"
+                                      viewBox="0 0 24 24"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      strokeWidth="2"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      aria-hidden="true"
+                                    >
+                                      <path d="M5 13l4 4L19 7" />
+                                    </svg>
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setEditingDeviceHwid(null);
+                                      setEditingDeviceName('');
+                                    }}
+                                    disabled={renameSaving}
+                                    className="rounded-lg px-2 py-1 text-dark-500 transition-all hover:bg-dark-700 disabled:opacity-50"
+                                    title={t(
+                                      'common.cancel',
+                                      '\u041E\u0442\u043C\u0435\u043D\u0430',
+                                    )}
+                                    aria-label={t(
+                                      'common.cancel',
+                                      '\u041E\u0442\u043C\u0435\u043D\u0430',
+                                    )}
+                                  >
+                                    <svg
+                                      width="14"
+                                      height="14"
+                                      viewBox="0 0 24 24"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      strokeWidth="2"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      aria-hidden="true"
+                                    >
+                                      <path d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                  </button>
+                                </>
+                              ) : (
+                                <>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setEditingDeviceHwid(device.hwid);
+                                      setEditingDeviceName(device.local_name || '');
+                                    }}
+                                    className="rounded-lg px-2 py-1 text-dark-500 transition-all hover:bg-accent-500/15 hover:text-accent-400"
+                                    title={t(
+                                      'admin.users.detail.devices.rename',
+                                      '\u041F\u0435\u0440\u0435\u0438\u043C\u0435\u043D\u043E\u0432\u0430\u0442\u044C',
+                                    )}
+                                    aria-label={t(
+                                      'admin.users.detail.devices.rename',
+                                      '\u041F\u0435\u0440\u0435\u0438\u043C\u0435\u043D\u043E\u0432\u0430\u0442\u044C',
+                                    )}
+                                  >
+                                    <svg
+                                      width="14"
+                                      height="14"
+                                      viewBox="0 0 24 24"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      strokeWidth="1.5"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      aria-hidden="true"
+                                    >
+                                      <path d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125" />
+                                    </svg>
+                                  </button>
+                                  <button
+                                    onClick={() =>
+                                      handleInlineConfirm(`deleteDevice_${device.hwid}`, () =>
+                                        handleDeleteDevice(device.hwid),
+                                      )
+                                    }
+                                    disabled={actionLoading}
+                                    className={`rounded-lg px-2 py-1 text-xs transition-all disabled:opacity-50 ${
+                                      confirmingAction === `deleteDevice_${device.hwid}`
+                                        ? 'bg-error-500 text-white'
+                                        : 'text-dark-500 hover:bg-error-500/15 hover:text-error-400'
+                                    }`}
+                                  >
+                                    {confirmingAction === `deleteDevice_${device.hwid}`
+                                      ? '?'
+                                      : '\u00D7'}
+                                  </button>
+                                </>
                               )}
                             </div>
                           </div>
-                          <button
-                            onClick={() =>
-                              handleInlineConfirm(`deleteDevice_${device.hwid}`, () =>
-                                handleDeleteDevice(device.hwid),
-                              )
-                            }
-                            disabled={actionLoading}
-                            className={`ml-2 shrink-0 rounded-lg px-2 py-1 text-xs transition-all disabled:opacity-50 ${
-                              confirmingAction === `deleteDevice_${device.hwid}`
-                                ? 'bg-error-500 text-white'
-                                : 'text-dark-500 hover:bg-error-500/15 hover:text-error-400'
-                            }`}
-                          >
-                            {confirmingAction === `deleteDevice_${device.hwid}` ? '?' : '\u00D7'}
-                          </button>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   ) : (
                     <div className="py-2 text-center text-xs text-dark-500">

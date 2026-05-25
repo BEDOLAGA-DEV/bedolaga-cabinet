@@ -32,9 +32,12 @@ export const getInsufficientBalanceError = (
   return null;
 };
 
-export const getFlagEmoji = (countryCode: string): string => {
-  if (!countryCode || countryCode.length !== 2) return '';
-  const codePoints = countryCode
+export const getFlagEmoji = (countryCode: string | null | undefined): string => {
+  // Trim + длина строго 2 буквы — иначе Unicode regional indicators не дадут флаг.
+  // Принимаем null/undefined чтобы вызывающие коду не приходилось страховаться.
+  const code = (countryCode ?? '').trim();
+  if (code.length !== 2 || !/^[A-Za-z]{2}$/.test(code)) return '';
+  const codePoints = code
     .toUpperCase()
     .split('')
     .map((char) => 127397 + char.charCodeAt(0));

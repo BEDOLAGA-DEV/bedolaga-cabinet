@@ -18,6 +18,7 @@ import {
   type TrafficEnrichmentData,
 } from '../api/adminTraffic';
 import { usePlatform } from '../platform/hooks/usePlatform';
+import { getFlagEmoji as _sharedGetFlagEmoji } from '../utils/subscriptionHelpers';
 
 // ============ TanStack Table module augmentation ============
 
@@ -40,14 +41,9 @@ const formatBytes = (bytes: number): string => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 };
 
-const getFlagEmoji = (countryCode: string): string => {
-  if (!countryCode || countryCode.length !== 2) return '';
-  const codePoints = countryCode
-    .toUpperCase()
-    .split('')
-    .map((char) => 127397 + char.charCodeAt(0));
-  return String.fromCodePoint(...codePoints);
-};
+// Локальная обёртка над общим helper'ом, чтобы внутренние сигнатуры (string)
+// оставались как были и call-sites не меняли.
+const getFlagEmoji = (countryCode: string): string => _sharedGetFlagEmoji(countryCode);
 
 const formatCurrency = (kopeks: number): string => {
   const rubles = kopeks / 100;

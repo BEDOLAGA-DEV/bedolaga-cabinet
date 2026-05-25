@@ -28,6 +28,7 @@ import {
   MaintenanceScreen,
   ChannelSubscriptionScreen,
   BlacklistedScreen,
+  AccountDeletedScreen,
 } from './components/blocking';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { PermissionRoute } from '@/components/auth/PermissionRoute';
@@ -35,6 +36,7 @@ import { saveReturnUrl } from './utils/token';
 import { useAnalyticsCounters } from './hooks/useAnalyticsCounters';
 import { useBranding } from './hooks/useBranding';
 import { useHostGuard } from './hooks/useHostGuard';
+import { useSiteVerification } from './hooks/useSiteVerification';
 // Auth pages - load immediately (small)
 import Login from './pages/Login';
 import Home from './pages/Home';
@@ -296,6 +298,10 @@ function BlockingOverlay() {
     return <BlacklistedScreen />;
   }
 
+  if (blockingType === 'account_deleted') {
+    return <AccountDeletedScreen />;
+  }
+
   return null;
 }
 
@@ -309,6 +315,7 @@ function App() {
   useAnalyticsCounters();
   useBranding();
   useHostGuard();
+  useSiteVerification();
 
   return (
     <>

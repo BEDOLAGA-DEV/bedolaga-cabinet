@@ -5,49 +5,12 @@ import { adminRemnawaveApi, SquadWithLocalInfo } from '../api/adminRemnawave';
 import { AdminBackButton } from '../components/admin';
 import { ServerIcon, UsersIcon, CheckIcon, XIcon } from '../components/icons';
 import Twemoji from 'react-twemoji';
-// Country flags helper
-const getCountryFlag = (code: string | null | undefined): string => {
-  if (!code) return '🌍';
-  const codeMap: Record<string, string> = {
-    RU: '🇷🇺',
-    US: '🇺🇸',
-    DE: '🇩🇪',
-    NL: '🇳🇱',
-    GB: '🇬🇧',
-    UK: '🇬🇧',
-    FR: '🇫🇷',
-    FI: '🇫🇮',
-    SE: '🇸🇪',
-    NO: '🇳🇴',
-    PL: '🇵🇱',
-    TR: '🇹🇷',
-    JP: '🇯🇵',
-    SG: '🇸🇬',
-    HK: '🇭🇰',
-    KR: '🇰🇷',
-    AU: '🇦🇺',
-    CA: '🇨🇦',
-    CH: '🇨🇭',
-    AT: '🇦🇹',
-    IT: '🇮🇹',
-    ES: '🇪🇸',
-    BR: '🇧🇷',
-    IN: '🇮🇳',
-    AE: '🇦🇪',
-    IL: '🇮🇱',
-    KZ: '🇰🇿',
-    UA: '🇺🇦',
-    CZ: '🇨🇿',
-    RO: '🇷🇴',
-    LV: '🇱🇻',
-    LT: '🇱🇹',
-    EE: '🇪🇪',
-    BG: '🇧🇬',
-    HU: '🇭🇺',
-    MD: '🇲🇩',
-  };
-  return codeMap[code.toUpperCase()] || code;
-};
+import { getFlagEmoji } from '../utils/subscriptionHelpers';
+
+// Country flag helper. Алгоритмический ISO 3166-1 alpha-2 → regional indicator,
+// чтобы не плодить хардкод-словари (исторически у каждого экрана был свой
+// неполный, и EE/MX/AR не покрывались). При отсутствии кода — глобус.
+const getCountryFlag = (code: string | null | undefined): string => getFlagEmoji(code) || '🌍';
 
 export default function AdminRemnawaveSquadDetail() {
   const { t } = useTranslation();

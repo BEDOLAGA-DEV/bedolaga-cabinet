@@ -20,37 +20,7 @@ const BackIcon = () => (
 );
 
 // Country flags (simple emoji mapping)
-const getCountryFlag = (code: string | null): string => {
-  if (!code) return '';
-  const codeMap: Record<string, string> = {
-    RU: '🇷🇺',
-    US: '🇺🇸',
-    DE: '🇩🇪',
-    NL: '🇳🇱',
-    GB: '🇬🇧',
-    FR: '🇫🇷',
-    FI: '🇫🇮',
-    SE: '🇸🇪',
-    PL: '🇵🇱',
-    CZ: '🇨🇿',
-    AT: '🇦🇹',
-    CH: '🇨🇭',
-    UA: '🇺🇦',
-    KZ: '🇰🇿',
-    JP: '🇯🇵',
-    KR: '🇰🇷',
-    SG: '🇸🇬',
-    HK: '🇭🇰',
-    CA: '🇨🇦',
-    AU: '🇦🇺',
-    BR: '🇧🇷',
-    IN: '🇮🇳',
-    TR: '🇹🇷',
-    IL: '🇮🇱',
-    AE: '🇦🇪',
-  };
-  return codeMap[code.toUpperCase()] || code;
-};
+import { getFlagEmoji as getCountryFlag } from '../utils/subscriptionHelpers';
 
 export default function AdminServers() {
   const { t } = useTranslation();

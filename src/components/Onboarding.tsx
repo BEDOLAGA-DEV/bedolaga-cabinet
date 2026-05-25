@@ -43,27 +43,52 @@ export default function Onboarding({ steps, onComplete, onSkip }: OnboardingProp
   const [isVisible, setIsVisible] = useState(false);
   const tooltipRef = useRef<HTMLDivElement>(null);
 
+  const onCompleteRef = useRef(onComplete);
+  useEffect(() => {
+    onCompleteRef.current = onComplete;
+  }, [onComplete]);
+
   const step = steps[currentStep];
 
-  // Find and highlight target element
   useEffect(() => {
-    const findTarget = () => {
+    let cancelled = false;
+    let attempts = 0;
+    const maxAttempts = 6;
+    const isLastStep = currentStep === steps.length - 1;
+
+    setIsVisible(false);
+    setTargetRect(null);
+
+    const tryFind = () => {
+      if (cancelled) return;
       const target = document.querySelector(`[data-onboarding="${step.target}"]`);
       if (target) {
         const rect = target.getBoundingClientRect();
         setTargetRect(rect);
-
-        // Scroll element into view if needed
         target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-        // Delay visibility for smooth animation
-        setTimeout(() => setIsVisible(true), 100);
+        window.setTimeout(() => {
+          if (!cancelled) setIsVisible(true);
+        }, 100);
+        return;
+      }
+      attempts += 1;
+      if (attempts < maxAttempts) {
+        window.setTimeout(tryFind, 200);
+        return;
+      }
+      if (isLastStep) {
+        onCompleteRef.current();
+      } else {
+        setCurrentStep((prev) => Math.min(prev + 1, steps.length - 1));
       }
     };
 
-    setIsVisible(false);
-    const timer = setTimeout(findTarget, 300);
-    return () => clearTimeout(timer);
+    const timer = window.setTimeout(tryFind, 300);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step.target]);
 
   // Recalculate position on resize/scroll
@@ -170,13 +195,22 @@ export default function Onboarding({ steps, onComplete, onSkip }: OnboardingProp
   return createPortal(
     <div className="onboarding-overlay" style={{ opacity: isVisible ? 1 : 0 }}>
       {/* Spotlight */}
-      <div className="onboarding-spotlight" style={getSpotlightStyle()} />
+      <div
+        className="onboarding-spotlight"
+        style={{
+          ...getSpotlightStyle(),
+          pointerEvents: isVisible ? 'auto' : 'none',
+        }}
+      />
 
       {/* Tooltip */}
       <div
         ref={tooltipRef}
         className={`onboarding-tooltip tooltip-${step.placement}`}
-        style={getTooltipStyle()}
+        style={{
+          ...getTooltipStyle(),
+          pointerEvents: isVisible ? 'auto' : 'none',
+        }}
       >
         {/* Progress indicator */}
         <div className="mb-4 flex items-center gap-1.5">
@@ -222,8 +256,8 @@ export default function Onboarding({ steps, onComplete, onSkip }: OnboardingProp
         </div>
       </div>
 
-      {/* Click handler to advance on target click */}
-      {targetRect && (
+      {/* Click handler to advance on target click — only when overlay is fully visible */}
+      {targetRect && isVisible && (
         <div
           className="absolute cursor-pointer"
           style={{

@@ -136,21 +136,21 @@ function syncYandexCid(counterId: string) {
         if (!token) return;
         // Route through brandingApi (apiClient) so baseURL, auth refresh, and
         // error handling all flow through the same interceptors as every other
-        // cabinet API call.
-        import('../api/branding').then(({ brandingApi: api }) => {
-          api
-            .storeYandexCid(cid)
-            .then(() => {
-              try {
-                localStorage.setItem(SENT_KEY, '1');
-              } catch {
-                /* ignore */
-              }
-            })
-            .catch(() => {
-              /* swallow -- non-critical, will retry on next login */
-            });
-        });
+        // cabinet API call. brandingApi уже импортирован статически — динамический
+        // import('../api/branding') ломал code-splitting (Vite warning о том, что
+        // модуль не может быть вынесен в отдельный chunk при mixed static+dynamic).
+        brandingApi
+          .storeYandexCid(cid)
+          .then(() => {
+            try {
+              localStorage.setItem(SENT_KEY, '1');
+            } catch {
+              /* ignore */
+            }
+          })
+          .catch(() => {
+            /* swallow -- non-critical, will retry on next login */
+          });
       });
     } catch {
       /* ignore */

@@ -264,12 +264,34 @@ export const subscriptionApi = {
       platform: string;
       device_model: string;
       created_at: string | null;
+      local_name?: string | null;
     }>;
     total: number;
     device_limit: number;
   }> => {
     const response = await apiClient.get(
       '/cabinet/subscription/devices',
+      withSubId(subscriptionId),
+    );
+    return response.data;
+  },
+
+  /**
+   * Persist a user-local alias for a device. Pass an empty/null `name` to
+   * clear the alias. Returns the final `local_name` after server-side
+   * normalization (trimmed + length-capped).
+   *
+   * Scope is per-(user, hwid), so the same alias appears across all of
+   * the user's subscriptions in multi-tariff mode.
+   */
+  renameDevice: async (
+    hwid: string,
+    name: string | null,
+    subscriptionId?: number,
+  ): Promise<{ hwid: string; local_name: string | null }> => {
+    const response = await apiClient.patch(
+      `/cabinet/subscription/devices/${encodeURIComponent(hwid)}/name`,
+      { name },
       withSubId(subscriptionId),
     );
     return response.data;
