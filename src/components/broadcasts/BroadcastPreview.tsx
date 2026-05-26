@@ -217,7 +217,12 @@ export function TelegramPreview({
         <div className="rounded-xl bg-[#0e1621] p-3">
           <div className="ml-auto max-w-[90%] rounded-2xl rounded-tr-md bg-[#2b5278] p-3 text-white shadow">
             {mediaUrl && mediaType === 'photo' && (
-              <img src={mediaUrl} alt="" className="mb-2 max-h-72 w-full rounded-lg object-cover" />
+              <img
+                src={mediaUrl}
+                alt=""
+                loading="lazy"
+                className="mb-2 max-h-72 w-full rounded-lg object-cover"
+              />
             )}
             {mediaUrl && mediaType === 'video' && (
               <video src={mediaUrl} controls className="mb-2 max-h-72 w-full rounded-lg" />

@@ -337,6 +337,7 @@ export default function Support() {
               <img
                 src={att.preview}
                 alt="Preview"
+                loading="lazy"
                 className="h-16 w-16 rounded-lg border border-dark-700 object-cover"
               />
             ) : (

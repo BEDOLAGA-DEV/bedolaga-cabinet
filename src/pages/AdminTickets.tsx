@@ -582,6 +582,7 @@ export default function AdminTickets() {
                             <img
                               src={att.preview}
                               alt="Preview"
+                              loading="lazy"
                               className="h-16 w-16 rounded-lg object-cover"
                             />
                           ) : (
