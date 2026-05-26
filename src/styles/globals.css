@@ -630,8 +630,10 @@ img.twemoji {
   }
 
   .progress-fill {
-    @apply h-full rounded-full duration-500 ease-smooth;
-    transition-property: width, background-color;
+    /* GPU-composited progress fill — consumer sets transform: scaleX(0..1)
+       with transform-origin: left. Avoids width-triggered reflow per frame. */
+    @apply h-full w-full origin-left rounded-full duration-500 ease-smooth;
+    transition-property: transform, background-color;
   }
 
   /* Stat card - Dark */

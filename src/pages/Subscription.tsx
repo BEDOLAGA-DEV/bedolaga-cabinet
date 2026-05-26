@@ -997,13 +997,18 @@ export default function Subscription() {
                         className="h-[6px] w-full overflow-hidden rounded-full"
                         style={{ background: g.textGhost }}
                       >
+                        {/* scaleX (compositor) instead of width (layout-thrash).
+                            Track is 64px (w-16), so 0.0625 floor = 4px minimum,
+                            preserving the prior minWidth behaviour. */}
                         <div
-                          className="h-full rounded-full transition-[width] duration-500"
+                          className="h-full w-full origin-left rounded-full transition-transform duration-500"
                           style={{
-                            width: `${Math.round((connectedDevices / subscription.device_limit) * 100)}%`,
+                            transform: `scaleX(${(() => {
+                              const pct = connectedDevices / subscription.device_limit;
+                              return connectedDevices > 0 ? Math.max(pct, 0.0625) : 0;
+                            })()})`,
                             background: zone.mainHex,
                             boxShadow: `0 0 8px ${zone.mainHex}40`,
-                            minWidth: connectedDevices > 0 ? '4px' : '0px',
                           }}
                         />
                       </div>
@@ -1146,9 +1151,9 @@ export default function Subscription() {
                           style={{ background: g.trackBg }}
                         >
                           <div
-                            className="absolute inset-0 rounded-full transition-[width] duration-500"
+                            className="absolute inset-0 origin-left rounded-full transition-transform duration-500"
                             style={{
-                              width: `${purchase.progress_percent}%`,
+                              transform: `scaleX(${purchase.progress_percent / 100})`,
                               background: `linear-gradient(90deg, ${zone.mainHex}, ${zone.mainHex}80)`,
                             }}
                           />
@@ -1193,10 +1198,15 @@ export default function Subscription() {
                       background: subscription.autopay_enabled ? zone.mainHex : g.textGhost,
                     }}
                   >
+                    {/* translateX (compositor) instead of left (layout-thrash).
+                        Resting position pinned at left:3px; on toggles a 23px
+                        slide on the GPU. */}
                     <span
-                      className="absolute top-[3px] h-[22px] w-[22px] rounded-full bg-white transition-[left] duration-300"
+                      className="absolute left-[3px] top-[3px] h-[22px] w-[22px] rounded-full bg-white transition-transform duration-300"
                       style={{
-                        left: subscription.autopay_enabled ? '26px' : '3px',
+                        transform: subscription.autopay_enabled
+                          ? 'translateX(23px)'
+                          : 'translateX(0)',
                         boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
                       }}
                     />
@@ -1387,9 +1397,9 @@ export default function Subscription() {
                     style={{ background: g.trackBg }}
                   >
                     <div
-                      className="absolute inset-0 rounded-full transition-[width] duration-500"
+                      className="absolute inset-0 origin-left rounded-full transition-transform duration-500"
                       style={{
-                        width: `${progress}%`,
+                        transform: `scaleX(${progress / 100})`,
                         background:
                           'linear-gradient(90deg, rgb(var(--color-accent-500)), rgb(var(--color-accent-400)))',
                       }}
