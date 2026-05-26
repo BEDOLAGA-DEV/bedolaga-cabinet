@@ -456,11 +456,6 @@ export default function AdminPayments() {
                         <span className="font-semibold text-dark-100">
                           {payment.method_display}
                         </span>
-                        {payment.is_paid && (
-                          <span className="rounded-full bg-green-500/20 px-2 py-0.5 text-xs font-medium text-green-400">
-                            {t('admin.payments.paid')}
-                          </span>
-                        )}
                       </div>
 
                       {/* Amount */}
