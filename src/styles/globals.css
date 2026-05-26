@@ -51,6 +51,24 @@
   }
 }
 
+/* Global reduced-motion defence — collapses every animation and transition
+   to ~0ms so users with vestibular disorders, motion sensitivity, or just
+   the OS-level preference set get instant state changes. State-conveying
+   motion still arrives at its final frame; only the journey is skipped.
+   Specific rules above (animation-play-state: paused, animation: none)
+   stay as documentation of intent — this rule subsumes them via !important.
+   WCAG 2.3.3 (Animation from Interactions). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 @keyframes border-rotate {
   to {
     --border-angle: 360deg;
