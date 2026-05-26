@@ -159,6 +159,38 @@ export const useAuthStore = create<AuthState>()(
           return initState.promise;
         }
 
+        // Three identical state shapes appeared inline 6 times — extract them
+        // here (closure-scoped to keep auth state internal). Behaviour is
+        // byte-for-byte identical to the previous inline blocks; the only
+        // change is that mistypes can't drift between branches.
+        // accessToken is typed `string | null` to match the previous inline
+        // set() shape and AuthState's field; in practice it's only called
+        // along the post-isTokenValid / post-refresh branches where the
+        // value is guaranteed non-null at runtime.
+        const applySession = (
+          accessToken: string | null,
+          refreshTokenValue: string,
+          user: User,
+        ): void => {
+          set({
+            accessToken,
+            refreshToken: refreshTokenValue,
+            user,
+            isAuthenticated: true,
+            isLoading: false,
+          });
+        };
+        const clearSession = (): void => {
+          tokenStorage.clearTokens();
+          set({
+            accessToken: null,
+            refreshToken: null,
+            user: null,
+            isAuthenticated: false,
+            isLoading: false,
+          });
+        };
+
         initState.isInitializing = true;
         initState.promise = (async () => {
           try {
@@ -184,22 +216,9 @@ export const useAuthStore = create<AuthState>()(
               if (newToken) {
                 const user = await authApi.getMe();
                 await get().checkAdminStatus();
-                set({
-                  accessToken: newToken,
-                  refreshToken,
-                  user,
-                  isAuthenticated: true,
-                  isLoading: false,
-                });
+                applySession(newToken, refreshToken, user);
               } else {
-                tokenStorage.clearTokens();
-                set({
-                  accessToken: null,
-                  refreshToken: null,
-                  user: null,
-                  isAuthenticated: false,
-                  isLoading: false,
-                });
+                clearSession();
               }
               return;
             }
@@ -207,45 +226,19 @@ export const useAuthStore = create<AuthState>()(
             try {
               const user = await authApi.getMe();
               await get().checkAdminStatus();
-              set({
-                accessToken,
-                refreshToken,
-                user,
-                isAuthenticated: true,
-                isLoading: false,
-              });
+              applySession(accessToken, refreshToken, user);
             } catch {
               const newToken = await tokenRefreshManager.refreshAccessToken();
               if (newToken) {
                 try {
                   const user = await authApi.getMe();
                   await get().checkAdminStatus();
-                  set({
-                    accessToken: newToken,
-                    refreshToken,
-                    user,
-                    isAuthenticated: true,
-                    isLoading: false,
-                  });
+                  applySession(newToken, refreshToken, user);
                 } catch {
-                  tokenStorage.clearTokens();
-                  set({
-                    accessToken: null,
-                    refreshToken: null,
-                    user: null,
-                    isAuthenticated: false,
-                    isLoading: false,
-                  });
+                  clearSession();
                 }
               } else {
-                tokenStorage.clearTokens();
-                set({
-                  accessToken: null,
-                  refreshToken: null,
-                  user: null,
-                  isAuthenticated: false,
-                  isLoading: false,
-                });
+                clearSession();
               }
             }
           } finally {
