@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
+import { useQuery } from '@tanstack/react-query';
 import {
   useReactTable,
   getCoreRowModel,
@@ -1591,72 +1592,92 @@ export default function AdminBulkActions() {
 
   // ---- Data loading ----
 
-  const loadUsers = useCallback(async () => {
-    try {
-      setLoading(true);
-      const params: Record<string, unknown> = {
-        offset,
-        limit,
-      };
+  // React Query owns network state; existing setters stay so downstream
+  // selection / handler code does not need to change.
+  const usersQuery = useQuery({
+    queryKey: [
+      'admin-bulk-users',
+      offset,
+      limit,
+      committedSearch,
+      statusFilter,
+      tariffFilter.join(','),
+      promoGroupFilter,
+      campaignFilter,
+      partnerFilter,
+    ] as const,
+    queryFn: () => {
+      const params: Record<string, unknown> = { offset, limit };
       if (committedSearch) params.search = committedSearch;
       if (statusFilter) params.subscription_status = statusFilter;
       if (tariffFilter.length > 0) params.tariff_id = tariffFilter.join(',');
       if (promoGroupFilter) params.promo_group_id = Number(promoGroupFilter);
       if (campaignFilter) params.campaign_id = Number(campaignFilter);
       if (partnerFilter) params.partner_id = Number(partnerFilter);
+      return adminUsersApi.getUsers(params as Parameters<typeof adminUsersApi.getUsers>[0]);
+    },
+  });
 
-      const data = await adminUsersApi.getUsers(
-        params as Parameters<typeof adminUsersApi.getUsers>[0],
-      );
-      setUsers(data.users);
-      setTotal(data.total);
-      // Auto-expand all users who have subscriptions
-      const autoExpand: Record<number, boolean> = {};
-      for (const u of data.users) {
-        if ((u.subscriptions?.length ?? 0) > 0) {
-          autoExpand[u.id] = true;
-        }
+  useEffect(() => {
+    if (!usersQuery.data) return;
+    setUsers(usersQuery.data.users);
+    setTotal(usersQuery.data.total);
+    // Auto-expand all users who have subscriptions
+    const autoExpand: Record<number, boolean> = {};
+    for (const u of usersQuery.data.users) {
+      if ((u.subscriptions?.length ?? 0) > 0) {
+        autoExpand[u.id] = true;
       }
-      setExpandedRows(autoExpand);
-    } catch {
-      // keep stale data
-    } finally {
-      setLoading(false);
     }
-  }, [
-    offset,
-    limit,
-    committedSearch,
-    statusFilter,
-    tariffFilter,
-    promoGroupFilter,
-    campaignFilter,
-    partnerFilter,
-  ]);
+    setExpandedRows(autoExpand);
+  }, [usersQuery.data]);
 
   useEffect(() => {
-    loadUsers();
-  }, [loadUsers]);
+    setLoading(usersQuery.isFetching);
+  }, [usersQuery.isFetching]);
 
-  // Load tariffs, promo groups, campaigns, and partners once (independent — one failure won't block others)
+  const loadUsers = useCallback(
+    async () => {
+      await usersQuery.refetch();
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [usersQuery.refetch],
+  );
+
+  // Static lookup tables — long staleTime since these change rarely.
+  const tariffsLookupQuery = useQuery({
+    queryKey: ['admin-bulk-tariffs-lookup'] as const,
+    queryFn: () => tariffsApi.getTariffs(true),
+    staleTime: 5 * 60 * 1000,
+  });
+  const promoGroupsLookupQuery = useQuery({
+    queryKey: ['admin-bulk-promo-groups-lookup'] as const,
+    queryFn: () => promocodesApi.getPromoGroups({ limit: 200 }),
+    staleTime: 5 * 60 * 1000,
+  });
+  const campaignsLookupQuery = useQuery({
+    queryKey: ['admin-bulk-campaigns-lookup'] as const,
+    queryFn: () => campaignsApi.getCampaigns(true, 0, 100),
+    staleTime: 5 * 60 * 1000,
+  });
+  const partnersLookupQuery = useQuery({
+    queryKey: ['admin-bulk-partners-lookup'] as const,
+    queryFn: () => partnerApi.getPartners({ limit: 100 }),
+    staleTime: 5 * 60 * 1000,
+  });
+
   useEffect(() => {
-    tariffsApi
-      .getTariffs(true)
-      .then((d) => setTariffs(d.tariffs))
-      .catch(() => {});
-    promocodesApi
-      .getPromoGroups({ limit: 200 })
-      .then((d) => setPromoGroups(d.items))
-      .catch(() => {});
-    campaignsApi
-      .getCampaigns(true, 0, 100)
-      .then((d) => setCampaigns(d.campaigns))
-      .catch(() => {});
-    partnerApi
-      .getPartners({ limit: 100 })
-      .then((d) => setPartners(d.items))
-      .catch(() => {});
-  }, []);
+    if (tariffsLookupQuery.data) setTariffs(tariffsLookupQuery.data.tariffs);
+  }, [tariffsLookupQuery.data]);
+  useEffect(() => {
+    if (promoGroupsLookupQuery.data) setPromoGroups(promoGroupsLookupQuery.data.items);
+  }, [promoGroupsLookupQuery.data]);
+  useEffect(() => {
+    if (campaignsLookupQuery.data) setCampaigns(campaignsLookupQuery.data.campaigns);
+  }, [campaignsLookupQuery.data]);
+  useEffect(() => {
+    if (partnersLookupQuery.data) setPartners(partnersLookupQuery.data.items);
+  }, [partnersLookupQuery.data]);
 
   // ---- Handlers ----
 
