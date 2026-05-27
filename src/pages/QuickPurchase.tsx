@@ -833,6 +833,10 @@ export default function QuickPurchase() {
       sessionStorage.setItem('landing_referrer', document.referrer.slice(0, 500));
     }
     // Save subid from URL (also clamped to backend limit of 255)
+    const urlRef = new URLSearchParams(window.location.search).get("ref");
+    if (urlRef) {
+      sessionStorage.setItem("landing_ref", urlRef.slice(0, 64));
+    }
     const urlSubid = new URLSearchParams(window.location.search).get('subid');
     if (urlSubid) {
       sessionStorage.setItem('landing_subid', urlSubid.slice(0, 255));
@@ -1075,6 +1079,8 @@ export default function QuickPurchase() {
     if (ymCid) data.yandex_cid = ymCid;
     const subid = sessionStorage.getItem('landing_subid');
     if (subid) (data as unknown as Record<string, unknown>).subid = subid;
+    const refCode = sessionStorage.getItem('landing_ref');
+    if (refCode) (data as unknown as Record<string, unknown>).referrer_code = refCode;
 
     // Fire landing-specific click goal
     if (config?.analytics_click_enabled && config?.analytics_click_goal) {
