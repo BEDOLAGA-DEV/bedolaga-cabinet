@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { EnabledThemes, DEFAULT_ENABLED_THEMES } from '../types/theme';
 import { themeColorsApi } from '../api/themeColors';
 import { STORAGE_KEYS } from '../config/constants';
+import { getTelegramColorScheme } from './useTelegramSDK';
 
 type Theme = 'dark' | 'light';
 
@@ -73,6 +74,13 @@ export function useTheme() {
       // If stored theme is disabled, use the enabled one
       if (stored && !enabled[stored]) {
         return enabled.dark ? 'dark' : 'light';
+      }
+      // No stored preference: follow the Telegram client's color scheme in a Mini App.
+      if (!stored) {
+        const tgScheme = getTelegramColorScheme();
+        if (tgScheme && enabled[tgScheme]) {
+          return tgScheme;
+        }
       }
       // Check system preference
       if (window.matchMedia('(prefers-color-scheme: light)').matches && enabled.light) {

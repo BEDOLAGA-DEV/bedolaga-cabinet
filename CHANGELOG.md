@@ -1,5 +1,101 @@
 # Changelog
 
+## [1.54.1](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.54.0...v1.54.1) (2026-05-28)
+
+
+### Bug Fixes
+
+* **i18n:** backfill 120 missing keys + close 2 typo regressions from purchase refactor ([e1f401c](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/e1f401c333b992ab6476206fb231b608f8f20646))
+
+## [1.54.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.53.0...v1.54.0) (2026-05-28)
+
+
+### Features
+
+* **a11y,i18n:** more modal focus-traps + Telegram theme/language sync ([0caba3d](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/0caba3dffb34927fc1d9744dc5e51c3869675551))
+* **a11y:** cross-platform hardening + modal focus-trap from impeccable audit ([8e0b63b](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/8e0b63bac893485752a5837f2f82599dcf752702))
+* **a11y:** dialog semantics + focus trap for the onboarding tour ([5c7d4b4](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/5c7d4b4888c230ebf9595106b479194946bbae2d))
+* **auth,a11y:** Telegram CloudStorage token recovery + blocking-screen a11y ([f311602](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/f31160208a5b5e872c78e8e0f5ee9a65d1a66928))
+* **yandex-conv:** forward CID through remaining paid API methods ([574da67](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/574da67ca059427731dca6e0af69977cad746107))
+* **yandex-conv:** forward CID through subscription purchase requests ([1b82280](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/1b82280853d5938efeaf1d8517b937e8cbde5583))
+
+
+### Bug Fixes
+
+* **a11y:** announce form-level errors via role=alert in Login + ResetPassword ([92ec9c3](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/92ec9c3c4288f409b2f280b2d2f47d4082ccb251))
+* **a11y:** announce Login form-level error via role=alert ([7e9e51b](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/7e9e51ba5a4d364413e2f47e09323ab0dc375d7d))
+* **a11y:** aria-label on icon-only buttons (Subscription copy + InstallationGuide back/QR) ([9f06526](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/9f065262385b8abf357fd8b3cff34e21b472bbc7))
+* **a11y:** associate referral form labels with their inputs ([1b40c38](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/1b40c3856d189be84ac8dfa60f5988b5fa8b805e))
+* **a11y:** associate Support ticket form labels with their inputs ([90888db](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/90888db48c0f620fb9ac223a31257416a1dd87d9))
+* **a11y:** label associations for AdminCampaignCreate fields ([4d18be8](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/4d18be848d8ad6174a3c81ffcb3959269ee24534))
+* **a11y:** label associations for AdminCampaignEdit fields ([6f66cb6](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/6f66cb67590b7fada4b6e79f875630c684380fed))
+* **a11y:** label associations for AdminInfoPageEditor fields ([a489724](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/a4897243ba7c8d046a485437e2e85d81b9b9c4a7))
+* **a11y:** label associations for AdminNewsCreate fields ([fefc52f](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/fefc52fb203ffc73c730ba3ebc7ae941440ec814))
+* **a11y:** label associations for AdminPromocodeCreate fields ([a635ca2](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/a635ca23161c3e2865e4f4f82a7e1e79bd283513))
+* **a11y:** label associations for AdminPromoGroupCreate + AdminPinnedMessageCreate ([5a8195f](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/5a8195f83fb78604af260fc127f4085742d3750f))
+* **a11y:** label associations for AdminPromoOfferTemplateEdit fields ([1ec6d7e](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/1ec6d7e9794b7630377065c7d1aa6ff02b9a1be5))
+* **a11y:** label associations for AdminServerEdit fields ([d42fcfa](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/d42fcfa5dd77a8663b1e4b761efe579f09328712))
+* **a11y:** label associations for AdminTariffCreate fields ([e1b48c1](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/e1b48c1ccb66ad44019c3fc4e537527b99dcd4d4))
+* **a11y:** radiogroup semantics for AdminInfoPageEditor button groups ([30c4c2e](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/30c4c2ecc67915df90c5eb5d0d1f5cd1233ca7cc))
+* **a11y:** radiogroup semantics for AdminPromoOfferSend button groups ([581a2ff](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/581a2ffb529f59bb8493a702ef2180cb4598b59b))
+* **a11y:** radiogroup semantics for Campaign bonus-type selector ([27ba507](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/27ba50747ac1fa6aab190560c4691a1284f9f8a7))
+* **a11y:** switch semantics for admin form toggles ([7b0a72d](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/7b0a72db5b4e13a5ddbb9e24bb405253501ebe5f))
+* **a11y:** switch semantics for user-flow toggles ([491f48a](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/491f48a331b80fa84e0ac82e3fd0341557adbff5))
+* **admin-bulk-actions:** plug stale-closure bug in columns useMemo ([7817243](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/78172432539b66e3ed4d57dce708b6ce5dae0052))
+* **admin-bulk-actions:** trap focus + label modal dialog (a11y) ([bc34e65](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/bc34e65aace9bda183ca33360a36c2b9471726bb))
+* **admin:** surface clipboard copy failures instead of swallowing ([576b4d5](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/576b4d5601f4ee9d242786297390c7717337d733))
+* **bulk-actions:** drop unused ChevronDownIcon import ([a8df415](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/a8df41593133133bafd0f14a4c78d70553a5b83c))
+* **chrome:** replace 2 platform emoji + 1 en-dash with on-brand tokens ([5784efd](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/5784efd7a3d6aa789b16282c8c04259466363a37))
+* **decoration:** strip 4 accent / status-hue leaks across hero surfaces ([75f7750](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/75f775064cfe50a140663b1498429a3f330b91da))
+* **i18n,a11y:** sync &lt;html lang&gt; + dir with i18n language ([28c6825](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/28c682500ca84bba214c1b7d60868fac5ea33346))
+* **navigation:** make Telegram back button work on deep-link entry ([2bcba3b](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/2bcba3b60f883afc5fbad980fd067b0939a32069))
+* **nav:** keep Support pinned in mobile bottom-nav ([68a97b8](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/68a97b896b4bc845bae49cf199198ca3d55a1ab3))
+* **permission-route:** guard against /admin → /admin redirect loop ([62eaef2](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/62eaef2f539a33bf92d06c78421628f98974faaf))
+* **profile,connected-accounts:** drop dead ['user'] invalidate calls ([23e4e9b](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/23e4e9b4d1854ce8f8ade8dd24249a5bdd232d2a))
+* **prose:** keep TipTap list markers inline with their content ([ed0b46e](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/ed0b46e833d5d4bf8a1f94f2564890c6bab93f03))
+* **reset-password:** cancel post-success redirect timer on unmount ([3f7320f](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/3f7320fb4d6910c6d5f452a62699656ec9d3549c))
+* **routing:** give every lazy page its own ErrorBoundary ([87e2e82](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/87e2e82136785d4dc25c9052cb122ee4812f8034))
+* **scope-selector:** drop role=dialog from non-modal popover (a11y) ([bef984d](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/bef984d72a534ac4296eaaf30e3cc01eb216e89e))
+* **security:** extract & reuse getSafeRedirectPath, plug TopUpAmount returnTo ([424a193](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/424a19344dcfe0bbd8116a021283f67657dd0ca2))
+* **subscription:** clear critique P0 + P1 + part of P2 ([312a34f](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/312a34f7159be3a836865a5120a7cc6f0640f699))
+* **subscription:** forward subscription_id to purchaseTariff to fix renew race ([e44a093](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/e44a09312edb936104ae9f4641f3e0452f275e79))
+* **telegram-redirect:** cancel pending timers on effect re-run/unmount ([748b051](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/748b0514ea6cba6424cd3054d93c201693ee7344))
+* **theming:** replace off-token TelegramCallback/VerifyEmail with design tokens ([feee9f9](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/feee9f9c05b2f872173ef6d4951bf2db8065514a))
+* **toast:** drop side-stripe ban + a11y polish ([eaaf5cf](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/eaaf5cfebbf90b9974712ae29f3a0334b6a08696))
+
+
+### Performance Improvements
+
+* **admin-bulk-actions:** migrate users + 4 lookup loaders to React Query ([bc5e95a](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/bc5e95a6e55af44fa96f22facf4becee1e17131e))
+* **admin-panel:** migrate system info + stats poll to React Query ([7426e1e](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/7426e1e6d14a43f269c976954d33dece7c2ec19e))
+* **admin-traffic:** migrate data flow to React Query ([2214d7f](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/2214d7fdabb9bc1df9754627638b6ba16d5cf10b))
+* **admin-user-detail:** migrate remaining 9 leaf loaders to React Query ([6f7bd10](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/6f7bd10d61dc77b7bb9b035238df38c1001bbdf6))
+* **admin:** migrate AdminBanSystem tab fetching to React Query ([1e4d6da](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/1e4d6dad47ff4030d88a6594fa364513f6ada3d7))
+* **admin:** migrate AdminDashboard to React Query (refetchInterval, no setInterval) ([0b07af8](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/0b07af82d4e1c28f8153fb5bb44a5cc10627a1ad))
+* **admin:** migrate AdminUserDetail loadUser to React Query (caching + cache key) ([5ee97e0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/5ee97e0a9f48fea1b267947c93c0d29585b59a43))
+* **admin:** migrate AdminUsers fetch to React Query ([dadf08d](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/dadf08d005cca5e22056ddef3e55106d646fc04f))
+* **build:** split recharts + tiptap into dedicated vendor chunks ([7f14c49](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/7f14c499ad61a7e74be638e5ca920c9951a3a01c))
+* **images:** add loading=lazy to in-list previews and attachments ([b6613ae](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/b6613ae4c92eb8ea02bf0375d419d6a510ddee99))
+* **motion:** convert layout-property transitions to transforms ([eb13689](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/eb13689ae79f9baddf973c1dc0a744913490f535))
+
+## [1.53.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.52.0...v1.53.0) (2026-05-16)
+
+
+### Features
+
+* **antilopay:** inject apay-tag meta on cabinet boot ([6fa4afd](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/6fa4afd5c1b67331a02127dc395476df1fbbd7e5))
+* **blocking:** account-deleted recovery screen with bot deep-link ([16b4711](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/16b47119c9a5da682f43727d3b747cbd5f06593d))
+* **devices:** inline rename UI for connected HWID devices ([321c65b](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/321c65b68b70248e96ba102783c8af32e2686258))
+
+
+### Bug Fixes
+
+* **admin:** show flag for every country code, not just hardcoded 25-36 ([f301d44](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/f301d44f2443681b49d006e6a5be5eb8bad29ce9))
+* **blocking:** open bot deep-link via platform adapter, not window.open ([8c336d1](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/8c336d16c72fef8ee062e01b9c2cf32a15c8c6f7))
+* **devices:** unicode escape bug + onSuccess race + en locale + apiErr surface ([d1e5ce8](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/d1e5ce873b3dd1c3ede0c82c73f47f91346c0b04))
+* **onboarding:** prevent invisible overlay blocking clicks and stuck tour ([abbbc6a](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/abbbc6a216f643a21131ebee0a34c638f3fbe777))
+* **subscription:** invalidate devices query after revoke ([47f0359](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/47f0359ed657b49b294dc1f289e8bb18500a5778))
+
 ## [1.52.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.51.0...v1.52.0) (2026-05-13)
 
 

@@ -14,8 +14,8 @@ const statusConfig: Record<string, { labelKey: string; color: string; bgColor: s
   },
   pending: {
     labelKey: 'admin.partnerDetail.status.pending',
-    color: 'text-yellow-400',
-    bgColor: 'bg-yellow-500/20',
+    color: 'text-warning-400',
+    bgColor: 'bg-warning-500/20',
   },
   rejected: {
     labelKey: 'admin.partnerDetail.status.rejected',

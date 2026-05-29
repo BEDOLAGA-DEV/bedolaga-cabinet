@@ -42,7 +42,7 @@ export function TrialsTab({ params }: TrialsTabProps) {
   }
 
   if (isError || !data) {
-    return <div className="py-8 text-center text-red-400">{t('admin.salesStats.loadError')}</div>;
+    return <div className="py-8 text-center text-error-400">{t('admin.salesStats.loadError')}</div>;
   }
 
   const pieData = data.by_provider.map((item) => ({

@@ -600,9 +600,9 @@ function SummaryCard({
                   const el = document.getElementById('contact-input');
                   if (el) {
                     el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    el.classList.add('!border-red-500', '!ring-2', '!ring-red-500/50');
+                    el.classList.add('!border-error-500', '!ring-2', '!ring-error-500/50');
                     setTimeout(() => {
-                      el.classList.remove('!border-red-500', '!ring-2', '!ring-red-500/50');
+                      el.classList.remove('!border-error-500', '!ring-2', '!ring-error-500/50');
                     }, 2000);
                   }
                   return;
@@ -643,12 +643,12 @@ function SummaryCard({
               const el = document.getElementById('contact-input');
               if (el) {
                 el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                el.classList.add('!border-red-500', '!ring-2', '!ring-red-500/50');
+                el.classList.add('!border-error-500', '!ring-2', '!ring-error-500/50');
                 setTimeout(() => {
                   el.focus();
                 }, 300);
                 setTimeout(() => {
-                  el.classList.remove('!border-red-500', '!ring-2', '!ring-red-500/50');
+                  el.classList.remove('!border-error-500', '!ring-2', '!ring-error-500/50');
                 }, 2000);
               }
               return;

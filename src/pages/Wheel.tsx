@@ -368,6 +368,10 @@ export default function Wheel() {
     setIsPayingStars(true);
     // In browser: pre-open window synchronously (direct user gesture) to avoid popup blocker
     if (!capabilities.hasInvoice) {
+      // Web-only: synchronously pre-open a tab during the user gesture to dodge the
+      // popup blocker before the async invoice URL resolves. Not reached in Telegram
+      // (hasInvoice is true there, so the native invoice flow is used instead).
+      // eslint-disable-next-line no-restricted-properties
       preOpenedWindowRef.current = window.open('about:blank', '_blank') || null;
     }
     starsInvoiceMutation.mutate();
@@ -483,7 +487,7 @@ export default function Wheel() {
   if (error || !config) {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4">
-        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-red-500/10">
+        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-error-500/10">
           <span className="text-4xl">😔</span>
         </div>
         <p className="text-lg text-dark-400">{t('wheel.errors.loadFailed')}</p>
@@ -705,7 +709,7 @@ export default function Wheel() {
                   className={`animate-fade-in rounded-linear border p-4 ${
                     spinResult.success
                       ? 'border-accent-500/30 bg-accent-500/10'
-                      : 'border-red-500/30 bg-red-500/10'
+                      : 'border-error-500/30 bg-error-500/10'
                   }`}
                 >
                   <div className="flex items-center gap-3">

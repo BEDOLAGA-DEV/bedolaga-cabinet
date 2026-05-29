@@ -1,4 +1,4 @@
-import { useState, useEffect, type FormEvent } from 'react';
+import { useState, useEffect, type SyntheticEvent } from 'react';
 import { useNavigate } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -37,7 +37,7 @@ export default function ReferralWithdrawalRequest() {
     },
   });
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = (e: SyntheticEvent) => {
     e.preventDefault();
     if (form.payment_details.length < 5) return;
     if (form.amount_rubles <= 0) return;
@@ -59,10 +59,11 @@ export default function ReferralWithdrawalRequest() {
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="bento-card space-y-4">
           <div>
-            <label className="mb-1 block text-sm font-medium text-dark-300">
+            <label htmlFor="rw-amount" className="mb-1 block text-sm font-medium text-dark-300">
               {t('referral.withdrawal.fields.amount')}
             </label>
             <input
+              id="rw-amount"
               type="number"
               min={balance ? Math.ceil(balance.min_amount_kopeks / 100) : 0}
               max={balance ? Math.floor(balance.available_total / 100) : 0}
@@ -86,10 +87,14 @@ export default function ReferralWithdrawalRequest() {
             </p>
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-dark-300">
+            <label
+              htmlFor="rw-payment-details"
+              className="mb-1 block text-sm font-medium text-dark-300"
+            >
               {balance?.requisites_text || t('referral.withdrawal.fields.paymentDetails')}
             </label>
             <textarea
+              id="rw-payment-details"
               className="input min-h-[80px] w-full"
               value={form.payment_details}
               onChange={(e) => setForm({ ...form, payment_details: e.target.value })}

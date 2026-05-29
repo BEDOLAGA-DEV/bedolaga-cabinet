@@ -54,7 +54,7 @@ export const DialogOverlay = forwardRef<HTMLDivElement, DialogOverlayProps>(
   ({ className, ...props }, ref) => (
     <DialogPrimitive.Overlay
       ref={ref}
-      className={cn('fixed inset-0 z-50 bg-black/60 backdrop-blur-sm', className)}
+      className={cn('fixed inset-0 z-50 bg-dark-950/60 backdrop-blur-sm', className)}
       asChild
       {...props}
     >

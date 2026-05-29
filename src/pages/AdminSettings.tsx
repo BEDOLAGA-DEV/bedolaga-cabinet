@@ -258,7 +258,7 @@ export default function AdminSettings() {
       </div>
 
       {/* Desktop Layout - fixed sidebar, scrollable content */}
-      <div className="hidden h-[calc(100vh-120px)] lg:flex">
+      <div className="hidden h-[calc(100dvh-120px)] lg:flex">
         {/* Fixed Sidebar */}
         <div className="w-[264px] shrink-0 overflow-y-auto border-r border-dark-700/50">
           <div className="border-b border-dark-700/50 p-4">

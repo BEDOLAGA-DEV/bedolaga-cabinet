@@ -404,7 +404,8 @@ export default function ConnectedAccounts() {
       const updatedUser = await authApi.getMe();
       setUser(updatedUser);
       queryClient.invalidateQueries({ queryKey: ['linked-providers'] });
-      queryClient.invalidateQueries({ queryKey: ['user'] });
+      // Note: auth user lives in the zustand store, not in React Query —
+      // the explicit setUser above IS the refresh. No ['user'] query exists.
     },
     onError: (err: { response?: { data?: { detail?: string } } }) => {
       const detail = err.response?.data?.detail;
@@ -419,7 +420,7 @@ export default function ConnectedAccounts() {
     },
   });
 
-  const handleEmailSubmit = (e: React.FormEvent) => {
+  const handleEmailSubmit = (e: React.SyntheticEvent) => {
     e.preventDefault();
     setEmailError(null);
     setEmailSuccess(null);

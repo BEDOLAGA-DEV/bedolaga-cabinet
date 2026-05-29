@@ -64,11 +64,11 @@ export default function TelegramCallback() {
 
   if (error) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-8">
+      <div className="min-h-viewport flex items-center justify-center bg-dark-950 px-4 py-8">
         <div className="w-full max-w-md text-center">
-          <div className="mb-4 text-5xl text-red-500">✗</div>
-          <h2 className="mb-2 text-lg font-semibold text-gray-900">{t('auth.loginFailed')}</h2>
-          <p className="mb-6 text-sm text-gray-500">{error}</p>
+          <div className="mb-4 text-5xl text-error-500">✗</div>
+          <h2 className="mb-2 text-lg font-semibold text-dark-50">{t('auth.loginFailed')}</h2>
+          <p className="mb-6 text-sm text-dark-400">{error}</p>
           <button onClick={() => navigate('/login')} className="btn-primary">
             {t('auth.tryAgain')}
           </button>
@@ -78,11 +78,11 @@ export default function TelegramCallback() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50">
+    <div className="min-h-viewport flex items-center justify-center bg-dark-950">
       <div className="text-center">
-        <div className="border-primary-600 mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2"></div>
-        <h2 className="text-lg font-semibold text-gray-900">{t('auth.authenticating')}</h2>
-        <p className="mt-2 text-sm text-gray-500">{t('common.loading')}</p>
+        <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-2 border-accent-500 border-t-transparent"></div>
+        <h2 className="text-lg font-semibold text-dark-50">{t('auth.authenticating')}</h2>
+        <p className="mt-2 text-sm text-dark-400">{t('common.loading')}</p>
       </div>
     </div>
   );

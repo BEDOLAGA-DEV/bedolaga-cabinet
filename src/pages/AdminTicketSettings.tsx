@@ -87,7 +87,7 @@ export default function AdminTicketSettings() {
   const isValid =
     !formData.sla_enabled || (isSlaMinutesValid && isCheckIntervalValid && isReminderCooldownValid);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.SyntheticEvent) => {
     e.preventDefault();
     if (!isValid) return;
     updateMutation.mutate({

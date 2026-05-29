@@ -39,6 +39,49 @@ export default tseslint.config(
       'no-implied-eval': 'error',
       'no-new-func': 'error',
       'no-script-url': 'error',
+      // Cross-platform guard: these browser APIs misbehave inside the Telegram WebView.
+      // Route them through the platform abstraction instead. The platform adapters and
+      // the clipboard util (the canonical implementations) are exempted below.
+      'no-restricted-properties': [
+        'error',
+        {
+          object: 'window',
+          property: 'confirm',
+          message:
+            'Use useNativeDialog().confirm — window.confirm is silently ignored in the Telegram WebView.',
+        },
+        {
+          object: 'window',
+          property: 'alert',
+          message:
+            'Use useNativeDialog().alert — window.alert is silently ignored in the Telegram WebView.',
+        },
+        {
+          object: 'window',
+          property: 'open',
+          message:
+            'Use usePlatform().openLink / openTelegramLink — window.open is intercepted by the Telegram WebView.',
+        },
+        {
+          object: 'window',
+          property: 'prompt',
+          message:
+            'Use usePrompt() (PromptDialogHost) — window.prompt is not supported in the Telegram WebView.',
+        },
+        {
+          object: 'navigator',
+          property: 'clipboard',
+          message:
+            'Use copyToClipboard from @/utils/clipboard — it falls back to execCommand when the Clipboard API is unavailable (Telegram WebView).',
+        },
+      ],
+    },
+  },
+  {
+    // Canonical implementations that intentionally call the restricted browser APIs.
+    files: ['src/platform/**/*.{ts,tsx}', 'src/utils/clipboard.ts'],
+    rules: {
+      'no-restricted-properties': 'off',
     },
   },
   eslintConfigPrettier,

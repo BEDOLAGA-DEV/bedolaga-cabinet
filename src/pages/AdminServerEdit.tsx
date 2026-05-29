@@ -7,39 +7,7 @@ import { AdminBackButton } from '../components/admin';
 import { ServerIcon } from '../components/icons';
 import { createNumberInputHandler, toNumber } from '../utils/inputHelpers';
 import Twemoji from 'react-twemoji';
-
-// Country flags (simple emoji mapping)
-const getCountryFlag = (code: string | null): string => {
-  if (!code) return '';
-  const codeMap: Record<string, string> = {
-    RU: '🇷🇺',
-    US: '🇺🇸',
-    DE: '🇩🇪',
-    NL: '🇳🇱',
-    GB: '🇬🇧',
-    FR: '🇫🇷',
-    FI: '🇫🇮',
-    SE: '🇸🇪',
-    PL: '🇵🇱',
-    CZ: '🇨🇿',
-    AT: '🇦🇹',
-    CH: '🇨🇭',
-    UA: '🇺🇦',
-    KZ: '🇰🇿',
-    JP: '🇯🇵',
-    KR: '🇰🇷',
-    SG: '🇸🇬',
-    HK: '🇭🇰',
-    CA: '🇨🇦',
-    AU: '🇦🇺',
-    BR: '🇧🇷',
-    IN: '🇮🇳',
-    TR: '🇹🇷',
-    IL: '🇮🇱',
-    AE: '🇦🇪',
-  };
-  return codeMap[code.toUpperCase()] || code;
-};
+import { getFlagEmoji as getCountryFlag } from '../utils/subscriptionHelpers';
 
 export default function AdminServerEdit() {
   const { t } = useTranslation();
@@ -86,7 +54,7 @@ export default function AdminServerEdit() {
     },
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.SyntheticEvent) => {
     e.preventDefault();
     const data: ServerUpdateRequest = {
       display_name: displayName,
@@ -167,11 +135,15 @@ export default function AdminServerEdit() {
 
           {/* Display Name */}
           <div className="mb-4">
-            <label className="mb-2 block text-sm font-medium text-dark-300">
+            <label
+              htmlFor="srv-display-name"
+              className="mb-2 block text-sm font-medium text-dark-300"
+            >
               {t('admin.servers.displayName')}
               <span className="text-error-400">*</span>
             </label>
             <input
+              id="srv-display-name"
               type="text"
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
@@ -183,10 +155,14 @@ export default function AdminServerEdit() {
 
           {/* Description */}
           <div className="mb-4">
-            <label className="mb-2 block text-sm font-medium text-dark-300">
+            <label
+              htmlFor="srv-description"
+              className="mb-2 block text-sm font-medium text-dark-300"
+            >
               {t('admin.servers.description')}
             </label>
             <textarea
+              id="srv-description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               className="input resize-none"
@@ -197,11 +173,15 @@ export default function AdminServerEdit() {
 
           {/* Country Code */}
           <div>
-            <label className="mb-2 block text-sm font-medium text-dark-300">
+            <label
+              htmlFor="srv-country-code"
+              className="mb-2 block text-sm font-medium text-dark-300"
+            >
               {t('admin.servers.countryCode')}
             </label>
             <div className="flex items-center gap-2">
               <input
+                id="srv-country-code"
                 type="text"
                 value={countryCode}
                 onChange={(e) => setCountryCode(e.target.value.toUpperCase().slice(0, 2))}
@@ -222,11 +202,12 @@ export default function AdminServerEdit() {
 
           {/* Price */}
           <div className="mb-4">
-            <label className="mb-2 block text-sm font-medium text-dark-300">
+            <label htmlFor="srv-price" className="mb-2 block text-sm font-medium text-dark-300">
               {t('admin.servers.price')}
             </label>
             <div className="flex items-center gap-2">
               <input
+                id="srv-price"
                 type="number"
                 value={priceKopeks === '' ? '' : priceKopeks / 100}
                 onChange={(e) => {
@@ -248,11 +229,12 @@ export default function AdminServerEdit() {
 
           {/* Max Users */}
           <div className="mb-4">
-            <label className="mb-2 block text-sm font-medium text-dark-300">
+            <label htmlFor="srv-max-users" className="mb-2 block text-sm font-medium text-dark-300">
               {t('admin.servers.maxUsers')}
             </label>
             <div className="flex items-center gap-2">
               <input
+                id="srv-max-users"
                 type="number"
                 value={maxUsers || ''}
                 onChange={(e) =>
@@ -270,10 +252,14 @@ export default function AdminServerEdit() {
 
           {/* Sort Order */}
           <div>
-            <label className="mb-2 block text-sm font-medium text-dark-300">
+            <label
+              htmlFor="srv-sort-order"
+              className="mb-2 block text-sm font-medium text-dark-300"
+            >
               {t('admin.servers.sortOrder')}
             </label>
             <input
+              id="srv-sort-order"
               type="number"
               value={sortOrder}
               onChange={createNumberInputHandler(setSortOrder)}

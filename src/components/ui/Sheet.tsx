@@ -333,7 +333,7 @@ export function Sheet({
     >
       {/* Backdrop */}
       <div
-        className={`absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300 ${
+        className={`absolute inset-0 bg-dark-950/60 backdrop-blur-sm transition-opacity duration-300 ${
           isVisible ? 'opacity-100' : 'opacity-0'
         }`}
       />
@@ -388,5 +388,5 @@ export function Sheet({
 
 // Light theme styles applied via CSS
 // Add to globals.css:
-// .light .sheet-backdrop { @apply bg-black/40; }
+// .light .sheet-backdrop { @apply bg-dark-950/40; }
 // .light .sheet-container { @apply bg-champagne-100; }

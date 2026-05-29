@@ -6,6 +6,7 @@ import i18n from '../i18n';
 import { campaignsApi, CampaignListItem, CampaignBonusType } from '../api/campaigns';
 import { PlusIcon, EditIcon, TrashIcon, CheckIcon, XIcon, ChartIcon } from '../components/icons';
 import { usePlatform } from '../platform/hooks/usePlatform';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 
 const PAGE_SIZE = 50;
 
@@ -69,6 +70,9 @@ export default function AdminCampaigns() {
   const { capabilities } = usePlatform();
 
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
+  const deleteDialogRef = useFocusTrap<HTMLDivElement>(deleteConfirm !== null, {
+    onEscape: () => setDeleteConfirm(null),
+  });
 
   // Queries
   const {
@@ -295,8 +299,20 @@ export default function AdminCampaigns() {
       {/* Delete Confirmation */}
       {deleteConfirm !== null && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="w-full max-w-sm rounded-xl bg-dark-800 p-6">
-            <h3 className="mb-2 text-lg font-semibold text-dark-100">
+          <div
+            className="absolute inset-0 bg-dark-950/60"
+            onClick={() => setDeleteConfirm(null)}
+            aria-hidden="true"
+          />
+          <div
+            ref={deleteDialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="campaign-delete-title"
+            tabIndex={-1}
+            className="relative w-full max-w-sm rounded-xl bg-dark-800 p-6"
+          >
+            <h3 id="campaign-delete-title" className="mb-2 text-lg font-semibold text-dark-100">
               {t('admin.campaigns.confirm.deleteTitle')}
             </h3>
             <p className="mb-6 text-dark-400">{t('admin.campaigns.confirm.deleteText')}</p>

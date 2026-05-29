@@ -12,6 +12,7 @@ import UnderlineExtension from '@tiptap/extension-underline';
 import HighlightExtension from '@tiptap/extension-highlight';
 import { VideoExtension } from '../lib/tiptap-video';
 import { newsApi } from '../api/news';
+import { usePrompt } from '../store/promptDialog';
 import { AdminBackButton } from '../components/admin';
 import { ColoredItemCombobox } from '../components/admin/ColoredItemCombobox';
 import { Toggle } from '../components/admin/Toggle';
@@ -601,17 +602,21 @@ export default function AdminNewsCreate() {
   };
 
   // Toolbar actions
-  const addLink = () => {
-    const url = window.prompt(t('news.admin.toolbar.linkUrlPrompt'));
-    if (url && editor) {
-      try {
-        const parsed = new URL(url);
-        if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return;
-      } catch {
-        return;
-      }
-      editor.chain().focus().setLink({ href: url }).run();
+  const promptDialog = usePrompt();
+  const addLink = async () => {
+    if (!editor) return;
+    const url = await promptDialog({
+      label: t('news.admin.toolbar.linkUrlPrompt'),
+      inputType: 'url',
+    });
+    if (!url) return;
+    try {
+      const parsed = new URL(url);
+      if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return;
+    } catch {
+      return;
     }
+    editor.chain().focus().setLink({ href: url }).run();
   };
 
   if (isEdit && isLoadingArticle) {
@@ -647,8 +652,11 @@ export default function AdminNewsCreate() {
       <div className="space-y-5">
         {/* Title */}
         <div>
-          <label className="label">{t('news.admin.titleLabel')}</label>
+          <label htmlFor="news-title" className="label">
+            {t('news.admin.titleLabel')}
+          </label>
           <input
+            id="news-title"
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
@@ -659,8 +667,11 @@ export default function AdminNewsCreate() {
 
         {/* Slug */}
         <div>
-          <label className="label">{t('news.admin.slugLabel')}</label>
+          <label htmlFor="news-slug" className="label">
+            {t('news.admin.slugLabel')}
+          </label>
           <input
+            id="news-slug"
             type="text"
             value={slug}
             onChange={(e) => {
@@ -683,6 +694,7 @@ export default function AdminNewsCreate() {
               onCreateNew={handleCreateCategory}
               onDelete={handleDeleteCategory}
               placeholder={t('news.admin.combobox.selectCategory')}
+              ariaLabel={t('news.admin.categoryLabel')}
             />
           </div>
           <div>
@@ -694,14 +706,18 @@ export default function AdminNewsCreate() {
               onCreateNew={handleCreateTag}
               onDelete={handleDeleteTag}
               placeholder={t('news.admin.combobox.selectTag')}
+              ariaLabel={t('news.admin.tagLabel')}
             />
           </div>
         </div>
 
         {/* Read time */}
         <div>
-          <label className="label">{t('news.admin.readTimeLabel')}</label>
+          <label htmlFor="news-readtime" className="label">
+            {t('news.admin.readTimeLabel')}
+          </label>
           <input
+            id="news-readtime"
             type="number"
             value={readTimeMinutes}
             onChange={(e) => setReadTimeMinutes(Number(e.target.value) || 1)}
@@ -713,8 +729,11 @@ export default function AdminNewsCreate() {
 
         {/* Excerpt */}
         <div>
-          <label className="label">{t('news.admin.excerptLabel')}</label>
+          <label htmlFor="news-excerpt" className="label">
+            {t('news.admin.excerptLabel')}
+          </label>
           <textarea
+            id="news-excerpt"
             value={excerpt}
             onChange={(e) => setExcerpt(e.target.value)}
             className="input min-h-[80px] resize-y"
@@ -724,9 +743,12 @@ export default function AdminNewsCreate() {
 
         {/* Featured Image URL */}
         <div>
-          <label className="label">{t('news.admin.imageLabel')}</label>
+          <label htmlFor="news-image" className="label">
+            {t('news.admin.imageLabel')}
+          </label>
           <div className="flex items-center gap-2">
             <input
+              id="news-image"
               type="text"
               value={featuredImageUrl}
               onChange={(e) => setFeaturedImageUrl(e.target.value)}

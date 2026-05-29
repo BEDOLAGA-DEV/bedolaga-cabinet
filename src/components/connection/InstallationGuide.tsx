@@ -197,6 +197,7 @@ export default function InstallationGuide({
         {!isTelegramWebApp && (
           <button
             onClick={onGoBack}
+            aria-label={t('common.back', 'Back')}
             className="flex h-10 w-10 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
           >
             <BackIcon />
@@ -208,6 +209,7 @@ export default function InstallationGuide({
         {appConfig.subscriptionUrl && onOpenQR && (
           <button
             onClick={() => onOpenQR()}
+            aria-label={t('subscription.connection.openQr', 'Open QR code')}
             className="flex h-10 w-10 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 text-dark-200 transition-colors hover:border-dark-600"
           >
             <svg
@@ -296,7 +298,7 @@ export default function InstallationGuide({
                       : 'border border-dark-700/50 bg-dark-800/80 text-dark-200 hover:border-dark-600/50 hover:bg-dark-700/80'
                 }`}
               >
-                {app.featured && <span className="h-2 w-2 shrink-0 rounded-full bg-amber-400" />}
+                {app.featured && <span className="h-2 w-2 shrink-0 rounded-full bg-warning-400" />}
                 <span className="relative z-10 truncate">{app.name}</span>
                 {appIconSvg && (
                   <div

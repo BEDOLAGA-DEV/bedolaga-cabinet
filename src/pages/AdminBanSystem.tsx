@@ -1,6 +1,8 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useQuery } from '@tanstack/react-query';
 import { AdminBackButton } from '../components/admin/AdminBackButton';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 import {
   banSystemApi,
   type BanSystemStatus,
@@ -198,6 +200,9 @@ export default function AdminBanSystem() {
   const [stats, setStats] = useState<BanSystemStats | null>(null);
   const [users, setUsers] = useState<BanUsersListResponse | null>(null);
   const [selectedUser, setSelectedUser] = useState<BanUserDetailResponse | null>(null);
+  const userDetailRef = useFocusTrap<HTMLDivElement>(selectedUser !== null, {
+    onEscape: () => setSelectedUser(null),
+  });
   const [punishments, setPunishments] = useState<BanPunishmentsListResponse | null>(null);
   const [nodes, setNodes] = useState<BanNodesListResponse | null>(null);
   const [agents, setAgents] = useState<BanAgentsListResponse | null>(null);
@@ -207,8 +212,6 @@ export default function AdminBanSystem() {
   const [report, setReport] = useState<BanReportResponse | null>(null);
   const [health, setHealth] = useState<BanHealthResponse | null>(null);
   const [reportHours, setReportHours] = useState(24);
-  const reportHoursRef = useRef(reportHours);
-  reportHoursRef.current = reportHours;
   const [settingLoading, setSettingLoading] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -243,101 +246,143 @@ export default function AdminBanSystem() {
   const [searchQuery, setSearchQuery] = useState('');
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
-  const loadStatus = useCallback(async () => {
-    try {
-      setLoading(true);
-      const data = await banSystemApi.getStatus();
-      setStatus(data);
-      if (!data.enabled || !data.configured) {
+  // React Query: status once at mount; each tab fetches lazily via `enabled`.
+  // Caching means switching tabs returns to cached data instantly (with background revalidate).
+  const statusQuery = useQuery({
+    queryKey: ['ban-status'] as const,
+    queryFn: () => banSystemApi.getStatus(),
+  });
+  const isReady = !!(status?.enabled && status?.configured);
+
+  const dashboardQuery = useQuery({
+    queryKey: ['ban-stats'] as const,
+    queryFn: () => banSystemApi.getStats(),
+    enabled: isReady && activeTab === 'dashboard',
+  });
+  const usersQuery = useQuery({
+    queryKey: ['ban-users'] as const,
+    queryFn: () => banSystemApi.getUsers({ limit: 50 }),
+    enabled: isReady && activeTab === 'users',
+  });
+  const punishmentsQuery = useQuery({
+    queryKey: ['ban-punishments'] as const,
+    queryFn: () => banSystemApi.getPunishments(),
+    enabled: isReady && activeTab === 'punishments',
+  });
+  const nodesQuery = useQuery({
+    queryKey: ['ban-nodes'] as const,
+    queryFn: () => banSystemApi.getNodes(),
+    enabled: isReady && activeTab === 'nodes',
+  });
+  const agentsQuery = useQuery({
+    queryKey: ['ban-agents'] as const,
+    queryFn: () => banSystemApi.getAgents(),
+    enabled: isReady && activeTab === 'agents',
+  });
+  const violationsQuery = useQuery({
+    queryKey: ['ban-violations'] as const,
+    queryFn: () => banSystemApi.getTrafficViolations(),
+    enabled: isReady && activeTab === 'violations',
+  });
+  const settingsQuery = useQuery({
+    queryKey: ['ban-settings'] as const,
+    queryFn: () => banSystemApi.getSettings(),
+    enabled: isReady && activeTab === 'settings',
+  });
+  const trafficQuery = useQuery({
+    queryKey: ['ban-traffic'] as const,
+    queryFn: () => banSystemApi.getTraffic(),
+    enabled: isReady && activeTab === 'traffic',
+  });
+  const reportsQuery = useQuery({
+    queryKey: ['ban-report', reportHours] as const,
+    queryFn: () => banSystemApi.getReport(reportHours),
+    enabled: isReady && activeTab === 'reports',
+  });
+  const healthQuery = useQuery({
+    queryKey: ['ban-health'] as const,
+    queryFn: () => banSystemApi.getHealth(),
+    enabled: isReady && activeTab === 'health',
+  });
+
+  // Sync query data into the existing state vars so the JSX + handlers stay unchanged
+  // (handleSearch overrides `users` with search results; useEffect re-syncs on next refetch).
+  useEffect(() => {
+    if (statusQuery.data) {
+      setStatus(statusQuery.data);
+      if (!statusQuery.data.enabled || !statusQuery.data.configured) {
         setError(t('banSystem.notConfigured'));
       }
-    } catch {
-      setError(t('banSystem.loadError'));
-    } finally {
-      setLoading(false);
     }
-  }, [t]);
-
-  const loadTabData = useCallback(
-    async (tab: TabType) => {
-      try {
-        setLoading(true);
-        setError(null);
-
-        switch (tab) {
-          case 'dashboard': {
-            const statsData = await banSystemApi.getStats();
-            setStats(statsData);
-            break;
-          }
-          case 'users': {
-            const usersData = await banSystemApi.getUsers({ limit: 50 });
-            setUsers(usersData);
-            break;
-          }
-          case 'punishments': {
-            const punishmentsData = await banSystemApi.getPunishments();
-            setPunishments(punishmentsData);
-            break;
-          }
-          case 'nodes': {
-            const nodesData = await banSystemApi.getNodes();
-            setNodes(nodesData);
-            break;
-          }
-          case 'agents': {
-            const agentsData = await banSystemApi.getAgents();
-            setAgents(agentsData);
-            break;
-          }
-          case 'violations': {
-            const violationsData = await banSystemApi.getTrafficViolations();
-            setViolations(violationsData);
-            break;
-          }
-          case 'settings': {
-            const settingsData = await banSystemApi.getSettings();
-            setSettings(settingsData);
-            break;
-          }
-          case 'traffic': {
-            const trafficData = await banSystemApi.getTraffic();
-            setTraffic(trafficData);
-            break;
-          }
-          case 'reports': {
-            const reportData = await banSystemApi.getReport(reportHoursRef.current);
-            setReport(reportData);
-            break;
-          }
-          case 'health': {
-            const healthData = await banSystemApi.getHealth();
-            setHealth(healthData);
-            break;
-          }
-        }
-      } catch {
-        setError(t('banSystem.loadError'));
-      } finally {
-        setLoading(false);
-      }
-    },
-    [t],
-  );
+    if (statusQuery.isError) setError(t('banSystem.loadError'));
+  }, [statusQuery.data, statusQuery.isError, t]);
 
   useEffect(() => {
-    loadStatus();
-  }, [loadStatus]);
-
+    if (dashboardQuery.data) setStats(dashboardQuery.data);
+  }, [dashboardQuery.data]);
   useEffect(() => {
-    if (status?.enabled && status?.configured) {
-      loadTabData(activeTab);
-    }
-  }, [activeTab, status, loadTabData]);
+    if (usersQuery.data) setUsers(usersQuery.data);
+  }, [usersQuery.data]);
+  useEffect(() => {
+    if (punishmentsQuery.data) setPunishments(punishmentsQuery.data);
+  }, [punishmentsQuery.data]);
+  useEffect(() => {
+    if (nodesQuery.data) setNodes(nodesQuery.data);
+  }, [nodesQuery.data]);
+  useEffect(() => {
+    if (agentsQuery.data) setAgents(agentsQuery.data);
+  }, [agentsQuery.data]);
+  useEffect(() => {
+    if (violationsQuery.data) setViolations(violationsQuery.data);
+  }, [violationsQuery.data]);
+  useEffect(() => {
+    if (settingsQuery.data) setSettings(settingsQuery.data);
+  }, [settingsQuery.data]);
+  useEffect(() => {
+    if (trafficQuery.data) setTraffic(trafficQuery.data);
+  }, [trafficQuery.data]);
+  useEffect(() => {
+    if (reportsQuery.data) setReport(reportsQuery.data);
+  }, [reportsQuery.data]);
+  useEffect(() => {
+    if (healthQuery.data) setHealth(healthQuery.data);
+  }, [healthQuery.data]);
+
+  // Map activeTab → its query (used for `loading` derivation and refetchActiveTab below).
+  const activeTabQuery =
+    activeTab === 'dashboard'
+      ? dashboardQuery
+      : activeTab === 'users'
+        ? usersQuery
+        : activeTab === 'punishments'
+          ? punishmentsQuery
+          : activeTab === 'nodes'
+            ? nodesQuery
+            : activeTab === 'agents'
+              ? agentsQuery
+              : activeTab === 'violations'
+                ? violationsQuery
+                : activeTab === 'settings'
+                  ? settingsQuery
+                  : activeTab === 'traffic'
+                    ? trafficQuery
+                    : activeTab === 'reports'
+                      ? reportsQuery
+                      : healthQuery;
+
+  // Derive `loading` from status + active tab query.
+  useEffect(() => {
+    setLoading(statusQuery.isLoading || activeTabQuery.isFetching);
+    if (activeTabQuery.isError) setError(t('banSystem.loadError'));
+  }, [statusQuery.isLoading, activeTabQuery.isFetching, activeTabQuery.isError, t]);
+
+  const refetchActiveTab = useCallback(() => {
+    void activeTabQuery.refetch();
+  }, [activeTabQuery]);
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) {
-      loadTabData('users');
+      void usersQuery.refetch();
       return;
     }
     try {
@@ -367,7 +412,7 @@ export default function AdminBanSystem() {
     try {
       setActionLoading(userId);
       await banSystemApi.unbanUser(userId);
-      loadTabData('punishments');
+      void punishmentsQuery.refetch();
     } catch {
       setError(t('banSystem.loadError'));
     } finally {
@@ -379,7 +424,7 @@ export default function AdminBanSystem() {
     try {
       setSettingLoading(key);
       await banSystemApi.toggleSetting(key);
-      loadTabData('settings');
+      void settingsQuery.refetch();
     } catch {
       setError(t('banSystem.loadError'));
     } finally {
@@ -391,7 +436,7 @@ export default function AdminBanSystem() {
     try {
       setSettingLoading(key);
       await banSystemApi.setSetting(key, value);
-      loadTabData('settings');
+      void settingsQuery.refetch();
     } catch {
       setError(t('banSystem.loadError'));
     } finally {
@@ -403,11 +448,7 @@ export default function AdminBanSystem() {
     setReportHours(hours);
   };
 
-  useEffect(() => {
-    if (activeTab === 'reports' && status?.enabled) {
-      loadTabData('reports');
-    }
-  }, [reportHours, activeTab, status, loadTabData]);
+  // (reports query auto-refetches when reportHours changes — it's in the queryKey)
 
   const formatBytes = (bytes: number) => {
     if (bytes === 0) return '0 B';
@@ -568,7 +609,7 @@ export default function AdminBanSystem() {
           </div>
         </div>
         <button
-          onClick={() => loadTabData(activeTab)}
+          onClick={refetchActiveTab}
           disabled={loading}
           className="flex items-center gap-2 rounded-lg bg-dark-800 px-4 py-2 text-dark-300 transition-colors hover:bg-dark-700 hover:text-dark-100 disabled:opacity-50"
         >
@@ -1494,19 +1535,25 @@ export default function AdminBanSystem() {
       {/* User Detail Modal */}
       {selectedUser && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-dark-950/50 p-4"
           onClick={() => setSelectedUser(null)}
         >
           <div
+            ref={userDetailRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="ban-user-detail-title"
+            tabIndex={-1}
             className="max-h-[80vh] w-full max-w-2xl overflow-y-auto rounded-xl border border-dark-700 bg-dark-800"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between border-b border-dark-700 p-4">
-              <h3 className="text-lg font-semibold text-dark-100">
+              <h3 id="ban-user-detail-title" className="text-lg font-semibold text-dark-100">
                 {t('banSystem.userDetail.title')}
               </h3>
               <button
                 onClick={() => setSelectedUser(null)}
+                aria-label={t('common.close')}
                 className="text-dark-400 hover:text-dark-200"
               >
                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -95,8 +95,14 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     <ToastContext.Provider value={{ showToast }}>
       {children}
 
-      {/* Toast Container — safe area aware, adaptive width */}
-      <div className="pointer-events-none fixed left-4 right-4 top-[calc(1rem+env(safe-area-inset-top,0px))] z-[100] flex flex-col gap-3 sm:left-auto sm:right-[calc(1rem+env(safe-area-inset-right,0px))]">
+      {/* Toast region — safe area aware, adaptive width. role+aria-live lets
+          screen readers announce arriving toasts without stealing focus. */}
+      <div
+        role="region"
+        aria-label="Notifications"
+        aria-live="polite"
+        className="pointer-events-none fixed left-4 right-4 top-[calc(1rem+env(safe-area-inset-top,0px))] z-[100] flex flex-col gap-3 sm:left-auto sm:right-[calc(1rem+env(safe-area-inset-right,0px))]"
+      >
         {toasts.map((toast) => (
           <ToastItem key={toast.id} toast={toast} onClose={() => removeToast(toast.id)} />
         ))}
@@ -111,34 +117,50 @@ function ToastItem({ toast, onClose }: { toast: Toast; onClose: () => void }) {
     onClose();
   };
 
+  // Semantic carries through the icon box + a full tinted border. No side
+  // stripe (was a 4px border-l accent — impeccable absolute ban) and no
+  // background tint flood — the contained icon is enough at this size.
   const typeStyles = {
     success: {
-      border: 'border-l-success-500',
+      border: 'border-success-500/40',
       icon: 'text-success-400',
-      iconBg: 'bg-success-500/20',
-      progress: 'bg-success-400',
+      iconBg: 'bg-success-500/15',
+      progress: 'bg-success-500',
     },
     error: {
-      border: 'border-l-error-500',
+      border: 'border-error-500/40',
       icon: 'text-error-400',
-      iconBg: 'bg-error-500/20',
-      progress: 'bg-error-400',
+      iconBg: 'bg-error-500/15',
+      progress: 'bg-error-500',
     },
     warning: {
-      border: 'border-l-warning-500',
+      border: 'border-warning-500/40',
       icon: 'text-warning-400',
-      iconBg: 'bg-warning-500/20',
-      progress: 'bg-warning-400',
+      iconBg: 'bg-warning-500/15',
+      progress: 'bg-warning-500',
     },
     info: {
-      border: 'border-l-accent-500',
+      border: 'border-accent-500/40',
       icon: 'text-accent-400',
-      iconBg: 'bg-accent-500/20',
-      progress: 'bg-accent-400',
+      iconBg: 'bg-accent-500/15',
+      progress: 'bg-accent-500',
     },
   };
 
   const style = typeStyles[toast.type || 'info'];
+
+  // Errors interrupt the screen reader; everything else announces politely.
+  const role = toast.type === 'error' ? 'alert' : 'status';
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      handleClick();
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      onClose();
+    }
+  };
 
   const defaultIcons = {
     success: (
@@ -197,13 +219,17 @@ function ToastItem({ toast, onClose }: { toast: Toast; onClose: () => void }) {
 
   return (
     <div
-      className={`pointer-events-auto w-full cursor-pointer border border-l-4 border-dark-700 ${style.border} animate-slide-in-right overflow-hidden rounded-2xl bg-dark-900 shadow-2xl shadow-black/50 backdrop-blur-xl transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98] sm:max-w-sm`}
+      role={role}
+      tabIndex={0}
       onClick={handleClick}
+      onKeyDown={handleKeyDown}
+      className={`pointer-events-auto w-full cursor-pointer overflow-hidden rounded-2xl border bg-dark-900 shadow-xl shadow-black/30 backdrop-blur-xl ${style.border} animate-slide-in-right transition-transform duration-200 hover:scale-[1.01] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/60 focus-visible:ring-offset-2 focus-visible:ring-offset-dark-950 active:scale-[0.99] sm:max-w-sm`}
     >
       <div className="relative p-4">
         <div className="flex gap-3">
-          {/* Icon */}
+          {/* Icon — carries the semantic by itself; the border is a soft echo */}
           <div
+            aria-hidden="true"
             className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl ${style.iconBg} ${style.icon}`}
           >
             {toast.icon || defaultIcons[toast.type || 'info']}
@@ -218,10 +244,12 @@ function ToastItem({ toast, onClose }: { toast: Toast; onClose: () => void }) {
           </div>
         </div>
 
-        {/* Progress bar */}
-        <div className="absolute bottom-0 left-0 right-0 h-1 bg-dark-800/50">
+        {/* Progress bar — visual countdown until auto-dismiss. scaleX animates
+            on the compositor, no layout reflow. aria-hidden because the visual
+            timer doesn't carry meaning beyond the toast lifetime. */}
+        <div aria-hidden="true" className="absolute bottom-0 left-0 right-0 h-0.5 bg-dark-800/50">
           <div
-            className={`h-full w-full ${style.progress} opacity-60`}
+            className={`h-full w-full ${style.progress} opacity-70`}
             style={{
               animation: `shrink ${toast.duration}ms linear forwards`,
               transformOrigin: 'left',

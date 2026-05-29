@@ -106,7 +106,7 @@ export default function AdminSalesStats() {
         <StatCard
           label={t('admin.salesStats.summary.newTrials')}
           value={summaryLoading ? '...' : (summary?.new_trials ?? 0)}
-          valueClassName="text-blue-400"
+          valueClassName="text-accent-400"
         />
         <StatCard
           label={t('admin.salesStats.summary.conversion')}

@@ -24,7 +24,7 @@ export default function PurchaseCTAButton({
   // Daily tariffs renew automatically — no manual renewal button needed in multi-tariff
   if (isMultiTariff && isDaily && !isExpired) return null;
 
-  const accentColor = isExpired ? '#FF3B5C' : 'rgb(var(--color-accent-400))';
+  const accentColor = isExpired ? 'rgb(var(--color-critical-500))' : 'rgb(var(--color-accent-400))';
 
   const buttonText = isExpired
     ? t('subscription.getSubscription')

@@ -57,13 +57,13 @@ export default function AdminWithdrawals() {
       {data && (
         <div className="mb-6 grid grid-cols-2 gap-3">
           <div className="rounded-xl border border-dark-700 bg-dark-800 p-4">
-            <div className="text-2xl font-bold text-yellow-400">{pendingCount}</div>
+            <div className="text-2xl font-bold text-warning-400">{pendingCount}</div>
             <div className="text-sm text-dark-400">
               {t('admin.withdrawals.overview.pendingCount')}
             </div>
           </div>
           <div className="rounded-xl border border-dark-700 bg-dark-800 p-4">
-            <div className="text-2xl font-bold text-yellow-400">
+            <div className="text-2xl font-bold text-warning-400">
               {formatWithCurrency(pendingTotal / 100, 0)}
             </div>
             <div className="text-sm text-dark-400">

@@ -419,7 +419,7 @@ export default function AdminLandingStats() {
             <div className="text-xs text-dark-500">{t('admin.landings.stats.revenue')}</div>
           </div>
           <div className="rounded-xl border border-dark-700 bg-dark-800 p-4 text-center">
-            <div className="text-xl font-bold text-purple-400 sm:text-2xl">{stats.total_gifts}</div>
+            <div className="text-xl font-bold text-accent-400 sm:text-2xl">{stats.total_gifts}</div>
             <div className="text-xs text-dark-500">{t('admin.landings.stats.giftPurchases')}</div>
           </div>
           <div className="rounded-xl border border-dark-700 bg-dark-800 p-4 text-center">
@@ -587,7 +587,7 @@ export default function AdminLandingStats() {
                           {day.label}
                         </span>
                         <div
-                          className="group relative h-5 flex-1 overflow-hidden rounded-full bg-amber-500/80"
+                          className="group relative h-5 flex-1 overflow-hidden rounded-full bg-warning-500/80"
                           title={`${t('admin.landings.stats.created', 'Created')}: ${day.created || 0}\n${t('admin.landings.stats.paid', 'paid')}: ${day.purchases || 0}\n${t('admin.landings.stats.revenueLabel', 'Revenue')}: ${day.revenue?.toFixed(0) || 0} ${t('common.currency', '\u20BD')}\nCR: ${Math.round(purchasedPct)}%`}
                         >
                           <div
@@ -596,7 +596,7 @@ export default function AdminLandingStats() {
                           />
                         </div>
                         <span className="w-12 shrink-0 text-xs text-dark-400">
-                          <span className="text-amber-400">{day.created || 0}</span>
+                          <span className="text-warning-400">{day.created || 0}</span>
                           <span className="text-dark-600">/</span>
                           <span className="text-accent-400">{day.purchases || 0}</span>
                         </span>
@@ -605,7 +605,7 @@ export default function AdminLandingStats() {
                   })}
                 <div className="mt-2 flex items-center gap-4 text-xs text-dark-500">
                   <div className="flex items-center gap-1">
-                    <div className="h-2 w-2 rounded-full bg-amber-500/80" />
+                    <div className="h-2 w-2 rounded-full bg-warning-500/80" />
                     <span>{t('admin.landings.stats.created', 'Created')}</span>
                   </div>
                   <div className="flex items-center gap-1">

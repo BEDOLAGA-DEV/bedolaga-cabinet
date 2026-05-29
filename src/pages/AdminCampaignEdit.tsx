@@ -110,10 +110,14 @@ function TariffSelector({
 
   return (
     <div>
-      <label className="mb-2 block text-sm font-medium text-dark-300">
+      <label
+        htmlFor="campaign-edit-tariff-select"
+        className="mb-2 block text-sm font-medium text-dark-300"
+      >
         {t('admin.campaigns.form.selectTariff')}
       </label>
       <select
+        id="campaign-edit-tariff-select"
         value={value || ''}
         onChange={(e) => onChange(e.target.value ? parseInt(e.target.value) : null)}
         className="input"
@@ -144,10 +148,14 @@ function PartnerSelector({
 
   return (
     <div>
-      <label className="mb-2 block text-sm font-medium text-dark-300">
+      <label
+        htmlFor="campaign-edit-partner-select"
+        className="mb-2 block text-sm font-medium text-dark-300"
+      >
         {t('admin.campaigns.form.partner')}
       </label>
       <select
+        id="campaign-edit-partner-select"
         value={value || ''}
         onChange={(e) => onChange(e.target.value ? parseInt(e.target.value) : null)}
         className="input"
@@ -344,11 +352,15 @@ export default function AdminCampaignEdit() {
       <div className="card space-y-4">
         {/* Name */}
         <div>
-          <label className="mb-2 block text-sm font-medium text-dark-300">
+          <label
+            htmlFor="campaign-edit-name"
+            className="mb-2 block text-sm font-medium text-dark-300"
+          >
             {t('admin.campaigns.form.name')}
             <span className="text-error-400">*</span>
           </label>
           <input
+            id="campaign-edit-name"
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -365,11 +377,15 @@ export default function AdminCampaignEdit() {
 
         {/* Start Parameter */}
         <div>
-          <label className="mb-2 block text-sm font-medium text-dark-300">
+          <label
+            htmlFor="campaign-edit-start-param"
+            className="mb-2 block text-sm font-medium text-dark-300"
+          >
             {t('admin.campaigns.form.startParameter')}
             <span className="text-error-400">*</span>
           </label>
           <input
+            id="campaign-edit-start-param"
             type="text"
             value={startParameter}
             onChange={(e) => setStartParameter(e.target.value.replace(/[^a-zA-Z0-9_-]/g, ''))}
@@ -390,6 +406,9 @@ export default function AdminCampaignEdit() {
           <button
             type="button"
             onClick={() => setIsActive(!isActive)}
+            role="switch"
+            aria-checked={isActive}
+            aria-label={t('admin.campaigns.form.active')}
             className={`relative h-6 w-11 rounded-full transition-colors ${
               isActive ? 'bg-accent-500' : 'bg-dark-600'
             }`}
@@ -410,15 +429,21 @@ export default function AdminCampaignEdit() {
 
       {/* Bonus Type */}
       <div className="card space-y-4">
-        <h2 className="text-lg font-semibold text-dark-100">
+        <h2 id="bonus-type-edit-label" className="text-lg font-semibold text-dark-100">
           {t('admin.campaigns.form.bonusType')}
         </h2>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div
+          className="grid grid-cols-2 gap-3"
+          role="radiogroup"
+          aria-labelledby="bonus-type-edit-label"
+        >
           {(Object.keys(bonusTypeConfig) as CampaignBonusType[]).map((type) => (
             <button
               key={type}
               type="button"
+              role="radio"
+              aria-checked={bonusType === type}
               onClick={() => setBonusType(type)}
               className={`rounded-lg border p-4 text-left transition-all ${
                 bonusType === type
@@ -464,10 +489,14 @@ export default function AdminCampaignEdit() {
 
           <div className="grid grid-cols-3 gap-4">
             <div>
-              <label className="mb-2 block text-sm font-medium text-dark-300">
+              <label
+                htmlFor="campaign-edit-sub-days"
+                className="mb-2 block text-sm font-medium text-dark-300"
+              >
                 {t('admin.campaigns.form.days')}
               </label>
               <input
+                id="campaign-edit-sub-days"
                 type="number"
                 value={subscriptionDays}
                 onChange={createNumberInputHandler(setSubscriptionDays, 1)}
@@ -476,10 +505,14 @@ export default function AdminCampaignEdit() {
               />
             </div>
             <div>
-              <label className="mb-2 block text-sm font-medium text-dark-300">
+              <label
+                htmlFor="campaign-edit-sub-traffic"
+                className="mb-2 block text-sm font-medium text-dark-300"
+              >
                 {t('admin.campaigns.form.trafficGb')}
               </label>
               <input
+                id="campaign-edit-sub-traffic"
                 type="number"
                 value={subscriptionTraffic}
                 onChange={createNumberInputHandler(setSubscriptionTraffic, 0)}
@@ -488,10 +521,14 @@ export default function AdminCampaignEdit() {
               />
             </div>
             <div>
-              <label className="mb-2 block text-sm font-medium text-dark-300">
+              <label
+                htmlFor="campaign-edit-sub-devices"
+                className="mb-2 block text-sm font-medium text-dark-300"
+              >
                 {t('admin.campaigns.form.devices')}
               </label>
               <input
+                id="campaign-edit-sub-devices"
                 type="number"
                 value={subscriptionDevices}
                 onChange={createNumberInputHandler(setSubscriptionDevices, 1)}
@@ -516,10 +553,14 @@ export default function AdminCampaignEdit() {
           <TariffSelector tariffs={tariffs} value={tariffId} onChange={setTariffId} />
 
           <div>
-            <label className="mb-2 block text-sm font-medium text-dark-300">
+            <label
+              htmlFor="campaign-edit-tariff-days"
+              className="mb-2 block text-sm font-medium text-dark-300"
+            >
               {t('admin.campaigns.form.durationDays')}
             </label>
             <input
+              id="campaign-edit-tariff-days"
               type="number"
               value={tariffDays}
               onChange={createNumberInputHandler(setTariffDays, 1)}

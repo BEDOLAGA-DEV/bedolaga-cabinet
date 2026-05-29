@@ -141,7 +141,7 @@ export default function AdminPaymentMethodEdit() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="min-h-viewport flex items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
       </div>
     );
@@ -207,6 +207,9 @@ export default function AdminPaymentMethodEdit() {
           </div>
           <button
             onClick={() => setIsEnabled(!isEnabled)}
+            role="switch"
+            aria-checked={isEnabled}
+            aria-label={t('admin.paymentMethods.methodEnabled')}
             className={`relative h-6 w-11 rounded-full transition-colors ${
               isEnabled ? 'bg-accent-500' : 'bg-dark-600'
             }`}
@@ -234,6 +237,8 @@ export default function AdminPaymentMethodEdit() {
           </div>
           <button
             onClick={() => setOpenUrlDirect(!openUrlDirect)}
+            role="switch"
+            aria-checked={openUrlDirect}
             className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${
               openUrlDirect ? 'bg-accent-500' : 'bg-dark-600'
             }`}

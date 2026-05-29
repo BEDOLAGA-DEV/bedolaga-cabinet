@@ -719,13 +719,32 @@ export const adminUsersApi = {
     userId: number,
     subscriptionId?: number,
   ): Promise<{
-    devices: { hwid: string; platform: string; device_model: string; created_at: string | null }[];
+    devices: {
+      hwid: string;
+      platform: string;
+      device_model: string;
+      created_at: string | null;
+      local_name?: string | null;
+    }[];
     total: number;
     device_limit: number;
   }> => {
     const response = await apiClient.get(`/cabinet/admin/users/${userId}/devices`, {
       params: subscriptionId != null ? { subscription_id: subscriptionId } : undefined,
     });
+    return response.data;
+  },
+
+  // Set / clear local device alias on behalf of the user (admin override).
+  renameUserDevice: async (
+    userId: number,
+    hwid: string,
+    name: string | null,
+  ): Promise<{ hwid: string; local_name: string | null }> => {
+    const response = await apiClient.patch(
+      `/cabinet/admin/users/${userId}/devices/${encodeURIComponent(hwid)}/name`,
+      { name },
+    );
     return response.data;
   },
 

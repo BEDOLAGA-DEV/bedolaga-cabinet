@@ -76,7 +76,7 @@ const EmailIcon = () => (
 function ChannelBadge({ channel }: { channel?: BroadcastChannel }) {
   if (!channel || channel === 'telegram') {
     return (
-      <span className="flex items-center gap-1 rounded-full bg-blue-500/20 px-2 py-0.5 text-xs text-blue-400">
+      <span className="flex items-center gap-1 rounded-full bg-accent-500/20 px-2 py-0.5 text-xs text-accent-400">
         <TelegramIcon />
         <span className="hidden sm:inline">Telegram</span>
       </span>

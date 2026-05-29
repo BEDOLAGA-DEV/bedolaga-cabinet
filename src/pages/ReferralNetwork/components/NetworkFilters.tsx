@@ -171,7 +171,7 @@ export function NetworkFilters({ data, className }: NetworkFiltersProps) {
       {/* Mobile: full-screen overlay */}
       {isOpen && (
         <div className="fixed inset-x-0 top-0 z-50 sm:hidden">
-          <div className="fixed inset-0 bg-black/60" onClick={() => setIsOpen(false)} />
+          <div className="fixed inset-0 bg-dark-950/60" onClick={() => setIsOpen(false)} />
           <div className="relative mx-3 mt-3 rounded-xl border border-dark-700/50 bg-dark-900/95 p-4 backdrop-blur-md">
             <div className="mb-3 flex items-center justify-between">
               <h3 className="text-sm font-semibold text-dark-100">

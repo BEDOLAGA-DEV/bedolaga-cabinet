@@ -7,26 +7,7 @@ import { useShallow } from 'zustand/shallow';
 import { brandingApi } from '../api/branding';
 import { isInTelegramWebApp, getTelegramInitData } from '../hooks/useTelegramSDK';
 import { tokenStorage } from '../utils/token';
-
-// Validate redirect URL to prevent open redirect attacks
-const getSafeRedirectUrl = (url: string | null): string => {
-  if (!url) return '/';
-  // Only allow relative paths starting with /
-  // Block protocol-relative URLs (//evil.com) and absolute URLs
-  if (!url.startsWith('/') || url.startsWith('//')) {
-    return '/';
-  }
-  // Additional check for encoded characters that could bypass validation
-  try {
-    const decoded = decodeURIComponent(url);
-    if (!decoded.startsWith('/') || decoded.startsWith('//') || decoded.includes('://')) {
-      return '/';
-    }
-  } catch {
-    return '/';
-  }
-  return url;
-};
+import { getSafeRedirectPath } from '../utils/safeRedirect';
 
 const MAX_RETRY_ATTEMPTS = 3;
 const RETRY_COUNT_KEY = 'telegram_redirect_retry_count';
@@ -65,14 +46,23 @@ export default function TelegramRedirect() {
   const logoUrl = branding ? brandingApi.getLogoUrl(branding) : null;
 
   // Get redirect target from URL params (validated)
-  const redirectTo = getSafeRedirectUrl(searchParams.get('redirect'));
+  const redirectTo = getSafeRedirectPath(searchParams.get('redirect'));
 
   useEffect(() => {
+    // All timers scheduled inside this effect funnel through `timers` so the
+    // cleanup can cancel everything when the effect re-runs (deps change
+    // during loginWithTelegram) or the page unmounts — preventing
+    // setState-on-unmounted-component warnings and stray late navigations.
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    const schedule = (fn: () => void, ms: number) => {
+      timers.push(setTimeout(fn, ms));
+    };
+
     // If already authenticated, redirect immediately
     if (isAuthenticated && !authLoading) {
       setStatus('success');
-      setTimeout(() => navigate(redirectTo), 500);
-      return;
+      schedule(() => navigate(redirectTo), 500);
+      return () => timers.forEach(clearTimeout);
     }
 
     const initTelegram = async () => {
@@ -82,7 +72,7 @@ export default function TelegramRedirect() {
       if (!isInTelegramWebApp() || !initData) {
         // Not in Telegram, show message and redirect to login
         setStatus('not-telegram');
-        setTimeout(() => navigate('/login'), 2000);
+        schedule(() => navigate('/login'), 2000);
         return;
       }
 
@@ -91,11 +81,8 @@ export default function TelegramRedirect() {
       try {
         await loginWithTelegram(initData);
         setStatus('success');
-
         // Small delay for nice UX
-        setTimeout(() => {
-          navigate(redirectTo);
-        }, 800);
+        schedule(() => navigate(redirectTo), 800);
       } catch (err: unknown) {
         console.error('Telegram auth failed:', err);
         const error = err as { response?: { data?: { detail?: string } } };
@@ -105,7 +92,9 @@ export default function TelegramRedirect() {
     };
 
     // Small delay to show loading screen
-    setTimeout(initTelegram, 300);
+    schedule(initTelegram, 300);
+
+    return () => timers.forEach(clearTimeout);
   }, [loginWithTelegram, navigate, isAuthenticated, authLoading, redirectTo, t]);
 
   // Handle retry with limit to prevent infinite loops
@@ -139,7 +128,7 @@ export default function TelegramRedirect() {
   }, [status]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-4">
+    <div className="min-h-viewport flex items-center justify-center p-4">
       {/* Background */}
       <div className="fixed inset-0 bg-gradient-to-br from-dark-950 via-dark-900 to-dark-950" />
       <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-accent-500/10 via-transparent to-transparent" />

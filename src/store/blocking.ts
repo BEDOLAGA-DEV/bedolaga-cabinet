@@ -1,6 +1,11 @@
 import { create } from 'zustand';
 
-export type BlockingType = 'maintenance' | 'channel_subscription' | 'blacklisted' | null;
+export type BlockingType =
+  | 'maintenance'
+  | 'channel_subscription'
+  | 'blacklisted'
+  | 'account_deleted'
+  | null;
 
 interface MaintenanceInfo {
   message: string;
@@ -29,15 +34,26 @@ interface BlacklistedInfo {
   message: string;
 }
 
+interface AccountDeletedInfo {
+  /** Backend-provided localized message. We may override with i18n key on render. */
+  message: string;
+  /** Bot username (without @) for building the Telegram deep link client-side as fallback. */
+  bot_username?: string;
+  /** Full Telegram deep-link URL (`https://t.me/<bot>?start=revive`). Empty when bot is unconfigured. */
+  telegram_deep_link?: string;
+}
+
 interface BlockingState {
   blockingType: BlockingType;
   maintenanceInfo: MaintenanceInfo | null;
   channelInfo: ChannelSubscriptionInfo | null;
   blacklistedInfo: BlacklistedInfo | null;
+  accountDeletedInfo: AccountDeletedInfo | null;
 
   setMaintenance: (info: MaintenanceInfo) => void;
   setChannelSubscription: (info: ChannelSubscriptionInfo) => void;
   setBlacklisted: (info: BlacklistedInfo) => void;
+  setAccountDeleted: (info: AccountDeletedInfo) => void;
   clearBlocking: () => void;
 }
 
@@ -46,6 +62,7 @@ export const useBlockingStore = create<BlockingState>((set) => ({
   maintenanceInfo: null,
   channelInfo: null,
   blacklistedInfo: null,
+  accountDeletedInfo: null,
 
   setMaintenance: (info) =>
     set({
@@ -53,6 +70,7 @@ export const useBlockingStore = create<BlockingState>((set) => ({
       maintenanceInfo: info,
       channelInfo: null,
       blacklistedInfo: null,
+      accountDeletedInfo: null,
     }),
 
   setChannelSubscription: (info) =>
@@ -61,6 +79,7 @@ export const useBlockingStore = create<BlockingState>((set) => ({
       channelInfo: info,
       maintenanceInfo: null,
       blacklistedInfo: null,
+      accountDeletedInfo: null,
     }),
 
   setBlacklisted: (info) =>
@@ -69,6 +88,16 @@ export const useBlockingStore = create<BlockingState>((set) => ({
       blacklistedInfo: info,
       maintenanceInfo: null,
       channelInfo: null,
+      accountDeletedInfo: null,
+    }),
+
+  setAccountDeleted: (info) =>
+    set({
+      blockingType: 'account_deleted',
+      accountDeletedInfo: info,
+      maintenanceInfo: null,
+      channelInfo: null,
+      blacklistedInfo: null,
     }),
 
   clearBlocking: () =>
@@ -77,5 +106,6 @@ export const useBlockingStore = create<BlockingState>((set) => ({
       maintenanceInfo: null,
       channelInfo: null,
       blacklistedInfo: null,
+      accountDeletedInfo: null,
     }),
 }));

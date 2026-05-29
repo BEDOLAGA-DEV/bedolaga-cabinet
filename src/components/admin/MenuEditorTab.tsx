@@ -29,6 +29,7 @@ import {
 } from '../../api/menuLayout';
 import { Toggle } from './Toggle';
 import { useNotify } from '../../platform/hooks/useNotify';
+import { useNativeDialog } from '../../platform/hooks/useNativeDialog';
 
 const GripIcon = () => (
   <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -233,7 +234,7 @@ function ButtonChip({
         {!isBuiltin && (
           <button
             onClick={onRemove}
-            className="rounded-lg p-1 text-dark-500 transition-colors hover:bg-red-500/10 hover:text-red-400"
+            className="rounded-lg p-1 text-dark-500 transition-colors hover:bg-error-500/10 hover:text-error-400"
           >
             <TrashIcon />
           </button>
@@ -422,7 +423,7 @@ function SortableRow({
         {!allBuiltin && (
           <button
             onClick={() => onRemoveRow(row.id)}
-            className="rounded-lg p-1.5 text-dark-500 transition-colors hover:bg-red-500/10 hover:text-red-400"
+            className="rounded-lg p-1.5 text-dark-500 transition-colors hover:bg-error-500/10 hover:text-error-400"
           >
             <TrashIcon />
           </button>
@@ -532,6 +533,7 @@ export function MenuEditorTab() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const notify = useNotify();
+  const { confirm: confirmDialog } = useNativeDialog();
 
   // Fetch config
   const {
@@ -794,7 +796,7 @@ export function MenuEditorTab() {
 
   if (isError) {
     return (
-      <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+      <div className="rounded-xl border border-error-500/30 bg-error-500/10 px-4 py-3 text-sm text-error-400">
         {t('common.error')}
       </div>
     );
@@ -868,8 +870,8 @@ export function MenuEditorTab() {
       {/* Reset */}
       <div className="flex justify-end">
         <button
-          onClick={() => {
-            if (window.confirm(t('admin.menuEditor.resetConfirm'))) {
+          onClick={async () => {
+            if (await confirmDialog(t('admin.menuEditor.resetConfirm'))) {
               resetMutation.mutate();
             }
           }}

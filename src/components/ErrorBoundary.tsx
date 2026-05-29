@@ -65,7 +65,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
     if (level === 'app') {
       return (
-        <div className="flex min-h-screen items-center justify-center bg-dark-900 p-4">
+        <div className="min-h-viewport flex items-center justify-center bg-dark-900 p-4">
           <div className="max-w-md text-center">
             <div className="mb-4 text-4xl">⚠️</div>
             <h1 className="mb-2 text-xl font-bold text-dark-50">Something went wrong</h1>

@@ -96,7 +96,7 @@ export function DesktopSidebar({
   };
 
   return (
-    <aside className="fixed left-0 top-0 z-40 flex h-screen w-60 flex-col border-r border-dark-700/30 bg-dark-950/80 backdrop-blur-linear">
+    <aside className="h-viewport fixed left-0 top-0 z-40 flex w-60 flex-col border-r border-dark-700/30 bg-dark-950/80 backdrop-blur-linear">
       {/* Logo */}
       <div className="flex h-16 items-center gap-3 border-b border-dark-700/30 px-4">
         <Link to="/" className="flex items-center gap-3" onClick={handleNavClick}>

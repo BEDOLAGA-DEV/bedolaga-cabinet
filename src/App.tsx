@@ -27,11 +27,13 @@ import {
   MaintenanceScreen,
   ChannelSubscriptionScreen,
   BlacklistedScreen,
+  AccountDeletedScreen,
 } from './components/blocking';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { PermissionRoute } from '@/components/auth/PermissionRoute';
 import { saveReturnUrl } from './utils/token';
 import { useAnalyticsCounters } from './hooks/useAnalyticsCounters';
+import { useSiteVerification } from './hooks/useSiteVerification';
 // Auth pages - load immediately (small)
 import Login from './pages/Login';
 import TelegramCallback from './pages/TelegramCallback';
@@ -198,9 +200,16 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
   return <Layout>{children}</Layout>;
 }
 
-// Suspense wrapper for lazy components
+// Suspense + error boundary wrapper for lazy routes. The boundary lives
+// OUTSIDE Suspense so chunk-load failures (caught by lazyWithRetry's reload
+// path) and render-time exceptions both surface in the page-level fallback
+// instead of crashing the entire shell via the top-level boundary.
 function LazyPage({ children }: { children: React.ReactNode }) {
-  return <Suspense fallback={<PageLoader variant="dark" />}>{children}</Suspense>;
+  return (
+    <ErrorBoundary level="page">
+      <Suspense fallback={<PageLoader variant="dark" />}>{children}</Suspense>
+    </ErrorBoundary>
+  );
 }
 
 function BlockingOverlay() {
@@ -218,6 +227,10 @@ function BlockingOverlay() {
     return <BlacklistedScreen />;
   }
 
+  if (blockingType === 'account_deleted') {
+    return <AccountDeletedScreen />;
+  }
+
   return null;
 }
 
@@ -229,6 +242,9 @@ function LegacySubscriptionRedirect() {
 
 function App() {
   useAnalyticsCounters();
+  // Pulls site-verification tokens (Antilopay apay-tag etc.) from the bot
+  // backend and injects matching <meta> tags into document.head.
+  useSiteVerification();
 
   return (
     <>
@@ -255,31 +271,25 @@ function App() {
         <Route
           path="/buy/success/:token"
           element={
-            <ErrorBoundary level="app">
-              <LazyPage>
-                <PurchaseSuccess />
-              </LazyPage>
-            </ErrorBoundary>
+            <LazyPage>
+              <PurchaseSuccess />
+            </LazyPage>
           }
         />
         <Route
           path="/buy/:slug"
           element={
-            <ErrorBoundary level="app">
-              <LazyPage>
-                <QuickPurchase />
-              </LazyPage>
-            </ErrorBoundary>
+            <LazyPage>
+              <QuickPurchase />
+            </LazyPage>
           }
         />
         <Route
           path="/auto-login"
           element={
-            <ErrorBoundary level="app">
-              <LazyPage>
-                <AutoLogin />
-              </LazyPage>
-            </ErrorBoundary>
+            <LazyPage>
+              <AutoLogin />
+            </LazyPage>
           }
         />
 
@@ -378,11 +388,9 @@ function App() {
           path="/balance/top-up/result"
           element={
             <ProtectedRoute withLayout={false}>
-              <ErrorBoundary level="app">
-                <LazyPage>
-                  <TopUpResult />
-                </LazyPage>
-              </ErrorBoundary>
+              <LazyPage>
+                <TopUpResult />
+              </LazyPage>
             </ProtectedRoute>
           }
         />
@@ -509,25 +517,21 @@ function App() {
         <Route
           path="/gift"
           element={
-            <ErrorBoundary level="app">
-              <ProtectedRoute>
-                <LazyPage>
-                  <GiftSubscription />
-                </LazyPage>
-              </ProtectedRoute>
-            </ErrorBoundary>
+            <ProtectedRoute>
+              <LazyPage>
+                <GiftSubscription />
+              </LazyPage>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/gift/result"
           element={
-            <ErrorBoundary level="app">
-              <ProtectedRoute>
-                <LazyPage>
-                  <GiftResult />
-                </LazyPage>
-              </ProtectedRoute>
-            </ErrorBoundary>
+            <ProtectedRoute>
+              <LazyPage>
+                <GiftResult />
+              </LazyPage>
+            </ProtectedRoute>
           }
         />
         <Route

@@ -83,7 +83,7 @@ export default function LinkTelegramCallback() {
   }, [searchParams, navigate, showToast, t]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center">
+    <div className="min-h-viewport flex items-center justify-center">
       <div className="fixed inset-0 bg-gradient-to-br from-dark-950 via-dark-900 to-dark-950" />
       <div className="relative text-center">
         <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />

@@ -13,6 +13,7 @@ import HighlightExtension from '@tiptap/extension-highlight';
 import { VideoExtension } from '../lib/tiptap-video';
 import { infoPagesApi } from '../api/infoPages';
 import { newsApi } from '../api/news';
+import { usePrompt } from '../store/promptDialog';
 import { AdminBackButton } from '../components/admin';
 import { Toggle } from '../components/admin/Toggle';
 import { useHapticFeedback } from '../platform/hooks/useHaptic';
@@ -372,18 +373,23 @@ function FaqAnswerEditor({ value, onChange }: { value: string; onChange: (html: 
     editor.setOptions({ editorProps: { ...editor.options.editorProps, handlePaste, handleDrop } });
   }, [editor]);
 
-  const addLink = useCallback(() => {
-    const url = window.prompt(t('news.admin.toolbar.linkUrlPrompt'));
-    if (url && editor) {
-      try {
-        const parsed = new URL(url);
-        if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return;
-      } catch {
-        return;
-      }
-      editor.chain().focus().setLink({ href: url }).run();
+  const promptDialog = usePrompt();
+
+  const addLink = useCallback(async () => {
+    if (!editor) return;
+    const url = await promptDialog({
+      label: t('news.admin.toolbar.linkUrlPrompt'),
+      inputType: 'url',
+    });
+    if (!url) return;
+    try {
+      const parsed = new URL(url);
+      if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return;
+    } catch {
+      return;
     }
-  }, [editor, t]);
+    editor.chain().focus().setLink({ href: url }).run();
+  }, [editor, t, promptDialog]);
 
   if (!editor) return null;
 
@@ -975,7 +981,10 @@ export default function AdminInfoPageEditor() {
     const initialContent = pageData.content[activeLocale] ?? pageData.content['ru'] ?? '';
     editor.commands.setContent(initialContent);
     editorPopulated.current = true;
-  }, [pageData, editor]); // activeLocale intentionally omitted
+    // activeLocale intentionally omitted — initial content is locked at editor
+    // mount; subsequent locale changes are routed through switchLocale().
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pageData, editor]);
 
   // Auto-generate slug from Russian title
   useEffect(() => {
@@ -1070,17 +1079,21 @@ export default function AdminInfoPageEditor() {
   };
 
   // Toolbar actions
-  const addLink = () => {
-    const url = window.prompt(t('news.admin.toolbar.linkUrlPrompt'));
-    if (url && editor) {
-      try {
-        const parsed = new URL(url);
-        if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return;
-      } catch {
-        return;
-      }
-      editor.chain().focus().setLink({ href: url }).run();
+  const promptDialog = usePrompt();
+  const addLink = async () => {
+    if (!editor) return;
+    const url = await promptDialog({
+      label: t('news.admin.toolbar.linkUrlPrompt'),
+      inputType: 'url',
+    });
+    if (!url) return;
+    try {
+      const parsed = new URL(url);
+      if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return;
+    } catch {
+      return;
     }
+    editor.chain().focus().setLink({ href: url }).run();
   };
 
   if (isEdit && isLoadingPage) {
@@ -1116,8 +1129,11 @@ export default function AdminInfoPageEditor() {
       <div className="space-y-5">
         {/* Slug */}
         <div>
-          <label className="label">{t('admin.infoPages.fields.slug')}</label>
+          <label htmlFor="ip-slug" className="label">
+            {t('admin.infoPages.fields.slug')}
+          </label>
           <input
+            id="ip-slug"
             type="text"
             value={slug}
             onChange={(e) => {
@@ -1132,8 +1148,11 @@ export default function AdminInfoPageEditor() {
         {/* Icon + Sort Order row */}
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <label className="label">{t('admin.infoPages.fields.icon')}</label>
+            <label htmlFor="ip-icon" className="label">
+              {t('admin.infoPages.fields.icon')}
+            </label>
             <input
+              id="ip-icon"
               type="text"
               value={icon}
               onChange={(e) => setIcon(e.target.value)}
@@ -1142,8 +1161,11 @@ export default function AdminInfoPageEditor() {
             />
           </div>
           <div>
-            <label className="label">{t('admin.infoPages.fields.sortOrder')}</label>
+            <label htmlFor="ip-sortorder" className="label">
+              {t('admin.infoPages.fields.sortOrder')}
+            </label>
             <input
+              id="ip-sortorder"
               type="number"
               value={sortOrder}
               onChange={(e) => setSortOrder(Number(e.target.value) || 0)}
@@ -1165,12 +1187,16 @@ export default function AdminInfoPageEditor() {
 
         {/* Page type selector */}
         <div>
-          <label className="label">{t('admin.infoPages.fields.pageType')}</label>
-          <div className="flex gap-1">
+          <label id="ip-pagetype-label" className="label">
+            {t('admin.infoPages.fields.pageType')}
+          </label>
+          <div className="flex gap-1" role="radiogroup" aria-labelledby="ip-pagetype-label">
             {(['page', 'faq'] as const).map((pt) => (
               <button
                 key={pt}
                 type="button"
+                role="radio"
+                aria-checked={pageType === pt}
                 onClick={() => setPageType(pt)}
                 className={cn(
                   'min-h-[44px] rounded-lg px-4 py-2.5 text-sm font-medium transition-colors',
@@ -1189,8 +1215,11 @@ export default function AdminInfoPageEditor() {
 
         {/* Replaces tab selector */}
         <div>
-          <label className="label">{t('admin.infoPages.fields.replacesTab')}</label>
+          <label htmlFor="ip-replaces-tab" className="label">
+            {t('admin.infoPages.fields.replacesTab')}
+          </label>
           <select
+            id="ip-replaces-tab"
             value={replacesTab ?? ''}
             onChange={(e) => setReplacesTab((e.target.value || null) as ReplacesTab | null)}
             className="input max-w-xs"
@@ -1218,12 +1247,16 @@ export default function AdminInfoPageEditor() {
 
         {/* Locale tabs */}
         <div>
-          <label className="label">{t('admin.infoPages.localeLabel')}</label>
-          <div className="flex flex-wrap gap-1">
+          <label id="ip-locale-label" className="label">
+            {t('admin.infoPages.localeLabel')}
+          </label>
+          <div className="flex flex-wrap gap-1" role="radiogroup" aria-labelledby="ip-locale-label">
             {AVAILABLE_LOCALES.map((loc) => (
               <button
                 key={loc}
                 type="button"
+                role="radio"
+                aria-checked={activeLocale === loc}
                 onClick={() => switchLocale(loc)}
                 className={cn(
                   'min-h-[44px] rounded-lg px-4 py-2.5 text-sm font-medium transition-colors',
@@ -1240,10 +1273,11 @@ export default function AdminInfoPageEditor() {
 
         {/* Title for current locale */}
         <div>
-          <label className="label">
+          <label htmlFor="ip-title" className="label">
             {t('admin.infoPages.fields.title')} ({t(`admin.infoPages.locales.${activeLocale}`)})
           </label>
           <input
+            id="ip-title"
             type="text"
             value={titles[activeLocale] ?? ''}
             onChange={(e) => setTitles((prev) => ({ ...prev, [activeLocale]: e.target.value }))}

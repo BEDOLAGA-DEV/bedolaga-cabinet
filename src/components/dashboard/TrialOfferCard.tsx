@@ -115,7 +115,7 @@ export default function TrialOfferCard({
             height="26"
             viewBox="0 0 24 24"
             fill="none"
-            stroke="#FFB800"
+            stroke="rgb(var(--color-urgent-400))"
             strokeWidth="1.5"
             aria-hidden="true"
           >
@@ -157,11 +157,14 @@ export default function TrialOfferCard({
         >
           <span
             className="text-[32px] font-extrabold leading-none tracking-tight"
-            style={{ color: '#FFB800' }}
+            style={{ color: 'rgb(var(--color-urgent-400))' }}
           >
             {trialInfo.price_rubles.toFixed(0)}
           </span>
-          <span className="text-base font-semibold opacity-70" style={{ color: '#FFB800' }}>
+          <span
+            className="text-base font-semibold opacity-70"
+            style={{ color: 'rgb(var(--color-urgent-400))' }}
+          >
             {currencySymbol}
           </span>
         </div>

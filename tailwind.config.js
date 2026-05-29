@@ -101,6 +101,13 @@ export default {
           900: withOpacity('--color-error-900'),
           950: withOpacity('--color-error-950'),
         },
+        // Subscription-status semantic tokens — see globals.css for rationale.
+        urgent: {
+          400: withOpacity('--color-urgent-400'),
+        },
+        critical: {
+          500: withOpacity('--color-critical-500'),
+        },
       },
       fontFamily: {
         sans: [

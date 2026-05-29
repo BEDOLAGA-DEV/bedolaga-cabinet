@@ -34,14 +34,11 @@ export default function LanguageSwitcher() {
   }, []);
 
   const changeLanguage = (code: string) => {
+    // i18n.ts subscribes to languageChanged and syncs <html lang> + dir
+    // centrally — no need to set documentElement.dir here.
     i18n.changeLanguage(code);
-    document.documentElement.dir = code === 'fa' ? 'rtl' : 'ltr';
     setIsOpen(false);
   };
-
-  useEffect(() => {
-    document.documentElement.dir = i18n.language === 'fa' ? 'rtl' : 'ltr';
-  }, [i18n.language]);
 
   if (availableLanguages.length <= 1) {
     return null;

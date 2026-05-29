@@ -82,7 +82,7 @@ export default function AdminPartnerSettings() {
     formData.withdrawal_cooldown_days <= 365;
   const isValid = !formData.withdrawal_enabled || (isMinAmountValid && isCooldownValid);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.SyntheticEvent) => {
     e.preventDefault();
     if (!isValid) return;
     updateMutation.mutate({

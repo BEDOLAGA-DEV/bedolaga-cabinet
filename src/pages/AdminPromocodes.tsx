@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import i18n from '../i18n';
 import { promocodesApi, PromoCode, PromoCodeType } from '../api/promocodes';
 import { usePlatform } from '../platform/hooks/usePlatform';
+import { copyToClipboard } from '../utils/clipboard';
 
 // Icons
 
@@ -131,7 +132,7 @@ export default function AdminPromocodes() {
   });
 
   const handleCopyCode = (code: string) => {
-    navigator.clipboard.writeText(code);
+    void copyToClipboard(code);
     setCopiedCode(code);
     setTimeout(() => setCopiedCode(null), 2000);
   };

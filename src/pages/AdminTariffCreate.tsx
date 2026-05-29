@@ -442,11 +442,12 @@ export default function AdminTariffCreate() {
         <div className="card space-y-4">
           {/* Name */}
           <div>
-            <label className="mb-2 block text-sm font-medium text-dark-300">
+            <label htmlFor="tariff-name" className="mb-2 block text-sm font-medium text-dark-300">
               {t('admin.tariffs.nameLabel')}
               <span className="text-error-400">*</span>
             </label>
             <input
+              id="tariff-name"
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -466,10 +467,14 @@ export default function AdminTariffCreate() {
 
           {/* Description */}
           <div>
-            <label className="mb-2 block text-sm font-medium text-dark-300">
+            <label
+              htmlFor="tariff-description"
+              className="mb-2 block text-sm font-medium text-dark-300"
+            >
               {t('admin.tariffs.descriptionLabel')}
             </label>
             <textarea
+              id="tariff-description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               className="input min-h-[80px] resize-none"
@@ -480,12 +485,16 @@ export default function AdminTariffCreate() {
           {/* Daily Price (only for daily tariff) */}
           {isDaily && (
             <div className="rounded-lg border border-warning-500/30 bg-warning-500/10 p-4">
-              <label className="mb-2 block text-sm font-medium text-warning-400">
+              <label
+                htmlFor="tariff-daily-price"
+                className="mb-2 block text-sm font-medium text-warning-400"
+              >
                 {t('admin.tariffs.dailyPriceLabel')}
                 <span className="text-error-400">*</span>
               </label>
               <div className="flex items-center gap-2">
                 <input
+                  id="tariff-daily-price"
                   type="number"
                   value={dailyPriceKopeks === '' ? '' : dailyPriceKopeks / 100}
                   onChange={(e) => {
@@ -510,11 +519,15 @@ export default function AdminTariffCreate() {
 
           {/* Traffic Limit */}
           <div>
-            <label className="mb-2 block text-sm font-medium text-dark-300">
+            <label
+              htmlFor="tariff-traffic-limit"
+              className="mb-2 block text-sm font-medium text-dark-300"
+            >
               {t('admin.tariffs.trafficLimitLabel')}
             </label>
             <div className="flex items-center gap-2">
               <input
+                id="tariff-traffic-limit"
                 type="number"
                 value={trafficLimitGb}
                 onChange={createNumberInputHandler(setTrafficLimitGb, 0)}
@@ -535,11 +548,15 @@ export default function AdminTariffCreate() {
 
           {/* Device Limit */}
           <div>
-            <label className="mb-2 block text-sm font-medium text-dark-300">
+            <label
+              htmlFor="tariff-device-limit"
+              className="mb-2 block text-sm font-medium text-dark-300"
+            >
               {t('admin.tariffs.deviceLimitLabel')}
               <span className="text-error-400">*</span>
             </label>
             <input
+              id="tariff-device-limit"
               type="number"
               value={deviceLimit}
               onChange={createNumberInputHandler(setDeviceLimit, 1)}
@@ -551,11 +568,15 @@ export default function AdminTariffCreate() {
 
           {/* Tier Level */}
           <div>
-            <label className="mb-2 block text-sm font-medium text-dark-300">
+            <label
+              htmlFor="tariff-tier-level"
+              className="mb-2 block text-sm font-medium text-dark-300"
+            >
               {t('admin.tariffs.tierLevelLabel')}
               <span className="text-error-400">*</span>
             </label>
             <input
+              id="tariff-tier-level"
               type="number"
               value={tierLevel}
               onChange={createNumberInputHandler(setTierLevel, 1, 10)}
@@ -855,6 +876,9 @@ export default function AdminTariffCreate() {
               <button
                 type="button"
                 onClick={() => setTrafficTopupEnabled(!trafficTopupEnabled)}
+                role="switch"
+                aria-checked={trafficTopupEnabled}
+                aria-label={t('admin.tariffs.extraTrafficTitle')}
                 className={`relative h-6 w-11 rounded-full transition-colors ${
                   trafficTopupEnabled ? 'bg-accent-500' : 'bg-dark-600'
                 }`}
@@ -1117,6 +1141,9 @@ export default function AdminTariffCreate() {
               <button
                 type="button"
                 onClick={() => setIsActive(!isActive)}
+                role="switch"
+                aria-checked={isActive}
+                aria-label={t('admin.tariffs.isActiveLabel')}
                 className={`relative h-6 w-11 rounded-full transition-colors ${
                   isActive ? 'bg-success-500' : 'bg-dark-600'
                 }`}
@@ -1139,6 +1166,9 @@ export default function AdminTariffCreate() {
               <button
                 type="button"
                 onClick={() => setShowInGift(!showInGift)}
+                role="switch"
+                aria-checked={showInGift}
+                aria-label={t('admin.tariffs.showInGiftLabel')}
                 className={`relative h-6 w-11 rounded-full transition-colors ${
                   showInGift ? 'bg-accent-500' : 'bg-dark-600'
                 }`}

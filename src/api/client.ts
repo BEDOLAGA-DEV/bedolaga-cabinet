@@ -152,6 +152,13 @@ export interface BlacklistedError {
   message: string;
 }
 
+export interface AccountDeletedError {
+  code: 'account_deleted';
+  message: string;
+  bot_username?: string;
+  telegram_deep_link?: string;
+}
+
 export function isMaintenanceError(
   error: unknown,
 ): error is { response: { status: 503; data: { detail: MaintenanceError } } } {
@@ -177,6 +184,14 @@ export function isBlacklistedError(
   if (!error || typeof error !== 'object') return false;
   const err = error as AxiosError<{ detail: BlacklistedError }>;
   return err.response?.status === 403 && err.response?.data?.detail?.code === 'blacklisted';
+}
+
+export function isAccountDeletedError(
+  error: unknown,
+): error is { response: { status: 403; data: { detail: AccountDeletedError } } } {
+  if (!error || typeof error !== 'object') return false;
+  const err = error as AxiosError<{ detail: AccountDeletedError }>;
+  return err.response?.status === 403 && err.response?.data?.detail?.code === 'account_deleted';
 }
 
 apiClient.interceptors.response.use(
@@ -207,6 +222,21 @@ apiClient.interceptors.response.use(
       const detail = (error.response?.data as { detail: BlacklistedError }).detail;
       useBlockingStore.getState().setBlacklisted({
         message: detail.message,
+      });
+      return Promise.reject(error);
+    }
+
+    if (isAccountDeletedError(error)) {
+      const detail = (error.response?.data as { detail: AccountDeletedError }).detail;
+      // Surface the deleted-account screen. The auth flow (initData login)
+      // is allowed to auto-revive; this branch is for token-bearing
+      // sessions where the user is already in the cabinet but their row
+      // got marked DELETED out-of-band, and for password-only logins
+      // that can't be silently revived.
+      useBlockingStore.getState().setAccountDeleted({
+        message: detail.message,
+        bot_username: detail.bot_username,
+        telegram_deep_link: detail.telegram_deep_link,
       });
       return Promise.reject(error);
     }

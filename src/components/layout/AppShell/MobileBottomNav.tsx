@@ -26,16 +26,29 @@ export function MobileBottomNav({
   const isActive = (path: string) =>
     path === '/' ? location.pathname === '/' : location.pathname.startsWith(path);
 
-  // Core navigation items for bottom bar
-  // When wheel is enabled, it replaces Support in the bottom nav (Support is still accessible via hamburger menu)
+  // Core navigation items for bottom bar.
+  //
+  // Support is ALWAYS present — frustrated paying customers must find help
+  // in the primary nav, not in the hamburger drawer. Previously Wheel
+  // (a brand-moment surface) displaced Support (a critical-path surface)
+  // when the wheel feature flag was on; that trade is hostile to the
+  // support-user persona and was flagged by the /impeccable critique.
+  //
+  // Slot priority when both Wheel and Referral are enabled and only
+  // four slots remain after Dashboard / Subscriptions / Balance / Support:
+  //   - Wheel wins (operator opted in as a deliberate brand moment)
+  //   - Referral falls back to the hamburger drawer
+  // When only one of them is enabled, that one fills the slot.
   const coreItems = [
     { path: '/', label: t('nav.dashboard'), icon: HomeIcon },
     { path: '/subscriptions', label: t('nav.subscription'), icon: SubscriptionIcon },
     { path: '/balance', label: t('nav.balance'), icon: WalletIcon },
-    ...(referralEnabled ? [{ path: '/referral', label: t('nav.referral'), icon: UsersIcon }] : []),
     ...(wheelEnabled
       ? [{ path: '/wheel', label: t('nav.wheel'), icon: WheelIcon }]
-      : [{ path: '/support', label: t('nav.support'), icon: ChatIcon }]),
+      : referralEnabled
+        ? [{ path: '/referral', label: t('nav.referral'), icon: UsersIcon }]
+        : []),
+    { path: '/support', label: t('nav.support'), icon: ChatIcon },
   ];
 
   const handleNavClick = () => {

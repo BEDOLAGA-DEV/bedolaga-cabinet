@@ -60,6 +60,10 @@ export default defineConfig(({ mode }) => {
             if (id.includes('twemoji') || id.includes('@twemoji/')) return 'vendor-twemoji';
             if (id.includes('/jsencrypt/') || id.includes('@kastov/')) return 'vendor-crypto';
             if (id.includes('@lottiefiles/')) return 'vendor-lottie';
+            // Heavy admin-only deps — split so they don't bloat the shared
+            // chunks of other lazy admin pages that don't use them.
+            if (id.includes('/recharts/') || id.includes('/d3-')) return 'vendor-recharts';
+            if (id.includes('@tiptap/') || id.includes('/prosemirror-')) return 'vendor-tiptap';
             if (
               id.includes('/axios/') ||
               id.includes('/zustand/') ||

@@ -7,6 +7,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { adminApi, AdminTicket, AdminTicketDetail } from '../api/admin';
 import { ticketsApi } from '../api/tickets';
+import { copyToClipboard as copyText } from '../utils/clipboard';
 import { usePlatform } from '../platform/hooks/usePlatform';
 
 interface MediaAttachment {
@@ -176,7 +177,7 @@ export default function AdminTickets() {
     }
   };
 
-  const handleReply = async (e: React.FormEvent) => {
+  const handleReply = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     if (!selectedTicketId) return;
     if (attachments.some((a) => a.uploading || a.error)) return;
@@ -257,14 +258,7 @@ export default function AdminTickets() {
   };
 
   const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text).catch(() => {
-      const textarea = document.createElement('textarea');
-      textarea.value = text;
-      document.body.appendChild(textarea);
-      textarea.select();
-      document.execCommand('copy');
-      document.body.removeChild(textarea);
-    });
+    void copyText(text);
   };
 
   return (
@@ -588,6 +582,7 @@ export default function AdminTickets() {
                             <img
                               src={att.preview}
                               alt="Preview"
+                              loading="lazy"
                               className="h-16 w-16 rounded-lg object-cover"
                             />
                           ) : (
@@ -596,19 +591,19 @@ export default function AdminTickets() {
                             </div>
                           )}
                           {att.uploading && (
-                            <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/50">
+                            <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-dark-950/50">
                               <span className="h-4 w-4 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
                             </div>
                           )}
                           {att.error && (
-                            <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-red-500/30">
-                              <span className="text-xs text-red-300">!</span>
+                            <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-error-500/30">
+                              <span className="text-xs text-error-300">!</span>
                             </div>
                           )}
                           <button
                             type="button"
                             onClick={() => removeAttachment(idx)}
-                            className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-dark-600 text-dark-300 hover:bg-red-500 hover:text-white"
+                            className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-dark-600 text-dark-300 hover:bg-error-500 hover:text-white"
                           >
                             <svg
                               className="h-3 w-3"
@@ -639,7 +634,7 @@ export default function AdminTickets() {
                   />
 
                   {replyError && (
-                    <div className="mt-2 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">
+                    <div className="mt-2 rounded-lg border border-error-500/30 bg-error-500/10 px-3 py-2 text-sm text-error-300">
                       {replyError}
                     </div>
                   )}

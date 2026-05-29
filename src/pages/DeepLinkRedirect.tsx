@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { brandingApi } from '../api/branding';
+import { copyToClipboard } from '../utils/clipboard';
 
 type Status = 'countdown' | 'fallback' | 'error';
 
@@ -132,20 +133,9 @@ export default function DeepLinkRedirect() {
     if (copiedTimeoutRef.current) {
       clearTimeout(copiedTimeoutRef.current);
     }
-    try {
-      await navigator.clipboard.writeText(linkToCopy);
-      setCopied(true);
-      copiedTimeoutRef.current = setTimeout(() => setCopied(false), 2000);
-    } catch {
-      const textarea = document.createElement('textarea');
-      textarea.value = linkToCopy;
-      document.body.appendChild(textarea);
-      textarea.select();
-      document.execCommand('copy');
-      document.body.removeChild(textarea);
-      setCopied(true);
-      copiedTimeoutRef.current = setTimeout(() => setCopied(false), 2000);
-    }
+    await copyToClipboard(linkToCopy);
+    setCopied(true);
+    copiedTimeoutRef.current = setTimeout(() => setCopied(false), 2000);
   };
 
   // Cleanup copied timeout on unmount
@@ -161,7 +151,7 @@ export default function DeepLinkRedirect() {
   const progress = ((COUNTDOWN_SECONDS - countdown) / COUNTDOWN_SECONDS) * 100;
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-4">
+    <div className="min-h-viewport flex items-center justify-center p-4">
       {/* Background */}
       <div className="fixed inset-0 bg-gradient-to-br from-dark-950 via-dark-900 to-dark-950" />
       <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-accent-500/10 via-transparent to-transparent" />

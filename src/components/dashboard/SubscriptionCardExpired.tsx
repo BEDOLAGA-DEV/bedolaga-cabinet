@@ -59,8 +59,11 @@ export default function SubscriptionCardExpired({
         // Resume daily subscription via toggle pause endpoint
         await subscriptionApi.togglePause(subscription.id);
       } else if (isDaily && subscription.tariff_id) {
-        // Expired daily tariff — purchase for 1 day
-        await subscriptionApi.purchaseTariff(subscription.tariff_id, 1);
+        // Expired daily tariff — purchase for 1 day. Pass subscription.id
+        // so the backend resolves the EXACT row instead of doing a
+        // (user_id, tariff_id) re-lookup that races with concurrent
+        // panel webhooks (would surface as "Тариф уже активен" + refund).
+        await subscriptionApi.purchaseTariff(subscription.tariff_id, 1, undefined, subscription.id);
       } else {
         await subscriptionApi.renewSubscription(30, subscription.id);
       }
@@ -104,14 +107,14 @@ export default function SubscriptionCardExpired({
         r: 255,
         g: 184,
         b: 0,
-        hex: '#FFB800',
+        hex: 'rgb(var(--color-urgent-400))',
         gradient: 'linear-gradient(135deg, #FFB800, #FF8C00)',
       }
     : {
         r: 255,
         g: 59,
         b: 92,
-        hex: '#FF3B5C',
+        hex: 'rgb(var(--color-critical-500))',
         gradient: 'linear-gradient(135deg, #FF3B5C, #FF6B35)',
       };
 

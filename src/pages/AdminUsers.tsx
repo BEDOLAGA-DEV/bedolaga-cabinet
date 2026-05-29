@@ -1,8 +1,9 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
+import { useQuery } from '@tanstack/react-query';
 import { useCurrency } from '../hooks/useCurrency';
-import { adminUsersApi, type UserListItem, type UsersStatsResponse } from '../api/adminUsers';
+import { adminUsersApi, type UserListItem } from '../api/adminUsers';
 import { usePlatform } from '../platform/hooks/usePlatform';
 
 const BackIcon = () => (
@@ -142,7 +143,7 @@ function UserRow({ user, onClick, formatAmount }: UserRowProps) {
                   : user.subscription_status === 'trial'
                     ? 'border-accent-500/30 bg-accent-500/20 text-accent-400'
                     : user.subscription_status === 'limited'
-                      ? 'border-yellow-500/30 bg-yellow-500/20 text-yellow-400'
+                      ? 'border-warning-500/30 bg-warning-500/20 text-warning-400'
                       : 'border-warning-500/30 bg-warning-500/20 text-warning-400'
               }`}
             >
@@ -181,56 +182,35 @@ export default function AdminUsers() {
   const navigate = useNavigate();
   const { capabilities } = usePlatform();
 
-  const [users, setUsers] = useState<UserListItem[]>([]);
-  const [stats, setStats] = useState<UsersStatsResponse | null>(null);
-  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [emailSearch, setEmailSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [sortBy, setSortBy] = useState<string>('created_at');
   const [offset, setOffset] = useState(0);
-  const [total, setTotal] = useState(0);
 
   const limit = 20;
 
-  const loadUsers = useCallback(async () => {
-    try {
-      setLoading(true);
+  const usersQuery = useQuery({
+    queryKey: ['admin-users', offset, limit, sortBy, search, emailSearch, statusFilter] as const,
+    queryFn: () => {
       const params: Record<string, unknown> = { offset, limit, sort_by: sortBy };
       if (search) params.search = search;
       if (emailSearch) params.email = emailSearch;
       if (statusFilter) params.status = statusFilter;
+      return adminUsersApi.getUsers(params as Parameters<typeof adminUsersApi.getUsers>[0]);
+    },
+  });
+  const users = usersQuery.data?.users ?? [];
+  const total = usersQuery.data?.total ?? 0;
+  const loading = usersQuery.isLoading;
 
-      const data = await adminUsersApi.getUsers(
-        params as Parameters<typeof adminUsersApi.getUsers>[0],
-      );
-      setUsers(data.users);
-      setTotal(data.total);
-    } catch (error) {
-      console.error('Failed to load users:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, [offset, search, emailSearch, statusFilter, sortBy]);
+  const statsQuery = useQuery({
+    queryKey: ['admin-users-stats'] as const,
+    queryFn: () => adminUsersApi.getStats(),
+  });
+  const stats = statsQuery.data ?? null;
 
-  const loadStats = useCallback(async () => {
-    try {
-      const data = await adminUsersApi.getStats();
-      setStats(data);
-    } catch (error) {
-      console.error('Failed to load stats:', error);
-    }
-  }, []);
-
-  useEffect(() => {
-    loadUsers();
-  }, [loadUsers]);
-
-  useEffect(() => {
-    loadStats();
-  }, [loadStats]);
-
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = (e: React.SyntheticEvent) => {
     e.preventDefault();
   };
 
@@ -258,8 +238,8 @@ export default function AdminUsers() {
         </div>
         <button
           onClick={() => {
-            loadUsers();
-            loadStats();
+            usersQuery.refetch();
+            statsQuery.refetch();
           }}
           className="rounded-lg p-2 transition-colors hover:bg-dark-700"
         >

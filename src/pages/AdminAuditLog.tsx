@@ -2,6 +2,7 @@ import { useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import { rbacApi, AuditLogEntry, AuditLogFilters } from '@/api/rbac';
 import { PermissionGate } from '@/components/auth/PermissionGate';
 import { usePlatform } from '@/platform/hooks/usePlatform';
@@ -137,11 +138,7 @@ const INITIAL_FILTERS: FiltersState = {
 
 // === Utility functions ===
 
-function translateAction(
-  action: string,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  t: any,
-): string {
+function translateAction(action: string, t: TFunction): string {
   return action
     .split(',')
     .map((perm: string) => {
@@ -189,8 +186,8 @@ interface StatusBadgeProps {
 function StatusBadge({ status, label }: StatusBadgeProps) {
   const colorMap: Record<string, string> = {
     success: 'bg-success-500/20 text-success-400',
-    denied: 'bg-red-500/20 text-red-400',
-    error: 'bg-amber-500/20 text-amber-400',
+    denied: 'bg-error-500/20 text-error-400',
+    error: 'bg-warning-500/20 text-warning-400',
   };
 
   return (
@@ -208,11 +205,11 @@ interface MethodBadgeProps {
 
 function MethodBadge({ method }: MethodBadgeProps) {
   const colorMap: Record<string, string> = {
-    GET: 'bg-blue-500/20 text-blue-400',
+    GET: 'bg-accent-500/20 text-accent-400',
     POST: 'bg-success-500/20 text-success-400',
-    PUT: 'bg-amber-500/20 text-amber-400',
-    PATCH: 'bg-amber-500/20 text-amber-400',
-    DELETE: 'bg-red-500/20 text-red-400',
+    PUT: 'bg-warning-500/20 text-warning-400',
+    PATCH: 'bg-warning-500/20 text-warning-400',
+    DELETE: 'bg-error-500/20 text-error-400',
   };
 
   return (

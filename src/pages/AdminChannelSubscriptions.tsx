@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useHaptic, useNotify } from '../platform';
+import { useNativeDialog } from '../platform/hooks/useNativeDialog';
 import {
   adminChannelsApi,
   type RequiredChannel,
@@ -656,8 +657,10 @@ export default function AdminChannelSubscriptions() {
     toggleMutation.mutate(id);
   };
 
-  const handleDelete = (id: number) => {
-    if (window.confirm(t('admin.channelSubscriptions.deleteConfirm'))) {
+  const { confirm: confirmDialog } = useNativeDialog();
+
+  const handleDelete = async (id: number) => {
+    if (await confirmDialog(t('admin.channelSubscriptions.deleteConfirm'))) {
       deleteMutation.mutate(id);
     }
   };

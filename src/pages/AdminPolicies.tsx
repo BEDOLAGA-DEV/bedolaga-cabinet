@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { rbacApi, AccessPolicy, AdminRole } from '@/api/rbac';
 import { PermissionGate } from '@/components/auth/PermissionGate';
 import { usePlatform } from '@/platform/hooks/usePlatform';
+import { useFocusTrap } from '@/hooks/useFocusTrap';
 
 const BackIcon = () => (
   <svg
@@ -140,7 +141,7 @@ function EffectBadge({ effect, className }: EffectBadgeProps) {
       className={`inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-semibold ${
         isAllow
           ? 'border-success-500/30 bg-success-500/10 text-success-400'
-          : 'border-red-500/30 bg-red-500/10 text-red-400'
+          : 'border-error-500/30 bg-error-500/10 text-error-400'
       } ${className ?? ''}`}
     >
       {isAllow ? t('admin.policies.effectAllow') : t('admin.policies.effectDeny')}
@@ -155,6 +156,9 @@ export default function AdminPolicies() {
   const { capabilities } = usePlatform();
 
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
+  const deleteDialogRef = useFocusTrap<HTMLDivElement>(deleteConfirm !== null, {
+    onEscape: () => setDeleteConfirm(null),
+  });
   const [formError, setFormError] = useState<string | null>(null);
 
   // Queries
@@ -327,7 +331,7 @@ export default function AdminPolicies() {
             <div className="text-xs text-dark-400">{t('admin.policies.stats.allow')}</div>
           </div>
           <div className="rounded-xl border border-dark-700 bg-dark-800 p-4">
-            <div className="text-2xl font-bold text-red-400">
+            <div className="text-2xl font-bold text-error-400">
               {sortedPolicies.filter((p) => p.effect === 'deny').length}
             </div>
             <div className="text-xs text-dark-400">{t('admin.policies.stats.deny')}</div>
@@ -445,12 +449,19 @@ export default function AdminPolicies() {
       {deleteConfirm !== null && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
-            className="fixed inset-0 bg-black/60"
+            className="fixed inset-0 bg-dark-950/60"
             onClick={() => setDeleteConfirm(null)}
             aria-hidden="true"
           />
-          <div className="relative w-full max-w-sm rounded-xl border border-dark-700 bg-dark-800 p-6">
-            <h3 className="mb-2 text-lg font-semibold text-dark-100">
+          <div
+            ref={deleteDialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="policy-delete-title"
+            tabIndex={-1}
+            className="relative w-full max-w-sm rounded-xl border border-dark-700 bg-dark-800 p-6"
+          >
+            <h3 id="policy-delete-title" className="mb-2 text-lg font-semibold text-dark-100">
               {t('admin.policies.confirm.title')}
             </h3>
             <p className="mb-6 text-dark-400">{t('admin.policies.confirm.text')}</p>

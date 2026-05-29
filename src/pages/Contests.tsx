@@ -83,8 +83,8 @@ export default function Contests() {
 
   if (error) {
     return (
-      <div className="card border-red-500/20 bg-red-500/10">
-        <p className="text-red-400">{t('contests.error')}</p>
+      <div className="card border-error-500/20 bg-error-500/10">
+        <p className="text-error-400">{t('contests.error')}</p>
       </div>
     );
   }
@@ -98,7 +98,7 @@ export default function Contests() {
 
       {/* Game Modal */}
       {selectedContest && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-dark-950/70 p-4 backdrop-blur-sm">
           <div
             className="bento-card max-h-[80vh] w-full max-w-lg overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
@@ -125,7 +125,7 @@ export default function Contests() {
 
             {result && (
               <div
-                className={`mb-4 rounded-lg p-4 ${result.is_winner ? 'bg-success-500/20 text-success-400' : 'bg-red-500/20 text-red-400'}`}
+                className={`mb-4 rounded-lg p-4 ${result.is_winner ? 'bg-success-500/20 text-success-400' : 'bg-error-500/20 text-error-400'}`}
               >
                 <p className="font-medium">{result.message}</p>
               </div>
@@ -137,7 +137,7 @@ export default function Contests() {
 
                 {/* Render game based on type */}
                 {(gameData.game_type === 'quest' || gameData.game_type === 'locks') && (
-                  <div className="grid grid-cols-5 gap-2">
+                  <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
                     {Array.from({
                       length: gameData.game_data.total || gameData.game_data.grid_size || 9,
                     }).map((_, i) => (
@@ -154,7 +154,7 @@ export default function Contests() {
                 )}
 
                 {gameData.game_type === 'server' && (
-                  <div className="grid grid-cols-5 gap-2">
+                  <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
                     {gameData.game_data.flags?.map((flag: string, i: number) => (
                       <button
                         key={i}

@@ -334,7 +334,7 @@ export default function AdminRoleEdit() {
   }, []);
 
   const handleSubmit = useCallback(
-    (e: React.FormEvent) => {
+    (e: React.SyntheticEvent) => {
       e.preventDefault();
       setFormError(null);
 

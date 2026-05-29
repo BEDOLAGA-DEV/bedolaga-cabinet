@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { adminPinnedMessagesApi, PinnedMessageResponse } from '../api/adminPinnedMessages';
 import { AdminBackButton } from '../components/admin';
+import { useNativeDialog } from '../platform/hooks/useNativeDialog';
 
 // Icons
 const PinIcon = () => (
@@ -316,20 +317,22 @@ export default function AdminPinnedMessages() {
     deactivateMutation.mutate();
   };
 
-  const handleUnpin = () => {
-    if (window.confirm(t('admin.pinnedMessages.unpinConfirm'))) {
+  const { confirm: confirmDialog } = useNativeDialog();
+
+  const handleUnpin = async () => {
+    if (await confirmDialog(t('admin.pinnedMessages.unpinConfirm'))) {
       unpinMutation.mutate();
     }
   };
 
-  const handleBroadcast = (id: number) => {
-    if (window.confirm(t('admin.pinnedMessages.broadcastConfirm'))) {
+  const handleBroadcast = async (id: number) => {
+    if (await confirmDialog(t('admin.pinnedMessages.broadcastConfirm'))) {
       broadcastMutation.mutate(id);
     }
   };
 
-  const handleDelete = (id: number) => {
-    if (window.confirm(t('admin.pinnedMessages.deleteConfirm'))) {
+  const handleDelete = async (id: number) => {
+    if (await confirmDialog(t('admin.pinnedMessages.deleteConfirm'))) {
       deleteMutation.mutate(id);
     }
   };

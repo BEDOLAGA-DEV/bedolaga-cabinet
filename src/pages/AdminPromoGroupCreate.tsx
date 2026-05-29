@@ -192,11 +192,12 @@ export default function AdminPromoGroupCreate() {
       <div className="card space-y-4">
         {/* Name */}
         <div>
-          <label className="mb-2 block text-sm font-medium text-dark-300">
+          <label htmlFor="pg-name" className="mb-2 block text-sm font-medium text-dark-300">
             {t('admin.promoGroups.form.name')}
             <span className="text-error-400">*</span>
           </label>
           <input
+            id="pg-name"
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -349,11 +350,12 @@ export default function AdminPromoGroupCreate() {
 
         {/* Auto-assign */}
         <div>
-          <label className="mb-2 block text-sm font-medium text-dark-300">
+          <label htmlFor="pg-auto-assign" className="mb-2 block text-sm font-medium text-dark-300">
             {t('admin.promoGroups.form.autoAssign')}
           </label>
           <div className="flex items-center gap-2">
             <input
+              id="pg-auto-assign"
               type="number"
               value={autoAssignSpent}
               onChange={(e) => {
@@ -378,6 +380,9 @@ export default function AdminPromoGroupCreate() {
           <button
             type="button"
             onClick={() => setApplyToAddons(!applyToAddons)}
+            role="switch"
+            aria-checked={applyToAddons}
+            aria-label={t('admin.promoGroups.form.applyToAddons')}
             className={`relative h-6 w-11 rounded-full transition-colors ${
               applyToAddons ? 'bg-accent-500' : 'bg-dark-600'
             }`}
@@ -396,6 +401,9 @@ export default function AdminPromoGroupCreate() {
           <button
             type="button"
             onClick={() => setIsDefault(!isDefault)}
+            role="switch"
+            aria-checked={isDefault}
+            aria-label={t('admin.promoGroups.form.isDefault')}
             className={`relative h-6 w-11 rounded-full transition-colors ${
               isDefault ? 'bg-accent-500' : 'bg-dark-600'
             }`}

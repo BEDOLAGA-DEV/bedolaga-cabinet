@@ -351,7 +351,7 @@ export default function AdminRoleAssign() {
   }, []);
 
   const handleAssign = useCallback(
-    (e: React.FormEvent) => {
+    (e: React.SyntheticEvent) => {
       e.preventDefault();
       setFormError(null);
       setFormSuccess(null);

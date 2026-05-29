@@ -246,8 +246,8 @@ export default function Dashboard() {
   }, [t, subscription]);
 
   const handleOnboardingComplete = () => {
-    setShowOnboarding(false);
     completeOnboarding();
+    setShowOnboarding(false);
   };
 
   return (

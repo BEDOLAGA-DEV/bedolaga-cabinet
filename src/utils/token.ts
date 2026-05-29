@@ -1,4 +1,10 @@
 import axios from 'axios';
+import {
+  getCloudStorageItem,
+  setCloudStorageItem,
+  deleteCloudStorageItem,
+} from '@telegram-apps/sdk-react';
+import { isInTelegramWebApp } from '../hooks/useTelegramSDK';
 
 const TOKEN_KEYS = {
   ACCESS: 'access_token',
@@ -6,6 +12,42 @@ const TOKEN_KEYS = {
   USER: 'user',
   TELEGRAM_INIT: 'telegram_init_data',
 } as const;
+
+// --- Telegram CloudStorage backup for the refresh token ---
+// The Telegram WebView can wipe localStorage between sessions. Mirroring the refresh
+// token to per-user CloudStorage lets initialize() recover the session instead of
+// dropping the user to the login screen. Best-effort: failures fall back to localStorage.
+const CLOUD_REFRESH_KEY = TOKEN_KEYS.REFRESH;
+
+function mirrorRefreshTokenToCloud(refreshToken: string): void {
+  if (!isInTelegramWebApp()) return;
+  try {
+    void setCloudStorageItem(CLOUD_REFRESH_KEY, refreshToken).catch(() => {});
+  } catch {}
+}
+
+function removeRefreshTokenFromCloud(): void {
+  if (!isInTelegramWebApp()) return;
+  try {
+    void deleteCloudStorageItem(CLOUD_REFRESH_KEY).catch(() => {});
+  } catch {}
+}
+
+export async function restoreRefreshTokenFromCloud(): Promise<string | null> {
+  if (!isInTelegramWebApp()) return null;
+  try {
+    const value = await getCloudStorageItem(CLOUD_REFRESH_KEY);
+    const token = value || null;
+    if (token) {
+      try {
+        localStorage.setItem(TOKEN_KEYS.REFRESH, token);
+      } catch {}
+    }
+    return token;
+  } catch {
+    return null;
+  }
+}
 
 interface JWTPayload {
   exp?: number;
@@ -64,6 +106,7 @@ export const tokenStorage = {
       sessionStorage.setItem(TOKEN_KEYS.ACCESS, accessToken);
       localStorage.setItem(TOKEN_KEYS.REFRESH, refreshToken);
       sessionStorage.removeItem(TOKEN_KEYS.REFRESH);
+      mirrorRefreshTokenToCloud(refreshToken);
     } catch {}
   },
 
@@ -83,6 +126,7 @@ export const tokenStorage = {
       localStorage.removeItem(TOKEN_KEYS.ACCESS);
       localStorage.removeItem(TOKEN_KEYS.REFRESH);
       localStorage.removeItem(TOKEN_KEYS.USER);
+      removeRefreshTokenFromCloud();
     } catch {}
   },
 

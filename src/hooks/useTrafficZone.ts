@@ -5,8 +5,8 @@ import type { ThemeColors } from '../types/theme';
 
 const FALLBACKS: Record<TrafficColorKey, string> = {
   accent: '#3b82f6',
-  warning: '#FFB800',
-  error: '#FF3B5C',
+  warning: 'rgb(var(--color-urgent-400))',
+  error: 'rgb(var(--color-critical-500))',
 };
 
 const COLOR_MAP: Record<TrafficColorKey, keyof ThemeColors> = {

@@ -72,7 +72,7 @@ export default function SubscriptionCardActive({
 
   return (
     <div
-      className="relative overflow-hidden rounded-3xl backdrop-blur-xl"
+      className="relative overflow-hidden rounded-3xl lg:backdrop-blur-xl"
       style={{
         background: g.cardBg,
         border: subscription.is_trial
@@ -86,28 +86,9 @@ export default function SubscriptionCardActive({
           : `0 2px 16px rgba(${zone.mainVarRaw}, 0.07), 0 0 0 1px rgba(${zone.mainVarRaw}, 0.03)`,
       }}
     >
-      {/* Trial shimmer border */}
-      {subscription.is_trial && (
-        <div
-          className="pointer-events-none absolute inset-[-1px] animate-trial-glow rounded-3xl"
-          aria-hidden="true"
-        />
-      )}
-
-      {/* Background glow */}
-      <div
-        className="pointer-events-none absolute"
-        style={{
-          top: -60,
-          right: -60,
-          width: 200,
-          height: 200,
-          borderRadius: '50%',
-          background: `radial-gradient(circle, rgba(${zone.mainVarRaw}, ${isDark ? 0.08 : 0.03}) 0%, transparent 70%)`,
-          transition: 'background 0.8s ease',
-        }}
-        aria-hidden="true"
-      />
+      {/* Decorative trial-shimmer border + ambient background glow removed.
+          Trial state is conveyed by the badge in the header; ambient glow
+          carried no information and ate visual attention. */}
 
       {/* ─── Header ─── */}
       <div className="mb-7 flex items-start justify-between">
@@ -118,8 +99,7 @@ export default function SubscriptionCardActive({
               className="h-2 w-2 rounded-full"
               style={{
                 background: zone.mainVar,
-                boxShadow: `0 0 8px rgba(${zone.mainVarRaw}, 0.5)`,
-                transition: 'all 0.6s ease',
+                transition: 'background 0.6s ease',
               }}
               aria-hidden="true"
             />
@@ -130,15 +110,7 @@ export default function SubscriptionCardActive({
               {isUnlimited ? t('dashboard.unlimited') : t(zone.labelKey)}
             </span>
             {subscription.is_trial && (
-              <span
-                className="inline-flex animate-trial-glow items-center gap-1 rounded-md px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-widest"
-                style={{
-                  background:
-                    'linear-gradient(135deg, rgba(var(--color-accent-400), 0.15), rgba(var(--color-accent-400), 0.06))',
-                  border: '1px solid rgba(var(--color-accent-400), 0.2)',
-                  color: 'rgb(var(--color-accent-400))',
-                }}
-              >
+              <span className="inline-flex items-center gap-1 rounded-md border border-accent-400/25 bg-accent-400/10 px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-widest text-accent-400">
                 <svg
                   width="10"
                   height="10"
@@ -310,18 +282,20 @@ export default function SubscriptionCardActive({
 
       {/* ─── Stats row: Tariff + Days Left ─── */}
       <div className="mb-5 flex gap-2.5">
-        {/* Tariff badge — clickable */}
+        {/* Tariff badge — clickable. Neutral chrome: the tariff name has
+            no traffic-zone semantics, so tinting it by the traffic zone
+            (DESIGN.md Status-Hue Lockout) was wrong. */}
         <Link
           to={`/subscriptions/${subscription.id}`}
-          className="flex-1 rounded-[14px] p-3.5 transition-all duration-500"
+          className="flex-1 rounded-[14px] p-3.5 transition-colors"
           style={{
-            background: `linear-gradient(135deg, rgba(${zone.mainVarRaw}, 0.07), rgba(${zone.mainVarRaw}, 0.02))`,
-            border: `1px solid rgba(${zone.mainVarRaw}, 0.09)`,
+            background: g.innerBg,
+            border: `1px solid ${g.innerBorder}`,
           }}
         >
           <div
-            className="mb-1.5 text-[10px] font-semibold uppercase tracking-wider opacity-70 transition-colors duration-500"
-            style={{ color: zone.mainVar }}
+            className="mb-1.5 text-[10px] font-semibold uppercase tracking-wider"
+            style={{ color: g.textFaint }}
           >
             {t('dashboard.tariff')}
           </div>

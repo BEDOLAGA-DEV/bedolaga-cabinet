@@ -221,7 +221,7 @@ export default function Login() {
     }
   };
 
-  const handleEmailSubmit = async (e: React.FormEvent) => {
+  const handleEmailSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     setError('');
 
@@ -282,7 +282,7 @@ export default function Login() {
     }
   };
 
-  const handleForgotPassword = async (e: React.FormEvent) => {
+  const handleForgotPassword = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     setForgotPasswordError('');
 
@@ -321,9 +321,10 @@ export default function Login() {
           safeBottom > 0 ? `${safeBottom + 16}px` : 'calc(1rem + env(safe-area-inset-bottom, 0px))',
       }}
     >
-      {/* Background gradient */}
-      <div className="fixed inset-0 bg-gradient-to-br from-dark-950 via-dark-900 to-dark-950" />
-      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-accent-500/10 via-transparent to-transparent" />
+      {/* Flat background — the previous two layered gradients (linear
+          + accent radial halo) read as the airdrop / crypto aesthetic
+          PRODUCT.md explicitly anti-references. Body bg-dark-950 carries
+          the surface alone. */}
 
       {/* Language switcher */}
       <div
@@ -425,7 +426,10 @@ export default function Login() {
           /* Main auth card */
           <div className="card">
             {error && (
-              <div className="mb-4 rounded-xl border border-error-500/30 bg-error-500/10 px-4 py-2.5 text-sm text-error-400">
+              <div
+                role="alert"
+                className="mb-4 rounded-xl border border-error-500/30 bg-error-500/10 px-4 py-2.5 text-sm text-error-400"
+              >
                 {error}
               </div>
             )}

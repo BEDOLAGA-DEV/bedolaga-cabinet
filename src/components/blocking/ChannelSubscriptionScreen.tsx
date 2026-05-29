@@ -2,20 +2,10 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useBlockingStore } from '../../store/blocking';
 import { apiClient, isChannelSubscriptionError } from '../../api/client';
+import { usePlatform } from '../../platform';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 
 const CHECK_COOLDOWN_SECONDS = 5;
-
-function safeOpenUrl(url: string | undefined | null): void {
-  if (!url) return;
-  try {
-    const parsed = new URL(url);
-    if (parsed.protocol === 'https:' || parsed.protocol === 'http:') {
-      window.open(url, '_blank', 'noopener');
-    }
-  } catch {
-    // invalid URL, do nothing
-  }
-}
 
 export default function ChannelSubscriptionScreen() {
   const { t } = useTranslation();
@@ -25,6 +15,28 @@ export default function ChannelSubscriptionScreen() {
   const [cooldown, setCooldown] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const isCheckingRef = useRef(false);
+  const { openLink, openTelegramLink } = usePlatform();
+
+  // Route channel links through the platform adapter: inside the Telegram
+  // WebView a raw window.open is intercepted by the client and the link
+  // silently fails to open. t.me links use openTelegramLink; others openLink.
+  const openChannel = useCallback(
+    (url: string | undefined | null) => {
+      if (!url) return;
+      try {
+        const parsed = new URL(url);
+        if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return;
+        if (parsed.hostname === 't.me' || parsed.hostname.endsWith('.t.me')) {
+          openTelegramLink(url);
+        } else {
+          openLink(url);
+        }
+      } catch {
+        // invalid URL, do nothing
+      }
+    },
+    [openLink, openTelegramLink],
+  );
 
   // Cooldown timer
   useEffect(() => {
@@ -69,8 +81,17 @@ export default function ChannelSubscriptionScreen() {
     }
   }, [clearBlocking, t]);
 
+  const screenRef = useFocusTrap<HTMLDivElement>(true, { lockScroll: false });
+
   return (
-    <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-dark-950 p-6">
+    <div
+      ref={screenRef}
+      role="alertdialog"
+      aria-modal="true"
+      aria-labelledby="channel-sub-title"
+      tabIndex={-1}
+      className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-dark-950 p-6"
+    >
       <div className="w-full max-w-md text-center">
         {/* Icon */}
         <div className="mb-8">
@@ -82,10 +103,12 @@ export default function ChannelSubscriptionScreen() {
         </div>
 
         {/* Title */}
-        <h1 className="mb-4 text-2xl font-bold text-white">{t('blocking.channel.title')}</h1>
+        <h1 id="channel-sub-title" className="mb-4 text-2xl font-bold text-white">
+          {t('blocking.channel.title')}
+        </h1>
 
         {/* Message */}
-        <p className="mb-6 text-lg text-gray-400">
+        <p className="mb-6 text-lg text-dark-400">
           {channelInfo?.message || t('blocking.channel.defaultMessage')}
         </p>
 
@@ -95,12 +118,12 @@ export default function ChannelSubscriptionScreen() {
             {channels.map((ch) => (
               <div
                 key={ch.channel_id}
-                className="flex items-center justify-between rounded-xl border border-red-500/30 bg-red-500/10 p-3"
+                className="flex items-center justify-between rounded-xl border border-error-500/30 bg-error-500/10 p-3"
               >
                 <span className="text-sm font-medium text-white">{ch.title || ch.channel_id}</span>
                 {ch.channel_link && (
                   <button
-                    onClick={() => safeOpenUrl(ch.channel_link)}
+                    onClick={() => openChannel(ch.channel_link)}
                     className="rounded-lg bg-blue-500/20 px-3 py-1 text-xs font-medium text-blue-400 hover:bg-blue-500/30"
                   >
                     {t('blocking.channel.openChannel')}
@@ -114,8 +137,8 @@ export default function ChannelSubscriptionScreen() {
         {/* Fallback: single channel (legacy) */}
         {channels.length === 0 && channelInfo?.channel_link && (
           <button
-            onClick={() => safeOpenUrl(channelInfo.channel_link)}
-            className="mb-6 flex w-full items-center justify-center gap-3 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-500 px-6 py-4 font-semibold text-white transition-all duration-200 hover:from-blue-600 hover:to-cyan-600"
+            onClick={() => openChannel(channelInfo.channel_link)}
+            className="mb-6 flex w-full items-center justify-center gap-3 rounded-xl bg-accent-500 px-6 py-4 font-semibold text-white transition-colors duration-200 hover:bg-accent-400"
           >
             {t('blocking.channel.openChannel')}
           </button>
@@ -123,8 +146,8 @@ export default function ChannelSubscriptionScreen() {
 
         {/* Error message */}
         {error && (
-          <div className="mb-4 rounded-xl border border-red-500/30 bg-red-500/10 p-3">
-            <p className="text-sm text-red-400">{error}</p>
+          <div className="mb-4 rounded-xl border border-error-500/30 bg-error-500/10 p-3">
+            <p className="text-sm text-error-400">{error}</p>
           </div>
         )}
 
@@ -161,7 +184,7 @@ export default function ChannelSubscriptionScreen() {
           ) : cooldown > 0 ? (
             <>
               <svg
-                className="h-5 w-5 text-gray-500"
+                className="h-5 w-5 text-dark-500"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -191,7 +214,7 @@ export default function ChannelSubscriptionScreen() {
         </button>
 
         {/* Hint */}
-        <p className="mt-4 text-sm text-gray-500">{t('blocking.channel.hint')}</p>
+        <p className="mt-4 text-sm text-dark-500">{t('blocking.channel.hint')}</p>
       </div>
     </div>
   );

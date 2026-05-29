@@ -256,9 +256,9 @@ export default function TvQuickConnect({ subscriptionUrl, isLight }: Props) {
       {/* QR Scanner */}
       <div className={cardClass}>
         <div className="flex items-start gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500/20 to-blue-600/10">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-accent-500/20 to-accent-600/10">
             <svg
-              className="h-5 w-5 text-blue-500"
+              className="h-5 w-5 text-accent-500"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -323,7 +323,7 @@ export default function TvQuickConnect({ subscriptionUrl, isLight }: Props) {
       {toast && (
         <div
           className={`fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-xl px-5 py-3 text-sm font-medium shadow-lg transition-all ${
-            toast.type === 'success' ? 'bg-emerald-500/90 text-white' : 'bg-red-500/90 text-white'
+            toast.type === 'success' ? 'bg-success-500/90 text-white' : 'bg-error-500/90 text-white'
           }`}
         >
           {toast.text}

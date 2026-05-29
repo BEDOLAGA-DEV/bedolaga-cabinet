@@ -69,7 +69,7 @@ export default function AdminEmailTemplatePreview() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-120px)] flex-col">
+    <div className="flex h-[calc(100dvh-120px)] flex-col">
       {/* Header */}
       <div className="mb-4 flex items-center gap-3">
         <button

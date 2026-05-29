@@ -141,6 +141,12 @@ export interface Device {
   platform: string;
   device_model: string;
   created_at: string | null;
+  /**
+   * User-set local alias persisted in the bot DB (`user_device_aliases`).
+   * `null` when the user hasn't renamed the device — clients fall back
+   * to `device_model` / `platform` for display.
+   */
+  local_name?: string | null;
 }
 
 export interface DevicesResponse {

@@ -10,7 +10,9 @@ import {
 } from '../api/adminEmailTemplates';
 import { AdminBackButton, BackIcon } from '../components/admin';
 import { useIsTelegram } from '../platform/hooks/usePlatform';
+import { useNativeDialog } from '../platform/hooks/useNativeDialog';
 import { useNotify } from '@/platform';
+import { copyToClipboard } from '@/utils/clipboard';
 
 // Hook to check if on mobile
 function useIsMobile() {
@@ -162,6 +164,7 @@ function TemplateEditor({
   const queryClient = useQueryClient();
   const notify = useNotify();
   const isTelegram = useIsTelegram();
+  const { confirm: confirmDialog } = useNativeDialog();
   const isMobile = useIsMobile();
   const isPreviewDisabled = isTelegram || isMobile;
 
@@ -303,8 +306,9 @@ function TemplateEditor({
           return (
             <button
               key={lang}
-              onClick={() => {
-                if (isDirty && !window.confirm(t('admin.emailTemplates.unsavedWarning'))) return;
+              onClick={async () => {
+                if (isDirty && !(await confirmDialog(t('admin.emailTemplates.unsavedWarning'))))
+                  return;
                 setActiveLang(lang);
               }}
               className={`flex flex-1 items-center justify-center gap-1 whitespace-nowrap rounded-md px-2 py-2 text-xs font-medium transition-all duration-150 sm:gap-1.5 sm:px-3 sm:text-sm ${
@@ -350,7 +354,7 @@ function TemplateEditor({
                 className="cursor-pointer rounded bg-dark-700 px-2 py-0.5 font-mono text-xs text-accent-400 transition-colors hover:bg-dark-600"
                 title={t('admin.emailTemplates.clickToCopy')}
                 onClick={() => {
-                  navigator.clipboard.writeText(`{${v}}`);
+                  void copyToClipboard(`{${v}}`);
                   notify.success(`Copied {${v}}`);
                 }}
               >
@@ -425,8 +429,8 @@ function TemplateEditor({
 
           {langData && !langData.is_default && (
             <button
-              onClick={() => {
-                if (window.confirm(t('admin.emailTemplates.resetConfirm'))) {
+              onClick={async () => {
+                if (await confirmDialog(t('admin.emailTemplates.resetConfirm'))) {
                   resetMutation.mutate();
                 }
               }}

@@ -1076,7 +1076,7 @@ function InlinePrizeForm({
     promo_traffic_gb: prize?.promo_traffic_gb || 0,
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.SyntheticEvent) => {
     e.preventDefault();
     onSave({
       ...formData,

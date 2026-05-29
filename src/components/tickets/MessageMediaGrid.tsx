@@ -116,7 +116,7 @@ export function MessageMediaGrid({
                   loading="lazy"
                 />
                 {isLastVisible && (
-                  <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/60 text-2xl font-semibold text-white">
+                  <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-dark-950/60 text-2xl font-semibold text-white">
                     +{hiddenCount}
                   </div>
                 )}
@@ -172,7 +172,7 @@ export function MessageMediaGrid({
         photoItems[fullscreenIndex] &&
         createPortal(
           <div
-            className="fixed inset-0 z-[9999] bg-black"
+            className="fixed inset-0 z-[9999] bg-dark-950"
             style={{ touchAction: 'pan-x pan-y pinch-zoom' }}
           >
             <button
@@ -225,7 +225,7 @@ export function MessageMediaGrid({
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                   </svg>
                 </button>
-                <div className="absolute bottom-6 left-1/2 z-10 -translate-x-1/2 rounded-full bg-black/70 px-3 py-1 text-sm text-white">
+                <div className="absolute bottom-6 left-1/2 z-10 -translate-x-1/2 rounded-full bg-dark-950/70 px-3 py-1 text-sm text-white">
                   {fullscreenIndex + 1} / {photoItems.length}
                 </div>
               </>

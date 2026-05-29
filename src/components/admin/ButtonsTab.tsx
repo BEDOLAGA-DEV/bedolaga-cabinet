@@ -11,14 +11,15 @@ import {
 } from '../../api/buttonStyles';
 import { Toggle } from './Toggle';
 import { useNotify } from '../../platform/hooks/useNotify';
+import { useNativeDialog } from '../../platform/hooks/useNativeDialog';
 
 type StyleValue = 'primary' | 'success' | 'danger' | 'default';
 
 const STYLE_OPTIONS: { value: StyleValue; colorClass: string }[] = [
   { value: 'default', colorClass: 'bg-dark-500' },
-  { value: 'primary', colorClass: 'bg-blue-500' },
+  { value: 'primary', colorClass: 'bg-accent-500' },
   { value: 'success', colorClass: 'bg-success-500' },
-  { value: 'danger', colorClass: 'bg-red-500' },
+  { value: 'danger', colorClass: 'bg-error-500' },
 ];
 
 function labelsEqual(a: Record<string, string>, b: Record<string, string>): boolean {
@@ -42,6 +43,7 @@ export function ButtonsTab() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const notify = useNotify();
+  const { confirm: confirmDialog } = useNativeDialog();
 
   const { data: serverStyles } = useQuery({
     queryKey: ['button-styles'],
@@ -224,8 +226,8 @@ export function ButtonsTab() {
                         : cfg.style === 'success'
                           ? 'bg-success-500 text-white'
                           : cfg.style === 'danger'
-                            ? 'bg-red-500 text-white'
-                            : 'bg-blue-500 text-white'
+                            ? 'bg-error-500 text-white'
+                            : 'bg-accent-500 text-white'
                     }`}
                   >
                     {t(`admin.buttons.styles.${cfg.style}`)}
@@ -341,8 +343,8 @@ export function ButtonsTab() {
       {/* Reset */}
       <div className="flex justify-end">
         <button
-          onClick={() => {
-            if (window.confirm(t('admin.buttons.resetConfirm'))) {
+          onClick={async () => {
+            if (await confirmDialog(t('admin.buttons.resetConfirm'))) {
               resetMutation.mutate();
             }
           }}

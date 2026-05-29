@@ -32,7 +32,7 @@ function StatusBadge({
 
   if (isTrial) {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full border border-amber-400/25 bg-amber-400/10 px-2 py-0.5 text-[10px] font-semibold text-amber-400">
+      <span className="inline-flex items-center gap-1 rounded-full border border-warning-400/25 bg-warning-400/10 px-2 py-0.5 text-[10px] font-semibold text-warning-400">
         <svg className="h-2.5 w-2.5" viewBox="0 0 24 24" fill="currentColor">
           <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
         </svg>
@@ -42,10 +42,10 @@ function StatusBadge({
   }
 
   const color = isActive
-    ? 'bg-emerald-400/15 text-emerald-400 border-emerald-400/20'
+    ? 'bg-success-400/15 text-success-400 border-success-400/20'
     : isLimited
-      ? 'bg-amber-400/15 text-amber-400 border-amber-400/20'
-      : 'bg-red-400/15 text-red-400 border-red-400/20';
+      ? 'bg-warning-400/15 text-warning-400 border-warning-400/20'
+      : 'bg-error-400/15 text-error-400 border-error-400/20';
 
   const label = isActive
     ? t('subscription.statusActive', 'Активна')
@@ -96,7 +96,11 @@ export default function SubscriptionListCard({
       ? Math.min(100, (trafficUsed / trafficLimit) * 100)
       : 0;
   const trafficColor =
-    trafficPercent >= 90 ? 'bg-red-400' : trafficPercent >= 70 ? 'bg-amber-400' : 'bg-emerald-400';
+    trafficPercent >= 90
+      ? 'bg-error-400'
+      : trafficPercent >= 70
+        ? 'bg-warning-400'
+        : 'bg-success-400';
 
   const isLimitedStatus = subscription.status === 'limited';
 
@@ -207,7 +211,7 @@ export default function SubscriptionListCard({
               : t('subscription.autopay', 'Автопродление');
             return (
               <span
-                className={`flex items-center gap-1 ${enabled ? 'text-emerald-400/70' : 'text-red-400/50'}`}
+                className={`flex items-center gap-1 ${enabled ? 'text-success-400/70' : 'text-error-400/50'}`}
               >
                 <svg
                   className="h-3 w-3"

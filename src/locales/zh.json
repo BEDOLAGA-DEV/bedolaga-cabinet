@@ -29,8 +29,16 @@
     "collapse": "收起",
     "units": {
       "gb": "GB",
-      "perGb": "/GB"
-    }
+      "perGb": "/GB",
+      "days": "天",
+      "mo": "月"
+    },
+    "balance": "余额",
+    "copied": "已复制",
+    "no_results": "无结果",
+    "ok": "确定",
+    "processing": "处理中…",
+    "rangeTo": "至"
   },
   "nav": {
     "dashboard": "首页",
@@ -45,7 +53,8 @@
     "info": "信息",
     "wheel": "幸运转盘",
     "menu": "菜单",
-    "gift": "赠送"
+    "gift": "赠送",
+    "navigation": "导航"
   },
   "notifications": {
     "ticketNotifications": "工单通知",
@@ -142,7 +151,17 @@
     "tariff": "套餐",
     "validUntil": "有效期至",
     "goToSubscription": "查看订阅",
-    "goToBalance": "查看余额"
+    "goToBalance": "查看余额",
+    "devicesAdded": "+{{count}} 设备",
+    "devicesPurchased": {
+      "title": "设备已添加"
+    },
+    "totalDevices": "总设备数：{{count}}",
+    "totalTraffic": "总流量：{{value}}",
+    "trafficAdded": "+{{value}} 流量",
+    "trafficPurchased": {
+      "title": "流量已添加"
+    }
   },
   "auth": {
     "login": "登录",
@@ -243,13 +262,38 @@
       "tariffs": "套餐",
       "traffic": "流量",
       "devices": "设备",
-      "expiredDate": "过期时间"
+      "expiredDate": "过期时间",
+      "activeUntil": "已过期 — 至 {{date}}"
     },
     "deviceLimitReached": "断开设备以添加新设备",
     "suspended": {
       "title": "订阅已暂停",
       "resume": "恢复"
-    }
+    },
+    "manageAll": "全部管理",
+    "showAll": "全部显示",
+    "subscriptions": "订阅",
+    "connectDevice": "连接设备",
+    "devicesConnectedUnlimited": "已连接 {{count}} 台设备",
+    "devicesOfMax": "{{used}} / {{max}}",
+    "maxUsage": "最大",
+    "remaining": "剩余",
+    "stats": {
+      "balance": "余额",
+      "referrals": "推荐人"
+    },
+    "tariff": "套餐",
+    "trafficUsageTitle": "流量使用",
+    "trialOffer": {
+      "freeDesc": "免费试用 {{days}} 天 — 无需付款",
+      "freeTitle": "免费试用",
+      "paidDesc": "{{days}} 天试用，仅需 {{price}}",
+      "paidTitle": "付费试用"
+    },
+    "unlimited": "无限",
+    "usageLast14Days": "近 14 天使用情况",
+    "usedSuffix": "已用",
+    "validUntil": "有效期至 {{date}}"
   },
   "subscription": {
     "title": "订阅",
@@ -339,7 +383,10 @@
       "devices_other": "{{count}} 个设备",
       "price": "激活费用",
       "activate": "激活免费试用",
-      "unavailable": "试用不可用"
+      "unavailable": "试用不可用",
+      "insufficientBalance": "余额不足以激活试用",
+      "payAndActivate": "付费并激活",
+      "topUpToActivate": "充值以激活试用"
     },
     "connection": {
       "title": "连接VPN",
@@ -368,7 +415,8 @@
       "goToApps": "前往应用设置",
       "qrTitle": "订阅二维码",
       "qrScanHint": "使用相机扫描以连接",
-      "qrButton": "二维码"
+      "qrButton": "二维码",
+      "openQr": "打开二维码"
     },
     "additionalOptions": {
       "title": "附加选项",
@@ -387,7 +435,20 @@
       "buyTrafficGb": "购买 {{gb}} GB",
       "buyUnlimited": "购买无限流量",
       "manageServers": "小队管理",
-      "manageServersTitle": "小队管理"
+      "manageServersTitle": "小队管理",
+      "connectedDevices": "已连接设备",
+      "currentDeviceLimit": "当前设备限制",
+      "decrementDevices": "减少设备数量",
+      "disconnectDevicesFirst": "请先断开多余的设备",
+      "incrementDevices": "增加设备数量",
+      "minDeviceLimit": "最低设备限制",
+      "newDeviceLimit": "新设备限制",
+      "reduce": "减少",
+      "reduceDevices": "减少设备数量",
+      "reduceDevicesDescription": "调整您的设备限制。如有需要，请先断开多余设备的连接",
+      "reduceDevicesTitle": "减少设备数量",
+      "reduceUnavailable": "当前无法减少设备数量",
+      "reducing": "正在减少…"
     },
     "serverManagement": {
       "statusLegend": "✅ — 已连接 • ➕ — 将添加（付费）• ➖ — 将断开",
@@ -454,6 +515,11 @@
     "month": "月",
     "myDevices": "我的设备",
     "noDevices": "没有已连接的设备",
+    "renameDevice": "重命名",
+    "renameDeviceSave": "保存",
+    "renameDeviceCancel": "取消",
+    "renameDevicePlaceholder": "设备名称",
+    "deviceRenamed": "设备名称已更新",
     "perExtraDevice": "/ 额外设备",
     "perMonth": "/月",
     "purchasedTraffic": "已购流量",
@@ -494,6 +560,46 @@
       "stopScan": "关闭摄像头",
       "noCamera": "无法访问摄像头",
       "codeFound": "找到代码"
+    },
+    "allTariffsPurchased": "所有套餐已购买",
+    "autopay": "自动续订",
+    "backToList": "返回订阅列表",
+    "confirmDelete": "删除订阅？",
+    "cta": {
+      "renewHint": "订阅已过期 — 续订以继续使用",
+      "activeHint": "订阅有效 — 您可以连接设备并使用 VPN",
+      "expiredHint": "订阅已过期 — 续订以继续使用",
+      "trialHint": "您正在试用中 — 升级到付费套餐以解锁所有功能"
+    },
+    "dailyAutoCharge": "每日自动扣费",
+    "defaultName": "订阅",
+    "delete": "删除",
+    "deleteTitle": "删除订阅",
+    "get_config": "获取配置",
+    "loadError": "加载订阅失败",
+    "newTariff": "新套餐",
+    "noOptionsAvailable": "暂无可用选项",
+    "noRenewalOptions": "无续订选项",
+    "notFound": "未找到订阅",
+    "notFoundDesc": "可能已被删除或尚未激活",
+    "servers": "服务器",
+    "statusActive": "已激活",
+    "statusExpired": "已过期",
+    "statusLimited": "受限",
+    "statusTrial": "试用",
+    "daysShort": "天",
+    "expiredBanner": {
+      "selectTariff": "选择套餐",
+      "title": "订阅已过期"
+    },
+    "trialInfo": {
+      "description": "免费试用我们的服务 {{days}} 天",
+      "remaining": "剩余 {{count}} 天",
+      "title": "试用期"
+    },
+    "trialUpgrade": {
+      "description": "升级到付费订阅以解锁所有功能并继续使用",
+      "title": "升级订阅"
     }
   },
   "balance": {
@@ -570,7 +676,9 @@
         "already_used_by_user": "您已使用过此优惠码",
         "user_not_found": "用户不存在",
         "server_error": "服务器错误"
-      }
+      },
+      "daysLeft": "剩余天数：{{count}}",
+      "selectSubscription": "选择订阅"
     },
     "minAmountError": "最小金额：{{amount}}",
     "maxAmountError": "最大金额：{{amount}}",
@@ -628,7 +736,8 @@
       "timeoutDesc": "付款处理时间比平时长。您可以再次检查状态。",
       "goToBalance": "查看余额",
       "tryAgain": "重试"
-    }
+    },
+    "top_up": "充值"
   },
   "referral": {
     "title": "推荐计划",
@@ -812,7 +921,8 @@
     "contactUs": "联系支持",
     "openSupport": "打开支持",
     "ticketsDisabled": "工单已禁用",
-    "useExternalLink": "请使用外部链接获取支持"
+    "useExternalLink": "请使用外部链接获取支持",
+    "create_ticket": "创建工单"
   },
   "wheel": {
     "title": "幸运转盘",
@@ -848,7 +958,8 @@
       "insufficientBalance": "余额不足",
       "topUpRequired": "请充值以支付抽奖费用",
       "starsNotAvailable": "Stars支付不可用。请通过Telegram打开应用。",
-      "noSubscription": "需要有效订阅才能转动轮盘。请先激活订阅。"
+      "noSubscription": "需要有效订阅才能转动轮盘。请先激活订阅。",
+      "selectSubscription": "请先选择订阅"
     },
     "payWithStars": "支付 {stars} Stars",
     "processingPayment": "处理中...",
@@ -863,7 +974,8 @@
       "title": "试试运气！",
       "description": "转动转盘赢取奖品：订阅天数、余额、流量等！",
       "button": "前往转盘"
-    }
+    },
+    "selectSubscription": "选择订阅"
   },
   "admin": {
     "backgrounds": {
@@ -1281,7 +1393,7 @@
       "methodEnabled": "方法已启用",
       "providerNotConfigured": "提供商未在env中配置",
       "openUrlDirect": "直接打开支付页面",
-      "openUrlDirectHint": "跳过链接面板 — 点击后提供商在 MiniApp/标签页内直接打开。支付完成后用户返回 /balance/top-up/result。Stars/CryptoBot 和其他 t.me/ 链接忽略此标志。",
+      "openUrlDirectHint": "跳过链接面板:点击后提供商在 MiniApp/标签页内直接打开。支付完成后用户返回 /balance/top-up/result。Stars/CryptoBot 和其他 t.me/ 链接忽略此标志。",
       "displayName": "显示名称",
       "displayNameHint": "留空以使用默认名称",
       "subOptions": "支付选项",
@@ -1304,7 +1416,8 @@
       "promoGroupsShort": "组",
       "noPromoGroups": "没有促销组",
       "cancelButton": "取消",
-      "saveButton": "保存"
+      "saveButton": "保存",
+      "notFound": "未找到支付方式"
     },
     "emailTemplates": {
       "title": "邮件模板",
@@ -1333,7 +1446,7 @@
       "description": "搜索和管理支付",
       "searchPlaceholder": "搜索：发票、TG ID、@用户名、邮箱...",
       "searchHint": "示例：SP-78291、@username、123456789、user@mail.ru",
-      "searchResults": "搜索结果：{{query}} — 找到 {{count}} 条",
+      "searchResults": "搜索结果:{{query}}。找到 {{count}} 条",
       "resetSearch": "重置",
       "statusAll": "全部",
       "statusPending": "待处理",
@@ -1493,7 +1606,32 @@
       "customButtonTypeCallback": "回调",
       "customButtonTypeUrl": "链接",
       "customButtonCallbackPlaceholder": "callback_data（例如 back_to_menu）",
-      "customButtonUrlPlaceholder": "https://example.com"
+      "customButtonUrlPlaceholder": "https://example.com",
+      "category": "类别",
+      "categoryNews": "新闻",
+      "categoryPromo": "促销",
+      "categorySystem": "系统",
+      "stopping": "正在停止…",
+      "btnBalance": "充值",
+      "btnConnect": "连接",
+      "btnHome": "主页",
+      "btnPartners": "推荐计划",
+      "btnPromocode": "优惠码",
+      "btnSubscription": "订阅",
+      "btnSupport": "客服支持",
+      "emailContent": "邮件内容",
+      "emailContentHint": "支持 HTML",
+      "emailContentPlaceholder": "<p>您好，{{user_name}}！</p>\n<p>您的消息内容...</p>",
+      "emailSection": "邮件群发",
+      "emailSubject": "邮件主题",
+      "emailSubjectPlaceholder": "请输入邮件主题...",
+      "emailVariables": "可用变量",
+      "preview": "预览",
+      "previewEmpty": "— 空 —",
+      "selectChannel": "群发渠道",
+      "selectEmailFilter": "选择邮件受众",
+      "selectEmailFilterPlaceholder": "选择筛选器...",
+      "telegramSection": "Telegram 群发"
     },
     "pinnedMessages": {
       "title": "置顶消息",
@@ -1758,8 +1896,8 @@
         "telegramOidcClientId": "Client ID（机器人 ID）",
         "telegramOidcClientSecret": "Client Secret"
       },
-      "offlineConv": "\u79bb\u7ebf\u8f6c\u5316",
-      "apiKey": "API \u5bc6\u94a5"
+      "offlineConv": "离线转化",
+      "apiKey": "API 密钥"
     },
     "buttons": {
       "color": "按钮颜色",
@@ -1865,7 +2003,10 @@
         "subscription": "订阅",
         "connect": "连接",
         "additional": "附加"
-      }
+      },
+      "noConfigs": "未配置任何配置",
+      "remnaWaveConnected": "RemnaWave 已连接",
+      "remnaWaveDisconnected": "RemnaWave 未连接"
     },
     "tickets": {
       "title": "工单管理",
@@ -1916,7 +2057,13 @@
       "copyTelegramId": "点击复制Telegram ID",
       "viewUser": "用户",
       "userNotificationsEnabled": "用户通知",
-      "userNotificationsEnabledDesc": "向用户发送管理员回复通知"
+      "userNotificationsEnabledDesc": "向用户发送管理员回复通知",
+      "replyFailed": "发送回复失败",
+      "validation": {
+        "checkIntervalRange": "检查间隔必须在 1 到 1440 分钟之间",
+        "reminderCooldownRange": "提醒冷却时间必须在 0 到 1440 分钟之间",
+        "slaMinutesRange": "SLA 必须在 1 到 10080 分钟之间"
+      }
     },
     "tariffs": {
       "title": "套餐管理",
@@ -1950,7 +2097,7 @@
       "confirmDeleteText": "此操作不可撤销。套餐将被永久删除。",
       "confirmDeleteWithSubscriptions": "此套餐有 {{count}} 个活跃订阅。删除后，用户续订时需要选择新套餐。",
       "deleteSuccess": "套餐删除成功",
-      "deleteSuccessWithSubscriptions": "套餐已删除。{{count}} 个订阅已重置 — 用户续订时将选择新套餐。",
+      "deleteSuccessWithSubscriptions": "套餐已删除。{{count}} 个订阅已重置。用户续订时将选择新套餐。",
       "saveOrder": "保存排序",
       "orderSaved": "排序已保存",
       "dragToReorder": "拖动以重新排序",
@@ -2133,7 +2280,8 @@
         "deactivate": "停用",
         "activate": "启用",
         "edit": "编辑",
-        "delete": "删除"
+        "delete": "删除",
+        "registrations": "注册"
       },
       "modal": {
         "editTitle": "编辑活动",
@@ -2157,7 +2305,7 @@
         "notSelected": "未选择",
         "tariffOption": "{{traffic}} GB，{{devices}} 台设备",
         "durationDays": "时长（天）",
-        "noBonusDescription": "无奖励活动——仅用于跟踪点击和注册。",
+        "noBonusDescription": "无奖励活动:仅用于跟踪点击和注册。",
         "active": "启用",
         "cancel": "取消",
         "save": "保存",
@@ -2201,11 +2349,13 @@
         "totalSpending": "订阅支出",
         "periodComparison": "期间比较",
         "vsLastWeek": "与上周对比",
-        "topRegistrations": "热门注册"
+        "topRegistrations": "热门注册",
+        "subscriptionsIssued": "已发放订阅",
+        "tariffsIssued": "已发放套餐"
       },
       "users": {
         "title": "活动用户",
-        "campaignRegistrations": "{{name}} — {{count}} 次注册",
+        "campaignRegistrations": "{{name}}:{{count}} 次注册",
         "noUsers": "没有注册用户",
         "user": "用户",
         "bonus": "奖励",
@@ -2225,7 +2375,11 @@
         "delete": "删除"
       },
       "loadError": "加载活动失败",
-      "updateError": "保存更改失败"
+      "updateError": "保存更改失败",
+      "validation": {
+        "nameRequired": "名称为必填项"
+      },
+      "loadMore": "加载更多"
     },
     "withdrawals": {
       "title": "提现",
@@ -2332,7 +2486,30 @@
         "description": "拒绝来自 {{name}} 的合作伙伴申请",
         "commentLabel": "备注（可选）",
         "commentPlaceholder": "拒绝原因..."
-      }
+      },
+      "settings": "设置",
+      "settingsFields": {
+        "cooldownDays": "提款冷却期（天）",
+        "cooldownDaysDesc": "两次提款请求之间需间隔多少天",
+        "minAmount": "最小提款金额（戈比）",
+        "minAmountDesc": "提款请求的最低金额（100 戈比 = 1 ₽）",
+        "partnerVisible": "在面板中显示推荐部分",
+        "partnerVisibleDesc": "为用户显示/隐藏合作申请和提款部分",
+        "programEnabled": "推荐计划已启用",
+        "programEnabledDesc": "启用整个推荐人功能",
+        "requisitesText": "收款信息文本",
+        "requisitesTextDesc": "将在合作申请表单中向用户显示",
+        "requisitesTextPlaceholder": "请输入您的收款信息...",
+        "withdrawalEnabled": "允许提款",
+        "withdrawalEnabledDesc": "允许用户请求提款"
+      },
+      "settingsLoadError": "加载推荐设置失败",
+      "settingsSection": {
+        "referralProgram": "推荐计划",
+        "withdrawalSettings": "提款设置"
+      },
+      "settingsSubtitle": "推荐计划和合作伙伴提款设置",
+      "settingsUpdateError": "保存推荐设置失败"
     },
     "partnerDetail": {
       "title": "合作伙伴详情",
@@ -2373,7 +2550,10 @@
         "createTitle": "创建活动",
         "createSubtitle": "活动将自动分配给合作伙伴",
         "autoAssignNote": "活动将自动分配给合作伙伴 {{name}}",
-        "createAndAssign": "创建并分配"
+        "createAndAssign": "创建并分配",
+        "earnings": "收入",
+        "referrals": "推荐人",
+        "registrations": "注册"
       },
       "dangerZone": {
         "title": "危险操作",
@@ -2446,7 +2626,10 @@
         "firstPurchaseOnly": "仅限首次购买",
         "cancel": "取消",
         "saving": "保存中...",
-        "save": "保存"
+        "save": "保存",
+        "defaultTrialTariff": "默认试用套餐",
+        "selectTariff": "选择套餐",
+        "tariff": "套餐"
       },
       "stats": {
         "title": "促销码统计",
@@ -2475,7 +2658,8 @@
         "totalPromocodes": "促销码总数",
         "activeCount": "活跃的",
         "usagesCount": "使用次数",
-        "exhausted": "已用完"
+        "exhausted": "已用完",
+        "hoursValue": "{{count}}小时"
       },
       "actions": {
         "stats": "统计",
@@ -2666,7 +2850,10 @@
           "none": "没有已连接的设备",
           "resetAll": "重置全部",
           "deleted": "设备已删除",
-          "allDeleted": "所有设备已重置"
+          "allDeleted": "所有设备已重置",
+          "rename": "重命名",
+          "renameSave": "保存",
+          "renamed": "设备名称已更新"
         },
         "referral": {
           "title": "推荐计划",
@@ -2727,7 +2914,9 @@
           "expired": "已过期",
           "daysLeft": "天剩余",
           "deviceLimitUpdated": "设备限制已更新",
-          "invalidDays": "请输入有效天数（大于0）"
+          "invalidDays": "请输入有效天数（大于0）",
+          "backToList": "返回订阅列表",
+          "createNew": "新建"
         },
         "balance": {
           "current": "当前余额",
@@ -2810,6 +2999,26 @@
           "searchPlaceholder": "按名称、邮箱或 Telegram ID 搜索...",
           "alreadyReferred": "已有推荐人",
           "noUsersFound": "未找到用户"
+        },
+        "actions": {
+          "areYouSure": "确定要继续？",
+          "title": "操作"
+        },
+        "noVpnData": "无 VPN 数据"
+      },
+      "notFound": "未找到用户",
+      "purchaseCount": "购买次数：{{count}}",
+      "userActions": {
+        "delete": "删除用户",
+        "disable": "禁用",
+        "error": "操作失败",
+        "resetSubscription": "重置订阅",
+        "resetTrial": "重置试用",
+        "success": {
+          "delete": "用户已删除",
+          "disable": "用户已禁用",
+          "resetSubscription": "订阅已重置",
+          "resetTrial": "试用已重置"
         }
       }
     },
@@ -2819,7 +3028,8 @@
       "sendButton": "发送",
       "tabs": {
         "templates_other": "模板 ({{count}})",
-        "logs": "日志"
+        "logs": "日志",
+        "templates": "模板"
       },
       "noData": {
         "templates": "没有模板",
@@ -2849,7 +3059,9 @@
         "activeDiscountHours": "折扣有效期（小时）",
         "discountDurationHint": "激活后折扣持续多长时间",
         "templateActive": "模板已激活",
-        "saving": "保存中..."
+        "saving": "保存中...",
+        "noServers": "无服务器",
+        "testSquads": "测试小队"
       },
       "send": {
         "title": "发送促销优惠",
@@ -2872,7 +3084,9 @@
         "offersCreated_other": "已创建优惠: {{count}}",
         "notificationsSent_other": "已发送通知: {{count}}",
         "notificationsFailed": "（失败: {{count}}）",
-        "sendError": "发送优惠失败"
+        "sendError": "发送优惠失败",
+        "notificationsSent": "已发送通知",
+        "offersCreated": "已创建优惠"
       },
       "notFound": "未找到模板",
       "noActiveTemplates": "没有活跃的模板",
@@ -2970,7 +3184,8 @@
           "offline": "离线",
           "disabled": "已禁用",
           "users": "用户"
-        }
+        },
+        "usersOnlineCount": "{{count}} 在线"
       },
       "overview": {
         "bandwidth": "实时带宽",
@@ -3021,7 +3236,9 @@
         "localSettings": "本地设置",
         "trialEligible": "可试用",
         "price": "价格",
-        "users": "用户"
+        "users": "用户",
+        "inboundsCount": "{{count}} 入站",
+        "membersCount": "{{count}} 成员"
       },
       "sync": {
         "autoSync": "自动同步",
@@ -3137,7 +3354,8 @@
         "selectedPermissions_other": "已选择 {{count}} 个权限",
         "cancel": "取消",
         "saving": "保存中...",
-        "save": "保存"
+        "save": "保存",
+        "selectedPermissions": "已选权限"
       },
       "presets": {
         "moderator": "版主",
@@ -3157,7 +3375,9 @@
         "updateFailed": "更新角色失败",
         "nameRequired": "请输入角色名称",
         "deleteFailed": "删除角色失败"
-      }
+      },
+      "permissionsCount": "{{count}} 项权限",
+      "usersCount": "{{count}} 个用户"
     },
     "roleAssign": {
       "title": "角色分配",
@@ -3209,7 +3429,8 @@
         "roleRequired": "请选择角色",
         "assignFailed": "角色分配失败",
         "revokeFailed": "角色撤销失败"
-      }
+      },
+      "totalAssignments": "总分配数：{{count}}"
     },
     "policies": {
       "title": "访问策略",
@@ -3276,7 +3497,8 @@
         "day3": "三",
         "day4": "四",
         "day5": "五",
-        "day6": "六"
+        "day6": "六",
+        "ipCount": "IP 数量"
       },
       "confirm": {
         "title": "删除策略？",
@@ -3358,7 +3580,10 @@
         "justNow": "刚刚",
         "minutesAgo_other": "{{count}} 分钟前",
         "hoursAgo_other": "{{count}} 小时前",
-        "daysAgo_other": "{{count}} 天前"
+        "daysAgo_other": "{{count}} 天前",
+        "daysAgo": "{{count}}天前",
+        "hoursAgo": "{{count}}小时前",
+        "minutesAgo": "{{count}}分钟前"
       },
       "pagination": {
         "pageSize": "每页：",
@@ -3371,7 +3596,8 @@
       "errors": {
         "loadFailed": "加载审计日志失败",
         "retry": "重试"
-      }
+      },
+      "totalEntries": "总条目数：{{count}}"
     },
     "landings": {
       "title": "落地页",
@@ -3465,7 +3691,8 @@
         "funnel": "漏斗",
         "loadError": "加载统计失败",
         "noPurchases": "无购买记录",
-        "paid": "已支付"
+        "paid": "已支付",
+        "dailyPurchases": "每日购买量"
       },
       "purchases": {
         "title": "购买记录",
@@ -3491,7 +3718,16 @@
         "page": "第 {{current}} 页，共 {{total}} 页",
         "prev": "上一页",
         "next": "下一页"
-      }
+      },
+      "methodCurrency": "货币",
+      "methodDescPlaceholder": "向用户显示的简短说明",
+      "methodDescription": "方法描述",
+      "methodDisplayName": "显示名称",
+      "methodIconUrl": "图标 URL",
+      "methodMaxAmount": "最大金额",
+      "methodMinAmount": "最小金额",
+      "methodReturnUrl": "回调 URL",
+      "stickyPayButton": "固定支付按钮"
     },
     "infoPages": {
       "title": "信息页面",
@@ -3588,7 +3824,9 @@
       },
       "deleteSubscription": {
         "warning": "选中的订阅将从机器人和RemnaWave面板中永久删除！",
-        "hint": "用户将失去已删除订阅的VPN访问权限。此操作无法撤销。"
+        "hint": "用户将失去已删除订阅的VPN访问权限。此操作无法撤销。",
+        "activePaidWarning": "所选订阅中有 {{count}} / {{total}} 是有效的付费订阅",
+        "forceDeleteConfirm": "我确认删除有效的付费订阅"
       },
       "deleteUser": {
         "warning": "选中的用户将从机器人中永久删除！他们的所有订阅、余额和数据将丢失！",
@@ -3624,7 +3862,7 @@
         "summaryErrors": "{{count}} 错误"
       },
       "errors": {
-        "title": "{{count}} 个错误 — 显示详情"
+        "title": "{{count}} 个错误。显示详情"
       },
       "filters": {
         "search": "按ID、用户名、邮箱搜索",
@@ -3709,7 +3947,8 @@
       "enable": "启用",
       "disable": "禁用",
       "hide": "隐藏 ({{count}})",
-      "showMore_other": "显示更多 {{count}} 个节点"
+      "showMore_other": "显示更多 {{count}} 个节点",
+      "showMore": "显示更多"
     },
     "revenue": {
       "title": "收入",
@@ -3773,6 +4012,16 @@
       "uptime": "运行时间",
       "users": "用户",
       "activeSubs": "订阅"
+    },
+    "tariffs": {
+      "activeSubscriptions": "活跃订阅",
+      "purchasedMonth": "本月已售出",
+      "purchasedToday": "今日已售出",
+      "purchasedWeek": "本周已售出",
+      "subtitle": "各套餐统计",
+      "tariffName": "套餐名称",
+      "title": "套餐统计",
+      "trialSubscriptions": "试用订阅"
     }
   },
   "profile": {
@@ -3870,7 +4119,8 @@
         "yandex": "Yandex",
         "discord": "Discord",
         "vk": "VK"
-      }
+      },
+      "backToAccounts": "返回账户列表"
     }
   },
   "theme": {
@@ -4021,7 +4271,8 @@
       "warning": "已取消的优惠码无法重新使用。折扣将立即失效。",
       "confirm": "取消折扣",
       "deactivating": "取消中...",
-      "error": "取消优惠码失败，请稍后重试。"
+      "error": "取消优惠码失败，请稍后重试。",
+      "success": "活动已停用"
     }
   },
   "telegramRedirect": {
@@ -4076,6 +4327,13 @@
       "defaultMessage": "您的帐户已被封锁。",
       "reason": "原因",
       "contactSupport": "如果您认为这是错误，请联系客服。"
+    },
+    "accountDeleted": {
+      "title": "账户已停用",
+      "description": "由于长期未活动，您的账户已被停用。请在 Telegram 中打开机器人并发送 /start 以恢复访问。",
+      "openBot": "打开机器人",
+      "retry": "我已按 /start，重试",
+      "hint": "运行 /start 后，返回此处并点击「重试」。"
     }
   },
   "banSystem": {
@@ -4302,6 +4560,12 @@
       "d456": "1年3个月",
       "nDays": "{{count}}天",
       "nMonths": "{{count}}个月"
+    },
+    "discount": {
+      "days": "天",
+      "hours": "小时",
+      "minutes": "分钟",
+      "seconds": "秒"
     }
   },
   "gift": {
@@ -4360,7 +4624,43 @@
     },
     "warning": {
       "telegram_unresolvable": "无法验证此 Telegram 用户名。收件人可能不会收到礼物通知。"
-    }
+    },
+    "activateButton": "激活",
+    "activateCodePlaceholder": "输入礼物代码",
+    "activatedBy": "由 {{name}} 激活",
+    "activateDescription": "输入您收到的礼物代码以激活订阅",
+    "activatedGiftsTitle": "已激活的礼物",
+    "activateError": "激活礼物失败",
+    "activateSelfError": "您不能激活自己的礼物",
+    "activateSuccess": "礼物已激活！",
+    "activateSuccessDesc": "订阅已添加到您的账户",
+    "activateTitle": "激活礼物",
+    "activeGiftsTitle": "活跃的礼物",
+    "codeLabel": "礼物代码",
+    "codeReadyTitle": "您的礼物代码已就绪",
+    "copyMessage": "复制消息",
+    "daysShort": "天",
+    "deviceCount": "设备数",
+    "devicesShort": "台",
+    "gbShort": "GB",
+    "myGiftsEmpty": "暂无礼物",
+    "myGiftsEmptyDesc": "您发送或收到的礼物将显示在这里",
+    "pageTitle": "礼物",
+    "receivedGiftsTitle": "已收到的礼物",
+    "selectPeriod": "选择时长",
+    "selectTariff": "选择套餐",
+    "sentTo": "已发送给 {{name}}",
+    "shareGift": "分享礼物",
+    "shareModalActivateVia": "通过以下方式激活",
+    "shareModalActivateViaCabinet": "通过个人中心",
+    "shareText": "我为您准备了一份 Bedolaga VPN 礼物：{{code}}",
+    "shareToastCopied": "链接已复制",
+    "statusActivated": "已激活",
+    "statusAvailable": "可激活",
+    "tabActivate": "激活",
+    "tabBuy": "购买",
+    "tabMyGifts": "我的礼物",
+    "unlimitedTraffic": "无限流量"
   },
   "news": {
     "title": "新闻与更新",
@@ -4421,5 +4721,12 @@
         "linkUrlPrompt": "URL："
       }
     }
+  },
+  "subscriptions": {
+    "buy": "购买订阅",
+    "buyAnother": "再购买一个订阅",
+    "empty": "您还没有订阅",
+    "emptyDesc": "选择套餐以开始使用",
+    "title": "我的订阅"
   }
 }

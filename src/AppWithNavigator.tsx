@@ -15,6 +15,7 @@ import { WebSocketProvider } from './providers/WebSocketProvider';
 import { ToastProvider } from './components/Toast';
 import { TooltipProvider } from './components/primitives/Tooltip';
 import { isInTelegramWebApp } from './hooks/useTelegramSDK';
+import { hasInAppHistory, getFallbackParentPath } from './utils/navigation';
 
 const TWEMOJI_OPTIONS = { className: 'twemoji', folder: 'svg', ext: '.svg' } as const;
 
@@ -30,6 +31,8 @@ function TelegramBackButton() {
   const navigate = useNavigate();
   const navigateRef = useRef(navigate);
   navigateRef.current = navigate;
+  const pathnameRef = useRef(location.pathname);
+  pathnameRef.current = location.pathname;
 
   useEffect(() => {
     const isTopLevel = location.pathname === '' || BOTTOM_NAV_PATHS.includes(location.pathname);
@@ -44,7 +47,14 @@ function TelegramBackButton() {
 
   // Stable handler — ref prevents re-subscription on every render
   const handler = useCallback(() => {
-    navigateRef.current(-1);
+    // When opened via a bot deep-link directly on a nested route, there is no
+    // in-app history and navigate(-1) is a no-op — the back button looks dead.
+    // Fall back to the parent route so it always navigates somewhere sensible.
+    if (hasInAppHistory()) {
+      navigateRef.current(-1);
+    } else {
+      navigateRef.current(getFallbackParentPath(pathnameRef.current), { replace: true });
+    }
   }, []);
 
   useEffect(() => {

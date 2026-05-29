@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { promocodesApi, PromoGroup } from '../api/promocodes';
 import { usePlatform } from '../platform/hooks/usePlatform';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 
 // Icons
 const BackIcon = () => (
@@ -61,6 +62,9 @@ export default function AdminPromoGroups() {
   const { capabilities } = usePlatform();
 
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
+  const deleteDialogRef = useFocusTrap<HTMLDivElement>(!!deleteConfirm, {
+    onEscape: () => setDeleteConfirm(null),
+  });
 
   // Query
   const { data: groupsData, isLoading } = useQuery({
@@ -216,8 +220,20 @@ export default function AdminPromoGroups() {
       {/* Delete Confirmation */}
       {deleteConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="w-full max-w-sm rounded-xl bg-dark-800 p-6">
-            <h3 className="mb-2 text-lg font-semibold text-dark-100">
+          <div
+            className="absolute inset-0 bg-dark-950/60"
+            onClick={() => setDeleteConfirm(null)}
+            aria-hidden="true"
+          />
+          <div
+            ref={deleteDialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="promo-group-delete-title"
+            tabIndex={-1}
+            className="relative w-full max-w-sm rounded-xl bg-dark-800 p-6"
+          >
+            <h3 id="promo-group-delete-title" className="mb-2 text-lg font-semibold text-dark-100">
               {t('admin.promoGroups.confirm.title')}
             </h3>
             <p className="mb-6 text-dark-400">{t('admin.promoGroups.confirm.text')}</p>

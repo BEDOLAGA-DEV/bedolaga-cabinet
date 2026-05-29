@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { pollsApi, PollInfo, PollQuestion } from '../api/polls';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 
 const ClipboardIcon = () => (
   <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -107,6 +108,10 @@ export default function Polls() {
     setCompletionMessage(null);
   };
 
+  const pollDialogRef = useFocusTrap<HTMLDivElement>(!!selectedPoll, {
+    onEscape: handleClosePoll,
+  });
+
   if (isLoading) {
     return (
       <div className="flex min-h-64 items-center justify-center">
@@ -117,8 +122,8 @@ export default function Polls() {
 
   if (error) {
     return (
-      <div className="card border-red-500/20 bg-red-500/10">
-        <p className="text-red-400">{t('polls.error')}</p>
+      <div className="card border-error-500/20 bg-error-500/10">
+        <p className="text-error-400">{t('polls.error')}</p>
       </div>
     );
   }
@@ -133,10 +138,28 @@ export default function Polls() {
       {/* Poll Modal */}
       {selectedPoll && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="card max-h-[80vh] w-full max-w-lg overflow-y-auto">
+          <div
+            className="absolute inset-0 bg-dark-950/60"
+            onClick={handleClosePoll}
+            aria-hidden="true"
+          />
+          <div
+            ref={pollDialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="poll-dialog-title"
+            tabIndex={-1}
+            className="card relative max-h-[80vh] w-full max-w-lg overflow-y-auto"
+          >
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-xl font-bold">{selectedPoll.title}</h2>
-              <button onClick={handleClosePoll} className="text-dark-400 hover:text-dark-200">
+              <h2 id="poll-dialog-title" className="text-xl font-bold">
+                {selectedPoll.title}
+              </h2>
+              <button
+                onClick={handleClosePoll}
+                aria-label={t('common.close')}
+                className="text-dark-400 hover:text-dark-200"
+              >
                 <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path
                     strokeLinecap="round"

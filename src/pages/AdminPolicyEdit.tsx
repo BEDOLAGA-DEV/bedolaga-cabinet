@@ -320,7 +320,7 @@ export default function AdminPolicyEdit() {
   }, []);
 
   const handleSubmit = useCallback(
-    (e: React.FormEvent) => {
+    (e: React.SyntheticEvent) => {
       e.preventDefault();
       setFormError(null);
 
@@ -455,7 +455,7 @@ export default function AdminPolicyEdit() {
                   onClick={() => setFormData((prev) => ({ ...prev, effect: 'deny' }))}
                   className={`flex-1 rounded-lg border px-3 py-2 text-sm font-medium transition-colors ${
                     formData.effect === 'deny'
-                      ? 'border-red-500/50 bg-red-500/10 text-red-400'
+                      ? 'border-error-500/50 bg-error-500/10 text-error-400'
                       : 'border-dark-600 bg-dark-900 text-dark-400 hover:border-dark-500'
                   }`}
                 >

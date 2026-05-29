@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSearchParams, Link, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { authApi } from '../api/auth';
@@ -14,8 +14,17 @@ export default function ResetPassword() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [status, setStatus] = useState<'form' | 'loading' | 'success' | 'error'>('form');
   const [error, setError] = useState('');
+  // Track the post-success redirect timer so unmount cancels it instead of
+  // firing navigate() on a torn-down component.
+  const redirectTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  useEffect(() => {
+    return () => {
+      if (redirectTimerRef.current) clearTimeout(redirectTimerRef.current);
+    };
+  }, []);
+
+  const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     setError('');
 
@@ -39,7 +48,7 @@ export default function ResetPassword() {
     try {
       await authApi.resetPassword(token, password);
       setStatus('success');
-      setTimeout(() => navigate('/login', { replace: true }), 2000);
+      redirectTimerRef.current = setTimeout(() => navigate('/login', { replace: true }), 2000);
     } catch (err: unknown) {
       setStatus('error');
       const error = err as { response?: { data?: { detail?: string } } };
@@ -49,7 +58,7 @@ export default function ResetPassword() {
 
   if (!token) {
     return (
-      <div className="flex min-h-screen items-center justify-center px-4 py-8 sm:py-12">
+      <div className="min-h-viewport flex items-center justify-center px-4 py-8 sm:py-12">
         <div className="fixed inset-0 bg-gradient-to-br from-dark-950 via-dark-900 to-dark-950" />
         <div className="fixed right-4 top-4 z-50">
           <LanguageSwitcher />
@@ -76,7 +85,7 @@ export default function ResetPassword() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4 py-8 sm:py-12">
+    <div className="min-h-viewport flex items-center justify-center px-4 py-8 sm:py-12">
       <div className="fixed inset-0 bg-gradient-to-br from-dark-950 via-dark-900 to-dark-950" />
       <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-accent-500/10 via-transparent to-transparent" />
       <div className="fixed right-4 top-4 z-50">
@@ -149,7 +158,10 @@ export default function ResetPassword() {
                 </div>
 
                 {error && (
-                  <div className="rounded-xl border border-error-500/30 bg-error-500/10 px-4 py-3 text-sm text-error-400">
+                  <div
+                    role="alert"
+                    className="rounded-xl border border-error-500/30 bg-error-500/10 px-4 py-3 text-sm text-error-400"
+                  >
                     {error}
                   </div>
                 )}

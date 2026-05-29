@@ -12,6 +12,7 @@ import {
 } from '../api/adminRemnawave';
 import { usePlatform } from '../platform/hooks/usePlatform';
 import { formatUptime } from '../utils/format';
+import { getFlagEmoji } from '../utils/subscriptionHelpers';
 import Twemoji from 'react-twemoji';
 import {
   ServerIcon,
@@ -46,48 +47,9 @@ const formatBytes = (bytes: number): string => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 };
 
-const getCountryFlag = (code: string | null | undefined): string => {
-  if (!code) return '🌍';
-  const codeMap: Record<string, string> = {
-    RU: '🇷🇺',
-    US: '🇺🇸',
-    DE: '🇩🇪',
-    NL: '🇳🇱',
-    GB: '🇬🇧',
-    UK: '🇬🇧',
-    FR: '🇫🇷',
-    FI: '🇫🇮',
-    SE: '🇸🇪',
-    NO: '🇳🇴',
-    PL: '🇵🇱',
-    TR: '🇹🇷',
-    JP: '🇯🇵',
-    SG: '🇸🇬',
-    HK: '🇭🇰',
-    KR: '🇰🇷',
-    AU: '🇦🇺',
-    CA: '🇨🇦',
-    CH: '🇨🇭',
-    AT: '🇦🇹',
-    IT: '🇮🇹',
-    ES: '🇪🇸',
-    BR: '🇧🇷',
-    IN: '🇮🇳',
-    AE: '🇦🇪',
-    IL: '🇮🇱',
-    KZ: '🇰🇿',
-    UA: '🇺🇦',
-    CZ: '🇨🇿',
-    RO: '🇷🇴',
-    LV: '🇱🇻',
-    LT: '🇱🇹',
-    EE: '🇪🇪',
-    BG: '🇧🇬',
-    HU: '🇭🇺',
-    MD: '🇲🇩',
-  };
-  return codeMap[code.toUpperCase()] || code;
-};
+// Алгоритмический ISO 3166-1 alpha-2 → regional indicator. Глобус-fallback
+// сохранён для случая пустого кода (важно для UI-плейсхолдеров).
+const getCountryFlag = (code: string | null | undefined): string => getFlagEmoji(code) || '🌍';
 
 interface StatCardProps {
   label: string;

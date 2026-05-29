@@ -413,7 +413,9 @@ export default function AdminLandings() {
       await copyToClipboard(url);
       notify.success(t('admin.landings.urlCopied'));
     } catch {
-      // Clipboard write failed silently
+      // The clipboard adapter already tries the legacy execCommand fallback;
+      // if we still failed, surface it so the admin doesn't think it worked.
+      notify.error(t('common.error'));
     }
   };
 

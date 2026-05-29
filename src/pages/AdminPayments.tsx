@@ -48,9 +48,9 @@ interface StatusBadgeProps {
 
 function StatusBadge({ status }: StatusBadgeProps) {
   const styles: Record<string, string> = {
-    paid: 'bg-green-500/20 text-green-400',
-    pending: 'bg-amber-500/20 text-amber-400',
-    cancelled: 'bg-red-500/20 text-red-400',
+    paid: 'bg-success-500/20 text-success-400',
+    pending: 'bg-warning-500/20 text-warning-400',
+    cancelled: 'bg-error-500/20 text-error-400',
   };
 
   const normalized = status.toLowerCase();
@@ -76,9 +76,9 @@ interface StatCardProps {
 function StatCard({ label, value, color, isActive, onClick }: StatCardProps) {
   const colors: Record<string, string> = {
     blue: 'border-accent-500/30 bg-accent-500/20 text-accent-400',
-    amber: 'border-amber-500/30 bg-amber-500/20 text-amber-400',
-    green: 'border-green-500/30 bg-green-500/20 text-green-400',
-    red: 'border-red-500/30 bg-red-500/20 text-red-400',
+    amber: 'border-warning-500/30 bg-warning-500/20 text-warning-400',
+    green: 'border-success-500/30 bg-success-500/20 text-success-400',
+    red: 'border-error-500/30 bg-error-500/20 text-error-400',
   };
 
   return (
@@ -457,7 +457,7 @@ export default function AdminPayments() {
                           {payment.method_display}
                         </span>
                         {payment.is_paid && (
-                          <span className="rounded-full bg-green-500/20 px-2 py-0.5 text-xs font-medium text-green-400">
+                          <span className="rounded-full bg-success-500/20 px-2 py-0.5 text-xs font-medium text-success-400">
                             {t('admin.payments.paid')}
                           </span>
                         )}
@@ -587,7 +587,7 @@ export default function AdminPayments() {
                       <div
                         className={`mt-3 rounded-lg p-2 text-sm ${
                           checkPaymentMutation.data?.status_changed
-                            ? 'border border-green-500/30 bg-green-500/10 text-green-400'
+                            ? 'border border-success-500/30 bg-success-500/10 text-success-400'
                             : 'bg-dark-700/30 text-dark-400'
                         }`}
                       >
@@ -597,7 +597,7 @@ export default function AdminPayments() {
                   {checkPaymentMutation.isError &&
                     checkPaymentMutation.variables?.paymentId === payment.id &&
                     checkPaymentMutation.variables?.method === payment.method && (
-                      <div className="mt-3 rounded-lg border border-red-500/30 bg-red-500/10 p-2 text-sm text-red-400">
+                      <div className="mt-3 rounded-lg border border-error-500/30 bg-error-500/10 p-2 text-sm text-error-400">
                         {t('admin.payments.checkError')}
                       </div>
                     )}

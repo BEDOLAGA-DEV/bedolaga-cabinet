@@ -316,7 +316,10 @@ export function AppHeader({
           style={{ top: headerHeight }}
         >
           {/* Backdrop */}
-          <div className="absolute inset-0 bg-black/60" onClick={() => setMobileMenuOpen(false)} />
+          <div
+            className="absolute inset-0 bg-dark-950/60"
+            onClick={() => setMobileMenuOpen(false)}
+          />
 
           {/* Menu content */}
           <div

@@ -422,7 +422,7 @@ export default function TelegramLoginButton({ referralCode }: TelegramLoginButto
 
   if (!botUsername || botUsername === 'your_bot') {
     return (
-      <div className="py-4 text-center text-sm text-gray-500">
+      <div className="py-4 text-center text-sm text-dark-400">
         {t('auth.telegramNotConfigured')}
       </div>
     );
@@ -499,7 +499,7 @@ export default function TelegramLoginButton({ referralCode }: TelegramLoginButto
           </>
         ) : deepLinkError ? (
           <div className="flex flex-col items-center space-y-2">
-            <p className="text-xs text-red-500">{deepLinkError}</p>
+            <p className="text-xs text-error-500">{deepLinkError}</p>
             <button
               type="button"
               onClick={startDeepLinkAuth}
@@ -542,14 +542,14 @@ export default function TelegramLoginButton({ referralCode }: TelegramLoginButto
             </svg>
             {oidcLoading ? t('common.loading') : t('auth.loginWithTelegram')}
           </button>
-          {oidcError && <p className="text-xs text-red-500">{oidcError}</p>}
+          {oidcError && <p className="text-xs text-error-500">{oidcError}</p>}
         </div>
       ) : (
         <div ref={containerRef} className="flex justify-center" />
       )}
 
       <div className="text-center">
-        <p className="mb-2 text-xs text-gray-500">{t('auth.orOpenInApp')}</p>
+        <p className="mb-2 text-xs text-dark-400">{t('auth.orOpenInApp')}</p>
         <a
           href={
             referralCode

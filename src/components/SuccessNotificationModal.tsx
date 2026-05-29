@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router';
 import { useSuccessNotification } from '../store/successNotification';
 import { useCurrency } from '../hooks/useCurrency';
 import { useTelegramSDK } from '../hooks/useTelegramSDK';
+import { useFocusTrap } from '../hooks/useFocusTrap';
 import { useHaptic } from '@/platform';
 
 // Icons
@@ -92,6 +93,9 @@ export default function SuccessNotificationModal() {
   const handleClose = useCallback(() => {
     hide();
   }, [hide]);
+
+  // Esc + scroll-lock are handled by the effects below; the trap only manages focus.
+  const modalRef = useFocusTrap<HTMLDivElement>(isOpen, { lockScroll: false });
 
   // Escape key to close
   useEffect(() => {
@@ -201,10 +205,15 @@ export default function SuccessNotificationModal() {
   const modalContent = (
     <div className="fixed inset-0 z-[100] flex items-center justify-center">
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={handleClose} />
+      <div className="absolute inset-0 bg-dark-950/80 backdrop-blur-sm" onClick={handleClose} />
 
       {/* Modal */}
       <div
+        ref={modalRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="success-modal-title"
+        tabIndex={-1}
         className="relative mx-4 w-full max-w-sm overflow-hidden rounded-3xl border border-dark-700/50 bg-dark-900 shadow-2xl"
         style={{
           marginBottom: safeBottom ? `${safeBottom}px` : undefined,
@@ -214,6 +223,7 @@ export default function SuccessNotificationModal() {
         {/* Close button */}
         <button
           onClick={handleClose}
+          aria-label={t('common.close')}
           className="absolute right-3 top-3 z-10 rounded-xl p-2 text-dark-400 transition-colors hover:bg-dark-800 hover:text-dark-200"
         >
           <CloseIcon />
@@ -223,8 +233,12 @@ export default function SuccessNotificationModal() {
         <div
           className={`flex flex-col items-center bg-gradient-to-br ${gradientClass} px-6 pb-8 pt-10`}
         >
-          <div className="mb-4 animate-bounce text-white">{icon}</div>
-          <h2 className="text-center text-2xl font-bold text-white">{title}</h2>
+          {/* Use animate-pulse for celebration; bounce easing reads dated and
+              the lift is the moment, not the bounce. */}
+          <div className="mb-4 animate-pulse text-white">{icon}</div>
+          <h2 id="success-modal-title" className="text-center text-2xl font-bold text-white">
+            {title}
+          </h2>
           {message && <p className="mt-2 text-center text-white/80">{message}</p>}
         </div>
 
@@ -318,7 +332,7 @@ export default function SuccessNotificationModal() {
             {isSubscription && (
               <button
                 onClick={handleGoToSubscription}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-accent-500 to-accent-600 py-3.5 font-bold text-white shadow-lg shadow-accent-500/25 transition-all hover:from-accent-400 hover:to-accent-500 active:from-accent-600 active:to-accent-700"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-accent-500 py-3.5 font-bold text-white shadow-lg shadow-accent-500/25 transition-colors hover:bg-accent-400 active:bg-accent-600"
               >
                 <RocketIcon />
                 <span>{t('successNotification.goToSubscription', 'Go to Subscription')}</span>
@@ -328,7 +342,7 @@ export default function SuccessNotificationModal() {
             {isBalanceTopup && (
               <button
                 onClick={handleGoToBalance}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-success-500 to-success-600 py-3.5 font-bold text-white shadow-lg shadow-success-500/25 transition-all hover:from-success-400 hover:to-success-500 active:from-success-600 active:to-success-700"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-success-500 py-3.5 font-bold text-white shadow-lg shadow-success-500/25 transition-colors hover:bg-success-400 active:bg-success-600"
               >
                 <WalletIcon />
                 <span>{t('successNotification.goToBalance', 'Go to Balance')}</span>
@@ -338,7 +352,7 @@ export default function SuccessNotificationModal() {
             {isDevicesPurchased && (
               <button
                 onClick={handleGoToSubscription}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-600 py-3.5 font-bold text-white shadow-lg shadow-blue-500/25 transition-all hover:from-blue-400 hover:to-cyan-500 active:from-blue-600 active:to-cyan-700"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-accent-500 py-3.5 font-bold text-white shadow-lg shadow-accent-500/25 transition-colors hover:bg-accent-400 active:bg-accent-600"
               >
                 <DevicesIcon />
                 <span>{t('successNotification.goToSubscription', 'Go to Subscription')}</span>
@@ -348,7 +362,7 @@ export default function SuccessNotificationModal() {
             {isTrafficPurchased && (
               <button
                 onClick={handleGoToSubscription}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-success-500 to-success-600 py-3.5 font-bold text-white shadow-lg shadow-success-500/25 transition-all hover:from-success-400 hover:to-success-500 active:from-success-600 active:to-success-700"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-success-500 py-3.5 font-bold text-white shadow-lg shadow-success-500/25 transition-colors hover:bg-success-400 active:bg-success-600"
               >
                 <TrafficIcon />
                 <span>{t('successNotification.goToSubscription', 'Go to Subscription')}</span>

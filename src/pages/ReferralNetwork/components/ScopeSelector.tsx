@@ -285,13 +285,13 @@ export function ScopeSelector({ value, onAdd, onRemove, onClear, className }: Sc
         </button>
       </div>
 
-      {/* Dropdown */}
+      {/* Dropdown — this is a non-modal popover containing tabs + search +
+          listbox. role="dialog" would imply modality and own the focus, but
+          we keep the page reachable behind it. The button's aria-haspopup
+          and aria-expanded already announce the popup; AT can navigate into
+          it directly. The inner div carries role="listbox". */}
       {isDropdownOpen && (
-        <div
-          className="absolute left-0 right-0 top-full z-50 mt-1 rounded-xl border border-dark-700/50 bg-dark-800 shadow-xl backdrop-blur-md"
-          role="dialog"
-          aria-label={t('admin.referralNetwork.scope.addScope')}
-        >
+        <div className="absolute left-0 right-0 top-full z-50 mt-1 rounded-xl border border-dark-700/50 bg-dark-800 shadow-xl backdrop-blur-md">
           {/* Max reached banner */}
           {isMaxReached && (
             <div className="border-b border-dark-700/50 px-3 py-1.5 text-center text-xs text-warning-400">

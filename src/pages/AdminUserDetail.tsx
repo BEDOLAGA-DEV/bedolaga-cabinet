@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
+import { useQuery } from '@tanstack/react-query';
 import i18n from '../i18n';
-import { useCurrency } from '../hooks/useCurrency';
 import { useNotify } from '../platform/hooks/useNotify';
+import { copyToClipboard as copyText } from '../utils/clipboard';
 import {
   adminUsersApi,
   type UserDetailResponse,
@@ -16,62 +17,23 @@ import {
   type AdminUserGiftsResponse,
   type SubscriptionRequestRecord,
 } from '../api/adminUsers';
-import { adminApi, type AdminTicket, type AdminTicketDetail } from '../api/admin';
 import { promocodesApi, type PromoGroup } from '../api/promocodes';
-import { promoOffersApi } from '../api/promoOffers';
 import { AdminBackButton } from '../components/admin';
-import { createNumberInputHandler, toNumber } from '../utils/inputHelpers';
+import { GiftsTab } from '../components/admin/userDetail/GiftsTab';
+import { SyncTab } from '../components/admin/userDetail/SyncTab';
+import { ReferralsTab } from '../components/admin/userDetail/ReferralsTab';
+import { BalanceTab } from '../components/admin/userDetail/BalanceTab';
+import { TicketsTab } from '../components/admin/userDetail/TicketsTab';
+import { InfoTab } from '../components/admin/userDetail/InfoTab';
+import { SubscriptionTab } from '../components/admin/userDetail/SubscriptionTab';
+import { toNumber } from '../utils/inputHelpers';
 import { usePermissionStore } from '../store/permissions';
-import { MessageMediaGrid } from '../components/tickets/MessageMediaGrid';
-import { linkifyText } from '../utils/linkify';
 
-// ============ Helpers ============
+// (Subscription-tab helpers: getCountryFlag / PlusIcon / MinusIcon /
+// StatusBadge / GiftStatusBadge / GiftCard moved to
+// components/admin/userDetail/{SubscriptionTab,GiftsTab,InfoTab,SyncTab}.tsx)
 
-const getCountryFlag = (code: string | null | undefined): string => {
-  if (!code) return '';
-  const codeMap: Record<string, string> = {
-    RU: '\u{1F1F7}\u{1F1FA}',
-    US: '\u{1F1FA}\u{1F1F8}',
-    DE: '\u{1F1E9}\u{1F1EA}',
-    NL: '\u{1F1F3}\u{1F1F1}',
-    GB: '\u{1F1EC}\u{1F1E7}',
-    UK: '\u{1F1EC}\u{1F1E7}',
-    FR: '\u{1F1EB}\u{1F1F7}',
-    FI: '\u{1F1EB}\u{1F1EE}',
-    SE: '\u{1F1F8}\u{1F1EA}',
-    NO: '\u{1F1F3}\u{1F1F4}',
-    PL: '\u{1F1F5}\u{1F1F1}',
-    TR: '\u{1F1F9}\u{1F1F7}',
-    JP: '\u{1F1EF}\u{1F1F5}',
-    SG: '\u{1F1F8}\u{1F1EC}',
-    HK: '\u{1F1ED}\u{1F1F0}',
-    KR: '\u{1F1F0}\u{1F1F7}',
-    AU: '\u{1F1E6}\u{1F1FA}',
-    CA: '\u{1F1E8}\u{1F1E6}',
-    CH: '\u{1F1E8}\u{1F1ED}',
-    AT: '\u{1F1E6}\u{1F1F9}',
-    IT: '\u{1F1EE}\u{1F1F9}',
-    ES: '\u{1F1EA}\u{1F1F8}',
-    BR: '\u{1F1E7}\u{1F1F7}',
-    IN: '\u{1F1EE}\u{1F1F3}',
-    AE: '\u{1F1E6}\u{1F1EA}',
-    IL: '\u{1F1EE}\u{1F1F1}',
-    KZ: '\u{1F1F0}\u{1F1FF}',
-    UA: '\u{1F1FA}\u{1F1E6}',
-    CZ: '\u{1F1E8}\u{1F1FF}',
-    RO: '\u{1F1F7}\u{1F1F4}',
-    LV: '\u{1F1F1}\u{1F1FB}',
-    LT: '\u{1F1F1}\u{1F1F9}',
-    EE: '\u{1F1EA}\u{1F1EA}',
-    BG: '\u{1F1E7}\u{1F1EC}',
-    HU: '\u{1F1ED}\u{1F1FA}',
-    MD: '\u{1F1F2}\u{1F1E9}',
-  };
-  return codeMap[code.toUpperCase()] || code;
-};
-
-// ============ Icons ============
-
+// RefreshIcon stays here — the page header's reload button uses it.
 const RefreshIcon = ({ className = 'w-5 h-5' }: { className?: string }) => (
   <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
     <path
@@ -82,211 +44,16 @@ const RefreshIcon = ({ className = 'w-5 h-5' }: { className?: string }) => (
   </svg>
 );
 
-const PlusIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-  </svg>
-);
-
-const MinusIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 12h-15" />
-  </svg>
-);
-
-const ArrowDownIcon = ({ className = 'w-5 h-5' }: { className?: string }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 13.5L12 21m0 0l-7.5-7.5M12 21V3" />
-  </svg>
-);
-
-const ArrowUpIcon = ({ className = 'w-5 h-5' }: { className?: string }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18" />
-  </svg>
-);
-
 const TelegramIcon = () => (
   <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
     <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z" />
   </svg>
 );
 
-// ============ Components ============
-
-function StatusBadge({ status }: { status: string }) {
-  const styles: Record<string, string> = {
-    active: 'bg-success-500/20 text-success-400 border-success-500/30',
-    blocked: 'bg-error-500/20 text-error-400 border-error-500/30',
-    deleted: 'bg-dark-600 text-dark-400 border-dark-500',
-    trial: 'bg-accent-500/20 text-accent-400 border-accent-500/30',
-    expired: 'bg-warning-500/20 text-warning-400 border-warning-500/30',
-    limited: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
-    disabled: 'bg-dark-600 text-dark-400 border-dark-500',
-  };
-
-  return (
-    <span className={`rounded-full border px-2 py-0.5 text-xs ${styles[status] || styles.active}`}>
-      {status}
-    </span>
-  );
-}
-
-function GiftStatusBadge({ status }: { status: string }) {
-  const { t } = useTranslation();
-  const styles: Record<string, string> = {
-    pending: 'bg-warning-500/20 text-warning-400 border-warning-500/30',
-    paid: 'bg-accent-500/20 text-accent-400 border-accent-500/30',
-    delivered: 'bg-success-500/20 text-success-400 border-success-500/30',
-    pending_activation: 'bg-accent-500/20 text-accent-400 border-accent-500/30',
-    failed: 'bg-error-500/20 text-error-400 border-error-500/30',
-    expired: 'bg-dark-600 text-dark-400 border-dark-500',
-  };
-  const fallback = 'bg-dark-600 text-dark-400 border-dark-500';
-
-  const label = t(`admin.users.detail.gifts.status.${status}`, { defaultValue: '' }) || status;
-
-  return (
-    <span
-      className={`rounded-full border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider ${styles[status] || fallback}`}
-    >
-      {label}
-    </span>
-  );
-}
-
-function GiftCard({
-  gift,
-  direction,
-  locale,
-  onNavigateToUser,
-}: {
-  gift: import('../api/adminUsers').AdminUserGiftItem;
-  direction: 'sent' | 'received';
-  locale: string;
-  onNavigateToUser: (userId: number) => void;
-}) {
-  const { t } = useTranslation();
-  const { formatWithCurrency } = useCurrency();
-  const isSent = direction === 'sent';
-
-  const otherPartyLabel = isSent
-    ? t('admin.users.detail.gifts.recipient')
-    : t('admin.users.detail.gifts.sender');
-  const otherPartyName = isSent
-    ? gift.receiver_username
-      ? `@${gift.receiver_username}`
-      : gift.gift_recipient_value || t('admin.users.detail.gifts.codeOnly')
-    : gift.buyer_username
-      ? `@${gift.buyer_username}`
-      : gift.buyer_full_name || t('admin.users.detail.gifts.unknownUser');
-  const otherPartyId = isSent ? gift.receiver_user_id : gift.buyer_user_id;
-
-  const dateOpts: Intl.DateTimeFormatOptions = {
-    day: '2-digit',
-    month: '2-digit',
-    year: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-  };
-
-  return (
-    <div className="rounded-xl border border-dark-700/50 bg-dark-800/50 p-4 transition-colors hover:bg-dark-800/70">
-      {/* Header */}
-      <div className="mb-3 flex items-start justify-between">
-        <div className="flex items-center gap-2">
-          <div
-            className={`flex h-8 w-8 items-center justify-center rounded-lg ${isSent ? 'bg-accent-500/15' : 'bg-success-500/15'}`}
-          >
-            <svg
-              className={`h-4 w-4 ${isSent ? 'text-accent-400' : 'text-success-400'}`}
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M21 11.25v8.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 109.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1114.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"
-              />
-            </svg>
-          </div>
-          <div>
-            <div className="text-sm font-medium text-dark-100">{gift.tariff_name || '—'}</div>
-            <div className="text-xs text-dark-500">
-              {gift.period_days} {t('admin.users.detail.gifts.days')} · {gift.device_limit}{' '}
-              {t('admin.users.detail.gifts.devices')}
-            </div>
-          </div>
-        </div>
-        <GiftStatusBadge status={gift.status} />
-      </div>
-
-      {/* Details grid */}
-      <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
-        <div>
-          <span className="text-dark-500">{otherPartyLabel}:</span>{' '}
-          <span className="text-dark-300">{otherPartyName}</span>
-          {otherPartyId && (
-            <button
-              onClick={() => onNavigateToUser(otherPartyId)}
-              className="ml-1 text-accent-400 hover:text-accent-300"
-            >
-              #{otherPartyId}
-            </button>
-          )}
-        </div>
-        <div>
-          <span className="text-dark-500">{t('admin.users.detail.gifts.amount')}:</span>{' '}
-          <span className="text-dark-300">{formatWithCurrency(gift.amount_kopeks / 100)}</span>
-        </div>
-        <div>
-          <span className="text-dark-500">{t('admin.users.detail.gifts.paymentMethod')}:</span>{' '}
-          <span className="text-dark-300">{gift.payment_method || '—'}</span>
-        </div>
-        <div>
-          <span className="text-dark-500">{t('admin.users.detail.gifts.createdAt')}:</span>{' '}
-          <span className="text-dark-300">
-            {gift.created_at ? new Date(gift.created_at).toLocaleString(locale, dateOpts) : '—'}
-          </span>
-        </div>
-        {gift.paid_at && (
-          <div>
-            <span className="text-dark-500">{t('admin.users.detail.gifts.paidAt')}:</span>{' '}
-            <span className="text-dark-300">
-              {new Date(gift.paid_at).toLocaleString(locale, dateOpts)}
-            </span>
-          </div>
-        )}
-        {gift.delivered_at && (
-          <div>
-            <span className="text-dark-500">{t('admin.users.detail.gifts.deliveredAt')}:</span>{' '}
-            <span className="text-success-400">
-              {new Date(gift.delivered_at).toLocaleString(locale, dateOpts)}
-            </span>
-          </div>
-        )}
-      </div>
-
-      {/* Gift message */}
-      {gift.gift_message && (
-        <div className="mt-3 rounded-lg bg-dark-900/50 p-2.5 text-xs italic text-dark-400">
-          &ldquo;{gift.gift_message}&rdquo;
-        </div>
-      )}
-
-      {/* Token */}
-      <div className="mt-2 font-mono text-[10px] text-dark-600">GIFT-{gift.token}</div>
-    </div>
-  );
-}
-
 // ============ Main Page ============
 
 export default function AdminUserDetail() {
   const { t } = useTranslation();
-  const { formatWithCurrency } = useCurrency();
   const navigate = useNavigate();
   const notify = useNotify();
   const { id } = useParams<{ id: string }>();
@@ -308,21 +75,8 @@ export default function AdminUserDetail() {
   const [referrals, setReferrals] = useState<UserListItem[]>([]);
   const [referralsLoading, setReferralsLoading] = useState(false);
 
-  // Referrals tab state
-  const [referralsList, setReferralsList] = useState<UserListItem[]>([]);
-  const [referralsTotal, setReferralsTotal] = useState(0);
-  const [referralsListLoading, setReferralsListLoading] = useState(false);
-  const [referrerSearchQuery, setReferrerSearchQuery] = useState('');
-  const [showReferrerSearch, setShowReferrerSearch] = useState(false);
-  const [referrerSearchResults, setReferrerSearchResults] = useState<UserListItem[]>([]);
-  const [referrerSearchLoading, setReferrerSearchLoading] = useState(false);
-  const referrerSearchRef = useRef<HTMLDivElement>(null);
-  // Add referral (bind someone as this user's referral)
-  const [showAddReferral, setShowAddReferral] = useState(false);
-  const [addReferralSearchQuery, setAddReferralSearchQuery] = useState('');
-  const [addReferralSearchResults, setAddReferralSearchResults] = useState<UserListItem[]>([]);
-  const [addReferralSearchLoading, setAddReferralSearchLoading] = useState(false);
-  const addReferralSearchRef = useRef<HTMLDivElement>(null);
+  // (Referrals-tab state, query, handlers, click-outside + debounced search
+  // effects moved into components/admin/userDetail/ReferralsTab.tsx)
 
   // Panel info & node usage
   const [panelInfo, setPanelInfo] = useState<UserPanelInfo | null>(null);
@@ -334,20 +88,9 @@ export default function AdminUserDetail() {
   const [confirmingAction, setConfirmingAction] = useState<string | null>(null);
   const confirmTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Balance form
-  const [balanceAmount, setBalanceAmount] = useState<number | ''>('');
-  const [balanceDescription, setBalanceDescription] = useState('');
+  // (Balance form state moved into BalanceTab.tsx)
 
-  // Tickets
-  const [tickets, setTickets] = useState<AdminTicket[]>([]);
-  const [ticketsLoading, setTicketsLoading] = useState(false);
-  const [ticketsTotal, setTicketsTotal] = useState(0);
-  const [selectedTicketId, setSelectedTicketId] = useState<number | null>(null);
-  const [selectedTicket, setSelectedTicket] = useState<AdminTicketDetail | null>(null);
-  const [ticketDetailLoading, setTicketDetailLoading] = useState(false);
-  const [replyText, setReplyText] = useState('');
-  const [replySending, setReplySending] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  // (Tickets-tab state + query + chat-view state moved into TicketsTab.tsx)
 
   // Subscription form
   const [subAction, setSubAction] = useState<string>('extend');
@@ -365,21 +108,27 @@ export default function AdminUserDetail() {
   const [editingReferralCommission, setEditingReferralCommission] = useState(false);
   const [referralCommissionValue, setReferralCommissionValue] = useState<number | ''>('');
 
-  // Send promo offer
-  const [offerDiscountPercent, setOfferDiscountPercent] = useState<number | ''>('');
-  const [offerValidHours, setOfferValidHours] = useState<number | ''>(24);
-  const [offerSending, setOfferSending] = useState(false);
+  // (Send-promo-offer form state moved into BalanceTab.tsx)
 
   // Traffic packages
   const [selectedTrafficGb, setSelectedTrafficGb] = useState<string>('');
 
   // Devices
   const [devices, setDevices] = useState<
-    { hwid: string; platform: string; device_model: string; created_at: string | null }[]
+    {
+      hwid: string;
+      platform: string;
+      device_model: string;
+      created_at: string | null;
+      local_name?: string | null;
+    }[]
   >([]);
   const [devicesTotal, setDevicesTotal] = useState(0);
   const [deviceLimit, setDeviceLimit] = useState(0);
   const [devicesLoading, setDevicesLoading] = useState(false);
+  const [editingDeviceHwid, setEditingDeviceHwid] = useState<string | null>(null);
+  const [editingDeviceName, setEditingDeviceName] = useState('');
+  const [renameSaving, setRenameSaving] = useState(false);
 
   // Gifts
   const [giftsData, setGiftsData] = useState<AdminUserGiftsResponse | null>(null);
@@ -395,103 +144,151 @@ export default function AdminUserDetail() {
 
   const userId = id ? parseInt(id, 10) : null;
 
-  const loadUser = useCallback(async () => {
-    if (!userId) return;
-    try {
-      setLoading(true);
-      const data = await adminUsersApi.getUser(userId);
-      setUser(data);
-    } catch (error) {
-      console.error('Failed to load user:', error);
+  // React Query owns the main user fetch: caching across navigations + auto-loading
+  // state. loadUser is kept as a thin refetch wrapper so the 25+ mutation handlers
+  // that call `await loadUser()` after writes need no changes.
+  const userQuery = useQuery({
+    queryKey: ['admin-user-detail', userId] as const,
+    queryFn: () => {
+      if (!userId) throw new Error('No userId');
+      return adminUsersApi.getUser(userId);
+    },
+    enabled: !!userId && !isNaN(userId),
+  });
+
+  useEffect(() => {
+    if (userQuery.data) setUser(userQuery.data);
+  }, [userQuery.data]);
+
+  useEffect(() => {
+    setLoading(userQuery.isFetching);
+  }, [userQuery.isFetching]);
+
+  useEffect(() => {
+    if (userQuery.isError) {
+      console.error('Failed to load user:', userQuery.error);
       navigate('/admin/users');
-    } finally {
-      setLoading(false);
     }
-  }, [userId, navigate]);
+  }, [userQuery.isError, userQuery.error, navigate]);
 
-  const loadSyncStatus = useCallback(async () => {
-    if (!userId) return;
-    try {
-      const data = await adminUsersApi.getSyncStatus(userId, activeSubscriptionId ?? undefined);
-      setSyncStatus(data);
-    } catch (error) {
-      console.error('Failed to load sync status:', error);
-    }
-  }, [userId, activeSubscriptionId]);
+  const loadUser = useCallback(
+    async () => {
+      await userQuery.refetch();
+    },
+    // userQuery.refetch is a stable function across renders; including the whole
+    // userQuery object would re-create loadUser on every render and cascade into
+    // useEffects that depend on it.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [userQuery.refetch],
+  );
 
-  const loadTariffs = useCallback(async () => {
-    if (!userId) return;
-    try {
-      const data = await adminUsersApi.getAvailableTariffs(userId, true);
-      setTariffs(data.tariffs);
-    } catch (error) {
-      console.error('Failed to load tariffs:', error);
-    }
-  }, [userId]);
+  // ---- React Query hooks for the rest of the leaf loaders -----------------
+  // Each loader callback below becomes a thin refetch wrapper so existing call
+  // sites (mutation handlers, useEffects) continue to work unchanged. queryKey
+  // includes the inputs that drive the request (userId / activeSubscriptionId)
+  // so changing them auto-invalidates.
 
-  const loadTickets = useCallback(async () => {
-    if (!userId) return;
-    try {
-      setTicketsLoading(true);
-      const data = await adminApi.getTickets({ user_id: userId, per_page: 50 });
-      setTickets(data.items);
-      setTicketsTotal(data.total);
-    } catch (error) {
-      console.error('Failed to load tickets:', error);
-    } finally {
-      setTicketsLoading(false);
-    }
-  }, [userId]);
+  const syncStatusQuery = useQuery({
+    queryKey: ['admin-user-sync-status', userId, activeSubscriptionId] as const,
+    queryFn: () => adminUsersApi.getSyncStatus(userId as number, activeSubscriptionId ?? undefined),
+    enabled: !!userId && !isNaN(userId) && activeTab === 'sync' && hasPermission('users:sync'),
+  });
+  const tariffsQuery = useQuery({
+    queryKey: ['admin-user-tariffs', userId] as const,
+    queryFn: () => adminUsersApi.getAvailableTariffs(userId as number, true),
+    enabled: !!userId && !isNaN(userId) && activeTab === 'subscription',
+  });
+  // (ticketsQuery moved into TicketsTab.tsx)
+  const referralsQuery = useQuery({
+    queryKey: ['admin-user-referrals', userId] as const,
+    queryFn: () => adminUsersApi.getReferrals(userId as number, 0, 50),
+    enabled: !!userId && !isNaN(userId) && activeTab === 'info',
+  });
+  // (referralsListQuery moved into ReferralsTab.tsx — the tab owns it now)
+  const panelInfoQuery = useQuery({
+    queryKey: ['admin-user-panel-info', userId, activeSubscriptionId] as const,
+    queryFn: () => adminUsersApi.getPanelInfo(userId as number, activeSubscriptionId ?? undefined),
+    enabled: !!userId && !isNaN(userId),
+  });
+  const nodeUsageQuery = useQuery({
+    queryKey: ['admin-user-node-usage', userId, activeSubscriptionId] as const,
+    queryFn: () => adminUsersApi.getNodeUsage(userId as number, activeSubscriptionId ?? undefined),
+    enabled: !!userId && !isNaN(userId) && activeTab === 'subscription',
+  });
+  const devicesQuery = useQuery({
+    queryKey: ['admin-user-devices', userId, activeSubscriptionId] as const,
+    queryFn: () =>
+      adminUsersApi.getUserDevices(userId as number, activeSubscriptionId ?? undefined),
+    enabled: !!userId && !isNaN(userId) && activeTab === 'subscription',
+  });
+  const giftsQuery = useQuery({
+    queryKey: ['admin-user-gifts', userId] as const,
+    queryFn: () => adminUsersApi.getUserGifts(userId as number),
+    enabled: !!userId && !isNaN(userId) && activeTab === 'gifts',
+  });
+  const promoGroupsQuery = useQuery({
+    queryKey: ['admin-promo-groups-all'] as const,
+    queryFn: () => promocodesApi.getPromoGroups({ limit: 100 }),
+    enabled: activeTab === 'info' && hasPermission('users:promo_group'),
+  });
 
-  const loadTicketDetail = useCallback(async (ticketId: number) => {
-    try {
-      setTicketDetailLoading(true);
-      const data = await adminApi.getTicket(ticketId);
-      setSelectedTicket(data);
-    } catch (error) {
-      console.error('Failed to load ticket detail:', error);
-    } finally {
-      setTicketDetailLoading(false);
+  // --- Sync each query's data + isFetching into existing state vars --------
+  useEffect(() => {
+    if (syncStatusQuery.data) setSyncStatus(syncStatusQuery.data);
+  }, [syncStatusQuery.data]);
+  useEffect(() => {
+    if (tariffsQuery.data) setTariffs(tariffsQuery.data.tariffs);
+  }, [tariffsQuery.data]);
+  // (ticketsQuery sync moved into TicketsTab.tsx)
+  useEffect(() => {
+    if (referralsQuery.data) setReferrals(referralsQuery.data.users || []);
+    setReferralsLoading(referralsQuery.isFetching);
+  }, [referralsQuery.data, referralsQuery.isFetching]);
+  // (referralsListQuery sync moved into ReferralsTab.tsx)
+  useEffect(() => {
+    if (panelInfoQuery.data) setPanelInfo(panelInfoQuery.data);
+    setPanelInfoLoading(panelInfoQuery.isFetching);
+  }, [panelInfoQuery.data, panelInfoQuery.isFetching]);
+  useEffect(() => {
+    if (nodeUsageQuery.data) setNodeUsage(nodeUsageQuery.data);
+  }, [nodeUsageQuery.data]);
+  useEffect(() => {
+    if (devicesQuery.data) {
+      setDevices(devicesQuery.data.devices);
+      setDevicesTotal(devicesQuery.data.total);
+      setDeviceLimit(devicesQuery.data.device_limit);
     }
-  }, []);
+    setDevicesLoading(devicesQuery.isFetching);
+  }, [devicesQuery.data, devicesQuery.isFetching]);
+  useEffect(() => {
+    if (giftsQuery.data) setGiftsData(giftsQuery.data);
+    setGiftsLoading(giftsQuery.isFetching);
+  }, [giftsQuery.data, giftsQuery.isFetching]);
+  useEffect(() => {
+    if (promoGroupsQuery.data) setPromoGroups(promoGroupsQuery.data.items);
+  }, [promoGroupsQuery.data]);
 
-  const loadReferrals = useCallback(async () => {
-    if (!userId) return;
-    try {
-      setReferralsLoading(true);
-      const data = await adminUsersApi.getReferrals(userId, 0, 50);
-      setReferrals(data.users || []);
-    } catch {
-    } finally {
-      setReferralsLoading(false);
-    }
-  }, [userId]);
+  // --- Loader callbacks: thin refetch wrappers (signatures unchanged) ------
 
-  const loadReferralsList = useCallback(async () => {
-    if (!userId) return;
-    setReferralsListLoading(true);
-    try {
-      const data = await adminUsersApi.getReferrals(userId, 0, 100);
-      setReferralsList(data.users || []);
-      setReferralsTotal(data.total || 0);
-    } catch {
-      // silent
-    } finally {
-      setReferralsListLoading(false);
-    }
-  }, [userId]);
+  const loadSyncStatus = useCallback(
+    async () => {
+      await syncStatusQuery.refetch();
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [syncStatusQuery.refetch],
+  );
 
-  const loadPanelInfo = useCallback(async () => {
-    if (!userId) return;
-    try {
-      setPanelInfoLoading(true);
-      const data = await adminUsersApi.getPanelInfo(userId, activeSubscriptionId ?? undefined);
-      setPanelInfo(data);
-    } catch {
-    } finally {
-      setPanelInfoLoading(false);
-    }
-  }, [userId, activeSubscriptionId]);
+  // (loadTickets / loadTicketDetail moved into TicketsTab.tsx)
+
+  // (loadReferralsList moved into ReferralsTab.tsx)
+
+  const loadPanelInfo = useCallback(
+    async () => {
+      await panelInfoQuery.refetch();
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [panelInfoQuery.refetch],
+  );
 
   const loadRequestHistory = useCallback(
     async (offset = 0, append = false) => {
@@ -516,105 +313,35 @@ export default function AdminUserDetail() {
     [userId, requestHistorySubId],
   );
 
-  const loadNodeUsage = useCallback(async () => {
-    if (!userId) return;
-    try {
-      const data = await adminUsersApi.getNodeUsage(userId, activeSubscriptionId ?? undefined);
-      setNodeUsage(data);
-    } catch {}
-  }, [userId, activeSubscriptionId]);
+  const loadNodeUsage = useCallback(
+    async () => {
+      await nodeUsageQuery.refetch();
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [nodeUsageQuery.refetch],
+  );
 
-  const loadDevices = useCallback(async () => {
-    if (!userId) return;
-    try {
-      setDevicesLoading(true);
-      const data = await adminUsersApi.getUserDevices(userId, activeSubscriptionId ?? undefined);
-      setDevices(data.devices);
-      setDevicesTotal(data.total);
-      setDeviceLimit(data.device_limit);
-    } catch {
-    } finally {
-      setDevicesLoading(false);
-    }
-  }, [userId, activeSubscriptionId]);
+  const loadDevices = useCallback(
+    async () => {
+      await devicesQuery.refetch();
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [devicesQuery.refetch],
+  );
 
   const loadSubscriptionData = useCallback(async () => {
     await Promise.all([loadPanelInfo(), loadNodeUsage(), loadDevices()]);
   }, [loadPanelInfo, loadNodeUsage, loadDevices]);
 
-  const loadGifts = useCallback(async () => {
-    if (!userId) return;
-    try {
-      setGiftsLoading(true);
-      const data = await adminUsersApi.getUserGifts(userId);
-      setGiftsData(data);
-    } catch {
-    } finally {
-      setGiftsLoading(false);
-    }
-  }, [userId]);
-
-  const loadPromoGroups = useCallback(async () => {
-    try {
-      const data = await promocodesApi.getPromoGroups({ limit: 100 });
-      setPromoGroups(data.items);
-    } catch {}
-  }, []);
-
-  const handleTicketReply = async () => {
-    if (!selectedTicketId || !replyText.trim()) return;
-    setReplySending(true);
-    try {
-      await adminApi.replyToTicket(selectedTicketId, replyText);
-      setReplyText('');
-      await loadTicketDetail(selectedTicketId);
-      await loadTickets();
-    } catch (error) {
-      console.error('Failed to reply:', error);
-    } finally {
-      setReplySending(false);
-    }
-  };
-
-  const handleTicketStatusChange = async (newStatus: string) => {
-    if (!selectedTicketId) return;
-    setActionLoading(true);
-    try {
-      await adminApi.updateTicketStatus(selectedTicketId, newStatus);
-      await loadTicketDetail(selectedTicketId);
-      await loadTickets();
-    } catch (error) {
-      console.error('Failed to update ticket status:', error);
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (selectedTicketId) {
-      loadTicketDetail(selectedTicketId);
-    }
-  }, [selectedTicketId, loadTicketDetail]);
-
-  useEffect(() => {
-    if (selectedTicket && messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [selectedTicket]);
+  // (handleTicketReply / handleTicketStatusChange + selected-ticket/scroll
+  // useEffects moved into TicketsTab.tsx)
 
   useEffect(() => {
     if (!userId || isNaN(userId)) {
       navigate('/admin/users');
-      return;
     }
-    loadUser();
-  }, [userId, loadUser, navigate]);
-
-  // Load panel info when subscription changes (separate from mount to avoid redundant loadUser)
-  useEffect(() => {
-    if (!userId || isNaN(userId)) return;
-    loadPanelInfo();
-  }, [userId, loadPanelInfo]);
+    // user data is auto-loaded by userQuery (enabled when userId is valid)
+  }, [userId, navigate]);
 
   // Reload request history when the request-history subscription selector changes
   useEffect(() => {
@@ -625,54 +352,10 @@ export default function AdminUserDetail() {
     loadRequestHistory(0);
   }, [requestHistorySubId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  useEffect(() => {
-    if (activeTab === 'info') {
-      loadReferrals();
-      if (hasPermission('users:promo_group')) loadPromoGroups();
-    }
-    if (activeTab === 'sync' && hasPermission('users:sync')) loadSyncStatus();
-    if (activeTab === 'subscription') {
-      loadTariffs();
-      loadSubscriptionData();
-    }
-    if (activeTab === 'tickets') loadTickets();
-    if (activeTab === 'gifts') loadGifts();
-    if (activeTab === 'referrals') loadReferralsList();
-  }, [
-    activeTab,
-    loadSyncStatus,
-    loadTariffs,
-    loadTickets,
-    loadReferrals,
-    loadSubscriptionData,
-    loadPromoGroups,
-    loadGifts,
-    loadReferralsList,
-    hasPermission,
-  ]);
+  // All other per-tab data fetching is driven by useQuery `enabled` gating
+  // wired to userId / activeSubscriptionId / activeTab — no manual triggers needed.
 
-  const handleUpdateBalance = async (isAdd: boolean) => {
-    if (balanceAmount === '' || !userId) return;
-    setActionLoading(true);
-    try {
-      const amount = Math.abs(toNumber(balanceAmount) * 100);
-      await adminUsersApi.updateBalance(userId, {
-        amount_kopeks: isAdd ? amount : -amount,
-        description:
-          balanceDescription ||
-          (isAdd
-            ? t('admin.users.detail.balance.addByAdmin')
-            : t('admin.users.detail.balance.subtractByAdmin')),
-      });
-      await loadUser();
-      setBalanceAmount('');
-      setBalanceDescription('');
-    } catch (error) {
-      console.error('Failed to update balance:', error);
-    } finally {
-      setActionLoading(false);
-    }
-  };
+  // (handleUpdateBalance moved into BalanceTab.tsx)
 
   const handleUpdateSubscription = async (overrideAction?: string) => {
     if (!userId) return;
@@ -797,6 +480,29 @@ export default function AdminUserDetail() {
     }
   };
 
+  // Admin renames a device on behalf of the user. Empty/whitespace input
+  // clears the alias and falls back to the platform/model default.
+  const handleRenameDevice = async (hwid: string) => {
+    if (!userId) return;
+    setRenameSaving(true);
+    // Snapshot inputs BEFORE the await so a fast click on another device
+    // mid-flight doesn't smuggle a different alias into this hwid's request.
+    const snapshotName = editingDeviceName.trim();
+    try {
+      await adminUsersApi.renameUserDevice(userId, hwid, snapshotName || null);
+      notify.success(t('admin.users.detail.devices.renamed', 'Имя устройства обновлено'));
+      // Reset edit state only if user is still on the saved row.
+      setEditingDeviceHwid((current) => (current === hwid ? null : current));
+      await loadDevices();
+    } catch (err) {
+      const apiMessage = (err as { response?: { data?: { detail?: string } } })?.response?.data
+        ?.detail;
+      notify.error(apiMessage || t('admin.users.userActions.error'), t('common.error'));
+    } finally {
+      setRenameSaving(false);
+    }
+  };
+
   const handleResetDevices = async () => {
     if (!userId) return;
     setActionLoading(true);
@@ -916,207 +622,10 @@ export default function AdminUserDetail() {
     }
   };
 
-  const handleDeactivateOffer = async () => {
-    if (!userId) return;
-    setActionLoading(true);
-    try {
-      await promocodesApi.deactivateDiscount(userId);
-      notify.success(t('admin.users.detail.offerDeactivated'), t('common.success'));
-      await loadUser();
-    } catch {
-      notify.error(t('admin.users.userActions.error'), t('common.error'));
-    } finally {
-      setActionLoading(false);
-    }
-  };
+  // (handleDeactivateOffer / handleSendOffer moved into BalanceTab.tsx)
 
-  const handleSendOffer = async () => {
-    if (!userId || offerDiscountPercent === '' || offerValidHours === '') return;
-    setOfferSending(true);
-    try {
-      await promoOffersApi.broadcastOffer({
-        user_id: userId,
-        notification_type: 'admin_personal',
-        discount_percent: toNumber(offerDiscountPercent),
-        valid_hours: toNumber(offerValidHours, 24),
-        effect_type: 'percent_discount',
-        send_notification: true,
-      });
-      notify.success(t('admin.users.detail.offerSent'), t('common.success'));
-      setOfferDiscountPercent('');
-      setOfferValidHours(24);
-      await loadUser();
-    } catch {
-      notify.error(t('admin.users.detail.offerSendError'), t('common.error'));
-    } finally {
-      setOfferSending(false);
-    }
-  };
-
-  // Referrals tab: assign referrer
-  const handleAssignReferrer = async (referrerId: number) => {
-    if (!userId) return;
-    setActionLoading(true);
-    try {
-      await adminUsersApi.assignReferrer(userId, referrerId);
-      await loadUser();
-      setShowReferrerSearch(false);
-      setReferrerSearchQuery('');
-      setReferrerSearchResults([]);
-      notify.success(t('admin.users.detail.referrals.referrerAssigned'));
-    } catch (error: unknown) {
-      const axiosErr = error as { response?: { data?: { detail?: string } } };
-      notify.error(axiosErr?.response?.data?.detail || t('common.error'));
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
-  // Referrals tab: remove referrer
-  const handleRemoveReferrer = async () => {
-    if (!userId) return;
-    setActionLoading(true);
-    try {
-      await adminUsersApi.removeReferrer(userId);
-      await loadUser();
-      notify.success(t('admin.users.detail.referrals.referrerRemoved'));
-    } catch (error: unknown) {
-      const axiosErr = error as { response?: { data?: { detail?: string } } };
-      notify.error(axiosErr?.response?.data?.detail || t('common.error'));
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
-  // Referrals tab: remove a referral
-  const handleRemoveReferral = async (referralUserId: number) => {
-    if (!userId) return;
-    setActionLoading(true);
-    try {
-      await adminUsersApi.removeReferral(userId, referralUserId);
-      await loadReferralsList();
-      await loadUser();
-      notify.success(t('admin.users.detail.referrals.referralRemoved'));
-    } catch (error: unknown) {
-      const axiosErr = error as { response?: { data?: { detail?: string } } };
-      notify.error(axiosErr?.response?.data?.detail || t('common.error'));
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
-  // Add a referral: assign current user as referrer of selected user
-  const handleAddReferral = async (targetUserId: number) => {
-    if (!userId) return;
-    setActionLoading(true);
-    try {
-      await adminUsersApi.assignReferrer(targetUserId, userId);
-      await loadReferralsList();
-      await loadUser();
-      setShowAddReferral(false);
-      setAddReferralSearchQuery('');
-      setAddReferralSearchResults([]);
-      notify.success(t('admin.users.detail.referrals.referralAdded'));
-    } catch (error: unknown) {
-      const axiosErr = error as { response?: { data?: { detail?: string } } };
-      notify.error(axiosErr?.response?.data?.detail || t('common.error'));
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
-  // Referrals tab: debounced user search for referrer assignment
-  useEffect(() => {
-    if (referrerSearchQuery.length < 2 || !showReferrerSearch) {
-      setReferrerSearchResults([]);
-      setReferrerSearchLoading(false);
-      return;
-    }
-    setReferrerSearchLoading(true);
-    setReferrerSearchResults([]);
-    let cancelled = false;
-    const timer = setTimeout(async () => {
-      try {
-        const data = await adminUsersApi.getUsers({ search: referrerSearchQuery, limit: 10 });
-        if (!cancelled) {
-          setReferrerSearchResults(data.users || []);
-          setReferrerSearchLoading(false);
-        }
-      } catch {
-        if (!cancelled) {
-          setReferrerSearchResults([]);
-          setReferrerSearchLoading(false);
-        }
-      }
-    }, 300);
-    return () => {
-      cancelled = true;
-      clearTimeout(timer);
-    };
-  }, [referrerSearchQuery, showReferrerSearch]);
-
-  // Referrals tab: close search dropdown on click outside
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (referrerSearchRef.current && !referrerSearchRef.current.contains(e.target as Node)) {
-        setShowReferrerSearch(false);
-        setReferrerSearchQuery('');
-        setReferrerSearchResults([]);
-      }
-    };
-    if (showReferrerSearch) {
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
-    }
-  }, [showReferrerSearch]);
-
-  // Referrals tab: debounced search for adding referral
-  useEffect(() => {
-    if (addReferralSearchQuery.length < 2 || !showAddReferral) {
-      setAddReferralSearchResults([]);
-      setAddReferralSearchLoading(false);
-      return;
-    }
-    setAddReferralSearchLoading(true);
-    setAddReferralSearchResults([]);
-    let cancelled = false;
-    const timer = setTimeout(async () => {
-      try {
-        const data = await adminUsersApi.getUsers({ search: addReferralSearchQuery, limit: 10 });
-        if (!cancelled) {
-          setAddReferralSearchResults(data.users || []);
-          setAddReferralSearchLoading(false);
-        }
-      } catch {
-        if (!cancelled) {
-          setAddReferralSearchResults([]);
-          setAddReferralSearchLoading(false);
-        }
-      }
-    }, 300);
-    return () => {
-      cancelled = true;
-      clearTimeout(timer);
-    };
-  }, [addReferralSearchQuery, showAddReferral]);
-
-  // Referrals tab: close add-referral dropdown on click outside
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (
-        addReferralSearchRef.current &&
-        !addReferralSearchRef.current.contains(e.target as Node)
-      ) {
-        setShowAddReferral(false);
-        setAddReferralSearchQuery('');
-        setAddReferralSearchResults([]);
-      }
-    };
-    if (showAddReferral) {
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
-    }
-  }, [showAddReferral]);
+  // (Referrals-tab handlers + debounced search useEffects + click-outside
+  // useEffects moved into components/admin/userDetail/ReferralsTab.tsx)
 
   const handleResetTrial = async () => {
     if (!userId) return;
@@ -1224,9 +733,13 @@ export default function AdminUserDetail() {
 
   const copyToClipboard = async (text: string) => {
     try {
-      await navigator.clipboard.writeText(text);
+      await copyText(text);
       notify.success(t('admin.users.detail.copied'));
-    } catch {}
+    } catch {
+      // copy adapter already handles fallback + permission errors; surface
+      // the failure to the user instead of swallowing it silently.
+      notify.error(t('common.error'));
+    }
   };
 
   if (loading) {
@@ -1306,2335 +819,150 @@ export default function AdminUserDetail() {
       <div className="space-y-4">
         {/* Info Tab */}
         {activeTab === 'info' && (
-          <div className="space-y-4">
-            {/* Status */}
-            <div className="flex items-center justify-between rounded-xl bg-dark-800/50 p-3">
-              <span className="text-dark-400">{t('admin.users.detail.status')}</span>
-              <div className="flex items-center gap-2">
-                <StatusBadge status={user.status} />
-                {user.status === 'active' ? (
-                  <button
-                    onClick={handleBlockUser}
-                    disabled={actionLoading}
-                    className="rounded-lg bg-error-500/20 px-3 py-1 text-xs text-error-400 transition-colors hover:bg-error-500/30"
-                  >
-                    {t('admin.users.actions.block')}
-                  </button>
-                ) : user.status === 'blocked' ? (
-                  <button
-                    onClick={handleUnblockUser}
-                    disabled={actionLoading}
-                    className="rounded-lg bg-success-500/20 px-3 py-1 text-xs text-success-400 transition-colors hover:bg-success-500/30"
-                  >
-                    {t('admin.users.actions.unblock')}
-                  </button>
-                ) : null}
-              </div>
-            </div>
-
-            {/* Details grid */}
-            <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-xl bg-dark-800/50 p-3">
-                <div className="mb-1 text-xs text-dark-500">Email</div>
-                <div className="text-dark-100">{user.email || '-'}</div>
-              </div>
-              <div className="rounded-xl bg-dark-800/50 p-3">
-                <div className="mb-1 text-xs text-dark-500">{t('admin.users.detail.language')}</div>
-                <div className="text-dark-100">{user.language}</div>
-              </div>
-              <div className="rounded-xl bg-dark-800/50 p-3">
-                <div className="mb-1 text-xs text-dark-500">
-                  {t('admin.users.detail.registration')}
-                </div>
-                <div className="text-dark-100">{formatDate(user.created_at)}</div>
-              </div>
-              <div className="rounded-xl bg-dark-800/50 p-3">
-                <div className="mb-1 text-xs text-dark-500">
-                  {t('admin.users.detail.botActivity')}
-                </div>
-                <div className="text-dark-100">{formatDate(user.last_activity)}</div>
-              </div>
-              <div className="rounded-xl bg-dark-800/50 p-3">
-                <div className="mb-1 text-xs text-dark-500">
-                  {t('admin.users.detail.cabinetLastLogin')}
-                </div>
-                <div className="text-dark-100">{formatDate(user.cabinet_last_login)}</div>
-              </div>
-              <div className="rounded-xl bg-dark-800/50 p-3">
-                <div className="mb-1 text-xs text-dark-500">
-                  {t('admin.users.detail.totalSpent')}
-                </div>
-                <div className="text-dark-100">
-                  {formatWithCurrency(user.total_spent_kopeks / 100)}
-                </div>
-              </div>
-              <div className="rounded-xl bg-dark-800/50 p-3">
-                <div className="mb-1 text-xs text-dark-500">
-                  {t('admin.users.detail.purchases')}
-                </div>
-                <div className="text-dark-100">{user.purchase_count}</div>
-              </div>
-            </div>
-
-            {/* VPN Connection Info */}
-            {(panelInfo || userSubscriptions.length > 0) && (
-              <div className="rounded-xl border border-dark-700/30 bg-dark-800/50 p-4">
-                <div className="mb-3 flex items-center justify-between">
-                  <span className="text-sm font-medium text-dark-200">
-                    {t('admin.users.detail.vpnConnection')}
-                  </span>
-                  {userSubscriptions.length > 1 && (
-                    <select
-                      value={activeSubscriptionId ?? ''}
-                      onChange={(e) => {
-                        const subId = Number(e.target.value);
-                        setActiveSubscriptionId(subId);
-                      }}
-                      className="rounded-lg border border-dark-600 bg-dark-700 px-3 py-1.5 text-xs text-dark-200"
-                    >
-                      {userSubscriptions.map((s) => (
-                        <option key={s.id} value={s.id}>
-                          {s.tariff_name || `#${s.id}`} — {s.status}
-                        </option>
-                      ))}
-                    </select>
-                  )}
-                </div>
-                {panelInfoLoading && !panelInfo?.found && (
-                  <div className="flex items-center justify-center py-4">
-                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-                  </div>
-                )}
-                {panelInfo?.found && (
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="rounded-lg bg-dark-700/30 p-3">
-                      <div className="mb-1 text-xs text-dark-500">
-                        {t('admin.users.detail.lastConnection')}
-                      </div>
-                      <div className="flex items-center gap-2">
-                        {panelInfo.online_at &&
-                          (() => {
-                            const onlineDate = new Date(panelInfo.online_at);
-                            const isRecent = Date.now() - onlineDate.getTime() < 5 * 60 * 1000;
-                            return (
-                              <>
-                                <span
-                                  className={`inline-block h-2 w-2 shrink-0 rounded-full ${isRecent ? 'bg-success-400 shadow-[0_0_6px_rgba(74,222,128,0.5)]' : 'bg-dark-500'}`}
-                                  title={isRecent ? t('admin.users.detail.online') : ''}
-                                />
-                                <span
-                                  className={`text-sm ${isRecent ? 'font-medium text-success-400' : 'text-dark-100'}`}
-                                >
-                                  {isRecent
-                                    ? t('admin.users.detail.online')
-                                    : formatDate(panelInfo.online_at)}
-                                </span>
-                              </>
-                            );
-                          })()}
-                        {!panelInfo.online_at && <span className="text-sm text-dark-100">-</span>}
-                      </div>
-                    </div>
-                    <div className="rounded-lg bg-dark-700/30 p-3">
-                      <div className="mb-1 text-xs text-dark-500">
-                        {t('admin.users.detail.firstConnection')}
-                      </div>
-                      <div className="text-sm text-dark-100">
-                        {panelInfo.first_connected_at
-                          ? new Date(panelInfo.first_connected_at).toLocaleDateString(locale, {
-                              day: '2-digit',
-                              month: '2-digit',
-                              year: 'numeric',
-                            })
-                          : '-'}
-                      </div>
-                    </div>
-                    {panelInfo.last_connected_node_name && (
-                      <div className="col-span-2 rounded-lg bg-dark-700/30 p-3">
-                        <div className="mb-1 text-xs text-dark-500">
-                          {t('admin.users.detail.lastNode')}
-                        </div>
-                        <div className="flex items-center gap-2 text-sm text-dark-100">
-                          <svg
-                            className="h-4 w-4 shrink-0 text-dark-400"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            strokeWidth={2}
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M5.25 14.25h13.5m-13.5 0a3 3 0 01-3-3m3 3a3 3 0 100 6h13.5a3 3 0 100-6m-16.5-3a3 3 0 013-3h13.5a3 3 0 013 3m-19.5 0a4.5 4.5 0 01.9-2.7L5.737 5.1a3.375 3.375 0 012.7-1.35h7.126c1.062 0 2.062.5 2.7 1.35l2.587 3.45a4.5 4.5 0 01.9 2.7m0 0a3 3 0 01-3 3m0 3h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008zm-3 6h.008v.008h-.008v-.008zm0-6h.008v.008h-.008v-.008z"
-                            />
-                          </svg>
-                          {panelInfo.last_connected_node_name}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-                {!panelInfoLoading && !panelInfo?.found && userSubscriptions.length > 0 && (
-                  <div className="py-2 text-center text-xs text-dark-500">
-                    {t('admin.users.detail.noVpnData')}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Campaign */}
-            {user.campaign_name && (
-              <div className="rounded-xl border border-accent-500/20 bg-accent-500/5 p-3">
-                <div className="mb-1 text-xs text-dark-500">{t('admin.users.detail.campaign')}</div>
-                <div className="text-sm font-medium text-accent-400">{user.campaign_name}</div>
-              </div>
-            )}
-
-            {/* Promo Group */}
-            <div className="rounded-xl bg-dark-800/50 p-3">
-              <div className="mb-1 flex items-center justify-between">
-                <span className="text-xs text-dark-500">{t('admin.users.detail.promoGroup')}</span>
-                {hasPermission('users:promo_group') && (
-                  <button
-                    onClick={() => setEditingPromoGroup(!editingPromoGroup)}
-                    className="text-xs text-accent-400 transition-colors hover:text-accent-300"
-                  >
-                    {editingPromoGroup
-                      ? t('common.cancel')
-                      : t('admin.users.detail.changePromoGroup')}
-                  </button>
-                )}
-              </div>
-              {editingPromoGroup ? (
-                <div className="mt-2 space-y-2">
-                  <select
-                    value={user.promo_group?.id ?? ''}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      handleChangePromoGroup(val ? parseInt(val, 10) : null);
-                    }}
-                    disabled={actionLoading}
-                    className="input text-sm"
-                  >
-                    <option value="">{t('admin.users.detail.selectPromoGroup')}</option>
-                    {promoGroups.map((g) => (
-                      <option key={g.id} value={g.id}>
-                        {g.name}
-                      </option>
-                    ))}
-                  </select>
-                  {user.promo_group && (
-                    <button
-                      onClick={() => handleChangePromoGroup(null)}
-                      disabled={actionLoading}
-                      className="w-full rounded-lg bg-dark-700 py-1.5 text-xs text-dark-300 transition-colors hover:bg-dark-600"
-                    >
-                      {t('admin.users.detail.removePromoGroup')}
-                    </button>
-                  )}
-                </div>
-              ) : (
-                <div className="text-sm font-medium text-dark-100">
-                  {user.promo_group?.name || (
-                    <span className="text-dark-500">{t('admin.users.detail.noPromoGroup')}</span>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* Referral */}
-            <div className="rounded-xl bg-dark-800/50 p-3">
-              <div className="mb-2 flex items-center justify-between">
-                <span className="text-sm font-medium text-dark-200">
-                  {t('admin.users.detail.referral.title')}
-                </span>
-                {hasPermission('users:referral') && (
-                  <button
-                    onClick={() => {
-                      if (!editingReferralCommission) {
-                        setReferralCommissionValue(user.referral.commission_percent ?? '');
-                      }
-                      setEditingReferralCommission(!editingReferralCommission);
-                    }}
-                    className="text-xs text-accent-400 transition-colors hover:text-accent-300"
-                  >
-                    {editingReferralCommission ? t('common.cancel') : t('common.edit')}
-                  </button>
-                )}
-              </div>
-              <div className="grid grid-cols-3 gap-3 text-center">
-                <div>
-                  <div className="text-lg font-bold text-dark-100">
-                    {user.referral.referrals_count}
-                  </div>
-                  <div className="text-xs text-dark-500">
-                    {t('admin.users.detail.referral.referrals')}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-lg font-bold text-dark-100">
-                    {formatWithCurrency(user.referral.total_earnings_kopeks / 100)}
-                  </div>
-                  <div className="text-xs text-dark-500">
-                    {t('admin.users.detail.referral.earned')}
-                  </div>
-                </div>
-                <div>
-                  {editingReferralCommission ? (
-                    <div className="space-y-1">
-                      <input
-                        type="number"
-                        value={referralCommissionValue}
-                        onChange={createNumberInputHandler(setReferralCommissionValue, 0)}
-                        placeholder="0-100"
-                        className="input w-full text-center text-sm"
-                        min={0}
-                        max={100}
-                        disabled={actionLoading}
-                      />
-                      <button
-                        onClick={handleUpdateReferralCommission}
-                        disabled={actionLoading}
-                        className="w-full rounded-lg bg-accent-500 px-2 py-1 text-xs text-white transition-colors hover:bg-accent-600 disabled:opacity-50"
-                      >
-                        {actionLoading ? t('common.loading') : t('common.save')}
-                      </button>
-                    </div>
-                  ) : (
-                    <>
-                      <div className="text-lg font-bold text-dark-100">
-                        {user.referral.commission_percent != null
-                          ? `${user.referral.commission_percent}%`
-                          : t('admin.users.detail.referral.default')}
-                      </div>
-                      <div className="text-xs text-dark-500">
-                        {t('admin.users.detail.referral.commission')}
-                      </div>
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Referrals list */}
-            {user.referral.referrals_count > 0 && (
-              <div className="rounded-xl bg-dark-800/50 p-3">
-                <div className="mb-2 text-sm font-medium text-dark-200">
-                  {t('admin.users.detail.referralsList')}
-                </div>
-                {referralsLoading ? (
-                  <div className="flex justify-center py-4">
-                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-                  </div>
-                ) : referrals.length === 0 ? (
-                  <div className="py-2 text-center text-xs text-dark-500">
-                    {t('admin.users.detail.noReferrals')}
-                  </div>
-                ) : (
-                  <div className="max-h-48 space-y-2 overflow-y-auto">
-                    {referrals.map((ref) => (
-                      <button
-                        key={ref.id}
-                        onClick={() => navigate(`/admin/users/${ref.id}`)}
-                        className="flex w-full items-center justify-between rounded-lg bg-dark-700/50 p-2 text-left transition-colors hover:bg-dark-700"
-                      >
-                        <div className="flex items-center gap-2">
-                          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-dark-600 text-xs font-bold text-dark-300">
-                            {ref.first_name?.[0] || ref.username?.[0] || '?'}
-                          </div>
-                          <div>
-                            <div className="text-sm text-dark-100">{ref.full_name}</div>
-                            <div className="text-xs text-dark-500">
-                              {formatDate(ref.created_at)}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="text-xs text-dark-400">
-                          {formatWithCurrency(ref.total_spent_kopeks / 100)}
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Restrictions */}
-            {(user.restriction_topup || user.restriction_subscription) && (
-              <div className="rounded-xl border border-error-500/30 bg-error-500/10 p-3">
-                <div className="mb-2 text-sm font-medium text-error-400">
-                  {t('admin.users.detail.restrictions.title')}
-                </div>
-                {user.restriction_topup && (
-                  <div className="text-xs text-error-300">
-                    {t('admin.users.detail.restrictions.topup')}
-                  </div>
-                )}
-                {user.restriction_subscription && (
-                  <div className="text-xs text-error-300">
-                    {t('admin.users.detail.restrictions.subscription')}
-                  </div>
-                )}
-                {user.restriction_reason && (
-                  <div className="mt-1 text-xs text-dark-400">
-                    {t('admin.users.detail.restrictions.reason')}: {user.restriction_reason}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Actions */}
-            <div className="rounded-xl bg-dark-800/50 p-4">
-              <div className="mb-3 text-sm font-medium text-dark-200">
-                {t('admin.users.detail.actions.title')}
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  onClick={() => handleInlineConfirm('resetTrial', handleResetTrial)}
-                  disabled={actionLoading}
-                  className={`rounded-lg px-3 py-2 text-sm font-medium transition-all disabled:opacity-50 ${
-                    confirmingAction === 'resetTrial'
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-blue-500/15 text-blue-400 hover:bg-blue-500/25'
-                  }`}
-                >
-                  {confirmingAction === 'resetTrial'
-                    ? t('admin.users.detail.actions.areYouSure')
-                    : t('admin.users.userActions.resetTrial')}
-                </button>
-                <button
-                  onClick={() => handleInlineConfirm('resetSubscription', handleResetSubscription)}
-                  disabled={actionLoading}
-                  className={`rounded-lg px-3 py-2 text-sm font-medium transition-all disabled:opacity-50 ${
-                    confirmingAction === 'resetSubscription'
-                      ? 'bg-amber-500 text-white'
-                      : 'bg-amber-500/15 text-amber-400 hover:bg-amber-500/25'
-                  }`}
-                >
-                  {confirmingAction === 'resetSubscription'
-                    ? t('admin.users.detail.actions.areYouSure')
-                    : t('admin.users.userActions.resetSubscription')}
-                </button>
-                <button
-                  onClick={() => handleInlineConfirm('disable', handleDisableUser)}
-                  disabled={actionLoading}
-                  className={`rounded-lg px-3 py-2 text-sm font-medium transition-all disabled:opacity-50 ${
-                    confirmingAction === 'disable'
-                      ? 'bg-dark-500 text-white'
-                      : 'bg-dark-700 text-dark-300 hover:bg-dark-600'
-                  }`}
-                >
-                  {confirmingAction === 'disable'
-                    ? t('admin.users.detail.actions.areYouSure')
-                    : t('admin.users.userActions.disable')}
-                </button>
-                <button
-                  onClick={() => handleInlineConfirm('fullDelete', handleFullDeleteUser)}
-                  disabled={actionLoading}
-                  className={`rounded-lg px-3 py-2 text-sm font-medium transition-all disabled:opacity-50 ${
-                    confirmingAction === 'fullDelete'
-                      ? 'bg-rose-500 text-white'
-                      : 'bg-rose-500/15 text-rose-400 hover:bg-rose-500/25'
-                  }`}
-                >
-                  {confirmingAction === 'fullDelete'
-                    ? t('admin.users.detail.actions.areYouSure')
-                    : t('admin.users.userActions.delete')}
-                </button>
-              </div>
-            </div>
-          </div>
+          <InfoTab
+            user={user}
+            hasPermission={hasPermission}
+            formatDate={formatDate}
+            locale={locale}
+            panelInfo={panelInfo}
+            panelInfoLoading={panelInfoLoading}
+            userSubscriptions={userSubscriptions}
+            activeSubscriptionId={activeSubscriptionId}
+            onActiveSubscriptionChange={setActiveSubscriptionId}
+            promoGroups={promoGroups}
+            editingPromoGroup={editingPromoGroup}
+            onToggleEditingPromoGroup={() => setEditingPromoGroup(!editingPromoGroup)}
+            onChangePromoGroup={handleChangePromoGroup}
+            editingReferralCommission={editingReferralCommission}
+            referralCommissionValue={referralCommissionValue}
+            onSetReferralCommissionValue={setReferralCommissionValue}
+            onToggleEditingReferralCommission={() => {
+              if (!editingReferralCommission) {
+                setReferralCommissionValue(user.referral.commission_percent ?? '');
+              }
+              setEditingReferralCommission(!editingReferralCommission);
+            }}
+            onUpdateReferralCommission={handleUpdateReferralCommission}
+            referrals={referrals}
+            referralsLoading={referralsLoading}
+            actionLoading={actionLoading}
+            onBlockUser={handleBlockUser}
+            onUnblockUser={handleUnblockUser}
+            confirmingAction={confirmingAction}
+            onInlineConfirm={handleInlineConfirm}
+            onResetTrial={handleResetTrial}
+            onResetSubscription={handleResetSubscription}
+            onDisableUser={handleDisableUser}
+            onFullDeleteUser={handleFullDeleteUser}
+          />
         )}
 
         {/* Subscription Tab */}
         {activeTab === 'subscription' && (
-          <div className="space-y-4">
-            {/* Multi-subscription: Level 1 — subscription list */}
-            {userSubscriptions.length > 1 && !subscriptionDetailView && (
-              <>
-                <div className="space-y-3">
-                  {userSubscriptions.map((sub) => (
-                    <button
-                      key={sub.id}
-                      onClick={() => {
-                        setActiveSubscriptionId(sub.id);
-                        setSubscriptionDetailView(true);
-                      }}
-                      className="w-full rounded-xl border border-dark-700/50 bg-dark-800/50 p-4 text-left transition-all hover:border-dark-600"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-semibold text-dark-100">
-                            {sub.tariff_name || `#${sub.id}`}
-                          </span>
-                          <StatusBadge status={sub.status} />
-                        </div>
-                        <svg
-                          className="h-4 w-4 text-dark-500"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          strokeWidth={2.5}
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M8.25 4.5l7.5 7.5-7.5 7.5"
-                          />
-                        </svg>
-                      </div>
-                      <div className="mt-2 flex items-center gap-4 text-xs text-dark-400">
-                        <span>
-                          {sub.traffic_used_gb.toFixed(1)} / {sub.traffic_limit_gb}{' '}
-                          {t('common.units.gb')}
-                        </span>
-                        <span>{formatDate(sub.end_date)}</span>
-                        <span>
-                          {sub.device_limit}{' '}
-                          {t('admin.users.detail.subscription.devices', 'устройств')}
-                        </span>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-
-                {/* Create new subscription — at list level */}
-                {hasPermission('users:subscription') && (
-                  <div className="rounded-xl bg-dark-800/50 p-4">
-                    <div className="mb-3 text-sm font-medium text-dark-200">
-                      {t('admin.users.detail.subscription.createNew', 'Создать подписку')}
-                    </div>
-                    <div className="space-y-3">
-                      <select
-                        value={selectedTariffId || ''}
-                        onChange={(e) =>
-                          setSelectedTariffId(e.target.value ? parseInt(e.target.value) : null)
-                        }
-                        className="input"
-                      >
-                        <option value="">
-                          {t('admin.users.detail.subscription.selectTariff')}
-                        </option>
-                        {tariffs
-                          .filter((tariffItem) => {
-                            const purchasedIds = new Set(
-                              userSubscriptions
-                                .filter(
-                                  (s) =>
-                                    s.is_active || s.status === 'trial' || s.status === 'limited',
-                                )
-                                .map((s) => s.tariff_id),
-                            );
-                            return !purchasedIds.has(tariffItem.id);
-                          })
-                          .map((tariffItem) => (
-                            <option key={tariffItem.id} value={tariffItem.id}>
-                              {tariffItem.name}
-                            </option>
-                          ))}
-                      </select>
-                      <input
-                        type="number"
-                        value={subDays}
-                        onChange={createNumberInputHandler(setSubDays, 1)}
-                        placeholder={t('admin.users.detail.subscription.days')}
-                        className="input"
-                        min={1}
-                        max={3650}
-                      />
-                      <button
-                        onClick={() => handleUpdateSubscription('create')}
-                        disabled={actionLoading}
-                        className="btn-primary w-full"
-                      >
-                        {actionLoading
-                          ? t('admin.users.detail.subscription.creating')
-                          : t('admin.users.detail.subscription.create')}
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </>
-            )}
-
-            {/* Level 2 — subscription detail (or single subscription) */}
-            {(subscriptionDetailView || userSubscriptions.length <= 1) && selectedSub ? (
-              <>
-                {/* Back to list (multi-subscription) */}
-                {subscriptionDetailView && userSubscriptions.length > 1 && (
-                  <button
-                    onClick={() => setSubscriptionDetailView(false)}
-                    className="flex items-center gap-1.5 text-sm text-dark-400 transition-colors hover:text-dark-200"
-                  >
-                    <svg
-                      className="h-4 w-4"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-                    </svg>
-                    {t('admin.users.detail.subscription.backToList', 'Все подписки')}
-                  </button>
-                )}
-
-                {/* Current subscription */}
-                <div className="rounded-xl bg-dark-800/50 p-4">
-                  <div className="mb-3 flex items-center justify-between">
-                    <span className="font-medium text-dark-200">
-                      {t('admin.users.detail.subscription.current')}
-                      {userSubscriptions.length > 1 && (
-                        <span className="ml-2 text-xs text-dark-500">#{selectedSub.id}</span>
-                      )}
-                    </span>
-                    <StatusBadge status={selectedSub.status} />
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <div className="text-xs text-dark-500">
-                        {t('admin.users.detail.subscription.tariff')}
-                      </div>
-                      <div className="text-dark-100">
-                        {selectedSub.tariff_name ||
-                          t('admin.users.detail.subscription.notSpecified')}
-                      </div>
-                    </div>
-                    <div>
-                      <div className="text-xs text-dark-500">
-                        {t('admin.users.detail.subscription.validUntil')}
-                      </div>
-                      <div className="text-dark-100">{formatDate(selectedSub.end_date)}</div>
-                    </div>
-                    <div>
-                      <div className="text-xs text-dark-500">
-                        {t('admin.users.detail.subscription.traffic')}
-                      </div>
-                      <div className="text-dark-100">
-                        {panelInfo?.found
-                          ? (panelInfo.used_traffic_bytes / (1024 * 1024 * 1024)).toFixed(1)
-                          : selectedSub.traffic_used_gb.toFixed(1)}{' '}
-                        / {selectedSub.traffic_limit_gb} {t('common.units.gb')}
-                      </div>
-                    </div>
-                    <div>
-                      <div className="text-xs text-dark-500">
-                        {t('admin.users.detail.subscription.devices')}
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => handleSetDeviceLimit(selectedSub.device_limit - 1)}
-                          disabled={actionLoading || selectedSub.device_limit <= 1}
-                          className="flex h-6 w-6 items-center justify-center rounded-md bg-dark-700 text-dark-300 transition-colors hover:bg-dark-600 disabled:opacity-30"
-                        >
-                          <MinusIcon />
-                        </button>
-                        <span className="min-w-[2ch] text-center text-dark-100">
-                          {selectedSub.device_limit}
-                        </span>
-                        <button
-                          onClick={() => handleSetDeviceLimit(selectedSub.device_limit + 1)}
-                          disabled={
-                            actionLoading ||
-                            (currentTariff?.max_device_limit != null &&
-                              selectedSub.device_limit >= currentTariff.max_device_limit)
-                          }
-                          className="flex h-6 w-6 items-center justify-center rounded-md bg-dark-700 text-dark-300 transition-colors hover:bg-dark-600 disabled:opacity-30"
-                        >
-                          <PlusIcon />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Traffic Packages */}
-                {selectedSub.traffic_purchases && selectedSub.traffic_purchases.length > 0 && (
-                  <div className="rounded-xl bg-dark-800/50 p-4">
-                    <div className="mb-3 flex items-center justify-between">
-                      <span className="text-sm font-medium text-dark-200">
-                        {t('admin.users.detail.subscription.trafficPackages')}
-                        {selectedSub.purchased_traffic_gb > 0 && (
-                          <span className="ml-2 text-xs text-dark-400">
-                            ({selectedSub.purchased_traffic_gb} {t('common.units.gb')})
-                          </span>
-                        )}
-                      </span>
-                    </div>
-                    <div className="space-y-2">
-                      {selectedSub.traffic_purchases.map((tp) => (
-                        <div
-                          key={tp.id}
-                          className={`flex items-center justify-between rounded-lg px-3 py-2 ${
-                            tp.is_expired ? 'bg-dark-700/30 opacity-60' : 'bg-dark-700/50'
-                          }`}
-                        >
-                          <div className="min-w-0 flex-1">
-                            <div className="flex items-center gap-2 text-sm text-dark-200">
-                              <span className="font-medium">
-                                {tp.traffic_gb} {t('common.units.gb')}
-                              </span>
-                              {tp.is_expired ? (
-                                <span className="rounded-full bg-error-500/20 px-1.5 py-0.5 text-[10px] text-error-400">
-                                  {t('admin.users.detail.subscription.expired')}
-                                </span>
-                              ) : (
-                                <span className="text-xs text-dark-400">
-                                  {tp.days_remaining}{' '}
-                                  {t('admin.users.detail.subscription.daysLeft')}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                          {!tp.is_expired && (
-                            <button
-                              onClick={() =>
-                                handleInlineConfirm(`removeTraffic_${tp.id}`, () =>
-                                  handleRemoveTraffic(tp.id),
-                                )
-                              }
-                              disabled={actionLoading}
-                              className={`ml-2 shrink-0 rounded-lg px-2 py-1 text-xs transition-all disabled:opacity-50 ${
-                                confirmingAction === `removeTraffic_${tp.id}`
-                                  ? 'bg-error-500 text-white'
-                                  : 'text-dark-500 hover:bg-error-500/15 hover:text-error-400'
-                              }`}
-                            >
-                              {confirmingAction === `removeTraffic_${tp.id}` ? '?' : '\u00D7'}
-                            </button>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Add Traffic */}
-                {currentTariff &&
-                  currentTariff.traffic_topup_enabled &&
-                  Object.keys(currentTariff.traffic_topup_packages).length > 0 && (
-                    <div className="rounded-xl bg-dark-800/50 p-4">
-                      <div className="mb-3 text-sm font-medium text-dark-200">
-                        {t('admin.users.detail.subscription.addTraffic')}
-                      </div>
-                      <div className="flex gap-2">
-                        <select
-                          value={selectedTrafficGb}
-                          onChange={(e) => setSelectedTrafficGb(e.target.value)}
-                          className="input flex-1"
-                        >
-                          <option value="">
-                            {t('admin.users.detail.subscription.selectPackage')}
-                          </option>
-                          {Object.entries(currentTariff.traffic_topup_packages)
-                            .sort(([a], [b]) => Number(a) - Number(b))
-                            .map(([gb]) => (
-                              <option key={gb} value={gb}>
-                                {gb} {t('common.units.gb')}
-                              </option>
-                            ))}
-                        </select>
-                        <button
-                          onClick={() =>
-                            selectedTrafficGb && handleAddTraffic(Number(selectedTrafficGb))
-                          }
-                          disabled={actionLoading || !selectedTrafficGb}
-                          className="shrink-0 rounded-lg bg-accent-500 px-4 py-2 text-sm text-white transition-colors hover:bg-accent-600 disabled:opacity-50"
-                        >
-                          {t('admin.users.detail.subscription.addButton')}
-                        </button>
-                      </div>
-                      <div className="mt-2 text-xs text-dark-500">
-                        {t('admin.users.detail.subscription.addTrafficNote')}
-                      </div>
-                    </div>
-                  )}
-
-                {/* Actions */}
-                {hasPermission('users:subscription') && (
-                  <div className="rounded-xl bg-dark-800/50 p-4">
-                    <div className="mb-3 font-medium text-dark-200">
-                      {t('admin.users.detail.subscription.actions')}
-                    </div>
-                    <div className="space-y-3">
-                      <select
-                        value={subAction}
-                        onChange={(e) => setSubAction(e.target.value)}
-                        className="input"
-                      >
-                        <option value="extend">
-                          {t('admin.users.detail.subscription.extend')}
-                        </option>
-                        <option value="shorten">
-                          {t('admin.users.detail.subscription.shorten')}
-                        </option>
-                        {userSubscriptions.length <= 1 && (
-                          <option value="change_tariff">
-                            {t('admin.users.detail.subscription.changeTariff')}
-                          </option>
-                        )}
-                        <option value="cancel">
-                          {t('admin.users.detail.subscription.cancel')}
-                        </option>
-                        <option value="activate">
-                          {t('admin.users.detail.subscription.activate')}
-                        </option>
-                      </select>
-
-                      {(subAction === 'extend' || subAction === 'shorten') && (
-                        <input
-                          type="number"
-                          value={subDays}
-                          onChange={createNumberInputHandler(setSubDays, 1)}
-                          placeholder={t('admin.users.detail.subscription.days')}
-                          className="input"
-                          min={1}
-                          max={3650}
-                        />
-                      )}
-
-                      {subAction === 'change_tariff' && (
-                        <select
-                          value={selectedTariffId || ''}
-                          onChange={(e) =>
-                            setSelectedTariffId(e.target.value ? parseInt(e.target.value) : null)
-                          }
-                          className="input"
-                        >
-                          <option value="">
-                            {t('admin.users.detail.subscription.selectTariff')}
-                          </option>
-                          {tariffs.map((tariffItem) => (
-                            <option key={tariffItem.id} value={tariffItem.id}>
-                              {tariffItem.name}{' '}
-                              {!tariffItem.is_available &&
-                                t('admin.users.detail.subscription.unavailable')}
-                            </option>
-                          ))}
-                        </select>
-                      )}
-
-                      <button
-                        onClick={() => handleUpdateSubscription()}
-                        disabled={actionLoading}
-                        className="btn-primary w-full"
-                      >
-                        {actionLoading
-                          ? t('admin.users.actions.applying')
-                          : t('admin.users.actions.apply')}
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </>
-            ) : null}
-
-            {/* Create new subscription — only for single-sub users or no subs */}
-            {hasPermission('users:subscription') && userSubscriptions.length <= 1 && (
-              <div className="rounded-xl bg-dark-800/50 p-4">
-                {userSubscriptions.length === 0 && (
-                  <div className="mb-4 text-center text-dark-400">
-                    {t('admin.users.detail.subscription.noActive')}
-                  </div>
-                )}
-                <div className="mb-3 text-sm font-medium text-dark-200">
-                  {t('admin.users.detail.subscription.createNew', 'Создать подписку')}
-                </div>
-                <div className="space-y-3">
-                  <select
-                    value={selectedTariffId || ''}
-                    onChange={(e) =>
-                      setSelectedTariffId(e.target.value ? parseInt(e.target.value) : null)
-                    }
-                    className="input"
-                  >
-                    <option value="">{t('admin.users.detail.subscription.selectTariff')}</option>
-                    {tariffs
-                      .filter((tariffItem) => {
-                        // In multi-tariff: hide tariffs user already has
-                        if (userSubscriptions.length > 0) {
-                          const purchasedIds = new Set(
-                            userSubscriptions
-                              .filter((s) => s.is_active || s.status === 'trial')
-                              .map((s) => s.tariff_id),
-                          );
-                          return !purchasedIds.has(tariffItem.id);
-                        }
-                        return true;
-                      })
-                      .map((tariffItem) => (
-                        <option key={tariffItem.id} value={tariffItem.id}>
-                          {tariffItem.name}
-                        </option>
-                      ))}
-                  </select>
-                  <input
-                    type="number"
-                    value={subDays}
-                    onChange={createNumberInputHandler(setSubDays, 1)}
-                    placeholder={t('admin.users.detail.subscription.days')}
-                    className="input"
-                    min={1}
-                    max={3650}
-                  />
-                  <button
-                    onClick={() => handleUpdateSubscription('create')}
-                    disabled={actionLoading}
-                    className="btn-primary w-full"
-                  >
-                    {actionLoading
-                      ? t('admin.users.detail.subscription.creating')
-                      : t('admin.users.detail.subscription.create')}
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Panel Info, Traffic, Devices — only inside subscription detail */}
-            {(subscriptionDetailView || userSubscriptions.length <= 1) && (
-              <>
-                {panelInfoLoading ? (
-                  <div className="flex justify-center rounded-xl bg-dark-800/50 py-8">
-                    <div className="h-6 w-6 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-                  </div>
-                ) : panelInfo && !panelInfo.found ? (
-                  <div className="rounded-xl border border-dark-700 bg-dark-800/50 p-4 text-center text-sm text-dark-400">
-                    {t('admin.users.detail.panelNotFound')}
-                  </div>
-                ) : panelInfo && panelInfo.found ? (
-                  <>
-                    {/* Links */}
-                    {(panelInfo.subscription_url || panelInfo.happ_link) && (
-                      <div className="rounded-xl bg-dark-800/50 p-4">
-                        <div className="mb-3 text-sm font-medium text-dark-200">
-                          {t('admin.users.detail.subscriptionUrl')} /{' '}
-                          {t('admin.users.detail.happLink')}
-                        </div>
-                        <div className="space-y-2">
-                          {panelInfo.subscription_url && (
-                            <button
-                              onClick={() => copyToClipboard(panelInfo.subscription_url!)}
-                              className="w-full rounded-lg bg-dark-700/50 p-2 text-left transition-colors hover:bg-dark-700"
-                            >
-                              <div className="mb-0.5 text-xs text-dark-500">
-                                {t('admin.users.detail.subscriptionUrl')}
-                              </div>
-                              <div className="truncate font-mono text-xs text-dark-200">
-                                {panelInfo.subscription_url}
-                              </div>
-                            </button>
-                          )}
-                          {panelInfo.happ_link && (
-                            <button
-                              onClick={() => copyToClipboard(panelInfo.happ_link!)}
-                              className="w-full rounded-lg bg-dark-700/50 p-2 text-left transition-colors hover:bg-dark-700"
-                            >
-                              <div className="mb-0.5 text-xs text-dark-500">
-                                {t('admin.users.detail.happLink')}
-                              </div>
-                              <div className="truncate font-mono text-xs text-dark-200">
-                                {panelInfo.happ_link}
-                              </div>
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Config */}
-                    {(panelInfo.trojan_password ||
-                      panelInfo.vless_uuid ||
-                      panelInfo.ss_password) && (
-                      <div className="rounded-xl bg-dark-800/50 p-4">
-                        <div className="mb-3 text-sm font-medium text-dark-200">
-                          {t('admin.users.detail.panelConfig')}
-                        </div>
-                        <div className="space-y-2">
-                          {panelInfo.trojan_password && (
-                            <button
-                              onClick={() => copyToClipboard(panelInfo.trojan_password!)}
-                              className="w-full rounded-lg bg-dark-700/50 p-2 text-left transition-colors hover:bg-dark-700"
-                            >
-                              <div className="mb-0.5 text-xs text-dark-500">
-                                {t('admin.users.detail.trojanPassword')}
-                              </div>
-                              <div className="truncate font-mono text-xs text-dark-200">
-                                {panelInfo.trojan_password}
-                              </div>
-                            </button>
-                          )}
-                          {panelInfo.vless_uuid && (
-                            <button
-                              onClick={() => copyToClipboard(panelInfo.vless_uuid!)}
-                              className="w-full rounded-lg bg-dark-700/50 p-2 text-left transition-colors hover:bg-dark-700"
-                            >
-                              <div className="mb-0.5 text-xs text-dark-500">
-                                {t('admin.users.detail.vlessUuid')}
-                              </div>
-                              <div className="truncate font-mono text-xs text-dark-200">
-                                {panelInfo.vless_uuid}
-                              </div>
-                            </button>
-                          )}
-                          {panelInfo.ss_password && (
-                            <button
-                              onClick={() => copyToClipboard(panelInfo.ss_password!)}
-                              className="w-full rounded-lg bg-dark-700/50 p-2 text-left transition-colors hover:bg-dark-700"
-                            >
-                              <div className="mb-0.5 text-xs text-dark-500">
-                                {t('admin.users.detail.ssPassword')}
-                              </div>
-                              <div className="truncate font-mono text-xs text-dark-200">
-                                {panelInfo.ss_password}
-                              </div>
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Connection info */}
-                    <div className="rounded-xl bg-dark-800/50 p-4">
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <div className="text-xs text-dark-500">
-                            {t('admin.users.detail.firstConnected')}
-                          </div>
-                          <div className="text-sm text-dark-100">
-                            {formatDate(panelInfo.first_connected_at)}
-                          </div>
-                        </div>
-                        <div>
-                          <div className="text-xs text-dark-500">
-                            {t('admin.users.detail.lastOnline')}
-                          </div>
-                          <div className="text-sm text-dark-100">
-                            {formatDate(panelInfo.online_at)}
-                          </div>
-                        </div>
-                        {panelInfo.last_connected_node_name && (
-                          <div className="col-span-2">
-                            <div className="text-xs text-dark-500">
-                              {t('admin.users.detail.lastNode')}
-                            </div>
-                            <div className="text-sm text-dark-100">
-                              {panelInfo.last_connected_node_name}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Live traffic */}
-                    <div className="rounded-xl bg-dark-800/50 p-4">
-                      <div className="mb-3 text-sm font-medium text-dark-200">
-                        {t('admin.users.detail.liveTraffic')}
-                      </div>
-                      <div className="mb-2">
-                        <div className="mb-1 flex justify-between text-xs">
-                          <span className="text-dark-400">
-                            {formatBytes(panelInfo.used_traffic_bytes)}
-                          </span>
-                          <span className="text-dark-500">
-                            {panelInfo.traffic_limit_bytes > 0
-                              ? formatBytes(panelInfo.traffic_limit_bytes)
-                              : '∞'}
-                          </span>
-                        </div>
-                        <div className="h-2 overflow-hidden rounded-full bg-dark-700">
-                          <div
-                            className="h-full rounded-full bg-accent-500 transition-all"
-                            style={{
-                              width:
-                                panelInfo.traffic_limit_bytes > 0
-                                  ? `${Math.min(100, (panelInfo.used_traffic_bytes / panelInfo.traffic_limit_bytes) * 100)}%`
-                                  : '0%',
-                            }}
-                          />
-                        </div>
-                      </div>
-                      <div className="text-xs text-dark-500">
-                        {t('admin.users.detail.lifetime')}:{' '}
-                        {formatBytes(panelInfo.lifetime_used_traffic_bytes)}
-                      </div>
-                    </div>
-
-                    {/* Node usage */}
-                    <div className="rounded-xl bg-dark-800/50 p-4">
-                      <div className="mb-3 flex items-center justify-between">
-                        <span className="text-sm font-medium text-dark-200">
-                          {t('admin.users.detail.nodeUsage')}
-                        </span>
-                        <div className="flex items-center gap-2">
-                          <div className="flex gap-1">
-                            {[1, 3, 7, 14, 30].map((d) => (
-                              <button
-                                key={d}
-                                onClick={() => setNodeUsageDays(d)}
-                                className={`rounded-lg px-2 py-1 text-xs transition-colors ${
-                                  nodeUsageDays === d
-                                    ? 'bg-accent-500/20 text-accent-400'
-                                    : 'text-dark-500 hover:text-dark-300'
-                                }`}
-                              >
-                                {d}d
-                              </button>
-                            ))}
-                          </div>
-                          <button
-                            onClick={() => loadSubscriptionData()}
-                            className="rounded-lg p-1 text-dark-500 transition-colors hover:text-dark-300"
-                            title={t('common.refresh')}
-                          >
-                            <RefreshIcon className="h-3.5 w-3.5" />
-                          </button>
-                        </div>
-                      </div>
-                      {nodeUsageForPeriod.length > 0 ? (
-                        <div className="space-y-2">
-                          {nodeUsageForPeriod.map((item) => {
-                            const maxBytes = nodeUsageForPeriod[0].total_bytes;
-                            const pct = maxBytes > 0 ? (item.total_bytes / maxBytes) * 100 : 0;
-                            return (
-                              <div key={item.node_uuid}>
-                                <div className="mb-1 flex justify-between text-xs">
-                                  <span className="text-dark-300">
-                                    {item.country_code && (
-                                      <span className="mr-1">
-                                        {getCountryFlag(item.country_code)}
-                                      </span>
-                                    )}
-                                    {item.node_name}
-                                  </span>
-                                  <span className="text-dark-400">
-                                    {formatBytes(item.total_bytes)}
-                                  </span>
-                                </div>
-                                <div className="h-1.5 overflow-hidden rounded-full bg-dark-700">
-                                  <div
-                                    className="h-full rounded-full bg-accent-500/60"
-                                    style={{ width: `${pct}%` }}
-                                  />
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      ) : (
-                        <div className="py-2 text-center text-xs text-dark-500">-</div>
-                      )}
-                    </div>
-                  </>
-                ) : null}
-
-                {/* Devices */}
-                <div className="rounded-xl bg-dark-800/50 p-4">
-                  <div className="mb-3 flex items-center justify-between">
-                    <span className="text-sm font-medium text-dark-200">
-                      {t('admin.users.detail.devices.title')} ({devicesTotal}/{deviceLimit})
-                    </span>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => loadDevices()}
-                        className="rounded-lg p-1 text-dark-500 transition-colors hover:text-dark-300"
-                        title={t('common.refresh')}
-                      >
-                        <RefreshIcon className="h-3.5 w-3.5" />
-                      </button>
-                      {devices.length > 0 && (
-                        <button
-                          onClick={() => handleInlineConfirm('resetDevices', handleResetDevices)}
-                          disabled={actionLoading}
-                          className={`rounded-lg px-2 py-1 text-xs font-medium transition-all disabled:opacity-50 ${
-                            confirmingAction === 'resetDevices'
-                              ? 'bg-error-500 text-white'
-                              : 'bg-error-500/15 text-error-400 hover:bg-error-500/25'
-                          }`}
-                        >
-                          {confirmingAction === 'resetDevices'
-                            ? t('admin.users.detail.actions.areYouSure')
-                            : t('admin.users.detail.devices.resetAll')}
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                  {devicesLoading ? (
-                    <div className="flex justify-center py-4">
-                      <div className="h-5 w-5 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-                    </div>
-                  ) : devices.length > 0 ? (
-                    <div className="space-y-2">
-                      {devices.map((device) => (
-                        <div
-                          key={device.hwid}
-                          className="flex items-center justify-between rounded-lg bg-dark-700/50 px-3 py-2"
-                        >
-                          <div className="min-w-0 flex-1">
-                            <div className="truncate text-xs font-medium text-dark-200">
-                              {device.platform || device.device_model || device.hwid.slice(0, 12)}
-                            </div>
-                            <div className="flex items-center gap-2 text-[10px] text-dark-500">
-                              {device.device_model && device.platform && (
-                                <span>{device.device_model}</span>
-                              )}
-                              <span className="font-mono">{device.hwid.slice(0, 8)}...</span>
-                              {device.created_at && (
-                                <span>
-                                  {new Date(device.created_at).toLocaleDateString(locale)}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                          <button
-                            onClick={() =>
-                              handleInlineConfirm(`deleteDevice_${device.hwid}`, () =>
-                                handleDeleteDevice(device.hwid),
-                              )
-                            }
-                            disabled={actionLoading}
-                            className={`ml-2 shrink-0 rounded-lg px-2 py-1 text-xs transition-all disabled:opacity-50 ${
-                              confirmingAction === `deleteDevice_${device.hwid}`
-                                ? 'bg-error-500 text-white'
-                                : 'text-dark-500 hover:bg-error-500/15 hover:text-error-400'
-                            }`}
-                          >
-                            {confirmingAction === `deleteDevice_${device.hwid}` ? '?' : '\u00D7'}
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="py-2 text-center text-xs text-dark-500">
-                      {t('admin.users.detail.devices.none')}
-                    </div>
-                  )}
-                </div>
-
-                {/* Subscription Request History */}
-                <div className="rounded-xl bg-dark-800/50">
-                  <button
-                    onClick={() => {
-                      const next = !requestHistoryExpanded;
-                      setRequestHistoryExpanded(next);
-                      if (next && requestHistory.length === 0) {
-                        loadRequestHistory(0);
-                      }
-                    }}
-                    className="flex w-full items-center justify-between p-4 text-left"
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-dark-200">
-                        {t('admin.users.detail.requestHistory')}
-                      </span>
-                      {requestHistoryTotal > 0 && (
-                        <span className="rounded-full bg-accent-500/15 px-2 py-0.5 text-xs font-medium text-accent-400">
-                          {requestHistoryTotal}
-                        </span>
-                      )}
-                    </div>
-                    <svg
-                      className={`h-4 w-4 text-dark-500 transition-transform ${requestHistoryExpanded ? 'rotate-180' : ''}`}
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M19.5 8.25l-7.5 7.5-7.5-7.5"
-                      />
-                    </svg>
-                  </button>
-
-                  {requestHistoryExpanded && (
-                    <div className="border-t border-dark-700/50 px-4 pb-4 pt-3">
-                      {/* Subscription selector for multi-tariff */}
-                      {userSubscriptions.length > 1 && (
-                        <div className="mb-3">
-                          <select
-                            value={requestHistorySubId || ''}
-                            onChange={(e) => {
-                              setRequestHistorySubId(Number(e.target.value) || null);
-                            }}
-                            className="w-full rounded-lg border border-dark-600 bg-dark-700 px-3 py-2 text-sm text-dark-100"
-                          >
-                            {userSubscriptions.map((sub) => (
-                              <option key={sub.id} value={sub.id}>
-                                {sub.tariff_name || `#${sub.id}`} — {sub.status}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                      )}
-
-                      {requestHistoryLoading && requestHistory.length === 0 ? (
-                        <div className="flex justify-center py-6">
-                          <div className="h-5 w-5 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-                        </div>
-                      ) : requestHistory.length === 0 && !requestHistoryLoading ? (
-                        <div className="py-6 text-center text-sm text-dark-500">
-                          {t('admin.users.detail.noRequests')}
-                        </div>
-                      ) : (
-                        <>
-                          <div className="mb-2 text-xs text-dark-500">
-                            {t('admin.users.detail.requestHistoryTotal')}: {requestHistoryTotal}
-                          </div>
-
-                          {/* Table */}
-                          <div className="-mx-4 overflow-x-auto px-4">
-                            <table className="w-full min-w-[480px] text-left text-sm">
-                              <thead>
-                                <tr className="border-b border-dark-700/50 text-xs text-dark-500">
-                                  <th className="pb-2 pr-3 font-medium">
-                                    {t('admin.users.detail.requestAt')}
-                                  </th>
-                                  <th className="pb-2 pr-3 font-medium">
-                                    {t('admin.users.detail.requestIp')}
-                                  </th>
-                                  <th className="pb-2 font-medium">
-                                    {t('admin.users.detail.requestUserAgent')}
-                                  </th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {requestHistory.map((record, idx) => (
-                                  <tr
-                                    key={record.id}
-                                    className={`border-b border-dark-700/30 ${idx % 2 === 0 ? 'bg-dark-800/30' : ''}`}
-                                  >
-                                    <td className="whitespace-nowrap py-2.5 pr-3 text-dark-200">
-                                      {formatDate(record.requestAt)}
-                                    </td>
-                                    <td className="whitespace-nowrap py-2.5 pr-3 font-mono text-xs text-dark-300">
-                                      {record.requestIp || '\u2014'}
-                                    </td>
-                                    <td
-                                      className="max-w-[200px] truncate py-2.5 text-xs text-dark-400"
-                                      title={record.userAgent || ''}
-                                    >
-                                      {record.userAgent
-                                        ? record.userAgent.length > 60
-                                          ? `${record.userAgent.slice(0, 60)}...`
-                                          : record.userAgent
-                                        : '\u2014'}
-                                    </td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                          </div>
-
-                          {/* Load more */}
-                          {requestHistory.length < requestHistoryTotal && (
-                            <button
-                              onClick={() => loadRequestHistory(requestHistoryOffset, true)}
-                              disabled={requestHistoryLoading}
-                              className="mt-3 flex min-h-[44px] w-full items-center justify-center rounded-lg bg-dark-700/50 py-2.5 text-sm text-dark-300 transition-colors hover:bg-dark-700 disabled:opacity-50"
-                            >
-                              {requestHistoryLoading ? (
-                                <div className="h-4 w-4 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-                              ) : (
-                                t('admin.users.detail.loadMore')
-                              )}
-                            </button>
-                          )}
-                        </>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </>
-            )}
-          </div>
+          <SubscriptionTab
+            userSubscriptions={userSubscriptions}
+            selectedSub={selectedSub}
+            activeSubscriptionId={activeSubscriptionId}
+            onActiveSubscriptionChange={setActiveSubscriptionId}
+            subscriptionDetailView={subscriptionDetailView}
+            onSubscriptionDetailViewChange={setSubscriptionDetailView}
+            tariffs={tariffs}
+            currentTariff={currentTariff}
+            subAction={subAction}
+            subDays={subDays}
+            onSubActionChange={setSubAction}
+            onSubDaysChange={setSubDays}
+            selectedTariffId={selectedTariffId}
+            onSelectedTariffIdChange={setSelectedTariffId}
+            selectedTrafficGb={selectedTrafficGb}
+            onSelectedTrafficGbChange={setSelectedTrafficGb}
+            panelInfo={panelInfo}
+            panelInfoLoading={panelInfoLoading}
+            copyToClipboard={copyToClipboard}
+            formatBytes={formatBytes}
+            nodeUsageDays={nodeUsageDays}
+            onNodeUsageDaysChange={setNodeUsageDays}
+            nodeUsageForPeriod={nodeUsageForPeriod}
+            devices={devices}
+            devicesLoading={devicesLoading}
+            devicesTotal={devicesTotal}
+            deviceLimit={deviceLimit}
+            editingDeviceHwid={editingDeviceHwid}
+            editingDeviceName={editingDeviceName}
+            onEditingDeviceHwidChange={setEditingDeviceHwid}
+            onEditingDeviceNameChange={setEditingDeviceName}
+            renameSaving={renameSaving}
+            requestHistory={requestHistory}
+            requestHistoryLoading={requestHistoryLoading}
+            requestHistoryTotal={requestHistoryTotal}
+            requestHistoryOffset={requestHistoryOffset}
+            requestHistorySubId={requestHistorySubId}
+            requestHistoryExpanded={requestHistoryExpanded}
+            onRequestHistoryExpandedChange={setRequestHistoryExpanded}
+            onRequestHistorySubIdChange={setRequestHistorySubId}
+            actionLoading={actionLoading}
+            confirmingAction={confirmingAction}
+            onInlineConfirm={handleInlineConfirm}
+            onUpdateSubscription={handleUpdateSubscription}
+            onSetDeviceLimit={handleSetDeviceLimit}
+            onAddTraffic={handleAddTraffic}
+            onRemoveTraffic={handleRemoveTraffic}
+            onResetDevices={handleResetDevices}
+            onDeleteDevice={handleDeleteDevice}
+            onRenameDevice={handleRenameDevice}
+            onLoadDevices={loadDevices}
+            onLoadSubscriptionData={loadSubscriptionData}
+            onLoadRequestHistory={loadRequestHistory}
+            hasPermission={hasPermission}
+            formatDate={formatDate}
+            locale={locale}
+          />
         )}
 
         {/* Balance Tab */}
-        {activeTab === 'balance' && (
-          <div className="space-y-4">
-            {/* Current balance */}
-            <div className="rounded-xl border border-accent-500/30 bg-gradient-to-r from-accent-500/20 to-accent-700/20 p-4">
-              <div className="mb-1 text-sm text-dark-400">
-                {t('admin.users.detail.balance.current')}
-              </div>
-              <div className="text-3xl font-bold text-dark-100">
-                {formatWithCurrency(user.balance_rubles)}
-              </div>
-            </div>
-
-            {/* Add/subtract form */}
-            {hasPermission('users:balance') && (
-              <div className="space-y-3 rounded-xl bg-dark-800/50 p-4">
-                <input
-                  type="number"
-                  value={balanceAmount}
-                  onChange={createNumberInputHandler(setBalanceAmount)}
-                  placeholder={t('admin.users.detail.balance.amountPlaceholder')}
-                  className="input"
-                />
-                <input
-                  type="text"
-                  value={balanceDescription}
-                  onChange={(e) => setBalanceDescription(e.target.value)}
-                  placeholder={t('admin.users.detail.balance.descriptionPlaceholder')}
-                  className="input"
-                  maxLength={500}
-                />
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => handleUpdateBalance(true)}
-                    disabled={actionLoading || balanceAmount === ''}
-                    className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-success-500 py-2 text-white transition-colors hover:bg-success-600 disabled:opacity-50"
-                  >
-                    <PlusIcon /> {t('admin.users.detail.balance.add')}
-                  </button>
-                  <button
-                    onClick={() => handleUpdateBalance(false)}
-                    disabled={actionLoading || balanceAmount === ''}
-                    className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-error-500 py-2 text-white transition-colors hover:bg-error-600 disabled:opacity-50"
-                  >
-                    <MinusIcon /> {t('admin.users.detail.balance.subtract')}
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Active promo offer */}
-            {user.promo_offer_discount_percent > 0 && (
-              <div className="rounded-xl border border-accent-500/20 bg-accent-500/5 p-4">
-                <div className="mb-3 flex items-center justify-between">
-                  <span className="text-sm font-medium text-accent-400">
-                    {t('admin.users.detail.activePromoOffer')}
-                  </span>
-                  <button
-                    onClick={() => handleInlineConfirm('deactivateOffer', handleDeactivateOffer)}
-                    disabled={actionLoading}
-                    className={`rounded-lg px-3 py-1 text-xs font-medium transition-all disabled:opacity-50 ${
-                      confirmingAction === 'deactivateOffer'
-                        ? 'bg-error-500 text-white'
-                        : 'bg-error-500/15 text-error-400 hover:bg-error-500/25'
-                    }`}
-                  >
-                    {confirmingAction === 'deactivateOffer'
-                      ? t('admin.users.detail.actions.areYouSure')
-                      : t('admin.users.detail.deactivateOffer')}
-                  </button>
-                </div>
-                <div className="grid grid-cols-3 gap-3 text-center">
-                  <div>
-                    <div className="text-lg font-bold text-dark-100">
-                      {user.promo_offer_discount_percent}%
-                    </div>
-                    <div className="text-xs text-dark-500">{t('admin.users.detail.discount')}</div>
-                  </div>
-                  <div>
-                    <div className="text-sm font-medium text-dark-100">
-                      {user.promo_offer_discount_source || '-'}
-                    </div>
-                    <div className="text-xs text-dark-500">{t('admin.users.detail.source')}</div>
-                  </div>
-                  <div>
-                    <div className="text-sm font-medium text-dark-100">
-                      {user.promo_offer_discount_expires_at
-                        ? formatDate(user.promo_offer_discount_expires_at)
-                        : '-'}
-                    </div>
-                    <div className="text-xs text-dark-500">{t('admin.users.detail.expiresAt')}</div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Send promo offer */}
-            {hasPermission('users:send_offer') && (
-              <div className="rounded-xl bg-dark-800/50 p-4">
-                <div className="mb-3 text-sm font-medium text-dark-200">
-                  {t('admin.users.detail.sendOffer')}
-                </div>
-                <div className="space-y-3">
-                  <input
-                    type="number"
-                    value={offerDiscountPercent}
-                    onChange={createNumberInputHandler(setOfferDiscountPercent, 1)}
-                    placeholder={t('admin.users.detail.discountPercent')}
-                    className="input"
-                    min={1}
-                    max={100}
-                  />
-                  <input
-                    type="number"
-                    value={offerValidHours}
-                    onChange={createNumberInputHandler(setOfferValidHours, 1)}
-                    placeholder={t('admin.users.detail.validHours')}
-                    className="input"
-                    min={1}
-                    max={8760}
-                  />
-                  <button
-                    onClick={handleSendOffer}
-                    disabled={offerSending || offerDiscountPercent === '' || offerValidHours === ''}
-                    className="btn-primary w-full disabled:opacity-50"
-                  >
-                    {offerSending ? t('common.loading') : t('admin.users.detail.sendOffer')}
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Recent transactions */}
-            {user.recent_transactions.length > 0 && (
-              <div className="rounded-xl bg-dark-800/50 p-4">
-                <div className="mb-3 font-medium text-dark-200">
-                  {t('admin.users.detail.balance.recentTransactions')}
-                </div>
-                <div className="max-h-48 space-y-2 overflow-y-auto">
-                  {user.recent_transactions.map((tx) => (
-                    <div
-                      key={tx.id}
-                      className="flex items-center justify-between border-b border-dark-700 py-2 last:border-0"
-                    >
-                      <div>
-                        <div className="text-sm text-dark-200">{tx.description || tx.type}</div>
-                        <div className="text-xs text-dark-500">{formatDate(tx.created_at)}</div>
-                      </div>
-                      <div
-                        className={tx.amount_kopeks >= 0 ? 'text-success-400' : 'text-error-400'}
-                      >
-                        {tx.amount_kopeks >= 0 ? '+' : ''}
-                        {formatWithCurrency(tx.amount_rubles)}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
+        {activeTab === 'balance' && userId && (
+          <BalanceTab
+            user={user}
+            userId={userId}
+            hasPermission={hasPermission}
+            onUserRefresh={loadUser}
+            formatDate={formatDate}
+          />
         )}
 
         {/* Sync Tab */}
         {activeTab === 'sync' && (
-          <div className="space-y-4">
-            {/* Subscription selector for multi-tariff */}
-            {userSubscriptions.length > 1 && (
-              <div className="rounded-xl bg-dark-800/50 p-4">
-                <div className="mb-2 text-sm text-dark-400">
-                  {t('admin.users.detail.sync.selectSubscription')}
-                </div>
-                <select
-                  value={activeSubscriptionId || ''}
-                  onChange={(e) => setActiveSubscriptionId(Number(e.target.value) || null)}
-                  className="w-full rounded-lg border border-dark-600 bg-dark-700 px-3 py-2 text-sm text-dark-100"
-                >
-                  {userSubscriptions.map((sub) => (
-                    <option key={sub.id} value={sub.id}>
-                      {sub.tariff_name || `#${sub.id}`} — {sub.status}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
-
-            {/* Sync status */}
-            {syncStatus && (
-              <div
-                className={`rounded-xl border p-4 ${syncStatus.has_differences ? 'border-warning-500/30 bg-warning-500/10' : 'border-success-500/30 bg-success-500/10'}`}
-              >
-                <div className="mb-3 flex items-center gap-2">
-                  {syncStatus.has_differences ? (
-                    <span className="font-medium text-warning-400">
-                      {t('admin.users.detail.sync.hasDifferences')}
-                    </span>
-                  ) : (
-                    <span className="font-medium text-success-400">
-                      {t('admin.users.detail.sync.synced')}
-                    </span>
-                  )}
-                </div>
-
-                {syncStatus.differences.length > 0 && (
-                  <div className="mb-3 space-y-1">
-                    {syncStatus.differences.map((diff, i) => (
-                      <div key={i} className="text-xs text-dark-300">
-                        • {diff}
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <div className="mb-2 text-xs text-dark-500">
-                      {t('admin.users.detail.sync.bot')}
-                    </div>
-                    <div className="space-y-1">
-                      <div className="flex justify-between">
-                        <span className="text-dark-400">
-                          {t('admin.users.detail.sync.statusLabel')}:
-                        </span>
-                        <span className="text-dark-200">
-                          {syncStatus.bot_subscription_status || '-'}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-dark-400">{t('admin.users.detail.sync.until')}:</span>
-                        <span className="text-dark-200">
-                          {syncStatus.bot_subscription_end_date
-                            ? new Date(syncStatus.bot_subscription_end_date).toLocaleDateString(
-                                locale,
-                              )
-                            : '-'}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-dark-400">
-                          {t('admin.users.detail.sync.traffic')}:
-                        </span>
-                        <span className="text-dark-200">
-                          {syncStatus.bot_traffic_used_gb.toFixed(2)} {t('common.units.gb')}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-dark-400">
-                          {t('admin.users.detail.sync.devices')}:
-                        </span>
-                        <span className="text-dark-200">{syncStatus.bot_device_limit}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-dark-400">
-                          {t('admin.users.detail.sync.squads')}:
-                        </span>
-                        <span className="text-dark-200">{syncStatus.bot_squads?.length || 0}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div>
-                    <div className="mb-2 text-xs text-dark-500">
-                      {t('admin.users.detail.sync.panel')}
-                    </div>
-                    <div className="space-y-1">
-                      <div className="flex justify-between">
-                        <span className="text-dark-400">
-                          {t('admin.users.detail.sync.statusLabel')}:
-                        </span>
-                        <span className="text-dark-200">{syncStatus.panel_status || '-'}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-dark-400">{t('admin.users.detail.sync.until')}:</span>
-                        <span className="text-dark-200">
-                          {syncStatus.panel_expire_at
-                            ? new Date(syncStatus.panel_expire_at).toLocaleDateString(locale)
-                            : '-'}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-dark-400">
-                          {t('admin.users.detail.sync.traffic')}:
-                        </span>
-                        <span className="text-dark-200">
-                          {syncStatus.panel_traffic_used_gb.toFixed(2)} {t('common.units.gb')}
-                        </span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-dark-400">
-                          {t('admin.users.detail.sync.devices')}:
-                        </span>
-                        <span className="text-dark-200">{syncStatus.panel_device_limit}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-dark-400">
-                          {t('admin.users.detail.sync.squads')}:
-                        </span>
-                        <span className="text-dark-200">
-                          {syncStatus.panel_squads?.length || 0}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* UUID info */}
-            <div className="rounded-xl bg-dark-800/50 p-4">
-              {syncStatus?.subscription_tariff_name && (
-                <div className="mb-2 text-xs text-dark-500">
-                  {syncStatus.subscription_tariff_name}
-                </div>
-              )}
-              <div className="mb-1 text-sm text-dark-400">Remnawave UUID</div>
-              <div className="break-all font-mono text-sm text-dark-100">
-                {syncStatus?.remnawave_uuid ||
-                  user.remnawave_uuid ||
-                  t('admin.users.detail.sync.notLinked')}
-              </div>
-            </div>
-
-            {/* Sync buttons */}
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                onClick={handleSyncFromPanel}
-                disabled={actionLoading}
-                className="flex flex-col items-center justify-center gap-2 rounded-xl border border-accent-500/30 bg-accent-500/10 p-4 text-accent-400 transition-all hover:bg-accent-500/20 disabled:opacity-50"
-              >
-                <ArrowDownIcon className={`h-6 w-6 ${actionLoading ? 'animate-bounce' : ''}`} />
-                <span className="text-center text-xs font-medium">
-                  {t('admin.users.detail.sync.fromPanel')}
-                </span>
-              </button>
-              <button
-                onClick={handleSyncToPanel}
-                disabled={actionLoading}
-                className="flex flex-col items-center justify-center gap-2 rounded-xl border border-accent-500/30 bg-accent-500/10 p-4 text-accent-400 transition-all hover:bg-accent-500/20 disabled:opacity-50"
-              >
-                <ArrowUpIcon className={`h-6 w-6 ${actionLoading ? 'animate-bounce' : ''}`} />
-                <span className="text-center text-xs font-medium">
-                  {t('admin.users.detail.sync.toPanel')}
-                </span>
-              </button>
-            </div>
-          </div>
+          <SyncTab
+            user={user}
+            syncStatus={syncStatus}
+            userSubscriptions={userSubscriptions}
+            activeSubscriptionId={activeSubscriptionId}
+            onActiveSubscriptionChange={setActiveSubscriptionId}
+            actionLoading={actionLoading}
+            onSyncFromPanel={handleSyncFromPanel}
+            onSyncToPanel={handleSyncToPanel}
+            locale={locale}
+          />
         )}
 
         {/* Tickets Tab */}
-        {activeTab === 'tickets' && (
-          <div className="space-y-4">
-            {selectedTicketId ? (
-              /* Ticket Chat View */
-              ticketDetailLoading ? (
-                <div className="flex items-center justify-center py-12">
-                  <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-                </div>
-              ) : selectedTicket ? (
-                <div className="space-y-4">
-                  {/* Chat header */}
-                  <div className="flex items-center gap-3">
-                    <button
-                      onClick={() => {
-                        setSelectedTicketId(null);
-                        setSelectedTicket(null);
-                      }}
-                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-dark-800 transition-colors hover:bg-dark-700"
-                    >
-                      <svg
-                        className="h-4 w-4 text-dark-400"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={2}
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M15.75 19.5L8.25 12l7.5-7.5"
-                        />
-                      </svg>
-                    </button>
-                    <div className="min-w-0 flex-1">
-                      <div className="truncate font-medium text-dark-100">
-                        #{selectedTicket.id} {selectedTicket.title}
-                      </div>
-                      <div className="flex items-center gap-2 text-xs text-dark-500">
-                        <span
-                          className={`rounded-full border px-1.5 py-0.5 ${
-                            {
-                              open: 'border-blue-500/30 bg-blue-500/20 text-blue-400',
-                              pending: 'border-warning-500/30 bg-warning-500/20 text-warning-400',
-                              answered: 'border-success-500/30 bg-success-500/20 text-success-400',
-                              closed: 'border-dark-500 bg-dark-600 text-dark-400',
-                            }[selectedTicket.status] || 'border-dark-500 bg-dark-600 text-dark-400'
-                          }`}
-                        >
-                          {selectedTicket.status}
-                        </span>
-                        <span>{formatDate(selectedTicket.created_at)}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Status buttons */}
-                  <div className="flex flex-wrap gap-1.5">
-                    {(['open', 'pending', 'answered', 'closed'] as const).map((s) => (
-                      <button
-                        key={s}
-                        onClick={() => handleTicketStatusChange(s)}
-                        disabled={selectedTicket.status === s || actionLoading}
-                        className={`rounded-lg border px-2.5 py-1 text-xs transition-all ${
-                          selectedTicket.status === s
-                            ? 'border-accent-500/50 bg-accent-500/20 text-accent-400'
-                            : 'border-dark-700/50 text-dark-400 hover:border-dark-600 hover:text-dark-200'
-                        } disabled:opacity-50`}
-                      >
-                        {t(`admin.tickets.status${s.charAt(0).toUpperCase() + s.slice(1)}`)}
-                      </button>
-                    ))}
-                  </div>
-
-                  {/* Messages */}
-                  <div className="scrollbar-hide max-h-[60vh] space-y-3 overflow-y-auto rounded-xl bg-dark-800/30 p-3">
-                    {selectedTicket.messages.map((msg) => (
-                      <div
-                        key={msg.id}
-                        className={`rounded-xl p-3 ${
-                          msg.is_from_admin
-                            ? 'ml-6 border border-accent-500/20 bg-accent-500/10'
-                            : 'mr-6 border border-dark-700/30 bg-dark-800/50'
-                        }`}
-                      >
-                        <div className="mb-1 flex items-center justify-between">
-                          <span
-                            className={`text-xs font-medium ${msg.is_from_admin ? 'text-accent-400' : 'text-dark-400'}`}
-                          >
-                            {msg.is_from_admin
-                              ? t('admin.tickets.adminLabel')
-                              : t('admin.tickets.userLabel')}
-                          </span>
-                          <span className="text-xs text-dark-500">
-                            {formatDate(msg.created_at)}
-                          </span>
-                        </div>
-                        {msg.message_text && (
-                          <p
-                            className="whitespace-pre-wrap text-sm text-dark-200 [&_a]:text-accent-400 [&_a]:underline"
-                            dangerouslySetInnerHTML={{ __html: linkifyText(msg.message_text) }}
-                          />
-                        )}
-                        <MessageMediaGrid message={msg} />
-                      </div>
-                    ))}
-                    <div ref={messagesEndRef} />
-                  </div>
-
-                  {/* Reply form */}
-                  {selectedTicket.status !== 'closed' && (
-                    <div className="flex gap-2">
-                      <textarea
-                        value={replyText}
-                        onChange={(e) => setReplyText(e.target.value)}
-                        placeholder={t('admin.tickets.replyPlaceholder')}
-                        rows={2}
-                        className="input flex-1 resize-none"
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter' && !e.shiftKey) {
-                            e.preventDefault();
-                            handleTicketReply();
-                          }
-                        }}
-                      />
-                      <button
-                        onClick={handleTicketReply}
-                        disabled={!replyText.trim() || replySending}
-                        className="shrink-0 self-end rounded-lg bg-accent-500 px-4 py-2 text-sm text-white transition-colors hover:bg-accent-600 disabled:opacity-50"
-                      >
-                        {replySending ? (
-                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                        ) : (
-                          <svg
-                            className="h-5 w-5"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            strokeWidth={2}
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"
-                            />
-                          </svg>
-                        )}
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ) : null
-            ) : ticketsLoading ? (
-              <div className="flex items-center justify-center py-12">
-                <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-              </div>
-            ) : tickets.length === 0 ? (
-              <div className="flex flex-col items-center justify-center rounded-xl bg-dark-800/50 py-12">
-                <svg
-                  className="mb-3 h-12 w-12 text-dark-600"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={1.5}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 01-.825-.242m9.345-8.334a2.126 2.126 0 00-.476-.095 48.64 48.64 0 00-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0011.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155"
-                  />
-                </svg>
-                <p className="text-dark-400">{t('admin.users.detail.noTickets')}</p>
-              </div>
-            ) : (
-              <>
-                <div className="text-sm text-dark-400">
-                  {ticketsTotal} {t('admin.users.detail.ticketsCount')}
-                </div>
-                <div className="space-y-2">
-                  {tickets.map((ticket) => {
-                    const statusStyles: Record<string, string> = {
-                      open: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-                      pending: 'bg-warning-500/20 text-warning-400 border-warning-500/30',
-                      answered: 'bg-success-500/20 text-success-400 border-success-500/30',
-                      closed: 'bg-dark-600 text-dark-400 border-dark-500',
-                    };
-                    return (
-                      <button
-                        key={ticket.id}
-                        onClick={() => setSelectedTicketId(ticket.id)}
-                        className="w-full rounded-xl bg-dark-800/50 p-4 text-left transition-colors hover:bg-dark-700/50"
-                      >
-                        <div className="mb-2 flex items-center justify-between">
-                          <span className="font-medium text-dark-100">
-                            #{ticket.id} {ticket.title}
-                          </span>
-                          <span
-                            className={`rounded-full border px-2 py-0.5 text-xs ${statusStyles[ticket.status] || statusStyles.closed}`}
-                          >
-                            {ticket.status}
-                          </span>
-                        </div>
-                        <div className="flex items-center justify-between text-xs text-dark-500">
-                          <span>{formatDate(ticket.created_at)}</span>
-                          <span>
-                            {ticket.messages_count} {t('admin.users.detail.messagesCount')}
-                          </span>
-                        </div>
-                        {ticket.last_message && (
-                          <div className="mt-2 truncate text-sm text-dark-400">
-                            {ticket.last_message.is_from_admin ? '> ' : ''}
-                            {ticket.last_message.message_text}
-                          </div>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-              </>
-            )}
-          </div>
+        {activeTab === 'tickets' && userId && (
+          <TicketsTab userId={userId} formatDate={formatDate} />
         )}
 
         {/* Gifts Tab */}
         {activeTab === 'gifts' && (
-          <div className="space-y-6">
-            {giftsLoading ? (
-              <div className="flex items-center justify-center py-12">
-                <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-              </div>
-            ) : !giftsData || (giftsData.sent.length === 0 && giftsData.received.length === 0) ? (
-              <div className="flex flex-col items-center justify-center rounded-xl bg-dark-800/50 py-16">
-                <svg
-                  className="mb-3 h-12 w-12 text-dark-600"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={1.5}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M21 11.25v8.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 109.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1114.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"
-                  />
-                </svg>
-                <p className="text-sm text-dark-500">{t('admin.users.detail.gifts.noGifts')}</p>
-              </div>
-            ) : (
-              <>
-                {/* Summary counters */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="rounded-xl bg-dark-800/50 p-4">
-                    <div className="mb-1 text-xs text-dark-500">
-                      {t('admin.users.detail.gifts.totalSent')}
-                    </div>
-                    <div className="text-2xl font-bold text-accent-400">{giftsData.sent_total}</div>
-                  </div>
-                  <div className="rounded-xl bg-dark-800/50 p-4">
-                    <div className="mb-1 text-xs text-dark-500">
-                      {t('admin.users.detail.gifts.totalReceived')}
-                    </div>
-                    <div className="text-2xl font-bold text-success-400">
-                      {giftsData.received_total}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Sent Gifts */}
-                <div>
-                  <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-dark-200">
-                    <svg
-                      className="h-4 w-4 text-accent-400"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"
-                      />
-                    </svg>
-                    {t('admin.users.detail.gifts.sentTitle')}
-                    <span className="text-dark-500">({giftsData.sent_total})</span>
-                  </h3>
-                  {giftsData.sent.length === 0 ? (
-                    <div className="rounded-xl bg-dark-800/30 py-6 text-center text-sm text-dark-500">
-                      {t('admin.users.detail.gifts.noSent')}
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      {giftsData.sent.map((gift) => (
-                        <GiftCard
-                          key={gift.id}
-                          gift={gift}
-                          direction="sent"
-                          locale={locale}
-                          onNavigateToUser={(id) => navigate(`/admin/users/${id}`)}
-                        />
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* Received Gifts */}
-                <div>
-                  <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-dark-200">
-                    <svg
-                      className="h-4 w-4 text-success-400"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M9 3.75H6.912a2.25 2.25 0 00-2.15 1.588L2.35 13.177a2.25 2.25 0 00-.1.661V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18v-4.162c0-.224-.034-.447-.1-.661L19.24 5.338a2.25 2.25 0 00-2.15-1.588H15M2.25 13.5h3.86a2.25 2.25 0 012.012 1.244l.256.512a2.25 2.25 0 002.013 1.244h3.218a2.25 2.25 0 002.013-1.244l.256-.512a2.25 2.25 0 012.013-1.244h3.859"
-                      />
-                    </svg>
-                    {t('admin.users.detail.gifts.receivedTitle')}
-                    <span className="text-dark-500">({giftsData.received_total})</span>
-                  </h3>
-                  {giftsData.received.length === 0 ? (
-                    <div className="rounded-xl bg-dark-800/30 py-6 text-center text-sm text-dark-500">
-                      {t('admin.users.detail.gifts.noReceived')}
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      {giftsData.received.map((gift) => (
-                        <GiftCard
-                          key={gift.id}
-                          gift={gift}
-                          direction="received"
-                          locale={locale}
-                          onNavigateToUser={(id) => navigate(`/admin/users/${id}`)}
-                        />
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </>
-            )}
-          </div>
+          <GiftsTab
+            giftsLoading={giftsLoading}
+            giftsData={giftsData}
+            locale={locale}
+            onNavigateToUser={(id) => navigate(`/admin/users/${id}`)}
+          />
         )}
 
         {/* Referrals Tab */}
-        {activeTab === 'referrals' && user && (
-          <div className="space-y-6">
-            {/* Section 1: Who referred this user */}
-            <div className="rounded-2xl border border-dark-700/30 bg-dark-800/40 p-5">
-              <h3 className="mb-4 text-base font-semibold text-dark-100">
-                {t('admin.users.detail.referrals.referredBy')}
-              </h3>
-
-              {user.referral.referred_by_id ? (
-                <div className="flex items-center justify-between gap-3">
-                  <button
-                    onClick={() => navigate(`/admin/users/${user.referral.referred_by_id}`)}
-                    className="flex items-center gap-3 rounded-xl bg-dark-700/30 px-4 py-3 transition-colors hover:bg-dark-700/50"
-                  >
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent-500/20 text-sm font-bold text-accent-400">
-                      {(user.referral.referred_by_username || '?')[0].toUpperCase()}
-                    </div>
-                    <div>
-                      <div className="text-sm font-medium text-dark-100">
-                        {user.referral.referred_by_username ||
-                          `ID: ${user.referral.referred_by_id}`}
-                      </div>
-                      <div className="text-xs text-dark-500">
-                        ID: {user.referral.referred_by_id}
-                      </div>
-                    </div>
-                  </button>
-                  <button
-                    onClick={handleRemoveReferrer}
-                    disabled={actionLoading}
-                    className="rounded-lg border border-error-500/30 bg-error-500/10 px-3 py-2 text-sm text-error-400 transition-colors hover:bg-error-500/20 disabled:opacity-50"
-                  >
-                    {t('admin.users.detail.referrals.removeReferrer')}
-                  </button>
-                </div>
-              ) : (
-                <div>
-                  {showReferrerSearch ? (
-                    <div ref={referrerSearchRef} className="relative">
-                      <div className="flex gap-2">
-                        <input
-                          type="text"
-                          value={referrerSearchQuery}
-                          onChange={(e) => setReferrerSearchQuery(e.target.value)}
-                          placeholder={t('admin.users.detail.referrals.searchPlaceholder')}
-                          className="flex-1 rounded-lg border border-dark-600 bg-dark-700 px-3 py-2.5 text-sm text-dark-100 placeholder-dark-500 focus:border-accent-500 focus:outline-none"
-                          autoFocus
-                        />
-                        <button
-                          onClick={() => {
-                            setShowReferrerSearch(false);
-                            setReferrerSearchQuery('');
-                            setReferrerSearchResults([]);
-                          }}
-                          className="rounded-lg bg-dark-700 px-3 py-2.5 text-sm text-dark-400 hover:bg-dark-600"
-                        >
-                          {t('common.cancel')}
-                        </button>
-                      </div>
-                      {referrerSearchQuery.length >= 2 && referrerSearchResults.length > 0 && (
-                        <div className="absolute left-0 right-0 top-full z-50 mt-1 max-h-60 overflow-y-auto rounded-xl border border-dark-700 bg-dark-800 py-1 shadow-xl">
-                          {referrerSearchResults
-                            .filter((u) => u.id !== userId)
-                            .map((u) => (
-                              <button
-                                key={u.id}
-                                onClick={() => handleAssignReferrer(u.id)}
-                                className="flex w-full items-center gap-3 px-3 py-2.5 text-left hover:bg-dark-700/50"
-                              >
-                                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-dark-600/50 text-xs font-bold text-dark-300">
-                                  {(u.full_name || u.username || '?')[0].toUpperCase()}
-                                </div>
-                                <div>
-                                  <div className="text-sm text-dark-100">
-                                    {u.full_name || u.username || `ID: ${u.id}`}
-                                  </div>
-                                  <div className="text-xs text-dark-500">
-                                    {u.telegram_id ? `TG: ${u.telegram_id}` : `ID: ${u.id}`}
-                                  </div>
-                                </div>
-                              </button>
-                            ))}
-                          {referrerSearchResults.filter((u) => u.id !== userId).length === 0 && (
-                            <div className="px-3 py-4 text-center text-sm text-dark-500">
-                              {t('admin.users.detail.referrals.noUsersFound')}
-                            </div>
-                          )}
-                        </div>
-                      )}
-                      {referrerSearchQuery.length >= 2 &&
-                        !referrerSearchLoading &&
-                        referrerSearchResults.length === 0 && (
-                          <div className="absolute left-0 right-0 top-full z-50 mt-1 rounded-xl border border-dark-700 bg-dark-800 py-4 text-center text-sm text-dark-500 shadow-xl">
-                            {t('admin.users.detail.referrals.noUsersFound')}
-                          </div>
-                        )}
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-dark-500">
-                        {t('admin.users.detail.referrals.noReferrer')}
-                      </span>
-                      <button
-                        onClick={() => setShowReferrerSearch(true)}
-                        className="rounded-lg bg-accent-500/15 px-3 py-2 text-sm text-accent-400 transition-colors hover:bg-accent-500/25"
-                      >
-                        {t('admin.users.detail.referrals.assignReferrer')}
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* Section 2: Referral stats */}
-            <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-              <div className="rounded-xl bg-dark-800/40 p-4">
-                <div className="text-xs text-dark-500">
-                  {t('admin.users.detail.referrals.totalReferrals')}
-                </div>
-                <div className="mt-1 text-xl font-bold text-dark-100">
-                  {user.referral.referrals_count}
-                </div>
-              </div>
-              <div className="rounded-xl bg-dark-800/40 p-4">
-                <div className="text-xs text-dark-500">
-                  {t('admin.users.detail.referrals.totalEarnings')}
-                </div>
-                <div className="mt-1 text-xl font-bold text-dark-100">
-                  {formatWithCurrency(user.referral.total_earnings_kopeks / 100)}
-                </div>
-              </div>
-              <div className="rounded-xl bg-dark-800/40 p-4">
-                <div className="text-xs text-dark-500">
-                  {t('admin.users.detail.referrals.commission')}
-                </div>
-                <div className="mt-1 text-xl font-bold text-dark-100">
-                  {user.referral.commission_percent != null
-                    ? `${user.referral.commission_percent}%`
-                    : t('admin.users.detail.referrals.default')}
-                </div>
-              </div>
-              <div className="rounded-xl bg-dark-800/40 p-4">
-                <div className="text-xs text-dark-500">
-                  {t('admin.users.detail.referrals.referralCode')}
-                </div>
-                <div className="mt-1 truncate font-mono text-sm text-dark-100">
-                  {user.referral.referral_code}
-                </div>
-              </div>
-            </div>
-
-            {/* Section 3: Referrals list */}
-            <div className="rounded-2xl border border-dark-700/30 bg-dark-800/40 p-5">
-              <div className="mb-4 flex items-center justify-between">
-                <h3 className="text-base font-semibold text-dark-100">
-                  {t('admin.users.detail.referrals.referralsList')} ({referralsTotal})
-                </h3>
-                {!showAddReferral && (
-                  <button
-                    onClick={() => setShowAddReferral(true)}
-                    className="rounded-lg bg-accent-500/15 px-3 py-2 text-sm text-accent-400 transition-colors hover:bg-accent-500/25"
-                  >
-                    {t('admin.users.detail.referrals.addReferral')}
-                  </button>
-                )}
-              </div>
-
-              {/* Add referral search */}
-              {showAddReferral && (
-                <div ref={addReferralSearchRef} className="relative mb-4">
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={addReferralSearchQuery}
-                      onChange={(e) => setAddReferralSearchQuery(e.target.value)}
-                      placeholder={t('admin.users.detail.referrals.searchPlaceholder')}
-                      className="flex-1 rounded-lg border border-dark-600 bg-dark-700 px-3 py-2.5 text-sm text-dark-100 placeholder-dark-500 focus:border-accent-500 focus:outline-none"
-                      autoFocus
-                    />
-                    <button
-                      onClick={() => {
-                        setShowAddReferral(false);
-                        setAddReferralSearchQuery('');
-                        setAddReferralSearchResults([]);
-                      }}
-                      className="rounded-lg bg-dark-700 px-3 py-2.5 text-sm text-dark-400 hover:bg-dark-600"
-                    >
-                      {t('common.cancel')}
-                    </button>
-                  </div>
-                  {addReferralSearchQuery.length >= 2 && addReferralSearchResults.length > 0 && (
-                    <div className="absolute left-0 right-0 top-full z-50 mt-1 max-h-60 overflow-y-auto rounded-xl border border-dark-700 bg-dark-800 py-1 shadow-xl">
-                      {addReferralSearchResults
-                        .filter((u) => u.id !== userId && !referralsList.some((r) => r.id === u.id))
-                        .map((u) => (
-                          <button
-                            key={u.id}
-                            onClick={() => handleAddReferral(u.id)}
-                            disabled={actionLoading}
-                            className="flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors hover:bg-dark-700/50 disabled:opacity-50"
-                          >
-                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-dark-600/50 text-xs font-bold text-dark-300">
-                              {(u.full_name || u.username || '?')[0].toUpperCase()}
-                            </div>
-                            <div>
-                              <div className="text-sm text-dark-100">
-                                {u.full_name || u.username || `ID: ${u.id}`}
-                              </div>
-                              <div className="text-xs text-dark-500">
-                                {u.telegram_id ? `TG: ${u.telegram_id}` : `ID: ${u.id}`}
-                              </div>
-                            </div>
-                          </button>
-                        ))}
-                      {addReferralSearchResults.filter(
-                        (u) => u.id !== userId && !referralsList.some((r) => r.id === u.id),
-                      ).length === 0 && (
-                        <div className="px-3 py-4 text-center text-sm text-dark-500">
-                          {t('admin.users.detail.referrals.noUsersFound')}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                  {addReferralSearchQuery.length >= 2 &&
-                    !addReferralSearchLoading &&
-                    addReferralSearchResults.length === 0 && (
-                      <div className="absolute left-0 right-0 top-full z-50 mt-1 rounded-xl border border-dark-700 bg-dark-800 py-4 text-center text-sm text-dark-500 shadow-xl">
-                        {t('admin.users.detail.referrals.noUsersFound')}
-                      </div>
-                    )}
-                </div>
-              )}
-
-              {referralsListLoading ? (
-                <div className="flex items-center justify-center py-8">
-                  <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-                </div>
-              ) : referralsList.length === 0 ? (
-                <div className="py-8 text-center text-dark-500">
-                  {t('admin.users.detail.referrals.noReferrals')}
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {referralsList.map((ref) => (
-                    <div
-                      key={ref.id}
-                      className="flex items-center justify-between rounded-xl bg-dark-700/20 px-4 py-3"
-                    >
-                      <button
-                        onClick={() => navigate(`/admin/users/${ref.id}`)}
-                        className="flex items-center gap-3 text-left"
-                      >
-                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-dark-600/50 text-sm font-bold text-dark-300">
-                          {(ref.full_name || ref.username || '?')[0].toUpperCase()}
-                        </div>
-                        <div>
-                          <div className="text-sm font-medium text-dark-100">
-                            {ref.full_name || ref.username || `ID: ${ref.id}`}
-                          </div>
-                          <div className="text-xs text-dark-500">
-                            {ref.telegram_id ? `TG: ${ref.telegram_id}` : `ID: ${ref.id}`}
-                          </div>
-                        </div>
-                      </button>
-                      <button
-                        onClick={() => handleRemoveReferral(ref.id)}
-                        disabled={actionLoading}
-                        className="rounded-lg p-2 text-dark-500 transition-colors hover:bg-error-500/10 hover:text-error-400 disabled:opacity-50"
-                        title={t('admin.users.detail.referrals.removeReferral')}
-                      >
-                        <svg
-                          className="h-4 w-4"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          strokeWidth={2}
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M6 18L18 6M6 6l12 12"
-                          />
-                        </svg>
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
+        {activeTab === 'referrals' && user && userId && (
+          <ReferralsTab user={user} userId={userId} onUserRefresh={loadUser} />
         )}
       </div>
     </div>

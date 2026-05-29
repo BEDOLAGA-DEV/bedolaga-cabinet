@@ -246,10 +246,11 @@ export default function AdminPinnedMessageCreate() {
       <div className="card space-y-6">
         {/* Message text */}
         <div>
-          <label className="mb-2 block text-sm font-medium text-dark-300">
+          <label htmlFor="pm-content" className="mb-2 block text-sm font-medium text-dark-300">
             {t('admin.pinnedMessages.content')}
           </label>
           <textarea
+            id="pm-content"
             value={content}
             onChange={(e) => setContent(e.target.value)}
             placeholder={t('admin.pinnedMessages.contentPlaceholder')}

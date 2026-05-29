@@ -300,14 +300,17 @@ export default function AdminPromoOfferSend() {
         <div className="mx-auto max-w-2xl space-y-6">
           {/* Template Selection */}
           <div className="rounded-xl border border-dark-700 bg-dark-800 p-6">
-            <label className="mb-2 block text-sm font-medium text-dark-300">
+            <label id="po-template-label" className="mb-2 block text-sm font-medium text-dark-300">
               {t('admin.promoOffers.send.offerTemplate')}
               <span className="text-error-400">*</span>
             </label>
-            <div className="space-y-2">
+            <div className="space-y-2" role="radiogroup" aria-labelledby="po-template-label">
               {activeTemplates.map((template) => (
                 <button
                   key={template.id}
+                  type="button"
+                  role="radio"
+                  aria-checked={selectedTemplateId === template.id}
                   onClick={() => setSelectedTemplateId(template.id)}
                   className={`w-full rounded-lg border p-4 text-left transition-colors ${
                     selectedTemplateId === template.id
@@ -345,12 +348,15 @@ export default function AdminPromoOfferSend() {
 
           {/* Send Mode */}
           <div className="rounded-xl border border-dark-700 bg-dark-800 p-6">
-            <label className="mb-2 block text-sm font-medium text-dark-300">
+            <label id="po-sendmode-label" className="mb-2 block text-sm font-medium text-dark-300">
               {t('admin.promoOffers.send.sendTo')}
               <span className="text-error-400">*</span>
             </label>
-            <div className="mb-4 flex gap-2">
+            <div className="mb-4 flex gap-2" role="radiogroup" aria-labelledby="po-sendmode-label">
               <button
+                type="button"
+                role="radio"
+                aria-checked={sendMode === 'segment'}
                 onClick={() => setSendMode('segment')}
                 className={`flex flex-1 items-center justify-center gap-2 rounded-lg border py-2.5 text-sm font-medium transition-colors ${
                   sendMode === 'segment'
@@ -362,6 +368,9 @@ export default function AdminPromoOfferSend() {
                 <span>{t('admin.promoOffers.send.segment')}</span>
               </button>
               <button
+                type="button"
+                role="radio"
+                aria-checked={sendMode === 'user'}
                 onClick={() => setSendMode('user')}
                 className={`flex flex-1 items-center justify-center gap-2 rounded-lg border py-2.5 text-sm font-medium transition-colors ${
                   sendMode === 'user'

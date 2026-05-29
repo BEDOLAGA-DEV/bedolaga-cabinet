@@ -123,7 +123,7 @@ export function CommandPalette({
               {/* Backdrop */}
               <DialogPrimitive.Overlay asChild>
                 <motion.div
-                  className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
+                  className="fixed inset-0 z-50 bg-dark-950/60 backdrop-blur-sm"
                   variants={backdrop}
                   initial="initial"
                   animate="animate"

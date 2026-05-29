@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { RemnawaveButtonClient, LocalizedText } from '@/types';
+import { copyToClipboard } from '@/utils/clipboard';
 
 // eslint-disable-next-line no-script-url
 const dangerousSchemes = ['javascript:', 'data:', 'vbscript:', 'file:'];
@@ -64,16 +65,7 @@ export function BlockButtons({
   const [copied, setCopied] = useState(false);
 
   const handleCopy = useCallback(async (url: string) => {
-    try {
-      await navigator.clipboard.writeText(url);
-    } catch {
-      const textarea = document.createElement('textarea');
-      textarea.value = url;
-      document.body.appendChild(textarea);
-      textarea.select();
-      document.execCommand('copy');
-      document.body.removeChild(textarea);
-    }
+    await copyToClipboard(url);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }, []);
