@@ -15,6 +15,7 @@ import type {
   PurchaseRequest,
 } from '../api/landings';
 import { StaticBackgroundRenderer } from '../components/backgrounds/BackgroundRenderer';
+import { CheckCircleIcon, CheckIcon, DevicesIcon, DownloadIcon } from '@/components/icons';
 import LanguageSwitcher from '../components/LanguageSwitcher';
 import { cn } from '../lib/utils';
 import { getApiErrorMessage } from '../utils/api-error';
@@ -285,52 +286,18 @@ function TariffCard({
             isSelected ? 'border-accent-500 bg-accent-500' : 'border-dark-600',
           )}
         >
-          {isSelected && (
-            <svg
-              className="h-3 w-3 text-white"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={3}
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-            </svg>
-          )}
+          {isSelected && <CheckIcon className="h-3 w-3 text-white" />}
         </div>
       </div>
 
       {/* Info row */}
       <div className="flex items-center gap-3 text-xs text-dark-400">
         <span className="flex items-center gap-1">
-          <svg
-            className="h-3.5 w-3.5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={1.5}
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"
-            />
-          </svg>
+          <DownloadIcon className="h-3.5 w-3.5" />
           {tariff.traffic_limit_gb === 0 ? '∞' : tariff.traffic_limit_gb} {t('landing.gb', 'GB')}
         </span>
         <span className="flex items-center gap-1">
-          <svg
-            className="h-3.5 w-3.5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={1.5}
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3"
-            />
-          </svg>
+          <DevicesIcon className="h-3.5 w-3.5" />
           {tariff.device_limit} {t('landing.devices', 'devices')}
         </span>
       </div>
@@ -550,15 +517,7 @@ function SummaryCard({
           {config.features.map((feature, idx) => (
             <div key={idx} className="flex gap-3">
               <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-success-500/10">
-                <svg
-                  className="h-3 w-3 text-success-500"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={3}
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
+                <CheckCircleIcon className="h-3 w-3 text-success-500" />
               </div>
               <div>
                 <p className="text-sm font-medium text-dark-100">{feature.title}</p>

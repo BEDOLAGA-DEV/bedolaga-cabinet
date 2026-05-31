@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { useState, useRef, useEffect } from 'react';
 import { infoApi, type LanguageInfo } from '@/api/info';
+import { ChevronDownIcon } from '@/components/icons';
 
 export default function LanguageSwitcher() {
   const { i18n } = useTranslation();
@@ -57,14 +58,9 @@ export default function LanguageSwitcher() {
       >
         <span>{currentLang.flag}</span>
         <span className="font-medium text-dark-200">{currentLang.code.toUpperCase()}</span>
-        <svg
+        <ChevronDownIcon
           className={`h-3.5 w-3.5 text-dark-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
+        />
       </button>
 
       {isOpen && (

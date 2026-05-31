@@ -13,7 +13,7 @@ import { partnerApi } from '../api/partners';
 import { AdminBackButton } from '../components/admin';
 import { createNumberInputHandler, toNumber } from '../utils/inputHelpers';
 import Twemoji from 'react-twemoji';
-import { CampaignIcon, CheckIcon, RefreshIcon } from '@/components/icons';
+import { CampaignIcon, CheckIcon, LinkIcon, RefreshIcon } from '@/components/icons';
 
 // Bonus type config
 const bonusTypeConfig: Record<
@@ -273,19 +273,7 @@ export default function AdminCampaignCreate() {
       {partnerId && partner && (
         <div className="rounded-xl border border-accent-500/20 bg-accent-500/5 p-4">
           <div className="flex items-start gap-3">
-            <svg
-              className="mt-0.5 h-5 w-5 shrink-0 text-accent-400"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={1.5}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"
-              />
-            </svg>
+            <LinkIcon className="mt-0.5 h-5 w-5 shrink-0 text-accent-400" />
             <p className="text-sm text-accent-300">
               {t('admin.campaigns.form.partnerAutoAssign', {
                 name: partner.first_name || partner.username || `#${partnerId}`,

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
+import { CheckIcon } from '@/components/icons';
 import { ChevronDownIcon } from './DropdownSelect';
 
 // ──────────────────────────────────────────────────────────────────
@@ -135,21 +136,7 @@ export function MultiSelectDropdown({
                       : 'border-dark-500 bg-dark-700/60',
                   )}
                 >
-                  {isChecked && (
-                    <svg
-                      className="h-2.5 w-2.5 text-white"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={4}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M4.5 12.75l6 6 9-13.5"
-                      />
-                    </svg>
-                  )}
+                  {isChecked && <CheckIcon className="h-2.5 w-2.5 text-white" />}
                 </div>
                 <span className={cn('text-sm', isChecked ? 'text-dark-100' : 'text-dark-300')}>
                   {option.label}

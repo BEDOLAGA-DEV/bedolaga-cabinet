@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { CheckIcon } from '@/components/icons';
 import { ChevronDownIcon, GlobeIcon } from '../TrafficIcons';
 import { getFlagEmoji } from '../trafficUsageHelpers';
 
@@ -71,17 +72,7 @@ export function CountryFilter({
                 allSelected ? 'border-accent-500 bg-accent-500' : 'border-dark-600'
               }`}
             >
-              {allSelected && (
-                <svg
-                  className="h-3 w-3 text-white"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={3}
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                </svg>
-              )}
+              {allSelected && <CheckIcon className="h-3 w-3 text-white" />}
             </span>
             All
           </button>
@@ -102,21 +93,7 @@ export function CountryFilter({
                       checked ? 'border-accent-500 bg-accent-500' : 'border-dark-600'
                     }`}
                   >
-                    {checked && (
-                      <svg
-                        className="h-3 w-3 text-white"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={3}
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M4.5 12.75l6 6 9-13.5"
-                        />
-                      </svg>
-                    )}
+                    {checked && <CheckIcon className="h-3 w-3 text-white" />}
                   </span>
                   {getFlagEmoji(code)} {code.toUpperCase()}
                   <span className="ml-auto text-dark-500">{count}</span>

@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { referralNetworkApi } from '@/api/referralNetwork';
+import { CloseIcon } from '@/components/icons';
 import { useReferralNetworkStore } from '@/store/referralNetwork';
 import { formatKopeksToRubles, getSubscriptionStatusColor } from '../utils';
 
@@ -37,15 +38,7 @@ export function UserDetailPanel({ userId, className }: UserDetailPanelProps) {
           className="rounded-lg p-1 text-dark-500 transition-colors hover:bg-dark-800 hover:text-dark-300"
           aria-label={t('common.close')}
         >
-          <svg
-            className="h-5 w-5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
+          <CloseIcon className="h-5 w-5" />
         </button>
       </div>
 

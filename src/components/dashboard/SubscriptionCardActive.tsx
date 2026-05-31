@@ -10,7 +10,7 @@ import { useTrafficZone } from '../../hooks/useTrafficZone';
 import { formatTraffic } from '../../utils/formatTraffic';
 import { getGlassColors } from '../../utils/glassTheme';
 import { HoverBorderGradient } from '../ui/hover-border-gradient';
-import { RefreshIcon } from '@/components/icons';
+import { CalendarIcon, RefreshIcon } from '@/components/icons';
 import { useHaptic } from '../../platform';
 import type { Subscription } from '../../types';
 
@@ -309,20 +309,14 @@ export default function SubscriptionCardActive({
                 background: daysLeft <= 3 ? 'rgba(var(--color-warning-400), 0.1)' : g.hoverBg,
               }}
             >
-              <svg
-                width="13"
-                height="13"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke={daysLeft <= 3 ? 'rgb(var(--color-warning-400))' : g.textSecondary}
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+              <span
+                style={{
+                  color: daysLeft <= 3 ? 'rgb(var(--color-warning-400))' : g.textSecondary,
+                }}
                 aria-hidden="true"
               >
-                <rect x="3" y="4" width="18" height="18" rx="2" />
-                <path d="M16 2v4M8 2v4M3 10h18" />
-              </svg>
+                <CalendarIcon className="h-[13px] w-[13px]" />
+              </span>
             </div>
             {t('dashboard.remaining')}
           </div>

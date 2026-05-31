@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { pollsApi, PollInfo, PollQuestion } from '../api/polls';
 import { useFocusTrap } from '../hooks/useFocusTrap';
-import { ClipboardIcon, GiftIcon, CheckIcon } from '@/components/icons';
+import { ClipboardIcon, GiftIcon, CheckIcon, CloseIcon } from '@/components/icons';
 
 export default function Polls() {
   const { t } = useTranslation();
@@ -135,14 +135,7 @@ export default function Polls() {
                 aria-label={t('common.close')}
                 className="text-dark-400 hover:text-dark-200"
               >
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
+                <CloseIcon className="h-6 w-6" />
               </button>
             </div>
 

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChevronDownIcon, ServerIcon } from '../TrafficIcons';
+import { CheckIcon } from '@/components/icons';
 import { getFlagEmoji } from '../trafficUsageHelpers';
 import type { TrafficNodeInfo } from '../../../../api/adminTraffic';
 
@@ -75,17 +76,7 @@ export function NodeFilter({
                 allSelected ? 'border-accent-500 bg-accent-500' : 'border-dark-600'
               }`}
             >
-              {allSelected && (
-                <svg
-                  className="h-3 w-3 text-white"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={3}
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                </svg>
-              )}
+              {allSelected && <CheckIcon className="h-3 w-3 text-white" />}
             </span>
             {t('admin.trafficUsage.allNodes')}
           </button>
@@ -106,21 +97,7 @@ export function NodeFilter({
                       checked ? 'border-accent-500 bg-accent-500' : 'border-dark-600'
                     }`}
                   >
-                    {checked && (
-                      <svg
-                        className="h-3 w-3 text-white"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={3}
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M4.5 12.75l6 6 9-13.5"
-                        />
-                      </svg>
-                    )}
+                    {checked && <CheckIcon className="h-3 w-3 text-white" />}
                   </span>
                   {getFlagEmoji(node.country_code)} {node.node_name}
                 </button>

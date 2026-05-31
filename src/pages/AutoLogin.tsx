@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { authApi } from '../api/auth';
 import { useAuthStore } from '../store/auth';
+import { XIcon } from '@/components/icons';
 
 export default function AutoLogin() {
   const { t } = useTranslation();
@@ -51,15 +52,7 @@ export default function AutoLogin() {
         {error ? (
           <div className="space-y-4">
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-error-500/10">
-              <svg
-                className="h-8 w-8 text-error-400"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              <XIcon className="h-8 w-8 text-error-400" />
             </div>
             <p className="text-sm text-dark-300">{t('landing.autoLoginFailed')}</p>
             <button

@@ -8,6 +8,7 @@ import { landingApi } from '../api/landings';
 import { authApi } from '../api/auth';
 import { useAuthStore } from '../store/auth';
 import { copyToClipboard } from '../utils/clipboard';
+import { CheckIcon, ClipboardIcon, ClockIcon, ExclamationIcon } from '@/components/icons';
 import { Spinner } from '@/components/ui/Spinner';
 import { AnimatedCheckmark } from '@/components/ui/AnimatedCheckmark';
 import { AnimatedCrossmark } from '@/components/ui/AnimatedCrossmark';
@@ -299,32 +300,12 @@ function SuccessState({
           >
             {copied ? (
               <>
-                <svg
-                  className="h-4 w-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
+                <CheckIcon className="h-4 w-4" />
                 {t('landing.copied', 'Copied!')}
               </>
             ) : (
               <>
-                <svg
-                  className="h-4 w-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={1.5}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9.75a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184"
-                  />
-                </svg>
+                <ClipboardIcon className="h-4 w-4" />
                 {t('landing.copyLink', 'Copy link')}
               </>
             )}
@@ -383,19 +364,7 @@ function PendingActivationState({
     >
       {/* Warning icon */}
       <div className="flex h-20 w-20 items-center justify-center rounded-full bg-warning-500/10">
-        <svg
-          className="h-10 w-10 text-warning-400"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          strokeWidth={2}
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"
-          />
-        </svg>
+        <ExclamationIcon className="h-10 w-10 text-warning-400" />
       </div>
 
       <div>
@@ -560,19 +529,7 @@ function PollTimedOutState({ onRetry }: { onRetry: () => void }) {
       className="flex flex-col items-center gap-6 text-center"
     >
       <div className="flex h-20 w-20 items-center justify-center rounded-full bg-dark-800/50">
-        <svg
-          className="h-10 w-10 text-dark-400"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          strokeWidth={2}
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
-          />
-        </svg>
+        <ClockIcon className="h-10 w-10 text-dark-400" />
       </div>
       <div>
         <h1 className="text-xl font-bold text-dark-50">

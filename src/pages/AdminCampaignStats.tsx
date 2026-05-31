@@ -10,7 +10,7 @@ import { PARTNER_STATS } from '../constants/partner';
 import { useCurrency } from '../hooks/useCurrency';
 import { copyToClipboard } from '../utils/clipboard';
 import { useHaptic } from '../platform';
-import { ChartIcon, CopyIcon, LinkIcon, UsersIcon } from '@/components/icons';
+import { ChartIcon, ChevronDownIcon, CopyIcon, LinkIcon, UsersIcon } from '@/components/icons';
 
 // Bonus type config
 const bonusTypeConfig: Record<
@@ -449,15 +449,9 @@ export default function AdminCampaignStats() {
                 {t('admin.campaigns.stats.users')} ({stats.registrations})
               </span>
             </div>
-            <svg
+            <ChevronDownIcon
               className={`h-5 w-5 text-dark-400 transition-transform ${showUsers ? 'rotate-180' : ''}`}
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-            </svg>
+            />
           </button>
 
           {showUsers && (

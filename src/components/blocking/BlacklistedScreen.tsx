@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { useBlockingStore } from '../../store/blocking';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
+import { BanIcon } from '@/components/icons';
 
 export default function BlacklistedScreen() {
   const { t } = useTranslation();
@@ -20,19 +21,7 @@ export default function BlacklistedScreen() {
         {/* Icon */}
         <div className="mb-8">
           <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-dark-800">
-            <svg
-              className="h-12 w-12 text-error-500"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"
-              />
-            </svg>
+            <BanIcon className="h-12 w-12 text-error-500" />
           </div>
         </div>
 

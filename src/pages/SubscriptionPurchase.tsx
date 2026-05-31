@@ -12,6 +12,7 @@ import { SwitchTariffSheet } from '../components/subscription/sheets/SwitchTarif
 import { TariffPurchaseForm } from '../components/subscription/purchase/TariffPurchaseForm';
 import { TariffPickerGrid } from '../components/subscription/purchase/TariffPickerGrid';
 import { ClassicPurchaseWizard } from '../components/subscription/purchase/ClassicPurchaseWizard';
+import { ExclamationIcon, SparklesIcon } from '@/components/icons';
 
 export default function SubscriptionPurchase() {
   const { t } = useTranslation();
@@ -177,23 +178,12 @@ export default function SubscriptionPurchase() {
                 <div className="flex items-start gap-3">
                   <div
                     className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-[10px]"
-                    style={{ background: 'rgba(255,184,0,0.12)' }}
+                    style={{
+                      background: 'rgba(255,184,0,0.12)',
+                      color: 'rgb(var(--color-urgent-400))',
+                    }}
                   >
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="rgb(var(--color-urgent-400))"
-                      strokeWidth="1.5"
-                      aria-hidden="true"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"
-                      />
-                    </svg>
+                    <SparklesIcon className="h-4 w-4" />
                   </div>
                   <div>
                     <div
@@ -225,23 +215,12 @@ export default function SubscriptionPurchase() {
                 <div className="flex items-start gap-3">
                   <div
                     className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-[10px]"
-                    style={{ background: 'rgba(255,59,92,0.12)' }}
+                    style={{
+                      background: 'rgba(255,59,92,0.12)',
+                      color: 'rgb(var(--color-critical-500))',
+                    }}
                   >
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="rgb(var(--color-critical-500))"
-                      strokeWidth="1.5"
-                      aria-hidden="true"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
-                      />
-                    </svg>
+                    <ExclamationIcon className="h-4 w-4" />
                   </div>
                   <div>
                     <div

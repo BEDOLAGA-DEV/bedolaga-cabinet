@@ -1,7 +1,7 @@
 import { Link } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { HoverBorderGradient } from '../ui/hover-border-gradient';
-import { SubscriptionIcon } from '@/components/icons';
+import { ChevronRightIcon, SubscriptionIcon } from '@/components/icons';
 import type { Subscription } from '../../types';
 
 interface PurchaseCTAButtonProps {
@@ -86,20 +86,7 @@ export default function PurchaseCTAButton({
           </div>
 
           {/* Right: chevron */}
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-            className="flex-shrink-0 text-dark-50/30 transition-transform duration-300 group-hover:translate-x-1"
-          >
-            <path d="M9 18l6-6-6-6" />
-          </svg>
+          <ChevronRightIcon className="h-5 w-5 flex-shrink-0 text-dark-50/30 transition-transform duration-300 group-hover:translate-x-1" />
         </div>
       </HoverBorderGradient>
     </Link>

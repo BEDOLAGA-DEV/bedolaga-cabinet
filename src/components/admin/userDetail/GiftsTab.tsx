@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { SendIcon } from '@/components/icons';
 import { useCurrency } from '../../../hooks/useCurrency';
 import type { AdminUserGiftItem, AdminUserGiftsResponse } from '../../../api/adminUsers';
 
@@ -224,19 +225,7 @@ export function GiftsTab({ giftsLoading, giftsData, locale, onNavigateToUser }: 
       {/* Sent Gifts */}
       <div>
         <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-dark-200">
-          <svg
-            className="h-4 w-4 text-accent-400"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"
-            />
-          </svg>
+          <SendIcon className="h-4 w-4 text-accent-400" />
           {t('admin.users.detail.gifts.sentTitle')}
           <span className="text-dark-500">({giftsData.sent_total})</span>
         </h3>

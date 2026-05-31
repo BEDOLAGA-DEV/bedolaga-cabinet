@@ -319,15 +319,7 @@ export default function Profile() {
               </h2>
               <p className="text-sm text-dark-400">{t('profile.accounts.subtitle')}</p>
             </div>
-            <svg
-              className="h-5 w-5 text-dark-400"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-            </svg>
+            <ArrowRightIcon className="h-5 w-5 text-dark-400" />
           </div>
         </Card>
       </motion.div>

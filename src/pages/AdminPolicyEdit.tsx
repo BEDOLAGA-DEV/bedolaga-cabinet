@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { rbacApi, AccessPolicy, CreatePolicyPayload, UpdatePolicyPayload } from '@/api/rbac';
 import { AdminBackButton } from '@/components/admin';
+import { XIcon } from '@/components/icons';
 
 // === Types ===
 
@@ -150,15 +151,7 @@ function IpTagInput({ values, onChange }: IpTagInputProps) {
             className="text-dark-400 transition-colors hover:text-dark-200"
             aria-label={t('admin.policies.conditions.removeIp', { ip })}
           >
-            <svg
-              className="h-3 w-3"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            <XIcon className="h-3 w-3" />
           </button>
         </span>
       ))}

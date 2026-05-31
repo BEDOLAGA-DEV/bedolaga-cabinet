@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { CheckIcon } from '@/components/icons';
 import { ChevronDownIcon, StatusIcon } from '../TrafficIcons';
 
 // Status colour pills shared with the StatusFilter dropdown.
@@ -86,17 +87,7 @@ export function StatusFilter({
                 allSelected ? 'border-accent-500 bg-accent-500' : 'border-dark-600'
               }`}
             >
-              {allSelected && (
-                <svg
-                  className="h-3 w-3 text-white"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={3}
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                </svg>
-              )}
+              {allSelected && <CheckIcon className="h-3 w-3 text-white" />}
             </span>
             {t('admin.trafficUsage.allStatuses')}
           </button>
@@ -117,21 +108,7 @@ export function StatusFilter({
                       checked ? 'border-accent-500 bg-accent-500' : 'border-dark-600'
                     }`}
                   >
-                    {checked && (
-                      <svg
-                        className="h-3 w-3 text-white"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={3}
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M4.5 12.75l6 6 9-13.5"
-                        />
-                      </svg>
-                    )}
+                    {checked && <CheckIcon className="h-3 w-3 text-white" />}
                   </span>
                   <span className={`h-2 w-2 rounded-full ${STATUS_COLORS[s] || 'bg-dark-500'}`} />
                   {statusLabel(s)}

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { contestsApi, ContestInfo, ContestGameData } from '../api/contests';
-import { GamepadIcon, TrophyIcon } from '@/components/icons';
+import { GamepadIcon, TrophyIcon, XIcon } from '@/components/icons';
 
 export default function Contests() {
   const { t } = useTranslation();
@@ -87,14 +87,7 @@ export default function Contests() {
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-xl font-bold">{selectedContest.name}</h2>
               <button onClick={handleCloseGame} className="text-dark-400 hover:text-dark-200">
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
+                <XIcon className="h-6 w-6" />
               </button>
             </div>
 

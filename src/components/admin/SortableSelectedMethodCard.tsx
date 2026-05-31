@@ -4,6 +4,7 @@ import { useSortable } from '@dnd-kit/sortable';
 import { PiCaretDown } from 'react-icons/pi';
 import { CSS } from '@dnd-kit/utilities';
 import { cn } from '../../lib/utils';
+import { CheckIcon } from '@/components/icons';
 import { GripIcon, TrashIcon } from '../icons/LandingIcons';
 import type { AdminLandingPaymentMethod, EditableMethodField } from '../../api/landings';
 import type { PaymentMethodSubOptionInfo } from '../../types';
@@ -218,17 +219,7 @@ export function SortableSelectedMethodCard({
                             : 'border border-dark-600 bg-dark-700',
                         )}
                       >
-                        {enabled && (
-                          <svg
-                            className="h-2.5 w-2.5"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            strokeWidth={3}
-                          >
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                          </svg>
-                        )}
+                        {enabled && <CheckIcon className="h-2.5 w-2.5" />}
                       </div>
                       {opt.name}
                     </button>

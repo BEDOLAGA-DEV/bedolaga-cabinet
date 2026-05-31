@@ -14,9 +14,12 @@ import {
   CheckIcon,
   ClockIcon,
   CopyIcon,
+  ExclamationIcon,
   LinkIcon,
   PartnerIcon,
   ShareIcon,
+  TelegramIcon,
+  UsersIcon,
   WalletIcon,
 } from '@/components/icons';
 
@@ -212,19 +215,7 @@ export default function Referral() {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center gap-6">
         <div className="flex h-24 w-24 items-center justify-center rounded-full bg-dark-800">
-          <svg
-            className="h-12 w-12 text-dark-500"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={1.5}
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"
-            />
-          </svg>
+          <UsersIcon className="h-12 w-12 text-dark-500" />
         </div>
         <div className="text-center">
           <h1 className="mb-2 text-2xl font-bold text-dark-100">{t('referral.title')}</h1>
@@ -273,9 +264,7 @@ export default function Referral() {
           {botReferralLink && (
             <div>
               <div className="mb-1.5 flex items-center gap-2 text-sm font-medium text-dark-300">
-                <svg className="h-4 w-4 text-accent-400" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z" />
-                </svg>
+                <TelegramIcon className="h-4 w-4 text-accent-400" />
                 {t('referral.botLink')}
               </div>
               <div className="flex flex-col gap-2 sm:flex-row">
@@ -302,19 +291,7 @@ export default function Referral() {
           {/* Cabinet link */}
           <div>
             <div className="mb-1.5 flex items-center gap-2 text-sm font-medium text-dark-300">
-              <svg
-                className="h-4 w-4 text-accent-400"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
-                />
-              </svg>
+              <LinkIcon className="h-4 w-4 text-accent-400" />
               {t('referral.cabinetLink')}
             </div>
             <div className="flex flex-col gap-2 sm:flex-row">
@@ -383,19 +360,7 @@ export default function Referral() {
         ) : (
           <div className="py-12 text-center">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-dark-800">
-              <svg
-                className="h-8 w-8 text-dark-500"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={1.5}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"
-                />
-              </svg>
+              <UsersIcon className="h-8 w-8 text-dark-500" />
             </div>
             <div className="text-dark-400">{t('referral.noReferrals')}</div>
           </div>
@@ -519,19 +484,7 @@ export default function Referral() {
         <div className="bento-card border-error-500/20">
           <div className="flex items-start gap-4">
             <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-error-500/10 text-error-400">
-              <svg
-                className="h-8 w-8"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={1.5}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
-                />
-              </svg>
+              <ExclamationIcon className="h-8 w-8" />
             </div>
             <div className="flex-1">
               <h2 className="text-lg font-semibold text-dark-100">

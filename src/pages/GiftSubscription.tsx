@@ -21,6 +21,7 @@ import { getApiErrorMessage } from '../utils/api-error';
 import { formatPrice } from '../utils/format';
 import { useCurrency } from '../hooks/useCurrency';
 import { usePlatform, useHaptic } from '@/platform';
+import { SparklesIcon } from '@/components/icons';
 
 function GiftIcon({ className }: { className?: string }) {
   return (
@@ -686,17 +687,7 @@ function BuyTabContent({
       {config.promo_group_name && (
         <div className="flex items-center gap-3 rounded-xl border border-success-500/30 bg-success-500/10 p-3">
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-success-500/20">
-            <svg
-              className="h-4 w-4 text-success-400"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={1.5}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
-            </svg>
+            <SparklesIcon className="h-4 w-4 text-success-400" />
           </div>
           <div>
             <div className="text-sm font-medium text-success-400">
@@ -713,17 +704,7 @@ function BuyTabContent({
       {config.active_discount_percent != null && config.active_discount_percent > 0 && (
         <div className="flex items-center gap-3 rounded-xl border border-warning-500/30 bg-warning-500/10 p-3">
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-warning-500/20">
-            <svg
-              className="h-4 w-4 text-warning-400"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={1.5}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
-            </svg>
+            <SparklesIcon className="h-4 w-4 text-warning-400" />
           </div>
           <div className="text-sm font-medium text-warning-400">
             {t('promo.discountApplied')} -{config.active_discount_percent}%

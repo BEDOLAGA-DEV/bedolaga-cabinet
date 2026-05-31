@@ -20,6 +20,7 @@ import {
   CheckIcon,
   CopyIcon,
   CryptoIcon,
+  ExclamationIcon,
   ExternalLinkIcon,
   SparklesIcon,
   StarIcon,
@@ -520,19 +521,7 @@ export default function TopUpAmount() {
           variants={staggerItem}
           className="flex items-center gap-2 rounded-xl border border-error-500/20 bg-error-500/10 p-3"
         >
-          <svg
-            className="h-5 w-5 shrink-0 text-error-400"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
-          </svg>
+          <ExclamationIcon className="h-5 w-5 shrink-0 text-error-400" />
           <span className="text-sm text-error-400">{error}</span>
         </motion.div>
       )}

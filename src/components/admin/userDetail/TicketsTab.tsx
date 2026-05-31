@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { adminApi, type AdminTicket, type AdminTicketDetail } from '../../../api/admin';
 import { MessageMediaGrid } from '../../tickets/MessageMediaGrid';
 import { linkifyText } from '../../../utils/linkify';
+import { ChatIcon, BackIcon, SendIcon } from '@/components/icons';
 
 // ──────────────────────────────────────────────────────────────────
 // Tickets tab — list view + chat view (selected ticket replaces list).
@@ -155,19 +156,7 @@ function EmptyState() {
   const { t } = useTranslation();
   return (
     <div className="flex flex-col items-center justify-center rounded-xl bg-dark-800/50 py-12">
-      <svg
-        className="mb-3 h-12 w-12 text-dark-600"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        strokeWidth={1.5}
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 01-.825-.242m9.345-8.334a2.126 2.126 0 00-.476-.095 48.64 48.64 0 00-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0011.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155"
-        />
-      </svg>
+      <ChatIcon className="mb-3 h-12 w-12 text-dark-600" />
       <p className="text-dark-400">{t('admin.users.detail.noTickets')}</p>
     </div>
   );
@@ -265,15 +254,7 @@ function ChatView({
           aria-label={t('common.back', 'Back')}
           className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-dark-800 transition-colors hover:bg-dark-700 sm:h-8 sm:w-8"
         >
-          <svg
-            className="h-4 w-4 text-dark-400"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-          </svg>
+          <BackIcon className="h-4 w-4 text-dark-400" />
         </button>
         <div className="min-w-0 flex-1">
           <div className="truncate font-medium text-dark-100">
@@ -372,19 +353,7 @@ function ChatView({
             {replySending ? (
               <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
             ) : (
-              <svg
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"
-                />
-              </svg>
+              <SendIcon className="h-5 w-5" />
             )}
           </button>
         </div>
