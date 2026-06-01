@@ -62,6 +62,19 @@ const formatBytes = (bytes: number): string => {
 // сохранён для случая пустого кода (важно для UI-плейсхолдеров).
 const getCountryFlag = (code: string | null | undefined): string => getFlagEmoji(code) || '🌍';
 
+// The panel's provider.faviconLink is the provider's site URL (e.g.
+// "https://waicore.com/"), not an image. Resolve it to an actual favicon
+// image via Google's favicon service, the same way the panel renders it.
+const providerFaviconUrl = (link: string | null | undefined): string | null => {
+  if (!link) return null;
+  try {
+    const host = new URL(link).hostname;
+    return host ? `https://www.google.com/s2/favicons?domain=${host}&sz=64` : null;
+  } catch {
+    return null;
+  }
+};
+
 // Realtime interface throughput (bytes/s) → network-style speed, matching the
 // panel exactly: the unit step is by 1024 bytes, but the value is shown in bits
 // (×8 / 1000), e.g. 341 KB/s → "2728 Kb/s", 1.34 MB/s → "10.72 Mb/s".
@@ -142,6 +155,7 @@ function NodeCard({ node, providerName, onAction, isLoading }: NodeCardProps) {
 
   // Provider name: realtime metrics first, fall back to the node's own provider.
   const providerLabel = providerName || node.provider_name;
+  const providerFavicon = providerFaviconUrl(node.provider_favicon);
 
   return (
     <div className="rounded-xl border border-dark-700 bg-dark-800/50 p-3.5 transition-colors hover:border-dark-600">
@@ -160,11 +174,11 @@ function NodeCard({ node, providerName, onAction, isLoading }: NodeCardProps) {
             {getCountryFlag(node.country_code)}
           </span>
           <h3 className="truncate font-semibold text-dark-100">{node.name}</h3>
-          {(providerLabel || node.provider_favicon) && (
+          {(providerLabel || providerFavicon) && (
             <span className="flex min-w-0 max-w-[7rem] shrink items-center gap-1 rounded-md bg-accent-500/15 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-accent-300">
-              {node.provider_favicon && (
+              {providerFavicon && (
                 <img
-                  src={node.provider_favicon}
+                  src={providerFavicon}
                   alt=""
                   className="h-3 w-3 shrink-0 rounded-[2px]"
                   onError={(e) => {
