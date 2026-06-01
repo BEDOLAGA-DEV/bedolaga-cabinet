@@ -329,6 +329,7 @@ function NodeCard({ node, providerName, realtime, onAction, isLoading }: NodeCar
         <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-dark-700/60 pt-2 font-mono text-[10.5px] text-dark-500">
           {ramPct !== null && (
             <span className="flex items-center gap-1.5" title="RAM">
+              <MemoryIcon className="h-3 w-3 text-dark-500" />
               <span
                 className={
                   ramPct > 85
@@ -348,7 +349,12 @@ function NodeCard({ node, providerName, realtime, onAction, isLoading }: NodeCar
               </span>
             </span>
           )}
-          {loadAvg && <span title="load average 1 / 5 / 15 min">{loadAvg}</span>}
+          {loadAvg && (
+            <span className="flex items-center gap-1" title="load average 1 / 5 / 15 min">
+              <CpuIcon className="h-3 w-3 text-dark-500" />
+              {loadAvg}
+            </span>
+          )}
           <span className="flex items-center gap-2">
             <span className="flex items-center gap-0.5">
               <DownloadIcon className="h-3 w-3 text-success-400/70" />
