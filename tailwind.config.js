@@ -110,7 +110,11 @@ export default {
         },
       },
       fontFamily: {
+        // 'Twemoji Country Flags' is first in every stack so Windows renders flag
+        // emoji (it's unicode-range-scoped to flag codepoints only — see globals.css —
+        // so it never affects any other glyph). Global root fix for flags everywhere.
         sans: [
+          'Twemoji Country Flags',
           'Manrope',
           'system-ui',
           '-apple-system',
@@ -119,8 +123,8 @@ export default {
           'Roboto',
           'sans-serif',
         ],
-        display: ['Outfit', 'Manrope', 'system-ui', 'sans-serif'],
-        mono: ['IBM Plex Mono', 'ui-monospace', 'monospace'],
+        display: ['Twemoji Country Flags', 'Outfit', 'Manrope', 'system-ui', 'sans-serif'],
+        mono: ['Twemoji Country Flags', 'IBM Plex Mono', 'ui-monospace', 'monospace'],
       },
       borderRadius: {
         bento: '24px',

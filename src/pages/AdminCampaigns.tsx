@@ -4,7 +4,15 @@ import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tansta
 import { useTranslation } from 'react-i18next';
 import i18n from '../i18n';
 import { campaignsApi, CampaignListItem, CampaignBonusType } from '../api/campaigns';
-import { PlusIcon, EditIcon, TrashIcon, CheckIcon, XIcon, ChartIcon } from '../components/icons';
+import {
+  PlusIcon,
+  EditIcon,
+  TrashIcon,
+  CheckIcon,
+  XIcon,
+  ChartIcon,
+  BackIcon,
+} from '../components/icons';
 import { usePlatform } from '../platform/hooks/usePlatform';
 import { useFocusTrap } from '../hooks/useFocusTrap';
 
@@ -36,19 +44,6 @@ const bonusTypeConfig: Record<
     bgColor: 'bg-dark-500/20',
   },
 };
-
-// Icons
-const BackIcon = () => (
-  <svg
-    className="h-5 w-5 text-dark-400"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={2}
-  >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-  </svg>
-);
 
 // Locale mapping for formatting
 const localeMap: Record<string, string> = { ru: 'ru-RU', en: 'en-US', zh: 'zh-CN', fa: 'fa-IR' };

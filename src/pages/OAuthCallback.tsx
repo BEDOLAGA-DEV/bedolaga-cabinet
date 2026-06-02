@@ -11,6 +11,7 @@ import {
   getErrorDetail,
 } from '../utils/oauth';
 import type { ServerCompleteResponse } from '../types';
+import { CheckIcon, ExclamationIcon } from '@/components/icons';
 
 type CallbackMode = 'login' | 'link-browser' | 'link-server';
 
@@ -145,15 +146,7 @@ export default function OAuthCallback() {
         <div className="relative w-full max-w-md text-center">
           <div className="card">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-success-500/20">
-              <svg
-                className="h-8 w-8 text-success-400"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={1.5}
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-              </svg>
+              <CheckIcon className="h-8 w-8 text-success-400" />
             </div>
             <h2 className="mb-2 text-lg font-semibold text-dark-50">
               {t('profile.accounts.linkSuccess')}
@@ -209,19 +202,7 @@ export default function OAuthCallback() {
         <div className="relative w-full max-w-md text-center">
           <div className="card">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-error-500/20">
-              <svg
-                className="h-8 w-8 text-error-400"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={1.5}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
-                />
-              </svg>
+              <ExclamationIcon className="h-8 w-8 text-error-400" />
             </div>
             <h2 className="mb-2 text-lg font-semibold text-dark-50">{t('auth.loginFailed')}</h2>
             <p className="mb-6 text-sm text-dark-400">{error}</p>

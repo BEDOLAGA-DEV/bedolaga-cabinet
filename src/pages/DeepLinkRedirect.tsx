@@ -4,6 +4,13 @@ import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { brandingApi } from '../api/branding';
 import { copyToClipboard } from '../utils/clipboard';
+import {
+  CheckIcon,
+  CopyIcon,
+  ExclamationIcon,
+  ExternalLinkIcon,
+  LinkIcon,
+} from '@/components/icons';
 
 type Status = 'countdown' | 'fallback' | 'error';
 
@@ -209,19 +216,7 @@ export default function DeepLinkRedirect() {
               onClick={openDeepLink}
               className="btn-primary flex w-full items-center justify-center gap-2 py-3"
             >
-              <svg
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
-                />
-              </svg>
+              <ExternalLinkIcon className="h-5 w-5" />
               {t('deepLink.openApp')}
             </button>
           </div>
@@ -243,36 +238,12 @@ export default function DeepLinkRedirect() {
               >
                 {copied ? (
                   <>
-                    <svg
-                      className="h-5 w-5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M4.5 12.75l6 6 9-13.5"
-                      />
-                    </svg>
+                    <CheckIcon className="h-5 w-5" />
                     {t('deepLink.copied')}
                   </>
                 ) : (
                   <>
-                    <svg
-                      className="h-5 w-5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={1.5}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-                      />
-                    </svg>
+                    <CopyIcon className="h-5 w-5" />
                     {t('deepLink.copyLink')}
                   </>
                 )}
@@ -283,19 +254,7 @@ export default function DeepLinkRedirect() {
                 onClick={openDeepLink}
                 className="btn-secondary flex w-full items-center justify-center gap-2"
               >
-                <svg
-                  className="h-5 w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
-                  />
-                </svg>
+                <ExternalLinkIcon className="h-5 w-5" />
                 {t('deepLink.tryAgain')}
               </button>
 
@@ -327,19 +286,7 @@ export default function DeepLinkRedirect() {
         {status === 'error' && (
           <div className="card !bg-dark-800/80 p-6 backdrop-blur-sm">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-error-500/20">
-              <svg
-                className="h-8 w-8 text-error-400"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
-                />
-              </svg>
+              <ExclamationIcon className="h-8 w-8 text-error-400" />
             </div>
             <p className="mb-2 font-medium text-dark-200">{t('deepLink.errorTitle')}</p>
             <p className="mb-6 text-sm text-dark-400">{t('deepLink.errorDesc')}</p>
@@ -351,19 +298,7 @@ export default function DeepLinkRedirect() {
 
         {/* Footer */}
         <div className="mt-8 flex items-center justify-center gap-2 text-dark-600">
-          <svg
-            className="h-4 w-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={1.5}
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"
-            />
-          </svg>
+          <LinkIcon className="h-4 w-4" />
           <span className="text-xs">VPN Config Redirect</span>
         </div>
       </div>

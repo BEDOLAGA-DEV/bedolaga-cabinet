@@ -1086,7 +1086,7 @@
       "promoOffers": "促销优惠",
       "promocodes": "促销码",
       "promoGroups": "折扣组",
-      "remnawave": "RemnaWave",
+      "remnawave": "Remnawave",
       "users": "用户",
       "trafficUsage": "流量使用",
       "updates": "更新",
@@ -1873,7 +1873,7 @@
         "db_sqlite": "SQLite",
         "db_redis": "Redis",
         "sys_core": "核心与调试",
-        "sys_remnawave": "RemnaWave",
+        "sys_remnawave": "Remnawave",
         "sys_webapi": "Web API",
         "sys_webhook": "Webhook",
         "sys_server": "服务器状态",
@@ -1991,12 +1991,12 @@
       "importError": "无效的JSON文件格式",
       "importPreview": "导入预览",
       "noAppsToImport": "没有可导入的应用",
-      "refreshRemnaWave": "从RemnaWave刷新",
+      "refreshRemnaWave": "从Remnawave刷新",
       "remnaWaveConfigUuid": "配置UUID",
-      "remnaWaveConfigUuidHint": "来自RemnaWave面板的订阅页面配置UUID",
-      "remnaWaveMode": "显示来自RemnaWave面板的应用。只读模式。",
-      "remnaWaveSettings": "RemnaWave设置",
-      "remnaWaveToggle": "切换RemnaWave源",
+      "remnaWaveConfigUuidHint": "来自Remnawave面板的订阅页面配置UUID",
+      "remnaWaveMode": "显示来自Remnawave面板的应用。只读模式。",
+      "remnaWaveSettings": "Remnawave设置",
+      "remnaWaveToggle": "切换Remnawave源",
       "tabs": {
         "basic": "基本",
         "installation": "安装",
@@ -2005,8 +2005,8 @@
         "additional": "附加"
       },
       "noConfigs": "未配置任何配置",
-      "remnaWaveConnected": "RemnaWave 已连接",
-      "remnaWaveDisconnected": "RemnaWave 未连接"
+      "remnaWaveConnected": "Remnawave 已连接",
+      "remnaWaveDisconnected": "Remnawave 未连接"
     },
     "tickets": {
       "title": "工单管理",
@@ -2147,7 +2147,7 @@
       "daysShort": "天",
       "serversTitle": "服务器",
       "externalSquadTitle": "外部小组",
-      "externalSquadHint": "为此套餐的用户分配RemnaWave外部小组。创建订阅时，用户将自动添加到所选小组。",
+      "externalSquadHint": "为此套餐的用户分配Remnawave外部小组。创建订阅时，用户将自动添加到所选小组。",
       "noExternalSquad": "无外部小组",
       "externalSquadUsers": "用户",
       "serversTabHint": "选择此套餐上可用的服务器。",
@@ -2226,7 +2226,7 @@
       "sync": "同步",
       "syncing": "同步中...",
       "syncNow": "立即同步",
-      "noServers": "暂无服务器。请与RemnaWave同步。",
+      "noServers": "暂无服务器。请与Remnawave同步。",
       "edit": "编辑服务器",
       "originalName": "原始名称",
       "displayName": "显示名称",
@@ -3146,7 +3146,7 @@
       "connected": "已连接",
       "disconnected": "未配置",
       "noData": "加载数据失败",
-      "title": "RemnaWave",
+      "title": "Remnawave",
       "subtitle": "面板管理和统计",
       "tabs": {
         "overview": "概览",
@@ -3254,9 +3254,9 @@
         "success": "成功",
         "runAutoSyncNow": "立即运行自动同步",
         "fromPanel": "从面板",
-        "fromPanelDesc": "从RemnaWave导入用户到机器人",
+        "fromPanelDesc": "从Remnawave导入用户到机器人",
         "toPanel": "到面板",
-        "toPanelDesc": "从机器人导出用户到RemnaWave"
+        "toPanelDesc": "从机器人导出用户到Remnawave"
       }
     },
     "roles": {
@@ -3823,7 +3823,7 @@
         "deleteUser": "删除用户"
       },
       "deleteSubscription": {
-        "warning": "选中的订阅将从机器人和RemnaWave面板中永久删除！",
+        "warning": "选中的订阅将从机器人和Remnawave面板中永久删除！",
         "hint": "用户将失去已删除订阅的VPN访问权限。此操作无法撤销。",
         "activePaidWarning": "所选订阅中有 {{count}} / {{total}} 是有效的付费订阅",
         "forceDeleteConfirm": "我确认删除有效的付费订阅"
@@ -3831,7 +3831,7 @@
       "deleteUser": {
         "warning": "选中的用户将从机器人中永久删除！他们的所有订阅、余额和数据将丢失！",
         "hint": "此操作无法撤销。用户需要重新启动机器人以创建新账户。",
-        "deleteFromPanel": "同时从RemnaWave面板删除"
+        "deleteFromPanel": "同时从Remnawave面板删除"
       },
       "params": {
         "days": "天数",

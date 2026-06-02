@@ -1086,7 +1086,7 @@
       "promoOffers": "پیشنهادات تبلیغاتی",
       "promocodes": "کدهای تخفیف",
       "promoGroups": "گروه‌های تخفیف",
-      "remnawave": "RemnaWave",
+      "remnawave": "Remnawave",
       "users": "کاربران",
       "trafficUsage": "مصرف ترافیک",
       "updates": "به‌روزرسانی‌ها",
@@ -1832,7 +1832,7 @@
         "db_sqlite": "SQLite",
         "db_redis": "Redis",
         "sys_core": "هسته و اشکال‌زدایی",
-        "sys_remnawave": "RemnaWave",
+        "sys_remnawave": "Remnawave",
         "sys_webapi": "Web API",
         "sys_webhook": "Webhook",
         "sys_server": "وضعیت سرور",
@@ -1957,15 +1957,15 @@
       "importError": "فرمت فایل JSON نامعتبر",
       "importPreview": "پیش‌نمایش وارد کردن",
       "noAppsToImport": "هیچ برنامه‌ای برای وارد کردن نیست",
-      "refreshRemnaWave": "بازخوانی از RemnaWave",
+      "refreshRemnaWave": "بازخوانی از Remnawave",
       "remnaWaveConfigUuid": "UUID پیکربندی",
-      "remnaWaveConfigUuidHint": "UUID پیکربندی صفحه اشتراک از پنل RemnaWave",
-      "remnaWaveMode": "نمایش برنامه‌ها از پنل RemnaWave. حالت فقط خواندنی.",
-      "remnaWaveSettings": "تنظیمات RemnaWave",
-      "remnaWaveToggle": "تغییر منبع RemnaWave",
+      "remnaWaveConfigUuidHint": "UUID پیکربندی صفحه اشتراک از پنل Remnawave",
+      "remnaWaveMode": "نمایش برنامه‌ها از پنل Remnawave. حالت فقط خواندنی.",
+      "remnaWaveSettings": "تنظیمات Remnawave",
+      "remnaWaveToggle": "تغییر منبع Remnawave",
       "noConfigs": "هیچ تنظیماتی وجود ندارد",
-      "remnaWaveConnected": "RemnaWave متصل است",
-      "remnaWaveDisconnected": "RemnaWave قطع است"
+      "remnaWaveConnected": "Remnawave متصل است",
+      "remnaWaveDisconnected": "Remnawave قطع است"
     },
     "tickets": {
       "title": "مدیریت تیکت‌ها",
@@ -2107,7 +2107,7 @@
       "daysShort": "روز",
       "serversTitle": "سرورها",
       "externalSquadTitle": "گروه خارجی",
-      "externalSquadHint": "یک گروه خارجی RemnaWave برای کاربران این تعرفه تعیین کنید. هنگام ایجاد اشتراک، کاربر به طور خودکار به گروه انتخاب شده اضافه می‌شود.",
+      "externalSquadHint": "یک گروه خارجی Remnawave برای کاربران این تعرفه تعیین کنید. هنگام ایجاد اشتراک، کاربر به طور خودکار به گروه انتخاب شده اضافه می‌شود.",
       "noExternalSquad": "بدون گروه خارجی",
       "externalSquadUsers": "کاربران",
       "serversTabHint": "سرورهای موجود در این تعرفه را انتخاب کنید.",
@@ -2186,7 +2186,7 @@
       "sync": "همگام‌سازی",
       "syncing": "در حال همگام‌سازی...",
       "syncNow": "همگام‌سازی الان",
-      "noServers": "سروری نیست. با RemnaWave همگام‌سازی کنید.",
+      "noServers": "سروری نیست. با Remnawave همگام‌سازی کنید.",
       "edit": "ویرایش سرور",
       "originalName": "نام اصلی",
       "displayName": "نام نمایشی",
@@ -3138,7 +3138,7 @@
       "connected": "متصل",
       "disconnected": "تنظیم نشده",
       "noData": "بارگذاری داده‌ها ناموفق بود",
-      "title": "RemnaWave",
+      "title": "Remnawave",
       "subtitle": "مدیریت پنل و آمار",
       "tabs": {
         "overview": "نمای کلی",
@@ -3246,9 +3246,9 @@
         "success": "موفق",
         "runAutoSyncNow": "اجرای همگام‌سازی خودکار",
         "fromPanel": "از پنل",
-        "fromPanelDesc": "وارد کردن کاربران از RemnaWave به ربات",
+        "fromPanelDesc": "وارد کردن کاربران از Remnawave به ربات",
         "toPanel": "به پنل",
-        "toPanelDesc": "صادر کردن کاربران از ربات به RemnaWave"
+        "toPanelDesc": "صادر کردن کاربران از ربات به Remnawave"
       }
     },
     "theme": {
@@ -3824,7 +3824,7 @@
         "deleteUser": "حذف کاربران"
       },
       "deleteSubscription": {
-        "warning": "اشتراک‌های انتخاب شده برای همیشه از ربات و پنل RemnaWave حذف خواهند شد!",
+        "warning": "اشتراک‌های انتخاب شده برای همیشه از ربات و پنل Remnawave حذف خواهند شد!",
         "hint": "کاربران دسترسی VPN اشتراک‌های حذف شده را از دست خواهند داد. این عملیات قابل بازگشت نیست.",
         "activePaidWarning": "{{count}} از {{total}} اشتراک انتخاب‌شده اشتراک‌های فعال پرداختی هستند",
         "forceDeleteConfirm": "حذف اشتراک‌های فعال پرداختی را تأیید می‌کنم"
@@ -3832,7 +3832,7 @@
       "deleteUser": {
         "warning": "کاربران انتخاب شده برای همیشه از ربات حذف خواهند شد! تمام اشتراک‌ها، موجودی و داده‌های آن‌ها از بین خواهد رفت!",
         "hint": "این عملیات قابل بازگشت نیست. کاربران باید ربات را دوباره راه‌اندازی کنند تا حساب جدید بسازند.",
-        "deleteFromPanel": "همچنین از پنل RemnaWave حذف شود"
+        "deleteFromPanel": "همچنین از پنل Remnawave حذف شود"
       },
       "params": {
         "days": "تعداد روز",

@@ -13,6 +13,7 @@ import { useIsTelegram } from '../platform/hooks/usePlatform';
 import { useNativeDialog } from '../platform/hooks/useNativeDialog';
 import { useNotify } from '@/platform';
 import { copyToClipboard } from '@/utils/clipboard';
+import { MailIcon, SaveIcon, EyeIcon, SendIcon, ResetIcon } from '@/components/icons';
 
 // Hook to check if on mobile
 function useIsMobile() {
@@ -29,55 +30,6 @@ function useIsMobile() {
 
   return isMobile;
 }
-
-// Icons
-
-const MailIcon = () => (
-  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"
-    />
-  </svg>
-);
-
-const SaveIcon = () => (
-  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-  </svg>
-);
-
-const EyeIcon = () => (
-  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"
-    />
-    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-  </svg>
-);
-
-const SendIcon = () => (
-  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"
-    />
-  </svg>
-);
-
-const ResetIcon = () => (
-  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"
-    />
-  </svg>
-);
 
 const LANG_LABELS: Record<string, string> = {
   ru: 'RU',
@@ -390,7 +342,7 @@ function TemplateEditor({
             disabled={!isDirty || saveMutation.isPending}
             className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-accent-500 px-3 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-600 disabled:cursor-not-allowed disabled:opacity-40 sm:px-4 sm:py-2"
           >
-            <SaveIcon />
+            <SaveIcon className="h-4 w-4" />
             {saveMutation.isPending ? t('common.loading') : t('common.save')}
           </button>
 
@@ -412,7 +364,7 @@ function TemplateEditor({
             }}
             className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-dark-700 px-3 py-2.5 text-sm font-medium text-dark-200 transition-colors hover:bg-dark-600 sm:px-4 sm:py-2"
           >
-            <EyeIcon />
+            <EyeIcon className="h-4 w-4" />
             {t('admin.emailTemplates.preview')}
           </button>
         </div>
@@ -423,7 +375,7 @@ function TemplateEditor({
             disabled={testMutation.isPending}
             className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-dark-700 px-3 py-2.5 text-sm font-medium text-dark-200 transition-colors hover:bg-dark-600 disabled:opacity-40 sm:px-4 sm:py-2"
           >
-            <SendIcon />
+            <SendIcon className="h-4 w-4" />
             {testMutation.isPending ? t('common.loading') : t('admin.emailTemplates.sendTest')}
           </button>
 
@@ -437,7 +389,7 @@ function TemplateEditor({
               disabled={resetMutation.isPending}
               className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-dark-700 px-3 py-2.5 text-sm font-medium text-warning-400 transition-colors hover:bg-dark-600 disabled:opacity-40 sm:ml-auto sm:px-4 sm:py-2"
             >
-              <ResetIcon />
+              <ResetIcon className="h-4 w-4" />
               <span className="truncate">{t('admin.emailTemplates.resetDefault')}</span>
             </button>
           )}
@@ -474,7 +426,7 @@ export default function AdminEmailTemplates() {
         <AdminBackButton className="flex-shrink-0 rounded-xl border border-dark-700 bg-dark-800 p-1.5 transition-colors hover:bg-dark-700 sm:p-2" />
         <div className="flex min-w-0 items-center gap-2 sm:gap-2.5">
           <div className="flex-shrink-0 rounded-xl bg-gradient-to-br from-accent-500/20 to-accent-600/10 p-1.5 text-accent-400 sm:p-2">
-            <MailIcon />
+            <MailIcon className="h-6 w-6" />
           </div>
           <div className="min-w-0">
             <h1 className="truncate text-lg font-bold text-dark-100 sm:text-xl">

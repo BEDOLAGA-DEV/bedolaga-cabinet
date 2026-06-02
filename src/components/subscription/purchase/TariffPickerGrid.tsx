@@ -4,6 +4,7 @@ import { useTheme } from '../../../hooks/useTheme';
 import { useCurrency } from '../../../hooks/useCurrency';
 import { usePromoDiscount } from '../../../hooks/usePromoDiscount';
 import { getGlassColors } from '../../../utils/glassTheme';
+import { ArrowDownIcon, DevicesIcon, RestartIcon } from '@/components/icons';
 import type { Tariff, Subscription, PurchaseOptions } from '../../../types';
 
 // ──────────────────────────────────────────────────────────────────
@@ -169,35 +170,11 @@ export function TariffPickerGrid({
                 </div>
                 <div className="flex flex-wrap gap-4 text-sm">
                   <div className="flex items-center gap-1.5">
-                    <svg
-                      className="h-4 w-4 text-accent-400"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={1.5}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"
-                      />
-                    </svg>
+                    <ArrowDownIcon className="h-4 w-4 text-accent-400" />
                     <span className="font-medium text-dark-200">{tariff.traffic_limit_label}</span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <svg
-                      className="h-4 w-4 text-dark-400"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={1.5}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3"
-                      />
-                    </svg>
+                    <DevicesIcon className="h-4 w-4 text-dark-400" />
                     <span className="text-dark-300">
                       {tariff.device_limit === 0
                         ? '∞'
@@ -206,19 +183,7 @@ export function TariffPickerGrid({
                   </div>
                   {tariff.traffic_reset_mode && tariff.traffic_reset_mode !== 'NO_RESET' && (
                     <div className="flex items-center gap-1.5">
-                      <svg
-                        className="h-4 w-4 text-dark-400"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={1.5}
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182M2.985 19.644l3.181-3.182"
-                        />
-                      </svg>
+                      <RestartIcon className="h-4 w-4 text-dark-400" />
                       <span className="text-dark-300">
                         {t(`subscription.trafficReset.${tariff.traffic_reset_mode}`)}
                       </span>

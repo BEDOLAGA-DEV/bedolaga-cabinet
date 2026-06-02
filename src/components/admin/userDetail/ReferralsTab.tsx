@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router';
 import { useCurrency } from '../../../hooks/useCurrency';
 import { useNotify } from '../../../platform/hooks/useNotify';
 import { adminUsersApi, type UserDetailResponse, type UserListItem } from '../../../api/adminUsers';
+import { XIcon } from '@/components/icons';
 
 // ──────────────────────────────────────────────────────────────────
 // Referrals tab — top-of-graph referrer + stats + referrals list,
@@ -481,15 +482,7 @@ export function ReferralsTab({ user, userId, onUserRefresh }: ReferralsTabProps)
                   className="rounded-lg p-2 text-dark-500 transition-colors hover:bg-error-500/10 hover:text-error-400 disabled:opacity-50"
                   title={t('admin.users.detail.referrals.removeReferral')}
                 >
-                  <svg
-                    className="h-4 w-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
+                  <XIcon className="h-4 w-4" />
                 </button>
               </div>
             ))}

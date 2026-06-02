@@ -8,6 +8,7 @@ import {
   useState,
   useCallback,
 } from 'react';
+import { CloseIcon } from '@/components/icons';
 import { cn } from '@/lib/utils';
 import { usePlatform } from '@/platform';
 import {
@@ -22,19 +23,6 @@ export {
   Portal as SheetPortal,
   Close as SheetClose,
 } from '@radix-ui/react-dialog';
-
-// Close icon
-const CloseIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-    <path
-      d="M12 4L4 12M4 4l8 8"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
 
 // Context for AnimatePresence and control
 interface SheetContextValue {

@@ -698,7 +698,7 @@ export const adminUsersApi = {
     return response.data;
   },
 
-  // Get subscription request history from RemnaWave panel
+  // Get subscription request history from Remnawave panel
   getSubscriptionRequestHistory: async (
     userId: number,
     subscriptionId?: number,

@@ -42,7 +42,7 @@ export function PeriodSelector({
   if (dateMode) {
     return (
       <div className="flex items-center gap-2">
-        <CalendarIcon />
+        <CalendarIcon className="h-4 w-4" />
         <span className="text-xs text-dark-400">{t('admin.trafficUsage.dateFrom')}</span>
         <input
           type="date"
@@ -66,7 +66,7 @@ export function PeriodSelector({
           className="rounded-lg p-1 text-dark-400 transition-colors hover:bg-dark-700 hover:text-dark-200"
           title={t('admin.trafficUsage.period')}
         >
-          <XIcon />
+          <XIcon className="h-3 w-3" />
         </button>
       </div>
     );
@@ -96,7 +96,7 @@ export function PeriodSelector({
         className="rounded-lg border border-dark-700 bg-dark-800 p-1.5 text-dark-400 transition-colors hover:border-dark-600 hover:bg-dark-700 hover:text-dark-200"
         title={t('admin.trafficUsage.customDates')}
       >
-        <CalendarIcon />
+        <CalendarIcon className="h-4 w-4" />
       </button>
     </div>
   );

@@ -1207,7 +1207,7 @@
       "broadcasts": "Broadcasts",
       "users": "Users",
       "payments": "Payments",
-      "remnawave": "RemnaWave",
+      "remnawave": "Remnawave",
       "emailTemplates": "Email Templates",
       "paymentMethods": "Payment Methods",
       "campaigns": "Campaigns",
@@ -1605,7 +1605,7 @@
       "notFound": "Payment method not found"
     },
     "remnawave": {
-      "title": "RemnaWave",
+      "title": "Remnawave",
       "subtitle": "Panel management and statistics",
       "connected": "Connected",
       "disconnected": "Not configured",
@@ -1719,9 +1719,9 @@
         "success": "Success",
         "runAutoSyncNow": "Run Auto Sync Now",
         "fromPanel": "From Panel",
-        "fromPanelDesc": "Import users from RemnaWave to bot",
+        "fromPanelDesc": "Import users from Remnawave to bot",
         "toPanel": "To Panel",
-        "toPanelDesc": "Export users from bot to RemnaWave"
+        "toPanelDesc": "Export users from bot to Remnawave"
       }
     },
     "wheel": {
@@ -2128,7 +2128,7 @@
         "db_sqlite": "SQLite",
         "db_redis": "Redis",
         "sys_core": "Core & Debug",
-        "sys_remnawave": "RemnaWave",
+        "sys_remnawave": "Remnawave",
         "sys_webapi": "Web API",
         "sys_webhook": "Webhook",
         "sys_server": "Server status",
@@ -2178,7 +2178,7 @@
         "deleteUser": "Delete users"
       },
       "deleteSubscription": {
-        "warning": "Selected subscriptions will be permanently deleted from the bot and RemnaWave panel!",
+        "warning": "Selected subscriptions will be permanently deleted from the bot and Remnawave panel!",
         "hint": "Users will lose VPN access for deleted subscriptions. This action cannot be undone.",
         "activePaidWarning": "{{count}} of {{total}} selected subscriptions are active paid",
         "forceDeleteConfirm": "I confirm deletion of active paid subscriptions"
@@ -2186,7 +2186,7 @@
       "deleteUser": {
         "warning": "Selected users will be permanently deleted from the bot! All their subscriptions, balance, and data will be lost!",
         "hint": "This action cannot be undone. Users will need to restart the bot to create a new account.",
-        "deleteFromPanel": "Also delete from RemnaWave panel"
+        "deleteFromPanel": "Also delete from Remnawave panel"
       },
       "params": {
         "days": "Number of days",
@@ -2370,16 +2370,16 @@
       "importError": "Invalid JSON file format",
       "importCreateError": "Failed to create some apps",
       "noAppsToImport": "No apps to import",
-      "remnaWaveToggle": "Toggle RemnaWave source",
-      "refreshRemnaWave": "Refresh from RemnaWave",
-      "remnaWaveMode": "Showing apps from RemnaWave panel. Read-only mode.",
-      "remnaWaveSettings": "RemnaWave Settings",
+      "remnaWaveToggle": "Toggle Remnawave source",
+      "refreshRemnaWave": "Refresh from Remnawave",
+      "remnaWaveMode": "Showing apps from Remnawave panel. Read-only mode.",
+      "remnaWaveSettings": "Remnawave Settings",
       "remnaWaveConfigUuid": "Config UUID",
-      "remnaWaveConfigUuidHint": "UUID of subscription page config from RemnaWave panel",
+      "remnaWaveConfigUuidHint": "UUID of subscription page config from Remnawave panel",
       "availableConfigs": "Available configs",
       "noConfigs": "No configs",
-      "remnaWaveConnected": "RemnaWave connected",
-      "remnaWaveDisconnected": "RemnaWave disconnected"
+      "remnaWaveConnected": "Remnawave connected",
+      "remnaWaveDisconnected": "Remnawave disconnected"
     },
     "tickets": {
       "title": "Ticket Management",
@@ -2528,7 +2528,7 @@
       "daysShort": "d.",
       "serversTitle": "Servers",
       "externalSquadTitle": "External Squad",
-      "externalSquadHint": "Assign a RemnaWave external squad for users on this tariff. When a subscription is created, the user will be automatically added to the selected squad.",
+      "externalSquadHint": "Assign a Remnawave external squad for users on this tariff. When a subscription is created, the user will be automatically added to the selected squad.",
       "noExternalSquad": "No external squad",
       "externalSquadUsers": "users",
       "serversTabHint": "Select servers available on this tariff.",
@@ -2607,7 +2607,7 @@
       "sync": "Sync",
       "syncing": "Syncing...",
       "syncNow": "Sync now",
-      "noServers": "No servers. Sync with RemnaWave.",
+      "noServers": "No servers. Sync with Remnawave.",
       "edit": "Edit Server",
       "originalName": "Original Name",
       "displayName": "Display Name",

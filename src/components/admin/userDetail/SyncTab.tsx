@@ -1,25 +1,10 @@
 import { useTranslation } from 'react-i18next';
+import { ArrowDownIcon, ArrowUpIcon } from '@/components/icons';
 import type {
   UserDetailResponse,
   UserSubscriptionInfo,
   PanelSyncStatusResponse,
 } from '../../../api/adminUsers';
-
-// ──────────────────────────────────────────────────────────────────
-// Icons (sync-tab-local — not used outside this view)
-// ──────────────────────────────────────────────────────────────────
-
-const ArrowDownIcon = ({ className = 'w-5 h-5' }: { className?: string }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 13.5L12 21m0 0l-7.5-7.5M12 21V3" />
-  </svg>
-);
-
-const ArrowUpIcon = ({ className = 'w-5 h-5' }: { className?: string }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18" />
-  </svg>
-);
 
 // ──────────────────────────────────────────────────────────────────
 // Sync tab — compares bot DB vs panel data, offers a 2-way push

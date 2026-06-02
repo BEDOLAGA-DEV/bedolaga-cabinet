@@ -21,10 +21,55 @@ export interface SystemSummary {
   total_users: number;
   active_connections: number;
   nodes_online: number;
+  total_nodes: number;
   users_last_day: number;
   users_last_week: number;
   users_never_online: number;
   total_user_traffic: number;
+}
+
+// Panel recap / devices / top consumers
+export interface RecapResponse {
+  version: string | null;
+  init_date: string | null;
+  total: {
+    users: number;
+    nodes: number;
+    traffic_bytes: number;
+    nodes_ram_bytes: number;
+    nodes_cpu_cores: number;
+    distinct_countries: number;
+  };
+  this_month: { users: number; traffic_bytes: number };
+}
+
+export interface DevicesStatsResponse {
+  by_platform: { platform: string; count: number }[];
+  by_app: { app: string; count: number }[];
+  top_users: { username: string; devices_count: number }[];
+  total_unique_devices: number;
+  total_hwid_devices: number;
+  average_devices_per_user: number;
+}
+
+export interface TopConsumersResponse {
+  period_days: number;
+  users: { username: string; total_bytes: number }[];
+}
+
+export interface HealthResponse {
+  instances: number;
+  rss_bytes: number;
+  heap_used_bytes: number;
+  heap_total_bytes: number;
+  event_loop_delay_ms: number;
+  event_loop_p99_ms: number;
+  uptime_seconds: number;
+  instance_id: string | null;
+}
+
+export interface SubscriptionRequestStatsResponse {
+  by_app: { app: string; count: number }[];
 }
 
 export interface ServerInfo {
@@ -89,6 +134,8 @@ export interface NodeInfo {
   created_at?: string;
   updated_at?: string;
   provider_uuid?: string;
+  provider_name?: string | null;
+  provider_favicon?: string | null;
   versions?: { xray: string; node: string } | null;
   system?: {
     info: {
@@ -289,6 +336,34 @@ export const adminRemnawaveApi = {
   // System Statistics
   getSystemStats: async (): Promise<SystemStatsResponse> => {
     const response = await apiClient.get('/cabinet/admin/remnawave/system');
+    return response.data;
+  },
+
+  // Panel recap / devices / top consumers
+  getRecap: async (): Promise<RecapResponse> => {
+    const response = await apiClient.get('/cabinet/admin/remnawave/recap');
+    return response.data;
+  },
+
+  getDevicesStats: async (): Promise<DevicesStatsResponse> => {
+    const response = await apiClient.get('/cabinet/admin/remnawave/devices-stats');
+    return response.data;
+  },
+
+  getTopConsumers: async (days = 7, limit = 10): Promise<TopConsumersResponse> => {
+    const response = await apiClient.get('/cabinet/admin/remnawave/top-consumers', {
+      params: { days, limit },
+    });
+    return response.data;
+  },
+
+  getHealth: async (): Promise<HealthResponse> => {
+    const response = await apiClient.get('/cabinet/admin/remnawave/health');
+    return response.data;
+  },
+
+  getSubscriptionRequests: async (): Promise<SubscriptionRequestStatsResponse> => {
+    const response = await apiClient.get('/cabinet/admin/remnawave/subscription-requests');
     return response.data;
   },
 

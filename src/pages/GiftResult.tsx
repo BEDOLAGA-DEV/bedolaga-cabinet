@@ -4,11 +4,13 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { giftApi } from '../api/gift';
+import { brandingApi, type TelegramWidgetConfig } from '../api/branding';
 import { Spinner } from '@/components/ui/Spinner';
 import { AnimatedCheckmark } from '@/components/ui/AnimatedCheckmark';
 import { AnimatedCrossmark } from '@/components/ui/AnimatedCrossmark';
 import { cn } from '@/lib/utils';
 import { copyToClipboard } from '@/utils/clipboard';
+import { CheckIcon, CopyIcon, InfoIcon, ExclamationIcon, ClockIcon } from '@/components/icons';
 
 const MAX_POLL_MS = 10 * 60 * 1000; // 10 minutes
 
@@ -53,13 +55,25 @@ function CodeOnlySuccessState({
   const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
 
+  // Bot username comes from the runtime branding config; the build-time env var
+  // is only a fallback. Otherwise the "activate via bot" line silently vanishes
+  // on deployments that don't set VITE_TELEGRAM_BOT_USERNAME at build time.
+  const { data: widgetConfig } = useQuery<TelegramWidgetConfig>({
+    queryKey: ['telegram-widget-config'],
+    queryFn: brandingApi.getTelegramWidgetConfig,
+    staleTime: 60000,
+  });
+  const botUsername =
+    widgetConfig?.bot_username || import.meta.env.VITE_TELEGRAM_BOT_USERNAME || '';
+
   const shortCode = purchaseToken.slice(0, 12);
   const giftCode = `GIFT-${shortCode}`;
-  const botUsername = import.meta.env.VITE_TELEGRAM_BOT_USERNAME as string | undefined;
-  // Encode underscores as %5F so Telegram auto-link detection doesn't strip them
-  const safeCode = shortCode.replace(/_/g, '%5F');
-  const botLink = botUsername ? `https://t.me/${botUsername}?start=GIFT%5F${safeCode}` : null;
-  const cabinetLink = `${window.location.origin}/gift?tab=activate&code=${safeCode}`;
+  // Telegram forwards the start parameter to the bot verbatim (no URL-decoding),
+  // and "_" is a valid start-param char — so use a literal "GIFT_" prefix to
+  // match the bot's `start_parameter.startswith('GIFT_')` handler. Encoding the
+  // underscore as %5F made the bot receive "GIFT%5F…" and silently fail.
+  const botLink = botUsername ? `https://t.me/${botUsername}?start=GIFT_${shortCode}` : null;
+  const cabinetLink = `${window.location.origin}/gift?tab=activate&code=${encodeURIComponent(shortCode)}`;
 
   const fullMessage = [
     t('gift.shareText', 'I have a gift for you! Activate it here:'),
@@ -147,32 +161,12 @@ function CodeOnlySuccessState({
       >
         {copied ? (
           <>
-            <svg
-              className="h-4 w-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-            </svg>
+            <CheckIcon className="h-4 w-4" />
             {t('common.copied', 'Copied!')}
           </>
         ) : (
           <>
-            <svg
-              className="h-4 w-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-              />
-            </svg>
+            <CopyIcon className="h-4 w-4" />
             {t('gift.copyMessage', 'Copy message')}
           </>
         )}
@@ -272,19 +266,7 @@ function PendingActivationState({
     >
       {/* Info icon */}
       <div className="flex h-20 w-20 items-center justify-center rounded-full bg-warning-500/10">
-        <svg
-          className="h-10 w-10 text-warning-400"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          strokeWidth={2}
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"
-          />
-        </svg>
+        <InfoIcon className="h-10 w-10 text-warning-400" />
       </div>
 
       <div>
@@ -372,19 +354,7 @@ function PollErrorState() {
       className="flex flex-col items-center gap-6 text-center"
     >
       <div className="flex h-20 w-20 items-center justify-center rounded-full bg-warning-500/10">
-        <svg
-          className="h-10 w-10 text-warning-400"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          strokeWidth={2}
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
-          />
-        </svg>
+        <ExclamationIcon className="h-10 w-10 text-warning-400" />
       </div>
 
       <div>
@@ -420,19 +390,7 @@ function PollTimedOutState({ onRetry }: { onRetry: () => void }) {
       className="flex flex-col items-center gap-6 text-center"
     >
       <div className="flex h-20 w-20 items-center justify-center rounded-full bg-dark-800/50">
-        <svg
-          className="h-10 w-10 text-dark-400"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          strokeWidth={2}
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
-          />
-        </svg>
+        <ClockIcon className="h-10 w-10 text-dark-400" />
       </div>
       <div>
         <h1 className="text-xl font-bold text-dark-50">
@@ -467,19 +425,7 @@ function NoTokenState() {
       className="flex flex-col items-center gap-6 text-center"
     >
       <div className="flex h-20 w-20 items-center justify-center rounded-full bg-dark-800/50">
-        <svg
-          className="h-10 w-10 text-dark-400"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          strokeWidth={1.5}
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
-          />
-        </svg>
+        <ExclamationIcon className="h-10 w-10 text-dark-400" />
       </div>
       <div>
         <h1 className="text-xl font-bold text-dark-50">{t('gift.noToken', 'Invalid link')}</h1>

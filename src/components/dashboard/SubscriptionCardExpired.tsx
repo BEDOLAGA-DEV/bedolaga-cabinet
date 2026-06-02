@@ -10,6 +10,7 @@ import { useCurrency } from '../../hooks/useCurrency';
 import { useHapticFeedback } from '../../platform/hooks/useHaptic';
 import { getGlassColors } from '../../utils/glassTheme';
 import { getInsufficientBalanceError } from '../../utils/subscriptionHelpers';
+import { ClockIcon, ExclamationIcon, PlusIcon, SubscriptionIcon } from '@/components/icons';
 
 interface SubscriptionCardExpiredProps {
   subscription: Subscription;
@@ -167,39 +168,13 @@ export default function SubscriptionCardExpired({
           style={{
             background: `rgba(${accent.r},${accent.g},${accent.b},0.1)`,
             border: `1px solid rgba(${accent.r},${accent.g},${accent.b},0.15)`,
+            color: accent.hex,
           }}
         >
           {isLimited ? (
-            <svg
-              width="22"
-              height="22"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke={accent.hex}
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
-              <line x1="12" y1="9" x2="12" y2="13" />
-              <line x1="12" y1="17" x2="12.01" y2="17" />
-            </svg>
+            <ExclamationIcon className="h-[22px] w-[22px]" />
           ) : (
-            <svg
-              width="22"
-              height="22"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke={accent.hex}
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <circle cx="12" cy="12" r="10" />
-              <path d="M12 6v6l4 2" />
-            </svg>
+            <ClockIcon className="h-[22px] w-[22px]" />
           )}
         </div>
         <h2 className="text-lg font-bold tracking-tight text-dark-50">
@@ -274,19 +249,7 @@ export default function SubscriptionCardExpired({
               boxShadow: `0 4px 20px rgba(${accent.r},${accent.g},${accent.b},0.2)`,
             }}
           >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <path d="M12 4.5v15m7.5-7.5h-15" />
-            </svg>
+            <PlusIcon className="h-4 w-4" />
             {t('subscription.buyTraffic')}
           </Link>
         ) : (
@@ -311,19 +274,7 @@ export default function SubscriptionCardExpired({
                         aria-hidden="true"
                       />
                     ) : (
-                      <svg
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        aria-hidden="true"
-                      >
-                        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-                      </svg>
+                      <SubscriptionIcon className="h-4 w-4" />
                     )}
                     {isRenewing
                       ? t('common.loading')
@@ -341,19 +292,7 @@ export default function SubscriptionCardExpired({
                       boxShadow: `0 4px 20px rgba(${accent.r},${accent.g},${accent.b},0.2)`,
                     }}
                   >
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      aria-hidden="true"
-                    >
-                      <path d="M12 4.5v15m7.5-7.5h-15" />
-                    </svg>
+                    <PlusIcon className="h-4 w-4" />
                     {t('dashboard.expired.topUp')}
                   </button>
                 )}

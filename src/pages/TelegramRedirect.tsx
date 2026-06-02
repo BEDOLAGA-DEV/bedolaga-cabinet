@@ -8,6 +8,7 @@ import { brandingApi } from '../api/branding';
 import { isInTelegramWebApp, getTelegramInitData } from '../hooks/useTelegramSDK';
 import { tokenStorage } from '../utils/token';
 import { getSafeRedirectPath } from '../utils/safeRedirect';
+import { CheckIcon, XIcon, ExclamationIcon } from '@/components/icons';
 
 const MAX_RETRY_ATTEMPTS = 3;
 const RETRY_COUNT_KEY = 'telegram_redirect_retry_count';
@@ -158,15 +159,7 @@ export default function TelegramRedirect() {
         {status === 'success' && (
           <div className="mt-8">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-success-500/20">
-              <svg
-                className="h-8 w-8 text-success-400"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-              </svg>
+              <CheckIcon className="h-8 w-8 text-success-400" />
             </div>
             <p className="text-dark-200">{t('auth.loginSuccess')}</p>
             <p className="mt-2 text-sm text-dark-500">{t('telegramRedirect.redirecting')}</p>
@@ -177,15 +170,7 @@ export default function TelegramRedirect() {
         {status === 'error' && (
           <div className="mt-8">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-error-500/20">
-              <svg
-                className="h-8 w-8 text-error-400"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              <XIcon className="h-8 w-8 text-error-400" />
             </div>
             <p className="mb-2 text-dark-200">{t('auth.loginFailed')}</p>
             <p className="mb-6 text-sm text-error-400">{errorMessage}</p>
@@ -204,19 +189,7 @@ export default function TelegramRedirect() {
         {status === 'not-telegram' && (
           <div className="mt-8">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-warning-500/20">
-              <svg
-                className="h-8 w-8 text-warning-400"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
-                />
-              </svg>
+              <ExclamationIcon className="h-8 w-8 text-warning-400" />
             </div>
             <p className="mb-2 text-dark-200">{t('telegramRedirect.openInTelegram')}</p>
             <p className="mb-6 text-sm text-dark-400">{t('telegramRedirect.openInTelegramDesc')}</p>

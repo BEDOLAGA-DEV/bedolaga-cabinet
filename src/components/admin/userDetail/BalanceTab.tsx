@@ -6,22 +6,7 @@ import { adminUsersApi, type UserDetailResponse } from '../../../api/adminUsers'
 import { promocodesApi } from '../../../api/promocodes';
 import { promoOffersApi } from '../../../api/promoOffers';
 import { createNumberInputHandler, toNumber } from '../../../utils/inputHelpers';
-
-// ──────────────────────────────────────────────────────────────────
-// Icons — local; balance is the only consumer.
-// ──────────────────────────────────────────────────────────────────
-
-const PlusIcon = () => (
-  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-  </svg>
-);
-
-const MinusIcon = () => (
-  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 12h-15" />
-  </svg>
-);
+import { PlusIcon, MinusIcon } from '@/components/icons';
 
 // ──────────────────────────────────────────────────────────────────
 // Balance tab — current balance, add/subtract form, active promo
@@ -168,14 +153,14 @@ export function BalanceTab({
               disabled={actionLoading || balanceAmount === ''}
               className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-success-500 py-2 text-white transition-colors hover:bg-success-600 disabled:opacity-50"
             >
-              <PlusIcon /> {t('admin.users.detail.balance.add')}
+              <PlusIcon className="h-4 w-4" /> {t('admin.users.detail.balance.add')}
             </button>
             <button
               onClick={() => handleUpdateBalance(false)}
               disabled={actionLoading || balanceAmount === ''}
               className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-error-500 py-2 text-white transition-colors hover:bg-error-600 disabled:opacity-50"
             >
-              <MinusIcon /> {t('admin.users.detail.balance.subtract')}
+              <MinusIcon className="h-4 w-4" /> {t('admin.users.detail.balance.subtract')}
             </button>
           </div>
         </div>

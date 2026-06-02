@@ -768,7 +768,7 @@ export default function AdminTrafficUsage() {
 
           {/* Threshold inputs */}
           <div className="flex items-center gap-1.5 rounded-lg border border-dark-700 bg-dark-800 px-2 py-1">
-            <ShieldIcon />
+            <ShieldIcon className="h-3.5 w-3.5" />
             <input
               type="number"
               value={totalThreshold}
@@ -784,12 +784,12 @@ export default function AdminTrafficUsage() {
                 onClick={() => setTotalThreshold('')}
                 className="text-dark-500 hover:text-dark-300"
               >
-                <XIcon />
+                <XIcon className="h-3 w-3" />
               </button>
             )}
           </div>
           <div className="flex items-center gap-1.5 rounded-lg border border-dark-700 bg-dark-800 px-2 py-1">
-            <ServerSmallIcon />
+            <ServerSmallIcon className="h-3.5 w-3.5" />
             <input
               type="number"
               value={nodeThreshold}
@@ -805,7 +805,7 @@ export default function AdminTrafficUsage() {
                 onClick={() => setNodeThreshold('')}
                 className="text-dark-500 hover:text-dark-300"
               >
-                <XIcon />
+                <XIcon className="h-3 w-3" />
               </button>
             )}
           </div>

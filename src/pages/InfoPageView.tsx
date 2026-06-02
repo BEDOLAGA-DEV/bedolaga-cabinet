@@ -3,22 +3,11 @@ import { useParams, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import DOMPurify from 'dompurify';
+import { PiCaretDown } from 'react-icons/pi';
+import { BackIcon, SearchIcon } from '@/components/icons';
 import { infoPagesApi } from '../api/infoPages';
 import { usePlatform } from '../platform/hooks/usePlatform';
 import type { FaqItem } from '../api/infoPages';
-
-// Icons
-const BackIcon = () => (
-  <svg
-    className="h-5 w-5 text-dark-400"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={2}
-  >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-  </svg>
-);
 
 /**
  * Sanitization config — same strict allowlist as NewsArticlePage.
@@ -171,31 +160,9 @@ function sanitizeHtml(html: string): string {
 
 // --- FAQ Accordion ---
 const ChevronIcon = ({ open }: { open: boolean }) => (
-  <svg
+  <PiCaretDown
     className={`h-5 w-5 text-dark-400 transition-transform duration-300 ${open ? 'rotate-180' : ''}`}
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={2}
-  >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-  </svg>
-);
-
-const SearchIcon = () => (
-  <svg
-    className="h-4 w-4 text-dark-500"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={2}
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
-    />
-  </svg>
+  />
 );
 
 function FaqAccordionItem({
@@ -275,7 +242,7 @@ function FaqView({ items }: { items: FaqItem[] }) {
       {items.length > 3 && (
         <div className="relative">
           <div className="pointer-events-none absolute inset-y-0 left-3 flex items-center">
-            <SearchIcon />
+            <SearchIcon className="h-4 w-4" />
           </div>
           <input
             type="text"

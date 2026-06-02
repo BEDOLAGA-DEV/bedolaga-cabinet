@@ -2,6 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Flag emoji polyfill — Windows has no glyphs for regional-indicator flags, so
+   they fall back to country letters. This locally-bundled Twemoji flag font is
+   scoped via unicode-range to ONLY flag codepoints, so adding it to the front
+   of the font stacks fixes every flag everywhere without touching any markup
+   and without affecting any other text. Root fix, not a per-component wrap. */
+@font-face {
+  font-family: 'Twemoji Country Flags';
+  unicode-range: U+1F1E6-1F1FF, U+1F3F4, U+E0062-E007F;
+  src: url('/fonts/TwemojiCountryFlags.woff2') format('woff2');
+  font-display: swap;
+}
+
 /* Animated gradient border — @property enables CSS-only angle animation */
 @property --border-angle {
   syntax: '<angle>';

@@ -1,11 +1,12 @@
 import { useEffect, useRef, useCallback } from 'react';
-import { BrowserRouter, useLocation, useNavigate } from 'react-router';
+import { BrowserRouter, useLocation, useNavigate, useNavigationType } from 'react-router';
 import {
   showBackButton,
   hideBackButton,
   onBackButtonClick,
   offBackButtonClick,
 } from '@telegram-apps/sdk-react';
+import { useQuery } from '@tanstack/react-query';
 import Twemoji from 'react-twemoji';
 import App from './App';
 import { ErrorBoundary } from './components/ErrorBoundary';
@@ -15,7 +16,8 @@ import { WebSocketProvider } from './providers/WebSocketProvider';
 import { ToastProvider } from './components/Toast';
 import { TooltipProvider } from './components/primitives/Tooltip';
 import { isInTelegramWebApp } from './hooks/useTelegramSDK';
-import { hasInAppHistory, getFallbackParentPath } from './utils/navigation';
+import { getFallbackParentPath } from './utils/navigation';
+import { subscriptionApi } from './api/subscription';
 
 const TWEMOJI_OPTIONS = { className: 'twemoji', folder: 'svg', ext: '.svg' } as const;
 
@@ -26,35 +28,98 @@ const TWEMOJI_OPTIONS = { className: 'twemoji', folder: 'svg', ext: '.svg' } as 
 /** Pages reachable from bottom nav — treat as top-level (no back button). */
 const BOTTOM_NAV_PATHS = ['/', '/subscriptions', '/balance', '/referral', '/support', '/wheel'];
 
+/** Matches /subscriptions/:numericId. Single-tariff users land here straight
+ * from bot deep-links, and their /subscriptions list auto-redirects right back
+ * to this page (Subscriptions.tsx). So on a genuine deep-link entry (in-app
+ * navigation depth 0) we hide the back button and let Telegram surface its
+ * native Close (X); when there IS in-app history we show it and navigate back. */
+const SUBSCRIPTION_DETAIL_RE = /^\/subscriptions\/\d+\/?$/;
+
 function TelegramBackButton() {
   const location = useLocation();
   const navigate = useNavigate();
+  const navType = useNavigationType();
   const navigateRef = useRef(navigate);
   navigateRef.current = navigate;
   const pathnameRef = useRef(location.pathname);
   pathnameRef.current = location.pathname;
 
+  // Reliable in-app navigation depth (the app's entry point is 0). Driven by
+  // React Router's navigation TYPE — NOT window.history.state.idx, which the
+  // app's own redirects mutate unpredictably and which is the root flake behind
+  // issue #436 (the back button shows/acts on the wrong state). PUSH goes
+  // deeper, POP unwinds, REPLACE (e.g. the Subscriptions.tsx auto-redirect) is
+  // flat. De-duped by location.key so StrictMode's double-effect can't miscount.
+  const depthRef = useRef(0);
+  const lastKeyRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (lastKeyRef.current === location.key) return;
+    lastKeyRef.current = location.key;
+    if (navType === 'PUSH') depthRef.current += 1;
+    else if (navType === 'POP') depthRef.current = Math.max(0, depthRef.current - 1);
+    // REPLACE: depth unchanged (replaces the current entry, adds no history)
+  }, [location.key, navType]);
+
+  // Share the subscriptions-list query with the page-level components.
+  // React Query dedupes by key so this does not cause an extra fetch when
+  // Subscriptions/Subscription/Dashboard pages mount.
+  const { data: subData } = useQuery({
+    queryKey: ['subscriptions-list'],
+    queryFn: () => subscriptionApi.getSubscriptions(),
+    staleTime: 30_000,
+    // Don't fetch outside Telegram — the cabinet still loads on the web.
+    enabled: isInTelegramWebApp(),
+  });
+  const isMultiTariff = subData?.multi_tariff_enabled ?? false;
+
+  // Refs so the stable back handler (memoised with []) reads fresh values
+  // without re-subscribing — re-subscription lets a component's local handler
+  // overwrite ours via Telegram's singleton onBackButtonClick (issue #436).
+  const isMultiTariffRef = useRef(isMultiTariff);
+  isMultiTariffRef.current = isMultiTariff;
+  const subsCountRef = useRef(subData?.subscriptions?.length ?? 0);
+  subsCountRef.current = subData?.subscriptions?.length ?? 0;
+
   useEffect(() => {
     const isTopLevel = location.pathname === '' || BOTTOM_NAV_PATHS.includes(location.pathname);
+    const isSingleTariffDetailDeepLink =
+      !isMultiTariff && SUBSCRIPTION_DETAIL_RE.test(location.pathname) && depthRef.current === 0;
     try {
-      if (isTopLevel) {
+      if (isTopLevel || isSingleTariffDetailDeepLink) {
         hideBackButton();
       } else {
         showBackButton();
       }
     } catch {}
-  }, [location]);
+  }, [location, isMultiTariff]);
 
   // Stable handler — ref prevents re-subscription on every render
   const handler = useCallback(() => {
-    // When opened via a bot deep-link directly on a nested route, there is no
-    // in-app history and navigate(-1) is a no-op — the back button looks dead.
-    // Fall back to the parent route so it always navigates somewhere sensible.
-    if (hasInAppHistory()) {
+    // Real in-app history (depth > 0): a normal back. Otherwise we were opened
+    // directly on this route via a deep-link — navigate(-1) is a no-op, so fall
+    // back to a sensible parent route instead.
+    if (depthRef.current > 0) {
       navigateRef.current(-1);
-    } else {
-      navigateRef.current(getFallbackParentPath(pathnameRef.current), { replace: true });
+      return;
     }
+    // /subscriptions/:id is special: the /subscriptions list auto-redirects
+    // straight back to a detail page when single-tariff with exactly one
+    // subscription (Subscriptions.tsx), so falling back there loops silently and
+    // the back button looks dead (issue #436). Land on the list ONLY when it is
+    // PROVABLY safe (multi-tariff, or more than one subscription — neither of
+    // which auto-redirects); otherwise escape to root.
+    //
+    // Fail-closed on purpose: `subsCount <= 1` is treated as not-safe, which
+    // also covers the stale default 0 before the shared subscriptions query
+    // resolves — so a fast tap on a cold cache can never route into the
+    // redirecting list and re-open the loop.
+    const pathname = pathnameRef.current;
+    const listIsSafe = isMultiTariffRef.current || subsCountRef.current > 1;
+    const fallback =
+      SUBSCRIPTION_DETAIL_RE.test(pathname) && !listIsSafe
+        ? '/'
+        : getFallbackParentPath(pathnameRef.current);
+    navigateRef.current(fallback, { replace: true });
   }, []);
 
   useEffect(() => {

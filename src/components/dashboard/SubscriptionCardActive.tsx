@@ -10,6 +10,7 @@ import { useTrafficZone } from '../../hooks/useTrafficZone';
 import { formatTraffic } from '../../utils/formatTraffic';
 import { getGlassColors } from '../../utils/glassTheme';
 import { HoverBorderGradient } from '../ui/hover-border-gradient';
+import { CalendarIcon, RefreshIcon } from '@/components/icons';
 import { useHaptic } from '../../platform';
 import type { Subscription } from '../../types';
 
@@ -24,23 +25,6 @@ interface SubscriptionCardActiveProps {
   trafficRefreshCooldown: number;
   connectedDevices: number;
 }
-
-const RefreshIcon = ({ className = 'w-4 h-4' }: { className?: string }) => (
-  <svg
-    className={className}
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={2}
-    aria-hidden="true"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"
-    />
-  </svg>
-);
 
 export default function SubscriptionCardActive({
   subscription,
@@ -325,20 +309,14 @@ export default function SubscriptionCardActive({
                 background: daysLeft <= 3 ? 'rgba(var(--color-warning-400), 0.1)' : g.hoverBg,
               }}
             >
-              <svg
-                width="13"
-                height="13"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke={daysLeft <= 3 ? 'rgb(var(--color-warning-400))' : g.textSecondary}
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+              <span
+                style={{
+                  color: daysLeft <= 3 ? 'rgb(var(--color-warning-400))' : g.textSecondary,
+                }}
                 aria-hidden="true"
               >
-                <rect x="3" y="4" width="18" height="18" rx="2" />
-                <path d="M16 2v4M8 2v4M3 10h18" />
-              </svg>
+                <CalendarIcon className="h-[13px] w-[13px]" />
+              </span>
             </div>
             {t('dashboard.remaining')}
           </div>

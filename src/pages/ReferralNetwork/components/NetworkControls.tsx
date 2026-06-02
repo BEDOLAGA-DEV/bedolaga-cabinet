@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+import { MinusIcon, PlusIcon } from '@/components/icons';
 import { getSigmaInstance } from '../sigmaGlobals';
 
 interface NetworkControlsProps {
@@ -62,32 +63,12 @@ export function NetworkControls({ className }: NetworkControlsProps) {
     {
       label: t('admin.referralNetwork.controls.zoomIn'),
       onClick: handleZoomIn,
-      icon: (
-        <svg
-          className="h-4 w-4"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          strokeWidth={2}
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-        </svg>
-      ),
+      icon: <PlusIcon className="h-4 w-4" />,
     },
     {
       label: t('admin.referralNetwork.controls.zoomOut'),
       onClick: handleZoomOut,
-      icon: (
-        <svg
-          className="h-4 w-4"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          strokeWidth={2}
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 12h-15" />
-        </svg>
-      ),
+      icon: <MinusIcon className="h-4 w-4" />,
     },
     {
       label: t('admin.referralNetwork.controls.resetZoom'),

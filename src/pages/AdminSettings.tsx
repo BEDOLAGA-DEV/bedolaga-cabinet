@@ -16,32 +16,7 @@ import { SettingsTab } from '../components/admin/SettingsTab';
 import { SettingsTreeSidebar } from '../components/admin/SettingsTreeSidebar';
 import { SettingsMobileTabs } from '../components/admin/SettingsMobileTabs';
 import { SettingsSearchMobile, SettingsSearchResults } from '../components/admin/SettingsSearch';
-
-// BackIcon
-const BackIcon = () => (
-  <svg
-    className="h-5 w-5 text-dark-400"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={2}
-  >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-  </svg>
-);
-
-// ChevronRight for breadcrumbs
-const ChevronRightIcon = () => (
-  <svg
-    className="h-3.5 w-3.5 text-dark-600"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={2}
-  >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-  </svg>
-);
+import { BackIcon, ChevronRightIcon } from '@/components/icons';
 
 // Settings that require SALES_MODE=tariffs to be visible
 const TARIFF_MODE_SETTINGS = ['MULTI_TARIFF_ENABLED', 'MAX_ACTIVE_SUBSCRIPTIONS'];
@@ -298,7 +273,7 @@ export default function AdminSettings() {
               >
                 {t(`admin.settings.groups.${activeTreeInfo.group.id}`)}
               </button>
-              <ChevronRightIcon />
+              <ChevronRightIcon className="h-3.5 w-3.5" />
               <span className="text-dark-300">
                 {t(`admin.settings.tree.${activeTreeInfo.child.id}`)}
               </span>

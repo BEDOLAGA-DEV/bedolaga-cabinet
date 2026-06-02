@@ -1,3 +1,4 @@
+import { ChevronDownIcon } from '@/components/icons';
 import { cn } from '@/lib/utils';
 
 // ──────────────────────────────────────────────────────────────────
@@ -7,11 +8,10 @@ import { cn } from '@/lib/utils';
 // chrome (border, focus ring, chevron).
 // ──────────────────────────────────────────────────────────────────
 
-export const ChevronDownIcon = () => (
-  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-  </svg>
-);
+// Re-exported so the sibling FloatingActionBar / MultiSelectDropdown keep
+// importing the chevron from this module while the glyph itself now comes
+// from the central Phosphor barrel instead of a hand-written SVG.
+export { ChevronDownIcon };
 
 export interface DropdownOption {
   value: string;
@@ -40,7 +40,7 @@ export function DropdownSelect({ value, options, onChange, className }: Dropdown
         ))}
       </select>
       <div className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-dark-500">
-        <ChevronDownIcon />
+        <ChevronDownIcon className="h-4 w-4" />
       </div>
     </div>
   );

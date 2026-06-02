@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
+import { CheckIcon, ChevronDownIcon, XCloseIcon, XIcon } from '@/components/icons';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
 import { DropdownSelect } from './DropdownSelect';
 import type { UserListItem } from '../../../api/adminUsers';
@@ -47,24 +48,6 @@ export interface ModalState {
   result: BulkActionResult | null;
   progress: ProgressState | null;
 }
-
-const CheckIcon = () => (
-  <svg
-    className="h-3 w-3 text-white"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={3}
-  >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-  </svg>
-);
-
-const XCloseIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-  </svg>
-);
 
 function ProgressView({ progress }: { progress: ProgressState }) {
   const { t } = useTranslation();
@@ -115,31 +98,11 @@ function ProgressView({ progress }: { progress: ProgressState }) {
               <div key={idx} className="flex items-start gap-2 text-xs">
                 {entry.success ? (
                   <span className="mt-0.5 shrink-0 text-success-400" aria-hidden="true">
-                    <svg
-                      className="h-3 w-3"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={3}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M4.5 12.75l6 6 9-13.5"
-                      />
-                    </svg>
+                    <CheckIcon className="h-3 w-3" />
                   </span>
                 ) : (
                   <span className="mt-0.5 shrink-0 text-error-400" aria-hidden="true">
-                    <svg
-                      className="h-3 w-3"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={3}
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
+                    <XIcon className="h-3 w-3" />
                   </span>
                 )}
                 <span className="font-mono text-dark-400">
@@ -176,18 +139,12 @@ function ErrorDetails({ result }: { result: BulkActionResult }) {
         <span className="text-sm font-medium text-error-400">
           {t('admin.bulkActions.errors.title', { count: result.error_count })}
         </span>
-        <svg
+        <ChevronDownIcon
           className={cn(
             'h-4 w-4 text-error-400 transition-transform duration-200',
             expanded && 'rotate-180',
           )}
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          strokeWidth={2}
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-        </svg>
+        />
       </button>
       {expanded && (
         <div className="max-h-48 overflow-y-auto border-t border-error-500/20 px-4 py-3">
@@ -195,15 +152,7 @@ function ErrorDetails({ result }: { result: BulkActionResult }) {
             {result.errors.map((err, idx) => (
               <div key={idx} className="flex items-start gap-2 text-xs">
                 <span className="mt-0.5 shrink-0 text-error-400" aria-hidden="true">
-                  <svg
-                    className="h-3 w-3"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={3}
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
+                  <XIcon className="h-3 w-3" />
                 </span>
                 <span className="shrink-0 font-mono text-dark-400">
                   {err.username ? `@${err.username}` : `#${err.user_id}`}
@@ -520,7 +469,7 @@ export function ActionModal({
                     )}
                     aria-pressed={forceDeleteActivePaid}
                   >
-                    {forceDeleteActivePaid && <CheckIcon />}
+                    {forceDeleteActivePaid && <CheckIcon className="h-3 w-3" />}
                   </button>
                   <span
                     className={cn(
@@ -558,7 +507,7 @@ export function ActionModal({
                 )}
                 aria-pressed={deleteFromPanel}
               >
-                {deleteFromPanel && <CheckIcon />}
+                {deleteFromPanel && <CheckIcon className="h-3 w-3" />}
               </button>
               <span
                 className={cn(

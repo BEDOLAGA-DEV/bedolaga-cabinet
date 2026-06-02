@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { newsApi } from '../../api/news';
 import { useHapticFeedback } from '../../platform/hooks/useHaptic';
 import { cn } from '../../lib/utils';
+import { ArrowIcon, NewsIcon } from '@/components/icons';
 import type { NewsListItem } from '../../types/news';
 
 // --- Security: hex color validation to prevent CSS injection ---
@@ -30,19 +31,6 @@ const fadeSlideUp = {
     },
   }),
 };
-
-// --- Icons ---
-const ArrowIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-    <path
-      d="M3 8h10M9 4l4 4-4 4"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
 
 // --- Sub-components ---
 
@@ -427,35 +415,7 @@ export default function NewsSection() {
         >
           <div className="mb-2 flex items-center gap-2.5">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-accent-400 to-accent-600">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path
-                  d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"
-                  fill="currentColor"
-                  className="text-dark-950/20"
-                />
-                <path
-                  d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  className="text-dark-950"
-                />
-                <path
-                  d="M7 8h4M7 11h10M7 14h10M7 17h6"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  className="text-dark-950"
-                />
-                <rect
-                  x="14"
-                  y="7"
-                  width="4"
-                  height="4"
-                  rx="0.5"
-                  fill="currentColor"
-                  className="text-dark-950"
-                />
-              </svg>
+              <NewsIcon className="h-[18px] w-[18px] text-dark-950" />
             </div>
             <span className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-dark-500">
               {t('news.title')}
@@ -469,11 +429,20 @@ export default function NewsSection() {
 
         {/* Grid */}
         {items.length > 0 && (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="space-y-4">
             {featured && <FeaturedCard item={featured} onClick={handleFeaturedClick} />}
-            {regular.map((item, i) => (
-              <NewsCardWrapper key={item.id} item={item} index={i} onCardClick={handleCardClick} />
-            ))}
+            {regular.length > 0 && (
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:[&>*:last-child:nth-child(odd)]:col-span-2">
+                {regular.map((item, i) => (
+                  <NewsCardWrapper
+                    key={item.id}
+                    item={item}
+                    index={i}
+                    onCardClick={handleCardClick}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         )}
 

@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { usePlatform } from '@/platform';
+import { InfoIcon } from '@/components/icons';
 import { useBlockingStore } from '../../store/blocking';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
 
@@ -55,20 +56,7 @@ export default function AccountDeletedScreen() {
       <div className="w-full max-w-md text-center">
         <div className="mb-8">
           <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-dark-800">
-            <svg
-              className="h-12 w-12 text-warning-400"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              aria-hidden="true"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
+            <InfoIcon className="h-12 w-12 text-warning-400" />
           </div>
         </div>
 

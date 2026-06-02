@@ -538,7 +538,7 @@ export interface LocalizedText {
   [key: string]: string;
 }
 
-// RemnaWave format types
+// Remnawave format types
 export interface RemnawaveButtonClient {
   url?: string;
   link?: string;
@@ -581,7 +581,7 @@ export interface AppConfig {
     supportUrl?: string;
   };
 
-  // RemnaWave
+  // Remnawave
   isRemnawave?: boolean;
   svgLibrary?: Record<string, string | { svgString: string }>;
   baseTranslations?: Record<string, LocalizedText>;

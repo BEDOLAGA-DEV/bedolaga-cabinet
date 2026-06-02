@@ -7,365 +7,91 @@ import { statsApi, type SystemInfo, type DashboardStats } from '@/api/admin';
 import { useAnimatedNumber } from '@/hooks/useAnimatedNumber';
 import { useTelegramSDK } from '@/hooks/useTelegramSDK';
 import { cn } from '@/lib/utils';
+import {
+  ArrowUpIcon,
+  BroadcastIcon,
+  CabinetIcon,
+  ChartBarIcon,
+  ChevronRightIcon,
+  ClipboardIcon,
+  CreditCardIcon,
+  FileTextIcon,
+  GiftIcon,
+  HistoryIcon,
+  LockIcon,
+  MailIcon,
+  MegaphoneIcon,
+  NewsIcon,
+  PartnerIcon,
+  PercentIcon,
+  PinIcon,
+  RemnawaveIcon,
+  SearchIcon,
+  SendIcon,
+  ServerIcon,
+  SettingsIcon,
+  ShareIcon,
+  ShieldIcon,
+  SparklesIcon,
+  StatBotIcon,
+  StatCabinetIcon,
+  StatPaidIcon,
+  StatsChartIcon,
+  StatTrialIcon,
+  StatUptimeIcon,
+  SyncIcon,
+  TagIcon,
+  TicketIcon,
+  TrafficIcon,
+  UserPlusIcon,
+  UsersIcon,
+  WalletIcon,
+  WheelIcon,
+  XIcon,
+} from '@/components/icons';
 
 const CABINET_VERSION = __APP_VERSION__;
 const IS_MAC = /Mac|iPhone|iPod|iPad/i.test(navigator.userAgent);
 
-// ─── Inline SVG Icons (lightweight, no external deps) ───
-
-const SvgIcon = ({
-  children,
-  className,
-  ...props
-}: React.SVGProps<SVGSVGElement> & { children: React.ReactNode }) => (
-  <svg
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth={1.7}
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-    aria-hidden="true"
-    {...props}
-  >
-    {children}
-  </svg>
-);
-
-// Stats bar icons (16x16 viewBox)
-const StatUptimeIcon = () => (
-  <svg
-    viewBox="0 0 16 16"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.3"
-    strokeLinecap="round"
-    className="h-3.5 w-3.5"
-    aria-hidden="true"
-  >
-    <circle cx="8" cy="8" r="6.5" />
-    <path d="M8 4.5V8l2.5 1.5" />
-  </svg>
-);
-const StatBotIcon = () => (
-  <svg
-    viewBox="0 0 16 16"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.3"
-    strokeLinecap="round"
-    className="h-3.5 w-3.5"
-    aria-hidden="true"
-  >
-    <rect x="3" y="4" width="10" height="8" rx="2" />
-    <path d="M6 8h.01M10 8h.01" />
-    <path d="M8 2v2M4 14h8" />
-  </svg>
-);
-const StatCabinetIcon = () => (
-  <svg
-    viewBox="0 0 16 16"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.3"
-    strokeLinecap="round"
-    className="h-3.5 w-3.5"
-    aria-hidden="true"
-  >
-    <rect x="2" y="3" width="12" height="10" rx="1.5" />
-    <path d="M2 6h12" />
-    <path d="M5 3v3" />
-  </svg>
-);
-const StatTrialIcon = () => (
-  <svg
-    viewBox="0 0 16 16"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.3"
-    strokeLinecap="round"
-    className="h-3.5 w-3.5"
-    aria-hidden="true"
-  >
-    <path d="M8 2v2M8 12v2M4 8H2M14 8h-2" />
-    <circle cx="8" cy="8" r="3" />
-  </svg>
-);
-const StatPaidIcon = () => (
-  <svg
-    viewBox="0 0 16 16"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.3"
-    strokeLinecap="round"
-    className="h-3.5 w-3.5"
-    aria-hidden="true"
-  >
-    <path d="M4 6c0-1.7 1.8-3 4-3s4 1.3 4 3-1.8 3-4 3-4 1.3-4 3 1.8 3 4 3 4-1.3 4-3" />
-    <path d="M8 1v2M8 13v2" />
-  </svg>
-);
-
 // Section nav icons (24x24 viewBox)
 const icons = {
-  'bar-chart': (
-    <SvgIcon>
-      <path d="M3 3v18h18" />
-      <path d="M7 16V8" />
-      <path d="M11 16V11" />
-      <path d="M15 16V5" />
-      <path d="M19 16v-3" />
-    </SvgIcon>
-  ),
-  'credit-card': (
-    <SvgIcon>
-      <rect x="2" y="5" width="20" height="14" rx="2" />
-      <path d="M2 10h20" />
-    </SvgIcon>
-  ),
-  activity: (
-    <SvgIcon>
-      <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-    </SvgIcon>
-  ),
-  trending: (
-    <SvgIcon>
-      <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
-      <polyline points="16 7 22 7 22 13" />
-    </SvgIcon>
-  ),
-  users: (
-    <SvgIcon>
-      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-      <circle cx="9" cy="7" r="4" />
-      <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
-      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-    </SvgIcon>
-  ),
-  ticket: (
-    <SvgIcon>
-      <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z" />
-      <path d="M13 5v2M13 17v2M13 11v2" />
-    </SvgIcon>
-  ),
-  'shield-alert': (
-    <SvgIcon>
-      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" />
-      <path d="M12 8v4" />
-      <path d="M12 16h.01" />
-    </SvgIcon>
-  ),
-  tag: (
-    <SvgIcon>
-      <path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z" />
-      <circle cx="7.5" cy="7.5" r=".5" fill="currentColor" />
-    </SvgIcon>
-  ),
-  gift: (
-    <SvgIcon>
-      <rect x="3" y="8" width="18" height="4" rx="1" />
-      <path d="M12 8v13" />
-      <path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7" />
-    </SvgIcon>
-  ),
-  percent: (
-    <SvgIcon>
-      <line x1="19" y1="5" x2="5" y2="19" />
-      <circle cx="6.5" cy="6.5" r="2.5" />
-      <circle cx="17.5" cy="17.5" r="2.5" />
-    </SvgIcon>
-  ),
-  sparkle: (
-    <SvgIcon>
-      <path d="m12 3-1.9 5.8a2 2 0 0 1-1.287 1.288L3 12l5.8 1.9a2 2 0 0 1 1.288 1.287L12 21l1.9-5.8a2 2 0 0 1 1.287-1.288L21 12l-5.8-1.9a2 2 0 0 1-1.288-1.287Z" />
-    </SvgIcon>
-  ),
-  wallet: (
-    <SvgIcon>
-      <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4" />
-      <path d="M3 5v14a2 2 0 0 0 2 2h16v-5" />
-      <path d="M18 12a2 2 0 0 0 0 4h4v-4Z" />
-    </SvgIcon>
-  ),
-  layout: (
-    <SvgIcon>
-      <rect x="3" y="3" width="18" height="18" rx="2" />
-      <path d="M3 9h18" />
-      <path d="M9 21V9" />
-    </SvgIcon>
-  ),
-  newspaper: (
-    <SvgIcon>
-      <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2" />
-      <path d="M18 14h-8M15 18h-5" />
-      <path d="M10 6h8v4h-8V6Z" />
-    </SvgIcon>
-  ),
-  megaphone: (
-    <SvgIcon>
-      <path d="m3 11 18-5v12L3 13v-2z" />
-      <path d="M11.6 16.8a3 3 0 1 1-5.8-1.6" />
-    </SvgIcon>
-  ),
-  send: (
-    <SvgIcon>
-      <path d="m22 2-7 20-4-9-9-4Z" />
-      <path d="M22 2 11 13" />
-    </SvgIcon>
-  ),
-  pin: (
-    <SvgIcon>
-      <line x1="12" y1="17" x2="12" y2="22" />
-      <path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z" />
-    </SvgIcon>
-  ),
-  'circle-dot': (
-    <SvgIcon>
-      <circle cx="12" cy="12" r="10" />
-      <circle cx="12" cy="12" r="1" fill="currentColor" />
-    </SvgIcon>
-  ),
-  handshake: (
-    <SvgIcon>
-      <path d="m11 17 2 2a1 1 0 1 0 3-3" />
-      <path d="m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88" />
-      <path d="m2 12 5.56-5.56a3 3 0 0 1 2.22-.88L12 5.5" />
-      <path d="M22 12 16.44 6.44a3 3 0 0 0-2.22-.88L12 5.5" />
-    </SvgIcon>
-  ),
-  'arrow-up': (
-    <SvgIcon>
-      <path d="m18 9-6-6-6 6" />
-      <path d="M12 3v14" />
-      <path d="M5 21h14" />
-    </SvgIcon>
-  ),
-  network: (
-    <SvgIcon>
-      <rect x="16" y="16" width="6" height="6" rx="1" />
-      <rect x="2" y="16" width="6" height="6" rx="1" />
-      <rect x="9" y="2" width="6" height="6" rx="1" />
-      <path d="M5 16v-3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3" />
-      <path d="M12 12V8" />
-    </SvgIcon>
-  ),
-  radio: (
-    <SvgIcon>
-      <path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9" />
-      <path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.4" />
-      <circle cx="12" cy="12" r="2" />
-      <path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.4" />
-      <path d="M19.1 4.9C23 8.8 23 15.1 19.1 19" />
-    </SvgIcon>
-  ),
-  settings: (
-    <SvgIcon>
-      <circle cx="12" cy="12" r="3" />
-      <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
-    </SvgIcon>
-  ),
-  app: (
-    <SvgIcon>
-      <rect x="2" y="4" width="20" height="16" rx="2" />
-      <path d="M10 4v4M2 8h20M6 4v4" />
-    </SvgIcon>
-  ),
-  server: (
-    <SvgIcon>
-      <rect x="2" y="2" width="20" height="8" rx="2" />
-      <rect x="2" y="14" width="20" height="8" rx="2" />
-      <circle cx="6" cy="6" r="1" fill="currentColor" />
-      <circle cx="6" cy="18" r="1" fill="currentColor" />
-    </SvgIcon>
-  ),
-  remnawave: (
-    <svg
-      viewBox="0 0 16 16"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className="h-[13px] w-[13px]"
-      aria-hidden="true"
-    >
-      <path
-        clipRule="evenodd"
-        d="M8 1a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-1.5 0V1.75A.75.75 0 0 1 8 1Zm6 2a.75.75 0 0 1 .75.75v8.5a.75.75 0 0 1-1.5 0v-8.5A.75.75 0 0 1 14 3ZM5 4a.75.75 0 0 1 .75.75v6.5a.75.75 0 0 1-1.5 0v-6.5A.75.75 0 0 1 5 4Zm6 1a.75.75 0 0 1 .75.75v4.5a.75.75 0 0 1-1.5 0v-4.5A.75.75 0 0 1 11 5ZM2 6a.75.75 0 0 1 .75.75v2.5a.75.75 0 0 1-1.5 0v-2.5A.75.75 0 0 1 2 6Z"
-        fill="currentColor"
-        fillRule="evenodd"
-      />
-    </svg>
-  ),
-  mail: (
-    <SvgIcon>
-      <rect x="2" y="4" width="20" height="16" rx="2" />
-      <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
-    </SvgIcon>
-  ),
-  refresh: (
-    <SvgIcon>
-      <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
-      <path d="M21 3v5h-5" />
-      <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
-      <path d="M8 16H3v5" />
-    </SvgIcon>
-  ),
-  shield: (
-    <SvgIcon>
-      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" />
-    </SvgIcon>
-  ),
-  'user-check': (
-    <SvgIcon>
-      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-      <circle cx="9" cy="7" r="4" />
-      <polyline points="16 11 18 13 22 9" />
-    </SvgIcon>
-  ),
-  lock: (
-    <SvgIcon>
-      <rect x="3" y="11" width="18" height="11" rx="2" />
-      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-    </SvgIcon>
-  ),
-  scroll: (
-    <SvgIcon>
-      <path d="M8 21h12a2 2 0 0 0 2-2v-2H10v2a2 2 0 1 1-4 0V5a2 2 0 1 0-4 0v3h4" />
-      <path d="M19 17V5a2 2 0 0 0-2-2H4" />
-      <path d="M15 8h-5M15 12h-5" />
-    </SvgIcon>
-  ),
-  'list-checks': (
-    <SvgIcon>
-      <path d="M10 6h11M10 12h11M10 18h11" />
-      <path d="m3 6 1 1 2-2M3 12l1 1 2-2M3 18l1 1 2-2" />
-    </SvgIcon>
-  ),
-  search: (
-    <SvgIcon>
-      <circle cx="11" cy="11" r="8" />
-      <path d="m21 21-4.3-4.3" />
-    </SvgIcon>
-  ),
-  'file-text': (
-    <SvgIcon>
-      <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
-      <polyline points="14 2 14 8 20 8" />
-      <line x1="16" y1="13" x2="8" y2="13" />
-      <line x1="16" y1="17" x2="8" y2="17" />
-      <line x1="10" y1="9" x2="8" y2="9" />
-    </SvgIcon>
-  ),
-  chevron: (
-    <SvgIcon>
-      <path d="m9 18 6-6-6-6" />
-    </SvgIcon>
-  ),
-  x: (
-    <SvgIcon>
-      <path d="M18 6 6 18" />
-      <path d="m6 6 12 12" />
-    </SvgIcon>
-  ),
+  'bar-chart': <ChartBarIcon />,
+  'credit-card': <CreditCardIcon />,
+  activity: <TrafficIcon />,
+  trending: <StatsChartIcon />,
+  users: <UsersIcon />,
+  ticket: <TicketIcon />,
+  'shield-alert': <ShieldIcon />,
+  tag: <TagIcon />,
+  gift: <GiftIcon />,
+  percent: <PercentIcon />,
+  sparkle: <SparklesIcon />,
+  wallet: <WalletIcon />,
+  layout: <CabinetIcon />,
+  newspaper: <NewsIcon />,
+  megaphone: <MegaphoneIcon />,
+  send: <SendIcon />,
+  pin: <PinIcon />,
+  'circle-dot': <WheelIcon />,
+  handshake: <PartnerIcon />,
+  'arrow-up': <ArrowUpIcon />,
+  network: <ShareIcon />,
+  radio: <BroadcastIcon />,
+  settings: <SettingsIcon />,
+  app: <CabinetIcon />,
+  server: <ServerIcon />,
+  remnawave: <RemnawaveIcon />,
+  mail: <MailIcon />,
+  refresh: <SyncIcon />,
+  shield: <ShieldIcon />,
+  'user-check': <UserPlusIcon />,
+  lock: <LockIcon />,
+  scroll: <HistoryIcon />,
+  'list-checks': <ClipboardIcon />,
+  search: <SearchIcon />,
+  'file-text': <FileTextIcon />,
+  chevron: <ChevronRightIcon />,
+  x: <XIcon />,
 } as const;
 
 type IconName = keyof typeof icons;
@@ -657,25 +383,25 @@ const StatsBar = memo(function StatsBar({ systemInfo, dashboardStats, loading }:
         colorClass: 'text-success-400 bg-success-400/10 border-success-400/20',
       },
       {
-        icon: <StatBotIcon />,
+        icon: <StatBotIcon className="h-3.5 w-3.5" />,
         label: t('admin.panel.statsBot'),
         value: systemInfo?.bot_version ?? '--',
         colorClass: 'text-accent-400 bg-accent-400/10 border-accent-400/20',
       },
       {
-        icon: <StatCabinetIcon />,
+        icon: <StatCabinetIcon className="h-3.5 w-3.5" />,
         label: t('admin.panel.statsCabinet'),
         value: `v${CABINET_VERSION}`,
         colorClass: 'text-accent-300 bg-accent-300/10 border-accent-300/20',
       },
       {
-        icon: <StatTrialIcon />,
+        icon: <StatTrialIcon className="h-3.5 w-3.5" />,
         label: t('admin.panel.statsTrials'),
         numericValue: trial,
         colorClass: 'text-warning-400 bg-warning-400/10 border-warning-400/20',
       },
       {
-        icon: <StatPaidIcon />,
+        icon: <StatPaidIcon className="h-3.5 w-3.5" />,
         label: t('admin.panel.statsPaid'),
         numericValue: paid,
         delta: purchasedToday > 0 ? `+${purchasedToday}` : undefined,
@@ -912,19 +638,19 @@ export default function AdminPanel() {
               cls: 'text-success-400',
             },
             {
-              icon: <StatBotIcon />,
+              icon: <StatBotIcon className="h-3.5 w-3.5" />,
               label: t('admin.panel.statsBot'),
               value: systemInfo?.bot_version ?? '--',
               cls: 'text-accent-400',
             },
             {
-              icon: <StatTrialIcon />,
+              icon: <StatTrialIcon className="h-3.5 w-3.5" />,
               label: t('admin.panel.statsTrials'),
               value: dashboardStats?.subscriptions.trial?.toLocaleString() ?? '--',
               cls: 'text-warning-400',
             },
             {
-              icon: <StatPaidIcon />,
+              icon: <StatPaidIcon className="h-3.5 w-3.5" />,
               label: t('admin.panel.statsPaid'),
               value: dashboardStats?.subscriptions.paid?.toLocaleString() ?? '--',
               delta:

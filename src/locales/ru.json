@@ -1229,7 +1229,7 @@
       "broadcasts": "Рассылки",
       "users": "Пользователи",
       "payments": "Платежи",
-      "remnawave": "RemnaWave",
+      "remnawave": "Remnawave",
       "emailTemplates": "Email-шаблоны",
       "paymentMethods": "Платёжные методы",
       "campaigns": "Кампании",
@@ -1627,7 +1627,7 @@
       "notFound": "Метод оплаты не найден"
     },
     "remnawave": {
-      "title": "RemnaWave",
+      "title": "Remnawave",
       "subtitle": "Управление панелью и статистика",
       "connected": "Подключено",
       "disconnected": "Не настроено",
@@ -1645,6 +1645,7 @@
         "totalUpload": "Отдача",
         "totalTraffic": "Всего",
         "online": "онлайн",
+        "realtimeTitle": "Текущий трафик",
         "inbounds": "Inbounds",
         "outbounds": "Outbounds"
       },
@@ -1744,9 +1745,9 @@
         "success": "Успешно",
         "runAutoSyncNow": "Запустить автосинхронизацию",
         "fromPanel": "Из панели",
-        "fromPanelDesc": "Импорт пользователей из RemnaWave в бота",
+        "fromPanelDesc": "Импорт пользователей из Remnawave в бота",
         "toPanel": "В панель",
-        "toPanelDesc": "Экспорт пользователей из бота в RemnaWave"
+        "toPanelDesc": "Экспорт пользователей из бота в Remnawave"
       }
     },
     "wheel": {
@@ -2145,7 +2146,7 @@
         "db_sqlite": "SQLite",
         "db_redis": "Redis",
         "sys_core": "Ядро и отладка",
-        "sys_remnawave": "RemnaWave",
+        "sys_remnawave": "Remnawave",
         "sys_webapi": "Web API",
         "sys_webhook": "Webhook",
         "sys_server": "Статус сервера",
@@ -2355,8 +2356,8 @@
         "Api Key": "API ключ",
         "Api Token": "API токен",
         "Webhook Secret": "Секрет вебхука",
-        "Remnawave Url": "URL RemnaWave",
-        "Remnawave Token": "Токен RemnaWave",
+        "Remnawave Url": "URL Remnawave",
+        "Remnawave Token": "Токен Remnawave",
         "Server Status Enabled": "Статус сервера",
         "Monitoring Enabled": "Мониторинг",
         "Backup Enabled": "Бэкап",
@@ -2646,7 +2647,7 @@
         "SQLITE": "SQLite",
         "REDIS": "Redis",
         "CORE": "Бот",
-        "REMNAWAVE": "RemnaWave",
+        "REMNAWAVE": "Remnawave",
         "SERVER_STATUS": "Статус сервера",
         "MONITORING": "Мониторинг",
         "MAINTENANCE": "Обслуживание",
@@ -2765,16 +2766,16 @@
       "importError": "Неверный формат JSON файла",
       "importCreateError": "Ошибка при создании приложений",
       "noAppsToImport": "Нет приложений для импорта",
-      "remnaWaveToggle": "Переключить источник RemnaWave",
-      "refreshRemnaWave": "Обновить данные из RemnaWave",
-      "remnaWaveMode": "Отображаются приложения из панели RemnaWave. Режим только для чтения.",
-      "remnaWaveSettings": "Настройки RemnaWave",
+      "remnaWaveToggle": "Переключить источник Remnawave",
+      "refreshRemnaWave": "Обновить данные из Remnawave",
+      "remnaWaveMode": "Отображаются приложения из панели Remnawave. Режим только для чтения.",
+      "remnaWaveSettings": "Настройки Remnawave",
       "remnaWaveConfigUuid": "UUID конфигурации",
-      "remnaWaveConfigUuidHint": "UUID конфигурации страницы подписки из панели RemnaWave",
+      "remnaWaveConfigUuidHint": "UUID конфигурации страницы подписки из панели Remnawave",
       "availableConfigs": "Доступные конфигурации",
       "noConfigs": "Нет настроенных конфигов",
-      "remnaWaveConnected": "RemnaWave подключён",
-      "remnaWaveDisconnected": "RemnaWave отключён"
+      "remnaWaveConnected": "Remnawave подключён",
+      "remnaWaveDisconnected": "Remnawave отключён"
     },
     "tickets": {
       "title": "Управление тикетами",
@@ -2926,7 +2927,7 @@
       "daysShort": "дн.",
       "serversTitle": "Серверы",
       "externalSquadTitle": "Внешний сквад",
-      "externalSquadHint": "Назначьте внешний сквад RemnaWave для пользователей этого тарифа. При создании подписки пользователь будет автоматически добавлен в выбранный сквад.",
+      "externalSquadHint": "Назначьте внешний сквад Remnawave для пользователей этого тарифа. При создании подписки пользователь будет автоматически добавлен в выбранный сквад.",
       "noExternalSquad": "Без внешнего сквада",
       "externalSquadUsers": "пользователей",
       "serversTabHint": "Выберите серверы, доступные на этом тарифе.",
@@ -3005,7 +3006,7 @@
       "sync": "Синхронизировать",
       "syncing": "Синхронизация...",
       "syncNow": "Синхронизировать сейчас",
-      "noServers": "Нет серверов. Синхронизируйте с RemnaWave.",
+      "noServers": "Нет серверов. Синхронизируйте с Remnawave.",
       "edit": "Редактировать сервер",
       "originalName": "Оригинальное название",
       "displayName": "Отображаемое название",
@@ -3976,7 +3977,7 @@
         "deleteUser": "Удалить пользователей"
       },
       "deleteSubscription": {
-        "warning": "Выбранные подписки будут безвозвратно удалены из бота и панели RemnaWave!",
+        "warning": "Выбранные подписки будут безвозвратно удалены из бота и панели Remnawave!",
         "hint": "Пользователи потеряют доступ к VPN по удалённым подпискам. Это действие нельзя отменить.",
         "activePaidWarning": "{{count}} из {{total}} выбранных подписок: активные платные",
         "forceDeleteConfirm": "Подтверждаю удаление активных платных подписок"
@@ -3984,7 +3985,7 @@
       "deleteUser": {
         "warning": "Выбранные пользователи будут безвозвратно удалены из бота! Все их подписки, баланс и данные будут потеряны!",
         "hint": "Это действие нельзя отменить. Пользователям придётся заново запустить бота для создания нового аккаунта.",
-        "deleteFromPanel": "Также удалить из панели RemnaWave"
+        "deleteFromPanel": "Также удалить из панели Remnawave"
       },
       "params": {
         "days": "Количество дней",

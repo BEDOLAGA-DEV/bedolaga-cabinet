@@ -4,20 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { rbacApi, PermissionSection, CreateRolePayload, UpdateRolePayload } from '@/api/rbac';
 import { AdminBackButton } from '@/components/admin';
-
-// === Icons ===
-
-const ChevronDownIcon = ({ className }: { className?: string }) => (
-  <svg
-    className={className || 'h-4 w-4'}
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={2}
-  >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-  </svg>
-);
+import { ChevronDownIcon } from '@/components/icons';
 
 // === Constants ===
 

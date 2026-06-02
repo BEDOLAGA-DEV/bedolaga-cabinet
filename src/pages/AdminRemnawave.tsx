@@ -9,6 +9,11 @@ import {
   SquadWithLocalInfo,
   SystemStatsResponse,
   AutoSyncStatus,
+  RecapResponse,
+  DevicesStatsResponse,
+  TopConsumersResponse,
+  HealthResponse,
+  SubscriptionRequestStatsResponse,
 } from '../api/adminRemnawave';
 import { usePlatform } from '../platform/hooks/usePlatform';
 import { formatUptime } from '../utils/format';
@@ -18,26 +23,37 @@ import {
   ServerIcon,
   ChartIcon,
   GlobeIcon,
+  HeartbeatIcon,
+  PowerIcon,
+  WarningCircleIcon,
+  CalendarIcon,
+  CalendarBlankIcon,
+  CalendarStarIcon,
+  ChartPieIcon,
+  ChartDonutIcon,
+  CpuIcon,
+  MemoryIcon,
+  PulseIcon,
+  DevicesIcon,
+  StatUptimeIcon,
   UsersIcon,
+  CheckCircleIcon,
+  BanIcon,
+  TrafficIcon,
+  ClockIcon,
   SyncIcon,
   RefreshIcon,
   PlayIcon,
   StopIcon,
   ArrowPathIcon,
   RemnawaveIcon,
+  XrayIcon,
+  DownloadIcon,
+  UploadIcon,
+  SubscriptionIcon,
+  BackIcon,
+  ChevronRightIcon,
 } from '../components/icons';
-
-const BackIcon = () => (
-  <svg
-    className="h-5 w-5 text-dark-400"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={2}
-  >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-  </svg>
-);
 
 const formatBytes = (bytes: number): string => {
   if (bytes === 0) return '0 B';
@@ -50,6 +66,47 @@ const formatBytes = (bytes: number): string => {
 // Алгоритмический ISO 3166-1 alpha-2 → regional indicator. Глобус-fallback
 // сохранён для случая пустого кода (важно для UI-плейсхолдеров).
 const getCountryFlag = (code: string | null | undefined): string => getFlagEmoji(code) || '🌍';
+
+// The panel's provider.faviconLink is the provider's site URL (e.g.
+// "https://waicore.com/"), not an image. Resolve it to an actual favicon
+// image via Google's favicon service, the same way the panel renders it.
+const providerFaviconUrl = (link: string | null | undefined): string | null => {
+  if (!link) return null;
+  try {
+    const host = new URL(link).hostname;
+    return host ? `https://www.google.com/s2/favicons?domain=${host}&sz=64` : null;
+  } catch {
+    return null;
+  }
+};
+
+// Meaningful icon per Remnawave user status (instead of the same people glyph).
+const userStatusIcon = (status: string): React.ReactNode => {
+  switch (status.toUpperCase()) {
+    case 'ACTIVE':
+      return <CheckCircleIcon className="h-4 w-4" />;
+    case 'DISABLED':
+      return <BanIcon className="h-4 w-4" />;
+    case 'LIMITED':
+      return <TrafficIcon className="h-4 w-4" />;
+    case 'EXPIRED':
+      return <ClockIcon className="h-4 w-4" />;
+    default:
+      return <UsersIcon className="h-4 w-4" />;
+  }
+};
+
+// Realtime interface throughput (bytes/s) → network-style speed, matching the
+// panel exactly: the unit step is by 1024 bytes, but the value is shown in bits
+// (×8 / 1000), e.g. 341 KB/s → "2728 Kb/s", 1.34 MB/s → "10.72 Mb/s".
+const formatSpeed = (bytesPerSec: number): string => {
+  const bps = bytesPerSec || 0;
+  const bits = bps * 8;
+  if (bps < 1024) return `${bits.toFixed(0)} b/s`;
+  if (bps < 1024 ** 2) return `${(bits / 1000).toFixed(2)} Kb/s`;
+  if (bps < 1024 ** 3) return `${(bits / 1e6).toFixed(2)} Mb/s`;
+  return `${(bits / 1e9).toFixed(2)} Gb/s`;
+};
 
 interface StatCardProps {
   label: string;
@@ -83,75 +140,148 @@ function StatCard({ label, value, icon, color = 'accent', subValue }: StatCardPr
   );
 }
 
+function NodeTrafficBreakdown({
+  title,
+  items,
+}: {
+  title: string;
+  items: { tag: string; downloadBytes: number; uploadBytes: number; totalBytes: number }[];
+}) {
+  return (
+    <div className="space-y-1">
+      <p className="text-[10px] font-medium uppercase tracking-wide text-dark-500">{title}</p>
+      {[...items]
+        .sort((a, b) => b.totalBytes - a.totalBytes)
+        .map((it) => (
+          <div
+            key={it.tag}
+            className="flex items-center justify-between gap-3 rounded-lg bg-dark-900/50 px-2.5 py-1.5"
+          >
+            <span className="min-w-0 flex-1 truncate text-xs text-dark-200">{it.tag}</span>
+            <div className="flex shrink-0 gap-2.5 font-mono text-[11px] text-dark-400">
+              <span>↓ {formatBytes(it.downloadBytes)}</span>
+              <span>↑ {formatBytes(it.uploadBytes)}</span>
+              <span className="font-medium text-dark-300">{formatBytes(it.totalBytes)}</span>
+            </div>
+          </div>
+        ))}
+    </div>
+  );
+}
+
 interface NodeCardProps {
   node: NodeInfo;
+  providerName?: string;
+  realtime?: NodeRealtimeStats;
   onAction: (uuid: string, action: 'enable' | 'disable' | 'restart') => void;
   isLoading?: boolean;
 }
 
-function NodeCard({ node, onAction, isLoading }: NodeCardProps) {
+function NodeCard({ node, providerName, realtime, onAction, isLoading }: NodeCardProps) {
   const { t } = useTranslation();
+  const [expanded, setExpanded] = useState(false);
 
-  const statusColor = node.is_disabled
-    ? 'text-dark-500'
-    : node.is_connected && node.is_node_online
-      ? 'text-success-400'
-      : 'text-error-400';
-
+  const isUp = node.is_connected && node.is_node_online && !node.is_disabled;
+  const dotColor = node.is_disabled ? 'bg-dark-500' : isUp ? 'bg-success-400' : 'bg-error-400';
   const statusText = node.is_disabled
     ? t('admin.remnawave.nodes.disabled', 'Disabled')
-    : node.is_connected && node.is_node_online
+    : isUp
       ? t('admin.remnawave.nodes.online', 'Online')
       : t('admin.remnawave.nodes.offline', 'Offline');
 
-  return (
-    <div className="rounded-xl border border-dark-700 bg-dark-800/50 p-4 transition-colors hover:border-dark-600">
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <span className="text-lg">{getCountryFlag(node.country_code)}</span>
-            <h3 className="truncate font-medium text-dark-100">{node.name}</h3>
-            <span className={`rounded-full px-2 py-0.5 text-xs ${statusColor} bg-current/10`}>
-              {statusText}
-            </span>
-          </div>
-          <p className="mt-1 truncate text-xs text-dark-500">{node.address}</p>
+  const s = node.system?.stats;
+  const memTotal = s ? s.memoryUsed + s.memoryFree : 0;
+  const ramPct = memTotal > 0 && s ? Math.round((s.memoryUsed / memTotal) * 100) : null;
+  const loadAvg = s?.loadAvg?.length
+    ? s.loadAvg
+        .slice(0, 3)
+        .map((n) => n.toFixed(2))
+        .join('  ')
+    : null;
+  const rx = s?.interface?.rxBytesPerSec ?? 0;
+  const tx = s?.interface?.txBytesPerSec ?? 0;
 
-          <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-dark-400">
-            <span className="flex items-center gap-1">
-              <UsersIcon className="h-3.5 w-3.5" />
-              {t('admin.remnawave.nodes.usersOnlineCount', '{{count}} online', {
-                count: node.users_online ?? 0,
-              })}
+  const used = node.traffic_used_bytes ?? 0;
+  const limit = node.traffic_limit_bytes ?? 0;
+  const trafficPct = limit > 0 ? Math.min(100, (used / limit) * 100) : null;
+
+  // Provider name: realtime metrics first, fall back to the node's own provider.
+  const providerLabel = providerName || node.provider_name;
+  const providerFavicon = providerFaviconUrl(node.provider_favicon);
+
+  // Per-node traffic breakdown (merged from the former Traffic tab) — shown in
+  // an accordion that toggles when the card is clicked.
+  const inbounds = realtime?.inbounds ?? [];
+  const outbounds = realtime?.outbounds ?? [];
+  const hasBreakdown = inbounds.length + outbounds.length > 0;
+
+  const ramColorClass =
+    ramPct === null
+      ? ''
+      : ramPct > 85
+        ? 'text-error-400'
+        : ramPct > 65
+          ? 'text-warning-400'
+          : 'text-dark-400';
+
+  return (
+    <div
+      className={`rounded-xl border border-dark-700 bg-dark-800/50 p-3.5 transition-colors hover:border-dark-600 ${
+        hasBreakdown ? 'cursor-pointer' : ''
+      }`}
+      onClick={hasBreakdown ? () => setExpanded((v) => !v) : undefined}
+    >
+      {/* Identity + actions */}
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-2">
+          <span
+            className={`h-2 w-2 shrink-0 rounded-full ${dotColor} ${isUp ? 'animate-pulse' : ''}`}
+            title={statusText}
+          />
+          <span className="flex shrink-0 items-center gap-1 rounded-md bg-dark-700/60 px-1.5 py-0.5 text-[11px] text-dark-300">
+            <UsersIcon className="h-3 w-3" />
+            {node.users_online ?? 0}
+          </span>
+          <span className="shrink-0 text-base leading-none">
+            {getCountryFlag(node.country_code)}
+          </span>
+          <h3 className="truncate font-semibold text-dark-100">{node.name}</h3>
+          {(providerLabel || providerFavicon) && (
+            <span className="flex min-w-0 max-w-[7rem] shrink items-center gap-1 rounded-md bg-accent-500/15 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-accent-300">
+              {providerFavicon && (
+                <img
+                  src={providerFavicon}
+                  alt=""
+                  className="h-3 w-3 shrink-0 rounded-[2px]"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
+              )}
+              {providerLabel && <span className="truncate">{providerLabel}</span>}
             </span>
-            {node.traffic_used_bytes !== undefined && (
-              <span>
-                {formatBytes(node.traffic_used_bytes)}{' '}
-                {t('admin.remnawave.nodes.trafficUsed', 'used')}
-              </span>
-            )}
-            {node.xray_uptime > 0 && (
-              <span>
-                {t('admin.remnawave.nodes.uptimeLabel', 'Uptime')}: {formatUptime(node.xray_uptime)}
-              </span>
-            )}
-            {node.versions?.xray && <span>Xray {node.versions.xray}</span>}
-          </div>
+          )}
         </div>
 
-        <div className="flex shrink-0 gap-1.5">
+        <div className="flex shrink-0 items-center gap-1.5">
           <button
-            onClick={() => onAction(node.uuid, 'restart')}
+            onClick={(e) => {
+              e.stopPropagation();
+              onAction(node.uuid, 'restart');
+            }}
             disabled={isLoading || node.is_disabled}
-            className="rounded-lg bg-dark-700 p-2 text-dark-300 transition-colors hover:bg-dark-600 hover:text-dark-100 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-lg bg-dark-700 p-1.5 text-dark-300 transition-colors hover:bg-dark-600 hover:text-dark-100 disabled:cursor-not-allowed disabled:opacity-50"
             title={t('admin.remnawave.nodes.restart', 'Restart')}
           >
-            <ArrowPathIcon className="h-4 w-4" />
+            <ArrowPathIcon className="h-3.5 w-3.5" />
           </button>
           <button
-            onClick={() => onAction(node.uuid, node.is_disabled ? 'enable' : 'disable')}
+            onClick={(e) => {
+              e.stopPropagation();
+              onAction(node.uuid, node.is_disabled ? 'enable' : 'disable');
+            }}
             disabled={isLoading}
-            className={`rounded-lg p-2 transition-colors disabled:opacity-50 ${
+            className={`rounded-lg p-1.5 transition-colors disabled:opacity-50 ${
               node.is_disabled
                 ? 'bg-success-500/20 text-success-400 hover:bg-success-500/30'
                 : 'bg-error-500/20 text-error-400 hover:bg-error-500/30'
@@ -162,10 +292,176 @@ function NodeCard({ node, onAction, isLoading }: NodeCardProps) {
                 : t('admin.remnawave.nodes.disable', 'Disable')
             }
           >
-            {node.is_disabled ? <PlayIcon className="h-4 w-4" /> : <StopIcon className="h-4 w-4" />}
+            {node.is_disabled ? (
+              <PlayIcon className="h-3.5 w-3.5" />
+            ) : (
+              <StopIcon className="h-3.5 w-3.5" />
+            )}
           </button>
+          {hasBreakdown && (
+            <ChevronRightIcon
+              className={`h-4 w-4 text-dark-500 transition-transform ${
+                expanded ? 'rotate-90' : ''
+              }`}
+            />
+          )}
         </div>
       </div>
+
+      {/* Address + traffic + uptime */}
+      <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-dark-400">
+        <span className="flex min-w-0 max-w-full items-center gap-1 font-mono text-dark-500">
+          <GlobeIcon className="h-3 w-3 shrink-0" />
+          <span className="truncate">{node.address}</span>
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="text-dark-300">{formatBytes(used)}</span>
+          {trafficPct !== null && (
+            <span className="h-1 w-16 overflow-hidden rounded-full bg-dark-700">
+              <span
+                className="block h-full rounded-full bg-accent-500"
+                style={{ width: `${trafficPct}%` }}
+              />
+            </span>
+          )}
+          <span className="text-dark-500">/ {limit > 0 ? formatBytes(limit) : '∞'}</span>
+        </span>
+        {node.xray_uptime > 0 && (
+          <span className="flex items-center gap-1 text-dark-500">
+            <StatUptimeIcon className="h-3 w-3" />
+            {formatUptime(node.xray_uptime)}
+          </span>
+        )}
+      </div>
+
+      {/* Live metrics — mobile: 3 fixed rows so wrapping speeds don't reflow;
+          desktop (sm+): the original single wrap row, wide enough not to jump. */}
+      {(ramPct !== null || loadAvg || rx > 0 || tx > 0 || node.versions) && (
+        <>
+          {/* Mobile: processor · traffic · versions */}
+          <div className="mt-2 space-y-1 border-t border-dark-700/60 pt-2 font-mono text-[10.5px] tabular-nums text-dark-500 sm:hidden">
+            {(loadAvg || ramPct !== null) && (
+              <div className="flex items-center gap-3">
+                {loadAvg && (
+                  <span className="flex items-center gap-1" title="load average 1 / 5 / 15 min">
+                    <CpuIcon className="h-3 w-3 shrink-0 text-dark-500" />
+                    {loadAvg}
+                  </span>
+                )}
+                {ramPct !== null && (
+                  <span className="flex items-center gap-1.5" title="RAM">
+                    <MemoryIcon className="h-3 w-3 shrink-0 text-dark-500" />
+                    <span className={ramColorClass}>{ramPct}%</span>
+                    <span className="h-1 w-10 overflow-hidden rounded-full bg-dark-700">
+                      <span
+                        className="block h-full rounded-full bg-dark-400"
+                        style={{ width: `${ramPct}%` }}
+                      />
+                    </span>
+                  </span>
+                )}
+              </div>
+            )}
+            {(rx > 0 || tx > 0) && (
+              <div className="flex items-center gap-4">
+                <span className="flex items-center gap-1">
+                  <DownloadIcon className="h-3 w-3 shrink-0 text-success-400/70" />
+                  {formatSpeed(rx)}
+                </span>
+                <span className="flex items-center gap-1">
+                  <UploadIcon className="h-3 w-3 shrink-0 text-accent-400/70" />
+                  {formatSpeed(tx)}
+                </span>
+              </div>
+            )}
+            {(node.versions?.node || node.versions?.xray) && (
+              <div className="flex items-center gap-3 text-dark-600">
+                {node.versions?.node && (
+                  <span className="flex items-center gap-1" title="remnanode">
+                    <RemnawaveIcon className="h-3 w-3 shrink-0" />
+                    {node.versions.node}
+                  </span>
+                )}
+                {node.versions?.xray && (
+                  <span className="flex items-center gap-1" title="xray core">
+                    <XrayIcon className="h-3 w-3 shrink-0" />
+                    {node.versions.xray}
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Desktop: single wrap row (original) */}
+          <div className="mt-2 hidden flex-wrap items-center gap-x-3 gap-y-1 border-t border-dark-700/60 pt-2 font-mono text-[10.5px] tabular-nums text-dark-500 sm:flex">
+            {ramPct !== null && (
+              <span className="flex items-center gap-1.5" title="RAM">
+                <MemoryIcon className="h-3 w-3 text-dark-500" />
+                <span className={ramColorClass}>{ramPct}%</span>
+                <span className="h-1 w-10 overflow-hidden rounded-full bg-dark-700">
+                  <span
+                    className="block h-full rounded-full bg-dark-400"
+                    style={{ width: `${ramPct}%` }}
+                  />
+                </span>
+              </span>
+            )}
+            {loadAvg && (
+              <span className="flex items-center gap-1" title="load average 1 / 5 / 15 min">
+                <CpuIcon className="h-3 w-3 text-dark-500" />
+                {loadAvg}
+              </span>
+            )}
+            <span className="flex items-center gap-2">
+              <span className="flex items-center gap-0.5">
+                <DownloadIcon className="h-3 w-3 text-success-400/70" />
+                {formatSpeed(rx)}
+              </span>
+              <span className="flex items-center gap-0.5">
+                <UploadIcon className="h-3 w-3 text-accent-400/70" />
+                {formatSpeed(tx)}
+              </span>
+            </span>
+            {(node.versions?.node || node.versions?.xray) && (
+              <span className="ml-auto flex items-center gap-2.5 text-dark-600">
+                {node.versions?.node && (
+                  <span className="flex items-center gap-1" title="remnanode">
+                    <RemnawaveIcon className="h-3 w-3" />
+                    {node.versions.node}
+                  </span>
+                )}
+                {node.versions?.xray && (
+                  <span className="flex items-center gap-1" title="xray core">
+                    <XrayIcon className="h-3 w-3" />
+                    {node.versions.xray}
+                  </span>
+                )}
+              </span>
+            )}
+          </div>
+        </>
+      )}
+
+      {/* Per-node traffic accordion (merged from the former Traffic tab) */}
+      {expanded && hasBreakdown && (
+        <div
+          className="mt-3 space-y-3 border-t border-dark-700/60 pt-3"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {inbounds.length > 0 && (
+            <NodeTrafficBreakdown
+              title={t('admin.remnawave.traffic.inbounds', 'Inbounds')}
+              items={inbounds}
+            />
+          )}
+          {outbounds.length > 0 && (
+            <NodeTrafficBreakdown
+              title={t('admin.remnawave.traffic.outbounds', 'Outbounds')}
+              items={outbounds}
+            />
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -231,15 +527,7 @@ function SquadCard({ squad, onClick }: SquadCardProps) {
           </div>
         </div>
 
-        <svg
-          className="h-5 w-5 shrink-0 text-dark-500"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          strokeWidth={2}
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-        </svg>
+        <ChevronRightIcon className="h-5 w-5 shrink-0 text-dark-500" />
       </div>
     </div>
   );
@@ -285,13 +573,69 @@ function SyncCard({ title, description, onAction, isLoading, lastResult }: SyncC
   );
 }
 
+const formatUptimeSince = (iso: string): string => {
+  const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
+  if (Number.isNaN(days)) return '—';
+  if (days < 1) return '<1d';
+  if (days < 30) return `${days}d`;
+  if (days < 365) return `${Math.floor(days / 30)}mo`;
+  return `${Math.floor(days / 365)}y`;
+};
+
+function BreakdownCard({
+  title,
+  items,
+  wide = false,
+}: {
+  title: string;
+  items: { label: string; count: number }[];
+  wide?: boolean;
+}) {
+  const max = Math.max(1, ...items.map((i) => i.count));
+  return (
+    <div className="rounded-xl border border-dark-700 bg-dark-800/50 p-4">
+      <h4 className="mb-3 text-sm font-medium text-dark-200">{title}</h4>
+      <div className={wide ? 'grid grid-cols-1 gap-x-6 gap-y-2 sm:grid-cols-2' : 'space-y-2'}>
+        {items.slice(0, wide ? 16 : 8).map((it) => (
+          <div key={it.label}>
+            <div className="flex items-center justify-between text-xs">
+              <span className="truncate text-dark-300">{it.label}</span>
+              <span className="ml-2 shrink-0 text-dark-400">{it.count}</span>
+            </div>
+            <div className="mt-1 h-1.5 rounded-full bg-dark-700">
+              <div
+                className="h-1.5 rounded-full bg-accent-500"
+                style={{ width: `${(it.count / max) * 100}%` }}
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 interface OverviewTabProps {
   stats: SystemStatsResponse | undefined;
+  recap?: RecapResponse;
+  devicesStats?: DevicesStatsResponse;
+  topConsumers?: TopConsumersResponse;
+  health?: HealthResponse;
+  subRequests?: SubscriptionRequestStatsResponse;
   isLoading: boolean;
   onRefresh: () => void;
 }
 
-function OverviewTab({ stats, isLoading, onRefresh }: OverviewTabProps) {
+function OverviewTab({
+  stats,
+  recap,
+  devicesStats,
+  topConsumers,
+  health,
+  subRequests,
+  isLoading,
+  onRefresh,
+}: OverviewTabProps) {
   const { t } = useTranslation();
 
   if (isLoading) {
@@ -326,7 +670,7 @@ function OverviewTab({ stats, isLoading, onRefresh }: OverviewTabProps) {
           <ChartIcon className="h-4 w-4" />
           {t('admin.remnawave.overview.system', 'System')}
         </h3>
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 max-lg:[&>*:last-child:nth-child(odd)]:col-span-2">
           <StatCard
             label={t('admin.remnawave.overview.usersOnline', 'Users Online')}
             value={stats.system.users_online}
@@ -341,13 +685,13 @@ function OverviewTab({ stats, isLoading, onRefresh }: OverviewTabProps) {
           />
           <StatCard
             label={t('admin.remnawave.overview.nodesOnline', 'Nodes Online')}
-            value={stats.system.nodes_online}
+            value={`${stats.system.nodes_online} / ${stats.system.total_nodes}`}
             icon={<GlobeIcon />}
-            color="purple"
+            color={stats.system.nodes_online < stats.system.total_nodes ? 'orange' : 'purple'}
           />
           <StatCard
-            label={t('admin.remnawave.overview.connections', 'Connections')}
-            value={stats.system.active_connections}
+            label={t('admin.remnawave.overview.active24h', 'Активны за 24ч')}
+            value={stats.system.users_last_day}
             icon={<ServerIcon className="h-5 w-5" />}
             color="orange"
           />
@@ -356,26 +700,27 @@ function OverviewTab({ stats, isLoading, onRefresh }: OverviewTabProps) {
 
       {/* Bandwidth */}
       <div>
-        <h3 className="mb-3 text-sm font-medium text-dark-300">
+        <h3 className="mb-3 flex items-center gap-2 text-sm font-medium text-dark-300">
+          <ChartIcon className="h-4 w-4" />
           {t('admin.remnawave.overview.bandwidth', 'Inbound Traffic')}
         </h3>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 max-sm:[&>*:last-child:nth-child(odd)]:col-span-2">
           <StatCard
             label={t('admin.remnawave.overview.download', 'Download')}
             value={formatBytes(stats.bandwidth.realtime_download)}
-            icon={<span className="text-lg">↓</span>}
+            icon={<DownloadIcon className="h-5 w-5" />}
             color="green"
           />
           <StatCard
             label={t('admin.remnawave.overview.upload', 'Upload')}
             value={formatBytes(stats.bandwidth.realtime_upload)}
-            icon={<span className="text-lg">↑</span>}
+            icon={<UploadIcon className="h-5 w-5" />}
             color="blue"
           />
           <StatCard
             label={t('admin.remnawave.overview.total', 'Total')}
             value={formatBytes(stats.bandwidth.realtime_total)}
-            icon={<span className="text-lg">⇅</span>}
+            icon={<ChartIcon className="h-5 w-5" />}
             color="purple"
           />
         </div>
@@ -383,27 +728,28 @@ function OverviewTab({ stats, isLoading, onRefresh }: OverviewTabProps) {
 
       {/* Server Info */}
       <div>
-        <h3 className="mb-3 text-sm font-medium text-dark-300">
+        <h3 className="mb-3 flex items-center gap-2 text-sm font-medium text-dark-300">
+          <ServerIcon className="h-4 w-4" />
           {t('admin.remnawave.overview.server', 'Server')}
         </h3>
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-3 max-lg:[&>*:last-child:nth-child(odd)]:col-span-2">
           <StatCard
             label={t('admin.remnawave.overview.cpu', 'CPU Cores')}
             value={stats.server_info.cpu_cores}
-            icon={<span className="text-lg">⚡</span>}
+            icon={<CpuIcon className="h-5 w-5" />}
             color="accent"
           />
           <StatCard
             label={t('admin.remnawave.overview.memory', 'Memory')}
             value={`${memoryUsedPercent}%`}
             subValue={`${formatBytes(stats.server_info.memory_used)} / ${formatBytes(stats.server_info.memory_total)}`}
-            icon={<span className="text-lg">💾</span>}
+            icon={<MemoryIcon className="h-5 w-5" />}
             color={memoryUsedPercent > 80 ? 'red' : memoryUsedPercent > 60 ? 'orange' : 'green'}
           />
           <StatCard
             label={t('admin.remnawave.overview.uptime', 'Uptime')}
             value={formatUptime(stats.server_info.uptime_seconds)}
-            icon={<span className="text-lg">⏱️</span>}
+            icon={<StatUptimeIcon className="h-5 w-5" />}
             color="blue"
           />
         </div>
@@ -411,38 +757,39 @@ function OverviewTab({ stats, isLoading, onRefresh }: OverviewTabProps) {
 
       {/* Traffic Periods */}
       <div>
-        <h3 className="mb-3 text-sm font-medium text-dark-300">
+        <h3 className="mb-3 flex items-center gap-2 text-sm font-medium text-dark-300">
+          <ChartIcon className="h-4 w-4" />
           {t('admin.remnawave.overview.traffic', 'Traffic Statistics')}
         </h3>
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-5 max-lg:[&>*:last-child:nth-child(odd)]:col-span-2">
           <StatCard
             label={t('admin.remnawave.overview.traffic2days', '2 days')}
             value={formatBytes(stats.traffic_periods.last_2_days.current)}
-            icon={<span className="text-xs">📊</span>}
+            icon={<CalendarIcon className="h-5 w-5" />}
             color="accent"
           />
           <StatCard
             label={t('admin.remnawave.overview.traffic7days', '7 days')}
             value={formatBytes(stats.traffic_periods.last_7_days.current)}
-            icon={<span className="text-xs">📊</span>}
+            icon={<ChartDonutIcon className="h-5 w-5" />}
             color="blue"
           />
           <StatCard
             label={t('admin.remnawave.overview.traffic30days', '30 days')}
             value={formatBytes(stats.traffic_periods.last_30_days.current)}
-            icon={<span className="text-xs">📊</span>}
+            icon={<ChartPieIcon className="h-5 w-5" />}
             color="green"
           />
           <StatCard
             label={t('admin.remnawave.overview.trafficMonth', 'Month')}
             value={formatBytes(stats.traffic_periods.current_month.current)}
-            icon={<span className="text-xs">📊</span>}
+            icon={<CalendarBlankIcon className="h-5 w-5" />}
             color="purple"
           />
           <StatCard
             label={t('admin.remnawave.overview.trafficYear', 'Year')}
             value={formatBytes(stats.traffic_periods.current_year.current)}
-            icon={<span className="text-xs">📊</span>}
+            icon={<CalendarStarIcon className="h-5 w-5" />}
             color="orange"
           />
         </div>
@@ -450,27 +797,184 @@ function OverviewTab({ stats, isLoading, onRefresh }: OverviewTabProps) {
 
       {/* Users by Status */}
       <div>
-        <h3 className="mb-3 text-sm font-medium text-dark-300">
+        <h3 className="mb-3 flex items-center gap-2 text-sm font-medium text-dark-300">
+          <UsersIcon className="h-4 w-4" />
           {t('admin.remnawave.overview.usersByStatus', 'Users by Status')}
         </h3>
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 max-lg:[&>*:last-child:nth-child(odd)]:col-span-2">
           {Object.entries(stats.users_by_status).map(([status, count]) => (
             <StatCard
               key={status}
               label={status}
               value={count}
-              icon={<UsersIcon className="h-4 w-4" />}
+              icon={userStatusIcon(status)}
               color={status === 'ACTIVE' ? 'green' : status === 'DISABLED' ? 'red' : 'accent'}
             />
           ))}
         </div>
       </div>
+
+      {/* Panel recap */}
+      {recap && (
+        <div>
+          <h3 className="mb-3 flex items-center gap-2 text-sm font-medium text-dark-300">
+            <RemnawaveIcon className="h-4 w-4" />
+            {t('admin.remnawave.overview.panel', 'Панель')}
+          </h3>
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 max-lg:[&>*:last-child:nth-child(odd)]:col-span-2">
+            <StatCard
+              label={t('admin.remnawave.overview.lifetimeTraffic', 'Трафик за всё время')}
+              value={formatBytes(recap.total.traffic_bytes)}
+              icon={<ChartIcon className="h-5 w-5" />}
+              color="purple"
+            />
+            <StatCard
+              label={t('admin.remnawave.overview.thisMonthTraffic', 'Трафик за месяц')}
+              value={formatBytes(recap.this_month.traffic_bytes)}
+              icon={<ChartIcon className="h-5 w-5" />}
+              color="blue"
+            />
+            <StatCard
+              label={t('admin.remnawave.overview.countries', 'Стран')}
+              value={recap.total.distinct_countries}
+              icon={<GlobeIcon className="h-5 w-5" />}
+              color="green"
+            />
+            <StatCard
+              label={t('admin.remnawave.overview.panelVersion', 'Версия панели')}
+              value={recap.version || '—'}
+              subValue={
+                recap.init_date
+                  ? `${t('admin.remnawave.overview.uptime', 'аптайм')} ${formatUptimeSince(recap.init_date)}`
+                  : undefined
+              }
+              icon={<ServerIcon className="h-5 w-5" />}
+              color="accent"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Devices breakdown */}
+      {devicesStats && (devicesStats.by_platform.length > 0 || devicesStats.by_app.length > 0) && (
+        <div>
+          <h3 className="mb-3 flex items-center gap-2 text-sm font-medium text-dark-300">
+            <DevicesIcon className="h-4 w-4" />
+            {t('admin.remnawave.overview.devices', 'Устройства')} ·{' '}
+            {devicesStats.total_hwid_devices} ({devicesStats.average_devices_per_user.toFixed(1)}/
+            {t('admin.remnawave.overview.perUser', 'юзер')})
+          </h3>
+          <div className="grid gap-3 lg:grid-cols-3">
+            <BreakdownCard
+              title={t('admin.remnawave.overview.byPlatform', 'По платформам')}
+              items={devicesStats.by_platform.map((p) => ({ label: p.platform, count: p.count }))}
+            />
+            <BreakdownCard
+              title={t('admin.remnawave.overview.byApp', 'По приложениям')}
+              items={devicesStats.by_app.map((a) => ({ label: a.app, count: a.count }))}
+            />
+            {devicesStats.top_users.length > 0 && (
+              <BreakdownCard
+                title={t('admin.remnawave.overview.topByDevices', 'Топ по устройствам')}
+                items={devicesStats.top_users.map((u) => ({
+                  label: u.username,
+                  count: u.devices_count,
+                }))}
+              />
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Top consumers */}
+      {topConsumers && topConsumers.users.length > 0 && (
+        <div>
+          <h3 className="mb-3 flex items-center gap-2 text-sm font-medium text-dark-300">
+            <ChartIcon className="h-4 w-4" />
+            {t('admin.remnawave.overview.topConsumers', 'Топ потребителей')} ·{' '}
+            {topConsumers.period_days}
+            {t('admin.remnawave.overview.daysShort', 'д')}
+          </h3>
+          <div className="divide-y divide-dark-700 rounded-xl border border-dark-700 bg-dark-800/50">
+            {topConsumers.users.map((u, i) => (
+              <div
+                key={u.username}
+                className="flex items-center justify-between px-4 py-2.5 text-sm"
+              >
+                <span className="flex min-w-0 items-center gap-2">
+                  <span className="w-5 shrink-0 text-dark-500">{i + 1}</span>
+                  <span className="truncate text-dark-100">{u.username}</span>
+                </span>
+                <span className="shrink-0 font-medium text-accent-400">
+                  {formatBytes(u.total_bytes)}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Panel health */}
+      {health && health.instances > 0 && (
+        <div>
+          <h3 className="mb-3 flex items-center gap-2 text-sm font-medium text-dark-300">
+            <ServerIcon className="h-4 w-4" />
+            {t('admin.remnawave.overview.panelHealth', 'Здоровье панели')}
+            {health.instances > 1 ? ` · ${health.instances}` : ''}
+          </h3>
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 max-lg:[&>*:last-child:nth-child(odd)]:col-span-2">
+            <StatCard
+              label={t('admin.remnawave.overview.panelRam', 'RAM процесса')}
+              value={formatBytes(health.rss_bytes)}
+              icon={<MemoryIcon className="h-5 w-5" />}
+              color="blue"
+            />
+            <StatCard
+              label={t('admin.remnawave.overview.heap', 'Heap')}
+              value={formatBytes(health.heap_used_bytes)}
+              subValue={`/ ${formatBytes(health.heap_total_bytes)}`}
+              icon={<ChartIcon className="h-5 w-5" />}
+              color="purple"
+            />
+            <StatCard
+              label={t('admin.remnawave.overview.eventLoopP99', 'Event-loop p99')}
+              value={`${health.event_loop_p99_ms.toFixed(1)} ms`}
+              icon={<PulseIcon className="h-5 w-5" />}
+              color={health.event_loop_p99_ms > 50 ? 'red' : 'green'}
+            />
+            <StatCard
+              label={t('admin.remnawave.overview.panelUptime', 'Аптайм панели')}
+              value={formatUptime(health.uptime_seconds)}
+              icon={<StatUptimeIcon className="h-5 w-5" />}
+              color="accent"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Subscription requests by app */}
+      {subRequests && subRequests.by_app.length > 0 && (
+        <div>
+          <h3 className="mb-3 flex items-center gap-2 text-sm font-medium text-dark-300">
+            <SubscriptionIcon className="h-4 w-4" />
+            {t('admin.remnawave.overview.subRequests', 'Запросы подписки (по клиентам)')} ·{' '}
+            {subRequests.by_app.reduce((acc, a) => acc + a.count, 0)}
+          </h3>
+          <BreakdownCard
+            wide
+            title={t('admin.remnawave.overview.byApp', 'По приложениям')}
+            items={subRequests.by_app.map((a) => ({ label: a.app, count: a.count }))}
+          />
+        </div>
+      )}
     </div>
   );
 }
 
 interface NodesTabProps {
   nodes: NodeInfo[];
+  providerByUuid: Record<string, string>;
+  realtimeByUuid: Record<string, NodeRealtimeStats>;
   isLoading: boolean;
   onRefresh: () => void;
   onAction: (uuid: string, action: 'enable' | 'disable' | 'restart') => void;
@@ -480,6 +984,8 @@ interface NodesTabProps {
 
 function NodesTab({
   nodes,
+  providerByUuid,
+  realtimeByUuid,
   isLoading,
   onRefresh,
   onAction,
@@ -499,6 +1005,13 @@ function NodesTab({
     return { total, online, offline, disabled, totalUsers };
   }, [nodes]);
 
+  const traffic = useMemo(() => {
+    const vals = Object.values(realtimeByUuid);
+    const download = vals.reduce((a, n) => a + (n.downloadBytes ?? 0), 0);
+    const upload = vals.reduce((a, n) => a + (n.uploadBytes ?? 0), 0);
+    return { download, upload, total: download + upload };
+  }, [realtimeByUuid]);
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -510,29 +1023,29 @@ function NodesTab({
   return (
     <div className="space-y-4">
       {/* Stats */}
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-5 max-lg:[&>*:last-child:nth-child(odd)]:col-span-2">
         <StatCard
           label={t('admin.remnawave.nodes.stats.total', 'Total')}
           value={stats.total}
-          icon={<GlobeIcon />}
+          icon={<ServerIcon />}
           color="accent"
         />
         <StatCard
           label={t('admin.remnawave.nodes.stats.online', 'Online')}
           value={stats.online}
-          icon={<GlobeIcon />}
+          icon={<HeartbeatIcon />}
           color="green"
         />
         <StatCard
           label={t('admin.remnawave.nodes.stats.offline', 'Offline')}
           value={stats.offline}
-          icon={<GlobeIcon />}
+          icon={<WarningCircleIcon />}
           color="red"
         />
         <StatCard
           label={t('admin.remnawave.nodes.stats.disabled', 'Disabled')}
           value={stats.disabled}
-          icon={<GlobeIcon />}
+          icon={<PowerIcon />}
           color="accent"
         />
         <StatCard
@@ -562,6 +1075,26 @@ function NodesTab({
         </button>
       </div>
 
+      {/* Realtime traffic totals (merged from the former Traffic tab) */}
+      {traffic.total > 0 && (
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 px-1 text-xs text-dark-400">
+          <span className="font-medium text-dark-300">
+            {t('admin.remnawave.traffic.realtimeTitle', 'Realtime traffic')}
+          </span>
+          <span className="flex items-center gap-1">
+            <DownloadIcon className="h-3 w-3 text-success-400/70" />
+            {formatBytes(traffic.download)}
+          </span>
+          <span className="flex items-center gap-1">
+            <UploadIcon className="h-3 w-3 text-accent-400/70" />
+            {formatBytes(traffic.upload)}
+          </span>
+          <span className="text-dark-300">
+            {'Σ'} {formatBytes(traffic.total)}
+          </span>
+        </div>
+      )}
+
       {/* Nodes List */}
       <div className="space-y-3">
         {nodes.length === 0 ? (
@@ -570,7 +1103,14 @@ function NodesTab({
           </p>
         ) : (
           nodes.map((node) => (
-            <NodeCard key={node.uuid} node={node} onAction={onAction} isLoading={isActionLoading} />
+            <NodeCard
+              key={node.uuid}
+              node={node}
+              providerName={providerByUuid[node.uuid]}
+              realtime={realtimeByUuid[node.uuid]}
+              onAction={onAction}
+              isLoading={isActionLoading}
+            />
           ))
         )}
       </div>
@@ -616,7 +1156,7 @@ function SquadsTab({
   return (
     <div className="space-y-4">
       {/* Stats */}
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 max-lg:[&>*:last-child:nth-child(odd)]:col-span-2">
         <StatCard
           label={t('admin.remnawave.squads.stats.total', 'Total')}
           value={stats.total}
@@ -796,7 +1336,7 @@ function SyncTab({
           title={t('admin.remnawave.sync.fromPanel', 'Sync from Panel')}
           description={t(
             'admin.remnawave.sync.fromPanelDesc',
-            'Import users from RemnaWave panel to bot',
+            'Import users from Remnawave panel to bot',
           )}
           onAction={onSyncFromPanel}
           isLoading={loadingStates.fromPanel}
@@ -806,7 +1346,7 @@ function SyncTab({
           title={t('admin.remnawave.sync.toPanel', 'Sync to Panel')}
           description={t(
             'admin.remnawave.sync.toPanelDesc',
-            'Export users from bot to RemnaWave panel',
+            'Export users from bot to Remnawave panel',
           )}
           onAction={onSyncToPanel}
           isLoading={loadingStates.toPanel}
@@ -817,138 +1357,7 @@ function SyncTab({
   );
 }
 
-interface TrafficTabProps {
-  data: NodeRealtimeStats[] | undefined;
-  isLoading: boolean;
-  onRefresh: () => void;
-}
-
-function TrafficTab({ data, isLoading, onRefresh }: TrafficTabProps) {
-  const { t } = useTranslation();
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-      </div>
-    );
-  }
-
-  if (!data || data.length === 0) {
-    return (
-      <div className="py-12 text-center">
-        <p className="text-dark-400">
-          {t('admin.remnawave.traffic.noData', 'No traffic data available')}
-        </p>
-        <button onClick={onRefresh} className="btn-primary mt-4">
-          {t('common.retry', 'Retry')}
-        </button>
-      </div>
-    );
-  }
-
-  const totalDownload = data.reduce((acc, n) => acc + n.downloadBytes, 0);
-  const totalUpload = data.reduce((acc, n) => acc + n.uploadBytes, 0);
-
-  return (
-    <div className="space-y-6">
-      {/* Totals */}
-      <div className="grid grid-cols-3 gap-3">
-        <StatCard
-          label={t('admin.remnawave.traffic.totalDownload', 'Download')}
-          value={formatBytes(totalDownload)}
-          icon={<span className="text-lg">↓</span>}
-          color="green"
-        />
-        <StatCard
-          label={t('admin.remnawave.traffic.totalUpload', 'Upload')}
-          value={formatBytes(totalUpload)}
-          icon={<span className="text-lg">↑</span>}
-          color="blue"
-        />
-        <StatCard
-          label={t('admin.remnawave.traffic.totalTraffic', 'Total')}
-          value={formatBytes(totalDownload + totalUpload)}
-          icon={<span className="text-lg">⇅</span>}
-          color="purple"
-        />
-      </div>
-
-      {/* Per-node inbound breakdown */}
-      {data.map((node) => (
-        <div key={node.nodeUuid} className="rounded-xl border border-dark-700 bg-dark-800/50 p-4">
-          <div className="mb-3 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              {node.countryEmoji && <span className="text-lg">{node.countryEmoji}</span>}
-              <h3 className="font-medium text-dark-100">{node.nodeName}</h3>
-              {node.providerName && (
-                <span className="rounded bg-dark-700/50 px-1.5 py-0.5 text-xs text-dark-400">
-                  {node.providerName}
-                </span>
-              )}
-              <span className="text-xs text-dark-500">
-                {node.usersOnline} {t('admin.remnawave.traffic.online', 'online')}
-              </span>
-            </div>
-            <span className="text-sm text-dark-300">{formatBytes(node.totalBytes)}</span>
-          </div>
-
-          {(node.inbounds?.length ?? 0) > 0 && (
-            <div className="space-y-1">
-              <p className="mb-2 text-xs font-medium text-dark-400">
-                {t('admin.remnawave.traffic.inbounds', 'Inbounds')}
-              </p>
-              {[...(node.inbounds ?? [])]
-                .sort((a, b) => b.totalBytes - a.totalBytes)
-                .map((ib) => (
-                  <div
-                    key={ib.tag}
-                    className="flex items-center justify-between rounded-lg bg-dark-900/50 px-3 py-2"
-                  >
-                    <span className="truncate text-sm text-dark-200">{ib.tag}</span>
-                    <div className="flex shrink-0 gap-4 text-xs text-dark-400">
-                      <span>↓ {formatBytes(ib.downloadBytes)}</span>
-                      <span>↑ {formatBytes(ib.uploadBytes)}</span>
-                      <span className="font-medium text-dark-300">
-                        {formatBytes(ib.totalBytes)}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-            </div>
-          )}
-
-          {(node.outbounds?.length ?? 0) > 0 && (
-            <div className="mt-3 space-y-1">
-              <p className="mb-2 text-xs font-medium text-dark-400">
-                {t('admin.remnawave.traffic.outbounds', 'Outbounds')}
-              </p>
-              {[...(node.outbounds ?? [])]
-                .sort((a, b) => b.totalBytes - a.totalBytes)
-                .map((ob) => (
-                  <div
-                    key={ob.tag}
-                    className="flex items-center justify-between rounded-lg bg-dark-900/50 px-3 py-2"
-                  >
-                    <span className="truncate text-sm text-dark-200">{ob.tag}</span>
-                    <div className="flex shrink-0 gap-4 text-xs text-dark-400">
-                      <span>↓ {formatBytes(ob.downloadBytes)}</span>
-                      <span>↑ {formatBytes(ob.uploadBytes)}</span>
-                      <span className="font-medium text-dark-300">
-                        {formatBytes(ob.totalBytes)}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-            </div>
-          )}
-        </div>
-      ))}
-    </div>
-  );
-}
-
-type TabType = 'overview' | 'nodes' | 'traffic' | 'squads' | 'sync';
+type TabType = 'overview' | 'nodes' | 'squads' | 'sync';
 
 export default function AdminRemnawave() {
   const { t } = useTranslation();
@@ -980,6 +1389,46 @@ export default function AdminRemnawave() {
     refetchInterval: 30000,
   });
 
+  const { data: recap } = useQuery({
+    queryKey: ['admin-remnawave-recap'],
+    queryFn: adminRemnawaveApi.getRecap,
+    enabled: activeTab === 'overview',
+    refetchInterval: 60000,
+    staleTime: 60000,
+  });
+
+  const { data: devicesStats } = useQuery({
+    queryKey: ['admin-remnawave-devices-stats'],
+    queryFn: adminRemnawaveApi.getDevicesStats,
+    enabled: activeTab === 'overview',
+    refetchInterval: 60000,
+    staleTime: 60000,
+  });
+
+  const { data: topConsumers } = useQuery({
+    queryKey: ['admin-remnawave-top-consumers'],
+    queryFn: () => adminRemnawaveApi.getTopConsumers(7, 10),
+    enabled: activeTab === 'overview',
+    refetchInterval: 60000,
+    staleTime: 60000,
+  });
+
+  const { data: health } = useQuery({
+    queryKey: ['admin-remnawave-health'],
+    queryFn: adminRemnawaveApi.getHealth,
+    enabled: activeTab === 'overview',
+    refetchInterval: 30000,
+    staleTime: 15000,
+  });
+
+  const { data: subRequests } = useQuery({
+    queryKey: ['admin-remnawave-sub-requests'],
+    queryFn: adminRemnawaveApi.getSubscriptionRequests,
+    enabled: activeTab === 'overview',
+    refetchInterval: 60000,
+    staleTime: 60000,
+  });
+
   const {
     data: nodesData,
     isLoading: isLoadingNodes,
@@ -988,7 +1437,8 @@ export default function AdminRemnawave() {
     queryKey: ['admin-remnawave-nodes'],
     queryFn: adminRemnawaveApi.getNodes,
     enabled: activeTab === 'nodes',
-    refetchInterval: 15000,
+    // Fast poll so realtime metrics (RAM, load, speeds) stay live like the panel.
+    refetchInterval: 5000,
   });
 
   const {
@@ -1001,16 +1451,32 @@ export default function AdminRemnawave() {
     enabled: activeTab === 'squads',
   });
 
-  const {
-    data: realtimeData,
-    isLoading: isLoadingRealtime,
-    refetch: refetchRealtime,
-  } = useQuery({
+  const { data: realtimeData } = useQuery({
     queryKey: ['admin-remnawave-realtime'],
     queryFn: adminRemnawaveApi.getNodesRealtime,
-    enabled: activeTab === 'traffic',
+    // Realtime carries the provider name + per-node inbound/outbound breakdown
+    // that the Nodes tab shows (provider badge + the per-node traffic accordion).
+    enabled: activeTab === 'nodes',
     refetchInterval: 10000,
   });
+
+  // Provider name (e.g. "WAICORE") only comes through the realtime stats; map it
+  // by node uuid so the Nodes tab can show the provider badge like the panel.
+  const providerByUuid = useMemo(() => {
+    const map: Record<string, string> = {};
+    for (const r of realtimeData ?? []) {
+      if (r.providerName) map[r.nodeUuid] = r.providerName;
+    }
+    return map;
+  }, [realtimeData]);
+
+  // Full realtime stats by node uuid — feeds the per-node traffic accordion
+  // (inbounds/outbounds) merged into the Nodes tab.
+  const realtimeByUuid = useMemo(() => {
+    const map: Record<string, NodeRealtimeStats> = {};
+    for (const r of realtimeData ?? []) map[r.nodeUuid] = r;
+    return map;
+  }, [realtimeData]);
 
   const { data: autoSyncStatus, isLoading: isLoadingAutoSync } = useQuery({
     queryKey: ['admin-remnawave-autosync'],
@@ -1087,11 +1553,6 @@ export default function AdminRemnawave() {
     },
     { id: 'nodes' as const, label: t('admin.remnawave.tabs.nodes', 'Nodes'), icon: <GlobeIcon /> },
     {
-      id: 'traffic' as const,
-      label: t('admin.remnawave.tabs.traffic', 'Traffic'),
-      icon: <ChartIcon />,
-    },
-    {
       id: 'squads' as const,
       label: t('admin.remnawave.tabs.squads', 'Squads'),
       icon: <ServerIcon className="h-5 w-5" />,
@@ -1112,7 +1573,7 @@ export default function AdminRemnawave() {
               onClick={() => navigate('/admin')}
               className="flex h-10 w-10 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
             >
-              <BackIcon />
+              <BackIcon className="text-dark-400" />
             </button>
           )}
           <div className="rounded-lg bg-accent-500/20 p-2">
@@ -1120,7 +1581,7 @@ export default function AdminRemnawave() {
           </div>
           <div>
             <h1 className="text-xl font-semibold text-dark-100">
-              {t('admin.remnawave.title', 'RemnaWave')}
+              {t('admin.remnawave.title', 'Remnawave')}
             </h1>
             <p className="text-sm text-dark-400">
               {t('admin.remnawave.subtitle', 'Panel management and statistics')}
@@ -1172,6 +1633,11 @@ export default function AdminRemnawave() {
       {activeTab === 'overview' && (
         <OverviewTab
           stats={systemStats}
+          recap={recap}
+          devicesStats={devicesStats}
+          topConsumers={topConsumers}
+          health={health}
+          subRequests={subRequests}
           isLoading={isLoadingStats}
           onRefresh={() => refetchStats()}
         />
@@ -1180,19 +1646,13 @@ export default function AdminRemnawave() {
       {activeTab === 'nodes' && (
         <NodesTab
           nodes={nodesData?.items || []}
+          providerByUuid={providerByUuid}
+          realtimeByUuid={realtimeByUuid}
           isLoading={isLoadingNodes}
           onRefresh={() => refetchNodes()}
           onAction={handleNodeAction}
           onRestartAll={handleRestartAll}
           isActionLoading={nodeActionMutation.isPending || restartAllMutation.isPending}
-        />
-      )}
-
-      {activeTab === 'traffic' && (
-        <TrafficTab
-          data={realtimeData}
-          isLoading={isLoadingRealtime}
-          onRefresh={() => refetchRealtime()}
         />
       )}
 

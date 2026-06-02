@@ -14,75 +14,15 @@ import {
 import { AdminBackButton } from '../components/admin';
 import { createNumberInputHandler, toNumber } from '../utils/inputHelpers';
 import Twemoji from 'react-twemoji';
-
-// Icons
-const PlusIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-  </svg>
-);
-
-const TrashIcon = () => (
-  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
-    />
-  </svg>
-);
-
-const CheckIcon = () => (
-  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-  </svg>
-);
-
-const InfinityIcon = () => (
-  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M16.5 12a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zm0 0c0 1.657 1.007 3 2.25 3S21 13.657 21 12a9 9 0 10-2.636 6.364M16.5 12V8.25"
-    />
-  </svg>
-);
-
-const CalendarIcon = () => (
-  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"
-    />
-  </svg>
-);
-
-const SunIcon = () => (
-  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"
-    />
-  </svg>
-);
-
-const RefreshIcon = () => (
-  <svg
-    className="h-4 w-4 animate-spin"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={2}
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"
-    />
-  </svg>
-);
+import {
+  CalendarIcon,
+  CheckIcon,
+  InfinityIcon,
+  PlusIcon,
+  RefreshIcon,
+  SunIcon,
+  TrashIcon,
+} from '@/components/icons';
 
 type TariffType = 'period' | 'daily' | null;
 
@@ -352,7 +292,7 @@ export default function AdminTariffCreate() {
           >
             <div className="flex items-center gap-4">
               <div className="rounded-lg bg-accent-500/20 p-3 text-accent-400 group-hover:bg-accent-500/30">
-                <CalendarIcon />
+                <CalendarIcon className="h-6 w-6" />
               </div>
               <div>
                 <h3 className="font-medium text-dark-100">{t('admin.tariffs.periodTariff')}</h3>
@@ -366,7 +306,7 @@ export default function AdminTariffCreate() {
           >
             <div className="flex items-center gap-4">
               <div className="rounded-lg bg-warning-500/20 p-3 text-warning-400 group-hover:bg-warning-500/30">
-                <SunIcon />
+                <SunIcon className="h-6 w-6" />
               </div>
               <div>
                 <h3 className="font-medium text-dark-100">{t('admin.tariffs.dailyTariff')}</h3>
@@ -392,7 +332,7 @@ export default function AdminTariffCreate() {
               isDaily ? 'bg-warning-500/20 text-warning-400' : 'bg-accent-500/20 text-accent-400'
             }`}
           >
-            {isDaily ? <SunIcon /> : <CalendarIcon />}
+            {isDaily ? <SunIcon className="h-6 w-6" /> : <CalendarIcon className="h-6 w-6" />}
           </div>
           <div>
             <h1 className="text-xl font-bold text-dark-100">
@@ -538,7 +478,7 @@ export default function AdminTariffCreate() {
               <span className="text-dark-400">{t('admin.tariffs.gbUnit')}</span>
               {(trafficLimitGb === 0 || trafficLimitGb === '') && (
                 <span className="flex items-center gap-1 text-sm text-success-500">
-                  <InfinityIcon />
+                  <InfinityIcon className="h-4 w-4" />
                   {t('admin.tariffs.unlimited')}
                 </span>
               )}
@@ -686,7 +626,7 @@ export default function AdminTariffCreate() {
                     onClick={() => removePeriod(period.days)}
                     className="rounded-lg p-2 text-dark-400 transition-colors hover:bg-error-500/20 hover:text-error-400"
                   >
-                    <TrashIcon />
+                    <TrashIcon className="h-4 w-4" />
                   </button>
                 </div>
               ))}
@@ -1035,7 +975,7 @@ export default function AdminTariffCreate() {
                               }}
                               className="rounded-lg p-2 text-dark-400 transition-colors hover:bg-error-500/20 hover:text-error-400"
                             >
-                              <TrashIcon />
+                              <TrashIcon className="h-4 w-4" />
                             </button>
                           </div>
                         ))}
@@ -1204,7 +1144,7 @@ export default function AdminTariffCreate() {
             disabled={!isValid || isLoading}
             className="btn-primary flex items-center gap-2"
           >
-            {isLoading && <RefreshIcon />}
+            {isLoading && <RefreshIcon spinning />}
             {isLoading ? t('admin.tariffs.savingButton') : t('admin.tariffs.saveButton')}
           </button>
         </div>

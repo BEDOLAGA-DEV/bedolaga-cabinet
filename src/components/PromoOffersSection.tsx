@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 import { promoApi, PromoOffer } from '../api/promo';
-import { ClockIcon, CheckIcon } from './icons';
+import { ClockIcon, CheckIcon, XCircleIcon } from './icons';
 import { useDestructiveConfirm } from '@/platform/hooks/useNativeDialog';
 
 // Helper functions
@@ -68,17 +68,6 @@ const getOfferDescription = (
   }
   return t('promo.offers.activateDiscountHint');
 };
-
-// Icons for deactivation
-const XCircleIcon = () => (
-  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-    />
-  </svg>
-);
 
 interface PromoOffersSectionProps {
   className?: string;
@@ -237,7 +226,7 @@ export default function PromoOffersSection({ className = '' }: PromoOffersSectio
                 onClick={handleDeactivateClick}
                 className="flex items-center justify-center gap-1.5 rounded-xl border border-dark-600/50 bg-dark-900/50 px-4 py-2.5 text-sm text-dark-400 transition-colors hover:border-error-500/30 hover:bg-error-500/10 hover:text-error-400"
               >
-                <XCircleIcon />
+                <XCircleIcon className="h-4 w-4" />
                 <span>{t('promo.deactivate.button')}</span>
               </button>
             </div>

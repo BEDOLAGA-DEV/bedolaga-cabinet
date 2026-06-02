@@ -20,9 +20,18 @@ import {
   type BulkActionType,
   type BulkActionParams,
 } from '../api/adminBulkActions';
+import { PiCaretDown } from 'react-icons/pi';
 import { usePlatform } from '../platform/hooks/usePlatform';
 import { useCurrency } from '../hooks/useCurrency';
 import { cn } from '@/lib/utils';
+import {
+  BackIcon,
+  CheckIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  RefreshIcon,
+  SearchIcon,
+} from '@/components/icons';
 import { ActionModal, type ModalState } from '@/components/admin/bulkActions/ActionModal';
 import { DropdownSelect, type DropdownOption } from '@/components/admin/bulkActions/DropdownSelect';
 import { FloatingActionBar } from '@/components/admin/bulkActions/FloatingActionBar';
@@ -41,77 +50,15 @@ type SubscriptionStatusFilter = '' | 'active' | 'expired' | 'trial' | 'limited' 
 
 // (ProgressState + ModalState moved into <ActionModal>; ModalState is re-exported.)
 
-// Local CheckIcon — still used by MultiSelectDropdown checkboxes and
-// the user-table column defs (not the modal). Kept here rather than
-// re-exported from a shared icons module.
-const CheckIcon = () => (
-  <svg
-    className="h-3 w-3 text-white"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={3}
-  >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-  </svg>
-);
-
 // ============ Icons ============
 
-const BackIcon = () => (
-  <svg
-    className="h-5 w-5 text-dark-400"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={2}
-  >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-  </svg>
-);
-
-const SearchIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
-    />
-  </svg>
-);
-
-const ChevronLeftIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-  </svg>
-);
-
-const ChevronRightIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-  </svg>
-);
-
-const RefreshIcon = ({ className = 'w-5 h-5' }: { className?: string }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"
-    />
-  </svg>
-);
-
+// ChevronExpandIcon keeps a custom `expanded` prop (not the barrel's
+// className-only API), so it stays local as a thin wrapper over the panel's
+// Phosphor caret, preserving the rotate-on-expand behavior.
 const ChevronExpandIcon = ({ expanded }: { expanded: boolean }) => (
-  <svg
+  <PiCaretDown
     className={cn('h-4 w-4 text-white transition-transform duration-200', expanded && 'rotate-180')}
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={2}
-  >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-  </svg>
+  />
 );
 
 // (SUBSCRIPTION_LEVEL_ACTIONS + isSubscriptionLevelAction moved into ./bulkActions/actionTargets.ts)
@@ -632,7 +579,7 @@ export default function AdminBulkActions() {
                 aria-label={t('admin.bulkActions.selectAll')}
                 title={t('admin.bulkActions.selectAll')}
               >
-                {table.getIsAllRowsSelected() && <CheckIcon />}
+                {table.getIsAllRowsSelected() && <CheckIcon className="h-3 w-3" />}
                 {table.getIsSomeRowsSelected() && !table.getIsAllRowsSelected() && (
                   <div className="h-0.5 w-2 rounded-full bg-white" />
                 )}
@@ -652,7 +599,7 @@ export default function AdminBulkActions() {
                   aria-label={t('admin.bulkActions.selectAllSubs')}
                   title={t('admin.bulkActions.selectAllSubs')}
                 >
-                  {allSubsSelected && <CheckIcon />}
+                  {allSubsSelected && <CheckIcon className="h-3 w-3" />}
                   {someSubsSelected && <div className="h-0.5 w-2 rounded-full bg-white" />}
                 </button>
               )}
@@ -678,7 +625,7 @@ export default function AdminBulkActions() {
                     : t('admin.bulkActions.selectUser', { name: userName })
                 }
               >
-                {row.getIsSelected() && <CheckIcon />}
+                {row.getIsSelected() && <CheckIcon className="h-3 w-3" />}
               </button>
             </div>
           );
@@ -988,7 +935,7 @@ export default function AdminBulkActions() {
             )}
             aria-pressed={trialOnly}
           >
-            {trialOnly && <CheckIcon />}
+            {trialOnly && <CheckIcon className="h-3 w-3" />}
           </button>
           <span
             className={cn('text-sm', trialOnly ? 'font-medium text-warning-400' : 'text-dark-400')}

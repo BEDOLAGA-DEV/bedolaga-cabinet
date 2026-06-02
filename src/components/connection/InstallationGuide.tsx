@@ -12,6 +12,7 @@ import { useTheme } from '@/hooks/useTheme';
 import { CardsBlock, TimelineBlock, AccordionBlock, MinimalBlock, BlockButtons } from './blocks';
 import type { BlockRendererProps } from './blocks';
 import TvQuickConnect from './TvQuickConnect';
+import { BackIcon, BookOpenIcon, ChevronIcon } from '@/components/icons';
 
 const platformOrder = ['ios', 'android', 'windows', 'macos', 'linux', 'androidTV', 'appleTV'];
 
@@ -32,12 +33,6 @@ const RENDERERS: Record<string, React.ComponentType<BlockRendererProps>> = {
   accordion: AccordionBlock,
   minimal: MinimalBlock,
 };
-
-const BackIcon = () => (
-  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-  </svg>
-);
 
 interface Props {
   appConfig: AppConfig;
@@ -200,7 +195,7 @@ export default function InstallationGuide({
             aria-label={t('common.back', 'Back')}
             className="flex h-10 w-10 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
           >
-            <BackIcon />
+            <BackIcon className="h-6 w-6" />
           </button>
         )}
         <h2 className="flex-1 text-lg font-bold text-dark-100">
@@ -264,15 +259,7 @@ export default function InstallationGuide({
               ))}
             </select>
             <div className="pointer-events-none absolute right-2.5 text-dark-400">
-              <svg
-                className="h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M8 9l4-4 4 4M8 15l4 4 4-4" />
-              </svg>
+              <ChevronIcon className="h-4 w-4" />
             </div>
           </div>
         )}
@@ -320,19 +307,7 @@ export default function InstallationGuide({
           rel="noopener noreferrer"
           className="btn-secondary w-full justify-center"
         >
-          <svg
-            className="h-5 w-5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={1.5}
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"
-            />
-          </svg>
+          <BookOpenIcon className="h-5 w-5" />
           {getBaseTranslation('tutorial', 'subscription.connection.tutorial')}
         </a>
       )}

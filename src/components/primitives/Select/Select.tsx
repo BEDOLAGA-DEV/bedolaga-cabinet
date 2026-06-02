@@ -2,35 +2,11 @@ import * as SelectPrimitive from '@radix-ui/react-select';
 import { motion } from 'framer-motion';
 import { forwardRef, type ComponentPropsWithoutRef, type ReactNode } from 'react';
 import { cn } from '@/lib/utils';
+import { CheckIcon, ChevronDownIcon } from '@/components/icons';
 import { usePlatform } from '@/platform';
 import { dropdown, dropdownTransition } from '../../motion/transitions';
 
 export { Root as Select, Group as SelectGroup } from '@radix-ui/react-select';
-
-// Icons
-const ChevronDownIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-dark-400">
-    <path
-      d="M4 6L8 10L12 6"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
-
-const CheckIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-accent-400">
-    <path
-      d="M3.5 8.5L6.5 11.5L12.5 4.5"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
 
 // Trigger
 export interface SelectTriggerProps extends ComponentPropsWithoutRef<

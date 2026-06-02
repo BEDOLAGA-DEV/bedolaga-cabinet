@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ChevronDownIcon, ServerIcon } from '../TrafficIcons';
+import { CheckIcon } from '@/components/icons';
 import { getFlagEmoji } from '../trafficUsageHelpers';
 import type { TrafficNodeInfo } from '../../../../api/adminTraffic';
 
@@ -52,14 +53,14 @@ export function NodeFilter({
             : 'border-dark-700 bg-dark-800 text-dark-200 hover:border-dark-600 hover:bg-dark-700'
         }`}
       >
-        <ServerIcon />
+        <ServerIcon className="h-4 w-4" />
         {t('admin.trafficUsage.nodes')}
         {activeCount > 0 && (
           <span className="rounded-full bg-accent-500 px-1.5 text-[10px] text-white">
             {activeCount}
           </span>
         )}
-        <ChevronDownIcon />
+        <ChevronDownIcon className="h-3 w-3" />
       </button>
 
       {open && (
@@ -75,17 +76,7 @@ export function NodeFilter({
                 allSelected ? 'border-accent-500 bg-accent-500' : 'border-dark-600'
               }`}
             >
-              {allSelected && (
-                <svg
-                  className="h-3 w-3 text-white"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={3}
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                </svg>
-              )}
+              {allSelected && <CheckIcon className="h-3 w-3 text-white" />}
             </span>
             {t('admin.trafficUsage.allNodes')}
           </button>
@@ -106,21 +97,7 @@ export function NodeFilter({
                       checked ? 'border-accent-500 bg-accent-500' : 'border-dark-600'
                     }`}
                   >
-                    {checked && (
-                      <svg
-                        className="h-3 w-3 text-white"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={3}
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M4.5 12.75l6 6 9-13.5"
-                        />
-                      </svg>
-                    )}
+                    {checked && <CheckIcon className="h-3 w-3 text-white" />}
                   </span>
                   {getFlagEmoji(node.country_code)} {node.node_name}
                 </button>

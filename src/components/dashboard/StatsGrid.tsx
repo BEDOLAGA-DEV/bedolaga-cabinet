@@ -1,3 +1,4 @@
+import { PiCaretRight } from 'react-icons/pi';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { useCurrency } from '../../hooks/useCurrency';
@@ -12,22 +13,7 @@ interface StatsGridProps {
 }
 
 const ChevronIcon = ({ color }: { color: string }) => (
-  <svg
-    width="16"
-    height="16"
-    viewBox="0 0 16 16"
-    fill="none"
-    style={{ flexShrink: 0 }}
-    aria-hidden="true"
-  >
-    <path
-      d="M6 4l4 4-4 4"
-      stroke={color}
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
+  <PiCaretRight width={16} height={16} style={{ flexShrink: 0, color }} aria-hidden="true" />
 );
 
 export default function StatsGrid({

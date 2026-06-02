@@ -1,5 +1,50 @@
 # Changelog
 
+## [1.55.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.54.1...v1.55.0) (2026-06-01)
+
+
+### Features
+
+* **admin-remnawave:** add node/xray version icons like the panel ([1b1046b](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/1b1046bb5c5caf43e55f3bb5915962a05319cc23))
+* **admin-remnawave:** auto-refresh overview, responsive mobile grids, wide sub-requests ([ff3dbfa](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/ff3dbfaa25c0a3bb08d2e16344b024fa659fcfab))
+* **admin-remnawave:** enrich panel stats UI and fix nodes-online display ([b8be989](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/b8be98939abb03ce9c8be24bc96890367c8443d3))
+* **admin-remnawave:** meaningful icons for users-by-status cards ([7ca9c04](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/7ca9c043ddfc5393efcd6c00fc5677d60b6dbe55))
+* **admin-remnawave:** merge Traffic into Nodes as a per-node accordion ([6c9a77d](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/6c9a77d419d7358308836efbe7614efad5932971))
+* **admin-remnawave:** panel-style node rows with live metrics ([08f12da](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/08f12daa400b0117d1502d260a405f4e9bd40f13))
+* **admin-remnawave:** provider favicon, mobile node card, meaningful icons ([9309643](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/9309643b7e200da10e6960e6a298d1dad26c7246))
+* **cabinet:** migrate all icons to the panel's Phosphor set ([d0e0b6b](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/d0e0b6b7e3fd29a533636b397ed5021a75074615))
+* **icons:** add node/gift glyphs to the central barrel ([872f731](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/872f73157faff53dc75d6689c1ea75d5e4150d6f))
+
+
+### Bug Fixes
+
+* **admin-remnawave:** add RAM/CPU icons to node metrics like the panel ([297d75a](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/297d75a92c30d650c2a5eee4c3785b2365d6d094))
+* **admin-remnawave:** lay node metrics in 3 fixed rows (processor/traffic/versions) ([43acb70](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/43acb70ab96ad70b7f66f26db32b05f6dc18349f))
+* **admin-remnawave:** node metrics 3-rows on mobile, original single row on desktop ([97d4367](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/97d436721ac5c180fd82af40e1267ffd97deda9f))
+* **admin-remnawave:** resolve provider favicon from site URL ([bd5e39f](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/bd5e39fa56591a06ac94c5b6c6f095215c57ffe0))
+* **admin-remnawave:** scope the mobile orphan-fill to small screens only ([493de23](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/493de23a1dc678f33af7878dbc5cd981daebb3c5))
+* **admin-remnawave:** truncate long tags in node traffic accordion ([1ef4b21](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/1ef4b21614a10d23bd2531bc9e66a79414864c50))
+* **broadcasts:** показывать «Партнёрка» вместо сырого ключа referrals в превью ([c24ae00](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/c24ae0039cc554176aef2085606748d8e21ec3e5))
+* **cabinet-icons:** correct two mismatched glyphs from the svg migration ([9aae399](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/9aae399ce82b8bf95eb739e1406508f89a40b097))
+* **flags:** render flag emoji on Windows globally via a scoped flag font ([b877d7f](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/b877d7f17550aff9157e662af0525653ab764a0f))
+* **gift:** stretch my-gifts cards full-width instead of cramped 2-col grid ([50d7d21](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/50d7d2146296a30027306b02e01ce4177dc210e3))
+* **gift:** working bot deep-link + desktop layout + barrel icons ([6ea7672](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/6ea767253f88796f50a9e0aad8d5363033a0fba3))
+* **i18n:** spell the brand "Remnawave" instead of camelCase "RemnaWave" ([0d024ae](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/0d024aec58919882478da773083c93888ce23a00))
+* **navigation:** break BackButton loop on single-tariff /subscriptions/:id deep-link ([3c2f650](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/3c2f650c28a7a47b12dcc19197cf1a6dd46f2b03))
+* **navigation:** single-tariff /subscriptions/:id deep-link shows Close, not Back ([0ed8bb1](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/0ed8bb1d48918d7a441043b035c8cd0721f6c515))
+* **navigation:** надёжная кнопка «Назад» через тип навигации, без петли ([#436](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/issues/436)) ([a62d689](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/a62d689fd39bea727b1bc9b13421775ca3a9c9a8))
+* **news:** fill the orphan card so the grid has no empty cell ([7b7ff53](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/7b7ff536729872bc4b107bb4ce19a1643d979ca5))
+* **subscriptions:** fill the orphan card so a lone subscription has no empty cell ([484c3ad](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/484c3ad005616e16fc4280284048dcf674551057))
+* **subscriptions:** дать новым юзерам путь в витрину без активации триала ([2d5982d](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/2d5982d82bf8c47f13e07b230a800653d1eeed60))
+* **subscription:** use the nav sparkle icon on the renew CTA button ([8613cb2](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/8613cb20aa585c24e5d5e99f64e8b82efbbd8915))
+* **subscription:** use the nav SubscriptionIcon on the quick-renew button ([5340f81](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/5340f81a9562ad83a0a101d9f550ee30cf507622))
+* **subscription:** use the sparkle icon on the quick-renew button ([e18db02](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/e18db02e42214c8b2f6f54813815173417286134))
+* **wheel:** keep spin sparkles in the outer ring, never near the centre ([6c5d1ee](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/6c5d1ee0b1cfb3329580879ce6b4be1c6c6a69ec))
+* **wheel:** kill the center-line LED artifact during spin (drop CSS blur filter) ([8a41aa7](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/8a41aa77819d141bc3e6cb6b481e2420b11f391e))
+* **wheel:** remove CSS filters from the spinning SVG (kill GPU-composite streak) ([2ce966c](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/2ce966cecec1c3a9634814cb1fb89a43d7ab63d9))
+* **wheel:** remove the spin-only sparkle lights entirely ([bc85034](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/bc8503469dc6651accb77f41b865e443849b75f2))
+* **wheel:** scatter spin sparkles so they don't streak through the centre ([7716e32](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/7716e32eecea6e43264342635090d8e4f68e4d87))
+
 ## [1.54.1](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.54.0...v1.54.1) (2026-05-28)
 
 

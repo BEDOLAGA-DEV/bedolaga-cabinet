@@ -17,7 +17,16 @@ import InsufficientBalancePrompt from '../components/InsufficientBalancePrompt';
 import { useCurrency } from '../hooks/useCurrency';
 import { useCloseOnSuccessNotification } from '../store/successNotification';
 import PurchaseCTAButton from '../components/subscription/PurchaseCTAButton';
-import { CopyIcon, CheckIcon, PauseIcon } from '../components/icons';
+import {
+  CopyIcon,
+  CheckIcon,
+  PauseIcon,
+  CalendarIcon,
+  RefreshIcon,
+  DevicesIcon,
+  DownloadIcon,
+  TrashIcon,
+} from '../components/icons';
 import { useHaptic } from '../platform';
 import { resolveConnectionUrlForUi } from '../utils/connectionLink';
 import {
@@ -97,26 +106,17 @@ const CountdownTimer = memo(function CountdownTimer({
                 : g.hoverBg,
           }}
         >
-          <svg
-            width="13"
-            height="13"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke={
-              isExpired
+          <span
+            style={{
+              color: isExpired
                 ? 'rgb(var(--color-critical-500))'
                 : isUrgent
                   ? 'rgb(var(--color-urgent-400))'
-                  : g.textSecondary
-            }
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
+                  : g.textSecondary,
+            }}
           >
-            <rect x="3" y="4" width="18" height="18" rx="2" />
-            <path d="M16 2v4M8 2v4M3 10h18" />
-          </svg>
+            <CalendarIcon className="h-[13px] w-[13px]" />
+          </span>
         </div>
         {t('dashboard.remaining')}
       </div>
@@ -438,7 +438,7 @@ export default function Subscription() {
       queryClient.invalidateQueries({ queryKey: ['subscription'] });
       queryClient.invalidateQueries({ queryKey: ['connection-link', subscriptionId] });
       queryClient.invalidateQueries({ queryKey: ['subscriptions-list'] });
-      // RemnaWave resets device HWIDs on revoke — make sure the cabinet
+      // Remnawave resets device HWIDs on revoke — make sure the cabinet
       // re-reads the now-empty device list instead of showing the stale cache.
       queryClient.invalidateQueries({ queryKey: ['devices', subscriptionId] });
       haptic.notification('success');
@@ -774,20 +774,10 @@ export default function Subscription() {
                       disabled={refreshTrafficMutation.isPending || trafficRefreshCooldown > 0}
                       className="flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium text-dark-50/30 transition-colors hover:bg-dark-50/[0.05] hover:text-dark-50/50 disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      <svg
-                        className={`h-3 w-3 ${refreshTrafficMutation.isPending ? 'animate-spin' : ''}`}
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={2}
-                        aria-hidden="true"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"
-                        />
-                      </svg>
+                      <RefreshIcon
+                        className="h-3 w-3"
+                        spinning={refreshTrafficMutation.isPending}
+                      />
                       {trafficRefreshCooldown > 0
                         ? `${trafficRefreshCooldown}s`
                         : t('common.refresh')}
@@ -827,23 +817,9 @@ export default function Subscription() {
                 >
                   <div
                     className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-[10px] transition-colors duration-500"
-                    style={{ background: `${zone.mainHex}12` }}
+                    style={{ background: `${zone.mainHex}12`, color: zone.mainHex }}
                   >
-                    <svg
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke={zone.mainHex}
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      aria-hidden="true"
-                    >
-                      <rect x="2" y="3" width="20" height="14" rx="2" />
-                      <path d="M12 17v4M8 21h8" />
-                      <path d="M12 8v4M10 10h4" opacity="0.7" />
-                    </svg>
+                    <DevicesIcon className="h-4 w-4" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="text-sm font-semibold tracking-tight text-dark-50">
@@ -1000,21 +976,9 @@ export default function Subscription() {
                           <div className="flex items-center gap-2">
                             <div
                               className="flex h-7 w-7 items-center justify-center rounded-[8px]"
-                              style={{ background: `${zone.mainHex}12` }}
+                              style={{ background: `${zone.mainHex}12`, color: zone.mainHex }}
                             >
-                              <svg
-                                width="14"
-                                height="14"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke={zone.mainHex}
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                aria-hidden="true"
-                              >
-                                <path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                              </svg>
+                              <DownloadIcon className="h-3.5 w-3.5" />
                             </div>
                             <span className="text-sm font-semibold text-dark-50">
                               {purchase.traffic_gb} {t('common.units.gb')}
@@ -1121,23 +1085,9 @@ export default function Subscription() {
         >
           <div
             className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl"
-            style={{ background: g.hoverBg }}
+            style={{ background: g.hoverBg, color: g.textFaint }}
           >
-            <svg
-              width="32"
-              height="32"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke={g.textFaint}
-              strokeWidth="1.5"
-              aria-hidden="true"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"
-              />
-            </svg>
+            <TrashIcon className="h-8 w-8" />
           </div>
           <div className="text-sm text-dark-50/30">{t('subscription.noSubscription')}</div>
         </div>
