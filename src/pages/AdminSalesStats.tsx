@@ -19,6 +19,40 @@ import {
 
 type TabId = 'trials' | 'sales' | 'renewals' | 'addons' | 'deposits';
 
+type Delta = { percent: number; trend: 'up' | 'down' | 'stable' };
+
+/** Same-length window immediately before the selected one, for period-over-period
+ * deltas. Returns null for "all time" — nothing meaningful to compare against. */
+function getPreviousPeriodParams(period: {
+  days?: number;
+  startDate?: string;
+  endDate?: string;
+}): SalesStatsParams | null {
+  if (period.startDate && period.endDate) {
+    const start = new Date(period.startDate).getTime();
+    const length = new Date(period.endDate).getTime() - start;
+    return {
+      start_date: new Date(start - length).toISOString(),
+      end_date: new Date(start).toISOString(),
+    };
+  }
+  if (period.days !== undefined && period.days > 0) {
+    const dayMs = 86_400_000;
+    const now = Date.now();
+    return {
+      start_date: new Date(now - 2 * period.days * dayMs).toISOString(),
+      end_date: new Date(now - period.days * dayMs).toISOString(),
+    };
+  }
+  return null;
+}
+
+function computeDelta(current: number, previous: number): Delta | null {
+  if (previous === 0) return current === 0 ? null : { percent: 100, trend: 'up' };
+  const percent = Math.round(((current - previous) / previous) * 1000) / 10;
+  return { percent, trend: percent > 0 ? 'up' : percent < 0 ? 'down' : 'stable' };
+}
+
 export default function AdminSalesStats() {
   const { t } = useTranslation();
   const { formatWithCurrency } = useCurrency();
@@ -51,6 +85,25 @@ export default function AdminSalesStats() {
     staleTime: SALES_STATS.STALE_TIME,
     enabled: isValidPeriod,
   });
+
+  const prevParams = useMemo(() => getPreviousPeriodParams(period), [period]);
+  const { data: prevSummary } = useQuery({
+    queryKey: ['sales-stats', 'summary', prevParams],
+    queryFn: () => salesStatsApi.getSummary(prevParams as SalesStatsParams),
+    staleTime: SALES_STATS.STALE_TIME,
+    enabled: isValidPeriod && prevParams !== null,
+  });
+
+  const deltas = useMemo(() => {
+    if (!summary || !prevSummary) return null;
+    return {
+      revenue: computeDelta(summary.total_revenue_kopeks, prevSummary.total_revenue_kopeks),
+      newTrials: computeDelta(summary.new_trials, prevSummary.new_trials),
+      renewals: computeDelta(summary.renewals_count, prevSummary.renewals_count),
+      addonRevenue: computeDelta(summary.addon_revenue_kopeks, prevSummary.addon_revenue_kopeks),
+      manualTopup: computeDelta(summary.manual_topup_kopeks, prevSummary.manual_topup_kopeks),
+    };
+  }, [summary, prevSummary]);
 
   const tabs: { id: TabId; label: string }[] = [
     { id: 'trials', label: t('admin.salesStats.tabs.trials') },
@@ -93,6 +146,7 @@ export default function AdminSalesStats() {
                 )
           }
           valueClassName="text-success-400"
+          delta={deltas?.revenue}
         />
         <StatCard
           label={t('admin.salesStats.summary.activeSubs')}
@@ -107,6 +161,7 @@ export default function AdminSalesStats() {
           label={t('admin.salesStats.summary.newTrials')}
           value={summaryLoading ? '...' : (summary?.new_trials ?? 0)}
           valueClassName="text-accent-400"
+          delta={deltas?.newTrials}
         />
         <StatCard
           label={t('admin.salesStats.summary.conversion')}
@@ -117,6 +172,7 @@ export default function AdminSalesStats() {
           label={t('admin.salesStats.summary.renewals')}
           value={summaryLoading ? '...' : (summary?.renewals_count ?? 0)}
           valueClassName="text-success-400"
+          delta={deltas?.renewals}
         />
         <StatCard
           label={t('admin.salesStats.summary.addonRevenue')}
@@ -128,6 +184,7 @@ export default function AdminSalesStats() {
                 )
           }
           valueClassName="text-accent-400"
+          delta={deltas?.addonRevenue}
         />
         <StatCard
           label={t('admin.salesStats.summary.manualTopup')}
@@ -137,6 +194,7 @@ export default function AdminSalesStats() {
               : formatWithCurrency((summary?.manual_topup_kopeks ?? 0) / SALES_STATS.KOPEKS_DIVISOR)
           }
           valueClassName="text-warning-400"
+          delta={deltas?.manualTopup}
         />
       </div>
 
