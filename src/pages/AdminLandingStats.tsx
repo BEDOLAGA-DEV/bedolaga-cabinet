@@ -26,12 +26,20 @@ import { useCurrency } from '../hooks/useCurrency';
 import { useChartColors } from '../hooks/useChartColors';
 import { CHART_COMMON } from '../constants/charts';
 import { AdminBackButton } from '../components/admin';
+import { StatCard } from '../components/stats';
 import {
   ChartIcon,
   EmailIcon,
   TelegramSmallIcon,
   ArrowRightIcon,
   GiftIcon,
+  EyeIcon,
+  CheckCircleIcon,
+  BanknotesIcon,
+  PercentIcon,
+  TicketIcon,
+  CardIcon,
+  WalletIcon,
   ChevronLeftIcon as ChevronLeftSmall,
   ChevronRightIcon as ChevronRightSmall,
 } from '@/components/icons';
@@ -339,39 +347,62 @@ export default function AdminLandingStats() {
       <div className="space-y-6">
         {/* Summary Cards */}
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <div className="rounded-xl border border-dark-700 bg-dark-800 p-4 text-center">
-            <div className="text-xl font-bold sm:text-2xl">
-              <span className="text-warning-400">{stats.total_created}</span>
-              <span className="mx-1 text-dark-600">/</span>
-              <span className="text-success-400">{stats.total_successful}</span>
-            </div>
-            <div className="text-xs text-dark-500">
-              {t('admin.landings.stats.created', 'Created')} /{' '}
-              {t('admin.landings.stats.paid', 'paid')}
-            </div>
-          </div>
-          <div className="rounded-xl border border-dark-700 bg-dark-800 p-4 text-center">
-            <div className="truncate text-xl font-bold text-accent-400 sm:text-2xl">
-              {formatWithCurrency(stats.total_revenue_kopeks / CHART_COMMON.KOPEKS_DIVISOR)}
-            </div>
-            <div className="text-xs text-dark-500">{t('admin.landings.stats.revenue')}</div>
-          </div>
-          <div className="rounded-xl border border-dark-700 bg-dark-800 p-4 text-center">
-            <div className="text-xl font-bold text-accent-400 sm:text-2xl">{stats.total_gifts}</div>
-            <div className="text-xs text-dark-500">{t('admin.landings.stats.giftPurchases')}</div>
-          </div>
-          <div className="rounded-xl border border-dark-700 bg-dark-800 p-4 text-center">
-            <div className="text-xl font-bold text-dark-200 sm:text-2xl">
-              {stats.conversion_rate}%
-            </div>
-            <div className="text-xs text-dark-500">{t('admin.landings.stats.conversionRate')}</div>
-          </div>
+          <StatCard
+            label={t('admin.landings.stats.created', 'Created')}
+            value={stats.total_created}
+            icon={<EyeIcon className="h-5 w-5" />}
+            tone="warning"
+          />
+          <StatCard
+            label={t('admin.landings.stats.paid', 'paid')}
+            value={stats.total_successful}
+            icon={<CheckCircleIcon className="h-5 w-5" />}
+            tone="success"
+          />
+          <StatCard
+            label={t('admin.landings.stats.revenue')}
+            value={formatWithCurrency(stats.total_revenue_kopeks / CHART_COMMON.KOPEKS_DIVISOR)}
+            icon={<BanknotesIcon className="h-5 w-5" />}
+            tone="success"
+          />
+          <StatCard
+            label={t('admin.landings.stats.conversionRate')}
+            value={`${stats.conversion_rate}%`}
+            icon={<PercentIcon className="h-5 w-5" />}
+            tone="accent"
+          />
+        </div>
+
+        {/* Breakdown Cards */}
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <StatCard
+            label={t('admin.landings.stats.purchases')}
+            value={stats.total_purchases}
+            icon={<TicketIcon className="h-5 w-5" />}
+            tone="accent"
+          />
+          <StatCard
+            label={t('admin.landings.stats.regularPurchases')}
+            value={stats.total_regular}
+            icon={<CardIcon className="h-5 w-5" />}
+          />
+          <StatCard
+            label={t('admin.landings.stats.giftPurchases')}
+            value={stats.total_gifts}
+            icon={<GiftIcon className="h-5 w-5" />}
+            tone="accent"
+          />
+          <StatCard
+            label={t('admin.landings.stats.avgPurchase')}
+            value={formatWithCurrency(stats.avg_purchase_kopeks / CHART_COMMON.KOPEKS_DIVISOR)}
+            icon={<WalletIcon className="h-5 w-5" />}
+          />
         </div>
 
         {/* Charts */}
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           {/* Daily Purchases & Revenue */}
-          <div className="rounded-xl border border-dark-700 bg-dark-800 p-4">
+          <div className="bento-card">
             <h3 className="mb-4 font-medium text-dark-200">
               {t('admin.landings.stats.dailyChart')}
             </h3>
@@ -501,7 +532,7 @@ export default function AdminLandingStats() {
           </div>
 
           {/* Daily Purchases Bar Chart */}
-          <div className="rounded-xl border border-dark-700 bg-dark-800 p-4">
+          <div className="bento-card">
             <h3 className="mb-4 font-medium text-dark-200">
               {t('admin.landings.stats.dailyPurchases', 'Daily purchases')}
             </h3>
@@ -557,7 +588,7 @@ export default function AdminLandingStats() {
         </div>
 
         {/* Tariff Distribution -- full width */}
-        <div className="rounded-xl border border-dark-700 bg-dark-800 p-4">
+        <div className="bento-card">
           <h3 className="mb-4 font-medium text-dark-200">
             {t('admin.landings.stats.tariffChart')}
           </h3>
@@ -614,39 +645,9 @@ export default function AdminLandingStats() {
           )}
         </div>
 
-        {/* Additional Stats Row */}
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-          <div className="rounded-xl border border-dark-700 bg-dark-800 p-4">
-            <div className="mb-1 text-sm text-dark-400">
-              {t('admin.landings.stats.avgPurchase')}
-            </div>
-            <div className="text-lg font-medium text-dark-200">
-              {formatWithCurrency(stats.avg_purchase_kopeks / CHART_COMMON.KOPEKS_DIVISOR)}
-            </div>
-          </div>
-          <div className="rounded-xl border border-dark-700 bg-dark-800 p-4">
-            <div className="mb-1 text-sm text-dark-400">
-              {t('admin.landings.stats.regularPurchases')}
-            </div>
-            <div className="text-lg font-medium text-dark-200">{stats.total_regular}</div>
-          </div>
-          <div className="col-span-2 rounded-xl border border-dark-700 bg-dark-800 p-4 sm:col-span-1">
-            <div className="mb-1 text-sm text-dark-400">{t('admin.landings.stats.funnel')}</div>
-            <div className="text-lg font-medium text-dark-200">
-              {stats.total_created}{' '}
-              <span className="text-sm text-dark-500">{t('admin.landings.stats.created')}</span>
-              {' / '}
-              {stats.total_successful}{' '}
-              <span className="text-sm text-dark-500">
-                {t('admin.landings.stats.paid', 'paid')}
-              </span>
-            </div>
-          </div>
-        </div>
-
         {/* Gift vs Regular Donut */}
         {stats.total_purchases > 0 && (
-          <div className="rounded-xl border border-dark-700 bg-dark-800 p-4">
+          <div className="bento-card">
             <h3 className="mb-4 font-medium text-dark-200">
               {t('admin.landings.stats.giftBreakdown')}
             </h3>
@@ -706,7 +707,7 @@ export default function AdminLandingStats() {
         )}
 
         {/* Purchases List */}
-        <div className="rounded-xl border border-dark-700 bg-dark-800 p-4">
+        <div className="bento-card">
           {/* Header row: title + status filter */}
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <h3 className="font-medium text-dark-200">{t('admin.landings.purchases.title')}</h3>
