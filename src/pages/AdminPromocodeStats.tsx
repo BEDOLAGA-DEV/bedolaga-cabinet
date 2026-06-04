@@ -100,7 +100,7 @@ export default function AdminPromocodeStats() {
           <AdminBackButton to="/admin/promocodes" />
           <div className="flex flex-wrap items-center gap-2">
             <div
-              className={`rounded-lg px-3 py-1.5 font-mono text-lg font-bold ${getTypeColor(promocode.type)}`}
+              className={`min-w-0 break-all rounded-lg px-3 py-1.5 font-mono text-lg font-bold ${getTypeColor(promocode.type)}`}
             >
               {promocode.code}
             </div>

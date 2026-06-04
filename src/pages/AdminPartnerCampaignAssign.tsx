@@ -87,9 +87,11 @@ export default function AdminPartnerCampaignAssign() {
                       </span>
                     )}
                   </div>
-                  <div className="mt-1 flex items-center gap-3 text-xs text-dark-500">
-                    <span className="font-mono">?start={campaign.start_parameter}</span>
-                    <span>
+                  <div className="mt-1 flex min-w-0 items-center gap-3 text-xs text-dark-500">
+                    <span className="min-w-0 truncate font-mono">
+                      ?start={campaign.start_parameter}
+                    </span>
+                    <span className="shrink-0">
                       {campaign.registrations_count}{' '}
                       {t('admin.campaigns.overview.registrations').toLowerCase()}
                     </span>

@@ -142,15 +142,15 @@ export function SwitchTariffSheet({
           return (
             <>
               <div className="space-y-2 text-sm">
-                <div className="flex justify-between text-dark-300">
-                  <span>{t('subscription.switchTariff.currentTariff')}</span>
-                  <span className="font-medium text-dark-100">
+                <div className="flex justify-between gap-2 text-dark-300">
+                  <span className="shrink-0">{t('subscription.switchTariff.currentTariff')}</span>
+                  <span className="min-w-0 truncate font-medium text-dark-100">
                     {switchPreview.current_tariff_name || '-'}
                   </span>
                 </div>
-                <div className="flex justify-between text-dark-300">
-                  <span>{t('subscription.switchTariff.newTariff')}</span>
-                  <span className="font-medium text-accent-400">
+                <div className="flex justify-between gap-2 text-dark-300">
+                  <span className="shrink-0">{t('subscription.switchTariff.newTariff')}</span>
+                  <span className="min-w-0 truncate font-medium text-accent-400">
                     {switchPreview.new_tariff_name}
                   </span>
                 </div>

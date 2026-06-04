@@ -61,9 +61,9 @@ export function UserDetailPanel({ userId, className }: UserDetailPanelProps) {
             {/* Identity */}
             <div className="space-y-2">
               {user.username && (
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-dark-500">@</span>
-                  <span className="font-mono text-dark-200">{user.username}</span>
+                <div className="flex items-center justify-between gap-2 text-sm">
+                  <span className="shrink-0 text-dark-500">@</span>
+                  <span className="min-w-0 truncate font-mono text-dark-200">{user.username}</span>
                 </div>
               )}
               {user.tg_id && (
@@ -196,11 +196,11 @@ export function UserDetailPanel({ userId, className }: UserDetailPanelProps) {
                   </span>
                 </div>
                 {user.campaign_name && (
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-dark-400">
+                  <div className="flex items-center justify-between gap-2 text-sm">
+                    <span className="shrink-0 text-dark-400">
                       {t('admin.referralNetwork.user.fromCampaign')}
                     </span>
-                    <span className="text-dark-200">{user.campaign_name}</span>
+                    <span className="min-w-0 truncate text-dark-200">{user.campaign_name}</span>
                   </div>
                 )}
               </div>

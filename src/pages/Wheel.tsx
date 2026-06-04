@@ -599,16 +599,16 @@ export default function Wheel() {
                           key={sub.id}
                           onClick={() => setSelectedSubscriptionId(sub.id)}
                           disabled={isSpinning}
-                          className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm transition-all ${
+                          className={`flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-sm transition-all ${
                             selectedSubscriptionId === sub.id
                               ? 'bg-accent-500/15 text-accent-400'
                               : 'text-dark-400 hover:text-dark-200'
                           }`}
                         >
-                          <span className="font-medium">
+                          <span className="min-w-0 truncate font-medium">
                             {sub.tariff_name || t('subscription.defaultName', 'Подписка')}
                           </span>
-                          <span className="text-xs opacity-60">
+                          <span className="shrink-0 text-xs opacity-60">
                             {sub.days_left} {t('common.units.days', 'дней')}
                           </span>
                         </button>

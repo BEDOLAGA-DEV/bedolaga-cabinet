@@ -105,9 +105,9 @@ export function TariffPurchaseForm({
 
   return (
     <div ref={ref} className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-medium text-dark-100">{tariff.name}</h3>
-        <button onClick={onBack} className="text-dark-400 hover:text-dark-200">
+      <div className="flex items-center justify-between gap-2">
+        <h3 className="min-w-0 truncate text-lg font-medium text-dark-100">{tariff.name}</h3>
+        <button onClick={onBack} className="shrink-0 text-dark-400 hover:text-dark-200">
           ← {t('common.back')}
         </button>
       </div>

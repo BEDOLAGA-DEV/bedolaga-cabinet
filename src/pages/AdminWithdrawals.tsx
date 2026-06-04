@@ -116,7 +116,7 @@ export default function AdminWithdrawals() {
                   <div className="min-w-0 flex-1">
                     {/* User and amount */}
                     <div className="mb-2 flex items-center gap-2">
-                      <span className="truncate font-medium text-dark-100">
+                      <span className="min-w-0 truncate font-medium text-dark-100">
                         {item.username
                           ? `@${item.username}`
                           : item.first_name || `#${item.user_id}`}

@@ -60,9 +60,9 @@ function CopyableField({ label, value }: { label: string; value: string }) {
 
   return (
     <div className="flex items-center gap-2 rounded-xl bg-dark-800/50 px-4 py-3">
-      <div className="flex-1 text-left">
+      <div className="min-w-0 flex-1 text-left">
         <p className="text-xs text-dark-400">{label}</p>
-        <p className="mt-0.5 font-mono text-sm text-dark-100">{value}</p>
+        <p className="mt-0.5 break-all font-mono text-sm text-dark-100">{value}</p>
       </div>
       <button
         type="button"
