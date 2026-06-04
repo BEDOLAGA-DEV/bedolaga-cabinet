@@ -621,28 +621,36 @@ export default function ConnectedAccounts() {
 
       {/* Provider cards */}
       {data?.providers.map((provider) => (
-        <motion.div key={provider.provider} variants={staggerItem}>
+        <motion.div
+          key={provider.provider}
+          variants={staggerItem}
+          initial="initial"
+          animate="animate"
+        >
           <Card>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <ProviderIcon provider={provider.provider} />
-                <div>
-                  <p className="font-medium text-dark-100">
+            <div className="flex min-w-0 items-center justify-between gap-3">
+              <div className="flex min-w-0 flex-1 items-center gap-3">
+                <ProviderIcon provider={provider.provider} className="h-6 w-6 shrink-0" />
+                <div className="min-w-0">
+                  <p className="truncate font-medium text-dark-100">
                     {t(`profile.accounts.providers.${provider.provider}`)}
                   </p>
                   {provider.identifier && (
-                    <p className="text-sm text-dark-400">{provider.identifier}</p>
+                    <p className="truncate text-sm text-dark-400">{provider.identifier}</p>
                   )}
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex shrink-0 flex-col items-center gap-1">
                 {provider.linked ? (
                   <>
-                    <span className="text-sm text-success-500">{t('profile.accounts.linked')}</span>
+                    <span className="shrink-0 whitespace-nowrap text-sm text-success-500">
+                      {t('profile.accounts.linked')}
+                    </span>
                     {canUnlink(provider) && (
                       <Button
                         variant={confirmingUnlink === provider.provider ? 'destructive' : 'outline'}
                         size="sm"
+                        className="shrink-0"
                         disabled={unlinkMutation.isPending}
                         loading={
                           unlinkMutation.isPending && unlinkMutation.variables === provider.provider
