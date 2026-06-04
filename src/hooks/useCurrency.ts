@@ -41,8 +41,13 @@ export function useCurrency() {
   const currentLanguage = i18n.language;
   const targetCurrency = LANGUAGE_CURRENCY_MAP[currentLanguage] || 'USD';
 
-  // Check if current language is Russian (no conversion needed)
+  // Russian: amounts are already in display rubles. Persian: bot balance_rubles is
+  // already Toman (÷100 on server) — do not apply FX again.
   const isRussian = currentLanguage === 'ru';
+  const skipFxConversion =
+    isRussian ||
+    currentLanguage === 'fa' ||
+    import.meta.env.VITE_DISABLE_BALANCE_FX === 'true';
 
   // Get currency symbol from translations
   const currencySymbol = t('common.currency');
@@ -50,7 +55,10 @@ export function useCurrency() {
   // Format amount with currency conversion
   const formatAmount = useCallback(
     (rubAmount: number, decimals: number = 2): string => {
-      if (isRussian) {
+      if (skipFxConversion) {
+        if (currentLanguage === 'fa') {
+          return Math.round(rubAmount).toLocaleString('fa-IR');
+        }
         return rubAmount.toFixed(decimals);
       }
 
@@ -68,7 +76,7 @@ export function useCurrency() {
 
       return convertedAmount.toFixed(decimals);
     },
-    [isRussian, targetCurrency, exchangeRates],
+    [skipFxConversion, currentLanguage, targetCurrency, exchangeRates],
   );
 
   // Format amount with currency symbol
@@ -90,7 +98,7 @@ export function useCurrency() {
   // Get raw converted amount (for calculations)
   const convertAmount = useCallback(
     (rubAmount: number): number => {
-      if (isRussian) {
+      if (skipFxConversion) {
         return rubAmount;
       }
       return currencyApi.convertFromRub(
@@ -99,18 +107,18 @@ export function useCurrency() {
         exchangeRates,
       );
     },
-    [isRussian, targetCurrency, exchangeRates],
+    [skipFxConversion, targetCurrency, exchangeRates],
   );
 
   // Convert from user's currency back to rubles
   const convertToRub = useCallback(
     (amount: number): number => {
-      if (isRussian) {
+      if (skipFxConversion) {
         return amount;
       }
       return currencyApi.convertToRub(amount, targetCurrency as keyof ExchangeRates, exchangeRates);
     },
-    [isRussian, targetCurrency, exchangeRates],
+    [skipFxConversion, targetCurrency, exchangeRates],
   );
 
   return useMemo(
@@ -118,6 +126,7 @@ export function useCurrency() {
       exchangeRates,
       targetCurrency,
       isRussian,
+      skipFxConversion,
       currencySymbol,
       formatAmount,
       formatWithCurrency,
@@ -129,6 +138,7 @@ export function useCurrency() {
       exchangeRates,
       targetCurrency,
       isRussian,
+      skipFxConversion,
       currencySymbol,
       formatAmount,
       formatWithCurrency,

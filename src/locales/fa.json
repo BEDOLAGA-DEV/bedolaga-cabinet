@@ -2932,7 +2932,7 @@
         },
         "balance": {
           "current": "موجودی فعلی",
-          "amountPlaceholder": "مبلغ به روبل",
+          "amountPlaceholder": "مبلغ به تومان",
           "descriptionPlaceholder": "توضیحات (اختیاری)",
           "add": "افزودن",
           "subtract": "کسر",
