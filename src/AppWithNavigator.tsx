@@ -28,11 +28,11 @@ const TWEMOJI_OPTIONS = { className: 'twemoji', folder: 'svg', ext: '.svg' } as 
 /** Pages reachable from bottom nav — treat as top-level (no back button). */
 const BOTTOM_NAV_PATHS = ['/', '/subscriptions', '/balance', '/referral', '/support', '/wheel'];
 
-/** Matches /subscriptions/:numericId. Single-tariff users land here straight
- * from bot deep-links, and their /subscriptions list auto-redirects right back
- * to this page (Subscriptions.tsx). So on a genuine deep-link entry (in-app
- * navigation depth 0) we hide the back button and let Telegram surface its
- * native Close (X); when there IS in-app history we show it and navigate back. */
+/** Matches /subscriptions/:numericId. When the user has a single tariff and at
+ * most one subscription, the /subscriptions list auto-redirects straight back
+ * here (Subscriptions.tsx), so this page is effectively top-level: we hide the
+ * back button and let Telegram surface its native Close (X). Multi-tariff users
+ * (or anyone with >1 subscription) keep a real Back to their meaningful list. */
 const SUBSCRIPTION_DETAIL_RE = /^\/subscriptions\/\d+\/?$/;
 
 function TelegramBackButton() {
@@ -71,27 +71,39 @@ function TelegramBackButton() {
     enabled: isInTelegramWebApp(),
   });
   const isMultiTariff = subData?.multi_tariff_enabled ?? false;
+  const subsCount = subData?.subscriptions?.length ?? 0;
+  // The /subscriptions list silently redirects straight back to the open detail
+  // page when there is a single tariff and at most one subscription
+  // (Subscriptions.tsx). In that mode the detail page IS the top-level screen —
+  // there is no meaningful "back" target. Inverse of the handler's `listIsSafe`.
+  // Defaults to true on a cold cache (isMultiTariff=false, subsCount=0): hiding
+  // Back is fail-closed — far better than briefly arming the looping Back.
+  const listRedirectsToDetail = !isMultiTariff && subsCount <= 1;
 
   // Refs so the stable back handler (memoised with []) reads fresh values
   // without re-subscribing — re-subscription lets a component's local handler
   // overwrite ours via Telegram's singleton onBackButtonClick (issue #436).
   const isMultiTariffRef = useRef(isMultiTariff);
   isMultiTariffRef.current = isMultiTariff;
-  const subsCountRef = useRef(subData?.subscriptions?.length ?? 0);
-  subsCountRef.current = subData?.subscriptions?.length ?? 0;
+  const subsCountRef = useRef(subsCount);
+  subsCountRef.current = subsCount;
 
   useEffect(() => {
     const isTopLevel = location.pathname === '' || BOTTOM_NAV_PATHS.includes(location.pathname);
-    const isSingleTariffDetailDeepLink =
-      !isMultiTariff && SUBSCRIPTION_DETAIL_RE.test(location.pathname) && depthRef.current === 0;
+    // Depth-independent on purpose: whether the user deep-linked in or navigated
+    // here in-app, a single-tariff detail whose list just bounces back has no
+    // real "back" target. Showing Back here is exactly what looped through the
+    // redirecting /subscriptions list (#436); hiding it always surfaces Close.
+    const isRedirectingSubscriptionDetail =
+      listRedirectsToDetail && SUBSCRIPTION_DETAIL_RE.test(location.pathname);
     try {
-      if (isTopLevel || isSingleTariffDetailDeepLink) {
+      if (isTopLevel || isRedirectingSubscriptionDetail) {
         hideBackButton();
       } else {
         showBackButton();
       }
     } catch {}
-  }, [location, isMultiTariff]);
+  }, [location, listRedirectsToDetail]);
 
   // Stable handler — ref prevents re-subscription on every render
   const handler = useCallback(() => {

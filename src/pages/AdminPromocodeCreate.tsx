@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import { DateField } from '../components/DateField';
 import { createNumberInputHandler } from '../utils/inputHelpers';
 import {
   promocodesApi,
@@ -447,12 +448,10 @@ export default function AdminPromocodeCreate() {
           <label htmlFor="pc-valid-until" className="mb-2 block text-sm font-medium text-dark-300">
             {t('admin.promocodes.form.validUntil')}
           </label>
-          <input
-            id="pc-valid-until"
-            type="date"
+          <DateField
             value={validUntil}
-            onChange={(e) => setValidUntil(e.target.value)}
-            className="input"
+            onChange={setValidUntil}
+            className="flex w-full items-center gap-2 rounded-xl border border-dark-700/50 bg-dark-800/50 px-4 py-3 text-sm text-dark-100 transition-colors hover:border-accent-500/50"
           />
           <p className="mt-1 text-xs text-dark-500">{t('admin.promocodes.form.validUntilHint')}</p>
         </div>

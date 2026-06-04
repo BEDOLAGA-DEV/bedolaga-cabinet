@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import { rbacApi, AuditLogEntry, AuditLogFilters } from '@/api/rbac';
 import { PermissionGate } from '@/components/auth/PermissionGate';
+import { DateField } from '@/components/DateField';
 import { usePlatform } from '@/platform/hooks/usePlatform';
 import {
   BackIcon,
@@ -704,12 +705,11 @@ export default function AdminAuditLog() {
                 >
                   {t('admin.auditLog.filters.dateFrom')}
                 </label>
-                <input
-                  id="filter-date-from"
-                  type="date"
+                <DateField
                   value={filters.dateFrom}
-                  onChange={(e) => setFilters((prev) => ({ ...prev, dateFrom: e.target.value }))}
-                  className="w-full rounded-lg border border-dark-600 bg-dark-900 px-3 py-2 text-sm text-dark-100 outline-none transition-colors focus:border-accent-500"
+                  max={filters.dateTo}
+                  onChange={(v) => setFilters((prev) => ({ ...prev, dateFrom: v }))}
+                  className="flex w-full items-center gap-2 rounded-lg border border-dark-600 bg-dark-900 px-3 py-2 text-sm text-dark-100 transition-colors hover:border-accent-500"
                 />
               </div>
 
@@ -721,12 +721,11 @@ export default function AdminAuditLog() {
                 >
                   {t('admin.auditLog.filters.dateTo')}
                 </label>
-                <input
-                  id="filter-date-to"
-                  type="date"
+                <DateField
                   value={filters.dateTo}
-                  onChange={(e) => setFilters((prev) => ({ ...prev, dateTo: e.target.value }))}
-                  className="w-full rounded-lg border border-dark-600 bg-dark-900 px-3 py-2 text-sm text-dark-100 outline-none transition-colors focus:border-accent-500"
+                  min={filters.dateFrom}
+                  onChange={(v) => setFilters((prev) => ({ ...prev, dateTo: v }))}
+                  className="flex w-full items-center gap-2 rounded-lg border border-dark-600 bg-dark-900 px-3 py-2 text-sm text-dark-100 transition-colors hover:border-accent-500"
                 />
               </div>
             </div>

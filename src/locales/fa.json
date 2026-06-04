@@ -1155,6 +1155,9 @@
       "title": "آمار فروش",
       "subtitle": "درآمد، آزمایشی، اشتراک و تمدید",
       "period": {
+        "thisMonth": "این ماه",
+        "from": "از",
+        "to": "تا",
         "week": "۷ روز",
         "month": "۳۰ روز",
         "quarter": "۹۰ روز",
@@ -1166,13 +1169,15 @@
         "sales": "فروش",
         "renewals": "تمدید",
         "addons": "خدمات اضافی",
-        "deposits": "شارژ"
+        "deposits": "شارژ",
+        "payment": "پرداخت‌ها"
       },
       "summary": {
         "revenue": "درآمد",
         "activeSubs": "اشتراک فعال",
         "activeTrials": "آزمایشی فعال",
         "newTrials": "آزمایشی جدید",
+        "newPaid": "اشتراک‌های پولی جدید",
         "conversion": "تبدیل",
         "renewals": "تمدید",
         "addonRevenue": "درآمد خدمات اضافی",
@@ -1183,13 +1188,13 @@
         "totalRegistrations": "ثبت‌نام‌ها",
         "trialsIssued": "آزمایشی صادرشده",
         "conversion": "نرخ تبدیل",
-        "avgDuration": "میانگین مدت",
         "byProvider": "بر اساس منبع",
         "dailyChart": "ثبت‌نام و آزمایشی روزانه",
         "registrations": "ثبت‌نام"
       },
       "sales": {
         "totalSales": "کل فروش",
+        "totalRevenue": "گردش اشتراک",
         "avgOrder": "میانگین سفارش",
         "topTariff": "تعرفه برتر",
         "byTariff": "بر اساس تعرفه",
@@ -1228,6 +1233,12 @@
         "dailyChart": "شارژ روزانه",
         "dailyByMethod": "شارژ روزانه بر اساس روش پرداخت",
         "revenue": "درآمد"
+      },
+      "payments": {
+        "successRate": "نرخ موفقیت پرداخت",
+        "attempts": "تلاش‌های پرداخت",
+        "failedPurchases": "خریدهای ناموفق",
+        "byGateway": "نرخ موفقیت بر اساس درگاه"
       },
       "loadError": "بارگذاری آمار ناموفق بود"
     },

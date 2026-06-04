@@ -116,24 +116,33 @@ interface StatCardProps {
   subValue?: string;
 }
 
+// Soulful chip + matching value colour, in the spirit of the sales-stats cards.
+// Fixed-size chip + forced icon size normalises every icon regardless of what the
+// call site passes (some omit a className) — that was the source of the misalignment.
+const STAT_TONE: Record<string, { chip: string; value: string }> = {
+  accent: { chip: 'bg-accent-500/15 text-accent-400', value: 'text-accent-400' },
+  green: { chip: 'bg-success-500/15 text-success-400', value: 'text-success-400' },
+  blue: { chip: 'bg-accent-500/15 text-accent-400', value: 'text-accent-400' },
+  orange: { chip: 'bg-warning-500/15 text-warning-400', value: 'text-warning-400' },
+  red: { chip: 'bg-error-500/15 text-error-400', value: 'text-error-400' },
+  purple: { chip: 'bg-accent-500/15 text-accent-400', value: 'text-accent-400' },
+};
+
 function StatCard({ label, value, icon, color = 'accent', subValue }: StatCardProps) {
-  const colorClasses: Record<string, string> = {
-    accent: 'bg-accent-500/20 text-accent-400',
-    green: 'bg-success-500/20 text-success-400',
-    blue: 'bg-accent-500/20 text-accent-400',
-    orange: 'bg-warning-500/20 text-warning-400',
-    red: 'bg-error-500/20 text-error-400',
-    purple: 'bg-accent-500/20 text-accent-400',
-  };
+  const tone = STAT_TONE[color] ?? STAT_TONE.accent;
 
   return (
     <div className="rounded-xl border border-dark-700 bg-dark-800/50 p-4">
-      <div className="flex items-center gap-3">
-        <div className={`rounded-lg p-2 ${colorClasses[color]}`}>{icon}</div>
+      <p className="truncate text-xs text-dark-400 sm:text-sm">{label}</p>
+      <div className="mt-1.5 flex items-center gap-2.5">
+        <span
+          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg [&>svg]:h-5 [&>svg]:w-5 ${tone.chip}`}
+        >
+          {icon}
+        </span>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-xs text-dark-400">{label}</p>
-          <p className="text-lg font-semibold text-dark-100">{value}</p>
-          {subValue && <p className="text-xs text-dark-500">{subValue}</p>}
+          <div className={`truncate text-lg font-semibold sm:text-xl ${tone.value}`}>{value}</div>
+          {subValue && <div className="truncate text-xs text-dark-500">{subValue}</div>}
         </div>
       </div>
     </div>

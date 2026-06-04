@@ -1282,6 +1282,9 @@
       "title": "Sales Statistics",
       "subtitle": "Revenue, trials, subscriptions, and renewals",
       "period": {
+        "thisMonth": "This month",
+        "from": "From",
+        "to": "To",
         "week": "7 days",
         "month": "30 days",
         "quarter": "90 days",
@@ -1293,13 +1296,15 @@
         "sales": "Sales",
         "renewals": "Renewals",
         "addons": "Add-ons",
-        "deposits": "Deposits"
+        "deposits": "Deposits",
+        "payment": "Payments"
       },
       "summary": {
         "revenue": "Revenue",
         "activeSubs": "Active Subs",
         "activeTrials": "Active Trials",
         "newTrials": "New Trials",
+        "newPaid": "New Paid Subscriptions",
         "conversion": "Conversion",
         "renewals": "Renewals",
         "addonRevenue": "Add-on Revenue",
@@ -1310,13 +1315,13 @@
         "totalRegistrations": "Registrations",
         "trialsIssued": "Trials Issued",
         "conversion": "Conversion Rate",
-        "avgDuration": "Avg Duration",
         "byProvider": "By Registration Source",
         "dailyChart": "Daily Registrations & Trials",
         "registrations": "Registrations"
       },
       "sales": {
         "totalSales": "Total Sales",
+        "totalRevenue": "Subscription turnover",
         "avgOrder": "Avg Order",
         "topTariff": "Top Tariff",
         "byTariff": "Sales by Tariff",
@@ -1355,6 +1360,12 @@
         "dailyChart": "Daily Deposits",
         "dailyByMethod": "Daily Deposits by Payment Method",
         "revenue": "Revenue"
+      },
+      "payments": {
+        "successRate": "Payment success rate",
+        "attempts": "Payment attempts",
+        "failedPurchases": "Failed purchases",
+        "byGateway": "Success rate by gateway"
       },
       "loadError": "Failed to load statistics"
     },

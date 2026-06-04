@@ -17,6 +17,7 @@ type Status = 'countdown' | 'fallback' | 'error';
 // App schemes configuration - same as miniapp
 const appSchemes = [
   { scheme: 'happ://', icon: 'H', name: 'Happ' },
+  { scheme: 'incy://', icon: 'I', name: 'INCY' },
   { scheme: 'flclash://', icon: 'F', name: 'FlClash' },
   { scheme: 'clash://', icon: 'C', name: 'Clash Meta' },
   { scheme: 'sing-box://', icon: 'S', name: 'sing-box' },

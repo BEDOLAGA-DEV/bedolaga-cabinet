@@ -1304,6 +1304,9 @@
       "title": "Статистика продаж",
       "subtitle": "Доход, триалы, подписки и продления",
       "period": {
+        "thisMonth": "Этот месяц",
+        "from": "Начало",
+        "to": "Конец",
         "week": "7 дней",
         "month": "30 дней",
         "quarter": "90 дней",
@@ -1315,13 +1318,15 @@
         "sales": "Продажи",
         "renewals": "Продления",
         "addons": "Доп. услуги",
-        "deposits": "Пополнения"
+        "deposits": "Пополнения",
+        "payment": "Оплаты"
       },
       "summary": {
         "revenue": "Доход",
         "activeSubs": "Активные подписки",
         "activeTrials": "Активные триалы",
         "newTrials": "Новые триалы",
+        "newPaid": "Новые платные подписки",
         "conversion": "Конверсия",
         "renewals": "Продления",
         "addonRevenue": "Доп. услуги",
@@ -1332,13 +1337,13 @@
         "totalRegistrations": "Регистрации",
         "trialsIssued": "Выданные триалы",
         "conversion": "Конверсия",
-        "avgDuration": "Средняя длит.",
         "byProvider": "По источнику регистрации",
         "dailyChart": "Регистрации и триалы по дням",
         "registrations": "Регистрации"
       },
       "sales": {
         "totalSales": "Всего продаж",
+        "totalRevenue": "Оборот по подпискам",
         "avgOrder": "Средний чек",
         "topTariff": "Топ тариф",
         "byTariff": "Продажи по тарифам",
@@ -1377,6 +1382,12 @@
         "dailyChart": "Пополнения по дням",
         "dailyByMethod": "Пополнения по дням по платёжкам",
         "revenue": "Доход"
+      },
+      "payments": {
+        "successRate": "Успешность оплат",
+        "attempts": "Попыток оплат",
+        "failedPurchases": "Неудачные покупки",
+        "byGateway": "Успешность по шлюзам"
       },
       "loadError": "Не удалось загрузить статистику"
     },

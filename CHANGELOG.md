@@ -1,5 +1,44 @@
 # Changelog
 
+## [1.56.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.55.0...v1.56.0) (2026-06-02)
+
+
+### Features
+
+* **sales-stats:** вкладка «Оплаты» — success-rate и неудачные покупки ([436d9f8](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/436d9f860c89a4012c57a9689b11abdff1572332))
+* **sales-stats:** дельты период-к-периоду на карточках сводки ([a685e54](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/a685e542aa1e3863b25cac52af6e12edebc6e3c7))
+* **sales-stats:** душевные карточки с иконками + фикс скачка при смене периода ([dfc7768](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/dfc7768a403c9d8ff91a79cea8df9207b1855d8c))
+* **sales-stats:** иконки на карточках во всех вкладках ([80ac631](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/80ac63102b91a3aced5b3b599c5da05b6803bffa))
+* **sales-stats:** карточки возвратов в сводке ([bd12113](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/bd12113294c92379fc7fee6d4c25f1d73e3de856))
+* **sales-stats:** конкретика в сводке ([3adda6f](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/3adda6fa032e3d105b8b7836b478f68f4c5e6d9f))
+* **sales-stats:** пресет «Этот месяц» (с 1-го числа) и он же по умолчанию ([9a05f23](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/9a05f23a04358affca5faa0acb5cd81911372136))
+* **sales-stats:** разбивка допов по пакетам тоже на BreakdownList ([bb97ee8](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/bb97ee8430c6073ea872b08dea7733c0f9a46f27))
+* **sales-stats:** читаемые разбивки и stacked-бары, иконки платёжек, выручка ([a75f42d](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/a75f42d056afe7183cf070cf0d9e9cb88630f94a))
+* **ui:** заменить все нативные date-инпуты на DateField ([016da9f](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/016da9f638ca4a7ecec35e0d77c0e851bc3b8808))
+* **ui:** тёмный DateField на react-day-picker вместо нативного input ([edd2d25](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/edd2d25024989a0b2d7888b82fa2f13dce60b63e))
+
+
+### Bug Fixes
+
+* **admin-remnawave:** причесать иконки в карточках статистики ([7efe069](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/7efe069be077a35e3538908d24bd68d11407d513))
+* **datepicker:** убрать скачки и поправить адаптив ([c880517](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/c8805171693ec4070b9f9bc9b194b4ee91d971fa))
+* **datepicker:** читаемость календаря в любой теме ([a8213ce](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/a8213ce5d5fccd24ee192196a52accbf65954984))
+* **deeplink:** поддержать схему incy:// в редиректе добавления подписки ([488503b](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/488503b360806def859e7792919b68ab29ae44e1))
+* **navigation:** single-tariff subscription detail всегда Close, не Back ([ec346d3](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/ec346d38d8e74a8efade19ac234c2f2261819747))
+* **payment-labels:** добавить лейбл OverPay (показывался сырым ключом) ([33f8dda](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/33f8ddac9a17047766ff924cefddf0e83e689cbf))
+* **sales-stats:** «Выручка» → «Оборот по подпискам» во вкладке Продажи ([40c684c](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/40c684cc8887df8ec6e2287939141a975e4aacbc))
+* **sales-stats:** адаптив сетки Допов и сводки ([56d8e1f](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/56d8e1ffa760558c0196cf1069a5696fe03dd0c9))
+* **sales-stats:** крупные суммы сводки без копеек (короче, не режет) ([a687cc3](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/a687cc3d1878eb22e12129e20b4e60158d62bfd2))
+* **sales-stats:** не резать значения в карточках сводки (адаптив) ([631e922](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/631e922f785bfaa0db396ea19df0dac886e2eb5b))
+* **sales-stats:** ровные иконки в карточках + не дублировать иконку ([622ec31](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/622ec318da6eac1cef92c95f244159825345a5e1))
+* **sales-stats:** убрать пустые ячейки в сетках карточек ([54998c8](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/54998c819566b749c282a5f20ab383469f2615ba))
+* **stats-charts:** убрать focus-outline артефакт при клике по графику ([5e83762](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/5e837621ad5649b8c6d78d74218cbee2258d0f2b))
+
+
+### Reverts
+
+* **sales-stats:** убрать карточки возвратов из сводки ([ec23618](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/ec23618a56f0e1da3b140d2983edf10768000e30))
+
 ## [1.55.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.54.1...v1.55.0) (2026-06-01)
 
 

@@ -1155,6 +1155,9 @@
       "title": "销售统计",
       "subtitle": "收入、试用、订阅和续订",
       "period": {
+        "thisMonth": "本月",
+        "from": "从",
+        "to": "到",
         "week": "7天",
         "month": "30天",
         "quarter": "90天",
@@ -1166,13 +1169,15 @@
         "sales": "销售",
         "renewals": "续订",
         "addons": "附加服务",
-        "deposits": "充值"
+        "deposits": "充值",
+        "payment": "支付"
       },
       "summary": {
         "revenue": "收入",
         "activeSubs": "活跃订阅",
         "activeTrials": "活跃试用",
         "newTrials": "新试用",
+        "newPaid": "新增付费订阅",
         "conversion": "转化率",
         "renewals": "续订",
         "addonRevenue": "附加服务收入",
@@ -1183,13 +1188,13 @@
         "totalRegistrations": "注册数",
         "trialsIssued": "已发放试用",
         "conversion": "转化率",
-        "avgDuration": "平均时长",
         "byProvider": "按注册来源",
         "dailyChart": "每日注册与试用",
         "registrations": "注册"
       },
       "sales": {
         "totalSales": "总销售",
+        "totalRevenue": "订阅流水",
         "avgOrder": "平均订单",
         "topTariff": "热门套餐",
         "byTariff": "按套餐",
@@ -1228,6 +1233,12 @@
         "dailyChart": "每日充值",
         "dailyByMethod": "每日按支付方式充值",
         "revenue": "收入"
+      },
+      "payments": {
+        "successRate": "支付成功率",
+        "attempts": "支付尝试",
+        "failedPurchases": "失败购买",
+        "byGateway": "各网关成功率"
       },
       "loadError": "加载统计失败"
     },

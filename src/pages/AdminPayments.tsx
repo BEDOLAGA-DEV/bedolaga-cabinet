@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { adminPaymentsApi, type SearchStats } from '../api/adminPayments';
+import { DateField } from '../components/DateField';
 import { useCurrency } from '../hooks/useCurrency';
 import type { PendingPayment, PaginatedResponse } from '../types';
 import { usePlatform } from '../platform/hooks/usePlatform';
@@ -327,20 +328,20 @@ export default function AdminPayments() {
             <label className="mb-1 block text-xs text-dark-400">
               {t('admin.payments.dateFrom')}
             </label>
-            <input
-              type="date"
+            <DateField
               value={dateFrom}
-              onChange={(e) => setDateFrom(e.target.value)}
-              className="w-full rounded-lg border border-dark-700 bg-dark-800 px-3 py-2 text-sm text-dark-100 focus:border-accent-500 focus:outline-none"
+              max={dateTo}
+              onChange={setDateFrom}
+              className="flex w-full items-center gap-2 rounded-lg border border-dark-700 bg-dark-800 px-3 py-2 text-sm text-dark-100 transition-colors hover:border-accent-500"
             />
           </div>
           <div className="flex-1">
             <label className="mb-1 block text-xs text-dark-400">{t('admin.payments.dateTo')}</label>
-            <input
-              type="date"
+            <DateField
               value={dateTo}
-              onChange={(e) => setDateTo(e.target.value)}
-              className="w-full rounded-lg border border-dark-700 bg-dark-800 px-3 py-2 text-sm text-dark-100 focus:border-accent-500 focus:outline-none"
+              min={dateFrom}
+              onChange={setDateTo}
+              className="flex w-full items-center gap-2 rounded-lg border border-dark-700 bg-dark-800 px-3 py-2 text-sm text-dark-100 transition-colors hover:border-accent-500"
             />
           </div>
           <button onClick={() => refetch()} className="btn-primary px-4 py-2 text-sm">

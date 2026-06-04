@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { CalendarIcon, XIcon } from '../TrafficIcons';
+import { DateField } from '../../../DateField';
 
 // ──────────────────────────────────────────────────────────────────
 // PeriodSelector — switches between fixed period tabs (1/3/7/14/30
@@ -41,25 +42,21 @@ export function PeriodSelector({
 
   if (dateMode) {
     return (
-      <div className="flex items-center gap-2">
-        <CalendarIcon className="h-4 w-4" />
+      <div className="flex flex-wrap items-center gap-2">
+        <CalendarIcon className="h-4 w-4 shrink-0" />
         <span className="text-xs text-dark-400">{t('admin.trafficUsage.dateFrom')}</span>
-        <input
-          type="date"
+        <DateField
           value={customStart}
           min={minDate}
           max={customEnd || today}
-          onChange={(e) => onCustomStartChange(e.target.value)}
-          className="rounded-lg border border-dark-700 bg-dark-800 px-2 py-1 text-xs text-dark-200 focus:border-dark-600 focus:outline-none"
+          onChange={onCustomStartChange}
         />
         <span className="text-xs text-dark-400">{t('admin.trafficUsage.dateTo')}</span>
-        <input
-          type="date"
+        <DateField
           value={customEnd}
           min={customStart || minDate}
           max={today}
-          onChange={(e) => onCustomEndChange(e.target.value)}
-          className="rounded-lg border border-dark-700 bg-dark-800 px-2 py-1 text-xs text-dark-200 focus:border-dark-600 focus:outline-none"
+          onChange={onCustomEndChange}
         />
         <button
           onClick={onToggleDateMode}

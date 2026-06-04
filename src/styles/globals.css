@@ -1380,6 +1380,89 @@ input[type='checkbox']:hover:not(:checked) {
   background-color: rgb(var(--color-dark-600));
 }
 
+/* Recharts: bars, pie sectors and dots become focusable, so clicking one draws
+   the browser's focus outline — a visual artifact on read-only charts. Kill it. */
+.recharts-wrapper:focus,
+.recharts-wrapper:focus-visible,
+.recharts-wrapper :focus,
+.recharts-wrapper :focus-visible,
+.recharts-surface,
+.recharts-sector,
+.recharts-rectangle {
+  outline: none;
+}
+
+/* react-day-picker (DateField) — themed via the library's CSS variables.
+   The library declares its rdp variables ON .rdp-root, so overriding them on a
+   parent (.rdp-dark) gets shadowed. We must target `.rdp-dark .rdp-root` to win.
+   All colors go through the app's theme tokens (the dark and accent scales),
+   which flip for light themes (e.g. champagne) — so the picker stays legible in
+   every theme without bespoke per-theme rules. */
+.rdp-dark {
+  color: rgb(var(--color-dark-100));
+  font-size: 0.85rem;
+}
+.rdp-dark .rdp-root {
+  --rdp-accent-color: rgb(var(--color-accent-500));
+  --rdp-accent-background-color: rgb(var(--color-accent-500) / 0.18);
+  --rdp-today-color: rgb(var(--color-accent-400));
+  --rdp-day-height: 2.25rem;
+  --rdp-day-width: 2.25rem;
+  --rdp-outside-opacity: 0.4;
+  --rdp-disabled-opacity: 0.4;
+  --rdp-selected-border: none;
+  --rdp-weekday-opacity: 1;
+}
+.rdp-dark .rdp-month_caption,
+.rdp-dark .rdp-caption_label {
+  color: rgb(var(--color-dark-100));
+  font-weight: 600;
+  text-transform: capitalize;
+}
+.rdp-dark .rdp-weekday {
+  color: rgb(var(--color-dark-400));
+  font-weight: 500;
+  text-transform: capitalize;
+}
+.rdp-dark .rdp-day_button {
+  color: rgb(var(--color-dark-100));
+  border: none;
+  border-radius: 0.5rem;
+}
+.rdp-dark .rdp-day_button:hover:not([disabled]) {
+  background-color: rgb(var(--color-dark-700));
+}
+.rdp-dark .rdp-day_button:focus-visible {
+  outline: 2px solid rgb(var(--color-accent-500));
+  outline-offset: 1px;
+}
+/* Today: accent-tinted text + subtle ring (loses to the filled "selected" look). */
+.rdp-dark .rdp-today:not(.rdp-outside) .rdp-day_button {
+  color: rgb(var(--color-accent-400));
+  font-weight: 700;
+  box-shadow: inset 0 0 0 1px rgb(var(--color-accent-500) / 0.45);
+}
+.rdp-dark .rdp-selected .rdp-day_button {
+  background-color: rgb(var(--color-accent-500));
+  color: #fff;
+  font-weight: 700;
+  border: none;
+  box-shadow: none;
+}
+.rdp-dark .rdp-chevron {
+  fill: currentColor;
+}
+.rdp-dark .rdp-button_previous,
+.rdp-dark .rdp-button_next {
+  color: rgb(var(--color-dark-300));
+  border-radius: 0.5rem;
+}
+.rdp-dark .rdp-button_previous:hover:not([disabled]),
+.rdp-dark .rdp-button_next:hover:not([disabled]) {
+  color: rgb(var(--color-dark-100));
+  background-color: rgb(var(--color-dark-700));
+}
+
 .light input[type='checkbox'] {
   border-color: rgb(var(--color-champagne-400));
   background-color: rgb(var(--color-champagne-100));

@@ -18,6 +18,7 @@ export const METHOD_LABELS: Record<string, string> = {
   paypear: 'PayPear',
   rollypay: 'RollyPay',
   aurapay: 'AuraPay',
+  overpay: 'OverPay',
   etoplatezhi: 'Etoplatezhi',
   antilopay: 'Antilopay',
   jupiter: 'Jupiter',
