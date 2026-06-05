@@ -276,7 +276,7 @@ export default function WebSocketNotifications() {
 
       if (type === 'autopay.insufficient_funds') {
         const required = message.required_rubles ?? (message.required_kopeks ?? 0) / 100;
-        const balance = message.balance_rubles ?? (message.balance_kopeks ?? 0) / 100;
+        const balance = message.balance_rubles ?? message.balance_kopeks ?? 0;
         showToast({
           type: 'warning',
           title: t('wsNotifications.autopay.insufficientTitle', 'Insufficient funds'),
