@@ -3670,6 +3670,7 @@
       "methodSubOptions": "گزینه‌های فرعی پرداخت",
       "loadingPeriods": "در حال بارگذاری...",
       "periodDaySuffix": "روز",
+      "trialPrefix": "آزمایشی",
       "localeTab": "زبان",
       "localeHint": "زبان را تغییر دهید تا متن را به آن زبان ویرایش کنید",
       "discount": "تخفیف",
