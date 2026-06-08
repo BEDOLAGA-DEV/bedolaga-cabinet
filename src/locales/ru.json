@@ -29,16 +29,8 @@
     "understand": "Понятно",
     "units": {
       "gb": "ГБ",
-      "perGb": "/ГБ",
-      "days": "дн",
-      "mo": "мес"
-    },
-    "balance": "Баланс",
-    "copied": "Скопировано",
-    "no_results": "Ничего не найдено",
-    "ok": "ОК",
-    "processing": "Обработка…",
-    "rangeTo": "до"
+      "perGb": "/ГБ"
+    }
   },
   "nav": {
     "dashboard": "Главная",
@@ -53,8 +45,7 @@
     "info": "Информация",
     "wheel": "Колесо удачи",
     "menu": "Меню",
-    "gift": "Подарить",
-    "navigation": "Навигация"
+    "gift": "Подарить"
   },
   "notifications": {
     "ticketNotifications": "Уведомления о тикетах",
@@ -160,17 +151,7 @@
     "tariff": "Тариф",
     "validUntil": "Действует до",
     "goToSubscription": "Перейти к подписке",
-    "goToBalance": "Перейти к балансу",
-    "devicesAdded": "+{{count}} устройств",
-    "devicesPurchased": {
-      "title": "Устройства добавлены"
-    },
-    "totalDevices": "Всего устройств: {{count}}",
-    "totalTraffic": "Всего трафика: {{value}}",
-    "trafficAdded": "+{{value}} трафика",
-    "trafficPurchased": {
-      "title": "Трафик добавлен"
-    }
+    "goToBalance": "Перейти к балансу"
   },
   "auth": {
     "login": "Вход",
@@ -191,7 +172,7 @@
     "registerHint": "Для регистрации по email сначала авторизуйтесь через Telegram, затем привяжите email в настройках.",
     "telegramRequired": "Требуется авторизация через Telegram",
     "telegramRetryFailed": "Авторизация не удалась. Закройте приложение и откройте заново.",
-    "telegramReopenHint": "Если проблема повторяется, закройте и откройте приложение заново",
+    "telegramReopenHint": "Если проблема повторяется — закройте и откройте приложение заново",
     "telegramNotConfigured": "Telegram бот не настроен",
     "telegramUnavailable": "Вход через Telegram временно недоступен",
     "authenticating": "Авторизация...",
@@ -314,7 +295,7 @@
     "trialOffer": {
       "freeTitle": "Бесплатный пробный период",
       "paidTitle": "Пробная подписка",
-      "freeDesc": "Попробуйте наш VPN бесплатно: без обязательств",
+      "freeDesc": "Попробуйте наш VPN бесплатно — без обязательств",
       "paidDesc": "Начните с пробной подписки"
     },
     "stats": {
@@ -322,10 +303,7 @@
       "subscription": "Подписка",
       "referrals": "Рефералы",
       "earnings": "Заработок"
-    },
-    "manageAll": "Управлять всеми",
-    "showAll": "Показать все",
-    "subscriptions": "Подписки"
+    }
   },
   "subscription": {
     "title": "Подписка",
@@ -387,8 +365,7 @@
     "cta": {
       "expiredHint": "Выберите тариф и оплатите",
       "trialHint": "Больше трафика и устройств",
-      "activeHint": "Продление и смена тарифа",
-      "renewHint": "Подписка истекла — продлите, чтобы продолжить пользоваться"
+      "activeHint": "Продление и смена тарифа"
     },
     "connectionInfo": "Данные для подключения",
     "copyLink": "Копировать ссылку",
@@ -505,8 +482,7 @@
       "goToApps": "Перейти к настройке приложений",
       "qrTitle": "QR-код подписки",
       "qrScanHint": "Отсканируйте для подключения",
-      "qrButton": "QR-код",
-      "openQr": "Открыть QR-код"
+      "qrButton": "QR-код"
     },
     "myDevices": "Мои устройства",
     "noDevices": "Нет подключенных устройств",
@@ -608,20 +584,13 @@
       "buyTraffic": "Докупить трафик",
       "currentTrafficLimit": "Текущий лимит: {{limit}} ГБ (использовано {{used}} ГБ)",
       "buyTrafficTitle": "Докупить трафик",
-      "trafficWarning": "Докупленный трафик добавляется к текущему лимиту и действует 30 дней с момента покупки",
+      "trafficWarning": "Докупленный трафик добавляется к текущему лимиту и не переносится на следующий период",
       "trafficUnavailable": "Докупка трафика недоступна для вашего тарифа",
       "unlimited": "Безлимит",
       "buyTrafficGb": "Купить {{gb}} ГБ",
       "buyUnlimited": "Купить Безлимит",
       "manageServers": "Управление сквадами",
-      "manageServersTitle": "Управление сквадами",
-      "connectedDevices": "Подключённые устройства",
-      "currentDeviceLimit": "Текущий лимит устройств",
-      "decrementDevices": "Уменьшить кол-во устройств",
-      "disconnectDevicesFirst": "Сначала отключите лишние устройства",
-      "incrementDevices": "Увеличить кол-во устройств",
-      "minDeviceLimit": "Минимальный лимит устройств",
-      "newDeviceLimit": "Новый лимит устройств"
+      "manageServersTitle": "Управление сквадами"
     },
     "serverManagement": {
       "statusLegend": "✅ — подключено • ➕ — будет добавлено (платно) • ➖ — будет отключено",
@@ -680,27 +649,7 @@
       "stopScan": "Закрыть камеру",
       "noCamera": "Нет доступа к камере",
       "codeFound": "Код найден"
-    },
-    "allTariffsPurchased": "Все тарифы уже куплены",
-    "autopay": "Автопродление",
-    "backToList": "К списку подписок",
-    "confirmDelete": "Удалить подписку?",
-    "dailyAutoCharge": "Ежедневное списание",
-    "defaultName": "Подписка",
-    "delete": "Удалить",
-    "deleteTitle": "Удаление подписки",
-    "get_config": "Получить конфиг",
-    "loadError": "Не удалось загрузить подписку",
-    "newTariff": "Новый тариф",
-    "noOptionsAvailable": "Доступных опций нет",
-    "noRenewalOptions": "Нет вариантов продления",
-    "notFound": "Подписка не найдена",
-    "notFoundDesc": "Возможно, она была удалена или ещё не активирована",
-    "servers": "Серверы",
-    "statusActive": "Активна",
-    "statusExpired": "Истекла",
-    "statusLimited": "Ограничена",
-    "statusTrial": "Триал"
+    }
   },
   "balance": {
     "title": "Баланс",
@@ -818,9 +767,7 @@
         "already_used_by_user": "Вы уже использовали этот промокод",
         "user_not_found": "Пользователь не найден",
         "server_error": "Ошибка сервера"
-      },
-      "daysLeft": "Осталось дней: {{count}}",
-      "selectSubscription": "Выберите подписку"
+      }
     },
     "minAmountError": "Минимальная сумма: {{amount}} ₽",
     "maxAmountError": "Максимальная сумма: {{amount}} ₽",
@@ -880,8 +827,7 @@
       "timeoutDesc": "Обработка платежа занимает больше времени. Вы можете проверить статус ещё раз.",
       "goToBalance": "Перейти к балансу",
       "tryAgain": "Попробовать снова"
-    },
-    "top_up": "Пополнить баланс"
+    }
   },
   "referral": {
     "title": "Реферальная программа",
@@ -1067,8 +1013,7 @@
     "useExternalLink": "Для получения поддержки воспользуйтесь внешней ссылкой",
     "openSupport": "Открыть поддержку",
     "contactSupport": "Для получения поддержки обратитесь к {{username}}",
-    "contactUs": "Связаться с поддержкой",
-    "create_ticket": "Создать тикет"
+    "contactUs": "Связаться с поддержкой"
   },
   "wheel": {
     "title": "Колесо удачи",
@@ -1102,8 +1047,7 @@
       "insufficientBalance": "Недостаточно средств на балансе",
       "topUpRequired": "Пополните баланс для оплаты спина",
       "starsNotAvailable": "Оплата Stars недоступна. Откройте приложение через Telegram.",
-      "noSubscription": "Для вращения колеса необходима активная подписка. Активируйте подписку в разделе «Подписка».",
-      "selectSubscription": "Сначала выберите подписку"
+      "noSubscription": "Для вращения колеса необходима активная подписка. Активируйте подписку в разделе «Подписка»."
     },
     "payWithStars": "Оплатить Stars",
     "payWithDays": "Оплатить днями",
@@ -1122,8 +1066,7 @@
       "title": "Испытай удачу!",
       "description": "Крути колесо и выигрывай призы: дни подписки, баланс, трафик и многое другое!",
       "button": "Перейти к колесу"
-    },
-    "selectSubscription": "Выберите подписку"
+    }
   },
   "admin": {
     "backgrounds": {
@@ -1229,7 +1172,7 @@
       "broadcasts": "Рассылки",
       "users": "Пользователи",
       "payments": "Платежи",
-      "remnawave": "Remnawave",
+      "remnawave": "RemnaWave",
       "emailTemplates": "Email-шаблоны",
       "paymentMethods": "Платёжные методы",
       "campaigns": "Кампании",
@@ -1304,9 +1247,6 @@
       "title": "Статистика продаж",
       "subtitle": "Доход, триалы, подписки и продления",
       "period": {
-        "thisMonth": "Этот месяц",
-        "from": "Начало",
-        "to": "Конец",
         "week": "7 дней",
         "month": "30 дней",
         "quarter": "90 дней",
@@ -1318,15 +1258,13 @@
         "sales": "Продажи",
         "renewals": "Продления",
         "addons": "Доп. услуги",
-        "deposits": "Пополнения",
-        "payment": "Оплаты"
+        "deposits": "Пополнения"
       },
       "summary": {
         "revenue": "Доход",
         "activeSubs": "Активные подписки",
         "activeTrials": "Активные триалы",
         "newTrials": "Новые триалы",
-        "newPaid": "Новые платные подписки",
         "conversion": "Конверсия",
         "renewals": "Продления",
         "addonRevenue": "Доп. услуги",
@@ -1337,13 +1275,13 @@
         "totalRegistrations": "Регистрации",
         "trialsIssued": "Выданные триалы",
         "conversion": "Конверсия",
+        "avgDuration": "Средняя длит.",
         "byProvider": "По источнику регистрации",
         "dailyChart": "Регистрации и триалы по дням",
         "registrations": "Регистрации"
       },
       "sales": {
         "totalSales": "Всего продаж",
-        "totalRevenue": "Оборот по подпискам",
         "avgOrder": "Средний чек",
         "topTariff": "Топ тариф",
         "byTariff": "Продажи по тарифам",
@@ -1382,12 +1320,6 @@
         "dailyChart": "Пополнения по дням",
         "dailyByMethod": "Пополнения по дням по платёжкам",
         "revenue": "Доход"
-      },
-      "payments": {
-        "successRate": "Успешность оплат",
-        "attempts": "Попыток оплат",
-        "failedPurchases": "Неудачные покупки",
-        "byGateway": "Успешность по шлюзам"
       },
       "loadError": "Не удалось загрузить статистику"
     },
@@ -1565,7 +1497,7 @@
       "description": "Поиск и управление платежами",
       "searchPlaceholder": "Поиск: инвойс, TG ID, @username, email...",
       "searchHint": "Примеры: SP-78291, @username, 123456789, user@mail.ru",
-      "searchResults": "Результаты по запросу: {{query}}. Найдено {{count}}",
+      "searchResults": "Результаты по запросу: {{query}} — найдено {{count}}",
       "resetSearch": "Сбросить",
       "statusAll": "Все",
       "statusPending": "В ожидании",
@@ -1611,7 +1543,7 @@
       "methodEnabled": "Метод включён",
       "providerNotConfigured": "Провайдер не настроен в env",
       "openUrlDirect": "Открывать страницу оплаты сразу",
-      "openUrlDirectHint": "Без панели со ссылкой: провайдер открывается внутри MiniApp/вкладки сразу после клика. После оплаты юзер возвращается на /balance/top-up/result. Для Stars/CryptoBot и других t.me/-ссылок флаг игнорируется.",
+      "openUrlDirectHint": "Без панели со ссылкой — провайдер открывается внутри MiniApp/вкладки сразу после клика. После оплаты юзер возвращается на /balance/top-up/result. Для Stars/CryptoBot и других t.me/-ссылок флаг игнорируется.",
       "displayName": "Отображаемое имя",
       "displayNameHint": "Оставьте пустым для имени по умолчанию",
       "subOptions": "Варианты оплаты",
@@ -1634,11 +1566,10 @@
       "firstTopupWas": "Было",
       "firstTopupWasNot": "Не было",
       "cancelButton": "Отмена",
-      "saveButton": "Сохранить",
-      "notFound": "Метод оплаты не найден"
+      "saveButton": "Сохранить"
     },
     "remnawave": {
-      "title": "Remnawave",
+      "title": "RemnaWave",
       "subtitle": "Управление панелью и статистика",
       "connected": "Подключено",
       "disconnected": "Не настроено",
@@ -1656,7 +1587,6 @@
         "totalUpload": "Отдача",
         "totalTraffic": "Всего",
         "online": "онлайн",
-        "realtimeTitle": "Текущий трафик",
         "inbounds": "Inbounds",
         "outbounds": "Outbounds"
       },
@@ -1704,8 +1634,7 @@
           "offline": "Офлайн",
           "disabled": "Отключены",
           "users": "Пользователей"
-        },
-        "usersOnlineCount": "{{count}} онлайн"
+        }
       },
       "squads": {
         "synced": "Синхронизирован",
@@ -1738,9 +1667,7 @@
         "localSettings": "Локальные настройки",
         "trialEligible": "Доступен триал",
         "price": "Цена",
-        "users": "Пользователей",
-        "inboundsCount": "{{count}} входящих",
-        "membersCount": "{{count}} участников"
+        "users": "Пользователей"
       },
       "sync": {
         "autoSync": "Автосинхронизация",
@@ -1756,9 +1683,9 @@
         "success": "Успешно",
         "runAutoSyncNow": "Запустить автосинхронизацию",
         "fromPanel": "Из панели",
-        "fromPanelDesc": "Импорт пользователей из Remnawave в бота",
+        "fromPanelDesc": "Импорт пользователей из RemnaWave в бота",
         "toPanel": "В панель",
-        "toPanelDesc": "Экспорт пользователей из бота в Remnawave"
+        "toPanelDesc": "Экспорт пользователей из бота в RemnaWave"
       }
     },
     "wheel": {
@@ -1782,8 +1709,7 @@
         "dailyLimit": "Дневной лимит вращений (0 = безлимит)",
         "minSubDays": "Мин. дней подписки для оплаты днями",
         "promocodes": "Промокоды",
-        "promoPrefix": "Префикс промокодов",
-        "promoValidityDays": "Срок действия промокода (дней)"
+        "promoPrefix": "Префикс промокодов"
       },
       "starsNotEnabledGlobally": "Оплата звёздами не включена в платёжных методах. Включите метод «Telegram Stars» в разделе «Платёжные методы».",
       "prizes": {
@@ -1810,9 +1736,7 @@
           "emoji": "Эмодзи",
           "color": "Цвет",
           "active": "Активен",
-          "worth": "Стоимость",
-          "probability": "Ручная вероятность (0–1)",
-          "probabilityHint": "Пусто — авто по RTP"
+          "worth": "Стоимость"
         },
         "promo": {
           "title": "Настройки промокода",
@@ -1831,9 +1755,7 @@
         "times_one": "{{count}} раз",
         "times_few": "{{count}} раза",
         "times_many": "{{count}} раз",
-        "topWins": "Топ выигрышей",
-        "loadError": "Не удалось загрузить статистику",
-        "empty": "Пока нет вращений"
+        "topWins": "Топ выигрышей"
       }
     },
     "broadcasts": {
@@ -1924,12 +1846,7 @@
       "btnConnect": "Подключиться",
       "btnSubscription": "Подписка",
       "btnSupport": "Техподдержка",
-      "btnHome": "На главную",
-      "category": "Категория",
-      "categoryNews": "Новости",
-      "categoryPromo": "Промо",
-      "categorySystem": "Системные",
-      "stopping": "Останавливается…"
+      "btnHome": "На главную"
     },
     "pinnedMessages": {
       "title": "Закреплённые сообщения",
@@ -2162,7 +2079,7 @@
         "db_sqlite": "SQLite",
         "db_redis": "Redis",
         "sys_core": "Ядро и отладка",
-        "sys_remnawave": "Remnawave",
+        "sys_remnawave": "RemnaWave",
         "sys_webapi": "Web API",
         "sys_webhook": "Webhook",
         "sys_server": "Статус сервера",
@@ -2372,8 +2289,8 @@
         "Api Key": "API ключ",
         "Api Token": "API токен",
         "Webhook Secret": "Секрет вебхука",
-        "Remnawave Url": "URL Remnawave",
-        "Remnawave Token": "Токен Remnawave",
+        "Remnawave Url": "URL RemnaWave",
+        "Remnawave Token": "Токен RemnaWave",
         "Server Status Enabled": "Статус сервера",
         "Monitoring Enabled": "Мониторинг",
         "Backup Enabled": "Бэкап",
@@ -2663,7 +2580,7 @@
         "SQLITE": "SQLite",
         "REDIS": "Redis",
         "CORE": "Бот",
-        "REMNAWAVE": "Remnawave",
+        "REMNAWAVE": "RemnaWave",
         "SERVER_STATUS": "Статус сервера",
         "MONITORING": "Мониторинг",
         "MAINTENANCE": "Обслуживание",
@@ -2782,16 +2699,13 @@
       "importError": "Неверный формат JSON файла",
       "importCreateError": "Ошибка при создании приложений",
       "noAppsToImport": "Нет приложений для импорта",
-      "remnaWaveToggle": "Переключить источник Remnawave",
-      "refreshRemnaWave": "Обновить данные из Remnawave",
-      "remnaWaveMode": "Отображаются приложения из панели Remnawave. Режим только для чтения.",
-      "remnaWaveSettings": "Настройки Remnawave",
+      "remnaWaveToggle": "Переключить источник RemnaWave",
+      "refreshRemnaWave": "Обновить данные из RemnaWave",
+      "remnaWaveMode": "Отображаются приложения из панели RemnaWave. Режим только для чтения.",
+      "remnaWaveSettings": "Настройки RemnaWave",
       "remnaWaveConfigUuid": "UUID конфигурации",
-      "remnaWaveConfigUuidHint": "UUID конфигурации страницы подписки из панели Remnawave",
-      "availableConfigs": "Доступные конфигурации",
-      "noConfigs": "Нет настроенных конфигов",
-      "remnaWaveConnected": "Remnawave подключён",
-      "remnaWaveDisconnected": "Remnawave отключён"
+      "remnaWaveConfigUuidHint": "UUID конфигурации страницы подписки из панели RemnaWave",
+      "availableConfigs": "Доступные конфигурации"
     },
     "tickets": {
       "title": "Управление тикетами",
@@ -2842,13 +2756,7 @@
       "userNotificationsEnabled": "Уведомления для пользователей",
       "userNotificationsEnabledDesc": "Отправлять уведомления пользователям об ответах админа",
       "adminNotificationsEnabled": "Уведомления для админов",
-      "adminNotificationsEnabledDesc": "Отправлять уведомления админам о новых тикетах и ответах",
-      "replyFailed": "Не удалось отправить ответ",
-      "validation": {
-        "checkIntervalRange": "Интервал проверки должен быть от 1 до 1440 мин",
-        "reminderCooldownRange": "Кулдаун напоминания должен быть от 0 до 1440 мин",
-        "slaMinutesRange": "SLA должен быть от 1 до 10080 мин"
-      }
+      "adminNotificationsEnabledDesc": "Отправлять уведомления админам о новых тикетах и ответах"
     },
     "tariffs": {
       "title": "Управление тарифами",
@@ -2888,7 +2796,7 @@
       "confirmDeleteText": "Это действие нельзя отменить. Тариф будет удалён навсегда.",
       "confirmDeleteWithSubscriptions": "У этого тарифа {{count}} активных подписок. При удалении пользователям потребуется выбрать новый тариф при продлении.",
       "deleteSuccess": "Тариф успешно удален",
-      "deleteSuccessWithSubscriptions": "Тариф удален. У {{count}} подписок сброшен тариф. При продлении пользователи выберут новый.",
+      "deleteSuccessWithSubscriptions": "Тариф удален. У {{count}} подписок сброшен тариф — при продлении пользователи выберут новый.",
       "saveOrder": "Сохранить порядок",
       "orderSaved": "Порядок сохранён",
       "dragToReorder": "Перетащите для изменения порядка",
@@ -2943,13 +2851,13 @@
       "daysShort": "дн.",
       "serversTitle": "Серверы",
       "externalSquadTitle": "Внешний сквад",
-      "externalSquadHint": "Назначьте внешний сквад Remnawave для пользователей этого тарифа. При создании подписки пользователь будет автоматически добавлен в выбранный сквад.",
+      "externalSquadHint": "Назначьте внешний сквад RemnaWave для пользователей этого тарифа. При создании подписки пользователь будет автоматически добавлен в выбранный сквад.",
       "noExternalSquad": "Без внешнего сквада",
       "externalSquadUsers": "пользователей",
       "serversTabHint": "Выберите серверы, доступные на этом тарифе.",
       "noServersAvailable": "Нет доступных серверов",
       "promoGroupsTitle": "Промо-группы",
-      "promoGroupsHint": "Выберите промо-группы, которым доступен этот тариф. Если не выбрано ничего, доступен всем.",
+      "promoGroupsHint": "Выберите промо-группы, которым доступен этот тариф. Если не выбрано ничего — доступен всем.",
       "noPromoGroups": "Нет промо-групп",
       "extraDeviceTitle": "Докупка устройств",
       "devicePriceLabel": "Цена за устройство (30 дней):",
@@ -3022,7 +2930,7 @@
       "sync": "Синхронизировать",
       "syncing": "Синхронизация...",
       "syncNow": "Синхронизировать сейчас",
-      "noServers": "Нет серверов. Синхронизируйте с Remnawave.",
+      "noServers": "Нет серверов. Синхронизируйте с RemnaWave.",
       "edit": "Редактировать сервер",
       "originalName": "Оригинальное название",
       "displayName": "Отображаемое название",
@@ -3079,8 +2987,7 @@
         "deactivate": "Деактивировать",
         "activate": "Активировать",
         "edit": "Редактировать",
-        "delete": "Удалить",
-        "registrations": "Регистрации"
+        "delete": "Удалить"
       },
       "modal": {
         "editTitle": "Редактирование кампании",
@@ -3152,9 +3059,7 @@
         "totalSpending": "Расход на подписки",
         "periodComparison": "Сравнение периодов",
         "vsLastWeek": "vs прошлая неделя",
-        "topRegistrations": "Топ регистрации",
-        "subscriptionsIssued": "Выдано подписок",
-        "tariffsIssued": "Выдано тарифов"
+        "topRegistrations": "Топ регистрации"
       },
       "users": {
         "title": "Пользователи кампании",
@@ -3178,10 +3083,7 @@
         "delete": "Удалить"
       },
       "loadError": "Не удалось загрузить кампанию",
-      "updateError": "Не удалось сохранить изменения",
-      "validation": {
-        "nameRequired": "Название обязательно"
-      }
+      "updateError": "Не удалось сохранить изменения"
     },
     "withdrawals": {
       "title": "Выводы средств",
@@ -3352,10 +3254,7 @@
         "createTitle": "Создать кампанию",
         "createSubtitle": "Кампания будет автоматически привязана к партнёру",
         "autoAssignNote": "Кампания будет автоматически привязана к партнёру {{name}}",
-        "createAndAssign": "Создать и привязать",
-        "earnings": "Доход",
-        "referrals": "Рефералы",
-        "registrations": "Регистрации"
+        "createAndAssign": "Создать и привязать"
       },
       "dangerZone": {
         "title": "Опасная зона",
@@ -3432,10 +3331,7 @@
         "firstPurchaseOnly": "Только для первой покупки",
         "cancel": "Отмена",
         "saving": "Сохранение...",
-        "save": "Сохранить",
-        "defaultTrialTariff": "Тариф триала по умолчанию",
-        "selectTariff": "Выберите тариф",
-        "tariff": "Тариф"
+        "save": "Сохранить"
       },
       "stats": {
         "title": "Статистика промокода",
@@ -3466,8 +3362,7 @@
         "totalPromocodes": "Всего промокодов",
         "activeCount": "Активных",
         "usagesCount": "Использований",
-        "exhausted": "Исчерпано",
-        "hoursValue": "{{count}} ч"
+        "exhausted": "Исчерпано"
       },
       "actions": {
         "stats": "Статистика",
@@ -3759,9 +3654,7 @@
           "expired": "истёк",
           "daysLeft": "дн. осталось",
           "deviceLimitUpdated": "Лимит устройств обновлён",
-          "invalidDays": "Введите корректное количество дней (больше 0)",
-          "backToList": "К списку подписок",
-          "createNew": "Создать новую"
+          "invalidDays": "Введите корректное количество дней (больше 0)"
         },
         "balance": {
           "current": "Текущий баланс",
@@ -3845,9 +3738,7 @@
           "alreadyReferred": "уже чей-то реферал",
           "noUsersFound": "Пользователи не найдены"
         }
-      },
-      "notFound": "Пользователь не найден",
-      "purchaseCount": "Покупок: {{count}}"
+      }
     },
     "promoOffers": {
       "title": "Промопредложения",
@@ -3857,8 +3748,7 @@
         "templates_one": "Шаблоны ({{count}} шаблон)",
         "templates_few": "Шаблоны ({{count}} шаблона)",
         "templates_many": "Шаблоны ({{count}} шаблонов)",
-        "logs": "Логи",
-        "templates": "Шаблоны"
+        "logs": "Логи"
       },
       "noData": {
         "templates": "Нет шаблонов",
@@ -3888,9 +3778,7 @@
         "activeDiscountHours": "Действие скидки (часы)",
         "discountDurationHint": "Сколько действует скидка после активации",
         "templateActive": "Шаблон активен",
-        "saving": "Сохранение...",
-        "noServers": "Нет серверов",
-        "testSquads": "Тестовые сквады"
+        "saving": "Сохранение..."
       },
       "send": {
         "title": "Отправка промопредложения",
@@ -3919,10 +3807,7 @@
         "notificationsFailed_one": "(не доставлено: {{count}})",
         "notificationsFailed_few": "(не доставлено: {{count}})",
         "notificationsFailed_many": "(не доставлено: {{count}})",
-        "sendError": "Не удалось отправить предложение",
-        "notificationsSent": "Отправлено уведомлений",
-        "offersCreated": "Создано офферов",
-        "notificationsFailed": "(не отправлено: {{count}})"
+        "sendError": "Не удалось отправить предложение"
       },
       "notFound": "Шаблон не найден",
       "noActiveTemplates": "Нет активных шаблонов",
@@ -3993,15 +3878,15 @@
         "deleteUser": "Удалить пользователей"
       },
       "deleteSubscription": {
-        "warning": "Выбранные подписки будут безвозвратно удалены из бота и панели Remnawave!",
+        "warning": "Выбранные подписки будут безвозвратно удалены из бота и панели RemnaWave!",
         "hint": "Пользователи потеряют доступ к VPN по удалённым подпискам. Это действие нельзя отменить.",
-        "activePaidWarning": "{{count}} из {{total}} выбранных подписок: активные платные",
+        "activePaidWarning": "{{count}} из {{total}} выбранных подписок — активные платные",
         "forceDeleteConfirm": "Подтверждаю удаление активных платных подписок"
       },
       "deleteUser": {
         "warning": "Выбранные пользователи будут безвозвратно удалены из бота! Все их подписки, баланс и данные будут потеряны!",
         "hint": "Это действие нельзя отменить. Пользователям придётся заново запустить бота для создания нового аккаунта.",
-        "deleteFromPanel": "Также удалить из панели Remnawave"
+        "deleteFromPanel": "Также удалить из панели RemnaWave"
       },
       "params": {
         "days": "Количество дней",
@@ -4032,7 +3917,7 @@
         "summaryErrors": "{{count}} ошибок"
       },
       "errors": {
-        "title": "{{count}} ошибок. Показать детали"
+        "title": "{{count}} ошибок — показать детали"
       },
       "filters": {
         "search": "Поиск по ID, нику, email",
@@ -4188,8 +4073,7 @@
         "selectedPermissions_many": "{{count}} разрешений выбрано",
         "cancel": "Отмена",
         "saving": "Сохранение...",
-        "save": "Сохранить",
-        "selectedPermissions": "Выбрано прав"
+        "save": "Сохранить"
       },
       "presets": {
         "moderator": "Модератор",
@@ -4209,9 +4093,7 @@
         "updateFailed": "Не удалось обновить роль",
         "nameRequired": "Укажите название роли",
         "deleteFailed": "Не удалось удалить роль"
-      },
-      "permissionsCount": "{{count}} прав",
-      "usersCount": "{{count}} пользователей"
+      }
     },
     "roleAssign": {
       "title": "Назначение ролей",
@@ -4265,8 +4147,7 @@
         "roleRequired": "Выберите роль",
         "assignFailed": "Не удалось назначить роль",
         "revokeFailed": "Не удалось отозвать роль"
-      },
-      "totalAssignments": "Всего назначений: {{count}}"
+      }
     },
     "policies": {
       "title": "Политики доступа",
@@ -4335,8 +4216,7 @@
         "day3": "Ср",
         "day4": "Чт",
         "day5": "Пт",
-        "day6": "Сб",
-        "ipCount": "Кол-во IP"
+        "day6": "Сб"
       },
       "confirm": {
         "title": "Удалить политику?",
@@ -4426,10 +4306,7 @@
         "hoursAgo_many": "{{count}} ч назад",
         "daysAgo_one": "{{count}} день назад",
         "daysAgo_few": "{{count}} дня назад",
-        "daysAgo_many": "{{count}} дней назад",
-        "daysAgo": "{{count}} дн назад",
-        "hoursAgo": "{{count}} ч назад",
-        "minutesAgo": "{{count}} мин назад"
+        "daysAgo_many": "{{count}} дней назад"
       },
       "pagination": {
         "pageSize": "На странице:",
@@ -4442,8 +4319,7 @@
       "errors": {
         "loadFailed": "Не удалось загрузить журнал аудита",
         "retry": "Попробовать снова"
-      },
-      "totalEntries": "Всего записей: {{count}}"
+      }
     },
     "landings": {
       "title": "Лендинги",
@@ -4528,12 +4404,6 @@
         "dailyChart": "Покупки и доход по дням",
         "tariffChart": "Распределение по тарифам",
         "giftBreakdown": "Подарки vs обычные",
-        "funnelTitle": "Воронка конверсии",
-        "giftClaimTitle": "Активация подарков",
-        "giftClaimLabel": "забрано / отправлено",
-        "dailyRevenue": "Выручка по дням",
-        "byPaymentMethod": "По способам оплаты",
-        "bySource": "Источники трафика",
         "purchases": "Покупки",
         "revenueLabel": "Доход",
         "gifts": "Подарки",
@@ -4543,8 +4413,7 @@
         "funnel": "Воронка",
         "loadError": "Не удалось загрузить статистику",
         "noPurchases": "Нет покупок",
-        "paid": "оплачено",
-        "dailyPurchases": "Покупок в день"
+        "paid": "оплачено"
       },
       "purchases": {
         "title": "Покупки",
@@ -4570,16 +4439,7 @@
         "page": "Стр. {{current}} из {{total}}",
         "prev": "Назад",
         "next": "Далее"
-      },
-      "methodCurrency": "Валюта",
-      "methodDescPlaceholder": "Краткое описание метода для пользователя",
-      "methodDescription": "Описание метода",
-      "methodDisplayName": "Отображаемое имя",
-      "methodIconUrl": "URL иконки",
-      "methodMaxAmount": "Максимальная сумма",
-      "methodMinAmount": "Минимальная сумма",
-      "methodReturnUrl": "URL возврата",
-      "stickyPayButton": "Закреплённая кнопка оплаты"
+      }
     },
     "infoPages": {
       "title": "Информационные страницы",
@@ -4692,8 +4552,7 @@
       "hide": "Скрыть ({{count}})",
       "showMore_one": "Показать еще {{count}} ноду",
       "showMore_few": "Показать еще {{count}} ноды",
-      "showMore_many": "Показать еще {{count}} нод",
-      "showMore": "Показать ещё"
+      "showMore_many": "Показать еще {{count}} нод"
     },
     "revenue": {
       "title": "Доходы",
@@ -4738,8 +4597,7 @@
       "byEarnings": "По доходу",
       "byInvited": "По пригл.",
       "invites": "пригл.",
-      "people": "чел.",
-      "stats": "реф., {{count}} приглашений"
+      "people": "чел."
     },
     "period": {
       "today": "Сегодня",
@@ -4751,8 +4609,7 @@
       "stats_one": "камп., {{count}} рег.",
       "stats_few": "камп., {{count}} рег.",
       "stats_many": "камп., {{count}} рег.",
-      "total": "Всего от РК",
-      "stats": "кампания, {{count}} регистр."
+      "total": "Всего от РК"
     },
     "recentPayments": {
       "title": "Последние платежи",
@@ -5149,15 +5006,8 @@
         "yandex": "Яндекс",
         "discord": "Discord",
         "vk": "VK"
-      },
-      "backToAccounts": "К списку аккаунтов"
-    },
-    "emailMergePasswordRequired": "Этот email уже привязан к другому аккаунту. Чтобы объединить аккаунты, введите пароль от него.",
-    "emailMergeCodeSent": "Код подтверждения отправлен на тот email.",
-    "emailMergeCodeDescription": "Этот email уже привязан к другому аккаунту. Мы отправили на него код — введите его, чтобы подтвердить владение и объединить аккаунты.",
-    "emailMergeCodeLabel": "Код из письма",
-    "emailMergeConfirm": "Подтвердить и объединить",
-    "emailMergeCodeInvalid": "Неверный или просроченный код"
+      }
+    }
   },
   "theme": {
     "colors": "Цвета темы",
@@ -5313,8 +5163,7 @@
       "warning": "Отменённый промокод нельзя будет использовать повторно. Скидка перестанет действовать немедленно.",
       "confirm": "Отменить",
       "deactivating": "Отмена...",
-      "error": "Не удалось отменить промокод. Попробуйте позже.",
-      "success": "Акция отключена"
+      "error": "Не удалось отменить промокод. Попробуйте позже."
     }
   },
   "telegramRedirect": {
@@ -5376,14 +5225,6 @@
       "openBot": "Открыть бота",
       "retry": "Я нажал /start, попробовать снова",
       "hint": "После /start вернитесь сюда и нажмите «Попробовать снова»."
-    },
-    "serviceUnavailable": {
-      "title": "Сервис недоступен",
-      "description": "Не удаётся подключиться к сервису. Возможно, идут технические работы или временные неполадки со связью.",
-      "retry": "Повторить попытку",
-      "checking": "Проверяем соединение...",
-      "hint": "Страница обновится автоматически, как только сервис снова станет доступен.",
-      "close": "Закрыть"
     }
   },
   "merge": {
@@ -5414,36 +5255,6 @@
     "merging": "Объединение..."
   },
   "landing": {
-    "giftClaim": {
-      "title": "Вам подарок!",
-      "error": "Не удалось активировать подарок.",
-      "notFoundTitle": "Подарок не найден",
-      "notFoundDesc": "Ссылка на подарок недействительна или больше недоступна.",
-      "alreadyTitle": "Подарок уже активирован",
-      "alreadyDesc": "Этот подарок уже забрали.",
-      "successTitle": "Подарок активирован!",
-      "connectDesc": "Используйте эту ссылку для подключения:",
-      "copyLink": "Скопировать ссылку",
-      "pendingTitle": "Почти готово…",
-      "pendingDesc": "Оплата ещё подтверждается. Страница обновится автоматически.",
-      "replaceWarning": "У вас уже есть подписка — активация подарка заменит её.",
-      "activateTelegram": "Активировать в Telegram",
-      "activateWeb": "Активировать по почте",
-      "emailLabel": "Ваш email",
-      "claimNow": "Получить подарок",
-      "failedTitle": "Подарок недоступен",
-      "failedDesc": "Оплата подарка не прошла, поэтому активировать его нельзя."
-    },
-    "giftLink": {
-      "shareText": "Дарю вам подписку! Активируйте здесь:",
-      "viaTelegram": "Telegram:",
-      "title": "Подарок готов!",
-      "subtitle": "Отправьте эту ссылку тому, кому предназначен подарок — он активирует его сам.",
-      "linkLabel": "Ссылка на подарок",
-      "telegramLabel": "Ссылка для Telegram",
-      "alsoSent": "Мы также отправили её на {{contact}}.",
-      "copyMessage": "Скопировать сообщение"
-    },
     "notFound": "Страница не найдена",
     "forMe": "Для себя",
     "asGift": "В подарок",
@@ -5482,6 +5293,7 @@
     "copy": "Скопировать",
     "copied": "Скопировано!",
     "copyLink": "Скопировать ссылку",
+    "consent": "Я согласен с <privacy>политикой обработки данных</privacy>, <offer>договором оферты</offer> и <recurrent>соглашением о рекуррентных платежах</recurrent>.",
     "giftToggleLabel": "Тип покупки",
     "pollTimedOut": "Занимает больше времени, чем ожидалось",
     "pollTimedOutDesc": "Обработка платежа занимает больше времени, чем обычно. Вы можете попробовать проверить ещё раз.",
@@ -5531,9 +5343,7 @@
       "nDays_many": "{{count}} дней",
       "nMonths_one": "{{count}} месяц",
       "nMonths_few": "{{count}} месяца",
-      "nMonths_many": "{{count}} месяцев",
-      "nDays": "{{count}} дн",
-      "nMonths": "{{count}} мес"
+      "nMonths_many": "{{count}} месяцев"
     }
   },
   "gift": {
@@ -5609,7 +5419,7 @@
     "activateButton": "Активировать подарок",
     "activating": "Активация...",
     "activateSuccess": "Подарок активирован!",
-    "activateSuccessDesc": "{{tariff}}: {{days}} дн. добавлено к вашей подписке",
+    "activateSuccessDesc": "{{tariff}} — {{days}} дн. добавлено к вашей подписке",
     "activateError": "Не удалось активировать подарок",
     "activateSelfError": "Нельзя активировать свой собственный подарок",
     "myGiftsEmpty": "У вас пока нет подарков",
@@ -5716,13 +5526,5 @@
         "linkUrlPrompt": "URL ссылки:"
       }
     }
-  },
-  "subscriptions": {
-    "buy": "Купить подписку",
-    "buyAnother": "Купить ещё подписку",
-    "browsePlans": "Посмотреть тарифы и купить подписку",
-    "empty": "У вас пока нет подписок",
-    "emptyDesc": "Выберите тариф, чтобы начать пользоваться сервисом",
-    "title": "Мои подписки"
   }
 }

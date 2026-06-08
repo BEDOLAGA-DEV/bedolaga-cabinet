@@ -116,7 +116,6 @@ export function BrandingTab({ accentColor = '#3b82f6' }: BrandingTabProps) {
                 <img
                   src={brandingApi.getLogoUrl(branding) ?? undefined}
                   alt="Logo"
-                  loading="lazy"
                   className="h-full w-full object-cover"
                 />
               ) : (
@@ -180,8 +179,8 @@ export function BrandingTab({ accentColor = '#3b82f6' }: BrandingTabProps) {
                 </button>
               </div>
             ) : (
-              <div className="flex min-w-0 items-center gap-2">
-                <span className="min-w-0 truncate text-lg text-dark-100">
+              <div className="flex items-center gap-2">
+                <span className="text-lg text-dark-100">
                   {branding?.name || t('admin.settings.notSpecified')}
                 </span>
                 <button
@@ -189,7 +188,7 @@ export function BrandingTab({ accentColor = '#3b82f6' }: BrandingTabProps) {
                     setNewName(branding?.name ?? '');
                     setEditingName(true);
                   }}
-                  className="shrink-0 rounded-lg p-1.5 text-dark-400 transition-colors hover:bg-dark-700 hover:text-dark-200"
+                  className="rounded-lg p-1.5 text-dark-400 transition-colors hover:bg-dark-700 hover:text-dark-200"
                 >
                   <PencilIcon />
                 </button>
