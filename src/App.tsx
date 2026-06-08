@@ -28,7 +28,6 @@ import {
   ChannelSubscriptionScreen,
   BlacklistedScreen,
   AccountDeletedScreen,
-  ServiceUnavailableScreen,
 } from './components/blocking';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { PermissionRoute } from '@/components/auth/PermissionRoute';
@@ -66,7 +65,6 @@ const Connection = lazyWithRetry(() => import('./pages/Connection'));
 const ConnectionQR = lazyWithRetry(() => import('./pages/ConnectionQR'));
 const QuickPurchase = lazyWithRetry(() => import('./pages/QuickPurchase'));
 const PurchaseSuccess = lazyWithRetry(() => import('./pages/PurchaseSuccess'));
-const GiftClaim = lazyWithRetry(() => import('./pages/GiftClaim'));
 const RenewSubscription = lazyWithRetry(() => import('./pages/RenewSubscription'));
 const AutoLogin = lazyWithRetry(() => import('./pages/AutoLogin'));
 const TopUpMethodSelect = lazyWithRetry(() => import('./pages/TopUpMethodSelect'));
@@ -75,6 +73,15 @@ const TopUpResult = lazyWithRetry(() => import('./pages/TopUpResult'));
 const ConnectedAccounts = lazyWithRetry(() => import('./pages/ConnectedAccounts'));
 const LinkTelegramCallback = lazyWithRetry(() => import('./pages/LinkTelegramCallback'));
 const MergeAccounts = lazyWithRetry(() => import('./pages/MergeAccounts'));
+const PublicPrivacyPage = lazyWithRetry(() =>
+  import('./pages/PublicLegalDoc').then((m) => ({ default: m.PublicPrivacyPage })),
+);
+const PublicOfferPage = lazyWithRetry(() =>
+  import('./pages/PublicLegalDoc').then((m) => ({ default: m.PublicOfferPage })),
+);
+const PublicRecurrentPaymentsPage = lazyWithRetry(() =>
+  import('./pages/PublicLegalDoc').then((m) => ({ default: m.PublicRecurrentPaymentsPage })),
+);
 
 // Admin pages - lazy load (only for admins)
 const AdminPanel = lazyWithRetry(() => import('./pages/AdminPanel'));
@@ -202,16 +209,9 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
   return <Layout>{children}</Layout>;
 }
 
-// Suspense + error boundary wrapper for lazy routes. The boundary lives
-// OUTSIDE Suspense so chunk-load failures (caught by lazyWithRetry's reload
-// path) and render-time exceptions both surface in the page-level fallback
-// instead of crashing the entire shell via the top-level boundary.
+// Suspense wrapper for lazy components
 function LazyPage({ children }: { children: React.ReactNode }) {
-  return (
-    <ErrorBoundary level="page">
-      <Suspense fallback={<PageLoader variant="dark" />}>{children}</Suspense>
-    </ErrorBoundary>
-  );
+  return <Suspense fallback={<PageLoader variant="dark" />}>{children}</Suspense>;
 }
 
 function BlockingOverlay() {
@@ -231,10 +231,6 @@ function BlockingOverlay() {
 
   if (blockingType === 'account_deleted') {
     return <AccountDeletedScreen />;
-  }
-
-  if (blockingType === 'backend_unavailable') {
-    return <ServiceUnavailableScreen />;
   }
 
   return null;
@@ -277,32 +273,56 @@ function App() {
         <Route
           path="/buy/success/:token"
           element={
-            <LazyPage>
-              <PurchaseSuccess />
-            </LazyPage>
-          }
-        />
-        <Route
-          path="/buy/gift/:token"
-          element={
-            <LazyPage>
-              <GiftClaim />
-            </LazyPage>
+            <ErrorBoundary level="app">
+              <LazyPage>
+                <PurchaseSuccess />
+              </LazyPage>
+            </ErrorBoundary>
           }
         />
         <Route
           path="/buy/:slug"
           element={
-            <LazyPage>
-              <QuickPurchase />
-            </LazyPage>
+            <ErrorBoundary level="app">
+              <LazyPage>
+                <QuickPurchase />
+              </LazyPage>
+            </ErrorBoundary>
           }
         />
         <Route
           path="/auto-login"
           element={
+            <ErrorBoundary level="app">
+              <LazyPage>
+                <AutoLogin />
+              </LazyPage>
+            </ErrorBoundary>
+          }
+        />
+
+        {/* Public legal pages — accessible without authentication */}
+        <Route
+          path="/privacy"
+          element={
             <LazyPage>
-              <AutoLogin />
+              <PublicPrivacyPage />
+            </LazyPage>
+          }
+        />
+        <Route
+          path="/offer"
+          element={
+            <LazyPage>
+              <PublicOfferPage />
+            </LazyPage>
+          }
+        />
+        <Route
+          path="/recurrent-payments"
+          element={
+            <LazyPage>
+              <PublicRecurrentPaymentsPage />
             </LazyPage>
           }
         />
@@ -402,9 +422,11 @@ function App() {
           path="/balance/top-up/result"
           element={
             <ProtectedRoute withLayout={false}>
-              <LazyPage>
-                <TopUpResult />
-              </LazyPage>
+              <ErrorBoundary level="app">
+                <LazyPage>
+                  <TopUpResult />
+                </LazyPage>
+              </ErrorBoundary>
             </ProtectedRoute>
           }
         />
@@ -531,21 +553,25 @@ function App() {
         <Route
           path="/gift"
           element={
-            <ProtectedRoute>
-              <LazyPage>
-                <GiftSubscription />
-              </LazyPage>
-            </ProtectedRoute>
+            <ErrorBoundary level="app">
+              <ProtectedRoute>
+                <LazyPage>
+                  <GiftSubscription />
+                </LazyPage>
+              </ProtectedRoute>
+            </ErrorBoundary>
           }
         />
         <Route
           path="/gift/result"
           element={
-            <ProtectedRoute>
-              <LazyPage>
-                <GiftResult />
-              </LazyPage>
-            </ProtectedRoute>
+            <ErrorBoundary level="app">
+              <ProtectedRoute>
+                <LazyPage>
+                  <GiftResult />
+                </LazyPage>
+              </ProtectedRoute>
+            </ErrorBoundary>
           }
         />
         <Route

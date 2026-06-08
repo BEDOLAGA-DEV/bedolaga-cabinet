@@ -23,6 +23,11 @@ export interface PublicOfferResponse {
   updated_at: string | null;
 }
 
+export interface RecurrentPaymentsResponse {
+  content: string;
+  updated_at: string | null;
+}
+
 export interface ServiceInfo {
   name: string;
   description: string | null;
@@ -65,6 +70,14 @@ export const infoApi = {
   // Get public offer
   getPublicOffer: async (): Promise<PublicOfferResponse> => {
     const response = await apiClient.get<PublicOfferResponse>('/cabinet/info/public-offer');
+    return response.data;
+  },
+
+  // Get recurrent payments agreement
+  getRecurrentPaymentsAgreement: async (): Promise<RecurrentPaymentsResponse> => {
+    const response = await apiClient.get<RecurrentPaymentsResponse>(
+      '/cabinet/info/recurrent-payments',
+    );
     return response.data;
   },
 

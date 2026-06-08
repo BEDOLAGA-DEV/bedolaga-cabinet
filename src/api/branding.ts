@@ -325,4 +325,10 @@ export const brandingApi = {
   storeYandexCid: async (cid: string): Promise<void> => {
     await apiClient.post('/cabinet/branding/analytics/yandex-cid', { cid });
   },
+
+  // Store partner / affiliate click_id (Keitaro etc.) for the authenticated user.
+  // Saved into yandex_client_id_map.subid for S2S postback delivery.
+  storePartnerClickId: async (click_id: string): Promise<void> => {
+    await apiClient.post('/cabinet/branding/analytics/partner-click-id', { click_id });
+  },
 };
