@@ -314,7 +314,7 @@ export default function Login() {
 
   return (
     <div
-      className="flex min-h-[100dvh] items-center justify-center px-4 sm:px-6 lg:px-8"
+      className="flex min-h-[100dvh] flex-col items-center justify-center gap-4 px-4 py-8 sm:px-6 lg:px-8"
       style={{
         paddingTop:
           safeTop > 0 ? `${safeTop + 16}px` : 'calc(1rem + env(safe-area-inset-top, 0px))',
@@ -737,6 +737,66 @@ export default function Login() {
             )}
           </div>
         )}
+      </div>
+
+      {/* ─── Юридические ссылки ─── */}
+      <div className="relative w-full max-w-md space-y-2 pb-6 pt-2 text-center">
+        <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
+          <a
+            href="https://t.me/berlinconnection_news"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs text-dark-400 transition-colors hover:text-dark-200"
+          >
+            Новости
+          </a>
+          <span className="text-xs text-dark-600">·</span>
+          <a
+            href="https://berlin-connection.ru/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs text-dark-400 transition-colors hover:text-dark-200"
+          >
+            Сайт
+          </a>
+          <span className="text-xs text-dark-600">·</span>
+          <a
+            href="https://t.me/berlinazure"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs text-dark-400 transition-colors hover:text-dark-200"
+          >
+            Поддержка
+          </a>
+        </div>
+        <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
+          <a
+            href="https://berlin-connection.ru/docs/docs.html#agreement"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs text-dark-400 transition-colors hover:text-dark-200"
+          >
+            Пользовательское соглашение
+          </a>
+          <span className="text-xs text-dark-600">·</span>
+          <a
+            href="https://berlin-connection.ru/docs/docs.html#policy"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs text-dark-400 transition-colors hover:text-dark-200"
+          >
+            Политика конфиденциальности
+          </a>
+          <span className="text-xs text-dark-600">·</span>
+          <a
+            href="https://berlin-connection.ru/docs/docs.html#soglasie"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs text-dark-400 transition-colors hover:text-dark-200"
+          >
+            Согласие на обработку ПДн
+          </a>
+        </div>
       </div>
     </div>
   );
