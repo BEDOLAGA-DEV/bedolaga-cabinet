@@ -268,9 +268,9 @@ export function AnalyticsTab() {
                 </button>
               </div>
             ) : (
-              <div className="flex items-center gap-2">
+              <div className="flex min-w-0 items-center gap-2">
                 <span
-                  className={`text-base ${analytics?.google_ads_id ? 'font-mono text-dark-100' : 'text-dark-500'}`}
+                  className={`min-w-0 truncate text-base ${analytics?.google_ads_id ? 'font-mono text-dark-100' : 'text-dark-500'}`}
                 >
                   {analytics?.google_ads_id || t('admin.settings.notConfigured')}
                 </span>
@@ -280,7 +280,7 @@ export function AnalyticsTab() {
                     setEditingGoogleId(true);
                     setError(null);
                   }}
-                  className="rounded-lg p-1.5 text-dark-400 transition-colors hover:bg-dark-700 hover:text-dark-200"
+                  className="shrink-0 rounded-lg p-1.5 text-dark-400 transition-colors hover:bg-dark-700 hover:text-dark-200"
                 >
                   <PencilIcon className="h-4 w-4" />
                 </button>
@@ -322,9 +322,9 @@ export function AnalyticsTab() {
                 </button>
               </div>
             ) : (
-              <div className="flex items-center gap-2">
+              <div className="flex min-w-0 items-center gap-2">
                 <span
-                  className={`text-base ${analytics?.google_ads_label ? 'font-mono text-dark-100' : 'text-dark-500'}`}
+                  className={`min-w-0 truncate text-base ${analytics?.google_ads_label ? 'font-mono text-dark-100' : 'text-dark-500'}`}
                 >
                   {analytics?.google_ads_label || t('admin.settings.notConfigured')}
                 </span>
@@ -334,7 +334,7 @@ export function AnalyticsTab() {
                     setEditingGoogleLabel(true);
                     setError(null);
                   }}
-                  className="rounded-lg p-1.5 text-dark-400 transition-colors hover:bg-dark-700 hover:text-dark-200"
+                  className="shrink-0 rounded-lg p-1.5 text-dark-400 transition-colors hover:bg-dark-700 hover:text-dark-200"
                 >
                   <PencilIcon className="h-4 w-4" />
                 </button>

@@ -229,11 +229,11 @@ export default function AdminRemnawaveSquadDetail() {
                 key={idx}
                 className="flex items-center justify-between rounded-lg bg-dark-700/50 px-4 py-3"
               >
-                <span className="text-sm text-dark-200">
+                <span className="min-w-0 flex-1 truncate text-sm text-dark-200">
                   {String(inbound.tag || inbound.uuid || `Inbound ${idx + 1}`)}
                 </span>
                 {typeof inbound.type === 'string' && (
-                  <span className="rounded bg-dark-600 px-2 py-1 text-xs text-dark-400">
+                  <span className="ml-2 shrink-0 rounded bg-dark-600 px-2 py-1 text-xs text-dark-400">
                     {inbound.type}
                   </span>
                 )}

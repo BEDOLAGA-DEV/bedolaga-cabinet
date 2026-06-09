@@ -7,6 +7,7 @@ import {
   safeRedirectToLogin,
 } from '../utils/token';
 import { useBlockingStore } from '../store/blocking';
+import { reportPossibleBackendDown, markBackendReached } from './health';
 import { API } from '../config/constants';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
@@ -94,6 +95,12 @@ apiClient.interceptors.request.use(async (config: InternalAxiosRequestConfig) =>
       const newToken = await tokenRefreshManager.refreshAccessToken();
       if (newToken) {
         token = newToken;
+      } else if (tokenRefreshManager.lastFailureWasTransport) {
+        // Backend unreachable (not a rejected token): keep the session intact so
+        // the ServiceUnavailableScreen can auto-recover once the backend returns,
+        // instead of wiping tokens and stranding the user on /login. Let the
+        // request go out with the stale token; it will fail and be handled.
+        return config;
       } else {
         tokenStorage.clearTokens();
         safeRedirectToLogin();
@@ -195,9 +202,27 @@ export function isAccountDeletedError(
 }
 
 apiClient.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // First successful response means the app reached the backend at least once
+    // (it bootstrapped). Recovery from a later outage can then just lift the
+    // overlay instead of hard-reloading and losing unsaved UI state.
+    markBackendReached();
+    return response;
+  },
   async (error: AxiosError) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
+
+    // Transport-level failure: no HTTP response at all (backend unreachable, DNS
+    // failure, connection refused, timeout). All the coded guards below need
+    // `error.response`, so this case had zero handling and produced a blank
+    // screen during bootstrap. Confirm the outage with a liveness probe (so a
+    // one-off blip doesn't blank an already-loaded app) and, if confirmed, flip
+    // the full-screen ServiceUnavailableScreen. Fire-and-forget — the original
+    // request still rejects now. Axios cancellations are not outages.
+    if (!error.response && error.code !== 'ERR_CANCELED') {
+      void reportPossibleBackendDown();
+      return Promise.reject(error);
+    }
 
     if (isMaintenanceError(error)) {
       const detail = (error.response?.data as { detail: MaintenanceError }).detail;
@@ -256,6 +281,9 @@ apiClient.interceptors.response.use(
           originalRequest.headers.Authorization = `Bearer ${newToken}`;
         }
         return apiClient(originalRequest);
+      } else if (tokenRefreshManager.lastFailureWasTransport) {
+        // Backend died between the 401 and the refresh: keep the session so the
+        // ServiceUnavailableScreen can recover, rather than logging the user out.
       } else {
         tokenStorage.clearTokens();
         safeRedirectToLogin();

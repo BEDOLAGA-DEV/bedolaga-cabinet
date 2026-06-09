@@ -579,7 +579,7 @@
       "buyTraffic": "Buy more traffic",
       "currentTrafficLimit": "Current limit: {{limit}} GB (used {{used}} GB)",
       "buyTrafficTitle": "Buy more traffic",
-      "trafficWarning": "Purchased traffic is added to your current limit and does not carry over to the next period",
+      "trafficWarning": "Purchased traffic is added to your current limit and is valid for 30 days from purchase",
       "trafficUnavailable": "Traffic purchase is not available for your tariff",
       "unlimited": "Unlimited",
       "buyTrafficGb": "Buy {{gb}} GB",
@@ -1756,7 +1756,8 @@
         "dailyLimit": "Daily Spin Limit (0 = unlimited)",
         "minSubDays": "Min subscription days for day payment",
         "promocodes": "Promocodes",
-        "promoPrefix": "Promo code prefix"
+        "promoPrefix": "Promo code prefix",
+        "promoValidityDays": "Promo code validity (days)"
       },
       "starsNotEnabledGlobally": "Star payments are not enabled in Payment Methods. Enable \"Telegram Stars\" in the Payment Methods section.",
       "prizes": {
@@ -1783,7 +1784,9 @@
           "emoji": "Emoji",
           "color": "Color",
           "active": "Active",
-          "worth": "Worth"
+          "worth": "Worth",
+          "probability": "Manual probability (0–1)",
+          "probabilityHint": "Empty = auto by RTP"
         },
         "promo": {
           "title": "Promo Code Settings",
@@ -1801,7 +1804,9 @@
         "times": "times",
         "times_one": "{{count}} time",
         "times_other": "{{count}} times",
-        "topWins": "Top Wins"
+        "topWins": "Top Wins",
+        "loadError": "Failed to load statistics",
+        "empty": "No spins yet"
       }
     },
     "broadcasts": {
@@ -3978,6 +3983,12 @@
         "dailyChart": "Purchases & Revenue by Day",
         "tariffChart": "Tariff Distribution",
         "giftBreakdown": "Gifts vs Regular",
+        "funnelTitle": "Conversion funnel",
+        "giftClaimTitle": "Gift activation",
+        "giftClaimLabel": "claimed / sent",
+        "dailyRevenue": "Daily revenue",
+        "byPaymentMethod": "By payment method",
+        "bySource": "Traffic sources",
         "purchases": "Purchases",
         "revenueLabel": "Revenue",
         "gifts": "Gifts",
@@ -4588,7 +4599,13 @@
         "vk": "VK"
       },
       "backToAccounts": "Back to accounts"
-    }
+    },
+    "emailMergePasswordRequired": "This email already belongs to another account. To merge the accounts, enter that account's password.",
+    "emailMergeCodeSent": "A confirmation code was sent to that email.",
+    "emailMergeCodeDescription": "This email already belongs to another account. We sent a code to it — enter it to confirm ownership and merge the accounts.",
+    "emailMergeCodeLabel": "Code from the email",
+    "emailMergeConfirm": "Confirm and merge",
+    "emailMergeCodeInvalid": "Invalid or expired code"
   },
   "theme": {
     "colors": "Theme Colors",
@@ -4804,6 +4821,14 @@
       "openBot": "Open the bot",
       "retry": "I pressed /start, retry",
       "hint": "After running /start, return here and tap «Retry»."
+    },
+    "serviceUnavailable": {
+      "title": "Service unavailable",
+      "description": "We can't reach the service right now. It may be undergoing maintenance or there's a temporary connection issue.",
+      "retry": "Try again",
+      "checking": "Checking connection...",
+      "hint": "This page will refresh automatically as soon as the service is back.",
+      "close": "Close"
     }
   },
   "merge": {
@@ -4834,6 +4859,36 @@
     "merging": "Merging..."
   },
   "landing": {
+    "giftClaim": {
+      "title": "You have a gift!",
+      "error": "Could not activate the gift.",
+      "notFoundTitle": "Gift not found",
+      "notFoundDesc": "This gift link is invalid or no longer available.",
+      "alreadyTitle": "Gift already activated",
+      "alreadyDesc": "This gift has already been claimed.",
+      "successTitle": "Gift activated!",
+      "connectDesc": "Use this link to connect:",
+      "copyLink": "Copy link",
+      "pendingTitle": "Almost ready…",
+      "pendingDesc": "The payment is still being confirmed. This page will update automatically.",
+      "replaceWarning": "You already have a subscription — activating this gift will replace it.",
+      "activateTelegram": "Activate in Telegram",
+      "activateWeb": "Activate by email",
+      "emailLabel": "Your email",
+      "claimNow": "Get my gift",
+      "failedTitle": "Gift unavailable",
+      "failedDesc": "The payment for this gift did not go through, so it cannot be activated."
+    },
+    "giftLink": {
+      "shareText": "I have a gift for you! Activate it here:",
+      "viaTelegram": "Telegram:",
+      "title": "Gift is ready!",
+      "subtitle": "Send this link to whoever you want to receive the gift — they activate it themselves.",
+      "linkLabel": "Gift link",
+      "telegramLabel": "Telegram link",
+      "alsoSent": "We also emailed it to {{contact}}.",
+      "copyMessage": "Copy message"
+    },
     "notFound": "Page not found",
     "forMe": "For me",
     "asGift": "As a gift",
@@ -5103,6 +5158,7 @@
   "subscriptions": {
     "buy": "Buy subscription",
     "buyAnother": "Buy another subscription",
+    "browsePlans": "View plans and subscribe",
     "empty": "You have no subscriptions yet",
     "emptyDesc": "Choose a tariff to get started",
     "title": "My subscriptions"

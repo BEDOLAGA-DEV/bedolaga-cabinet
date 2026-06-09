@@ -198,14 +198,14 @@ export default function Contests() {
         <div className="grid gap-4 sm:grid-cols-2">
           {contests.map((contest) => (
             <div key={contest.id} className="card">
-              <div className="flex items-start justify-between">
-                <div>
-                  <h3 className="text-lg font-semibold">{contest.name}</h3>
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <h3 className="break-words text-lg font-semibold">{contest.name}</h3>
                   {contest.description && (
                     <p className="mt-1 text-sm text-dark-400">{contest.description}</p>
                   )}
                 </div>
-                <div className="flex items-center gap-1 text-accent-400">
+                <div className="flex shrink-0 items-center gap-1 text-accent-400">
                   <TrophyIcon />
                   <span className="text-sm font-medium">
                     +{t('contests.days', { count: contest.prize_days })}

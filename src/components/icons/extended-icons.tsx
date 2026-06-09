@@ -49,6 +49,7 @@ import {
   PiFlag,
   PiArrowCounterClockwise,
   PiArrowClockwise,
+  PiCloudWarning,
   PiRocket,
   PiFloppyDisk,
   PiPaperPlaneTilt,
@@ -359,6 +360,10 @@ export const ResetIcon = ({ className }: IconProps) => (
 
 export const RestartIcon = ({ className }: IconProps) => (
   <PiArrowClockwise className={cn('h-5 w-5', className)} />
+);
+
+export const CloudWarningIcon = ({ className }: IconProps) => (
+  <PiCloudWarning className={cn('h-5 w-5', className)} />
 );
 
 export const RocketIcon = ({ className }: IconProps) => (

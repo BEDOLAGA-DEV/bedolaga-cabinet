@@ -256,9 +256,13 @@ export default function SuccessNotificationModal() {
 
           {/* Tariff name */}
           {data.tariffName && (
-            <div className="flex items-center justify-between rounded-xl bg-dark-800/50 px-4 py-3">
-              <span className="text-dark-400">{t('successNotification.tariff', 'Tariff')}</span>
-              <span className="font-semibold text-dark-100">{data.tariffName}</span>
+            <div className="flex items-center justify-between gap-3 rounded-xl bg-dark-800/50 px-4 py-3">
+              <span className="shrink-0 text-dark-400">
+                {t('successNotification.tariff', 'Tariff')}
+              </span>
+              <span className="min-w-0 truncate font-semibold text-dark-100">
+                {data.tariffName}
+              </span>
             </div>
           )}
 

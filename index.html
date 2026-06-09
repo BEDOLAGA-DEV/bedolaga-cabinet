@@ -13,14 +13,14 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="format-detection" content="telephone=no" />
     <meta name="referrer" content="strict-origin-when-cross-origin" />
-    <title>Loading...</title>
+    <title>VPN</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700&display=swap"
       rel="stylesheet"
       media="print"
-      onload="this.media='all'"
+      onload="this.media = 'all'"
     />
     <noscript>
       <link
@@ -30,8 +30,9 @@
     </noscript>
     <script>
       // Load Telegram Web App script only inside Telegram environment
-      (function() {
-        var isTelegram = window.TelegramWebviewProxy ||
+      (function () {
+        var isTelegram =
+          window.TelegramWebviewProxy ||
           location.hash.indexOf('tgWebApp') !== -1 ||
           location.search.indexOf('tgWebApp') !== -1;
         if (isTelegram) {

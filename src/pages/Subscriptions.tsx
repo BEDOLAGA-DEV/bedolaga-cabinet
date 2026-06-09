@@ -62,6 +62,12 @@ export default function Subscriptions() {
   const subscriptions = data?.subscriptions ?? [];
   const isMultiTariff = data?.multi_tariff_enabled ?? false;
   const hasNoSubscriptions = !isLoading && subscriptions.length === 0;
+  // Есть ли хотя бы одна НАСТОЯЩАЯ (платная, не триал) живая подписка. От этого
+  // зависит CTA: «+ Купить ещё» — только если уже есть платная; иначе показываем
+  // явную «Посмотреть тарифы и купить подписку» (триал/истёкшие — это ещё не покупка).
+  const hasActivePaid = subscriptions.some(
+    (s) => !s.is_trial && (s.status === 'active' || s.status === 'limited'),
+  );
 
   // Если у юзера нет подписок — проверяем доступность триала, иначе
   // (в multi-tariff) ему вообще негде увидеть оффер.
@@ -107,7 +113,8 @@ export default function Subscriptions() {
         <h1 className="text-2xl font-bold" style={{ color: g.text }}>
           {t('subscriptions.title', 'Мои подписки')}
         </h1>
-        {!isLoading && subscriptions.length > 0 && (
+        {/* «+ Купить ещё» — только если уже есть платная активная подписка */}
+        {!isLoading && hasActivePaid && (
           <button
             onClick={() => navigate('/subscription/purchase')}
             className="flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-medium transition-colors"
@@ -122,6 +129,18 @@ export default function Subscriptions() {
           </button>
         )}
       </div>
+
+      {/* Есть подписки, но платной активной нет (только триал/истёкшие) —
+          даём ЯВНУЮ primary-кнопку покупки: мы продаём подписки. */}
+      {!isLoading && subscriptions.length > 0 && !hasActivePaid && (
+        <button
+          onClick={() => navigate('/subscription/purchase')}
+          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-accent-500 p-3.5 text-sm font-semibold text-white transition-colors hover:bg-accent-600"
+        >
+          <PlusIcon className="h-5 w-5" />
+          {t('subscriptions.browsePlans', 'Посмотреть тарифы и купить подписку')}
+        </button>
+      )}
 
       {/* Loading */}
       {isLoading && (
@@ -152,9 +171,9 @@ export default function Subscriptions() {
               (Telegram-баг #605056/#605063). */}
           <button
             onClick={() => navigate('/subscription/purchase')}
-            className="w-full rounded-xl border px-6 py-3 text-sm font-medium transition-colors"
-            style={{ background: g.innerBg, borderColor: g.cardBorder, color: g.text }}
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-accent-500 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-accent-600"
           >
+            <PlusIcon className="h-5 w-5" />
             {t('subscriptions.browsePlans', 'Посмотреть тарифы и купить подписку')}
           </button>
         </div>

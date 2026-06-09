@@ -40,8 +40,13 @@ import {
   StarIcon,
   TicketIcon,
   TrashIcon,
+  WalletIcon,
+  WheelIcon,
   XMarkIcon,
 } from '@/components/icons';
+import { StatCard } from '@/components/stats';
+import { BreakdownList } from '@/components/sales-stats/BreakdownList';
+import { useCurrency } from '@/hooks/useCurrency';
 import { usePlatform } from '../platform/hooks/usePlatform';
 import { toNumber } from '../utils/inputHelpers';
 
@@ -166,6 +171,7 @@ export default function AdminWheel() {
   const confirmDelete = useDestructiveConfirm();
   const { capabilities } = usePlatform();
   const notify = useNotify();
+  const { formatWithCurrency } = useCurrency();
 
   const [activeTab, setActiveTab] = useState<Tab>('settings');
   const [expandedPrizeId, setExpandedPrizeId] = useState<number | null>(null);
@@ -184,6 +190,7 @@ export default function AdminWheel() {
     daily_spin_limit: number | '';
     min_subscription_days_for_day_payment: number | '';
     promo_prefix: string;
+    promo_validity_days: number | '';
   } | null>(null);
 
   // Fetch config
@@ -193,7 +200,11 @@ export default function AdminWheel() {
   });
 
   // Fetch statistics
-  const { data: stats } = useQuery({
+  const {
+    data: stats,
+    isLoading: statsLoading,
+    error: statsError,
+  } = useQuery({
     queryKey: ['admin-wheel-stats'],
     queryFn: () => adminWheelApi.getStatistics(),
     enabled: activeTab === 'statistics',
@@ -214,6 +225,7 @@ export default function AdminWheel() {
           daily_spin_limit: config.daily_spin_limit,
           min_subscription_days_for_day_payment: config.min_subscription_days_for_day_payment,
           promo_prefix: config.promo_prefix,
+          promo_validity_days: config.promo_validity_days,
         };
       });
     }
@@ -232,7 +244,8 @@ export default function AdminWheel() {
       settingsForm.daily_spin_limit !== config.daily_spin_limit ||
       settingsForm.min_subscription_days_for_day_payment !==
         config.min_subscription_days_for_day_payment ||
-      settingsForm.promo_prefix !== config.promo_prefix);
+      settingsForm.promo_prefix !== config.promo_prefix ||
+      settingsForm.promo_validity_days !== config.promo_validity_days);
 
   // Update config mutation
   const updateConfigMutation = useMutation({
@@ -669,6 +682,26 @@ export default function AdminWheel() {
                   className="input w-full"
                 />
               </div>
+              <div>
+                <label className="mb-2 block text-sm font-medium text-dark-300">
+                  {t('admin.wheel.settings.promoValidityDays')}
+                </label>
+                <input
+                  type="number"
+                  value={settingsForm?.promo_validity_days ?? config.promo_validity_days}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setSettingsForm((prev) =>
+                      prev
+                        ? { ...prev, promo_validity_days: val === '' ? '' : parseInt(val) || 0 }
+                        : null,
+                    );
+                  }}
+                  min={1}
+                  max={365}
+                  className="input w-full"
+                />
+              </div>
             </div>
           </div>
 
@@ -701,6 +734,10 @@ export default function AdminWheel() {
                     min_subscription_days_for_day_payment: toNumber(
                       settingsForm.min_subscription_days_for_day_payment,
                       config.min_subscription_days_for_day_payment,
+                    ),
+                    promo_validity_days: toNumber(
+                      settingsForm.promo_validity_days,
+                      config.promo_validity_days,
                     ),
                   });
                 }}
@@ -740,28 +777,22 @@ export default function AdminWheel() {
               <div className="flex items-center gap-3 rounded-xl border border-warning-500/30 bg-warning-500/10 p-4">
                 <div className="flex-1">
                   <p className="text-sm font-medium text-warning-400">
-                    {t('admin.wheel.prizes.unsavedOrder') || 'Есть несохраненные изменения порядка'}
+                    {t('admin.wheel.prizes.unsavedOrder')}
                   </p>
                   <p className="text-xs text-warning-400/70">
-                    {t('admin.wheel.prizes.unsavedOrderHint') ||
-                      'Сохраните изменения или отмените их'}
+                    {t('admin.wheel.prizes.unsavedOrderHint')}
                   </p>
                 </div>
                 <div className="flex gap-2">
-                  <button
-                    onClick={handleDiscardOrderChanges}
-                    className="rounded-lg border border-dark-600 bg-dark-700 px-4 py-2 text-sm text-dark-200 transition-colors hover:bg-dark-600"
-                  >
-                    {t('common.cancel') || 'Отменить'}
+                  <button onClick={handleDiscardOrderChanges} className="btn-secondary">
+                    {t('common.cancel')}
                   </button>
                   <button
                     onClick={handleSavePrizeOrder}
                     disabled={reorderPrizesMutation.isPending}
-                    className="rounded-lg bg-warning-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-warning-600 disabled:opacity-50"
+                    className="btn-primary"
                   >
-                    {reorderPrizesMutation.isPending
-                      ? t('common.saving') || 'Сохранение...'
-                      : t('common.save') || 'Сохранить'}
+                    {reorderPrizesMutation.isPending ? t('common.saving') : t('common.save')}
                   </button>
                 </div>
               </div>
@@ -833,79 +864,82 @@ export default function AdminWheel() {
       )}
 
       {/* Statistics Tab */}
-      {activeTab === 'statistics' && stats && (
+      {activeTab === 'statistics' && statsLoading && (
+        <div className="flex justify-center py-12">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
+        </div>
+      )}
+
+      {activeTab === 'statistics' && !statsLoading && statsError && (
+        <div className="bento-card py-8 text-center text-error-400">
+          {t('admin.wheel.statistics.loadError')}
+        </div>
+      )}
+
+      {activeTab === 'statistics' &&
+        !statsLoading &&
+        !statsError &&
+        stats &&
+        stats.total_spins === 0 && (
+          <div className="bento-card py-12 text-center text-dark-400">
+            {t('admin.wheel.statistics.empty')}
+          </div>
+        )}
+
+      {activeTab === 'statistics' && stats && stats.total_spins > 0 && (
         <div className="space-y-4">
-          {/* Stats cards */}
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-            <div className="card p-4 text-center">
-              <div className="text-3xl font-bold text-accent-400">{stats.total_spins}</div>
-              <div className="text-sm text-dark-400">{t('admin.wheel.statistics.totalSpins')}</div>
-            </div>
-            <div className="card p-4 text-center">
-              <div className="text-3xl font-bold text-success-400">
-                {(stats.total_revenue_kopeks / 100).toFixed(0)}₽
-              </div>
-              <div className="text-sm text-dark-400">{t('admin.wheel.statistics.revenue')}</div>
-            </div>
-            <div className="card p-4 text-center">
-              <div className="text-3xl font-bold text-warning-400">
-                {(stats.total_payout_kopeks / 100).toFixed(0)}₽
-              </div>
-              <div className="text-sm text-dark-400">{t('admin.wheel.statistics.payouts')}</div>
-            </div>
-            <div className="card p-4 text-center">
-              <div
-                className={`text-3xl font-bold ${
-                  stats.actual_rtp_percent <= stats.configured_rtp_percent
-                    ? 'text-success-400'
-                    : 'text-error-400'
-                }`}
-              >
-                {stats.actual_rtp_percent.toFixed(1)}%
-              </div>
-              <div className="text-sm text-dark-400">
-                {t('admin.wheel.statistics.actualRtp')} ({t('admin.wheel.statistics.targetRtp')}:{' '}
-                {stats.configured_rtp_percent}%)
-              </div>
-            </div>
+          {/* Headline metrics — shared StatCard, like the rest of the admin stats */}
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <StatCard
+              label={t('admin.wheel.statistics.totalSpins')}
+              value={stats.total_spins}
+              icon={<WheelIcon className="h-5 w-5" />}
+              tone="accent"
+            />
+            <StatCard
+              label={t('admin.wheel.statistics.revenue')}
+              value={formatWithCurrency(stats.total_revenue_kopeks / 100, 0)}
+              icon={<WalletIcon className="h-5 w-5" />}
+              tone="success"
+            />
+            <StatCard
+              label={t('admin.wheel.statistics.payouts')}
+              value={formatWithCurrency(stats.total_payout_kopeks / 100, 0)}
+              icon={<GiftIcon className="h-5 w-5" />}
+              tone="warning"
+            />
+            <StatCard
+              label={`${t('admin.wheel.statistics.actualRtp')} · ${t('admin.wheel.statistics.targetRtp')} ${stats.configured_rtp_percent}%`}
+              value={`${stats.actual_rtp_percent.toFixed(1)}%`}
+              icon={<ChartIcon className="h-5 w-5" />}
+              tone={stats.actual_rtp_percent <= stats.configured_rtp_percent ? 'success' : 'error'}
+            />
           </div>
 
-          {/* Prize distribution */}
+          {/* Prize distribution — shared BreakdownList (ranked bars + share %) */}
           {stats.prizes_distribution.length > 0 && (
-            <div className="card p-4">
-              <h3 className="mb-3 font-semibold text-dark-100">
-                {t('admin.wheel.statistics.prizeDistribution')}
-              </h3>
-              <div className="space-y-2">
-                {stats.prizes_distribution.map((prize, i) => (
-                  <div key={i} className="flex items-center justify-between">
-                    <span className="text-dark-300">{prize.display_name}</span>
-                    <span className="text-dark-100">
-                      {t('admin.wheel.statistics.times', { count: prize.count })}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <BreakdownList
+              title={t('admin.wheel.statistics.prizeDistribution')}
+              items={stats.prizes_distribution.map((prize) => ({
+                key: prize.display_name,
+                label: prize.display_name,
+                value: prize.count,
+              }))}
+              valueFormatter={(v) => t('admin.wheel.statistics.times', { count: v })}
+            />
           )}
 
-          {/* Top wins */}
+          {/* Top wins — same BreakdownList, ranked by win value */}
           {stats.top_wins.length > 0 && (
-            <div className="card p-4">
-              <h3 className="mb-3 font-semibold text-dark-100">
-                {t('admin.wheel.statistics.topWins')}
-              </h3>
-              <div className="space-y-2">
-                {stats.top_wins.slice(0, 5).map((win, i) => (
-                  <div key={i} className="flex items-center justify-between">
-                    <span className="text-dark-300">{win.username || `User #${win.user_id}`}</span>
-                    <span className="text-dark-100">
-                      {win.prize_display_name} ({(win.prize_value_kopeks / 100).toFixed(0)}₽)
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <BreakdownList
+              title={t('admin.wheel.statistics.topWins')}
+              items={stats.top_wins.slice(0, 8).map((win, i) => ({
+                key: `${win.user_id}-${i}`,
+                label: `${win.username || `#${win.user_id}`} · ${win.prize_display_name}`,
+                value: win.prize_value_kopeks / 100,
+              }))}
+              valueFormatter={(v) => formatWithCurrency(v, 0)}
+            />
           )}
         </div>
       )}
@@ -1095,6 +1129,33 @@ function InlinePrizeForm({
         <label htmlFor={`is_active_${prize?.id || 'new'}`} className="text-sm text-dark-300">
           {t('admin.wheel.prizes.fields.active')}
         </label>
+      </div>
+
+      {/* Manual probability override (optional; empty = auto by RTP) */}
+      <div>
+        <label className="mb-2 block text-sm font-medium text-dark-300">
+          {t('admin.wheel.prizes.fields.probability')}
+        </label>
+        <input
+          type="number"
+          value={formData.manual_probability ?? ''}
+          onChange={(e) => {
+            const val = e.target.value;
+            setFormData({
+              ...formData,
+              manual_probability:
+                val === '' ? null : Math.min(1, Math.max(0, parseFloat(val) || 0)),
+            });
+          }}
+          min={0}
+          max={1}
+          step={0.01}
+          placeholder="0.00 – 1.00"
+          className="input w-full sm:w-1/2"
+        />
+        <p className="mt-1 text-xs text-dark-500">
+          {t('admin.wheel.prizes.fields.probabilityHint')}
+        </p>
       </div>
 
       {/* Promocode settings */}

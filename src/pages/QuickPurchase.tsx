@@ -7,6 +7,13 @@ import { fireAnalyticsEvent, getYandexCid } from '../hooks/useAnalyticsCounters'
 import { motion, AnimatePresence } from 'framer-motion';
 import DOMPurify from 'dompurify';
 import { landingApi } from '../api/landings';
+import {
+  brandingApi,
+  getCachedBranding,
+  setCachedBranding,
+  preloadLogo,
+  getLogoBlobUrl,
+} from '../api/branding';
 import type {
   LandingConfig,
   LandingTariff,
@@ -14,12 +21,16 @@ import type {
   LandingPaymentMethod,
   PurchaseRequest,
 } from '../api/landings';
-import { StaticBackgroundRenderer } from '../components/backgrounds/BackgroundRenderer';
+import {
+  BackgroundRenderer,
+  StaticBackgroundRenderer,
+} from '../components/backgrounds/BackgroundRenderer';
 import { CheckCircleIcon, CheckIcon, DevicesIcon, DownloadIcon } from '@/components/icons';
 import LanguageSwitcher from '../components/LanguageSwitcher';
 import { cn } from '../lib/utils';
 import { getApiErrorMessage } from '../utils/api-error';
 import { formatPrice } from '../utils/format';
+import { setFavicon, letterFaviconDataUri, roundedFaviconDataUri } from '../utils/favicon';
 import { useCurrency } from '../hooks/useCurrency';
 
 function detectContactType(value: string): 'email' | 'telegram' {
@@ -772,6 +783,42 @@ export default function QuickPurchase() {
     retry: 1,
   });
 
+  // Public branding — drives the favicon on this standalone landing page.
+  // The cabinet's useBranding hook is auth-gated and AppShell-only, so a public
+  // landing would otherwise keep the empty index.html favicon. The branding
+  // endpoint is public; logo is preloaded as a blob to keep the backend URL out
+  // of the DOM (same pattern as the authenticated app).
+  const { data: branding } = useQuery({
+    queryKey: ['branding'],
+    queryFn: async () => {
+      const data = await brandingApi.getBranding();
+      setCachedBranding(data);
+      await preloadLogo(data);
+      return data;
+    },
+    initialData: getCachedBranding() ?? undefined,
+    initialDataUpdatedAt: 0,
+    staleTime: 60_000,
+    retry: 1,
+  });
+
+  useEffect(() => {
+    if (!branding) return;
+    const logoUrl = branding.has_custom_logo ? getLogoBlobUrl() : null;
+    if (!logoUrl) {
+      setFavicon(letterFaviconDataUri(branding.logo_letter));
+      return;
+    }
+    let cancelled = false;
+    // Round the custom logo like the header tile instead of a hard square.
+    roundedFaviconDataUri(logoUrl).then((rounded) => {
+      if (!cancelled) setFavicon(rounded || logoUrl);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [branding]);
+
   const [discountExpired, setDiscountExpired] = useState(false);
 
   const handleDiscountExpired = useCallback(() => {
@@ -900,15 +947,18 @@ export default function QuickPurchase() {
     }
   }, [visibleTariffs, selectedTariffId]);
 
-  // SEO: set document title
+  // SEO: set document title. Fall back to the landing's own title when no
+  // dedicated meta_title is set — otherwise the tab keeps the static
+  // index.html "VPN" placeholder and never reflects the landing.
   useEffect(() => {
-    if (!config?.meta_title) return;
+    const pageTitle = config?.meta_title || config?.title;
+    if (!pageTitle) return;
     const prev = document.title;
-    document.title = config.meta_title;
+    document.title = pageTitle;
     return () => {
       document.title = prev;
     };
-  }, [config?.meta_title]);
+  }, [config?.meta_title, config?.title]);
 
   // SEO: set meta description
   useEffect(() => {
@@ -1069,8 +1119,16 @@ export default function QuickPurchase() {
   const showTariffCards = visibleTariffs.length > 1;
 
   return (
-    <div className={cn('min-h-dvh overflow-x-hidden', !config.background_config && 'bg-dark-950')}>
-      {config.background_config && <StaticBackgroundRenderer config={config.background_config} />}
+    <div className="min-h-dvh overflow-x-hidden">
+      {/* Background: the landing's own per-landing theme when configured, else
+          fall back to the cabinet's global animated theme (instead of a bare
+          dark canvas). Both render via a portal behind the content, so the
+          wrapper stays transparent over the body's #0a0f1a. */}
+      {config.background_config ? (
+        <StaticBackgroundRenderer config={config.background_config} />
+      ) : (
+        <BackgroundRenderer />
+      )}
       <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
         {/* Language switcher */}
         <div className="mb-4 flex justify-end">

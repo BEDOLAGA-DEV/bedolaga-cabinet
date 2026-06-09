@@ -93,7 +93,7 @@ export function SubscriptionSubRow({
                 />
               </svg>
             </span>
-            <span className="text-xs font-semibold text-dark-200">
+            <span className="min-w-0 flex-1 truncate text-xs font-semibold text-dark-200">
               {subscription.tariff_name || '—'}
             </span>
           </div>

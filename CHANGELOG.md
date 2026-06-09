@@ -1,5 +1,49 @@
 # Changelog
 
+## [1.57.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.56.0...v1.57.0) (2026-06-05)
+
+
+### Features
+
+* **cabinet:** bulletproof Close button + kill the /login flash on the service-unavailable screen ([7413837](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/7413837fafdf7346054b72bbd05a1c42c4e38bd2))
+* **cabinet:** premium redesign of all 5 full-screen blocking states ([782568e](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/782568e091fbe636c9f3136002f5b230089cdc04))
+* **cabinet:** recoverable "service unavailable" screen when the backend is unreachable ([ac8a0fc](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/ac8a0fc41aff4065fdf1dde0bbc47694bfd1f010))
+* **connected-accounts:** email-merge confirmation via emailed one-time code ([3224320](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/322432009502e6b983f286747e1d4840123fb7db))
+* **desktop-header:** group nav into a centered segmented capsule ([7de9b3b](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/7de9b3b51be095da15a9035c98d0aefa4b526838))
+* **gift:** transferable gift claim — buyer share link + recipient claim page ([db31d39](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/db31d395cd70055da8b0cbf697fc70173b45401a))
+* **landing-stats:** rebuild charts on shared components + add funnel & breakdowns ([78c633f](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/78c633ff548e893978f3bb7213475501a5562d56))
+* **landing:** фолбэк на глобальную тему кабинета, когда у лендинга своя не задана ([0859583](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/085958342e023ecf5811208644a1db54029ab67b))
+
+
+### Bug Fixes
+
+* **admin-wheel:** unify prize-order banner buttons + drop hardcoded i18n fallbacks ([e4b3c86](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/e4b3c8640bdbcf18430c736b8027abb51ce612cc))
+* **admin-wheel:** unify statistics rendering + fill config UI gaps ([5de43c1](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/5de43c1071aa1fabb63ce70989afde1e5f431059))
+* **cabinet:** blocking screens exit via the native Telegram back button, drop the in-page Close ([f9cc70c](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/f9cc70cba32debc8edb300869ba652b93f774212))
+* **cabinet:** stop long user data overflowing flex rows on mobile ([63863a0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/63863a048bf71793f08a560b26bb41cc3a24bdba))
+* **cabinet:** sweep mobile flex-overflow across all pages + components ([800daf7](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/800daf7506c1c1d1718971d672a8fabb38dfa8e8))
+* **connected-accounts:** guide the user to enter the existing account's password when merging by email ([7d31dc3](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/7d31dc3ffa094683c17b81dbf0ee8a555a34da09))
+* **connected-accounts:** keep status/unlink inside the card on long IDs ([c39c164](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/c39c164d51fac8616b994f87ba8bc027a4bf0726))
+* **connected-accounts:** stack status + unlink so the full ID shows on mobile ([7383505](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/7383505a127efc11b166d307eb2f06e1a70972e0))
+* **connection:** Happ TV connect renders through the active block style (all 4) ([c91c9e0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/c91c9e0441232109398798d4c42711b1c897b5ed))
+* **connection:** Happ TV connect works on Apple TV too (one API for both) ([ce7a3ea](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/ce7a3eaedf4127129de2b2aec3dea85bd9fe48b1))
+* **connection:** Happ TV quick-connect is Happ-only + matches config-block styles ([5855a88](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/5855a88dc630924ea3e047ccb9cc85e578532b08))
+* **connection:** keep selected app when switching platform ([f8ac489](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/f8ac4895fa7def88d2e2905a8df57726f85aa048))
+* **connection:** restrict Happ TV quick-connect to Android TV only ([ca54cb4](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/ca54cb4732ee30cc18a851cd8a6b8b2301194014))
+* **dashboard:** убрать дубль кнопки покупки при пустом списке подписок ([cecfe7e](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/cecfe7ec038a26eb580404957e70859e0df27e26))
+* **desktop-header:** full-width row so all nav items fit (no overflow/overlap) ([864aeaf](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/864aeaf600eb3af20f700af2c68f6570abbf1115))
+* **desktop-header:** stop layout jumping via 3-column grid ([9fc681b](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/9fc681b56da18c1453bc2e034d306019c454c771))
+* **favicon:** скругляем углы кастомного лого как у плитки в хедере ([7104778](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/71047780c96b72fe6af3bfca86e8e3b30eb2be9c))
+* **gift:** cabinet GiftResult shows claim link for directed gifts + review fixes ([b9521f1](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/b9521f1aa73758ad61d0d0be4686676c051dbe17))
+* **landing-stats:** guard gift claim-rate against stale cache (avoid NaN%) ([b210a04](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/b210a04dbb772fe1faf66f02b6ef6db447e9766e))
+* **landing:** заголовок «Loading...» и пустая иконка вкладки на лендингах ([5a6e458](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/5a6e4589c866a168656285deae214f178491cb12))
+* **security:** use signed media tokens for ticket attachments ([c6fc167](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/c6fc167d80898832504000c24860be8c4099fb93))
+* **security:** validate the deep-link url in miniapp/redirect.html (open redirect + DOM-XSS) ([b4f0669](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/b4f066942a613027d8a9c347332ef1efdd29e03d))
+* **subscriptions:** «+ Купить ещё» только при платной подписке, явный CTA покупки ([39bfef5](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/39bfef58d0db9ebbe2bd27d4e7f327f02932b81b))
+* **switch-tariff:** route trial & expired subs to the purchase flow ([#629889](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/issues/629889)) ([5b123f5](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/5b123f5da034f22ed8d59700cf60d79213d4ea8c))
+* **traffic:** correct misleading add-traffic note — 30-day validity ([f7bd36a](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/f7bd36a95e27d9d9257fbfb45f23513b05a6b017))
+* **wheel:** stop showing fake wins in the browser ([73ee42a](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/73ee42a0ef38ec36ff6f763304b9521e44d9302a))
+
 ## [1.56.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.55.0...v1.56.0) (2026-06-02)
 
 

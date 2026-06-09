@@ -476,8 +476,9 @@ export default function GiftResult() {
       const s = d?.status;
       if (s === 'delivered' || s === 'failed' || s === 'pending_activation' || s === 'expired')
         return false;
-      // Code-only gifts stay in 'paid' status — stop polling
-      if (s === 'paid' && d?.is_code_only) return false;
+      // Claimable gifts (code-only AND directed) stay in 'paid' until claimed —
+      // stop polling; the buyer shares the link.
+      if (s === 'paid' && d?.is_claimable) return false;
 
       // Check poll timeout
       if (Date.now() - pollStart.current > MAX_POLL_MS) {
@@ -511,8 +512,8 @@ export default function GiftResult() {
     );
   }
 
-  const isCodeOnlyPaid =
-    status?.status === 'paid' && status?.is_code_only && status?.purchase_token != null;
+  const isClaimablePaid =
+    status?.status === 'paid' && status?.is_claimable && status?.purchase_token != null;
   const isDelivered = status?.status === 'delivered';
   const isPendingActivation = status?.status === 'pending_activation';
   const isFailed = status?.status === 'failed' || status?.status === 'expired';
@@ -531,7 +532,7 @@ export default function GiftResult() {
       >
         {isError ? (
           <PollErrorState />
-        ) : isCodeOnlyPaid ? (
+        ) : isClaimablePaid ? (
           <CodeOnlySuccessState
             purchaseToken={status.purchase_token!}
             tariffName={status.tariff_name}

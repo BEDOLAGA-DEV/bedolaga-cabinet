@@ -26,6 +26,25 @@ import type { Tariff } from '../../../types';
 // TariffPurchaseForm instead of attempting another switch.
 // ──────────────────────────────────────────────────────────────────
 
+// The backend rejects a switch that must instead go through the purchase flow:
+// the subscription lapsed (`subscription_expired`), or it is a trial that has no
+// paid value to prorate and would otherwise be handed a full target period
+// (`trial_cannot_switch`, bug #629889). Both arrive as detail.code +
+// use_purchase_flow=true; some payloads use the legacy `error_code` key, so we
+// accept either.
+function shouldUsePurchaseFlow(error: unknown): boolean {
+  if (!(error instanceof AxiosError)) return false;
+  const detail = error.response?.data?.detail as
+    | { code?: string; error_code?: string; use_purchase_flow?: boolean }
+    | undefined;
+  if (!detail || typeof detail !== 'object') return false;
+  const code = detail.code ?? detail.error_code;
+  return (
+    (code === 'subscription_expired' || code === 'trial_cannot_switch') &&
+    detail.use_purchase_flow === true
+  );
+}
+
 export interface SwitchTariffSheetProps {
   open: boolean;
   tariffId: number | null;
@@ -69,22 +88,15 @@ export function SwitchTariffSheet({
       navigate('/subscriptions', { replace: true });
     },
     onError: (error: unknown) => {
-      // Backend signal: the subscription lapsed mid-flight. Hand the
-      // selected tariff back to the parent so it can open the regular
-      // purchase form instead.
-      if (error instanceof AxiosError) {
-        const detail = error.response?.data?.detail;
-        if (
-          typeof detail === 'object' &&
-          detail?.error_code === 'subscription_expired' &&
-          detail?.use_purchase_flow === true
-        ) {
-          const targetTariff = tariffs.find((tariff) => tariff.id === tariffId);
-          if (targetTariff) {
-            onClose();
-            onExpiredFallback(targetTariff);
-            queryClient.invalidateQueries({ queryKey: ['purchase-options', subscriptionId] });
-          }
+      // Backend signal: this subscription can't be switched (it lapsed, or it's
+      // a trial). Hand the selected tariff back to the parent so it opens the
+      // regular purchase form instead.
+      if (shouldUsePurchaseFlow(error)) {
+        const targetTariff = tariffs.find((tariff) => tariff.id === tariffId);
+        if (targetTariff) {
+          onClose();
+          onExpiredFallback(targetTariff);
+          queryClient.invalidateQueries({ queryKey: ['purchase-options', subscriptionId] });
         }
       }
     },
@@ -130,15 +142,15 @@ export function SwitchTariffSheet({
           return (
             <>
               <div className="space-y-2 text-sm">
-                <div className="flex justify-between text-dark-300">
-                  <span>{t('subscription.switchTariff.currentTariff')}</span>
-                  <span className="font-medium text-dark-100">
+                <div className="flex justify-between gap-2 text-dark-300">
+                  <span className="shrink-0">{t('subscription.switchTariff.currentTariff')}</span>
+                  <span className="min-w-0 truncate font-medium text-dark-100">
                     {switchPreview.current_tariff_name || '-'}
                   </span>
                 </div>
-                <div className="flex justify-between text-dark-300">
-                  <span>{t('subscription.switchTariff.newTariff')}</span>
-                  <span className="font-medium text-accent-400">
+                <div className="flex justify-between gap-2 text-dark-300">
+                  <span className="shrink-0">{t('subscription.switchTariff.newTariff')}</span>
+                  <span className="min-w-0 truncate font-medium text-accent-400">
                     {switchPreview.new_tariff_name}
                   </span>
                 </div>
@@ -213,15 +225,10 @@ export function SwitchTariffSheet({
 
               {switchMutation.isError &&
                 (() => {
-                  // Suppress the toast when the subscription_expired
-                  // fallback already triggered: the parent is now
-                  // showing the regular purchase form, surfacing the
-                  // raw axios message here would be misleading.
-                  const detail =
-                    switchMutation.error instanceof AxiosError
-                      ? switchMutation.error.response?.data?.detail
-                      : null;
-                  if (typeof detail === 'object' && detail?.error_code === 'subscription_expired') {
+                  // Suppress the toast when the purchase-flow fallback already
+                  // triggered (expired / trial): the parent is now showing the
+                  // regular purchase form, so the raw axios message would mislead.
+                  if (shouldUsePurchaseFlow(switchMutation.error)) {
                     return null;
                   }
                   return (

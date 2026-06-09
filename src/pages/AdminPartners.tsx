@@ -129,12 +129,14 @@ export default function AdminPartners() {
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="min-w-0 flex-1">
-                      <div className="mb-1 flex items-center gap-2">
+                      <div className="mb-1 flex min-w-0 items-center gap-2">
                         <h3 className="truncate font-medium text-dark-100">
                           {partner.first_name || partner.username || `#${partner.user_id}`}
                         </h3>
                         {partner.username && (
-                          <span className="text-sm text-dark-500">@{partner.username}</span>
+                          <span className="shrink-0 text-sm text-dark-500">
+                            @{partner.username}
+                          </span>
                         )}
                       </div>
                       <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-dark-400">
@@ -177,12 +179,12 @@ export default function AdminPartners() {
                 <div key={app.id} className="rounded-xl border border-dark-700 bg-dark-800 p-4">
                   <div className="mb-3 flex items-start justify-between gap-4">
                     <div className="min-w-0 flex-1">
-                      <div className="mb-1 flex items-center gap-2">
+                      <div className="mb-1 flex min-w-0 items-center gap-2">
                         <h3 className="truncate font-medium text-dark-100">
                           {app.first_name || app.username || `#${app.user_id}`}
                         </h3>
                         {app.username && (
-                          <span className="text-sm text-dark-500">@{app.username}</span>
+                          <span className="shrink-0 text-sm text-dark-500">@{app.username}</span>
                         )}
                       </div>
                       {app.company_name && (

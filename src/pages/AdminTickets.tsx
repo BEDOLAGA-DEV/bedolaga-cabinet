@@ -443,7 +443,7 @@ export default function AdminTickets() {
                     </span>
                   </div>
                 </div>
-                <div className="mb-4 flex items-center gap-2 text-sm text-dark-500">
+                <div className="mb-4 flex flex-wrap items-center gap-2 text-sm text-dark-500">
                   <span>
                     {t('admin.tickets.from')}: {formatUser(selectedTicket)}
                     {selectedTicket.user?.telegram_id && (

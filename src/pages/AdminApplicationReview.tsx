@@ -88,9 +88,11 @@ export default function AdminApplicationReview() {
           <div className="space-y-3">
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0 flex-1">
-                <div className="mb-1 flex items-center gap-2">
-                  <span className="font-medium text-dark-100">{displayName}</span>
-                  {app.username && <span className="text-sm text-dark-500">@{app.username}</span>}
+                <div className="mb-1 flex min-w-0 items-center gap-2">
+                  <span className="truncate font-medium text-dark-100">{displayName}</span>
+                  {app.username && (
+                    <span className="shrink-0 text-sm text-dark-500">@{app.username}</span>
+                  )}
                 </div>
               </div>
             </div>

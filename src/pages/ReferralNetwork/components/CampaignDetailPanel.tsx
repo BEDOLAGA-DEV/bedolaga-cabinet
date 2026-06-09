@@ -60,11 +60,13 @@ export function CampaignDetailPanel({ campaignId, className }: CampaignDetailPan
           <div className="space-y-5">
             {/* Info */}
             <div className="space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-dark-500">
+              <div className="flex items-center justify-between gap-2 text-sm">
+                <span className="shrink-0 text-dark-500">
                   {t('admin.referralNetwork.campaign.startParam')}
                 </span>
-                <span className="font-mono text-dark-200">{campaign.start_parameter}</span>
+                <span className="min-w-0 truncate font-mono text-dark-200">
+                  {campaign.start_parameter}
+                </span>
               </div>
               <div className="flex justify-end">
                 <span
@@ -133,17 +135,19 @@ export function CampaignDetailPanel({ campaignId, className }: CampaignDetailPan
                   {campaign.top_referrers.map((referrer, index) => (
                     <div
                       key={referrer.user_id}
-                      className="flex items-center justify-between text-sm"
+                      className="flex items-center justify-between gap-2 text-sm"
                     >
-                      <div className="flex items-center gap-2">
-                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-dark-700 text-[10px] font-medium text-dark-300">
+                      <div className="flex min-w-0 items-center gap-2">
+                        <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-dark-700 text-[10px] font-medium text-dark-300">
                           {index + 1}
                         </span>
-                        <span className="text-dark-200">
+                        <span className="truncate text-dark-200">
                           {referrer.username ? `@${referrer.username}` : `#${referrer.user_id}`}
                         </span>
                       </div>
-                      <span className="font-mono text-dark-300">{referrer.referral_count}</span>
+                      <span className="shrink-0 font-mono text-dark-300">
+                        {referrer.referral_count}
+                      </span>
                     </div>
                   ))}
                 </div>

@@ -2,20 +2,7 @@ import { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import {
-  Area,
-  AreaChart,
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Cell,
-  Pie,
-  PieChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from 'recharts';
+import { Cell, Funnel, FunnelChart, LabelList, ResponsiveContainer } from 'recharts';
 import {
   adminLandingsApi,
   resolveLocaleDisplay,
@@ -23,21 +10,32 @@ import {
   type LandingPurchaseItem,
 } from '../api/landings';
 import { useCurrency } from '../hooks/useCurrency';
-import { useChartColors } from '../hooks/useChartColors';
 import { CHART_COMMON } from '../constants/charts';
 import { AdminBackButton } from '../components/admin';
+import { StatCard } from '../components/stats';
+import { BreakdownList } from '../components/sales-stats/BreakdownList';
+import { DonutChart } from '../components/sales-stats/DonutChart';
+import { SimpleAreaChart } from '../components/sales-stats/SimpleAreaChart';
+import { MultiSeriesAreaChart } from '../components/sales-stats/MultiSeriesAreaChart';
 import {
   ChartIcon,
   EmailIcon,
   TelegramSmallIcon,
   ArrowRightIcon,
   GiftIcon,
+  EyeIcon,
+  CheckCircleIcon,
+  BanknotesIcon,
+  PercentIcon,
+  TicketIcon,
+  CardIcon,
+  WalletIcon,
   ChevronLeftIcon as ChevronLeftSmall,
   ChevronRightIcon as ChevronRightSmall,
 } from '@/components/icons';
 
-const TARIFF_PALETTE = ['#818cf8', '#34d399', '#f59e0b', '#ec4899', '#06b6d4', '#8b5cf6'];
-const GIFT_COLOR = '#a855f7';
+const FUNNEL_COLORS = ['#f59e0b', '#34d399'];
+const GIFT_DONUT = { regular: '#818cf8', gift: '#a855f7' };
 
 const PURCHASE_STATUS_STYLES: Record<string, string> = {
   pending: 'bg-warning-500/20 text-warning-400',
@@ -181,7 +179,8 @@ export default function AdminLandingStats() {
   const isValidId = !isNaN(numericId);
   const navigate = useNavigate();
   const { formatWithCurrency } = useCurrency();
-  const colors = useChartColors();
+  const divisor = CHART_COMMON.KOPEKS_DIVISOR;
+  const money = (kopeks: number) => formatWithCurrency(kopeks / divisor);
 
   // Purchases list state
   const [purchaseOffset, setPurchaseOffset] = useState(0);
@@ -234,49 +233,59 @@ export default function AdminLandingStats() {
   const purchaseTotalPages = Math.ceil(purchaseTotal / PURCHASES_PAGE_SIZE);
   const purchaseCurrentPage = Math.floor(purchaseOffset / PURCHASES_PAGE_SIZE) + 1;
 
-  // Prepare daily chart data
-  const dailyData = useMemo(() => {
+  // Daily counts (created / paid) — flat data for MultiSeriesAreaChart
+  const dailyCounts = useMemo(() => {
     if (!stats) return [];
-    return stats.daily_stats.map((item) => ({
-      label: (() => {
-        const d = new Date(item.date + 'T00:00:00');
-        return `${d.getDate()}.${String(d.getMonth() + 1).padStart(2, '0')}`;
-      })(),
-      created: item.created,
-      purchases: item.purchases,
-      revenue: item.revenue_kopeks / CHART_COMMON.KOPEKS_DIVISOR,
-      gifts: item.gifts,
-    }));
-  }, [stats]);
+    const createdLabel = t('admin.landings.stats.created', 'Created');
+    const paidLabel = t('admin.landings.stats.paid', 'Paid');
+    return stats.daily_stats.flatMap((d) => [
+      { date: d.date, key: createdLabel, value: d.created },
+      { date: d.date, key: paidLabel, value: d.purchases },
+    ]);
+  }, [stats, t]);
 
-  // Prepare tariff chart data
-  const tariffData = useMemo(() => {
+  // Daily revenue — for SimpleAreaChart
+  const dailyRevenue = useMemo(() => {
     if (!stats) return [];
-    return stats.tariff_stats.map((item) => ({
-      name: item.tariff_name,
-      purchases: item.purchases,
-      revenue: item.revenue_kopeks / CHART_COMMON.KOPEKS_DIVISOR,
-    }));
-  }, [stats]);
+    return stats.daily_stats.map((d) => ({ date: d.date, value: d.revenue_kopeks / divisor }));
+  }, [stats, divisor]);
 
-  // Donut data for gift vs regular
-  const donutData = useMemo(() => {
+  // Tariff breakdown (by revenue)
+  const tariffItems = useMemo(
+    () =>
+      (stats?.tariff_stats ?? []).map((t2) => ({
+        key: String(t2.tariff_id ?? t2.tariff_name),
+        label: t2.tariff_name,
+        value: t2.revenue_kopeks / divisor,
+      })),
+    [stats, divisor],
+  );
+
+  // Payment method breakdown (by purchases)
+  const paymentDonut = useMemo(
+    () => (stats?.payment_method_stats ?? []).map((p) => ({ name: p.method, value: p.purchases })),
+    [stats],
+  );
+
+  // Traffic source breakdown (by purchases)
+  const sourceItems = useMemo(
+    () =>
+      (stats?.source_stats ?? []).map((s) => ({
+        key: s.source,
+        label: s.source,
+        value: s.purchases,
+      })),
+    [stats],
+  );
+
+  // Funnel: created -> paid
+  const funnelData = useMemo(() => {
     if (!stats) return [];
     return [
-      {
-        name: t('admin.landings.stats.regular'),
-        value: stats.total_regular,
-        color: colors.referrals,
-      },
-      { name: t('admin.landings.stats.gifts'), value: stats.total_gifts, color: GIFT_COLOR },
+      { name: t('admin.landings.stats.created', 'Created'), value: stats.total_created },
+      { name: t('admin.landings.stats.paid', 'Paid'), value: stats.total_successful },
     ];
-  }, [stats, t, colors.referrals]);
-
-  // Bar chart height based on tariff count
-  const barChartHeight = useMemo(() => {
-    const count = tariffData.length;
-    return Math.max(220, count * 45 + 40);
-  }, [tariffData.length]);
+  }, [stats, t]);
 
   // Loading state
   if (isLoading) {
@@ -309,6 +318,9 @@ export default function AdminLandingStats() {
   }
 
   const landingTitle = landing ? resolveLocaleDisplay(landing.title) : `#${numericId}`;
+  const giftsClaimed = stats.total_gifts_claimed ?? 0;
+  const giftClaimRate =
+    stats.total_gifts > 0 ? Math.round((giftsClaimed / stats.total_gifts) * 100) : 0;
 
   return (
     <div className="animate-fade-in">
@@ -336,377 +348,185 @@ export default function AdminLandingStats() {
         </div>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-4">
         {/* Summary Cards */}
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <div className="rounded-xl border border-dark-700 bg-dark-800 p-4 text-center">
-            <div className="text-xl font-bold sm:text-2xl">
-              <span className="text-warning-400">{stats.total_created}</span>
-              <span className="mx-1 text-dark-600">/</span>
-              <span className="text-success-400">{stats.total_successful}</span>
-            </div>
-            <div className="text-xs text-dark-500">
-              {t('admin.landings.stats.created', 'Created')} /{' '}
-              {t('admin.landings.stats.paid', 'paid')}
-            </div>
-          </div>
-          <div className="rounded-xl border border-dark-700 bg-dark-800 p-4 text-center">
-            <div className="truncate text-xl font-bold text-accent-400 sm:text-2xl">
-              {formatWithCurrency(stats.total_revenue_kopeks / CHART_COMMON.KOPEKS_DIVISOR)}
-            </div>
-            <div className="text-xs text-dark-500">{t('admin.landings.stats.revenue')}</div>
-          </div>
-          <div className="rounded-xl border border-dark-700 bg-dark-800 p-4 text-center">
-            <div className="text-xl font-bold text-accent-400 sm:text-2xl">{stats.total_gifts}</div>
-            <div className="text-xs text-dark-500">{t('admin.landings.stats.giftPurchases')}</div>
-          </div>
-          <div className="rounded-xl border border-dark-700 bg-dark-800 p-4 text-center">
-            <div className="text-xl font-bold text-dark-200 sm:text-2xl">
-              {stats.conversion_rate}%
-            </div>
-            <div className="text-xs text-dark-500">{t('admin.landings.stats.conversionRate')}</div>
-          </div>
+          <StatCard
+            label={t('admin.landings.stats.created', 'Created')}
+            value={stats.total_created}
+            icon={<EyeIcon className="h-5 w-5" />}
+            tone="warning"
+          />
+          <StatCard
+            label={t('admin.landings.stats.paid', 'Paid')}
+            value={stats.total_successful}
+            icon={<CheckCircleIcon className="h-5 w-5" />}
+            tone="success"
+          />
+          <StatCard
+            label={t('admin.landings.stats.revenue')}
+            value={money(stats.total_revenue_kopeks)}
+            icon={<BanknotesIcon className="h-5 w-5" />}
+            tone="success"
+          />
+          <StatCard
+            label={t('admin.landings.stats.conversionRate')}
+            value={`${stats.conversion_rate}%`}
+            icon={<PercentIcon className="h-5 w-5" />}
+            tone="accent"
+          />
         </div>
 
-        {/* Charts */}
+        {/* Breakdown Cards */}
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <StatCard
+            label={t('admin.landings.stats.purchases')}
+            value={stats.total_purchases}
+            icon={<TicketIcon className="h-5 w-5" />}
+            tone="accent"
+          />
+          <StatCard
+            label={t('admin.landings.stats.regularPurchases')}
+            value={stats.total_regular}
+            icon={<CardIcon className="h-5 w-5" />}
+          />
+          <StatCard
+            label={t('admin.landings.stats.giftPurchases')}
+            value={stats.total_gifts}
+            icon={<GiftIcon className="h-5 w-5" />}
+            tone="accent"
+          />
+          <StatCard
+            label={t('admin.landings.stats.avgPurchase')}
+            value={money(stats.avg_purchase_kopeks)}
+            icon={<WalletIcon className="h-5 w-5" />}
+          />
+        </div>
+
+        {/* Funnel + gift activation */}
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          {/* Daily Purchases & Revenue */}
-          <div className="rounded-xl border border-dark-700 bg-dark-800 p-4">
-            <h3 className="mb-4 font-medium text-dark-200">
-              {t('admin.landings.stats.dailyChart')}
-            </h3>
-            {dailyData.length === 0 ? (
-              <div className="flex h-[220px] items-center justify-center text-sm text-dark-500">
+          <div className="bento-card">
+            <h4 className="mb-3 text-sm font-semibold text-dark-200">
+              {t('admin.landings.stats.funnelTitle', 'Conversion funnel')}
+            </h4>
+            {stats.total_created === 0 ? (
+              <div className="flex h-[180px] items-center justify-center text-sm text-dark-500">
                 {t('admin.landings.stats.noPurchases')}
               </div>
             ) : (
-              <ResponsiveContainer width="100%" height={220}>
-                <AreaChart data={dailyData} margin={CHART_COMMON.CHART.MARGIN}>
-                  <defs>
-                    <linearGradient
-                      id={`landingPurchaseGrad-${numericId}`}
-                      x1="0"
-                      y1="0"
-                      x2="0"
-                      y2="1"
-                    >
-                      <stop
-                        offset={CHART_COMMON.GRADIENT.START_OFFSET}
-                        stopColor={colors.referrals}
-                        stopOpacity={CHART_COMMON.GRADIENT.START_OPACITY}
+              <>
+                <ResponsiveContainer width="100%" height={170}>
+                  <FunnelChart>
+                    <Funnel dataKey="value" data={funnelData} isAnimationActive>
+                      {/* Center value labels (dark text reads on the light segments)
+                          — left/right labels can clip in the half-width column. */}
+                      <LabelList
+                        position="center"
+                        dataKey="value"
+                        fill="#0a0f1a"
+                        stroke="none"
+                        fontSize={14}
                       />
-                      <stop
-                        offset={CHART_COMMON.GRADIENT.END_OFFSET}
-                        stopColor={colors.referrals}
-                        stopOpacity={CHART_COMMON.GRADIENT.END_OPACITY}
-                      />
-                    </linearGradient>
-                    <linearGradient
-                      id={`landingRevenueGrad-${numericId}`}
-                      x1="0"
-                      y1="0"
-                      x2="0"
-                      y2="1"
-                    >
-                      <stop
-                        offset={CHART_COMMON.GRADIENT.START_OFFSET}
-                        stopColor={colors.earnings}
-                        stopOpacity={CHART_COMMON.GRADIENT.START_OPACITY}
-                      />
-                      <stop
-                        offset={CHART_COMMON.GRADIENT.END_OFFSET}
-                        stopColor={colors.earnings}
-                        stopOpacity={CHART_COMMON.GRADIENT.END_OPACITY}
-                      />
-                    </linearGradient>
-                    <linearGradient
-                      id={`landingCreatedGrad-${numericId}`}
-                      x1="0"
-                      y1="0"
-                      x2="0"
-                      y2="1"
-                    >
-                      <stop
-                        offset={CHART_COMMON.GRADIENT.START_OFFSET}
-                        stopColor="#f59e0b"
-                        stopOpacity={CHART_COMMON.GRADIENT.START_OPACITY}
-                      />
-                      <stop
-                        offset={CHART_COMMON.GRADIENT.END_OFFSET}
-                        stopColor="#f59e0b"
-                        stopOpacity={CHART_COMMON.GRADIENT.END_OPACITY}
-                      />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray={CHART_COMMON.GRID_DASH} stroke={colors.grid} />
-                  <XAxis
-                    dataKey="label"
-                    tick={{ fontSize: CHART_COMMON.AXIS.TICK_FONT_SIZE, fill: colors.tick }}
-                    stroke={colors.grid}
-                    interval="preserveStartEnd"
-                  />
-                  <YAxis
-                    yAxisId="left"
-                    tick={{ fontSize: CHART_COMMON.AXIS.TICK_FONT_SIZE, fill: colors.tick }}
-                    stroke={colors.grid}
-                    allowDecimals={false}
-                  />
-                  <YAxis
-                    yAxisId="right"
-                    orientation="right"
-                    tick={{ fontSize: CHART_COMMON.AXIS.TICK_FONT_SIZE, fill: colors.tick }}
-                    stroke={colors.grid}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: colors.tooltipBg,
-                      border: `1px solid ${colors.tooltipBorder}`,
-                      borderRadius: CHART_COMMON.TOOLTIP.BORDER_RADIUS,
-                      fontSize: CHART_COMMON.TOOLTIP.FONT_SIZE,
-                      color: colors.label,
-                    }}
-                    labelStyle={{ color: colors.label }}
-                    itemStyle={{ color: colors.label }}
-                  />
-                  <Area
-                    yAxisId="left"
-                    type="monotone"
-                    dataKey="created"
-                    name={t('admin.landings.stats.created', 'Created')}
-                    stroke="#f59e0b"
-                    fill={`url(#landingCreatedGrad-${numericId})`}
-                    strokeWidth={CHART_COMMON.STROKE_WIDTH}
-                  />
-                  <Area
-                    yAxisId="left"
-                    type="monotone"
-                    dataKey="purchases"
-                    name={t('admin.landings.stats.purchases')}
-                    stroke={colors.referrals}
-                    fill={`url(#landingPurchaseGrad-${numericId})`}
-                    strokeWidth={CHART_COMMON.STROKE_WIDTH}
-                  />
-                  <Area
-                    yAxisId="right"
-                    type="monotone"
-                    dataKey="revenue"
-                    name={t('admin.landings.stats.revenueLabel')}
-                    stroke={colors.earnings}
-                    fill={`url(#landingRevenueGrad-${numericId})`}
-                    strokeWidth={CHART_COMMON.STROKE_WIDTH}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            )}
-          </div>
-
-          {/* Daily Purchases Bar Chart */}
-          <div className="rounded-xl border border-dark-700 bg-dark-800 p-4">
-            <h3 className="mb-4 font-medium text-dark-200">
-              {t('admin.landings.stats.dailyPurchases', 'Daily purchases')}
-            </h3>
-            {dailyData.length === 0 ? (
-              <div className="flex h-[220px] items-center justify-center text-sm text-dark-500">
-                {t('admin.landings.stats.noPurchases')}
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {[...dailyData]
-                  .slice(-7)
-                  .reverse()
-                  .map((day, i) => {
-                    const purchasedPct =
-                      (day.created || 0) > 0
-                        ? ((day.purchases || 0) / (day.created || 1)) * 100
-                        : 0;
-                    return (
-                      <div key={i} className="flex items-center gap-2">
-                        <span className="w-10 shrink-0 text-right text-xs text-dark-500">
-                          {day.label}
-                        </span>
-                        <div
-                          className="group relative h-5 flex-1 overflow-hidden rounded-full bg-warning-500/80"
-                          title={`${t('admin.landings.stats.created', 'Created')}: ${day.created || 0}\n${t('admin.landings.stats.paid', 'paid')}: ${day.purchases || 0}\n${t('admin.landings.stats.revenueLabel', 'Revenue')}: ${day.revenue?.toFixed(0) || 0} ${t('common.currency', '\u20BD')}\nCR: ${Math.round(purchasedPct)}%`}
-                        >
-                          <div
-                            className="absolute inset-y-0 left-0 rounded-full bg-accent-500"
-                            style={{ width: `${purchasedPct}%` }}
-                          />
-                        </div>
-                        <span className="w-12 shrink-0 text-xs text-dark-400">
-                          <span className="text-warning-400">{day.created || 0}</span>
-                          <span className="text-dark-600">/</span>
-                          <span className="text-accent-400">{day.purchases || 0}</span>
-                        </span>
-                      </div>
-                    );
-                  })}
-                <div className="mt-2 flex items-center gap-4 text-xs text-dark-500">
-                  <div className="flex items-center gap-1">
-                    <div className="h-2 w-2 rounded-full bg-warning-500/80" />
-                    <span>{t('admin.landings.stats.created', 'Created')}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <div className="h-2 w-2 rounded-full bg-accent-500" />
-                    <span>{t('admin.landings.stats.paid', 'paid')}</span>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Tariff Distribution -- full width */}
-        <div className="rounded-xl border border-dark-700 bg-dark-800 p-4">
-          <h3 className="mb-4 font-medium text-dark-200">
-            {t('admin.landings.stats.tariffChart')}
-          </h3>
-          {tariffData.length === 0 ? (
-            <div className="flex h-[220px] items-center justify-center text-sm text-dark-500">
-              {t('admin.landings.stats.noPurchases')}
-            </div>
-          ) : (
-            <ResponsiveContainer width="100%" height={barChartHeight}>
-              <BarChart
-                data={tariffData}
-                layout="vertical"
-                margin={{ ...CHART_COMMON.CHART.MARGIN, left: 10 }}
-              >
-                <CartesianGrid strokeDasharray={CHART_COMMON.GRID_DASH} stroke={colors.grid} />
-                <XAxis
-                  type="number"
-                  tick={{ fontSize: CHART_COMMON.AXIS.TICK_FONT_SIZE, fill: colors.tick }}
-                  stroke={colors.grid}
-                  allowDecimals={false}
-                />
-                <YAxis
-                  type="category"
-                  dataKey="name"
-                  tick={{ fontSize: CHART_COMMON.AXIS.TICK_FONT_SIZE, fill: colors.tick }}
-                  stroke={colors.grid}
-                  width={100}
-                />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: colors.tooltipBg,
-                    border: `1px solid ${colors.tooltipBorder}`,
-                    borderRadius: CHART_COMMON.TOOLTIP.BORDER_RADIUS,
-                    fontSize: CHART_COMMON.TOOLTIP.FONT_SIZE,
-                    color: colors.label,
-                  }}
-                  labelStyle={{ color: colors.label }}
-                  itemStyle={{ color: colors.label }}
-                  formatter={(value: number | undefined) => {
-                    return [value ?? 0, t('admin.landings.stats.purchases')];
-                  }}
-                />
-                <Bar
-                  dataKey="purchases"
-                  name={t('admin.landings.stats.purchases')}
-                  radius={[0, 4, 4, 0]}
-                >
-                  {tariffData.map((_, index) => (
-                    <Cell key={index} fill={TARIFF_PALETTE[index % TARIFF_PALETTE.length]} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          )}
-        </div>
-
-        {/* Additional Stats Row */}
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-          <div className="rounded-xl border border-dark-700 bg-dark-800 p-4">
-            <div className="mb-1 text-sm text-dark-400">
-              {t('admin.landings.stats.avgPurchase')}
-            </div>
-            <div className="text-lg font-medium text-dark-200">
-              {formatWithCurrency(stats.avg_purchase_kopeks / CHART_COMMON.KOPEKS_DIVISOR)}
-            </div>
-          </div>
-          <div className="rounded-xl border border-dark-700 bg-dark-800 p-4">
-            <div className="mb-1 text-sm text-dark-400">
-              {t('admin.landings.stats.regularPurchases')}
-            </div>
-            <div className="text-lg font-medium text-dark-200">{stats.total_regular}</div>
-          </div>
-          <div className="col-span-2 rounded-xl border border-dark-700 bg-dark-800 p-4 sm:col-span-1">
-            <div className="mb-1 text-sm text-dark-400">{t('admin.landings.stats.funnel')}</div>
-            <div className="text-lg font-medium text-dark-200">
-              {stats.total_created}{' '}
-              <span className="text-sm text-dark-500">{t('admin.landings.stats.created')}</span>
-              {' / '}
-              {stats.total_successful}{' '}
-              <span className="text-sm text-dark-500">
-                {t('admin.landings.stats.paid', 'paid')}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Gift vs Regular Donut */}
-        {stats.total_purchases > 0 && (
-          <div className="rounded-xl border border-dark-700 bg-dark-800 p-4">
-            <h3 className="mb-4 font-medium text-dark-200">
-              {t('admin.landings.stats.giftBreakdown')}
-            </h3>
-            <div className="flex items-center justify-center gap-8">
-              <div className="relative">
-                <ResponsiveContainer width={160} height={160}>
-                  <PieChart>
-                    <Pie
-                      data={donutData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={50}
-                      outerRadius={70}
-                      dataKey="value"
-                      strokeWidth={0}
-                    >
-                      {donutData.map((entry, index) => (
-                        <Cell key={index} fill={entry.color} />
+                      {funnelData.map((_, i) => (
+                        <Cell key={i} fill={FUNNEL_COLORS[i % FUNNEL_COLORS.length]} />
                       ))}
-                    </Pie>
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: colors.tooltipBg,
-                        border: `1px solid ${colors.tooltipBorder}`,
-                        borderRadius: CHART_COMMON.TOOLTIP.BORDER_RADIUS,
-                        fontSize: CHART_COMMON.TOOLTIP.FONT_SIZE,
-                        color: colors.label,
-                      }}
-                      itemStyle={{ color: colors.label }}
-                    />
-                  </PieChart>
+                    </Funnel>
+                  </FunnelChart>
                 </ResponsiveContainer>
-                {/* Center text */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-lg font-bold text-dark-100">{stats.total_purchases}</span>
+                <div className="mt-2 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-dark-400">
+                  {funnelData.map((s, i) => (
+                    <span key={i} className="flex items-center gap-1.5">
+                      <span
+                        className="h-2 w-2 rounded-full"
+                        style={{ backgroundColor: FUNNEL_COLORS[i % FUNNEL_COLORS.length] }}
+                      />
+                      {s.name}: <span className="text-dark-200">{s.value}</span>
+                    </span>
+                  ))}
+                  <span className="text-accent-400">{stats.conversion_rate}%</span>
+                </div>
+              </>
+            )}
+          </div>
+
+          <div className="bento-card">
+            <h4 className="mb-3 text-sm font-semibold text-dark-200">
+              {t('admin.landings.stats.giftClaimTitle', 'Gift activation')}
+            </h4>
+            <div className="flex items-end justify-between">
+              <div>
+                <div className="text-2xl font-semibold text-dark-100">
+                  {giftsClaimed}
+                  <span className="text-base text-dark-500"> / {stats.total_gifts}</span>
+                </div>
+                <div className="mt-0.5 text-xs text-dark-500">
+                  {t('admin.landings.stats.giftClaimLabel', 'claimed / sent')}
                 </div>
               </div>
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <div
-                    className="h-3 w-3 rounded-full"
-                    style={{ backgroundColor: colors.referrals }}
-                  />
-                  <span className="text-sm text-dark-300">
-                    {t('admin.landings.stats.regular')}: {stats.total_regular}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="h-3 w-3 rounded-full" style={{ backgroundColor: GIFT_COLOR }} />
-                  <span className="text-sm text-dark-300">
-                    {t('admin.landings.stats.gifts')}: {stats.total_gifts}
-                  </span>
-                </div>
-              </div>
+              <div className="text-2xl font-semibold text-accent-400">{giftClaimRate}%</div>
+            </div>
+            <div className="mt-3 h-2 overflow-hidden rounded-full bg-dark-800/60">
+              <div
+                className="h-full rounded-full bg-accent-500 transition-all"
+                style={{ width: `${giftClaimRate}%` }}
+              />
             </div>
           </div>
-        )}
+        </div>
+
+        {/* Daily charts */}
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <MultiSeriesAreaChart
+            data={dailyCounts}
+            title={t('admin.landings.stats.dailyPurchases', 'Daily purchases')}
+            chartId={`landing-counts-${numericId}`}
+          />
+          <SimpleAreaChart
+            data={dailyRevenue}
+            title={t('admin.landings.stats.dailyRevenue', 'Daily revenue')}
+            chartId={`landing-revenue-${numericId}`}
+            valueLabel={t('admin.landings.stats.revenueLabel', 'Revenue')}
+          />
+        </div>
+
+        {/* Tariff + payment method */}
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <BreakdownList
+            title={t('admin.landings.stats.tariffChart')}
+            items={tariffItems}
+            valueFormatter={(v) => formatWithCurrency(v)}
+          />
+          <DonutChart
+            data={paymentDonut}
+            title={t('admin.landings.stats.byPaymentMethod', 'By payment method')}
+          />
+        </div>
+
+        {/* Source + gift composition */}
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <BreakdownList
+            title={t('admin.landings.stats.bySource', 'Traffic sources')}
+            items={sourceItems}
+          />
+          <DonutChart
+            data={[
+              {
+                name: t('admin.landings.stats.regular'),
+                value: stats.total_regular,
+                color: GIFT_DONUT.regular,
+              },
+              {
+                name: t('admin.landings.stats.gifts'),
+                value: stats.total_gifts,
+                color: GIFT_DONUT.gift,
+              },
+            ]}
+            title={t('admin.landings.stats.giftBreakdown')}
+          />
+        </div>
 
         {/* Purchases List */}
-        <div className="rounded-xl border border-dark-700 bg-dark-800 p-4">
+        <div className="bento-card">
           {/* Header row: title + status filter */}
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <h3 className="font-medium text-dark-200">{t('admin.landings.purchases.title')}</h3>
@@ -745,9 +565,7 @@ export default function AdminLandingStats() {
                   <PurchaseCard
                     key={item.id}
                     item={item}
-                    formatPrice={(kopeks) =>
-                      formatWithCurrency(kopeks / CHART_COMMON.KOPEKS_DIVISOR)
-                    }
+                    formatPrice={(kopeks) => money(kopeks)}
                     lang={i18n.language}
                     t={t}
                   />

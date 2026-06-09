@@ -429,7 +429,7 @@
       "buyTraffic": "购买更多流量",
       "currentTrafficLimit": "当前限制：{{limit}} GB（已使用 {{used}} GB）",
       "buyTrafficTitle": "购买更多流量",
-      "trafficWarning": "购买的流量将添加到当前限制，不会延续到下一个周期",
+      "trafficWarning": "购买的流量将添加到当前限制，自购买之日起30天内有效",
       "trafficUnavailable": "您的套餐不支持购买流量",
       "unlimited": "无限制",
       "buyTrafficGb": "购买 {{gb}} GB",
@@ -1509,7 +1509,8 @@
         "promoPrefix": "优惠码前缀",
         "spinCost": "旋转费用",
         "limitsAndRtp": "限制和RTP",
-        "promocodes": "促销码"
+        "promocodes": "促销码",
+        "promoValidityDays": "促销码有效期（天）"
       },
       "starsNotEnabledGlobally": "星星支付未在支付方式中启用。请在「支付方式」中启用「Telegram Stars」。",
       "prizes": {
@@ -1536,7 +1537,9 @@
           "emoji": "表情",
           "color": "颜色",
           "active": "启用",
-          "worth": "价值"
+          "worth": "价值",
+          "probability": "手动概率 (0–1)",
+          "probabilityHint": "留空 = 按 RTP 自动"
         },
         "promo": {
           "title": "优惠码设置",
@@ -1553,7 +1556,9 @@
         "prizeDistribution": "奖品分布",
         "times": "次",
         "times_other": "{{count}} 次",
-        "topWins": "最高奖品"
+        "topWins": "最高奖品",
+        "loadError": "无法加载统计数据",
+        "empty": "暂无抽奖记录"
       }
     },
     "broadcasts": {
@@ -3693,6 +3698,12 @@
         "dailyChart": "每日购买与收入",
         "tariffChart": "套餐分布",
         "giftBreakdown": "礼物 vs 普通",
+        "funnelTitle": "转化漏斗",
+        "giftClaimTitle": "礼物激活",
+        "giftClaimLabel": "已领取 / 已发送",
+        "dailyRevenue": "每日收入",
+        "byPaymentMethod": "按支付方式",
+        "bySource": "流量来源",
         "purchases": "购买",
         "revenueLabel": "收入",
         "gifts": "礼物",
@@ -4132,7 +4143,13 @@
         "vk": "VK"
       },
       "backToAccounts": "返回账户列表"
-    }
+    },
+    "emailMergePasswordRequired": "该邮箱已属于另一个账户。要合并账户，请输入该账户的密码。",
+    "emailMergeCodeSent": "确认码已发送至该邮箱。",
+    "emailMergeCodeDescription": "该邮箱已属于另一个账户。我们已向其发送验证码——请输入以确认所有权并合并账户。",
+    "emailMergeCodeLabel": "邮件中的验证码",
+    "emailMergeConfirm": "确认并合并",
+    "emailMergeCodeInvalid": "验证码无效或已过期"
   },
   "theme": {
     "colors": "主题颜色",
@@ -4345,6 +4362,14 @@
       "openBot": "打开机器人",
       "retry": "我已按 /start，重试",
       "hint": "运行 /start 后，返回此处并点击「重试」。"
+    },
+    "serviceUnavailable": {
+      "title": "服务不可用",
+      "description": "暂时无法连接到服务。可能正在进行维护，或存在临时的网络问题。",
+      "retry": "重试",
+      "checking": "正在检查连接...",
+      "hint": "服务恢复后，本页面将自动刷新。",
+      "close": "关闭"
     }
   },
   "banSystem": {
@@ -4493,6 +4518,36 @@
     "merging": "合并中..."
   },
   "landing": {
+    "giftClaim": {
+      "title": "您收到一份礼物！",
+      "error": "无法激活礼物。",
+      "notFoundTitle": "未找到礼物",
+      "notFoundDesc": "此礼物链接无效或已不可用。",
+      "alreadyTitle": "礼物已激活",
+      "alreadyDesc": "此礼物已被领取。",
+      "successTitle": "礼物已激活！",
+      "connectDesc": "使用此链接连接：",
+      "copyLink": "复制链接",
+      "pendingTitle": "即将完成…",
+      "pendingDesc": "付款仍在确认中。本页面将自动更新。",
+      "replaceWarning": "您已有订阅——激活此礼物将替换它。",
+      "activateTelegram": "在 Telegram 中激活",
+      "activateWeb": "通过邮箱激活",
+      "emailLabel": "您的邮箱",
+      "claimNow": "领取礼物",
+      "failedTitle": "礼物不可用",
+      "failedDesc": "此礼物的付款未成功，无法激活。"
+    },
+    "giftLink": {
+      "shareText": "我送您一份订阅！在此激活：",
+      "viaTelegram": "Telegram：",
+      "title": "礼物已就绪！",
+      "subtitle": "将此链接发送给您想赠送的人——他们自行激活。",
+      "linkLabel": "礼物链接",
+      "telegramLabel": "Telegram 链接",
+      "alsoSent": "我们也已发送到 {{contact}}。",
+      "copyMessage": "复制消息"
+    },
     "notFound": "页面未找到",
     "forMe": "为自己",
     "asGift": "作为礼物",
@@ -4736,6 +4791,7 @@
   "subscriptions": {
     "buy": "购买订阅",
     "buyAnother": "再购买一个订阅",
+    "browsePlans": "查看套餐并订阅",
     "empty": "您还没有订阅",
     "emptyDesc": "选择套餐以开始使用",
     "title": "我的订阅"

@@ -124,7 +124,21 @@
             document.getElementById('errorText').textContent = t.error;
             document.getElementById('manualBtn').textContent = t.btn;
 
-            if (!url) {
+            // SECURITY: this page navigates to a user-supplied `url`. Only open
+            // a custom app deep link. A bare `javascript:`/`data:`/`vbscript:`/
+            // `file:` URI (DOM-XSS) is not scheme://-shaped, and http(s)/intent
+            // are blocked (open redirect / intent abuse) — so only VPN app
+            // schemes (happ://, vless://, ...) pass. Mirrors the validation in
+            // src/pages/DeepLinkRedirect.tsx.
+            function isSafeAppLink(raw) {
+                var s = String(raw || '').trim().toLowerCase();
+                var m = s.match(/^([a-z][a-z0-9+.\-]*):\/\//);
+                if (!m) return false;
+                var blocked = ['http', 'https', 'file', 'blob', 'about', 'javascript', 'data', 'vbscript', 'intent', 'content'];
+                return blocked.indexOf(m[1]) === -1;
+            }
+
+            if (!url || !isSafeAppLink(url)) {
                 document.getElementById('title').textContent = t.noUrl;
                 document.getElementById('subtitle').textContent = '';
                 document.querySelector('.spinner').style.display = 'none';

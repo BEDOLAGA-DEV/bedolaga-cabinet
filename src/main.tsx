@@ -24,6 +24,7 @@ import { useAuthStore } from './store/auth';
 import { AppWithNavigator } from './AppWithNavigator';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { initLogoPreload } from './api/branding';
+import { checkBackendOnStartup } from './api/health';
 import { getCachedFullscreenEnabled, isTelegramMobile } from './hooks/useTelegramSDK';
 import { applyTelegramLanguage } from './i18n';
 import './styles/globals.css';
@@ -105,6 +106,11 @@ if (isTelegramEnv && !alreadyInitialized) {
 // refresh-token recovery can run inside initialize() (launch params + CloudStorage
 // are only available post-init()).
 void useAuthStore.getState().initialize();
+
+// In parallel with auth bootstrap, eagerly check backend liveness so a dead
+// backend paints the ServiceUnavailableScreen immediately instead of flashing
+// the /login page first.
+void checkBackendOnStartup();
 
 if ('requestIdleCallback' in window) {
   requestIdleCallback(() => initLogoPreload());

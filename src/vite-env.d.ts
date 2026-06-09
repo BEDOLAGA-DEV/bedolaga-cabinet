@@ -7,6 +7,8 @@ interface ImportMetaEnv {
   readonly VITE_TELEGRAM_BOT_USERNAME?: string;
   readonly VITE_APP_NAME?: string;
   readonly VITE_APP_LOGO?: string;
+  /** Optional override for the backend liveness URL (defaults to `<origin>/health/unified`). */
+  readonly VITE_HEALTH_URL?: string;
 }
 
 interface ImportMeta {
@@ -17,6 +19,8 @@ interface ImportMeta {
 interface TelegramWebAppGlobal {
   onEvent?: (event: string, callback: () => void) => void;
   offEvent?: (event: string, callback: () => void) => void;
+  /** Closes the Mini App (injected by telegram-web-app.js). */
+  close?: () => void;
 }
 
 /** Telegram Login JS SDK — loaded from https://oauth.telegram.org/js/telegram-login.js */

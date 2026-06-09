@@ -15,6 +15,8 @@ import {
   retrieveLaunchParams,
   retrieveRawInitData,
   themeParamsState,
+  closeMiniApp as sdkCloseMiniApp,
+  postEvent,
 } from '@telegram-apps/sdk-react';
 
 const FULLSCREEN_CACHE_KEY = 'cabinet_fullscreen_enabled';
@@ -48,6 +50,34 @@ function detectTelegram(): boolean {
 
 export function isInTelegramWebApp(): boolean {
   return detectTelegram();
+}
+
+/**
+ * Closes the Telegram Mini App as reliably as possible. All three paths emit the
+ * same `web_app_close` event to the Telegram client; we try the most broadly
+ * compatible first and stop at the first that doesn't throw:
+ *   1) the legacy `window.Telegram.WebApp.close()` global (telegram-web-app.js,
+ *      loaded in index.html) — widest client coverage, no SDK-mount dependency;
+ *   2) the modern SDK `closeMiniApp()` (mini app is mounted on init);
+ *   3) the raw `postEvent('web_app_close')` protocol event — no global/mount
+ *      dependency at all.
+ * Outside Telegram it is a safe no-op.
+ */
+export function closeTelegramApp(): void {
+  try {
+    const wa = window.Telegram?.WebApp;
+    if (wa?.close) {
+      wa.close();
+      return;
+    }
+  } catch {}
+  try {
+    sdkCloseMiniApp();
+    return;
+  } catch {}
+  try {
+    postEvent('web_app_close');
+  } catch {}
 }
 
 export function isTelegramMobile(): boolean {

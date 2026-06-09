@@ -60,9 +60,9 @@ function CopyableField({ label, value }: { label: string; value: string }) {
 
   return (
     <div className="flex items-center gap-2 rounded-xl bg-dark-800/50 px-4 py-3">
-      <div className="flex-1 text-left">
+      <div className="min-w-0 flex-1 text-left">
         <p className="text-xs text-dark-400">{label}</p>
-        <p className="mt-0.5 font-mono text-sm text-dark-100">{value}</p>
+        <p className="mt-0.5 break-all font-mono text-sm text-dark-100">{value}</p>
       </div>
       <button
         type="button"
@@ -553,6 +553,113 @@ function PollTimedOutState({ onRetry }: { onRetry: () => void }) {
   );
 }
 
+function GiftLinkShareState({
+  claimUrl,
+  botClaimLink,
+  tariffName,
+  periodDays,
+  recipientContactValue,
+  contactType,
+}: {
+  claimUrl: string | null;
+  botClaimLink: string | null;
+  tariffName: string | null;
+  periodDays: number | null;
+  recipientContactValue: string | null;
+  contactType: 'email' | 'telegram' | null;
+}) {
+  const { t } = useTranslation();
+  const [copied, setCopied] = useState(false);
+
+  const message = [
+    t('landing.giftLink.shareText', 'I have a gift for you! Activate it here:'),
+    '',
+    claimUrl,
+    botClaimLink ? `${t('landing.giftLink.viaTelegram', 'Telegram:')} ${botClaimLink}` : null,
+  ]
+    .filter(Boolean)
+    .join('\n');
+
+  const handleCopy = async () => {
+    try {
+      await copyToClipboard(message);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      /* ignore */
+    }
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="flex flex-col items-center gap-5 text-center"
+    >
+      <AnimatedCheckmark />
+      <div>
+        <h1 className="text-xl font-bold text-dark-50">
+          {t('landing.giftLink.title', 'Gift is ready!')}
+        </h1>
+        {tariffName && periodDays !== null && (
+          <p className="mt-1 text-sm text-dark-300">
+            {tariffName} — {periodDays} {t('landing.days', 'days')}
+          </p>
+        )}
+      </div>
+
+      <p className="text-sm text-dark-300">
+        {t(
+          'landing.giftLink.subtitle',
+          'Send this link to whoever you want to receive the gift — they activate it themselves.',
+        )}
+      </p>
+
+      {claimUrl && (
+        <CopyableField label={t('landing.giftLink.linkLabel', 'Gift link')} value={claimUrl} />
+      )}
+      {botClaimLink && (
+        <CopyableField
+          label={t('landing.giftLink.telegramLabel', 'Telegram link')}
+          value={botClaimLink}
+        />
+      )}
+
+      {recipientContactValue && contactType === 'email' && (
+        <p className="text-xs text-dark-500">
+          {t('landing.giftLink.alsoSent', {
+            contact: recipientContactValue,
+            defaultValue: 'We also emailed it to {{contact}}.',
+          })}
+        </p>
+      )}
+
+      <button
+        type="button"
+        onClick={handleCopy}
+        className={cn(
+          'flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3.5 text-sm font-bold transition-all duration-200 active:scale-[0.98]',
+          copied
+            ? 'bg-success-500/20 text-success-400'
+            : 'bg-accent-500 text-white shadow-lg shadow-accent-500/25 hover:bg-accent-400',
+        )}
+      >
+        {copied ? (
+          <>
+            <CheckIcon className="h-4 w-4" />
+            {t('landing.copied', 'Copied!')}
+          </>
+        ) : (
+          <>
+            <ClipboardIcon className="h-4 w-4" />
+            {t('landing.giftLink.copyMessage', 'Copy message')}
+          </>
+        )}
+      </button>
+    </motion.div>
+  );
+}
+
 export default function PurchaseSuccess() {
   const { t } = useTranslation();
   const { token } = useParams<{ token: string }>();
@@ -586,7 +693,12 @@ export default function PurchaseSuccess() {
     queryFn: () => landingApi.getPurchaseStatus(token!),
     enabled: !!token && !pollTimedOut,
     refetchInterval: (query) => {
-      const currentStatus = query.state.data?.status;
+      const data = query.state.data;
+      const currentStatus = data?.status;
+      // A gift that reached PAID is terminal for the BUYER (it stays PAID until
+      // the recipient claims) — stop polling and show the share link instead of
+      // spinning. A paid gift is always claimable, so don't gate on is_claimable.
+      if (currentStatus === 'paid' && data?.is_gift) return false;
       if (currentStatus === 'pending' || currentStatus === 'paid') {
         if (Date.now() - pollStart.current > MAX_POLL_MS) {
           setPollTimedOut(true);
@@ -652,6 +764,10 @@ export default function PurchaseSuccess() {
   const isPendingActivation = purchaseStatus?.status === 'pending_activation';
   const isFailed = purchaseStatus?.status === 'failed' || purchaseStatus?.status === 'expired';
 
+  // Deferred gift the buyer just paid for → show the transferable claim link to
+  // forward (it stays PAID until the recipient claims it).
+  const isBuyerGiftLink = purchaseStatus?.status === 'paid' && !!purchaseStatus?.is_gift;
+
   // Gift pending activation → buyer sees "gift sent" message, not the activate button.
   // Recipient arrives via email link with ?activate=1 and sees the activate button instead.
   const isGiftPendingActivation = isPendingActivation && purchaseStatus?.is_gift && !isActivateHint;
@@ -672,6 +788,15 @@ export default function PurchaseSuccess() {
       >
         {isError ? (
           <FailedState />
+        ) : isBuyerGiftLink ? (
+          <GiftLinkShareState
+            claimUrl={purchaseStatus.claim_url}
+            botClaimLink={purchaseStatus.bot_claim_link}
+            tariffName={purchaseStatus.tariff_name}
+            periodDays={purchaseStatus.period_days}
+            recipientContactValue={purchaseStatus.recipient_contact_value}
+            contactType={purchaseStatus.contact_type}
+          />
         ) : isEmailSelfPurchase ? (
           <CabinetCredentialsState
             cabinetEmail={purchaseStatus.cabinet_email!}

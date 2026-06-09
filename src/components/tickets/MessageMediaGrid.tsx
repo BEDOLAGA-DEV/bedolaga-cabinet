@@ -9,12 +9,15 @@ export interface MediaItem {
   type: string;
   file_id: string;
   caption?: string | null;
+  /** Signed, expiring download token from the ticket response. */
+  token?: string | null;
 }
 
 interface MessageLike {
   has_media?: boolean;
   media_type?: string | null;
   media_file_id?: string | null;
+  media_token?: string | null;
   media_caption?: string | null;
   media_items?: MediaItem[] | null;
 }
@@ -33,6 +36,7 @@ function getItems(message: MessageLike): MediaItem[] {
         type: message.media_type,
         file_id: message.media_file_id,
         caption: message.media_caption,
+        token: message.media_token,
       },
     ];
   }
@@ -113,7 +117,7 @@ export function MessageMediaGrid({
                 onClick={() => openFullscreen(originalIdx)}
               >
                 <img
-                  src={ticketsApi.getMediaUrl(item.file_id)}
+                  src={ticketsApi.getMediaUrl(item.file_id, item.token)}
                   alt={item.caption || 'Attached photo'}
                   className="h-full w-full object-cover transition-opacity group-hover:opacity-90"
                   loading="lazy"
@@ -131,7 +135,7 @@ export function MessageMediaGrid({
 
       {/* Non-photo media rendered inline */}
       {otherItems.map((item) => {
-        const mediaUrl = ticketsApi.getMediaUrl(item.file_id);
+        const mediaUrl = ticketsApi.getMediaUrl(item.file_id, item.token);
         if (item.type === 'video') {
           return (
             <div key={item.file_id}>
@@ -203,7 +207,10 @@ export function MessageMediaGrid({
               onClick={closeFullscreen}
             >
               <img
-                src={ticketsApi.getMediaUrl(photoItems[fullscreenIndex].file_id)}
+                src={ticketsApi.getMediaUrl(
+                  photoItems[fullscreenIndex].file_id,
+                  photoItems[fullscreenIndex].token,
+                )}
                 alt={photoItems[fullscreenIndex].caption || 'Attached photo'}
                 className="max-h-full max-w-full object-contain"
                 style={{ touchAction: 'pinch-zoom' }}

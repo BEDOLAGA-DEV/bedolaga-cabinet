@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { CheckIcon, CopyIcon } from '@/components/icons';
 import type { RemnawaveButtonClient, LocalizedText } from '@/types';
 import { copyToClipboard } from '@/utils/clipboard';
+import { blockButtonClass } from './buttonStyles';
 
 // eslint-disable-next-line no-script-url
 const dangerousSchemes = ['javascript:', 'data:', 'vbscript:', 'file:'];
@@ -57,14 +58,7 @@ export function BlockButtons({
 
   if (!buttons || buttons.length === 0) return null;
 
-  const baseClass =
-    variant === 'light'
-      ? isLight
-        ? 'rounded-xl border border-accent-500/50 px-4 py-2 text-sm font-medium text-accent-600 shadow-sm transition-all hover:bg-accent-500/10'
-        : 'rounded-xl border border-accent-500/40 px-4 py-2 text-sm font-medium text-accent-400 transition-all hover:bg-accent-500/10'
-      : isLight
-        ? 'rounded-xl px-3 py-1.5 text-sm font-medium text-dark-300 transition-all hover:bg-dark-700/30'
-        : 'rounded-xl px-3 py-1.5 text-sm font-medium text-dark-300 transition-all hover:bg-dark-700/50';
+  const baseClass = blockButtonClass(variant, isLight);
 
   return (
     <div className="mt-3 flex flex-wrap gap-2">

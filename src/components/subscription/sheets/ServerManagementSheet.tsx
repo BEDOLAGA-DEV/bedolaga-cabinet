@@ -168,15 +168,15 @@ export function ServerManagementSheet({
                             : 'border-champagne-300/60 bg-champagne-200/40 hover:border-champagne-400'
                     } ${!country.is_available && !isCurrentlyConnected ? 'cursor-not-allowed opacity-50' : ''}`}
                   >
-                    <div className="flex items-center gap-3">
-                      <span className="text-lg">
+                    <div className="flex min-w-0 items-center gap-3">
+                      <span className="shrink-0 text-lg">
                         {willBeAdded ? '➕' : willBeRemoved ? '➖' : isSelected ? '✅' : '⚪'}
                       </span>
-                      <div>
-                        <div className="flex items-center gap-2 font-medium text-dark-100">
-                          {country.name}
+                      <div className="min-w-0">
+                        <div className="flex min-w-0 items-center gap-2 font-medium text-dark-100">
+                          <span className="truncate">{country.name}</span>
                           {country.has_discount && !isCurrentlyConnected && (
-                            <span className="rounded bg-success-500/20 px-1.5 py-0.5 text-xs text-success-400">
+                            <span className="shrink-0 rounded bg-success-500/20 px-1.5 py-0.5 text-xs text-success-400">
                               -{country.discount_percent}%
                             </span>
                           )}
@@ -217,7 +217,7 @@ export function ServerManagementSheet({
                       </div>
                     </div>
                     {country.country_code && (
-                      <span className="text-xl">{getFlagEmoji(country.country_code)}</span>
+                      <span className="shrink-0 text-xl">{getFlagEmoji(country.country_code)}</span>
                     )}
                   </button>
                 );

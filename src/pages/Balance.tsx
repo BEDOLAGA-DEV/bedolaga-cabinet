@@ -275,10 +275,10 @@ export default function Balance() {
                   key={sub.id}
                   onClick={() => handlePromocodeActivate(sub.id)}
                   disabled={promocodeLoading}
-                  className="flex w-full items-center justify-between rounded-linear border border-dark-600 bg-dark-700 px-3 py-2 text-sm text-dark-200 transition-colors hover:border-accent-500/50 hover:bg-dark-600"
+                  className="flex w-full min-w-0 items-center justify-between gap-3 rounded-linear border border-dark-600 bg-dark-700 px-3 py-2 text-sm text-dark-200 transition-colors hover:border-accent-500/50 hover:bg-dark-600"
                 >
-                  <span>{sub.tariff_name}</span>
-                  <span className="text-dark-400">
+                  <span className="truncate">{sub.tariff_name}</span>
+                  <span className="shrink-0 text-dark-400">
                     {t('balance.promocode.daysLeft', '{{count}} дн.', { count: sub.days_left })}
                   </span>
                 </button>

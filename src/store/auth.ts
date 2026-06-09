@@ -217,6 +217,11 @@ export const useAuthStore = create<AuthState>()(
                 const user = await authApi.getMe();
                 await get().checkAdminStatus();
                 applySession(newToken, refreshToken, user);
+              } else if (tokenRefreshManager.lastFailureWasTransport) {
+                // Backend unreachable, not a rejected token — keep the session
+                // (don't wipe tokens) so the ServiceUnavailableScreen can resume
+                // once the backend returns. Just stop the bootstrap loader.
+                set({ isLoading: false });
               } else {
                 clearSession();
               }
@@ -237,6 +242,11 @@ export const useAuthStore = create<AuthState>()(
                 } catch {
                   clearSession();
                 }
+              } else if (tokenRefreshManager.lastFailureWasTransport) {
+                // Backend unreachable, not a rejected token — keep the session
+                // (don't wipe tokens) so the ServiceUnavailableScreen can resume
+                // once the backend returns. Just stop the bootstrap loader.
+                set({ isLoading: false });
               } else {
                 clearSession();
               }

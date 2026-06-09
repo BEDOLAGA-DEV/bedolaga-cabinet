@@ -400,8 +400,8 @@ export function ClassicPurchaseWizard({
                         >
                           {selectedServers.includes(server.uuid) && <CheckIcon />}
                         </div>
-                        <div>
-                          <div className="font-medium text-dark-100">
+                        <div className="min-w-0">
+                          <div className="truncate font-medium text-dark-100">
                             <Twemoji options={{ className: 'twemoji', folder: 'svg', ext: '.svg' }}>
                               {server.name}
                             </Twemoji>

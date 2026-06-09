@@ -462,13 +462,13 @@ export function ReferralsTab({ user, userId, onUserRefresh }: ReferralsTabProps)
               >
                 <button
                   onClick={() => navigate(`/admin/users/${ref.id}`)}
-                  className="flex items-center gap-3 text-left"
+                  className="flex min-w-0 items-center gap-3 text-left"
                 >
-                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-dark-600/50 text-sm font-bold text-dark-300">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-dark-600/50 text-sm font-bold text-dark-300">
                     {(ref.full_name || ref.username || '?')[0].toUpperCase()}
                   </div>
-                  <div>
-                    <div className="text-sm font-medium text-dark-100">
+                  <div className="min-w-0">
+                    <div className="truncate text-sm font-medium text-dark-100">
                       {ref.full_name || ref.username || `ID: ${ref.id}`}
                     </div>
                     <div className="text-xs text-dark-500">
@@ -479,7 +479,7 @@ export function ReferralsTab({ user, userId, onUserRefresh }: ReferralsTabProps)
                 <button
                   onClick={() => handleRemoveReferral(ref.id)}
                   disabled={actionLoading}
-                  className="rounded-lg p-2 text-dark-500 transition-colors hover:bg-error-500/10 hover:text-error-400 disabled:opacity-50"
+                  className="shrink-0 rounded-lg p-2 text-dark-500 transition-colors hover:bg-error-500/10 hover:text-error-400 disabled:opacity-50"
                   title={t('admin.users.detail.referrals.removeReferral')}
                 >
                   <XIcon className="h-4 w-4" />

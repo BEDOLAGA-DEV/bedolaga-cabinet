@@ -318,6 +318,10 @@ export default function ConnectedAccounts() {
   const [emailConfirmPassword, setEmailConfirmPassword] = useState('');
   const [emailError, setEmailError] = useState<string | null>(null);
   const [emailSuccess, setEmailSuccess] = useState<string | null>(null);
+  // Email-merge confirmation: the target email belongs to another account, so a
+  // one-time code was mailed to it; verifying the code yields the merge token.
+  const [emailMergeCodePending, setEmailMergeCodePending] = useState(false);
+  const [emailMergeCode, setEmailMergeCode] = useState('');
   const setUser = useAuthStore((state) => state.setUser);
 
   const { data: emailAuthConfig } = useQuery<EmailAuthEnabled>({
@@ -396,6 +400,15 @@ export default function ConnectedAccounts() {
         navigate(`/merge/${response.merge_token}`, { replace: true });
         return;
       }
+      // The email belongs to another account: a one-time code was mailed to it.
+      // Switch to the code step; verifying it yields the merge token.
+      if (response.merge_required && response.merge_verification === 'email_code') {
+        setEmailMergeCodePending(true);
+        setEmailMergeCode('');
+        setEmailSuccess(t('profile.emailMergeCodeSent'));
+        setEmailError(null);
+        return;
+      }
       setEmailSuccess(t('profile.emailSent'));
       setEmailError(null);
       setEmailValue('');
@@ -409,7 +422,12 @@ export default function ConnectedAccounts() {
     },
     onError: (err: { response?: { data?: { detail?: string } } }) => {
       const detail = err.response?.data?.detail;
-      if (detail?.includes('already registered')) {
+      // The email belongs to another account and merging it requires proving
+      // ownership: the backend asks for THAT account's password (account-takeover
+      // fix). Guide the user to enter it rather than showing a dead-end error.
+      if (detail?.includes('merge')) {
+        setEmailError(t('profile.emailMergePasswordRequired'));
+      } else if (detail?.includes('already registered')) {
         setEmailError(t('profile.emailAlreadyRegistered'));
       } else if (detail?.includes('already have a verified email')) {
         setEmailError(t('profile.alreadyHaveEmail'));
@@ -419,6 +437,36 @@ export default function ConnectedAccounts() {
       setEmailSuccess(null);
     },
   });
+
+  const verifyEmailMergeMutation = useMutation({
+    mutationFn: (code: string) => authApi.verifyEmailMerge(code),
+    onSuccess: (response) => {
+      if (response.merge_token) {
+        navigate(`/merge/${response.merge_token}`, { replace: true });
+      }
+    },
+    onError: (err: { response?: { data?: { detail?: string } } }) => {
+      setEmailError(err.response?.data?.detail || t('profile.emailMergeCodeInvalid'));
+    },
+  });
+
+  const handleVerifyMergeCode = (e: React.SyntheticEvent) => {
+    e.preventDefault();
+    setEmailError(null);
+    const code = emailMergeCode.trim();
+    if (!/^\d{6}$/.test(code)) {
+      setEmailError(t('profile.emailMergeCodeInvalid'));
+      return;
+    }
+    verifyEmailMergeMutation.mutate(code);
+  };
+
+  const cancelEmailMerge = () => {
+    setEmailMergeCodePending(false);
+    setEmailMergeCode('');
+    setEmailError(null);
+    setEmailSuccess(null);
+  };
 
   const handleEmailSubmit = (e: React.SyntheticEvent) => {
     e.preventDefault();
@@ -623,19 +671,19 @@ export default function ConnectedAccounts() {
       {data?.providers.map((provider) => (
         <motion.div key={provider.provider} variants={staggerItem}>
           <Card>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex min-w-0 items-center gap-3">
                 <ProviderIcon provider={provider.provider} />
-                <div>
-                  <p className="font-medium text-dark-100">
+                <div className="min-w-0">
+                  <p className="truncate font-medium text-dark-100">
                     {t(`profile.accounts.providers.${provider.provider}`)}
                   </p>
                   {provider.identifier && (
-                    <p className="text-sm text-dark-400">{provider.identifier}</p>
+                    <p className="truncate text-sm text-dark-400">{provider.identifier}</p>
                   )}
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex shrink-0 flex-col items-end gap-1.5">
                 {provider.linked ? (
                   <>
                     <span className="text-sm text-success-500">{t('profile.accounts.linked')}</span>
@@ -680,68 +728,117 @@ export default function ConnectedAccounts() {
                   >
                     <div className="mt-4 border-t border-dark-700/30 pt-4">
                       <p className="mb-4 text-sm text-dark-400">
-                        {t('profile.linkEmailDescription')}
+                        {emailMergeCodePending
+                          ? t('profile.emailMergeCodeDescription')
+                          : t('profile.linkEmailDescription')}
                       </p>
-                      <form onSubmit={handleEmailSubmit} className="space-y-3">
-                        <div>
-                          <label htmlFor="email-link-input" className="label">
-                            Email
-                          </label>
-                          <input
-                            id="email-link-input"
-                            type="email"
-                            value={emailValue}
-                            onChange={(e) => setEmailValue(e.target.value)}
-                            placeholder="email@example.com"
-                            className="input"
-                            autoComplete="email"
-                          />
-                        </div>
-                        <div>
-                          <label htmlFor="email-link-password" className="label">
-                            {t('auth.password')}
-                          </label>
-                          <input
-                            id="email-link-password"
-                            type="password"
-                            value={emailPassword}
-                            onChange={(e) => setEmailPassword(e.target.value)}
-                            placeholder={t('profile.passwordPlaceholder')}
-                            className="input"
-                            autoComplete="new-password"
-                          />
-                          <p className="mt-1 text-xs text-dark-500">{t('profile.passwordHint')}</p>
-                        </div>
-                        <div>
-                          <label htmlFor="email-link-confirm" className="label">
-                            {t('auth.confirmPassword')}
-                          </label>
-                          <input
-                            id="email-link-confirm"
-                            type="password"
-                            value={emailConfirmPassword}
-                            onChange={(e) => setEmailConfirmPassword(e.target.value)}
-                            placeholder={t('profile.confirmPasswordPlaceholder')}
-                            className="input"
-                            autoComplete="new-password"
-                          />
-                        </div>
-
-                        {emailError && (
-                          <div className="rounded-xl border border-error-500/30 bg-error-500/10 p-3 text-sm text-error-400">
-                            {emailError}
+                      {emailMergeCodePending ? (
+                        <form onSubmit={handleVerifyMergeCode} className="space-y-3">
+                          <div>
+                            <label htmlFor="email-merge-code" className="label">
+                              {t('profile.emailMergeCodeLabel')}
+                            </label>
+                            <input
+                              id="email-merge-code"
+                              type="text"
+                              inputMode="numeric"
+                              maxLength={6}
+                              value={emailMergeCode}
+                              onChange={(e) => setEmailMergeCode(e.target.value.replace(/\D/g, ''))}
+                              placeholder="000000"
+                              className="input tracking-[0.5em]"
+                              autoComplete="one-time-code"
+                            />
                           </div>
-                        )}
-                        {emailSuccess && (
-                          <div className="rounded-xl border border-success-500/30 bg-success-500/10 p-3 text-sm text-success-400">
-                            {emailSuccess}
+                          {emailError && (
+                            <div className="rounded-xl border border-error-500/30 bg-error-500/10 p-3 text-sm text-error-400">
+                              {emailError}
+                            </div>
+                          )}
+                          {emailSuccess && (
+                            <div className="rounded-xl border border-success-500/30 bg-success-500/10 p-3 text-sm text-success-400">
+                              {emailSuccess}
+                            </div>
+                          )}
+                          <Button
+                            type="submit"
+                            fullWidth
+                            loading={verifyEmailMergeMutation.isPending}
+                          >
+                            {t('profile.emailMergeConfirm')}
+                          </Button>
+                          <button
+                            type="button"
+                            onClick={cancelEmailMerge}
+                            className="w-full text-sm text-dark-400 transition-colors hover:text-dark-200"
+                          >
+                            {t('common.cancel')}
+                          </button>
+                        </form>
+                      ) : (
+                        <form onSubmit={handleEmailSubmit} className="space-y-3">
+                          <div>
+                            <label htmlFor="email-link-input" className="label">
+                              Email
+                            </label>
+                            <input
+                              id="email-link-input"
+                              type="email"
+                              value={emailValue}
+                              onChange={(e) => setEmailValue(e.target.value)}
+                              placeholder="email@example.com"
+                              className="input"
+                              autoComplete="email"
+                            />
                           </div>
-                        )}
+                          <div>
+                            <label htmlFor="email-link-password" className="label">
+                              {t('auth.password')}
+                            </label>
+                            <input
+                              id="email-link-password"
+                              type="password"
+                              value={emailPassword}
+                              onChange={(e) => setEmailPassword(e.target.value)}
+                              placeholder={t('profile.passwordPlaceholder')}
+                              className="input"
+                              autoComplete="new-password"
+                            />
+                            <p className="mt-1 text-xs text-dark-500">
+                              {t('profile.passwordHint')}
+                            </p>
+                          </div>
+                          <div>
+                            <label htmlFor="email-link-confirm" className="label">
+                              {t('auth.confirmPassword')}
+                            </label>
+                            <input
+                              id="email-link-confirm"
+                              type="password"
+                              value={emailConfirmPassword}
+                              onChange={(e) => setEmailConfirmPassword(e.target.value)}
+                              placeholder={t('profile.confirmPasswordPlaceholder')}
+                              className="input"
+                              autoComplete="new-password"
+                            />
+                          </div>
 
-                        <Button type="submit" fullWidth loading={registerEmailMutation.isPending}>
-                          {t('profile.linkEmail')}
-                        </Button>
-                      </form>
+                          {emailError && (
+                            <div className="rounded-xl border border-error-500/30 bg-error-500/10 p-3 text-sm text-error-400">
+                              {emailError}
+                            </div>
+                          )}
+                          {emailSuccess && (
+                            <div className="rounded-xl border border-success-500/30 bg-success-500/10 p-3 text-sm text-success-400">
+                              {emailSuccess}
+                            </div>
+                          )}
+
+                          <Button type="submit" fullWidth loading={registerEmailMutation.isPending}>
+                            {t('profile.linkEmail')}
+                          </Button>
+                        </form>
+                      )}
                     </div>
                   </motion.div>
                 )}

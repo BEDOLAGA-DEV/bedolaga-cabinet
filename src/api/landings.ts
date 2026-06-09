@@ -25,6 +25,9 @@ export interface LandingTariff {
   device_limit: number;
   tier_level: number;
   periods: LandingTariffPeriod[];
+  /** Daily tariff: the single purchasable period is 1 day, priced per day. */
+  is_daily?: boolean;
+  daily_price_kopeks?: number;
 }
 
 export interface LandingPaymentMethodSubOption {
@@ -134,6 +137,21 @@ export interface PurchaseStatus {
   auto_login_token: string | null;
   recipient_in_bot: boolean | null;
   bot_link: string | null;
+  // Transferable gift claim link — the buyer forwards this; whoever activates it
+  // gets the gift. Derived from token + status (purchase.user is null until claim).
+  is_claimable: boolean;
+  claim_url: string | null;
+  bot_claim_link: string | null;
+}
+
+/** Result returned to the recipient after a successful web (email) gift claim. */
+export interface GiftClaimResult {
+  status: string;
+  tariff_name: string | null;
+  period_days: number | null;
+  subscription_url: string | null;
+  subscription_crypto_link: string | null;
+  auto_login_token: string | null;
 }
 
 /** Locale dict for multi-language text fields (admin API) */
@@ -279,6 +297,18 @@ export const landingApi = {
     const response = await apiClient.post(`/cabinet/landing/activate/${token}`);
     return response.data;
   },
+
+  // Public gift claim page data (no auth — the token is the bearer secret).
+  getGiftClaim: async (token: string): Promise<PurchaseStatus> => {
+    const response = await apiClient.get(`/cabinet/landing/gift/${token}`);
+    return response.data;
+  },
+
+  // Web (email) arm of the gift claim — binds the gift to the given email account.
+  claimGift: async (token: string, email: string): Promise<GiftClaimResult> => {
+    const response = await apiClient.post(`/cabinet/landing/gift/${token}/claim`, { email });
+    return response.data;
+  },
 };
 
 export interface LandingDailyStat {
@@ -296,10 +326,22 @@ export interface LandingTariffStat {
   revenue_kopeks: number;
 }
 
+export interface LandingPaymentMethodStat {
+  method: string;
+  purchases: number;
+  revenue_kopeks: number;
+}
+
+export interface LandingSourceStat {
+  source: string;
+  purchases: number;
+}
+
 export interface LandingStatsResponse {
   total_purchases: number;
   total_revenue_kopeks: number;
   total_gifts: number;
+  total_gifts_claimed: number;
   total_regular: number;
   avg_purchase_kopeks: number;
   total_created: number;
@@ -307,6 +349,8 @@ export interface LandingStatsResponse {
   conversion_rate: number;
   daily_stats: LandingDailyStat[];
   tariff_stats: LandingTariffStat[];
+  payment_method_stats: LandingPaymentMethodStat[];
+  source_stats: LandingSourceStat[];
 }
 
 export type PurchaseItemStatus =

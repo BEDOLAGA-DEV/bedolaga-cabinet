@@ -205,9 +205,9 @@ export default function Polls() {
         <div className="grid gap-4 sm:grid-cols-2">
           {polls.map((poll) => (
             <div key={poll.id} className="card">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <h3 className="text-lg font-semibold">{poll.title}</h3>
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0 flex-1">
+                  <h3 className="break-words text-lg font-semibold">{poll.title}</h3>
                   {poll.description && (
                     <p className="mt-1 text-sm text-dark-400">{poll.description}</p>
                   )}
@@ -219,7 +219,7 @@ export default function Polls() {
                   </div>
                 </div>
                 {poll.reward_amount && (
-                  <div className="flex items-center gap-1 text-accent-400">
+                  <div className="flex shrink-0 items-center gap-1 text-accent-400">
                     <GiftIcon className="h-5 w-5" />
                     <span className="text-sm font-medium">+{poll.reward_amount}</span>
                   </div>

@@ -15,9 +15,10 @@ import { ThemeColorsProvider } from './providers/ThemeColorsProvider';
 import { WebSocketProvider } from './providers/WebSocketProvider';
 import { ToastProvider } from './components/Toast';
 import { TooltipProvider } from './components/primitives/Tooltip';
-import { isInTelegramWebApp } from './hooks/useTelegramSDK';
+import { isInTelegramWebApp, closeTelegramApp } from './hooks/useTelegramSDK';
 import { getFallbackParentPath } from './utils/navigation';
 import { subscriptionApi } from './api/subscription';
+import { useBlockingStore } from './store/blocking';
 
 const TWEMOJI_OPTIONS = { className: 'twemoji', folder: 'svg', ext: '.svg' } as const;
 
@@ -43,6 +44,13 @@ function TelegramBackButton() {
   navigateRef.current = navigate;
   const pathnameRef = useRef(location.pathname);
   pathnameRef.current = location.pathname;
+
+  // A full-screen blocking overlay (maintenance / channel-sub / blacklist /
+  // account-deleted / backend-unavailable) takes over the native back button:
+  // there is nowhere to navigate, so it becomes a single, stable EXIT control.
+  const blockingType = useBlockingStore((state) => state.blockingType);
+  const blockingTypeRef = useRef(blockingType);
+  blockingTypeRef.current = blockingType;
 
   // Reliable in-app navigation depth (the app's entry point is 0). Driven by
   // React Router's navigation TYPE — NOT window.history.state.idx, which the
@@ -89,6 +97,15 @@ function TelegramBackButton() {
   subsCountRef.current = subsCount;
 
   useEffect(() => {
+    // On a blocking overlay, keep exactly one visible Back button (its click
+    // exits the app — see handler). Skip the route logic so it can't flip
+    // between Back and Close as the hidden route changes underneath.
+    if (blockingType) {
+      try {
+        showBackButton();
+      } catch {}
+      return;
+    }
     const isTopLevel = location.pathname === '' || BOTTOM_NAV_PATHS.includes(location.pathname);
     // Depth-independent on purpose: whether the user deep-linked in or navigated
     // here in-app, a single-tariff detail whose list just bounces back has no
@@ -103,10 +120,17 @@ function TelegramBackButton() {
         showBackButton();
       }
     } catch {}
-  }, [location, listRedirectsToDetail]);
+  }, [location, listRedirectsToDetail, blockingType]);
 
   // Stable handler — ref prevents re-subscription on every render
   const handler = useCallback(() => {
+    // A blocking overlay is a hard block with nowhere to navigate — the back
+    // button's only job is to EXIT the Mini App (no SPA navigation, so it can't
+    // flip-flop between Back and Close).
+    if (blockingTypeRef.current) {
+      closeTelegramApp();
+      return;
+    }
     // Real in-app history (depth > 0): a normal back. Otherwise we were opened
     // directly on this route via a deep-link — navigate(-1) is a no-op, so fall
     // back to a sensible parent route instead.

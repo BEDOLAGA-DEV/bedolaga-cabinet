@@ -22,38 +22,57 @@ const ChevronIcon = ({ expanded }: { expanded: boolean }) => (
 );
 
 /**
- * Calculate rotation degrees for a prize based on its position on the wheel.
+ * Rotation (mod 360) that brings sector `prizeIndex` under the top pointer.
  * Mirrors the backend _calculate_rotation logic in wheel_service.py.
  */
-function calculateRotationForPrize(prizes: WheelPrize[], result: SpinResult): number {
-  // Find prize index by matching display_name + emoji (both must match for safety)
-  let prizeIndex = prizes.findIndex(
-    (p) => p.display_name === result.prize_display_name && p.emoji === result.emoji,
-  );
-
-  // Fallback: match by display_name only
-  if (prizeIndex === -1) {
-    prizeIndex = prizes.findIndex((p) => p.display_name === result.prize_display_name);
-  }
-
-  // Fallback: match by emoji + prize_type
-  if (prizeIndex === -1) {
-    prizeIndex = prizes.findIndex(
-      (p) => p.emoji === result.emoji && p.prize_type === result.prize_type,
-    );
-  }
-
-  if (prizeIndex === -1) {
-    // Can't determine prize position — random angle
-    return Math.random() * 360;
-  }
-
+function rotationForIndex(prizes: WheelPrize[], prizeIndex: number): number {
+  if (prizes.length === 0) return 0;
   const sectorAngle = 360 / prizes.length;
   const baseAngle = prizeIndex * sectorAngle + sectorAngle / 2;
-  const offset = (Math.random() - 0.5) * sectorAngle * 0.6; // ±30% of sector
-  const stopAngle = 360 - baseAngle + offset;
+  const offset = (Math.random() - 0.5) * sectorAngle * 0.6; // ±30% within the sector
+  return 360 - baseAngle + offset;
+}
 
-  return stopAngle;
+/** Index of the "Nothing" sector, or 0 if there isn't one. */
+function neutralIndex(prizes: WheelPrize[]): number {
+  const idx = prizes.findIndex((p) => p.prize_type === 'nothing');
+  return idx === -1 ? 0 : idx;
+}
+
+/**
+ * Rotation that lands the wheel on the ACTUAL won prize's sector.
+ *
+ * Matches by prize_id (exact). It must NEVER land on a random sector: a random
+ * angle was the root cause of "the wheel shows месяц/50₽ but the result is
+ * Ничего" on the browser Stars path — when the prize couldn't be located the old
+ * code span to Math.random()*360, which often pointed at a winning slot. When the
+ * prize can't be resolved we land on the neutral ("Nothing") sector instead, so
+ * the animation never falsely celebrates a win.
+ */
+function calculateRotationForPrize(prizes: WheelPrize[], result: SpinResult): number {
+  let prizeIndex = result.prize_id != null ? prizes.findIndex((p) => p.id === result.prize_id) : -1;
+
+  // Defensive fallbacks for older payloads without prize_id: name+emoji, then name.
+  if (prizeIndex === -1 && result.prize_display_name) {
+    prizeIndex = prizes.findIndex(
+      (p) => p.display_name === result.prize_display_name && p.emoji === result.emoji,
+    );
+    if (prizeIndex === -1) {
+      prizeIndex = prizes.findIndex((p) => p.display_name === result.prize_display_name);
+    }
+  }
+
+  if (prizeIndex === -1) prizeIndex = neutralIndex(prizes); // unknown → neutral, never random
+
+  return rotationForIndex(prizes, prizeIndex);
+}
+
+/**
+ * Rotation used when the real result is unknown (e.g. the Stars-payment poll timed
+ * out). Lands on the neutral ("Nothing") sector — never a random/winning angle.
+ */
+function neutralRotation(prizes: WheelPrize[]): number {
+  return rotationForIndex(prizes, neutralIndex(prizes));
 }
 
 export default function Wheel() {
@@ -144,7 +163,10 @@ export default function Wheel() {
               // Found a new spin! Return it as SpinResult
               return {
                 success: true,
-                prize_id: latestSpin.id,
+                // WheelPrize id — lets the wheel land on the exact won sector.
+                // (Was latestSpin.id, the SPIN id, which never matched a sector and
+                // forced the random-angle fallback → the fake-win bug.)
+                prize_id: latestSpin.prize_id,
                 prize_type: latestSpin.prize_type,
                 prize_value: latestSpin.prize_value,
                 prize_display_name: latestSpin.prize_display_name,
@@ -219,13 +241,11 @@ export default function Wheel() {
 
               if (result) {
                 pendingStarsResultRef.current = result;
-                // Calculate rotation so the wheel lands on the correct prize sector
-                const rotation = config?.prizes
-                  ? calculateRotationForPrize(config.prizes, result)
-                  : Math.random() * 360;
-                setTargetRotation(rotation);
+                // Land on the ACTUAL won sector (matched by prize_id).
+                setTargetRotation(calculateRotationForPrize(config?.prizes ?? [], result));
               } else {
-                // Fallback: couldn't get result — use random rotation
+                // Couldn't get the result — land on the neutral sector (never a
+                // random/winning angle) and tell the user to check their history.
                 pendingStarsResultRef.current = {
                   success: true,
                   prize_id: null,
@@ -239,7 +259,7 @@ export default function Wheel() {
                   promocode: null,
                   error: null,
                 };
-                setTargetRotation(Math.random() * 360);
+                setTargetRotation(neutralRotation(config?.prizes ?? []));
               }
 
               setIsSpinning(true);
@@ -249,7 +269,8 @@ export default function Wheel() {
 
               setIsPayingStars(false);
 
-              // Error polling — spin with random rotation and show generic message
+              // Error polling — land on the neutral sector (never a random/winning
+              // angle) and show the generic "check your history" message.
               pendingStarsResultRef.current = {
                 success: true,
                 prize_id: null,
@@ -263,7 +284,7 @@ export default function Wheel() {
                 promocode: null,
                 error: null,
               };
-              setTargetRotation(Math.random() * 360);
+              setTargetRotation(neutralRotation(config?.prizes ?? []));
               setIsSpinning(true);
             });
         } else if (status !== 'cancelled') {
@@ -578,16 +599,16 @@ export default function Wheel() {
                           key={sub.id}
                           onClick={() => setSelectedSubscriptionId(sub.id)}
                           disabled={isSpinning}
-                          className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm transition-all ${
+                          className={`flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-sm transition-all ${
                             selectedSubscriptionId === sub.id
                               ? 'bg-accent-500/15 text-accent-400'
                               : 'text-dark-400 hover:text-dark-200'
                           }`}
                         >
-                          <span className="font-medium">
+                          <span className="min-w-0 truncate font-medium">
                             {sub.tariff_name || t('subscription.defaultName', 'Подписка')}
                           </span>
-                          <span className="text-xs opacity-60">
+                          <span className="shrink-0 text-xs opacity-60">
                             {sub.days_left} {t('common.units.days', 'дней')}
                           </span>
                         </button>

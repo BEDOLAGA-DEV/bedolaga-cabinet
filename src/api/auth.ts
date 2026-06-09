@@ -87,13 +87,24 @@ export const authApi = {
     message: string;
     email?: string;
     merge_required?: boolean;
-    merge_token?: string;
+    // 'email_code' means the email belongs to another account: a confirmation
+    // code was mailed to it and must be verified before a merge token is issued.
+    merge_verification?: 'email_code';
+    merge_token?: string | null;
   }> => {
     const response = await apiClient.post('/cabinet/auth/email/register', {
       email,
       password,
       yandex_cid: getYandexCid() || undefined,
     });
+    return response.data;
+  },
+
+  // Confirm an email account merge with the code sent to the existing account.
+  verifyEmailMerge: async (
+    code: string,
+  ): Promise<{ message: string; merge_required?: boolean; merge_token?: string }> => {
+    const response = await apiClient.post('/cabinet/auth/email/merge/verify', { code });
     return response.data;
   },
 
