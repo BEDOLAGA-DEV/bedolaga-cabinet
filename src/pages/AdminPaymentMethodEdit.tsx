@@ -1,13 +1,201 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, type ChangeEvent } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { adminPaymentMethodsApi } from '../api/adminPaymentMethods';
+import { adminOverpayCertificateApi, OVERPAY_CERT_MAX_SIZE } from '../api/adminOverpayCertificate';
 import { METHOD_LABELS } from '../constants/paymentMethods';
 import type { PromoGroupSimple } from '../types';
 import { usePlatform } from '../platform/hooks/usePlatform';
+import { useHapticFeedback } from '../platform/hooks/useHaptic';
+import { useDestructiveConfirm } from '../platform/hooks/useNativeDialog';
 import { createNumberInputHandler, toNumber } from '../utils/inputHelpers';
+import { localeMap } from '../utils/withdrawalUtils';
 import { BackIcon, CheckIcon, SaveIcon } from '@/components/icons';
+
+function extractErrorDetail(err: unknown): string | null {
+  const error = err as { response?: { data?: { detail?: unknown } } };
+  const detail = error.response?.data?.detail;
+  return typeof detail === 'string' ? detail : null;
+}
+
+function OverpayCertificateSection() {
+  const { t, i18n } = useTranslation();
+  const queryClient = useQueryClient();
+  const haptic = useHapticFeedback();
+  const confirm = useDestructiveConfirm();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [certFile, setCertFile] = useState<File | null>(null);
+  const [passphrase, setPassphrase] = useState('');
+  const [certError, setCertError] = useState<string | null>(null);
+  const [certWarning, setCertWarning] = useState<string | null>(null);
+
+  const { data: certStatus, isLoading } = useQuery({
+    queryKey: ['admin', 'overpay-certificate'],
+    queryFn: adminOverpayCertificateApi.getStatus,
+  });
+
+  const uploadMutation = useMutation({
+    mutationFn: (payload: { file: File; passphrase: string }) =>
+      adminOverpayCertificateApi.upload(payload.file, payload.passphrase),
+    onSuccess: (resp) => {
+      haptic.success();
+      setCertError(null);
+      setCertWarning(resp.warning ?? null);
+      setCertFile(null);
+      setPassphrase('');
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      queryClient.invalidateQueries({ queryKey: ['admin', 'overpay-certificate'] });
+    },
+    onError: (err) => {
+      haptic.error();
+      setCertWarning(null);
+      setCertError(extractErrorDetail(err) ?? t('admin.paymentMethods.overpayCertUploadError'));
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: adminOverpayCertificateApi.remove,
+    onSuccess: () => {
+      haptic.success();
+      setCertError(null);
+      setCertWarning(null);
+      queryClient.invalidateQueries({ queryKey: ['admin', 'overpay-certificate'] });
+    },
+    onError: (err) => {
+      haptic.error();
+      setCertError(extractErrorDetail(err) ?? t('admin.paymentMethods.overpayCertDeleteError'));
+    },
+  });
+
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setCertError(null);
+    setCertWarning(null);
+    const selected = e.target.files?.[0] ?? null;
+    if (selected && selected.size > OVERPAY_CERT_MAX_SIZE) {
+      setCertFile(null);
+      e.target.value = '';
+      setCertError(t('admin.paymentMethods.overpayCertFileTooLarge'));
+      return;
+    }
+    setCertFile(selected);
+  };
+
+  const handleDelete = async () => {
+    const confirmed = await confirm(t('admin.paymentMethods.overpayCertConfirmDelete'));
+    if (confirmed) deleteMutation.mutate();
+  };
+
+  const expiryDate = certStatus?.not_valid_after
+    ? new Date(certStatus.not_valid_after).toLocaleDateString(localeMap[i18n.language] || 'ru-RU', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+      })
+    : null;
+
+  return (
+    <div className="card space-y-4">
+      <h3 className="text-sm font-semibold text-dark-200">
+        {t('admin.paymentMethods.overpayCertTitle')}
+      </h3>
+
+      {isLoading ? (
+        <div className="skeleton h-10 w-full rounded-xl" />
+      ) : certStatus ? (
+        <div>
+          {certStatus.valid ? (
+            <>
+              <p className="text-sm text-success-400">
+                {t('admin.paymentMethods.overpayCertValid', { date: expiryDate })}
+              </p>
+              {certStatus.subject && (
+                <p className="mt-1 break-all text-xs text-dark-500">{certStatus.subject}</p>
+              )}
+            </>
+          ) : certStatus.uploaded ? (
+            <p className="text-sm text-warning-400">
+              {t('admin.paymentMethods.overpayCertUnreadable')}
+            </p>
+          ) : (
+            <p className="text-sm text-dark-400">{t('admin.paymentMethods.overpayCertMissing')}</p>
+          )}
+          {certStatus.env_locked_path && (
+            <p className="mt-1 text-xs text-dark-500">
+              {t('admin.paymentMethods.overpayCertEnvLockedPath')}
+            </p>
+          )}
+          {certStatus.env_locked_passphrase && (
+            <p className="mt-1 text-xs text-dark-500">
+              {t('admin.paymentMethods.overpayCertEnvLockedPassphrase')}
+            </p>
+          )}
+        </div>
+      ) : null}
+
+      <div>
+        <label className="mb-2 block text-sm font-medium text-dark-300">
+          {t('admin.paymentMethods.overpayCertFile')}
+        </label>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".p12,.pfx"
+          onChange={handleFileChange}
+          className="hidden"
+        />
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-dark-600 bg-dark-800/50 p-4 text-sm text-dark-400 transition-colors hover:border-dark-500 hover:text-dark-300"
+        >
+          {certFile ? certFile.name : t('admin.paymentMethods.overpayCertChooseFile')}
+        </button>
+      </div>
+
+      <div>
+        <label className="mb-2 block text-sm font-medium text-dark-300">
+          {t('admin.paymentMethods.overpayCertPassphrase')}
+        </label>
+        <input
+          type="password"
+          autoComplete="off"
+          value={passphrase}
+          onChange={(e) => setPassphrase(e.target.value)}
+          placeholder={t('admin.paymentMethods.overpayCertPassphrasePlaceholder')}
+          className="input"
+        />
+      </div>
+
+      {certError && <p className="text-sm text-error-400">{certError}</p>}
+      {certWarning && <p className="text-sm text-warning-400">{certWarning}</p>}
+
+      <div className="flex gap-3">
+        <button
+          type="button"
+          onClick={() => certFile && uploadMutation.mutate({ file: certFile, passphrase })}
+          disabled={!certFile || uploadMutation.isPending}
+          className="btn-primary flex flex-1 items-center justify-center gap-2"
+        >
+          {uploadMutation.isPending && (
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+          )}
+          {t('admin.paymentMethods.overpayCertUpload')}
+        </button>
+        {certStatus?.uploaded && (
+          <button
+            type="button"
+            onClick={handleDelete}
+            disabled={deleteMutation.isPending}
+            className="btn-danger"
+          >
+            {t('admin.paymentMethods.overpayCertDelete')}
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
 
 export default function AdminPaymentMethodEdit() {
   const { t } = useTranslation();
@@ -507,6 +695,8 @@ export default function AdminPaymentMethodEdit() {
           </div>
         </div>
       </div>
+
+      {config.method_id === 'overpay' && <OverpayCertificateSection />}
 
       {/* Actions */}
       <div className="flex items-center gap-3">
