@@ -103,5 +103,8 @@
     "*.{css,json}": [
       "prettier --write"
     ]
+  },
+  "overrides": {
+    "valibot": "^1.1.0"
   }
 }
