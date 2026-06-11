@@ -1660,6 +1660,7 @@
       "quickAmountsRemove": "Удалить сумму {{value}} ₽",
       "overpayCertTitle": "Сертификат mTLS (Overpay)",
       "overpayCertValid": "✅ Действует до {{date}}",
+      "overpayCertExpired": "⚠️ Срок действия истёк {{date}}",
       "overpayCertUnreadable": "⚠️ Сертификат не читается — неверный пароль или повреждённый файл",
       "overpayCertMissing": "❌ Сертификат не загружен",
       "overpayCertEnvLockedPath": "Путь задан через переменную окружения OVERPAY_P12_PATH — значение из БД не применяется",

@@ -11,6 +11,7 @@ import { useHapticFeedback } from '../platform/hooks/useHaptic';
 import { useDestructiveConfirm } from '../platform/hooks/useNativeDialog';
 import { createNumberInputHandler, toNumber } from '../utils/inputHelpers';
 import { localeMap } from '../utils/withdrawalUtils';
+import { PermissionGate } from '@/components/auth/PermissionGate';
 import { BackIcon, CheckIcon, SaveIcon } from '@/components/icons';
 
 function extractErrorDetail(err: unknown): string | null {
@@ -94,6 +95,10 @@ function OverpayCertificateSection() {
       })
     : null;
 
+  const isExpired = certStatus?.not_valid_after
+    ? new Date(certStatus.not_valid_after).getTime() < Date.now()
+    : false;
+
   return (
     <div className="card space-y-4">
       <h3 className="text-sm font-semibold text-dark-200">
@@ -106,9 +111,15 @@ function OverpayCertificateSection() {
         <div>
           {certStatus.valid ? (
             <>
-              <p className="text-sm text-success-400">
-                {t('admin.paymentMethods.overpayCertValid', { date: expiryDate })}
-              </p>
+              {isExpired ? (
+                <p className="text-sm text-warning-400">
+                  {t('admin.paymentMethods.overpayCertExpired', { date: expiryDate })}
+                </p>
+              ) : (
+                <p className="text-sm text-success-400">
+                  {t('admin.paymentMethods.overpayCertValid', { date: expiryDate })}
+                </p>
+              )}
               {certStatus.subject && (
                 <p className="mt-1 break-all text-xs text-dark-500">{certStatus.subject}</p>
               )}
@@ -696,7 +707,11 @@ export default function AdminPaymentMethodEdit() {
         </div>
       </div>
 
-      {config.method_id === 'overpay' && <OverpayCertificateSection />}
+      {config.method_id === 'overpay' && (
+        <PermissionGate permission="settings:read">
+          <OverpayCertificateSection />
+        </PermissionGate>
+      )}
 
       {/* Actions */}
       <div className="flex items-center gap-3">

@@ -2315,6 +2315,7 @@
       "quickAmountsRemove": "حذف مبلغ {{value}} ₽",
       "overpayCertTitle": "گواهی mTLS (Overpay)",
       "overpayCertValid": "✅ معتبر تا {{date}}",
+      "overpayCertExpired": "⚠️ در تاریخ {{date}} منقضی شده است",
       "overpayCertUnreadable": "⚠️ گواهی قابل خواندن نیست — رمز نادرست یا فایل خراب است",
       "overpayCertMissing": "❌ گواهی بارگذاری نشده است",
       "overpayCertEnvLockedPath": "مسیر از طریق متغیر محیطی OVERPAY_P12_PATH تنظیم شده است — مقدار پایگاه داده اعمال نمی‌شود",

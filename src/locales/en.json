@@ -1638,6 +1638,7 @@
       "quickAmountsRemove": "Remove amount {{value}} ₽",
       "overpayCertTitle": "mTLS certificate (Overpay)",
       "overpayCertValid": "✅ Valid until {{date}}",
+      "overpayCertExpired": "⚠️ Expired {{date}}",
       "overpayCertUnreadable": "⚠️ Certificate cannot be read — wrong passphrase or corrupted file",
       "overpayCertMissing": "❌ Certificate not uploaded",
       "overpayCertEnvLockedPath": "Path is set via the OVERPAY_P12_PATH environment variable — the database value is not applied",

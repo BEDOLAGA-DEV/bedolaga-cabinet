@@ -1467,6 +1467,7 @@
       "quickAmountsRemove": "删除金额 {{value}} ₽",
       "overpayCertTitle": "mTLS 证书（Overpay）",
       "overpayCertValid": "✅ 有效期至 {{date}}",
+      "overpayCertExpired": "⚠️ 已于 {{date}} 过期",
       "overpayCertUnreadable": "⚠️ 证书无法读取——密码错误或文件损坏",
       "overpayCertMissing": "❌ 未上传证书",
       "overpayCertEnvLockedPath": "路径已通过环境变量 OVERPAY_P12_PATH 设置——数据库中的值不会生效",
