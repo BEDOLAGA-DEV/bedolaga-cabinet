@@ -105,8 +105,8 @@ function onColorFor(bgTriplet: string): string {
   const [r, g, b] = bgTriplet.split(',').map((x) => Number(x.trim()));
   const bg = { r, g, b };
   const white = { r: 255, g: 255, b: 255 };
-  const ink = { r: 15, g: 23, b: 42 };
-  return contrastRatio(white, bg) >= contrastRatio(ink, bg) ? '255, 255, 255' : '15, 23, 42';
+  const ink = { r: 10, g: 11, b: 13 };
+  return contrastRatio(white, bg) >= contrastRatio(ink, bg) ? '255, 255, 255' : '10, 11, 13';
 }
 
 // Apply theme colors as CSS variables (RGB format for Tailwind opacity support)
