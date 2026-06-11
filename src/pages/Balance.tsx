@@ -79,7 +79,7 @@ export default function Balance() {
     placeholderData: (previousData) => previousData,
   });
 
-  const { data: paymentMethods } = useQuery({
+  const { data: paymentMethods, isLoading: isMethodsLoading } = useQuery({
     queryKey: ['payment-methods'],
     queryFn: balanceApi.getPaymentMethods,
   });
@@ -308,7 +308,19 @@ export default function Balance() {
         </Card>
       </motion.div>
 
-      {/* Payment Methods */}
+      {/* Payment Methods — на время загрузки резервируем место скелетоном,
+          иначе «История операций» прыгает вниз при позднем ответе (CLS 0.2) */}
+      {isMethodsLoading && (
+        <motion.div variants={staggerItem}>
+          <Card>
+            <div className="mb-4 h-6 w-48 animate-pulse rounded-lg bg-dark-700/60" />
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="h-24 animate-pulse rounded-2xl bg-dark-800/80" />
+              <div className="hidden h-24 animate-pulse rounded-2xl bg-dark-800/80 sm:block" />
+            </div>
+          </Card>
+        </motion.div>
+      )}
       {paymentMethods && paymentMethods.length > 0 && (
         <motion.div variants={staggerItem}>
           <Card>

@@ -188,7 +188,9 @@ export default function Support() {
   // Show loading while checking configuration
   if (configLoading) {
     return (
-      <div className="flex items-center justify-center py-24">
+      // Стабильная высота на время загрузки конфига — иначе подмена
+      // спиннера контентом сдвигает страницу (CLS 0.15 на проде)
+      <div className="flex min-h-[60vh] items-center justify-center">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
       </div>
     );
