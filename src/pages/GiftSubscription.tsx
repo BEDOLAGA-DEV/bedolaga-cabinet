@@ -297,7 +297,7 @@ function TariffCard({
           )}
         >
           {tariff.traffic_limit_gb > 0
-            ? `${tariff.traffic_limit_gb} ${t('gift.gbShort')}`
+            ? `${tariff.traffic_limit_gb} ${t('gift.gbShort')} ${t('common.units.perMonthTraffic')}`
             : t('gift.unlimitedTraffic')}
           {' \u2022 '}
           {t('gift.deviceCount', { count: tariff.device_limit })}

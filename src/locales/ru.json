@@ -48,7 +48,10 @@
     "understand": "Понятно",
     "units": {
       "gb": "ГБ",
-      "perGb": "/ГБ"
+      "perGb": "/ГБ",
+      "perMonthTraffic": "в месяц",
+      "perWeekTraffic": "в неделю",
+      "perDayTraffic": "в сутки"
     }
   },
   "nav": {
@@ -5327,6 +5330,7 @@
     "daysAccess": "дней доступа",
     "error": "Ошибка",
     "gb": "ГБ",
+    "perMonth": "/мес",
     "selectedTariff": "Тариф",
     "period": "Период",
     "total": "Итого",

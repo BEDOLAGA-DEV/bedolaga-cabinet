@@ -330,7 +330,7 @@ export default function Home() {
                         </svg>
                         {tariff.traffic_limit_gb === 0
                           ? t('home.pricing.unlimited')
-                          : `${tariff.traffic_limit_gb} ${t('home.pricing.gb')}`}
+                          : `${tariff.traffic_limit_gb} ${t('home.pricing.gb')} ${t('common.units.perMonthTraffic')}`}
                       </span>
                       <span className="flex items-center gap-1.5">
                         <svg

@@ -39,6 +39,10 @@ function isValidContact(value: string): boolean {
 // that represents all daily tariffs in the period selector.
 const DAILY_DAYS_SENTINEL = -1;
 
+// Period (in days) selected by default on the landing: 12 months.
+// Falls back to the first available period when this one isn't offered.
+const DEFAULT_PERIOD_DAYS = 360;
+
 function formatPeriodLabel(
   days: number,
   t: (key: string, options?: Record<string, unknown>) => string,
@@ -402,7 +406,9 @@ function TariffCard({
               d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"
             />
           </svg>
-          {tariff.traffic_limit_gb === 0 ? '∞' : tariff.traffic_limit_gb} {t('landing.gb', 'GB')}
+          {tariff.traffic_limit_gb === 0
+            ? '∞'
+            : `${tariff.traffic_limit_gb} ${t('landing.gb', 'GB')} ${t('common.units.perMonthTraffic')}`}
         </span>
         <span className="flex items-center gap-1">
           <svg
@@ -443,6 +449,19 @@ function TariffCard({
                 </>
               )}
           </div>
+          {/* Per-month price (skip daily tariffs and the 1-month period) */}
+          {!tariff.is_daily &&
+            selectedPeriod.days > 30 &&
+            (() => {
+              const months = selectedPeriod.days / 30;
+              const perMonth = Math.round(selectedPeriod.price_kopeks / months);
+              return (
+                <div className="mt-0.5 text-xs text-dark-400">
+                  ≈ {formatPrice(perMonth)}
+                  {t('landing.perMonth', '/мес')}
+                </div>
+              );
+            })()}
         </div>
       )}
     </button>
@@ -1014,9 +1033,10 @@ export default function QuickPurchase() {
   useEffect(() => {
     if (!config) return;
 
-    // Auto-select first period from all available periods
+    // Default to the 12-month period when available, otherwise the first one.
     if (allPeriods.length > 0 && selectedPeriodDays === null) {
-      setSelectedPeriodDays(allPeriods[0].days);
+      const preferred = allPeriods.find((p) => p.days === DEFAULT_PERIOD_DAYS);
+      setSelectedPeriodDays(preferred ? preferred.days : allPeriods[0].days);
     }
 
     // Auto-select first visible tariff
