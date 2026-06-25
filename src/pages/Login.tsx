@@ -24,6 +24,7 @@ import OAuthProviderIcon from '../components/OAuthProviderIcon';
 import { saveOAuthState } from '../utils/oauth';
 import { getPendingReferralCode } from '../utils/referral';
 import { UsersIcon, EmailIcon, RefreshIcon, ChevronDownIcon } from '@/components/icons';
+import LegalFooter from '../components/LegalFooter';
 
 export default function Login() {
   const { t } = useTranslation();
@@ -111,6 +112,12 @@ export default function Login() {
     staleTime: 60000,
   });
   const isEmailAuthEnabled = emailAuthConfig?.enabled ?? true;
+
+  const { data: footerEnabled } = useQuery({
+    queryKey: ['footer-enabled'],
+    queryFn: brandingApi.getFooterEnabled,
+    staleTime: 60000,
+  });
 
   // Fetch enabled OAuth providers
   const { data: oauthData } = useQuery({
@@ -737,6 +744,7 @@ export default function Login() {
             )}
           </div>
         )}
+        {footerEnabled && <LegalFooter className="pt-1" />}
       </div>
     </div>
   );

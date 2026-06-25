@@ -242,6 +242,18 @@ export const brandingApi = {
   },
 
   // Get email auth enabled (public, no auth required)
+  getFooterEnabled: async (): Promise<boolean> => {
+    try {
+      const response = await apiClient.get<{ enabled: boolean }>('/cabinet/branding/footer-enabled');
+      return response.data.enabled;
+    } catch {
+      return false;
+    }
+  },
+  updateFooterEnabled: async (enabled: boolean): Promise<boolean> => {
+    const response = await apiClient.patch<{ enabled: boolean }>('/cabinet/branding/footer-enabled', { enabled });
+    return response.data.enabled;
+  },
   getEmailAuthEnabled: async (): Promise<EmailAuthEnabled> => {
     try {
       const response = await apiClient.get<EmailAuthEnabled>('/cabinet/branding/email-auth');
@@ -324,5 +336,11 @@ export const brandingApi = {
   // Store Yandex Metrika ClientID for the authenticated cabinet user
   storeYandexCid: async (cid: string): Promise<void> => {
     await apiClient.post('/cabinet/branding/analytics/yandex-cid', { cid });
+  },
+
+  // Store partner / affiliate click_id (Keitaro etc.) for the authenticated user.
+  // Saved into yandex_client_id_map.subid for S2S postback delivery.
+  storePartnerClickId: async (click_id: string): Promise<void> => {
+    await apiClient.post('/cabinet/branding/analytics/partner-click-id', { click_id });
   },
 };

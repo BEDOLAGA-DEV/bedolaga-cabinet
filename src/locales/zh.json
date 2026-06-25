@@ -1973,7 +1973,9 @@
         "telegramOidcClientSecret": "Client Secret"
       },
       "offlineConv": "离线转化",
-      "apiKey": "API 密钥"
+      "apiKey": "API 密钥",
+      "legalFooter": "法律页脚",
+      "legalFooterDesc": "登录页面底部的要约、隐私政策和定期付款链接"
     },
     "buttons": {
       "color": "按钮颜色",
@@ -4898,5 +4900,10 @@
     "empty": "您还没有订阅",
     "emptyDesc": "选择套餐以开始使用",
     "title": "我的订阅"
+  },
+  "footer": {
+    "offer": "公开要约",
+    "privacy": "隐私政策",
+    "recurrent": "定期付款"
   }
 }

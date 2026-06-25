@@ -1908,7 +1908,9 @@
         "telegramOidcClientSecret": "Client Secret"
       },
       "offlineConv": "تبدیل‌های آفلاین",
-      "apiKey": "کلید API"
+      "apiKey": "کلید API",
+      "legalFooter": "پاورقی حقوقی",
+      "legalFooterDesc": "پیوند به پیشنهاد، سیاست حریم خصوصی و پرداخت‌های مکرر در پایین صفحه ورود"
     },
     "buttons": {
       "color": "رنگ دکمه",
@@ -4899,5 +4901,10 @@
     "empty": "هنوز اشتراکی ندارید",
     "emptyDesc": "برای شروع تعرفه‌ای انتخاب کنید",
     "title": "اشتراک‌های من"
+  },
+  "footer": {
+    "offer": "پیشنهاد عمومی",
+    "privacy": "سیاست حفظ حریم خصوصی",
+    "recurrent": "پرداخت‌های مکرر"
   }
 }

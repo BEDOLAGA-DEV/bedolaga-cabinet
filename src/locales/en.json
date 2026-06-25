@@ -2228,7 +2228,9 @@
         "telegramOidcClientSecret": "Client Secret"
       },
       "offlineConv": "Offline Conversions",
-      "apiKey": "API Key"
+      "apiKey": "API Key",
+      "legalFooter": "Legal Footer",
+      "legalFooterDesc": "Links to the offer, privacy policy and recurring payments at the bottom of the login page"
     },
     "bulkActions": {
       "title": "Bulk Actions",
@@ -5265,5 +5267,10 @@
     "empty": "You have no subscriptions yet",
     "emptyDesc": "Choose a tariff to get started",
     "title": "My subscriptions"
+  },
+  "footer": {
+    "offer": "Public Offer",
+    "privacy": "Privacy Policy",
+    "recurrent": "Recurring Payments"
   }
 }
