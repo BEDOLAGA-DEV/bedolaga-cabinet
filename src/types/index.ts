@@ -686,6 +686,7 @@ export interface PaymentMethodConfig {
   is_enabled: boolean;
   display_name: string | null;
   default_display_name: string;
+  description: string | null;
   sub_options: Record<string, boolean> | null;
   available_sub_options: PaymentMethodSubOptionInfo[] | null;
   quick_amounts: number[] | null;
