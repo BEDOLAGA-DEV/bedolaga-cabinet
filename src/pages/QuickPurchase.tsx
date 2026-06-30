@@ -126,7 +126,7 @@ function PeriodTabs({
               : 'bg-dark-800/50 text-dark-300 hover:bg-dark-700/50 hover:text-dark-100',
           )}
         >
-          {formatPeriodLabel(period.days, t)}
+          {period.is_trial ? period.label : formatPeriodLabel(period.days, t)}
         </button>
       ))}
     </div>
@@ -495,7 +495,9 @@ function SummaryCard({
               {t('landing.period', 'Period')}
             </p>
             <p className="mt-1 text-sm text-dark-200">
-              {formatPeriodLabel(selectedPeriod.days, t)}
+              {selectedPeriod.is_trial
+                ? selectedPeriod.label
+                : formatPeriodLabel(selectedPeriod.days, t)}
             </p>
           </div>
         )}
