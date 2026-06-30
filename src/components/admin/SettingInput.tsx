@@ -40,7 +40,10 @@ export function SettingInput({ setting, onUpdate, disabled }: SettingInputProps)
   const inputRef = useRef<HTMLInputElement>(null);
 
   const currentValue = String(setting.current ?? '');
-  const needsTextarea = isLongValue(currentValue) || isListOrJsonKey(setting.key);
+  // Secrets are always edited via the single-line (password) input — never a textarea — and
+  // never pre-filled with the masked value, so leaving the field empty means "keep current".
+  const needsTextarea =
+    !setting.is_secret && (isLongValue(currentValue) || isListOrJsonKey(setting.key));
 
   // Auto-resize textarea
   useEffect(() => {
@@ -51,11 +54,19 @@ export function SettingInput({ setting, onUpdate, disabled }: SettingInputProps)
   }, [value, isEditing]);
 
   const handleStart = () => {
-    setValue(currentValue);
+    // For secrets, start from an empty field (the displayed value is just the mask) so the
+    // admin types a brand-new value; leaving it empty is treated as "no change".
+    setValue(setting.is_secret ? '' : currentValue);
     setIsEditing(true);
   };
 
   const handleSave = () => {
+    // Empty secret field = the admin opened edit but didn't change anything → keep the stored
+    // secret instead of overwriting it with an empty value.
+    if (setting.is_secret && value === '') {
+      handleCancel();
+      return;
+    }
     onUpdate(value);
     setIsEditing(false);
   };
@@ -111,7 +122,7 @@ export function SettingInput({ setting, onUpdate, disabled }: SettingInputProps)
             </button>
             <button
               onClick={handleSave}
-              className="flex items-center gap-1.5 rounded-lg bg-accent-500 px-3 py-1.5 text-sm text-white transition-colors hover:bg-accent-600"
+              className="flex items-center gap-1.5 rounded-lg bg-accent-500 px-3 py-1.5 text-sm text-on-accent transition-colors hover:bg-accent-600"
             >
               <CheckIcon />
               {t('admin.settings.saveButton')}
@@ -128,7 +139,14 @@ export function SettingInput({ setting, onUpdate, disabled }: SettingInputProps)
       <div className="flex items-center gap-2">
         <input
           ref={inputRef}
-          type={setting.type === 'int' || setting.type === 'float' ? 'number' : 'text'}
+          type={
+            setting.is_secret
+              ? 'password'
+              : setting.type === 'int' || setting.type === 'float'
+                ? 'number'
+                : 'text'
+          }
+          autoComplete={setting.is_secret ? 'new-password' : undefined}
           value={value}
           onChange={(e) => setValue(e.target.value)}
           onKeyDown={(e) => {
@@ -141,7 +159,7 @@ export function SettingInput({ setting, onUpdate, disabled }: SettingInputProps)
         />
         <button
           onClick={handleSave}
-          className="rounded-lg bg-accent-500 p-2 text-white transition-colors hover:bg-accent-600"
+          className="rounded-lg bg-accent-500 p-2 text-on-accent transition-colors hover:bg-accent-600"
           title={t('admin.settings.saveHint')}
         >
           <CheckIcon />

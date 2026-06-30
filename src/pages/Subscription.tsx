@@ -515,7 +515,7 @@ export default function Subscription() {
         </p>
         <button
           onClick={() => navigate('/subscriptions')}
-          className="rounded-xl bg-accent-500 px-6 py-2.5 text-sm font-medium text-white"
+          className="rounded-xl bg-accent-500 px-6 py-2.5 text-sm font-medium text-on-accent"
         >
           {t('subscription.backToList', 'Мои подписки')}
         </button>

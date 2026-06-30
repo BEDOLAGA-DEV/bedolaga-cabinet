@@ -80,7 +80,7 @@ export function MobileBottomNav({
             onClick={handleNavClick}
             className={cn(
               'relative flex min-w-[56px] flex-1 shrink-0 flex-col items-center justify-center rounded-2xl px-3 py-2.5 transition-all duration-200',
-              isActive(item.path) ? 'text-accent-400' : 'text-dark-500 hover:text-dark-300',
+              isActive(item.path) ? 'text-accent-400' : 'text-dark-400 hover:text-dark-200',
             )}
           >
             {isActive(item.path) && (

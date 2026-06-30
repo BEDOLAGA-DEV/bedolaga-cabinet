@@ -199,7 +199,7 @@ export default function AdminPromoOfferSend() {
           <div className="flex justify-center gap-3">
             <button
               onClick={() => navigate('/admin/promo-offers')}
-              className="rounded-lg bg-accent-500 px-6 py-2 text-white transition-colors hover:bg-accent-600"
+              className="rounded-lg bg-accent-500 px-6 py-2 text-on-accent transition-colors hover:bg-accent-600"
             >
               {t('admin.promoOffers.backToList')}
             </button>
@@ -441,7 +441,7 @@ export default function AdminPromoOfferSend() {
                   {selectedTemplate.message_text}
                 </div>
                 <div className="mt-4">
-                  <span className="inline-block rounded-lg bg-accent-500 px-4 py-2 text-sm text-white">
+                  <span className="inline-block rounded-lg bg-accent-500 px-4 py-2 text-sm text-on-accent">
                     {selectedTemplate.button_text}
                   </span>
                 </div>

@@ -4,7 +4,18 @@ import { useTranslation } from 'react-i18next';
 import { partnerApi } from '../api/partners';
 import { AdminBackButton } from '../components/admin';
 import { useCurrency } from '../hooks/useCurrency';
-import { XIcon } from '@/components/icons';
+import { StatCard } from '@/components/stats';
+import {
+  XIcon,
+  UsersIcon,
+  CheckCircleIcon,
+  UsersOnlineIcon,
+  PercentIcon,
+  BanknotesIcon,
+  CalendarIcon,
+  CalendarBlankIcon,
+  CalendarStarIcon,
+} from '@/components/icons';
 
 // Status badge config — keys must match backend PartnerStatus enum values
 const statusConfig: Record<string, { labelKey: string; color: string; bgColor: string }> = {
@@ -112,30 +123,30 @@ export default function AdminPartnerDetail() {
       <div className="space-y-6">
         {/* Referral Stats */}
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <div className="rounded-xl border border-dark-700 bg-dark-800 p-4 text-center">
-            <div className="text-2xl font-bold text-dark-100">{partner.total_referrals}</div>
-            <div className="text-xs text-dark-500">
-              {t('admin.partnerDetail.stats.totalReferrals')}
-            </div>
-          </div>
-          <div className="rounded-xl border border-dark-700 bg-dark-800 p-4 text-center">
-            <div className="text-2xl font-bold text-success-400">{partner.paid_referrals}</div>
-            <div className="text-xs text-dark-500">
-              {t('admin.partnerDetail.stats.paidReferrals')}
-            </div>
-          </div>
-          <div className="rounded-xl border border-dark-700 bg-dark-800 p-4 text-center">
-            <div className="text-2xl font-bold text-accent-400">{partner.active_referrals}</div>
-            <div className="text-xs text-dark-500">
-              {t('admin.partnerDetail.stats.activeReferrals')}
-            </div>
-          </div>
-          <div className="rounded-xl border border-dark-700 bg-dark-800 p-4 text-center">
-            <div className="text-2xl font-bold text-accent-400">{partner.conversion_to_paid}%</div>
-            <div className="text-xs text-dark-500">
-              {t('admin.partnerDetail.stats.conversionRate')}
-            </div>
-          </div>
+          <StatCard
+            label={t('admin.partnerDetail.stats.totalReferrals')}
+            value={partner.total_referrals}
+            icon={<UsersIcon className="h-5 w-5" />}
+            tone="neutral"
+          />
+          <StatCard
+            label={t('admin.partnerDetail.stats.paidReferrals')}
+            value={partner.paid_referrals}
+            icon={<CheckCircleIcon className="h-5 w-5" />}
+            tone="success"
+          />
+          <StatCard
+            label={t('admin.partnerDetail.stats.activeReferrals')}
+            value={partner.active_referrals}
+            icon={<UsersOnlineIcon className="h-5 w-5" />}
+            tone="accent"
+          />
+          <StatCard
+            label={t('admin.partnerDetail.stats.conversionRate')}
+            value={`${partner.conversion_to_paid}%`}
+            icon={<PercentIcon className="h-5 w-5" />}
+            tone="accent"
+          />
         </div>
 
         {/* Earnings */}
@@ -144,38 +155,30 @@ export default function AdminPartnerDetail() {
             {t('admin.partnerDetail.earnings.title')}
           </h3>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <div className="rounded-lg bg-dark-700/50 p-3">
-              <div className="mb-1 text-sm text-dark-400">
-                {t('admin.partnerDetail.earnings.allTime')}
-              </div>
-              <div className="text-lg font-medium text-success-400">
-                {formatWithCurrency(partner.earnings_all_time / 100)}
-              </div>
-            </div>
-            <div className="rounded-lg bg-dark-700/50 p-3">
-              <div className="mb-1 text-sm text-dark-400">
-                {t('admin.partnerDetail.earnings.today')}
-              </div>
-              <div className="text-lg font-medium text-dark-200">
-                {formatWithCurrency(partner.earnings_today / 100)}
-              </div>
-            </div>
-            <div className="rounded-lg bg-dark-700/50 p-3">
-              <div className="mb-1 text-sm text-dark-400">
-                {t('admin.partnerDetail.earnings.week')}
-              </div>
-              <div className="text-lg font-medium text-dark-200">
-                {formatWithCurrency(partner.earnings_week / 100)}
-              </div>
-            </div>
-            <div className="rounded-lg bg-dark-700/50 p-3">
-              <div className="mb-1 text-sm text-dark-400">
-                {t('admin.partnerDetail.earnings.month')}
-              </div>
-              <div className="text-lg font-medium text-dark-200">
-                {formatWithCurrency(partner.earnings_month / 100)}
-              </div>
-            </div>
+            <StatCard
+              label={t('admin.partnerDetail.earnings.allTime')}
+              value={formatWithCurrency(partner.earnings_all_time / 100)}
+              icon={<BanknotesIcon className="h-5 w-5" />}
+              tone="success"
+            />
+            <StatCard
+              label={t('admin.partnerDetail.earnings.today')}
+              value={formatWithCurrency(partner.earnings_today / 100)}
+              icon={<CalendarIcon className="h-5 w-5" />}
+              tone="neutral"
+            />
+            <StatCard
+              label={t('admin.partnerDetail.earnings.week')}
+              value={formatWithCurrency(partner.earnings_week / 100)}
+              icon={<CalendarBlankIcon className="h-5 w-5" />}
+              tone="neutral"
+            />
+            <StatCard
+              label={t('admin.partnerDetail.earnings.month')}
+              value={formatWithCurrency(partner.earnings_month / 100)}
+              icon={<CalendarStarIcon className="h-5 w-5" />}
+              tone="neutral"
+            />
           </div>
         </div>
 

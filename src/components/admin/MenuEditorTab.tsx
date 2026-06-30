@@ -72,7 +72,7 @@ function MaxPerRowSelector({ value, onChange }: MaxPerRowSelectorProps) {
           onClick={() => onChange(n)}
           className={`flex h-7 w-7 items-center justify-center rounded-lg text-xs font-semibold transition-all ${
             value === n
-              ? 'bg-accent-500 text-white'
+              ? 'bg-accent-500 text-on-accent'
               : 'bg-dark-700/50 text-dark-400 hover:bg-dark-600 hover:text-dark-300'
           }`}
         >
@@ -788,7 +788,7 @@ export function MenuEditorTab() {
           <button
             onClick={handleSave}
             disabled={updateMutation.isPending}
-            className="rounded-xl bg-accent-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-accent-600 disabled:opacity-50"
+            className="rounded-xl bg-accent-500 px-4 py-2 text-sm font-medium text-on-accent transition-colors hover:bg-accent-600 disabled:opacity-50"
           >
             {updateMutation.isPending ? t('common.saving') : t('common.save')}
           </button>

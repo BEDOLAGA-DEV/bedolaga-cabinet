@@ -424,7 +424,7 @@ function AddChannelForm({
           <button
             onClick={handleSubmit}
             disabled={!channelId.trim() || isLoading}
-            className="flex items-center gap-2 rounded-lg bg-accent-500 px-4 py-2 text-sm text-white transition-colors hover:bg-accent-600 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex items-center gap-2 rounded-lg bg-accent-500 px-4 py-2 text-sm text-on-accent transition-colors hover:bg-accent-600 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <CheckIcon />
             {t('admin.channelSubscriptions.form.submit')}
@@ -499,7 +499,7 @@ function EditChannelForm({
           <button
             onClick={handleSubmit}
             disabled={isLoading}
-            className="flex items-center gap-2 rounded-lg bg-accent-500 px-4 py-2 text-sm text-white transition-colors hover:bg-accent-600 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex items-center gap-2 rounded-lg bg-accent-500 px-4 py-2 text-sm text-on-accent transition-colors hover:bg-accent-600 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <CheckIcon />
             {t('admin.channelSubscriptions.form.save')}
@@ -641,7 +641,7 @@ export default function AdminChannelSubscriptions() {
             <button
               onClick={() => setShowAddForm(true)}
               aria-label={t('admin.channelSubscriptions.addChannel')}
-              className="flex items-center gap-2 rounded-lg bg-accent-500 px-4 py-2 text-white transition-colors hover:bg-accent-600"
+              className="flex items-center gap-2 rounded-lg bg-accent-500 px-4 py-2 text-on-accent transition-colors hover:bg-accent-600"
             >
               <PlusIcon />
               <span className="hidden sm:inline">{t('admin.channelSubscriptions.addChannel')}</span>

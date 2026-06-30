@@ -74,7 +74,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
             </p>
             <button
               onClick={() => window.location.reload()}
-              className="rounded-xl bg-accent-500 px-6 py-3 font-medium text-white transition-colors hover:bg-accent-600"
+              className="rounded-xl bg-accent-500 px-6 py-3 font-medium text-on-accent transition-colors hover:bg-accent-600"
             >
               Reload page
             </button>
@@ -110,7 +110,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
           </p>
           <button
             onClick={() => window.location.reload()}
-            className="rounded-xl bg-accent-500 px-6 py-3 font-medium text-white transition-colors hover:bg-accent-600"
+            className="rounded-xl bg-accent-500 px-6 py-3 font-medium text-on-accent transition-colors hover:bg-accent-600"
           >
             {isChunk ? 'Reload' : 'Try again'}
           </button>

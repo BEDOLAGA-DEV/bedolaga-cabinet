@@ -161,7 +161,8 @@ export interface UserPanelInfo {
 
 export interface SubscriptionRequestRecord {
   id: number;
-  userUuid: string;
+  // Remnawave 2.8.0 renamed this panel field userUuid (uuid) -> userId (number).
+  userId: number;
   requestAt: string;
   requestIp: string | null;
   userAgent: string | null;

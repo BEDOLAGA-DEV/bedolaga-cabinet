@@ -82,7 +82,7 @@ export default function TopUpMethodSelect() {
                         {translatedDesc || method.description}
                       </div>
                     )}
-                    <div className="mt-3 text-xs text-dark-600">
+                    <div className="mt-3 text-xs text-dark-400">
                       {formatAmount(method.min_amount_kopeks / 100, 0)} –{' '}
                       {formatAmount(method.max_amount_kopeks / 100, 0)} {currencySymbol}
                     </div>

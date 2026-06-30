@@ -364,7 +364,7 @@ export default function AdminWithdrawalDetail() {
             <button
               onClick={() => completeMutation.mutate()}
               disabled={completeMutation.isPending}
-              className="w-full rounded-lg bg-accent-500 px-4 py-3 font-medium text-white transition-colors hover:bg-accent-600 disabled:opacity-50"
+              className="w-full rounded-lg bg-accent-500 px-4 py-3 font-medium text-on-accent transition-colors hover:bg-accent-600 disabled:opacity-50"
             >
               {completeMutation.isPending
                 ? t('admin.withdrawals.detail.completing')

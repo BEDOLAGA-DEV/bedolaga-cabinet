@@ -70,7 +70,6 @@ const AUTH_ENDPOINTS = [
   '/cabinet/auth/password/forgot',
   '/cabinet/auth/password/reset',
   '/cabinet/auth/oauth/',
-  '/cabinet/auth/merge/',
   '/cabinet/auth/account/link/server-complete',
   '/cabinet/auth/deeplink/',
   '/cabinet/auth/login/auto',

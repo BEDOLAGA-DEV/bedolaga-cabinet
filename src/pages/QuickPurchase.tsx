@@ -122,7 +122,7 @@ function PeriodTabs({
           className={cn(
             'whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-all duration-200',
             selectedDays === period.days
-              ? 'bg-accent-500 text-white shadow-lg shadow-accent-500/25'
+              ? 'bg-accent-500 text-on-accent shadow-lg shadow-accent-500/25'
               : 'bg-dark-800/50 text-dark-300 hover:bg-dark-700/50 hover:text-dark-100',
           )}
         >
@@ -409,7 +409,7 @@ function PaymentMethodCard({
                 className={cn(
                   'rounded-xl px-4 py-2 text-sm font-medium transition-all duration-200',
                   selectedSubOption === opt.id
-                    ? 'bg-accent-500 text-white shadow-sm shadow-accent-500/25'
+                    ? 'bg-accent-500 text-on-accent shadow-sm shadow-accent-500/25'
                     : 'bg-dark-800/50 text-dark-300 hover:bg-dark-700/50 hover:text-dark-100',
                 )}
               >
@@ -583,7 +583,7 @@ function SummaryCard({
               className={cn(
                 'flex w-full items-center justify-center gap-2 rounded-2xl px-6 py-4 text-base font-semibold transition-all duration-200',
                 canSubmit && !isSubmitting
-                  ? 'bg-accent-500 text-white shadow-lg shadow-accent-500/25 hover:bg-accent-400 hover:shadow-accent-500/40 active:scale-[0.98]'
+                  ? 'bg-accent-500 text-on-accent shadow-lg shadow-accent-500/25 hover:bg-accent-400 hover:shadow-accent-500/40 active:scale-[0.98]'
                   : 'cursor-not-allowed bg-dark-800 text-dark-500',
               )}
             >
@@ -629,7 +629,7 @@ function SummaryCard({
           className={cn(
             'flex w-full items-center justify-center gap-2 rounded-2xl px-6 py-4 text-base font-semibold transition-all duration-200',
             canSubmit && !isSubmitting
-              ? 'bg-accent-500 text-white shadow-lg shadow-accent-500/25 hover:bg-accent-400 hover:shadow-accent-500/40 active:scale-[0.98]'
+              ? 'bg-accent-500 text-on-accent shadow-lg shadow-accent-500/25 hover:bg-accent-400 hover:shadow-accent-500/40 active:scale-[0.98]'
               : 'cursor-not-allowed bg-dark-800 text-dark-500',
           )}
         >
@@ -734,7 +734,7 @@ function DiscountBanner({
       <div className="flex flex-col items-center gap-4 px-5 py-5 sm:flex-row sm:justify-between">
         {/* Left: badge + text */}
         <div className="flex items-center gap-3">
-          <span className="shrink-0 rounded-full bg-accent-500 px-3 py-1 text-sm font-bold text-white shadow-lg shadow-accent-500/25">
+          <span className="shrink-0 rounded-full bg-accent-500 px-3 py-1 text-sm font-bold text-on-accent shadow-lg shadow-accent-500/25">
             -{discount.percent}%
           </span>
           {discount.badge_text && (

@@ -76,7 +76,7 @@ export default function AdminServers() {
         <button
           onClick={() => syncMutation.mutate()}
           disabled={syncMutation.isPending}
-          className="flex items-center justify-center gap-2 rounded-lg bg-accent-500 px-4 py-2 text-white transition-colors hover:bg-accent-600 disabled:opacity-50"
+          className="flex items-center justify-center gap-2 rounded-lg bg-accent-500 px-4 py-2 text-on-accent transition-colors hover:bg-accent-600 disabled:opacity-50"
         >
           <SyncIcon />
           {syncMutation.isPending ? t('admin.servers.syncing') : t('admin.servers.sync')}

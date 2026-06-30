@@ -228,7 +228,7 @@ export function ButtonsTab() {
                           ? 'bg-success-500 text-white'
                           : cfg.style === 'danger'
                             ? 'bg-error-500 text-white'
-                            : 'bg-accent-500 text-white'
+                            : 'bg-accent-500 text-on-accent'
                     }`}
                   >
                     {t(`admin.buttons.styles.${cfg.style}`)}
@@ -321,7 +321,7 @@ export function ButtonsTab() {
           <button
             onClick={handleSave}
             disabled={updateMutation.isPending}
-            className="rounded-xl bg-accent-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-accent-600 disabled:opacity-50"
+            className="rounded-xl bg-accent-500 px-4 py-2 text-sm font-medium text-on-accent transition-colors hover:bg-accent-600 disabled:opacity-50"
           >
             {updateMutation.isPending ? t('common.saving') : t('common.save')}
           </button>

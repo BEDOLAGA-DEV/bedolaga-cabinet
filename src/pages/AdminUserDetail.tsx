@@ -740,7 +740,7 @@ export default function AdminUserDetail() {
         <p className="text-dark-400">{t('admin.users.notFound')}</p>
         <button
           onClick={() => navigate('/admin/users')}
-          className="rounded-lg bg-accent-500 px-4 py-2 text-white transition-colors hover:bg-accent-600"
+          className="rounded-lg bg-accent-500 px-4 py-2 text-on-accent transition-colors hover:bg-accent-600"
         >
           {t('common.back')}
         </button>

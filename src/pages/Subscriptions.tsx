@@ -35,7 +35,7 @@ function EmptyState({ onBuy }: { onBuy: () => void }) {
       </p>
       <button
         onClick={onBuy}
-        className="rounded-xl bg-accent-500 px-8 py-3 text-sm font-medium text-white transition-colors hover:bg-accent-600"
+        className="rounded-xl bg-accent-500 px-8 py-3 text-sm font-medium text-on-accent transition-colors hover:bg-accent-600"
       >
         {t('subscriptions.buy', 'Купить подписку')}
       </button>
@@ -109,15 +109,15 @@ export default function Subscriptions() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold" style={{ color: g.text }}>
+      <div className="flex items-center justify-between gap-3">
+        <h1 className="truncate text-xl font-bold" style={{ color: g.text }}>
           {t('subscriptions.title', 'Мои подписки')}
         </h1>
         {/* «+ Купить ещё» — только если уже есть платная активная подписка */}
         {!isLoading && hasActivePaid && (
           <button
             onClick={() => navigate('/subscription/purchase')}
-            className="flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-medium transition-colors"
+            className="flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-xl px-4 py-2 text-sm font-medium transition-colors"
             style={{
               background: 'rgba(var(--color-accent-400), 0.1)',
               color: 'rgb(var(--color-accent-400))',
@@ -135,7 +135,7 @@ export default function Subscriptions() {
       {!isLoading && subscriptions.length > 0 && !hasActivePaid && (
         <button
           onClick={() => navigate('/subscription/purchase')}
-          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-accent-500 p-3.5 text-sm font-semibold text-white transition-colors hover:bg-accent-600"
+          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-accent-500 p-3.5 text-sm font-semibold text-on-accent transition-colors hover:bg-accent-600"
         >
           <PlusIcon className="h-5 w-5" />
           {t('subscriptions.browsePlans', 'Посмотреть тарифы и купить подписку')}
@@ -171,7 +171,7 @@ export default function Subscriptions() {
               (Telegram-баг #605056/#605063). */}
           <button
             onClick={() => navigate('/subscription/purchase')}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-accent-500 px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-accent-600"
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-accent-500 px-6 py-3 text-sm font-semibold text-on-accent transition-colors hover:bg-accent-600"
           >
             <PlusIcon className="h-5 w-5" />
             {t('subscriptions.browsePlans', 'Посмотреть тарифы и купить подписку')}

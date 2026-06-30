@@ -14,7 +14,12 @@ import {
   CheckIcon,
   CopyIcon,
   ChartIcon,
+  ChartBarIcon,
+  CheckCircleIcon,
+  TagIcon,
+  TicketIcon,
 } from '@/components/icons';
+import { StatCard } from '../components/stats';
 
 // Helper functions
 const getTypeLabel = (type: PromoCodeType): string => {
@@ -97,13 +102,13 @@ export default function AdminPromocodes() {
             </button>
           )}
           <div>
-            <h1 className="text-xl font-semibold text-dark-100">{t('admin.promocodes.title')}</h1>
+            <h1 className="text-xl font-bold text-dark-100">{t('admin.promocodes.title')}</h1>
             <p className="text-sm text-dark-400">{t('admin.promocodes.subtitle')}</p>
           </div>
         </div>
         <button
           onClick={() => navigate('/admin/promocodes/create')}
-          className="flex items-center justify-center gap-2 rounded-lg bg-accent-500 px-4 py-2 text-white transition-colors hover:bg-accent-600"
+          className="flex items-center justify-center gap-2 rounded-lg bg-accent-500 px-4 py-2 text-on-accent transition-colors hover:bg-accent-600"
         >
           <PlusIcon />
           {t('admin.promocodes.addPromocode')}
@@ -113,30 +118,30 @@ export default function AdminPromocodes() {
       {/* Stats Overview */}
       {promocodes.length > 0 && (
         <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <div className="rounded-xl border border-dark-700 bg-dark-800 p-4">
-            <div className="text-2xl font-bold text-dark-100">{promocodes.length}</div>
-            <div className="text-xs text-dark-400">
-              {t('admin.promocodes.stats.totalPromocodes')}
-            </div>
-          </div>
-          <div className="rounded-xl border border-dark-700 bg-dark-800 p-4">
-            <div className="text-2xl font-bold text-success-400">
-              {promocodes.filter((p) => p.is_active && p.is_valid).length}
-            </div>
-            <div className="text-xs text-dark-400">{t('admin.promocodes.stats.activeCount')}</div>
-          </div>
-          <div className="rounded-xl border border-dark-700 bg-dark-800 p-4">
-            <div className="text-2xl font-bold text-accent-400">
-              {promocodes.reduce((sum, p) => sum + p.current_uses, 0)}
-            </div>
-            <div className="text-xs text-dark-400">{t('admin.promocodes.stats.usagesCount')}</div>
-          </div>
-          <div className="rounded-xl border border-dark-700 bg-dark-800 p-4">
-            <div className="text-2xl font-bold text-warning-400">
-              {promocodes.filter((p) => p.uses_left === 0 && p.max_uses > 0).length}
-            </div>
-            <div className="text-xs text-dark-400">{t('admin.promocodes.stats.exhausted')}</div>
-          </div>
+          <StatCard
+            label={t('admin.promocodes.stats.totalPromocodes')}
+            value={promocodes.length}
+            icon={<TagIcon className="h-5 w-5" />}
+            tone="neutral"
+          />
+          <StatCard
+            label={t('admin.promocodes.stats.activeCount')}
+            value={promocodes.filter((p) => p.is_active && p.is_valid).length}
+            icon={<CheckCircleIcon className="h-5 w-5" />}
+            tone="success"
+          />
+          <StatCard
+            label={t('admin.promocodes.stats.usagesCount')}
+            value={promocodes.reduce((sum, p) => sum + p.current_uses, 0)}
+            icon={<ChartBarIcon className="h-5 w-5" />}
+            tone="accent"
+          />
+          <StatCard
+            label={t('admin.promocodes.stats.exhausted')}
+            value={promocodes.filter((p) => p.uses_left === 0 && p.max_uses > 0).length}
+            icon={<TicketIcon className="h-5 w-5" />}
+            tone="warning"
+          />
         </div>
       )}
 

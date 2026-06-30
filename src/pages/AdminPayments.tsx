@@ -7,12 +7,16 @@ import { DateField } from '../components/DateField';
 import { useCurrency } from '../hooks/useCurrency';
 import type { PendingPayment, PaginatedResponse } from '../types';
 import { usePlatform } from '../platform/hooks/usePlatform';
+import { StatCard } from '@/components/stats';
 import {
   BackIcon,
   SearchIcon,
   CalendarIcon,
   RefreshIcon,
   CheckCircleIcon,
+  ChartBarIcon,
+  ClockIcon,
+  XCircleIcon,
 } from '@/components/icons';
 
 interface StatusBadgeProps {
@@ -35,38 +39,6 @@ function StatusBadge({ status }: StatusBadgeProps) {
     >
       {status}
     </span>
-  );
-}
-
-interface StatCardProps {
-  label: string;
-  value: number;
-  color: 'blue' | 'amber' | 'green' | 'red';
-  isActive: boolean;
-  onClick: () => void;
-}
-
-function StatCard({ label, value, color, isActive, onClick }: StatCardProps) {
-  const colors: Record<string, string> = {
-    blue: 'border-accent-500/30 bg-accent-500/20 text-accent-400',
-    amber: 'border-warning-500/30 bg-warning-500/20 text-warning-400',
-    green: 'border-success-500/30 bg-success-500/20 text-success-400',
-    red: 'border-error-500/30 bg-error-500/20 text-error-400',
-  };
-
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`rounded-xl border p-4 text-left transition-all ${
-        isActive
-          ? colors[color]
-          : 'border-dark-700/50 bg-dark-800/50 text-dark-300 hover:border-dark-600'
-      }`}
-    >
-      <div className={`text-2xl font-bold ${isActive ? '' : 'text-dark-50'}`}>{value}</div>
-      <div className="text-sm opacity-80">{label}</div>
-    </button>
   );
 }
 
@@ -212,7 +184,7 @@ export default function AdminPayments() {
             </button>
           )}
           <div>
-            <h1 className="text-xl font-semibold text-dark-100">{t('admin.payments.title')}</h1>
+            <h1 className="text-xl font-bold text-dark-100">{t('admin.payments.title')}</h1>
             <p className="text-sm text-dark-400">{t('admin.payments.description')}</p>
           </div>
         </div>
@@ -267,7 +239,7 @@ export default function AdminPayments() {
               onClick={() => setStatusFilter(option.value)}
               className={`rounded-lg px-3 py-1.5 text-sm transition-all ${
                 statusFilter === option.value
-                  ? 'bg-accent-500 text-white'
+                  ? 'bg-accent-500 text-on-accent'
                   : 'bg-dark-800 text-dark-300 hover:bg-dark-700'
               }`}
             >
@@ -284,7 +256,7 @@ export default function AdminPayments() {
               onClick={() => handlePeriodChange(option.value)}
               className={`rounded-lg px-3 py-1.5 text-sm transition-all ${
                 periodFilter === option.value
-                  ? 'bg-accent-500 text-white'
+                  ? 'bg-accent-500 text-on-accent'
                   : 'bg-dark-800 text-dark-300 hover:bg-dark-700'
               }`}
             >
@@ -295,7 +267,7 @@ export default function AdminPayments() {
             onClick={() => handlePeriodChange('custom')}
             className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm transition-all ${
               periodFilter === 'custom'
-                ? 'bg-accent-500 text-white'
+                ? 'bg-accent-500 text-on-accent'
                 : 'bg-dark-800 text-dark-300 hover:bg-dark-700'
             }`}
           >
@@ -353,34 +325,62 @@ export default function AdminPayments() {
       {/* Stats cards */}
       {stats && (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <StatCard
-            label={t('admin.payments.totalCount')}
-            value={stats.total}
-            color="blue"
-            isActive={statusFilter === 'all'}
+          <button
+            type="button"
             onClick={() => handleStatusCardClick('all')}
-          />
-          <StatCard
-            label={t('admin.payments.pendingCount')}
-            value={stats.pending}
-            color="amber"
-            isActive={statusFilter === 'pending'}
+            className={`rounded-xl text-left transition-all ${
+              statusFilter === 'all' ? 'ring-2 ring-accent-500' : ''
+            }`}
+          >
+            <StatCard
+              label={t('admin.payments.totalCount')}
+              value={stats.total}
+              icon={<ChartBarIcon className="h-5 w-5" />}
+              tone="accent"
+            />
+          </button>
+          <button
+            type="button"
             onClick={() => handleStatusCardClick('pending')}
-          />
-          <StatCard
-            label={t('admin.payments.paidCount')}
-            value={stats.paid}
-            color="green"
-            isActive={statusFilter === 'paid'}
+            className={`rounded-xl text-left transition-all ${
+              statusFilter === 'pending' ? 'ring-2 ring-warning-500' : ''
+            }`}
+          >
+            <StatCard
+              label={t('admin.payments.pendingCount')}
+              value={stats.pending}
+              icon={<ClockIcon className="h-5 w-5" />}
+              tone="warning"
+            />
+          </button>
+          <button
+            type="button"
             onClick={() => handleStatusCardClick('paid')}
-          />
-          <StatCard
-            label={t('admin.payments.cancelledCount')}
-            value={stats.cancelled}
-            color="red"
-            isActive={statusFilter === 'cancelled'}
+            className={`rounded-xl text-left transition-all ${
+              statusFilter === 'paid' ? 'ring-2 ring-success-500' : ''
+            }`}
+          >
+            <StatCard
+              label={t('admin.payments.paidCount')}
+              value={stats.paid}
+              icon={<CheckCircleIcon className="h-5 w-5" />}
+              tone="success"
+            />
+          </button>
+          <button
+            type="button"
             onClick={() => handleStatusCardClick('cancelled')}
-          />
+            className={`rounded-xl text-left transition-all ${
+              statusFilter === 'cancelled' ? 'ring-2 ring-error-500' : ''
+            }`}
+          >
+            <StatCard
+              label={t('admin.payments.cancelledCount')}
+              value={stats.cancelled}
+              icon={<XCircleIcon className="h-5 w-5" />}
+              tone="error"
+            />
+          </button>
         </div>
       )}
 

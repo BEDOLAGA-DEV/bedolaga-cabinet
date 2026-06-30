@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
-import { SendIcon } from '@/components/icons';
+import { GiftIcon, SendIcon } from '@/components/icons';
+import { StatCard } from '@/components/stats';
 import { useCurrency } from '../../../hooks/useCurrency';
 import type { AdminUserGiftItem, AdminUserGiftsResponse } from '../../../api/adminUsers';
 
@@ -208,18 +209,18 @@ export function GiftsTab({ giftsLoading, giftsData, locale, onNavigateToUser }: 
     <div className="space-y-6">
       {/* Summary counters */}
       <div className="grid grid-cols-2 gap-3">
-        <div className="rounded-xl bg-dark-800/50 p-4">
-          <div className="mb-1 text-xs text-dark-500">
-            {t('admin.users.detail.gifts.totalSent')}
-          </div>
-          <div className="text-2xl font-bold text-accent-400">{giftsData.sent_total}</div>
-        </div>
-        <div className="rounded-xl bg-dark-800/50 p-4">
-          <div className="mb-1 text-xs text-dark-500">
-            {t('admin.users.detail.gifts.totalReceived')}
-          </div>
-          <div className="text-2xl font-bold text-success-400">{giftsData.received_total}</div>
-        </div>
+        <StatCard
+          label={t('admin.users.detail.gifts.totalSent')}
+          value={giftsData.sent_total}
+          icon={<GiftIcon className="h-5 w-5" />}
+          tone="accent"
+        />
+        <StatCard
+          label={t('admin.users.detail.gifts.totalReceived')}
+          value={giftsData.received_total}
+          icon={<GiftIcon className="h-5 w-5" />}
+          tone="success"
+        />
       </div>
 
       {/* Sent Gifts */}

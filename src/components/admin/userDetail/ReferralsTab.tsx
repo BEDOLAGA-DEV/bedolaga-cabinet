@@ -5,7 +5,8 @@ import { useNavigate } from 'react-router';
 import { useCurrency } from '../../../hooks/useCurrency';
 import { useNotify } from '../../../platform/hooks/useNotify';
 import { adminUsersApi, type UserDetailResponse, type UserListItem } from '../../../api/adminUsers';
-import { XIcon } from '@/components/icons';
+import { StatCard } from '@/components/stats';
+import { BanknotesIcon, PercentIcon, TagIcon, UsersIcon, XIcon } from '@/components/icons';
 
 // ──────────────────────────────────────────────────────────────────
 // Referrals tab — top-of-graph referrer + stats + referrals list,
@@ -327,40 +328,35 @@ export function ReferralsTab({ user, userId, onUserRefresh }: ReferralsTabProps)
 
       {/* Section 2: Referral stats */}
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <div className="rounded-xl bg-dark-800/40 p-4">
-          <div className="text-xs text-dark-500">
-            {t('admin.users.detail.referrals.totalReferrals')}
-          </div>
-          <div className="mt-1 text-xl font-bold text-dark-100">
-            {user.referral.referrals_count}
-          </div>
-        </div>
-        <div className="rounded-xl bg-dark-800/40 p-4">
-          <div className="text-xs text-dark-500">
-            {t('admin.users.detail.referrals.totalEarnings')}
-          </div>
-          <div className="mt-1 text-xl font-bold text-dark-100">
-            {formatWithCurrency(user.referral.total_earnings_kopeks / 100)}
-          </div>
-        </div>
-        <div className="rounded-xl bg-dark-800/40 p-4">
-          <div className="text-xs text-dark-500">
-            {t('admin.users.detail.referrals.commission')}
-          </div>
-          <div className="mt-1 text-xl font-bold text-dark-100">
-            {user.referral.commission_percent != null
+        <StatCard
+          label={t('admin.users.detail.referrals.totalReferrals')}
+          value={user.referral.referrals_count}
+          icon={<UsersIcon className="h-5 w-5" />}
+          tone="neutral"
+        />
+        <StatCard
+          label={t('admin.users.detail.referrals.totalEarnings')}
+          value={formatWithCurrency(user.referral.total_earnings_kopeks / 100)}
+          icon={<BanknotesIcon className="h-5 w-5" />}
+          tone="neutral"
+        />
+        <StatCard
+          label={t('admin.users.detail.referrals.commission')}
+          value={
+            user.referral.commission_percent != null
               ? `${user.referral.commission_percent}%`
-              : t('admin.users.detail.referrals.default')}
-          </div>
-        </div>
-        <div className="rounded-xl bg-dark-800/40 p-4">
-          <div className="text-xs text-dark-500">
-            {t('admin.users.detail.referrals.referralCode')}
-          </div>
-          <div className="mt-1 truncate font-mono text-sm text-dark-100">
-            {user.referral.referral_code}
-          </div>
-        </div>
+              : t('admin.users.detail.referrals.default')
+          }
+          icon={<PercentIcon className="h-5 w-5" />}
+          tone="neutral"
+        />
+        <StatCard
+          label={t('admin.users.detail.referrals.referralCode')}
+          value={user.referral.referral_code}
+          icon={<TagIcon className="h-5 w-5" />}
+          tone="neutral"
+          valueClassName="font-mono"
+        />
       </div>
 
       {/* Section 3: Referrals list */}

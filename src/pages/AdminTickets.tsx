@@ -2,14 +2,24 @@ import { useState, useRef, useEffect } from 'react';
 import logger from '../utils/logger';
 import { linkifyText } from '../utils/linkify';
 import { MessageMediaGrid } from '../components/tickets/MessageMediaGrid';
-import { useNavigate } from 'react-router';
+import { useNavigate, useParams } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { adminApi, AdminTicket, AdminTicketDetail } from '../api/admin';
 import { ticketsApi } from '../api/tickets';
 import { copyToClipboard as copyText } from '../utils/clipboard';
 import { usePlatform } from '../platform/hooks/usePlatform';
-import { BackIcon, SettingsIcon, TicketIcon, XIcon } from '@/components/icons';
+import {
+  BackIcon,
+  CheckCircleIcon,
+  ClockIcon,
+  InboxIcon,
+  SettingsIcon,
+  TicketIcon,
+  XCircleIcon,
+  XIcon,
+} from '@/components/icons';
+import { StatCard } from '@/components/stats';
 
 interface MediaAttachment {
   id: string;
@@ -43,10 +53,29 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 export default function AdminTickets() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { ticketId } = useParams<{ ticketId: string }>();
   const queryClient = useQueryClient();
   const { capabilities } = usePlatform();
 
   const [selectedTicketId, setSelectedTicketId] = useState<number | null>(null);
+
+  // Deep-link: /admin/tickets/:ticketId (or a startapp param routed here) opens
+  // the given ticket directly — used by the admin-chat notification buttons.
+  // Both routes render the same component instance (no remount), so we mirror the
+  // URL param into the selection: navigating to the bare /admin/tickets list
+  // clears any deep-linked selection, keeping URL and detail pane in sync. (This
+  // only fires on mount or an actual param change, never on in-list clicks, since
+  // ticketId stays undefined on the bare route.)
+  useEffect(() => {
+    if (!ticketId) {
+      setSelectedTicketId(null);
+      return;
+    }
+    const id = Number(ticketId);
+    if (Number.isInteger(id) && id > 0) {
+      setSelectedTicketId(id);
+    }
+  }, [ticketId]);
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [replyText, setReplyText] = useState('');
   const [isReplying, setIsReplying] = useState(false);
@@ -262,9 +291,7 @@ export default function AdminTickets() {
               <BackIcon />
             </button>
           )}
-          <h1 className="text-2xl font-bold text-dark-50 sm:text-3xl">
-            {t('admin.tickets.title')}
-          </h1>
+          <h1 className="text-xl font-bold text-dark-100">{t('admin.tickets.title')}</h1>
         </div>
         <button
           onClick={() => navigate('/admin/tickets/settings')}
@@ -278,25 +305,37 @@ export default function AdminTickets() {
       {/* Stats */}
       {stats && (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
-          <div className="card text-center">
-            <div className="stat-value">{stats.total}</div>
-            <div className="stat-label">{t('admin.tickets.total')}</div>
-          </div>
-          <div className="card text-center">
-            <div className="stat-value text-accent-400">{stats.open}</div>
-            <div className="stat-label">{t('admin.tickets.statusOpen')}</div>
-          </div>
-          <div className="card text-center">
-            <div className="stat-value text-warning-400">{stats.pending}</div>
-            <div className="stat-label">{t('admin.tickets.statusPending')}</div>
-          </div>
-          <div className="card text-center">
-            <div className="stat-value text-success-400">{stats.answered}</div>
-            <div className="stat-label">{t('admin.tickets.statusAnswered')}</div>
-          </div>
-          <div className="card col-span-2 text-center sm:col-span-1">
-            <div className="stat-value text-dark-400">{stats.closed}</div>
-            <div className="stat-label">{t('admin.tickets.statusClosed')}</div>
+          <StatCard
+            label={t('admin.tickets.total')}
+            value={stats.total}
+            icon={<TicketIcon className="h-5 w-5" />}
+            tone="neutral"
+          />
+          <StatCard
+            label={t('admin.tickets.statusOpen')}
+            value={stats.open}
+            icon={<InboxIcon className="h-5 w-5" />}
+            tone="accent"
+          />
+          <StatCard
+            label={t('admin.tickets.statusPending')}
+            value={stats.pending}
+            icon={<ClockIcon className="h-5 w-5" />}
+            tone="warning"
+          />
+          <StatCard
+            label={t('admin.tickets.statusAnswered')}
+            value={stats.answered}
+            icon={<CheckCircleIcon className="h-5 w-5" />}
+            tone="success"
+          />
+          <div className="col-span-2 sm:col-span-1">
+            <StatCard
+              label={t('admin.tickets.statusClosed')}
+              value={stats.closed}
+              icon={<XCircleIcon className="h-5 w-5" />}
+              tone="neutral"
+            />
           </div>
         </div>
       )}

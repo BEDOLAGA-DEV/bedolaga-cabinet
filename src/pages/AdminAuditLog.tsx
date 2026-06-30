@@ -545,7 +545,7 @@ export default function AdminAuditLog() {
                   handleExport();
                 }}
                 disabled={exporting}
-                className="flex items-center gap-2 rounded-lg bg-accent-500 px-4 py-2 text-white transition-colors hover:bg-accent-600 disabled:opacity-50"
+                className="flex items-center gap-2 rounded-lg bg-accent-500 px-4 py-2 text-on-accent transition-colors hover:bg-accent-600 disabled:opacity-50"
               >
                 <DownloadIcon />
                 <span className="hidden sm:inline">
@@ -614,7 +614,7 @@ export default function AdminAuditLog() {
                           <span
                             className={`flex h-4 w-4 items-center justify-center rounded border text-xs ${
                               isSelected
-                                ? 'border-accent-500 bg-accent-500 text-white'
+                                ? 'border-accent-500 bg-accent-500 text-on-accent'
                                 : 'border-dark-500 bg-dark-800'
                             }`}
                           >
@@ -734,7 +734,7 @@ export default function AdminAuditLog() {
             <div className="mt-4 flex items-center gap-3">
               <button
                 onClick={handleApplyFilters}
-                className="rounded-lg bg-accent-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-accent-600"
+                className="rounded-lg bg-accent-500 px-4 py-2 text-sm font-medium text-on-accent transition-colors hover:bg-accent-600"
               >
                 {t('admin.auditLog.filters.apply')}
               </button>

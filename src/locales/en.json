@@ -25,10 +25,9 @@
     "copy": "Copy",
     "all": "All",
     "units": {
+      "tb": "TB",
       "gb": "GB",
-      "perGb": "/GB",
-      "days": "days",
-      "mo": "mo"
+      "mb": "MB"
     },
     "retry": "Retry",
     "saving": "Saving...",
@@ -787,6 +786,13 @@
         "not_yet_valid": "Promo code is not yet active",
         "used": "Promo code has already been used",
         "already_used_by_user": "You have already used this promo code",
+        "active_discount_exists": "You already have an active discount. Deactivate it first.",
+        "no_subscription_for_days": "This promo code requires an active or expired subscription",
+        "subscription_not_found": "Subscription not found",
+        "not_first_purchase": "This promo code is only available for your first purchase",
+        "daily_limit": "Too many promo code activations today",
+        "trial_subscription_exists": "You already have a subscription, so this trial code can't be applied",
+        "trial_provisioning_failed": "Couldn't provision the trial right now, please try again later",
         "user_not_found": "User not found",
         "server_error": "Server error"
       },
@@ -1039,7 +1045,8 @@
     "openSupport": "Open Support",
     "contactSupport": "Please contact {{username}} for support",
     "contactUs": "Contact Support",
-    "create_ticket": "Create ticket"
+    "create_ticket": "Create ticket",
+    "writeButton": "Message"
   },
   "wheel": {
     "title": "Fortune Wheel",
@@ -1112,7 +1119,7 @@
       "globalOpacity": "Opacity",
       "globalBlur": "Blur",
       "categoryCSS": "CSS",
-      "categoryCanvas": "Canvas",
+      "categoryCANVAS": "Canvas",
       "categorySVG": "SVG",
       "aurora": "Aurora",
       "auroraDesc": "Northern lights with smooth gradients",
@@ -1146,6 +1153,18 @@
       "noiseDesc": "Noise gradients with motion",
       "ripple": "Ripple",
       "rippleDesc": "Ripple wave effect",
+      "fireflies": "Fireflies",
+      "firefliesDesc": "Drifting glowing dots with pulsation",
+      "snowfall": "Snowfall",
+      "snowfallDesc": "Falling snow with wind drift",
+      "starfield": "Starfield",
+      "starfieldDesc": "Stars flying toward the viewer",
+      "matrixRain": "Matrix Rain",
+      "matrixRainDesc": "Falling columns of glyphs",
+      "liquidGradient": "Liquid Gradient",
+      "liquidGradientDesc": "Blurred mesh gradient blobs",
+      "constellation": "Constellation",
+      "constellationDesc": "Particles linked by lines",
       "geminiEffect": "Gemini Effect",
       "geminiEffectDesc": "SVG effect like Google Gemini",
       "speed": "Speed",
@@ -1161,6 +1180,15 @@
       "particleColor": "Particle Color",
       "starColor": "Star Color",
       "trailColor": "Trail Color",
+      "bgStarColor": "Background Stars Color",
+      "pointerColor": "Pointer Color",
+      "beamColor": "Beam Color",
+      "explosionColor": "Explosion Color",
+      "multicolor": "Multicolor",
+      "lineColor": "Line Color",
+      "wind": "Wind",
+      "charset": "Charset",
+      "linkDistance": "Link Distance",
       "bgColor": "Background Color",
       "fillColor": "Fill Color",
       "color1": "Color 1",
@@ -1229,7 +1257,8 @@
       "referralNetwork": "Referral Network",
       "news": "News",
       "bulkActions": "Bulk Actions",
-      "infoPages": "Info Pages"
+      "infoPages": "Info Pages",
+      "legalPages": "System pages"
     },
     "panel": {
       "title": "Admin Panel",
@@ -1534,9 +1563,14 @@
       "resetted": "Template reset to default",
       "testSent": "Test email sent",
       "variables": "Available Variables",
-      "clickToCopy": "Click to copy",
-      "previewDesktopOnly": "Preview is only available in the desktop web version",
-      "previewNotAvailable": "Preview not available"
+      "editorTab": "Editor",
+      "previewHint": "The preview shows the email with sample values in place of variables.",
+      "clickToInsert": "Click to insert into the text",
+      "insertDefault": "Insert default template",
+      "insertDefaultConfirm": "Replace the current content with the default template?",
+      "testRecipientPlaceholder": "Recipient email (defaults to yours)",
+      "testHint": "Sends the current editor content with sample values in place of variables.",
+      "variablesCommon": "Common variables (work in all templates)"
     },
     "payments": {
       "title": "Payments",
@@ -1589,12 +1623,36 @@
       "methodEnabled": "Method enabled",
       "providerNotConfigured": "Provider not configured in env",
       "openUrlDirect": "Open payment page directly",
-      "openUrlDirectHint": "Skip the link panel: the provider opens inside the MiniApp/tab right after the click. After payment the user returns to /balance/top-up/result. Ignored for Stars/CryptoBot and other t.me/ links.",
+      "openUrlDirectHint": "ON — the payment link opens immediately, without the intermediate button panel. OFF — an \"Open payment\" button is shown. Inside Telegram the link opens in the external browser either way (otherwise paying via a bank app/SBP fails); after payment the user returns to the result page. Stars/CryptoBot (t.me/ links) always open natively and ignore this flag.",
       "displayName": "Display name",
       "displayNameHint": "Leave empty for default name",
       "subOptions": "Payment options",
       "minAmount": "Min amount (kopeks)",
       "maxAmount": "Max amount (kopeks)",
+      "quickAmounts": "Quick amounts (₽)",
+      "quickAmountsHint": "Quick top-up amount buttons. Empty — defaults are used: {{defaults}} ₽",
+      "quickAmountsPlaceholder": "Amount in rubles",
+      "quickAmountsAdd": "Add",
+      "quickAmountsInvalid": "Enter a positive amount in rubles",
+      "quickAmountsLimit": "No more than 10 amounts",
+      "quickAmountsRemove": "Remove amount {{value}} ₽",
+      "overpayCertTitle": "mTLS certificate (Overpay)",
+      "overpayCertValid": "✅ Valid until {{date}}",
+      "overpayCertExpired": "⚠️ Expired {{date}}",
+      "overpayCertUnreadable": "⚠️ Certificate cannot be read — wrong passphrase or corrupted file",
+      "overpayCertMissing": "❌ Certificate not uploaded",
+      "overpayCertEnvLockedPath": "Path is set via the OVERPAY_P12_PATH environment variable — the database value is not applied",
+      "overpayCertEnvLockedPassphrase": "Passphrase is set via the OVERPAY_P12_PASSPHRASE environment variable — the database value is not applied",
+      "overpayCertFile": "Certificate file (.p12 / .pfx)",
+      "overpayCertChooseFile": "Choose file",
+      "overpayCertPassphrase": "Certificate passphrase",
+      "overpayCertPassphrasePlaceholder": "Leave empty if none",
+      "overpayCertUpload": "Upload",
+      "overpayCertDelete": "Delete",
+      "overpayCertConfirmDelete": "Delete the Overpay certificate?",
+      "overpayCertFileTooLarge": "File exceeds 1 MB",
+      "overpayCertUploadError": "Failed to upload certificate",
+      "overpayCertDeleteError": "Failed to delete certificate",
       "conditions": "Display conditions",
       "userTypeFilter": "User type",
       "userTypeAll": "All",
@@ -1993,6 +2051,8 @@
       "quickToggles": "Quick Toggles",
       "modified": "Modified",
       "readOnly": "Read only",
+      "envLocked": "Set in .env",
+      "envLockedHint": "This value is set in the .env file and overrides the database, so it can't be changed here. To manage it from the cabinet, remove the key from .env and restart the bot.",
       "badgeDb": "DB",
       "badgeEnv": "ENV",
       "reset": "Reset",
@@ -2168,7 +2228,9 @@
         "telegramOidcClientSecret": "Client Secret"
       },
       "offlineConv": "Offline Conversions",
-      "apiKey": "API Key"
+      "apiKey": "API Key",
+      "legalFooter": "Legal Footer",
+      "legalFooterDesc": "Links to the offer, privacy policy and recurring payments at the bottom of the login page"
     },
     "bulkActions": {
       "title": "Bulk Actions",
@@ -4062,7 +4124,8 @@
         "sortOrder": "Sort Order",
         "icon": "Icon (emoji)",
         "pageType": "Page Type",
-        "replacesTab": "Replaces Tab"
+        "replacesTab": "Replaces Tab",
+        "displayMode": "Visibility"
       },
       "replacesTabNone": "None",
       "replacesTabOptions": {
@@ -4070,6 +4133,11 @@
         "rules": "Rules",
         "privacy": "Privacy",
         "offer": "Offer"
+      },
+      "displayModes": {
+        "bot": "Bot only",
+        "web": "Web only",
+        "both": "Bot and web"
       },
       "replacesTabConflict": "already assigned",
       "replacesTabWarning": "Another page already replaces this tab. It will be unassigned on save.",
@@ -4105,6 +4173,43 @@
         "zh": "Chinese",
         "fa": "Persian"
       }
+    },
+    "legalPages": {
+      "title": "System pages",
+      "subtitle": "Rules, privacy policy, public offer and FAQ",
+      "open": "System pages",
+      "tabs": {
+        "privacy": "Privacy",
+        "offer": "Offer",
+        "rules": "Rules",
+        "faq": "FAQ"
+      },
+      "displayMode": "Visibility",
+      "displayModes": {
+        "bot": "Bot only",
+        "web": "Web only",
+        "both": "Bot and web"
+      },
+      "displayModeLocked": "Set via environment variable",
+      "enabled": "Visible to users",
+      "language": "Content language",
+      "content": "Content",
+      "contentPlaceholder": "HTML page content...",
+      "save": "Save",
+      "saving": "Saving...",
+      "saveError": "Failed to save. Please try again.",
+      "unsavedWarning": "Unsaved changes will be lost. Continue?",
+      "faqPages": "Questions and answers",
+      "addQuestion": "Add question",
+      "newQuestion": "New question",
+      "questionTitle": "Question",
+      "questionContent": "Answer (HTML supported)",
+      "confirmDeleteQuestion": "Delete this question?",
+      "noQuestions": "No questions yet",
+      "active": "Active",
+      "moveUp": "Move up",
+      "moveDown": "Move down",
+      "delete": "Delete"
     }
   },
   "adminUpdates": {
@@ -5157,10 +5262,15 @@
   },
   "subscriptions": {
     "buy": "Buy subscription",
-    "buyAnother": "Buy another subscription",
+    "buyAnother": "Buy another",
     "browsePlans": "View plans and subscribe",
     "empty": "You have no subscriptions yet",
     "emptyDesc": "Choose a tariff to get started",
     "title": "My subscriptions"
+  },
+  "footer": {
+    "offer": "Public Offer",
+    "privacy": "Privacy Policy",
+    "recurrent": "Recurring Payments"
   }
 }

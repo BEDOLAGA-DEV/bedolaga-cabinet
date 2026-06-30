@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useMemo } from 'react';
-import { sanitizeColor, clampNumber } from './types';
+import { sanitizeColor, clampNumber, safeBoolean } from './types';
 import { useAnimationLoop, getMobileDpr } from '@/hooks/useAnimationLoop';
 
 interface Props {
@@ -18,7 +18,14 @@ const COLORS = [
 ];
 
 function hexToRgb(hex: string): [number, number, number] {
-  const v = parseInt(hex.slice(1), 16);
+  let value = hex.replace('#', '');
+  if (value.length === 3)
+    value = value
+      .split('')
+      .map((c) => c + c)
+      .join('');
+  if (!/^[0-9a-fA-F]{6}$/.test(value)) return [129, 140, 248];
+  const v = parseInt(value, 16);
   return [(v >> 16) & 255, (v >> 8) & 255, v & 255];
 }
 
@@ -44,16 +51,19 @@ export default React.memo(function BackgroundBoxes({ settings }: Props) {
   const rows = clampNumber(settings.rows, 4, 30, 15);
   const cols = clampNumber(settings.cols, 4, 30, 15);
   const boxColor = sanitizeColor(settings.boxColor, '#818cf8');
+  const lineColor = sanitizeColor(settings.lineColor, '#334155');
+  const multicolor =
+    settings.multicolor === undefined
+      ? boxColor === '#818cf8'
+      : safeBoolean(settings.multicolor, true);
 
   const cells = useMemo((): CellData[] => {
     return Array.from({ length: rows * cols }, () => ({
-      rgb: hexToRgb(
-        boxColor === '#818cf8' ? COLORS[Math.floor(Math.random() * COLORS.length)] : boxColor,
-      ),
+      rgb: hexToRgb(multicolor ? COLORS[Math.floor(Math.random() * COLORS.length)] : boxColor),
       phase: Math.random() * 8,
       period: 3 + Math.random() * 4,
     }));
-  }, [rows, cols, boxColor]);
+  }, [rows, cols, boxColor, multicolor]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -124,7 +134,8 @@ export default React.memo(function BackgroundBoxes({ settings }: Props) {
         ctx.fillRect(ox + col * cellW, oy + row * cellH, cellW, cellH);
       }
 
-      ctx.strokeStyle = 'rgba(51,65,85,0.5)';
+      ctx.globalAlpha = 0.5;
+      ctx.strokeStyle = lineColor;
       ctx.lineWidth = 1;
       ctx.beginPath();
 
@@ -142,7 +153,7 @@ export default React.memo(function BackgroundBoxes({ settings }: Props) {
       ctx.stroke();
       ctx.restore();
     },
-    [cells, rows, cols],
+    [cells, rows, cols, lineColor],
   );
 
   return (

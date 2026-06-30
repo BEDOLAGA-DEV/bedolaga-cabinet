@@ -1,5 +1,4 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import {
@@ -9,33 +8,17 @@ import {
   EmailTemplateLanguageData,
 } from '../api/adminEmailTemplates';
 import { AdminBackButton, BackIcon } from '../components/admin';
-import { useIsTelegram } from '../platform/hooks/usePlatform';
 import { useNativeDialog } from '../platform/hooks/useNativeDialog';
 import { useNotify } from '@/platform';
-import { copyToClipboard } from '@/utils/clipboard';
-import { MailIcon, SaveIcon, EyeIcon, SendIcon, ResetIcon } from '@/components/icons';
-
-// Hook to check if on mobile
-function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    return window.innerWidth < 1024;
-  });
-
-  useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 1024);
-    window.addEventListener('resize', check);
-    return () => window.removeEventListener('resize', check);
-  }, []);
-
-  return isMobile;
-}
+import { getApiErrorMessage } from '@/utils/api-error';
+import { MailIcon, SaveIcon, EyeIcon, SendIcon, ResetIcon, EditIcon } from '@/components/icons';
 
 const LANG_LABELS: Record<string, string> = {
   ru: 'RU',
   en: 'EN',
   zh: 'ZH',
   ua: 'UA',
+  fa: 'FA',
 };
 
 const LANG_FULL_LABELS: Record<string, string> = {
@@ -43,6 +26,7 @@ const LANG_FULL_LABELS: Record<string, string> = {
   en: 'English',
   zh: '中文',
   ua: 'Українська',
+  fa: 'فارسی',
 };
 
 // ============ Template List View ============
@@ -102,6 +86,17 @@ function TemplateCard({
 
 // ============ Template Editor ============
 
+// Extract body content from full HTML (strip base template wrapper)
+function extractBodyContent(html: string): string {
+  const contentMatch = html.match(
+    /<div class="content">\s*([\s\S]*?)\s*<\/div>\s*<div class="footer">/,
+  );
+  if (contentMatch) {
+    return contentMatch[1].trim();
+  }
+  return html;
+}
+
 function TemplateEditor({
   detail,
   onClose,
@@ -112,56 +107,40 @@ function TemplateEditor({
   currentLang: string;
 }) {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const notify = useNotify();
-  const isTelegram = useIsTelegram();
   const { confirm: confirmDialog } = useNativeDialog();
-  const isMobile = useIsMobile();
-  const isPreviewDisabled = isTelegram || isMobile;
 
   const [activeLang, setActiveLang] = useState('ru');
+  const [activeTab, setActiveTab] = useState<'editor' | 'preview'>('editor');
   const [editSubject, setEditSubject] = useState('');
   const [editBody, setEditBody] = useState('');
+  const [testEmail, setTestEmail] = useState('');
   const [isDirty, setIsDirty] = useState(false);
+  const [previewHtml, setPreviewHtml] = useState('');
+  const [previewSubject, setPreviewSubject] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const langData: EmailTemplateLanguageData | undefined = detail.languages[activeLang];
 
-  // Load data for current language
+  // Load data for current language (defaults arrive with {placeholders} intact)
   useEffect(() => {
     if (langData) {
       setEditSubject(langData.subject);
-      setEditBody(langData.is_default ? langData.body_html : langData.body_html);
+      setEditBody(
+        langData.is_default ? extractBodyContent(langData.body_html) : langData.body_html,
+      );
       setIsDirty(false);
+      setActiveTab('editor');
     }
   }, [activeLang, langData]);
 
-  // Extract body content from full HTML (strip base template wrapper)
-  const extractBodyContent = useCallback((html: string): string => {
-    // If it's wrapped in the base template, extract just the content div
-    const contentMatch = html.match(
-      /<div class="content">\s*([\s\S]*?)\s*<\/div>\s*<div class="footer">/,
-    );
-    if (contentMatch) {
-      return contentMatch[1].trim();
-    }
-    return html;
-  }, []);
-
-  // When langData changes (e.g., after refetch), update the body content
-  useEffect(() => {
-    if (langData) {
-      if (langData.is_default) {
-        // For default templates, extract just the content portion
-        setEditBody(extractBodyContent(langData.body_html));
-      } else {
-        setEditBody(langData.body_html);
-      }
-      setEditSubject(langData.subject);
-      setIsDirty(false);
-    }
-  }, [activeLang, langData, extractBodyContent]);
+  const notifyError = useCallback(
+    (error: unknown) => {
+      notify.error(getApiErrorMessage(error, t('common.error')));
+    },
+    [notify, t],
+  );
 
   // Save mutation
   const saveMutation = useMutation({
@@ -178,9 +157,7 @@ function TemplateEditor({
       setIsDirty(false);
       notify.success(t('admin.emailTemplates.saved'));
     },
-    onError: () => {
-      notify.error(t('common.error'));
-    },
+    onError: notifyError,
   });
 
   // Reset mutation
@@ -194,33 +171,70 @@ function TemplateEditor({
       setIsDirty(false);
       notify.success(t('admin.emailTemplates.resetted'));
     },
-    onError: () => {
-      notify.error(t('common.error'));
-    },
+    onError: notifyError,
   });
 
-  // Send test mutation
+  // Send test mutation — sends the CURRENT editor content (even unsaved)
   const testMutation = useMutation({
     mutationFn: () =>
       adminEmailTemplatesApi.sendTestEmail(detail.notification_type, {
         language: activeLang,
+        email: testEmail.trim(),
+        subject: editSubject,
+        body_html: editBody,
       }),
     onSuccess: (data) => {
       notify.success(`${t('admin.emailTemplates.testSent')} → ${data.sent_to}`);
     },
-    onError: () => {
-      notify.error(t('common.error'));
-    },
+    onError: notifyError,
   });
 
-  const handleSubjectChange = (value: string) => {
-    setEditSubject(value);
-    setIsDirty(true);
+  // Preview mutation — renders current content with sample values
+  const previewMutation = useMutation({
+    mutationFn: () =>
+      adminEmailTemplatesApi.previewTemplate(detail.notification_type, {
+        language: activeLang,
+        subject: editSubject,
+        body_html: editBody,
+      }),
+    onSuccess: (data) => {
+      setPreviewHtml(data.body_html);
+      setPreviewSubject(data.subject);
+    },
+    onError: notifyError,
+  });
+
+  const openPreview = () => {
+    setActiveTab('preview');
+    previewMutation.mutate();
   };
 
-  const handleBodyChange = (value: string) => {
-    setEditBody(value);
+  const insertVariable = (variable: string) => {
+    const token = `{${variable}}`;
+    const textarea = textareaRef.current;
+    if (!textarea) {
+      setEditBody(editBody + token);
+      setIsDirty(true);
+      return;
+    }
+    const start = textarea.selectionStart ?? editBody.length;
+    const end = textarea.selectionEnd ?? editBody.length;
+    const next = editBody.slice(0, start) + token + editBody.slice(end);
+    setEditBody(next);
     setIsDirty(true);
+    requestAnimationFrame(() => {
+      textarea.focus();
+      textarea.setSelectionRange(start + token.length, start + token.length);
+    });
+  };
+
+  const insertDefaultTemplate = async () => {
+    if (!langData) return;
+    if (!(await confirmDialog(t('admin.emailTemplates.insertDefaultConfirm')))) return;
+    setEditSubject(langData.default_subject);
+    setEditBody(extractBodyContent(langData.default_body_html));
+    setIsDirty(true);
+    setActiveTab('editor');
   };
 
   const label = detail.label[interfaceLang] || detail.label['en'] || detail.notification_type;
@@ -279,60 +293,148 @@ function TemplateEditor({
         })}
       </div>
 
-      {/* Subject */}
-      <div>
-        <label className="mb-2 block text-sm font-medium text-dark-300">
-          {t('admin.emailTemplates.subject')}
-        </label>
-        <input
-          type="text"
-          value={editSubject}
-          onChange={(e) => handleSubjectChange(e.target.value)}
-          className="input"
-          placeholder={t('admin.emailTemplates.subjectPlaceholder')}
-        />
+      {/* Editor / Preview tabs */}
+      <div className="flex items-center gap-1 rounded-lg bg-dark-900 p-1">
+        <button
+          onClick={() => setActiveTab('editor')}
+          className={`flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium transition-all duration-150 sm:text-sm ${
+            activeTab === 'editor'
+              ? 'bg-dark-700 text-dark-100 shadow-sm'
+              : 'text-dark-400 hover:bg-dark-800 hover:text-dark-200'
+          }`}
+        >
+          <EditIcon className="h-4 w-4" />
+          {t('admin.emailTemplates.editorTab')}
+        </button>
+        <button
+          onClick={openPreview}
+          className={`flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-2 text-xs font-medium transition-all duration-150 sm:text-sm ${
+            activeTab === 'preview'
+              ? 'bg-dark-700 text-dark-100 shadow-sm'
+              : 'text-dark-400 hover:bg-dark-800 hover:text-dark-200'
+          }`}
+        >
+          <EyeIcon className="h-4 w-4" />
+          {t('admin.emailTemplates.preview')}
+        </button>
       </div>
 
-      {/* Context variables hint */}
-      {detail.context_vars.length > 0 && (
-        <div className="rounded-lg border border-dark-700 bg-dark-900/60 p-2.5 sm:p-3">
-          <p className="mb-1.5 text-xs font-medium text-dark-300">
-            {t('admin.emailTemplates.variables')}
-          </p>
-          <div className="flex flex-wrap gap-1 sm:gap-1.5">
-            {detail.context_vars.map((v) => (
-              <code
-                key={v}
-                className="cursor-pointer rounded bg-dark-700 px-2 py-0.5 font-mono text-xs text-accent-400 transition-colors hover:bg-dark-600"
-                title={t('admin.emailTemplates.clickToCopy')}
-                onClick={() => {
-                  void copyToClipboard(`{${v}}`);
-                  notify.success(`Copied {${v}}`);
-                }}
-              >
-                {`{${v}}`}
-              </code>
-            ))}
+      {activeTab === 'preview' ? (
+        <div className="space-y-2">
+          {previewSubject && (
+            <div className="rounded-lg border border-dark-700 bg-dark-900/60 px-3 py-2">
+              <span className="text-xs text-dark-400">{t('admin.emailTemplates.subject')}: </span>
+              <span className="text-sm text-dark-100">{previewSubject}</span>
+            </div>
+          )}
+          <div className="overflow-hidden rounded-xl border border-dark-700 bg-white">
+            {previewMutation.isPending ? (
+              <div className="flex h-[420px] items-center justify-center bg-dark-800">
+                <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
+              </div>
+            ) : (
+              <iframe
+                srcDoc={previewHtml}
+                sandbox=""
+                className="h-[420px] w-full sm:h-[560px]"
+                title="Email Preview"
+              />
+            )}
           </div>
+          <p className="text-2xs text-dark-500">{t('admin.emailTemplates.previewHint')}</p>
         </div>
-      )}
+      ) : (
+        <>
+          {/* Subject */}
+          <div>
+            <label className="mb-2 block text-sm font-medium text-dark-300">
+              {t('admin.emailTemplates.subject')}
+            </label>
+            <input
+              type="text"
+              value={editSubject}
+              onChange={(e) => {
+                setEditSubject(e.target.value);
+                setIsDirty(true);
+              }}
+              className="input"
+              placeholder={t('admin.emailTemplates.subjectPlaceholder')}
+            />
+          </div>
 
-      {/* Body HTML editor */}
-      <div>
-        <label className="mb-2 block text-sm font-medium text-dark-300">
-          {t('admin.emailTemplates.body')}
-        </label>
-        <textarea
-          ref={textareaRef}
-          value={editBody}
-          onChange={(e) => handleBodyChange(e.target.value)}
-          rows={12}
-          className="input min-h-[200px] resize-y font-mono text-xs leading-relaxed sm:min-h-[300px] sm:text-sm"
-          placeholder="<h2>Title</h2><p>Content...</p>"
-          spellCheck={false}
-        />
-        <p className="mt-1 text-2xs text-dark-500">{t('admin.emailTemplates.bodyHint')}</p>
-      </div>
+          {/* Context variables hint: type-specific + common (available in all templates) */}
+          {(detail.context_vars.length > 0 || (detail.common_context_vars?.length ?? 0) > 0) && (
+            <div className="space-y-2.5 rounded-lg border border-dark-700 bg-dark-900/60 p-2.5 sm:p-3">
+              {detail.context_vars.length > 0 && (
+                <div>
+                  <p className="mb-1.5 text-xs font-medium text-dark-300">
+                    {t('admin.emailTemplates.variables')}
+                  </p>
+                  <div className="flex flex-wrap gap-1 sm:gap-1.5">
+                    {detail.context_vars.map((v) => (
+                      <code
+                        key={v}
+                        className="cursor-pointer rounded bg-dark-700 px-2 py-0.5 font-mono text-xs text-accent-400 transition-colors hover:bg-dark-600"
+                        title={t('admin.emailTemplates.clickToInsert')}
+                        onClick={() => insertVariable(v)}
+                      >
+                        {`{${v}}`}
+                      </code>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {(detail.common_context_vars?.length ?? 0) > 0 && (
+                <div>
+                  <p className="mb-1.5 text-xs font-medium text-dark-400">
+                    {t('admin.emailTemplates.variablesCommon')}
+                  </p>
+                  <div className="flex flex-wrap gap-1 sm:gap-1.5">
+                    {detail.common_context_vars!.map((v) => (
+                      <code
+                        key={v}
+                        className="cursor-pointer rounded bg-dark-800 px-2 py-0.5 font-mono text-xs text-dark-300 ring-1 ring-dark-600 transition-colors hover:bg-dark-700 hover:text-accent-400"
+                        title={t('admin.emailTemplates.clickToInsert')}
+                        onClick={() => insertVariable(v)}
+                      >
+                        {`{${v}}`}
+                      </code>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Body HTML editor */}
+          <div>
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <label className="block text-sm font-medium text-dark-300">
+                {t('admin.emailTemplates.body')}
+              </label>
+              <button
+                onClick={insertDefaultTemplate}
+                className="text-xs text-dark-400 underline-offset-2 transition-colors hover:text-accent-400 hover:underline"
+              >
+                {t('admin.emailTemplates.insertDefault')}
+              </button>
+            </div>
+            <textarea
+              ref={textareaRef}
+              value={editBody}
+              onChange={(e) => {
+                setEditBody(e.target.value);
+                setIsDirty(true);
+              }}
+              rows={12}
+              className="input min-h-[200px] resize-y font-mono text-xs leading-relaxed sm:min-h-[300px] sm:text-sm"
+              placeholder="<h2>Title</h2><p>Content...</p>"
+              spellCheck={false}
+            />
+            <p className="mt-1 text-2xs text-dark-500">{t('admin.emailTemplates.bodyHint')}</p>
+          </div>
+        </>
+      )}
 
       {/* Actions */}
       <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
@@ -340,43 +442,10 @@ function TemplateEditor({
           <button
             onClick={() => saveMutation.mutate()}
             disabled={!isDirty || saveMutation.isPending}
-            className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-accent-500 px-3 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-600 disabled:cursor-not-allowed disabled:opacity-40 sm:px-4 sm:py-2"
+            className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-accent-500 px-3 py-2.5 text-sm font-medium text-on-accent transition-colors hover:bg-accent-600 disabled:cursor-not-allowed disabled:opacity-40 sm:px-4 sm:py-2"
           >
             <SaveIcon className="h-4 w-4" />
             {saveMutation.isPending ? t('common.loading') : t('common.save')}
-          </button>
-
-          <button
-            onClick={() => {
-              if (isPreviewDisabled) {
-                notify.warning(
-                  t('admin.emailTemplates.previewDesktopOnly'),
-                  t('admin.emailTemplates.previewNotAvailable'),
-                );
-                return;
-              }
-              navigate(`/admin/email-templates/preview/${detail.notification_type}/${activeLang}`, {
-                state: {
-                  subject: editSubject,
-                  body_html: editBody,
-                },
-              });
-            }}
-            className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-dark-700 px-3 py-2.5 text-sm font-medium text-dark-200 transition-colors hover:bg-dark-600 sm:px-4 sm:py-2"
-          >
-            <EyeIcon className="h-4 w-4" />
-            {t('admin.emailTemplates.preview')}
-          </button>
-        </div>
-
-        <div className="grid grid-cols-2 gap-2 sm:flex">
-          <button
-            onClick={() => testMutation.mutate()}
-            disabled={testMutation.isPending}
-            className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-dark-700 px-3 py-2.5 text-sm font-medium text-dark-200 transition-colors hover:bg-dark-600 disabled:opacity-40 sm:px-4 sm:py-2"
-          >
-            <SendIcon className="h-4 w-4" />
-            {testMutation.isPending ? t('common.loading') : t('admin.emailTemplates.sendTest')}
           </button>
 
           {langData && !langData.is_default && (
@@ -387,13 +456,38 @@ function TemplateEditor({
                 }
               }}
               disabled={resetMutation.isPending}
-              className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-dark-700 px-3 py-2.5 text-sm font-medium text-warning-400 transition-colors hover:bg-dark-600 disabled:opacity-40 sm:ml-auto sm:px-4 sm:py-2"
+              className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-dark-700 px-3 py-2.5 text-sm font-medium text-warning-400 transition-colors hover:bg-dark-600 disabled:opacity-40 sm:px-4 sm:py-2"
             >
               <ResetIcon className="h-4 w-4" />
               <span className="truncate">{t('admin.emailTemplates.resetDefault')}</span>
             </button>
           )}
         </div>
+      </div>
+
+      {/* Test email */}
+      <div className="rounded-lg border border-dark-700 bg-dark-900/60 p-2.5 sm:p-3">
+        <p className="mb-2 text-xs font-medium text-dark-300">
+          {t('admin.emailTemplates.sendTest')}
+        </p>
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <input
+            type="email"
+            value={testEmail}
+            onChange={(e) => setTestEmail(e.target.value)}
+            className="input flex-1"
+            placeholder={t('admin.emailTemplates.testRecipientPlaceholder')}
+          />
+          <button
+            onClick={() => testMutation.mutate()}
+            disabled={testMutation.isPending}
+            className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-dark-700 px-3 py-2.5 text-sm font-medium text-dark-200 transition-colors hover:bg-dark-600 disabled:opacity-40 sm:px-4 sm:py-2"
+          >
+            <SendIcon className="h-4 w-4" />
+            {testMutation.isPending ? t('common.loading') : t('admin.emailTemplates.sendTest')}
+          </button>
+        </div>
+        <p className="mt-1.5 text-2xs text-dark-500">{t('admin.emailTemplates.testHint')}</p>
       </div>
     </div>
   );

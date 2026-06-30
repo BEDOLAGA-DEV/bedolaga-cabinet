@@ -702,7 +702,7 @@ export default function AdminBroadcastCreate() {
                   onClick={() => toggleButton(button.key)}
                   className={`rounded-lg px-3 py-2 text-sm transition-colors ${
                     selectedButtons.includes(button.key)
-                      ? 'bg-accent-500 text-white'
+                      ? 'bg-accent-500 text-on-accent'
                       : 'border border-dark-700 bg-dark-800 text-dark-300 hover:bg-dark-700'
                   }`}
                 >
@@ -770,7 +770,7 @@ export default function AdminBroadcastCreate() {
                     onClick={() => setNewButtonActionType('callback')}
                     className={`flex-1 rounded-lg px-3 py-2 text-sm transition-colors ${
                       newButtonActionType === 'callback'
-                        ? 'bg-accent-500 text-white'
+                        ? 'bg-accent-500 text-on-accent'
                         : 'border border-dark-700 bg-dark-800 text-dark-300 hover:bg-dark-700'
                     }`}
                   >
@@ -781,7 +781,7 @@ export default function AdminBroadcastCreate() {
                     onClick={() => setNewButtonActionType('url')}
                     className={`flex-1 rounded-lg px-3 py-2 text-sm transition-colors ${
                       newButtonActionType === 'url'
-                        ? 'bg-accent-500 text-white'
+                        ? 'bg-accent-500 text-on-accent'
                         : 'border border-dark-700 bg-dark-800 text-dark-300 hover:bg-dark-700'
                     }`}
                   >

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { brandingApi } from '../api/branding';
 import { copyToClipboard } from '../utils/clipboard';
+import { openAppScheme } from '../utils/openAppScheme';
 import {
   CheckIcon,
   CopyIcon,
@@ -97,10 +98,12 @@ export default function DeepLinkRedirect() {
   const appName = appInfo?.name || appParam || 'VPN';
   const appIcon = appInfo?.icon || appName[0]?.toUpperCase() || 'V';
 
-  // Open deep link - same as miniapp, just window.location.href
+  // Open deep link via a contained iframe attempt so a custom scheme the in-app
+  // WebView can't resolve doesn't replace this page with net::ERR_UNKNOWN_URL_SCHEME
+  // (Android) / silently fail (iOS) and wipe the fallback UI. See openAppScheme.
   const openDeepLink = useCallback(() => {
     if (!deepLink || !isValidDeepLink(deepLink)) return;
-    window.location.href = deepLink;
+    openAppScheme(deepLink);
   }, [deepLink]);
 
   // Countdown timer effect

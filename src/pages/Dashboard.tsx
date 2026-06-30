@@ -318,7 +318,7 @@ export default function Dashboard() {
           ) : (
             <Link
               to="/subscription/purchase"
-              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-accent-500 p-3.5 text-sm font-semibold text-white transition-colors hover:bg-accent-600"
+              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-accent-500 p-3.5 text-sm font-semibold text-on-accent transition-colors hover:bg-accent-600"
             >
               <span className="text-base">+</span>{' '}
               {t('subscriptions.browsePlans', 'Посмотреть тарифы и купить подписку')}
@@ -381,7 +381,7 @@ export default function Dashboard() {
           )}
           <Link
             to="/subscription/purchase"
-            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-accent-500 p-3.5 text-sm font-semibold text-white transition-colors hover:bg-accent-600"
+            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-accent-500 p-3.5 text-sm font-semibold text-on-accent transition-colors hover:bg-accent-600"
           >
             <span className="text-base">+</span>{' '}
             {t('subscriptions.browsePlans', 'Посмотреть тарифы и купить подписку')}

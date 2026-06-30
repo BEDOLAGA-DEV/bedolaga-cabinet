@@ -54,7 +54,7 @@ export function TariffFilter({
         <FilterIcon className="h-4 w-4" />
         {t('admin.trafficUsage.tariff')}
         {activeCount > 0 && (
-          <span className="rounded-full bg-accent-500 px-1.5 text-[10px] text-white">
+          <span className="rounded-full bg-accent-500 px-1.5 text-[10px] text-on-accent">
             {activeCount}
           </span>
         )}

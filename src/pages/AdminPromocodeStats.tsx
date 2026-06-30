@@ -4,7 +4,15 @@ import { useTranslation } from 'react-i18next';
 import i18n from '../i18n';
 import { promocodesApi, PromoCodeType } from '../api/promocodes';
 import { AdminBackButton } from '../components/admin';
-import { EditIcon, ClockIcon, UserIcon } from '@/components/icons';
+import { StatCard } from '../components/stats';
+import {
+  EditIcon,
+  ClockIcon,
+  UserIcon,
+  ChartBarIcon,
+  SparklesIcon,
+  TicketIcon,
+} from '@/components/icons';
 
 // Helper functions
 const getTypeLabel = (type: PromoCodeType): string => {
@@ -116,7 +124,7 @@ export default function AdminPromocodeStats() {
         </div>
         <button
           onClick={() => navigate(`/admin/promocodes/${id}/edit`)}
-          className="flex items-center justify-center gap-2 rounded-lg bg-accent-500 px-4 py-2 text-white transition-colors hover:bg-accent-600"
+          className="flex items-center justify-center gap-2 rounded-lg bg-accent-500 px-4 py-2 text-on-accent transition-colors hover:bg-accent-600"
         >
           <EditIcon />
           {t('admin.promocodes.modal.edit')}
@@ -125,25 +133,29 @@ export default function AdminPromocodeStats() {
 
       <div className="space-y-6">
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <div className="rounded-xl border border-dark-700 bg-dark-800 p-4 text-center">
-            <div className="mb-1 text-3xl font-bold text-dark-100">{promocode.total_uses}</div>
-            <div className="text-sm text-dark-400">{t('admin.promocodes.stats.totalUses')}</div>
-          </div>
-          <div className="rounded-xl border border-dark-700 bg-dark-800 p-4 text-center">
-            <div className="mb-1 text-3xl font-bold text-success-400">{promocode.today_uses}</div>
-            <div className="text-sm text-dark-400">{t('admin.promocodes.stats.today')}</div>
-          </div>
-          <div className="rounded-xl border border-dark-700 bg-dark-800 p-4 text-center">
-            <div className="mb-1 text-3xl font-bold text-accent-400">
-              {promocode.max_uses === 0 ? '∞' : promocode.uses_left}
-            </div>
-            <div className="text-sm text-dark-400">{t('admin.promocodes.stats.remaining')}</div>
-          </div>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <StatCard
+            label={t('admin.promocodes.stats.totalUses')}
+            value={promocode.total_uses}
+            icon={<ChartBarIcon className="h-5 w-5" />}
+            tone="neutral"
+          />
+          <StatCard
+            label={t('admin.promocodes.stats.today')}
+            value={promocode.today_uses}
+            icon={<SparklesIcon className="h-5 w-5" />}
+            tone="success"
+          />
+          <StatCard
+            label={t('admin.promocodes.stats.remaining')}
+            value={promocode.max_uses === 0 ? '∞' : promocode.uses_left}
+            icon={<TicketIcon className="h-5 w-5" />}
+            tone="accent"
+          />
         </div>
 
         {/* Details */}
-        <div className="rounded-xl border border-dark-700 bg-dark-800 p-4">
+        <div className="rounded-xl border border-dark-700 bg-dark-800/50 p-4">
           <h4 className="mb-4 font-medium text-dark-200">{t('admin.promocodes.stats.details')}</h4>
           <div className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
             <div className="flex justify-between rounded-lg bg-dark-700/50 p-3">
@@ -221,7 +233,7 @@ export default function AdminPromocodeStats() {
         </div>
 
         {/* Usage History */}
-        <div className="rounded-xl border border-dark-700 bg-dark-800 p-4">
+        <div className="rounded-xl border border-dark-700 bg-dark-800/50 p-4">
           <h4 className="mb-4 flex items-center gap-2 font-medium text-dark-200">
             <ClockIcon className="h-4 w-4" />
             {t('admin.promocodes.stats.usageHistory')}

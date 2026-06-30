@@ -10,15 +10,23 @@ import { partnerApi } from '../api/partners';
 import { withdrawalApi } from '../api/withdrawals';
 import { CampaignCard } from '../components/partner/CampaignCard';
 import { useCurrency } from '../hooks/useCurrency';
+import { StatCard } from '@/components/stats';
 import {
+  ArrowDownIcon,
+  ArrowUpIcon,
+  BanknotesIcon,
+  CardIcon,
   CheckIcon,
   ClockIcon,
   CopyIcon,
   ExclamationIcon,
+  GiftIcon,
   LinkIcon,
   PartnerIcon,
+  PercentIcon,
   ShareIcon,
   TelegramIcon,
+  UserPlusIcon,
   UsersIcon,
   WalletIcon,
 } from '@/components/icons';
@@ -131,33 +139,33 @@ export default function Referral() {
       <div className="bento-card">
         <h2 className="mb-4 text-lg font-semibold text-dark-100">{t('referral.terms.title')}</h2>
         <div className={`grid grid-cols-2 gap-4 ${gridCols}`}>
-          <div className="rounded-xl bg-dark-800/30 p-3">
-            <div className="text-sm text-dark-500">{t('referral.terms.commission')}</div>
-            <div className="mt-1 text-lg font-semibold text-dark-100">
-              {terms.commission_percent}%
-            </div>
-          </div>
-          <div className="rounded-xl bg-dark-800/30 p-3">
-            <div className="text-sm text-dark-500">{t('referral.terms.minTopup')}</div>
-            <div className="mt-1 text-lg font-semibold text-dark-100">
-              {formatAmount(terms.minimum_topup_rubles)} {currencySymbol}
-            </div>
-          </div>
+          <StatCard
+            label={t('referral.terms.commission')}
+            value={`${terms.commission_percent}%`}
+            icon={<PercentIcon className="h-5 w-5" />}
+            tone="neutral"
+          />
+          <StatCard
+            label={t('referral.terms.minTopup')}
+            value={`${formatAmount(terms.minimum_topup_rubles)} ${currencySymbol}`}
+            icon={<BanknotesIcon className="h-5 w-5" />}
+            tone="neutral"
+          />
           {showNewUserBonus && (
-            <div className="rounded-xl bg-dark-800/30 p-3">
-              <div className="text-sm text-dark-500">{t('referral.terms.newUserBonus')}</div>
-              <div className="mt-1 text-lg font-semibold text-success-400">
-                {formatPositive(terms.first_topup_bonus_rubles)}
-              </div>
-            </div>
+            <StatCard
+              label={t('referral.terms.newUserBonus')}
+              value={formatPositive(terms.first_topup_bonus_rubles)}
+              icon={<GiftIcon className="h-5 w-5" />}
+              tone="success"
+            />
           )}
           {showInviterBonus && (
-            <div className="rounded-xl bg-dark-800/30 p-3">
-              <div className="text-sm text-dark-500">{t('referral.terms.inviterBonus')}</div>
-              <div className="mt-1 text-lg font-semibold text-success-400">
-                {formatPositive(terms.inviter_bonus_rubles)}
-              </div>
-            </div>
+            <StatCard
+              label={t('referral.terms.inviterBonus')}
+              value={formatPositive(terms.inviter_bonus_rubles)}
+              icon={<UserPlusIcon className="h-5 w-5" />}
+              tone="success"
+            />
           )}
         </div>
       </div>
@@ -237,23 +245,27 @@ export default function Referral() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4">
-        <div className="bento-card-hover col-span-2 md:col-span-1">
-          <div className="text-sm text-dark-400">{t('referral.stats.totalReferrals')}</div>
-          <div className="stat-value mt-1">{info?.total_referrals || 0}</div>
-          <div className="mt-1 text-sm text-dark-500">
-            {info?.active_referrals || 0} {t('referral.stats.activeReferrals').toLowerCase()}
-          </div>
+        <div className="col-span-2 md:col-span-1">
+          <StatCard
+            label={t('referral.stats.totalReferrals')}
+            value={info?.total_referrals || 0}
+            icon={<UsersIcon className="h-5 w-5" />}
+            tone="neutral"
+            subValue={`${info?.active_referrals || 0} ${t('referral.stats.activeReferrals').toLowerCase()}`}
+          />
         </div>
-        <div className="bento-card-hover">
-          <div className="text-sm text-dark-400">{t('referral.stats.totalEarnings')}</div>
-          <div className="stat-value mt-1 text-success-400">
-            {formatPositive(info?.total_earnings_rubles || 0)}
-          </div>
-        </div>
-        <div className="bento-card-hover">
-          <div className="text-sm text-dark-400">{t('referral.stats.commissionRate')}</div>
-          <div className="stat-value mt-1 text-accent-400">{info?.commission_percent || 0}%</div>
-        </div>
+        <StatCard
+          label={t('referral.stats.totalEarnings')}
+          value={formatPositive(info?.total_earnings_rubles || 0)}
+          icon={<BanknotesIcon className="h-5 w-5" />}
+          tone="success"
+        />
+        <StatCard
+          label={t('referral.stats.commissionRate')}
+          value={`${info?.commission_percent || 0}%`}
+          icon={<PercentIcon className="h-5 w-5" />}
+          tone="accent"
+        />
       </div>
 
       {/* Referral Links */}
@@ -545,38 +557,38 @@ export default function Referral() {
               </div>
 
               <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
-                <div className="col-span-2 rounded-xl bg-dark-800/30 p-4 md:col-span-1">
-                  <div className="text-sm text-dark-500">{t('referral.withdrawal.available')}</div>
-                  <div className="mt-1 text-2xl font-bold text-success-400">
-                    {formatWithCurrency(withdrawalBalance.available_total / 100)}
-                  </div>
+                <div className="col-span-2 md:col-span-1">
+                  <StatCard
+                    label={t('referral.withdrawal.available')}
+                    value={formatWithCurrency(withdrawalBalance.available_total / 100)}
+                    icon={<WalletIcon className="h-5 w-5" />}
+                    tone="success"
+                  />
                 </div>
-                <div className="rounded-xl bg-dark-800/30 p-3">
-                  <div className="text-sm text-dark-500">
-                    {t('referral.withdrawal.totalEarned')}
-                  </div>
-                  <div className="mt-1 text-lg font-semibold text-dark-100">
-                    {formatWithCurrency(withdrawalBalance.total_earned / 100)}
-                  </div>
-                </div>
-                <div className="rounded-xl bg-dark-800/30 p-3">
-                  <div className="text-sm text-dark-500">{t('referral.withdrawal.withdrawn')}</div>
-                  <div className="mt-1 text-lg font-semibold text-dark-100">
-                    {formatWithCurrency(withdrawalBalance.withdrawn / 100)}
-                  </div>
-                </div>
-                <div className="rounded-xl bg-dark-800/30 p-3">
-                  <div className="text-sm text-dark-500">{t('referral.withdrawal.spent')}</div>
-                  <div className="mt-1 text-lg font-semibold text-dark-100">
-                    {formatWithCurrency(withdrawalBalance.referral_spent / 100)}
-                  </div>
-                </div>
-                <div className="rounded-xl bg-dark-800/30 p-3">
-                  <div className="text-sm text-dark-500">{t('referral.withdrawal.pending')}</div>
-                  <div className="mt-1 text-lg font-semibold text-warning-400">
-                    {formatWithCurrency(withdrawalBalance.pending / 100)}
-                  </div>
-                </div>
+                <StatCard
+                  label={t('referral.withdrawal.totalEarned')}
+                  value={formatWithCurrency(withdrawalBalance.total_earned / 100)}
+                  icon={<BanknotesIcon className="h-5 w-5" />}
+                  tone="neutral"
+                />
+                <StatCard
+                  label={t('referral.withdrawal.withdrawn')}
+                  value={formatWithCurrency(withdrawalBalance.withdrawn / 100)}
+                  icon={<ArrowUpIcon className="h-5 w-5" />}
+                  tone="neutral"
+                />
+                <StatCard
+                  label={t('referral.withdrawal.spent')}
+                  value={formatWithCurrency(withdrawalBalance.referral_spent / 100)}
+                  icon={<CardIcon className="h-5 w-5" />}
+                  tone="neutral"
+                />
+                <StatCard
+                  label={t('referral.withdrawal.pending')}
+                  value={formatWithCurrency(withdrawalBalance.pending / 100)}
+                  icon={<ArrowDownIcon className="h-5 w-5" />}
+                  tone="warning"
+                />
               </div>
 
               <div className="mt-4">

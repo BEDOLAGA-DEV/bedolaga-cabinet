@@ -5,6 +5,7 @@ import {
   hideBackButton,
   onBackButtonClick,
   offBackButtonClick,
+  retrieveLaunchParams,
 } from '@telegram-apps/sdk-react';
 import { useQuery } from '@tanstack/react-query';
 import Twemoji from 'react-twemoji';
@@ -172,12 +173,51 @@ function TelegramBackButton() {
   return null;
 }
 
+/** `admin_ticket_<id>` startapp param → /admin/tickets/<id>. */
+const ADMIN_TICKET_START_PARAM_RE = /^admin_ticket_(\d+)$/;
+
+/**
+ * Routes a Telegram Mini App start param to an in-app destination on launch.
+ *
+ * Admin ticket notification buttons in GROUP/channel chats open the cabinet via
+ * a `t.me/<bot>/<app>?startapp=admin_ticket_<id>` deep link (bot issue #2988) —
+ * `web_app` buttons don't work in group chats, so the startapp param is the only
+ * way in. Telegram delivers it as `tgWebAppStartParam`; we map it to the admin
+ * ticket route once on mount. Access is still gated by the route's
+ * `PermissionRoute permission="tickets:read"`.
+ */
+function StartParamNavigator() {
+  const navigate = useNavigate();
+  const handled = useRef(false);
+
+  useEffect(() => {
+    if (handled.current) return;
+    handled.current = true;
+
+    let startParam: string | undefined;
+    try {
+      startParam = retrieveLaunchParams().tgWebAppStartParam;
+    } catch {
+      return;
+    }
+    if (!startParam) return;
+
+    const match = ADMIN_TICKET_START_PARAM_RE.exec(startParam);
+    if (match) {
+      navigate(`/admin/tickets/${match[1]}`, { replace: true });
+    }
+  }, [navigate]);
+
+  return null;
+}
+
 export function AppWithNavigator() {
   const isTelegram = isInTelegramWebApp();
 
   return (
     <BrowserRouter>
       {isTelegram && <TelegramBackButton />}
+      {isTelegram && <StartParamNavigator />}
       <ErrorBoundary level="page">
         <PlatformProvider>
           <ThemeColorsProvider>

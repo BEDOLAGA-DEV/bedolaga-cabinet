@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { sanitizeColor } from './types';
 import { useAnimationPause } from '@/hooks/useAnimationLoop';
 
 interface Props {
@@ -26,7 +27,11 @@ const BEAMS: BeamOptions[] = [
   { initialX: 1200, translateX: 1200, duration: 6, repeatDelay: 4, delay: 2, className: 'h-6' },
 ];
 
-function Explosion(props: React.HTMLProps<HTMLDivElement>) {
+function Explosion({
+  beamColor,
+  explosionColor,
+  ...props
+}: React.HTMLProps<HTMLDivElement> & { beamColor: string; explosionColor: string }) {
   const spans = Array.from({ length: 20 }, (_, i) => ({
     id: i,
     directionX: Math.floor(Math.random() * 80 - 40),
@@ -40,7 +45,10 @@ function Explosion(props: React.HTMLProps<HTMLDivElement>) {
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 1.5, ease: 'easeOut' }}
-        className="absolute -inset-x-10 top-0 m-auto h-2 w-10 rounded-full bg-gradient-to-r from-transparent via-indigo-500 to-transparent blur-sm"
+        className="absolute -inset-x-10 top-0 m-auto h-2 w-10 rounded-full blur-sm"
+        style={{
+          background: `linear-gradient(to right, transparent, ${explosionColor}, transparent)`,
+        }}
       />
       {spans.map((span) => (
         <motion.span
@@ -48,7 +56,10 @@ function Explosion(props: React.HTMLProps<HTMLDivElement>) {
           initial={{ x: 0, y: 0, opacity: 1 }}
           animate={{ x: span.directionX, y: span.directionY, opacity: 0 }}
           transition={{ duration: Math.random() * 1.5 + 0.5, ease: 'easeOut' }}
-          className="absolute h-1 w-1 rounded-full bg-gradient-to-b from-indigo-500 to-purple-500"
+          className="absolute h-1 w-1 rounded-full"
+          style={{
+            background: `linear-gradient(to bottom, ${beamColor}, ${explosionColor})`,
+          }}
         />
       ))}
     </div>
@@ -59,10 +70,14 @@ function CollisionMechanism({
   containerRef,
   parentRef,
   beamOptions,
+  beamColor,
+  explosionColor,
 }: {
   containerRef: React.RefObject<HTMLDivElement | null>;
   parentRef: React.RefObject<HTMLDivElement | null>;
   beamOptions: BeamOptions;
+  beamColor: string;
+  explosionColor: string;
 }) {
   const beamRef = useRef<HTMLDivElement>(null);
   const [collision, setCollision] = useState<{
@@ -92,8 +107,6 @@ function CollisionMechanism({
     }
   }, [containerRef, parentRef]);
 
-  // Throttled collision detection loop.
-  // Parent unmounts this component when paused, so no visibility handling needed here.
   useEffect(() => {
     let animId = 0;
     let lastCheck = 0;
@@ -114,7 +127,6 @@ function CollisionMechanism({
     };
   }, [checkCollision]);
 
-  // Collision reset with proper timeout cleanup
   useEffect(() => {
     if (!collision.detected || !collision.coordinates) return;
 
@@ -154,14 +166,19 @@ function CollisionMechanism({
           repeatDelay: beamOptions.repeatDelay,
         }}
         className={cn(
-          'absolute left-0 top-20 m-auto h-14 w-px rounded-full bg-gradient-to-t from-indigo-500 via-purple-500 to-transparent',
+          'absolute left-0 top-20 m-auto h-14 w-px rounded-full',
           beamOptions.className,
         )}
+        style={{
+          background: `linear-gradient(to top, ${beamColor}, ${explosionColor}, transparent)`,
+        }}
       />
       <AnimatePresence>
         {collision.detected && collision.coordinates && (
           <Explosion
             key={`${collision.coordinates.x}-${collision.coordinates.y}`}
+            beamColor={beamColor}
+            explosionColor={explosionColor}
             style={{
               left: `${collision.coordinates.x}px`,
               top: `${collision.coordinates.y}px`,
@@ -174,10 +191,13 @@ function CollisionMechanism({
   );
 }
 
-export default function BackgroundBeamsCollision({ settings: _settings }: Props) {
+export default function BackgroundBeamsCollision({ settings }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const parentRef = useRef<HTMLDivElement>(null);
   const paused = useAnimationPause();
+
+  const beamColor = sanitizeColor(settings.beamColor, '#6366f1');
+  const explosionColor = sanitizeColor(settings.explosionColor, '#a855f7');
 
   return (
     <div ref={parentRef} className="absolute inset-0 overflow-hidden">
@@ -188,9 +208,10 @@ export default function BackgroundBeamsCollision({ settings: _settings }: Props)
             beamOptions={beam}
             containerRef={containerRef}
             parentRef={parentRef}
+            beamColor={beamColor}
+            explosionColor={explosionColor}
           />
         ))}
-      {/* Bottom collision line */}
       <div
         ref={containerRef}
         className="pointer-events-none absolute inset-x-0 bottom-0 w-full"

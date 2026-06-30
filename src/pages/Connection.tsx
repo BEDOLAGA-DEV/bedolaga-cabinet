@@ -8,6 +8,7 @@ import { useTelegramSDK } from '../hooks/useTelegramSDK';
 import { useHaptic } from '@/platform';
 import { SettingsIcon } from '@/components/icons';
 import { resolveTemplate, hasTemplates } from '../utils/templateEngine';
+import { openAppScheme } from '../utils/openAppScheme';
 import { isHappCryptolinkMode, resolveConnectionUrlForUi } from '../utils/connectionLink';
 import { useAuthStore } from '../store/auth';
 import type { AppConfig, RemnawavePlatformData } from '../types';
@@ -133,8 +134,11 @@ export default function Connection() {
         }
       }
 
-      // In regular browsers open deeplink directly (without intermediate redirect page).
-      window.location.href = resolved;
+      // In regular browsers open the deeplink directly. openAppScheme uses a contained
+      // iframe for custom schemes so an unresolved scheme doesn't paint a full-page
+      // net::ERR_UNKNOWN_URL_SCHEME (Android) / silently fail (iOS); http(s) links
+      // still navigate normally. (Telegram bug #654272.)
+      openAppScheme(resolved);
     },
     [isTelegramWebApp, i18n.language, resolveUrl, connectionLink?.connect_mode, qrConnectionUrl],
   );

@@ -32,6 +32,7 @@ export default function BackgroundGradientAnimation({ settings }: Props) {
   const thirdColor = hexToRgbString(sanitizeColor(settings.thirdColor, '#64DCFF'));
   const fourthColor = hexToRgbString(sanitizeColor(settings.fourthColor, '#C83232'));
   const fifthColor = hexToRgbString(sanitizeColor(settings.fifthColor, '#B4B432'));
+  const pointerColor = hexToRgbString(sanitizeColor(settings.pointerColor, '#8C64FF'));
   const interactive = safeBoolean(settings.interactive, true);
   const size = safeSelect(settings.size, ['60%', '80%', '100%'] as const, '80%');
 
@@ -172,7 +173,7 @@ export default function BackgroundGradientAnimation({ settings }: Props) {
             ref={interactiveRef}
             className="absolute left-[calc(50%-var(--size)/2)] top-[calc(50%-var(--size)/2)] h-[var(--size)] w-[var(--size)] rounded-full opacity-70 mix-blend-hard-light"
             style={{
-              background: `radial-gradient(circle at center, rgba(140, 100, 255, 0.8) 0, rgba(140, 100, 255, 0) 50%) no-repeat`,
+              background: `radial-gradient(circle at center, rgba(${pointerColor}, 0.8) 0, rgba(${pointerColor}, 0) 50%) no-repeat`,
             }}
           />
         )}

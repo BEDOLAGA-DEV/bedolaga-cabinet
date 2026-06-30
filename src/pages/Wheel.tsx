@@ -632,7 +632,7 @@ export default function Wheel() {
                     </button>
                     <button
                       onClick={handleDirectStarsPay}
-                      className="rounded-lg bg-accent-500 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-600"
+                      className="rounded-lg bg-accent-500 px-4 py-2.5 text-sm font-medium text-on-accent transition-colors hover:bg-accent-600"
                     >
                       {t('wheel.payStars', { count: config.spin_cost_stars ?? 0 })}
                     </button>

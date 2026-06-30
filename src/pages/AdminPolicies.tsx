@@ -6,16 +6,19 @@ import { rbacApi, AccessPolicy, AdminRole } from '@/api/rbac';
 import { PermissionGate } from '@/components/auth/PermissionGate';
 import { usePlatform } from '@/platform/hooks/usePlatform';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
+import { StatCard } from '@/components/stats';
 import {
   BackIcon,
   BoltIcon,
   CalendarIcon,
+  CheckCircleIcon,
   ClockIcon,
   EditIcon,
   GlobeIcon,
   PlusIcon,
   ShieldIcon,
   TrashIcon,
+  XCircleIcon,
 } from '@/components/icons';
 
 interface PolicyConditions {
@@ -225,7 +228,7 @@ export default function AdminPolicies() {
         <PermissionGate permission="roles:create">
           <button
             onClick={() => navigate('/admin/policies/create')}
-            className="flex items-center justify-center gap-2 rounded-lg bg-accent-500 px-4 py-2 text-white transition-colors hover:bg-accent-600"
+            className="flex items-center justify-center gap-2 rounded-lg bg-accent-500 px-4 py-2 text-on-accent transition-colors hover:bg-accent-600"
           >
             <PlusIcon />
             {t('admin.policies.createPolicy')}
@@ -243,28 +246,30 @@ export default function AdminPolicies() {
       {/* Stats Overview */}
       {sortedPolicies.length > 0 && (
         <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <div className="rounded-xl border border-dark-700 bg-dark-800 p-4">
-            <div className="text-2xl font-bold text-dark-100">{sortedPolicies.length}</div>
-            <div className="text-xs text-dark-400">{t('admin.policies.stats.total')}</div>
-          </div>
-          <div className="rounded-xl border border-dark-700 bg-dark-800 p-4">
-            <div className="text-2xl font-bold text-success-400">
-              {sortedPolicies.filter((p) => p.effect === 'allow').length}
-            </div>
-            <div className="text-xs text-dark-400">{t('admin.policies.stats.allow')}</div>
-          </div>
-          <div className="rounded-xl border border-dark-700 bg-dark-800 p-4">
-            <div className="text-2xl font-bold text-error-400">
-              {sortedPolicies.filter((p) => p.effect === 'deny').length}
-            </div>
-            <div className="text-xs text-dark-400">{t('admin.policies.stats.deny')}</div>
-          </div>
-          <div className="rounded-xl border border-dark-700 bg-dark-800 p-4">
-            <div className="text-2xl font-bold text-accent-400">
-              {sortedPolicies.filter((p) => p.is_active).length}
-            </div>
-            <div className="text-xs text-dark-400">{t('admin.policies.stats.active')}</div>
-          </div>
+          <StatCard
+            label={t('admin.policies.stats.total')}
+            value={sortedPolicies.length}
+            icon={<ShieldIcon className="h-5 w-5" />}
+            tone="neutral"
+          />
+          <StatCard
+            label={t('admin.policies.stats.allow')}
+            value={sortedPolicies.filter((p) => p.effect === 'allow').length}
+            icon={<CheckCircleIcon className="h-5 w-5" />}
+            tone="success"
+          />
+          <StatCard
+            label={t('admin.policies.stats.deny')}
+            value={sortedPolicies.filter((p) => p.effect === 'deny').length}
+            icon={<XCircleIcon className="h-5 w-5" />}
+            tone="error"
+          />
+          <StatCard
+            label={t('admin.policies.stats.active')}
+            value={sortedPolicies.filter((p) => p.is_active).length}
+            icon={<BoltIcon className="h-5 w-5" />}
+            tone="accent"
+          />
         </div>
       )}
 

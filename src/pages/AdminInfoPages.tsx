@@ -216,6 +216,17 @@ export default function AdminInfoPages() {
         </div>
         <div className="flex gap-2">
           <button
+            onClick={() => {
+              haptic.buttonPress();
+              navigate('/admin/legal-pages');
+            }}
+            className="flex min-h-[44px] items-center gap-2 rounded-lg bg-dark-800 px-4 py-2.5 text-dark-200 transition-colors hover:bg-dark-700"
+            aria-label={t('admin.legalPages.open')}
+          >
+            <FileTextIcon className="h-4 w-4" />
+            <span className="hidden sm:inline">{t('admin.legalPages.open')}</span>
+          </button>
+          <button
             onClick={() => refetch()}
             className="min-h-[44px] min-w-[44px] rounded-lg bg-dark-800 p-2.5 text-dark-400 transition-colors hover:text-dark-100"
             aria-label={t('common.refresh')}
@@ -227,7 +238,7 @@ export default function AdminInfoPages() {
               haptic.buttonPress();
               navigate('/admin/info-pages/create?type=faq');
             }}
-            className="flex min-h-[44px] items-center gap-2 rounded-lg bg-warning-500/80 px-4 py-2.5 text-white transition-colors hover:bg-warning-500"
+            className="flex min-h-[44px] items-center gap-2 rounded-lg bg-warning-500 px-4 py-2.5 text-on-warning transition-colors hover:bg-warning-400"
             aria-label={t('admin.infoPages.createFaq')}
           >
             <PlusIcon />
@@ -238,7 +249,7 @@ export default function AdminInfoPages() {
               haptic.buttonPress();
               navigate('/admin/info-pages/create');
             }}
-            className="flex min-h-[44px] items-center gap-2 rounded-lg bg-accent-500 px-4 py-2.5 text-white transition-colors hover:bg-accent-600"
+            className="flex min-h-[44px] items-center gap-2 rounded-lg bg-accent-500 px-4 py-2.5 text-on-accent transition-colors hover:bg-accent-600"
             aria-label={t('admin.infoPages.create')}
           >
             <PlusIcon />
@@ -257,7 +268,7 @@ export default function AdminInfoPages() {
             className={cn(
               'min-h-[44px] rounded-lg px-4 py-2.5 text-sm font-medium transition-colors',
               activeFilter === tab
-                ? 'bg-accent-500 text-white'
+                ? 'bg-accent-500 text-on-accent'
                 : 'bg-dark-700 text-dark-300 hover:bg-dark-600 hover:text-dark-100',
             )}
           >

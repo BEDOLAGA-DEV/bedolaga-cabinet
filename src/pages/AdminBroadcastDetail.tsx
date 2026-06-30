@@ -3,14 +3,19 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { adminBroadcastsApi, type BroadcastChannel } from '../api/adminBroadcasts';
 import { AdminBackButton } from '../components/admin';
+import { StatCard } from '@/components/stats';
 import {
+  BanIcon,
   DocumentIcon,
   EmailIcon,
   PhotoIcon,
   RefreshIcon,
+  SendIcon,
   StopIcon,
   TelegramIcon,
+  UsersIcon,
   VideoIcon,
+  XCircleIcon,
 } from '@/components/icons';
 
 // Channel badge component
@@ -150,7 +155,7 @@ export default function AdminBroadcastDetail() {
         <p className="text-dark-400">{t('admin.broadcasts.notFound')}</p>
         <button
           onClick={() => navigate('/admin/broadcasts')}
-          className="rounded-lg bg-accent-500 px-4 py-2 text-white transition-colors hover:bg-accent-600"
+          className="rounded-lg bg-accent-500 px-4 py-2 text-on-accent transition-colors hover:bg-accent-600"
         >
           {t('common.back')}
         </button>
@@ -205,22 +210,30 @@ export default function AdminBroadcastDetail() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <div className="rounded-xl border border-dark-700 bg-dark-800/50 p-4 text-center">
-          <p className="text-3xl font-bold text-dark-100">{broadcast.total_count}</p>
-          <p className="text-sm text-dark-400">{t('admin.broadcasts.total')}</p>
-        </div>
-        <div className="rounded-xl border border-success-500/30 bg-success-500/10 p-4 text-center">
-          <p className="text-3xl font-bold text-success-400">{broadcast.sent_count}</p>
-          <p className="text-sm text-dark-400">{t('admin.broadcasts.sent')}</p>
-        </div>
-        <div className="rounded-xl border border-warning-500/30 bg-warning-500/10 p-4 text-center">
-          <p className="text-3xl font-bold text-warning-400">{broadcast.blocked_count}</p>
-          <p className="text-sm text-dark-400">{t('admin.broadcasts.blocked')}</p>
-        </div>
-        <div className="rounded-xl border border-error-500/30 bg-error-500/10 p-4 text-center">
-          <p className="text-3xl font-bold text-error-400">{broadcast.failed_count}</p>
-          <p className="text-sm text-dark-400">{t('admin.broadcasts.failed')}</p>
-        </div>
+        <StatCard
+          label={t('admin.broadcasts.total')}
+          value={broadcast.total_count}
+          icon={<UsersIcon className="h-5 w-5" />}
+          tone="neutral"
+        />
+        <StatCard
+          label={t('admin.broadcasts.sent')}
+          value={broadcast.sent_count}
+          icon={<SendIcon className="h-5 w-5" />}
+          tone="success"
+        />
+        <StatCard
+          label={t('admin.broadcasts.blocked')}
+          value={broadcast.blocked_count}
+          icon={<BanIcon className="h-5 w-5" />}
+          tone="warning"
+        />
+        <StatCard
+          label={t('admin.broadcasts.failed')}
+          value={broadcast.failed_count}
+          icon={<XCircleIcon className="h-5 w-5" />}
+          tone="error"
+        />
       </div>
 
       {/* Target */}

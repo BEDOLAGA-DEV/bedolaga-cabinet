@@ -189,7 +189,7 @@ export default function GiftClaim() {
                   'flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-bold transition-all active:scale-[0.98]',
                   copied
                     ? 'bg-success-500/20 text-success-400'
-                    : 'bg-accent-500 text-white hover:bg-accent-400',
+                    : 'bg-accent-500 text-on-accent hover:bg-accent-400',
                 )}
               >
                 {copied ? <CheckIcon className="h-4 w-4" /> : <CopyIcon className="h-4 w-4" />}
@@ -264,7 +264,7 @@ export default function GiftClaim() {
         {gift.bot_claim_link && (
           <a
             href={gift.bot_claim_link}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-accent-500 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-accent-500/25 transition-all hover:bg-accent-400 active:scale-[0.98]"
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-accent-500 px-6 py-3.5 text-sm font-bold text-on-accent shadow-lg shadow-accent-500/25 transition-all hover:bg-accent-400 active:scale-[0.98]"
           >
             {t('landing.giftClaim.activateTelegram', 'Activate in Telegram')}
           </a>
@@ -303,7 +303,7 @@ export default function GiftClaim() {
               className={cn(
                 'flex w-full items-center justify-center gap-2 rounded-xl px-6 py-3.5 text-sm font-bold transition-all',
                 isValidEmail(email) && !claimMutation.isPending
-                  ? 'bg-accent-500 text-white hover:bg-accent-400 active:scale-[0.98]'
+                  ? 'bg-accent-500 text-on-accent hover:bg-accent-400 active:scale-[0.98]'
                   : 'cursor-not-allowed bg-dark-800 text-dark-500',
               )}
             >

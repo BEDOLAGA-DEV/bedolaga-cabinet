@@ -248,7 +248,7 @@ export default function AdminSettings() {
                   <BackIcon />
                 </button>
               )}
-              <h1 className="text-lg font-bold text-dark-100">{t('admin.settings.title')}</h1>
+              <h1 className="text-xl font-bold text-dark-100">{t('admin.settings.title')}</h1>
             </div>
           </div>
           <SettingsTreeSidebar

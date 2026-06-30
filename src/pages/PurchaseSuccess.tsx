@@ -268,7 +268,7 @@ function SuccessState({
           href={botLink}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex w-full items-center justify-center gap-2 rounded-xl bg-accent-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-accent-400"
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-accent-500 px-6 py-3 text-sm font-medium text-on-accent transition-colors hover:bg-accent-400"
         >
           {t('landing.openBot')}
         </a>
@@ -492,7 +492,7 @@ function GiftPendingActivationState({
           href={botLink}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex w-full items-center justify-center gap-2 rounded-xl bg-accent-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-accent-400"
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-accent-500 px-6 py-3 text-sm font-medium text-on-accent transition-colors hover:bg-accent-400"
         >
           {t('landing.openBot')}
         </a>
@@ -545,7 +545,7 @@ function PollTimedOutState({ onRetry }: { onRetry: () => void }) {
       <button
         type="button"
         onClick={onRetry}
-        className="rounded-xl bg-accent-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-accent-400"
+        className="rounded-xl bg-accent-500 px-6 py-3 text-sm font-medium text-on-accent transition-colors hover:bg-accent-400"
       >
         {t('common.retry', 'Retry')}
       </button>
@@ -641,7 +641,7 @@ function GiftLinkShareState({
           'flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3.5 text-sm font-bold transition-all duration-200 active:scale-[0.98]',
           copied
             ? 'bg-success-500/20 text-success-400'
-            : 'bg-accent-500 text-white shadow-lg shadow-accent-500/25 hover:bg-accent-400',
+            : 'bg-accent-500 text-on-accent shadow-lg shadow-accent-500/25 hover:bg-accent-400',
         )}
       >
         {copied ? (

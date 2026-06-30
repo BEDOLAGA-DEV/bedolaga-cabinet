@@ -7,7 +7,16 @@ import { PermissionGate } from '@/components/auth/PermissionGate';
 import { usePermissionStore } from '@/store/permissions';
 import { usePlatform } from '@/platform/hooks/usePlatform';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
-import { BackIcon, PlusIcon, EditIcon, TrashIcon, ShieldIcon } from '@/components/icons';
+import {
+  BackIcon,
+  PlusIcon,
+  EditIcon,
+  TrashIcon,
+  ShieldIcon,
+  CheckCircleIcon,
+  CogIcon,
+} from '@/components/icons';
+import { StatCard } from '@/components/stats';
 
 export default function AdminRoles() {
   const { t } = useTranslation();
@@ -72,7 +81,7 @@ export default function AdminRoles() {
         <PermissionGate permission="roles:create">
           <button
             onClick={() => navigate('/admin/roles/create')}
-            className="flex items-center justify-center gap-2 rounded-lg bg-accent-500 px-4 py-2 text-white transition-colors hover:bg-accent-600"
+            className="flex items-center justify-center gap-2 rounded-lg bg-accent-500 px-4 py-2 text-on-accent transition-colors hover:bg-accent-600"
           >
             <PlusIcon />
             {t('admin.roles.createRole')}
@@ -90,22 +99,24 @@ export default function AdminRoles() {
       {/* Stats Overview */}
       {sortedRoles.length > 0 && (
         <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
-          <div className="rounded-xl border border-dark-700 bg-dark-800 p-4">
-            <div className="text-2xl font-bold text-dark-100">{sortedRoles.length}</div>
-            <div className="text-xs text-dark-400">{t('admin.roles.stats.totalRoles')}</div>
-          </div>
-          <div className="rounded-xl border border-dark-700 bg-dark-800 p-4">
-            <div className="text-2xl font-bold text-accent-400">
-              {sortedRoles.filter((r) => r.is_active).length}
-            </div>
-            <div className="text-xs text-dark-400">{t('admin.roles.stats.active')}</div>
-          </div>
-          <div className="rounded-xl border border-dark-700 bg-dark-800 p-4">
-            <div className="text-2xl font-bold text-warning-400">
-              {sortedRoles.filter((r) => r.is_system).length}
-            </div>
-            <div className="text-xs text-dark-400">{t('admin.roles.stats.system')}</div>
-          </div>
+          <StatCard
+            label={t('admin.roles.stats.totalRoles')}
+            value={sortedRoles.length}
+            icon={<ShieldIcon className="h-5 w-5" />}
+            tone="neutral"
+          />
+          <StatCard
+            label={t('admin.roles.stats.active')}
+            value={sortedRoles.filter((r) => r.is_active).length}
+            icon={<CheckCircleIcon className="h-5 w-5" />}
+            tone="accent"
+          />
+          <StatCard
+            label={t('admin.roles.stats.system')}
+            value={sortedRoles.filter((r) => r.is_system).length}
+            icon={<CogIcon className="h-5 w-5" />}
+            tone="warning"
+          />
         </div>
       )}
 

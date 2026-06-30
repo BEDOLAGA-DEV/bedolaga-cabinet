@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router';
+import { useNavigate, useParams, useSearchParams } from 'react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
@@ -85,7 +85,7 @@ function SuccessState({ amountKopeks }: { amountKopeks: number | null }) {
       <button
         type="button"
         onClick={handleGoToBalance}
-        className="flex w-full items-center justify-center gap-2 rounded-xl bg-accent-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-accent-400"
+        className="flex w-full items-center justify-center gap-2 rounded-xl bg-accent-500 px-6 py-3 text-sm font-medium text-on-accent transition-colors hover:bg-accent-400"
       >
         {t('balance.topUpResult.goToBalance')}
       </button>
@@ -162,7 +162,7 @@ function TimeoutState({ onRetry, onGoBack }: { onRetry: () => void; onGoBack: ()
         <button
           type="button"
           onClick={onRetry}
-          className="w-full rounded-xl bg-accent-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-accent-400"
+          className="w-full rounded-xl bg-accent-500 px-6 py-3 text-sm font-medium text-on-accent transition-colors hover:bg-accent-400"
         >
           {t('common.retry')}
         </button>
@@ -194,8 +194,11 @@ export default function TopUpResult() {
   // Load saved payment info from sessionStorage (once on mount)
   const [pendingInfo] = useState(() => loadTopUpPendingInfo());
 
-  // Fallback: read method from query params (for external browser redirects where sessionStorage is unavailable)
-  const methodFromUrl = searchParams.get('method');
+  // Fallback: read method for external-browser redirects where sessionStorage is unavailable.
+  // Providers that reject query strings (Lava) return to /balance/top-up/result/<method>, so
+  // accept the method from the path param too, not just ?method=.
+  const { method: methodFromPath } = useParams<{ method?: string }>();
+  const methodFromUrl = searchParams.get('method') || methodFromPath || null;
 
   // Detect if user arrived via redirect with success param (no polling needed)
   const redirectStatus = searchParams.get('status') || searchParams.get('payment');

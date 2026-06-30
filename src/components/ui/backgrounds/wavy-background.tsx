@@ -27,7 +27,13 @@ export default function WavyBackground({ settings }: Props) {
   const blur = clampNumber(settings.blur, 0, 50, 10);
   const waveOpacity = clampNumber(settings.waveOpacity, 0.05, 1, 0.5);
   const backgroundFill = sanitizeColor(settings.backgroundFill, '#000000');
-  const colors = ['#38bdf8', '#818cf8', '#c084fc', '#e879f9', '#22d3ee'];
+  const colors = [
+    sanitizeColor(settings.waveColor1, '#38bdf8'),
+    sanitizeColor(settings.waveColor2, '#818cf8'),
+    sanitizeColor(settings.waveColor3, '#c084fc'),
+    sanitizeColor(settings.waveColor4, '#e879f9'),
+    sanitizeColor(settings.waveColor5, '#22d3ee'),
+  ];
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -100,7 +106,7 @@ export default function WavyBackground({ settings }: Props) {
       ctx.stroke();
       ctx.closePath();
     }
-  }, [speed, waveWidth, blur, waveOpacity, backgroundFill]);
+  }, [speed, waveWidth, blur, waveOpacity, backgroundFill, ...colors]);
 
   return <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />;
 }

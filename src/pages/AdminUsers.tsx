@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useCurrency } from '../hooks/useCurrency';
 import { adminUsersApi, type UserListItem } from '../api/adminUsers';
 import { usePlatform } from '../platform/hooks/usePlatform';
+import { StatCard } from '@/components/stats';
 import {
   BackIcon,
   SearchIcon,
@@ -12,32 +13,12 @@ import {
   ChevronRightIcon,
   RefreshIcon,
   TelegramSmallIcon as TelegramIcon,
+  UsersIcon,
+  CheckCircleIcon,
+  SubscriptionIcon,
+  UserPlusIcon,
+  BanIcon,
 } from '@/components/icons';
-
-interface StatCardProps {
-  title: string;
-  value: string | number;
-  subtitle?: string;
-  color: 'blue' | 'green' | 'yellow' | 'red' | 'purple';
-}
-
-function StatCard({ title, value, subtitle, color }: StatCardProps) {
-  const colors = {
-    blue: 'bg-accent-500/20 text-accent-400 border-accent-500/30',
-    green: 'bg-success-500/20 text-success-400 border-success-500/30',
-    yellow: 'bg-warning-500/20 text-warning-400 border-warning-500/30',
-    red: 'bg-error-500/20 text-error-400 border-error-500/30',
-    purple: 'bg-accent-500/20 text-accent-400 border-accent-500/30',
-  };
-
-  return (
-    <div className={`rounded-xl border p-4 ${colors[color]}`}>
-      <div className="mb-1 text-2xl font-bold">{value}</div>
-      <div className="text-sm opacity-80">{title}</div>
-      {subtitle && <div className="mt-1 text-xs opacity-60">{subtitle}</div>}
-    </div>
-  );
-}
 
 function StatusBadge({ status }: { status: string }) {
   const styles: Record<string, string> = {
@@ -208,26 +189,35 @@ export default function AdminUsers() {
       {/* Stats */}
       {stats && (
         <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-          <StatCard title={t('admin.users.stats.total')} value={stats.total_users} color="blue" />
           <StatCard
-            title={t('admin.users.stats.active')}
+            label={t('admin.users.stats.total')}
+            value={stats.total_users}
+            icon={<UsersIcon className="h-5 w-5" />}
+            tone="accent"
+          />
+          <StatCard
+            label={t('admin.users.stats.active')}
             value={stats.active_users}
-            color="green"
+            icon={<CheckCircleIcon className="h-5 w-5" />}
+            tone="success"
           />
           <StatCard
-            title={t('admin.users.stats.withSubscription')}
+            label={t('admin.users.stats.withSubscription')}
             value={stats.users_with_active_subscription}
-            color="purple"
+            icon={<SubscriptionIcon className="h-5 w-5" />}
+            tone="accent"
           />
           <StatCard
-            title={t('admin.users.stats.newToday')}
+            label={t('admin.users.stats.newToday')}
             value={stats.new_today}
-            color="yellow"
+            icon={<UserPlusIcon className="h-5 w-5" />}
+            tone="warning"
           />
           <StatCard
-            title={t('admin.users.stats.blocked')}
+            label={t('admin.users.stats.blocked')}
             value={stats.blocked_users}
-            color="red"
+            icon={<BanIcon className="h-5 w-5" />}
+            tone="error"
           />
         </div>
       )}

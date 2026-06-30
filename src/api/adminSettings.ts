@@ -35,6 +35,11 @@ export interface SettingDefinition {
   original: unknown;
   has_override: boolean;
   read_only: boolean;
+  // Secret-bearing key (token/secret/password/key). `current`/`original` come back masked
+  // (••••••••); the UI renders a password input and only sends a value when actually changed.
+  is_secret?: boolean;
+  // Pinned in .env: value shadows the DB and can't be edited here (only viewed).
+  env_locked: boolean;
   choices: SettingChoice[];
   hint?: SettingHint | null;
 }

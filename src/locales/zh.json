@@ -28,10 +28,9 @@
     "understand": "明白了",
     "collapse": "收起",
     "units": {
+      "tb": "TB",
       "gb": "GB",
-      "perGb": "/GB",
-      "days": "天",
-      "mo": "月"
+      "mb": "MB"
     },
     "balance": "余额",
     "copied": "已复制",
@@ -674,6 +673,13 @@
         "not_yet_valid": "优惠码尚未生效",
         "used": "优惠码已被使用",
         "already_used_by_user": "您已使用过此优惠码",
+        "active_discount_exists": "您已有一个生效中的折扣，请先停用它。",
+        "no_subscription_for_days": "此优惠码需要有效或已过期的订阅",
+        "subscription_not_found": "未找到订阅",
+        "not_first_purchase": "此优惠码仅限首次购买使用",
+        "daily_limit": "今日优惠码激活次数过多",
+        "trial_subscription_exists": "您已有订阅，因此无法使用此试用优惠码",
+        "trial_provisioning_failed": "暂时无法开通试用，请稍后再试",
         "user_not_found": "用户不存在",
         "server_error": "服务器错误"
       },
@@ -922,7 +928,8 @@
     "openSupport": "打开支持",
     "ticketsDisabled": "工单已禁用",
     "useExternalLink": "请使用外部链接获取支持",
-    "create_ticket": "创建工单"
+    "create_ticket": "创建工单",
+    "writeButton": "发消息"
   },
   "wheel": {
     "title": "幸运转盘",
@@ -994,7 +1001,7 @@
       "globalOpacity": "透明度",
       "globalBlur": "模糊",
       "categoryCSS": "CSS",
-      "categoryCanvas": "Canvas",
+      "categoryCANVAS": "Canvas",
       "categorySVG": "SVG",
       "aurora": "极光",
       "auroraDesc": "柔和渐变的北极光",
@@ -1028,6 +1035,18 @@
       "noiseDesc": "带运动的噪声渐变",
       "ripple": "涟漪",
       "rippleDesc": "涟漪波纹效果",
+      "fireflies": "萤火虫",
+      "firefliesDesc": "漂浮闪烁的发光点",
+      "snowfall": "降雪",
+      "snowfallDesc": "随风飘落的雪花",
+      "starfield": "星空",
+      "starfieldDesc": "向观察者飞来的星星",
+      "matrixRain": "黑客帝国雨",
+      "matrixRainDesc": "下落的字符列",
+      "liquidGradient": "流体渐变",
+      "liquidGradientDesc": "模糊的网格渐变色块",
+      "constellation": "星座",
+      "constellationDesc": "由线条连接的粒子",
       "geminiEffect": "Gemini效果",
       "geminiEffectDesc": "类似Google Gemini的SVG效果",
       "speed": "速度",
@@ -1043,6 +1062,15 @@
       "particleColor": "粒子颜色",
       "starColor": "星星颜色",
       "trailColor": "尾迹颜色",
+      "bgStarColor": "背景星星颜色",
+      "pointerColor": "指针颜色",
+      "beamColor": "光束颜色",
+      "explosionColor": "爆炸颜色",
+      "multicolor": "多彩模式",
+      "lineColor": "线条颜色",
+      "wind": "风力",
+      "charset": "字符集",
+      "linkDistance": "连接距离",
       "bgColor": "背景颜色",
       "fillColor": "填充颜色",
       "color1": "颜色1",
@@ -1102,7 +1130,8 @@
       "landings": "落地页",
       "referralNetwork": "推荐网络",
       "news": "新闻",
-      "infoPages": "信息页面"
+      "infoPages": "信息页面",
+      "legalPages": "系统页面"
     },
     "panel": {
       "title": "管理面板",
@@ -1404,7 +1433,7 @@
       "methodEnabled": "方法已启用",
       "providerNotConfigured": "提供商未在env中配置",
       "openUrlDirect": "直接打开支付页面",
-      "openUrlDirectHint": "跳过链接面板:点击后提供商在 MiniApp/标签页内直接打开。支付完成后用户返回 /balance/top-up/result。Stars/CryptoBot 和其他 t.me/ 链接忽略此标志。",
+      "openUrlDirectHint": "开启 — 支付链接立即打开,不显示中间的按钮面板。关闭 — 显示「打开支付」按钮。在 Telegram 内两种情况都会在外部浏览器中打开链接(否则通过银行 App/SBP 付款会失败);支付完成后返回结果页。Stars/CryptoBot(t.me/ 链接)始终原生打开,不受此开关影响。",
       "displayName": "显示名称",
       "displayNameHint": "留空以使用默认名称",
       "subOptions": "支付选项",
@@ -1428,7 +1457,31 @@
       "noPromoGroups": "没有促销组",
       "cancelButton": "取消",
       "saveButton": "保存",
-      "notFound": "未找到支付方式"
+      "notFound": "未找到支付方式",
+      "quickAmounts": "快捷金额（₽）",
+      "quickAmountsHint": "快捷充值金额按钮。留空 — 使用默认值：{{defaults}} ₽",
+      "quickAmountsPlaceholder": "金额（卢布）",
+      "quickAmountsAdd": "添加",
+      "quickAmountsInvalid": "请输入正的卢布金额",
+      "quickAmountsLimit": "最多 10 个金额",
+      "quickAmountsRemove": "删除金额 {{value}} ₽",
+      "overpayCertTitle": "mTLS 证书（Overpay）",
+      "overpayCertValid": "✅ 有效期至 {{date}}",
+      "overpayCertExpired": "⚠️ 已于 {{date}} 过期",
+      "overpayCertUnreadable": "⚠️ 证书无法读取——密码错误或文件损坏",
+      "overpayCertMissing": "❌ 未上传证书",
+      "overpayCertEnvLockedPath": "路径已通过环境变量 OVERPAY_P12_PATH 设置——数据库中的值不会生效",
+      "overpayCertEnvLockedPassphrase": "密码已通过环境变量 OVERPAY_P12_PASSPHRASE 设置——数据库中的值不会生效",
+      "overpayCertFile": "证书文件（.p12 / .pfx）",
+      "overpayCertChooseFile": "选择文件",
+      "overpayCertPassphrase": "证书密码",
+      "overpayCertPassphrasePlaceholder": "无密码请留空",
+      "overpayCertUpload": "上传",
+      "overpayCertDelete": "删除",
+      "overpayCertConfirmDelete": "确定删除 Overpay 证书？",
+      "overpayCertFileTooLarge": "文件超过 1 MB",
+      "overpayCertUploadError": "证书上传失败",
+      "overpayCertDeleteError": "证书删除失败"
     },
     "emailTemplates": {
       "title": "邮件模板",
@@ -1448,9 +1501,14 @@
       "resetted": "模板已恢复默认",
       "testSent": "测试邮件已发送",
       "variables": "可用变量",
-      "clickToCopy": "点击复制",
-      "previewDesktopOnly": "预览仅在桌面网页版可用",
-      "previewNotAvailable": "预览不可用"
+      "editorTab": "编辑器",
+      "previewHint": "预览以示例值代替变量显示邮件。",
+      "clickToInsert": "点击插入到文本中",
+      "insertDefault": "插入默认模板",
+      "insertDefaultConfirm": "用默认模板替换当前内容？",
+      "testRecipientPlaceholder": "收件人邮箱（默认为您的邮箱）",
+      "testHint": "发送当前编辑器内容，变量将替换为示例值。",
+      "variablesCommon": "通用变量（适用于所有模板）"
     },
     "payments": {
       "title": "支付",
@@ -1738,6 +1796,8 @@
       "quickToggles": "快速开关",
       "modified": "已修改",
       "readOnly": "只读",
+      "envLocked": "在 .env 中设置",
+      "envLockedHint": "该值在 .env 文件中设置并覆盖数据库,因此无法在此处更改。若要从面板管理此设置,请从 .env 中删除该键并重启机器人。",
       "reset": "重置",
       "categoriesCount": "个分类",
       "settingsCount": "个设置",
@@ -1913,7 +1973,9 @@
         "telegramOidcClientSecret": "Client Secret"
       },
       "offlineConv": "离线转化",
-      "apiKey": "API 密钥"
+      "apiKey": "API 密钥",
+      "legalFooter": "法律页脚",
+      "legalFooterDesc": "登录页面底部的要约、隐私政策和定期付款链接"
     },
     "buttons": {
       "color": "按钮颜色",
@@ -3777,7 +3839,8 @@
         "sortOrder": "排序",
         "icon": "图标（表情）",
         "pageType": "页面类型",
-        "replacesTab": "替换标签"
+        "replacesTab": "替换标签",
+        "displayMode": "显示"
       },
       "replacesTabNone": "不替换",
       "replacesTabOptions": {
@@ -3819,6 +3882,11 @@
         "en": "英语",
         "zh": "中文",
         "fa": "波斯语"
+      },
+      "displayModes": {
+        "bot": "仅机器人",
+        "web": "仅网页",
+        "both": "机器人和网页"
       }
     },
     "bulkActions": {
@@ -3929,6 +3997,43 @@
       "trafficGbUnit": "GB",
       "selectAllSubs": "选择所有订阅",
       "deselectAllSubs": "取消选择所有订阅"
+    },
+    "legalPages": {
+      "title": "系统页面",
+      "subtitle": "规则、隐私政策、公开要约和 FAQ",
+      "open": "系统页面",
+      "tabs": {
+        "privacy": "隐私",
+        "offer": "条款",
+        "rules": "规则",
+        "faq": "FAQ"
+      },
+      "displayMode": "显示",
+      "displayModes": {
+        "bot": "仅机器人",
+        "web": "仅网页",
+        "both": "机器人和网页"
+      },
+      "displayModeLocked": "通过环境变量设置",
+      "enabled": "对用户可见",
+      "language": "内容语言",
+      "content": "内容",
+      "contentPlaceholder": "HTML 页面内容...",
+      "save": "保存",
+      "saving": "保存中...",
+      "saveError": "保存失败，请重试。",
+      "unsavedWarning": "未保存的更改将丢失。是否继续？",
+      "faqPages": "问答",
+      "addQuestion": "添加问题",
+      "newQuestion": "新问题",
+      "questionTitle": "问题",
+      "questionContent": "答案（支持 HTML）",
+      "confirmDeleteQuestion": "确定删除此问题？",
+      "noQuestions": "暂无问题",
+      "active": "已激活",
+      "moveUp": "上移",
+      "moveDown": "下移",
+      "delete": "删除"
     }
   },
   "adminUpdates": {
@@ -4790,10 +4895,15 @@
   },
   "subscriptions": {
     "buy": "购买订阅",
-    "buyAnother": "再购买一个订阅",
+    "buyAnother": "再购买",
     "browsePlans": "查看套餐并订阅",
     "empty": "您还没有订阅",
     "emptyDesc": "选择套餐以开始使用",
     "title": "我的订阅"
+  },
+  "footer": {
+    "offer": "公开要约",
+    "privacy": "隐私政策",
+    "recurrent": "定期付款"
   }
 }

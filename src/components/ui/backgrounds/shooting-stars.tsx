@@ -41,6 +41,7 @@ export default function ShootingStarsBackground({ settings }: Props) {
 
   const starColor = sanitizeColor(settings.starColor, '#9E00FF');
   const trailColor = sanitizeColor(settings.trailColor, '#2EB9DF');
+  const bgStarColor = sanitizeColor(settings.bgStarColor, '#ffffff');
   const starDensity = clampNumber(settings.starDensity, 0.00001, 0.001, 0.00015);
   const minSpeed = clampNumber(settings.minSpeed, 1, 50, 10);
   const maxSpeed = clampNumber(settings.maxSpeed, 5, 100, 30);
@@ -117,9 +118,11 @@ export default function ShootingStarsBackground({ settings }: Props) {
         }
         ctx.beginPath();
         ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(255,255,255,${opacity})`;
+        ctx.globalAlpha = opacity;
+        ctx.fillStyle = bgStarColor;
         ctx.fill();
       }
+      ctx.globalAlpha = 1;
 
       if (time - state.lastShootingTime > state.nextShootingDelay) {
         state.shootingStars.push({
@@ -166,7 +169,7 @@ export default function ShootingStarsBackground({ settings }: Props) {
         return true;
       });
     },
-    [starColor, trailColor, starDensity, minSpeed, maxSpeed],
+    [starColor, trailColor, bgStarColor, starDensity, minSpeed, maxSpeed],
   );
 
   return <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />;

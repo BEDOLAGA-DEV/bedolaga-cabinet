@@ -79,7 +79,7 @@ export function PeriodSelector({
             onClick={() => onChange(p)}
             className={`rounded-lg px-2.5 py-1 text-xs font-medium transition-colors ${
               value === p
-                ? 'bg-accent-500 text-white'
+                ? 'bg-accent-500 text-on-accent'
                 : 'bg-dark-800 text-dark-400 hover:bg-dark-700 hover:text-dark-200'
             }`}
           >

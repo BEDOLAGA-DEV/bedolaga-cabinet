@@ -79,7 +79,9 @@ function ServerSelector({
           >
             <div
               className={`flex h-5 w-5 items-center justify-center rounded ${
-                selected.includes(server.squad_uuid) ? 'bg-accent-500 text-white' : 'bg-dark-600'
+                selected.includes(server.squad_uuid)
+                  ? 'bg-accent-500 text-on-accent'
+                  : 'bg-dark-600'
               }`}
             >
               {selected.includes(server.squad_uuid) && <CheckIcon />}

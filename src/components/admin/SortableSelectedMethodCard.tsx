@@ -215,7 +215,7 @@ export function SortableSelectedMethodCard({
                         className={cn(
                           'flex h-3.5 w-3.5 items-center justify-center rounded',
                           enabled
-                            ? 'bg-accent-500 text-white'
+                            ? 'bg-accent-500 text-on-accent'
                             : 'border border-dark-600 bg-dark-700',
                         )}
                       >

@@ -40,6 +40,11 @@ export function BrandingTab({ accentColor = '#3b82f6' }: BrandingTabProps) {
     queryFn: brandingApi.getGiftEnabled,
   });
 
+  const { data: footerEnabled } = useQuery({
+    queryKey: ['footer-enabled'],
+    queryFn: brandingApi.getFooterEnabled,
+  });
+
   // Mutations
   const updateBrandingMutation = useMutation({
     mutationFn: brandingApi.updateName,
@@ -85,6 +90,13 @@ export function BrandingTab({ accentColor = '#3b82f6' }: BrandingTabProps) {
     mutationFn: (enabled: boolean) => brandingApi.updateGiftEnabled(enabled),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['gift-enabled'] });
+    },
+  });
+
+  const updateFooterMutation = useMutation({
+    mutationFn: (enabled: boolean) => brandingApi.updateFooterEnabled(enabled),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['footer-enabled'] });
     },
   });
 
@@ -168,7 +180,7 @@ export function BrandingTab({ accentColor = '#3b82f6' }: BrandingTabProps) {
                 <button
                   onClick={() => updateBrandingMutation.mutate(newName)}
                   disabled={updateBrandingMutation.isPending}
-                  className="rounded-xl bg-accent-500 px-4 py-2 text-white transition-colors hover:bg-accent-600 disabled:opacity-50"
+                  className="rounded-xl bg-accent-500 px-4 py-2 text-on-accent transition-colors hover:bg-accent-600 disabled:opacity-50"
                 >
                   <CheckIcon />
                 </button>
@@ -248,6 +260,25 @@ export function BrandingTab({ accentColor = '#3b82f6' }: BrandingTabProps) {
               checked={giftSettings?.enabled ?? false}
               onChange={() => updateGiftMutation.mutate(!(giftSettings?.enabled ?? false))}
               disabled={updateGiftMutation.isPending}
+            />
+          </div>
+
+          <div className="flex items-center justify-between rounded-xl bg-dark-700/30 p-4">
+            <div>
+              <span className="font-medium text-dark-100">
+                {t('admin.settings.legalFooter', 'Юридический футер')}
+              </span>
+              <p className="text-sm text-dark-400">
+                {t(
+                  'admin.settings.legalFooterDesc',
+                  'Ссылки на оферту/политику/рекурренты внизу страницы входа',
+                )}
+              </p>
+            </div>
+            <Toggle
+              checked={footerEnabled ?? true}
+              onChange={() => updateFooterMutation.mutate(!(footerEnabled ?? true))}
+              disabled={updateFooterMutation.isPending}
             />
           </div>
         </div>

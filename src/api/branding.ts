@@ -241,6 +241,25 @@ export const brandingApi = {
     return response.data;
   },
 
+  // Legal footer enabled (public read for the login page, admin-only update)
+  getFooterEnabled: async (): Promise<boolean> => {
+    try {
+      const response = await apiClient.get<{ enabled: boolean }>(
+        '/cabinet/branding/footer-enabled',
+      );
+      return response.data.enabled;
+    } catch {
+      return false;
+    }
+  },
+  updateFooterEnabled: async (enabled: boolean): Promise<boolean> => {
+    const response = await apiClient.patch<{ enabled: boolean }>(
+      '/cabinet/branding/footer-enabled',
+      { enabled },
+    );
+    return response.data.enabled;
+  },
+
   // Get email auth enabled (public, no auth required)
   getEmailAuthEnabled: async (): Promise<EmailAuthEnabled> => {
     try {

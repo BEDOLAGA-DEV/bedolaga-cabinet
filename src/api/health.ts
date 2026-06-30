@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { useBlockingStore } from '../store/blocking';
+import { HEALTH } from '../config/constants';
 
 /**
  * Backend liveness probe + "service unavailable" detection.
@@ -44,9 +45,9 @@ const GATEWAY_DOWN_STATUSES = new Set([502, 503, 504]);
  * proxy is up but the API upstream is dead, so it counts as NOT reachable.
  * Resolves false on a transport-level failure with no response.
  */
-export async function pingBackend(): Promise<boolean> {
+export async function pingBackend(timeoutMs: number = HEALTH.PROBE_TIMEOUT_MS): Promise<boolean> {
   try {
-    await axios.get(HEALTH_URL, { timeout: 5000 });
+    await axios.get(HEALTH_URL, { timeout: timeoutMs });
     return true;
   } catch (err) {
     if (axios.isAxiosError(err) && err.response) {
@@ -54,6 +55,22 @@ export async function pingBackend(): Promise<boolean> {
     }
     return false;
   }
+}
+
+/**
+ * Confirm a *real* outage before blanking the app. Probes with the tolerant timeout and
+ * retries once: returns true only when the backend is unreachable across all attempts. A
+ * single slow/cold-connection blip on a working backend (common on mobile / in-app webviews)
+ * must not flip the full-screen ServiceUnavailableScreen.
+ */
+async function confirmBackendDown(): Promise<boolean> {
+  for (let attempt = 0; attempt <= HEALTH.CONFIRM_RETRIES; attempt++) {
+    if (await pingBackend()) return false;
+    if (attempt < HEALTH.CONFIRM_RETRIES) {
+      await new Promise((resolve) => setTimeout(resolve, HEALTH.CONFIRM_RETRY_DELAY_MS));
+    }
+  }
+  return true;
 }
 
 let everReachedBackend = false;
@@ -99,9 +116,13 @@ export async function reportPossibleBackendDown(): Promise<void> {
   if (confirmInFlight) return;
   confirmInFlight = true;
   try {
-    const reachable = await pingBackend();
-    if (!reachable) {
-      useBlockingStore.getState().setBackendUnavailable();
+    // Confirm with a tolerant, retried probe so a single cold-connection blip on a working
+    // backend can't blank an already-loaded session.
+    if (await confirmBackendDown()) {
+      // Re-check: a concurrent request may have reached the backend during the probe.
+      if (useBlockingStore.getState().blockingType !== 'backend_unavailable') {
+        useBlockingStore.getState().setBackendUnavailable();
+      }
     }
   } finally {
     confirmInFlight = false;
@@ -110,17 +131,22 @@ export async function reportPossibleBackendDown(): Promise<void> {
 
 /**
  * Eager liveness check fired once at app launch (from main.tsx), in parallel
- * with auth bootstrap. If the backend is already down at launch this paints the
- * ServiceUnavailableScreen immediately — before the auth flow can flash the
- * /login page — even on the no-stored-token path that makes no early request.
- * No-op if the app has already reached the backend or another blocking screen
- * is showing.
+ * with auth bootstrap. If the backend is genuinely down at launch this paints the
+ * ServiceUnavailableScreen — before the auth flow can flash the /login page — even
+ * on the no-stored-token path that makes no early request.
+ *
+ * Uses the tolerant, retried confirm probe (NOT a single short-timeout ping): the old
+ * hardcoded 5s probe falsely flagged slow devices / cold mobile connections as
+ * "service unavailable" while the real 30s API requests racing alongside it would have
+ * succeeded — the exact "works on one device, not another on the same Wi-Fi" report.
+ * No-op if the app has already reached the backend or another blocking screen is showing.
  */
 export async function checkBackendOnStartup(): Promise<void> {
   if (everReachedBackend) return;
   if (useBlockingStore.getState().blockingType !== null) return;
-  const reachable = await pingBackend();
-  if (!reachable && !everReachedBackend && useBlockingStore.getState().blockingType === null) {
-    useBlockingStore.getState().setBackendUnavailable();
+  if (await confirmBackendDown()) {
+    if (!everReachedBackend && useBlockingStore.getState().blockingType === null) {
+      useBlockingStore.getState().setBackendUnavailable();
+    }
   }
 }

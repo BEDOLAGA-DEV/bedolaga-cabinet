@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { PiCaretDown } from 'react-icons/pi';
 import DOMPurify from 'dompurify';
-import { infoApi, FaqPage } from '../api/info';
+import { infoApi, FaqPage, InfoVisibility } from '../api/info';
 import { infoPagesApi } from '../api/infoPages';
 import { promoApi, LoyaltyTierInfo } from '../api/promo';
 import type { FaqItem, ReplacesTab } from '../api/infoPages';
@@ -331,6 +331,12 @@ export default function Info() {
     staleTime: 60_000,
   });
 
+  const { data: visibility } = useQuery({
+    queryKey: ['info-visibility'],
+    queryFn: infoApi.getVisibility,
+    staleTime: 60_000,
+  });
+
   // Filter to only pages that don't replace a built-in tab and don't collide with built-in IDs
   const extraPages = useMemo(
     () => (customPages ?? []).filter((p) => !p.replaces_tab && !BUILTIN_TABS.has(p.slug)),
@@ -425,20 +431,36 @@ export default function Info() {
     refetchOnMount: 'always',
   });
 
-  const builtinTabs: Array<{ id: string; label: string; icon: React.FC; emoji?: string }> = [
-    { id: 'faq', label: t('info.faq'), icon: QuestionIcon },
-    { id: 'rules', label: t('info.rules'), icon: DocumentIcon },
-    { id: 'privacy', label: t('info.privacy'), icon: ShieldIcon },
-    { id: 'offer', label: t('info.offer'), icon: DocumentIcon },
-    { id: 'loyalty', label: t('info.loyalty'), icon: StarIcon },
-  ];
+  const tabs = useMemo(() => {
+    const builtinTabs: Array<{ id: string; label: string; icon: React.FC; emoji?: string }> = [
+      { id: 'faq', label: t('info.faq'), icon: QuestionIcon },
+      { id: 'rules', label: t('info.rules'), icon: DocumentIcon },
+      { id: 'privacy', label: t('info.privacy'), icon: ShieldIcon },
+      { id: 'offer', label: t('info.offer'), icon: DocumentIcon },
+      { id: 'loyalty', label: t('info.loyalty'), icon: StarIcon },
+    ];
 
-  const customTabs = extraPages.map((p) => {
-    const label = p.title[locale] || p.title['ru'] || p.title['en'] || p.slug;
-    return { id: p.slug, label, icon: DocumentIcon, emoji: p.icon ?? undefined };
-  });
+    const visibleBuiltinTabs = builtinTabs.filter((tab) => {
+      if (tab.id === 'loyalty') return true;
+      if (tabReplacements?.[tab.id as ReplacesTab]) return true;
+      if (!visibility) return true;
+      return visibility[tab.id as keyof InfoVisibility];
+    });
 
-  const tabs = [...builtinTabs, ...customTabs];
+    const customTabs = extraPages.map((p) => {
+      const label = p.title[locale] || p.title['ru'] || p.title['en'] || p.slug;
+      return { id: p.slug, label, icon: DocumentIcon, emoji: p.icon ?? undefined };
+    });
+
+    return [...visibleBuiltinTabs, ...customTabs];
+  }, [visibility, tabReplacements, extraPages, locale, t]);
+
+  useEffect(() => {
+    if (tabs.length === 0) return;
+    if (!tabs.some((tab) => tab.id === activeTab)) {
+      setActiveTab(tabs[0].id);
+    }
+  }, [tabs, activeTab]);
 
   const toggleFaq = useCallback((id: number) => {
     setExpandedFaq((prev) => (prev === id ? null : id));
@@ -816,7 +838,7 @@ export default function Info() {
             onClick={() => setActiveTab(tab.id)}
             className={`flex min-h-[44px] shrink-0 items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${
               activeTab === tab.id
-                ? 'bg-accent-500 text-white'
+                ? 'bg-accent-500 text-on-accent'
                 : 'bg-dark-800 text-dark-300 hover:bg-dark-700'
             }`}
           >

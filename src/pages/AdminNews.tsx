@@ -273,7 +273,7 @@ export default function AdminNews() {
               haptic.buttonPress();
               navigate('/admin/news/create');
             }}
-            className="flex min-h-[44px] items-center gap-2 rounded-lg bg-accent-500 px-4 py-2.5 text-white transition-colors hover:bg-accent-600"
+            className="flex min-h-[44px] items-center gap-2 rounded-lg bg-accent-500 px-4 py-2.5 text-on-accent transition-colors hover:bg-accent-600"
             aria-label={t('news.admin.create')}
           >
             <PlusIcon />

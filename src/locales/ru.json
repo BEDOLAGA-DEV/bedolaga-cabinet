@@ -28,10 +28,9 @@
     "saving": "Сохранение...",
     "understand": "Понятно",
     "units": {
+      "tb": "ТБ",
       "gb": "ГБ",
-      "perGb": "/ГБ",
-      "days": "дн",
-      "mo": "мес"
+      "mb": "МБ"
     },
     "balance": "Баланс",
     "copied": "Скопировано",
@@ -613,8 +612,8 @@
       "unlimited": "Безлимит",
       "buyTrafficGb": "Купить {{gb}} ГБ",
       "buyUnlimited": "Купить Безлимит",
-      "manageServers": "Управление сквадами",
-      "manageServersTitle": "Управление сквадами",
+      "manageServers": "Управление локациями",
+      "manageServersTitle": "Управление локациями",
       "connectedDevices": "Подключённые устройства",
       "currentDeviceLimit": "Текущий лимит устройств",
       "decrementDevices": "Уменьшить кол-во устройств",
@@ -816,6 +815,13 @@
         "not_yet_valid": "Промокод ещё не начал действовать",
         "used": "Промокод уже использован",
         "already_used_by_user": "Вы уже использовали этот промокод",
+        "active_discount_exists": "У вас уже есть активная скидка. Сначала отключите её.",
+        "no_subscription_for_days": "Для этого промокода нужна активная или истёкшая подписка",
+        "subscription_not_found": "Подписка не найдена",
+        "not_first_purchase": "Промокод доступен только для первой покупки",
+        "daily_limit": "Слишком много активаций промокодов за сегодня",
+        "trial_subscription_exists": "У вас уже есть подписка, поэтому триал-промокод применить нельзя",
+        "trial_provisioning_failed": "Не удалось выдать триал прямо сейчас, попробуйте позже",
         "user_not_found": "Пользователь не найден",
         "server_error": "Ошибка сервера"
       },
@@ -1068,7 +1074,8 @@
     "openSupport": "Открыть поддержку",
     "contactSupport": "Для получения поддержки обратитесь к {{username}}",
     "contactUs": "Связаться с поддержкой",
-    "create_ticket": "Создать тикет"
+    "create_ticket": "Создать тикет",
+    "writeButton": "Написать"
   },
   "wheel": {
     "title": "Колесо удачи",
@@ -1142,7 +1149,7 @@
       "globalOpacity": "Прозрачность",
       "globalBlur": "Размытие",
       "categoryCSS": "CSS",
-      "categoryCanvas": "Canvas",
+      "categoryCANVAS": "Canvas",
       "categorySVG": "SVG",
       "aurora": "Aurora",
       "auroraDesc": "Северное сияние с плавными переливами",
@@ -1176,6 +1183,18 @@
       "noiseDesc": "Шумовые градиенты с движением",
       "ripple": "Ripple",
       "rippleDesc": "Волновой эффект при клике",
+      "fireflies": "Fireflies",
+      "firefliesDesc": "Дрейфующие светящиеся точки с пульсацией",
+      "snowfall": "Snowfall",
+      "snowfallDesc": "Падающий снег с ветром",
+      "starfield": "Starfield",
+      "starfieldDesc": "Полёт сквозь звёздное небо",
+      "matrixRain": "Matrix Rain",
+      "matrixRainDesc": "Падающие колонки символов",
+      "liquidGradient": "Liquid Gradient",
+      "liquidGradientDesc": "Жидкий mesh-градиент из размытых блобов",
+      "constellation": "Constellation",
+      "constellationDesc": "Частицы, связанные линиями",
       "geminiEffect": "Gemini Effect",
       "geminiEffectDesc": "SVG-эффект как на Google Gemini",
       "speed": "Скорость",
@@ -1191,6 +1210,15 @@
       "particleColor": "Цвет частиц",
       "starColor": "Цвет звёзд",
       "trailColor": "Цвет следа",
+      "bgStarColor": "Цвет фоновых звёзд",
+      "pointerColor": "Цвет курсорного блоба",
+      "beamColor": "Цвет лучей",
+      "explosionColor": "Цвет взрыва",
+      "multicolor": "Разноцветный режим",
+      "lineColor": "Цвет линий",
+      "wind": "Ветер",
+      "charset": "Набор символов",
+      "linkDistance": "Дистанция связи",
       "bgColor": "Цвет фона",
       "fillColor": "Цвет заливки",
       "color1": "Цвет 1",
@@ -1251,7 +1279,8 @@
       "referralNetwork": "Реферальная сеть",
       "news": "Новости",
       "bulkActions": "Массовые действия",
-      "infoPages": "Инфо-страницы"
+      "infoPages": "Инфо-страницы",
+      "legalPages": "Системные страницы"
     },
     "panel": {
       "title": "Панель администратора",
@@ -1556,9 +1585,14 @@
       "resetted": "Шаблон сброшен к значению по умолчанию",
       "testSent": "Тестовое письмо отправлено",
       "variables": "Доступные переменные",
-      "clickToCopy": "Нажмите для копирования",
-      "previewDesktopOnly": "Предпросмотр доступен только в веб-версии на десктопе",
-      "previewNotAvailable": "Предпросмотр недоступен"
+      "editorTab": "Редактор",
+      "previewHint": "Превью показывает письмо с примерами значений вместо переменных.",
+      "clickToInsert": "Нажмите, чтобы вставить в текст",
+      "insertDefault": "Вставить шаблон по умолчанию",
+      "insertDefaultConfirm": "Заменить текущее содержимое шаблоном по умолчанию?",
+      "testRecipientPlaceholder": "Email получателя (по умолчанию — ваш)",
+      "testHint": "Отправит текущее содержимое редактора с примерами значений вместо переменных.",
+      "variablesCommon": "Общие переменные (работают во всех шаблонах)"
     },
     "payments": {
       "title": "Платежи",
@@ -1611,12 +1645,36 @@
       "methodEnabled": "Метод включён",
       "providerNotConfigured": "Провайдер не настроен в env",
       "openUrlDirect": "Открывать страницу оплаты сразу",
-      "openUrlDirectHint": "Без панели со ссылкой: провайдер открывается внутри MiniApp/вкладки сразу после клика. После оплаты юзер возвращается на /balance/top-up/result. Для Stars/CryptoBot и других t.me/-ссылок флаг игнорируется.",
+      "openUrlDirectHint": "ВКЛ — ссылка оплаты открывается сразу, без промежуточной панели с кнопкой. ВЫКЛ — показывается кнопка «Открыть оплату». В Telegram ссылка в обоих случаях открывается во внешнем браузере (иначе оплата через банковское приложение/СБП не срабатывает), после оплаты — возврат на страницу результата. Stars/CryptoBot (t.me/-ссылки) всегда открываются нативно, флаг к ним не применяется.",
       "displayName": "Отображаемое имя",
       "displayNameHint": "Оставьте пустым для имени по умолчанию",
       "subOptions": "Варианты оплаты",
       "minAmount": "Мин. сумма (коп.)",
       "maxAmount": "Макс. сумма (коп.)",
+      "quickAmounts": "Быстрые суммы (₽)",
+      "quickAmountsHint": "Кнопки быстрого выбора суммы пополнения. Пусто — используются значения по умолчанию: {{defaults}} ₽",
+      "quickAmountsPlaceholder": "Сумма в рублях",
+      "quickAmountsAdd": "Добавить",
+      "quickAmountsInvalid": "Введите положительную сумму в рублях",
+      "quickAmountsLimit": "Не более 10 сумм",
+      "quickAmountsRemove": "Удалить сумму {{value}} ₽",
+      "overpayCertTitle": "Сертификат mTLS (Overpay)",
+      "overpayCertValid": "✅ Действует до {{date}}",
+      "overpayCertExpired": "⚠️ Срок действия истёк {{date}}",
+      "overpayCertUnreadable": "⚠️ Сертификат не читается — неверный пароль или повреждённый файл",
+      "overpayCertMissing": "❌ Сертификат не загружен",
+      "overpayCertEnvLockedPath": "Путь задан через переменную окружения OVERPAY_P12_PATH — значение из БД не применяется",
+      "overpayCertEnvLockedPassphrase": "Пароль задан через переменную окружения OVERPAY_P12_PASSPHRASE — значение из БД не применяется",
+      "overpayCertFile": "Файл сертификата (.p12 / .pfx)",
+      "overpayCertChooseFile": "Выбрать файл",
+      "overpayCertPassphrase": "Пароль сертификата",
+      "overpayCertPassphrasePlaceholder": "Пусто, если без пароля",
+      "overpayCertUpload": "Загрузить",
+      "overpayCertDelete": "Удалить",
+      "overpayCertConfirmDelete": "Удалить сертификат Overpay?",
+      "overpayCertFileTooLarge": "Файл больше 1 МБ",
+      "overpayCertUploadError": "Не удалось загрузить сертификат",
+      "overpayCertDeleteError": "Не удалось удалить сертификат",
       "conditions": "Условия отображения",
       "userTypeFilter": "Тип пользователя",
       "userTypeAll": "Все",
@@ -2020,6 +2078,8 @@
       "quickToggles": "Быстрые переключатели",
       "modified": "Изменено",
       "readOnly": "Только чтение",
+      "envLocked": "Задано в .env",
+      "envLockedHint": "Значение задано в файле .env и перекрывает базу данных — здесь его изменить нельзя. Чтобы управлять настройкой из кабинета, удалите ключ из .env и перезапустите бота.",
       "badgeDb": "БД",
       "badgeEnv": "ENV",
       "reset": "Сбросить",
@@ -2682,7 +2742,9 @@
         "MODERATION": "Модерация"
       },
       "offlineConv": "Офлайн-конверсии",
-      "apiKey": "API-ключ"
+      "apiKey": "API-ключ",
+      "legalFooter": "Юридический футер",
+      "legalFooterDesc": "Ссылки на оферту, политику и рекуррентные платежи внизу страницы входа"
     },
     "buttons": {
       "color": "Цвет кнопки",
@@ -4607,7 +4669,8 @@
         "sortOrder": "Порядок сортировки",
         "icon": "Иконка (эмодзи)",
         "pageType": "Тип страницы",
-        "replacesTab": "Заменяет таб"
+        "replacesTab": "Заменяет таб",
+        "displayMode": "Отображение"
       },
       "replacesTabNone": "Не заменяет",
       "replacesTabOptions": {
@@ -4615,6 +4678,11 @@
         "rules": "Правила",
         "privacy": "Конфиденциальность",
         "offer": "Оферта"
+      },
+      "displayModes": {
+        "bot": "Только бот",
+        "web": "Только веб",
+        "both": "Бот и веб"
       },
       "replacesTabConflict": "уже занят",
       "replacesTabWarning": "Другая страница уже заменяет этот таб. При сохранении она будет снята.",
@@ -4650,6 +4718,43 @@
         "zh": "Китайский",
         "fa": "Персидский"
       }
+    },
+    "legalPages": {
+      "title": "Системные страницы",
+      "subtitle": "Правила, политика конфиденциальности, оферта и FAQ",
+      "open": "Системные страницы",
+      "tabs": {
+        "privacy": "Политика конф.",
+        "offer": "Оферта",
+        "rules": "Правила",
+        "faq": "FAQ"
+      },
+      "displayMode": "Отображение",
+      "displayModes": {
+        "bot": "Только бот",
+        "web": "Только веб",
+        "both": "Бот и веб"
+      },
+      "displayModeLocked": "Задано через переменную окружения",
+      "enabled": "Показывать пользователям",
+      "language": "Язык контента",
+      "content": "Текст",
+      "contentPlaceholder": "HTML-текст страницы...",
+      "save": "Сохранить",
+      "saving": "Сохранение...",
+      "saveError": "Не удалось сохранить. Попробуйте ещё раз.",
+      "unsavedWarning": "Несохранённые изменения будут потеряны. Продолжить?",
+      "faqPages": "Вопросы и ответы",
+      "addQuestion": "Добавить вопрос",
+      "newQuestion": "Новый вопрос",
+      "questionTitle": "Вопрос",
+      "questionContent": "Ответ (поддерживается HTML)",
+      "confirmDeleteQuestion": "Удалить этот вопрос?",
+      "noQuestions": "Вопросов пока нет",
+      "active": "Активен",
+      "moveUp": "Переместить вверх",
+      "moveDown": "Переместить вниз",
+      "delete": "Удалить"
     }
   },
   "adminUpdates": {
@@ -5719,10 +5824,15 @@
   },
   "subscriptions": {
     "buy": "Купить подписку",
-    "buyAnother": "Купить ещё подписку",
+    "buyAnother": "Купить ещё",
     "browsePlans": "Посмотреть тарифы и купить подписку",
     "empty": "У вас пока нет подписок",
     "emptyDesc": "Выберите тариф, чтобы начать пользоваться сервисом",
     "title": "Мои подписки"
+  },
+  "footer": {
+    "offer": "Публичная оферта",
+    "privacy": "Политика конфиденциальности",
+    "recurrent": "Рекуррентные платежи"
   }
 }

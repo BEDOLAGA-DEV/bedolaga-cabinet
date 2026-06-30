@@ -1,5 +1,66 @@
 # Changelog
 
+## [1.59.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.58.0...v1.59.0) (2026-06-30)
+
+
+### Features
+
+* **cabinet:** legal footer on login + admin toggle ([984d1b0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/984d1b077616a352eb972daa02a9030545afc55e))
+
+
+### Bug Fixes
+
+* align SubscriptionRequestRecord type with Remnawave 2.8.0 ([fd5500c](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/fd5500c85badb95fce620267dff4574b7290258a))
+
+## [1.58.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.57.0...v1.58.0) (2026-06-19)
+
+
+### Features
+
+* add admin legal pages api client and display mode types ([e979aa8](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/e979aa8863e32cd141722dbc1690fac12bfedeae))
+* add display mode selector to info page editor ([04cbbb5](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/04cbbb5e5182ee3996d62356917c7786132ea8ac))
+* add system pages admin section ([0d6a85a](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/0d6a85a4f91ec07b1f87207e1502e30fbf3aeb2c))
+* **admin-tickets:** deep-link to a specific ticket from notifications ([ff0b119](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/ff0b119ebc02ecf053f568d53fc77363a31f1338))
+* **admin:** overpay certificate upload block ([f523604](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/f52360449b5888026e45b8cecf34d2a10ebb0dad))
+* **admin:** quick amounts editor in payment method settings ([bb8b823](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/bb8b823b3778ac31538cb980c7323f7ca33d212a))
+* **admin:** show common placeholders group in email template editor ([8b2501d](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/8b2501d908b17a4f5402571da778e0cb793cc934))
+* **backgrounds:** add constellation background ([510e4bd](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/510e4bd7383af7ac595f31cbe11eebbde5073792))
+* **backgrounds:** add fireflies background ([1d00ca9](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/1d00ca97e52db514083ca0a06ac54d33637b6625))
+* **backgrounds:** add liquid-gradient background ([71160c6](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/71160c670019ab7a5adaedf2beae4ea1e937d7cc))
+* **backgrounds:** add matrix-rain background ([ab91c86](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/ab91c86f81afa2166700ccc7dd9bde70a8d5ce7b))
+* **backgrounds:** add snowfall background ([e3dbc4e](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/e3dbc4e663419db99d391b43f2262af392a7528c))
+* **backgrounds:** add starfield background with depth projection ([3742f2f](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/3742f2f88df4d141ff344affed6844d6cea75815))
+* **balance:** per-method quick amounts on top-up page ([25784db](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/25784dbe181a515a3c340f086fda347f77b86031))
+* hide info tabs by display mode visibility ([39758a1](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/39758a18b04c7af2bb0d629cda69e1b978196672))
+* per-method quick amounts, system pages admin, animated backgrounds overhaul ([47119c4](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/47119c4c1fcb134a05845a71b29b6ec04648067e))
+
+
+### Bug Fixes
+
+* address review feedback on admin pages and backgrounds ([9e6372a](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/9e6372afba53cfd51db50aac0e501df83b61e8bb))
+* **admin:** gate overpay certificate block by settings permission ([ecc2d45](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/ecc2d45562b4e9ee43bf4b9b82976245ce872c8f))
+* **admin:** harden legal pages editor state handling ([515c3d7](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/515c3d73b8e60295653fbd5f0390d8e212e0a092))
+* **admin:** rework email template editor ([#667043](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/issues/667043)) ([ac75a80](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/ac75a806d93374313d8b65d77d6250c87c07a096))
+* **auth:** send Bearer token for account merge endpoints ([6721e25](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/6721e25df677caf4a13af349364eed5f1b70d85a))
+* **backgrounds:** configurable wave colors and boxes grid color with explicit multicolor mode ([725bf8d](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/725bf8df39bf71ab54a36289f40f9c2791334279))
+* **backgrounds:** expose remaining hardcoded colors in shooting-stars, meteors, gradient-animation ([f1f4281](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/f1f4281e119ca853fd12448541ac15bdb7f72f36))
+* **backgrounds:** keep constellation particles in bounds on resize ([acd0d7c](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/acd0d7c69e8252418e403c1dc97f6647c6c3756d))
+* **backgrounds:** legacy config compatibility and locale sync ([caf499a](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/caf499a824774fa0cfbb84c76a158872db58f224))
+* **backgrounds:** live speed and size updates for fireflies ([3df2ef0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/3df2ef0f39391ed182d1b71b7dbd273970b62632))
+* **backgrounds:** make beams and beams-collision colors configurable ([acbccc8](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/acbccc8af802ec239381700df80ad83dea58f3a7))
+* **backgrounds:** read aurora gradient colors and speed from settings ([66c08b5](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/66c08b5d6d1431c93473eebd923ac71729f48d65))
+* **balance:** align quick amounts edge cases with bot behavior ([9219885](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/92198854b2efbc213d7bb4a951f85f249d9c9bb2))
+* **cabinet:** equal-height StatCards so dashboard balance/referral align ([1a3236f](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/1a3236f6506ffba87d65308a99b4cc0653b0d0ad))
+* **cabinet:** harden global encoders against lone UTF-16 surrogates ([d37872f](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/d37872fd4fa80d781377fc2b2169b3af22b77394))
+* **cabinet:** Lava top-up return route + Telegram-unavailable card overflow ([d7f7bc7](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/d7f7bc7c173817812193aa00b5b2215d2c87159b))
+* **cabinet:** recover "Сервис недоступен" false-positive + top-up fixes ([16fad9f](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/16fad9f4feae4323c181f8a3c1bb33e13071f82b))
+* **connection:** stop ERR_UNKNOWN_URL_SCHEME when opening app deep links on mobile ([325e221](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/325e221e3209b430a7f5fd95df325802dae5db97))
+* guard decodeURI(Component) against lone-surrogate crash ([#667225](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/issues/667225)) ([81581f5](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/81581f5c9bdf119afb43e1b1d74ebcfa9934b86c))
+* **payments:** open_url_direct payment URL opens externally in Telegram ([#654272](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/issues/654272)) ([ce5737f](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/ce5737fcbc44030595c0dc7a3cfda92e19aa2dbf))
+* **promocode:** correct activation UX, error mapping and validity dates ([35428cc](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/35428cc27d45335c11b8999391bd8a388090fe7b))
+* **theme:** readable text on any operator palette + admin consistency pass ([7f68e2c](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/7f68e2cd5ef510faf54537e8b93c4450be854589))
+* **ui:** finish design-audit follow-ups ([9456c7f](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/9456c7f54eab9ab054472dd54cb527ec42a82571))
+
 ## [1.57.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.56.0...v1.57.0) (2026-06-05)
 
 

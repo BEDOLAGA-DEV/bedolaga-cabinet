@@ -226,7 +226,7 @@ export default function RenewSubscription() {
         <button
           onClick={() => handleRenew(selectedPeriod)}
           disabled={renewMutation.isPending}
-          className="w-full rounded-2xl bg-accent-500 py-3.5 text-base font-semibold text-white transition-colors hover:bg-accent-600 disabled:opacity-50"
+          className="w-full rounded-2xl bg-accent-500 py-3.5 text-base font-semibold text-on-accent transition-colors hover:bg-accent-600 disabled:opacity-50"
         >
           {renewMutation.isPending
             ? t('common.processing', 'Обработка...')

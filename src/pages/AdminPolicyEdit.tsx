@@ -757,7 +757,7 @@ export default function AdminPolicyEdit() {
             <button
               type="submit"
               disabled={isSaving}
-              className="rounded-lg bg-accent-500 px-4 py-2 text-white transition-colors hover:bg-accent-600 disabled:opacity-50"
+              className="rounded-lg bg-accent-500 px-4 py-2 text-on-accent transition-colors hover:bg-accent-600 disabled:opacity-50"
             >
               {isSaving ? t('admin.policies.form.saving') : t('admin.policies.form.save')}
             </button>

@@ -4,7 +4,8 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { withdrawalApi, AdminWithdrawalItem } from '../api/withdrawals';
 import { AdminBackButton } from '../components/admin';
-import { ChevronRightIcon } from '@/components/icons';
+import { ChevronRightIcon, ClockIcon, WalletIcon } from '@/components/icons';
+import { StatCard } from '@/components/stats';
 import { useCurrency } from '../hooks/useCurrency';
 import { formatDate, getWithdrawalStatusBadge, getRiskColor } from '../utils/withdrawalUtils';
 
@@ -57,20 +58,18 @@ export default function AdminWithdrawals() {
       {/* Overview Stats */}
       {data && (
         <div className="mb-6 grid grid-cols-2 gap-3">
-          <div className="rounded-xl border border-dark-700 bg-dark-800 p-4">
-            <div className="text-2xl font-bold text-warning-400">{pendingCount}</div>
-            <div className="text-sm text-dark-400">
-              {t('admin.withdrawals.overview.pendingCount')}
-            </div>
-          </div>
-          <div className="rounded-xl border border-dark-700 bg-dark-800 p-4">
-            <div className="text-2xl font-bold text-warning-400">
-              {formatWithCurrency(pendingTotal / 100, 0)}
-            </div>
-            <div className="text-sm text-dark-400">
-              {t('admin.withdrawals.overview.pendingAmount')}
-            </div>
-          </div>
+          <StatCard
+            label={t('admin.withdrawals.overview.pendingCount')}
+            value={pendingCount}
+            icon={<ClockIcon className="h-5 w-5" />}
+            tone="warning"
+          />
+          <StatCard
+            label={t('admin.withdrawals.overview.pendingAmount')}
+            value={formatWithCurrency(pendingTotal / 100, 0)}
+            icon={<WalletIcon className="h-5 w-5" />}
+            tone="warning"
+          />
         </div>
       )}
 
@@ -82,7 +81,7 @@ export default function AdminWithdrawals() {
             onClick={() => setStatusFilter(filter)}
             className={`whitespace-nowrap rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
               statusFilter === filter
-                ? 'bg-accent-500 text-white'
+                ? 'bg-accent-500 text-on-accent'
                 : 'bg-dark-800/40 text-dark-400 hover:bg-dark-700/50 hover:text-dark-200'
             }`}
           >

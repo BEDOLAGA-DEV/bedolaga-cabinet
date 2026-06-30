@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { AdminBackButton } from '../components/admin/AdminBackButton';
 import { useFocusTrap } from '../hooks/useFocusTrap';
+import { StatCard } from '@/components/stats';
 import {
   banSystemApi,
   type BanSystemStatus,
@@ -37,6 +38,8 @@ import {
   ExclamationIcon,
   BackIcon,
   XIcon,
+  ClockIcon,
+  StatusIcon,
 } from '@/components/icons';
 
 type TabType =
@@ -50,35 +53,6 @@ type TabType =
   | 'traffic'
   | 'reports'
   | 'health';
-
-interface StatCardProps {
-  title: string;
-  value: string | number;
-  subtitle?: string;
-  icon: React.ReactNode;
-  color: 'accent' | 'success' | 'warning' | 'error' | 'info';
-}
-
-function StatCard({ title, value, subtitle, icon, color }: StatCardProps) {
-  const colorClasses = {
-    accent: 'bg-accent-500/20 text-accent-400',
-    success: 'bg-success-500/20 text-success-400',
-    warning: 'bg-warning-500/20 text-warning-400',
-    error: 'bg-error-500/20 text-error-400',
-    info: 'bg-info-500/20 text-info-400',
-  };
-
-  return (
-    <div className="rounded-xl border border-dark-700 bg-dark-800/50 p-4 backdrop-blur transition-colors hover:border-dark-600">
-      <div className="mb-2 flex items-start justify-between">
-        <div className={`rounded-lg p-2 ${colorClasses[color]}`}>{icon}</div>
-      </div>
-      <div className="mb-1 text-2xl font-bold text-dark-100">{value}</div>
-      <div className="text-sm text-dark-400">{title}</div>
-      {subtitle && <div className="mt-1 text-xs text-dark-500">{subtitle}</div>}
-    </div>
-  );
-}
 
 export default function AdminBanSystem() {
   const { t } = useTranslation();
@@ -504,58 +478,58 @@ export default function AdminBanSystem() {
           {activeTab === 'dashboard' && stats && (
             <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
               <StatCard
-                title={t('banSystem.stats.activeUsers')}
+                label={t('banSystem.stats.activeUsers')}
                 value={stats.active_users}
-                subtitle={`${t('banSystem.stats.total')}: ${stats.total_users}`}
-                icon={<UsersIcon />}
-                color="success"
+                subValue={`${t('banSystem.stats.total')}: ${stats.total_users}`}
+                icon={<UsersIcon className="h-5 w-5" />}
+                tone="success"
               />
               <StatCard
-                title={t('banSystem.stats.usersOverLimit')}
+                label={t('banSystem.stats.usersOverLimit')}
                 value={stats.users_over_limit}
-                icon={<WarningIcon />}
-                color="warning"
+                icon={<WarningIcon className="h-5 w-5" />}
+                tone="warning"
               />
               <StatCard
-                title={t('banSystem.stats.activeBans')}
+                label={t('banSystem.stats.activeBans')}
                 value={stats.active_punishments}
-                subtitle={`${t('banSystem.stats.total')}: ${stats.total_punishments}`}
-                icon={<BanIcon />}
-                color="error"
+                subValue={`${t('banSystem.stats.total')}: ${stats.total_punishments}`}
+                icon={<BanIcon className="h-5 w-5" />}
+                tone="error"
               />
               <StatCard
-                title={t('banSystem.stats.nodesOnline')}
+                label={t('banSystem.stats.nodesOnline')}
                 value={`${stats.nodes_online}/${stats.nodes_total}`}
-                icon={<ServerIcon />}
-                color="accent"
+                icon={<ServerIcon className="h-5 w-5" />}
+                tone="accent"
               />
               <StatCard
-                title={t('banSystem.stats.agentsOnline')}
+                label={t('banSystem.stats.agentsOnline')}
                 value={`${stats.agents_online}/${stats.agents_total}`}
-                icon={<AgentIcon />}
-                color="info"
+                icon={<AgentIcon className="h-5 w-5" />}
+                tone="accent"
               />
               <StatCard
-                title={t('banSystem.stats.totalRequests')}
+                label={t('banSystem.stats.totalRequests')}
                 value={stats.total_requests.toLocaleString()}
                 icon={<ChartIcon className="h-5 w-5" />}
-                color="accent"
+                tone="accent"
               />
               <StatCard
-                title={t('banSystem.stats.panelStatus')}
+                label={t('banSystem.stats.panelStatus')}
                 value={
                   stats.panel_connected
                     ? t('banSystem.stats.connected')
                     : t('banSystem.stats.disconnected')
                 }
-                icon={<ServerIcon />}
-                color={stats.panel_connected ? 'success' : 'error'}
+                icon={<StatusIcon className="h-5 w-5" />}
+                tone={stats.panel_connected ? 'success' : 'error'}
               />
               <StatCard
-                title={t('banSystem.stats.uptime')}
+                label={t('banSystem.stats.uptime')}
                 value={formatUptime(stats.uptime_seconds)}
-                icon={<ChartIcon className="h-5 w-5" />}
-                color="info"
+                icon={<ClockIcon className="h-5 w-5" />}
+                tone="accent"
               />
             </div>
           )}
@@ -777,29 +751,29 @@ export default function AdminBanSystem() {
               {agents?.summary && (
                 <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
                   <StatCard
-                    title={t('banSystem.agents.online')}
+                    label={t('banSystem.agents.online')}
                     value={`${agents.summary.online_agents}/${agents.summary.total_agents}`}
-                    icon={<AgentIcon />}
-                    color="success"
+                    icon={<AgentIcon className="h-5 w-5" />}
+                    tone="success"
                   />
                   <StatCard
-                    title={t('banSystem.agents.totalSent')}
+                    label={t('banSystem.agents.totalSent')}
                     value={agents.summary.total_sent.toLocaleString()}
                     icon={<ChartIcon className="h-5 w-5" />}
-                    color="accent"
+                    tone="accent"
                   />
                   <StatCard
-                    title={t('banSystem.agents.totalDropped')}
+                    label={t('banSystem.agents.totalDropped')}
                     value={agents.summary.total_dropped.toLocaleString()}
-                    icon={<WarningIcon />}
-                    color="warning"
+                    icon={<WarningIcon className="h-5 w-5" />}
+                    tone="warning"
                   />
                   <StatCard
-                    title={t('banSystem.agents.healthy')}
+                    label={t('banSystem.agents.healthy')}
                     value={agents.summary.healthy_count}
-                    subtitle={`${t('banSystem.agents.warning')}: ${agents.summary.warning_count}, ${t('banSystem.agents.critical')}: ${agents.summary.critical_count}`}
-                    icon={<AgentIcon />}
-                    color="info"
+                    subValue={`${t('banSystem.agents.warning')}: ${agents.summary.warning_count}, ${t('banSystem.agents.critical')}: ${agents.summary.critical_count}`}
+                    icon={<AgentIcon className="h-5 w-5" />}
+                    tone="accent"
                   />
                 </div>
               )}
@@ -952,10 +926,10 @@ export default function AdminBanSystem() {
               {/* Traffic Stats */}
               <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
                 <StatCard
-                  title={t('banSystem.traffic.enabled')}
+                  label={t('banSystem.traffic.enabled')}
                   value={traffic.enabled ? t('common.yes') : t('common.no')}
-                  icon={<TrafficIcon />}
-                  color={traffic.enabled ? 'success' : 'warning'}
+                  icon={<TrafficIcon className="h-5 w-5" />}
+                  tone={traffic.enabled ? 'success' : 'warning'}
                 />
               </div>
 
@@ -1086,16 +1060,16 @@ export default function AdminBanSystem() {
                   {/* Report Stats */}
                   <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
                     <StatCard
-                      title={t('banSystem.reports.currentUsers')}
+                      label={t('banSystem.reports.currentUsers')}
                       value={report.current_users}
-                      icon={<UsersIcon />}
-                      color="accent"
+                      icon={<UsersIcon className="h-5 w-5" />}
+                      tone="accent"
                     />
                     <StatCard
-                      title={t('banSystem.reports.currentIps')}
+                      label={t('banSystem.reports.currentIps')}
                       value={report.current_ips}
-                      icon={<ServerIcon />}
-                      color="info"
+                      icon={<ServerIcon className="h-5 w-5" />}
+                      tone="accent"
                     />
                   </div>
 

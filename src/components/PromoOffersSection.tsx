@@ -118,9 +118,21 @@ export default function PromoOffersSection({ className = '' }: PromoOffersSectio
     },
   });
 
-  // Deactivate discount mutation
+  // Deactivate discount mutation.
+  // A discount granted by a PROMOCODE must be turned off via the dedicated route
+  // (POST /cabinet/promocode/deactivate-discount), which also rolls back the promocode
+  // usage (deletes the PromoCodeUse, decrements current_uses, strips the promo group) so
+  // the user can re-activate it later. The plain clearActiveDiscount route only zeroes
+  // the discount fields and is correct for admin/offer-sourced discounts.
   const deactivateMutation = useMutation({
-    mutationFn: promoApi.clearActiveDiscount,
+    mutationFn: async () => {
+      const source = activeDiscount?.source ?? '';
+      if (source.startsWith('promocode:')) {
+        await promoApi.deactivateDiscount();
+      } else {
+        await promoApi.clearActiveDiscount();
+      }
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['active-discount'] });
       queryClient.invalidateQueries({ queryKey: ['promo-offers'] });
@@ -131,8 +143,14 @@ export default function PromoOffersSection({ className = '' }: PromoOffersSectio
       setTimeout(() => setSuccessMessage(null), 5000);
     },
     onError: (error: unknown) => {
-      const axiosErr = error as { response?: { data?: { detail?: string } } };
-      setErrorMessage(axiosErr.response?.data?.detail || t('promo.deactivate.error'));
+      // detail may be a plain string (clearActiveDiscount route) or a structured
+      // { code, message } object (deactivate-discount route). Handle both.
+      const axiosErr = error as {
+        response?: { data?: { detail?: string | { message?: string } } };
+      };
+      const detail = axiosErr.response?.data?.detail;
+      const message = typeof detail === 'string' ? detail : detail?.message;
+      setErrorMessage(message || t('promo.deactivate.error'));
 
       setTimeout(() => setErrorMessage(null), 5000);
     },

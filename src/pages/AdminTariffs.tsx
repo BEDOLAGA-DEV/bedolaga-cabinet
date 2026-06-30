@@ -307,7 +307,7 @@ export default function AdminTariffs() {
             </button>
           )}
           <div>
-            <h1 className="text-xl font-semibold text-dark-100">{t('admin.tariffs.title')}</h1>
+            <h1 className="text-xl font-bold text-dark-100">{t('admin.tariffs.title')}</h1>
             <p className="text-sm text-dark-400">{t('admin.tariffs.subtitle')}</p>
           </div>
         </div>
@@ -328,7 +328,7 @@ export default function AdminTariffs() {
           )}
           <button
             onClick={() => navigate('/admin/tariffs/create')}
-            className="flex items-center justify-center gap-2 rounded-lg bg-accent-500 px-4 py-2 text-white transition-colors hover:bg-accent-600"
+            className="flex items-center justify-center gap-2 rounded-lg bg-accent-500 px-4 py-2 text-on-accent transition-colors hover:bg-accent-600"
           >
             <PlusIcon />
             {t('admin.tariffs.create')}

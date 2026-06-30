@@ -5,7 +5,16 @@ import { useTranslation } from 'react-i18next';
 import { promocodesApi, PromoGroup } from '../api/promocodes';
 import { usePlatform } from '../platform/hooks/usePlatform';
 import { useFocusTrap } from '../hooks/useFocusTrap';
-import { BackIcon, PlusIcon, EditIcon, TrashIcon, UsersIcon } from '@/components/icons';
+import {
+  BackIcon,
+  PlusIcon,
+  EditIcon,
+  TrashIcon,
+  UsersIcon,
+  TagIcon,
+  BoltIcon,
+} from '@/components/icons';
+import { StatCard } from '@/components/stats';
 
 export default function AdminPromoGroups() {
   const { t } = useTranslation();
@@ -56,7 +65,7 @@ export default function AdminPromoGroups() {
         </div>
         <button
           onClick={() => navigate('/admin/promo-groups/create')}
-          className="flex items-center justify-center gap-2 rounded-lg bg-accent-500 px-4 py-2 text-white transition-colors hover:bg-accent-600"
+          className="flex items-center justify-center gap-2 rounded-lg bg-accent-500 px-4 py-2 text-on-accent transition-colors hover:bg-accent-600"
         >
           <PlusIcon />
           {t('admin.promoGroups.addGroup')}
@@ -66,22 +75,24 @@ export default function AdminPromoGroups() {
       {/* Stats */}
       {groups.length > 0 && (
         <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
-          <div className="rounded-xl border border-dark-700 bg-dark-800 p-4">
-            <div className="text-2xl font-bold text-dark-100">{groups.length}</div>
-            <div className="text-xs text-dark-400">{t('admin.promoGroups.stats.total')}</div>
-          </div>
-          <div className="rounded-xl border border-dark-700 bg-dark-800 p-4">
-            <div className="text-2xl font-bold text-accent-400">
-              {groups.reduce((sum, g) => sum + g.members_count, 0)}
-            </div>
-            <div className="text-xs text-dark-400">{t('admin.promoGroups.stats.members')}</div>
-          </div>
-          <div className="rounded-xl border border-dark-700 bg-dark-800 p-4">
-            <div className="text-2xl font-bold text-warning-400">
-              {groups.filter((g) => g.auto_assign_total_spent_kopeks).length}
-            </div>
-            <div className="text-xs text-dark-400">{t('admin.promoGroups.stats.autoAssign')}</div>
-          </div>
+          <StatCard
+            label={t('admin.promoGroups.stats.total')}
+            value={groups.length}
+            icon={<TagIcon className="h-5 w-5" />}
+            tone="neutral"
+          />
+          <StatCard
+            label={t('admin.promoGroups.stats.members')}
+            value={groups.reduce((sum, g) => sum + g.members_count, 0)}
+            icon={<UsersIcon className="h-5 w-5" />}
+            tone="accent"
+          />
+          <StatCard
+            label={t('admin.promoGroups.stats.autoAssign')}
+            value={groups.filter((g) => g.auto_assign_total_spent_kopeks).length}
+            icon={<BoltIcon className="h-5 w-5" />}
+            tone="warning"
+          />
         </div>
       )}
 

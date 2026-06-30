@@ -68,7 +68,7 @@ export default function AdminPartnerCampaignAssign() {
           </div>
           <button
             onClick={() => navigate(`/admin/campaigns/create?partnerId=${userId}`)}
-            className="mt-2 w-full rounded-lg bg-accent-500 px-4 py-3 font-medium text-white transition-colors hover:bg-accent-600"
+            className="mt-2 w-full rounded-lg bg-accent-500 px-4 py-3 font-medium text-on-accent transition-colors hover:bg-accent-600"
           >
             {t('admin.partnerDetail.campaigns.createNew')}
           </button>

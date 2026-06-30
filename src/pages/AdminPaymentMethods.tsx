@@ -218,7 +218,7 @@ export default function AdminPaymentMethods() {
             </button>
           )}
           <div>
-            <h1 className="text-2xl font-bold text-dark-50">{t('admin.paymentMethods.title')}</h1>
+            <h1 className="text-xl font-bold text-dark-100">{t('admin.paymentMethods.title')}</h1>
             <p className="text-sm text-dark-400">{t('admin.paymentMethods.description')}</p>
           </div>
         </div>

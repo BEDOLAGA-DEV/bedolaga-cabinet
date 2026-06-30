@@ -4,12 +4,11 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useBlockingStore } from '../../store/blocking';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { pingBackend, hasEverReachedBackend } from '../../api/health';
+import { HEALTH } from '../../config/constants';
 import { CloudWarningIcon, RestartIcon } from '@/components/icons';
 import { Button } from '@/components/primitives';
 import { cn } from '@/lib/utils';
 import BlockingShell from './BlockingShell';
-
-const POLL_INTERVAL_MS = 5000;
 
 /**
  * Full-screen state shown when the backend is unreachable (transport-level
@@ -54,20 +53,24 @@ export default function ServiceUnavailableScreen() {
     }
   }, [recover]);
 
-  // Auto-recovery: probe immediately on mount, then every POLL_INTERVAL_MS.
+  // Auto-recovery: probe on mount, then re-schedule after each result resolves. Self-chaining
+  // (rather than a fixed setInterval) prevents the now-longer tolerant probe from overlapping
+  // with itself.
   useEffect(() => {
     let cancelled = false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
     const tick = async () => {
       if (cancelled) return;
       if (await pingBackend()) {
         if (!cancelled) recover();
+        return;
       }
+      if (!cancelled) timer = setTimeout(tick, HEALTH.RECOVERY_POLL_INTERVAL_MS);
     };
     void tick();
-    const id = setInterval(tick, POLL_INTERVAL_MS);
     return () => {
       cancelled = true;
-      clearInterval(id);
+      if (timer) clearTimeout(timer);
     };
   }, [recover]);
 

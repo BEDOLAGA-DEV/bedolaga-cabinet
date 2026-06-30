@@ -58,7 +58,7 @@ export default function AutoLogin() {
             <button
               type="button"
               onClick={() => navigate('/login', { replace: true })}
-              className="rounded-xl bg-accent-500 px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-400"
+              className="rounded-xl bg-accent-500 px-6 py-2.5 text-sm font-medium text-on-accent transition-colors hover:bg-accent-400"
             >
               {t('auth.login', 'Login')}
             </button>

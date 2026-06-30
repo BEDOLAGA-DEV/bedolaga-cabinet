@@ -304,6 +304,12 @@ const sections: AdminSection[] = [
         permission: 'info_pages:read',
       },
       {
+        name: 'admin.nav.legalPages',
+        icon: 'file-text',
+        to: '/admin/legal-pages',
+        permission: 'info_pages:read',
+      },
+      {
         name: 'admin.nav.updates',
         icon: 'refresh',
         to: '/admin/updates',

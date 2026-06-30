@@ -54,8 +54,66 @@ function interpolateRgb(
   );
 }
 
+type Rgb = { r: number; g: number; b: number };
+
+function mixRgb(rgb1: Rgb, rgb2: Rgb, factor: number): Rgb {
+  return {
+    r: Math.round(rgb1.r + (rgb2.r - rgb1.r) * factor),
+    g: Math.round(rgb1.g + (rgb2.g - rgb1.g) * factor),
+    b: Math.round(rgb1.b + (rgb2.b - rgb1.b) * factor),
+  };
+}
+
+// WCAG relative luminance
+function relativeLuminance({ r, g, b }: Rgb): number {
+  const srgb = (v: number) => {
+    const c = v / 255;
+    return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+  };
+  return 0.2126 * srgb(r) + 0.7152 * srgb(g) + 0.0722 * srgb(b);
+}
+
+// WCAG contrast ratio between two colors
+function contrastRatio(a: Rgb, b: Rgb): number {
+  const l1 = relativeLuminance(a);
+  const l2 = relativeLuminance(b);
+  return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
+}
+
+/**
+ * Guarantee a minimum contrast for a TEXT color against its background.
+ *
+ * Operators pick arbitrary palette colors in the theme editor, and several
+ * tokens are additionally blended toward the surface (dark-500 = secondary
+ * text mixed 40% into the card color). Without a floor, hint/meta text
+ * regularly lands at a 1.5-2.5 contrast ratio and becomes unreadable.
+ * When the color already passes, it is returned untouched, so well-tuned
+ * palettes render byte-for-byte the same as before.
+ */
+function ensureReadable(fg: Rgb, towards: Rgb, bg: Rgb, minRatio: number): Rgb {
+  if (contrastRatio(fg, bg) >= minRatio) return fg;
+  for (let t = 0.1; t <= 1; t += 0.1) {
+    const mixed = mixRgb(fg, towards, t);
+    if (contrastRatio(mixed, bg) >= minRatio) return mixed;
+  }
+  return towards;
+}
+
+// Black-or-white text for a given button/badge background: pick whichever
+// side actually reads on top of it (operators may choose a light accent).
+function onColorFor(bgTriplet: string): string {
+  const [r, g, b] = bgTriplet.split(',').map((x) => Number(x.trim()));
+  const bg = { r, g, b };
+  const white = { r: 255, g: 255, b: 255 };
+  const ink = { r: 15, g: 23, b: 42 };
+  return contrastRatio(white, bg) >= contrastRatio(ink, bg) ? '255, 255, 255' : '15, 23, 42';
+}
+
 // Apply theme colors as CSS variables (RGB format for Tailwind opacity support)
-export function applyThemeColors(colors: ThemeColors): void {
+export function applyThemeColors(themeColors: ThemeColors): void {
+  // Частичный/битый ответ /branding/colors раньше ронял ВСЁ приложение в
+  // ErrorBoundary (hexToRgb(undefined)). Недостающие поля добиваем дефолтами.
+  const colors: ThemeColors = { ...DEFAULT_THEME_COLORS, ...themeColors };
   const root = document.documentElement;
 
   // Generate palettes from status colors
@@ -69,6 +127,17 @@ export function applyThemeColors(colors: ThemeColors): void {
   const darkSurfaceRgb = hexToRgb(colors.darkSurface);
   const darkTextRgb = hexToRgb(colors.darkText);
   const darkTextSecRgb = hexToRgb(colors.darkTextSecondary);
+
+  // Contrast floors: secondary text must stay readable on the card surface
+  // regardless of the operator-chosen palette (AA 4.5 for dark-400, a softer
+  // 3.5 floor for the blended hint token dark-500).
+  const darkTextSecReadable = ensureReadable(darkTextSecRgb, darkTextRgb, darkSurfaceRgb, 5.0);
+  const darkHintReadable = ensureReadable(
+    mixRgb(darkTextSecRgb, darkSurfaceRgb, 0.4),
+    darkTextRgb,
+    darkSurfaceRgb,
+    3.8,
+  );
 
   // Apply dark palette with actual user colors:
   // Text colors (light shades): 50-100 = primary text, 200-300 = mixed, 400 = secondary text
@@ -84,11 +153,14 @@ export function applyThemeColors(colors: ThemeColors): void {
   root.style.setProperty('--color-dark-300', interpolateRgb(darkTextRgb, darkTextSecRgb, 0.66));
   root.style.setProperty(
     '--color-dark-400',
-    rgbToString(darkTextSecRgb.r, darkTextSecRgb.g, darkTextSecRgb.b),
+    rgbToString(darkTextSecReadable.r, darkTextSecReadable.g, darkTextSecReadable.b),
   );
 
   // Transition colors (500-700): interpolate between secondary text and surface
-  root.style.setProperty('--color-dark-500', interpolateRgb(darkTextSecRgb, darkSurfaceRgb, 0.4));
+  root.style.setProperty(
+    '--color-dark-500',
+    rgbToString(darkHintReadable.r, darkHintReadable.g, darkHintReadable.b),
+  );
   root.style.setProperty('--color-dark-600', interpolateRgb(darkTextSecRgb, darkSurfaceRgb, 0.6));
   root.style.setProperty('--color-dark-700', interpolateRgb(darkTextSecRgb, darkSurfaceRgb, 0.8));
 
@@ -122,11 +194,23 @@ export function applyThemeColors(colors: ThemeColors): void {
   root.style.setProperty('--color-champagne-300', interpolateRgb(lightBgRgb, lightTextSecRgb, 0.2));
   root.style.setProperty('--color-champagne-400', interpolateRgb(lightBgRgb, lightTextSecRgb, 0.4));
 
-  // Transition colors (500-600): between bg and text
-  root.style.setProperty('--color-champagne-500', interpolateRgb(lightBgRgb, lightTextSecRgb, 0.6));
+  // Transition colors (500-600): between bg and text.
+  // Same contrast floors as the dark palette: champagne-600 backs dark-400
+  // (secondary text) in the light theme, champagne-500 backs dark-500 (hints).
+  const lightHintReadable = ensureReadable(
+    mixRgb(lightBgRgb, lightTextSecRgb, 0.6),
+    lightTextRgb,
+    lightSurfaceRgb,
+    3.8,
+  );
+  const lightTextSecReadable = ensureReadable(lightTextSecRgb, lightTextRgb, lightSurfaceRgb, 5.0);
+  root.style.setProperty(
+    '--color-champagne-500',
+    rgbToString(lightHintReadable.r, lightHintReadable.g, lightHintReadable.b),
+  );
   root.style.setProperty(
     '--color-champagne-600',
-    rgbToString(lightTextSecRgb.r, lightTextSecRgb.g, lightTextSecRgb.b),
+    rgbToString(lightTextSecReadable.r, lightTextSecReadable.g, lightTextSecReadable.b),
   );
 
   // Text colors (700-950): secondary to primary text
@@ -153,6 +237,13 @@ export function applyThemeColors(colors: ThemeColors): void {
     root.style.setProperty(`--color-warning-${shade}`, warningPalette[shade]);
     root.style.setProperty(`--color-error-${shade}`, errorPalette[shade]);
   }
+
+  // Readable text color on top of each status color (buttons, filled badges).
+  // Hardcoded white breaks the moment an operator picks a light accent.
+  root.style.setProperty('--color-on-accent', onColorFor(accentPalette[500]));
+  root.style.setProperty('--color-on-success', onColorFor(successPalette[500]));
+  root.style.setProperty('--color-on-warning', onColorFor(warningPalette[500]));
+  root.style.setProperty('--color-on-error', onColorFor(errorPalette[500]));
 
   // Apply semantic colors (hex for direct use)
   root.style.setProperty('--color-dark-bg', colors.darkBackground);

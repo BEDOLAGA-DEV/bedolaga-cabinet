@@ -661,7 +661,7 @@ export default function AdminTariffCreate() {
                       !selectedExternalSquad
                         ? isDaily
                           ? 'bg-warning-500 text-white'
-                          : 'bg-accent-500 text-white'
+                          : 'bg-accent-500 text-on-accent'
                         : 'bg-dark-600'
                     }`}
                   >
@@ -691,7 +691,7 @@ export default function AdminTariffCreate() {
                           isSelected
                             ? isDaily
                               ? 'bg-warning-500 text-white'
-                              : 'bg-accent-500 text-white'
+                              : 'bg-accent-500 text-on-accent'
                             : 'bg-dark-600'
                         }`}
                       >
@@ -740,7 +740,7 @@ export default function AdminTariffCreate() {
                           isSelected
                             ? isDaily
                               ? 'bg-warning-500 text-white'
-                              : 'bg-accent-500 text-white'
+                              : 'bg-accent-500 text-on-accent'
                             : 'bg-dark-600'
                         }`}
                       >
@@ -1055,7 +1055,7 @@ export default function AdminTariffCreate() {
                           isSelected
                             ? isDaily
                               ? 'bg-warning-500 text-white'
-                              : 'bg-accent-500 text-white'
+                              : 'bg-accent-500 text-on-accent'
                             : 'bg-dark-600'
                         }`}
                       >

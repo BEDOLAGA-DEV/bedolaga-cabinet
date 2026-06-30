@@ -432,7 +432,7 @@ export default function AdminRoleAssign() {
               <button
                 type="submit"
                 disabled={assignMutation.isPending || !selectedUser || !selectedRoleId}
-                className="flex items-center gap-2 rounded-lg bg-accent-500 px-5 py-2 text-white transition-colors hover:bg-accent-600 disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex items-center gap-2 rounded-lg bg-accent-500 px-5 py-2 text-on-accent transition-colors hover:bg-accent-600 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {assignMutation.isPending
                   ? t('admin.roleAssign.assigning')

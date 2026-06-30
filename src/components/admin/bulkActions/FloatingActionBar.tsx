@@ -208,7 +208,7 @@ export function FloatingActionBar({
         <div className="relative ml-auto">
           <button
             onClick={() => setOpen(!open)}
-            className="flex items-center gap-2 rounded-xl bg-accent-500 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-accent-600"
+            className="flex items-center gap-2 rounded-xl bg-accent-500 px-4 py-2 text-sm font-semibold text-on-accent transition-colors hover:bg-accent-600"
           >
             {t('common.actions')}
             <ChevronDownIcon />

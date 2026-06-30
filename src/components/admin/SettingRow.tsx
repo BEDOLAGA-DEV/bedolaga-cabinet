@@ -30,6 +30,10 @@ export function SettingRow({
   const displayName = t(`admin.settings.settingNames.${formattedKey}`, formattedKey);
   const description = setting.hint?.description ? stripHtml(setting.hint.description) : null;
 
+  // env-locked keys behave like read-only here: the .env value shadows the DB,
+  // so editing would be silently discarded by the bot. Show the value, no input.
+  const locked = setting.read_only || setting.env_locked;
+
   // Check if this is a long/complex value
   const isLongValue = (() => {
     const val = String(setting.current ?? '');
@@ -63,6 +67,15 @@ export function SettingRow({
               <span className="flex items-center gap-1 rounded-full bg-dark-600/50 px-2 py-0.5 text-xs font-medium text-dark-400">
                 <LockIcon />
                 {t('admin.settings.readOnly')}
+              </span>
+            )}
+            {setting.env_locked && !setting.read_only && (
+              <span
+                className="flex items-center gap-1 rounded-full bg-dark-600/50 px-2 py-0.5 text-xs font-medium text-dark-400"
+                title={t('admin.settings.envLockedHint')}
+              >
+                <LockIcon />
+                {t('admin.settings.envLocked')}
               </span>
             )}
           </div>
@@ -100,10 +113,17 @@ export function SettingRow({
       <div
         className={`${isLongValue ? '' : 'flex items-center justify-between gap-3'} border-t border-dark-700/30 pt-3`}
       >
-        {setting.read_only ? (
-          // Read-only display
-          <div className="flex items-center gap-2 rounded-lg bg-dark-700/30 px-4 py-2.5 text-dark-300">
-            <span className="break-all font-mono text-sm">{String(setting.current ?? '-')}</span>
+        {locked ? (
+          // Read-only / env-locked display
+          <div className="flex flex-col gap-1.5">
+            <div className="flex items-center gap-2 rounded-lg bg-dark-700/30 px-4 py-2.5 text-dark-300">
+              <span className="break-all font-mono text-sm">{String(setting.current ?? '-')}</span>
+            </div>
+            {setting.env_locked && !setting.read_only && (
+              <p className="text-xs leading-relaxed text-dark-500">
+                {t('admin.settings.envLockedHint')}
+              </p>
+            )}
           </div>
         ) : setting.type === 'bool' ? (
           // Boolean toggle
@@ -158,7 +178,7 @@ export function SettingRow({
       </div>
 
       {/* Reset button for long values - shown below */}
-      {isLongValue && setting.has_override && !setting.read_only && setting.type !== 'bool' && (
+      {isLongValue && setting.has_override && !locked && setting.type !== 'bool' && (
         <div className="mt-3 flex justify-end">
           <button
             onClick={onReset}

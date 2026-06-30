@@ -156,7 +156,7 @@ function CodeOnlySuccessState({
           'flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3.5 text-sm font-bold transition-all duration-200 active:scale-[0.98]',
           copied
             ? 'bg-success-500/20 text-success-400'
-            : 'bg-accent-500 text-white shadow-lg shadow-accent-500/25 hover:bg-accent-400',
+            : 'bg-accent-500 text-on-accent shadow-lg shadow-accent-500/25 hover:bg-accent-400',
         )}
       >
         {copied ? (
@@ -236,7 +236,7 @@ function DeliveredState({
       <button
         type="button"
         onClick={() => navigate('/')}
-        className="flex w-full items-center justify-center rounded-xl bg-accent-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-accent-400"
+        className="flex w-full items-center justify-center rounded-xl bg-accent-500 px-6 py-3 text-sm font-medium text-on-accent transition-colors hover:bg-accent-400"
       >
         {t('gift.backToDashboard', 'Back to dashboard')}
       </button>
@@ -303,7 +303,7 @@ function PendingActivationState({
       <button
         type="button"
         onClick={() => navigate('/')}
-        className="flex w-full items-center justify-center rounded-xl bg-accent-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-accent-400"
+        className="flex w-full items-center justify-center rounded-xl bg-accent-500 px-6 py-3 text-sm font-medium text-on-accent transition-colors hover:bg-accent-400"
       >
         {t('gift.backToDashboard', 'Back to dashboard')}
       </button>
@@ -335,7 +335,7 @@ function FailedState() {
       <button
         type="button"
         onClick={() => navigate('/gift')}
-        className="flex w-full items-center justify-center rounded-xl bg-accent-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-accent-400"
+        className="flex w-full items-center justify-center rounded-xl bg-accent-500 px-6 py-3 text-sm font-medium text-on-accent transition-colors hover:bg-accent-400"
       >
         {t('gift.tryAgain', 'Try again')}
       </button>
@@ -372,7 +372,7 @@ function PollErrorState() {
       <button
         type="button"
         onClick={() => navigate('/')}
-        className="flex w-full items-center justify-center rounded-xl bg-accent-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-accent-400"
+        className="flex w-full items-center justify-center rounded-xl bg-accent-500 px-6 py-3 text-sm font-medium text-on-accent transition-colors hover:bg-accent-400"
       >
         {t('gift.backToDashboard', 'Back to dashboard')}
       </button>
@@ -406,7 +406,7 @@ function PollTimedOutState({ onRetry }: { onRetry: () => void }) {
       <button
         type="button"
         onClick={onRetry}
-        className="rounded-xl bg-accent-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-accent-400"
+        className="rounded-xl bg-accent-500 px-6 py-3 text-sm font-medium text-on-accent transition-colors hover:bg-accent-400"
       >
         {t('gift.retry', 'Retry')}
       </button>
@@ -436,7 +436,7 @@ function NoTokenState() {
       <button
         type="button"
         onClick={() => navigate('/gift')}
-        className="rounded-xl bg-accent-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-accent-400"
+        className="rounded-xl bg-accent-500 px-6 py-3 text-sm font-medium text-on-accent transition-colors hover:bg-accent-400"
       >
         {t('gift.backToGift', 'Go back')}
       </button>
