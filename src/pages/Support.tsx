@@ -15,6 +15,7 @@ import { staggerContainer, staggerItem } from '@/components/motion/transitions';
 import { ChatIcon, CloseIcon, ImageIcon, PlusIcon, SendIcon } from '@/components/icons';
 import { usePlatform } from '@/platform';
 import { linkifyText } from '../utils/linkify';
+import { InfoIcon } from '@/components/icons';
 
 const log = logger.createLogger('Support');
 
@@ -376,6 +377,27 @@ export default function Support() {
           </Card>
         </motion.div>
       )}
+
+      {/* FAQ Link */}
+      <motion.div variants={staggerItem}>
+        <Card className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-dark-800">
+              <InfoIcon className="h-5 w-5 text-dark-400" />
+            </div>
+            <div>
+              <div className="text-sm font-medium text-dark-100">Часто задаваемые вопросы</div>
+              <div className="text-xs text-dark-400">База знаний сервиса</div>
+            </div>
+          </div>
+          <Button
+            variant="secondary"
+            onClick={() => openLink('https://berlin-connection.ru/faq/qa.html')}
+          >
+            Открыть FAQ
+          </Button>
+        </Card>
+      </motion.div>
 
       <motion.div variants={staggerItem} className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Tickets List */}

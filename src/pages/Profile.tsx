@@ -756,6 +756,41 @@ export default function Profile() {
           )}
         </Card>
       </motion.div>
+
+      {/* ─── Документы ─── */}
+      <motion.div variants={staggerItem}>
+        <Card className="p-6">
+          <h2 className="mb-4 text-lg font-semibold text-dark-50">Документы</h2>
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+            <a
+              href="https://berlin-connection.ru/docs/docs.html#agreement"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-dark-400 transition-colors hover:text-dark-200"
+            >
+              Пользовательское соглашение
+            </a>
+            <span className="text-dark-700">·</span>
+            <a
+              href="https://berlin-connection.ru/docs/docs.html#policy"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-dark-400 transition-colors hover:text-dark-200"
+            >
+              Политика конфиденциальности
+            </a>
+            <span className="text-dark-700">·</span>
+            <a
+              href="https://berlin-connection.ru/docs/docs.html#soglasie"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-dark-400 transition-colors hover:text-dark-200"
+            >
+              Согласие на обработку ПДн
+            </a>
+          </div>
+        </Card>
+      </motion.div>
     </motion.div>
   );
 }
