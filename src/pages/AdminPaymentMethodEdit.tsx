@@ -232,6 +232,7 @@ export default function AdminPaymentMethodEdit() {
   // Local state for editing
   const [isEnabled, setIsEnabled] = useState(false);
   const [customName, setCustomName] = useState('');
+  const [customDescription, setCustomDescription] = useState('');
   const [subOptions, setSubOptions] = useState<Record<string, boolean>>({});
   const [minAmount, setMinAmount] = useState<number | ''>('');
   const [maxAmount, setMaxAmount] = useState<number | ''>('');
@@ -249,6 +250,7 @@ export default function AdminPaymentMethodEdit() {
     if (config) {
       setIsEnabled(config.is_enabled);
       setCustomName(config.display_name || '');
+      setCustomDescription(config.description || '');
       setSubOptions(config.sub_options || {});
       setMinAmount(config.min_amount_kopeks ?? '');
       setMaxAmount(config.max_amount_kopeks ?? '');
@@ -288,6 +290,13 @@ export default function AdminPaymentMethodEdit() {
       data.display_name = customName.trim();
     } else {
       data.reset_display_name = true;
+    }
+
+    // Description
+    if (customDescription.trim()) {
+      data.description = customDescription.trim();
+    } else {
+      data.reset_description = true;
     }
 
     // Sub-options
@@ -475,6 +484,22 @@ export default function AdminPaymentMethodEdit() {
           />
           <p className="mt-1 text-xs text-dark-500">
             {t('admin.paymentMethods.displayNameHint')}: {config.default_display_name}
+          </p>
+        </div>
+
+        {/* Description */}
+        <div>
+          <label className="mb-2 block text-sm font-medium text-dark-300">
+            {t('admin.paymentMethods.description', 'Описание')}
+          </label>
+          <textarea
+            value={customDescription}
+            onChange={(e) => setCustomDescription(e.target.value)}
+            rows={2}
+            className="input"
+          />
+          <p className="mt-1 text-xs text-dark-500">
+            {t('admin.paymentMethods.descriptionHint', 'Текст под названием метода. Пусто — текст по умолчанию')}
           </p>
         </div>
 
