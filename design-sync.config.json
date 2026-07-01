@@ -1,0 +1,52 @@
+{
+  "pkg": "cabinet-frontend",
+  "globalName": "BedolagaCabinet",
+  "projectId": "e7848549-7665-43da-a3bd-1a4a0c01f6b2",
+  "shape": "package",
+  "srcDir": "src",
+  "cssEntry": "cabinet-dist/assets/index-DIzzeqs4.css",
+  "docsDir": ".design-sync/docs",
+  "provider": { "component": "PlatformProvider" },
+  "overrides": {
+    "Dialog": { "cardMode": "single", "viewport": "480x460" },
+    "Popover": { "cardMode": "single", "viewport": "400x320" },
+    "DropdownMenu": { "cardMode": "single", "viewport": "380x400" },
+    "Select": { "cardMode": "single", "viewport": "380x380" },
+    "Tooltip": { "cardMode": "single", "viewport": "340x220" },
+    "Sheet": { "cardMode": "single", "viewport": "420x520" },
+    "Command": { "cardMode": "single", "viewport": "480x420" }
+  },
+  "extraFonts": [".design-sync/fonts/fonts.css"],
+  "dtsPropsFor": {
+    "Card": "  children: React.ReactNode;\n  asChild?: boolean;\n  haptic?: boolean;\n  size?: \"sm\" | \"md\" | \"lg\" | \"xl\";\n  variant?: \"default\" | \"glass\" | \"solid\" | \"outline\";\n  interactive?: boolean;\n  glow?: boolean;\n  className?: string;\n  style?: React.CSSProperties;\n  onClick?: React.MouseEventHandler<HTMLDivElement>;",
+    "Spinner": "  className?: string;",
+    "StatCard": "  label: string;\n  value: React.ReactNode;\n  icon?: React.ReactNode;\n  change?: { value: number; label?: string };\n  trend?: \"up\" | \"down\" | \"neutral\";\n  loading?: boolean;\n  size?: \"sm\" | \"md\" | \"lg\" | \"xl\";\n  variant?: \"default\" | \"glass\" | \"solid\" | \"outline\";\n  className?: string;",
+    "Sheet": "  isOpen: boolean;\n  onClose: () => void;\n  /** Snap points as fractions of viewport height (0-1) */\n  snapPoints?: number[];\n  /** Initial snap point index */\n  initialSnap?: number;\n  closeOnDragDown?: boolean;\n  closeThreshold?: number;\n  showHandle?: boolean;\n  closeOnBackdropClick?: boolean;\n  closeOnEscape?: boolean;\n  className?: string;\n  contentClassName?: string;\n  /** Title shown in the header */\n  title?: string;\n  children: React.ReactNode;",
+    "AnimatedCheckmark": "  className?: string;",
+    "AnimatedCrossmark": "  className?: string;",
+    "DropdownMenu": "  children: React.ReactNode;\n  open?: boolean;\n  defaultOpen?: boolean;\n  onOpenChange?: (open: boolean) => void;\n  modal?: boolean;\n  dir?: \"ltr\" | \"rtl\";",
+    "Popover": "  children: React.ReactNode;\n  open?: boolean;\n  defaultOpen?: boolean;\n  onOpenChange?: (open: boolean) => void;\n  modal?: boolean;",
+    "Select": "  children: React.ReactNode;\n  value?: string;\n  defaultValue?: string;\n  onValueChange?: (value: string) => void;\n  open?: boolean;\n  defaultOpen?: boolean;\n  onOpenChange?: (open: boolean) => void;\n  disabled?: boolean;\n  name?: string;\n  required?: boolean;\n  dir?: \"ltr\" | \"rtl\";",
+    "Tooltip": "  children: React.ReactNode;\n  open?: boolean;\n  defaultOpen?: boolean;\n  onOpenChange?: (open: boolean) => void;\n  delayDuration?: number;\n  disableHoverableContent?: boolean;"
+  },
+  "componentSrcMap": {
+    "Button": "src/components/primitives/Button/Button.tsx",
+    "Command": "src/components/primitives/Command/Command.tsx",
+    "Dialog": "src/components/primitives/Dialog/Dialog.tsx",
+    "DropdownMenu": "src/components/primitives/DropdownMenu/DropdownMenu.tsx",
+    "Popover": "src/components/primitives/Popover/Popover.tsx",
+    "Select": "src/components/primitives/Select/Select.tsx",
+    "Sheet": "src/components/primitives/Sheet/Sheet.tsx",
+    "Switch": "src/components/primitives/Switch/Switch.tsx",
+    "Tooltip": "src/components/primitives/Tooltip/Tooltip.tsx",
+    "Card": "src/components/data-display/Card/Card.tsx",
+    "StatCard": "src/components/data-display/StatCard/StatCard.tsx",
+    "AnimatedCheckmark": "src/components/ui/AnimatedCheckmark.tsx",
+    "AnimatedCrossmark": "src/components/ui/AnimatedCrossmark.tsx",
+    "BentoCard": "src/components/ui/BentoCard.tsx",
+    "BentoSkeleton": "src/components/ui/BentoSkeleton.tsx",
+    "Skeleton": "src/components/ui/Skeleton.tsx",
+    "Spinner": "src/components/ui/Spinner.tsx",
+    "HoverBorderGradient": "src/components/ui/hover-border-gradient.tsx"
+  }
+}
