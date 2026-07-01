@@ -30,6 +30,8 @@ export function useHostGuard() {
   const location = useLocation();
 
   useEffect(() => {
+    if (import.meta.env.DEV) return;
+
     const cabinetHost = import.meta.env.VITE_CABINET_HOST;
     if (!cabinetHost) return;
 

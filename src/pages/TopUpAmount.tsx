@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams, useSearchParams } from 'react-router';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 
 import { balanceApi } from '../api/balance';
@@ -17,32 +17,6 @@ import { useAuthStore } from '../store/auth';
 import { isValidEmail } from '../utils/validation';
 
 // Icons
-const StarIcon = () => (
-  <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-  </svg>
-);
-
-const CardIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"
-    />
-  </svg>
-);
-
-const CryptoIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125"
-    />
-  </svg>
-);
-
 const SparklesIcon = () => (
   <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
     <path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
@@ -74,13 +48,6 @@ const CheckIcon = () => (
     <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
   </svg>
 );
-
-const getMethodIcon = (methodId: string) => {
-  const id = methodId.toLowerCase();
-  if (id.includes('stars')) return <StarIcon />;
-  if (id.includes('crypto') || id.includes('ton') || id.includes('usdt')) return <CryptoIcon />;
-  return <CardIcon />;
-};
 
 const getPreferredOptionId = (options?: PaymentMethod['options']) => {
   if (!options || options.length === 0) return null;
@@ -138,9 +105,12 @@ export default function TopUpAmount() {
     ? parseFloat(searchParams.get('amount')!)
     : undefined;
 
-  // Get method from cached payment-methods query
-  const cachedMethods = queryClient.getQueryData<PaymentMethod[]>(['payment-methods']);
-  const method = cachedMethods?.find((m) => m.id === methodId);
+  const { data: paymentMethods, isLoading: methodsLoading } = useQuery({
+    queryKey: ['payment-methods'],
+    queryFn: balanceApi.getPaymentMethods,
+    initialData: () => queryClient.getQueryData<PaymentMethod[]>(['payment-methods']),
+  });
+  const method = paymentMethods?.find((m) => m.id === methodId);
 
   const handleNavigateBack = useCallback(() => {
     navigate(-1);
@@ -189,9 +159,9 @@ export default function TopUpAmount() {
     setEmail((current) => (current ? current : profileEmail));
   }, [profileEmail]);
 
-  // If method not found in cache, redirect to method selection
+  // If method not found after loading, redirect to method selection
   useEffect(() => {
-    if (cachedMethods && !method) {
+    if (paymentMethods && !method) {
       const params = new URLSearchParams();
       const amount = searchParams.get('amount');
       const rt = searchParams.get('returnTo');
@@ -200,7 +170,7 @@ export default function TopUpAmount() {
       const qs = params.toString();
       navigate(`/balance/top-up${qs ? `?${qs}` : ''}`, { replace: true });
     }
-  }, [cachedMethods, method, navigate, searchParams]);
+  }, [paymentMethods, method, navigate, searchParams]);
 
   useEffect(() => {
     if (!method?.options || method.options.length === 0) {
@@ -264,6 +234,7 @@ export default function TopUpAmount() {
         method.id,
         email.trim(),
         selectedOption || undefined,
+        returnTo || undefined,
       );
     },
     onSuccess: (data) => {
@@ -281,6 +252,7 @@ export default function TopUpAmount() {
             method_name: displayName,
             payment_id: data.payment_id,
             created_at: Date.now(),
+            return_to: returnTo || undefined,
           });
         }
 
@@ -328,7 +300,7 @@ export default function TopUpAmount() {
     return () => clearTimeout(timer);
   }, [platform]);
 
-  if (!method) {
+  if (methodsLoading || !method) {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
@@ -342,8 +314,6 @@ export default function TopUpAmount() {
   const maxRubles = method.max_amount_kopeks / 100;
   const methodKey = method.id.toLowerCase().replace(/-/g, '_');
   const isStarsMethod = methodKey.includes('stars');
-  const methodName =
-    t(`balance.paymentMethods.${methodKey}.name`, { defaultValue: '' }) || method.name;
 
   const handleSubmit = () => {
     setError(null);
@@ -438,25 +408,6 @@ export default function TopUpAmount() {
       initial="initial"
       animate="animate"
     >
-      {/* Header icon and method */}
-      <motion.div variants={staggerItem} className="flex items-center gap-4 pb-1">
-        <div
-          className={`flex h-14 w-14 items-center justify-center rounded-2xl ${
-            isStarsMethod
-              ? 'bg-gradient-to-br from-yellow-500/20 to-orange-500/20 text-yellow-400'
-              : 'bg-gradient-to-br from-accent-500/20 to-accent-600/20 text-accent-400'
-          }`}
-        >
-          <div className="flex h-7 w-7 items-center justify-center">{getMethodIcon(method.id)}</div>
-        </div>
-        <div className="flex-1">
-          <h3 className="text-lg font-bold text-dark-100">{methodName}</h3>
-          <p className="text-sm text-dark-400">
-            {formatAmount(minRubles, 0)} – {formatAmount(maxRubles, 0)} {currencySymbol}
-          </p>
-        </div>
-      </motion.div>
-
       {/* Payment options (if any) */}
       {hasOptions && orderedOptions.length > 0 && (
         <motion.div variants={staggerItem} className="space-y-2">

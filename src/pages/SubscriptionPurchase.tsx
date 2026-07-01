@@ -1,8 +1,9 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { useNavigate, useSearchParams } from 'react-router';
+import { useLocation, useNavigate, useSearchParams } from 'react-router';
 import { AxiosError } from 'axios';
+import { balanceApi } from '../api/balance';
 import { subscriptionApi } from '../api/subscription';
 import { promoApi } from '../api/promo';
 import { WebBackButton } from '../components/WebBackButton';
@@ -27,14 +28,94 @@ import {
   type PurchaseStep,
 } from '../utils/subscriptionHelpers';
 
+const PURCHASE_RESUME_KEY = 'subscription_purchase_resume';
+
+type PurchaseResumeState =
+  | {
+      mode: 'classic';
+      subscriptionId?: number;
+      selection: PurchaseSelection;
+      customName: string;
+    }
+  | {
+      mode: 'tariff';
+      subscriptionId?: number;
+      tariffId: number;
+      tariffPeriodDays?: number;
+      customDays: number;
+      customTrafficGb: number;
+      useCustomDays: boolean;
+      useCustomTraffic: boolean;
+      customName: string;
+    };
+
+function savePurchaseResumeState(state: PurchaseResumeState) {
+  try {
+    sessionStorage.setItem(PURCHASE_RESUME_KEY, JSON.stringify(state));
+  } catch {}
+}
+
+function loadPurchaseResumeState(subscriptionId?: number): PurchaseResumeState | null {
+  try {
+    const raw = sessionStorage.getItem(PURCHASE_RESUME_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as PurchaseResumeState;
+    if (parsed.subscriptionId !== subscriptionId) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function numberFromParam(value: string | null): number | undefined {
+  if (!value) return undefined;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
+}
+
+function loadPurchaseResumeStateFromUrl(
+  searchParams: URLSearchParams,
+  subscriptionId?: number,
+): PurchaseResumeState | null {
+  if (searchParams.get('purchaseMode') !== 'tariff') return null;
+
+  const tariffId = numberFromParam(searchParams.get('tariffId'));
+  if (!tariffId) return null;
+
+  return {
+    mode: 'tariff',
+    subscriptionId,
+    tariffId,
+    tariffPeriodDays: numberFromParam(searchParams.get('periodDays')),
+    customDays: numberFromParam(searchParams.get('customDays')) ?? 30,
+    customTrafficGb: numberFromParam(searchParams.get('customTrafficGb')) ?? 50,
+    useCustomDays: searchParams.get('useCustomDays') === '1',
+    useCustomTraffic: searchParams.get('useCustomTraffic') === '1',
+    customName: '',
+  };
+}
+
+function clearPurchaseResumeState() {
+  try {
+    sessionStorage.removeItem(PURCHASE_RESUME_KEY);
+  } catch {}
+}
+
 export default function SubscriptionPurchase() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const subscriptionId = searchParams.get('subscriptionId')
     ? parseInt(searchParams.get('subscriptionId')!, 10)
     : undefined;
+  const backToDashboard = searchParams.get('from') === 'dashboard';
+  const backTarget = backToDashboard
+    ? '/'
+    : subscriptionId
+      ? `/subscriptions/${subscriptionId}`
+      : '/subscriptions';
   const { formatAmount, currencySymbol } = useCurrency();
   const { isDark } = useTheme();
   const g = getGlassColors(isDark);
@@ -43,6 +124,26 @@ export default function SubscriptionPurchase() {
     kopeks === 0
       ? t('subscription.free', 'Бесплатно')
       : `${formatAmount(kopeks / 100)} ${currencySymbol}`;
+
+  const renderBalanceSummary = (balanceKopeks: number, missingAmountKopeks: number) => (
+    <div className="rounded-xl border border-dark-700/50 bg-dark-800/50 p-3 text-sm">
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-dark-400">{t('subscription.purchaseBalance')}</span>
+        <span className="font-semibold text-dark-100">{formatPrice(balanceKopeks)}</span>
+      </div>
+      {missingAmountKopeks > 0 ? (
+        <div className="mt-2 flex items-center justify-between gap-3">
+          <span className="text-warning-300">{t('subscription.purchaseMissing')}</span>
+          <span className="font-semibold text-warning-300">{formatPrice(missingAmountKopeks)}</span>
+        </div>
+      ) : (
+        <div className="mt-2 text-success-400">{t('subscription.purchaseEnoughBalance')}</div>
+      )}
+    </div>
+  );
+
+  const getPurchaseButtonText = (missingAmountKopeks: number, fallback: string) =>
+    missingAmountKopeks > 0 ? t('subscription.topUpAndContinue') : fallback;
 
   // Subscription query (shares cache with /subscription page)
   const { data: subscriptionResponse, isLoading } = useQuery({
@@ -74,11 +175,22 @@ export default function SubscriptionPurchase() {
     staleTime: 30000,
   });
 
+  const { data: paymentMethods } = useQuery({
+    queryKey: ['payment-methods'],
+    queryFn: balanceApi.getPaymentMethods,
+    staleTime: 300000,
+  });
+
   // Sales mode detection
   const isTariffsMode = purchaseOptions?.sales_mode === 'tariffs';
   const classicOptions = !isTariffsMode ? (purchaseOptions as ClassicPurchaseOptions) : null;
-  const tariffs =
-    isTariffsMode && purchaseOptions && 'tariffs' in purchaseOptions ? purchaseOptions.tariffs : [];
+  const tariffs = useMemo(
+    () =>
+      isTariffsMode && purchaseOptions && 'tariffs' in purchaseOptions
+        ? purchaseOptions.tariffs
+        : [],
+    [isTariffsMode, purchaseOptions],
+  );
 
   // Multi-tariff: check via subscriptions list query
   const { data: multiSubData } = useQuery({
@@ -87,6 +199,41 @@ export default function SubscriptionPurchase() {
     staleTime: 60_000,
   });
   const isMultiTariff = multiSubData?.multi_tariff_enabled ?? false;
+  const availablePaymentMethods = paymentMethods?.filter((method) => method.is_available) ?? [];
+  const singlePaymentMethod =
+    availablePaymentMethods.length === 1 ? availablePaymentMethods[0] : null;
+
+  const navigateToTopUp = useCallback(
+    (missingAmountKopeks: number, returnPath = `${location.pathname}${location.search}`) => {
+      const params = new URLSearchParams();
+      const missingRubles = Math.ceil(Math.max(missingAmountKopeks, 0) / 100);
+      const minRubles = singlePaymentMethod
+        ? Math.ceil(singlePaymentMethod.min_amount_kopeks / 100)
+        : 0;
+      params.set('amount', String(Math.max(missingRubles, minRubles)));
+      params.set('returnTo', returnPath);
+
+      const target = singlePaymentMethod
+        ? `/balance/top-up/${singlePaymentMethod.id}`
+        : '/balance/top-up';
+      navigate(`${target}?${params.toString()}`);
+    },
+    [location.pathname, location.search, navigate, singlePaymentMethod],
+  );
+
+  const navigateToTopUpFromError = useCallback(
+    (error: unknown, returnPath?: string) => {
+      const insufficientBalance = getInsufficientBalanceError(error);
+      if (!insufficientBalance) return false;
+
+      const missingAmount =
+        insufficientBalance.missingAmount ||
+        Math.max(insufficientBalance.required - insufficientBalance.balance, 0);
+      navigateToTopUp(missingAmount, returnPath);
+      return true;
+    },
+    [navigateToTopUp],
+  );
 
   // Helper to apply promo discount
   const applyPromoDiscount = (
@@ -155,6 +302,49 @@ export default function SubscriptionPurchase() {
   // Refs for auto-scroll
   const switchModalRef = useRef<HTMLDivElement>(null);
   const tariffPurchaseRef = useRef<HTMLDivElement>(null);
+  const resumeAppliedRef = useRef(false);
+
+  const buildTariffReturnPath = useCallback(() => {
+    if (!selectedTariff) return `${location.pathname}${location.search}`;
+
+    const params = new URLSearchParams(location.search);
+    params.set('purchaseMode', 'tariff');
+    params.set('tariffId', String(selectedTariff.id));
+
+    if (selectedTariffPeriod?.days) {
+      params.set('periodDays', String(selectedTariffPeriod.days));
+    } else {
+      params.delete('periodDays');
+    }
+
+    if (useCustomDays) {
+      params.set('useCustomDays', '1');
+      params.set('customDays', String(customDays));
+    } else {
+      params.delete('useCustomDays');
+      params.delete('customDays');
+    }
+
+    if (useCustomTraffic) {
+      params.set('useCustomTraffic', '1');
+      params.set('customTrafficGb', String(customTrafficGb));
+    } else {
+      params.delete('useCustomTraffic');
+      params.delete('customTrafficGb');
+    }
+
+    const query = params.toString();
+    return `${location.pathname}${query ? `?${query}` : ''}`;
+  }, [
+    customDays,
+    customTrafficGb,
+    location.pathname,
+    location.search,
+    selectedTariff,
+    selectedTariffPeriod,
+    useCustomDays,
+    useCustomTraffic,
+  ]);
 
   // Tariff switch
   const [switchTariffId, setSwitchTariffId] = useState<number | null>(null);
@@ -169,6 +359,23 @@ export default function SubscriptionPurchase() {
     setSelectedTariffPeriod(null);
   };
   useCloseOnSuccessNotification(handleCloseAllModals);
+
+  const navigateAfterPurchase = (purchasedSubscription?: {
+    id?: number;
+    subscription_url?: string | null;
+  }) => {
+    if (purchasedSubscription?.id && purchasedSubscription.subscription_url) {
+      navigate(`/connection?sub=${purchasedSubscription.id}`, { replace: true });
+      return;
+    }
+
+    if (purchasedSubscription?.id) {
+      navigate(`/subscriptions/${purchasedSubscription.id}`, { replace: true });
+      return;
+    }
+
+    navigate('/subscriptions', { replace: true });
+  };
 
   // Get available servers
   const getAvailableServers = useCallback(
@@ -237,6 +444,56 @@ export default function SubscriptionPurchase() {
     [selectedPeriod, selectedTraffic, selectedServers, selectedDevices],
   );
 
+  useEffect(() => {
+    if (resumeAppliedRef.current) return;
+    if (!purchaseOptions) return;
+
+    const storedResumeState = loadPurchaseResumeState(subscriptionId);
+    const resumeState =
+      storedResumeState || loadPurchaseResumeStateFromUrl(searchParams, subscriptionId);
+    if (!resumeState) return;
+
+    resumeAppliedRef.current = true;
+    if (storedResumeState) {
+      clearPurchaseResumeState();
+    }
+    setCustomName(resumeState.customName);
+
+    if (resumeState.mode === 'classic' && classicOptions) {
+      const resumedPeriod =
+        classicOptions.periods.find((period) => period.id === resumeState.selection.period_id) ||
+        classicOptions.periods.find(
+          (period) => period.period_days === resumeState.selection.period_days,
+        ) ||
+        classicOptions.periods[0];
+
+      setSelectedPeriod(resumedPeriod);
+      setSelectedTraffic(resumeState.selection.traffic_value ?? null);
+      setSelectedServers(resumeState.selection.servers ?? []);
+      setSelectedDevices(resumeState.selection.devices ?? classicOptions.selection.devices);
+      setCurrentStep('confirm');
+      setShowPurchaseForm(true);
+      return;
+    }
+
+    if (resumeState.mode === 'tariff' && tariffs.length > 0) {
+      const resumedTariff = tariffs.find((tariff) => tariff.id === resumeState.tariffId);
+      if (!resumedTariff) return;
+
+      setSelectedTariff(resumedTariff);
+      setSelectedTariffPeriod(
+        resumedTariff.periods.find((period) => period.days === resumeState.tariffPeriodDays) ||
+          resumedTariff.periods[0] ||
+          null,
+      );
+      setCustomDays(resumeState.customDays);
+      setCustomTrafficGb(resumeState.customTrafficGb);
+      setUseCustomDays(resumeState.useCustomDays);
+      setUseCustomTraffic(resumeState.useCustomTraffic);
+      setShowTariffPurchase(true);
+    }
+  }, [classicOptions, purchaseOptions, searchParams, subscriptionId, tariffs]);
+
   // Preview query (classic)
   const { data: preview, isLoading: previewLoading } = useQuery({
     queryKey: ['purchase-preview', currentSelection],
@@ -248,12 +505,18 @@ export default function SubscriptionPurchase() {
   const purchaseMutation = useMutation({
     mutationFn: () =>
       subscriptionApi.submitPurchase(currentSelection, subscriptionId, customNameForApi),
-    onSuccess: () => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['subscription', subscriptionId] });
       queryClient.invalidateQueries({ queryKey: ['purchase-options', subscriptionId] });
       queryClient.invalidateQueries({ queryKey: ['balance'] });
       queryClient.invalidateQueries({ queryKey: ['subscriptions-list'] });
-      navigate('/subscriptions', { replace: true });
+      navigateAfterPurchase(result.subscription);
+    },
+    onError: (error) => {
+      if (getInsufficientBalanceError(error)) {
+        saveClassicResumeState();
+      }
+      navigateToTopUpFromError(error);
     },
   });
 
@@ -314,11 +577,17 @@ export default function SubscriptionPurchase() {
         useCustomTraffic && selectedTariff.custom_traffic_enabled ? customTrafficGb : undefined;
       return subscriptionApi.purchaseTariff(selectedTariff.id, days, trafficGb, customNameForApi);
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['subscription'] });
       queryClient.invalidateQueries({ queryKey: ['purchase-options'] });
       queryClient.invalidateQueries({ queryKey: ['subscriptions-list'] });
-      navigate('/subscriptions', { replace: true });
+      navigateAfterPurchase(result.subscription);
+    },
+    onError: (error) => {
+      if (getInsufficientBalanceError(error)) {
+        saveTariffResumeState();
+      }
+      navigateToTopUpFromError(error, buildTariffReturnPath());
     },
   });
 
@@ -369,6 +638,51 @@ export default function SubscriptionPurchase() {
   const resetPurchase = () => {
     setShowPurchaseForm(false);
     setCurrentStep('period');
+  };
+
+  const saveClassicResumeState = () => {
+    savePurchaseResumeState({
+      mode: 'classic',
+      subscriptionId,
+      selection: currentSelection,
+      customName,
+    });
+  };
+
+  const saveTariffResumeState = () => {
+    if (!selectedTariff) return;
+
+    savePurchaseResumeState({
+      mode: 'tariff',
+      subscriptionId,
+      tariffId: selectedTariff.id,
+      tariffPeriodDays: selectedTariffPeriod?.days,
+      customDays,
+      customTrafficGb,
+      useCustomDays,
+      useCustomTraffic,
+      customName,
+    });
+  };
+
+  const handleClassicPurchaseClick = () => {
+    if (preview && !preview.can_purchase && preview.missing_amount_kopeks > 0) {
+      saveClassicResumeState();
+      navigateToTopUp(preview.missing_amount_kopeks);
+      return;
+    }
+
+    purchaseMutation.mutate();
+  };
+
+  const handleTariffPurchaseClick = (knownMissingAmountKopeks = 0) => {
+    if (knownMissingAmountKopeks > 0) {
+      saveTariffResumeState();
+      navigateToTopUp(knownMissingAmountKopeks, buildTariffReturnPath());
+      return;
+    }
+
+    tariffPurchaseMutation.mutate();
   };
 
   const getStepLabel = (step: PurchaseStep) => {
@@ -423,9 +737,7 @@ export default function SubscriptionPurchase() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <WebBackButton
-          to={subscriptionId ? `/subscriptions/${subscriptionId}` : '/subscriptions'}
-        />
+        <WebBackButton to={backTarget} />
         <h1 className="text-2xl font-bold text-dark-50 sm:text-3xl">
           {isMultiTariff && !subscriptionId
             ? t('subscription.newTariff', 'Новый тариф')
@@ -1079,19 +1391,18 @@ export default function SubscriptionPurchase() {
                       const dailyPrice = selectedTariff.daily_price_kopeks || 0;
                       const hasEnoughBalance =
                         purchaseOptions && dailyPrice <= purchaseOptions.balance_kopeks;
+                      const missingAmount =
+                        purchaseOptions && !hasEnoughBalance
+                          ? dailyPrice - purchaseOptions.balance_kopeks
+                          : 0;
 
                       return (
-                        <div className="mt-6">
-                          {purchaseOptions && !hasEnoughBalance && (
-                            <InsufficientBalancePrompt
-                              missingAmountKopeks={dailyPrice - purchaseOptions.balance_kopeks}
-                              compact
-                              className="mb-4"
-                            />
-                          )}
+                        <div className="mt-6 space-y-4">
+                          {purchaseOptions &&
+                            renderBalanceSummary(purchaseOptions.balance_kopeks, missingAmount)}
 
                           <button
-                            onClick={() => tariffPurchaseMutation.mutate()}
+                            onClick={() => handleTariffPurchaseClick(missingAmount)}
                             disabled={tariffPurchaseMutation.isPending}
                             className="btn-primary w-full py-3"
                           >
@@ -1101,9 +1412,12 @@ export default function SubscriptionPurchase() {
                                 {t('common.loading')}
                               </span>
                             ) : (
-                              t('subscription.dailyPurchase.activate', {
-                                price: formatPrice(dailyPrice),
-                              })
+                              getPurchaseButtonText(
+                                missingAmount,
+                                t('subscription.dailyPurchase.activate', {
+                                  price: formatPrice(dailyPrice),
+                                }),
+                              )
                             )}
                           </button>
 
@@ -1111,19 +1425,6 @@ export default function SubscriptionPurchase() {
                             !getInsufficientBalanceError(tariffPurchaseMutation.error) && (
                               <div className="mt-3 text-center text-sm text-error-400">
                                 {getErrorMessage(tariffPurchaseMutation.error)}
-                              </div>
-                            )}
-                          {tariffPurchaseMutation.isError &&
-                            getInsufficientBalanceError(tariffPurchaseMutation.error) && (
-                              <div className="mt-3">
-                                <InsufficientBalancePrompt
-                                  missingAmountKopeks={
-                                    getInsufficientBalanceError(tariffPurchaseMutation.error)
-                                      ?.missingAmount ||
-                                    dailyPrice - (purchaseOptions?.balance_kopeks || 0)
-                                  }
-                                  compact
-                                />
                               </div>
                             )}
                         </div>
@@ -1447,6 +1748,9 @@ export default function SubscriptionPurchase() {
                           const originalTotal = promoPeriod.original
                             ? promoPeriod.original + trafficPrice
                             : null;
+                          const missingAmount = purchaseOptions
+                            ? Math.max(totalPrice - purchaseOptions.balance_kopeks, 0)
+                            : 0;
 
                           return (
                             <>
@@ -1552,10 +1856,13 @@ export default function SubscriptionPurchase() {
                                 </div>
                               </div>
 
+                              {purchaseOptions &&
+                                renderBalanceSummary(purchaseOptions.balance_kopeks, missingAmount)}
+
                               <button
-                                onClick={() => tariffPurchaseMutation.mutate()}
+                                onClick={() => handleTariffPurchaseClick(missingAmount)}
                                 disabled={tariffPurchaseMutation.isPending}
-                                className="btn-primary w-full py-3"
+                                className="btn-primary mt-4 w-full py-3"
                               >
                                 {tariffPurchaseMutation.isPending ? (
                                   <span className="flex items-center justify-center gap-2">
@@ -1563,7 +1870,7 @@ export default function SubscriptionPurchase() {
                                     {t('common.loading')}
                                   </span>
                                 ) : (
-                                  t('subscription.purchase')
+                                  getPurchaseButtonText(missingAmount, t('subscription.purchase'))
                                 )}
                               </button>
                             </>
@@ -1574,18 +1881,6 @@ export default function SubscriptionPurchase() {
                           !getInsufficientBalanceError(tariffPurchaseMutation.error) && (
                             <div className="mt-3 text-center text-sm text-error-400">
                               {getErrorMessage(tariffPurchaseMutation.error)}
-                            </div>
-                          )}
-                        {tariffPurchaseMutation.isError &&
-                          getInsufficientBalanceError(tariffPurchaseMutation.error) && (
-                            <div className="mt-3">
-                              <InsufficientBalancePrompt
-                                missingAmountKopeks={
-                                  getInsufficientBalanceError(tariffPurchaseMutation.error)
-                                    ?.missingAmount || 0
-                                }
-                                compact
-                              />
                             </div>
                           )}
                       </div>
@@ -1957,13 +2252,11 @@ export default function SubscriptionPurchase() {
                         </div>
                       )}
 
+                      {renderBalanceSummary(preview.balance_kopeks, preview.missing_amount_kopeks)}
+
                       {!preview.can_purchase &&
-                        (preview.missing_amount_kopeks > 0 ? (
-                          <InsufficientBalancePrompt
-                            missingAmountKopeks={preview.missing_amount_kopeks}
-                            compact
-                          />
-                        ) : preview.status_message ? (
+                        preview.missing_amount_kopeks <= 0 &&
+                        (preview.status_message ? (
                           <div className="rounded-lg bg-error-500/10 px-4 py-3 text-center text-sm text-error-400">
                             {preview.status_message}
                           </div>
@@ -1997,9 +2290,12 @@ export default function SubscriptionPurchase() {
                   </button>
                 ) : (
                   <button
-                    onClick={() => purchaseMutation.mutate()}
+                    onClick={handleClassicPurchaseClick}
                     disabled={
-                      purchaseMutation.isPending || previewLoading || !preview?.can_purchase
+                      purchaseMutation.isPending ||
+                      previewLoading ||
+                      !preview ||
+                      (!preview.can_purchase && preview.missing_amount_kopeks <= 0)
                     }
                     className="btn-primary flex-1"
                   >
@@ -2009,13 +2305,16 @@ export default function SubscriptionPurchase() {
                         {t('common.loading')}
                       </span>
                     ) : (
-                      t('subscription.purchase')
+                      getPurchaseButtonText(
+                        preview?.missing_amount_kopeks ?? 0,
+                        t('subscription.purchase'),
+                      )
                     )}
                   </button>
                 )}
               </div>
 
-              {purchaseMutation.isError && (
+              {purchaseMutation.isError && !getInsufficientBalanceError(purchaseMutation.error) && (
                 <div className="text-center text-sm text-error-400">
                   {getErrorMessage(purchaseMutation.error)}
                 </div>

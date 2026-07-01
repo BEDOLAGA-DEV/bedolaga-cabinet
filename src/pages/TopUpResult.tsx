@@ -57,13 +57,27 @@ function PendingState({ amountKopeks }: { amountKopeks: number | null }) {
   );
 }
 
-function SuccessState({ amountKopeks }: { amountKopeks: number | null }) {
+function SuccessState({
+  amountKopeks,
+  returnTo,
+}: {
+  amountKopeks: number | null;
+  returnTo?: string;
+}) {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  const handleGoToBalance = useCallback(() => {
-    navigate('/balance', { replace: true });
-  }, [navigate]);
+  const handleContinue = useCallback(() => {
+    navigate(returnTo || '/balance', { replace: true });
+  }, [navigate, returnTo]);
+
+  useEffect(() => {
+    if (!returnTo) return;
+    const timeoutId = window.setTimeout(() => {
+      navigate(returnTo, { replace: true });
+    }, 900);
+    return () => window.clearTimeout(timeoutId);
+  }, [navigate, returnTo]);
 
   return (
     <motion.div
@@ -84,10 +98,10 @@ function SuccessState({ amountKopeks }: { amountKopeks: number | null }) {
 
       <button
         type="button"
-        onClick={handleGoToBalance}
+        onClick={handleContinue}
         className="flex w-full items-center justify-center gap-2 rounded-xl bg-accent-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-accent-400"
       >
-        {t('balance.topUpResult.goToBalance')}
+        {returnTo ? t('balance.topUpResult.continue') : t('balance.topUpResult.goToBalance')}
       </button>
     </motion.div>
   );
@@ -196,6 +210,7 @@ export default function TopUpResult() {
 
   // Fallback: read method from query params (for external browser redirects where sessionStorage is unavailable)
   const methodFromUrl = searchParams.get('method');
+  const returnToFromUrl = searchParams.get('returnTo') || undefined;
 
   // Detect if user arrived via redirect with success param (no polling needed)
   const redirectStatus = searchParams.get('status') || searchParams.get('payment');
@@ -296,6 +311,8 @@ export default function TopUpResult() {
 
   const resolvedFailed =
     isRedirectFailed || (effectivePayment && isFailedStatus(effectivePayment.status));
+  const resolvedReturnTo =
+    pendingInfo?.return_to || returnToFromUrl || effectivePayment?.return_to || undefined;
 
   // Clean up sessionStorage and invalidate queries when payment resolves
   useEffect(() => {
@@ -337,7 +354,7 @@ export default function TopUpResult() {
         aria-atomic="true"
       >
         {resolvedPaid ? (
-          <SuccessState amountKopeks={amountKopeks} />
+          <SuccessState amountKopeks={amountKopeks} returnTo={resolvedReturnTo} />
         ) : resolvedFailed ? (
           <FailedState amountKopeks={amountKopeks} />
         ) : pollTimedOut ? (

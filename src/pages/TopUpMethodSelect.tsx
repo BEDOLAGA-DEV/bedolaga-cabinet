@@ -1,3 +1,4 @@
+import { useCallback, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate, useSearchParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
@@ -20,15 +21,27 @@ export default function TopUpMethodSelect() {
     queryFn: balanceApi.getPaymentMethods,
   });
 
-  const handleMethodClick = (methodId: string) => {
-    const params = new URLSearchParams();
-    const amount = searchParams.get('amount');
-    const returnTo = searchParams.get('returnTo');
-    if (amount) params.set('amount', amount);
-    if (returnTo) params.set('returnTo', returnTo);
-    const qs = params.toString();
-    navigate(`/balance/top-up/${methodId}${qs ? `?${qs}` : ''}`);
-  };
+  const handleMethodClick = useCallback(
+    (methodId: string) => {
+      const params = new URLSearchParams();
+      const amount = searchParams.get('amount');
+      const returnTo = searchParams.get('returnTo');
+      if (amount) params.set('amount', amount);
+      if (returnTo) params.set('returnTo', returnTo);
+      const qs = params.toString();
+      navigate(`/balance/top-up/${methodId}${qs ? `?${qs}` : ''}`);
+    },
+    [navigate, searchParams],
+  );
+
+  useEffect(() => {
+    if (isLoading || !paymentMethods) return;
+
+    const availableMethods = paymentMethods.filter((method) => method.is_available);
+    if (availableMethods.length === 1) {
+      handleMethodClick(availableMethods[0].id);
+    }
+  }, [handleMethodClick, isLoading, paymentMethods]);
 
   return (
     <motion.div

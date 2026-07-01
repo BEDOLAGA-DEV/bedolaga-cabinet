@@ -612,6 +612,7 @@ export interface PendingPayment {
   created_at: string;
   expires_at: string | null;
   payment_url: string | null;
+  return_to?: string | null;
   user_id?: number;
   user_telegram_id?: number;
   user_username?: string | null;

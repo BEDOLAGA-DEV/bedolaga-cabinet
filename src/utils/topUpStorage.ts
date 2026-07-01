@@ -7,6 +7,7 @@ export interface TopUpPendingInfo {
   method_name: string;
   payment_id: string;
   created_at: number; // Date.now()
+  return_to?: string;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -46,6 +47,7 @@ export function loadTopUpPendingInfo(): TopUpPendingInfo | null {
       method_name: parsed.method_name as string,
       payment_id: parsed.payment_id as string,
       created_at: parsed.created_at as number,
+      return_to: typeof parsed.return_to === 'string' ? parsed.return_to : undefined,
     };
   } catch {
     return null;

@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router';
 import { useTranslation } from 'react-i18next';
+import { useQuery } from '@tanstack/react-query';
 import { useCurrency } from '../hooks/useCurrency';
+import { balanceApi } from '../api/balance';
 
 interface InsufficientBalancePromptProps {
   /** Amount missing in kopeks */
@@ -28,9 +30,19 @@ export default function InsufficientBalancePrompt({
   const location = useLocation();
   const { formatAmount, currencySymbol } = useCurrency();
   const [isPreparingTopUp, setIsPreparingTopUp] = useState(false);
+  const { data: paymentMethods, isLoading: isPaymentMethodsLoading } = useQuery({
+    queryKey: ['payment-methods'],
+    queryFn: balanceApi.getPaymentMethods,
+  });
 
   const missingRubles = missingAmountKopeks / 100;
   const displayAmount = formatAmount(missingRubles);
+  const availablePaymentMethods = paymentMethods?.filter((method) => method.is_available) ?? [];
+  const topUpTarget =
+    availablePaymentMethods.length === 1
+      ? `/balance/top-up/${availablePaymentMethods[0].id}`
+      : '/balance/top-up';
+  const isTopUpBusy = isPreparingTopUp || isPaymentMethodsLoading;
 
   const handleTopUpClick = async () => {
     if (onBeforeTopUp) {
@@ -46,7 +58,7 @@ export default function InsufficientBalancePrompt({
     const params = new URLSearchParams();
     params.set('amount', String(Math.ceil(missingRubles)));
     params.set('returnTo', location.pathname);
-    navigate(`/balance/top-up?${params.toString()}`);
+    navigate(`${topUpTarget}?${params.toString()}`);
   };
 
   if (compact) {
@@ -77,10 +89,10 @@ export default function InsufficientBalancePrompt({
         </div>
         <button
           onClick={handleTopUpClick}
-          disabled={isPreparingTopUp}
+          disabled={isTopUpBusy}
           className="btn-primary whitespace-nowrap px-3 py-1.5 text-xs"
         >
-          {isPreparingTopUp ? (
+          {isTopUpBusy ? (
             <span className="h-3 w-3 animate-spin rounded-full border border-white/30 border-t-white" />
           ) : (
             t('balance.topUp')
@@ -125,10 +137,10 @@ export default function InsufficientBalancePrompt({
       </div>
       <button
         onClick={handleTopUpClick}
-        disabled={isPreparingTopUp}
+        disabled={isTopUpBusy}
         className="btn-primary mt-4 flex w-full items-center justify-center gap-2 py-2.5"
       >
-        {isPreparingTopUp ? (
+        {isTopUpBusy ? (
           <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
         ) : (
           <>

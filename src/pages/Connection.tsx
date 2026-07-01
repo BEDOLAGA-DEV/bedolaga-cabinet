@@ -33,7 +33,7 @@ export default function Connection() {
     queryKey: ['appConfig', subId],
     queryFn: () => subscriptionApi.getAppConfig(subId),
   });
-  const { data: connectionLink, isLoading: isConnectionLinkLoading } = useQuery({
+  const { data: connectionLink } = useQuery({
     queryKey: ['connectionLink', subId],
     queryFn: () => subscriptionApi.getConnectionLink(subId),
     retry: false,
@@ -146,7 +146,7 @@ export default function Connection() {
     );
   }, [appConfig?.platforms]);
 
-  if (isLoading || isConnectionLinkLoading) {
+  if (isLoading) {
     return (
       <div className="flex flex-1 items-center justify-center py-20">
         <div className="h-10 w-10 animate-spin rounded-full border-[3px] border-accent-500/30 border-t-accent-500" />

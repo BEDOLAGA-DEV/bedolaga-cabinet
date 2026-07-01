@@ -260,6 +260,35 @@
     "title": "Личный кабинет",
     "welcome": "Добро пожаловать, {{name}}!",
     "yourSubscription": "Ваша подписка",
+    "simple": {
+      "hello": "Здравствуйте",
+      "helloWithName": "Здравствуйте, {{name}}",
+      "activeTitle": "Интернет работает",
+      "activeDescription": "Тариф {{tariff}} оплачен до {{date}}.",
+      "daysLeft": "Осталось дней",
+      "connectedDevices": "Устройства",
+      "traffic": "Трафик",
+      "trafficUsed": "{{used}} из {{limit}}",
+      "unlimitedTraffic": "без лимита",
+      "connectMain": "Подключить телефон или компьютер",
+      "renewMain": "Продлить подписку",
+      "connectDeviceMain": "Подключить устройство",
+      "chooseSubscription": "Выберите подписку",
+      "chooseForRenew": "Какую подписку продлить?",
+      "chooseForConnect": "К какой подписке подключить устройство?",
+      "checkingDevices": "Проверяем свободные места",
+      "noDeviceSlots": "Мест нет — откроем подписку",
+      "details": "Посмотреть подписку",
+      "useful": "Что ещё можно сделать",
+      "balanceTitle": "Деньги на счёте",
+      "balanceHint": "пополнить или посмотреть платежи",
+      "supportTitle": "Помощь",
+      "supportValue": "Написать",
+      "supportHint": "если что-то не работает",
+      "referralTitle": "Пригласить близких",
+      "referralHint": "и получить бонус",
+      "referralEarnings": "+{{amount}} {{currency}} доступно"
+    },
     "quickActions": "Быстрые действия",
     "viewSubscription": "Управление подпиской",
     "topUpBalance": "Пополнить баланс",
@@ -348,6 +377,10 @@
     "inactive": "Неактивна",
     "trialStatus": "Пробный период",
     "expired": "Истекла",
+    "purchaseBalance": "Ваш баланс",
+    "purchaseMissing": "Не хватает",
+    "purchaseEnoughBalance": "Денег хватает для оплаты",
+    "topUpAndContinue": "Пополнить баланс и продолжить",
     "trafficLimited": "Трафик исчерпан",
     "trafficLimitedTitle": "Трафик закончился",
     "trafficLimitedDescription": "Ваш трафик исчерпан. Докупите дополнительный трафик ниже, чтобы продолжить пользоваться VPN.",
@@ -686,6 +719,11 @@
       "codeFound": "Код найден"
     }
   },
+  "subscriptions": {
+    "buy": "Купить подписку",
+    "buySubscription": "Купить подписку",
+    "buyAnother": "Купить ещё подписку"
+  },
   "balance": {
     "title": "Баланс",
     "currentBalance": "Текущий баланс",
@@ -695,7 +733,7 @@
     "paymentMethod": "Способ оплаты",
     "paymentMethods": {
       "yookassa": {
-        "description": "Оплата через ЮKassa"
+        "description": "Оплата через ЮKassa (карта/СБП)"
       },
       "cryptobot": {
         "description": "Оплата криптовалютой через CryptoBot"
@@ -865,6 +903,7 @@
       "timeout": "Дольше, чем обычно",
       "timeoutDesc": "Обработка платежа занимает больше времени. Вы можете проверить статус ещё раз.",
       "goToBalance": "Перейти к балансу",
+      "continue": "Продолжить покупку",
       "tryAgain": "Попробовать снова"
     }
   },

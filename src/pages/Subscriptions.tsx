@@ -187,7 +187,7 @@ export default function Subscriptions() {
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                 </svg>
-                {t('subscriptions.buyAnother', 'Новый тариф')}
+                {t('subscriptions.buyAnother', 'Купить ещё подписку')}
               </button>
             )}
           </div>

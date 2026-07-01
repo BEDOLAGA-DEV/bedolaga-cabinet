@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { Navigate, useNavigate, useParams } from 'react-router';
+import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router';
 import { subscriptionApi } from '../api/subscription';
 import { useTheme } from '../hooks/useTheme';
 import { getGlassColors } from '../utils/glassTheme';
@@ -13,6 +13,8 @@ import { WebBackButton } from '../components/WebBackButton';
 export default function RenewSubscription() {
   const { subscriptionId } = useParams<{ subscriptionId: string }>();
   const subId = subscriptionId ? Number(subscriptionId) : undefined;
+  const [searchParams] = useSearchParams();
+  const backTarget = searchParams.get('from') === 'dashboard' ? '/' : `/subscriptions/${subId}`;
 
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -102,7 +104,7 @@ export default function RenewSubscription() {
     <div className="space-y-5">
       {/* Title */}
       <div className="flex items-center gap-3">
-        <WebBackButton to={`/subscriptions/${subId}`} />
+        <WebBackButton to={backTarget} />
         <div>
           <h1 className="text-2xl font-bold" style={{ color: g.text }}>
             {t('subscription.extend', 'Продлить подписку')}

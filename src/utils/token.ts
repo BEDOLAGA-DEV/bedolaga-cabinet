@@ -194,7 +194,7 @@ class TokenRefreshManager {
       const response = await axios.post<{ access_token?: string }>(
         this.refreshEndpoint,
         { refresh_token: refreshToken },
-        { headers: { 'Content-Type': 'application/json' } },
+        { headers: { 'Content-Type': 'application/json' }, timeout: 30000 },
       );
 
       const newAccessToken = response.data.access_token;

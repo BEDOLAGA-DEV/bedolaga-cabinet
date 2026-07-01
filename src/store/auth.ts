@@ -238,7 +238,17 @@ export const useAuthStore = create<AuthState>()(
                 });
               }
             }
+          } catch {
+            tokenStorage.clearTokens();
+            set({
+              accessToken: null,
+              refreshToken: null,
+              user: null,
+              isAuthenticated: false,
+              isLoading: false,
+            });
           } finally {
+            set({ isLoading: false });
             initState.isInitializing = false;
             initState.isInitialized = true;
             initState.promise = null;

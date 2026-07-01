@@ -44,6 +44,7 @@ export const balanceApi = {
     paymentMethod: string,
     email: string,
     paymentOption?: string,
+    returnTo?: string,
   ): Promise<{
     payment_id: string;
     payment_url: string;
@@ -57,6 +58,7 @@ export const balanceApi = {
       payment_method: string;
       email: string;
       payment_option?: string;
+      return_to?: string;
       language?: string;
     } = {
       amount_kopeks: amountKopeks,
@@ -65,6 +67,9 @@ export const balanceApi = {
     };
     if (paymentOption) {
       payload.payment_option = paymentOption;
+    }
+    if (returnTo) {
+      payload.return_to = returnTo;
     }
     payload.language = i18n.language || 'ru';
     const response = await apiClient.post('/cabinet/balance/topup', payload);
