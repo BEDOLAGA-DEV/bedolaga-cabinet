@@ -1,12 +1,16 @@
 {
   "pkg": "cabinet-frontend",
   "globalName": "BedolagaCabinet",
-  "projectId": "e7848549-7665-43da-a3bd-1a4a0c01f6b2",
+  "projectId": "1383e51b-e04b-45be-8192-1b982e0fc040",
   "shape": "package",
   "srcDir": "src",
   "cssEntry": "cabinet-dist/assets/index-DIzzeqs4.css",
   "docsDir": ".design-sync/docs",
   "provider": { "component": "PlatformProvider" },
+  "libOverrides": {
+    "previews.mjs": "define import.meta.env (VITE_*) so this Vite app's page previews boot",
+    "bundle.mjs": "define import.meta.env (VITE_*) in the main IIFE build ONLY — stampHeader/output contract untouched"
+  },
   "overrides": {
     "Dialog": { "cardMode": "single", "viewport": "480x460" },
     "Popover": { "cardMode": "single", "viewport": "400x320" },
@@ -47,6 +51,20 @@
     "BentoSkeleton": "src/components/ui/BentoSkeleton.tsx",
     "Skeleton": "src/components/ui/Skeleton.tsx",
     "Spinner": "src/components/ui/Spinner.tsx",
-    "HoverBorderGradient": "src/components/ui/hover-border-gradient.tsx"
+    "HoverBorderGradient": "src/components/ui/hover-border-gradient.tsx",
+    "Dashboard": "src/pages/Dashboard.tsx",
+    "Subscriptions": "src/pages/Subscriptions.tsx",
+    "Subscription": "src/pages/Subscription.tsx",
+    "SubscriptionPurchase": "src/pages/SubscriptionPurchase.tsx",
+    "Balance": "src/pages/Balance.tsx",
+    "TopUpMethodSelect": "src/pages/TopUpMethodSelect.tsx",
+    "Connection": "src/pages/Connection.tsx",
+    "Profile": "src/pages/Profile.tsx",
+    "Support": "src/pages/Support.tsx",
+    "Referral": "src/pages/Referral.tsx",
+    "Wheel": "src/pages/Wheel.tsx",
+    "Login": "src/pages/Login.tsx",
+    "PurchaseSuccess": "src/pages/PurchaseSuccess.tsx",
+    "Info": "src/pages/Info.tsx"
   }
 }

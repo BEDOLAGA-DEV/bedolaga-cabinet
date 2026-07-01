@@ -94,6 +94,51 @@
   but the panel stays translated off-screen. Not statically renderable. Ships as floor card.
 - All three remain fully importable with correct `.d.ts` + `.prompt.md`.
 
+## Pages (data-driven screens) — added in the second pass
+- Scope expanded from primitives-only to also include **14 key user pages** (src/pages/):
+  Dashboard, Subscriptions, Subscription, SubscriptionPurchase, Balance, TopUpMethodSelect,
+  Connection, Profile, Support, Referral, Wheel, Login, PurchaseSuccess, Info. They're in
+  `entry.tsx` + `cfg.componentSrcMap`, grouped under `pages/`.
+- Pages are data-driven (react-query + zustand + router). They render via a shared harness
+  **`.design-sync/page-harness.tsx`** (`PageFrame`) which each `previews/<Page>.tsx` imports.
+  PageFrame:
+  - Wraps in QueryClientProvider (OUTERMOST — ThemeColorsProvider/others call useQuery) →
+    MemoryRouter → PlatformProvider → ThemeColorsProvider → ToastProvider → `<Routes>`.
+  - Seeds the react-query cache via `setQueryData` per page (staleTime Infinity so no fetch).
+    **Query-key types matter**: `useParams` values are strings unless the page `parseInt`s
+    them (Subscription does → key uses the NUMBER 1). Without a matching `<Route path>` in the
+    harness, useParams is empty — pass `routePattern` (e.g. "/subscriptions/:subscriptionId").
+  - Seeds the auth store (mockUser), forces dark theme (`localStorage['cabinet-theme']='dark'`
+    + `.dark` class), suppresses onboarding (`localStorage['onboarding_completed']='true'`).
+  - **Neutralizes the network** (inert fetch + XMLHttpRequest) so on-mount side effects
+    (refreshUser, traffic refresh) don't leave requests pending — Playwright waits for
+    networkidle and a real axios call to the mock host would hang the capture.
+  - Wrapped-response gotcha: `getSubscription()` returns `{has_subscription, subscription}`,
+    NOT the Subscription directly — seed `['subscription', …]` with `mockSubscriptionResponse`.
+  - Reusable mocks live in the harness (mockUser, mockSubscription, mockSubscriptionResponse,
+    mockSubscriptionsList, mockTrialInfo, mockBalance, mockPaymentMethods). Extend there.
+- Provider/store/router symbols the harness needs are re-exported from `entry.tsx`
+  (QueryClient, QueryClientProvider, MemoryRouter, Routes, Route, ThemeColorsProvider,
+  ToastProvider, PlatformProvider, useAuthStore, …). They are NOT in componentSrcMap so they
+  don't become cards.
+- **Login and Connection are floor cards** (like Tooltip/DropdownMenu/Sheet). Login is deeply
+  entangled with the Telegram SDK / branding / OAuth and redirects on auth; Connection needs a
+  large nested RemnaWave `AppConfig` (platforms→apps→blocks) that's admin/server-driven. Both
+  stay fully importable. 12 of 14 pages have rich authored previews.
+- **import.meta.env / global**: because this is a Vite app, both the main bundle and the
+  preview bundle need `import.meta.env` (VITE_*) and `global` defined at build. Done via the
+  two forks in `.design-sync/overrides/` (bundle.mjs, previews.mjs) — see `cfg.libOverrides`.
+  On re-sync, diff these against the bundled `lib/*.mjs` and re-apply the define blocks if the
+  upstream scripts changed. bundle.mjs fork changes ONLY the `define` map (stampHeader/output
+  contract untouched).
+
+## PROJECT MOVED (auth change 2026-07-01)
+- The first upload (primitives only) went to project `e7848549-…` under one claude.ai login.
+  A mid-session `/login` switched accounts; that project became inaccessible (list_projects
+  empty, get_project 404). The full 32-component bundle (primitives + pages) was uploaded to a
+  NEW project **`1383e51b-e04b-45be-8192-1b982e0fc040`** ("Bedolaga Cabinet") under the current
+  login — this is the projectId now pinned in config. The old project is orphaned.
+
 ## Re-sync risks (what can silently go stale)
 - `cfg.cssEntry` is a HASHED filename under `cabinet-dist/assets/` — if the app is
   rebuilt, update it to the new hash (or `[CSS_*]` diagnostics will fire).
