@@ -133,15 +133,23 @@ export default function Connection() {
         }
       }
 
-      // Custom schemes (happ://, wisp://, …) do NOT launch from a hidden iframe on iOS
-      // Safari / Android real browsers — the iframe navigation is silently dropped, so
-      // the app never opens (only desktop WebKit honours it, which is why macOS worked
-      // but iPhone/Android didn't). A real top-level navigation from this user gesture
-      // is the reliable trigger. finalUrlForTelegram routes custom schemes through
-      // /miniapp/redirect.html (iframe auto-attempt + a tappable "Open app" button that
-      // fires on tap everywhere); http(s) links are already the plain URL and navigate
-      // directly.
-      window.location.href = finalUrlForTelegram;
+      // http(s) links navigate normally.
+      if (isHttpUrl) {
+        window.location.href = resolved;
+        return;
+      }
+
+      // Custom schemes (happ://, wisp://, …). A real top-level navigation from this user
+      // gesture launches the app — the old hidden-iframe path is silently dropped on iOS
+      // Safari / Android, so only desktop WebKit opened it (macOS worked, iPhone did not).
+      // In-app webviews (Telegram/Yandex/…) can't resolve custom schemes at all and would
+      // paint a full-page net::ERR_UNKNOWN_URL_SCHEME, so those go through the redirect
+      // page (error contained in an iframe + a tappable "Open app" button). Real browsers
+      // open the app in-place.
+      const inAppWebView = /Telegram|YaBrowser|Instagram|FBAN|FBAV|VKClient|Snapchat/i.test(
+        navigator.userAgent || '',
+      );
+      window.location.href = inAppWebView ? finalUrlForTelegram : resolved;
     },
     [isTelegramWebApp, i18n.language, resolveUrl, connectionLink?.connect_mode, qrConnectionUrl],
   );
