@@ -148,26 +148,30 @@
             const manualBtn = document.getElementById('manualBtn');
             manualBtn.href = url;
 
-            // Attempt to launch the app WITHOUT a top-level navigation. A direct
-            // `location.href = scheme` paints a full-page net::ERR_UNKNOWN_URL_SCHEME
-            // inside Android in-app browsers (Telegram/Yandex/…) and silently fails on
-            // iOS — hiding the manual button (Telegram bug #654272). A hidden iframe is
-            // contained: the app opens if installed, otherwise the failure stays inside
-            // the (invisible) frame and the button below stays usable.
-            try {
-                var frame = document.createElement('iframe');
-                frame.style.display = 'none';
-                frame.src = url;
-                document.body.appendChild(frame);
-                setTimeout(function() {
-                    try { frame.parentNode.removeChild(frame); } catch (e) {}
-                }, 2000);
-            } catch (e) {
+            // In a REAL external browser (Safari/Chrome/desktop) a top-level navigation to
+            // the scheme auto-launches the app on page load — no tap needed. This is the
+            // common case: Telegram Mini Apps open this page via openLink() in the SYSTEM
+            // browser, whose UA is plain Safari/Chrome. In-app webviews (Telegram/Yandex/…)
+            // instead paint a full-page net::ERR_UNKNOWN_URL_SCHEME on a top-level scheme
+            // navigation, so there we keep the launch inside a hidden iframe and rely on the
+            // manual button (a user tap is the reliable trigger). (Telegram bug #654272.)
+            var inAppWebView = /Telegram|YaBrowser|Instagram|FBAN|FBAV|VKClient|Snapchat/i.test(navigator.userAgent || '');
+            if (inAppWebView) {
+                try {
+                    var frame = document.createElement('iframe');
+                    frame.style.display = 'none';
+                    frame.src = url;
+                    document.body.appendChild(frame);
+                    setTimeout(function() {
+                        try { frame.parentNode.removeChild(frame); } catch (e) {}
+                    }, 2000);
+                } catch (e) {}
+            } else {
                 window.location.href = url;
             }
 
-            // Programmatic opening is unreliable in in-app browsers, so surface the
-            // manual "Open app" button immediately — a user tap is the reliable trigger.
+            // Surface the manual "Open app" button as a fallback (app not installed, or the
+            // auto-attempt was blocked).
             document.getElementById('errorBlock').classList.add('show');
         })();
     </script>
