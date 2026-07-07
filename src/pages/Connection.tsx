@@ -8,7 +8,6 @@ import { useTelegramSDK } from '../hooks/useTelegramSDK';
 import { useHaptic } from '@/platform';
 import { SettingsIcon } from '@/components/icons';
 import { resolveTemplate, hasTemplates } from '../utils/templateEngine';
-import { openAppScheme } from '../utils/openAppScheme';
 import { isHappCryptolinkMode, resolveConnectionUrlForUi } from '../utils/connectionLink';
 import { useAuthStore } from '../store/auth';
 import type { AppConfig, RemnawavePlatformData } from '../types';
@@ -134,11 +133,15 @@ export default function Connection() {
         }
       }
 
-      // In regular browsers open the deeplink directly. openAppScheme uses a contained
-      // iframe for custom schemes so an unresolved scheme doesn't paint a full-page
-      // net::ERR_UNKNOWN_URL_SCHEME (Android) / silently fail (iOS); http(s) links
-      // still navigate normally. (Telegram bug #654272.)
-      openAppScheme(resolved);
+      // Custom schemes (happ://, wisp://, …) do NOT launch from a hidden iframe on iOS
+      // Safari / Android real browsers — the iframe navigation is silently dropped, so
+      // the app never opens (only desktop WebKit honours it, which is why macOS worked
+      // but iPhone/Android didn't). A real top-level navigation from this user gesture
+      // is the reliable trigger. finalUrlForTelegram routes custom schemes through
+      // /miniapp/redirect.html (iframe auto-attempt + a tappable "Open app" button that
+      // fires on tap everywhere); http(s) links are already the plain URL and navigate
+      // directly.
+      window.location.href = finalUrlForTelegram;
     },
     [isTelegramWebApp, i18n.language, resolveUrl, connectionLink?.connect_mode, qrConnectionUrl],
   );
