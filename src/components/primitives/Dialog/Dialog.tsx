@@ -60,9 +60,8 @@ export const DialogOverlay = forwardRef<HTMLDivElement, DialogOverlayProps>(
 DialogOverlay.displayName = 'DialogOverlay';
 
 // Content
-export interface DialogContentProps extends ComponentPropsWithoutRef<
-  typeof DialogPrimitive.Content
-> {
+export interface DialogContentProps
+  extends ComponentPropsWithoutRef<typeof DialogPrimitive.Content> {
   showCloseButton?: boolean;
 }
 
