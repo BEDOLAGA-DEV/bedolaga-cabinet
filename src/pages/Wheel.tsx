@@ -357,7 +357,7 @@ export default function Wheel() {
       // Web-only: synchronously pre-open a tab during the user gesture to dodge the
       // popup blocker before the async invoice URL resolves. Not reached in Telegram
       // (hasInvoice is true there, so the native invoice flow is used instead).
-      // eslint-disable-next-line no-restricted-properties
+      // biome-ignore lint: canonical popup-blocker workaround, see comment above
       preOpenedWindowRef.current = window.open('about:blank', '_blank') || null;
     }
     starsInvoiceMutation.mutate();

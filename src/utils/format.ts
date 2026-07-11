@@ -59,3 +59,21 @@ export function formatPrice(kopeks: number, lang?: string): string {
     return `${rounded} ${config.symbol}`;
   }
 }
+
+const SHORT_DATE_LOCALE_MAP: Record<string, string> = {
+  ru: 'ru-RU',
+  en: 'en-US',
+  zh: 'zh-CN',
+  fa: 'fa-IR',
+};
+
+/** Date-only (dd.mm.yyyy) in the active UI locale; '-' for a null date. */
+export function formatShortDate(date: string | null): string {
+  if (!date) return '-';
+  const locale = SHORT_DATE_LOCALE_MAP[i18next.language] || 'ru-RU';
+  return new Date(date).toLocaleDateString(locale, {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  });
+}

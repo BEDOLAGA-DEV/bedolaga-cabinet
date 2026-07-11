@@ -13,9 +13,8 @@ export {
 } from '@radix-ui/react-popover';
 
 // Content
-export interface PopoverContentProps extends ComponentPropsWithoutRef<
-  typeof PopoverPrimitive.Content
-> {
+export interface PopoverContentProps
+  extends ComponentPropsWithoutRef<typeof PopoverPrimitive.Content> {
   showCloseButton?: boolean;
 }
 
