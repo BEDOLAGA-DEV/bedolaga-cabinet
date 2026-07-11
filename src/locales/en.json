@@ -1241,6 +1241,7 @@
       "campaigns": "Campaigns",
       "promoOffers": "Promo Offers",
       "promocodes": "Promo Codes",
+      "coupons": "Coupons",
       "promoGroups": "Discount Groups",
       "trafficUsage": "Traffic Usage",
       "updates": "Updates",
@@ -3029,6 +3030,84 @@
       "revokeDialog": {
         "title": "Revoke Partner Status?",
         "description": "This will remove partner privileges. The partner will no longer earn commissions from referrals."
+      }
+    },
+    "coupons": {
+      "title": "Coupons",
+      "subtitle": "Wholesale batches of one-time subscription links",
+      "addBatch": "Create batch",
+      "noBatches": "No batches yet",
+      "days": "d.",
+      "stats": {
+        "batches": "Batches",
+        "active": "Active",
+        "redeemed": "Redeemed",
+        "revoked": "Revoked"
+      },
+      "list": {
+        "revoked": "Revoked",
+        "until": "Until",
+        "price": "Wholesale"
+      },
+      "pagination": {
+        "prev": "Previous",
+        "next": "Next",
+        "page": "Page {{current}} of {{total}}"
+      },
+      "form": {
+        "title": "New coupon batch",
+        "subtitle": "Every coupon is a one-time subscription link",
+        "name": "Batch name",
+        "namePlaceholder": "E.g. the partner name",
+        "tariff": "Tariff",
+        "selectTariff": "Select a tariff",
+        "periodDays": "Subscription days per coupon",
+        "couponsCount": "Number of coupons (1–500)",
+        "price": "Wholesale price per coupon, ₽",
+        "priceHint": "Bookkeeping only, 0 — not set",
+        "validDays": "Coupon lifetime, days",
+        "validDaysHint": "0 or empty — perpetual",
+        "create": "Create batch",
+        "creating": "Creating…",
+        "cancel": "Cancel"
+      },
+      "validation": {
+        "nameRequired": "Enter the batch name",
+        "tariffRequired": "Select a tariff",
+        "periodInvalid": "Subscription days: 1 to 3650",
+        "countInvalid": "Number of coupons: 1 to 500"
+      },
+      "created": {
+        "title": "Batch created",
+        "linksLabel": "Links ({{count}})",
+        "copyAll": "Copy all",
+        "copied": "Copied",
+        "download": "Download .txt",
+        "toList": "Back to batches",
+        "toBatch": "Open batch"
+      },
+      "detail": {
+        "title": "Batch #{{id}}",
+        "total": "Total coupons",
+        "price": "Wholesale price",
+        "priceTotal": "total",
+        "validUntil": "Valid until",
+        "perpetual": "Perpetual",
+        "createdAt": "Created",
+        "linksTitle": "Active links ({{count}})"
+      },
+      "revoke": {
+        "button": "Revoke unredeemed ({{count}})",
+        "confirmTitle": "Revoke the batch?",
+        "confirmText": "{{count}} unredeemed coupons will be revoked. Their links will stop working. This cannot be undone.",
+        "confirm": "Revoke",
+        "cancel": "Cancel",
+        "success": "Coupons revoked: {{count}}"
+      },
+      "errors": {
+        "loadFailed": "Batch not found",
+        "createFailed": "Failed to create the batch",
+        "revokeFailed": "Failed to revoke the batch"
       }
     },
     "promocodes": {
@@ -5084,6 +5163,34 @@
       "nMonths_other": "{{count}} months",
       "nDays": "{{count}} days",
       "nMonths": "{{count}} months"
+    }
+  },
+  "coupon": {
+    "title": "Subscription coupon",
+    "subtitle": "A one-time coupon — redeem it to get or extend a subscription",
+    "tariff": "Tariff",
+    "period": "Period",
+    "daysSuffix": "d.",
+    "validUntil": "Redeem before",
+    "openBot": "Redeem in the bot",
+    "redeemCabinet": "Redeem in the cabinet",
+    "redeeming": "Redeeming…",
+    "needAuth": "Sign in to redeem the coupon in the cabinet — or open the link in the bot",
+    "notFound": {
+      "title": "Coupon not found",
+      "text": "The coupon does not exist, was already used or has expired"
+    },
+    "success": {
+      "activated": "Subscription activated!",
+      "renewed": "Subscription extended!",
+      "until": "Valid until"
+    },
+    "errors": {
+      "invalid": "Coupon not found or already used",
+      "expired": "The coupon has expired",
+      "already_redeemed_by_you": "You have already redeemed this coupon",
+      "internal": "Server error, try again later",
+      "generic": "Failed to redeem the coupon"
     }
   },
   "gift": {
