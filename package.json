@@ -8,6 +8,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "build:docker": "vite build",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write \"src/**/*.{ts,tsx,css,json}\"",
