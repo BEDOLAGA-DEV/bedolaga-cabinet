@@ -3,10 +3,8 @@ import { forwardRef, type ComponentPropsWithoutRef } from 'react';
 import { cn } from '@/lib/utils';
 import { usePlatform } from '@/platform';
 
-export interface SwitchProps extends Omit<
-  ComponentPropsWithoutRef<typeof SwitchPrimitive.Root>,
-  'onChange'
-> {
+export interface SwitchProps
+  extends Omit<ComponentPropsWithoutRef<typeof SwitchPrimitive.Root>, 'onChange'> {
   label?: string;
   description?: string;
   onChange?: (checked: boolean) => void;

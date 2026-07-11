@@ -52,7 +52,8 @@ const cardVariants = cva(
 );
 
 export interface CardProps
-  extends Omit<HTMLMotionProps<'div'>, 'children'>, VariantProps<typeof cardVariants> {
+  extends Omit<HTMLMotionProps<'div'>, 'children'>,
+    VariantProps<typeof cardVariants> {
   children: ReactNode;
   asChild?: boolean;
   haptic?: boolean;

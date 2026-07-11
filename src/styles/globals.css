@@ -8,15 +8,15 @@
    of the font stacks fixes every flag everywhere without touching any markup
    and without affecting any other text. Root fix, not a per-component wrap. */
 @font-face {
-  font-family: 'Twemoji Country Flags';
+  font-family: "Twemoji Country Flags";
   unicode-range: U+1F1E6-1F1FF, U+1F3F4, U+E0062-E007F;
-  src: url('/fonts/TwemojiCountryFlags.woff2') format('woff2');
+  src: url("/fonts/TwemojiCountryFlags.woff2") format("woff2");
   font-display: swap;
 }
 
 /* Animated gradient border — @property enables CSS-only angle animation */
 @property --border-angle {
-  syntax: '<angle>';
+  syntax: "<angle>";
   initial-value: 0deg;
   inherits: false;
 }
@@ -28,13 +28,13 @@
   background:
     linear-gradient(var(--_bg), var(--_bg)) padding-box,
     conic-gradient(
-        from var(--border-angle),
-        var(--_accent) 0%,
-        transparent 25%,
-        transparent 75%,
-        var(--_accent) 100%
-      )
-      border-box;
+      from var(--border-angle),
+      var(--_accent) 0%,
+      transparent 25%,
+      transparent 75%,
+      var(--_accent) 100%
+    )
+    border-box;
   animation: border-rotate var(--border-duration, 3s) linear infinite;
 }
 
@@ -295,7 +295,7 @@
 
   /* Global Noise Texture — no mix-blend-mode to avoid fullscreen GPU compositing */
   body::before {
-    content: '';
+    content: "";
     position: fixed;
     inset: 0;
     z-index: -1;
@@ -450,7 +450,7 @@ img.twemoji {
 
   /* CSS Spotlight Effect via pseudo-element */
   .bento-card-hover::after {
-    content: '';
+    content: "";
     position: absolute;
     inset: 0;
     background: radial-gradient(circle at top, rgba(255, 255, 255, 0.06), transparent 60%);
@@ -625,7 +625,7 @@ img.twemoji {
   /* Remove tap highlight and focus outline on mobile */
   button,
   a,
-  [role='button'] {
+  [role="button"] {
     -webkit-tap-highlight-color: transparent;
     outline: none;
   }
@@ -633,13 +633,13 @@ img.twemoji {
   /* Only show focus ring for keyboard navigation */
   button:focus-visible,
   a:focus-visible,
-  [role='button']:focus-visible {
+  [role="button"]:focus-visible {
     @apply ring-2 ring-accent-500/50 ring-offset-2 ring-offset-dark-900;
   }
 
   .light button:focus-visible,
   .light a:focus-visible,
-  .light [role='button']:focus-visible {
+  .light [role="button"]:focus-visible {
     @apply ring-offset-champagne-100;
   }
 
@@ -1181,11 +1181,11 @@ img.twemoji {
 
   /* Glow effects */
   .glow-accent {
-    box-shadow: 0 0 20px theme('colors.accent.500 / 30%');
+    box-shadow: 0 0 20px theme("colors.accent.500 / 30%");
   }
 
   .glow-success {
-    box-shadow: 0 0 20px theme('colors.success.500 / 30%');
+    box-shadow: 0 0 20px theme("colors.success.500 / 30%");
   }
 
   /* Blur backdrop */
@@ -1229,9 +1229,9 @@ img.twemoji {
 .shimmer {
   background: linear-gradient(
     90deg,
-    theme('colors.dark.800') 0%,
-    theme('colors.dark.700') 50%,
-    theme('colors.dark.800') 100%
+    theme("colors.dark.800") 0%,
+    theme("colors.dark.700") 50%,
+    theme("colors.dark.800") 100%
   );
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
@@ -1240,9 +1240,9 @@ img.twemoji {
 .light .shimmer {
   background: linear-gradient(
     90deg,
-    theme('colors.champagne.200') 0%,
-    theme('colors.champagne.300') 50%,
-    theme('colors.champagne.200') 100%
+    theme("colors.champagne.200") 0%,
+    theme("colors.champagne.300") 50%,
+    theme("colors.champagne.200") 100%
   );
 }
 
@@ -1256,7 +1256,7 @@ img.twemoji {
 }
 
 /* Color picker range input styling */
-input[type='range'] {
+input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
   height: 12px;
@@ -1267,13 +1267,13 @@ input[type='range'] {
 
 /* Desktop: smaller track */
 @media (min-width: 640px) {
-  input[type='range'] {
+  input[type="range"] {
     height: 8px;
     border-radius: 4px;
   }
 }
 
-input[type='range']::-webkit-slider-thumb {
+input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
   width: 24px;
@@ -1290,26 +1290,26 @@ input[type='range']::-webkit-slider-thumb {
     box-shadow 0.15s ease;
 }
 
-input[type='range']::-webkit-slider-thumb:hover {
+input[type="range"]::-webkit-slider-thumb:hover {
   transform: scale(1.1);
   box-shadow:
     0 3px 8px rgba(0, 0, 0, 0.4),
     0 0 0 2px rgba(255, 255, 255, 0.2);
 }
 
-input[type='range']::-webkit-slider-thumb:active {
+input[type="range"]::-webkit-slider-thumb:active {
   transform: scale(0.95);
 }
 
 /* Desktop: smaller thumb */
 @media (min-width: 640px) {
-  input[type='range']::-webkit-slider-thumb {
+  input[type="range"]::-webkit-slider-thumb {
     width: 18px;
     height: 18px;
   }
 }
 
-input[type='range']::-moz-range-thumb {
+input[type="range"]::-moz-range-thumb {
   width: 24px;
   height: 24px;
   border-radius: 50%;
@@ -1324,7 +1324,7 @@ input[type='range']::-moz-range-thumb {
     box-shadow 0.15s ease;
 }
 
-input[type='range']::-moz-range-thumb:hover {
+input[type="range"]::-moz-range-thumb:hover {
   transform: scale(1.1);
   box-shadow:
     0 3px 8px rgba(0, 0, 0, 0.4),
@@ -1333,25 +1333,25 @@ input[type='range']::-moz-range-thumb:hover {
 
 /* Desktop: smaller thumb */
 @media (min-width: 640px) {
-  input[type='range']::-moz-range-thumb {
+  input[type="range"]::-moz-range-thumb {
     width: 18px;
     height: 18px;
   }
 }
 
 /* Hide number input spinners for cleaner look */
-input[type='number']::-webkit-inner-spin-button,
-input[type='number']::-webkit-outer-spin-button {
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
 
-input[type='number'] {
+input[type="number"] {
   -moz-appearance: textfield;
 }
 
 /* Custom checkbox styling - more visible */
-input[type='checkbox'] {
+input[type="checkbox"] {
   -webkit-appearance: none;
   appearance: none;
   width: 1.25rem;
@@ -1367,13 +1367,13 @@ input[type='checkbox'] {
   flex-shrink: 0;
 }
 
-input[type='checkbox']:checked {
+input[type="checkbox"]:checked {
   background-color: rgb(var(--color-accent-500));
   border-color: rgb(var(--color-accent-500));
 }
 
-input[type='checkbox']:checked::after {
-  content: '';
+input[type="checkbox"]:checked::after {
+  content: "";
   position: absolute;
   left: 50%;
   top: 45%;
@@ -1384,12 +1384,12 @@ input[type='checkbox']:checked::after {
   transform: translate(-50%, -50%) rotate(45deg);
 }
 
-input[type='checkbox']:focus {
+input[type="checkbox"]:focus {
   outline: none;
   box-shadow: 0 0 0 2px rgba(var(--color-accent-500), 0.3);
 }
 
-input[type='checkbox']:hover:not(:checked) {
+input[type="checkbox"]:hover:not(:checked) {
   border-color: rgb(var(--color-dark-500));
   background-color: rgb(var(--color-dark-600));
 }
@@ -1477,17 +1477,17 @@ input[type='checkbox']:hover:not(:checked) {
   background-color: rgb(var(--color-dark-700));
 }
 
-.light input[type='checkbox'] {
+.light input[type="checkbox"] {
   border-color: rgb(var(--color-champagne-400));
   background-color: rgb(var(--color-champagne-100));
 }
 
-.light input[type='checkbox']:checked {
+.light input[type="checkbox"]:checked {
   background-color: rgb(var(--color-accent-500));
   border-color: rgb(var(--color-accent-500));
 }
 
-.light input[type='checkbox']:hover:not(:checked) {
+.light input[type="checkbox"]:hover:not(:checked) {
   border-color: rgb(var(--color-champagne-500));
   background-color: rgb(var(--color-champagne-200));
 }
@@ -1523,7 +1523,7 @@ input[type='checkbox']:hover:not(:checked) {
 }
 
 .onboarding-tooltip::before {
-  content: '';
+  content: "";
   @apply absolute h-3 w-3 border-l border-t border-accent-500/30 bg-dark-900;
   transform: rotate(45deg);
 }
