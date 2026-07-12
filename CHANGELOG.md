@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.60.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.59.0...v1.60.0) (2026-07-12)
+
+
+### Features
+
+* **admin:** предупреждение о разбивке длинных текстов системных страниц в боте ([93cfca4](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/93cfca46dc133662329aa0ec8196f91f15ba4b3a))
+* **coupons:** раздел оптовых купонов + публичная страница активации ([799e986](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/799e986d841aadf8a02ccc8287320a025e6a0aac))
+* **legal:** wire recurrent-payments document + restore footer link ([20565b8](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/20565b8f593f99533a016ae4706fc1030a8a8d57))
+
+
+### Bug Fixes
+
+* **auth:** make login footer legal links open real pages, not the login tab ([37a53e4](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/37a53e40ea37cdba0882f98455d8b00bc9dde2d2))
+* **connection:** keep the Happ add-subscription button working on Remnawave 2.8.0 ([8f31311](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/8f31311112979beebeccf2952adcb8f2d4580fdd))
+* **ui:** контент, пришедший из API после mount, оставался невидимым (stagger) ([adaaa23](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/adaaa23da390ccdbc8938488fa9d36a00dc9c1db))
+* **ui:** нормализовать detail из ответов API перед рендером — краш на 422 ([9b97293](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/9b972931cf8ea85f84538bf0b421df2730c4db66))
+
 ## [1.59.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.58.0...v1.59.0) (2026-06-30)
 
 
