@@ -1,5 +1,30 @@
 # Changelog
 
+## [1.61.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.60.0...v1.61.0) (2026-07-13)
+
+
+### Features
+
+* **admin:** бейдж «Команда» для команд бота в таймлайне активности ([f9ee16a](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/f9ee16a2e67ed36b8672dd35b4a27d075743cc0a))
+* **admin:** вкладка «Активность» в карточке пользователя ([7547b49](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/7547b49d7a58745487693040537ddfb1bfa9dd43))
+* **admin:** клики кнопок бота и действия в кабинете во вкладке «Активность» ([5fc8e7f](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/5fc8e7f97a2f09f4d81ff17fa3914eacc7db58b7))
+* **broadcasts:** поле icon_custom_emoji_id для кастомных кнопок рассылки ([b4b4bca](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/b4b4bca2cb290c1be4ae4c076593200c686b72c5))
+* **broadcasts:** поле icon_custom_emoji_id у кастомных кнопок рассылки ([eeb715c](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/eeb715c09535a4e1d2489cd2c9d5969346718a26))
+* **navigation:** startapp=trial → дашборд (оплата платного триала из rich-меню) ([c920330](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/c920330fa606350c40c3ecaeb83651d5100b3f15))
+* **navigation:** роутинг startapp-диплинков rich-меню бота ([2eaea75](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/2eaea75fd93f1db3a0203ff308f365b11079cbc4))
+
+
+### Bug Fixes
+
+* **docker:** слушать IPv6 в nginx — healthcheck на localhost уводил контейнер в unhealthy ([a47e9ab](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/a47e9ab6999a5da4d9574e3a00bb3ed18a461971))
+* **docker:** слушать IPv6 в nginx — healthcheck на localhost уводил контейнер в unhealthy ([ce4ce04](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/ce4ce046ba34b6439befda2899b87b77316c4030))
+* **header:** кэшировать список языков — переключатель не мигает при смене страницы ([a7ff8a6](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/a7ff8a6b09281df2b971cddf30a95a4f8b774205))
+* **subscription:** fall back to purchase flow for free-tariff switches ([9f909b0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/9f909b0f2c22bf9c37ba4e0a74cf7dbaf36e5a02))
+* **subscription:** fall back to purchase flow for free-tariff switches ([255777e](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/255777e7d1db7af09963d397a187bf0d15cc5b39))
+* **ui:** не перезапускать анимированный фон при смене страницы ([1ea9b99](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/1ea9b99ab579f709db440b103cd37f93b92927ca))
+* **ui:** сдвиг страницы, мигание переключателя языка и перезапуск фона при SPA-навигации ([478a693](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/478a6930198503ab93d9a2d2c5db0d6cbc5a84ef))
+* **ui:** фиксированная ширина 100vw — страницы не сдвигаются при появлении скроллбара ([b40f939](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/b40f939e914453d3080bde6051a7dbcf66a42321))
+
 ## [1.60.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.59.0...v1.60.0) (2026-07-12)
 
 
