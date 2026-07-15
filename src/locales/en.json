@@ -2068,6 +2068,7 @@
       "example": "Example",
       "analytics": "Analytics",
       "buttons": "Buttons",
+      "botPresentation": "Bot text and emoji",
       "notConfigured": "Not configured",
       "counterActive": "Active",
       "counterInactive": "Inactive",

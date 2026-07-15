@@ -1,4 +1,4 @@
-import { ThemeColors, DEFAULT_THEME_COLORS } from '../../types/theme';
+import { type ThemeColors, DEFAULT_THEME_COLORS } from '../../types/theme';
 
 // Tree sidebar types
 export interface TreeSubItem {
@@ -31,6 +31,7 @@ export const SETTINGS_TREE: SettingsTreeConfig = {
     { id: 'theme', icon: '🌈' },
     { id: 'analytics', icon: '📊' },
     { id: 'buttons', icon: '📱' },
+    { id: 'botPresentation', icon: '✨' },
   ],
   groups: [
     {

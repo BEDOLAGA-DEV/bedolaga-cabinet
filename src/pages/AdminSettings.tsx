@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { adminSettingsApi, SettingDefinition } from '../api/adminSettings';
+import { adminSettingsApi, type SettingDefinition } from '../api/adminSettings';
 import { themeColorsApi } from '../api/themeColors';
 import { useFavoriteSettings } from '../hooks/useFavoriteSettings';
 import { SETTINGS_TREE, findTreeLocation, formatSettingKey } from '../components/admin';
@@ -10,6 +10,7 @@ import { usePlatform } from '../platform/hooks/usePlatform';
 import { AnalyticsTab } from '../components/admin/AnalyticsTab';
 import { BrandingTab } from '../components/admin/BrandingTab';
 import { MenuEditorTab } from '../components/admin/MenuEditorTab';
+import { BotPresentationTab } from '../components/admin/BotPresentationTab';
 import { ThemeTab } from '../components/admin/ThemeTab';
 import { FavoritesTab } from '../components/admin/FavoritesTab';
 import { SettingsTab } from '../components/admin/SettingsTab';
@@ -187,6 +188,8 @@ export default function AdminSettings() {
         return <ThemeTab />;
       case 'buttons':
         return <MenuEditorTab />;
+      case 'botPresentation':
+        return <BotPresentationTab />;
       case 'favorites':
         return (
           <FavoritesTab
