@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.62.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.61.0...v1.62.0) (2026-07-19)
+
+
+### Features
+
+* **payments:** способ оплаты cisPay ([4b98217](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/4b982175d75f5d7d43312859cc061462b52f9570))
+* **promocodes:** состав промокода чекбоксами — баланс / дни / промогруппа ([9ce838b](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/9ce838badeda4dde45b16f38458e260a100fb39d))
+* **referral-network:** кнопка построения полной реферальной сети ([19facf2](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/19facf2ba968212ba9f1bb974ce886e9facc348f))
+* **users:** кнопка «Отправить сообщение» в карточке пользователя ([2f743d8](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/2f743d82dbb4d737fcb5f54dda5269271bae3de2))
+
+
+### Bug Fixes
+
+* **admin:** дубликат ключа admin.paymentMethods.description ([46c1bc7](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/46c1bc79a454c71b469a64f82f90a9585f265ab0))
+* **i18n:** добавить недостающие английские переводы resetPassword и expiredDate_trial ([dd50d64](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/dd50d648d069bb69db54d18d8e3bdf6bec965872))
+* **i18n:** форматировать даты и числа локалью выбранного языка, а не браузера ([81fd96c](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/81fd96c2a758d8d092289dbaefa105b29f54137d))
+* **payment-methods:** admin display_name/description override locale on balance ([112e09b](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/112e09bc6d1f0776f3f98602151a7730a8ed9245))
+
 ## [1.61.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.60.0...v1.61.0) (2026-07-13)
 
 
