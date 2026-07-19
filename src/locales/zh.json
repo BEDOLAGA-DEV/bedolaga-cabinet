@@ -3824,6 +3824,7 @@
       "methodSubOptions": "支付子选项",
       "loadingPeriods": "加载中...",
       "periodDaySuffix": "天",
+      "trialPrefix": "试用",
       "localeTab": "语言",
       "localeHint": "切换语言以编辑该语言的文本",
       "discount": "折扣",
