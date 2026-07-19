@@ -1703,6 +1703,7 @@
         "totalUpload": "Upload",
         "totalTraffic": "Total",
         "online": "online",
+        "realtimeTitle": "Realtime traffic",
         "inbounds": "Inbounds",
         "outbounds": "Outbounds"
       },

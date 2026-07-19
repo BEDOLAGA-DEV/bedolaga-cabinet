@@ -17,22 +17,12 @@ const RU_ONLY_NAMESPACES = [
   'admin.settings.presets.',
 ];
 
-// Известные дыры на момент добавления теста. НЕ добавлять сюда новые ключи —
-// переводите en.json. Записи ниже удалить после мержа PR #489.
-const KNOWN_MISSING_IN_EN = new Set([
-  'admin.remnawave.traffic.realtimeTitle',
-  'dashboard.expired.expiredDate_trial',
-  'resetPassword.enterNewPassword',
-  'resetPassword.invalidToken',
-  'resetPassword.redirectingToLogin',
-  'resetPassword.setPassword',
-  'resetPassword.success',
-  'resetPassword.title',
-  'resetPassword.tokenExpiredOrInvalid',
+// Известные дыры. #489 смержен, realtimeTitle переведён — список пуст.
+const KNOWN_MISSING_IN_EN = new Set<string>([
+  // Пусто — так и держать: новые ключи переводите в en.json, а не вносите сюда.
 ]);
 
-// Удалить после мержа PR #489 (en-значение получит {{count}}).
-const KNOWN_PLACEHOLDER_MISMATCHES = new Set(['promo.offers.serverAccess']);
+const KNOWN_PLACEHOLDER_MISMATCHES = new Set<string>([]);
 
 // Плюральные категории i18next: ru использует _one/_few/_many, en — _one/_other.
 // Сравниваем БАЗОВЫЕ ключи (без плюрального суффикса); context-варианты
