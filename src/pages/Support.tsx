@@ -1,5 +1,5 @@
 import { uiLocale } from '@/utils/uiLocale';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
@@ -9,13 +9,14 @@ import { infoApi } from '../api/info';
 import { useAuthStore } from '../store/auth';
 import { logger } from '../utils/logger';
 import { checkRateLimit, getRateLimitResetTime, RATE_LIMIT_KEYS } from '../utils/rateLimit';
-import type { TicketDetail } from '../types';
+import type { SupportConfig, TicketDetail } from '../types';
 import { Card } from '@/components/data-display/Card';
 import { Button } from '@/components/primitives/Button';
 import { staggerContainer, staggerItem } from '@/components/motion/transitions';
 import { ChatIcon, CloseIcon, ImageIcon, PlusIcon, SendIcon } from '@/components/icons';
 import { usePlatform } from '@/platform';
 import { linkifyText } from '../utils/linkify';
+import { resolveSupportContact } from '../utils/supportContact';
 
 const log = logger.createLogger('Support');
 
@@ -36,6 +37,18 @@ export default function Support() {
   const isAdmin = useAuthStore((state) => state.isAdmin);
   const queryClient = useQueryClient();
   const { openTelegramLink, openLink } = usePlatform();
+
+  const openSupportContact = useCallback(
+    (config: SupportConfig) => {
+      const target = resolveSupportContact(config);
+      if (target.kind === 'external') {
+        openLink(target.url, { tryInstantView: false });
+      } else {
+        openTelegramLink(target.url);
+      }
+    },
+    [openLink, openTelegramLink],
+  );
   const [selectedTicket, setSelectedTicket] = useState<TicketDetail | null>(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newTitle, setNewTitle] = useState('');
@@ -211,17 +224,7 @@ export default function Support() {
           buttonText: t('support.contactUs'),
           buttonAction: () => {
             log.debug('Button clicked, opening:', supportUsername);
-
-            // Extract username without @
-            const username = supportUsername.startsWith('@')
-              ? supportUsername.slice(1)
-              : supportUsername;
-
-            const webUrl = `https://t.me/${username}`;
-            log.debug('Web URL:', webUrl);
-
-            // Use platform's openTelegramLink
-            openTelegramLink(webUrl);
+            openSupportContact(supportConfig);
           },
         };
       }
@@ -246,17 +249,7 @@ export default function Support() {
         buttonText: t('support.contactUs'),
         buttonAction: () => {
           log.debug('Fallback button clicked, opening:', supportUsername);
-
-          // Extract username without @
-          const username = supportUsername.startsWith('@')
-            ? supportUsername.slice(1)
-            : supportUsername;
-
-          const webUrl = `https://t.me/${username}`;
-          log.debug('Fallback opening URL:', webUrl);
-
-          // Use platform's openTelegramLink
-          openTelegramLink(webUrl);
+          openSupportContact(supportConfig);
         },
       };
     };
@@ -367,12 +360,7 @@ export default function Support() {
             <Button
               variant="secondary"
               className="shrink-0 whitespace-nowrap"
-              onClick={() => {
-                const username = supportConfig.support_username!.startsWith('@')
-                  ? supportConfig.support_username!.slice(1)
-                  : supportConfig.support_username!;
-                openTelegramLink(`https://t.me/${username}`);
-              }}
+              onClick={() => openSupportContact(supportConfig)}
             >
               {t('support.writeButton', 'Написать')}
             </Button>

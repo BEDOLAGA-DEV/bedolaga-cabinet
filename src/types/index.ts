@@ -530,6 +530,8 @@ export interface SupportConfig {
   support_type: 'tickets' | 'profile' | 'url' | 'both';
   support_url?: string | null;
   support_username?: string | null;
+  /** Резолвнутый контакт ведёт в Telegram, а не на внешний хелпдеск. */
+  contact_is_telegram?: boolean;
 }
 
 // Paginated response
