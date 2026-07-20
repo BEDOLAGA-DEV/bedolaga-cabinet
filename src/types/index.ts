@@ -530,6 +530,8 @@ export interface SupportConfig {
   support_type: 'tickets' | 'profile' | 'url' | 'both';
   support_url?: string | null;
   support_username?: string | null;
+  /** Ссылка ведёт в Telegram — открывать через openTelegramLink. Нет у старых бэкендов. */
+  contact_is_telegram?: boolean;
 }
 
 // Paginated response

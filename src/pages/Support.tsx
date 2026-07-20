@@ -16,6 +16,7 @@ import { staggerContainer, staggerItem } from '@/components/motion/transitions';
 import { ChatIcon, CloseIcon, ImageIcon, PlusIcon, SendIcon } from '@/components/icons';
 import { usePlatform } from '@/platform';
 import { linkifyText } from '../utils/linkify';
+import { resolveSupportLink } from '../utils/supportLink';
 
 const log = logger.createLogger('Support');
 
@@ -195,69 +196,36 @@ export default function Support() {
     );
   }
 
+  const link = resolveSupportLink(supportConfig);
+
   // If tickets are disabled, show redirect message
   if (supportConfig && !supportConfig.tickets_enabled) {
-    log.debug('Tickets disabled, config:', supportConfig);
+    log.debug('Tickets disabled, config:', supportConfig, 'link:', link);
 
     const getSupportMessage = () => {
-      log.debug('Getting support message for type:', supportConfig.support_type);
+      const title = isAdmin ? t('support.ticketsDisabled') : t('support.title');
 
-      if (supportConfig.support_type === 'profile') {
-        const supportUsername = supportConfig.support_username || '@support';
-        log.debug('Opening profile:', supportUsername);
-        return {
-          title: isAdmin ? t('support.ticketsDisabled') : t('support.title'),
-          message: t('support.contactSupport', { username: supportUsername }),
-          buttonText: t('support.contactUs'),
-          buttonAction: () => {
-            log.debug('Button clicked, opening:', supportUsername);
-
-            // Extract username without @
-            const username = supportUsername.startsWith('@')
-              ? supportUsername.slice(1)
-              : supportUsername;
-
-            const webUrl = `https://t.me/${username}`;
-            log.debug('Web URL:', webUrl);
-
-            // Use platform's openTelegramLink
-            openTelegramLink(webUrl);
-          },
-        };
+      if (!link) {
+        // Контакт не настроен или не прошёл проверку — кнопку не показываем.
+        return { title, message: t('support.contactSupport', { username: '—' }), action: null };
       }
 
-      if (supportConfig.support_type === 'url' && supportConfig.support_url) {
+      if (!link.isTelegram) {
         return {
-          title: isAdmin ? t('support.ticketsDisabled') : t('support.title'),
+          title,
           message: t('support.useExternalLink'),
           buttonText: t('support.openSupport'),
-          buttonAction: () => {
-            openLink(supportConfig.support_url!, { tryInstantView: false });
-          },
+          action: () => openLink(link.url, { tryInstantView: false }),
         };
       }
 
-      // Fallback: contact support (should not normally happen if config is correct)
-      const supportUsername = supportConfig.support_username || '@support';
-      log.debug('Fallback: Opening profile:', supportUsername);
       return {
-        title: isAdmin ? t('support.ticketsDisabled') : t('support.title'),
-        message: t('support.contactSupport', { username: supportUsername }),
+        title,
+        message: t('support.contactSupport', {
+          username: supportConfig.support_username || link.url,
+        }),
         buttonText: t('support.contactUs'),
-        buttonAction: () => {
-          log.debug('Fallback button clicked, opening:', supportUsername);
-
-          // Extract username without @
-          const username = supportUsername.startsWith('@')
-            ? supportUsername.slice(1)
-            : supportUsername;
-
-          const webUrl = `https://t.me/${username}`;
-          log.debug('Fallback opening URL:', webUrl);
-
-          // Use platform's openTelegramLink
-          openTelegramLink(webUrl);
-        },
+        action: () => openTelegramLink(link.url),
       };
     };
 
@@ -271,9 +239,11 @@ export default function Support() {
           </div>
           <h2 className="mb-2 text-xl font-semibold text-dark-100">{supportMessage.title}</h2>
           <p className="mb-6 text-dark-400">{supportMessage.message}</p>
-          <Button onClick={supportMessage.buttonAction} fullWidth>
-            {supportMessage.buttonText}
-          </Button>
+          {supportMessage.action && (
+            <Button onClick={supportMessage.action} fullWidth>
+              {supportMessage.buttonText}
+            </Button>
+          )}
         </Card>
       </div>
     );
@@ -352,7 +322,7 @@ export default function Support() {
       {/* Contact support card for "both" mode — self-animated: mounts after the
           config query resolves, when the parent stagger orchestration has already
           finished and would leave it stuck at opacity 0 */}
-      {supportConfig?.support_type === 'both' && supportConfig.support_username && (
+      {supportConfig?.support_type === 'both' && link && (
         <motion.div variants={staggerItem} initial="initial" animate="animate">
           <Card className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -361,17 +331,20 @@ export default function Support() {
               </div>
               <div>
                 <div className="text-sm font-medium text-dark-100">{t('support.contactUs')}</div>
-                <div className="text-xs text-dark-400">{supportConfig.support_username}</div>
+                <div className="text-xs text-dark-400">
+                  {supportConfig.support_username || link.url}
+                </div>
               </div>
             </div>
             <Button
               variant="secondary"
               className="shrink-0 whitespace-nowrap"
               onClick={() => {
-                const username = supportConfig.support_username!.startsWith('@')
-                  ? supportConfig.support_username!.slice(1)
-                  : supportConfig.support_username!;
-                openTelegramLink(`https://t.me/${username}`);
+                if (link.isTelegram) {
+                  openTelegramLink(link.url);
+                } else {
+                  openLink(link.url, { tryInstantView: false });
+                }
               }}
             >
               {t('support.writeButton', 'Написать')}
