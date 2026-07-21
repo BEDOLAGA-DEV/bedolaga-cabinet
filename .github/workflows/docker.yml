@@ -12,6 +12,9 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
+permissions:
+  contents: read
+
 jobs:
   lint:
     uses: ./.github/workflows/lint.yml
@@ -22,6 +25,7 @@ jobs:
     permissions:
       contents: read
       packages: write
+      security-events: write
 
     steps:
       - name: Checkout code
@@ -53,6 +57,7 @@ jobs:
             type=raw,value=latest,enable={{is_default_branch}}
 
       - name: Build and push Docker image
+        id: build
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -66,3 +71,23 @@ jobs:
             VITE_TELEGRAM_BOT_USERNAME=
             VITE_APP_NAME=Cabinet
             VITE_APP_LOGO=V
+
+      # Сканируем запушенный образ на CVE. Пока non-blocking (exit-code: 0):
+      # находки уезжают в Security → Code scanning, но сборку не роняют.
+      # Для ужесточения — поставить severity-фильтр в exit-code и убрать PR-гейт.
+      - name: Scan image with Trivy
+        if: github.event_name != 'pull_request'
+        uses: aquasecurity/trivy-action@0.24.0
+        with:
+          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ steps.build.outputs.digest }}
+          format: sarif
+          output: trivy-results.sarif
+          severity: HIGH,CRITICAL
+          exit-code: "0"
+
+      - name: Upload Trivy results to Security tab
+        if: github.event_name != 'pull_request'
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-results.sarif
+          category: trivy
