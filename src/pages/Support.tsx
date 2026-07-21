@@ -41,6 +41,7 @@ export default function Support() {
   const openSupportContact = useCallback(
     (config: SupportConfig) => {
       const target = resolveSupportContact(config);
+      if (!target) return;
       if (target.kind === 'external') {
         openLink(target.url, { tryInstantView: false });
       } else {
@@ -212,45 +213,29 @@ export default function Support() {
   if (supportConfig && !supportConfig.tickets_enabled) {
     log.debug('Tickets disabled, config:', supportConfig);
 
+    // Куда и чем открывать контакт — один резолв на весь блок. null → открывать
+    // нечего (пустой/битый конфиг), и кнопку тогда не рендерим вовсе.
+    const contact = resolveSupportContact(supportConfig);
+
     const getSupportMessage = () => {
       log.debug('Getting support message for type:', supportConfig.support_type);
 
-      if (supportConfig.support_type === 'profile') {
-        const supportUsername = supportConfig.support_username || '@support';
-        log.debug('Opening profile:', supportUsername);
-        return {
-          title: isAdmin ? t('support.ticketsDisabled') : t('support.title'),
-          message: t('support.contactSupport', { username: supportUsername }),
-          buttonText: t('support.contactUs'),
-          buttonAction: () => {
-            log.debug('Button clicked, opening:', supportUsername);
-            openSupportContact(supportConfig);
-          },
-        };
-      }
+      const title = isAdmin ? t('support.ticketsDisabled') : t('support.title');
 
       if (supportConfig.support_type === 'url' && supportConfig.support_url) {
         return {
-          title: isAdmin ? t('support.ticketsDisabled') : t('support.title'),
+          title,
           message: t('support.useExternalLink'),
           buttonText: t('support.openSupport'),
-          buttonAction: () => {
-            openLink(supportConfig.support_url!, { tryInstantView: false });
-          },
         };
       }
 
-      // Fallback: contact support (should not normally happen if config is correct)
+      // profile и любой fallback — контакт в телеграме
       const supportUsername = supportConfig.support_username || '@support';
-      log.debug('Fallback: Opening profile:', supportUsername);
       return {
-        title: isAdmin ? t('support.ticketsDisabled') : t('support.title'),
+        title,
         message: t('support.contactSupport', { username: supportUsername }),
         buttonText: t('support.contactUs'),
-        buttonAction: () => {
-          log.debug('Fallback button clicked, opening:', supportUsername);
-          openSupportContact(supportConfig);
-        },
       };
     };
 
@@ -264,9 +249,11 @@ export default function Support() {
           </div>
           <h2 className="mb-2 text-xl font-semibold text-dark-100">{supportMessage.title}</h2>
           <p className="mb-6 text-dark-400">{supportMessage.message}</p>
-          <Button onClick={supportMessage.buttonAction} fullWidth>
-            {supportMessage.buttonText}
-          </Button>
+          {contact && (
+            <Button onClick={() => openSupportContact(supportConfig)} fullWidth>
+              {supportMessage.buttonText}
+            </Button>
+          )}
         </Card>
       </div>
     );
@@ -345,28 +332,30 @@ export default function Support() {
       {/* Contact support card for "both" mode — self-animated: mounts after the
           config query resolves, when the parent stagger orchestration has already
           finished and would leave it stuck at opacity 0 */}
-      {supportConfig?.support_type === 'both' && supportConfig.support_username && (
-        <motion.div variants={staggerItem} initial="initial" animate="animate">
-          <Card className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-dark-800">
-                <ChatIcon className="h-5 w-5 text-dark-400" />
+      {supportConfig?.support_type === 'both' &&
+        supportConfig.support_username &&
+        resolveSupportContact(supportConfig) && (
+          <motion.div variants={staggerItem} initial="initial" animate="animate">
+            <Card className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-dark-800">
+                  <ChatIcon className="h-5 w-5 text-dark-400" />
+                </div>
+                <div>
+                  <div className="text-sm font-medium text-dark-100">{t('support.contactUs')}</div>
+                  <div className="text-xs text-dark-400">{supportConfig.support_username}</div>
+                </div>
               </div>
-              <div>
-                <div className="text-sm font-medium text-dark-100">{t('support.contactUs')}</div>
-                <div className="text-xs text-dark-400">{supportConfig.support_username}</div>
-              </div>
-            </div>
-            <Button
-              variant="secondary"
-              className="shrink-0 whitespace-nowrap"
-              onClick={() => openSupportContact(supportConfig)}
-            >
-              {t('support.writeButton', 'Написать')}
-            </Button>
-          </Card>
-        </motion.div>
-      )}
+              <Button
+                variant="secondary"
+                className="shrink-0 whitespace-nowrap"
+                onClick={() => openSupportContact(supportConfig)}
+              >
+                {t('support.writeButton', 'Написать')}
+              </Button>
+            </Card>
+          </motion.div>
+        )}
 
       <motion.div variants={staggerItem} className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Tickets List */}

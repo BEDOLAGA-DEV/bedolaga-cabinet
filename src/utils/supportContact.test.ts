@@ -7,6 +7,10 @@ import { resolveSupportContact } from './supportContact';
  * SUPPORT_USERNAME принимает и `@user`, и произвольный URL, поэтому из
  * `https://help.example.com` получалось `https://t.me/https://help.example.com`.
  * Бэк отдаёт контакт уже разрезолвленным — клеить на клиенте больше нечего.
+ *
+ * resolveSupportContact дополнительно защищается от битого конфига: чужие схемы
+ * (`javascript:` и т.п.) и URL-образный legacy-username не уводят в опенер, а
+ * возвращают null — кнопку в таком случае не рендерим.
  */
 
 const config = (overrides: Partial<SupportConfig>): SupportConfig => ({
@@ -26,7 +30,7 @@ describe('resolveSupportContact', () => {
     );
 
     expect(target).toEqual({ kind: 'external', url: 'https://help.example.com' });
-    expect(target.url).not.toContain('t.me');
+    expect(target?.url).not.toContain('t.me');
   });
 
   it('телеграм-контакт открывается через telegram-ссылку', () => {
@@ -41,6 +45,24 @@ describe('resolveSupportContact', () => {
     expect(target).toEqual({ kind: 'telegram', url: 'https://t.me/help' });
   });
 
+  it('tg:// deep link — валидная схема', () => {
+    const target = resolveSupportContact(
+      config({ support_url: 'tg://resolve?domain=help', contact_is_telegram: true }),
+    );
+
+    expect(target).toEqual({ kind: 'telegram', url: 'tg://resolve?domain=help' });
+  });
+
+  describe('чужие схемы в support_url отсекаются', () => {
+    it.each([
+      'javascript:alert(1)',
+      'data:text/html,x',
+      'not a url',
+    ])('%s -> null', (support_url) => {
+      expect(resolveSupportContact(config({ support_url }))).toBeNull();
+    });
+  });
+
   describe('старый бэк без support_url — прежнее поведение', () => {
     it.each([
       ['@help', 'https://t.me/help'],
@@ -51,11 +73,17 @@ describe('resolveSupportContact', () => {
       expect(target).toEqual({ kind: 'telegram', url: expected });
     });
 
-    it('контакт вообще не задан — дефолтный @support', () => {
-      expect(resolveSupportContact(config({}))).toEqual({
-        kind: 'telegram',
-        url: 'https://t.me/support',
-      });
+    it.each([
+      'https://help.example.com',
+      'help.example.com',
+      't.me/help',
+    ])('URL-образный legacy username (%s) не клеится в t.me — null', (support_username) => {
+      expect(resolveSupportContact(config({ support_username }))).toBeNull();
+    });
+
+    it('контакт вообще не задан — кнопки нет (null, без дефолта @support)', () => {
+      expect(resolveSupportContact(config({}))).toBeNull();
+      expect(resolveSupportContact(config({ support_username: '   ' }))).toBeNull();
     });
   });
 
@@ -64,6 +92,6 @@ describe('resolveSupportContact', () => {
     // поведение, а не в переход по внешней ссылке.
     const target = resolveSupportContact(config({ support_url: 'https://t.me/help' }));
 
-    expect(target.kind).toBe('telegram');
+    expect(target?.kind).toBe('telegram');
   });
 });
