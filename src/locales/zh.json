@@ -4785,6 +4785,7 @@
     "copy": "复制",
     "copied": "已复制！",
     "copyLink": "复制链接",
+    "consent": "我同意<privacy>隐私政策</privacy>、<offer>服务条款</offer>和<recurrent>定期付款协议</recurrent>。",
     "giftToggleLabel": "购买类型",
     "pollTimedOut": "处理时间较长",
     "pollTimedOutDesc": "付款处理时间比平时长。您可以尝试再次检查。",
