@@ -8,7 +8,6 @@ import { useTelegramSDK } from '../hooks/useTelegramSDK';
 import { useHaptic } from '@/platform';
 import { SettingsIcon } from '@/components/icons';
 import { resolveTemplate, hasTemplates } from '../utils/templateEngine';
-import { openAppScheme } from '../utils/openAppScheme';
 import { isHappCryptolinkMode, resolveConnectionUrlForUi } from '../utils/connectionLink';
 import { useAuthStore } from '../store/auth';
 import type { AppConfig, RemnawavePlatformData } from '../types';
@@ -142,11 +141,23 @@ export default function Connection() {
         }
       }
 
-      // In regular browsers open the deeplink directly. openAppScheme uses a contained
-      // iframe for custom schemes so an unresolved scheme doesn't paint a full-page
-      // net::ERR_UNKNOWN_URL_SCHEME (Android) / silently fail (iOS); http(s) links
-      // still navigate normally. (Telegram bug #654272.)
-      openAppScheme(resolved);
+      // http(s) links navigate normally.
+      if (isHttpUrl) {
+        window.location.href = resolved;
+        return;
+      }
+
+      // Custom schemes (happ://, wisp://, …). A real top-level navigation from this user
+      // gesture launches the app — the old hidden-iframe path is silently dropped on iOS
+      // Safari / Android, so only desktop WebKit opened it (macOS worked, iPhone did not).
+      // In-app webviews (Telegram/Yandex/…) can't resolve custom schemes at all and would
+      // paint a full-page net::ERR_UNKNOWN_URL_SCHEME, so those go through the redirect
+      // page (error contained in an iframe + a tappable "Open app" button). Real browsers
+      // open the app in-place.
+      const inAppWebView = /Telegram|YaBrowser|Instagram|FBAN|FBAV|VKClient|Snapchat/i.test(
+        navigator.userAgent || '',
+      );
+      window.location.href = inAppWebView ? finalUrlForTelegram : resolved;
     },
     [
       isTelegramWebApp,
