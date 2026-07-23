@@ -116,6 +116,18 @@
       "insufficientTitle": "Insufficient funds",
       "insufficientMessage": "Need {{required}} {{currency}} for renewal, but balance is {{balance}} {{currency}}"
     },
+    "sbpRecurring": {
+      "confirmedTitle": "SBP payment confirmed",
+      "confirmedMessage": "Payment of {{amount}} {{currency}} was charged successfully",
+      "failedTitle": "SBP payment failed",
+      "failedMessage": "Failed to charge your SBP auto-payment",
+      "pastDueTitle": "SBP payment overdue",
+      "pastDueMessage": "Your SBP auto-payment is overdue. Please check your banking app.",
+      "cancelledTitle": "SBP auto-payment disabled",
+      "cancelledMessage": "SBP auto-payment has been disabled",
+      "activatedTitle": "SBP auto-payment connected",
+      "activatedMessage": "SBP auto-payment has been successfully connected"
+    },
     "account": {
       "bannedTitle": "Account blocked",
       "bannedMessage": "Your account has been blocked",
@@ -663,6 +675,27 @@
     },
     "allTariffsPurchased": "All tariffs already purchased",
     "autopay": "Auto-renew",
+    "sbpRecurring": {
+      "title": "SBP Auto-payment",
+      "connect": "Connect",
+      "confirmInBank": "Confirm in your banking app",
+      "cancel": "Disable",
+      "confirmCancel": "Disable SBP auto-payment? Your subscription will no longer renew automatically via SBP.",
+      "cancelled": "SBP auto-payment disabled",
+      "enableError": "Failed to connect SBP auto-payment",
+      "statusPending": "Waiting for confirmation in your banking app",
+      "statusActive": "Active",
+      "statusPastDue": "Payment failed — please retry",
+      "nextCharge": "next charge {{date}}",
+      "amountPerInterval": "{{amount}} ₽ {{interval}}",
+      "interval": {
+        "day": "daily",
+        "week": "weekly",
+        "month": "monthly",
+        "year": "yearly"
+      },
+      "autopayHint": "Your subscription will be charged automatically via SBP, no card required"
+    },
     "backToList": "Back to subscriptions",
     "confirmDelete": "Delete subscription?",
     "dailyAutoCharge": "Daily auto-charge",
@@ -839,7 +872,10 @@
       "pageTitle": "Saved Cards",
       "backToBalance": "Back",
       "empty": "No saved cards. A card will be saved automatically on your next top-up.",
-      "loadError": "Failed to load saved cards. Please try again later."
+      "loadError": "Failed to load saved cards. Please try again later.",
+      "sbpSection": "SBP Auto-payment",
+      "sbpBinding": "SBP binding",
+      "sbpUnlink": "Disable SBP auto-payment"
     },
     "paymentReady": "Payment link is ready",
     "clickToOpenPayment": "Click the button below to open the payment page in a new tab",
@@ -3539,7 +3575,13 @@
           "deviceLimitUpdated": "Device limit updated",
           "invalidDays": "Please enter a valid number of days (greater than 0)",
           "backToList": "Back to subscriptions",
-          "createNew": "Create new"
+          "createNew": "Create new",
+          "sbpTitle": "SBP Auto-payment",
+          "sbpCancel": "Disable",
+          "sbpCancelled": "SBP auto-payment disabled",
+          "sbpStatus_PENDING": "Pending",
+          "sbpStatus_ACTIVE": "Active",
+          "sbpStatus_PAST_DUE": "Payment failed"
         },
         "balance": {
           "current": "Current balance",

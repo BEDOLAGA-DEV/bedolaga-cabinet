@@ -110,6 +110,18 @@
       "insufficientTitle": "موجودی ناکافی",
       "insufficientMessage": "برای تمدید {{required}} {{currency}} لازم است، موجودی فعلی {{balance}} {{currency}}"
     },
+    "sbpRecurring": {
+      "confirmedTitle": "پرداخت SBP تأیید شد",
+      "confirmedMessage": "مبلغ {{amount}} {{currency}} با موفقیت برداشت شد",
+      "failedTitle": "پرداخت SBP ناموفق بود",
+      "failedMessage": "برداشت پرداخت خودکار SBP ناموفق بود",
+      "pastDueTitle": "پرداخت SBP معوق است",
+      "pastDueMessage": "پرداخت خودکار SBP شما معوق است. لطفاً اپلیکیشن بانک را بررسی کنید.",
+      "cancelledTitle": "پرداخت خودکار SBP غیرفعال شد",
+      "cancelledMessage": "پرداخت خودکار SBP غیرفعال شده است",
+      "activatedTitle": "پرداخت خودکار SBP متصل شد",
+      "activatedMessage": "پرداخت خودکار SBP با موفقیت متصل شد"
+    },
     "account": {
       "bannedTitle": "حساب مسدود شد",
       "bannedMessage": "حساب شما مسدود شده است",
@@ -562,6 +574,27 @@
     },
     "allTariffsPurchased": "همه تعرفه‌ها قبلاً خریداری شده‌اند",
     "autopay": "تمدید خودکار",
+    "sbpRecurring": {
+      "title": "پرداخت خودکار SBP",
+      "connect": "اتصال",
+      "confirmInBank": "در اپلیکیشن بانک تأیید کنید",
+      "cancel": "غیرفعال کردن",
+      "confirmCancel": "پرداخت خودکار SBP غیرفعال شود؟ اشتراک شما دیگر به‌صورت خودکار از طریق SBP تمدید نخواهد شد.",
+      "cancelled": "پرداخت خودکار SBP غیرفعال شد",
+      "enableError": "اتصال پرداخت خودکار SBP ناموفق بود",
+      "statusPending": "در انتظار تأیید در اپلیکیشن بانک",
+      "statusActive": "فعال",
+      "statusPastDue": "پرداخت ناموفق بود — دوباره تلاش کنید",
+      "nextCharge": "برداشت بعدی {{date}}",
+      "amountPerInterval": "{{amount}} ₽ {{interval}}",
+      "interval": {
+        "day": "روزانه",
+        "week": "هفتگی",
+        "month": "ماهانه",
+        "year": "سالانه"
+      },
+      "autopayHint": "اشتراک شما به‌صورت خودکار از طریق SBP بدون نیاز به کارت ذخیره‌شده شارژ می‌شود"
+    },
     "backToList": "بازگشت به فهرست اشتراک‌ها",
     "confirmDelete": "اشتراک حذف شود؟",
     "cta": {
@@ -727,7 +760,10 @@
       "pageTitle": "کارت‌های ذخیره شده",
       "backToBalance": "بازگشت",
       "empty": "کارتی ذخیره نشده است. کارت به طور خودکار در شارژ بعدی ذخیره می‌شود.",
-      "loadError": "خطا در بارگذاری کارت‌ها. لطفاً بعداً دوباره امتحان کنید."
+      "loadError": "خطا در بارگذاری کارت‌ها. لطفاً بعداً دوباره امتحان کنید.",
+      "sbpSection": "پرداخت خودکار SBP",
+      "sbpBinding": "اتصال SBP",
+      "sbpUnlink": "غیرفعال کردن پرداخت خودکار SBP"
     },
     "paymentSuccess": {
       "title": "پرداخت موفق",
@@ -3010,7 +3046,13 @@
           "deviceLimitUpdated": "محدودیت دستگاه به‌روز شد",
           "invalidDays": "لطفاً تعداد روز معتبر وارد کنید (بیشتر از ۰)",
           "backToList": "بازگشت به فهرست اشتراک‌ها",
-          "createNew": "ایجاد جدید"
+          "createNew": "ایجاد جدید",
+          "sbpTitle": "پرداخت خودکار SBP",
+          "sbpCancel": "غیرفعال کردن",
+          "sbpCancelled": "پرداخت خودکار SBP غیرفعال شد",
+          "sbpStatus_PENDING": "در انتظار",
+          "sbpStatus_ACTIVE": "فعال",
+          "sbpStatus_PAST_DUE": "پرداخت ناموفق"
         },
         "balance": {
           "current": "موجودی فعلی",

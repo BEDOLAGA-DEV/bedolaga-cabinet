@@ -21,6 +21,8 @@ export interface UserSubscriptionInfo {
   tariff_id: number | null;
   tariff_name: string | null;
   autopay_enabled: boolean;
+  sbp_recurring_status: string | null;
+  sbp_recurring_id: number | null;
   is_active: boolean;
   days_remaining: number;
   purchased_traffic_gb: number;
@@ -505,6 +507,14 @@ export const adminUsersApi = {
     data: UpdateSubscriptionRequest,
   ): Promise<UpdateSubscriptionResponse> => {
     const response = await apiClient.post(`/cabinet/admin/users/${userId}/subscription`, data);
+    return response.data;
+  },
+
+  // Cancel a user's SBP (Platega) recurring auto-payment
+  cancelSbpRecurring: async (userId: number, subId: number): Promise<{ status: string }> => {
+    const response = await apiClient.post(
+      `/cabinet/admin/users/${userId}/subscriptions/${subId}/cancel-sbp-recurring`,
+    );
     return response.data;
   },
 
