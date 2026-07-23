@@ -251,12 +251,14 @@ export default function Dashboard() {
     setShowOnboarding(false);
   };
 
+  const userName = displayName(user);
+
   return (
     <div className="space-y-6">
       {/* Header */}
       <div data-onboarding="welcome">
         <h1 className="text-2xl font-bold text-dark-50 sm:text-3xl">
-          {t('dashboard.welcome', { name: displayName(user) })}
+          {userName ? t('dashboard.welcome', { name: userName }) : t('dashboard.welcomeNoName')}
         </h1>
         <div className="mt-1 flex flex-wrap items-center gap-2">
           <p className="text-dark-400">{t('dashboard.yourSubscription')}</p>
@@ -328,40 +330,37 @@ export default function Dashboard() {
       )}
 
       {/* Subscription Status Card — hidden in multi-tariff (managed via /subscriptions) */}
-      {!isMultiTariff && (
-        <>
-          {subLoading ? (
-            <div className="bento-card">
-              <div className="mb-4 flex items-center justify-between">
-                <div className="skeleton h-5 w-20" />
-                <div className="skeleton h-6 w-16 rounded-full" />
-              </div>
-              <div className="skeleton mb-3 h-10 w-32" />
-              <div className="skeleton mb-3 h-4 w-40" />
-              <div className="skeleton h-3 w-full rounded-full" />
-              <div className="mt-5">
-                <div className="skeleton h-12 w-full rounded-xl" />
-              </div>
+      {!isMultiTariff &&
+        (subLoading ? (
+          <div className="bento-card">
+            <div className="mb-4 flex items-center justify-between">
+              <div className="skeleton h-5 w-20" />
+              <div className="skeleton h-6 w-16 rounded-full" />
             </div>
-          ) : subscription?.is_expired ||
-            subscription?.status === 'disabled' ||
-            subscription?.is_limited ? (
-            <SubscriptionCardExpired
-              subscription={subscription}
-              balanceKopeks={balanceData?.balance_kopeks ?? 0}
-              balanceRubles={balanceData?.balance_rubles ?? 0}
-            />
-          ) : subscription ? (
-            <SubscriptionCardActive
-              subscription={subscription}
-              trafficData={trafficData}
-              refreshTrafficMutation={refreshTrafficMutation}
-              trafficRefreshCooldown={trafficRefreshCooldown}
-              connectedDevices={devicesData?.total ?? 0}
-            />
-          ) : null}
-        </>
-      )}
+            <div className="skeleton mb-3 h-10 w-32" />
+            <div className="skeleton mb-3 h-4 w-40" />
+            <div className="skeleton h-3 w-full rounded-full" />
+            <div className="mt-5">
+              <div className="skeleton h-12 w-full rounded-xl" />
+            </div>
+          </div>
+        ) : subscription?.is_expired ||
+          subscription?.status === 'disabled' ||
+          subscription?.is_limited ? (
+          <SubscriptionCardExpired
+            subscription={subscription}
+            balanceKopeks={balanceData?.balance_kopeks ?? 0}
+            balanceRubles={balanceData?.balance_rubles ?? 0}
+          />
+        ) : subscription ? (
+          <SubscriptionCardActive
+            subscription={subscription}
+            trafficData={trafficData}
+            refreshTrafficMutation={refreshTrafficMutation}
+            trafficRefreshCooldown={trafficRefreshCooldown}
+            connectedDevices={devicesData?.total ?? 0}
+          />
+        ) : null)}
 
       {/* Нет подписок: показываем триал (если доступен) и ВСЕГДА одну явную
           кнопку покупки. Триал не обязателен, чтобы попасть в витрину — раньше

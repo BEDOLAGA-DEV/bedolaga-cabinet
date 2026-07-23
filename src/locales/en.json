@@ -250,6 +250,7 @@
   "dashboard": {
     "title": "Dashboard",
     "welcome": "Welcome, {{name}}!",
+    "welcomeNoName": "Welcome!",
     "yourSubscription": "Your Subscription",
     "quickActions": "Quick Actions",
     "viewSubscription": "Manage Subscription",
