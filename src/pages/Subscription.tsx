@@ -28,13 +28,21 @@ import {
   DownloadIcon,
   TrashIcon,
 } from '../components/icons';
-import { useHaptic } from '../platform';
+import { useHaptic, usePlatform } from '../platform';
 import { resolveConnectionUrlForUi } from '../utils/connectionLink';
 import {
   getErrorMessage,
   getInsufficientBalanceError,
   getFlagEmoji,
 } from '../utils/subscriptionHelpers';
+import { openPaymentUrl } from '../utils/openPaymentUrl';
+import { useToast } from '../components/Toast';
+import {
+  isSbpFeatureDisabledError,
+  sbpIntervalLabelKey,
+  sbpUiState,
+  type SbpUiState,
+} from '../utils/sbpRecurring';
 import Twemoji from 'react-twemoji';
 import { DeviceTopupSheet } from '../components/subscription/sheets/DeviceTopupSheet';
 import { DeviceReductionSheet } from '../components/subscription/sheets/DeviceReductionSheet';
@@ -194,6 +202,8 @@ export default function Subscription() {
   const { isDark } = useTheme();
   const g = getGlassColors(isDark);
   const haptic = useHaptic();
+  const { openLink, platform } = usePlatform();
+  const { showToast } = useToast();
   const [copied, setCopied] = useState(false);
   const [showDeleteSheet, setShowDeleteSheet] = useState(false);
   const destructiveConfirm = useDestructiveConfirm();
@@ -290,12 +300,80 @@ export default function Subscription() {
 
   const isTariffsMode = purchaseOptions?.sales_mode === 'tariffs';
 
+  // SBP (Platega) recurring auto-payment status. Polls every 8s while a
+  // payment is PENDING (waiting for bank-app confirmation) so the UI flips
+  // to 'active'/'past_due' without a manual refresh; stops polling otherwise.
+  const sbpQuery = useQuery({
+    queryKey: ['sbp-recurring', subscriptionId],
+    queryFn: () => subscriptionApi.getSbpRecurring(subscriptionId),
+    enabled: !!subscription && !subscription.is_trial,
+    retry: false,
+    refetchInterval: (query) => (query.state.data?.status === 'PENDING' ? 8000 : false),
+  });
+  const sbpInfo = sbpQuery.data;
+  // 403 with a specific detail means the feature itself is disabled on the
+  // backend — distinct from "not resolved yet" or "other error", both of
+  // which must fail quiet (render nothing) rather than flash the 'off' state.
+  const sbpFeatureDisabled = isSbpFeatureDisabledError(sbpQuery.error);
+  const sbpUiStateValue: SbpUiState =
+    sbpInfo !== undefined || sbpFeatureDisabled
+      ? sbpUiState(sbpInfo, sbpFeatureDisabled)
+      : 'hidden';
+
+  const enableSbpMutation = useMutation({
+    mutationFn: () => subscriptionApi.enableSbpRecurring(subscriptionId),
+    onSuccess: (data) => {
+      if (data.redirect_url) {
+        openPaymentUrl(data.redirect_url, platform, openLink);
+      }
+      queryClient.invalidateQueries({ queryKey: ['sbp-recurring', subscriptionId] });
+      // Backend flips autopay_enabled off when SBP auto-pay is enabled.
+      queryClient.invalidateQueries({ queryKey: ['subscription', subscriptionId] });
+    },
+    onError: (error: unknown) => {
+      const detail = (error as { response?: { data?: { detail?: unknown } } })?.response?.data
+        ?.detail;
+      showToast({
+        type: 'error',
+        title: typeof detail === 'string' ? detail : t('subscription.sbpRecurring.enableError'),
+        message: '',
+        duration: 3000,
+      });
+    },
+  });
+
+  const cancelSbpMutation = useMutation({
+    mutationFn: () => subscriptionApi.cancelSbpRecurring(subscriptionId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['sbp-recurring', subscriptionId] });
+      queryClient.invalidateQueries({ queryKey: ['subscription', subscriptionId] });
+      showToast({
+        type: 'success',
+        title: t('subscription.sbpRecurring.cancelled'),
+        message: '',
+        duration: 3000,
+      });
+    },
+  });
+
+  const handleCancelSbp = async () => {
+    const confirmed = await destructiveConfirm(
+      t('subscription.sbpRecurring.confirmCancel'),
+      t('subscription.sbpRecurring.cancel'),
+    );
+    if (!confirmed) return;
+    cancelSbpMutation.mutate();
+  };
+
   const autopayMutation = useMutation({
     mutationFn: (enabled: boolean) =>
       subscriptionApi.updateAutopay(enabled, undefined, subscriptionId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['subscription', subscriptionId] });
       queryClient.invalidateQueries({ queryKey: ['subscriptions-list'] });
+      // Enabling balance-autopay cancels SBP auto-pay server-side — refresh so
+      // the SBP block doesn't keep showing a now-stale 'active'/'pending' state.
+      queryClient.invalidateQueries({ queryKey: ['sbp-recurring', subscriptionId] });
     },
   });
 
@@ -1074,6 +1152,115 @@ export default function Subscription() {
                       }}
                     />
                   </button>
+                </div>
+              )}
+
+              {/* ─── SBP Recurring Auto-payment ───
+                   Sibling of the autopay toggle above, guarded ONLY by
+                   is_trial + uiState — daily-tariff subscriptions must see
+                   this block too (backend supports a day-interval charge). */}
+              {!subscription.is_trial && sbpUiStateValue !== 'hidden' && (
+                <div
+                  className="rounded-[14px] p-3.5"
+                  style={{
+                    background: g.innerBg,
+                    border: `1px solid ${g.innerBorder}`,
+                  }}
+                >
+                  <div className="text-sm font-semibold text-dark-50">
+                    {t('subscription.sbpRecurring.title')}
+                  </div>
+
+                  {sbpUiStateValue === 'off' && (
+                    <>
+                      <div className="mt-0.5 text-[11px] text-dark-50/30">
+                        {t('subscription.sbpRecurring.autopayHint')}
+                      </div>
+                      <button
+                        onClick={() => enableSbpMutation.mutate()}
+                        disabled={enableSbpMutation.isPending}
+                        className="mt-3 w-full rounded-xl bg-accent-500 px-4 py-2.5 text-sm font-medium text-on-accent transition-opacity disabled:opacity-50"
+                      >
+                        {enableSbpMutation.isPending ? (
+                          <span className="mx-auto block h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                        ) : (
+                          t('subscription.sbpRecurring.connect')
+                        )}
+                      </button>
+                    </>
+                  )}
+
+                  {sbpUiStateValue === 'pending' && (
+                    <>
+                      <div className="mt-0.5 text-[11px] text-dark-50/30">
+                        {t('subscription.sbpRecurring.statusPending')}
+                      </div>
+                      {sbpInfo?.redirect_url && (
+                        <button
+                          onClick={() => {
+                            if (sbpInfo.redirect_url) {
+                              openPaymentUrl(sbpInfo.redirect_url, platform, openLink);
+                            }
+                          }}
+                          className="mt-3 w-full rounded-xl bg-accent-500 px-4 py-2.5 text-sm font-medium text-on-accent transition-opacity"
+                        >
+                          {t('subscription.sbpRecurring.confirmInBank')}
+                        </button>
+                      )}
+                      <button
+                        onClick={handleCancelSbp}
+                        disabled={cancelSbpMutation.isPending}
+                        className="mt-2 text-[11px] font-medium transition-colors disabled:opacity-50"
+                        style={{ color: 'rgb(var(--color-critical-500))' }}
+                      >
+                        {t('subscription.sbpRecurring.cancel')}
+                      </button>
+                    </>
+                  )}
+
+                  {sbpUiStateValue === 'active' && sbpInfo && (
+                    <>
+                      <div className="mt-0.5 text-[11px] text-dark-50/30">
+                        {t('subscription.sbpRecurring.amountPerInterval', {
+                          amount: formatAmount((sbpInfo.amount_kopeks ?? 0) / 100),
+                          interval: t(sbpIntervalLabelKey(sbpInfo.interval)),
+                        })}
+                      </div>
+                      {sbpInfo.next_charge_at && (
+                        <div className="mt-0.5 text-[11px] text-dark-50/30">
+                          {t('subscription.sbpRecurring.nextCharge', {
+                            date: new Date(sbpInfo.next_charge_at).toLocaleDateString(uiLocale(), {
+                              day: '2-digit',
+                              month: '2-digit',
+                              year: 'numeric',
+                            }),
+                          })}
+                        </div>
+                      )}
+                      <button
+                        onClick={handleCancelSbp}
+                        disabled={cancelSbpMutation.isPending}
+                        className="mt-3 w-full rounded-xl border border-error-500/30 bg-error-500/10 px-4 py-2.5 text-sm font-medium text-error-400 transition-colors hover:bg-error-500/20 disabled:opacity-50"
+                      >
+                        {t('subscription.sbpRecurring.cancel')}
+                      </button>
+                    </>
+                  )}
+
+                  {sbpUiStateValue === 'past_due' && (
+                    <>
+                      <div className="mt-0.5 text-[11px] font-medium text-warning-400">
+                        {t('subscription.sbpRecurring.statusPastDue')}
+                      </div>
+                      <button
+                        onClick={handleCancelSbp}
+                        disabled={cancelSbpMutation.isPending}
+                        className="mt-3 w-full rounded-xl border border-error-500/30 bg-error-500/10 px-4 py-2.5 text-sm font-medium text-error-400 transition-colors hover:bg-error-500/20 disabled:opacity-50"
+                      >
+                        {t('subscription.sbpRecurring.cancel')}
+                      </button>
+                    </>
+                  )}
                 </div>
               )}
             </div>
