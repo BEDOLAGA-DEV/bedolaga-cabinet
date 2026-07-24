@@ -408,15 +408,19 @@ export function SubscriptionTab(props: SubscriptionTabProps) {
                 </div>
                 {hasPermission('users:subscription') && (
                   <button
-                    onClick={() => onInlineConfirm('cancelSbpRecurring', onCancelSbpRecurring)}
+                    // Per-subscription confirm key: an armed confirm must not
+                    // survive switching to another subscription in the picker.
+                    onClick={() =>
+                      onInlineConfirm(`cancelSbpRecurring_${selectedSub.id}`, onCancelSbpRecurring)
+                    }
                     disabled={actionLoading}
                     className={`rounded-lg px-3 py-2 text-sm font-medium transition-all disabled:opacity-50 ${
-                      confirmingAction === 'cancelSbpRecurring'
+                      confirmingAction === `cancelSbpRecurring_${selectedSub.id}`
                         ? 'bg-warning-500 text-white'
                         : 'bg-warning-500/15 text-warning-400 hover:bg-warning-500/25'
                     }`}
                   >
-                    {confirmingAction === 'cancelSbpRecurring'
+                    {confirmingAction === `cancelSbpRecurring_${selectedSub.id}`
                       ? t('admin.users.detail.actions.areYouSure')
                       : t('admin.users.detail.subscription.sbpCancel')}
                   </button>

@@ -354,6 +354,16 @@ export default function Subscription() {
         duration: 3000,
       });
     },
+    onError: (error: unknown) => {
+      const detail = (error as { response?: { data?: { detail?: unknown } } })?.response?.data
+        ?.detail;
+      showToast({
+        type: 'error',
+        title: typeof detail === 'string' ? detail : t('subscription.sbpRecurring.cancelError'),
+        message: '',
+        duration: 3000,
+      });
+    },
   });
 
   const handleCancelSbp = async () => {

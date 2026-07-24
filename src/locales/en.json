@@ -683,6 +683,7 @@
       "confirmCancel": "Disable SBP auto-payment? Your subscription will no longer renew automatically via SBP.",
       "cancelled": "SBP auto-payment disabled",
       "enableError": "Failed to connect SBP auto-payment",
+      "cancelError": "Failed to cancel SBP auto-payment",
       "statusPending": "Waiting for confirmation in your banking app",
       "statusActive": "Active",
       "statusPastDue": "Payment failed — please retry",

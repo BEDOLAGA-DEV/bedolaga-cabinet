@@ -582,6 +582,7 @@
       "confirmCancel": "关闭 SBP 自动扣款？您的订阅将不再通过 SBP 自动续订。",
       "cancelled": "SBP 自动扣款已关闭",
       "enableError": "开通 SBP 自动扣款失败",
+      "cancelError": "取消 SBP 自动扣款失败",
       "statusPending": "等待银行应用确认",
       "statusActive": "已启用",
       "statusPastDue": "扣款失败 — 请重试",
