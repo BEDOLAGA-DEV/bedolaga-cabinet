@@ -72,14 +72,21 @@ jobs:
             VITE_APP_NAME=Cabinet
             VITE_APP_LOGO=V
 
+      # OCI-референсы требуют lowercase, а github.repository сохраняет регистр
+      # (BEDOLAGA-DEV/…) — Trivy падал бы на 'repository name must be lowercase'.
+      - name: Lowercase image name for Trivy
+        if: github.event_name != 'pull_request'
+        id: image
+        run: echo "name=${IMAGE_NAME,,}" >> "$GITHUB_OUTPUT"
+
       # Сканируем запушенный образ на CVE. Пока non-blocking (exit-code: 0):
       # находки уезжают в Security → Code scanning, но сборку не роняют.
       # Для ужесточения — поставить severity-фильтр в exit-code и убрать PR-гейт.
       - name: Scan image with Trivy
         if: github.event_name != 'pull_request'
-        uses: aquasecurity/trivy-action@0.24.0
+        uses: aquasecurity/trivy-action@a9c7b0f06e461e9d4b4d1711f154ee024b8d7ab8 # v0.36.0
         with:
-          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ steps.build.outputs.digest }}
+          image-ref: ${{ env.REGISTRY }}/${{ steps.image.outputs.name }}@${{ steps.build.outputs.digest }}
           format: sarif
           output: trivy-results.sarif
           severity: HIGH,CRITICAL
@@ -87,7 +94,7 @@ jobs:
 
       - name: Upload Trivy results to Security tab
         if: github.event_name != 'pull_request'
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: trivy-results.sarif
           category: trivy
