@@ -4,6 +4,7 @@ import { useBlockingStore } from '../../store/blocking';
 import { apiClient, isChannelSubscriptionError } from '../../api/client';
 import { usePlatform } from '../../platform';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
+import { customChannelMessage } from '../../utils/channelBlockingMessage';
 import { TelegramIcon, ClockIcon, CheckIcon, RestartIcon } from '@/components/icons';
 import { Button } from '@/components/primitives';
 import BlockingShell from './BlockingShell';
@@ -108,7 +109,9 @@ export default function ChannelSubscriptionScreen() {
       ariaLive="polite"
       icon={<TelegramIcon className="h-9 w-9" />}
       title={t('blocking.channel.title')}
-      description={channelInfo?.message || t('blocking.channel.defaultMessage')}
+      description={
+        customChannelMessage(channelInfo?.message) ?? t('blocking.channel.defaultMessage')
+      }
       footer={t('blocking.channel.hint')}
       actions={
         <Button
