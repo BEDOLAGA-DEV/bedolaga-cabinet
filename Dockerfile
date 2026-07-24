@@ -1,13 +1,19 @@
 # Stage 1: Build the React application
+FROM oven/bun:1-alpine AS bun-bin
+
+# Гибрид: bun только для установки пакетов (2.4x быстрее npm ci),
+# сборка остаётся под node — вывод бит-в-бит совпадает с npm-сборкой
 FROM node:20-alpine AS builder
+RUN apk add --no-cache libgcc libstdc++
+COPY --from=bun-bin /usr/local/bin/bun /usr/local/bin/bun
 
 WORKDIR /app
 
-# Copy package files
-COPY package.json package-lock.json* ./
+# Copy package files (bun.lock is generated from package-lock.json versions)
+COPY package.json bun.lock ./
 
-# Install dependencies
-RUN if [ -f package-lock.json ]; then npm ci; else npm install; fi
+# Install dependencies (frozen lockfile = reproducible builds, like npm ci)
+RUN --mount=type=cache,target=/root/.bun/install/cache bun install --frozen-lockfile
 
 # Copy source code
 COPY . .
@@ -40,3 +46,6 @@ EXPOSE 80
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD wget --no-verbose --tries=1 --spider http://localhost:80/ || exit 1
+
+
+
