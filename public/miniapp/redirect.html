@@ -148,22 +148,35 @@
             const manualBtn = document.getElementById('manualBtn');
             manualBtn.href = url;
 
-            // Attempt to launch the app WITHOUT a top-level navigation. A direct
-            // `location.href = scheme` paints a full-page net::ERR_UNKNOWN_URL_SCHEME
-            // inside Android in-app browsers (Telegram/Yandex/…) and silently fails on
-            // iOS — hiding the manual button (Telegram bug #654272). A hidden iframe is
-            // contained: the app opens if installed, otherwise the failure stays inside
-            // the (invisible) frame and the button below stays usable.
-            try {
-                var frame = document.createElement('iframe');
-                frame.style.display = 'none';
-                frame.src = url;
-                document.body.appendChild(frame);
-                setTimeout(function() {
-                    try { frame.parentNode.removeChild(frame); } catch (e) {}
-                }, 2000);
-            } catch (e) {
+            // iPadOS 13+ reports itself as desktop Safari, so a touch-capable "Mac"
+            // is treated as an iPad.
+            function isIOS() {
+                var ua = navigator.userAgent || '';
+                if (/iP(ad|hone|od)/.test(ua)) return true;
+                return navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1;
+            }
+
+            // Attempt to auto-launch the app. Two opposite fixes:
+            // - iOS launches a custom scheme only from a top-level navigation; a hidden
+            //   iframe is a silent no-op there, so use location.href.
+            // - Android in-app browsers (Telegram/Yandex/…) paint a full-page
+            //   net::ERR_UNKNOWN_URL_SCHEME on a top-level nav to an unresolved scheme
+            //   (Telegram bug #654272), so a contained hidden iframe is used instead.
+            // Either way the manual "Open app" button below stays as the reliable path.
+            if (isIOS()) {
                 window.location.href = url;
+            } else {
+                try {
+                    var frame = document.createElement('iframe');
+                    frame.style.display = 'none';
+                    frame.src = url;
+                    document.body.appendChild(frame);
+                    setTimeout(function() {
+                        try { frame.parentNode.removeChild(frame); } catch (e) {}
+                    }, 2000);
+                } catch (e) {
+                    window.location.href = url;
+                }
             }
 
             // Programmatic opening is unreliable in in-app browsers, so surface the
