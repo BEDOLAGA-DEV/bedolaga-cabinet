@@ -1,13 +1,13 @@
 # Bedolaga Cabinet - Web Interface
 
-Веб-интерфейс личного кабинета для VPN бота на базе [Remnawave Bedolaga Telegram Bot V3.0.0+](https://github.com/BEDOLAGA-DEV/remnawave-bedolaga-telegram-bot).
+Веб-интерфейс личного кабинета для VPN бота на базе [Remnawave Bedolaga Telegram Bot v3.33.0+](https://github.com/BEDOLAGA-DEV/remnawave-bedolaga-telegram-bot).
 
 React + Vite + TypeScript | Авторизация через Telegram | Мультиязычность (EN/RU) | Адаптивный дизайн
 
 ## Требования
 
 - Docker и Docker Compose
-- Запущенный backend бота с включенным Cabinet API
+- Запущенный backend бота с включенным Cabinet API, версия **v3.33.0 или новее** — авторизация кабинета использует deep-link эндпоинты (`/cabinet/auth/deeplink/*`), которых нет в более старых версиях. На старом боте кабинет не сможет авторизовать пользователей (залоченные теги вроде `:3` не подходят — используйте `:latest` или конкретный тег ≥ 3.33.0)
 - Обратный прокси (Caddy / Nginx / Traefik)
 
 ## Архитектура

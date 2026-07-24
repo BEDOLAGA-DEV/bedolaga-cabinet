@@ -201,6 +201,7 @@
     "telegramRetryFailed": "Authorization failed. Close the app and try again.",
     "telegramReopenHint": "If the problem persists, close and reopen the app",
     "telegramNotConfigured": "Telegram bot is not configured",
+    "botOutdated": "The bot version is not compatible with the cabinet. Update the bot to v3.33.0 or newer.",
     "telegramUnavailable": "Telegram login is temporarily unavailable",
     "authenticating": "Authenticating...",
     "orOpenInApp": "Or open the bot in the app",

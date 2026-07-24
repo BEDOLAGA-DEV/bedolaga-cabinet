@@ -193,6 +193,7 @@
     "telegramRetryFailed": "授权失败。请关闭应用后重新打开。",
     "telegramReopenHint": "如果问题持续存在，请关闭并重新打开应用",
     "telegramNotConfigured": "Telegram机器人未配置",
+    "botOutdated": "机器人版本与后台不兼容，请将机器人更新至 v3.33.0 或更高版本。",
     "telegramUnavailable": "Telegram登录暂时不可用",
     "authenticating": "正在验证...",
     "orOpenInApp": "或在应用中打开机器人",
