@@ -649,6 +649,15 @@ export interface SavedCardsResponse {
   recurrent_enabled: boolean;
 }
 
+// Platega SBP recurring auto-payment status for a subscription
+export interface SbpRecurringInfo {
+  status: string; // 'none' | 'PENDING' | 'ACTIVE' | 'PAST_DUE'
+  interval?: number; // 1=day,2=week,3=month,4=year
+  amount_kopeks?: number;
+  next_charge_at?: string | null;
+  redirect_url?: string | null;
+}
+
 // Ticket notifications types
 export interface TicketNotification {
   id: number;

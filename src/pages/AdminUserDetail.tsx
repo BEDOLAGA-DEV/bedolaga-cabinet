@@ -648,6 +648,20 @@ export default function AdminUserDetail() {
     }
   };
 
+  const handleCancelSbpRecurring = async () => {
+    if (!userId || !selectedSub?.sbp_recurring_id) return;
+    setActionLoading(true);
+    try {
+      await adminUsersApi.cancelSbpRecurring(userId, selectedSub.id);
+      notify.success(t('admin.users.detail.subscription.sbpCancelled'), t('common.success'));
+      await loadUser();
+    } catch {
+      notify.error(t('admin.users.userActions.error'), t('common.error'));
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   const handleDisableUser = async () => {
     if (!userId) return;
     setActionLoading(true);
@@ -713,7 +727,7 @@ export default function AdminUserDetail() {
     const k = 1024;
     const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB'];
     const i = Math.min(Math.floor(Math.log(bytes) / Math.log(k)), sizes.length - 1);
-    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
+    return `${parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`;
   };
 
   const copyToClipboard = async (text: string) => {
@@ -859,6 +873,7 @@ export default function AdminUserDetail() {
           <SubscriptionTab
             userSubscriptions={userSubscriptions}
             selectedSub={selectedSub}
+            onCancelSbpRecurring={handleCancelSbpRecurring}
             activeSubscriptionId={activeSubscriptionId}
             onActiveSubscriptionChange={setActiveSubscriptionId}
             subscriptionDetailView={subscriptionDetailView}

@@ -110,6 +110,18 @@
       "insufficientTitle": "余额不足",
       "insufficientMessage": "续期需要 {{required}} {{currency}}，当前余额 {{balance}} {{currency}}"
     },
+    "sbpRecurring": {
+      "confirmedTitle": "SBP 扣款已确认",
+      "confirmedMessage": "已成功扣款 {{amount}} {{currency}}",
+      "failedTitle": "SBP 扣款失败",
+      "failedMessage": "SBP 自动扣款失败",
+      "pastDueTitle": "SBP 扣款已逾期",
+      "pastDueMessage": "您的 SBP 自动扣款已逾期，请检查银行应用。",
+      "cancelledTitle": "SBP 自动扣款已关闭",
+      "cancelledMessage": "SBP 自动扣款已被关闭",
+      "activatedTitle": "SBP 自动扣款已开通",
+      "activatedMessage": "SBP 自动扣款已成功开通"
+    },
     "account": {
       "bannedTitle": "账户已封禁",
       "bannedMessage": "您的账户已被封禁",
@@ -562,6 +574,27 @@
     },
     "allTariffsPurchased": "所有套餐已购买",
     "autopay": "自动续订",
+    "sbpRecurring": {
+      "title": "SBP 自动扣款",
+      "connect": "开通",
+      "confirmInBank": "请在银行应用中确认",
+      "cancel": "关闭",
+      "confirmCancel": "关闭 SBP 自动扣款？您的订阅将不再通过 SBP 自动续订。",
+      "cancelled": "SBP 自动扣款已关闭",
+      "enableError": "开通 SBP 自动扣款失败",
+      "statusPending": "等待银行应用确认",
+      "statusActive": "已启用",
+      "statusPastDue": "扣款失败 — 请重试",
+      "nextCharge": "下次扣款 {{date}}",
+      "amountPerInterval": "{{amount}} ₽ {{interval}}",
+      "interval": {
+        "day": "每天",
+        "week": "每周",
+        "month": "每月",
+        "year": "每年"
+      },
+      "autopayHint": "您的订阅将通过 SBP 自动扣款，无需保存银行卡"
+    },
     "backToList": "返回订阅列表",
     "confirmDelete": "删除订阅？",
     "cta": {
@@ -727,7 +760,10 @@
       "pageTitle": "已保存的银行卡",
       "backToBalance": "返回",
       "empty": "暂无已保存的银行卡。银行卡将在下次充值时自动保存。",
-      "loadError": "加载银行卡失败，请稍后重试。"
+      "loadError": "加载银行卡失败，请稍后重试。",
+      "sbpSection": "SBP 自动扣款",
+      "sbpBinding": "SBP 绑定",
+      "sbpUnlink": "关闭 SBP 自动扣款"
     },
     "paymentSuccess": {
       "title": "支付成功",
@@ -3009,7 +3045,13 @@
           "deviceLimitUpdated": "设备限制已更新",
           "invalidDays": "请输入有效天数（大于0）",
           "backToList": "返回订阅列表",
-          "createNew": "新建"
+          "createNew": "新建",
+          "sbpTitle": "SBP 自动扣款",
+          "sbpCancel": "关闭",
+          "sbpCancelled": "SBP 自动扣款已关闭",
+          "sbpStatus_PENDING": "待确认",
+          "sbpStatus_ACTIVE": "已启用",
+          "sbpStatus_PAST_DUE": "扣款失败"
         },
         "balance": {
           "current": "当前余额",
