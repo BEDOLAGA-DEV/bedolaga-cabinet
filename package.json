@@ -60,7 +60,7 @@
     "graphology": "^0.26.0",
     "graphology-layout-forceatlas2": "^0.10.1",
     "graphology-types": "^0.24.8",
-    "i18next": "^25.8.4",
+    "i18next": "^26.3.6",
     "i18next-browser-languagedetector": "^8.2.0",
     "jsencrypt": "^3.5.4",
     "qrcode.react": "^4.2.0",
