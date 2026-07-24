@@ -247,6 +247,7 @@
   "dashboard": {
     "title": "داشبورد",
     "welcome": "خوش آمدید، {{name}}!",
+    "welcomeNoName": "خوش آمدید!",
     "yourSubscription": "اشتراک شما",
     "quickActions": "دسترسی سریع",
     "viewSubscription": "مدیریت اشتراک",

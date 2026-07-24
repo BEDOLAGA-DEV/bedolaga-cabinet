@@ -247,6 +247,7 @@
   "dashboard": {
     "title": "个人中心",
     "welcome": "欢迎，{{name}}！",
+    "welcomeNoName": "欢迎！",
     "yourSubscription": "您的订阅",
     "quickActions": "快捷操作",
     "viewSubscription": "管理订阅",
