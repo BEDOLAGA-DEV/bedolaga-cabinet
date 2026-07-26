@@ -22,6 +22,7 @@ export const METHOD_LABELS: Record<string, string> = {
   etoplatezhi: 'Etoplatezhi',
   antilopay: 'Antilopay',
   jupiter: 'Jupiter',
+  cispay: 'CisPay',
   donut: 'Donut',
   lava: 'Lava',
   apple_iap: 'Apple In-App Purchase',

@@ -219,7 +219,7 @@ export default function AdminPaymentMethods() {
           )}
           <div>
             <h1 className="text-xl font-bold text-dark-100">{t('admin.paymentMethods.title')}</h1>
-            <p className="text-sm text-dark-400">{t('admin.paymentMethods.description')}</p>
+            <p className="text-sm text-dark-400">{t('admin.paymentMethods.subtitle')}</p>
           </div>
         </div>
         {orderChanged && (

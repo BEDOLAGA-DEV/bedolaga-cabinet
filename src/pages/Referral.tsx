@@ -101,17 +101,21 @@ export default function Referral() {
 
   const isPartner = partnerStatus?.partner_status === 'approved';
 
-  // Withdrawal queries (only when partner is approved)
+  // Withdrawal is available to any referrer: the backend endpoints
+  // (/cabinet/referral/withdrawal/*) do not require partner_status, so the
+  // section is gated only by the admin visibility flag.
+  const withdrawalVisible = terms?.partner_section_visible !== false;
+
   const { data: withdrawalBalance } = useQuery({
     queryKey: ['withdrawal-balance'],
     queryFn: withdrawalApi.getBalance,
-    enabled: isPartner,
+    enabled: withdrawalVisible,
   });
 
   const { data: withdrawalHistory } = useQuery({
     queryKey: ['withdrawal-history'],
     queryFn: withdrawalApi.getHistory,
-    enabled: isPartner,
+    enabled: withdrawalVisible,
   });
 
   // Withdrawal cancel mutation
@@ -540,9 +544,9 @@ export default function Referral() {
           </div>
         )}
 
-      {/* ==================== Withdrawal Section (approved partners only) ==================== */}
+      {/* ==================== Withdrawal Section ==================== */}
 
-      {terms?.partner_section_visible !== false && isPartner && (
+      {withdrawalVisible && (
         <div id="withdrawal-section" className="space-y-6">
           {/* Withdrawal Balance Card */}
           {withdrawalBalance && (

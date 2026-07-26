@@ -16,9 +16,8 @@ export {
 } from '@radix-ui/react-dropdown-menu';
 
 // SubTrigger
-export interface DropdownMenuSubTriggerProps extends ComponentPropsWithoutRef<
-  typeof DropdownMenuPrimitive.SubTrigger
-> {
+export interface DropdownMenuSubTriggerProps
+  extends ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.SubTrigger> {
   inset?: boolean;
 }
 
@@ -115,9 +114,8 @@ export const DropdownMenuContent = forwardRef<HTMLDivElement, DropdownMenuConten
 DropdownMenuContent.displayName = 'DropdownMenuContent';
 
 // Item
-export interface DropdownMenuItemProps extends ComponentPropsWithoutRef<
-  typeof DropdownMenuPrimitive.Item
-> {
+export interface DropdownMenuItemProps
+  extends ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Item> {
   inset?: boolean;
   destructive?: boolean;
 }
@@ -210,9 +208,8 @@ export const DropdownMenuRadioItem = forwardRef<HTMLDivElement, DropdownMenuRadi
 DropdownMenuRadioItem.displayName = 'DropdownMenuRadioItem';
 
 // Label
-export interface DropdownMenuLabelProps extends ComponentPropsWithoutRef<
-  typeof DropdownMenuPrimitive.Label
-> {
+export interface DropdownMenuLabelProps
+  extends ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Label> {
   inset?: boolean;
 }
 

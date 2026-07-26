@@ -27,11 +27,13 @@ import type { Tariff } from '../../../types';
 // ──────────────────────────────────────────────────────────────────
 
 // The backend rejects a switch that must instead go through the purchase flow:
-// the subscription lapsed (`subscription_expired`), or it is a trial that has no
+// the subscription lapsed (`subscription_expired`), it is a trial that has no
 // paid value to prorate and would otherwise be handed a full target period
-// (`trial_cannot_switch`, bug #629889). Both arrive as detail.code +
-// use_purchase_flow=true; some payloads use the legacy `error_code` key, so we
-// accept either.
+// (`trial_cannot_switch`, bug #629889), or it sits on a free 0₽ tariff whose
+// spammed/gifted remainder must reset rather than be prorated and carried
+// (`free_tariff_cannot_switch`, TARIFF_SWITCH_RESET_FREE_DAYS). All arrive as
+// detail.code + use_purchase_flow=true; some payloads use the legacy
+// `error_code` key, so we accept either.
 function shouldUsePurchaseFlow(error: unknown): boolean {
   if (!(error instanceof AxiosError)) return false;
   const detail = error.response?.data?.detail as
@@ -40,7 +42,9 @@ function shouldUsePurchaseFlow(error: unknown): boolean {
   if (!detail || typeof detail !== 'object') return false;
   const code = detail.code ?? detail.error_code;
   return (
-    (code === 'subscription_expired' || code === 'trial_cannot_switch') &&
+    (code === 'subscription_expired' ||
+      code === 'trial_cannot_switch' ||
+      code === 'free_tariff_cannot_switch') &&
     detail.use_purchase_flow === true
   );
 }

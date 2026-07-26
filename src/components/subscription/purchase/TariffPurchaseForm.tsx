@@ -6,6 +6,8 @@ import { subscriptionApi } from '../../../api/subscription';
 import { getErrorMessage, getInsufficientBalanceError } from '../../../utils/subscriptionHelpers';
 import { useCurrency } from '../../../hooks/useCurrency';
 import { usePromoDiscount } from '../../../hooks/usePromoDiscount';
+import { usePlatform } from '../../../platform';
+import { openPaymentUrl } from '../../../utils/openPaymentUrl';
 import InsufficientBalancePrompt from '../../InsufficientBalancePrompt';
 import type { Tariff, TariffPeriod } from '../../../types';
 
@@ -31,6 +33,8 @@ export interface TariffPurchaseFormProps {
   tariff: Tariff;
   subscriptionId: number | undefined;
   balanceKopeks: number | undefined;
+  /** СБП-оформление (Platega recurrent) доступно — показать вторую CTA. */
+  sbpPurchaseEnabled?: boolean;
   onBack: () => void;
 }
 
@@ -38,6 +42,7 @@ export function TariffPurchaseForm({
   tariff,
   subscriptionId,
   balanceKopeks,
+  sbpPurchaseEnabled = false,
   onBack,
 }: TariffPurchaseFormProps) {
   const { t } = useTranslation();
@@ -45,6 +50,7 @@ export function TariffPurchaseForm({
   const queryClient = useQueryClient();
   const { formatAmount, currencySymbol } = useCurrency();
   const { applyPromoDiscount } = usePromoDiscount();
+  const { openLink, platform } = usePlatform();
   const ref = useRef<HTMLDivElement>(null);
 
   const formatPrice = (kopeks: number) =>
@@ -92,6 +98,49 @@ export function TariffPurchaseForm({
       navigate('/subscriptions', { replace: true });
     },
   });
+
+  // СБП-оформление: первое списание = подтверждение привязки в банке; период
+  // на форме не участвует — списания идут по каденс-правилу тарифа.
+  const sbpPurchaseMutation = useMutation({
+    mutationFn: () => subscriptionApi.purchaseWithSbpRecurring(tariff.id),
+    onSuccess: (data) => {
+      if (data.redirect_url) {
+        openPaymentUrl(data.redirect_url, platform, openLink);
+      }
+      queryClient.invalidateQueries({ queryKey: ['subscription'] });
+      queryClient.invalidateQueries({ queryKey: ['purchase-options'] });
+      queryClient.invalidateQueries({ queryKey: ['subscriptions-list'] });
+      queryClient.invalidateQueries({ queryKey: ['sbp-recurring', data.subscription_id] });
+      navigate('/subscriptions', { replace: true });
+    },
+  });
+
+  const sbpPurchaseButton = sbpPurchaseEnabled && (
+    <>
+      <button
+        onClick={() => sbpPurchaseMutation.mutate()}
+        disabled={sbpPurchaseMutation.isPending || purchaseMutation.isPending}
+        className="mt-2 w-full rounded-xl border border-accent-500/40 bg-accent-500/10 py-3 text-sm font-medium text-accent-400 transition-colors hover:bg-accent-500/20 disabled:opacity-50"
+      >
+        {sbpPurchaseMutation.isPending ? (
+          <span className="flex items-center justify-center gap-2">
+            <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+            {t('common.loading')}
+          </span>
+        ) : (
+          t('subscription.sbpRecurring.purchaseButton')
+        )}
+      </button>
+      <div className="mt-1.5 text-center text-[11px] text-dark-500">
+        {t('subscription.sbpRecurring.purchaseHint')}
+      </div>
+      {sbpPurchaseMutation.isError && (
+        <div className="mt-2 text-center text-sm text-error-400">
+          {getErrorMessage(sbpPurchaseMutation.error)}
+        </div>
+      )}
+    </>
+  );
 
   // Smooth scroll the form into view when first mounted.
   useEffect(() => {
@@ -189,6 +238,8 @@ export function TariffPurchaseForm({
                     })
                   )}
                 </button>
+
+                {sbpPurchaseButton}
 
                 {purchaseMutation.isError &&
                   !getInsufficientBalanceError(purchaseMutation.error) && (
@@ -613,6 +664,8 @@ export function TariffPurchaseForm({
                         t('subscription.purchase')
                       )}
                     </button>
+
+                    {sbpPurchaseButton}
                   </>
                 );
               })()}

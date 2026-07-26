@@ -14,6 +14,11 @@ export const referralNetworkApi = {
     return response.data;
   },
 
+  getFullGraph: async (): Promise<NetworkGraphData> => {
+    const response = await apiClient.get('/cabinet/admin/referral-network/');
+    return response.data;
+  },
+
   getScopedGraph: async (selections: ScopeSelection[]): Promise<NetworkGraphData> => {
     const campaignIds = selections.filter((s) => s.type === 'campaign').map((s) => s.id);
     const partnerIds = selections.filter((s) => s.type === 'partner').map((s) => s.id);

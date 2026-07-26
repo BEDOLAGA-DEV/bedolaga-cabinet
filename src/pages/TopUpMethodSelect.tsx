@@ -74,12 +74,12 @@ export default function TopUpMethodSelect() {
                     <div className="flex items-center gap-3">
                       <PaymentMethodIcon method={methodKey} className="h-8 w-8 flex-shrink-0" />
                       <div className="font-semibold text-dark-100">
-                        {translatedName || method.name}
+                        {method.name || translatedName}
                       </div>
                     </div>
-                    {(translatedDesc || method.description) && (
+                    {(method.description || translatedDesc) && (
                       <div className="mt-1 text-sm text-dark-500">
-                        {translatedDesc || method.description}
+                        {method.description || translatedDesc}
                       </div>
                     )}
                     <div className="mt-3 text-xs text-dark-400">

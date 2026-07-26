@@ -21,6 +21,8 @@ export interface UserSubscriptionInfo {
   tariff_id: number | null;
   tariff_name: string | null;
   autopay_enabled: boolean;
+  sbp_recurring_status: string | null;
+  sbp_recurring_id: number | null;
   is_active: boolean;
   days_remaining: number;
   purchased_traffic_gb: number;
@@ -171,6 +173,23 @@ export interface SubscriptionRequestRecord {
 export interface SubscriptionRequestHistory {
   total: number;
   records: SubscriptionRequestRecord[];
+}
+
+export interface UserActivityItem {
+  type: string;
+  subtype: string | null;
+  source: string | null;
+  title: string | null;
+  amount_kopeks: number | null;
+  timestamp: string;
+  meta: Record<string, unknown> | null;
+}
+
+export interface UserActivityResponse {
+  items: UserActivityItem[];
+  total: number;
+  offset: number;
+  limit: number;
 }
 
 export interface UserNodeUsageItem {
@@ -491,6 +510,14 @@ export const adminUsersApi = {
     return response.data;
   },
 
+  // Cancel a user's SBP (Platega) recurring auto-payment
+  cancelSbpRecurring: async (userId: number, subId: number): Promise<{ status: string }> => {
+    const response = await apiClient.post(
+      `/cabinet/admin/users/${userId}/subscriptions/${subId}/cancel-sbp-recurring`,
+    );
+    return response.data;
+  },
+
   // Update status
   updateStatus: async (
     userId: number,
@@ -515,6 +542,15 @@ export const adminUsersApi = {
   // Unblock user
   unblockUser: async (userId: number): Promise<UpdateUserStatusResponse> => {
     const response = await apiClient.post(`/cabinet/admin/users/${userId}/unblock`);
+    return response.data;
+  },
+
+  // Send direct Telegram message to user via bot (parity with bot's admin action)
+  sendMessage: async (
+    userId: number,
+    text: string,
+  ): Promise<{ success: boolean; message: string }> => {
+    const response = await apiClient.post(`/cabinet/admin/users/${userId}/send-message`, { text });
     return response.data;
   },
 
@@ -696,6 +732,19 @@ export const adminUsersApi = {
     const response = await apiClient.get(`/cabinet/admin/users/${userId}/node-usage`, {
       params: subscriptionId != null ? { subscription_id: subscriptionId } : undefined,
     });
+    return response.data;
+  },
+
+  // Unified activity timeline (bot + cabinet actions)
+  getUserActivity: async (
+    userId: number,
+    offset = 0,
+    limit = 25,
+    types?: string,
+  ): Promise<UserActivityResponse> => {
+    const params: Record<string, unknown> = { offset, limit };
+    if (types) params.types = types;
+    const response = await apiClient.get(`/cabinet/admin/users/${userId}/activity`, { params });
     return response.data;
   },
 

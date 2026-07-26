@@ -114,11 +114,19 @@ export default function Connection() {
   const openDeepLink = useCallback(
     (deepLink: string) => {
       let resolved = deepLink;
-      if (isHappCryptolinkMode(connectionLink?.connect_mode) && qrConnectionUrl) {
-        // In HAPP cryptolink mode always open the resolved happ://crypt... URL.
-        resolved = qrConnectionUrl;
-      } else if (hasTemplates(resolved)) {
+      if (hasTemplates(resolved)) {
         resolved = resolveUrl(resolved);
+      }
+      // In HAPP cryptolink mode keep hiding the plain subscription link: force the
+      // happ://crypt... URL only when the button fell back to it or its template
+      // could not be resolved. An explicit link from the panel's Subpage config
+      // (e.g. happ://add/...) wins — admins expect Subpage edits to apply here.
+      if (
+        isHappCryptolinkMode(connectionLink?.connect_mode) &&
+        qrConnectionUrl &&
+        (!resolved || resolved === appConfig?.subscriptionUrl || hasTemplates(resolved))
+      ) {
+        resolved = qrConnectionUrl;
       }
       const isHttpUrl = /^https?:\/\//i.test(resolved);
       const finalUrlForTelegram = isHttpUrl
@@ -140,7 +148,14 @@ export default function Connection() {
       // still navigate normally. (Telegram bug #654272.)
       openAppScheme(resolved);
     },
-    [isTelegramWebApp, i18n.language, resolveUrl, connectionLink?.connect_mode, qrConnectionUrl],
+    [
+      isTelegramWebApp,
+      i18n.language,
+      resolveUrl,
+      connectionLink?.connect_mode,
+      qrConnectionUrl,
+      appConfig?.subscriptionUrl,
+    ],
   );
 
   // Check if any platform has configured apps
@@ -217,6 +232,7 @@ export default function Connection() {
       isTelegramWebApp={isTelegramWebApp}
       onGoBack={handleGoBack}
       onOpenQR={handleOpenQR}
+      username={user?.username ?? undefined}
     />
   );
 }

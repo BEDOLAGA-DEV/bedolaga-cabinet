@@ -1,12 +1,15 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
+import { useNotify } from '../../../platform/hooks/useNotify';
 import { useCurrency } from '../../../hooks/useCurrency';
 import { createNumberInputHandler } from '../../../utils/inputHelpers';
-import type {
-  UserDetailResponse,
-  UserListItem,
-  UserPanelInfo,
-  UserSubscriptionInfo,
+import {
+  adminUsersApi,
+  type UserDetailResponse,
+  type UserListItem,
+  type UserPanelInfo,
+  type UserSubscriptionInfo,
 } from '../../../api/adminUsers';
 import type { PromoGroup } from '../../../api/promocodes';
 import { ServerIcon } from '@/components/icons';
@@ -92,6 +95,12 @@ export function InfoTab(props: InfoTabProps) {
   const { t } = useTranslation();
   const { formatWithCurrency } = useCurrency();
   const navigate = useNavigate();
+  const notify = useNotify();
+
+  // «Отправить сообщение» — паритет с бот-кнопкой в карточке юзера
+  const [sendMsgOpen, setSendMsgOpen] = useState(false);
+  const [sendMsgText, setSendMsgText] = useState('');
+  const [sendMsgLoading, setSendMsgLoading] = useState(false);
   const {
     user,
     hasPermission,
@@ -123,6 +132,32 @@ export function InfoTab(props: InfoTabProps) {
     onDisableUser,
     onFullDeleteUser,
   } = props;
+
+  const handleSendMessage = async () => {
+    const text = sendMsgText.trim();
+    if (!text || sendMsgLoading) return;
+    setSendMsgLoading(true);
+    try {
+      await adminUsersApi.sendMessage(user.id, text);
+      notify.success(t('admin.users.sendMessage.success'), t('common.success'));
+      setSendMsgOpen(false);
+      setSendMsgText('');
+    } catch (err) {
+      const detail = (
+        err as { response?: { data?: { detail?: { code?: string; message?: string } | string } } }
+      )?.response?.data?.detail;
+      const code = typeof detail === 'object' ? detail?.code : undefined;
+      const known = ['no_telegram_id', 'forbidden', 'bad_request'];
+      const message =
+        code && known.includes(code)
+          ? t(`admin.users.sendMessage.errors.${code}`)
+          : (typeof detail === 'object' ? detail?.message : detail) ||
+            t('admin.users.userActions.error');
+      notify.error(message, t('common.error'));
+    } finally {
+      setSendMsgLoading(false);
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -470,6 +505,16 @@ export function InfoTab(props: InfoTabProps) {
           {t('admin.users.detail.actions.title')}
         </div>
         <div className="grid grid-cols-2 gap-2">
+          {hasPermission('users:send_message') && (
+            <button
+              onClick={() => setSendMsgOpen(true)}
+              disabled={actionLoading || !user.telegram_id}
+              title={!user.telegram_id ? t('admin.users.sendMessage.noTelegram') : undefined}
+              className="col-span-2 rounded-lg bg-accent-500/15 px-3 py-2 text-sm font-medium text-accent-400 transition-all hover:bg-accent-500/25 disabled:opacity-50"
+            >
+              {t('admin.users.sendMessage.button')}
+            </button>
+          )}
           <button
             onClick={() => onInlineConfirm('resetTrial', onResetTrial)}
             disabled={actionLoading}
@@ -524,6 +569,55 @@ export function InfoTab(props: InfoTabProps) {
           </button>
         </div>
       </div>
+
+      {/* Send message modal */}
+      {sendMsgOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="fixed inset-0 bg-dark-950/60"
+            onClick={() => !sendMsgLoading && setSendMsgOpen(false)}
+            aria-hidden="true"
+          />
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="send-message-title"
+            className="relative w-full max-w-md rounded-xl border border-dark-700 bg-dark-800 p-5"
+          >
+            <h3 id="send-message-title" className="mb-3 text-base font-semibold text-dark-100">
+              {t('admin.users.sendMessage.title')}
+            </h3>
+            <textarea
+              value={sendMsgText}
+              onChange={(e) => setSendMsgText(e.target.value)}
+              maxLength={4096}
+              rows={5}
+              autoFocus
+              placeholder={t('admin.users.sendMessage.placeholder')}
+              className="w-full resize-y rounded-lg border border-dark-600 bg-dark-900/60 px-3 py-2 text-sm text-dark-100 placeholder-dark-500 focus:border-accent-500 focus:outline-none"
+            />
+            <div className="mt-1 text-right text-xs text-dark-500">{sendMsgText.length}/4096</div>
+            <div className="mt-3 flex justify-end gap-2">
+              <button
+                onClick={() => setSendMsgOpen(false)}
+                disabled={sendMsgLoading}
+                className="rounded-lg bg-dark-700 px-4 py-2 text-sm font-medium text-dark-300 transition-colors hover:bg-dark-600 disabled:opacity-50"
+              >
+                {t('common.cancel')}
+              </button>
+              <button
+                onClick={handleSendMessage}
+                disabled={sendMsgLoading || !sendMsgText.trim()}
+                className="rounded-lg bg-accent-500 px-4 py-2 text-sm font-medium text-on-accent transition-colors hover:bg-accent-600 disabled:opacity-50"
+              >
+                {sendMsgLoading
+                  ? t('admin.users.sendMessage.sending')
+                  : t('admin.users.sendMessage.send')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

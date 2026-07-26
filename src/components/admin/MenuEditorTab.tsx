@@ -39,6 +39,7 @@ import {
 import { Toggle } from './Toggle';
 import { useNotify } from '../../platform/hooks/useNotify';
 import { useNativeDialog } from '../../platform/hooks/useNativeDialog';
+import { getApiErrorMessage } from '../../utils/api-error';
 
 const ChevronIcon = ({ expanded }: { expanded: boolean }) => (
   <PiCaretDown className={`h-3.5 w-3.5 transition-transform ${expanded ? 'rotate-180' : ''}`} />
@@ -511,9 +512,7 @@ export function MenuEditorTab() {
       queryClient.setQueryData(['menu-layout'], data);
     },
     onError: (err: unknown) => {
-      const error = err as { response?: { data?: { detail?: string } } };
-      const detail = error.response?.data?.detail;
-      notify.error(detail || t('common.error'));
+      notify.error(getApiErrorMessage(err, t('common.error')));
     },
   });
 

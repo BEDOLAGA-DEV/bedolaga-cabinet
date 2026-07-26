@@ -1,11 +1,13 @@
+import { uiLocale } from '@/utils/uiLocale';
 import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { PiCaretDown } from 'react-icons/pi';
 import DOMPurify from 'dompurify';
-import { infoApi, FaqPage, InfoVisibility } from '../api/info';
+import { infoApi, type FaqPage, type InfoVisibility } from '../api/info';
+import { formatContent } from '../utils/legalContent';
 import { infoPagesApi } from '../api/infoPages';
-import { promoApi, LoyaltyTierInfo } from '../api/promo';
+import { promoApi, type LoyaltyTierInfo } from '../api/promo';
 import type { FaqItem, ReplacesTab } from '../api/infoPages';
 import { DocumentIcon, InfoIcon, QuestionIcon, ShieldIcon, StarIcon } from '@/components/icons';
 
@@ -14,42 +16,6 @@ const ChevronIcon = ({ expanded }: { expanded: boolean }) => (
 );
 
 const BUILTIN_TABS = new Set<string>(['faq', 'rules', 'privacy', 'offer', 'loyalty']);
-
-// Sanitize HTML content to prevent XSS
-const sanitizeHtml = (html: string): string => {
-  return DOMPurify.sanitize(html, {
-    ALLOWED_TAGS: [
-      'p',
-      'br',
-      'b',
-      'i',
-      'u',
-      'strong',
-      'em',
-      'a',
-      'ul',
-      'ol',
-      'li',
-      'h1',
-      'h2',
-      'h3',
-      'h4',
-      'h5',
-      'h6',
-      'blockquote',
-      'code',
-      'pre',
-      's',
-      'del',
-      'ins',
-      'span',
-      'div',
-      'tg-spoiler',
-    ],
-    ALLOWED_ATTR: ['href', 'target', 'rel', 'class', 'start'],
-    ALLOW_DATA_ATTR: false,
-  });
-};
 
 // Rich sanitizer for custom InfoPage content (TipTap editor output with media)
 const ALLOWED_IFRAME_HOSTS = new Set([
@@ -179,55 +145,6 @@ const RICH_SANITIZE_CONFIG = {
 
 const sanitizeRichHtml = (html: string): string => {
   return infoPagePurify.sanitize(html, RICH_SANITIZE_CONFIG);
-};
-
-// Convert content to formatted HTML (handles Telegram HTML + plain text)
-const formatContent = (content: string): string => {
-  if (!content) return '';
-
-  // Check if content has block-level HTML (full HTML document)
-  const hasBlockHtml = /<(p|div|h[1-6]|ul|ol|blockquote)\b/i.test(content);
-
-  if (hasBlockHtml) {
-    return sanitizeHtml(content);
-  }
-
-  // Content may have inline Telegram HTML (<b>, <i>, <u>, <code>, <a>) but uses
-  // newlines for structure. Convert newlines to paragraphs while preserving inline tags.
-  const result = content
-    .split(/\n\n+/)
-    .map((paragraph) => {
-      const trimmed = paragraph.trim();
-      if (!trimmed) return '';
-
-      // Check if it's a markdown header
-      if (/^#{1,4}\s/.test(trimmed)) {
-        const level = trimmed.match(/^(#{1,4})/)?.[1].length || 1;
-        const text = trimmed.replace(/^#{1,4}\s*/, '');
-        return `<h${level}>${text}</h${level}>`;
-      }
-
-      // Check for list items
-      if (/^[-•]\s/.test(trimmed) || /^\d+[.)]\s/.test(trimmed)) {
-        const lines = trimmed.split('\n');
-        const isOrdered = /^\d+[.)]\s/.test(lines[0]);
-        const startNum = isOrdered ? parseInt(lines[0].match(/^(\d+)/)?.[1] || '1', 10) : 1;
-        const listItems = lines
-          .map((line) => line.replace(/^[-•]\s*/, '').replace(/^\d+[.)]\s*/, ''))
-          .filter((line) => line.trim())
-          .map((line) => `<li>${line}</li>`)
-          .join('');
-        return isOrdered ? `<ol start="${startNum}">${listItems}</ol>` : `<ul>${listItems}</ul>`;
-      }
-
-      // Regular paragraph — single newlines become <br/>
-      const formatted = trimmed.split('\n').join('<br/>');
-      return `<p>${formatted}</p>`;
-    })
-    .filter(Boolean)
-    .join('');
-
-  return sanitizeHtml(result);
 };
 
 // --- FAQ Accordion for tab replacements ---
@@ -573,7 +490,7 @@ export default function Info() {
           />
           {rules.updated_at && (
             <p className="mt-6 border-t border-dark-700 pt-4 text-sm text-dark-400">
-              {t('info.updatedAt')}: {new Date(rules.updated_at).toLocaleDateString()}
+              {t('info.updatedAt')}: {new Date(rules.updated_at).toLocaleDateString(uiLocale())}
             </p>
           )}
         </div>
@@ -601,7 +518,7 @@ export default function Info() {
           />
           {privacy.updated_at && (
             <p className="mt-6 border-t border-dark-700 pt-4 text-sm text-dark-400">
-              {t('info.updatedAt')}: {new Date(privacy.updated_at).toLocaleDateString()}
+              {t('info.updatedAt')}: {new Date(privacy.updated_at).toLocaleDateString(uiLocale())}
             </p>
           )}
         </div>
@@ -629,7 +546,7 @@ export default function Info() {
           />
           {offer.updated_at && (
             <p className="mt-6 border-t border-dark-700 pt-4 text-sm text-dark-400">
-              {t('info.updatedAt')}: {new Date(offer.updated_at).toLocaleDateString()}
+              {t('info.updatedAt')}: {new Date(offer.updated_at).toLocaleDateString(uiLocale())}
             </p>
           )}
         </div>
@@ -650,7 +567,7 @@ export default function Info() {
       }
 
       const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat('ru-RU', {
+        return new Intl.NumberFormat(uiLocale(), {
           style: 'currency',
           currency: 'RUB',
           minimumFractionDigits: 0,

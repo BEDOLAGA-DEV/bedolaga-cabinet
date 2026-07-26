@@ -116,6 +116,18 @@
       "insufficientTitle": "Insufficient funds",
       "insufficientMessage": "Need {{required}} {{currency}} for renewal, but balance is {{balance}} {{currency}}"
     },
+    "sbpRecurring": {
+      "confirmedTitle": "SBP payment confirmed",
+      "confirmedMessage": "Payment of {{amount}} {{currency}} was charged successfully",
+      "failedTitle": "SBP payment failed",
+      "failedMessage": "Failed to charge your SBP auto-payment",
+      "pastDueTitle": "SBP payment overdue",
+      "pastDueMessage": "Your SBP auto-payment is overdue. Please check your banking app.",
+      "cancelledTitle": "SBP auto-payment disabled",
+      "cancelledMessage": "SBP auto-payment has been disabled",
+      "activatedTitle": "SBP auto-payment connected",
+      "activatedMessage": "SBP auto-payment has been successfully connected"
+    },
     "account": {
       "bannedTitle": "Account blocked",
       "bannedMessage": "Your account has been blocked",
@@ -189,6 +201,7 @@
     "telegramRetryFailed": "Authorization failed. Close the app and try again.",
     "telegramReopenHint": "If the problem persists, close and reopen the app",
     "telegramNotConfigured": "Telegram bot is not configured",
+    "botOutdated": "The bot version is not compatible with the cabinet. Update the bot to v3.33.0 or newer.",
     "telegramUnavailable": "Telegram login is temporarily unavailable",
     "authenticating": "Authenticating...",
     "orOpenInApp": "Or open the bot in the app",
@@ -238,9 +251,19 @@
     "failed": "Verification Failed",
     "goToLogin": "Go to Login"
   },
+  "resetPassword": {
+    "title": "Set new password",
+    "enterNewPassword": "Enter your new password below.",
+    "success": "Password changed!",
+    "redirectingToLogin": "Redirecting to login...",
+    "setPassword": "Set new password",
+    "invalidToken": "Invalid reset link",
+    "tokenExpiredOrInvalid": "This password reset link is invalid or has expired."
+  },
   "dashboard": {
     "title": "Dashboard",
     "welcome": "Welcome, {{name}}!",
+    "welcomeNoName": "Welcome!",
     "yourSubscription": "Your Subscription",
     "quickActions": "Quick Actions",
     "viewSubscription": "Manage Subscription",
@@ -291,6 +314,7 @@
       "traffic": "Traffic",
       "devices": "Devices",
       "expiredDate": "Expired",
+      "expiredDate_trial": "Expired",
       "activeUntil": "Active until"
     },
     "suspended": {
@@ -653,6 +677,30 @@
     },
     "allTariffsPurchased": "All tariffs already purchased",
     "autopay": "Auto-renew",
+    "sbpRecurring": {
+      "title": "SBP Auto-payment",
+      "connect": "Connect",
+      "confirmInBank": "Confirm in your banking app",
+      "cancel": "Disable",
+      "confirmCancel": "Disable SBP auto-payment? Your subscription will no longer renew automatically via SBP.",
+      "cancelled": "SBP auto-payment disabled",
+      "enableError": "Failed to connect SBP auto-payment",
+      "cancelError": "Failed to cancel SBP auto-payment",
+      "statusPending": "Waiting for confirmation in your banking app",
+      "statusActive": "Active",
+      "statusPastDue": "Payment failed — please retry",
+      "nextCharge": "next charge {{date}}",
+      "amountPerInterval": "{{amount}} ₽ {{interval}}",
+      "interval": {
+        "day": "daily",
+        "week": "weekly",
+        "month": "monthly",
+        "year": "yearly"
+      },
+      "autopayHint": "Your subscription will be charged automatically via SBP, no card required",
+      "purchaseButton": "⚡ Subscribe with SBP auto-payment",
+      "purchaseHint": "First charge confirms the binding in your bank app; renewals are charged automatically per the tariff cadence."
+    },
     "backToList": "Back to subscriptions",
     "confirmDelete": "Delete subscription?",
     "dailyAutoCharge": "Daily auto-charge",
@@ -746,6 +794,9 @@
       "jupiter": {
         "description": "Pay via SBP through Jupiter (FPGate P2P)"
       },
+      "cispay": {
+        "description": "Pay by card or via SBP (cisPay)"
+      },
       "donut": {
         "description": "Pay by card or SBP through Donut P2P"
       },
@@ -826,7 +877,10 @@
       "pageTitle": "Saved Cards",
       "backToBalance": "Back",
       "empty": "No saved cards. A card will be saved automatically on your next top-up.",
-      "loadError": "Failed to load saved cards. Please try again later."
+      "loadError": "Failed to load saved cards. Please try again later.",
+      "sbpSection": "SBP Auto-payment",
+      "sbpBinding": "SBP binding",
+      "sbpUnlink": "Disable SBP auto-payment"
     },
     "paymentReady": "Payment link is ready",
     "clickToOpenPayment": "Click the button below to open the payment page in a new tab",
@@ -1241,6 +1295,7 @@
       "campaigns": "Campaigns",
       "promoOffers": "Promo Offers",
       "promocodes": "Promo Codes",
+      "coupons": "Coupons",
       "promoGroups": "Discount Groups",
       "trafficUsage": "Traffic Usage",
       "updates": "Updates",
@@ -1497,7 +1552,10 @@
         "removeItem": "Remove {{label}}",
         "clearAll": "Clear all selections",
         "addScope": "Add scope",
-        "maxReached": "Maximum {{max}} items"
+        "maxReached": "Maximum {{max}} items",
+        "fullNetwork": "Full network",
+        "fullNetworkHint": "Show the entire graph",
+        "removeFullNetwork": "Turn off full network mode"
       },
       "loading": "Loading graph...",
       "error": "Failed to load network data",
@@ -1610,7 +1668,7 @@
     },
     "paymentMethods": {
       "title": "Payment Methods",
-      "description": "Configure display order and conditions",
+      "subtitle": "Configure display order and conditions",
       "enabled": "On",
       "disabled": "Off",
       "notConfigured": "Not configured",
@@ -1626,6 +1684,8 @@
       "openUrlDirectHint": "ON — the payment link opens immediately, without the intermediate button panel. OFF — an \"Open payment\" button is shown. Inside Telegram the link opens in the external browser either way (otherwise paying via a bank app/SBP fails); after payment the user returns to the result page. Stars/CryptoBot (t.me/ links) always open natively and ignore this flag.",
       "displayName": "Display name",
       "displayNameHint": "Leave empty for default name",
+      "description": "Description",
+      "descriptionHint": "Shown under the method name. Empty for default text",
       "subOptions": "Payment options",
       "minAmount": "Min amount (kopeks)",
       "maxAmount": "Max amount (kopeks)",
@@ -1692,6 +1752,7 @@
         "totalUpload": "Upload",
         "totalTraffic": "Total",
         "online": "online",
+        "realtimeTitle": "Realtime traffic",
         "inbounds": "Inbounds",
         "outbounds": "Outbounds"
       },
@@ -1946,6 +2007,7 @@
       "customButtonTypeUrl": "URL",
       "customButtonCallbackPlaceholder": "callback_data (e.g. back_to_menu)",
       "customButtonUrlPlaceholder": "https://example.com",
+      "customButtonEmojiIdPlaceholder": "Custom emoji ID (optional)",
       "preview": "Preview",
       "previewEmpty": "— empty —",
       "emailSubjectLabel": "Subject",
@@ -2173,6 +2235,7 @@
         "payments_etoplatezhi": "Etoplatezhi",
         "payments_antilopay": "Antilopay",
         "payments_jupiter": "Jupiter",
+        "payments_cispay": "CisPay",
         "payments_donut": "Donut",
         "payments_lava": "Lava",
         "payments_apple_iap": "Apple IAP",
@@ -3031,6 +3094,84 @@
         "description": "This will remove partner privileges. The partner will no longer earn commissions from referrals."
       }
     },
+    "coupons": {
+      "title": "Coupons",
+      "subtitle": "Wholesale batches of one-time subscription links",
+      "addBatch": "Create batch",
+      "noBatches": "No batches yet",
+      "days": "d.",
+      "stats": {
+        "batches": "Batches",
+        "active": "Active",
+        "redeemed": "Redeemed",
+        "revoked": "Revoked"
+      },
+      "list": {
+        "revoked": "Revoked",
+        "until": "Until",
+        "price": "Wholesale"
+      },
+      "pagination": {
+        "prev": "Previous",
+        "next": "Next",
+        "page": "Page {{current}} of {{total}}"
+      },
+      "form": {
+        "title": "New coupon batch",
+        "subtitle": "Every coupon is a one-time subscription link",
+        "name": "Batch name",
+        "namePlaceholder": "E.g. the partner name",
+        "tariff": "Tariff",
+        "selectTariff": "Select a tariff",
+        "periodDays": "Subscription days per coupon",
+        "couponsCount": "Number of coupons (1–500)",
+        "price": "Wholesale price per coupon, ₽",
+        "priceHint": "Bookkeeping only, 0 — not set",
+        "validDays": "Coupon lifetime, days",
+        "validDaysHint": "0 or empty — perpetual",
+        "create": "Create batch",
+        "creating": "Creating…",
+        "cancel": "Cancel"
+      },
+      "validation": {
+        "nameRequired": "Enter the batch name",
+        "tariffRequired": "Select a tariff",
+        "periodInvalid": "Subscription days: 1 to 3650",
+        "countInvalid": "Number of coupons: 1 to 500"
+      },
+      "created": {
+        "title": "Batch created",
+        "linksLabel": "Links ({{count}})",
+        "copyAll": "Copy all",
+        "copied": "Copied",
+        "download": "Download .txt",
+        "toList": "Back to batches",
+        "toBatch": "Open batch"
+      },
+      "detail": {
+        "title": "Batch #{{id}}",
+        "total": "Total coupons",
+        "price": "Wholesale price",
+        "priceTotal": "total",
+        "validUntil": "Valid until",
+        "perpetual": "Perpetual",
+        "createdAt": "Created",
+        "linksTitle": "Active links ({{count}})"
+      },
+      "revoke": {
+        "button": "Revoke unredeemed ({{count}})",
+        "confirmTitle": "Revoke the batch?",
+        "confirmText": "{{count}} unredeemed coupons will be revoked. Their links will stop working. This cannot be undone.",
+        "confirm": "Revoke",
+        "cancel": "Cancel",
+        "success": "Coupons revoked: {{count}}"
+      },
+      "errors": {
+        "loadFailed": "Batch not found",
+        "createFailed": "Failed to create the batch",
+        "revokeFailed": "Failed to revoke the batch"
+      }
+    },
     "promocodes": {
       "title": "Promo Codes",
       "subtitle": "Manage promo codes and discount groups",
@@ -3053,7 +3194,8 @@
         "subscriptionDays": "Subscription days",
         "trialSubscription": "Trial subscription",
         "promoGroup": "Discount group",
-        "discount": "Discount %"
+        "discount": "Discount %",
+        "balanceAndDays": "Balance + days"
       },
       "modal": {
         "editPromocode": "Edit promo code",
@@ -3071,6 +3213,11 @@
         "typeTrialSubscription": "Trial subscription",
         "typePromoGroup": "Discount group",
         "typeDiscount": "Percentage discount",
+        "typeBonusSet": "Bonus set (balance / days / promo group)",
+        "bonusComposition": "Promo code contents",
+        "includeBalance": "Balance bonus",
+        "includeDays": "Subscription days",
+        "includePromoGroup": "Promo group",
         "bonusAmount": "Bonus amount",
         "rub": "RUB",
         "daysCount": "Number of days",
@@ -3162,6 +3309,7 @@
       },
       "validation": {
         "codeRequired": "Enter promo code",
+        "bonusSetEmpty": "Select at least one bonus for the promo code",
         "balanceRequired": "Bonus amount must be greater than 0",
         "daysRequired": "Number of days must be greater than 0",
         "groupRequired": "Select a discount group",
@@ -3262,6 +3410,20 @@
       "confirm": {
         "block": "Block this user?"
       },
+      "sendMessage": {
+        "button": "✉️ Send message",
+        "title": "Send message to user",
+        "placeholder": "Text the bot will send to the user (HTML supported)",
+        "send": "Send",
+        "sending": "Sending...",
+        "success": "Message sent to user",
+        "noTelegram": "This user is registered by email only and cannot receive Telegram messages",
+        "errors": {
+          "no_telegram_id": "This user is registered by email only and cannot receive Telegram messages",
+          "forbidden": "The user has blocked the bot or cannot receive messages",
+          "bad_request": "Telegram rejected the message. Check the text (HTML markup) and try again"
+        }
+      },
       "userActions": {
         "delete": "Delete user",
         "resetTrial": "Reset trial",
@@ -3299,7 +3461,8 @@
           "sync": "Synchronization",
           "tickets": "Tickets",
           "gifts": "Gifts",
-          "referrals": "Referrals"
+          "referrals": "Referrals",
+          "activity": "Activity"
         },
         "noTickets": "No tickets from this user",
         "ticketsCount": "tickets",
@@ -3417,7 +3580,13 @@
           "deviceLimitUpdated": "Device limit updated",
           "invalidDays": "Please enter a valid number of days (greater than 0)",
           "backToList": "Back to subscriptions",
-          "createNew": "Create new"
+          "createNew": "Create new",
+          "sbpTitle": "SBP Auto-payment",
+          "sbpCancel": "Disable",
+          "sbpCancelled": "SBP auto-payment disabled",
+          "sbpStatus_PENDING": "Pending",
+          "sbpStatus_ACTIVE": "Active",
+          "sbpStatus_PAST_DUE": "Payment failed"
         },
         "balance": {
           "current": "Current balance",
@@ -3500,6 +3669,70 @@
           "searchPlaceholder": "Search by name, email, or Telegram ID...",
           "alreadyReferred": "already has referrer",
           "noUsersFound": "No users found"
+        },
+        "activity": {
+          "total": "Total events",
+          "empty": "No activity yet",
+          "filters": {
+            "all": "All",
+            "payments": "Payments",
+            "events": "Events",
+            "promo": "Promo",
+            "tickets": "Tickets",
+            "gifts": "Gifts",
+            "referrals": "Referrals",
+            "logins": "Logins",
+            "clicks": "Clicks"
+          },
+          "types": {
+            "transaction": "Transaction",
+            "event": "Event",
+            "promocode": "Promo code",
+            "coupon": "Coupon",
+            "ticket": "Ticket",
+            "wheel_spin": "Fortune wheel",
+            "poll": "Poll completed",
+            "gift_sent": "Gift sent",
+            "gift_received": "Gift received",
+            "referral_earning": "Referral earning",
+            "cabinet_login": "Cabinet login",
+            "withdrawal": "Withdrawal request",
+            "button_click": "Bot button",
+            "cabinet_action": "Cabinet action"
+          },
+          "sources": {
+            "bot": "Bot",
+            "cabinet": "Cabinet"
+          },
+          "subtypes": {
+            "deposit": "Deposit",
+            "withdrawal": "Charge",
+            "subscription_payment": "Subscription payment",
+            "refund": "Refund",
+            "failed_refund": "Failed refund",
+            "referral_reward": "Referral reward",
+            "poll_reward": "Poll reward",
+            "gift_payment": "Gift payment",
+            "activation": "Activation",
+            "purchase": "Purchase",
+            "subscription_purchase": "Subscription purchase",
+            "renewal": "Renewal",
+            "balance_topup": "Balance top-up",
+            "promo_group_change": "Promo group change",
+            "campaign_registration": "Campaign registration",
+            "referral_link_visit": "Referral link visit",
+            "referral_registration": "Referral registration",
+            "trial_activation": "Trial activation",
+            "open": "Open",
+            "answered": "Answered",
+            "pending": "Pending",
+            "closed": "Closed",
+            "redeemed": "Redeemed",
+            "approved": "Approved",
+            "rejected": "Rejected",
+            "completed": "Completed",
+            "command": "Command"
+          }
         }
       },
       "notFound": "User not found",
@@ -4181,6 +4414,7 @@
       "tabs": {
         "privacy": "Privacy",
         "offer": "Offer",
+        "recurrent": "Recurring Payments",
         "rules": "Rules",
         "faq": "FAQ"
       },
@@ -4195,6 +4429,9 @@
       "language": "Content language",
       "content": "Content",
       "contentPlaceholder": "HTML page content...",
+      "charCount": "Characters: {{count}}",
+      "botSplitEstimate_one": "⚠️ The bot will show it split into ~{{count}} message",
+      "botSplitEstimate_other": "⚠️ The bot will show it split into ~{{count}} messages",
       "save": "Save",
       "saving": "Saving...",
       "saveError": "Failed to save. Please try again.",
@@ -4779,6 +5016,7 @@
     "loyalty": "Loyalty",
     "noFaq": "No FAQ available",
     "noContent": "No content available",
+    "documentUnavailable": "This document is not available yet.",
     "updatedAt": "Updated",
     "noLoyaltyTiers": "Loyalty program is not available yet",
     "yourProgress": "Your Progress",
@@ -4854,7 +5092,7 @@
       "test": "Test",
       "activating": "Activating...",
       "activate": "Activate",
-      "serverAccess": "Server access"
+      "serverAccess": "Access to {{count}} servers"
     },
     "deactivate": {
       "button": "Cancel promo code",
@@ -5082,6 +5320,34 @@
       "nMonths_other": "{{count}} months",
       "nDays": "{{count}} days",
       "nMonths": "{{count}} months"
+    }
+  },
+  "coupon": {
+    "title": "Subscription coupon",
+    "subtitle": "A one-time coupon — redeem it to get or extend a subscription",
+    "tariff": "Tariff",
+    "period": "Period",
+    "daysSuffix": "d.",
+    "validUntil": "Redeem before",
+    "openBot": "Redeem in the bot",
+    "redeemCabinet": "Redeem in the cabinet",
+    "redeeming": "Redeeming…",
+    "needAuth": "Sign in to redeem the coupon in the cabinet — or open the link in the bot",
+    "notFound": {
+      "title": "Coupon not found",
+      "text": "The coupon does not exist, was already used or has expired"
+    },
+    "success": {
+      "activated": "Subscription activated!",
+      "renewed": "Subscription extended!",
+      "until": "Valid until"
+    },
+    "errors": {
+      "invalid": "Coupon not found or already used",
+      "expired": "The coupon has expired",
+      "already_redeemed_by_you": "You have already redeemed this coupon",
+      "internal": "Server error, try again later",
+      "generic": "Failed to redeem the coupon"
     }
   },
   "gift": {

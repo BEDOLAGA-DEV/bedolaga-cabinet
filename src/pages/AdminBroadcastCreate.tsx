@@ -4,10 +4,10 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import {
   adminBroadcastsApi,
-  BroadcastFilter,
-  TariffFilter,
-  CombinedBroadcastCreateRequest,
-  CustomBroadcastButton,
+  type BroadcastFilter,
+  type TariffFilter,
+  type CombinedBroadcastCreateRequest,
+  type CustomBroadcastButton,
 } from '../api/adminBroadcasts';
 import { AdminBackButton } from '../components/admin';
 import { TelegramPreview, EmailPreview } from '../components/broadcasts/BroadcastPreview';
@@ -63,6 +63,7 @@ export default function AdminBroadcastCreate() {
   const [newButtonLabel, setNewButtonLabel] = useState('');
   const [newButtonActionType, setNewButtonActionType] = useState<'callback' | 'url'>('callback');
   const [newButtonActionValue, setNewButtonActionValue] = useState('');
+  const [newButtonEmojiId, setNewButtonEmojiId] = useState('');
   const [mediaFile, setMediaFile] = useState<File | null>(null);
   const [mediaType, setMediaType] = useState<'photo' | 'video' | 'document'>('photo');
   const [mediaPreview, setMediaPreview] = useState<string | null>(null);
@@ -305,6 +306,8 @@ export default function AdminBroadcastCreate() {
   // Custom button validation
   const isNewButtonValid = useMemo(() => {
     if (!newButtonLabel.trim() || !newButtonActionValue.trim()) return false;
+    // custom_emoji_id — необязательное поле, но если задано — числовая строка (Bot API)
+    if (newButtonEmojiId.trim() && !/^\d{1,64}$/.test(newButtonEmojiId.trim())) return false;
     if (newButtonActionType === 'url') {
       return /^https:\/\/|^tg:\/\//.test(newButtonActionValue.trim());
     }
@@ -312,22 +315,25 @@ export default function AdminBroadcastCreate() {
       return new TextEncoder().encode(newButtonActionValue.trim()).length <= 64;
     }
     return true;
-  }, [newButtonLabel, newButtonActionType, newButtonActionValue]);
+  }, [newButtonLabel, newButtonActionType, newButtonActionValue, newButtonEmojiId]);
 
   // Custom button handlers
   const addCustomButton = () => {
     if (!isNewButtonValid) return;
+    const emojiId = newButtonEmojiId.trim();
     setCustomButtons((prev) => [
       ...prev,
       {
         label: newButtonLabel.trim(),
         action_type: newButtonActionType,
         action_value: newButtonActionValue.trim(),
+        ...(emojiId ? { icon_custom_emoji_id: emojiId } : {}),
       },
     ]);
     setNewButtonLabel('');
     setNewButtonActionValue('');
     setNewButtonActionType('callback');
+    setNewButtonEmojiId('');
     setIsAddingCustomButton(false);
   };
 
@@ -800,6 +806,15 @@ export default function AdminBroadcastCreate() {
                   maxLength={newButtonActionType === 'callback' ? 64 : 256}
                   className="input"
                 />
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={newButtonEmojiId}
+                  onChange={(e) => setNewButtonEmojiId(e.target.value)}
+                  placeholder={t('admin.broadcasts.customButtonEmojiIdPlaceholder')}
+                  maxLength={64}
+                  className="input"
+                />
                 <div className="flex gap-2">
                   <button
                     type="button"
@@ -807,6 +822,7 @@ export default function AdminBroadcastCreate() {
                       setIsAddingCustomButton(false);
                       setNewButtonLabel('');
                       setNewButtonActionValue('');
+                      setNewButtonEmojiId('');
                     }}
                     className="btn-secondary flex-1"
                   >

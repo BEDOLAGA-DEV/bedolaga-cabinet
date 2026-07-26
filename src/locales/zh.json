@@ -110,6 +110,18 @@
       "insufficientTitle": "余额不足",
       "insufficientMessage": "续期需要 {{required}} {{currency}}，当前余额 {{balance}} {{currency}}"
     },
+    "sbpRecurring": {
+      "confirmedTitle": "SBP 扣款已确认",
+      "confirmedMessage": "已成功扣款 {{amount}} {{currency}}",
+      "failedTitle": "SBP 扣款失败",
+      "failedMessage": "SBP 自动扣款失败",
+      "pastDueTitle": "SBP 扣款已逾期",
+      "pastDueMessage": "您的 SBP 自动扣款已逾期，请检查银行应用。",
+      "cancelledTitle": "SBP 自动扣款已关闭",
+      "cancelledMessage": "SBP 自动扣款已被关闭",
+      "activatedTitle": "SBP 自动扣款已开通",
+      "activatedMessage": "SBP 自动扣款已成功开通"
+    },
     "account": {
       "bannedTitle": "账户已封禁",
       "bannedMessage": "您的账户已被封禁",
@@ -181,6 +193,7 @@
     "telegramRetryFailed": "授权失败。请关闭应用后重新打开。",
     "telegramReopenHint": "如果问题持续存在，请关闭并重新打开应用",
     "telegramNotConfigured": "Telegram机器人未配置",
+    "botOutdated": "机器人版本与后台不兼容，请将机器人更新至 v3.33.0 或更高版本。",
     "telegramUnavailable": "Telegram登录暂时不可用",
     "authenticating": "正在验证...",
     "orOpenInApp": "或在应用中打开机器人",
@@ -235,6 +248,7 @@
   "dashboard": {
     "title": "个人中心",
     "welcome": "欢迎，{{name}}！",
+    "welcomeNoName": "欢迎！",
     "yourSubscription": "您的订阅",
     "quickActions": "快捷操作",
     "viewSubscription": "管理订阅",
@@ -562,6 +576,30 @@
     },
     "allTariffsPurchased": "所有套餐已购买",
     "autopay": "自动续订",
+    "sbpRecurring": {
+      "title": "SBP 自动扣款",
+      "connect": "开通",
+      "confirmInBank": "请在银行应用中确认",
+      "cancel": "关闭",
+      "confirmCancel": "关闭 SBP 自动扣款？您的订阅将不再通过 SBP 自动续订。",
+      "cancelled": "SBP 自动扣款已关闭",
+      "enableError": "开通 SBP 自动扣款失败",
+      "cancelError": "取消 SBP 自动扣款失败",
+      "statusPending": "等待银行应用确认",
+      "statusActive": "已启用",
+      "statusPastDue": "扣款失败 — 请重试",
+      "nextCharge": "下次扣款 {{date}}",
+      "amountPerInterval": "{{amount}} ₽ {{interval}}",
+      "interval": {
+        "day": "每天",
+        "week": "每周",
+        "month": "每月",
+        "year": "每年"
+      },
+      "autopayHint": "您的订阅将通过 SBP 自动扣款，无需保存银行卡",
+      "purchaseButton": "⚡ 通过SBP自动扣款订阅",
+      "purchaseHint": "首次扣款即在银行应用中确认绑定；续费将按资费周期自动扣款。"
+    },
     "backToList": "返回订阅列表",
     "confirmDelete": "删除订阅？",
     "cta": {
@@ -632,6 +670,9 @@
       },
       "jupiter": {
         "description": "通过 Jupiter (FPGate P2P) 使用 SBP 支付"
+      },
+      "cispay": {
+        "description": "通过 cisPay 使用银行卡或 SBP 支付"
       },
       "donut": {
         "description": "通过 Donut P2P 使用银行卡或 SBP 支付"
@@ -724,7 +765,10 @@
       "pageTitle": "已保存的银行卡",
       "backToBalance": "返回",
       "empty": "暂无已保存的银行卡。银行卡将在下次充值时自动保存。",
-      "loadError": "加载银行卡失败，请稍后重试。"
+      "loadError": "加载银行卡失败，请稍后重试。",
+      "sbpSection": "SBP 自动扣款",
+      "sbpBinding": "SBP 绑定",
+      "sbpUnlink": "关闭 SBP 自动扣款"
     },
     "paymentSuccess": {
       "title": "支付成功",
@@ -1420,7 +1464,7 @@
     },
     "paymentMethods": {
       "title": "支付方法",
-      "description": "配置顺序和显示条件",
+      "subtitle": "配置顺序和显示条件",
       "enabled": "开启",
       "disabled": "关闭",
       "notConfigured": "未配置",
@@ -1436,6 +1480,8 @@
       "openUrlDirectHint": "开启 — 支付链接立即打开,不显示中间的按钮面板。关闭 — 显示「打开支付」按钮。在 Telegram 内两种情况都会在外部浏览器中打开链接(否则通过银行 App/SBP 付款会失败);支付完成后返回结果页。Stars/CryptoBot(t.me/ 链接)始终原生打开,不受此开关影响。",
       "displayName": "显示名称",
       "displayNameHint": "留空以使用默认名称",
+      "description": "描述",
+      "descriptionHint": "显示在支付方法名称下方。留空则使用默认文本",
       "subOptions": "支付选项",
       "minAmount": "最小金额（戈比）",
       "maxAmount": "最大金额（戈比）",
@@ -1681,6 +1727,7 @@
       "customButtonTypeUrl": "链接",
       "customButtonCallbackPlaceholder": "callback_data（例如 back_to_menu）",
       "customButtonUrlPlaceholder": "https://example.com",
+      "customButtonEmojiIdPlaceholder": "自定义 Emoji ID（可选）",
       "category": "类别",
       "categoryNews": "新闻",
       "categoryPromo": "促销",
@@ -1918,6 +1965,7 @@
         "payments_etoplatezhi": "Etoplatezhi",
         "payments_antilopay": "Antilopay",
         "payments_jupiter": "Jupiter",
+        "payments_cispay": "CisPay",
         "payments_donut": "Donut",
         "payments_lava": "Lava",
         "payments_apple_iap": "Apple IAP",
@@ -2667,7 +2715,8 @@
         "subscriptionDays": "订阅天数",
         "trialSubscription": "试用订阅",
         "promoGroup": "折扣组",
-        "discount": "折扣 %"
+        "discount": "折扣 %",
+        "balanceAndDays": "余额 + 天数"
       },
       "modal": {
         "editPromocode": "编辑促销码",
@@ -2685,6 +2734,11 @@
         "typeTrialSubscription": "试用订阅",
         "typePromoGroup": "折扣组",
         "typeDiscount": "百分比折扣",
+        "typeBonusSet": "奖励组合（余额 / 天数 / 优惠组）",
+        "bonusComposition": "促销码内容",
+        "includeBalance": "余额奖励",
+        "includeDays": "订阅天数",
+        "includePromoGroup": "优惠组",
         "bonusAmount": "奖金金额",
         "rub": "卢布",
         "daysCount": "天数",
@@ -2774,6 +2828,7 @@
       },
       "validation": {
         "codeRequired": "请输入促销码",
+        "bonusSetEmpty": "请为促销码至少选择一项奖励",
         "balanceRequired": "奖金金额必须大于0",
         "daysRequired": "天数必须大于0",
         "groupRequired": "请选择折扣组",
@@ -2881,7 +2936,8 @@
           "sync": "同步",
           "tickets": "工单",
           "gifts": "礼物",
-          "referrals": "推荐"
+          "referrals": "推荐",
+          "activity": "活动记录"
         },
         "noTickets": "该用户没有工单",
         "ticketsCount": "个工单",
@@ -2994,7 +3050,13 @@
           "deviceLimitUpdated": "设备限制已更新",
           "invalidDays": "请输入有效天数（大于0）",
           "backToList": "返回订阅列表",
-          "createNew": "新建"
+          "createNew": "新建",
+          "sbpTitle": "SBP 自动扣款",
+          "sbpCancel": "关闭",
+          "sbpCancelled": "SBP 自动扣款已关闭",
+          "sbpStatus_PENDING": "待确认",
+          "sbpStatus_ACTIVE": "已启用",
+          "sbpStatus_PAST_DUE": "扣款失败"
         },
         "balance": {
           "current": "当前余额",
@@ -3082,10 +3144,88 @@
           "areYouSure": "确定要继续？",
           "title": "操作"
         },
-        "noVpnData": "无 VPN 数据"
+        "noVpnData": "无 VPN 数据",
+        "activity": {
+          "total": "事件总数",
+          "empty": "暂无活动记录",
+          "filters": {
+            "all": "全部",
+            "payments": "支付",
+            "events": "事件",
+            "promo": "促销",
+            "tickets": "工单",
+            "gifts": "礼物",
+            "referrals": "推荐",
+            "logins": "登录",
+            "clicks": "点击"
+          },
+          "types": {
+            "transaction": "交易",
+            "event": "事件",
+            "promocode": "促销码",
+            "coupon": "优惠券",
+            "ticket": "工单",
+            "wheel_spin": "幸运转盘",
+            "poll": "问卷已完成",
+            "gift_sent": "已发送礼物",
+            "gift_received": "已收到礼物",
+            "referral_earning": "推荐收益",
+            "cabinet_login": "登录后台",
+            "withdrawal": "提现申请",
+            "button_click": "机器人按钮",
+            "cabinet_action": "后台操作"
+          },
+          "sources": {
+            "bot": "机器人",
+            "cabinet": "后台"
+          },
+          "subtypes": {
+            "deposit": "充值",
+            "withdrawal": "扣款",
+            "subscription_payment": "订阅付款",
+            "refund": "退款",
+            "failed_refund": "退款失败",
+            "referral_reward": "推荐奖励",
+            "poll_reward": "问卷奖励",
+            "gift_payment": "礼物付款",
+            "activation": "激活",
+            "purchase": "购买",
+            "subscription_purchase": "订阅购买",
+            "renewal": "续订",
+            "balance_topup": "余额充值",
+            "promo_group_change": "促销组变更",
+            "campaign_registration": "活动注册",
+            "referral_link_visit": "推荐链接访问",
+            "referral_registration": "推荐注册",
+            "trial_activation": "试用激活",
+            "open": "打开",
+            "answered": "已回复",
+            "pending": "等待中",
+            "closed": "已关闭",
+            "redeemed": "已兑换",
+            "approved": "已批准",
+            "rejected": "已拒绝",
+            "completed": "已完成",
+            "command": "命令"
+          }
+        }
       },
       "notFound": "未找到用户",
       "purchaseCount": "购买次数：{{count}}",
+      "sendMessage": {
+        "button": "✉️ 发送消息",
+        "title": "向用户发送消息",
+        "placeholder": "机器人将发送给用户的文本（支持 HTML）",
+        "send": "发送",
+        "sending": "发送中...",
+        "success": "消息已发送给用户",
+        "noTelegram": "该用户仅通过邮箱注册，无法接收 Telegram 消息",
+        "errors": {
+          "no_telegram_id": "该用户仅通过邮箱注册，无法接收 Telegram 消息",
+          "forbidden": "用户已屏蔽机器人或无法接收消息",
+          "bad_request": "Telegram 拒绝了该消息。请检查文本（HTML 标记）后重试"
+        }
+      },
       "userActions": {
         "delete": "删除用户",
         "disable": "禁用",
@@ -4005,6 +4145,7 @@
       "tabs": {
         "privacy": "隐私",
         "offer": "条款",
+        "recurrent": "定期付款",
         "rules": "规则",
         "faq": "FAQ"
       },

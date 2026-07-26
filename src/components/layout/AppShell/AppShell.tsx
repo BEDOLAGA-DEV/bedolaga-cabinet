@@ -39,7 +39,7 @@ import {
 
 import { MobileBottomNav } from './MobileBottomNav';
 import { AppHeader } from './AppHeader';
-import { BackgroundRenderer } from '@/components/backgrounds/BackgroundRenderer';
+import { useBackgroundConsumer } from '@/components/backgrounds/BackgroundHost';
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -60,6 +60,9 @@ export function AppShell({ children }: AppShellProps) {
   const { appName, logoLetter, hasCustomLogo, logoUrl } = useBranding();
   const { referralEnabled, wheelEnabled, hasContests, hasPolls, giftEnabled } = useFeatureFlags();
   useScrollRestoration();
+  // Анимированный фон рендерит BackgroundHost в App (не перемонтируется при
+  // смене роута) — здесь только регистрируем, что на этом роуте он нужен.
+  useBackgroundConsumer();
 
   // Theme toggle visibility
   const { data: enabledThemes } = useQuery({
@@ -180,9 +183,6 @@ export function AppShell({ children }: AppShellProps) {
 
   return (
     <div className="min-h-viewport">
-      {/* Animated background renders via portal on document.body at z-index: -1 */}
-      <BackgroundRenderer />
-
       {/* Global components */}
       <WebSocketNotifications />
       <CampaignBonusNotifier />
@@ -190,7 +190,11 @@ export function AppShell({ children }: AppShellProps) {
       <PromptDialogHost />
 
       {/* Desktop Header */}
-      <header className="fixed left-0 right-0 top-0 z-50 hidden border-b border-dark-800/50 bg-dark-950/95 lg:block">
+      {/* w-screen вместо left-0 right-0: right-0 упирается в край вьюпорта БЕЗ
+          скроллбара, и капсула по центру прыгала бы на полширины скроллбара при
+          переходах между страницами со скроллом и без. 100vw даёт ту же ось
+          центрирования, что и у body (тоже 100vw). */}
+      <header className="fixed left-0 top-0 z-50 hidden w-screen border-b border-dark-800/50 bg-dark-950/95 lg:block">
         {/* 3-зонный grid: лого | капсула | действия. Колонки 1fr_auto_1fr держат
             капсулу строго по центру вьюпорта НЕЗАВИСИМО от ширины лого/действий,
             а действия — у правого края. Поэтому ничего не «скачет» при переходах

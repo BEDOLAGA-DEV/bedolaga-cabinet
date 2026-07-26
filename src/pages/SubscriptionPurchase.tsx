@@ -286,6 +286,12 @@ export default function SubscriptionPurchase() {
                 tariff={selectedTariff}
                 subscriptionId={subscriptionId}
                 balanceKopeks={purchaseOptions?.balance_kopeks}
+                sbpPurchaseEnabled={
+                  isTariffsMode &&
+                  purchaseOptions !== undefined &&
+                  'platega_recurrent_enabled' in purchaseOptions &&
+                  purchaseOptions.platega_recurrent_enabled === true
+                }
                 onBack={() => {
                   setShowTariffPurchase(false);
                   setSelectedTariff(null);

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { CheckIcon, CopyIcon } from '@/components/icons';
 import type { RemnawaveButtonClient, LocalizedText } from '@/types';
 import { copyToClipboard } from '@/utils/clipboard';
+import { collapseDoubledCryptPrefix, hasTemplates, resolveTemplate } from '@/utils/templateEngine';
 import { blockButtonClass } from './buttonStyles';
 
 // eslint-disable-next-line no-script-url
@@ -29,6 +30,7 @@ interface BlockButtonsProps {
   subscriptionUrl: string | null;
   hideLink?: boolean;
   deepLink?: string | null;
+  username?: string;
   getLocalizedText: (text: LocalizedText | undefined) => string;
   getBaseTranslation: (key: string, i18nKey: string) => string;
   getSvgHtml: (key: string | undefined) => string;
@@ -42,6 +44,7 @@ export function BlockButtons({
   subscriptionUrl,
   hideLink,
   deepLink,
+  username,
   getLocalizedText,
   getBaseTranslation,
   getSvgHtml,
@@ -73,8 +76,17 @@ export function BlockButtons({
         ) : null;
 
         if (btn.type === 'subscriptionLink') {
-          const url = btn.resolvedUrl || btn.url || btn.link || deepLink || subscriptionUrl;
-          if (!url || !isValidDeepLink(url)) return null;
+          const raw = btn.resolvedUrl || btn.url || btn.link || deepLink || subscriptionUrl;
+          // The backend resolves {{HAPP_CRYPT*_LINK}} only when a crypto link is
+          // stored in the DB; since Remnawave 2.8.0 removed the encrypt endpoint,
+          // new users can get the raw template here. Resolve it client-side (the
+          // panel's own subpage does the same) instead of dropping the button.
+          const resolved =
+            raw && subscriptionUrl && hasTemplates(raw)
+              ? resolveTemplate(raw, { subscriptionUrl, username })
+              : raw;
+          const url = resolved ? collapseDoubledCryptPrefix(resolved) : resolved;
+          if (!url || hasTemplates(url) || !isValidDeepLink(url)) return null;
           return (
             <button
               key={idx}

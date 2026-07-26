@@ -1,3 +1,4 @@
+import { uiLocale } from '@/utils/uiLocale';
 import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
@@ -9,10 +10,11 @@ import { useAuthStore } from '../store/auth';
 import { displayName } from '../utils/displayName';
 import { authApi } from '../api/auth';
 import { isValidEmail } from '../utils/validation';
+import { getApiErrorMessage } from '../utils/api-error';
 import {
   notificationsApi,
-  NotificationSettings,
-  NotificationSettingsUpdate,
+  type NotificationSettings,
+  type NotificationSettingsUpdate,
 } from '../api/notifications';
 import { referralApi } from '../api/referral';
 import { brandingApi, type EmailAuthEnabled } from '../api/branding';
@@ -112,8 +114,8 @@ export default function Profile() {
       setError(null);
       setVerificationResendCooldown(UI.RESEND_COOLDOWN_SEC);
     },
-    onError: (err: { response?: { data?: { detail?: string } } }) => {
-      setError(err.response?.data?.detail || t('common.error'));
+    onError: (err: unknown) => {
+      setError(getApiErrorMessage(err, t('common.error')));
       setSuccess(null);
     },
   });
@@ -133,13 +135,13 @@ export default function Profile() {
         setResendCooldown(UI.RESEND_COOLDOWN_SEC);
       }
     },
-    onError: (err: { response?: { data?: { detail?: string } } }) => {
-      const detail = err.response?.data?.detail;
-      if (detail?.includes('already registered') || detail?.includes('already in use')) {
+    onError: (err: unknown) => {
+      const detail = getApiErrorMessage(err, '');
+      if (detail.includes('already registered') || detail.includes('already in use')) {
         setChangeError(t('profile.changeEmail.emailAlreadyUsed'));
-      } else if (detail?.includes('same as current')) {
+      } else if (detail.includes('same as current')) {
         setChangeError(t('profile.changeEmail.sameEmail'));
-      } else if (detail?.includes('rate limit') || detail?.includes('too many')) {
+      } else if (detail.includes('rate limit') || detail.includes('too many')) {
         setChangeError(t('profile.changeEmail.tooManyRequests'));
       } else {
         setChangeError(detail || t('common.error'));
@@ -157,11 +159,11 @@ export default function Profile() {
       // Note: auth user lives in the zustand store, not in React Query —
       // the explicit setUser above IS the refresh. No ['user'] query exists.
     },
-    onError: (err: { response?: { data?: { detail?: string } } }) => {
-      const detail = err.response?.data?.detail;
-      if (detail?.includes('invalid') || detail?.includes('wrong')) {
+    onError: (err: unknown) => {
+      const detail = getApiErrorMessage(err, '');
+      if (detail.includes('invalid') || detail.includes('wrong')) {
         setChangeError(t('profile.changeEmail.invalidCode'));
-      } else if (detail?.includes('expired')) {
+      } else if (detail.includes('expired')) {
         setChangeError(t('profile.changeEmail.codeExpired'));
       } else {
         setChangeError(detail || t('common.error'));
@@ -302,7 +304,7 @@ export default function Profile() {
             <div className="flex items-center justify-between py-3">
               <span className="text-dark-400">{t('profile.registeredAt')}</span>
               <span className="font-medium text-dark-100">
-                {user?.created_at ? new Date(user.created_at).toLocaleDateString() : '-'}
+                {user?.created_at ? new Date(user.created_at).toLocaleDateString(uiLocale()) : '-'}
               </span>
             </div>
           </div>
@@ -324,9 +326,11 @@ export default function Profile() {
         </Card>
       </motion.div>
 
-      {/* Referral Link Widget */}
+      {/* Referral Link Widget — self-animated: mounts after the referral queries
+          resolve, when the parent stagger orchestration has already finished and
+          would leave it stuck at opacity 0 */}
       {referralTerms?.is_enabled && referralLink && (
-        <motion.div variants={staggerItem}>
+        <motion.div variants={staggerItem} initial="initial" animate="animate">
           <Card>
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-semibold text-dark-100">{t('referral.yourLink')}</h2>

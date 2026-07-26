@@ -24,12 +24,14 @@ interface ReferralNetworkState {
   highlightedNodes: Set<string>;
   filters: NetworkFilters;
   scope: ScopeSelection[];
+  isFullNetwork: boolean;
 
   setSelectedNode: (node: SelectedNode) => void;
   setHoveredNode: (id: string | null) => void;
   setHighlightedNodes: (nodes: Set<string>) => void;
   updateFilters: (filters: Partial<NetworkFilters>) => void;
   resetFilters: () => void;
+  setFullNetwork: (enabled: boolean) => void;
   addScope: (item: ScopeSelection) => void;
   removeScope: (type: ScopeSelection['type'], id: number) => void;
   clearScope: () => void;
@@ -41,6 +43,7 @@ export const useReferralNetworkStore = create<ReferralNetworkState>()((set) => (
   highlightedNodes: new Set<string>(),
   filters: { ...DEFAULT_FILTERS },
   scope: [],
+  isFullNetwork: false,
 
   setSelectedNode: (node) => set({ selectedNode: node }),
   setHoveredNode: (id) => set({ hoveredNodeId: id }),
@@ -53,6 +56,16 @@ export const useReferralNetworkStore = create<ReferralNetworkState>()((set) => (
 
   resetFilters: () => set({ filters: { ...DEFAULT_FILTERS } }),
 
+  // Full network and a scope selection are mutually exclusive: the whole graph
+  // already contains every campaign, partner and user, so narrowing it by chips
+  // would be meaningless. Each mode therefore drops the other.
+  setFullNetwork: (enabled) =>
+    set({
+      isFullNetwork: enabled,
+      scope: [],
+      ...resetGraphState(),
+    }),
+
   addScope: (item) =>
     set((state) => {
       const exists = state.scope.some((s) => s.type === item.type && s.id === item.id);
@@ -60,6 +73,7 @@ export const useReferralNetworkStore = create<ReferralNetworkState>()((set) => (
       if (state.scope.length >= MAX_SCOPE_ITEMS) return state;
       return {
         scope: [...state.scope, item],
+        isFullNetwork: false,
         ...resetGraphState(),
       };
     }),
@@ -76,6 +90,7 @@ export const useReferralNetworkStore = create<ReferralNetworkState>()((set) => (
   clearScope: () =>
     set({
       scope: [],
+      isFullNetwork: false,
       ...resetGraphState(),
     }),
 }));

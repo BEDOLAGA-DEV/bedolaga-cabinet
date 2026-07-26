@@ -110,6 +110,18 @@
       "insufficientTitle": "موجودی ناکافی",
       "insufficientMessage": "برای تمدید {{required}} {{currency}} لازم است، موجودی فعلی {{balance}} {{currency}}"
     },
+    "sbpRecurring": {
+      "confirmedTitle": "پرداخت SBP تأیید شد",
+      "confirmedMessage": "مبلغ {{amount}} {{currency}} با موفقیت برداشت شد",
+      "failedTitle": "پرداخت SBP ناموفق بود",
+      "failedMessage": "برداشت پرداخت خودکار SBP ناموفق بود",
+      "pastDueTitle": "پرداخت SBP معوق است",
+      "pastDueMessage": "پرداخت خودکار SBP شما معوق است. لطفاً اپلیکیشن بانک را بررسی کنید.",
+      "cancelledTitle": "پرداخت خودکار SBP غیرفعال شد",
+      "cancelledMessage": "پرداخت خودکار SBP غیرفعال شده است",
+      "activatedTitle": "پرداخت خودکار SBP متصل شد",
+      "activatedMessage": "پرداخت خودکار SBP با موفقیت متصل شد"
+    },
     "account": {
       "bannedTitle": "حساب مسدود شد",
       "bannedMessage": "حساب شما مسدود شده است",
@@ -181,6 +193,7 @@
     "telegramRetryFailed": "تایید هویت ناموفق بود. برنامه را ببندید و دوباره باز کنید.",
     "telegramReopenHint": "اگر مشکل ادامه دارد، برنامه را ببندید و دوباره باز کنید",
     "telegramNotConfigured": "ربات تلگرام پیکربندی نشده",
+    "botOutdated": "نسخهٔ ربات با کابینت سازگار نیست. ربات را به v3.33.0 یا جدیدتر به‌روزرسانی کنید.",
     "telegramUnavailable": "ورود از طریق تلگرام موقتاً در دسترس نیست",
     "authenticating": "در حال تایید هویت...",
     "orOpenInApp": "یا ربات را در برنامه باز کنید",
@@ -235,6 +248,7 @@
   "dashboard": {
     "title": "داشبورد",
     "welcome": "خوش آمدید، {{name}}!",
+    "welcomeNoName": "خوش آمدید!",
     "yourSubscription": "اشتراک شما",
     "quickActions": "دسترسی سریع",
     "viewSubscription": "مدیریت اشتراک",
@@ -562,6 +576,30 @@
     },
     "allTariffsPurchased": "همه تعرفه‌ها قبلاً خریداری شده‌اند",
     "autopay": "تمدید خودکار",
+    "sbpRecurring": {
+      "title": "پرداخت خودکار SBP",
+      "connect": "اتصال",
+      "confirmInBank": "در اپلیکیشن بانک تأیید کنید",
+      "cancel": "غیرفعال کردن",
+      "confirmCancel": "پرداخت خودکار SBP غیرفعال شود؟ اشتراک شما دیگر به‌صورت خودکار از طریق SBP تمدید نخواهد شد.",
+      "cancelled": "پرداخت خودکار SBP غیرفعال شد",
+      "enableError": "اتصال پرداخت خودکار SBP ناموفق بود",
+      "cancelError": "لغو پرداخت خودکار SBP ناموفق بود",
+      "statusPending": "در انتظار تأیید در اپلیکیشن بانک",
+      "statusActive": "فعال",
+      "statusPastDue": "پرداخت ناموفق بود — دوباره تلاش کنید",
+      "nextCharge": "برداشت بعدی {{date}}",
+      "amountPerInterval": "{{amount}} ₽ {{interval}}",
+      "interval": {
+        "day": "روزانه",
+        "week": "هفتگی",
+        "month": "ماهانه",
+        "year": "سالانه"
+      },
+      "autopayHint": "اشتراک شما به‌صورت خودکار از طریق SBP بدون نیاز به کارت ذخیره‌شده شارژ می‌شود",
+      "purchaseButton": "⚡ اشتراک با پرداخت خودکار SBP",
+      "purchaseHint": "اولین برداشت، اتصال را در اپ بانک تأیید می‌کند؛ تمدیدها به‌صورت خودکار برداشت می‌شوند."
+    },
     "backToList": "بازگشت به فهرست اشتراک‌ها",
     "confirmDelete": "اشتراک حذف شود؟",
     "cta": {
@@ -632,6 +670,9 @@
       },
       "jupiter": {
         "description": "پرداخت SBP از طریق Jupiter (FPGate P2P)"
+      },
+      "cispay": {
+        "description": "پرداخت با کارت یا SBP از طریق cisPay"
       },
       "donut": {
         "description": "پرداخت با کارت یا SBP از طریق Donut P2P"
@@ -724,7 +765,10 @@
       "pageTitle": "کارت‌های ذخیره شده",
       "backToBalance": "بازگشت",
       "empty": "کارتی ذخیره نشده است. کارت به طور خودکار در شارژ بعدی ذخیره می‌شود.",
-      "loadError": "خطا در بارگذاری کارت‌ها. لطفاً بعداً دوباره امتحان کنید."
+      "loadError": "خطا در بارگذاری کارت‌ها. لطفاً بعداً دوباره امتحان کنید.",
+      "sbpSection": "پرداخت خودکار SBP",
+      "sbpBinding": "اتصال SBP",
+      "sbpUnlink": "غیرفعال کردن پرداخت خودکار SBP"
     },
     "paymentSuccess": {
       "title": "پرداخت موفق",
@@ -1580,6 +1624,7 @@
       "customButtonTypeUrl": "لینک",
       "customButtonCallbackPlaceholder": "callback_data (مثلاً back_to_menu)",
       "customButtonUrlPlaceholder": "https://example.com",
+      "customButtonEmojiIdPlaceholder": "شناسه ایموجی سفارشی (اختیاری)",
       "category": "دسته‌بندی",
       "categoryNews": "اخبار",
       "categoryPromo": "تبلیغاتی",
@@ -1853,6 +1898,7 @@
         "payments_etoplatezhi": "Etoplatezhi",
         "payments_antilopay": "Antilopay",
         "payments_jupiter": "Jupiter",
+        "payments_cispay": "CisPay",
         "payments_donut": "Donut",
         "payments_lava": "Lava",
         "payments_apple_iap": "Apple IAP",
@@ -2270,7 +2316,7 @@
     },
     "paymentMethods": {
       "title": "روش‌های پرداخت",
-      "description": "پیکربندی ترتیب و شرایط نمایش",
+      "subtitle": "پیکربندی ترتیب و شرایط نمایش",
       "enabled": "روشن",
       "disabled": "خاموش",
       "notConfigured": "تنظیم نشده",
@@ -2286,6 +2332,8 @@
       "openUrlDirectHint": "روشن — لینک پرداخت بلافاصله باز می‌شود، بدون پنل دکمهٔ میانی. خاموش — دکمهٔ «باز کردن پرداخت» نمایش داده می‌شود. داخل تلگرام لینک در هر دو حالت در مرورگر خارجی باز می‌شود (در غیر این صورت پرداخت از طریق اپ بانکی/SBP کار نمی‌کند)؛ پس از پرداخت کاربر به صفحهٔ نتیجه بازمی‌گردد. Stars/CryptoBot (لینک‌های t.me/) همیشه به‌صورت نیتیو باز می‌شوند و این پرچم روی آن‌ها اعمال نمی‌شود.",
       "displayName": "نام نمایشی",
       "displayNameHint": "برای نام پیش‌فرض خالی بگذارید",
+      "description": "توضیحات",
+      "descriptionHint": "زیر نام روش پرداخت نمایش داده می‌شود. خالی — متن پیش‌فرض",
       "subOptions": "گزینه‌های پرداخت",
       "minAmount": "حداقل مبلغ (کپک)",
       "maxAmount": "حداکثر مبلغ (کپک)",
@@ -2668,7 +2716,8 @@
         "subscriptionDays": "روزهای اشتراک",
         "trialSubscription": "اشتراک آزمایشی",
         "promoGroup": "گروه تخفیف",
-        "discount": "تخفیف %"
+        "discount": "تخفیف %",
+        "balanceAndDays": "موجودی + روزها"
       },
       "modal": {
         "editPromocode": "ویرایش کد تخفیف",
@@ -2686,6 +2735,11 @@
         "typeTrialSubscription": "اشتراک آزمایشی",
         "typePromoGroup": "گروه تخفیف",
         "typeDiscount": "تخفیف درصدی",
+        "typeBonusSet": "مجموعه پاداش (موجودی / روزها / گروه تخفیف)",
+        "bonusComposition": "محتوای کد تخفیف",
+        "includeBalance": "پاداش موجودی",
+        "includeDays": "روزهای اشتراک",
+        "includePromoGroup": "گروه تخفیف",
         "bonusAmount": "مبلغ پاداش",
         "rub": "روبل",
         "daysCount": "تعداد روزها",
@@ -2775,6 +2829,7 @@
       },
       "validation": {
         "codeRequired": "کد تخفیف را وارد کنید",
+        "bonusSetEmpty": "حداقل یک پاداش برای کد تخفیف انتخاب کنید",
         "balanceRequired": "مبلغ پاداش باید بیشتر از 0 باشد",
         "daysRequired": "تعداد روزها باید بیشتر از 0 باشد",
         "groupRequired": "یک گروه تخفیف انتخاب کنید",
@@ -2882,7 +2937,8 @@
           "sync": "همگام‌سازی",
           "tickets": "تیکت‌ها",
           "gifts": "هدایا",
-          "referrals": "معرفی‌ها"
+          "referrals": "معرفی‌ها",
+          "activity": "فعالیت"
         },
         "noTickets": "این کاربر تیکتی ندارد",
         "ticketsCount": "تیکت",
@@ -2995,7 +3051,13 @@
           "deviceLimitUpdated": "محدودیت دستگاه به‌روز شد",
           "invalidDays": "لطفاً تعداد روز معتبر وارد کنید (بیشتر از ۰)",
           "backToList": "بازگشت به فهرست اشتراک‌ها",
-          "createNew": "ایجاد جدید"
+          "createNew": "ایجاد جدید",
+          "sbpTitle": "پرداخت خودکار SBP",
+          "sbpCancel": "غیرفعال کردن",
+          "sbpCancelled": "پرداخت خودکار SBP غیرفعال شد",
+          "sbpStatus_PENDING": "در انتظار",
+          "sbpStatus_ACTIVE": "فعال",
+          "sbpStatus_PAST_DUE": "پرداخت ناموفق"
         },
         "balance": {
           "current": "موجودی فعلی",
@@ -3083,10 +3145,88 @@
           "areYouSure": "آیا مطمئنید می‌خواهید ادامه دهید؟",
           "title": "عملیات"
         },
-        "noVpnData": "داده‌ای از VPN وجود ندارد"
+        "noVpnData": "داده‌ای از VPN وجود ندارد",
+        "activity": {
+          "total": "مجموع رویدادها",
+          "empty": "هنوز فعالیتی وجود ندارد",
+          "filters": {
+            "all": "همه",
+            "payments": "پرداخت‌ها",
+            "events": "رویدادها",
+            "promo": "تخفیف‌ها",
+            "tickets": "تیکت‌ها",
+            "gifts": "هدایا",
+            "referrals": "دعوت‌ها",
+            "logins": "ورودها",
+            "clicks": "کلیک‌ها"
+          },
+          "types": {
+            "transaction": "تراکنش",
+            "event": "رویداد",
+            "promocode": "کد تخفیف",
+            "coupon": "کوپن",
+            "ticket": "تیکت",
+            "wheel_spin": "گردونه شانس",
+            "poll": "نظرسنجی تکمیل شد",
+            "gift_sent": "هدیه ارسال شد",
+            "gift_received": "هدیه دریافت شد",
+            "referral_earning": "درآمد دعوت",
+            "cabinet_login": "ورود به پنل",
+            "withdrawal": "درخواست برداشت",
+            "button_click": "دکمه ربات",
+            "cabinet_action": "اقدام در پنل"
+          },
+          "sources": {
+            "bot": "ربات",
+            "cabinet": "پنل"
+          },
+          "subtypes": {
+            "deposit": "واریز",
+            "withdrawal": "برداشت",
+            "subscription_payment": "پرداخت اشتراک",
+            "refund": "بازپرداخت",
+            "failed_refund": "بازپرداخت ناموفق",
+            "referral_reward": "پاداش دعوت",
+            "poll_reward": "پاداش نظرسنجی",
+            "gift_payment": "پرداخت هدیه",
+            "activation": "فعال‌سازی",
+            "purchase": "خرید",
+            "subscription_purchase": "خرید اشتراک",
+            "renewal": "تمدید",
+            "balance_topup": "شارژ موجودی",
+            "promo_group_change": "تغییر گروه تخفیف",
+            "campaign_registration": "ثبت‌نام کمپین",
+            "referral_link_visit": "بازدید لینک دعوت",
+            "referral_registration": "ثبت‌نام دعوتی",
+            "trial_activation": "فعال‌سازی دوره آزمایشی",
+            "open": "باز",
+            "answered": "پاسخ داده شده",
+            "pending": "در انتظار",
+            "closed": "بسته",
+            "redeemed": "استفاده شده",
+            "approved": "تأیید شده",
+            "rejected": "رد شده",
+            "completed": "انجام شده",
+            "command": "دستور"
+          }
+        }
       },
       "notFound": "کاربر یافت نشد",
       "purchaseCount": "تعداد خرید: {{count}}",
+      "sendMessage": {
+        "button": "✉️ ارسال پیام",
+        "title": "ارسال پیام به کاربر",
+        "placeholder": "متنی که ربات برای کاربر ارسال می‌کند (HTML پشتیبانی می‌شود)",
+        "send": "ارسال",
+        "sending": "در حال ارسال...",
+        "success": "پیام برای کاربر ارسال شد",
+        "noTelegram": "این کاربر فقط با ایمیل ثبت‌نام کرده و نمی‌تواند پیام تلگرام دریافت کند",
+        "errors": {
+          "no_telegram_id": "این کاربر فقط با ایمیل ثبت‌نام کرده و نمی‌تواند پیام تلگرام دریافت کند",
+          "forbidden": "کاربر ربات را مسدود کرده یا نمی‌تواند پیام دریافت کند",
+          "bad_request": "تلگرام پیام را رد کرد. متن (نشانه‌گذاری HTML) را بررسی کرده و دوباره تلاش کنید"
+        }
+      },
       "userActions": {
         "delete": "حذف کاربر",
         "disable": "غیرفعال‌سازی",
@@ -4006,6 +4146,7 @@
       "tabs": {
         "privacy": "حریم خصوصی",
         "offer": "پیشنهاد",
+        "recurrent": "پرداخت‌های تکراری",
         "rules": "قوانین",
         "faq": "FAQ"
       },

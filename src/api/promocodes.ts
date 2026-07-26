@@ -7,7 +7,8 @@ export type PromoCodeType =
   | 'subscription_days'
   | 'trial_subscription'
   | 'promo_group'
-  | 'discount';
+  | 'discount'
+  | 'balance_and_days';
 
 export interface PromoCode {
   id: number;

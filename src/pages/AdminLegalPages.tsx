@@ -14,9 +14,90 @@ import { useDestructiveConfirm } from '../platform/hooks/useNativeDialog';
 import { cn } from '../lib/utils';
 import { ChevronDownIcon, ChevronUpIcon, PlusIcon, TrashIcon } from '@/components/icons';
 
-type LegalTab = 'privacy' | 'offer' | 'rules' | 'faq';
+type LegalTab = 'privacy' | 'offer' | 'recurrent' | 'rules' | 'faq';
 
 const DISPLAY_MODES: LegalDisplayMode[] = ['bot', 'web', 'both'];
+
+type DocumentKind = 'privacy-policy' | 'public-offer' | 'recurrent-payments';
+
+// Bot chunk/page size (split_telegram_text max_length): longer texts are
+// delivered by the bot in several messages / paginated pages
+const TELEGRAM_SPLIT_THRESHOLD = 3500;
+
+// Mirrors the bot's split_telegram_text greedy paragraph packing to estimate
+// how many messages/pages the bot will produce for this text
+function estimateTelegramParts(text: string): number {
+  const normalized = text.replace(/\r\n/g, '\n').trim();
+  if (!normalized) return 0;
+  if (normalized.length <= TELEGRAM_SPLIT_THRESHOLD) return 1;
+  const paragraphs = normalized.split('\n\n').filter((p) => p.trim());
+  let parts = 0;
+  let current = '';
+  for (const paragraph of paragraphs) {
+    const candidate = current ? `${current}\n\n${paragraph}` : paragraph;
+    if (candidate.length <= TELEGRAM_SPLIT_THRESHOLD) {
+      current = candidate;
+      continue;
+    }
+    if (current) {
+      parts += 1;
+      current = '';
+    }
+    if (paragraph.length <= TELEGRAM_SPLIT_THRESHOLD) {
+      current = paragraph;
+    } else {
+      parts += Math.ceil(paragraph.length / TELEGRAM_SPLIT_THRESHOLD);
+    }
+  }
+  if (current) parts += 1;
+  return parts;
+}
+
+function ContentLengthMeta({ text, botVisible }: { text: string; botVisible: boolean }) {
+  const { t } = useTranslation();
+  const parts = botVisible ? estimateTelegramParts(text) : 0;
+  return (
+    <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+      <span className="text-dark-500">
+        {t('admin.legalPages.charCount', {
+          count: text.length,
+          defaultValue: 'Characters: {{count}}',
+        })}
+      </span>
+      {parts > 1 && (
+        <span className="text-warning-400">
+          {t('admin.legalPages.botSplitEstimate', {
+            count: parts,
+            defaultValue: '⚠️ The bot will show it split into ~{{count}} messages',
+          })}
+        </span>
+      )}
+    </div>
+  );
+}
+
+const DOCUMENT_API: Record<
+  DocumentKind,
+  {
+    get: () => ReturnType<typeof adminLegalPagesApi.getPrivacyPolicy>;
+    update: (
+      data: Parameters<typeof adminLegalPagesApi.updatePrivacyPolicy>[0],
+    ) => ReturnType<typeof adminLegalPagesApi.updatePrivacyPolicy>;
+  }
+> = {
+  'privacy-policy': {
+    get: adminLegalPagesApi.getPrivacyPolicy,
+    update: adminLegalPagesApi.updatePrivacyPolicy,
+  },
+  'public-offer': {
+    get: adminLegalPagesApi.getPublicOffer,
+    update: adminLegalPagesApi.updatePublicOffer,
+  },
+  'recurrent-payments': {
+    get: adminLegalPagesApi.getRecurrentPayments,
+    update: adminLegalPagesApi.updateRecurrentPayments,
+  },
+};
 
 function extractErrorDetail(err: unknown): string | null {
   const error = err as { response?: { data?: { detail?: unknown } } };
@@ -103,7 +184,7 @@ function DocumentEditor({
   kind,
   onDirtyChange,
 }: {
-  kind: 'privacy-policy' | 'public-offer';
+  kind: DocumentKind;
   onDirtyChange: (dirty: boolean) => void;
 }) {
   const { t } = useTranslation();
@@ -118,10 +199,7 @@ function DocumentEditor({
 
   const { data, isLoading, isFetching } = useQuery({
     queryKey: ['admin', 'legal-pages', kind],
-    queryFn: () =>
-      kind === 'privacy-policy'
-        ? adminLegalPagesApi.getPrivacyPolicy()
-        : adminLegalPagesApi.getPublicOffer(),
+    queryFn: () => DOCUMENT_API[kind].get(),
     staleTime: 0,
     gcTime: 0,
   });
@@ -167,9 +245,7 @@ function DocumentEditor({
           is_enabled: enabled[language] ?? false,
         })),
       };
-      return kind === 'privacy-policy'
-        ? adminLegalPagesApi.updatePrivacyPolicy(payload)
-        : adminLegalPagesApi.updatePublicOffer(payload);
+      return DOCUMENT_API[kind].update(payload);
     },
     onSuccess: () => {
       haptic.success();
@@ -215,6 +291,10 @@ function DocumentEditor({
           rows={16}
           className="input min-h-[320px] w-full font-mono text-sm"
           placeholder={t('admin.legalPages.contentPlaceholder')}
+        />
+        <ContentLengthMeta
+          text={contents[activeLang] ?? ''}
+          botVisible={kind !== 'recurrent-payments' && displayMode !== 'web'}
         />
       </div>
       {saveError && <p className="text-sm text-error-400">{saveError}</p>}
@@ -316,6 +396,7 @@ function RulesEditor({ onDirtyChange }: { onDirtyChange: (dirty: boolean) => voi
           className="input min-h-[320px] w-full font-mono text-sm"
           placeholder={t('admin.legalPages.contentPlaceholder')}
         />
+        <ContentLengthMeta text={contents[activeLang] ?? ''} botVisible={displayMode !== 'web'} />
       </div>
       {saveError && <p className="text-sm text-error-400">{saveError}</p>}
       <button
@@ -661,7 +742,7 @@ export default function AdminLegalPages() {
       </div>
 
       <div className="flex flex-wrap gap-1">
-        {(['privacy', 'offer', 'rules', 'faq'] as const).map((tab) => (
+        {(['privacy', 'offer', 'recurrent', 'rules', 'faq'] as const).map((tab) => (
           <button
             key={tab}
             type="button"
@@ -683,6 +764,9 @@ export default function AdminLegalPages() {
       )}
       {activeTab === 'offer' && (
         <DocumentEditor key="offer" kind="public-offer" onDirtyChange={setDirty} />
+      )}
+      {activeTab === 'recurrent' && (
+        <DocumentEditor key="recurrent" kind="recurrent-payments" onDirtyChange={setDirty} />
       )}
       {activeTab === 'rules' && <RulesEditor onDirtyChange={setDirty} />}
       {activeTab === 'faq' && <FaqEditor onDirtyChange={setDirty} />}

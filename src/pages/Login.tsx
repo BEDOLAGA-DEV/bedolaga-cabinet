@@ -16,6 +16,7 @@ import {
   type EmailAuthEnabled,
 } from '../api/branding';
 import { getAndClearReturnUrl, tokenStorage } from '../utils/token';
+import { getApiErrorMessage } from '../utils/api-error';
 import { isInTelegramWebApp, getTelegramInitData, useTelegramSDK } from '../hooks/useTelegramSDK';
 import { closeMiniApp } from '@telegram-apps/sdk-react';
 import LanguageSwitcher from '../components/LanguageSwitcher';
@@ -190,9 +191,9 @@ export default function Login() {
           navigate(getReturnUrl(), { replace: true });
           return;
         } catch (err) {
-          const error = err as { response?: { status?: number; data?: { detail?: string } } };
+          const error = err as { response?: { status?: number } };
           const status = error.response?.status;
-          const detail = error.response?.data?.detail;
+          const detail = getApiErrorMessage(err, '');
           if (import.meta.env.DEV)
             console.warn(`Telegram auth attempt ${attempt + 1} failed:`, status, detail);
 
@@ -268,14 +269,14 @@ export default function Login() {
         setRegisteredEmail(result.email);
       }
     } catch (err: unknown) {
-      const error = err as { response?: { status?: number; data?: { detail?: string } } };
+      const error = err as { response?: { status?: number } };
       const status = error.response?.status;
-      const detail = error.response?.data?.detail;
+      const detail = getApiErrorMessage(err, '');
 
-      if (status === 400 && detail?.includes('already registered')) {
+      if (status === 400 && detail.includes('already registered')) {
         setError(t('auth.emailAlreadyRegistered', 'This email is already registered'));
       } else if (status === 401 || status === 403) {
-        if (detail?.includes('verify your email')) {
+        if (detail.includes('verify your email')) {
           setError(t('auth.emailNotVerified', 'Please verify your email first'));
         } else {
           setError(t('auth.invalidCredentials', 'Invalid email or password'));
@@ -304,9 +305,7 @@ export default function Login() {
       await authApi.forgotPassword(forgotPasswordEmail.trim());
       setForgotPasswordSent(true);
     } catch (err: unknown) {
-      const error = err as { response?: { status?: number; data?: { detail?: string } } };
-      const detail = error.response?.data?.detail;
-      setForgotPasswordError(detail || t('common.error'));
+      setForgotPasswordError(getApiErrorMessage(err, t('common.error')));
     } finally {
       setForgotPasswordLoading(false);
     }

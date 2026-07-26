@@ -3,6 +3,7 @@
  * Shows prominent success messages for balance top-ups and subscription purchases.
  */
 
+import { uiLocale } from '@/utils/uiLocale';
 import { useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
@@ -96,7 +97,7 @@ export default function SuccessNotificationModal() {
 
   // Format expiry date
   const formattedExpiry = data.expiresAt
-    ? new Date(data.expiresAt).toLocaleDateString(undefined, {
+    ? new Date(data.expiresAt).toLocaleDateString(uiLocale(), {
         day: 'numeric',
         month: 'long',
         year: 'numeric',

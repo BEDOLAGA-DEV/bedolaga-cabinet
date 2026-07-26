@@ -1,4 +1,5 @@
-import { useState, useRef, useEffect } from 'react';
+import { uiLocale } from '@/utils/uiLocale';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
@@ -8,13 +9,14 @@ import { infoApi } from '../api/info';
 import { useAuthStore } from '../store/auth';
 import { logger } from '../utils/logger';
 import { checkRateLimit, getRateLimitResetTime, RATE_LIMIT_KEYS } from '../utils/rateLimit';
-import type { TicketDetail } from '../types';
+import type { SupportConfig, TicketDetail } from '../types';
 import { Card } from '@/components/data-display/Card';
 import { Button } from '@/components/primitives/Button';
 import { staggerContainer, staggerItem } from '@/components/motion/transitions';
 import { ChatIcon, CloseIcon, ImageIcon, PlusIcon, SendIcon } from '@/components/icons';
 import { usePlatform } from '@/platform';
 import { linkifyText } from '../utils/linkify';
+import { resolveSupportContact } from '../utils/supportContact';
 
 const log = logger.createLogger('Support');
 
@@ -35,6 +37,19 @@ export default function Support() {
   const isAdmin = useAuthStore((state) => state.isAdmin);
   const queryClient = useQueryClient();
   const { openTelegramLink, openLink } = usePlatform();
+
+  const openSupportContact = useCallback(
+    (config: SupportConfig) => {
+      const target = resolveSupportContact(config);
+      if (!target) return;
+      if (target.kind === 'external') {
+        openLink(target.url, { tryInstantView: false });
+      } else {
+        openTelegramLink(target.url);
+      }
+    },
+    [openLink, openTelegramLink],
+  );
   const [selectedTicket, setSelectedTicket] = useState<TicketDetail | null>(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newTitle, setNewTitle] = useState('');
@@ -198,65 +213,29 @@ export default function Support() {
   if (supportConfig && !supportConfig.tickets_enabled) {
     log.debug('Tickets disabled, config:', supportConfig);
 
+    // Куда и чем открывать контакт — один резолв на весь блок. null → открывать
+    // нечего (пустой/битый конфиг), и кнопку тогда не рендерим вовсе.
+    const contact = resolveSupportContact(supportConfig);
+
     const getSupportMessage = () => {
       log.debug('Getting support message for type:', supportConfig.support_type);
 
-      if (supportConfig.support_type === 'profile') {
-        const supportUsername = supportConfig.support_username || '@support';
-        log.debug('Opening profile:', supportUsername);
-        return {
-          title: isAdmin ? t('support.ticketsDisabled') : t('support.title'),
-          message: t('support.contactSupport', { username: supportUsername }),
-          buttonText: t('support.contactUs'),
-          buttonAction: () => {
-            log.debug('Button clicked, opening:', supportUsername);
-
-            // Extract username without @
-            const username = supportUsername.startsWith('@')
-              ? supportUsername.slice(1)
-              : supportUsername;
-
-            const webUrl = `https://t.me/${username}`;
-            log.debug('Web URL:', webUrl);
-
-            // Use platform's openTelegramLink
-            openTelegramLink(webUrl);
-          },
-        };
-      }
+      const title = isAdmin ? t('support.ticketsDisabled') : t('support.title');
 
       if (supportConfig.support_type === 'url' && supportConfig.support_url) {
         return {
-          title: isAdmin ? t('support.ticketsDisabled') : t('support.title'),
+          title,
           message: t('support.useExternalLink'),
           buttonText: t('support.openSupport'),
-          buttonAction: () => {
-            openLink(supportConfig.support_url!, { tryInstantView: false });
-          },
         };
       }
 
-      // Fallback: contact support (should not normally happen if config is correct)
+      // profile и любой fallback — контакт в телеграме
       const supportUsername = supportConfig.support_username || '@support';
-      log.debug('Fallback: Opening profile:', supportUsername);
       return {
-        title: isAdmin ? t('support.ticketsDisabled') : t('support.title'),
+        title,
         message: t('support.contactSupport', { username: supportUsername }),
         buttonText: t('support.contactUs'),
-        buttonAction: () => {
-          log.debug('Fallback button clicked, opening:', supportUsername);
-
-          // Extract username without @
-          const username = supportUsername.startsWith('@')
-            ? supportUsername.slice(1)
-            : supportUsername;
-
-          const webUrl = `https://t.me/${username}`;
-          log.debug('Fallback opening URL:', webUrl);
-
-          // Use platform's openTelegramLink
-          openTelegramLink(webUrl);
-        },
       };
     };
 
@@ -270,9 +249,11 @@ export default function Support() {
           </div>
           <h2 className="mb-2 text-xl font-semibold text-dark-100">{supportMessage.title}</h2>
           <p className="mb-6 text-dark-400">{supportMessage.message}</p>
-          <Button onClick={supportMessage.buttonAction} fullWidth>
-            {supportMessage.buttonText}
-          </Button>
+          {contact && (
+            <Button onClick={() => openSupportContact(supportConfig)} fullWidth>
+              {supportMessage.buttonText}
+            </Button>
+          )}
         </Card>
       </div>
     );
@@ -348,34 +329,33 @@ export default function Support() {
         </Button>
       </motion.div>
 
-      {/* Contact support card for "both" mode */}
-      {supportConfig?.support_type === 'both' && supportConfig.support_username && (
-        <motion.div variants={staggerItem}>
-          <Card className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-dark-800">
-                <ChatIcon className="h-5 w-5 text-dark-400" />
+      {/* Contact support card for "both" mode — self-animated: mounts after the
+          config query resolves, when the parent stagger orchestration has already
+          finished and would leave it stuck at opacity 0 */}
+      {supportConfig?.support_type === 'both' &&
+        supportConfig.support_username &&
+        resolveSupportContact(supportConfig) && (
+          <motion.div variants={staggerItem} initial="initial" animate="animate">
+            <Card className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-dark-800">
+                  <ChatIcon className="h-5 w-5 text-dark-400" />
+                </div>
+                <div>
+                  <div className="text-sm font-medium text-dark-100">{t('support.contactUs')}</div>
+                  <div className="text-xs text-dark-400">{supportConfig.support_username}</div>
+                </div>
               </div>
-              <div>
-                <div className="text-sm font-medium text-dark-100">{t('support.contactUs')}</div>
-                <div className="text-xs text-dark-400">{supportConfig.support_username}</div>
-              </div>
-            </div>
-            <Button
-              variant="secondary"
-              className="shrink-0 whitespace-nowrap"
-              onClick={() => {
-                const username = supportConfig.support_username!.startsWith('@')
-                  ? supportConfig.support_username!.slice(1)
-                  : supportConfig.support_username!;
-                openTelegramLink(`https://t.me/${username}`);
-              }}
-            >
-              {t('support.writeButton', 'Написать')}
-            </Button>
-          </Card>
-        </motion.div>
-      )}
+              <Button
+                variant="secondary"
+                className="shrink-0 whitespace-nowrap"
+                onClick={() => openSupportContact(supportConfig)}
+              >
+                {t('support.writeButton', 'Написать')}
+              </Button>
+            </Card>
+          </motion.div>
+        )}
 
       <motion.div variants={staggerItem} className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Tickets List */}
@@ -409,7 +389,7 @@ export default function Support() {
                     </span>
                   </div>
                   <div className="text-xs text-dark-500">
-                    {new Date(ticket.updated_at).toLocaleDateString()}
+                    {new Date(ticket.updated_at).toLocaleDateString(uiLocale())}
                   </div>
                 </button>
               ))}
@@ -556,7 +536,7 @@ export default function Support() {
                     </span>
                     <span className="text-xs text-dark-500">
                       {t('support.created')}{' '}
-                      {new Date(selectedTicket.created_at).toLocaleDateString()}
+                      {new Date(selectedTicket.created_at).toLocaleDateString(uiLocale())}
                     </span>
                   </div>
                 </div>
@@ -585,7 +565,7 @@ export default function Support() {
                           {msg.is_from_admin ? t('support.supportTeam') : t('support.you')}
                         </span>
                         <span className="text-xs text-dark-500">
-                          {new Date(msg.created_at).toLocaleString()}
+                          {new Date(msg.created_at).toLocaleString(uiLocale())}
                         </span>
                       </div>
                       {msg.message_text && (

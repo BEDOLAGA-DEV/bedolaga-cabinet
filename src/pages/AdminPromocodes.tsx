@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import i18n from '../i18n';
-import { promocodesApi, PromoCode, PromoCodeType } from '../api/promocodes';
+import { promocodesApi, type PromoCode, type PromoCodeType } from '../api/promocodes';
 import { usePlatform } from '../platform/hooks/usePlatform';
 import { copyToClipboard } from '../utils/clipboard';
 import {
@@ -29,6 +29,7 @@ const getTypeLabel = (type: PromoCodeType): string => {
     trial_subscription: i18n.t('admin.promocodes.type.trialSubscription'),
     promo_group: i18n.t('admin.promocodes.type.promoGroup'),
     discount: i18n.t('admin.promocodes.type.discount'),
+    balance_and_days: i18n.t('admin.promocodes.type.balanceAndDays'),
   };
   return labels[type] || type;
 };
@@ -40,6 +41,7 @@ const getTypeColor = (type: PromoCodeType): string => {
     trial_subscription: 'bg-accent-500/20 text-accent-400',
     promo_group: 'bg-warning-500/20 text-warning-400',
     discount: 'bg-pink-500/20 text-pink-400',
+    balance_and_days: 'bg-success-500/20 text-success-400',
   };
   return colors[type] || 'bg-dark-600 text-dark-300';
 };
@@ -194,13 +196,14 @@ export default function AdminPromocodes() {
                   </div>
                   {/* Info line */}
                   <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-dark-400">
-                    {promo.type === 'balance' && (
+                    {(promo.type === 'balance' || promo.type === 'balance_and_days') && (
                       <span className="text-success-400">
                         +{promo.balance_bonus_rubles} {t('admin.promocodes.form.rub')}
                       </span>
                     )}
                     {(promo.type === 'subscription_days' ||
-                      promo.type === 'trial_subscription') && (
+                      promo.type === 'trial_subscription' ||
+                      promo.type === 'balance_and_days') && (
                       <span className="text-accent-400">
                         +{promo.subscription_days} {t('admin.promocodes.form.days')}
                       </span>

@@ -1,6 +1,0 @@
-dist
-node_modules
-public
-*.min.js
-*.min.css
-package-lock.json

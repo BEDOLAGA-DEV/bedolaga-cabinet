@@ -1,3 +1,4 @@
+import { uiLocale } from '@/utils/uiLocale';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useLocation } from 'react-router';
@@ -37,7 +38,7 @@ export default function SubscriptionCardExpired({
   const [isRenewing, setIsRenewing] = useState(false);
   const [renewError, setRenewError] = useState<string | null>(null);
 
-  const formattedDate = new Date(subscription.end_date).toLocaleDateString();
+  const formattedDate = new Date(subscription.end_date).toLocaleDateString(uiLocale());
 
   // Detect limited (traffic exhausted) state
   const isLimited = subscription.is_limited;

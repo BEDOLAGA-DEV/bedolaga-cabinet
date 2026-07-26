@@ -1,3 +1,4 @@
+import { uiLocale } from '@/utils/uiLocale';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { referralNetworkApi } from '@/api/referralNetwork';
@@ -115,7 +116,7 @@ export function UserDetailPanel({ userId, className }: UserDetailPanelProps) {
                   {user.subscription_end && (
                     <p className="mt-0.5 text-xs text-dark-400">
                       {t('admin.referralNetwork.user.validUntil', {
-                        date: new Date(user.subscription_end).toLocaleDateString(),
+                        date: new Date(user.subscription_end).toLocaleDateString(uiLocale()),
                       })}
                     </p>
                   )}

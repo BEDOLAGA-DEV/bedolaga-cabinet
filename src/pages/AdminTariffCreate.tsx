@@ -4,12 +4,12 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import {
   tariffsApi,
-  TariffDetail,
-  TariffCreateRequest,
-  TariffUpdateRequest,
-  PeriodPrice,
-  ServerInfo,
-  ExternalSquadInfo,
+  type TariffDetail,
+  type TariffCreateRequest,
+  type TariffUpdateRequest,
+  type PeriodPrice,
+  type ServerInfo,
+  type ExternalSquadInfo,
 } from '../api/tariffs';
 import { AdminBackButton } from '../components/admin';
 import { createNumberInputHandler, toNumber } from '../utils/inputHelpers';
@@ -153,9 +153,12 @@ export default function AdminTariffCreate() {
   const handleSubmit = () => {
     const isDaily = tariffType === 'daily';
 
+    // PATCH applies a field only when it is present in the payload, so empty
+    // values ('' / []) must still be sent when editing — omitting them makes
+    // clearing the description or unchecking all promo groups impossible.
     const data: TariffCreateRequest | TariffUpdateRequest = {
       name,
-      description: description || undefined,
+      description: isEdit ? description : description || undefined,
       is_active: isActive,
       show_in_gift: showInGift,
       traffic_limit_gb: toNumber(trafficLimitGb, 100),
@@ -167,7 +170,7 @@ export default function AdminTariffCreate() {
       period_prices: isDaily ? [] : periodPrices.filter((p) => p.price_kopeks >= 0),
       allowed_squads: selectedSquads,
       external_squad_uuid: selectedExternalSquad || null,
-      promo_group_ids: selectedPromoGroups.length > 0 ? selectedPromoGroups : undefined,
+      promo_group_ids: selectedPromoGroups,
       traffic_topup_enabled: trafficTopupEnabled,
       traffic_topup_packages: trafficTopupPackages,
       max_topup_traffic_gb: toNumber(maxTopupTrafficGb),
@@ -600,7 +603,7 @@ export default function AdminTariffCreate() {
                       setEditingPeriodPrices((prev) => ({ ...prev, [period.days]: val }));
                       if (val !== '') {
                         const num = parseFloat(val);
-                        if (!isNaN(num)) {
+                        if (!Number.isNaN(num)) {
                           updatePeriodPrice(period.days, Math.max(0, num));
                         }
                       }
@@ -938,7 +941,7 @@ export default function AdminTariffCreate() {
                                 setEditingPackagePrices((prev) => ({ ...prev, [gb]: val }));
                                 if (val !== '') {
                                   const num = parseFloat(val);
-                                  if (!isNaN(num)) {
+                                  if (!Number.isNaN(num)) {
                                     setTrafficTopupPackages((prev) => ({
                                       ...prev,
                                       [gb]: Math.max(0, num) * 100,

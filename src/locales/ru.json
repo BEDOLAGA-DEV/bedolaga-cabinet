@@ -119,6 +119,18 @@
       "insufficientTitle": "Недостаточно средств",
       "insufficientMessage": "Для продления нужно {{required}} {{currency}}, на балансе {{balance}} {{currency}}"
     },
+    "sbpRecurring": {
+      "confirmedTitle": "Платёж по СБП подтверждён",
+      "confirmedMessage": "Списано {{amount}} {{currency}}",
+      "failedTitle": "Ошибка платежа по СБП",
+      "failedMessage": "Не удалось списать платёж по СБП",
+      "pastDueTitle": "Просрочен платёж по СБП",
+      "pastDueMessage": "Платёж по СБП просрочен. Проверьте приложение банка.",
+      "cancelledTitle": "Автоплатёж по СБП отключён",
+      "cancelledMessage": "Автоплатёж по СБП был отключён",
+      "activatedTitle": "Автоплатёж по СБП подключён",
+      "activatedMessage": "Автоплатёж по СБП успешно подключён"
+    },
     "account": {
       "bannedTitle": "Аккаунт заблокирован",
       "bannedMessage": "Ваш аккаунт был заблокирован",
@@ -192,6 +204,7 @@
     "telegramRetryFailed": "Авторизация не удалась. Закройте приложение и откройте заново.",
     "telegramReopenHint": "Если проблема повторяется, закройте и откройте приложение заново",
     "telegramNotConfigured": "Telegram бот не настроен",
+    "botOutdated": "Версия бота несовместима с кабинетом. Обновите бота до v3.33.0 или новее.",
     "telegramUnavailable": "Вход через Telegram временно недоступен",
     "authenticating": "Авторизация...",
     "orOpenInApp": "Или откройте бота в приложении",
@@ -253,6 +266,7 @@
   "dashboard": {
     "title": "Личный кабинет",
     "welcome": "Добро пожаловать, {{name}}!",
+    "welcomeNoName": "Добро пожаловать!",
     "yourSubscription": "Ваша подписка",
     "quickActions": "Быстрые действия",
     "viewSubscription": "Управление подпиской",
@@ -682,6 +696,30 @@
     },
     "allTariffsPurchased": "Все тарифы уже куплены",
     "autopay": "Автопродление",
+    "sbpRecurring": {
+      "title": "Автоплатёж по СБП",
+      "connect": "Подключить",
+      "confirmInBank": "Подтвердите в приложении банка",
+      "cancel": "Отключить",
+      "confirmCancel": "Отключить автоплатёж по СБП? Подписка больше не будет продлеваться автоматически через СБП.",
+      "cancelled": "Автоплатёж по СБП отключён",
+      "enableError": "Не удалось подключить автоплатёж по СБП",
+      "cancelError": "Не удалось отменить автоплатёж по СБП",
+      "statusPending": "Ожидает подтверждения в приложении банка",
+      "statusActive": "Активен",
+      "statusPastDue": "Платёж не прошёл — попробуйте снова",
+      "nextCharge": "следующее списание {{date}}",
+      "amountPerInterval": "{{amount}} ₽ {{interval}}",
+      "interval": {
+        "day": "ежедневно",
+        "week": "еженедельно",
+        "month": "ежемесячно",
+        "year": "ежегодно"
+      },
+      "autopayHint": "Подписка будет автоматически продлеваться через СБП без сохранённой карты",
+      "purchaseButton": "⚡ Оформить с автооплатой СБП",
+      "purchaseHint": "Первое списание подтверждает привязку в банке; продления списываются автоматически по каденсу тарифа."
+    },
     "backToList": "К списку подписок",
     "confirmDelete": "Удалить подписку?",
     "dailyAutoCharge": "Ежедневное списание",
@@ -775,6 +813,9 @@
       "jupiter": {
         "description": "Оплата СБП через Jupiter (FPGate P2P)"
       },
+      "cispay": {
+        "description": "Оплата картой или через СБП (cisPay)"
+      },
       "donut": {
         "description": "Оплата картой и СБП через Donut P2P"
       },
@@ -855,7 +896,10 @@
       "pageTitle": "Сохранённые карты",
       "backToBalance": "Назад",
       "empty": "Нет привязанных карт. Карта будет сохранена автоматически при следующем пополнении.",
-      "loadError": "Не удалось загрузить сохранённые карты. Попробуйте позже."
+      "loadError": "Не удалось загрузить сохранённые карты. Попробуйте позже.",
+      "sbpSection": "Автоплатёж по СБП",
+      "sbpBinding": "Привязка СБП",
+      "sbpUnlink": "Отключить автоплатёж по СБП"
     },
     "paymentReady": "Ссылка на оплату готова",
     "clickToOpenPayment": "Нажмите кнопку ниже, чтобы открыть страницу оплаты в новой вкладке",
@@ -1263,6 +1307,7 @@
       "campaigns": "Кампании",
       "promoOffers": "Промопредложения",
       "promocodes": "Промокоды",
+      "coupons": "Купоны",
       "promoGroups": "Группы скидок",
       "trafficUsage": "Расход трафика",
       "updates": "Обновления",
@@ -1519,7 +1564,10 @@
         "removeItem": "Удалить {{label}}",
         "clearAll": "Очистить все выбранные",
         "addScope": "Добавить область",
-        "maxReached": "Максимум {{max}} элементов"
+        "maxReached": "Максимум {{max}} элементов",
+        "fullNetwork": "Вся сеть",
+        "fullNetworkHint": "Показать граф целиком",
+        "removeFullNetwork": "Выключить режим полной сети"
       },
       "loading": "Загрузка графа...",
       "error": "Ошибка загрузки данных сети",
@@ -1632,7 +1680,7 @@
     },
     "paymentMethods": {
       "title": "Платёжные методы",
-      "description": "Настройка порядка и условий отображения",
+      "subtitle": "Настройка порядка и условий отображения",
       "enabled": "Вкл",
       "disabled": "Выкл",
       "notConfigured": "Не настроен",
@@ -1648,6 +1696,8 @@
       "openUrlDirectHint": "ВКЛ — ссылка оплаты открывается сразу, без промежуточной панели с кнопкой. ВЫКЛ — показывается кнопка «Открыть оплату». В Telegram ссылка в обоих случаях открывается во внешнем браузере (иначе оплата через банковское приложение/СБП не срабатывает), после оплаты — возврат на страницу результата. Stars/CryptoBot (t.me/-ссылки) всегда открываются нативно, флаг к ним не применяется.",
       "displayName": "Отображаемое имя",
       "displayNameHint": "Оставьте пустым для имени по умолчанию",
+      "description": "Описание",
+      "descriptionHint": "Показывается под названием метода. Пусто — текст по умолчанию",
       "subOptions": "Варианты оплаты",
       "minAmount": "Мин. сумма (коп.)",
       "maxAmount": "Макс. сумма (коп.)",
@@ -1973,6 +2023,7 @@
       "customButtonTypeUrl": "Ссылка",
       "customButtonCallbackPlaceholder": "callback_data (например, back_to_menu)",
       "customButtonUrlPlaceholder": "https://example.com",
+      "customButtonEmojiIdPlaceholder": "Custom emoji ID (необязательно)",
       "preview": "Предпросмотр",
       "previewEmpty": "— пусто —",
       "emailSubjectLabel": "Тема",
@@ -2191,6 +2242,7 @@
         "payments_etoplatezhi": "Etoplatezhi",
         "payments_antilopay": "Antilopay",
         "payments_jupiter": "Jupiter",
+        "payments_cispay": "CisPay",
         "payments_donut": "Donut",
         "payments_lava": "Lava",
         "payments_apple_iap": "Apple IAP",
@@ -2922,6 +2974,7 @@
       "namePlaceholder": "Введите название тарифа",
       "description": "Описание",
       "descriptionPlaceholder": "Краткое описание тарифа",
+      "descriptionPlaceholder2": "Краткое описание тарифа",
       "trafficLimit": "Лимит трафика",
       "trafficHint": "0 = безлимитный трафик",
       "deviceLimit": "Лимит устройств",
@@ -3433,6 +3486,84 @@
         "description": "Это лишит партнёра привилегий. Партнёр больше не будет получать комиссию от рефералов."
       }
     },
+    "coupons": {
+      "title": "Купоны",
+      "subtitle": "Оптовые партии одноразовых ссылок на подписку",
+      "addBatch": "Создать партию",
+      "noBatches": "Партий пока нет",
+      "days": "дн.",
+      "stats": {
+        "batches": "Партий",
+        "active": "Активных",
+        "redeemed": "Погашено",
+        "revoked": "Отозвано"
+      },
+      "list": {
+        "revoked": "Отозвана",
+        "until": "До",
+        "price": "Опт"
+      },
+      "pagination": {
+        "prev": "Назад",
+        "next": "Вперёд",
+        "page": "Стр. {{current}} из {{total}}"
+      },
+      "form": {
+        "title": "Новая партия купонов",
+        "subtitle": "Каждый купон — одноразовая ссылка на подписку",
+        "name": "Название партии",
+        "namePlaceholder": "Например, имя партнёра",
+        "tariff": "Тариф",
+        "selectTariff": "Выберите тариф",
+        "periodDays": "Дней подписки на купон",
+        "couponsCount": "Количество купонов (1–500)",
+        "price": "Оптовая цена за купон, ₽",
+        "priceHint": "Только для учёта, 0 — не указывать",
+        "validDays": "Срок действия купонов, дней",
+        "validDaysHint": "0 или пусто — бессрочно",
+        "create": "Создать партию",
+        "creating": "Создание…",
+        "cancel": "Отмена"
+      },
+      "validation": {
+        "nameRequired": "Укажите название партии",
+        "tariffRequired": "Выберите тариф",
+        "periodInvalid": "Дней подписки: от 1 до 3650",
+        "countInvalid": "Количество купонов: от 1 до 500"
+      },
+      "created": {
+        "title": "Партия создана",
+        "linksLabel": "Ссылки ({{count}} шт.)",
+        "copyAll": "Скопировать все",
+        "copied": "Скопировано",
+        "download": "Скачать .txt",
+        "toList": "К списку партий",
+        "toBatch": "К партии"
+      },
+      "detail": {
+        "title": "Партия #{{id}}",
+        "total": "Всего купонов",
+        "price": "Оптовая цена",
+        "priceTotal": "итого",
+        "validUntil": "Действует до",
+        "perpetual": "Бессрочно",
+        "createdAt": "Создана",
+        "linksTitle": "Активные ссылки ({{count}} шт.)"
+      },
+      "revoke": {
+        "button": "Отозвать непогашенные ({{count}})",
+        "confirmTitle": "Отозвать партию?",
+        "confirmText": "Будет отозвано {{count}} непогашенных купонов. Их ссылки перестанут работать. Действие необратимо.",
+        "confirm": "Отозвать",
+        "cancel": "Отмена",
+        "success": "Отозвано купонов: {{count}}"
+      },
+      "errors": {
+        "loadFailed": "Партия не найдена",
+        "createFailed": "Не удалось создать партию",
+        "revokeFailed": "Не удалось отозвать партию"
+      }
+    },
     "promocodes": {
       "title": "Промокоды",
       "subtitle": "Управление промокодами и группами скидок",
@@ -3457,7 +3588,8 @@
         "subscriptionDays": "Дни подписки",
         "trialSubscription": "Тестовая подписка",
         "promoGroup": "Группа скидок",
-        "discount": "Скидка %"
+        "discount": "Скидка %",
+        "balanceAndDays": "Баланс + дни"
       },
       "modal": {
         "editPromocode": "Редактирование промокода",
@@ -3475,6 +3607,11 @@
         "typeTrialSubscription": "Тестовая подписка",
         "typePromoGroup": "Группа скидок",
         "typeDiscount": "Процентная скидка",
+        "typeBonusSet": "Набор бонусов (баланс / дни / промогруппа)",
+        "bonusComposition": "Состав промокода",
+        "includeBalance": "Бонус на баланс",
+        "includeDays": "Дни подписки",
+        "includePromoGroup": "Промогруппа",
         "bonusAmount": "Сумма бонуса",
         "rub": "руб.",
         "daysCount": "Количество дней",
@@ -3568,6 +3705,7 @@
       },
       "validation": {
         "codeRequired": "Введите код промокода",
+        "bonusSetEmpty": "Выберите хотя бы один бонус в составе промокода",
         "balanceRequired": "Сумма бонуса должна быть больше 0",
         "daysRequired": "Количество дней должно быть больше 0",
         "groupRequired": "Выберите группу скидок",
@@ -3669,6 +3807,20 @@
       "confirm": {
         "block": "Заблокировать пользователя?"
       },
+      "sendMessage": {
+        "button": "✉️ Отправить сообщение",
+        "title": "Отправка сообщения пользователю",
+        "placeholder": "Текст, который бот отправит пользователю (поддерживается HTML)",
+        "send": "Отправить",
+        "sending": "Отправка...",
+        "success": "Сообщение отправлено пользователю",
+        "noTelegram": "Пользователь зарегистрирован только по email и не может получать сообщения в Telegram",
+        "errors": {
+          "no_telegram_id": "Пользователь зарегистрирован только по email и не может получать сообщения в Telegram",
+          "forbidden": "Пользователь заблокировал бота или не может получать сообщения",
+          "bad_request": "Telegram отклонил сообщение. Проверьте текст (HTML-разметку) и попробуйте ещё раз"
+        }
+      },
       "userActions": {
         "delete": "Удалить пользователя",
         "resetTrial": "Сбросить триал",
@@ -3706,7 +3858,8 @@
           "sync": "Синхронизация",
           "tickets": "Тикеты",
           "gifts": "Подарки",
-          "referrals": "Рефералы"
+          "referrals": "Рефералы",
+          "activity": "Активность"
         },
         "noTickets": "У пользователя нет тикетов",
         "ticketsCount": "тикетов",
@@ -3733,6 +3886,7 @@
         "purchases": "Покупок",
         "campaign": "Рекламная кампания",
         "referralsList": "Список рефералов",
+        "referralEarnings": "Реф. доход",
         "noReferrals": "Нет рефералов",
         "panelConfig": "Конфигурация панели",
         "trojanPassword": "Trojan пароль",
@@ -3823,7 +3977,13 @@
           "deviceLimitUpdated": "Лимит устройств обновлён",
           "invalidDays": "Введите корректное количество дней (больше 0)",
           "backToList": "К списку подписок",
-          "createNew": "Создать новую"
+          "createNew": "Создать новую",
+          "sbpTitle": "Автоплатёж по СБП",
+          "sbpCancel": "Отключить",
+          "sbpCancelled": "Автоплатёж по СБП отключён",
+          "sbpStatus_PENDING": "Ожидает подтверждения",
+          "sbpStatus_ACTIVE": "Активен",
+          "sbpStatus_PAST_DUE": "Платёж не прошёл"
         },
         "balance": {
           "current": "Текущий баланс",
@@ -3906,6 +4066,70 @@
           "searchPlaceholder": "Поиск по имени, email или Telegram ID...",
           "alreadyReferred": "уже чей-то реферал",
           "noUsersFound": "Пользователи не найдены"
+        },
+        "activity": {
+          "total": "Всего событий",
+          "empty": "Активности пока нет",
+          "filters": {
+            "all": "Все",
+            "payments": "Платежи",
+            "events": "События",
+            "promo": "Промо",
+            "tickets": "Тикеты",
+            "gifts": "Подарки",
+            "referrals": "Рефералы",
+            "logins": "Входы",
+            "clicks": "Клики"
+          },
+          "types": {
+            "transaction": "Транзакция",
+            "event": "Событие",
+            "promocode": "Промокод",
+            "coupon": "Купон",
+            "ticket": "Тикет",
+            "wheel_spin": "Колесо фортуны",
+            "poll": "Опрос пройден",
+            "gift_sent": "Подарок отправлен",
+            "gift_received": "Подарок получен",
+            "referral_earning": "Реферальное начисление",
+            "cabinet_login": "Вход в кабинет",
+            "withdrawal": "Заявка на вывод",
+            "button_click": "Кнопка в боте",
+            "cabinet_action": "Действие в кабинете"
+          },
+          "sources": {
+            "bot": "Бот",
+            "cabinet": "Кабинет"
+          },
+          "subtypes": {
+            "deposit": "Пополнение",
+            "withdrawal": "Списание",
+            "subscription_payment": "Оплата подписки",
+            "refund": "Возврат",
+            "failed_refund": "Неудачный возврат",
+            "referral_reward": "Реферальная награда",
+            "poll_reward": "Награда за опрос",
+            "gift_payment": "Оплата подарка",
+            "activation": "Активация",
+            "purchase": "Покупка",
+            "subscription_purchase": "Покупка подписки",
+            "renewal": "Продление",
+            "balance_topup": "Пополнение баланса",
+            "promo_group_change": "Смена промогруппы",
+            "campaign_registration": "Регистрация по кампании",
+            "referral_link_visit": "Переход по реф. ссылке",
+            "referral_registration": "Реф. регистрация",
+            "trial_activation": "Активация триала",
+            "open": "Открыт",
+            "answered": "Отвечен",
+            "pending": "Ожидает",
+            "closed": "Закрыт",
+            "redeemed": "Погашен",
+            "approved": "Одобрена",
+            "rejected": "Отклонена",
+            "completed": "Выполнена",
+            "command": "Команда"
+          }
         }
       },
       "notFound": "Пользователь не найден",
@@ -4726,6 +4950,7 @@
       "tabs": {
         "privacy": "Политика конф.",
         "offer": "Оферта",
+        "recurrent": "Рекуррентные платежи",
         "rules": "Правила",
         "faq": "FAQ"
       },
@@ -4740,6 +4965,10 @@
       "language": "Язык контента",
       "content": "Текст",
       "contentPlaceholder": "HTML-текст страницы...",
+      "charCount": "Символов: {{count}}",
+      "botSplitEstimate_one": "⚠️ В боте будет показано по частям: ~{{count}} сообщение",
+      "botSplitEstimate_few": "⚠️ В боте будет показано по частям: ~{{count}} сообщения",
+      "botSplitEstimate_many": "⚠️ В боте будет показано по частям: ~{{count}} сообщений",
       "save": "Сохранить",
       "saving": "Сохранение...",
       "saveError": "Не удалось сохранить. Попробуйте ещё раз.",
@@ -5333,6 +5562,7 @@
     "loyalty": "Статусы",
     "noFaq": "Нет вопросов и ответов",
     "noContent": "Нет контента",
+    "documentUnavailable": "Документ пока недоступен.",
     "updatedAt": "Обновлено",
     "noLoyaltyTiers": "Программа лояльности пока недоступна",
     "yourProgress": "Ваш прогресс",
@@ -5639,6 +5869,34 @@
       "nMonths_many": "{{count}} месяцев",
       "nDays": "{{count}} дн",
       "nMonths": "{{count}} мес"
+    }
+  },
+  "coupon": {
+    "title": "Купон на подписку",
+    "subtitle": "Одноразовый купон — активируйте, чтобы получить или продлить подписку",
+    "tariff": "Тариф",
+    "period": "Срок",
+    "daysSuffix": "дн.",
+    "validUntil": "Активировать до",
+    "openBot": "Активировать в боте",
+    "redeemCabinet": "Активировать в кабинете",
+    "redeeming": "Активация…",
+    "needAuth": "Чтобы активировать купон в кабинете, войдите в аккаунт — или откройте ссылку в боте",
+    "notFound": {
+      "title": "Купон не найден",
+      "text": "Купон не существует, уже использован или истёк"
+    },
+    "success": {
+      "activated": "Подписка активирована!",
+      "renewed": "Подписка продлена!",
+      "until": "Действует до"
+    },
+    "errors": {
+      "invalid": "Купон не найден или уже использован",
+      "expired": "Срок действия купона истёк",
+      "already_redeemed_by_you": "Вы уже активировали этот купон",
+      "internal": "Ошибка сервера, попробуйте позже",
+      "generic": "Не удалось активировать купон"
     }
   },
   "gift": {
