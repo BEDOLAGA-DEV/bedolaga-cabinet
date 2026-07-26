@@ -1,0 +1,17 @@
+services:
+  cabinet-frontend:
+    build:
+      context: .
+      args:
+        VITE_TELEGRAM_BOT_USERNAME: qalampirvpn_bot
+    image: bedolaga-cabinet:latest
+    container_name: cabinet_frontend
+    restart: unless-stopped
+    # Порты НЕ пробрасываем — доступ только через Docker сеть
+    networks:
+      - bot_network
+
+networks:
+  bot_network:
+    external: true
+    name: remnawave-bedolaga-telegram-bot_bot_network  # Сеть вашего бота

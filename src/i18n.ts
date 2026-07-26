@@ -8,6 +8,7 @@ const localeLoaders: Record<string, () => Promise<{ default: ResourceLanguage }>
   en: () => import('./locales/en.json'),
   zh: () => import('./locales/zh.json'),
   fa: () => import('./locales/fa.json'),
+  uz: () => import('./locales/uz.json'),
 };
 
 const SUPPORTED_LANGS = Object.keys(localeLoaders);
