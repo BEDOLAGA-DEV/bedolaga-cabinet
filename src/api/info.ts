@@ -1,5 +1,16 @@
 import apiClient from './client';
+import i18n from '../i18n';
 import type { SupportConfig } from '../types';
+
+// Backend defaults every /cabinet/info document endpoint to `language=ru`
+// (see app/cabinet/routes/info.py). Without this param the cabinet always got
+// the Russian FAQ / rules / legal texts no matter which UI language was
+// selected, so per-language content (uz, ua, en, …) was unreachable.
+function currentLanguage(): string {
+  return (i18n.language || 'ru').split('-')[0].toLowerCase();
+}
+
+const langParams = () => ({ params: { language: currentLanguage() } });
 
 export interface FaqPage {
   id: number;
@@ -53,31 +64,37 @@ export interface InfoVisibility {
 export const infoApi = {
   // Get FAQ pages list
   getFaqPages: async (): Promise<FaqPage[]> => {
-    const response = await apiClient.get<FaqPage[]>('/cabinet/info/faq');
+    const response = await apiClient.get<FaqPage[]>('/cabinet/info/faq', langParams());
     return response.data;
   },
 
   // Get specific FAQ page
   getFaqPage: async (pageId: number): Promise<FaqPage> => {
-    const response = await apiClient.get<FaqPage>(`/cabinet/info/faq/${pageId}`);
+    const response = await apiClient.get<FaqPage>(`/cabinet/info/faq/${pageId}`, langParams());
     return response.data;
   },
 
   // Get service rules
   getRules: async (): Promise<RulesResponse> => {
-    const response = await apiClient.get<RulesResponse>('/cabinet/info/rules');
+    const response = await apiClient.get<RulesResponse>('/cabinet/info/rules', langParams());
     return response.data;
   },
 
   // Get privacy policy
   getPrivacyPolicy: async (): Promise<PrivacyPolicyResponse> => {
-    const response = await apiClient.get<PrivacyPolicyResponse>('/cabinet/info/privacy-policy');
+    const response = await apiClient.get<PrivacyPolicyResponse>(
+      '/cabinet/info/privacy-policy',
+      langParams(),
+    );
     return response.data;
   },
 
   // Get public offer
   getPublicOffer: async (): Promise<PublicOfferResponse> => {
-    const response = await apiClient.get<PublicOfferResponse>('/cabinet/info/public-offer');
+    const response = await apiClient.get<PublicOfferResponse>(
+      '/cabinet/info/public-offer',
+      langParams(),
+    );
     return response.data;
   },
 
@@ -85,6 +102,7 @@ export const infoApi = {
   getRecurrentPayments: async (): Promise<RecurrentPaymentsResponse> => {
     const response = await apiClient.get<RecurrentPaymentsResponse>(
       '/cabinet/info/recurrent-payments',
+      langParams(),
     );
     return response.data;
   },

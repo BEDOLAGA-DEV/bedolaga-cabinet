@@ -45,11 +45,14 @@ const DOC_CONFIG: Record<
 // footer. Reads the same public /cabinet/info endpoints the authenticated Info page
 // uses, so the pages are reachable before login instead of bouncing to /login.
 export default function PublicLegal({ doc }: PublicLegalProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const config = DOC_CONFIG[doc];
+  const locale = i18n.language.split('-')[0];
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['public-legal', config.queryKey],
+    // locale is part of the key so the LanguageSwitcher above actually reloads
+    // the document in the selected language instead of reusing the cached one
+    queryKey: ['public-legal', config.queryKey, locale],
     queryFn: config.fetch,
     staleTime: 5 * 60 * 1000,
   });

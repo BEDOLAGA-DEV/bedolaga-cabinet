@@ -309,7 +309,9 @@ export default function Info() {
   }, [infoPage, locale]);
 
   const { data: faqPages, isLoading: faqLoading } = useQuery({
-    queryKey: ['faq-pages'],
+    // locale is part of the key: these documents are fetched per language,
+    // so switching the UI language must refetch instead of serving the cache
+    queryKey: ['faq-pages', locale],
     queryFn: infoApi.getFaqPages,
     enabled: activeTab === 'faq' && !currentTabSlug && replacementsLoaded,
     staleTime: 0,
@@ -317,7 +319,7 @@ export default function Info() {
   });
 
   const { data: rules, isLoading: rulesLoading } = useQuery({
-    queryKey: ['rules'],
+    queryKey: ['rules', locale],
     queryFn: infoApi.getRules,
     enabled: activeTab === 'rules' && !currentTabSlug && replacementsLoaded,
     staleTime: 0,
@@ -325,7 +327,7 @@ export default function Info() {
   });
 
   const { data: privacy, isLoading: privacyLoading } = useQuery({
-    queryKey: ['privacy-policy'],
+    queryKey: ['privacy-policy', locale],
     queryFn: infoApi.getPrivacyPolicy,
     enabled: activeTab === 'privacy' && !currentTabSlug && replacementsLoaded,
     staleTime: 0,
@@ -333,7 +335,7 @@ export default function Info() {
   });
 
   const { data: offer, isLoading: offerLoading } = useQuery({
-    queryKey: ['public-offer'],
+    queryKey: ['public-offer', locale],
     queryFn: infoApi.getPublicOffer,
     enabled: activeTab === 'offer' && !currentTabSlug && replacementsLoaded,
     staleTime: 0,

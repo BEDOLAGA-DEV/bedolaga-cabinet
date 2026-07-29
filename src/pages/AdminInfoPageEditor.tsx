@@ -39,8 +39,19 @@ import {
 } from '@/components/icons';
 import type { InfoPageType, FaqItem, ReplacesTab, InfoPageDisplayMode } from '../api/infoPages';
 
-const AVAILABLE_LOCALES = ['ru', 'en', 'zh', 'fa'] as const;
+const AVAILABLE_LOCALES = ['ru', 'en', 'ua', 'zh', 'fa', 'uz'] as const;
 type LocaleCode = (typeof AVAILABLE_LOCALES)[number];
+
+// Locale tab labels. `admin.infoPages.locales` in the bundled translations only
+// covers ru/en/zh/fa, so ua/uz would render as the raw key without a fallback.
+const LOCALE_LABELS: Record<LocaleCode, string> = {
+  ru: 'Русский',
+  en: 'Английский',
+  ua: 'Українська',
+  zh: 'Китайский',
+  fa: 'Персидский',
+  uz: "O'zbekcha",
+};
 
 // --- Icons ---
 const H1Icon = () => <span className="text-xs font-bold">H1</span>;
@@ -626,6 +637,8 @@ function FaqBuilder({ items, onChange, locale, localeLabel }: FaqBuilderProps) {
 
 export default function AdminInfoPageEditor() {
   const { t } = useTranslation();
+  const localeLabel = (loc: LocaleCode) =>
+    t(`admin.infoPages.locales.${loc}`, { defaultValue: LOCALE_LABELS[loc] });
   const navigate = useNavigate();
   const { id: rawId } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
@@ -1198,7 +1211,7 @@ export default function AdminInfoPageEditor() {
                     : 'bg-dark-700 text-dark-300 hover:bg-dark-600 hover:text-dark-100',
                 )}
               >
-                {t(`admin.infoPages.locales.${loc}`)}
+                {localeLabel(loc)}
               </button>
             ))}
           </div>
@@ -1207,7 +1220,7 @@ export default function AdminInfoPageEditor() {
         {/* Title for current locale */}
         <div>
           <label htmlFor="ip-title" className="label">
-            {t('admin.infoPages.fields.title')} ({t(`admin.infoPages.locales.${activeLocale}`)})
+            {t('admin.infoPages.fields.title')} ({localeLabel(activeLocale)})
           </label>
           <input
             id="ip-title"
@@ -1224,12 +1237,12 @@ export default function AdminInfoPageEditor() {
             items={faqItems[activeLocale] ?? []}
             onChange={(items) => setFaqItems((prev) => ({ ...prev, [activeLocale]: items }))}
             locale={activeLocale}
-            localeLabel={t(`admin.infoPages.locales.${activeLocale}`)}
+            localeLabel={localeLabel(activeLocale)}
           />
         ) : (
           <div>
             <label className="label">
-              {t('admin.infoPages.fields.content')} ({t(`admin.infoPages.locales.${activeLocale}`)})
+              {t('admin.infoPages.fields.content')} ({localeLabel(activeLocale)})
             </label>
             <div
               className="relative overflow-hidden rounded-xl border border-dark-700 bg-dark-800/50"
