@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.64.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.63.0...v1.64.0) (2026-07-29)
+
+
+### Features
+
+* **branding:** загрузка видео стартового меню бота ([c9afea7](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/c9afea7a5043e2a3b02d2242a116878fc70a0be6))
+* **coupons:** лимит на пользователя и удаление партии в кабинете ([390da33](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/390da33914eb3f992719e33acf85decac660a880))
+* **gift:** QR подарка и сканирование в кабинете ([0e4dc43](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/0e4dc43335135fe229ce3c695fd7fa2722eb87e4))
+* **lava:** автопродление Lava на странице подписки ([2dce539](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/2dce539da2a7c3128084ed2bc6bcdf560d440c75))
+* **lava:** покупка привязкой, продукт тарифа в админке, CTA ([a28f116](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/a28f1167f7af57bfc6e5c7c370849e7478ec459f))
+* **promo-offers:** охват сегментов и прогресс доставки на странице отправки ([c6d8c0a](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/c6d8c0afe0a30b864a9d0834735fdc7b52d8f362))
+
+
+### Bug Fixes
+
+* **admin:** фиксированный телеграм-синий у свотча «Синий» вместо акцента темы ([62aaa5d](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/62aaa5d7c9eaedb5a118469587a35585f9e4f549))
+* **i18n:** починка плейсхолдеров и переводов в zh/fa/en локалях кабинета ([fb1f5cf](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/fb1f5cf3a762f55f18806be97a0db973316ff6ad))
+* **i18n:** существующие ключи вместо отсутствующих common.units.* на экране продления ([516399c](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/516399cef9fa4a100b5dae979a04fafe0d05e634))
+* **security:** SRI для CDN-скрипта сканера QR ([b615927](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/b615927283d9ae530c03f6120b3c5794d92e0689))
+* **subscription:** корректная цена за месяц при выборе периода ([888a02f](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/888a02f39722c68e4beddefbd1e39c402dfa51cb))
+
 ## [1.63.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.62.0...v1.63.0) (2026-07-24)
 
 
