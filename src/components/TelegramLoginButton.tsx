@@ -54,6 +54,9 @@ export default function TelegramLoginButton({ referralCode }: TelegramLoginButto
   const botUsername =
     widgetConfig?.bot_username || import.meta.env.VITE_TELEGRAM_BOT_USERNAME || '';
   const isOIDC = Boolean(widgetConfig?.oidc_enabled && widgetConfig?.oidc_client_id);
+  const telegramBaseDomain = import.meta.env.VITE_TELEGRAM_BASE_URL || 't.me';
+  const telegramScriptDomain = import.meta.env.VITE_TELEGRAM_SCRIPT_URL || 'telegram.org';
+  const telegramOauthDomain = import.meta.env.VITE_TELEGRAM_OAUTH_URL || 'oauth.telegram.org';
 
   // OIDC callback handler
   const handleOIDCCallbackRef =
@@ -137,7 +140,7 @@ export default function TelegramLoginButton({ referralCode }: TelegramLoginButto
     if (!script) {
       script = document.createElement('script');
       script.id = scriptId;
-      script.src = 'https://oauth.telegram.org/js/telegram-login.js?3';
+      script.src = `https://${telegramOauthDomain}/js/telegram-login.js?3`;
       script.async = true;
       script.onload = () => {
         clearTimeout(timeoutId);
@@ -196,7 +199,7 @@ export default function TelegramLoginButton({ referralCode }: TelegramLoginButto
     };
 
     const script = document.createElement('script');
-    script.src = 'https://telegram.org/js/telegram-widget.js?23';
+    script.src = `https://${telegramScriptDomain}/js/telegram-widget.js?23`;
     script.setAttribute('data-telegram-login', botUsername);
     script.setAttribute('data-size', widgetConfig.size);
     script.setAttribute('data-radius', String(widgetConfig.radius));
@@ -435,7 +438,7 @@ export default function TelegramLoginButton({ referralCode }: TelegramLoginButto
   if (scriptFailed) {
     const resolvedBotUsername = deepLinkBotUsername || botUsername;
     const deepLinkUrl = deepLinkToken
-      ? `https://t.me/${resolvedBotUsername}?start=webauth_${deepLinkToken}`
+      ? `https://${telegramBaseDomain}/${resolvedBotUsername}?start=webauth_${deepLinkToken}`
       : '';
     const startCommand = deepLinkToken ? `/start webauth_${deepLinkToken}` : '';
 
@@ -556,8 +559,8 @@ export default function TelegramLoginButton({ referralCode }: TelegramLoginButto
         <a
           href={
             referralCode
-              ? `https://t.me/${botUsername}?start=${encodeURIComponent(referralCode)}`
-              : `https://t.me/${botUsername}`
+              ? `https://${telegramBaseDomain}/${botUsername}?start=${encodeURIComponent(referralCode)}`
+              : `https://${telegramBaseDomain}/${botUsername}`
           }
           target="_blank"
           rel="noopener noreferrer"

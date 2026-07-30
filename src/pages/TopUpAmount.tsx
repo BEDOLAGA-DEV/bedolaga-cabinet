@@ -251,10 +251,12 @@ export default function TopUpAmount() {
         // toLowerCase для устойчивости к редким провайдерам, которые могут вернуть
         // URL в нестандартном регистре. Также покрываем tg:// scheme на всякий случай.
         const lowerUrl = redirectUrl.toLowerCase();
+        const telegramBaseDomain = import.meta.env.VITE_TELEGRAM_BASE_URL || 't.me';
+        const telegramProtocol = import.meta.env.VITE_TELEGRAM_PROTOCOL || 'tg';
         const isTelegramDeepLink =
-          lowerUrl.startsWith('https://t.me/') ||
-          lowerUrl.startsWith('http://t.me/') ||
-          lowerUrl.startsWith('tg://');
+          lowerUrl.startsWith(`https://${telegramBaseDomain}/`) ||
+          lowerUrl.startsWith(`http://${telegramBaseDomain}/`) ||
+          lowerUrl.startsWith(`${telegramProtocol}://`);
         if (method?.open_url_direct && !isTelegramDeepLink) {
           // In the Telegram WebView, same-container navigation to the provider page breaks
           // when it hands off to a bank app via a custom scheme (SBP) — Android shows
@@ -387,9 +389,10 @@ export default function TopUpAmount() {
       : convertAmount(rub).toFixed(currencyDecimals);
   const isPending = topUpMutation.isPending || starsPaymentMutation.isPending;
 
+  const telegramBaseDomain = import.meta.env.VITE_TELEGRAM_BASE_URL || 't.me';
   const handleOpenPayment = () => {
     if (!paymentUrl) return;
-    if (paymentUrl.includes('t.me/')) {
+    if (paymentUrl.includes(`${telegramBaseDomain}/`)) {
       openTelegramLink(paymentUrl);
     } else {
       openLink(paymentUrl);

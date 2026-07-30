@@ -73,7 +73,9 @@ function CodeOnlySuccessState({
   // and "_" is a valid start-param char — so use a literal "GIFT_" prefix to
   // match the bot's `start_parameter.startswith('GIFT_')` handler. Encoding the
   // underscore as %5F made the bot receive "GIFT%5F…" and silently fail.
-  const botLink = botUsername ? `https://t.me/${botUsername}?start=GIFT_${shortCode}` : null;
+
+  const telegramBaseDomain = import.meta.env.VITE_TELEGRAM_BASE_URL || 't.me';
+  const botLink = botUsername ? `https://${telegramBaseDomain}/${botUsername}?start=GIFT_${shortCode}` : null;
   const cabinetLink = `${window.location.origin}/gift?tab=activate&code=${encodeURIComponent(shortCode)}`;
 
   const fullMessage = [

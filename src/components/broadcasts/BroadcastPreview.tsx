@@ -117,8 +117,10 @@ function wrap(frame: Frame, key: number): ReactNode {
         </pre>
       );
     case 'a': {
+      const telegramProtocol = import.meta.env.VITE_TELEGRAM_PROTOCOL || 'tg';
+      const dynamicRegex = new RegExp(`^(https?:|${telegramProtocol}:|mailto:|tel:)`, 'i');
       const safeHref =
-        frame.href && /^(https?:|tg:|mailto:|tel:)/i.test(frame.href) ? frame.href : '#';
+        frame.href && dynamicRegex.test(frame.href) ? frame.href : '#';
       return (
         <a
           key={k}

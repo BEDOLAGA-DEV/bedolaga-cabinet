@@ -309,7 +309,9 @@ export default function AdminBroadcastCreate() {
     // custom_emoji_id — необязательное поле, но если задано — числовая строка (Bot API)
     if (newButtonEmojiId.trim() && !/^\d{1,64}$/.test(newButtonEmojiId.trim())) return false;
     if (newButtonActionType === 'url') {
-      return /^https:\/\/|^tg:\/\//.test(newButtonActionValue.trim());
+      const telegramProtocol = import.meta.env.VITE_TELEGRAM_PROTOCOL || 'tg';
+      const dynamicRegex = new RegExp(`^https:\\/\\/|^${telegramProtocol}:\\/\\/`);
+      return dynamicRegex.test(newButtonActionValue.trim());
     }
     if (newButtonActionType === 'callback') {
       return new TextEncoder().encode(newButtonActionValue.trim()).length <= 64;

@@ -39,7 +39,7 @@
           location.search.indexOf('tgWebApp') !== -1;
         if (isTelegram) {
           var s = document.createElement('script');
-          s.src = 'https://telegram.org/js/telegram-web-app.js';
+          s.src = s.src = '%VITE_TELEGRAM_SCRIPT_URL%';
           s.async = true;
           document.head.appendChild(s);
         }

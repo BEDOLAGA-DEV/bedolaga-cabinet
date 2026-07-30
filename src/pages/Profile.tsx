@@ -103,7 +103,8 @@ export default function Profile() {
       return;
     }
 
-    const telegramUrl = `https://t.me/share/url?url=${encodeURIComponent(referralLink)}&text=${encodeURIComponent(shareText)}`;
+    const telegramBaseDomain = import.meta.env.VITE_TELEGRAM_BASE_URL || 't.me';
+    const telegramUrl = `https://${telegramBaseDomain}/share/url?url=${encodeURIComponent(referralLink)}&text=${encodeURIComponent(shareText)}`;
     openTelegramLink(telegramUrl);
   };
 

@@ -29,8 +29,9 @@ export default function ChannelSubscriptionScreen() {
       if (!url) return;
       try {
         const parsed = new URL(url);
+        const telegramBaseDomain = import.meta.env.VITE_TELEGRAM_BASE_URL || 't.me';
         if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return;
-        if (parsed.hostname === 't.me' || parsed.hostname.endsWith('.t.me')) {
+        if (parsed.hostname === telegramBaseDomain || parsed.hostname.endsWith(`.${telegramBaseDomain}`)) {
           openTelegramLink(url);
         } else {
           openLink(url);

@@ -683,6 +683,7 @@ export function MenuEditorTab() {
   const handleSave = useCallback(() => {
     // Validate custom buttons have valid URLs
     const currentDraft = draftConfigRef.current;
+    const telegramProtocol = import.meta.env.VITE_TELEGRAM_PROTOCOL || 'tg';
     for (const row of currentDraft.rows) {
       for (const btn of row.buttons) {
         if (btn.type === 'custom') {
@@ -690,7 +691,7 @@ export function MenuEditorTab() {
             !btn.url ||
             (!btn.url.startsWith('http://') &&
               !btn.url.startsWith('https://') &&
-              !btn.url.startsWith('tg://'))
+              !btn.url.startsWith(`${telegramProtocol}://`))
           ) {
             notify.error(t('admin.menuEditor.invalidUrl'));
             return;

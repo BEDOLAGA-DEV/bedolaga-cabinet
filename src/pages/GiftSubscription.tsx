@@ -1010,7 +1010,8 @@ function SentGiftCard({ gift }: { gift: SentGift }) {
     // Literal "GIFT_" prefix: Telegram forwards the start param to the bot
     // verbatim (no URL-decoding), so the previously-encoded "%5F" never matched
     // the bot's `start_parameter.startswith('GIFT_')` handler.
-    const botLink = botUsername ? `https://t.me/${botUsername}?start=GIFT_${shortCode}` : null;
+    const telegramBaseDomain = import.meta.env.VITE_TELEGRAM_BASE_URL || 't.me';
+    const botLink = botUsername ? `https://${telegramBaseDomain}/${botUsername}?start=GIFT_${shortCode}` : null;
     const cabinetLink = `${window.location.origin}/gift?tab=activate&code=${encodeURIComponent(shortCode)}`;
     return [
       t('gift.shareText'),

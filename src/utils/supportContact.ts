@@ -13,7 +13,8 @@ export type SupportContactTarget = {
 // Открываем только то, что реально ведёт в браузер/телеграм. support_url приходит
 // из админского SUPPORT_USERNAME — чужую схему (`javascript:`, `data:` и т.п.)
 // нельзя пускать в опенер как есть.
-const ALLOWED_SCHEMES = ['http:', 'https:', 'tg:'];
+const telegramProtocol = import.meta.env.VITE_TELEGRAM_PROTOCOL || 'tg';
+const ALLOWED_SCHEMES = ['http:', 'https:', `${telegramProtocol}:`];
 
 function isAllowedScheme(url: string): boolean {
   try {
@@ -59,5 +60,6 @@ export function resolveSupportContact(config: SupportConfig): SupportContactTarg
   // только из настоящего юзернейма — всё URL-образное отдаём резолвить бэку.
   if (!/^[A-Za-z0-9_]{3,}$/.test(username)) return null;
 
-  return { kind: 'telegram', url: `https://t.me/${username}` };
+  const telegramBaseDomain = import.meta.env.VITE_TELEGRAM_BASE_URL || 't.me';
+  return { kind: 'telegram', url: `https://${telegramBaseDomain}/${username}` };
 }
