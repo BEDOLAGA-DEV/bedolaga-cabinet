@@ -75,7 +75,9 @@ function CodeOnlySuccessState({
   // underscore as %5F made the bot receive "GIFT%5F…" and silently fail.
 
   const telegramBaseDomain = import.meta.env.VITE_TELEGRAM_BASE_URL || 't.me';
-  const botLink = botUsername ? `https://${telegramBaseDomain}/${botUsername}?start=GIFT_${shortCode}` : null;
+  const botLink = botUsername
+    ? `https://${telegramBaseDomain}/${botUsername}?start=GIFT_${shortCode}`
+    : null;
   const cabinetLink = `${window.location.origin}/gift?tab=activate&code=${encodeURIComponent(shortCode)}`;
 
   const fullMessage = [
