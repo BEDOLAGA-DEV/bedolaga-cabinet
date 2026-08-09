@@ -205,10 +205,18 @@ export function TariffPickerGrid({
                       tariff.daily_price_kopeks ?? tariff.price_per_day_kopeks ?? 0;
                     const originalDailyPrice = tariff.original_daily_price_kopeks || 0;
                     if (dailyPrice > 0 || originalDailyPrice > 0) {
-                      const promoDaily = applyPromoDiscount(
-                        dailyPrice,
-                        originalDailyPrice > dailyPrice ? originalDailyPrice : undefined,
-                      );
+                      // The backend returns the exact daily charge with promo and
+                      // preserved extra devices already included. Applying the
+                      // cabinet promo a second time would understate the charge.
+                      const promoDaily = {
+                        price: dailyPrice,
+                        original: originalDailyPrice > dailyPrice ? originalDailyPrice : undefined,
+                        percent:
+                          originalDailyPrice > dailyPrice
+                            ? Math.round((1 - dailyPrice / originalDailyPrice) * 100)
+                            : undefined,
+                        isPromoGroup: Boolean(tariff.promo_group_name),
+                      };
                       return (
                         <span className="flex items-center gap-2">
                           <span className="font-medium text-accent-400">
