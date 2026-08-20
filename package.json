@@ -110,5 +110,9 @@
   },
   "overrides": {
     "valibot": "^1.4.2"
+  },
+  "allowScripts": {
+    "esbuild": true,
+    "fsevents": true
   }
 }
