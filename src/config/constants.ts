@@ -2,7 +2,6 @@ export const STORAGE_KEYS = {
   THEME: 'cabinet-theme',
   ENABLED_THEMES: 'cabinet-enabled-themes',
   FAVORITE_SETTINGS: 'admin_favorite_settings',
-  USER_THEME_PREFS: 'user_theme_preferences',
 } as const;
 
 // WebSocket

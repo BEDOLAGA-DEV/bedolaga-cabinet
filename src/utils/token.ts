@@ -335,18 +335,3 @@ export function safeRedirectToLogin(): void {
     window.location.href = '/login';
   }
 }
-
-export function isValidRedirectUrl(url: string): boolean {
-  if (!url) return false;
-
-  if (url.startsWith('/') && !url.startsWith('//')) {
-    return true;
-  }
-
-  try {
-    const parsed = new URL(url, window.location.origin);
-    return parsed.origin === window.location.origin;
-  } catch {
-    return false;
-  }
-}

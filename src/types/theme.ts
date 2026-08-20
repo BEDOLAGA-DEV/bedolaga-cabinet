@@ -59,58 +59,6 @@ export const DEFAULT_THEME_COLORS: ThemeColors = {
 // Color shade levels for palette generation
 export const SHADE_LEVELS = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950] as const;
 
-// Extended shade levels including 850 for dark palette
-export const EXTENDED_SHADE_LEVELS = [
-  50, 100, 200, 300, 400, 500, 600, 700, 800, 850, 900, 950,
-] as const;
-
 export type ShadeLevel = (typeof SHADE_LEVELS)[number];
-export type ExtendedShadeLevel = (typeof EXTENDED_SHADE_LEVELS)[number];
 
 export type ColorPalette = Record<ShadeLevel | 850, string>;
-
-// Extended theme settings for user preferences
-export type BorderRadiusPreset = 'none' | 'small' | 'medium' | 'large' | 'pill';
-export type SpacingPreset = 'compact' | 'comfortable' | 'spacious';
-export type ThemeMode = 'dark' | 'light' | 'system';
-
-export interface UserThemePreferences {
-  /**
-   * Theme mode preference
-   * @default 'system'
-   */
-  theme: ThemeMode;
-
-  /**
-   * Border radius preset
-   * @default 'large'
-   */
-  borderRadius: BorderRadiusPreset;
-
-  /**
-   * Whether animations are enabled
-   * @default true
-   */
-  animationsEnabled: boolean;
-}
-
-export const DEFAULT_USER_PREFERENCES: UserThemePreferences = {
-  theme: 'system',
-  borderRadius: 'large',
-  animationsEnabled: true,
-};
-
-// CSS variable values for each preset
-export const BORDER_RADIUS_VALUES: Record<BorderRadiusPreset, string> = {
-  none: '0px',
-  small: '8px',
-  medium: '16px',
-  large: '24px',
-  pill: '9999px',
-};
-
-export const SPACING_VALUES: Record<SpacingPreset, { padding: string; gap: string }> = {
-  compact: { padding: '12px', gap: '12px' },
-  comfortable: { padding: '16px', gap: '16px' },
-  spacious: { padding: '24px', gap: '24px' },
-};

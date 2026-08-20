@@ -149,34 +149,6 @@ export interface Device {
   local_name?: string | null;
 }
 
-export interface DevicesResponse {
-  devices: Device[];
-  total: number;
-  device_limit: number;
-}
-
-// Tariff switch preview
-export interface TariffSwitchPreview {
-  can_switch: boolean;
-  current_tariff_id: number | null;
-  current_tariff_name: string | null;
-  new_tariff_id: number;
-  new_tariff_name: string;
-  remaining_days: number;
-  upgrade_cost_kopeks: number;
-  upgrade_cost_label: string;
-  balance_kopeks: number;
-  balance_label: string;
-  has_enough_balance: boolean;
-  missing_amount_kopeks: number;
-  missing_amount_label: string;
-  is_upgrade: boolean;
-  // Discount fields (from promo group)
-  base_upgrade_cost_kopeks?: number;
-  discount_percent?: number;
-  discount_kopeks?: number;
-}
-
 export interface RenewalOption {
   period_days: number;
   price_kopeks: number;
