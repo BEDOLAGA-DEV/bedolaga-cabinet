@@ -12,7 +12,7 @@ import { getErrorMessage, type PurchaseStep } from '../../../utils/subscriptionH
 import { CheckIcon } from '../../icons';
 import InsufficientBalancePrompt from '../../InsufficientBalancePrompt';
 import Twemoji from 'react-twemoji';
-import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
+import { Skeleton, SkeletonGroup } from '../../ui/skeleton';
 import type {
   ClassicPurchaseOptions,
   PeriodOption,

@@ -12,7 +12,7 @@ import { serversApi } from '../api/servers';
 import { AdminBackButton } from '../components/admin';
 import { createNumberInputHandler, toNumber } from '../utils/inputHelpers';
 import Twemoji from 'react-twemoji';
-import { PageSkeleton, Skeleton } from '@/components/ui/skeleton';
+import { PageSkeleton, Skeleton } from '../components/ui/skeleton';
 
 const getOfferTypeIcon = (offerType: string): string => {
   return OFFER_TYPE_CONFIG[offerType as OfferType]?.icon || '🎁';

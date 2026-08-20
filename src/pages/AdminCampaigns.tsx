@@ -20,7 +20,7 @@ import {
 import { StatCard } from '../components/stats';
 import { usePlatform } from '../platform/hooks/usePlatform';
 import { useFocusTrap } from '../hooks/useFocusTrap';
-import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
+import { Skeleton, SkeletonGroup } from '../components/ui/skeleton';
 
 const PAGE_SIZE = 50;
 

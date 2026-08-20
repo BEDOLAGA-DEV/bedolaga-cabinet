@@ -37,7 +37,7 @@ import { TariffFilter } from '../components/admin/trafficUsage/filters/TariffFil
 import { StatusFilter } from '../components/admin/trafficUsage/filters/StatusFilter';
 import { NodeFilter } from '../components/admin/trafficUsage/filters/NodeFilter';
 import { CountryFilter } from '../components/admin/trafficUsage/filters/CountryFilter';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Skeleton } from '../components/ui/skeleton';
 import {
   SearchIcon,
   ChevronLeftIcon,

@@ -10,7 +10,7 @@ import { useCurrency } from '../hooks/useCurrency';
 import { useHaptic } from '../platform';
 import InsufficientBalancePrompt from '../components/InsufficientBalancePrompt';
 import { WebBackButton } from '../components/WebBackButton';
-import { PageSkeleton, Skeleton } from '@/components/ui/skeleton';
+import { PageSkeleton, Skeleton } from '../components/ui/skeleton';
 
 export default function RenewSubscription() {
   const { subscriptionId } = useParams<{ subscriptionId: string }>();

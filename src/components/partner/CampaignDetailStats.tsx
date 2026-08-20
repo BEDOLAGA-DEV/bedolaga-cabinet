@@ -8,7 +8,7 @@ import { DailyChart } from '../stats/DailyChart';
 import { PeriodComparison } from '../stats/PeriodComparison';
 import { StatCard } from '../stats/StatCard';
 import { TopReferrals } from './TopReferrals';
-import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
+import { Skeleton, SkeletonGroup } from '../ui/skeleton';
 
 interface CampaignDetailStatsProps {
   campaignId: number;

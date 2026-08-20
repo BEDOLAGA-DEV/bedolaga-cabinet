@@ -6,7 +6,7 @@ import { getErrorMessage, getFlagEmoji } from '../../../utils/subscriptionHelper
 import InsufficientBalancePrompt from '../../InsufficientBalancePrompt';
 import { ChevronRightIcon } from '../../icons';
 import type { PurchaseOptions, Subscription } from '../../../types';
-import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
+import { Skeleton, SkeletonGroup } from '../../ui/skeleton';
 
 // ──────────────────────────────────────────────────────────────────
 // Manage-servers sheet (classic-mode only — caller decides whether to

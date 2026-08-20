@@ -58,7 +58,7 @@ import {
 } from '../components/icons';
 import { GeoCheckModal } from '../components/admin/remnawave/GeoCheckModal';
 import { supportsGeoCheck } from '../utils/nodeVersion';
-import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
+import { Skeleton, SkeletonGroup } from '../components/ui/skeleton';
 
 const formatBytes = (bytes: number): string => {
   if (bytes === 0) return '0 B';

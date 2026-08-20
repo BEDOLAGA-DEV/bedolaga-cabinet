@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 
 import { TREND_STYLES } from './constants';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Skeleton } from '../ui/skeleton';
 
 export interface StatCardDelta {
   /** Signed percent change vs the comparison period. */

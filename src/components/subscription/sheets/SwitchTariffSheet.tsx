@@ -8,7 +8,7 @@ import { getErrorMessage } from '../../../utils/subscriptionHelpers';
 import { useCurrency } from '../../../hooks/useCurrency';
 import InsufficientBalancePrompt from '../../InsufficientBalancePrompt';
 import type { Tariff } from '../../../types';
-import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
+import { Skeleton, SkeletonGroup } from '../../ui/skeleton';
 
 // ──────────────────────────────────────────────────────────────────
 // SwitchTariffSheet

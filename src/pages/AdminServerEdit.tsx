@@ -8,7 +8,7 @@ import { ServerIcon } from '../components/icons';
 import { createNumberInputHandler, toNumber } from '../utils/inputHelpers';
 import Twemoji from 'react-twemoji';
 import { getFlagEmoji as getCountryFlag } from '../utils/subscriptionHelpers';
-import { PageSkeleton, Skeleton } from '@/components/ui/skeleton';
+import { PageSkeleton, Skeleton } from '../components/ui/skeleton';
 
 export default function AdminServerEdit() {
   const { t } = useTranslation();

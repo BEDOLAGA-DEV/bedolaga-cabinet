@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { partnerApi } from '../api/partners';
 import { campaignsApi } from '../api/campaigns';
 import { AdminBackButton } from '../components/admin';
-import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
+import { Skeleton, SkeletonGroup } from '../components/ui/skeleton';
 
 export default function AdminPartnerCampaignAssign() {
   const { t } = useTranslation();

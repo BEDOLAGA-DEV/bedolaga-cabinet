@@ -16,7 +16,7 @@ import Twemoji from 'react-twemoji';
 
 // Country flags (simple emoji mapping)
 import { getFlagEmoji as getCountryFlag } from '../utils/subscriptionHelpers';
-import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
+import { Skeleton, SkeletonGroup } from '../components/ui/skeleton';
 
 export default function AdminServers() {
   const { t } = useTranslation();
