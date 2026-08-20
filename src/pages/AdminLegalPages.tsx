@@ -13,7 +13,7 @@ import { useHapticFeedback } from '../platform/hooks/useHaptic';
 import { useDestructiveConfirm } from '../platform/hooks/useNativeDialog';
 import { cn } from '../lib/utils';
 import { ChevronDownIcon, ChevronUpIcon, PlusIcon, TrashIcon } from '@/components/icons';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 
 type LegalTab = 'privacy' | 'offer' | 'recurrent' | 'rules' | 'faq';
 
@@ -260,7 +260,11 @@ function DocumentEditor({
   });
 
   if (isLoading || !data) {
-    return <Skeleton className="h-64 w-full rounded-xl" />;
+    return (
+      <SkeletonGroup>
+        <Skeleton className="h-64 w-full rounded-xl" />
+      </SkeletonGroup>
+    );
   }
 
   const languages = data.items.map((item) => item.language);
@@ -372,7 +376,11 @@ function RulesEditor({ onDirtyChange }: { onDirtyChange: (dirty: boolean) => voi
   });
 
   if (isLoading || !data) {
-    return <Skeleton className="h-64 w-full rounded-xl" />;
+    return (
+      <SkeletonGroup>
+        <Skeleton className="h-64 w-full rounded-xl" />
+      </SkeletonGroup>
+    );
   }
 
   const languages = data.items.map((item) => item.language);
@@ -639,7 +647,11 @@ function FaqEditor({ onDirtyChange }: { onDirtyChange: (dirty: boolean) => void 
   });
 
   if (isLoading || !data) {
-    return <Skeleton className="h-64 w-full rounded-xl" />;
+    return (
+      <SkeletonGroup>
+        <Skeleton className="h-64 w-full rounded-xl" />
+      </SkeletonGroup>
+    );
   }
 
   const languages = data.settings.map((s) => s.language);

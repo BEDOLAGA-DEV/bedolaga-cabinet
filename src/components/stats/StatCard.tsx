@@ -56,9 +56,10 @@ export function StatCard({
       <div className="flex items-center justify-between gap-2">
         {loading && !label ? (
           // Карточка сама себе скелетон: страницам не нужно угадывать её высоту.
-          // Высота повторяет реальную подпись: text-xs (16px) и text-sm (20px)
-          // на sm — иначе карточка меняет высоту в момент загрузки.
-          <Skeleton className="h-4 w-24 sm:h-5" />
+          // Высота замерена по реальной подписи, а не выведена из шкалы:
+          // на мобиле leading-tight перебивает text-xs и даёт 15px, а на sm
+          // responsive-вариант text-sm перебивает leading-tight и даёт 20px.
+          <Skeleton className="h-[15px] w-24 sm:h-5" />
         ) : (
           <span className="line-clamp-2 text-xs leading-tight text-dark-500 sm:text-sm">
             {label}

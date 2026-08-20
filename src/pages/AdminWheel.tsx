@@ -371,7 +371,10 @@ export default function AdminWheel() {
   if (isLoading) {
     return (
       <PageSkeleton variant="admin" titleWidth="w-56" className="space-y-4">
-        <Skeleton variant="card" className="h-96" />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <Skeleton variant="card" count={4} className="h-24" />
+        </div>
+        <Skeleton variant="card" className="h-64" />
       </PageSkeleton>
     );
   }

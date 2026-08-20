@@ -355,7 +355,12 @@ export default function AdminBanSystem() {
 
   if (loading && !status) {
     return (
-      <PageSkeleton variant="admin" leading={2} titleWidth="w-56" className="space-y-6">
+      <PageSkeleton
+        variant="admin"
+        leading={['h-10 w-10 rounded-xl', 'h-12 w-12 rounded-xl']}
+        titleWidth="w-56"
+        className="space-y-6"
+      >
         <div className="flex flex-wrap gap-2 border-b border-dark-700 pb-2">
           <Skeleton count={4} className="h-10 w-28 shrink-0 rounded-lg" />
         </div>

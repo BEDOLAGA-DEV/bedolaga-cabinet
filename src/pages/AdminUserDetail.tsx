@@ -767,7 +767,12 @@ export default function AdminUserDetail() {
 
   if (loading) {
     return (
-      <PageSkeleton variant="admin" leading={1} titleWidth="w-56" className="space-y-6">
+      <PageSkeleton
+        variant="admin"
+        leading={['h-10 w-10 rounded-xl', 'h-12 w-12 rounded-full']}
+        titleWidth="w-56"
+        className="space-y-6"
+      >
         <Skeleton variant="card" count={2} className="h-40" />
       </PageSkeleton>
     );

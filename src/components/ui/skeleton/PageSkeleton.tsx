@@ -23,8 +23,13 @@ const LEADING_BOX: Record<PageSkeletonVariant, string> = {
 
 interface PageSkeletonProps {
   variant?: PageSkeletonVariant;
-  /** Сколько квадратных заглушек слева: кнопка «назад», иконка-чип. */
-  leading?: number;
+  /**
+   * Заглушки слева от заголовка: кнопка «назад», иконка-чип, аватар.
+   * Число — столько квадратов размера по умолчанию для варианта.
+   * Массив — явные классы под каждый, когда размеры разные: например
+   * у AdminUserDetail это кнопка 40×40 и круглый аватар 48×48.
+   */
+  leading?: number | string[];
   titleWidth?: string;
   /** Вертикальный ритм страницы: обычно space-y-6, кое-где space-y-5. */
   className?: string;
@@ -51,8 +56,11 @@ export function PageSkeleton({
   return (
     <SkeletonGroup className={className}>
       <div className="flex items-center gap-3">
-        {Array.from({ length: leading }, (_, i) => (
-          <Skeleton key={i} className={`shrink-0 ${LEADING_BOX[variant]}`} />
+        {(typeof leading === 'number'
+          ? (Array.from({ length: leading }, () => LEADING_BOX[variant]) as string[])
+          : leading
+        ).map((box, i) => (
+          <Skeleton key={i} className={`shrink-0 ${box}`} />
         ))}
         <Skeleton className={`${TITLE_HEIGHT[variant]} ${titleWidth}`} />
       </div>

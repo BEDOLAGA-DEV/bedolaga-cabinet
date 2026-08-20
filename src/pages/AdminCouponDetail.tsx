@@ -114,7 +114,12 @@ export default function AdminCouponDetail() {
 
   if (isLoading) {
     return (
-      <PageSkeleton variant="admin" leading={1} titleWidth="w-56" className="space-y-6">
+      <PageSkeleton
+        variant="admin"
+        leading={1}
+        titleWidth="w-56"
+        className="mx-auto max-w-2xl space-y-6"
+      >
         <div className="grid grid-cols-3 gap-3">
           <StatCard loading />
           <StatCard loading />

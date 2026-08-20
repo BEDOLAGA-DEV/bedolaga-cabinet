@@ -203,7 +203,12 @@ export default function AdminPromoOfferSend() {
 
   if (isLoading) {
     return (
-      <PageSkeleton variant="admin" leading={2} titleWidth="w-56" className="space-y-6">
+      <PageSkeleton
+        variant="admin"
+        leading={2}
+        titleWidth="w-56"
+        className="mx-auto max-w-2xl space-y-6"
+      >
         <Skeleton variant="card" className="h-96" />
       </PageSkeleton>
     );
