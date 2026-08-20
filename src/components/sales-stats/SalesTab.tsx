@@ -13,6 +13,7 @@ import { BreakdownList } from './BreakdownList';
 import { DonutChart } from './DonutChart';
 import { SimpleAreaChart } from './SimpleAreaChart';
 import { StackedBarChart } from './StackedBarChart';
+import { StatsTabSkeleton } from './StatsTabSkeleton';
 
 interface SalesTabProps {
   params: SalesStatsParams;
@@ -37,13 +38,7 @@ export function SalesTab({ params }: SalesTabProps) {
   );
 
   if (isLoading) {
-    return (
-      <div className="animate-pulse space-y-4">
-        {Array.from({ length: 3 }, (_, i) => (
-          <div key={i} className="h-24 rounded-xl bg-dark-800/30" />
-        ))}
-      </div>
-    );
+    return <StatsTabSkeleton />;
   }
 
   if (isError || !data) {
