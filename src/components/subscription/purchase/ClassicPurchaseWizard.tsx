@@ -12,6 +12,7 @@ import { getErrorMessage, type PurchaseStep } from '../../../utils/subscriptionH
 import { CheckIcon } from '../../icons';
 import InsufficientBalancePrompt from '../../InsufficientBalancePrompt';
 import Twemoji from 'react-twemoji';
+import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 import type {
   ClassicPurchaseOptions,
   PeriodOption,
@@ -470,9 +471,9 @@ export function ClassicPurchaseWizard({
           {currentStep === 'confirm' && (
             <div>
               {previewLoading ? (
-                <div className="flex items-center justify-center py-8">
-                  <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-                </div>
+                <SkeletonGroup className="space-y-3">
+                  <Skeleton variant="card" count={3} className="h-16" />
+                </SkeletonGroup>
               ) : preview ? (
                 <div className="space-y-4 rounded-xl bg-dark-800/50 p-5">
                   {activeDiscount?.is_active && activeDiscount.discount_percent && (

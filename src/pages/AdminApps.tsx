@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { adminAppsApi } from '../api/adminApps';
 import { usePlatform } from '../platform/hooks/usePlatform';
 import { BackIcon } from '@/components/icons';
+import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 
 export default function AdminApps() {
   const { t } = useTranslation();
@@ -77,9 +78,9 @@ export default function AdminApps() {
           {t('admin.apps.availableConfigs', 'Available configs')}
         </h2>
         {isLoadingConfigs ? (
-          <div className="flex items-center justify-center py-8">
-            <div className="h-6 w-6 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-          </div>
+          <SkeletonGroup className="space-y-3">
+            <Skeleton variant="card" count={3} className="h-16" />
+          </SkeletonGroup>
         ) : configs && configs.length > 0 ? (
           <div className="space-y-2">
             {configs.map((config) => (

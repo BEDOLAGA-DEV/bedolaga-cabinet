@@ -6,6 +6,7 @@ import { getErrorMessage, getFlagEmoji } from '../../../utils/subscriptionHelper
 import InsufficientBalancePrompt from '../../InsufficientBalancePrompt';
 import { ChevronRightIcon } from '../../icons';
 import type { PurchaseOptions, Subscription } from '../../../types';
+import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 
 // ──────────────────────────────────────────────────────────────────
 // Manage-servers sheet (classic-mode only — caller decides whether to
@@ -116,9 +117,9 @@ export function ServerManagementSheet({
       </div>
 
       {countriesLoading ? (
-        <div className="flex items-center justify-center py-8">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-        </div>
+        <SkeletonGroup className="space-y-3">
+          <Skeleton variant="card" count={3} className="h-16" />
+        </SkeletonGroup>
       ) : countriesData && countriesData.countries.length > 0 ? (
         <div className="space-y-4">
           <div

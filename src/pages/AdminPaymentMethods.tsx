@@ -24,6 +24,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { adminPaymentMethodsApi } from '../api/adminPaymentMethods';
 import type { PaymentMethodConfig } from '../types';
 import { BackIcon, GripIcon, ChevronRightIcon, SaveIcon } from '@/components/icons';
+import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 
 interface SortableCardProps {
   config: PaymentMethodConfig;
@@ -247,9 +248,9 @@ export default function AdminPaymentMethods() {
       {/* Methods list */}
       <div className="card">
         {isLoading ? (
-          <div className="flex items-center justify-center py-16">
-            <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-          </div>
+          <SkeletonGroup className="space-y-3">
+            <Skeleton variant="card" count={3} className="h-16" />
+          </SkeletonGroup>
         ) : methods.length > 0 ? (
           <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
             <SortableContext

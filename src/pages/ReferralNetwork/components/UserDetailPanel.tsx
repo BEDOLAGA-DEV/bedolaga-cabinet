@@ -5,6 +5,7 @@ import { referralNetworkApi } from '@/api/referralNetwork';
 import { CloseIcon } from '@/components/icons';
 import { useReferralNetworkStore } from '@/store/referralNetwork';
 import { formatKopeksToRubles, getSubscriptionStatusColor } from '../utils';
+import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 
 interface UserDetailPanelProps {
   userId: number;
@@ -46,9 +47,9 @@ export function UserDetailPanel({ userId, className }: UserDetailPanelProps) {
       {/* Content */}
       <div className="overflow-y-auto p-4 pb-[calc(1rem+var(--safe-bottom,0px))]">
         {isLoading && (
-          <div className="flex items-center justify-center py-8">
-            <div className="h-6 w-6 animate-spin rounded-full border-2 border-dark-600 border-t-accent-400" />
-          </div>
+          <SkeletonGroup className="space-y-3">
+            <Skeleton variant="card" count={3} className="h-16" />
+          </SkeletonGroup>
         )}
 
         {isError && (

@@ -5,7 +5,7 @@ import { MessageMediaGrid } from '../components/tickets/MessageMediaGrid';
 import { useNavigate, useParams } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { adminApi, AdminTicket, AdminTicketDetail } from '../api/admin';
+import { adminApi, type AdminTicket, type AdminTicketDetail } from '../api/admin';
 import { ticketsApi } from '../api/tickets';
 import { copyToClipboard as copyText } from '../utils/clipboard';
 import { usePlatform } from '../platform/hooks/usePlatform';
@@ -20,6 +20,7 @@ import {
   XIcon,
 } from '@/components/icons';
 import { StatCard } from '@/components/stats';
+import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 
 interface MediaAttachment {
   id: string;
@@ -362,9 +363,9 @@ export default function AdminTickets() {
           </div>
 
           {ticketsLoading ? (
-            <div className="flex justify-center py-12">
-              <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-            </div>
+            <SkeletonGroup className="space-y-3">
+              <Skeleton variant="card" count={3} className="h-16" />
+            </SkeletonGroup>
           ) : ticketsData?.items.length === 0 ? (
             <div className="py-12 text-center text-dark-500">{t('admin.tickets.noTickets')}</div>
           ) : (

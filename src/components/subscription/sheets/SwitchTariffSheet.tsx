@@ -8,6 +8,7 @@ import { getErrorMessage } from '../../../utils/subscriptionHelpers';
 import { useCurrency } from '../../../hooks/useCurrency';
 import InsufficientBalancePrompt from '../../InsufficientBalancePrompt';
 import type { Tariff } from '../../../types';
+import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 
 // ──────────────────────────────────────────────────────────────────
 // SwitchTariffSheet
@@ -132,9 +133,9 @@ export function SwitchTariffSheet({
       </div>
 
       {switchPreviewLoading ? (
-        <div className="flex items-center justify-center py-4">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-        </div>
+        <SkeletonGroup className="space-y-3">
+          <Skeleton variant="card" count={3} className="h-16" />
+        </SkeletonGroup>
       ) : (
         switchPreview &&
         (() => {

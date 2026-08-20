@@ -17,7 +17,7 @@ import { BreakdownList } from '../components/sales-stats/BreakdownList';
 import { DonutChart } from '../components/sales-stats/DonutChart';
 import { SimpleAreaChart } from '../components/sales-stats/SimpleAreaChart';
 import { MultiSeriesAreaChart } from '../components/sales-stats/MultiSeriesAreaChart';
-import { PageSkeleton, Skeleton } from '@/components/ui/skeleton';
+import { PageSkeleton, Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 import {
   ChartIcon,
   EmailIcon,
@@ -558,9 +558,9 @@ export default function AdminLandingStats() {
 
           {/* Content */}
           {purchasesLoading ? (
-            <div className="flex items-center justify-center py-8">
-              <div className="h-6 w-6 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-            </div>
+            <SkeletonGroup className="space-y-3">
+              <Skeleton variant="card" count={3} className="h-16" />
+            </SkeletonGroup>
           ) : purchaseItems.length === 0 ? (
             <div className="py-8 text-center text-sm text-dark-500">
               {t('admin.landings.purchases.noPurchases')}

@@ -460,9 +460,9 @@ export default function AdminCampaignStats() {
           {showUsers && (
             <div className="border-t border-dark-700 p-4">
               {usersLoading ? (
-                <div className="flex items-center justify-center py-8">
-                  <div className="h-6 w-6 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-                </div>
+                <SkeletonGroup className="space-y-3">
+                  <Skeleton variant="card" count={3} className="h-16" />
+                </SkeletonGroup>
               ) : registrationsData?.registrations.length === 0 ? (
                 <div className="py-8 text-center text-dark-500">
                   {t('admin.campaigns.stats.noUsers')}

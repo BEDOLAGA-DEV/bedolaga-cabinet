@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { serversApi, ServerListItem } from '../api/servers';
+import { serversApi, type ServerListItem } from '../api/servers';
 import {
   SyncIcon,
   EditIcon,
@@ -16,6 +16,7 @@ import Twemoji from 'react-twemoji';
 
 // Country flags (simple emoji mapping)
 import { getFlagEmoji as getCountryFlag } from '../utils/subscriptionHelpers';
+import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 
 export default function AdminServers() {
   const { t } = useTranslation();
@@ -85,9 +86,9 @@ export default function AdminServers() {
 
       {/* Servers List */}
       {isLoading ? (
-        <div className="flex items-center justify-center py-12">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-        </div>
+        <SkeletonGroup className="space-y-3">
+          <Skeleton variant="card" count={3} className="h-16" />
+        </SkeletonGroup>
       ) : servers.length === 0 ? (
         <div className="py-12 text-center">
           <p className="text-dark-400">{t('admin.servers.noServers')}</p>

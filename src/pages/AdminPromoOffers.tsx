@@ -3,9 +3,15 @@ import { useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import i18n from '../i18n';
-import { promoOffersApi, PromoOfferLog, OFFER_TYPE_CONFIG, OfferType } from '../api/promoOffers';
+import {
+  promoOffersApi,
+  type PromoOfferLog,
+  OFFER_TYPE_CONFIG,
+  type OfferType,
+} from '../api/promoOffers';
 import { usePlatform } from '../platform/hooks/usePlatform';
 import { BackIcon, EditIcon, SendIcon, ClockIcon, UserIcon } from '@/components/icons';
+import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 
 // Helper functions
 const formatDateTime = (date: string | null): string => {
@@ -126,9 +132,9 @@ export default function AdminPromoOffers() {
       {activeTab === 'templates' && (
         <>
           {templatesLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-            </div>
+            <SkeletonGroup className="space-y-3">
+              <Skeleton variant="card" count={3} className="h-16" />
+            </SkeletonGroup>
           ) : templates.length === 0 ? (
             <div className="py-12 text-center">
               <p className="text-dark-400">{t('admin.promoOffers.noData.templates')}</p>
@@ -229,9 +235,9 @@ export default function AdminPromoOffers() {
       {activeTab === 'logs' && (
         <>
           {logsLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-            </div>
+            <SkeletonGroup className="space-y-3">
+              <Skeleton variant="card" count={3} className="h-16" />
+            </SkeletonGroup>
           ) : logs.length === 0 ? (
             <div className="py-12 text-center">
               <p className="text-dark-400">{t('admin.promoOffers.noData.logs')}</p>

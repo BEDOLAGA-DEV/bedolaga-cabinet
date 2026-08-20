@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { AdminBackButton } from '../components/admin/AdminBackButton';
 import { useFocusTrap } from '../hooks/useFocusTrap';
 import { StatCard } from '@/components/stats';
-import { PageSkeleton, Skeleton } from '@/components/ui/skeleton';
+import { PageSkeleton, Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 import {
   banSystemApi,
   type BanSystemStatus,
@@ -481,9 +481,9 @@ export default function AdminBanSystem() {
 
       {/* Content */}
       {loading ? (
-        <div className="flex h-48 items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-        </div>
+        <SkeletonGroup className="space-y-3">
+          <Skeleton variant="card" count={3} className="h-16" />
+        </SkeletonGroup>
       ) : error ? (
         <div className="py-8 text-center text-error-400">{error}</div>
       ) : (

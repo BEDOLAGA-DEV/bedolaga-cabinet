@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router';
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import i18n from '../i18n';
-import { campaignsApi, CampaignListItem, CampaignBonusType } from '../api/campaigns';
+import { campaignsApi, type CampaignListItem, type CampaignBonusType } from '../api/campaigns';
 import {
   PlusIcon,
   EditIcon,
@@ -20,6 +20,7 @@ import {
 import { StatCard } from '../components/stats';
 import { usePlatform } from '../platform/hooks/usePlatform';
 import { useFocusTrap } from '../hooks/useFocusTrap';
+import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 
 const PAGE_SIZE = 50;
 
@@ -175,9 +176,9 @@ export default function AdminCampaigns() {
 
       {/* Campaigns List */}
       {isLoading ? (
-        <div className="flex items-center justify-center py-12">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-        </div>
+        <SkeletonGroup className="space-y-3">
+          <Skeleton variant="card" count={3} className="h-16" />
+        </SkeletonGroup>
       ) : campaigns.length === 0 ? (
         <div className="py-12 text-center">
           <p className="text-dark-400">{t('admin.campaigns.noData')}</p>
