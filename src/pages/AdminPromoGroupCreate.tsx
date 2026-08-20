@@ -4,12 +4,13 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import {
   promocodesApi,
-  PromoGroup,
-  PromoGroupCreateRequest,
-  PromoGroupUpdateRequest,
+  type PromoGroup,
+  type PromoGroupCreateRequest,
+  type PromoGroupUpdateRequest,
 } from '../api/promocodes';
 import { AdminBackButton } from '../components/admin';
 import { PlusIcon, RefreshIcon, TrashIcon } from '@/components/icons';
+import { PageSkeleton, Skeleton } from '@/components/ui/skeleton';
 
 interface PeriodDiscount {
   days: number | '';
@@ -137,9 +138,9 @@ export default function AdminPromoGroupCreate() {
   // Loading state
   if (isEdit && isLoadingGroup) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-      </div>
+      <PageSkeleton variant="admin" leading={1} titleWidth="w-56" className="space-y-6">
+        <Skeleton variant="card" className="h-96" />
+      </PageSkeleton>
     );
   }
 

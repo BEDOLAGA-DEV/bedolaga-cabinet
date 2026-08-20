@@ -2,12 +2,13 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { serversApi, ServerUpdateRequest } from '../api/servers';
+import { serversApi, type ServerUpdateRequest } from '../api/servers';
 import { AdminBackButton } from '../components/admin';
 import { ServerIcon } from '../components/icons';
 import { createNumberInputHandler, toNumber } from '../utils/inputHelpers';
 import Twemoji from 'react-twemoji';
 import { getFlagEmoji as getCountryFlag } from '../utils/subscriptionHelpers';
+import { PageSkeleton, Skeleton } from '@/components/ui/skeleton';
 
 export default function AdminServerEdit() {
   const { t } = useTranslation();
@@ -69,9 +70,9 @@ export default function AdminServerEdit() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-      </div>
+      <PageSkeleton variant="admin" leading={2} titleWidth="w-56" className="space-y-6">
+        <Skeleton variant="card" className="h-96" />
+      </PageSkeleton>
     );
   }
 

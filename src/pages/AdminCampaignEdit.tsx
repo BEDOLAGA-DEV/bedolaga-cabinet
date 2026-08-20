@@ -4,16 +4,17 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import {
   campaignsApi,
-  CampaignUpdateRequest,
-  CampaignBonusType,
-  ServerSquadInfo,
-  TariffListItem,
-  AvailablePartner,
+  type CampaignUpdateRequest,
+  type CampaignBonusType,
+  type ServerSquadInfo,
+  type TariffListItem,
+  type AvailablePartner,
 } from '../api/campaigns';
 import { AdminBackButton } from '../components/admin';
 import { CheckIcon, CampaignIcon } from '../components/icons';
 import { createNumberInputHandler, toNumber } from '../utils/inputHelpers';
 import Twemoji from 'react-twemoji';
+import { PageSkeleton, Skeleton } from '@/components/ui/skeleton';
 
 // Bonus type config
 const bonusTypeConfig: Record<
@@ -304,9 +305,9 @@ export default function AdminCampaignEdit() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-      </div>
+      <PageSkeleton variant="admin" leading={2} titleWidth="w-56" className="space-y-6">
+        <Skeleton variant="card" className="h-96" />
+      </PageSkeleton>
     );
   }
 

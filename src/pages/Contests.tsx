@@ -57,7 +57,7 @@ export default function Contests() {
 
   if (isLoading) {
     return (
-      <PageSkeleton leading titleWidth="w-40">
+      <PageSkeleton leading={1} titleWidth="w-40">
         <Skeleton variant="card" count={3} className="h-32" />
       </PageSkeleton>
     );

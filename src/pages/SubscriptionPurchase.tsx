@@ -100,7 +100,7 @@ export default function SubscriptionPurchase() {
 
   if (isLoading || optionsLoading) {
     return (
-      <PageSkeleton leading titleWidth="w-56">
+      <PageSkeleton leading={1} titleWidth="w-56">
         <Skeleton variant="card" className="h-32" />
         <Skeleton variant="card" count={2} className="h-40" />
       </PageSkeleton>

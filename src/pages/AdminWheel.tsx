@@ -49,6 +49,7 @@ import { BreakdownList } from '@/components/sales-stats/BreakdownList';
 import { useCurrency } from '@/hooks/useCurrency';
 import { usePlatform } from '../platform/hooks/usePlatform';
 import { toNumber } from '../utils/inputHelpers';
+import { PageSkeleton, Skeleton } from '@/components/ui/skeleton';
 
 const PRIZE_TYPE_KEYS = [
   { value: 'subscription_days', key: 'subscription_days', emoji: '📅' },
@@ -369,9 +370,9 @@ export default function AdminWheel() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-[400px] items-center justify-center">
-        <div className="h-10 w-10 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-      </div>
+      <PageSkeleton variant="admin" titleWidth="w-56" className="space-y-4">
+        <Skeleton variant="card" className="h-96" />
+      </PageSkeleton>
     );
   }
 

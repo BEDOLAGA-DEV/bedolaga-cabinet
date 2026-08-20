@@ -91,7 +91,7 @@ export default function RenewSubscription() {
 
   if (isLoading) {
     return (
-      <PageSkeleton leading titleWidth="w-56" className="space-y-5">
+      <PageSkeleton leading={1} titleWidth="w-56" className="space-y-5">
         <Skeleton variant="card" className="h-16" />
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <Skeleton variant="card" count={4} className="h-20" />

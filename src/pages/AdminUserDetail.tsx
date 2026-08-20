@@ -31,6 +31,7 @@ import { SubscriptionTab } from '../components/admin/userDetail/SubscriptionTab'
 import { getApiErrorMessage } from '../utils/api-error';
 import { toNumber } from '../utils/inputHelpers';
 import { usePermissionStore } from '../store/permissions';
+import { PageSkeleton, Skeleton } from '@/components/ui/skeleton';
 
 // (Subscription-tab helpers: getCountryFlag / PlusIcon / MinusIcon /
 // StatusBadge / GiftStatusBadge / GiftCard moved to
@@ -766,9 +767,9 @@ export default function AdminUserDetail() {
 
   if (loading) {
     return (
-      <div className="flex min-h-[50vh] items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-      </div>
+      <PageSkeleton variant="admin" leading={1} titleWidth="w-56" className="space-y-6">
+        <Skeleton variant="card" count={2} className="h-40" />
+      </PageSkeleton>
     );
   }
 

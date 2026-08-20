@@ -12,6 +12,7 @@ import {
 import { adminSettingsApi, type SettingDefinition } from '../api/adminSettings';
 import { AdminBackButton } from '../components/admin';
 import { Toggle } from '../components/admin/Toggle';
+import { PageSkeleton, Skeleton } from '@/components/ui/skeleton';
 import {
   ChannelIcon,
   PlusIcon,
@@ -88,14 +89,9 @@ function GlobalSettingsSection() {
 
   if (isLoading) {
     return (
-      <div className="rounded-xl border border-dark-700 bg-dark-800/50 p-6">
-        <div className="flex items-center gap-3">
-          <div className="animate-spin">
-            <RefreshIcon />
-          </div>
-          <span className="text-sm text-dark-400">{t('common.loading')}</span>
-        </div>
-      </div>
+      <PageSkeleton variant="admin" leading={2} titleWidth="w-56" className="space-y-6">
+        <Skeleton variant="card" count={2} className="h-40" />
+      </PageSkeleton>
     );
   }
 

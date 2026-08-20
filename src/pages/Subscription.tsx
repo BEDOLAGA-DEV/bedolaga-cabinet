@@ -665,7 +665,7 @@ export default function Subscription() {
 
   if (isLoading) {
     return (
-      <PageSkeleton leading titleWidth="w-48">
+      <PageSkeleton leading={1} titleWidth="w-48">
         <Skeleton variant="card" className="h-64" />
         <Skeleton variant="card" count={2} className="h-20" />
       </PageSkeleton>

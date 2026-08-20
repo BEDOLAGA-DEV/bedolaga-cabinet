@@ -10,6 +10,7 @@ import { useCurrency } from '../hooks/useCurrency';
 import { usePlatform } from '../platform/hooks/usePlatform';
 
 import { StatCard } from '@/components/stats';
+import { PageSkeleton, Skeleton } from '@/components/ui/skeleton';
 import {
   BackIcon,
   BanknotesIcon,
@@ -261,9 +262,15 @@ export default function AdminDashboard() {
 
   if (loading && !stats) {
     return (
-      <div className="flex h-64 items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-      </div>
+      <PageSkeleton variant="admin" leading={1} titleWidth="w-56" className="space-y-6">
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+          <StatCard loading />
+          <StatCard loading />
+          <StatCard loading />
+          <StatCard loading />
+        </div>
+        <Skeleton variant="card" count={2} className="h-40" />
+      </PageSkeleton>
     );
   }
 

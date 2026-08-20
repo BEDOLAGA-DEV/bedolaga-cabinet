@@ -11,7 +11,7 @@ import { useCurrency } from '../hooks/useCurrency';
 import { copyToClipboard } from '../utils/clipboard';
 import { useHaptic } from '../platform';
 import { ChartIcon, ChevronDownIcon, CopyIcon, LinkIcon, UsersIcon } from '@/components/icons';
-import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
+import { PageSkeleton, Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 
 // Bonus type config
 const bonusTypeConfig: Record<
@@ -131,9 +131,12 @@ export default function AdminCampaignStats() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-      </div>
+      <PageSkeleton variant="admin" leading={2} titleWidth="w-56" className="space-y-6">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <Skeleton variant="card" count={4} className="h-20" />
+        </div>
+        <Skeleton variant="card" className="h-64" />
+      </PageSkeleton>
     );
   }
 

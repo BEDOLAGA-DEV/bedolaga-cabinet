@@ -17,6 +17,7 @@ import { BreakdownList } from '../components/sales-stats/BreakdownList';
 import { DonutChart } from '../components/sales-stats/DonutChart';
 import { SimpleAreaChart } from '../components/sales-stats/SimpleAreaChart';
 import { MultiSeriesAreaChart } from '../components/sales-stats/MultiSeriesAreaChart';
+import { PageSkeleton, Skeleton } from '@/components/ui/skeleton';
 import {
   ChartIcon,
   EmailIcon,
@@ -290,9 +291,15 @@ export default function AdminLandingStats() {
   // Loading state
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-      </div>
+      <PageSkeleton variant="admin" leading={2} titleWidth="w-56" className="space-y-6">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <StatCard loading />
+          <StatCard loading />
+          <StatCard loading />
+          <StatCard loading />
+        </div>
+        <Skeleton variant="card" className="h-64" />
+      </PageSkeleton>
     );
   }
 

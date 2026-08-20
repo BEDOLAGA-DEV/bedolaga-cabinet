@@ -58,6 +58,7 @@ import {
 } from '../components/icons';
 import { GeoCheckModal } from '../components/admin/remnawave/GeoCheckModal';
 import { supportsGeoCheck } from '../utils/nodeVersion';
+import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 
 const formatBytes = (bytes: number): string => {
   if (bytes === 0) return '0 B';
@@ -638,9 +639,15 @@ function OverviewTab({
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-      </div>
+      <SkeletonGroup className="space-y-6">
+        <Skeleton className="h-5 w-40" />
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <StatCard loading />
+          <StatCard loading />
+          <StatCard loading />
+          <StatCard loading />
+        </div>
+      </SkeletonGroup>
     );
   }
 
@@ -1012,9 +1019,19 @@ function NodesTab({
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-      </div>
+      <SkeletonGroup className="space-y-4">
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
+          <StatCard loading />
+          <StatCard loading />
+          <StatCard loading />
+          <StatCard loading />
+          <StatCard loading />
+        </div>
+        <div className="flex gap-2">
+          <Skeleton count={3} className="h-9 w-24 shrink-0 rounded-lg" />
+        </div>
+        <Skeleton variant="card" count={2} className="h-32" />
+      </SkeletonGroup>
     );
   }
 
@@ -1145,9 +1162,15 @@ function SquadsTab({
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-      </div>
+      <SkeletonGroup className="space-y-4">
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <StatCard loading />
+          <StatCard loading />
+          <StatCard loading />
+          <StatCard loading />
+        </div>
+        <Skeleton variant="card" count={2} className="h-32" />
+      </SkeletonGroup>
     );
   }
 
@@ -1239,9 +1262,9 @@ function SyncTab({
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-      </div>
+      <SkeletonGroup className="space-y-6">
+        <Skeleton variant="card" count={2} className="h-40" />
+      </SkeletonGroup>
     );
   }
 

@@ -1,13 +1,32 @@
 import type { ReactNode } from 'react';
-import { Skeleton } from './Skeleton';
-import { SkeletonGroup } from './Skeleton';
+import { Skeleton, SkeletonGroup } from './Skeleton';
+
+export type PageSkeletonVariant = 'user' | 'admin';
+
+/**
+ * Высота заглушки заголовка по канону CLAUDE.md:
+ * H1 юзер-страниц — text-2xl/sm:text-3xl, H1 админки — text-xl без скачков.
+ */
+const TITLE_HEIGHT: Record<PageSkeletonVariant, string> = {
+  user: 'h-8',
+  admin: 'h-7',
+};
+
+/**
+ * Слева от заголовка: у юзер-страниц иконка 24px, у админских — кнопка
+ * «назад» и/или иконка-чип, оба 40×40 со скруглением xl.
+ */
+const LEADING_BOX: Record<PageSkeletonVariant, string> = {
+  user: 'h-6 w-6 rounded-lg',
+  admin: 'h-10 w-10 rounded-xl',
+};
 
 interface PageSkeletonProps {
-  /** Ширина заглушки заголовка. */
+  variant?: PageSkeletonVariant;
+  /** Сколько квадратных заглушек слева: кнопка «назад», иконка-чип. */
+  leading?: number;
   titleWidth?: string;
-  /** Квадратная заглушка слева от заголовка: иконка страницы или кнопка «назад». */
-  leading?: boolean;
-  /** Вертикальный ритм страницы: у большинства space-y-6, кое-где space-y-5. */
+  /** Вертикальный ритм страницы: обычно space-y-6, кое-где space-y-5. */
   className?: string;
   /** Тело страницы — оно у каждой своё, общей тут только рамка. */
   children?: ReactNode;
@@ -16,23 +35,26 @@ interface PageSkeletonProps {
 /**
  * Рамка страничного скелетона: заголовок и вертикальный ритм.
  *
- * Все пользовательские страницы кабинета устроены одинаково — `space-y-6`,
- * затем H1 (`text-2xl sm:text-3xl`, отсюда высота заглушки h-8), иногда с
- * иконкой или кнопкой «назад» слева. Повторять эту рамку в каждой странице
- * незачем, а тело остаётся специфичным: скелетон обязан совпадать с формой
- * будущего контента, иначе он хуже спиннера — обещает одно, приезжает другое.
+ * Страницы кабинета устроены одинаково — вертикальный стек, затем шапка с
+ * заголовком и опциональными квадратными элементами слева. Повторять эту
+ * рамку в каждой странице незачем, а тело остаётся специфичным: скелетон
+ * обязан совпадать с формой будущего контента, иначе он хуже спиннера —
+ * обещает одно, а приезжает другое.
  */
 export function PageSkeleton({
+  variant = 'user',
+  leading = 0,
   titleWidth = 'w-48',
-  leading = false,
   className = 'space-y-6',
   children,
 }: PageSkeletonProps) {
   return (
     <SkeletonGroup className={className}>
       <div className="flex items-center gap-3">
-        {leading && <Skeleton className="h-6 w-6 shrink-0 rounded-lg" />}
-        <Skeleton className={`h-8 ${titleWidth}`} />
+        {Array.from({ length: leading }, (_, i) => (
+          <Skeleton key={i} className={`shrink-0 ${LEADING_BOX[variant]}`} />
+        ))}
+        <Skeleton className={`${TITLE_HEIGHT[variant]} ${titleWidth}`} />
       </div>
       {children}
     </SkeletonGroup>

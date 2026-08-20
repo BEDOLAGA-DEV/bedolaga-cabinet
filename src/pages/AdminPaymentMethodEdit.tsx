@@ -13,7 +13,7 @@ import { createNumberInputHandler, toNumber } from '../utils/inputHelpers';
 import { localeMap } from '../utils/withdrawalUtils';
 import { PermissionGate } from '@/components/auth/PermissionGate';
 import { BackIcon, CheckIcon, SaveIcon } from '@/components/icons';
-import { Skeleton } from '@/components/ui/skeleton';
+import { PageSkeleton, Skeleton } from '@/components/ui/skeleton';
 
 function extractErrorDetail(err: unknown): string | null {
   const error = err as { response?: { data?: { detail?: unknown } } };
@@ -360,9 +360,9 @@ export default function AdminPaymentMethodEdit() {
 
   if (isLoading) {
     return (
-      <div className="min-h-viewport flex items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-      </div>
+      <PageSkeleton variant="admin" leading={1} titleWidth="w-56" className="space-y-6">
+        <Skeleton variant="card" className="h-96" />
+      </PageSkeleton>
     );
   }
 

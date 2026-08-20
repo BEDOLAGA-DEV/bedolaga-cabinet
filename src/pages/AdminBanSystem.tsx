@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { AdminBackButton } from '../components/admin/AdminBackButton';
 import { useFocusTrap } from '../hooks/useFocusTrap';
 import { StatCard } from '@/components/stats';
+import { PageSkeleton, Skeleton } from '@/components/ui/skeleton';
 import {
   banSystemApi,
   type BanSystemStatus,
@@ -316,7 +317,7 @@ export default function AdminBanSystem() {
     const k = 1024;
     const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB'];
     const i = Math.min(Math.floor(Math.log(bytes) / Math.log(k)), sizes.length - 1);
-    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
+    return `${parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`;
   };
 
   const formatUptime = (seconds: number | null) => {
@@ -354,9 +355,17 @@ export default function AdminBanSystem() {
 
   if (loading && !status) {
     return (
-      <div className="flex h-64 items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-      </div>
+      <PageSkeleton variant="admin" leading={2} titleWidth="w-56" className="space-y-6">
+        <div className="flex flex-wrap gap-2 border-b border-dark-700 pb-2">
+          <Skeleton count={4} className="h-10 w-28 shrink-0 rounded-lg" />
+        </div>
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+          <StatCard loading />
+          <StatCard loading />
+          <StatCard loading />
+          <StatCard loading />
+        </div>
+      </PageSkeleton>
     );
   }
 
