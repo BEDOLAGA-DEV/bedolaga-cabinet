@@ -19,6 +19,7 @@ import { Toggle } from '../components/admin/Toggle';
 import { useHapticFeedback } from '../platform/hooks/useHaptic';
 import { cn } from '../lib/utils';
 import type { NewsCategory, NewsTag, NewsCreateRequest } from '../types/news';
+import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 import {
   BoldIcon,
   ItalicIcon,
@@ -537,11 +538,11 @@ export default function AdminNewsCreate() {
 
   if (isEdit && isLoadingArticle) {
     return (
-      <div className="space-y-6">
-        <div className="skeleton h-8 w-48 rounded-lg" />
-        <div className="skeleton h-12 w-full rounded-xl" />
-        <div className="skeleton h-64 w-full rounded-xl" />
-      </div>
+      <SkeletonGroup className="space-y-6">
+        <Skeleton className="h-8 w-48 rounded-lg" />
+        <Skeleton className="h-12 w-full rounded-xl" />
+        <Skeleton className="h-64 w-full rounded-xl" />
+      </SkeletonGroup>
     );
   }
 

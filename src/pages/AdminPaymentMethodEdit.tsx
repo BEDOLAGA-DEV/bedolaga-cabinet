@@ -13,6 +13,7 @@ import { createNumberInputHandler, toNumber } from '../utils/inputHelpers';
 import { localeMap } from '../utils/withdrawalUtils';
 import { PermissionGate } from '@/components/auth/PermissionGate';
 import { BackIcon, CheckIcon, SaveIcon } from '@/components/icons';
+import { Skeleton } from '@/components/ui/skeleton';
 
 function extractErrorDetail(err: unknown): string | null {
   const error = err as { response?: { data?: { detail?: unknown } } };
@@ -106,7 +107,7 @@ function OverpayCertificateSection() {
       </h3>
 
       {isLoading ? (
-        <div className="skeleton h-10 w-full rounded-xl" />
+        <Skeleton className="h-10 w-full rounded-xl" />
       ) : certStatus ? (
         <div>
           {certStatus.valid ? (

@@ -38,6 +38,7 @@ import {
   PlusSmallIcon,
 } from '@/components/icons';
 import type { InfoPageType, FaqItem, ReplacesTab, InfoPageDisplayMode } from '../api/infoPages';
+import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 
 const AVAILABLE_LOCALES = ['ru', 'en', 'zh', 'fa'] as const;
 type LocaleCode = (typeof AVAILABLE_LOCALES)[number];
@@ -1006,11 +1007,11 @@ export default function AdminInfoPageEditor() {
 
   if (isEdit && isLoadingPage) {
     return (
-      <div className="space-y-6">
-        <div className="skeleton h-8 w-48 rounded-lg" />
-        <div className="skeleton h-12 w-full rounded-xl" />
-        <div className="skeleton h-64 w-full rounded-xl" />
-      </div>
+      <SkeletonGroup className="space-y-6">
+        <Skeleton className="h-8 w-48 rounded-lg" />
+        <Skeleton className="h-12 w-full rounded-xl" />
+        <Skeleton className="h-64 w-full rounded-xl" />
+      </SkeletonGroup>
     );
   }
 
