@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { Card, type CardProps } from '../Card';
 import { slideUp, slideUpTransition } from '@/components/motion/transitions';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export interface StatCardProps extends Omit<CardProps, 'children'> {
   label: string;
@@ -42,7 +43,7 @@ export const StatCard = forwardRef<HTMLDivElement, StatCardProps>(
 
             {/* Value */}
             {loading ? (
-              <div className="mt-2 h-8 w-24 animate-pulse rounded bg-dark-800" />
+              <Skeleton className="mt-2 h-8 w-24" />
             ) : (
               <motion.p
                 className="mt-1 text-2xl font-bold text-dark-100 sm:text-3xl"

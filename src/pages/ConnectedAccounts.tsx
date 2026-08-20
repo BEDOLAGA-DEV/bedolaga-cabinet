@@ -17,6 +17,7 @@ import { usePlatform, useIsTelegram } from '@/platform/hooks/usePlatform';
 import { useAuthStore } from '../store/auth';
 import { isValidEmail } from '../utils/validation';
 import type { LinkedProvider } from '../types';
+import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 
 const OAUTH_PROVIDERS = ['google', 'yandex', 'discord', 'vk'];
 
@@ -283,22 +284,22 @@ function TelegramLinkWidget() {
 
 function LoadingSkeleton() {
   return (
-    <div className="space-y-3">
+    <SkeletonGroup className="space-y-3">
       {Array.from({ length: 4 }).map((_, i) => (
         <Card key={i}>
-          <div className="flex animate-pulse items-center justify-between">
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="h-6 w-6 rounded-full bg-dark-700" />
+              <Skeleton circle className="h-6 w-6 shrink-0" />
               <div className="space-y-2">
-                <div className="h-4 w-24 rounded bg-dark-700" />
-                <div className="h-3 w-32 rounded bg-dark-700" />
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-3 w-32" />
               </div>
             </div>
-            <div className="h-8 w-20 rounded bg-dark-700" />
+            <Skeleton className="h-8 w-20 shrink-0" />
           </div>
         </Card>
       ))}
-    </div>
+    </SkeletonGroup>
   );
 }
 
