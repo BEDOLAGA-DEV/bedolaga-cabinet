@@ -50,9 +50,9 @@ import { describe, expect, it } from 'vitest';
 import { skeletonClass } from './skeletonStyles';
 
 describe('skeletonClass', () => {
-  it('по умолчанию даёт вариант line: заливка dark-700/50, радиус lg, пульс', () => {
+  it('по умолчанию даёт вариант line: заливка dark-500/40, радиус lg, пульс', () => {
     const cls = skeletonClass();
-    expect(cls).toContain('bg-dark-700/50');
+    expect(cls).toContain('bg-dark-500/40');
     expect(cls).toContain('rounded-lg');
     expect(cls).toContain('animate-pulse');
   });
@@ -78,10 +78,10 @@ describe('skeletonClass', () => {
 
   it('вариант card даёт рамку, свою заливку и радиус 2xl вместо line-стилей', () => {
     const cls = skeletonClass({ variant: 'card' });
-    expect(cls).toContain('bg-dark-800/40');
-    expect(cls).toContain('border-dark-700/30');
+    expect(cls).toContain('bg-dark-500/25');
+    expect(cls).toContain('border-dark-500/40');
     expect(cls).toContain('rounded-2xl');
-    expect(cls).not.toContain('bg-dark-700/50');
+    expect(cls).not.toContain('bg-dark-500/40');
     expect(cls).not.toContain('rounded-lg');
   });
 
@@ -98,7 +98,7 @@ describe('skeletonClass', () => {
   it('заливка из className перекрывает вариантную', () => {
     const cls = skeletonClass({ className: 'bg-dark-800/30' });
     expect(cls).toContain('bg-dark-800/30');
-    expect(cls).not.toContain('bg-dark-700/50');
+    expect(cls).not.toContain('bg-dark-500/40');
   });
 
   // Канон CLAUDE.md:128-132 — только токены палитры.
@@ -140,8 +140,8 @@ export type SkeletonVariant = 'line' | 'card';
  * без отдельных веток.
  */
 const VARIANT_FILL: Record<SkeletonVariant, string> = {
-  line: 'bg-dark-700/50',
-  card: 'border border-dark-700/30 bg-dark-800/40',
+  line: 'bg-dark-500/40',
+  card: 'border border-dark-500/40 bg-dark-500/25',
 };
 
 /** Радиусы по канону CLAUDE.md:134-137: строки — lg, внутренние панели — 2xl. */
@@ -459,7 +459,7 @@ git commit -m "feat(ui): примитив Skeleton и SkeletonGroup вместо
 
 Добавить импорт: `import { Skeleton } from '@/components/ui/skeleton';`
 
-Заливка меняется с `bg-dark-800` на каноническую `bg-dark-700/50` — это осознанно: `StatCard` рисуется внутри карточки, роль плейсхолдера здесь `line`.
+Заливка меняется с `bg-dark-800` на каноническую `bg-dark-500/40` — это осознанно: `StatCard` рисуется внутри карточки, роль плейсхолдера здесь `line`.
 
 - [ ] **Step 2: PromoOffersSection**
 
@@ -1086,7 +1086,7 @@ git commit -m "refactor(stats): свести шесть копий заглуш�
 - Consumes: ничего из предыдущих задач в рантайме; тест читает исходники с диска.
 - Produces: ничего.
 
-**Что делает страж.** Ищет в `src/` строковые литералы, где `animate-pulse` соседствует с `bg-dark-*` внутри ОДНОГО литерала. Это точная сигнатура инлайнового скелетона. Статус-точки (`animate-pulse bg-success-500`), тинт при загрузке (`'animate-pulse'` в одиночку) и декоративные пульсации под неё не попадают, потому что `bg-dark-*` в их литералах нет.
+**Что делает страж.** Ищет в `src/` строковые литералы, где `animate-pulse` соседствует с `bg-dark-*` внутри ОДНОГО литерала (сигнатура ловит и старые `bg-dark-700`/`bg-dark-800`, и новую `bg-dark-500`). Это точная сигнатура инлайнового скелетона. Статус-точки (`animate-pulse bg-success-500`), тинт при загрузке (`'animate-pulse'` в одиночку) и декоративные пульсации под неё не попадают, потому что `bg-dark-*` в их литералах нет.
 
 Соседство проверяется именно внутри литерала, а не «в пределах N символов»: в `AdminBanSystem.tsx:714` и `AdminDashboard.tsx:76` тернарник ставит `'animate-pulse bg-success-500'` и `'bg-dark-500'` в одну строку кода, и оконная проверка дала бы ложное срабатывание на легальном коде.
 

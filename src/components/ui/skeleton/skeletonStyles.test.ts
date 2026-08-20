@@ -2,9 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { skeletonClass } from './skeletonStyles';
 
 describe('skeletonClass', () => {
-  it('по умолчанию даёт вариант line: заливка dark-700/50, радиус lg, пульс', () => {
+  it('по умолчанию даёт вариант line: заливка dark-500/40, радиус lg, пульс', () => {
     const cls = skeletonClass();
-    expect(cls).toContain('bg-dark-700/50');
+    expect(cls).toContain('bg-dark-500/40');
     expect(cls).toContain('rounded-lg');
     expect(cls).toContain('animate-pulse');
   });
@@ -30,10 +30,10 @@ describe('skeletonClass', () => {
 
   it('вариант card даёт рамку, свою заливку и радиус 2xl вместо line-стилей', () => {
     const cls = skeletonClass({ variant: 'card' });
-    expect(cls).toContain('bg-dark-800/40');
-    expect(cls).toContain('border-dark-700/30');
+    expect(cls).toContain('bg-dark-500/25');
+    expect(cls).toContain('border-dark-500/40');
     expect(cls).toContain('rounded-2xl');
-    expect(cls).not.toContain('bg-dark-700/50');
+    expect(cls).not.toContain('bg-dark-500/40');
     expect(cls).not.toContain('rounded-lg');
   });
 
@@ -50,7 +50,7 @@ describe('skeletonClass', () => {
   it('заливка из className перекрывает вариантную', () => {
     const cls = skeletonClass({ className: 'bg-dark-800/30' });
     expect(cls).toContain('bg-dark-800/30');
-    expect(cls).not.toContain('bg-dark-700/50');
+    expect(cls).not.toContain('bg-dark-500/40');
   });
 
   // Канон CLAUDE.md:128-132 — только токены палитры.

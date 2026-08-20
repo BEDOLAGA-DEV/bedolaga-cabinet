@@ -33,6 +33,7 @@ import {
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { BackgroundHost } from './components/backgrounds/BackgroundHost';
 import { PermissionRoute } from '@/components/auth/PermissionRoute';
+import SkeletonGallery from '@/components/dev/SkeletonGallery';
 import { saveReturnUrl } from './utils/token';
 import { useAnalyticsCounters } from './hooks/useAnalyticsCounters';
 import { useSiteVerification } from './hooks/useSiteVerification';
@@ -277,6 +278,8 @@ function App() {
         <Route path="/offer" element={<PublicLegal doc="offer" />} />
         <Route path="/privacy" element={<PublicLegal doc="privacy" />} />
         <Route path="/recurrent-payments" element={<PublicLegal doc="recurrent" />} />
+        {/* Dev-only витрина скелетонов. В прод-сборке ветка вырезается тришейкингом. */}
+        {import.meta.env.DEV && <Route path="/__skeletons" element={<SkeletonGallery />} />}
         <Route
           path="/merge/:mergeToken"
           element={
