@@ -19,8 +19,9 @@ const TONE = {
 } as const;
 
 interface StatCardProps {
-  label: string;
-  value: string | number;
+  /** Необязателен в режиме загрузки: тогда вместо подписи рисуется заглушка. */
+  label?: string;
+  value?: string | number;
   icon?: ReactNode;
   /** Tints the icon chip and (unless valueClassName is set) the value colour. */
   tone?: keyof typeof TONE;
@@ -53,7 +54,16 @@ export function StatCard({
   return (
     <div className="h-full rounded-xl bg-dark-800/30 p-3 transition-colors hover:bg-dark-800/50">
       <div className="flex items-center justify-between gap-2">
-        <span className="line-clamp-2 text-xs leading-tight text-dark-500 sm:text-sm">{label}</span>
+        {loading && !label ? (
+          // Карточка сама себе скелетон: страницам не нужно угадывать её высоту.
+          // Высота повторяет реальную подпись: text-xs (16px) и text-sm (20px)
+          // на sm — иначе карточка меняет высоту в момент загрузки.
+          <Skeleton className="h-4 w-24 sm:h-5" />
+        ) : (
+          <span className="line-clamp-2 text-xs leading-tight text-dark-500 sm:text-sm">
+            {label}
+          </span>
+        )}
         {trailing}
       </div>
       {/* Chip is centred against the value line only (delta sits below the whole

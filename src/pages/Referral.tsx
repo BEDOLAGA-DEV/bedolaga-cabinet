@@ -11,6 +11,7 @@ import { withdrawalApi } from '../api/withdrawals';
 import { CampaignCard } from '../components/partner/CampaignCard';
 import { useCurrency } from '../hooks/useCurrency';
 import { StatCard } from '@/components/stats';
+import { PageSkeleton, Skeleton } from '@/components/ui/skeleton';
 import {
   ArrowDownIcon,
   ArrowUpIcon,
@@ -216,9 +217,16 @@ export default function Referral() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-64 items-center justify-center">
-        <div className="h-10 w-10 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-      </div>
+      <PageSkeleton titleWidth="w-40">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4">
+          <div className="col-span-2 md:col-span-1">
+            <StatCard loading />
+          </div>
+          <StatCard loading />
+          <StatCard loading />
+        </div>
+        <Skeleton variant="card" className="h-48" />
+      </PageSkeleton>
     );
   }
 

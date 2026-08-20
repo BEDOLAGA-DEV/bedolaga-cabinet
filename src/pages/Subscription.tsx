@@ -55,6 +55,7 @@ import { DeviceReductionSheet } from '../components/subscription/sheets/DeviceRe
 import { TrafficTopupSheet } from '../components/subscription/sheets/TrafficTopupSheet';
 import { ServerManagementSheet } from '../components/subscription/sheets/ServerManagementSheet';
 import { DeleteSubscriptionSheet } from '../components/subscription/sheets/DeleteSubscriptionSheet';
+import { PageSkeleton, Skeleton } from '@/components/ui/skeleton';
 
 /** Isolated countdown so 1s interval doesn't re-render the whole page */
 const CountdownTimer = memo(function CountdownTimer({
@@ -664,9 +665,10 @@ export default function Subscription() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-64 items-center justify-center">
-        <div className="h-10 w-10 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-      </div>
+      <PageSkeleton leading titleWidth="w-48">
+        <Skeleton variant="card" className="h-64" />
+        <Skeleton variant="card" count={2} className="h-20" />
+      </PageSkeleton>
     );
   }
 
