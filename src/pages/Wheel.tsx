@@ -14,6 +14,7 @@ import { staggerContainer, staggerItem } from '@/components/motion/transitions';
 import { PiCaretDown } from 'react-icons/pi';
 import { StarIcon, CalendarIcon, HistoryIcon, CloseIcon } from '@/components/icons';
 import { cn } from '@/lib/utils';
+import { PageSkeleton, Skeleton } from '@/components/ui/skeleton';
 
 // Icons
 const ChevronIcon = ({ expanded }: { expanded: boolean }) => (
@@ -465,9 +466,10 @@ export default function Wheel() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <div className="h-12 w-12 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-      </div>
+      <PageSkeleton titleWidth="w-40" className="space-y-6 pb-8">
+        <Skeleton className="h-4 w-56" />
+        <Skeleton variant="card" className="h-80" />
+      </PageSkeleton>
     );
   }
 

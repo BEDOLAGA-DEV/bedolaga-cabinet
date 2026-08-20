@@ -31,6 +31,7 @@ import { formatPrice } from '../utils/format';
 import { useCurrency } from '../hooks/useCurrency';
 import { usePlatform, useHaptic } from '@/platform';
 import { openPaymentUrl } from '../utils/openPaymentUrl';
+import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 import {
   SparklesIcon,
   GiftIcon,
@@ -1189,9 +1190,9 @@ function MyGiftsTabContent() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-16">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-dark-600 border-t-accent-500" />
-      </div>
+      <SkeletonGroup className="space-y-3">
+        <Skeleton variant="card" count={3} className="h-24" />
+      </SkeletonGroup>
     );
   }
 
