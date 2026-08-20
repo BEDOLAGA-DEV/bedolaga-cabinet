@@ -54,13 +54,12 @@ describe('resolveSupportContact', () => {
   });
 
   describe('чужие схемы в support_url отсекаются', () => {
-    it.each([
-      'javascript:alert(1)',
-      'data:text/html,x',
-      'not a url',
-    ])('%s -> null', (support_url) => {
-      expect(resolveSupportContact(config({ support_url }))).toBeNull();
-    });
+    it.each(['javascript:alert(1)', 'data:text/html,x', 'not a url'])(
+      '%s -> null',
+      (support_url) => {
+        expect(resolveSupportContact(config({ support_url }))).toBeNull();
+      },
+    );
   });
 
   describe('старый бэк без support_url — прежнее поведение', () => {
@@ -73,13 +72,12 @@ describe('resolveSupportContact', () => {
       expect(target).toEqual({ kind: 'telegram', url: expected });
     });
 
-    it.each([
-      'https://help.example.com',
-      'help.example.com',
-      't.me/help',
-    ])('URL-образный legacy username (%s) не клеится в t.me — null', (support_username) => {
-      expect(resolveSupportContact(config({ support_username }))).toBeNull();
-    });
+    it.each(['https://help.example.com', 'help.example.com', 't.me/help'])(
+      'URL-образный legacy username (%s) не клеится в t.me — null',
+      (support_username) => {
+        expect(resolveSupportContact(config({ support_username }))).toBeNull();
+      },
+    );
 
     it('контакт вообще не задан — кнопки нет (null, без дефолта @support)', () => {
       expect(resolveSupportContact(config({}))).toBeNull();
