@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { campaignsApi, CampaignBonusType } from '../api/campaigns';
+import { campaignsApi, type CampaignBonusType } from '../api/campaigns';
 import type { AdminCampaignChartData } from '../api/campaigns';
 import { AdminBackButton } from '../components/admin';
 import { DailyChart, PeriodComparison, StatCard } from '../components/stats';
@@ -11,6 +11,7 @@ import { useCurrency } from '../hooks/useCurrency';
 import { copyToClipboard } from '../utils/clipboard';
 import { useHaptic } from '../platform';
 import { ChartIcon, ChevronDownIcon, CopyIcon, LinkIcon, UsersIcon } from '@/components/icons';
+import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 
 // Bonus type config
 const bonusTypeConfig: Record<
@@ -352,13 +353,12 @@ export default function AdminCampaignStats() {
         {/* Analytics Charts */}
         <div className="space-y-4">
           {chartLoading ? (
-            <div className="space-y-3">
-              <div className="h-52 animate-pulse rounded-xl bg-dark-800/30" />
+            <SkeletonGroup className="space-y-3">
+              <Skeleton variant="card" className="h-52 rounded-xl" />
               <div className="grid grid-cols-2 gap-3">
-                <div className="h-24 animate-pulse rounded-xl bg-dark-800/30" />
-                <div className="h-24 animate-pulse rounded-xl bg-dark-800/30" />
+                <Skeleton variant="card" count={2} className="h-24 rounded-xl" />
               </div>
-            </div>
+            </SkeletonGroup>
           ) : chartData ? (
             <>
               {/* Deposits vs Spending */}
