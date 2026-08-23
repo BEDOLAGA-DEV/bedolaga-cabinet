@@ -4,7 +4,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
   init,
   restoreInitData,
-  retrieveRawInitData,
   mountMiniApp,
   miniAppReady,
   mountViewport,
@@ -20,6 +19,7 @@ import {
   isFullscreen,
 } from '@telegram-apps/sdk-react';
 import { clearStaleSessionIfNeeded } from './utils/token';
+import { getTelegramInitData } from './utils/telegramInitData';
 import { useAuthStore } from './store/auth';
 import { AppWithNavigator } from './AppWithNavigator';
 import { ErrorBoundary } from './components/ErrorBoundary';
@@ -31,7 +31,8 @@ import './styles/globals.css';
 
 // Polyfill Object.hasOwn for older iOS/Android WebViews (Safari < 15.4, old Chrome).
 // @telegram-apps/sdk v3 depends on valibot which uses Object.hasOwn internally.
-// Without this, init() throws LaunchParamsRetrieveError on affected devices.
+// Without this, init() and any launch-params retrieval below throw
+// LaunchParamsRetrieveError on affected devices.
 // See: https://github.com/Telegram-Mini-Apps/tma.js/issues/683
 if (typeof (Object as { hasOwn?: unknown }).hasOwn !== 'function') {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -55,7 +56,7 @@ if (isTelegramEnv && !alreadyInitialized) {
     init();
     restoreInitData();
 
-    clearStaleSessionIfNeeded(retrieveRawInitData() || null);
+    clearStaleSessionIfNeeded(getTelegramInitData());
 
     // Adopt the user's Telegram client language on first run (no explicit choice yet).
     applyTelegramLanguage();
