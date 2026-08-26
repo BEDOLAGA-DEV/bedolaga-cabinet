@@ -500,11 +500,10 @@ export default function GiftResult() {
 
       const d = query.state.data;
       const s = d?.status;
-      if (s === 'delivered' || s === 'failed' || s === 'pending_activation' || s === 'expired')
-        return false;
-      // Claimable gifts (code-only AND directed) stay in 'paid' until claimed —
+      if (s === 'delivered' || s === 'failed' || s === 'expired') return false;
+      // Claimable gifts (code-only AND directed) stay in 'paid' or 'pending_activation' until claimed —
       // stop polling; the buyer shares the link.
-      if (s === 'paid' && d?.is_claimable) return false;
+      if ((s === 'paid' || s === 'pending_activation') && d?.is_claimable) return false;
 
       // Check poll timeout
       if (Date.now() - pollStart.current > MAX_POLL_MS) {
@@ -538,8 +537,10 @@ export default function GiftResult() {
     );
   }
 
-  const isClaimablePaid =
-    status?.status === 'paid' && status?.is_claimable && status?.purchase_token != null;
+  const isClaimable =
+    (status?.status === 'paid' || status?.status === 'pending_activation') &&
+    Boolean(status?.is_claimable) &&
+    status?.purchase_token != null;
   const isDelivered = status?.status === 'delivered';
   const isPendingActivation = status?.status === 'pending_activation';
   const isFailed = status?.status === 'failed' || status?.status === 'expired';
@@ -558,7 +559,7 @@ export default function GiftResult() {
       >
         {isError ? (
           <PollErrorState />
-        ) : isClaimablePaid ? (
+        ) : isClaimable ? (
           <CodeOnlySuccessState
             purchaseToken={status.purchase_token!}
             tariffName={status.tariff_name}
