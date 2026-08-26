@@ -515,6 +515,12 @@ export interface ReferralRewardLevels {
    * see no tariff to pick, which is exactly the config where days are dropped.
    */
   available_tariffs: ReferralRewardTariffOption[];
+  /**
+   * What the legacy import could not express as a level — commission tiers have
+   * no equivalent here. Only ever populated by the import response; losing them
+   * silently would be worse than not importing them.
+   */
+  import_notes?: string[];
 }
 
 // Ticket types

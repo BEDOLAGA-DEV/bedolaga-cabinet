@@ -65,9 +65,16 @@ export default function AdminReferralLevels() {
     onError: reportError,
   });
 
+  const [importNotes, setImportNotes] = useState<string[]>([]);
+
   const importMutation = useMutation({
     mutationFn: partnerApi.importLegacyReferralSettings,
-    onSuccess: invalidate,
+    onSuccess: (result) => {
+      // Что перенос не смог выразить уровнем. Показывается явно: молча потерять
+      // ступени комиссии хуже, чем сообщить о них.
+      setImportNotes(result.import_notes ?? []);
+      invalidate();
+    },
     onError: reportError,
   });
 
@@ -172,6 +179,14 @@ export default function AdminReferralLevels() {
         >
           {t('admin.referralLevels.importLegacy')}
         </button>
+      )}
+
+      {importNotes.length > 0 && (
+        <ul className="mb-4 space-y-1 rounded-xl border border-warning-500/30 bg-warning-500/10 p-3 text-sm text-warning-400">
+          {importNotes.map((note) => (
+            <li key={note}>{note}</li>
+          ))}
+        </ul>
       )}
 
       {saveError && (

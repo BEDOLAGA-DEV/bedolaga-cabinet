@@ -83,7 +83,10 @@ vi.mock('@/api/partners', () => ({
     deleteReferralLevel: () => Promise.resolve(state.payload),
     importLegacyReferralSettings: () => {
       state.imported += 1;
-      return Promise.resolve(state.payload);
+      return Promise.resolve({
+        ...state.payload,
+        import_notes: ['Ступени комиссии НЕ перенесены'],
+      });
     },
     updateReferralScheme: () => Promise.resolve(state.payload),
   },
@@ -277,6 +280,9 @@ describe('перенос легаси-настроек', () => {
     const button = await screen.findByText(/Перенести текущие настройки/);
     fireEvent.click(button);
     await waitFor(() => expect(state.imported).toBe(1));
+
+    // Молча потерять ступени комиссии хуже, чем сообщить о них.
+    expect(await screen.findByText(/Ступени комиссии НЕ перенесены/)).toBeTruthy();
   });
 
   it('не предлагается, когда уровни уже есть', async () => {
