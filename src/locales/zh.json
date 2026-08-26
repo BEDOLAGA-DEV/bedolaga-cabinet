@@ -4348,7 +4348,8 @@
       "saveError": "保存更改失败",
       "percentRange": "百分比必须在 0 到 100 之间",
       "beyondDepth": "链条不会超过 {{count}} 级——该等级不会发放奖励",
-      "registrationNeedsTariff": "注册时被邀请人还没有订阅：未选择套餐则天数无法发放"
+      "registrationNeedsTariff": "注册时被邀请人还没有订阅：未选择套餐则天数无法发放",
+      "invalidValue": "值无效：{{field}}"
     }
   },
   "adminUpdates": {

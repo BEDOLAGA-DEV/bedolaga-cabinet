@@ -4632,7 +4632,8 @@
       "saveError": "Could not save the change",
       "percentRange": "Percent must be between 0 and 100",
       "beyondDepth": "The chain is not walked beyond {{count}} levels — this one never pays",
-      "registrationNeedsTariff": "At sign-up the invited user has no subscription yet: without a tariff the days cannot be granted"
+      "registrationNeedsTariff": "At sign-up the invited user has no subscription yet: without a tariff the days cannot be granted",
+      "invalidValue": "Invalid value: {{field}}"
     }
   },
   "adminUpdates": {
