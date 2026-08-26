@@ -1,10 +1,19 @@
-import type { SentGift } from '../api/gift';
+/**
+ * Generic source object for building gift claim artifacts.
+ * Compatible with SentGift, objects assembled from GiftPurchaseStatus / PurchaseStatus, or direct fields.
+ */
+export interface GiftClaimSource {
+  token: string;
+  gift_code?: string | null;
+  bot_claim_url?: string | null;
+  cabinet_claim_url?: string | null;
+}
 
 /**
- * Claim artifacts for a sent gift.
+ * Claim artifacts for a gift (sent card, post-purchase modal, landing success, etc.).
  *
  * The backend hands out canonical ones: the code is `GIFT_` + 59 characters, which is
- * exactly Telegram's 64-character `start_param` limit. `SentGift.token` is only a
+ * exactly Telegram's 64-character `start_param` limit. `token` is only a
  * 12-character display id — the bot rejects any claim input shorter than 48 characters,
  * so links built from it handed the recipient a deep link the bot refused to open.
  *
@@ -18,17 +27,18 @@ export interface GiftClaimArtifacts {
 }
 
 export function buildGiftClaimArtifacts(
-  gift: Pick<SentGift, 'token' | 'gift_code' | 'bot_claim_url' | 'cabinet_claim_url'>,
-  { botUsername, origin }: { botUsername: string; origin: string },
+  source: GiftClaimSource,
+  context: { botUsername: string; origin: string },
 ): GiftClaimArtifacts {
-  const shortCode = gift.token.slice(0, 12);
+  const shortCode = source.token.slice(0, 12);
 
   return {
-    code: gift.gift_code ?? `GIFT-${shortCode}`,
+    code: source.gift_code ?? `GIFT-${shortCode}`,
     botLink:
-      gift.bot_claim_url ??
-      (botUsername ? `https://t.me/${botUsername}?start=GIFT_${shortCode}` : null),
+      source.bot_claim_url ??
+      (context.botUsername ? `https://t.me/${context.botUsername}?start=GIFT_${shortCode}` : null),
     cabinetLink:
-      gift.cabinet_claim_url ?? `${origin}/gift?tab=activate&code=${encodeURIComponent(shortCode)}`,
+      source.cabinet_claim_url ??
+      `${context.origin}/gift?tab=activate&code=${encodeURIComponent(shortCode)}`,
   };
 }
