@@ -104,7 +104,7 @@ export function parseGiftCode(raw: string | null | undefined): string | null {
   // Голый код: допускаем префикс GIFT- и разделители, но не произвольный текст —
   // иначе сканер «распознал» бы любую ссылку и подставил мусор в поле.
   const bare = value.replace(/^GIFT[-_]/i, '');
-  if (/^[A-Za-z0-9]{6,64}$/.test(bare)) return bare;
+  if (/^[A-Za-z0-9_-]{6,64}$/.test(bare)) return bare;
 
   return null;
 }

@@ -24,18 +24,42 @@ describe('parseGiftCode', () => {
 
   it('reads the bot deep link (main distribution path)', () => {
     expect(parseGiftCode('https://t.me/mybot?start=GIFT_abc123def456')).toBe('abc123def456');
+    expect(parseGiftCode(`https://t.me/mybot?start=GIFT_${urlSafeToken}`)).toBe(urlSafeToken);
+    expect(parseGiftCode(`tg://resolve?domain=mybot&start=GIFT_${urlSafeToken}`)).toBe(
+      urlSafeToken,
+    );
   });
 
   it('reads the cabinet activation link', () => {
     expect(parseGiftCode('https://cab.example.com/gift?tab=activate&code=abc123def456')).toBe(
       'abc123def456',
     );
+    expect(parseGiftCode(`https://cab.example.com/gift?tab=activate&code=${urlSafeToken}`)).toBe(
+      urlSafeToken,
+    );
   });
 
   it('reads a bare code with and without the GIFT prefix', () => {
     expect(parseGiftCode('GIFT-abc123def456')).toBe('abc123def456');
+    expect(parseGiftCode('GIFT_abc123def456')).toBe('abc123def456');
     expect(parseGiftCode('abc123def456')).toBe('abc123def456');
     expect(parseGiftCode('  abc123def456  ')).toBe('abc123def456');
+  });
+
+  it('reads bare URL-safe gift codes with hyphens and underscores', () => {
+    // bare canonical code with hyphen
+    expect(parseGiftCode('canonical-code-12345')).toBe('canonical-code-12345');
+    expect(parseGiftCode('GIFT-canonical-code-12345')).toBe('canonical-code-12345');
+
+    // bare canonical code with underscore
+    expect(parseGiftCode('canonical_code_12345')).toBe('canonical_code_12345');
+    expect(parseGiftCode('GIFT_canonical_code_12345')).toBe('canonical_code_12345');
+
+    // bare canonical code with both hyphen and underscore
+    expect(parseGiftCode(urlSafeToken)).toBe(urlSafeToken);
+    expect(parseGiftCode(`GIFT-${urlSafeToken}`)).toBe(urlSafeToken);
+    expect(parseGiftCode(`GIFT_${urlSafeToken}`)).toBe(urlSafeToken);
+    expect(parseGiftCode(`  ${urlSafeToken}  `)).toBe(urlSafeToken);
   });
 
   it('rejects unrelated QR content instead of filling the field with junk', () => {
@@ -46,6 +70,8 @@ describe('parseGiftCode', () => {
     expect(parseGiftCode('')).toBeNull();
     expect(parseGiftCode(null)).toBeNull();
     expect(parseGiftCode(undefined)).toBeNull();
+    expect(parseGiftCode('hello world! invalid chars here')).toBeNull();
+    expect(parseGiftCode('code+with=plus/and=equals')).toBeNull();
   });
 
   it('rejects /buy/gift/ without token or with invalid token length', () => {
