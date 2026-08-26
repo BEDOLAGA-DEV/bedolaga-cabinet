@@ -30,6 +30,7 @@ vi.mock('react-i18next', () => ({
         'admin.referralLevels.addLevel': 'Добавить уровень {{count}}',
         'admin.referralLevels.beyondDepth': 'Глубже {{count}} — не платит',
         'admin.referralLevels.importLegacy': 'Перенести текущие настройки',
+        'admin.referralLevels.schemeOffWarning': 'Схема классическая: правила НЕ применяются',
       };
       const template = templates[key] ?? key;
       return template.replace(/{{(\w+)}}/g, (_m, name) => String(options?.[name] ?? ''));
@@ -288,5 +289,48 @@ describe('перенос легаси-настроек', () => {
   it('не предлагается, когда уровни уже есть', async () => {
     await renderEditor();
     expect(screen.queryByText(/Перенести текущие настройки/)).toBeNull();
+  });
+});
+
+describe('ловушки редактора', () => {
+  it('дыра в уровнях предлагается заново, а не следующий за максимумом', async () => {
+    state.payload = {
+      ...basePayload(),
+      levels: [level({ level: 1 }), level({ level: 3 })],
+    };
+    await renderEditor();
+    expect(await screen.findByText(/Добавить уровень 2/)).toBeTruthy();
+  });
+
+  it('назначенный неактивный тариф остаётся в списке выбора', async () => {
+    state.payload = {
+      ...basePayload(),
+      available_tariffs: [{ id: 3, name: 'Активный' }],
+      levels: [
+        level({
+          reward_mode: 'days',
+          referrer_days: 7,
+          referrer_tariff_id: 99,
+          referrer_tariff_name: 'Снятый',
+        }),
+      ],
+    };
+    await renderEditor();
+
+    const select = screen.getAllByLabelText('Тариф')[0] as HTMLSelectElement;
+    expect(select.value).toBe('99');
+    const labels = Array.from(select.options).map((o) => o.textContent);
+    expect(labels).toContain('Снятый');
+  });
+
+  it('предупреждает, что правила не применяются под классической схемой', async () => {
+    state.payload = { ...basePayload(), scheme: 'legacy' };
+    await renderEditor();
+    expect(await screen.findByText(/правила НЕ применяются/)).toBeTruthy();
+  });
+
+  it('под многоуровневой схемой не предупреждает', async () => {
+    await renderEditor();
+    expect(screen.queryByText(/правила НЕ применяются/)).toBeNull();
   });
 });

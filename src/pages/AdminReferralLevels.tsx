@@ -107,7 +107,11 @@ export default function AdminReferralLevels() {
   }
 
   const isLevels = data.scheme === 'levels';
-  const nextLevel = data.levels.reduce((max, lvl) => Math.max(max, lvl.level), 0) + 1;
+  // Наименьший свободный номер, а не «последний плюс один»: иначе удалённый
+  // средний уровень нельзя создать заново ни отсюда, ни из бота.
+  const taken = new Set(data.levels.map((lvl) => lvl.level));
+  let nextLevel = 1;
+  while (taken.has(nextLevel)) nextLevel += 1;
   const hasActiveLevel = data.levels.some((lvl) => lvl.is_active);
 
   const save = (level: number, patch: LevelPatch) => saveMutation.mutate({ level, patch });
@@ -192,6 +196,12 @@ export default function AdminReferralLevels() {
       {saveError && (
         <p className="mb-4 rounded-xl border border-error-500/30 bg-error-500/10 p-3 text-sm text-error-400">
           {saveError}
+        </p>
+      )}
+
+      {!isLevels && data.levels.length > 0 && (
+        <p className="mb-4 rounded-xl border border-warning-500/30 bg-warning-500/10 p-3 text-sm text-warning-400">
+          {t('admin.referralLevels.schemeOffWarning')}
         </p>
       )}
 
@@ -303,7 +313,11 @@ export default function AdminReferralLevels() {
                 <TariffSelect
                   label={t('admin.referralLevels.tariff')}
                   value={level.referrer_tariff_id}
-                  options={data.available_tariffs}
+                  options={withAssigned(
+                    data.available_tariffs,
+                    level.referrer_tariff_id,
+                    level.referrer_tariff_name,
+                  )}
                   disabled={level.reward_mode === 'money'}
                   noneLabel={t('admin.referralLevels.mainSubscription')}
                   onChange={(tariffId) => save(level.level, { referrer_tariff_id: tariffId })}
@@ -337,7 +351,11 @@ export default function AdminReferralLevels() {
                 <TariffSelect
                   label={t('admin.referralLevels.tariff')}
                   value={level.referee_tariff_id}
-                  options={data.available_tariffs}
+                  options={withAssigned(
+                    data.available_tariffs,
+                    level.referee_tariff_id,
+                    level.referee_tariff_name,
+                  )}
                   disabled={level.reward_mode === 'money'}
                   noneLabel={t('admin.referralLevels.mainSubscription')}
                   onChange={(tariffId) => save(level.level, { referee_tariff_id: tariffId })}
@@ -477,4 +495,19 @@ function TariffSelect({
       </select>
     </label>
   );
+}
+
+/**
+ * The tariff assigned to a level may since have been deactivated, and the list of
+ * selectable tariffs only carries active ones. Without adding it back the select
+ * falls to its empty option and reads as "no tariff" — an admin would clear a
+ * working setting without noticing.
+ */
+function withAssigned(
+  options: { id: number; name: string }[],
+  assignedId: number | null,
+  assignedName?: string | null,
+): { id: number; name: string }[] {
+  if (!assignedId || options.some((tariff) => tariff.id === assignedId)) return options;
+  return [{ id: assignedId, name: assignedName || `#${assignedId}` }, ...options];
 }
