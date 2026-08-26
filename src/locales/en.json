@@ -5528,6 +5528,8 @@
     "giftMessageLabel": "Message",
     "recipientLabel": "Recipient",
     "featureDisabled": "Gift feature is temporarily unavailable",
+    "purchasesDisabled": "Gift purchases are temporarily unavailable",
+    "purchasesDisabledDesc": "Purchasing new gifts is temporarily disabled. You can activate an existing gift or view your gift history using the tabs above.",
     "redirecting": "Redirecting...",
     "pending": {
       "title": "You received a gift!",

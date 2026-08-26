@@ -1,7 +1,7 @@
 import { uiLocale } from '@/utils/uiLocale';
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { useNavigate, useSearchParams, Link } from 'react-router';
+import { useSearchParams, Link } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -119,24 +119,16 @@ function ErrorState({ message }: { message: string }) {
   );
 }
 
-function DisabledState() {
+function BuyDisabledState() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const timer = setTimeout(() => navigate('/'), 3000);
-    return () => clearTimeout(timer);
-  }, [navigate]);
 
   return (
-    <div className="flex min-h-dvh items-center justify-center px-4">
-      <div className="flex max-w-sm flex-col items-center gap-4 text-center">
-        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-dark-800/50">
-          <BanIcon className="h-8 w-8 text-dark-400" />
-        </div>
-        <h2 className="text-lg font-semibold text-dark-50">{t('gift.featureDisabled')}</h2>
-        <p className="text-sm text-dark-300">{t('gift.redirecting')}</p>
+    <div className="flex flex-col items-center gap-4 py-12 text-center">
+      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-dark-800/50">
+        <BanIcon className="h-8 w-8 text-dark-400" />
       </div>
+      <h2 className="text-lg font-semibold text-dark-200">{t('gift.purchasesDisabled')}</h2>
+      <p className="max-w-xs text-sm text-dark-400">{t('gift.purchasesDisabledDesc')}</p>
     </div>
   );
 }
@@ -1309,11 +1301,6 @@ export default function GiftSubscription() {
     return <ErrorState message={errMsg} />;
   }
 
-  // Disabled state
-  if (!config.is_enabled) {
-    return <DisabledState />;
-  }
-
   const tabs: { id: TabId; label: string }[] = [
     { id: 'buy', label: t('gift.tabBuy') },
     { id: 'activate', label: t('gift.tabActivate') },
@@ -1379,9 +1366,12 @@ export default function GiftSubscription() {
             id={`tabpanel-${activeTab}`}
             aria-labelledby={`tab-${activeTab}`}
           >
-            {activeTab === 'buy' && (
-              <BuyTabContent config={config} onPurchaseComplete={() => setActiveTab('myGifts')} />
-            )}
+            {activeTab === 'buy' &&
+              (!config.is_enabled ? (
+                <BuyDisabledState />
+              ) : (
+                <BuyTabContent config={config} onPurchaseComplete={() => setActiveTab('myGifts')} />
+              ))}
             {activeTab === 'activate' && <ActivateTabContent initialCode={urlCode} />}
             {activeTab === 'myGifts' && <MyGiftsTabContent />}
           </motion.div>

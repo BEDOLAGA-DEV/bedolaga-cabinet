@@ -62,7 +62,6 @@ interface AppHeaderProps {
   referralEnabled?: boolean;
   hasContests?: boolean;
   hasPolls?: boolean;
-  giftEnabled?: boolean;
 }
 
 export function AppHeader({
@@ -78,7 +77,6 @@ export function AppHeader({
   referralEnabled,
   hasContests,
   hasPolls,
-  giftEnabled,
 }: AppHeaderProps) {
   const { t } = useTranslation();
   const location = useLocation();
@@ -168,7 +166,7 @@ export function AppHeader({
     ...(hasContests ? [{ path: '/contests', label: t('nav.contests'), icon: GamepadIcon }] : []),
     ...(hasPolls ? [{ path: '/polls', label: t('nav.polls'), icon: ClipboardIcon }] : []),
     ...(wheelEnabled ? [{ path: '/wheel', label: t('nav.wheel'), icon: WheelIcon }] : []),
-    ...(giftEnabled ? [{ path: '/gift', label: t('nav.gift'), icon: GiftIcon }] : []),
+    { path: '/gift', label: t('nav.gift'), icon: GiftIcon },
     { path: '/info', label: t('nav.info'), icon: InfoIcon },
   ];
 
