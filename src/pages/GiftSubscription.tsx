@@ -73,12 +73,12 @@ function getGiftStatusKey(status: string): string {
   return statusMap[status] ?? 'gift.statusPending';
 }
 
-function isGiftAvailable(status: string): boolean {
-  return status === 'paid' || status === 'delivered' || status === 'pending_activation';
+export function isGiftAvailable(status: string): boolean {
+  return status === 'paid' || status === 'pending_activation';
 }
 
-function isGiftActivated(gift: SentGift): boolean {
-  return gift.status === 'delivered' && gift.activated_by_username != null;
+export function isGiftActivated(gift: SentGift): boolean {
+  return gift.status === 'delivered';
 }
 
 function formatGiftDate(dateStr: string | null): string {
@@ -989,13 +989,16 @@ function SentGiftCard({ gift }: { gift: SentGift }) {
   const botUsername =
     widgetConfig?.bot_username || import.meta.env.VITE_TELEGRAM_BOT_USERNAME || '';
 
-  const artifacts = buildGiftClaimArtifacts(gift, {
-    botUsername,
-    origin: window.location.origin,
-  });
-  const giftCode = artifacts.code;
   const isActivated = isGiftActivated(gift);
   const isAvailable = !isActivated && isGiftAvailable(gift.status);
+
+  const artifacts = !isActivated
+    ? buildGiftClaimArtifacts(gift, {
+        botUsername,
+        origin: window.location.origin,
+      })
+    : null;
+  const giftCode = artifacts?.code;
 
   const statusText = isActivated
     ? t('gift.statusActivated')
@@ -1004,6 +1007,7 @@ function SentGiftCard({ gift }: { gift: SentGift }) {
       : t(getGiftStatusKey(gift.status));
 
   const buildShareMessage = useCallback(() => {
+    if (!artifacts) return '';
     // Literal "GIFT_" prefix: Telegram forwards the start param to the bot
     // verbatim (no URL-decoding), so the previously-encoded "%5F" never matched
     // the bot's `start_parameter.startswith('GIFT_')` handler.
@@ -1015,10 +1019,11 @@ function SentGiftCard({ gift }: { gift: SentGift }) {
     ]
       .filter(Boolean)
       .join('\n');
-  }, [artifacts.botLink, artifacts.cabinetLink, t]);
+  }, [artifacts, t]);
 
   const handleShare = useCallback(async () => {
     const message = buildShareMessage();
+    if (!message) return;
     await copyToClipboard(message);
     setShowToast(true);
   }, [buildShareMessage]);
@@ -1054,7 +1059,7 @@ function SentGiftCard({ gift }: { gift: SentGift }) {
       </p>
 
       {/* Gift code + actions (only when not activated) */}
-      {!isActivated && (
+      {!isActivated && giftCode && (
         <>
           {/* Gift code display */}
           <div className="mb-3 rounded-xl bg-dark-800/80 px-4 py-4 text-center">

@@ -4,7 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter, Route, Routes } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { GiftConfig, SentGift, ReceivedGift, ActivateGiftResponse } from '@/api/gift';
-import GiftSubscription from './GiftSubscription';
+import GiftSubscription, { isGiftActivated, isGiftAvailable } from './GiftSubscription';
 import { AppShell } from '@/components/layout/AppShell/AppShell';
 import { AppHeader } from '@/components/layout/AppShell/AppHeader';
 import { PlatformProvider } from '@/platform/PlatformProvider';
@@ -30,6 +30,18 @@ vi.mock('react-i18next', () => ({
         'gift.selectTariff': 'ВЫБЕРИТЕ ТАРИФ',
         'gift.selectPeriod': 'ПЕРИОД ПОДПИСКИ',
         'gift.giftButton': 'Подарить',
+        'gift.statusActivated': 'АКТИВИРОВАН',
+        'gift.statusAvailable': 'ДОСТУПЕН',
+        'gift.statusPendingActivation': 'ОЖИДАЕТ АКТИВАЦИИ',
+        'gift.statusDelivered': 'ДОСТАВЛЕН',
+        'gift.statusPending': 'В ОБРАБОТКЕ',
+        'gift.statusFailed': 'ОШИБКА',
+        'gift.statusExpired': 'ИСТЁК',
+        'gift.activeGiftsTitle': 'Ожидают активации',
+        'gift.activatedGiftsTitle': 'Активированные подарки',
+        'gift.receivedGiftsTitle': 'Полученные подарки',
+        'gift.shareGift': 'Поделиться',
+        'gift.daysShort': 'дн.',
         'nav.dashboard': 'Главная',
         'nav.subscription': 'Подписка',
         'nav.balance': 'Баланс',
@@ -44,6 +56,12 @@ vi.mock('react-i18next', () => ({
       }
       if (key === 'gift.activatedBy') {
         return `Активирован пользователем ${options?.username}`;
+      }
+      if (key === 'gift.sentTo') {
+        return `Отправлен: ${options?.recipient}`;
+      }
+      if (key === 'gift.devicesShort') {
+        return `${options?.count} устр.`;
       }
       return translations[key] ?? key;
     },
@@ -345,6 +363,234 @@ describe('GiftSubscription when purchases are disabled (is_enabled=false)', () =
     // Sent gift is displayed
     expect(await screen.findByText('Standard VPN')).toBeTruthy();
     expect(screen.getByText(/friend_user/)).toBeTruthy();
+  });
+});
+
+describe('Gift status helper functions', () => {
+  describe('isGiftActivated', () => {
+    it('returns true for delivered gift with activated_by_username present', () => {
+      const gift: SentGift = {
+        token: 'gift_tok_123',
+        tariff_name: 'Tariff',
+        period_days: 30,
+        device_limit: 1,
+        status: 'delivered',
+        gift_recipient_value: null,
+        gift_message: null,
+        activated_by_username: 'recipient_user',
+        created_at: null,
+      };
+      expect(isGiftActivated(gift)).toBe(true);
+    });
+
+    it('returns true for delivered gift with activated_by_username === null', () => {
+      const gift: SentGift = {
+        token: 'gift_tok_123',
+        tariff_name: 'Tariff',
+        period_days: 30,
+        device_limit: 1,
+        status: 'delivered',
+        gift_recipient_value: null,
+        gift_message: null,
+        activated_by_username: null,
+        created_at: null,
+      };
+      expect(isGiftActivated(gift)).toBe(true);
+    });
+
+    it('returns false for paid status', () => {
+      const gift: SentGift = {
+        token: 'gift_tok_123',
+        tariff_name: 'Tariff',
+        period_days: 30,
+        device_limit: 1,
+        status: 'paid',
+        gift_recipient_value: null,
+        gift_message: null,
+        activated_by_username: null,
+        created_at: null,
+      };
+      expect(isGiftActivated(gift)).toBe(false);
+    });
+
+    it('returns false for pending_activation status', () => {
+      const gift: SentGift = {
+        token: 'gift_tok_123',
+        tariff_name: 'Tariff',
+        period_days: 30,
+        device_limit: 1,
+        status: 'pending_activation',
+        gift_recipient_value: null,
+        gift_message: null,
+        activated_by_username: null,
+        created_at: null,
+      };
+      expect(isGiftActivated(gift)).toBe(false);
+    });
+
+    it('returns false for pending, failed, expired statuses', () => {
+      ['pending', 'failed', 'expired'].forEach((status) => {
+        const gift: SentGift = {
+          token: 'gift_tok_123',
+          tariff_name: 'Tariff',
+          period_days: 30,
+          device_limit: 1,
+          status,
+          gift_recipient_value: null,
+          gift_message: null,
+          activated_by_username: null,
+          created_at: null,
+        };
+        expect(isGiftActivated(gift)).toBe(false);
+      });
+    });
+  });
+
+  describe('isGiftAvailable', () => {
+    it('returns true for paid and pending_activation', () => {
+      expect(isGiftAvailable('paid')).toBe(true);
+      expect(isGiftAvailable('pending_activation')).toBe(true);
+    });
+
+    it('returns false for delivered status', () => {
+      expect(isGiftAvailable('delivered')).toBe(false);
+    });
+
+    it('returns false for pending, failed, expired statuses', () => {
+      expect(isGiftAvailable('pending')).toBe(false);
+      expect(isGiftAvailable('failed')).toBe(false);
+      expect(isGiftAvailable('expired')).toBe(false);
+      expect(isGiftAvailable('unknown')).toBe(false);
+    });
+  });
+});
+
+describe('SentGiftCard and MyGiftsTabContent activation behavior', () => {
+  it('отображает delivered подарок с username как активированный без кнопок отправки/кода', async () => {
+    getConfigMock.mockResolvedValue(mockDisabledConfig);
+    const sentGifts: SentGift[] = [
+      {
+        token: 'gift_delivered_1',
+        tariff_name: 'Delivered VPN',
+        period_days: 30,
+        device_limit: 2,
+        status: 'delivered',
+        gift_recipient_value: '@friend',
+        gift_message: null,
+        activated_by_username: 'happy_recipient',
+        created_at: '2026-08-01T10:00:00Z',
+      },
+    ];
+    getSentGiftsMock.mockResolvedValue(sentGifts);
+    getReceivedGiftsMock.mockResolvedValue([]);
+
+    renderGiftSubscription('/gift?tab=myGifts');
+
+    expect(await screen.findByRole('heading', { name: 'Активированные подарки' })).toBeTruthy();
+    expect(screen.queryByRole('heading', { name: 'Ожидают активации' })).toBeNull();
+    expect(screen.getByText('Delivered VPN')).toBeTruthy();
+    expect(screen.getByText('АКТИВИРОВАН')).toBeTruthy();
+    expect(screen.getByText('Активирован пользователем happy_recipient')).toBeTruthy();
+
+    // No gift code display, no share button
+    expect(screen.queryByRole('button', { name: /поделиться/i })).toBeNull();
+    expect(screen.queryByText(/GIFT-/)).toBeNull();
+  });
+
+  it('отображает delivered подарок с activated_by_username=null как активированный без кнопок отправки/кода и без legacy fallback', async () => {
+    getConfigMock.mockResolvedValue(mockDisabledConfig);
+    const sentGifts: SentGift[] = [
+      {
+        token: 'gift_delivered_no_user_123456',
+        tariff_name: 'Delivered Email VPN',
+        period_days: 60,
+        device_limit: 3,
+        status: 'delivered',
+        gift_recipient_value: 'user@example.com',
+        gift_message: null,
+        activated_by_username: null,
+        created_at: '2026-08-01T10:00:00Z',
+      },
+    ];
+    getSentGiftsMock.mockResolvedValue(sentGifts);
+    getReceivedGiftsMock.mockResolvedValue([]);
+
+    renderGiftSubscription('/gift?tab=myGifts');
+
+    expect(await screen.findByRole('heading', { name: 'Активированные подарки' })).toBeTruthy();
+    expect(screen.queryByRole('heading', { name: 'Ожидают активации' })).toBeNull();
+    expect(screen.getByText('Delivered Email VPN')).toBeTruthy();
+    expect(screen.getByText('АКТИВИРОВАН')).toBeTruthy();
+    expect(screen.queryByText(/Активирован пользователем/)).toBeNull();
+    expect(screen.getByText('Отправлен: user@example.com')).toBeTruthy();
+
+    // No gift code display, no share button, no short token fallback code
+    expect(screen.queryByRole('button', { name: /поделиться/i })).toBeNull();
+    expect(screen.queryByText(/GIFT-gift_delive/)).toBeNull();
+    expect(screen.queryByText(/GIFT-/)).toBeNull();
+  });
+
+  it('отображает paid подарок как доступный для отправки с кодом и кнопкой поделиться', async () => {
+    getConfigMock.mockResolvedValue(mockDisabledConfig);
+    const sentGifts: SentGift[] = [
+      {
+        token: 'gift_tok_paid_123',
+        tariff_name: 'Available VPN',
+        period_days: 30,
+        device_limit: 1,
+        status: 'paid',
+        gift_recipient_value: null,
+        gift_message: null,
+        activated_by_username: null,
+        created_at: '2026-08-01T10:00:00Z',
+        gift_code: 'GIFT_CANONICAL_CODE_PAID',
+        bot_claim_url: 'https://t.me/BedolagaBot?start=GIFT_CANONICAL_CODE_PAID',
+        cabinet_claim_url: 'http://localhost:3000/gift?tab=activate&code=GIFT_CANONICAL_CODE_PAID',
+      },
+    ];
+    getSentGiftsMock.mockResolvedValue(sentGifts);
+    getReceivedGiftsMock.mockResolvedValue([]);
+
+    renderGiftSubscription('/gift?tab=myGifts');
+
+    expect(await screen.findByRole('heading', { name: 'Ожидают активации' })).toBeTruthy();
+    expect(screen.queryByRole('heading', { name: 'Активированные подарки' })).toBeNull();
+    expect(screen.getByText('Available VPN')).toBeTruthy();
+    expect(screen.getByText('ДОСТУПЕН')).toBeTruthy();
+    expect(screen.getByText('GIFT_CANONICAL_CODE_PAID')).toBeTruthy();
+    expect(screen.getByRole('button', { name: /поделиться/i })).toBeTruthy();
+  });
+
+  it('отображает pending_activation подарок как доступный для отправки с кодом и кнопкой поделиться', async () => {
+    getConfigMock.mockResolvedValue(mockDisabledConfig);
+    const sentGifts: SentGift[] = [
+      {
+        token: 'gift_tok_pending_123',
+        tariff_name: 'Pending Activation VPN',
+        period_days: 90,
+        device_limit: 5,
+        status: 'pending_activation',
+        gift_recipient_value: null,
+        gift_message: null,
+        activated_by_username: null,
+        created_at: '2026-08-01T10:00:00Z',
+        gift_code: 'GIFT_CANONICAL_CODE_PENDING',
+        bot_claim_url: 'https://t.me/BedolagaBot?start=GIFT_CANONICAL_CODE_PENDING',
+        cabinet_claim_url:
+          'http://localhost:3000/gift?tab=activate&code=GIFT_CANONICAL_CODE_PENDING',
+      },
+    ];
+    getSentGiftsMock.mockResolvedValue(sentGifts);
+    getReceivedGiftsMock.mockResolvedValue([]);
+
+    renderGiftSubscription('/gift?tab=myGifts');
+
+    expect(await screen.findByRole('heading', { name: 'Ожидают активации' })).toBeTruthy();
+    expect(screen.queryByRole('heading', { name: 'Активированные подарки' })).toBeNull();
+    expect(screen.getByText('Pending Activation VPN')).toBeTruthy();
+    expect(screen.getByText('ДОСТУПЕН')).toBeTruthy();
+    expect(screen.getByText('GIFT_CANONICAL_CODE_PENDING')).toBeTruthy();
+    expect(screen.getByRole('button', { name: /поделиться/i })).toBeTruthy();
   });
 });
 
