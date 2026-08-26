@@ -11,6 +11,7 @@ import { AnimatedCheckmark } from '@/components/ui/AnimatedCheckmark';
 import { AnimatedCrossmark } from '@/components/ui/AnimatedCrossmark';
 import { cn } from '@/lib/utils';
 import { copyToClipboard } from '@/utils/clipboard';
+import { buildGiftClaimArtifacts } from '@/utils/giftShare';
 import { CheckIcon, CopyIcon, InfoIcon, ExclamationIcon, ClockIcon } from '@/components/icons';
 
 const MAX_POLL_MS = 10 * 60 * 1000; // 10 minutes
@@ -47,10 +48,16 @@ function CodeOnlySuccessState({
   purchaseToken,
   tariffName,
   periodDays,
+  giftCode,
+  botClaimUrl,
+  cabinetClaimUrl,
 }: {
   purchaseToken: string;
   tariffName: string | null;
   periodDays: number | null;
+  giftCode?: string | null;
+  botClaimUrl?: string | null;
+  cabinetClaimUrl?: string | null;
 }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -67,20 +74,23 @@ function CodeOnlySuccessState({
   const botUsername =
     widgetConfig?.bot_username || import.meta.env.VITE_TELEGRAM_BOT_USERNAME || '';
 
-  const shortCode = purchaseToken.slice(0, 12);
-  const giftCode = `GIFT-${shortCode}`;
-  // Telegram forwards the start parameter to the bot verbatim (no URL-decoding),
-  // and "_" is a valid start-param char — so use a literal "GIFT_" prefix to
-  // match the bot's `start_parameter.startswith('GIFT_')` handler. Encoding the
-  // underscore as %5F made the bot receive "GIFT%5F…" and silently fail.
-  const botLink = botUsername ? `https://t.me/${botUsername}?start=GIFT_${shortCode}` : null;
-  const cabinetLink = `${window.location.origin}/gift?tab=activate&code=${encodeURIComponent(shortCode)}`;
+  const artifacts = buildGiftClaimArtifacts(
+    {
+      token: purchaseToken,
+      gift_code: giftCode,
+      bot_claim_url: botClaimUrl,
+      cabinet_claim_url: cabinetClaimUrl,
+    },
+    { botUsername, origin: window.location.origin },
+  );
 
   const fullMessage = [
     t('gift.shareText', 'I have a gift for you! Activate it here:'),
     '',
-    botLink ? `${t('gift.shareModalActivateVia', 'Activate via bot:')} ${botLink}` : null,
-    `${t('gift.shareModalActivateViaCabinet', 'Or via website:')} ${cabinetLink}`,
+    artifacts.botLink
+      ? `${t('gift.shareModalActivateVia', 'Activate via bot:')} ${artifacts.botLink}`
+      : null,
+    `${t('gift.shareModalActivateViaCabinet', 'Or via website:')} ${artifacts.cabinetLink}`,
   ]
     .filter(Boolean)
     .join('\n');
@@ -119,14 +129,21 @@ function CodeOnlySuccessState({
         <p className="mb-1 text-xs font-medium uppercase tracking-wider text-dark-400">
           {t('gift.codeLabel', 'Gift code')}
         </p>
-        <p className="select-all font-mono text-lg font-bold text-accent-400">{giftCode}</p>
+        <p className="select-all break-all font-mono text-sm font-bold tracking-wider text-accent-400">
+          {artifacts.code}
+        </p>
       </div>
 
       {/* QR — получателю проще отсканировать, чем копировать ссылку.
           Кодируем bot-ссылку, если она есть: активация в боте — основной путь,
           иначе ссылку кабинета. */}
       <div className="flex w-full flex-col items-center gap-2 rounded-xl border border-dark-700/30 bg-white p-4">
-        <QRCodeSVG value={botLink ?? cabinetLink} size={180} level="M" includeMargin={false} />
+        <QRCodeSVG
+          value={artifacts.botLink ?? artifacts.cabinetLink}
+          size={180}
+          level="M"
+          includeMargin={false}
+        />
       </div>
       <p className="-mt-3 text-xs text-dark-400">{t('gift.qrHint', 'Scan to activate the gift')}</p>
 
@@ -136,13 +153,13 @@ function CodeOnlySuccessState({
           {t('gift.shareText', 'I have a gift for you! Activate it here:')}
         </p>
 
-        {botLink && (
+        {artifacts.botLink && (
           <div className="mb-2">
             <p className="mb-1 text-xs font-medium text-dark-400">
               {t('gift.shareModalActivateVia', 'Activate via bot:')}
             </p>
             <p className="truncate rounded-lg bg-dark-900/60 px-3 py-2 text-sm text-accent-400">
-              {botLink}
+              {artifacts.botLink}
             </p>
           </div>
         )}
@@ -152,7 +169,7 @@ function CodeOnlySuccessState({
             {t('gift.shareModalActivateViaCabinet', 'Or via website:')}
           </p>
           <p className="truncate rounded-lg bg-dark-900/60 px-3 py-2 text-sm text-accent-400">
-            {cabinetLink}
+            {artifacts.cabinetLink}
           </p>
         </div>
       </div>
@@ -546,6 +563,9 @@ export default function GiftResult() {
             purchaseToken={status.purchase_token!}
             tariffName={status.tariff_name}
             periodDays={status.period_days}
+            giftCode={status.gift_code}
+            botClaimUrl={status.bot_claim_url}
+            cabinetClaimUrl={status.cabinet_claim_url}
           />
         ) : isDelivered ? (
           <DeliveredState
