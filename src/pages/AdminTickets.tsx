@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import logger from '../utils/logger';
 import { linkifyText } from '../utils/linkify';
 import { MessageMediaGrid } from '../components/tickets/MessageMediaGrid';
-import { useNavigate, useParams } from 'react-router';
+import { Link, useNavigate, useParams } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { adminApi, type AdminTicket, type AdminTicketDetail } from '../api/admin';
@@ -485,7 +485,18 @@ export default function AdminTickets() {
                 </div>
                 <div className="mb-4 flex flex-wrap items-center gap-2 text-sm text-dark-500">
                   <span>
-                    {t('admin.tickets.from')}: {formatUser(selectedTicket)}
+                    {t('admin.tickets.from')}:{' '}
+                    {selectedTicket.user ? (
+                      <Link
+                        to={`/admin/users/${selectedTicket.user.id}`}
+                        title={t('admin.tickets.viewUser')}
+                        className="font-medium text-accent-400 underline decoration-accent-400/40 underline-offset-2 transition-colors hover:text-accent-300 hover:decoration-accent-300"
+                      >
+                        {formatUser(selectedTicket)}
+                      </Link>
+                    ) : (
+                      formatUser(selectedTicket)
+                    )}
                     {selectedTicket.user?.telegram_id && (
                       <button
                         onClick={() => copyToClipboard(String(selectedTicket.user!.telegram_id))}
@@ -498,14 +509,6 @@ export default function AdminTickets() {
                     | {t('admin.tickets.created')}:{' '}
                     {new Date(selectedTicket.created_at).toLocaleString()}
                   </span>
-                  {selectedTicket.user && (
-                    <button
-                      onClick={() => navigate(`/admin/users/${selectedTicket.user!.id}`)}
-                      className="shrink-0 rounded-lg border border-accent-500/30 bg-accent-500/10 px-2 py-0.5 text-xs text-accent-400 transition-colors hover:bg-accent-500/20"
-                    >
-                      {t('admin.tickets.viewUser')}
-                    </button>
-                  )}
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {['open', 'pending', 'answered', 'closed'].map((s) => (
