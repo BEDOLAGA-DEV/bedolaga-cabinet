@@ -7,7 +7,7 @@ import {
 import { isInTelegramWebApp } from '../hooks/useTelegramSDK';
 import { API } from '../config/constants';
 import { reportPossibleBackendDown } from '../api/health';
-import { safeSession } from './safeStorage';
+import { safeLocal, safeSession } from './safeStorage';
 
 const TOKEN_KEYS = {
   ACCESS: 'access_token',
@@ -190,7 +190,7 @@ export function clearStaleSessionIfNeeded(freshInitData: string | null): void {
       sessionStorage.removeItem(TOKEN_KEYS.REFRESH);
       sessionStorage.removeItem(TOKEN_KEYS.USER);
       localStorage.removeItem(TOKEN_KEYS.REFRESH);
-      localStorage.removeItem('cabinet-auth');
+      safeLocal.removeItem('cabinet-auth');
     }
 
     if (currentTgUserId) {

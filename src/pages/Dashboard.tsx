@@ -24,6 +24,7 @@ import { DeviceLimitSheet } from '../components/subscription/DeviceLimitSheet';
 import { API } from '../config/constants';
 import { ChevronRightIcon, StarIcon } from '@/components/icons';
 import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
+import { safeLocal } from '../utils/safeStorage';
 
 export default function Dashboard() {
   const { t } = useTranslation();
@@ -168,7 +169,7 @@ export default function Dashboard() {
         traffic_used_percent: data.traffic_used_percent,
         is_unlimited: data.is_unlimited,
       });
-      localStorage.setItem(
+      safeLocal.setItem(
         `traffic_refresh_ts_${subscription?.id ?? 'default'}`,
         Date.now().toString(),
       );
@@ -206,7 +207,7 @@ export default function Dashboard() {
     if (hasAutoRefreshed.current) return;
     hasAutoRefreshed.current = true;
 
-    const lastRefresh = localStorage.getItem(`traffic_refresh_ts_${subscription?.id ?? 'default'}`);
+    const lastRefresh = safeLocal.getItem(`traffic_refresh_ts_${subscription?.id ?? 'default'}`);
     const now = Date.now();
     const cacheMs = API.TRAFFIC_CACHE_MS;
 
