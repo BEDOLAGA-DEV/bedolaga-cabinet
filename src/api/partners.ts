@@ -333,6 +333,14 @@ export const partnerApi = {
     return response.data;
   },
 
+  /** Переносит действующие REFERRAL_* в уровень 1 — выключенным, для проверки. */
+  importLegacyReferralSettings: async (): Promise<ReferralRewardLevels> => {
+    const response = await apiClient.post<ReferralRewardLevels>(
+      '/cabinet/admin/partners/referral-levels/import-legacy',
+    );
+    return response.data;
+  },
+
   updateReferralScheme: async (scheme: 'legacy' | 'levels'): Promise<ReferralRewardLevels> => {
     const response = await apiClient.patch<ReferralRewardLevels>(
       '/cabinet/admin/partners/referral-scheme',

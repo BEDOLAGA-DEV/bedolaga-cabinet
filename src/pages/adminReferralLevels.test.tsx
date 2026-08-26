@@ -29,6 +29,7 @@ vi.mock('react-i18next', () => ({
         'admin.referralLevels.invalidValue': 'Некорректное значение: {{field}}',
         'admin.referralLevels.addLevel': 'Добавить уровень {{count}}',
         'admin.referralLevels.beyondDepth': 'Глубже {{count}} — не платит',
+        'admin.referralLevels.importLegacy': 'Перенести текущие настройки',
       };
       const template = templates[key] ?? key;
       return template.replace(/{{(\w+)}}/g, (_m, name) => String(options?.[name] ?? ''));
@@ -55,7 +56,12 @@ const level = (overrides: Partial<ReferralRewardLevel> = {}): ReferralRewardLeve
   ...overrides,
 });
 
-const state: { payload: ReferralRewardLevels; saves: { level: number; patch: unknown }[] } = {
+const state: {
+  payload: ReferralRewardLevels;
+  saves: { level: number; patch: unknown }[];
+  imported: number;
+} = {
+  imported: 0,
   payload: {
     scheme: 'levels',
     scheme_locked_by_env: false,
@@ -75,6 +81,10 @@ vi.mock('@/api/partners', () => ({
       return Promise.resolve(state.payload);
     },
     deleteReferralLevel: () => Promise.resolve(state.payload),
+    importLegacyReferralSettings: () => {
+      state.imported += 1;
+      return Promise.resolve(state.payload);
+    },
     updateReferralScheme: () => Promise.resolve(state.payload),
   },
 }));
@@ -106,6 +116,7 @@ const basePayload = (): ReferralRewardLevels => ({
 afterEach(() => {
   cleanup();
   state.saves = [];
+  state.imported = 0;
   // Полный сброс: точечная замена levels оставляла изменённые границы из
   // предыдущего теста и делала следующий зависимым от порядка.
   state.payload = basePayload();
@@ -245,5 +256,31 @@ describe('стороны уровня различаются', () => {
     blur('Дни', '5', 1);
     await waitFor(() => expect(state.saves).toHaveLength(1));
     expect(state.saves[0]).toEqual({ level: 1, patch: { referee_days: 5 } });
+  });
+});
+
+describe('перенос легаси-настроек', () => {
+  it('предлагается только на пустой таблице уровней', async () => {
+    state.payload = { ...basePayload(), levels: [] };
+    const Page = (await import('./AdminReferralLevels')).default;
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <QueryClientProvider client={client}>
+        <PlatformProvider>
+          <MemoryRouter initialEntries={['/admin/partners/referral-levels']}>
+            <Page />
+          </MemoryRouter>
+        </PlatformProvider>
+      </QueryClientProvider>,
+    );
+
+    const button = await screen.findByText(/Перенести текущие настройки/);
+    fireEvent.click(button);
+    await waitFor(() => expect(state.imported).toBe(1));
+  });
+
+  it('не предлагается, когда уровни уже есть', async () => {
+    await renderEditor();
+    expect(screen.queryByText(/Перенести текущие настройки/)).toBeNull();
   });
 });

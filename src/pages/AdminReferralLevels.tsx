@@ -65,6 +65,12 @@ export default function AdminReferralLevels() {
     onError: reportError,
   });
 
+  const importMutation = useMutation({
+    mutationFn: partnerApi.importLegacyReferralSettings,
+    onSuccess: invalidate,
+    onError: reportError,
+  });
+
   const schemeMutation = useMutation({
     mutationFn: (scheme: 'legacy' | 'levels') => partnerApi.updateReferralScheme(scheme),
     onSuccess: invalidate,
@@ -154,6 +160,19 @@ export default function AdminReferralLevels() {
           </p>
         )}
       </div>
+
+      {data.levels.length === 0 && (
+        // Показывается только на пустой таблице: правило создаётся выключенным,
+        // и повторный перенос сервер отклоняет.
+        <button
+          type="button"
+          onClick={() => importMutation.mutate()}
+          disabled={importMutation.isPending}
+          className="btn-secondary mb-4 w-full"
+        >
+          {t('admin.referralLevels.importLegacy')}
+        </button>
+      )}
 
       {saveError && (
         <p className="mb-4 rounded-xl border border-error-500/30 bg-error-500/10 p-3 text-sm text-error-400">
