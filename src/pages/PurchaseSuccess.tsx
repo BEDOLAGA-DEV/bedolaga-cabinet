@@ -790,8 +790,8 @@ export default function PurchaseSuccess() {
           <FailedState />
         ) : isBuyerGiftLink ? (
           <GiftLinkShareState
-            claimUrl={purchaseStatus.claim_url}
-            botClaimLink={purchaseStatus.bot_claim_link}
+            claimUrl={purchaseStatus.cabinet_claim_url ?? purchaseStatus.claim_url}
+            botClaimLink={purchaseStatus.bot_claim_url ?? purchaseStatus.bot_claim_link}
             tariffName={purchaseStatus.tariff_name}
             periodDays={purchaseStatus.period_days}
             recipientContactValue={purchaseStatus.recipient_contact_value}
