@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { partnerApi } from '../api/partners';
@@ -43,25 +44,39 @@ export default function AdminReferralLevels() {
     queryFn: partnerApi.getReferralLevels,
   });
 
+  // Без onError страница молчала на любой отказ сервера — включая 409 на
+  // залоченной в .env схеме и 400 на выходе за границу уровней. Админ видел, что
+  // «ничего не произошло», и не знал почему.
+  const [saveError, setSaveError] = useState<string | null>(null);
+
   const invalidate = () => {
+    setSaveError(null);
     queryClient.invalidateQueries({ queryKey: ['referral-levels'] });
     queryClient.invalidateQueries({ queryKey: ['referral-terms'] });
+  };
+
+  const reportError = (error: unknown) => {
+    const detail = (error as { response?: { data?: { detail?: string } } })?.response?.data?.detail;
+    setSaveError(detail || t('admin.referralLevels.saveError'));
   };
 
   const saveMutation = useMutation({
     mutationFn: ({ level, patch }: { level: number; patch: LevelPatch }) =>
       partnerApi.upsertReferralLevel(level, patch),
     onSuccess: invalidate,
+    onError: reportError,
   });
 
   const deleteMutation = useMutation({
     mutationFn: (level: number) => partnerApi.deleteReferralLevel(level),
     onSuccess: invalidate,
+    onError: reportError,
   });
 
   const schemeMutation = useMutation({
     mutationFn: (scheme: 'legacy' | 'levels') => partnerApi.updateReferralScheme(scheme),
     onSuccess: invalidate,
+    onError: reportError,
   });
 
   if (isLoading) {
@@ -148,14 +163,27 @@ export default function AdminReferralLevels() {
         )}
       </div>
 
+      {saveError && (
+        <p className="mb-4 rounded-xl border border-error-500/30 bg-error-500/10 p-3 text-sm text-error-400">
+          {saveError}
+        </p>
+      )}
+
       {/* Levels */}
       <div className="space-y-4">
         {data.levels.map((level) => (
           <div key={level.level} className="card">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-              <h3 className="text-lg font-semibold text-dark-100">
-                {t('admin.referralLevels.levelTitle', { count: level.level })}
-              </h3>
+              <div>
+                <h3 className="text-lg font-semibold text-dark-100">
+                  {t('admin.referralLevels.levelTitle', { count: level.level })}
+                </h3>
+                {level.level > data.max_level_depth && (
+                  <p className="text-xs text-warning-400">
+                    {t('admin.referralLevels.beyondDepth', { count: data.max_level_depth })}
+                  </p>
+                )}
+              </div>
               <div className="flex flex-wrap gap-2">
                 <button
                   type="button"
@@ -214,8 +242,14 @@ export default function AdminReferralLevels() {
                   value={level.referrer_percent ?? ''}
                   disabled={level.reward_mode === 'days'}
                   onCommit={(raw) => {
+                    // Пустая строка — «не начисляется», как и 0. Раньше parseInt('')
+                    // давал NaN, сохранение молча не происходило, а поле оставалось
+                    // пустым: уровень продолжал платить прежний процент.
+                    if (raw.trim() === '') return save(level.level, { referrer_percent: null });
                     const parsed = Number.parseInt(raw, 10);
-                    if (Number.isNaN(parsed) || parsed < 0 || parsed > 100) return;
+                    if (Number.isNaN(parsed) || parsed < 0 || parsed > 100) {
+                      return setSaveError(t('admin.referralLevels.percentRange'));
+                    }
                     save(level.level, { referrer_percent: parsed || null });
                   }}
                 />
@@ -239,10 +273,14 @@ export default function AdminReferralLevels() {
                     save(level.level, { referrer_days: parsed });
                   }}
                 />
-                <div className="mt-1 text-xs text-dark-500">
-                  {t('admin.referralLevels.tariff')}:{' '}
-                  {level.referrer_tariff_name || t('admin.referralLevels.mainSubscription')}
-                </div>
+                <TariffSelect
+                  label={t('admin.referralLevels.tariff')}
+                  value={level.referrer_tariff_id}
+                  options={data.available_tariffs}
+                  disabled={level.reward_mode === 'money'}
+                  noneLabel={t('admin.referralLevels.mainSubscription')}
+                  onChange={(tariffId) => save(level.level, { referrer_tariff_id: tariffId })}
+                />
               </div>
 
               <div>
@@ -269,10 +307,22 @@ export default function AdminReferralLevels() {
                     save(level.level, { referee_days: parsed });
                   }}
                 />
-                <div className="mt-1 text-xs text-dark-500">
-                  {t('admin.referralLevels.tariff')}:{' '}
-                  {level.referee_tariff_name || t('admin.referralLevels.mainSubscription')}
-                </div>
+                <TariffSelect
+                  label={t('admin.referralLevels.tariff')}
+                  value={level.referee_tariff_id}
+                  options={data.available_tariffs}
+                  disabled={level.reward_mode === 'money'}
+                  noneLabel={t('admin.referralLevels.mainSubscription')}
+                  onChange={(tariffId) => save(level.level, { referee_tariff_id: tariffId })}
+                />
+                {level.trigger === 'registration' &&
+                  level.reward_mode !== 'money' &&
+                  level.referee_days > 0 &&
+                  !level.referee_tariff_id && (
+                    <p className="mt-2 rounded-lg border border-warning-500/30 bg-warning-500/10 p-2 text-xs text-warning-400">
+                      {t('admin.referralLevels.registrationNeedsTariff')}
+                    </p>
+                  )}
               </div>
             </div>
 
@@ -291,18 +341,20 @@ export default function AdminReferralLevels() {
         ))}
       </div>
 
-      <button
-        type="button"
-        onClick={() =>
-          // A new level starts disabled: creating it live would begin paying from a
-          // half-filled rule on the very next top-up.
-          save(nextLevel, { is_active: false, reward_mode: 'money', trigger: 'every_topup' })
-        }
-        className="btn-primary mt-6"
-        disabled={saveMutation.isPending}
-      >
-        {t('admin.referralLevels.addLevel', { count: nextLevel })}
-      </button>
+      {nextLevel <= data.max_supported_level && (
+        <button
+          type="button"
+          onClick={() =>
+            // A new level starts disabled: creating it live would begin paying from a
+            // half-filled rule on the very next top-up.
+            save(nextLevel, { is_active: false, reward_mode: 'money', trigger: 'every_topup' })
+          }
+          className="btn-primary mt-6"
+          disabled={saveMutation.isPending}
+        >
+          {t('admin.referralLevels.addLevel', { count: nextLevel })}
+        </button>
+      )}
     </div>
   );
 }
@@ -332,6 +384,41 @@ function NumberField({
         onBlur={(e) => onCommit(e.target.value)}
         className="w-full rounded-lg border border-dark-700 bg-dark-800 px-3 py-2 text-dark-100 disabled:opacity-40"
       />
+    </label>
+  );
+}
+
+function TariffSelect({
+  label,
+  value,
+  options,
+  disabled,
+  noneLabel,
+  onChange,
+}: {
+  label: string;
+  value: number | null;
+  options: { id: number; name: string }[];
+  disabled?: boolean;
+  noneLabel: string;
+  onChange: (tariffId: number | null) => void;
+}) {
+  return (
+    <label className="mt-2 block">
+      <span className="mb-1 block text-xs text-dark-500">{label}</span>
+      <select
+        value={value ?? ''}
+        disabled={disabled}
+        onChange={(e) => onChange(e.target.value === '' ? null : Number(e.target.value))}
+        className="w-full rounded-lg border border-dark-700 bg-dark-800 px-3 py-2 text-dark-100 disabled:opacity-40"
+      >
+        <option value="">{noneLabel}</option>
+        {options.map((tariff) => (
+          <option key={tariff.id} value={tariff.id}>
+            {tariff.name}
+          </option>
+        ))}
+      </select>
     </label>
   );
 }

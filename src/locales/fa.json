@@ -988,7 +988,10 @@
     },
     "levelBadge": "سطح {{count}}",
     "days": "{{count}} روز",
-    "daysWithTariff": "{{count}} روز «{{tariff}}»"
+    "daysWithTariff": "{{count}} روز «{{tariff}}»",
+    "shareMessageBonus": "به {{botName}} بپیوند! پاداش ثبت‌نام تو با این لینک: {{bonus}}",
+    "shareMessagePlain": "با لینک من به {{botName}} بپیوند!",
+    "shareHintLevels": "لینک را با دوستان به اشتراک بگذارید — پاداش بر اساس سطوح برنامه معرفی است."
   },
   "support": {
     "title": "پشتیبانی",
@@ -4342,7 +4345,11 @@
         "registration": "هنگام ثبت‌نام",
         "first_topup": "هنگام اولین شارژ",
         "every_topup": "هنگام هر شارژ"
-      }
+      },
+      "saveError": "ذخیره تغییر ممکن نشد",
+      "percentRange": "درصد باید بین ۰ تا ۱۰۰ باشد",
+      "beyondDepth": "زنجیره بیش از {{count}} سطح پیمایش نمی‌شود — این سطح پرداختی ندارد",
+      "registrationNeedsTariff": "هنگام ثبت‌نام کاربر دعوت‌شده اشتراکی ندارد: بدون تعرفه روزها اعطا نمی‌شوند"
     }
   },
   "adminUpdates": {

@@ -992,7 +992,10 @@ function App() {
         <Route
           path="/admin/partners/referral-levels"
           element={
-            <PermissionRoute permission="partners:read">
+            /* Право совпадает с тем, что требуют сами эндпоинты уровней:
+               с одним partners:read страница открывалась и падала в общую
+               ошибку загрузки, не сообщая, что дело в правах. */
+            <PermissionRoute permission="partners:settings">
               <LazyPage>
                 <AdminReferralLevels />
               </LazyPage>

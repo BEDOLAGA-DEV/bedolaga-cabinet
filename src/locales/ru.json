@@ -1132,7 +1132,10 @@
     },
     "levelBadge": "уровень {{count}}",
     "days": "{{count}} дн.",
-    "daysWithTariff": "{{count}} дн. «{{tariff}}»"
+    "daysWithTariff": "{{count}} дн. «{{tariff}}»",
+    "shareMessageBonus": "Присоединяйся к {{botName}}! Твой бонус за регистрацию по ссылке: {{bonus}}",
+    "shareMessagePlain": "Присоединяйся к {{botName}} по моей ссылке!",
+    "shareHintLevels": "Поделитесь ссылкой с друзьями — награда начисляется по уровням реферальной программы."
   },
   "support": {
     "title": "Поддержка",
@@ -5162,7 +5165,11 @@
         "registration": "За регистрацию",
         "first_topup": "За первое пополнение",
         "every_topup": "С каждого пополнения"
-      }
+      },
+      "saveError": "Не удалось сохранить изменение",
+      "percentRange": "Процент должен быть от 0 до 100",
+      "beyondDepth": "Глубже {{count}} уровней цепочка не обходится — этот уровень не платит",
+      "registrationNeedsTariff": "За регистрацию у приглашённого ещё нет подписки: без тарифа дни не начислятся"
     }
   },
   "adminUpdates": {

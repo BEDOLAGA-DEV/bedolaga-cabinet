@@ -496,12 +496,25 @@ export interface ReferralRewardLevel {
   max_payments: number;
 }
 
+export interface ReferralRewardTariffOption {
+  id: number;
+  name: string;
+}
+
 export interface ReferralRewardLevels {
   scheme: 'legacy' | 'levels';
   /** Pinned in .env: the switch would not apply and would lose on restart. */
   scheme_locked_by_env: boolean;
+  /** The chain is not walked deeper than this, so deeper levels never pay. */
   max_level_depth: number;
+  max_supported_level: number;
   levels: ReferralRewardLevel[];
+  /**
+   * Served with the levels rather than fetched from /admin/tariffs, which needs a
+   * different permission — an admin holding only partners:settings would otherwise
+   * see no tariff to pick, which is exactly the config where days are dropped.
+   */
+  available_tariffs: ReferralRewardTariffOption[];
 }
 
 // Ticket types

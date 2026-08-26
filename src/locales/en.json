@@ -1113,7 +1113,10 @@
     },
     "levelBadge": "level {{count}}",
     "days": "{{count}} days",
-    "daysWithTariff": "{{count}} days of \"{{tariff}}\""
+    "daysWithTariff": "{{count}} days of \"{{tariff}}\"",
+    "shareMessageBonus": "Join {{botName}}! Your sign-up bonus via this link: {{bonus}}",
+    "shareMessagePlain": "Join {{botName}} through my link!",
+    "shareHintLevels": "Share the link with friends — rewards follow the referral program levels."
   },
   "support": {
     "title": "Support",
@@ -4625,7 +4628,11 @@
         "registration": "On sign-up",
         "first_topup": "On first top-up",
         "every_topup": "On every top-up"
-      }
+      },
+      "saveError": "Could not save the change",
+      "percentRange": "Percent must be between 0 and 100",
+      "beyondDepth": "The chain is not walked beyond {{count}} levels — this one never pays",
+      "registrationNeedsTariff": "At sign-up the invited user has no subscription yet: without a tariff the days cannot be granted"
     }
   },
   "adminUpdates": {

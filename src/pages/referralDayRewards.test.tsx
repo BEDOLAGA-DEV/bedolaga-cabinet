@@ -26,6 +26,8 @@ vi.mock('react-i18next', () => ({
         'referral.levelBadge': 'уровень {{count}}',
         'referral.stats.earnedDays': '{{count}} дн. подписки',
         'referral.terms.noLevels': 'Уровни наград ещё не настроены',
+        'referral.shareHint': 'Получите {{percent}}% комиссии!',
+        'referral.shareHintLevels': 'Награда начисляется по уровням программы.',
       };
       const template = templates[key];
       if (!template) return key;
@@ -218,5 +220,25 @@ describe('условия программы под многоуровневой 
     await renderReferral();
 
     expect(await screen.findByText(/Уровни наград ещё не настроены/)).toBeTruthy();
+  });
+});
+
+describe('обещание процента под многоуровневой схемой', () => {
+  it('не показывается: плоский процент там ничем не управляет', async () => {
+    state.terms = { scheme: 'levels', level_descriptions: ['Уровень 1: 10%'], max_level_depth: 3 };
+    state.info = { commission_percent: 25 };
+    await renderReferral();
+
+    await screen.findByText(/Уровень 1: 10%/);
+    expect(screen.queryByText(/25% комиссии/)).toBeNull();
+    expect(screen.getByText(/по уровням программы/)).toBeTruthy();
+  });
+
+  it('остаётся на классической схеме', async () => {
+    state.terms = { scheme: 'legacy' };
+    state.info = { commission_percent: 25 };
+    await renderReferral();
+
+    expect(await screen.findByText(/25% комиссии/)).toBeTruthy();
   });
 });

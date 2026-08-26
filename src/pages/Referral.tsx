@@ -251,10 +251,16 @@ export default function Referral() {
 
   const shareLink = () => {
     if (!referralLink) return;
-    const shareText = t('referral.shareMessage', {
-      percent: info?.commission_percent || 0,
-      botName: branding?.name || import.meta.env.VITE_APP_NAME || 'Cabinet',
-    });
+    // Under the levels scheme commission_percent governs nothing — payouts come
+    // from the level table — so the invite must not name a rate. This text is what
+    // the user forwards to a friend; a wrong number here is a promise made in their
+    // name. The bot's own invite was fixed the same way.
+    const botName = branding?.name || import.meta.env.VITE_APP_NAME || 'Cabinet';
+    const shareText = isLevelsScheme
+      ? terms?.referee_bonus_description
+        ? t('referral.shareMessageBonus', { bonus: terms.referee_bonus_description, botName })
+        : t('referral.shareMessagePlain', { botName })
+      : t('referral.shareMessage', { percent: info?.commission_percent || 0, botName });
 
     if (navigator.share) {
       navigator
@@ -417,7 +423,9 @@ export default function Referral() {
           </div>
         </div>
         <p className="mt-3 text-sm text-dark-500">
-          {t('referral.shareHint', { percent: info?.commission_percent || 0 })}
+          {isLevelsScheme
+            ? t('referral.shareHintLevels')
+            : t('referral.shareHint', { percent: info?.commission_percent || 0 })}
         </p>
       </div>
 

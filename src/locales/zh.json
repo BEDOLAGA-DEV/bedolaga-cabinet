@@ -988,7 +988,10 @@
     },
     "levelBadge": "第 {{count}} 级",
     "days": "{{count}} 天",
-    "daysWithTariff": "“{{tariff}}” {{count}} 天"
+    "daysWithTariff": "“{{tariff}}” {{count}} 天",
+    "shareMessageBonus": "加入 {{botName}}！通过此链接注册的奖励：{{bonus}}",
+    "shareMessagePlain": "通过我的链接加入 {{botName}}！",
+    "shareHintLevels": "把链接分享给朋友——奖励按推荐计划的等级发放。"
   },
   "support": {
     "title": "支持",
@@ -4341,7 +4344,11 @@
         "registration": "注册时",
         "first_topup": "首次充值时",
         "every_topup": "每次充值时"
-      }
+      },
+      "saveError": "保存更改失败",
+      "percentRange": "百分比必须在 0 到 100 之间",
+      "beyondDepth": "链条不会超过 {{count}} 级——该等级不会发放奖励",
+      "registrationNeedsTariff": "注册时被邀请人还没有订阅：未选择套餐则天数无法发放"
     }
   },
   "adminUpdates": {
