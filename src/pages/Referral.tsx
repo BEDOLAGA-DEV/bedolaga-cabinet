@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { referralApi } from '../api/referral';
+import { referralApi, type ReferralEarning } from '../api/referral';
 import { usePlatform } from '../platform';
 import { copyToClipboard } from '../utils/clipboard';
 import { brandingApi } from '../api/branding';
@@ -128,8 +128,66 @@ export default function Referral() {
     },
   });
 
+  const isLevelsScheme = terms?.scheme === 'levels';
+
+  /**
+   * A reward can be money, subscription days, or both. Days carry
+   * amount_kopeks = 0 by design, so formatting by the money amount alone renders
+   * a real "+7 days" reward as "+0.00 ₽". Zero money is omitted next to days for
+   * the same reason it is on the bot side: it reports the absence of something
+   * this programme never promised.
+   */
+  const formatEarning = useCallback(
+    (earning: ReferralEarning) => {
+      const days = earning.days_granted ?? 0;
+      const money = earning.amount_rubles ?? 0;
+      const daysLabel = days
+        ? earning.tariff_name
+          ? t('referral.daysWithTariff', { count: days, tariff: earning.tariff_name })
+          : t('referral.days', { count: days })
+        : '';
+
+      if (days && !money) return `+${daysLabel}`;
+      if (days) return `${formatPositive(money)} + ${daysLabel}`;
+      return formatPositive(money);
+    },
+    [formatPositive, t],
+  );
+
   const programTerms = useMemo(() => {
     if (!terms) return null;
+
+    // Под схемой `levels` плоские поля ниже не управляют ни одним начислением:
+    // выплаты идут по таблице уровней. Показывать их как «условия программы»
+    // значило бы обещать пользователю то, чего бот не платит.
+    if (terms.scheme === 'levels') {
+      const levelLines = terms.level_descriptions ?? [];
+      return (
+        <div className="bento-card">
+          <h2 className="mb-4 text-lg font-semibold text-dark-100">{t('referral.terms.title')}</h2>
+          {levelLines.length > 0 ? (
+            <ul className="space-y-2">
+              {levelLines.map((line) => (
+                <li key={line} className="flex items-start gap-2 text-sm text-dark-200">
+                  <span aria-hidden="true" className="mt-1 text-accent-400">
+                    •
+                  </span>
+                  <span>{line}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-dark-400">{t('referral.terms.noLevels')}</p>
+          )}
+          {terms.referee_bonus_description && (
+            <p className="mt-4 rounded-xl border border-dark-700/30 bg-dark-800/30 p-3 text-sm text-dark-200">
+              {t('referral.terms.newUserBonus')}: {terms.referee_bonus_description}
+            </p>
+          )}
+        </div>
+      );
+    }
+
     const showNewUserBonus = terms.first_topup_bonus_kopeks > 0;
     const showInviterBonus = terms.inviter_bonus_kopeks > 0;
     const cardCount = 2 + (showNewUserBonus ? 1 : 0) + (showInviterBonus ? 1 : 0);
@@ -271,10 +329,21 @@ export default function Referral() {
           value={formatPositive(info?.total_earnings_rubles || 0)}
           icon={<BanknotesIcon className="h-5 w-5" />}
           tone="success"
+          subValue={
+            info?.total_earnings_days
+              ? t('referral.stats.earnedDays', { count: info.total_earnings_days })
+              : undefined
+          }
         />
         <StatCard
-          label={t('referral.stats.commissionRate')}
-          value={`${info?.commission_percent || 0}%`}
+          label={
+            isLevelsScheme ? t('referral.stats.chainDepth') : t('referral.stats.commissionRate')
+          }
+          value={
+            isLevelsScheme
+              ? t('referral.stats.levelsValue', { count: terms?.max_level_depth || 1 })
+              : `${info?.commission_percent || 0}%`
+          }
           icon={<PercentIcon className="h-5 w-5" />}
           tone="accent"
         />
@@ -410,13 +479,13 @@ export default function Referral() {
                       t('referral.anonymousReferral')}
                   </div>
                   <div className="mt-0.5 text-xs text-dark-500">
-                    {t(`referral.reasons.${earning.reason}`, earning.reason)} •{' '}
-                    {new Date(earning.created_at).toLocaleDateString(i18n.language)}
+                    {t(`referral.reasons.${earning.reason}`, earning.reason)}
+                    {(earning.level ?? 1) > 1 &&
+                      ` • ${t('referral.levelBadge', { count: earning.level ?? 1 })}`}{' '}
+                    • {new Date(earning.created_at).toLocaleDateString(i18n.language)}
                   </div>
                 </div>
-                <div className="font-semibold text-success-400">
-                  {formatPositive(earning.amount_rubles)}
-                </div>
+                <div className="font-semibold text-success-400">{formatEarning(earning)}</div>
               </div>
             ))}
           </div>

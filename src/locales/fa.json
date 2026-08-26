@@ -847,14 +847,18 @@
       "totalReferrals": "کل معرفی‌ها",
       "activeReferrals": "فعال",
       "totalEarnings": "کل درآمد",
-      "commissionRate": "نرخ کمیسیون"
+      "commissionRate": "نرخ کمیسیون",
+      "earnedDays": "{{count}} روز اشتراک",
+      "chainDepth": "عمق شبکه",
+      "levelsValue": "تا {{count}} سطح"
     },
     "terms": {
       "title": "شرایط برنامه",
       "commission": "کمیسیون",
       "minTopup": "حداقل شارژ",
       "newUserBonus": "جایزه کاربر جدید",
-      "inviterBonus": "جایزه معرف"
+      "inviterBonus": "جایزه معرف",
+      "noLevels": "سطوح پاداش هنوز تنظیم نشده‌اند — پرداختی انجام نمی‌شود."
     },
     "yourReferrals": "معرفی‌های شما",
     "noReferrals": "هنوز معرفی ندارید. لینک را به اشتراک بگذارید!",
@@ -874,7 +878,12 @@
       "referral_registration": "ثبت‌نام کاربر معرفی‌شده",
       "referral_first_payment": "اولین پرداخت کاربر معرفی‌شده",
       "referral_subscription_renewal": "تمدید اشتراک کاربر معرفی‌شده",
-      "referral_bonus": "پاداش کاربر معرفی‌شده"
+      "referral_bonus": "پاداش کاربر معرفی‌شده",
+      "referral_first_topup": "اولین شارژ",
+      "referral_commission_topup": "کمیسیون شارژ",
+      "referral_registration_reward": "پاداش ثبت‌نام",
+      "referral_days_reward": "روزهای اشتراک",
+      "referral_days_bonus": "روزهای هدیه"
     },
     "disabled": "برنامه معرفی موقتاً غیرفعال است",
     "partner": {
@@ -976,7 +985,10 @@
         "rejected": "رد شده",
         "cancelled": "لغو شده"
       }
-    }
+    },
+    "levelBadge": "سطح {{count}}",
+    "days": "{{count}} روز",
+    "daysWithTariff": "{{count}} روز «{{tariff}}»"
   },
   "support": {
     "title": "پشتیبانی",

@@ -972,14 +972,18 @@
       "totalReferrals": "Total Referrals",
       "activeReferrals": "Active",
       "totalEarnings": "Total Earnings",
-      "commissionRate": "Commission Rate"
+      "commissionRate": "Commission Rate",
+      "earnedDays": "{{count}} subscription days",
+      "chainDepth": "Network depth",
+      "levelsValue": "up to {{count}} lvl"
     },
     "terms": {
       "title": "Program Terms",
       "commission": "Commission",
       "minTopup": "Min. Top-up",
       "newUserBonus": "New User Bonus",
-      "inviterBonus": "Inviter Bonus"
+      "inviterBonus": "Inviter Bonus",
+      "noLevels": "Reward levels are not configured yet — nothing is being paid out."
     },
     "yourReferrals": "Your Referrals",
     "noReferrals": "No referrals yet. Share your link to invite friends!",
@@ -999,7 +1003,12 @@
       "referral_registration": "Referral Registration",
       "referral_first_payment": "Referral First Payment",
       "referral_subscription_renewal": "Referral Subscription Renewal",
-      "referral_bonus": "Referral Bonus"
+      "referral_bonus": "Referral Bonus",
+      "referral_first_topup": "First top-up",
+      "referral_commission_topup": "Top-up commission",
+      "referral_registration_reward": "Sign-up reward",
+      "referral_days_reward": "Subscription days",
+      "referral_days_bonus": "Bonus days"
     },
     "disabled": "Referral program is currently disabled",
     "partner": {
@@ -1101,7 +1110,10 @@
         "rejected": "Rejected",
         "cancelled": "Cancelled"
       }
-    }
+    },
+    "levelBadge": "level {{count}}",
+    "days": "{{count}} days",
+    "daysWithTariff": "{{count}} days of \"{{tariff}}\""
   },
   "support": {
     "title": "Support",

@@ -991,14 +991,18 @@
       "totalReferrals": "Всего рефералов",
       "activeReferrals": "Активных",
       "totalEarnings": "Общий заработок",
-      "commissionRate": "Комиссия"
+      "commissionRate": "Комиссия",
+      "earnedDays": "{{count}} дн. подписки",
+      "chainDepth": "Глубина сети",
+      "levelsValue": "до {{count}} ур."
     },
     "terms": {
       "title": "Условия программы",
       "commission": "Комиссия",
       "minTopup": "Мин. пополнение",
       "newUserBonus": "Бонус новому пользователю",
-      "inviterBonus": "Бонус пригласившему"
+      "inviterBonus": "Бонус пригласившему",
+      "noLevels": "Уровни наград ещё не настроены — начисления не производятся."
     },
     "yourReferrals": "Ваши рефералы",
     "noReferrals": "Пока нет рефералов. Поделитесь ссылкой, чтобы пригласить друзей!",
@@ -1018,7 +1022,12 @@
       "referral_registration": "Регистрация реферала",
       "referral_first_payment": "Первая оплата реферала",
       "referral_subscription_renewal": "Продление подписки реферала",
-      "referral_bonus": "Бонус за реферала"
+      "referral_bonus": "Бонус за реферала",
+      "referral_first_topup": "Первое пополнение",
+      "referral_commission_topup": "Комиссия с пополнения",
+      "referral_registration_reward": "Награда за регистрацию",
+      "referral_days_reward": "Дни подписки",
+      "referral_days_bonus": "Бонусные дни"
     },
     "disabled": "Реферальная программа временно отключена",
     "partner": {
@@ -1120,7 +1129,10 @@
         "rejected": "Отклонен",
         "cancelled": "Отменен"
       }
-    }
+    },
+    "levelBadge": "уровень {{count}}",
+    "days": "{{count}} дн.",
+    "daysWithTariff": "{{count}} дн. «{{tariff}}»"
   },
   "support": {
     "title": "Поддержка",

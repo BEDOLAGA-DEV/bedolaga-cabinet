@@ -442,6 +442,12 @@ export interface ReferralInfo {
   active_referrals: number;
   total_earnings_kopeks: number;
   total_earnings_rubles: number;
+  /**
+   * Days rewards are recorded with amount_kopeks = 0 by design, so they never
+   * show up in the money totals. Without this field a partner on a days-based
+   * programme sees a flat zero while rewards keep arriving.
+   */
+  total_earnings_days?: number;
   commission_percent: number;
   available_balance_kopeks: number;
   available_balance_rubles: number;
@@ -459,6 +465,43 @@ export interface ReferralTerms {
   inviter_bonus_rubles: number;
   max_commission_payments: number;
   partner_section_visible?: boolean;
+  /**
+   * Under the `levels` scheme the flat fields above govern nothing: payouts come
+   * from the reward-level table. `level_descriptions` is generated server-side
+   * from the same config the payout engine reads, so the terms shown here cannot
+   * drift away from what is actually paid.
+   */
+  scheme?: 'legacy' | 'levels';
+  level_descriptions?: string[];
+  referee_bonus_description?: string | null;
+  max_level_depth?: number;
+}
+
+/** A reward level of the referral chain, as edited in the admin cabinet. */
+export interface ReferralRewardLevel {
+  level: number;
+  is_active: boolean;
+  /** Which bonuses are active on this level. */
+  reward_mode: 'money' | 'days' | 'both';
+  trigger: 'registration' | 'first_topup' | 'every_topup';
+  referrer_percent: number | null;
+  referrer_fixed_kopeks: number | null;
+  referrer_days: number;
+  referrer_tariff_id: number | null;
+  referrer_tariff_name?: string | null;
+  referee_fixed_kopeks: number | null;
+  referee_days: number;
+  referee_tariff_id: number | null;
+  referee_tariff_name?: string | null;
+  max_payments: number;
+}
+
+export interface ReferralRewardLevels {
+  scheme: 'legacy' | 'levels';
+  /** Pinned in .env: the switch would not apply and would lose on restart. */
+  scheme_locked_by_env: boolean;
+  max_level_depth: number;
+  levels: ReferralRewardLevel[];
 }
 
 // Ticket types

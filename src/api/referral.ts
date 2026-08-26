@@ -10,11 +10,22 @@ interface ReferralItem {
   has_paid: boolean;
 }
 
-interface ReferralEarning {
+export interface ReferralEarning {
   id: number;
   amount_kopeks: number;
   amount_rubles: number;
   reason: string;
+  /**
+   * A `days` reward carries amount_kopeks = 0 and days_granted > 0. Rendering it
+   * by the money amount alone prints "+0.00 ₽" for a real reward.
+   */
+  reward_type?: 'money' | 'days';
+  /** Chain level the reward was earned on. The only thing distinguishing
+   *  otherwise identical rows from different links of the chain. */
+  level?: number;
+  days_granted?: number;
+  tariff_id?: number | null;
+  tariff_name?: string | null;
   referral_username: string | null;
   referral_first_name: string | null;
   campaign_name: string | null;
@@ -24,6 +35,7 @@ interface ReferralEarning {
 interface ReferralEarningsList extends PaginatedResponse<ReferralEarning> {
   total_amount_kopeks: number;
   total_amount_rubles: number;
+  total_days_granted?: number;
 }
 
 export const referralApi = {

@@ -847,14 +847,18 @@
       "totalReferrals": "总推荐数",
       "activeReferrals": "活跃",
       "totalEarnings": "总收益",
-      "commissionRate": "佣金比例"
+      "commissionRate": "佣金比例",
+      "earnedDays": "{{count}} 天订阅",
+      "chainDepth": "网络深度",
+      "levelsValue": "最多 {{count}} 级"
     },
     "terms": {
       "title": "计划条款",
       "commission": "佣金",
       "minTopup": "最低充值",
       "newUserBonus": "新用户奖励",
-      "inviterBonus": "邀请人奖励"
+      "inviterBonus": "邀请人奖励",
+      "noLevels": "奖励等级尚未配置，暂不发放奖励。"
     },
     "yourReferrals": "您的推荐",
     "noReferrals": "暂无推荐。分享链接邀请好友！",
@@ -874,7 +878,12 @@
       "referral_registration": "推荐用户注册",
       "referral_first_payment": "推荐用户首次付款",
       "referral_subscription_renewal": "推荐用户续订",
-      "referral_bonus": "推荐奖金"
+      "referral_bonus": "推荐奖金",
+      "referral_first_topup": "首次充值",
+      "referral_commission_topup": "充值佣金",
+      "referral_registration_reward": "注册奖励",
+      "referral_days_reward": "订阅天数",
+      "referral_days_bonus": "赠送天数"
     },
     "disabled": "推荐计划暂时停用",
     "partner": {
@@ -976,7 +985,10 @@
         "rejected": "已拒绝",
         "cancelled": "已取消"
       }
-    }
+    },
+    "levelBadge": "第 {{count}} 级",
+    "days": "{{count}} 天",
+    "daysWithTariff": "“{{tariff}}” {{count}} 天"
   },
   "support": {
     "title": "支持",
