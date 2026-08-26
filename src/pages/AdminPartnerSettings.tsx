@@ -125,6 +125,22 @@ export default function AdminPartnerSettings() {
         </div>
       </div>
 
+      {/* Уровни наград живут в своей таблице, а не в настройках выше: их
+          настройка — отдельный экран с собственной моделью данных. */}
+      <button
+        type="button"
+        onClick={() => navigate('/admin/partners/referral-levels')}
+        className="card mb-6 flex w-full items-center justify-between text-left transition-colors hover:border-accent-500/40"
+      >
+        <div>
+          <div className="font-medium text-dark-100">{t('admin.referralLevels.title')}</div>
+          <div className="text-sm text-dark-500">{t('admin.referralLevels.subtitle')}</div>
+        </div>
+        <span aria-hidden="true" className="text-dark-500">
+          →
+        </span>
+      </button>
+
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Referral Program Section */}
         <div className="card">

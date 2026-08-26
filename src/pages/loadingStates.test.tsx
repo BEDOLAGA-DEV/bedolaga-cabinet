@@ -94,6 +94,7 @@ const PAGES: PageCase[] = [
   { name: 'Contests', load: () => import('./Contests') },
   { name: 'Polls', load: () => import('./Polls') },
   { name: 'AdminPartnerSettings', load: () => import('./AdminPartnerSettings') },
+  { name: 'AdminReferralLevels', load: () => import('./AdminReferralLevels') },
   { name: 'AdminTicketSettings', load: () => import('./AdminTicketSettings') },
   {
     name: 'AdminBroadcastDetail',

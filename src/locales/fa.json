@@ -4306,6 +4306,43 @@
       "moveUp": "انتقال به بالا",
       "moveDown": "انتقال به پایین",
       "delete": "حذف"
+    },
+    "referralLevels": {
+      "title": "سطوح پاداش معرفی",
+      "subtitle": "پول و/یا روزهای اشتراک در هر سطح زنجیره",
+      "loadError": "بارگذاری سطوح پاداش ممکن نشد",
+      "schemeLevels": "طرح چندسطحی فعال است",
+      "schemeLegacy": "طرح کلاسیک",
+      "schemeLegacyHint": "پرداخت‌ها بر اساس تنظیمات برنامه همکاری است؛ سطوح اعمال نمی‌شوند",
+      "depth": "عمق زنجیره: تا {{count}} سطح",
+      "switchToLevels": "فعال‌سازی چندسطحی",
+      "switchToLegacy": "بازگشت به کلاسیک",
+      "envLocked": "مقدار REFERRAL_REWARD_SCHEME در .env ثابت شده است: تغییر اعمال نمی‌شود و پس از راه‌اندازی مجدد فایل غالب می‌شود.",
+      "noActiveLevels": "طرح فعال است اما هیچ سطحی فعال نیست — پاداشی پرداخت نمی‌شود.",
+      "levelTitle": "سطح {{count}}",
+      "enable": "فعال‌سازی",
+      "disable": "غیرفعال‌سازی",
+      "activeBonuses": "پاداش‌های فعال",
+      "trigger": "شرط پرداخت",
+      "toReferrer": "به معرف",
+      "toReferee": "به کاربر دعوت‌شده",
+      "percent": "درصد از مبلغ",
+      "fixedAmount": "مبلغ ثابت",
+      "days": "روزهای اشتراک",
+      "tariff": "تعرفه",
+      "mainSubscription": "اشتراک اصلی",
+      "maxPayments": "سقف کمیسیون‌های پرداختی (۰ یعنی بدون سقف)",
+      "addLevel": "افزودن سطح {{count}}",
+      "modes": {
+        "money": "فقط پول",
+        "days": "فقط روز",
+        "both": "پول و روز"
+      },
+      "triggers": {
+        "registration": "هنگام ثبت‌نام",
+        "first_topup": "هنگام اولین شارژ",
+        "every_topup": "هنگام هر شارژ"
+      }
     }
   },
   "adminUpdates": {

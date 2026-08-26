@@ -112,6 +112,7 @@ const AdminCampaignStats = lazyWithRetry(() => import('./pages/AdminCampaignStat
 const AdminCampaignEdit = lazyWithRetry(() => import('./pages/AdminCampaignEdit'));
 const AdminPartners = lazyWithRetry(() => import('./pages/AdminPartners'));
 const AdminPartnerSettings = lazyWithRetry(() => import('./pages/AdminPartnerSettings'));
+const AdminReferralLevels = lazyWithRetry(() => import('./pages/AdminReferralLevels'));
 const AdminPartnerDetail = lazyWithRetry(() => import('./pages/AdminPartnerDetail'));
 const AdminApplicationReview = lazyWithRetry(() => import('./pages/AdminApplicationReview'));
 const AdminPartnerCommission = lazyWithRetry(() => import('./pages/AdminPartnerCommission'));
@@ -984,6 +985,16 @@ function App() {
             <PermissionRoute permission="partners:read">
               <LazyPage>
                 <AdminPartnerSettings />
+              </LazyPage>
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="/admin/partners/referral-levels"
+          element={
+            <PermissionRoute permission="partners:read">
+              <LazyPage>
+                <AdminReferralLevels />
               </LazyPage>
             </PermissionRoute>
           }

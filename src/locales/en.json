@@ -4589,6 +4589,43 @@
       "moveUp": "Move up",
       "moveDown": "Move down",
       "delete": "Delete"
+    },
+    "referralLevels": {
+      "title": "Referral reward levels",
+      "subtitle": "Money and/or subscription days at each level of the chain",
+      "loadError": "Could not load reward levels",
+      "schemeLevels": "Multi-level scheme is on",
+      "schemeLegacy": "Classic scheme",
+      "schemeLegacyHint": "Payouts follow the partner program settings; levels are not applied",
+      "depth": "Chain depth: up to {{count}} levels",
+      "switchToLevels": "Enable multi-level",
+      "switchToLegacy": "Back to classic",
+      "envLocked": "REFERRAL_REWARD_SCHEME is pinned in .env: the switch will not apply and the file wins on restart.",
+      "noActiveLevels": "The scheme is on but no level is active — nothing is being paid out.",
+      "levelTitle": "Level {{count}}",
+      "enable": "Enable",
+      "disable": "Disable",
+      "activeBonuses": "Active bonuses",
+      "trigger": "Trigger",
+      "toReferrer": "To the referrer",
+      "toReferee": "To the invited user",
+      "percent": "Percent of the amount",
+      "fixedAmount": "Fixed amount",
+      "days": "Subscription days",
+      "tariff": "Tariff",
+      "mainSubscription": "main subscription",
+      "maxPayments": "Paid commission limit (0 — unlimited)",
+      "addLevel": "Add level {{count}}",
+      "modes": {
+        "money": "Money only",
+        "days": "Days only",
+        "both": "Money and days"
+      },
+      "triggers": {
+        "registration": "On sign-up",
+        "first_topup": "On first top-up",
+        "every_topup": "On every top-up"
+      }
     }
   },
   "adminUpdates": {

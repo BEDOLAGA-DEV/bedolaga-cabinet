@@ -4305,6 +4305,43 @@
       "moveUp": "上移",
       "moveDown": "下移",
       "delete": "删除"
+    },
+    "referralLevels": {
+      "title": "推荐奖励等级",
+      "subtitle": "链条每一级可发放金额和/或订阅天数",
+      "loadError": "无法加载奖励等级",
+      "schemeLevels": "多级方案已启用",
+      "schemeLegacy": "经典方案",
+      "schemeLegacyHint": "按合作伙伴计划设置发放，等级不生效",
+      "depth": "链条深度：最多 {{count}} 级",
+      "switchToLevels": "启用多级",
+      "switchToLegacy": "返回经典",
+      "envLocked": "REFERRAL_REWARD_SCHEME 在 .env 中固定：切换不会生效，重启后以文件为准。",
+      "noActiveLevels": "方案已启用但没有激活的等级，暂不发放奖励。",
+      "levelTitle": "第 {{count}} 级",
+      "enable": "启用",
+      "disable": "停用",
+      "activeBonuses": "激活的奖励",
+      "trigger": "触发条件",
+      "toReferrer": "给推荐人",
+      "toReferee": "给被邀请人",
+      "percent": "金额百分比",
+      "fixedAmount": "固定金额",
+      "days": "订阅天数",
+      "tariff": "套餐",
+      "mainSubscription": "主订阅",
+      "maxPayments": "已付佣金上限（0 为不限）",
+      "addLevel": "添加第 {{count}} 级",
+      "modes": {
+        "money": "仅金额",
+        "days": "仅天数",
+        "both": "金额和天数"
+      },
+      "triggers": {
+        "registration": "注册时",
+        "first_topup": "首次充值时",
+        "every_topup": "每次充值时"
+      }
     }
   },
   "adminUpdates": {
