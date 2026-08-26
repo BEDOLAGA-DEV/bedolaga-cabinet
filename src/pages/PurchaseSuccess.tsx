@@ -764,12 +764,13 @@ export default function PurchaseSuccess() {
   const isPendingActivation = purchaseStatus?.status === 'pending_activation';
   const isFailed = purchaseStatus?.status === 'failed' || purchaseStatus?.status === 'expired';
 
-  // Deferred gift the buyer just paid for → show the transferable claim link to
-  // forward (it stays PAID until the recipient claims it).
-  const isBuyerGiftLink = purchaseStatus?.status === 'paid' && !!purchaseStatus?.is_gift;
+  // Every claimable gift exposes transferable artifacts to the buyer. The
+  // activate hint identifies the recipient flow and must keep the activation UI.
+  const isBuyerGiftLink =
+    !!purchaseStatus?.is_gift && !!purchaseStatus?.is_claimable && !isActivateHint;
 
-  // Gift pending activation → buyer sees "gift sent" message, not the activate button.
-  // Recipient arrives via email link with ?activate=1 and sees the activate button instead.
+  // A non-claimable pending gift keeps the informational buyer state. The recipient
+  // arrives via email with ?activate=1 and sees the activation UI instead.
   const isGiftPendingActivation = isPendingActivation && purchaseStatus?.is_gift && !isActivateHint;
 
   // Email self-purchase delivered → show cabinet credentials

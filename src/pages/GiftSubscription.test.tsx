@@ -592,6 +592,34 @@ describe('SentGiftCard and MyGiftsTabContent activation behavior', () => {
     expect(screen.getByText('GIFT_CANONICAL_CODE_PENDING')).toBeTruthy();
     expect(screen.getByRole('button', { name: /поделиться/i })).toBeTruthy();
   });
+
+  it('не показывает claim-коды и отправку для pending, failed и expired подарков', async () => {
+    getConfigMock.mockResolvedValue(mockDisabledConfig);
+    const sentGifts: SentGift[] = ['pending', 'failed', 'expired'].map((status) => ({
+      token: `gift_${status}_legacy_token`,
+      tariff_name: `${status} VPN`,
+      period_days: 30,
+      device_limit: 1,
+      status,
+      gift_recipient_value: null,
+      gift_message: null,
+      activated_by_username: null,
+      created_at: '2026-08-01T10:00:00Z',
+      gift_code: null,
+      bot_claim_url: null,
+      cabinet_claim_url: null,
+    }));
+    getSentGiftsMock.mockResolvedValue(sentGifts);
+    getReceivedGiftsMock.mockResolvedValue([]);
+
+    renderGiftSubscription('/gift?tab=myGifts');
+
+    expect(await screen.findByText('pending VPN')).toBeTruthy();
+    expect(screen.getByText('failed VPN')).toBeTruthy();
+    expect(screen.getByText('expired VPN')).toBeTruthy();
+    expect(screen.queryByRole('button', { name: /поделиться/i })).toBeNull();
+    expect(screen.queryByText(/GIFT-/)).toBeNull();
+  });
 });
 
 describe('Navigation item /gift availability', () => {

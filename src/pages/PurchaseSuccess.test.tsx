@@ -56,7 +56,7 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 
-function renderPurchaseSuccess(token = 'test_token_123') {
+function renderPurchaseSuccess(token = 'test_token_123', search = '') {
   const client = new QueryClient({
     defaultOptions: {
       queries: {
@@ -67,7 +67,7 @@ function renderPurchaseSuccess(token = 'test_token_123') {
 
   return render(
     <QueryClientProvider client={client}>
-      <MemoryRouter initialEntries={[`/buy/success/${token}`]}>
+      <MemoryRouter initialEntries={[`/buy/success/${token}${search}`]}>
         <Routes>
           <Route path="/buy/success/:token" element={<PurchaseSuccess />} />
         </Routes>
@@ -205,5 +205,102 @@ describe('PurchaseSuccess gift flow canonical vs legacy link selection', () => {
     const copiedText = vi.mocked(copyToClipboard).mock.calls[0][0];
     expect(copiedText).toContain(CANONICAL_CABINET_URL);
     expect(copiedText).not.toContain('Telegram:');
+  });
+
+  it('показывает canonical-ссылки покупателю для claimable pending_activation', async () => {
+    const status: PurchaseStatus = {
+      status: 'pending_activation',
+      is_gift: true,
+      is_claimable: true,
+      tariff_name: 'Pending Gift',
+      period_days: 30,
+      contact_type: 'email',
+      recipient_contact_value: 're***@example.com',
+      subscription_url: null,
+      subscription_crypto_link: null,
+      cabinet_email: null,
+      cabinet_password: null,
+      auto_login_token: null,
+      contact_value: null,
+      gift_message: null,
+      recipient_in_bot: null,
+      bot_link: null,
+      claim_url: LEGACY_CLAIM_URL,
+      bot_claim_link: LEGACY_BOT_URL,
+      cabinet_claim_url: CANONICAL_CABINET_URL,
+      bot_claim_url: CANONICAL_BOT_URL,
+    };
+
+    getPurchaseStatusMock.mockResolvedValue(status);
+    renderPurchaseSuccess();
+
+    expect(await screen.findByText(CANONICAL_CABINET_URL)).toBeTruthy();
+    expect(screen.getByText(CANONICAL_BOT_URL)).toBeTruthy();
+    expect(screen.queryByText(LEGACY_CLAIM_URL)).toBeNull();
+    expect(screen.queryByText(LEGACY_BOT_URL)).toBeNull();
+    expect(screen.queryByRole('button', { name: 'landing.activateNow' })).toBeNull();
+  });
+
+  it('сохраняет legacy fallback покупателю для claimable pending_activation', async () => {
+    const status: PurchaseStatus = {
+      status: 'pending_activation',
+      is_gift: true,
+      is_claimable: true,
+      tariff_name: 'Legacy Pending Gift',
+      period_days: 14,
+      contact_type: null,
+      recipient_contact_value: null,
+      subscription_url: null,
+      subscription_crypto_link: null,
+      cabinet_email: null,
+      cabinet_password: null,
+      auto_login_token: null,
+      contact_value: null,
+      gift_message: null,
+      recipient_in_bot: null,
+      bot_link: null,
+      claim_url: LEGACY_CLAIM_URL,
+      bot_claim_link: LEGACY_BOT_URL,
+      cabinet_claim_url: null,
+      bot_claim_url: null,
+    };
+
+    getPurchaseStatusMock.mockResolvedValue(status);
+    renderPurchaseSuccess();
+
+    expect(await screen.findByText(LEGACY_CLAIM_URL)).toBeTruthy();
+    expect(screen.getByText(LEGACY_BOT_URL)).toBeTruthy();
+  });
+
+  it('сохраняет recipient activation flow при параметре activate=1', async () => {
+    const status: PurchaseStatus = {
+      status: 'pending_activation',
+      is_gift: true,
+      is_claimable: true,
+      tariff_name: 'Recipient Gift',
+      period_days: 30,
+      contact_type: 'email',
+      recipient_contact_value: 're***@example.com',
+      subscription_url: null,
+      subscription_crypto_link: null,
+      cabinet_email: null,
+      cabinet_password: null,
+      auto_login_token: null,
+      contact_value: null,
+      gift_message: null,
+      recipient_in_bot: null,
+      bot_link: null,
+      claim_url: LEGACY_CLAIM_URL,
+      bot_claim_link: LEGACY_BOT_URL,
+      cabinet_claim_url: CANONICAL_CABINET_URL,
+      bot_claim_url: CANONICAL_BOT_URL,
+    };
+
+    getPurchaseStatusMock.mockResolvedValue(status);
+    renderPurchaseSuccess('test_token_123', '?activate=1');
+
+    expect(await screen.findByRole('button', { name: 'landing.activateNow' })).toBeTruthy();
+    expect(screen.queryByText(CANONICAL_CABINET_URL)).toBeNull();
+    expect(screen.queryByText(CANONICAL_BOT_URL)).toBeNull();
   });
 });

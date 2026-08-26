@@ -992,7 +992,7 @@ function SentGiftCard({ gift }: { gift: SentGift }) {
   const isActivated = isGiftActivated(gift);
   const isAvailable = !isActivated && isGiftAvailable(gift.status);
 
-  const artifacts = !isActivated
+  const artifacts = isAvailable
     ? buildGiftClaimArtifacts(gift, {
         botUsername,
         origin: window.location.origin,
@@ -1058,8 +1058,8 @@ function SentGiftCard({ gift }: { gift: SentGift }) {
         {gift.device_limit} {t('gift.devicesShort', { count: gift.device_limit })}
       </p>
 
-      {/* Gift code + actions (only when not activated) */}
-      {!isActivated && giftCode && (
+      {/* Gift code + actions (only while the gift is claimable) */}
+      {isAvailable && giftCode && (
         <>
           {/* Gift code display */}
           <div className="mb-3 rounded-xl bg-dark-800/80 px-4 py-4 text-center">
