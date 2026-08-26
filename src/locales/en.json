@@ -4634,7 +4634,8 @@
       "beyondDepth": "The chain is not walked beyond {{count}} levels — this one never pays",
       "registrationNeedsTariff": "At sign-up the invited user has no subscription yet: without a tariff the days cannot be granted",
       "invalidValue": "Invalid value: {{field}}",
-      "importLegacy": "Import current settings into level 1"
+      "importLegacy": "Import current settings into level 1",
+      "noTariffHint": "Without a tariff the days go to the recipient’s paid subscription; with several, the one ending latest."
     }
   },
   "adminUpdates": {

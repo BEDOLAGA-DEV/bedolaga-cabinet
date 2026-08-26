@@ -278,6 +278,13 @@ export default function AdminReferralLevels() {
                     setSaveError(t('admin.referralLevels.invalidValue', { field: name }))
                   }
                 />
+                {level.reward_mode !== 'money' &&
+                  level.referrer_days > 0 &&
+                  !level.referrer_tariff_id && (
+                    <p className="mt-1 text-xs text-dark-500">
+                      {t('admin.referralLevels.noTariffHint')}
+                    </p>
+                  )}
                 <TariffSelect
                   label={t('admin.referralLevels.tariff')}
                   value={level.referrer_tariff_id}

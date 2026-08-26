@@ -4350,7 +4350,8 @@
       "beyondDepth": "链条不会超过 {{count}} 级——该等级不会发放奖励",
       "registrationNeedsTariff": "注册时被邀请人还没有订阅：未选择套餐则天数无法发放",
       "invalidValue": "值无效：{{field}}",
-      "importLegacy": "将当前设置导入第 1 级"
+      "importLegacy": "将当前设置导入第 1 级",
+      "noTariffHint": "未选择套餐时，天数计入收件人的付费订阅；有多个时选到期最晚的那个。"
     }
   },
   "adminUpdates": {
