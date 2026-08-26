@@ -54,17 +54,18 @@ beforeEach(async () => {
   for (const name of ['localStorage', 'sessionStorage']) {
     originals.set(name, Object.getOwnPropertyDescriptor(globalThis, name));
   }
-  const { resetStorageProbe } = await import('../utils/safeStorage');
-  resetStorageProbe();
+  const { resetSafeStorage } = await import('../utils/safeStorage');
+  resetSafeStorage();
 });
 
 afterEach(async () => {
   cleanup();
   for (const [name, descriptor] of originals) {
     if (descriptor) Object.defineProperty(globalThis, name, descriptor);
+    else delete (globalThis as Record<string, unknown>)[name];
   }
-  const { resetStorageProbe } = await import('../utils/safeStorage');
-  resetStorageProbe();
+  const { resetSafeStorage } = await import('../utils/safeStorage');
+  resetSafeStorage();
 });
 
 describe('useTheme при заблокированном localStorage', () => {
