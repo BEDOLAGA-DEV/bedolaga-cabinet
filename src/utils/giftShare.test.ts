@@ -191,6 +191,19 @@ describe('buildGiftClaimArtifacts', () => {
     expect(buildGiftClaimArtifacts(legacy, { ...context, botUsername: '' }).botLink).toBeNull();
   });
 
+  it('не выдумывает ссылку на бота, когда username неизвестен, даже если gift_code присутствует', () => {
+    const sourceWithCode: GiftClaimSource = {
+      token: TOKEN.slice(0, 12),
+      gift_code: CANONICAL_CODE,
+      bot_claim_url: null,
+      cabinet_claim_url: null,
+    };
+
+    expect(
+      buildGiftClaimArtifacts(sourceWithCode, { ...context, botUsername: '' }).botLink,
+    ).toBeNull();
+  });
+
   it('корректно кодирует параметры URL для fallback ссылок', () => {
     const specialTokenSource: GiftClaimSource = {
       token: 'abc+def/ghi=jkl',
@@ -207,7 +220,7 @@ describe('buildGiftClaimArtifacts', () => {
     );
   });
 
-  it('корректно обрабатывает частичное наличие канонических полей', () => {
+  it('восстанавливает Telegram-ссылку из gift_code, когда bot_claim_url отсутствует (null)', () => {
     const partial: GiftClaimSource = {
       token: TOKEN.slice(0, 12),
       gift_code: CANONICAL_CODE,
@@ -218,9 +231,42 @@ describe('buildGiftClaimArtifacts', () => {
     const artifacts = buildGiftClaimArtifacts(partial, context);
 
     expect(artifacts.code).toBe(CANONICAL_CODE);
-    expect(artifacts.botLink).toBe(`https://t.me/ExampleBot?start=GIFT_${TOKEN.slice(0, 12)}`);
+    expect(artifacts.botLink).toBe(`https://t.me/ExampleBot?start=${CANONICAL_CODE}`);
     expect(artifacts.cabinetLink).toBe(
       `https://cab.example/gift?tab=activate&code=${TOKEN.slice(0, 12)}`,
     );
+  });
+
+  it('корректно обрабатывает canonical code с символами "-" и "_"', () => {
+    const customCode = 'GIFT_code-with_hyphens-and_underscores-1234567890';
+    const source: GiftClaimSource = {
+      token: TOKEN.slice(0, 12),
+      gift_code: customCode,
+      bot_claim_url: null,
+      cabinet_claim_url: null,
+    };
+
+    const artifacts = buildGiftClaimArtifacts(source, context);
+
+    expect(artifacts.code).toBe(customCode);
+    expect(artifacts.botLink).toBe(`https://t.me/ExampleBot?start=${customCode}`);
+  });
+
+  it('не преобразует canonical code в short token и не добавляет лишний префикс GIFT_', () => {
+    const fullCanonical = 'GIFT_ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890abcdefghijklmnopqrstuv';
+    const source: GiftClaimSource = {
+      token: 'legacy_short_token_123',
+      gift_code: fullCanonical,
+      bot_claim_url: null,
+    };
+
+    const artifacts = buildGiftClaimArtifacts(source, context);
+
+    expect(artifacts.code).toBe(fullCanonical);
+    expect(artifacts.botLink).toBe(`https://t.me/ExampleBot?start=${fullCanonical}`);
+    expect(artifacts.botLink).not.toContain('legacy_short_token');
+    expect(artifacts.botLink).not.toContain('GIFT_GIFT_');
+    const startParam = artifacts.botLink?.split('?start=')[1];
+    expect(startParam).toBe(fullCanonical);
   });
 });

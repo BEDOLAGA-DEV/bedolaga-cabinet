@@ -32,11 +32,17 @@ export function buildGiftClaimArtifacts(
 ): GiftClaimArtifacts {
   const shortCode = source.token.slice(0, 12);
 
+  const botLink =
+    source.bot_claim_url ??
+    (context.botUsername
+      ? source.gift_code
+        ? `https://t.me/${context.botUsername}?start=${source.gift_code}`
+        : `https://t.me/${context.botUsername}?start=GIFT_${shortCode}`
+      : null);
+
   return {
     code: source.gift_code ?? `GIFT-${shortCode}`,
-    botLink:
-      source.bot_claim_url ??
-      (context.botUsername ? `https://t.me/${context.botUsername}?start=GIFT_${shortCode}` : null),
+    botLink,
     cabinetLink:
       source.cabinet_claim_url ??
       `${context.origin}/gift?tab=activate&code=${encodeURIComponent(shortCode)}`,
