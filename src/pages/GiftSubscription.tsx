@@ -26,6 +26,7 @@ import type {
 
 import { cn } from '../lib/utils';
 import { copyToClipboard } from '../utils/clipboard';
+import { buildGiftClaimArtifacts } from '../utils/giftShare';
 import { getApiErrorMessage } from '../utils/api-error';
 import { formatPrice } from '../utils/format';
 import { useCurrency } from '../hooks/useCurrency';
@@ -996,8 +997,11 @@ function SentGiftCard({ gift }: { gift: SentGift }) {
   const botUsername =
     widgetConfig?.bot_username || import.meta.env.VITE_TELEGRAM_BOT_USERNAME || '';
 
-  const shortCode = gift.token.slice(0, 12);
-  const giftCode = `GIFT-${shortCode}`;
+  const artifacts = buildGiftClaimArtifacts(gift, {
+    botUsername,
+    origin: window.location.origin,
+  });
+  const giftCode = artifacts.code;
   const isActivated = isGiftActivated(gift);
   const isAvailable = !isActivated && isGiftAvailable(gift.status);
 
@@ -1011,17 +1015,15 @@ function SentGiftCard({ gift }: { gift: SentGift }) {
     // Literal "GIFT_" prefix: Telegram forwards the start param to the bot
     // verbatim (no URL-decoding), so the previously-encoded "%5F" never matched
     // the bot's `start_parameter.startswith('GIFT_')` handler.
-    const botLink = botUsername ? `https://t.me/${botUsername}?start=GIFT_${shortCode}` : null;
-    const cabinetLink = `${window.location.origin}/gift?tab=activate&code=${encodeURIComponent(shortCode)}`;
     return [
       t('gift.shareText'),
       '',
-      botLink ? `${t('gift.shareModalActivateVia')} ${botLink}` : null,
-      `${t('gift.shareModalActivateViaCabinet')} ${cabinetLink}`,
+      artifacts.botLink ? `${t('gift.shareModalActivateVia')} ${artifacts.botLink}` : null,
+      `${t('gift.shareModalActivateViaCabinet')} ${artifacts.cabinetLink}`,
     ]
       .filter(Boolean)
       .join('\n');
-  }, [shortCode, botUsername, t]);
+  }, [artifacts.botLink, artifacts.cabinetLink, t]);
 
   const handleShare = useCallback(async () => {
     const message = buildShareMessage();
@@ -1064,7 +1066,7 @@ function SentGiftCard({ gift }: { gift: SentGift }) {
         <>
           {/* Gift code display */}
           <div className="mb-3 rounded-xl bg-dark-800/80 px-4 py-4 text-center">
-            <p className="font-mono text-base font-bold tracking-[0.15em] text-accent-400">
+            <p className="break-all font-mono text-sm font-bold tracking-wider text-accent-400">
               {giftCode}
             </p>
           </div>
