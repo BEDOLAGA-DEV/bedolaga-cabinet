@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { EnabledThemes, DEFAULT_ENABLED_THEMES } from '../types/theme';
+import { type EnabledThemes, DEFAULT_ENABLED_THEMES } from '../types/theme';
 import { themeColorsApi } from '../api/themeColors';
 import { STORAGE_KEYS } from '../config/constants';
+import { safeLocal } from '../utils/safeStorage';
 import { getTelegramColorScheme } from './useTelegramSDK';
 
 type Theme = 'dark' | 'light';
@@ -13,35 +14,20 @@ const ENABLED_THEMES_KEY = STORAGE_KEYS.ENABLED_THEMES;
 async function fetchEnabledThemes(): Promise<EnabledThemes> {
   try {
     const data = await themeColorsApi.getEnabledThemes();
-    // Cache in localStorage for faster subsequent loads
-    localStorage.setItem(ENABLED_THEMES_KEY, JSON.stringify(data));
+    // Cache for faster subsequent loads
+    safeLocal.setJson(ENABLED_THEMES_KEY, data);
     return data;
   } catch {
     // Ignore errors, use cached or default
   }
-  // Try to get from cache
-  const cached = localStorage.getItem(ENABLED_THEMES_KEY);
-  if (cached) {
-    try {
-      return JSON.parse(cached);
-    } catch {
-      // Ignore parse errors
-    }
-  }
-  return DEFAULT_ENABLED_THEMES;
+  return getCachedEnabledThemes();
 }
 
-// Get cached enabled themes synchronously
+// Get cached enabled themes synchronously.
+// Runs inside a useState initialiser, i.e. during render at the top of the tree:
+// a bare localStorage read here white-screens the app when storage is blocked.
 function getCachedEnabledThemes(): EnabledThemes {
-  const cached = localStorage.getItem(ENABLED_THEMES_KEY);
-  if (cached) {
-    try {
-      return JSON.parse(cached);
-    } catch {
-      // Ignore parse errors
-    }
-  }
-  return DEFAULT_ENABLED_THEMES;
+  return safeLocal.getJson<EnabledThemes>(ENABLED_THEMES_KEY, DEFAULT_ENABLED_THEMES);
 }
 
 // Custom events for same-tab updates
@@ -50,7 +36,7 @@ const THEME_CHANGED_EVENT = 'themeChanged';
 
 // Update cache (called from admin settings)
 export function updateEnabledThemesCache(themes: EnabledThemes) {
-  localStorage.setItem(ENABLED_THEMES_KEY, JSON.stringify(themes));
+  safeLocal.setJson(ENABLED_THEMES_KEY, themes);
   // Dispatch custom event for same-tab updates
   window.dispatchEvent(new CustomEvent(ENABLED_THEMES_CHANGED_EVENT, { detail: themes }));
 }
@@ -64,7 +50,7 @@ export function useTheme() {
 
     // Check localStorage first
     if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem(THEME_KEY) as Theme | null;
+      const stored = safeLocal.getItem(THEME_KEY) as Theme | null;
       if (stored === 'light' && enabled.light) {
         return 'light';
       }
@@ -173,7 +159,7 @@ export function useTheme() {
       root.classList.add('dark');
     }
 
-    localStorage.setItem(THEME_KEY, theme);
+    safeLocal.setItem(THEME_KEY, theme);
     // Notify other useTheme() instances in the same tab
     window.dispatchEvent(new CustomEvent(THEME_CHANGED_EVENT, { detail: theme }));
   }, [theme, enabledThemes]);
@@ -194,7 +180,7 @@ export function useTheme() {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: light)');
 
     const handleChange = (e: MediaQueryListEvent) => {
-      const stored = localStorage.getItem(THEME_KEY);
+      const stored = safeLocal.getItem(THEME_KEY);
       // Only auto-switch if user hasn't set a preference and theme is enabled
       if (!stored) {
         const newTheme = e.matches ? 'light' : 'dark';
