@@ -10,7 +10,7 @@ import { Card } from '@/components/data-display/Card';
 import { Button } from '@/components/primitives/Button';
 import { staggerContainer, staggerItem } from '@/components/motion/transitions';
 import ProviderIcon from '../components/ProviderIcon';
-import { LINK_OAUTH_STATE_KEY, LINK_OAUTH_PROVIDER_KEY, getErrorDetail } from '../utils/oauth';
+import { getErrorDetail, saveLinkOAuthState } from '../utils/oauth';
 import { getApiErrorMessage } from '../utils/api-error';
 import { getTelegramInitData } from '../hooks/useTelegramSDK';
 import { usePlatform, useIsTelegram } from '@/platform/hooks/usePlatform';
@@ -535,8 +535,9 @@ export default function ConnectedAccounts() {
       } else {
         // Regular browser: navigate within the same tab.
         // Save state in sessionStorage for the callback page to verify.
-        sessionStorage.setItem(LINK_OAUTH_STATE_KEY, state);
-        sessionStorage.setItem(LINK_OAUTH_PROVIDER_KEY, provider);
+        if (!saveLinkOAuthState(state, provider)) {
+          throw new Error('OAuth state is not persistable');
+        }
         window.location.href = authorize_url;
       }
     } catch (err: unknown) {

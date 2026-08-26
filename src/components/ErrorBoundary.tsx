@@ -1,4 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
+import { safeSession } from '../utils/safeStorage';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -39,11 +40,12 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     // Auto-reload on chunk load failures (stale deploy)
     if (isChunkLoadError(error)) {
       const reloadKey = 'chunk_reload_ts';
-      const lastReload = Number(sessionStorage.getItem(reloadKey) || '0');
+      const lastReload = Number(safeSession.getItem(reloadKey) || '0');
       const now = Date.now();
       // Prevent reload loop — only auto-reload once per 30 seconds
-      if (now - lastReload > 30_000) {
-        sessionStorage.setItem(reloadKey, String(now));
+      // См. App.tsx lazyWithRetry: без переживающей reload метки перезагрузка
+      // зациклится, поэтому перезагружаемся только если метка реально легла.
+      if (now - lastReload > 30_000 && safeSession.setItem(reloadKey, String(now))) {
         window.location.reload();
         return;
       }

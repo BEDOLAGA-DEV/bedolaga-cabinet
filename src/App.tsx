@@ -1,3 +1,4 @@
+import { safeSession } from './utils/safeStorage';
 import { lazy, Suspense, type ComponentType } from 'react';
 import { Routes, Route, Navigate, useLocation, useParams } from 'react-router';
 import { useAuthStore } from './store/auth';
@@ -10,9 +11,12 @@ function lazyWithRetry<T extends ComponentType<unknown>>(factory: () => Promise<
   return lazy(() =>
     factory().catch(() => {
       const key = 'chunk_reload_ts';
-      const last = Number(sessionStorage.getItem(key) || '0');
-      if (Date.now() - last > 30_000) {
-        sessionStorage.setItem(key, String(Date.now()));
+      const last = Number(safeSession.getItem(key) || '0');
+      // Метка обязана пережить сам reload — в этом её единственный смысл. Если
+      // сохранить её негде, перезагрузка станет бесконечной: после reload метки
+      // не окажется, и условие снова выполнится. Лучше отдать ошибку в
+      // ErrorBoundary, чем крутить страницу по кругу.
+      if (Date.now() - last > 30_000 && safeSession.setItem(key, String(Date.now()))) {
         window.location.reload();
       }
       // Re-throw so ErrorBoundary catches it if reload guard prevents loop
