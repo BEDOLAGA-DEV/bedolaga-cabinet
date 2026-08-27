@@ -983,7 +983,9 @@
       "minTopup": "Min. Top-up",
       "newUserBonus": "New User Bonus",
       "inviterBonus": "Inviter Bonus",
-      "noLevels": "Reward levels are not configured yet — nothing is being paid out."
+      "noLevels": "Reward levels are not configured yet — nothing is being paid out.",
+      "tierNext": "{{count}} more to reach tier {{level}}",
+      "tierNone": "No tier reached yet — rewards start at the first threshold."
     },
     "yourReferrals": "Your Referrals",
     "noReferrals": "No referrals yet. Share your link to invite friends!",
@@ -4643,7 +4645,23 @@
       "depthRange": "Depth must be between 1 and {{max}}",
       "requiredReferrals": "Referrals to unlock the level (0 — from the start)",
       "countingActive": "Counting: referrals who topped up",
-      "countingAll": "Counting: all invited users"
+      "countingAll": "Counting: all invited users",
+      "modeChain": "Mode: chain",
+      "modeTiers": "Mode: tiers",
+      "modeChainHint": "The level number is chain depth. Level 1 pays the direct referrer, level 2 pays whoever invited them. Several levels pay for one top-up.",
+      "modeTiersHint": "The level number is a rank earned by referral count. Only the direct referrer is paid, and exactly one rank applies — the highest reached.",
+      "switchToTiers": "Switch to tiers",
+      "switchToChain": "Switch to chain",
+      "modeEnvLocked": "REFERRAL_LEVELS_MODE is pinned in .env: the switch would not apply and would revert on restart.",
+      "tierTitle": "Tier {{count}}",
+      "addTier": "Add tier {{count}}",
+      "tierThreshold": "Tier applies from (referrals); 0 is the starting tier",
+      "depthNotUsed": "Under tiers the chain is not walked, so depth does not apply.",
+      "noBaseTier": "Every tier has a threshold above zero: partners below the lowest one get nothing. Add a tier with threshold 0 as the starting tier.",
+      "duplicateThresholds": "Several active tiers share the same threshold ({{count}}). The higher level number wins — give them distinct thresholds so the ladder reads unambiguously.",
+      "tiersSubtitle": "Money and/or subscription days per partner rank",
+      "tierPaysNothing": "Tier {{levels}} pays the referrer nothing. Once a partner reaches its threshold their income stops: exactly one tier applies.",
+      "tierMixedTriggers": "Tiers have different payout triggers. Only the trigger of the tier a partner has reached applies, so rewards for other triggers never arrive."
     }
   },
   "adminUpdates": {

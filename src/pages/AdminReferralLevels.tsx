@@ -90,6 +90,12 @@ export default function AdminReferralLevels() {
     onError: reportError,
   });
 
+  const modeMutation = useMutation({
+    mutationFn: partnerApi.updateReferralLevelsMode,
+    onSuccess: invalidate,
+    onError: reportError,
+  });
+
   if (isLoading) {
     return (
       <PageSkeleton variant="admin" leading={2} titleWidth="w-56" className="space-y-6">
@@ -113,12 +119,53 @@ export default function AdminReferralLevels() {
   }
 
   const isLevels = data.scheme === 'levels';
+  // Под рангами номер уровня означает ступень партнёра, а не глубину цепочки:
+  // применяется ровно один уровень и платят только прямому пригласившему.
+  const isTiers = isLevels && data.levels_mode === 'tiers';
   // Наименьший свободный номер, а не «последний плюс один»: иначе удалённый
   // средний уровень нельзя создать заново ни отсюда, ни из бота.
   const taken = new Set(data.levels.map((lvl) => lvl.level));
   let nextLevel = 1;
   while (taken.has(nextLevel)) nextLevel += 1;
   const hasActiveLevel = data.levels.some((lvl) => lvl.is_active);
+
+  // Ранги читаются как лестница, поэтому показываются в порядке подъёма по ней,
+  // а не по номеру: номера админ расставляет руками и не обязан по порядку.
+  const orderedLevels = isTiers
+    ? [...data.levels].sort(
+        (a, b) => a.required_referrals - b.required_referrals || a.level - b.level,
+      )
+    : data.levels;
+
+  const activeTiers = data.levels.filter((lvl) => lvl.is_active);
+  // Без ступени с нулевым порогом партнёр не получает ничего, пока не наберёт
+  // минимальный порог. Настройка законная, но чаще это недосмотр, и выглядит он
+  // как «переключил режим — выплаты прекратились».
+  const missingBaseTier =
+    isTiers && activeTiers.length > 0 && activeTiers.every((lvl) => lvl.required_referrals > 0);
+  // Одинаковый порог у двух рангов разрешается детерминированно (побеждает
+  // больший номер), но админ об этом не догадается — лестница выглядит неоднозначной.
+  const duplicateThreshold = isTiers
+    ? (activeTiers
+        .map((lvl) => lvl.required_referrals)
+        .find((value, index, all) => all.indexOf(value) !== index) ?? null)
+    : null;
+  // Ранг без наград пригласившему не просто ничего не добавляет, как в цепочке,
+  // а ЗАМЕНЯЕТ собой платящий: набрав его порог, партнёр теряет доход.
+  const paysNothing = isTiers
+    ? activeTiers
+        .filter(
+          (lvl) =>
+            !(
+              (lvl.reward_mode !== 'days' && (lvl.referrer_percent || lvl.referrer_fixed_kopeks)) ||
+              (lvl.reward_mode !== 'money' && lvl.referrer_days)
+            ),
+        )
+        .map((lvl) => lvl.level)
+    : [];
+  // Повод принадлежит ступени целиком: награда за другой повод партнёру,
+  // стоящему не на той ступени, не достанется вовсе.
+  const mixedTriggers = isTiers && new Set(activeTiers.map((lvl) => lvl.trigger)).size > 1;
 
   const save = (level: number, patch: LevelPatch) => saveMutation.mutate({ level, patch });
 
@@ -134,7 +181,9 @@ export default function AdminReferralLevels() {
         </div>
         <div>
           <h1 className="text-xl font-semibold text-dark-100">{t('admin.referralLevels.title')}</h1>
-          <p className="text-sm text-dark-400">{t('admin.referralLevels.subtitle')}</p>
+          <p className="text-sm text-dark-400">
+            {isTiers ? t('admin.referralLevels.tiersSubtitle') : t('admin.referralLevels.subtitle')}
+          </p>
         </div>
       </div>
 
@@ -148,9 +197,14 @@ export default function AdminReferralLevels() {
                 : t('admin.referralLevels.schemeLegacy')}
             </div>
             <div className="text-sm text-dark-500">
-              {isLevels
-                ? t('admin.referralLevels.depth', { count: data.max_level_depth })
-                : t('admin.referralLevels.schemeLegacyHint')}
+              {/* Глубину называем только в цепочке. В рангах эта же карточка ниже
+                  говорит «глубина не применяется», и строка «до N уровней» рядом
+                  с ней противоречит и ей, и тому, как режим на самом деле платит. */}
+              {!isLevels
+                ? t('admin.referralLevels.schemeLegacyHint')
+                : isTiers
+                  ? t('admin.referralLevels.tiersSubtitle')
+                  : t('admin.referralLevels.depth', { count: data.max_level_depth })}
             </div>
           </div>
           <button
@@ -165,19 +219,63 @@ export default function AdminReferralLevels() {
           </button>
         </div>
 
-        <div className="mt-3">
-          <NumberField
-            label={t('admin.referralLevels.chainDepth')}
-            value={data.max_level_depth}
-            max={data.max_supported_level}
-            onCommit={(parsed) => depthMutation.mutate(parsed ?? 1)}
-            onInvalid={() =>
-              setSaveError(t('admin.referralLevels.depthRange', { max: data.max_supported_level }))
-            }
-          />
-          <p className="text-xs text-dark-500">
-            {t('admin.referralLevels.chainDepthHint', { max: data.max_supported_level })}
+        {isLevels && (
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-dark-700 pt-4">
+            <div>
+              <div className="font-medium text-dark-100">
+                {isTiers
+                  ? t('admin.referralLevels.modeTiers')
+                  : t('admin.referralLevels.modeChain')}
+              </div>
+              <div className="text-sm text-dark-500">
+                {isTiers
+                  ? t('admin.referralLevels.modeTiersHint')
+                  : t('admin.referralLevels.modeChainHint')}
+              </div>
+            </div>
+            <button
+              type="button"
+              disabled={data.levels_mode_locked_by_env || modeMutation.isPending}
+              onClick={() => modeMutation.mutate(isTiers ? 'chain' : 'tiers')}
+              className="btn-secondary disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {isTiers
+                ? t('admin.referralLevels.switchToChain')
+                : t('admin.referralLevels.switchToTiers')}
+            </button>
+          </div>
+        )}
+
+        {isLevels && data.levels_mode_locked_by_env && (
+          <p className="mt-3 rounded-xl border border-warning-500/30 bg-warning-500/10 p-3 text-sm text-warning-400">
+            {t('admin.referralLevels.modeEnvLocked')}
           </p>
+        )}
+
+        {/* Глубина имеет смысл только в цепочке. Поле не исчезает, а прямо
+            говорит, что не применяется: пропавшая настройка читается как
+            потерянная, и её идут искать в общем списке конфигурации. */}
+        <div className="mt-3">
+          {isTiers ? (
+            <p className="text-sm text-dark-500">{t('admin.referralLevels.depthNotUsed')}</p>
+          ) : (
+            <>
+              <NumberField
+                label={t('admin.referralLevels.chainDepth')}
+                value={data.max_level_depth}
+                max={data.max_supported_level}
+                onCommit={(parsed) => depthMutation.mutate(parsed ?? 1)}
+                onInvalid={() =>
+                  setSaveError(
+                    t('admin.referralLevels.depthRange', { max: data.max_supported_level }),
+                  )
+                }
+              />
+              <p className="text-xs text-dark-500">
+                {t('admin.referralLevels.chainDepthHint', { max: data.max_supported_level })}
+              </p>
+            </>
+          )}
         </div>
 
         {data.scheme_locked_by_env && (
@@ -189,6 +287,30 @@ export default function AdminReferralLevels() {
         {isLevels && !hasActiveLevel && (
           <p className="mt-3 rounded-xl border border-warning-500/30 bg-warning-500/10 p-3 text-sm text-warning-400">
             {t('admin.referralLevels.noActiveLevels')}
+          </p>
+        )}
+
+        {missingBaseTier && (
+          <p className="mt-3 rounded-xl border border-warning-500/30 bg-warning-500/10 p-3 text-sm text-warning-400">
+            {t('admin.referralLevels.noBaseTier')}
+          </p>
+        )}
+
+        {duplicateThreshold !== null && (
+          <p className="mt-3 rounded-xl border border-warning-500/30 bg-warning-500/10 p-3 text-sm text-warning-400">
+            {t('admin.referralLevels.duplicateThresholds', { count: duplicateThreshold })}
+          </p>
+        )}
+
+        {paysNothing.length > 0 && (
+          <p className="mt-3 rounded-xl border border-warning-500/30 bg-warning-500/10 p-3 text-sm text-warning-400">
+            {t('admin.referralLevels.tierPaysNothing', { levels: paysNothing.join(', ') })}
+          </p>
+        )}
+
+        {mixedTriggers && (
+          <p className="mt-3 rounded-xl border border-warning-500/30 bg-warning-500/10 p-3 text-sm text-warning-400">
+            {t('admin.referralLevels.tierMixedTriggers')}
           </p>
         )}
       </div>
@@ -228,14 +350,18 @@ export default function AdminReferralLevels() {
 
       {/* Levels */}
       <div className="space-y-4">
-        {data.levels.map((level) => (
+        {orderedLevels.map((level) => (
           <div key={level.level} className="card">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <div>
                 <h3 className="text-lg font-semibold text-dark-100">
-                  {t('admin.referralLevels.levelTitle', { count: level.level })}
+                  {isTiers
+                    ? t('admin.referralLevels.tierTitle', { count: level.level })
+                    : t('admin.referralLevels.levelTitle', { count: level.level })}
                 </h3>
-                {level.level > data.max_level_depth && (
+                {/* Глубина ограничивает только цепочку: под рангами работают все
+                    заведённые уровни, и метка «не платит» была бы ложной. */}
+                {!isTiers && level.level > data.max_level_depth && (
                   <p className="text-xs text-warning-400">
                     {t('admin.referralLevels.beyondDepth', { count: data.max_level_depth })}
                   </p>
@@ -395,7 +521,11 @@ export default function AdminReferralLevels() {
             <div className="mt-4 grid gap-4 md:grid-cols-2">
               <div>
                 <NumberField
-                  label={t('admin.referralLevels.requiredReferrals')}
+                  label={
+                    isTiers
+                      ? t('admin.referralLevels.tierThreshold')
+                      : t('admin.referralLevels.requiredReferrals')
+                  }
                   value={level.required_referrals || ''}
                   onCommit={(parsed) => save(level.level, { required_referrals: parsed ?? 0 })}
                   onInvalid={(name) =>
@@ -442,7 +572,9 @@ export default function AdminReferralLevels() {
           className="btn-primary mt-6"
           disabled={saveMutation.isPending}
         >
-          {t('admin.referralLevels.addLevel', { count: nextLevel })}
+          {isTiers
+            ? t('admin.referralLevels.addTier', { count: nextLevel })
+            : t('admin.referralLevels.addLevel', { count: nextLevel })}
         </button>
       )}
     </div>

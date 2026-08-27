@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { referralApi, type ReferralEarning } from '../api/referral';
+import type { ReferralTerms } from '../types';
 import { usePlatform } from '../platform';
 import { copyToClipboard } from '../utils/clipboard';
 import { brandingApi } from '../api/branding';
@@ -46,6 +47,37 @@ function getWithdrawalStatusBadge(status: string): string {
     default:
       return 'badge-neutral';
   }
+}
+
+/**
+ * The rank line under the programme terms, or null when there is nothing to say.
+ *
+ * Three states, and only two of them produce text: no rank reached yet, and a
+ * rank with a next step ahead. A partner standing on the TOP rank has no next
+ * step — rendering an empty paragraph for them left a stray margin on the one
+ * screen that should read as "you are done climbing".
+ *
+ * Under `chain` there are no ranks at all, so nothing is shown: the server sends
+ * tier_current_level = null there, and a naive check would tell every single user
+ * "no rank reached yet" about a concept that does not exist in their programme.
+ *
+ * Exported for tests: the decision is worth checking on its own, without
+ * mounting the whole page.
+ */
+export function tierProgressText(
+  terms: Pick<
+    ReferralTerms,
+    'levels_mode' | 'tier_current_level' | 'tier_next_level' | 'tier_next_remaining'
+  >,
+  t: (key: string, options?: Record<string, unknown>) => string,
+): string | null {
+  if (terms.levels_mode !== 'tiers') return null;
+  if (terms.tier_current_level == null) return t('referral.terms.tierNone');
+  if (terms.tier_next_level == null) return null;
+  return t('referral.terms.tierNext', {
+    level: terms.tier_next_level,
+    count: terms.tier_next_remaining ?? 0,
+  });
 }
 
 export default function Referral() {
@@ -179,6 +211,14 @@ export default function Referral() {
           ) : (
             <p className="text-sm text-dark-400">{t('referral.terms.noLevels')}</p>
           )}
+          {/* Под рангами перечисленные строки НЕ складываются: действует ровно
+              одна. Сервер помечает в списке текущий ранг, а здесь — насколько
+              пользователь близок к следующему; без этого лестница не отвечает
+              на вопрос «а мне-то что с неё». */}
+          {tierProgressText(terms, t) && (
+            <p className="mt-4 text-sm text-dark-300">{tierProgressText(terms, t)}</p>
+          )}
+
           {terms.referee_bonus_description && (
             <p className="mt-4 rounded-xl border border-dark-700/30 bg-dark-800/30 p-3 text-sm text-dark-200">
               {t('referral.terms.newUserBonus')}: {terms.referee_bonus_description}

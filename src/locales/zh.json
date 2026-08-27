@@ -858,7 +858,9 @@
       "minTopup": "最低充值",
       "newUserBonus": "新用户奖励",
       "inviterBonus": "邀请人奖励",
-      "noLevels": "奖励等级尚未配置，暂不发放奖励。"
+      "noLevels": "奖励等级尚未配置，暂不发放奖励。",
+      "tierNext": "距离第 {{level}} 档还差 {{count}} 人",
+      "tierNone": "尚未达到任何档位——从第一个门槛开始发放奖励。"
     },
     "yourReferrals": "您的推荐",
     "noReferrals": "暂无推荐。分享链接邀请好友！",
@@ -4359,7 +4361,23 @@
       "depthRange": "深度必须在 1 到 {{max}} 之间",
       "requiredReferrals": "解锁该等级所需推荐人数（0 表示立即可用）",
       "countingActive": "计数：已充值的推荐用户",
-      "countingAll": "计数：全部邀请用户"
+      "countingAll": "计数：全部邀请用户",
+      "modeChain": "模式：链式",
+      "modeTiers": "模式：档位",
+      "modeChainHint": "层级编号表示链条深度。第 1 级支付给直接推荐人，第 2 级支付给推荐他的人。一次充值会有多个层级同时支付。",
+      "modeTiersHint": "层级编号表示按推荐人数获得的档位。只支付给直接推荐人，且只应用一个档位——已达到的最高档。",
+      "switchToTiers": "切换为档位",
+      "switchToChain": "切换为链式",
+      "modeEnvLocked": "REFERRAL_LEVELS_MODE 已在 .env 中固定：切换不会生效，重启后会恢复为文件中的值。",
+      "tierTitle": "第 {{count}} 档",
+      "addTier": "添加第 {{count}} 档",
+      "tierThreshold": "档位生效所需推荐人数；0 为起始档",
+      "depthNotUsed": "档位模式下不遍历链条，因此深度不适用。",
+      "noBaseTier": "所有档位的门槛都大于零：未达到最低门槛的伙伴将一无所获。请添加门槛为 0 的起始档。",
+      "duplicateThresholds": "有多个启用的档位门槛相同（{{count}}）。编号较大的档位生效——请设置不同门槛，使档位阶梯清晰明确。",
+      "tiersSubtitle": "按伙伴档位发放的金额和/或订阅天数",
+      "tierPaysNothing": "第 {{levels}} 档不向推荐人发放任何奖励。伙伴达到其门槛后收入将中断：只有一个档位生效。",
+      "tierMixedTriggers": "各档位的发放时机不同。只有伙伴已达到的档位的时机生效，其他时机的奖励不会发放。"
     }
   },
   "adminUpdates": {

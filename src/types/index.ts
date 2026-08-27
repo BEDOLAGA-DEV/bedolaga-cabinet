@@ -475,7 +475,23 @@ export interface ReferralTerms {
   level_descriptions?: string[];
   referee_bonus_description?: string | null;
   max_level_depth?: number;
+  /**
+   * What a level number means. Under `chain` the listed levels apply at the same
+   * time, each paying a different person up the chain. Under `tiers` exactly ONE
+   * applies — the highest rank the partner has reached — and only the direct
+   * referrer is ever paid, so the same list must not be read as cumulative.
+   */
+  levels_mode?: ReferralLevelsMode;
+  /** The viewer's own rank. Only meaningful under `tiers`. */
+  tier_current_level?: number | null;
+  tier_next_level?: number | null;
+  tier_next_remaining?: number;
+  tier_referrals_any?: number;
+  tier_referrals_active?: number;
 }
+
+/** Whether a level number is chain depth or a rank earned by referral count. */
+export type ReferralLevelsMode = 'chain' | 'tiers';
 
 /** A reward level of the referral chain, as edited in the admin cabinet. */
 export interface ReferralRewardLevel {
@@ -514,6 +530,13 @@ export interface ReferralRewardLevels {
   scheme: 'legacy' | 'levels';
   /** Pinned in .env: the switch would not apply and would lose on restart. */
   scheme_locked_by_env: boolean;
+  /**
+   * Chain depth under `chain`; under `tiers` there is no chain and every level
+   * works as a rank, so this must not gate what is shown.
+   */
+  levels_mode: ReferralLevelsMode;
+  /** Pinned in .env: the switch would not apply and would lose on restart. */
+  levels_mode_locked_by_env: boolean;
   /** The chain is not walked deeper than this, so deeper levels never pay. */
   max_level_depth: number;
   max_supported_level: number;

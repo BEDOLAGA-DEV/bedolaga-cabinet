@@ -16,6 +16,15 @@ import type { ReferralRewardLevel, ReferralRewardLevels } from '@/types';
  * units — rather than the layout.
  */
 
+import ruLocale from '@/locales/ru.json';
+
+function resolveRu(key: string): string | undefined {
+  const value = key
+    .split('.')
+    .reduce<unknown>((node, part) => (node as Record<string, unknown>)?.[part], ruLocale);
+  return typeof value === 'string' ? value : undefined;
+}
+
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string, options?: Record<string, unknown>) => {
@@ -38,7 +47,10 @@ vi.mock('react-i18next', () => ({
         'admin.referralLevels.countingActive': 'Считаем: с пополнением',
         'admin.referralLevels.countingAll': 'Считаем: всех',
       };
-      const template = templates[key] ?? key;
+      // Ключ, которого нет в карте выше, берётся из НАСТОЯЩЕЙ ru.json. Иначе
+      // забытый перевод остаётся незамеченным: компонент рисует ключ, а тест
+      // сверяется с той же выдуманной строкой и остаётся зелёным.
+      const template = templates[key] ?? resolveRu(key) ?? key;
       return template.replace(/{{(\w+)}}/g, (_m, name) => String(options?.[name] ?? ''));
     },
     i18n: { language: 'ru', changeLanguage: () => Promise.resolve() },
@@ -70,18 +82,22 @@ const state: {
   saves: { level: number; patch: unknown }[];
   imported: number;
   depth: number | null;
+  mode: string | null;
 } = {
   imported: 0,
   depth: null,
   payload: {
     scheme: 'levels',
     scheme_locked_by_env: false,
+    levels_mode: 'chain',
+    levels_mode_locked_by_env: false,
     max_level_depth: 3,
     max_supported_level: 10,
     levels: [level()],
     available_tariffs: [{ id: 42, name: 'Про' }],
   },
   saves: [],
+  mode: null,
 };
 
 vi.mock('@/api/partners', () => ({
@@ -104,6 +120,10 @@ vi.mock('@/api/partners', () => ({
       });
     },
     updateReferralScheme: () => Promise.resolve(state.payload),
+    updateReferralLevelsMode: (mode: string) => {
+      state.mode = mode;
+      return Promise.resolve(state.payload);
+    },
   },
 }));
 
@@ -125,6 +145,8 @@ if (!window.matchMedia) {
 const basePayload = (): ReferralRewardLevels => ({
   scheme: 'levels',
   scheme_locked_by_env: false,
+  levels_mode: 'chain',
+  levels_mode_locked_by_env: false,
   max_level_depth: 3,
   max_supported_level: 10,
   levels: [level()],
@@ -136,6 +158,7 @@ afterEach(() => {
   state.saves = [];
   state.imported = 0;
   state.depth = null;
+  state.mode = null;
   // Полный сброс: точечная замена levels оставляла изменённые границы из
   // предыдущего теста и делала следующий зависимым от порядка.
   state.payload = basePayload();
@@ -386,5 +409,213 @@ describe('порог открытия уровня', () => {
     fireEvent.click(screen.getByText(/Считаем: с пополнением/));
     await waitFor(() => expect(state.saves).toHaveLength(1));
     expect(state.saves[0]).toEqual({ level: 1, patch: { required_referrals_active_only: false } });
+  });
+});
+
+describe('режим уровней', () => {
+  it('переключает цепочку на ранги', async () => {
+    await renderEditor();
+    fireEvent.click(screen.getByText('Переключить на ранги'));
+    await waitFor(() => expect(state.mode).toBe('tiers'));
+  });
+
+  it('в режиме рангов прячет глубину цепочки и говорит, почему', async () => {
+    // Поле, которое принимает значение и ни на что не влияет, хуже отсутствующего:
+    // в рангах цепочка не обходится вовсе.
+    state.payload = { ...basePayload(), levels_mode: 'tiers' };
+    await renderEditor();
+
+    expect(screen.queryByLabelText(/Глубина цепочки/)).toBeNull();
+    expect(screen.getByText(/глубина не применяется/)).toBeTruthy();
+  });
+
+  it('в режиме рангов не помечает уровни выше глубины как неплатящие', async () => {
+    // Глубина ограничивает только цепочку. Метка «не платит» на работающем
+    // ранге — прямая ложь о том, что бот начисляет.
+    state.payload = {
+      ...basePayload(),
+      levels_mode: 'tiers',
+      max_level_depth: 3,
+      levels: [level({ level: 5, required_referrals: 10 })],
+    };
+    await renderEditor();
+
+    expect(screen.queryByText(/не платит/)).toBeNull();
+    expect(screen.getByText('Ранг 5')).toBeTruthy();
+  });
+
+  it('предупреждает, когда у всех рангов порог больше нуля', async () => {
+    // Такая лестница не платит никому, пока партнёр не наберёт минимальный
+    // порог: со стороны это «переключил режим — выплаты прекратились».
+    state.payload = {
+      ...basePayload(),
+      levels_mode: 'tiers',
+      levels: [level({ level: 1, required_referrals: 10 })],
+    };
+    await renderEditor();
+
+    expect(screen.getByText(/Заведите ранг с порогом 0/)).toBeTruthy();
+  });
+
+  it('предупреждает про одинаковые пороги у активных рангов', async () => {
+    state.payload = {
+      ...basePayload(),
+      levels_mode: 'tiers',
+      levels: [
+        level({ level: 1, required_referrals: 0 }),
+        level({ level: 2, required_referrals: 10 }),
+        level({ level: 3, required_referrals: 10 }),
+      ],
+    };
+    await renderEditor();
+
+    expect(screen.getByText(/одинаковый порог/)).toBeTruthy();
+  });
+
+  it('не предупреждает про одинаковые пороги, если один из рангов выключен', async () => {
+    state.payload = {
+      ...basePayload(),
+      levels_mode: 'tiers',
+      levels: [
+        level({ level: 2, required_referrals: 10 }),
+        level({ level: 3, required_referrals: 10, is_active: false }),
+      ],
+    };
+    await renderEditor();
+
+    expect(screen.queryByText(/одинаковый порог/)).toBeNull();
+  });
+
+  it('показывает ранги в порядке подъёма по лестнице, а не по номеру', async () => {
+    state.payload = {
+      ...basePayload(),
+      levels_mode: 'tiers',
+      levels: [
+        level({ level: 2, required_referrals: 25 }),
+        level({ level: 3, required_referrals: 5 }),
+      ],
+    };
+    await renderEditor();
+
+    const titles = screen.getAllByRole('heading', { level: 3 }).map((node) => node.textContent);
+    expect(titles).toEqual(['Ранг 3', 'Ранг 2']);
+  });
+
+  it('не даёт переключить режим, закреплённый в .env', async () => {
+    state.payload = { ...basePayload(), levels_mode_locked_by_env: true };
+    await renderEditor();
+
+    const button = screen.getByText('Переключить на ранги') as HTMLButtonElement;
+    expect(button.disabled).toBe(true);
+    fireEvent.click(button);
+    expect(state.mode).toBeNull();
+  });
+});
+
+describe('карточка схемы в режиме рангов', () => {
+  it('не заявляет глубину цепочки рядом с «глубина не применяется»', async () => {
+    // Одна карточка утверждала и «Глубина цепочки: до 3 уровней», и «в режиме
+    // рангов глубина не применяется» — второе верно, первое противоречит и ему,
+    // и тому, как режим реально платит.
+    state.payload = { ...basePayload(), levels_mode: 'tiers', max_level_depth: 3 };
+    await renderEditor();
+
+    expect(screen.queryByText(/Глубина цепочки: до/)).toBeNull();
+    expect(screen.getByText(/глубина не применяется/)).toBeTruthy();
+  });
+
+  it('в цепочке глубину по-прежнему называет', async () => {
+    state.payload = { ...basePayload(), levels_mode: 'chain', max_level_depth: 3 };
+    await renderEditor();
+
+    expect(screen.getByText(/Глубина цепочки: до 3/)).toBeTruthy();
+  });
+});
+
+describe('переключатель режима: направление и контракт', () => {
+  it('переключает ранги обратно на цепочку', async () => {
+    // Без этого теста кнопку можно было заклинить на 'tiers': админ, включивший
+    // ранги, физически не смог бы вернуться, а выплаты продолжали бы идти по ним.
+    state.payload = { ...basePayload(), levels_mode: 'tiers' };
+    await renderEditor();
+
+    fireEvent.click(screen.getByText('Переключить на цепочку'));
+    await waitFor(() => expect(state.mode).toBe('chain'));
+  });
+
+  it('объясняет, почему переключатель заблокирован ключом из .env', async () => {
+    // Заблокированная кнопка без объяснения читается как поломка интерфейса.
+    state.payload = { ...basePayload(), levels_mode_locked_by_env: true };
+    await renderEditor();
+
+    expect(screen.getByText(/REFERRAL_LEVELS_MODE задан в \.env/)).toBeTruthy();
+  });
+
+  it('подписывает порог и кнопку добавления по-ранговому', async () => {
+    state.payload = { ...basePayload(), levels_mode: 'tiers' };
+    await renderEditor();
+
+    expect(screen.getByLabelText(/Ранг действует с/)).toBeTruthy();
+    expect(screen.getByText(/Добавить ранг/)).toBeTruthy();
+  });
+
+  it('в цепочке подписи остаются уровневыми', async () => {
+    state.payload = { ...basePayload(), levels_mode: 'chain' };
+    await renderEditor();
+
+    expect(screen.getByLabelText(/Рефералов для открытия/)).toBeTruthy();
+    expect(screen.getByText(/Добавить уровень/)).toBeTruthy();
+  });
+
+  it('предупреждает про ранг, который ничего не начисляет пригласившему', async () => {
+    // В цепочке такой уровень просто ничего не добавляет; в рангах он ЗАМЕНЯЕТ
+    // собой платящий, и партнёр, набрав его порог, теряет доход.
+    state.payload = {
+      ...basePayload(),
+      levels_mode: 'tiers',
+      levels: [
+        level({ level: 1, required_referrals: 0 }),
+        level({
+          level: 2,
+          required_referrals: 10,
+          referrer_percent: null,
+          referrer_fixed_kopeks: null,
+          referrer_days: 0,
+          referee_fixed_kopeks: 50000,
+        }),
+      ],
+    };
+    await renderEditor();
+
+    expect(screen.getByText(/ничего не начисляет пригласившему/)).toBeTruthy();
+  });
+
+  it('предупреждает про разные поводы начисления у рангов', async () => {
+    state.payload = {
+      ...basePayload(),
+      levels_mode: 'tiers',
+      levels: [
+        level({ level: 1, required_referrals: 0, trigger: 'registration' }),
+        level({ level: 2, required_referrals: 10, trigger: 'every_topup' }),
+      ],
+    };
+    await renderEditor();
+
+    expect(screen.getByText(/разные поводы начисления/)).toBeTruthy();
+  });
+
+  it('в цепочке ранговых предупреждений не показывает', async () => {
+    state.payload = {
+      ...basePayload(),
+      levels_mode: 'chain',
+      levels: [
+        level({ level: 1, required_referrals: 10, trigger: 'registration' }),
+        level({ level: 2, required_referrals: 10, trigger: 'every_topup' }),
+      ],
+    };
+    await renderEditor();
+
+    expect(screen.queryByText(/одинаковый порог/)).toBeNull();
+    expect(screen.queryByText(/разные поводы начисления/)).toBeNull();
   });
 });

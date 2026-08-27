@@ -1,5 +1,5 @@
 import apiClient from './client';
-import type { ReferralRewardLevel, ReferralRewardLevels } from '../types';
+import type { ReferralLevelsMode, ReferralRewardLevel, ReferralRewardLevels } from '../types';
 
 // ==================== User-facing types ====================
 
@@ -354,6 +354,15 @@ export const partnerApi = {
     const response = await apiClient.patch<ReferralRewardLevels>(
       '/cabinet/admin/partners/referral-scheme',
       { scheme },
+    );
+    return response.data;
+  },
+
+  /** Whether a level number means chain depth or a rank earned by referral count. */
+  updateReferralLevelsMode: async (mode: ReferralLevelsMode): Promise<ReferralRewardLevels> => {
+    const response = await apiClient.patch<ReferralRewardLevels>(
+      '/cabinet/admin/partners/referral-levels-mode',
+      { levels_mode: mode },
     );
     return response.data;
   },
