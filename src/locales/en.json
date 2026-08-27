@@ -2493,14 +2493,16 @@
         "body": "Running mode is “{{running}}”, saved mode is “{{configured}}”. Until a restart, grace behaves like the running one."
       },
       "issues": {
-        "title": "Configuration problems"
+        "title": "Configuration problems",
+        "titleBeforeEnabling": "Needed before enabling"
       },
       "issue": {
-        "squad_required": "Squad is empty: {{field}}. The bot will start with grace disabled.",
+        "squad_required": "Squad is empty: {{field}}. Without it the mode cannot be set to “On” — the bot would start with grace disabled.",
         "squad_invalid": "Malformed UUID: {{field}}",
         "traffic_required": "The traffic limit must be at least 1 GB",
         "open_sessions_stranded": "Sessions are still open but this mode never finishes them, so the overlay stays in the panel. Switch to “Drain”.",
-        "number_required": "Number is empty: {{field}}"
+        "number_required": "Number is empty: {{field}}",
+        "mode_invalid": "An unknown mode is stored. The bot fails on it at startup and leaves grace disabled — pick a mode again."
       },
       "fields": {
         "mode": "Mode",
@@ -2597,7 +2599,8 @@
           "drained": "Drained",
           "conflict": "Panel conflict",
           "revoked": "Revoked"
-        }
+        },
+        "forbidden": "Requires the users:read permission: this list carries user names and Telegram IDs."
       },
       "fullyLocked": {
         "title": "This section is read-only",

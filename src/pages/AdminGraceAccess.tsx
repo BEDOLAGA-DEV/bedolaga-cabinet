@@ -136,7 +136,10 @@ export function changedFields(
   for (const key of Object.keys(stored) as (keyof GraceAccessConfig)[]) {
     const value = next[key];
     // A half-typed number is not a value yet; save stays blocked until it is one.
-    if (value === '') continue;
+    // Only numbers, though: '' is a real value for the squad fields — for the
+    // external one it IS "detach", so skipping every empty string made the safe
+    // default the one setting that could never be saved.
+    if (value === '' && (NUMERIC_FIELDS as readonly string[]).includes(key)) continue;
     if (value !== stored[key]) patch[key] = value;
   }
   return patch as Partial<GraceAccessConfig>;
@@ -293,7 +296,13 @@ function SessionsSection() {
 
       {isLoading && <Skeleton variant="card" className="mt-4 h-40" />}
       {error && (
-        <p className="mt-4 text-sm text-error-400">{t('admin.graceAccess.sessions.loadError')}</p>
+        <p className="mt-4 text-sm text-error-400">
+          {/* Список — это люди, поэтому он требует ещё и users:read. Без него
+              «не удалось загрузить» звучит как поломка, а не как право. */}
+          {(error as { response?: { status?: number } })?.response?.status === 403
+            ? t('admin.graceAccess.sessions.forbidden')
+            : t('admin.graceAccess.sessions.loadError')}
+        </p>
       )}
 
       {data && data.items.length === 0 && (
@@ -439,8 +448,11 @@ export default function AdminGraceAccess() {
   const emptyNumbers = form ? emptyNumericFields(form) : [];
   // "Fallback squad" with an empty box silently means "detach" — the opposite of
   // what was picked, so it is refused rather than quietly reinterpreted.
+  // Сравнение по обрезанной строке: сервер всё равно обрежет, и пробел прошёл бы
+  // мимо обеих проверок, а сохранился бы как «Отцепить» — ровно та подмена, от
+  // которой этот флаг и защищает.
   const externalIncomplete =
-    externalChoice === 'custom' && (form?.external_squad_uuid ?? '') === '';
+    externalChoice === 'custom' && (form?.external_squad_uuid ?? '').trim() === '';
   const blocksSave = modeBlockers.length > 0 || emptyNumbers.length > 0 || externalIncomplete;
   const invalidFields = new Set(blockers.map((issue) => issue.field));
 
@@ -543,19 +555,42 @@ export default function AdminGraceAccess() {
         </div>
       )}
 
-      {data.issues.length > 0 && (
-        <div className="rounded-xl border border-error-500/30 bg-error-500/10 p-4">
-          <div className="flex items-center gap-2 font-medium text-error-300">
-            <WarningIcon className="h-4 w-4" />
-            {t('admin.graceAccess.issues.title')}
-          </div>
-          <ul className="mt-2 space-y-1 text-sm text-error-200/90">
-            {data.issues.map((issue) => (
-              <li key={`${issue.field}-${issue.code}`}>· {issueText(issue)}</li>
-            ))}
-          </ul>
-        </div>
-      )}
+      {data.issues.length > 0 &&
+        (() => {
+          // Пока grace выключен, незаполненный сквад — заметка о том, что
+          // понадобится при включении, а не авария. Красная рамка на свежей
+          // установке приучает не читать этот блок вовсе.
+          const severe = data.issues.some((issue) => issue.severity === 'error');
+          return (
+            <div
+              className={`rounded-xl border p-4 ${
+                severe
+                  ? 'border-error-500/30 bg-error-500/10'
+                  : 'border-warning-500/30 bg-warning-500/10'
+              }`}
+            >
+              <div
+                className={`flex items-center gap-2 font-medium ${
+                  severe ? 'text-error-300' : 'text-warning-300'
+                }`}
+              >
+                <WarningIcon className="h-4 w-4" />
+                {severe
+                  ? t('admin.graceAccess.issues.title')
+                  : t('admin.graceAccess.issues.titleBeforeEnabling')}
+              </div>
+              <ul
+                className={`mt-2 space-y-1 text-sm ${
+                  severe ? 'text-error-200/90' : 'text-warning-200/80'
+                }`}
+              >
+                {data.issues.map((issue) => (
+                  <li key={`${issue.field}-${issue.code}`}>· {issueText(issue)}</li>
+                ))}
+              </ul>
+            </div>
+          );
+        })()}
 
       {/* Mode */}
       <div className="card">

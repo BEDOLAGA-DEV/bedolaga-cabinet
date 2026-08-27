@@ -250,6 +250,89 @@ describe('раздел grace-доступа', () => {
     expect(screen.queryByText('Раздел открыт только на чтение')).toBeNull();
   });
 
+  it('«Отцепить» можно сохранить', async () => {
+    // Пропуск любой пустой строки делал безопасное значение единственным,
+    // которое нельзя было записать: внешний сквад навсегда оставался keep.
+    state.overview = overview({ config: config({ external_squad_uuid: 'keep' }) });
+    await renderPage();
+
+    fireEvent.change(screen.getByLabelText('Внешний сквад'), { target: { value: 'detach' } });
+    fireEvent.click(saveButton());
+
+    await waitFor(() => expect(state.saves).toEqual([{ external_squad_uuid: '' }]));
+  });
+
+  it('сквад можно очистить', async () => {
+    await renderPage();
+
+    fireEvent.change(screen.getByLabelText('Сквад для истёкшей подписки'), {
+      target: { value: '' },
+    });
+    fireEvent.click(saveButton());
+
+    await waitFor(() => expect(state.saves).toEqual([{ expired_squad_uuid: '' }]));
+  });
+
+  it('аварийный сквад из пробелов не сохраняется как «Отцепить»', async () => {
+    await renderPage();
+
+    fireEvent.change(screen.getByLabelText('Внешний сквад'), { target: { value: 'custom' } });
+    fireEvent.change(screen.getByLabelText('Аварийный сквад'), { target: { value: '   ' } });
+
+    expect(saveButton().disabled).toBe(true);
+    expect(state.saves).toEqual([]);
+  });
+
+  it('о неполной конфигурации при выключенном grace говорит спокойно', async () => {
+    // Красная рамка на свежей установке приучает не читать этот блок вовсе.
+    state.overview = overview({
+      issues: [{ field: 'expired_squad_uuid', code: 'squad_required', severity: 'warning' }],
+    });
+    await renderPage();
+
+    expect(screen.getByText('Понадобится перед включением')).toBeTruthy();
+    expect(screen.queryByText('Проблемы конфигурации')).toBeNull();
+  });
+
+  it('ту же нехватку при работающем grace показывает как аварию', async () => {
+    state.overview = overview({
+      issues: [{ field: 'expired_squad_uuid', code: 'squad_required', severity: 'error' }],
+    });
+    await renderPage();
+
+    expect(screen.getByText('Проблемы конфигурации')).toBeTruthy();
+  });
+
+  it('о недоступной панели говорит прямо', async () => {
+    state.squads = { available: false, items: [] };
+    await renderPage();
+
+    expect(screen.getAllByText(/Панель недоступна/).length).toBeGreaterThan(0);
+  });
+
+  it('живая панель без сквадов недоступной не объявляется', async () => {
+    // get_all_squads глотал ошибки и отдавал [], так что «панель лежит» и
+    // «сквадов нет» выглядели одинаково; подпись обязана различать их.
+    state.squads = { available: true, items: [] };
+    await renderPage();
+
+    expect(screen.queryByText(/Панель недоступна/)).toBeNull();
+  });
+
+  it('без права на список сессий объясняет, какого права не хватает', async () => {
+    const api = await import('@/api/adminGraceAccess');
+    vi.spyOn(api.adminGraceAccessApi, 'getSessions').mockRejectedValue(
+      Object.assign(new Error('Forbidden'), {
+        isAxiosError: true,
+        response: { status: 403, data: { detail: 'Permission denied' } },
+      }),
+    );
+
+    await renderPage();
+
+    expect(await screen.findByText(/Нужно право users:read/)).toBeTruthy();
+  });
+
   it('недоступная панель оставляет ввод UUID руками', async () => {
     state.squads = { available: false, items: [] };
     await renderPage();
@@ -412,6 +495,8 @@ describe('раздел grace-доступа', () => {
   });
 });
 
+type LocaleTree = { admin: { graceAccess: unknown; nav: { graceAccess: unknown } } };
+
 describe('переводы раздела', () => {
   /**
    * locales.test.ts сверяет только en и ru, поэтому ключ, добавленный в русскую
@@ -424,19 +509,42 @@ describe('переводы раздела', () => {
         )
       : [prefix];
 
-  const russian = flatten((ruLocale as Record<string, any>).admin.graceAccess).sort();
+  const russian = flatten((ruLocale as LocaleTree).admin.graceAccess).sort();
 
   it.each([
     ['en', enLocale],
     ['zh', zhLocale],
     ['fa', faLocale],
   ])('%s содержит те же ключи, что и ru', (_language, locale) => {
-    expect(flatten((locale as Record<string, any>).admin.graceAccess).sort()).toEqual(russian);
+    expect(flatten((locale as LocaleTree).admin.graceAccess).sort()).toEqual(russian);
   });
 
   it('пункт меню переведён везде', () => {
     for (const locale of [ruLocale, enLocale, zhLocale, faLocale]) {
-      expect(typeof (locale as Record<string, any>).admin.nav.graceAccess).toBe('string');
+      expect(typeof (locale as LocaleTree).admin.nav.graceAccess).toBe('string');
     }
+  });
+});
+
+describe('changedFields', () => {
+  /**
+   * Разделение «пустое число» и «пустая строка» стоило того, чтобы закрепить его
+   * отдельно от разметки: пропуск любой пустой строки делал «Отцепить»
+   * единственным значением, которое нельзя было записать.
+   */
+  it('пропускает недобранное число, но не пустой сквад', async () => {
+    const { changedFields } = await import('./AdminGraceAccess');
+    const stored = config({ external_squad_uuid: 'keep', duration_hours: 72 });
+
+    const patch = changedFields({ ...stored, external_squad_uuid: '', duration_hours: '' }, stored);
+
+    expect(patch).toEqual({ external_squad_uuid: '' });
+  });
+
+  it('одинаковые значения не отправляет', async () => {
+    const { changedFields } = await import('./AdminGraceAccess');
+    const stored = config();
+
+    expect(changedFields({ ...stored }, stored)).toEqual({});
   });
 });

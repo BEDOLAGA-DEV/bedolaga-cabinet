@@ -2182,14 +2182,16 @@
         "body": "当前运行模式为「{{running}}」，已保存模式为「{{configured}}」。重启之前，宽限访问按运行模式工作。"
       },
       "issues": {
-        "title": "配置问题"
+        "title": "配置问题",
+        "titleBeforeEnabling": "开启前需要补齐"
       },
       "issue": {
-        "squad_required": "小队未填写：{{field}}。这样机器人会在启动时关闭宽限访问。",
+        "squad_required": "小队未填写：{{field}}。缺少它就无法切换到「已开启」——机器人会以关闭状态启动。",
         "squad_invalid": "UUID 格式错误：{{field}}",
         "traffic_required": "流量上限不得少于 1 GB",
         "open_sessions_stranded": "仍有未结束的会话，而当前模式不会处理它们，面板中的覆盖状态会一直保留。请切换到「排空」。",
-        "number_required": "数值未填写：{{field}}"
+        "number_required": "数值未填写：{{field}}",
+        "mode_invalid": "保存了未知的模式。机器人启动时会因此失败并保持宽限访问关闭——请重新选择模式。"
       },
       "fields": {
         "mode": "模式",
@@ -2286,7 +2288,8 @@
           "drained": "已排空",
           "conflict": "面板冲突",
           "revoked": "已撤销"
-        }
+        },
+        "forbidden": "需要 users:read 权限：该列表包含用户姓名和 Telegram ID。"
       },
       "fullyLocked": {
         "title": "本页面仅可查看",
