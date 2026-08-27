@@ -2,55 +2,42 @@ import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { referralNetworkApi } from '@/api/referralNetwork';
+import { CheckIcon, CloseIcon, PlusIcon, SearchIcon, ShareIcon } from '@/components/icons';
 import { MAX_SCOPE_ITEMS } from '@/store/referralNetwork';
 import type { ScopeSelection, ScopeType } from '@/types/referralNetwork';
 
 interface ScopeSelectorProps {
   value: ScopeSelection[];
+  isFullNetwork: boolean;
   onAdd: (selection: ScopeSelection) => void;
   onRemove: (type: ScopeSelection['type'], id: number) => void;
   onClear: () => void;
+  onFullNetworkChange: (enabled: boolean) => void;
   className?: string;
 }
 
 const SCOPE_TABS: ScopeType[] = ['campaign', 'partner', 'user'];
 
-const CHIP_COLORS: Record<ScopeType, string> = {
+// 'all' is the full-network mode rather than a scope entity, so it gets a
+// neutral chip instead of one of the three entity colours.
+type OptionType = ScopeType | 'all';
+
+const CHIP_COLORS: Record<OptionType, string> = {
   campaign: 'bg-success-500/20 text-success-400',
   partner: 'bg-warning-500/20 text-warning-400',
   user: 'bg-accent-500/20 text-accent-400',
+  all: 'bg-dark-700 text-dark-100',
 };
 
 // Reuse CHIP_COLORS for avatar backgrounds (same palette)
 const AVATAR_COLORS = CHIP_COLORS;
 
-const AVATAR_LETTERS: Record<ScopeType, string> = {
+const AVATAR_GLYPHS: Record<OptionType, React.ReactNode> = {
   campaign: 'C',
   partner: 'P',
   user: 'U',
+  all: <ShareIcon className="h-4 w-4" />,
 };
-
-function CheckIcon() {
-  return (
-    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-    </svg>
-  );
-}
-
-function CloseIcon({ className = 'h-3 w-3' }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      strokeWidth={2}
-    >
-      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-    </svg>
-  );
-}
 
 function Spinner({ size = 'h-5 w-5' }: { size?: string }) {
   return (
@@ -65,7 +52,7 @@ function EmptyMessage({ text }: { text: string }) {
 }
 
 interface ScopeListItemProps {
-  type: ScopeType;
+  type: OptionType;
   selected: boolean;
   onClick: () => void;
   title: string;
@@ -86,7 +73,7 @@ function ScopeListItem({ type, selected, onClick, title, subtitle, badge }: Scop
       <div
         className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-medium ${AVATAR_COLORS[type]}`}
       >
-        {selected ? <CheckIcon /> : AVATAR_LETTERS[type]}
+        {selected ? <CheckIcon /> : AVATAR_GLYPHS[type]}
       </div>
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-medium text-dark-100">{title}</p>
@@ -97,7 +84,15 @@ function ScopeListItem({ type, selected, onClick, title, subtitle, badge }: Scop
   );
 }
 
-export function ScopeSelector({ value, onAdd, onRemove, onClear, className }: ScopeSelectorProps) {
+export function ScopeSelector({
+  value,
+  isFullNetwork,
+  onAdd,
+  onRemove,
+  onClear,
+  onFullNetworkChange,
+  className,
+}: ScopeSelectorProps) {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<ScopeType>('campaign');
   const [searchInput, setSearchInput] = useState('');
@@ -232,8 +227,24 @@ export function ScopeSelector({ value, onAdd, onRemove, onClear, className }: Sc
       {/* Chips row + add trigger */}
       <div className="flex items-center gap-1.5">
         {/* Selected chips */}
-        {value.length > 0 && (
+        {(isFullNetwork || value.length > 0) && (
           <div className="flex min-w-0 flex-1 flex-wrap items-center gap-1">
+            {isFullNetwork && (
+              <span
+                className={`inline-flex shrink-0 items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium ${CHIP_COLORS.all}`}
+              >
+                <span className="max-w-[120px] truncate">
+                  {t('admin.referralNetwork.scope.fullNetwork')}
+                </span>
+                <button
+                  onClick={() => onFullNetworkChange(false)}
+                  aria-label={t('admin.referralNetwork.scope.removeFullNetwork')}
+                  className="ml-0.5 rounded-sm p-0.5 transition-colors hover:bg-white/10"
+                >
+                  <CloseIcon className="h-3 w-3" />
+                </button>
+              </span>
+            )}
             {value.map((item) => (
               <span
                 key={`${item.type}:${item.id}`}
@@ -245,7 +256,7 @@ export function ScopeSelector({ value, onAdd, onRemove, onClear, className }: Sc
                   aria-label={t('admin.referralNetwork.scope.removeItem', { label: item.label })}
                   className="ml-0.5 rounded-sm p-0.5 transition-colors hover:bg-white/10"
                 >
-                  <CloseIcon />
+                  <CloseIcon className="h-3 w-3" />
                 </button>
               </span>
             ))}
@@ -273,25 +284,17 @@ export function ScopeSelector({ value, onAdd, onRemove, onClear, className }: Sc
           }`}
           disabled={isMaxReached && !isDropdownOpen}
         >
-          <svg
-            className="h-4 w-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-          </svg>
+          <PlusIcon className="h-4 w-4" />
         </button>
       </div>
 
-      {/* Dropdown */}
+      {/* Dropdown — this is a non-modal popover containing tabs + search +
+          listbox. role="dialog" would imply modality and own the focus, but
+          we keep the page reachable behind it. The button's aria-haspopup
+          and aria-expanded already announce the popup; AT can navigate into
+          it directly. The inner div carries role="listbox". */}
       {isDropdownOpen && (
-        <div
-          className="absolute left-0 right-0 top-full z-50 mt-1 rounded-xl border border-dark-700/50 bg-dark-800 shadow-xl backdrop-blur-md"
-          role="dialog"
-          aria-label={t('admin.referralNetwork.scope.addScope')}
-        >
+        <div className="absolute left-0 right-0 top-full z-50 mt-1 rounded-xl border border-dark-700/50 bg-dark-800 shadow-xl backdrop-blur-md">
           {/* Max reached banner */}
           {isMaxReached && (
             <div className="border-b border-dark-700/50 px-3 py-1.5 text-center text-xs text-warning-400">
@@ -323,19 +326,7 @@ export function ScopeSelector({ value, onAdd, onRemove, onClear, className }: Sc
             </div>
 
             <div className="relative min-w-0 flex-1">
-              <svg
-                className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-dark-500"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={1.5}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
-                />
-              </svg>
+              <SearchIcon className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-dark-500" />
               <input
                 ref={inputRef}
                 type="text"
@@ -353,8 +344,18 @@ export function ScopeSelector({ value, onAdd, onRemove, onClear, className }: Sc
             </div>
           </div>
 
-          {/* List */}
+          {/* List — the full-network option leads every tab, since it is a mode
+              rather than an entity of the currently active tab. */}
           <div className="max-h-64 overflow-y-auto" role="listbox" aria-multiselectable="true">
+            <div className="border-b border-dark-700/50">
+              <ScopeListItem
+                type="all"
+                selected={isFullNetwork}
+                onClick={() => onFullNetworkChange(!isFullNetwork)}
+                title={t('admin.referralNetwork.scope.fullNetwork')}
+                subtitle={t('admin.referralNetwork.scope.fullNetworkHint')}
+              />
+            </div>
             {activeTab === 'campaign' && renderCampaignList()}
             {activeTab === 'partner' && renderPartnerList()}
             {activeTab === 'user' && renderUserList()}

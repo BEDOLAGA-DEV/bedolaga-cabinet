@@ -1,9 +1,10 @@
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 
 import type { SalesStatsParams } from '../../api/adminSalesStats';
 import { salesStatsApi } from '../../api/adminSalesStats';
 import { SALES_STATS } from '../../constants/salesStats';
+import { GiftIcon, PercentIcon, UserPlusIcon } from '../../components/icons';
 import { StatCard } from '../stats';
 
 import { DonutChart } from './DonutChart';
@@ -29,6 +30,7 @@ export function TrialsTab({ params }: TrialsTabProps) {
     queryKey: ['sales-stats', 'trials', params],
     queryFn: () => salesStatsApi.getTrials(params),
     staleTime: SALES_STATS.STALE_TIME,
+    placeholderData: keepPreviousData,
   });
 
   if (isLoading) {
@@ -42,7 +44,7 @@ export function TrialsTab({ params }: TrialsTabProps) {
   }
 
   if (isError || !data) {
-    return <div className="py-8 text-center text-red-400">{t('admin.salesStats.loadError')}</div>;
+    return <div className="py-8 text-center text-error-400">{t('admin.salesStats.loadError')}</div>;
   }
 
   const pieData = data.by_provider.map((item) => ({
@@ -59,20 +61,24 @@ export function TrialsTab({ params }: TrialsTabProps) {
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <StatCard
           label={t('admin.salesStats.trials.totalRegistrations')}
           value={data.total_registrations}
+          icon={<UserPlusIcon className="h-5 w-5" />}
+          tone="accent"
         />
-        <StatCard label={t('admin.salesStats.trials.total')} value={data.total_trials} />
+        <StatCard
+          label={t('admin.salesStats.trials.total')}
+          value={data.total_trials}
+          icon={<GiftIcon className="h-5 w-5" />}
+          tone="neutral"
+        />
         <StatCard
           label={t('admin.salesStats.trials.conversion')}
           value={`${data.conversion_rate}%`}
-          valueClassName="text-success-400"
-        />
-        <StatCard
-          label={t('admin.salesStats.trials.avgDuration')}
-          value={`${data.avg_trial_duration_days} ${t('admin.trafficUsage.days')}`}
+          icon={<PercentIcon className="h-5 w-5" />}
+          tone="success"
         />
       </div>
 

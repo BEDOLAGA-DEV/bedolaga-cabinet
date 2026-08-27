@@ -1,20 +1,22 @@
 {
   "name": "cabinet-frontend",
   "private": true,
-  "version": "1.53.0",
+  "version": "1.66.0",
   "description": "Remnawave Bedolaga Web App",
   "license": "AGPL-3.0",
   "type": "module",
   "scripts": {
     "dev": "node scripts/generate-mobile-deeplinks.mjs && vite",
     "build": "node scripts/generate-mobile-deeplinks.mjs && tsc && vite build",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "format": "prettier --write \"src/**/*.{ts,tsx,css,json}\"",
-    "format:check": "prettier --check \"src/**/*.{ts,tsx,css,json}\"",
-    "type-check": "tsc --noEmit",
+    "build:docker": "node scripts/generate-mobile-deeplinks.mjs && vite build",
+    "lint": "biome lint .",
+    "lint:fix": "biome lint --write .",
+    "format": "biome format --write .",
+    "format:check": "biome format .",
+    "check": "biome check .",
     "test": "vitest run",
     "test:watch": "vitest",
+    "type-check": "tsc --noEmit",
     "preview": "vite preview",
     "prepare": "husky"
   },
@@ -63,10 +65,13 @@
     "jsencrypt": "^3.5.4",
     "qrcode.react": "^4.2.0",
     "react": "^19.2.4",
+    "react-day-picker": "^10.0.1",
     "react-dom": "^19.2.4",
     "react-i18next": "^16.5.4",
+    "react-icons": "^5.6.0",
     "react-router": "^7.13.0",
     "react-twemoji": "^0.7.2",
+    "react-zoom-pan-pinch": "^4.0.4",
     "recharts": "^3.7.0",
     "sigma": "^3.0.2",
     "simplex-noise": "^4.0.3",
@@ -74,40 +79,30 @@
     "zustand": "^5.0.11"
   },
   "devDependencies": {
-    "@eslint/js": "^9.39.2",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/react": "^16.3.2",
+    "@biomejs/biome": "2.5.3",
     "@types/dompurify": "^3.0.5",
     "@types/node": "^25.2.1",
     "@types/react": "^19.2.13",
     "@types/react-dom": "^19.2.3",
     "@types/react-twemoji": "^0.4.3",
     "@vitejs/plugin-react": "^5.1.2",
-    "@vitest/coverage-v8": "^4.1.7",
-    "eslint": "^9.39.2",
-    "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-react-hooks": "^7.0.1",
-    "eslint-plugin-react-refresh": "^0.5.0",
-    "globals": "^17.1.0",
     "happy-dom": "^20.9.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
     "postcss": "^8.4.31",
-    "prettier": "^3.8.1",
-    "prettier-plugin-tailwindcss": "^0.7.2",
     "tailwindcss": "^3.4.19",
     "typescript": "^5.2.2",
-    "typescript-eslint": "^8.54.0",
     "vite": "^7.3.1",
-    "vitest": "^4.1.7"
+    "vitest": "^4.1.10"
   },
   "lint-staged": {
-    "*.{ts,tsx}": [
-      "eslint --fix",
-      "prettier --write"
+    "*.{ts,tsx,json}": [
+      "biome check --write --no-errors-on-unmatched"
     ],
-    "*.{css,json}": [
-      "prettier --write"
+    "*.css": [
+      "biome format --write --no-errors-on-unmatched"
     ]
   }
 }

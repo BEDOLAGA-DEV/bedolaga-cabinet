@@ -2,46 +2,29 @@ import { useState, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import { DateField } from '../components/DateField';
 import { createNumberInputHandler } from '../utils/inputHelpers';
 import {
   promocodesApi,
-  PromoCodeDetail,
-  PromoCodeType,
-  PromoCodeCreateRequest,
-  PromoCodeUpdateRequest,
-  PromoGroup,
+  type PromoCodeDetail,
+  type PromoCodeType,
+  type PromoCodeCreateRequest,
+  type PromoCodeUpdateRequest,
+  type PromoGroup,
 } from '../api/promocodes';
 import { tariffsApi } from '../api/tariffs';
 import { usePlatform } from '../platform/hooks/usePlatform';
+import { BackIcon, RefreshIcon } from '@/components/icons';
 
-// Icons
-const BackIcon = () => (
-  <svg
-    className="h-5 w-5 text-dark-400"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={2}
-  >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-  </svg>
-);
-
-const RefreshIcon = () => (
-  <svg
-    className="h-4 w-4 animate-spin"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={2}
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"
-    />
-  </svg>
-);
+// valid_until is created as end-of-day in the admin's LOCAL tz, then stored/returned
+// as a UTC instant. Reading the picker back must convert UTC -> local date, otherwise
+// negative-offset admins see tomorrow's date and re-saving drifts the expiry forward a
+// day each time. (Mirror of DateField's local toISO; must NOT slice the raw UTC string.)
+const utcInstantToLocalDateInput = (iso: string): string => {
+  const d = new Date(iso);
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+};
 
 export default function AdminPromocodeCreate() {
   const { t } = useTranslation();
@@ -51,9 +34,18 @@ export default function AdminPromocodeCreate() {
   const { capabilities } = usePlatform();
   const isEdit = !!id;
 
-  // Form state
+  // Form state.
+  // Режим формы: «набор бонусов» (баланс/дни/промогруппа чекбоксами — тип
+  // промокода выводится из выбранной комбинации) либо особые типы, которые не
+  // комбинируются: триал и процентная скидка (скидка переиспользует те же
+  // колонки с другой семантикой — процент/часы).
   const [code, setCode] = useState('');
-  const [type, setType] = useState<PromoCodeType>('balance');
+  const [mode, setMode] = useState<'bonus_set' | 'trial_subscription' | 'discount'>('bonus_set');
+  const [includeBalance, setIncludeBalance] = useState(true);
+  const [includeDays, setIncludeDays] = useState(false);
+  const [includeGroup, setIncludeGroup] = useState(false);
+  const [includeTraffic, setIncludeTraffic] = useState(false);
+  const [trafficGb, setTrafficGb] = useState<number | ''>(0);
   const [balanceBonusRubles, setBalanceBonusRubles] = useState<number | ''>(0);
   const [subscriptionDays, setSubscriptionDays] = useState<number | ''>(0);
   const [maxUses, setMaxUses] = useState<number | ''>(1);
@@ -75,7 +67,7 @@ export default function AdminPromocodeCreate() {
   const { data: tariffsData } = useQuery({
     queryKey: ['admin-tariffs-for-promo'],
     queryFn: () => tariffsApi.getTariffs(true),
-    enabled: type === 'trial_subscription',
+    enabled: mode === 'trial_subscription',
   });
 
   const trialTariff = tariffsData?.tariffs?.find((t) => t.is_trial_available) || null;
@@ -91,7 +83,23 @@ export default function AdminPromocodeCreate() {
     refetchOnWindowFocus: false,
     select: useCallback((data: PromoCodeDetail) => {
       setCode(data.code);
-      setType(data.type);
+      if (data.type === 'trial_subscription' || data.type === 'discount') {
+        setMode(data.type);
+      } else {
+        setMode('bonus_set');
+        // Галочки поднимаем по ЗНАЧЕНИЯМ, а не по типу. С появлением трафика
+        // balance_and_days перестал означать «есть и баланс, и дни»: этот тип
+        // теперь у любого набора с трафиком, в том числе с нулевым балансом и
+        // нулём дней. По типу такой код открывался бы с двумя чужими галочками
+        // на нулях, валидация требовала бы «больше 0», и Сохранить не работало
+        // бы, пока админ их не снимет, — а подсказка толкает вместо этого
+        // вписать сумму и молча добавить коду бонус, которого в нём не было.
+        setIncludeBalance(data.type === 'balance' || (data.balance_bonus_rubles || 0) > 0);
+        setIncludeDays(data.type === 'subscription_days' || (data.subscription_days || 0) > 0);
+        // Промогруппа комбинируется с любым составом (bэкенд назначает её
+        // независимо от типа), поэтому чекбокс — по факту наличия группы
+        setIncludeGroup(data.type === 'promo_group' || !!data.promo_group_id);
+      }
       // For discount type, balance_bonus_kopeks is percentage directly
       // For balance type, balance_bonus_kopeks needs to be converted to rubles
       if (data.type === 'discount') {
@@ -100,10 +108,12 @@ export default function AdminPromocodeCreate() {
         setBalanceBonusRubles(data.balance_bonus_rubles || 0);
       }
       setSubscriptionDays(data.subscription_days || 0);
+      setTrafficGb(data.traffic_gb || 0);
+      setIncludeTraffic((data.traffic_gb || 0) > 0);
       setMaxUses(data.max_uses || 1);
       setIsActive(data.is_active ?? true);
       setFirstPurchaseOnly(data.first_purchase_only || false);
-      setValidUntil(data.valid_until ? data.valid_until.split('T')[0] : '');
+      setValidUntil(data.valid_until ? utcInstantToLocalDateInput(data.valid_until) : '');
       setPromoGroupId(data.promo_group_id || null);
       setTariffId(data.tariff_id || null);
       return data;
@@ -129,27 +139,55 @@ export default function AdminPromocodeCreate() {
     },
   });
 
+  // Тип промокода выводится из режима и выбранных чекбоксов. «Только
+  // промогруппа» — легаси-тип promo_group; группа в комбинации с балансом/днями
+  // едет через promo_group_id при любом типе (бэкенд применяет её независимо).
+  const derivedType: PromoCodeType =
+    mode === 'bonus_set'
+      ? includeTraffic || (includeBalance && includeDays)
+        ? 'balance_and_days'
+        : includeBalance
+          ? 'balance'
+          : includeDays
+            ? 'subscription_days'
+            : 'promo_group'
+      : mode;
+
   const handleSubmit = () => {
     // For discount: balance_bonus_kopeks = percent (integer), subscription_days = hours
     // For balance: balance_bonus_kopeks = rubles * 100
     const balanceValue = balanceBonusRubles === '' ? 0 : balanceBonusRubles;
     const daysValue = subscriptionDays === '' ? 0 : subscriptionDays;
     const maxUsesValue = maxUses === '' ? 0 : maxUses;
+    const trafficValue = trafficGb === '' ? 0 : trafficGb;
 
     const data: PromoCodeCreateRequest | PromoCodeUpdateRequest = {
       code: code.trim().toUpperCase(),
-      type,
+      type: derivedType,
       balance_bonus_kopeks:
-        type === 'discount'
+        mode === 'discount'
           ? Math.round(balanceValue) // percent as integer
-          : Math.round(balanceValue * 100), // rubles to kopeks
-      subscription_days: daysValue,
+          : mode === 'bonus_set' && includeBalance
+            ? Math.round(balanceValue * 100) // rubles to kopeks
+            : 0,
+      subscription_days:
+        mode === 'discount' ||
+        mode === 'trial_subscription' ||
+        (mode === 'bonus_set' && includeDays)
+          ? daysValue
+          : 0,
+      traffic_gb: mode === 'bonus_set' && includeTraffic ? trafficValue : 0,
       max_uses: maxUsesValue,
       is_active: isActive,
       first_purchase_only: firstPurchaseOnly,
-      valid_until: validUntil ? new Date(validUntil).toISOString() : null,
-      promo_group_id: type === 'promo_group' ? promoGroupId : null,
-      ...(type === 'trial_subscription' && tariffId ? { tariff_id: tariffId } : {}),
+      // The picker yields a date-only 'YYYY-MM-DD'. A promo "valid until D" must
+      // stay valid through the WHOLE of day D, so anchor to end-of-day in the
+      // admin's local timezone. `new Date('YYYY-MM-DD')` parses as UTC midnight
+      // (the START of the day) — for a GMT+3 admin that made a code picked for
+      // "today" already expired by 3am, surfacing as a bogus "expired" error.
+      valid_until: validUntil ? new Date(`${validUntil}T23:59:59`).toISOString() : null,
+      promo_group_id: mode === 'bonus_set' && includeGroup ? promoGroupId : null,
+      ...(mode === 'trial_subscription' && tariffId ? { tariff_id: tariffId } : {}),
     };
 
     if (isEdit) {
@@ -166,39 +204,43 @@ export default function AdminPromocodeCreate() {
   const balanceValue = balanceBonusRubles === '' ? 0 : balanceBonusRubles;
   const daysValue = subscriptionDays === '' ? 0 : subscriptionDays;
 
-  const isValid = (): boolean => {
-    if (!isCodeValid) return false;
-    if (type === 'balance' && balanceValue <= 0) return false;
-    if ((type === 'subscription_days' || type === 'trial_subscription') && daysValue <= 0)
-      return false;
-    if (type === 'promo_group' && !promoGroupId) return false;
-    if (type === 'discount' && (balanceValue <= 0 || balanceValue > 100 || daysValue <= 0))
-      return false;
-    return true;
-  };
-
   // Collect validation errors for display
   const validationErrors: string[] = [];
   if (!isCodeValid) {
     validationErrors.push('codeRequired');
   }
-  if (type === 'balance' && balanceValue <= 0) {
-    validationErrors.push('balanceRequired');
+  if (mode === 'bonus_set') {
+    if (!includeBalance && !includeDays && !includeGroup && !includeTraffic) {
+      validationErrors.push('bonusSetEmpty');
+    }
+    if (includeBalance && balanceValue <= 0) {
+      validationErrors.push('balanceRequired');
+    }
+    if (includeDays && daysValue <= 0) {
+      validationErrors.push('daysRequired');
+    }
+    if (includeGroup && !promoGroupId) {
+      validationErrors.push('groupRequired');
+    }
+    if (includeTraffic && (trafficGb === '' || trafficGb <= 0)) {
+      validationErrors.push('trafficRequired');
+    }
   }
-  if ((type === 'subscription_days' || type === 'trial_subscription') && daysValue <= 0) {
+  if (mode === 'trial_subscription' && daysValue <= 0) {
     validationErrors.push('daysRequired');
   }
-  if (type === 'promo_group' && !promoGroupId) {
-    validationErrors.push('groupRequired');
-  }
-  if (type === 'discount') {
+  if (mode === 'discount') {
     if (balanceValue <= 0 || balanceValue > 100) {
       validationErrors.push('discountPercentInvalid');
     }
-    if (daysValue <= 0) {
+    // 0 часов = «бессрочно до первой покупки» — разрешено (как в isValid до
+    // унификации; раньше isValid и список ошибок противоречили друг другу)
+    if (daysValue < 0) {
       validationErrors.push('discountHoursRequired');
     }
   }
+
+  const isValid = (): boolean => validationErrors.length === 0;
 
   // Loading state
   if (isEdit && isLoadingPromocode) {
@@ -236,11 +278,12 @@ export default function AdminPromocodeCreate() {
       <div className="card space-y-4">
         {/* Code */}
         <div>
-          <label className="mb-2 block text-sm font-medium text-dark-300">
+          <label htmlFor="pc-code" className="mb-2 block text-sm font-medium text-dark-300">
             {t('admin.promocodes.form.code')}
             <span className="text-error-400">*</span>
           </label>
           <input
+            id="pc-code"
             type="text"
             value={code}
             onChange={(e) => setCode(e.target.value.toUpperCase())}
@@ -252,35 +295,76 @@ export default function AdminPromocodeCreate() {
 
         {/* Type */}
         <div>
-          <label className="mb-2 block text-sm font-medium text-dark-300">
+          <label htmlFor="pc-type" className="mb-2 block text-sm font-medium text-dark-300">
             {t('admin.promocodes.form.type')}
           </label>
           <select
-            value={type}
-            onChange={(e) => setType(e.target.value as PromoCodeType)}
+            id="pc-type"
+            value={mode}
+            onChange={(e) => setMode(e.target.value as typeof mode)}
             className="input"
           >
-            <option value="balance">{t('admin.promocodes.form.typeBalance')}</option>
-            <option value="subscription_days">
-              {t('admin.promocodes.form.typeSubscriptionDays')}
-            </option>
+            <option value="bonus_set">{t('admin.promocodes.form.typeBonusSet')}</option>
             <option value="trial_subscription">
               {t('admin.promocodes.form.typeTrialSubscription')}
             </option>
-            <option value="promo_group">{t('admin.promocodes.form.typePromoGroup')}</option>
             <option value="discount">{t('admin.promocodes.form.typeDiscount')}</option>
           </select>
         </div>
 
-        {/* Type-specific fields */}
-        {type === 'balance' && (
+        {/* Состав набора бонусов — любая комбинация чекбоксами */}
+        {mode === 'bonus_set' && (
           <div>
-            <label className="mb-2 block text-sm font-medium text-dark-300">
+            <div className="mb-2 block text-sm font-medium text-dark-300">
+              {t('admin.promocodes.form.bonusComposition')}
+              <span className="text-error-400">*</span>
+            </div>
+            <div className="flex flex-col gap-2">
+              {(
+                [
+                  ['includeBalance', includeBalance, setIncludeBalance] as const,
+                  ['includeDays', includeDays, setIncludeDays] as const,
+                  ['includeTraffic', includeTraffic, setIncludeTraffic] as const,
+                  ['includePromoGroup', includeGroup, setIncludeGroup] as const,
+                ] as const
+              ).map(([key, checked, setChecked]) => (
+                <label key={key} className="flex cursor-pointer items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setChecked(!checked)}
+                    role="switch"
+                    aria-checked={checked}
+                    aria-label={t(`admin.promocodes.form.${key}`)}
+                    className={`relative h-6 w-10 rounded-full transition-colors ${
+                      checked ? 'bg-accent-500' : 'bg-dark-600'
+                    }`}
+                  >
+                    <span
+                      className={`absolute top-1 h-4 w-4 rounded-full bg-white transition-transform ${
+                        checked ? 'left-5' : 'left-1'
+                      }`}
+                    />
+                  </button>
+                  <span className="text-sm text-dark-200">{t(`admin.promocodes.form.${key}`)}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Type-specific fields */}
+        {mode === 'bonus_set' && includeBalance && (
+          <div>
+            <label
+              htmlFor="pc-balance-bonus"
+              className="mb-2 block text-sm font-medium text-dark-300"
+            >
               {t('admin.promocodes.form.bonusAmount')}
               <span className="text-error-400">*</span>
             </label>
             <div className="flex items-center gap-2">
               <input
+                id="pc-balance-bonus"
                 type="number"
                 value={balanceBonusRubles}
                 onChange={createNumberInputHandler(setBalanceBonusRubles, 0)}
@@ -294,14 +378,37 @@ export default function AdminPromocodeCreate() {
           </div>
         )}
 
-        {(type === 'subscription_days' || type === 'trial_subscription') && (
+        {mode === 'bonus_set' && includeTraffic && (
           <div>
-            <label className="mb-2 block text-sm font-medium text-dark-300">
+            <label htmlFor="pc-traffic-gb" className="mb-2 block text-sm font-medium text-dark-300">
+              {t('admin.promocodes.form.trafficAmount')}
+              <span className="text-error-400">*</span>
+            </label>
+            <div className="flex items-center gap-2">
+              <input
+                id="pc-traffic-gb"
+                type="number"
+                value={trafficGb}
+                onChange={createNumberInputHandler(setTrafficGb, 0)}
+                className="input w-32"
+                min={0}
+                step={1}
+                placeholder="0"
+              />
+              <span className="text-dark-400">{t('admin.promocodes.form.gb')}</span>
+            </div>
+          </div>
+        )}
+
+        {(mode === 'trial_subscription' || (mode === 'bonus_set' && includeDays)) && (
+          <div>
+            <label htmlFor="pc-sub-days" className="mb-2 block text-sm font-medium text-dark-300">
               {t('admin.promocodes.form.daysCount')}
               <span className="text-error-400">*</span>
             </label>
             <div className="flex items-center gap-2">
               <input
+                id="pc-sub-days"
                 type="number"
                 value={subscriptionDays}
                 onChange={createNumberInputHandler(setSubscriptionDays, 0)}
@@ -314,12 +421,13 @@ export default function AdminPromocodeCreate() {
           </div>
         )}
 
-        {type === 'trial_subscription' && (
+        {mode === 'trial_subscription' && (
           <div>
-            <label className="mb-2 block text-sm font-medium text-dark-300">
+            <label htmlFor="pc-tariff" className="mb-2 block text-sm font-medium text-dark-300">
               {t('admin.promocodes.form.tariff', 'Тариф')}
             </label>
             <select
+              id="pc-tariff"
               value={tariffId || ''}
               onChange={(e) => setTariffId(e.target.value ? parseInt(e.target.value) : null)}
               className="input"
@@ -348,13 +456,17 @@ export default function AdminPromocodeCreate() {
           </div>
         )}
 
-        {type === 'promo_group' && (
+        {mode === 'bonus_set' && includeGroup && (
           <div>
-            <label className="mb-2 block text-sm font-medium text-dark-300">
+            <label
+              htmlFor="pc-promo-group"
+              className="mb-2 block text-sm font-medium text-dark-300"
+            >
               {t('admin.promocodes.form.discountGroup')}
               <span className="text-error-400">*</span>
             </label>
             <select
+              id="pc-promo-group"
               value={promoGroupId || ''}
               onChange={(e) => setPromoGroupId(e.target.value ? parseInt(e.target.value) : null)}
               className="input"
@@ -369,15 +481,19 @@ export default function AdminPromocodeCreate() {
           </div>
         )}
 
-        {type === 'discount' && (
+        {mode === 'discount' && (
           <>
             <div>
-              <label className="mb-2 block text-sm font-medium text-dark-300">
+              <label
+                htmlFor="pc-discount-percent"
+                className="mb-2 block text-sm font-medium text-dark-300"
+              >
                 {t('admin.promocodes.form.discountPercent')}
                 <span className="text-error-400">*</span>
               </label>
               <div className="flex items-center gap-2">
                 <input
+                  id="pc-discount-percent"
                   type="number"
                   value={balanceBonusRubles}
                   onChange={(e) => {
@@ -400,12 +516,16 @@ export default function AdminPromocodeCreate() {
               </p>
             </div>
             <div>
-              <label className="mb-2 block text-sm font-medium text-dark-300">
+              <label
+                htmlFor="pc-discount-validity"
+                className="mb-2 block text-sm font-medium text-dark-300"
+              >
                 {t('admin.promocodes.form.validityPeriod')}
                 <span className="text-error-400">*</span>
               </label>
               <div className="flex items-center gap-2">
                 <input
+                  id="pc-discount-validity"
                   type="number"
                   value={subscriptionDays}
                   onChange={(e) => {
@@ -417,7 +537,7 @@ export default function AdminPromocodeCreate() {
                     }
                   }}
                   className="input w-32"
-                  min={1}
+                  min={0}
                   placeholder="0"
                 />
                 <span className="text-dark-400">{t('admin.promocodes.form.hours')}</span>
@@ -431,11 +551,12 @@ export default function AdminPromocodeCreate() {
 
         {/* Max Uses */}
         <div>
-          <label className="mb-2 block text-sm font-medium text-dark-300">
+          <label htmlFor="pc-max-uses" className="mb-2 block text-sm font-medium text-dark-300">
             {t('admin.promocodes.form.maxUses')}
           </label>
           <div className="flex items-center gap-2">
             <input
+              id="pc-max-uses"
               type="number"
               value={maxUses}
               onChange={createNumberInputHandler(setMaxUses, 0)}
@@ -451,14 +572,13 @@ export default function AdminPromocodeCreate() {
 
         {/* Valid Until */}
         <div>
-          <label className="mb-2 block text-sm font-medium text-dark-300">
+          <label htmlFor="pc-valid-until" className="mb-2 block text-sm font-medium text-dark-300">
             {t('admin.promocodes.form.validUntil')}
           </label>
-          <input
-            type="date"
+          <DateField
             value={validUntil}
-            onChange={(e) => setValidUntil(e.target.value)}
-            className="input"
+            onChange={setValidUntil}
+            className="flex w-full items-center gap-2 rounded-xl border border-dark-700/50 bg-dark-800/50 px-4 py-3 text-sm text-dark-100 transition-colors hover:border-accent-500/50"
           />
           <p className="mt-1 text-xs text-dark-500">{t('admin.promocodes.form.validUntilHint')}</p>
         </div>
@@ -469,6 +589,9 @@ export default function AdminPromocodeCreate() {
             <button
               type="button"
               onClick={() => setIsActive(!isActive)}
+              role="switch"
+              aria-checked={isActive}
+              aria-label={t('admin.promocodes.form.active')}
               className={`relative h-6 w-10 rounded-full transition-colors ${
                 isActive ? 'bg-accent-500' : 'bg-dark-600'
               }`}
@@ -486,6 +609,9 @@ export default function AdminPromocodeCreate() {
             <button
               type="button"
               onClick={() => setFirstPurchaseOnly(!firstPurchaseOnly)}
+              role="switch"
+              aria-checked={firstPurchaseOnly}
+              aria-label={t('admin.promocodes.form.firstPurchaseOnly')}
               className={`relative h-6 w-10 rounded-full transition-colors ${
                 firstPurchaseOnly ? 'bg-accent-500' : 'bg-dark-600'
               }`}
@@ -529,7 +655,7 @@ export default function AdminPromocodeCreate() {
             disabled={!isValid() || isLoading}
             className="btn-primary flex items-center gap-2"
           >
-            {isLoading && <RefreshIcon />}
+            {isLoading && <RefreshIcon spinning />}
             {isLoading ? t('admin.promocodes.form.saving') : t('admin.promocodes.form.save')}
           </button>
         </div>

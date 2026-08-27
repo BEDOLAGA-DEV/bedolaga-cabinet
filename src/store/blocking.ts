@@ -5,6 +5,7 @@ export type BlockingType =
   | 'channel_subscription'
   | 'blacklisted'
   | 'account_deleted'
+  | 'backend_unavailable'
   | null;
 
 interface MaintenanceInfo {
@@ -54,6 +55,9 @@ interface BlockingState {
   setChannelSubscription: (info: ChannelSubscriptionInfo) => void;
   setBlacklisted: (info: BlacklistedInfo) => void;
   setAccountDeleted: (info: AccountDeletedInfo) => void;
+  /** Backend is unreachable (transport-level failure). Renders the full-screen
+   *  ServiceUnavailableScreen. No info payload — the screen shows static copy. */
+  setBackendUnavailable: () => void;
   clearBlocking: () => void;
 }
 
@@ -98,6 +102,15 @@ export const useBlockingStore = create<BlockingState>((set) => ({
       maintenanceInfo: null,
       channelInfo: null,
       blacklistedInfo: null,
+    }),
+
+  setBackendUnavailable: () =>
+    set({
+      blockingType: 'backend_unavailable',
+      maintenanceInfo: null,
+      channelInfo: null,
+      blacklistedInfo: null,
+      accountDeletedInfo: null,
     }),
 
   clearBlocking: () =>

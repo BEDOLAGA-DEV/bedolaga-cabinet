@@ -8,13 +8,6 @@ interface FortuneWheelProps {
   onSpinComplete: () => void;
 }
 
-// Pre-generate sparkle positions to avoid recalculating on each render
-const SPARKLE_POSITIONS = Array.from({ length: 8 }, (_, i) => ({
-  top: `${20 + ((i * 10) % 60)}%`,
-  left: `${15 + ((i * 13) % 70)}%`,
-  delay: `${i * 0.15}s`,
-}));
-
 const FortuneWheel = memo(function FortuneWheel({
   prizes,
   isSpinning,
@@ -206,6 +199,21 @@ const FortuneWheel = memo(function FortuneWheel({
             <filter id="textShadow" x="-20%" y="-20%" width="140%" height="140%">
               <feDropShadow dx="0" dy="1" stdDeviation="1" floodColor="#000" floodOpacity="0.7" />
             </filter>
+
+            {/* LED glow as a soft gradient instead of a CSS blur. CSS filters on
+                cx/cy-positioned SVG elements mis-render under the spin's GPU
+                compositing — phantom streaks toward the centre that are often
+                invisible in screen recordings but visible live. */}
+            <radialGradient id="ledGlowGrad">
+              <stop offset="0%" stopColor="#FEF08A" stopOpacity="0.95" />
+              <stop offset="45%" stopColor="#FDE047" stopOpacity="0.55" />
+              <stop offset="100%" stopColor="#FDE047" stopOpacity="0" />
+            </radialGradient>
+
+            {/* SVG-native emoji shadow (not a CSS filter) for the same reason */}
+            <filter id="emojiShadow" x="-30%" y="-30%" width="160%" height="160%">
+              <feDropShadow dx="0" dy="2" stdDeviation="2" floodColor="#000" floodOpacity="0.5" />
+            </filter>
           </defs>
 
           {/* Background shadow */}
@@ -262,9 +270,9 @@ const FortuneWheel = memo(function FortuneWheel({
                     className="led-glow"
                     cx={dotX}
                     cy={dotY}
-                    r={5}
-                    fill="#FEF08A"
-                    style={{ filter: 'blur(2px)', animationDelay: delay }}
+                    r={9}
+                    fill="url(#ledGlowGrad)"
+                    style={{ animationDelay: delay }}
                   />
                   <circle
                     className="led-dot"
@@ -331,7 +339,7 @@ const FortuneWheel = memo(function FortuneWheel({
                   dominantBaseline="middle"
                   fontSize={prizes.length <= 6 ? '32' : '26'}
                   transform={`rotate(${pos.rotation}, ${pos.x}, ${pos.y})`}
-                  style={{ filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.5))' }}
+                  filter="url(#emojiShadow)"
                 >
                   {prize.emoji}
                 </text>
@@ -400,25 +408,6 @@ const FortuneWheel = memo(function FortuneWheel({
           />
         )}
       </div>
-
-      {/* Sparkle effects when spinning - optimized with pre-calculated positions */}
-      {isSpinning && (
-        <div className="pointer-events-none absolute inset-0 overflow-hidden">
-          {SPARKLE_POSITIONS.map((pos, i) => (
-            <div
-              key={`sparkle-${i}`}
-              className="absolute h-2 w-2 animate-ping rounded-full bg-yellow-300"
-              style={{
-                top: pos.top,
-                left: pos.left,
-                animationDelay: pos.delay,
-                animationDuration: '1.5s',
-                opacity: 0.7,
-              }}
-            />
-          ))}
-        </div>
-      )}
     </div>
   );
 });

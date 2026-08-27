@@ -2,7 +2,10 @@
 <html lang="ru" class="dark">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" href="data:," />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2064%2064'%3E%3Crect%20width='64'%20height='64'%20rx='14'%20fill='%230a0f1a'/%3E%3Ctext%20x='50%25'%20y='50%25'%20font-family='Manrope,Arial,sans-serif'%20font-size='38'%20font-weight='700'%20fill='%23ffffff'%20text-anchor='middle'%20dominant-baseline='central'%3EV%3C/text%3E%3C/svg%3E"
+    />
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
@@ -12,14 +15,14 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="format-detection" content="telephone=no" />
     <meta name="referrer" content="strict-origin-when-cross-origin" />
-    <title>Loading...</title>
+    <title>VPN</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700&display=swap"
       rel="stylesheet"
       media="print"
-      onload="this.media='all'"
+      onload="this.media = 'all'"
     />
     <noscript>
       <link
@@ -29,8 +32,9 @@
     </noscript>
     <script>
       // Load Telegram Web App script only inside Telegram environment
-      (function() {
-        var isTelegram = window.TelegramWebviewProxy ||
+      (function () {
+        var isTelegram =
+          window.TelegramWebviewProxy ||
           location.hash.indexOf('tgWebApp') !== -1 ||
           location.search.indexOf('tgWebApp') !== -1;
         if (isTelegram) {

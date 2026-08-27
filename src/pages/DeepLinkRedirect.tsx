@@ -3,12 +3,22 @@ import { useSearchParams, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { brandingApi } from '../api/branding';
+import { copyToClipboard } from '../utils/clipboard';
+import { openAppScheme } from '../utils/openAppScheme';
+import {
+  CheckIcon,
+  CopyIcon,
+  ExclamationIcon,
+  ExternalLinkIcon,
+  LinkIcon,
+} from '@/components/icons';
 
 type Status = 'countdown' | 'fallback' | 'error';
 
 // App schemes configuration - same as miniapp
 const appSchemes = [
   { scheme: 'happ://', icon: 'H', name: 'Happ' },
+  { scheme: 'incy://', icon: 'I', name: 'INCY' },
   { scheme: 'flclash://', icon: 'F', name: 'FlClash' },
   { scheme: 'clash://', icon: 'C', name: 'Clash Meta' },
   { scheme: 'sing-box://', icon: 'S', name: 'sing-box' },
@@ -88,10 +98,12 @@ export default function DeepLinkRedirect() {
   const appName = appInfo?.name || appParam || 'VPN';
   const appIcon = appInfo?.icon || appName[0]?.toUpperCase() || 'V';
 
-  // Open deep link - same as miniapp, just window.location.href
+  // Open deep link via a contained iframe attempt so a custom scheme the in-app
+  // WebView can't resolve doesn't replace this page with net::ERR_UNKNOWN_URL_SCHEME
+  // (Android) / silently fail (iOS) and wipe the fallback UI. See openAppScheme.
   const openDeepLink = useCallback(() => {
     if (!deepLink || !isValidDeepLink(deepLink)) return;
-    window.location.href = deepLink;
+    openAppScheme(deepLink);
   }, [deepLink]);
 
   // Countdown timer effect
@@ -132,20 +144,9 @@ export default function DeepLinkRedirect() {
     if (copiedTimeoutRef.current) {
       clearTimeout(copiedTimeoutRef.current);
     }
-    try {
-      await navigator.clipboard.writeText(linkToCopy);
-      setCopied(true);
-      copiedTimeoutRef.current = setTimeout(() => setCopied(false), 2000);
-    } catch {
-      const textarea = document.createElement('textarea');
-      textarea.value = linkToCopy;
-      document.body.appendChild(textarea);
-      textarea.select();
-      document.execCommand('copy');
-      document.body.removeChild(textarea);
-      setCopied(true);
-      copiedTimeoutRef.current = setTimeout(() => setCopied(false), 2000);
-    }
+    await copyToClipboard(linkToCopy);
+    setCopied(true);
+    copiedTimeoutRef.current = setTimeout(() => setCopied(false), 2000);
   };
 
   // Cleanup copied timeout on unmount
@@ -161,7 +162,7 @@ export default function DeepLinkRedirect() {
   const progress = ((COUNTDOWN_SECONDS - countdown) / COUNTDOWN_SECONDS) * 100;
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-4">
+    <div className="min-h-viewport flex items-center justify-center p-4">
       {/* Background */}
       <div className="fixed inset-0 bg-gradient-to-br from-dark-950 via-dark-900 to-dark-950" />
       <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-accent-500/10 via-transparent to-transparent" />
@@ -219,19 +220,7 @@ export default function DeepLinkRedirect() {
               onClick={openDeepLink}
               className="btn-primary flex w-full items-center justify-center gap-2 py-3"
             >
-              <svg
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
-                />
-              </svg>
+              <ExternalLinkIcon className="h-5 w-5" />
               {t('deepLink.openApp')}
             </button>
           </div>
@@ -253,36 +242,12 @@ export default function DeepLinkRedirect() {
               >
                 {copied ? (
                   <>
-                    <svg
-                      className="h-5 w-5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M4.5 12.75l6 6 9-13.5"
-                      />
-                    </svg>
+                    <CheckIcon className="h-5 w-5" />
                     {t('deepLink.copied')}
                   </>
                 ) : (
                   <>
-                    <svg
-                      className="h-5 w-5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={1.5}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-                      />
-                    </svg>
+                    <CopyIcon className="h-5 w-5" />
                     {t('deepLink.copyLink')}
                   </>
                 )}
@@ -293,19 +258,7 @@ export default function DeepLinkRedirect() {
                 onClick={openDeepLink}
                 className="btn-secondary flex w-full items-center justify-center gap-2"
               >
-                <svg
-                  className="h-5 w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
-                  />
-                </svg>
+                <ExternalLinkIcon className="h-5 w-5" />
                 {t('deepLink.tryAgain')}
               </button>
 
@@ -337,19 +290,7 @@ export default function DeepLinkRedirect() {
         {status === 'error' && (
           <div className="card !bg-dark-800/80 p-6 backdrop-blur-sm">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-error-500/20">
-              <svg
-                className="h-8 w-8 text-error-400"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
-                />
-              </svg>
+              <ExclamationIcon className="h-8 w-8 text-error-400" />
             </div>
             <p className="mb-2 font-medium text-dark-200">{t('deepLink.errorTitle')}</p>
             <p className="mb-6 text-sm text-dark-400">{t('deepLink.errorDesc')}</p>
@@ -361,19 +302,7 @@ export default function DeepLinkRedirect() {
 
         {/* Footer */}
         <div className="mt-8 flex items-center justify-center gap-2 text-dark-600">
-          <svg
-            className="h-4 w-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={1.5}
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"
-            />
-          </svg>
+          <LinkIcon className="h-4 w-4" />
           <span className="text-xs">VPN Config Redirect</span>
         </div>
       </div>

@@ -1,6 +1,7 @@
 import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
 import { motion } from 'framer-motion';
 import { forwardRef, type ComponentPropsWithoutRef } from 'react';
+import { CheckIcon, ChevronRightIcon, DotIcon } from '@/components/icons';
 import { cn } from '@/lib/utils';
 import { usePlatform } from '@/platform';
 import { dropdown, dropdownTransition } from '../../motion/transitions';
@@ -14,41 +15,9 @@ export {
   RadioGroup as DropdownMenuRadioGroup,
 } from '@radix-ui/react-dropdown-menu';
 
-// Icons
-const CheckIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-    <path
-      d="M3.5 8.5L6.5 11.5L12.5 4.5"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
-
-const ChevronRightIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-    <path
-      d="M6 4l4 4-4 4"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
-
-const DotIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-    <circle cx="8" cy="8" r="3" fill="currentColor" />
-  </svg>
-);
-
 // SubTrigger
-export interface DropdownMenuSubTriggerProps extends ComponentPropsWithoutRef<
-  typeof DropdownMenuPrimitive.SubTrigger
-> {
+export interface DropdownMenuSubTriggerProps
+  extends ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.SubTrigger> {
   inset?: boolean;
 }
 
@@ -145,9 +114,8 @@ export const DropdownMenuContent = forwardRef<HTMLDivElement, DropdownMenuConten
 DropdownMenuContent.displayName = 'DropdownMenuContent';
 
 // Item
-export interface DropdownMenuItemProps extends ComponentPropsWithoutRef<
-  typeof DropdownMenuPrimitive.Item
-> {
+export interface DropdownMenuItemProps
+  extends ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Item> {
   inset?: boolean;
   destructive?: boolean;
 }
@@ -240,9 +208,8 @@ export const DropdownMenuRadioItem = forwardRef<HTMLDivElement, DropdownMenuRadi
 DropdownMenuRadioItem.displayName = 'DropdownMenuRadioItem';
 
 // Label
-export interface DropdownMenuLabelProps extends ComponentPropsWithoutRef<
-  typeof DropdownMenuPrimitive.Label
-> {
+export interface DropdownMenuLabelProps
+  extends ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Label> {
   inset?: boolean;
 }
 

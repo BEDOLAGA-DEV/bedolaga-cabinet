@@ -13,8 +13,11 @@ import {
   enableVerticalSwipes as sdkEnableVerticalSwipes,
   expandViewport,
   retrieveLaunchParams,
-  retrieveRawInitData,
+  themeParamsState,
+  closeMiniApp as sdkCloseMiniApp,
+  postEvent,
 } from '@telegram-apps/sdk-react';
+import { getTelegramInitData as readTelegramInitData } from '../utils/telegramInitData';
 
 const FULLSCREEN_CACHE_KEY = 'cabinet_fullscreen_enabled';
 
@@ -49,6 +52,34 @@ export function isInTelegramWebApp(): boolean {
   return detectTelegram();
 }
 
+/**
+ * Closes the Telegram Mini App as reliably as possible. All three paths emit the
+ * same `web_app_close` event to the Telegram client; we try the most broadly
+ * compatible first and stop at the first that doesn't throw:
+ *   1) the legacy `window.Telegram.WebApp.close()` global (telegram-web-app.js,
+ *      loaded in index.html) — widest client coverage, no SDK-mount dependency;
+ *   2) the modern SDK `closeMiniApp()` (mini app is mounted on init);
+ *   3) the raw `postEvent('web_app_close')` protocol event — no global/mount
+ *      dependency at all.
+ * Outside Telegram it is a safe no-op.
+ */
+export function closeTelegramApp(): void {
+  try {
+    const wa = window.Telegram?.WebApp;
+    if (wa?.close) {
+      wa.close();
+      return;
+    }
+  } catch {}
+  try {
+    sdkCloseMiniApp();
+    return;
+  } catch {}
+  try {
+    postEvent('web_app_close');
+  } catch {}
+}
+
 export function isTelegramMobile(): boolean {
   try {
     const { tgWebAppPlatform } = retrieveLaunchParams();
@@ -59,8 +90,44 @@ export function isTelegramMobile(): boolean {
 }
 
 export function getTelegramInitData(): string | null {
+  return readTelegramInitData();
+}
+
+function isDarkHexColor(hex: string): boolean {
+  const m = hex.replace('#', '');
+  const full = m.length === 3 ? m.replace(/(.)/g, '$1$1') : m;
+  if (full.length !== 6) return false;
+  const r = parseInt(full.slice(0, 2), 16);
+  const g = parseInt(full.slice(2, 4), 16);
+  const b = parseInt(full.slice(4, 6), 16);
+  // Perceived sRGB luminance; below 0.5 reads as a dark surface.
+  return (0.299 * r + 0.587 * g + 0.114 * b) / 255 < 0.5;
+}
+
+/**
+ * The Telegram client's effective color scheme ('light' | 'dark'), derived from
+ * the theme background color. Returns null outside Telegram or before theme params load.
+ */
+export function getTelegramColorScheme(): 'light' | 'dark' | null {
+  if (!detectTelegram()) return null;
   try {
-    return retrieveRawInitData() || null;
+    const bg = themeParamsState()?.bgColor;
+    return bg ? (isDarkHexColor(bg) ? 'dark' : 'light') : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * The user's Telegram client language as a 2-letter code (e.g. 'en'), or null
+ * outside Telegram / when unavailable.
+ */
+export function getTelegramLanguageCode(): string | null {
+  if (!detectTelegram()) return null;
+  try {
+    const user = retrieveLaunchParams().tgWebAppData?.user as { languageCode?: string } | undefined;
+    const code = user?.languageCode;
+    return code ? code.split('-')[0].toLowerCase() : null;
   } catch {
     return null;
   }

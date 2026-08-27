@@ -1,4 +1,12 @@
 import axios from 'axios';
+import {
+  getCloudStorageItem,
+  setCloudStorageItem,
+  deleteCloudStorageItem,
+} from '@telegram-apps/sdk-react';
+import { isInTelegramWebApp } from '../hooks/useTelegramSDK';
+import { API } from '../config/constants';
+import { reportPossibleBackendDown } from '../api/health';
 
 const TOKEN_KEYS = {
   ACCESS: 'access_token',
@@ -6,6 +14,42 @@ const TOKEN_KEYS = {
   USER: 'user',
   TELEGRAM_INIT: 'telegram_init_data',
 } as const;
+
+// --- Telegram CloudStorage backup for the refresh token ---
+// The Telegram WebView can wipe localStorage between sessions. Mirroring the refresh
+// token to per-user CloudStorage lets initialize() recover the session instead of
+// dropping the user to the login screen. Best-effort: failures fall back to localStorage.
+const CLOUD_REFRESH_KEY = TOKEN_KEYS.REFRESH;
+
+function mirrorRefreshTokenToCloud(refreshToken: string): void {
+  if (!isInTelegramWebApp()) return;
+  try {
+    void setCloudStorageItem(CLOUD_REFRESH_KEY, refreshToken).catch(() => {});
+  } catch {}
+}
+
+function removeRefreshTokenFromCloud(): void {
+  if (!isInTelegramWebApp()) return;
+  try {
+    void deleteCloudStorageItem(CLOUD_REFRESH_KEY).catch(() => {});
+  } catch {}
+}
+
+export async function restoreRefreshTokenFromCloud(): Promise<string | null> {
+  if (!isInTelegramWebApp()) return null;
+  try {
+    const value = await getCloudStorageItem(CLOUD_REFRESH_KEY);
+    const token = value || null;
+    if (token) {
+      try {
+        localStorage.setItem(TOKEN_KEYS.REFRESH, token);
+      } catch {}
+    }
+    return token;
+  } catch {
+    return null;
+  }
+}
 
 interface JWTPayload {
   exp?: number;
@@ -64,6 +108,7 @@ export const tokenStorage = {
       sessionStorage.setItem(TOKEN_KEYS.ACCESS, accessToken);
       localStorage.setItem(TOKEN_KEYS.REFRESH, refreshToken);
       sessionStorage.removeItem(TOKEN_KEYS.REFRESH);
+      mirrorRefreshTokenToCloud(refreshToken);
     } catch {}
   },
 
@@ -83,6 +128,7 @@ export const tokenStorage = {
       localStorage.removeItem(TOKEN_KEYS.ACCESS);
       localStorage.removeItem(TOKEN_KEYS.REFRESH);
       localStorage.removeItem(TOKEN_KEYS.USER);
+      removeRefreshTokenFromCloud();
     } catch {}
   },
 
@@ -161,6 +207,17 @@ class TokenRefreshManager {
   private subscribers: ((token: string | null) => void)[] = [];
   private refreshEndpoint = '/api/cabinet/auth/refresh';
 
+  /**
+   * True when the most recent refresh failed at the TRANSPORT level (backend
+   * unreachable / timeout) rather than because the refresh token was rejected.
+   * Callers read this right after a null `refreshAccessToken()` to decide whether
+   * to destroy the session (rejected token) or KEEP it so the recoverable
+   * ServiceUnavailableScreen can resume once the backend returns. Synchronously
+   * accurate: it is set inside doRefresh before the shared promise resolves, so
+   * every awaiter (including deduped concurrent callers) reads a consistent value.
+   */
+  lastFailureWasTransport = false;
+
   setRefreshEndpoint(endpoint: string): void {
     this.refreshEndpoint = endpoint;
   }
@@ -169,6 +226,8 @@ class TokenRefreshManager {
     if (this.isRefreshing && this.refreshPromise) {
       return this.refreshPromise;
     }
+
+    this.lastFailureWasTransport = false;
 
     const refreshToken = tokenStorage.getRefreshToken();
     if (!refreshToken) {
@@ -194,7 +253,10 @@ class TokenRefreshManager {
       const response = await axios.post<{ access_token?: string }>(
         this.refreshEndpoint,
         { refresh_token: refreshToken },
-        { headers: { 'Content-Type': 'application/json' } },
+        // Without an explicit timeout this inherits axios's default of 0 (no
+        // timeout): on the persisted-token bootstrap path an unreachable backend
+        // would hang the refresh indefinitely, pinning the app on a blank loader.
+        { headers: { 'Content-Type': 'application/json' }, timeout: API.TIMEOUT_MS },
       );
 
       const newAccessToken = response.data.access_token;
@@ -205,7 +267,16 @@ class TokenRefreshManager {
       }
 
       return null;
-    } catch {
+    } catch (err) {
+      // This bare-axios call bypasses the apiClient interceptor, so a dead
+      // backend on the refresh-only bootstrap path would otherwise be swallowed
+      // here and silently fall through to a login redirect. Distinguish a
+      // transport-level failure (no response) from an invalid/expired token (a
+      // 4xx response) and surface the service-unavailable screen for the former.
+      if (axios.isAxiosError(err) && !err.response) {
+        this.lastFailureWasTransport = true;
+        void reportPossibleBackendDown();
+      }
       return null;
     }
   }

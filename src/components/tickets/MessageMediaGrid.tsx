@@ -1,17 +1,23 @@
 import { useState, useCallback, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+
+import { ChevronLeftIcon, ChevronRightIcon, DocumentIcon, XIcon } from '@/components/icons';
+
 import { ticketsApi } from '../../api/tickets';
 
 export interface MediaItem {
   type: string;
   file_id: string;
   caption?: string | null;
+  /** Signed, expiring download token from the ticket response. */
+  token?: string | null;
 }
 
 interface MessageLike {
   has_media?: boolean;
   media_type?: string | null;
   media_file_id?: string | null;
+  media_token?: string | null;
   media_caption?: string | null;
   media_items?: MediaItem[] | null;
 }
@@ -30,6 +36,7 @@ function getItems(message: MessageLike): MediaItem[] {
         type: message.media_type,
         file_id: message.media_file_id,
         caption: message.media_caption,
+        token: message.media_token,
       },
     ];
   }
@@ -110,13 +117,13 @@ export function MessageMediaGrid({
                 onClick={() => openFullscreen(originalIdx)}
               >
                 <img
-                  src={ticketsApi.getMediaUrl(item.file_id)}
+                  src={ticketsApi.getMediaUrl(item.file_id, item.token)}
                   alt={item.caption || 'Attached photo'}
                   className="h-full w-full object-cover transition-opacity group-hover:opacity-90"
                   loading="lazy"
                 />
                 {isLastVisible && (
-                  <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/60 text-2xl font-semibold text-white">
+                  <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-dark-950/60 text-2xl font-semibold text-white">
                     +{hiddenCount}
                   </div>
                 )}
@@ -128,7 +135,7 @@ export function MessageMediaGrid({
 
       {/* Non-photo media rendered inline */}
       {otherItems.map((item) => {
-        const mediaUrl = ticketsApi.getMediaUrl(item.file_id);
+        const mediaUrl = ticketsApi.getMediaUrl(item.file_id, item.token);
         if (item.type === 'video') {
           return (
             <div key={item.file_id}>
@@ -150,19 +157,7 @@ export function MessageMediaGrid({
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 rounded-lg bg-dark-700 px-3 py-2 text-sm text-dark-200 transition-colors hover:bg-dark-600"
           >
-            <svg
-              className="h-4 w-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={1.5}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"
-              />
-            </svg>
+            <DocumentIcon className="h-4 w-4" />
             {item.caption || `Download ${item.type}`}
           </a>
         );
@@ -172,7 +167,7 @@ export function MessageMediaGrid({
         photoItems[fullscreenIndex] &&
         createPortal(
           <div
-            className="fixed inset-0 z-[9999] bg-black"
+            className="fixed inset-0 z-[9999] bg-dark-950"
             style={{ touchAction: 'pan-x pan-y pinch-zoom' }}
           >
             <button
@@ -180,15 +175,7 @@ export function MessageMediaGrid({
               className="absolute right-4 top-4 z-10 flex h-12 w-12 items-center justify-center rounded-full bg-white text-black shadow-xl transition-colors hover:bg-gray-200"
               onClick={closeFullscreen}
             >
-              <svg
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              <XIcon className="h-5 w-5" />
             </button>
 
             {photoItems.length > 1 && (
@@ -199,15 +186,7 @@ export function MessageMediaGrid({
                   onClick={() => setFullscreenIndex(fullscreenIndex - 1)}
                   className="absolute left-4 top-1/2 z-10 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-black shadow-xl transition-colors hover:bg-white disabled:opacity-30"
                 >
-                  <svg
-                    className="h-5 w-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-                  </svg>
+                  <ChevronLeftIcon className="h-5 w-5" />
                 </button>
                 <button
                   type="button"
@@ -215,17 +194,9 @@ export function MessageMediaGrid({
                   onClick={() => setFullscreenIndex(fullscreenIndex + 1)}
                   className="absolute right-4 top-1/2 z-10 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-black shadow-xl transition-colors hover:bg-white disabled:opacity-30"
                 >
-                  <svg
-                    className="h-5 w-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                  </svg>
+                  <ChevronRightIcon className="h-5 w-5" />
                 </button>
-                <div className="absolute bottom-6 left-1/2 z-10 -translate-x-1/2 rounded-full bg-black/70 px-3 py-1 text-sm text-white">
+                <div className="absolute bottom-6 left-1/2 z-10 -translate-x-1/2 rounded-full bg-dark-950/70 px-3 py-1 text-sm text-white">
                   {fullscreenIndex + 1} / {photoItems.length}
                 </div>
               </>
@@ -236,7 +207,10 @@ export function MessageMediaGrid({
               onClick={closeFullscreen}
             >
               <img
-                src={ticketsApi.getMediaUrl(photoItems[fullscreenIndex].file_id)}
+                src={ticketsApi.getMediaUrl(
+                  photoItems[fullscreenIndex].file_id,
+                  photoItems[fullscreenIndex].token,
+                )}
                 alt={photoItems[fullscreenIndex].caption || 'Attached photo'}
                 className="max-h-full max-w-full object-contain"
                 style={{ touchAction: 'pinch-zoom' }}

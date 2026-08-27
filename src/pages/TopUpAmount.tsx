@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams, useSearchParams } from 'react-router';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 
 import { balanceApi } from '../api/balance';
@@ -13,65 +13,19 @@ import { staggerContainer, staggerItem } from '@/components/motion/transitions';
 import type { PaymentMethod, PaymentMethodOption } from '../types';
 import BentoCard from '../components/ui/BentoCard';
 import { saveTopUpPendingInfo } from '../utils/topUpStorage';
-
-// Icons
-const StarIcon = () => (
-  <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-  </svg>
-);
-
-const CardIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"
-    />
-  </svg>
-);
-
-const CryptoIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125"
-    />
-  </svg>
-);
-
-const SparklesIcon = () => (
-  <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
-    <path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
-  </svg>
-);
-
-const ExternalLinkIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"
-    />
-  </svg>
-);
-
-const CopyIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184"
-    />
-  </svg>
-);
-
-const CheckIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-  </svg>
-);
+import { getSafeRedirectPath } from '../utils/safeRedirect';
+import { openPaymentUrl } from '../utils/openPaymentUrl';
+import { copyToClipboard } from '@/utils/clipboard';
+import {
+  CardIcon,
+  CheckIcon,
+  CopyIcon,
+  CryptoIcon,
+  ExclamationIcon,
+  ExternalLinkIcon,
+  SparklesIcon,
+  StarIcon,
+} from '@/components/icons';
 
 const getMethodIcon = (methodId: string) => {
   const id = methodId.toLowerCase();
@@ -123,7 +77,6 @@ export default function TopUpAmount() {
   const navigate = useNavigate();
   const { methodId } = useParams<{ methodId: string }>();
   const [searchParams] = useSearchParams();
-  const queryClient = useQueryClient();
   const { formatAmount, currencySymbol, convertAmount, convertToRub, targetCurrency } =
     useCurrency();
   const { openInvoice, openTelegramLink, openLink, platform } = usePlatform();
@@ -135,16 +88,27 @@ export default function TopUpAmount() {
     ? parseFloat(searchParams.get('amount')!)
     : undefined;
 
-  // Get method from cached payment-methods query
-  const cachedMethods = queryClient.getQueryData<PaymentMethod[]>(['payment-methods']);
-  const method = cachedMethods?.find((m) => m.id === methodId);
+  // Fetch payment methods with a real query (dedupes with the method-selection page and
+  // Balance via the shared ['payment-methods'] key). A non-reactive getQueryData read used
+  // to dead-end on an infinite spinner whenever the cache was cold — reload, browser-back
+  // from the provider page, or a deep link straight to this route.
+  const { data: methods, isLoading: isMethodsLoading } = useQuery({
+    queryKey: ['payment-methods'],
+    queryFn: balanceApi.getPaymentMethods,
+  });
+  const method = methods?.find((m) => m.id === methodId);
 
   const handleNavigateBack = useCallback(() => {
     navigate(-1);
   }, [navigate]);
 
   const handleSuccess = useCallback(() => {
-    navigate(returnTo || '/balance', { replace: true });
+    // returnTo arrives via query string — validate as an in-app path before
+    // navigate(), otherwise an absolute or encoded URL produces ugly
+    // path artefacts in the URL bar. The validator returns '/' for invalid
+    // input; treat that case as "no returnTo" and use the /balance default.
+    const safe = getSafeRedirectPath(returnTo);
+    navigate(returnTo && safe !== '/' ? safe : '/balance', { replace: true });
   }, [navigate, returnTo]);
 
   // Keyboard: Escape to go back
@@ -179,10 +143,15 @@ export default function TopUpAmount() {
   const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [isInputFocused, setIsInputFocused] = useState(false);
+  // Canonical RUB amount when the user picked a quick-amount chip. The input shows a
+  // rounded display-currency value; validating/charging the canonical RUB avoids the FX
+  // round-trip that could push a min-amount chip just below the allowed minimum. Cleared
+  // as soon as the user edits the field by hand.
+  const [quickRub, setQuickRub] = useState<number | null>(null);
 
-  // If method not found in cache, redirect to method selection
+  // Once methods have loaded, redirect to method selection if this method id is unknown.
   useEffect(() => {
-    if (cachedMethods && !method) {
+    if (methods && !method) {
       const params = new URLSearchParams();
       const amount = searchParams.get('amount');
       const rt = searchParams.get('returnTo');
@@ -191,7 +160,7 @@ export default function TopUpAmount() {
       const qs = params.toString();
       navigate(`/balance/top-up${qs ? `?${qs}` : ''}`, { replace: true });
     }
-  }, [cachedMethods, method, navigate, searchParams]);
+  }, [methods, method, navigate, searchParams]);
 
   useEffect(() => {
     if (!method?.options || method.options.length === 0) {
@@ -287,7 +256,11 @@ export default function TopUpAmount() {
           lowerUrl.startsWith('http://t.me/') ||
           lowerUrl.startsWith('tg://');
         if (method?.open_url_direct && !isTelegramDeepLink) {
-          window.location.href = redirectUrl;
+          // In the Telegram WebView, same-container navigation to the provider page breaks
+          // when it hands off to a bank app via a custom scheme (SBP) — Android shows
+          // ERR_UNKNOWN_URL_SCHEME, iOS opens nothing (bug #654272). Open externally there;
+          // on web keep same-tab navigation.
+          openPaymentUrl(redirectUrl, platform, openLink);
           return;
         }
 
@@ -314,7 +287,13 @@ export default function TopUpAmount() {
     return () => clearTimeout(timer);
   }, [platform]);
 
+  // Spinner only while methods are actually loading. Once the query has resolved without
+  // this method, the redirect effect above navigates away (so we render nothing here rather
+  // than spinning forever on a cold cache).
   if (!method) {
+    if (!isMethodsLoading) {
+      return null;
+    }
     return (
       <div className="flex items-center justify-center py-12">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
@@ -352,27 +331,43 @@ export default function TopUpAmount() {
       return;
     }
     const amountRubles = convertToRub(amountCurrency);
-    if (amountRubles < minRubles || amountRubles > maxRubles) {
+
+    // Resolve the canonical RUB amount. Prefer an exact source — an unedited prefill or a
+    // quick-amount chip — over the display value, whose FX round-trip rounding (e.g. 150₽ at
+    // rate 90.66 → "1.65" USD → back to 149.59₽) could push a min selection just below the
+    // allowed minimum and block the top-up. quickRub is cleared on any manual edit, so a
+    // non-null value means the field still holds that chip's exact amount.
+    const userEditedAmount = amount.trim() !== initialDisplayAmount.trim();
+    const usingPrefill = !userEditedAmount && !!initialAmountRubles && initialAmountRubles > 0;
+    const usingQuick = quickRub !== null;
+
+    let canonicalRubles = amountRubles;
+    if (usingPrefill) {
+      canonicalRubles = initialAmountRubles as number;
+    } else if (usingQuick && quickRub !== null) {
+      canonicalRubles = quickRub;
+    } else if (targetCurrency !== 'RUB') {
+      // Hand-typed non-RUB amount: snap up to the minimum when it lands within one
+      // display-currency rounding step below it, so typing the advertised (rounded)
+      // minimum isn't rejected by FX rounding.
+      const decimals = targetCurrency === 'IRR' ? 0 : 2;
+      const roundingStep = convertToRub(10 ** -decimals);
+      if (canonicalRubles < minRubles && canonicalRubles >= minRubles - roundingStep) {
+        canonicalRubles = minRubles;
+      }
+    }
+
+    if (canonicalRubles < minRubles || canonicalRubles > maxRubles) {
       setError(t('balance.errors.amountRange', { min: minRubles, max: maxRubles }));
       return;
     }
 
-    // Сохраняем canonical RUB amount если юзер НЕ редактировал префилл.
-    // Display-rounding в `.toFixed(2)` теряет точность: 150₽ при rate=90.66 → "1.65" USD
-    // (округление вниз с 1.6545), back-конвертация даёт 1.65 × 90.66 = 149.589₽ < 150₽
-    // → юзер не может купить подписку 150₽. С canonical RUB обходим FX round-trip.
-    //
-    // Math.ceil для не-RUB локалей покрывает остаточные sub-копеечные ошибки
-    // floating-point, когда юзер реально вводит свой amount.
-    const userEditedAmount = amount.trim() !== initialDisplayAmount.trim();
-    let amountKopeks: number;
-    if (!userEditedAmount && initialAmountRubles && initialAmountRubles > 0) {
-      amountKopeks = Math.round(initialAmountRubles * 100);
-    } else if (targetCurrency === 'RUB') {
-      amountKopeks = Math.round(amountRubles * 100);
-    } else {
-      amountKopeks = Math.ceil(amountRubles * 100);
-    }
+    // Round for exact sources; ceil a hand-typed amount so float noise never lands sub-kopeck
+    // under the chosen value.
+    const amountKopeks =
+      targetCurrency === 'RUB' || usingPrefill || usingQuick
+        ? Math.round(canonicalRubles * 100)
+        : Math.ceil(canonicalRubles * 100);
     if (isStarsMethod) {
       starsPaymentMutation.mutate(amountKopeks);
     } else {
@@ -380,7 +375,11 @@ export default function TopUpAmount() {
     }
   };
 
-  const quickAmounts = [100, 300, 500, 1000].filter((a) => a >= minRubles && a <= maxRubles);
+  const quickAmounts = (
+    method.quick_amounts != null
+      ? method.quick_amounts.map((kopeks) => kopeks / 100)
+      : [100, 300, 500, 1000]
+  ).filter((a) => a >= minRubles && a <= maxRubles);
   const currencyDecimals = targetCurrency === 'IRR' || targetCurrency === 'RUB' ? 0 : 2;
   const getQuickValue = (rub: number) =>
     targetCurrency === 'IRR'
@@ -400,7 +399,7 @@ export default function TopUpAmount() {
   const handleCopyUrl = async () => {
     if (!paymentUrl) return;
     try {
-      await navigator.clipboard.writeText(paymentUrl);
+      await copyToClipboard(paymentUrl);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
@@ -479,7 +478,10 @@ export default function TopUpAmount() {
               inputMode="decimal"
               enterKeyHint="done"
               value={amount}
-              onChange={(e) => setAmount(e.target.value)}
+              onChange={(e) => {
+                setAmount(e.target.value);
+                setQuickRub(null);
+              }}
               onFocus={() => setIsInputFocused(true)}
               onBlur={() => setIsInputFocused(false)}
               onKeyDown={(e) => {
@@ -505,14 +507,14 @@ export default function TopUpAmount() {
                 ? 'cursor-not-allowed bg-dark-700 text-dark-500'
                 : isStarsMethod
                   ? 'bg-gradient-to-r from-yellow-500 to-orange-500 text-white shadow-lg shadow-yellow-500/25 hover:from-yellow-400 hover:to-orange-400 active:from-yellow-600 active:to-orange-600'
-                  : 'bg-gradient-to-r from-accent-500 to-accent-600 text-white shadow-lg shadow-accent-500/25 hover:from-accent-400 hover:to-accent-500 active:from-accent-600 active:to-accent-700'
+                  : 'bg-accent-500 text-on-accent shadow-lg shadow-accent-500/25 transition-colors hover:bg-accent-400 active:bg-accent-600'
             }`}
           >
             {isPending ? (
               <span className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
             ) : (
               <>
-                <SparklesIcon />
+                <SparklesIcon className="h-4 w-4" />
                 <span>{t('balance.topUp')}</span>
               </>
             )}
@@ -522,7 +524,7 @@ export default function TopUpAmount() {
 
       {/* Quick amount buttons */}
       {quickAmounts.length > 0 && (
-        <motion.div variants={staggerItem} className="grid grid-cols-4 gap-2">
+        <motion.div variants={staggerItem} className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           {quickAmounts.map((a) => {
             const val = getQuickValue(a);
             const isSelected = amount === val;
@@ -533,6 +535,7 @@ export default function TopUpAmount() {
                 type="button"
                 onClick={() => {
                   setAmount(val);
+                  setQuickRub(a);
                   inputRef.current?.blur();
                 }}
                 hover
@@ -563,19 +566,7 @@ export default function TopUpAmount() {
           variants={staggerItem}
           className="flex items-center gap-2 rounded-xl border border-error-500/20 bg-error-500/10 p-3"
         >
-          <svg
-            className="h-5 w-5 shrink-0 text-error-400"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
-          </svg>
+          <ExclamationIcon className="h-5 w-5 shrink-0 text-error-400" />
           <span className="text-sm text-error-400">{error}</span>
         </motion.div>
       )}
@@ -587,7 +578,7 @@ export default function TopUpAmount() {
           className="space-y-3 rounded-2xl border border-success-500/20 bg-success-500/10 p-4"
         >
           <div className="flex items-center gap-2 text-success-400">
-            <CheckIcon />
+            <CheckIcon className="h-5 w-5" />
             <span className="font-semibold">{t('balance.paymentReady')}</span>
           </div>
 
@@ -616,7 +607,7 @@ export default function TopUpAmount() {
               }`}
               title={t('common.copy')}
             >
-              {copied ? <CheckIcon /> : <CopyIcon />}
+              {copied ? <CheckIcon className="h-5 w-5" /> : <CopyIcon className="h-5 w-5" />}
             </button>
           </div>
         </motion.div>

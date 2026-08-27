@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { SettingDefinition } from '../../api/adminSettings';
+import type { SettingDefinition } from '../../api/adminSettings';
 import { CheckIcon, CloseIcon, EditIcon } from './icons';
 
 interface SettingInputProps {
@@ -40,7 +40,10 @@ export function SettingInput({ setting, onUpdate, disabled }: SettingInputProps)
   const inputRef = useRef<HTMLInputElement>(null);
 
   const currentValue = String(setting.current ?? '');
-  const needsTextarea = isLongValue(currentValue) || isListOrJsonKey(setting.key);
+  // Secrets are always edited via the single-line (password) input — never a textarea — and
+  // never pre-filled with the masked value, so leaving the field empty means "keep current".
+  const needsTextarea =
+    !setting.is_secret && (isLongValue(currentValue) || isListOrJsonKey(setting.key));
 
   // Auto-resize textarea
   useEffect(() => {
@@ -51,11 +54,19 @@ export function SettingInput({ setting, onUpdate, disabled }: SettingInputProps)
   }, [value, isEditing]);
 
   const handleStart = () => {
-    setValue(currentValue);
+    // For secrets, start from an empty field (the displayed value is just the mask) so the
+    // admin types a brand-new value; leaving it empty is treated as "no change".
+    setValue(setting.is_secret ? '' : currentValue);
     setIsEditing(true);
   };
 
   const handleSave = () => {
+    // Empty secret field = the admin opened edit but didn't change anything → keep the stored
+    // secret instead of overwriting it with an empty value.
+    if (setting.is_secret && value === '') {
+      handleCancel();
+      return;
+    }
     onUpdate(value);
     setIsEditing(false);
   };
@@ -111,7 +122,7 @@ export function SettingInput({ setting, onUpdate, disabled }: SettingInputProps)
             </button>
             <button
               onClick={handleSave}
-              className="flex items-center gap-1.5 rounded-lg bg-accent-500 px-3 py-1.5 text-sm text-white transition-colors hover:bg-accent-600"
+              className="flex items-center gap-1.5 rounded-lg bg-accent-500 px-3 py-1.5 text-sm text-on-accent transition-colors hover:bg-accent-600"
             >
               <CheckIcon />
               {t('admin.settings.saveButton')}
@@ -128,7 +139,14 @@ export function SettingInput({ setting, onUpdate, disabled }: SettingInputProps)
       <div className="flex items-center gap-2">
         <input
           ref={inputRef}
-          type={setting.type === 'int' || setting.type === 'float' ? 'number' : 'text'}
+          type={
+            setting.is_secret
+              ? 'password'
+              : setting.type === 'int' || setting.type === 'float'
+                ? 'number'
+                : 'text'
+          }
+          autoComplete={setting.is_secret ? 'new-password' : undefined}
           value={value}
           onChange={(e) => setValue(e.target.value)}
           onKeyDown={(e) => {
@@ -141,7 +159,7 @@ export function SettingInput({ setting, onUpdate, disabled }: SettingInputProps)
         />
         <button
           onClick={handleSave}
-          className="rounded-lg bg-accent-500 p-2 text-white transition-colors hover:bg-accent-600"
+          className="rounded-lg bg-accent-500 p-2 text-on-accent transition-colors hover:bg-accent-600"
           title={t('admin.settings.saveHint')}
         >
           <CheckIcon />
@@ -187,7 +205,7 @@ export function SettingInput({ setting, onUpdate, disabled }: SettingInputProps)
       className="group flex min-w-[100px] max-w-[200px] items-center gap-2 truncate rounded-lg border border-dark-600 bg-dark-700 px-3 py-2.5 text-left font-mono text-sm text-dark-200 transition-colors hover:border-dark-500 hover:bg-dark-600 disabled:opacity-50"
     >
       <span className="flex-1 truncate">{currentValue || '-'}</span>
-      <span className="text-dark-500 opacity-0 transition-colors group-hover:text-accent-400 group-hover:opacity-100">
+      <span className="text-dark-500 opacity-0 transition-colors group-focus-within:text-accent-400 group-focus-within:opacity-100 group-hover:text-accent-400 group-hover:opacity-100 [@media(hover:none)]:opacity-100">
         <EditIcon />
       </span>
     </button>

@@ -4,6 +4,8 @@ export type InfoPageType = 'page' | 'faq';
 
 export type ReplacesTab = 'faq' | 'rules' | 'privacy' | 'offer';
 
+export type InfoPageDisplayMode = 'bot' | 'web' | 'both';
+
 export interface InfoPage {
   id: number;
   slug: string;
@@ -14,6 +16,7 @@ export interface InfoPage {
   sort_order: number;
   icon: string | null;
   replaces_tab: ReplacesTab | null;
+  display_mode: InfoPageDisplayMode;
   created_at: string;
   updated_at: string | null;
 }
@@ -27,6 +30,7 @@ export interface InfoPageListItem {
   sort_order: number;
   icon: string | null;
   replaces_tab: ReplacesTab | null;
+  display_mode: InfoPageDisplayMode;
   updated_at: string | null;
 }
 
@@ -39,6 +43,7 @@ export interface InfoPageCreateRequest {
   sort_order: number;
   icon: string | null;
   replaces_tab: ReplacesTab | null;
+  display_mode: InfoPageDisplayMode;
 }
 
 export interface InfoPageUpdateRequest {
@@ -50,6 +55,7 @@ export interface InfoPageUpdateRequest {
   sort_order?: number;
   icon?: string | null;
   replaces_tab?: ReplacesTab | null;
+  display_mode?: InfoPageDisplayMode;
 }
 
 export type TabReplacements = Record<ReplacesTab, string | null>;

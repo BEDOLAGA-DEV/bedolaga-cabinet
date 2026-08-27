@@ -35,6 +35,8 @@ export interface TariffListItem {
   show_in_gift: boolean;
   is_daily: boolean;
   daily_price_kopeks: number;
+  /** UUID продукта Lava для рекуррентных подписок (цена/период заданы в кабинете Lava) */
+  lava_product_id?: string | null;
   traffic_limit_gb: number;
   device_limit: number;
   tier_level: number;
@@ -85,9 +87,11 @@ export interface TariffDetail {
   // Дневной тариф
   is_daily: boolean;
   daily_price_kopeks: number;
+  /** UUID продукта Lava для рекуррентных подписок (цена/период заданы в кабинете Lava) */
+  lava_product_id?: string | null;
   // Режим сброса трафика
   traffic_reset_mode: string | null; // 'DAY', 'WEEK', 'MONTH', 'MONTH_ROLLING', 'NO_RESET', null = глобальная настройка
-  // Внешний сквад RemnaWave
+  // Внешний сквад Remnawave
   external_squad_uuid: string | null;
   created_at: string;
   updated_at: string | null;
@@ -124,9 +128,11 @@ export interface TariffCreateRequest {
   // Дневной тариф
   is_daily?: boolean;
   daily_price_kopeks?: number;
+  // Автопродление Lava: продукт из кабинета Lava
+  lava_product_id?: string | null;
   // Режим сброса трафика
   traffic_reset_mode?: string | null;
-  // Внешний сквад RemnaWave
+  // Внешний сквад Remnawave
   external_squad_uuid?: string | null;
 }
 
@@ -168,9 +174,11 @@ export interface TariffUpdateRequest {
   // Дневной тариф
   is_daily?: boolean;
   daily_price_kopeks?: number;
+  // Автопродление Lava: продукт из кабинета Lava
+  lava_product_id?: string | null;
   // Режим сброса трафика
   traffic_reset_mode?: string | null;
-  // Внешний сквад RemnaWave
+  // Внешний сквад Remnawave
   external_squad_uuid?: string | null;
 }
 
@@ -266,7 +274,7 @@ export const tariffsApi = {
     return response.data;
   },
 
-  // Get available external squads from RemnaWave
+  // Get available external squads from Remnawave
   getAvailableExternalSquads: async (): Promise<ExternalSquadInfo[]> => {
     const response = await apiClient.get('/cabinet/admin/tariffs/available-external-squads');
     return response.data;

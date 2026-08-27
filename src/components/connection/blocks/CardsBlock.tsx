@@ -11,7 +11,11 @@ export function CardsBlock({
   renderBlockButtons,
 }: BlockRendererProps) {
   const visibleBlocks = blocks.filter(
-    (b) => getLocalizedText(b.title) || getLocalizedText(b.description) || b.buttons?.length,
+    (b) =>
+      getLocalizedText(b.title) ||
+      getLocalizedText(b.description) ||
+      b.buttons?.length ||
+      b.customNode,
   );
 
   if (!visibleBlocks.length) return null;
@@ -43,6 +47,7 @@ export function CardsBlock({
                   {getLocalizedText(block.description)}
                 </p>
                 {renderBlockButtons(block.buttons, 'light')}
+                {block.customNode}
               </div>
             </div>
           </div>

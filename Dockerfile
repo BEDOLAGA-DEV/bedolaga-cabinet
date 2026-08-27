@@ -40,8 +40,10 @@ ENV MOBILE_IOS_APP_IDS=$MOBILE_IOS_APP_IDS
 ENV MOBILE_ANDROID_PACKAGE_NAME=$MOBILE_ANDROID_PACKAGE_NAME
 ENV MOBILE_ANDROID_SHA256_CERT_FINGERPRINTS=$MOBILE_ANDROID_SHA256_CERT_FINGERPRINTS
 
-# Build the application
-RUN npm run build
+# Build the application. Type-check намеренно пропущен: tsc --noEmit уже
+# гоняется CI на каждый PR (lint.yml), образ собирается из проверенного
+# коммита - повторная проверка стоила бы ~10s на каждую сборку.
+RUN npm run build:docker
 
 # Stage 2: Serve with Nginx
 FROM nginx:alpine

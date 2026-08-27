@@ -8,6 +8,7 @@ import { landingApi } from '../api/landings';
 import { authApi } from '../api/auth';
 import { useAuthStore } from '../store/auth';
 import { copyToClipboard } from '../utils/clipboard';
+import { CheckIcon, ClipboardIcon, ClockIcon, ExclamationIcon } from '@/components/icons';
 import { Spinner } from '@/components/ui/Spinner';
 import { AnimatedCheckmark } from '@/components/ui/AnimatedCheckmark';
 import { AnimatedCrossmark } from '@/components/ui/AnimatedCrossmark';
@@ -59,9 +60,9 @@ function CopyableField({ label, value }: { label: string; value: string }) {
 
   return (
     <div className="flex items-center gap-2 rounded-xl bg-dark-800/50 px-4 py-3">
-      <div className="flex-1 text-left">
+      <div className="min-w-0 flex-1 text-left">
         <p className="text-xs text-dark-400">{label}</p>
-        <p className="mt-0.5 font-mono text-sm text-dark-100">{value}</p>
+        <p className="mt-0.5 break-all font-mono text-sm text-dark-100">{value}</p>
       </div>
       <button
         type="button"
@@ -267,7 +268,7 @@ function SuccessState({
           href={botLink}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex w-full items-center justify-center gap-2 rounded-xl bg-accent-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-accent-400"
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-accent-500 px-6 py-3 text-sm font-medium text-on-accent transition-colors hover:bg-accent-400"
         >
           {t('landing.openBot')}
         </a>
@@ -299,32 +300,12 @@ function SuccessState({
           >
             {copied ? (
               <>
-                <svg
-                  className="h-4 w-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
+                <CheckIcon className="h-4 w-4" />
                 {t('landing.copied', 'Copied!')}
               </>
             ) : (
               <>
-                <svg
-                  className="h-4 w-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={1.5}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9.75a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184"
-                  />
-                </svg>
+                <ClipboardIcon className="h-4 w-4" />
                 {t('landing.copyLink', 'Copy link')}
               </>
             )}
@@ -383,19 +364,7 @@ function PendingActivationState({
     >
       {/* Warning icon */}
       <div className="flex h-20 w-20 items-center justify-center rounded-full bg-warning-500/10">
-        <svg
-          className="h-10 w-10 text-warning-400"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          strokeWidth={2}
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"
-          />
-        </svg>
+        <ExclamationIcon className="h-10 w-10 text-warning-400" />
       </div>
 
       <div>
@@ -523,7 +492,7 @@ function GiftPendingActivationState({
           href={botLink}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex w-full items-center justify-center gap-2 rounded-xl bg-accent-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-accent-400"
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-accent-500 px-6 py-3 text-sm font-medium text-on-accent transition-colors hover:bg-accent-400"
         >
           {t('landing.openBot')}
         </a>
@@ -560,19 +529,7 @@ function PollTimedOutState({ onRetry }: { onRetry: () => void }) {
       className="flex flex-col items-center gap-6 text-center"
     >
       <div className="flex h-20 w-20 items-center justify-center rounded-full bg-dark-800/50">
-        <svg
-          className="h-10 w-10 text-dark-400"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          strokeWidth={2}
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
-          />
-        </svg>
+        <ClockIcon className="h-10 w-10 text-dark-400" />
       </div>
       <div>
         <h1 className="text-xl font-bold text-dark-50">
@@ -588,9 +545,116 @@ function PollTimedOutState({ onRetry }: { onRetry: () => void }) {
       <button
         type="button"
         onClick={onRetry}
-        className="rounded-xl bg-accent-500 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-accent-400"
+        className="rounded-xl bg-accent-500 px-6 py-3 text-sm font-medium text-on-accent transition-colors hover:bg-accent-400"
       >
         {t('common.retry', 'Retry')}
+      </button>
+    </motion.div>
+  );
+}
+
+function GiftLinkShareState({
+  claimUrl,
+  botClaimLink,
+  tariffName,
+  periodDays,
+  recipientContactValue,
+  contactType,
+}: {
+  claimUrl: string | null;
+  botClaimLink: string | null;
+  tariffName: string | null;
+  periodDays: number | null;
+  recipientContactValue: string | null;
+  contactType: 'email' | 'telegram' | null;
+}) {
+  const { t } = useTranslation();
+  const [copied, setCopied] = useState(false);
+
+  const message = [
+    t('landing.giftLink.shareText', 'I have a gift for you! Activate it here:'),
+    '',
+    claimUrl,
+    botClaimLink ? `${t('landing.giftLink.viaTelegram', 'Telegram:')} ${botClaimLink}` : null,
+  ]
+    .filter(Boolean)
+    .join('\n');
+
+  const handleCopy = async () => {
+    try {
+      await copyToClipboard(message);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      /* ignore */
+    }
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="flex flex-col items-center gap-5 text-center"
+    >
+      <AnimatedCheckmark />
+      <div>
+        <h1 className="text-xl font-bold text-dark-50">
+          {t('landing.giftLink.title', 'Gift is ready!')}
+        </h1>
+        {tariffName && periodDays !== null && (
+          <p className="mt-1 text-sm text-dark-300">
+            {tariffName} — {periodDays} {t('landing.days', 'days')}
+          </p>
+        )}
+      </div>
+
+      <p className="text-sm text-dark-300">
+        {t(
+          'landing.giftLink.subtitle',
+          'Send this link to whoever you want to receive the gift — they activate it themselves.',
+        )}
+      </p>
+
+      {claimUrl && (
+        <CopyableField label={t('landing.giftLink.linkLabel', 'Gift link')} value={claimUrl} />
+      )}
+      {botClaimLink && (
+        <CopyableField
+          label={t('landing.giftLink.telegramLabel', 'Telegram link')}
+          value={botClaimLink}
+        />
+      )}
+
+      {recipientContactValue && contactType === 'email' && (
+        <p className="text-xs text-dark-500">
+          {t('landing.giftLink.alsoSent', {
+            contact: recipientContactValue,
+            defaultValue: 'We also emailed it to {{contact}}.',
+          })}
+        </p>
+      )}
+
+      <button
+        type="button"
+        onClick={handleCopy}
+        className={cn(
+          'flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3.5 text-sm font-bold transition-all duration-200 active:scale-[0.98]',
+          copied
+            ? 'bg-success-500/20 text-success-400'
+            : 'bg-accent-500 text-on-accent shadow-lg shadow-accent-500/25 hover:bg-accent-400',
+        )}
+      >
+        {copied ? (
+          <>
+            <CheckIcon className="h-4 w-4" />
+            {t('landing.copied', 'Copied!')}
+          </>
+        ) : (
+          <>
+            <ClipboardIcon className="h-4 w-4" />
+            {t('landing.giftLink.copyMessage', 'Copy message')}
+          </>
+        )}
       </button>
     </motion.div>
   );
@@ -629,7 +693,12 @@ export default function PurchaseSuccess() {
     queryFn: () => landingApi.getPurchaseStatus(token!),
     enabled: !!token && !pollTimedOut,
     refetchInterval: (query) => {
-      const currentStatus = query.state.data?.status;
+      const data = query.state.data;
+      const currentStatus = data?.status;
+      // A gift that reached PAID is terminal for the BUYER (it stays PAID until
+      // the recipient claims) — stop polling and show the share link instead of
+      // spinning. A paid gift is always claimable, so don't gate on is_claimable.
+      if (currentStatus === 'paid' && data?.is_gift) return false;
       if (currentStatus === 'pending' || currentStatus === 'paid') {
         if (Date.now() - pollStart.current > MAX_POLL_MS) {
           setPollTimedOut(true);
@@ -695,6 +764,10 @@ export default function PurchaseSuccess() {
   const isPendingActivation = purchaseStatus?.status === 'pending_activation';
   const isFailed = purchaseStatus?.status === 'failed' || purchaseStatus?.status === 'expired';
 
+  // Deferred gift the buyer just paid for → show the transferable claim link to
+  // forward (it stays PAID until the recipient claims it).
+  const isBuyerGiftLink = purchaseStatus?.status === 'paid' && !!purchaseStatus?.is_gift;
+
   // Gift pending activation → buyer sees "gift sent" message, not the activate button.
   // Recipient arrives via email link with ?activate=1 and sees the activate button instead.
   const isGiftPendingActivation = isPendingActivation && purchaseStatus?.is_gift && !isActivateHint;
@@ -715,6 +788,15 @@ export default function PurchaseSuccess() {
       >
         {isError ? (
           <FailedState />
+        ) : isBuyerGiftLink ? (
+          <GiftLinkShareState
+            claimUrl={purchaseStatus.claim_url}
+            botClaimLink={purchaseStatus.bot_claim_link}
+            tariffName={purchaseStatus.tariff_name}
+            periodDays={purchaseStatus.period_days}
+            recipientContactValue={purchaseStatus.recipient_contact_value}
+            contactType={purchaseStatus.contact_type}
+          />
         ) : isEmailSelfPurchase ? (
           <CabinetCredentialsState
             cabinetEmail={purchaseStatus.cabinet_email!}

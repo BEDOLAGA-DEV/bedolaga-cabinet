@@ -1,9 +1,10 @@
 import { useParams, useNavigate } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { adminRemnawaveApi, SquadWithLocalInfo } from '../api/adminRemnawave';
+import { adminRemnawaveApi, type SquadWithLocalInfo } from '../api/adminRemnawave';
 import { AdminBackButton } from '../components/admin';
-import { ServerIcon, UsersIcon, CheckIcon, XIcon } from '../components/icons';
+import { ServerIcon, UsersIcon, CheckIcon, XIcon, BanknotesIcon } from '../components/icons';
+import { StatCard } from '@/components/stats';
 import Twemoji from 'react-twemoji';
 import { getFlagEmoji } from '../utils/subscriptionHelpers';
 
@@ -126,43 +127,33 @@ export default function AdminRemnawaveSquadDetail() {
           {t('admin.remnawave.squads.statsTitle', 'Statistics')}
         </h3>
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-          <div className="rounded-lg bg-dark-700/50 p-4">
-            <div className="flex items-center gap-2 text-dark-400">
-              <UsersIcon className="h-4 w-4" />
-              <span className="text-sm">{t('admin.remnawave.squads.members', 'Members')}</span>
-            </div>
-            <p className="mt-1 text-2xl font-bold text-dark-100">{squad.members_count}</p>
-          </div>
-          <div className="rounded-lg bg-dark-700/50 p-4">
-            <div className="flex items-center gap-2 text-dark-400">
-              <ServerIcon className="h-4 w-4" />
-              <span className="text-sm">{t('admin.remnawave.squads.inbounds', 'Inbounds')}</span>
-            </div>
-            <p className="mt-1 text-2xl font-bold text-dark-100">{squad.inbounds_count}</p>
-          </div>
+          <StatCard
+            label={t('admin.remnawave.squads.members', 'Members')}
+            value={squad.members_count}
+            icon={<UsersIcon className="h-5 w-5" />}
+            tone="neutral"
+          />
+          <StatCard
+            label={t('admin.remnawave.squads.inbounds', 'Inbounds')}
+            value={squad.inbounds_count}
+            icon={<ServerIcon className="h-5 w-5" />}
+            tone="neutral"
+          />
           {squad.is_synced && (
             <>
-              <div className="rounded-lg bg-dark-700/50 p-4">
-                <div className="flex items-center gap-2 text-dark-400">
-                  <UsersIcon className="h-4 w-4" />
-                  <span className="text-sm">{t('admin.remnawave.squads.users', 'Users')}</span>
-                </div>
-                <p className="mt-1 text-2xl font-bold text-dark-100">
-                  {squad.current_users ?? 0}
-                  <span className="text-sm font-normal text-dark-400">
-                    {' '}
-                    / {squad.max_users ?? '∞'}
-                  </span>
-                </p>
-              </div>
-              <div className="rounded-lg bg-dark-700/50 p-4">
-                <div className="flex items-center gap-2 text-dark-400">
-                  <span className="text-sm">{t('admin.remnawave.squads.price', 'Price')}</span>
-                </div>
-                <p className="mt-1 text-2xl font-bold text-dark-100">
-                  {((squad.price_kopeks ?? 0) / 100).toFixed(0)} ₽
-                </p>
-              </div>
+              <StatCard
+                label={t('admin.remnawave.squads.users', 'Users')}
+                value={squad.current_users ?? 0}
+                icon={<UsersIcon className="h-5 w-5" />}
+                tone="neutral"
+                subValue={`/ ${squad.max_users ?? '∞'}`}
+              />
+              <StatCard
+                label={t('admin.remnawave.squads.price', 'Price')}
+                value={`${((squad.price_kopeks ?? 0) / 100).toFixed(0)} ₽`}
+                icon={<BanknotesIcon className="h-5 w-5" />}
+                tone="neutral"
+              />
             </>
           )}
         </div>
@@ -229,11 +220,11 @@ export default function AdminRemnawaveSquadDetail() {
                 key={idx}
                 className="flex items-center justify-between rounded-lg bg-dark-700/50 px-4 py-3"
               >
-                <span className="text-sm text-dark-200">
+                <span className="min-w-0 flex-1 truncate text-sm text-dark-200">
                   {String(inbound.tag || inbound.uuid || `Inbound ${idx + 1}`)}
                 </span>
                 {typeof inbound.type === 'string' && (
-                  <span className="rounded bg-dark-600 px-2 py-1 text-xs text-dark-400">
+                  <span className="ml-2 shrink-0 rounded bg-dark-600 px-2 py-1 text-xs text-dark-400">
                     {inbound.type}
                   </span>
                 )}

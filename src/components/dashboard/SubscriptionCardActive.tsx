@@ -1,16 +1,16 @@
+import { uiLocale } from '@/utils/uiLocale';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router';
 import { Link } from 'react-router';
-import { UseMutationResult } from '@tanstack/react-query';
+import type { UseMutationResult } from '@tanstack/react-query';
 import TrafficProgressBar from './TrafficProgressBar';
 import Sparkline from './Sparkline';
+import ConnectDeviceTile from './ConnectDeviceTile';
 import { useAnimatedNumber } from '../../hooks/useAnimatedNumber';
 import { useTheme } from '../../hooks/useTheme';
 import { useTrafficZone } from '../../hooks/useTrafficZone';
 import { formatTraffic } from '../../utils/formatTraffic';
 import { getGlassColors } from '../../utils/glassTheme';
-import { HoverBorderGradient } from '../ui/hover-border-gradient';
-import { useHaptic } from '../../platform';
+import { CalendarIcon, RefreshIcon } from '@/components/icons';
 import type { Subscription } from '../../types';
 
 interface SubscriptionCardActiveProps {
@@ -25,23 +25,6 @@ interface SubscriptionCardActiveProps {
   connectedDevices: number;
 }
 
-const RefreshIcon = ({ className = 'w-4 h-4' }: { className?: string }) => (
-  <svg
-    className={className}
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={2}
-    aria-hidden="true"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"
-    />
-  </svg>
-);
-
 export default function SubscriptionCardActive({
   subscription,
   trafficData,
@@ -50,7 +33,6 @@ export default function SubscriptionCardActive({
   connectedDevices,
 }: SubscriptionCardActiveProps) {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const { isDark } = useTheme();
   const g = getGlassColors(isDark);
 
@@ -59,12 +41,8 @@ export default function SubscriptionCardActive({
   const isUnlimited = trafficData?.is_unlimited ?? subscription.traffic_limit_gb === 0;
   const zone = useTrafficZone(usedPercent);
   const animatedPercent = useAnimatedNumber(usedPercent);
-  const haptic = useHaptic();
 
-  const isAtDeviceLimit =
-    subscription.device_limit > 0 && connectedDevices >= subscription.device_limit;
-
-  const formattedDate = new Date(subscription.end_date).toLocaleDateString();
+  const formattedDate = new Date(subscription.end_date).toLocaleDateString(uiLocale());
   const daysLeft = subscription.days_left;
 
   // Sparkline placeholder data (hidden until API provides daily usage)
@@ -72,7 +50,7 @@ export default function SubscriptionCardActive({
 
   return (
     <div
-      className="relative overflow-hidden rounded-3xl backdrop-blur-xl"
+      className="relative overflow-hidden rounded-3xl lg:backdrop-blur-xl"
       style={{
         background: g.cardBg,
         border: subscription.is_trial
@@ -86,28 +64,9 @@ export default function SubscriptionCardActive({
           : `0 2px 16px rgba(${zone.mainVarRaw}, 0.07), 0 0 0 1px rgba(${zone.mainVarRaw}, 0.03)`,
       }}
     >
-      {/* Trial shimmer border */}
-      {subscription.is_trial && (
-        <div
-          className="pointer-events-none absolute inset-[-1px] animate-trial-glow rounded-3xl"
-          aria-hidden="true"
-        />
-      )}
-
-      {/* Background glow */}
-      <div
-        className="pointer-events-none absolute"
-        style={{
-          top: -60,
-          right: -60,
-          width: 200,
-          height: 200,
-          borderRadius: '50%',
-          background: `radial-gradient(circle, rgba(${zone.mainVarRaw}, ${isDark ? 0.08 : 0.03}) 0%, transparent 70%)`,
-          transition: 'background 0.8s ease',
-        }}
-        aria-hidden="true"
-      />
+      {/* Decorative trial-shimmer border + ambient background glow removed.
+          Trial state is conveyed by the badge in the header; ambient glow
+          carried no information and ate visual attention. */}
 
       {/* ─── Header ─── */}
       <div className="mb-7 flex items-start justify-between">
@@ -118,8 +77,7 @@ export default function SubscriptionCardActive({
               className="h-2 w-2 rounded-full"
               style={{
                 background: zone.mainVar,
-                boxShadow: `0 0 8px rgba(${zone.mainVarRaw}, 0.5)`,
-                transition: 'all 0.6s ease',
+                transition: 'background 0.6s ease',
               }}
               aria-hidden="true"
             />
@@ -130,15 +88,7 @@ export default function SubscriptionCardActive({
               {isUnlimited ? t('dashboard.unlimited') : t(zone.labelKey)}
             </span>
             {subscription.is_trial && (
-              <span
-                className="inline-flex animate-trial-glow items-center gap-1 rounded-md px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-widest"
-                style={{
-                  background:
-                    'linear-gradient(135deg, rgba(var(--color-accent-400), 0.15), rgba(var(--color-accent-400), 0.06))',
-                  border: '1px solid rgba(var(--color-accent-400), 0.2)',
-                  color: 'rgb(var(--color-accent-400))',
-                }}
-              >
+              <span className="inline-flex items-center gap-1 rounded-md border border-accent-400/25 bg-accent-400/10 px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-widest text-accent-400">
                 <svg
                   width="10"
                   height="10"
@@ -204,128 +154,32 @@ export default function SubscriptionCardActive({
       </div>
 
       {/* ─── Connect Device Button ─── */}
-      {subscription.subscription_url && (
-        <HoverBorderGradient
-          as="button"
-          accentColor={zone.mainHex}
-          disabled={isAtDeviceLimit}
-          onClick={() => {
-            if (isAtDeviceLimit) {
-              haptic.notification('error');
-              return;
-            }
-            navigate(`/connection?sub=${subscription.id}`);
-          }}
-          className={`mb-2.5 flex w-full items-center gap-3.5 rounded-[14px] p-3.5 text-left transition-shadow duration-300${isAtDeviceLimit ? 'cursor-not-allowed opacity-50' : ''}`}
-          data-onboarding="connect-devices"
-          style={{ fontFamily: 'inherit' }}
-        >
-          {/* Monitor icon */}
-          <div
-            className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-[10px] transition-colors duration-500"
-            style={{ background: `rgba(${zone.mainVarRaw}, 0.07)` }}
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke={zone.mainVar}
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <rect x="2" y="3" width="20" height="14" rx="2" />
-              <path d="M12 17v4M8 21h8" />
-              <path d="M12 8v4M10 10h4" opacity="0.7" />
-            </svg>
-          </div>
-
-          {/* Text */}
-          <div className="min-w-0 flex-1">
-            <div className="text-sm font-semibold tracking-tight text-dark-50">
-              {t('dashboard.connectDevice')}
-            </div>
-            <div className="mt-0.5 text-[11px] text-dark-50/30">
-              {subscription.device_limit === 0
-                ? t('dashboard.devicesConnectedUnlimited', { used: connectedDevices })
-                : t('dashboard.devicesOfMax', {
-                    used: connectedDevices,
-                    max: subscription.device_limit,
-                  })}
-            </div>
-            {isAtDeviceLimit && (
-              <div
-                className="mt-1 text-[10px] font-medium"
-                style={{ color: 'rgb(var(--color-warning-400))' }}
-              >
-                {t('dashboard.deviceLimitReached')}
-              </div>
-            )}
-          </div>
-
-          {/* Device indicator */}
-          {subscription.device_limit === 0 ? (
-            <div
-              className="flex flex-shrink-0 items-center text-lg text-dark-50/40"
-              aria-hidden="true"
-            >
-              ∞
-            </div>
-          ) : subscription.device_limit <= 10 ? (
-            <div className="flex flex-shrink-0 gap-1.5" aria-hidden="true">
-              {Array.from({ length: subscription.device_limit }, (_, i) => (
-                <div
-                  key={i}
-                  className="h-[7px] w-[7px] rounded-full transition-all duration-300"
-                  style={{
-                    background: i < connectedDevices ? zone.mainVar : g.textGhost,
-                    boxShadow:
-                      i < connectedDevices ? `0 0 6px rgba(${zone.mainVarRaw}, 0.31)` : 'none',
-                  }}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="flex w-16 flex-shrink-0 items-center" aria-hidden="true">
-              <div
-                className="h-[6px] w-full overflow-hidden rounded-full"
-                style={{ background: g.textGhost }}
-              >
-                <div
-                  className="h-full rounded-full transition-all duration-500"
-                  style={{
-                    width: `${Math.round((connectedDevices / subscription.device_limit) * 100)}%`,
-                    background: zone.mainVar,
-                    boxShadow: `0 0 8px rgba(${zone.mainVarRaw}, 0.25)`,
-                    minWidth: connectedDevices > 0 ? '4px' : '0px',
-                  }}
-                />
-              </div>
-            </div>
-          )}
-        </HoverBorderGradient>
-      )}
+      <ConnectDeviceTile
+        subscription={subscription}
+        connectedDevices={connectedDevices}
+        usedPercent={usedPercent}
+      />
 
       {/* ─── Stats row: Tariff + Days Left ─── */}
       <div className="mb-5 flex gap-2.5">
-        {/* Tariff badge — clickable */}
+        {/* Tariff badge — clickable. Neutral chrome: the tariff name has
+            no traffic-zone semantics, so tinting it by the traffic zone
+            (DESIGN.md Status-Hue Lockout) was wrong. */}
         <Link
           to={`/subscriptions/${subscription.id}`}
-          className="flex-1 rounded-[14px] p-3.5 transition-all duration-500"
+          className="flex-1 rounded-[14px] p-3.5 transition-colors"
           style={{
-            background: `linear-gradient(135deg, rgba(${zone.mainVarRaw}, 0.07), rgba(${zone.mainVarRaw}, 0.02))`,
-            border: `1px solid rgba(${zone.mainVarRaw}, 0.09)`,
+            background: g.innerBg,
+            border: `1px solid ${g.innerBorder}`,
           }}
         >
           <div
-            className="mb-1.5 text-[10px] font-semibold uppercase tracking-wider opacity-70 transition-colors duration-500"
-            style={{ color: zone.mainVar }}
+            className="mb-1.5 text-[10px] font-semibold uppercase tracking-wider"
+            style={{ color: g.textFaint }}
           >
             {t('dashboard.tariff')}
           </div>
-          <div className="text-base font-bold leading-tight tracking-tight text-dark-50">
+          <div className="min-w-0 truncate text-base font-bold leading-tight tracking-tight text-dark-50">
             {subscription.tariff_name || t('subscription.currentPlan')}
           </div>
           <div className="mt-0.5 font-mono text-[10px] text-dark-50/30">
@@ -351,20 +205,14 @@ export default function SubscriptionCardActive({
                 background: daysLeft <= 3 ? 'rgba(var(--color-warning-400), 0.1)' : g.hoverBg,
               }}
             >
-              <svg
-                width="13"
-                height="13"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke={daysLeft <= 3 ? 'rgb(var(--color-warning-400))' : g.textSecondary}
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+              <span
+                style={{
+                  color: daysLeft <= 3 ? 'rgb(var(--color-warning-400))' : g.textSecondary,
+                }}
                 aria-hidden="true"
               >
-                <rect x="3" y="4" width="18" height="18" rx="2" />
-                <path d="M16 2v4M8 2v4M3 10h18" />
-              </svg>
+                <CalendarIcon className="h-[13px] w-[13px]" />
+              </span>
             </div>
             {t('dashboard.remaining')}
           </div>

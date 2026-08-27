@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { ChevronDownIcon } from '@/components/icons';
 import { getColorGradient } from '@/utils/colorParser';
 import { ThemeIcon } from './ThemeIcon';
 import type { BlockRendererProps } from './types';
@@ -14,7 +15,11 @@ export function AccordionBlock({
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   const visibleBlocks = blocks.filter(
-    (b) => getLocalizedText(b.title) || getLocalizedText(b.description) || b.buttons?.length,
+    (b) =>
+      getLocalizedText(b.title) ||
+      getLocalizedText(b.description) ||
+      b.buttons?.length ||
+      b.customNode,
   );
 
   if (!visibleBlocks.length) return null;
@@ -52,15 +57,9 @@ export function AccordionBlock({
               <span className="min-w-0 flex-1 truncate font-semibold text-dark-100">
                 {getLocalizedText(block.title)}
               </span>
-              <svg
+              <ChevronDownIcon
                 className={`h-[18px] w-[18px] shrink-0 text-dark-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-              </svg>
+              />
             </button>
             {/* Panel */}
             <div
@@ -73,6 +72,7 @@ export function AccordionBlock({
                   {getLocalizedText(block.description)}
                 </p>
                 {renderBlockButtons(block.buttons, 'light')}
+                {block.customNode}
               </div>
             </div>
           </div>

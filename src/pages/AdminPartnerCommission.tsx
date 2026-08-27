@@ -90,7 +90,7 @@ export default function AdminPartnerCommission() {
               Number(commissionValue) < 1 ||
               Number(commissionValue) > 100
             }
-            className="flex-1 rounded-lg bg-accent-500 px-4 py-3 font-medium text-white transition-colors hover:bg-accent-600 disabled:opacity-50"
+            className="flex-1 rounded-lg bg-accent-500 px-4 py-3 font-medium text-on-accent transition-colors hover:bg-accent-600 disabled:opacity-50"
           >
             {updateMutation.isPending ? t('common.saving') : t('common.save')}
           </button>

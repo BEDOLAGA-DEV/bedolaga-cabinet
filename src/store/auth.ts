@@ -13,7 +13,12 @@ import {
   consumeReferralCode,
   getPendingReferralCode,
 } from '../utils/referral';
-import { tokenStorage, isTokenValid, tokenRefreshManager } from '../utils/token';
+import {
+  tokenStorage,
+  isTokenValid,
+  tokenRefreshManager,
+  restoreRefreshTokenFromCloud,
+} from '../utils/token';
 import { usePermissionStore } from './permissions';
 
 export interface TelegramWidgetData {
@@ -43,9 +48,12 @@ interface AuthState {
   initialize: () => Promise<void>;
   refreshUser: () => Promise<void>;
   checkAdminStatus: () => Promise<void>;
-  loginWithTelegram: (initData: string) => Promise<void>;
-  loginWithTelegramWidget: (data: TelegramWidgetData) => Promise<void>;
-  loginWithTelegramOIDC: (idToken: string) => Promise<void>;
+  loginWithTelegram: (initData: string, acceptedLegalDocuments?: string[]) => Promise<void>;
+  loginWithTelegramWidget: (
+    data: TelegramWidgetData,
+    acceptedLegalDocuments?: string[],
+  ) => Promise<void>;
+  loginWithTelegramOIDC: (idToken: string, acceptedLegalDocuments?: string[]) => Promise<void>;
   loginWithEmail: (email: string, password: string) => Promise<void>;
   loginWithOAuth: (
     provider: string,
@@ -60,6 +68,7 @@ interface AuthState {
     password: string,
     firstName?: string,
     referralCode?: string,
+    acceptedLegalDocuments?: string[],
   ) => Promise<RegisterResponse>;
 }
 
@@ -155,6 +164,38 @@ export const useAuthStore = create<AuthState>()(
           return initState.promise;
         }
 
+        // Three identical state shapes appeared inline 6 times — extract them
+        // here (closure-scoped to keep auth state internal). Behaviour is
+        // byte-for-byte identical to the previous inline blocks; the only
+        // change is that mistypes can't drift between branches.
+        // accessToken is typed `string | null` to match the previous inline
+        // set() shape and AuthState's field; in practice it's only called
+        // along the post-isTokenValid / post-refresh branches where the
+        // value is guaranteed non-null at runtime.
+        const applySession = (
+          accessToken: string | null,
+          refreshTokenValue: string,
+          user: User,
+        ): void => {
+          set({
+            accessToken,
+            refreshToken: refreshTokenValue,
+            user,
+            isAuthenticated: true,
+            isLoading: false,
+          });
+        };
+        const clearSession = (): void => {
+          tokenStorage.clearTokens();
+          set({
+            accessToken: null,
+            refreshToken: null,
+            user: null,
+            isAuthenticated: false,
+            isLoading: false,
+          });
+        };
+
         initState.isInitializing = true;
         initState.promise = (async () => {
           try {
@@ -163,11 +204,16 @@ export const useAuthStore = create<AuthState>()(
             tokenStorage.migrateFromLocalStorage();
 
             const accessToken = tokenStorage.getAccessToken();
-            const refreshToken = tokenStorage.getRefreshToken();
+            let refreshToken = tokenStorage.getRefreshToken();
 
             if (!refreshToken) {
-              set({ isLoading: false, isAuthenticated: false });
-              return;
+              // localStorage may have been wiped by the Telegram WebView; try to
+              // recover the refresh token from Telegram CloudStorage before giving up.
+              refreshToken = await restoreRefreshTokenFromCloud();
+              if (!refreshToken) {
+                set({ isLoading: false, isAuthenticated: false });
+                return;
+              }
             }
 
             if (!isTokenValid(accessToken)) {
@@ -175,22 +221,14 @@ export const useAuthStore = create<AuthState>()(
               if (newToken) {
                 const user = await authApi.getMe();
                 await get().checkAdminStatus();
-                set({
-                  accessToken: newToken,
-                  refreshToken,
-                  user,
-                  isAuthenticated: true,
-                  isLoading: false,
-                });
+                applySession(newToken, refreshToken, user);
+              } else if (tokenRefreshManager.lastFailureWasTransport) {
+                // Backend unreachable, not a rejected token — keep the session
+                // (don't wipe tokens) so the ServiceUnavailableScreen can resume
+                // once the backend returns. Just stop the bootstrap loader.
+                set({ isLoading: false });
               } else {
-                tokenStorage.clearTokens();
-                set({
-                  accessToken: null,
-                  refreshToken: null,
-                  user: null,
-                  isAuthenticated: false,
-                  isLoading: false,
-                });
+                clearSession();
               }
               return;
             }
@@ -198,45 +236,24 @@ export const useAuthStore = create<AuthState>()(
             try {
               const user = await authApi.getMe();
               await get().checkAdminStatus();
-              set({
-                accessToken,
-                refreshToken,
-                user,
-                isAuthenticated: true,
-                isLoading: false,
-              });
+              applySession(accessToken, refreshToken, user);
             } catch {
               const newToken = await tokenRefreshManager.refreshAccessToken();
               if (newToken) {
                 try {
                   const user = await authApi.getMe();
                   await get().checkAdminStatus();
-                  set({
-                    accessToken: newToken,
-                    refreshToken,
-                    user,
-                    isAuthenticated: true,
-                    isLoading: false,
-                  });
+                  applySession(newToken, refreshToken, user);
                 } catch {
-                  tokenStorage.clearTokens();
-                  set({
-                    accessToken: null,
-                    refreshToken: null,
-                    user: null,
-                    isAuthenticated: false,
-                    isLoading: false,
-                  });
+                  clearSession();
                 }
+              } else if (tokenRefreshManager.lastFailureWasTransport) {
+                // Backend unreachable, not a rejected token — keep the session
+                // (don't wipe tokens) so the ServiceUnavailableScreen can resume
+                // once the backend returns. Just stop the bootstrap loader.
+                set({ isLoading: false });
               } else {
-                tokenStorage.clearTokens();
-                set({
-                  accessToken: null,
-                  refreshToken: null,
-                  user: null,
-                  isAuthenticated: false,
-                  isLoading: false,
-                });
+                clearSession();
               }
             }
           } finally {
@@ -249,10 +266,15 @@ export const useAuthStore = create<AuthState>()(
         return initState.promise;
       },
 
-      loginWithTelegram: async (initData) => {
+      loginWithTelegram: async (initData, acceptedLegalDocuments) => {
         const campaignSlug = getPendingCampaignSlug();
         const referralCode = getPendingReferralCode();
-        const response = await authApi.loginTelegram(initData, campaignSlug, referralCode);
+        const response = await authApi.loginTelegram(
+          initData,
+          campaignSlug,
+          referralCode,
+          acceptedLegalDocuments,
+        );
         // Clear only after successful auth — retry keeps the slugs
         consumeCampaignSlug();
         consumeReferralCode();
@@ -267,10 +289,15 @@ export const useAuthStore = create<AuthState>()(
         await get().checkAdminStatus();
       },
 
-      loginWithTelegramWidget: async (data) => {
+      loginWithTelegramWidget: async (data, acceptedLegalDocuments) => {
         const campaignSlug = getPendingCampaignSlug();
         const referralCode = getPendingReferralCode();
-        const response = await authApi.loginTelegramWidget(data, campaignSlug, referralCode);
+        const response = await authApi.loginTelegramWidget(
+          data,
+          campaignSlug,
+          referralCode,
+          acceptedLegalDocuments,
+        );
         consumeCampaignSlug();
         consumeReferralCode();
         tokenStorage.setTokens(response.access_token, response.refresh_token);
@@ -284,10 +311,15 @@ export const useAuthStore = create<AuthState>()(
         await get().checkAdminStatus();
       },
 
-      loginWithTelegramOIDC: async (idToken) => {
+      loginWithTelegramOIDC: async (idToken, acceptedLegalDocuments) => {
         const campaignSlug = getPendingCampaignSlug();
         const referralCode = getPendingReferralCode();
-        const response = await authApi.loginTelegramOIDC(idToken, campaignSlug, referralCode);
+        const response = await authApi.loginTelegramOIDC(
+          idToken,
+          campaignSlug,
+          referralCode,
+          acceptedLegalDocuments,
+        );
         consumeCampaignSlug();
         consumeReferralCode();
         tokenStorage.setTokens(response.access_token, response.refresh_token);
@@ -359,7 +391,13 @@ export const useAuthStore = create<AuthState>()(
         await get().checkAdminStatus();
       },
 
-      registerWithEmail: async (email, password, firstName, referralCode) => {
+      registerWithEmail: async (
+        email,
+        password,
+        firstName,
+        referralCode,
+        acceptedLegalDocuments,
+      ) => {
         const code = referralCode || getPendingReferralCode() || undefined;
         const campaignSlug = getPendingCampaignSlug() || undefined;
         const response = await authApi.registerEmailStandalone({
@@ -369,6 +407,7 @@ export const useAuthStore = create<AuthState>()(
           language: navigator.language.split('-')[0] || 'ru',
           referral_code: code,
           campaign_slug: campaignSlug,
+          accepted_legal_documents: acceptedLegalDocuments,
         });
         consumeReferralCode();
         return response;
@@ -386,4 +425,5 @@ export const useAuthStore = create<AuthState>()(
 captureCampaignFromUrl();
 captureReferralFromUrl();
 
-useAuthStore.getState().initialize();
+// Note: initialize() is kicked off from main.tsx after the Telegram SDK is set up,
+// so CloudStorage-backed token recovery can run during bootstrap.

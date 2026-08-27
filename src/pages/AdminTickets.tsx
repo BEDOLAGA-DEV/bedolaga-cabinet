@@ -2,12 +2,24 @@ import { useState, useRef, useEffect } from 'react';
 import logger from '../utils/logger';
 import { linkifyText } from '../utils/linkify';
 import { MessageMediaGrid } from '../components/tickets/MessageMediaGrid';
-import { useNavigate } from 'react-router';
+import { useNavigate, useParams } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { adminApi, AdminTicket, AdminTicketDetail } from '../api/admin';
+import { adminApi, type AdminTicket, type AdminTicketDetail } from '../api/admin';
 import { ticketsApi } from '../api/tickets';
+import { copyToClipboard as copyText } from '../utils/clipboard';
 import { usePlatform } from '../platform/hooks/usePlatform';
+import {
+  BackIcon,
+  CheckCircleIcon,
+  ClockIcon,
+  InboxIcon,
+  SettingsIcon,
+  TicketIcon,
+  XCircleIcon,
+  XIcon,
+} from '@/components/icons';
+import { StatCard } from '@/components/stats';
 
 interface MediaAttachment {
   id: string;
@@ -38,26 +50,32 @@ const ALLOWED_FILE_TYPES: Record<string, string> = {
 const ACCEPT_STRING = Object.keys(ALLOWED_FILE_TYPES).join(',');
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
-// BackIcon
-const BackIcon = () => (
-  <svg
-    className="h-5 w-5 text-dark-400"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={2}
-  >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-  </svg>
-);
-
 export default function AdminTickets() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { ticketId } = useParams<{ ticketId: string }>();
   const queryClient = useQueryClient();
   const { capabilities } = usePlatform();
 
   const [selectedTicketId, setSelectedTicketId] = useState<number | null>(null);
+
+  // Deep-link: /admin/tickets/:ticketId (or a startapp param routed here) opens
+  // the given ticket directly — used by the admin-chat notification buttons.
+  // Both routes render the same component instance (no remount), so we mirror the
+  // URL param into the selection: navigating to the bare /admin/tickets list
+  // clears any deep-linked selection, keeping URL and detail pane in sync. (This
+  // only fires on mount or an actual param change, never on in-list clicks, since
+  // ticketId stays undefined on the bare route.)
+  useEffect(() => {
+    if (!ticketId) {
+      setSelectedTicketId(null);
+      return;
+    }
+    const id = Number(ticketId);
+    if (Number.isInteger(id) && id > 0) {
+      setSelectedTicketId(id);
+    }
+  }, [ticketId]);
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [replyText, setReplyText] = useState('');
   const [isReplying, setIsReplying] = useState(false);
@@ -176,7 +194,7 @@ export default function AdminTickets() {
     }
   };
 
-  const handleReply = async (e: React.FormEvent) => {
+  const handleReply = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     if (!selectedTicketId) return;
     if (attachments.some((a) => a.uploading || a.error)) return;
@@ -257,14 +275,7 @@ export default function AdminTickets() {
   };
 
   const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text).catch(() => {
-      const textarea = document.createElement('textarea');
-      textarea.value = text;
-      document.body.appendChild(textarea);
-      textarea.select();
-      document.execCommand('copy');
-      document.body.removeChild(textarea);
-    });
+    void copyText(text);
   };
 
   return (
@@ -280,32 +291,13 @@ export default function AdminTickets() {
               <BackIcon />
             </button>
           )}
-          <h1 className="text-2xl font-bold text-dark-50 sm:text-3xl">
-            {t('admin.tickets.title')}
-          </h1>
+          <h1 className="text-xl font-bold text-dark-100">{t('admin.tickets.title')}</h1>
         </div>
         <button
           onClick={() => navigate('/admin/tickets/settings')}
           className="btn-secondary flex items-center gap-2"
         >
-          <svg
-            className="h-5 w-5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={1.5}
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z"
-            />
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-            />
-          </svg>
+          <SettingsIcon className="h-5 w-5" />
           {t('admin.tickets.settings')}
         </button>
       </div>
@@ -313,25 +305,37 @@ export default function AdminTickets() {
       {/* Stats */}
       {stats && (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
-          <div className="card text-center">
-            <div className="stat-value">{stats.total}</div>
-            <div className="stat-label">{t('admin.tickets.total')}</div>
-          </div>
-          <div className="card text-center">
-            <div className="stat-value text-accent-400">{stats.open}</div>
-            <div className="stat-label">{t('admin.tickets.statusOpen')}</div>
-          </div>
-          <div className="card text-center">
-            <div className="stat-value text-warning-400">{stats.pending}</div>
-            <div className="stat-label">{t('admin.tickets.statusPending')}</div>
-          </div>
-          <div className="card text-center">
-            <div className="stat-value text-success-400">{stats.answered}</div>
-            <div className="stat-label">{t('admin.tickets.statusAnswered')}</div>
-          </div>
-          <div className="card col-span-2 text-center sm:col-span-1">
-            <div className="stat-value text-dark-400">{stats.closed}</div>
-            <div className="stat-label">{t('admin.tickets.statusClosed')}</div>
+          <StatCard
+            label={t('admin.tickets.total')}
+            value={stats.total}
+            icon={<TicketIcon className="h-5 w-5" />}
+            tone="neutral"
+          />
+          <StatCard
+            label={t('admin.tickets.statusOpen')}
+            value={stats.open}
+            icon={<InboxIcon className="h-5 w-5" />}
+            tone="accent"
+          />
+          <StatCard
+            label={t('admin.tickets.statusPending')}
+            value={stats.pending}
+            icon={<ClockIcon className="h-5 w-5" />}
+            tone="warning"
+          />
+          <StatCard
+            label={t('admin.tickets.statusAnswered')}
+            value={stats.answered}
+            icon={<CheckCircleIcon className="h-5 w-5" />}
+            tone="success"
+          />
+          <div className="col-span-2 sm:col-span-1">
+            <StatCard
+              label={t('admin.tickets.statusClosed')}
+              value={stats.closed}
+              icon={<XCircleIcon className="h-5 w-5" />}
+              tone="neutral"
+            />
           </div>
         </div>
       )}
@@ -451,19 +455,7 @@ export default function AdminTickets() {
           {!selectedTicketId ? (
             <div className="flex h-64 flex-col items-center justify-center">
               <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-dark-800">
-                <svg
-                  className="h-8 w-8 text-dark-500"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={1.5}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M16.5 6v.75m0 3v.75m0 3v.75m0 3V18m-9-5.25h5.25M7.5 15h3M3.375 5.25c-.621 0-1.125.504-1.125 1.125v3.026a2.999 2.999 0 010 5.198v3.026c0 .621.504 1.125 1.125 1.125h17.25c.621 0 1.125-.504 1.125-1.125v-3.026a2.999 2.999 0 010-5.198V6.375c0-.621-.504-1.125-1.125-1.125H3.375z"
-                  />
-                </svg>
+                <TicketIcon className="h-8 w-8 text-dark-500" />
               </div>
               <div className="text-dark-400">{t('admin.tickets.selectTicket')}</div>
             </div>
@@ -490,7 +482,7 @@ export default function AdminTickets() {
                     </span>
                   </div>
                 </div>
-                <div className="mb-4 flex items-center gap-2 text-sm text-dark-500">
+                <div className="mb-4 flex flex-wrap items-center gap-2 text-sm text-dark-500">
                   <span>
                     {t('admin.tickets.from')}: {formatUser(selectedTicket)}
                     {selectedTicket.user?.telegram_id && (
@@ -559,7 +551,7 @@ export default function AdminTickets() {
                     </div>
                     {msg.message_text && (
                       <p
-                        className="whitespace-pre-wrap text-dark-200 [&_a]:text-accent-400 [&_a]:underline"
+                        className="whitespace-pre-wrap break-words text-dark-200 [&_a]:text-accent-400 [&_a]:underline"
                         dangerouslySetInnerHTML={{ __html: linkifyText(msg.message_text) }}
                       />
                     )}
@@ -588,6 +580,7 @@ export default function AdminTickets() {
                             <img
                               src={att.preview}
                               alt="Preview"
+                              loading="lazy"
                               className="h-16 w-16 rounded-lg object-cover"
                             />
                           ) : (
@@ -596,33 +589,21 @@ export default function AdminTickets() {
                             </div>
                           )}
                           {att.uploading && (
-                            <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/50">
+                            <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-dark-950/50">
                               <span className="h-4 w-4 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
                             </div>
                           )}
                           {att.error && (
-                            <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-red-500/30">
-                              <span className="text-xs text-red-300">!</span>
+                            <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-error-500/30">
+                              <span className="text-xs text-error-300">!</span>
                             </div>
                           )}
                           <button
                             type="button"
                             onClick={() => removeAttachment(idx)}
-                            className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-dark-600 text-dark-300 hover:bg-red-500 hover:text-white"
+                            className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-dark-600 text-dark-300 hover:bg-error-500 hover:text-white"
                           >
-                            <svg
-                              className="h-3 w-3"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                              strokeWidth={3}
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M6 18L18 6M6 6l12 12"
-                              />
-                            </svg>
+                            <XIcon className="h-3 w-3" />
                           </button>
                         </div>
                       ))}
@@ -639,7 +620,7 @@ export default function AdminTickets() {
                   />
 
                   {replyError && (
-                    <div className="mt-2 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">
+                    <div className="mt-2 rounded-lg border border-error-500/30 bg-error-500/10 px-3 py-2 text-sm text-error-300">
                       {replyError}
                     </div>
                   )}

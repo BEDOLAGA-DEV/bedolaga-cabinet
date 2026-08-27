@@ -60,6 +60,9 @@ export interface SpinResult {
 
 export interface SpinHistoryItem {
   id: number;
+  // WheelPrize id of the won prize (null if that prize was later deleted). Used to
+  // land the wheel animation on the exact winning sector after a Stars payment.
+  prize_id: number | null;
   payment_type: string;
   payment_amount: number;
   prize_type: string;

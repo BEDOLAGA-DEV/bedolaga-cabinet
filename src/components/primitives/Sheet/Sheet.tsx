@@ -1,5 +1,5 @@
 import * as DialogPrimitive from '@radix-ui/react-dialog';
-import { motion, AnimatePresence, useDragControls, PanInfo } from 'framer-motion';
+import { motion, AnimatePresence, useDragControls, type PanInfo } from 'framer-motion';
 import {
   forwardRef,
   type ComponentPropsWithoutRef,
@@ -8,6 +8,7 @@ import {
   useState,
   useCallback,
 } from 'react';
+import { CloseIcon } from '@/components/icons';
 import { cn } from '@/lib/utils';
 import { usePlatform } from '@/platform';
 import {
@@ -22,19 +23,6 @@ export {
   Portal as SheetPortal,
   Close as SheetClose,
 } from '@radix-ui/react-dialog';
-
-// Close icon
-const CloseIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-    <path
-      d="M12 4L4 12M4 4l8 8"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
 
 // Context for AnimatePresence and control
 interface SheetContextValue {
@@ -91,7 +79,7 @@ export const SheetOverlay = forwardRef<HTMLDivElement, SheetOverlayProps>(
   ({ className, ...props }, ref) => (
     <DialogPrimitive.Overlay
       ref={ref}
-      className={cn('fixed inset-0 z-50 bg-black/60 backdrop-blur-sm', className)}
+      className={cn('fixed inset-0 z-50 bg-dark-950/60 backdrop-blur-sm', className)}
       asChild
       {...props}
     >
@@ -109,9 +97,8 @@ export const SheetOverlay = forwardRef<HTMLDivElement, SheetOverlayProps>(
 SheetOverlay.displayName = 'SheetOverlay';
 
 // Content
-export interface SheetContentProps extends ComponentPropsWithoutRef<
-  typeof DialogPrimitive.Content
-> {
+export interface SheetContentProps
+  extends ComponentPropsWithoutRef<typeof DialogPrimitive.Content> {
   showDragHandle?: boolean;
   showCloseButton?: boolean;
   enableDragToClose?: boolean;

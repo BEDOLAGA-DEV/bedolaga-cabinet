@@ -4,67 +4,29 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import {
   promoOffersApi,
-  PromoOfferBroadcastRequest,
+  type PromoOfferBroadcastRequest,
   TARGET_SEGMENTS,
-  TargetSegment,
+  type TargetSegment,
   OFFER_TYPE_CONFIG,
-  OfferType,
+  type OfferType,
 } from '../api/promoOffers';
-import { adminUsersApi, UserListItem } from '../api/adminUsers';
+import { adminBroadcastsApi } from '../api/adminBroadcasts';
+import { adminUsersApi, type UserListItem } from '../api/adminUsers';
 import { AdminBackButton } from '../components/admin';
-
-// Icons
-const SendIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"
-    />
-  </svg>
-);
-
-const CheckIcon = () => (
-  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-  </svg>
-);
-
-const UsersIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"
-    />
-  </svg>
-);
-
-const UserIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"
-    />
-  </svg>
-);
-
-const SearchIcon = () => (
-  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
-    />
-  </svg>
-);
-
-const CloseIcon = () => (
-  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-  </svg>
-);
+import {
+  BroadcastDeliveryStats,
+  BroadcastStatusBadge,
+} from '../components/broadcasts/BroadcastDeliveryStats';
+import { broadcastPollInterval } from '../utils/broadcastStatus';
+import {
+  SendIcon,
+  CheckIcon,
+  UsersIcon,
+  UserIcon,
+  SearchIcon,
+  CloseIcon,
+  XIcon,
+} from '@/components/icons';
 
 const getOfferTypeIcon = (offerType: string): string => {
   return OFFER_TYPE_CONFIG[offerType as OfferType]?.icon || '🎁';
@@ -87,12 +49,34 @@ export default function AdminPromoOfferSend() {
     title: string;
     message: string;
     isSuccess: boolean;
+    broadcastId?: number | null;
   } | null>(null);
 
   // Query templates
   const { data: templatesData, isLoading } = useQuery({
     queryKey: ['admin-promo-templates'],
     queryFn: promoOffersApi.getTemplates,
+  });
+
+  // Recipient counts per segment — админ видит охват до отправки
+  const { data: segmentsData } = useQuery({
+    queryKey: ['admin-promo-segments'],
+    queryFn: promoOffersApi.getSegments,
+    staleTime: 60000,
+  });
+
+  const segmentCounts = new Map(
+    (segmentsData?.segments || []).map((segment) => [segment.key, segment.count]),
+  );
+  const selectedSegmentCount = segmentCounts.get(selectedTarget);
+
+  // Delivery progress of the offer we have just sent
+  const broadcastId = result?.broadcastId ?? null;
+  const { data: delivery } = useQuery({
+    queryKey: ['admin', 'broadcasts', 'detail', broadcastId],
+    queryFn: async () => adminBroadcastsApi.get(broadcastId as number),
+    enabled: broadcastId !== null,
+    refetchInterval: (query) => broadcastPollInterval(query.state.data?.status),
   });
 
   const templates = templatesData?.items || [];
@@ -146,6 +130,7 @@ export default function AdminPromoOfferSend() {
     mutationFn: promoOffersApi.broadcastOffer,
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['admin-promo-logs'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'broadcasts'] });
 
       let message = t('admin.promoOffers.result.offersCreated', { count: data.created_offers });
       if (data.notifications_sent > 0 || data.notifications_failed > 0) {
@@ -165,6 +150,7 @@ export default function AdminPromoOfferSend() {
         title: t('admin.promoOffers.result.sentTitle'),
         message,
         isSuccess: true,
+        broadcastId: data.broadcast_id,
       });
     },
     onError: (error: unknown) => {
@@ -226,40 +212,51 @@ export default function AdminPromoOfferSend() {
   if (result) {
     return (
       <div className="animate-fade-in">
-        <div className="mx-auto max-w-md py-12 text-center">
+        <div className="mx-auto max-w-2xl py-12 text-center">
           <div
             className={`mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full ${
               result.isSuccess ? 'bg-success-500/20' : 'bg-error-500/20'
             }`}
           >
             {result.isSuccess ? (
-              <svg
-                className="h-8 w-8 text-success-400"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-              </svg>
+              <CheckIcon className="h-8 w-8 text-success-400" />
             ) : (
-              <svg
-                className="h-8 w-8 text-error-400"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              <XIcon className="h-8 w-8 text-error-400" />
             )}
           </div>
           <h3 className="mb-2 text-lg font-semibold text-dark-100">{result.title}</h3>
           <p className="mb-6 whitespace-pre-wrap text-dark-400">{result.message}</p>
+
+          {/* Прогресс доставки в Telegram: сколько дошло, кто заблокировал бота */}
+          {delivery && (
+            <div className="mb-6 space-y-4 text-left">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-dark-300">
+                  {t('admin.promoOffers.result.deliveryTitle')}
+                </span>
+                <BroadcastStatusBadge status={delivery.status} />
+              </div>
+              <BroadcastDeliveryStats
+                status={delivery.status}
+                progressPercent={delivery.progress_percent}
+                totalCount={delivery.total_count}
+                sentCount={delivery.sent_count}
+                blockedCount={delivery.blocked_count}
+                failedCount={delivery.failed_count}
+              />
+              <button
+                onClick={() => navigate(`/admin/broadcasts/${delivery.id}`)}
+                className="text-sm text-accent-400 transition-colors hover:text-accent-300"
+              >
+                {t('admin.promoOffers.result.openAsBroadcast')}
+              </button>
+            </div>
+          )}
+
           <div className="flex justify-center gap-3">
             <button
               onClick={() => navigate('/admin/promo-offers')}
-              className="rounded-lg bg-accent-500 px-6 py-2 text-white transition-colors hover:bg-accent-600"
+              className="rounded-lg bg-accent-500 px-6 py-2 text-on-accent transition-colors hover:bg-accent-600"
             >
               {t('admin.promoOffers.backToList')}
             </button>
@@ -300,14 +297,17 @@ export default function AdminPromoOfferSend() {
         <div className="mx-auto max-w-2xl space-y-6">
           {/* Template Selection */}
           <div className="rounded-xl border border-dark-700 bg-dark-800 p-6">
-            <label className="mb-2 block text-sm font-medium text-dark-300">
+            <label id="po-template-label" className="mb-2 block text-sm font-medium text-dark-300">
               {t('admin.promoOffers.send.offerTemplate')}
               <span className="text-error-400">*</span>
             </label>
-            <div className="space-y-2">
+            <div className="space-y-2" role="radiogroup" aria-labelledby="po-template-label">
               {activeTemplates.map((template) => (
                 <button
                   key={template.id}
+                  type="button"
+                  role="radio"
+                  aria-checked={selectedTemplateId === template.id}
                   onClick={() => setSelectedTemplateId(template.id)}
                   className={`w-full rounded-lg border p-4 text-left transition-colors ${
                     selectedTemplateId === template.id
@@ -345,12 +345,15 @@ export default function AdminPromoOfferSend() {
 
           {/* Send Mode */}
           <div className="rounded-xl border border-dark-700 bg-dark-800 p-6">
-            <label className="mb-2 block text-sm font-medium text-dark-300">
+            <label id="po-sendmode-label" className="mb-2 block text-sm font-medium text-dark-300">
               {t('admin.promoOffers.send.sendTo')}
               <span className="text-error-400">*</span>
             </label>
-            <div className="mb-4 flex gap-2">
+            <div className="mb-4 flex gap-2" role="radiogroup" aria-labelledby="po-sendmode-label">
               <button
+                type="button"
+                role="radio"
+                aria-checked={sendMode === 'segment'}
                 onClick={() => setSendMode('segment')}
                 className={`flex flex-1 items-center justify-center gap-2 rounded-lg border py-2.5 text-sm font-medium transition-colors ${
                   sendMode === 'segment'
@@ -362,6 +365,9 @@ export default function AdminPromoOfferSend() {
                 <span>{t('admin.promoOffers.send.segment')}</span>
               </button>
               <button
+                type="button"
+                role="radio"
+                aria-checked={sendMode === 'user'}
                 onClick={() => setSendMode('user')}
                 className={`flex flex-1 items-center justify-center gap-2 rounded-lg border py-2.5 text-sm font-medium transition-colors ${
                   sendMode === 'user'
@@ -375,33 +381,46 @@ export default function AdminPromoOfferSend() {
             </div>
 
             {sendMode === 'segment' ? (
-              <select
-                value={selectedTarget}
-                onChange={(e) => setSelectedTarget(e.target.value as TargetSegment)}
-                className="input"
-              >
-                {Object.entries(TARGET_SEGMENTS).map(([key, labelKey]) => (
-                  <option key={key} value={key}>
-                    {t(labelKey)}
-                  </option>
-                ))}
-              </select>
+              <>
+                <select
+                  value={selectedTarget}
+                  onChange={(e) => setSelectedTarget(e.target.value as TargetSegment)}
+                  className="input"
+                >
+                  {Object.entries(TARGET_SEGMENTS).map(([key, labelKey]) => {
+                    const count = segmentCounts.get(key);
+                    return (
+                      <option key={key} value={key}>
+                        {count === undefined
+                          ? t(labelKey)
+                          : `${t(labelKey)} — ${count} ${t('admin.broadcasts.recipients')}`}
+                      </option>
+                    );
+                  })}
+                </select>
+                {selectedSegmentCount !== undefined && (
+                  <div className="mt-2 text-sm text-dark-400">
+                    {t('admin.broadcasts.willBeSent')}:{' '}
+                    <strong className="text-accent-400">{selectedSegmentCount}</strong>
+                  </div>
+                )}
+              </>
             ) : (
               <div ref={searchRef} className="relative">
                 {selectedUser ? (
                   // Selected user display
-                  <div className="flex items-center justify-between rounded-lg border border-accent-500 bg-accent-500/10 px-3 py-2.5">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-dark-600">
+                  <div className="flex items-center justify-between gap-2 rounded-lg border border-accent-500 bg-accent-500/10 px-3 py-2.5">
+                    <div className="flex min-w-0 items-center gap-3">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-dark-600">
                         <UserIcon />
                       </div>
-                      <div>
-                        <div className="text-sm font-medium text-dark-100">
+                      <div className="min-w-0">
+                        <div className="truncate text-sm font-medium text-dark-100">
                           {selectedUser.full_name ||
                             selectedUser.username ||
                             `ID: ${selectedUser.telegram_id}`}
                         </div>
-                        <div className="text-xs text-dark-400">
+                        <div className="truncate text-xs text-dark-400">
                           {selectedUser.username && `@${selectedUser.username} · `}
                           Telegram: {selectedUser.telegram_id}
                         </div>
@@ -409,9 +428,9 @@ export default function AdminPromoOfferSend() {
                     </div>
                     <button
                       onClick={handleClearUser}
-                      className="rounded-lg p-1.5 text-dark-400 transition-colors hover:bg-dark-600 hover:text-dark-100"
+                      className="shrink-0 rounded-lg p-1.5 text-dark-400 transition-colors hover:bg-dark-600 hover:text-dark-100"
                     >
-                      <CloseIcon />
+                      <CloseIcon className="h-4 w-4" />
                     </button>
                   </div>
                 ) : (
@@ -419,7 +438,7 @@ export default function AdminPromoOfferSend() {
                   <>
                     <div className="relative">
                       <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-dark-400">
-                        <SearchIcon />
+                        <SearchIcon className="h-4 w-4" />
                       </div>
                       <input
                         type="text"
@@ -492,7 +511,7 @@ export default function AdminPromoOfferSend() {
                   {selectedTemplate.message_text}
                 </div>
                 <div className="mt-4">
-                  <span className="inline-block rounded-lg bg-accent-500 px-4 py-2 text-sm text-white">
+                  <span className="inline-block rounded-lg bg-accent-500 px-4 py-2 text-sm text-on-accent">
                     {selectedTemplate.button_text}
                   </span>
                 </div>

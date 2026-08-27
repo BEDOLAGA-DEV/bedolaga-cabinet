@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { adminAppsApi } from '../api/adminApps';
 import { usePlatform } from '../platform/hooks/usePlatform';
+import { BackIcon } from '@/components/icons';
 
 export default function AdminApps() {
   const { t } = useTranslation();
@@ -10,7 +11,7 @@ export default function AdminApps() {
   const queryClient = useQueryClient();
   const { capabilities } = usePlatform();
 
-  // RemnaWave status
+  // Remnawave status
   const { data: status } = useQuery({
     queryKey: ['remnawave-status'],
     queryFn: adminAppsApi.getRemnaWaveStatus,
@@ -45,15 +46,7 @@ export default function AdminApps() {
             onClick={() => navigate('/admin')}
             className="flex h-10 w-10 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
           >
-            <svg
-              className="h-5 w-5 text-dark-400"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-            </svg>
+            <BackIcon className="h-5 w-5 text-dark-400" />
           </button>
         )}
         <h1 className="text-2xl font-bold text-dark-50 sm:text-3xl">{t('admin.apps.title')}</h1>
@@ -67,8 +60,8 @@ export default function AdminApps() {
           />
           <span className="text-sm font-medium text-dark-200">
             {status?.enabled
-              ? t('admin.apps.remnaWaveConnected', 'RemnaWave connected')
-              : t('admin.apps.remnaWaveDisconnected', 'RemnaWave not connected')}
+              ? t('admin.apps.remnaWaveConnected', 'Remnawave connected')
+              : t('admin.apps.remnaWaveDisconnected', 'Remnawave not connected')}
           </span>
         </div>
         {status?.config_uuid && (

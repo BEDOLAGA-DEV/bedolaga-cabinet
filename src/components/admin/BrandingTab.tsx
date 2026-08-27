@@ -15,6 +15,7 @@ export function BrandingTab({ accentColor = '#3b82f6' }: BrandingTabProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const startVideoInputRef = useRef<HTMLInputElement>(null);
 
   const [editingName, setEditingName] = useState(false);
   const [newName, setNewName] = useState('');
@@ -23,6 +24,12 @@ export function BrandingTab({ accentColor = '#3b82f6' }: BrandingTabProps) {
   const { data: branding } = useQuery({
     queryKey: ['branding'],
     queryFn: brandingApi.getBranding,
+  });
+
+  // Видео стартового меню бота: хранится как Telegram file_id
+  const { data: startVideo } = useQuery({
+    queryKey: ['bot-start-video'],
+    queryFn: brandingApi.getBotStartVideo,
   });
 
   const { data: fullscreenSettings } = useQuery({
@@ -38,6 +45,11 @@ export function BrandingTab({ accentColor = '#3b82f6' }: BrandingTabProps) {
   const { data: giftSettings } = useQuery({
     queryKey: ['gift-enabled'],
     queryFn: brandingApi.getGiftEnabled,
+  });
+
+  const { data: footerEnabled } = useQuery({
+    queryKey: ['footer-enabled'],
+    queryFn: brandingApi.getFooterEnabled,
   });
 
   // Mutations
@@ -88,6 +100,36 @@ export function BrandingTab({ accentColor = '#3b82f6' }: BrandingTabProps) {
     },
   });
 
+  const updateFooterMutation = useMutation({
+    mutationFn: (enabled: boolean) => brandingApi.updateFooterEnabled(enabled),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['footer-enabled'] });
+    },
+  });
+
+  const uploadStartVideoMutation = useMutation({
+    mutationFn: brandingApi.uploadBotStartVideo,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['bot-start-video'] });
+    },
+  });
+
+  const deleteStartVideoMutation = useMutation({
+    mutationFn: brandingApi.deleteBotStartVideo,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['bot-start-video'] });
+    },
+  });
+
+  const handleStartVideoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      uploadStartVideoMutation.mutate(file);
+    }
+    // Сбрасываем input, чтобы повторный выбор того же файла снова сработал
+    e.target.value = '';
+  };
+
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -116,6 +158,7 @@ export function BrandingTab({ accentColor = '#3b82f6' }: BrandingTabProps) {
                 <img
                   src={brandingApi.getLogoUrl(branding) ?? undefined}
                   alt="Logo"
+                  loading="lazy"
                   className="h-full w-full object-cover"
                 />
               ) : (
@@ -167,7 +210,7 @@ export function BrandingTab({ accentColor = '#3b82f6' }: BrandingTabProps) {
                 <button
                   onClick={() => updateBrandingMutation.mutate(newName)}
                   disabled={updateBrandingMutation.isPending}
-                  className="rounded-xl bg-accent-500 px-4 py-2 text-white transition-colors hover:bg-accent-600 disabled:opacity-50"
+                  className="rounded-xl bg-accent-500 px-4 py-2 text-on-accent transition-colors hover:bg-accent-600 disabled:opacity-50"
                 >
                   <CheckIcon />
                 </button>
@@ -179,8 +222,8 @@ export function BrandingTab({ accentColor = '#3b82f6' }: BrandingTabProps) {
                 </button>
               </div>
             ) : (
-              <div className="flex items-center gap-2">
-                <span className="text-lg text-dark-100">
+              <div className="flex min-w-0 items-center gap-2">
+                <span className="min-w-0 truncate text-lg text-dark-100">
                   {branding?.name || t('admin.settings.notSpecified')}
                 </span>
                 <button
@@ -188,7 +231,7 @@ export function BrandingTab({ accentColor = '#3b82f6' }: BrandingTabProps) {
                     setNewName(branding?.name ?? '');
                     setEditingName(true);
                   }}
-                  className="rounded-lg p-1.5 text-dark-400 transition-colors hover:bg-dark-700 hover:text-dark-200"
+                  className="shrink-0 rounded-lg p-1.5 text-dark-400 transition-colors hover:bg-dark-700 hover:text-dark-200"
                 >
                   <PencilIcon />
                 </button>
@@ -196,6 +239,57 @@ export function BrandingTab({ accentColor = '#3b82f6' }: BrandingTabProps) {
             )}
           </div>
         </div>
+      </div>
+
+      {/* Видео стартового меню бота */}
+      <div className="rounded-2xl border border-dark-700/50 bg-dark-800/50 p-6">
+        <h3 className="mb-1 text-lg font-semibold text-dark-100">
+          {t('admin.settings.botStartVideo')}
+        </h3>
+        <p className="mb-4 text-sm text-dark-400">{t('admin.settings.botStartVideoDesc')}</p>
+
+        <div className="flex flex-wrap items-center gap-3">
+          <input
+            ref={startVideoInputRef}
+            type="file"
+            accept="video/*"
+            onChange={handleStartVideoUpload}
+            className="hidden"
+          />
+          <button
+            onClick={() => startVideoInputRef.current?.click()}
+            disabled={uploadStartVideoMutation.isPending}
+            className="rounded-xl bg-dark-700 px-4 py-2 text-sm text-dark-200 transition-colors hover:bg-dark-600 disabled:opacity-50"
+          >
+            {uploadStartVideoMutation.isPending
+              ? t('common.loading')
+              : startVideo?.has_video
+                ? t('admin.settings.botStartVideoReplace')
+                : t('admin.settings.botStartVideoUpload')}
+          </button>
+
+          {startVideo?.has_video && (
+            <button
+              onClick={() => deleteStartVideoMutation.mutate()}
+              disabled={deleteStartVideoMutation.isPending}
+              className="rounded-xl bg-dark-700 px-4 py-2 text-sm text-dark-400 transition-colors hover:bg-error-500/20 hover:text-error-400 disabled:opacity-50"
+            >
+              {t('admin.settings.botStartVideoRemove')}
+            </button>
+          )}
+
+          <span className="text-sm text-dark-400">
+            {startVideo?.has_video
+              ? t('admin.settings.botStartVideoActive')
+              : t('admin.settings.botStartVideoNone')}
+          </span>
+        </div>
+
+        {uploadStartVideoMutation.isError && (
+          <div className="mt-3 text-sm text-error-400">
+            {t('admin.settings.botStartVideoError')}
+          </div>
+        )}
       </div>
 
       {/* Animated Background Editor */}
@@ -247,6 +341,25 @@ export function BrandingTab({ accentColor = '#3b82f6' }: BrandingTabProps) {
               checked={giftSettings?.enabled ?? false}
               onChange={() => updateGiftMutation.mutate(!(giftSettings?.enabled ?? false))}
               disabled={updateGiftMutation.isPending}
+            />
+          </div>
+
+          <div className="flex items-center justify-between rounded-xl bg-dark-700/30 p-4">
+            <div>
+              <span className="font-medium text-dark-100">
+                {t('admin.settings.legalFooter', 'Юридический футер')}
+              </span>
+              <p className="text-sm text-dark-400">
+                {t(
+                  'admin.settings.legalFooterDesc',
+                  'Ссылки на оферту/политику/рекурренты внизу страницы входа',
+                )}
+              </p>
+            </div>
+            <Toggle
+              checked={footerEnabled ?? true}
+              onChange={() => updateFooterMutation.mutate(!(footerEnabled ?? true))}
+              disabled={updateFooterMutation.isPending}
             />
           </div>
         </div>

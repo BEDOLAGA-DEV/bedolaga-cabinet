@@ -9,7 +9,7 @@ export interface LocalizedText {
 }
 
 export const adminAppsApi = {
-  // Get RemnaWave config status
+  // Get Remnawave config status
   getRemnaWaveStatus: async (): Promise<{ enabled: boolean; config_uuid: string | null }> => {
     const response = await apiClient.get<{ enabled: boolean; config_uuid: string | null }>(
       '/cabinet/admin/apps/remnawave/status',
@@ -17,7 +17,7 @@ export const adminAppsApi = {
     return response.data;
   },
 
-  // Set RemnaWave config UUID
+  // Set Remnawave config UUID
   setRemnaWaveUuid: async (
     uuid: string | null,
   ): Promise<{ enabled: boolean; config_uuid: string | null }> => {
@@ -28,7 +28,7 @@ export const adminAppsApi = {
     return response.data;
   },
 
-  // List available RemnaWave configs
+  // List available Remnawave configs
   listRemnaWaveConfigs: async (): Promise<
     { uuid: string; name: string; view_position: number }[]
   > => {
@@ -38,7 +38,7 @@ export const adminAppsApi = {
     return response.data;
   },
 
-  // Get RemnaWave subscription config
+  // Get Remnawave subscription config
   getRemnaWaveConfig: async (): Promise<RemnawaveConfig> => {
     const response = await apiClient.get<{
       uuid: string;
@@ -50,7 +50,7 @@ export const adminAppsApi = {
   },
 };
 
-// ============== RemnaWave Format Types ==============
+// ============== Remnawave Format Types ==============
 
 export interface RemnawaveButton {
   url: string;

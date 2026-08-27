@@ -15,6 +15,8 @@ export interface EmailTemplateType {
 export interface EmailTemplateListResponse {
   items: EmailTemplateType[];
   available_languages: string[];
+  /** Placeholders available in every template regardless of type */
+  common_context_vars: string[];
 }
 
 export interface EmailTemplateLanguageData {
@@ -30,6 +32,8 @@ export interface EmailTemplateDetail {
   label: Record<string, string>;
   description: Record<string, string>;
   context_vars: string[];
+  /** Placeholders available in every template regardless of type */
+  common_context_vars?: string[];
   languages: Record<string, EmailTemplateLanguageData>;
 }
 
@@ -52,6 +56,9 @@ export interface EmailTemplatePreviewResponse {
 export interface EmailTemplateSendTestRequest {
   language: string;
   email?: string;
+  /** Current editor content — when set, the test sends it instead of the saved template */
+  subject?: string;
+  body_html?: string;
 }
 
 export const adminEmailTemplatesApi = {

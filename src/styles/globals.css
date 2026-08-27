@@ -2,9 +2,21 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Flag emoji polyfill — Windows has no glyphs for regional-indicator flags, so
+   they fall back to country letters. This locally-bundled Twemoji flag font is
+   scoped via unicode-range to ONLY flag codepoints, so adding it to the front
+   of the font stacks fixes every flag everywhere without touching any markup
+   and without affecting any other text. Root fix, not a per-component wrap. */
+@font-face {
+  font-family: "Twemoji Country Flags";
+  unicode-range: U+1F1E6-1F1FF, U+1F3F4, U+E0062-E007F;
+  src: url("/fonts/TwemojiCountryFlags.woff2") format("woff2");
+  font-display: swap;
+}
+
 /* Animated gradient border — @property enables CSS-only angle animation */
 @property --border-angle {
-  syntax: '<angle>';
+  syntax: "<angle>";
   initial-value: 0deg;
   inherits: false;
 }
@@ -16,13 +28,13 @@
   background:
     linear-gradient(var(--_bg), var(--_bg)) padding-box,
     conic-gradient(
-        from var(--border-angle),
-        var(--_accent) 0%,
-        transparent 25%,
-        transparent 75%,
-        var(--_accent) 100%
-      )
-      border-box;
+      from var(--border-angle),
+      var(--_accent) 0%,
+      transparent 25%,
+      transparent 75%,
+      var(--_accent) 100%
+    )
+    border-box;
   animation: border-rotate var(--border-duration, 3s) linear infinite;
 }
 
@@ -48,6 +60,24 @@
 @media (prefers-reduced-motion: reduce) {
   .hover-border-gradient {
     animation-play-state: paused;
+  }
+}
+
+/* Global reduced-motion defence — collapses every animation and transition
+   to ~0ms so users with vestibular disorders, motion sensitivity, or just
+   the OS-level preference set get instant state changes. State-conveying
+   motion still arrives at its final frame; only the journey is skipped.
+   Specific rules above (animation-play-state: paused, animation: none)
+   stay as documentation of intent — this rule subsumes them via !important.
+   WCAG 2.3.3 (Animation from Interactions). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 
@@ -180,6 +210,13 @@
     --color-error-900: 127, 29, 29;
     --color-error-950: 69, 10, 10;
 
+    /* Subscription-status semantic tokens — distinct from warning/error
+       because the urgency timeline ("expiring soon" vs "expired") needs a
+       sharper, hotter signal than the system-wide warning/error roles.
+       Extracted from inline #FFB800 / #FF3B5C in Subscription.tsx etc. */
+    --color-urgent-400: 255, 184, 0; /* #FFB800 — expiring soon */
+    --color-critical-500: 255, 59, 92; /* #FF3B5C — expired */
+
     /* Theme semantic colors (hex for direct use) */
     --color-dark-bg: #0a0f1a;
     --color-dark-surface: #0f172a;
@@ -196,6 +233,17 @@
     overflow-x: hidden;
     scrollbar-width: thin;
     scrollbar-color: rgb(var(--color-dark-700)) transparent;
+  }
+
+  body {
+    /* 100vw включает ширину скроллбара, поэтому центрированный контент не
+       сдвигается, когда при навигации появляется/исчезает вертикальный
+       скроллбар; лишние ~6px справа уходят под скроллбар и срезаются
+       overflow-x: hidden на html. Вариант со scrollbar-gutter: stable не
+       подошёл: фоновый слой (fixed-портал) не красит зарезервированный жёлоб,
+       и справа остаётся пустая полоса. На мобильных overlay-скроллбары места
+       не занимают — правило ни на что не влияет. */
+    width: 100vw;
   }
 
   /* Hide scrollbar on mobile (iOS/Android) */
@@ -258,7 +306,7 @@
 
   /* Global Noise Texture — no mix-blend-mode to avoid fullscreen GPU compositing */
   body::before {
-    content: '';
+    content: "";
     position: fixed;
     inset: 0;
     z-index: -1;
@@ -305,6 +353,20 @@
     --color-dark-850: var(--color-champagne-100) !important;
     --color-dark-900: var(--color-champagne-100) !important;
     --color-dark-950: var(--color-champagne-200) !important;
+
+    /* Статусные палитры генерируются под тёмную тему: текстовые оттенки
+       300/400 (зелёные суммы, жёлтая «Админка», бейджи) на светлом фоне
+       дают контраст 1.3–1.6. В светлой теме подменяем их тёмными шейдами —
+       зеркально ремапу серых выше. Фоновые употребления (bg-*-500/15 и т.п.)
+       используют 500+ и не затрагиваются. */
+    --color-accent-300: var(--color-accent-700) !important;
+    --color-accent-400: var(--color-accent-700) !important;
+    --color-success-300: var(--color-success-700) !important;
+    --color-success-400: var(--color-success-700) !important;
+    --color-warning-300: var(--color-warning-700) !important;
+    --color-warning-400: var(--color-warning-700) !important;
+    --color-error-300: var(--color-error-700) !important;
+    --color-error-400: var(--color-error-700) !important;
   }
 
   /* Custom scrollbar - Dark */
@@ -399,7 +461,7 @@ img.twemoji {
 
   /* CSS Spotlight Effect via pseudo-element */
   .bento-card-hover::after {
-    content: '';
+    content: "";
     position: absolute;
     inset: 0;
     background: radial-gradient(circle at top, rgba(255, 255, 255, 0.06), transparent 60%);
@@ -525,14 +587,23 @@ img.twemoji {
     }
   }
 
-  /* Buttons - Dark */
+  /* Buttons - Dark
+     min-h-[44px] on mobile (WCAG 2.5.5 AAA touch target floor), keeping
+     visual at py-2 / ~36px on desktop where mouse precision rules.
+     Cascades to every .btn-primary / .btn-secondary / .btn-ghost / .btn-danger. */
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium duration-200 ease-smooth focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-dark-900 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium duration-200 ease-smooth focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-dark-900 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-0;
     transition-property: color, background-color, border-color, box-shadow, transform, opacity;
   }
 
+  .btn-icon {
+    /* Same logic for icon-only buttons. */
+    @apply min-h-[44px] min-w-[44px] rounded-lg p-2 text-dark-400 duration-200 hover:bg-dark-800 hover:text-dark-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/50 active:scale-95 sm:min-h-0 sm:min-w-0;
+    transition-property: color, background-color, transform;
+  }
+
   .btn-primary {
-    @apply btn bg-accent-500 text-white shadow-lg shadow-accent-500/25 hover:bg-accent-400 hover:shadow-xl hover:shadow-accent-500/30 focus-visible:ring-accent-500 active:bg-accent-600;
+    @apply btn bg-accent-500 text-on-accent shadow-lg shadow-accent-500/25 hover:bg-accent-400 hover:shadow-xl hover:shadow-accent-500/30 focus-visible:ring-accent-500 active:bg-accent-600;
   }
 
   .btn-secondary {
@@ -545,11 +616,6 @@ img.twemoji {
 
   .btn-danger {
     @apply btn border border-error-500/30 bg-error-500/10 text-error-400 hover:border-error-500/50 hover:bg-error-500/20 focus-visible:ring-error-500 active:bg-error-500/30;
-  }
-
-  .btn-icon {
-    @apply rounded-lg p-2 text-dark-400 duration-200 hover:bg-dark-800 hover:text-dark-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/50 active:scale-95;
-    transition-property: color, background-color, transform;
   }
 
   /* Highlighted button for onboarding */
@@ -570,7 +636,7 @@ img.twemoji {
   /* Remove tap highlight and focus outline on mobile */
   button,
   a,
-  [role='button'] {
+  [role="button"] {
     -webkit-tap-highlight-color: transparent;
     outline: none;
   }
@@ -578,13 +644,13 @@ img.twemoji {
   /* Only show focus ring for keyboard navigation */
   button:focus-visible,
   a:focus-visible,
-  [role='button']:focus-visible {
+  [role="button"]:focus-visible {
     @apply ring-2 ring-accent-500/50 ring-offset-2 ring-offset-dark-900;
   }
 
   .light button:focus-visible,
   .light a:focus-visible,
-  .light [role='button']:focus-visible {
+  .light [role="button"]:focus-visible {
     @apply ring-offset-champagne-100;
   }
 
@@ -615,16 +681,6 @@ img.twemoji {
 
   .badge-neutral {
     @apply badge border border-dark-600/50 bg-dark-700/50 text-dark-300;
-  }
-
-  /* Progress bar - Dark */
-  .progress-bar {
-    @apply h-2 w-full overflow-hidden rounded-full bg-dark-800;
-  }
-
-  .progress-fill {
-    @apply h-full rounded-full duration-500 ease-smooth;
-    transition-property: width, background-color;
   }
 
   /* Stat card - Dark */
@@ -793,11 +849,6 @@ img.twemoji {
     @apply border border-champagne-300 bg-champagne-200/50 text-champagne-700;
   }
 
-  /* Progress bar - Light */
-  .light .progress-bar {
-    @apply bg-champagne-200;
-  }
-
   /* Stat card - Light */
   .light .stat-value {
     @apply text-champagne-900;
@@ -903,15 +954,26 @@ img.twemoji {
   }
 
   .prose ul {
-    @apply mb-4 list-inside list-disc space-y-2 pl-2;
+    @apply mb-4 list-disc space-y-2 pl-6;
   }
 
   .prose ol {
-    @apply mb-4 list-inside list-decimal space-y-2 pl-2;
+    @apply mb-4 list-decimal space-y-2 pl-6;
   }
 
   .prose li {
     @apply text-dark-300;
+  }
+
+  /* TipTap wraps list-item content in <p>. Without these resets, the marker
+     stays on its line and the <p> drops to the next line, breaking lists
+     in the editor and on the rendered article page (Telegram bug #597116). */
+  .prose li > p {
+    @apply mb-0 inline;
+  }
+
+  .prose li > p + p {
+    @apply mt-2 block;
   }
 
   .prose li::marker {
@@ -1111,6 +1173,18 @@ img.twemoji {
 }
 
 @layer utilities {
+  /* Viewport height — correct across web (dvh) and Telegram Mini App.
+     main.tsx binds --tg-viewport-stable-height via bindViewportCssVars();
+     on the standalone web build the var is undefined and falls back to 100dvh. */
+  .min-h-viewport {
+    min-height: 100dvh;
+    min-height: var(--tg-viewport-stable-height, 100dvh);
+  }
+  .h-viewport {
+    height: 100dvh;
+    height: var(--tg-viewport-stable-height, 100dvh);
+  }
+
   /* Text gradient */
   .text-gradient {
     @apply bg-gradient-to-r from-accent-400 to-accent-600 bg-clip-text text-transparent;
@@ -1118,11 +1192,11 @@ img.twemoji {
 
   /* Glow effects */
   .glow-accent {
-    box-shadow: 0 0 20px theme('colors.accent.500 / 30%');
+    box-shadow: 0 0 20px theme("colors.accent.500 / 30%");
   }
 
   .glow-success {
-    box-shadow: 0 0 20px theme('colors.success.500 / 30%');
+    box-shadow: 0 0 20px theme("colors.success.500 / 30%");
   }
 
   /* Blur backdrop */
@@ -1166,9 +1240,9 @@ img.twemoji {
 .shimmer {
   background: linear-gradient(
     90deg,
-    theme('colors.dark.800') 0%,
-    theme('colors.dark.700') 50%,
-    theme('colors.dark.800') 100%
+    theme("colors.dark.800") 0%,
+    theme("colors.dark.700") 50%,
+    theme("colors.dark.800") 100%
   );
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
@@ -1177,9 +1251,9 @@ img.twemoji {
 .light .shimmer {
   background: linear-gradient(
     90deg,
-    theme('colors.champagne.200') 0%,
-    theme('colors.champagne.300') 50%,
-    theme('colors.champagne.200') 100%
+    theme("colors.champagne.200") 0%,
+    theme("colors.champagne.300") 50%,
+    theme("colors.champagne.200") 100%
   );
 }
 
@@ -1193,7 +1267,7 @@ img.twemoji {
 }
 
 /* Color picker range input styling */
-input[type='range'] {
+input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
   height: 12px;
@@ -1204,13 +1278,13 @@ input[type='range'] {
 
 /* Desktop: smaller track */
 @media (min-width: 640px) {
-  input[type='range'] {
+  input[type="range"] {
     height: 8px;
     border-radius: 4px;
   }
 }
 
-input[type='range']::-webkit-slider-thumb {
+input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
   width: 24px;
@@ -1227,26 +1301,26 @@ input[type='range']::-webkit-slider-thumb {
     box-shadow 0.15s ease;
 }
 
-input[type='range']::-webkit-slider-thumb:hover {
+input[type="range"]::-webkit-slider-thumb:hover {
   transform: scale(1.1);
   box-shadow:
     0 3px 8px rgba(0, 0, 0, 0.4),
     0 0 0 2px rgba(255, 255, 255, 0.2);
 }
 
-input[type='range']::-webkit-slider-thumb:active {
+input[type="range"]::-webkit-slider-thumb:active {
   transform: scale(0.95);
 }
 
 /* Desktop: smaller thumb */
 @media (min-width: 640px) {
-  input[type='range']::-webkit-slider-thumb {
+  input[type="range"]::-webkit-slider-thumb {
     width: 18px;
     height: 18px;
   }
 }
 
-input[type='range']::-moz-range-thumb {
+input[type="range"]::-moz-range-thumb {
   width: 24px;
   height: 24px;
   border-radius: 50%;
@@ -1261,7 +1335,7 @@ input[type='range']::-moz-range-thumb {
     box-shadow 0.15s ease;
 }
 
-input[type='range']::-moz-range-thumb:hover {
+input[type="range"]::-moz-range-thumb:hover {
   transform: scale(1.1);
   box-shadow:
     0 3px 8px rgba(0, 0, 0, 0.4),
@@ -1270,25 +1344,25 @@ input[type='range']::-moz-range-thumb:hover {
 
 /* Desktop: smaller thumb */
 @media (min-width: 640px) {
-  input[type='range']::-moz-range-thumb {
+  input[type="range"]::-moz-range-thumb {
     width: 18px;
     height: 18px;
   }
 }
 
 /* Hide number input spinners for cleaner look */
-input[type='number']::-webkit-inner-spin-button,
-input[type='number']::-webkit-outer-spin-button {
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
 
-input[type='number'] {
+input[type="number"] {
   -moz-appearance: textfield;
 }
 
 /* Custom checkbox styling - more visible */
-input[type='checkbox'] {
+input[type="checkbox"] {
   -webkit-appearance: none;
   appearance: none;
   width: 1.25rem;
@@ -1304,13 +1378,13 @@ input[type='checkbox'] {
   flex-shrink: 0;
 }
 
-input[type='checkbox']:checked {
+input[type="checkbox"]:checked {
   background-color: rgb(var(--color-accent-500));
   border-color: rgb(var(--color-accent-500));
 }
 
-input[type='checkbox']:checked::after {
-  content: '';
+input[type="checkbox"]:checked::after {
+  content: "";
   position: absolute;
   left: 50%;
   top: 45%;
@@ -1321,27 +1395,110 @@ input[type='checkbox']:checked::after {
   transform: translate(-50%, -50%) rotate(45deg);
 }
 
-input[type='checkbox']:focus {
+input[type="checkbox"]:focus {
   outline: none;
   box-shadow: 0 0 0 2px rgba(var(--color-accent-500), 0.3);
 }
 
-input[type='checkbox']:hover:not(:checked) {
+input[type="checkbox"]:hover:not(:checked) {
   border-color: rgb(var(--color-dark-500));
   background-color: rgb(var(--color-dark-600));
 }
 
-.light input[type='checkbox'] {
+/* Recharts: bars, pie sectors and dots become focusable, so clicking one draws
+   the browser's focus outline — a visual artifact on read-only charts. Kill it. */
+.recharts-wrapper:focus,
+.recharts-wrapper:focus-visible,
+.recharts-wrapper :focus,
+.recharts-wrapper :focus-visible,
+.recharts-surface,
+.recharts-sector,
+.recharts-rectangle {
+  outline: none;
+}
+
+/* react-day-picker (DateField) — themed via the library's CSS variables.
+   The library declares its rdp variables ON .rdp-root, so overriding them on a
+   parent (.rdp-dark) gets shadowed. We must target `.rdp-dark .rdp-root` to win.
+   All colors go through the app's theme tokens (the dark and accent scales),
+   which flip for light themes (e.g. champagne) — so the picker stays legible in
+   every theme without bespoke per-theme rules. */
+.rdp-dark {
+  color: rgb(var(--color-dark-100));
+  font-size: 0.85rem;
+}
+.rdp-dark .rdp-root {
+  --rdp-accent-color: rgb(var(--color-accent-500));
+  --rdp-accent-background-color: rgb(var(--color-accent-500) / 0.18);
+  --rdp-today-color: rgb(var(--color-accent-400));
+  --rdp-day-height: 2.25rem;
+  --rdp-day-width: 2.25rem;
+  --rdp-outside-opacity: 0.4;
+  --rdp-disabled-opacity: 0.4;
+  --rdp-selected-border: none;
+  --rdp-weekday-opacity: 1;
+}
+.rdp-dark .rdp-month_caption,
+.rdp-dark .rdp-caption_label {
+  color: rgb(var(--color-dark-100));
+  font-weight: 600;
+  text-transform: capitalize;
+}
+.rdp-dark .rdp-weekday {
+  color: rgb(var(--color-dark-400));
+  font-weight: 500;
+  text-transform: capitalize;
+}
+.rdp-dark .rdp-day_button {
+  color: rgb(var(--color-dark-100));
+  border: none;
+  border-radius: 0.5rem;
+}
+.rdp-dark .rdp-day_button:hover:not([disabled]) {
+  background-color: rgb(var(--color-dark-700));
+}
+.rdp-dark .rdp-day_button:focus-visible {
+  outline: 2px solid rgb(var(--color-accent-500));
+  outline-offset: 1px;
+}
+/* Today: accent-tinted text + subtle ring (loses to the filled "selected" look). */
+.rdp-dark .rdp-today:not(.rdp-outside) .rdp-day_button {
+  color: rgb(var(--color-accent-400));
+  font-weight: 700;
+  box-shadow: inset 0 0 0 1px rgb(var(--color-accent-500) / 0.45);
+}
+.rdp-dark .rdp-selected .rdp-day_button {
+  background-color: rgb(var(--color-accent-500));
+  color: #fff;
+  font-weight: 700;
+  border: none;
+  box-shadow: none;
+}
+.rdp-dark .rdp-chevron {
+  fill: currentColor;
+}
+.rdp-dark .rdp-button_previous,
+.rdp-dark .rdp-button_next {
+  color: rgb(var(--color-dark-300));
+  border-radius: 0.5rem;
+}
+.rdp-dark .rdp-button_previous:hover:not([disabled]),
+.rdp-dark .rdp-button_next:hover:not([disabled]) {
+  color: rgb(var(--color-dark-100));
+  background-color: rgb(var(--color-dark-700));
+}
+
+.light input[type="checkbox"] {
   border-color: rgb(var(--color-champagne-400));
   background-color: rgb(var(--color-champagne-100));
 }
 
-.light input[type='checkbox']:checked {
+.light input[type="checkbox"]:checked {
   background-color: rgb(var(--color-accent-500));
   border-color: rgb(var(--color-accent-500));
 }
 
-.light input[type='checkbox']:hover:not(:checked) {
+.light input[type="checkbox"]:hover:not(:checked) {
   border-color: rgb(var(--color-champagne-500));
   background-color: rgb(var(--color-champagne-200));
 }
@@ -1377,7 +1534,7 @@ input[type='checkbox']:hover:not(:checked) {
 }
 
 .onboarding-tooltip::before {
-  content: '';
+  content: "";
   @apply absolute h-3 w-3 border-l border-t border-accent-500/30 bg-dark-900;
   transform: rotate(45deg);
 }

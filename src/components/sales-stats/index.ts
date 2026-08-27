@@ -3,6 +3,7 @@ export { DepositsTab } from './DepositsTab';
 export { DonutChart } from './DonutChart';
 export { DualAreaChart } from './DualAreaChart';
 export { MultiSeriesAreaChart } from './MultiSeriesAreaChart';
+export { PaymentHealthTab } from './PaymentHealthTab';
 export { PeriodSelector } from './PeriodSelector';
 export { RenewalsTab } from './RenewalsTab';
 export { SalesTab } from './SalesTab';

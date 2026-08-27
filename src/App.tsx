@@ -28,8 +28,10 @@ import {
   ChannelSubscriptionScreen,
   BlacklistedScreen,
   AccountDeletedScreen,
+  ServiceUnavailableScreen,
 } from './components/blocking';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { BackgroundHost } from './components/backgrounds/BackgroundHost';
 import { PermissionRoute } from '@/components/auth/PermissionRoute';
 import { saveReturnUrl } from './utils/token';
 import { useAnalyticsCounters } from './hooks/useAnalyticsCounters';
@@ -41,6 +43,7 @@ import TelegramRedirect from './pages/TelegramRedirect';
 import DeepLinkRedirect from './pages/DeepLinkRedirect';
 import VerifyEmail from './pages/VerifyEmail';
 import ResetPassword from './pages/ResetPassword';
+import PublicLegal from './pages/PublicLegal';
 import OAuthCallback from './pages/OAuthCallback';
 
 // Dashboard - load eagerly (default route, LCP-critical)
@@ -65,6 +68,7 @@ const Connection = lazyWithRetry(() => import('./pages/Connection'));
 const ConnectionQR = lazyWithRetry(() => import('./pages/ConnectionQR'));
 const QuickPurchase = lazyWithRetry(() => import('./pages/QuickPurchase'));
 const PurchaseSuccess = lazyWithRetry(() => import('./pages/PurchaseSuccess'));
+const GiftClaim = lazyWithRetry(() => import('./pages/GiftClaim'));
 const RenewSubscription = lazyWithRetry(() => import('./pages/RenewSubscription'));
 const AutoLogin = lazyWithRetry(() => import('./pages/AutoLogin'));
 const TopUpMethodSelect = lazyWithRetry(() => import('./pages/TopUpMethodSelect'));
@@ -91,6 +95,10 @@ const AdminBroadcasts = lazyWithRetry(() => import('./pages/AdminBroadcasts'));
 const AdminBroadcastCreate = lazyWithRetry(() => import('./pages/AdminBroadcastCreate'));
 const AdminPromocodes = lazyWithRetry(() => import('./pages/AdminPromocodes'));
 const AdminPromocodeCreate = lazyWithRetry(() => import('./pages/AdminPromocodeCreate'));
+const AdminCoupons = lazyWithRetry(() => import('./pages/AdminCoupons'));
+const AdminCouponCreate = lazyWithRetry(() => import('./pages/AdminCouponCreate'));
+const AdminCouponDetail = lazyWithRetry(() => import('./pages/AdminCouponDetail'));
+const CouponStatus = lazyWithRetry(() => import('./pages/CouponStatus'));
 const AdminPromocodeStats = lazyWithRetry(() => import('./pages/AdminPromocodeStats'));
 const AdminPromoGroups = lazyWithRetry(() => import('./pages/AdminPromoGroups'));
 const AdminPromoGroupCreate = lazyWithRetry(() => import('./pages/AdminPromoGroupCreate'));
@@ -133,7 +141,6 @@ const AdminBroadcastDetail = lazyWithRetry(() => import('./pages/AdminBroadcastD
 const AdminPinnedMessages = lazyWithRetry(() => import('./pages/AdminPinnedMessages'));
 const AdminPinnedMessageCreate = lazyWithRetry(() => import('./pages/AdminPinnedMessageCreate'));
 const AdminChannelSubscriptions = lazyWithRetry(() => import('./pages/AdminChannelSubscriptions'));
-const AdminEmailTemplatePreview = lazyWithRetry(() => import('./pages/AdminEmailTemplatePreview'));
 const AdminRoles = lazyWithRetry(() => import('./pages/AdminRoles'));
 const AdminRoleEdit = lazyWithRetry(() => import('./pages/AdminRoleEdit'));
 const AdminRoleAssign = lazyWithRetry(() => import('./pages/AdminRoleAssign'));
@@ -154,6 +161,7 @@ const AdminNewsCreate = lazyWithRetry(() => import('./pages/AdminNewsCreate'));
 const InfoPageView = lazyWithRetry(() => import('./pages/InfoPageView'));
 const AdminInfoPages = lazyWithRetry(() => import('./pages/AdminInfoPages'));
 const AdminInfoPageEditor = lazyWithRetry(() => import('./pages/AdminInfoPageEditor'));
+const AdminLegalPages = lazyWithRetry(() => import('./pages/AdminLegalPages'));
 
 function ProtectedRoute({
   children,
@@ -200,9 +208,16 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
   return <Layout>{children}</Layout>;
 }
 
-// Suspense wrapper for lazy components
+// Suspense + error boundary wrapper for lazy routes. The boundary lives
+// OUTSIDE Suspense so chunk-load failures (caught by lazyWithRetry's reload
+// path) and render-time exceptions both surface in the page-level fallback
+// instead of crashing the entire shell via the top-level boundary.
 function LazyPage({ children }: { children: React.ReactNode }) {
-  return <Suspense fallback={<PageLoader variant="dark" />}>{children}</Suspense>;
+  return (
+    <ErrorBoundary level="page">
+      <Suspense fallback={<PageLoader variant="dark" />}>{children}</Suspense>
+    </ErrorBoundary>
+  );
 }
 
 function BlockingOverlay() {
@@ -224,6 +239,10 @@ function BlockingOverlay() {
     return <AccountDeletedScreen />;
   }
 
+  if (blockingType === 'backend_unavailable') {
+    return <ServiceUnavailableScreen />;
+  }
+
   return null;
 }
 
@@ -241,6 +260,8 @@ function App() {
 
   return (
     <>
+      {/* Живёт над <Routes>: анимация фона не перезапускается при навигации */}
+      <BackgroundHost />
       <BlockingOverlay />
       <Routes>
         {/* Public routes */}
@@ -253,6 +274,9 @@ function App() {
         <Route path="/auth/oauth/callback" element={<OAuthCallback />} />
         <Route path="/verify-email" element={<VerifyEmail />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/offer" element={<PublicLegal doc="offer" />} />
+        <Route path="/privacy" element={<PublicLegal doc="privacy" />} />
+        <Route path="/recurrent-payments" element={<PublicLegal doc="recurrent" />} />
         <Route
           path="/merge/:mergeToken"
           element={
@@ -264,31 +288,41 @@ function App() {
         <Route
           path="/buy/success/:token"
           element={
-            <ErrorBoundary level="app">
-              <LazyPage>
-                <PurchaseSuccess />
-              </LazyPage>
-            </ErrorBoundary>
+            <LazyPage>
+              <PurchaseSuccess />
+            </LazyPage>
+          }
+        />
+        <Route
+          path="/buy/gift/:token"
+          element={
+            <LazyPage>
+              <GiftClaim />
+            </LazyPage>
+          }
+        />
+        <Route
+          path="/coupon/:token"
+          element={
+            <LazyPage>
+              <CouponStatus />
+            </LazyPage>
           }
         />
         <Route
           path="/buy/:slug"
           element={
-            <ErrorBoundary level="app">
-              <LazyPage>
-                <QuickPurchase />
-              </LazyPage>
-            </ErrorBoundary>
+            <LazyPage>
+              <QuickPurchase />
+            </LazyPage>
           }
         />
         <Route
           path="/auto-login"
           element={
-            <ErrorBoundary level="app">
-              <LazyPage>
-                <AutoLogin />
-              </LazyPage>
-            </ErrorBoundary>
+            <LazyPage>
+              <AutoLogin />
+            </LazyPage>
           }
         />
 
@@ -387,11 +421,21 @@ function App() {
           path="/balance/top-up/result"
           element={
             <ProtectedRoute withLayout={false}>
-              <ErrorBoundary level="app">
-                <LazyPage>
-                  <TopUpResult />
-                </LazyPage>
-              </ErrorBoundary>
+              <LazyPage>
+                <TopUpResult />
+              </LazyPage>
+            </ProtectedRoute>
+          }
+        />
+        {/* Path-based method variant: some providers (Lava) reject return URLs that carry a
+            query string, so the method is encoded in the path instead of ?method=. */}
+        <Route
+          path="/balance/top-up/result/:method"
+          element={
+            <ProtectedRoute withLayout={false}>
+              <LazyPage>
+                <TopUpResult />
+              </LazyPage>
             </ProtectedRoute>
           }
         />
@@ -518,25 +562,21 @@ function App() {
         <Route
           path="/gift"
           element={
-            <ErrorBoundary level="app">
-              <ProtectedRoute>
-                <LazyPage>
-                  <GiftSubscription />
-                </LazyPage>
-              </ProtectedRoute>
-            </ErrorBoundary>
+            <ProtectedRoute>
+              <LazyPage>
+                <GiftSubscription />
+              </LazyPage>
+            </ProtectedRoute>
           }
         />
         <Route
           path="/gift/result"
           element={
-            <ErrorBoundary level="app">
-              <ProtectedRoute>
-                <LazyPage>
-                  <GiftResult />
-                </LazyPage>
-              </ProtectedRoute>
-            </ErrorBoundary>
+            <ProtectedRoute>
+              <LazyPage>
+                <GiftResult />
+              </LazyPage>
+            </ProtectedRoute>
           }
         />
         <Route
@@ -607,6 +647,19 @@ function App() {
             <PermissionRoute permission="tickets:settings">
               <LazyPage>
                 <AdminTicketSettings />
+              </LazyPage>
+            </PermissionRoute>
+          }
+        />
+        {/* Deep-link target for admin ticket notification buttons (bot issue #2988):
+            opens a specific ticket directly. Static "/settings" above out-ranks
+            this dynamic segment in react-router, so there is no conflict. */}
+        <Route
+          path="/admin/tickets/:ticketId"
+          element={
+            <PermissionRoute permission="tickets:read">
+              <LazyPage>
+                <AdminTickets />
               </LazyPage>
             </PermissionRoute>
           }
@@ -797,6 +850,36 @@ function App() {
             <PermissionRoute permission="promocodes:read">
               <LazyPage>
                 <AdminPromocodeCreate />
+              </LazyPage>
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="/admin/coupons"
+          element={
+            <PermissionRoute permission="coupons:read">
+              <LazyPage>
+                <AdminCoupons />
+              </LazyPage>
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="/admin/coupons/create"
+          element={
+            <PermissionRoute permission="coupons:create">
+              <LazyPage>
+                <AdminCouponCreate />
+              </LazyPage>
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="/admin/coupons/:id"
+          element={
+            <PermissionRoute permission="coupons:read">
+              <LazyPage>
+                <AdminCouponDetail />
               </LazyPage>
             </PermissionRoute>
           }
@@ -1191,17 +1274,6 @@ function App() {
             </PermissionRoute>
           }
         />
-        <Route
-          path="/admin/email-templates/preview/:type/:lang"
-          element={
-            <PermissionRoute permission="email_templates:read">
-              <LazyPage>
-                <AdminEmailTemplatePreview />
-              </LazyPage>
-            </PermissionRoute>
-          }
-        />
-
         {/* RBAC routes */}
         <Route
           path="/admin/roles"
@@ -1332,6 +1404,16 @@ function App() {
             <PermissionRoute permission="info_pages:edit">
               <LazyPage>
                 <AdminInfoPageEditor />
+              </LazyPage>
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="/admin/legal-pages"
+          element={
+            <PermissionRoute permission="info_pages:read">
+              <LazyPage>
+                <AdminLegalPages />
               </LazyPage>
             </PermissionRoute>
           }

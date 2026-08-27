@@ -36,7 +36,7 @@ export default function Meteors({ settings }: Props) {
             animationPlayState: paused ? 'paused' : 'running',
             width: meteor.size,
             height: meteor.size,
-            boxShadow: `0 0 0 1px rgba(255,255,255,0.05), 0 0 2px 1px ${meteorColor}20, 0 0 20px 2px ${meteorColor}40`,
+            boxShadow: `0 0 0 1px ${meteorColor}0d, 0 0 2px 1px ${meteorColor}20, 0 0 20px 2px ${meteorColor}40`,
             background: meteorColor,
           }}
         >

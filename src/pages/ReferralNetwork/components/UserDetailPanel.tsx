@@ -1,6 +1,8 @@
+import { uiLocale } from '@/utils/uiLocale';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { referralNetworkApi } from '@/api/referralNetwork';
+import { CloseIcon } from '@/components/icons';
 import { useReferralNetworkStore } from '@/store/referralNetwork';
 import { formatKopeksToRubles, getSubscriptionStatusColor } from '../utils';
 
@@ -37,15 +39,7 @@ export function UserDetailPanel({ userId, className }: UserDetailPanelProps) {
           className="rounded-lg p-1 text-dark-500 transition-colors hover:bg-dark-800 hover:text-dark-300"
           aria-label={t('common.close')}
         >
-          <svg
-            className="h-5 w-5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
+          <CloseIcon className="h-5 w-5" />
         </button>
       </div>
 
@@ -68,9 +62,9 @@ export function UserDetailPanel({ userId, className }: UserDetailPanelProps) {
             {/* Identity */}
             <div className="space-y-2">
               {user.username && (
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-dark-500">@</span>
-                  <span className="font-mono text-dark-200">{user.username}</span>
+                <div className="flex items-center justify-between gap-2 text-sm">
+                  <span className="shrink-0 text-dark-500">@</span>
+                  <span className="min-w-0 truncate font-mono text-dark-200">{user.username}</span>
                 </div>
               )}
               {user.tg_id && (
@@ -122,7 +116,7 @@ export function UserDetailPanel({ userId, className }: UserDetailPanelProps) {
                   {user.subscription_end && (
                     <p className="mt-0.5 text-xs text-dark-400">
                       {t('admin.referralNetwork.user.validUntil', {
-                        date: new Date(user.subscription_end).toLocaleDateString(),
+                        date: new Date(user.subscription_end).toLocaleDateString(uiLocale()),
                       })}
                     </p>
                   )}
@@ -203,11 +197,11 @@ export function UserDetailPanel({ userId, className }: UserDetailPanelProps) {
                   </span>
                 </div>
                 {user.campaign_name && (
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-dark-400">
+                  <div className="flex items-center justify-between gap-2 text-sm">
+                    <span className="shrink-0 text-dark-400">
                       {t('admin.referralNetwork.user.fromCampaign')}
                     </span>
-                    <span className="text-dark-200">{user.campaign_name}</span>
+                    <span className="min-w-0 truncate text-dark-200">{user.campaign_name}</span>
                   </div>
                 )}
               </div>

@@ -1,4 +1,4 @@
-import { useState, useEffect, type FormEvent } from 'react';
+import { useState, useEffect, type SyntheticEvent } from 'react';
 import { useNavigate } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -41,7 +41,7 @@ export default function ReferralPartnerApply() {
     },
   });
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = (e: SyntheticEvent) => {
     e.preventDefault();
     const payload: PartnerApplicationRequest = {};
     if (form.company_name) payload.company_name = form.company_name;
@@ -65,10 +65,14 @@ export default function ReferralPartnerApply() {
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="bento-card space-y-4">
           <div>
-            <label className="mb-1 block text-sm font-medium text-dark-300">
+            <label
+              htmlFor="rp-company-name"
+              className="mb-1 block text-sm font-medium text-dark-300"
+            >
               {t('referral.partner.fields.companyName')}
             </label>
             <input
+              id="rp-company-name"
               type="text"
               className="input w-full"
               value={form.company_name ?? ''}
@@ -77,10 +81,14 @@ export default function ReferralPartnerApply() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-dark-300">
+            <label
+              htmlFor="rp-telegram-channel"
+              className="mb-1 block text-sm font-medium text-dark-300"
+            >
               {t('referral.partner.fields.telegramChannel')}
             </label>
             <input
+              id="rp-telegram-channel"
               type="text"
               className="input w-full"
               value={form.telegram_channel ?? ''}
@@ -89,10 +97,14 @@ export default function ReferralPartnerApply() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-dark-300">
+            <label
+              htmlFor="rp-website-url"
+              className="mb-1 block text-sm font-medium text-dark-300"
+            >
               {t('referral.partner.fields.websiteUrl')}
             </label>
             <input
+              id="rp-website-url"
               type="url"
               className="input w-full"
               value={form.website_url ?? ''}
@@ -101,10 +113,14 @@ export default function ReferralPartnerApply() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-dark-300">
+            <label
+              htmlFor="rp-description"
+              className="mb-1 block text-sm font-medium text-dark-300"
+            >
               {t('referral.partner.fields.description')}
             </label>
             <textarea
+              id="rp-description"
               className="input min-h-[80px] w-full"
               value={form.description ?? ''}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
@@ -112,10 +128,14 @@ export default function ReferralPartnerApply() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-dark-300">
+            <label
+              htmlFor="rp-expected-referrals"
+              className="mb-1 block text-sm font-medium text-dark-300"
+            >
               {t('referral.partner.fields.expectedReferrals')}
             </label>
             <input
+              id="rp-expected-referrals"
               type="number"
               min={0}
               max={2000000000}
@@ -131,10 +151,14 @@ export default function ReferralPartnerApply() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-dark-300">
+            <label
+              htmlFor="rp-desired-commission"
+              className="mb-1 block text-sm font-medium text-dark-300"
+            >
               {t('referral.partner.fields.desiredCommission')}
             </label>
             <input
+              id="rp-desired-commission"
               type="number"
               min={1}
               max={100}

@@ -5,6 +5,7 @@ import { Navigate, useNavigate, useParams } from 'react-router';
 import { subscriptionApi } from '../api/subscription';
 import { useTheme } from '../hooks/useTheme';
 import { getGlassColors } from '../utils/glassTheme';
+import { getMonthlyPriceKopeks } from '../utils/pricing';
 import { useCurrency } from '../hooks/useCurrency';
 import { useHaptic } from '../platform';
 import InsufficientBalancePrompt from '../components/InsufficientBalancePrompt';
@@ -143,8 +144,7 @@ export default function RenewSubscription() {
           {options.map((option) => {
             const isSelected = selectedPeriod === option.period_days;
             const canAfford = balanceKopeks >= option.price_kopeks;
-            const months = Math.max(1, Math.round(option.period_days / 30));
-            const perMonth = option.price_kopeks / months;
+            const perMonth = getMonthlyPriceKopeks(option.price_kopeks, option.period_days);
 
             return (
               <button
@@ -167,10 +167,10 @@ export default function RenewSubscription() {
                 <div className="flex items-center justify-between">
                   <div>
                     <span className="text-base font-semibold" style={{ color: g.text }}>
-                      {option.period_days} {t('common.units.days', 'дней')}
+                      {option.period_days} {t('subscription.days', 'дней')}
                     </span>
                     {option.discount_percent > 0 && (
-                      <span className="ml-2 rounded-full bg-emerald-400/15 px-2 py-0.5 text-[10px] font-semibold text-emerald-400">
+                      <span className="ml-2 rounded-full bg-success-400/15 px-2 py-0.5 text-[10px] font-semibold text-success-400">
                         -{option.discount_percent}%
                       </span>
                     )}
@@ -181,10 +181,10 @@ export default function RenewSubscription() {
                         ? t('subscription.free', 'Бесплатно')
                         : `${formatAmount(option.price_kopeks / 100)} ${currencySymbol}`}
                     </div>
-                    {months > 1 && (
+                    {perMonth !== null && (
                       <div className="text-[11px]" style={{ color: g.textSecondary }}>
                         {formatAmount(perMonth / 100)} {currencySymbol}/
-                        {t('common.units.mo', 'мес')}
+                        {t('subscription.month', 'мес')}
                       </div>
                     )}
                     {option.original_price_kopeks && (
@@ -195,7 +195,7 @@ export default function RenewSubscription() {
                   </div>
                 </div>
                 {!canAfford && (
-                  <div className="mt-1 text-[11px] text-red-400">
+                  <div className="mt-1 text-[11px] text-error-400">
                     {t(
                       'subscription.insufficientBalanceAmount',
                       'Недостаточно средств. Не хватает {{missing}}',
@@ -216,7 +216,9 @@ export default function RenewSubscription() {
 
       {/* Error */}
       {error && !missingAmount && (
-        <div className="rounded-xl bg-red-400/10 p-3 text-center text-sm text-red-400">{error}</div>
+        <div className="rounded-xl bg-error-400/10 p-3 text-center text-sm text-error-400">
+          {error}
+        </div>
       )}
 
       {/* Renew button */}
@@ -224,7 +226,7 @@ export default function RenewSubscription() {
         <button
           onClick={() => handleRenew(selectedPeriod)}
           disabled={renewMutation.isPending}
-          className="w-full rounded-2xl bg-accent-500 py-3.5 text-base font-semibold text-white transition-colors hover:bg-accent-600 disabled:opacity-50"
+          className="w-full rounded-2xl bg-accent-500 py-3.5 text-base font-semibold text-on-accent transition-colors hover:bg-accent-600 disabled:opacity-50"
         >
           {renewMutation.isPending
             ? t('common.processing', 'Обработка...')

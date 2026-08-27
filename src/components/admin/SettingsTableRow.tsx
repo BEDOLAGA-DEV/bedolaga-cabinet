@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { SettingDefinition } from '../../api/adminSettings';
+import type { SettingDefinition } from '../../api/adminSettings';
 import { cn } from '../../lib/utils';
 import { StarIcon, LockIcon, RefreshIcon } from './icons';
 import { SettingInput } from './SettingInput';
@@ -37,6 +37,8 @@ export function SettingsTableRow({
   const isModified = setting.has_override;
   const isBool = setting.type === 'bool';
   const boolChecked = setting.current === true || setting.current === 'true';
+  // env-locked keys are pinned in .env and shadow the DB — show value, no input.
+  const locked = setting.read_only || setting.env_locked;
 
   const isLongValue = (() => {
     const val = String(setting.current ?? '');
@@ -84,14 +86,17 @@ export function SettingsTableRow({
               </span>
             )}
 
-            {setting.has_override && !setting.read_only && (
+            {setting.has_override && !locked && (
               <span className="rounded-full bg-sky-500/20 px-1.5 py-0.5 text-[10px] font-medium leading-none text-sky-400">
                 {t('admin.settings.badgeDb')}
               </span>
             )}
 
-            {setting.read_only && (
-              <span className="flex items-center gap-0.5 rounded-full bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-medium leading-none text-amber-400">
+            {setting.env_locked && (
+              <span
+                className="flex items-center gap-0.5 rounded-full bg-warning-500/15 px-1.5 py-0.5 text-[10px] font-medium leading-none text-warning-400"
+                title={t('admin.settings.envLockedHint')}
+              >
                 {t('admin.settings.badgeEnv')}
                 <LockIcon className="h-3 w-3" />
               </span>
@@ -116,7 +121,7 @@ export function SettingsTableRow({
             isLongValue ? 'w-full' : 'max-lg:self-end lg:flex-shrink-0',
           )}
         >
-          {setting.read_only ? (
+          {locked ? (
             <span className="max-w-[240px] truncate rounded bg-dark-700/30 px-3 py-1.5 font-mono text-xs text-dark-400">
               {isBool
                 ? boolChecked
@@ -138,11 +143,11 @@ export function SettingsTableRow({
           )}
 
           {/* Reset button -- hover-reveal when has_override */}
-          {isModified && !setting.read_only && (
+          {isModified && !locked && (
             <button
               onClick={onReset}
               disabled={isResetting}
-              className="flex-shrink-0 rounded-lg p-1.5 text-dark-500 opacity-0 transition-all hover:bg-dark-700 hover:text-dark-200 disabled:opacity-50 group-hover:opacity-100 max-lg:opacity-100"
+              className="flex-shrink-0 rounded-lg p-1.5 text-dark-500 opacity-0 transition-all hover:bg-dark-700 hover:text-dark-200 disabled:opacity-50 group-focus-within:opacity-100 group-hover:opacity-100 max-lg:opacity-100 [@media(hover:none)]:opacity-100"
               title={t('admin.settings.reset')}
               aria-label={t('admin.settings.reset')}
             >
@@ -157,7 +162,7 @@ export function SettingsTableRow({
               'flex-shrink-0 rounded-lg p-1.5 transition-all',
               isFavorite
                 ? 'text-warning-400 hover:bg-warning-500/15'
-                : 'text-dark-500 opacity-0 hover:bg-dark-700/50 hover:text-warning-400 group-hover:opacity-100 max-lg:opacity-100',
+                : 'text-dark-500 opacity-0 hover:bg-dark-700/50 hover:text-warning-400 group-focus-within:opacity-100 group-hover:opacity-100 max-lg:opacity-100 [@media(hover:none)]:opacity-100',
             )}
             title={
               isFavorite

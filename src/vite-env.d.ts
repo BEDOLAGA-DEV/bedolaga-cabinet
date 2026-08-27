@@ -11,6 +11,8 @@ interface ImportMetaEnv {
   readonly VITE_APP_STORE_URL?: string;
   readonly VITE_PLAY_STORE_URL?: string;
   readonly VITE_MAC_APP_STORE_URL?: string;
+  /** Optional override for the backend liveness URL (defaults to `<origin>/health/unified`). */
+  readonly VITE_HEALTH_URL?: string;
 }
 
 interface ImportMeta {
@@ -21,6 +23,14 @@ interface ImportMeta {
 interface TelegramWebAppGlobal {
   onEvent?: (event: string, callback: () => void) => void;
   offEvent?: (event: string, callback: () => void) => void;
+  /** Closes the Mini App (injected by telegram-web-app.js). */
+  close?: () => void;
+  /**
+   * Raw init data, snapshotted by Telegram's own bridge script at page load.
+   * Independent of the @telegram-apps/sdk launch-params cache, which can go
+   * stale — see src/utils/telegramInitData.ts.
+   */
+  initData?: string;
 }
 
 /** Telegram Login JS SDK — loaded from https://oauth.telegram.org/js/telegram-login.js */

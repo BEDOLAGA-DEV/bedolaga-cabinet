@@ -1,4 +1,4 @@
-import { ThemeColors, DEFAULT_THEME_COLORS } from '../../types/theme';
+import { type ThemeColors, DEFAULT_THEME_COLORS } from '../../types/theme';
 
 // Tree sidebar types
 export interface TreeSubItem {
@@ -22,6 +22,9 @@ export interface SettingsTreeConfig {
   specialItems: SpecialItem[];
   groups: TreeGroup[];
 }
+
+// Маркер пункта-сборника: подставляется вместо списка категорий.
+export const OTHER_CATEGORIES = '*';
 
 // Hierarchical settings tree — all 61 backend category keys mapped into 7 groups
 export const SETTINGS_TREE: SettingsTreeConfig = {
@@ -58,6 +61,7 @@ export const SETTINGS_TREE: SettingsTreeConfig = {
         { id: 'payments_etoplatezhi', categories: ['ETOPLATEZHI'] },
         { id: 'payments_antilopay', categories: ['ANTILOPAY'] },
         { id: 'payments_jupiter', categories: ['JUPITER'] },
+        { id: 'payments_cispay', categories: ['CISPAY'] },
         { id: 'payments_donut', categories: ['DONUT'] },
         { id: 'payments_lava', categories: ['LAVA'] },
         { id: 'payments_apple_iap', categories: ['APPLE_IAP'] },
@@ -90,6 +94,8 @@ export const SETTINGS_TREE: SettingsTreeConfig = {
         { id: 'iface_widget', categories: ['TELEGRAM_WIDGET'] },
         { id: 'iface_oidc', categories: ['TELEGRAM_OIDC'] },
         { id: 'iface_skip', categories: ['SKIP'] },
+        { id: 'iface_info', categories: ['INFO_PAGES'] },
+        { id: 'iface_menu', categories: ['MENU'] },
         { id: 'iface_additional', categories: ['ADDITIONAL'] },
       ],
     },
@@ -130,6 +136,7 @@ export const SETTINGS_TREE: SettingsTreeConfig = {
         { id: 'sys_core', categories: ['CORE', 'DEBUG'] },
         { id: 'sys_remnawave', categories: ['REMNAWAVE'] },
         { id: 'sys_webapi', categories: ['WEB_API', 'EXTERNAL_ADMIN'] },
+        { id: 'sys_cabinet', categories: ['CABINET'] },
         { id: 'sys_webhook', categories: ['WEBHOOK'] },
         { id: 'sys_server', categories: ['SERVER_STATUS'] },
         { id: 'sys_monitoring', categories: ['MONITORING'] },
@@ -137,10 +144,28 @@ export const SETTINGS_TREE: SettingsTreeConfig = {
         { id: 'sys_backup', categories: ['BACKUP'] },
         { id: 'sys_version', categories: ['VERSION'] },
         { id: 'sys_logging', categories: ['LOG'] },
+        // Категории на бэкенде выводятся из имени ключа, поэтому каждая новая
+        // настройка может создать категорию, которой в дереве нет — и тогда она
+        // просто исчезала из админки (так пропала вся категория CABINET).
+        // Этот пункт собирает всё неразложенное, как «Прочее» в админке бота.
+        { id: 'sys_other', categories: [OTHER_CATEGORIES] },
       ],
     },
   ],
 };
+
+// Категории, у которых есть своё место в дереве (маркер сборника не считается).
+export function getMappedCategoryKeys(): Set<string> {
+  const mapped = new Set<string>();
+  for (const group of SETTINGS_TREE.groups) {
+    for (const child of group.children) {
+      for (const category of child.categories) {
+        if (category !== OTHER_CATEGORIES) mapped.add(category);
+      }
+    }
+  }
+  return mapped;
+}
 
 // Helper: find which group and sub-item a backend category key belongs to
 export function findTreeLocation(

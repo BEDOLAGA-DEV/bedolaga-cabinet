@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { SALES_STATS } from '../../constants/salesStats';
+import { getMonthToDateRange, isMonthToDate } from '../../utils/period';
+import { DateField } from '../DateField';
 
 interface PeriodSelectorProps {
   value: { days?: number; startDate?: string; endDate?: string };
@@ -24,63 +26,61 @@ export function PeriodSelector({ value, onChange }: PeriodSelectorProps) {
     onChange({ days });
   };
 
-  const handleCustomToggle = () => {
-    setShowCustom((prev) => !prev);
+  const handleThisMonth = () => {
+    setShowCustom(false);
+    onChange({ days: undefined, ...getMonthToDateRange() });
   };
+
+  const handleCustomToggle = () => setShowCustom((prev) => !prev);
 
   const handleDateChange = (field: 'startDate' | 'endDate', dateStr: string) => {
-    onChange({
-      ...value,
-      days: undefined,
-      [field]: dateStr,
-    });
+    onChange({ ...value, days: undefined, [field]: dateStr });
   };
 
-  const isPresetActive = (days: number) => !showCustom && value.days === days;
+  const buttonClass = (active: boolean) =>
+    `rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+      active
+        ? 'bg-accent-500/20 text-accent-400'
+        : 'bg-dark-800/50 text-dark-400 hover:bg-dark-700/50 hover:text-dark-300'
+    }`;
+
+  const mtdActive = !showCustom && isMonthToDate(value);
 
   return (
     <div className="flex flex-wrap items-center gap-2">
+      <button type="button" onClick={handleThisMonth} className={buttonClass(mtdActive)}>
+        {t('admin.salesStats.period.thisMonth')}
+      </button>
+
       {SALES_STATS.PERIOD_PRESETS.map((days) => (
         <button
           key={days}
           type="button"
           onClick={() => handlePreset(days)}
-          className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
-            isPresetActive(days)
-              ? 'bg-accent-500/20 text-accent-400'
-              : 'bg-dark-800/50 text-dark-400 hover:bg-dark-700/50 hover:text-dark-300'
-          }`}
+          className={buttonClass(!showCustom && value.days === days)}
         >
           {presetLabels[days]}
         </button>
       ))}
 
-      <button
-        type="button"
-        onClick={handleCustomToggle}
-        className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
-          showCustom
-            ? 'bg-accent-500/20 text-accent-400'
-            : 'bg-dark-800/50 text-dark-400 hover:bg-dark-700/50 hover:text-dark-300'
-        }`}
-      >
+      <button type="button" onClick={handleCustomToggle} className={buttonClass(showCustom)}>
         {t('admin.salesStats.period.custom')}
       </button>
 
       {showCustom && (
-        <div className="flex items-center gap-2">
-          <input
-            type="date"
+        <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
+          <DateField
             value={value.startDate || ''}
-            onChange={(e) => handleDateChange('startDate', e.target.value)}
-            className="rounded-lg border border-dark-600 bg-dark-800 px-2 py-1 text-sm text-dark-200"
+            onChange={(v) => handleDateChange('startDate', v)}
+            max={value.endDate}
+            placeholder={t('admin.salesStats.period.from')}
           />
-          <span className="text-dark-500">{'\u2014'}</span>
-          <input
-            type="date"
+          <span className="text-dark-500">{'—'}</span>
+          <DateField
             value={value.endDate || ''}
-            onChange={(e) => handleDateChange('endDate', e.target.value)}
-            className="rounded-lg border border-dark-600 bg-dark-800 px-2 py-1 text-sm text-dark-200"
+            onChange={(v) => handleDateChange('endDate', v)}
+            min={value.startDate}
+            placeholder={t('admin.salesStats.period.to')}
           />
         </div>
       )}

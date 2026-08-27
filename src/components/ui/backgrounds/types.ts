@@ -14,6 +14,12 @@ export type BackgroundType =
   | 'dots'
   | 'spotlight'
   | 'ripple'
+  | 'fireflies'
+  | 'snowfall'
+  | 'starfield'
+  | 'matrix-rain'
+  | 'liquid-gradient'
+  | 'constellation'
   | 'none';
 
 export interface AnimationConfig {

@@ -1,3 +1,4 @@
+import { uiLocale } from '@/utils/uiLocale';
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -10,85 +11,69 @@ import { Card } from '@/components/data-display/Card/Card';
 import { Button } from '@/components/primitives/Button/Button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { staggerContainer, staggerItem } from '@/components/motion/transitions';
+import { PiCaretDown } from 'react-icons/pi';
+import { StarIcon, CalendarIcon, HistoryIcon, CloseIcon } from '@/components/icons';
+import { cn } from '@/lib/utils';
 
 // Icons
-const StarIcon = () => (
-  <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-  </svg>
-);
-
-const CalendarIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"
-    />
-  </svg>
-);
-
-const HistoryIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
-    />
-  </svg>
-);
-
-const CloseIcon = () => (
-  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-  </svg>
-);
-
 const ChevronIcon = ({ expanded }: { expanded: boolean }) => (
-  <svg
-    className={`h-5 w-5 transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`}
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={2}
-  >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-  </svg>
+  <PiCaretDown
+    className={cn('h-5 w-5 transition-transform duration-200', expanded && 'rotate-180')}
+  />
 );
 
 /**
- * Calculate rotation degrees for a prize based on its position on the wheel.
+ * Rotation (mod 360) that brings sector `prizeIndex` under the top pointer.
  * Mirrors the backend _calculate_rotation logic in wheel_service.py.
  */
-function calculateRotationForPrize(prizes: WheelPrize[], result: SpinResult): number {
-  // Find prize index by matching display_name + emoji (both must match for safety)
-  let prizeIndex = prizes.findIndex(
-    (p) => p.display_name === result.prize_display_name && p.emoji === result.emoji,
-  );
-
-  // Fallback: match by display_name only
-  if (prizeIndex === -1) {
-    prizeIndex = prizes.findIndex((p) => p.display_name === result.prize_display_name);
-  }
-
-  // Fallback: match by emoji + prize_type
-  if (prizeIndex === -1) {
-    prizeIndex = prizes.findIndex(
-      (p) => p.emoji === result.emoji && p.prize_type === result.prize_type,
-    );
-  }
-
-  if (prizeIndex === -1) {
-    // Can't determine prize position — random angle
-    return Math.random() * 360;
-  }
-
+function rotationForIndex(prizes: WheelPrize[], prizeIndex: number): number {
+  if (prizes.length === 0) return 0;
   const sectorAngle = 360 / prizes.length;
   const baseAngle = prizeIndex * sectorAngle + sectorAngle / 2;
-  const offset = (Math.random() - 0.5) * sectorAngle * 0.6; // ±30% of sector
-  const stopAngle = 360 - baseAngle + offset;
+  const offset = (Math.random() - 0.5) * sectorAngle * 0.6; // ±30% within the sector
+  return 360 - baseAngle + offset;
+}
 
-  return stopAngle;
+/** Index of the "Nothing" sector, or 0 if there isn't one. */
+function neutralIndex(prizes: WheelPrize[]): number {
+  const idx = prizes.findIndex((p) => p.prize_type === 'nothing');
+  return idx === -1 ? 0 : idx;
+}
+
+/**
+ * Rotation that lands the wheel on the ACTUAL won prize's sector.
+ *
+ * Matches by prize_id (exact). It must NEVER land on a random sector: a random
+ * angle was the root cause of "the wheel shows месяц/50₽ but the result is
+ * Ничего" on the browser Stars path — when the prize couldn't be located the old
+ * code span to Math.random()*360, which often pointed at a winning slot. When the
+ * prize can't be resolved we land on the neutral ("Nothing") sector instead, so
+ * the animation never falsely celebrates a win.
+ */
+function calculateRotationForPrize(prizes: WheelPrize[], result: SpinResult): number {
+  let prizeIndex = result.prize_id != null ? prizes.findIndex((p) => p.id === result.prize_id) : -1;
+
+  // Defensive fallbacks for older payloads without prize_id: name+emoji, then name.
+  if (prizeIndex === -1 && result.prize_display_name) {
+    prizeIndex = prizes.findIndex(
+      (p) => p.display_name === result.prize_display_name && p.emoji === result.emoji,
+    );
+    if (prizeIndex === -1) {
+      prizeIndex = prizes.findIndex((p) => p.display_name === result.prize_display_name);
+    }
+  }
+
+  if (prizeIndex === -1) prizeIndex = neutralIndex(prizes); // unknown → neutral, never random
+
+  return rotationForIndex(prizes, prizeIndex);
+}
+
+/**
+ * Rotation used when the real result is unknown (e.g. the Stars-payment poll timed
+ * out). Lands on the neutral ("Nothing") sector — never a random/winning angle.
+ */
+function neutralRotation(prizes: WheelPrize[]): number {
+  return rotationForIndex(prizes, neutralIndex(prizes));
 }
 
 export default function Wheel() {
@@ -179,7 +164,10 @@ export default function Wheel() {
               // Found a new spin! Return it as SpinResult
               return {
                 success: true,
-                prize_id: latestSpin.id,
+                // WheelPrize id — lets the wheel land on the exact won sector.
+                // (Was latestSpin.id, the SPIN id, which never matched a sector and
+                // forced the random-angle fallback → the fake-win bug.)
+                prize_id: latestSpin.prize_id,
                 prize_type: latestSpin.prize_type,
                 prize_value: latestSpin.prize_value,
                 prize_display_name: latestSpin.prize_display_name,
@@ -254,13 +242,11 @@ export default function Wheel() {
 
               if (result) {
                 pendingStarsResultRef.current = result;
-                // Calculate rotation so the wheel lands on the correct prize sector
-                const rotation = config?.prizes
-                  ? calculateRotationForPrize(config.prizes, result)
-                  : Math.random() * 360;
-                setTargetRotation(rotation);
+                // Land on the ACTUAL won sector (matched by prize_id).
+                setTargetRotation(calculateRotationForPrize(config?.prizes ?? [], result));
               } else {
-                // Fallback: couldn't get result — use random rotation
+                // Couldn't get the result — land on the neutral sector (never a
+                // random/winning angle) and tell the user to check their history.
                 pendingStarsResultRef.current = {
                   success: true,
                   prize_id: null,
@@ -274,7 +260,7 @@ export default function Wheel() {
                   promocode: null,
                   error: null,
                 };
-                setTargetRotation(Math.random() * 360);
+                setTargetRotation(neutralRotation(config?.prizes ?? []));
               }
 
               setIsSpinning(true);
@@ -284,7 +270,8 @@ export default function Wheel() {
 
               setIsPayingStars(false);
 
-              // Error polling — spin with random rotation and show generic message
+              // Error polling — land on the neutral sector (never a random/winning
+              // angle) and show the generic "check your history" message.
               pendingStarsResultRef.current = {
                 success: true,
                 prize_id: null,
@@ -298,7 +285,7 @@ export default function Wheel() {
                 promocode: null,
                 error: null,
               };
-              setTargetRotation(Math.random() * 360);
+              setTargetRotation(neutralRotation(config?.prizes ?? []));
               setIsSpinning(true);
             });
         } else if (status !== 'cancelled') {
@@ -368,6 +355,10 @@ export default function Wheel() {
     setIsPayingStars(true);
     // In browser: pre-open window synchronously (direct user gesture) to avoid popup blocker
     if (!capabilities.hasInvoice) {
+      // Web-only: synchronously pre-open a tab during the user gesture to dodge the
+      // popup blocker before the async invoice URL resolves. Not reached in Telegram
+      // (hasInvoice is true there, so the native invoice flow is used instead).
+      // biome-ignore lint: canonical popup-blocker workaround, see comment above
       preOpenedWindowRef.current = window.open('about:blank', '_blank') || null;
     }
     starsInvoiceMutation.mutate();
@@ -483,7 +474,7 @@ export default function Wheel() {
   if (error || !config) {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4">
-        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-red-500/10">
+        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-error-500/10">
           <span className="text-4xl">😔</span>
         </div>
         <p className="text-lg text-dark-400">{t('wheel.errors.loadFailed')}</p>
@@ -609,16 +600,16 @@ export default function Wheel() {
                           key={sub.id}
                           onClick={() => setSelectedSubscriptionId(sub.id)}
                           disabled={isSpinning}
-                          className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm transition-all ${
+                          className={`flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-sm transition-all ${
                             selectedSubscriptionId === sub.id
                               ? 'bg-accent-500/15 text-accent-400'
                               : 'text-dark-400 hover:text-dark-200'
                           }`}
                         >
-                          <span className="font-medium">
+                          <span className="min-w-0 truncate font-medium">
                             {sub.tariff_name || t('subscription.defaultName', 'Подписка')}
                           </span>
-                          <span className="text-xs opacity-60">
+                          <span className="shrink-0 text-xs opacity-60">
                             {sub.days_left} {t('common.units.days', 'дней')}
                           </span>
                         </button>
@@ -642,7 +633,7 @@ export default function Wheel() {
                     </button>
                     <button
                       onClick={handleDirectStarsPay}
-                      className="rounded-lg bg-accent-500 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-600"
+                      className="rounded-lg bg-accent-500 px-4 py-2.5 text-sm font-medium text-on-accent transition-colors hover:bg-accent-600"
                     >
                       {t('wheel.payStars', { count: config.spin_cost_stars ?? 0 })}
                     </button>
@@ -705,7 +696,7 @@ export default function Wheel() {
                   className={`animate-fade-in rounded-linear border p-4 ${
                     spinResult.success
                       ? 'border-accent-500/30 bg-accent-500/10'
-                      : 'border-red-500/30 bg-red-500/10'
+                      : 'border-error-500/30 bg-error-500/10'
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -728,7 +719,7 @@ export default function Wheel() {
                       onClick={closeResultModal}
                       className="shrink-0 rounded-lg p-2 text-dark-400 transition-colors hover:bg-white/5 hover:text-dark-200"
                     >
-                      <CloseIcon />
+                      <CloseIcon className="h-6 w-6" />
                     </button>
                   </div>
 
@@ -784,10 +775,13 @@ export default function Wheel() {
             >
               <div className="border-t border-dark-700/30 px-4 pb-4 pt-2">
                 {history && history.items.length > 0 ? (
+                  // "hidden"/"show" don't exist in staggerContainer/staggerItem
+                  // (their keys are initial/animate/exit), so the stagger here
+                  // was silently a no-op
                   <motion.div
                     variants={staggerContainer}
-                    initial="hidden"
-                    animate="show"
+                    initial="initial"
+                    animate="animate"
                     className="space-y-2"
                   >
                     {history.items.map((item: SpinHistoryItem) => (
@@ -805,7 +799,7 @@ export default function Wheel() {
                               {item.prize_display_name}
                             </div>
                             <div className="text-xs text-dark-500">
-                              {new Date(item.created_at).toLocaleDateString()}
+                              {new Date(item.created_at).toLocaleDateString(uiLocale())}
                             </div>
                           </div>
                         </div>

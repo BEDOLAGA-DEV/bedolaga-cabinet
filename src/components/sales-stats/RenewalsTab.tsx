@@ -1,10 +1,11 @@
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 
 import type { SalesStatsParams } from '../../api/adminSalesStats';
 import { salesStatsApi } from '../../api/adminSalesStats';
 import { SALES_STATS } from '../../constants/salesStats';
 import { useCurrency } from '../../hooks/useCurrency';
+import { BanknotesIcon, PercentIcon, RepeatIcon } from '../../components/icons';
 import { StatCard } from '../stats';
 import { TREND_STYLES } from '../stats/constants';
 
@@ -22,6 +23,7 @@ export function RenewalsTab({ params }: RenewalsTabProps) {
     queryKey: ['sales-stats', 'renewals', params],
     queryFn: () => salesStatsApi.getRenewals(params),
     staleTime: SALES_STATS.STALE_TIME,
+    placeholderData: keepPreviousData,
   });
 
   if (isLoading) {
@@ -35,7 +37,7 @@ export function RenewalsTab({ params }: RenewalsTabProps) {
   }
 
   if (isError || !data) {
-    return <div className="py-8 text-center text-red-400">{t('admin.salesStats.loadError')}</div>;
+    return <div className="py-8 text-center text-error-400">{t('admin.salesStats.loadError')}</div>;
   }
 
   const dailyData = data.daily.map((item) => ({
@@ -48,16 +50,23 @@ export function RenewalsTab({ params }: RenewalsTabProps) {
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <StatCard label={t('admin.salesStats.renewals.total')} value={data.total_renewals} />
+        <StatCard
+          label={t('admin.salesStats.renewals.total')}
+          value={data.total_renewals}
+          icon={<RepeatIcon className="h-5 w-5" />}
+          tone="success"
+        />
         <StatCard
           label={t('admin.salesStats.renewals.rate')}
           value={`${data.renewal_rate}%`}
-          valueClassName="text-success-400"
+          icon={<PercentIcon className="h-5 w-5" />}
+          tone="accent"
         />
         <StatCard
           label={t('admin.salesStats.renewals.revenue')}
-          value={formatWithCurrency(data.total_revenue_kopeks / SALES_STATS.KOPEKS_DIVISOR)}
-          valueClassName="text-success-400"
+          value={formatWithCurrency(data.total_revenue_kopeks / SALES_STATS.KOPEKS_DIVISOR, 0)}
+          icon={<BanknotesIcon className="h-5 w-5" />}
+          tone="success"
         />
       </div>
 

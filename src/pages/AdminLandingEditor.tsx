@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
+import { PiCaretDown } from 'react-icons/pi';
 import { useNavigate, useParams } from 'react-router';
 import { useQuery, useQueries, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -11,7 +12,7 @@ import {
   type SupportedLocale,
   toLocaleDict,
 } from '../api/landings';
-import { tariffsApi, TariffListItem, PeriodPrice } from '../api/tariffs';
+import { tariffsApi, type TariffListItem, type PeriodPrice } from '../api/tariffs';
 import { formatPrice } from '../utils/format';
 import { useCurrency } from '../hooks/useCurrency';
 import { adminPaymentMethodsApi } from '../api/adminPaymentMethods';
@@ -52,15 +53,7 @@ function isoToDatetimeLocal(iso: string): string {
 }
 
 const ChevronDownIcon = ({ open }: { open: boolean }) => (
-  <svg
-    className={cn('h-5 w-5 transition-transform', open && 'rotate-180')}
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={2}
-  >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-  </svg>
+  <PiCaretDown className={cn('h-5 w-5 transition-transform', open && 'rotate-180')} />
 );
 
 // ============ Collapsible Section ============
@@ -595,7 +588,7 @@ export default function AdminLandingEditor() {
           <button
             onClick={handleSubmit}
             disabled={isPending || !slug || !Object.values(title).some((v) => v.trim())}
-            className="flex items-center gap-2 rounded-lg bg-accent-500 px-4 py-2 text-sm text-white transition-colors hover:bg-accent-600 disabled:opacity-50"
+            className="flex items-center gap-2 rounded-lg bg-accent-500 px-4 py-2 text-sm text-on-accent transition-colors hover:bg-accent-600 disabled:opacity-50"
           >
             {isPending && (
               <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />

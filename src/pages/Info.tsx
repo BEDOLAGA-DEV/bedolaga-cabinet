@@ -1,111 +1,21 @@
+import { uiLocale } from '@/utils/uiLocale';
 import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import { PiCaretDown } from 'react-icons/pi';
 import DOMPurify from 'dompurify';
-import { infoApi, FaqPage } from '../api/info';
+import { infoApi, type FaqPage, type InfoVisibility } from '../api/info';
+import { formatContent } from '../utils/legalContent';
 import { infoPagesApi } from '../api/infoPages';
-import { promoApi, LoyaltyTierInfo } from '../api/promo';
+import { promoApi, type LoyaltyTierInfo } from '../api/promo';
 import type { FaqItem, ReplacesTab } from '../api/infoPages';
-
-const InfoIcon = () => (
-  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"
-    />
-  </svg>
-);
-
-const QuestionIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z"
-    />
-  </svg>
-);
-
-const DocumentIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
-    />
-  </svg>
-);
-
-const ShieldIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"
-    />
-  </svg>
-);
-
-const StarIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"
-    />
-  </svg>
-);
+import { DocumentIcon, InfoIcon, QuestionIcon, ShieldIcon, StarIcon } from '@/components/icons';
 
 const ChevronIcon = ({ expanded }: { expanded: boolean }) => (
-  <svg
-    className={`h-5 w-5 transition-transform ${expanded ? 'rotate-180' : ''}`}
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={1.5}
-  >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-  </svg>
+  <PiCaretDown className={`h-5 w-5 transition-transform ${expanded ? 'rotate-180' : ''}`} />
 );
 
 const BUILTIN_TABS = new Set<string>(['faq', 'rules', 'privacy', 'offer', 'loyalty']);
-
-// Sanitize HTML content to prevent XSS
-const sanitizeHtml = (html: string): string => {
-  return DOMPurify.sanitize(html, {
-    ALLOWED_TAGS: [
-      'p',
-      'br',
-      'b',
-      'i',
-      'u',
-      'strong',
-      'em',
-      'a',
-      'ul',
-      'ol',
-      'li',
-      'h1',
-      'h2',
-      'h3',
-      'h4',
-      'h5',
-      'h6',
-      'blockquote',
-      'code',
-      'pre',
-      's',
-      'del',
-      'ins',
-      'span',
-      'div',
-      'tg-spoiler',
-    ],
-    ALLOWED_ATTR: ['href', 'target', 'rel', 'class', 'start'],
-    ALLOW_DATA_ATTR: false,
-  });
-};
 
 // Rich sanitizer for custom InfoPage content (TipTap editor output with media)
 const ALLOWED_IFRAME_HOSTS = new Set([
@@ -237,55 +147,6 @@ const sanitizeRichHtml = (html: string): string => {
   return infoPagePurify.sanitize(html, RICH_SANITIZE_CONFIG);
 };
 
-// Convert content to formatted HTML (handles Telegram HTML + plain text)
-const formatContent = (content: string): string => {
-  if (!content) return '';
-
-  // Check if content has block-level HTML (full HTML document)
-  const hasBlockHtml = /<(p|div|h[1-6]|ul|ol|blockquote)\b/i.test(content);
-
-  if (hasBlockHtml) {
-    return sanitizeHtml(content);
-  }
-
-  // Content may have inline Telegram HTML (<b>, <i>, <u>, <code>, <a>) but uses
-  // newlines for structure. Convert newlines to paragraphs while preserving inline tags.
-  const result = content
-    .split(/\n\n+/)
-    .map((paragraph) => {
-      const trimmed = paragraph.trim();
-      if (!trimmed) return '';
-
-      // Check if it's a markdown header
-      if (/^#{1,4}\s/.test(trimmed)) {
-        const level = trimmed.match(/^(#{1,4})/)?.[1].length || 1;
-        const text = trimmed.replace(/^#{1,4}\s*/, '');
-        return `<h${level}>${text}</h${level}>`;
-      }
-
-      // Check for list items
-      if (/^[-•]\s/.test(trimmed) || /^\d+[.)]\s/.test(trimmed)) {
-        const lines = trimmed.split('\n');
-        const isOrdered = /^\d+[.)]\s/.test(lines[0]);
-        const startNum = isOrdered ? parseInt(lines[0].match(/^(\d+)/)?.[1] || '1', 10) : 1;
-        const listItems = lines
-          .map((line) => line.replace(/^[-•]\s*/, '').replace(/^\d+[.)]\s*/, ''))
-          .filter((line) => line.trim())
-          .map((line) => `<li>${line}</li>`)
-          .join('');
-        return isOrdered ? `<ol start="${startNum}">${listItems}</ol>` : `<ul>${listItems}</ul>`;
-      }
-
-      // Regular paragraph — single newlines become <br/>
-      const formatted = trimmed.split('\n').join('<br/>');
-      return `<p>${formatted}</p>`;
-    })
-    .filter(Boolean)
-    .join('');
-
-  return sanitizeHtml(result);
-};
-
 // --- FAQ Accordion for tab replacements ---
 
 function ReplacementFaqItem({
@@ -387,6 +248,12 @@ export default function Info() {
     staleTime: 60_000,
   });
 
+  const { data: visibility } = useQuery({
+    queryKey: ['info-visibility'],
+    queryFn: infoApi.getVisibility,
+    staleTime: 60_000,
+  });
+
   // Filter to only pages that don't replace a built-in tab and don't collide with built-in IDs
   const extraPages = useMemo(
     () => (customPages ?? []).filter((p) => !p.replaces_tab && !BUILTIN_TABS.has(p.slug)),
@@ -481,20 +348,36 @@ export default function Info() {
     refetchOnMount: 'always',
   });
 
-  const builtinTabs: Array<{ id: string; label: string; icon: React.FC; emoji?: string }> = [
-    { id: 'faq', label: t('info.faq'), icon: QuestionIcon },
-    { id: 'rules', label: t('info.rules'), icon: DocumentIcon },
-    { id: 'privacy', label: t('info.privacy'), icon: ShieldIcon },
-    { id: 'offer', label: t('info.offer'), icon: DocumentIcon },
-    { id: 'loyalty', label: t('info.loyalty'), icon: StarIcon },
-  ];
+  const tabs = useMemo(() => {
+    const builtinTabs: Array<{ id: string; label: string; icon: React.FC; emoji?: string }> = [
+      { id: 'faq', label: t('info.faq'), icon: QuestionIcon },
+      { id: 'rules', label: t('info.rules'), icon: DocumentIcon },
+      { id: 'privacy', label: t('info.privacy'), icon: ShieldIcon },
+      { id: 'offer', label: t('info.offer'), icon: DocumentIcon },
+      { id: 'loyalty', label: t('info.loyalty'), icon: StarIcon },
+    ];
 
-  const customTabs = extraPages.map((p) => {
-    const label = p.title[locale] || p.title['ru'] || p.title['en'] || p.slug;
-    return { id: p.slug, label, icon: DocumentIcon, emoji: p.icon ?? undefined };
-  });
+    const visibleBuiltinTabs = builtinTabs.filter((tab) => {
+      if (tab.id === 'loyalty') return true;
+      if (tabReplacements?.[tab.id as ReplacesTab]) return true;
+      if (!visibility) return true;
+      return visibility[tab.id as keyof InfoVisibility];
+    });
 
-  const tabs = [...builtinTabs, ...customTabs];
+    const customTabs = extraPages.map((p) => {
+      const label = p.title[locale] || p.title['ru'] || p.title['en'] || p.slug;
+      return { id: p.slug, label, icon: DocumentIcon, emoji: p.icon ?? undefined };
+    });
+
+    return [...visibleBuiltinTabs, ...customTabs];
+  }, [visibility, tabReplacements, extraPages, locale, t]);
+
+  useEffect(() => {
+    if (tabs.length === 0) return;
+    if (!tabs.some((tab) => tab.id === activeTab)) {
+      setActiveTab(tabs[0].id);
+    }
+  }, [tabs, activeTab]);
 
   const toggleFaq = useCallback((id: number) => {
     setExpandedFaq((prev) => (prev === id ? null : id));
@@ -607,7 +490,7 @@ export default function Info() {
           />
           {rules.updated_at && (
             <p className="mt-6 border-t border-dark-700 pt-4 text-sm text-dark-400">
-              {t('info.updatedAt')}: {new Date(rules.updated_at).toLocaleDateString()}
+              {t('info.updatedAt')}: {new Date(rules.updated_at).toLocaleDateString(uiLocale())}
             </p>
           )}
         </div>
@@ -635,7 +518,7 @@ export default function Info() {
           />
           {privacy.updated_at && (
             <p className="mt-6 border-t border-dark-700 pt-4 text-sm text-dark-400">
-              {t('info.updatedAt')}: {new Date(privacy.updated_at).toLocaleDateString()}
+              {t('info.updatedAt')}: {new Date(privacy.updated_at).toLocaleDateString(uiLocale())}
             </p>
           )}
         </div>
@@ -663,7 +546,7 @@ export default function Info() {
           />
           {offer.updated_at && (
             <p className="mt-6 border-t border-dark-700 pt-4 text-sm text-dark-400">
-              {t('info.updatedAt')}: {new Date(offer.updated_at).toLocaleDateString()}
+              {t('info.updatedAt')}: {new Date(offer.updated_at).toLocaleDateString(uiLocale())}
             </p>
           )}
         </div>
@@ -684,7 +567,7 @@ export default function Info() {
       }
 
       const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat('ru-RU', {
+        return new Intl.NumberFormat(uiLocale(), {
           style: 'currency',
           currency: 'RUB',
           minimumFractionDigits: 0,
@@ -860,7 +743,7 @@ export default function Info() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <InfoIcon />
+        <InfoIcon className="h-6 w-6" />
         <h1 className="text-2xl font-bold text-dark-50 sm:text-3xl">{t('info.title')}</h1>
       </div>
 
@@ -872,7 +755,7 @@ export default function Info() {
             onClick={() => setActiveTab(tab.id)}
             className={`flex min-h-[44px] shrink-0 items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors ${
               activeTab === tab.id
-                ? 'bg-accent-500 text-white'
+                ? 'bg-accent-500 text-on-accent'
                 : 'bg-dark-800 text-dark-300 hover:bg-dark-700'
             }`}
           >

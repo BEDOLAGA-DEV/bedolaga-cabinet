@@ -3,22 +3,27 @@ import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   buttonStylesApi,
-  ButtonStylesConfig,
+  type ButtonStylesConfig,
   DEFAULT_BUTTON_STYLES,
   BUTTON_SECTIONS,
-  ButtonSection,
+  type ButtonSection,
   BOT_LOCALES,
 } from '../../api/buttonStyles';
+import { ChevronDownIcon } from '@/components/icons';
 import { Toggle } from './Toggle';
 import { useNotify } from '../../platform/hooks/useNotify';
+import { useNativeDialog } from '../../platform/hooks/useNativeDialog';
 
 type StyleValue = 'primary' | 'success' | 'danger' | 'default';
 
 const STYLE_OPTIONS: { value: StyleValue; colorClass: string }[] = [
   { value: 'default', colorClass: 'bg-dark-500' },
-  { value: 'primary', colorClass: 'bg-blue-500' },
+  // 'primary' — синяя кнопка Telegram Bot API: свотч фиксированный телеграм-синий,
+  // а не bg-accent-500 — акцент темы кабинета перекрашивается (например, в оранжевый)
+  // и не имеет отношения к цвету реальной кнопки в боте.
+  { value: 'primary', colorClass: 'bg-[#54a9eb]' },
   { value: 'success', colorClass: 'bg-success-500' },
-  { value: 'danger', colorClass: 'bg-red-500' },
+  { value: 'danger', colorClass: 'bg-error-500' },
 ];
 
 function labelsEqual(a: Record<string, string>, b: Record<string, string>): boolean {
@@ -42,6 +47,7 @@ export function ButtonsTab() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const notify = useNotify();
+  const { confirm: confirmDialog } = useNativeDialog();
 
   const { data: serverStyles } = useQuery({
     queryKey: ['button-styles'],
@@ -224,8 +230,8 @@ export function ButtonsTab() {
                         : cfg.style === 'success'
                           ? 'bg-success-500 text-white'
                           : cfg.style === 'danger'
-                            ? 'bg-red-500 text-white'
-                            : 'bg-blue-500 text-white'
+                            ? 'bg-error-500 text-white'
+                            : 'bg-[#54a9eb] text-white'
                     }`}
                   >
                     {t(`admin.buttons.styles.${cfg.style}`)}
@@ -282,15 +288,9 @@ export function ButtonsTab() {
                     {t('admin.buttons.customLabels')}
                     {hasCustomLabels && <span className="h-1.5 w-1.5 rounded-full bg-accent-500" />}
                   </span>
-                  <svg
+                  <ChevronDownIcon
                     className={`h-3.5 w-3.5 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                  </svg>
+                  />
                 </button>
                 {isExpanded && (
                   <div className="mt-2 space-y-2">
@@ -324,7 +324,7 @@ export function ButtonsTab() {
           <button
             onClick={handleSave}
             disabled={updateMutation.isPending}
-            className="rounded-xl bg-accent-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-accent-600 disabled:opacity-50"
+            className="rounded-xl bg-accent-500 px-4 py-2 text-sm font-medium text-on-accent transition-colors hover:bg-accent-600 disabled:opacity-50"
           >
             {updateMutation.isPending ? t('common.saving') : t('common.save')}
           </button>
@@ -341,8 +341,8 @@ export function ButtonsTab() {
       {/* Reset */}
       <div className="flex justify-end">
         <button
-          onClick={() => {
-            if (window.confirm(t('admin.buttons.resetConfirm'))) {
+          onClick={async () => {
+            if (await confirmDialog(t('admin.buttons.resetConfirm'))) {
               resetMutation.mutate();
             }
           }}

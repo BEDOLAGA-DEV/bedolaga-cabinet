@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { withdrawalApi } from '../api/withdrawals';
 import { AdminBackButton } from '../components/admin';
+import { WarningIcon } from '@/components/icons';
 import { useCurrency } from '../hooks/useCurrency';
 import {
   formatDate,
@@ -237,19 +238,7 @@ export default function AdminWithdrawalDetail() {
                     key={index}
                     className="flex items-start gap-2 rounded-lg bg-error-500/10 px-3 py-2"
                   >
-                    <svg
-                      className="mt-0.5 h-4 w-4 shrink-0 text-error-400"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"
-                      />
-                    </svg>
+                    <WarningIcon className="mt-0.5 h-4 w-4 shrink-0 text-error-400" />
                     <span className="text-sm text-error-300">{flag}</span>
                   </div>
                 ))}
@@ -375,7 +364,7 @@ export default function AdminWithdrawalDetail() {
             <button
               onClick={() => completeMutation.mutate()}
               disabled={completeMutation.isPending}
-              className="w-full rounded-lg bg-accent-500 px-4 py-3 font-medium text-white transition-colors hover:bg-accent-600 disabled:opacity-50"
+              className="w-full rounded-lg bg-accent-500 px-4 py-3 font-medium text-on-accent transition-colors hover:bg-accent-600 disabled:opacity-50"
             >
               {completeMutation.isPending
                 ? t('admin.withdrawals.detail.completing')

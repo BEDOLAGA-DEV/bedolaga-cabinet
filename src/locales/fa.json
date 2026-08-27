@@ -22,15 +22,22 @@
     "currency": "تومان",
     "copy": "کپی",
     "units": {
+      "tb": "TB",
       "gb": "GB",
-      "perGb": "/GB"
+      "mb": "MB"
     },
     "add": "افزودن",
     "refresh": "بازخوانی",
     "retry": "تلاش مجدد",
     "saving": "در حال ذخیره...",
     "understand": "متوجه شدم",
-    "collapse": "جمع کردن"
+    "collapse": "جمع کردن",
+    "balance": "موجودی",
+    "copied": "کپی شد",
+    "no_results": "نتیجه‌ای یافت نشد",
+    "ok": "تأیید",
+    "processing": "در حال پردازش…",
+    "rangeTo": "تا"
   },
   "nav": {
     "dashboard": "داشبورد",
@@ -45,7 +52,8 @@
     "info": "اطلاعات",
     "wheel": "چرخ شانس",
     "menu": "منو",
-    "gift": "هدیه"
+    "gift": "هدیه",
+    "navigation": "ناوبری"
   },
   "notifications": {
     "ticketNotifications": "اعلان‌های تیکت",
@@ -102,6 +110,18 @@
       "insufficientTitle": "موجودی ناکافی",
       "insufficientMessage": "برای تمدید {{required}} {{currency}} لازم است، موجودی فعلی {{balance}} {{currency}}"
     },
+    "sbpRecurring": {
+      "confirmedTitle": "پرداخت SBP تأیید شد",
+      "confirmedMessage": "مبلغ {{amount}} {{currency}} با موفقیت برداشت شد",
+      "failedTitle": "پرداخت SBP ناموفق بود",
+      "failedMessage": "برداشت پرداخت خودکار SBP ناموفق بود",
+      "pastDueTitle": "پرداخت SBP معوق است",
+      "pastDueMessage": "پرداخت خودکار SBP شما معوق است. لطفاً اپلیکیشن بانک را بررسی کنید.",
+      "cancelledTitle": "پرداخت خودکار SBP غیرفعال شد",
+      "cancelledMessage": "پرداخت خودکار SBP غیرفعال شده است",
+      "activatedTitle": "پرداخت خودکار SBP متصل شد",
+      "activatedMessage": "پرداخت خودکار SBP با موفقیت متصل شد"
+    },
     "account": {
       "bannedTitle": "حساب مسدود شد",
       "bannedMessage": "حساب شما مسدود شده است",
@@ -142,7 +162,17 @@
     "tariff": "تعرفه",
     "validUntil": "معتبر تا",
     "goToSubscription": "رفتن به اشتراک",
-    "goToBalance": "رفتن به موجودی"
+    "goToBalance": "رفتن به موجودی",
+    "devicesAdded": "+{{count}} دستگاه",
+    "devicesPurchased": {
+      "title": "دستگاه‌ها افزوده شدند"
+    },
+    "totalDevices": "مجموع دستگاه‌ها: {{count}}",
+    "totalTraffic": "مجموع ترافیک: {{value}}",
+    "trafficAdded": "+{{value}} ترافیک",
+    "trafficPurchased": {
+      "title": "ترافیک افزوده شد"
+    }
   },
   "auth": {
     "login": "ورود",
@@ -163,12 +193,16 @@
     "telegramRetryFailed": "تایید هویت ناموفق بود. برنامه را ببندید و دوباره باز کنید.",
     "telegramReopenHint": "اگر مشکل ادامه دارد، برنامه را ببندید و دوباره باز کنید",
     "telegramNotConfigured": "ربات تلگرام پیکربندی نشده",
+    "botOutdated": "نسخهٔ ربات با کابینت سازگار نیست. ربات را به v3.33.0 یا جدیدتر به‌روزرسانی کنید.",
     "telegramUnavailable": "ورود از طریق تلگرام موقتاً در دسترس نیست",
     "appleBrowserOnly": "ورود با Apple فقط در مرورگر معمولی در دسترس است.",
     "authenticating": "در حال تایید هویت...",
     "orOpenInApp": "یا ربات را در برنامه باز کنید",
     "loginFailed": "ورود ناموفق",
     "telegramWidgetBlocked": "ویجت ورود تلگرام در دسترس نیست. از طریق ربات وارد شوید:",
+    "deepLinkIntro": "ورود را مستقیماً در ربات تأیید کنید — بدون نیاز به شماره تلفن:",
+    "loginWithBot": "ورود از طریق ربات",
+    "backToWidget": "بازگشت به ورود با ویجت",
     "openBotToLogin": "باز کردن ربات برای ورود",
     "waitingForConfirmation": "در انتظار تایید...",
     "deepLinkExpired": "لینک منقضی شده است. لطفا دوباره تلاش کنید.",
@@ -198,6 +232,10 @@
     "sendResetLink": "ارسال لینک بازنشانی",
     "tooManyAttempts": "تلاش‌های زیاد. لطفاً بعداً امتحان کنید",
     "verificationEmailNotice": "پس از ثبت نام، ایمیل تأیید به آدرس شما ارسال خواهد شد",
+    "legalConsentPrefix": "من این سند را مطالعه کرده‌ام:",
+    "legalConsentTitle": "یک قدم دیگر",
+    "legalConsentSubtitle": "برای ساخت حساب، تأیید کنید که اسناد را مطالعه کرده‌اید.",
+    "legalConsentContinue": "ادامه",
     "continueWithGoogle": "ادامه با Google",
     "continueWithYandex": "ادامه با Yandex",
     "continueWithDiscord": "ادامه با Discord",
@@ -218,6 +256,7 @@
   "dashboard": {
     "title": "داشبورد",
     "welcome": "خوش آمدید، {{name}}!",
+    "welcomeNoName": "خوش آمدید!",
     "yourSubscription": "اشتراک شما",
     "quickActions": "دسترسی سریع",
     "viewSubscription": "مدیریت اشتراک",
@@ -244,13 +283,38 @@
       "tariffs": "تعرفه‌ها",
       "traffic": "ترافیک",
       "devices": "دستگاه‌ها",
-      "expiredDate": "منقضی شده"
+      "expiredDate": "منقضی شده",
+      "activeUntil": "فعال تا"
     },
     "deviceLimitReached": "برای افزودن دستگاه جدید، دستگاه‌های فعلی را قطع کنید",
     "suspended": {
       "title": "اشتراک معلق شده",
       "resume": "از سرگیری"
-    }
+    },
+    "manageAll": "مدیریت همه",
+    "showAll": "نمایش همه",
+    "subscriptions": "اشتراک‌ها",
+    "connectDevice": "اتصال دستگاه",
+    "devicesConnectedUnlimited": "{{used}} دستگاه متصل · نامحدود",
+    "devicesOfMax": "{{used}} از {{max}}",
+    "maxUsage": "حداکثر {{amount}}",
+    "remaining": "باقی‌مانده",
+    "stats": {
+      "balance": "موجودی",
+      "referrals": "معرفی‌شده‌ها"
+    },
+    "tariff": "تعرفه",
+    "trafficUsageTitle": "مصرف ترافیک",
+    "trialOffer": {
+      "freeDesc": "وی‌پی‌ان ما را رایگان امتحان کنید: بدون هیچ تعهدی",
+      "freeTitle": "دوره آزمایشی رایگان",
+      "paidDesc": "با یک اشتراک آزمایشی شروع کنید",
+      "paidTitle": "دوره آزمایشی پرداختی"
+    },
+    "unlimited": "نامحدود",
+    "usageLast14Days": "مصرف ۱۴ روز اخیر",
+    "usedSuffix": "مصرف شده",
+    "validUntil": "معتبر تا {{date}}"
   },
   "subscription": {
     "title": "اشتراک",
@@ -340,7 +404,10 @@
       "devices_other": "{{count}} دستگاه",
       "price": "هزینه فعال‌سازی",
       "activate": "فعال‌سازی دوره آزمایشی",
-      "unavailable": "دوره آزمایشی در دسترس نیست"
+      "unavailable": "دوره آزمایشی در دسترس نیست",
+      "insufficientBalance": "موجودی برای فعال‌سازی دوره آزمایشی کافی نیست",
+      "payAndActivate": "پرداخت و فعال‌سازی",
+      "topUpToActivate": "برای فعال‌سازی دوره آزمایشی موجودی را افزایش دهید"
     },
     "connection": {
       "title": "اتصال VPN",
@@ -369,7 +436,8 @@
       "goToApps": "رفتن به تنظیمات برنامه‌ها",
       "qrTitle": "کد QR اشتراک",
       "qrScanHint": "برای اتصال با دوربین اسکن کنید",
-      "qrButton": "کد QR"
+      "qrButton": "کد QR",
+      "openQr": "باز کردن کد QR"
     },
     "additionalOptions": {
       "title": "گزینه‌های اضافی",
@@ -382,13 +450,26 @@
       "buyTraffic": "خرید ترافیک بیشتر",
       "currentTrafficLimit": "محدودیت فعلی: {{limit}} GB (مصرف شده {{used}} GB)",
       "buyTrafficTitle": "خرید ترافیک بیشتر",
-      "trafficWarning": "ترافیک خریداری شده به محدودیت فعلی اضافه می‌شود و به دوره بعدی منتقل نمی‌شود",
+      "trafficWarning": "ترافیک خریداری‌شده به محدودیت فعلی اضافه می‌شود و تا ۳۰ روز از زمان خرید معتبر است",
       "trafficUnavailable": "خرید ترافیک برای اشتراک شما در دسترس نیست",
       "unlimited": "نامحدود",
       "buyTrafficGb": "خرید {{gb}} GB",
       "buyUnlimited": "خرید نامحدود",
       "manageServers": "مدیریت اسکوادها",
-      "manageServersTitle": "مدیریت اسکوادها"
+      "manageServersTitle": "مدیریت اسکوادها",
+      "connectedDevices": "دستگاه‌های متصل",
+      "currentDeviceLimit": "محدودیت فعلی دستگاه",
+      "decrementDevices": "کاهش تعداد دستگاه‌ها",
+      "disconnectDevicesFirst": "ابتدا دستگاه‌های اضافی را قطع کنید",
+      "incrementDevices": "افزایش تعداد دستگاه‌ها",
+      "minDeviceLimit": "حداقل محدودیت دستگاه",
+      "newDeviceLimit": "محدودیت جدید دستگاه",
+      "reduce": "کاهش",
+      "reduceDevices": "کاهش تعداد دستگاه‌ها",
+      "reduceDevicesDescription": "می‌توانید تعداد دستگاه‌ها را تا حداقل مجاز در تعرفه کاهش دهید",
+      "reduceDevicesTitle": "کاهش تعداد دستگاه‌ها",
+      "reduceUnavailable": "در حال حاضر کاهش تعداد دستگاه‌ها امکان‌پذیر نیست",
+      "reducing": "در حال کاهش…"
     },
     "serverManagement": {
       "statusLegend": "✅ — متصل • ➕ — اضافه خواهد شد (پولی) • ➖ — قطع خواهد شد",
@@ -500,6 +581,107 @@
       "stopScan": "بستن دوربین",
       "noCamera": "دسترسی به دوربین امکان‌پذیر نیست",
       "codeFound": "کد پیدا شد"
+    },
+    "allTariffsPurchased": "همه تعرفه‌ها قبلاً خریداری شده‌اند",
+    "autopay": "تمدید خودکار",
+    "sbpRecurring": {
+      "title": "پرداخت خودکار SBP",
+      "connect": "اتصال",
+      "confirmInBank": "در اپلیکیشن بانک تأیید کنید",
+      "cancel": "غیرفعال کردن",
+      "confirmCancel": "پرداخت خودکار SBP غیرفعال شود؟ اشتراک شما دیگر به‌صورت خودکار از طریق SBP تمدید نخواهد شد.",
+      "cancelled": "پرداخت خودکار SBP غیرفعال شد",
+      "enableError": "اتصال پرداخت خودکار SBP ناموفق بود",
+      "cancelError": "لغو پرداخت خودکار SBP ناموفق بود",
+      "statusPending": "در انتظار تأیید در اپلیکیشن بانک",
+      "statusActive": "فعال",
+      "statusPastDue": "پرداخت ناموفق بود — دوباره تلاش کنید",
+      "nextCharge": "برداشت بعدی {{date}}",
+      "amountPerInterval": "{{amount}} ₽ {{interval}}",
+      "interval": {
+        "day": "روزانه",
+        "week": "هفتگی",
+        "month": "ماهانه",
+        "year": "سالانه"
+      },
+      "autopayHint": "اشتراک شما به‌صورت خودکار از طریق SBP بدون نیاز به کارت ذخیره‌شده شارژ می‌شود",
+      "purchaseButton": "⚡ اشتراک با پرداخت خودکار SBP",
+      "purchaseHint": "اولین برداشت، اتصال را در اپ بانک تأیید می‌کند؛ تمدیدها به‌صورت خودکار برداشت می‌شوند."
+    },
+    "lavaRecurring": {
+      "title": "تمدید خودکار Lava",
+      "connect": "اتصال",
+      "payFirst": "پرداخت صورتحساب اول",
+      "cancel": "غیرفعال‌سازی",
+      "confirmCancel": "تمدید خودکار Lava غیرفعال شود؟ اشتراک دیگر به‌طور خودکار تمدید نمی‌شود.",
+      "cancelled": "تمدید خودکار Lava غیرفعال شد",
+      "enableError": "فعال‌سازی تمدید خودکار Lava ناموفق بود",
+      "cancelError": "غیرفعال‌سازی تمدید خودکار Lava ناموفق بود",
+      "statusPending": "در انتظار پرداخت صورتحساب اول",
+      "statusActive": "فعال",
+      "statusPastDue": "پرداخت ناموفق بود — دوباره تلاش کنید",
+      "nextCharge": "برداشت بعدی {{date}}",
+      "amountPerPeriod": "{{amount}} ₽ {{period}}",
+      "amountPerDays": "هر {{days}} روز {{amount}} ₽",
+      "period": {
+        "day": "روزانه",
+        "week": "هفتگی",
+        "month": "ماهانه",
+        "quarter": "هر سه ماه",
+        "halfYear": "هر شش ماه",
+        "year": "سالانه"
+      },
+      "autopayHint": "اشتراک به‌طور خودکار از طریق Lava تمدید می‌شود",
+      "purchaseButton": "⚡ ثبت‌نام با تمدید خودکار Lava",
+      "purchaseHint": "صورتحساب اول از طریق لینک Lava پرداخت می‌شود؛ سپس تمدیدها بر اساس دوره محصول به‌طور خودکار کسر می‌شوند."
+    },
+    "backToList": "بازگشت به فهرست اشتراک‌ها",
+    "confirmDelete": "اشتراک حذف شود؟",
+    "cta": {
+      "renewHint": "اشتراک منقضی شده — برای ادامه استفاده تمدید کنید",
+      "activeHint": "تمدید و تغییر تعرفه",
+      "expiredHint": "یک تعرفه انتخاب و پرداخت کنید",
+      "trialHint": "ترافیک و دستگاه بیشتر"
+    },
+    "dailyAutoCharge": "برداشت خودکار روزانه",
+    "defaultName": "اشتراک",
+    "connectFooter": {
+      "connect": "اتصال دستگاه",
+      "full": "همه ظرفیت‌ها پر است",
+      "connectedDevices": "دستگاه‌های متصل",
+      "disconnect": "قطع اتصال",
+      "addSlots": "افزودن ظرفیت",
+      "limitExplained": "طرح «{{name}}» ‏{{count}} ظرفیت دارد و همه پر است. یکی را آزاد کنید یا ظرفیت اضافه کنید.",
+      "limitExplainedNoTopup": "طرح «{{name}}» ‏{{count}} ظرفیت دارد و همه پر است. یک ظرفیت را آزاد کنید.",
+      "noTopupHint": "روی اشتراک آزمایشی نمی‌توان ظرفیت خرید — یکی را آزاد کنید یا طرح پولی بگیرید."
+    },
+    "delete": "حذف",
+    "deleteTitle": "حذف اشتراک",
+    "get_config": "دریافت پیکربندی",
+    "loadError": "بارگذاری اشتراک ناموفق بود",
+    "newTariff": "تعرفه جدید",
+    "noOptionsAvailable": "گزینه‌ای در دسترس نیست",
+    "noRenewalOptions": "گزینه‌ای برای تمدید وجود ندارد",
+    "notFound": "اشتراک یافت نشد",
+    "notFoundDesc": "ممکن است حذف شده یا هنوز فعال نشده باشد",
+    "servers": "سرورها",
+    "statusActive": "فعال",
+    "statusExpired": "منقضی شده",
+    "statusLimited": "محدود",
+    "statusTrial": "آزمایشی",
+    "daysShort": "روز",
+    "expiredBanner": {
+      "selectTariff": "اشتراک شما منقضی شده است. برای بازیابی دسترسی به VPN، یک تعرفه را از پایین انتخاب کنید.",
+      "title": "اشتراک منقضی شده است"
+    },
+    "trialInfo": {
+      "description": "شما در حال استفاده از نسخهٔ آزمایشی سرویس هستید. برای دسترسی کامل، یک تعرفه را در پایین انتخاب کنید.",
+      "remaining": "باقی‌مانده",
+      "title": "دوره آزمایشی"
+    },
+    "trialUpgrade": {
+      "description": "دوره آزمایشی شما به‌زودی به پایان می‌رسد. برای ادامه استفاده از VPN بدون محدودیت، یک تعرفه مناسب انتخاب کنید.",
+      "title": "ارتقای اشتراک"
     }
   },
   "balance": {
@@ -533,6 +715,9 @@
       },
       "jupiter": {
         "description": "پرداخت SBP از طریق Jupiter (FPGate P2P)"
+      },
+      "cispay": {
+        "description": "پرداخت با کارت یا SBP از طریق cisPay"
       },
       "donut": {
         "description": "پرداخت با کارت یا SBP از طریق Donut P2P"
@@ -574,9 +759,18 @@
         "not_yet_valid": "کد تخفیف هنوز فعال نشده",
         "used": "کد تخفیف قبلاً استفاده شده",
         "already_used_by_user": "شما قبلاً از این کد استفاده کرده‌اید",
+        "active_discount_exists": "شما در حال حاضر یک تخفیف فعال دارید. ابتدا آن را غیرفعال کنید.",
+        "no_subscription_for_days": "این کد تخفیف به اشتراک فعال یا منقضی‌شده نیاز دارد",
+        "subscription_not_found": "اشتراک یافت نشد",
+        "not_first_purchase": "این کد تخفیف فقط برای اولین خرید در دسترس است",
+        "daily_limit": "تعداد فعال‌سازی کد تخفیف امروز بیش از حد است",
+        "trial_subscription_exists": "شما در حال حاضر اشتراک دارید، بنابراین این کد آزمایشی قابل اعمال نیست",
+        "trial_provisioning_failed": "در حال حاضر امکان فعال‌سازی نسخه آزمایشی نیست، لطفاً بعداً تلاش کنید",
         "user_not_found": "کاربر یافت نشد",
         "server_error": "خطای سرور"
-      }
+      },
+      "daysLeft": "روزهای باقی‌مانده: {{count}}",
+      "selectSubscription": "اشتراک را انتخاب کنید"
     },
     "minAmountError": "حداقل مبلغ: {{amount}}",
     "maxAmountError": "حداکثر مبلغ: {{amount}}",
@@ -616,7 +810,10 @@
       "pageTitle": "کارت‌های ذخیره شده",
       "backToBalance": "بازگشت",
       "empty": "کارتی ذخیره نشده است. کارت به طور خودکار در شارژ بعدی ذخیره می‌شود.",
-      "loadError": "خطا در بارگذاری کارت‌ها. لطفاً بعداً دوباره امتحان کنید."
+      "loadError": "خطا در بارگذاری کارت‌ها. لطفاً بعداً دوباره امتحان کنید.",
+      "sbpSection": "پرداخت خودکار SBP",
+      "sbpBinding": "اتصال SBP",
+      "sbpUnlink": "غیرفعال کردن پرداخت خودکار SBP"
     },
     "paymentSuccess": {
       "title": "پرداخت موفق",
@@ -634,7 +831,8 @@
       "timeoutDesc": "پردازش پرداخت بیشتر از حد معمول طول می‌کشد. می‌توانید دوباره وضعیت را بررسی کنید.",
       "goToBalance": "مشاهده موجودی",
       "tryAgain": "تلاش مجدد"
-    }
+    },
+    "top_up": "افزایش موجودی"
   },
   "referral": {
     "title": "برنامه معرفی",
@@ -818,7 +1016,14 @@
     "contactUs": "تماس با پشتیبانی",
     "openSupport": "باز کردن پشتیبانی",
     "ticketsDisabled": "تیکت‌ها غیرفعال است",
-    "useExternalLink": "لطفاً از لینک خارجی برای دریافت پشتیبانی استفاده کنید"
+    "useExternalLink": "لطفاً از لینک خارجی برای دریافت پشتیبانی استفاده کنید",
+    "create_ticket": "ایجاد تیکت",
+    "writeButton": "پیام",
+    "errors": {
+      "alreadyOpenTicket": "شما در حال حاضر یک تیکت باز دارید. گفتگو را در همان تیکت ادامه دهید؛ پس از بسته شدن آن می‌توانید تیکت جدید ایجاد کنید.",
+      "createFailed": "ایجاد تیکت ناموفق بود. لطفاً دوباره تلاش کنید.",
+      "replyFailed": "ارسال پاسخ ناموفق بود. لطفاً دوباره تلاش کنید."
+    }
   },
   "wheel": {
     "title": "چرخ شانس",
@@ -850,9 +1055,10 @@
       "insufficientBalance": "موجودی کافی نیست",
       "topUpRequired": "برای پرداخت شارژ کنید",
       "starsNotAvailable": "پرداخت Stars در دسترس نیست. برنامه را از طریق تلگرام باز کنید.",
-      "noSubscription": "برای چرخاندن گردونه نیاز به اشتراک فعال دارید. ابتدا اشتراک خود را فعال کنید."
+      "noSubscription": "برای چرخاندن گردونه نیاز به اشتراک فعال دارید. ابتدا اشتراک خود را فعال کنید.",
+      "selectSubscription": "ابتدا یک اشتراک انتخاب کنید"
     },
-    "payWithStars": "پرداخت {stars} Stars",
+    "payWithStars": "پرداخت Stars",
     "processingPayment": "در حال پردازش...",
     "starsPaymentSuccess": "پرداخت موفق! نتیجه به تلگرام ارسال شد.",
     "starsPaymentFailed": "پرداخت ناموفق. دوباره تلاش کنید.",
@@ -869,7 +1075,8 @@
     "noPrize": "این بار شانس نیاوردید...",
     "payWithDays": "پرداخت با روز",
     "starsPaymentSuccessCheckHistory": "پرداخت موفق! تاریخچه یا تلگرام را بررسی کنید.",
-    "youWon": "شما برنده شدید"
+    "youWon": "شما برنده شدید",
+    "selectSubscription": "اشتراک را انتخاب کنید"
   },
   "admin": {
     "backgrounds": {
@@ -888,7 +1095,7 @@
       "globalOpacity": "شفافیت",
       "globalBlur": "تاری",
       "categoryCSS": "CSS",
-      "categoryCanvas": "Canvas",
+      "categoryCANVAS": "Canvas",
       "categorySVG": "SVG",
       "aurora": "شفق قطبی",
       "auroraDesc": "شفق شمالی با گرادیان‌های نرم",
@@ -922,6 +1129,18 @@
       "noiseDesc": "گرادیان‌های نویزی با حرکت",
       "ripple": "موج",
       "rippleDesc": "اثر موج دایره‌ای",
+      "fireflies": "کرم‌های شب‌تاب",
+      "firefliesDesc": "نقاط درخشان شناور با تپش",
+      "snowfall": "بارش برف",
+      "snowfallDesc": "برف در حال بارش با وزش باد",
+      "starfield": "میدان ستارگان",
+      "starfieldDesc": "پرواز در میان ستاره‌ها",
+      "matrixRain": "باران ماتریکس",
+      "matrixRainDesc": "ستون‌های نمادهای در حال سقوط",
+      "liquidGradient": "گرادیان مایع",
+      "liquidGradientDesc": "حباب‌های گرادیان مات و روان",
+      "constellation": "صورت فلکی",
+      "constellationDesc": "ذرات متصل با خطوط",
       "geminiEffect": "افکت Gemini",
       "geminiEffectDesc": "افکت SVG مشابه Google Gemini",
       "speed": "سرعت",
@@ -937,6 +1156,15 @@
       "particleColor": "رنگ ذرات",
       "starColor": "رنگ ستاره",
       "trailColor": "رنگ دنباله",
+      "bgStarColor": "رنگ ستاره‌های پس‌زمینه",
+      "pointerColor": "رنگ اشاره‌گر",
+      "beamColor": "رنگ پرتو",
+      "explosionColor": "رنگ انفجار",
+      "multicolor": "حالت چندرنگ",
+      "lineColor": "رنگ خطوط",
+      "wind": "باد",
+      "charset": "مجموعه نویسه‌ها",
+      "linkDistance": "فاصله اتصال",
       "bgColor": "رنگ پس‌زمینه",
       "fillColor": "رنگ پر کردن",
       "color1": "رنگ ۱",
@@ -980,7 +1208,7 @@
       "promoOffers": "پیشنهادات تبلیغاتی",
       "promocodes": "کدهای تخفیف",
       "promoGroups": "گروه‌های تخفیف",
-      "remnawave": "RemnaWave",
+      "remnawave": "Remnawave",
       "users": "کاربران",
       "trafficUsage": "مصرف ترافیک",
       "updates": "به‌روزرسانی‌ها",
@@ -996,7 +1224,8 @@
       "landings": "صفحات فرود",
       "referralNetwork": "شبکه ارجاع",
       "news": "اخبار",
-      "infoPages": "صفحات اطلاعات"
+      "infoPages": "صفحات اطلاعات",
+      "legalPages": "صفحات سیستمی"
     },
     "panel": {
       "title": "پنل مدیریت",
@@ -1049,6 +1278,9 @@
       "title": "آمار فروش",
       "subtitle": "درآمد، آزمایشی، اشتراک و تمدید",
       "period": {
+        "thisMonth": "این ماه",
+        "from": "از",
+        "to": "تا",
         "week": "۷ روز",
         "month": "۳۰ روز",
         "quarter": "۹۰ روز",
@@ -1060,13 +1292,15 @@
         "sales": "فروش",
         "renewals": "تمدید",
         "addons": "خدمات اضافی",
-        "deposits": "شارژ"
+        "deposits": "شارژ",
+        "payment": "پرداخت‌ها"
       },
       "summary": {
         "revenue": "درآمد",
         "activeSubs": "اشتراک فعال",
         "activeTrials": "آزمایشی فعال",
         "newTrials": "آزمایشی جدید",
+        "newPaid": "اشتراک‌های پولی جدید",
         "conversion": "تبدیل",
         "renewals": "تمدید",
         "addonRevenue": "درآمد خدمات اضافی",
@@ -1077,13 +1311,13 @@
         "totalRegistrations": "ثبت‌نام‌ها",
         "trialsIssued": "آزمایشی صادرشده",
         "conversion": "نرخ تبدیل",
-        "avgDuration": "میانگین مدت",
         "byProvider": "بر اساس منبع",
         "dailyChart": "ثبت‌نام و آزمایشی روزانه",
         "registrations": "ثبت‌نام"
       },
       "sales": {
         "totalSales": "کل فروش",
+        "totalRevenue": "گردش اشتراک",
         "avgOrder": "میانگین سفارش",
         "topTariff": "تعرفه برتر",
         "byTariff": "بر اساس تعرفه",
@@ -1122,6 +1356,12 @@
         "dailyChart": "شارژ روزانه",
         "dailyByMethod": "شارژ روزانه بر اساس روش پرداخت",
         "revenue": "درآمد"
+      },
+      "payments": {
+        "successRate": "نرخ موفقیت پرداخت",
+        "attempts": "تلاش‌های پرداخت",
+        "failedPurchases": "خریدهای ناموفق",
+        "byGateway": "نرخ موفقیت بر اساس درگاه"
       },
       "loadError": "بارگذاری آمار ناموفق بود"
     },
@@ -1290,9 +1530,14 @@
       "resetted": "قالب به پیش‌فرض بازگردانده شد",
       "testSent": "ایمیل آزمایشی ارسال شد",
       "variables": "متغیرهای موجود",
-      "clickToCopy": "برای کپی کلیک کنید",
-      "previewDesktopOnly": "پیش‌نمایش فقط در نسخه وب دسکتاپ در دسترس است",
-      "previewNotAvailable": "پیش‌نمایش در دسترس نیست"
+      "editorTab": "ویرایشگر",
+      "previewHint": "پیش‌نمایش ایمیل را با مقادیر نمونه به جای متغیرها نشان می‌دهد.",
+      "clickToInsert": "برای درج در متن کلیک کنید",
+      "insertDefault": "درج قالب پیش‌فرض",
+      "insertDefaultConfirm": "محتوای فعلی با قالب پیش‌فرض جایگزین شود؟",
+      "testRecipientPlaceholder": "ایمیل گیرنده (پیش‌فرض: ایمیل شما)",
+      "testHint": "محتوای فعلی ویرایشگر با مقادیر نمونه به جای متغیرها ارسال می‌شود.",
+      "variablesCommon": "متغیرهای عمومی (در همه قالب‌ها کار می‌کنند)"
     },
     "wheel": {
       "title": "تنظیمات چرخ شانس",
@@ -1315,7 +1560,8 @@
         "promoPrefix": "پیشوند کد تخفیف",
         "spinCost": "هزینه چرخش",
         "limitsAndRtp": "محدودیت‌ها و RTP",
-        "promocodes": "کدهای تخفیف"
+        "promocodes": "کدهای تخفیف",
+        "promoValidityDays": "اعتبار کد تخفیف (روز)"
       },
       "starsNotEnabledGlobally": "پرداخت با ستاره در روش‌های پرداخت فعال نیست. «Telegram Stars» را در بخش «روش‌های پرداخت» فعال کنید.",
       "prizes": {
@@ -1342,7 +1588,9 @@
           "emoji": "ایموجی",
           "color": "رنگ",
           "active": "فعال",
-          "worth": "ارزش"
+          "worth": "ارزش",
+          "probability": "احتمال دستی (۰–۱)",
+          "probabilityHint": "خالی = خودکار بر اساس RTP"
         },
         "promo": {
           "title": "تنظیمات کد تخفیف",
@@ -1359,12 +1607,14 @@
         "prizeDistribution": "توزیع جوایز",
         "times": "بار",
         "times_other": "{{count}} بار",
-        "topWins": "برترین برنده‌ها"
+        "topWins": "برترین برنده‌ها",
+        "loadError": "بارگذاری آمار ناموفق بود",
+        "empty": "هنوز چرخشی انجام نشده"
       }
     },
     "broadcasts": {
       "title": "نشریات",
-      "subtitle": "تاریخچه و مدیریت",
+      "subtitle": "ارسال گروهی پیام به کاربران",
       "create": "ایجاد پیام",
       "empty": "هیچ نشریه‌ای نیست",
       "selectFilter": "انتخاب مخاطبین",
@@ -1423,49 +1673,75 @@
       "customButtonTypeCallback": "Callback",
       "customButtonTypeUrl": "لینک",
       "customButtonCallbackPlaceholder": "callback_data (مثلاً back_to_menu)",
-      "customButtonUrlPlaceholder": "https://example.com"
+      "customButtonUrlPlaceholder": "https://example.com",
+      "customButtonEmojiIdPlaceholder": "شناسه ایموجی سفارشی (اختیاری)",
+      "category": "دسته‌بندی",
+      "categoryNews": "اخبار",
+      "categoryPromo": "تبلیغاتی",
+      "categorySystem": "سیستمی",
+      "stopping": "در حال توقف…",
+      "btnBalance": "افزایش موجودی",
+      "btnConnect": "اتصال",
+      "btnHome": "صفحه اصلی",
+      "btnPartners": "برنامه معرفی",
+      "btnPromocode": "کد تخفیف",
+      "btnSubscription": "اشتراک",
+      "btnSupport": "پشتیبانی",
+      "emailContent": "محتوای ایمیل",
+      "emailContentHint": "پشتیبانی از HTML",
+      "emailContentPlaceholder": "<p>سلام، {{user_name}}!</p>\n<p>پیام شما اینجا...</p>",
+      "emailSection": "ارسال انبوه ایمیل",
+      "emailSubject": "موضوع ایمیل",
+      "emailSubjectPlaceholder": "موضوع ایمیل را وارد کنید...",
+      "emailVariables": "متغیرهای موجود",
+      "preview": "پیش‌نمایش",
+      "previewEmpty": "— خالی —",
+      "selectChannel": "کانال ارسال",
+      "selectEmailFilter": "مخاطبان ایمیل را انتخاب کنید",
+      "selectEmailFilterPlaceholder": "فیلتر را انتخاب کنید...",
+      "telegramSection": "ارسال انبوه تلگرام"
     },
     "pinnedMessages": {
-      "title": "Pinned Messages",
-      "subtitle": "Manage pinned messages for users",
-      "create": "Create",
-      "empty": "No pinned messages",
-      "content": "Message text",
-      "contentPlaceholder": "Enter pinned message text...",
-      "noContent": "No text",
-      "media": "Media file",
-      "addMedia": "Add media",
-      "uploading": "Uploading...",
-      "settings": "Settings",
-      "sendBeforeMenu": "Send before menu",
-      "sendOnEveryStart": "Send on every start",
-      "broadcast": "Broadcast",
-      "broadcastOnCreate": "Broadcast on create",
-      "broadcastConfirm": "Broadcast pinned message to all active users?",
-      "broadcastToAll": "Broadcast to all",
-      "activate": "Activate",
-      "deactivate": "Deactivate",
-      "unpin": "Unpin",
-      "unpinAll": "Unpin for everyone",
-      "unpinConfirm": "Unpin message for all users?",
-      "delete": "Delete",
-      "deleteConfirm": "Delete this pinned message?",
-      "active": "Active",
-      "inactive": "Inactive",
-      "prev": "Previous",
-      "next": "Next",
-      "createSuccess": "Pinned message created",
-      "updateSuccess": "Message updated",
-      "deleteSuccess": "Message deleted",
-      "activateSuccess": "Message activated",
-      "deactivateSuccess": "Message deactivated",
-      "broadcastSuccess": "Broadcast completed",
-      "unpinSuccess": "Messages unpinned",
-      "sentCount": "Sent",
-      "failedCount": "Failed",
-      "unpinnedCount": "Unpinned",
-      "editMessage": "Edit",
-      "cantDeleteActive": "Cannot delete active message"
+      "title": "پیام‌های سنجاق‌شده",
+      "subtitle": "مدیریت پیام‌های سنجاق‌شده برای کاربران",
+      "create": "ایجاد",
+      "empty": "هیچ پیام سنجاق‌شده‌ای وجود ندارد",
+      "content": "متن پیام",
+      "contentPlaceholder": "متن پیام سنجاق‌شده را وارد کنید...",
+      "noContent": "بدون متن",
+      "media": "فایل رسانه",
+      "addMedia": "افزودن رسانه",
+      "uploading": "در حال بارگذاری...",
+      "settings": "تنظیمات",
+      "sendBeforeMenu": "ارسال قبل از منو",
+      "sendOnEveryStart": "ارسال در هر بار شروع",
+      "broadcast": "ارسال همگانی",
+      "broadcastOnCreate": "ارسال همگانی هنگام ایجاد",
+      "broadcastConfirm": "پیام سنجاق‌شده برای همه کاربران فعال ارسال شود؟",
+      "broadcastToAll": "ارسال به همه",
+      "activate": "فعال‌سازی",
+      "deactivate": "غیرفعال‌سازی",
+      "unpin": "برداشتن سنجاق",
+      "unpinAll": "برداشتن سنجاق برای همه",
+      "unpinConfirm": "سنجاق پیام برای همه کاربران برداشته شود؟",
+      "delete": "حذف",
+      "deleteConfirm": "این پیام سنجاق‌شده حذف شود؟",
+      "active": "فعال",
+      "inactive": "غیرفعال",
+      "prev": "قبلی",
+      "next": "بعدی",
+      "createSuccess": "پیام سنجاق‌شده ایجاد شد",
+      "updateSuccess": "پیام به‌روزرسانی شد",
+      "deleteSuccess": "پیام حذف شد",
+      "activateSuccess": "پیام فعال شد",
+      "deactivateSuccess": "پیام غیرفعال شد",
+      "broadcastSuccess": "ارسال همگانی تکمیل شد",
+      "unpinSuccess": "سنجاق پیام‌ها برداشته شد",
+      "sentCount": "ارسال‌شده",
+      "failedCount": "ناموفق",
+      "unpinnedCount": "سنجاق‌برداشته",
+      "editMessage": "ویرایش",
+      "cantDeleteActive": "نمی‌توان پیام فعال را حذف کرد"
     },
     "channelSubscriptions": {
       "title": "کانال‌های اجباری",
@@ -1512,7 +1788,7 @@
       "description": "جستجو و مدیریت پرداخت‌ها",
       "searchPlaceholder": "جستجو: فاکتور، شناسه تلگرام، @نام‌کاربری، ایمیل...",
       "searchHint": "مثال‌ها: SP-78291, @username, 123456789, user@mail.ru",
-      "searchResults": "نتایج برای: {{query}} — {{count}} یافت شد",
+      "searchResults": "نتایج برای: {{query}}. {{count}} یافت شد",
       "resetSearch": "بازنشانی",
       "statusAll": "همه",
       "statusPending": "در انتظار",
@@ -1550,6 +1826,8 @@
       "quickToggles": "تغییر سریع",
       "modified": "تغییر یافته",
       "readOnly": "فقط خواندنی",
+      "envLocked": "تنظیم‌شده در ‎.env‎",
+      "envLockedHint": "این مقدار در فایل ‎.env‎ تنظیم شده و پایگاه‌داده را بازنویسی می‌کند، بنابراین اینجا قابل تغییر نیست. برای مدیریت آن از پنل، کلید را از ‎.env‎ حذف کنید و ربات را ری‌استارت کنید.",
       "reset": "بازنشانی",
       "categoriesCount": "دسته",
       "settingsCount": "تنظیم",
@@ -1670,6 +1948,7 @@
         "payments_etoplatezhi": "Etoplatezhi",
         "payments_antilopay": "Antilopay",
         "payments_jupiter": "Jupiter",
+        "payments_cispay": "CisPay",
         "payments_donut": "Donut",
         "payments_lava": "Lava",
         "payments_apple_iap": "Apple IAP",
@@ -1701,7 +1980,7 @@
         "db_sqlite": "SQLite",
         "db_redis": "Redis",
         "sys_core": "هسته و اشکال‌زدایی",
-        "sys_remnawave": "RemnaWave",
+        "sys_remnawave": "Remnawave",
         "sys_webapi": "Web API",
         "sys_webhook": "Webhook",
         "sys_server": "وضعیت سرور",
@@ -1709,9 +1988,16 @@
         "sys_maintenance": "نگهداری",
         "sys_backup": "پشتیبان‌گیری",
         "sys_version": "نسخه",
-        "sys_logging": "لاگ‌ها"
+        "sys_logging": "لاگ‌ها",
+        "iface_info": "اسناد حقوقی",
+        "iface_menu": "دکمه منو",
+        "sys_cabinet": "کابین",
+        "sys_other": "سایر تنظیمات"
       },
       "categories": {
+        "CABINET": "کابین",
+        "INFO_PAGES": "اسناد حقوقی و پرسش‌های متداول",
+        "MENU": "دکمه منو",
         "TELEGRAM_WIDGET": "Telegram Login Widget",
         "TELEGRAM_OIDC": "Telegram Login (OIDC)"
       },
@@ -1724,8 +2010,18 @@
         "telegramOidcClientId": "Client ID (شناسه ربات)",
         "telegramOidcClientSecret": "Client Secret"
       },
-      "offlineConv": "\u062a\u0628\u062f\u06cc\u0644\u200c\u0647\u0627\u06cc \u0622\u0641\u0644\u0627\u06cc\u0646",
-      "apiKey": "\u06a9\u0644\u06cc\u062f API"
+      "offlineConv": "تبدیل‌های آفلاین",
+      "apiKey": "کلید API",
+      "legalFooter": "پاورقی حقوقی",
+      "legalFooterDesc": "پیوند به پیشنهاد، سیاست حریم خصوصی و پرداخت‌های مکرر در پایین صفحه ورود",
+      "botStartVideo": "ویدیوی منوی شروع ربات",
+      "botStartVideoDesc": "ربات این ویدیو را به‌جای تصویر لوگو به پیام /start پیوست می‌کند. فایل یک‌بار در تلگرام بارگذاری می‌شود و ما فقط شناسه آن را نگه می‌داریم.",
+      "botStartVideoUpload": "بارگذاری ویدیو",
+      "botStartVideoReplace": "جایگزینی ویدیو",
+      "botStartVideoRemove": "حذف",
+      "botStartVideoActive": "ویدیو تنظیم شده است",
+      "botStartVideoNone": "ویدیویی تنظیم نشده — منو از تصویر لوگو استفاده می‌کند",
+      "botStartVideoError": "بارگذاری ویدیو ناموفق بود"
     },
     "buttons": {
       "color": "رنگ دکمه",
@@ -1774,7 +2070,7 @@
       "builtinButtons": "بخش‌های داخلی",
       "resetConfirm": "منو به تنظیمات پیش‌فرض بازنشانی شود؟ تمام تغییرات از بین می‌رود.",
       "buttonTextPlaceholder": "متن دکمه",
-      "customLabelsHint": "متن دکمه برای هر زبان ربات",
+      "customLabelsHint": "خالی = عنوان پیش‌فرض",
       "moveUp": "انتقال به بالا",
       "moveDown": "انتقال به پایین",
       "openIn": "باز کردن در",
@@ -1826,12 +2122,15 @@
       "importError": "فرمت فایل JSON نامعتبر",
       "importPreview": "پیش‌نمایش وارد کردن",
       "noAppsToImport": "هیچ برنامه‌ای برای وارد کردن نیست",
-      "refreshRemnaWave": "بازخوانی از RemnaWave",
+      "refreshRemnaWave": "بازخوانی از Remnawave",
       "remnaWaveConfigUuid": "UUID پیکربندی",
-      "remnaWaveConfigUuidHint": "UUID پیکربندی صفحه اشتراک از پنل RemnaWave",
-      "remnaWaveMode": "نمایش برنامه‌ها از پنل RemnaWave. حالت فقط خواندنی.",
-      "remnaWaveSettings": "تنظیمات RemnaWave",
-      "remnaWaveToggle": "تغییر منبع RemnaWave"
+      "remnaWaveConfigUuidHint": "UUID پیکربندی صفحه اشتراک از پنل Remnawave",
+      "remnaWaveMode": "نمایش برنامه‌ها از پنل Remnawave. حالت فقط خواندنی.",
+      "remnaWaveSettings": "تنظیمات Remnawave",
+      "remnaWaveToggle": "تغییر منبع Remnawave",
+      "noConfigs": "هیچ تنظیماتی وجود ندارد",
+      "remnaWaveConnected": "Remnawave متصل است",
+      "remnaWaveDisconnected": "Remnawave قطع است"
     },
     "tickets": {
       "title": "مدیریت تیکت‌ها",
@@ -1882,7 +2181,13 @@
       "copyTelegramId": "برای کپی شناسه تلگرام کلیک کنید",
       "viewUser": "کاربر",
       "userNotificationsEnabled": "اعلان‌های کاربر",
-      "userNotificationsEnabledDesc": "ارسال اعلان به کاربران درباره پاسخ‌های مدیر"
+      "userNotificationsEnabledDesc": "ارسال اعلان به کاربران درباره پاسخ‌های مدیر",
+      "replyFailed": "ارسال پاسخ ناموفق بود",
+      "validation": {
+        "checkIntervalRange": "بازه بررسی باید بین ۱ تا ۱۴۴۰ دقیقه باشد",
+        "reminderCooldownRange": "زمان تأخیر یادآوری باید بین ۰ تا ۱۴۴۰ دقیقه باشد",
+        "slaMinutesRange": "SLA باید بین ۱ تا ۱۰۰۸۰ دقیقه باشد"
+      }
     },
     "tariffs": {
       "title": "مدیریت تعرفه‌ها",
@@ -1916,7 +2221,7 @@
       "confirmDeleteText": "این عمل قابل بازگشت نیست. تعرفه برای همیشه حذف می‌شود.",
       "confirmDeleteWithSubscriptions": "این تعرفه {{count}} اشتراک فعال دارد. پس از حذف، کاربران هنگام تمدید باید تعرفه جدید انتخاب کنند.",
       "deleteSuccess": "تعرفه با موفقیت حذف شد",
-      "deleteSuccessWithSubscriptions": "تعرفه حذف شد. تعرفه {{count}} اشتراک بازنشانی شد — کاربران هنگام تمدید تعرفه جدید انتخاب می‌کنند.",
+      "deleteSuccessWithSubscriptions": "تعرفه حذف شد. تعرفه {{count}} اشتراک بازنشانی شد. کاربران هنگام تمدید تعرفه جدید انتخاب می‌کنند.",
       "saveOrder": "ذخیره ترتیب",
       "orderSaved": "ترتیب ذخیره شد",
       "dragToReorder": "برای تغییر ترتیب بکشید",
@@ -1967,7 +2272,7 @@
       "daysShort": "روز",
       "serversTitle": "سرورها",
       "externalSquadTitle": "گروه خارجی",
-      "externalSquadHint": "یک گروه خارجی RemnaWave برای کاربران این تعرفه تعیین کنید. هنگام ایجاد اشتراک، کاربر به طور خودکار به گروه انتخاب شده اضافه می‌شود.",
+      "externalSquadHint": "یک گروه خارجی Remnawave برای کاربران این تعرفه تعیین کنید. هنگام ایجاد اشتراک، کاربر به طور خودکار به گروه انتخاب شده اضافه می‌شود.",
       "noExternalSquad": "بدون گروه خارجی",
       "externalSquadUsers": "کاربران",
       "serversTabHint": "سرورهای موجود در این تعرفه را انتخاب کنید.",
@@ -2038,7 +2343,9 @@
         "periodsRequired": "حداقل یک دوره اضافه کنید",
         "dailyPriceRequired": "قیمت روزانه بزرگتر از 0 را وارد کنید",
         "trafficPackagesRequired": "حداقل یک بسته ترافیک اضافه کنید (یا خرید ترافیک را غیرفعال کنید)"
-      }
+      },
+      "lavaProductLabel": "محصول Lava (تمدید خودکار)",
+      "lavaProductDesc": "شناسه UUID محصول از پنل Lava: قیمت و دوره کسر در آنجا تنظیم می‌شود. خالی — تمدید خودکار برای این تعرفه در دسترس نیست."
     },
     "servers": {
       "title": "مدیریت اسکوادها",
@@ -2046,7 +2353,7 @@
       "sync": "همگام‌سازی",
       "syncing": "در حال همگام‌سازی...",
       "syncNow": "همگام‌سازی الان",
-      "noServers": "سروری نیست. با RemnaWave همگام‌سازی کنید.",
+      "noServers": "سروری نیست. با Remnawave همگام‌سازی کنید.",
       "edit": "ویرایش سرور",
       "originalName": "نام اصلی",
       "displayName": "نام نمایشی",
@@ -2076,7 +2383,7 @@
     },
     "paymentMethods": {
       "title": "روش‌های پرداخت",
-      "description": "پیکربندی ترتیب و شرایط نمایش",
+      "subtitle": "پیکربندی ترتیب و شرایط نمایش",
       "enabled": "روشن",
       "disabled": "خاموش",
       "notConfigured": "تنظیم نشده",
@@ -2089,9 +2396,11 @@
       "methodEnabled": "روش فعال است",
       "providerNotConfigured": "ارائه‌دهنده در env تنظیم نشده",
       "openUrlDirect": "صفحه پرداخت را مستقیماً باز کن",
-      "openUrlDirectHint": "بدون پنل لینک — ارائه‌دهنده داخل MiniApp/تب بلافاصله پس از کلیک باز می‌شود. پس از پرداخت کاربر به /balance/top-up/result بازمی‌گردد. برای Stars/CryptoBot و سایر لینک‌های t.me/ این پرچم نادیده گرفته می‌شود.",
+      "openUrlDirectHint": "روشن — لینک پرداخت بلافاصله باز می‌شود، بدون پنل دکمهٔ میانی. خاموش — دکمهٔ «باز کردن پرداخت» نمایش داده می‌شود. داخل تلگرام لینک در هر دو حالت در مرورگر خارجی باز می‌شود (در غیر این صورت پرداخت از طریق اپ بانکی/SBP کار نمی‌کند)؛ پس از پرداخت کاربر به صفحهٔ نتیجه بازمی‌گردد. Stars/CryptoBot (لینک‌های t.me/) همیشه به‌صورت نیتیو باز می‌شوند و این پرچم روی آن‌ها اعمال نمی‌شود.",
       "displayName": "نام نمایشی",
       "displayNameHint": "برای نام پیش‌فرض خالی بگذارید",
+      "description": "توضیحات",
+      "descriptionHint": "زیر نام روش پرداخت نمایش داده می‌شود. خالی — متن پیش‌فرض",
       "subOptions": "گزینه‌های پرداخت",
       "minAmount": "حداقل مبلغ (کپک)",
       "maxAmount": "حداکثر مبلغ (کپک)",
@@ -2112,7 +2421,32 @@
       "promoGroupsShort": "گروه",
       "noPromoGroups": "هیچ گروه تبلیغاتی نیست",
       "cancelButton": "لغو",
-      "saveButton": "ذخیره"
+      "saveButton": "ذخیره",
+      "notFound": "روش پرداخت یافت نشد",
+      "quickAmounts": "مبالغ سریع (₽)",
+      "quickAmountsHint": "دکمه‌های مبلغ شارژ سریع. خالی — مقادیر پیش‌فرض استفاده می‌شوند: {{defaults}} ₽",
+      "quickAmountsPlaceholder": "مبلغ به روبل",
+      "quickAmountsAdd": "افزودن",
+      "quickAmountsInvalid": "یک مبلغ مثبت به روبل وارد کنید",
+      "quickAmountsLimit": "حداکثر ۱۰ مبلغ مجاز است",
+      "quickAmountsRemove": "حذف مبلغ {{value}} ₽",
+      "overpayCertTitle": "گواهی mTLS (Overpay)",
+      "overpayCertValid": "✅ معتبر تا {{date}}",
+      "overpayCertExpired": "⚠️ در تاریخ {{date}} منقضی شده است",
+      "overpayCertUnreadable": "⚠️ گواهی قابل خواندن نیست — رمز نادرست یا فایل خراب است",
+      "overpayCertMissing": "❌ گواهی بارگذاری نشده است",
+      "overpayCertEnvLockedPath": "مسیر از طریق متغیر محیطی OVERPAY_P12_PATH تنظیم شده است — مقدار پایگاه داده اعمال نمی‌شود",
+      "overpayCertEnvLockedPassphrase": "رمز از طریق متغیر محیطی OVERPAY_P12_PASSPHRASE تنظیم شده است — مقدار پایگاه داده اعمال نمی‌شود",
+      "overpayCertFile": "فایل گواهی (.p12 / .pfx)",
+      "overpayCertChooseFile": "انتخاب فایل",
+      "overpayCertPassphrase": "رمز گواهی",
+      "overpayCertPassphrasePlaceholder": "اگر رمزی ندارد خالی بگذارید",
+      "overpayCertUpload": "بارگذاری",
+      "overpayCertDelete": "حذف",
+      "overpayCertConfirmDelete": "گواهی Overpay حذف شود؟",
+      "overpayCertFileTooLarge": "حجم فایل بیش از ۱ مگابایت است",
+      "overpayCertUploadError": "بارگذاری گواهی ناموفق بود",
+      "overpayCertDeleteError": "حذف گواهی ناموفق بود"
     },
     "campaigns": {
       "title": "کمپین‌های تبلیغاتی",
@@ -2140,7 +2474,8 @@
         "deactivate": "غیرفعال کردن",
         "activate": "فعال کردن",
         "edit": "ویرایش",
-        "delete": "حذف"
+        "delete": "حذف",
+        "registrations": "ثبت‌نام‌ها"
       },
       "modal": {
         "editTitle": "ویرایش کمپین",
@@ -2164,7 +2499,7 @@
         "notSelected": "انتخاب نشده",
         "tariffOption": "{{traffic}} GB، {{devices}} دستگاه",
         "durationDays": "مدت (روز)",
-        "noBonusDescription": "کمپین بدون پاداش — فقط برای ردیابی کلیک‌ها و ثبت‌نام‌ها.",
+        "noBonusDescription": "کمپین بدون پاداش: فقط برای ردیابی کلیک‌ها و ثبت‌نام‌ها.",
         "active": "فعال",
         "cancel": "لغو",
         "save": "ذخیره",
@@ -2208,11 +2543,13 @@
         "totalSpending": "هزینه اشتراک",
         "periodComparison": "مقایسه دوره‌ها",
         "vsLastWeek": "نسبت به هفته قبل",
-        "topRegistrations": "بالاترین ثبت‌نام‌ها"
+        "topRegistrations": "بالاترین ثبت‌نام‌ها",
+        "subscriptionsIssued": "اشتراک‌های صادر شده",
+        "tariffsIssued": "تعرفه‌های صادر شده"
       },
       "users": {
         "title": "کاربران کمپین",
-        "campaignRegistrations": "{{name}} — {{count}} ثبت‌نام",
+        "campaignRegistrations": "{{name}}: {{count}} ثبت‌نام",
         "noUsers": "کاربر ثبت‌نام شده‌ای وجود ندارد",
         "user": "کاربر",
         "bonus": "پاداش",
@@ -2232,7 +2569,11 @@
         "delete": "حذف"
       },
       "loadError": "بارگذاری کمپین ناموفق بود",
-      "updateError": "ذخیره تغییرات ناموفق بود"
+      "updateError": "ذخیره تغییرات ناموفق بود",
+      "validation": {
+        "nameRequired": "نام الزامی است"
+      },
+      "loadMore": "بارگذاری بیشتر"
     },
     "withdrawals": {
       "title": "برداشت‌ها",
@@ -2339,7 +2680,30 @@
         "description": "رد درخواست شراکت از {{name}}",
         "commentLabel": "نظر (اختیاری)",
         "commentPlaceholder": "دلیل رد..."
-      }
+      },
+      "settings": "تنظیمات",
+      "settingsFields": {
+        "cooldownDays": "فاصله بین برداشت‌ها (روز)",
+        "cooldownDaysDesc": "چند روز باید بین درخواست‌های برداشت بگذرد",
+        "minAmount": "حداقل مبلغ برداشت (کوپک)",
+        "minAmountDesc": "حداقل مبلغ برای درخواست برداشت (۱۰۰ کوپک = ۱ ₽)",
+        "partnerVisible": "بخش همکاران در کابین قابل مشاهده باشد",
+        "partnerVisibleDesc": "نمایش/مخفی کردن بخش‌های درخواست همکاری و برداشت برای کاربران",
+        "programEnabled": "برنامه معرفی فعال است",
+        "programEnabledDesc": "تمام عملکرد ارجاع را فعال می‌کند",
+        "requisitesText": "متن اطلاعات حساب",
+        "requisitesTextDesc": "متن سفارشی برای توضیح به کاربران که هنگام برداشت چه اطلاعات پرداختی را وارد کنند",
+        "requisitesTextPlaceholder": "اطلاعات حساب خود را وارد کنید...",
+        "withdrawalEnabled": "برداشت مجاز است",
+        "withdrawalEnabledDesc": "اجازه دادن به همکاران برای درخواست برداشت موجودی معرفی"
+      },
+      "settingsLoadError": "بارگذاری تنظیمات همکاری ناموفق بود",
+      "settingsSection": {
+        "referralProgram": "برنامه معرفی",
+        "withdrawalSettings": "تنظیمات برداشت"
+      },
+      "settingsSubtitle": "تنظیمات برنامه معرفی و برداشت همکاران",
+      "settingsUpdateError": "ذخیره تنظیمات همکاری ناموفق بود"
     },
     "partnerDetail": {
       "title": "جزئیات شریک",
@@ -2380,7 +2744,10 @@
         "createTitle": "ایجاد کمپین",
         "createSubtitle": "کمپین به‌طور خودکار به شریک اختصاص می‌یابد",
         "autoAssignNote": "کمپین به‌طور خودکار به شریک {{name}} اختصاص می‌یابد",
-        "createAndAssign": "ایجاد و اختصاص"
+        "createAndAssign": "ایجاد و اختصاص",
+        "earnings": "درآمد",
+        "referrals": "معرفی‌شده‌ها",
+        "registrations": "ثبت‌نام‌ها"
       },
       "dangerZone": {
         "title": "منطقه خطر",
@@ -2416,7 +2783,8 @@
         "subscriptionDays": "روزهای اشتراک",
         "trialSubscription": "اشتراک آزمایشی",
         "promoGroup": "گروه تخفیف",
-        "discount": "تخفیف %"
+        "discount": "تخفیف %",
+        "balanceAndDays": "موجودی + روزها"
       },
       "modal": {
         "editPromocode": "ویرایش کد تخفیف",
@@ -2434,6 +2802,11 @@
         "typeTrialSubscription": "اشتراک آزمایشی",
         "typePromoGroup": "گروه تخفیف",
         "typeDiscount": "تخفیف درصدی",
+        "typeBonusSet": "مجموعه پاداش (موجودی / روزها / گروه تخفیف)",
+        "bonusComposition": "محتوای کد تخفیف",
+        "includeBalance": "پاداش موجودی",
+        "includeDays": "روزهای اشتراک",
+        "includePromoGroup": "گروه تخفیف",
         "bonusAmount": "مبلغ پاداش",
         "rub": "روبل",
         "daysCount": "تعداد روزها",
@@ -2453,7 +2826,13 @@
         "firstPurchaseOnly": "فقط برای اولین خرید",
         "cancel": "لغو",
         "saving": "در حال ذخیره...",
-        "save": "ذخیره"
+        "save": "ذخیره",
+        "defaultTrialTariff": "تعرفه پیش‌فرض آزمایشی",
+        "selectTariff": "تعرفه را انتخاب کنید",
+        "tariff": "تعرفه",
+        "includeTraffic": "ترافیک",
+        "trafficAmount": "حجم ترافیک",
+        "gb": "گیگابایت"
       },
       "stats": {
         "title": "آمار کد تخفیف",
@@ -2482,7 +2861,8 @@
         "totalPromocodes": "کل کدهای تخفیف",
         "activeCount": "فعال",
         "usagesCount": "استفاده‌ها",
-        "exhausted": "تمام شده"
+        "exhausted": "تمام شده",
+        "hoursValue": "{{count}} ساعت"
       },
       "actions": {
         "stats": "آمار",
@@ -2519,11 +2899,13 @@
       },
       "validation": {
         "codeRequired": "کد تخفیف را وارد کنید",
+        "bonusSetEmpty": "حداقل یک پاداش برای کد تخفیف انتخاب کنید",
         "balanceRequired": "مبلغ پاداش باید بیشتر از 0 باشد",
         "daysRequired": "تعداد روزها باید بیشتر از 0 باشد",
         "groupRequired": "یک گروه تخفیف انتخاب کنید",
         "discountPercentInvalid": "درصد تخفیف باید بین 1 تا 100 باشد",
-        "discountHoursRequired": "مدت اعتبار تخفیف را به ساعت مشخص کنید"
+        "discountHoursRequired": "مدت اعتبار تخفیف را به ساعت مشخص کنید",
+        "trafficRequired": "حجم ترافیک باید بیشتر از ۰ باشد"
       }
     },
     "promoGroups": {
@@ -2604,7 +2986,8 @@
         "byDate": "بر اساس تاریخ",
         "byBalance": "بر اساس موجودی",
         "byActivity": "بر اساس فعالیت",
-        "bySpent": "بر اساس هزینه"
+        "bySpent": "بر اساس هزینه",
+        "byExpiry": "بر اساس انقضا"
       },
       "pagination": {
         "showing": "نمایش {{from}}-{{to}} از {{total}}"
@@ -2626,7 +3009,8 @@
           "sync": "همگام‌سازی",
           "tickets": "تیکت‌ها",
           "gifts": "هدایا",
-          "referrals": "معرفی‌ها"
+          "referrals": "معرفی‌ها",
+          "activity": "فعالیت"
         },
         "noTickets": "این کاربر تیکتی ندارد",
         "ticketsCount": "تیکت",
@@ -2737,7 +3121,19 @@
           "expired": "منقضی شده",
           "daysLeft": "روز باقیمانده",
           "deviceLimitUpdated": "محدودیت دستگاه به‌روز شد",
-          "invalidDays": "لطفاً تعداد روز معتبر وارد کنید (بیشتر از ۰)"
+          "invalidDays": "لطفاً تعداد روز معتبر وارد کنید (بیشتر از ۰)",
+          "backToList": "بازگشت به فهرست اشتراک‌ها",
+          "createNew": "ایجاد جدید",
+          "sbpTitle": "پرداخت خودکار SBP",
+          "sbpCancel": "غیرفعال کردن",
+          "sbpCancelled": "پرداخت خودکار SBP غیرفعال شد",
+          "sbpStatus_PENDING": "در انتظار",
+          "sbpStatus_ACTIVE": "فعال",
+          "sbpStatus_PAST_DUE": "پرداخت ناموفق",
+          "deleteTitle": "حذف اشتراک",
+          "deleteHint": "اشتراک و دستگاه‌های آن برای همیشه حذف می‌شوند",
+          "deleteButton": "حذف اشتراک",
+          "deleted": "اشتراک حذف شد"
         },
         "balance": {
           "current": "موجودی فعلی",
@@ -2820,6 +3216,104 @@
           "searchPlaceholder": "جستجو بر اساس نام، ایمیل یا شناسه تلگرام...",
           "alreadyReferred": "قبلاً معرفی شده",
           "noUsersFound": "کاربری یافت نشد"
+        },
+        "actions": {
+          "areYouSure": "آیا مطمئنید می‌خواهید ادامه دهید؟",
+          "title": "عملیات"
+        },
+        "noVpnData": "داده‌ای از VPN وجود ندارد",
+        "activity": {
+          "total": "مجموع رویدادها",
+          "empty": "هنوز فعالیتی وجود ندارد",
+          "filters": {
+            "all": "همه",
+            "payments": "پرداخت‌ها",
+            "events": "رویدادها",
+            "promo": "تخفیف‌ها",
+            "tickets": "تیکت‌ها",
+            "gifts": "هدایا",
+            "referrals": "دعوت‌ها",
+            "logins": "ورودها",
+            "clicks": "کلیک‌ها"
+          },
+          "types": {
+            "transaction": "تراکنش",
+            "event": "رویداد",
+            "promocode": "کد تخفیف",
+            "coupon": "کوپن",
+            "ticket": "تیکت",
+            "wheel_spin": "گردونه شانس",
+            "poll": "نظرسنجی تکمیل شد",
+            "gift_sent": "هدیه ارسال شد",
+            "gift_received": "هدیه دریافت شد",
+            "referral_earning": "درآمد دعوت",
+            "cabinet_login": "ورود به پنل",
+            "withdrawal": "درخواست برداشت",
+            "button_click": "دکمه ربات",
+            "cabinet_action": "اقدام در پنل"
+          },
+          "sources": {
+            "bot": "ربات",
+            "cabinet": "پنل"
+          },
+          "subtypes": {
+            "deposit": "واریز",
+            "withdrawal": "برداشت",
+            "subscription_payment": "پرداخت اشتراک",
+            "refund": "بازپرداخت",
+            "failed_refund": "بازپرداخت ناموفق",
+            "referral_reward": "پاداش دعوت",
+            "poll_reward": "پاداش نظرسنجی",
+            "gift_payment": "پرداخت هدیه",
+            "activation": "فعال‌سازی",
+            "purchase": "خرید",
+            "subscription_purchase": "خرید اشتراک",
+            "renewal": "تمدید",
+            "balance_topup": "شارژ موجودی",
+            "promo_group_change": "تغییر گروه تخفیف",
+            "campaign_registration": "ثبت‌نام کمپین",
+            "referral_link_visit": "بازدید لینک دعوت",
+            "referral_registration": "ثبت‌نام دعوتی",
+            "trial_activation": "فعال‌سازی دوره آزمایشی",
+            "open": "باز",
+            "answered": "پاسخ داده شده",
+            "pending": "در انتظار",
+            "closed": "بسته",
+            "redeemed": "استفاده شده",
+            "approved": "تأیید شده",
+            "rejected": "رد شده",
+            "completed": "انجام شده",
+            "command": "دستور"
+          }
+        }
+      },
+      "notFound": "کاربر یافت نشد",
+      "purchaseCount": "تعداد خرید: {{count}}",
+      "sendMessage": {
+        "button": "✉️ ارسال پیام",
+        "title": "ارسال پیام به کاربر",
+        "placeholder": "متنی که ربات برای کاربر ارسال می‌کند (HTML پشتیبانی می‌شود)",
+        "send": "ارسال",
+        "sending": "در حال ارسال...",
+        "success": "پیام برای کاربر ارسال شد",
+        "noTelegram": "این کاربر فقط با ایمیل ثبت‌نام کرده و نمی‌تواند پیام تلگرام دریافت کند",
+        "errors": {
+          "no_telegram_id": "این کاربر فقط با ایمیل ثبت‌نام کرده و نمی‌تواند پیام تلگرام دریافت کند",
+          "forbidden": "کاربر ربات را مسدود کرده یا نمی‌تواند پیام دریافت کند",
+          "bad_request": "تلگرام پیام را رد کرد. متن (نشانه‌گذاری HTML) را بررسی کرده و دوباره تلاش کنید"
+        }
+      },
+      "userActions": {
+        "delete": "حذف کاربر",
+        "disable": "غیرفعال‌سازی",
+        "error": "انجام عملیات ناموفق بود",
+        "resetSubscription": "بازنشانی اشتراک",
+        "resetTrial": "بازنشانی دوره آزمایشی",
+        "success": {
+          "delete": "کاربر حذف شد",
+          "disable": "کاربر غیرفعال شد",
+          "resetSubscription": "اشتراک بازنشانی شد",
+          "resetTrial": "دوره آزمایشی بازنشانی شد"
         }
       }
     },
@@ -2829,7 +3323,8 @@
       "sendButton": "ارسال",
       "tabs": {
         "templates_other": "قالب‌ها ({{count}})",
-        "logs": "گزارش‌ها"
+        "logs": "گزارش‌ها",
+        "templates": "قالب‌ها"
       },
       "noData": {
         "templates": "قالبی وجود ندارد",
@@ -2859,7 +3354,9 @@
         "activeDiscountHours": "اعتبار تخفیف (ساعت)",
         "discountDurationHint": "مدت زمان اعتبار تخفیف پس از فعال‌سازی",
         "templateActive": "قالب فعال",
-        "saving": "در حال ذخیره..."
+        "saving": "در حال ذخیره...",
+        "noServers": "هیچ سروری وجود ندارد",
+        "testSquads": "تیم‌های آزمایشی"
       },
       "send": {
         "title": "ارسال پیشنهاد تبلیغاتی",
@@ -2882,7 +3379,11 @@
         "offersCreated_other": "پیشنهادات ایجاد شده: {{count}}",
         "notificationsSent_other": "اعلان‌های ارسال شده: {{count}}",
         "notificationsFailed": "(ناموفق: {{count}})",
-        "sendError": "ارسال پیشنهاد ناموفق بود"
+        "sendError": "ارسال پیشنهاد ناموفق بود",
+        "notificationsSent": "اعلان‌های ارسال شده",
+        "offersCreated": "پیشنهادهای ایجاد شده",
+        "deliveryTitle": "تحویل در تلگرام",
+        "openAsBroadcast": "نمایش به‌عنوان ارسال گروهی"
       },
       "notFound": "قالب یافت نشد",
       "noActiveTemplates": "قالب فعالی وجود ندارد",
@@ -2933,7 +3434,7 @@
       "connected": "متصل",
       "disconnected": "تنظیم نشده",
       "noData": "بارگذاری داده‌ها ناموفق بود",
-      "title": "RemnaWave",
+      "title": "Remnawave",
       "subtitle": "مدیریت پنل و آمار",
       "tabs": {
         "overview": "نمای کلی",
@@ -2971,10 +3472,52 @@
           "offline": "آفلاین",
           "disabled": "غیرفعال",
           "users": "کاربران"
+        },
+        "usersOnlineCount": "{{count}} آنلاین"
+      },
+      "geoCheck": {
+        "title": "GeoCheck",
+        "start": "اجرای بررسی",
+        "running": "در حال بررسی موقعیت جغرافیایی",
+        "runningHint": "نود در حال آزمایش اتصال است — معمولاً تا یک دقیقه طول می‌کشد.",
+        "changeRoute": "تغییر مسیر",
+        "rerun": "اجرای دوباره",
+        "reportAlt": "گزارش GeoCheck برای {{node}}",
+        "invalidIp": "یک نشانی معتبر IPv4 یا IPv6 وارد کنید",
+        "invalidInterface": "یک نام رابط شبکه معتبر وارد کنید",
+        "fullscreen": "تمام‌صفحه",
+        "exitFullscreen": "خروج از تمام‌صفحه",
+        "copyJson": "کپی گزارش JSON",
+        "download": "دانلود SVG",
+        "zoomIn": "بزرگ‌نمایی",
+        "zoomOut": "کوچک‌نمایی",
+        "zoomReset": "بازنشانی بزرگ‌نمایی",
+        "mode": {
+          "legend": "مسیر بررسی",
+          "default": "پیش‌فرض",
+          "ip": "نشانی IP",
+          "interface": "رابط شبکه"
+        },
+        "hint": {
+          "default": "نود از مسیر خروجی پیش‌فرض خود استفاده می‌کند.",
+          "ip": "یکی از نشانی‌های نود را انتخاب کنید یا هر نشانی دلخواه را وارد کنید.",
+          "interface": "یکی از رابط‌های نود را انتخاب کنید یا هر نامی را وارد کنید."
+        },
+        "placeholder": {
+          "default": "خودکار"
+        },
+        "tab": {
+          "report": "گزارش",
+          "json": "JSON"
+        },
+        "error": {
+          "title": "بررسی ناموفق بود",
+          "timeout": "نود به‌موقع پاسخ نداد. دوباره بررسی را اجرا کنید.",
+          "generic": "انجام بررسی ممکن نشد."
         }
       },
       "overview": {
-        "bandwidth": "پهنای باند لحظه‌ای",
+        "bandwidth": "ترافیک ورودی‌ها",
         "connections": "اتصالات",
         "cpu": "هسته‌های CPU",
         "download": "دانلود",
@@ -3022,7 +3565,9 @@
         "localSettings": "تنظیمات محلی",
         "trialEligible": "واجد شرایط آزمایشی",
         "price": "قیمت",
-        "users": "کاربران"
+        "users": "کاربران",
+        "inboundsCount": "{{count}} ورودی",
+        "membersCount": "{{count}} عضو"
       },
       "sync": {
         "autoSync": "همگام‌سازی خودکار",
@@ -3038,9 +3583,9 @@
         "success": "موفق",
         "runAutoSyncNow": "اجرای همگام‌سازی خودکار",
         "fromPanel": "از پنل",
-        "fromPanelDesc": "وارد کردن کاربران از RemnaWave به ربات",
+        "fromPanelDesc": "وارد کردن کاربران از Remnawave به ربات",
         "toPanel": "به پنل",
-        "toPanelDesc": "صادر کردن کاربران از ربات به RemnaWave"
+        "toPanelDesc": "صادر کردن کاربران از ربات به Remnawave"
       }
     },
     "theme": {
@@ -3147,7 +3692,8 @@
         "selectedPermissions_other": "{{count}} مجوز انتخاب شده",
         "cancel": "لغو",
         "saving": "در حال ذخیره...",
-        "save": "ذخیره"
+        "save": "ذخیره",
+        "selectedPermissions": "مجوزهای انتخاب‌شده"
       },
       "presets": {
         "moderator": "مدیر محتوا",
@@ -3167,7 +3713,9 @@
         "updateFailed": "به‌روزرسانی نقش ناموفق بود",
         "nameRequired": "نام نقش الزامی است",
         "deleteFailed": "حذف نقش ناموفق بود"
-      }
+      },
+      "permissionsCount": "{{count}} مجوز",
+      "usersCount": "{{count}} کاربر"
     },
     "roleAssign": {
       "title": "تخصیص نقش",
@@ -3219,7 +3767,8 @@
         "roleRequired": "لطفاً یک نقش انتخاب کنید",
         "assignFailed": "تخصیص نقش ناموفق بود",
         "revokeFailed": "لغو نقش ناموفق بود"
-      }
+      },
+      "totalAssignments": "مجموع انتساب‌ها: {{count}}"
     },
     "policies": {
       "title": "سیاست‌های دسترسی",
@@ -3286,7 +3835,8 @@
         "day3": "چهارشنبه",
         "day4": "پنجشنبه",
         "day5": "جمعه",
-        "day6": "شنبه"
+        "day6": "شنبه",
+        "ipCount": "تعداد آی‌پی"
       },
       "confirm": {
         "title": "حذف سیاست؟",
@@ -3368,7 +3918,10 @@
         "justNow": "همین الان",
         "minutesAgo_other": "{{count}} دقیقه پیش",
         "hoursAgo_other": "{{count}} ساعت پیش",
-        "daysAgo_other": "{{count}} روز پیش"
+        "daysAgo_other": "{{count}} روز پیش",
+        "daysAgo": "{{count}} روز پیش",
+        "hoursAgo": "{{count}} ساعت پیش",
+        "minutesAgo": "{{count}} دقیقه پیش"
       },
       "pagination": {
         "pageSize": "در هر صفحه:",
@@ -3381,7 +3934,8 @@
       "errors": {
         "loadFailed": "بارگذاری گزارش بازرسی ناموفق بود",
         "retry": "تلاش مجدد"
-      }
+      },
+      "totalEntries": "مجموع موارد: {{count}}"
     },
     "landings": {
       "title": "صفحات فرود",
@@ -3466,6 +4020,12 @@
         "dailyChart": "خرید و درآمد روزانه",
         "tariffChart": "توزیع طرح‌ها",
         "giftBreakdown": "هدایا در مقابل عادی",
+        "funnelTitle": "قیف تبدیل",
+        "giftClaimTitle": "فعال‌سازی هدیه",
+        "giftClaimLabel": "دریافت‌شده / ارسال‌شده",
+        "dailyRevenue": "درآمد روزانه",
+        "byPaymentMethod": "بر اساس روش پرداخت",
+        "bySource": "منابع ترافیک",
         "purchases": "خریدها",
         "revenueLabel": "درآمد",
         "gifts": "هدایا",
@@ -3475,7 +4035,8 @@
         "funnel": "قیف",
         "loadError": "بارگذاری آمار ناموفق بود",
         "noPurchases": "خریدی وجود ندارد",
-        "paid": "پرداخت شده"
+        "paid": "پرداخت شده",
+        "dailyPurchases": "خریدهای روزانه"
       },
       "purchases": {
         "title": "خریدها",
@@ -3501,7 +4062,16 @@
         "page": "صفحه {{current}} از {{total}}",
         "prev": "قبلی",
         "next": "بعدی"
-      }
+      },
+      "methodCurrency": "ارز",
+      "methodDescPlaceholder": "توضیح کوتاه برای کاربر",
+      "methodDescription": "توضیحات روش",
+      "methodDisplayName": "نام نمایشی",
+      "methodIconUrl": "آدرس نماد",
+      "methodMaxAmount": "حداکثر مبلغ",
+      "methodMinAmount": "حداقل مبلغ",
+      "methodReturnUrl": "آدرس بازگشت",
+      "stickyPayButton": "دکمه پرداخت ثابت"
     },
     "infoPages": {
       "title": "صفحات اطلاعات",
@@ -3529,7 +4099,8 @@
         "sortOrder": "ترتیب",
         "icon": "آیکون (ایموجی)",
         "pageType": "نوع صفحه",
-        "replacesTab": "جایگزینی تب"
+        "replacesTab": "جایگزینی تب",
+        "displayMode": "نمایش"
       },
       "replacesTabNone": "بدون جایگزینی",
       "replacesTabOptions": {
@@ -3571,6 +4142,11 @@
         "en": "انگلیسی",
         "zh": "چینی",
         "fa": "فارسی"
+      },
+      "displayModes": {
+        "bot": "فقط ربات",
+        "web": "فقط وب",
+        "both": "ربات و وب"
       }
     },
     "bulkActions": {
@@ -3597,13 +4173,15 @@
         "deleteUser": "حذف کاربران"
       },
       "deleteSubscription": {
-        "warning": "اشتراک‌های انتخاب شده برای همیشه از ربات و پنل RemnaWave حذف خواهند شد!",
-        "hint": "کاربران دسترسی VPN اشتراک‌های حذف شده را از دست خواهند داد. این عملیات قابل بازگشت نیست."
+        "warning": "اشتراک‌های انتخاب شده برای همیشه از ربات و پنل Remnawave حذف خواهند شد!",
+        "hint": "کاربران دسترسی VPN اشتراک‌های حذف شده را از دست خواهند داد. این عملیات قابل بازگشت نیست.",
+        "activePaidWarning": "{{count}} از {{total}} اشتراک انتخاب‌شده اشتراک‌های فعال پرداختی هستند",
+        "forceDeleteConfirm": "حذف اشتراک‌های فعال پرداختی را تأیید می‌کنم"
       },
       "deleteUser": {
         "warning": "کاربران انتخاب شده برای همیشه از ربات حذف خواهند شد! تمام اشتراک‌ها، موجودی و داده‌های آن‌ها از بین خواهد رفت!",
         "hint": "این عملیات قابل بازگشت نیست. کاربران باید ربات را دوباره راه‌اندازی کنند تا حساب جدید بسازند.",
-        "deleteFromPanel": "همچنین از پنل RemnaWave حذف شود"
+        "deleteFromPanel": "همچنین از پنل Remnawave حذف شود"
       },
       "params": {
         "days": "تعداد روز",
@@ -3634,7 +4212,7 @@
         "summaryErrors": "{{count}} خطا"
       },
       "errors": {
-        "title": "{{count}} خطا — نمایش جزئیات"
+        "title": "{{count}} خطا. نمایش جزئیات"
       },
       "filters": {
         "search": "جستجو بر اساس شناسه، نام کاربری، ایمیل",
@@ -3679,6 +4257,44 @@
       "trafficGbUnit": "GB",
       "selectAllSubs": "انتخاب همه اشتراک‌ها",
       "deselectAllSubs": "لغو انتخاب همه اشتراک‌ها"
+    },
+    "legalPages": {
+      "title": "صفحات سیستمی",
+      "subtitle": "قوانین، سیاست حریم خصوصی، پیشنهاد عمومی و FAQ",
+      "open": "صفحات سیستمی",
+      "tabs": {
+        "privacy": "حریم خصوصی",
+        "offer": "پیشنهاد",
+        "recurrent": "پرداخت‌های تکراری",
+        "rules": "قوانین",
+        "faq": "FAQ"
+      },
+      "displayMode": "نمایش",
+      "displayModes": {
+        "bot": "فقط ربات",
+        "web": "فقط وب",
+        "both": "ربات و وب"
+      },
+      "displayModeLocked": "از طریق متغیر محیطی تنظیم شده",
+      "enabled": "نمایش به کاربران",
+      "language": "زبان محتوا",
+      "content": "متن",
+      "contentPlaceholder": "متن HTML صفحه...",
+      "save": "ذخیره",
+      "saving": "در حال ذخیره...",
+      "saveError": "ذخیره ناموفق بود. لطفاً دوباره تلاش کنید.",
+      "unsavedWarning": "تغییرات ذخیره‌نشده از بین می‌رود. ادامه می‌دهید؟",
+      "faqPages": "سوالات و پاسخ‌ها",
+      "addQuestion": "افزودن سوال",
+      "newQuestion": "سوال جدید",
+      "questionTitle": "سوال",
+      "questionContent": "پاسخ (HTML پشتیبانی می‌شود)",
+      "confirmDeleteQuestion": "این سوال حذف شود؟",
+      "noQuestions": "هنوز سوالی وجود ندارد",
+      "active": "فعال",
+      "moveUp": "انتقال به بالا",
+      "moveDown": "انتقال به پایین",
+      "delete": "حذف"
     }
   },
   "adminUpdates": {
@@ -3719,7 +4335,8 @@
       "enable": "فعال",
       "disable": "غیرفعال",
       "hide": "پنهان کردن ({{count}})",
-      "showMore_other": "نمایش {{count}} گره بیشتر"
+      "showMore_other": "نمایش {{count}} گره بیشتر",
+      "showMore": "نمایش بیشتر"
     },
     "revenue": {
       "title": "درآمد",
@@ -3783,6 +4400,16 @@
       "uptime": "آپتایم",
       "users": "کاربران",
       "activeSubs": "اشتراک‌ها"
+    },
+    "tariffs": {
+      "activeSubscriptions": "اشتراک‌های فعال",
+      "purchasedMonth": "فروش ماه",
+      "purchasedToday": "فروش امروز",
+      "purchasedWeek": "فروش هفته",
+      "subtitle": "آمار به تفکیک تعرفه",
+      "tariffName": "نام تعرفه",
+      "title": "آمار تعرفه‌ها",
+      "trialSubscriptions": "اشتراک‌های آزمایشی"
     }
   },
   "profile": {
@@ -3882,8 +4509,15 @@
         "discord": "دیسکورد",
         "vk": "VK",
         "apple": "Apple"
-      }
-    }
+      },
+      "backToAccounts": "بازگشت به فهرست حساب‌ها"
+    },
+    "emailMergePasswordRequired": "این ایمیل قبلاً به حساب دیگری تعلق دارد. برای ادغام حساب‌ها، رمز عبور آن حساب را وارد کنید.",
+    "emailMergeCodeSent": "کد تأیید به آن ایمیل ارسال شد.",
+    "emailMergeCodeDescription": "این ایمیل قبلاً به حساب دیگری تعلق دارد. کدی به آن ارسال کردیم — برای تأیید مالکیت و ادغام حساب‌ها آن را وارد کنید.",
+    "emailMergeCodeLabel": "کد ارسال‌شده در ایمیل",
+    "emailMergeConfirm": "تأیید و ادغام",
+    "emailMergeCodeInvalid": "کد نامعتبر یا منقضی‌شده"
   },
   "theme": {
     "colors": "رنگ‌های تم",
@@ -4033,7 +4667,8 @@
       "warning": "کد تخفیف لغو شده قابل استفاده مجدد نیست. تخفیف بلافاصله متوقف می‌شود.",
       "confirm": "لغو تخفیف",
       "deactivating": "در حال لغو...",
-      "error": "لغو کد تخفیف ناموفق بود. لطفاً بعداً دوباره امتحان کنید."
+      "error": "لغو کد تخفیف ناموفق بود. لطفاً بعداً دوباره امتحان کنید.",
+      "success": "پیشنهاد غیرفعال شد"
     }
   },
   "telegramRedirect": {
@@ -4213,6 +4848,14 @@
       "openBot": "باز کردن ربات",
       "retry": "من /start را زدم، دوباره امتحان کن",
       "hint": "پس از اجرای /start، به اینجا بازگردید و «دوباره امتحان کنید» را بزنید."
+    },
+    "serviceUnavailable": {
+      "title": "سرویس در دسترس نیست",
+      "description": "در حال حاضر امکان اتصال به سرویس وجود ندارد. ممکن است در حال تعمیر باشد یا مشکل موقتی در اتصال وجود داشته باشد.",
+      "retry": "تلاش مجدد",
+      "checking": "در حال بررسی اتصال...",
+      "hint": "به‌محض در دسترس قرار گرفتن سرویس، این صفحه به‌طور خودکار بازخوانی می‌شود.",
+      "close": "بستن"
     }
   },
   "merge": {
@@ -4243,6 +4886,36 @@
     "merging": "در حال ادغام..."
   },
   "landing": {
+    "giftClaim": {
+      "title": "شما یک هدیه دارید!",
+      "error": "فعال‌سازی هدیه ناموفق بود.",
+      "notFoundTitle": "هدیه یافت نشد",
+      "notFoundDesc": "این لینک هدیه نامعتبر یا دیگر در دسترس نیست.",
+      "alreadyTitle": "هدیه قبلاً فعال شده است",
+      "alreadyDesc": "این هدیه قبلاً دریافت شده است.",
+      "successTitle": "هدیه فعال شد!",
+      "connectDesc": "از این لینک برای اتصال استفاده کنید:",
+      "copyLink": "کپی لینک",
+      "pendingTitle": "تقریباً آماده است…",
+      "pendingDesc": "پرداخت در حال تأیید است. این صفحه به‌طور خودکار به‌روزرسانی می‌شود.",
+      "replaceWarning": "شما در حال حاضر اشتراک دارید — فعال‌سازی این هدیه جایگزین آن خواهد شد.",
+      "activateTelegram": "فعال‌سازی در تلگرام",
+      "activateWeb": "فعال‌سازی با ایمیل",
+      "emailLabel": "ایمیل شما",
+      "claimNow": "دریافت هدیه",
+      "failedTitle": "هدیه در دسترس نیست",
+      "failedDesc": "پرداخت این هدیه انجام نشد، بنابراین قابل فعال‌سازی نیست."
+    },
+    "giftLink": {
+      "shareText": "یک هدیه برای شما دارم! اینجا فعال کنید:",
+      "viaTelegram": "تلگرام:",
+      "title": "هدیه آماده است!",
+      "subtitle": "این لینک را برای کسی که می‌خواهید هدیه را دریافت کند بفرستید — خودش آن را فعال می‌کند.",
+      "linkLabel": "لینک هدیه",
+      "telegramLabel": "لینک تلگرام",
+      "alsoSent": "آن را به {{contact}} نیز ایمیل کردیم.",
+      "copyMessage": "کپی پیام"
+    },
     "notFound": "صفحه یافت نشد",
     "forMe": "برای خودم",
     "asGift": "به عنوان هدیه",
@@ -4321,6 +4994,12 @@
       "d456": "۱ سال و ۳ ماه",
       "nDays": "{{count}} روز",
       "nMonths": "{{count}} ماه"
+    },
+    "discount": {
+      "days": "روز",
+      "hours": "ساعت",
+      "minutes": "دقیقه",
+      "seconds": "ثانیه"
     }
   },
   "gift": {
@@ -4379,7 +5058,51 @@
     },
     "warning": {
       "telegram_unresolvable": "نام کاربری تلگرام قابل تأیید نبود. ممکن است گیرنده اعلان هدیه را دریافت نکند."
-    }
+    },
+    "activateButton": "فعال‌سازی",
+    "activateCodePlaceholder": "کد هدیه را وارد کنید",
+    "activatedBy": "توسط {{username}} فعال شد",
+    "activateDescription": "برای فعال‌سازی اشتراک، کد هدیه دریافتی را وارد کنید",
+    "activatedGiftsTitle": "هدایای فعال‌شده",
+    "activateError": "فعال‌سازی هدیه ناموفق بود",
+    "activateSelfError": "نمی‌توانید هدیه خودتان را فعال کنید",
+    "activateSuccess": "هدیه فعال شد!",
+    "activateSuccessDesc": "{{tariff}}: {{days}} روز به اشتراک شما اضافه شد",
+    "activateTitle": "فعال‌سازی هدیه",
+    "activeGiftsTitle": "هدایای فعال",
+    "codeLabel": "کد هدیه",
+    "codeReadyTitle": "کد هدیه شما آماده است",
+    "copyMessage": "کپی پیام",
+    "daysShort": "روز",
+    "deviceCount": "{{count}} دستگاه",
+    "devicesShort": "دستگاه",
+    "gbShort": "گیگابایت",
+    "myGiftsEmpty": "هنوز هدیه‌ای ندارید",
+    "myGiftsEmptyDesc": "برای یک دوست هدیه بخرید یا کد دریافتی را فعال کنید",
+    "pageTitle": "هدایا",
+    "receivedGiftsTitle": "هدایای دریافت‌شده",
+    "selectPeriod": "دوره را انتخاب کنید",
+    "selectTariff": "تعرفه را انتخاب کنید",
+    "sentTo": "به {{recipient}} ارسال شد",
+    "shareGift": "به اشتراک گذاشتن هدیه",
+    "shareModalActivateVia": "فعال‌سازی از طریق ربات:",
+    "shareModalActivateViaCabinet": "از طریق کابین",
+    "shareText": "برای تو یک هدیهٔ Bedolaga VPN دارم، از همین‌جا فعالش کن:",
+    "shareToastCopied": "لینک کپی شد",
+    "statusActivated": "فعال شده",
+    "statusAvailable": "قابل فعال‌سازی",
+    "tabActivate": "فعال‌سازی",
+    "tabBuy": "خرید",
+    "tabMyGifts": "هدایای من",
+    "unlimitedTraffic": "ترافیک نامحدود",
+    "qrHint": "برای فعال‌سازی هدیه اسکن کنید",
+    "scanButton": "📷 اسکن QR",
+    "scanInProgress": "در حال اسکن…",
+    "scanCancel": "توقف اسکن",
+    "scanDescription": "دوربین را روی کد QR هدیه بگیرید",
+    "scanNotRecognized": "در این QR کد هدیه‌ای نیست",
+    "scanError": "اسکن ناموفق بود",
+    "scanNoCamera": "دوربین در دسترس نیست — کد را دستی وارد کنید"
   },
   "news": {
     "title": "اخبار و به‌روزرسانی‌ها",
@@ -4448,5 +5171,18 @@
     "dismiss": "بستن",
     "appStore": "App Store",
     "googlePlay": "Google Play"
+  },
+  "subscriptions": {
+    "buy": "خرید اشتراک",
+    "buyAnother": "خرید دیگر",
+    "browsePlans": "مشاهده تعرفه‌ها و خرید اشتراک",
+    "empty": "هنوز اشتراکی ندارید",
+    "emptyDesc": "برای شروع تعرفه‌ای انتخاب کنید",
+    "title": "اشتراک‌های من"
+  },
+  "footer": {
+    "offer": "پیشنهاد عمومی",
+    "privacy": "سیاست حفظ حریم خصوصی",
+    "recurrent": "پرداخت‌های مکرر"
   }
 }

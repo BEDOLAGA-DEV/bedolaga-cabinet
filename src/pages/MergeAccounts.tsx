@@ -1,3 +1,4 @@
+import { uiLocale } from '@/utils/uiLocale';
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router';
 import { useTranslation } from 'react-i18next';
@@ -88,7 +89,7 @@ function formatCountdown(seconds: number): string {
 function formatDate(dateStr: string | null): string {
   if (!dateStr) return '-';
   try {
-    return new Date(dateStr).toLocaleDateString(undefined, {
+    return new Date(dateStr).toLocaleDateString(uiLocale(), {
       day: 'numeric',
       month: 'long',
       year: 'numeric',
@@ -99,7 +100,7 @@ function formatDate(dateStr: string | null): string {
 }
 
 function formatBalance(kopeks: number): string {
-  return Math.floor(kopeks / 100).toLocaleString();
+  return Math.floor(kopeks / 100).toLocaleString(uiLocale());
 }
 
 // -- Radio Indicator --

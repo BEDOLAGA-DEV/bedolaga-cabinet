@@ -21,10 +21,55 @@ export interface SystemSummary {
   total_users: number;
   active_connections: number;
   nodes_online: number;
+  total_nodes: number;
   users_last_day: number;
   users_last_week: number;
   users_never_online: number;
   total_user_traffic: number;
+}
+
+// Panel recap / devices / top consumers
+export interface RecapResponse {
+  version: string | null;
+  init_date: string | null;
+  total: {
+    users: number;
+    nodes: number;
+    traffic_bytes: number;
+    nodes_ram_bytes: number;
+    nodes_cpu_cores: number;
+    distinct_countries: number;
+  };
+  this_month: { users: number; traffic_bytes: number };
+}
+
+export interface DevicesStatsResponse {
+  by_platform: { platform: string; count: number }[];
+  by_app: { app: string; count: number }[];
+  top_users: { username: string; devices_count: number }[];
+  total_unique_devices: number;
+  total_hwid_devices: number;
+  average_devices_per_user: number;
+}
+
+export interface TopConsumersResponse {
+  period_days: number;
+  users: { username: string; total_bytes: number }[];
+}
+
+export interface HealthResponse {
+  instances: number;
+  rss_bytes: number;
+  heap_used_bytes: number;
+  heap_total_bytes: number;
+  event_loop_delay_ms: number;
+  event_loop_p99_ms: number;
+  uptime_seconds: number;
+  instance_id: string | null;
+}
+
+export interface SubscriptionRequestStatsResponse {
+  by_app: { app: string; count: number }[];
 }
 
 export interface ServerInfo {
@@ -67,6 +112,23 @@ export interface SystemStatsResponse {
 }
 
 // Nodes
+export type NodeIpStatus =
+  | 'INBOUND'
+  | 'OUTBOUND'
+  | 'MANAGEMENT'
+  | 'TRANSIT'
+  | 'MONITORING'
+  | 'RESERVE'
+  | 'BLOCKED'
+  | 'FLAGGED'
+  | 'DEPRECATED'
+  | 'UNKNOWN';
+
+export interface NodeIpAddress {
+  ip: string;
+  status: NodeIpStatus;
+}
+
 export interface NodeInfo {
   uuid: string;
   name: string;
@@ -89,6 +151,8 @@ export interface NodeInfo {
   created_at?: string;
   updated_at?: string;
   provider_uuid?: string;
+  provider_name?: string | null;
+  provider_favicon?: string | null;
   versions?: { xray: string; node: string } | null;
   system?: {
     info: {
@@ -118,6 +182,8 @@ export interface NodeInfo {
     };
   } | null;
   active_plugin_uuid?: string;
+  /** Адреса узла из панели — варианты исходного адреса для GeoCheck. */
+  ips?: NodeIpAddress[];
   config_profile?: {
     active_config_profile_uuid: string | null;
     active_inbounds: Array<{
@@ -157,6 +223,40 @@ export interface NodeActionResponse {
   success: boolean;
   message?: string;
   is_disabled?: boolean;
+}
+
+// GeoCheck (Remnawave 3.3.0)
+/** С какого маршрута гнать проверку: пусто — маршрут узла по умолчанию. */
+export interface GeoCheckRequest {
+  ip?: string;
+  interface?: string;
+}
+
+export interface GeoCheckStartResponse {
+  job_id: string;
+}
+
+/** SVG-отчёт в base64, готовый для data: URL. */
+export interface GeoCheckImage {
+  format: string;
+  media_type: string;
+  encoding: string;
+  data: string;
+}
+
+export interface GeoCheckResult {
+  success: boolean;
+  node_uuid?: string | null;
+  image?: GeoCheckImage | null;
+  raw_report?: Record<string, unknown> | null;
+  message?: string | null;
+}
+
+export interface GeoCheckJobResponse {
+  job_id: string;
+  is_completed: boolean;
+  is_failed: boolean;
+  result?: GeoCheckResult | null;
 }
 
 // Realtime Traffic
@@ -292,6 +392,34 @@ export const adminRemnawaveApi = {
     return response.data;
   },
 
+  // Panel recap / devices / top consumers
+  getRecap: async (): Promise<RecapResponse> => {
+    const response = await apiClient.get('/cabinet/admin/remnawave/recap');
+    return response.data;
+  },
+
+  getDevicesStats: async (): Promise<DevicesStatsResponse> => {
+    const response = await apiClient.get('/cabinet/admin/remnawave/devices-stats');
+    return response.data;
+  },
+
+  getTopConsumers: async (days = 7, limit = 10): Promise<TopConsumersResponse> => {
+    const response = await apiClient.get('/cabinet/admin/remnawave/top-consumers', {
+      params: { days, limit },
+    });
+    return response.data;
+  },
+
+  getHealth: async (): Promise<HealthResponse> => {
+    const response = await apiClient.get('/cabinet/admin/remnawave/health');
+    return response.data;
+  },
+
+  getSubscriptionRequests: async (): Promise<SubscriptionRequestStatsResponse> => {
+    const response = await apiClient.get('/cabinet/admin/remnawave/subscription-requests');
+    return response.data;
+  },
+
   // Nodes
   getNodes: async (): Promise<NodesListResponse> => {
     const response = await apiClient.get('/cabinet/admin/remnawave/nodes');
@@ -325,6 +453,21 @@ export const adminRemnawaveApi = {
     const response = await apiClient.post(`/cabinet/admin/remnawave/nodes/${uuid}/action`, {
       action,
     });
+    return response.data;
+  },
+
+  /** Ставит GeoCheck ноды в очередь; результат забирается по job_id. */
+  startNodeGeoCheck: async (
+    uuid: string,
+    body: GeoCheckRequest = {},
+  ): Promise<GeoCheckStartResponse> => {
+    const response = await apiClient.post(`/cabinet/admin/remnawave/nodes/${uuid}/geocheck`, body);
+    return response.data;
+  },
+
+  /** Статус задачи GeoCheck — нода отвечает до минуты. */
+  getGeoCheckJob: async (jobId: string): Promise<GeoCheckJobResponse> => {
+    const response = await apiClient.get(`/cabinet/admin/remnawave/geocheck/${jobId}`);
     return response.data;
   },
 

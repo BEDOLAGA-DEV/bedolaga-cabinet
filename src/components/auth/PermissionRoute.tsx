@@ -58,7 +58,11 @@ export function PermissionRoute({
     }
 
     if (!hasAccess) {
-      return <Navigate to="/admin" replace />;
+      // Redirect back to the admin landing — unless we're already there
+      // (would loop) or the landing itself is what we lack permission for.
+      // Fall back to the user dashboard in that case.
+      const target = location.pathname === '/admin' ? '/' : '/admin';
+      return <Navigate to={target} replace />;
     }
   }
 

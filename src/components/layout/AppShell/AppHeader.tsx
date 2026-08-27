@@ -314,7 +314,10 @@ export function AppHeader({
           style={{ top: headerHeight + topOffset }}
         >
           {/* Backdrop */}
-          <div className="absolute inset-0 bg-black/60" onClick={() => setMobileMenuOpen(false)} />
+          <div
+            className="absolute inset-0 bg-dark-950/60"
+            onClick={() => setMobileMenuOpen(false)}
+          />
 
           {/* Menu content */}
           <div
@@ -344,9 +347,11 @@ export function AppHeader({
                   >
                     <UserIcon className="h-5 w-5" />
                   </div>
-                  <div>
-                    <div className="text-sm font-medium text-dark-100">{displayName(user)}</div>
-                    <div className="text-xs text-dark-500">
+                  <div className="min-w-0">
+                    <div className="truncate text-sm font-medium text-dark-100">
+                      {displayName(user)}
+                    </div>
+                    <div className="truncate text-xs text-dark-500">
                       @{user?.username || `ID: ${user?.telegram_id}`}
                     </div>
                   </div>

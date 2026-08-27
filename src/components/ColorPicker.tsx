@@ -281,6 +281,7 @@ export function ColorPicker({ value, onChange, label, description, disabled }: C
             max="360"
             value={hsl.h}
             onChange={handleHueChange}
+            aria-label="Hue"
             className="h-3 w-full cursor-pointer appearance-none rounded-full"
             style={{
               background:
@@ -301,6 +302,7 @@ export function ColorPicker({ value, onChange, label, description, disabled }: C
             max="100"
             value={hsl.s}
             onChange={handleSaturationChange}
+            aria-label="Saturation"
             className="h-3 w-full cursor-pointer appearance-none rounded-full"
             style={{
               background: `linear-gradient(to right, hsl(${hsl.h}, 0%, ${hsl.l}%), hsl(${hsl.h}, 100%, ${hsl.l}%))`,
@@ -320,6 +322,7 @@ export function ColorPicker({ value, onChange, label, description, disabled }: C
             max="100"
             value={hsl.l}
             onChange={handleLightnessChange}
+            aria-label="Lightness"
             className="h-3 w-full cursor-pointer appearance-none rounded-full"
             style={{
               background: `linear-gradient(to right, #000000, hsl(${hsl.h}, ${hsl.s}%, 50%), #ffffff)`,

@@ -27,6 +27,13 @@ export default defineConfig({
         // Strip /api prefix: /api/cabinet/auth -> /cabinet/auth
         rewrite: (path) => path.replace(/^\/api/, ''),
       },
+      // The backend serves its liveness endpoint at the host root (not under
+      // /api). Proxy it too so the "service unavailable" detection probe hits the
+      // real backend in dev instead of the Vite server (which would mask outages).
+      '/health': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+      },
     },
   },
   build: {
@@ -55,6 +62,10 @@ export default defineConfig({
           if (id.includes('twemoji') || id.includes('@twemoji/')) return 'vendor-twemoji';
           if (id.includes('/jsencrypt/') || id.includes('@kastov/')) return 'vendor-crypto';
           if (id.includes('@lottiefiles/')) return 'vendor-lottie';
+          // Heavy admin-only deps — split so they don't bloat the shared
+          // chunks of other lazy admin pages that don't use them.
+          if (id.includes('/recharts/') || id.includes('/d3-')) return 'vendor-recharts';
+          if (id.includes('@tiptap/') || id.includes('/prosemirror-')) return 'vendor-tiptap';
           if (
             id.includes('/axios/') ||
             id.includes('/zustand/') ||

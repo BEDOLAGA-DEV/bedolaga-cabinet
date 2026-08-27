@@ -1,208 +1,39 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
-import {
-  statsApi,
-  type DashboardStats,
-  type NodeStatus,
-  type SystemInfo,
-  type TopReferrersResponse,
-  type TopCampaignsResponse,
-  type RecentPaymentsResponse,
-} from '../api/admin';
+import { useQuery } from '@tanstack/react-query';
+import { statsApi, type NodeStatus } from '../api/admin';
 import { formatUptime } from '../utils/format';
 
 const CABINET_VERSION = __APP_VERSION__;
 import { useCurrency } from '../hooks/useCurrency';
 import { usePlatform } from '../platform/hooks/usePlatform';
 
-// Icons - styled like main navigation
-
-const BackIcon = () => (
-  <svg
-    className="h-5 w-5 text-dark-400"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={2}
-  >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-  </svg>
-);
-
-const ServerIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M21.75 17.25v-.228a4.5 4.5 0 00-.12-1.03l-2.268-9.64a3.375 3.375 0 00-3.285-2.602H7.923a3.375 3.375 0 00-3.285 2.602l-2.268 9.64a4.5 4.5 0 00-.12 1.03v.228m19.5 0a3 3 0 01-3 3H5.25a3 3 0 01-3-3m19.5 0a3 3 0 00-3-3H5.25a3 3 0 00-3 3m16.5 0h.008v.008h-.008v-.008zm-3 0h.008v.008h-.008v-.008z"
-    />
-  </svg>
-);
-
-const UsersOnlineIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"
-    />
-  </svg>
-);
-
-const WalletIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M21 12a2.25 2.25 0 00-2.25-2.25H15a3 3 0 11-6 0H5.25A2.25 2.25 0 003 12m18 0v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6m18 0V9M3 12V9m18 0a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 9m18 0V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v3"
-    />
-  </svg>
-);
-
-const ChartBarIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"
-    />
-  </svg>
-);
-
-const SparklesIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z"
-    />
-  </svg>
-);
-
-const TagIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z"
-    />
-    <path strokeLinecap="round" strokeLinejoin="round" d="M6 6h.008v.008H6V6z" />
-  </svg>
-);
-
-const RefreshIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"
-    />
-  </svg>
-);
-
-const PowerIcon = () => (
-  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M5.636 5.636a9 9 0 1012.728 0M12 3v9" />
-  </svg>
-);
-
-const RestartIcon = () => (
-  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"
-    />
-  </svg>
-);
-
-const ChevronDownIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-  </svg>
-);
-
-const UsersIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"
-    />
-  </svg>
-);
-
-const MegaphoneIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 110-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783.247.55.06 1.21-.463 1.511l-.657.38c-.551.318-1.26.117-1.527-.461a20.845 20.845 0 01-1.44-4.282m3.102.069a18.03 18.03 0 01-.59-4.59c0-1.586.205-3.124.59-4.59m0 9.18a23.848 23.848 0 018.835 2.535M10.34 6.66a23.847 23.847 0 008.835-2.535m0 0A23.74 23.74 0 0018.795 3m.38 1.125a23.91 23.91 0 011.014 5.395m-1.014 8.855c-.118.38-.245.754-.38 1.125m.38-1.125a23.91 23.91 0 001.014-5.395m0-3.46c.495.413.811 1.035.811 1.73 0 .695-.316 1.317-.811 1.73m0-3.46a24.347 24.347 0 010 3.46"
-    />
-  </svg>
-);
-
-const BanknotesIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z"
-    />
-  </svg>
-);
-
-const ExclamationIcon = () => (
-  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
-    />
-  </svg>
-);
-
-interface StatCardProps {
-  title: string;
-  value: string | number;
-  subtitle?: string;
-  icon: React.ReactNode;
-  color: 'accent' | 'success' | 'warning' | 'error' | 'info';
-  trend?: {
-    value: number;
-    label: string;
-  };
-}
-
-function StatCard({ title, value, subtitle, icon, color, trend }: StatCardProps) {
-  const colorClasses = {
-    accent: 'bg-accent-500/20 text-accent-400',
-    success: 'bg-success-500/20 text-success-400',
-    warning: 'bg-warning-500/20 text-warning-400',
-    error: 'bg-error-500/20 text-error-400',
-    info: 'bg-info-500/20 text-info-400',
-  };
-
-  return (
-    <div className="rounded-xl border border-dark-700 bg-dark-800/50 p-5 backdrop-blur transition-colors hover:border-dark-600">
-      <div className="mb-3 flex items-start justify-between">
-        <div className={`rounded-lg p-2.5 ${colorClasses[color]}`}>{icon}</div>
-        {trend && (
-          <div
-            className={`rounded-full px-2 py-1 text-xs ${trend.value >= 0 ? 'bg-success-500/20 text-success-400' : 'bg-error-500/20 text-error-400'}`}
-          >
-            {trend.value >= 0 ? '+' : ''}
-            {trend.value}% {trend.label}
-          </div>
-        )}
-      </div>
-      <div className="mb-1 text-2xl font-bold text-dark-100">{value}</div>
-      <div className="text-sm text-dark-400">{title}</div>
-      {subtitle && <div className="mt-1 text-xs text-dark-500">{subtitle}</div>}
-    </div>
-  );
-}
+import { StatCard } from '@/components/stats';
+import {
+  BackIcon,
+  BanknotesIcon,
+  CalendarBlankIcon,
+  CalendarIcon,
+  ChartBarIcon,
+  CheckCircleIcon,
+  ChevronDownIcon,
+  ClockIcon,
+  CreditCardIcon,
+  ExclamationIcon,
+  MegaphoneIcon,
+  PowerIcon,
+  RefreshIcon,
+  RestartIcon,
+  ServerIcon,
+  SparklesIcon,
+  StarIcon,
+  TagIcon,
+  UsersIcon,
+  UsersOnlineIcon,
+  WalletIcon,
+  XCircleIcon,
+} from '@/components/icons';
 
 interface NodeCardProps {
   node: NodeStatus;
@@ -237,7 +68,7 @@ function NodeCard({ node, onRestart, onToggle, isLoading }: NodeCardProps) {
 
   return (
     <div
-      className={`rounded-xl border bg-dark-800/50 backdrop-blur ${node.is_disabled ? 'border-dark-700' : node.is_connected ? 'border-success-500/30' : 'border-error-500/30'} p-4 transition-colors hover:border-dark-600`}
+      className={`rounded-xl border bg-dark-800/50 ${node.is_disabled ? 'border-dark-700' : node.is_connected ? 'border-success-500/30' : 'border-error-500/30'} p-4 transition-colors hover:border-dark-600`}
     >
       <div className="mb-3 flex items-start justify-between">
         <div className="flex items-center gap-3">
@@ -272,7 +103,7 @@ function NodeCard({ node, onRestart, onToggle, isLoading }: NodeCardProps) {
       {hasError && (
         <div className="mb-3 rounded-lg border border-error-500/20 bg-error-500/10 p-2">
           <div className="flex items-start gap-2">
-            <ExclamationIcon />
+            <ExclamationIcon className="h-4 w-4" />
             <span className="break-all text-xs text-error-400">{node.last_status_message}</span>
           </div>
         </div>
@@ -303,7 +134,7 @@ function NodeCard({ node, onRestart, onToggle, isLoading }: NodeCardProps) {
               : 'bg-warning-500/20 text-warning-400 hover:bg-warning-500/30'
           } disabled:opacity-50`}
         >
-          <PowerIcon />
+          <PowerIcon className="h-4 w-4" />
           {node.is_disabled ? t('adminDashboard.nodes.enable') : t('adminDashboard.nodes.disable')}
         </button>
         <button
@@ -311,7 +142,7 @@ function NodeCard({ node, onRestart, onToggle, isLoading }: NodeCardProps) {
           disabled={isLoading || node.is_disabled}
           className="flex items-center justify-center gap-1.5 rounded-lg bg-accent-500/20 px-3 py-2 text-sm font-medium text-accent-400 transition-colors hover:bg-accent-500/30 disabled:opacity-50"
         >
-          <RestartIcon />
+          <RestartIcon className="h-4 w-4" />
         </button>
       </div>
     </div>
@@ -370,67 +201,45 @@ export default function AdminDashboard() {
   const { formatAmount, currencySymbol } = useCurrency();
   const { capabilities } = usePlatform();
 
-  const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [showAllNodes, setShowAllNodes] = useState(false);
-
-  // Extended stats
-  const [referrers, setReferrers] = useState<TopReferrersResponse | null>(null);
-  const [campaigns, setCampaigns] = useState<TopCampaignsResponse | null>(null);
-  const [payments, setPayments] = useState<RecentPaymentsResponse | null>(null);
   const [referrersTab, setReferrersTab] = useState<'earnings' | 'invited'>('earnings');
-  const [systemInfo, setSystemInfo] = useState<SystemInfo | null>(null);
 
-  const fetchStats = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await statsApi.getDashboardStats();
-      setStats(data);
-    } catch (err) {
-      setError(t('adminDashboard.loadError'));
-      console.error('Failed to load dashboard stats:', err);
-    } finally {
-      setLoading(false);
-    }
-  }, [t]);
+  // Data fetching via React Query: caching, dedupe, and auto-refetch every 30s
+  // (replaces the manual setInterval + useState + console.error pattern).
+  const statsQuery = useQuery({
+    queryKey: ['admin-dashboard-stats'] as const,
+    queryFn: () => statsApi.getDashboardStats(),
+    refetchInterval: 30_000,
+  });
+  const stats = statsQuery.data ?? null;
+  const loading = statsQuery.isLoading;
+  const error = statsQuery.isError ? t('adminDashboard.loadError') : null;
 
-  const fetchExtendedStats = useCallback(async () => {
-    try {
-      const [referrersData, campaignsData, paymentsData, sysInfoData] = await Promise.all([
+  const extendedQuery = useQuery({
+    queryKey: ['admin-dashboard-extended'] as const,
+    queryFn: async () => {
+      const [topReferrers, topCampaigns, recentPayments, sysInfo] = await Promise.all([
         statsApi.getTopReferrers(10),
         statsApi.getTopCampaigns(10),
         statsApi.getRecentPayments(20),
         statsApi.getSystemInfo(),
       ]);
-      setReferrers(referrersData);
-      setCampaigns(campaignsData);
-      setPayments(paymentsData);
-      setSystemInfo(sysInfoData);
-    } catch (err) {
-      console.error('Failed to load extended stats:', err);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchStats();
-    fetchExtendedStats();
-    // Refresh every 30 seconds
-    const interval = setInterval(() => {
-      fetchStats();
-      fetchExtendedStats();
-    }, 30000);
-    return () => clearInterval(interval);
-  }, [fetchStats, fetchExtendedStats]);
+      return { topReferrers, topCampaigns, recentPayments, sysInfo };
+    },
+    refetchInterval: 30_000,
+  });
+  const referrers = extendedQuery.data?.topReferrers ?? null;
+  const campaigns = extendedQuery.data?.topCampaigns ?? null;
+  const payments = extendedQuery.data?.recentPayments ?? null;
+  const systemInfo = extendedQuery.data?.sysInfo ?? null;
 
   const handleRestartNode = async (uuid: string) => {
     try {
       setActionLoading(uuid);
       await statsApi.restartNode(uuid);
       // Refresh stats after action
-      setTimeout(fetchStats, 2000);
+      setTimeout(() => statsQuery.refetch(), 2000);
     } catch (err) {
       console.error('Failed to restart node:', err);
     } finally {
@@ -442,7 +251,7 @@ export default function AdminDashboard() {
     try {
       setActionLoading(uuid);
       await statsApi.toggleNode(uuid);
-      await fetchStats();
+      await statsQuery.refetch();
     } catch (err) {
       console.error('Failed to toggle node:', err);
     } finally {
@@ -462,7 +271,7 @@ export default function AdminDashboard() {
     return (
       <div className="flex h-64 flex-col items-center justify-center gap-4">
         <div className="text-error-400">{error}</div>
-        <button onClick={fetchStats} className="btn-primary">
+        <button onClick={() => statsQuery.refetch()} className="btn-primary">
           {t('common.loading')}
         </button>
       </div>
@@ -489,11 +298,11 @@ export default function AdminDashboard() {
           </div>
         </div>
         <button
-          onClick={fetchStats}
+          onClick={() => statsQuery.refetch()}
           disabled={loading}
           className="flex items-center gap-2 rounded-lg bg-dark-800 px-4 py-2 text-dark-300 transition-colors hover:bg-dark-700 hover:text-dark-100 disabled:opacity-50"
         >
-          <RefreshIcon />
+          <RefreshIcon className="h-5 w-5" />
           {t('adminDashboard.refresh')}
         </button>
       </div>
@@ -501,34 +310,34 @@ export default function AdminDashboard() {
       {/* Main Stats Grid */}
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
         <StatCard
-          title={t('adminDashboard.stats.usersOnline')}
+          label={t('adminDashboard.stats.usersOnline')}
           value={stats?.nodes.total_users_online || 0}
-          icon={<UsersOnlineIcon />}
-          color="success"
+          icon={<UsersOnlineIcon className="h-5 w-5" />}
+          tone="success"
         />
         <StatCard
-          title={t('adminDashboard.stats.activeSubscriptions')}
+          label={t('adminDashboard.stats.activeSubscriptions')}
           value={stats?.subscriptions.active || 0}
-          subtitle={`${t('adminDashboard.stats.total')}: ${stats?.subscriptions.total || 0}`}
-          icon={<SparklesIcon />}
-          color="accent"
+          subValue={`${t('adminDashboard.stats.total')}: ${stats?.subscriptions.total || 0}`}
+          icon={<SparklesIcon className="h-5 w-5" />}
+          tone="accent"
         />
         <StatCard
-          title={t('adminDashboard.stats.incomeToday')}
+          label={t('adminDashboard.stats.incomeToday')}
           value={`${formatAmount(stats?.financial.income_today_rubles || 0)} ${currencySymbol}`}
-          icon={<WalletIcon />}
-          color="warning"
+          icon={<WalletIcon className="h-5 w-5" />}
+          tone="warning"
         />
         <StatCard
-          title={t('adminDashboard.stats.incomeMonth')}
+          label={t('adminDashboard.stats.incomeMonth')}
           value={`${formatAmount(stats?.financial.income_month_rubles || 0)} ${currencySymbol}`}
-          icon={<ChartBarIcon />}
-          color="info"
+          icon={<ChartBarIcon className="h-5 w-5" />}
+          tone="accent"
         />
       </div>
 
       {/* Nodes Section */}
-      <div className="rounded-xl border border-dark-700 bg-dark-800/30 p-5 backdrop-blur">
+      <div className="rounded-xl border border-dark-700 bg-dark-800/30 p-5">
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="rounded-lg bg-accent-500/20 p-2.5 text-accent-400">
@@ -597,7 +406,7 @@ export default function AdminDashboard() {
       {/* Revenue and Subscriptions */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Revenue Chart */}
-        <div className="rounded-xl border border-dark-700 bg-dark-800/30 p-5 backdrop-blur">
+        <div className="rounded-xl border border-dark-700 bg-dark-800/30 p-5">
           <div className="mb-4 flex items-center gap-3">
             <div className="rounded-lg bg-warning-500/20 p-2.5 text-warning-400">
               <ChartBarIcon />
@@ -611,27 +420,23 @@ export default function AdminDashboard() {
           </div>
           <RevenueChart data={stats?.revenue_chart || []} />
           <div className="mt-4 grid grid-cols-2 gap-4 border-t border-dark-700 pt-4">
-            <div>
-              <div className="mb-1 text-xs text-dark-500">
-                {t('adminDashboard.stats.incomeTotal')}
-              </div>
-              <div className="text-xl font-bold text-dark-100">
-                {formatAmount(stats?.financial.income_total_rubles || 0)} {currencySymbol}
-              </div>
-            </div>
-            <div>
-              <div className="mb-1 text-xs text-dark-500">
-                {t('adminDashboard.stats.subscriptionIncome')}
-              </div>
-              <div className="text-xl font-bold text-accent-400">
-                {formatAmount(stats?.financial.subscription_income_rubles || 0)} {currencySymbol}
-              </div>
-            </div>
+            <StatCard
+              label={t('adminDashboard.stats.incomeTotal')}
+              value={`${formatAmount(stats?.financial.income_total_rubles || 0)} ${currencySymbol}`}
+              icon={<BanknotesIcon className="h-5 w-5" />}
+              tone="neutral"
+            />
+            <StatCard
+              label={t('adminDashboard.stats.subscriptionIncome')}
+              value={`${formatAmount(stats?.financial.subscription_income_rubles || 0)} ${currencySymbol}`}
+              icon={<SparklesIcon className="h-5 w-5" />}
+              tone="accent"
+            />
           </div>
         </div>
 
         {/* Subscription Stats */}
-        <div className="rounded-xl border border-dark-700 bg-dark-800/30 p-5 backdrop-blur">
+        <div className="rounded-xl border border-dark-700 bg-dark-800/30 p-5">
           <div className="mb-4 flex items-center gap-3">
             <div className="rounded-lg bg-accent-500/20 p-2.5 text-accent-400">
               <SparklesIcon />
@@ -646,38 +451,30 @@ export default function AdminDashboard() {
 
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
-              <div className="rounded-lg bg-dark-900/50 p-4">
-                <div className="mb-1 text-xs text-dark-500">
-                  {t('adminDashboard.subscriptions.active')}
-                </div>
-                <div className="text-2xl font-bold text-success-400">
-                  {stats?.subscriptions.active || 0}
-                </div>
-              </div>
-              <div className="rounded-lg bg-dark-900/50 p-4">
-                <div className="mb-1 text-xs text-dark-500">
-                  {t('adminDashboard.subscriptions.trial')}
-                </div>
-                <div className="text-2xl font-bold text-warning-400">
-                  {stats?.subscriptions.trial || 0}
-                </div>
-              </div>
-              <div className="rounded-lg bg-dark-900/50 p-4">
-                <div className="mb-1 text-xs text-dark-500">
-                  {t('adminDashboard.subscriptions.paid')}
-                </div>
-                <div className="text-2xl font-bold text-accent-400">
-                  {stats?.subscriptions.paid || 0}
-                </div>
-              </div>
-              <div className="rounded-lg bg-dark-900/50 p-4">
-                <div className="mb-1 text-xs text-dark-500">
-                  {t('adminDashboard.subscriptions.expired')}
-                </div>
-                <div className="text-2xl font-bold text-error-400">
-                  {stats?.subscriptions.expired || 0}
-                </div>
-              </div>
+              <StatCard
+                label={t('adminDashboard.subscriptions.active')}
+                value={stats?.subscriptions.active || 0}
+                icon={<CheckCircleIcon className="h-5 w-5" />}
+                tone="success"
+              />
+              <StatCard
+                label={t('adminDashboard.subscriptions.trial')}
+                value={stats?.subscriptions.trial || 0}
+                icon={<StarIcon className="h-5 w-5" />}
+                tone="warning"
+              />
+              <StatCard
+                label={t('adminDashboard.subscriptions.paid')}
+                value={stats?.subscriptions.paid || 0}
+                icon={<CreditCardIcon className="h-5 w-5" />}
+                tone="accent"
+              />
+              <StatCard
+                label={t('adminDashboard.subscriptions.expired')}
+                value={stats?.subscriptions.expired || 0}
+                icon={<XCircleIcon className="h-5 w-5" />}
+                tone="error"
+              />
             </div>
 
             <div className="border-t border-dark-700 pt-4">
@@ -685,30 +482,24 @@ export default function AdminDashboard() {
                 {t('adminDashboard.subscriptions.newSubscriptions')}
               </div>
               <div className="grid grid-cols-3 gap-3">
-                <div className="text-center">
-                  <div className="text-xl font-bold text-dark-100">
-                    {stats?.subscriptions.purchased_today || 0}
-                  </div>
-                  <div className="text-xs text-dark-500">
-                    {t('adminDashboard.subscriptions.today')}
-                  </div>
-                </div>
-                <div className="text-center">
-                  <div className="text-xl font-bold text-dark-100">
-                    {stats?.subscriptions.purchased_week || 0}
-                  </div>
-                  <div className="text-xs text-dark-500">
-                    {t('adminDashboard.subscriptions.week')}
-                  </div>
-                </div>
-                <div className="text-center">
-                  <div className="text-xl font-bold text-dark-100">
-                    {stats?.subscriptions.purchased_month || 0}
-                  </div>
-                  <div className="text-xs text-dark-500">
-                    {t('adminDashboard.subscriptions.month')}
-                  </div>
-                </div>
+                <StatCard
+                  label={t('adminDashboard.subscriptions.today')}
+                  value={stats?.subscriptions.purchased_today || 0}
+                  icon={<ClockIcon className="h-5 w-5" />}
+                  tone="neutral"
+                />
+                <StatCard
+                  label={t('adminDashboard.subscriptions.week')}
+                  value={stats?.subscriptions.purchased_week || 0}
+                  icon={<CalendarBlankIcon className="h-5 w-5" />}
+                  tone="neutral"
+                />
+                <StatCard
+                  label={t('adminDashboard.subscriptions.month')}
+                  value={stats?.subscriptions.purchased_month || 0}
+                  icon={<CalendarIcon className="h-5 w-5" />}
+                  tone="neutral"
+                />
               </div>
             </div>
 
@@ -730,7 +521,7 @@ export default function AdminDashboard() {
 
       {/* Tariff Stats */}
       {stats?.tariff_stats && stats.tariff_stats.tariffs.length > 0 && (
-        <div className="rounded-xl border border-dark-700 bg-dark-800/30 p-5 backdrop-blur">
+        <div className="rounded-xl border border-dark-700 bg-dark-800/30 p-5">
           <div className="mb-4 flex items-center gap-3">
             <div className="rounded-lg bg-success-500/20 p-2.5 text-success-400">
               <TagIcon />
@@ -807,7 +598,7 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Top Referrers */}
         {referrers && (referrers.by_earnings.length > 0 || referrers.by_invited.length > 0) && (
-          <div className="rounded-xl border border-dark-700 bg-dark-800/30 p-4 backdrop-blur sm:p-5">
+          <div className="rounded-xl border border-dark-700 bg-dark-800/30 p-4 sm:p-5">
             <div className="mb-4 flex items-center justify-between">
               <div className="flex items-center gap-2 sm:gap-3">
                 <div className="rounded-lg bg-accent-500/20 p-2 text-accent-400 sm:p-2.5">
@@ -899,55 +690,46 @@ export default function AdminDashboard() {
 
             {/* Period Stats */}
             <div className="mt-4 grid grid-cols-3 gap-2 border-t border-dark-700 pt-4 sm:gap-3">
-              <div className="text-center">
-                <div className="mb-1 text-[10px] text-dark-500 sm:text-xs">
-                  {t('adminDashboard.period.today')}
-                </div>
-                <div className="truncate text-xs font-semibold text-dark-200 sm:text-base">
-                  {formatAmount(
-                    (referrersTab === 'earnings'
-                      ? referrers.by_earnings
-                      : referrers.by_invited
-                    ).reduce((sum, r) => sum + r.earnings_today_kopeks, 0) / 100,
-                  )}{' '}
-                  {currencySymbol}
-                </div>
-              </div>
-              <div className="text-center">
-                <div className="mb-1 text-[10px] text-dark-500 sm:text-xs">
-                  {t('adminDashboard.period.week')}
-                </div>
-                <div className="truncate text-xs font-semibold text-dark-200 sm:text-base">
-                  {formatAmount(
-                    (referrersTab === 'earnings'
-                      ? referrers.by_earnings
-                      : referrers.by_invited
-                    ).reduce((sum, r) => sum + r.earnings_week_kopeks, 0) / 100,
-                  )}{' '}
-                  {currencySymbol}
-                </div>
-              </div>
-              <div className="text-center">
-                <div className="mb-1 text-[10px] text-dark-500 sm:text-xs">
-                  {t('adminDashboard.period.month')}
-                </div>
-                <div className="truncate text-xs font-semibold text-dark-200 sm:text-base">
-                  {formatAmount(
-                    (referrersTab === 'earnings'
-                      ? referrers.by_earnings
-                      : referrers.by_invited
-                    ).reduce((sum, r) => sum + r.earnings_month_kopeks, 0) / 100,
-                  )}{' '}
-                  {currencySymbol}
-                </div>
-              </div>
+              <StatCard
+                label={t('adminDashboard.period.today')}
+                value={`${formatAmount(
+                  (referrersTab === 'earnings'
+                    ? referrers.by_earnings
+                    : referrers.by_invited
+                  ).reduce((sum, r) => sum + r.earnings_today_kopeks, 0) / 100,
+                )} ${currencySymbol}`}
+                icon={<ClockIcon className="h-5 w-5" />}
+                tone="neutral"
+              />
+              <StatCard
+                label={t('adminDashboard.period.week')}
+                value={`${formatAmount(
+                  (referrersTab === 'earnings'
+                    ? referrers.by_earnings
+                    : referrers.by_invited
+                  ).reduce((sum, r) => sum + r.earnings_week_kopeks, 0) / 100,
+                )} ${currencySymbol}`}
+                icon={<CalendarBlankIcon className="h-5 w-5" />}
+                tone="neutral"
+              />
+              <StatCard
+                label={t('adminDashboard.period.month')}
+                value={`${formatAmount(
+                  (referrersTab === 'earnings'
+                    ? referrers.by_earnings
+                    : referrers.by_invited
+                  ).reduce((sum, r) => sum + r.earnings_month_kopeks, 0) / 100,
+                )} ${currencySymbol}`}
+                icon={<CalendarIcon className="h-5 w-5" />}
+                tone="neutral"
+              />
             </div>
           </div>
         )}
 
         {/* Top Campaigns */}
         {campaigns && campaigns.campaigns.length > 0 && (
-          <div className="rounded-xl border border-dark-700 bg-dark-800/30 p-4 backdrop-blur sm:p-5">
+          <div className="rounded-xl border border-dark-700 bg-dark-800/30 p-4 sm:p-5">
             <div className="mb-4 flex items-center gap-2 sm:gap-3">
               <div className="rounded-lg bg-warning-500/20 p-2 text-warning-400 sm:p-2.5">
                 <MegaphoneIcon />
@@ -1010,7 +792,7 @@ export default function AdminDashboard() {
 
       {/* Recent Payments */}
       {payments && payments.payments.length > 0 && (
-        <div className="rounded-xl border border-dark-700 bg-dark-800/30 p-4 backdrop-blur sm:p-5">
+        <div className="rounded-xl border border-dark-700 bg-dark-800/30 p-4 sm:p-5">
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="rounded-lg bg-success-500/20 p-2 text-success-400 sm:p-2.5">

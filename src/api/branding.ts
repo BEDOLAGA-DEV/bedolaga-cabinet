@@ -1,4 +1,5 @@
 import apiClient from './client';
+import { isEndpointMissingError } from '../utils/api-error';
 import type { AnimationConfig } from '@/components/ui/backgrounds/types';
 import { DEFAULT_ANIMATION_CONFIG } from '@/components/ui/backgrounds/types';
 
@@ -36,6 +37,8 @@ export interface TelegramWidgetConfig {
   request_access: boolean;
   oidc_enabled: boolean;
   oidc_client_id: string;
+  /** The bot answered 404 on the config route — build older than v3.24.0. */
+  endpoint_missing?: boolean;
 }
 
 export interface OfflineConvGoal {
@@ -146,6 +149,11 @@ export const initLogoPreload = () => {
   }
 };
 
+export interface BotStartVideoInfo {
+  has_video: boolean;
+  file_id?: string | null;
+}
+
 export const brandingApi = {
   // Get current branding (public, no auth required)
   getBranding: async (): Promise<BrandingInfo> => {
@@ -170,6 +178,29 @@ export const brandingApi = {
       _logoBlobUrl = null;
     }
     sessionStorage.removeItem(LOGO_PRELOADED_KEY);
+    return response.data;
+  },
+
+  // ── Видео стартового меню бота ────────────────────────────────────────
+  // Хранится как Telegram file_id: файл на нашей стороне не сохраняется.
+
+  getBotStartVideo: async (): Promise<BotStartVideoInfo> => {
+    const response = await apiClient.get<BotStartVideoInfo>('/cabinet/branding/bot-start-video');
+    return response.data;
+  },
+
+  uploadBotStartVideo: async (file: File): Promise<BotStartVideoInfo> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await apiClient.post<BotStartVideoInfo>(
+      '/cabinet/branding/bot-start-video',
+      formData,
+    );
+    return response.data;
+  },
+
+  deleteBotStartVideo: async (): Promise<BotStartVideoInfo> => {
+    const response = await apiClient.delete<BotStartVideoInfo>('/cabinet/branding/bot-start-video');
     return response.data;
   },
 
@@ -241,6 +272,25 @@ export const brandingApi = {
     return response.data;
   },
 
+  // Legal footer enabled (public read for the login page, admin-only update)
+  getFooterEnabled: async (): Promise<boolean> => {
+    try {
+      const response = await apiClient.get<{ enabled: boolean }>(
+        '/cabinet/branding/footer-enabled',
+      );
+      return response.data.enabled;
+    } catch {
+      return false;
+    }
+  },
+  updateFooterEnabled: async (enabled: boolean): Promise<boolean> => {
+    const response = await apiClient.patch<{ enabled: boolean }>(
+      '/cabinet/branding/footer-enabled',
+      { enabled },
+    );
+    return response.data.enabled;
+  },
+
   // Get email auth enabled (public, no auth required)
   getEmailAuthEnabled: async (): Promise<EmailAuthEnabled> => {
     try {
@@ -302,7 +352,7 @@ export const brandingApi = {
         '/cabinet/branding/telegram-widget',
       );
       return response.data;
-    } catch {
+    } catch (err) {
       return {
         bot_username: import.meta.env.VITE_TELEGRAM_BOT_USERNAME || '',
         size: 'large',
@@ -311,6 +361,7 @@ export const brandingApi = {
         request_access: true,
         oidc_enabled: false,
         oidc_client_id: '',
+        endpoint_missing: isEndpointMissingError(err),
       };
     }
   },

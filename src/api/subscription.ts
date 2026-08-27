@@ -1,4 +1,5 @@
 import apiClient from './client';
+import { getYandexCid } from '../utils/yandexCid';
 import type {
   Subscription,
   SubscriptionStatusResponse,
@@ -11,6 +12,8 @@ import type {
   PurchaseSelection,
   PurchasePreview,
   AppConfig,
+  SbpRecurringInfo,
+  LavaRecurringInfo,
 } from '../types';
 
 /** Helper: build query params with optional subscription_id */
@@ -83,7 +86,10 @@ export const subscriptionApi = {
   }> => {
     const response = await apiClient.post(
       '/cabinet/subscription/renew',
-      ...bodyWithSubId({ period_days: periodDays }, subscriptionId),
+      ...bodyWithSubId(
+        { period_days: periodDays, yandex_cid: getYandexCid() || undefined },
+        subscriptionId,
+      ),
     );
     return response.data;
   },
@@ -108,7 +114,7 @@ export const subscriptionApi = {
   }> => {
     const response = await apiClient.post(
       '/cabinet/subscription/traffic',
-      ...bodyWithSubId({ gb }, subscriptionId),
+      ...bodyWithSubId({ gb, yandex_cid: getYandexCid() || undefined }, subscriptionId),
     );
     return response.data;
   },
@@ -127,7 +133,7 @@ export const subscriptionApi = {
   }> => {
     const response = await apiClient.put(
       '/cabinet/subscription/traffic',
-      ...bodyWithSubId({ gb }, subscriptionId),
+      ...bodyWithSubId({ gb, yandex_cid: getYandexCid() || undefined }, subscriptionId),
     );
     return response.data;
   },
@@ -181,7 +187,7 @@ export const subscriptionApi = {
   }> => {
     const response = await apiClient.post(
       '/cabinet/subscription/devices/purchase',
-      ...bodyWithSubId({ devices }, subscriptionId),
+      ...bodyWithSubId({ devices, yandex_cid: getYandexCid() || undefined }, subscriptionId),
     );
     return response.data;
   },
@@ -345,6 +351,93 @@ export const subscriptionApi = {
     return response.data;
   },
 
+  // ── SBP recurring (Platega) ───────────────────────────────────────────
+
+  getSbpRecurring: async (subscriptionId?: number): Promise<SbpRecurringInfo> => {
+    const response = await apiClient.get<SbpRecurringInfo>(
+      '/cabinet/subscription/platega-recurrent',
+      withSubId(subscriptionId),
+    );
+    return response.data;
+  },
+
+  enableSbpRecurring: async (
+    subscriptionId?: number,
+  ): Promise<{ status: string; redirect_url: string | null }> => {
+    const response = await apiClient.post(
+      '/cabinet/subscription/platega-recurrent/enable',
+      ...bodyWithSubId({}, subscriptionId),
+    );
+    return response.data;
+  },
+
+  cancelSbpRecurring: async (subscriptionId?: number): Promise<{ status: string }> => {
+    const response = await apiClient.post(
+      '/cabinet/subscription/platega-recurrent/cancel',
+      ...bodyWithSubId({}, subscriptionId),
+    );
+    return response.data;
+  },
+
+  /**
+   * Оформление подписки на тариф через СБП-автопродление: первое списание =
+   * подтверждение привязки в банке. Для нового тарифа бэкенд создаёт
+   * неактивную заготовку, которую активирует первый чардж.
+   */
+  purchaseWithSbpRecurring: async (
+    tariffId: number,
+  ): Promise<{ status: string; redirect_url: string | null; subscription_id: number }> => {
+    const response = await apiClient.post(
+      '/cabinet/subscription/platega-recurrent/purchase',
+      {},
+      { params: { tariff_id: tariffId } },
+    );
+    return response.data;
+  },
+
+  // ── Recurring (Lava) ──────────────────────────────────────────────────
+
+  getLavaRecurring: async (subscriptionId?: number): Promise<LavaRecurringInfo> => {
+    const response = await apiClient.get<LavaRecurringInfo>(
+      '/cabinet/subscription/lava-recurrent',
+      withSubId(subscriptionId),
+    );
+    return response.data;
+  },
+
+  enableLavaRecurring: async (
+    subscriptionId?: number,
+  ): Promise<{ status: string; redirect_url: string | null }> => {
+    const response = await apiClient.post(
+      '/cabinet/subscription/lava-recurrent/enable',
+      ...bodyWithSubId({}, subscriptionId),
+    );
+    return response.data;
+  },
+
+  cancelLavaRecurring: async (subscriptionId?: number): Promise<{ status: string }> => {
+    const response = await apiClient.post(
+      '/cabinet/subscription/lava-recurrent/cancel',
+      ...bodyWithSubId({}, subscriptionId),
+    );
+    return response.data;
+  },
+
+  /**
+   * Оформление подписки на тариф привязкой Lava: первое списание оплачивается
+   * по возвращённой ссылке и активирует подписку.
+   */
+  purchaseWithLavaRecurring: async (
+    tariffId: number,
+  ): Promise<{ status: string; redirect_url: string | null; subscription_id: number }> => {
+    const response = await apiClient.post(
+      '/cabinet/subscription/lava-recurrent/purchase',
+      {},
+      { params: { tariff_id: tariffId } },
+    );
+    return response.data;
+  },
+
   // ── Trial ───────────────────────────────────────────────────────────
 
   getTrialInfo: async (): Promise<TrialInfo> => {
@@ -353,7 +446,9 @@ export const subscriptionApi = {
   },
 
   activateTrial: async (): Promise<Subscription> => {
-    const response = await apiClient.post<Subscription>('/cabinet/subscription/trial');
+    const response = await apiClient.post<Subscription>('/cabinet/subscription/trial', {
+      yandex_cid: getYandexCid() || undefined,
+    });
     return response.data;
   },
 
@@ -389,7 +484,7 @@ export const subscriptionApi = {
   }> => {
     const response = await apiClient.post(
       '/cabinet/subscription/purchase',
-      ...bodyWithSubId({ selection }, subscriptionId),
+      ...bodyWithSubId({ selection, yandex_cid: getYandexCid() || undefined }, subscriptionId),
     );
     return response.data;
   },
@@ -398,6 +493,14 @@ export const subscriptionApi = {
     tariffId: number,
     periodDays: number,
     trafficGb?: number,
+    /**
+     * Subscription ID being renewed. Pass this when the user clicked
+     * "Renew" on an existing subscription so the backend can resolve
+     * the target row by ID instead of doing a (user_id, tariff_id)
+     * re-lookup that races with concurrent panel webhooks. Omit when
+     * this is a fresh purchase from the catalog.
+     */
+    subscriptionId?: number,
   ): Promise<{
     success: boolean;
     message: string;
@@ -411,6 +514,8 @@ export const subscriptionApi = {
       tariff_id: tariffId,
       period_days: periodDays,
       traffic_gb: trafficGb,
+      subscription_id: subscriptionId,
+      yandex_cid: getYandexCid() || undefined,
     });
     return response.data;
   },
@@ -457,7 +562,7 @@ export const subscriptionApi = {
   }> => {
     const response = await apiClient.post(
       '/cabinet/subscription/countries',
-      ...bodyWithSubId({ countries }, subscriptionId),
+      ...bodyWithSubId({ countries, yandex_cid: getYandexCid() || undefined }, subscriptionId),
     );
     return response.data;
   },
@@ -557,7 +662,10 @@ export const subscriptionApi = {
   }> => {
     const response = await apiClient.post(
       '/cabinet/subscription/tariff/switch',
-      ...bodyWithSubId({ tariff_id: tariffId, period_days: 30 }, subscriptionId),
+      ...bodyWithSubId(
+        { tariff_id: tariffId, period_days: 30, yandex_cid: getYandexCid() || undefined },
+        subscriptionId,
+      ),
     );
     return response.data;
   },

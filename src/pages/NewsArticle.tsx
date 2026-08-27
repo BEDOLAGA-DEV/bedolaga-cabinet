@@ -6,39 +6,7 @@ import { motion } from 'framer-motion';
 import DOMPurify from 'dompurify';
 import { newsApi } from '../api/news';
 import { usePlatform } from '../platform/hooks/usePlatform';
-
-// Icons
-const BackIcon = () => (
-  <svg
-    className="h-5 w-5 text-dark-400"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={2}
-  >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-  </svg>
-);
-
-const ClockIcon = () => (
-  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
-    />
-  </svg>
-);
-
-const CalendarIcon = () => (
-  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"
-    />
-  </svg>
-);
+import { BackIcon, ClockIcon, CalendarIcon } from '@/components/icons';
 
 /**
  * Sanitizes HTML content using DOMPurify to prevent XSS attacks.
@@ -386,12 +354,12 @@ export default function NewsArticlePage() {
         <div className="mb-6 flex flex-wrap items-center gap-4 text-sm text-dark-400">
           {article.published_at && (
             <span className="inline-flex items-center gap-1.5 font-mono text-xs">
-              <CalendarIcon />
+              <CalendarIcon className="h-4 w-4" />
               {new Date(article.published_at).toLocaleDateString(i18n.language)}
             </span>
           )}
           <span className="inline-flex items-center gap-1.5 font-mono text-xs">
-            <ClockIcon />
+            <ClockIcon className="h-4 w-4" />
             {article.read_time_minutes} {t('news.readTime')}
           </span>
         </div>

@@ -2,7 +2,7 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { themeColorsApi } from '../../api/themeColors';
-import { DEFAULT_THEME_COLORS, ThemeColors } from '../../types/theme';
+import { DEFAULT_THEME_COLORS, type ThemeColors } from '../../types/theme';
 import { ColorPicker } from '../ColorPicker';
 import { applyThemeColors } from '../../hooks/useThemeColors';
 import { updateEnabledThemesCache } from '../../hooks/useTheme';
@@ -428,7 +428,7 @@ export function ThemeTab() {
           <button
             onClick={() => updateColorsMutation.mutate(draftColors)}
             disabled={updateColorsMutation.isPending}
-            className="rounded-xl bg-accent-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-accent-600 disabled:opacity-50"
+            className="rounded-xl bg-accent-500 px-4 py-2 text-sm font-medium text-on-accent transition-colors hover:bg-accent-600 disabled:opacity-50"
           >
             {updateColorsMutation.isPending
               ? t('common.saving', t('common.save'))

@@ -381,9 +381,16 @@ export interface TariffsPurchaseOptions {
   // New fields for expired subscription handling
   subscription_status?: string;
   subscription_is_expired?: boolean;
+  // Free (0₽) source tariff: switch is blocked (free days must reset),
+  // tariff cards must offer the purchase flow instead of the prorated switch
+  subscription_on_free_tariff?: boolean;
   has_subscription?: boolean;
   // Multi-tariff: all available tariffs already purchased
   all_tariffs_purchased?: boolean;
+  // СБП-оформление (Platega recurrent): показывать кнопку «Оформить с
+  // автооплатой СБП» рядом с покупкой с баланса
+  platega_recurrent_enabled?: boolean;
+  lava_recurrent_enabled?: boolean;
 }
 
 export interface ClassicPurchaseOptions {
@@ -465,6 +472,7 @@ export interface PaymentMethod {
   max_amount_kopeks: number;
   is_available: boolean;
   options?: PaymentMethodOption[] | null;
+  quick_amounts?: number[];
   // Если true — после получения payment_url кабинет сразу делает
   // window.location.href вместо показа панели с кнопкой "Открыть".
   open_url_direct?: boolean;
@@ -503,6 +511,8 @@ export interface TicketMediaItem {
   type: 'photo' | 'video' | 'document';
   file_id: string;
   caption?: string | null;
+  /** Signed, expiring download token (response only). */
+  token?: string | null;
 }
 
 export interface TicketMessage {
@@ -512,6 +522,8 @@ export interface TicketMessage {
   has_media: boolean;
   media_type: string | null;
   media_file_id: string | null;
+  /** Signed, expiring download token for the legacy single media_file_id. */
+  media_token?: string | null;
   media_caption: string | null;
   media_items?: TicketMediaItem[] | null;
   created_at: string;
@@ -534,11 +546,21 @@ export interface TicketDetail extends Omit<Ticket, 'messages_count' | 'last_mess
   messages: TicketMessage[];
 }
 
+// Гейт согласия с офертой/политикой на экране первой авторизации.
+// documents — ключи документов, которые бэк реально требует отметить.
+export interface LegalConsentConfig {
+  required: boolean;
+  prechecked: boolean;
+  documents: string[];
+}
+
 export interface SupportConfig {
   tickets_enabled: boolean;
   support_type: 'tickets' | 'profile' | 'url' | 'both';
   support_url?: string | null;
   support_username?: string | null;
+  /** Резолвнутый контакт ведёт в Telegram, а не на внешний хелпдеск. */
+  contact_is_telegram?: boolean;
 }
 
 // Paginated response
@@ -555,7 +577,7 @@ export interface LocalizedText {
   [key: string]: string;
 }
 
-// RemnaWave format types
+// Remnawave format types
 export interface RemnawaveButtonClient {
   url?: string;
   link?: string;
@@ -598,7 +620,7 @@ export interface AppConfig {
     supportUrl?: string;
   };
 
-  // RemnaWave
+  // Remnawave
   isRemnawave?: boolean;
   svgLibrary?: Record<string, string | { svgString: string }>;
   baseTranslations?: Record<string, LocalizedText>;
@@ -656,6 +678,27 @@ export interface SavedCardsResponse {
   recurrent_enabled: boolean;
 }
 
+// Platega SBP recurring auto-payment status for a subscription
+export interface SbpRecurringInfo {
+  status: string; // 'none' | 'PENDING' | 'ACTIVE' | 'PAST_DUE'
+  interval?: number; // 1=day,2=week,3=month,4=year
+  amount_kopeks?: number;
+  next_charge_at?: string | null;
+  redirect_url?: string | null;
+}
+
+/**
+ * Автопродление Lava. В отличие от Platega период задан продуктом в кабинете
+ * Lava и приезжает числом дней (charge_days), а не enum-интервалом.
+ */
+export interface LavaRecurringInfo {
+  status: string; // 'none' | 'PENDING' | 'ACTIVE' | 'PAST_DUE'
+  charge_days?: number;
+  amount_kopeks?: number;
+  next_charge_at?: string | null;
+  redirect_url?: string | null;
+}
+
 // Ticket notifications types
 export interface TicketNotification {
   id: number;
@@ -698,8 +741,11 @@ export interface PaymentMethodConfig {
   is_enabled: boolean;
   display_name: string | null;
   default_display_name: string;
+  description: string | null;
   sub_options: Record<string, boolean> | null;
   available_sub_options: PaymentMethodSubOptionInfo[] | null;
+  quick_amounts: number[] | null;
+  default_quick_amounts: number[];
   min_amount_kopeks: number | null;
   max_amount_kopeks: number | null;
   default_min_amount_kopeks: number;

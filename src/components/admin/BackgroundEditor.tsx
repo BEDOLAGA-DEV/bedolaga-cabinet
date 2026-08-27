@@ -68,7 +68,7 @@ export function BackgroundEditor() {
             'w-full rounded-xl py-3 text-sm font-medium transition-colors',
             saveStatus === 'saved'
               ? 'bg-success-500/20 text-success-400'
-              : 'bg-accent-500 text-white hover:bg-accent-600 disabled:opacity-50',
+              : 'bg-accent-500 text-on-accent hover:bg-accent-600 disabled:opacity-50',
           )}
         >
           {saveStatus === 'saving'

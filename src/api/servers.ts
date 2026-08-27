@@ -134,7 +134,7 @@ export const serversApi = {
     return response.data;
   },
 
-  // Sync servers with RemnaWave
+  // Sync servers with Remnawave
   syncServers: async (): Promise<ServerSyncResponse> => {
     const response = await apiClient.post('/cabinet/admin/servers/sync');
     return response.data;

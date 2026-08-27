@@ -1,3 +1,4 @@
+import { uiLocale } from '@/utils/uiLocale';
 import { useState, useEffect, useRef } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -12,25 +13,9 @@ import type { PaginatedResponse, Transaction } from '../types';
 
 import { Card } from '@/components/data-display/Card';
 import { Button } from '@/components/primitives/Button';
-import { ChevronDownIcon, ChevronRightIcon } from '@/components/icons';
+import { ChevronDownIcon, ChevronRightIcon, CreditCardIcon, WalletIcon } from '@/components/icons';
 import { staggerContainer, staggerItem } from '@/components/motion/transitions';
 import { isPaidStatus, isFailedStatus } from '../utils/paymentStatus';
-
-const WalletIcon = ({ className = 'h-8 w-8' }: { className?: string }) => (
-  <svg
-    className={className}
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={1.5}
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z"
-    />
-  </svg>
-);
 
 export default function Balance() {
   const { t } = useTranslation();
@@ -175,22 +160,33 @@ export default function Balance() {
         queryClient.invalidateQueries({ queryKey: ['subscriptions-list'] });
       }
     } catch (error: unknown) {
-      const axiosError = error as { response?: { data?: { detail?: string } } };
-      const errorDetail = axiosError.response?.data?.detail || 'server_error';
-      const detail = errorDetail.toLowerCase();
-      const errorKey = detail.includes('not found')
-        ? 'not_found'
-        : detail.includes('deactivated')
-          ? 'inactive'
-          : detail.includes('not yet active')
-            ? 'not_yet_valid'
-            : detail.includes('expired')
-              ? 'expired'
-              : detail.includes('fully used')
-                ? 'used'
-                : detail.includes('already used')
-                  ? 'already_used_by_user'
-                  : 'server_error';
+      // Backend returns a structured error: detail = { code, message }. We map
+      // the stable machine code to a localized string. (The old contract
+      // substring-matched English prose and silently degraded every unmapped
+      // code — active_discount_exists, daily_limit, … — to "server error".)
+      const axiosError = error as {
+        response?: { data?: { detail?: { code?: string } | string } };
+      };
+      const detail = axiosError.response?.data?.detail;
+      const code = typeof detail === 'object' && detail ? detail.code : undefined;
+      const knownErrorKeys = [
+        'not_found',
+        'expired',
+        'inactive',
+        'not_yet_valid',
+        'used',
+        'already_used_by_user',
+        'active_discount_exists',
+        'no_subscription_for_days',
+        'subscription_not_found',
+        'not_first_purchase',
+        'daily_limit',
+        'trial_subscription_exists',
+        'trial_provisioning_failed',
+        'user_not_found',
+        'server_error',
+      ];
+      const errorKey = code && knownErrorKeys.includes(code) ? code : 'server_error';
       setPromocodeError(t(`balance.promocode.errors.${errorKey}`));
       setPromoSelectSubs(null);
       setPromoSelectCode(null);
@@ -210,9 +206,12 @@ export default function Balance() {
         <h1 className="text-2xl font-bold text-dark-50 sm:text-3xl">{t('balance.title')}</h1>
       </motion.div>
 
-      {/* Balance Card */}
+      {/* Balance Card — flat surface; the giant numeric carries the
+          weight. The previous accent gradient + glow leaked accent into
+          decoration (DESIGN.md Tunable-but-Scarce Rule) and read as the
+          SaaS hero-metric template. */}
       <motion.div variants={staggerItem}>
-        <Card className="bg-gradient-to-br from-accent-500/10 to-transparent" glow>
+        <Card>
           <div className="mb-2 text-sm text-dark-400">{t('balance.currentBalance')}</div>
           <div className="text-4xl font-bold text-dark-50 sm:text-5xl">
             {formatAmount(balanceData?.balance_rubles || 0)}
@@ -288,10 +287,10 @@ export default function Balance() {
                   key={sub.id}
                   onClick={() => handlePromocodeActivate(sub.id)}
                   disabled={promocodeLoading}
-                  className="flex w-full items-center justify-between rounded-linear border border-dark-600 bg-dark-700 px-3 py-2 text-sm text-dark-200 transition-colors hover:border-accent-500/50 hover:bg-dark-600"
+                  className="flex w-full min-w-0 items-center justify-between gap-3 rounded-linear border border-dark-600 bg-dark-700 px-3 py-2 text-sm text-dark-200 transition-colors hover:border-accent-500/50 hover:bg-dark-600"
                 >
-                  <span>{sub.tariff_name}</span>
-                  <span className="text-dark-400">
+                  <span className="truncate">{sub.tariff_name}</span>
+                  <span className="shrink-0 text-dark-400">
                     {t('balance.promocode.daysLeft', '{{count}} дн.', { count: sub.days_left })}
                   </span>
                 </button>
@@ -310,9 +309,11 @@ export default function Balance() {
         </Card>
       </motion.div>
 
-      {/* Payment Methods */}
+      {/* Payment Methods — self-animated: mounts after its query resolves, when
+          the parent stagger orchestration has already finished and would leave
+          it stuck at opacity 0 */}
       {paymentMethods && paymentMethods.length > 0 && (
-        <motion.div variants={staggerItem}>
+        <motion.div variants={staggerItem} initial="initial" animate="animate">
           <Card>
             <h2 className="mb-4 text-lg font-semibold text-dark-100">
               {t('balance.topUpBalance')}
@@ -335,15 +336,15 @@ export default function Balance() {
                     onClick={() => method.is_available && navigate(`/balance/top-up/${method.id}`)}
                   >
                     <div className="font-semibold text-dark-100">
-                      {translatedName || method.name}
+                      {method.name || translatedName}
                     </div>
-                    {(translatedDesc || method.description) && (
+                    {(method.description || translatedDesc) && (
                       <div className="mt-1 text-sm text-dark-500">
-                        {translatedDesc || method.description}
+                        {method.description || translatedDesc}
                       </div>
                     )}
-                    <div className="mt-3 text-xs text-dark-600">
-                      {formatAmount(method.min_amount_kopeks / 100, 0)} –{' '}
+                    <div className="mt-3 text-xs text-dark-400">
+                      {formatAmount(method.min_amount_kopeks / 100, 0)} {t('common.rangeTo', 'to')}{' '}
                       {formatAmount(method.max_amount_kopeks / 100, 0)} {currencySymbol}
                     </div>
                   </Card>
@@ -413,7 +414,7 @@ export default function Balance() {
                                   {getTypeLabel(tx.type)}
                                 </span>
                                 <span className="text-xs text-dark-500">
-                                  {new Date(tx.created_at).toLocaleDateString()}
+                                  {new Date(tx.created_at).toLocaleDateString(uiLocale())}
                                 </span>
                               </div>
                               {tx.description && (
@@ -476,13 +477,14 @@ export default function Balance() {
         </Card>
       </motion.div>
 
-      {/* Saved Cards Navigation */}
+      {/* Saved Cards Navigation — self-animated: mounts after its query resolves
+          (see Payment Methods above) */}
       {savedCardsData?.recurrent_enabled && (
-        <motion.div variants={staggerItem}>
+        <motion.div variants={staggerItem} initial="initial" animate="animate">
           <Card interactive onClick={() => navigate('/balance/saved-cards')}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <span className="text-xl">💳</span>
+                <CreditCardIcon className="h-5 w-5 text-dark-400" />
                 <span className="font-medium text-dark-100">{t('balance.savedCards.title')}</span>
               </div>
               <ChevronRightIcon className="h-5 w-5 text-dark-400" />

@@ -17,21 +17,26 @@ export function ReferralNetwork() {
   const { t } = useTranslation();
   const selectedNode = useReferralNetworkStore((s) => s.selectedNode);
   const scope = useReferralNetworkStore((s) => s.scope);
+  const isFullNetwork = useReferralNetworkStore((s) => s.isFullNetwork);
   const addScope = useReferralNetworkStore((s) => s.addScope);
   const removeScope = useReferralNetworkStore((s) => s.removeScope);
   const clearScope = useReferralNetworkStore((s) => s.clearScope);
+  const setFullNetwork = useReferralNetworkStore((s) => s.setFullNetwork);
 
   const { mobile: mobileHeaderHeight, bottomSafeArea } = useHeaderHeight();
 
-  const hasScope = scope.length > 0;
+  const hasScope = isFullNetwork || scope.length > 0;
 
   const {
     data: networkData,
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ['referral-network', 'scoped', scope.map((s) => `${s.type}:${s.id}`).sort()],
-    queryFn: () => referralNetworkApi.getScopedGraph(scope),
+    queryKey: isFullNetwork
+      ? ['referral-network', 'full']
+      : ['referral-network', 'scoped', scope.map((s) => `${s.type}:${s.id}`).sort()],
+    queryFn: () =>
+      isFullNetwork ? referralNetworkApi.getFullGraph() : referralNetworkApi.getScopedGraph(scope),
     enabled: hasScope,
     staleTime: 120_000,
   });
@@ -60,9 +65,11 @@ export function ReferralNetwork() {
           </div>
           <ScopeSelector
             value={scope}
+            isFullNetwork={isFullNetwork}
             onAdd={addScope}
             onRemove={removeScope}
             onClear={clearScope}
+            onFullNetworkChange={setFullNetwork}
             className="min-w-0 flex-1 sm:max-w-xl"
           />
         </div>

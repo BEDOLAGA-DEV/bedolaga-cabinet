@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { CloseIcon, FilterIcon } from '@/components/icons';
 import { useReferralNetworkStore } from '@/store/referralNetwork';
 import type { NetworkGraphData } from '@/types/referralNetwork';
 
@@ -120,19 +121,7 @@ export function NetworkFilters({ data, className }: NetworkFiltersProps) {
             : 'border-dark-700/50 bg-dark-800/80 text-dark-300 hover:border-dark-600 hover:text-dark-100'
         }`}
       >
-        <svg
-          className="h-4 w-4"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          strokeWidth={1.5}
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75"
-          />
-        </svg>
+        <FilterIcon className="h-4 w-4" />
         <span className="hidden sm:inline">{t('admin.referralNetwork.filters.title')}</span>
         {hasActiveFilters && (
           <span className="absolute -right-1 -top-1 h-2 w-2 rounded-full bg-accent-500" />
@@ -152,15 +141,7 @@ export function NetworkFilters({ data, className }: NetworkFiltersProps) {
                 aria-label={t('common.close')}
                 className="text-dark-500 transition-colors hover:text-dark-300"
               >
-                <svg
-                  className="h-4 w-4"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                <CloseIcon className="h-4 w-4" />
               </button>
             </div>
             {panelContent}
@@ -171,7 +152,7 @@ export function NetworkFilters({ data, className }: NetworkFiltersProps) {
       {/* Mobile: full-screen overlay */}
       {isOpen && (
         <div className="fixed inset-x-0 top-0 z-50 sm:hidden">
-          <div className="fixed inset-0 bg-black/60" onClick={() => setIsOpen(false)} />
+          <div className="fixed inset-0 bg-dark-950/60" onClick={() => setIsOpen(false)} />
           <div className="relative mx-3 mt-3 rounded-xl border border-dark-700/50 bg-dark-900/95 p-4 backdrop-blur-md">
             <div className="mb-3 flex items-center justify-between">
               <h3 className="text-sm font-semibold text-dark-100">
@@ -182,15 +163,7 @@ export function NetworkFilters({ data, className }: NetworkFiltersProps) {
                 aria-label={t('common.close')}
                 className="rounded-lg p-1 text-dark-500 transition-colors hover:bg-dark-800 hover:text-dark-300"
               >
-                <svg
-                  className="h-5 w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                <CloseIcon className="h-5 w-5" />
               </button>
             </div>
             {panelContent}

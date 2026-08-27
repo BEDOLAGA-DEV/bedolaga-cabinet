@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 
 import type { SalesStatsParams } from '../../api/adminSalesStats';
@@ -7,11 +7,14 @@ import { salesStatsApi } from '../../api/adminSalesStats';
 import { METHOD_LABELS } from '../../constants/paymentMethods';
 import { SALES_STATS } from '../../constants/salesStats';
 import { useCurrency } from '../../hooks/useCurrency';
+import { BanknotesIcon, CardIcon, WalletIcon } from '../../components/icons';
 import { StatCard } from '../stats';
 
-import { MultiSeriesAreaChart } from './MultiSeriesAreaChart';
+import PaymentMethodIcon from '../PaymentMethodIcon';
+
+import { BreakdownList } from './BreakdownList';
 import { SimpleAreaChart } from './SimpleAreaChart';
-import { SimpleBarChart } from './SimpleBarChart';
+import { StackedBarChart } from './StackedBarChart';
 
 interface DepositsTabProps {
   params: SalesStatsParams;
@@ -25,15 +28,18 @@ export function DepositsTab({ params }: DepositsTabProps) {
     queryKey: ['sales-stats', 'deposits', params],
     queryFn: () => salesStatsApi.getDeposits(params),
     staleTime: SALES_STATS.STALE_TIME,
+    placeholderData: keepPreviousData,
   });
 
   const formatValue = useCallback((v: number) => formatWithCurrency(v), [formatWithCurrency]);
 
-  const methodBarData = useMemo(
+  const methodBreakdown = useMemo(
     () =>
       data?.by_method.map((item) => ({
-        name: METHOD_LABELS[item.method] || item.method,
+        key: item.method,
+        label: METHOD_LABELS[item.method] || item.method,
         value: item.amount_kopeks / SALES_STATS.KOPEKS_DIVISOR,
+        icon: <PaymentMethodIcon method={item.method} className="h-5 w-5 shrink-0" />,
       })) ?? [],
     [data?.by_method],
   );
@@ -68,7 +74,7 @@ export function DepositsTab({ params }: DepositsTabProps) {
   }
 
   if (isError || !data) {
-    return <div className="py-8 text-center text-red-400">{t('admin.salesStats.loadError')}</div>;
+    return <div className="py-8 text-center text-error-400">{t('admin.salesStats.loadError')}</div>;
   }
 
   return (
@@ -77,21 +83,26 @@ export function DepositsTab({ params }: DepositsTabProps) {
         <StatCard
           label={t('admin.salesStats.deposits.totalDeposits')}
           value={data.total_deposits}
+          icon={<WalletIcon className="h-5 w-5" />}
+          tone="accent"
         />
         <StatCard
           label={t('admin.salesStats.deposits.totalAmount')}
-          value={formatWithCurrency(data.total_amount_kopeks / SALES_STATS.KOPEKS_DIVISOR)}
-          valueClassName="text-success-400"
+          value={formatWithCurrency(data.total_amount_kopeks / SALES_STATS.KOPEKS_DIVISOR, 0)}
+          icon={<BanknotesIcon className="h-5 w-5" />}
+          tone="success"
         />
         <StatCard
           label={t('admin.salesStats.deposits.avgDeposit')}
           value={formatWithCurrency(data.avg_deposit_kopeks / SALES_STATS.KOPEKS_DIVISOR)}
+          icon={<CardIcon className="h-5 w-5" />}
+          tone="neutral"
         />
       </div>
 
-      <SimpleBarChart
-        data={methodBarData}
+      <BreakdownList
         title={t('admin.salesStats.deposits.byMethod')}
+        items={methodBreakdown}
         valueFormatter={formatValue}
       />
 
@@ -102,11 +113,9 @@ export function DepositsTab({ params }: DepositsTabProps) {
         valueLabel={t('admin.salesStats.deposits.revenue')}
       />
 
-      <MultiSeriesAreaChart
+      <StackedBarChart
         data={dailyByMethodData}
         title={t('admin.salesStats.deposits.dailyByMethod')}
-        chartId="deposits-daily-by-method"
-        valueLabel={t('admin.salesStats.deposits.revenue')}
         valueFormatter={formatValue}
       />
     </div>

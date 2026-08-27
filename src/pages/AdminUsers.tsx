@@ -1,84 +1,24 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
+import { useQuery } from '@tanstack/react-query';
 import { useCurrency } from '../hooks/useCurrency';
-import { adminUsersApi, type UserListItem, type UsersStatsResponse } from '../api/adminUsers';
+import { adminUsersApi, type UserListItem } from '../api/adminUsers';
 import { usePlatform } from '../platform/hooks/usePlatform';
-
-const BackIcon = () => (
-  <svg
-    className="h-5 w-5 text-dark-400"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={2}
-  >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-  </svg>
-);
-
-const SearchIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
-    />
-  </svg>
-);
-
-const ChevronLeftIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-  </svg>
-);
-
-const ChevronRightIcon = () => (
-  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-  </svg>
-);
-
-const RefreshIcon = ({ className = 'w-5 h-5' }: { className?: string }) => (
-  <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"
-    />
-  </svg>
-);
-
-const TelegramIcon = () => (
-  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z" />
-  </svg>
-);
-
-interface StatCardProps {
-  title: string;
-  value: string | number;
-  subtitle?: string;
-  color: 'blue' | 'green' | 'yellow' | 'red' | 'purple';
-}
-
-function StatCard({ title, value, subtitle, color }: StatCardProps) {
-  const colors = {
-    blue: 'bg-accent-500/20 text-accent-400 border-accent-500/30',
-    green: 'bg-success-500/20 text-success-400 border-success-500/30',
-    yellow: 'bg-warning-500/20 text-warning-400 border-warning-500/30',
-    red: 'bg-error-500/20 text-error-400 border-error-500/30',
-    purple: 'bg-accent-500/20 text-accent-400 border-accent-500/30',
-  };
-
-  return (
-    <div className={`rounded-xl border p-4 ${colors[color]}`}>
-      <div className="mb-1 text-2xl font-bold">{value}</div>
-      <div className="text-sm opacity-80">{title}</div>
-      {subtitle && <div className="mt-1 text-xs opacity-60">{subtitle}</div>}
-    </div>
-  );
-}
+import { StatCard } from '@/components/stats';
+import {
+  BackIcon,
+  SearchIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  RefreshIcon,
+  TelegramSmallIcon as TelegramIcon,
+  UsersIcon,
+  CheckCircleIcon,
+  SubscriptionIcon,
+  UserPlusIcon,
+  BanIcon,
+} from '@/components/icons';
 
 function StatusBadge({ status }: { status: string }) {
   const styles: Record<string, string> = {
@@ -142,7 +82,7 @@ function UserRow({ user, onClick, formatAmount }: UserRowProps) {
                   : user.subscription_status === 'trial'
                     ? 'border-accent-500/30 bg-accent-500/20 text-accent-400'
                     : user.subscription_status === 'limited'
-                      ? 'border-yellow-500/30 bg-yellow-500/20 text-yellow-400'
+                      ? 'border-warning-500/30 bg-warning-500/20 text-warning-400'
                       : 'border-warning-500/30 bg-warning-500/20 text-warning-400'
               }`}
             >
@@ -181,56 +121,35 @@ export default function AdminUsers() {
   const navigate = useNavigate();
   const { capabilities } = usePlatform();
 
-  const [users, setUsers] = useState<UserListItem[]>([]);
-  const [stats, setStats] = useState<UsersStatsResponse | null>(null);
-  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [emailSearch, setEmailSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [sortBy, setSortBy] = useState<string>('created_at');
   const [offset, setOffset] = useState(0);
-  const [total, setTotal] = useState(0);
 
   const limit = 20;
 
-  const loadUsers = useCallback(async () => {
-    try {
-      setLoading(true);
+  const usersQuery = useQuery({
+    queryKey: ['admin-users', offset, limit, sortBy, search, emailSearch, statusFilter] as const,
+    queryFn: () => {
       const params: Record<string, unknown> = { offset, limit, sort_by: sortBy };
       if (search) params.search = search;
       if (emailSearch) params.email = emailSearch;
       if (statusFilter) params.status = statusFilter;
+      return adminUsersApi.getUsers(params as Parameters<typeof adminUsersApi.getUsers>[0]);
+    },
+  });
+  const users = usersQuery.data?.users ?? [];
+  const total = usersQuery.data?.total ?? 0;
+  const loading = usersQuery.isLoading;
 
-      const data = await adminUsersApi.getUsers(
-        params as Parameters<typeof adminUsersApi.getUsers>[0],
-      );
-      setUsers(data.users);
-      setTotal(data.total);
-    } catch (error) {
-      console.error('Failed to load users:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, [offset, search, emailSearch, statusFilter, sortBy]);
+  const statsQuery = useQuery({
+    queryKey: ['admin-users-stats'] as const,
+    queryFn: () => adminUsersApi.getStats(),
+  });
+  const stats = statsQuery.data ?? null;
 
-  const loadStats = useCallback(async () => {
-    try {
-      const data = await adminUsersApi.getStats();
-      setStats(data);
-    } catch (error) {
-      console.error('Failed to load stats:', error);
-    }
-  }, []);
-
-  useEffect(() => {
-    loadUsers();
-  }, [loadUsers]);
-
-  useEffect(() => {
-    loadStats();
-  }, [loadStats]);
-
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = (e: React.SyntheticEvent) => {
     e.preventDefault();
   };
 
@@ -258,8 +177,8 @@ export default function AdminUsers() {
         </div>
         <button
           onClick={() => {
-            loadUsers();
-            loadStats();
+            usersQuery.refetch();
+            statsQuery.refetch();
           }}
           className="rounded-lg p-2 transition-colors hover:bg-dark-700"
         >
@@ -270,26 +189,35 @@ export default function AdminUsers() {
       {/* Stats */}
       {stats && (
         <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-          <StatCard title={t('admin.users.stats.total')} value={stats.total_users} color="blue" />
           <StatCard
-            title={t('admin.users.stats.active')}
+            label={t('admin.users.stats.total')}
+            value={stats.total_users}
+            icon={<UsersIcon className="h-5 w-5" />}
+            tone="accent"
+          />
+          <StatCard
+            label={t('admin.users.stats.active')}
             value={stats.active_users}
-            color="green"
+            icon={<CheckCircleIcon className="h-5 w-5" />}
+            tone="success"
           />
           <StatCard
-            title={t('admin.users.stats.withSubscription')}
+            label={t('admin.users.stats.withSubscription')}
             value={stats.users_with_active_subscription}
-            color="purple"
+            icon={<SubscriptionIcon className="h-5 w-5" />}
+            tone="accent"
           />
           <StatCard
-            title={t('admin.users.stats.newToday')}
+            label={t('admin.users.stats.newToday')}
             value={stats.new_today}
-            color="yellow"
+            icon={<UserPlusIcon className="h-5 w-5" />}
+            tone="warning"
           />
           <StatCard
-            title={t('admin.users.stats.blocked')}
+            label={t('admin.users.stats.blocked')}
             value={stats.blocked_users}
-            color="red"
+            icon={<BanIcon className="h-5 w-5" />}
+            tone="error"
           />
         </div>
       )}
@@ -360,6 +288,7 @@ export default function AdminUsers() {
             <option value="balance">{t('admin.users.filters.byBalance')}</option>
             <option value="last_activity">{t('admin.users.filters.byActivity')}</option>
             <option value="total_spent">{t('admin.users.filters.bySpent')}</option>
+            <option value="subscription_end_date">{t('admin.users.filters.byExpiry')}</option>
           </select>
         </div>
       </div>
