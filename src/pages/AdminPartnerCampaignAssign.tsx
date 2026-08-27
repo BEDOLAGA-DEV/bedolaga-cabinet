@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { partnerApi } from '../api/partners';
 import { campaignsApi } from '../api/campaigns';
 import { AdminBackButton } from '../components/admin';
+import { Skeleton, SkeletonGroup } from '../components/ui/skeleton';
 
 export default function AdminPartnerCampaignAssign() {
   const { t } = useTranslation();
@@ -58,9 +59,9 @@ export default function AdminPartnerCampaignAssign() {
       </div>
 
       {isLoading ? (
-        <div className="flex items-center justify-center py-12">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-        </div>
+        <SkeletonGroup className="space-y-3">
+          <Skeleton variant="card" count={3} className="h-16" />
+        </SkeletonGroup>
       ) : available.length === 0 ? (
         <div className="rounded-xl border border-dark-700 bg-dark-800 p-6">
           <div className="py-4 text-center text-sm text-dark-500">

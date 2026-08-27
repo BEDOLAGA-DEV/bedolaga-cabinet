@@ -6,6 +6,7 @@ import { partnerApi } from '../api/partners';
 import { AdminBackButton } from '../components/admin';
 import { toNumber } from '../utils/inputHelpers';
 import { SettingsIcon } from '@/components/icons';
+import { PageSkeleton, Skeleton } from '@/components/ui/skeleton';
 
 type NumberOrEmpty = number | '';
 
@@ -84,9 +85,9 @@ export default function AdminPartnerSettings() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-      </div>
+      <PageSkeleton variant="admin" leading={2} titleWidth="w-56" className="space-y-6">
+        <Skeleton variant="card" className="h-96" />
+      </PageSkeleton>
     );
   }
 
@@ -123,6 +124,22 @@ export default function AdminPartnerSettings() {
           <p className="text-sm text-dark-400">{t('admin.partners.settingsSubtitle')}</p>
         </div>
       </div>
+
+      {/* Уровни наград живут в своей таблице, а не в настройках выше: их
+          настройка — отдельный экран с собственной моделью данных. */}
+      <button
+        type="button"
+        onClick={() => navigate('/admin/partners/referral-levels')}
+        className="card mb-6 flex w-full items-center justify-between text-left transition-colors hover:border-accent-500/40"
+      >
+        <div>
+          <div className="font-medium text-dark-100">{t('admin.referralLevels.title')}</div>
+          <div className="text-sm text-dark-500">{t('admin.referralLevels.subtitle')}</div>
+        </div>
+        <span aria-hidden="true" className="text-dark-500">
+          →
+        </span>
+      </button>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Referral Program Section */}

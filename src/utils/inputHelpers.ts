@@ -1,4 +1,4 @@
-import { ChangeEvent } from 'react';
+import type { ChangeEvent } from 'react';
 
 /**
  * Creates an onChange handler for number inputs that allows empty values while typing.
@@ -37,12 +37,4 @@ export function createNumberInputHandler(
  */
 export function toNumber(value: number | '', defaultValue = 0): number {
   return value === '' ? defaultValue : value;
-}
-
-/**
- * Gets the display value for a kopeks field (converts to rubles).
- * Returns '' if the value is empty, otherwise divides by 100.
- */
-export function kopeksToDisplay(value: number | ''): number | '' {
-  return value === '' ? '' : value / 100;
 }

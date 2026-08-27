@@ -18,6 +18,7 @@ import {
   BroadcastStatusBadge,
 } from '../components/broadcasts/BroadcastDeliveryStats';
 import { broadcastPollInterval } from '../utils/broadcastStatus';
+import { PageSkeleton, Skeleton } from '@/components/ui/skeleton';
 import {
   SendIcon,
   CheckIcon,
@@ -202,9 +203,14 @@ export default function AdminPromoOfferSend() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-      </div>
+      <PageSkeleton
+        variant="admin"
+        leading={2}
+        titleWidth="w-56"
+        className="mx-auto max-w-2xl space-y-6"
+      >
+        <Skeleton variant="card" className="h-96" />
+      </PageSkeleton>
     );
   }
 

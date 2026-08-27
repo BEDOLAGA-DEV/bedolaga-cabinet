@@ -8,6 +8,7 @@ import {
   PiWrench,
   PiBookOpen,
   PiHeadset,
+  PiLifebuoy,
   PiArrowDown,
   PiArrowRight,
   PiArrowUp,
@@ -314,6 +315,10 @@ export const HealthIcon = ({ className }: IconProps) => (
 
 export const HistoryIcon = ({ className }: IconProps) => (
   <PiClockCounterClockwise className={cn('h-5 w-5', className)} />
+);
+
+export const LifebuoyIcon = ({ className }: IconProps) => (
+  <PiLifebuoy className={cn('h-5 w-5', className)} />
 );
 
 export const ImageIcon = ({ className }: IconProps) => (

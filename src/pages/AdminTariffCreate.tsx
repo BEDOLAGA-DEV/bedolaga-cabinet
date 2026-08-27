@@ -14,6 +14,7 @@ import {
 import { AdminBackButton } from '../components/admin';
 import { createNumberInputHandler, toNumber } from '../utils/inputHelpers';
 import Twemoji from 'react-twemoji';
+import { PageSkeleton, Skeleton } from '@/components/ui/skeleton';
 import {
   CalendarIcon,
   CheckIcon,
@@ -274,9 +275,12 @@ export default function AdminTariffCreate() {
   // Loading state
   if (isEdit && isLoadingTariff) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-      </div>
+      <PageSkeleton variant="admin" leading={1} titleWidth="w-56" className="space-y-6">
+        <div className="flex gap-2">
+          <Skeleton count={4} className="h-10 w-28 shrink-0 rounded-xl" />
+        </div>
+        <Skeleton variant="card" className="h-96" />
+      </PageSkeleton>
     );
   }
 

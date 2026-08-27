@@ -13,6 +13,7 @@ import {
 } from '../../../api/adminUsers';
 import type { PromoGroup } from '../../../api/promocodes';
 import { ServerIcon } from '@/components/icons';
+import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 
 // ──────────────────────────────────────────────────────────────────
 // Local status badge (parent has its own — duplicating here to keep
@@ -441,9 +442,9 @@ export function InfoTab(props: InfoTabProps) {
             {t('admin.users.detail.referralsList')}
           </div>
           {referralsLoading ? (
-            <div className="flex justify-center py-4">
-              <div className="h-5 w-5 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-            </div>
+            <SkeletonGroup className="space-y-3">
+              <Skeleton variant="card" count={3} className="h-16" />
+            </SkeletonGroup>
           ) : referrals.length === 0 ? (
             <div className="py-2 text-center text-xs text-dark-500">
               {t('admin.users.detail.noReferrals')}

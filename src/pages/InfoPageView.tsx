@@ -8,6 +8,7 @@ import { BackIcon, SearchIcon } from '@/components/icons';
 import { infoPagesApi } from '../api/infoPages';
 import { usePlatform } from '../platform/hooks/usePlatform';
 import type { FaqItem } from '../api/infoPages';
+import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 
 /**
  * Sanitization config — same strict allowlist as NewsArticlePage.
@@ -342,16 +343,16 @@ export default function InfoPageView() {
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
-        <div className="skeleton h-8 w-32 rounded-lg" />
-        <div className="skeleton h-10 w-3/4 rounded-lg" />
-        <div className="skeleton h-64 w-full rounded-xl" />
+      <SkeletonGroup className="space-y-6">
+        <Skeleton className="h-8 w-32 rounded-lg" />
+        <Skeleton className="h-10 w-3/4 rounded-lg" />
+        <Skeleton className="h-64 w-full rounded-xl" />
         <div className="space-y-3">
-          <div className="skeleton h-4 w-full rounded" />
-          <div className="skeleton h-4 w-5/6 rounded" />
-          <div className="skeleton h-4 w-4/6 rounded" />
+          <Skeleton className="h-4 w-full rounded" />
+          <Skeleton className="h-4 w-5/6 rounded" />
+          <Skeleton className="h-4 w-4/6 rounded" />
         </div>
-      </div>
+      </SkeletonGroup>
     );
   }
 

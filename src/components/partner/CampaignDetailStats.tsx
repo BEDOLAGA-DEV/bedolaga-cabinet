@@ -8,6 +8,7 @@ import { DailyChart } from '../stats/DailyChart';
 import { PeriodComparison } from '../stats/PeriodComparison';
 import { StatCard } from '../stats/StatCard';
 import { TopReferrals } from './TopReferrals';
+import { Skeleton, SkeletonGroup } from '../ui/skeleton';
 
 interface CampaignDetailStatsProps {
   campaignId: number;
@@ -25,15 +26,16 @@ export function CampaignDetailStats({ campaignId }: CampaignDetailStatsProps) {
 
   if (isLoading) {
     return (
-      <div className="space-y-3 pt-2">
-        {/* Skeleton loader */}
+      <SkeletonGroup className="space-y-3 pt-2">
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-          {Array.from({ length: PARTNER_STATS.SKELETON_COUNT }).map((_, i) => (
-            <div key={i} className="h-16 animate-pulse rounded-xl bg-dark-800/30" />
-          ))}
+          <Skeleton
+            variant="card"
+            count={PARTNER_STATS.SKELETON_COUNT}
+            className="h-16 rounded-xl"
+          />
         </div>
-        <div className="h-52 animate-pulse rounded-xl bg-dark-800/30" />
-      </div>
+        <Skeleton variant="card" className="h-52 rounded-xl" />
+      </SkeletonGroup>
     );
   }
 

@@ -5,6 +5,7 @@ import { referralNetworkApi } from '@/api/referralNetwork';
 import { CheckIcon, CloseIcon, PlusIcon, SearchIcon, ShareIcon } from '@/components/icons';
 import { MAX_SCOPE_ITEMS } from '@/store/referralNetwork';
 import type { ScopeSelection, ScopeType } from '@/types/referralNetwork';
+import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 
 interface ScopeSelectorProps {
   value: ScopeSelection[];
@@ -368,9 +369,9 @@ export function ScopeSelector({
   function renderCampaignList() {
     if (isScopeLoading) {
       return (
-        <div className="flex items-center justify-center px-4 py-6">
-          <Spinner />
-        </div>
+        <SkeletonGroup className="space-y-3">
+          <Skeleton variant="card" count={3} className="h-16" />
+        </SkeletonGroup>
       );
     }
 
@@ -406,9 +407,9 @@ export function ScopeSelector({
   function renderPartnerList() {
     if (isScopeLoading) {
       return (
-        <div className="flex items-center justify-center px-4 py-6">
-          <Spinner />
-        </div>
+        <SkeletonGroup className="space-y-3">
+          <Skeleton variant="card" count={3} className="h-16" />
+        </SkeletonGroup>
       );
     }
 
@@ -435,9 +436,9 @@ export function ScopeSelector({
 
     if (isUserSearching) {
       return (
-        <div className="flex items-center justify-center px-4 py-6">
-          <Spinner />
-        </div>
+        <SkeletonGroup className="space-y-3">
+          <Skeleton variant="card" count={3} className="h-16" />
+        </SkeletonGroup>
       );
     }
 

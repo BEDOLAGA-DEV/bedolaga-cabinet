@@ -847,14 +847,32 @@
       "totalReferrals": "总推荐数",
       "activeReferrals": "活跃",
       "totalEarnings": "总收益",
-      "commissionRate": "佣金比例"
+      "commissionRate": "佣金比例",
+      "earnedDays": "{{count}} 天订阅",
+      "chainDepth": "网络深度",
+      "levelsValue": "最多 {{count}} 级",
+      "yourLevel": "您的等级",
+      "levelNotReached": "尚未达到"
     },
     "terms": {
       "title": "计划条款",
       "commission": "佣金",
       "minTopup": "最低充值",
       "newUserBonus": "新用户奖励",
-      "inviterBonus": "邀请人奖励"
+      "inviterBonus": "邀请人奖励",
+      "noLevels": "奖励等级尚未配置，暂不发放奖励。",
+      "tierNext": "距离第 {{level}} 级还差 {{count}} 人",
+      "tierNone": "尚未达到任何等级——从第一个门槛开始发放奖励。",
+      "modeChain": "多个层级同时发放奖励：为您邀请的人、为他邀请的人，依此类推。",
+      "modeTiers": "只有一个等级生效——由您邀请的人数解锁的那一级。奖励仅来自您直接邀请的人。",
+      "currentBadge": "您的等级",
+      "levelLabel": "第 {{level}} 级",
+      "fromActive": "需 {{count}} 位已充值的推荐用户",
+      "fromAny": "需邀请 {{count}} 人",
+      "startingLevel": "立即可用",
+      "refereeGets": "受邀用户获得：{{reward}}",
+      "paysNothing": "不向您发放",
+      "personalRate": "您有 {{percent}}% 的专属费率——适用于任何等级。"
     },
     "yourReferrals": "您的推荐",
     "noReferrals": "暂无推荐。分享链接邀请好友！",
@@ -874,7 +892,12 @@
       "referral_registration": "推荐用户注册",
       "referral_first_payment": "推荐用户首次付款",
       "referral_subscription_renewal": "推荐用户续订",
-      "referral_bonus": "推荐奖金"
+      "referral_bonus": "推荐奖金",
+      "referral_first_topup": "首次充值",
+      "referral_commission_topup": "充值佣金",
+      "referral_registration_reward": "注册奖励",
+      "referral_days_reward": "订阅天数",
+      "referral_days_bonus": "赠送天数"
     },
     "disabled": "推荐计划暂时停用",
     "partner": {
@@ -976,6 +999,30 @@
         "rejected": "已拒绝",
         "cancelled": "已取消"
       }
+    },
+    "levelBadge": "第 {{count}} 级",
+    "days": "{{count}} 天",
+    "daysWithTariff": "“{{tariff}}” {{count}} 天",
+    "shareMessageBonus": "加入 {{botName}}！通过此链接注册的奖励：{{bonus}}",
+    "shareMessagePlain": "通过我的链接加入 {{botName}}！",
+    "shareHintLevels": "把链接分享给朋友——奖励按推荐计划的等级发放。",
+    "rewardSettings": {
+      "title": "奖励设置",
+      "intro": "选择推荐奖励的形式，以及订阅天数计入哪个订阅。",
+      "kindHeader": "获取方式",
+      "kindMoney": "现金到余额",
+      "kindDays": "订阅天数",
+      "kindHint": "请选择一项。在等级同时提供现金和天数时生效；若等级只给其中一种，您将获得该种。",
+      "targetHeader": "天数计入何处",
+      "targetAuto": "自动选择",
+      "targetAutoHint": "天数计入到期日最晚的付费订阅。",
+      "targetHint": "若等级指定了资费，天数仍会计入该资费的订阅——这是管理员的设置。",
+      "targetNone": "您还没有可供选择的订阅。",
+      "subscription": "订阅",
+      "until": "至 {{date}}",
+      "saveError": "设置保存失败",
+      "kindMoneyHint": "奖励以金额计入余额",
+      "kindDaysHint": "奖励延长您的订阅"
     }
   },
   "support": {
@@ -1194,6 +1241,7 @@
       "dashboard": "统计",
       "tickets": "工单",
       "settings": "设置",
+      "graceAccess": "宽限访问",
       "apps": "应用",
       "wheel": "转盘",
       "tariffs": "套餐",
@@ -1213,6 +1261,7 @@
       "updates": "更新",
       "pinnedMessages": "置顶消息",
       "partners": "合作伙伴",
+      "referralLevels": "奖励等级",
       "withdrawals": "提现",
       "channelSubscriptions": "必订频道",
       "roles": "角色",
@@ -2089,6 +2138,164 @@
       "botStartVideoNone": "未设置视频 — 菜单使用 logo 图片",
       "botStartVideoError": "视频上传失败"
     },
+    "graceAccess": {
+      "title": "宽限访问",
+      "subtitle": "临时受限访问，让用户仍有机会续订",
+      "loadError": "无法加载宽限访问设置",
+      "saveError": "无法保存设置",
+      "save": "保存",
+      "saving": "保存中…",
+      "discard": "撤销",
+      "dirty": "有未保存的更改",
+      "envLocked": "该值固定在 .env 中，此处无法修改",
+      "restartOnly": "重启机器人后生效",
+      "badge": {
+        "false": "已关闭",
+        "observe": "观察",
+        "true": "已开启",
+        "drain": "排空"
+      },
+      "modeSection": {
+        "title": "模式",
+        "hint": "模式在机器人启动时读取，保存的值需要重启后才会生效。"
+      },
+      "modes": {
+        "false": {
+          "label": "已关闭",
+          "desc": "不发放也不结束宽限会话"
+        },
+        "observe": {
+          "label": "观察",
+          "desc": "仅记录候选，不修改面板"
+        },
+        "true": {
+          "label": "已开启",
+          "desc": "发放临时访问并在结束后恢复"
+        },
+        "drain": {
+          "label": "排空",
+          "desc": "不再新增会话，把已开启的处理完"
+        }
+      },
+      "restart": {
+        "title": "需要重启机器人",
+        "body": "当前运行模式为「{{running}}」，已保存模式为「{{configured}}」。重启之前，宽限访问按运行模式工作。"
+      },
+      "issues": {
+        "title": "配置问题",
+        "titleBeforeEnabling": "开启前需要补齐"
+      },
+      "issue": {
+        "squad_required": "小队未填写：{{field}}。缺少它就无法切换到「已开启」——机器人会以关闭状态启动。",
+        "squad_invalid": "UUID 格式错误：{{field}}",
+        "traffic_required": "流量上限不得少于 1 GB",
+        "open_sessions_stranded": "仍有未结束的会话，而当前模式不会处理它们，面板中的覆盖状态会一直保留。请切换到「排空」。",
+        "number_required": "数值未填写：{{field}}",
+        "mode_invalid": "保存了未知的模式。机器人启动时会因此失败并保持宽限访问关闭——请重新选择模式。"
+      },
+      "fields": {
+        "mode": "模式",
+        "expired_squad_uuid": "订阅到期使用的小队",
+        "limited_squad_uuid": "流量耗尽使用的小队",
+        "external_squad_uuid": "外部小队",
+        "duration_hours": "时长（小时）",
+        "traffic_gb": "流量（GB）",
+        "reconcile_interval_seconds": "核对间隔（秒）",
+        "reconcile_batch_size": "批量大小",
+        "candidate_lookback_minutes": "回溯窗口（分钟）"
+      },
+      "squads": {
+        "title": "小队",
+        "hint": "宽限期间用户被移动到哪里。原始状态会被快照保存，结束时恢复。",
+        "choose": "选择小队",
+        "manual": "手动输入 UUID…",
+        "members": "{{n}} 人",
+        "unavailable": "面板不可用 — 可手动输入 UUID",
+        "expiredDesc": "订阅到期时使用",
+        "limitedDesc": "流量上限耗尽时使用"
+      },
+      "external": {
+        "detach": "移除",
+        "keep": "保持不变",
+        "custom": "备用小队",
+        "detachDesc": "宽限期间移除外部小队，结束后恢复",
+        "keepDesc": "不改动用户的外部小队",
+        "customDesc": "宽限期间使用指定的小队"
+      },
+      "limits": {
+        "title": "限制",
+        "durationDesc": "如果一直没有续订，访问可持续多久",
+        "trafficDesc": "宽限期间的流量上限"
+      },
+      "coverage": {
+        "title": "发放对象",
+        "hint": "默认只有付费订阅可获得宽限访问。",
+        "trial_enabled": "试用订阅",
+        "trial_enabledDesc": "试用结束后也发放宽限访问",
+        "daily_enabled": "按日订阅",
+        "daily_enabledDesc": "为按日计费的订阅发放宽限访问",
+        "free_enabled": "免费订阅",
+        "free_enabledDesc": "为零费用订阅发放宽限访问"
+      },
+      "reconcile": {
+        "title": "后台核对",
+        "hint": "机器人多久查找一次候选并处理未结束的会话",
+        "show": "展开",
+        "hide": "收起",
+        "reconcile_interval_secondsDesc": "两次核对之间的间隔",
+        "reconcile_batch_sizeDesc": "一次处理多少个会话",
+        "candidate_lookback_minutesDesc": "向前查找多久之内的到期和限额"
+      },
+      "health": {
+        "title": "状态",
+        "open": "进行中",
+        "completed": "已结束",
+        "openErrors": "进行中出错",
+        "completedErrors": "已结束出错",
+        "recentErrors": "最近的错误",
+        "subscription": "订阅 #{{id}}"
+      },
+      "sessions": {
+        "title": "会话",
+        "hint": "目前谁持有临时访问，以及以往的会话如何结束",
+        "loadError": "无法加载会话",
+        "empty": "暂无会话",
+        "user": "用户",
+        "reason": "原因",
+        "state": "状态",
+        "until": "有效期至",
+        "filter": {
+          "open": "进行中",
+          "pending": "等待中",
+          "active": "活跃",
+          "restoring": "恢复中",
+          "completed": "已结束",
+          "errors": "有错误"
+        },
+        "states": {
+          "pending": "等待面板",
+          "active": "活跃",
+          "restoring": "恢复中",
+          "completed": "已结束"
+        },
+        "reasons": {
+          "expired": "已到期",
+          "limited": "流量耗尽"
+        },
+        "completion": {
+          "paid": "已续订",
+          "timeout": "宽限期结束",
+          "drained": "已排空",
+          "conflict": "面板冲突",
+          "revoked": "已撤销"
+        },
+        "forbidden": "需要 users:read 权限：该列表包含用户姓名和 Telegram ID。"
+      },
+      "fullyLocked": {
+        "title": "本页面仅可查看",
+        "body": "所有宽限设置都固定在 .env 中，文件会覆盖数据库，这里的修改不会生效。请从 .env 中删除 GRACE_ACCESS_* 行并重启机器人，即可在此管理。"
+      }
+    },
     "buttons": {
       "color": "按钮颜色",
       "emojiId": "自定义表情 ID",
@@ -2245,7 +2452,7 @@
       "adminNotificationsEnabledDesc": "向管理员发送新工单和回复通知",
       "cabinetNotifications": "面板通知",
       "copyTelegramId": "点击复制Telegram ID",
-      "viewUser": "用户",
+      "viewUser": "用户资料",
       "userNotificationsEnabled": "用户通知",
       "userNotificationsEnabledDesc": "向用户发送管理员回复通知",
       "replyFailed": "发送回复失败",
@@ -4293,6 +4500,75 @@
       "moveUp": "上移",
       "moveDown": "下移",
       "delete": "删除"
+    },
+    "referralLevels": {
+      "title": "推荐奖励等级",
+      "subtitle": "链条每一级可发放金额和/或订阅天数",
+      "loadError": "无法加载奖励等级",
+      "schemeLevels": "多级方案已启用",
+      "schemeLegacy": "经典方案",
+      "schemeLegacyHint": "按合作伙伴计划设置发放，等级不生效",
+      "depth": "链条深度：最多 {{count}} 级",
+      "switchToLevels": "启用多级",
+      "switchToLegacy": "返回经典",
+      "envLocked": "REFERRAL_REWARD_SCHEME 在 .env 中固定：切换不会生效，重启后以文件为准。",
+      "noActiveLevels": "方案已启用但没有激活的等级，暂不发放奖励。",
+      "levelTitle": "第 {{count}} 级",
+      "enable": "启用",
+      "disable": "停用",
+      "activeBonuses": "激活的奖励",
+      "trigger": "触发条件",
+      "toReferrer": "给推荐人",
+      "toReferee": "给被邀请人",
+      "percent": "金额百分比",
+      "fixedAmount": "固定金额",
+      "days": "订阅天数",
+      "tariff": "套餐",
+      "mainSubscription": "主订阅",
+      "maxPayments": "已付佣金上限（0 为不限）",
+      "addLevel": "添加第 {{count}} 级",
+      "modes": {
+        "money": "仅金额",
+        "days": "仅天数",
+        "both": "金额和天数"
+      },
+      "triggers": {
+        "registration": "注册时",
+        "first_topup": "首次充值时",
+        "every_topup": "每次充值时"
+      },
+      "saveError": "保存更改失败",
+      "percentRange": "百分比必须在 0 到 100 之间",
+      "beyondDepth": "链条不会超过 {{count}} 级——该等级不会发放奖励",
+      "registrationNeedsTariff": "注册时被邀请人还没有订阅：未选择套餐则天数无法发放",
+      "invalidValue": "值无效：{{field}}",
+      "importLegacy": "将当前设置导入第 1 级",
+      "noTariffHint": "未选择套餐时，天数计入收件人的付费订阅；有多个时选到期最晚的那个。",
+      "schemeOffWarning": "当前为经典奖励方案：以下规则已配置但不会生效。",
+      "chainDepth": "链条深度",
+      "chainDepthHint": "向上有多少层可获得奖励。第 1 级是直接推荐人，第 2 级是其推荐人。超过该深度的规则不发放奖励。最大值：{{max}}。",
+      "depthRange": "深度必须在 1 到 {{max}} 之间",
+      "requiredReferrals": "解锁该等级所需推荐人数（0 表示立即可用）",
+      "countingActive": "计数：已充值的推荐用户",
+      "countingAll": "计数：全部邀请用户",
+      "modeChain": "模式：按链条分级",
+      "modeTiers": "模式：按邀请人数分级",
+      "modeChainHint": "层级编号表示链条深度。第 1 级支付给直接推荐人，第 2 级支付给推荐他的人。一次充值会有多个层级同时支付。",
+      "modeTiersHint": "伙伴的等级随邀请人数提升。只支付给直接推荐人，且只应用一个等级——已达到的最高级。",
+      "switchToTiers": "切换为按邀请人数分级",
+      "switchToChain": "切换为按链条分级",
+      "modeEnvLocked": "REFERRAL_LEVELS_MODE 已在 .env 中固定：切换不会生效，重启后会恢复为文件中的值。",
+      "tierTitle": "第 {{count}} 级",
+      "addTier": "添加第 {{count}} 级",
+      "tierThreshold": "等级生效所需邀请人数；0 为起始级",
+      "depthNotUsed": "按邀请人数分级时不遍历链条，因此深度不适用。",
+      "noBaseTier": "所有等级的门槛都大于零：未达到最低门槛的伙伴将一无所获。请添加门槛为 0 的起始级。",
+      "duplicateThresholds": "有多个启用的等级门槛相同（{{count}}）。编号较大的等级生效——请设置不同门槛，使等级阶梯清晰明确。",
+      "tiersSubtitle": "按伙伴等级发放的金额和/或订阅天数",
+      "tierPaysNothing": "第 {{levels}} 级不向推荐人发放任何奖励。伙伴达到其门槛后收入将中断：只有一个等级生效。",
+      "tierMixedTriggers": "各等级的发放时机不同。只有伙伴已达到的等级的时机生效，其他时机的奖励不会发放。",
+      "multiTariffOff": "多资费已关闭：订阅没有资费，因此指定资费的天数不会发放。清除资费后，天数将计入主订阅。",
+      "depthEnvLocked": "REFERRAL_MAX_LEVEL_DEPTH 已在 .env 中固定：无法在此修改深度，重启后会恢复为文件中的值。"
     }
   },
   "adminUpdates": {

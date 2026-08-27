@@ -1,4 +1,5 @@
 import apiClient from './client';
+import type { ReferralLevelsMode, ReferralRewardLevel, ReferralRewardLevels } from '../types';
 
 // ==================== User-facing types ====================
 
@@ -295,6 +296,73 @@ export const partnerApi = {
     const response = await apiClient.patch<PartnerSettings>(
       '/cabinet/admin/partners/settings',
       data,
+    );
+    return response.data;
+  },
+
+  // Reward levels
+  getReferralLevels: async (): Promise<ReferralRewardLevels> => {
+    const response = await apiClient.get<ReferralRewardLevels>(
+      '/cabinet/admin/partners/referral-levels',
+    );
+    return response.data;
+  },
+
+  /**
+   * Sends ONLY the fields being changed. The editor writes one field at a time and
+   * the bot writes the same table, so shipping the whole object would silently
+   * overwrite an edit made there a moment earlier.
+   */
+  upsertReferralLevel: async (
+    level: number,
+    patch: Partial<
+      Omit<ReferralRewardLevel, 'level' | 'referrer_tariff_name' | 'referee_tariff_name'>
+    >,
+  ): Promise<ReferralRewardLevels> => {
+    const response = await apiClient.put<ReferralRewardLevels>(
+      `/cabinet/admin/partners/referral-levels/${level}`,
+      patch,
+    );
+    return response.data;
+  },
+
+  deleteReferralLevel: async (level: number): Promise<ReferralRewardLevels> => {
+    const response = await apiClient.delete<ReferralRewardLevels>(
+      `/cabinet/admin/partners/referral-levels/${level}`,
+    );
+    return response.data;
+  },
+
+  /** Переносит действующие REFERRAL_* в уровень 1 — выключенным, для проверки. */
+  importLegacyReferralSettings: async (): Promise<ReferralRewardLevels> => {
+    const response = await apiClient.post<ReferralRewardLevels>(
+      '/cabinet/admin/partners/referral-levels/import-legacy',
+    );
+    return response.data;
+  },
+
+  /** How many links up the chain are paid; capped at max_supported_level. */
+  updateReferralDepth: async (maxLevelDepth: number): Promise<ReferralRewardLevels> => {
+    const response = await apiClient.patch<ReferralRewardLevels>(
+      '/cabinet/admin/partners/referral-depth',
+      { max_level_depth: maxLevelDepth },
+    );
+    return response.data;
+  },
+
+  updateReferralScheme: async (scheme: 'legacy' | 'levels'): Promise<ReferralRewardLevels> => {
+    const response = await apiClient.patch<ReferralRewardLevels>(
+      '/cabinet/admin/partners/referral-scheme',
+      { scheme },
+    );
+    return response.data;
+  },
+
+  /** Whether a level number means chain depth or a rank earned by referral count. */
+  updateReferralLevelsMode: async (mode: ReferralLevelsMode): Promise<ReferralRewardLevels> => {
+    const response = await apiClient.patch<ReferralRewardLevels>(
+      '/cabinet/admin/partners/referral-levels-mode',
+      { levels_mode: mode },
     );
     return response.data;
   },

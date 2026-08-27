@@ -7,6 +7,7 @@ import {
 import { isInTelegramWebApp } from '../hooks/useTelegramSDK';
 import { API } from '../config/constants';
 import { reportPossibleBackendDown } from '../api/health';
+import { safeLocal, safeSession } from './safeStorage';
 
 const TOKEN_KEYS = {
   ACCESS: 'access_token',
@@ -189,7 +190,7 @@ export function clearStaleSessionIfNeeded(freshInitData: string | null): void {
       sessionStorage.removeItem(TOKEN_KEYS.REFRESH);
       sessionStorage.removeItem(TOKEN_KEYS.USER);
       localStorage.removeItem(TOKEN_KEYS.REFRESH);
-      localStorage.removeItem('cabinet-auth');
+      safeLocal.removeItem('cabinet-auth');
     }
 
     if (currentTgUserId) {
@@ -309,19 +310,22 @@ export const tokenRefreshManager = new TokenRefreshManager();
 
 const RETURN_URL_KEY = 'auth_return_url';
 
+// Called from the render body of ProtectedRoute/AdminRoute right before the
+// redirect, so a throwing sessionStorage here would keep the user from ever
+// reaching the login screen — the `typeof window` check only guards SSR.
 export function saveReturnUrl(): void {
   if (typeof window !== 'undefined') {
     const currentPath = window.location.pathname + window.location.search;
     if (currentPath && currentPath !== '/login') {
-      sessionStorage.setItem(RETURN_URL_KEY, currentPath);
+      safeSession.setItem(RETURN_URL_KEY, currentPath);
     }
   }
 }
 
 export function getAndClearReturnUrl(): string | null {
   if (typeof window !== 'undefined') {
-    const url = sessionStorage.getItem(RETURN_URL_KEY);
-    sessionStorage.removeItem(RETURN_URL_KEY);
+    const url = safeSession.getItem(RETURN_URL_KEY);
+    safeSession.removeItem(RETURN_URL_KEY);
     return url;
   }
   return null;
@@ -333,20 +337,5 @@ export function safeRedirectToLogin(): void {
     if (window.location.pathname === '/login') return;
     saveReturnUrl();
     window.location.href = '/login';
-  }
-}
-
-export function isValidRedirectUrl(url: string): boolean {
-  if (!url) return false;
-
-  if (url.startsWith('/') && !url.startsWith('//')) {
-    return true;
-  }
-
-  try {
-    const parsed = new URL(url, window.location.origin);
-    return parsed.origin === window.location.origin;
-  } catch {
-    return false;
   }
 }

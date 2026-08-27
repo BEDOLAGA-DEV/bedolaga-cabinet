@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import i18n from '../i18n';
-import { couponsApi, CouponBatch } from '../api/coupons';
+import { couponsApi, type CouponBatch } from '../api/coupons';
 import { usePlatform } from '../platform/hooks/usePlatform';
 import { formatPrice, formatShortDate } from '../utils/format';
 import {
@@ -15,6 +15,7 @@ import {
   TicketIcon,
 } from '@/components/icons';
 import { StatCard } from '../components/stats';
+import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 
 const PAGE_SIZE = 50;
 
@@ -97,9 +98,9 @@ export default function AdminCoupons() {
 
       {/* Batches List */}
       {isLoading ? (
-        <div className="flex items-center justify-center py-12">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-        </div>
+        <SkeletonGroup className="space-y-3">
+          <Skeleton variant="card" count={3} className="h-16" />
+        </SkeletonGroup>
       ) : batches.length === 0 ? (
         <div className="py-12 text-center">
           <p className="text-dark-400">{t('admin.coupons.noBatches')}</p>

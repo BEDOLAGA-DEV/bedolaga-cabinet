@@ -3,15 +3,16 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import {
   adminEmailTemplatesApi,
-  EmailTemplateType,
-  EmailTemplateDetail,
-  EmailTemplateLanguageData,
+  type EmailTemplateType,
+  type EmailTemplateDetail,
+  type EmailTemplateLanguageData,
 } from '../api/adminEmailTemplates';
 import { AdminBackButton, BackIcon } from '../components/admin';
 import { useNativeDialog } from '../platform/hooks/useNativeDialog';
 import { useNotify } from '@/platform';
 import { getApiErrorMessage } from '@/utils/api-error';
 import { MailIcon, SaveIcon, EyeIcon, SendIcon, ResetIcon, EditIcon } from '@/components/icons';
+import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 
 const LANG_LABELS: Record<string, string> = {
   ru: 'RU',
@@ -544,11 +545,9 @@ export default function AdminEmailTemplates() {
         <>
           {/* Template List */}
           {typesLoading ? (
-            <div className="space-y-3">
-              {[...Array(6)].map((_, i) => (
-                <div key={i} className="h-20 animate-pulse rounded-xl bg-dark-800" />
-              ))}
-            </div>
+            <SkeletonGroup className="space-y-3">
+              <Skeleton variant="card" count={6} className="h-20 rounded-xl" />
+            </SkeletonGroup>
           ) : (
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3">
               {typesData?.items.map((template) => (
