@@ -2287,6 +2287,10 @@
           "conflict": "面板冲突",
           "revoked": "已撤销"
         }
+      },
+      "fullyLocked": {
+        "title": "本页面仅可查看",
+        "body": "所有宽限设置都固定在 .env 中，文件会覆盖数据库，这里的修改不会生效。请从 .env 中删除 GRACE_ACCESS_* 行并重启机器人，即可在此管理。"
       }
     },
     "buttons": {

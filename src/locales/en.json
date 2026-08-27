@@ -2598,6 +2598,10 @@
           "conflict": "Panel conflict",
           "revoked": "Revoked"
         }
+      },
+      "fullyLocked": {
+        "title": "This section is read-only",
+        "body": "Every grace setting is pinned in .env, so the file shadows the database and edits made here would not apply. Remove the GRACE_ACCESS_* lines from .env and restart the bot to manage them from here."
       }
     },
     "bulkActions": {

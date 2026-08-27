@@ -232,6 +232,24 @@ describe('раздел grace-доступа', () => {
     );
   });
 
+  it('о полностью закреплённом в .env разделе сообщает одной строкой', async () => {
+    // Пример .env отдавал все ключи grace раскомментированными: у скопировавших
+    // его раздел нередактируем целиком, и двенадцать замков этого не объясняют.
+    state.overview = overview({
+      env_locked: Object.keys(config()),
+    });
+    await renderPage();
+
+    expect(screen.getByText('Раздел открыт только на чтение')).toBeTruthy();
+  });
+
+  it('частичная блокировка общего баннера не показывает', async () => {
+    state.overview = overview({ env_locked: ['duration_hours'] });
+    await renderPage();
+
+    expect(screen.queryByText('Раздел открыт только на чтение')).toBeNull();
+  });
+
   it('недоступная панель оставляет ввод UUID руками', async () => {
     state.squads = { available: false, items: [] };
     await renderPage();

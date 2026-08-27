@@ -468,6 +468,10 @@ export default function AdminGraceAccess() {
 
   const locked = new Set(data.env_locked);
   const isLocked = (field: keyof GraceAccessConfig) => locked.has(field);
+  // Пример .env долгое время отдавал все ключи grace раскомментированными, поэтому
+  // у скопировавших его раздел открывается целиком нередактируемым. Двенадцать
+  // мелких замков этого не объясняют — нужна одна строка о том, что делать.
+  const fullyLocked = data.env_locked.length >= Object.keys(data.config).length;
   const restartOnly = new Set(data.restart_only);
 
   const update = <K extends keyof GraceForm>(field: K, value: GraceForm[K]) =>
@@ -507,6 +511,18 @@ export default function AdminGraceAccess() {
           })}
         </span>
       </div>
+
+      {fullyLocked && (
+        <div className="rounded-xl border border-warning-500/30 bg-warning-500/10 p-4">
+          <div className="flex items-center gap-2 font-medium text-warning-300">
+            <LockIcon className="h-4 w-4" />
+            {t('admin.graceAccess.fullyLocked.title')}
+          </div>
+          <p className="mt-1 text-sm text-warning-200/80">
+            {t('admin.graceAccess.fullyLocked.body')}
+          </p>
+        </div>
+      )}
 
       {data.runtime.restart_required && (
         <div className="rounded-xl border border-warning-500/30 bg-warning-500/10 p-4">
