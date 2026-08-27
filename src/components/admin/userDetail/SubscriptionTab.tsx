@@ -13,6 +13,7 @@ import {
 import { DEVICE_ALIAS_MAX_LENGTH } from '../../../constants/devices';
 import { createNumberInputHandler } from '../../../utils/inputHelpers';
 import { getFlagEmoji } from '../../../utils/subscriptionHelpers';
+import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 import type {
   UserAvailableTariff,
   UserPanelInfo,
@@ -694,9 +695,9 @@ export function SubscriptionTab(props: SubscriptionTabProps) {
       {(subscriptionDetailView || userSubscriptions.length <= 1) && (
         <>
           {panelInfoLoading ? (
-            <div className="flex justify-center rounded-xl bg-dark-800/50 py-8">
-              <div className="h-6 w-6 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-            </div>
+            <SkeletonGroup className="space-y-3">
+              <Skeleton variant="card" count={3} className="h-16" />
+            </SkeletonGroup>
           ) : panelInfo && !panelInfo.found ? (
             <div className="rounded-xl border border-dark-700 bg-dark-800/50 p-4 text-center text-sm text-dark-400">
               {t('admin.users.detail.panelNotFound')}
@@ -950,9 +951,9 @@ export function SubscriptionTab(props: SubscriptionTabProps) {
               </div>
             </div>
             {devicesLoading ? (
-              <div className="flex justify-center py-4">
-                <div className="h-5 w-5 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-              </div>
+              <SkeletonGroup className="space-y-3">
+                <Skeleton variant="card" count={3} className="h-16" />
+              </SkeletonGroup>
             ) : devices.length > 0 ? (
               <div className="space-y-2">
                 {devices.map((device) => {

@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { createJSONStorage, persist } from 'zustand/middleware';
 import type { CampaignBonusInfo, RegisterResponse, User } from '../types';
 import { authApi } from '../api/auth';
 import { apiClient } from '../api/client';
@@ -20,6 +20,7 @@ import {
   restoreRefreshTokenFromCloud,
 } from '../utils/token';
 import { usePermissionStore } from './permissions';
+import { safeLocal } from '../utils/safeStorage';
 
 export interface TelegramWidgetData {
   id: number;
@@ -413,6 +414,22 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: 'cabinet-auth',
+      // Дефолт persist ходит в голый localStorage. createJSONStorage ловит только
+      // БРОСОК геттера (заблокированное хранилище деградирует штатно), но не
+      // случай, когда глобала попросту нет: тогда он строит хранилище поверх
+      // undefined и роняет TypeError на каждом set(). Ровно так ведёт себя node
+      // 25+ под jsdom и часть встроенных вебвью. Явный safeLocal это закрывает.
+      // Тонкая обёртка, а не safeLocal напрямую: StateStorage у zustand выводит
+      // generic из setItem, и boolean оттуда потребовал бы boolean и от removeItem.
+      storage: createJSONStorage(() => ({
+        getItem: (name) => safeLocal.getItem(name),
+        setItem: (name, value) => {
+          safeLocal.setItem(name, value);
+        },
+        removeItem: (name) => {
+          safeLocal.removeItem(name);
+        },
+      })),
       partialize: (state) => ({
         user: state.user,
       }),

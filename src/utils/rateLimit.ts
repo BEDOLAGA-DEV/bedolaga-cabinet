@@ -61,13 +61,6 @@ export function getRateLimitResetTime(key: string): number {
 }
 
 /**
- * Reset rate limit for a key (e.g., after successful action)
- */
-export function resetRateLimit(key: string): void {
-  rateLimitStore.delete(key);
-}
-
-/**
  * Debounce function - delays execution until after wait ms have elapsed
  */
 export function debounce<T extends (...args: unknown[]) => unknown>(

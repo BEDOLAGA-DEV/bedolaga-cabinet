@@ -81,22 +81,3 @@ export function hslToRgb(h: number, s: number, l: number): RGBColor {
 
   return { r: f(0), g: f(8), b: f(4) };
 }
-
-export function hslToHex(h: number, s: number, l: number): string {
-  const { r, g, b } = hslToRgb(h, s, l);
-  return rgbToHex(r, g, b);
-}
-
-export function isValidHex(hex: string): boolean {
-  return /^#[0-9A-Fa-f]{6}$/.test(hex);
-}
-
-export function normalizeHex(hex: string): string {
-  if (!hex.startsWith('#')) {
-    hex = '#' + hex;
-  }
-  if (hex.length === 4) {
-    hex = '#' + hex[1] + hex[1] + hex[2] + hex[2] + hex[3] + hex[3];
-  }
-  return hex.toLowerCase();
-}

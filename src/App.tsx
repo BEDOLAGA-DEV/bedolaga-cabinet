@@ -1,3 +1,4 @@
+import { safeSession } from './utils/safeStorage';
 import { lazy, Suspense, type ComponentType } from 'react';
 import { Routes, Route, Navigate, useLocation, useParams } from 'react-router';
 import { useAuthStore } from './store/auth';
@@ -10,9 +11,12 @@ function lazyWithRetry<T extends ComponentType<unknown>>(factory: () => Promise<
   return lazy(() =>
     factory().catch(() => {
       const key = 'chunk_reload_ts';
-      const last = Number(sessionStorage.getItem(key) || '0');
-      if (Date.now() - last > 30_000) {
-        sessionStorage.setItem(key, String(Date.now()));
+      const last = Number(safeSession.getItem(key) || '0');
+      // Метка обязана пережить сам reload — в этом её единственный смысл. Если
+      // сохранить её негде, перезагрузка станет бесконечной: после reload метки
+      // не окажется, и условие снова выполнится. Лучше отдать ошибку в
+      // ErrorBoundary, чем крутить страницу по кругу.
+      if (Date.now() - last > 30_000 && safeSession.setItem(key, String(Date.now()))) {
         window.location.reload();
       }
       // Re-throw so ErrorBoundary catches it if reload guard prevents loop
@@ -83,6 +87,7 @@ const AdminPanel = lazyWithRetry(() => import('./pages/AdminPanel'));
 const AdminTickets = lazyWithRetry(() => import('./pages/AdminTickets'));
 const AdminTicketSettings = lazyWithRetry(() => import('./pages/AdminTicketSettings'));
 const AdminSettings = lazyWithRetry(() => import('./pages/AdminSettings'));
+const AdminGraceAccess = lazyWithRetry(() => import('./pages/AdminGraceAccess'));
 const AdminApps = lazyWithRetry(() => import('./pages/AdminApps'));
 const AdminWheel = lazyWithRetry(() => import('./pages/AdminWheel'));
 const AdminTariffs = lazyWithRetry(() => import('./pages/AdminTariffs'));
@@ -108,6 +113,7 @@ const AdminCampaignStats = lazyWithRetry(() => import('./pages/AdminCampaignStat
 const AdminCampaignEdit = lazyWithRetry(() => import('./pages/AdminCampaignEdit'));
 const AdminPartners = lazyWithRetry(() => import('./pages/AdminPartners'));
 const AdminPartnerSettings = lazyWithRetry(() => import('./pages/AdminPartnerSettings'));
+const AdminReferralLevels = lazyWithRetry(() => import('./pages/AdminReferralLevels'));
 const AdminPartnerDetail = lazyWithRetry(() => import('./pages/AdminPartnerDetail'));
 const AdminApplicationReview = lazyWithRetry(() => import('./pages/AdminApplicationReview'));
 const AdminPartnerCommission = lazyWithRetry(() => import('./pages/AdminPartnerCommission'));
@@ -675,6 +681,16 @@ function App() {
           }
         />
         <Route
+          path="/admin/grace-access"
+          element={
+            <PermissionRoute permission="settings:read">
+              <LazyPage>
+                <AdminGraceAccess />
+              </LazyPage>
+            </PermissionRoute>
+          }
+        />
+        <Route
           path="/admin/apps"
           element={
             <PermissionRoute permission="apps:read">
@@ -980,6 +996,19 @@ function App() {
             <PermissionRoute permission="partners:read">
               <LazyPage>
                 <AdminPartnerSettings />
+              </LazyPage>
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="/admin/partners/referral-levels"
+          element={
+            /* Право совпадает с тем, что требуют сами эндпоинты уровней:
+               с одним partners:read страница открывалась и падала в общую
+               ошибку загрузки, не сообщая, что дело в правах. */
+            <PermissionRoute permission="partners:settings">
+              <LazyPage>
+                <AdminReferralLevels />
               </LazyPage>
             </PermissionRoute>
           }

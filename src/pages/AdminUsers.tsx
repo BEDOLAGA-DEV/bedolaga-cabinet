@@ -6,6 +6,7 @@ import { useCurrency } from '../hooks/useCurrency';
 import { adminUsersApi, type UserListItem } from '../api/adminUsers';
 import { usePlatform } from '../platform/hooks/usePlatform';
 import { StatCard } from '@/components/stats';
+import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 import {
   BackIcon,
   SearchIcon,
@@ -296,9 +297,9 @@ export default function AdminUsers() {
       {/* Users list */}
       <div className="mb-4 space-y-2">
         {loading ? (
-          <div className="flex justify-center py-12">
-            <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-          </div>
+          <SkeletonGroup className="space-y-3">
+            <Skeleton variant="card" count={3} className="h-16" />
+          </SkeletonGroup>
         ) : users.length === 0 ? (
           <div className="py-12 text-center text-dark-400">{t('admin.users.noData')}</div>
         ) : (

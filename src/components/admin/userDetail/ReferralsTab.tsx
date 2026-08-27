@@ -7,6 +7,7 @@ import { useNotify } from '../../../platform/hooks/useNotify';
 import { adminUsersApi, type UserDetailResponse, type UserListItem } from '../../../api/adminUsers';
 import { StatCard } from '@/components/stats';
 import { BanknotesIcon, PercentIcon, TagIcon, UsersIcon, XIcon } from '@/components/icons';
+import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 
 // ──────────────────────────────────────────────────────────────────
 // Referrals tab — top-of-graph referrer + stats + referrals list,
@@ -442,9 +443,9 @@ export function ReferralsTab({ user, userId, onUserRefresh }: ReferralsTabProps)
         )}
 
         {referralsListLoading ? (
-          <div className="flex items-center justify-center py-8">
-            <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-          </div>
+          <SkeletonGroup className="space-y-3">
+            <Skeleton variant="card" count={3} className="h-16" />
+          </SkeletonGroup>
         ) : referralsList.length === 0 ? (
           <div className="py-8 text-center text-dark-500">
             {t('admin.users.detail.referrals.noReferrals')}

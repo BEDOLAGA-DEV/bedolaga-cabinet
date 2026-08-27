@@ -207,10 +207,6 @@ export interface BanSettingsResponse {
   settings: BanSettingDefinition[];
 }
 
-export interface BanWhitelistRequest {
-  username: string;
-}
-
 // === Report Types ===
 
 export interface BanReportTopViolator {

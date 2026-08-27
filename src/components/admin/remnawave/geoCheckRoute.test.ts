@@ -27,23 +27,15 @@ function node(overrides: Partial<NodeInfo> = {}): NodeInfo {
 }
 
 describe('isValidIpAddress', () => {
-  it.each([
-    '1.2.3.4',
-    '213.176.77.249',
-    '0.0.0.0',
-    '255.255.255.255',
-    '2a0b:4141:820:140d::2',
-  ])('принимает %s', (value) => expect(isValidIpAddress(value)).toBe(true));
+  it.each(['1.2.3.4', '213.176.77.249', '0.0.0.0', '255.255.255.255', '2a0b:4141:820:140d::2'])(
+    'принимает %s',
+    (value) => expect(isValidIpAddress(value)).toBe(true),
+  );
 
-  it.each([
-    '',
-    '   ',
-    'not-an-ip',
-    '256.1.1.1',
-    '1.2.3',
-    '1.2.3.4/24',
-    '1.2.3.4 ; reboot',
-  ])('отклоняет %s', (value) => expect(isValidIpAddress(value)).toBe(false));
+  it.each(['', '   ', 'not-an-ip', '256.1.1.1', '1.2.3', '1.2.3.4/24', '1.2.3.4 ; reboot'])(
+    'отклоняет %s',
+    (value) => expect(isValidIpAddress(value)).toBe(false),
+  );
 
   it('игнорирует обрамляющие пробелы', () => {
     expect(isValidIpAddress('  1.2.3.4  ')).toBe(true);
@@ -52,16 +44,13 @@ describe('isValidIpAddress', () => {
 
 describe('isValidInterfaceName', () => {
   it.each(['eth0', 'ens3', 'wg0', 'br-lan', 'enp0s31f6'])('принимает %s', (value) =>
-    expect(isValidInterfaceName(value)).toBe(true));
+    expect(isValidInterfaceName(value)).toBe(true),
+  );
 
-  it.each([
-    '',
-    'bad iface',
-    'eth0;reboot',
-    '../etc',
-    '-eth0',
-    'a'.repeat(33),
-  ])('отклоняет %s', (value) => expect(isValidInterfaceName(value)).toBe(false));
+  it.each(['', 'bad iface', 'eth0;reboot', '../etc', '-eth0', 'a'.repeat(33)])(
+    'отклоняет %s',
+    (value) => expect(isValidInterfaceName(value)).toBe(false),
+  );
 });
 
 describe('isRouteReady', () => {

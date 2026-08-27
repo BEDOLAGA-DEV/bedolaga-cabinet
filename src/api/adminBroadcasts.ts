@@ -130,10 +130,6 @@ export interface BroadcastListResponse {
   offset: number;
 }
 
-export interface BroadcastPreviewRequest {
-  target: string;
-}
-
 export interface BroadcastPreviewResponse {
   target: string;
   count: number;

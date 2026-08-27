@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { tariffsApi, TariffListItem } from '../api/tariffs';
+import { tariffsApi, type TariffListItem } from '../api/tariffs';
 import { useDestructiveConfirm, useNotify } from '@/platform';
 import { usePlatform } from '../platform/hooks/usePlatform';
 import {
@@ -21,6 +21,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 import {
   BackIcon,
   CheckIcon,
@@ -344,9 +345,9 @@ export default function AdminTariffs() {
 
       {/* Tariffs List */}
       {isLoading ? (
-        <div className="flex items-center justify-center py-12">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-        </div>
+        <SkeletonGroup className="space-y-3">
+          <Skeleton variant="card" count={3} className="h-16" />
+        </SkeletonGroup>
       ) : localTariffs.length === 0 ? (
         <div className="py-12 text-center">
           <p className="text-dark-400">{t('admin.tariffs.noTariffs')}</p>

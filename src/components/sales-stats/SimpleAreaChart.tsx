@@ -100,7 +100,7 @@ export function SimpleAreaChart({
             }}
             labelStyle={{ color: colors.label }}
             itemStyle={{ color: colors.label }}
-            formatter={(value: number | undefined) => [value ?? 0, valueLabel || '']}
+            formatter={(value) => [Number(value) || 0, valueLabel || '']}
           />
           <Area
             type="monotone"

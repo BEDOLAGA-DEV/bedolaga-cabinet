@@ -3,12 +3,12 @@ import { useParams } from 'react-router';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
-import { couponsApi, CouponRedeemResponse } from '../api/coupons';
+import { couponsApi, type CouponRedeemResponse } from '../api/coupons';
 import { useAuthStore } from '../store/auth';
 import { formatShortDate } from '../utils/format';
-import { Spinner } from '@/components/ui/Spinner';
 import { AnimatedCheckmark } from '@/components/ui/AnimatedCheckmark';
 import { TicketIcon } from '@/components/icons';
+import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
@@ -69,9 +69,12 @@ export default function CouponStatus() {
   if (isLoading) {
     return (
       <Shell>
-        <div className="flex justify-center py-8">
-          <Spinner />
-        </div>
+        <SkeletonGroup className="text-center">
+          <Skeleton circle className="mx-auto mb-4 h-10 w-10" />
+          <Skeleton className="mx-auto mb-1 h-7 w-40" />
+          <Skeleton className="mx-auto mb-6 h-5 w-56" />
+          <Skeleton variant="card" className="h-32" />
+        </SkeletonGroup>
       </Shell>
     );
   }

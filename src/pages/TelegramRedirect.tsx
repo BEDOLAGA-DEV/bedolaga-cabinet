@@ -9,6 +9,7 @@ import { isInTelegramWebApp, getTelegramInitData } from '../hooks/useTelegramSDK
 import { tokenStorage } from '../utils/token';
 import { getSafeRedirectPath } from '../utils/safeRedirect';
 import { CheckIcon, XIcon, ExclamationIcon } from '@/components/icons';
+import { safeLocal, safeSession } from '../utils/safeStorage';
 
 const MAX_RETRY_ATTEMPTS = 3;
 const RETRY_COUNT_KEY = 'telegram_redirect_retry_count';
@@ -31,7 +32,7 @@ export default function TelegramRedirect() {
   const [status, setStatus] = useState<'loading' | 'success' | 'error' | 'not-telegram'>('loading');
   const [errorMessage, setErrorMessage] = useState('');
   const [retryCount, setRetryCount] = useState(() => {
-    const stored = sessionStorage.getItem(RETRY_COUNT_KEY);
+    const stored = safeSession.getItem(RETRY_COUNT_KEY);
     return stored ? parseInt(stored, 10) : 0;
   });
 
@@ -102,19 +103,25 @@ export default function TelegramRedirect() {
   const handleRetry = () => {
     if (retryCount >= MAX_RETRY_ATTEMPTS) {
       setErrorMessage(t('telegramRedirect.maxRetries'));
-      sessionStorage.removeItem(RETRY_COUNT_KEY);
+      safeSession.removeItem(RETRY_COUNT_KEY);
       return;
     }
     const newCount = retryCount + 1;
     setRetryCount(newCount);
-    sessionStorage.setItem(RETRY_COUNT_KEY, String(newCount));
+    // Счётчик читается после reload, поэтому память тут не считается: если
+    // сохранить некуда, лимит попыток не сработает никогда и пользователь
+    // останется крутить перезагрузку. Тогда сразу говорим, что попытки исчерпаны.
+    if (!safeSession.setItem(RETRY_COUNT_KEY, String(newCount))) {
+      setErrorMessage(t('telegramRedirect.maxRetries'));
+      return;
+    }
 
     // Clear all cached auth state to prevent stale token/initData loops
     tokenStorage.clearTokens();
-    sessionStorage.removeItem('tapps/launchParams');
-    sessionStorage.removeItem('telegram_init_data');
-    localStorage.removeItem('cabinet-auth');
-    localStorage.removeItem('tg_user_id');
+    safeSession.removeItem('tapps/launchParams');
+    safeSession.removeItem('telegram_init_data');
+    safeLocal.removeItem('cabinet-auth');
+    safeLocal.removeItem('tg_user_id');
 
     setStatus('loading');
     setErrorMessage('');
@@ -124,7 +131,7 @@ export default function TelegramRedirect() {
   // Clear retry count on successful auth
   useEffect(() => {
     if (status === 'success') {
-      sessionStorage.removeItem(RETRY_COUNT_KEY);
+      safeSession.removeItem(RETRY_COUNT_KEY);
     }
   }, [status]);
 

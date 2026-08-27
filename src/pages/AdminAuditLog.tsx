@@ -3,10 +3,11 @@ import { useNavigate } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
-import { rbacApi, AuditLogEntry, AuditLogFilters } from '@/api/rbac';
+import { rbacApi, type AuditLogEntry, type AuditLogFilters } from '@/api/rbac';
 import { PermissionGate } from '@/components/auth/PermissionGate';
 import { DateField } from '@/components/DateField';
 import { usePlatform } from '@/platform/hooks/usePlatform';
+import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 import {
   BackIcon,
   ChevronDownIcon,
@@ -777,9 +778,9 @@ export default function AdminAuditLog() {
 
       {/* Content */}
       {isLoading ? (
-        <div className="flex items-center justify-center py-12">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-        </div>
+        <SkeletonGroup className="space-y-3">
+          <Skeleton variant="card" count={3} className="h-16" />
+        </SkeletonGroup>
       ) : error ? (
         <div className="py-12 text-center">
           <p className="text-error-400">{t('admin.auditLog.errors.loadFailed')}</p>

@@ -2,9 +2,15 @@ import { useState, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { rbacApi, PermissionSection, CreateRolePayload, UpdateRolePayload } from '@/api/rbac';
+import {
+  rbacApi,
+  type PermissionSection,
+  type CreateRolePayload,
+  type UpdateRolePayload,
+} from '@/api/rbac';
 import { AdminBackButton } from '@/components/admin';
 import { ChevronDownIcon } from '@/components/icons';
+import { PageSkeleton, Skeleton } from '@/components/ui/skeleton';
 
 // === Constants ===
 
@@ -352,9 +358,9 @@ export default function AdminRoleEdit() {
   // Loading state
   if (isEdit && isLoadingRole) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-      </div>
+      <PageSkeleton variant="admin" leading={1} titleWidth="w-56" className="space-y-6">
+        <Skeleton variant="card" className="h-96" />
+      </PageSkeleton>
     );
   }
 

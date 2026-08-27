@@ -1,6 +1,7 @@
-import { type ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 import { TREND_STYLES } from './constants';
+import { Skeleton } from '../ui/skeleton';
 
 export interface StatCardDelta {
   /** Signed percent change vs the comparison period. */
@@ -18,8 +19,9 @@ const TONE = {
 } as const;
 
 interface StatCardProps {
-  label: string;
-  value: string | number;
+  /** Необязателен в режиме загрузки: тогда вместо подписи рисуется заглушка. */
+  label?: string;
+  value?: string | number;
   icon?: ReactNode;
   /** Tints the icon chip and (unless valueClassName is set) the value colour. */
   tone?: keyof typeof TONE;
@@ -52,7 +54,17 @@ export function StatCard({
   return (
     <div className="h-full rounded-xl bg-dark-800/30 p-3 transition-colors hover:bg-dark-800/50">
       <div className="flex items-center justify-between gap-2">
-        <span className="line-clamp-2 text-xs leading-tight text-dark-500 sm:text-sm">{label}</span>
+        {loading && !label ? (
+          // Карточка сама себе скелетон: страницам не нужно угадывать её высоту.
+          // Высота замерена по реальной подписи, а не выведена из шкалы:
+          // на мобиле leading-tight перебивает text-xs и даёт 15px, а на sm
+          // responsive-вариант text-sm перебивает leading-tight и даёт 20px.
+          <Skeleton className="h-[15px] w-24 sm:h-5" />
+        ) : (
+          <span className="line-clamp-2 text-xs leading-tight text-dark-500 sm:text-sm">
+            {label}
+          </span>
+        )}
         {trailing}
       </div>
       {/* Chip is centred against the value line only (delta sits below the whole
@@ -68,7 +80,7 @@ export function StatCard({
         )}
         <div className="min-w-0 flex-1">
           {loading ? (
-            <div className="skeleton h-7 w-20 rounded" />
+            <Skeleton className="h-7 w-20 rounded" />
           ) : (
             <>
               <div className={`truncate text-lg font-semibold sm:text-xl ${valueClass}`}>

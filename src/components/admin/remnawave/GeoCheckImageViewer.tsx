@@ -2,6 +2,7 @@ import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch';
 import { MinusIcon, PlusIcon, ResetIcon } from '@/components/icons';
+import { Skeleton } from '@/components/ui/skeleton';
 
 /**
  * Ширина в CSS-пикселях, при которой моноширинный отчёт ещё читается.
@@ -82,13 +83,14 @@ export function GeoCheckImageViewer({ src, alt, fullscreen }: GeoCheckImageViewe
   return (
     <div ref={hostRef} className="relative h-full">
       {!loaded && (
-        <div className="absolute inset-0 z-10 space-y-2 p-4" aria-busy="true">
+        <div
+          className="absolute inset-0 z-10 space-y-2 p-4"
+          role="status"
+          aria-busy="true"
+          aria-label={t('common.loading')}
+        >
           {SKELETON_ROWS.map((w) => (
-            <div
-              key={w}
-              className="h-3 animate-pulse rounded bg-dark-700/50"
-              style={{ width: `${w}%` }}
-            />
+            <Skeleton key={w} className="h-3" style={{ width: `${w}%` }} />
           ))}
         </div>
       )}

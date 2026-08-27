@@ -118,8 +118,8 @@ export function DualAreaChart({
             }}
             labelStyle={{ color: colors.label }}
             itemStyle={{ color: colors.label }}
-            formatter={(value: number | undefined, name: string | undefined) => {
-              const displayValue = value ?? 0;
+            formatter={(value, name) => {
+              const displayValue = Number(value) || 0;
               if (name === 'series1') return [displayValue, series1Label];
               return [displayValue, series2Label];
             }}

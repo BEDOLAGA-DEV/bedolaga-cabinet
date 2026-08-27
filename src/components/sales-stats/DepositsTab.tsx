@@ -15,6 +15,7 @@ import PaymentMethodIcon from '../PaymentMethodIcon';
 import { BreakdownList } from './BreakdownList';
 import { SimpleAreaChart } from './SimpleAreaChart';
 import { StackedBarChart } from './StackedBarChart';
+import { StatsTabSkeleton } from './StatsTabSkeleton';
 
 interface DepositsTabProps {
   params: SalesStatsParams;
@@ -64,13 +65,7 @@ export function DepositsTab({ params }: DepositsTabProps) {
   );
 
   if (isLoading) {
-    return (
-      <div className="animate-pulse space-y-4">
-        {Array.from({ length: 3 }, (_, i) => (
-          <div key={i} className="h-24 rounded-xl bg-dark-800/30" />
-        ))}
-      </div>
-    );
+    return <StatsTabSkeleton />;
   }
 
   if (isError || !data) {

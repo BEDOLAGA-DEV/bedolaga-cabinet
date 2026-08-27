@@ -25,15 +25,12 @@ describe('isVersionAtLeast', () => {
     expect(isVersionAtLeast('3.3.0-rc.1', '3.3.0')).toBe(true);
   });
 
-  it.each([
-    undefined,
-    null,
-    '',
-    'unknown',
-    'dev',
-  ])('нераспознанное значение %s -> false', (value) => {
-    expect(isVersionAtLeast(value, '3.3.0')).toBe(false);
-  });
+  it.each([undefined, null, '', 'unknown', 'dev'])(
+    'нераспознанное значение %s -> false',
+    (value) => {
+      expect(isVersionAtLeast(value, '3.3.0')).toBe(false);
+    },
+  );
 });
 
 describe('supportsGeoCheck', () => {

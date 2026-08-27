@@ -2,9 +2,10 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
-import { promoApi, PromoOffer } from '../api/promo';
+import { promoApi, type PromoOffer } from '../api/promo';
 import { ClockIcon, CheckIcon, XCircleIcon } from './icons';
 import { useDestructiveConfirm } from '@/platform/hooks/useNativeDialog';
+import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 
 // Helper functions
 const formatTimeLeft = (
@@ -325,13 +326,13 @@ export default function PromoOffersSection({ className = '' }: PromoOffersSectio
       {/* Loading State */}
       {offersLoading && (
         <div className="card">
-          <div className="flex items-center gap-4">
-            <div className="h-12 w-12 animate-pulse rounded-xl bg-dark-700" />
+          <SkeletonGroup className="flex items-center gap-4">
+            <Skeleton className="h-12 w-12 shrink-0 rounded-xl" />
             <div className="flex-1 space-y-2">
-              <div className="h-5 w-32 animate-pulse rounded bg-dark-700" />
-              <div className="h-4 w-48 animate-pulse rounded bg-dark-700" />
+              <Skeleton className="h-5 w-32" />
+              <Skeleton className="h-4 w-48" />
             </div>
-          </div>
+          </SkeletonGroup>
         </div>
       )}
     </div>

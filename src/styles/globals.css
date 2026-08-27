@@ -907,14 +907,6 @@ img.twemoji {
   }
 
   /* Skeleton loader */
-  .skeleton {
-    @apply animate-pulse rounded-lg bg-dark-800;
-  }
-
-  .light .skeleton {
-    @apply bg-champagne-300;
-  }
-
   /* Link */
   .link {
     @apply text-accent-400 transition-colors duration-200 hover:text-accent-300;

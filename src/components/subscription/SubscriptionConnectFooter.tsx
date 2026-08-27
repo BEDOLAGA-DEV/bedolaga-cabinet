@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { ChevronRightIcon, DevicesIcon, WarningIcon } from '@/components/icons';
 import { cn } from '@/lib/utils';
+import { Skeleton } from '@/components/ui/skeleton';
 import type { ConnectFooterState } from './connectFooterState';
 
 interface SubscriptionConnectFooterProps {
@@ -34,15 +35,17 @@ export function SubscriptionConnectFooter({
       <div
         className="flex items-center gap-2.5 border-t px-4 py-2.5"
         style={{ borderColor }}
+        role="status"
         aria-busy="true"
+        aria-label={t('common.loading')}
       >
         {/* Высоту задаёт невидимый текст с той же типографикой, что у готового
             подвала. Подбирать её числом нельзя: строчный бокс даёт дробные
             пиксели, и карточка дёргается при появлении данных. */}
         <div className="flex w-full items-center gap-2.5">
-          <div className="h-4 w-4 shrink-0 animate-pulse rounded bg-dark-700/60" />
-          <div className="h-3.5 w-40 animate-pulse rounded bg-dark-700/60" />
-          <div className="ml-auto h-3 w-10 animate-pulse rounded bg-dark-700/60" />
+          <Skeleton className="h-4 w-4 shrink-0" />
+          <Skeleton className="h-3.5 w-40" />
+          <Skeleton className="ml-auto h-3 w-10" />
           <span aria-hidden className="w-0 overflow-hidden text-[13px] font-medium">
             &nbsp;
           </span>

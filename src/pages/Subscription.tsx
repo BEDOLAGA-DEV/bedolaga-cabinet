@@ -55,6 +55,8 @@ import { DeviceReductionSheet } from '../components/subscription/sheets/DeviceRe
 import { TrafficTopupSheet } from '../components/subscription/sheets/TrafficTopupSheet';
 import { ServerManagementSheet } from '../components/subscription/sheets/ServerManagementSheet';
 import { DeleteSubscriptionSheet } from '../components/subscription/sheets/DeleteSubscriptionSheet';
+import { PageSkeleton, Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
+import { safeLocal } from '../utils/safeStorage';
 
 /** Isolated countdown so 1s interval doesn't re-render the whole page */
 const CountdownTimer = memo(function CountdownTimer({
@@ -546,10 +548,7 @@ export default function Subscription() {
         traffic_used_percent: data.traffic_used_percent,
         is_unlimited: data.is_unlimited,
       });
-      localStorage.setItem(
-        `traffic_refresh_ts_${subscriptionId ?? 'default'}`,
-        Date.now().toString(),
-      );
+      safeLocal.setItem(`traffic_refresh_ts_${subscriptionId ?? 'default'}`, Date.now().toString());
       if (data.rate_limited && data.retry_after_seconds) {
         setTrafficRefreshCooldown(data.retry_after_seconds);
       } else {
@@ -581,7 +580,7 @@ export default function Subscription() {
 
   // Initialize revoke cooldown from localStorage on mount
   useEffect(() => {
-    const ts = localStorage.getItem(`revoke_ts_${subscriptionId ?? 'default'}`);
+    const ts = safeLocal.getItem(`revoke_ts_${subscriptionId ?? 'default'}`);
     if (ts) {
       const elapsed = Math.floor((Date.now() - parseInt(ts, 10)) / 1000);
       const remaining = Math.max(0, 900 - elapsed);
@@ -609,7 +608,7 @@ export default function Subscription() {
       // re-reads the now-empty device list instead of showing the stale cache.
       queryClient.invalidateQueries({ queryKey: ['devices', subscriptionId] });
       haptic.notification('success');
-      localStorage.setItem(`revoke_ts_${subscriptionId ?? 'default'}`, Date.now().toString());
+      safeLocal.setItem(`revoke_ts_${subscriptionId ?? 'default'}`, Date.now().toString());
       setRevokeCooldown(900);
     },
     onError: () => {
@@ -623,7 +622,7 @@ export default function Subscription() {
     if (hasAutoRefreshed.current) return;
     hasAutoRefreshed.current = true;
 
-    const lastRefresh = localStorage.getItem(`traffic_refresh_ts_${subscriptionId ?? 'default'}`);
+    const lastRefresh = safeLocal.getItem(`traffic_refresh_ts_${subscriptionId ?? 'default'}`);
     const now = Date.now();
     const cacheMs = 30 * 1000;
 
@@ -664,9 +663,10 @@ export default function Subscription() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-64 items-center justify-center">
-        <div className="h-10 w-10 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-      </div>
+      <PageSkeleton leading={1} titleWidth="w-48">
+        <Skeleton variant="card" className="h-64" />
+        <Skeleton variant="card" count={2} className="h-20" />
+      </PageSkeleton>
     );
   }
 
@@ -1875,15 +1875,9 @@ export default function Subscription() {
           </div>
 
           {devicesLoading ? (
-            <div className="flex items-center justify-center py-8">
-              <div
-                className="h-8 w-8 animate-spin rounded-full border-2 border-t-transparent"
-                style={{
-                  borderColor: 'rgb(var(--color-accent-500))',
-                  borderTopColor: 'transparent',
-                }}
-              />
-            </div>
+            <SkeletonGroup className="space-y-3">
+              <Skeleton variant="card" count={3} className="h-16" />
+            </SkeletonGroup>
           ) : devicesData && devicesData.devices.length > 0 ? (
             <div className="space-y-2">
               <div className="mb-2 font-mono text-[11px] text-dark-50/30">

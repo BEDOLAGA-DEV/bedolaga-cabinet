@@ -181,15 +181,6 @@ export function findTreeLocation(
   return null;
 }
 
-// Helper: get all backend category keys for a given sub-item id
-export function getCategoriesForSubItem(subItemId: string): string[] {
-  for (const group of SETTINGS_TREE.groups) {
-    const child = group.children.find((c) => c.id === subItemId);
-    if (child) return child.categories;
-  }
-  return [];
-}
-
 // Theme preset type
 export interface ThemePreset {
   id: string;

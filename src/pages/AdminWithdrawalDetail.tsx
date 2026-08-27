@@ -5,6 +5,7 @@ import { withdrawalApi } from '../api/withdrawals';
 import { AdminBackButton } from '../components/admin';
 import { WarningIcon } from '@/components/icons';
 import { useCurrency } from '../hooks/useCurrency';
+import { PageSkeleton, Skeleton } from '@/components/ui/skeleton';
 import {
   formatDate,
   getWithdrawalStatusBadge,
@@ -60,9 +61,9 @@ export default function AdminWithdrawalDetail() {
   // Loading
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-      </div>
+      <PageSkeleton variant="admin" leading={1} titleWidth="w-56" className="space-y-6">
+        <Skeleton variant="card" count={2} className="h-40" />
+      </PageSkeleton>
     );
   }
 

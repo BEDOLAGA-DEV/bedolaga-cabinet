@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { adminLandingsApi, LandingListItem, resolveLocaleDisplay } from '../api/landings';
+import { adminLandingsApi, type LandingListItem, resolveLocaleDisplay } from '../api/landings';
 import { useNotify } from '@/platform';
 import { copyToClipboard } from '../utils/clipboard';
 import { getApiErrorMessage } from '../utils/api-error';
@@ -34,6 +34,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 
 // ============ Sortable Landing Card ============
 
@@ -439,9 +440,9 @@ export default function AdminLandings() {
 
       {/* Landings List */}
       {isLoading ? (
-        <div className="flex items-center justify-center py-12">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-        </div>
+        <SkeletonGroup className="space-y-3">
+          <Skeleton variant="card" count={3} className="h-16" />
+        </SkeletonGroup>
       ) : localLandings.length === 0 ? (
         <div className="py-12 text-center">
           <p className="text-dark-400">{t('common.noData')}</p>

@@ -18,6 +18,7 @@ import {
   FileTextIcon,
   GiftIcon,
   HistoryIcon,
+  LifebuoyIcon,
   LockIcon,
   MailIcon,
   MegaphoneIcon,
@@ -85,6 +86,7 @@ const icons = {
   refresh: <SyncIcon />,
   shield: <ShieldIcon />,
   'user-check': <UserPlusIcon />,
+  lifebuoy: <LifebuoyIcon />,
   lock: <LockIcon />,
   scroll: <HistoryIcon />,
   'list-checks': <ClipboardIcon />,
@@ -252,6 +254,17 @@ const sections: AdminSection[] = [
         permission: 'partners:read',
       },
       {
+        // Раньше страница уровней открывалась только из Партнёры → Настройки, и
+        // включив многоуровневую схему, админ не находил её в меню вовсе.
+        // Пункт показывается всегда, а не при включённой схеме: саму схему
+        // переключают с этой же страницы, и условный пункт замкнул бы круг.
+        name: 'admin.nav.referralLevels',
+        icon: 'trending',
+        to: '/admin/partners/referral-levels',
+        // Совпадает с правом, которое требуют и маршрут, и все эндпоинты уровней.
+        permission: 'partners:settings',
+      },
+      {
         name: 'admin.nav.withdrawals',
         icon: 'arrow-up',
         to: '/admin/withdrawals',
@@ -282,6 +295,16 @@ const sections: AdminSection[] = [
         name: 'admin.nav.settings',
         icon: 'settings',
         to: '/admin/settings',
+        permission: 'settings:read',
+      },
+      {
+        // Настройки grace-доступа существуют и на общей странице настроек — там это
+        // двенадцать несвязанных строк. Тут они собраны вместе с проверкой конфигурации
+        // и состоянием сессий, поэтому и пункт меню отдельный.
+        name: 'admin.nav.graceAccess',
+        icon: 'lifebuoy',
+        to: '/admin/grace-access',
+        // То же право, что у страницы настроек и у эндпоинтов раздела.
         permission: 'settings:read',
       },
       { name: 'admin.nav.apps', icon: 'app', to: '/admin/apps', permission: 'apps:read' },

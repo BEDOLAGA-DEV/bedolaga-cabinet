@@ -15,6 +15,7 @@ import {
 import { tariffsApi } from '../api/tariffs';
 import { usePlatform } from '../platform/hooks/usePlatform';
 import { BackIcon, RefreshIcon } from '@/components/icons';
+import { PageSkeleton, Skeleton } from '@/components/ui/skeleton';
 
 // valid_until is created as end-of-day in the admin's LOCAL tz, then stored/returned
 // as a UTC instant. Reading the picker back must convert UTC -> local date, otherwise
@@ -245,9 +246,9 @@ export default function AdminPromocodeCreate() {
   // Loading state
   if (isEdit && isLoadingPromocode) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-      </div>
+      <PageSkeleton variant="admin" leading={1} titleWidth="w-56" className="space-y-6">
+        <Skeleton variant="card" className="h-96" />
+      </PageSkeleton>
     );
   }
 

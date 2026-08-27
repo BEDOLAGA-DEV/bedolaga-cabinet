@@ -8,6 +8,7 @@ import { Toggle } from '../components/admin/Toggle';
 import { useHapticFeedback } from '../platform/hooks/useHaptic';
 import { useDestructiveConfirm } from '../platform/hooks/useNativeDialog';
 import type { NewsListItem } from '../types/news';
+import { ListRowSkeleton } from '@/components/admin/ListRowSkeleton';
 import {
   PlusIcon,
   RefreshIcon,
@@ -284,30 +285,9 @@ export default function AdminNews() {
 
       {/* Articles list */}
       {isLoading ? (
-        <div className="space-y-3">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div
-              key={i}
-              className="animate-pulse rounded-xl border border-dark-700 bg-dark-800/50 p-4"
-            >
-              <div className="flex items-start gap-4">
-                <div className="min-w-0 flex-1 space-y-2">
-                  <div className="flex gap-2">
-                    <div className="h-4 w-16 rounded bg-dark-700" />
-                    <div className="h-4 w-12 rounded bg-dark-700" />
-                  </div>
-                  <div className="h-5 w-3/4 rounded bg-dark-700" />
-                  <div className="h-3 w-1/2 rounded bg-dark-700" />
-                </div>
-                <div className="flex gap-2">
-                  <div className="h-8 w-8 rounded-lg bg-dark-700" />
-                  <div className="h-8 w-14 rounded-full bg-dark-700" />
-                  <div className="h-8 w-8 rounded-lg bg-dark-700" />
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+        <ListRowSkeleton
+          actions={[{ width: 'w-8' }, { width: 'w-14', pill: true }, { width: 'w-8' }]}
+        />
       ) : articles.length === 0 ? (
         <div className="flex flex-col items-center rounded-xl border border-dark-700 bg-dark-800/50 p-8 text-center text-dark-400">
           <NewsIcon className="h-6 w-6" />

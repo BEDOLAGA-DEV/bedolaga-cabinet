@@ -20,6 +20,7 @@ import {
   TicketIcon,
 } from '@/components/icons';
 import { StatCard } from '../components/stats';
+import { PageSkeleton, Skeleton } from '@/components/ui/skeleton';
 
 export default function AdminCouponDetail() {
   const { t } = useTranslation();
@@ -113,9 +114,19 @@ export default function AdminCouponDetail() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-      </div>
+      <PageSkeleton
+        variant="admin"
+        leading={1}
+        titleWidth="w-56"
+        className="mx-auto max-w-2xl space-y-6"
+      >
+        <div className="grid grid-cols-3 gap-3">
+          <StatCard loading />
+          <StatCard loading />
+          <StatCard loading />
+        </div>
+        <Skeleton variant="card" count={2} className="h-40" />
+      </PageSkeleton>
     );
   }
 

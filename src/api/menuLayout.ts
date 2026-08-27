@@ -37,8 +37,6 @@ export const BUILTIN_SECTIONS = [
   'language',
 ] as const;
 
-export type BuiltinSection = (typeof BUILTIN_SECTIONS)[number];
-
 export const STYLE_OPTIONS = [
   { value: 'default' as const, colorClass: 'bg-dark-500' },
   { value: 'primary' as const, colorClass: 'bg-accent-500' },
