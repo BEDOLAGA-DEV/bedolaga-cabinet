@@ -302,6 +302,21 @@ export default function AdminReferralLevels() {
           </p>
         )}
 
+        {/* Мультитариф выключен: у подписок нет тарифа, и дни с выбранным
+            тарифом не начислятся вовсе. Список тарифов при этом полон, поэтому
+            без оговорки настройка выглядит рабочей. Бот предупреждает об этом
+            на карточке уровня — кабинет обязан говорить то же самое. */}
+        {isLevels &&
+          !data.multi_tariff_enabled &&
+          data.levels.some(
+            (lvl) =>
+              lvl.reward_mode !== 'money' && (lvl.referrer_tariff_id || lvl.referee_tariff_id),
+          ) && (
+            <p className="mt-3 rounded-xl border border-warning-500/30 bg-warning-500/10 p-3 text-sm text-warning-400">
+              {t('admin.referralLevels.multiTariffOff')}
+            </p>
+          )}
+
         {paysNothing.length > 0 && (
           <p className="mt-3 rounded-xl border border-warning-500/30 bg-warning-500/10 p-3 text-sm text-warning-400">
             {t('admin.referralLevels.tierPaysNothing', { levels: paysNothing.join(', ') })}
