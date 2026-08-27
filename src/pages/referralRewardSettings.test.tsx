@@ -107,7 +107,7 @@ describe('настройки наград пользователя', () => {
 
   it('отмечают автоподбор, пока подписка не выбрана', async () => {
     // Автоподбор — тоже вариант, и без отметки непонятно, что происходит сейчас.
-    await renderCard(terms({ days_target_subscription_id: null }));
+    await renderCard(terms({ reward_preference: 'days', days_target_subscription_id: null }));
 
     const selected = screen
       .getAllByRole('button')
@@ -118,12 +118,12 @@ describe('настройки наград пользователя', () => {
 
   it('показывают срок рядом с названием тарифа', async () => {
     // Подписок одного тарифа может быть несколько — по названию их не различить.
-    await renderCard(terms());
+    await renderCard(terms({ reward_preference: 'days' }));
     expect(screen.getByText(/Про — до /)).toBeTruthy();
   });
 
   it('сообщают, когда выбирать не из чего', async () => {
-    await renderCard(terms({ days_target_options: [] }));
+    await renderCard(terms({ reward_preference: 'days', days_target_options: [] }));
     expect(screen.getByText(/нет подписок/)).toBeTruthy();
   });
 
@@ -141,7 +141,7 @@ describe('настройки наград пользователя', () => {
   });
 
   it('шлют выбранную подписку', async () => {
-    const onChange = await renderCard(terms());
+    const onChange = await renderCard(terms({ reward_preference: 'days' }));
 
     fireEvent.click(screen.getByText(/Про — до /));
 
@@ -152,7 +152,9 @@ describe('настройки наград пользователя', () => {
   });
 
   it('шлют null при возврате к автоподбору', async () => {
-    const onChange = await renderCard(terms({ days_target_subscription_id: 10 }));
+    const onChange = await renderCard(
+      terms({ reward_preference: 'days', days_target_subscription_id: 10 }),
+    );
 
     fireEvent.click(screen.getByText('Выбирать автоматически'));
 
@@ -169,5 +171,45 @@ describe('настройки наград пользователя', () => {
 
     const button = screen.getByText('Деньги на баланс').closest('button') as HTMLButtonElement;
     expect(button.disabled).toBe(true);
+  });
+});
+
+describe('раздел подписок следует за выбором вида', () => {
+  it.each([
+    ['days', true],
+    ['money', false],
+    [null, false],
+  ])('preference=%s -> раздел показан: %s', async (preference, shown) => {
+    // Выбравшему деньги настройка ни на что не влияет: раздел обещал бы
+    // влияние, которого нет.
+    await renderCard(terms({ reward_preference: preference as string | null }));
+
+    const found = screen.queryByText(/Куда зачислять дни/);
+    expect(Boolean(found)).toBe(shown);
+  });
+
+  it('показан всегда, если выбор вида админ не разрешил', async () => {
+    // Дни тогда приходят по правилу, и цель у них есть.
+    await renderCard(terms({ allow_reward_kind_choice: false, reward_preference: null }));
+
+    expect(screen.getByText(/Куда зачислять дни/)).toBeTruthy();
+  });
+});
+
+describe('суммы на карточках выбора', () => {
+  it('показывают, что даёт каждая сторона', async () => {
+    await renderCard(
+      terms({ reward_choice_money: '25% от суммы', reward_choice_days: '7 дн. подписки' }),
+    );
+
+    expect(screen.getByText('25% от суммы')).toBeTruthy();
+    expect(screen.getByText('7 дн. подписки')).toBeTruthy();
+  });
+
+  it('падают на общую подпись, когда суммы нет', async () => {
+    await renderCard(terms({ reward_choice_money: null, reward_choice_days: null }));
+
+    expect(screen.getByText('Награда приходит суммой на баланс')).toBeTruthy();
+    expect(screen.getByText('Награда продлевает подписку')).toBeTruthy();
   });
 });

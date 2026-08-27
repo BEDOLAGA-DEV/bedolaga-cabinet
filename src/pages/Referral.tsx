@@ -109,13 +109,17 @@ export function RewardSettings({
     {
       value: 'money',
       label: t('referral.rewardSettings.kindMoney'),
-      hint: t('referral.rewardSettings.kindMoneyHint'),
+      // Сумма важнее общей фразы: без неё выбор делается вслепую — непонятно,
+      // от чего отказываешься. Общая фраза остаётся, когда суммы нет.
+      hint: terms.reward_choice_money || t('referral.rewardSettings.kindMoneyHint'),
+      amount: Boolean(terms.reward_choice_money),
       icon: <BanknotesIcon className="h-5 w-5" />,
     },
     {
       value: 'days',
       label: t('referral.rewardSettings.kindDays'),
-      hint: t('referral.rewardSettings.kindDaysHint'),
+      hint: terms.reward_choice_days || t('referral.rewardSettings.kindDaysHint'),
+      amount: Boolean(terms.reward_choice_days),
       icon: <CalendarIcon className="h-5 w-5" />,
     },
   ];
@@ -198,7 +202,17 @@ export function RewardSettings({
                     >
                       {kind.label}
                     </span>
-                    <span className="mt-0.5 block text-xs text-dark-500">{kind.hint}</span>
+                    <span
+                      className={`mt-0.5 block text-xs ${
+                        kind.amount
+                          ? selected
+                            ? 'font-medium text-accent-300'
+                            : 'font-medium text-dark-300'
+                          : 'text-dark-500'
+                      }`}
+                    >
+                      {kind.hint}
+                    </span>
                   </span>
                 </button>
               );
@@ -207,7 +221,11 @@ export function RewardSettings({
         </section>
       )}
 
-      {targetChoice && (
+      {/* Куда класть дни спрашиваем, только когда человек выбрал дни: выбравшему
+          деньги эта настройка ни на что не влияет, и раздел обещал бы влияние,
+          которого нет. Если выбор вида админ не разрешил, спрашиваем всегда —
+          дни тогда приходят по правилу, и цель у них есть. */}
+      {targetChoice && (!kindChoice || currentKind === 'days') && (
         <section className="mt-5">
           <h3 className="text-sm font-medium text-dark-200">
             {t('referral.rewardSettings.targetHeader')}

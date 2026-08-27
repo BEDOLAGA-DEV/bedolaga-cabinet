@@ -507,6 +507,13 @@ export interface ReferralTerms {
   reward_preference?: string | null;
   days_target_subscription_id?: number | null;
   days_target_options?: ReferralDaysTargetOption[];
+  /**
+   * What each side of the choice actually gives, computed without regard to the
+   * choice already made: the cards must show what every option yields, not only
+   * the selected one. null means the rule has no such side.
+   */
+  reward_choice_money?: string | null;
+  reward_choice_days?: string | null;
 }
 
 /** A subscription the reward days can be directed to. */
