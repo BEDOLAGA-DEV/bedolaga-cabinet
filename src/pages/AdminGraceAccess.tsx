@@ -13,6 +13,7 @@ import {
 import { AdminBackButton, Toggle } from '@/components/admin';
 import { BanIcon, BoltIcon, EyeIcon, LockIcon, RestartIcon, WarningIcon } from '@/components/icons';
 import { PageSkeleton, Skeleton } from '@/components/ui/skeleton';
+import { getApiErrorMessage } from '@/utils/api-error';
 
 /**
  * Grace access: temporary restricted VPN for an expired or traffic-limited
@@ -417,9 +418,9 @@ export default function AdminGraceAccess() {
       queryClient.invalidateQueries({ queryKey: ['grace-sessions'] });
     },
     onError: (mutationError: unknown) => {
-      const detail = (mutationError as { response?: { data?: { detail?: string } } })?.response
-        ?.data?.detail;
-      setSaveError(detail || t('admin.graceAccess.saveError'));
+      // Через общий разбор: у 422 от FastAPI detail — СПИСОК объектов, и он
+      // попадал в JSX массивом, роняя экран вместо показа причины.
+      setSaveError(getApiErrorMessage(mutationError, t('admin.graceAccess.saveError')));
     },
   });
 

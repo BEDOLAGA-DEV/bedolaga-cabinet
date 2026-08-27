@@ -20,7 +20,10 @@ import type {
  * and the saved one — rather than the layout.
  */
 
+import enLocale from '@/locales/en.json';
+import faLocale from '@/locales/fa.json';
 import ruLocale from '@/locales/ru.json';
+import zhLocale from '@/locales/zh.json';
 
 function resolveRu(key: string): string | undefined {
   const value = key
@@ -343,16 +346,69 @@ describe('раздел grace-доступа', () => {
     expect(saveButton().disabled).toBe(true);
   });
 
+  it('ошибку валидации 422 показывает текстом, а не роняет экран', async () => {
+    // У FastAPI detail при 422 — список объектов; в JSX он попадал бы как массив.
+    await renderPage();
+    const api = await import('@/api/adminGraceAccess');
+    const rejection = Object.assign(new Error('Request failed'), {
+      isAxiosError: true,
+      response: {
+        status: 422,
+        data: {
+          detail: [{ loc: ['body', 'duration_hours'], msg: 'Input should be less than 8760' }],
+        },
+      },
+    });
+    vi.spyOn(api.adminGraceAccessApi, 'update').mockRejectedValueOnce(rejection);
+
+    fireEvent.change(screen.getByLabelText('Длительность, часов'), { target: { value: '99999' } });
+    fireEvent.click(saveButton());
+
+    expect(await screen.findByText('duration_hours: Input should be less than 8760')).toBeTruthy();
+  });
+
   it('ошибка сервера показывается, а не проглатывается', async () => {
     await renderPage();
     const api = await import('@/api/adminGraceAccess');
-    vi.spyOn(api.adminGraceAccessApi, 'update').mockRejectedValueOnce({
-      response: { data: { detail: 'Grace access cannot be enabled' } },
-    });
+    vi.spyOn(api.adminGraceAccessApi, 'update').mockRejectedValueOnce(
+      Object.assign(new Error('Request failed'), {
+        isAxiosError: true,
+        response: { status: 400, data: { detail: 'Grace access cannot be enabled' } },
+      }),
+    );
 
     fireEvent.change(screen.getByLabelText('Длительность, часов'), { target: { value: '48' } });
     fireEvent.click(saveButton());
 
     expect(await screen.findByText('Grace access cannot be enabled')).toBeTruthy();
+  });
+});
+
+describe('переводы раздела', () => {
+  /**
+   * locales.test.ts сверяет только en и ru, поэтому ключ, добавленный в русскую
+   * локаль и забытый в zh/fa, доезжает до прода: экран рисует сам ключ.
+   */
+  const flatten = (node: unknown, prefix = ''): string[] =>
+    typeof node === 'object' && node !== null
+      ? Object.entries(node).flatMap(([key, value]) =>
+          flatten(value, prefix ? `${prefix}.${key}` : key),
+        )
+      : [prefix];
+
+  const russian = flatten((ruLocale as Record<string, any>).admin.graceAccess).sort();
+
+  it.each([
+    ['en', enLocale],
+    ['zh', zhLocale],
+    ['fa', faLocale],
+  ])('%s содержит те же ключи, что и ru', (_language, locale) => {
+    expect(flatten((locale as Record<string, any>).admin.graceAccess).sort()).toEqual(russian);
+  });
+
+  it('пункт меню переведён везде', () => {
+    for (const locale of [ruLocale, enLocale, zhLocale, faLocale]) {
+      expect(typeof (locale as Record<string, any>).admin.nav.graceAccess).toBe('string');
+    }
   });
 });
