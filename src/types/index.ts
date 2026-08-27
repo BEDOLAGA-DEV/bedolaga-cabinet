@@ -488,6 +488,30 @@ export interface ReferralTerms {
   tier_next_remaining?: number;
   tier_referrals_any?: number;
   tier_referrals_active?: number;
+  /**
+   * Programme levels broken into parts, ordered the way they should be shown:
+   * by number under `chain`, by ascending threshold under `tiers`. Built by the
+   * same server code that formats the bot's text, so the two cannot drift apart.
+   */
+  levels?: ReferralProgramLevel[];
+  /** The partner's personal rate when it overrides the level's own percent. */
+  personal_percent?: number | null;
+}
+
+/** One level of the referral programme, as shown to the user. */
+export interface ReferralProgramLevel {
+  level: number;
+  is_current: boolean;
+  /** Ready-made reward chips: "25% от суммы", "50 ₽", "7 дн. подписки (Про)". */
+  rewards: string[];
+  /** False means this level pays the referrer nothing — shown only when it is theirs. */
+  pays_referrer: boolean;
+  trigger: string;
+  trigger_label: string;
+  required_referrals: number;
+  required_referrals_active_only: boolean;
+  /** What the invited user gets at this level, or null. */
+  referee_reward: string | null;
 }
 
 /** Whether a level number is chain depth or a rank earned by referral count. */

@@ -413,13 +413,13 @@ describe('порог открытия уровня', () => {
 });
 
 describe('режим уровней', () => {
-  it('переключает цепочку на ранги', async () => {
+  it('переключает цепочку на уровни за приглашённых', async () => {
     await renderEditor();
-    fireEvent.click(screen.getByText('Переключить на ранги'));
+    fireEvent.click(screen.getByText('Переключить на уровни за приглашённых'));
     await waitFor(() => expect(state.mode).toBe('tiers'));
   });
 
-  it('в режиме рангов прячет глубину цепочки и говорит, почему', async () => {
+  it('в режиме за приглашённых прячет глубину цепочки и говорит, почему', async () => {
     // Поле, которое принимает значение и ни на что не влияет, хуже отсутствующего:
     // в рангах цепочка не обходится вовсе.
     state.payload = { ...basePayload(), levels_mode: 'tiers' };
@@ -429,7 +429,7 @@ describe('режим уровней', () => {
     expect(screen.getByText(/глубина не применяется/)).toBeTruthy();
   });
 
-  it('в режиме рангов не помечает уровни выше глубины как неплатящие', async () => {
+  it('в режиме за приглашённых не помечает уровни выше глубины как неплатящие', async () => {
     // Глубина ограничивает только цепочку. Метка «не платит» на работающем
     // ранге — прямая ложь о том, что бот начисляет.
     state.payload = {
@@ -441,10 +441,10 @@ describe('режим уровней', () => {
     await renderEditor();
 
     expect(screen.queryByText(/не платит/)).toBeNull();
-    expect(screen.getByText('Ранг 5')).toBeTruthy();
+    expect(screen.getByText('Уровень 5')).toBeTruthy();
   });
 
-  it('предупреждает, когда у всех рангов порог больше нуля', async () => {
+  it('предупреждает, когда у всех уровней порог больше нуля', async () => {
     // Такая лестница не платит никому, пока партнёр не наберёт минимальный
     // порог: со стороны это «переключил режим — выплаты прекратились».
     state.payload = {
@@ -454,10 +454,10 @@ describe('режим уровней', () => {
     };
     await renderEditor();
 
-    expect(screen.getByText(/Заведите ранг с порогом 0/)).toBeTruthy();
+    expect(screen.getByText(/Заведите уровень с порогом 0/)).toBeTruthy();
   });
 
-  it('предупреждает про одинаковые пороги у активных рангов', async () => {
+  it('предупреждает про одинаковые пороги у активных уровней', async () => {
     state.payload = {
       ...basePayload(),
       levels_mode: 'tiers',
@@ -472,7 +472,7 @@ describe('режим уровней', () => {
     expect(screen.getByText(/одинаковый порог/)).toBeTruthy();
   });
 
-  it('не предупреждает про одинаковые пороги, если один из рангов выключен', async () => {
+  it('не предупреждает про одинаковые пороги, если один из уровней выключен', async () => {
     state.payload = {
       ...basePayload(),
       levels_mode: 'tiers',
@@ -486,7 +486,7 @@ describe('режим уровней', () => {
     expect(screen.queryByText(/одинаковый порог/)).toBeNull();
   });
 
-  it('показывает ранги в порядке подъёма по лестнице, а не по номеру', async () => {
+  it('показывает уровни в порядке подъёма по лестнице, а не по номеру', async () => {
     state.payload = {
       ...basePayload(),
       levels_mode: 'tiers',
@@ -498,21 +498,21 @@ describe('режим уровней', () => {
     await renderEditor();
 
     const titles = screen.getAllByRole('heading', { level: 3 }).map((node) => node.textContent);
-    expect(titles).toEqual(['Ранг 3', 'Ранг 2']);
+    expect(titles).toEqual(['Уровень 3', 'Уровень 2']);
   });
 
   it('не даёт переключить режим, закреплённый в .env', async () => {
     state.payload = { ...basePayload(), levels_mode_locked_by_env: true };
     await renderEditor();
 
-    const button = screen.getByText('Переключить на ранги') as HTMLButtonElement;
+    const button = screen.getByText('Переключить на уровни за приглашённых') as HTMLButtonElement;
     expect(button.disabled).toBe(true);
     fireEvent.click(button);
     expect(state.mode).toBeNull();
   });
 });
 
-describe('карточка схемы в режиме рангов', () => {
+describe('карточка схемы в режиме за приглашённых', () => {
   it('не заявляет глубину цепочки рядом с «глубина не применяется»', async () => {
     // Одна карточка утверждала и «Глубина цепочки: до 3 уровней», и «в режиме
     // рангов глубина не применяется» — второе верно, первое противоречит и ему,
@@ -533,13 +533,13 @@ describe('карточка схемы в режиме рангов', () => {
 });
 
 describe('переключатель режима: направление и контракт', () => {
-  it('переключает ранги обратно на цепочку', async () => {
+  it('переключает обратно на уровни по цепочке', async () => {
     // Без этого теста кнопку можно было заклинить на 'tiers': админ, включивший
     // ранги, физически не смог бы вернуться, а выплаты продолжали бы идти по ним.
     state.payload = { ...basePayload(), levels_mode: 'tiers' };
     await renderEditor();
 
-    fireEvent.click(screen.getByText('Переключить на цепочку'));
+    fireEvent.click(screen.getByText('Переключить на уровни по цепочке'));
     await waitFor(() => expect(state.mode).toBe('chain'));
   });
 
@@ -555,8 +555,8 @@ describe('переключатель режима: направление и к�
     state.payload = { ...basePayload(), levels_mode: 'tiers' };
     await renderEditor();
 
-    expect(screen.getByLabelText(/Ранг действует с/)).toBeTruthy();
-    expect(screen.getByText(/Добавить ранг/)).toBeTruthy();
+    expect(screen.getByLabelText(/Уровень действует с/)).toBeTruthy();
+    expect(screen.getByText(/Добавить уровень/)).toBeTruthy();
   });
 
   it('в цепочке подписи остаются уровневыми', async () => {
@@ -567,7 +567,7 @@ describe('переключатель режима: направление и к�
     expect(screen.getByText(/Добавить уровень/)).toBeTruthy();
   });
 
-  it('предупреждает про ранг, который ничего не начисляет пригласившему', async () => {
+  it('предупреждает про уровень, который ничего не начисляет пригласившему', async () => {
     // В цепочке такой уровень просто ничего не добавляет; в рангах он ЗАМЕНЯЕТ
     // собой платящий, и партнёр, набрав его порог, теряет доход.
     state.payload = {
@@ -590,7 +590,7 @@ describe('переключатель режима: направление и к�
     expect(screen.getByText(/ничего не начисляет пригласившему/)).toBeTruthy();
   });
 
-  it('предупреждает про разные поводы начисления у рангов', async () => {
+  it('предупреждает про разные поводы начисления у уровней', async () => {
     state.payload = {
       ...basePayload(),
       levels_mode: 'tiers',
@@ -604,7 +604,7 @@ describe('переключатель режима: направление и к�
     expect(screen.getByText(/разные поводы начисления/)).toBeTruthy();
   });
 
-  it('в цепочке ранговых предупреждений не показывает', async () => {
+  it('в цепочке этих предупреждений не показывает', async () => {
     state.payload = {
       ...basePayload(),
       levels_mode: 'chain',

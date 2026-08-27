@@ -64,6 +64,127 @@ function getWithdrawalStatusBadge(status: string): string {
  * Exported for tests: the decision is worth checking on its own, without
  * mounting the whole page.
  */
+/**
+ * Programme terms under the `levels` scheme.
+ *
+ * Exported so the card can be tested on its own: mounting the whole Referral page
+ * needs a dozen mocks, and the part worth checking is this one — whether the card
+ * states which mode is in force and marks the level the viewer is actually on.
+ */
+export function ProgrammeTerms({ terms }: { terms: ReferralTerms }) {
+  const { t } = useTranslation();
+  const isTiers = terms.levels_mode === 'tiers';
+  const levels = terms.levels ?? [];
+  // Строки-описания остаются запасным путём: они приходят из того же источника
+  // и покрывают старый сервер, который ещё не отдаёт разбор по частям.
+  const fallbackLines = terms.level_descriptions ?? [];
+  const progress = tierProgressText(terms, t);
+
+  return (
+    <div className="bento-card">
+      <div className="mb-4">
+        <h2 className="text-lg font-semibold text-dark-100">{t('referral.terms.title')}</h2>
+        {/* Правило режима — одной фразой над лестницей. Без неё список
+              уровней в режиме «за приглашённых» читается как складывающиеся
+              награды, а в цепочке — наоборот, как выбор одной из них. */}
+        <p className="mt-1 text-sm text-dark-400">
+          {isTiers ? t('referral.terms.modeTiers') : t('referral.terms.modeChain')}
+        </p>
+      </div>
+
+      {levels.length > 0 ? (
+        <ol className="space-y-2">
+          {levels.map((lvl) => (
+            <li
+              key={lvl.level}
+              className={`rounded-xl border p-3 transition-colors ${
+                lvl.is_current
+                  ? 'border-accent-500/40 bg-accent-500/10'
+                  : 'border-dark-700/40 bg-dark-800/30'
+              }`}
+            >
+              <div className="flex flex-wrap items-center gap-2">
+                <span
+                  className={`inline-flex h-7 min-w-7 items-center justify-center rounded-lg px-2 text-sm font-semibold ${
+                    lvl.is_current ? 'bg-accent-500 text-dark-900' : 'bg-dark-700 text-dark-200'
+                  }`}
+                >
+                  {lvl.level}
+                </span>
+                <span className="text-sm font-medium text-dark-100">
+                  {t('referral.terms.levelLabel', { level: lvl.level })}
+                </span>
+                {lvl.is_current && (
+                  <span className="rounded-full bg-accent-500/20 px-2 py-0.5 text-xs text-accent-300">
+                    {t('referral.terms.currentBadge')}
+                  </span>
+                )}
+              </div>
+
+              <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                {lvl.pays_referrer ? (
+                  lvl.rewards.map((reward) => (
+                    <span
+                      key={reward}
+                      className="rounded-lg bg-success-500/15 px-2 py-1 text-sm text-success-300"
+                    >
+                      {reward}
+                    </span>
+                  ))
+                ) : (
+                  <span className="rounded-lg bg-dark-700/60 px-2 py-1 text-sm text-dark-400">
+                    {t('referral.terms.paysNothing')}
+                  </span>
+                )}
+                {lvl.pays_referrer && lvl.trigger_label && (
+                  <span className="text-xs text-dark-400">{lvl.trigger_label}</span>
+                )}
+              </div>
+
+              <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-dark-400">
+                {/* Условие показывается только там, где оно есть смысл: в
+                      цепочке уровень открывается порогом, а в режиме за
+                      приглашённых порог и определяет, какой уровень ваш. */}
+                <span>
+                  {lvl.required_referrals > 0
+                    ? lvl.required_referrals_active_only
+                      ? t('referral.terms.fromActive', { count: lvl.required_referrals })
+                      : t('referral.terms.fromAny', { count: lvl.required_referrals })
+                    : t('referral.terms.startingLevel')}
+                </span>
+                {lvl.referee_reward && (
+                  <span>{t('referral.terms.refereeGets', { reward: lvl.referee_reward })}</span>
+                )}
+              </div>
+            </li>
+          ))}
+        </ol>
+      ) : fallbackLines.length > 0 ? (
+        <ul className="space-y-2">
+          {fallbackLines.map((line) => (
+            <li key={line} className="flex items-start gap-2 text-sm text-dark-200">
+              <span aria-hidden="true" className="mt-1 text-accent-400">
+                •
+              </span>
+              <span>{line}</span>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="text-sm text-dark-400">{t('referral.terms.noLevels')}</p>
+      )}
+
+      {terms.personal_percent != null && (
+        <p className="mt-4 rounded-xl border border-warning-500/25 bg-warning-500/10 p-3 text-sm text-warning-300">
+          {t('referral.terms.personalRate', { percent: terms.personal_percent })}
+        </p>
+      )}
+
+      {progress && <p className="mt-4 text-sm text-dark-300">{progress}</p>}
+    </div>
+  );
+}
+
 export function tierProgressText(
   terms: Pick<
     ReferralTerms,
@@ -161,6 +282,7 @@ export default function Referral() {
   });
 
   const isLevelsScheme = terms?.scheme === 'levels';
+  const isTiersScheme = isLevelsScheme && terms?.levels_mode === 'tiers';
 
   /**
    * A reward can be money, subscription days, or both. Days carry
@@ -193,39 +315,7 @@ export default function Referral() {
     // выплаты идут по таблице уровней. Показывать их как «условия программы»
     // значило бы обещать пользователю то, чего бот не платит.
     if (terms.scheme === 'levels') {
-      const levelLines = terms.level_descriptions ?? [];
-      return (
-        <div className="bento-card">
-          <h2 className="mb-4 text-lg font-semibold text-dark-100">{t('referral.terms.title')}</h2>
-          {levelLines.length > 0 ? (
-            <ul className="space-y-2">
-              {levelLines.map((line) => (
-                <li key={line} className="flex items-start gap-2 text-sm text-dark-200">
-                  <span aria-hidden="true" className="mt-1 text-accent-400">
-                    •
-                  </span>
-                  <span>{line}</span>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-sm text-dark-400">{t('referral.terms.noLevels')}</p>
-          )}
-          {/* Под рангами перечисленные строки НЕ складываются: действует ровно
-              одна. Сервер помечает в списке текущий ранг, а здесь — насколько
-              пользователь близок к следующему; без этого лестница не отвечает
-              на вопрос «а мне-то что с неё». */}
-          {tierProgressText(terms, t) && (
-            <p className="mt-4 text-sm text-dark-300">{tierProgressText(terms, t)}</p>
-          )}
-
-          {terms.referee_bonus_description && (
-            <p className="mt-4 rounded-xl border border-dark-700/30 bg-dark-800/30 p-3 text-sm text-dark-200">
-              {t('referral.terms.newUserBonus')}: {terms.referee_bonus_description}
-            </p>
-          )}
-        </div>
-      );
+      return <ProgrammeTerms terms={terms} />;
     }
 
     const showNewUserBonus = terms.first_topup_bonus_kopeks > 0;
@@ -383,12 +473,23 @@ export default function Referral() {
         />
         <StatCard
           label={
-            isLevelsScheme ? t('referral.stats.chainDepth') : t('referral.stats.commissionRate')
+            // В режиме «за приглашённых» глубины сети не существует — цепочка не
+            // обходится вовсе. Показывать её там значит обещать выплаты за
+            // приглашённых чужими приглашёнными, которых в этом режиме не бывает.
+            isTiersScheme
+              ? t('referral.stats.yourLevel')
+              : isLevelsScheme
+                ? t('referral.stats.chainDepth')
+                : t('referral.stats.commissionRate')
           }
           value={
-            isLevelsScheme
-              ? t('referral.stats.levelsValue', { count: terms?.max_level_depth || 1 })
-              : `${info?.commission_percent || 0}%`
+            isTiersScheme
+              ? (terms?.tier_current_level ?? null) === null
+                ? t('referral.stats.levelNotReached')
+                : String(terms?.tier_current_level)
+              : isLevelsScheme
+                ? t('referral.stats.levelsValue', { count: terms?.max_level_depth || 1 })
+                : `${info?.commission_percent || 0}%`
           }
           icon={<PercentIcon className="h-5 w-5" />}
           tone="accent"
