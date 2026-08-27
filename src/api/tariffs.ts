@@ -5,6 +5,8 @@ export interface PeriodPrice {
   days: number;
   price_kopeks: number;
   price_rubles?: number;
+  /** Marks a virtual trial-period entry (read-only on the admin tariff editor). */
+  is_trial?: boolean;
 }
 
 export interface ServerTrafficLimit {
