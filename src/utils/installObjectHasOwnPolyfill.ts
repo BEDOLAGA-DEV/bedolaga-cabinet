@@ -9,5 +9,5 @@ export function installObjectHasOwnPolyfill(): void {
   }
 
   objectWithOptionalHasOwn.hasOwn = (obj: object, prop: PropertyKey): boolean =>
-    Object.hasOwn(obj, prop);
+    Reflect.getOwnPropertyDescriptor(obj, prop) !== undefined;
 }

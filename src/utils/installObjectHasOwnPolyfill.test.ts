@@ -39,7 +39,8 @@ afterEach(() => {
 
 describe('installObjectHasOwnPolyfill', () => {
   it('installs fallback only when Object.hasOwn is absent and preserves a native implementation', () => {
-    const nativeHasOwn = (obj: object, prop: PropertyKey): boolean => Object.hasOwn(obj, prop);
+    const nativeHasOwn = (obj: object, prop: PropertyKey): boolean =>
+      Reflect.getOwnPropertyDescriptor(obj, prop) !== undefined;
 
     Object.defineProperty(Object, 'hasOwn', {
       value: nativeHasOwn,
