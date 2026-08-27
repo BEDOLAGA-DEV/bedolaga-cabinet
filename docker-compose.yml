@@ -20,12 +20,33 @@ services:
     ports:
       # Маппинг: <хост-порт>:<контейнер-порт>
       # Внутри контейнера nginx слушает на порту 80
-      - '${CABINET_PORT:-3020}:80'
+      - "${CABINET_PORT:-3020}:80"
     healthcheck:
       # 127.0.0.1 вместо localhost: localhost может резолвиться в [::1], и на
       # образах, где nginx слушает только IPv4, healthcheck ложно падает
-      test: ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'http://127.0.0.1:80/']
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://127.0.0.1:80/",
+        ]
       interval: 30s
       timeout: 3s
       retries: 3
       start_period: 10s
+    networks:
+      - bot_bot_network
+      - remnawave-network
+
+networks:
+  bot_bot_network:
+    name: bot_bot_network
+    driver: bridge
+    external: true
+  remnawave-network:
+    name: remnawave-network
+    driver: bridge
+    external: true
