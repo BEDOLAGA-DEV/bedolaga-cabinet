@@ -92,6 +92,7 @@ const state: {
     levels_mode: 'chain',
     levels_mode_locked_by_env: false,
     multi_tariff_enabled: true,
+    max_level_depth_locked_by_env: false,
     max_level_depth: 3,
     max_supported_level: 10,
     levels: [level()],
@@ -149,6 +150,7 @@ const basePayload = (): ReferralRewardLevels => ({
   levels_mode: 'chain',
   levels_mode_locked_by_env: false,
   multi_tariff_enabled: true,
+  max_level_depth_locked_by_env: false,
   max_level_depth: 3,
   max_supported_level: 10,
   levels: [level()],
@@ -651,10 +653,37 @@ describe('выключенный мультитариф', () => {
     state.payload = {
       ...basePayload(),
       multi_tariff_enabled: true,
+      max_level_depth_locked_by_env: false,
       levels: [level({ reward_mode: 'days', referrer_days: 14, referrer_tariff_id: 1 })],
     };
     await renderEditor();
 
     expect(screen.queryByText(/Мультитариф выключен/)).toBeNull();
+  });
+});
+
+describe('глубина, закреплённая в .env', () => {
+  it('поле заблокировано и объясняет причину', async () => {
+    // Правка отбивалась 409, а несохранённое значение продолжало висеть в
+    // форме — выглядело так, будто его приняли.
+    state.payload = { ...basePayload(), levels_mode: 'chain', max_level_depth_locked_by_env: true };
+    await renderEditor();
+
+    const field = screen.getByLabelText(/Глубина цепочки/) as HTMLInputElement;
+    expect(field.disabled).toBe(true);
+    expect(screen.getByText(/REFERRAL_MAX_LEVEL_DEPTH задан в \.env/)).toBeTruthy();
+  });
+
+  it('без лока поле остаётся редактируемым', async () => {
+    state.payload = {
+      ...basePayload(),
+      levels_mode: 'chain',
+      max_level_depth_locked_by_env: false,
+    };
+    await renderEditor();
+
+    const field = screen.getByLabelText(/Глубина цепочки/) as HTMLInputElement;
+    expect(field.disabled).toBe(false);
+    expect(screen.queryByText(/REFERRAL_MAX_LEVEL_DEPTH задан/)).toBeNull();
   });
 });

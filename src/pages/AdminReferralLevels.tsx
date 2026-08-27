@@ -264,6 +264,7 @@ export default function AdminReferralLevels() {
                 label={t('admin.referralLevels.chainDepth')}
                 value={data.max_level_depth}
                 max={data.max_supported_level}
+                disabled={data.max_level_depth_locked_by_env}
                 onCommit={(parsed) => depthMutation.mutate(parsed ?? 1)}
                 onInvalid={() =>
                   setSaveError(
@@ -274,6 +275,13 @@ export default function AdminReferralLevels() {
               <p className="text-xs text-dark-500">
                 {t('admin.referralLevels.chainDepthHint', { max: data.max_supported_level })}
               </p>
+              {/* Ключ из .env: правка отбивается 409, а несохранённое значение
+                  продолжало висеть в форме и выглядело принятым. */}
+              {data.max_level_depth_locked_by_env && (
+                <p className="mt-2 rounded-xl border border-warning-500/30 bg-warning-500/10 p-3 text-sm text-warning-400">
+                  {t('admin.referralLevels.depthEnvLocked')}
+                </p>
+              )}
             </>
           )}
         </div>

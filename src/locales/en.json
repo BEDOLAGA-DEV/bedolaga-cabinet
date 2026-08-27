@@ -4674,7 +4674,8 @@
       "tiersSubtitle": "Money and/or subscription days per partner level",
       "tierPaysNothing": "Level {{levels}} pays the referrer nothing. Once a partner reaches its threshold their income stops: exactly one level applies.",
       "tierMixedTriggers": "Levels have different payout triggers. Only the trigger of the level a partner has reached applies, so rewards for other triggers never arrive.",
-      "multiTariffOff": "Multi-tariff is off: subscriptions have no tariff, so days targeted at one are never granted. Clear the tariff and the days go to the main subscription."
+      "multiTariffOff": "Multi-tariff is off: subscriptions have no tariff, so days targeted at one are never granted. Clear the tariff and the days go to the main subscription.",
+      "depthEnvLocked": "REFERRAL_MAX_LEVEL_DEPTH is pinned in .env: depth cannot be changed here and would revert on restart."
     }
   },
   "adminUpdates": {

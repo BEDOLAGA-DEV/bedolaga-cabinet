@@ -567,6 +567,8 @@ export interface ReferralRewardLevels {
    * the setting looks valid and silently does nothing.
    */
   multi_tariff_enabled: boolean;
+  /** Pinned in .env: the depth field would be refused with 409 and revert on restart. */
+  max_level_depth_locked_by_env: boolean;
   /** The chain is not walked deeper than this, so deeper levels never pay. */
   max_level_depth: number;
   max_supported_level: number;

@@ -4390,7 +4390,8 @@
       "tiersSubtitle": "按伙伴等级发放的金额和/或订阅天数",
       "tierPaysNothing": "第 {{levels}} 级不向推荐人发放任何奖励。伙伴达到其门槛后收入将中断：只有一个等级生效。",
       "tierMixedTriggers": "各等级的发放时机不同。只有伙伴已达到的等级的时机生效，其他时机的奖励不会发放。",
-      "multiTariffOff": "多资费已关闭：订阅没有资费，因此指定资费的天数不会发放。清除资费后，天数将计入主订阅。"
+      "multiTariffOff": "多资费已关闭：订阅没有资费，因此指定资费的天数不会发放。清除资费后，天数将计入主订阅。",
+      "depthEnvLocked": "REFERRAL_MAX_LEVEL_DEPTH 已在 .env 中固定：无法在此修改深度，重启后会恢复为文件中的值。"
     }
   },
   "adminUpdates": {
