@@ -82,17 +82,27 @@ describe('настройки наград пользователя', () => {
       .getAllByRole('button')
       .filter((b) => b.getAttribute('aria-pressed') === 'true')
       .map((b) => b.textContent);
-    expect(selected).toContain('Только дни подписки');
+    expect(selected.join(' ')).toContain('Дни подписки');
   });
 
-  it('по умолчанию отмечают «всё, что даёт уровень»', async () => {
+  it('предлагают ровно два варианта — деньги или дни', async () => {
+    await renderCard(terms());
+
+    expect(screen.getByText('Деньги на баланс')).toBeTruthy();
+    expect(screen.getByText('Дни подписки')).toBeTruthy();
+    expect(screen.queryByText(/Всё, что даёт уровень/)).toBeNull();
+  });
+
+  it('у не выбиравшего отмечены деньги — так же, как их выдаст расчёт', async () => {
+    // Показать «ничего не выбрано» значило бы разойтись с начислением: выбор
+    // двоичный, и без него человек получает деньги.
     await renderCard(terms({ reward_preference: null }));
 
     const selected = screen
       .getAllByRole('button')
       .filter((b) => b.getAttribute('aria-pressed') === 'true')
       .map((b) => b.textContent);
-    expect(selected).toContain('Всё, что даёт уровень');
+    expect(selected.join(' ')).toContain('Деньги на баланс');
   });
 
   it('отмечают автоподбор, пока подписка не выбрана', async () => {
@@ -118,14 +128,14 @@ describe('настройки наград пользователя', () => {
   });
 
   it('шлют явный признак «поле трогали» при выборе вида', async () => {
-    // null здесь значимое значение, и без признака его нельзя отличить от
-    // «не присылали» — сервер затёр бы выбор, сделанный из бота.
+    // Без признака сервер не отличил бы присланное от «не трогали» и затёр бы
+    // выбор подписки, сделанный из бота.
     const onChange = await renderCard(terms({ reward_preference: 'money' }));
 
-    fireEvent.click(screen.getByText('Всё, что даёт уровень'));
+    fireEvent.click(screen.getByText('Дни подписки'));
 
     expect(onChange).toHaveBeenCalledWith({
-      reward_preference: null,
+      reward_preference: 'days',
       set_reward_preference: true,
     });
   });
@@ -157,7 +167,7 @@ describe('настройки наград пользователя', () => {
     const onChange = vi.fn();
     render(<RewardSettings terms={terms()} onChange={onChange} pending />);
 
-    const button = screen.getByText('Только деньги').closest('button') as HTMLButtonElement;
+    const button = screen.getByText('Деньги на баланс').closest('button') as HTMLButtonElement;
     expect(button.disabled).toBe(true);
   });
 });

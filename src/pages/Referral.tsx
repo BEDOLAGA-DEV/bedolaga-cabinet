@@ -17,6 +17,7 @@ import {
   ArrowDownIcon,
   ArrowUpIcon,
   BanknotesIcon,
+  CalendarIcon,
   CardIcon,
   CheckIcon,
   ClockIcon,
@@ -102,11 +103,23 @@ export function RewardSettings({
   if (!kindChoice && !targetChoice) return null;
 
   const options = terms.days_target_options ?? [];
-  const kinds: { value: string | null; label: string }[] = [
-    { value: null, label: t('referral.rewardSettings.kindBoth') },
-    { value: 'money', label: t('referral.rewardSettings.kindMoney') },
-    { value: 'days', label: t('referral.rewardSettings.kindDays') },
+  // Выбор двоичный: деньги ИЛИ дни. Не выбиравший получает деньги — так же, как
+  // их выдаст расчёт, поэтому и отмечены они, а не «ничего не выбрано».
+  const kinds = [
+    {
+      value: 'money',
+      label: t('referral.rewardSettings.kindMoney'),
+      hint: t('referral.rewardSettings.kindMoneyHint'),
+      icon: <BanknotesIcon className="h-5 w-5" />,
+    },
+    {
+      value: 'days',
+      label: t('referral.rewardSettings.kindDays'),
+      hint: t('referral.rewardSettings.kindDaysHint'),
+      icon: <CalendarIcon className="h-5 w-5" />,
+    },
   ];
+  const currentKind = terms.reward_preference === 'days' ? 'days' : 'money';
 
   const optionLabel = (option: ReferralDaysTargetOption) => {
     const name = option.tariff_name || t('referral.rewardSettings.subscription');
@@ -153,15 +166,43 @@ export function RewardSettings({
             {t('referral.rewardSettings.kindHeader')}
           </h3>
           <p className="mt-1 text-xs text-dark-500">{t('referral.rewardSettings.kindHint')}</p>
-          <div className="mt-2 space-y-2">
-            {kinds.map((kind) =>
-              choice(
-                kind.value ?? 'any',
-                (terms.reward_preference ?? null) === kind.value,
-                kind.label,
-                () => onChange({ reward_preference: kind.value, set_reward_preference: true }),
-              ),
-            )}
+          <div className="mt-2 grid gap-2 sm:grid-cols-2">
+            {kinds.map((kind) => {
+              const selected = currentKind === kind.value;
+              return (
+                <button
+                  key={kind.value}
+                  type="button"
+                  disabled={pending}
+                  aria-pressed={selected}
+                  onClick={() =>
+                    onChange({ reward_preference: kind.value, set_reward_preference: true })
+                  }
+                  className={`flex items-start gap-3 rounded-xl border p-3 text-left transition-colors disabled:opacity-60 ${
+                    selected
+                      ? 'border-accent-500/50 bg-accent-500/10'
+                      : 'border-dark-700/40 bg-dark-800/30 hover:border-dark-600'
+                  }`}
+                >
+                  <span
+                    aria-hidden="true"
+                    className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
+                      selected ? 'bg-accent-500/20 text-accent-300' : 'bg-dark-700/60 text-dark-400'
+                    }`}
+                  >
+                    {kind.icon}
+                  </span>
+                  <span className="min-w-0">
+                    <span
+                      className={`block text-sm font-medium ${selected ? 'text-dark-100' : 'text-dark-200'}`}
+                    >
+                      {kind.label}
+                    </span>
+                    <span className="mt-0.5 block text-xs text-dark-500">{kind.hint}</span>
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </section>
       )}
