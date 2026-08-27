@@ -4636,7 +4636,10 @@
       "invalidValue": "Invalid value: {{field}}",
       "importLegacy": "Import current settings into level 1",
       "noTariffHint": "Without a tariff the days go to the recipient’s paid subscription; with several, the one ending latest.",
-      "schemeOffWarning": "The reward scheme is classic: the rules below are configured but NOT applied."
+      "schemeOffWarning": "The reward scheme is classic: the rules below are configured but NOT applied.",
+      "chainDepth": "Chain depth",
+      "chainDepthHint": "How many links up the chain are paid. Level 1 is the direct referrer, level 2 is theirs. Rules deeper than this pay nothing. Maximum: {{max}}.",
+      "depthRange": "Depth must be between 1 and {{max}}"
     }
   },
   "adminUpdates": {

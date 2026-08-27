@@ -341,6 +341,15 @@ export const partnerApi = {
     return response.data;
   },
 
+  /** How many links up the chain are paid; capped at max_supported_level. */
+  updateReferralDepth: async (maxLevelDepth: number): Promise<ReferralRewardLevels> => {
+    const response = await apiClient.patch<ReferralRewardLevels>(
+      '/cabinet/admin/partners/referral-depth',
+      { max_level_depth: maxLevelDepth },
+    );
+    return response.data;
+  },
+
   updateReferralScheme: async (scheme: 'legacy' | 'levels'): Promise<ReferralRewardLevels> => {
     const response = await apiClient.patch<ReferralRewardLevels>(
       '/cabinet/admin/partners/referral-scheme',

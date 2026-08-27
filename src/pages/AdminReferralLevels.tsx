@@ -78,6 +78,12 @@ export default function AdminReferralLevels() {
     onError: reportError,
   });
 
+  const depthMutation = useMutation({
+    mutationFn: partnerApi.updateReferralDepth,
+    onSuccess: invalidate,
+    onError: reportError,
+  });
+
   const schemeMutation = useMutation({
     mutationFn: (scheme: 'legacy' | 'levels') => partnerApi.updateReferralScheme(scheme),
     onSuccess: invalidate,
@@ -157,6 +163,21 @@ export default function AdminReferralLevels() {
               ? t('admin.referralLevels.switchToLegacy')
               : t('admin.referralLevels.switchToLevels')}
           </button>
+        </div>
+
+        <div className="mt-3">
+          <NumberField
+            label={t('admin.referralLevels.chainDepth')}
+            value={data.max_level_depth}
+            max={data.max_supported_level}
+            onCommit={(parsed) => depthMutation.mutate(parsed ?? 1)}
+            onInvalid={() =>
+              setSaveError(t('admin.referralLevels.depthRange', { max: data.max_supported_level }))
+            }
+          />
+          <p className="text-xs text-dark-500">
+            {t('admin.referralLevels.chainDepthHint', { max: data.max_supported_level })}
+          </p>
         </div>
 
         {data.scheme_locked_by_env && (

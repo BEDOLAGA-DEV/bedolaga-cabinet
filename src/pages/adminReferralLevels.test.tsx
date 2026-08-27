@@ -31,6 +31,9 @@ vi.mock('react-i18next', () => ({
         'admin.referralLevels.beyondDepth': 'Глубже {{count}} — не платит',
         'admin.referralLevels.importLegacy': 'Перенести текущие настройки',
         'admin.referralLevels.schemeOffWarning': 'Схема классическая: правила НЕ применяются',
+        'admin.referralLevels.chainDepth': 'Глубина цепочки',
+        'admin.referralLevels.chainDepthHint': 'Максимум: {{max}}',
+        'admin.referralLevels.depthRange': 'Глубина должна быть от 1 до {{max}}',
       };
       const template = templates[key] ?? key;
       return template.replace(/{{(\w+)}}/g, (_m, name) => String(options?.[name] ?? ''));
@@ -61,8 +64,10 @@ const state: {
   payload: ReferralRewardLevels;
   saves: { level: number; patch: unknown }[];
   imported: number;
+  depth: number | null;
 } = {
   imported: 0,
+  depth: null,
   payload: {
     scheme: 'levels',
     scheme_locked_by_env: false,
@@ -82,6 +87,10 @@ vi.mock('@/api/partners', () => ({
       return Promise.resolve(state.payload);
     },
     deleteReferralLevel: () => Promise.resolve(state.payload),
+    updateReferralDepth: (depth: number) => {
+      state.depth = depth;
+      return Promise.resolve(state.payload);
+    },
     importLegacyReferralSettings: () => {
       state.imported += 1;
       return Promise.resolve({
@@ -121,6 +130,7 @@ afterEach(() => {
   cleanup();
   state.saves = [];
   state.imported = 0;
+  state.depth = null;
   // Полный сброс: точечная замена levels оставляла изменённые границы из
   // предыдущего теста и делала следующий зависимым от порядка.
   state.payload = basePayload();
@@ -332,5 +342,20 @@ describe('ловушки редактора', () => {
   it('под многоуровневой схемой не предупреждает', async () => {
     await renderEditor();
     expect(screen.queryByText(/правила НЕ применяются/)).toBeNull();
+  });
+});
+
+describe('глубина цепочки', () => {
+  it('задаётся прямо в редакторе уровней', async () => {
+    await renderEditor();
+    blur('Глубина цепочки', '10');
+    await waitFor(() => expect(state.depth).toBe(10));
+  });
+
+  it('не принимает больше, чем можно завести уровней', async () => {
+    await renderEditor();
+    blur('Глубина цепочки', '11');
+    expect(await screen.findByText(/Глубина должна быть от 1 до 10/)).toBeTruthy();
+    expect(state.depth).toBeNull();
   });
 });
