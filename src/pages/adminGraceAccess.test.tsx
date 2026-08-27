@@ -327,6 +327,16 @@ describe('раздел grace-доступа', () => {
     expect(field.value).toBe(EXPIRED_UUID);
   });
 
+  it("сохранённое 'Keep' не считается кривым UUID", async () => {
+    // Рантайм сравнивает значение в нижнем регистре; строгое сравнение помечало бы
+    // рабочую настройку как ошибку и запрещало включение режима.
+    state.overview = overview({ config: config({ mode: 'true', external_squad_uuid: 'Keep' }) });
+    await renderPage();
+
+    expect((screen.getByLabelText('Внешний сквад') as HTMLSelectElement).value).toBe('keep');
+    expect(screen.queryByText(/Некорректный UUID/)).toBeNull();
+  });
+
   it('«оставить как есть» отправляется как keep', async () => {
     await renderPage();
 

@@ -68,13 +68,17 @@ export type GraceForm = Omit<GraceAccessConfig, NumericField> & Record<NumericFi
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-/** 'keep' is not a UUID — it means "leave whatever external squad the user has". */
+/**
+ * 'keep' is not a UUID — it means "leave whatever external squad the user has".
+ * The runtime compares it lowercased, so a stored 'Keep' is valid and must not be
+ * shown as a malformed UUID.
+ */
 const EXTERNAL_KEEP = 'keep';
 
 type ExternalChoice = 'detach' | 'keep' | 'custom';
 
 export function externalChoiceOf(value: string): ExternalChoice {
-  const normalized = value.trim();
+  const normalized = value.trim().toLowerCase();
   if (normalized === '') return 'detach';
   if (normalized === EXTERNAL_KEEP) return 'keep';
   return 'custom';
@@ -104,7 +108,7 @@ export function graceFormIssues(form: GraceForm): GraceAccessIssue[] {
   }
 
   const external = form.external_squad_uuid.trim();
-  if (external && external !== EXTERNAL_KEEP && !UUID_PATTERN.test(external)) {
+  if (external && external.toLowerCase() !== EXTERNAL_KEEP && !UUID_PATTERN.test(external)) {
     issues.push({ field: 'external_squad_uuid', code: 'squad_invalid', severity: 'error' });
   }
 
@@ -690,7 +694,10 @@ export default function AdminGraceAccess() {
               setExternalChoice(next);
               if (next === 'detach') update('external_squad_uuid', '');
               if (next === 'keep') update('external_squad_uuid', EXTERNAL_KEEP);
-              if (next === 'custom' && form.external_squad_uuid.trim() === EXTERNAL_KEEP) {
+              if (
+                next === 'custom' &&
+                form.external_squad_uuid.trim().toLowerCase() === EXTERNAL_KEEP
+              ) {
                 update('external_squad_uuid', '');
               }
             }}
@@ -713,7 +720,11 @@ export default function AdminGraceAccess() {
                   : ''
               }`}
               placeholder="00000000-0000-0000-0000-000000000000"
-              value={form.external_squad_uuid === EXTERNAL_KEEP ? '' : form.external_squad_uuid}
+              value={
+                externalChoiceOf(form.external_squad_uuid) === 'keep'
+                  ? ''
+                  : form.external_squad_uuid
+              }
               disabled={isLocked('external_squad_uuid')}
               onChange={(event) => update('external_squad_uuid', event.target.value)}
             />
