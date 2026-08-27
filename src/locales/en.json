@@ -1130,7 +1130,24 @@
     "daysWithTariff": "{{count}} days of \"{{tariff}}\"",
     "shareMessageBonus": "Join {{botName}}! Your sign-up bonus via this link: {{bonus}}",
     "shareMessagePlain": "Join {{botName}} through my link!",
-    "shareHintLevels": "Share the link with friends — rewards follow the referral program levels."
+    "shareHintLevels": "Share the link with friends — rewards follow the referral program levels.",
+    "rewardSettings": {
+      "title": "Reward settings",
+      "intro": "Choose the form your referral rewards take and which subscription the days go to.",
+      "kindHeader": "What to receive",
+      "kindBoth": "Everything the level gives",
+      "kindMoney": "Money only",
+      "kindDays": "Subscription days only",
+      "kindHint": "Applies only where a level gives both money and days. If a level gives just one, you get that one.",
+      "targetHeader": "Where the days go",
+      "targetAuto": "Pick automatically",
+      "targetAutoHint": "Days go to the paid subscription with the latest end date.",
+      "targetHint": "If a level targets a tariff, the days still go to that tariff — the administrator set it that way.",
+      "targetNone": "You have no subscriptions to choose between yet.",
+      "subscription": "Subscription",
+      "until": "until {{date}}",
+      "saveError": "Could not save the setting"
+    }
   },
   "support": {
     "title": "Support",

@@ -496,6 +496,25 @@ export interface ReferralTerms {
   levels?: ReferralProgramLevel[];
   /** The partner's personal rate when it overrides the level's own percent. */
   personal_percent?: number | null;
+  /**
+   * What the user is allowed to choose. Until an administrator allows it the
+   * settings card is not shown at all: a choice that changes nothing promises
+   * an influence it does not have.
+   */
+  allow_reward_kind_choice?: boolean;
+  allow_days_target_choice?: boolean;
+  /** 'money' | 'days' | null — null means "whatever the level gives". */
+  reward_preference?: string | null;
+  days_target_subscription_id?: number | null;
+  days_target_options?: ReferralDaysTargetOption[];
+}
+
+/** A subscription the reward days can be directed to. */
+export interface ReferralDaysTargetOption {
+  id: number;
+  tariff_name: string | null;
+  /** Shown next to the name: several subscriptions may share a tariff. */
+  end_date: string | null;
 }
 
 /** One level of the referral programme, as shown to the user. */

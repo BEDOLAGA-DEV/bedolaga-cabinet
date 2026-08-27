@@ -71,6 +71,25 @@ export const referralApi = {
   },
 
   // Get referral terms
+  /**
+   * Saves what the user chose. Each field carries an explicit "was sent" flag:
+   * null is a meaningful value here ("whatever the level gives", "pick
+   * automatically") and cannot otherwise be told apart from "left untouched" —
+   * which would silently overwrite a choice made from the bot.
+   */
+  updateRewardChoice: async (payload: {
+    reward_preference?: string | null;
+    days_target_subscription_id?: number | null;
+    set_reward_preference?: boolean;
+    set_days_target?: boolean;
+  }): Promise<ReferralTerms> => {
+    const response = await apiClient.patch<ReferralTerms>(
+      '/cabinet/referral/reward-choice',
+      payload,
+    );
+    return response.data;
+  },
+
   getReferralTerms: async (): Promise<ReferralTerms> => {
     const response = await apiClient.get<ReferralTerms>('/cabinet/referral/terms');
     return response.data;

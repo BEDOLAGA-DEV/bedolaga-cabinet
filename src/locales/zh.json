@@ -1005,7 +1005,24 @@
     "daysWithTariff": "“{{tariff}}” {{count}} 天",
     "shareMessageBonus": "加入 {{botName}}！通过此链接注册的奖励：{{bonus}}",
     "shareMessagePlain": "通过我的链接加入 {{botName}}！",
-    "shareHintLevels": "把链接分享给朋友——奖励按推荐计划的等级发放。"
+    "shareHintLevels": "把链接分享给朋友——奖励按推荐计划的等级发放。",
+    "rewardSettings": {
+      "title": "奖励设置",
+      "intro": "选择推荐奖励的形式，以及订阅天数计入哪个订阅。",
+      "kindHeader": "获取方式",
+      "kindBoth": "该等级提供的全部",
+      "kindMoney": "仅现金",
+      "kindDays": "仅订阅天数",
+      "kindHint": "仅在等级同时提供现金和天数时生效。若等级只给其中一种，您将获得该种。",
+      "targetHeader": "天数计入何处",
+      "targetAuto": "自动选择",
+      "targetAutoHint": "天数计入到期日最晚的付费订阅。",
+      "targetHint": "若等级指定了资费，天数仍会计入该资费的订阅——这是管理员的设置。",
+      "targetNone": "您还没有可供选择的订阅。",
+      "subscription": "订阅",
+      "until": "至 {{date}}",
+      "saveError": "设置保存失败"
+    }
   },
   "support": {
     "title": "支持",

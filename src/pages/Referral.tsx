@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { referralApi, type ReferralEarning } from '../api/referral';
-import type { ReferralTerms } from '../types';
+import type { ReferralDaysTargetOption, ReferralTerms } from '../types';
 import { usePlatform } from '../platform';
 import { copyToClipboard } from '../utils/clipboard';
 import { brandingApi } from '../api/branding';
@@ -71,6 +71,135 @@ function getWithdrawalStatusBadge(status: string): string {
  * needs a dozen mocks, and the part worth checking is this one — whether the card
  * states which mode is in force and marks the level the viewer is actually on.
  */
+/**
+ * What the user chose: the form of the reward and where the days land.
+ *
+ * Rendered only for the parts an administrator allowed — a control that changes
+ * nothing promises an influence it does not have. Each option shows whether it is
+ * the one in force, because a settings screen that does not say what is selected
+ * makes people guess.
+ *
+ * Exported for tests: mounting the whole page needs a dozen mocks, and the part
+ * worth checking is this one.
+ */
+export function RewardSettings({
+  terms,
+  onChange,
+  pending = false,
+}: {
+  terms: ReferralTerms;
+  onChange: (payload: {
+    reward_preference?: string | null;
+    days_target_subscription_id?: number | null;
+    set_reward_preference?: boolean;
+    set_days_target?: boolean;
+  }) => void;
+  pending?: boolean;
+}) {
+  const { t } = useTranslation();
+  const kindChoice = terms.allow_reward_kind_choice === true;
+  const targetChoice = terms.allow_days_target_choice === true;
+  if (!kindChoice && !targetChoice) return null;
+
+  const options = terms.days_target_options ?? [];
+  const kinds: { value: string | null; label: string }[] = [
+    { value: null, label: t('referral.rewardSettings.kindBoth') },
+    { value: 'money', label: t('referral.rewardSettings.kindMoney') },
+    { value: 'days', label: t('referral.rewardSettings.kindDays') },
+  ];
+
+  const optionLabel = (option: ReferralDaysTargetOption) => {
+    const name = option.tariff_name || t('referral.rewardSettings.subscription');
+    if (!option.end_date) return name;
+    const until = t('referral.rewardSettings.until', {
+      date: new Date(option.end_date).toLocaleDateString(),
+    });
+    return `${name} — ${until}`;
+  };
+
+  const choice = (key: string, selected: boolean, label: string, onSelect: () => void) => (
+    <button
+      key={key}
+      type="button"
+      disabled={pending}
+      onClick={onSelect}
+      aria-pressed={selected}
+      className={`flex w-full items-center gap-3 rounded-xl border p-3 text-left text-sm transition-colors disabled:opacity-60 ${
+        selected
+          ? 'border-accent-500/40 bg-accent-500/10 text-dark-100'
+          : 'border-dark-700/40 bg-dark-800/30 text-dark-200 hover:border-dark-600'
+      }`}
+    >
+      <span
+        aria-hidden="true"
+        className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border ${
+          selected ? 'border-accent-400' : 'border-dark-600'
+        }`}
+      >
+        {selected && <span className="h-2 w-2 rounded-full bg-accent-400" />}
+      </span>
+      <span>{label}</span>
+    </button>
+  );
+
+  return (
+    <div className="bento-card">
+      <h2 className="text-lg font-semibold text-dark-100">{t('referral.rewardSettings.title')}</h2>
+      <p className="mt-1 text-sm text-dark-400">{t('referral.rewardSettings.intro')}</p>
+
+      {kindChoice && (
+        <section className="mt-4">
+          <h3 className="text-sm font-medium text-dark-200">
+            {t('referral.rewardSettings.kindHeader')}
+          </h3>
+          <p className="mt-1 text-xs text-dark-500">{t('referral.rewardSettings.kindHint')}</p>
+          <div className="mt-2 space-y-2">
+            {kinds.map((kind) =>
+              choice(
+                kind.value ?? 'any',
+                (terms.reward_preference ?? null) === kind.value,
+                kind.label,
+                () => onChange({ reward_preference: kind.value, set_reward_preference: true }),
+              ),
+            )}
+          </div>
+        </section>
+      )}
+
+      {targetChoice && (
+        <section className="mt-5">
+          <h3 className="text-sm font-medium text-dark-200">
+            {t('referral.rewardSettings.targetHeader')}
+          </h3>
+          <p className="mt-1 text-xs text-dark-500">{t('referral.rewardSettings.targetHint')}</p>
+          {options.length === 0 ? (
+            <p className="mt-2 text-sm text-dark-400">{t('referral.rewardSettings.targetNone')}</p>
+          ) : (
+            <div className="mt-2 space-y-2">
+              {/* Автоподбор — тоже вариант, и он обязан быть виден как выбранный:
+                  иначе непонятно, что происходит сейчас. */}
+              {choice(
+                'auto',
+                (terms.days_target_subscription_id ?? null) === null,
+                t('referral.rewardSettings.targetAuto'),
+                () => onChange({ days_target_subscription_id: null, set_days_target: true }),
+              )}
+              {options.map((option) =>
+                choice(
+                  String(option.id),
+                  terms.days_target_subscription_id === option.id,
+                  optionLabel(option),
+                  () => onChange({ days_target_subscription_id: option.id, set_days_target: true }),
+                ),
+              )}
+            </div>
+          )}
+        </section>
+      )}
+    </div>
+  );
+}
+
 export function ProgrammeTerms({ terms }: { terms: ReferralTerms }) {
   const { t } = useTranslation();
   const isTiers = terms.levels_mode === 'tiers';
@@ -207,6 +336,7 @@ export default function Referral() {
   const { formatAmount, currencySymbol, formatPositive, formatWithCurrency } = useCurrency();
   const queryClient = useQueryClient();
   const [copiedLink, setCopiedLink] = useState<'cabinet' | 'bot' | null>(null);
+  const [rewardChoiceError, setRewardChoiceError] = useState<string | null>(null);
   const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -225,6 +355,14 @@ export default function Referral() {
     ? `${window.location.origin}/login?ref=${info.referral_code}`
     : '';
   const botReferralLink = info?.bot_referral_link || '';
+
+  const rewardChoiceMutation = useMutation({
+    mutationFn: referralApi.updateRewardChoice,
+    // Ответ эндпоинта — те же условия целиком, поэтому кладём их в кэш сразу:
+    // повторный запрос показал бы прежний выбор на долю секунды.
+    onSuccess: (updated) => queryClient.setQueryData(['referral-terms'], updated),
+    onError: () => setRewardChoiceError(t('referral.rewardSettings.saveError')),
+  });
 
   const { data: terms } = useQuery({
     queryKey: ['referral-terms'],
@@ -572,6 +710,27 @@ export default function Referral() {
 
       {/* Program Terms */}
       {programTerms}
+
+      {/* Reward Settings */}
+      {terms && (
+        <div className="mt-6">
+          <RewardSettings
+            terms={terms}
+            pending={rewardChoiceMutation.isPending}
+            onChange={(payload) => {
+              setRewardChoiceError(null);
+              rewardChoiceMutation.mutate(payload);
+            }}
+          />
+          {/* Ошибка сохранения обязана быть видна: без неё нажатие выглядит
+              принятым, а выбор остаётся прежним. */}
+          {rewardChoiceError && (
+            <p className="mt-2 rounded-xl border border-error-500/30 bg-error-500/10 p-3 text-sm text-error-400">
+              {rewardChoiceError}
+            </p>
+          )}
+        </div>
+      )}
 
       {/* Referrals List */}
       <div className="bento-card">
