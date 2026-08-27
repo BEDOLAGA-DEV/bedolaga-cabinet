@@ -3,7 +3,12 @@ import { useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import i18n from '../i18n';
-import { promoOffersApi, PromoOfferLog, OFFER_TYPE_CONFIG, OfferType } from '../api/promoOffers';
+import {
+  promoOffersApi,
+  type PromoOfferLog,
+  OFFER_TYPE_CONFIG,
+  type OfferType,
+} from '../api/promoOffers';
 import { usePlatform } from '../platform/hooks/usePlatform';
 import { BackIcon, EditIcon, SendIcon, ClockIcon, UserIcon } from '@/components/icons';
 

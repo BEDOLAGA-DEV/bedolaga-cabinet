@@ -6,9 +6,9 @@
   "license": "AGPL-3.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "build:docker": "vite build",
+    "dev": "node scripts/generate-mobile-deeplinks.mjs && vite",
+    "build": "node scripts/generate-mobile-deeplinks.mjs && tsc && vite build",
+    "build:docker": "node scripts/generate-mobile-deeplinks.mjs && vite build",
     "lint": "biome lint .",
     "lint:fix": "biome lint --write .",
     "format": "biome format --write .",
@@ -79,6 +79,8 @@
     "zustand": "^5.0.11"
   },
   "devDependencies": {
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/react": "^16.3.2",
     "@biomejs/biome": "2.5.3",
     "@types/dompurify": "^3.0.5",
     "@types/node": "^25.2.1",
@@ -86,6 +88,7 @@
     "@types/react-dom": "^19.2.3",
     "@types/react-twemoji": "^0.4.3",
     "@vitejs/plugin-react": "^5.1.2",
+    "happy-dom": "^20.9.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
     "postcss": "^8.4.31",

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { promocodesApi, PromoGroup } from '../api/promocodes';
+import { promocodesApi, type PromoGroup } from '../api/promocodes';
 import { usePlatform } from '../platform/hooks/usePlatform';
 import { useFocusTrap } from '../hooks/useFocusTrap';
 import {

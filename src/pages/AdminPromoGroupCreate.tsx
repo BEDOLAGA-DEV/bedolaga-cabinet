@@ -4,9 +4,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import {
   promocodesApi,
-  PromoGroup,
-  PromoGroupCreateRequest,
-  PromoGroupUpdateRequest,
+  type PromoGroup,
+  type PromoGroupCreateRequest,
+  type PromoGroupUpdateRequest,
 } from '../api/promocodes';
 import { AdminBackButton } from '../components/admin';
 import { PlusIcon, RefreshIcon, TrashIcon } from '@/components/icons';

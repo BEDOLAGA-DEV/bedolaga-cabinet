@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { serversApi, ServerUpdateRequest } from '../api/servers';
+import { serversApi, type ServerUpdateRequest } from '../api/servers';
 import { AdminBackButton } from '../components/admin';
 import { ServerIcon } from '../components/icons';
 import { createNumberInputHandler, toNumber } from '../utils/inputHelpers';

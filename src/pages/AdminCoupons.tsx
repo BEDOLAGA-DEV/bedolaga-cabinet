@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import i18n from '../i18n';
-import { couponsApi, CouponBatch } from '../api/coupons';
+import { couponsApi, type CouponBatch } from '../api/coupons';
 import { usePlatform } from '../platform/hooks/usePlatform';
 import { formatPrice, formatShortDate } from '../utils/format';
 import {

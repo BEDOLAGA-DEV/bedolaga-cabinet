@@ -1,3 +1,5 @@
+// @vitest-environment node
+/// <reference types="node" />
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const retrieveRawInitData = vi.fn<() => string | undefined>();

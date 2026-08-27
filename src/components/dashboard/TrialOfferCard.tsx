@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
-import { UseMutationResult } from '@tanstack/react-query';
+import type { UseMutationResult } from '@tanstack/react-query';
 import type { TrialInfo } from '../../types';
 import { useCurrency } from '../../hooks/useCurrency';
 import { useTheme } from '../../hooks/useTheme';

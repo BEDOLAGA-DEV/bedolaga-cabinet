@@ -2,7 +2,7 @@ import { useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { rbacApi, AccessPolicy, AdminRole } from '@/api/rbac';
+import { rbacApi, type AccessPolicy, type AdminRole } from '@/api/rbac';
 import { PermissionGate } from '@/components/auth/PermissionGate';
 import { usePlatform } from '@/platform/hooks/usePlatform';
 import { useFocusTrap } from '@/hooks/useFocusTrap';

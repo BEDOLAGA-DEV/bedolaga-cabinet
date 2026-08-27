@@ -12,13 +12,30 @@ export interface User {
   referral_code: string | null;
   language: string;
   created_at: string;
-  auth_type: 'telegram' | 'email' | 'google' | 'yandex' | 'discord' | 'vk'; // Тип аутентификации
+  auth_type: 'telegram' | 'email' | 'google' | 'yandex' | 'discord' | 'vk' | 'apple'; // Тип аутентификации
 }
 
 // OAuth types
+export type OAuthClientType = 'web' | 'ios';
+
 export interface OAuthProvider {
   name: string;
   display_name: string;
+}
+
+export interface OAuthAuthorizeResponse {
+  authorize_url: string | null;
+  state: string;
+  nonce?: string | null;
+  client_type?: OAuthClientType | null;
+}
+
+export interface AppleOAuthUserPayload {
+  name?: {
+    firstName?: string;
+    lastName?: string;
+  };
+  email?: string;
 }
 
 // Campaign bonus info (returned during auth)

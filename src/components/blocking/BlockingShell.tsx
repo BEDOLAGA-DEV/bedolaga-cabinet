@@ -1,4 +1,4 @@
-import { type ReactNode, type Ref } from 'react';
+import type { ReactNode, Ref } from 'react';
 import { motion } from 'framer-motion';
 import { scale, scaleTransition, slideUp, slideUpTransition } from '../motion/transitions';
 import { cn } from '@/lib/utils';

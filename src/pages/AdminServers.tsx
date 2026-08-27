@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { serversApi, ServerListItem } from '../api/servers';
+import { serversApi, type ServerListItem } from '../api/servers';
 import {
   SyncIcon,
   EditIcon,

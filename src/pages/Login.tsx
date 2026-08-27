@@ -22,8 +22,13 @@ import { closeMiniApp } from '@telegram-apps/sdk-react';
 import LanguageSwitcher from '../components/LanguageSwitcher';
 import TelegramLoginButton from '../components/TelegramLoginButton';
 import OAuthProviderIcon from '../components/OAuthProviderIcon';
-import { saveOAuthState } from '../utils/oauth';
+import MobileAppBanner from '../components/MobileAppBanner';
+import PageLoader from '../components/common/PageLoader';
+import { useMobileAppPromo } from '../hooks/useMobileAppPromo';
+import { UI } from '../config/constants';
+import { isOAuthConsentRequiredStatus428, saveOAuthState } from '../utils/oauth';
 import { getPendingReferralCode } from '../utils/referral';
+import { signInWithApple } from '../utils/appleSignIn';
 import { UsersIcon, EmailIcon, RefreshIcon, ChevronDownIcon } from '@/components/icons';
 import LegalFooter from '../components/LegalFooter';
 import LegalConsent from '../components/LegalConsent';
@@ -40,6 +45,7 @@ export default function Login() {
     loginWithTelegram,
     loginWithEmail,
     registerWithEmail,
+    loginWithOAuth,
   } = useAuthStore(
     useShallow((state) => ({
       isAuthenticated: state.isAuthenticated,
@@ -47,6 +53,7 @@ export default function Login() {
       loginWithTelegram: state.loginWithTelegram,
       loginWithEmail: state.loginWithEmail,
       registerWithEmail: state.registerWithEmail,
+      loginWithOAuth: state.loginWithOAuth,
     })),
   );
 
@@ -141,6 +148,10 @@ export default function Login() {
   const safeTop = Math.max(safeAreaInset.top, contentSafeAreaInset.top);
   const safeBottom = Math.max(safeAreaInset.bottom, contentSafeAreaInset.bottom);
 
+  // Mobile app download banner offset (banner is fixed at top: 0 / z-60).
+  const { show: showAppBanner } = useMobileAppPromo();
+  const appBannerHeight = showAppBanner ? UI.APP_BANNER_HEIGHT_PX : 0;
+
   // Получаем URL для возврата после авторизации
   const getReturnUrl = useCallback(() => {
     // Сначала проверяем state от React Router
@@ -200,8 +211,32 @@ export default function Login() {
   const handleOAuthLogin = async (provider: string) => {
     setError('');
     setOauthLoading(provider);
+
+    if (provider === 'apple' && isInTelegramWebApp()) {
+      setError(
+        t('auth.appleBrowserOnly', 'Sign in with Apple is available in a regular browser only.'),
+      );
+      setOauthLoading(null);
+      return;
+    }
+
     try {
-      const { authorize_url, state } = await authApi.getOAuthAuthorizeUrl(provider);
+      const authorizeResponse = await authApi.getOAuthAuthorizeUrl(
+        provider,
+        provider === 'apple' ? 'web' : undefined,
+      );
+
+      if (provider === 'apple') {
+        const { code, state, user } = await signInWithApple(authorizeResponse);
+        await loginWithOAuth(provider, code, state, undefined, user);
+        navigate(getReturnUrl(), { replace: true });
+        return;
+      }
+
+      const { authorize_url, state } = authorizeResponse;
+      if (!authorize_url) {
+        throw new Error('Invalid OAuth redirect URL');
+      }
 
       // Validate redirect URL — only allow HTTPS to prevent open redirect
       let parsed: URL;
@@ -216,8 +251,17 @@ export default function Login() {
 
       saveOAuthState(state, provider);
       window.location.href = authorize_url;
-    } catch {
-      setError(t('auth.oauthError', 'Authorization was denied or failed'));
+    } catch (err: unknown) {
+      if (isOAuthConsentRequiredStatus428(err)) {
+        setError(
+          t(
+            'auth.oauthConsentRequired',
+            'Legal consent is required before OAuth sign-in. Please register or sign in with email or Telegram first, then try again. If this persists, contact support.',
+          ),
+        );
+      } else {
+        setError(t('auth.oauthError', 'Authorization was denied or failed'));
+      }
       setOauthLoading(null);
     }
   };
@@ -414,12 +458,29 @@ export default function Login() {
     setForgotPasswordError('');
   };
 
+  // Hide the form (and the banner) while the auth store is still initializing
+  // or while we're about to redirect an already-authenticated user. This avoids
+  // a flash of the Login UI on returning visits.
+  if (isAuthInitializing || isAuthenticated) {
+    return <PageLoader variant="dark" />;
+  }
+
+  // Build top-padding and language-switcher offsets without `+ 0px` artifacts.
+  const bannerPx = appBannerHeight ? ` + ${appBannerHeight}px` : '';
+  const pageTopPad =
+    safeTop > 0
+      ? `${safeTop + 16 + appBannerHeight}px`
+      : `calc(1rem${bannerPx} + env(safe-area-inset-top, 0px))`;
+  const switcherTop =
+    safeTop > 0
+      ? `${safeTop + 12 + appBannerHeight}px`
+      : `calc(12px${bannerPx} + env(safe-area-inset-top, 0px))`;
+
   return (
     <div
       className="flex min-h-[100dvh] items-center justify-center px-4 sm:px-6 lg:px-8"
       style={{
-        paddingTop:
-          safeTop > 0 ? `${safeTop + 16}px` : 'calc(1rem + env(safe-area-inset-top, 0px))',
+        paddingTop: pageTopPad,
         paddingBottom:
           safeBottom > 0 ? `${safeBottom + 16}px` : 'calc(1rem + env(safe-area-inset-bottom, 0px))',
       }}
@@ -429,13 +490,11 @@ export default function Login() {
           PRODUCT.md explicitly anti-references. Body bg-dark-950 carries
           the surface alone. */}
 
+      {/* App download banner (only on supported devices with a configured URL) */}
+      <MobileAppBanner />
+
       {/* Language switcher */}
-      <div
-        className="fixed right-3 z-50"
-        style={{
-          top: safeTop > 0 ? `${safeTop + 12}px` : 'calc(12px + env(safe-area-inset-top, 0px))',
-        }}
-      >
+      <div className="fixed right-3 z-50" style={{ top: switcherTop }}>
         <LanguageSwitcher />
       </div>
 

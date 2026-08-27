@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { adminLandingsApi, LandingListItem, resolveLocaleDisplay } from '../api/landings';
+import { adminLandingsApi, type LandingListItem, resolveLocaleDisplay } from '../api/landings';
 import { useNotify } from '@/platform';
 import { copyToClipboard } from '../utils/clipboard';
 import { getApiErrorMessage } from '../utils/api-error';

@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { SettingDefinition } from '../../api/adminSettings';
+import type { SettingDefinition } from '../../api/adminSettings';
 import { cn } from '../../lib/utils';
 import { StarIcon, LockIcon, RefreshIcon } from './icons';
 import { SettingInput } from './SettingInput';

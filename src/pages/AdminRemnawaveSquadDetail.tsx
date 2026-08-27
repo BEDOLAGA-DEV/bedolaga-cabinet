@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { adminRemnawaveApi, SquadWithLocalInfo } from '../api/adminRemnawave';
+import { adminRemnawaveApi, type SquadWithLocalInfo } from '../api/adminRemnawave';
 import { AdminBackButton } from '../components/admin';
 import { ServerIcon, UsersIcon, CheckIcon, XIcon, BanknotesIcon } from '../components/icons';
 import { StatCard } from '@/components/stats';

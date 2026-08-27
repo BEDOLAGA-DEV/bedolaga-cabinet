@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { SettingDefinition } from '../../api/adminSettings';
+import type { SettingDefinition } from '../../api/adminSettings';
 import { CheckIcon, CloseIcon, EditIcon } from './icons';
 
 interface SettingInputProps {

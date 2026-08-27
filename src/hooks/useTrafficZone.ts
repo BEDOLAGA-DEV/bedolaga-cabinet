@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { getTrafficZone, TrafficColorKey } from '../utils/trafficZone';
+import { getTrafficZone, type TrafficColorKey } from '../utils/trafficZone';
 import { useThemeColors } from './useThemeColors';
 import type { ThemeColors } from '../types/theme';
 

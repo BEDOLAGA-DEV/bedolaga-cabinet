@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { tariffsApi, TariffListItem } from '../api/tariffs';
+import { tariffsApi, type TariffListItem } from '../api/tariffs';
 import { useDestructiveConfirm, useNotify } from '@/platform';
 import { usePlatform } from '../platform/hooks/usePlatform';
 import {

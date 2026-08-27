@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { adminPinnedMessagesApi, PinnedMessageResponse } from '../api/adminPinnedMessages';
+import { adminPinnedMessagesApi, type PinnedMessageResponse } from '../api/adminPinnedMessages';
 import { AdminBackButton } from '../components/admin';
 import { useNativeDialog } from '../platform/hooks/useNativeDialog';
 import {

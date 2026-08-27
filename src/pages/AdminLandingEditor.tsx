@@ -12,7 +12,7 @@ import {
   type SupportedLocale,
   toLocaleDict,
 } from '../api/landings';
-import { tariffsApi, TariffListItem, PeriodPrice } from '../api/tariffs';
+import { tariffsApi, type TariffListItem, type PeriodPrice } from '../api/tariffs';
 import { formatPrice } from '../utils/format';
 import { useCurrency } from '../hooks/useCurrency';
 import { adminPaymentMethodsApi } from '../api/adminPaymentMethods';

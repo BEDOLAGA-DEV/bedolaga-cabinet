@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { pollsApi, PollInfo, PollQuestion } from '../api/polls';
+import { pollsApi, type PollInfo, type PollQuestion } from '../api/polls';
 import { useFocusTrap } from '../hooks/useFocusTrap';
 import { ClipboardIcon, GiftIcon, CheckIcon, CloseIcon } from '@/components/icons';
 

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { contestsApi, ContestInfo, ContestGameData } from '../api/contests';
+import { contestsApi, type ContestInfo, type ContestGameData } from '../api/contests';
 import { GamepadIcon, TrophyIcon, XIcon } from '@/components/icons';
 
 export default function Contests() {

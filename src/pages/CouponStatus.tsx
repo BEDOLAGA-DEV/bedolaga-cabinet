@@ -3,7 +3,7 @@ import { useParams } from 'react-router';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
-import { couponsApi, CouponRedeemResponse } from '../api/coupons';
+import { couponsApi, type CouponRedeemResponse } from '../api/coupons';
 import { useAuthStore } from '../store/auth';
 import { formatShortDate } from '../utils/format';
 import { Spinner } from '@/components/ui/Spinner';

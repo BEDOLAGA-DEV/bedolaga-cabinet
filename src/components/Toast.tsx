@@ -5,7 +5,7 @@ import {
   useCallback,
   useRef,
   useEffect,
-  ReactNode,
+  type ReactNode,
 } from 'react';
 
 import { CheckIcon, XIcon, ExclamationIcon, InfoIcon } from '@/components/icons';

@@ -4,9 +4,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import {
   promoOffersApi,
-  PromoOfferTemplateUpdateRequest,
+  type PromoOfferTemplateUpdateRequest,
   OFFER_TYPE_CONFIG,
-  OfferType,
+  type OfferType,
 } from '../api/promoOffers';
 import { serversApi } from '../api/servers';
 import { AdminBackButton } from '../components/admin';

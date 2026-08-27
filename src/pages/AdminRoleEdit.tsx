@@ -2,7 +2,12 @@ import { useState, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { rbacApi, PermissionSection, CreateRolePayload, UpdateRolePayload } from '@/api/rbac';
+import {
+  rbacApi,
+  type PermissionSection,
+  type CreateRolePayload,
+  type UpdateRolePayload,
+} from '@/api/rbac';
 import { AdminBackButton } from '@/components/admin';
 import { ChevronDownIcon } from '@/components/icons';
 

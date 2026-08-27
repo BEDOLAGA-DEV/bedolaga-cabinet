@@ -4,11 +4,11 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import {
   campaignsApi,
-  CampaignUpdateRequest,
-  CampaignBonusType,
-  ServerSquadInfo,
-  TariffListItem,
-  AvailablePartner,
+  type CampaignUpdateRequest,
+  type CampaignBonusType,
+  type ServerSquadInfo,
+  type TariffListItem,
+  type AvailablePartner,
 } from '../api/campaigns';
 import { AdminBackButton } from '../components/admin';
 import { CheckIcon, CampaignIcon } from '../components/icons';

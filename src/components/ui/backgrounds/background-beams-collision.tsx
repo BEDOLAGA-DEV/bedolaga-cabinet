@@ -1,4 +1,5 @@
-import React, { useRef, useState, useEffect, useCallback } from 'react';
+import type React from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { sanitizeColor } from './types';

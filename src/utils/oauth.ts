@@ -33,6 +33,19 @@ export function clearLinkOAuthState(): void {
   sessionStorage.removeItem(LINK_OAUTH_PROVIDER_KEY);
 }
 
+export function isOAuthConsentRequiredStatus428(err: unknown): boolean {
+  if (!err || typeof err !== 'object' || !('response' in err)) {
+    return false;
+  }
+
+  const response = (err as { response?: unknown }).response;
+  if (!response || typeof response !== 'object' || !('status' in response)) {
+    return false;
+  }
+
+  return (response as { status?: unknown }).status === 428;
+}
+
 export function getErrorDetail(err: unknown): string | null {
   if (err && typeof err === 'object' && 'response' in err) {
     const resp = (err as { response?: { data?: { detail?: unknown } } }).response;

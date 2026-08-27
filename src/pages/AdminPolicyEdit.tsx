@@ -2,7 +2,12 @@ import { useState, useCallback, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { rbacApi, AccessPolicy, CreatePolicyPayload, UpdatePolicyPayload } from '@/api/rbac';
+import {
+  rbacApi,
+  type AccessPolicy,
+  type CreatePolicyPayload,
+  type UpdatePolicyPayload,
+} from '@/api/rbac';
 import { AdminBackButton } from '@/components/admin';
 import { XIcon } from '@/components/icons';
 

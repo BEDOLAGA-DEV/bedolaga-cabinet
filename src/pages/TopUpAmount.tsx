@@ -351,7 +351,7 @@ export default function TopUpAmount() {
       // display-currency rounding step below it, so typing the advertised (rounded)
       // minimum isn't rejected by FX rounding.
       const decimals = targetCurrency === 'IRR' ? 0 : 2;
-      const roundingStep = convertToRub(Math.pow(10, -decimals));
+      const roundingStep = convertToRub(10 ** -decimals);
       if (canonicalRubles < minRubles && canonicalRubles >= minRubles - roundingStep) {
         canonicalRubles = minRubles;
       }

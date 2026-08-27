@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { ticketNotificationsApi } from '../api/ticketNotifications';
 import { useAuthStore } from '../store/auth';
 import { useToast } from './Toast';
-import { useWebSocket, WSMessage } from '../hooks/useWebSocket';
+import { useWebSocket, type WSMessage } from '../hooks/useWebSocket';
 import { useHeaderHeight } from '../hooks/useHeaderHeight';
 import type { TicketNotification } from '../types';
 import { BellIcon, CheckIcon } from '@/components/icons';

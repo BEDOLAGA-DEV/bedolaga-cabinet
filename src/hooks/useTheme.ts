@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { EnabledThemes, DEFAULT_ENABLED_THEMES } from '../types/theme';
+import { type EnabledThemes, DEFAULT_ENABLED_THEMES } from '../types/theme';
 import { themeColorsApi } from '../api/themeColors';
 import { STORAGE_KEYS } from '../config/constants';
 import { getTelegramColorScheme } from './useTelegramSDK';

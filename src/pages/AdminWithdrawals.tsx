@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { withdrawalApi, AdminWithdrawalItem } from '../api/withdrawals';
+import { withdrawalApi, type AdminWithdrawalItem } from '../api/withdrawals';
 import { AdminBackButton } from '../components/admin';
 import { ChevronRightIcon, ClockIcon, WalletIcon } from '@/components/icons';
 import { StatCard } from '@/components/stats';

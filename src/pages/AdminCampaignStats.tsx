@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { campaignsApi, CampaignBonusType } from '../api/campaigns';
+import { campaignsApi, type CampaignBonusType } from '../api/campaigns';
 import type { AdminCampaignChartData } from '../api/campaigns';
 import { AdminBackButton } from '../components/admin';
 import { DailyChart, PeriodComparison, StatCard } from '../components/stats';

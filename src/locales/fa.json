@@ -195,6 +195,7 @@
     "telegramNotConfigured": "ربات تلگرام پیکربندی نشده",
     "botOutdated": "نسخهٔ ربات با کابینت سازگار نیست. ربات را به v3.33.0 یا جدیدتر به‌روزرسانی کنید.",
     "telegramUnavailable": "ورود از طریق تلگرام موقتاً در دسترس نیست",
+    "appleBrowserOnly": "ورود با Apple فقط در مرورگر معمولی در دسترس است.",
     "authenticating": "در حال تایید هویت...",
     "orOpenInApp": "یا ربات را در برنامه باز کنید",
     "loginFailed": "ورود ناموفق",
@@ -240,6 +241,7 @@
     "continueWithDiscord": "ادامه با Discord",
     "continueWithVk": "ادامه با VK",
     "oauthError": "مجوز رد شد یا ناموفق بود",
+    "oauthConsentRequired": "برای ورود با OAuth باید رضایت حقوقی ثبت شده باشد. لطفاً ابتدا با ایمیل یا تلگرام ثبت‌نام/وارد شوید و سپس دوباره تلاش کنید. اگر مشکل ادامه داشت، با پشتیبانی تماس بگیرید.",
     "oauthExpired": "نشست OAuth منقضی شده است. لطفاً دوباره امتحان کنید."
   },
   "emailVerification": {
@@ -4499,13 +4501,15 @@
       "openTelegram": "باز کردن تلگرام",
       "continueInBrowser": "ادامه احراز هویت در مرورگر باز شده",
       "pollingTimeout": "بررسی احراز هویت منقضی شد. اگر اتصال را تکمیل کرده‌اید صفحه را بارگذاری مجدد کنید.",
+      "appleBrowserOnly": "اتصال حساب Apple فقط در مرورگر معمولی در دسترس است.",
       "providers": {
         "telegram": "تلگرام",
         "email": "ایمیل",
         "google": "گوگل",
         "yandex": "یاندکس",
         "discord": "دیسکورد",
-        "vk": "VK"
+        "vk": "VK",
+        "apple": "Apple"
       },
       "backToAccounts": "بازگشت به فهرست حساب‌ها"
     },
@@ -5160,6 +5164,14 @@
         "linkUrlPrompt": "آدرس پیوند:"
       }
     }
+  },
+  "mobileAppBanner": {
+    "title": "اپلیکیشن {{appName}} را دریافت کنید",
+    "description": "سریع‌تر و روان‌تر — از {{store}} نصب کنید",
+    "install": "نصب",
+    "dismiss": "بستن",
+    "appStore": "App Store",
+    "googlePlay": "Google Play"
   },
   "subscriptions": {
     "buy": "خرید اشتراک",

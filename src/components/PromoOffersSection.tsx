@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
-import { promoApi, PromoOffer } from '../api/promo';
+import { promoApi, type PromoOffer } from '../api/promo';
 import { ClockIcon, CheckIcon, XCircleIcon } from './icons';
 import { useDestructiveConfirm } from '@/platform/hooks/useNativeDialog';
 

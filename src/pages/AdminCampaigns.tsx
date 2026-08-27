@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router';
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import i18n from '../i18n';
-import { campaignsApi, CampaignListItem, CampaignBonusType } from '../api/campaigns';
+import { campaignsApi, type CampaignListItem, type CampaignBonusType } from '../api/campaigns';
 import {
   PlusIcon,
   EditIcon,

@@ -203,6 +203,7 @@
     "telegramNotConfigured": "Telegram bot is not configured",
     "botOutdated": "The bot version is not compatible with the cabinet. Update the bot to v3.33.0 or newer.",
     "telegramUnavailable": "Telegram login is temporarily unavailable",
+    "appleBrowserOnly": "Sign in with Apple is available in a regular browser only.",
     "authenticating": "Authenticating...",
     "orOpenInApp": "Or open the bot in the app",
     "loginFailed": "Login Failed",
@@ -246,6 +247,7 @@
     "continueWithDiscord": "Continue with Discord",
     "continueWithVk": "Continue with VK",
     "oauthError": "Authorization was denied or failed",
+    "oauthConsentRequired": "Legal consent is required before OAuth sign-in. Please register or sign in with email or Telegram first, then try again. If this persists, contact support.",
     "oauthExpired": "OAuth session expired. Please try again."
   },
   "emailVerification": {
@@ -5062,13 +5064,15 @@
       "openTelegram": "Open Telegram",
       "continueInBrowser": "Continue authorization in the opened browser",
       "pollingTimeout": "Authorization check timed out. Refresh the page if you completed linking.",
+      "appleBrowserOnly": "Apple account linking is available in a regular browser only.",
       "providers": {
         "telegram": "Telegram",
         "email": "Email",
         "google": "Google",
         "yandex": "Yandex",
         "discord": "Discord",
-        "vk": "VK"
+        "vk": "VK",
+        "apple": "Apple"
       },
       "backToAccounts": "Back to accounts"
     },
@@ -5663,6 +5667,14 @@
         "linkUrlPrompt": "URL:"
       }
     }
+  },
+  "mobileAppBanner": {
+    "title": "Get the {{appName}} app",
+    "description": "Faster, smoother — install from {{store}}",
+    "install": "Install",
+    "dismiss": "Dismiss",
+    "appStore": "App Store",
+    "googlePlay": "Google Play"
   },
   "subscriptions": {
     "buy": "Buy subscription",

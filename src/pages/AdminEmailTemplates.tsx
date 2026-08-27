@@ -3,9 +3,9 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import {
   adminEmailTemplatesApi,
-  EmailTemplateType,
-  EmailTemplateDetail,
-  EmailTemplateLanguageData,
+  type EmailTemplateType,
+  type EmailTemplateDetail,
+  type EmailTemplateLanguageData,
 } from '../api/adminEmailTemplates';
 import { AdminBackButton, BackIcon } from '../components/admin';
 import { useNativeDialog } from '../platform/hooks/useNativeDialog';

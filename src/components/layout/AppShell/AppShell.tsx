@@ -22,6 +22,9 @@ import SuccessNotificationModal from '@/components/SuccessNotificationModal';
 import { PromptDialogHost } from '@/components/PromptDialogHost';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import TicketNotificationBell from '@/components/TicketNotificationBell';
+import MobileAppBanner from '@/components/MobileAppBanner';
+import { useMobileAppPromo } from '@/hooks/useMobileAppPromo';
+import { UI } from '@/config/constants';
 import {
   SubscriptionIcon,
   GiftIcon,
@@ -59,6 +62,8 @@ export function AppShell({ children }: AppShellProps) {
   // Extracted hooks
   const { appName, logoLetter, hasCustomLogo, logoUrl } = useBranding();
   const { referralEnabled, wheelEnabled, hasContests, hasPolls, giftEnabled } = useFeatureFlags();
+  const { show: showMobileAppBanner } = useMobileAppPromo();
+  const appBannerHeight = showMobileAppBanner ? UI.APP_BANNER_HEIGHT_PX : 0;
   useScrollRestoration();
   // Анимированный фон рендерит BackgroundHost в App (не перемонтируется при
   // смене роута) — здесь только регистрируем, что на этом роуте он нужен.
@@ -189,16 +194,14 @@ export function AppShell({ children }: AppShellProps) {
       <SuccessNotificationModal />
       <PromptDialogHost />
 
+      {/* App download banner (renders above the mobile and desktop headers) */}
+      <MobileAppBanner />
+
       {/* Desktop Header */}
-      {/* w-screen вместо left-0 right-0: right-0 упирается в край вьюпорта БЕЗ
-          скроллбара, и капсула по центру прыгала бы на полширины скроллбара при
-          переходах между страницами со скроллом и без. 100vw даёт ту же ось
-          центрирования, что и у body (тоже 100vw). */}
-      <header className="fixed left-0 top-0 z-50 hidden w-screen border-b border-dark-800/50 bg-dark-950/95 lg:block">
-        {/* 3-зонный grid: лого | капсула | действия. Колонки 1fr_auto_1fr держат
-            капсулу строго по центру вьюпорта НЕЗАВИСИМО от ширины лого/действий,
-            а действия — у правого края. Поэтому ничего не «скачет» при переходах
-            (в т.ч. в админку): смена ширины в одной зоне не двигает другие. */}
+      <header
+        className="fixed left-0 z-50 hidden w-screen border-b border-dark-800/50 bg-dark-950/95 lg:block"
+        style={{ top: appBannerHeight }}
+      >
         <div className="mx-auto grid h-14 max-w-[1600px] grid-cols-[1fr_auto_1fr] items-center gap-4 px-6">
           {/* Logo */}
           <Link
@@ -291,13 +294,17 @@ export function AppShell({ children }: AppShellProps) {
         hasContests={hasContests}
         hasPolls={hasPolls}
         giftEnabled={giftEnabled}
+        topOffset={appBannerHeight}
       />
 
       {/* Desktop spacer */}
-      <div className="hidden h-14 lg:block" />
+      <div
+        className="hidden lg:block"
+        style={{ height: UI.DESKTOP_HEADER_HEIGHT_PX + appBannerHeight }}
+      />
 
       {/* Mobile spacer */}
-      <div className="lg:hidden" style={{ height: headerHeight }} />
+      <div className="lg:hidden" style={{ height: headerHeight + appBannerHeight }} />
 
       {/* Main content */}
       <main className="mx-auto max-w-6xl px-4 py-6 pb-28 lg:px-6 lg:pb-8">{children}</main>

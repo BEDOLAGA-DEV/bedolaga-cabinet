@@ -206,6 +206,7 @@
     "telegramNotConfigured": "Telegram бот не настроен",
     "botOutdated": "Версия бота несовместима с кабинетом. Обновите бота до v3.33.0 или новее.",
     "telegramUnavailable": "Вход через Telegram временно недоступен",
+    "appleBrowserOnly": "Вход через Apple доступен только в обычном браузере.",
     "authenticating": "Авторизация...",
     "orOpenInApp": "Или откройте бота в приложении",
     "loginFailed": "Ошибка входа",
@@ -249,6 +250,7 @@
     "continueWithDiscord": "Продолжить через Discord",
     "continueWithVk": "Продолжить через VK",
     "oauthError": "Авторизация отклонена или не удалась",
+    "oauthConsentRequired": "Для входа через OAuth требуется подтверждённое согласие с документами. Сначала зарегистрируйтесь или войдите по email либо через Telegram, затем повторите попытку. Если проблема сохраняется, обратитесь в поддержку.",
     "oauthExpired": "Сессия OAuth истекла. Попробуйте снова."
   },
   "emailVerification": {
@@ -5606,13 +5608,15 @@
       "openTelegram": "Открыть Telegram",
       "continueInBrowser": "Продолжите авторизацию в открывшемся браузере",
       "pollingTimeout": "Проверка авторизации истекла. Обновите страницу, если привязка завершена.",
+      "appleBrowserOnly": "Привязка Apple доступна только в обычном браузере.",
       "providers": {
         "telegram": "Telegram",
         "email": "Email",
         "google": "Google",
         "yandex": "Яндекс",
         "discord": "Discord",
-        "vk": "VK"
+        "vk": "VK",
+        "apple": "Apple"
       },
       "backToAccounts": "К списку аккаунтов"
     },
@@ -6217,6 +6221,14 @@
         "linkUrlPrompt": "URL ссылки:"
       }
     }
+  },
+  "mobileAppBanner": {
+    "title": "Скачайте приложение {{appName}}",
+    "description": "Быстрее и удобнее — установите из {{store}}",
+    "install": "Установить",
+    "dismiss": "Закрыть",
+    "appStore": "App Store",
+    "googlePlay": "Google Play"
   },
   "subscriptions": {
     "buy": "Купить подписку",

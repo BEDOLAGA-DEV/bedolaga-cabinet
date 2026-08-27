@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
-import { rbacApi, AuditLogEntry, AuditLogFilters } from '@/api/rbac';
+import { rbacApi, type AuditLogEntry, type AuditLogFilters } from '@/api/rbac';
 import { PermissionGate } from '@/components/auth/PermissionGate';
 import { DateField } from '@/components/DateField';
 import { usePlatform } from '@/platform/hooks/usePlatform';
