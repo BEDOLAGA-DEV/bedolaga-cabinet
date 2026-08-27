@@ -1241,6 +1241,7 @@
       "dashboard": "统计",
       "tickets": "工单",
       "settings": "设置",
+      "graceAccess": "宽限访问",
       "apps": "应用",
       "wheel": "转盘",
       "tariffs": "套餐",
@@ -2136,6 +2137,156 @@
       "botStartVideoActive": "已设置视频",
       "botStartVideoNone": "未设置视频 — 菜单使用 logo 图片",
       "botStartVideoError": "视频上传失败"
+    },
+    "graceAccess": {
+      "title": "宽限访问",
+      "subtitle": "临时受限访问，让用户仍有机会续订",
+      "loadError": "无法加载宽限访问设置",
+      "saveError": "无法保存设置",
+      "save": "保存",
+      "saving": "保存中…",
+      "discard": "撤销",
+      "dirty": "有未保存的更改",
+      "envLocked": "该值固定在 .env 中，此处无法修改",
+      "restartOnly": "重启机器人后生效",
+      "badge": {
+        "false": "已关闭",
+        "observe": "观察",
+        "true": "已开启",
+        "drain": "排空"
+      },
+      "modeSection": {
+        "title": "模式",
+        "hint": "模式在机器人启动时读取，保存的值需要重启后才会生效。"
+      },
+      "modes": {
+        "false": {
+          "label": "已关闭",
+          "desc": "不发放也不结束宽限会话"
+        },
+        "observe": {
+          "label": "观察",
+          "desc": "仅记录候选，不修改面板"
+        },
+        "true": {
+          "label": "已开启",
+          "desc": "发放临时访问并在结束后恢复"
+        },
+        "drain": {
+          "label": "排空",
+          "desc": "不再新增会话，把已开启的处理完"
+        }
+      },
+      "restart": {
+        "title": "需要重启机器人",
+        "body": "当前运行模式为「{{running}}」，已保存模式为「{{configured}}」。重启之前，宽限访问按运行模式工作。"
+      },
+      "issues": {
+        "title": "配置问题"
+      },
+      "issue": {
+        "squad_required": "小队未填写：{{field}}。这样机器人会在启动时关闭宽限访问。",
+        "squad_invalid": "UUID 格式错误：{{field}}",
+        "traffic_required": "流量上限不得少于 1 GB",
+        "open_sessions_stranded": "仍有未结束的会话，而当前模式不会处理它们，面板中的覆盖状态会一直保留。请切换到「排空」。"
+      },
+      "fields": {
+        "mode": "模式",
+        "expired_squad_uuid": "订阅到期使用的小队",
+        "limited_squad_uuid": "流量耗尽使用的小队",
+        "external_squad_uuid": "外部小队",
+        "duration_hours": "时长（小时）",
+        "traffic_gb": "流量（GB）",
+        "reconcile_interval_seconds": "核对间隔（秒）",
+        "reconcile_batch_size": "批量大小",
+        "candidate_lookback_minutes": "回溯窗口（分钟）"
+      },
+      "squads": {
+        "title": "小队",
+        "hint": "宽限期间用户被移动到哪里。原始状态会被快照保存，结束时恢复。",
+        "choose": "选择小队",
+        "manual": "手动输入 UUID…",
+        "members": "{{n}} 人",
+        "unavailable": "面板不可用 — 可手动输入 UUID",
+        "expiredDesc": "订阅到期时使用",
+        "limitedDesc": "流量上限耗尽时使用"
+      },
+      "external": {
+        "detach": "移除",
+        "keep": "保持不变",
+        "custom": "备用小队",
+        "detachDesc": "宽限期间移除外部小队，结束后恢复",
+        "keepDesc": "不改动用户的外部小队",
+        "customDesc": "宽限期间使用指定的小队"
+      },
+      "limits": {
+        "title": "限制",
+        "durationDesc": "如果一直没有续订，访问可持续多久",
+        "trafficDesc": "宽限期间的流量上限"
+      },
+      "coverage": {
+        "title": "发放对象",
+        "hint": "默认只有付费订阅可获得宽限访问。",
+        "trial_enabled": "试用订阅",
+        "trial_enabledDesc": "试用结束后也发放宽限访问",
+        "daily_enabled": "按日订阅",
+        "daily_enabledDesc": "为按日计费的订阅发放宽限访问",
+        "free_enabled": "免费订阅",
+        "free_enabledDesc": "为零费用订阅发放宽限访问"
+      },
+      "reconcile": {
+        "title": "后台核对",
+        "hint": "机器人多久查找一次候选并处理未结束的会话",
+        "show": "展开",
+        "hide": "收起",
+        "reconcile_interval_secondsDesc": "两次核对之间的间隔",
+        "reconcile_batch_sizeDesc": "一次处理多少个会话",
+        "candidate_lookback_minutesDesc": "向前查找多久之内的到期和限额"
+      },
+      "health": {
+        "title": "状态",
+        "open": "进行中",
+        "completed": "已结束",
+        "openErrors": "进行中出错",
+        "completedErrors": "已结束出错",
+        "recentErrors": "最近的错误",
+        "subscription": "订阅 #{{id}}"
+      },
+      "sessions": {
+        "title": "会话",
+        "hint": "目前谁持有临时访问，以及以往的会话如何结束",
+        "loadError": "无法加载会话",
+        "empty": "暂无会话",
+        "user": "用户",
+        "reason": "原因",
+        "state": "状态",
+        "until": "有效期至",
+        "filter": {
+          "open": "进行中",
+          "pending": "等待中",
+          "active": "活跃",
+          "restoring": "恢复中",
+          "completed": "已结束",
+          "errors": "有错误"
+        },
+        "states": {
+          "pending": "等待面板",
+          "active": "活跃",
+          "restoring": "恢复中",
+          "completed": "已结束"
+        },
+        "reasons": {
+          "expired": "已到期",
+          "limited": "流量耗尽"
+        },
+        "completion": {
+          "paid": "已续订",
+          "timeout": "宽限期结束",
+          "drained": "已排空",
+          "conflict": "面板冲突",
+          "revoked": "已撤销"
+        }
+      }
     },
     "buttons": {
       "color": "按钮颜色",

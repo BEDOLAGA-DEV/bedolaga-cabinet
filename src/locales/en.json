@@ -1377,6 +1377,7 @@
       "dashboard": "Dashboard",
       "tickets": "Tickets",
       "settings": "Settings",
+      "graceAccess": "Grace access",
       "apps": "Apps",
       "wheel": "Wheel",
       "tariffs": "Tariffs",
@@ -2447,6 +2448,156 @@
       "botStartVideoActive": "Video is set",
       "botStartVideoNone": "No video — the menu uses the logo image",
       "botStartVideoError": "Could not upload the video"
+    },
+    "graceAccess": {
+      "title": "Grace access",
+      "subtitle": "Temporary restricted access so a user can still renew",
+      "loadError": "Could not load grace access settings",
+      "saveError": "Could not save the settings",
+      "save": "Save",
+      "saving": "Saving…",
+      "discard": "Discard",
+      "dirty": "Unsaved changes",
+      "envLocked": "Pinned in .env — it cannot be changed here",
+      "restartOnly": "Applies after the bot restarts",
+      "badge": {
+        "false": "Off",
+        "observe": "Observe",
+        "true": "On",
+        "drain": "Drain"
+      },
+      "modeSection": {
+        "title": "Mode",
+        "hint": "The mode is read while the bot starts, so a saved value takes effect only after a restart."
+      },
+      "modes": {
+        "false": {
+          "label": "Off",
+          "desc": "No grace sessions are granted or finished"
+        },
+        "observe": {
+          "label": "Observe",
+          "desc": "Candidates are only logged, the panel is left alone"
+        },
+        "true": {
+          "label": "On",
+          "desc": "Grants temporary access and restores it afterwards"
+        },
+        "drain": {
+          "label": "Drain",
+          "desc": "No new sessions, the open ones are seen through"
+        }
+      },
+      "restart": {
+        "title": "Restart the bot to apply",
+        "body": "Running mode is “{{running}}”, saved mode is “{{configured}}”. Until a restart, grace behaves like the running one."
+      },
+      "issues": {
+        "title": "Configuration problems"
+      },
+      "issue": {
+        "squad_required": "Squad is empty: {{field}}. The bot will start with grace disabled.",
+        "squad_invalid": "Malformed UUID: {{field}}",
+        "traffic_required": "The traffic limit must be at least 1 GB",
+        "open_sessions_stranded": "Sessions are still open but this mode never finishes them, so the overlay stays in the panel. Switch to “Drain”."
+      },
+      "fields": {
+        "mode": "Mode",
+        "expired_squad_uuid": "Squad for an expired subscription",
+        "limited_squad_uuid": "Squad for exhausted traffic",
+        "external_squad_uuid": "External squad",
+        "duration_hours": "Duration, hours",
+        "traffic_gb": "Traffic, GB",
+        "reconcile_interval_seconds": "Reconcile interval, sec",
+        "reconcile_batch_size": "Batch size",
+        "candidate_lookback_minutes": "Lookback window, min"
+      },
+      "squads": {
+        "title": "Squads",
+        "hint": "Where the user is moved for the duration of grace. The original state is snapshotted and restored at the end.",
+        "choose": "Pick a squad",
+        "manual": "Enter a UUID manually…",
+        "members": "{{n}} members",
+        "unavailable": "The panel is unreachable — enter the UUID manually",
+        "expiredDesc": "Used when the subscription has expired",
+        "limitedDesc": "Used when the traffic limit is exhausted"
+      },
+      "external": {
+        "detach": "Detach",
+        "keep": "Leave as is",
+        "custom": "Fallback squad",
+        "detachDesc": "The external squad is removed for the grace period and restored afterwards",
+        "keepDesc": "The external squad is left untouched",
+        "customDesc": "The chosen squad is used for the grace period"
+      },
+      "limits": {
+        "title": "Limits",
+        "durationDesc": "How long access lasts if the subscription is never renewed",
+        "trafficDesc": "Traffic limit for the grace period"
+      },
+      "coverage": {
+        "title": "Who gets it",
+        "hint": "By default only paid subscriptions receive grace.",
+        "trial_enabled": "Trial subscriptions",
+        "trial_enabledDesc": "Grant grace after a trial ends",
+        "daily_enabled": "Daily subscriptions",
+        "daily_enabledDesc": "Grant grace to per-day subscriptions",
+        "free_enabled": "Free subscriptions",
+        "free_enabledDesc": "Grant grace to zero-cost subscriptions"
+      },
+      "reconcile": {
+        "title": "Background reconciliation",
+        "hint": "How often the bot looks for candidates and finishes open sessions",
+        "show": "Show",
+        "hide": "Hide",
+        "reconcile_interval_secondsDesc": "Pause between reconciliation passes",
+        "reconcile_batch_sizeDesc": "How many sessions one pass handles",
+        "candidate_lookback_minutesDesc": "How far back recent expirations and limits are searched"
+      },
+      "health": {
+        "title": "Health",
+        "open": "Open",
+        "completed": "Completed",
+        "openErrors": "Errors in open",
+        "completedErrors": "Errors in completed",
+        "recentErrors": "Recent errors",
+        "subscription": "Subscription #{{id}}"
+      },
+      "sessions": {
+        "title": "Sessions",
+        "hint": "Who holds temporary access right now, and how earlier ones ended",
+        "loadError": "Could not load the sessions",
+        "empty": "No sessions",
+        "user": "User",
+        "reason": "Reason",
+        "state": "State",
+        "until": "Valid until",
+        "filter": {
+          "open": "Open",
+          "pending": "Pending",
+          "active": "Active",
+          "restoring": "Restoring",
+          "completed": "Completed",
+          "errors": "With errors"
+        },
+        "states": {
+          "pending": "Waiting for the panel",
+          "active": "Active",
+          "restoring": "Restoring",
+          "completed": "Completed"
+        },
+        "reasons": {
+          "expired": "Expired",
+          "limited": "Traffic exhausted"
+        },
+        "completion": {
+          "paid": "Renewed",
+          "timeout": "Grace expired",
+          "drained": "Drained",
+          "conflict": "Panel conflict",
+          "revoked": "Revoked"
+        }
+      }
     },
     "bulkActions": {
       "title": "Bulk Actions",
