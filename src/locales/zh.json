@@ -2188,7 +2188,8 @@
         "squad_required": "小队未填写：{{field}}。这样机器人会在启动时关闭宽限访问。",
         "squad_invalid": "UUID 格式错误：{{field}}",
         "traffic_required": "流量上限不得少于 1 GB",
-        "open_sessions_stranded": "仍有未结束的会话，而当前模式不会处理它们，面板中的覆盖状态会一直保留。请切换到「排空」。"
+        "open_sessions_stranded": "仍有未结束的会话，而当前模式不会处理它们，面板中的覆盖状态会一直保留。请切换到「排空」。",
+        "number_required": "数值未填写：{{field}}"
       },
       "fields": {
         "mode": "模式",

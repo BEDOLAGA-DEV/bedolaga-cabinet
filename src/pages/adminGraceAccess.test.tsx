@@ -263,6 +263,67 @@ describe('раздел grace-доступа', () => {
     expect(field.value).toBe(EXPIRED_UUID);
   });
 
+  it('выбор «Аварийный сквад» не сбрасывается обратно на «Отцепить»', async () => {
+    // Вариант начинается с пустого поля, и вывод варианта из самого значения
+    // возвращал бы список к «Отцепить» сразу после выбора.
+    await renderPage();
+
+    const select = screen.getByLabelText('Внешний сквад') as HTMLSelectElement;
+    fireEvent.change(select, { target: { value: 'custom' } });
+
+    expect(select.value).toBe('custom');
+    expect(screen.getByLabelText('Аварийный сквад')).toBeTruthy();
+  });
+
+  it('пустой аварийный сквад не сохраняется как «Отцепить»', async () => {
+    await renderPage();
+
+    fireEvent.change(screen.getByLabelText('Внешний сквад'), { target: { value: 'custom' } });
+
+    expect(saveButton().disabled).toBe(true);
+    expect(state.saves).toEqual([]);
+  });
+
+  it('числовое поле можно очистить и набрать заново', async () => {
+    // Строго числовое состояние возвращает в пустую клетку прежнее число, и
+    // первый набранный символ дописывается к нему.
+    await renderPage();
+
+    const field = screen.getByLabelText('Длительность, часов') as HTMLInputElement;
+    fireEvent.change(field, { target: { value: '' } });
+
+    expect(field.value).toBe('');
+    expect(saveButton().disabled).toBe(true);
+
+    fireEvent.change(field, { target: { value: '5' } });
+    expect(field.value).toBe('5');
+  });
+
+  it('сквад, которого нет в панели, переживает позднюю загрузку списка', async () => {
+    // Список приходит после первого рендера; состояние, посчитанное по пустому
+    // списку, показало бы настроенный UUID как «не выбрано» — за один шаг до потери.
+    let release: (value: GraceSquadsResponse) => void = () => {};
+    const pending = new Promise<GraceSquadsResponse>((resolve) => {
+      release = resolve;
+    });
+    const api = await import('@/api/adminGraceAccess');
+    vi.spyOn(api.adminGraceAccessApi, 'getSquads').mockReturnValueOnce(pending);
+
+    await renderPage();
+    release({ available: true, items: [{ uuid: LIMITED_UUID, name: 'Другой', members_count: 0 }] });
+
+    // Ждём именно применения списка: у второго сквада UUID из него, и он обязан
+    // превратиться в выпадающий список. Без этого проверка успевает пройти до
+    // загрузки и зеленеет независимо от поведения.
+    await waitFor(() =>
+      expect(screen.getByLabelText('Сквад для исчерпанного трафика').tagName).toBe('SELECT'),
+    );
+
+    const field = screen.getByLabelText('Сквад для истёкшей подписки') as HTMLInputElement;
+    expect(field.tagName).toBe('INPUT');
+    expect(field.value).toBe(EXPIRED_UUID);
+  });
+
   it('«оставить как есть» отправляется как keep', async () => {
     await renderPage();
 

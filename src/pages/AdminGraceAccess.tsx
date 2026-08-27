@@ -48,10 +48,40 @@ const SESSION_FILTERS: GraceSessionFilter[] = [
   'errors',
 ];
 
+const NUMERIC_FIELDS = [
+  'duration_hours',
+  'traffic_gb',
+  'reconcile_interval_seconds',
+  'reconcile_batch_size',
+  'candidate_lookback_minutes',
+] as const;
+
+type NumericField = (typeof NUMERIC_FIELDS)[number];
+
+/**
+ * A number field has to be clearable to be retypeable: a strictly numeric state
+ * turns an empty box back into the previous number on the next render, so the
+ * first character typed lands after it.
+ */
+export type GraceForm = Omit<GraceAccessConfig, NumericField> & Record<NumericField, number | ''>;
+
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /** 'keep' is not a UUID — it means "leave whatever external squad the user has". */
 const EXTERNAL_KEEP = 'keep';
+
+type ExternalChoice = 'detach' | 'keep' | 'custom';
+
+export function externalChoiceOf(value: string): ExternalChoice {
+  const normalized = value.trim();
+  if (normalized === '') return 'detach';
+  if (normalized === EXTERNAL_KEEP) return 'keep';
+  return 'custom';
+}
+
+export function toForm(config: GraceAccessConfig): GraceForm {
+  return { ...config };
+}
 
 /**
  * The same rules the backend enforces, checked while typing.
@@ -60,11 +90,11 @@ const EXTERNAL_KEEP = 'keep';
  * its value is impossible after pressing Save teaches nothing about *which* field
  * is wrong.
  */
-export function graceFormIssues(config: GraceAccessConfig): GraceAccessIssue[] {
+export function graceFormIssues(form: GraceForm): GraceAccessIssue[] {
   const issues: GraceAccessIssue[] = [];
 
   for (const field of ['expired_squad_uuid', 'limited_squad_uuid'] as const) {
-    const value = config[field].trim();
+    const value = form[field].trim();
     if (!value) {
       issues.push({ field, code: 'squad_required', severity: 'error' });
     } else if (!UUID_PATTERN.test(value)) {
@@ -72,26 +102,37 @@ export function graceFormIssues(config: GraceAccessConfig): GraceAccessIssue[] {
     }
   }
 
-  const external = config.external_squad_uuid.trim();
+  const external = form.external_squad_uuid.trim();
   if (external && external !== EXTERNAL_KEEP && !UUID_PATTERN.test(external)) {
     issues.push({ field: 'external_squad_uuid', code: 'squad_invalid', severity: 'error' });
   }
 
-  if (config.traffic_gb < 1) {
+  if (form.traffic_gb === '' || form.traffic_gb < 1) {
     issues.push({ field: 'traffic_gb', code: 'traffic_required', severity: 'error' });
   }
 
   return issues;
 }
 
+/**
+ * Number boxes left empty. Saving them is impossible in any mode — unlike the
+ * squad rules, which only matter once grace is switched on.
+ */
+export function emptyNumericFields(form: GraceForm): NumericField[] {
+  return NUMERIC_FIELDS.filter((field) => form[field] === '');
+}
+
 /** Fields whose value differs from what is stored — the only ones worth sending. */
 export function changedFields(
-  next: GraceAccessConfig,
+  next: GraceForm,
   stored: GraceAccessConfig,
 ): Partial<GraceAccessConfig> {
   const patch: Record<string, unknown> = {};
   for (const key of Object.keys(stored) as (keyof GraceAccessConfig)[]) {
-    if (next[key] !== stored[key]) patch[key] = next[key];
+    const value = next[key];
+    // A half-typed number is not a value yet; save stays blocked until it is one.
+    if (value === '') continue;
+    if (value !== stored[key]) patch[key] = value;
   }
   return patch as Partial<GraceAccessConfig>;
 }
@@ -129,16 +170,13 @@ function SquadField({
   invalid: boolean;
 }) {
   const { t } = useTranslation();
+  const [manualOverride, setManualOverride] = useState(false);
+
   const listed = squads.some((squad) => squad.uuid === value);
-  // A value the panel does not list must stay editable: squads get renamed and
-  // deleted, and silently resetting the field to "not chosen" would drop a
-  // working configuration on the next save.
-  const [manual, setManual] = useState(!listed && value !== '');
-
-  useEffect(() => {
-    if (listed) setManual(false);
-  }, [listed]);
-
+  // Derived, not synchronised: the squad list arrives after the first render, and
+  // a state seeded from the empty list would leave a configured-but-unlisted UUID
+  // showing as "not chosen" — one save away from being dropped.
+  const manual = manualOverride || (!listed && value.trim() !== '');
   const usePicker = squadsAvailable && squads.length > 0 && !manual;
 
   return (
@@ -154,7 +192,7 @@ function SquadField({
           disabled={disabled}
           onChange={(event) => {
             if (event.target.value === '__manual__') {
-              setManual(true);
+              setManualOverride(true);
               return;
             }
             onChange(event.target.value);
@@ -176,7 +214,12 @@ function SquadField({
           placeholder="00000000-0000-0000-0000-000000000000"
           value={value}
           disabled={disabled}
-          onChange={(event) => onChange(event.target.value)}
+          onChange={(event) => {
+            // Clearing the box is the way back to the list; without it a manual
+            // entry is a one-way door.
+            if (event.target.value === '') setManualOverride(false);
+            onChange(event.target.value);
+          }}
         />
       )}
       <p className="mt-1 text-xs text-dark-500">{description}</p>
@@ -188,19 +231,14 @@ function SquadField({
 }
 
 function StatTile({ label, value, tone }: { label: string; value: number; tone?: 'error' }) {
+  const alarming = tone === 'error' && value > 0;
   return (
     <div
       className={`rounded-xl border p-3 ${
-        tone === 'error' && value > 0
-          ? 'border-error-500/30 bg-error-500/10'
-          : 'border-dark-700/40 bg-dark-800/30'
+        alarming ? 'border-error-500/30 bg-error-500/10' : 'border-dark-700/40 bg-dark-800/30'
       }`}
     >
-      <div
-        className={`text-2xl font-semibold ${
-          tone === 'error' && value > 0 ? 'text-error-300' : 'text-dark-100'
-        }`}
-      >
+      <div className={`text-2xl font-semibold ${alarming ? 'text-error-300' : 'text-dark-100'}`}>
         {value}
       </div>
       <div className="mt-0.5 text-xs text-dark-400">{label}</div>
@@ -358,19 +396,23 @@ export default function AdminGraceAccess() {
     staleTime: 60_000,
   });
 
-  const [form, setForm] = useState<GraceAccessConfig | null>(null);
+  const [form, setForm] = useState<GraceForm | null>(null);
+  const [externalChoice, setExternalChoice] = useState<ExternalChoice>('detach');
   const [saveError, setSaveError] = useState<string | null>(null);
   const [showReconcile, setShowReconcile] = useState(false);
 
   useEffect(() => {
-    if (data) setForm(data.config);
+    if (!data) return;
+    setForm(toForm(data.config));
+    setExternalChoice(externalChoiceOf(data.config.external_squad_uuid));
   }, [data]);
 
   const saveMutation = useMutation({
     mutationFn: (patch: Partial<GraceAccessConfig>) => adminGraceAccessApi.update(patch),
     onSuccess: (overview) => {
       setSaveError(null);
-      setForm(overview.config);
+      setForm(toForm(overview.config));
+      setExternalChoice(externalChoiceOf(overview.config.external_squad_uuid));
       queryClient.setQueryData(['grace-access'], overview);
       queryClient.invalidateQueries({ queryKey: ['grace-sessions'] });
     },
@@ -386,9 +428,15 @@ export default function AdminGraceAccess() {
 
   const formIssues = form ? graceFormIssues(form) : [];
   const blockers = formIssues.filter((issue) => issue.severity === 'error');
-  // Blockers only prevent saving when the chosen mode is the one that needs them:
-  // an operator whose config is already broken must still be able to turn grace off.
-  const blocksSave = form?.mode === 'true' && blockers.length > 0;
+  // Squad rules only block saving when the chosen mode needs them: an operator whose
+  // config is already broken must still be able to turn grace off or drain it.
+  const modeBlockers = form?.mode === 'true' ? blockers : [];
+  const emptyNumbers = form ? emptyNumericFields(form) : [];
+  // "Fallback squad" with an empty box silently means "detach" — the opposite of
+  // what was picked, so it is refused rather than quietly reinterpreted.
+  const externalIncomplete =
+    externalChoice === 'custom' && (form?.external_squad_uuid ?? '') === '';
+  const blocksSave = modeBlockers.length > 0 || emptyNumbers.length > 0 || externalIncomplete;
   const invalidFields = new Set(blockers.map((issue) => issue.field));
 
   if (isLoading || (!form && !error)) {
@@ -417,8 +465,14 @@ export default function AdminGraceAccess() {
   const isLocked = (field: keyof GraceAccessConfig) => locked.has(field);
   const restartOnly = new Set(data.restart_only);
 
-  const update = <K extends keyof GraceAccessConfig>(field: K, value: GraceAccessConfig[K]) =>
+  const update = <K extends keyof GraceForm>(field: K, value: GraceForm[K]) =>
     setForm((current) => (current ? { ...current, [field]: value } : current));
+
+  const updateNumber = (field: NumericField, raw: string) => {
+    if (raw === '') return update(field, '');
+    const parsed = Number(raw);
+    if (Number.isFinite(parsed)) update(field, parsed);
+  };
 
   const lockNote = (field: keyof GraceAccessConfig) =>
     isLocked(field) ? (
@@ -427,13 +481,6 @@ export default function AdminGraceAccess() {
         {t('admin.graceAccess.envLocked')}
       </p>
     ) : null;
-
-  const externalMode =
-    form.external_squad_uuid.trim() === ''
-      ? 'detach'
-      : form.external_squad_uuid.trim() === EXTERNAL_KEEP
-        ? 'keep'
-        : 'custom';
 
   return (
     <div className="animate-fade-in space-y-6 pb-24">
@@ -632,14 +679,19 @@ export default function AdminGraceAccess() {
           <select
             id="grace-external-squad"
             className="input"
-            value={externalMode}
+            value={externalChoice}
             disabled={isLocked('external_squad_uuid')}
             onChange={(event) => {
-              const next = event.target.value;
-              update(
-                'external_squad_uuid',
-                next === 'detach' ? '' : next === 'keep' ? EXTERNAL_KEEP : '',
-              );
+              const next = event.target.value as ExternalChoice;
+              // The choice is its own state: "fallback squad" starts with an empty
+              // box, and deriving the choice from that empty value would snap the
+              // select straight back to "detach".
+              setExternalChoice(next);
+              if (next === 'detach') update('external_squad_uuid', '');
+              if (next === 'keep') update('external_squad_uuid', EXTERNAL_KEEP);
+              if (next === 'custom' && form.external_squad_uuid.trim() === EXTERNAL_KEEP) {
+                update('external_squad_uuid', '');
+              }
             }}
           >
             <option value="detach">{t('admin.graceAccess.external.detach')}</option>
@@ -647,15 +699,17 @@ export default function AdminGraceAccess() {
             <option value="custom">{t('admin.graceAccess.external.custom')}</option>
           </select>
           <p className="mt-1 text-xs text-dark-500">
-            {t(`admin.graceAccess.external.${externalMode}Desc`)}
+            {t(`admin.graceAccess.external.${externalChoice}Desc`)}
           </p>
-          {externalMode === 'custom' && (
+          {externalChoice === 'custom' && (
             <input
               id="grace-external-squad-uuid"
               type="text"
               aria-label={t('admin.graceAccess.external.custom')}
               className={`input mt-2 font-mono text-xs ${
-                invalidFields.has('external_squad_uuid') ? 'border-error-500/50' : ''
+                invalidFields.has('external_squad_uuid') || externalIncomplete
+                  ? 'border-error-500/50'
+                  : ''
               }`}
               placeholder="00000000-0000-0000-0000-000000000000"
               value={form.external_squad_uuid === EXTERNAL_KEEP ? '' : form.external_squad_uuid}
@@ -688,7 +742,7 @@ export default function AdminGraceAccess() {
               className="input"
               value={form.duration_hours}
               disabled={isLocked('duration_hours')}
-              onChange={(event) => update('duration_hours', Number(event.target.value))}
+              onChange={(event) => updateNumber('duration_hours', event.target.value)}
             />
             <p className="mt-1 text-xs text-dark-500">
               {t('admin.graceAccess.limits.durationDesc')}
@@ -707,7 +761,7 @@ export default function AdminGraceAccess() {
               className={`input ${invalidFields.has('traffic_gb') ? 'border-error-500/50' : ''}`}
               value={form.traffic_gb}
               disabled={isLocked('traffic_gb')}
-              onChange={(event) => update('traffic_gb', Number(event.target.value))}
+              onChange={(event) => updateNumber('traffic_gb', event.target.value)}
             />
             <p className="mt-1 text-xs text-dark-500">
               {t('admin.graceAccess.limits.trafficDesc')}
@@ -793,7 +847,7 @@ export default function AdminGraceAccess() {
                   className="input"
                   value={form[field]}
                   disabled={isLocked(field)}
-                  onChange={(event) => update(field, Number(event.target.value))}
+                  onChange={(event) => updateNumber(field, event.target.value)}
                 />
                 <p className="mt-1 text-xs text-dark-500">
                   {t(`admin.graceAccess.reconcile.${field}Desc`)}
@@ -813,11 +867,27 @@ export default function AdminGraceAccess() {
       {/* Save */}
       <div className="sticky bottom-4 z-10">
         <div className="rounded-xl border border-dark-700/50 bg-dark-900/90 p-3 backdrop-blur">
-          {blocksSave && (
+          {(modeBlockers.length > 0 || emptyNumbers.length > 0 || externalIncomplete) && (
             <ul className="mb-2 space-y-1 text-xs text-error-400">
-              {blockers.map((issue) => (
+              {modeBlockers.map((issue) => (
                 <li key={`${issue.field}-${issue.code}`}>· {issueText(issue)}</li>
               ))}
+              {emptyNumbers.map((field) => (
+                <li key={field}>
+                  ·{' '}
+                  {t('admin.graceAccess.issue.number_required', {
+                    field: t(`admin.graceAccess.fields.${field}`),
+                  })}
+                </li>
+              ))}
+              {externalIncomplete && (
+                <li>
+                  ·{' '}
+                  {t('admin.graceAccess.issue.squad_required', {
+                    field: t('admin.graceAccess.fields.external_squad_uuid'),
+                  })}
+                </li>
+              )}
             </ul>
           )}
           {saveError && <p className="mb-2 text-xs text-error-400">{saveError}</p>}
@@ -836,7 +906,8 @@ export default function AdminGraceAccess() {
               disabled={!dirty || saveMutation.isPending}
               onClick={() => {
                 setSaveError(null);
-                setForm(data.config);
+                setForm(toForm(data.config));
+                setExternalChoice(externalChoiceOf(data.config.external_squad_uuid));
               }}
             >
               {t('admin.graceAccess.discard')}

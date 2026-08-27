@@ -2499,7 +2499,8 @@
         "squad_required": "Squad is empty: {{field}}. The bot will start with grace disabled.",
         "squad_invalid": "Malformed UUID: {{field}}",
         "traffic_required": "The traffic limit must be at least 1 GB",
-        "open_sessions_stranded": "Sessions are still open but this mode never finishes them, so the overlay stays in the panel. Switch to “Drain”."
+        "open_sessions_stranded": "Sessions are still open but this mode never finishes them, so the overlay stays in the panel. Switch to “Drain”.",
+        "number_required": "Number is empty: {{field}}"
       },
       "fields": {
         "mode": "Mode",
