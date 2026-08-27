@@ -252,6 +252,17 @@ const sections: AdminSection[] = [
         permission: 'partners:read',
       },
       {
+        // Раньше страница уровней открывалась только из Партнёры → Настройки, и
+        // включив многоуровневую схему, админ не находил её в меню вовсе.
+        // Пункт показывается всегда, а не при включённой схеме: саму схему
+        // переключают с этой же страницы, и условный пункт замкнул бы круг.
+        name: 'admin.nav.referralLevels',
+        icon: 'trending',
+        to: '/admin/partners/referral-levels',
+        // Совпадает с правом, которое требуют и маршрут, и все эндпоинты уровней.
+        permission: 'partners:settings',
+      },
+      {
         name: 'admin.nav.withdrawals',
         icon: 'arrow-up',
         to: '/admin/withdrawals',
