@@ -241,6 +241,7 @@
     "continueWithDiscord": "通过 Discord 继续",
     "continueWithVk": "通过 VK 继续",
     "oauthError": "授权被拒绝或失败",
+    "oauthConsentRequired": "OAuth 登录前需要先完成法律文件同意。请先使用邮箱或 Telegram 注册/登录后再重试；如果问题仍然存在，请联系支持。",
     "oauthExpired": "OAuth 会话已过期。请重试。"
   },
   "emailVerification": {

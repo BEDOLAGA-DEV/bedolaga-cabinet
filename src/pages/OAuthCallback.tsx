@@ -9,6 +9,7 @@ import {
   loadOAuthState,
   clearOAuthState,
   getErrorDetail,
+  isOAuthConsentRequiredStatus428,
 } from '../utils/oauth';
 import type { ServerCompleteResponse } from '../types';
 import { CheckIcon, ExclamationIcon } from '@/components/icons';
@@ -108,6 +109,16 @@ export default function OAuthCallback() {
           await loginWithOAuth(provider, code, state, deviceId);
           navigate('/', { replace: true });
         } catch (err: unknown) {
+          if (isOAuthConsentRequiredStatus428(err)) {
+            setError(
+              t(
+                'auth.oauthConsentRequired',
+                'Legal consent is required before OAuth sign-in. Please register or sign in with email or Telegram first, then try again. If this persists, contact support.',
+              ),
+            );
+            return;
+          }
+
           const detail = getErrorDetail(err);
           setError(detail || t('auth.oauthError', 'Authorization was denied or failed'));
         }

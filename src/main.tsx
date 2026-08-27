@@ -20,6 +20,7 @@ import {
 } from '@telegram-apps/sdk-react';
 import { clearStaleSessionIfNeeded } from './utils/token';
 import { installEncodingSurrogateGuard } from './utils/installEncodingSurrogateGuard';
+import { installObjectHasOwnPolyfill } from './utils/installObjectHasOwnPolyfill';
 import { getTelegramInitData } from './utils/telegramInitData';
 import { useAuthStore } from './store/auth';
 import { AppWithNavigator } from './AppWithNavigator';
@@ -41,10 +42,7 @@ installEncodingSurrogateGuard();
 // Without this, init() and any launch-params retrieval below throw
 // LaunchParamsRetrieveError on affected devices.
 // See: https://github.com/Telegram-Mini-Apps/tma.js/issues/683
-if (typeof (Object as { hasOwn?: unknown }).hasOwn !== 'function') {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (Object as any).hasOwn = (obj: object, prop: PropertyKey): boolean => Object.prototype.hasOwnProperty.call(obj, prop);
-}
+installObjectHasOwnPolyfill();
 
 // Only initialize Telegram SDK when running inside Telegram
 const isTelegramEnv =

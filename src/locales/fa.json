@@ -241,6 +241,7 @@
     "continueWithDiscord": "ادامه با Discord",
     "continueWithVk": "ادامه با VK",
     "oauthError": "مجوز رد شد یا ناموفق بود",
+    "oauthConsentRequired": "برای ورود با OAuth باید رضایت حقوقی ثبت شده باشد. لطفاً ابتدا با ایمیل یا تلگرام ثبت‌نام/وارد شوید و سپس دوباره تلاش کنید. اگر مشکل ادامه داشت، با پشتیبانی تماس بگیرید.",
     "oauthExpired": "نشست OAuth منقضی شده است. لطفاً دوباره امتحان کنید."
   },
   "emailVerification": {

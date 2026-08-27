@@ -247,6 +247,7 @@
     "continueWithDiscord": "Continue with Discord",
     "continueWithVk": "Continue with VK",
     "oauthError": "Authorization was denied or failed",
+    "oauthConsentRequired": "Legal consent is required before OAuth sign-in. Please register or sign in with email or Telegram first, then try again. If this persists, contact support.",
     "oauthExpired": "OAuth session expired. Please try again."
   },
   "emailVerification": {

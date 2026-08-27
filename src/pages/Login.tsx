@@ -26,7 +26,7 @@ import MobileAppBanner from '../components/MobileAppBanner';
 import PageLoader from '../components/common/PageLoader';
 import { useMobileAppPromo } from '../hooks/useMobileAppPromo';
 import { UI } from '../config/constants';
-import { saveOAuthState } from '../utils/oauth';
+import { isOAuthConsentRequiredStatus428, saveOAuthState } from '../utils/oauth';
 import { getPendingReferralCode } from '../utils/referral';
 import { signInWithApple } from '../utils/appleSignIn';
 import { UsersIcon, EmailIcon, RefreshIcon, ChevronDownIcon } from '@/components/icons';
@@ -251,8 +251,17 @@ export default function Login() {
 
       saveOAuthState(state, provider);
       window.location.href = authorize_url;
-    } catch {
-      setError(t('auth.oauthError', 'Authorization was denied or failed'));
+    } catch (err: unknown) {
+      if (isOAuthConsentRequiredStatus428(err)) {
+        setError(
+          t(
+            'auth.oauthConsentRequired',
+            'Legal consent is required before OAuth sign-in. Please register or sign in with email or Telegram first, then try again. If this persists, contact support.',
+          ),
+        );
+      } else {
+        setError(t('auth.oauthError', 'Authorization was denied or failed'));
+      }
       setOauthLoading(null);
     }
   };
