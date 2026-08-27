@@ -392,7 +392,31 @@ export default function AdminReferralLevels() {
               </div>
             </div>
 
-            <div className="mt-4">
+            <div className="mt-4 grid gap-4 md:grid-cols-2">
+              <div>
+                <NumberField
+                  label={t('admin.referralLevels.requiredReferrals')}
+                  value={level.required_referrals || ''}
+                  onCommit={(parsed) => save(level.level, { required_referrals: parsed ?? 0 })}
+                  onInvalid={(name) =>
+                    setSaveError(t('admin.referralLevels.invalidValue', { field: name }))
+                  }
+                />
+                <button
+                  type="button"
+                  onClick={() =>
+                    save(level.level, {
+                      required_referrals_active_only: !level.required_referrals_active_only,
+                    })
+                  }
+                  className="text-xs text-accent-400 underline"
+                >
+                  {level.required_referrals_active_only
+                    ? t('admin.referralLevels.countingActive')
+                    : t('admin.referralLevels.countingAll')}
+                </button>
+              </div>
+
               <NumberField
                 label={t('admin.referralLevels.maxPayments')}
                 value={level.max_payments || ''}

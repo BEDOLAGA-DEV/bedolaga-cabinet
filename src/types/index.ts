@@ -494,6 +494,15 @@ export interface ReferralRewardLevel {
   referee_tariff_id: number | null;
   referee_tariff_name?: string | null;
   max_payments: number;
+  /**
+   * How many referrals unlock this level; 0 means available from the start.
+   * The level NUMBER says whose top-up pays you (1 = someone you invited,
+   * 2 = someone they invited); this says when you start earning from that link
+   * at all — which is what "what do I get a level for" was missing.
+   */
+  required_referrals: number;
+  /** Count only referrals who topped up at least once. */
+  required_referrals_active_only: boolean;
 }
 
 export interface ReferralRewardTariffOption {

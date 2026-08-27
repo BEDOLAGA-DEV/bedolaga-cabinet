@@ -4355,7 +4355,10 @@
       "schemeOffWarning": "当前为经典奖励方案：以下规则已配置但不会生效。",
       "chainDepth": "链条深度",
       "chainDepthHint": "向上有多少层可获得奖励。第 1 级是直接推荐人，第 2 级是其推荐人。超过该深度的规则不发放奖励。最大值：{{max}}。",
-      "depthRange": "深度必须在 1 到 {{max}} 之间"
+      "depthRange": "深度必须在 1 到 {{max}} 之间",
+      "requiredReferrals": "解锁该等级所需推荐人数（0 表示立即可用）",
+      "countingActive": "计数：已充值的推荐用户",
+      "countingAll": "计数：全部邀请用户"
     }
   },
   "adminUpdates": {

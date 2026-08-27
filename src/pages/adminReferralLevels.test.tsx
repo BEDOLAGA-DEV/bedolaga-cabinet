@@ -34,6 +34,9 @@ vi.mock('react-i18next', () => ({
         'admin.referralLevels.chainDepth': 'Глубина цепочки',
         'admin.referralLevels.chainDepthHint': 'Максимум: {{max}}',
         'admin.referralLevels.depthRange': 'Глубина должна быть от 1 до {{max}}',
+        'admin.referralLevels.requiredReferrals': 'Рефералов для открытия',
+        'admin.referralLevels.countingActive': 'Считаем: с пополнением',
+        'admin.referralLevels.countingAll': 'Считаем: всех',
       };
       const template = templates[key] ?? key;
       return template.replace(/{{(\w+)}}/g, (_m, name) => String(options?.[name] ?? ''));
@@ -57,6 +60,8 @@ const level = (overrides: Partial<ReferralRewardLevel> = {}): ReferralRewardLeve
   referee_days: 0,
   referee_tariff_id: null,
   max_payments: 0,
+  required_referrals: 0,
+  required_referrals_active_only: true,
   ...overrides,
 });
 
@@ -357,5 +362,29 @@ describe('глубина цепочки', () => {
     blur('Глубина цепочки', '11');
     expect(await screen.findByText(/Глубина должна быть от 1 до 10/)).toBeTruthy();
     expect(state.depth).toBeNull();
+  });
+});
+
+describe('порог открытия уровня', () => {
+  it('задаётся количеством рефералов', async () => {
+    await renderEditor();
+    blur('Рефералов для открытия', '25');
+    await waitFor(() => expect(state.saves).toHaveLength(1));
+    expect(state.saves[0]).toEqual({ level: 1, patch: { required_referrals: 25 } });
+  });
+
+  it('пустое поле означает «доступен сразу»', async () => {
+    state.payload = { ...basePayload(), levels: [level({ required_referrals: 10 })] };
+    await renderEditor();
+    blur('Рефералов для открытия', '');
+    await waitFor(() => expect(state.saves).toHaveLength(1));
+    expect(state.saves[0]).toEqual({ level: 1, patch: { required_referrals: 0 } });
+  });
+
+  it('переключает, кого считать: порог по всем регистрациям накручивается пустыми аккаунтами', async () => {
+    await renderEditor();
+    fireEvent.click(screen.getByText(/Считаем: с пополнением/));
+    await waitFor(() => expect(state.saves).toHaveLength(1));
+    expect(state.saves[0]).toEqual({ level: 1, patch: { required_referrals_active_only: false } });
   });
 });

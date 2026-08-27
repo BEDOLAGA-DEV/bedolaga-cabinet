@@ -4639,7 +4639,10 @@
       "schemeOffWarning": "The reward scheme is classic: the rules below are configured but NOT applied.",
       "chainDepth": "Chain depth",
       "chainDepthHint": "How many links up the chain are paid. Level 1 is the direct referrer, level 2 is theirs. Rules deeper than this pay nothing. Maximum: {{max}}.",
-      "depthRange": "Depth must be between 1 and {{max}}"
+      "depthRange": "Depth must be between 1 and {{max}}",
+      "requiredReferrals": "Referrals to unlock the level (0 — from the start)",
+      "countingActive": "Counting: referrals who topped up",
+      "countingAll": "Counting: all invited users"
     }
   },
   "adminUpdates": {
