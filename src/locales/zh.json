@@ -4605,7 +4605,9 @@
         "userId": "用户 ID",
         "context": "上下文",
         "traceback": "堆栈",
-        "retry": "重新发送"
+        "retry": "重新发送",
+        "retrySent": "错误已发送至管理员聊天",
+        "retryFailed": "无法发送至管理员聊天"
       }
     }
   },

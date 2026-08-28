@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import {
@@ -8,8 +8,11 @@ import {
   UNDELIVERED_STATUSES,
 } from '../api/adminSystemErrors';
 import { AdminBackButton } from '../components/admin';
+import { getApiErrorMessage } from '../utils/api-error';
+import { PermissionGate } from '@/components/auth/PermissionGate';
 import { ChevronDownIcon, ClockIcon, InfoIcon, XIcon } from '@/components/icons';
 import { StatCard } from '@/components/stats';
+import { useNotify } from '@/platform';
 
 type StatusFilter = 'all' | 'undelivered' | DeliveryStatus;
 
@@ -24,6 +27,10 @@ const STATUS_FILTERS: StatusFilter[] = [
 ];
 
 const PAGE_SIZE = 50;
+
+// Поиск уходит на сервер как ILIKE '%…%' плюс COUNT(*) по таблице, которая
+// растёт сама по себе. Без паузы каждый символ — это отдельный такой запрос.
+const SEARCH_DEBOUNCE_MS = 400;
 
 /** Цвет бейджа статуса доставки: провал и ожидание — это то, чего админ не видел. */
 const STATUS_BADGE: Record<DeliveryStatus, string> = {
@@ -47,8 +54,15 @@ export default function AdminSystemErrors() {
 
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [page, setPage] = useState(0);
   const [expandedId, setExpandedId] = useState<number | null>(null);
+  const notify = useNotify();
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(search), SEARCH_DEBOUNCE_MS);
+    return () => clearTimeout(timer);
+  }, [search]);
 
   const { data: summary } = useQuery({
     queryKey: ['admin-system-errors-summary'],
@@ -57,13 +71,13 @@ export default function AdminSystemErrors() {
   });
 
   const { data, isLoading } = useQuery({
-    queryKey: ['admin-system-errors', statusFilter, search, page],
+    queryKey: ['admin-system-errors', statusFilter, debouncedSearch, page],
     queryFn: () =>
       adminSystemErrorsApi.getAll({
         undelivered_only: statusFilter === 'undelivered' || undefined,
         delivery_status:
           statusFilter === 'all' || statusFilter === 'undelivered' ? undefined : statusFilter,
-        search: search.trim() || undefined,
+        search: debouncedSearch.trim() || undefined,
         limit: PAGE_SIZE,
         offset: page * PAGE_SIZE,
       }),
@@ -77,10 +91,21 @@ export default function AdminSystemErrors() {
 
   const retryMutation = useMutation({
     mutationFn: (id: number) => adminSystemErrorsApi.retry(id),
-    onSuccess: () => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['admin-system-errors'] });
       queryClient.invalidateQueries({ queryKey: ['admin-system-errors-summary'] });
       queryClient.invalidateQueries({ queryKey: ['admin-system-error-detail'] });
+      // 200 здесь не означает «доставлено»: бэкенд ловит сбой отправки, пишет
+      // статус failed и всё равно отдаёт запись. Смотрим на статус, иначе
+      // непрошедшая доставка выглядит как удачная.
+      if (result.delivery_status === 'sent') {
+        notify.success(t('admin.systemErrors.detail.retrySent'));
+      } else {
+        notify.error(result.delivery_error || t('admin.systemErrors.detail.retryFailed'));
+      }
+    },
+    onError: (err: unknown) => {
+      notify.error(getApiErrorMessage(err, t('common.error')));
     },
   });
 
@@ -222,19 +247,24 @@ export default function AdminSystemErrors() {
                       </div>
                     </dl>
 
+                    {/* Эндпоинт повтора требует system_errors:manage, а страница
+                        открывается по system_errors:read: без гейта админ с
+                        доступом только на чтение видит кнопку, жмёт и получает 403. */}
                     {UNDELIVERED_STATUSES.includes(item.delivery_status) && (
-                      <div className="mb-3">
-                        <button
-                          type="button"
-                          disabled={retryMutation.isPending}
-                          onClick={() => retryMutation.mutate(item.id)}
-                          className="rounded-lg bg-accent-500/15 px-3 py-1.5 text-accent-400 transition-colors hover:bg-accent-500/25 disabled:opacity-40"
-                        >
-                          {retryMutation.isPending
-                            ? t('common.processing')
-                            : t('admin.systemErrors.detail.retry')}
-                        </button>
-                      </div>
+                      <PermissionGate permission="system_errors:manage">
+                        <div className="mb-3">
+                          <button
+                            type="button"
+                            disabled={retryMutation.isPending}
+                            onClick={() => retryMutation.mutate(item.id)}
+                            className="rounded-lg bg-accent-500/15 px-3 py-1.5 text-accent-400 transition-colors hover:bg-accent-500/25 disabled:opacity-40"
+                          >
+                            {retryMutation.isPending
+                              ? t('common.processing')
+                              : t('admin.systemErrors.detail.retry')}
+                          </button>
+                        </div>
+                      </PermissionGate>
                     )}
 
                     {detail?.id === item.id && detail.delivery_error && (

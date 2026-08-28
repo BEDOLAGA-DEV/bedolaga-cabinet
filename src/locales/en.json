@@ -4889,7 +4889,9 @@
         "userId": "User ID",
         "context": "Context",
         "traceback": "Traceback",
-        "retry": "Retry delivery"
+        "retry": "Retry delivery",
+        "retrySent": "Error sent to the admin chat",
+        "retryFailed": "Could not send to the admin chat"
       }
     }
   },
