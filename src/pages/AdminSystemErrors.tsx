@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import {
   adminSystemErrorsApi,
   type DeliveryStatus,
   type SystemErrorListItem,
+  UNDELIVERED_STATUSES,
 } from '../api/adminSystemErrors';
 import { AdminBackButton } from '../components/admin';
 import { ChevronDownIcon, ClockIcon, InfoIcon, XIcon } from '@/components/icons';
@@ -42,6 +43,7 @@ function formatDateTime(value: string | null): string {
 
 export default function AdminSystemErrors() {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
 
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [search, setSearch] = useState('');
@@ -71,6 +73,15 @@ export default function AdminSystemErrors() {
     queryKey: ['admin-system-error-detail', expandedId],
     queryFn: () => adminSystemErrorsApi.getOne(expandedId as number),
     enabled: expandedId !== null,
+  });
+
+  const retryMutation = useMutation({
+    mutationFn: (id: number) => adminSystemErrorsApi.retry(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-system-errors'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-system-errors-summary'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-system-error-detail'] });
+    },
   });
 
   const items: SystemErrorListItem[] = data?.items || [];
@@ -210,6 +221,21 @@ export default function AdminSystemErrors() {
                         <dd>{item.user_id ?? '—'}</dd>
                       </div>
                     </dl>
+
+                    {UNDELIVERED_STATUSES.includes(item.delivery_status) && (
+                      <div className="mb-3">
+                        <button
+                          type="button"
+                          disabled={retryMutation.isPending}
+                          onClick={() => retryMutation.mutate(item.id)}
+                          className="rounded-lg bg-accent-500/15 px-3 py-1.5 text-accent-400 transition-colors hover:bg-accent-500/25 disabled:opacity-40"
+                        >
+                          {retryMutation.isPending
+                            ? t('common.processing')
+                            : t('admin.systemErrors.detail.retry')}
+                        </button>
+                      </div>
+                    )}
 
                     {detail?.id === item.id && detail.delivery_error && (
                       <p className="mb-3 rounded bg-error-500/10 p-2 text-error-400">

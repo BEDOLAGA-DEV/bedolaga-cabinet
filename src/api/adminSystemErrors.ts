@@ -82,6 +82,12 @@ export const adminSystemErrorsApi = {
     const { data } = await apiClient.get<SystemErrorDetail>(`/admin/system-errors/${id}`);
     return data;
   },
+
+  /** Повторно отправить ошибку в админ-чат, минуя троттлинг и дедупликацию. */
+  async retry(id: number): Promise<SystemErrorDetail> {
+    const { data } = await apiClient.post<SystemErrorDetail>(`/admin/system-errors/${id}/retry`);
+    return data;
+  },
 };
 
 export default adminSystemErrorsApi;
