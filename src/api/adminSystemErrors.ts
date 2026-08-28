@@ -67,25 +67,29 @@ export interface SystemErrorListParams {
 
 export const adminSystemErrorsApi = {
   async getSummary(): Promise<SystemErrorSummary> {
-    const { data } = await apiClient.get<SystemErrorSummary>('/admin/system-errors/summary');
+    const { data } = await apiClient.get<SystemErrorSummary>(
+      '/cabinet/admin/system-errors/summary',
+    );
     return data;
   },
 
   async getAll(params: SystemErrorListParams = {}): Promise<SystemErrorListResponse> {
-    const { data } = await apiClient.get<SystemErrorListResponse>('/admin/system-errors', {
+    const { data } = await apiClient.get<SystemErrorListResponse>('/cabinet/admin/system-errors', {
       params,
     });
     return data;
   },
 
   async getOne(id: number): Promise<SystemErrorDetail> {
-    const { data } = await apiClient.get<SystemErrorDetail>(`/admin/system-errors/${id}`);
+    const { data } = await apiClient.get<SystemErrorDetail>(`/cabinet/admin/system-errors/${id}`);
     return data;
   },
 
   /** Повторно отправить ошибку в админ-чат, минуя троттлинг и дедупликацию. */
   async retry(id: number): Promise<SystemErrorDetail> {
-    const { data } = await apiClient.post<SystemErrorDetail>(`/admin/system-errors/${id}/retry`);
+    const { data } = await apiClient.post<SystemErrorDetail>(
+      `/cabinet/admin/system-errors/${id}/retry`,
+    );
     return data;
   },
 };
