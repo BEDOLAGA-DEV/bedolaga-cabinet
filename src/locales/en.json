@@ -1411,7 +1411,8 @@
       "news": "News",
       "bulkActions": "Bulk Actions",
       "infoPages": "Info Pages",
-      "legalPages": "System pages"
+      "legalPages": "System pages",
+      "systemErrors": "System errors"
     },
     "panel": {
       "title": "Admin Panel",
@@ -1458,7 +1459,8 @@
       "salesStatsDesc": "Sales analytics and trends",
       "landingsDesc": "Quick purchase landing pages",
       "referralNetworkDesc": "Referral graph and campaign visualization",
-      "newsDesc": "Manage news articles and publications"
+      "newsDesc": "Manage news articles and publications",
+      "systemErrorsDesc": "Application errors and their delivery status"
     },
     "salesStats": {
       "title": "Sales Statistics",
@@ -4853,6 +4855,42 @@
       "tierMixedTriggers": "Levels have different payout triggers. Only the trigger of the level a partner has reached applies, so rewards for other triggers never arrive.",
       "multiTariffOff": "Multi-tariff is off: subscriptions have no tariff, so days targeted at one are never granted. Clear the tariff and the days go to the main subscription.",
       "depthEnvLocked": "REFERRAL_MAX_LEVEL_DEPTH is pinned in .env: depth cannot be changed here and would revert on restart."
+    },
+    "systemErrors": {
+      "title": "System errors",
+      "subtitle": "Application errors and whether an alert about them was delivered",
+      "searchPlaceholder": "Search by message, error type or logger",
+      "empty": "No errors found",
+      "overview": {
+        "undelivered": "Undelivered",
+        "last24h": "Last 24h",
+        "last7d": "Last 7 days"
+      },
+      "filters": {
+        "all": "All",
+        "undelivered": "Undelivered",
+        "failed": "Failed",
+        "pending": "Pending",
+        "sent": "Sent",
+        "suppressed": "Suppressed",
+        "skipped": "Skipped"
+      },
+      "status": {
+        "failed": "failed",
+        "pending": "pending",
+        "sent": "sent",
+        "suppressed": "suppressed",
+        "skipped": "skipped"
+      },
+      "detail": {
+        "level": "Level",
+        "attempts": "Attempts",
+        "deliveredAt": "Delivered",
+        "userId": "User ID",
+        "context": "Context",
+        "traceback": "Traceback",
+        "retry": "Retry delivery"
+      }
     }
   },
   "adminUpdates": {
