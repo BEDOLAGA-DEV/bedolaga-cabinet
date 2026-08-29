@@ -41,9 +41,14 @@ installEncodingSurrogateGuard();
 // Without this, init() and any launch-params retrieval below throw
 // LaunchParamsRetrieveError on affected devices.
 // See: https://github.com/Telegram-Mini-Apps/tma.js/issues/683
+// Тело полифила берёт hasOwnProperty из прототипа заранее: автофикс biome
+// (noPrototypeBuiltins) переписывает прямой вызов на Object.hasOwn(), то есть на
+// вызов самого полифила — бесконечная рекурсия и падение tsc на target ниже es2022.
+const objectHasOwnProperty = Object.prototype.hasOwnProperty;
 if (typeof (Object as { hasOwn?: unknown }).hasOwn !== 'function') {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (Object as any).hasOwn = (obj: object, prop: PropertyKey): boolean => Object.hasOwn(obj, prop);
+  (Object as any).hasOwn = (obj: object, prop: PropertyKey): boolean =>
+    objectHasOwnProperty.call(obj, prop);
 }
 
 // Only initialize Telegram SDK when running inside Telegram
