@@ -1273,7 +1273,8 @@
       "referralNetwork": "推荐网络",
       "news": "新闻",
       "infoPages": "信息页面",
-      "legalPages": "系统页面"
+      "legalPages": "系统页面",
+      "systemErrors": "系统错误"
     },
     "panel": {
       "title": "管理面板",
@@ -1320,7 +1321,8 @@
       "salesStatsDesc": "销售分析与趋势",
       "landingsDesc": "快速购买落地页",
       "referralNetworkDesc": "推荐图表和广告活动可视化",
-      "newsDesc": "管理新闻文章和出版物"
+      "newsDesc": "管理新闻文章和出版物",
+      "systemErrorsDesc": "应用错误及其通知投递状态"
     },
     "salesStats": {
       "title": "销售统计",
@@ -4569,6 +4571,44 @@
       "tierMixedTriggers": "各等级的发放时机不同。只有伙伴已达到的等级的时机生效，其他时机的奖励不会发放。",
       "multiTariffOff": "多资费已关闭：订阅没有资费，因此指定资费的天数不会发放。清除资费后，天数将计入主订阅。",
       "depthEnvLocked": "REFERRAL_MAX_LEVEL_DEPTH 已在 .env 中固定：无法在此修改深度，重启后会恢复为文件中的值。"
+    },
+    "systemErrors": {
+      "title": "系统错误",
+      "subtitle": "应用错误以及相关告警是否已送达",
+      "searchPlaceholder": "按消息、错误类型或日志器搜索",
+      "empty": "未找到错误",
+      "overview": {
+        "undelivered": "未送达",
+        "last24h": "最近 24 小时",
+        "last7d": "最近 7 天"
+      },
+      "filters": {
+        "all": "全部",
+        "undelivered": "未送达",
+        "failed": "失败",
+        "pending": "等待中",
+        "sent": "已发送",
+        "suppressed": "已抑制",
+        "skipped": "已跳过"
+      },
+      "status": {
+        "failed": "失败",
+        "pending": "等待中",
+        "sent": "已发送",
+        "suppressed": "已抑制",
+        "skipped": "已跳过"
+      },
+      "detail": {
+        "level": "级别",
+        "attempts": "尝试次数",
+        "deliveredAt": "送达时间",
+        "userId": "用户 ID",
+        "context": "上下文",
+        "traceback": "堆栈",
+        "retry": "重新发送",
+        "retrySent": "错误已发送至管理员聊天",
+        "retryFailed": "无法发送至管理员聊天"
+      }
     }
   },
   "adminUpdates": {
