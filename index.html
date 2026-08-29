@@ -46,10 +46,62 @@
       })();
     </script>
     <style>
+      /* Фон первой отрисовки — до того, как приедет CSS приложения. Светлый
+         вариант соответствует champagne-200 из globals.css (.light body). */
       body {
         background-color: #0a0f1a;
       }
+      html.light body {
+        background-color: #f7e7ce;
+      }
     </style>
+    <script>
+      // Тема ДО первой отрисовки. useTheme вешает класс в useEffect, то есть уже
+      // после неё, а тут зашиты class="dark" и тёмный фон — пользователь светлой
+      // темы видел тёмную вспышку. Порядок разрешения повторяет useTheme:
+      // сохранённый выбор -> системная тема -> тёмная. Ветку Telegram намеренно
+      // не трогаем: colorScheme доступен только после init() SDK, а внутри
+      // Telegram фон и так задаёт клиент.
+      (function () {
+        try {
+          var enabled = { dark: true, light: true };
+          try {
+            var rawEnabled = localStorage.getItem('cabinet-enabled-themes');
+            if (rawEnabled) {
+              var parsed = JSON.parse(rawEnabled);
+              if (parsed && typeof parsed === 'object') {
+                enabled = { dark: parsed.dark !== false, light: parsed.light !== false };
+              }
+            }
+          } catch (e) {}
+          if (!enabled.dark && !enabled.light) enabled = { dark: true, light: true };
+
+          var stored = null;
+          try {
+            stored = localStorage.getItem('cabinet-theme');
+          } catch (e) {}
+
+          var theme;
+          if (stored === 'light' || stored === 'dark') {
+            theme = enabled[stored] ? stored : enabled.dark ? 'dark' : 'light';
+          } else if (window.matchMedia('(prefers-color-scheme: light)').matches && enabled.light) {
+            theme = 'light';
+          } else {
+            theme = enabled.dark ? 'dark' : 'light';
+          }
+
+          var root = document.documentElement;
+          root.classList.remove('dark', 'light');
+          root.classList.add(theme);
+          if (theme === 'light') {
+            var meta = document.querySelector('meta[name="theme-color"]');
+            if (meta) meta.setAttribute('content', '#f7e7ce');
+          }
+        } catch (e) {
+          // Хранилище заблокировано — остаётся тёмная тема из разметки.
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
