@@ -860,6 +860,9 @@
       "cispay": {
         "description": "Оплата картой или через СБП (cisPay)"
       },
+      "tabpay": {
+        "description": "Оплата картой или через СБП (TabPay)"
+      },
       "donut": {
         "description": "Оплата картой и СБП через Donut P2P"
       },
@@ -2384,6 +2387,7 @@
         "payments_antilopay": "Antilopay",
         "payments_jupiter": "Jupiter",
         "payments_cispay": "CisPay",
+        "payments_tabpay": "TabPay",
         "payments_donut": "Donut",
         "payments_lava": "Lava",
         "payments_apple_iap": "Apple IAP",

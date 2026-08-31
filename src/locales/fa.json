@@ -718,6 +718,9 @@
       "cispay": {
         "description": "پرداخت با کارت یا SBP از طریق cisPay"
       },
+      "tabpay": {
+        "description": "پرداخت با کارت یا SBP از طریق TabPay"
+      },
       "donut": {
         "description": "پرداخت با کارت یا SBP از طریق Donut P2P"
       },
@@ -1999,6 +2002,7 @@
         "payments_antilopay": "Antilopay",
         "payments_jupiter": "Jupiter",
         "payments_cispay": "CisPay",
+        "payments_tabpay": "TabPay",
         "payments_donut": "Donut",
         "payments_lava": "Lava",
         "payments_apple_iap": "Apple IAP",

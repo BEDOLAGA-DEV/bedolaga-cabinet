@@ -718,6 +718,9 @@
       "cispay": {
         "description": "通过 cisPay 使用银行卡或 SBP 支付"
       },
+      "tabpay": {
+        "description": "通过 TabPay 使用银行卡或 SBP 支付"
+      },
       "donut": {
         "description": "通过 Donut P2P 使用银行卡或 SBP 支付"
       },
@@ -2066,6 +2069,7 @@
         "payments_antilopay": "Antilopay",
         "payments_jupiter": "Jupiter",
         "payments_cispay": "CisPay",
+        "payments_tabpay": "TabPay",
         "payments_donut": "Donut",
         "payments_lava": "Lava",
         "payments_apple_iap": "Apple IAP",

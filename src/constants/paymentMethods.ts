@@ -23,6 +23,7 @@ export const METHOD_LABELS: Record<string, string> = {
   antilopay: 'Antilopay',
   jupiter: 'Jupiter',
   cispay: 'CisPay',
+  tabpay: 'TabPay',
   donut: 'Donut',
   lava: 'Lava',
   apple_iap: 'Apple In-App Purchase',
