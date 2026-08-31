@@ -721,6 +721,9 @@
       "tabpay": {
         "description": "پرداخت با کارت یا SBP از طریق TabPay"
       },
+      "paritypay": {
+        "description": "پرداخت با کارت یا SBP از طریق ParityPay"
+      },
       "donut": {
         "description": "پرداخت با کارت یا SBP از طریق Donut P2P"
       },
@@ -2003,6 +2006,7 @@
         "payments_jupiter": "Jupiter",
         "payments_cispay": "CisPay",
         "payments_tabpay": "TabPay",
+        "payments_paritypay": "ParityPay",
         "payments_donut": "Donut",
         "payments_lava": "Lava",
         "payments_apple_iap": "Apple IAP",

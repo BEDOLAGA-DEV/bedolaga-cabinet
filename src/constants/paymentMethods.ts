@@ -24,6 +24,7 @@ export const METHOD_LABELS: Record<string, string> = {
   jupiter: 'Jupiter',
   cispay: 'CisPay',
   tabpay: 'TabPay',
+  paritypay: 'ParityPay',
   donut: 'Donut',
   lava: 'Lava',
   apple_iap: 'Apple In-App Purchase',
