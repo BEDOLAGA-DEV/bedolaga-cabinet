@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.69.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.68.2...v1.69.0) (2026-09-04)
+
+
+### Features
+
+* **admin:** переключатель «отправлять это письмо» в редакторе email-шаблонов ([745e839](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/745e8397916754a9fb6d654e08f60afd15e9d14e))
+* **admin:** превью письма рассылки рендерит бот — в общей обёртке ([f18d64c](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/f18d64c3dd1d5ebab64d0c976cd0940e860b9269))
+* **admin:** редактор email-шаблонов понимает общую обёртку писем ([3f07301](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/3f0730191d0d0ff04fd7353d848c4fc8eb760142))
+
 ## [1.68.2](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.68.1...v1.68.2) (2026-09-04)
 
 
