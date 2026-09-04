@@ -68,8 +68,10 @@ export function MobileBottomNav({
         // висит слишком высоко. Берём большее из двух: над индикатором «Домой»
         // панель стоит вплотную к безопасной зоне, в браузере — прежние 16px.
         bottom: 'max(16px, env(safe-area-inset-bottom, 0px))',
-        left: '16px',
-        right: '16px',
+        // По бокам та же логика: в альбомной ориентации iPhone вырезы слева и
+        // справа около 59pt, панель не должна уходить под чёлку и углы.
+        left: 'max(16px, env(safe-area-inset-left, 0px))',
+        right: 'max(16px, env(safe-area-inset-right, 0px))',
         borderRadius: 'var(--bento-radius, 24px)',
         padding: '8px 4px',
         boxShadow: '0 4px 30px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05) inset',

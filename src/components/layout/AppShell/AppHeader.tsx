@@ -188,7 +188,9 @@ export function AppHeader({
         }}
       >
         <div
-          className="mx-auto w-full px-4"
+          // Боковые отступы не меньше вырезов: в альбомной ориентации iPhone
+          // env(safe-area-inset-left/right) — это чёлка и скруглённые углы.
+          className="mx-auto w-full pl-[max(1rem,env(safe-area-inset-left,0px))] pr-[max(1rem,env(safe-area-inset-right,0px))]"
           onClick={() => mobileMenuOpen && setMobileMenuOpen(false)}
         >
           <div className="flex h-16 items-center justify-between">
@@ -324,7 +326,7 @@ export function AppHeader({
             className="mobile-menu-content absolute inset-x-0 bottom-0 top-0 overflow-y-auto overscroll-contain border-t border-dark-800/50 bg-dark-900/95 pb-[calc(5rem+env(safe-area-inset-bottom,0px))]"
             style={{ WebkitOverflowScrolling: 'touch' }}
           >
-            <div className="mx-auto max-w-6xl px-4 py-4">
+            <div className="mx-auto max-w-6xl py-4 pl-[max(1rem,env(safe-area-inset-left,0px))] pr-[max(1rem,env(safe-area-inset-right,0px))]">
               {/* User info */}
               <div className="mb-4 flex items-center justify-between border-b border-dark-800/50 pb-4">
                 <div className="flex items-center gap-3">

@@ -300,7 +300,10 @@ export function AppShell({ children }: AppShellProps) {
       <div className="lg:hidden" style={{ height: headerHeight }} />
 
       {/* Main content */}
-      <main className="mx-auto max-w-6xl px-4 py-6 pb-28 lg:px-6 lg:pb-8">{children}</main>
+      {/* Боковые отступы не меньше вырезов (альбомная ориентация iPhone). */}
+      <main className="mx-auto max-w-6xl py-6 pb-28 pl-[max(1rem,env(safe-area-inset-left,0px))] pr-[max(1rem,env(safe-area-inset-right,0px))] lg:px-6 lg:pb-8">
+        {children}
+      </main>
 
       {/* Mobile Bottom Navigation */}
       <MobileBottomNav
