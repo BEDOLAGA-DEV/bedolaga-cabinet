@@ -88,6 +88,9 @@ function TemplateCard({
 // ============ Template Editor ============
 
 // Extract body content from full HTML (strip base template wrapper)
+/** Псевдо-тип общей обёртки писем — см. email_layout в боте. */
+const EMAIL_LAYOUT_TYPE = 'email_layout';
+
 function extractBodyContent(html: string): string {
   const contentMatch = html.match(
     /<div class="content">\s*([\s\S]*?)\s*<\/div>\s*<div class="footer">/,
@@ -123,18 +126,23 @@ function TemplateEditor({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const langData: EmailTemplateLanguageData | undefined = detail.languages[activeLang];
+  // Общая обёртка писем — не письмо, а каркас: у неё нет темы, а её HTML
+  // редактируется целиком (тело письма встаёт в {content}), без вырезания.
+  const isLayout = detail.notification_type === EMAIL_LAYOUT_TYPE;
 
   // Load data for current language (defaults arrive with {placeholders} intact)
   useEffect(() => {
     if (langData) {
       setEditSubject(langData.subject);
       setEditBody(
-        langData.is_default ? extractBodyContent(langData.body_html) : langData.body_html,
+        langData.is_default && !isLayout
+          ? extractBodyContent(langData.body_html)
+          : langData.body_html,
       );
       setIsDirty(false);
       setActiveTab('editor');
     }
-  }, [activeLang, langData]);
+  }, [activeLang, langData, isLayout]);
 
   const notifyError = useCallback(
     (error: unknown) => {
@@ -147,7 +155,7 @@ function TemplateEditor({
   const saveMutation = useMutation({
     mutationFn: () =>
       adminEmailTemplatesApi.updateTemplate(detail.notification_type, activeLang, {
-        subject: editSubject,
+        subject: isLayout ? EMAIL_LAYOUT_TYPE : editSubject,
         body_html: editBody,
       }),
     onSuccess: () => {
@@ -181,7 +189,7 @@ function TemplateEditor({
       adminEmailTemplatesApi.sendTestEmail(detail.notification_type, {
         language: activeLang,
         email: testEmail.trim(),
-        subject: editSubject,
+        subject: isLayout ? EMAIL_LAYOUT_TYPE : editSubject,
         body_html: editBody,
       }),
     onSuccess: (data) => {
@@ -195,7 +203,7 @@ function TemplateEditor({
     mutationFn: () =>
       adminEmailTemplatesApi.previewTemplate(detail.notification_type, {
         language: activeLang,
-        subject: editSubject,
+        subject: isLayout ? EMAIL_LAYOUT_TYPE : editSubject,
         body_html: editBody,
       }),
     onSuccess: (data) => {
@@ -233,7 +241,9 @@ function TemplateEditor({
     if (!langData) return;
     if (!(await confirmDialog(t('admin.emailTemplates.insertDefaultConfirm')))) return;
     setEditSubject(langData.default_subject);
-    setEditBody(extractBodyContent(langData.default_body_html));
+    setEditBody(
+      isLayout ? langData.default_body_html : extractBodyContent(langData.default_body_html),
+    );
     setIsDirty(true);
     setActiveTab('editor');
   };
@@ -346,22 +356,24 @@ function TemplateEditor({
         </div>
       ) : (
         <>
-          {/* Subject */}
-          <div>
-            <label className="mb-2 block text-sm font-medium text-dark-300">
-              {t('admin.emailTemplates.subject')}
-            </label>
-            <input
-              type="text"
-              value={editSubject}
-              onChange={(e) => {
-                setEditSubject(e.target.value);
-                setIsDirty(true);
-              }}
-              className="input"
-              placeholder={t('admin.emailTemplates.subjectPlaceholder')}
-            />
-          </div>
+          {/* Subject — у общей обёртки темы нет */}
+          {!isLayout && (
+            <div>
+              <label className="mb-2 block text-sm font-medium text-dark-300">
+                {t('admin.emailTemplates.subject')}
+              </label>
+              <input
+                type="text"
+                value={editSubject}
+                onChange={(e) => {
+                  setEditSubject(e.target.value);
+                  setIsDirty(true);
+                }}
+                className="input"
+                placeholder={t('admin.emailTemplates.subjectPlaceholder')}
+              />
+            </div>
+          )}
 
           {/* Context variables hint: type-specific + common (available in all templates) */}
           {(detail.context_vars.length > 0 || (detail.common_context_vars?.length ?? 0) > 0) && (
