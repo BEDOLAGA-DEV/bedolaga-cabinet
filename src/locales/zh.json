@@ -1658,6 +1658,13 @@
       "clickToInsert": "点击插入到文本中",
       "insertDefault": "插入默认模板",
       "insertDefaultConfirm": "用默认模板替换当前内容？",
+      "sendingToggle": "发送此邮件",
+      "sendingOnHint": "此邮件正在发送。关闭后，此类型邮件将不再发送给任何人。",
+      "sendingOffHint": "此邮件已关闭，不会发送给任何人。开启即可恢复。",
+      "sendingLocked": "此邮件无法关闭：没有它用户将无法登录或收到所购内容。",
+      "sendingOn": "已开启邮件发送",
+      "sendingOff": "已关闭邮件发送",
+      "sendingOffBadge": "不发送",
       "testRecipientPlaceholder": "收件人邮箱（默认为您的邮箱）",
       "testHint": "发送当前编辑器内容，变量将替换为示例值。",
       "variablesCommon": "通用变量（适用于所有模板）"

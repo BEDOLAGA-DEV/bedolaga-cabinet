@@ -1732,6 +1732,13 @@
       "clickToInsert": "Click to insert into the text",
       "insertDefault": "Insert default template",
       "insertDefaultConfirm": "Replace the current content with the default template?",
+      "sendingToggle": "Send this email",
+      "sendingOnHint": "The email is being sent. Turn it off to stop sending emails of this type to anyone.",
+      "sendingOffHint": "The email is off and is not sent to anyone. Turn it on to bring it back.",
+      "sendingLocked": "This email cannot be turned off: without it the user cannot sign in or receive their purchase.",
+      "sendingOn": "Email sending enabled",
+      "sendingOff": "Email sending disabled",
+      "sendingOffBadge": "Not sent",
       "testRecipientPlaceholder": "Recipient email (defaults to yours)",
       "testHint": "Sends the current editor content with sample values in place of variables.",
       "variablesCommon": "Common variables (work in all templates)"
