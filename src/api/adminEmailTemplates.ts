@@ -10,6 +10,10 @@ export interface EmailTemplateType {
   description: Record<string, string>;
   context_vars: string[];
   languages: Record<string, EmailTemplateLanguageStatus>;
+  /** Отправка писем этого типа включена (выключатель в редакторе). */
+  enabled?: boolean;
+  /** false — письмо нельзя отключить (без него не войти / не получить купленное). */
+  can_disable?: boolean;
 }
 
 export interface EmailTemplateListResponse {
@@ -34,6 +38,10 @@ export interface EmailTemplateDetail {
   context_vars: string[];
   /** Placeholders available in every template regardless of type */
   common_context_vars?: string[];
+  /** Обязательные плейсхолдеры: без них редактор не сохранит шаблон. */
+  required_vars?: string[];
+  enabled?: boolean;
+  can_disable?: boolean;
   languages: Record<string, EmailTemplateLanguageData>;
 }
 
@@ -86,6 +94,18 @@ export const adminEmailTemplatesApi = {
 
   deleteTemplate: async (notificationType: string, language: string): Promise<void> => {
     await apiClient.delete(`/cabinet/admin/email-templates/${notificationType}/${language}`);
+  },
+
+  // Включить/выключить отправку писем этого типа
+  setEnabled: async (
+    notificationType: string,
+    enabled: boolean,
+  ): Promise<{ status: string; enabled: boolean }> => {
+    const response = await apiClient.patch<{ status: string; enabled: boolean }>(
+      `/cabinet/admin/email-templates/${notificationType}/enabled`,
+      { enabled },
+    );
+    return response.data;
   },
 
   previewTemplate: async (

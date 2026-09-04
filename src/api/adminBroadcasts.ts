@@ -186,6 +186,21 @@ export const adminBroadcastsApi = {
     return response.data;
   },
 
+  // Письмо рассылки так, как его получит адресат: фрагмент — в общей обёртке
+  // писем из редактора шаблонов, полный документ — как есть. Тем же кодом,
+  // что и отправка, чтобы превью не расходилось с письмом.
+  renderEmail: async (data: {
+    subject: string;
+    html_content: string;
+    language?: string;
+  }): Promise<{ subject: string; body_html: string }> => {
+    const response = await apiClient.post<{ subject: string; body_html: string }>(
+      '/cabinet/admin/broadcasts/email-render',
+      data,
+    );
+    return response.data;
+  },
+
   // Preview email broadcast (get recipients count)
   previewEmail: async (target: string): Promise<BroadcastPreviewResponse> => {
     const response = await apiClient.post<BroadcastPreviewResponse>(

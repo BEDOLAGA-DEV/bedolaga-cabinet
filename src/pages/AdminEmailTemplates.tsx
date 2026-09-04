@@ -8,6 +8,7 @@ import {
   type EmailTemplateLanguageData,
 } from '../api/adminEmailTemplates';
 import { AdminBackButton, BackIcon } from '../components/admin';
+import { Toggle } from '../components/admin/Toggle';
 import { useNativeDialog } from '../platform/hooks/useNativeDialog';
 import { useNotify } from '@/platform';
 import { getApiErrorMessage } from '@/utils/api-error';
@@ -44,11 +45,15 @@ function TemplateCard({
   const label = template.label[currentLang] || template.label['en'] || template.type;
   const description = template.description[currentLang] || template.description['en'] || '';
   const customCount = Object.values(template.languages).filter((l) => l.has_custom).length;
+  const { t } = useTranslation();
+  const sendingOff = template.enabled === false;
 
   return (
     <button
       onClick={onClick}
-      className="group w-full rounded-xl border border-dark-700 bg-dark-800 p-3 text-left transition-all duration-200 hover:border-accent-500/50 sm:p-4"
+      className={`group w-full rounded-xl border border-dark-700 bg-dark-800 p-3 text-left transition-all duration-200 hover:border-accent-500/50 sm:p-4 ${
+        sendingOff ? 'opacity-60' : ''
+      }`}
     >
       <div className="flex items-start justify-between gap-2 sm:gap-3">
         <div className="min-w-0 flex-1">
@@ -73,12 +78,20 @@ function TemplateCard({
           ))}
         </div>
       </div>
-      {customCount > 0 && (
-        <div className="mt-2">
-          <span className="inline-flex items-center gap-1 rounded-full bg-accent-500/10 px-2 py-0.5 text-2xs text-accent-400">
-            <span className="h-1.5 w-1.5 rounded-full bg-accent-400" />
-            {customCount} custom
-          </span>
+      {(customCount > 0 || sendingOff) && (
+        <div className="mt-2 flex flex-wrap gap-1.5">
+          {sendingOff && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-error-500/10 px-2 py-0.5 text-2xs text-error-400">
+              <span className="h-1.5 w-1.5 rounded-full bg-error-400" />
+              {t('admin.emailTemplates.sendingOffBadge')}
+            </span>
+          )}
+          {customCount > 0 && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-accent-500/10 px-2 py-0.5 text-2xs text-accent-400">
+              <span className="h-1.5 w-1.5 rounded-full bg-accent-400" />
+              {customCount} custom
+            </span>
+          )}
         </div>
       )}
     </button>
@@ -88,6 +101,9 @@ function TemplateCard({
 // ============ Template Editor ============
 
 // Extract body content from full HTML (strip base template wrapper)
+/** Псевдо-тип общей обёртки писем — см. email_layout в боте. */
+const EMAIL_LAYOUT_TYPE = 'email_layout';
+
 function extractBodyContent(html: string): string {
   const contentMatch = html.match(
     /<div class="content">\s*([\s\S]*?)\s*<\/div>\s*<div class="footer">/,
@@ -123,18 +139,23 @@ function TemplateEditor({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const langData: EmailTemplateLanguageData | undefined = detail.languages[activeLang];
+  // Общая обёртка писем — не письмо, а каркас: у неё нет темы, а её HTML
+  // редактируется целиком (тело письма встаёт в {content}), без вырезания.
+  const isLayout = detail.notification_type === EMAIL_LAYOUT_TYPE;
 
   // Load data for current language (defaults arrive with {placeholders} intact)
   useEffect(() => {
     if (langData) {
       setEditSubject(langData.subject);
       setEditBody(
-        langData.is_default ? extractBodyContent(langData.body_html) : langData.body_html,
+        langData.is_default && !isLayout
+          ? extractBodyContent(langData.body_html)
+          : langData.body_html,
       );
       setIsDirty(false);
       setActiveTab('editor');
     }
-  }, [activeLang, langData]);
+  }, [activeLang, langData, isLayout]);
 
   const notifyError = useCallback(
     (error: unknown) => {
@@ -147,7 +168,7 @@ function TemplateEditor({
   const saveMutation = useMutation({
     mutationFn: () =>
       adminEmailTemplatesApi.updateTemplate(detail.notification_type, activeLang, {
-        subject: editSubject,
+        subject: isLayout ? EMAIL_LAYOUT_TYPE : editSubject,
         body_html: editBody,
       }),
     onSuccess: () => {
@@ -181,7 +202,7 @@ function TemplateEditor({
       adminEmailTemplatesApi.sendTestEmail(detail.notification_type, {
         language: activeLang,
         email: testEmail.trim(),
-        subject: editSubject,
+        subject: isLayout ? EMAIL_LAYOUT_TYPE : editSubject,
         body_html: editBody,
       }),
     onSuccess: (data) => {
@@ -195,7 +216,7 @@ function TemplateEditor({
     mutationFn: () =>
       adminEmailTemplatesApi.previewTemplate(detail.notification_type, {
         language: activeLang,
-        subject: editSubject,
+        subject: isLayout ? EMAIL_LAYOUT_TYPE : editSubject,
         body_html: editBody,
       }),
     onSuccess: (data) => {
@@ -209,6 +230,23 @@ function TemplateEditor({
     setActiveTab('preview');
     previewMutation.mutate();
   };
+
+  // Выключатель писем этого типа: отключённое письмо не отправляется никому.
+  const enabledMutation = useMutation({
+    mutationFn: (enabled: boolean) =>
+      adminEmailTemplatesApi.setEnabled(detail.notification_type, enabled),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'email-templates'] });
+      queryClient.invalidateQueries({
+        queryKey: ['admin', 'email-template', detail.notification_type],
+      });
+      notify.success(
+        data.enabled ? t('admin.emailTemplates.sendingOn') : t('admin.emailTemplates.sendingOff'),
+      );
+    },
+    onError: notifyError,
+  });
+  const sendingEnabled = detail.enabled !== false;
 
   const insertVariable = (variable: string) => {
     const token = `{${variable}}`;
@@ -233,7 +271,9 @@ function TemplateEditor({
     if (!langData) return;
     if (!(await confirmDialog(t('admin.emailTemplates.insertDefaultConfirm')))) return;
     setEditSubject(langData.default_subject);
-    setEditBody(extractBodyContent(langData.default_body_html));
+    setEditBody(
+      isLayout ? langData.default_body_html : extractBodyContent(langData.default_body_html),
+    );
     setIsDirty(true);
     setActiveTab('editor');
   };
@@ -264,6 +304,34 @@ function TemplateEditor({
           </span>
         )}
       </div>
+
+      {/* Sending switch — не у обёртки: она не письмо */}
+      {!isLayout && (
+        <div
+          className={`flex items-center justify-between gap-3 rounded-lg border p-2.5 sm:p-3 ${
+            sendingEnabled ? 'border-dark-700 bg-dark-900/60' : 'border-error-500/30 bg-error-500/5'
+          }`}
+        >
+          <div className="min-w-0">
+            <div className="text-sm font-medium text-dark-100">
+              {t('admin.emailTemplates.sendingToggle')}
+            </div>
+            <p className="text-xs text-dark-400">
+              {detail.can_disable === false
+                ? t('admin.emailTemplates.sendingLocked')
+                : sendingEnabled
+                  ? t('admin.emailTemplates.sendingOnHint')
+                  : t('admin.emailTemplates.sendingOffHint')}
+            </p>
+          </div>
+          <Toggle
+            checked={sendingEnabled}
+            disabled={detail.can_disable === false || enabledMutation.isPending}
+            onChange={() => enabledMutation.mutate(!sendingEnabled)}
+            aria-label={t('admin.emailTemplates.sendingToggle')}
+          />
+        </div>
+      )}
 
       {/* Language tabs */}
       <div className="flex items-center gap-1 overflow-x-auto rounded-lg bg-dark-900 p-1">
@@ -346,22 +414,24 @@ function TemplateEditor({
         </div>
       ) : (
         <>
-          {/* Subject */}
-          <div>
-            <label className="mb-2 block text-sm font-medium text-dark-300">
-              {t('admin.emailTemplates.subject')}
-            </label>
-            <input
-              type="text"
-              value={editSubject}
-              onChange={(e) => {
-                setEditSubject(e.target.value);
-                setIsDirty(true);
-              }}
-              className="input"
-              placeholder={t('admin.emailTemplates.subjectPlaceholder')}
-            />
-          </div>
+          {/* Subject — у общей обёртки темы нет */}
+          {!isLayout && (
+            <div>
+              <label className="mb-2 block text-sm font-medium text-dark-300">
+                {t('admin.emailTemplates.subject')}
+              </label>
+              <input
+                type="text"
+                value={editSubject}
+                onChange={(e) => {
+                  setEditSubject(e.target.value);
+                  setIsDirty(true);
+                }}
+                className="input"
+                placeholder={t('admin.emailTemplates.subjectPlaceholder')}
+              />
+            </div>
+          )}
 
           {/* Context variables hint: type-specific + common (available in all templates) */}
           {(detail.context_vars.length > 0 || (detail.common_context_vars?.length ?? 0) > 0) && (
