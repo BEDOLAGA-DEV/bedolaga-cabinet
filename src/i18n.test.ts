@@ -67,6 +67,7 @@ describe('тема до первой отрисовки', () => {
     // находить тему, и вспышка вернётся без единой ошибки в консоли.
     expect(htmlSource).toContain(STORAGE_KEYS.THEME);
     expect(htmlSource).toContain(STORAGE_KEYS.ENABLED_THEMES);
+    expect(htmlSource).toContain(STORAGE_KEYS.BRAND_HINT);
   });
 
   it('фон первой отрисовки уступает фону темы из CSS приложения', () => {

@@ -141,14 +141,23 @@ function tripletOf({ r, g, b }: Rgb): string {
 // лучшим контрастом: на пастельном акценте это тёмный текст.
 const ON_COLOR_WHITE_MIN_RATIO = 3;
 
+const WHITE: Rgb = { r: 255, g: 255, b: 255 };
+const INK: Rgb = { r: 15, g: 23, b: 42 };
+
+function prefersWhiteText(bg: Rgb): boolean {
+  const whiteRatio = contrastRatio(WHITE, bg);
+  if (whiteRatio >= ON_COLOR_WHITE_MIN_RATIO) return true;
+  return whiteRatio >= contrastRatio(INK, bg);
+}
+
 // Black-or-white text for a given button/badge background.
 function onColorFor(bgTriplet: string): string {
-  const bg = parseTriplet(bgTriplet);
-  const white = { r: 255, g: 255, b: 255 };
-  const ink = { r: 15, g: 23, b: 42 };
-  const whiteRatio = contrastRatio(white, bg);
-  if (whiteRatio >= ON_COLOR_WHITE_MIN_RATIO) return '255, 255, 255';
-  return whiteRatio >= contrastRatio(ink, bg) ? '255, 255, 255' : '15, 23, 42';
+  return prefersWhiteText(parseTriplet(bgTriplet)) ? '255, 255, 255' : '15, 23, 42';
+}
+
+/** Тот же выбор белый/тёмный для hex-заливки — для иконок, рисуемых вне CSS. */
+export function readableTextOnHex(hex: string): string {
+  return prefersWhiteText(hexToRgb(hex)) ? '#ffffff' : '#0f172a';
 }
 
 type ThemeSurfaces = { surface: Rgb; text: Rgb };

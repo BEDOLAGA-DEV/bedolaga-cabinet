@@ -1,0 +1,113 @@
+/**
+ * Бренд в <head>: заголовок вкладки, имя приложения для ярлыков (Android читает
+ * манифест и application-name, iOS — apple-mobile-web-app-title), иконки и
+ * веб-манифест. Единственный владелец — useDocumentBranding; страницы, которым
+ * нужен свой заголовок (SEO лендинга), переписывают его сами и восстанавливают.
+ */
+import { STORAGE_KEYS } from '@/config/constants';
+import { safeLocal } from './safeStorage';
+
+/** Подсказка для инлайн-скрипта index.html: что показать до прихода брендинга. */
+export interface BrandHint {
+  name: string;
+  letter: string;
+  /** data URI фавикона; крупные не сохраняем, чтобы не раздувать localStorage. */
+  icon?: string;
+}
+
+const HINT_ICON_MAX_CHARS = 16_000;
+
+export function readBrandHint(): BrandHint | null {
+  const raw = safeLocal.getJson<unknown>(STORAGE_KEYS.BRAND_HINT, null);
+  if (!raw || typeof raw !== 'object') return null;
+  const { name, letter, icon } = raw as Record<string, unknown>;
+  if (typeof name !== 'string' || typeof letter !== 'string') return null;
+  return { name, letter, icon: typeof icon === 'string' ? icon : undefined };
+}
+
+export function writeBrandHint(hint: BrandHint): void {
+  const icon = hint.icon && hint.icon.length <= HINT_ICON_MAX_CHARS ? hint.icon : undefined;
+  safeLocal.setJson(STORAGE_KEYS.BRAND_HINT, {
+    name: hint.name,
+    letter: hint.letter,
+    ...(icon ? { icon } : {}),
+  });
+}
+
+function upsertMeta(name: string, content: string): void {
+  let meta = document.head.querySelector<HTMLMetaElement>(`meta[name="${name}"]`);
+  if (!meta) {
+    meta = document.createElement('meta');
+    meta.name = name;
+    document.head.appendChild(meta);
+  }
+  meta.content = content;
+}
+
+function upsertLink(rel: string): HTMLLinkElement {
+  let link = document.head.querySelector<HTMLLinkElement>(`link[rel="${rel}"]`);
+  if (!link) {
+    link = document.createElement('link');
+    link.rel = rel;
+    document.head.appendChild(link);
+  }
+  return link;
+}
+
+/**
+ * Заголовок вкладки. `previous` — что ставили сами в прошлый раз: если страница
+ * с тех пор переписала заголовок под себя, не трогаем его. Возвращает значение,
+ * которое надо передать сюда следующим вызовом.
+ */
+export function setDocumentTitle(name: string, previous: string | null): string {
+  if (previous !== null && document.title !== previous) return previous;
+  document.title = name;
+  return name;
+}
+
+export function setAppNameMeta(name: string): void {
+  upsertMeta('application-name', name);
+  upsertMeta('apple-mobile-web-app-title', name);
+}
+
+export function setAppleTouchIcon(href: string | null): void {
+  if (!href) {
+    document.head.querySelector('link[rel="apple-touch-icon"]')?.remove();
+    return;
+  }
+  upsertLink('apple-touch-icon').href = href;
+}
+
+export interface ManifestIcon {
+  src: string;
+  sizes: string;
+  type: string;
+}
+
+export interface WebManifestInput {
+  name: string;
+  icons: ManifestIcon[];
+  themeColor: string;
+  backgroundColor: string;
+}
+
+export function buildWebManifest(input: WebManifestInput): Record<string, unknown> {
+  // У манифеста в data: URI нет своего адреса, поэтому start_url и scope —
+  // абсолютные, от корня приложения.
+  const base = new URL(import.meta.env.BASE_URL || '/', window.location.origin).href;
+  return {
+    name: input.name,
+    short_name: input.name,
+    start_url: base,
+    scope: base,
+    display: 'standalone',
+    background_color: input.backgroundColor,
+    theme_color: input.themeColor,
+    icons: input.icons,
+  };
+}
+
+export function setWebManifest(input: WebManifestInput): void {
+  const json = JSON.stringify(buildWebManifest(input));
+  upsertLink('manifest').href = `data:application/manifest+json,${encodeURIComponent(json)}`;
+}

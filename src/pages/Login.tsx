@@ -231,11 +231,6 @@ export default function Login() {
   const appLogo = branding?.logo_letter || import.meta.env.VITE_APP_LOGO || 'V';
   const logoUrl = branding ? brandingApi.getLogoUrl(branding) : null;
 
-  // Set document title
-  useEffect(() => {
-    document.title = appName || 'VPN';
-  }, [appName]);
-
   useEffect(() => {
     if (isAuthenticated) {
       navigate(getReturnUrl(), { replace: true });

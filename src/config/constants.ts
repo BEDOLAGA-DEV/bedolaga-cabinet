@@ -1,6 +1,8 @@
 export const STORAGE_KEYS = {
   THEME: 'cabinet-theme',
   ENABLED_THEMES: 'cabinet-enabled-themes',
+  /** Подсказка первой отрисовки: имя, буква и иконка бренда для инлайн-скрипта index.html. */
+  BRAND_HINT: 'cabinet-brand-hint',
   FAVORITE_SETTINGS: 'admin_favorite_settings',
 } as const;
 
