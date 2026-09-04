@@ -175,13 +175,27 @@ export function AppHeader({
 
   return (
     <>
+      {/* Полоса под статус-баром в standalone-режиме iOS («На экран Домой»):
+          непрозрачный фон страницы, шапка сдвигается под неё и остаётся своей
+          обычной высоты. Растягивать само стекло шапки на статус-бар нельзя —
+          оно читалось как лишний размытый блок сверху. В обычном браузере и в
+          Mini App env() равен нулю, полоса невидима; в fullscreen Telegram
+          отступ считает SDK и полоса не нужна. */}
+      {!isFullscreen && (
+        <div
+          aria-hidden="true"
+          className="fixed inset-x-0 top-0 z-50 bg-dark-950 lg:hidden"
+          style={{ height: 'env(safe-area-inset-top, 0px)' }}
+        />
+      )}
       {/* Header - only on mobile */}
       <header
-        className="glass fixed left-0 right-0 top-0 z-50 shadow-lg shadow-black/10 lg:hidden"
+        className="glass fixed left-0 right-0 z-50 shadow-lg shadow-black/10 lg:hidden"
         style={{
+          top: isFullscreen ? 0 : 'env(safe-area-inset-top, 0px)',
           paddingTop: isFullscreen
             ? `${Math.max(safeAreaInset.top, contentSafeAreaInset.top) + (telegramPlatform === 'android' ? 48 : 45)}px`
-            : 'env(safe-area-inset-top, 0px)',
+            : undefined,
         }}
       >
         <div
