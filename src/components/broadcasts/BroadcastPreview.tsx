@@ -1,6 +1,8 @@
 import { useMemo, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
+import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import { adminBroadcastsApi } from '../../api/adminBroadcasts';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
 
 interface PreviewButton {
@@ -262,10 +264,25 @@ export function TelegramPreview({
 }
 
 export function EmailPreview({ open, onClose, subject, htmlContent }: EmailPreviewProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const dialogRef = useFocusTrap<HTMLDivElement>(open, { onEscape: onClose });
+  // Письмо рендерит бот — в той же обёртке и тем же кодом, что при отправке.
+  // Пока ответа нет или он не пришёл, показываем сырой HTML.
+  const rendered = useQuery({
+    queryKey: ['admin', 'broadcast-email-render', subject, htmlContent, i18n.language],
+    queryFn: () =>
+      adminBroadcastsApi.renderEmail({
+        subject,
+        html_content: htmlContent,
+        language: i18n.language,
+      }),
+    enabled: open && htmlContent.trim().length > 0,
+    staleTime: 60_000,
+    retry: 0,
+  });
   if (!open) return null;
   const emptyHtml = `<p style="color:#999;font-family:sans-serif">${t('admin.broadcasts.previewEmpty', '— пусто —')}</p>`;
+  const previewHtml = rendered.data?.body_html || htmlContent;
   return createPortal(
     <div
       className="fixed inset-0 z-[9999] flex items-center justify-center bg-dark-950/70 p-4"
@@ -301,7 +318,7 @@ export function EmailPreview({ open, onClose, subject, htmlContent }: EmailPrevi
           title="email preview"
           className="w-full flex-1 bg-white"
           sandbox=""
-          srcDoc={htmlContent || emptyHtml}
+          srcDoc={previewHtml || emptyHtml}
         />
       </div>
     </div>,
