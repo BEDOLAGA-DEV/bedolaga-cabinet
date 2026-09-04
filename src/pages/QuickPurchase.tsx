@@ -554,6 +554,8 @@ function SummaryCard({
           <div
             className="fixed bottom-0 left-0 right-0 z-50 p-3"
             style={{
+              // Ярлык iOS: под кнопкой ещё индикатор «Домой» (safe-area снизу).
+              paddingBottom: 'calc(0.75rem + env(safe-area-inset-bottom, 0px))',
               background:
                 'linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.6) 70%, transparent 100%)',
             }}

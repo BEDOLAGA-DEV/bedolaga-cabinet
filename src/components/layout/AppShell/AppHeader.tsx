@@ -323,7 +323,7 @@ export function AppHeader({
 
           {/* Menu content */}
           <div
-            className="mobile-menu-content absolute inset-x-0 bottom-0 top-0 overflow-y-auto overscroll-contain border-t border-dark-800/50 bg-dark-900/95 pb-[calc(5rem+env(safe-area-inset-bottom,0px))]"
+            className="mobile-menu-content absolute inset-x-0 bottom-0 top-0 overflow-y-auto overscroll-contain border-t border-dark-800/50 bg-dark-900/95 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]"
             style={{ WebkitOverflowScrolling: 'touch' }}
           >
             <div className="mx-auto max-w-6xl py-4 pl-[max(1rem,env(safe-area-inset-left,0px))] pr-[max(1rem,env(safe-area-inset-right,0px))]">

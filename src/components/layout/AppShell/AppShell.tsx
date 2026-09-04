@@ -300,14 +300,17 @@ export function AppShell({ children }: AppShellProps) {
       <div className="lg:hidden" style={{ height: headerHeight }} />
 
       {/* Main content */}
-      {/* Боковые отступы не меньше вырезов (альбомная ориентация iPhone). */}
-      <main className="mx-auto max-w-6xl py-6 pb-28 pl-[max(1rem,env(safe-area-inset-left,0px))] pr-[max(1rem,env(safe-area-inset-right,0px))] lg:px-6 lg:pb-8">
+      {/* Боковые отступы не меньше вырезов (альбомная ориентация iPhone); снизу —
+          просвет под панелью: фиксированные 112px в standalone iOS не хватало,
+          и низ контента уходил под неё. */}
+      <main className="mx-auto max-w-6xl py-6 pb-[calc(var(--mobile-nav-clearance)+0.5rem)] pl-[max(1rem,env(safe-area-inset-left,0px))] pr-[max(1rem,env(safe-area-inset-right,0px))] lg:px-6 lg:pb-8">
         {children}
       </main>
 
       {/* Mobile Bottom Navigation */}
       <MobileBottomNav
         isKeyboardOpen={isKeyboardOpen}
+        isMenuOpen={mobileMenuOpen}
         referralEnabled={referralEnabled}
         wheelEnabled={wheelEnabled}
       />

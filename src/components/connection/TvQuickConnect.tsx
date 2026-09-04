@@ -253,7 +253,8 @@ export default function TvQuickConnect({ subscriptionUrl, isLight }: Props) {
       {/* Toast */}
       {toast && (
         <div
-          className={`fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-xl px-5 py-3 text-sm font-medium shadow-lg transition-all ${
+          // На мобильном стоит над нижней панелью: на bottom-6 тост целиком уходил за неё.
+          className={`fixed bottom-[var(--mobile-nav-clearance)] left-1/2 z-50 -translate-x-1/2 rounded-xl px-5 py-3 text-sm font-medium shadow-lg transition-all lg:bottom-6 ${
             toast.type === 'success' ? 'bg-success-500/90 text-white' : 'bg-error-500/90 text-white'
           }`}
         >

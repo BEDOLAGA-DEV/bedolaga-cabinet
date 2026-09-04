@@ -100,7 +100,13 @@
 
 @layer base {
   :root {
-    --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+    /* Мобильная нижняя панель (MobileBottomNav): отступ от края и место, которое
+       она занимает. Всё, что прижато к низу на мобильном (тосты, бары действий,
+       низ контента), встаёт выше --mobile-nav-clearance — иначе панель это
+       перекрывает. Высота панели — константа дизайна (иконка + подпись). */
+    --mobile-nav-height: 76px;
+    --mobile-nav-offset: max(16px, env(safe-area-inset-bottom, 0px));
+    --mobile-nav-clearance: calc(var(--mobile-nav-height) + var(--mobile-nav-offset) + 12px);
 
     /* Unified Card System */
     --bento-radius: 16px;
@@ -715,39 +721,6 @@ img.twemoji {
     @apply nav-item bg-accent-500/10 text-accent-400;
   }
 
-  .bottom-nav {
-    @apply fixed z-50 bg-dark-900/95;
-    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
-    left: 16px;
-    right: 16px;
-    border-radius: var(--bento-radius);
-    padding: 8px 4px;
-    transform: translateZ(0);
-    box-shadow:
-      0 4px 30px rgba(0, 0, 0, 0.4),
-      0 0 0 1px rgba(255, 255, 255, 0.05) inset;
-  }
-
-  @media (min-width: 1024px) {
-    .bottom-nav {
-      @apply bg-dark-900/80 backdrop-blur-xl;
-    }
-  }
-
-  .bottom-nav-item {
-    @apply flex min-w-[56px] flex-1 shrink-0 flex-col items-center justify-center rounded-2xl px-3 py-2.5 text-dark-500 duration-200;
-    transition-property: color, background-color;
-  }
-
-  .bottom-nav-item:hover {
-    @apply text-dark-300;
-  }
-
-  .bottom-nav-item-active {
-    @apply flex min-w-[56px] flex-1 shrink-0 flex-col items-center justify-center rounded-2xl bg-accent-500/15 px-3 py-2.5 text-accent-400 duration-200;
-    transition-property: color, background-color;
-  }
-
   /* Divider - Dark */
   .divider {
     @apply border-t border-dark-800/50;
@@ -890,43 +863,9 @@ img.twemoji {
     @apply bg-champagne-200/70 text-champagne-800;
   }
 
-  .light .bottom-nav {
-    @apply bg-white/95;
-    box-shadow:
-      0 4px 30px rgba(0, 0, 0, 0.1),
-      0 0 0 1px rgba(0, 0, 0, 0.05);
-  }
-
-  @media (min-width: 1024px) {
-    .light .bottom-nav {
-      @apply bg-white/80 backdrop-blur-xl;
-    }
-  }
-
-  .light .bottom-nav-item {
-    @apply text-champagne-500;
-  }
-
-  .light .bottom-nav-item:hover {
-    @apply text-champagne-700;
-  }
-
-  .light .bottom-nav-item-active {
-    @apply bg-champagne-300/40 text-champagne-800;
-  }
-
   /* Divider - Light */
   .light .divider {
     @apply border-t border-champagne-200;
-  }
-
-  /* Safe area */
-  .safe-area-pb {
-    padding-bottom: calc(0.5rem + var(--safe-area-inset-bottom));
-  }
-
-  .pt-safe {
-    padding-top: env(safe-area-inset-top, 0px);
   }
 
   /* Skeleton loader */

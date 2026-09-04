@@ -10,12 +10,15 @@ import { HomeIcon, SubscriptionIcon, WalletIcon, UsersIcon, ChatIcon, WheelIcon 
 
 interface MobileBottomNavProps {
   isKeyboardOpen: boolean;
+  /** Открыто выезжающее меню шапки: у него есть все те же пункты, панель поверх него лишняя. */
+  isMenuOpen?: boolean;
   referralEnabled?: boolean;
   wheelEnabled?: boolean;
 }
 
 export function MobileBottomNav({
   isKeyboardOpen,
+  isMenuOpen = false,
   referralEnabled,
   wheelEnabled,
 }: MobileBottomNavProps) {
@@ -61,13 +64,13 @@ export function MobileBottomNav({
         'fixed z-50 transition-all duration-200 lg:hidden',
         'bg-dark-900/95 backdrop-blur-linear',
         'border border-dark-700/30',
-        isKeyboardOpen ? 'pointer-events-none opacity-0' : 'opacity-100',
+        isKeyboardOpen || isMenuOpen ? 'pointer-events-none opacity-0' : 'opacity-100',
       )}
       style={{
-        // В standalone iOS inset снизу ~34pt: складывать с ним ещё 16px — панель
-        // висит слишком высоко. Берём большее из двух: над индикатором «Домой»
-        // панель стоит вплотную к безопасной зоне, в браузере — прежние 16px.
-        bottom: 'max(16px, env(safe-area-inset-bottom, 0px))',
+        // Отступ снизу и просвет под панелью объявлены в globals.css
+        // (--mobile-nav-*): в standalone iOS inset около 34pt, и панель стоит
+        // вплотную к безопасной зоне, в браузере — 16px.
+        bottom: 'var(--mobile-nav-offset)',
         // По бокам та же логика: в альбомной ориентации iPhone вырезы слева и
         // справа около 59pt, панель не должна уходить под чёлку и углы.
         left: 'max(16px, env(safe-area-inset-left, 0px))',

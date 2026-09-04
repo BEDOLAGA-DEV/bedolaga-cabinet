@@ -973,7 +973,8 @@ function CopiedToast({ onDismiss }: { onDismiss: () => void }) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 20 }}
       transition={{ duration: 0.2, ease: 'easeOut' }}
-      className="fixed inset-x-0 bottom-6 z-50 flex justify-center"
+      // На мобильном стоит над нижней панелью: на bottom-6 тост целиком уходил за неё.
+      className="fixed inset-x-0 bottom-[var(--mobile-nav-clearance)] z-50 flex justify-center lg:bottom-6"
     >
       <div className="flex items-center gap-2 rounded-full border border-dark-700/50 bg-dark-900/95 px-5 py-2.5 shadow-2xl shadow-black/40 backdrop-blur-md">
         <CheckIcon className="h-4 w-4 text-success-400" />
