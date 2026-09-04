@@ -8,7 +8,7 @@ import {
   preloadLogo,
   setCachedBranding,
 } from '@/api/branding';
-import { themeColorsApi } from '@/api/themeColors';
+import { themeColorsQueryOptions } from '@/api/themeColors';
 import { DEFAULT_THEME_COLORS } from '@/types/theme';
 import {
   type ManifestIcon,
@@ -131,13 +131,7 @@ export function useDocumentBranding(): void {
     staleTime: 60_000,
     retry: 1,
   });
-  const { data: colors } = useQuery({
-    queryKey: ['theme-colors'],
-    queryFn: themeColorsApi.getColors,
-    staleTime: 5 * 60 * 1000,
-    refetchOnWindowFocus: false,
-    retry: 1,
-  });
+  const { data: colors } = useQuery(themeColorsQueryOptions());
   const { isDark } = useTheme();
 
   const palette = colors ?? DEFAULT_THEME_COLORS;

@@ -27,12 +27,16 @@ vi.mock('@/api/branding', () => ({
   getLogoBlobUrl: () => null,
 }));
 
-vi.mock('@/api/themeColors', () => ({
-  themeColorsApi: {
-    getColors: () => Promise.resolve({ ...DEFAULT_THEME_COLORS, accent: '#22c55e' }),
-    getEnabledThemes: () => Promise.resolve({ dark: true, light: true }),
-  },
-}));
+vi.mock('@/api/themeColors', () => {
+  const getColors = () => Promise.resolve({ ...DEFAULT_THEME_COLORS, accent: '#22c55e' });
+  return {
+    themeColorsApi: {
+      getColors,
+      getEnabledThemes: () => Promise.resolve({ dark: true, light: true }),
+    },
+    themeColorsQueryOptions: () => ({ queryKey: ['theme-colors'], queryFn: getColors }),
+  };
+});
 
 // jsdom не реализует matchMedia, а useTheme его спрашивает.
 if (!window.matchMedia) {

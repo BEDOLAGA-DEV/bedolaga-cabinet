@@ -107,6 +107,55 @@
         }
       })();
     </script>
+    <script data-hint="theme-colors">
+      // Палитра оператора ДО первой отрисовки. Цвета приходят с бэкенда уже после
+      // загрузки JS, и каждая загрузка сначала показывала палитру по умолчанию,
+      // а потом прыгала в операторскую. applyThemeColors записывает применённые
+      // переменные в localStorage (ключ = STORAGE_KEYS.THEME_COLORS_HINT), здесь
+      // они ставятся на :root теми же именами. Принимаются только --color-* с
+      // hex или RGB-триплетом: подсказка не может подменить прочие токены.
+      // Фон страницы и theme-color тоже берутся отсюда — до прихода CSS приложения
+      // они иначе остаются цветами сборки. Специфичность правил фона (0,0,1)
+      // обязательна, см. <style> выше.
+      (function () {
+        try {
+          var raw = localStorage.getItem('cabinet-theme-colors-hint');
+          if (!raw) return;
+          var hint = JSON.parse(raw);
+          var vars = hint && hint.vars;
+          if (!vars || typeof vars !== 'object') return;
+          var NAME = /^--color-[a-z0-9-]+$/;
+          var VALUE = /^(#[0-9a-f]{6}|\d{1,3}, \d{1,3}, \d{1,3})$/i;
+          var root = document.documentElement;
+          var applied = {};
+          for (var name in vars) {
+            var value = vars[name];
+            if (NAME.test(name) && typeof value === 'string' && VALUE.test(value)) {
+              root.style.setProperty(name, value);
+              applied[name] = value;
+            }
+          }
+          var css = function (v) {
+            return v.charAt(0) === '#' ? v : 'rgb(' + v + ')';
+          };
+          var dark = applied['--color-dark-950'];
+          var light = applied['--color-champagne-200'];
+          if (dark || light) {
+            var style = document.createElement('style');
+            style.textContent =
+              (dark ? 'body{background-color:' + css(dark) + '}' : '') +
+              (light ? ':where(html.light) body{background-color:' + css(light) + '}' : '');
+            document.head.appendChild(style);
+          }
+          var isLight = root.classList.contains('light');
+          var chrome = isLight ? applied['--color-light-bg'] : applied['--color-dark-bg'];
+          var meta = document.querySelector('meta[name="theme-color"]');
+          if (meta && chrome) meta.setAttribute('content', css(chrome));
+        } catch (e) {
+          // Хранилище заблокировано или подсказка битая — остаётся палитра сборки.
+        }
+      })();
+    </script>
     <script>
       // Бренд до первой отрисовки. Имя и логотип приходят с бэкенда уже после
       // загрузки JS, и на медленной сети вкладка успевает показать значения из

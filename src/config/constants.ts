@@ -3,6 +3,8 @@ export const STORAGE_KEYS = {
   ENABLED_THEMES: 'cabinet-enabled-themes',
   /** Подсказка первой отрисовки: имя, буква и иконка бренда для инлайн-скрипта index.html. */
   BRAND_HINT: 'cabinet-brand-hint',
+  /** Подсказка первой отрисовки: палитра оператора (CSS-переменные) для инлайн-скрипта index.html. */
+  THEME_COLORS_HINT: 'cabinet-theme-colors-hint',
   FAVORITE_SETTINGS: 'admin_favorite_settings',
 } as const;
 
@@ -20,6 +22,8 @@ export const UI = {
   TELEGRAM_HEADER_IOS_PX: 45,
   MOBILE_HEADER_HEIGHT_PX: 64,
   DESKTOP_HEADER_HEIGHT_PX: 56,
+  /** Сколько ждать палитру оператора перед первой отрисовкой, когда подсказки ещё нет. */
+  THEME_COLORS_FIRST_PAINT_TIMEOUT_MS: 1500,
 } as const;
 
 // API
