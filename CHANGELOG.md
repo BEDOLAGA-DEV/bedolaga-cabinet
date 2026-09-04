@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.68.2](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.68.1...v1.68.2) (2026-09-04)
+
+
+### Bug Fixes
+
+* **branding:** бренд инсталляции во вкладке, фавиконе и ярлыках вместо «VPN»/«V» ([1ca7e48](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/1ca7e489af577dda7c58302ecba161a3403f056d))
+* **branding:** иконки ярлыков без прозрачных углов — iOS и Android заливали их белым ([38a6738](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/38a6738c4ae98f9ebc61a068aa60fca99e4c47e3))
+* **theme:** палитра оператора применяется до первой отрисовки ([d62c8d3](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/d62c8d39e6e99c91f567a1a4ac13e099ef630cff))
+* **ui:** боковые вырезы в альбомной ориентации iPhone ([2d71d63](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/2d71d63b68370b9cb3c679a52410eaa80edd7078))
+* **ui:** мобильная шапка не срезается статус-баром в standalone-режиме iOS ([59c42b1](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/59c42b197c9003d570c976811609b42cec44d791))
+* **ui:** полоса под статус-баром iOS вместо растянутого стекла шапки ([28fd968](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/28fd9680f1a2b45068b612e44c6f5ce049e66f2e))
+* **ui:** прижатые к низу элементы не прячутся за мобильной панелью ([b7d1391](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/b7d1391518819689d807d4b5589e9d96aa551e51))
+* **ui:** ярлык iOS — шапка сливается со статус-баром, панель ближе к краю ([accd1e9](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/accd1e99c2866ddc5ede338e7434980394596d74))
+
 ## [1.68.1](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.68.0...v1.68.1) (2026-09-04)
 
 
