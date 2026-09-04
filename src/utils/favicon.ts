@@ -1,37 +1,40 @@
 /**
  * Favicon helpers.
  *
- * The static fallback in index.html is a neutral monogram so the tab is never
- * left without an icon. Once branding is known we override it with the custom
- * logo (or a brand-letter monogram) via {@link setFavicon}.
+ * Статический фавикон index.html — монограмма из VITE_APP_LOGO; когда брендинг
+ * известен, useDocumentBranding подменяет её логотипом инсталляции (или
+ * монограммой в цвете акцента) через {@link setFavicon}.
  */
+import {
+  DEFAULT_MONOGRAM_COLORS,
+  type MonogramColors,
+  monogramDataUri,
+  monogramLetter,
+} from '../../vite-plugins/brandMonogram';
 
-/** Point the page favicon at `href`, creating the <link> if needed. */
+const IMAGE_LOAD_TIMEOUT_MS = 8000;
+
+/** Поставить фавикон `href`, заменив существующие <link rel="icon">. */
 export function setFavicon(href: string): void {
   if (!href) return;
-  let link = document.querySelector<HTMLLinkElement>("link[rel*='icon']");
-  if (!link) {
-    link = document.createElement('link');
-    link.rel = 'icon';
-    document.head.appendChild(link);
-  }
+  // Именно замена узла: при смене href у существующего <link> Firefox и Safari
+  // не всегда перерисовывают иконку вкладки.
+  const stale = document.querySelectorAll<HTMLLinkElement>(
+    "link[rel='icon'], link[rel='shortcut icon']",
+  );
+  for (const link of stale) link.remove();
+  const link = document.createElement('link');
+  link.rel = 'icon';
   link.href = href;
+  document.head.appendChild(link);
 }
 
-/**
- * Generate a square monogram favicon (SVG data URI) from a brand letter.
- * Used when the deployment has no custom logo, so every page still gets an
- * icon that matches the brand letter instead of the browser's blank default.
- */
-export function letterFaviconDataUri(letter: string): string {
-  const ch = (letter || 'V').trim().charAt(0).toUpperCase() || 'V';
-  const svg =
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">` +
-    `<rect width="64" height="64" rx="14" fill="#0a0f1a"/>` +
-    `<text x="50%" y="50%" font-family="Manrope,Arial,sans-serif" font-size="38" ` +
-    `font-weight="700" fill="#ffffff" text-anchor="middle" dominant-baseline="central">${ch}</text>` +
-    `</svg>`;
-  return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+/** Квадратная монограмма (SVG data URI) из буквы бренда. */
+export function letterFaviconDataUri(
+  letter: string,
+  colors: MonogramColors = DEFAULT_MONOGRAM_COLORS,
+): string {
+  return monogramDataUri(monogramLetter(letter), colors);
 }
 
 /**
@@ -40,8 +43,8 @@ export function letterFaviconDataUri(letter: string): string {
  * hard square corners.
  *
  * `radiusRatio` 0.3 mirrors the header tile (rounded-linear-lg = 12px on a 40px
- * tile). Returns null if the image can't be loaded or the canvas is tainted —
- * the caller should fall back to the raw `src`.
+ * tile). Returns null if canvas is unavailable, the image can't be loaded or
+ * the canvas is tainted — the caller should fall back to the raw `src`.
  */
 export async function roundedFaviconDataUri(
   src: string,
@@ -49,14 +52,15 @@ export async function roundedFaviconDataUri(
   radiusRatio = 0.3,
 ): Promise<string | null> {
   if (!src) return null;
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  // Проверяем canvas ДО загрузки картинки: в средах без него (jsdom) onload
+  // не приходит никогда, и вызывающий повис бы на ожидании.
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return null;
   try {
     const img = await loadImage(src);
-    const canvas = document.createElement('canvas');
-    canvas.width = size;
-    canvas.height = size;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return null;
-
     traceRoundedRect(ctx, size, size * radiusRatio);
     ctx.clip();
 
@@ -72,11 +76,60 @@ export async function roundedFaviconDataUri(
   }
 }
 
+export interface SquareIconOptions {
+  /** Непрозрачная заливка под содержимым (CSS-цвет). */
+  background: string;
+  /** Доля стороны под содержимое: 1 — во всю плитку, 0.8 — безопасная зона maskable. */
+  contentScale?: number;
+}
+
+/**
+ * Непрозрачная квадратная плитка для иконок ярлыков (apple-touch-icon, манифест).
+ * iOS и Android накладывают на иконку свою маску и рисуют прозрачные пиксели
+ * белым или чёрным — скруглённые углы с прозрачностью превращаются в белые
+ * пятна. Поэтому: заливка на всю плитку, содержимое вписано целиком (contain)
+ * и отцентровано, никакого клипа. Null — без canvas или при ошибке загрузки.
+ */
+export async function squareIconDataUri(
+  src: string,
+  size: number,
+  options: SquareIconOptions,
+): Promise<string | null> {
+  if (!src) return null;
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return null;
+  try {
+    const img = await loadImage(src);
+    ctx.fillStyle = options.background;
+    ctx.fillRect(0, 0, size, size);
+    const scale = Math.min(size / img.width, size / img.height) * (options.contentScale ?? 1);
+    const dw = img.width * scale;
+    const dh = img.height * scale;
+    ctx.drawImage(img, (size - dw) / 2, (size - dh) / 2, dw, dh);
+    return canvas.toDataURL('image/png');
+  } catch {
+    return null;
+  }
+}
+
 function loadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image();
-    img.onload = () => resolve(img);
-    img.onerror = reject;
+    const timer = window.setTimeout(
+      () => reject(new Error('image load timeout')),
+      IMAGE_LOAD_TIMEOUT_MS,
+    );
+    img.onload = () => {
+      window.clearTimeout(timer);
+      resolve(img);
+    };
+    img.onerror = () => {
+      window.clearTimeout(timer);
+      reject(new Error('image load failed'));
+    };
     img.src = src;
   });
 }

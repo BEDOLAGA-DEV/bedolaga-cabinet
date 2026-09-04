@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { themeColorsApi } from '../api/themeColors';
+import { themeColorsQueryOptions } from '../api/themeColors';
 import {
   type ThemeColors,
   DEFAULT_THEME_COLORS,
@@ -9,6 +9,7 @@ import {
   type ShadeLevel,
 } from '../types/theme';
 import { hexToRgb, hexToHsl, hslToRgb } from '../utils/colorConversion';
+import { writeThemeColorsHint } from '../utils/themeColorsHint';
 
 // Convert RGB to string format for CSS variable
 function rgbToString(r: number, g: number, b: number): string {
@@ -141,14 +142,23 @@ function tripletOf({ r, g, b }: Rgb): string {
 // лучшим контрастом: на пастельном акценте это тёмный текст.
 const ON_COLOR_WHITE_MIN_RATIO = 3;
 
+const WHITE: Rgb = { r: 255, g: 255, b: 255 };
+const INK: Rgb = { r: 15, g: 23, b: 42 };
+
+function prefersWhiteText(bg: Rgb): boolean {
+  const whiteRatio = contrastRatio(WHITE, bg);
+  if (whiteRatio >= ON_COLOR_WHITE_MIN_RATIO) return true;
+  return whiteRatio >= contrastRatio(INK, bg);
+}
+
 // Black-or-white text for a given button/badge background.
 function onColorFor(bgTriplet: string): string {
-  const bg = parseTriplet(bgTriplet);
-  const white = { r: 255, g: 255, b: 255 };
-  const ink = { r: 15, g: 23, b: 42 };
-  const whiteRatio = contrastRatio(white, bg);
-  if (whiteRatio >= ON_COLOR_WHITE_MIN_RATIO) return '255, 255, 255';
-  return whiteRatio >= contrastRatio(ink, bg) ? '255, 255, 255' : '15, 23, 42';
+  return prefersWhiteText(parseTriplet(bgTriplet)) ? '255, 255, 255' : '15, 23, 42';
+}
+
+/** Тот же выбор белый/тёмный для hex-заливки — для иконок, рисуемых вне CSS. */
+export function readableTextOnHex(hex: string): string {
+  return prefersWhiteText(hexToRgb(hex)) ? '#ffffff' : '#0f172a';
 }
 
 type ThemeSurfaces = { surface: Rgb; text: Rgb };
@@ -174,12 +184,15 @@ function withReadableTextShades(
   };
 }
 
-// Apply theme colors as CSS variables (RGB format for Tailwind opacity support)
-export function applyThemeColors(themeColors: ThemeColors): void {
+/**
+ * CSS-переменные палитры для :root (RGB-триплеты — ради Tailwind-прозрачности).
+ * Чистая функция: результат и ставится на документ, и уходит в подсказку первой
+ * отрисовки, которую инлайн-скрипт index.html применит до загрузки приложения.
+ */
+export function computeThemeCssVars(themeColors: ThemeColors): Record<string, string> {
   // Частичный/битый ответ /branding/colors раньше ронял ВСЁ приложение в
   // ErrorBoundary (hexToRgb(undefined)). Недостающие поля добиваем дефолтами.
   const colors: ThemeColors = { ...DEFAULT_THEME_COLORS, ...themeColors };
-  const root = document.documentElement;
 
   // Generate palettes from status colors
   const accentPalette = generatePalette(colors.accent);
@@ -204,62 +217,30 @@ export function applyThemeColors(themeColors: ThemeColors): void {
     3.8,
   );
 
-  // Apply dark palette with actual user colors:
-  // Text colors (light shades): 50-100 = primary text, 200-300 = mixed, 400 = secondary text
-  root.style.setProperty(
-    '--color-dark-50',
-    rgbToString(darkTextRgb.r, darkTextRgb.g, darkTextRgb.b),
-  );
-  root.style.setProperty(
-    '--color-dark-100',
-    rgbToString(darkTextRgb.r, darkTextRgb.g, darkTextRgb.b),
-  );
-  root.style.setProperty('--color-dark-200', interpolateRgb(darkTextRgb, darkTextSecRgb, 0.33));
-  root.style.setProperty('--color-dark-300', interpolateRgb(darkTextRgb, darkTextSecRgb, 0.66));
-  root.style.setProperty(
-    '--color-dark-400',
-    rgbToString(darkTextSecReadable.r, darkTextSecReadable.g, darkTextSecReadable.b),
-  );
-
-  // Transition colors (500-700): interpolate between secondary text and surface
-  root.style.setProperty(
-    '--color-dark-500',
-    rgbToString(darkHintReadable.r, darkHintReadable.g, darkHintReadable.b),
-  );
-  root.style.setProperty('--color-dark-600', interpolateRgb(darkTextSecRgb, darkSurfaceRgb, 0.6));
-  root.style.setProperty('--color-dark-700', interpolateRgb(darkTextSecRgb, darkSurfaceRgb, 0.8));
-
-  // Surface/card colors (800-850): surface color
-  root.style.setProperty(
-    '--color-dark-800',
-    rgbToString(darkSurfaceRgb.r, darkSurfaceRgb.g, darkSurfaceRgb.b),
-  );
-  root.style.setProperty('--color-dark-850', interpolateRgb(darkSurfaceRgb, darkBgRgb, 0.5));
-
-  // Background colors (900-950): background color
-  root.style.setProperty('--color-dark-900', interpolateRgb(darkSurfaceRgb, darkBgRgb, 0.7));
-  root.style.setProperty('--color-dark-950', rgbToString(darkBgRgb.r, darkBgRgb.g, darkBgRgb.b));
+  // Dark palette with actual user colors:
+  // text colors (light shades): 50-100 = primary text, 200-300 = mixed, 400 = secondary text;
+  // transition colors (500-700): between secondary text and surface;
+  // surface/card colors (800-850); background colors (900-950).
+  const darkVars = {
+    '--color-dark-50': tripletOf(darkTextRgb),
+    '--color-dark-100': tripletOf(darkTextRgb),
+    '--color-dark-200': interpolateRgb(darkTextRgb, darkTextSecRgb, 0.33),
+    '--color-dark-300': interpolateRgb(darkTextRgb, darkTextSecRgb, 0.66),
+    '--color-dark-400': tripletOf(darkTextSecReadable),
+    '--color-dark-500': tripletOf(darkHintReadable),
+    '--color-dark-600': interpolateRgb(darkTextSecRgb, darkSurfaceRgb, 0.6),
+    '--color-dark-700': interpolateRgb(darkTextSecRgb, darkSurfaceRgb, 0.8),
+    '--color-dark-800': tripletOf(darkSurfaceRgb),
+    '--color-dark-850': interpolateRgb(darkSurfaceRgb, darkBgRgb, 0.5),
+    '--color-dark-900': interpolateRgb(darkSurfaceRgb, darkBgRgb, 0.7),
+    '--color-dark-950': tripletOf(darkBgRgb),
+  };
 
   const lightBgRgb = hexToRgb(colors.lightBackground);
   const lightSurfaceRgb = hexToRgb(colors.lightSurface);
   const lightTextRgb = hexToRgb(colors.lightText);
   const lightTextSecRgb = hexToRgb(colors.lightTextSecondary);
 
-  // Apply champagne palette with actual user colors:
-  // Background colors (light shades): 50-100 = surface, 200-400 = background tones
-  root.style.setProperty(
-    '--color-champagne-50',
-    rgbToString(lightSurfaceRgb.r, lightSurfaceRgb.g, lightSurfaceRgb.b),
-  );
-  root.style.setProperty('--color-champagne-100', interpolateRgb(lightSurfaceRgb, lightBgRgb, 0.3));
-  root.style.setProperty(
-    '--color-champagne-200',
-    rgbToString(lightBgRgb.r, lightBgRgb.g, lightBgRgb.b),
-  );
-  root.style.setProperty('--color-champagne-300', interpolateRgb(lightBgRgb, lightTextSecRgb, 0.2));
-  root.style.setProperty('--color-champagne-400', interpolateRgb(lightBgRgb, lightTextSecRgb, 0.4));
-
-  // Transition colors (500-600): between bg and text.
   // Same contrast floors as the dark palette: champagne-600 backs dark-400
   // (secondary text) in the light theme, champagne-500 backs dark-500 (hints).
   const lightHintReadable = ensureReadable(
@@ -269,32 +250,23 @@ export function applyThemeColors(themeColors: ThemeColors): void {
     3.8,
   );
   const lightTextSecReadable = ensureReadable(lightTextSecRgb, lightTextRgb, lightSurfaceRgb, 5.0);
-  root.style.setProperty(
-    '--color-champagne-500',
-    rgbToString(lightHintReadable.r, lightHintReadable.g, lightHintReadable.b),
-  );
-  root.style.setProperty(
-    '--color-champagne-600',
-    rgbToString(lightTextSecReadable.r, lightTextSecReadable.g, lightTextSecReadable.b),
-  );
 
-  // Text colors (700-950): secondary to primary text
-  root.style.setProperty(
-    '--color-champagne-700',
-    interpolateRgb(lightTextSecRgb, lightTextRgb, 0.33),
-  );
-  root.style.setProperty(
-    '--color-champagne-800',
-    interpolateRgb(lightTextSecRgb, lightTextRgb, 0.66),
-  );
-  root.style.setProperty(
-    '--color-champagne-900',
-    rgbToString(lightTextRgb.r, lightTextRgb.g, lightTextRgb.b),
-  );
-  root.style.setProperty(
-    '--color-champagne-950',
-    rgbToString(lightTextRgb.r, lightTextRgb.g, lightTextRgb.b),
-  );
+  // Champagne palette with actual user colors:
+  // background colors (light shades): 50-100 = surface, 200-400 = background tones;
+  // transition colors (500-600): between bg and text; text colors (700-950).
+  const lightVars = {
+    '--color-champagne-50': tripletOf(lightSurfaceRgb),
+    '--color-champagne-100': interpolateRgb(lightSurfaceRgb, lightBgRgb, 0.3),
+    '--color-champagne-200': tripletOf(lightBgRgb),
+    '--color-champagne-300': interpolateRgb(lightBgRgb, lightTextSecRgb, 0.2),
+    '--color-champagne-400': interpolateRgb(lightBgRgb, lightTextSecRgb, 0.4),
+    '--color-champagne-500': tripletOf(lightHintReadable),
+    '--color-champagne-600': tripletOf(lightTextSecReadable),
+    '--color-champagne-700': interpolateRgb(lightTextSecRgb, lightTextRgb, 0.33),
+    '--color-champagne-800': interpolateRgb(lightTextSecRgb, lightTextRgb, 0.66),
+    '--color-champagne-900': tripletOf(lightTextRgb),
+    '--color-champagne-950': tripletOf(lightTextRgb),
+  };
 
   const darkSurfaces: ThemeSurfaces = { surface: darkSurfaceRgb, text: darkTextRgb };
   const lightSurfaces: ThemeSurfaces = { surface: lightSurfaceRgb, text: lightTextRgb };
@@ -303,46 +275,56 @@ export function applyThemeColors(themeColors: ThemeColors): void {
   const warning = withReadableTextShades(warningPalette, darkSurfaces, lightSurfaces);
   const error = withReadableTextShades(errorPalette, darkSurfaces, lightSurfaces);
 
-  for (const shade of SHADE_LEVELS) {
-    root.style.setProperty(`--color-accent-${shade}`, accent[shade]);
-    root.style.setProperty(`--color-success-${shade}`, success[shade]);
-    root.style.setProperty(`--color-warning-${shade}`, warning[shade]);
-    root.style.setProperty(`--color-error-${shade}`, error[shade]);
-  }
+  const statusVars = Object.fromEntries(
+    SHADE_LEVELS.flatMap((shade) => [
+      [`--color-accent-${shade}`, accent[shade]],
+      [`--color-success-${shade}`, success[shade]],
+      [`--color-warning-${shade}`, warning[shade]],
+      [`--color-error-${shade}`, error[shade]],
+    ]),
+  );
 
   // Readable text color on top of each status color (buttons, filled badges).
   // Hardcoded white breaks the moment an operator picks a light accent.
-  root.style.setProperty('--color-on-accent', onColorFor(accent[500]));
-  root.style.setProperty('--color-on-success', onColorFor(success[500]));
-  root.style.setProperty('--color-on-warning', onColorFor(warning[500]));
-  root.style.setProperty('--color-on-error', onColorFor(error[500]));
+  const onColorVars = {
+    '--color-on-accent': onColorFor(accent[500]),
+    '--color-on-success': onColorFor(success[500]),
+    '--color-on-warning': onColorFor(warning[500]),
+    '--color-on-error': onColorFor(error[500]),
+  };
 
-  // Apply semantic colors (hex for direct use)
-  root.style.setProperty('--color-dark-bg', colors.darkBackground);
-  root.style.setProperty('--color-dark-surface', colors.darkSurface);
-  root.style.setProperty('--color-dark-text', colors.darkText);
-  root.style.setProperty('--color-dark-text-secondary', colors.darkTextSecondary);
+  // Semantic colors (hex for direct use)
+  const semanticVars = {
+    '--color-dark-bg': colors.darkBackground,
+    '--color-dark-surface': colors.darkSurface,
+    '--color-dark-text': colors.darkText,
+    '--color-dark-text-secondary': colors.darkTextSecondary,
+    '--color-light-bg': colors.lightBackground,
+    '--color-light-surface': colors.lightSurface,
+    '--color-light-text': colors.lightText,
+    '--color-light-text-secondary': colors.lightTextSecondary,
+  };
 
-  root.style.setProperty('--color-light-bg', colors.lightBackground);
-  root.style.setProperty('--color-light-surface', colors.lightSurface);
-  root.style.setProperty('--color-light-text', colors.lightText);
-  root.style.setProperty('--color-light-text-secondary', colors.lightTextSecondary);
+  return { ...darkVars, ...lightVars, ...statusVars, ...onColorVars, ...semanticVars };
+}
+
+// Apply theme colors as CSS variables on :root and remember them for the next first paint.
+export function applyThemeColors(themeColors: ThemeColors): void {
+  const colors: ThemeColors = { ...DEFAULT_THEME_COLORS, ...themeColors };
+  const vars = computeThemeCssVars(colors);
+  const root = document.documentElement;
+  for (const [name, value] of Object.entries(vars)) {
+    root.style.setProperty(name, value);
+  }
+  // Следующая загрузка стартует с этой палитры, а не с дефолтной: инлайн-скрипт
+  // index.html ставит переменные из подсказки до загрузки приложения.
+  writeThemeColorsHint({ colors, vars });
 }
 
 export function useThemeColors() {
   const queryClient = useQueryClient();
 
-  const {
-    data: colors,
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: ['theme-colors'],
-    queryFn: themeColorsApi.getColors,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    refetchOnWindowFocus: false,
-    retry: 1,
-  });
+  const { data: colors, isLoading, error } = useQuery(themeColorsQueryOptions());
 
   // Apply colors when loaded or changed
   useEffect(() => {

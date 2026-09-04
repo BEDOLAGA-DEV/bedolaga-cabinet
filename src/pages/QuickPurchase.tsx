@@ -7,13 +7,6 @@ import { fireAnalyticsEvent, getYandexCid } from '../hooks/useAnalyticsCounters'
 import { motion, AnimatePresence } from 'framer-motion';
 import DOMPurify from 'dompurify';
 import { landingApi } from '../api/landings';
-import {
-  brandingApi,
-  getCachedBranding,
-  setCachedBranding,
-  preloadLogo,
-  getLogoBlobUrl,
-} from '../api/branding';
 import type {
   LandingConfig,
   LandingTariff,
@@ -32,7 +25,6 @@ import { getApiErrorMessage } from '../utils/api-error';
 import { getPendingCampaignSlug } from '../utils/campaign';
 import { readContactPrefill, stripContactFromUrl } from '../utils/contactPrefill';
 import { formatPrice } from '../utils/format';
-import { setFavicon, letterFaviconDataUri, roundedFaviconDataUri } from '../utils/favicon';
 import { useCurrency } from '../hooks/useCurrency';
 import { safeSession } from '../utils/safeStorage';
 
@@ -562,6 +554,8 @@ function SummaryCard({
           <div
             className="fixed bottom-0 left-0 right-0 z-50 p-3"
             style={{
+              // Ярлык iOS: под кнопкой ещё индикатор «Домой» (safe-area снизу).
+              paddingBottom: 'calc(0.75rem + env(safe-area-inset-bottom, 0px))',
               background:
                 'linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.6) 70%, transparent 100%)',
             }}
@@ -785,42 +779,6 @@ export default function QuickPurchase() {
     staleTime: 60_000,
     retry: 1,
   });
-
-  // Public branding — drives the favicon on this standalone landing page.
-  // The cabinet's useBranding hook is auth-gated and AppShell-only, so a public
-  // landing would otherwise keep the empty index.html favicon. The branding
-  // endpoint is public; logo is preloaded as a blob to keep the backend URL out
-  // of the DOM (same pattern as the authenticated app).
-  const { data: branding } = useQuery({
-    queryKey: ['branding'],
-    queryFn: async () => {
-      const data = await brandingApi.getBranding();
-      setCachedBranding(data);
-      await preloadLogo(data);
-      return data;
-    },
-    initialData: getCachedBranding() ?? undefined,
-    initialDataUpdatedAt: 0,
-    staleTime: 60_000,
-    retry: 1,
-  });
-
-  useEffect(() => {
-    if (!branding) return;
-    const logoUrl = branding.has_custom_logo ? getLogoBlobUrl() : null;
-    if (!logoUrl) {
-      setFavicon(letterFaviconDataUri(branding.logo_letter));
-      return;
-    }
-    let cancelled = false;
-    // Round the custom logo like the header tile instead of a hard square.
-    roundedFaviconDataUri(logoUrl).then((rounded) => {
-      if (!cancelled) setFavicon(rounded || logoUrl);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [branding]);
 
   const [discountExpired, setDiscountExpired] = useState(false);
 

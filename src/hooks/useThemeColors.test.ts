@@ -1,7 +1,8 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it } from 'vitest';
-import { applyThemeColors } from './useThemeColors';
+import { applyThemeColors, computeThemeCssVars } from './useThemeColors';
 import { DEFAULT_THEME_COLORS, SHADE_LEVELS } from '../types/theme';
+import { readThemeColorsHint } from '../utils/themeColorsHint';
 
 /**
  * Палитра статусных цветов строится из одного выбранного оператором цвета.
@@ -124,5 +125,33 @@ describe('applyThemeColors: статусные палитры', () => {
     expect(readVar('--color-on-error')).toBe('255, 255, 255');
     expect(readVar('--color-on-success')).toBe('15, 23, 42');
     expect(readVar('--color-on-warning')).toBe('15, 23, 42');
+  });
+});
+
+describe('applyThemeColors: подсказка первой отрисовки', () => {
+  afterEach(() => {
+    localStorage.clear();
+  });
+
+  it('после применения в localStorage лежат те же переменные, что и на :root', () => {
+    const custom = { ...DEFAULT_THEME_COLORS, accent: '#14b8a6', darkBackground: '#0a1410' };
+    applyThemeColors(custom);
+    const hint = readThemeColorsHint();
+    expect(hint?.colors).toEqual(custom);
+    expect(hint?.vars['--color-accent-500']).toBe(hexToTriplet('#14b8a6'));
+    expect(hint?.vars['--color-dark-950']).toBe(hexToTriplet('#0a1410'));
+    for (const [name, value] of Object.entries(hint?.vars ?? {})) {
+      expect(readVar(name)).toBe(value);
+    }
+  });
+
+  it('computeThemeCssVars чист и совпадает с тем, что ставит applyThemeColors', () => {
+    const vars = computeThemeCssVars(DEFAULT_THEME_COLORS);
+    expect(Object.keys(vars).length).toBeGreaterThan(50);
+    expect(document.documentElement.getAttribute('style')).toBeNull();
+    applyThemeColors(DEFAULT_THEME_COLORS);
+    for (const [name, value] of Object.entries(vars)) {
+      expect(readVar(name)).toBe(value);
+    }
   });
 });

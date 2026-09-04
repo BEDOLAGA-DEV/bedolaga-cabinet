@@ -53,7 +53,8 @@ interface AppHeaderProps {
   mobileMenuOpen: boolean;
   setMobileMenuOpen: (open: boolean) => void;
   onCommandPaletteOpen: () => void;
-  headerHeight: number;
+  /** CSS-длина шапки (учитывает safe-area) — сдвиг оверлея меню. */
+  headerHeight: string;
   isFullscreen: boolean;
   safeAreaInset: { top: number; bottom: number; left: number; right: number };
   contentSafeAreaInset: { top: number; bottom: number; left: number; right: number };
@@ -174,17 +175,22 @@ export function AppHeader({
 
   return (
     <>
-      {/* Header - only on mobile */}
+      {/* Header - only on mobile. В standalone-режиме iOS («На экран Домой»)
+          шапка продолжается под статус-бар через padding-top; тон для этого
+          режима задаёт .app-mobile-header в globals.css (display-mode: standalone),
+          чтобы не было ни отдельного светлого блока, ни жёсткой границы. */}
       <header
-        className="glass fixed left-0 right-0 top-0 z-50 shadow-lg shadow-black/10 lg:hidden"
+        className="glass app-mobile-header fixed left-0 right-0 top-0 z-50 shadow-lg shadow-black/10 lg:hidden"
         style={{
           paddingTop: isFullscreen
             ? `${Math.max(safeAreaInset.top, contentSafeAreaInset.top) + (telegramPlatform === 'android' ? 48 : 45)}px`
-            : undefined,
+            : 'env(safe-area-inset-top, 0px)',
         }}
       >
         <div
-          className="mx-auto w-full px-4"
+          // Боковые отступы не меньше вырезов: в альбомной ориентации iPhone
+          // env(safe-area-inset-left/right) — это чёлка и скруглённые углы.
+          className="mx-auto w-full pl-[max(1rem,env(safe-area-inset-left,0px))] pr-[max(1rem,env(safe-area-inset-right,0px))]"
           onClick={() => mobileMenuOpen && setMobileMenuOpen(false)}
         >
           <div className="flex h-16 items-center justify-between">
@@ -317,10 +323,10 @@ export function AppHeader({
 
           {/* Menu content */}
           <div
-            className="mobile-menu-content absolute inset-x-0 bottom-0 top-0 overflow-y-auto overscroll-contain border-t border-dark-800/50 bg-dark-900/95 pb-[calc(5rem+env(safe-area-inset-bottom,0px))]"
+            className="mobile-menu-content absolute inset-x-0 bottom-0 top-0 overflow-y-auto overscroll-contain border-t border-dark-800/50 bg-dark-900/95 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]"
             style={{ WebkitOverflowScrolling: 'touch' }}
           >
-            <div className="mx-auto max-w-6xl px-4 py-4">
+            <div className="mx-auto max-w-6xl py-4 pl-[max(1rem,env(safe-area-inset-left,0px))] pr-[max(1rem,env(safe-area-inset-right,0px))]">
               {/* User info */}
               <div className="mb-4 flex items-center justify-between border-b border-dark-800/50 pb-4">
                 <div className="flex items-center gap-3">
