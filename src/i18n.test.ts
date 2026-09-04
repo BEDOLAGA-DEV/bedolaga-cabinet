@@ -68,4 +68,35 @@ describe('тема до первой отрисовки', () => {
     expect(htmlSource).toContain(STORAGE_KEYS.THEME);
     expect(htmlSource).toContain(STORAGE_KEYS.ENABLED_THEMES);
   });
+
+  it('фон первой отрисовки уступает фону темы из CSS приложения', () => {
+    // Инлайн-стиль index.html — только заглушка до прихода CSS приложения.
+    // Фон светлой темы там задаёт `.light body` (специфичность 0,1,1) через
+    // операторский цвет из applyThemeColors; `@layer base` в Tailwind v3 — не
+    // настоящий каскадный слой, так что более специфичный селектор в index.html
+    // (`html.light body`, 0,1,2) молча перекрывал бы кастомный фон навсегда.
+    const inlineCss = /<style>([\s\S]*?)<\/style>/.exec(htmlSource)?.[1];
+    expect(inlineCss).toBeTruthy();
+
+    const root = document.documentElement;
+    const inline = document.createElement('style');
+    inline.textContent = inlineCss ?? '';
+    const app = document.createElement('style');
+    app.textContent = '.light body { background-color: rgb(1, 2, 3); }';
+    const bodyBg = () => getComputedStyle(document.body).backgroundColor;
+
+    root.className = 'light';
+    document.head.append(inline);
+    try {
+      // До CSS приложения заглушка обязана рисовать светлый фон, не тёмный.
+      expect(bodyBg()).toBe('rgb(247, 231, 206)');
+
+      document.head.append(app);
+      expect(bodyBg()).toBe('rgb(1, 2, 3)');
+    } finally {
+      inline.remove();
+      app.remove();
+      root.className = '';
+    }
+  });
 });
