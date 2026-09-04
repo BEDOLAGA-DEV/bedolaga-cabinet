@@ -3,6 +3,9 @@
  * Provides consistent colors for the glassmorphic card components
  * that work on both dark and light backgrounds.
  */
+// Цвет текста темы: darkText в тёмной, через ремап .light — lightText в светлой.
+const TEXT_VAR = '--color-dark-50';
+
 export function getGlassColors(isDark: boolean) {
   return {
     // Card container
@@ -19,12 +22,15 @@ export function getGlassColors(isDark: boolean) {
     hoverBg: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
     hoverBorder: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.1)',
 
-    // Text
-    text: isDark ? '#fff' : '#1a1a2e',
-    textSecondary: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.5)',
-    textMuted: isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.35)',
-    textFaint: isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.25)',
-    textGhost: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
+    // Text — из палитры оператора, а не зашитые белый/чёрный: иначе кастомный
+    // цвет текста не доходил до дашборда и карточек подписок. Годится только
+    // для CSS-свойств: в SVG-атрибутах var() не раскрывается — там передавать
+    // через style={{ stroke }}.
+    text: `rgb(var(${TEXT_VAR}))`,
+    textSecondary: `rgba(var(${TEXT_VAR}), ${isDark ? 0.4 : 0.5})`,
+    textMuted: `rgba(var(${TEXT_VAR}), ${isDark ? 0.3 : 0.35})`,
+    textFaint: `rgba(var(${TEXT_VAR}), 0.25)`,
+    textGhost: `rgba(var(${TEXT_VAR}), ${isDark ? 0.08 : 0.06})`,
 
     // Progress bar track
     trackBg: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)',

@@ -1912,7 +1912,7 @@ export default function Subscription() {
                           height="16"
                           viewBox="0 0 24 24"
                           fill="none"
-                          stroke={g.textSecondary}
+                          style={{ stroke: g.textSecondary }}
                           strokeWidth="1.5"
                           strokeLinecap="round"
                           strokeLinejoin="round"

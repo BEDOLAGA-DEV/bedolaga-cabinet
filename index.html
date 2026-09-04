@@ -47,11 +47,16 @@
     </script>
     <style>
       /* Фон первой отрисовки — до того, как приедет CSS приложения. Светлый
-         вариант соответствует champagne-200 из globals.css (.light body). */
+         вариант соответствует champagne-200 из globals.css (.light body).
+         Специфичность обоих правил обязана оставаться (0,0,1): фон темы в
+         globals.css задаёт `.light body` (0,1,1) операторским цветом, а
+         @layer base в Tailwind v3 — не настоящий каскадный слой. Более
+         специфичный селектор здесь (например `html.light body`) навсегда
+         перекрывал бы кастомный светлый фон. :where() обнуляет вклад класса. */
       body {
         background-color: #0a0f1a;
       }
-      html.light body {
+      :where(html.light) body {
         background-color: #f7e7ce;
       }
     </style>
