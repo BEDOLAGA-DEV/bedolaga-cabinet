@@ -18,7 +18,12 @@ import {
   setWebManifest,
   writeBrandHint,
 } from '@/utils/documentBranding';
-import { letterFaviconDataUri, roundedFaviconDataUri, setFavicon } from '@/utils/favicon';
+import {
+  letterFaviconDataUri,
+  roundedFaviconDataUri,
+  setFavicon,
+  squareIconDataUri,
+} from '@/utils/favicon';
 import { readableTextOnHex } from './useThemeColors';
 import { useTheme } from './useTheme';
 
@@ -26,8 +31,10 @@ const FALLBACK_NAME = import.meta.env.VITE_APP_NAME || 'Cabinet';
 const FALLBACK_LOGO = import.meta.env.VITE_APP_LOGO || 'V';
 const APPLE_TOUCH_ICON_PX = 180;
 const MANIFEST_ICON_SIZES = [192, 512] as const;
-/** Скругление плитки логотипа, как у шапки; монограмма скруглена внутри самого SVG. */
+/** Скругление плитки логотипа во вкладке, как у шапки; для ярлыков не скругляем. */
 const LOGO_TILE_RADIUS = 0.3;
+/** Безопасная зона maskable-иконок Android: содержимое в центральных 80 %. */
+const MASKABLE_SAFE_ZONE = 0.8;
 
 async function fetchBranding(): Promise<BrandingInfo> {
   const data = await brandingApi.getBranding();
@@ -42,37 +49,47 @@ interface BrandIcons {
   manifest: ManifestIcon[];
 }
 
-async function rasterSet(
+/**
+ * Иконки для ярлыков: непрозрачные квадраты на `background` без скругления —
+ * iOS и Android накладывают свою маску, а прозрачные углы рисуют белым.
+ * Для Android добавляем вариант maskable с содержимым в безопасной зоне.
+ */
+async function shortcutIcons(
   src: string,
-  radiusRatio: number,
+  background: string,
 ): Promise<{ touch: string | null; manifest: ManifestIcon[] }> {
   const [touch, ...sized] = await Promise.all([
-    roundedFaviconDataUri(src, APPLE_TOUCH_ICON_PX, radiusRatio),
-    ...MANIFEST_ICON_SIZES.map((size) => roundedFaviconDataUri(src, size, radiusRatio)),
+    squareIconDataUri(src, APPLE_TOUCH_ICON_PX, { background }),
+    ...MANIFEST_ICON_SIZES.flatMap((size) => [
+      squareIconDataUri(src, size, { background }),
+      squareIconDataUri(src, size, { background, contentScale: MASKABLE_SAFE_ZONE }),
+    ]),
   ]);
-  const manifest = sized.flatMap((uri, index) =>
-    uri
-      ? [
-          {
-            src: uri,
-            sizes: `${MANIFEST_ICON_SIZES[index]}x${MANIFEST_ICON_SIZES[index]}`,
-            type: 'image/png',
-          },
-        ]
-      : [],
-  );
+  const manifest = MANIFEST_ICON_SIZES.flatMap((size, index): ManifestIcon[] => {
+    const sizes = `${size}x${size}`;
+    const any = sized[index * 2];
+    const maskable = sized[index * 2 + 1];
+    return [
+      ...(any ? [{ src: any, sizes, type: 'image/png', purpose: 'any' as const }] : []),
+      ...(maskable
+        ? [{ src: maskable, sizes, type: 'image/png', purpose: 'maskable' as const }]
+        : []),
+    ];
+  });
   return { touch, manifest };
 }
 
 /**
  * Иконки бренда: логотип инсталляции, иначе монограмма в цвете акцента.
- * Для вкладки годится SVG, для iOS и манифеста нужен PNG — растеризуем через
- * canvas; без canvas манифест получает SVG, а apple-touch-icon не ставится.
+ * Во вкладке — скруглённая плитка (прозрачные углы там безвредны), для
+ * ярлыков — непрозрачные квадраты. Без canvas манифест получает SVG, а
+ * apple-touch-icon не ставится.
  */
 async function buildBrandIcons(
   branding: BrandingInfo,
   letter: string,
   accent: string,
+  background: string,
 ): Promise<BrandIcons> {
   if (branding.has_custom_logo) {
     await preloadLogo(branding);
@@ -80,7 +97,7 @@ async function buildBrandIcons(
     if (blobUrl) {
       const favicon = await roundedFaviconDataUri(blobUrl, 64, LOGO_TILE_RADIUS);
       if (favicon) {
-        const { touch, manifest } = await rasterSet(blobUrl, LOGO_TILE_RADIUS);
+        const { touch, manifest } = await shortcutIcons(blobUrl, background);
         return { favicon, touch, manifest };
       }
     }
@@ -90,7 +107,8 @@ async function buildBrandIcons(
     background: accent,
     foreground: readableTextOnHex(accent),
   });
-  const { touch, manifest } = await rasterSet(monogram, 0);
+  // Заливка тем же акцентом, что и плашка внутри SVG: углы сливаются, белых пятен нет.
+  const { touch, manifest } = await shortcutIcons(monogram, accent);
   return {
     favicon: monogram,
     touch,
@@ -140,7 +158,7 @@ export function useDocumentBranding(): void {
   useEffect(() => {
     if (!branding) return;
     let cancelled = false;
-    buildBrandIcons(branding, letter, accent)
+    buildBrandIcons(branding, letter, accent, background)
       .then((icons) => {
         if (cancelled) return;
         setFavicon(icons.favicon);

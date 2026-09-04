@@ -10,7 +10,7 @@ import {
   setWebManifest,
   writeBrandHint,
 } from './documentBranding';
-import { letterFaviconDataUri, setFavicon } from './favicon';
+import { letterFaviconDataUri, setFavicon, squareIconDataUri } from './favicon';
 
 /**
  * <head> под бренд инсталляции: вкладка, ярлыки Android/iOS, манифест и
@@ -64,6 +64,15 @@ describe('letterFaviconDataUri', () => {
     );
     expect(svg).toContain('fill="#123456"');
     expect(svg).toContain('fill="#ffffff"');
+  });
+});
+
+describe('squareIconDataUri', () => {
+  it('без canvas отдаёт null сразу, а не ждёт загрузку картинки', async () => {
+    // jsdom не реализует 2D-контекст: раньше ожидание onload было вечным.
+    await expect(
+      squareIconDataUri('data:image/svg+xml,x', 192, { background: '#0a0f1a' }),
+    ).resolves.toBeNull();
   });
 });
 

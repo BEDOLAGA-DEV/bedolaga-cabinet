@@ -76,6 +76,45 @@ export async function roundedFaviconDataUri(
   }
 }
 
+export interface SquareIconOptions {
+  /** Непрозрачная заливка под содержимым (CSS-цвет). */
+  background: string;
+  /** Доля стороны под содержимое: 1 — во всю плитку, 0.8 — безопасная зона maskable. */
+  contentScale?: number;
+}
+
+/**
+ * Непрозрачная квадратная плитка для иконок ярлыков (apple-touch-icon, манифест).
+ * iOS и Android накладывают на иконку свою маску и рисуют прозрачные пиксели
+ * белым или чёрным — скруглённые углы с прозрачностью превращаются в белые
+ * пятна. Поэтому: заливка на всю плитку, содержимое вписано целиком (contain)
+ * и отцентровано, никакого клипа. Null — без canvas или при ошибке загрузки.
+ */
+export async function squareIconDataUri(
+  src: string,
+  size: number,
+  options: SquareIconOptions,
+): Promise<string | null> {
+  if (!src) return null;
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return null;
+  try {
+    const img = await loadImage(src);
+    ctx.fillStyle = options.background;
+    ctx.fillRect(0, 0, size, size);
+    const scale = Math.min(size / img.width, size / img.height) * (options.contentScale ?? 1);
+    const dw = img.width * scale;
+    const dh = img.height * scale;
+    ctx.drawImage(img, (size - dw) / 2, (size - dh) / 2, dw, dh);
+    return canvas.toDataURL('image/png');
+  } catch {
+    return null;
+  }
+}
+
 function loadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image();

@@ -82,6 +82,8 @@ export interface ManifestIcon {
   src: string;
   sizes: string;
   type: string;
+  /** any — как есть; maskable — лаунчер Android режет по своей форме, содержимое в безопасной зоне. */
+  purpose?: 'any' | 'maskable';
 }
 
 export interface WebManifestInput {
