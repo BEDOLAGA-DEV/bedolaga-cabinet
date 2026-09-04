@@ -1,7 +1,13 @@
 import { useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { themeColorsApi } from '../api/themeColors';
-import { ThemeColors, DEFAULT_THEME_COLORS, SHADE_LEVELS, ColorPalette } from '../types/theme';
+import {
+  type ThemeColors,
+  DEFAULT_THEME_COLORS,
+  SHADE_LEVELS,
+  type ColorPalette,
+  type ShadeLevel,
+} from '../types/theme';
 import { hexToRgb, hexToHsl, hslToRgb } from '../utils/colorConversion';
 
 // Convert RGB to string format for CSS variable
@@ -9,32 +15,53 @@ function rgbToString(r: number, g: number, b: number): string {
   return `${r}, ${g}, ${b}`;
 }
 
-// Generate color palette from base color (returns RGB strings)
+// Опорная светлота шейдов для базового цвета с L = 50 %. Для реального базового
+// цвета лестница масштабируется: 500 — ровно выбранный цвет, светлые шейды
+// растягиваются от него к 97 (шейд 50), тёмные — к 10 (шейд 950).
+const LIGHTNESS_LADDER: Record<ShadeLevel, number> = {
+  50: 97,
+  100: 94,
+  200: 86,
+  300: 76,
+  400: 64,
+  500: 50,
+  600: 42,
+  700: 34,
+  800: 26,
+  900: 18,
+  950: 10,
+};
+const LADDER_TOP = LIGHTNESS_LADDER[50];
+const LADDER_MID = LIGHTNESS_LADDER[500];
+const LADDER_BOTTOM = LIGHTNESS_LADDER[950];
+
+function shadeLightness(shade: ShadeLevel, baseLightness: number): number {
+  const target = LIGHTNESS_LADDER[shade];
+  if (target > LADDER_MID) {
+    const share = (target - LADDER_MID) / (LADDER_TOP - LADDER_MID);
+    return Math.max(baseLightness, baseLightness + share * (LADDER_TOP - baseLightness));
+  }
+  const share = (LADDER_MID - target) / (LADDER_MID - LADDER_BOTTOM);
+  return Math.min(baseLightness, baseLightness - share * (baseLightness - LADDER_BOTTOM));
+}
+
+// Generate color palette from base color (returns RGB strings).
+// Шейд 500 — сам выбранный цвет. Раньше он принудительно получал L = 50 %:
+// оператор выбирал один цвет, а кнопки красились другим (пастель становилась
+// насыщенной, дефолтный #3b82f6 уезжал в 11,100,244 против статики globals.css).
 function generatePalette(baseHex: string): ColorPalette {
-  const { h, s } = hexToHsl(baseHex);
-
-  // Lightness values for each shade level (from light to dark)
-  const lightnessMap: Record<number, number> = {
-    50: 97,
-    100: 94,
-    200: 86,
-    300: 76,
-    400: 64,
-    500: 50,
-    600: 42,
-    700: 34,
-    800: 26,
-    900: 18,
-    950: 10,
-  };
-
+  const base = hexToRgb(baseHex);
+  const { h, s, l } = hexToHsl(baseHex);
   const palette: Partial<ColorPalette> = {};
 
   for (const shade of SHADE_LEVELS) {
-    const lightness = lightnessMap[shade];
+    if (shade === 500) {
+      palette[shade] = rgbToString(base.r, base.g, base.b);
+      continue;
+    }
     // Adjust saturation slightly for very light/dark shades
     const adjustedS = shade <= 100 ? s * 0.7 : shade >= 900 ? s * 0.8 : s;
-    const { r, g, b } = hslToRgb(h, adjustedS, lightness);
+    const { r, g, b } = hslToRgb(h, adjustedS, shadeLightness(shade, l));
     palette[shade] = rgbToString(r, g, b);
   }
 
@@ -68,7 +95,7 @@ function mixRgb(rgb1: Rgb, rgb2: Rgb, factor: number): Rgb {
 function relativeLuminance({ r, g, b }: Rgb): number {
   const srgb = (v: number) => {
     const c = v / 255;
-    return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+    return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
   };
   return 0.2126 * srgb(r) + 0.7152 * srgb(g) + 0.0722 * srgb(b);
 }
@@ -99,14 +126,52 @@ function ensureReadable(fg: Rgb, towards: Rgb, bg: Rgb, minRatio: number): Rgb {
   return towards;
 }
 
-// Black-or-white text for a given button/badge background: pick whichever
-// side actually reads on top of it (operators may choose a light accent).
+function parseTriplet(triplet: string): Rgb {
+  const [r, g, b] = triplet.split(',').map((x) => Number(x.trim()));
+  return { r, g, b };
+}
+
+function tripletOf({ r, g, b }: Rgb): string {
+  return rgbToString(r, g, b);
+}
+
+// Белый текст на заливке остаётся, пока даёт AA для UI-элементов (3:1) —
+// так на средних по светлоте цветах (синий #3b82f6: белый 3.7, тёмный 4.8)
+// сохраняется привычный белый на кнопках. Ниже порога берётся сторона с
+// лучшим контрастом: на пастельном акценте это тёмный текст.
+const ON_COLOR_WHITE_MIN_RATIO = 3;
+
+// Black-or-white text for a given button/badge background.
 function onColorFor(bgTriplet: string): string {
-  const [r, g, b] = bgTriplet.split(',').map((x) => Number(x.trim()));
-  const bg = { r, g, b };
+  const bg = parseTriplet(bgTriplet);
   const white = { r: 255, g: 255, b: 255 };
   const ink = { r: 15, g: 23, b: 42 };
-  return contrastRatio(white, bg) >= contrastRatio(ink, bg) ? '255, 255, 255' : '15, 23, 42';
+  const whiteRatio = contrastRatio(white, bg);
+  if (whiteRatio >= ON_COLOR_WHITE_MIN_RATIO) return '255, 255, 255';
+  return whiteRatio >= contrastRatio(ink, bg) ? '255, 255, 255' : '15, 23, 42';
+}
+
+type ThemeSurfaces = { surface: Rgb; text: Rgb };
+const TEXT_SHADE_MIN_RATIO = 4.5;
+
+// Текстовые шейды статусных палитр: 300/400 — текст в тёмной теме (ссылки,
+// суммы, бейджи), 700 — их замена в светлой (.light ремапит *-300/400 -> *-700).
+// Лестница привязана к базовому цвету, поэтому у тёмного акцента светлые шейды
+// сжимаются, у светлого — тёмные; здесь им гарантируется AA на поверхности
+// своей темы. Палитры, которые и так читаются, остаются нетронутыми.
+function withReadableTextShades(
+  palette: ColorPalette,
+  dark: ThemeSurfaces,
+  light: ThemeSurfaces,
+): ColorPalette {
+  const readable = (shade: ShadeLevel, towards: Rgb, bg: Rgb) =>
+    tripletOf(ensureReadable(parseTriplet(palette[shade]), towards, bg, TEXT_SHADE_MIN_RATIO));
+  return {
+    ...palette,
+    300: readable(300, dark.text, dark.surface),
+    400: readable(400, dark.text, dark.surface),
+    700: readable(700, light.text, light.surface),
+  };
 }
 
 // Apply theme colors as CSS variables (RGB format for Tailwind opacity support)
@@ -231,19 +296,26 @@ export function applyThemeColors(themeColors: ThemeColors): void {
     rgbToString(lightTextRgb.r, lightTextRgb.g, lightTextRgb.b),
   );
 
+  const darkSurfaces: ThemeSurfaces = { surface: darkSurfaceRgb, text: darkTextRgb };
+  const lightSurfaces: ThemeSurfaces = { surface: lightSurfaceRgb, text: lightTextRgb };
+  const accent = withReadableTextShades(accentPalette, darkSurfaces, lightSurfaces);
+  const success = withReadableTextShades(successPalette, darkSurfaces, lightSurfaces);
+  const warning = withReadableTextShades(warningPalette, darkSurfaces, lightSurfaces);
+  const error = withReadableTextShades(errorPalette, darkSurfaces, lightSurfaces);
+
   for (const shade of SHADE_LEVELS) {
-    root.style.setProperty(`--color-accent-${shade}`, accentPalette[shade]);
-    root.style.setProperty(`--color-success-${shade}`, successPalette[shade]);
-    root.style.setProperty(`--color-warning-${shade}`, warningPalette[shade]);
-    root.style.setProperty(`--color-error-${shade}`, errorPalette[shade]);
+    root.style.setProperty(`--color-accent-${shade}`, accent[shade]);
+    root.style.setProperty(`--color-success-${shade}`, success[shade]);
+    root.style.setProperty(`--color-warning-${shade}`, warning[shade]);
+    root.style.setProperty(`--color-error-${shade}`, error[shade]);
   }
 
   // Readable text color on top of each status color (buttons, filled badges).
   // Hardcoded white breaks the moment an operator picks a light accent.
-  root.style.setProperty('--color-on-accent', onColorFor(accentPalette[500]));
-  root.style.setProperty('--color-on-success', onColorFor(successPalette[500]));
-  root.style.setProperty('--color-on-warning', onColorFor(warningPalette[500]));
-  root.style.setProperty('--color-on-error', onColorFor(errorPalette[500]));
+  root.style.setProperty('--color-on-accent', onColorFor(accent[500]));
+  root.style.setProperty('--color-on-success', onColorFor(success[500]));
+  root.style.setProperty('--color-on-warning', onColorFor(warning[500]));
+  root.style.setProperty('--color-on-error', onColorFor(error[500]));
 
   // Apply semantic colors (hex for direct use)
   root.style.setProperty('--color-dark-bg', colors.darkBackground);
