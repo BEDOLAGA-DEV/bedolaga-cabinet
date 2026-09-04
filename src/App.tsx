@@ -153,6 +153,7 @@ const AdminRoleAssign = lazyWithRetry(() => import('./pages/AdminRoleAssign'));
 const AdminPolicies = lazyWithRetry(() => import('./pages/AdminPolicies'));
 const AdminPolicyEdit = lazyWithRetry(() => import('./pages/AdminPolicyEdit'));
 const AdminAuditLog = lazyWithRetry(() => import('./pages/AdminAuditLog'));
+const AdminSystemErrors = lazyWithRetry(() => import('./pages/AdminSystemErrors'));
 const AdminLandings = lazyWithRetry(() => import('./pages/AdminLandings'));
 const AdminLandingEditor = lazyWithRetry(() => import('./pages/AdminLandingEditor'));
 const AdminLandingStats = lazyWithRetry(() => import('./pages/AdminLandingStats'));
@@ -1454,6 +1455,17 @@ function App() {
             <PermissionRoute permission="audit_log:read">
               <LazyPage>
                 <AdminAuditLog />
+              </LazyPage>
+            </PermissionRoute>
+          }
+        />
+
+        <Route
+          path="/admin/system-errors"
+          element={
+            <PermissionRoute permission="system_errors:read">
+              <LazyPage>
+                <AdminSystemErrors />
               </LazyPage>
             </PermissionRoute>
           }

@@ -860,6 +860,12 @@
       "cispay": {
         "description": "Оплата картой или через СБП (cisPay)"
       },
+      "tabpay": {
+        "description": "Оплата картой или через СБП (TabPay)"
+      },
+      "paritypay": {
+        "description": "Оплата картой или через СБП (ParityPay)"
+      },
       "donut": {
         "description": "Оплата картой и СБП через Donut P2P"
       },
@@ -1423,7 +1429,8 @@
       "news": "Новости",
       "bulkActions": "Массовые действия",
       "infoPages": "Инфо-страницы",
-      "legalPages": "Системные страницы"
+      "legalPages": "Системные страницы",
+      "systemErrors": "Ошибки системы"
     },
     "panel": {
       "title": "Панель администратора",
@@ -1470,7 +1477,8 @@
       "salesStatsDesc": "Аналитика продаж и тренды",
       "landingsDesc": "Страницы быстрой покупки",
       "referralNetworkDesc": "Визуализация графа рефералов и РК",
-      "newsDesc": "Управление новостями и статьями"
+      "newsDesc": "Управление новостями и статьями",
+      "systemErrorsDesc": "Ошибки приложения и статус их доставки"
     },
     "salesStats": {
       "title": "Статистика продаж",
@@ -2382,6 +2390,8 @@
         "payments_antilopay": "Antilopay",
         "payments_jupiter": "Jupiter",
         "payments_cispay": "CisPay",
+        "payments_tabpay": "TabPay",
+        "payments_paritypay": "ParityPay",
         "payments_donut": "Donut",
         "payments_lava": "Lava",
         "payments_apple_iap": "Apple IAP",
@@ -5390,6 +5400,44 @@
       "tierMixedTriggers": "У уровней разные поводы начисления. Действует повод того уровня, который партнёр набрал, поэтому награда за другой повод ему не достанется.",
       "multiTariffOff": "Мультитариф выключен: у подписок нет тарифа, и дни с выбранным тарифом не начислятся. Уберите тариф — дни пойдут в основную подписку.",
       "depthEnvLocked": "REFERRAL_MAX_LEVEL_DEPTH задан в .env: глубина не меняется из кабинета и после перезапуска вернётся к значению из файла."
+    },
+    "systemErrors": {
+      "title": "Ошибки системы",
+      "subtitle": "Ошибки приложения и доставлено ли о них уведомление",
+      "searchPlaceholder": "Поиск по тексту, типу ошибки или логгеру",
+      "empty": "Ошибок не найдено",
+      "overview": {
+        "undelivered": "Не доставлено",
+        "last24h": "За 24 часа",
+        "last7d": "За 7 дней"
+      },
+      "filters": {
+        "all": "Все",
+        "undelivered": "Не доставлены",
+        "failed": "Провал",
+        "pending": "Ожидают",
+        "sent": "Отправлены",
+        "suppressed": "Подавлены",
+        "skipped": "Пропущены"
+      },
+      "status": {
+        "failed": "провал",
+        "pending": "ожидает",
+        "sent": "отправлено",
+        "suppressed": "подавлено",
+        "skipped": "пропущено"
+      },
+      "detail": {
+        "level": "Уровень",
+        "attempts": "Попыток",
+        "deliveredAt": "Доставлено",
+        "userId": "ID пользователя",
+        "context": "Контекст",
+        "traceback": "Трейсбек",
+        "retry": "Отправить повторно",
+        "retrySent": "Ошибка отправлена в админ-чат",
+        "retryFailed": "Не удалось отправить в админ-чат"
+      }
     }
   },
   "adminUpdates": {
