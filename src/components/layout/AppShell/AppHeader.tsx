@@ -53,7 +53,8 @@ interface AppHeaderProps {
   mobileMenuOpen: boolean;
   setMobileMenuOpen: (open: boolean) => void;
   onCommandPaletteOpen: () => void;
-  headerHeight: number;
+  /** CSS-длина шапки (учитывает safe-area) — сдвиг оверлея меню. */
+  headerHeight: string;
   isFullscreen: boolean;
   safeAreaInset: { top: number; bottom: number; left: number; right: number };
   contentSafeAreaInset: { top: number; bottom: number; left: number; right: number };
@@ -180,7 +181,7 @@ export function AppHeader({
         style={{
           paddingTop: isFullscreen
             ? `${Math.max(safeAreaInset.top, contentSafeAreaInset.top) + (telegramPlatform === 'android' ? 48 : 45)}px`
-            : undefined,
+            : 'env(safe-area-inset-top, 0px)',
         }}
       >
         <div
