@@ -9,11 +9,11 @@ import { UI } from '@/config/constants';
  * bottomSafeArea: TG SDK bottom inset (home indicator etc.), 0 outside TG.
  */
 /**
- * Место, занятое шапкой сверху, как CSS-длина. Вне fullscreen Telegram добавляет
+ * Высота мобильной шапки как CSS-длина. Вне fullscreen Telegram добавляет
  * env(safe-area-inset-top): в standalone-режиме iOS («На экран Домой», статус-бар
- * black-translucent) страница начинается под статус-баром; шапка сдвигается под
- * него (AppHeader рисует над ней непрозрачную полосу), и распорка контента с
- * оверлеем меню должны учитывать этот сдвиг.
+ * black-translucent) страница начинается под статус-баром, и шапка продолжается
+ * под него через padding-top — распорка контента и оверлей меню должны это
+ * учитывать.
  */
 export function headerHeightCss(mobilePx: number, isMobileFullscreen: boolean): string {
   return isMobileFullscreen

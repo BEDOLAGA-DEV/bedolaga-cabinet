@@ -64,7 +64,10 @@ export function MobileBottomNav({
         isKeyboardOpen ? 'pointer-events-none opacity-0' : 'opacity-100',
       )}
       style={{
-        bottom: 'calc(16px + env(safe-area-inset-bottom, 0px))',
+        // В standalone iOS inset снизу ~34pt: складывать с ним ещё 16px — панель
+        // висит слишком высоко. Берём большее из двух: над индикатором «Домой»
+        // панель стоит вплотную к безопасной зоне, в браузере — прежние 16px.
+        bottom: 'max(16px, env(safe-area-inset-bottom, 0px))',
         left: '16px',
         right: '16px',
         borderRadius: 'var(--bento-radius, 24px)',

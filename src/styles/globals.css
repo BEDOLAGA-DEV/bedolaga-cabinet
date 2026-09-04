@@ -580,6 +580,19 @@ img.twemoji {
     @apply border border-dark-700/30 bg-dark-900/80;
   }
 
+  /* Ярлык «На экран Домой» (standalone): мобильная шапка продолжается под
+     статус-бар, и стекло на всю эту высоту читается как лишний светлый блок, а
+     полоса цвета страницы над стеклом — как жёсткая граница. Поэтому в этом
+     режиме шапка берёт тон десктопной (bg-dark-950/95, в светлой теме ремап
+     сам): статус-бар и шапка сливаются с фоном, границу даёт только нижняя
+     обводка. В браузере и в Mini App display-mode = browser, тут ничего не
+     меняется. */
+  @media (display-mode: standalone) {
+    .glass.app-mobile-header {
+      @apply border-x-0 border-t-0 bg-dark-950/95;
+    }
+  }
+
   /* Enable backdrop-blur only on desktop where it's performant */
   @media (min-width: 1024px) {
     .glass {
@@ -787,6 +800,16 @@ img.twemoji {
   @media (min-width: 1024px) {
     .light .glass {
       @apply bg-champagne-50/60 backdrop-blur-xl;
+    }
+  }
+
+  /* Ярлык «На экран Домой» в светлой теме — то же, что для тёмной выше: шапка
+     берёт тон страницы (dark-950 здесь ремапится в champagne-200) без верхней
+     и боковых обводок. Правило обязано стоять ПОСЛЕ `.light .glass`: у них
+     одинаковая специфичность, и иначе стекло светлой темы перебивало бы его. */
+  @media (display-mode: standalone) {
+    .light .glass.app-mobile-header {
+      @apply border-x-0 border-t-0 bg-dark-950/95;
     }
   }
 
