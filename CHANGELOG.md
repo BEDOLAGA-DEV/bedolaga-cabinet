@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.68.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.67.0...v1.68.0) (2026-09-04)
+
+
+### Features
+
+* **admin:** кнопка повторной доставки ошибки ([7c63bcd](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/7c63bcd474dbbe95a8455c839dac418435f2a615))
+* **admin:** страница системных ошибок ([a337b96](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/a337b96f9b76d2350c21e280fbd33548d5fec5c1))
+* **admin:** страница системных ошибок ([d2e25ab](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/d2e25abe94f72a0a76ce413c5c7db0b4959dcef6))
+* **payments:** ParityPay в кабинете ([04dd888](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/04dd8882ed0a971e3c68d7262e409cbb3ef3f5b9))
+* **payments:** TabPay в кабинете ([47f8760](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/47f8760d8816eafa6b58b13290e313ae4eb73fb3))
+
+
+### Bug Fixes
+
+* **admin:** гейт кнопки повтора, видимый исход доставки и дебаунс поиска ([c39107d](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/c39107def07f427c52b0acb2b9480223c9764c55))
+* **admin:** неверный путь API у страницы системных ошибок ([6b08bee](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/6b08bee8397292beea0fbadd44a82be4faa6118e))
+* **build:** вернуть тело полифила Object.hasOwn ([f23b3c0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/f23b3c0b3454470741745a066bd158879b44209b))
+* **i18n:** не рисовать интерфейс раньше словарей и темы ([881122f](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/881122f730f22f1d265e4120e51e52159778406c))
+* **i18n:** не рисовать интерфейс раньше словарей и темы ([379ab0e](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/379ab0e9e61f00ea3dfdf44f99bc3f9b3b813d71))
+* **repo:** убрать закоммиченный симлинк node_modules ([906e6bd](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/906e6bdfdda519d559c633ff893eef2036769561))
+
 ## [1.67.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.66.0...v1.67.0) (2026-08-27)
 
 
