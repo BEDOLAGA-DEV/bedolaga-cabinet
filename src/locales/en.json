@@ -2132,7 +2132,9 @@
         "alive_one": "{{count}} live address",
         "alive_other": "{{count}} live addresses",
         "copy": "Copy list",
-        "copied": "Copied"
+        "copied": "Copied",
+        "perUnit": "per SIM",
+        "ofTotal": "of {{total}}"
       },
       "probes": {
         "icmp": "ICMP",
@@ -2149,7 +2151,9 @@
         "latency": "{{ms}} ms",
         "core": "core {{core}}",
         "raw": "Details",
-        "diagnosis": "Diagnosis"
+        "diagnosis": "Diagnosis",
+        "empty": "Empty result",
+        "failReason": "reason"
       },
       "summary": {
         "empty": "No checks yet — run the first one on the Probe tab",

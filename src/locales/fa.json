@@ -3936,7 +3936,9 @@
         "alive_one": "{{count}} آدرس فعال",
         "alive_other": "{{count}} آدرس فعال",
         "copy": "کپی فهرست",
-        "copied": "کپی شد"
+        "copied": "کپی شد",
+        "perUnit": "به تفکیک سیم‌کارت",
+        "ofTotal": "از {{total}}"
       },
       "probes": {
         "icmp": "ICMP",
@@ -3953,7 +3955,9 @@
         "latency": "{{ms}} م‌ث",
         "core": "هسته {{core}}",
         "raw": "جزئیات",
-        "diagnosis": "تشخیص"
+        "diagnosis": "تشخیص",
+        "empty": "نتیجه خالی است",
+        "failReason": "دلیل"
       },
       "summary": {
         "empty": "هنوز بررسی‌ای انجام نشده — اولین را در تب «بررسی» شروع کنید",

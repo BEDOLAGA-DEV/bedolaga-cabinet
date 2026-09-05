@@ -3939,7 +3939,9 @@
         "invalid": "需要恰好一个 /24 子网",
         "alive_other": "{{count}} 个存活地址",
         "copy": "复制列表",
-        "copied": "已复制"
+        "copied": "已复制",
+        "perUnit": "按 SIM 卡",
+        "ofTotal": "共 {{total}}"
       },
       "probes": {
         "icmp": "ICMP",
@@ -3956,7 +3958,9 @@
         "latency": "{{ms}} 毫秒",
         "core": "内核 {{core}}",
         "raw": "详情",
-        "diagnosis": "诊断"
+        "diagnosis": "诊断",
+        "empty": "结果为空",
+        "failReason": "原因"
       },
       "summary": {
         "empty": "尚无检查 — 在「探测」标签页启动第一次",
