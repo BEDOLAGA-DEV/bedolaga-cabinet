@@ -29,6 +29,19 @@ const backend = vi.hoisted(() => ({
   blobUrl: null as string | null,
 }));
 
+// Растеризация на canvas: jsdom её не умеет, а нужны и вкладка, и подсказка.
+// Возвращаем маркер с радиусом, чтобы отличить одну плитку от другой.
+const canvasMode = vi.hoisted(() => ({ enabled: false }));
+vi.mock('@/utils/favicon', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/utils/favicon')>();
+  return {
+    ...actual,
+    roundedFaviconDataUri: vi.fn(async (_src: string, _size: number, radius = 0.3) =>
+      canvasMode.enabled ? `data:image/png;base64,r${radius}` : null,
+    ),
+  };
+});
+
 vi.mock('@/api/branding', () => ({
   brandingApi: { getBranding: () => Promise.resolve(backend.branding) },
   getCachedBranding: () => null,
@@ -70,6 +83,7 @@ beforeEach(() => {
   localStorage.clear();
   backend.branding = NO_LOGO;
   backend.blobUrl = null;
+  canvasMode.enabled = false;
 });
 
 afterEach(() => {
@@ -120,6 +134,25 @@ describe('DocumentBranding', () => {
     // Без canvas (jsdom) растровой монограммы нет — подсказка без иконки.
     const hint = JSON.parse(localStorage.getItem(STORAGE_KEYS.BRAND_HINT) ?? 'null');
     expect(hint).toEqual({ name: 'ZeroPing', letter: 'Z' });
+  });
+
+  it('вкладке — плитка как в шапке, подсказке для Safari — с меньшим скруглением', async () => {
+    // Safari в тёмной теме подрисовывает иконке с прозрачными углами белую
+    // плитку-подложку, если скругление заметное: при 0,16 стороны и больше
+    // подложка есть, при 0,12 — нет (Safari 26.6, замерено). Chrome ставит
+    // иконку из React и подсказку видит доли секунды, Safari — только подсказку.
+    canvasMode.enabled = true;
+    backend.branding = WITH_LOGO;
+    backend.blobUrl = 'blob:logo';
+    await renderBranding();
+
+    await waitFor(() =>
+      expect(document.querySelector('link[rel="icon"]')?.getAttribute('href')).toBe(
+        'data:image/png;base64,r0.3',
+      ),
+    );
+    const hint = JSON.parse(localStorage.getItem(STORAGE_KEYS.BRAND_HINT) ?? 'null');
+    expect(hint.icon).toBe('data:image/png;base64,r0.12');
   });
 
   it('с логотипом, но без растровой иконки, оставляет ссылку на бота и подсказку без иконки', async () => {

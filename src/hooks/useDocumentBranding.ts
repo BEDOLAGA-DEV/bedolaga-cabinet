@@ -34,6 +34,13 @@ const APPLE_TOUCH_ICON_PX = 180;
 const MANIFEST_ICON_SIZES = [192, 512] as const;
 /** Скругление плитки логотипа во вкладке, как у шапки; для ярлыков не скругляем. */
 const LOGO_TILE_RADIUS = 0.3;
+/**
+ * Скругление плитки в подсказке первого кадра — её видит Safari. В тёмной теме
+ * Safari подрисовывает иконке с прозрачными углами белую плитку-подложку, если
+ * скругление заметное: при 0,16 стороны и больше подложка есть, при 0,12 — нет
+ * (Safari 26.6, замерено). Тот же радиус у плитки бота на /cabinet/branding/favicon.
+ */
+const SAFARI_TILE_RADIUS = 0.12;
 /** Безопасная зона maskable-иконок Android: содержимое в центральных 80 %. */
 const MASKABLE_SAFE_ZONE = 0.8;
 
@@ -47,6 +54,8 @@ async function fetchBranding(): Promise<BrandingInfo> {
 interface BrandIcons {
   /** data: URI для вкладки; null — ссылку не трогаем: в index.html она ведёт на эндпоинт бота с самим логотипом. */
   favicon: string | null;
+  /** PNG для подсказки первого кадра (его видит Safari); null — подсказка без иконки. */
+  hint: string | null;
   touch: string | null;
   manifest: ManifestIcon[];
 }
@@ -103,11 +112,12 @@ async function buildBrandIcons(
     await preloadLogo(branding);
     const blobUrl = getLogoBlobUrl();
     if (blobUrl) {
-      const [favicon, shortcuts] = await Promise.all([
+      const [favicon, hint, shortcuts] = await Promise.all([
         roundedFaviconDataUri(blobUrl, 64, LOGO_TILE_RADIUS),
+        roundedFaviconDataUri(blobUrl, 64, SAFARI_TILE_RADIUS),
         shortcutIcons(blobUrl, background),
       ]);
-      return { favicon, ...shortcuts };
+      return { favicon, hint, ...shortcuts };
     }
   }
 
@@ -122,6 +132,7 @@ async function buildBrandIcons(
   ]);
   return {
     favicon: branding.has_custom_logo ? null : (raster ?? monogram),
+    hint: branding.has_custom_logo ? null : raster,
     touch,
     manifest: manifest.length ? manifest : [{ src: monogram, sizes: 'any', type: 'image/svg+xml' }],
   };
@@ -176,7 +187,7 @@ export function useDocumentBranding(): void {
           themeColor: background,
           backgroundColor: background,
         });
-        writeBrandHint({ name, letter, icon: icons.favicon ?? undefined });
+        writeBrandHint({ name, letter, icon: icons.hint ?? undefined });
       })
       .catch(() => {
         // Иконка не критична: вкладка остаётся со статическим фавиконом сборки.
