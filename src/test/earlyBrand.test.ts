@@ -2,25 +2,29 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import htmlSource from '../../index.html?raw';
 import { renderBrandingHtml } from '../../vite-plugins/brandingHtml';
-import { monogramDataUri } from '../../vite-plugins/brandMonogram';
 import { BRAND_READY_ATTR } from '../utils/documentBranding';
 
 /**
- * Инлайн-скрипт index.html подтягивает бренд с API до загрузки бандла.
+ * Инлайн-скрипт index.html подтягивает имя бренда с API до загрузки бандла.
  *
- * Готовый образ собран с «Cabinet» и «V», и у рекомендуемой установки (статика
- * из образа за своим Caddy/Nginx) нет никакого рантайма, где это можно было бы
+ * Готовый образ собран с «Cabinet», и у рекомендуемой установки (статика из
+ * образа за своим Caddy/Nginx) нет никакого рантайма, где это можно было бы
  * поправить. Единственное, что есть у каждой установки одинаково, — сама
  * страница и прокси на API бота. Тест гоняет настоящий скрипт из index.html
- * в jsdom с подменённым fetch и сверяет монограмму с vite-плагином: у SVG две
- * копии (TS для сборки/React и JS в разметке), разъехаться им нельзя.
+ * в jsdom с подменённым fetch.
+ *
+ * Фавикон скрипт не трогает: статическая ссылка ведёт на эндпоинт бота (Safari
+ * читает её только при загрузке), а адрес логотипа ему давать нельзя — запрос
+ * иконки без Origin кладёт в кеш ответ без CORS-заголовков, и fetch() логотипа
+ * из React падает. Единственное исключение — подсказка прошлого визита: это
+ * data: URI, сети в нём нет.
  */
 
-const BUILT_ICON = 'data:image/svg+xml,built';
+const STATIC_ICON = '/api/cabinet/branding/favicon';
 const API = '/api';
 
 const SCRIPT = (() => {
-  const html = renderBrandingHtml(htmlSource, { name: 'Cabinet', logo: 'V', apiUrl: API });
+  const html = renderBrandingHtml(htmlSource, { name: 'Cabinet', apiUrl: API });
   const scripts = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map((m) => m[1]);
   const early = scripts.find((s) => s.includes('/cabinet/branding'));
   if (!early) throw new Error('в index.html нет инлайн-скрипта раннего бренда');
@@ -34,11 +38,11 @@ interface Branding {
   has_custom_logo: boolean;
 }
 
-const MONOGRAM_BRAND: Branding = {
+const LOGO_BRAND: Branding = {
   name: 'ZeroPing',
-  logo_url: null,
+  logo_url: '/cabinet/branding/logo',
   logo_letter: 'Z',
-  has_custom_logo: false,
+  has_custom_logo: true,
 };
 
 function fetchReturning(branding: Branding | null, ok = true) {
@@ -65,7 +69,7 @@ function metaContent(name: string): string | null {
 
 beforeEach(() => {
   document.head.innerHTML = [
-    `<link rel="icon" href="${BUILT_ICON}" />`,
+    `<link rel="icon" href="${STATIC_ICON}" />`,
     '<title>Cabinet</title>',
     '<meta name="application-name" content="Cabinet" />',
     '<meta name="apple-mobile-web-app-title" content="Cabinet" />',
@@ -80,8 +84,8 @@ afterEach(() => {
 });
 
 describe('ранний бренд из index.html', () => {
-  it('на первом заходе берёт имя и монограмму с API, не дожидаясь React', async () => {
-    const fetch = fetchReturning(MONOGRAM_BRAND);
+  it('на первом заходе берёт имя с API, не дожидаясь React', async () => {
+    const fetch = fetchReturning(LOGO_BRAND);
     vi.stubGlobal('fetch', fetch);
 
     runScript();
@@ -91,28 +95,20 @@ describe('ранний бренд из index.html', () => {
     expect(document.title).toBe('ZeroPing');
     expect(metaContent('application-name')).toBe('ZeroPing');
     expect(metaContent('apple-mobile-web-app-title')).toBe('ZeroPing');
-    expect(iconHref()).toBe(monogramDataUri('Z'));
   });
 
-  it('с кастомным логотипом ставит фавиконом сам логотип с API', async () => {
-    vi.stubGlobal(
-      'fetch',
-      fetchReturning({
-        name: 'ZeroPing',
-        logo_url: '/cabinet/branding/logo',
-        logo_letter: 'Z',
-        has_custom_logo: true,
-      }),
-    );
+  it('фавикон по ответу API не трогает: ссылка на эндпоинт бота остаётся как есть', async () => {
+    vi.stubGlobal('fetch', fetchReturning(LOGO_BRAND));
 
     runScript();
     await settle();
 
-    expect(iconHref()).toBe(`${API}/cabinet/branding/logo`);
+    expect(iconHref()).toBe(STATIC_ICON);
+    expect(document.head.innerHTML).not.toContain('/cabinet/branding/logo');
   });
 
   it('запоминает имя и букву, чтобы следующий заход не ждал даже API', async () => {
-    vi.stubGlobal('fetch', fetchReturning(MONOGRAM_BRAND));
+    vi.stubGlobal('fetch', fetchReturning(LOGO_BRAND));
 
     runScript();
     await settle();
@@ -123,13 +119,13 @@ describe('ранний бренд из index.html', () => {
     });
   });
 
-  it('подсказку прошлого визита применяет синхронно и не затирает её без иконки', async () => {
+  it('подсказку прошлого визита применяет синхронно, включая data: иконку', async () => {
     const icon = 'data:image/png;base64,hint';
     localStorage.setItem(
       'cabinet-brand-hint',
       JSON.stringify({ name: 'ZeroPing', letter: 'Z', icon }),
     );
-    vi.stubGlobal('fetch', fetchReturning({ ...MONOGRAM_BRAND, name: 'ZeroPing VPN' }));
+    vi.stubGlobal('fetch', fetchReturning({ ...LOGO_BRAND, name: 'ZeroPing VPN' }));
 
     runScript();
     expect(document.title).toBe('ZeroPing');
@@ -137,6 +133,7 @@ describe('ранний бренд из index.html', () => {
 
     await settle();
     expect(document.title).toBe('ZeroPing VPN');
+    expect(iconHref()).toBe(icon);
     expect(JSON.parse(localStorage.getItem('cabinet-brand-hint') ?? 'null').icon).toBe(icon);
   });
 
@@ -152,13 +149,11 @@ describe('ранний бренд из index.html', () => {
 
     runScript();
     document.title = 'ZeroPing';
-    document.querySelector('link[rel="icon"]')?.setAttribute('href', 'data:image/png;base64,react');
     document.documentElement.setAttribute(BRAND_READY_ATTR, '1');
-    resolve({ ok: true, json: async () => ({ ...MONOGRAM_BRAND, name: 'Late' }) });
+    resolve({ ok: true, json: async () => ({ ...LOGO_BRAND, name: 'Late' }) });
     await settle();
 
     expect(document.title).toBe('ZeroPing');
-    expect(iconHref()).toBe('data:image/png;base64,react');
   });
 
   it('при недоступном API остаются значения сборки и ничего не падает', async () => {
@@ -173,7 +168,7 @@ describe('ранний бренд из index.html', () => {
     await settle();
 
     expect(document.title).toBe('Cabinet');
-    expect(iconHref()).toBe(BUILT_ICON);
+    expect(iconHref()).toBe(STATIC_ICON);
     expect(localStorage.getItem('cabinet-brand-hint')).toBeNull();
   });
 
@@ -184,6 +179,6 @@ describe('ранний бренд из index.html', () => {
     await settle();
 
     expect(document.title).toBe('Cabinet');
-    expect(iconHref()).toBe(BUILT_ICON);
+    expect(iconHref()).toBe(STATIC_ICON);
   });
 });

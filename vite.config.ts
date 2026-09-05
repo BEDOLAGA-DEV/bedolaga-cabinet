@@ -14,7 +14,6 @@ export default defineConfig(({ mode }) => {
       react(),
       brandingHtml({
         name: env.VITE_APP_NAME ?? '',
-        logo: env.VITE_APP_LOGO ?? '',
         apiUrl: env.VITE_API_URL ?? '',
       }),
     ],

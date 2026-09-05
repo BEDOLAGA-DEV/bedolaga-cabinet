@@ -157,17 +157,24 @@
       })();
     </script>
     <script>
-      // Бренд до первой отрисовки — без шагов при установке.
+      // Имя бренда до первой отрисовки — без шагов при установке.
       //
-      // Имя и логотип живут у бота, а страница у всех вариантов установки одна и
-      // та же (готовый образ собран с «Cabinet» и монограммой «V»). Ждать React —
-      // секунды на медленной сети, и вкладка с ярлыками успевают взять значения
-      // сборки. Поэтому здесь, ещё до загрузки бандла: (1) подсказка прошлого
-      // визита из localStorage (её пишет useDocumentBranding, ключ
-      // STORAGE_KEYS.BRAND_HINT); (2) запрос /cabinet/branding к API — он
-      // публичный, и прокси на API есть у каждой установки. React, когда
-      // доберётся, перерисует иконку своей (скруглённой) и поставит
-      // data-brand-ready на <html> — после этого мы уже ничего не трогаем.
+      // Имя живёт у бота, а страница у всех вариантов установки одна и та же
+      // (готовый образ собран с «Cabinet»). Ждать React — секунды на медленной
+      // сети, и вкладка с ярлыками успевают взять значение сборки. Поэтому здесь,
+      // ещё до загрузки бандла: (1) подсказка прошлого визита из localStorage
+      // (её пишет useDocumentBranding, ключ STORAGE_KEYS.BRAND_HINT); (2) запрос
+      // /cabinet/branding к API — он публичный, и прокси на API есть у каждой
+      // установки. React, когда доберётся, поставит data-brand-ready на <html> —
+      // после этого мы уже ничего не трогаем.
+      //
+      // Фавикон здесь НЕ трогаем: <link rel="icon"> выше ведёт на
+      // /cabinet/branding/favicon у бота — Safari берёт иконку только при
+      // загрузке страницы и не замечает смену через JS. И ни в коем случае не
+      // на /cabinet/branding/logo: запрос фавикона идёт без Origin, его ответ
+      // без CORS-заголовков ложится в кеш, и fetch() логотипа из React получает
+      // из кеша копию без Access-Control-Allow-Origin. Подсказка прошлого визита
+      // (data: URI) — единственное исключение: сети в ней нет.
       // __API_URL__ подставляет vite-plugins/brandingHtml из VITE_API_URL.
       (function () {
         var API = '__API_URL__';
@@ -184,28 +191,9 @@
           var icon = document.querySelector('link[rel="icon"]');
           if (icon) icon.setAttribute('href', href);
         }
-        function escapeXml(value) {
-          return value
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;');
-        }
         function firstLetter(value, fallback) {
           var ch = (value || '').replace(/^\s+/, '').charAt(0).toUpperCase();
           return ch || fallback;
-        }
-        // Та же монограмма, что рисует vite-plugins/brandMonogram.ts; за совпадение
-        // двух копий отвечает src/test/earlyBrand.test.ts.
-        function monogram(letter) {
-          var svg =
-            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">' +
-            '<rect width="64" height="64" rx="14" fill="#0a0f1a"/>' +
-            '<text x="50%" y="50%" font-family="Manrope,Arial,sans-serif" font-size="38" ' +
-            'font-weight="700" fill="#ffffff" text-anchor="middle" ' +
-            'dominant-baseline="central">' + escapeXml(letter) + '</text>' +
-            '</svg>';
-          return 'data:image/svg+xml,' + encodeURIComponent(svg);
         }
 
         var hint = null;
@@ -235,8 +223,6 @@
               firstLetter(name, 'V')
             );
             if (name) applyName(name);
-            var hasLogo = brand.has_custom_logo && typeof brand.logo_url === 'string';
-            setIcon(hasLogo ? base + brand.logo_url : monogram(letter));
             if (!hint) {
               try {
                 localStorage.setItem(HINT_KEY, JSON.stringify({ name: name, letter: letter }));
