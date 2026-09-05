@@ -23,6 +23,12 @@ export function getApiErrorMessage(err: unknown, fallback: string): string {
         })
         .join('; ');
     }
+    // Структурные ошибки бэка ({code, message, ...}: 428 «нужно согласие», 403
+    // maintenance и т.п.) — берём message. Объект в тексте ошибки роняет React (#31).
+    if (detail && typeof detail === 'object') {
+      const message = (detail as { message?: unknown }).message;
+      if (typeof message === 'string') return message;
+    }
     return fallback;
   }
   return fallback;
