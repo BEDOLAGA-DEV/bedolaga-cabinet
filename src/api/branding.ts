@@ -106,6 +106,23 @@ export const setCachedBranding = (branding: BrandingInfo) => {
   } catch {}
 };
 
+/**
+ * Логотип с API, с самолечением кеша браузера.
+ *
+ * Тот же URL браузер мог уже запросить без заголовка Origin — как фавикон или
+ * <img> (старые сборки кабинета так и делали). Ответ без CORS-заголовков ложится
+ * в кеш, и обычный fetch() получает из кеша копию без Access-Control-Allow-Origin:
+ * это выглядит как CORS-ошибка, хотя сервер отвечает правильно. Повтор в режиме
+ * reload идёт мимо кеша и перезаписывает отравленную запись.
+ */
+async function fetchLogo(url: string): Promise<Response> {
+  try {
+    return await fetch(url);
+  } catch {
+    return fetch(url, { cache: 'reload' });
+  }
+}
+
 // Preload logo image as blob to hide backend URL
 export const preloadLogo = async (branding: BrandingInfo): Promise<void> => {
   if (!branding.has_custom_logo || !branding.logo_url) {
@@ -124,7 +141,7 @@ export const preloadLogo = async (branding: BrandingInfo): Promise<void> => {
 
   try {
     const logoUrl = `${import.meta.env.VITE_API_URL || ''}${branding.logo_url}`;
-    const response = await fetch(logoUrl);
+    const response = await fetchLogo(logoUrl);
     if (!response.ok) return;
 
     const blob = await response.blob();
