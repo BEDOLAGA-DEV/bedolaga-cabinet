@@ -15,6 +15,11 @@ export interface User {
   auth_type: 'telegram' | 'email' | 'google' | 'yandex' | 'discord' | 'vk'; // Тип аутентификации
 }
 
+// Фото профиля Telegram для шапки: подписанная ссылка на прокси медиа бота или null.
+export interface UserAvatarResponse {
+  photo_url: string | null;
+}
+
 // OAuth types
 export interface OAuthProvider {
   name: string;
