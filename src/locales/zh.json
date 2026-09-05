@@ -3823,7 +3823,6 @@
     },
     "reachability": {
       "title": "俄罗斯可达性",
-      "comingSoon": "板块建设中",
       "tabs": {
         "summary": "概览",
         "probe": "探测",
@@ -3968,7 +3967,10 @@
         "empty": "尚无检查 — 在「探测」标签页启动第一次",
         "age": "{{age}}前",
         "openJob": "打开任务",
-        "dpiFilter": "SIM 卡"
+        "dpiFilter": "SIM 卡",
+        "panelError": "面板不可用：{{error}}",
+        "notInPanel": "不在面板中",
+        "notInCatalog": "不在目录中"
       },
       "history": {
         "empty": "历史为空",
@@ -3994,7 +3996,9 @@
           "cancelled": "已取消"
         },
         "details": "任务 #{{id}}",
-        "loadMore": "显示更多"
+        "loadMore": "显示更多",
+        "more": "+{{count}}",
+        "rawJson": "原始响应"
       }
     },
     "roles": {

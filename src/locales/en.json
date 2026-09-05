@@ -2011,7 +2011,6 @@
     },
     "reachability": {
       "title": "Reachability from Russia",
-      "comingSoon": "Section under construction",
       "tabs": {
         "summary": "Summary",
         "probe": "Probe",
@@ -2161,7 +2160,10 @@
         "empty": "No checks yet — run the first one on the Probe tab",
         "age": "{{age}} ago",
         "openJob": "Open job",
-        "dpiFilter": "SIMs"
+        "dpiFilter": "SIMs",
+        "panelError": "Panel unavailable: {{error}}",
+        "notInPanel": "not in panel",
+        "notInCatalog": "not in catalog"
       },
       "history": {
         "empty": "History is empty",
@@ -2187,7 +2189,9 @@
           "cancelled": "cancelled"
         },
         "details": "Job #{{id}}",
-        "loadMore": "Show more"
+        "loadMore": "Show more",
+        "more": "+{{count}}",
+        "rawJson": "Raw response"
       }
     },
     "wheel": {
