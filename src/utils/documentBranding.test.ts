@@ -134,20 +134,44 @@ describe('веб-манифест', () => {
 
 describe('подсказка первой отрисовки', () => {
   it('пишется под ключом STORAGE_KEYS.BRAND_HINT и читается обратно', () => {
-    writeBrandHint({ name: 'ZeroPing', letter: 'Z', icon: 'data:image/svg+xml,x' });
+    writeBrandHint({ name: 'ZeroPing', letter: 'Z', icon: 'data:image/png;base64,x' });
     expect(localStorage.getItem(STORAGE_KEYS.BRAND_HINT)).toContain('ZeroPing');
     expect(readBrandHint()).toEqual({
       name: 'ZeroPing',
       letter: 'Z',
-      icon: 'data:image/svg+xml,x',
+      icon: 'data:image/png;base64,x',
     });
   });
 
-  it('не сохраняет слишком большую иконку и отбрасывает мусор', () => {
+  it('SVG-иконку не сохраняет и не отдаёт: Safari рисует её белой плиткой с буквой', () => {
+    // Инлайн-скрипт index.html ставит иконку из подсказки до загрузки бандла, а
+    // Safari берёт фавикон только в этот момент. SVG в подсказке значил бы, что
+    // Safari никогда не увидит ни логотип по ссылке на бота, ни цвета монограммы.
+    writeBrandHint({ name: 'ZeroPing', letter: 'Z', icon: 'data:image/svg+xml,%3Csvg%3E' });
+    expect(readBrandHint()).toEqual({ name: 'ZeroPing', letter: 'Z', icon: undefined });
+
+    // Подсказка, записанная прошлой сборкой, тоже не должна отдавать SVG.
+    localStorage.setItem(
+      STORAGE_KEYS.BRAND_HINT,
+      JSON.stringify({ name: 'ZeroPing', letter: 'Z', icon: 'data:image/svg+xml,%3Csvg%3E' }),
+    );
+    expect(readBrandHint()).toEqual({ name: 'ZeroPing', letter: 'Z', icon: undefined });
+  });
+
+  it('сохраняет фавикон обычного для логотипа размера', () => {
+    // PNG 64×64 с canvas у фотографичного логотипа — около 20 тысяч символов.
+    // Порог в 16 000 выбрасывал такую иконку, и до старта React вкладка
+    // показывала монограмму сборки, хотя имя из подсказки уже стояло.
+    const icon = `data:image/png;base64,${'A'.repeat(20_000)}`;
+    writeBrandHint({ name: 'ZeroPing', letter: 'Z', icon });
+    expect(readBrandHint()).toEqual({ name: 'ZeroPing', letter: 'Z', icon });
+  });
+
+  it('не сохраняет неправдоподобно большую иконку и отбрасывает мусор', () => {
     writeBrandHint({
       name: 'ZeroPing',
       letter: 'Z',
-      icon: `data:image/png;base64,${'A'.repeat(20_000)}`,
+      icon: `data:image/png;base64,${'A'.repeat(200_000)}`,
     });
     expect(readBrandHint()).toEqual({ name: 'ZeroPing', letter: 'Z', icon: undefined });
 

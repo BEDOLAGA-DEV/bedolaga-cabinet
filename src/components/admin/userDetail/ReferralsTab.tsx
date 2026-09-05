@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router';
 import { useCurrency } from '../../../hooks/useCurrency';
 import { useNotify } from '../../../platform/hooks/useNotify';
 import { adminUsersApi, type UserDetailResponse, type UserListItem } from '../../../api/adminUsers';
+import { getApiErrorMessage } from '../../../utils/api-error';
 import { StatCard } from '@/components/stats';
 import { BanknotesIcon, PercentIcon, TagIcon, UsersIcon, XIcon } from '@/components/icons';
 import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
@@ -160,8 +161,7 @@ export function ReferralsTab({ user, userId, onUserRefresh }: ReferralsTabProps)
       setReferrerSearchResults([]);
       notify.success(t('admin.users.detail.referrals.referrerAssigned'));
     } catch (error: unknown) {
-      const axiosErr = error as { response?: { data?: { detail?: string } } };
-      notify.error(axiosErr?.response?.data?.detail || t('common.error'));
+      notify.error(getApiErrorMessage(error, t('common.error')));
     } finally {
       setActionLoading(false);
     }
@@ -174,8 +174,7 @@ export function ReferralsTab({ user, userId, onUserRefresh }: ReferralsTabProps)
       await onUserRefresh();
       notify.success(t('admin.users.detail.referrals.referrerRemoved'));
     } catch (error: unknown) {
-      const axiosErr = error as { response?: { data?: { detail?: string } } };
-      notify.error(axiosErr?.response?.data?.detail || t('common.error'));
+      notify.error(getApiErrorMessage(error, t('common.error')));
     } finally {
       setActionLoading(false);
     }
@@ -189,8 +188,7 @@ export function ReferralsTab({ user, userId, onUserRefresh }: ReferralsTabProps)
       await onUserRefresh();
       notify.success(t('admin.users.detail.referrals.referralRemoved'));
     } catch (error: unknown) {
-      const axiosErr = error as { response?: { data?: { detail?: string } } };
-      notify.error(axiosErr?.response?.data?.detail || t('common.error'));
+      notify.error(getApiErrorMessage(error, t('common.error')));
     } finally {
       setActionLoading(false);
     }
@@ -207,8 +205,7 @@ export function ReferralsTab({ user, userId, onUserRefresh }: ReferralsTabProps)
       setAddReferralSearchResults([]);
       notify.success(t('admin.users.detail.referrals.referralAdded'));
     } catch (error: unknown) {
-      const axiosErr = error as { response?: { data?: { detail?: string } } };
-      notify.error(axiosErr?.response?.data?.detail || t('common.error'));
+      notify.error(getApiErrorMessage(error, t('common.error')));
     } finally {
       setActionLoading(false);
     }

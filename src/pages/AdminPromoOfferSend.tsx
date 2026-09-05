@@ -18,6 +18,7 @@ import {
   BroadcastStatusBadge,
 } from '../components/broadcasts/BroadcastDeliveryStats';
 import { broadcastPollInterval } from '../utils/broadcastStatus';
+import { getApiErrorMessage } from '../utils/api-error';
 import { PageSkeleton, Skeleton } from '@/components/ui/skeleton';
 import {
   SendIcon,
@@ -155,10 +156,9 @@ export default function AdminPromoOfferSend() {
       });
     },
     onError: (error: unknown) => {
-      const axiosErr = error as { response?: { data?: { detail?: string } } };
       setResult({
         title: t('common.error'),
-        message: axiosErr.response?.data?.detail || t('admin.promoOffers.result.sendError'),
+        message: getApiErrorMessage(error, t('admin.promoOffers.result.sendError')),
         isSuccess: false,
       });
     },

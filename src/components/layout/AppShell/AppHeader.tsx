@@ -2,12 +2,12 @@ import { Link, useLocation } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { useState, useEffect } from 'react';
-import { initDataUser } from '@telegram-apps/sdk-react';
 
 import { useAuthStore } from '@/store/auth';
 import { displayName } from '@/utils/displayName';
 import { useShallow } from 'zustand/shallow';
 import { useTheme } from '@/hooks/useTheme';
+import { useUserAvatar } from '@/hooks/useUserAvatar';
 import { usePlatform } from '@/platform';
 import {
   brandingApi,
@@ -88,7 +88,7 @@ export function AppHeader({
   );
   const { toggleTheme, isDark } = useTheme();
   const { haptic, platform } = usePlatform();
-  const [userPhotoUrl, setUserPhotoUrl] = useState<string | null>(null);
+  const avatar = useUserAvatar(user);
   const [logoLoaded, setLogoLoaded] = useState(() => isLogoPreloaded());
 
   // Branding
@@ -119,18 +119,6 @@ export function AppHeader({
     staleTime: 1000 * 60 * 5,
   });
   const canToggle = enabledThemes?.dark && enabledThemes?.light;
-
-  // Get user photo from Telegram
-  useEffect(() => {
-    try {
-      const user = initDataUser();
-      if (user?.photo_url) {
-        setUserPhotoUrl(user.photo_url);
-      }
-    } catch {
-      // Not in Telegram or init data not available
-    }
-  }, []);
 
   // Lock scroll when menu is open (works in iframe/Telegram Mini App)
   useEffect(() => {
@@ -330,25 +318,21 @@ export function AppHeader({
               {/* User info */}
               <div className="mb-4 flex items-center justify-between border-b border-dark-800/50 pb-4">
                 <div className="flex items-center gap-3">
-                  {userPhotoUrl ? (
+                  {/* Заглушка — через состояние, а не правкой DOM: прежний onError прятал
+                      картинку руками, и любой ре-рендер возвращал класс hidden заглушке,
+                      оставляя пустое место. */}
+                  {avatar.src ? (
                     <img
-                      src={userPhotoUrl}
+                      src={avatar.src}
                       alt="Avatar"
                       className="h-10 w-10 rounded-full object-cover"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                        e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                      }}
+                      onError={avatar.onError}
                     />
-                  ) : null}
-                  <div
-                    className={cn(
-                      'flex h-10 w-10 items-center justify-center rounded-full bg-dark-700',
-                      userPhotoUrl ? 'hidden' : '',
-                    )}
-                  >
-                    <UserIcon className="h-5 w-5" />
-                  </div>
+                  ) : (
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-dark-700">
+                      <UserIcon className="h-5 w-5" />
+                    </div>
+                  )}
                   <div className="min-w-0">
                     <div className="truncate text-sm font-medium text-dark-100">
                       {displayName(user)}
