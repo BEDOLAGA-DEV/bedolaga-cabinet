@@ -7,10 +7,12 @@ import { FleetStatus } from '../components/admin/reachability/FleetStatus';
 import { HostsHealthStrip } from '../components/admin/reachability/HostsHealthStrip';
 import { Launcher } from '../components/admin/reachability/Launcher';
 import { RecentJobs } from '../components/admin/reachability/RecentJobs';
-import { parseReachabilityDeepLink } from '../components/admin/reachability/deepLink';
+import {
+  type LaunchMode,
+  parseReachabilityDeepLink,
+} from '../components/admin/reachability/deepLink';
 import { useReachabilityStatus } from '../components/admin/reachability/useReachabilityStatus';
-import type { JobKind } from '@/api/reachability';
-import { CellSignalIcon } from '@/components/icons';
+import { RadarIcon } from '@/components/icons';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function AdminReachability() {
@@ -20,9 +22,9 @@ export default function AdminReachability() {
   const { data: status, isLoading } = useReachabilityStatus();
   const ready = Boolean(status?.enabled && status?.configured);
 
-  const setKind = (kind: JobKind) => {
+  const setMode = (mode: LaunchMode) => {
     const next = new URLSearchParams(searchParams);
-    next.set('kind', kind);
+    next.set('kind', mode);
     setSearchParams(next, { replace: true });
   };
 
@@ -32,7 +34,7 @@ export default function AdminReachability() {
         <div className="flex flex-wrap items-center gap-3">
           <AdminBackButton />
           <div className="rounded-xl bg-accent-500/20 p-3">
-            <CellSignalIcon className="h-6 w-6 text-accent-400" />
+            <RadarIcon className="h-6 w-6 text-accent-400" />
           </div>
           <h1 className="text-xl font-bold text-dark-100">{t('admin.reachability.title')}</h1>
           <div className="ml-auto">
@@ -60,7 +62,7 @@ export default function AdminReachability() {
       {ready && (
         <>
           <HostsHealthStrip />
-          <Launcher status={status} link={link} onKindChange={setKind} />
+          <Launcher status={status} link={link} onModeChange={setMode} />
           <RecentJobs initialJobId={link.jobId} />
         </>
       )}

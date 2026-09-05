@@ -51,6 +51,8 @@ export interface ReachabilityStatus {
   active_jobs: ActiveJob[];
   reference: ReferenceStatus | null;
   cost_limit_kopeks: number;
+  /** Ядро Xray → номер версии, как показывает оригинал bsbord.com. */
+  cores: Record<string, string>;
 }
 
 export interface HostTarget {

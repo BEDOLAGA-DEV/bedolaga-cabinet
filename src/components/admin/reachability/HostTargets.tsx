@@ -15,16 +15,13 @@ import { PurposeChip } from './PurposeChip';
 import { CheckGlyph, ROW, ROW_BUTTON, ROW_OFF, ROW_ON } from './SelectableRow';
 import { SectionHeading } from './SectionHeading';
 import { pickByPurpose } from './targetPicks';
-import { MAX_CUSTOM_TARGETS, parseTargets } from './targetsInput';
 import { useHosts, useInvalidateTargets, useNodes } from './useTargets';
 
-export interface ProbeTargetsProps {
+export interface HostTargetsProps {
   hosts: HostTarget[];
   onToggleHost: (host: HostTarget) => void;
   nodes: NodeTarget[];
   onToggleNode: (node: NodeTarget) => void;
-  own: string;
-  onOwnChange: (text: string) => void;
   preselectedHosts?: string[];
   preselectedNodes?: string[];
 }
@@ -41,8 +38,8 @@ function matches(host: HostTarget, query: string): boolean {
     .includes(needle);
 }
 
-/** Цели проверки хостов: хосты панели, а под «Дополнительно» ноды и свои адреса. */
-export function ProbeTargets(props: ProbeTargetsProps) {
+/** Вкладка «Хосты»: хосты панели Remnawave с назначением, ноды — под раскрывашкой. */
+export function HostTargets(props: HostTargetsProps) {
   const { t } = useTranslation();
   const [search, setSearch] = useState('');
   const [showAll, setShowAll] = useState(false);
@@ -82,8 +79,7 @@ export function ProbeTargets(props: ProbeTargetsProps) {
   const visible = showAll || search ? filtered : filtered.slice(0, SHORT_LIST);
   const selectedIds = new Set(props.hosts.map((host) => host.uuid));
   const bsUnselected = pickByPurpose(allHosts, 'bs').filter((host) => !selectedIds.has(host.uuid));
-  const own = parseTargets(props.own);
-  const total = props.hosts.length + props.nodes.length + own.targets.length;
+  const total = props.hosts.length + props.nodes.length;
 
   if (isLoading) {
     return (
@@ -100,7 +96,7 @@ export function ProbeTargets(props: ProbeTargetsProps) {
       <SectionHeading
         id="reachability-targets"
         title={t('admin.reachability.sections.targets')}
-        hint={t('admin.reachability.switch.probeHint')}
+        hint={t('admin.reachability.switch.hostsHint')}
         aside={t('admin.reachability.targets.count', { count: total })}
       />
 
@@ -189,28 +185,6 @@ export function ProbeTargets(props: ProbeTargetsProps) {
             : t('admin.reachability.targets.showAll', { count: filtered.length })}
         </button>
       )}
-
-      <div>
-        <label htmlFor="reachability-own" className="text-sm font-medium text-dark-200">
-          {t('admin.reachability.targets.ownAddresses')}
-        </label>
-        <textarea
-          id="reachability-own"
-          value={props.own}
-          onChange={(event) => props.onOwnChange(event.target.value)}
-          rows={2}
-          placeholder={t('admin.reachability.targets.ownPlaceholder')}
-          className="input mt-1 w-full font-mono text-sm"
-        />
-        <p className="mt-1 text-xs text-dark-400">
-          {t('admin.reachability.targets.ownHint')} · {MAX_CUSTOM_TARGETS}
-        </p>
-        {own.overLimit > 0 && (
-          <p className="mt-1 text-xs text-warning-400">
-            {t('admin.reachability.targets.overLimit', { count: own.overLimit })}
-          </p>
-        )}
-      </div>
 
       {allNodes.length > 0 && (
         <details className="group rounded-xl border border-dark-700/60 bg-dark-900/30">

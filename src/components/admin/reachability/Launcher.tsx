@@ -2,23 +2,24 @@ import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type {
   HostTarget,
-  JobKind,
   NodeTarget,
   Probes,
   ReachabilityStatus,
   VlessCore,
 } from '@/api/reachability';
+import { AddressTargets } from './AddressTargets';
+import { HostTargets } from './HostTargets';
 import { JobProgress } from './JobProgress';
-import { KindSwitch } from './KindSwitch';
 import { LaunchAside, LaunchBar } from './LaunchAside';
+import { ModeSwitch } from './ModeSwitch';
 import { OperatorPicker } from './OperatorPicker';
-import { ProbeTargets } from './ProbeTargets';
 import { ProbesRow } from './ProbesRow';
 import { ScanTargets } from './ScanTargets';
 import { SectionHeading } from './SectionHeading';
 import { SubscriptionTargets } from './SubscriptionTargets';
-import type { DeepLink } from './deepLink';
+import { type DeepLink, type LaunchMode, jobKindOf } from './deepLink';
 import { buildProbeBody, buildScanBody, buildVlessBody } from './jobBodies';
+import { sniNamesFor, sniNamesForAddresses } from './sniNames';
 import { parseTargets, scanSubnet } from './targetsInput';
 import { dpiForSelection } from './unitSelection';
 import { useSubscriptionConfigs } from './useTargets';
@@ -27,7 +28,7 @@ import { useUnits } from './useUnits';
 interface LauncherProps {
   status: ReachabilityStatus | undefined;
   link: DeepLink;
-  onKindChange: (kind: JobKind) => void;
+  onModeChange: (mode: LaunchMode) => void;
 }
 
 const PROBE_DEFAULT: Probes = { icmp: false, tcp: true, sni: true };
@@ -39,15 +40,16 @@ function toggleBy<T extends { uuid: string }>(list: T[], item: T): T[] {
     : [...list, item];
 }
 
-/** Один запуск на все виды проверки: цели по виду, операторы, пробы, итог и кнопка. */
-export function Launcher({ status, link, onKindChange }: LauncherProps) {
+/** Один запуск на все вкладки: цели по вкладке, пробы, операторы, итог и кнопка. */
+export function Launcher({ status, link, onModeChange }: LauncherProps) {
   const { t } = useTranslation();
-  const kind = link.kind;
+  const mode = link.mode;
+  const kind = jobKindOf(mode);
   const { data: catalog = [] } = useUnits();
 
   const [hosts, setHosts] = useState<HostTarget[]>([]);
   const [nodes, setNodes] = useState<NodeTarget[]>([]);
-  const [own, setOwn] = useState('');
+  const [addresses, setAddresses] = useState('');
   const [source, setSource] = useState({ userId: link.userId, shortUuid: link.shortUuid });
   const [configIndexes, setConfigIndexes] = useState<number[]>([]);
   const [core, setCore] = useState<VlessCore>('');
@@ -57,7 +59,12 @@ export function Launcher({ status, link, onKindChange }: LauncherProps) {
   const [scanProbes, setScanProbes] = useState<Probes>(SCAN_DEFAULT);
   const [jobId, setJobId] = useState<number | null>(null);
 
-  const configs = useSubscriptionConfigs(source.userId, source.shortUuid);
+  const hasReference = Boolean(status?.reference?.short_uuid);
+  const configs = useSubscriptionConfigs(
+    source.userId,
+    source.shortUuid,
+    source.userId !== null || source.shortUuid !== null || hasReference,
+  );
   const toggleHost = useCallback(
     (host: HostTarget) => setHosts((list) => toggleBy(list, host)),
     [],
@@ -84,21 +91,25 @@ export function Launcher({ status, link, onKindChange }: LauncherProps) {
     () => link.targets.filter((item) => item.kind === 'node').map((item) => item.ref),
     [link.targets],
   );
-  const ownTargets = useMemo(() => parseTargets(own).targets, [own]);
-  const probeProbes: Probes = { ...probes, icmp: probes.icmp || nodes.length > 0 };
+  const ownTargets = useMemo(() => parseTargets(addresses).targets, [addresses]);
+  // Нода проверяется только ping-ом — при нодах ICMP не выключить.
+  const hostProbes: Probes = { ...probes, icmp: probes.icmp || nodes.length > 0 };
 
   const body = useMemo(() => {
-    if (kind === 'probe') {
+    if (mode === 'hosts') {
       return buildProbeBody({
         hosts: hosts.map((host) => host.uuid),
         nodes: nodes.map((node) => node.uuid),
-        custom: ownTargets,
+        custom: [],
         units,
         dpi,
         probes,
       });
     }
-    if (kind === 'vless') {
+    if (mode === 'ip') {
+      return buildProbeBody({ hosts: [], nodes: [], custom: ownTargets, units, dpi, probes });
+    }
+    if (mode === 'vless') {
       return buildVlessBody({
         shortUuid: configs.data?.short_uuid ?? null,
         indexes: configIndexes,
@@ -114,7 +125,7 @@ export function Launcher({ status, link, onKindChange }: LauncherProps) {
       probes: { ...scanProbes, sni: false },
     });
   }, [
-    kind,
+    mode,
     hosts,
     nodes,
     ownTargets,
@@ -129,18 +140,28 @@ export function Launcher({ status, link, onKindChange }: LauncherProps) {
   ]);
 
   const targetsCount =
-    kind === 'probe'
-      ? hosts.length + nodes.length + ownTargets.length
-      : kind === 'vless'
-        ? configIndexes.length
-        : scanSubnet(cidr)
-          ? 1
-          : 0;
+    mode === 'hosts'
+      ? hosts.length + nodes.length
+      : mode === 'ip'
+        ? ownTargets.length
+        : mode === 'vless'
+          ? configIndexes.length
+          : scanSubnet(cidr)
+            ? 1
+            : 0;
+
+  // Имена для TLS-SNI видны до запуска: SNI хоста или его домен; у IP имени нет.
+  const sniNames = useMemo(
+    () =>
+      mode === 'hosts' ? sniNamesFor(hosts) : mode === 'ip' ? sniNamesForAddresses(ownTargets) : [],
+    [mode, hosts, ownTargets],
+  );
+  const showSniNames = mode !== 'cidr' && mode !== 'vless' && probes.sni && targetsCount > 0;
 
   if (jobId !== null) {
     return (
       <div className="space-y-6">
-        <KindSwitch value={kind} onChange={onKindChange} />
+        <ModeSwitch value={mode} onChange={onModeChange} />
         <JobProgress jobId={jobId} onReset={() => setJobId(null)} />
       </div>
     );
@@ -156,22 +177,21 @@ export function Launcher({ status, link, onKindChange }: LauncherProps) {
 
   return (
     <div className="space-y-6">
-      <KindSwitch value={kind} onChange={onKindChange} />
+      <ModeSwitch value={mode} onChange={onModeChange} />
       <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start lg:gap-8">
         <div className="space-y-8">
-          {kind === 'probe' && (
-            <ProbeTargets
+          {mode === 'hosts' && (
+            <HostTargets
               hosts={hosts}
               onToggleHost={toggleHost}
               nodes={nodes}
               onToggleNode={toggleNode}
-              own={own}
-              onOwnChange={setOwn}
               preselectedHosts={preselectedHosts}
               preselectedNodes={preselectedNodes}
             />
           )}
-          {kind === 'vless' && (
+          {mode === 'ip' && <AddressTargets value={addresses} onChange={setAddresses} />}
+          {mode === 'vless' && (
             <SubscriptionTargets
               userId={source.userId}
               shortUuid={source.shortUuid}
@@ -183,28 +203,41 @@ export function Launcher({ status, link, onKindChange }: LauncherProps) {
               onToggle={toggleConfig}
               core={core}
               onCoreChange={setCore}
+              reference={status?.reference ?? null}
+              cores={status?.cores}
             />
           )}
-          {kind === 'scan' && <ScanTargets cidr={cidr} onChange={setCidr} />}
+          {mode === 'cidr' && <ScanTargets cidr={cidr} onChange={setCidr} />}
 
-          {kind !== 'vless' && (
+          {mode !== 'vless' && (
             <section aria-labelledby="reachability-probes" className="space-y-3">
               <SectionHeading
                 id="reachability-probes"
                 title={t('admin.reachability.sections.probes')}
               />
-              {kind === 'probe' ? (
-                <ProbesRow
-                  probes={probeProbes}
-                  onChange={setProbes}
-                  locked={nodes.length ? ['icmp'] : []}
-                />
-              ) : (
+              {mode === 'cidr' ? (
                 <ProbesRow
                   probes={{ ...scanProbes, sni: false }}
                   onChange={setScanProbes}
                   locked={['sni']}
                 />
+              ) : (
+                <ProbesRow
+                  probes={mode === 'hosts' ? hostProbes : probes}
+                  onChange={setProbes}
+                  locked={mode === 'hosts' && nodes.length ? ['icmp'] : []}
+                />
+              )}
+              {showSniNames && (
+                <p className="text-xs text-dark-400">
+                  {sniNames.length > 0 ? (
+                    t('admin.reachability.probes.sniNames', { names: sniNames.join(', ') })
+                  ) : (
+                    <span className="text-warning-400">
+                      {t('admin.reachability.probes.sniNoNames')}
+                    </span>
+                  )}
+                </p>
               )}
             </section>
           )}

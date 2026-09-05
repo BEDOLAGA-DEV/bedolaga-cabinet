@@ -75,6 +75,7 @@ const status: ReachabilityStatus = {
   active_jobs: [],
   reference: null,
   cost_limit_kopeks: 0,
+  cores: {},
 };
 const job = { id: 7, kind: 'probe', status: 'pending' } as Job;
 

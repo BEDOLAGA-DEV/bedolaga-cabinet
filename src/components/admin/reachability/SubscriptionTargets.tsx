@@ -1,10 +1,15 @@
 import { useTranslation } from 'react-i18next';
-import type { SubscriptionConfigs as SubscriptionConfigsData, VlessCore } from '@/api/reachability';
+import type {
+  ReferenceStatus,
+  SubscriptionConfigs as SubscriptionConfigsData,
+  VlessCore,
+} from '@/api/reachability';
 import { XrayIcon } from '@/components/icons';
 import { ChoiceChips } from './ChoiceChips';
 import { SectionHeading } from './SectionHeading';
 import { SubscriptionConfigs } from './SubscriptionConfigs';
 import { SubscriptionSourcePicker } from './SubscriptionSourcePicker';
+import { type CoreVersions, coreVersion } from './cores';
 
 export interface SubscriptionTargetsProps {
   userId: number | null;
@@ -17,15 +22,13 @@ export interface SubscriptionTargetsProps {
   onToggle: (index: number) => void;
   core: VlessCore;
   onCoreChange: (core: VlessCore) => void;
+  reference: ReferenceStatus | null;
+  cores: CoreVersions;
 }
 
-const CORES: Array<{ value: VlessCore; key: string }> = [
-  { value: '', key: 'coreAuto' },
-  { value: 'stable', key: 'coreStable' },
-  { value: 'prerelease', key: 'corePrerelease' },
-];
+const CORES: readonly VlessCore[] = ['', 'stable', 'prerelease'];
 
-/** Цели VLESS-теста: откуда взять подписку и какие конфиги тестировать. */
+/** Вкладка «Подписка»: откуда взять подписку, какие конфиги тестировать, каким ядром Xray. */
 export function SubscriptionTargets(props: SubscriptionTargetsProps) {
   const { t } = useTranslation();
   return (
@@ -40,6 +43,7 @@ export function SubscriptionTargets(props: SubscriptionTargetsProps) {
         userId={props.userId}
         shortUuid={props.shortUuid}
         onSource={props.onSource}
+        reference={props.reference}
       />
       <SubscriptionConfigs
         data={props.data}
@@ -57,9 +61,12 @@ export function SubscriptionTargets(props: SubscriptionTargetsProps) {
           value={props.core}
           onChange={props.onCoreChange}
           label={t('admin.reachability.subscription.core')}
-          options={CORES.map((item) => ({
-            value: item.value,
-            label: t(`admin.reachability.subscription.${item.key}`),
+          options={CORES.map((value) => ({
+            value,
+            label:
+              value === ''
+                ? t('admin.reachability.subscription.coreAuto')
+                : coreVersion(props.cores, value),
           }))}
         />
       </div>

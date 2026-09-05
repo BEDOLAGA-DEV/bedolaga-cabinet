@@ -3926,10 +3926,6 @@
         "search": "搜索主机",
         "empty": "面板未返回主机",
         "pickAllBs": "选择所有白名单主机",
-        "ownAddresses": "自定义地址",
-        "ownPlaceholder": "ya.ru, 77.88.8.8, host.example:443",
-        "ownHint": "IP、域名或地址:端口，逗号或换行分隔",
-        "overLimit_other": "已丢弃 {{count}} 个多余地址：保留前十个",
         "nodesTitle": "节点",
         "nodesHint": "仅 ping",
         "purposeToggle": "更改主机用途",
@@ -3953,25 +3949,33 @@
         "empty": "订阅中没有可用配置",
         "pickBs": "选择所有白名单配置（{{count}}）",
         "source": "来源",
-        "userLabel": "用户 #{{id}}"
+        "userLabel": "用户 #{{id}}",
+        "noReference": "未设置默认订阅",
+        "noReferenceHint": "在下方选择用户的订阅，或在机器人设置中指定默认订阅"
       },
       "scan": {
-        "cidr": "IP 或子网",
-        "cidrPlaceholder": "192.0.2.10 或 192.0.2.0/24",
+        "cidr": "CIDR",
+        "cidrPlaceholder": "192.0.2.0/24",
         "fromHost": "此主机的子网",
-        "invalid": "请输入 IPv4 地址或 /24 子网",
+        "invalid": "请输入 /24 子网或 IPv4 地址",
         "alive_other": "{{count}} 个存活地址",
         "copy": "复制列表",
         "copied": "已复制",
         "perUnit": "按 SIM 卡",
         "ofTotal": "共 {{total}}",
-        "willScan": "将扫描子网 {{subnet}}"
+        "willScan": "将扫描子网 {{subnet}}",
+        "cidrHint": "一个 /24 子网；输入 IP 将取其子网"
       },
       "probes": {
         "icmp": "ICMP",
         "tcp": "TCP",
-        "sni": "SNI",
-        "title": "探测项"
+        "sni": "TLS-SNI",
+        "title": "探测项",
+        "icmpDesc": "ping · 3 个包",
+        "tcpDesc": "连接端口",
+        "sniDesc": "按 SNI 进行 TLS 握手",
+        "sniNames": "SNI 名称：{{names}}",
+        "sniNoNames": "TLS-SNI 需要目标中有域名——IP 地址没有 SNI 名称"
       },
       "result": {
         "cost": "已扣费",
@@ -4030,12 +4034,14 @@
       },
       "switch": {
         "label": "检查内容",
-        "probe": "主机与地址",
-        "probeHint": "面板主机、节点和自定义地址，每次最多 10 个目标",
+        "hosts": "主机",
+        "hostsHint": "Remnawave 面板的主机和节点，每次最多 10 个目标",
+        "ip": "IP / 域名",
+        "ipHint": "自定义地址：IP、IP:端口、域名或 https://…，每次最多 10 个目标",
+        "cidr": "CIDR",
+        "cidrHint": "扫描 /24 子网：通过 SIM 查看存活地址",
         "vless": "订阅",
-        "vlessHint": "通过 VLESS 隧道检查订阅配置，每次最多 20 个",
-        "scan": "子网 /24",
-        "scanHint": "通过 SIM 查看子网存活地址"
+        "vlessHint": "通过 VLESS 隧道检查订阅配置，每次最多 20 个"
       },
       "sections": {
         "targets": "目标",
@@ -4065,6 +4071,12 @@
         "filterKind": "类型",
         "filterStatus": "状态",
         "all": "全部"
+      },
+      "addresses": {
+        "label": "地址",
+        "placeholder": "ya.ru, 77.88.8.8, github.com:443 — 最多 10 个目标，逗号或换行分隔",
+        "hint": "IP、IP:端口、域名或 https://… 可混合",
+        "overLimit_other": "已丢弃 {{count}} 个多余地址：保留前十个"
       }
     },
     "roles": {

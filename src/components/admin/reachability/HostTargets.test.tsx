@@ -11,7 +11,7 @@ vi.mock('@/api/reachability', () => ({
 }));
 
 import { reachabilityApi } from '@/api/reachability';
-import { ProbeTargets } from './ProbeTargets';
+import { HostTargets } from './HostTargets';
 import { installMatchMedia, renderWithProviders } from './testUtils';
 
 const host = (uuid: string, purpose: HostTarget['purpose']): HostTarget => ({
@@ -46,19 +46,12 @@ afterEach(cleanup);
 
 function render(selected: HostTarget[], onToggleHost = vi.fn()) {
   renderWithProviders(
-    <ProbeTargets
-      hosts={selected}
-      onToggleHost={onToggleHost}
-      nodes={[]}
-      onToggleNode={vi.fn()}
-      own=""
-      onOwnChange={vi.fn()}
-    />,
+    <HostTargets hosts={selected} onToggleHost={onToggleHost} nodes={[]} onToggleNode={vi.fn()} />,
   );
   return onToggleHost;
 }
 
-describe('ProbeTargets', () => {
+describe('HostTargets', () => {
   it('«Отметить все хосты под БС» отмечает только ещё не отмеченные', async () => {
     const onToggleHost = render([HOSTS[0]]);
     await screen.findByText('BS1');

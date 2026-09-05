@@ -11,7 +11,7 @@ export interface ScanTargetsProps {
   onChange: (cidr: string) => void;
 }
 
-/** Цель скана: одна подсеть /24, подсказки берутся из адресов хостов панели. */
+/** Вкладка «CIDR»: одна подсеть /24 (из IP берётся его подсеть), чипы — подсети хостов панели. */
 export function ScanTargets({ cidr, onChange }: ScanTargetsProps) {
   const { t } = useTranslation();
   const { data: hosts = [] } = useHosts(false);
@@ -32,10 +32,10 @@ export function ScanTargets({ cidr, onChange }: ScanTargetsProps) {
       <SectionHeading
         id="reachability-targets"
         title={t('admin.reachability.sections.targets')}
-        hint={t('admin.reachability.switch.scanHint')}
+        hint={t('admin.reachability.switch.cidrHint')}
       />
       <div>
-        <label htmlFor="reachability-cidr" className="text-sm font-medium text-dark-200">
+        <label htmlFor="reachability-cidr" className="block text-sm font-medium text-dark-200">
           {t('admin.reachability.scan.cidr')}
         </label>
         <input
@@ -45,14 +45,15 @@ export function ScanTargets({ cidr, onChange }: ScanTargetsProps) {
           onChange={(event) => onChange(event.target.value)}
           placeholder={t('admin.reachability.scan.cidrPlaceholder')}
           aria-invalid={invalid}
-          className="input mt-1 w-full font-mono sm:w-72"
+          className="input mt-1.5 w-full font-mono sm:w-72"
         />
-        {invalid && (
-          <p className="mt-1 text-xs text-warning-400">{t('admin.reachability.scan.invalid')}</p>
-        )}
-        {subnet && (
-          <p className="mt-1 text-xs text-dark-400">
-            {t('admin.reachability.scan.willScan', { subnet })}
+        {invalid ? (
+          <p className="mt-1.5 text-xs text-warning-400">{t('admin.reachability.scan.invalid')}</p>
+        ) : (
+          <p className="mt-1.5 text-xs text-dark-400">
+            {subnet
+              ? t('admin.reachability.scan.willScan', { subnet })
+              : t('admin.reachability.scan.cidrHint')}
           </p>
         )}
       </div>

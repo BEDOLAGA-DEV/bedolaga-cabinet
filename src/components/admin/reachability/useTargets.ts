@@ -22,8 +22,16 @@ export function useNodes() {
   });
 }
 
-/** Конфиги подписки: пользователя, если задан, иначе эталонной (или переданного shortUuid). */
-export function useSubscriptionConfigs(userId: number | null, shortUuid: string | null) {
+/**
+ * Конфиги подписки: пользователя, если задан, иначе подписки по умолчанию (или переданного
+ * shortUuid). `enabled: false` — источника нет вовсе (подписка по умолчанию не задана):
+ * запрос не уходит, объяснение даёт SubscriptionSourcePicker, а не ошибка API.
+ */
+export function useSubscriptionConfigs(
+  userId: number | null,
+  shortUuid: string | null,
+  enabled = true,
+) {
   return useQuery<SubscriptionConfigs>({
     queryKey: [REACHABILITY_SUBSCRIPTION_KEY, userId, shortUuid],
     queryFn: () =>
@@ -33,6 +41,7 @@ export function useSubscriptionConfigs(userId: number | null, shortUuid: string 
       }),
     staleTime: 60_000,
     retry: false,
+    enabled,
   });
 }
 

@@ -2121,11 +2121,6 @@
         "search": "Search hosts",
         "empty": "The panel returned no hosts",
         "pickAllBs": "Select all whitelist hosts",
-        "ownAddresses": "Own addresses",
-        "ownPlaceholder": "ya.ru, 77.88.8.8, host.example:443",
-        "ownHint": "IP, domain or address:port, comma or newline separated",
-        "overLimit_one": "one extra address dropped: first ten kept",
-        "overLimit_other": "{{count}} extra addresses dropped: first ten kept",
         "nodesTitle": "Nodes",
         "nodesHint": "ping only",
         "purposeToggle": "Change host purpose",
@@ -2151,26 +2146,34 @@
         "empty": "The subscription has no usable configs",
         "pickBs": "Select all whitelist configs ({{count}})",
         "source": "Source",
-        "userLabel": "user #{{id}}"
+        "userLabel": "user #{{id}}",
+        "noReference": "Default subscription is not set",
+        "noReferenceHint": "Pick a user's subscription below or set the default subscription in bot settings"
       },
       "scan": {
-        "cidr": "IP or subnet",
-        "cidrPlaceholder": "192.0.2.10 or 192.0.2.0/24",
+        "cidr": "CIDR",
+        "cidrPlaceholder": "192.0.2.0/24",
         "fromHost": "this host's subnet",
-        "invalid": "Enter an IPv4 address or a /24 subnet",
+        "invalid": "Enter a /24 subnet or an IPv4 address",
         "alive_one": "{{count}} live address",
         "alive_other": "{{count}} live addresses",
         "copy": "Copy list",
         "copied": "Copied",
         "perUnit": "per SIM",
         "ofTotal": "of {{total}}",
-        "willScan": "Subnet {{subnet}} will be scanned"
+        "willScan": "Subnet {{subnet}} will be scanned",
+        "cidrHint": "One /24 subnet; an IP is expanded to its subnet"
       },
       "probes": {
         "icmp": "ICMP",
         "tcp": "TCP",
-        "sni": "SNI",
-        "title": "Probes"
+        "sni": "TLS-SNI",
+        "title": "Probes",
+        "icmpDesc": "ping · 3 packets",
+        "tcpDesc": "connect to port",
+        "sniDesc": "TLS handshake by SNI",
+        "sniNames": "SNI names: {{names}}",
+        "sniNoNames": "TLS-SNI needs a domain among the targets — an IP address has no SNI name"
       },
       "result": {
         "cost": "Charged",
@@ -2232,12 +2235,14 @@
       },
       "switch": {
         "label": "What to check",
-        "probe": "Hosts and addresses",
-        "probeHint": "panel hosts, nodes and your own addresses, up to 10 targets per run",
+        "hosts": "Hosts",
+        "hostsHint": "Remnawave panel hosts and nodes, up to 10 targets per run",
+        "ip": "IP / domain",
+        "ipHint": "your own addresses: IP, IP:port, domain or https://…, up to 10 targets per run",
+        "cidr": "CIDR",
+        "cidrHint": "scan a /24 subnet: live addresses as seen by SIMs",
         "vless": "Subscription",
-        "vlessHint": "subscription configs through a VLESS tunnel, up to 20 per test",
-        "scan": "Subnet /24",
-        "scanHint": "live addresses of a subnet as seen by SIMs"
+        "vlessHint": "subscription configs through a VLESS tunnel, up to 20 per test"
       },
       "sections": {
         "targets": "Targets",
@@ -2267,6 +2272,13 @@
         "filterKind": "Kind",
         "filterStatus": "Status",
         "all": "all"
+      },
+      "addresses": {
+        "label": "Addresses",
+        "placeholder": "ya.ru, 77.88.8.8, github.com:443 — up to 10 targets, comma or newline separated",
+        "hint": "IP, IP:port, domain or https://… in any mix",
+        "overLimit_one": "one extra address dropped: first ten kept",
+        "overLimit_other": "{{count}} extra addresses dropped: first ten kept"
       }
     },
     "wheel": {

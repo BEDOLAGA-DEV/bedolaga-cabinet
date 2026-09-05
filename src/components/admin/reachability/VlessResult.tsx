@@ -3,11 +3,14 @@ import { useTranslation } from 'react-i18next';
 import type { Job } from '@/api/reachability';
 import { XrayIcon } from '@/components/icons';
 import { VerdictBadge } from './VerdictBadge';
+import { coreVersion } from './cores';
 import { vlessLegView } from './resultShapes';
+import { useReachabilityStatus } from './useReachabilityStatus';
 
 export function VlessResult({ job }: { job: Job }) {
   const { t } = useTranslation();
   const legs = useMemo(() => job.legs.map(vlessLegView), [job.legs]);
+  const { data: status } = useReachabilityStatus();
 
   if (legs.length === 0) {
     return <p className="text-sm text-dark-400">{t('admin.reachability.result.empty')}</p>;
@@ -53,7 +56,9 @@ export function VlessResult({ job }: { job: Job }) {
               <div className="inline-flex items-center gap-1">
                 <XrayIcon className="h-3.5 w-3.5 text-dark-400" aria-hidden="true" />
                 <dd className="inline">
-                  {t('admin.reachability.result.core', { core: leg.core })}
+                  {t('admin.reachability.result.core', {
+                    core: coreVersion(status?.cores, leg.core),
+                  })}
                 </dd>
               </div>
             )}

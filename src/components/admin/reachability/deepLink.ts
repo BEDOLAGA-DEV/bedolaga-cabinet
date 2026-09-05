@@ -1,6 +1,24 @@
 import type { JobKind } from '@/api/reachability';
 
-export const KIND_KEYS: readonly JobKind[] = ['probe', 'vless', 'scan'];
+/** Вкладка запуска — как в оригинале bsbord.com: хосты панели, IP / домен, CIDR, подписка. */
+export type LaunchMode = 'hosts' | 'ip' | 'cidr' | 'vless';
+
+export const MODE_KEYS: readonly LaunchMode[] = ['hosts', 'ip', 'cidr', 'vless'];
+
+/** Старые значения `?kind=` из сохранённых ссылок: проверка хостов и скан подсети. */
+const LEGACY_MODES: Record<string, LaunchMode> = { probe: 'hosts', scan: 'cidr' };
+
+/** Хосты и свои адреса — одна и та же probe-задача бота, CIDR — скан. */
+const JOB_KIND: Record<LaunchMode, JobKind> = {
+  hosts: 'probe',
+  ip: 'probe',
+  cidr: 'scan',
+  vless: 'vless',
+};
+
+export function jobKindOf(mode: LaunchMode): JobKind {
+  return JOB_KIND[mode];
+}
 
 export interface DeepLinkTarget {
   kind: 'host' | 'node';
@@ -8,7 +26,7 @@ export interface DeepLinkTarget {
 }
 
 export interface DeepLink {
-  kind: JobKind;
+  mode: LaunchMode;
   targets: DeepLinkTarget[];
   userId: number | null;
   shortUuid: string | null;
@@ -18,8 +36,10 @@ export interface DeepLink {
 
 export const REACHABILITY_PATH = '/admin/reachability';
 
-function isKind(value: string | null): value is JobKind {
-  return (KIND_KEYS as readonly string[]).includes(value ?? '');
+function parseMode(value: string | null): LaunchMode | null {
+  if (value === null) return null;
+  if ((MODE_KEYS as readonly string[]).includes(value)) return value as LaunchMode;
+  return LEGACY_MODES[value] ?? null;
 }
 
 function isTargetKind(value: string): value is DeepLinkTarget['kind'] {
@@ -38,15 +58,15 @@ function parseId(raw: string | null): number | null {
   return raw && /^\d+$/.test(raw) ? Number(raw) : null;
 }
 
-function defaultKind(input: Pick<DeepLink, 'targets' | 'userId' | 'shortUuid'>): JobKind {
-  if (input.targets.length) return 'probe';
+function defaultMode(input: Pick<DeepLink, 'targets' | 'userId' | 'shortUuid'>): LaunchMode {
+  if (input.targets.length) return 'hosts';
   if (input.userId || input.shortUuid) return 'vless';
-  return 'probe';
+  return 'hosts';
 }
 
 /**
  * `?kind=&target=host:<uuid>&target=node:<uuid>&user=<id>&sub=<shortUuid>&job=<id>`.
- * Цель без kind открывает проверку хостов, пользователь или подписка — подписку.
+ * Цель без kind открывает хосты панели, пользователь или подписка — подписку.
  */
 export function parseReachabilityDeepLink(params: URLSearchParams): DeepLink {
   const targets = params
@@ -55,9 +75,8 @@ export function parseReachabilityDeepLink(params: URLSearchParams): DeepLink {
     .filter((target): target is DeepLinkTarget => target !== null);
   const userId = parseId(params.get('user'));
   const shortUuid = params.get('sub') || null;
-  const kindParam = params.get('kind');
-  const kind = isKind(kindParam) ? kindParam : defaultKind({ targets, userId, shortUuid });
-  return { kind, targets, userId, shortUuid, jobId: parseId(params.get('job')) };
+  const mode = parseMode(params.get('kind')) ?? defaultMode({ targets, userId, shortUuid });
+  return { mode, targets, userId, shortUuid, jobId: parseId(params.get('job')) };
 }
 
 export function buildReachabilityLink(input: Partial<DeepLink>): string {
@@ -65,7 +84,7 @@ export function buildReachabilityLink(input: Partial<DeepLink>): string {
   const userId = input.userId ?? null;
   const shortUuid = input.shortUuid ?? null;
   const params = new URLSearchParams();
-  params.set('kind', input.kind ?? defaultKind({ targets, userId, shortUuid }));
+  params.set('kind', input.mode ?? defaultMode({ targets, userId, shortUuid }));
   for (const target of targets) params.append('target', `${target.kind}:${target.ref}`);
   if (userId) params.set('user', String(userId));
   if (shortUuid) params.set('sub', shortUuid);

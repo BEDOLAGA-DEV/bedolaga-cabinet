@@ -55,7 +55,7 @@ import {
   BackIcon,
   ChevronRightIcon,
   GeoCheckIcon,
-  CellSignalIcon,
+  RadarIcon,
 } from '../components/icons';
 import { GeoCheckModal } from '../components/admin/remnawave/GeoCheckModal';
 import { buildReachabilityLink } from '../components/admin/reachability/deepLink';
@@ -266,7 +266,7 @@ function NodeCard({ node, providerName, realtime, onAction, isLoading }: NodeCar
                 title={t('admin.reachability.shortcuts.checkNode')}
                 aria-label={t('admin.reachability.shortcuts.checkNode')}
               >
-                <CellSignalIcon className="h-3.5 w-3.5" />
+                <RadarIcon className="h-3.5 w-3.5" />
               </button>
             )}
             {canGeoCheck && (
