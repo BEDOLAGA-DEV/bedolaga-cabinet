@@ -25,7 +25,10 @@ const API = '/api';
 
 const SCRIPT = (() => {
   const html = renderBrandingHtml(htmlSource, { name: 'Cabinet', apiUrl: API });
-  const scripts = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map((m) => m[1]);
+  // Разбор настоящим парсером, а не регуляркой: index.html — документ, и
+  // инлайн-скрипты берём из DOM, как это сделал бы браузер.
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  const scripts = [...doc.querySelectorAll('script:not([src])')].map((s) => s.textContent ?? '');
   const early = scripts.find((s) => s.includes('/cabinet/branding'));
   if (!early) throw new Error('в index.html нет инлайн-скрипта раннего бренда');
   return early;
