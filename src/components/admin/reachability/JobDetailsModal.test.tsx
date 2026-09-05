@@ -37,7 +37,7 @@ describe('JobDetailsModal', () => {
 
     const dialog = await screen.findByRole('dialog', { name: 'Задача #2' });
     expect(dialog.getAttribute('aria-modal')).toBe('true');
-    await screen.findByText('1,03 ₽');
+    await screen.findByText('◈ 103 cred ≈ 1,03 ₽');
 
     fireEvent.keyDown(document, { key: 'Escape' });
     expect(onClose).toHaveBeenCalledTimes(1);

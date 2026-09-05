@@ -3983,7 +3983,8 @@
         "raw": "详情",
         "diagnosis": "诊断",
         "empty": "结果为空",
-        "failReason": "原因"
+        "failReason": "原因",
+        "estimate": "估算"
       },
       "summary": {
         "empty": "尚无检查 — 在「探测」标签页启动第一次",

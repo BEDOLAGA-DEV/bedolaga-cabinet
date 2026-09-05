@@ -13,7 +13,7 @@ import { useNativeDialog } from '@/platform/hooks/useNativeDialog';
 import { useNotify } from '@/platform/hooks/useNotify';
 import { getApiErrorMessage } from '@/utils/api-error';
 import { type LaunchSummary, formatList, launchSummary } from './launchSummary';
-import { formatKopeks } from './money';
+import { formatCredits, formatKopeks, formatMoney } from './money';
 import { rememberSelection } from './unitSelection';
 import { useJobPreview } from './useJobPreview';
 import { REACHABILITY_STATUS_KEY } from './useReachabilityStatus';
@@ -70,14 +70,14 @@ export function LaunchPanel({ body, status, onStarted }: LaunchPanelProps) {
   else if (preview.data && preview.data.units_resolved.length === 0)
     blocker = t('admin.reachability.launch.noUnits');
   else if (limit > 0 && cost !== null && cost > limit)
-    blocker = t('admin.reachability.launch.overLimit', { limit: formatKopeks(limit) });
+    blocker = t('admin.reachability.launch.overLimit', { limit: formatMoney(limit) });
   else if (balance !== null && cost !== null && cost > balance)
     blocker = t('admin.reachability.launch.overBalance');
 
   const confirmText = (summary: LaunchSummary, kind: JobCreateRequest['kind']): string => {
     const listed = dialog.isNative ? LISTED_NATIVE : LISTED_WEB;
     const more = (count: number) => t('admin.reachability.launch.confirmMore', { count });
-    const price = formatKopeks(summary.cost);
+    const price = formatMoney(summary.cost);
     return [
       t('admin.reachability.launch.confirmQuestion', {
         kind: t(`admin.reachability.kinds.${kind}`),
@@ -96,7 +96,7 @@ export function LaunchPanel({ body, status, onStarted }: LaunchPanelProps) {
       summary.balanceAfter === null
         ? null
         : t('admin.reachability.launch.confirmBalanceAfter', {
-            balance: formatKopeks(summary.balanceAfter),
+            balance: formatMoney(summary.balanceAfter),
           }),
     ]
       .filter((line): line is string => line !== null)
@@ -123,13 +123,16 @@ export function LaunchPanel({ body, status, onStarted }: LaunchPanelProps) {
             {t('admin.reachability.launch.price')}
           </p>
           <p className="text-2xl font-bold text-dark-50">
-            {preview.isFetching ? '…' : formatKopeks(cost)}
+            {preview.isFetching ? '…' : formatCredits(cost)}
           </p>
+          {cost !== null && !preview.isFetching && (
+            <p className="text-sm text-dark-300">≈ {formatKopeks(cost)}</p>
+          )}
           {preview.data && !preview.data.estimate_is_exact && (
             <p className="text-xs text-warning-400">{t('admin.reachability.launch.estimate')}</p>
           )}
           <p className="mt-1 text-xs text-dark-400">
-            {t('admin.reachability.launch.balance')}: {formatKopeks(balance)}
+            {t('admin.reachability.launch.balance')}: {formatMoney(balance)}
           </p>
         </div>
         <Button
@@ -142,7 +145,7 @@ export function LaunchPanel({ body, status, onStarted }: LaunchPanelProps) {
         >
           {create.isPending
             ? t('admin.reachability.launch.running')
-            : t('admin.reachability.launch.run', { price: formatKopeks(cost) })}
+            : t('admin.reachability.launch.run', { price: formatCredits(cost) })}
         </Button>
       </div>
 

@@ -2176,7 +2176,8 @@
         "raw": "Details",
         "diagnosis": "Diagnosis",
         "empty": "Empty result",
-        "failReason": "reason"
+        "failReason": "reason",
+        "estimate": "estimate"
       },
       "summary": {
         "empty": "No checks yet — run the first one on the Probe tab",

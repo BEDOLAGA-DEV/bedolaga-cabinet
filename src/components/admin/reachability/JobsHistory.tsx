@@ -9,7 +9,7 @@ import { ChevronRightIcon } from '@/components/icons';
 import { cn } from '@/lib/utils';
 import { getApiErrorMessage } from '@/utils/api-error';
 import { JobDetailsModal } from './JobDetailsModal';
-import { formatKopeks } from './money';
+import { formatCredits } from './money';
 import { relativeAge } from './relativeAge';
 
 const KINDS: JobKind[] = ['probe', 'vless', 'scan'];
@@ -153,7 +153,7 @@ export function JobsHistory() {
                       <span>
                         {t('admin.reachability.history.units', { count: unitsCount(job) })}
                       </span>
-                      <span className="text-dark-100">{formatKopeks(job.cost_kopeks)}</span>
+                      <span className="text-dark-100">{formatCredits(job.cost_kopeks)}</span>
                       <span>{age(job)}</span>
                     </span>
                   </span>
@@ -190,7 +190,7 @@ export function JobsHistory() {
                       {targetsLabel(job, more)}
                     </td>
                     <td className="p-2 text-dark-300">{unitsCount(job)}</td>
-                    <td className="p-2 text-dark-100">{formatKopeks(job.cost_kopeks)}</td>
+                    <td className="p-2 text-dark-100">{formatCredits(job.cost_kopeks)}</td>
                     <td className="p-2">{statusChip(job)}</td>
                     <td className="p-2 text-dark-400">{age(job)}</td>
                   </tr>

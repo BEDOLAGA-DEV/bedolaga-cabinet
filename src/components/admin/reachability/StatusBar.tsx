@@ -3,7 +3,7 @@ import { Link } from 'react-router';
 import type { ReachabilityStatus } from '@/api/reachability';
 import { StatCard } from '@/components/stats';
 import { formatShortDate } from '@/utils/format';
-import { formatKopeks } from './money';
+import { formatCredits, formatKopeks } from './money';
 
 interface StatusBarProps {
   status: ReachabilityStatus | undefined;
@@ -46,7 +46,10 @@ export function StatusBar({ status, isLoading }: StatusBarProps) {
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <StatCard
           label={t('admin.reachability.status.balance')}
-          value={formatKopeks(status.balance_kopeks)}
+          value={formatCredits(status.balance_kopeks)}
+          subValue={
+            status.balance_kopeks === null ? undefined : `≈ ${formatKopeks(status.balance_kopeks)}`
+          }
         />
         <StatCard
           label={t('admin.reachability.status.tier')}

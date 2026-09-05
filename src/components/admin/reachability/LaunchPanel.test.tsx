@@ -94,7 +94,7 @@ afterEach(cleanup);
 
 async function renderPanel(onStarted = vi.fn()) {
   renderWithProviders(<LaunchPanel body={body} status={status} onStarted={onStarted} />);
-  const run = await screen.findByRole('button', { name: 'Запустить за 6,40 ₽' });
+  const run = await screen.findByRole('button', { name: 'Запустить за ◈ 640 cred' });
   await waitFor(() => expect((run as HTMLButtonElement).disabled).toBe(false));
   return { run, onStarted };
 }
@@ -109,7 +109,13 @@ describe('LaunchPanel', () => {
     await waitFor(() => expect(dialog.confirm).toHaveBeenCalledTimes(1));
     const [text, title] = dialog.confirm.mock.calls[0];
     expect(title).toBe('Списание средств');
-    for (const part of ['RU-BS', 'mts|цфо|on', 'tele2|цфо|on', '6,40 ₽', '93,60 ₽']) {
+    for (const part of [
+      'RU-BS',
+      'mts|цфо|on',
+      'tele2|цфо|on',
+      '◈ 640 cred ≈ 6,40 ₽',
+      '◈ 9 360 cred ≈ 93,60 ₽',
+    ]) {
       expect(text).toContain(part);
     }
     expect(reachabilityApi.createJob).not.toHaveBeenCalled();
