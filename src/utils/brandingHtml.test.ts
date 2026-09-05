@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import htmlSource from '../../index.html?raw';
 import {
   BRANDING_PLACEHOLDERS,
+  DEFAULT_API_URL,
   DEFAULT_APP_NAME,
   renderBrandingHtml,
 } from '../../vite-plugins/brandingHtml';
@@ -39,5 +40,32 @@ describe('brandingHtml', () => {
   it('VITE_APP_LOGO задаёт букву монограммы', () => {
     const html = renderBrandingHtml(htmlSource, { name: 'ZeroPing', logo: 'zp' });
     expect(html).toContain(`href="${letterFaviconDataUri('Z')}"`);
+  });
+
+  // Инлайн-скрипт запрашивает /cabinet/branding до загрузки бандла и должен
+  // знать адрес API — тот же VITE_API_URL, что зашивается в JS.
+  it('подставляет адрес API в инлайн-скрипт, по умолчанию /api', () => {
+    expect(htmlSource).toContain(`var API = '${BRANDING_PLACEHOLDERS.apiUrl}';`);
+
+    const withDefault = renderBrandingHtml(htmlSource, { name: 'X', logo: '' });
+    expect(withDefault).toContain(`var API = '${DEFAULT_API_URL}';`);
+    expect(withDefault).not.toContain(BRANDING_PLACEHOLDERS.apiUrl);
+
+    const withUrl = renderBrandingHtml(htmlSource, {
+      name: 'X',
+      logo: '',
+      apiUrl: 'https://api.example.com',
+    });
+    expect(withUrl).toContain("var API = 'https://api.example.com';");
+  });
+
+  it('экранирует адрес API как JS-строку, чтобы не сломать скрипт', () => {
+    const html = renderBrandingHtml(htmlSource, {
+      name: 'X',
+      logo: '',
+      apiUrl: "/api'; alert(1); '</script>",
+    });
+    expect(html).toContain("var API = '/api\\'; alert(1); \\'\\x3C/script>';");
+    expect(html).not.toContain("alert(1); '</script>");
   });
 });

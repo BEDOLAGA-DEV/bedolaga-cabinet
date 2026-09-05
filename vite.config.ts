@@ -12,7 +12,11 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [
       react(),
-      brandingHtml({ name: env.VITE_APP_NAME ?? '', logo: env.VITE_APP_LOGO ?? '' }),
+      brandingHtml({
+        name: env.VITE_APP_NAME ?? '',
+        logo: env.VITE_APP_LOGO ?? '',
+        apiUrl: env.VITE_API_URL ?? '',
+      }),
     ],
     define: {
       __APP_VERSION__: JSON.stringify(packageJson.version),

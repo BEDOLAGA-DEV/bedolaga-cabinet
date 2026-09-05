@@ -15,7 +15,11 @@ export interface BrandHint {
   icon?: string;
 }
 
-const HINT_ICON_MAX_CHARS = 16_000;
+// Фавикон из загруженного логотипа — PNG 64×64 с canvas, у «фотографичных»
+// логотипов это 15–25 тысяч символов base64. Прежний порог в 16 000 молча
+// выбрасывал именно их: имя в подсказке было, а иконка нет, и до старта React
+// вкладка показывала монограмму сборки. Лимит localStorage — мегабайты.
+const HINT_ICON_MAX_CHARS = 96_000;
 
 export function readBrandHint(): BrandHint | null {
   const raw = safeLocal.getJson<unknown>(STORAGE_KEYS.BRAND_HINT, null);
@@ -23,6 +27,17 @@ export function readBrandHint(): BrandHint | null {
   const { name, letter, icon } = raw as Record<string, unknown>;
   if (typeof name !== 'string' || typeof letter !== 'string') return null;
   return { name, letter, icon: typeof icon === 'string' ? icon : undefined };
+}
+
+/**
+ * Атрибут на <html>: React применил бренд. Инлайн-скрипт index.html, который
+ * запросил /cabinet/branding ещё до загрузки бандла, после этого не вмешивается —
+ * иначе на медленном API его сырой логотип затёр бы нашу скруглённую иконку.
+ */
+export const BRAND_READY_ATTR = 'data-brand-ready';
+
+export function markBrandApplied(): void {
+  document.documentElement.setAttribute(BRAND_READY_ATTR, '1');
 }
 
 export function writeBrandHint(hint: BrandHint): void {

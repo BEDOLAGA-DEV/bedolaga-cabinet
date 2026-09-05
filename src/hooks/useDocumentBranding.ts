@@ -12,6 +12,7 @@ import { themeColorsQueryOptions } from '@/api/themeColors';
 import { DEFAULT_THEME_COLORS } from '@/types/theme';
 import {
   type ManifestIcon,
+  markBrandApplied,
   setAppNameMeta,
   setAppleTouchIcon,
   setDocumentTitle,
@@ -156,6 +157,8 @@ export function useDocumentBranding(): void {
       .then((icons) => {
         if (cancelled) return;
         setFavicon(icons.favicon);
+        // С этого момента ранний инлайн-скрипт index.html бренд не трогает.
+        markBrandApplied();
         setAppleTouchIcon(icons.touch);
         setWebManifest({
           name,

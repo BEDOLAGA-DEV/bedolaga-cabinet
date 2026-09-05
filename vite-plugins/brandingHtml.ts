@@ -15,14 +15,22 @@ export interface BrandingHtmlOptions {
   name: string;
   /** VITE_APP_LOGO; пустая строка → первая буква имени. */
   logo: string;
+  /**
+   * VITE_API_URL; пустая строка → «/api». Нужен инлайн-скрипту index.html:
+   * он запрашивает /cabinet/branding ещё до загрузки бандла, чтобы вкладка и
+   * ярлыки не показывали значения сборки (готовый образ собран с «Cabinet»).
+   */
+  apiUrl?: string;
 }
 
 export const BRANDING_PLACEHOLDERS = {
   name: '__APP_NAME__',
   icon: '__APP_ICON__',
+  apiUrl: '__API_URL__',
 } as const;
 
 export const DEFAULT_APP_NAME = 'Cabinet';
+export const DEFAULT_API_URL = '/api';
 
 function escapeHtml(value: string): string {
   return value
@@ -32,6 +40,15 @@ function escapeHtml(value: string): string {
     .replace(/"/g, '&quot;');
 }
 
+/** Значение внутри одинарных кавычек JS-строки в инлайн-скрипте; `<` — чтобы не собрать `</script>`. */
+function escapeJsString(value: string): string {
+  return value
+    .replace(/\\/g, '\\\\')
+    .replace(/'/g, "\\'")
+    .replace(/</g, '\\x3C')
+    .replace(/\r?\n/g, '\\n');
+}
+
 function replaceAll(html: string, placeholder: string, value: string): string {
   return html.split(placeholder).join(value);
 }
@@ -39,8 +56,10 @@ function replaceAll(html: string, placeholder: string, value: string): string {
 export function renderBrandingHtml(html: string, options: BrandingHtmlOptions): string {
   const name = options.name.trim() || DEFAULT_APP_NAME;
   const letter = monogramLetter(options.logo, monogramLetter(name));
+  const apiUrl = (options.apiUrl ?? '').trim() || DEFAULT_API_URL;
   const withName = replaceAll(html, BRANDING_PLACEHOLDERS.name, escapeHtml(name));
-  return replaceAll(withName, BRANDING_PLACEHOLDERS.icon, monogramDataUri(letter));
+  const withIcon = replaceAll(withName, BRANDING_PLACEHOLDERS.icon, monogramDataUri(letter));
+  return replaceAll(withIcon, BRANDING_PLACEHOLDERS.apiUrl, escapeJsString(apiUrl));
 }
 
 export function brandingHtml(options: BrandingHtmlOptions): Plugin {

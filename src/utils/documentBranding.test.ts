@@ -143,11 +143,20 @@ describe('подсказка первой отрисовки', () => {
     });
   });
 
-  it('не сохраняет слишком большую иконку и отбрасывает мусор', () => {
+  it('сохраняет фавикон обычного для логотипа размера', () => {
+    // PNG 64×64 с canvas у фотографичного логотипа — около 20 тысяч символов.
+    // Порог в 16 000 выбрасывал такую иконку, и до старта React вкладка
+    // показывала монограмму сборки, хотя имя из подсказки уже стояло.
+    const icon = `data:image/png;base64,${'A'.repeat(20_000)}`;
+    writeBrandHint({ name: 'ZeroPing', letter: 'Z', icon });
+    expect(readBrandHint()).toEqual({ name: 'ZeroPing', letter: 'Z', icon });
+  });
+
+  it('не сохраняет неправдоподобно большую иконку и отбрасывает мусор', () => {
     writeBrandHint({
       name: 'ZeroPing',
       letter: 'Z',
-      icon: `data:image/png;base64,${'A'.repeat(20_000)}`,
+      icon: `data:image/png;base64,${'A'.repeat(200_000)}`,
     });
     expect(readBrandHint()).toEqual({ name: 'ZeroPing', letter: 'Z', icon: undefined });
 

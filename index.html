@@ -157,31 +157,97 @@
       })();
     </script>
     <script>
-      // Бренд до первой отрисовки. Имя и логотип приходят с бэкенда уже после
-      // загрузки JS, и на медленной сети вкладка успевает показать значения из
-      // сборки (__APP_NAME__ и монограмму). Повторные визиты берут подсказку,
-      // которую записал useDocumentBranding (ключ = STORAGE_KEYS.BRAND_HINT).
+      // Бренд до первой отрисовки — без шагов при установке.
+      //
+      // Имя и логотип живут у бота, а страница у всех вариантов установки одна и
+      // та же (готовый образ собран с «Cabinet» и монограммой «V»). Ждать React —
+      // секунды на медленной сети, и вкладка с ярлыками успевают взять значения
+      // сборки. Поэтому здесь, ещё до загрузки бандла: (1) подсказка прошлого
+      // визита из localStorage (её пишет useDocumentBranding, ключ
+      // STORAGE_KEYS.BRAND_HINT); (2) запрос /cabinet/branding к API — он
+      // публичный, и прокси на API есть у каждой установки. React, когда
+      // доберётся, перерисует иконку своей (скруглённой) и поставит
+      // data-brand-ready на <html> — после этого мы уже ничего не трогаем.
+      // __API_URL__ подставляет vite-plugins/brandingHtml из VITE_API_URL.
       (function () {
+        var API = '__API_URL__';
+        var HINT_KEY = 'cabinet-brand-hint';
+
+        function applyName(name) {
+          document.title = name;
+          var metas = document.querySelectorAll(
+            'meta[name="application-name"], meta[name="apple-mobile-web-app-title"]'
+          );
+          for (var i = 0; i < metas.length; i++) metas[i].setAttribute('content', name);
+        }
+        function setIcon(href) {
+          var icon = document.querySelector('link[rel="icon"]');
+          if (icon) icon.setAttribute('href', href);
+        }
+        function escapeXml(value) {
+          return value
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+        }
+        function firstLetter(value, fallback) {
+          var ch = (value || '').replace(/^\s+/, '').charAt(0).toUpperCase();
+          return ch || fallback;
+        }
+        // Та же монограмма, что рисует vite-plugins/brandMonogram.ts; за совпадение
+        // двух копий отвечает src/test/earlyBrand.test.ts.
+        function monogram(letter) {
+          var svg =
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">' +
+            '<rect width="64" height="64" rx="14" fill="#0a0f1a"/>' +
+            '<text x="50%" y="50%" font-family="Manrope,Arial,sans-serif" font-size="38" ' +
+            'font-weight="700" fill="#ffffff" text-anchor="middle" ' +
+            'dominant-baseline="central">' + escapeXml(letter) + '</text>' +
+            '</svg>';
+          return 'data:image/svg+xml,' + encodeURIComponent(svg);
+        }
+
+        var hint = null;
         try {
-          var raw = localStorage.getItem('cabinet-brand-hint');
-          if (!raw) return;
-          var hint = JSON.parse(raw);
-          if (!hint || typeof hint.name !== 'string') return;
-          var name = hint.name.trim();
-          if (name) {
-            document.title = name;
-            var metas = document.querySelectorAll(
-              'meta[name="application-name"], meta[name="apple-mobile-web-app-title"]'
-            );
-            for (var i = 0; i < metas.length; i++) metas[i].setAttribute('content', name);
-          }
-          if (typeof hint.icon === 'string' && hint.icon.indexOf('data:image/') === 0) {
-            var icon = document.querySelector('link[rel="icon"]');
-            if (icon) icon.setAttribute('href', hint.icon);
+          hint = JSON.parse(localStorage.getItem(HINT_KEY) || 'null');
+          if (hint && typeof hint.name === 'string' && hint.name.trim()) applyName(hint.name.trim());
+          if (hint && typeof hint.icon === 'string' && hint.icon.indexOf('data:image/') === 0) {
+            setIcon(hint.icon);
           }
         } catch (e) {
-          // Хранилище заблокировано — остаются значения сборки.
+          // Хранилище заблокировано или подсказка битая — остаются значения сборки.
+          hint = null;
         }
+
+        if (typeof fetch !== 'function') return;
+        var base = API.replace(/\/+$/, '');
+        fetch(base + '/cabinet/branding', { credentials: 'omit' })
+          .then(function (response) {
+            return response.ok ? response.json() : null;
+          })
+          .then(function (brand) {
+            if (!brand || typeof brand.name !== 'string') return;
+            if (document.documentElement.hasAttribute('data-brand-ready')) return;
+            var name = brand.name.trim();
+            var letter = firstLetter(
+              typeof brand.logo_letter === 'string' ? brand.logo_letter : '',
+              firstLetter(name, 'V')
+            );
+            if (name) applyName(name);
+            var hasLogo = brand.has_custom_logo && typeof brand.logo_url === 'string';
+            setIcon(hasLogo ? base + brand.logo_url : monogram(letter));
+            if (!hint) {
+              try {
+                localStorage.setItem(HINT_KEY, JSON.stringify({ name: name, letter: letter }));
+              } catch (e) {
+                // Хранилище заблокировано — следующий визит снова спросит API.
+              }
+            }
+          })
+          .catch(function () {
+            // API недоступен — React покажет свой экран, вкладка останется со сборкой.
+          });
       })();
     </script>
   </head>
