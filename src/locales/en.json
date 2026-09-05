@@ -2017,8 +2017,6 @@
         "scan": "scan /24"
       },
       "status": {
-        "disabled": "bschekbot integration is disabled",
-        "notConfigured": "bschekbot API key is not set",
         "openSettings": "Open settings",
         "balance": "Balance",
         "tier": "Plan",
@@ -2279,6 +2277,23 @@
         "hint": "IP, IP:port, domain or https://… in any mix",
         "overLimit_one": "one extra address dropped: first ten kept",
         "overLimit_other": "{{count}} extra addresses dropped: first ten kept"
+      },
+      "setup": {
+        "titleDisabled": "BSCHEKER is disabled",
+        "titleNotConfigured": "BSCHEKER is not configured",
+        "intro": "Checks hosts, subscriptions and subnets as seen by Russian mobile SIMs via the bschekbot service. To get started:",
+        "key": "bschekbot API key",
+        "keyHint": "Get it at bsbord.com (Bronze plan or higher) and put it into the BSCHEK_API_KEY setting",
+        "enable": "Enable the integration",
+        "enableHint": "BSCHEK_ENABLED setting",
+        "reference": "Default subscription — optional",
+        "referenceHint": "shortUuid of a panel subscription in BSCHEK_REFERENCE_SUBSCRIPTION: VLESS test without picking a user",
+        "rights": "Admin permissions",
+        "rightsHint": "reachability:read to view the section, reachability:run to launch checks (they spend credits)",
+        "openSettings": "Open BSCHEKER settings",
+        "openSite": "Get a key at bsbord.com",
+        "envNote": "If the bot is configured via .env, environment variables override cabinet settings — edit .env and restart the bot instead.",
+        "unhealthyHint": "Check the API key and plan at bsbord.com"
       }
     },
     "wheel": {

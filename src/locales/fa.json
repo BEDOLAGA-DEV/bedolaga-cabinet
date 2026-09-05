@@ -3821,8 +3821,6 @@
         "scan": "اسکن /24"
       },
       "status": {
-        "disabled": "یکپارچه‌سازی bschekbot خاموش است",
-        "notConfigured": "کلید API bschekbot تنظیم نشده",
         "openSettings": "باز کردن تنظیمات",
         "balance": "موجودی",
         "tier": "طرح",
@@ -4083,6 +4081,23 @@
         "hint": "IP، IP:پورت، دامنه یا https://… به صورت ترکیبی",
         "overLimit_one": "یک آدرس اضافه حذف شد: ده تای اول نگه داشته شد",
         "overLimit_other": "{{count}} آدرس اضافه حذف شد: ده تای اول نگه داشته شد"
+      },
+      "setup": {
+        "titleDisabled": "BSCHEKER خاموش است",
+        "titleNotConfigured": "BSCHEKER پیکربندی نشده است",
+        "intro": "بررسی میزبان‌ها، اشتراک‌ها و زیرشبکه‌ها از دید سیم‌کارت‌های اپراتورهای روسیه از طریق سرویس bschekbot. برای شروع:",
+        "key": "کلید API سرویس bschekbot",
+        "keyHint": "آن را از bsbord.com بگیرید (طرح Bronze یا بالاتر) و در تنظیم BSCHEK_API_KEY قرار دهید",
+        "enable": "یکپارچه‌سازی را روشن کنید",
+        "enableHint": "تنظیم BSCHEK_ENABLED",
+        "reference": "اشتراک پیش‌فرض — اختیاری",
+        "referenceHint": "shortUuid یک اشتراک پنل در BSCHEK_REFERENCE_SUBSCRIPTION: تست VLESS بدون انتخاب کاربر",
+        "rights": "دسترسی مدیران",
+        "rightsHint": "reachability:read برای دیدن بخش، reachability:run برای اجرای بررسی‌ها (اعتبار مصرف می‌کنند)",
+        "openSettings": "باز کردن تنظیمات BSCHEKER",
+        "openSite": "دریافت کلید در bsbord.com",
+        "envNote": "اگر ربات از طریق .env پیکربندی شده، متغیرهای محیطی بر تنظیمات کابینت اولویت دارند — .env را ویرایش کرده و ربات را دوباره راه‌اندازی کنید.",
+        "unhealthyHint": "کلید API و طرح را در bsbord.com بررسی کنید"
       }
     },
     "theme": {

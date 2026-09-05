@@ -45,7 +45,7 @@ describe('SubscriptionTargets', () => {
     render(missing);
     expect(screen.getByText('Подписка по умолчанию не задана')).toBeTruthy();
     expect(screen.getByRole('link', { name: 'Открыть настройки' }).getAttribute('href')).toBe(
-      '/admin/settings',
+      '/admin/settings?section=sys_reachability',
     );
     expect(
       screen.getByRole('searchbox', { name: 'Подставить подписку пользователя' }),

@@ -26,6 +26,16 @@ export interface SettingsTreeConfig {
 // Маркер пункта-сборника: подставляется вместо списка категорий.
 export const OTHER_CATEGORIES = '*';
 
+/** Раздел настроек по id из ссылки `?section=`: подпункт дерева или особый пункт; иначе null. */
+export function findSettingsSection(id: string | null): string | null {
+  if (!id) return null;
+  if (SETTINGS_TREE.specialItems.some((item) => item.id === id)) return id;
+  const known = SETTINGS_TREE.groups.some((group) =>
+    group.children.some((child) => child.id === id),
+  );
+  return known ? id : null;
+}
+
 // Hierarchical settings tree — all 61 backend category keys mapped into 7 groups
 export const SETTINGS_TREE: SettingsTreeConfig = {
   specialItems: [

@@ -5,6 +5,7 @@ import { Link } from 'react-router';
 import { adminUsersApi } from '@/api/adminUsers';
 import type { ReferenceStatus } from '@/api/reachability';
 import { ChoiceChips } from './ChoiceChips';
+import { REACHABILITY_SETTINGS_PATH } from './deepLink';
 import { useDebouncedValue } from './useDebouncedValue';
 
 interface SubscriptionSourcePickerProps {
@@ -82,7 +83,7 @@ export function SubscriptionSourcePicker({
             {t('admin.reachability.subscription.noReferenceHint')}
           </p>
           <Link
-            to="/admin/settings"
+            to={REACHABILITY_SETTINGS_PATH}
             className="mt-2 inline-block text-xs text-accent-400 hover:underline"
           >
             {t('admin.reachability.status.openSettings')}

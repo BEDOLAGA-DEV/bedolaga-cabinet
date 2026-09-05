@@ -7,8 +7,10 @@ import { FleetStatus } from '../components/admin/reachability/FleetStatus';
 import { HostsHealthStrip } from '../components/admin/reachability/HostsHealthStrip';
 import { Launcher } from '../components/admin/reachability/Launcher';
 import { RecentJobs } from '../components/admin/reachability/RecentJobs';
+import { SetupGuide } from '../components/admin/reachability/SetupGuide';
 import {
   type LaunchMode,
+  REACHABILITY_SETTINGS_PATH,
   parseReachabilityDeepLink,
 } from '../components/admin/reachability/deepLink';
 import { useReachabilityStatus } from '../components/admin/reachability/useReachabilityStatus';
@@ -44,20 +46,19 @@ export default function AdminReachability() {
         </div>
         {ready && <FleetStatus />}
         {status && !status.healthy && status.health_message && (
-          <p className="text-sm text-error-400">{status.health_message}</p>
+          <div className="space-y-1">
+            <p className="text-sm text-error-400">{status.health_message}</p>
+            <p className="text-xs text-dark-400">
+              {t('admin.reachability.setup.unhealthyHint')} ·{' '}
+              <Link to={REACHABILITY_SETTINGS_PATH} className="text-accent-400 hover:underline">
+                {t('admin.reachability.setup.openSettings')}
+              </Link>
+            </p>
+          </div>
         )}
       </header>
 
-      {status && !ready && (
-        <div className="rounded-xl border border-warning-500/30 bg-warning-500/10 p-4 text-sm text-dark-100">
-          <p className="font-medium">
-            {t(`admin.reachability.status.${status.enabled ? 'notConfigured' : 'disabled'}`)}
-          </p>
-          <Link to="/admin/settings" className="mt-2 inline-block text-accent-400 hover:underline">
-            {t('admin.reachability.status.openSettings')}
-          </Link>
-        </div>
-      )}
+      {status && !ready && <SetupGuide status={status} />}
 
       {ready && (
         <>

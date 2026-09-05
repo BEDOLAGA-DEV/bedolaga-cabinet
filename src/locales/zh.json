@@ -3829,8 +3829,6 @@
         "scan": "扫描 /24"
       },
       "status": {
-        "disabled": "bschekbot 集成已关闭",
-        "notConfigured": "未设置 bschekbot API 密钥",
         "openSettings": "打开设置",
         "balance": "余额",
         "tier": "套餐",
@@ -4077,6 +4075,23 @@
         "placeholder": "ya.ru, 77.88.8.8, github.com:443 — 最多 10 个目标，逗号或换行分隔",
         "hint": "IP、IP:端口、域名或 https://… 可混合",
         "overLimit_other": "已丢弃 {{count}} 个多余地址：保留前十个"
+      },
+      "setup": {
+        "titleDisabled": "BSCHEKER 已关闭",
+        "titleNotConfigured": "BSCHEKER 未配置",
+        "intro": "通过 bschekbot 服务，用俄罗斯运营商的真实 SIM 检查主机、订阅和子网。开始前请：",
+        "key": "bschekbot API 密钥",
+        "keyHint": "在 bsbord.com 获取（需 Bronze 及以上套餐），填入 BSCHEK_API_KEY 设置",
+        "enable": "启用集成",
+        "enableHint": "BSCHEK_ENABLED 设置",
+        "reference": "默认订阅 — 可选",
+        "referenceHint": "在 BSCHEK_REFERENCE_SUBSCRIPTION 填入面板订阅的 shortUuid：无需选择用户即可进行 VLESS 测试",
+        "rights": "管理员权限",
+        "rightsHint": "reachability:read 查看该板块，reachability:run 发起检查（消耗积分）",
+        "openSettings": "打开 BSCHEKER 设置",
+        "openSite": "前往 bsbord.com 获取密钥",
+        "envNote": "如果机器人通过 .env 配置，环境变量会覆盖后台设置——请改 .env 并重启机器人。",
+        "unhealthyHint": "请在 bsbord.com 检查 API 密钥和套餐"
       }
     },
     "roles": {

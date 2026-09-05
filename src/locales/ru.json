@@ -2032,8 +2032,6 @@
         "scan": "скан /24"
       },
       "status": {
-        "disabled": "Интеграция bschekbot выключена",
-        "notConfigured": "Не задан ключ API bschekbot",
         "openSettings": "Открыть настройки",
         "balance": "Баланс",
         "tier": "Тариф",
@@ -2308,6 +2306,23 @@
         "overLimit_one": "лишний адрес отброшен: оставлены первые десять",
         "overLimit_few": "лишних адресов: {{count}}, оставлены первые десять",
         "overLimit_many": "лишних адресов: {{count}}, оставлены первые десять"
+      },
+      "setup": {
+        "titleDisabled": "BSCHEKER выключен",
+        "titleNotConfigured": "BSCHEKER не настроен",
+        "intro": "Проверка хостов, подписок и подсетей глазами симок операторов РФ через сервис bschekbot. Чтобы раздел заработал:",
+        "key": "Ключ API bschekbot",
+        "keyHint": "Получите на bsbord.com (нужен тариф не ниже Bronze) и вставьте в настройку BSCHEK_API_KEY",
+        "enable": "Включите интеграцию",
+        "enableHint": "Настройка BSCHEK_ENABLED",
+        "reference": "Подписка по умолчанию — необязательно",
+        "referenceHint": "shortUuid подписки панели в BSCHEK_REFERENCE_SUBSCRIPTION: VLESS-тест без выбора пользователя",
+        "rights": "Права админов",
+        "rightsHint": "reachability:read — смотреть раздел, reachability:run — запускать проверки (тратят кредиты)",
+        "openSettings": "Открыть настройки BSCHEKER",
+        "openSite": "Получить ключ на bsbord.com",
+        "envNote": "Если бот настроен через .env, переменные окружения перекрывают настройки из кабинета — тогда правьте .env и перезапустите бота.",
+        "unhealthyHint": "Проверьте ключ API и тариф на bsbord.com"
       }
     },
     "wheel": {

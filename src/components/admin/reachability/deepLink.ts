@@ -35,6 +35,10 @@ export interface DeepLink {
 }
 
 export const REACHABILITY_PATH = '/admin/reachability';
+/** Раздел BSCHEKER в настройках кабинета (подпункт дерева `sys_reachability`). */
+export const REACHABILITY_SETTINGS_PATH = '/admin/settings?section=sys_reachability';
+/** Сайт сервиса: ключ API и тариф. */
+export const BSBORD_URL = 'https://bsbord.com';
 
 function parseMode(value: string | null): LaunchMode | null {
   if (value === null) return null;
