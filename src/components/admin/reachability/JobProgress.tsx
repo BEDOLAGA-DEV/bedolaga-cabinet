@@ -120,7 +120,7 @@ export function JobProgress({ jobId, onReset }: JobProgressProps) {
           <p className="mt-1 text-dark-300">
             {error}{' '}
             {job.error_code && (
-              <span className="font-mono text-xs text-dark-500">[{job.error_code}]</span>
+              <span className="font-mono text-xs text-dark-400">[{job.error_code}]</span>
             )}
           </p>
         </div>

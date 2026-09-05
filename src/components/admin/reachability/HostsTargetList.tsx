@@ -92,8 +92,8 @@ export function HostsTargetList({ selected, onToggle, preselected = [] }: HostsT
 
       <ul className="mt-3 divide-y divide-dark-700/60">
         {visible.map((host) => (
-          <li key={host.uuid} className="flex flex-wrap items-center gap-3 py-2">
-            <label className="flex min-w-0 flex-1 cursor-pointer items-center gap-3">
+          <li key={host.uuid} className="flex flex-wrap items-center gap-x-3 gap-y-1 py-2">
+            <label className="flex w-full min-w-0 cursor-pointer items-center gap-3 sm:w-auto sm:flex-1">
               <input
                 type="checkbox"
                 className="h-4 w-4 shrink-0 rounded border-dark-600 accent-accent-500"
@@ -104,7 +104,7 @@ export function HostsTargetList({ selected, onToggle, preselected = [] }: HostsT
                 <span className="block truncate text-sm font-medium text-dark-100">
                   {host.remark}
                   {host.is_disabled && (
-                    <span className="ml-2 text-xs text-dark-500">
+                    <span className="ml-2 text-xs text-dark-400">
                       {t('admin.reachability.targets.includeDisabled')}
                     </span>
                   )}
@@ -115,7 +115,7 @@ export function HostsTargetList({ selected, onToggle, preselected = [] }: HostsT
                 </span>
               </span>
             </label>
-            <div className="flex items-center gap-2 text-xs">
+            <div className="flex w-full items-center justify-end gap-2 pl-7 text-xs sm:w-auto sm:pl-0">
               {host.node_uuids.length > 0 && (
                 <span className="text-dark-400">
                   {t('admin.reachability.targets.nodeHosts', { count: host.node_uuids.length })}
@@ -125,7 +125,7 @@ export function HostsTargetList({ selected, onToggle, preselected = [] }: HostsT
                 <span className="text-warning-400">{t('admin.reachability.targets.excluded')}</span>
               )}
               {host.purpose_guessed && (
-                <span className="text-dark-500">{t('admin.reachability.purpose.guessed')}</span>
+                <span className="text-dark-400">{t('admin.reachability.purpose.guessed')}</span>
               )}
               <select
                 value={host.purpose}

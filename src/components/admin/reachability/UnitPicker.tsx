@@ -135,7 +135,7 @@ export function UnitPicker({ kind, dpi, onDpiChange, selected, onChange }: UnitP
                   <label
                     className={cn(
                       'flex items-center gap-2 text-sm',
-                      unit.probeable ? 'text-dark-200' : 'text-dark-500',
+                      unit.probeable ? 'text-dark-200' : 'text-dark-400',
                     )}
                   >
                     <input

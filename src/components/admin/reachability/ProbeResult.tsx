@@ -54,7 +54,7 @@ export function ProbeResult({ job }: { job: Job }) {
                           <VerdictBadge verdict={leg.verdict} matches={leg.matches_expectation} />
                         </button>
                       ) : (
-                        <span className="text-dark-500">—</span>
+                        <span className="text-dark-400">—</span>
                       )}
                     </td>
                   );

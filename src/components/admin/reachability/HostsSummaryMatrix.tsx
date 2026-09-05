@@ -28,7 +28,7 @@ export function HostsSummaryMatrix({ summary }: HostsSummaryMatrixProps) {
             {summary.units.map((unit) => (
               <th key={unit.op_key} className="p-2 text-center font-normal">
                 <span className="block">{unitHeader(unit)}</span>
-                <span className="block font-mono text-[10px] text-dark-500">{unit.op_key}</span>
+                <span className="block font-mono text-[10px] text-dark-400">{unit.op_key}</span>
                 {!unit.in_catalog && (
                   <span className="block text-[10px] text-warning-400">
                     {t('admin.reachability.summary.notInCatalog')}
@@ -75,7 +75,7 @@ export function HostsSummaryMatrix({ summary }: HostsSummaryMatrixProps) {
                         </span>
                       </Link>
                     ) : (
-                      <span className="block rounded-lg border border-dashed border-dark-700 px-2 py-1 text-center text-xs text-dark-500">
+                      <span className="block rounded-lg border border-dashed border-dark-700 px-2 py-1 text-center text-xs text-dark-400">
                         —
                       </span>
                     )}
