@@ -3912,7 +3912,8 @@
         "nodeHosts_one": "{{count}} هاست",
         "nodeHosts_other": "{{count}} هاست",
         "excluded": "از خلاصه حذف شده",
-        "empty": "پنل هاستی برنگرداند"
+        "empty": "پنل هاستی برنگرداند",
+        "nodesEmpty": "پنل نودی برنگرداند"
       },
       "subscription": {
         "title": "پیکربندی‌های اشتراک",
@@ -3926,7 +3927,8 @@
         "core": "هسته xray",
         "coreAuto": "خودکار",
         "coreStable": "stable",
-        "corePrerelease": "prerelease"
+        "corePrerelease": "prerelease",
+        "empty": "اشتراک پیکربندی قابل‌استفاده‌ای ندارد"
       },
       "scan": {
         "cidr": "زیرشبکه /24",

@@ -3917,7 +3917,8 @@
         "nodePing": "仅 ping 服务器",
         "nodeHosts_other": "{{count}} 台主机",
         "excluded": "已从概览中排除",
-        "empty": "面板未返回主机"
+        "empty": "面板未返回主机",
+        "nodesEmpty": "面板未返回节点"
       },
       "subscription": {
         "title": "订阅配置",
@@ -3930,7 +3931,8 @@
         "core": "xray 内核",
         "coreAuto": "自动",
         "coreStable": "stable",
-        "corePrerelease": "prerelease"
+        "corePrerelease": "prerelease",
+        "empty": "订阅中没有可用配置"
       },
       "scan": {
         "cidr": "子网 /24",

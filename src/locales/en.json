@@ -2108,7 +2108,8 @@
         "nodeHosts_one": "{{count}} host",
         "nodeHosts_other": "{{count}} hosts",
         "excluded": "excluded from summary",
-        "empty": "The panel returned no hosts"
+        "empty": "The panel returned no hosts",
+        "nodesEmpty": "The panel returned no nodes"
       },
       "subscription": {
         "title": "Subscription configs",
@@ -2122,7 +2123,8 @@
         "core": "xray core",
         "coreAuto": "auto",
         "coreStable": "stable",
-        "corePrerelease": "prerelease"
+        "corePrerelease": "prerelease",
+        "empty": "The subscription has no usable configs"
       },
       "scan": {
         "cidr": "Subnet /24",

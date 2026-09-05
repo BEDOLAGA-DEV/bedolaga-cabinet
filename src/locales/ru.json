@@ -2126,7 +2126,8 @@
         "nodeHosts_few": "{{count}} хоста",
         "nodeHosts_many": "{{count}} хостов",
         "excluded": "исключён из сводки",
-        "empty": "Панель не вернула хостов"
+        "empty": "Панель не вернула хостов",
+        "nodesEmpty": "Панель не вернула нод"
       },
       "subscription": {
         "title": "Конфиги подписки",
@@ -2141,7 +2142,8 @@
         "core": "Ядро xray",
         "coreAuto": "авто",
         "coreStable": "stable",
-        "corePrerelease": "prerelease"
+        "corePrerelease": "prerelease",
+        "empty": "В подписке нет пригодных конфигов"
       },
       "scan": {
         "cidr": "Подсеть /24",
