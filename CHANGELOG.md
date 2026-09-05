@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.69.1](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.69.0...v1.69.1) (2026-09-05)
+
+
+### Bug Fixes
+
+* **auth:** экран согласия на всех Telegram-входах вместо падения «Something went wrong» ([a24058c](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/a24058c9855199e725b8f0316041b2036ee97d77))
+* **brand:** Safari снова видит логотип во вкладке — подсказка первого кадра только PNG ([fccc16b](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/fccc16b7d9436203b57a862285b84536d4f4f9c7))
+* **brand:** вкладка и ярлыки берут бренд с API ещё до загрузки приложения ([7efd51f](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/7efd51f6d4f4508fbc68509ff62588d886cd301b))
+* **brand:** загрузка логотипа лечит отравленный кеш браузера ([06b331f](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/06b331fceb85da28563a3f5024cc46a5bdc231ca))
+* **brand:** подсказка первого кадра для Safari — плитка с меньшим скруглением ([5869af4](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/5869af43387a56f63fa2cf3a89dbb9b210c02e3c))
+* **brand:** фавикон ведёт на эндпоинт бота — Safari его видит, CORS логотипа цел ([fb4ea70](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/fb4ea701a5c582107b7bade1139c209ca3d62147))
+* **errors:** структурный detail с бэка больше нигде не попадает в текст ошибки ([1a9c922](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/1a9c922852d90f227dee35150ae471cbe3d256f5))
+* **header:** аватар берётся и у бота, а не только из initData ([1137b70](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/1137b70ee2c1cb729a4760e2cd250f2099ce62b3))
+
 ## [1.69.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.68.2...v1.69.0) (2026-09-04)
 
 
