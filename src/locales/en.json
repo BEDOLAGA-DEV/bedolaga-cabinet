@@ -2192,6 +2192,10 @@
         "loadMore": "Show more",
         "more": "+{{count}}",
         "rawJson": "Raw response"
+      },
+      "shortcuts": {
+        "checkSubscription": "Check via Russian operators",
+        "checkNode": "Check reachability from Russia"
       }
     },
     "wheel": {

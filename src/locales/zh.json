@@ -3999,6 +3999,10 @@
         "loadMore": "显示更多",
         "more": "+{{count}}",
         "rawJson": "原始响应"
+      },
+      "shortcuts": {
+        "checkSubscription": "通过俄罗斯运营商检查",
+        "checkNode": "检查从俄罗斯的可达性"
       }
     },
     "roles": {

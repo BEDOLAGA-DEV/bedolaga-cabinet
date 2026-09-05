@@ -3996,6 +3996,10 @@
         "loadMore": "نمایش بیشتر",
         "more": "+{{count}}",
         "rawJson": "پاسخ خام"
+      },
+      "shortcuts": {
+        "checkSubscription": "بررسی از طریق اپراتورهای روسیه",
+        "checkNode": "بررسی دسترسی‌پذیری از روسیه"
       }
     },
     "theme": {

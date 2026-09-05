@@ -2212,6 +2212,10 @@
         "loadMore": "Показать ещё",
         "more": "+{{count}}",
         "rawJson": "Сырой ответ"
+      },
+      "shortcuts": {
+        "checkSubscription": "Проверить через операторов РФ",
+        "checkNode": "Проверить доступность из РФ"
       }
     },
     "wheel": {

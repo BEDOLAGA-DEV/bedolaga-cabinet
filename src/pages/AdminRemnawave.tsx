@@ -55,8 +55,12 @@ import {
   BackIcon,
   ChevronRightIcon,
   GeoCheckIcon,
+  CellSignalIcon,
 } from '../components/icons';
 import { GeoCheckModal } from '../components/admin/remnawave/GeoCheckModal';
+import { buildReachabilityLink } from '../components/admin/reachability/deepLink';
+import { useReachabilityAvailable } from '../components/admin/reachability/useReachabilityStatus';
+import { usePermissionStore } from '../store/permissions';
 import { supportsGeoCheck } from '../utils/nodeVersion';
 import { Skeleton, SkeletonGroup } from '../components/ui/skeleton';
 
@@ -158,6 +162,12 @@ function NodeCard({ node, providerName, realtime, onAction, isLoading }: NodeCar
   // GeoCheck умеет только узел 3.3.0+; на старом узле кнопку не показываем,
   // чтобы админ не упирался в ошибку панели.
   const canGeoCheck = supportsGeoCheck(node.versions);
+  // Ярлык в «Доступность из РФ»: только с правом запуска и при включённой интеграции.
+  // Оба хука вызываются безусловно — правило хуков, объединяем результат после.
+  const navigate = useNavigate();
+  const canRunReachability = usePermissionStore((s) => s.hasPermission('reachability:run'));
+  const reachabilityAvailable = useReachabilityAvailable();
+  const canReach = canRunReachability && reachabilityAvailable;
 
   const isUp = node.is_connected && node.is_node_online && !node.is_disabled;
   const dotColor = node.is_disabled ? 'bg-dark-500' : isUp ? 'bg-success-400' : 'bg-error-400';
@@ -246,6 +256,19 @@ function NodeCard({ node, providerName, realtime, onAction, isLoading }: NodeCar
           </div>
 
           <div className="flex shrink-0 items-center gap-1.5">
+            {canReach && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate(buildReachabilityLink({ targets: [{ kind: 'node', ref: node.uuid }] }));
+                }}
+                className="rounded-lg bg-dark-700 p-1.5 text-dark-300 transition-colors hover:bg-dark-600 hover:text-dark-100"
+                title={t('admin.reachability.shortcuts.checkNode')}
+                aria-label={t('admin.reachability.shortcuts.checkNode')}
+              >
+                <CellSignalIcon className="h-3.5 w-3.5" />
+              </button>
+            )}
             {canGeoCheck && (
               <button
                 onClick={(e) => {
