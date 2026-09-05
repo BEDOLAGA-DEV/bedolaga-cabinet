@@ -136,7 +136,7 @@ export default function AdminUserDetail() {
   const reachabilityAvailable = useReachabilityAvailable();
   const reachabilityLink =
     hasPermission('reachability:run') && reachabilityAvailable && userId && !Number.isNaN(userId)
-      ? buildReachabilityLink({ tab: 'vless', userId })
+      ? buildReachabilityLink({ kind: 'vless', userId })
       : null;
 
   // React Query owns the main user fetch: caching across navigations + auto-loading

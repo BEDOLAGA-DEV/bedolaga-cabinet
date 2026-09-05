@@ -2011,13 +2011,6 @@
     },
     "reachability": {
       "title": "BSCHEKER",
-      "tabs": {
-        "summary": "Summary",
-        "probe": "Probe",
-        "vless": "VLESS test",
-        "scan": "Scan /24",
-        "history": "History"
-      },
       "kinds": {
         "probe": "probe",
         "vless": "VLESS test",
@@ -2036,26 +2029,9 @@
         "idle": "idle"
       },
       "units": {
-        "title": "Operator SIMs",
         "dpiOn": "with whitelist",
         "dpiOff": "without whitelist",
-        "dpiAny": "all",
-        "bsShort": "WL",
-        "allRegions": "all regions",
-        "selected_one": "{{count}} SIM selected",
-        "selected_other": "{{count}} SIMs selected",
-        "notProbeable": "unavailable now",
-        "empty": "No SIMs — service unavailable",
-        "mode": "Mode",
-        "region": "Region",
-        "pickBs": "select whitelist SIMs ({{count}})",
-        "pickRegular": "select non-whitelist SIMs ({{count}})",
-        "clearAll": "clear all",
-        "recall": "same as last time ({{count}})",
-        "groupCount": "{{selected}} of {{total}}",
-        "showGroup": "{{operator}} SIMs",
-        "pickGroup": "Select all {{operator}} SIMs",
-        "noneSelected": "No SIMs selected — pick the ones you need by hand or with a quick pick"
+        "dpiAny": "all"
       },
       "launch": {
         "price": "Price",
@@ -2079,7 +2055,34 @@
         "confirmEstimate": "Price: ≈{{price}} (estimate, exact after start)",
         "confirmBalanceAfter": "Balance after charge: {{balance}}",
         "confirmMore": "and {{count}} more",
-        "started": "Job #{{id}} started"
+        "started": "Job #{{id}} started",
+        "title": "Launch",
+        "targetsRow": "Targets",
+        "unitsRow": "SIMs",
+        "total": "Total",
+        "balanceAfter": "Balance after",
+        "runProbe_one": "Check {{count}} target · {{price}}",
+        "runProbe_other": "Check {{count}} targets · {{price}}",
+        "runVless_one": "Test {{count}} config · {{price}}",
+        "runVless_other": "Test {{count}} configs · {{price}}",
+        "runScan": "Scan subnet · {{price}}",
+        "runEmpty": "Check",
+        "details": "Details",
+        "hideDetails": "Hide",
+        "newCheck": "New check",
+        "noUnitsChosen": "Select at least one SIM",
+        "skippedNoBs": "Will run without whitelist: {{units}}",
+        "inProgress": "Check in progress",
+        "runShortProbe_one": "Check {{count}} target",
+        "runShortProbe_other": "Check {{count}} targets",
+        "runShortVless_one": "Test {{count}} config",
+        "runShortVless_other": "Test {{count}} configs",
+        "runShortScan": "Scan",
+        "formula": "{{targets}} × {{units}}",
+        "summaryTargets_one": "{{count}} target",
+        "summaryTargets_other": "{{count}} targets",
+        "summaryUnits_one": "{{count}} SIM",
+        "summaryUnits_other": "{{count}} SIMs"
       },
       "progress": {
         "submitting": "Sending request…",
@@ -2114,20 +2117,22 @@
       },
       "targets": {
         "hosts": "Panel hosts",
-        "nodes": "Nodes",
-        "custom": "Custom target",
-        "customPlaceholder": "IP, domain or address:port",
-        "customAdd": "Add",
         "includeDisabled": "show disabled",
         "search": "Search hosts",
-        "nodePing": "server ping only",
-        "nodeHosts_one": "{{count}} host",
-        "nodeHosts_other": "{{count}} hosts",
-        "excluded": "excluded from summary",
         "empty": "The panel returned no hosts",
-        "nodesEmpty": "The panel returned no nodes",
-        "pickBs": "select whitelist hosts ({{count}})",
-        "purposeLabel": "Purpose"
+        "pickAllBs": "Select all whitelist hosts",
+        "ownAddresses": "Own addresses",
+        "ownPlaceholder": "ya.ru, 77.88.8.8, host.example:443",
+        "ownHint": "IP, domain or address:port, comma or newline separated",
+        "overLimit_one": "one extra address dropped: first ten kept",
+        "overLimit_other": "{{count}} extra addresses dropped: first ten kept",
+        "nodesTitle": "Nodes",
+        "nodesHint": "ping only",
+        "purposeToggle": "Change host purpose",
+        "count_one": "{{count}} target",
+        "count_other": "{{count}} targets",
+        "showAll": "Show all hosts ({{count}})",
+        "showLess": "Collapse list"
       },
       "subscription": {
         "title": "Subscription configs",
@@ -2143,7 +2148,7 @@
         "coreStable": "stable",
         "corePrerelease": "prerelease",
         "empty": "The subscription has no usable configs",
-        "pickBs": "select whitelist configs ({{count}})",
+        "pickBs": "Select all whitelist configs ({{count}})",
         "source": "Source",
         "userLabel": "user #{{id}}"
       },
@@ -2168,7 +2173,6 @@
       "result": {
         "cost": "Charged",
         "refunded": "refund {{amount}}",
-        "http": "HTTP",
         "tunnel": "tunnel",
         "targetsOk": "targets {{ok}}/{{total}}",
         "latency": "{{ms}} ms",
@@ -2180,8 +2184,6 @@
         "estimate": "estimate"
       },
       "summary": {
-        "empty": "No checks yet — run the first one on the Probe tab",
-        "age": "{{age}} ago",
         "openJob": "Open job",
         "dpiFilter": "SIMs",
         "panelError": "Panel unavailable: {{error}}",
@@ -2189,20 +2191,8 @@
         "notInCatalog": "not in catalog"
       },
       "history": {
-        "empty": "History is empty",
-        "filters": {
-          "kind": "Kind",
-          "status": "Status",
-          "all": "all"
-        },
         "columns": {
-          "id": "#",
-          "kind": "Kind",
-          "targets": "Targets",
-          "units": "SIMs",
-          "cost": "Charged",
-          "status": "Status",
-          "started": "Started"
+          "targets": "Targets"
         },
         "statuses": {
           "pending": "queued",
@@ -2211,17 +2201,71 @@
           "failed": "failed",
           "cancelled": "cancelled"
         },
-        "details": "Job #{{id}}",
         "loadMore": "Show more",
         "more": "+{{count}}",
         "rawJson": "Raw response",
-        "open": "Open job #{{id}}",
         "units_one": "{{count}} SIM",
         "units_other": "{{count}} SIMs"
       },
       "shortcuts": {
         "checkSubscription": "Check in BSCHEKER",
         "checkNode": "Check in BSCHEKER"
+      },
+      "fleet": {
+        "onAir": "on air: {{bs}} with whitelist · {{regular}} without",
+        "offline": "operators are unavailable right now, try again in 1–2 minutes"
+      },
+      "health": {
+        "title": "Whitelist hosts",
+        "summary": "{{ok}} of {{total}} healthy",
+        "failing_one": "{{count}} with a problem",
+        "failing_other": "{{count}} with problems",
+        "unchecked_one": "{{count}} unchecked",
+        "unchecked_other": "{{count}} unchecked",
+        "checked": "checked {{age}}",
+        "none": "No hosts marked as “whitelist” in the panel",
+        "empty": "No checks yet: pick hosts and run the first one",
+        "showMatrix": "Show matrix",
+        "hideMatrix": "Hide matrix"
+      },
+      "switch": {
+        "label": "What to check",
+        "probe": "Hosts and addresses",
+        "probeHint": "panel hosts, nodes and your own addresses, up to 10 targets per run",
+        "vless": "Subscription",
+        "vlessHint": "subscription configs through a VLESS tunnel, up to 20 per test",
+        "scan": "Subnet /24",
+        "scanHint": "live addresses of a subnet as seen by SIMs"
+      },
+      "sections": {
+        "targets": "Targets",
+        "probes": "Probes",
+        "more": "More"
+      },
+      "operators": {
+        "title": "Operators",
+        "hint": "each SIM is charged separately",
+        "pickBs": "Select all with whitelist",
+        "unpickBs": "Deselect all with whitelist",
+        "pickRegular": "Select all without whitelist",
+        "unpickRegular": "Deselect all without whitelist",
+        "recall": "Same as last time",
+        "reset": "Reset selection",
+        "selected": "{{selected}} / {{total}} selected",
+        "pickDistrict": "Select whole district {{code}}",
+        "unpickDistrict": "Deselect whole district {{code}}",
+        "noBs": "no whitelist",
+        "offline": "offline",
+        "empty": "SIM list is empty: service unavailable"
+      },
+      "recent": {
+        "title": "My checks",
+        "empty": "No checks yet",
+        "open": "Details",
+        "close": "Collapse",
+        "filterKind": "Kind",
+        "filterStatus": "Status",
+        "all": "all"
       }
     },
     "wheel": {

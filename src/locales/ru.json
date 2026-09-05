@@ -2026,13 +2026,6 @@
     },
     "reachability": {
       "title": "BSCHEKER",
-      "tabs": {
-        "summary": "Сводка",
-        "probe": "Проверка",
-        "vless": "VLESS-тест",
-        "scan": "Скан /24",
-        "history": "История"
-      },
       "kinds": {
         "probe": "проверка",
         "vless": "VLESS-тест",
@@ -2052,27 +2045,9 @@
         "idle": "свободно"
       },
       "units": {
-        "title": "Симки операторов",
         "dpiOn": "с Белым списком",
         "dpiOff": "без Белого списка",
-        "dpiAny": "все",
-        "bsShort": "БС",
-        "allRegions": "все округа",
-        "selected_one": "выбрана {{count}} симка",
-        "selected_few": "выбрано {{count}} симки",
-        "selected_many": "выбрано {{count}} симок",
-        "notProbeable": "сейчас недоступна",
-        "empty": "Список симок пуст — сервис недоступен",
-        "mode": "Режим",
-        "region": "Округ",
-        "pickBs": "отметить симки с БС ({{count}})",
-        "pickRegular": "отметить симки без БС ({{count}})",
-        "clearAll": "снять всё",
-        "recall": "как в прошлый раз ({{count}})",
-        "groupCount": "{{selected}} из {{total}}",
-        "showGroup": "Симки {{operator}}",
-        "pickGroup": "Отметить все симки {{operator}}",
-        "noneSelected": "Ни одна симка не отмечена — отметьте нужные вручную или быстрым выбором"
+        "dpiAny": "все"
       },
       "launch": {
         "price": "Цена",
@@ -2096,7 +2071,40 @@
         "confirmEstimate": "Цена: ≈{{price}} (оценка, точная после запуска)",
         "confirmBalanceAfter": "Остаток после списания: {{balance}}",
         "confirmMore": "и ещё {{count}}",
-        "started": "Задача #{{id}} запущена"
+        "started": "Задача #{{id}} запущена",
+        "title": "Запуск",
+        "targetsRow": "Цели",
+        "unitsRow": "Симки",
+        "total": "Итого",
+        "balanceAfter": "Остаток после",
+        "runProbe_one": "Проверить {{count}} цель · {{price}}",
+        "runProbe_few": "Проверить {{count}} цели · {{price}}",
+        "runProbe_many": "Проверить {{count}} целей · {{price}}",
+        "runVless_one": "Тестировать {{count}} конфиг · {{price}}",
+        "runVless_few": "Тестировать {{count}} конфига · {{price}}",
+        "runVless_many": "Тестировать {{count}} конфигов · {{price}}",
+        "runScan": "Сканировать подсеть · {{price}}",
+        "runEmpty": "Проверить",
+        "details": "Подробности",
+        "hideDetails": "Скрыть",
+        "newCheck": "Новая проверка",
+        "noUnitsChosen": "Выберите хотя бы одну симку",
+        "skippedNoBs": "Без Белого списка пройдут: {{units}}",
+        "inProgress": "Идёт проверка",
+        "runShortProbe_one": "Проверить {{count}} цель",
+        "runShortProbe_few": "Проверить {{count}} цели",
+        "runShortProbe_many": "Проверить {{count}} целей",
+        "runShortVless_one": "Тестировать {{count}} конфиг",
+        "runShortVless_few": "Тестировать {{count}} конфига",
+        "runShortVless_many": "Тестировать {{count}} конфигов",
+        "runShortScan": "Сканировать",
+        "formula": "{{targets}} × {{units}}",
+        "summaryTargets_one": "{{count}} цель",
+        "summaryTargets_few": "{{count}} цели",
+        "summaryTargets_many": "{{count}} целей",
+        "summaryUnits_one": "{{count}} симка",
+        "summaryUnits_few": "{{count}} симки",
+        "summaryUnits_many": "{{count}} симок"
       },
       "progress": {
         "submitting": "Отправляем запрос…",
@@ -2131,21 +2139,24 @@
       },
       "targets": {
         "hosts": "Хосты панели",
-        "nodes": "Ноды",
-        "custom": "Произвольная цель",
-        "customPlaceholder": "IP, домен или адрес:порт",
-        "customAdd": "Добавить",
         "includeDisabled": "показывать отключённые",
         "search": "Поиск по хостам",
-        "nodePing": "только ping сервера",
-        "nodeHosts_one": "{{count}} хост",
-        "nodeHosts_few": "{{count}} хоста",
-        "nodeHosts_many": "{{count}} хостов",
-        "excluded": "исключён из сводки",
         "empty": "Панель не вернула хостов",
-        "nodesEmpty": "Панель не вернула нод",
-        "pickBs": "отметить хосты под БС ({{count}})",
-        "purposeLabel": "Назначение"
+        "pickAllBs": "Отметить все хосты под БС",
+        "ownAddresses": "Свои адреса",
+        "ownPlaceholder": "ya.ru, 77.88.8.8, host.example:443",
+        "ownHint": "IP, домен или адрес:порт, через запятую или с новой строки",
+        "overLimit_one": "лишний адрес отброшен: оставлены первые десять",
+        "overLimit_few": "лишних адресов: {{count}}, оставлены первые десять",
+        "overLimit_many": "лишних адресов: {{count}}, оставлены первые десять",
+        "nodesTitle": "Ноды",
+        "nodesHint": "проверяются только ping-ом",
+        "purposeToggle": "Сменить назначение хоста",
+        "count_one": "{{count}} цель",
+        "count_few": "{{count}} цели",
+        "count_many": "{{count}} целей",
+        "showAll": "Показать все хосты ({{count}})",
+        "showLess": "Свернуть список"
       },
       "subscription": {
         "title": "Конфиги подписки",
@@ -2162,7 +2173,7 @@
         "coreStable": "stable",
         "corePrerelease": "prerelease",
         "empty": "В подписке нет пригодных конфигов",
-        "pickBs": "отметить конфиги под БС ({{count}})",
+        "pickBs": "Отметить все конфиги под БС ({{count}})",
         "source": "Источник",
         "userLabel": "пользователь #{{id}}"
       },
@@ -2188,7 +2199,6 @@
       "result": {
         "cost": "Списано",
         "refunded": "возврат {{amount}}",
-        "http": "HTTP",
         "tunnel": "туннель",
         "targetsOk": "цели {{ok}}/{{total}}",
         "latency": "{{ms}} мс",
@@ -2200,8 +2210,6 @@
         "estimate": "оценка"
       },
       "summary": {
-        "empty": "Проверок ещё не было — запустите первую на вкладке «Проверка»",
-        "age": "{{age}} назад",
         "openJob": "Открыть задачу",
         "dpiFilter": "Симки",
         "panelError": "Панель недоступна: {{error}}",
@@ -2209,20 +2217,8 @@
         "notInCatalog": "нет в каталоге"
       },
       "history": {
-        "empty": "История пуста",
-        "filters": {
-          "kind": "Вид",
-          "status": "Статус",
-          "all": "все"
-        },
         "columns": {
-          "id": "#",
-          "kind": "Вид",
-          "targets": "Цели",
-          "units": "Симки",
-          "cost": "Списано",
-          "status": "Статус",
-          "started": "Запущена"
+          "targets": "Цели"
         },
         "statuses": {
           "pending": "в очереди",
@@ -2231,11 +2227,9 @@
           "failed": "ошибка",
           "cancelled": "отменена"
         },
-        "details": "Задача #{{id}}",
         "loadMore": "Показать ещё",
         "more": "+{{count}}",
         "rawJson": "Сырой ответ",
-        "open": "Открыть задачу #{{id}}",
         "units_one": "{{count}} симка",
         "units_few": "{{count}} симки",
         "units_many": "{{count}} симок"
@@ -2243,6 +2237,64 @@
       "shortcuts": {
         "checkSubscription": "Проверить в BSCHEKER",
         "checkNode": "Проверить в BSCHEKER"
+      },
+      "fleet": {
+        "onAir": "в эфире {{bs}} с БС · {{regular}} без БС",
+        "offline": "операторы сейчас недоступны, попробуйте через 1–2 минуты"
+      },
+      "health": {
+        "title": "Хосты под Белым списком",
+        "summary": "{{ok}} из {{total}} в норме",
+        "failing_one": "{{count}} с проблемой",
+        "failing_few": "{{count}} с проблемами",
+        "failing_many": "{{count}} с проблемами",
+        "unchecked_one": "{{count}} не проверен",
+        "unchecked_few": "{{count}} не проверены",
+        "unchecked_many": "{{count}} не проверены",
+        "checked": "проверено {{age}}",
+        "none": "В панели нет хостов с назначением «под Белый список»",
+        "empty": "Проверок ещё не было: отметьте хосты и запустите первую",
+        "showMatrix": "Показать матрицу",
+        "hideMatrix": "Скрыть матрицу"
+      },
+      "switch": {
+        "label": "Что проверяем",
+        "probe": "Хосты и адреса",
+        "probeHint": "хосты панели, ноды и свои адреса, до 10 целей за запуск",
+        "vless": "Подписка",
+        "vlessHint": "конфиги подписки через VLESS-туннель, до 20 за тест",
+        "scan": "Подсеть /24",
+        "scanHint": "живые адреса подсети глазами симок"
+      },
+      "sections": {
+        "targets": "Цели",
+        "probes": "Пробы",
+        "more": "Дополнительно"
+      },
+      "operators": {
+        "title": "Операторы",
+        "hint": "каждая симка списывается отдельно",
+        "pickBs": "Выбрать всех с БС",
+        "unpickBs": "Снять всех с БС",
+        "pickRegular": "Выбрать всех без БС",
+        "unpickRegular": "Снять всех без БС",
+        "recall": "Как в прошлый раз",
+        "reset": "Сбросить выбор",
+        "selected": "выбрано {{selected}} / {{total}}",
+        "pickDistrict": "Выбрать весь округ {{code}}",
+        "unpickDistrict": "Снять весь округ {{code}}",
+        "noBs": "без БС",
+        "offline": "нет связи",
+        "empty": "Список симок пуст: сервис недоступен"
+      },
+      "recent": {
+        "title": "Мои проверки",
+        "empty": "Проверок ещё не было",
+        "open": "Подробности",
+        "close": "Свернуть",
+        "filterKind": "Вид",
+        "filterStatus": "Статус",
+        "all": "все"
       }
     },
     "wheel": {

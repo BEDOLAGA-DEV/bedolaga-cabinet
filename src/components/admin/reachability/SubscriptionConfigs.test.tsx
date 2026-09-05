@@ -49,7 +49,7 @@ describe('SubscriptionConfigs', () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole('button', { name: /отметить конфиги под БС \(1\)/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Отметить все конфиги под БС \(1\)/ }));
 
     expect(onToggle).toHaveBeenCalledTimes(1);
     expect(onToggle).toHaveBeenCalledWith(0);

@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 import { OperatorIcon } from './OperatorIcon';
 import { PurposeChip } from './PurposeChip';
 import { type VerdictRow, VerdictChipList } from './VerdictChipList';
-import { REACHABILITY_PATH } from './deepLink';
+import { buildReachabilityLink } from './deepLink';
 import { relativeAge } from './relativeAge';
 import { toneClasses, verdictLabelKey, verdictTone } from './verdict';
 
@@ -19,7 +19,7 @@ function unitHeader(unit: Unit): string {
 }
 
 function jobLink(jobId: number): string {
-  return `${REACHABILITY_PATH}?tab=history&job=${jobId}`;
+  return buildReachabilityLink({ jobId });
 }
 
 export function HostsSummaryMatrix({ summary }: HostsSummaryMatrixProps) {

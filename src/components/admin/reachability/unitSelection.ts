@@ -79,6 +79,40 @@ export function toggleGroup(selected: string[], group: OperatorGroup): string[] 
   return mergeKeys(selected, keys);
 }
 
+export interface District {
+  code: string;
+  label: string;
+  units: Unit[];
+}
+
+/** Операторы по федеральным округам в порядке появления в каталоге. */
+export function groupByDistrict(units: Unit[]): District[] {
+  const map = new Map<string, District>();
+  for (const unit of units) {
+    const current = map.get(unit.region_code);
+    if (current) map.set(unit.region_code, { ...current, units: [...current.units, unit] });
+    else map.set(unit.region_code, { code: unit.region_code, label: unit.region, units: [unit] });
+  }
+  return [...map.values()];
+}
+
+export function districtState(district: District, selected: string[]): GroupState {
+  return groupState({ operator: district.code, units: district.units }, selected);
+}
+
+export function toggleDistrict(selected: string[], district: District): string[] {
+  return toggleGroup(selected, { operator: district.code, units: district.units });
+}
+
+/** Режим Белого списка следует за выбранными симками: только с БС → on, только без → off, иначе any. */
+export function dpiForSelection(units: Unit[], selected: string[]): DpiFilter {
+  const chosen = units.filter((unit) => selected.includes(unit.op_key));
+  if (chosen.length === 0) return 'any';
+  if (chosen.every((unit) => unit.dpi === 'on')) return 'on';
+  if (chosen.every((unit) => unit.dpi === 'off')) return 'off';
+  return 'any';
+}
+
 const STORAGE_PREFIX = 'cabinet_reachability_units_';
 
 /** Память последнего запуска. Подставляется ТОЛЬКО по явной кнопке «как в прошлый раз». */

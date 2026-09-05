@@ -29,7 +29,7 @@ vi.mock('@/platform/hooks/useNotify', () => ({
 }));
 
 import { reachabilityApi } from '@/api/reachability';
-import { LaunchPanel } from './LaunchPanel';
+import { LaunchAside } from './LaunchAside';
 import { installMatchMedia, renderWithProviders } from './testUtils';
 import { recallSelection } from './unitSelection';
 
@@ -93,13 +93,15 @@ beforeEach(() => {
 afterEach(cleanup);
 
 async function renderPanel(onStarted = vi.fn()) {
-  renderWithProviders(<LaunchPanel body={body} status={status} onStarted={onStarted} />);
-  const run = await screen.findByRole('button', { name: 'Запустить за ◈ 640 cred' });
+  renderWithProviders(
+    <LaunchAside kind="probe" targetsCount={1} body={body} status={status} onStarted={onStarted} />,
+  );
+  const run = await screen.findByRole('button', { name: 'Проверить 1 цель · ◈ 640 cred' });
   await waitFor(() => expect((run as HTMLButtonElement).disabled).toBe(false));
   return { run, onStarted };
 }
 
-describe('LaunchPanel', () => {
+describe('LaunchAside', () => {
   it('отказ в диалоге — задача не создаётся', async () => {
     dialog.confirm.mockResolvedValue(false);
     const { run } = await renderPanel();

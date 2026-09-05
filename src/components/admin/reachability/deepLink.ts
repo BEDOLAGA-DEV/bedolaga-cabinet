@@ -1,5 +1,6 @@
-export const TAB_KEYS = ['summary', 'probe', 'vless', 'scan', 'history'] as const;
-export type TabKey = (typeof TAB_KEYS)[number];
+import type { JobKind } from '@/api/reachability';
+
+export const KIND_KEYS: readonly JobKind[] = ['probe', 'vless', 'scan'];
 
 export interface DeepLinkTarget {
   kind: 'host' | 'node';
@@ -7,16 +8,18 @@ export interface DeepLinkTarget {
 }
 
 export interface DeepLink {
-  tab: TabKey;
+  kind: JobKind;
   targets: DeepLinkTarget[];
   userId: number | null;
   shortUuid: string | null;
+  /** Задача, которую раскрыть в «моих проверках». */
+  jobId: number | null;
 }
 
 export const REACHABILITY_PATH = '/admin/reachability';
 
-function isTab(value: string | null): value is TabKey {
-  return (TAB_KEYS as readonly string[]).includes(value ?? '');
+function isKind(value: string | null): value is JobKind {
+  return (KIND_KEYS as readonly string[]).includes(value ?? '');
 }
 
 function isTargetKind(value: string): value is DeepLinkTarget['kind'] {
@@ -31,27 +34,30 @@ function parseTarget(raw: string): DeepLinkTarget | null {
   return isTargetKind(kind) && ref !== '' ? { kind, ref } : null;
 }
 
-function defaultTab(input: Pick<DeepLink, 'targets' | 'userId' | 'shortUuid'>): TabKey {
+function parseId(raw: string | null): number | null {
+  return raw && /^\d+$/.test(raw) ? Number(raw) : null;
+}
+
+function defaultKind(input: Pick<DeepLink, 'targets' | 'userId' | 'shortUuid'>): JobKind {
   if (input.targets.length) return 'probe';
   if (input.userId || input.shortUuid) return 'vless';
-  return 'summary';
+  return 'probe';
 }
 
 /**
- * `?tab=&target=host:<uuid>&target=node:<uuid>&user=<id>&sub=<shortUuid>`.
- * Цель без tab открывает «Проверку», пользователь или подписка — «VLESS-тест».
+ * `?kind=&target=host:<uuid>&target=node:<uuid>&user=<id>&sub=<shortUuid>&job=<id>`.
+ * Цель без kind открывает проверку хостов, пользователь или подписка — подписку.
  */
 export function parseReachabilityDeepLink(params: URLSearchParams): DeepLink {
   const targets = params
     .getAll('target')
     .map(parseTarget)
     .filter((target): target is DeepLinkTarget => target !== null);
-  const userRaw = params.get('user');
-  const userId = userRaw && /^\d+$/.test(userRaw) ? Number(userRaw) : null;
+  const userId = parseId(params.get('user'));
   const shortUuid = params.get('sub') || null;
-  const tabParam = params.get('tab');
-  const tab = isTab(tabParam) ? tabParam : defaultTab({ targets, userId, shortUuid });
-  return { tab, targets, userId, shortUuid };
+  const kindParam = params.get('kind');
+  const kind = isKind(kindParam) ? kindParam : defaultKind({ targets, userId, shortUuid });
+  return { kind, targets, userId, shortUuid, jobId: parseId(params.get('job')) };
 }
 
 export function buildReachabilityLink(input: Partial<DeepLink>): string {
@@ -59,9 +65,10 @@ export function buildReachabilityLink(input: Partial<DeepLink>): string {
   const userId = input.userId ?? null;
   const shortUuid = input.shortUuid ?? null;
   const params = new URLSearchParams();
-  params.set('tab', input.tab ?? defaultTab({ targets, userId, shortUuid }));
+  params.set('kind', input.kind ?? defaultKind({ targets, userId, shortUuid }));
   for (const target of targets) params.append('target', `${target.kind}:${target.ref}`);
   if (userId) params.set('user', String(userId));
   if (shortUuid) params.set('sub', shortUuid);
+  if (input.jobId) params.set('job', String(input.jobId));
   return `${REACHABILITY_PATH}?${params.toString()}`;
 }

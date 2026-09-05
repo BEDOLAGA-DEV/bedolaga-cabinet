@@ -3823,13 +3823,6 @@
     },
     "reachability": {
       "title": "BSCHEKER",
-      "tabs": {
-        "summary": "概览",
-        "probe": "探测",
-        "vless": "VLESS 测试",
-        "scan": "扫描 /24",
-        "history": "历史"
-      },
       "kinds": {
         "probe": "探测",
         "vless": "VLESS 测试",
@@ -3847,25 +3840,9 @@
         "idle": "空闲"
       },
       "units": {
-        "title": "运营商 SIM 卡",
         "dpiOn": "带白名单",
         "dpiOff": "不带白名单",
-        "dpiAny": "全部",
-        "bsShort": "白名单",
-        "allRegions": "所有联邦区",
-        "selected_other": "已选 {{count}} 张 SIM 卡",
-        "notProbeable": "当前不可用",
-        "empty": "没有 SIM 卡 — 服务不可用",
-        "mode": "模式",
-        "region": "地区",
-        "pickBs": "选择白名单 SIM（{{count}}）",
-        "pickRegular": "选择非白名单 SIM（{{count}}）",
-        "clearAll": "全部取消",
-        "recall": "与上次相同（{{count}}）",
-        "groupCount": "{{selected}}/{{total}}",
-        "showGroup": "{{operator}} 的 SIM",
-        "pickGroup": "选择 {{operator}} 的全部 SIM",
-        "noneSelected": "未选择任何 SIM——请手动或通过快速选择勾选"
+        "dpiAny": "全部"
       },
       "launch": {
         "price": "价格",
@@ -3889,7 +3866,28 @@
         "confirmEstimate": "价格：≈{{price}}（估算，启动后确定）",
         "confirmBalanceAfter": "扣费后余额：{{balance}}",
         "confirmMore": "还有 {{count}} 个",
-        "started": "任务 #{{id}} 已启动"
+        "started": "任务 #{{id}} 已启动",
+        "title": "启动",
+        "targetsRow": "目标",
+        "unitsRow": "SIM",
+        "total": "合计",
+        "balanceAfter": "扣费后余额",
+        "runProbe_other": "检查 {{count}} 个目标 · {{price}}",
+        "runVless_other": "测试 {{count}} 个配置 · {{price}}",
+        "runScan": "扫描子网 · {{price}}",
+        "runEmpty": "检查",
+        "details": "详情",
+        "hideDetails": "隐藏",
+        "newCheck": "新检查",
+        "noUnitsChosen": "请至少选择一张 SIM",
+        "skippedNoBs": "将在无白名单下运行：{{units}}",
+        "inProgress": "检查进行中",
+        "runShortProbe_other": "检查 {{count}} 个目标",
+        "runShortVless_other": "测试 {{count}} 个配置",
+        "runShortScan": "扫描",
+        "formula": "{{targets}} × {{units}}",
+        "summaryTargets_other": "{{count}} 个目标",
+        "summaryUnits_other": "{{count}} 张 SIM"
       },
       "progress": {
         "submitting": "正在发送请求…",
@@ -3924,19 +3922,20 @@
       },
       "targets": {
         "hosts": "面板主机",
-        "nodes": "节点",
-        "custom": "自定义目标",
-        "customPlaceholder": "IP、域名或地址:端口",
-        "customAdd": "添加",
         "includeDisabled": "显示已禁用",
         "search": "搜索主机",
-        "nodePing": "仅 ping 服务器",
-        "nodeHosts_other": "{{count}} 台主机",
-        "excluded": "已从概览中排除",
         "empty": "面板未返回主机",
-        "nodesEmpty": "面板未返回节点",
-        "pickBs": "选择白名单主机（{{count}}）",
-        "purposeLabel": "用途"
+        "pickAllBs": "选择所有白名单主机",
+        "ownAddresses": "自定义地址",
+        "ownPlaceholder": "ya.ru, 77.88.8.8, host.example:443",
+        "ownHint": "IP、域名或地址:端口，逗号或换行分隔",
+        "overLimit_other": "已丢弃 {{count}} 个多余地址：保留前十个",
+        "nodesTitle": "节点",
+        "nodesHint": "仅 ping",
+        "purposeToggle": "更改主机用途",
+        "count_other": "{{count}} 个目标",
+        "showAll": "显示全部主机（{{count}}）",
+        "showLess": "收起列表"
       },
       "subscription": {
         "title": "订阅配置",
@@ -3951,7 +3950,7 @@
         "coreStable": "stable",
         "corePrerelease": "prerelease",
         "empty": "订阅中没有可用配置",
-        "pickBs": "选择白名单配置（{{count}}）",
+        "pickBs": "选择所有白名单配置（{{count}}）",
         "source": "来源",
         "userLabel": "用户 #{{id}}"
       },
@@ -3975,7 +3974,6 @@
       "result": {
         "cost": "已扣费",
         "refunded": "退款 {{amount}}",
-        "http": "HTTP",
         "tunnel": "隧道",
         "targetsOk": "目标 {{ok}}/{{total}}",
         "latency": "{{ms}} 毫秒",
@@ -3987,8 +3985,6 @@
         "estimate": "估算"
       },
       "summary": {
-        "empty": "尚无检查 — 在「探测」标签页启动第一次",
-        "age": "{{age}}前",
         "openJob": "打开任务",
         "dpiFilter": "SIM 卡",
         "panelError": "面板不可用：{{error}}",
@@ -3996,20 +3992,8 @@
         "notInCatalog": "不在目录中"
       },
       "history": {
-        "empty": "历史为空",
-        "filters": {
-          "kind": "类型",
-          "status": "状态",
-          "all": "全部"
-        },
         "columns": {
-          "id": "#",
-          "kind": "类型",
-          "targets": "目标",
-          "units": "SIM 卡",
-          "cost": "已扣费",
-          "status": "状态",
-          "started": "启动时间"
+          "targets": "目标"
         },
         "statuses": {
           "pending": "排队中",
@@ -4018,16 +4002,68 @@
           "failed": "失败",
           "cancelled": "已取消"
         },
-        "details": "任务 #{{id}}",
         "loadMore": "显示更多",
         "more": "+{{count}}",
         "rawJson": "原始响应",
-        "open": "打开任务 #{{id}}",
         "units_other": "{{count}} 张 SIM"
       },
       "shortcuts": {
         "checkSubscription": "在 BSCHEKER 中检查",
         "checkNode": "在 BSCHEKER 中检查"
+      },
+      "fleet": {
+        "onAir": "在线：{{bs}} 有白名单 · {{regular}} 无白名单",
+        "offline": "运营商暂时不可用，请 1–2 分钟后重试"
+      },
+      "health": {
+        "title": "白名单主机",
+        "summary": "{{total}} 台中 {{ok}} 台正常",
+        "failing_other": "{{count}} 台有问题",
+        "unchecked_other": "{{count}} 台未检查",
+        "checked": "检查于 {{age}}",
+        "none": "面板中没有标记为“白名单”的主机",
+        "empty": "尚无检查：选择主机并运行第一次检查",
+        "showMatrix": "显示矩阵",
+        "hideMatrix": "隐藏矩阵"
+      },
+      "switch": {
+        "label": "检查内容",
+        "probe": "主机与地址",
+        "probeHint": "面板主机、节点和自定义地址，每次最多 10 个目标",
+        "vless": "订阅",
+        "vlessHint": "通过 VLESS 隧道检查订阅配置，每次最多 20 个",
+        "scan": "子网 /24",
+        "scanHint": "通过 SIM 查看子网存活地址"
+      },
+      "sections": {
+        "targets": "目标",
+        "probes": "探测",
+        "more": "更多"
+      },
+      "operators": {
+        "title": "运营商",
+        "hint": "每张 SIM 单独计费",
+        "pickBs": "选择所有有白名单的",
+        "unpickBs": "取消所有有白名单的",
+        "pickRegular": "选择所有无白名单的",
+        "unpickRegular": "取消所有无白名单的",
+        "recall": "与上次相同",
+        "reset": "重置选择",
+        "selected": "已选 {{selected}} / {{total}}",
+        "pickDistrict": "选择整个地区 {{code}}",
+        "unpickDistrict": "取消整个地区 {{code}}",
+        "noBs": "无白名单",
+        "offline": "离线",
+        "empty": "SIM 列表为空：服务不可用"
+      },
+      "recent": {
+        "title": "我的检查",
+        "empty": "尚无检查",
+        "open": "详情",
+        "close": "收起",
+        "filterKind": "类型",
+        "filterStatus": "状态",
+        "all": "全部"
       }
     },
     "roles": {

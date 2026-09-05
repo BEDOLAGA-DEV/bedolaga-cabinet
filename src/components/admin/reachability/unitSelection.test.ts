@@ -3,7 +3,10 @@ import type { Unit } from '@/api/reachability';
 import { resetSafeStorage } from '@/utils/safeStorage';
 import {
   defaultDpiFor,
+  districtState,
+  dpiForSelection,
   filterUnits,
+  groupByDistrict,
   groupByOperator,
   groupState,
   mergeKeys,
@@ -11,6 +14,7 @@ import {
   recallSelection,
   regionsOf,
   rememberSelection,
+  toggleDistrict,
   toggleGroup,
   toggleKey,
 } from './unitSelection';
@@ -116,5 +120,34 @@ describe('память последнего запуска', () => {
     rememberSelection('probe', ['mts|пфо|on']);
     expect(recallSelection('probe')).toEqual(['mts|пфо|on']);
     expect(recallSelection('scan')).toEqual([]);
+  });
+});
+
+describe('округа', () => {
+  it('groupByDistrict группирует по коду округа в порядке появления', () => {
+    expect(groupByDistrict(UNITS).map((d) => [d.code, d.label, d.units.length])).toEqual([
+      ['cfo', 'CFO', 3],
+      ['pfo', 'PFO', 1],
+      ['urfo', 'URFO', 1],
+    ]);
+  });
+  it('districtState и toggleDistrict считают только доступные симки', () => {
+    const [cfo, , urfo] = groupByDistrict(UNITS);
+    expect(districtState(cfo, [])).toBe('none');
+    expect(districtState(cfo, ['mts|цфо|off'])).toBe('some');
+    expect(toggleDistrict(['x'], cfo)).toEqual(['x', 'mts|цфо|off', 'tele2|цфо|on']);
+    expect(toggleDistrict(['x', 'mts|цфо|off', 'tele2|цфо|on'], cfo)).toEqual(['x']);
+    // в УФО обе симки недоступны — отмечать нечего
+    expect(districtState(urfo, [])).toBe('none');
+    expect(toggleDistrict([], urfo)).toEqual([]);
+  });
+});
+
+describe('dpiForSelection', () => {
+  it('режим выводится из выбранных симок: все с БС → on, все без → off, смесь → any', () => {
+    expect(dpiForSelection(UNITS, ['mts|пфо|on', 'tele2|цфо|on'])).toBe('on');
+    expect(dpiForSelection(UNITS, ['mts|цфо|off'])).toBe('off');
+    expect(dpiForSelection(UNITS, ['mts|цфо|off', 'tele2|цфо|on'])).toBe('any');
+    expect(dpiForSelection(UNITS, [])).toBe('any');
   });
 });

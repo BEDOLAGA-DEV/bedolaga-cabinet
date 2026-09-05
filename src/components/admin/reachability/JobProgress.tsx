@@ -135,7 +135,7 @@ export function JobProgress({ jobId, onReset }: JobProgressProps) {
 
       {!inFlight && (
         <Button variant="ghost" onClick={onReset}>
-          {t('admin.reachability.progress.retry')}
+          {t('admin.reachability.launch.newCheck')}
         </Button>
       )}
     </Card>

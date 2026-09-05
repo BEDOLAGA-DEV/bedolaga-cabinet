@@ -3815,13 +3815,6 @@
     },
     "reachability": {
       "title": "BSCHEKER",
-      "tabs": {
-        "summary": "خلاصه",
-        "probe": "بررسی",
-        "vless": "تست VLESS",
-        "scan": "اسکن /24",
-        "history": "تاریخچه"
-      },
       "kinds": {
         "probe": "بررسی",
         "vless": "تست VLESS",
@@ -3840,26 +3833,9 @@
         "idle": "آزاد"
       },
       "units": {
-        "title": "سیم‌کارت‌های اپراتورها",
         "dpiOn": "با لیست سفید",
         "dpiOff": "بدون لیست سفید",
-        "dpiAny": "همه",
-        "bsShort": "ل.س",
-        "allRegions": "همه مناطق",
-        "selected_one": "{{count}} سیم‌کارت انتخاب شد",
-        "selected_other": "{{count}} سیم‌کارت انتخاب شد",
-        "notProbeable": "اکنون در دسترس نیست",
-        "empty": "سیم‌کارتی نیست — سرویس در دسترس نیست",
-        "mode": "حالت",
-        "region": "منطقه",
-        "pickBs": "انتخاب سیم‌کارت‌های لیست سفید ({{count}})",
-        "pickRegular": "انتخاب سیم‌کارت‌های بدون لیست سفید ({{count}})",
-        "clearAll": "پاک کردن همه",
-        "recall": "مانند دفعه قبل ({{count}})",
-        "groupCount": "{{selected}} از {{total}}",
-        "showGroup": "سیم‌کارت‌های {{operator}}",
-        "pickGroup": "انتخاب همه سیم‌کارت‌های {{operator}}",
-        "noneSelected": "هیچ سیم‌کارتی انتخاب نشده — موارد لازم را دستی یا با انتخاب سریع علامت بزنید"
+        "dpiAny": "همه"
       },
       "launch": {
         "price": "قیمت",
@@ -3883,7 +3859,34 @@
         "confirmEstimate": "قیمت: ≈{{price}} (تخمینی، مبلغ دقیق پس از شروع)",
         "confirmBalanceAfter": "موجودی پس از کسر: {{balance}}",
         "confirmMore": "و {{count}} مورد دیگر",
-        "started": "کار #{{id}} شروع شد"
+        "started": "کار #{{id}} شروع شد",
+        "title": "اجرا",
+        "targetsRow": "اهداف",
+        "unitsRow": "سیم‌کارت‌ها",
+        "total": "جمع",
+        "balanceAfter": "موجودی پس از",
+        "runProbe_one": "بررسی {{count}} هدف · {{price}}",
+        "runProbe_other": "بررسی {{count}} هدف · {{price}}",
+        "runVless_one": "آزمون {{count}} پیکربندی · {{price}}",
+        "runVless_other": "آزمون {{count}} پیکربندی · {{price}}",
+        "runScan": "اسکن زیرشبکه · {{price}}",
+        "runEmpty": "بررسی",
+        "details": "جزئیات",
+        "hideDetails": "پنهان کردن",
+        "newCheck": "بررسی جدید",
+        "noUnitsChosen": "حداقل یک سیم‌کارت انتخاب کنید",
+        "skippedNoBs": "بدون لیست سفید اجرا می‌شوند: {{units}}",
+        "inProgress": "بررسی در حال انجام",
+        "runShortProbe_one": "بررسی {{count}} هدف",
+        "runShortProbe_other": "بررسی {{count}} هدف",
+        "runShortVless_one": "آزمون {{count}} پیکربندی",
+        "runShortVless_other": "آزمون {{count}} پیکربندی",
+        "runShortScan": "اسکن",
+        "formula": "{{targets}} × {{units}}",
+        "summaryTargets_one": "{{count}} هدف",
+        "summaryTargets_other": "{{count}} هدف",
+        "summaryUnits_one": "{{count}} سیم‌کارت",
+        "summaryUnits_other": "{{count}} سیم‌کارت"
       },
       "progress": {
         "submitting": "در حال ارسال درخواست…",
@@ -3918,20 +3921,22 @@
       },
       "targets": {
         "hosts": "هاست‌های پنل",
-        "nodes": "نودها",
-        "custom": "هدف دلخواه",
-        "customPlaceholder": "IP، دامنه یا آدرس:پورت",
-        "customAdd": "افزودن",
         "includeDisabled": "نمایش غیرفعال‌ها",
         "search": "جستجوی هاست‌ها",
-        "nodePing": "فقط پینگ سرور",
-        "nodeHosts_one": "{{count}} هاست",
-        "nodeHosts_other": "{{count}} هاست",
-        "excluded": "از خلاصه حذف شده",
         "empty": "پنل هاستی برنگرداند",
-        "nodesEmpty": "پنل نودی برنگرداند",
-        "pickBs": "انتخاب میزبان‌های لیست سفید ({{count}})",
-        "purposeLabel": "کاربرد"
+        "pickAllBs": "انتخاب همه میزبان‌های لیست سفید",
+        "ownAddresses": "آدرس‌های خودتان",
+        "ownPlaceholder": "ya.ru, 77.88.8.8, host.example:443",
+        "ownHint": "IP، دامنه یا آدرس:پورت، با کاما یا خط جدید",
+        "overLimit_one": "یک آدرس اضافه حذف شد: ده تای اول نگه داشته شد",
+        "overLimit_other": "{{count}} آدرس اضافه حذف شد: ده تای اول نگه داشته شد",
+        "nodesTitle": "نودها",
+        "nodesHint": "فقط ping",
+        "purposeToggle": "تغییر کاربرد میزبان",
+        "count_one": "{{count}} هدف",
+        "count_other": "{{count}} هدف",
+        "showAll": "نمایش همه میزبان‌ها ({{count}})",
+        "showLess": "جمع کردن فهرست"
       },
       "subscription": {
         "title": "پیکربندی‌های اشتراک",
@@ -3947,7 +3952,7 @@
         "coreStable": "stable",
         "corePrerelease": "prerelease",
         "empty": "اشتراک پیکربندی قابل‌استفاده‌ای ندارد",
-        "pickBs": "انتخاب پیکربندی‌های لیست سفید ({{count}})",
+        "pickBs": "انتخاب همه پیکربندی‌های لیست سفید ({{count}})",
         "source": "منبع",
         "userLabel": "کاربر #{{id}}"
       },
@@ -3972,7 +3977,6 @@
       "result": {
         "cost": "کسر شده",
         "refunded": "بازگشت {{amount}}",
-        "http": "HTTP",
         "tunnel": "تونل",
         "targetsOk": "اهداف {{ok}}/{{total}}",
         "latency": "{{ms}} م‌ث",
@@ -3984,8 +3988,6 @@
         "estimate": "تخمینی"
       },
       "summary": {
-        "empty": "هنوز بررسی‌ای انجام نشده — اولین را در تب «بررسی» شروع کنید",
-        "age": "{{age}} پیش",
         "openJob": "باز کردن کار",
         "dpiFilter": "سیم‌کارت‌ها",
         "panelError": "پنل در دسترس نیست: {{error}}",
@@ -3993,20 +3995,8 @@
         "notInCatalog": "در فهرست نیست"
       },
       "history": {
-        "empty": "تاریخچه خالی است",
-        "filters": {
-          "kind": "نوع",
-          "status": "وضعیت",
-          "all": "همه"
-        },
         "columns": {
-          "id": "#",
-          "kind": "نوع",
-          "targets": "اهداف",
-          "units": "سیم‌کارت‌ها",
-          "cost": "کسر شده",
-          "status": "وضعیت",
-          "started": "شروع"
+          "targets": "اهداف"
         },
         "statuses": {
           "pending": "در صف",
@@ -4015,17 +4005,71 @@
           "failed": "خطا",
           "cancelled": "لغو شد"
         },
-        "details": "کار #{{id}}",
         "loadMore": "نمایش بیشتر",
         "more": "+{{count}}",
         "rawJson": "پاسخ خام",
-        "open": "باز کردن کار #{{id}}",
         "units_one": "{{count}} سیم‌کارت",
         "units_other": "{{count}} سیم‌کارت"
       },
       "shortcuts": {
         "checkSubscription": "بررسی در BSCHEKER",
         "checkNode": "بررسی در BSCHEKER"
+      },
+      "fleet": {
+        "onAir": "روی خط: {{bs}} با لیست سفید · {{regular}} بدون",
+        "offline": "اپراتورها اکنون در دسترس نیستند، ۱–۲ دقیقه بعد دوباره امتحان کنید"
+      },
+      "health": {
+        "title": "میزبان‌های لیست سفید",
+        "summary": "{{ok}} از {{total}} سالم",
+        "failing_one": "{{count}} با مشکل",
+        "failing_other": "{{count}} با مشکل",
+        "unchecked_one": "{{count}} بررسی‌نشده",
+        "unchecked_other": "{{count}} بررسی‌نشده",
+        "checked": "بررسی شده {{age}}",
+        "none": "هیچ میزبانی با کاربرد «لیست سفید» در پنل نیست",
+        "empty": "هنوز بررسی‌ای نیست: میزبان‌ها را انتخاب و اولین بررسی را اجرا کنید",
+        "showMatrix": "نمایش ماتریس",
+        "hideMatrix": "پنهان کردن ماتریس"
+      },
+      "switch": {
+        "label": "چه چیزی بررسی شود",
+        "probe": "میزبان‌ها و آدرس‌ها",
+        "probeHint": "میزبان‌های پنل، نودها و آدرس‌های خودتان، تا ۱۰ هدف در هر اجرا",
+        "vless": "اشتراک",
+        "vlessHint": "پیکربندی‌های اشتراک از طریق تونل VLESS، تا ۲۰ در هر آزمون",
+        "scan": "زیرشبکه /24",
+        "scanHint": "آدرس‌های زنده زیرشبکه از دید سیم‌کارت‌ها"
+      },
+      "sections": {
+        "targets": "اهداف",
+        "probes": "پروب‌ها",
+        "more": "بیشتر"
+      },
+      "operators": {
+        "title": "اپراتورها",
+        "hint": "هر سیم‌کارت جداگانه کسر می‌شود",
+        "pickBs": "انتخاب همه با لیست سفید",
+        "unpickBs": "لغو انتخاب همه با لیست سفید",
+        "pickRegular": "انتخاب همه بدون لیست سفید",
+        "unpickRegular": "لغو انتخاب همه بدون لیست سفید",
+        "recall": "مانند دفعه قبل",
+        "reset": "بازنشانی انتخاب",
+        "selected": "{{selected}} / {{total}} انتخاب شده",
+        "pickDistrict": "انتخاب کل منطقه {{code}}",
+        "unpickDistrict": "لغو انتخاب کل منطقه {{code}}",
+        "noBs": "بدون لیست سفید",
+        "offline": "آفلاین",
+        "empty": "فهرست سیم‌کارت‌ها خالی است: سرویس در دسترس نیست"
+      },
+      "recent": {
+        "title": "بررسی‌های من",
+        "empty": "هنوز بررسی‌ای نیست",
+        "open": "جزئیات",
+        "close": "جمع کردن",
+        "filterKind": "نوع",
+        "filterStatus": "وضعیت",
+        "all": "همه"
       }
     },
     "theme": {
