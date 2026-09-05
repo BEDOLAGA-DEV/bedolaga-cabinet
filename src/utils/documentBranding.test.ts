@@ -134,13 +134,28 @@ describe('веб-манифест', () => {
 
 describe('подсказка первой отрисовки', () => {
   it('пишется под ключом STORAGE_KEYS.BRAND_HINT и читается обратно', () => {
-    writeBrandHint({ name: 'ZeroPing', letter: 'Z', icon: 'data:image/svg+xml,x' });
+    writeBrandHint({ name: 'ZeroPing', letter: 'Z', icon: 'data:image/png;base64,x' });
     expect(localStorage.getItem(STORAGE_KEYS.BRAND_HINT)).toContain('ZeroPing');
     expect(readBrandHint()).toEqual({
       name: 'ZeroPing',
       letter: 'Z',
-      icon: 'data:image/svg+xml,x',
+      icon: 'data:image/png;base64,x',
     });
+  });
+
+  it('SVG-иконку не сохраняет и не отдаёт: Safari рисует её белой плиткой с буквой', () => {
+    // Инлайн-скрипт index.html ставит иконку из подсказки до загрузки бандла, а
+    // Safari берёт фавикон только в этот момент. SVG в подсказке значил бы, что
+    // Safari никогда не увидит ни логотип по ссылке на бота, ни цвета монограммы.
+    writeBrandHint({ name: 'ZeroPing', letter: 'Z', icon: 'data:image/svg+xml,%3Csvg%3E' });
+    expect(readBrandHint()).toEqual({ name: 'ZeroPing', letter: 'Z', icon: undefined });
+
+    // Подсказка, записанная прошлой сборкой, тоже не должна отдавать SVG.
+    localStorage.setItem(
+      STORAGE_KEYS.BRAND_HINT,
+      JSON.stringify({ name: 'ZeroPing', letter: 'Z', icon: 'data:image/svg+xml,%3Csvg%3E' }),
+    );
+    expect(readBrandHint()).toEqual({ name: 'ZeroPing', letter: 'Z', icon: undefined });
   });
 
   it('сохраняет фавикон обычного для логотипа размера', () => {

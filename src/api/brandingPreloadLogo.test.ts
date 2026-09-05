@@ -37,6 +37,8 @@ const objectUrl = { createObjectURL: vi.fn(() => 'blob:logo'), revokeObjectURL: 
 
 beforeEach(() => {
   sessionStorage.clear();
+  objectUrl.createObjectURL.mockClear();
+  objectUrl.revokeObjectURL.mockClear();
   Object.defineProperty(URL, 'createObjectURL', {
     value: objectUrl.createObjectURL,
     configurable: true,
@@ -79,6 +81,43 @@ describe('preloadLogo', () => {
       cache: 'reload',
     });
     expect(getLogoBlobUrl()).toBe('blob:logo');
+  });
+
+  it('параллельные вызовы делят один запрос и один blob, ничего не отзывая', async () => {
+    // Логотип просят одновременно запрос брендинга и сборка иконок. Раньше каждый
+    // вызов делал свой fetch, а закончивший вторым отзывал blob-адрес первого —
+    // прямо под <img> шапки или под canvas фавикона: картинка не грузилась,
+    // и вкладка получала монограмму вместо логотипа.
+    let release: (value: Response) => void = () => {};
+    const pending = new Promise<Response>((resolve) => {
+      release = resolve;
+    });
+    const fetch = vi.fn(() => pending);
+    vi.stubGlobal('fetch', fetch);
+    const { preloadLogo, getLogoBlobUrl } = await loadModule();
+
+    const first = preloadLogo(BRANDING);
+    const second = preloadLogo(BRANDING);
+    release(okResponse());
+    await Promise.all([first, second]);
+
+    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(objectUrl.createObjectURL).toHaveBeenCalledTimes(1);
+    expect(objectUrl.revokeObjectURL).not.toHaveBeenCalled();
+    expect(getLogoBlobUrl()).toBe('blob:logo');
+  });
+
+  it('повторный вызов после загрузки не ходит в сеть и не трогает blob', async () => {
+    const fetch = vi.fn(async () => okResponse());
+    vi.stubGlobal('fetch', fetch);
+    const { preloadLogo } = await loadModule();
+
+    await preloadLogo(BRANDING);
+    await preloadLogo(BRANDING);
+
+    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(objectUrl.createObjectURL).toHaveBeenCalledTimes(1);
+    expect(objectUrl.revokeObjectURL).not.toHaveBeenCalled();
   });
 
   it('если и повтор упал — тихо остаётся без логотипа', async () => {

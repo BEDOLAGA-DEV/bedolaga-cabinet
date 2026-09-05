@@ -119,7 +119,7 @@ describe('ранний бренд из index.html', () => {
     });
   });
 
-  it('подсказку прошлого визита применяет синхронно, включая data: иконку', async () => {
+  it('подсказку прошлого визита применяет синхронно, включая PNG-иконку', async () => {
     const icon = 'data:image/png;base64,hint';
     localStorage.setItem(
       'cabinet-brand-hint',
@@ -135,6 +135,22 @@ describe('ранний бренд из index.html', () => {
     expect(document.title).toBe('ZeroPing VPN');
     expect(iconHref()).toBe(icon);
     expect(JSON.parse(localStorage.getItem('cabinet-brand-hint') ?? 'null').icon).toBe(icon);
+  });
+
+  it('SVG-иконку из подсказки не применяет: ссылка на эндпоинт бота остаётся', () => {
+    // Safari рисует SVG-фавикон монохромной плиткой с буквой, а иконку берёт
+    // только при загрузке страницы. Подменив ссылку на SVG, скрипт лишал Safari
+    // логотипа навсегда: до эндпоинта бота он уже не доходил.
+    localStorage.setItem(
+      'cabinet-brand-hint',
+      JSON.stringify({ name: 'ZeroPing', letter: 'Z', icon: 'data:image/svg+xml,%3Csvg%3E' }),
+    );
+    vi.stubGlobal('fetch', fetchReturning(LOGO_BRAND));
+
+    runScript();
+
+    expect(document.title).toBe('ZeroPing');
+    expect(iconHref()).toBe(STATIC_ICON);
   });
 
   it('если React уже применил бренд, поздний ответ API ничего не трогает', async () => {

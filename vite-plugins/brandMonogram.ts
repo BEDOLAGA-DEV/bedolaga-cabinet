@@ -34,8 +34,10 @@ export function monogramSvg(
   letter: string,
   colors: MonogramColors = DEFAULT_MONOGRAM_COLORS,
 ): string {
+  // width/height обязательны: без них drawImage на canvas берёт для SVG
+  // размер по умолчанию 300×150 и режет монограмму при растеризации.
   return (
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">` +
+    `<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">` +
     `<rect width="64" height="64" rx="14" fill="${escapeXml(colors.background)}"/>` +
     `<text x="50%" y="50%" font-family="Manrope,Arial,sans-serif" font-size="38" ` +
     `font-weight="700" fill="${escapeXml(colors.foreground)}" text-anchor="middle" ` +

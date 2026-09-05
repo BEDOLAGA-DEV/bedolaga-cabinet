@@ -174,7 +174,9 @@
       // на /cabinet/branding/logo: запрос фавикона идёт без Origin, его ответ
       // без CORS-заголовков ложится в кеш, и fetch() логотипа из React получает
       // из кеша копию без Access-Control-Allow-Origin. Подсказка прошлого визита
-      // (data: URI) — единственное исключение: сети в ней нет.
+      // (PNG data: URI) — единственное исключение: сети в ней нет. SVG из
+      // подсказки не берём: Safari рисует SVG-фавикон монохромной плиткой с
+      // буквой, и подменив ссылку, мы лишили бы его логотипа с эндпоинта бота.
       // __API_URL__ подставляет vite-plugins/brandingHtml из VITE_API_URL.
       (function () {
         var API = '__API_URL__';
@@ -200,7 +202,7 @@
         try {
           hint = JSON.parse(localStorage.getItem(HINT_KEY) || 'null');
           if (hint && typeof hint.name === 'string' && hint.name.trim()) applyName(hint.name.trim());
-          if (hint && typeof hint.icon === 'string' && hint.icon.indexOf('data:image/') === 0) {
+          if (hint && typeof hint.icon === 'string' && hint.icon.indexOf('data:image/png;') === 0) {
             setIcon(hint.icon);
           }
         } catch (e) {

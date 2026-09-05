@@ -11,20 +11,30 @@ import { DEFAULT_THEME_COLORS } from '@/types/theme';
  * что заголовок и фавикон ставил только AppShell после логина.
  */
 
-vi.mock('@/api/branding', () => ({
-  brandingApi: {
-    getBranding: () =>
-      Promise.resolve({
-        name: 'ZeroPing',
-        logo_url: null,
-        logo_letter: 'Z',
-        has_custom_logo: false,
-      }),
+const NO_LOGO = { name: 'ZeroPing', logo_url: null, logo_letter: 'Z', has_custom_logo: false };
+const WITH_LOGO = {
+  name: 'ZeroPing',
+  logo_url: '/cabinet/branding/logo',
+  logo_letter: 'Z',
+  has_custom_logo: true,
+};
+
+const backend = vi.hoisted(() => ({
+  branding: {
+    name: 'ZeroPing',
+    logo_url: null as string | null,
+    logo_letter: 'Z',
+    has_custom_logo: false,
   },
+  blobUrl: null as string | null,
+}));
+
+vi.mock('@/api/branding', () => ({
+  brandingApi: { getBranding: () => Promise.resolve(backend.branding) },
   getCachedBranding: () => null,
   setCachedBranding: () => {},
   preloadLogo: () => Promise.resolve(),
-  getLogoBlobUrl: () => null,
+  getLogoBlobUrl: () => backend.blobUrl,
 }));
 
 vi.mock('@/api/themeColors', () => {
@@ -52,10 +62,14 @@ if (!window.matchMedia) {
   })) as unknown as typeof window.matchMedia;
 }
 
+const STATIC_ICON = '/api/cabinet/branding/favicon';
+
 beforeEach(() => {
-  document.head.innerHTML = '<link rel="icon" href="data:image/svg+xml,static" />';
+  document.head.innerHTML = `<link rel="icon" href="${STATIC_ICON}" />`;
   document.title = 'Cabinet';
   localStorage.clear();
+  backend.branding = NO_LOGO;
+  backend.blobUrl = null;
 });
 
 afterEach(() => {
@@ -101,9 +115,29 @@ describe('DocumentBranding', () => {
     expect(manifest.name).toBe('ZeroPing');
     expect(manifest.icons.length).toBeGreaterThan(0);
 
-    // Подсказка для следующей первой отрисовки записана.
+    // Подсказка для следующей первой отрисовки записана, но без SVG: Safari
+    // ставит иконку из подсказки при загрузке и рисует SVG белой плиткой.
+    // Без canvas (jsdom) растровой монограммы нет — подсказка без иконки.
     const hint = JSON.parse(localStorage.getItem(STORAGE_KEYS.BRAND_HINT) ?? 'null');
-    expect(hint).toMatchObject({ name: 'ZeroPing', letter: 'Z' });
-    expect(String(hint.icon)).toContain('data:image/svg+xml');
+    expect(hint).toEqual({ name: 'ZeroPing', letter: 'Z' });
+  });
+
+  it('с логотипом, но без растровой иконки, оставляет ссылку на бота и подсказку без иконки', async () => {
+    // Логотип есть, а скруглить его в PNG не вышло (нет canvas, blob отозван,
+    // картинка не загрузилась). Раньше вкладка получала SVG-монограмму, и она же
+    // уходила в подсказку — Safari у пользователя с логотипом навсегда оставался
+    // с белой плиткой «Z». Лучший запасной вариант — ссылка на эндпоинт бота,
+    // который отдаёт сам логотип: её и не трогаем.
+    backend.branding = WITH_LOGO;
+    backend.blobUrl = 'blob:logo';
+    await renderBranding();
+
+    await waitFor(() => expect(document.title).toBe('ZeroPing'));
+    await waitFor(() => {
+      const hint = JSON.parse(localStorage.getItem(STORAGE_KEYS.BRAND_HINT) ?? 'null');
+      expect(hint).toEqual({ name: 'ZeroPing', letter: 'Z' });
+    });
+    expect(document.querySelector('link[rel="icon"]')?.getAttribute('href')).toBe(STATIC_ICON);
+    expect(document.head.innerHTML).not.toContain('svg+xml');
   });
 });
