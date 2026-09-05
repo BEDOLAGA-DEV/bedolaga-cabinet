@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { ReachabilityStatus, VlessCore } from '@/api/reachability';
+import { DropdownSelect } from '@/components/admin/bulkActions/DropdownSelect';
+import { Card } from '@/components/data-display';
 import { JobProgress } from './JobProgress';
 import { LaunchPanel } from './LaunchPanel';
 import { SubscriptionConfigs } from './SubscriptionConfigs';
@@ -64,7 +66,7 @@ export function VlessTab(props: VlessTabProps) {
 
   return (
     <div className="space-y-4">
-      <section className="space-y-3 rounded-2xl border border-dark-700/60 bg-dark-800/60 p-4">
+      <Card size="md" className="space-y-3">
         <h2 className="text-lg font-semibold text-dark-100">
           {t('admin.reachability.subscription.title')}
         </h2>
@@ -80,23 +82,20 @@ export function VlessTab(props: VlessTabProps) {
           selected={selected}
           onToggle={toggle}
         />
-        <label className="flex items-center gap-2 text-sm text-dark-200">
+        <label className="flex flex-col gap-1 text-sm text-dark-200 sm:w-64">
           <span className="text-xs uppercase tracking-wide text-dark-400">
             {t('admin.reachability.subscription.core')}
           </span>
-          <select
+          <DropdownSelect
             value={core}
-            onChange={(event) => setCore(event.target.value as VlessCore)}
-            className="rounded-lg border border-dark-700 bg-dark-900 px-2 py-1 text-xs text-dark-100"
-          >
-            {CORES.map((item) => (
-              <option key={item.value} value={item.value}>
-                {t(`admin.reachability.subscription.${item.key}`)}
-              </option>
-            ))}
-          </select>
+            onChange={(value) => setCore(value as VlessCore)}
+            options={CORES.map((item) => ({
+              value: item.value,
+              label: t(`admin.reachability.subscription.${item.key}`),
+            }))}
+          />
         </label>
-      </section>
+      </Card>
       <UnitPicker
         kind="vless"
         dpi={dpi}

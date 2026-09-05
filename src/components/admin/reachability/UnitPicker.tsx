@@ -2,14 +2,24 @@ import { useQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { type JobKind, type Unit, reachabilityApi } from '@/api/reachability';
+import { DropdownSelect } from '@/components/admin/bulkActions/DropdownSelect';
+import { Card } from '@/components/data-display';
+import { ChevronDownIcon } from '@/components/icons';
 import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
+import { ChoiceChips } from './ChoiceChips';
 import {
   type DpiFilter,
+  type GroupState,
+  type OperatorGroup,
   filterUnits,
-  loadSelection,
+  groupByOperator,
+  groupState,
+  mergeKeys,
+  pickUnits,
+  recallSelection,
   regionsOf,
-  saveSelection,
+  toggleGroup,
   toggleKey,
 } from './unitSelection';
 
@@ -23,54 +33,45 @@ interface UnitPickerProps {
   onChange: (keys: string[]) => void;
 }
 
-const DPI_OPTIONS: Array<{ value: DpiFilter; key: string }> = [
-  { value: 'on', key: 'dpiOn' },
-  { value: 'off', key: 'dpiOff' },
-  { value: 'any', key: 'dpiAny' },
-];
+const DPI_VALUES: DpiFilter[] = ['on', 'off', 'any'];
+const DPI_LABEL_KEY: Record<DpiFilter, string> = { on: 'dpiOn', off: 'dpiOff', any: 'dpiAny' };
 
-function groupByOperator(units: Unit[]): Array<[string, Unit[]]> {
-  const map = new Map<string, Unit[]>();
-  for (const unit of units) map.set(unit.name, [...(map.get(unit.name) ?? []), unit]);
-  return [...map.entries()];
-}
-
+/**
+ * Выбор симок. Каждая симка — отдельное списание, поэтому ничего не отмечается само:
+ * ни память прошлого запуска, ни «все». Есть только именованные быстрые выборы.
+ */
 export function UnitPicker({ kind, dpi, onDpiChange, selected, onChange }: UnitPickerProps) {
   const { t } = useTranslation();
   const [region, setRegion] = useState<string | null>(null);
-  const hydrated = useRef(false);
+  const [expanded, setExpanded] = useState<ReadonlySet<string>>(new Set());
   const { data: units = [], isLoading } = useQuery({
     queryKey: REACHABILITY_UNITS_KEY,
     queryFn: () => reachabilityApi.getUnits({ dpi: 'any' }),
     staleTime: 60_000,
   });
 
-  // Один раз после загрузки каталога: подставить прошлый выбор, если сейчас ничего не выбрано.
-  useEffect(() => {
-    if (hydrated.current || units.length === 0) return;
-    hydrated.current = true;
-    if (selected.length > 0) return;
-    const stored = loadSelection(kind).filter((key) => units.some((u) => u.op_key === key));
-    if (stored.length) onChange(stored);
-  }, [units, kind, selected.length, onChange]);
-
   const visible = useMemo(() => filterUnits(units, { dpi, region }), [units, dpi, region]);
-  const grouped = useMemo(() => groupByOperator(visible), [visible]);
+  const groups = useMemo(() => groupByOperator(visible), [visible]);
   const regions = useMemo(() => regionsOf(units), [units]);
+  const bsPick = useMemo(() => pickUnits(visible, 'on'), [visible]);
+  const regularPick = useMemo(() => pickUnits(visible, 'off'), [visible]);
+  const recalled = useMemo(
+    () => recallSelection(kind).filter((key) => units.some((unit) => unit.op_key === key)),
+    [kind, units],
+  );
 
-  const update = (keys: string[]) => {
-    onChange(keys);
-    saveSelection(kind, keys);
-  };
-  const selectVisible = () =>
-    update([...new Set([...selected, ...visible.filter((u) => u.probeable).map((u) => u.op_key)])]);
-  const clearVisible = () => update(selected.filter((k) => !visible.some((u) => u.op_key === k)));
+  const toggleExpanded = (operator: string) =>
+    setExpanded((current) => {
+      const next = new Set(current);
+      if (next.has(operator)) next.delete(operator);
+      else next.add(operator);
+      return next;
+    });
 
   if (isLoading) {
     return (
       <SkeletonGroup aria-label={t('admin.reachability.units.title')}>
-        <Skeleton className="h-8 w-64 rounded-xl" />
-        <Skeleton className="mt-3 h-32 w-full rounded-2xl" />
+        <Skeleton variant="card" className="h-40 w-full rounded-2xl" />
       </SkeletonGroup>
     );
   }
@@ -79,88 +80,191 @@ export function UnitPicker({ kind, dpi, onDpiChange, selected, onChange }: UnitP
   }
 
   return (
-    <section className="rounded-2xl border border-dark-700/60 bg-dark-800/60 p-4">
-      <div className="flex flex-wrap items-center gap-2">
-        <h2 className="mr-auto text-lg font-semibold text-dark-100">
+    <Card size="md" className="space-y-3">
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <h2 className="text-lg font-semibold text-dark-100">
           {t('admin.reachability.units.title')}
         </h2>
-        {DPI_OPTIONS.map((option) => (
-          <button
-            key={option.value}
-            type="button"
-            aria-pressed={dpi === option.value}
-            onClick={() => onDpiChange(option.value)}
-            className={cn(
-              'rounded-xl px-3 py-1.5 text-xs font-medium transition-colors',
-              dpi === option.value
-                ? 'bg-accent-500 text-on-accent'
-                : 'bg-dark-700 text-dark-300 hover:text-dark-100',
-            )}
-          >
-            {t(`admin.reachability.units.${option.key}`)}
-          </button>
-        ))}
-        <select
+        <span className="text-xs text-dark-400">
+          {t('admin.reachability.units.selected', { count: selected.length })}
+        </span>
+      </div>
+
+      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+        <ChoiceChips
+          value={dpi}
+          onChange={onDpiChange}
+          label={t('admin.reachability.units.mode')}
+          showLabel
+          options={DPI_VALUES.map((value) => ({
+            value,
+            label: t(`admin.reachability.units.${DPI_LABEL_KEY[value]}`),
+          }))}
+        />
+        <DropdownSelect
           value={region ?? ''}
-          onChange={(event) => setRegion(event.target.value || null)}
-          aria-label={t('admin.reachability.units.allRegions')}
-          className="rounded-xl border border-dark-700 bg-dark-900 px-3 py-1.5 text-xs text-dark-100"
+          onChange={(value) => setRegion(value || null)}
+          className="sm:ml-auto sm:w-48"
+          options={[
+            { value: '', label: t('admin.reachability.units.allRegions') },
+            ...regions.map((item) => ({ value: item.code, label: item.label })),
+          ]}
+        />
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        <button
+          type="button"
+          className="btn-secondary px-3 py-1.5 text-xs"
+          disabled={bsPick.length === 0}
+          onClick={() => onChange(mergeKeys(selected, bsPick))}
         >
-          <option value="">{t('admin.reachability.units.allRegions')}</option>
-          {regions.map((item) => (
-            <option key={item.code} value={item.code}>
-              {item.label}
-            </option>
-          ))}
-        </select>
+          {t('admin.reachability.units.pickBs', { count: bsPick.length })}
+        </button>
+        <button
+          type="button"
+          className="btn-secondary px-3 py-1.5 text-xs"
+          disabled={regularPick.length === 0}
+          onClick={() => onChange(mergeKeys(selected, regularPick))}
+        >
+          {t('admin.reachability.units.pickRegular', { count: regularPick.length })}
+        </button>
+        {recalled.length > 0 && (
+          <button
+            type="button"
+            className="btn-secondary px-3 py-1.5 text-xs"
+            onClick={() => onChange(mergeKeys(selected, recalled))}
+          >
+            {t('admin.reachability.units.recall', { count: recalled.length })}
+          </button>
+        )}
+        {selected.length > 0 && (
+          <button
+            type="button"
+            className="btn-ghost px-3 py-1.5 text-xs"
+            onClick={() => onChange([])}
+          >
+            {t('admin.reachability.units.clearAll')}
+          </button>
+        )}
       </div>
 
-      <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-dark-400">
-        <span>{t('admin.reachability.units.selected', { count: selected.length })}</span>
-        <button type="button" className="btn-ghost px-2 py-1 text-xs" onClick={selectVisible}>
-          {t('admin.reachability.units.selectAll')}
-        </button>
-        <button type="button" className="btn-ghost px-2 py-1 text-xs" onClick={clearVisible}>
-          {t('admin.reachability.units.selectNone')}
-        </button>
-      </div>
+      {selected.length === 0 && (
+        <p className="text-xs text-dark-400">{t('admin.reachability.units.noneSelected')}</p>
+      )}
 
-      <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {grouped.map(([operator, list]) => (
-          <div key={operator} className="rounded-xl border border-dark-700/60 p-3">
-            <p className="text-sm font-medium text-dark-100">{operator}</p>
-            <ul className="mt-2 space-y-1">
-              {list.map((unit) => (
-                <li key={unit.op_key}>
-                  <label
-                    className={cn(
-                      'flex items-center gap-2 text-sm',
-                      unit.probeable ? 'text-dark-200' : 'text-dark-400',
-                    )}
-                  >
-                    <input
-                      type="checkbox"
-                      className="h-4 w-4 rounded border-dark-600 accent-accent-500"
-                      checked={selected.includes(unit.op_key)}
-                      disabled={!unit.probeable}
-                      onChange={() => update(toggleKey(selected, unit.op_key))}
-                    />
-                    <span className="font-mono text-xs">{unit.region}</span>
-                    <span className="text-xs text-dark-400">
-                      {unit.dpi === 'on' ? t('admin.reachability.units.bsShort') : '—'}
-                    </span>
-                    {!unit.probeable && (
-                      <span className="text-xs text-warning-400">
-                        {t('admin.reachability.units.notProbeable')}
-                      </span>
-                    )}
-                  </label>
-                </li>
-              ))}
-            </ul>
-          </div>
+      <ul className="divide-y divide-dark-700/60 rounded-xl border border-dark-700/60">
+        {groups.map((group) => (
+          <OperatorRow
+            key={group.operator}
+            group={group}
+            state={groupState(group, selected)}
+            expanded={expanded.has(group.operator)}
+            selected={selected}
+            onToggleGroup={() => onChange(toggleGroup(selected, group))}
+            onToggleExpanded={() => toggleExpanded(group.operator)}
+            onToggleUnit={(unit) => onChange(toggleKey(selected, unit.op_key))}
+          />
         ))}
+      </ul>
+    </Card>
+  );
+}
+
+interface OperatorRowProps {
+  group: OperatorGroup;
+  state: GroupState;
+  expanded: boolean;
+  selected: string[];
+  onToggleGroup: () => void;
+  onToggleExpanded: () => void;
+  onToggleUnit: (unit: Unit) => void;
+}
+
+function OperatorRow({
+  group,
+  state,
+  expanded,
+  selected,
+  onToggleGroup,
+  onToggleExpanded,
+  onToggleUnit,
+}: OperatorRowProps) {
+  const { t } = useTranslation();
+  const checkbox = useRef<HTMLInputElement>(null);
+  const probeable = group.units.filter((unit) => unit.probeable);
+  const chosen = probeable.filter((unit) => selected.includes(unit.op_key)).length;
+
+  useEffect(() => {
+    if (checkbox.current) checkbox.current.indeterminate = state === 'some';
+  }, [state]);
+
+  return (
+    <li>
+      <div className="flex items-center gap-3 px-3 py-2">
+        <input
+          ref={checkbox}
+          type="checkbox"
+          className="h-4 w-4 shrink-0 rounded border-dark-600 accent-accent-500"
+          aria-label={t('admin.reachability.units.pickGroup', { operator: group.operator })}
+          checked={state === 'all'}
+          disabled={probeable.length === 0}
+          onChange={onToggleGroup}
+        />
+        <button
+          type="button"
+          aria-expanded={expanded}
+          aria-label={t('admin.reachability.units.showGroup', { operator: group.operator })}
+          onClick={onToggleExpanded}
+          className="flex min-h-[44px] min-w-0 flex-1 items-center gap-2 text-left"
+        >
+          <span className="truncate text-sm font-medium text-dark-100">{group.operator}</span>
+          <span className="text-xs text-dark-400">
+            {t('admin.reachability.units.groupCount', {
+              selected: chosen,
+              total: probeable.length,
+            })}
+          </span>
+          <ChevronDownIcon
+            className={cn('ml-auto h-4 w-4 shrink-0 text-dark-400', expanded && 'rotate-180')}
+          />
+        </button>
       </div>
-    </section>
+      {expanded && (
+        <ul className="space-y-1 px-3 pb-3 pl-10">
+          {group.units.map((unit) => (
+            <li key={unit.op_key}>
+              <label
+                className={cn(
+                  'flex items-center gap-2 text-sm',
+                  unit.probeable ? 'text-dark-200' : 'text-dark-400',
+                )}
+              >
+                <input
+                  type="checkbox"
+                  className="h-4 w-4 rounded border-dark-600 accent-accent-500"
+                  checked={selected.includes(unit.op_key)}
+                  disabled={!unit.probeable}
+                  onChange={() => onToggleUnit(unit)}
+                />
+                <span className="font-mono text-xs">{unit.region}</span>
+                {unit.dpi === 'on' ? (
+                  <span className="rounded-md bg-accent-500/15 px-1.5 py-0.5 text-[10px] font-medium text-accent-400">
+                    {t('admin.reachability.units.bsShort')}
+                  </span>
+                ) : (
+                  <span className="text-xs text-dark-400">—</span>
+                )}
+                {!unit.probeable && (
+                  <span className="text-xs text-warning-400">
+                    {t('admin.reachability.units.notProbeable')}
+                  </span>
+                )}
+              </label>
+            </li>
+          ))}
+        </ul>
+      )}
+    </li>
   );
 }

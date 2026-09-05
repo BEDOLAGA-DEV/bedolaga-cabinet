@@ -1,23 +1,17 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Job } from '@/api/reachability';
+import { CopyIcon } from '@/components/icons';
 import { Button } from '@/components/primitives';
+import { useNotify } from '@/platform/hooks/useNotify';
 import { copyToClipboard } from '@/utils/clipboard';
 import { scanSummary } from './resultShapes';
-
-const COPIED_MS = 2000;
 
 export function ScanResult({ job }: { job: Job }) {
   const { t } = useTranslation();
   const summary = useMemo(() => scanSummary(job.result), [job.result]);
   const [perUnit, setPerUnit] = useState(false);
-  const [copied, setCopied] = useState(false);
-
-  useEffect(() => {
-    if (!copied) return undefined;
-    const timer = setTimeout(() => setCopied(false), COPIED_MS);
-    return () => clearTimeout(timer);
-  }, [copied]);
+  const notify = useNotify();
 
   if (!summary) {
     return <p className="text-sm text-dark-400">{t('admin.reachability.result.empty')}</p>;
@@ -25,8 +19,12 @@ export function ScanResult({ job }: { job: Job }) {
 
   const units = Object.keys(summary.aliveByUnit);
   const copyList = async () => {
-    await copyToClipboard(summary.ips.map((item) => item.ip).join('\n'));
-    setCopied(true);
+    try {
+      await copyToClipboard(summary.ips.map((item) => item.ip).join('\n'));
+      notify.success(t('admin.reachability.scan.copied'));
+    } catch (error) {
+      notify.error(error instanceof Error ? error.message : String(error));
+    }
   };
 
   return (
@@ -52,8 +50,14 @@ export function ScanResult({ job }: { job: Job }) {
           </label>
         )}
         {summary.ips.length > 0 && (
-          <Button variant="secondary" size="sm" className="ml-auto" onClick={copyList}>
-            {copied ? t('admin.reachability.scan.copied') : t('admin.reachability.scan.copy')}
+          <Button
+            variant="secondary"
+            size="sm"
+            className="ml-auto"
+            leftIcon={<CopyIcon className="h-4 w-4" />}
+            onClick={copyList}
+          >
+            {t('admin.reachability.scan.copy')}
           </Button>
         )}
       </div>

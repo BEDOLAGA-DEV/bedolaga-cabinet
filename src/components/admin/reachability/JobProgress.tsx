@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { type Job, reachabilityApi } from '@/api/reachability';
+import { Card } from '@/components/data-display';
 import { Button } from '@/components/primitives';
 import { getApiErrorMessage } from '@/utils/api-error';
 import { JobResult } from './JobResult';
@@ -70,7 +71,7 @@ export function JobProgress({ jobId, onReset }: JobProgressProps) {
   const actionError = cancel.error ?? retrieve.error;
 
   return (
-    <section className="space-y-4 rounded-2xl border border-dark-700/60 bg-dark-800/60 p-4">
+    <Card size="md" className="space-y-4">
       {inFlight && (
         <div>
           <p className="text-sm font-medium text-dark-100">
@@ -137,6 +138,6 @@ export function JobProgress({ jobId, onReset }: JobProgressProps) {
           {t('admin.reachability.progress.retry')}
         </Button>
       )}
-    </section>
+    </Card>
   );
 }

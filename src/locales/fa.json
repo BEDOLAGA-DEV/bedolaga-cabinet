@@ -3846,12 +3846,20 @@
         "dpiAny": "همه",
         "bsShort": "ل.س",
         "allRegions": "همه مناطق",
-        "selectAll": "انتخاب همه",
-        "selectNone": "پاک کردن",
         "selected_one": "{{count}} سیم‌کارت انتخاب شد",
         "selected_other": "{{count}} سیم‌کارت انتخاب شد",
         "notProbeable": "اکنون در دسترس نیست",
-        "empty": "سیم‌کارتی نیست — سرویس در دسترس نیست"
+        "empty": "سیم‌کارتی نیست — سرویس در دسترس نیست",
+        "mode": "حالت",
+        "region": "منطقه",
+        "pickBs": "انتخاب سیم‌کارت‌های لیست سفید ({{count}})",
+        "pickRegular": "انتخاب سیم‌کارت‌های بدون لیست سفید ({{count}})",
+        "clearAll": "پاک کردن همه",
+        "recall": "مانند دفعه قبل ({{count}})",
+        "groupCount": "{{selected}} از {{total}}",
+        "showGroup": "سیم‌کارت‌های {{operator}}",
+        "pickGroup": "انتخاب همه سیم‌کارت‌های {{operator}}",
+        "noneSelected": "هیچ سیم‌کارتی انتخاب نشده — موارد لازم را دستی یا با انتخاب سریع علامت بزنید"
       },
       "launch": {
         "price": "قیمت",
@@ -3866,7 +3874,16 @@
         "busy": "{{kind}} #{{id}} در حال اجراست — منتظر بمانید",
         "skippedDpiOff": "با حالت لیست سفید فیلتر شد: {{units}}",
         "skippedUnavailable": "اکنون در دسترس نیست: {{units}}",
-        "previewFailed": "محاسبه قیمت ممکن نشد"
+        "previewFailed": "محاسبه قیمت ممکن نشد",
+        "confirmTitle": "تأیید کسر هزینه",
+        "confirmQuestion": "{{kind}} شروع شود؟",
+        "confirmTargets": "اهداف ({{count}}): {{list}}",
+        "confirmUnits": "سیم‌کارت‌ها ({{count}}): {{list}}",
+        "confirmPrice": "قیمت: {{price}}",
+        "confirmEstimate": "قیمت: ≈{{price}} (تخمینی، مبلغ دقیق پس از شروع)",
+        "confirmBalanceAfter": "موجودی پس از کسر: {{balance}}",
+        "confirmMore": "و {{count}} مورد دیگر",
+        "started": "کار #{{id}} شروع شد"
       },
       "progress": {
         "submitting": "در حال ارسال درخواست…",
@@ -3912,7 +3929,9 @@
         "nodeHosts_other": "{{count}} هاست",
         "excluded": "از خلاصه حذف شده",
         "empty": "پنل هاستی برنگرداند",
-        "nodesEmpty": "پنل نودی برنگرداند"
+        "nodesEmpty": "پنل نودی برنگرداند",
+        "pickBs": "انتخاب میزبان‌های لیست سفید ({{count}})",
+        "purposeLabel": "کاربرد"
       },
       "subscription": {
         "title": "پیکربندی‌های اشتراک",
@@ -3927,7 +3946,10 @@
         "coreAuto": "خودکار",
         "coreStable": "stable",
         "corePrerelease": "prerelease",
-        "empty": "اشتراک پیکربندی قابل‌استفاده‌ای ندارد"
+        "empty": "اشتراک پیکربندی قابل‌استفاده‌ای ندارد",
+        "pickBs": "انتخاب پیکربندی‌های لیست سفید ({{count}})",
+        "source": "منبع",
+        "userLabel": "کاربر #{{id}}"
       },
       "scan": {
         "cidr": "زیرشبکه /24",
@@ -3995,7 +4017,10 @@
         "details": "کار #{{id}}",
         "loadMore": "نمایش بیشتر",
         "more": "+{{count}}",
-        "rawJson": "پاسخ خام"
+        "rawJson": "پاسخ خام",
+        "open": "باز کردن کار #{{id}}",
+        "units_one": "{{count}} سیم‌کارت",
+        "units_other": "{{count}} سیم‌کارت"
       },
       "shortcuts": {
         "checkSubscription": "بررسی از طریق اپراتورهای روسیه",

@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { NodeTarget } from '@/api/reachability';
+import { Card } from '@/components/data-display';
 import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { getApiErrorMessage } from '@/utils/api-error';
@@ -31,15 +32,14 @@ export function NodesTargetList({ selected, onToggle, preselected = [] }: NodesT
   if (isLoading) {
     return (
       <SkeletonGroup aria-label={t('admin.reachability.targets.nodes')}>
-        <Skeleton className="h-8 w-40 rounded-xl" />
-        <Skeleton className="mt-3 h-24 w-full rounded-2xl" />
+        <Skeleton variant="card" className="h-24 w-full rounded-2xl" />
       </SkeletonGroup>
     );
   }
 
   return (
-    <section className="rounded-2xl border border-dark-700/60 bg-dark-800/60 p-4">
-      <div className="flex items-baseline gap-3">
+    <Card size="md">
+      <div className="flex flex-wrap items-baseline gap-3">
         <h2 className="text-lg font-semibold text-dark-100">
           {t('admin.reachability.targets.nodes')}
         </h2>
@@ -49,7 +49,7 @@ export function NodesTargetList({ selected, onToggle, preselected = [] }: NodesT
       {!error && nodes.length === 0 && (
         <p className="mt-3 text-sm text-dark-400">{t('admin.reachability.targets.nodesEmpty')}</p>
       )}
-      <ul className="mt-3 divide-y divide-dark-700/60">
+      <ul className="mt-2 divide-y divide-dark-700/60">
         {nodes.map((node) => (
           <li key={node.uuid} className="py-2">
             <label className="flex cursor-pointer items-center gap-3">
@@ -70,17 +70,17 @@ export function NodesTargetList({ selected, onToggle, preselected = [] }: NodesT
                 <span className="block truncate text-sm font-medium text-dark-100">
                   {node.name}
                 </span>
-                <span className="block truncate font-mono text-xs text-dark-400">
+                <span className="block break-all font-mono text-xs text-dark-400">
                   {node.address}
                 </span>
               </span>
-              <span className="text-xs text-dark-400">
+              <span className="shrink-0 text-xs text-dark-400">
                 {t('admin.reachability.targets.nodeHosts', { count: node.host_uuids.length })}
               </span>
             </label>
           </li>
         ))}
       </ul>
-    </section>
+    </Card>
   );
 }

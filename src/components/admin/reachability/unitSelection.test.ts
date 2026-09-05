@@ -1,18 +1,24 @@
 import { describe, expect, it } from 'vitest';
 import type { Unit } from '@/api/reachability';
+import { resetSafeStorage } from '@/utils/safeStorage';
 import {
   defaultDpiFor,
   filterUnits,
-  loadSelection,
+  groupByOperator,
+  groupState,
+  mergeKeys,
+  pickUnits,
+  recallSelection,
   regionsOf,
-  saveSelection,
+  rememberSelection,
+  toggleGroup,
   toggleKey,
 } from './unitSelection';
 
 const unit = (op_key: string, dpi: 'on' | 'off', region_code: string, probeable = true): Unit => ({
   op_key,
   operator: op_key.split('|')[0],
-  name: op_key,
+  name: op_key.split('|')[0].toUpperCase(),
   region: region_code.toUpperCase(),
   region_code,
   dpi,
@@ -25,6 +31,7 @@ const UNITS = [
   unit('mts|пфо|on', 'on', 'pfo'),
   unit('tele2|цфо|on', 'on', 'cfo'),
   unit('yota|уфо|off', 'off', 'urfo', false),
+  unit('yota|цфо|on', 'on', 'cfo', false),
 ];
 
 describe('filterUnits', () => {
@@ -32,12 +39,14 @@ describe('filterUnits', () => {
     expect(filterUnits(UNITS, { dpi: 'on', region: null }).map((u) => u.op_key)).toEqual([
       'mts|пфо|on',
       'tele2|цфо|on',
+      'yota|цфо|on',
     ]);
     expect(filterUnits(UNITS, { dpi: 'any', region: 'cfo' }).map((u) => u.op_key)).toEqual([
       'mts|цфо|off',
       'tele2|цфо|on',
+      'yota|цфо|on',
     ]);
-    expect(filterUnits(UNITS, { dpi: 'any', region: null })).toHaveLength(4);
+    expect(filterUnits(UNITS, { dpi: 'any', region: null })).toHaveLength(5);
   });
 });
 
@@ -64,17 +73,48 @@ describe('regionsOf / toggleKey / defaultDpiFor', () => {
   });
 });
 
-describe('память выбора', () => {
-  it('переживает отсутствие localStorage и мусор в нём', () => {
-    saveSelection('probe', ['mts|пфо|on']);
-    expect(loadSelection('probe')).toEqual(
-      typeof localStorage === 'undefined' ? [] : ['mts|пфо|on'],
-    );
-    if (typeof localStorage !== 'undefined') {
-      localStorage.setItem('cabinet_reachability_units_scan', '{"not":"array"}');
-      expect(loadSelection('scan')).toEqual([]);
-      localStorage.setItem('cabinet_reachability_units_vless', 'garbage');
-      expect(loadSelection('vless')).toEqual([]);
-    }
+describe('быстрый выбор симок', () => {
+  it('pickUnits берёт только доступные симки нужного режима', () => {
+    expect(pickUnits(UNITS, 'on')).toEqual(['mts|пфо|on', 'tele2|цфо|on']);
+    expect(pickUnits(UNITS, 'off')).toEqual(['mts|цфо|off']);
+  });
+  it('mergeKeys объединяет без дублей и не трогает исходный массив', () => {
+    const selected = ['a', 'b'];
+    expect(mergeKeys(selected, ['b', 'c'])).toEqual(['a', 'b', 'c']);
+    expect(selected).toEqual(['a', 'b']);
+  });
+});
+
+describe('группы по оператору', () => {
+  it('groupByOperator сохраняет порядок первого появления', () => {
+    expect(groupByOperator(UNITS).map((g) => [g.operator, g.units.length])).toEqual([
+      ['MTS', 2],
+      ['TELE2', 1],
+      ['YOTA', 2],
+    ]);
+  });
+  it('groupState считает только доступные симки', () => {
+    const [mts, , yota] = groupByOperator(UNITS);
+    expect(groupState(mts, [])).toBe('none');
+    expect(groupState(mts, ['mts|цфо|off'])).toBe('some');
+    expect(groupState(mts, ['mts|цфо|off', 'mts|пфо|on'])).toBe('all');
+    // у yota нет доступных симок — отмечать нечего
+    expect(groupState(yota, [])).toBe('none');
+  });
+  it('toggleGroup отмечает все доступные, а при полном выборе снимает группу', () => {
+    const [mts] = groupByOperator(UNITS);
+    expect(toggleGroup(['x'], mts)).toEqual(['x', 'mts|цфо|off', 'mts|пфо|on']);
+    expect(toggleGroup(['x', 'mts|цфо|off'], mts)).toEqual(['x', 'mts|цфо|off', 'mts|пфо|on']);
+    expect(toggleGroup(['x', 'mts|цфо|off', 'mts|пфо|on'], mts)).toEqual(['x']);
+  });
+});
+
+describe('память последнего запуска', () => {
+  it('recallSelection отдаёт то, что запомнили, и пустой список без записи', () => {
+    resetSafeStorage();
+    expect(recallSelection('probe')).toEqual([]);
+    rememberSelection('probe', ['mts|пфо|on']);
+    expect(recallSelection('probe')).toEqual(['mts|пфо|on']);
+    expect(recallSelection('scan')).toEqual([]);
   });
 });

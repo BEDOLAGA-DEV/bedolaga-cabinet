@@ -2,9 +2,13 @@ import { useMutation } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { type HostTarget, type Purpose, reachabilityApi } from '@/api/reachability';
-import { Switch } from '@/components/primitives';
+import { Toggle } from '@/components/admin/Toggle';
+import { DropdownSelect } from '@/components/admin/bulkActions/DropdownSelect';
+import { Card } from '@/components/data-display';
 import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 import { getApiErrorMessage } from '@/utils/api-error';
+import { PurposeChip } from './PurposeChip';
+import { pickByPurpose } from './targetPicks';
 import { useHosts, useInvalidateTargets } from './useTargets';
 
 interface HostsTargetListProps {
@@ -54,18 +58,22 @@ export function HostsTargetList({ selected, onToggle, preselected = [] }: HostsT
 
   const visible = useMemo(() => hosts.filter((host) => matches(host, search)), [hosts, search]);
   const selectedIds = new Set(selected.map((host) => host.uuid));
+  const bsUnselected = pickByPurpose(visible, 'bs').filter((host) => !selectedIds.has(host.uuid));
+  const purposeOptions = PURPOSES.map((purpose) => ({
+    value: purpose,
+    label: t(`admin.reachability.purpose.${purpose}`),
+  }));
 
   if (isLoading) {
     return (
       <SkeletonGroup aria-label={t('admin.reachability.targets.hosts')}>
-        <Skeleton className="h-8 w-48 rounded-xl" />
-        <Skeleton className="mt-3 h-40 w-full rounded-2xl" />
+        <Skeleton variant="card" className="h-40 w-full rounded-2xl" />
       </SkeletonGroup>
     );
   }
 
   return (
-    <section className="rounded-2xl border border-dark-700/60 bg-dark-800/60 p-4">
+    <Card size="md">
       <div className="flex flex-wrap items-center gap-3">
         <h2 className="mr-auto text-lg font-semibold text-dark-100">
           {t('admin.reachability.targets.hosts')}
@@ -78,11 +86,27 @@ export function HostsTargetList({ selected, onToggle, preselected = [] }: HostsT
           aria-label={t('admin.reachability.targets.search')}
           className="input w-full sm:w-56"
         />
-        <Switch
-          checked={includeDisabled}
-          onChange={setIncludeDisabled}
-          label={t('admin.reachability.targets.includeDisabled')}
-        />
+        <div className="flex items-center gap-2 text-xs text-dark-300">
+          <span>{t('admin.reachability.targets.includeDisabled')}</span>
+          <Toggle
+            checked={includeDisabled}
+            onChange={() => setIncludeDisabled((value) => !value)}
+            aria-label={t('admin.reachability.targets.includeDisabled')}
+          />
+        </div>
+      </div>
+
+      <div className="mt-2 flex flex-wrap gap-2">
+        <button
+          type="button"
+          className="btn-secondary px-3 py-1.5 text-xs"
+          disabled={bsUnselected.length === 0}
+          onClick={() => {
+            for (const host of bsUnselected) onToggle(host);
+          }}
+        >
+          {t('admin.reachability.targets.pickBs', { count: bsUnselected.length })}
+        </button>
       </div>
 
       {error && <p className="mt-3 text-sm text-error-400">{getApiErrorMessage(error, '')}</p>}
@@ -90,9 +114,9 @@ export function HostsTargetList({ selected, onToggle, preselected = [] }: HostsT
         <p className="mt-3 text-sm text-dark-400">{t('admin.reachability.targets.empty')}</p>
       )}
 
-      <ul className="mt-3 divide-y divide-dark-700/60">
+      <ul className="mt-2 divide-y divide-dark-700/60">
         {visible.map((host) => (
-          <li key={host.uuid} className="flex flex-wrap items-center gap-x-3 gap-y-1 py-2">
+          <li key={host.uuid} className="flex flex-wrap items-center gap-x-3 gap-y-2 py-2">
             <label className="flex w-full min-w-0 cursor-pointer items-center gap-3 sm:w-auto sm:flex-1">
               <input
                 type="checkbox"
@@ -101,15 +125,16 @@ export function HostsTargetList({ selected, onToggle, preselected = [] }: HostsT
                 onChange={() => onToggle(host)}
               />
               <span className="min-w-0">
-                <span className="block truncate text-sm font-medium text-dark-100">
-                  {host.remark}
+                <span className="flex min-w-0 items-center gap-2">
+                  <span className="truncate text-sm font-medium text-dark-100">{host.remark}</span>
+                  <PurposeChip purpose={host.purpose} guessed={host.purpose_guessed} />
                   {host.is_disabled && (
-                    <span className="ml-2 text-xs text-dark-400">
+                    <span className="shrink-0 text-xs text-dark-400">
                       {t('admin.reachability.targets.includeDisabled')}
                     </span>
                   )}
                 </span>
-                <span className="block truncate font-mono text-xs text-dark-400">
+                <span className="block break-all font-mono text-xs text-dark-400">
                   {host.target_key}
                   {host.sni && host.sni !== host.address ? ` · sni ${host.sni}` : ''}
                 </span>
@@ -124,24 +149,16 @@ export function HostsTargetList({ selected, onToggle, preselected = [] }: HostsT
               {host.excluded && (
                 <span className="text-warning-400">{t('admin.reachability.targets.excluded')}</span>
               )}
-              {host.purpose_guessed && (
-                <span className="text-dark-400">{t('admin.reachability.purpose.guessed')}</span>
-              )}
-              <select
-                value={host.purpose}
-                aria-label={t('admin.reachability.purpose.unknown')}
-                disabled={setPurpose.isPending}
-                onChange={(event) =>
-                  setPurpose.mutate({ uuid: host.uuid, purpose: event.target.value as Purpose })
-                }
-                className="rounded-lg border border-dark-700 bg-dark-900 px-2 py-1 text-xs text-dark-100"
-              >
-                {PURPOSES.map((purpose) => (
-                  <option key={purpose} value={purpose}>
-                    {t(`admin.reachability.purpose.${purpose}`)}
-                  </option>
-                ))}
-              </select>
+              <label className="w-44">
+                <span className="sr-only">{t('admin.reachability.targets.purposeLabel')}</span>
+                <DropdownSelect
+                  value={host.purpose}
+                  options={purposeOptions}
+                  onChange={(value) =>
+                    setPurpose.mutate({ uuid: host.uuid, purpose: value as Purpose })
+                  }
+                />
+              </label>
             </div>
           </li>
         ))}
@@ -149,6 +166,6 @@ export function HostsTargetList({ selected, onToggle, preselected = [] }: HostsT
       {setPurpose.isError && (
         <p className="mt-2 text-sm text-error-400">{getApiErrorMessage(setPurpose.error, '')}</p>
       )}
-    </section>
+    </Card>
   );
 }

@@ -7,9 +7,14 @@ import {
   type SkippedUnit,
   reachabilityApi,
 } from '@/api/reachability';
+import { Card } from '@/components/data-display';
 import { Button } from '@/components/primitives';
+import { useNativeDialog } from '@/platform/hooks/useNativeDialog';
+import { useNotify } from '@/platform/hooks/useNotify';
 import { getApiErrorMessage } from '@/utils/api-error';
+import { type LaunchSummary, formatList, launchSummary } from './launchSummary';
 import { formatKopeks } from './money';
+import { rememberSelection } from './unitSelection';
 import { useJobPreview } from './useJobPreview';
 import { REACHABILITY_STATUS_KEY } from './useReachabilityStatus';
 
@@ -18,6 +23,10 @@ interface LaunchPanelProps {
   status: ReachabilityStatus | undefined;
   onStarted: (job: Job) => void;
 }
+
+/** Родной попап Telegram вмещает 256 символов — в Mini App списки короче. */
+const LISTED_WEB = 5;
+const LISTED_NATIVE = 2;
 
 function unitNames(list: SkippedUnit[] | undefined): string {
   return (list ?? [])
@@ -29,13 +38,19 @@ function unitNames(list: SkippedUnit[] | undefined): string {
 export function LaunchPanel({ body, status, onStarted }: LaunchPanelProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const dialog = useNativeDialog();
+  const notify = useNotify();
   const preview = useJobPreview(body);
   const create = useMutation({
     mutationFn: (request: JobCreateRequest) => reachabilityApi.createJob(request),
-    onSuccess: (job) => {
+    onSuccess: (job, request) => {
+      rememberSelection(request.kind, request.units);
       queryClient.invalidateQueries({ queryKey: REACHABILITY_STATUS_KEY });
+      notify.success(t('admin.reachability.launch.started', { id: job.id }));
       onStarted(job);
     },
+    onError: (error) =>
+      notify.error(getApiErrorMessage(error, t('admin.reachability.progress.failed'))),
   });
 
   const busy = status?.active_jobs.find((job) => job.kind === body?.kind);
@@ -59,11 +74,50 @@ export function LaunchPanel({ body, status, onStarted }: LaunchPanelProps) {
   else if (balance !== null && cost !== null && cost > balance)
     blocker = t('admin.reachability.launch.overBalance');
 
+  const confirmText = (summary: LaunchSummary, kind: JobCreateRequest['kind']): string => {
+    const listed = dialog.isNative ? LISTED_NATIVE : LISTED_WEB;
+    const more = (count: number) => t('admin.reachability.launch.confirmMore', { count });
+    const price = formatKopeks(summary.cost);
+    return [
+      t('admin.reachability.launch.confirmQuestion', {
+        kind: t(`admin.reachability.kinds.${kind}`),
+      }),
+      t('admin.reachability.launch.confirmTargets', {
+        count: summary.targets.length,
+        list: formatList(summary.targets, listed, more),
+      }),
+      t('admin.reachability.launch.confirmUnits', {
+        count: summary.units.length,
+        list: formatList(summary.units, listed, more),
+      }),
+      summary.exact
+        ? t('admin.reachability.launch.confirmPrice', { price })
+        : t('admin.reachability.launch.confirmEstimate', { price }),
+      summary.balanceAfter === null
+        ? null
+        : t('admin.reachability.launch.confirmBalanceAfter', {
+            balance: formatKopeks(summary.balanceAfter),
+          }),
+    ]
+      .filter((line): line is string => line !== null)
+      .join('\n');
+  };
+
+  // Списание — только после родного диалога со сводкой; отказ ничего не отправляет.
+  const handleRun = async () => {
+    if (!body || !preview.data) return;
+    const confirmed = await dialog.confirm(
+      confirmText(launchSummary(preview.data), body.kind),
+      t('admin.reachability.launch.confirmTitle'),
+    );
+    if (confirmed) create.mutate(body);
+  };
+
   const skipped = preview.data?.skipped;
 
   return (
-    <section className="rounded-2xl border border-dark-700/60 bg-dark-800/60 p-4">
-      <div className="flex flex-wrap items-end justify-between gap-4">
+    <Card size="md">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-xs uppercase tracking-wide text-dark-400">
             {t('admin.reachability.launch.price')}
@@ -80,8 +134,11 @@ export function LaunchPanel({ body, status, onStarted }: LaunchPanelProps) {
         </div>
         <Button
           variant="primary"
-          disabled={Boolean(blocker) || preview.isFetching || create.isPending || !body}
-          onClick={() => body && create.mutate(body)}
+          className="w-full sm:w-auto"
+          disabled={
+            Boolean(blocker) || preview.isFetching || !preview.data || create.isPending || !body
+          }
+          onClick={handleRun}
         >
           {create.isPending
             ? t('admin.reachability.launch.running')
@@ -117,6 +174,6 @@ export function LaunchPanel({ body, status, onStarted }: LaunchPanelProps) {
           ))}
         </ul>
       )}
-    </section>
+    </Card>
   );
 }

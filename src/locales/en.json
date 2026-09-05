@@ -2042,12 +2042,20 @@
         "dpiAny": "all",
         "bsShort": "WL",
         "allRegions": "all regions",
-        "selectAll": "select all",
-        "selectNone": "clear",
         "selected_one": "{{count}} SIM selected",
         "selected_other": "{{count}} SIMs selected",
         "notProbeable": "unavailable now",
-        "empty": "No SIMs — service unavailable"
+        "empty": "No SIMs — service unavailable",
+        "mode": "Mode",
+        "region": "Region",
+        "pickBs": "select whitelist SIMs ({{count}})",
+        "pickRegular": "select non-whitelist SIMs ({{count}})",
+        "clearAll": "clear all",
+        "recall": "same as last time ({{count}})",
+        "groupCount": "{{selected}} of {{total}}",
+        "showGroup": "{{operator}} SIMs",
+        "pickGroup": "Select all {{operator}} SIMs",
+        "noneSelected": "No SIMs selected — pick the ones you need by hand or with a quick pick"
       },
       "launch": {
         "price": "Price",
@@ -2062,7 +2070,16 @@
         "busy": "{{kind}} #{{id}} is already running — wait for it",
         "skippedDpiOff": "Filtered out by whitelist mode: {{units}}",
         "skippedUnavailable": "Unavailable now: {{units}}",
-        "previewFailed": "Could not compute the price"
+        "previewFailed": "Could not compute the price",
+        "confirmTitle": "Charge confirmation",
+        "confirmQuestion": "Start {{kind}}?",
+        "confirmTargets": "Targets ({{count}}): {{list}}",
+        "confirmUnits": "SIMs ({{count}}): {{list}}",
+        "confirmPrice": "Price: {{price}}",
+        "confirmEstimate": "Price: ≈{{price}} (estimate, exact after start)",
+        "confirmBalanceAfter": "Balance after charge: {{balance}}",
+        "confirmMore": "and {{count}} more",
+        "started": "Job #{{id}} started"
       },
       "progress": {
         "submitting": "Sending request…",
@@ -2108,7 +2125,9 @@
         "nodeHosts_other": "{{count}} hosts",
         "excluded": "excluded from summary",
         "empty": "The panel returned no hosts",
-        "nodesEmpty": "The panel returned no nodes"
+        "nodesEmpty": "The panel returned no nodes",
+        "pickBs": "select whitelist hosts ({{count}})",
+        "purposeLabel": "Purpose"
       },
       "subscription": {
         "title": "Subscription configs",
@@ -2123,7 +2142,10 @@
         "coreAuto": "auto",
         "coreStable": "stable",
         "corePrerelease": "prerelease",
-        "empty": "The subscription has no usable configs"
+        "empty": "The subscription has no usable configs",
+        "pickBs": "select whitelist configs ({{count}})",
+        "source": "Source",
+        "userLabel": "user #{{id}}"
       },
       "scan": {
         "cidr": "Subnet /24",
@@ -2191,7 +2213,10 @@
         "details": "Job #{{id}}",
         "loadMore": "Show more",
         "more": "+{{count}}",
-        "rawJson": "Raw response"
+        "rawJson": "Raw response",
+        "open": "Open job #{{id}}",
+        "units_one": "{{count}} SIM",
+        "units_other": "{{count}} SIMs"
       },
       "shortcuts": {
         "checkSubscription": "Check via Russian operators",

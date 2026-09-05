@@ -4,8 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { type Dpi, type ReachabilityStatus, reachabilityApi } from '@/api/reachability';
 import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
-import { cn } from '@/lib/utils';
 import { getApiErrorMessage } from '@/utils/api-error';
+import { ChoiceChips } from './ChoiceChips';
 import { HostsSummaryMatrix } from './HostsSummaryMatrix';
 import { REACHABILITY_PATH } from './deepLink';
 import { REACHABILITY_SUMMARY_KEY } from './useTargets';
@@ -33,27 +33,16 @@ export function SummaryTab(_props: SummaryTabProps) {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="mr-1 text-xs uppercase tracking-wide text-dark-400">
-          {t('admin.reachability.summary.dpiFilter')}
-        </span>
-        {DPI_OPTIONS.map((option) => (
-          <button
-            key={option.value}
-            type="button"
-            aria-pressed={dpi === option.value}
-            onClick={() => setDpi(option.value)}
-            className={cn(
-              'rounded-xl px-3 py-1.5 text-xs font-medium transition-colors',
-              dpi === option.value
-                ? 'bg-accent-500 text-on-accent'
-                : 'bg-dark-700 text-dark-300 hover:text-dark-100',
-            )}
-          >
-            {t(`admin.reachability.units.${option.key}`)}
-          </button>
-        ))}
-      </div>
+      <ChoiceChips
+        value={dpi}
+        onChange={setDpi}
+        label={t('admin.reachability.summary.dpiFilter')}
+        showLabel
+        options={DPI_OPTIONS.map((option) => ({
+          value: option.value,
+          label: t(`admin.reachability.units.${option.key}`),
+        }))}
+      />
 
       {summary.isLoading && (
         <SkeletonGroup aria-label={t('admin.reachability.tabs.summary')}>

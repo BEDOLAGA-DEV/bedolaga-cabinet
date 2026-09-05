@@ -2058,13 +2058,21 @@
         "dpiAny": "все",
         "bsShort": "БС",
         "allRegions": "все округа",
-        "selectAll": "выбрать все",
-        "selectNone": "снять",
         "selected_one": "выбрана {{count}} симка",
         "selected_few": "выбрано {{count}} симки",
         "selected_many": "выбрано {{count}} симок",
         "notProbeable": "сейчас недоступна",
-        "empty": "Список симок пуст — сервис недоступен"
+        "empty": "Список симок пуст — сервис недоступен",
+        "mode": "Режим",
+        "region": "Округ",
+        "pickBs": "отметить симки с БС ({{count}})",
+        "pickRegular": "отметить симки без БС ({{count}})",
+        "clearAll": "снять всё",
+        "recall": "как в прошлый раз ({{count}})",
+        "groupCount": "{{selected}} из {{total}}",
+        "showGroup": "Симки {{operator}}",
+        "pickGroup": "Отметить все симки {{operator}}",
+        "noneSelected": "Ни одна симка не отмечена — отметьте нужные вручную или быстрым выбором"
       },
       "launch": {
         "price": "Цена",
@@ -2079,7 +2087,16 @@
         "busy": "Уже идёт {{kind}} #{{id}} — дождитесь завершения",
         "skippedDpiOff": "Не попали под фильтр Белого списка: {{units}}",
         "skippedUnavailable": "Сейчас недоступны: {{units}}",
-        "previewFailed": "Не удалось посчитать цену"
+        "previewFailed": "Не удалось посчитать цену",
+        "confirmTitle": "Списание средств",
+        "confirmQuestion": "Запуск: {{kind}}",
+        "confirmTargets": "Цели ({{count}}): {{list}}",
+        "confirmUnits": "Симки ({{count}}): {{list}}",
+        "confirmPrice": "Цена: {{price}}",
+        "confirmEstimate": "Цена: ≈{{price}} (оценка, точная после запуска)",
+        "confirmBalanceAfter": "Остаток после списания: {{balance}}",
+        "confirmMore": "и ещё {{count}}",
+        "started": "Задача #{{id}} запущена"
       },
       "progress": {
         "submitting": "Отправляем запрос…",
@@ -2126,7 +2143,9 @@
         "nodeHosts_many": "{{count}} хостов",
         "excluded": "исключён из сводки",
         "empty": "Панель не вернула хостов",
-        "nodesEmpty": "Панель не вернула нод"
+        "nodesEmpty": "Панель не вернула нод",
+        "pickBs": "отметить хосты под БС ({{count}})",
+        "purposeLabel": "Назначение"
       },
       "subscription": {
         "title": "Конфиги подписки",
@@ -2142,7 +2161,10 @@
         "coreAuto": "авто",
         "coreStable": "stable",
         "corePrerelease": "prerelease",
-        "empty": "В подписке нет пригодных конфигов"
+        "empty": "В подписке нет пригодных конфигов",
+        "pickBs": "отметить конфиги под БС ({{count}})",
+        "source": "Источник",
+        "userLabel": "пользователь #{{id}}"
       },
       "scan": {
         "cidr": "Подсеть /24",
@@ -2211,7 +2233,11 @@
         "details": "Задача #{{id}}",
         "loadMore": "Показать ещё",
         "more": "+{{count}}",
-        "rawJson": "Сырой ответ"
+        "rawJson": "Сырой ответ",
+        "open": "Открыть задачу #{{id}}",
+        "units_one": "{{count}} симка",
+        "units_few": "{{count}} симки",
+        "units_many": "{{count}} симок"
       },
       "shortcuts": {
         "checkSubscription": "Проверить через операторов РФ",

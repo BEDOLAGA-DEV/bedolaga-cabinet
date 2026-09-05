@@ -62,7 +62,7 @@ describe('buildVlessBody', () => {
       { kind: 'subscription_config', short_uuid: 's-1', index: 2 },
       { kind: 'subscription_config', short_uuid: 's-1', index: 0 },
     ]);
-    expect((body?.kind, body?.core)).toBe('stable');
+    expect(body?.core).toBe('stable');
     expect(body?.probes).toEqual({ icmp: false, tcp: false, sni: false });
   });
 

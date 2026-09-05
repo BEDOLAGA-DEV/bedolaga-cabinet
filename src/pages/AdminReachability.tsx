@@ -41,7 +41,7 @@ export default function AdminReachability() {
 
       <StatusBar status={status} isLoading={isLoading} />
 
-      <div className="flex gap-1 overflow-x-auto rounded-2xl bg-dark-800/60 p-1" role="tablist">
+      <div className="flex gap-2 overflow-x-auto pb-1" role="tablist">
         {TAB_KEYS.map((tab) => (
           <button
             key={tab}
@@ -50,10 +50,10 @@ export default function AdminReachability() {
             aria-selected={link.tab === tab}
             onClick={() => setTab(tab)}
             className={cn(
-              'whitespace-nowrap rounded-xl px-4 py-2 text-sm font-medium transition-colors',
+              'shrink-0 whitespace-nowrap rounded-xl px-4 py-2.5 text-sm font-medium transition-all',
               link.tab === tab
-                ? 'bg-accent-500 text-on-accent'
-                : 'text-dark-300 hover:bg-dark-700 hover:text-dark-100',
+                ? 'bg-accent-500/15 text-accent-400 ring-1 ring-accent-500/30'
+                : 'bg-dark-800/50 text-dark-400 active:bg-dark-700',
             )}
           >
             {t(`admin.reachability.tabs.${tab}`)}

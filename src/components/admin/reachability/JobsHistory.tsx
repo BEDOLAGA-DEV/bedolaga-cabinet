@@ -3,9 +3,12 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router';
 import { type Job, type JobKind, type JobStatus, reachabilityApi } from '@/api/reachability';
-import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
+import { ListRowSkeleton } from '@/components/admin/ListRowSkeleton';
+import { DropdownSelect } from '@/components/admin/bulkActions/DropdownSelect';
+import { ChevronRightIcon } from '@/components/icons';
+import { cn } from '@/lib/utils';
 import { getApiErrorMessage } from '@/utils/api-error';
-import { JobDetailsSheet } from './JobDetailsSheet';
+import { JobDetailsModal } from './JobDetailsModal';
 import { formatKopeks } from './money';
 import { relativeAge } from './relativeAge';
 
@@ -13,19 +16,24 @@ const KINDS: JobKind[] = ['probe', 'vless', 'scan'];
 const STATUSES: JobStatus[] = ['pending', 'running', 'done', 'failed', 'cancelled'];
 const PAGE = 20;
 const SHOWN_TARGETS = 2;
+const COLUMNS = ['id', 'kind', 'targets', 'units', 'cost', 'status', 'started'] as const;
 
 const STATUS_CLASS: Record<JobStatus, string> = {
-  pending: 'text-dark-300',
-  running: 'text-accent-400',
-  done: 'text-success-400',
-  failed: 'text-error-400',
-  cancelled: 'text-dark-400',
+  pending: 'bg-dark-700/60 text-dark-300',
+  running: 'bg-accent-500/15 text-accent-400',
+  done: 'bg-success-500/15 text-success-400',
+  failed: 'bg-error-500/15 text-error-400',
+  cancelled: 'bg-dark-700/60 text-dark-400',
 };
 
 function targetsLabel(job: Job, more: (count: number) => string): string {
   const keys = job.targets.map((target) => target.label || target.target_key);
   const shown = keys.slice(0, SHOWN_TARGETS).join(', ');
   return keys.length > SHOWN_TARGETS ? `${shown} ${more(keys.length - SHOWN_TARGETS)}` : shown;
+}
+
+function unitsCount(job: Job): number {
+  return (job.units_effective ?? job.units_resolved ?? []).length;
 }
 
 export function JobsHistory() {
@@ -56,52 +64,59 @@ export function JobsHistory() {
     setSearchParams(next, { replace: true });
   };
 
-  const selectClass =
-    'rounded-xl border border-dark-700 bg-dark-900 px-3 py-1.5 text-xs text-dark-100';
+  const more = (count: number) => t('admin.reachability.history.more', { count });
+  const statusChip = (job: Job) => (
+    <span
+      className={cn(
+        'whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-medium',
+        STATUS_CLASS[job.status],
+      )}
+    >
+      {t(`admin.reachability.history.statuses.${job.status}`)}
+    </span>
+  );
+  const age = (job: Job) => relativeAge(job.started_at ?? job.created_at, i18n.language);
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-2">
-        <select
-          value={kind}
-          onChange={(event) => setKind(event.target.value as JobKind | '')}
-          aria-label={t('admin.reachability.history.filters.kind')}
-          className={selectClass}
-        >
-          <option value="">
-            {t('admin.reachability.history.filters.kind')}:{' '}
-            {t('admin.reachability.history.filters.all')}
-          </option>
-          {KINDS.map((item) => (
-            <option key={item} value={item}>
-              {t(`admin.reachability.kinds.${item}`)}
-            </option>
-          ))}
-        </select>
-        <select
-          value={status}
-          onChange={(event) => setStatus(event.target.value as JobStatus | '')}
-          aria-label={t('admin.reachability.history.filters.status')}
-          className={selectClass}
-        >
-          <option value="">
-            {t('admin.reachability.history.filters.status')}:{' '}
-            {t('admin.reachability.history.filters.all')}
-          </option>
-          {STATUSES.map((item) => (
-            <option key={item} value={item}>
-              {t(`admin.reachability.history.statuses.${item}`)}
-            </option>
-          ))}
-        </select>
+      <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+        <label className="sm:w-48">
+          <span className="sr-only">{t('admin.reachability.history.filters.kind')}</span>
+          <DropdownSelect
+            value={kind}
+            onChange={(value) => setKind(value as JobKind | '')}
+            options={[
+              {
+                value: '',
+                label: `${t('admin.reachability.history.filters.kind')}: ${t('admin.reachability.history.filters.all')}`,
+              },
+              ...KINDS.map((item) => ({
+                value: item,
+                label: t(`admin.reachability.kinds.${item}`),
+              })),
+            ]}
+          />
+        </label>
+        <label className="sm:w-48">
+          <span className="sr-only">{t('admin.reachability.history.filters.status')}</span>
+          <DropdownSelect
+            value={status}
+            onChange={(value) => setStatus(value as JobStatus | '')}
+            options={[
+              {
+                value: '',
+                label: `${t('admin.reachability.history.filters.status')}: ${t('admin.reachability.history.filters.all')}`,
+              },
+              ...STATUSES.map((item) => ({
+                value: item,
+                label: t(`admin.reachability.history.statuses.${item}`),
+              })),
+            ]}
+          />
+        </label>
       </div>
 
-      {jobs.isLoading && (
-        <SkeletonGroup aria-label={t('admin.reachability.tabs.history')}>
-          <Skeleton variant="card" className="h-12 w-full rounded-2xl" />
-          <Skeleton variant="card" className="mt-2 h-12 w-full rounded-2xl" />
-        </SkeletonGroup>
-      )}
+      {jobs.isLoading && <ListRowSkeleton count={4} actions={[{ width: 'w-16', pill: true }]} />}
       {jobs.isError && (
         <p className="text-sm text-error-400">{getApiErrorMessage(jobs.error, '')}</p>
       )}
@@ -112,46 +127,78 @@ export function JobsHistory() {
       )}
 
       {jobs.data && jobs.data.items.length > 0 && (
-        <div className="overflow-x-auto rounded-2xl border border-dark-700/60">
-          <table className="w-full min-w-max border-collapse text-sm">
-            <thead>
-              <tr className="bg-dark-900/60 text-left text-xs uppercase tracking-wide text-dark-400">
-                {(['id', 'kind', 'targets', 'units', 'cost', 'status', 'started'] as const).map(
-                  (column) => (
+        <>
+          {/* Телефон: карточки, как в остальных админ-списках */}
+          <ul className="space-y-2 md:hidden">
+            {jobs.data.items.map((job) => (
+              <li key={job.id}>
+                <button
+                  type="button"
+                  onClick={() => openJob(job.id)}
+                  aria-label={t('admin.reachability.history.open', { id: job.id })}
+                  className="flex w-full items-start gap-3 rounded-xl border border-dark-700 bg-dark-800/50 p-3 text-left transition-colors hover:border-dark-600"
+                >
+                  <span className="min-w-0 flex-1">
+                    <span className="flex flex-wrap items-center gap-2">
+                      <span className="font-mono text-xs text-dark-400">#{job.id}</span>
+                      <span className="text-sm font-medium text-dark-100">
+                        {t(`admin.reachability.kinds.${job.kind}`)}
+                      </span>
+                      {statusChip(job)}
+                    </span>
+                    <span className="mt-1 block truncate text-sm text-dark-200">
+                      {targetsLabel(job, more)}
+                    </span>
+                    <span className="mt-1 flex flex-wrap gap-x-3 text-xs text-dark-400">
+                      <span>
+                        {t('admin.reachability.history.units', { count: unitsCount(job) })}
+                      </span>
+                      <span className="text-dark-100">{formatKopeks(job.cost_kopeks)}</span>
+                      <span>{age(job)}</span>
+                    </span>
+                  </span>
+                  <ChevronRightIcon className="mt-1 h-4 w-4 shrink-0 text-dark-400" />
+                </button>
+              </li>
+            ))}
+          </ul>
+
+          {/* Десктоп: таблица */}
+          <div className="hidden overflow-x-auto rounded-2xl border border-dark-700/60 md:block">
+            <table className="w-full min-w-max border-collapse text-sm">
+              <thead>
+                <tr className="bg-dark-900/60 text-left text-xs uppercase tracking-wide text-dark-400">
+                  {COLUMNS.map((column) => (
                     <th key={column} className="p-2 font-medium">
                       {t(`admin.reachability.history.columns.${column}`)}
                     </th>
-                  ),
-                )}
-              </tr>
-            </thead>
-            <tbody>
-              {jobs.data.items.map((job) => (
-                <tr
-                  key={job.id}
-                  onClick={() => openJob(job.id)}
-                  className="cursor-pointer border-t border-dark-700/60 hover:bg-dark-800/60"
-                >
-                  <td className="p-2 font-mono text-xs text-dark-400">#{job.id}</td>
-                  <td className="p-2 text-dark-100">{t(`admin.reachability.kinds.${job.kind}`)}</td>
-                  <td className="max-w-xs truncate p-2 text-dark-200">
-                    {targetsLabel(job, (count) => t('admin.reachability.history.more', { count }))}
-                  </td>
-                  <td className="p-2 text-dark-300">
-                    {(job.units_effective ?? job.units_resolved ?? []).length}
-                  </td>
-                  <td className="p-2 text-dark-100">{formatKopeks(job.cost_kopeks)}</td>
-                  <td className={`p-2 ${STATUS_CLASS[job.status]}`}>
-                    {t(`admin.reachability.history.statuses.${job.status}`)}
-                  </td>
-                  <td className="p-2 text-dark-400">
-                    {relativeAge(job.started_at ?? job.created_at, i18n.language)}
-                  </td>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {jobs.data.items.map((job) => (
+                  <tr
+                    key={job.id}
+                    onClick={() => openJob(job.id)}
+                    className="cursor-pointer border-t border-dark-700/60 hover:bg-dark-800/60"
+                  >
+                    <td className="p-2 font-mono text-xs text-dark-400">#{job.id}</td>
+                    <td className="p-2 text-dark-100">
+                      {t(`admin.reachability.kinds.${job.kind}`)}
+                    </td>
+                    <td className="max-w-xs truncate p-2 text-dark-200">
+                      {targetsLabel(job, more)}
+                    </td>
+                    <td className="p-2 text-dark-300">{unitsCount(job)}</td>
+                    <td className="p-2 text-dark-100">{formatKopeks(job.cost_kopeks)}</td>
+                    <td className="p-2">{statusChip(job)}</td>
+                    <td className="p-2 text-dark-400">{age(job)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
 
       {jobs.data && jobs.data.total > jobs.data.items.length && (
@@ -165,7 +212,7 @@ export function JobsHistory() {
         </button>
       )}
 
-      <JobDetailsSheet jobId={openJobId} onClose={() => openJob(null)} />
+      <JobDetailsModal jobId={openJobId} onClose={() => openJob(null)} />
     </div>
   );
 }

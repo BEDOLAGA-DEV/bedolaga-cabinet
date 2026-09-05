@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { adminUsersApi } from '@/api/adminUsers';
-import { cn } from '@/lib/utils';
+import { ChoiceChips } from './ChoiceChips';
 import { useDebouncedValue } from './useDebouncedValue';
 
 interface SubscriptionSourcePickerProps {
@@ -13,6 +13,8 @@ interface SubscriptionSourcePickerProps {
 
 const SEARCH_LIMIT = 8;
 const DEBOUNCE_MS = 300;
+
+type SourceKind = 'reference' | 'user' | 'sub';
 
 /** Откуда брать конфиги: эталонная подписка панели или подписка конкретного пользователя. */
 export function SubscriptionSourcePicker({
@@ -29,34 +31,32 @@ export function SubscriptionSourcePicker({
     enabled: query.length >= 2,
     staleTime: 30_000,
   });
-  const isReference = userId === null && shortUuid === null;
+
+  const current: SourceKind = userId !== null ? 'user' : shortUuid !== null ? 'sub' : 'reference';
+  const options = [
+    { value: 'reference' as const, label: t('admin.reachability.subscription.reference') },
+    ...(userId !== null
+      ? [
+          {
+            value: 'user' as const,
+            label: t('admin.reachability.subscription.userLabel', { id: userId }),
+          },
+        ]
+      : []),
+    ...(shortUuid !== null && userId === null ? [{ value: 'sub' as const, label: shortUuid }] : []),
+  ];
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      <button
-        type="button"
-        aria-pressed={isReference}
-        onClick={() => onSource({ userId: null, shortUuid: null })}
-        className={cn(
-          'rounded-xl px-3 py-1.5 text-xs font-medium transition-colors',
-          isReference
-            ? 'bg-accent-500 text-on-accent'
-            : 'bg-dark-700 text-dark-300 hover:text-dark-100',
-        )}
-      >
-        {t('admin.reachability.subscription.reference')}
-      </button>
-      {userId !== null && (
-        <span className="rounded-xl bg-accent-500 px-3 py-1.5 text-xs font-medium text-on-accent">
-          {t('admin.reachability.subscription.pickUser')}: #{userId}
-        </span>
-      )}
-      {shortUuid !== null && userId === null && (
-        <span className="rounded-xl bg-accent-500 px-3 py-1.5 font-mono text-xs text-on-accent">
-          {shortUuid}
-        </span>
-      )}
-      <div className="relative">
+    <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+      <ChoiceChips
+        value={current}
+        options={options}
+        label={t('admin.reachability.subscription.source')}
+        onChange={(value) => {
+          if (value === 'reference') onSource({ userId: null, shortUuid: null });
+        }}
+      />
+      <div className="relative sm:ml-auto">
         <input
           type="search"
           value={search}

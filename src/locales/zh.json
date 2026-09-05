@@ -3853,11 +3853,19 @@
         "dpiAny": "全部",
         "bsShort": "白名单",
         "allRegions": "所有联邦区",
-        "selectAll": "全选",
-        "selectNone": "清除",
         "selected_other": "已选 {{count}} 张 SIM 卡",
         "notProbeable": "当前不可用",
-        "empty": "没有 SIM 卡 — 服务不可用"
+        "empty": "没有 SIM 卡 — 服务不可用",
+        "mode": "模式",
+        "region": "地区",
+        "pickBs": "选择白名单 SIM（{{count}}）",
+        "pickRegular": "选择非白名单 SIM（{{count}}）",
+        "clearAll": "全部取消",
+        "recall": "与上次相同（{{count}}）",
+        "groupCount": "{{selected}}/{{total}}",
+        "showGroup": "{{operator}} 的 SIM",
+        "pickGroup": "选择 {{operator}} 的全部 SIM",
+        "noneSelected": "未选择任何 SIM——请手动或通过快速选择勾选"
       },
       "launch": {
         "price": "价格",
@@ -3872,7 +3880,16 @@
         "busy": "{{kind}} #{{id}} 已在运行 — 请等待完成",
         "skippedDpiOff": "被白名单模式过滤：{{units}}",
         "skippedUnavailable": "当前不可用：{{units}}",
-        "previewFailed": "无法计算价格"
+        "previewFailed": "无法计算价格",
+        "confirmTitle": "扣费确认",
+        "confirmQuestion": "启动{{kind}}？",
+        "confirmTargets": "目标（{{count}}）：{{list}}",
+        "confirmUnits": "SIM（{{count}}）：{{list}}",
+        "confirmPrice": "价格：{{price}}",
+        "confirmEstimate": "价格：≈{{price}}（估算，启动后确定）",
+        "confirmBalanceAfter": "扣费后余额：{{balance}}",
+        "confirmMore": "还有 {{count}} 个",
+        "started": "任务 #{{id}} 已启动"
       },
       "progress": {
         "submitting": "正在发送请求…",
@@ -3917,7 +3934,9 @@
         "nodeHosts_other": "{{count}} 台主机",
         "excluded": "已从概览中排除",
         "empty": "面板未返回主机",
-        "nodesEmpty": "面板未返回节点"
+        "nodesEmpty": "面板未返回节点",
+        "pickBs": "选择白名单主机（{{count}}）",
+        "purposeLabel": "用途"
       },
       "subscription": {
         "title": "订阅配置",
@@ -3931,7 +3950,10 @@
         "coreAuto": "自动",
         "coreStable": "stable",
         "corePrerelease": "prerelease",
-        "empty": "订阅中没有可用配置"
+        "empty": "订阅中没有可用配置",
+        "pickBs": "选择白名单配置（{{count}}）",
+        "source": "来源",
+        "userLabel": "用户 #{{id}}"
       },
       "scan": {
         "cidr": "子网 /24",
@@ -3998,7 +4020,9 @@
         "details": "任务 #{{id}}",
         "loadMore": "显示更多",
         "more": "+{{count}}",
-        "rawJson": "原始响应"
+        "rawJson": "原始响应",
+        "open": "打开任务 #{{id}}",
+        "units_other": "{{count}} 张 SIM"
       },
       "shortcuts": {
         "checkSubscription": "通过俄罗斯运营商检查",

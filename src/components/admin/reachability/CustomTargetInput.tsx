@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Card } from '@/components/data-display';
 import { XIcon } from '@/components/icons';
 
 interface CustomTargetInputProps {
@@ -19,7 +20,7 @@ export function CustomTargetInput({ values, onChange }: CustomTargetInputProps) 
   };
 
   return (
-    <section className="rounded-2xl border border-dark-700/60 bg-dark-800/60 p-4">
+    <Card size="md">
       <h2 className="text-lg font-semibold text-dark-100">
         {t('admin.reachability.targets.custom')}
       </h2>
@@ -36,7 +37,7 @@ export function CustomTargetInput({ values, onChange }: CustomTargetInputProps) 
           }}
           placeholder={t('admin.reachability.targets.customPlaceholder')}
           aria-label={t('admin.reachability.targets.custom')}
-          className="input flex-1"
+          className="input min-w-0 flex-1"
         />
         <button type="button" className="btn-secondary" onClick={add} disabled={!draft.trim()}>
           {t('admin.reachability.targets.customAdd')}
@@ -62,6 +63,6 @@ export function CustomTargetInput({ values, onChange }: CustomTargetInputProps) 
           ))}
         </ul>
       )}
-    </section>
+    </Card>
   );
 }
