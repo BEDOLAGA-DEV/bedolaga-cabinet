@@ -162,7 +162,7 @@ function NodeCard({ node, providerName, realtime, onAction, isLoading }: NodeCar
   // GeoCheck умеет только узел 3.3.0+; на старом узле кнопку не показываем,
   // чтобы админ не упирался в ошибку панели.
   const canGeoCheck = supportsGeoCheck(node.versions);
-  // Ярлык в «Доступность из РФ»: только с правом запуска и при включённой интеграции.
+  // Ярлык в BSCHEKER: только с правом запуска и при включённой интеграции.
   // Оба хука вызываются безусловно — правило хуков, объединяем результат после.
   const navigate = useNavigate();
   const canRunReachability = usePermissionStore((s) => s.hasPermission('reachability:run'));

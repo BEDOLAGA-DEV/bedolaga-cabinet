@@ -1262,7 +1262,7 @@
       "promocodes": "促销码",
       "promoGroups": "折扣组",
       "remnawave": "Remnawave",
-      "reachability": "俄罗斯可达性",
+      "reachability": "BSCHEKER",
       "users": "用户",
       "trafficUsage": "流量使用",
       "updates": "更新",
@@ -2114,7 +2114,7 @@
         "db_redis": "Redis",
         "sys_core": "核心与调试",
         "sys_remnawave": "Remnawave",
-        "sys_reachability": "俄罗斯可达性",
+        "sys_reachability": "BSCHEKER",
         "sys_webapi": "Web API",
         "sys_webhook": "Webhook",
         "sys_server": "服务器状态",
@@ -3822,7 +3822,7 @@
       }
     },
     "reachability": {
-      "title": "俄罗斯可达性",
+      "title": "BSCHEKER",
       "tabs": {
         "summary": "概览",
         "probe": "探测",
@@ -4025,8 +4025,8 @@
         "units_other": "{{count}} 张 SIM"
       },
       "shortcuts": {
-        "checkSubscription": "通过俄罗斯运营商检查",
-        "checkNode": "检查从俄罗斯的可达性"
+        "checkSubscription": "在 BSCHEKER 中检查",
+        "checkNode": "在 BSCHEKER 中检查"
       }
     },
     "roles": {

@@ -1393,7 +1393,7 @@
       "users": "Users",
       "payments": "Payments",
       "remnawave": "Remnawave",
-      "reachability": "Reachability from Russia",
+      "reachability": "BSCHEKER",
       "emailTemplates": "Email Templates",
       "paymentMethods": "Payment Methods",
       "campaigns": "Campaigns",
@@ -2010,7 +2010,7 @@
       }
     },
     "reachability": {
-      "title": "Reachability from Russia",
+      "title": "BSCHEKER",
       "tabs": {
         "summary": "Summary",
         "probe": "Probe",
@@ -2219,8 +2219,8 @@
         "units_other": "{{count}} SIMs"
       },
       "shortcuts": {
-        "checkSubscription": "Check via Russian operators",
-        "checkNode": "Check reachability from Russia"
+        "checkSubscription": "Check in BSCHEKER",
+        "checkNode": "Check in BSCHEKER"
       }
     },
     "wheel": {
@@ -2639,7 +2639,7 @@
         "db_redis": "Redis",
         "sys_core": "Core & Debug",
         "sys_remnawave": "Remnawave",
-        "sys_reachability": "Reachability from Russia",
+        "sys_reachability": "BSCHEKER",
         "sys_webapi": "Web API",
         "sys_webhook": "Webhook",
         "sys_server": "Server status",

@@ -1405,7 +1405,7 @@
       "users": "Пользователи",
       "payments": "Платежи",
       "remnawave": "Remnawave",
-      "reachability": "Доступность из РФ",
+      "reachability": "BSCHEKER",
       "emailTemplates": "Email-шаблоны",
       "paymentMethods": "Платёжные методы",
       "campaigns": "Кампании",
@@ -2025,7 +2025,7 @@
       }
     },
     "reachability": {
-      "title": "Доступность из РФ",
+      "title": "BSCHEKER",
       "tabs": {
         "summary": "Сводка",
         "probe": "Проверка",
@@ -2240,8 +2240,8 @@
         "units_many": "{{count}} симок"
       },
       "shortcuts": {
-        "checkSubscription": "Проверить через операторов РФ",
-        "checkNode": "Проверить доступность из РФ"
+        "checkSubscription": "Проверить в BSCHEKER",
+        "checkNode": "Проверить в BSCHEKER"
       }
     },
     "wheel": {
@@ -2652,7 +2652,7 @@
         "db_redis": "Redis",
         "sys_core": "Ядро и отладка",
         "sys_remnawave": "Remnawave",
-        "sys_reachability": "Доступность из РФ",
+        "sys_reachability": "BSCHEKER",
         "sys_webapi": "Web API",
         "sys_webhook": "Webhook",
         "sys_server": "Статус сервера",
@@ -3161,7 +3161,7 @@
         "REDIS": "Redis",
         "CORE": "Бот",
         "REMNAWAVE": "Remnawave",
-        "BSCHEK": "Доступность из РФ (bschekbot)",
+        "BSCHEK": "BSCHEKER (bschekbot)",
         "SERVER_STATUS": "Статус сервера",
         "MONITORING": "Мониторинг",
         "MAINTENANCE": "Обслуживание",

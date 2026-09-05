@@ -1262,7 +1262,7 @@
       "promocodes": "کدهای تخفیف",
       "promoGroups": "گروه‌های تخفیف",
       "remnawave": "Remnawave",
-      "reachability": "دسترسی‌پذیری از روسیه",
+      "reachability": "BSCHEKER",
       "users": "کاربران",
       "trafficUsage": "مصرف ترافیک",
       "updates": "به‌روزرسانی‌ها",
@@ -2047,7 +2047,7 @@
         "db_redis": "Redis",
         "sys_core": "هسته و اشکال‌زدایی",
         "sys_remnawave": "Remnawave",
-        "sys_reachability": "دسترسی‌پذیری از روسیه",
+        "sys_reachability": "BSCHEKER",
         "sys_webapi": "Web API",
         "sys_webhook": "Webhook",
         "sys_server": "وضعیت سرور",
@@ -3814,7 +3814,7 @@
       }
     },
     "reachability": {
-      "title": "دسترسی‌پذیری از روسیه",
+      "title": "BSCHEKER",
       "tabs": {
         "summary": "خلاصه",
         "probe": "بررسی",
@@ -4023,8 +4023,8 @@
         "units_other": "{{count}} سیم‌کارت"
       },
       "shortcuts": {
-        "checkSubscription": "بررسی از طریق اپراتورهای روسیه",
-        "checkNode": "بررسی دسترسی‌پذیری از روسیه"
+        "checkSubscription": "بررسی در BSCHEKER",
+        "checkNode": "بررسی در BSCHEKER"
       }
     },
     "theme": {
