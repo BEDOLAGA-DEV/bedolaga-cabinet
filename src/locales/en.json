@@ -1393,6 +1393,7 @@
       "users": "Users",
       "payments": "Payments",
       "remnawave": "Remnawave",
+      "reachability": "Reachability from Russia",
       "emailTemplates": "Email Templates",
       "paymentMethods": "Payment Methods",
       "campaigns": "Campaigns",
@@ -2008,6 +2009,181 @@
         "toPanelDesc": "Export users from bot to Remnawave"
       }
     },
+    "reachability": {
+      "title": "Reachability from Russia",
+      "comingSoon": "Section under construction",
+      "tabs": {
+        "summary": "Summary",
+        "probe": "Probe",
+        "vless": "VLESS test",
+        "scan": "Scan /24",
+        "history": "History"
+      },
+      "kinds": {
+        "probe": "probe",
+        "vless": "VLESS test",
+        "scan": "scan /24"
+      },
+      "status": {
+        "disabled": "bschekbot integration is disabled",
+        "notConfigured": "bschekbot API key is not set",
+        "openSettings": "Open settings",
+        "balance": "Balance",
+        "tier": "Plan",
+        "reference": "Reference subscription",
+        "referenceConfigs_one": "{{count}} config",
+        "referenceConfigs_other": "{{count}} configs",
+        "activity": "Now",
+        "idle": "idle"
+      },
+      "units": {
+        "title": "Operator SIMs",
+        "dpiOn": "with whitelist",
+        "dpiOff": "without whitelist",
+        "dpiAny": "all",
+        "bsShort": "WL",
+        "allRegions": "all regions",
+        "selectAll": "select all",
+        "selectNone": "clear",
+        "selected_one": "{{count}} SIM selected",
+        "selected_other": "{{count}} SIMs selected",
+        "notProbeable": "unavailable now",
+        "empty": "No SIMs — service unavailable"
+      },
+      "launch": {
+        "price": "Price",
+        "estimate": "estimate, exact price after launch",
+        "balance": "Balance left",
+        "run": "Run for {{price}}",
+        "running": "Starting…",
+        "noTargets": "Pick at least one target",
+        "noUnits": "No SIM matches the whitelist filter",
+        "overLimit": "Above the job price cap ({{limit}})",
+        "overBalance": "Not enough balance",
+        "busy": "{{kind}} #{{id}} is already running — wait for it",
+        "skippedDpiOff": "Filtered out by whitelist mode: {{units}}",
+        "skippedUnavailable": "Unavailable now: {{units}}",
+        "previewFailed": "Could not compute the price"
+      },
+      "progress": {
+        "submitting": "Sending request…",
+        "waiting": "Waiting for operators ({{elapsed}})",
+        "retrieving": "Taking longer than usual, fetching the result ({{elapsed}})",
+        "polling": "Check in progress ({{elapsed}})",
+        "cancelling": "Cancelling…",
+        "hintProbe": "Usually 5–60 s, whole fleet up to 10 min",
+        "hintVless": "Up to 3 min per server",
+        "hintScan": "15–40 s per SIM",
+        "stalled": "Polling stopped, the result will appear in History",
+        "cancel": "Cancel",
+        "retrieve": "Fetch result",
+        "failed": "Check failed",
+        "retry": "Retry",
+        "cancelled": "Cancelled"
+      },
+      "verdict": {
+        "reachable": "reachable",
+        "blocked": "blocked",
+        "down": "down",
+        "unknown": "unknown",
+        "cancelled": "cancelled",
+        "asExpected": "as expected",
+        "unexpected": "not as expected"
+      },
+      "purpose": {
+        "bs": "whitelist bypass",
+        "regular": "regular",
+        "unknown": "undefined",
+        "guessed": "guess"
+      },
+      "targets": {
+        "hosts": "Panel hosts",
+        "nodes": "Nodes",
+        "custom": "Custom target",
+        "customPlaceholder": "IP, domain or address:port",
+        "customAdd": "Add",
+        "includeDisabled": "show disabled",
+        "search": "Search hosts",
+        "nodePing": "server ping only",
+        "nodeHosts_one": "{{count}} host",
+        "nodeHosts_other": "{{count}} hosts",
+        "excluded": "excluded from summary",
+        "empty": "The panel returned no hosts"
+      },
+      "subscription": {
+        "title": "Subscription configs",
+        "reference": "reference subscription",
+        "pickUser": "Use a user's subscription",
+        "userSearchPlaceholder": "Name, id or username",
+        "configs_one": "{{count}} config",
+        "configs_other": "{{count}} configs",
+        "rejected": "Skipped: {{count}}",
+        "limit": "At most 20 configs per test",
+        "core": "xray core",
+        "coreAuto": "auto",
+        "coreStable": "stable",
+        "corePrerelease": "prerelease"
+      },
+      "scan": {
+        "cidr": "Subnet /24",
+        "cidrPlaceholder": "192.0.2.0/24",
+        "fromHost": "this host's subnet",
+        "invalid": "Exactly one /24 subnet is required",
+        "alive_one": "{{count}} live address",
+        "alive_other": "{{count}} live addresses",
+        "copy": "Copy list",
+        "copied": "Copied"
+      },
+      "probes": {
+        "icmp": "ICMP",
+        "tcp": "TCP",
+        "sni": "SNI",
+        "title": "Probes"
+      },
+      "result": {
+        "cost": "Charged",
+        "refunded": "refund {{amount}}",
+        "http": "HTTP",
+        "tunnel": "tunnel",
+        "targetsOk": "targets {{ok}}/{{total}}",
+        "latency": "{{ms}} ms",
+        "core": "core {{core}}",
+        "raw": "Details",
+        "diagnosis": "Diagnosis"
+      },
+      "summary": {
+        "empty": "No checks yet — run the first one on the Probe tab",
+        "age": "{{age}} ago",
+        "openJob": "Open job",
+        "dpiFilter": "SIMs"
+      },
+      "history": {
+        "empty": "History is empty",
+        "filters": {
+          "kind": "Kind",
+          "status": "Status",
+          "all": "all"
+        },
+        "columns": {
+          "id": "#",
+          "kind": "Kind",
+          "targets": "Targets",
+          "units": "SIMs",
+          "cost": "Charged",
+          "status": "Status",
+          "started": "Started"
+        },
+        "statuses": {
+          "pending": "queued",
+          "running": "running",
+          "done": "done",
+          "failed": "failed",
+          "cancelled": "cancelled"
+        },
+        "details": "Job #{{id}}",
+        "loadMore": "Show more"
+      }
+    },
     "wheel": {
       "title": "Fortune Wheel Settings",
       "enabled": "Enabled",
@@ -2424,6 +2600,7 @@
         "db_redis": "Redis",
         "sys_core": "Core & Debug",
         "sys_remnawave": "Remnawave",
+        "sys_reachability": "Reachability from Russia",
         "sys_webapi": "Web API",
         "sys_webhook": "Webhook",
         "sys_server": "Server status",

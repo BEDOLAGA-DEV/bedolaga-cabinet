@@ -49,6 +49,7 @@ import {
   WalletIcon,
   WheelIcon,
   XIcon,
+  CellSignalIcon,
 } from '@/components/icons';
 
 const CABINET_VERSION = __APP_VERSION__;
@@ -82,6 +83,7 @@ const icons = {
   app: <CabinetIcon />,
   server: <ServerIcon />,
   remnawave: <RemnawaveIcon />,
+  signal: <CellSignalIcon />,
   mail: <MailIcon />,
   refresh: <SyncIcon />,
   shield: <ShieldIcon />,
@@ -319,6 +321,12 @@ const sections: AdminSection[] = [
         icon: 'remnawave',
         to: '/admin/remnawave',
         permission: 'remnawave:read',
+      },
+      {
+        name: 'admin.nav.reachability',
+        icon: 'signal',
+        to: '/admin/reachability',
+        permission: 'reachability:read',
       },
       {
         name: 'admin.nav.emailTemplates',

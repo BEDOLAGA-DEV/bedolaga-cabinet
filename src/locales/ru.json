@@ -1405,6 +1405,7 @@
       "users": "Пользователи",
       "payments": "Платежи",
       "remnawave": "Remnawave",
+      "reachability": "Доступность из РФ",
       "emailTemplates": "Email-шаблоны",
       "paymentMethods": "Платёжные методы",
       "campaigns": "Кампании",
@@ -2023,6 +2024,186 @@
         "toPanelDesc": "Экспорт пользователей из бота в Remnawave"
       }
     },
+    "reachability": {
+      "title": "Доступность из РФ",
+      "comingSoon": "Раздел в разработке",
+      "tabs": {
+        "summary": "Сводка",
+        "probe": "Проверка",
+        "vless": "VLESS-тест",
+        "scan": "Скан /24",
+        "history": "История"
+      },
+      "kinds": {
+        "probe": "проверка",
+        "vless": "VLESS-тест",
+        "scan": "скан /24"
+      },
+      "status": {
+        "disabled": "Интеграция bschekbot выключена",
+        "notConfigured": "Не задан ключ API bschekbot",
+        "openSettings": "Открыть настройки",
+        "balance": "Баланс",
+        "tier": "Тариф",
+        "reference": "Эталонная подписка",
+        "referenceConfigs_one": "{{count}} конфиг",
+        "referenceConfigs_few": "{{count}} конфига",
+        "referenceConfigs_many": "{{count}} конфигов",
+        "activity": "Сейчас",
+        "idle": "свободно"
+      },
+      "units": {
+        "title": "Симки операторов",
+        "dpiOn": "с Белым списком",
+        "dpiOff": "без Белого списка",
+        "dpiAny": "все",
+        "bsShort": "БС",
+        "allRegions": "все округа",
+        "selectAll": "выбрать все",
+        "selectNone": "снять",
+        "selected_one": "выбрана {{count}} симка",
+        "selected_few": "выбрано {{count}} симки",
+        "selected_many": "выбрано {{count}} симок",
+        "notProbeable": "сейчас недоступна",
+        "empty": "Список симок пуст — сервис недоступен"
+      },
+      "launch": {
+        "price": "Цена",
+        "estimate": "оценка, точная цена после запуска",
+        "balance": "Остаток",
+        "run": "Запустить за {{price}}",
+        "running": "Запускаем…",
+        "noTargets": "Выберите хотя бы одну цель",
+        "noUnits": "Под фильтр Белого списка не попала ни одна симка",
+        "overLimit": "Дороже потолка задачи ({{limit}})",
+        "overBalance": "На балансе не хватает средств",
+        "busy": "Уже идёт {{kind}} #{{id}} — дождитесь завершения",
+        "skippedDpiOff": "Не попали под фильтр Белого списка: {{units}}",
+        "skippedUnavailable": "Сейчас недоступны: {{units}}",
+        "previewFailed": "Не удалось посчитать цену"
+      },
+      "progress": {
+        "submitting": "Отправляем запрос…",
+        "waiting": "Ждём ответа операторов ({{elapsed}})",
+        "retrieving": "Проверка идёт дольше обычного, забираем результат ({{elapsed}})",
+        "polling": "Проверка идёт ({{elapsed}})",
+        "cancelling": "Отменяем…",
+        "hintProbe": "Обычно 5–60 секунд, по всему флоту — до 10 минут",
+        "hintVless": "До 3 минут на сервер",
+        "hintScan": "15–40 секунд на симку",
+        "stalled": "Опрос остановлен, результат появится в истории",
+        "cancel": "Отменить",
+        "retrieve": "Забрать результат",
+        "failed": "Проверка не удалась",
+        "retry": "Повторить",
+        "cancelled": "Отменено"
+      },
+      "verdict": {
+        "reachable": "доступен",
+        "blocked": "режется",
+        "down": "недоступен",
+        "unknown": "неизвестно",
+        "cancelled": "отменено",
+        "asExpected": "как ожидалось",
+        "unexpected": "не так, как ожидалось"
+      },
+      "purpose": {
+        "bs": "под Белый список",
+        "regular": "обычный",
+        "unknown": "не определено",
+        "guessed": "догадка"
+      },
+      "targets": {
+        "hosts": "Хосты панели",
+        "nodes": "Ноды",
+        "custom": "Произвольная цель",
+        "customPlaceholder": "IP, домен или адрес:порт",
+        "customAdd": "Добавить",
+        "includeDisabled": "показывать отключённые",
+        "search": "Поиск по хостам",
+        "nodePing": "только ping сервера",
+        "nodeHosts_one": "{{count}} хост",
+        "nodeHosts_few": "{{count}} хоста",
+        "nodeHosts_many": "{{count}} хостов",
+        "excluded": "исключён из сводки",
+        "empty": "Панель не вернула хостов"
+      },
+      "subscription": {
+        "title": "Конфиги подписки",
+        "reference": "эталонная подписка",
+        "pickUser": "Подставить подписку пользователя",
+        "userSearchPlaceholder": "Имя, id или username",
+        "configs_one": "{{count}} конфиг",
+        "configs_few": "{{count}} конфига",
+        "configs_many": "{{count}} конфигов",
+        "rejected": "Пропущено: {{count}}",
+        "limit": "Не больше 20 конфигов за тест",
+        "core": "Ядро xray",
+        "coreAuto": "авто",
+        "coreStable": "stable",
+        "corePrerelease": "prerelease"
+      },
+      "scan": {
+        "cidr": "Подсеть /24",
+        "cidrPlaceholder": "192.0.2.0/24",
+        "fromHost": "подсеть этого хоста",
+        "invalid": "Нужна ровно одна подсеть /24",
+        "alive_one": "{{count}} живой адрес",
+        "alive_few": "{{count}} живых адреса",
+        "alive_many": "{{count}} живых адресов",
+        "copy": "Скопировать список",
+        "copied": "Скопировано"
+      },
+      "probes": {
+        "icmp": "ICMP",
+        "tcp": "TCP",
+        "sni": "SNI",
+        "title": "Пробы"
+      },
+      "result": {
+        "cost": "Списано",
+        "refunded": "возврат {{amount}}",
+        "http": "HTTP",
+        "tunnel": "туннель",
+        "targetsOk": "цели {{ok}}/{{total}}",
+        "latency": "{{ms}} мс",
+        "core": "ядро {{core}}",
+        "raw": "Подробности",
+        "diagnosis": "Диагноз"
+      },
+      "summary": {
+        "empty": "Проверок ещё не было — запустите первую на вкладке «Проверка»",
+        "age": "{{age}} назад",
+        "openJob": "Открыть задачу",
+        "dpiFilter": "Симки"
+      },
+      "history": {
+        "empty": "История пуста",
+        "filters": {
+          "kind": "Вид",
+          "status": "Статус",
+          "all": "все"
+        },
+        "columns": {
+          "id": "#",
+          "kind": "Вид",
+          "targets": "Цели",
+          "units": "Симки",
+          "cost": "Списано",
+          "status": "Статус",
+          "started": "Запущена"
+        },
+        "statuses": {
+          "pending": "в очереди",
+          "running": "идёт",
+          "done": "готово",
+          "failed": "ошибка",
+          "cancelled": "отменена"
+        },
+        "details": "Задача #{{id}}",
+        "loadMore": "Показать ещё"
+      }
+    },
     "wheel": {
       "title": "Настройки колеса удачи",
       "enabled": "Включено",
@@ -2431,6 +2612,7 @@
         "db_redis": "Redis",
         "sys_core": "Ядро и отладка",
         "sys_remnawave": "Remnawave",
+        "sys_reachability": "Доступность из РФ",
         "sys_webapi": "Web API",
         "sys_webhook": "Webhook",
         "sys_server": "Статус сервера",
@@ -2939,6 +3121,7 @@
         "REDIS": "Redis",
         "CORE": "Бот",
         "REMNAWAVE": "Remnawave",
+        "BSCHEK": "Доступность из РФ (bschekbot)",
         "SERVER_STATUS": "Статус сервера",
         "MONITORING": "Мониторинг",
         "MAINTENANCE": "Обслуживание",

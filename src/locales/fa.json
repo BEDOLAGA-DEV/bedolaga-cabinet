@@ -1262,6 +1262,7 @@
       "promocodes": "کدهای تخفیف",
       "promoGroups": "گروه‌های تخفیف",
       "remnawave": "Remnawave",
+      "reachability": "دسترسی‌پذیری از روسیه",
       "users": "کاربران",
       "trafficUsage": "مصرف ترافیک",
       "updates": "به‌روزرسانی‌ها",
@@ -2046,6 +2047,7 @@
         "db_redis": "Redis",
         "sys_core": "هسته و اشکال‌زدایی",
         "sys_remnawave": "Remnawave",
+        "sys_reachability": "دسترسی‌پذیری از روسیه",
         "sys_webapi": "Web API",
         "sys_webhook": "Webhook",
         "sys_server": "وضعیت سرور",
@@ -3809,6 +3811,181 @@
         "fromPanelDesc": "وارد کردن کاربران از Remnawave به ربات",
         "toPanel": "به پنل",
         "toPanelDesc": "صادر کردن کاربران از ربات به Remnawave"
+      }
+    },
+    "reachability": {
+      "title": "دسترسی‌پذیری از روسیه",
+      "comingSoon": "بخش در حال ساخت است",
+      "tabs": {
+        "summary": "خلاصه",
+        "probe": "بررسی",
+        "vless": "تست VLESS",
+        "scan": "اسکن /24",
+        "history": "تاریخچه"
+      },
+      "kinds": {
+        "probe": "بررسی",
+        "vless": "تست VLESS",
+        "scan": "اسکن /24"
+      },
+      "status": {
+        "disabled": "یکپارچه‌سازی bschekbot خاموش است",
+        "notConfigured": "کلید API bschekbot تنظیم نشده",
+        "openSettings": "باز کردن تنظیمات",
+        "balance": "موجودی",
+        "tier": "طرح",
+        "reference": "اشتراک مرجع",
+        "referenceConfigs_one": "{{count}} پیکربندی",
+        "referenceConfigs_other": "{{count}} پیکربندی",
+        "activity": "اکنون",
+        "idle": "آزاد"
+      },
+      "units": {
+        "title": "سیم‌کارت‌های اپراتورها",
+        "dpiOn": "با لیست سفید",
+        "dpiOff": "بدون لیست سفید",
+        "dpiAny": "همه",
+        "bsShort": "ل.س",
+        "allRegions": "همه مناطق",
+        "selectAll": "انتخاب همه",
+        "selectNone": "پاک کردن",
+        "selected_one": "{{count}} سیم‌کارت انتخاب شد",
+        "selected_other": "{{count}} سیم‌کارت انتخاب شد",
+        "notProbeable": "اکنون در دسترس نیست",
+        "empty": "سیم‌کارتی نیست — سرویس در دسترس نیست"
+      },
+      "launch": {
+        "price": "قیمت",
+        "estimate": "تخمین، قیمت دقیق پس از شروع",
+        "balance": "موجودی باقی‌مانده",
+        "run": "شروع با {{price}}",
+        "running": "در حال شروع…",
+        "noTargets": "حداقل یک هدف انتخاب کنید",
+        "noUnits": "هیچ سیم‌کارتی با فیلتر لیست سفید مطابقت ندارد",
+        "overLimit": "بیش از سقف قیمت کار ({{limit}})",
+        "overBalance": "موجودی کافی نیست",
+        "busy": "{{kind}} #{{id}} در حال اجراست — منتظر بمانید",
+        "skippedDpiOff": "با حالت لیست سفید فیلتر شد: {{units}}",
+        "skippedUnavailable": "اکنون در دسترس نیست: {{units}}",
+        "previewFailed": "محاسبه قیمت ممکن نشد"
+      },
+      "progress": {
+        "submitting": "در حال ارسال درخواست…",
+        "waiting": "در انتظار اپراتورها ({{elapsed}})",
+        "retrieving": "بیش از معمول طول می‌کشد، در حال دریافت نتیجه ({{elapsed}})",
+        "polling": "بررسی در حال انجام ({{elapsed}})",
+        "cancelling": "در حال لغو…",
+        "hintProbe": "معمولاً ۵–۶۰ ثانیه، همه سیم‌کارت‌ها تا ۱۰ دقیقه",
+        "hintVless": "تا ۳ دقیقه برای هر سرور",
+        "hintScan": "۱۵–۴۰ ثانیه برای هر سیم‌کارت",
+        "stalled": "نظرسنجی متوقف شد، نتیجه در تاریخچه ظاهر می‌شود",
+        "cancel": "لغو",
+        "retrieve": "دریافت نتیجه",
+        "failed": "بررسی ناموفق بود",
+        "retry": "تلاش مجدد",
+        "cancelled": "لغو شد"
+      },
+      "verdict": {
+        "reachable": "در دسترس",
+        "blocked": "مسدود",
+        "down": "خارج از دسترس",
+        "unknown": "نامشخص",
+        "cancelled": "لغو شد",
+        "asExpected": "مطابق انتظار",
+        "unexpected": "خلاف انتظار"
+      },
+      "purpose": {
+        "bs": "دور زدن لیست سفید",
+        "regular": "معمولی",
+        "unknown": "تعیین نشده",
+        "guessed": "حدس"
+      },
+      "targets": {
+        "hosts": "هاست‌های پنل",
+        "nodes": "نودها",
+        "custom": "هدف دلخواه",
+        "customPlaceholder": "IP، دامنه یا آدرس:پورت",
+        "customAdd": "افزودن",
+        "includeDisabled": "نمایش غیرفعال‌ها",
+        "search": "جستجوی هاست‌ها",
+        "nodePing": "فقط پینگ سرور",
+        "nodeHosts_one": "{{count}} هاست",
+        "nodeHosts_other": "{{count}} هاست",
+        "excluded": "از خلاصه حذف شده",
+        "empty": "پنل هاستی برنگرداند"
+      },
+      "subscription": {
+        "title": "پیکربندی‌های اشتراک",
+        "reference": "اشتراک مرجع",
+        "pickUser": "استفاده از اشتراک کاربر",
+        "userSearchPlaceholder": "نام، شناسه یا نام کاربری",
+        "configs_one": "{{count}} پیکربندی",
+        "configs_other": "{{count}} پیکربندی",
+        "rejected": "رد شده: {{count}}",
+        "limit": "حداکثر ۲۰ پیکربندی در هر تست",
+        "core": "هسته xray",
+        "coreAuto": "خودکار",
+        "coreStable": "stable",
+        "corePrerelease": "prerelease"
+      },
+      "scan": {
+        "cidr": "زیرشبکه /24",
+        "cidrPlaceholder": "192.0.2.0/24",
+        "fromHost": "زیرشبکه این هاست",
+        "invalid": "دقیقاً یک زیرشبکه /24 لازم است",
+        "alive_one": "{{count}} آدرس فعال",
+        "alive_other": "{{count}} آدرس فعال",
+        "copy": "کپی فهرست",
+        "copied": "کپی شد"
+      },
+      "probes": {
+        "icmp": "ICMP",
+        "tcp": "TCP",
+        "sni": "SNI",
+        "title": "بررسی‌ها"
+      },
+      "result": {
+        "cost": "کسر شده",
+        "refunded": "بازگشت {{amount}}",
+        "http": "HTTP",
+        "tunnel": "تونل",
+        "targetsOk": "اهداف {{ok}}/{{total}}",
+        "latency": "{{ms}} م‌ث",
+        "core": "هسته {{core}}",
+        "raw": "جزئیات",
+        "diagnosis": "تشخیص"
+      },
+      "summary": {
+        "empty": "هنوز بررسی‌ای انجام نشده — اولین را در تب «بررسی» شروع کنید",
+        "age": "{{age}} پیش",
+        "openJob": "باز کردن کار",
+        "dpiFilter": "سیم‌کارت‌ها"
+      },
+      "history": {
+        "empty": "تاریخچه خالی است",
+        "filters": {
+          "kind": "نوع",
+          "status": "وضعیت",
+          "all": "همه"
+        },
+        "columns": {
+          "id": "#",
+          "kind": "نوع",
+          "targets": "اهداف",
+          "units": "سیم‌کارت‌ها",
+          "cost": "کسر شده",
+          "status": "وضعیت",
+          "started": "شروع"
+        },
+        "statuses": {
+          "pending": "در صف",
+          "running": "در حال اجرا",
+          "done": "انجام شد",
+          "failed": "خطا",
+          "cancelled": "لغو شد"
+        },
+        "details": "کار #{{id}}",
+        "loadMore": "نمایش بیشتر"
       }
     },
     "theme": {

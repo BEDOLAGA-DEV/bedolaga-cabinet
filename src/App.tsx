@@ -135,6 +135,7 @@ const AdminPromoOfferTemplateEdit = lazyWithRetry(
   () => import('./pages/AdminPromoOfferTemplateEdit'),
 );
 const AdminPromoOfferSend = lazyWithRetry(() => import('./pages/AdminPromoOfferSend'));
+const AdminReachability = lazyWithRetry(() => import('./pages/AdminReachability'));
 const AdminRemnawave = lazyWithRetry(() => import('./pages/AdminRemnawave'));
 const AdminRemnawaveSquadDetail = lazyWithRetry(() => import('./pages/AdminRemnawaveSquadDetail'));
 const AdminEmailTemplates = lazyWithRetry(() => import('./pages/AdminEmailTemplates'));
@@ -817,6 +818,16 @@ function App() {
             <PermissionRoute permission="ban_system:read">
               <LazyPage>
                 <AdminBanSystem />
+              </LazyPage>
+            </PermissionRoute>
+          }
+        />
+        <Route
+          path="/admin/reachability"
+          element={
+            <PermissionRoute permission="reachability:read">
+              <LazyPage>
+                <AdminReachability />
               </LazyPage>
             </PermissionRoute>
           }

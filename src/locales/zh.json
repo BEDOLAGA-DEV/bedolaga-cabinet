@@ -1262,6 +1262,7 @@
       "promocodes": "促销码",
       "promoGroups": "折扣组",
       "remnawave": "Remnawave",
+      "reachability": "俄罗斯可达性",
       "users": "用户",
       "trafficUsage": "流量使用",
       "updates": "更新",
@@ -2113,6 +2114,7 @@
         "db_redis": "Redis",
         "sys_core": "核心与调试",
         "sys_remnawave": "Remnawave",
+        "sys_reachability": "俄罗斯可达性",
         "sys_webapi": "Web API",
         "sys_webhook": "Webhook",
         "sys_server": "服务器状态",
@@ -3817,6 +3819,176 @@
         "fromPanelDesc": "从Remnawave导入用户到机器人",
         "toPanel": "到面板",
         "toPanelDesc": "从机器人导出用户到Remnawave"
+      }
+    },
+    "reachability": {
+      "title": "俄罗斯可达性",
+      "comingSoon": "板块建设中",
+      "tabs": {
+        "summary": "概览",
+        "probe": "探测",
+        "vless": "VLESS 测试",
+        "scan": "扫描 /24",
+        "history": "历史"
+      },
+      "kinds": {
+        "probe": "探测",
+        "vless": "VLESS 测试",
+        "scan": "扫描 /24"
+      },
+      "status": {
+        "disabled": "bschekbot 集成已关闭",
+        "notConfigured": "未设置 bschekbot API 密钥",
+        "openSettings": "打开设置",
+        "balance": "余额",
+        "tier": "套餐",
+        "reference": "基准订阅",
+        "referenceConfigs_other": "{{count}} 个配置",
+        "activity": "当前",
+        "idle": "空闲"
+      },
+      "units": {
+        "title": "运营商 SIM 卡",
+        "dpiOn": "带白名单",
+        "dpiOff": "不带白名单",
+        "dpiAny": "全部",
+        "bsShort": "白名单",
+        "allRegions": "所有联邦区",
+        "selectAll": "全选",
+        "selectNone": "清除",
+        "selected_other": "已选 {{count}} 张 SIM 卡",
+        "notProbeable": "当前不可用",
+        "empty": "没有 SIM 卡 — 服务不可用"
+      },
+      "launch": {
+        "price": "价格",
+        "estimate": "估算，启动后确定准确价格",
+        "balance": "剩余余额",
+        "run": "花费 {{price}} 启动",
+        "running": "正在启动…",
+        "noTargets": "至少选择一个目标",
+        "noUnits": "没有 SIM 卡符合白名单筛选",
+        "overLimit": "超过任务价格上限（{{limit}}）",
+        "overBalance": "余额不足",
+        "busy": "{{kind}} #{{id}} 已在运行 — 请等待完成",
+        "skippedDpiOff": "被白名单模式过滤：{{units}}",
+        "skippedUnavailable": "当前不可用：{{units}}",
+        "previewFailed": "无法计算价格"
+      },
+      "progress": {
+        "submitting": "正在发送请求…",
+        "waiting": "等待运营商响应（{{elapsed}}）",
+        "retrieving": "耗时比平常长，正在获取结果（{{elapsed}}）",
+        "polling": "检查进行中（{{elapsed}}）",
+        "cancelling": "正在取消…",
+        "hintProbe": "通常 5–60 秒，全部 SIM 卡最多 10 分钟",
+        "hintVless": "每台服务器最多 3 分钟",
+        "hintScan": "每张 SIM 卡 15–40 秒",
+        "stalled": "轮询已停止，结果将出现在历史中",
+        "cancel": "取消",
+        "retrieve": "获取结果",
+        "failed": "检查失败",
+        "retry": "重试",
+        "cancelled": "已取消"
+      },
+      "verdict": {
+        "reachable": "可达",
+        "blocked": "被拦截",
+        "down": "不可用",
+        "unknown": "未知",
+        "cancelled": "已取消",
+        "asExpected": "符合预期",
+        "unexpected": "不符合预期"
+      },
+      "purpose": {
+        "bs": "白名单绕过",
+        "regular": "普通",
+        "unknown": "未确定",
+        "guessed": "推测"
+      },
+      "targets": {
+        "hosts": "面板主机",
+        "nodes": "节点",
+        "custom": "自定义目标",
+        "customPlaceholder": "IP、域名或地址:端口",
+        "customAdd": "添加",
+        "includeDisabled": "显示已禁用",
+        "search": "搜索主机",
+        "nodePing": "仅 ping 服务器",
+        "nodeHosts_other": "{{count}} 台主机",
+        "excluded": "已从概览中排除",
+        "empty": "面板未返回主机"
+      },
+      "subscription": {
+        "title": "订阅配置",
+        "reference": "基准订阅",
+        "pickUser": "使用用户的订阅",
+        "userSearchPlaceholder": "姓名、ID 或用户名",
+        "configs_other": "{{count}} 个配置",
+        "rejected": "已跳过：{{count}}",
+        "limit": "每次测试最多 20 个配置",
+        "core": "xray 内核",
+        "coreAuto": "自动",
+        "coreStable": "stable",
+        "corePrerelease": "prerelease"
+      },
+      "scan": {
+        "cidr": "子网 /24",
+        "cidrPlaceholder": "192.0.2.0/24",
+        "fromHost": "此主机的子网",
+        "invalid": "需要恰好一个 /24 子网",
+        "alive_other": "{{count}} 个存活地址",
+        "copy": "复制列表",
+        "copied": "已复制"
+      },
+      "probes": {
+        "icmp": "ICMP",
+        "tcp": "TCP",
+        "sni": "SNI",
+        "title": "探测项"
+      },
+      "result": {
+        "cost": "已扣费",
+        "refunded": "退款 {{amount}}",
+        "http": "HTTP",
+        "tunnel": "隧道",
+        "targetsOk": "目标 {{ok}}/{{total}}",
+        "latency": "{{ms}} 毫秒",
+        "core": "内核 {{core}}",
+        "raw": "详情",
+        "diagnosis": "诊断"
+      },
+      "summary": {
+        "empty": "尚无检查 — 在「探测」标签页启动第一次",
+        "age": "{{age}}前",
+        "openJob": "打开任务",
+        "dpiFilter": "SIM 卡"
+      },
+      "history": {
+        "empty": "历史为空",
+        "filters": {
+          "kind": "类型",
+          "status": "状态",
+          "all": "全部"
+        },
+        "columns": {
+          "id": "#",
+          "kind": "类型",
+          "targets": "目标",
+          "units": "SIM 卡",
+          "cost": "已扣费",
+          "status": "状态",
+          "started": "启动时间"
+        },
+        "statuses": {
+          "pending": "排队中",
+          "running": "运行中",
+          "done": "完成",
+          "failed": "失败",
+          "cancelled": "已取消"
+        },
+        "details": "任务 #{{id}}",
+        "loadMore": "显示更多"
       }
     },
     "roles": {

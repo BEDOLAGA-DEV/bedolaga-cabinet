@@ -18,6 +18,7 @@ import {
   PiLightning,
   PiRobot,
   PiBroadcast,
+  PiCellSignalFull,
   PiAppWindow,
   PiCalendarDots,
   PiCreditCard,
@@ -508,3 +509,7 @@ export const XCloseIcon = ({ className }: IconProps) => (
 );
 
 export const XMarkIcon = ({ className }: IconProps) => <PiX className={cn('h-5 w-5', className)} />;
+
+export const CellSignalIcon = ({ className }: IconProps) => (
+  <PiCellSignalFull className={cn('h-5 w-5', className)} />
+);

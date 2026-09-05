@@ -137,6 +137,7 @@ export const SETTINGS_TREE: SettingsTreeConfig = {
       children: [
         { id: 'sys_core', categories: ['CORE', 'DEBUG'] },
         { id: 'sys_remnawave', categories: ['REMNAWAVE'] },
+        { id: 'sys_reachability', categories: ['BSCHEK'] },
         { id: 'sys_webapi', categories: ['WEB_API', 'EXTERNAL_ADMIN'] },
         { id: 'sys_cabinet', categories: ['CABINET'] },
         { id: 'sys_webhook', categories: ['WEBHOOK'] },
