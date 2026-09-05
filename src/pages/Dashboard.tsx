@@ -25,6 +25,7 @@ import { API } from '../config/constants';
 import { ChevronRightIcon, StarIcon } from '@/components/icons';
 import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 import { safeLocal } from '../utils/safeStorage';
+import { getApiErrorMessage } from '../utils/api-error';
 
 export default function Dashboard() {
   const { t } = useTranslation();
@@ -148,8 +149,8 @@ export default function Dashboard() {
       queryClient.invalidateQueries({ queryKey: ['purchase-options'] });
       refreshUser();
     },
-    onError: (error: { response?: { data?: { detail?: string } } }) => {
-      setTrialError(error.response?.data?.detail || t('common.error'));
+    onError: (error: unknown) => {
+      setTrialError(getApiErrorMessage(error, t('common.error')));
     },
   });
 

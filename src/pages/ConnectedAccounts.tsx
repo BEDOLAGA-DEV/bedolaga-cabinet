@@ -449,8 +449,8 @@ export default function ConnectedAccounts() {
         navigate(`/merge/${response.merge_token}`, { replace: true });
       }
     },
-    onError: (err: { response?: { data?: { detail?: string } } }) => {
-      setEmailError(err.response?.data?.detail || t('profile.emailMergeCodeInvalid'));
+    onError: (err: unknown) => {
+      setEmailError(getApiErrorMessage(err, t('profile.emailMergeCodeInvalid')));
     },
   });
 
