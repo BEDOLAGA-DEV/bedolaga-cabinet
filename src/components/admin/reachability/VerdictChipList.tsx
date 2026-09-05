@@ -3,11 +3,14 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import type { Verdict } from '@/api/reachability';
 import { cn } from '@/lib/utils';
+import { OperatorIcon } from './OperatorIcon';
 import { toneClasses, verdictLabelKey, verdictTone } from './verdict';
 
 export interface VerdictCell {
   key: string;
   label: string;
+  /** Код оператора для иконки («mts»). */
+  operator?: string | null;
   verdict: Verdict;
   matches: boolean | null;
   /** Мелкая подпись под вердиктом — например, давность проверки. */
@@ -49,7 +52,10 @@ export function VerdictChipList({ rows, onSelect, selectedCell = null }: Verdict
             {row.cells.map((cell) => {
               const body = (
                 <>
-                  <span className="font-mono text-[11px] opacity-80">{cell.label}</span>
+                  <span className="flex items-center gap-1 font-mono text-[11px] opacity-80">
+                    <OperatorIcon operator={cell.operator} className="h-3.5 w-3.5 rounded" />
+                    {cell.label}
+                  </span>
                   <span className="font-medium">{t(verdictLabelKey(cell.verdict))}</span>
                   {cell.hint && <span className="text-[10px] opacity-70">{cell.hint}</span>}
                 </>

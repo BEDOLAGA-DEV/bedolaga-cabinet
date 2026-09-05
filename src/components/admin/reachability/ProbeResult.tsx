@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next';
 import type { Job, Leg } from '@/api/reachability';
 import { VerdictBadge } from './VerdictBadge';
 import { type VerdictRow, VerdictChipList } from './VerdictChipList';
+import { OperatorIcon } from './OperatorIcon';
+import { operatorCode } from './operatorIcons';
 import { probeMatrix } from './resultShapes';
 
 function labelFor(job: Job, targetKey: string): string {
@@ -31,6 +33,7 @@ export function ProbeResult({ job }: { job: Job }) {
                 {
                   key: opKey,
                   label: unitLabel(leg),
+                  operator: leg.operator ?? operatorCode(opKey),
                   verdict: leg.verdict,
                   matches: leg.matches_expectation,
                 },
@@ -68,7 +71,10 @@ export function ProbeResult({ job }: { job: Job }) {
               </th>
               {matrix.cols.map((opKey) => (
                 <th key={opKey} className="p-2 text-center font-mono text-[11px] normal-case">
-                  {opKey}
+                  <span className="flex flex-col items-center gap-1">
+                    <OperatorIcon operator={operatorCode(opKey)} />
+                    {opKey}
+                  </span>
                 </th>
               ))}
             </tr>

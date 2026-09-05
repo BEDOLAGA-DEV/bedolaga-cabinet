@@ -8,6 +8,7 @@ import { ChevronDownIcon } from '@/components/icons';
 import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { ChoiceChips } from './ChoiceChips';
+import { OperatorIcon } from './OperatorIcon';
 import {
   type DpiFilter,
   type GroupState,
@@ -218,6 +219,7 @@ function OperatorRow({
           onClick={onToggleExpanded}
           className="flex min-h-[44px] min-w-0 flex-1 items-center gap-2 text-left"
         >
+          <OperatorIcon operator={group.units[0]?.operator} />
           <span className="truncate text-sm font-medium text-dark-100">{group.operator}</span>
           <span className="text-xs text-dark-400">
             {t('admin.reachability.units.groupCount', {

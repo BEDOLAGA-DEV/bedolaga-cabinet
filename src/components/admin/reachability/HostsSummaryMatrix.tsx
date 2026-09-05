@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import type { Summary, Unit } from '@/api/reachability';
 import { cn } from '@/lib/utils';
+import { OperatorIcon } from './OperatorIcon';
 import { PurposeChip } from './PurposeChip';
 import { type VerdictRow, VerdictChipList } from './VerdictChipList';
 import { REACHABILITY_PATH } from './deepLink';
@@ -47,6 +48,7 @@ export function HostsSummaryMatrix({ summary }: HostsSummaryMatrixProps) {
                 {
                   key: unit.op_key,
                   label: unitHeader(unit),
+                  operator: unit.operator,
                   verdict: cell.verdict,
                   matches: cell.matches_expectation,
                   hint: relativeAge(cell.checked_at, i18n.language),
@@ -73,6 +75,7 @@ export function HostsSummaryMatrix({ summary }: HostsSummaryMatrixProps) {
               </th>
               {summary.units.map((unit) => (
                 <th key={unit.op_key} className="p-2 text-center font-normal">
+                  <OperatorIcon operator={unit.operator} className="mx-auto mb-1" />
                   <span className="block">{unitHeader(unit)}</span>
                   <span className="block font-mono text-[10px] text-dark-400">{unit.op_key}</span>
                   {!unit.in_catalog && (
