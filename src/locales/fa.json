@@ -3936,37 +3936,39 @@
         "count_one": "{{count}} هدف",
         "count_other": "{{count}} هدف",
         "showAll": "نمایش همه میزبان‌ها ({{count}})",
-        "showLess": "جمع کردن فهرست"
+        "showLess": "جمع کردن فهرست",
+        "purposeHint": "برچسب میزبان کاربرد آن است: «لیست سفید» باید از سیم‌کارت‌های لیست سفید در دسترس باشد، «معمولی» از سیم‌کارت‌های بدون آن. برای تغییر روی برچسب بزنید."
       },
       "subscription": {
         "title": "پیکربندی‌های اشتراک",
-        "reference": "اشتراک مرجع",
+        "reference": "اشتراک پیش‌فرض",
         "pickUser": "استفاده از اشتراک کاربر",
         "userSearchPlaceholder": "نام، شناسه یا نام کاربری",
         "configs_one": "{{count}} پیکربندی",
         "configs_other": "{{count}} پیکربندی",
         "rejected": "رد شده: {{count}}",
         "limit": "حداکثر ۲۰ پیکربندی در هر تست",
-        "core": "هسته xray",
+        "core": "هسته Xray",
         "coreAuto": "خودکار",
-        "coreStable": "stable",
-        "corePrerelease": "prerelease",
+        "coreStable": "Stable",
+        "corePrerelease": "Prerelease",
         "empty": "اشتراک پیکربندی قابل‌استفاده‌ای ندارد",
         "pickBs": "انتخاب همه پیکربندی‌های لیست سفید ({{count}})",
         "source": "منبع",
         "userLabel": "کاربر #{{id}}"
       },
       "scan": {
-        "cidr": "زیرشبکه /24",
-        "cidrPlaceholder": "192.0.2.0/24",
+        "cidr": "IP یا زیرشبکه",
+        "cidrPlaceholder": "192.0.2.10 یا 192.0.2.0/24",
         "fromHost": "زیرشبکه این هاست",
-        "invalid": "دقیقاً یک زیرشبکه /24 لازم است",
+        "invalid": "یک آدرس IPv4 یا زیرشبکه /24 وارد کنید",
         "alive_one": "{{count}} آدرس فعال",
         "alive_other": "{{count}} آدرس فعال",
         "copy": "کپی فهرست",
         "copied": "کپی شد",
         "perUnit": "به تفکیک سیم‌کارت",
-        "ofTotal": "از {{total}}"
+        "ofTotal": "از {{total}}",
+        "willScan": "زیرشبکه {{subnet}} اسکن می‌شود"
       },
       "probes": {
         "icmp": "ICMP",
@@ -3980,7 +3982,7 @@
         "tunnel": "تونل",
         "targetsOk": "اهداف {{ok}}/{{total}}",
         "latency": "{{ms}} م‌ث",
-        "core": "هسته {{core}}",
+        "core": "Xray {{core}}",
         "raw": "جزئیات",
         "diagnosis": "تشخیص",
         "empty": "نتیجه خالی است",
@@ -4059,7 +4061,6 @@
         "pickDistrict": "انتخاب کل منطقه {{code}}",
         "unpickDistrict": "لغو انتخاب کل منطقه {{code}}",
         "noBs": "بدون لیست سفید",
-        "offline": "آفلاین",
         "empty": "فهرست سیم‌کارت‌ها خالی است: سرویس در دسترس نیست"
       },
       "recent": {

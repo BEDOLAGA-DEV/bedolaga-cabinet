@@ -2,7 +2,8 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { SectionHeading } from './SectionHeading';
-import { cidrFromAddress, isCidr24 } from './jobBodies';
+import { cidrFromAddress } from './jobBodies';
+import { scanSubnet } from './targetsInput';
 import { useHosts } from './useTargets';
 
 export interface ScanTargetsProps {
@@ -23,7 +24,8 @@ export function ScanTargets({ cidr, onChange }: ScanTargetsProps) {
       return [{ subnet, label: host.remark }];
     });
   }, [hosts]);
-  const invalid = cidr.trim() !== '' && !isCidr24(cidr);
+  const subnet = scanSubnet(cidr);
+  const invalid = cidr.trim() !== '' && subnet === null;
 
   return (
     <section aria-labelledby="reachability-targets" className="space-y-3">
@@ -48,13 +50,18 @@ export function ScanTargets({ cidr, onChange }: ScanTargetsProps) {
         {invalid && (
           <p className="mt-1 text-xs text-warning-400">{t('admin.reachability.scan.invalid')}</p>
         )}
+        {subnet && (
+          <p className="mt-1 text-xs text-dark-400">
+            {t('admin.reachability.scan.willScan', { subnet })}
+          </p>
+        )}
       </div>
       {suggestions.length > 0 && (
         <div>
           <p className="text-xs text-dark-400">{t('admin.reachability.scan.fromHost')}</p>
           <div className="mt-1.5 flex flex-wrap gap-1.5">
             {suggestions.map((item) => {
-              const on = cidr.trim() === item.subnet;
+              const on = subnet === item.subnet;
               return (
                 <button
                   key={item.subnet}

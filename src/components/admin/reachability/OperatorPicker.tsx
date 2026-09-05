@@ -34,7 +34,9 @@ const PRESET_ON = 'border-accent-500/40 bg-accent-500/10 text-accent-400';
  */
 export function OperatorPicker({ kind, selected, onChange }: OperatorPickerProps) {
   const { t } = useTranslation();
-  const { data: units = [], isLoading } = useUnits();
+  const { data: catalog = [], isLoading } = useUnits();
+  // Симки без связи не показываем: отмечать их нельзя, а место на экране они едят.
+  const units = useMemo(() => catalog.filter((unit) => unit.probeable), [catalog]);
 
   const districts = useMemo(() => groupByDistrict(units), [units]);
   const bsKeys = useMemo(() => pickUnits(units, 'on'), [units]);
@@ -198,12 +200,8 @@ function DistrictRow({ district, selected, onToggleDistrict, onToggleUnit }: Dis
             >
               <OperatorIcon operator={unit.operator} className="h-[18px] w-[18px] rounded" />
               <span>{unit.name}</span>
-              {!unit.probeable ? (
-                <span className="text-xs text-dark-400">
-                  {t('admin.reachability.operators.offline')}
-                </span>
-              ) : unit.dpi === 'off' ? (
-                <span className="text-xs text-dark-400">
+              {unit.dpi === 'off' ? (
+                <span className="text-xs text-warning-400">
                   {t('admin.reachability.operators.noBs')}
                 </span>
               ) : (

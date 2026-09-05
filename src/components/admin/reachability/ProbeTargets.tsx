@@ -12,6 +12,7 @@ import { cn } from '@/lib/utils';
 import { getApiErrorMessage } from '@/utils/api-error';
 import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 import { PurposeChip } from './PurposeChip';
+import { CheckGlyph, ROW, ROW_BUTTON, ROW_OFF, ROW_ON } from './SelectableRow';
 import { SectionHeading } from './SectionHeading';
 import { pickByPurpose } from './targetPicks';
 import { MAX_CUSTOM_TARGETS, parseTargets } from './targetsInput';
@@ -38,24 +39,6 @@ function matches(host: HostTarget, query: string): boolean {
     .join(' ')
     .toLowerCase()
     .includes(needle);
-}
-
-const ROW = 'flex items-center gap-3 rounded-xl border px-3 py-1 transition-colors';
-const ROW_ON = 'border-accent-500/40 bg-accent-500/10';
-const ROW_OFF = 'border-dark-700/60 bg-dark-900/30 hover:border-dark-600';
-
-function CheckGlyph({ on }: { on: boolean }) {
-  return (
-    <span
-      aria-hidden="true"
-      className={cn(
-        'flex h-4 w-4 shrink-0 items-center justify-center rounded border text-[10px] font-bold',
-        on ? 'border-accent-500 bg-accent-500 text-on-accent' : 'border-dark-600 text-transparent',
-      )}
-    >
-      ✓
-    </span>
-  );
 }
 
 /** Цели проверки хостов: хосты панели, а под «Дополнительно» ноды и свои адреса. */
@@ -144,6 +127,8 @@ export function ProbeTargets(props: ProbeTargetsProps) {
         )}
       </div>
 
+      <p className="text-xs text-dark-400">{t('admin.reachability.targets.purposeHint')}</p>
+
       {error && <p className="text-sm text-error-400">{getApiErrorMessage(error, '')}</p>}
       {!error && filtered.length === 0 && (
         <p className="text-sm text-dark-400">{t('admin.reachability.targets.empty')}</p>
@@ -158,7 +143,7 @@ export function ProbeTargets(props: ProbeTargetsProps) {
                 type="button"
                 aria-pressed={on}
                 onClick={() => props.onToggleHost(host)}
-                className="flex min-h-[44px] min-w-0 flex-1 items-center gap-3 text-left"
+                className={ROW_BUTTON}
               >
                 <CheckGlyph on={on} />
                 <span className="min-w-0 flex-1">
@@ -205,81 +190,71 @@ export function ProbeTargets(props: ProbeTargetsProps) {
         </button>
       )}
 
-      <details className="group rounded-xl border border-dark-700/60 bg-dark-900/30">
-        <summary className="flex min-h-[44px] cursor-pointer list-none items-center justify-between gap-3 px-3 text-sm font-medium text-dark-200">
-          <span>
-            {t('admin.reachability.sections.more')}
-            <span className="ml-2 text-xs font-normal text-dark-400">
-              {t('admin.reachability.targets.nodesTitle')} ·{' '}
-              {t('admin.reachability.targets.ownAddresses')}
+      <div>
+        <label htmlFor="reachability-own" className="text-sm font-medium text-dark-200">
+          {t('admin.reachability.targets.ownAddresses')}
+        </label>
+        <textarea
+          id="reachability-own"
+          value={props.own}
+          onChange={(event) => props.onOwnChange(event.target.value)}
+          rows={2}
+          placeholder={t('admin.reachability.targets.ownPlaceholder')}
+          className="input mt-1 w-full font-mono text-sm"
+        />
+        <p className="mt-1 text-xs text-dark-400">
+          {t('admin.reachability.targets.ownHint')} · {MAX_CUSTOM_TARGETS}
+        </p>
+        {own.overLimit > 0 && (
+          <p className="mt-1 text-xs text-warning-400">
+            {t('admin.reachability.targets.overLimit', { count: own.overLimit })}
+          </p>
+        )}
+      </div>
+
+      {allNodes.length > 0 && (
+        <details className="group rounded-xl border border-dark-700/60 bg-dark-900/30">
+          <summary className="flex min-h-[44px] cursor-pointer list-none items-center justify-between gap-3 px-3 text-sm font-medium text-dark-200">
+            <span>
+              {t('admin.reachability.targets.nodesTitle')}
+              <span className="ml-2 text-xs font-normal text-dark-400">
+                {t('admin.reachability.targets.nodesHint')}
+              </span>
             </span>
-          </span>
-          <ChevronDownIcon
-            aria-hidden="true"
-            className="h-4 w-4 shrink-0 text-dark-400 transition-transform group-open:rotate-180"
-          />
-        </summary>
-        <div className="space-y-4 border-t border-dark-700/60 p-3">
-          {allNodes.length > 0 && (
-            <div>
-              <p className="text-sm font-medium text-dark-200">
-                {t('admin.reachability.targets.nodesTitle')}
-                <span className="ml-2 text-xs font-normal text-dark-400">
-                  {t('admin.reachability.targets.nodesHint')}
-                </span>
-              </p>
-              <div className="mt-2 flex flex-wrap gap-1.5">
-                {allNodes.map((node) => {
-                  const on = props.nodes.some((item) => item.uuid === node.uuid);
-                  return (
-                    <button
-                      key={node.uuid}
-                      type="button"
-                      aria-pressed={on}
-                      onClick={() => props.onToggleNode(node)}
-                      className={cn(
-                        'flex min-h-[40px] items-center gap-2 rounded-xl border px-3 text-sm',
-                        on ? ROW_ON : ROW_OFF,
-                      )}
-                    >
-                      <span
-                        aria-hidden="true"
-                        className={cn(
-                          'h-1.5 w-1.5 rounded-full',
-                          node.is_connected ? 'bg-success-500' : 'bg-dark-500',
-                        )}
-                      />
-                      <span className="text-dark-100">{node.name}</span>
-                      <span className="font-mono text-xs text-dark-400">{node.address}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-          <div>
-            <label htmlFor="reachability-own" className="text-sm font-medium text-dark-200">
-              {t('admin.reachability.targets.ownAddresses')}
-            </label>
-            <textarea
-              id="reachability-own"
-              value={props.own}
-              onChange={(event) => props.onOwnChange(event.target.value)}
-              rows={2}
-              placeholder={t('admin.reachability.targets.ownPlaceholder')}
-              className="input mt-1 w-full font-mono text-sm"
+            <ChevronDownIcon
+              aria-hidden="true"
+              className="h-4 w-4 shrink-0 text-dark-400 transition-transform group-open:rotate-180"
             />
-            <p className="mt-1 text-xs text-dark-400">
-              {t('admin.reachability.targets.ownHint')} · {MAX_CUSTOM_TARGETS}
-            </p>
-            {own.overLimit > 0 && (
-              <p className="mt-1 text-xs text-warning-400">
-                {t('admin.reachability.targets.overLimit', { count: own.overLimit })}
-              </p>
-            )}
+          </summary>
+          <div className="flex flex-wrap gap-1.5 border-t border-dark-700/60 p-3">
+            {allNodes.map((node) => {
+              const on = props.nodes.some((item) => item.uuid === node.uuid);
+              return (
+                <button
+                  key={node.uuid}
+                  type="button"
+                  aria-pressed={on}
+                  onClick={() => props.onToggleNode(node)}
+                  className={cn(
+                    'flex min-h-[40px] items-center gap-2 rounded-xl border px-3 text-sm',
+                    on ? ROW_ON : ROW_OFF,
+                  )}
+                >
+                  <span
+                    aria-hidden="true"
+                    className={cn(
+                      'h-1.5 w-1.5 rounded-full',
+                      node.is_connected ? 'bg-success-500' : 'bg-dark-500',
+                    )}
+                  />
+                  <span className="text-dark-100">{node.name}</span>
+                  <span className="font-mono text-xs text-dark-400">{node.address}</span>
+                </button>
+              );
+            })}
           </div>
-        </div>
-      </details>
+        </details>
+      )}
     </section>
   );
 }

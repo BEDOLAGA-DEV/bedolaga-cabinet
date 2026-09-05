@@ -2132,37 +2132,39 @@
         "count_one": "{{count}} target",
         "count_other": "{{count}} targets",
         "showAll": "Show all hosts ({{count}})",
-        "showLess": "Collapse list"
+        "showLess": "Collapse list",
+        "purposeHint": "The host tag is its purpose: “whitelist” must be reachable from whitelist SIMs, “regular” from SIMs without it. Tap the tag to change."
       },
       "subscription": {
         "title": "Subscription configs",
-        "reference": "reference subscription",
+        "reference": "default subscription",
         "pickUser": "Use a user's subscription",
         "userSearchPlaceholder": "Name, id or username",
         "configs_one": "{{count}} config",
         "configs_other": "{{count}} configs",
         "rejected": "Skipped: {{count}}",
         "limit": "At most 20 configs per test",
-        "core": "xray core",
-        "coreAuto": "auto",
-        "coreStable": "stable",
-        "corePrerelease": "prerelease",
+        "core": "Xray core",
+        "coreAuto": "Auto",
+        "coreStable": "Stable",
+        "corePrerelease": "Prerelease",
         "empty": "The subscription has no usable configs",
         "pickBs": "Select all whitelist configs ({{count}})",
         "source": "Source",
         "userLabel": "user #{{id}}"
       },
       "scan": {
-        "cidr": "Subnet /24",
-        "cidrPlaceholder": "192.0.2.0/24",
+        "cidr": "IP or subnet",
+        "cidrPlaceholder": "192.0.2.10 or 192.0.2.0/24",
         "fromHost": "this host's subnet",
-        "invalid": "Exactly one /24 subnet is required",
+        "invalid": "Enter an IPv4 address or a /24 subnet",
         "alive_one": "{{count}} live address",
         "alive_other": "{{count}} live addresses",
         "copy": "Copy list",
         "copied": "Copied",
         "perUnit": "per SIM",
-        "ofTotal": "of {{total}}"
+        "ofTotal": "of {{total}}",
+        "willScan": "Subnet {{subnet}} will be scanned"
       },
       "probes": {
         "icmp": "ICMP",
@@ -2176,7 +2178,7 @@
         "tunnel": "tunnel",
         "targetsOk": "targets {{ok}}/{{total}}",
         "latency": "{{ms}} ms",
-        "core": "core {{core}}",
+        "core": "Xray {{core}}",
         "raw": "Details",
         "diagnosis": "Diagnosis",
         "empty": "Empty result",
@@ -2255,7 +2257,6 @@
         "pickDistrict": "Select whole district {{code}}",
         "unpickDistrict": "Deselect whole district {{code}}",
         "noBs": "no whitelist",
-        "offline": "offline",
         "empty": "SIM list is empty: service unavailable"
       },
       "recent": {

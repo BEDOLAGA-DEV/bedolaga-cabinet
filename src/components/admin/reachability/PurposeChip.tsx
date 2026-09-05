@@ -10,6 +10,7 @@ const CLASS: Record<Purpose, string> = {
 
 interface PurposeChipProps {
   purpose: Purpose;
+  /** Назначение угадано по имени хоста; в интерфейсе не выделяется, чип всё равно переключаемый. */
   guessed?: boolean;
   /** Если задано, чип становится кнопкой «Сменить назначение». */
   onToggle?: () => void;
@@ -17,11 +18,9 @@ interface PurposeChipProps {
 }
 
 /** Назначение цели. Хосты под Белый список — предмет проверки, они выделены акцентом. */
-export function PurposeChip({ purpose, guessed = false, onToggle, disabled }: PurposeChipProps) {
+export function PurposeChip({ purpose, onToggle, disabled }: PurposeChipProps) {
   const { t } = useTranslation();
-  const label = `${t(`admin.reachability.purpose.${purpose}`)}${
-    guessed ? ` · ${t('admin.reachability.purpose.guessed')}` : ''
-  }`;
+  const label = t(`admin.reachability.purpose.${purpose}`);
   const className = cn(
     'shrink-0 whitespace-nowrap rounded-md px-1.5 py-0.5 text-xs font-medium',
     CLASS[purpose],

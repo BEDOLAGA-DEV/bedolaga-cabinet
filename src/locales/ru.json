@@ -2156,11 +2156,12 @@
         "count_few": "{{count}} цели",
         "count_many": "{{count}} целей",
         "showAll": "Показать все хосты ({{count}})",
-        "showLess": "Свернуть список"
+        "showLess": "Свернуть список",
+        "purposeHint": "Тег у хоста — его назначение: «под Белый список» должен быть доступен у симок с БС, «обычный» — у симок без БС. Нажмите на тег, чтобы сменить."
       },
       "subscription": {
         "title": "Конфиги подписки",
-        "reference": "эталонная подписка",
+        "reference": "подписка по умолчанию",
         "pickUser": "Подставить подписку пользователя",
         "userSearchPlaceholder": "Имя, id или username",
         "configs_one": "{{count}} конфиг",
@@ -2168,27 +2169,28 @@
         "configs_many": "{{count}} конфигов",
         "rejected": "Пропущено: {{count}}",
         "limit": "Не больше 20 конфигов за тест",
-        "core": "Ядро xray",
-        "coreAuto": "авто",
-        "coreStable": "stable",
-        "corePrerelease": "prerelease",
+        "core": "Ядро Xray",
+        "coreAuto": "Авто",
+        "coreStable": "Stable",
+        "corePrerelease": "Prerelease",
         "empty": "В подписке нет пригодных конфигов",
         "pickBs": "Отметить все конфиги под БС ({{count}})",
         "source": "Источник",
         "userLabel": "пользователь #{{id}}"
       },
       "scan": {
-        "cidr": "Подсеть /24",
-        "cidrPlaceholder": "192.0.2.0/24",
+        "cidr": "IP или подсеть",
+        "cidrPlaceholder": "192.0.2.10 или 192.0.2.0/24",
         "fromHost": "подсеть этого хоста",
-        "invalid": "Нужна ровно одна подсеть /24",
+        "invalid": "Нужен IPv4-адрес или подсеть /24",
         "alive_one": "{{count}} живой адрес",
         "alive_few": "{{count}} живых адреса",
         "alive_many": "{{count}} живых адресов",
         "copy": "Скопировать список",
         "copied": "Скопировано",
         "perUnit": "по симкам",
-        "ofTotal": "из {{total}}"
+        "ofTotal": "из {{total}}",
+        "willScan": "В скан пойдёт подсеть {{subnet}}"
       },
       "probes": {
         "icmp": "ICMP",
@@ -2202,7 +2204,7 @@
         "tunnel": "туннель",
         "targetsOk": "цели {{ok}}/{{total}}",
         "latency": "{{ms}} мс",
-        "core": "ядро {{core}}",
+        "core": "Xray {{core}}",
         "raw": "Подробности",
         "diagnosis": "Диагноз",
         "empty": "Результат пуст",
@@ -2284,7 +2286,6 @@
         "pickDistrict": "Выбрать весь округ {{code}}",
         "unpickDistrict": "Снять весь округ {{code}}",
         "noBs": "без БС",
-        "offline": "нет связи",
         "empty": "Список симок пуст: сервис недоступен"
       },
       "recent": {

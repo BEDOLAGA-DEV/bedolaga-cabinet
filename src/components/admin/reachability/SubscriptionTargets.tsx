@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import type { SubscriptionConfigs as SubscriptionConfigsData, VlessCore } from '@/api/reachability';
-import { ChevronDownIcon } from '@/components/icons';
-import { DropdownSelect } from '@/components/admin/bulkActions/DropdownSelect';
+import { XrayIcon } from '@/components/icons';
+import { ChoiceChips } from './ChoiceChips';
 import { SectionHeading } from './SectionHeading';
 import { SubscriptionConfigs } from './SubscriptionConfigs';
 import { SubscriptionSourcePicker } from './SubscriptionSourcePicker';
@@ -48,37 +48,21 @@ export function SubscriptionTargets(props: SubscriptionTargetsProps) {
         selected={props.selected}
         onToggle={props.onToggle}
       />
-      <details className="group rounded-xl border border-dark-700/60 bg-dark-900/30">
-        <summary className="flex min-h-[44px] cursor-pointer list-none items-center justify-between gap-3 px-3 text-sm font-medium text-dark-200">
-          <span>
-            {t('admin.reachability.sections.more')}
-            <span className="ml-2 text-xs font-normal text-dark-400">
-              {t('admin.reachability.subscription.core')}
-            </span>
-          </span>
-          <ChevronDownIcon
-            aria-hidden="true"
-            className="h-4 w-4 shrink-0 text-dark-400 transition-transform group-open:rotate-180"
-          />
-        </summary>
-        <div className="border-t border-dark-700/60 p-3">
-          <label className="block sm:w-64">
-            <span className="text-sm font-medium text-dark-200">
-              {t('admin.reachability.subscription.core')}
-            </span>
-            <div className="mt-1">
-              <DropdownSelect
-                value={props.core}
-                onChange={(value) => props.onCoreChange(value as VlessCore)}
-                options={CORES.map((item) => ({
-                  value: item.value,
-                  label: t(`admin.reachability.subscription.${item.key}`),
-                }))}
-              />
-            </div>
-          </label>
-        </div>
-      </details>
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+        <span className="flex items-center gap-2 text-sm font-medium text-dark-200">
+          <XrayIcon className="h-5 w-5 text-dark-300" />
+          {t('admin.reachability.subscription.core')}
+        </span>
+        <ChoiceChips
+          value={props.core}
+          onChange={props.onCoreChange}
+          label={t('admin.reachability.subscription.core')}
+          options={CORES.map((item) => ({
+            value: item.value,
+            label: t(`admin.reachability.subscription.${item.key}`),
+          }))}
+        />
+      </div>
     </section>
   );
 }

@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Job } from '@/api/reachability';
+import { XrayIcon } from '@/components/icons';
 import { VerdictBadge } from './VerdictBadge';
 import { vlessLegView } from './resultShapes';
 
@@ -49,7 +50,8 @@ export function VlessResult({ job }: { job: Job }) {
               </div>
             )}
             {leg.core && (
-              <div>
+              <div className="inline-flex items-center gap-1">
+                <XrayIcon className="h-3.5 w-3.5 text-dark-400" aria-hidden="true" />
                 <dd className="inline">
                   {t('admin.reachability.result.core', { core: leg.core })}
                 </dd>

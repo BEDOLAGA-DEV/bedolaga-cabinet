@@ -18,8 +18,8 @@ import { ScanTargets } from './ScanTargets';
 import { SectionHeading } from './SectionHeading';
 import { SubscriptionTargets } from './SubscriptionTargets';
 import type { DeepLink } from './deepLink';
-import { buildProbeBody, buildScanBody, buildVlessBody, isCidr24 } from './jobBodies';
-import { parseTargets } from './targetsInput';
+import { buildProbeBody, buildScanBody, buildVlessBody } from './jobBodies';
+import { parseTargets, scanSubnet } from './targetsInput';
 import { dpiForSelection } from './unitSelection';
 import { useSubscriptionConfigs } from './useTargets';
 import { useUnits } from './useUnits';
@@ -107,7 +107,12 @@ export function Launcher({ status, link, onKindChange }: LauncherProps) {
         core,
       });
     }
-    return buildScanBody({ cidr, units, dpi, probes: { ...scanProbes, sni: false } });
+    return buildScanBody({
+      cidr: scanSubnet(cidr) ?? '',
+      units,
+      dpi,
+      probes: { ...scanProbes, sni: false },
+    });
   }, [
     kind,
     hosts,
@@ -128,7 +133,7 @@ export function Launcher({ status, link, onKindChange }: LauncherProps) {
       ? hosts.length + nodes.length + ownTargets.length
       : kind === 'vless'
         ? configIndexes.length
-        : isCidr24(cidr)
+        : scanSubnet(cidr)
           ? 1
           : 0;
 
@@ -182,8 +187,6 @@ export function Launcher({ status, link, onKindChange }: LauncherProps) {
           )}
           {kind === 'scan' && <ScanTargets cidr={cidr} onChange={setCidr} />}
 
-          <OperatorPicker kind={kind} selected={units} onChange={setUnits} />
-
           {kind !== 'vless' && (
             <section aria-labelledby="reachability-probes" className="space-y-3">
               <SectionHeading
@@ -205,6 +208,7 @@ export function Launcher({ status, link, onKindChange }: LauncherProps) {
               )}
             </section>
           )}
+          <OperatorPicker kind={kind} selected={units} onChange={setUnits} />
         </div>
         <div className="hidden lg:block">
           <LaunchAside {...launchProps} />

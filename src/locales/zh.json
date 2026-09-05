@@ -3935,35 +3935,37 @@
         "purposeToggle": "更改主机用途",
         "count_other": "{{count}} 个目标",
         "showAll": "显示全部主机（{{count}}）",
-        "showLess": "收起列表"
+        "showLess": "收起列表",
+        "purposeHint": "主机标签表示用途：“白名单”应能从白名单 SIM 访问，“普通”从无白名单 SIM 访问。点击标签可更改。"
       },
       "subscription": {
         "title": "订阅配置",
-        "reference": "基准订阅",
+        "reference": "默认订阅",
         "pickUser": "使用用户的订阅",
         "userSearchPlaceholder": "姓名、ID 或用户名",
         "configs_other": "{{count}} 个配置",
         "rejected": "已跳过：{{count}}",
         "limit": "每次测试最多 20 个配置",
-        "core": "xray 内核",
+        "core": "Xray 内核",
         "coreAuto": "自动",
-        "coreStable": "stable",
-        "corePrerelease": "prerelease",
+        "coreStable": "Stable",
+        "corePrerelease": "Prerelease",
         "empty": "订阅中没有可用配置",
         "pickBs": "选择所有白名单配置（{{count}}）",
         "source": "来源",
         "userLabel": "用户 #{{id}}"
       },
       "scan": {
-        "cidr": "子网 /24",
-        "cidrPlaceholder": "192.0.2.0/24",
+        "cidr": "IP 或子网",
+        "cidrPlaceholder": "192.0.2.10 或 192.0.2.0/24",
         "fromHost": "此主机的子网",
-        "invalid": "需要恰好一个 /24 子网",
+        "invalid": "请输入 IPv4 地址或 /24 子网",
         "alive_other": "{{count}} 个存活地址",
         "copy": "复制列表",
         "copied": "已复制",
         "perUnit": "按 SIM 卡",
-        "ofTotal": "共 {{total}}"
+        "ofTotal": "共 {{total}}",
+        "willScan": "将扫描子网 {{subnet}}"
       },
       "probes": {
         "icmp": "ICMP",
@@ -3977,7 +3979,7 @@
         "tunnel": "隧道",
         "targetsOk": "目标 {{ok}}/{{total}}",
         "latency": "{{ms}} 毫秒",
-        "core": "内核 {{core}}",
+        "core": "Xray {{core}}",
         "raw": "详情",
         "diagnosis": "诊断",
         "empty": "结果为空",
@@ -4053,7 +4055,6 @@
         "pickDistrict": "选择整个地区 {{code}}",
         "unpickDistrict": "取消整个地区 {{code}}",
         "noBs": "无白名单",
-        "offline": "离线",
         "empty": "SIM 列表为空：服务不可用"
       },
       "recent": {

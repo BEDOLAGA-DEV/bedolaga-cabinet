@@ -2,7 +2,9 @@ import { useTranslation } from 'react-i18next';
 import type { SubscriptionConfigs as SubscriptionConfigsData } from '@/api/reachability';
 import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 import { getApiErrorMessage } from '@/utils/api-error';
+import { cn } from '@/lib/utils';
 import { PurposeChip } from './PurposeChip';
+import { CheckGlyph, ROW, ROW_BUTTON, ROW_OFF, ROW_ON } from './SelectableRow';
 import { pickByPurpose } from './targetPicks';
 
 export const MAX_CONFIGS_PER_TEST = 20;
@@ -67,33 +69,31 @@ export function SubscriptionConfigs({
       {data.configs.length === 0 && (
         <p className="mt-3 text-sm text-dark-400">{t('admin.reachability.subscription.empty')}</p>
       )}
-      <ul className="mt-3 divide-y divide-dark-700/60">
+      <ul className="mt-3 space-y-1.5">
         {data.configs.map((config) => {
           const checked = selected.includes(config.index);
           return (
-            <li key={config.index} className="py-2">
-              <label className="flex cursor-pointer items-center gap-3">
-                <input
-                  type="checkbox"
-                  className="h-4 w-4 shrink-0 rounded border-dark-600 accent-accent-500"
-                  checked={checked}
-                  disabled={!checked && atLimit}
-                  onChange={() => onToggle(config.index)}
-                />
+            <li key={config.index} className={cn(ROW, checked ? ROW_ON : ROW_OFF)}>
+              <button
+                type="button"
+                aria-pressed={checked}
+                disabled={!checked && atLimit}
+                onClick={() => onToggle(config.index)}
+                className={cn(ROW_BUTTON, 'disabled:opacity-50')}
+              >
+                <CheckGlyph on={checked} />
                 <span className="min-w-0 flex-1">
-                  <span className="flex min-w-0 items-center gap-2">
-                    <span className="truncate text-sm font-medium text-dark-100">
-                      {config.label}
-                    </span>
-                    <PurposeChip purpose={config.purpose} />
+                  <span className="block truncate text-sm font-medium text-dark-100">
+                    {config.label}
                   </span>
-                  <span className="block break-all font-mono text-xs text-dark-400">
+                  <span className="block truncate font-mono text-xs text-dark-400">
                     {config.protocol ? `${config.protocol} · ` : ''}
                     {config.target_key}
                     {config.sni && config.sni !== config.address ? ` · sni ${config.sni}` : ''}
                   </span>
                 </span>
-              </label>
+              </button>
+              <PurposeChip purpose={config.purpose} />
             </li>
           );
         })}

@@ -67,11 +67,10 @@ describe('OperatorPicker', () => {
     expect(onChange).toHaveBeenLastCalledWith(['mts|цфо|off']);
   });
 
-  it('недоступная симка отключена и подписана «нет связи»', async () => {
+  it('симка без связи не показывается вовсе', async () => {
     await renderPicker();
-    const yota = screen.getByRole('button', { name: /^YOTA/ }) as HTMLButtonElement;
-    expect(yota.disabled).toBe(true);
-    expect(yota.textContent).toContain('нет связи');
+    expect(screen.queryByRole('button', { name: /^YOTA/ })).toBeNull();
+    expect(screen.queryByRole('button', { name: /округ URFO/ })).toBeNull();
   });
 
   it('«Сбросить выбор» есть только при выборе', async () => {
