@@ -1,7 +1,7 @@
 import { uiLocale } from '@/utils/uiLocale';
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { useNavigate, useSearchParams, Link } from 'react-router';
+import { useSearchParams, Link } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -73,12 +73,12 @@ function getGiftStatusKey(status: string): string {
   return statusMap[status] ?? 'gift.statusPending';
 }
 
-function isGiftAvailable(status: string): boolean {
-  return status === 'paid' || status === 'delivered' || status === 'pending_activation';
+export function isGiftAvailable(status: string): boolean {
+  return status === 'paid' || status === 'pending_activation';
 }
 
-function isGiftActivated(gift: SentGift): boolean {
-  return gift.status === 'delivered' && gift.activated_by_username != null;
+export function isGiftActivated(gift: SentGift): boolean {
+  return gift.status === 'delivered';
 }
 
 function formatGiftDate(dateStr: string | null): string {
@@ -119,24 +119,16 @@ function ErrorState({ message }: { message: string }) {
   );
 }
 
-function DisabledState() {
+function BuyDisabledState() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const timer = setTimeout(() => navigate('/'), 3000);
-    return () => clearTimeout(timer);
-  }, [navigate]);
 
   return (
-    <div className="flex min-h-dvh items-center justify-center px-4">
-      <div className="flex max-w-sm flex-col items-center gap-4 text-center">
-        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-dark-800/50">
-          <BanIcon className="h-8 w-8 text-dark-400" />
-        </div>
-        <h2 className="text-lg font-semibold text-dark-50">{t('gift.featureDisabled')}</h2>
-        <p className="text-sm text-dark-300">{t('gift.redirecting')}</p>
+    <div className="flex flex-col items-center gap-4 py-12 text-center">
+      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-dark-800/50">
+        <BanIcon className="h-8 w-8 text-dark-400" />
       </div>
+      <h2 className="text-lg font-semibold text-dark-200">{t('gift.purchasesDisabled')}</h2>
+      <p className="max-w-xs text-sm text-dark-400">{t('gift.purchasesDisabledDesc')}</p>
     </div>
   );
 }
@@ -998,13 +990,16 @@ function SentGiftCard({ gift }: { gift: SentGift }) {
   const botUsername =
     widgetConfig?.bot_username || import.meta.env.VITE_TELEGRAM_BOT_USERNAME || '';
 
-  const artifacts = buildGiftClaimArtifacts(gift, {
-    botUsername,
-    origin: window.location.origin,
-  });
-  const giftCode = artifacts.code;
   const isActivated = isGiftActivated(gift);
   const isAvailable = !isActivated && isGiftAvailable(gift.status);
+
+  const artifacts = isAvailable
+    ? buildGiftClaimArtifacts(gift, {
+        botUsername,
+        origin: window.location.origin,
+      })
+    : null;
+  const giftCode = artifacts?.code;
 
   const statusText = isActivated
     ? t('gift.statusActivated')
@@ -1013,6 +1008,7 @@ function SentGiftCard({ gift }: { gift: SentGift }) {
       : t(getGiftStatusKey(gift.status));
 
   const buildShareMessage = useCallback(() => {
+    if (!artifacts) return '';
     // Literal "GIFT_" prefix: Telegram forwards the start param to the bot
     // verbatim (no URL-decoding), so the previously-encoded "%5F" never matched
     // the bot's `start_parameter.startswith('GIFT_')` handler.
@@ -1024,10 +1020,11 @@ function SentGiftCard({ gift }: { gift: SentGift }) {
     ]
       .filter(Boolean)
       .join('\n');
-  }, [artifacts.botLink, artifacts.cabinetLink, t]);
+  }, [artifacts, t]);
 
   const handleShare = useCallback(async () => {
     const message = buildShareMessage();
+    if (!message) return;
     await copyToClipboard(message);
     setShowToast(true);
   }, [buildShareMessage]);
@@ -1062,8 +1059,8 @@ function SentGiftCard({ gift }: { gift: SentGift }) {
         {gift.device_limit} {t('gift.devicesShort', { count: gift.device_limit })}
       </p>
 
-      {/* Gift code + actions (only when not activated) */}
-      {!isActivated && (
+      {/* Gift code + actions (only while the gift is claimable) */}
+      {isAvailable && giftCode && (
         <>
           {/* Gift code display */}
           <div className="mb-3 rounded-xl bg-dark-800/80 px-4 py-4 text-center">
@@ -1310,11 +1307,6 @@ export default function GiftSubscription() {
     return <ErrorState message={errMsg} />;
   }
 
-  // Disabled state
-  if (!config.is_enabled) {
-    return <DisabledState />;
-  }
-
   const tabs: { id: TabId; label: string }[] = [
     { id: 'buy', label: t('gift.tabBuy') },
     { id: 'activate', label: t('gift.tabActivate') },
@@ -1380,9 +1372,12 @@ export default function GiftSubscription() {
             id={`tabpanel-${activeTab}`}
             aria-labelledby={`tab-${activeTab}`}
           >
-            {activeTab === 'buy' && (
-              <BuyTabContent config={config} onPurchaseComplete={() => setActiveTab('myGifts')} />
-            )}
+            {activeTab === 'buy' &&
+              (!config.is_enabled ? (
+                <BuyDisabledState />
+              ) : (
+                <BuyTabContent config={config} onPurchaseComplete={() => setActiveTab('myGifts')} />
+              ))}
             {activeTab === 'activate' && <ActivateTabContent initialCode={urlCode} />}
             {activeTab === 'myGifts' && <MyGiftsTabContent />}
           </motion.div>

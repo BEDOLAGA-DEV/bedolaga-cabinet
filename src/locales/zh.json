@@ -5377,6 +5377,8 @@
     "giftMessageLabel": "消息",
     "recipientLabel": "收件人",
     "featureDisabled": "礼物功能暂时不可用",
+    "purchasesDisabled": "购买礼物功能暂时关闭",
+    "purchasesDisabledDesc": "新礼物购买已暂时关闭。您可以在其他标签页中激活已有礼物或查看礼物历史记录。",
     "redirecting": "正在跳转...",
     "pending": {
       "title": "您收到了一份礼物！",
