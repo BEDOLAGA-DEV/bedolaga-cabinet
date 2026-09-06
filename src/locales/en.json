@@ -2163,7 +2163,9 @@
           "unsupported_scheme": "not a config link",
           "malformed": "broken link",
           "subscription_failed": "subscription did not load"
-        }
+        },
+        "duplicate": "same server",
+        "duplicateHint": "Address and port match an entry above (the \"AUTO\" balancer): the bot will test it once"
       },
       "scan": {
         "cidr": "CIDR",

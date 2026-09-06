@@ -49,6 +49,20 @@ describe('SubscriptionConfigs', () => {
     expect(onSelectMany).toHaveBeenCalledWith([0]);
   });
 
+  it('повтор адреса и порта помечается как тот же сервер', () => {
+    render(
+      <SubscriptionConfigs
+        configs={[...configs, { ...configs[1], index: 2, label: 'АВТО · proxy-2' }]}
+        rejected={[]}
+        selected={[]}
+        onToggle={vi.fn()}
+        onSelectMany={vi.fn()}
+        onClear={vi.fn()}
+      />,
+    );
+    expect(screen.getAllByText('тот же сервер')).toHaveLength(1);
+  });
+
   it('«✓ Все» отмечает остальные, «↺ Сбросить» снимает всё', () => {
     const onSelectMany = vi.fn();
     const onClear = vi.fn();

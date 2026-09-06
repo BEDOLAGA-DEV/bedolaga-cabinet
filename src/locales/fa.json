@@ -3967,7 +3967,9 @@
           "unsupported_scheme": "لینک کانفیگ نیست",
           "malformed": "لینک خراب",
           "subscription_failed": "اشتراک بارگذاری نشد"
-        }
+        },
+        "duplicate": "همان سرور",
+        "duplicateHint": "آدرس و پورت با یکی از موارد بالا یکسان است (بالانسر «AUTO»): ربات یک بار آن را بررسی می‌کند"
       },
       "scan": {
         "cidr": "CIDR",

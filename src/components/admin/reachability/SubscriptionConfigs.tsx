@@ -32,6 +32,12 @@ export function SubscriptionConfigs({
     list.filter((config) => !selected.includes(config.index)).slice(0, room);
   const bsUnselected = unselected(pickByPurpose(configs, 'bs'));
   const allUnselected = unselected(configs);
+  // Балансировщик «АВТО» повторяет те же серверы отдельными записями — помечаем, бот при
+  // запуске сведёт их к одной цели.
+  const firstByKey = new Map<string, number>();
+  for (const config of configs) {
+    if (!firstByKey.has(config.target_key)) firstByKey.set(config.target_key, config.index);
+  }
 
   return (
     <div>
@@ -104,6 +110,14 @@ export function SubscriptionConfigs({
                   </span>
                 </span>
               </button>
+              {firstByKey.get(config.target_key) !== config.index && (
+                <span
+                  title={t('admin.reachability.subscription.duplicateHint')}
+                  className="rounded-md bg-dark-700/60 px-1.5 py-0.5 text-[10px] text-dark-300"
+                >
+                  {t('admin.reachability.subscription.duplicate')}
+                </span>
+              )}
               <PurposeChip purpose={config.purpose} />
             </li>
           );

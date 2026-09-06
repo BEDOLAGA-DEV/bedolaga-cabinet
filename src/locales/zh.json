@@ -3966,7 +3966,9 @@
           "unsupported_scheme": "不是配置链接",
           "malformed": "链接损坏",
           "subscription_failed": "订阅未加载"
-        }
+        },
+        "duplicate": "同一服务器",
+        "duplicateHint": "地址和端口与上方条目相同（“AUTO”均衡器）：启动时只测试一次"
       },
       "scan": {
         "cidr": "CIDR",
