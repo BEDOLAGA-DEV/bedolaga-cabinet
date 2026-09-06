@@ -438,6 +438,14 @@ export default function AdminPayments() {
                         <code className="font-mono text-accent-400">{payment.identifier}</code>
                       </div>
 
+                      {/* Decline reason */}
+                      {payment.decline_reason && (
+                        <div className="mt-1.5 flex items-start gap-1.5 rounded-lg bg-red-500/10 px-2.5 py-1.5 text-xs text-red-300">
+                          <span className="shrink-0">⚠️</span>
+                          <span>{payment.decline_reason}</span>
+                        </div>
+                      )}
+
                       {/* User info */}
                       {(payment.user_username ||
                         payment.user_telegram_id ||
