@@ -31,3 +31,15 @@ export function unitLabel(
 export function targetLabel(job: Pick<Job, 'targets'>, targetKey: string): string | undefined {
   return job.targets.find((target) => target.target_key === targetKey)?.label;
 }
+
+/** Имена симок с округом по каталогу («МТС ЦФО»); неизвестная симка — своим ключом. */
+export function unitNameList(opKeys: readonly string[], catalog: readonly Unit[]): string[] {
+  return opKeys.map((opKey) => {
+    const unit = catalog.find((item) => item.op_key === opKey);
+    return unit ? `${unit.name} ${unit.region}` : opKey;
+  });
+}
+
+export function unitNames(opKeys: readonly string[], catalog: readonly Unit[]): string {
+  return unitNameList(opKeys, catalog).join(', ');
+}

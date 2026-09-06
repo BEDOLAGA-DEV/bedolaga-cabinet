@@ -2053,6 +2053,7 @@
         "confirmEstimate": "Price: ≈{{price}} (estimate, exact after start)",
         "confirmBalanceAfter": "Balance after charge: {{balance}}",
         "confirmMore": "and {{count}} more",
+        "confirmCharge": "Charge {{price}}",
         "started": "Job #{{id}} started",
         "title": "Launch",
         "targetsRow": "Targets",

@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   type Job,
@@ -29,8 +30,17 @@ export interface LaunchState {
   isPricing: boolean;
   isPending: boolean;
   canRun: boolean;
-  /** Подтверждение со сводкой, затем POST /jobs. Отказ ничего не отправляет. */
+  /** Браузер: показан второй шаг «Списать / Отмена» в панели. В Mini App всегда false. */
+  confirming: boolean;
+  /** Сводка для второго шага; null — цена ещё не посчитана. */
+  summary: LaunchSummary | null;
+  /**
+   * Mini App: родной попап со сводкой, затем POST /jobs. Браузер: первый вызов включает второй
+   * шаг в панели, второй — отправляет. Отказ ничего не отправляет.
+   */
   run: () => Promise<void>;
+  /** Браузер: убрать второй шаг. */
+  cancel: () => void;
 }
 
 export function useLaunch(
@@ -110,13 +120,28 @@ export function useLaunch(
   const isPricing = preview.isFetching;
   const canRun = blocker === null && !isPricing && Boolean(preview.data) && !create.isPending;
 
+  // Второй шаг привязан к конкретному набору целей и симок: изменился набор — шаг сброшен.
+  const bodyKey = JSON.stringify(body);
+  const [armedFor, setArmedFor] = useState<string | null>(null);
+  const confirming = armedFor !== null && armedFor === bodyKey;
+  const cancel = () => setArmedFor(null);
+
   const run = async () => {
     if (!body || !preview.data || !canRun) return;
-    const confirmed = await dialog.confirm(
-      confirmText(launchSummary(preview.data), body.kind),
-      t('admin.reachability.launch.confirmTitle'),
-    );
-    if (confirmed) create.mutate(body);
+    if (dialog.isNative) {
+      const confirmed = await dialog.confirm(
+        confirmText(launchSummary(preview.data), body.kind),
+        t('admin.reachability.launch.confirmTitle'),
+      );
+      if (confirmed) create.mutate(body);
+      return;
+    }
+    if (!confirming) {
+      setArmedFor(bodyKey);
+      return;
+    }
+    setArmedFor(null);
+    create.mutate(body);
   };
 
   return {
@@ -128,6 +153,9 @@ export function useLaunch(
     isPricing,
     isPending: create.isPending,
     canRun,
+    confirming,
+    summary: preview.data ? launchSummary(preview.data) : null,
     run,
+    cancel,
   };
 }

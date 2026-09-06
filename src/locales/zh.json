@@ -3864,6 +3864,7 @@
         "confirmEstimate": "价格：≈{{price}}（估算，启动后确定）",
         "confirmBalanceAfter": "扣费后余额：{{balance}}",
         "confirmMore": "还有 {{count}} 个",
+        "confirmCharge": "扣费 {{price}}",
         "started": "任务 #{{id}} 已启动",
         "title": "启动",
         "targetsRow": "目标",

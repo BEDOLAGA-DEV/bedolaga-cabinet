@@ -3857,6 +3857,7 @@
         "confirmEstimate": "قیمت: ≈{{price}} (تخمینی، مبلغ دقیق پس از شروع)",
         "confirmBalanceAfter": "موجودی پس از کسر: {{balance}}",
         "confirmMore": "و {{count}} مورد دیگر",
+        "confirmCharge": "کسر {{price}}",
         "started": "کار #{{id}} شروع شد",
         "title": "اجرا",
         "targetsRow": "اهداف",

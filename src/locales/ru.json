@@ -2069,6 +2069,7 @@
         "confirmEstimate": "Цена: ≈{{price}} (оценка, точная после запуска)",
         "confirmBalanceAfter": "Остаток после списания: {{balance}}",
         "confirmMore": "и ещё {{count}}",
+        "confirmCharge": "Списать {{price}}",
         "started": "Задача #{{id}} запущена",
         "title": "Запуск",
         "targetsRow": "Цели",
