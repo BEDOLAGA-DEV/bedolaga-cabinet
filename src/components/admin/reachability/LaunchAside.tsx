@@ -112,9 +112,11 @@ function LaunchDetails({
           <dd className="tabular-nums text-dark-200">{formatMoney(launch.balanceAfter)}</dd>
         </div>
       )}
-      {launch.preview.data && !launch.preview.data.estimate_is_exact && (
-        <p className="text-xs text-warning-400">{t('admin.reachability.launch.estimate')}</p>
-      )}
+      {launch.preview.data &&
+        !launch.preview.data.estimate_is_exact &&
+        launch.preview.data.warnings.length === 0 && (
+          <p className="text-xs text-warning-400">{t('admin.reachability.launch.estimate')}</p>
+        )}
       {skipped && skipped.dpi_off.length > 0 && (
         <p className="text-xs text-dark-400">
           {t('admin.reachability.launch.skippedDpiOff', {
