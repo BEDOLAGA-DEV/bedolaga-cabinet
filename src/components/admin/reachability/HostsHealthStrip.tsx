@@ -3,11 +3,10 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { type Dpi, reachabilityApi } from '@/api/reachability';
 import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
-import { cn } from '@/lib/utils';
 import { getApiErrorMessage } from '@/utils/api-error';
 import { ChoiceChips } from './ChoiceChips';
 import { HostsSummaryMatrix } from './HostsSummaryMatrix';
-import { hostsHealth } from './hostsHealth';
+import { lastCheckedAt } from './lastChecked';
 import { relativeAge } from './relativeAge';
 import { REACHABILITY_SUMMARY_KEY } from './useTargets';
 
@@ -19,7 +18,10 @@ function useSummary(dpi: Dpi) {
   });
 }
 
-/** Вход в раздел: живы ли хосты под Белым списком у симок с БС по последней проверке. */
+/**
+ * Вход в матрицу последних проверок: заголовок, давность, кнопка. Счётчиков «N из M в норме»
+ * здесь нет — одна режущаяся симка делала хост «с проблемой» и только смущала.
+ */
 export function HostsHealthStrip() {
   const { t, i18n } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -39,14 +41,8 @@ export function HostsHealthStrip() {
   }
   if (!primary.data) return null;
 
-  const health = hostsHealth(primary.data);
-  const hasCells = primary.data.rows.some((row) => Object.keys(row.cells).length > 0);
-  const tone =
-    health.total === 0 || health.ok === health.total
-      ? 'text-success-400'
-      : health.failing > 0
-        ? 'text-error-400'
-        : 'text-warning-400';
+  const checkedAt = lastCheckedAt(primary.data);
+  const hasHosts = primary.data.rows.length > 0;
 
   return (
     <section aria-labelledby="reachability-health" className="space-y-3">
@@ -54,35 +50,18 @@ export function HostsHealthStrip() {
         <h2 id="reachability-health" className="text-sm font-medium text-dark-300">
           {t('admin.reachability.health.title')}
         </h2>
-        {health.total === 0 ? (
+        {!hasHosts && (
           <span className="text-sm text-dark-400">{t('admin.reachability.health.none')}</span>
-        ) : health.unchecked === health.total ? (
-          <span className="text-sm text-dark-400">{t('admin.reachability.health.empty')}</span>
-        ) : (
-          <>
-            <span className={cn('text-sm font-semibold', tone)}>
-              {t('admin.reachability.health.summary', { ok: health.ok, total: health.total })}
-            </span>
-            {health.failing > 0 && (
-              <span className="text-xs text-error-400">
-                {t('admin.reachability.health.failing', { count: health.failing })}
-              </span>
-            )}
-            {health.unchecked > 0 && (
-              <span className="text-xs text-dark-400">
-                {t('admin.reachability.health.unchecked', { count: health.unchecked })}
-              </span>
-            )}
-            {health.lastCheckedAt && (
-              <span className="text-xs text-dark-400">
-                {t('admin.reachability.health.checked', {
-                  age: relativeAge(health.lastCheckedAt, i18n.language),
-                })}
-              </span>
-            )}
-          </>
         )}
-        {hasCells && (
+        {hasHosts && checkedAt === null && (
+          <span className="text-sm text-dark-400">{t('admin.reachability.health.empty')}</span>
+        )}
+        {checkedAt !== null && (
+          <span className="text-xs text-dark-400">
+            {t('admin.reachability.health.checked', { age: relativeAge(checkedAt, i18n.language) })}
+          </span>
+        )}
+        {checkedAt !== null && (
           <button
             type="button"
             aria-expanded={open}

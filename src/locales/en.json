@@ -2095,6 +2095,7 @@
         "stalled": "Polling stopped, the result will appear in History",
         "cancel": "Cancel",
         "retrieve": "Fetch result",
+        "lastAnswer": "Last API answer: {{answer}} · attempt {{attempt}} · {{age}}",
         "failed": "Check failed",
         "retry": "Retry",
         "cancelled": "Cancelled"
@@ -2254,12 +2255,7 @@
         "offline": "operators are unavailable right now, try again in 1–2 minutes"
       },
       "health": {
-        "title": "Whitelist hosts",
-        "summary": "{{ok}} of {{total}} healthy",
-        "failing_one": "{{count}} with a problem",
-        "failing_other": "{{count}} with problems",
-        "unchecked_one": "{{count}} unchecked",
-        "unchecked_other": "{{count}} unchecked",
+        "title": "Checks matrix",
         "checked": "checked {{age}}",
         "none": "No hosts marked as “whitelist” in the panel",
         "empty": "No checks yet: pick hosts and run the first one",

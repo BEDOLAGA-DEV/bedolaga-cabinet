@@ -3900,6 +3900,7 @@
         "stalled": "轮询已停止，结果将出现在历史中",
         "cancel": "取消",
         "retrieve": "获取结果",
+        "lastAnswer": "API 最近响应：{{answer}} · 第 {{attempt}} 次 · {{age}}",
         "failed": "检查失败",
         "retry": "重试",
         "cancelled": "已取消"
@@ -4054,10 +4055,7 @@
         "offline": "运营商暂时不可用，请 1–2 分钟后重试"
       },
       "health": {
-        "title": "白名单主机",
-        "summary": "{{total}} 台中 {{ok}} 台正常",
-        "failing_other": "{{count}} 台有问题",
-        "unchecked_other": "{{count}} 台未检查",
+        "title": "检测矩阵",
         "checked": "检查于 {{age}}",
         "none": "面板中没有标记为“白名单”的主机",
         "empty": "尚无检查：选择主机并运行第一次检查",

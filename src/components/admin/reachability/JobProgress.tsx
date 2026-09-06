@@ -6,6 +6,8 @@ import { Card } from '@/components/data-display';
 import { Button } from '@/components/primitives';
 import { getApiErrorMessage } from '@/utils/api-error';
 import { JobResult } from './JobResult';
+import { relativeAge } from './relativeAge';
+import { retrieveTrace } from './retrieveTrace';
 import { useReachabilityJob } from './useReachabilityJob';
 import { REACHABILITY_STATUS_KEY } from './useReachabilityStatus';
 
@@ -27,7 +29,7 @@ function elapsedLabel(startedAt: string | null): string {
 }
 
 export function JobProgress({ jobId, onReset }: JobProgressProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
   const { job, phase, error, refetch } = useReachabilityJob(jobId);
   const [, tick] = useState(0);
@@ -69,6 +71,7 @@ export function JobProgress({ jobId, onReset }: JobProgressProps) {
     job.phase !== 'cancelling';
   const canRetrieve = job.kind === 'probe' && (job.phase === 'retrieving' || phase === 'stalled');
   const actionError = cancel.error ?? retrieve.error;
+  const trace = job.phase === 'retrieving' ? retrieveTrace(job) : null;
 
   return (
     <Card size="md" className="space-y-4">
@@ -84,6 +87,18 @@ export function JobProgress({ jobId, onReset }: JobProgressProps) {
           <p className="mt-1 text-xs text-dark-400">
             {t(`admin.reachability.progress.${HINT_KEY[job.kind]}`)}
           </p>
+          {trace && (
+            <p
+              className="mt-1 font-mono text-xs text-dark-400"
+              title={trace.requestId ?? undefined}
+            >
+              {t('admin.reachability.progress.lastAnswer', {
+                answer: trace.answer,
+                attempt: trace.attempt,
+                age: relativeAge(trace.at, i18n.language),
+              })}
+            </p>
+          )}
           {phase !== 'stalled' && (
             <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-dark-700">
               <div className="h-full w-1/3 animate-pulse rounded-full bg-accent-500" />
