@@ -52,6 +52,7 @@ import {
 import Twemoji from 'react-twemoji';
 import { DeviceTopupSheet } from '../components/subscription/sheets/DeviceTopupSheet';
 import { DeviceReductionSheet } from '../components/subscription/sheets/DeviceReductionSheet';
+import { PremiumTrafficTopupSheet } from '../components/subscription/sheets/PremiumTrafficTopupSheet';
 import { TrafficTopupSheet } from '../components/subscription/sheets/TrafficTopupSheet';
 import { ServerManagementSheet } from '../components/subscription/sheets/ServerManagementSheet';
 import { DeleteSubscriptionSheet } from '../components/subscription/sheets/DeleteSubscriptionSheet';
@@ -228,6 +229,7 @@ export default function Subscription() {
   const [showDeviceReduction, setShowDeviceReduction] = useState(false);
   const [targetDeviceLimit, setTargetDeviceLimit] = useState<number>(1);
   const [showTrafficTopup, setShowTrafficTopup] = useState(false);
+  const [showPremiumTrafficTopup, setShowPremiumTrafficTopup] = useState(false);
   const [selectedTrafficPackage, setSelectedTrafficPackage] = useState<number | null>(null);
   const [showServerManagement, setShowServerManagement] = useState(false);
   const [selectedServersToUpdate, setSelectedServersToUpdate] = useState<string[]>([]);
@@ -1757,6 +1759,18 @@ export default function Subscription() {
                 />
               </div>
             )}
+
+            {/* Buy premium traffic — сам скрывается, если премиум-серверов нет */}
+            <div className="mt-4">
+              <PremiumTrafficTopupSheet
+                open={showPremiumTrafficTopup}
+                onOpen={() => setShowPremiumTrafficTopup(true)}
+                onClose={() => setShowPremiumTrafficTopup(false)}
+                subscriptionId={subscriptionId}
+                purchaseOptions={purchaseOptions}
+                isDark={isDark}
+              />
+            </div>
 
             {/* Server Management - only in classic mode */}
             {!isTariffsMode && (

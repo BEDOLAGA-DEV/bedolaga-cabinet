@@ -2,6 +2,7 @@ import { uiLocale } from '@/utils/uiLocale';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import type { UseMutationResult } from '@tanstack/react-query';
+import PremiumTrafficRow from './PremiumTrafficRow';
 import TrafficProgressBar from './TrafficProgressBar';
 import Sparkline from './Sparkline';
 import ConnectDeviceTile from './ConnectDeviceTile';
@@ -152,6 +153,9 @@ export default function SubscriptionCardActive({
           isUnlimited={isUnlimited}
         />
       </div>
+
+      {/* ─── Premium squads traffic ─── */}
+      <PremiumTrafficRow items={subscription.premium_traffic ?? []} />
 
       {/* ─── Connect Device Button ─── */}
       <ConnectDeviceTile

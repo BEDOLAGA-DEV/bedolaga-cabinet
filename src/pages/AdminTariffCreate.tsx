@@ -9,8 +9,10 @@ import {
   type TariffUpdateRequest,
   type PeriodPrice,
   type ServerInfo,
+  type ServerTrafficLimit,
   type ExternalSquadInfo,
 } from '../api/tariffs';
+import { PremiumSquadLimits } from '../components/admin/tariffs/PremiumSquadLimits';
 import { AdminBackButton } from '../components/admin';
 import { createNumberInputHandler, toNumber } from '../utils/inputHelpers';
 import Twemoji from 'react-twemoji';
@@ -48,6 +50,9 @@ export default function AdminTariffCreate() {
   const [tierLevel, setTierLevel] = useState<number | ''>(1);
   const [periodPrices, setPeriodPrices] = useState<PeriodPrice[]>([]);
   const [selectedSquads, setSelectedSquads] = useState<string[]>([]);
+  const [serverTrafficLimits, setServerTrafficLimits] = useState<
+    Record<string, ServerTrafficLimit>
+  >({});
   const [selectedExternalSquad, setSelectedExternalSquad] = useState<string | null>(null);
   const [selectedPromoGroups, setSelectedPromoGroups] = useState<number[]>([]);
   const [dailyPriceKopeks, setDailyPriceKopeks] = useState<number | ''>(0);
@@ -119,6 +124,7 @@ export default function AdminTariffCreate() {
       setTierLevel(data.tier_level || 1);
       setPeriodPrices(data.period_prices?.length ? data.period_prices : []);
       setSelectedSquads(data.allowed_squads || []);
+      setServerTrafficLimits(data.server_traffic_limits || {});
       setSelectedExternalSquad(data.external_squad_uuid || null);
       setSelectedPromoGroups(
         data.promo_groups?.filter((pg) => pg.is_selected).map((pg) => pg.id) || [],
@@ -172,6 +178,7 @@ export default function AdminTariffCreate() {
       tier_level: toNumber(tierLevel, 1),
       period_prices: isDaily ? [] : periodPrices.filter((p) => p.price_kopeks >= 0),
       allowed_squads: selectedSquads,
+      server_traffic_limits: serverTrafficLimits,
       external_squad_uuid: selectedExternalSquad || null,
       promo_group_ids: selectedPromoGroups,
       traffic_topup_enabled: trafficTopupEnabled,
@@ -790,6 +797,13 @@ export default function AdminTariffCreate() {
               </div>
             )}
           </div>
+
+          <PremiumSquadLimits
+            servers={servers}
+            selectedSquads={selectedSquads}
+            value={serverTrafficLimits}
+            onChange={setServerTrafficLimits}
+          />
         </div>
       )}
 
