@@ -3894,7 +3894,7 @@
         "retrieving": "耗时比平常长，正在获取结果（{{elapsed}}）",
         "polling": "检查进行中（{{elapsed}}）",
         "cancelling": "正在取消…",
-        "hintProbe": "通常 5–60 秒，全部 SIM 卡最多 10 分钟",
+        "hintProbe": "通常 5–60 秒；全部 SIM 卡加 TLS-SNI — 10–20 分钟，结果会自动到达",
         "hintVless": "每台服务器最多 3 分钟",
         "hintScan": "每张 SIM 卡 15–40 秒",
         "stalled": "轮询已停止，结果将出现在历史中",

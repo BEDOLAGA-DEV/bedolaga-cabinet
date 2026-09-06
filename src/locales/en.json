@@ -2089,7 +2089,7 @@
         "retrieving": "Taking longer than usual, fetching the result ({{elapsed}})",
         "polling": "Check in progress ({{elapsed}})",
         "cancelling": "Cancelling…",
-        "hintProbe": "Usually 5–60 s, whole fleet up to 10 min",
+        "hintProbe": "Usually 5–60 s; whole fleet with TLS-SNI — 10–20 min, the result arrives by itself",
         "hintVless": "Up to 3 min per server",
         "hintScan": "15–40 s per SIM",
         "stalled": "Polling stopped, the result will appear in History",
