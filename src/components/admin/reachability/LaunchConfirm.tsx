@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { formatList } from './launchSummary';
+import { formatMoney } from './money';
 import { unitNameList } from './unitLabel';
 import type { LaunchState } from './useLaunch';
 import { useUnits } from './useUnits';
@@ -20,7 +21,7 @@ export function LaunchConfirm({ launch }: { launch: LaunchState }) {
     <div
       role="group"
       aria-label={t('admin.reachability.launch.confirmTitle')}
-      className="space-y-1.5 rounded-xl border border-accent-500/40 bg-accent-500/10 p-3"
+      className="space-y-1.5"
     >
       <p className="text-sm font-semibold text-dark-50">
         {t('admin.reachability.launch.confirmTitle')}
@@ -37,8 +38,20 @@ export function LaunchConfirm({ launch }: { launch: LaunchState }) {
           list: formatList(unitNameList(summary.units, catalog), LISTED, more),
         })}
       </p>
-      {!summary.exact && (
-        <p className="text-xs text-warning-400">{t('admin.reachability.launch.estimate')}</p>
+      <p className="text-sm text-dark-100">
+        {t(
+          summary.exact
+            ? 'admin.reachability.launch.confirmPrice'
+            : 'admin.reachability.launch.confirmEstimate',
+          { price: formatMoney(summary.cost) },
+        )}
+      </p>
+      {summary.balanceAfter !== null && (
+        <p className="text-xs text-dark-400">
+          {t('admin.reachability.launch.confirmBalanceAfter', {
+            balance: formatMoney(summary.balanceAfter),
+          })}
+        </p>
       )}
     </div>
   );

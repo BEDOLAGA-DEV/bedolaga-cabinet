@@ -9,7 +9,9 @@ import type { Job } from '@/api/reachability';
  */
 
 vi.mock('react-i18next', async () => (await import('./testUtils')).i18nMock());
-vi.mock('@/api/reachability', () => ({ reachabilityApi: { cancelJob: vi.fn() } }));
+vi.mock('@/api/reachability', () => ({
+  reachabilityApi: { cancelJob: vi.fn(), getUnits: vi.fn().mockResolvedValue([]) },
+}));
 const hook = vi.hoisted(() => ({
   job: null as Job | null,
   phase: 'running' as string,
@@ -74,5 +76,31 @@ describe('JobProgress', () => {
 
     expect(screen.getByText(/Сервис не ответил/)).toBeTruthy();
     expect(screen.queryByText(/probe_stalled/)).toBeNull();
+  });
+
+  it('пока идёт проверка — список симок: кто уже ответил, кто ещё нет; можно закрыть страницу', () => {
+    hook.job = probe({
+      kind: 'vless',
+      phase: 'polling',
+      units_resolved: ['mts|цфо|on', 'tele2|цфо|on'],
+      legs: [
+        {
+          id: 1,
+          op_key: 'mts|цфо|on',
+          operator: 'mts',
+          verdict: 'reachable',
+          matches_expectation: null,
+          raw: null,
+        } as unknown as Job['legs'][number],
+      ],
+    });
+    hook.phase = 'running';
+    renderWithProviders(<JobProgress jobId={10} onReset={vi.fn()} />);
+    const list = screen.getByRole('list', { name: 'Симки' });
+    expect(list.textContent).toContain('mts');
+    expect(list.textContent).toContain('доступен');
+    expect(list.textContent).toContain('tele2');
+    expect(list.textContent).toContain('ждём');
+    expect(screen.getByText(/Можно закрыть страницу/)).toBeTruthy();
   });
 });

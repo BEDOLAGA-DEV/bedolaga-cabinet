@@ -2024,7 +2024,8 @@
         "referenceConfigs_one": "{{count}} config",
         "referenceConfigs_other": "{{count}} configs",
         "activity": "Now",
-        "idle": "idle"
+        "idle": "idle",
+        "tierUntil": "{{tier}} plan until {{date}}"
       },
       "units": {
         "dpiOn": "with whitelist",
@@ -2053,7 +2054,7 @@
         "confirmEstimate": "Price: ≈{{price}} (estimate, exact after start)",
         "confirmBalanceAfter": "Balance after charge: {{balance}}",
         "confirmMore": "and {{count}} more",
-        "confirmCharge": "Charge {{price}}",
+        "confirmCharge": "Start for {{price}}",
         "started": "Job #{{id}} started",
         "title": "Launch",
         "targetsRow": "Targets",
@@ -2095,7 +2096,11 @@
         "cancel": "Cancel",
         "failed": "Check failed",
         "retry": "Retry",
-        "cancelled": "Cancelled"
+        "cancelled": "Cancelled",
+        "units": "SIMs",
+        "waitingUnit": "waiting…",
+        "answered": "{{answered}} of {{total}} SIMs answered",
+        "canLeave": "You can close the page: the result will appear in “My checks”."
       },
       "verdict": {
         "reachable": "reachable",
@@ -2125,7 +2130,9 @@
         "count_other": "{{count}} targets",
         "showAll": "Show all hosts ({{count}})",
         "showLess": "Collapse list",
-        "purposeHint": "The host tag is its purpose: “whitelist” must be reachable from whitelist SIMs, “regular” from SIMs without it. Tap the tag to change."
+        "whatIsWhitelist": "What is the whitelist?",
+        "whitelistHelp": "The whitelist is a carrier mode where only approved sites open without a VPN. Whitelist hosts are checked with whitelist SIMs, regular hosts with SIMs without it.",
+        "purposeChanged": "Purpose changed"
       },
       "subscription": {
         "title": "Subscription configs",
@@ -2253,16 +2260,13 @@
         "checkNode": "Check in BSCHEKER"
       },
       "fleet": {
-        "onAir": "on air: {{bs}} with whitelist · {{regular}} without",
-        "offline": "operators are unavailable right now, try again in 1–2 minutes"
+        "offline": "operators are unavailable right now, try again in 1–2 minutes",
+        "onAir_one": "{{total}} SIM online: {{bs}} with the whitelist, {{regular}} without",
+        "onAir_other": "{{total}} SIMs online: {{bs}} with the whitelist, {{regular}} without"
       },
       "health": {
-        "title": "Checks matrix",
         "checked": "checked {{age}}",
-        "none": "No hosts marked as “whitelist” in the panel",
-        "empty": "No checks yet: pick hosts and run the first one",
-        "showMatrix": "Show matrix",
-        "hideMatrix": "Hide matrix"
+        "none": "No hosts marked as “whitelist” in the panel"
       },
       "switch": {
         "label": "What to check",
@@ -2281,19 +2285,16 @@
         "more": "More"
       },
       "operators": {
-        "title": "Operators",
-        "hint": "each SIM is charged separately",
-        "pickBs": "Select all with whitelist",
-        "unpickBs": "Deselect all with whitelist",
-        "pickRegular": "Select all without whitelist",
-        "unpickRegular": "Deselect all without whitelist",
+        "pickBs": "All with whitelist",
+        "unpickBs": "Unselect all with whitelist",
+        "pickRegular": "All without whitelist",
+        "unpickRegular": "Unselect all without whitelist",
         "recall": "Same as last time",
-        "reset": "Reset selection",
-        "selected": "{{selected}} / {{total}} selected",
-        "pickDistrict": "Select whole district {{code}}",
-        "unpickDistrict": "Deselect whole district {{code}}",
-        "noBs": "no whitelist",
-        "empty": "SIM list is empty: service unavailable"
+        "reset": "Reset",
+        "empty": "SIM list is empty: service unavailable",
+        "pickOperator": "All {{name}} SIMs",
+        "unpickOperator": "Unselect {{name}} SIMs",
+        "noBsShort": "no WL"
       },
       "recent": {
         "title": "My checks",
@@ -2357,6 +2358,41 @@
         "openSite": "Get a key at bsbord.com",
         "envNote": "If the bot is configured via .env, environment variables override cabinet settings — edit .env and restart the bot instead.",
         "unhealthyHint": "Check the API key and plan at bsbord.com"
+      },
+      "subtitle": "server reachability from Russia",
+      "answer": {
+        "title": "Server status",
+        "bs_one": "opens on {{ok}} of {{total}} whitelist SIM",
+        "bs_other": "opens on {{ok}} of {{total}} whitelist SIMs",
+        "regular_one": "opens on {{ok}} of {{total}} non-whitelist SIM",
+        "regular_other": "opens on {{ok}} of {{total}} non-whitelist SIMs",
+        "blocked": "Blocked: {{list}}",
+        "unchecked": "not checked yet",
+        "again": "Check again",
+        "first": "Check",
+        "details": "Details",
+        "hideDetails": "Hide details",
+        "running": "Checking…"
+      },
+      "unitsSummary": {
+        "title": "SIMs",
+        "none": "No SIMs selected",
+        "bs_one": "{{count}} whitelist SIM",
+        "bs_other": "{{count}} whitelist SIMs",
+        "regular_one": "{{count}} non-whitelist SIM",
+        "regular_other": "{{count}} non-whitelist SIMs",
+        "mixed_one": "{{count}} SIM: {{bs}} whitelist, {{regular}} without",
+        "mixed_other": "{{count}} SIMs: {{bs}} whitelist, {{regular}} without",
+        "auto": "by target purpose",
+        "manual": "chosen manually",
+        "edit": "Change",
+        "hide": "Hide",
+        "reset": "As per targets"
+      },
+      "advanced": {
+        "probes": "Probes: {{probes}}",
+        "sni": "SNI: {{sni}}",
+        "core": "Xray core: {{core}}"
       }
     },
     "wheel": {

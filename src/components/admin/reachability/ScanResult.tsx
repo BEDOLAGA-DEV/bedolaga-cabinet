@@ -77,7 +77,7 @@ export function ScanResult({ job }: { job: Job }) {
                 <span className="font-mono">{opKey}</span>
                 <span className="text-dark-100">{summary.aliveByUnit[opKey]}</span>
                 {counts && (
-                  <span className="text-[10px] text-dark-400">
+                  <span className="text-xs text-dark-400">
                     {t('admin.reachability.scan.perUnitProbes', {
                       icmp: counts.icmp,
                       tcp: counts.tcp,

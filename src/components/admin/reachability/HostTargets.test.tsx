@@ -6,6 +6,15 @@ import type { HostTarget } from '@/api/reachability';
 /** Хосты под Белый список — предмет проверки: отмечаются одной кнопкой с говорящим названием. */
 
 vi.mock('react-i18next', async () => (await import('./testUtils')).i18nMock());
+vi.mock('@/platform/hooks/useNotify', () => ({
+  useNotify: () => ({
+    success: vi.fn(),
+    error: vi.fn(),
+    warning: vi.fn(),
+    info: vi.fn(),
+    notify: vi.fn(),
+  }),
+}));
 vi.mock('@/api/reachability', () => ({
   reachabilityApi: { getHosts: vi.fn(), getNodes: vi.fn(), updatePref: vi.fn() },
 }));
@@ -55,7 +64,7 @@ describe('HostTargets', () => {
   it('«Отметить все хосты под БС» отмечает только ещё не отмеченные', async () => {
     const onToggleHost = render([HOSTS[0]]);
     await screen.findByText('BS1');
-    fireEvent.click(screen.getByRole('button', { name: 'Отметить все хосты под БС' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Отметить все под Белый список' }));
     expect(onToggleHost).toHaveBeenCalledTimes(1);
     expect(onToggleHost).toHaveBeenCalledWith(HOSTS[2]);
   });
@@ -71,5 +80,14 @@ describe('HostTargets', () => {
       purpose: 'bs',
     });
     expect(onToggleHost).not.toHaveBeenCalled();
+  });
+
+  it('без абзаца про тег: определение Белого списка по знаку вопроса; адрес без sni', async () => {
+    render([]);
+    await screen.findByText('BS1');
+    expect(screen.queryByText(/Тег у хоста/)).toBeNull();
+    expect(screen.queryByText(/sni /)).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Что такое Белый список?' }));
+    expect(screen.getByText(/Белый список — режим оператора/)).toBeTruthy();
   });
 });

@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import type { Purpose } from '@/api/reachability';
+import { PencilIcon } from '@/components/icons';
 import { cn } from '@/lib/utils';
 
 const CLASS: Record<Purpose, string> = {
@@ -39,10 +40,11 @@ export function PurposeChip({ purpose, onToggle, disabled }: PurposeChipProps) {
       }}
       className={cn(
         className,
-        'min-h-[28px] hover:ring-1 hover:ring-accent-500/40 disabled:opacity-60',
+        'inline-flex min-h-[28px] items-center gap-1 hover:ring-1 hover:ring-accent-500/40 disabled:opacity-60',
       )}
     >
       {label}
+      <PencilIcon className="h-3 w-3 opacity-70" />
     </button>
   );
 }

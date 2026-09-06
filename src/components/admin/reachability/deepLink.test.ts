@@ -16,6 +16,7 @@ describe('parseReachabilityDeepLink', () => {
       shortUuid: null,
       jobId: null,
       repeatJobId: null,
+      runningJobId: null,
     });
   });
 
@@ -82,6 +83,7 @@ describe('parseReachabilityDeepLink', () => {
       shortUuid: null,
       jobId: null,
       repeatJobId: null,
+      runningJobId: null,
     });
   });
 });
@@ -99,6 +101,13 @@ describe('jobKindOf', () => {
     expect([link.mode, link.repeatJobId]).toEqual(['ip', 12]);
     expect(buildReachabilityLink({ mode: 'ip', repeatJobId: 12 })).toBe(
       '/admin/reachability?kind=ip&repeat=12',
+    );
+  });
+
+  it('идущая проверка живёт в адресе: ?running=<id>', () => {
+    expect(parseReachabilityDeepLink(new URLSearchParams('running=15')).runningJobId).toBe(15);
+    expect(buildReachabilityLink({ runningJobId: 15 })).toBe(
+      '/admin/reachability?kind=hosts&running=15',
     );
   });
 });

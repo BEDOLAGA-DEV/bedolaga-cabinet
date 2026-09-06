@@ -6,6 +6,7 @@ import { Card } from '@/components/data-display';
 import { Button } from '@/components/primitives';
 import { getApiErrorMessage } from '@/utils/api-error';
 import { JobResult } from './JobResult';
+import { ProgressUnits } from './ProgressUnits';
 import { REACHABILITY_JOBS_KEY } from './jobsRefetch';
 import { useReachabilityJob } from './useReachabilityJob';
 import { REACHABILITY_STATUS_KEY } from './useReachabilityStatus';
@@ -80,10 +81,11 @@ export function JobProgress({ jobId, onReset }: JobProgressProps) {
             })}
           </p>
           <p className="mt-1 text-xs text-dark-400">
-            {t(`admin.reachability.progress.${HINT_KEY[job.kind]}`)}
+            {t(`admin.reachability.progress.${HINT_KEY[job.kind]}`)}{' '}
+            {t('admin.reachability.progress.canLeave')}
           </p>
-          <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-dark-700">
-            <div className="h-full w-1/3 animate-pulse rounded-full bg-accent-500" />
+          <div className="mt-3">
+            <ProgressUnits job={job} />
           </div>
           {canCancel && (
             <div className="mt-3 flex gap-2">

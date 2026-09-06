@@ -19,7 +19,6 @@ import { installMatchMedia, renderWithProviders } from './testUtils';
 installMatchMedia();
 afterEach(cleanup);
 
-const CORES = { stable: '26.3.27', prerelease: '26.7.11' };
 const missing: ReferenceStatus = { short_uuid: null, configs: 0, rejected: 0, error: 'не задана' };
 const ready: ReferenceStatus = { short_uuid: 'ref-1', configs: 3, rejected: 0, error: null };
 
@@ -64,9 +63,6 @@ function render(
       onToggle={vi.fn()}
       onSelectMany={vi.fn()}
       onClear={vi.fn()}
-      core=""
-      onCoreChange={vi.fn()}
-      cores={CORES}
       {...overrides}
     />,
   );
@@ -86,14 +82,10 @@ describe('SubscriptionTargets', () => {
     expect(screen.queryByRole('button', { name: /подписка по умолчанию/ })).toBeNull();
   });
 
-  it('с подпиской по умолчанию показывает её как источник, ядро Xray — номером версии', () => {
+  it('с подпиской по умолчанию показывает её как источник', () => {
     render(ready);
     expect(screen.getByRole('button', { name: /подписка по умолчанию/ })).toBeTruthy();
     expect(screen.queryByText('Подписка по умолчанию не задана')).toBeNull();
-    const chips = screen.getByRole('group', { name: 'Ядро Xray' });
-    expect(chips.textContent).toContain('26.3.27');
-    expect(chips.textContent).toContain('26.7.11');
-    expect(chips.textContent).not.toContain('Stable');
   });
 
   it('с заполненным полем показывает разобранные конфиги и прячет готовые источники', () => {

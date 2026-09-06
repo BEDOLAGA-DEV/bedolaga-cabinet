@@ -20,7 +20,12 @@ export function FleetStatus({ className }: { className?: string }) {
         )}
       />
       {alive.length > 0
-        ? t('admin.reachability.fleet.onAir', { bs, regular })
+        ? t('admin.reachability.fleet.onAir', {
+            count: alive.length,
+            total: alive.length,
+            bs,
+            regular,
+          })
         : t('admin.reachability.fleet.offline')}
     </p>
   );

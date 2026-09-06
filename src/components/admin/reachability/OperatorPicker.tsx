@@ -4,15 +4,14 @@ import type { JobKind, Unit } from '@/api/reachability';
 import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { OperatorIcon } from './OperatorIcon';
-import { SectionHeading } from './SectionHeading';
 import {
-  type District,
-  districtState,
-  groupByDistrict,
+  type OperatorGroup,
+  groupByOperator,
+  groupState,
   mergeKeys,
   pickUnits,
   recallSelection,
-  toggleDistrict,
+  toggleGroup,
   toggleKey,
 } from './unitSelection';
 import { useUnits } from './useUnits';
@@ -23,30 +22,26 @@ interface OperatorPickerProps {
   onChange: (keys: string[]) => void;
 }
 
-const PRESET =
-  'min-h-[40px] rounded-xl border px-3 text-sm font-medium transition-colors disabled:opacity-50';
-const PRESET_OFF = 'border-dark-700/60 bg-dark-900/40 text-dark-200 hover:border-dark-600';
-const PRESET_ON = 'border-accent-500/40 bg-accent-500/10 text-accent-400';
+const PRESET = 'min-h-[36px] rounded-lg px-3 text-sm font-medium transition-colors';
+const PRESET_OFF = 'bg-dark-800/50 text-dark-200 hover:bg-dark-700/50';
+const PRESET_ON = 'bg-accent-500/15 text-accent-400 ring-1 ring-accent-500/30';
 
 /**
- * Операторы по федеральным округам. Каждая симка списывается отдельно, поэтому ничего не
- * отмечается само: только именованные действия и тап по оператору.
+ * Ручной выбор симок: плоский список без рамок — пресеты словами, операторы группами,
+ * округа чипами, «без» рядом с округом без Белого списка. Ничего не отмечается само.
  */
 export function OperatorPicker({ kind, selected, onChange }: OperatorPickerProps) {
   const { t } = useTranslation();
   const { data: catalog = [], isLoading } = useUnits();
   // Симки без связи не показываем: отмечать их нельзя, а место на экране они едят.
   const units = useMemo(() => catalog.filter((unit) => unit.probeable), [catalog]);
-
-  const districts = useMemo(() => groupByDistrict(units), [units]);
+  const groups = useMemo(() => groupByOperator(units), [units]);
   const bsKeys = useMemo(() => pickUnits(units, 'on'), [units]);
   const regularKeys = useMemo(() => pickUnits(units, 'off'), [units]);
   const recalled = useMemo(
     () => recallSelection(kind).filter((key) => units.some((unit) => unit.op_key === key)),
     [kind, units],
   );
-  const alive = units.filter((unit) => unit.probeable);
-  const chosen = alive.filter((unit) => selected.includes(unit.op_key));
   const allOf = (keys: string[]) => keys.length > 0 && keys.every((key) => selected.includes(key));
   const togglePreset = (keys: string[]) =>
     onChange(
@@ -56,9 +51,8 @@ export function OperatorPicker({ kind, selected, onChange }: OperatorPickerProps
   if (isLoading) {
     return (
       <SkeletonGroup aria-label={t('admin.reachability.operators.title')}>
-        <Skeleton className="h-7 w-40" />
-        <Skeleton className="mt-3 h-10 w-full rounded-xl" />
-        <Skeleton className="mt-2 h-24 w-full rounded-xl" />
+        <Skeleton className="h-9 w-full rounded-lg" />
+        <Skeleton className="mt-3 h-24 w-full rounded-lg" />
       </SkeletonGroup>
     );
   }
@@ -67,17 +61,7 @@ export function OperatorPicker({ kind, selected, onChange }: OperatorPickerProps
   }
 
   return (
-    <section aria-labelledby="reachability-operators" className="space-y-3">
-      <SectionHeading
-        id="reachability-operators"
-        title={t('admin.reachability.operators.title')}
-        hint={t('admin.reachability.operators.hint')}
-        aside={t('admin.reachability.operators.selected', {
-          selected: chosen.length,
-          total: alive.length,
-        })}
-      />
-
+    <div className="space-y-3">
       <div className="flex flex-wrap gap-2">
         <button
           type="button"
@@ -115,7 +99,7 @@ export function OperatorPicker({ kind, selected, onChange }: OperatorPickerProps
         {selected.length > 0 && (
           <button
             type="button"
-            className="btn-ghost min-h-[40px] px-3 text-sm"
+            className={cn(PRESET, 'text-dark-400 hover:text-dark-200')}
             onClick={() => onChange([])}
           >
             {t('admin.reachability.operators.reset')}
@@ -123,52 +107,54 @@ export function OperatorPicker({ kind, selected, onChange }: OperatorPickerProps
         )}
       </div>
 
-      <ul className="space-y-2">
-        {districts.map((district) => (
-          <DistrictRow
-            key={district.code}
-            district={district}
+      <ul className="divide-y divide-dark-700/60">
+        {groups.map((group) => (
+          <OperatorRow
+            key={group.operator}
+            group={group}
             selected={selected}
-            onToggleDistrict={() => onChange(toggleDistrict(selected, district))}
+            onToggleGroup={() => onChange(toggleGroup(selected, group))}
             onToggleUnit={(unit) => onChange(toggleKey(selected, unit.op_key))}
           />
         ))}
       </ul>
-    </section>
+    </div>
   );
 }
 
-interface DistrictRowProps {
-  district: District;
+interface OperatorRowProps {
+  group: OperatorGroup;
   selected: string[];
-  onToggleDistrict: () => void;
+  onToggleGroup: () => void;
   onToggleUnit: (unit: Unit) => void;
 }
 
-function DistrictRow({ district, selected, onToggleDistrict, onToggleUnit }: DistrictRowProps) {
+function OperatorRow({ group, selected, onToggleGroup, onToggleUnit }: OperatorRowProps) {
   const { t } = useTranslation();
-  const state = districtState(district, selected);
-  const alive = district.units.filter((unit) => unit.probeable);
-  const chosen = alive.filter((unit) => selected.includes(unit.op_key)).length;
+  const state = groupState(group, selected);
+  const first = group.units[0];
   return (
-    <li className="rounded-xl border border-dark-700/60 bg-dark-900/30 p-2 sm:flex sm:items-start sm:gap-3">
+    <li
+      role="group"
+      aria-label={group.operator}
+      className="flex flex-wrap items-center gap-x-3 gap-y-1.5 py-2 sm:flex-nowrap"
+    >
       <button
         type="button"
         aria-pressed={state === 'all'}
         aria-label={t(
           state === 'all'
-            ? 'admin.reachability.operators.unpickDistrict'
-            : 'admin.reachability.operators.pickDistrict',
-          { code: district.label },
+            ? 'admin.reachability.operators.unpickOperator'
+            : 'admin.reachability.operators.pickOperator',
+          { name: group.operator },
         )}
-        disabled={alive.length === 0}
-        onClick={onToggleDistrict}
-        className="flex min-h-[40px] w-full items-center gap-2 rounded-lg px-1.5 text-left disabled:opacity-50 sm:w-28 sm:shrink-0"
+        onClick={onToggleGroup}
+        className="flex min-h-[40px] w-full items-center gap-2 text-left sm:w-40 sm:shrink-0"
       >
         <span
           aria-hidden="true"
           className={cn(
-            'flex h-4 w-4 shrink-0 items-center justify-center rounded border text-[10px] font-bold',
+            'flex h-4 w-4 shrink-0 items-center justify-center rounded border text-xs font-bold',
             state === 'none'
               ? 'border-dark-600 text-transparent'
               : 'border-accent-500 bg-accent-500 text-on-accent',
@@ -176,36 +162,35 @@ function DistrictRow({ district, selected, onToggleDistrict, onToggleUnit }: Dis
         >
           {state === 'some' ? '–' : '✓'}
         </span>
-        <span className="text-sm font-semibold text-dark-100">{district.label}</span>
-        <span className="text-xs tabular-nums text-dark-400">
-          {chosen}/{alive.length}
-        </span>
+        <OperatorIcon operator={first?.operator} className="h-5 w-5 rounded" />
+        <span className="text-sm font-medium text-dark-100">{group.operator}</span>
       </button>
-      <div className="mt-1 flex flex-wrap gap-1.5 sm:mt-0 sm:flex-1">
-        {district.units.map((unit) => {
-          const on = selected.includes(unit.op_key) && unit.probeable;
+      <div className="flex flex-wrap gap-1.5">
+        {group.units.map((unit) => {
+          const on = selected.includes(unit.op_key);
           return (
             <button
               key={unit.op_key}
               type="button"
               aria-pressed={on}
-              disabled={!unit.probeable}
+              title={
+                unit.dpi === 'off'
+                  ? `${unit.region} · ${t('admin.reachability.units.dpiOff')}`
+                  : `${unit.region} · ${t('admin.reachability.units.dpiOn')}`
+              }
               onClick={() => onToggleUnit(unit)}
               className={cn(
-                'flex min-h-[40px] items-center gap-1.5 rounded-xl border px-2.5 text-sm transition-colors disabled:cursor-not-allowed disabled:opacity-50',
+                'min-h-[36px] rounded-lg px-2.5 text-sm transition-colors',
                 on
-                  ? 'border-accent-500/40 bg-accent-500/10 text-dark-50'
-                  : 'border-dark-700/60 bg-dark-900/40 text-dark-200 hover:border-dark-600',
+                  ? 'bg-accent-500/15 text-accent-400 ring-1 ring-accent-500/30'
+                  : 'bg-dark-800/50 text-dark-200 hover:bg-dark-700/50',
               )}
             >
-              <OperatorIcon operator={unit.operator} className="h-[18px] w-[18px] rounded" />
-              <span>{unit.name}</span>
-              {unit.dpi === 'off' ? (
-                <span className="text-xs text-warning-400">
-                  {t('admin.reachability.operators.noBs')}
+              {unit.region}
+              {unit.dpi === 'off' && (
+                <span className="ms-1 text-xs text-dark-400">
+                  {t('admin.reachability.operators.noBsShort')}
                 </span>
-              ) : (
-                <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-success-500" />
               )}
             </button>
           );

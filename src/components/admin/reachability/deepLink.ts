@@ -34,6 +34,8 @@ export interface DeepLink {
   jobId: number | null;
   /** «Повторить»: задача, чьи цели, симки и пробы подставить в форму. */
   repeatJobId: number | null;
+  /** Идущая проверка: экран ожидания переживает перезагрузку страницы. */
+  runningJobId: number | null;
 }
 
 export const REACHABILITY_PATH = '/admin/reachability';
@@ -89,6 +91,7 @@ export function parseReachabilityDeepLink(params: URLSearchParams): DeepLink {
     shortUuid,
     jobId: parseId(params.get('job')),
     repeatJobId: parseId(params.get('repeat')),
+    runningJobId: parseId(params.get('running')),
   };
 }
 
@@ -103,5 +106,6 @@ export function buildReachabilityLink(input: Partial<DeepLink>): string {
   if (shortUuid) params.set('sub', shortUuid);
   if (input.jobId) params.set('job', String(input.jobId));
   if (input.repeatJobId) params.set('repeat', String(input.repeatJobId));
+  if (input.runningJobId) params.set('running', String(input.runningJobId));
   return `${REACHABILITY_PATH}?${params.toString()}`;
 }

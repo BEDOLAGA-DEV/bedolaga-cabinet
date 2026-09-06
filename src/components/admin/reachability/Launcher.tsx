@@ -1,6 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import {
   type HostTarget,
   type NodeTarget,
@@ -11,16 +10,15 @@ import {
   reachabilityApi,
 } from '@/api/reachability';
 import { AddressTargets } from './AddressTargets';
+import { AdvancedOptions } from './AdvancedOptions';
 import { HostTargets } from './HostTargets';
 import { JobProgress } from './JobProgress';
 import { LaunchAside, LaunchBar } from './LaunchAside';
 import { ModeSwitch } from './ModeSwitch';
-import { OperatorPicker } from './OperatorPicker';
-import { ProbesRow } from './ProbesRow';
 import { ScanTargets } from './ScanTargets';
-import { SectionHeading } from './SectionHeading';
-import { SniHostsField } from './SniHostsField';
 import { type ConfigItem, SubscriptionTargets } from './SubscriptionTargets';
+import { UnitsSummary } from './UnitsSummary';
+import { autoUnitsFor } from './autoUnits';
 import { type DeepLink, type LaunchMode, jobKindOf } from './deepLink';
 import { buildProbeBody, buildScanBody, buildVlessBody } from './jobBodies';
 import {
@@ -42,6 +40,9 @@ interface LauncherProps {
   status: ReachabilityStatus | undefined;
   link: DeepLink;
   onModeChange: (mode: LaunchMode) => void;
+  /** Идущая проверка живёт в адресе страницы (?running=), чтобы пережить перезагрузку. */
+  runningJobId: number | null;
+  onRunning: (jobId: number | null) => void;
 }
 
 const PROBE_DEFAULT: Probes = { icmp: false, tcp: true, sni: true };
@@ -54,8 +55,7 @@ function toggleBy<T extends { uuid: string }>(list: T[], item: T): T[] {
 }
 
 /** Один запуск на все вкладки: цели по вкладке, пробы, SNI-хост, операторы, итог и кнопка. */
-export function Launcher({ status, link, onModeChange }: LauncherProps) {
-  const { t } = useTranslation();
+export function Launcher({ status, link, onModeChange, runningJobId, onRunning }: LauncherProps) {
   const mode = link.mode;
   const kind = jobKindOf(mode);
   const { data: catalog = [] } = useUnits();
@@ -68,14 +68,14 @@ export function Launcher({ status, link, onModeChange }: LauncherProps) {
   const [configIndexes, setConfigIndexes] = useState<number[]>([]);
   const [core, setCore] = useState<VlessCore>('');
   const [cidr, setCidr] = useState('');
-  const [units, setUnits] = useState<string[]>([]);
+  // Симки: сами по назначению целей; null — человек не трогал руками.
+  const [manualUnits, setManualUnits] = useState<string[] | null>(null);
   const [probes, setProbes] = useState<Probes>(PROBE_DEFAULT);
   const [scanProbes, setScanProbes] = useState<Probes>(SCAN_DEFAULT);
   // Как в оригинале: поле помнит последний ввод, иначе белый домен по умолчанию (зашит в код).
   const [sniHosts, setSniHosts] = useState(
     () => recallSniHosts() ?? status?.default_sni ?? DEFAULT_SNI_HOST,
   );
-  const [jobId, setJobId] = useState<number | null>(null);
   const changeSni = (value: string) => {
     setSniHosts(value);
     rememberSniHosts(value);
@@ -96,7 +96,7 @@ export function Launcher({ status, link, onModeChange }: LauncherProps) {
   useEffect(() => {
     if (!repeat.data || !repeatState || appliedRepeat.current === repeat.data.id) return;
     appliedRepeat.current = repeat.data.id;
-    setUnits(repeatState.units);
+    setManualUnits(repeatState.units);
     if (repeatState.probes) {
       if (repeatState.mode === 'cidr') setScanProbes(repeatState.probes);
       else setProbes(repeatState.probes);
@@ -162,6 +162,21 @@ export function Launcher({ status, link, onModeChange }: LauncherProps) {
     setConfigIndexes([]);
   };
 
+  const targetPurposes = useMemo(() => {
+    if (mode === 'hosts') {
+      return [...hosts.map((host) => host.purpose), ...nodes.map(() => 'unknown' as const)];
+    }
+    if (mode === 'vless') {
+      return configIndexes
+        .map((index) => configList.find((config) => config.index === index)?.purpose)
+        .filter((purpose): purpose is NonNullable<typeof purpose> => purpose !== undefined);
+    }
+    const hasTargets =
+      mode === 'ip' ? parseTargets(addresses).targets.length > 0 : Boolean(scanSubnet(cidr));
+    return hasTargets ? ['unknown' as const] : [];
+  }, [mode, hosts, nodes, configIndexes, configList, addresses, cidr]);
+  const autoUnits = useMemo(() => autoUnitsFor(targetPurposes, catalog), [targetPurposes, catalog]);
+  const units = manualUnits ?? autoUnits;
   const dpi = dpiForSelection(catalog, units);
   const preselectedHosts = useMemo(
     () => [
@@ -257,11 +272,10 @@ export function Launcher({ status, link, onModeChange }: LauncherProps) {
   const activeProbes = mode === 'cidr' ? scanProbes : mode === 'hosts' ? hostProbes : probes;
   const showSni = mode !== 'vless' && activeProbes.sni;
 
-  if (jobId !== null) {
+  if (runningJobId !== null) {
     return (
-      <div className="space-y-6">
-        <ModeSwitch value={mode} onChange={onModeChange} />
-        <JobProgress jobId={jobId} onReset={() => setJobId(null)} />
+      <div id="reachability-launcher">
+        <JobProgress jobId={runningJobId} onReset={() => onRunning(null)} />
       </div>
     );
   }
@@ -271,7 +285,7 @@ export function Launcher({ status, link, onModeChange }: LauncherProps) {
     targetsCount,
     body,
     status,
-    onStarted: (job: { id: number }) => setJobId(job.id),
+    onStarted: (job: { id: number }) => onRunning(job.id),
   };
 
   return (
@@ -306,34 +320,39 @@ export function Launcher({ status, link, onModeChange }: LauncherProps) {
               onToggle={toggleConfig}
               onSelectMany={selectConfigs}
               onClear={() => setConfigIndexes([])}
-              core={core}
-              onCoreChange={setCore}
-              cores={status?.cores}
             />
           )}
           {mode === 'cidr' && <ScanTargets cidr={cidr} onChange={setCidr} />}
 
-          {mode !== 'vless' && (
-            <section aria-labelledby="reachability-probes" className="space-y-3">
-              <SectionHeading
-                id="reachability-probes"
-                title={t('admin.reachability.sections.probes')}
-              />
-              {mode === 'cidr' ? (
-                <ProbesRow probes={scanProbes} onChange={setScanProbes} />
-              ) : (
-                <ProbesRow
-                  probes={mode === 'hosts' ? hostProbes : probes}
-                  onChange={setProbes}
-                  locked={mode === 'hosts' && nodes.length ? ['icmp'] : []}
-                />
-              )}
-              {showSni && (
-                <SniHostsField value={sniHosts} onChange={changeSni} autoNames={autoSniNames} />
-              )}
-            </section>
+          <UnitsSummary
+            kind={kind}
+            selected={units}
+            auto={manualUnits === null}
+            onChange={setManualUnits}
+            onReset={() => setManualUnits(null)}
+          />
+          {mode === 'vless' ? (
+            <AdvancedOptions core={core} onCoreChange={setCore} cores={status?.cores} />
+          ) : mode === 'cidr' ? (
+            <AdvancedOptions
+              probes={scanProbes}
+              onProbesChange={setScanProbes}
+              sniHosts={sniHosts}
+              onSniChange={changeSni}
+              autoSniNames={autoSniNames}
+              showSni={showSni}
+            />
+          ) : (
+            <AdvancedOptions
+              probes={mode === 'hosts' ? hostProbes : probes}
+              onProbesChange={setProbes}
+              locked={mode === 'hosts' && nodes.length ? ['icmp'] : []}
+              sniHosts={sniHosts}
+              onSniChange={changeSni}
+              autoSniNames={autoSniNames}
+              showSni={showSni}
+            />
           )}
-          <OperatorPicker kind={kind} selected={units} onChange={setUnits} />
         </div>
         <div className="hidden lg:block">
           <LaunchAside {...launchProps} />

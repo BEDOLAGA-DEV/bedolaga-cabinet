@@ -37,8 +37,8 @@ export function HostsSummaryMatrix({ summary }: HostsSummaryMatrixProps) {
       <div className="hidden overflow-x-auto rounded-2xl border border-dark-700/60 md:block">
         <table className="w-full border-collapse text-sm">
           <thead>
-            <tr className="bg-dark-900/60 text-[11px] text-dark-400">
-              <th className="sticky left-0 z-10 bg-dark-900/60 px-3 py-2 text-left font-medium uppercase tracking-wide">
+            <tr className="bg-dark-900/60 text-xs text-dark-400">
+              <th className="sticky left-0 z-10 bg-dark-900/60 px-3 py-2 text-left font-medium">
                 {t('admin.reachability.targets.hosts')}
               </th>
               {summary.units.map((unit) => (
@@ -48,16 +48,16 @@ export function HostsSummaryMatrix({ summary }: HostsSummaryMatrixProps) {
                   className="px-1 py-2 text-center font-normal"
                 >
                   <OperatorIcon operator={unit.operator} className="mx-auto h-4 w-4 rounded" />
-                  <span className="mt-1 block text-[9px] font-bold uppercase tracking-wide">
+                  <span className="mt-1 block text-xs font-medium">
                     {unit.region || unit.op_key.split('|')[1] || ''}
                   </span>
                   {unit.dpi === 'off' && (
-                    <span className="block text-[8px] font-bold text-warning-400">
+                    <span className="block text-xs text-dark-400">
                       {t('admin.reachability.result.noBs')}
                     </span>
                   )}
                   {!unit.in_catalog && (
-                    <span className="block text-[8px] text-warning-400">
+                    <span className="block text-xs text-dark-400">
                       {t('admin.reachability.summary.notInCatalog')}
                     </span>
                   )}
@@ -74,7 +74,7 @@ export function HostsSummaryMatrix({ summary }: HostsSummaryMatrixProps) {
                   <span className="mt-1 flex flex-wrap gap-1">
                     <PurposeChip purpose={row.purpose} guessed={row.purpose_guessed} />
                     {!row.in_panel && (
-                      <span className="rounded-md bg-warning-500/15 px-1.5 py-0.5 text-[10px] text-warning-400">
+                      <span className="rounded-md bg-dark-700/60 px-1.5 py-0.5 text-xs text-dark-300">
                         {t('admin.reachability.summary.notInPanel')}
                       </span>
                     )}

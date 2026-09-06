@@ -93,18 +93,20 @@ function LaunchDetails({
           {t('admin.reachability.launch.summaryUnits', { count: unitsCount })}
         </dd>
       </div>
-      <div className="flex justify-between gap-3 border-t border-dark-700/60 pt-1.5">
-        <dt className="text-dark-400">{t('admin.reachability.launch.total')}</dt>
-        <dd className="text-right">
-          <span className="block font-semibold tabular-nums text-dark-50">
-            {launch.isPricing ? '…' : formatCredits(launch.cost)}
-          </span>
-          {launch.cost !== null && !launch.isPricing && (
-            <span className="block text-xs text-dark-400">≈ {formatKopeks(launch.cost)}</span>
-          )}
-        </dd>
-      </div>
-      {launch.balanceAfter !== null && (
+      {!launch.blocker && (
+        <div className="flex justify-between gap-3 border-t border-dark-700/60 pt-1.5">
+          <dt className="text-dark-400">{t('admin.reachability.launch.total')}</dt>
+          <dd className="text-right">
+            <span className="block font-semibold tabular-nums text-dark-50">
+              {launch.isPricing ? '…' : formatCredits(launch.cost)}
+            </span>
+            {launch.cost !== null && !launch.isPricing && (
+              <span className="block text-xs text-dark-400">≈ {formatKopeks(launch.cost)}</span>
+            )}
+          </dd>
+        </div>
+      )}
+      {!launch.blocker && launch.balanceAfter !== null && (
         <div className="flex justify-between gap-3">
           <dt className="text-dark-400">{t('admin.reachability.launch.balanceAfter')}</dt>
           <dd className="tabular-nums text-dark-200">{formatMoney(launch.balanceAfter)}</dd>
@@ -153,13 +155,18 @@ export function LaunchAside(props: LaunchProps) {
         {t('admin.reachability.launch.title')}
       </h2>
       <div className="mt-3">
-        <LaunchDetails launch={launch} targetsCount={props.targetsCount} unitsCount={unitsCount} />
-      </div>
-      {launch.blocker && <p className="mt-3 text-sm text-warning-400">{launch.blocker}</p>}
-      {launch.confirming && (
-        <div className="mt-3">
+        {launch.confirming ? (
           <LaunchConfirm launch={launch} />
-        </div>
+        ) : (
+          <LaunchDetails
+            launch={launch}
+            targetsCount={props.targetsCount}
+            unitsCount={unitsCount}
+          />
+        )}
+      </div>
+      {launch.blocker && !launch.confirming && (
+        <p className="mt-3 text-sm text-dark-400">{launch.blocker}</p>
       )}
       <div className="mt-4 flex gap-2">
         {launch.confirming && (
@@ -197,16 +204,17 @@ export function LaunchBar(props: LaunchProps) {
       >
         {showDetails && (
           <div className="mb-3 border-b border-dark-700/60 pb-3">
-            <LaunchDetails
-              launch={launch}
-              targetsCount={props.targetsCount}
-              unitsCount={unitsCount}
-            />
-            {launch.blocker && <p className="mt-2 text-xs text-warning-400">{launch.blocker}</p>}
-            {launch.confirming && (
-              <div className="mt-3">
-                <LaunchConfirm launch={launch} />
-              </div>
+            {launch.confirming ? (
+              <LaunchConfirm launch={launch} />
+            ) : (
+              <LaunchDetails
+                launch={launch}
+                targetsCount={props.targetsCount}
+                unitsCount={unitsCount}
+              />
+            )}
+            {launch.blocker && !launch.confirming && (
+              <p className="mt-2 text-xs text-dark-400">{launch.blocker}</p>
             )}
           </div>
         )}

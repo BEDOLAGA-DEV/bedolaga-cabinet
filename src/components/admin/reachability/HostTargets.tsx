@@ -9,6 +9,7 @@ import {
 } from '@/api/reachability';
 import { ChevronDownIcon } from '@/components/icons';
 import { cn } from '@/lib/utils';
+import { useNotify } from '@/platform/hooks/useNotify';
 import { getApiErrorMessage } from '@/utils/api-error';
 import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 import { PurposeChip } from './PurposeChip';
@@ -43,6 +44,8 @@ export function HostTargets(props: HostTargetsProps) {
   const { t } = useTranslation();
   const [search, setSearch] = useState('');
   const [showAll, setShowAll] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
+  const notify = useNotify();
   const { data: allHosts = [], isLoading, error } = useHosts(false);
   const { data: allNodes = [] } = useNodes();
   const invalidate = useInvalidateTargets();
@@ -80,7 +83,10 @@ export function HostTargets(props: HostTargetsProps) {
         target_ref: input.uuid,
         purpose: input.purpose,
       }),
-    onSuccess: invalidate,
+    onSuccess: () => {
+      invalidate();
+      notify.success(t('admin.reachability.targets.purposeChanged'));
+    },
   });
 
   const filtered = useMemo(
@@ -134,7 +140,19 @@ export function HostTargets(props: HostTargetsProps) {
         )}
       </div>
 
-      <p className="text-xs text-dark-400">{t('admin.reachability.targets.purposeHint')}</p>
+      <div className="text-xs text-dark-400">
+        <button
+          type="button"
+          aria-expanded={helpOpen}
+          onClick={() => setHelpOpen((value) => !value)}
+          className="text-accent-400 hover:underline"
+        >
+          {t('admin.reachability.targets.whatIsWhitelist')}
+        </button>
+        {helpOpen && (
+          <p className="mt-1 max-w-prose">{t('admin.reachability.targets.whitelistHelp')}</p>
+        )}
+      </div>
 
       {error && <p className="text-sm text-error-400">{getApiErrorMessage(error, '')}</p>}
       {!error && filtered.length === 0 && (
@@ -166,7 +184,6 @@ export function HostTargets(props: HostTargetsProps) {
                   </span>
                   <span className="block truncate font-mono text-xs text-dark-400">
                     {host.target_key}
-                    {host.sni && host.sni !== host.address ? ` · sni ${host.sni}` : ''}
                   </span>
                 </span>
               </button>

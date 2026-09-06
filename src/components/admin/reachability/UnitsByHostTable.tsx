@@ -38,7 +38,7 @@ export function UnitsByHostTable({ summary }: { summary: Summary }) {
                 <span className="flex items-center gap-2">
                   <UnitBadge label={unitLabel(unit, summary.units)} noBs={unit.dpi === 'off'} />
                   {!unit.in_catalog && (
-                    <span className="text-[9px] text-warning-400">
+                    <span className="text-xs text-dark-400">
                       {t('admin.reachability.summary.notInCatalog')}
                     </span>
                   )}

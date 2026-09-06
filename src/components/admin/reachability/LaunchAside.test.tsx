@@ -116,7 +116,7 @@ async function renderPanel(onStarted = vi.fn()) {
   return { run, onStarted };
 }
 
-const CHARGE = 'Списать ◈ 640 cred';
+const CHARGE = 'Запустить за ◈ 640 cred';
 
 describe('LaunchAside в браузере: второй шаг в панели, без модалки', () => {
   it('первый клик показывает сводку и «Списать», диалог не зовётся, задача не создаётся', async () => {
@@ -240,5 +240,30 @@ describe('LaunchAside в Mini App: родной попап', () => {
     expect(reachabilityApi.createJob).toHaveBeenCalledWith(body);
     expect(recallSelection('probe')).toEqual(body.units);
     expect(notify.success).toHaveBeenCalledWith('Задача #7 запущена');
+  });
+});
+
+describe('LaunchAside: панель без лишнего', () => {
+  it('пока запуск невозможен, сумм нет — только причина', async () => {
+    renderWithProviders(
+      <LaunchAside
+        kind="probe"
+        targetsCount={1}
+        body={{ ...body, units: [] }}
+        status={status}
+        onStarted={vi.fn()}
+      />,
+    );
+    expect(await screen.findByText('Выберите хотя бы одну симку')).toBeTruthy();
+    expect(screen.queryByText('Итого')).toBeNull();
+    expect(screen.queryByText('Остаток после')).toBeNull();
+  });
+
+  it('второй шаг заменяет детали: цена и остаток внутри сводки, строк «Итого» нет', async () => {
+    const { run } = await renderPanel();
+    fireEvent.click(run);
+    expect(screen.getByText(/^Цена: ◈ 640 cred/)).toBeTruthy();
+    expect(screen.getByText(/^Остаток после списания: /)).toBeTruthy();
+    expect(screen.queryByText('Итого')).toBeNull();
   });
 });

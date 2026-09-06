@@ -11,7 +11,7 @@ export function CheckGlyph({ on }: { on: boolean }) {
     <span
       aria-hidden="true"
       className={cn(
-        'flex h-4 w-4 shrink-0 items-center justify-center rounded border text-[10px] font-bold',
+        'flex h-4 w-4 shrink-0 items-center justify-center rounded border text-xs font-bold',
         on ? 'border-accent-500 bg-accent-500 text-on-accent' : 'border-dark-600 text-transparent',
       )}
     >
