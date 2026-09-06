@@ -1,3 +1,5 @@
+import { safeLocal } from '@/utils/safeStorage';
+
 /**
  * Какие имена уйдут в TLS-SNI — то же правило, что в боте (``requests.sni_hosts_for``):
  * SNI цели, а без него её домен; у голого IP имени нет (RFC 6066). Бот остаётся судьёй,
@@ -41,6 +43,19 @@ export function sniNamesForAddresses(values: string[]): string[] {
 // ---------------------------------------------------------------- свои имена (поле «SNI-хост»)
 
 export const MAX_SNI_HOSTS = 5;
+/** Белый домен по умолчанию — плейсхолдер оригинала; бот подставит его же, если поле пустое. */
+export const DEFAULT_SNI_HOST = 'ads.x5.ru';
+const SNI_STORAGE_KEY = 'cabinet_reachability_sni';
+
+/** Последние введённые имена: в оригинале поле запоминается в настройках пользователя. */
+export function recallSniHosts(): string | null {
+  const value = safeLocal.getItem(SNI_STORAGE_KEY);
+  return typeof value === 'string' && value.trim() ? value : null;
+}
+
+export function rememberSniHosts(text: string): void {
+  safeLocal.setItem(SNI_STORAGE_KEY, text);
+}
 
 const HOSTNAME =
   /^(?=.{1,253}$)[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*$/;

@@ -21,7 +21,14 @@ import { SniHostsField } from './SniHostsField';
 import { type ConfigItem, SubscriptionTargets } from './SubscriptionTargets';
 import { type DeepLink, type LaunchMode, jobKindOf } from './deepLink';
 import { buildProbeBody, buildScanBody, buildVlessBody } from './jobBodies';
-import { parseSniHosts, sniNamesFor, sniNamesForAddresses } from './sniNames';
+import {
+  DEFAULT_SNI_HOST,
+  parseSniHosts,
+  recallSniHosts,
+  rememberSniHosts,
+  sniNamesFor,
+  sniNamesForAddresses,
+} from './sniNames';
 import { parseTargets, scanSubnet } from './targetsInput';
 import { dpiForSelection } from './unitSelection';
 import { useParsedInput, useSubscriptionConfigs } from './useTargets';
@@ -60,17 +67,14 @@ export function Launcher({ status, link, onModeChange }: LauncherProps) {
   const [units, setUnits] = useState<string[]>([]);
   const [probes, setProbes] = useState<Probes>(PROBE_DEFAULT);
   const [scanProbes, setScanProbes] = useState<Probes>(SCAN_DEFAULT);
-  const [sniHosts, setSniHosts] = useState('');
-  const sniTouched = useRef(false);
+  // Как в оригинале: поле помнит последний ввод, иначе белый домен по умолчанию (зашит в код).
+  const [sniHosts, setSniHosts] = useState(
+    () => recallSniHosts() ?? status?.default_sni ?? DEFAULT_SNI_HOST,
+  );
   const [jobId, setJobId] = useState<number | null>(null);
-
-  // «SNI-хост по умолчанию» из настроек подставляется один раз, пока поле не трогали.
-  useEffect(() => {
-    if (!sniTouched.current && status?.default_sni) setSniHosts(status.default_sni);
-  }, [status?.default_sni]);
   const changeSni = (value: string) => {
-    sniTouched.current = true;
     setSniHosts(value);
+    rememberSniHosts(value);
   };
 
   const hasReference = Boolean(status?.reference?.short_uuid);
