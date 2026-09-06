@@ -5139,6 +5139,7 @@
       "methodSubOptions": "Варианты оплаты",
       "loadingPeriods": "Загрузка...",
       "periodDaySuffix": "д",
+      "trialPrefix": "Триал",
       "localeTab": "Язык",
       "localeHint": "Переключите язык для редактирования текста на этом языке",
       "discount": "Скидка",

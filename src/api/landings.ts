@@ -15,6 +15,14 @@ export interface LandingTariffPeriod {
   original_price_kopeks: number | null;
   original_price_label: string | null;
   discount_percent: number | null;
+  /**
+   * Marks a virtual period that represents a paid trial. The backend may
+   * inject this entry when a trial product is enabled. When true, the UI
+   * shows `label` verbatim (e.g. "Trial period") instead of formatting
+   * the day count, and the admin editor renders it in a distinct style.
+   * Default: false / undefined for regular periods.
+   */
+  is_trial?: boolean;
 }
 
 export interface LandingTariff {
