@@ -1,4 +1,5 @@
 import type { Verdict } from '@/api/reachability';
+import type { CellState } from './probeCells';
 
 export type Tone = 'success' | 'error' | 'warning' | 'neutral';
 
@@ -9,6 +10,18 @@ export function verdictTone(verdict: Verdict, matches: boolean | null): Tone {
   if (matches === true) return 'success';
   if (matches === false) return 'error';
   return 'neutral';
+}
+
+const TONE_STATE: Record<Tone, CellState> = {
+  success: 'ok',
+  error: 'down',
+  warning: 'warn',
+  neutral: 'na',
+};
+
+/** Состояние точки (как в таблицах результата) по тону вердикта. */
+export function verdictState(verdict: Verdict, matches: boolean | null): CellState {
+  return TONE_STATE[verdictTone(verdict, matches)];
 }
 
 const TONE_CLASSES: Record<Tone, string> = {

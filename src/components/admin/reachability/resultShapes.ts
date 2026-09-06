@@ -42,11 +42,15 @@ export function probeMatrix(legs: Leg[]): ProbeMatrix {
 export interface VlessLegView {
   server: string;
   opKey: string;
+  /** Имя оператора из ответа API — запасное, когда симки нет в каталоге. */
+  operatorName: string | null;
   verdict: Verdict;
   matches: boolean | null;
+  /** Проверка отменена: флаг в сыром ответе или вердикт «отменено». */
+  cancelled: boolean;
   tunnelUp: boolean | null;
-  targetsOk: number;
-  targetsTotal: number;
+  /** Целевые сайты через туннель — по флагу на каждый, в порядке ответа. */
+  targets: boolean[];
   latencyMs: number | null;
   core: string | null;
   failReason: string | null;
@@ -59,11 +63,12 @@ export function vlessLegView(leg: Leg): VlessLegView {
   return {
     server: asString(raw.server_name) ?? asString(raw.server_addr) ?? leg.target_key,
     opKey: leg.op_key,
+    operatorName: asString(raw.operator_name),
     verdict: leg.verdict,
     matches: leg.matches_expectation,
+    cancelled: raw.cancelled === true || leg.verdict === 'cancelled',
     tunnelUp: typeof raw.tunnel_up === 'boolean' ? raw.tunnel_up : null,
-    targetsOk: targets.filter((target) => target.ok === true).length,
-    targetsTotal: targets.length,
+    targets: targets.map((target) => target.ok === true),
     latencyMs: asNumber(raw.tcp_latency_ms),
     core: asString(raw.used_core),
     failReason: asString(raw.fail_reason),

@@ -22,6 +22,12 @@ describe('ProbesRow', () => {
     expect(onChange).toHaveBeenCalledWith({ icmp: false, tcp: true, sni: false });
   });
 
+  it('нажатая проба помечена галочкой, ненажатая — нет', () => {
+    render(<ProbesRow probes={{ icmp: false, tcp: true, sni: true }} onChange={vi.fn()} />);
+    expect(screen.getByRole('button', { name: /^TCP/ }).querySelector('svg')).not.toBeNull();
+    expect(screen.getByRole('button', { name: /^ICMP/ }).querySelector('svg')).toBeNull();
+  });
+
   it('заблокированная проба не переключается', () => {
     const onChange = vi.fn();
     render(

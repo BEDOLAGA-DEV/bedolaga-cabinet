@@ -33,6 +33,7 @@ describe('vlessLegView', () => {
     const view = vlessLegView(
       leg('eu.example:443', 'tele2|цфо|on', {
         server_name: '🇩🇪 Germany',
+        operator_name: 'Tele2',
         tunnel_up: true,
         targets: [{ ok: true }, { ok: false }, { ok: true }],
         tcp_latency_ms: 82,
@@ -44,11 +45,12 @@ describe('vlessLegView', () => {
     expect(view).toEqual({
       server: '🇩🇪 Germany',
       opKey: 'tele2|цфо|on',
+      operatorName: 'Tele2',
       verdict: 'reachable',
       matches: true,
+      cancelled: false,
       tunnelUp: true,
-      targetsOk: 2,
-      targetsTotal: 3,
+      targets: [true, false, true],
       latencyMs: 82,
       core: 'stable',
       failReason: 'zombie_tcp',
@@ -66,7 +68,15 @@ describe('vlessLegView', () => {
       null,
       null,
     ]);
-    expect([view.targetsOk, view.targetsTotal]).toEqual([0, 0]);
+    expect(view.targets).toEqual([]);
+    expect(view.cancelled).toBe(false);
+    expect(view.operatorName).toBeNull();
+  });
+
+  it('отменённый лег помечен по флагу cancelled в сыром ответе или по вердикту', () => {
+    const byRaw = vlessLegView(leg('a', 'mts|цфо|on', { cancelled: true }));
+    const byVerdict = vlessLegView({ ...leg('a', 'mts|цфо|on'), verdict: 'cancelled' });
+    expect([byRaw.cancelled, byVerdict.cancelled]).toEqual([true, true]);
   });
 });
 

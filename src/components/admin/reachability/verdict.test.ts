@@ -23,3 +23,14 @@ describe('verdictTone', () => {
     expect(verdictLabelKey('down')).toBe('admin.reachability.verdict.down');
   });
 });
+
+describe('verdictState', () => {
+  it('состояние точки по тону вердикта: ok · down · warn · na', async () => {
+    const { verdictState } = await import('./verdict');
+    expect(verdictState('reachable', true)).toBe('ok');
+    expect(verdictState('blocked', false)).toBe('down');
+    expect(verdictState('unknown', null)).toBe('warn');
+    expect(verdictState('cancelled', null)).toBe('na');
+    expect(verdictState('reachable', null)).toBe('na');
+  });
+});

@@ -1,26 +1,17 @@
-import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import type { Summary, Unit } from '@/api/reachability';
 import { OperatorIcon } from './OperatorIcon';
 import { ProbeDot } from './ProbeDot';
 import { PurposeChip } from './PurposeChip';
-import { type VerdictRow, VerdictChipList } from './VerdictChipList';
+import { UnitsByHostTable } from './UnitsByHostTable';
 import { buildReachabilityLink } from './deepLink';
-import type { CellState } from './probeCells';
 import { relativeAge } from './relativeAge';
-import { type Tone, verdictLabelKey, verdictTone } from './verdict';
+import { verdictLabelKey, verdictState } from './verdict';
 
 interface HostsSummaryMatrixProps {
   summary: Summary;
 }
-
-const TONE_TO_STATE: Record<Tone, CellState> = {
-  success: 'ok',
-  error: 'down',
-  warning: 'warn',
-  neutral: 'na',
-};
 
 function unitHeader(unit: Unit): string {
   return unit.operator ? `${unit.name || unit.operator} · ${unit.region}` : unit.op_key;
@@ -33,51 +24,15 @@ function jobLink(jobId: number): string {
 /**
  * Матрица «хост × симка» точками, как таблицы оригинала: иконка оператора и округ в шапке,
  * в ячейке цветная точка (соответствие ожиданию), подробности — во всплывающей подсказке,
- * тап ведёт в задачу. На узких экранах — список чипов.
+ * тап ведёт в задачу. На узких экранах — таблица «симка × хост» в стиле таблиц результата.
  */
 export function HostsSummaryMatrix({ summary }: HostsSummaryMatrixProps) {
   const { t, i18n } = useTranslation();
 
-  const rows = useMemo<VerdictRow[]>(
-    () =>
-      summary.rows.map((row) => ({
-        key: row.target_key,
-        label: row.label,
-        sub: row.target_key,
-        badges: (
-          <>
-            <PurposeChip purpose={row.purpose} guessed={row.purpose_guessed} />
-            {!row.in_panel && (
-              <span className="rounded-md bg-warning-500/15 px-1.5 py-0.5 text-[10px] text-warning-400">
-                {t('admin.reachability.summary.notInPanel')}
-              </span>
-            )}
-          </>
-        ),
-        cells: summary.units.flatMap((unit) => {
-          const cell = row.cells[unit.op_key];
-          return cell
-            ? [
-                {
-                  key: unit.op_key,
-                  label: unitHeader(unit),
-                  operator: unit.operator,
-                  verdict: cell.verdict,
-                  matches: cell.matches_expectation,
-                  hint: relativeAge(cell.checked_at, i18n.language),
-                  to: jobLink(cell.job_id),
-                },
-              ]
-            : [];
-        }),
-      })),
-    [summary, t, i18n.language],
-  );
-
   return (
     <>
       <div className="md:hidden">
-        <VerdictChipList rows={rows} />
+        <UnitsByHostTable summary={summary} />
       </div>
       <div className="hidden overflow-x-auto rounded-2xl border border-dark-700/60 md:block">
         <table className="w-full border-collapse text-sm">
@@ -134,7 +89,6 @@ export function HostsSummaryMatrix({ summary }: HostsSummaryMatrixProps) {
                       </td>
                     );
                   }
-                  const tone = verdictTone(cell.verdict, cell.matches_expectation);
                   const title = `${unitHeader(unit)} · ${t(verdictLabelKey(cell.verdict))} · ${relativeAge(cell.checked_at, i18n.language)}`;
                   return (
                     <td key={unit.op_key} className="px-1 py-2 text-center">
@@ -144,7 +98,7 @@ export function HostsSummaryMatrix({ summary }: HostsSummaryMatrixProps) {
                         aria-label={title}
                         className="inline-flex h-6 w-6 items-center justify-center rounded-md hover:bg-dark-700/40"
                       >
-                        <ProbeDot state={TONE_TO_STATE[tone]} />
+                        <ProbeDot state={verdictState(cell.verdict, cell.matches_expectation)} />
                       </Link>
                     </td>
                   );

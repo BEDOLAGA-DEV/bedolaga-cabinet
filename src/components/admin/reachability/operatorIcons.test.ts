@@ -11,7 +11,7 @@ const KNOWN = [
   'mts',
   'rtk',
   'sberm',
-  'svyaz1',
+  'svyaz',
   't-mobile',
   'tele2',
   'volna',
