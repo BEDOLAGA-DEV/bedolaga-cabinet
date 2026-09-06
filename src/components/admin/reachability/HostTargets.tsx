@@ -46,12 +46,23 @@ export function HostTargets(props: HostTargetsProps) {
   const { data: allHosts = [], isLoading, error } = useHosts(false);
   const { data: allNodes = [] } = useNodes();
   const invalidate = useInvalidateTargets();
-  const preselectedApplied = useRef(false);
+  const preselectedApplied = useRef<string | null>(null);
 
-  // Цели из ярлыка (?target=host:<uuid>) отмечаются один раз, когда списки загрузились.
+  // Цели из ярлыка (?target=host:<uuid>) и из «Повторить» отмечаются один раз на набор,
+  // когда списки загрузились.
+  const preselectedKey = [
+    ...(props.preselectedHosts ?? []),
+    ...(props.preselectedNodes ?? []),
+  ].join(',');
   useEffect(() => {
-    if (preselectedApplied.current || (allHosts.length === 0 && allNodes.length === 0)) return;
-    preselectedApplied.current = true;
+    if (
+      !preselectedKey ||
+      preselectedApplied.current === preselectedKey ||
+      (allHosts.length === 0 && allNodes.length === 0)
+    ) {
+      return;
+    }
+    preselectedApplied.current = preselectedKey;
     for (const uuid of props.preselectedHosts ?? []) {
       const host = allHosts.find((item) => item.uuid === uuid);
       if (host && !props.hosts.some((item) => item.uuid === uuid)) props.onToggleHost(host);
@@ -60,7 +71,7 @@ export function HostTargets(props: HostTargetsProps) {
       const node = allNodes.find((item) => item.uuid === uuid);
       if (node && !props.nodes.some((item) => item.uuid === uuid)) props.onToggleNode(node);
     }
-  }, [allHosts, allNodes, props]);
+  }, [allHosts, allNodes, props, preselectedKey]);
 
   const setPurpose = useMutation({
     mutationFn: (input: { uuid: string; purpose: Purpose }) =>

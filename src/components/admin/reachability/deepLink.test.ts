@@ -15,6 +15,7 @@ describe('parseReachabilityDeepLink', () => {
       userId: null,
       shortUuid: null,
       jobId: null,
+      repeatJobId: null,
     });
   });
 
@@ -80,6 +81,7 @@ describe('parseReachabilityDeepLink', () => {
       userId: 3,
       shortUuid: null,
       jobId: null,
+      repeatJobId: null,
     });
   });
 });
@@ -90,5 +92,13 @@ describe('jobKindOf', () => {
     expect(jobKindOf('ip')).toBe('probe');
     expect(jobKindOf('cidr')).toBe('scan');
     expect(jobKindOf('vless')).toBe('vless');
+  });
+
+  it('«Повторить»: ?repeat=<id> читается и пишется вместе с видом', () => {
+    const link = parseReachabilityDeepLink(new URLSearchParams('kind=ip&repeat=12'));
+    expect([link.mode, link.repeatJobId]).toEqual(['ip', 12]);
+    expect(buildReachabilityLink({ mode: 'ip', repeatJobId: 12 })).toBe(
+      '/admin/reachability?kind=ip&repeat=12',
+    );
   });
 });

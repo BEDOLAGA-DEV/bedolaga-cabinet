@@ -1,12 +1,14 @@
+import { useQuery } from '@tanstack/react-query';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import type {
-  HostTarget,
-  NodeTarget,
-  Probes,
-  ReachabilityStatus,
-  TargetIn,
-  VlessCore,
+import {
+  type HostTarget,
+  type NodeTarget,
+  type Probes,
+  type ReachabilityStatus,
+  type TargetIn,
+  type VlessCore,
+  reachabilityApi,
 } from '@/api/reachability';
 import { AddressTargets } from './AddressTargets';
 import { HostTargets } from './HostTargets';
@@ -29,8 +31,10 @@ import {
   sniNamesFor,
   sniNamesForAddresses,
 } from './sniNames';
+import { repeatFromJob } from './repeatFromJob';
 import { parseTargets, scanSubnet } from './targetsInput';
 import { dpiForSelection } from './unitSelection';
+import { REACHABILITY_JOB_KEY } from './useReachabilityJob';
 import { useParsedInput, useSubscriptionConfigs } from './useTargets';
 import { useUnits } from './useUnits';
 
@@ -76,6 +80,35 @@ export function Launcher({ status, link, onModeChange }: LauncherProps) {
     setSniHosts(value);
     rememberSniHosts(value);
   };
+
+  // «Повторить» из журнала: цели, симки, пробы и SNI прошлой задачи подставляются в форму.
+  const repeat = useQuery({
+    queryKey: [REACHABILITY_JOB_KEY, 'repeat', link.repeatJobId],
+    queryFn: () => reachabilityApi.getJob(link.repeatJobId as number),
+    enabled: link.repeatJobId !== null,
+    staleTime: Number.POSITIVE_INFINITY,
+  });
+  const repeatState = useMemo(
+    () => (repeat.data ? repeatFromJob(repeat.data) : null),
+    [repeat.data],
+  );
+  const appliedRepeat = useRef<number | null>(null);
+  useEffect(() => {
+    if (!repeat.data || !repeatState || appliedRepeat.current === repeat.data.id) return;
+    appliedRepeat.current = repeat.data.id;
+    setUnits(repeatState.units);
+    if (repeatState.probes) {
+      if (repeatState.mode === 'cidr') setScanProbes(repeatState.probes);
+      else setProbes(repeatState.probes);
+    }
+    if (repeatState.sniHosts) setSniHosts(repeatState.sniHosts);
+    setAddresses(repeatState.addresses);
+    setCidr(repeatState.cidr);
+    if (repeatState.shortUuid) {
+      setSource({ userId: null, shortUuid: repeatState.shortUuid });
+      setConfigIndexes(repeatState.configIndexes);
+    }
+  }, [repeat.data, repeatState]);
 
   const hasReference = Boolean(status?.reference?.short_uuid);
   const pastedMode = pasted.trim().length > 0;
@@ -131,12 +164,18 @@ export function Launcher({ status, link, onModeChange }: LauncherProps) {
 
   const dpi = dpiForSelection(catalog, units);
   const preselectedHosts = useMemo(
-    () => link.targets.filter((item) => item.kind === 'host').map((item) => item.ref),
-    [link.targets],
+    () => [
+      ...link.targets.filter((item) => item.kind === 'host').map((item) => item.ref),
+      ...(repeatState?.hosts ?? []),
+    ],
+    [link.targets, repeatState],
   );
   const preselectedNodes = useMemo(
-    () => link.targets.filter((item) => item.kind === 'node').map((item) => item.ref),
-    [link.targets],
+    () => [
+      ...link.targets.filter((item) => item.kind === 'node').map((item) => item.ref),
+      ...(repeatState?.nodes ?? []),
+    ],
+    [link.targets, repeatState],
   );
   const ownTargets = useMemo(() => parseTargets(addresses).targets, [addresses]);
   // Нода проверяется только ping-ом — при нодах ICMP не выключить.
@@ -236,7 +275,7 @@ export function Launcher({ status, link, onModeChange }: LauncherProps) {
   };
 
   return (
-    <div className="space-y-6">
+    <div id="reachability-launcher" className="space-y-6">
       <ModeSwitch value={mode} onChange={onModeChange} />
       <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start lg:gap-8">
         <div className="space-y-8">

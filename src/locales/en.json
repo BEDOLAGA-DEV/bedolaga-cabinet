@@ -2222,7 +2222,8 @@
           "zombie_tcp": "drops after TLS",
           "dataplane_dead": "sites don't open",
           "cancelled": "cancelled"
-        }
+        },
+        "list": "Result by SIM"
       },
       "summary": {
         "openJob": "Open job",
@@ -2304,10 +2305,10 @@
         "all": "all",
         "columns": {
           "target": "Target",
-          "probes": "Probes",
-          "operators": "Operators",
           "time": "Time",
-          "cost": "Charged"
+          "cost": "Charged",
+          "outcome": "Outcome",
+          "units": "SIMs"
         },
         "outcome": {
           "ok": "all reachable",
@@ -2315,6 +2316,22 @@
           "down": "unreachable",
           "pending": "in progress",
           "na": "no verdict"
+        },
+        "filter": "Filter",
+        "repeat": "Repeat",
+        "headline": {
+          "all_one": "Opens on the only SIM checked",
+          "all_other": "Opens on all {{total}} SIMs",
+          "partial_one": "Opens on {{ok}} of {{total}} SIM",
+          "partial_other": "Opens on {{ok}} of {{total}} SIMs",
+          "none_one": "Does not open on the only SIM checked",
+          "none_other": "Does not open on any of {{total}} SIMs",
+          "failed": "Check failed",
+          "cancelled": "Check cancelled",
+          "pending": "Check in progress",
+          "scan": "Alive addresses: {{ok}} of {{total}}",
+          "empty": "No result",
+          "blockedList": "Blocked or no answer: {{list}}"
         }
       },
       "addresses": {

@@ -32,6 +32,8 @@ export interface DeepLink {
   shortUuid: string | null;
   /** Задача, которую раскрыть в «моих проверках». */
   jobId: number | null;
+  /** «Повторить»: задача, чьи цели, симки и пробы подставить в форму. */
+  repeatJobId: number | null;
 }
 
 export const REACHABILITY_PATH = '/admin/reachability';
@@ -80,7 +82,14 @@ export function parseReachabilityDeepLink(params: URLSearchParams): DeepLink {
   const userId = parseId(params.get('user'));
   const shortUuid = params.get('sub') || null;
   const mode = parseMode(params.get('kind')) ?? defaultMode({ targets, userId, shortUuid });
-  return { mode, targets, userId, shortUuid, jobId: parseId(params.get('job')) };
+  return {
+    mode,
+    targets,
+    userId,
+    shortUuid,
+    jobId: parseId(params.get('job')),
+    repeatJobId: parseId(params.get('repeat')),
+  };
 }
 
 export function buildReachabilityLink(input: Partial<DeepLink>): string {
@@ -93,5 +102,6 @@ export function buildReachabilityLink(input: Partial<DeepLink>): string {
   if (userId) params.set('user', String(userId));
   if (shortUuid) params.set('sub', shortUuid);
   if (input.jobId) params.set('job', String(input.jobId));
+  if (input.repeatJobId) params.set('repeat', String(input.repeatJobId));
   return `${REACHABILITY_PATH}?${params.toString()}`;
 }

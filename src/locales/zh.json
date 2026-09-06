@@ -4023,7 +4023,8 @@
           "zombie_tcp": "TLS 后断开",
           "dataplane_dead": "网站打不开",
           "cancelled": "已取消"
-        }
+        },
+        "list": "按 SIM 卡的结果"
       },
       "summary": {
         "openJob": "打开任务",
@@ -4104,10 +4105,10 @@
         "all": "全部",
         "columns": {
           "target": "目标",
-          "probes": "探测",
-          "operators": "运营商",
           "time": "时间",
-          "cost": "扣费"
+          "cost": "扣费",
+          "outcome": "结果",
+          "units": "SIM 卡"
         },
         "outcome": {
           "ok": "全部可达",
@@ -4115,6 +4116,19 @@
           "down": "不可达",
           "pending": "进行中",
           "na": "无结论"
+        },
+        "filter": "筛选",
+        "repeat": "重复",
+        "headline": {
+          "all_other": "全部 {{total}} 张 SIM 卡均可打开",
+          "partial_other": "{{total}} 张 SIM 卡中 {{ok}} 张可打开",
+          "none_other": "{{total}} 张 SIM 卡均无法打开",
+          "failed": "检测失败",
+          "cancelled": "检测已取消",
+          "pending": "检测进行中",
+          "scan": "存活地址：{{ok}} / {{total}}",
+          "empty": "没有结果",
+          "blockedList": "被拦截或无响应：{{list}}"
         }
       },
       "addresses": {

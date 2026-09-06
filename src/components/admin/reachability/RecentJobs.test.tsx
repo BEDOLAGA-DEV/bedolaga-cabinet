@@ -55,7 +55,7 @@ describe('RecentJobs', () => {
     renderWithProviders(<RecentJobs initialJobId={null} />);
     await screen.findByText('Host 1');
     expect(screen.queryByText('◈ 100 cred ≈ 1,00 ₽')).toBeNull();
-    fireEvent.click(screen.getAllByRole('button', { name: 'Подробности' })[0]);
+    fireEvent.click(screen.getByRole('button', { name: /Host 1/ }));
     expect(screen.getByText('◈ 100 cred ≈ 1,00 ₽')).toBeTruthy();
   });
 
@@ -77,5 +77,67 @@ describe('RecentJobs', () => {
     expect(await screen.findByText('Под фильтр не попала ни одна симка')).toBeTruthy();
     expect(screen.queryByText(/no_dpi_on/)).toBeNull();
     expect(screen.queryByText('Сырой ответ')).toBeNull();
+  });
+
+  it('без счётчика в заголовке и без фильтров при коротком списке; строка словами', async () => {
+    vi.mocked(reachabilityApi.listJobs).mockResolvedValue({
+      items: [job(1, 'probe')],
+      total: 1,
+      offset: 0,
+      limit: 20,
+    });
+    renderWithProviders(<RecentJobs initialJobId={null} />);
+    await screen.findByText('Host 1');
+    expect(
+      screen.getByRole('heading', { name: 'Мои проверки' }).parentElement?.textContent,
+    ).not.toMatch(/\d/);
+    expect(screen.queryByRole('button', { name: 'Фильтр' })).toBeNull();
+    expect(screen.queryByText('Вид')).toBeNull();
+    expect(screen.getAllByText(/1 симка/).length).toBeGreaterThan(0);
+    expect(screen.queryByText('#1')).toBeNull();
+  });
+
+  it('раскрытие: ответ словами, «Повторить» ведёт в форму, «Свернуть» закрывает', async () => {
+    vi.mocked(reachabilityApi.listJobs).mockResolvedValue({
+      items: [
+        {
+          ...job(3, 'probe'),
+          probes: null,
+          sni_hosts: [],
+          targets: [
+            { kind: 'host', label: 'Host 3', target_key: 'h3:443', ref: { host_uuid: 'h-3' } },
+          ],
+          legs: [
+            { id: 1, op_key: 'mts|цфо|on', operator: 'mts', verdict: 'reachable', raw: null },
+            { id: 2, op_key: 'tele2|цфо|on', operator: 'tele2', verdict: 'blocked', raw: null },
+          ],
+        } as unknown as Job,
+      ],
+      total: 1,
+      offset: 0,
+      limit: 20,
+    });
+    renderWithProviders(<RecentJobs initialJobId={3} />);
+    expect(await screen.findByText('Открывается у 1 из 2 симок')).toBeTruthy();
+    expect(screen.getByText(/Режется или не отвечает: tele2/)).toBeTruthy();
+    const repeat = screen.getByRole('link', { name: 'Повторить' });
+    expect(repeat.getAttribute('href')).toContain('repeat=3');
+    expect(repeat.getAttribute('href')).toContain('kind=hosts');
+    fireEvent.click(screen.getByRole('button', { name: 'Свернуть' }));
+    expect(screen.queryByText('Открывается у 1 из 2 симок')).toBeNull();
+  });
+
+  it('фильтр появляется, когда проверок больше двадцати', async () => {
+    vi.mocked(reachabilityApi.listJobs).mockResolvedValue({
+      items: [job(1, 'probe')],
+      total: 27,
+      offset: 0,
+      limit: 20,
+    });
+    renderWithProviders(<RecentJobs initialJobId={null} />);
+    const filter = await screen.findByRole('button', { name: 'Фильтр' });
+    expect(screen.queryByText('Статус')).toBeNull();
+    fireEvent.click(filter);
+    expect(screen.getByText('Статус')).toBeTruthy();
   });
 });
