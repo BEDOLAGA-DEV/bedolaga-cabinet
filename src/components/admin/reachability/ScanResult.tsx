@@ -5,6 +5,8 @@ import { CopyIcon } from '@/components/icons';
 import { Button } from '@/components/primitives';
 import { useNotify } from '@/platform/hooks/useNotify';
 import { copyToClipboard } from '@/utils/clipboard';
+import { OperatorIcon } from './OperatorIcon';
+import { operatorCode } from './operatorIcons';
 import { scanSummary } from './resultShapes';
 
 export function ScanResult({ job }: { job: Job }) {
@@ -64,15 +66,28 @@ export function ScanResult({ job }: { job: Job }) {
 
       {units.length > 0 && (
         <ul className="flex flex-wrap gap-2 text-xs">
-          {units.map((opKey) => (
-            <li
-              key={opKey}
-              className="rounded-lg border border-dark-700/60 px-2 py-1 text-dark-300"
-            >
-              <span className="font-mono">{opKey}</span>
-              <span className="ml-1 text-dark-100">{summary.aliveByUnit[opKey]}</span>
-            </li>
-          ))}
+          {units.map((opKey) => {
+            const counts = summary.countsByUnit[opKey];
+            return (
+              <li
+                key={opKey}
+                className="flex items-center gap-2 rounded-lg border border-dark-700/60 px-2 py-1 text-dark-300"
+              >
+                <OperatorIcon operator={operatorCode(opKey)} className="h-4 w-4 rounded" />
+                <span className="font-mono">{opKey}</span>
+                <span className="text-dark-100">{summary.aliveByUnit[opKey]}</span>
+                {counts && (
+                  <span className="text-[10px] text-dark-400">
+                    {t('admin.reachability.scan.perUnitProbes', {
+                      icmp: counts.icmp,
+                      tcp: counts.tcp,
+                      sni: counts.sni,
+                    })}
+                  </span>
+                )}
+              </li>
+            );
+          })}
         </ul>
       )}
 

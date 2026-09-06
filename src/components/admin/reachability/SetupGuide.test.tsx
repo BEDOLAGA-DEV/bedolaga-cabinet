@@ -30,6 +30,7 @@ const base: ReachabilityStatus = {
   reference: null,
   cost_limit_kopeks: 0,
   cores: {},
+  default_sni: null,
 };
 
 describe('SetupGuide', () => {

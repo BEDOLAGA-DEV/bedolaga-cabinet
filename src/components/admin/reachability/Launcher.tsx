@@ -1,10 +1,11 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type {
   HostTarget,
   NodeTarget,
   Probes,
   ReachabilityStatus,
+  TargetIn,
   VlessCore,
 } from '@/api/reachability';
 import { AddressTargets } from './AddressTargets';
@@ -16,13 +17,14 @@ import { OperatorPicker } from './OperatorPicker';
 import { ProbesRow } from './ProbesRow';
 import { ScanTargets } from './ScanTargets';
 import { SectionHeading } from './SectionHeading';
-import { SubscriptionTargets } from './SubscriptionTargets';
+import { SniHostsField } from './SniHostsField';
+import { type ConfigItem, SubscriptionTargets } from './SubscriptionTargets';
 import { type DeepLink, type LaunchMode, jobKindOf } from './deepLink';
 import { buildProbeBody, buildScanBody, buildVlessBody } from './jobBodies';
-import { sniNamesFor, sniNamesForAddresses } from './sniNames';
+import { parseSniHosts, sniNamesFor, sniNamesForAddresses } from './sniNames';
 import { parseTargets, scanSubnet } from './targetsInput';
 import { dpiForSelection } from './unitSelection';
-import { useSubscriptionConfigs } from './useTargets';
+import { useParsedInput, useSubscriptionConfigs } from './useTargets';
 import { useUnits } from './useUnits';
 
 interface LauncherProps {
@@ -40,7 +42,7 @@ function toggleBy<T extends { uuid: string }>(list: T[], item: T): T[] {
     : [...list, item];
 }
 
-/** Один запуск на все вкладки: цели по вкладке, пробы, операторы, итог и кнопка. */
+/** Один запуск на все вкладки: цели по вкладке, пробы, SNI-хост, операторы, итог и кнопка. */
 export function Launcher({ status, link, onModeChange }: LauncherProps) {
   const { t } = useTranslation();
   const mode = link.mode;
@@ -51,20 +53,55 @@ export function Launcher({ status, link, onModeChange }: LauncherProps) {
   const [nodes, setNodes] = useState<NodeTarget[]>([]);
   const [addresses, setAddresses] = useState('');
   const [source, setSource] = useState({ userId: link.userId, shortUuid: link.shortUuid });
+  const [pasted, setPasted] = useState('');
   const [configIndexes, setConfigIndexes] = useState<number[]>([]);
   const [core, setCore] = useState<VlessCore>('');
   const [cidr, setCidr] = useState('');
   const [units, setUnits] = useState<string[]>([]);
   const [probes, setProbes] = useState<Probes>(PROBE_DEFAULT);
   const [scanProbes, setScanProbes] = useState<Probes>(SCAN_DEFAULT);
+  const [sniHosts, setSniHosts] = useState('');
+  const sniTouched = useRef(false);
   const [jobId, setJobId] = useState<number | null>(null);
 
+  // «SNI-хост по умолчанию» из настроек подставляется один раз, пока поле не трогали.
+  useEffect(() => {
+    if (!sniTouched.current && status?.default_sni) setSniHosts(status.default_sni);
+  }, [status?.default_sni]);
+  const changeSni = (value: string) => {
+    sniTouched.current = true;
+    setSniHosts(value);
+  };
+
   const hasReference = Boolean(status?.reference?.short_uuid);
-  const configs = useSubscriptionConfigs(
+  const pastedMode = pasted.trim().length > 0;
+  const subscription = useSubscriptionConfigs(
     source.userId,
     source.shortUuid,
-    source.userId !== null || source.shortUuid !== null || hasReference,
+    !pastedMode && (source.userId !== null || source.shortUuid !== null || hasReference),
   );
+  const parsed = useParsedInput(pasted);
+
+  const configList = useMemo<ConfigItem[]>(() => {
+    if (pastedMode) return parsed.data?.configs ?? [];
+    const data = subscription.data;
+    if (!data) return [];
+    return data.configs.map((config) => ({
+      ...config,
+      target: { kind: 'subscription_config', short_uuid: data.short_uuid, index: config.index },
+    }));
+  }, [pastedMode, parsed.data, subscription.data]);
+  const rejected = (pastedMode ? parsed.data?.rejected : subscription.data?.rejected) ?? [];
+
+  // Вставленные конфиги отмечаются сразу — их вставили, чтобы проверить; подписку выбирают руками.
+  const autoSelectedFor = useRef<string | null>(null);
+  useEffect(() => {
+    const key = pastedMode ? pasted.trim() : null;
+    if (!key || !parsed.data || autoSelectedFor.current === key) return;
+    autoSelectedFor.current = key;
+    setConfigIndexes(parsed.data.configs.map((config) => config.index));
+  }, [pastedMode, pasted, parsed.data]);
+
   const toggleHost = useCallback(
     (host: HostTarget) => setHosts((list) => toggleBy(list, host)),
     [],
@@ -77,8 +114,14 @@ export function Launcher({ status, link, onModeChange }: LauncherProps) {
     setConfigIndexes((list) =>
       list.includes(index) ? list.filter((item) => item !== index) : [...list, index],
     );
+  const selectConfigs = (indexes: number[]) =>
+    setConfigIndexes((list) => [...list, ...indexes.filter((index) => !list.includes(index))]);
   const changeSource = (next: { userId: number | null; shortUuid: string | null }) => {
     setSource(next);
+    setConfigIndexes([]);
+  };
+  const changePasted = (text: string) => {
+    setPasted(text);
     setConfigIndexes([]);
   };
 
@@ -94,6 +137,14 @@ export function Launcher({ status, link, onModeChange }: LauncherProps) {
   const ownTargets = useMemo(() => parseTargets(addresses).targets, [addresses]);
   // Нода проверяется только ping-ом — при нодах ICMP не выключить.
   const hostProbes: Probes = { ...probes, icmp: probes.icmp || nodes.length > 0 };
+  const sniParsed = useMemo(() => parseSniHosts(sniHosts), [sniHosts]);
+  const vlessTargets = useMemo<TargetIn[]>(
+    () =>
+      configIndexes
+        .map((index) => configList.find((config) => config.index === index)?.target)
+        .filter((target): target is TargetIn => target !== undefined),
+    [configIndexes, configList],
+  );
 
   const body = useMemo(() => {
     if (mode === 'hosts') {
@@ -104,25 +155,29 @@ export function Launcher({ status, link, onModeChange }: LauncherProps) {
         units,
         dpi,
         probes,
+        sniHosts: sniParsed.names,
       });
     }
     if (mode === 'ip') {
-      return buildProbeBody({ hosts: [], nodes: [], custom: ownTargets, units, dpi, probes });
-    }
-    if (mode === 'vless') {
-      return buildVlessBody({
-        shortUuid: configs.data?.short_uuid ?? null,
-        indexes: configIndexes,
+      return buildProbeBody({
+        hosts: [],
+        nodes: [],
+        custom: ownTargets,
         units,
         dpi,
-        core,
+        probes,
+        sniHosts: sniParsed.names,
       });
+    }
+    if (mode === 'vless') {
+      return buildVlessBody({ targets: vlessTargets, units, dpi, core });
     }
     return buildScanBody({
       cidr: scanSubnet(cidr) ?? '',
       units,
       dpi,
-      probes: { ...scanProbes, sni: false },
+      probes: scanProbes,
+      sniHosts: sniParsed.names,
     });
   }, [
     mode,
@@ -132,8 +187,8 @@ export function Launcher({ status, link, onModeChange }: LauncherProps) {
     units,
     dpi,
     probes,
-    configs.data,
-    configIndexes,
+    sniParsed,
+    vlessTargets,
     core,
     cidr,
     scanProbes,
@@ -145,18 +200,19 @@ export function Launcher({ status, link, onModeChange }: LauncherProps) {
       : mode === 'ip'
         ? ownTargets.length
         : mode === 'vless'
-          ? configIndexes.length
+          ? vlessTargets.length
           : scanSubnet(cidr)
             ? 1
             : 0;
 
-  // Имена для TLS-SNI видны до запуска: SNI хоста или его домен; у IP имени нет.
-  const sniNames = useMemo(
+  // Имена, которые бот возьмёт сам при пустом поле: SNI хоста или его домен; у IP имени нет.
+  const autoSniNames = useMemo(
     () =>
       mode === 'hosts' ? sniNamesFor(hosts) : mode === 'ip' ? sniNamesForAddresses(ownTargets) : [],
     [mode, hosts, ownTargets],
   );
-  const showSniNames = mode !== 'cidr' && mode !== 'vless' && probes.sni && targetsCount > 0;
+  const activeProbes = mode === 'cidr' ? scanProbes : mode === 'hosts' ? hostProbes : probes;
+  const showSni = mode !== 'vless' && activeProbes.sni;
 
   if (jobId !== null) {
     return (
@@ -193,17 +249,22 @@ export function Launcher({ status, link, onModeChange }: LauncherProps) {
           {mode === 'ip' && <AddressTargets value={addresses} onChange={setAddresses} />}
           {mode === 'vless' && (
             <SubscriptionTargets
+              pasted={pasted}
+              onPastedChange={changePasted}
+              parsed={parsed}
               userId={source.userId}
               shortUuid={source.shortUuid}
               onSource={changeSource}
-              data={configs.data}
-              isLoading={configs.isLoading}
-              error={configs.error}
+              subscription={subscription}
+              reference={status?.reference ?? null}
+              list={configList}
+              rejected={rejected}
               selected={configIndexes}
               onToggle={toggleConfig}
+              onSelectMany={selectConfigs}
+              onClear={() => setConfigIndexes([])}
               core={core}
               onCoreChange={setCore}
-              reference={status?.reference ?? null}
               cores={status?.cores}
             />
           )}
@@ -216,11 +277,7 @@ export function Launcher({ status, link, onModeChange }: LauncherProps) {
                 title={t('admin.reachability.sections.probes')}
               />
               {mode === 'cidr' ? (
-                <ProbesRow
-                  probes={{ ...scanProbes, sni: false }}
-                  onChange={setScanProbes}
-                  locked={['sni']}
-                />
+                <ProbesRow probes={scanProbes} onChange={setScanProbes} />
               ) : (
                 <ProbesRow
                   probes={mode === 'hosts' ? hostProbes : probes}
@@ -228,16 +285,8 @@ export function Launcher({ status, link, onModeChange }: LauncherProps) {
                   locked={mode === 'hosts' && nodes.length ? ['icmp'] : []}
                 />
               )}
-              {showSniNames && (
-                <p className="text-xs text-dark-400">
-                  {sniNames.length > 0 ? (
-                    t('admin.reachability.probes.sniNames', { names: sniNames.join(', ') })
-                  ) : (
-                    <span className="text-warning-400">
-                      {t('admin.reachability.probes.sniNoNames')}
-                    </span>
-                  )}
-                </p>
+              {showSni && (
+                <SniHostsField value={sniHosts} onChange={changeSni} autoNames={autoSniNames} />
               )}
             </section>
           )}

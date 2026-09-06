@@ -84,12 +84,21 @@ export interface ScanIp {
   units: Record<string, ScanUnitProbe>;
 }
 
+export interface ScanUnitCounts {
+  alive: number;
+  icmp: number;
+  tcp: number;
+  sni: number;
+}
+
 export interface ScanSummary {
   upN: number;
   total: number;
   operators: string[];
   ips: ScanIp[];
   aliveByUnit: Record<string, number>;
+  /** Сколько адресов ответило на каждую пробу у каждой симки — как сводка скана в оригинале. */
+  countsByUnit: Record<string, ScanUnitCounts>;
 }
 
 function unitProbe(value: unknown): ScanUnitProbe | null {
@@ -125,8 +134,18 @@ export function scanSummary(jobResult: Raw | null): ScanSummary | null {
     ? result.operators.filter((item): item is string => typeof item === 'string')
     : [];
   const aliveByUnit: Record<string, number> = {};
+  const countsByUnit: Record<string, ScanUnitCounts> = {};
   for (const item of ips) {
-    for (const opKey of Object.keys(item.units)) aliveByUnit[opKey] = (aliveByUnit[opKey] ?? 0) + 1;
+    for (const [opKey, probe] of Object.entries(item.units)) {
+      aliveByUnit[opKey] = (aliveByUnit[opKey] ?? 0) + 1;
+      const counts = countsByUnit[opKey] ?? { alive: 0, icmp: 0, tcp: 0, sni: 0 };
+      countsByUnit[opKey] = {
+        alive: counts.alive + 1,
+        icmp: counts.icmp + (probe.icmp ? 1 : 0),
+        tcp: counts.tcp + (probe.tcp ? 1 : 0),
+        sni: counts.sni + (Object.values(probe.sni).some(Boolean) ? 1 : 0),
+      };
+    }
   }
   return {
     upN: asNumber(result.up_n) ?? ips.length,
@@ -134,5 +153,6 @@ export function scanSummary(jobResult: Raw | null): ScanSummary | null {
     operators,
     ips,
     aliveByUnit,
+    countsByUnit,
   };
 }

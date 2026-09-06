@@ -1,7 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import type { SubscriptionConfigs as SubscriptionConfigsData } from '@/api/reachability';
-import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
-import { getApiErrorMessage } from '@/utils/api-error';
+import type { RejectedConfig, SubscriptionConfig } from '@/api/reachability';
 import { cn } from '@/lib/utils';
 import { PurposeChip } from './PurposeChip';
 import { CheckGlyph, ROW, ROW_BUTTON, ROW_OFF, ROW_ON } from './SelectableRow';
@@ -10,67 +8,80 @@ import { pickByPurpose } from './targetPicks';
 export const MAX_CONFIGS_PER_TEST = 20;
 
 interface SubscriptionConfigsProps {
-  data: SubscriptionConfigsData | undefined;
-  isLoading: boolean;
-  error: unknown;
+  configs: SubscriptionConfig[];
+  rejected: RejectedConfig[];
   selected: number[];
   onToggle: (index: number) => void;
+  onSelectMany: (indexes: number[]) => void;
+  onClear: () => void;
 }
 
+/** Список серверов подписки с галочками: «✓ Все», «↺ Сбросить», «под БС» — как в оригинале. */
 export function SubscriptionConfigs({
-  data,
-  isLoading,
-  error,
+  configs,
+  rejected,
   selected,
   onToggle,
+  onSelectMany,
+  onClear,
 }: SubscriptionConfigsProps) {
   const { t } = useTranslation();
   const atLimit = selected.length >= MAX_CONFIGS_PER_TEST;
-
-  if (isLoading) {
-    return (
-      <SkeletonGroup aria-label={t('admin.reachability.subscription.title')}>
-        <Skeleton className="h-32 w-full rounded-2xl" />
-      </SkeletonGroup>
-    );
-  }
-  if (error) {
-    return <p className="text-sm text-error-400">{getApiErrorMessage(error, '')}</p>;
-  }
-  if (!data) return null;
-
-  const bsUnselected = pickByPurpose(data.configs, 'bs')
-    .filter((config) => !selected.includes(config.index))
-    .slice(0, Math.max(0, MAX_CONFIGS_PER_TEST - selected.length));
+  const room = Math.max(0, MAX_CONFIGS_PER_TEST - selected.length);
+  const unselected = (list: SubscriptionConfig[]) =>
+    list.filter((config) => !selected.includes(config.index)).slice(0, room);
+  const bsUnselected = unselected(pickByPurpose(configs, 'bs'));
+  const allUnselected = unselected(configs);
 
   return (
     <div>
-      <div className="flex flex-wrap items-center gap-3 text-xs text-dark-400">
-        <span>{t('admin.reachability.subscription.configs', { count: data.configs.length })}</span>
-        {data.rejected.length > 0 && (
-          <span title={data.rejected.map((item) => `${item.reason}: ${item.preview}`).join('\n')}>
-            {t('admin.reachability.subscription.rejected', { count: data.rejected.length })}
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-dark-400">
+        <span>
+          {t('admin.reachability.subscription.selectedOf', {
+            selected: selected.length,
+            total: configs.length,
+          })}
+        </span>
+        {rejected.length > 0 && (
+          <span title={rejected.map((item) => `${item.reason}: ${item.preview}`).join('\n')}>
+            {t('admin.reachability.subscription.rejected', { count: rejected.length })}
           </span>
         )}
         {atLimit && (
           <span className="text-warning-400">{t('admin.reachability.subscription.limit')}</span>
         )}
-        <button
-          type="button"
-          className="btn-secondary px-3 py-1.5 text-xs"
-          disabled={bsUnselected.length === 0}
-          onClick={() => {
-            for (const config of bsUnselected) onToggle(config.index);
-          }}
-        >
-          {t('admin.reachability.subscription.pickBs', { count: bsUnselected.length })}
-        </button>
+        <span className="flex flex-wrap gap-1.5">
+          <button
+            type="button"
+            className="btn-secondary px-3 py-1.5 text-xs"
+            disabled={allUnselected.length === 0}
+            onClick={() => onSelectMany(allUnselected.map((config) => config.index))}
+          >
+            {t('admin.reachability.subscription.pickAll')}
+          </button>
+          <button
+            type="button"
+            className="btn-secondary px-3 py-1.5 text-xs"
+            disabled={bsUnselected.length === 0}
+            onClick={() => onSelectMany(bsUnselected.map((config) => config.index))}
+          >
+            {t('admin.reachability.subscription.pickBs', { count: bsUnselected.length })}
+          </button>
+          <button
+            type="button"
+            className="btn-secondary px-3 py-1.5 text-xs"
+            disabled={selected.length === 0}
+            onClick={onClear}
+          >
+            {t('admin.reachability.subscription.pickNone')}
+          </button>
+        </span>
       </div>
-      {data.configs.length === 0 && (
+      {configs.length === 0 && (
         <p className="mt-3 text-sm text-dark-400">{t('admin.reachability.subscription.empty')}</p>
       )}
-      <ul className="mt-3 space-y-1.5">
-        {data.configs.map((config) => {
+      <ul className="mt-3 max-h-96 space-y-1.5 overflow-y-auto pr-1">
+        {configs.map((config) => {
           const checked = selected.includes(config.index);
           return (
             <li key={config.index} className={cn(ROW, checked ? ROW_ON : ROW_OFF)}>

@@ -2146,7 +2146,24 @@
         "source": "Source",
         "userLabel": "user #{{id}}",
         "noReference": "Default subscription is not set",
-        "noReferenceHint": "Pick a user's subscription below or set the default subscription in bot settings"
+        "noReferenceHint": "Pick a user's subscription below or set the default subscription in bot settings",
+        "input": "Config or subscription",
+        "inputPlaceholder": "vless:// · vmess:// · trojan:// · ss:// · hysteria2:// · subscription URL · base64 — one link per line",
+        "loading": "Loading subscription…",
+        "parseFailed": "Could not parse",
+        "sourceLinks": "links · {{count}}",
+        "sourceSubscription": "subscription · {{count}}",
+        "pickAll": "✓ All",
+        "pickNone": "↺ Reset",
+        "orPick": "or use a ready subscription",
+        "fromInput": "showing configs from the field above",
+        "selectedOf": "selected {{selected}} / {{total}}",
+        "rejectedReasons": {
+          "stub": "placeholder",
+          "unsupported_scheme": "not a config link",
+          "malformed": "broken link",
+          "subscription_failed": "subscription did not load"
+        }
       },
       "scan": {
         "cidr": "CIDR",
@@ -2160,7 +2177,8 @@
         "perUnit": "per SIM",
         "ofTotal": "of {{total}}",
         "willScan": "Subnet {{subnet}} will be scanned",
-        "cidrHint": "One /24 subnet; an IP is expanded to its subnet"
+        "cidrHint": "One /24 subnet; an IP is expanded to its subnet",
+        "perUnitProbes": "{{icmp}} icmp · {{tcp}} tcp · {{sni}} sni"
       },
       "probes": {
         "icmp": "ICMP",
@@ -2171,7 +2189,15 @@
         "tcpDesc": "connect to port",
         "sniDesc": "TLS handshake by SNI",
         "sniNames": "SNI names: {{names}}",
-        "sniNoNames": "TLS-SNI needs a domain among the targets — an IP address has no SNI name"
+        "sniNoNames": "TLS-SNI needs a domain among the targets — an IP address has no SNI name",
+        "sniHost": "SNI host",
+        "sniHostPlaceholder": "ads.x5.ru",
+        "sniHostHint": "up to {{max}} names, comma-separated · +4 cred per name per SIM",
+        "sniInvalid": "Not a domain: {{names}}",
+        "sniOverLimit_one": "One extra name dropped: the first {{max}} go",
+        "sniOverLimit_other": "{{count}} extra names dropped: the first {{max}} go",
+        "sniAuto": "taken from targets",
+        "sniMissing": "Enter an SNI host: an IP address has no name for TLS-SNI"
       },
       "result": {
         "cost": "Charged",
@@ -2184,7 +2210,13 @@
         "diagnosis": "Diagnosis",
         "empty": "Empty result",
         "failReason": "reason",
-        "estimate": "estimate"
+        "estimate": "estimate",
+        "operator": "Operator",
+        "verdict": "Verdict",
+        "http": "HTTP",
+        "sniMulti": "{{count}}×SNI",
+        "sniList": "SNI: {{names}}",
+        "noBs": "no WL"
       },
       "summary": {
         "openJob": "Open job",
@@ -2269,7 +2301,21 @@
         "close": "Collapse",
         "filterKind": "Kind",
         "filterStatus": "Status",
-        "all": "all"
+        "all": "all",
+        "columns": {
+          "target": "Target",
+          "probes": "Probes",
+          "operators": "Operators",
+          "time": "Time",
+          "cost": "Charged"
+        },
+        "outcome": {
+          "ok": "all reachable",
+          "warn": "partial",
+          "down": "unreachable",
+          "pending": "in progress",
+          "na": "no verdict"
+        }
       },
       "addresses": {
         "label": "Addresses",

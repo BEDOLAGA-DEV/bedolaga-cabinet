@@ -2170,7 +2170,24 @@
         "source": "Источник",
         "userLabel": "пользователь #{{id}}",
         "noReference": "Подписка по умолчанию не задана",
-        "noReferenceHint": "Подставьте подписку пользователя ниже или укажите подписку по умолчанию в настройках бота"
+        "noReferenceHint": "Подставьте подписку пользователя ниже или укажите подписку по умолчанию в настройках бота",
+        "input": "Конфиг или подписка",
+        "inputPlaceholder": "vless:// · vmess:// · trojan:// · ss:// · hysteria2:// · URL подписки · base64 — несколько ссылок построчно",
+        "loading": "Загружаю подписку…",
+        "parseFailed": "Не удалось разобрать",
+        "sourceLinks": "ссылки · {{count}}",
+        "sourceSubscription": "подписка · {{count}}",
+        "pickAll": "✓ Все",
+        "pickNone": "↺ Сбросить",
+        "orPick": "или подставьте готовую подписку",
+        "fromInput": "показаны конфиги из поля выше",
+        "selectedOf": "выбрано {{selected}} / {{total}}",
+        "rejectedReasons": {
+          "stub": "заглушка",
+          "unsupported_scheme": "не ссылка конфига",
+          "malformed": "битая ссылка",
+          "subscription_failed": "подписка не загрузилась"
+        }
       },
       "scan": {
         "cidr": "CIDR",
@@ -2185,7 +2202,8 @@
         "perUnit": "по симкам",
         "ofTotal": "из {{total}}",
         "willScan": "В скан пойдёт подсеть {{subnet}}",
-        "cidrHint": "Одна подсеть /24; из IP возьмём его подсеть"
+        "cidrHint": "Одна подсеть /24; из IP возьмём его подсеть",
+        "perUnitProbes": "{{icmp}} icmp · {{tcp}} tcp · {{sni}} sni"
       },
       "probes": {
         "icmp": "ICMP",
@@ -2196,7 +2214,16 @@
         "tcpDesc": "connect на порт",
         "sniDesc": "TLS-рукопожатие по SNI",
         "sniNames": "SNI-имена: {{names}}",
-        "sniNoNames": "Для TLS-SNI нужен домен среди целей — у IP-адреса нет имени для SNI"
+        "sniNoNames": "Для TLS-SNI нужен домен среди целей — у IP-адреса нет имени для SNI",
+        "sniHost": "SNI-хост",
+        "sniHostPlaceholder": "ads.x5.ru",
+        "sniHostHint": "до {{max}} имён через запятую · +4 cred за имя на каждую симку",
+        "sniInvalid": "Не похоже на домен: {{names}}",
+        "sniOverLimit_one": "Лишнее имя отброшено: уйдут первые {{max}}",
+        "sniOverLimit_few": "Лишних имён: {{count}}, уйдут первые {{max}}",
+        "sniOverLimit_many": "Лишних имён: {{count}}, уйдут первые {{max}}",
+        "sniAuto": "взяты из целей",
+        "sniMissing": "Укажите SNI-хост: у IP-адреса нет имени для TLS-SNI"
       },
       "result": {
         "cost": "Списано",
@@ -2209,7 +2236,13 @@
         "diagnosis": "Диагноз",
         "empty": "Результат пуст",
         "failReason": "причина",
-        "estimate": "оценка"
+        "estimate": "оценка",
+        "operator": "Оператор",
+        "verdict": "Вердикт",
+        "http": "HTTP",
+        "sniMulti": "{{count}}×SNI",
+        "sniList": "SNI: {{names}}",
+        "noBs": "без БС"
       },
       "summary": {
         "openJob": "Открыть задачу",
@@ -2297,7 +2330,21 @@
         "close": "Свернуть",
         "filterKind": "Вид",
         "filterStatus": "Статус",
-        "all": "все"
+        "all": "все",
+        "columns": {
+          "target": "Цель",
+          "probes": "Пробы",
+          "operators": "Операторы",
+          "time": "Время",
+          "cost": "Списано"
+        },
+        "outcome": {
+          "ok": "всё доступно",
+          "warn": "частично",
+          "down": "недоступно",
+          "pending": "идёт",
+          "na": "без итога"
+        }
       },
       "addresses": {
         "label": "Адреса",

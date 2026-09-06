@@ -1,9 +1,10 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { type SubscriptionConfigs, reachabilityApi } from '@/api/reachability';
+import { type ParsedInput, type SubscriptionConfigs, reachabilityApi } from '@/api/reachability';
 
 export const REACHABILITY_HOSTS_KEY = 'admin-reachability-hosts';
 export const REACHABILITY_NODES_KEY = ['admin-reachability-nodes'] as const;
 export const REACHABILITY_SUBSCRIPTION_KEY = 'admin-reachability-subscription';
+export const REACHABILITY_PARSE_KEY = 'admin-reachability-parse';
 export const REACHABILITY_SUMMARY_KEY = 'admin-reachability-summary';
 
 export function useHosts(includeDisabled = false) {
@@ -52,4 +53,19 @@ export function useInvalidateTargets() {
     queryClient.invalidateQueries({ queryKey: [REACHABILITY_HOSTS_KEY] });
     queryClient.invalidateQueries({ queryKey: [REACHABILITY_SUMMARY_KEY] });
   };
+}
+
+/**
+ * Поле «Конфиг или подписка»: бот разбирает ссылки, URL подписок и base64 и отдаёт конфиги
+ * с готовыми целями. Пустой текст — запрос не уходит.
+ */
+export function useParsedInput(text: string) {
+  const rawInput = text.trim();
+  return useQuery<ParsedInput>({
+    queryKey: [REACHABILITY_PARSE_KEY, rawInput],
+    queryFn: () => reachabilityApi.parseInput(rawInput),
+    enabled: rawInput.length > 0,
+    staleTime: 60_000,
+    retry: false,
+  });
 }

@@ -40,6 +40,7 @@ const body: JobCreateRequest = {
   dpi: 'on',
   probes: { icmp: false, tcp: true, sni: true },
   core: '',
+  sni_hosts: [],
 };
 const preview: PreviewResponse = {
   kind: 'probe',
@@ -76,6 +77,7 @@ const status: ReachabilityStatus = {
   reference: null,
   cost_limit_kopeks: 0,
   cores: {},
+  default_sni: null,
 };
 const job = { id: 7, kind: 'probe', status: 'pending' } as Job;
 

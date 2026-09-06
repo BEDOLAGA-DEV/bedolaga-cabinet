@@ -3950,7 +3950,24 @@
         "source": "منبع",
         "userLabel": "کاربر #{{id}}",
         "noReference": "اشتراک پیش‌فرض تنظیم نشده است",
-        "noReferenceHint": "اشتراک کاربر را در پایین انتخاب کنید یا اشتراک پیش‌فرض را در تنظیمات ربات مشخص کنید"
+        "noReferenceHint": "اشتراک کاربر را در پایین انتخاب کنید یا اشتراک پیش‌فرض را در تنظیمات ربات مشخص کنید",
+        "input": "کانفیگ یا اشتراک",
+        "inputPlaceholder": "vless:// · vmess:// · trojan:// · ss:// · hysteria2:// · URL اشتراک · base64 — هر لینک در یک خط",
+        "loading": "در حال بارگذاری اشتراک…",
+        "parseFailed": "تجزیه ناموفق بود",
+        "sourceLinks": "لینک‌ها · {{count}}",
+        "sourceSubscription": "اشتراک · {{count}}",
+        "pickAll": "✓ همه",
+        "pickNone": "↺ بازنشانی",
+        "orPick": "یا از اشتراک آماده استفاده کنید",
+        "fromInput": "کانفیگ‌های فیلد بالا نمایش داده می‌شوند",
+        "selectedOf": "انتخاب‌شده {{selected}} / {{total}}",
+        "rejectedReasons": {
+          "stub": "جای‌نگهدار",
+          "unsupported_scheme": "لینک کانفیگ نیست",
+          "malformed": "لینک خراب",
+          "subscription_failed": "اشتراک بارگذاری نشد"
+        }
       },
       "scan": {
         "cidr": "CIDR",
@@ -3964,7 +3981,8 @@
         "perUnit": "به تفکیک سیم‌کارت",
         "ofTotal": "از {{total}}",
         "willScan": "زیرشبکه {{subnet}} اسکن می‌شود",
-        "cidrHint": "یک زیرشبکه /24؛ از IP زیرشبکه‌اش گرفته می‌شود"
+        "cidrHint": "یک زیرشبکه /24؛ از IP زیرشبکه‌اش گرفته می‌شود",
+        "perUnitProbes": "{{icmp}} icmp · {{tcp}} tcp · {{sni}} sni"
       },
       "probes": {
         "icmp": "ICMP",
@@ -3975,7 +3993,15 @@
         "tcpDesc": "اتصال به پورت",
         "sniDesc": "دست‌دهی TLS با SNI",
         "sniNames": "نام‌های SNI: {{names}}",
-        "sniNoNames": "TLS-SNI به یک دامنه میان اهداف نیاز دارد — آدرس IP نام SNI ندارد"
+        "sniNoNames": "TLS-SNI به یک دامنه میان اهداف نیاز دارد — آدرس IP نام SNI ندارد",
+        "sniHost": "میزبان SNI",
+        "sniHostPlaceholder": "ads.x5.ru",
+        "sniHostHint": "حداکثر {{max}} نام با کاما · هر نام برای هر سیم‌کارت +۴ cred",
+        "sniInvalid": "شبیه دامنه نیست: {{names}}",
+        "sniOverLimit_one": "یک نام اضافه حذف شد: {{max}} نام اول ارسال می‌شود",
+        "sniOverLimit_other": "{{count}} نام اضافه حذف شد: {{max}} نام اول ارسال می‌شود",
+        "sniAuto": "از اهداف گرفته شده",
+        "sniMissing": "میزبان SNI را وارد کنید: آدرس IP نامی برای TLS-SNI ندارد"
       },
       "result": {
         "cost": "کسر شده",
@@ -3988,7 +4014,13 @@
         "diagnosis": "تشخیص",
         "empty": "نتیجه خالی است",
         "failReason": "دلیل",
-        "estimate": "تخمینی"
+        "estimate": "تخمینی",
+        "operator": "اپراتور",
+        "verdict": "نتیجه",
+        "http": "HTTP",
+        "sniMulti": "{{count}}×SNI",
+        "sniList": "SNI: {{names}}",
+        "noBs": "بدون لیست سفید"
       },
       "summary": {
         "openJob": "باز کردن کار",
@@ -4073,7 +4105,21 @@
         "close": "جمع کردن",
         "filterKind": "نوع",
         "filterStatus": "وضعیت",
-        "all": "همه"
+        "all": "همه",
+        "columns": {
+          "target": "هدف",
+          "probes": "بررسی‌ها",
+          "operators": "اپراتورها",
+          "time": "زمان",
+          "cost": "کسر شده"
+        },
+        "outcome": {
+          "ok": "همه در دسترس",
+          "warn": "بخشی",
+          "down": "در دسترس نیست",
+          "pending": "در حال انجام",
+          "na": "بدون نتیجه"
+        }
       },
       "addresses": {
         "label": "آدرس‌ها",

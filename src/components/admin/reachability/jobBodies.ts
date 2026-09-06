@@ -1,4 +1,4 @@
-import type { Dpi, JobCreateRequest, Probes, VlessCore } from '@/api/reachability';
+import type { Dpi, JobCreateRequest, Probes, TargetIn, VlessCore } from '@/api/reachability';
 
 /** Чистая сборка тела ``POST /jobs`` из состояния вкладок; null — запускать нечего. */
 
@@ -12,6 +12,8 @@ export interface ProbeSelection {
   units: string[];
   dpi: Dpi;
   probes: Probes;
+  /** Свои имена из поля «SNI-хост»; уходят только при включённой SNI-пробе. */
+  sniHosts: string[];
 }
 
 export function buildProbeBody(selection: ProbeSelection): JobCreateRequest | null {
@@ -29,31 +31,28 @@ export function buildProbeBody(selection: ProbeSelection): JobCreateRequest | nu
     // Нода проверяется только по ping: без ICMP её лег останется «неизвестно».
     probes: { ...selection.probes, icmp: selection.probes.icmp || selection.nodes.length > 0 },
     core: '',
+    sni_hosts: selection.probes.sni ? selection.sniHosts : [],
   };
 }
 
 export interface VlessSelection {
-  shortUuid: string | null;
-  indexes: number[];
+  /** Готовые цели: конфиги подписки панели или из поля «Конфиг или подписка». */
+  targets: TargetIn[];
   units: string[];
   dpi: Dpi;
   core: VlessCore;
 }
 
 export function buildVlessBody(selection: VlessSelection): JobCreateRequest | null {
-  if (!selection.shortUuid || selection.indexes.length === 0) return null;
-  const shortUuid = selection.shortUuid;
+  if (selection.targets.length === 0) return null;
   return {
     kind: 'vless',
-    targets: selection.indexes.map((index) => ({
-      kind: 'subscription_config' as const,
-      short_uuid: shortUuid,
-      index,
-    })),
+    targets: selection.targets,
     units: selection.units,
     dpi: selection.dpi,
     probes: { icmp: false, tcp: false, sni: false },
     core: selection.core,
+    sni_hosts: [],
   };
 }
 
@@ -62,6 +61,7 @@ export interface ScanSelection {
   units: string[];
   dpi: Dpi;
   probes: Probes;
+  sniHosts: string[];
 }
 
 export function isCidr24(value: string): boolean {
@@ -78,6 +78,7 @@ export function buildScanBody(selection: ScanSelection): JobCreateRequest | null
     dpi: selection.dpi,
     probes: selection.probes,
     core: '',
+    sni_hosts: selection.probes.sni ? selection.sniHosts : [],
   };
 }
 

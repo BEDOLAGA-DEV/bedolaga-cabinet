@@ -1,57 +1,71 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import type { SubscriptionConfigs as Data } from '@/api/reachability';
+import type { SubscriptionConfig } from '@/api/reachability';
 
 vi.mock('react-i18next', async () => (await import('./testUtils')).i18nMock());
 
 import { SubscriptionConfigs } from './SubscriptionConfigs';
 
-const data: Data = {
-  short_uuid: 'ref',
-  configs: [
-    {
-      index: 0,
-      protocol: 'vless',
-      label: 'RU-BS',
-      address: 'bs.example',
-      port: 443,
-      sni: 'white.example',
-      target_key: 'bs.example:443',
-      purpose: 'bs',
-    },
-    {
-      index: 1,
-      protocol: 'vless',
-      label: 'DE',
-      address: 'de.example',
-      port: 443,
-      sni: null,
-      target_key: 'de.example:443',
-      purpose: 'regular',
-    },
-  ],
-  rejected: [],
-};
+const configs: SubscriptionConfig[] = [
+  {
+    index: 0,
+    protocol: 'vless',
+    label: 'RU-BS',
+    address: 'bs.example',
+    port: 443,
+    sni: 'white.example',
+    target_key: 'bs.example:443',
+    purpose: 'bs',
+  },
+  {
+    index: 1,
+    protocol: 'vless',
+    label: 'DE',
+    address: 'de.example',
+    port: 443,
+    sni: null,
+    target_key: 'de.example:443',
+    purpose: 'regular',
+  },
+];
 
 afterEach(cleanup);
 
 describe('SubscriptionConfigs', () => {
   it('быстрый выбор отмечает конфиги под Белый список, не трогая уже отмеченные', () => {
-    const onToggle = vi.fn();
+    const onSelectMany = vi.fn();
     render(
       <SubscriptionConfigs
-        data={data}
-        isLoading={false}
-        error={null}
+        configs={configs}
+        rejected={[]}
         selected={[]}
-        onToggle={onToggle}
+        onToggle={vi.fn()}
+        onSelectMany={onSelectMany}
+        onClear={vi.fn()}
       />,
     );
-
     fireEvent.click(screen.getByRole('button', { name: /Отметить все конфиги под БС \(1\)/ }));
+    expect(onSelectMany).toHaveBeenCalledWith([0]);
+  });
 
-    expect(onToggle).toHaveBeenCalledTimes(1);
-    expect(onToggle).toHaveBeenCalledWith(0);
+  it('«✓ Все» отмечает остальные, «↺ Сбросить» снимает всё', () => {
+    const onSelectMany = vi.fn();
+    const onClear = vi.fn();
+    render(
+      <SubscriptionConfigs
+        configs={configs}
+        rejected={[]}
+        selected={[0]}
+        onToggle={vi.fn()}
+        onSelectMany={onSelectMany}
+        onClear={onClear}
+      />,
+    );
+    expect(screen.getByText('выбрано 1 / 2')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: '✓ Все' }));
+    expect(onSelectMany).toHaveBeenCalledWith([1]);
+    fireEvent.click(screen.getByRole('button', { name: '↺ Сбросить' }));
+    expect(onClear).toHaveBeenCalled();
   });
 });

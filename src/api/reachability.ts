@@ -53,6 +53,8 @@ export interface ReachabilityStatus {
   cost_limit_kopeks: number;
   /** Ядро Xray → номер версии, как показывает оригинал bsbord.com. */
   cores: Record<string, string>;
+  /** «SNI-хост по умолчанию» из настроек бота — подставляется в поле SNI. */
+  default_sni: string | null;
 }
 
 export interface HostTarget {
@@ -102,12 +104,33 @@ export interface SubscriptionConfigs {
   rejected: RejectedConfig[];
 }
 
+/** Конфиг из поля «Конфиг или подписка» — с готовой целью для задачи. */
+export interface ParsedConfig extends SubscriptionConfig {
+  target: TargetIn;
+}
+
+export interface ParsedSource {
+  kind: 'links' | 'subscription';
+  label: string;
+  count: number;
+}
+
+export interface ParsedInput {
+  configs: ParsedConfig[];
+  rejected: RejectedConfig[];
+  sources: ParsedSource[];
+}
+
 export interface TargetIn {
   kind: TargetKind;
   ref?: string;
   value?: string;
   short_uuid?: string;
+  /** Подписка по URL (чужая панель) из поля «Конфиг или подписка». */
+  url?: string;
   index?: number;
+  /** Ключ цели на момент разбора — бот сверит, не изменилась ли подписка. */
+  target_key?: string;
 }
 
 export interface Probes {
@@ -125,6 +148,8 @@ export interface JobCreateRequest {
   dpi: Dpi;
   probes: Probes;
   core: VlessCore;
+  /** Свои имена для TLS-SNI (до 5); пусто — имена целей или дефолт из настроек. */
+  sni_hosts: string[];
 }
 
 export type SkippedUnit = Partial<Unit> & { op_key?: string };
@@ -200,6 +225,9 @@ export interface Job {
   started_at: string | null;
   finished_at: string | null;
   legs: Leg[];
+  /** Из тела запроса к API: заказанные пробы и SNI-имена. */
+  probes: Probes | null;
+  sni_hosts: string[];
 }
 
 export interface JobList {
@@ -293,6 +321,9 @@ export const reachabilityApi = {
         params: { short_uuid: params.shortUuid, user_id: params.userId },
       })
     ).data,
+
+  parseInput: async (rawInput: string): Promise<ParsedInput> =>
+    (await apiClient.post(`${BASE}/targets/parse`, { raw_input: rawInput })).data,
 
   updatePref: async (body: PrefUpdate): Promise<Pref> =>
     (await apiClient.put(`${BASE}/targets/prefs`, body)).data,

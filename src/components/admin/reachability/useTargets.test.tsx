@@ -7,11 +7,11 @@ import { describe, expect, it, vi } from 'vitest';
 /** Без источника (подписка по умолчанию не задана) запрос конфигов не уходит — объясняет форма. */
 
 vi.mock('@/api/reachability', () => ({
-  reachabilityApi: { getSubscriptionConfigs: vi.fn() },
+  reachabilityApi: { getSubscriptionConfigs: vi.fn(), parseInput: vi.fn() },
 }));
 
 import { reachabilityApi } from '@/api/reachability';
-import { useSubscriptionConfigs } from './useTargets';
+import { useParsedInput, useSubscriptionConfigs } from './useTargets';
 
 function wrapper({ children }: { children: ReactNode }) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -38,5 +38,21 @@ describe('useSubscriptionConfigs', () => {
       userId: 15,
       shortUuid: undefined,
     });
+  });
+});
+
+describe('useParsedInput', () => {
+  it('пустое поле не дёргает бота, текст уходит обрезанным', async () => {
+    const { result: empty } = renderHook(() => useParsedInput('  '), { wrapper });
+    expect(reachabilityApi.parseInput).not.toHaveBeenCalled();
+    expect(empty.current.isLoading).toBe(false);
+    vi.mocked(reachabilityApi.parseInput).mockResolvedValue({
+      configs: [],
+      rejected: [],
+      sources: [],
+    });
+    const { result } = renderHook(() => useParsedInput(' https://sub.example/x \n'), { wrapper });
+    await waitFor(() => expect(result.current.data).toBeTruthy());
+    expect(reachabilityApi.parseInput).toHaveBeenCalledWith('https://sub.example/x');
   });
 });

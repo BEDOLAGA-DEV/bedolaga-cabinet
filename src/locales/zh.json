@@ -3949,7 +3949,24 @@
         "source": "来源",
         "userLabel": "用户 #{{id}}",
         "noReference": "未设置默认订阅",
-        "noReferenceHint": "在下方选择用户的订阅，或在机器人设置中指定默认订阅"
+        "noReferenceHint": "在下方选择用户的订阅，或在机器人设置中指定默认订阅",
+        "input": "配置或订阅",
+        "inputPlaceholder": "vless:// · vmess:// · trojan:// · ss:// · hysteria2:// · 订阅 URL · base64 — 每行一条",
+        "loading": "正在加载订阅…",
+        "parseFailed": "无法解析",
+        "sourceLinks": "链接 · {{count}}",
+        "sourceSubscription": "订阅 · {{count}}",
+        "pickAll": "✓ 全部",
+        "pickNone": "↺ 重置",
+        "orPick": "或使用现成的订阅",
+        "fromInput": "显示上方字段中的配置",
+        "selectedOf": "已选 {{selected}} / {{total}}",
+        "rejectedReasons": {
+          "stub": "占位符",
+          "unsupported_scheme": "不是配置链接",
+          "malformed": "链接损坏",
+          "subscription_failed": "订阅未加载"
+        }
       },
       "scan": {
         "cidr": "CIDR",
@@ -3962,7 +3979,8 @@
         "perUnit": "按 SIM 卡",
         "ofTotal": "共 {{total}}",
         "willScan": "将扫描子网 {{subnet}}",
-        "cidrHint": "一个 /24 子网；输入 IP 将取其子网"
+        "cidrHint": "一个 /24 子网；输入 IP 将取其子网",
+        "perUnitProbes": "{{icmp}} icmp · {{tcp}} tcp · {{sni}} sni"
       },
       "probes": {
         "icmp": "ICMP",
@@ -3973,7 +3991,14 @@
         "tcpDesc": "连接端口",
         "sniDesc": "按 SNI 进行 TLS 握手",
         "sniNames": "SNI 名称：{{names}}",
-        "sniNoNames": "TLS-SNI 需要目标中有域名——IP 地址没有 SNI 名称"
+        "sniNoNames": "TLS-SNI 需要目标中有域名——IP 地址没有 SNI 名称",
+        "sniHost": "SNI 主机",
+        "sniHostPlaceholder": "ads.x5.ru",
+        "sniHostHint": "最多 {{max}} 个名称，用逗号分隔 · 每个名称每张 SIM +4 cred",
+        "sniInvalid": "不是域名：{{names}}",
+        "sniOverLimit_other": "多余名称 {{count}} 个已丢弃：只发送前 {{max}} 个",
+        "sniAuto": "取自目标",
+        "sniMissing": "请填写 SNI 主机：IP 地址没有 TLS-SNI 名称"
       },
       "result": {
         "cost": "已扣费",
@@ -3986,7 +4011,13 @@
         "diagnosis": "诊断",
         "empty": "结果为空",
         "failReason": "原因",
-        "estimate": "估算"
+        "estimate": "估算",
+        "operator": "运营商",
+        "verdict": "结论",
+        "http": "HTTP",
+        "sniMulti": "{{count}}×SNI",
+        "sniList": "SNI：{{names}}",
+        "noBs": "无白名单"
       },
       "summary": {
         "openJob": "打开任务",
@@ -4068,7 +4099,21 @@
         "close": "收起",
         "filterKind": "类型",
         "filterStatus": "状态",
-        "all": "全部"
+        "all": "全部",
+        "columns": {
+          "target": "目标",
+          "probes": "探测",
+          "operators": "运营商",
+          "time": "时间",
+          "cost": "扣费"
+        },
+        "outcome": {
+          "ok": "全部可达",
+          "warn": "部分",
+          "down": "不可达",
+          "pending": "进行中",
+          "na": "无结论"
+        }
       },
       "addresses": {
         "label": "地址",

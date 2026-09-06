@@ -1,17 +1,19 @@
 // @vitest-environment jsdom
+import type { UseQueryResult } from '@tanstack/react-query';
 import { cleanup, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import type { ReferenceStatus } from '@/api/reachability';
+import type { ParsedInput, ReferenceStatus, SubscriptionConfigs } from '@/api/reachability';
 
 /**
- * Вкладка «Подписка» не должна упираться в «выберите цель» без объяснений: без подписки
- * по умолчанию — говорим, что делать, и ведём в настройки; ядро Xray подписано номером версии.
+ * Вкладка «Подписка»: поле «Конфиг или подписка» всегда сверху; без подписки по умолчанию —
+ * говорим, что делать; с заполненным полем показываются разобранные конфиги, готовые
+ * источники прячутся; ядро Xray подписано номером версии.
  */
 
 vi.mock('react-i18next', async () => (await import('./testUtils')).i18nMock());
 vi.mock('@/api/adminUsers', () => ({ adminUsersApi: { getUsers: vi.fn() } }));
 
-import { SubscriptionTargets } from './SubscriptionTargets';
+import { type ConfigItem, SubscriptionTargets } from './SubscriptionTargets';
 import { installMatchMedia, renderWithProviders } from './testUtils';
 
 installMatchMedia();
@@ -21,28 +23,59 @@ const CORES = { stable: '26.3.27', prerelease: '26.7.11' };
 const missing: ReferenceStatus = { short_uuid: null, configs: 0, rejected: 0, error: 'не задана' };
 const ready: ReferenceStatus = { short_uuid: 'ref-1', configs: 3, rejected: 0, error: null };
 
-function render(reference: ReferenceStatus | null) {
+const idle = <T,>(data?: T) =>
+  ({
+    data,
+    error: null,
+    isLoading: false,
+    isFetching: false,
+    isError: false,
+  }) as unknown as UseQueryResult<T>;
+
+const item = (index: number, label: string): ConfigItem => ({
+  index,
+  protocol: 'vless',
+  label,
+  address: `${label.toLowerCase()}.example`,
+  port: 443,
+  sni: null,
+  target_key: `${label.toLowerCase()}.example:443`,
+  purpose: 'regular',
+  target: { kind: 'custom', value: `vless://u@${label.toLowerCase()}.example:443#${label}` },
+});
+
+function render(
+  reference: ReferenceStatus | null,
+  overrides: Partial<Parameters<typeof SubscriptionTargets>[0]> = {},
+) {
   renderWithProviders(
     <SubscriptionTargets
+      pasted=""
+      onPastedChange={vi.fn()}
+      parsed={idle<ParsedInput>()}
       userId={null}
       shortUuid={null}
       onSource={vi.fn()}
-      data={undefined}
-      isLoading={false}
-      error={null}
+      subscription={idle<SubscriptionConfigs>()}
+      reference={reference}
+      list={[]}
+      rejected={[]}
       selected={[]}
       onToggle={vi.fn()}
+      onSelectMany={vi.fn()}
+      onClear={vi.fn()}
       core=""
       onCoreChange={vi.fn()}
-      reference={reference}
       cores={CORES}
+      {...overrides}
     />,
   );
 }
 
 describe('SubscriptionTargets', () => {
-  it('без подписки по умолчанию объясняет, что делать, и ведёт в настройки', () => {
+  it('поле «Конфиг или подписка» сверху; без подписки по умолчанию объясняет, что делать', () => {
     render(missing);
+    expect(screen.getByRole('textbox', { name: 'Конфиг или подписка' })).toBeTruthy();
     expect(screen.getByText('Подписка по умолчанию не задана')).toBeTruthy();
     expect(screen.getByRole('link', { name: 'Открыть настройки' }).getAttribute('href')).toBe(
       '/admin/settings?section=sys_reachability',
@@ -61,5 +94,25 @@ describe('SubscriptionTargets', () => {
     expect(chips.textContent).toContain('26.3.27');
     expect(chips.textContent).toContain('26.7.11');
     expect(chips.textContent).not.toContain('Stable');
+  });
+
+  it('с заполненным полем показывает разобранные конфиги и прячет готовые источники', () => {
+    const parsed: ParsedInput = {
+      configs: [item(0, 'Germany'), item(1, 'Poland')],
+      rejected: [{ reason: 'stub', preview: '0.0.0.0:1' }],
+      sources: [{ kind: 'subscription', label: 'https://sub.example/x', count: 2 }],
+    };
+    render(ready, {
+      pasted: 'https://sub.example/x',
+      parsed: idle(parsed),
+      list: parsed.configs,
+      rejected: parsed.rejected,
+      selected: [0, 1],
+    });
+    expect(screen.getByText('Germany')).toBeTruthy();
+    expect(screen.getByText('подписка · 2')).toBeTruthy();
+    expect(screen.getByText('выбрано 2 / 2')).toBeTruthy();
+    expect(screen.queryByRole('button', { name: /подписка по умолчанию/ })).toBeNull();
+    expect(screen.queryByRole('searchbox')).toBeNull();
   });
 });

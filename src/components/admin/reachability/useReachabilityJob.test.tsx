@@ -28,6 +28,8 @@ const job = (overrides: Partial<Job>): Job => ({
   estimate_is_exact: true,
   cost_kopeks: null,
   refunded_kopeks: null,
+  probes: null,
+  sni_hosts: [],
   result: null,
   error_code: null,
   error_message: null,
