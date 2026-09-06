@@ -58,4 +58,24 @@ describe('RecentJobs', () => {
     fireEvent.click(screen.getAllByRole('button', { name: 'Подробности' })[0]);
     expect(screen.getByText('◈ 100 cred ≈ 1,00 ₽')).toBeTruthy();
   });
+
+  it('раскрытая задача: ошибка словами, без служебного кода и без «Сырого ответа»', async () => {
+    vi.mocked(reachabilityApi.listJobs).mockResolvedValue({
+      items: [
+        {
+          ...job(5, 'probe'),
+          status: 'failed',
+          error_code: 'no_dpi_on',
+          error_message: 'Под фильтр не попала ни одна симка',
+        },
+      ],
+      total: 1,
+      offset: 0,
+      limit: 20,
+    });
+    renderWithProviders(<RecentJobs initialJobId={5} />);
+    expect(await screen.findByText('Под фильтр не попала ни одна симка')).toBeTruthy();
+    expect(screen.queryByText(/no_dpi_on/)).toBeNull();
+    expect(screen.queryByText('Сырой ответ')).toBeNull();
+  });
 });

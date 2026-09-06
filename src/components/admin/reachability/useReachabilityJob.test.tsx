@@ -88,23 +88,26 @@ describe('useReachabilityJob', () => {
     expect(result.current.error).toBe('нет симок');
   });
 
-  it('после maxMs опрос прекращается со стадией stalled', async () => {
+  it('пока задача идёт, опрос не прекращается — после slowAfterMs просто реже', async () => {
     vi.mocked(reachabilityApi.getJob).mockResolvedValue(
       job({ status: 'running', phase: 'retrieving' }),
     );
-    const { result } = renderHook(() => useReachabilityJob(3, { pollMs: 50, maxMs: 120 }), {
-      wrapper: wrapper(),
-    });
+    const { result } = renderHook(
+      () => useReachabilityJob(3, { pollMs: 50, slowAfterMs: 200, slowPollMs: 500 }),
+      { wrapper: wrapper() },
+    );
     await waitFor(() => expect(result.current.phase).toBe('running'));
     await act(async () => {
-      await vi.advanceTimersByTimeAsync(300);
+      await vi.advanceTimersByTimeAsync(2_000);
     });
-    await waitFor(() => expect(result.current.phase).toBe('stalled'));
+    expect(result.current.phase).toBe('running');
     const calls = vi.mocked(reachabilityApi.getJob).mock.calls.length;
+    expect(calls).toBeGreaterThanOrEqual(5);
+    expect(calls).toBeLessThan(15);
     await act(async () => {
-      await vi.advanceTimersByTimeAsync(300);
+      await vi.advanceTimersByTimeAsync(1_000);
     });
-    expect(vi.mocked(reachabilityApi.getJob).mock.calls.length).toBe(calls);
+    expect(vi.mocked(reachabilityApi.getJob).mock.calls.length).toBeGreaterThan(calls);
   });
 
   it('ошибка запроса — стадия failed с текстом', async () => {

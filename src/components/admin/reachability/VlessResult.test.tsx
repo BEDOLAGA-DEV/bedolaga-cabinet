@@ -6,7 +6,7 @@ import type { Job } from '@/api/reachability';
 /**
  * Результат VLESS-теста в том же стиле, что таблица проб: строки — симки операторов,
  * столбцы — туннель · цели · задержка · Xray · причина, справа вердикт; серверы — группами;
- * диагноз и сырой ответ — по тапу на строку.
+ * причина словами, диагноз — по тапу на строку; сырого ответа нет.
  */
 
 vi.mock('react-i18next', async () => (await import('./testUtils')).i18nMock());
@@ -93,8 +93,9 @@ describe('VlessResult', () => {
     expect(screen.getByText('2/3')).toBeTruthy();
     expect(screen.getByText('0/2')).toBeTruthy();
     expect(screen.getByText('82 ms')).toBeTruthy();
-    expect(screen.getByText('zombie_tcp')).toBeTruthy();
-    expect(screen.getByText('tcp_timeout')).toBeTruthy();
+    expect(screen.getByText('рвётся после TLS')).toBeTruthy();
+    expect(screen.getByText('нет ответа')).toBeTruthy();
+    expect(screen.queryByText('zombie_tcp')).toBeNull();
     expect(screen.getByText('без БС')).toBeTruthy();
     expect(screen.getByText('МТС')).toBeTruthy();
     expect(screen.getByText('режется')).toBeTruthy();
@@ -102,12 +103,12 @@ describe('VlessResult', () => {
     expect(await screen.findAllByText('26.3.27')).toHaveLength(2);
   });
 
-  it('диагноз и сырой ответ показываются по тапу на строку', () => {
+  it('диагноз словами показывается по тапу на строку, сырого ответа нет', () => {
     renderWithProviders(<VlessResult job={job} />);
     expect(screen.queryByText('Сервер режется на этом операторе')).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: /МТС/ }));
     expect(screen.getByText('Сервер режется на этом операторе')).toBeTruthy();
-    expect(screen.getByText(/"fail_reason": "tcp_timeout"/)).toBeTruthy();
+    expect(screen.queryByText(/fail_reason/)).toBeNull();
     expect(screen.queryByText('Туннель до сервера есть, но целевые сайты режутся')).toBeNull();
   });
 

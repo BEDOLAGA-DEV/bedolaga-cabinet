@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils';
 import { getApiErrorMessage } from '@/utils/api-error';
 import { ChoiceChips } from './ChoiceChips';
 import { JobResult } from './JobResult';
+import { REACHABILITY_JOBS_KEY, jobsRefetchInterval } from './jobsRefetch';
 import { OperatorIcon } from './OperatorIcon';
 import { ProbeDot } from './ProbeDot';
 import { SectionHeading } from './SectionHeading';
@@ -113,7 +114,7 @@ export function RecentJobs({ initialJobId }: RecentJobsProps) {
   const scrolledTo = useRef<number | null>(null);
 
   const jobs = useQuery({
-    queryKey: ['admin-reachability-jobs', kind, status, limit],
+    queryKey: [REACHABILITY_JOBS_KEY, kind, status, limit],
     queryFn: () =>
       reachabilityApi.listJobs({
         kind: kind || undefined,
@@ -122,6 +123,7 @@ export function RecentJobs({ initialJobId }: RecentJobsProps) {
         limit,
       }),
     staleTime: 10_000,
+    refetchInterval: (query) => jobsRefetchInterval(query.state.data?.items),
   });
 
   useEffect(() => {
@@ -264,24 +266,9 @@ export function RecentJobs({ initialJobId }: RecentJobsProps) {
                   {open && (
                     <div className="space-y-3 border-t border-dark-700/60 p-3">
                       {job.error_message && (
-                        <p className="text-sm text-error-400">
-                          {job.error_message}
-                          {job.error_code ? (
-                            <span className="ml-1 font-mono text-xs text-dark-400">
-                              [{job.error_code}]
-                            </span>
-                          ) : null}
-                        </p>
+                        <p className="text-sm text-error-400">{job.error_message}</p>
                       )}
                       <JobResult job={job} />
-                      <details className="rounded-xl border border-dark-700/60 bg-dark-950/40 p-3">
-                        <summary className="cursor-pointer text-xs text-dark-400">
-                          {t('admin.reachability.history.rawJson')}
-                        </summary>
-                        <pre className="mt-2 max-h-80 overflow-auto text-xs text-dark-200">
-                          {JSON.stringify(job.result, null, 2)}
-                        </pre>
-                      </details>
                     </div>
                   )}
                 </li>

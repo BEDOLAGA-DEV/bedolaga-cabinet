@@ -160,21 +160,31 @@ export interface LegRowProps {
   leg: Leg;
   label: UnitLabel;
   cells: ReadonlyArray<ResultCellProps & { key: string }>;
-  open: boolean;
-  onToggle: () => void;
+  /** Есть что раскрыть (диагноз): строка — кнопка. Без onToggle строка просто строка. */
+  open?: boolean;
+  onToggle?: () => void;
 }
 
 /** Строка симки: оператор с округом, ячейки по столбцам, вердикт. */
-export function LegRow({ leg, label, cells, open, onToggle }: LegRowProps) {
+export function LegRow({ leg, label, cells, open = false, onToggle }: LegRowProps) {
+  const badge = <UnitBadge label={label} noBs={leg.dpi === 'off'} />;
   return (
     <tr
-      className={cn('cursor-pointer hover:bg-dark-800/40', ROW_BORDER, open && 'bg-dark-800/40')}
+      className={cn(
+        ROW_BORDER,
+        onToggle && 'cursor-pointer hover:bg-dark-800/40',
+        open && 'bg-dark-800/40',
+      )}
       onClick={onToggle}
     >
       <td className={TABLE_STYLES.unitCell}>
-        <button type="button" aria-expanded={open} className="flex items-center gap-2 text-left">
-          <UnitBadge label={label} noBs={leg.dpi === 'off'} />
-        </button>
+        {onToggle ? (
+          <button type="button" aria-expanded={open} className="flex items-center gap-2 text-left">
+            {badge}
+          </button>
+        ) : (
+          <span className="flex items-center gap-2">{badge}</span>
+        )}
       </td>
       {cells.map(({ key, ...cell }) => (
         <ValueCell key={key} {...cell} />
@@ -186,36 +196,14 @@ export function LegRow({ leg, label, cells, open, onToggle }: LegRowProps) {
   );
 }
 
-/** Раскрытая строка: подпись цели и симки, диагноз словами (если есть), сырой ответ. */
-export function DetailsRow({
-  span,
-  label,
-  opKey,
-  note,
-  raw,
-}: {
-  span: number;
-  label: string;
-  opKey: string;
-  note?: string | null;
-  raw: unknown;
-}) {
+/** Раскрытая строка: диагноз словами. Сырых ответов людям не показываем. */
+export function DetailsRow({ span, note }: { span: number; note: string }) {
   const { t } = useTranslation();
   return (
     <tr className={cn(ROW_BORDER, 'bg-dark-950/40')}>
-      <td colSpan={span} className="px-3 py-2">
-        <p className="mb-1 text-xs text-dark-400">
-          {t('admin.reachability.result.raw')}: {label} · <span className="font-mono">{opKey}</span>
-        </p>
-        {note && (
-          <p className="mb-2 text-sm text-dark-200">
-            <span className="text-dark-400">{t('admin.reachability.result.diagnosis')}: </span>
-            {note}
-          </p>
-        )}
-        <pre className="max-h-80 overflow-auto text-xs text-dark-200">
-          {JSON.stringify(raw, null, 2)}
-        </pre>
+      <td colSpan={span} className="px-3 py-2 text-sm text-dark-200">
+        <span className="text-dark-400">{t('admin.reachability.result.diagnosis')}: </span>
+        {note}
       </td>
     </tr>
   );

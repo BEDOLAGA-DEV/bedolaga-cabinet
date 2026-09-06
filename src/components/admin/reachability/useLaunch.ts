@@ -10,6 +10,7 @@ import {
 import { useNativeDialog } from '@/platform/hooks/useNativeDialog';
 import { useNotify } from '@/platform/hooks/useNotify';
 import { getApiErrorMessage } from '@/utils/api-error';
+import { REACHABILITY_JOBS_KEY } from './jobsRefetch';
 import { type LaunchSummary, formatList, launchSummary } from './launchSummary';
 import { formatMoney } from './money';
 import { rememberSelection } from './unitSelection';
@@ -58,6 +59,7 @@ export function useLaunch(
     onSuccess: (job, request) => {
       rememberSelection(request.kind, request.units);
       queryClient.invalidateQueries({ queryKey: REACHABILITY_STATUS_KEY });
+      queryClient.invalidateQueries({ queryKey: [REACHABILITY_JOBS_KEY] });
       notify.success(t('admin.reachability.launch.started', { id: job.id }));
       onStarted(job);
     },

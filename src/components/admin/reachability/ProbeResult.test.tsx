@@ -1,11 +1,11 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, screen } from '@testing-library/react';
+import { cleanup, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Job } from '@/api/reachability';
 
 /**
  * Таблица результата как в оригинале: строки — симки операторов с округом, столбцы — пробы,
- * в ячейке точка и значение, справа наш вердикт; список SNI-имён под таблицей.
+ * в ячейке точка и значение, справа наш вердикт; список SNI-имён под таблицей. Сырого ответа нет.
  */
 
 vi.mock('react-i18next', async () => (await import('./testUtils')).i18nMock());
@@ -73,7 +73,7 @@ describe('ProbeResult', () => {
     expect(screen.getByText('1/2')).toBeTruthy();
     expect(screen.getByText('без БС')).toBeTruthy();
     expect(screen.getByText('SNI: 1 ads.x5.ru · 2 vk.com')).toBeTruthy();
-    fireEvent.click(screen.getByRole('button', { name: /mts/ }));
-    expect(screen.getByText(/"rtt_avg_ms": 49.6/)).toBeTruthy();
+    expect(screen.queryByRole('button', { name: /mts/ })).toBeNull();
+    expect(screen.queryByText(/rtt_avg_ms/)).toBeNull();
   });
 });

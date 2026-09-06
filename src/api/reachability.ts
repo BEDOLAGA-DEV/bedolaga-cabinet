@@ -342,9 +342,6 @@ export const reachabilityApi = {
   cancelJob: async (id: number): Promise<Job> =>
     (await apiClient.post(`${BASE}/jobs/${id}/cancel`)).data,
 
-  retrieveJob: async (id: number): Promise<Job> =>
-    (await apiClient.post(`${BASE}/jobs/${id}/retrieve`)).data,
-
   getSummary: async (dpi: Dpi = 'on'): Promise<Summary> =>
     (await apiClient.get(`${BASE}/summary/hosts`, { params: { dpi } })).data,
 };

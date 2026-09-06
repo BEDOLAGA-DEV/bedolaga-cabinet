@@ -2086,16 +2086,13 @@
       "progress": {
         "submitting": "Sending request…",
         "waiting": "Waiting for operators ({{elapsed}})",
-        "retrieving": "Taking longer than usual, fetching the result ({{elapsed}})",
+        "retrieving": "Still checking, please wait ({{elapsed}})",
         "polling": "Check in progress ({{elapsed}})",
         "cancelling": "Cancelling…",
-        "hintProbe": "Usually 5–60 s; whole fleet with TLS-SNI — 10–20 min, the result arrives by itself",
-        "hintVless": "Up to 3 min per server",
-        "hintScan": "15–40 s per SIM",
-        "stalled": "Polling stopped, the result will appear in History",
+        "hintProbe": "More SIMs take longer: the full set takes 10–20 minutes. The page updates by itself.",
+        "hintVless": "Up to 3 minutes per server. The page updates by itself.",
+        "hintScan": "15–40 seconds per SIM. The page updates by itself.",
         "cancel": "Cancel",
-        "retrieve": "Fetch result",
-        "lastAnswer": "Last API answer: {{answer}} · attempt {{attempt}} · {{age}}",
         "failed": "Check failed",
         "retry": "Retry",
         "cancelled": "Cancelled"
@@ -2210,7 +2207,6 @@
         "targets": "Targets",
         "latency": "Latency",
         "core": "Xray",
-        "raw": "Details",
         "diagnosis": "Diagnosis",
         "empty": "Empty result",
         "failReason": "Reason",
@@ -2220,7 +2216,13 @@
         "http": "HTTP",
         "sniMulti": "{{count}}×SNI",
         "sniList": "SNI: {{names}}",
-        "noBs": "no WL"
+        "noBs": "no WL",
+        "reasons": {
+          "tcp_timeout": "no answer",
+          "zombie_tcp": "drops after TLS",
+          "dataplane_dead": "sites don't open",
+          "cancelled": "cancelled"
+        }
       },
       "summary": {
         "openJob": "Open job",
@@ -2242,7 +2244,6 @@
         },
         "loadMore": "Show more",
         "more": "+{{count}}",
-        "rawJson": "Raw response",
         "units_one": "{{count}} SIM",
         "units_other": "{{count}} SIMs"
       },

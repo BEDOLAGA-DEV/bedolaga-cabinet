@@ -21,7 +21,7 @@ const COLUMN_KEYS: Record<VlessColumn, string> = {
 /**
  * Результат VLESS-теста в том же стиле, что таблица проб: строки — симки операторов,
  * столбцы — туннель · цели · задержка · Xray · причина, справа наш вердикт. Несколько серверов —
- * группами. Тап по строке — диагноз словами и сырой ответ.
+ * группами. Причина — словами (код в подсказке), тап по строке — диагноз. Сырых ответов нет.
  */
 export function VlessResult({ job }: { job: Job }) {
   const { t } = useTranslation();
@@ -55,6 +55,16 @@ export function VlessResult({ job }: { job: Job }) {
             const open = expanded?.id === leg.id;
             const cells = vlessCells(view, status?.cores).map((cell) => ({
               ...cell,
+              value:
+                cell.key === 'reason' && cell.value
+                  ? t(`admin.reachability.result.reasons.${cell.value}`, {
+                      defaultValue: cell.value,
+                    })
+                  : cell.value,
+              title:
+                cell.key === 'reason'
+                  ? [cell.title, cell.value].filter(Boolean).join(' · ') || null
+                  : cell.title,
               icon:
                 cell.key === 'core' && cell.value ? (
                   <XrayIcon className="h-3.5 w-3.5 text-dark-400" aria-hidden="true" />
@@ -68,17 +78,9 @@ export function VlessResult({ job }: { job: Job }) {
                   label={unitLabel(leg, catalog, view.operatorName)}
                   cells={cells}
                   open={open}
-                  onToggle={() => toggle(leg)}
+                  onToggle={view.diagnosis ? () => toggle(leg) : undefined}
                 />
-                {open && (
-                  <DetailsRow
-                    span={span}
-                    label={targetLabel(job, leg.target_key) ?? view.server}
-                    opKey={leg.op_key}
-                    note={view.diagnosis}
-                    raw={leg.raw}
-                  />
-                )}
+                {open && view.diagnosis && <DetailsRow span={span} note={view.diagnosis} />}
               </Fragment>
             );
           })}

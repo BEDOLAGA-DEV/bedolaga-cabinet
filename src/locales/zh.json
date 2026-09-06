@@ -3891,16 +3891,13 @@
       "progress": {
         "submitting": "正在发送请求…",
         "waiting": "等待运营商响应（{{elapsed}}）",
-        "retrieving": "耗时比平常长，正在获取结果（{{elapsed}}）",
+        "retrieving": "仍在检测，请稍候（{{elapsed}}）",
         "polling": "检查进行中（{{elapsed}}）",
         "cancelling": "正在取消…",
-        "hintProbe": "通常 5–60 秒；全部 SIM 卡加 TLS-SNI — 10–20 分钟，结果会自动到达",
-        "hintVless": "每台服务器最多 3 分钟",
-        "hintScan": "每张 SIM 卡 15–40 秒",
-        "stalled": "轮询已停止，结果将出现在历史中",
+        "hintProbe": "SIM 卡越多耗时越长：全部约需 10–20 分钟。页面会自动更新。",
+        "hintVless": "每台服务器最多 3 分钟。页面会自动更新。",
+        "hintScan": "每张 SIM 卡 15–40 秒。页面会自动更新。",
         "cancel": "取消",
-        "retrieve": "获取结果",
-        "lastAnswer": "API 最近响应：{{answer}} · 第 {{attempt}} 次 · {{age}}",
         "failed": "检查失败",
         "retry": "重试",
         "cancelled": "已取消"
@@ -4011,7 +4008,6 @@
         "targets": "目标",
         "latency": "延迟",
         "core": "Xray",
-        "raw": "详情",
         "diagnosis": "诊断",
         "empty": "结果为空",
         "failReason": "原因",
@@ -4021,7 +4017,13 @@
         "http": "HTTP",
         "sniMulti": "{{count}}×SNI",
         "sniList": "SNI：{{names}}",
-        "noBs": "无白名单"
+        "noBs": "无白名单",
+        "reasons": {
+          "tcp_timeout": "无响应",
+          "zombie_tcp": "TLS 后断开",
+          "dataplane_dead": "网站打不开",
+          "cancelled": "已取消"
+        }
       },
       "summary": {
         "openJob": "打开任务",
@@ -4043,7 +4045,6 @@
         },
         "loadMore": "显示更多",
         "more": "+{{count}}",
-        "rawJson": "原始响应",
         "units_other": "{{count}} 张 SIM"
       },
       "shortcuts": {
