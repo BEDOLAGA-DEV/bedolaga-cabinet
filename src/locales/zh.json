@@ -4061,7 +4061,47 @@
       },
       "fleet": {
         "offline": "运营商暂时不可用，请 1–2 分钟后重试",
-        "onAir_other": "{{total}} 张 SIM 卡在线：{{bs}} 张有白名单，{{regular}} 张无"
+        "onAir_other": "{{total}} 张 SIM 卡在线：{{bs}} 张有白名单，{{regular}} 张无",
+        "statement": "{{total}} 台服务器中 {{ok}} 台正常",
+        "statementAllOk": "全部 {{total}} 台服务器正常",
+        "statementNone": "面板中没有服务器",
+        "legendPartial_other": "{{count}} 台部分可用",
+        "legendDown_other": "{{count}} 台不可用",
+        "legendUnchecked_other": "{{count}} 台未检查",
+        "meta": "检查于{{age}} · {{units}}",
+        "search": "查找服务器",
+        "sort": "问题优先",
+        "filter": {
+          "all": "全部 {{count}}",
+          "problems": "有问题 {{count}}",
+          "unchecked": "未检查 {{count}}",
+          "bs": "白名单 {{count}}",
+          "regular": "普通 {{count}}"
+        },
+        "group": {
+          "down": "不可用",
+          "partial": "部分可用",
+          "unchecked": "未检查",
+          "ok": "正常"
+        },
+        "showAll": "显示全部 {{count}}",
+        "hide": "收起",
+        "state": {
+          "ok": "正常",
+          "partial": "部分可用",
+          "down": "不可用",
+          "unchecked": "未检查",
+          "checking": "检查中…"
+        },
+        "ofUnits": "{{total}} 张中 {{ok}} 张",
+        "justNow": "刚刚",
+        "empty": "此筛选下没有服务器",
+        "check": "检查服务器",
+        "history": "检查历史",
+        "other": "检查地址或订阅",
+        "pick": "手动选择",
+        "pickDone": "完成",
+        "picked_other": "已选择 {{count}} 台服务器"
       },
       "health": {
         "checked": "检查于 {{age}}",
@@ -4183,6 +4223,56 @@
         "probes": "探测：{{probes}}",
         "sni": "SNI：{{sni}}",
         "core": "Xray 内核：{{core}}"
+      },
+      "server": {
+        "byOperators": "按运营商",
+        "catchesAll": "所有地区可用",
+        "catchesNone": "不可用",
+        "catchesNot": "在{{regions}}不可用",
+        "ofUnits": "{{total}} 张中 {{ok}} 张",
+        "summaryBs": "{{total}} 张白名单 SIM 卡中 {{ok}} 张可用",
+        "summaryRegular": "{{total}} 张无白名单 SIM 卡中 {{ok}} 张可用",
+        "summaryAny": "{{total}} 张 SIM 卡中 {{ok}} 张可用",
+        "checked": "检查于{{age}}",
+        "unchecked": "此服务器尚未检查",
+        "history": "以往检查",
+        "allHistory": "全部",
+        "checkOne": "检查此服务器 · {{price}}",
+        "close": "关闭"
+      },
+      "batch": {
+        "title": "检查什么？",
+        "scope": {
+          "problems": "有问题的",
+          "stale": "久未检查",
+          "all": "全部服务器",
+          "manual": "手动选择",
+          "staleHint": "超过一周",
+          "manualHint": "在列表中勾选"
+        },
+        "servers_other": "{{count}} 台服务器",
+        "minutes": "约 {{count}} 分钟",
+        "unitsLine": "SIM 卡：按服务器用途，{{units}}",
+        "change": "更改",
+        "advanced": "高级：{{summary}}",
+        "balanceAfter": "之后余额：{{balance}}",
+        "onlyChecked": "只按已检查的 SIM 卡收费。检查可随时停止。",
+        "run": "以 {{price}} 启动",
+        "running": "正在启动…",
+        "progressTitle_other": "正在检查 {{count}} 台服务器",
+        "progressLine": "已完成 {{done}}/{{total}} · 还需{{eta}}",
+        "progressDone": "已完成 {{done}}/{{total}}",
+        "canLeave": "可以关闭页面，检查会继续。",
+        "stop": "停止",
+        "stopping": "正在停止…",
+        "spentSoFar": "已扣费：{{price}}",
+        "aside": "检查进行中",
+        "queued": "排队中",
+        "started": "检查已启动",
+        "finishedOk": "检查完成",
+        "finishedCancelled": "检查已停止",
+        "finishedFailed": "检查失败",
+        "nothingToCheck": "没有符合此选择的服务器"
       }
     },
     "roles": {
