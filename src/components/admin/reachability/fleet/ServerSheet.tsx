@@ -10,7 +10,9 @@ type ServerSheetProps = Omit<ComponentProps<typeof ServerDetails>, 'withHeader'>
 export function ServerSheet({ isOpen, onClose, ...props }: ServerSheetProps) {
   return (
     <ResponsiveSheet isOpen={isOpen} onClose={onClose} title={props.row.label}>
-      <ServerDetails {...props} onClose={onClose} withHeader={false} />
+      <div className="px-5 pb-6 pt-1">
+        <ServerDetails {...props} onClose={onClose} withHeader={false} />
+      </div>
     </ResponsiveSheet>
   );
 }

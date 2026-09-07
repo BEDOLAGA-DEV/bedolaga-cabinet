@@ -146,7 +146,7 @@ export function BatchScope({
 
   return (
     <ResponsiveSheet isOpen={isOpen} onClose={onClose} title={t(`${base}.batch.title`)}>
-      <div className="space-y-4">
+      <div className="space-y-4 px-5 pb-6 pt-1">
         <div role="radiogroup" aria-label={t(`${base}.batch.title`)} className="space-y-2">
           {KINDS.map((k) => {
             const active = k === kind;

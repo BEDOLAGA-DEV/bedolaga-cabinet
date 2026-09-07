@@ -330,10 +330,13 @@
     }
   }
 
-  /* Main content — containment removed to avoid GPU layer conflicts
-     with isolation: isolate on content wrapper */
+  /* Main content: только style-containment. Layout/paint-containment (contain: content)
+     делало <main> containing block для position: fixed внутри него — нижние плашки
+     (LaunchBar, FleetActionBar, FloatingActionBar, панели подарка и TV) прилипали к концу
+     страницы вместо низа экрана. Слой от анимированного фона изолирует isolation: isolate
+     на обёртке контента. */
   main {
-    contain: content;
+    contain: style;
   }
 
   /* Light theme - Champagne */

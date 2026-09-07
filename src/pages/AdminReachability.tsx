@@ -178,15 +178,16 @@ function FleetView({ status, link, patchParams }: FleetViewProps) {
   }, [isActive, batch, link.batchId, notify, patchParams, t]);
 
   const alive = fleet.units.filter((unit) => unit.probeable);
-  const unitsLine =
-    alive.length > 0
-      ? t('admin.reachability.fleet.onAir', {
-          count: alive.length,
-          total: alive.length,
-          bs: alive.filter((unit) => unit.dpi === 'on').length,
-          regular: alive.filter((unit) => unit.dpi !== 'on').length,
-        })
-      : '';
+  const onAir = alive.length
+    ? t('admin.reachability.fleet.onAir', {
+        count: alive.length,
+        total: alive.length,
+        bs: alive.filter((unit) => unit.dpi === 'on').length,
+        regular: alive.filter((unit) => unit.dpi !== 'on').length,
+      })
+    : '';
+  // Посреди строки «проверено вчера · …» заглавная буква лишняя.
+  const unitsLine = onAir ? onAir.charAt(0).toLowerCase() + onAir.slice(1) : '';
 
   const openServer = (row: FleetRow) => patchParams({ server: row.key });
   const closeServer = () => patchParams({ server: null });
@@ -323,17 +324,19 @@ function FleetView({ status, link, patchParams }: FleetViewProps) {
         />
       )}
 
-      <BatchScope
-        isOpen={scopeOpen}
-        onClose={() => setScopeOpen(false)}
-        rows={fleet.rows}
-        counts={counts}
-        status={status}
-        units={fleet.units}
-        picked={picked}
-        onPickManually={startPicking}
-        onStarted={onStarted}
-      />
+      {scopeOpen && (
+        <BatchScope
+          isOpen
+          onClose={() => setScopeOpen(false)}
+          rows={fleet.rows}
+          counts={counts}
+          status={status}
+          units={fleet.units}
+          picked={picked}
+          onPickManually={startPicking}
+          onStarted={onStarted}
+        />
+      )}
 
       {isActive && batch ? (
         <FleetActionBar
