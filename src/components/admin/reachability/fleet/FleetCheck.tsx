@@ -33,7 +33,7 @@ import { FleetActionBar } from './FleetActionBar';
 import { FleetList } from './FleetList';
 import { FleetSummary } from './FleetSummary';
 import { FleetToolbar } from './FleetToolbar';
-import { ServerSheet } from './ServerSheet';
+import { ServerDetails } from './ServerDetails';
 import { batchTargets, estimateBatchMinutes } from './batchProgress';
 import {
   type FleetFilter,
@@ -68,8 +68,9 @@ function sameSet(a: readonly string[], b: readonly string[]): boolean {
 
 /**
  * Вкладка «Хосты»: состояние серверов панели и проверка выбранных одной формой, как на bsbord.com:
- * строки серверов с чекбоксами (быстрые выборы «с проблемами / давно / все»), под списком пробы и
- * операторы по округам, справа «Запуск» с ценой. Идущая проверка занимает место сводки.
+ * строки серверов с чекбоксами (быстрые выборы «с проблемами / давно / все»), карточка сервера
+ * раскрывается под строкой, под списком пробы и операторы по округам, справа «Запуск» с ценой.
+ * Идущая проверка занимает место сводки. Никаких модалок и шитов.
  */
 export function FleetCheck({ status, link, patchParams }: FleetCheckProps) {
   const { t } = useTranslation();
@@ -210,7 +211,8 @@ export function FleetCheck({ status, link, patchParams }: FleetCheckProps) {
   const summaryRow = selectedForDetails
     ? fleet.summary?.rows.find((row) => row.target_key === selectedForDetails.key)
     : undefined;
-  const openDetails = (row: FleetRow) => patchParams({ server: row.key });
+  const openDetails = (row: FleetRow) =>
+    patchParams({ server: link.serverKey === row.key ? null : row.key });
   const closeDetails = () => patchParams({ server: null });
   const checkOne = () => {
     if (selectedForDetails?.ref) setPicked([selectedForDetails.ref]);
@@ -296,6 +298,18 @@ export function FleetCheck({ status, link, patchParams }: FleetCheckProps) {
               picked={pickedSet}
               onToggle={(ref) => setPicked((current) => toggleKey(current, ref))}
               onDetails={openDetails}
+              expandedKey={link.serverKey}
+              renderDetails={(row) => (
+                <ServerDetails
+                  row={row}
+                  summaryRow={summaryRow}
+                  units={fleet.units}
+                  status={status}
+                  onClose={closeDetails}
+                  onCheck={checkOne}
+                  withHeader={false}
+                />
+              )}
               progress={progress}
               emptyText={t(`${base}.fleet.empty`)}
             />
@@ -345,18 +359,6 @@ export function FleetCheck({ status, link, patchParams }: FleetCheckProps) {
           picked.length > 0 && <LaunchBar launch={launch} />
         )}
       </div>
-
-      {selectedForDetails && (
-        <ServerSheet
-          isOpen
-          row={selectedForDetails}
-          summaryRow={summaryRow}
-          units={fleet.units}
-          status={status}
-          onClose={closeDetails}
-          onCheck={checkOne}
-        />
-      )}
     </div>
   );
 }

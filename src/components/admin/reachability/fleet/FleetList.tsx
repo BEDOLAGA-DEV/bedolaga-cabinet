@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { type ReactNode, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/primitives';
 import { cn } from '@/lib/utils';
@@ -13,6 +13,10 @@ interface FleetListProps {
   picked: Set<string>;
   onToggle: (ref: string) => void;
   onDetails: (row: FleetRow) => void;
+  /** Сервер, чья карточка раскрыта под строкой (target_key). */
+  expandedKey?: string | null;
+  /** Содержимое раскрытой карточки. */
+  renderDetails?: (row: FleetRow) => ReactNode;
   /** Живой прогресс идущей пачки по target_key. */
   progress?: Map<string, TargetProgress>;
   emptyText: string;
@@ -30,6 +34,8 @@ export function FleetList({
   picked,
   onToggle,
   onDetails,
+  expandedKey = null,
+  renderDetails,
   progress,
   emptyText,
 }: FleetListProps) {
@@ -65,14 +71,21 @@ export function FleetList({
             {!collapsed && (
               <div className="divide-y divide-dark-700/30">
                 {group.rows.map((row) => (
-                  <FleetRowItem
-                    key={row.key}
-                    row={row}
-                    picked={row.ref !== null && picked.has(row.ref)}
-                    onToggle={onToggle}
-                    onDetails={onDetails}
-                    progress={progress?.get(row.key)}
-                  />
+                  <div key={row.key}>
+                    <FleetRowItem
+                      row={row}
+                      picked={row.ref !== null && picked.has(row.ref)}
+                      onToggle={onToggle}
+                      onDetails={onDetails}
+                      expanded={row.key === expandedKey}
+                      progress={progress?.get(row.key)}
+                    />
+                    {row.key === expandedKey && renderDetails && (
+                      <div className="mb-2 ml-9 rounded-2xl border border-dark-700/40 bg-dark-900/50 p-4">
+                        {renderDetails(row)}
+                      </div>
+                    )}
+                  </div>
                 ))}
               </div>
             )}

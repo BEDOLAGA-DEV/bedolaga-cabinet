@@ -191,7 +191,7 @@ describe('FleetCheck', () => {
     expect(notify.success).toHaveBeenCalledWith('Проверка запущена');
   });
 
-  it('из карточки сервер выбирается одной кнопкой', async () => {
+  it('карточка раскрывается под строкой, оттуда сервер выбирается одной кнопкой', async () => {
     const patchParams = open();
     const rowButton = await screen.findByRole('button', { name: /Russia \| LTE \| БС/ });
     const row = rowButton.parentElement as HTMLElement;
@@ -199,8 +199,8 @@ describe('FleetCheck', () => {
     expect(patchParams).toHaveBeenCalledWith({ server: 'bs.example:9443' });
     cleanup();
     open('server=bs.example%3A9443');
-    const sheet = await screen.findByRole('dialog', { name: 'Russia | LTE | БС' });
-    fireEvent.click(await within(sheet).findByRole('button', { name: /Проверить этот сервер/ }));
+    expect(await screen.findByText(/ловит у 1 из 2 симок/)).toBeTruthy();
+    fireEvent.click(await screen.findByRole('button', { name: /Проверить этот сервер/ }));
     await waitFor(() =>
       expect(reachabilityApi.previewBatch).toHaveBeenLastCalledWith(
         expect.objectContaining({

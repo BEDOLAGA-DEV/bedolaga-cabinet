@@ -105,6 +105,23 @@ describe('FleetList', () => {
     expect(onDetails).toHaveBeenCalledWith(rows[0]);
   });
 
+  it('карточка раскрывается под своей строкой', () => {
+    const rows = fleet().slice(0, 4);
+    renderWithProviders(
+      <FleetList
+        rows={rows}
+        {...noop}
+        expandedKey={rows[1].key}
+        renderDetails={(row) => <p>карточка {row.label}</p>}
+      />,
+    );
+    expect(screen.getByText('карточка Server 2')).toBeTruthy();
+    expect(screen.queryByText('карточка Server 1')).toBeNull();
+    const details = screen.getAllByRole('button', { name: 'Подробнее' });
+    expect(details[1].getAttribute('aria-expanded')).toBe('true');
+    expect(details[0].getAttribute('aria-expanded')).toBe('false');
+  });
+
   it('shows live progress words while a batch runs', () => {
     const rows = fleet().slice(0, 4);
     const progress = new Map<string, TargetProgress>([
