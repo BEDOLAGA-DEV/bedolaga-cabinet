@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Batch, HostTarget, ReachabilityStatus, Summary, Unit } from '@/api/reachability';
 
@@ -177,14 +177,16 @@ describe('AdminReachability (флот)', () => {
   it('shows the fleet statement, groups and opens a server card from the list', async () => {
     renderWithProviders(<AdminReachability />);
     await waitFor(() =>
-      expect(screen.getByRole('heading', { level: 2 }).textContent).toBe(
+      expect(screen.getAllByRole('heading', { level: 2 })[0].textContent).toBe(
         'Работают 0 из 2 серверов',
       ),
     );
     expect(screen.getByText('1 не у всех')).toBeTruthy();
     expect(screen.getByText('1 не проверяли')).toBeTruthy();
     expect(screen.getByRole('region', { name: 'Работают не у всех' })).toBeTruthy();
-    fireEvent.click(screen.getByRole('button', { name: /Russia \| LTE \| БС/ }));
+    const row = screen.getByRole('button', { name: /Russia \| LTE \| БС/ })
+      .parentElement as HTMLElement;
+    fireEvent.click(within(row).getByRole('button', { name: 'Подробнее' }));
     await waitFor(() => expect(screen.getByText('ловит во всех округах')).toBeTruthy());
     expect(screen.getByText('не ловит')).toBeTruthy();
     expect(screen.getAllByText('Russia | LTE | БС').length).toBeGreaterThan(1);
@@ -197,7 +199,9 @@ describe('AdminReachability (флот)', () => {
     });
     renderWithProviders(<AdminReachability />);
     await waitFor(() =>
-      expect(screen.getByRole('heading', { level: 2 }).textContent).toBe('Проверяем 1 сервер'),
+      expect(screen.getAllByRole('heading', { level: 2 })[0].textContent).toBe(
+        'Проверяем 1 сервер',
+      ),
     );
     expect(screen.getAllByRole('button', { name: 'Остановить' }).length).toBeGreaterThan(0);
     expect(screen.getByText('Готово 0 из 1 · ещё около 4 минут')).toBeTruthy();

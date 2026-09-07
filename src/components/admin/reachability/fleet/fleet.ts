@@ -234,3 +234,13 @@ export function operatorBreakdown(
   }
   return [...byOperator.values()].sort((a, b) => a.name.localeCompare(b.name, 'ru'));
 }
+
+/** Каким объёмом оказался ручной выбор: совпал с «проблемы», «давно», «все» — так и пишем в пачку. */
+export function scopeKindFor(rows: FleetRow[], picked: readonly string[], now: Date): ScopeKind {
+  if (picked.length === 0) return 'manual';
+  for (const kind of ['problems', 'stale', 'all'] as const) {
+    const refs = scopeRefs(rows, kind, now, []);
+    if (refs.length === picked.length && refs.every((ref) => picked.includes(ref))) return kind;
+  }
+  return 'manual';
+}

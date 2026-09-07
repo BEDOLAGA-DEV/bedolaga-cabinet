@@ -2,25 +2,27 @@ import { describe, expect, it } from 'vitest';
 import { resetSafeStorage } from '@/utils/safeStorage';
 import { unit } from './testUtils';
 import {
-  activeQuickPick,
+  allOf,
+  districtState,
   dpiForSelection,
+  groupByDistrict,
   mergeKeys,
   pickUnits,
   recallSelection,
   rememberSelection,
+  toggleDistrict,
   toggleKey,
-  unitsByMode,
 } from './unitSelection';
 
 const UNITS = [
-  { ...unit('tele2|цфо|on', 'on', 'cfo'), name: 'Tele2' },
-  { ...unit('mts|цфо|off', 'off', 'cfo'), name: 'МТС' },
-  { ...unit('mts|пфо|on', 'on', 'pfo'), name: 'МТС' },
-  { ...unit('beeline|цфо|on', 'on', 'cfo'), name: 'Билайн' },
-  { ...unit('yota|уфо|off', 'off', 'urfo', false), name: 'Yota' },
+  unit('mts|цфо|off', 'off', 'cfo'),
+  unit('mts|пфо|on', 'on', 'pfo'),
+  unit('tele2|цфо|on', 'on', 'cfo'),
+  unit('yota|уфо|off', 'off', 'urfo', false),
+  unit('yota|цфо|on', 'on', 'cfo', false),
 ];
 
-describe('toggleKey / mergeKeys / pickUnits', () => {
+describe('toggleKey / mergeKeys / pickUnits / allOf', () => {
   it('toggleKey возвращает новый массив', () => {
     const selected = ['a'];
     expect(toggleKey(selected, 'b')).toEqual(['a', 'b']);
@@ -28,7 +30,7 @@ describe('toggleKey / mergeKeys / pickUnits', () => {
     expect(selected).toEqual(['a']);
   });
   it('pickUnits берёт только доступные симки нужного режима', () => {
-    expect(pickUnits(UNITS, 'on')).toEqual(['tele2|цфо|on', 'mts|пфо|on', 'beeline|цфо|on']);
+    expect(pickUnits(UNITS, 'on')).toEqual(['mts|пфо|on', 'tele2|цфо|on']);
     expect(pickUnits(UNITS, 'off')).toEqual(['mts|цфо|off']);
   });
   it('mergeKeys объединяет без дублей и не трогает исходный массив', () => {
@@ -36,33 +38,32 @@ describe('toggleKey / mergeKeys / pickUnits', () => {
     expect(mergeKeys(selected, ['b', 'c'])).toEqual(['a', 'b', 'c']);
     expect(selected).toEqual(['a', 'b']);
   });
+  it('allOf: все ключи набора выбраны; пустой набор — нет', () => {
+    expect(allOf(['a', 'b'], ['b', 'a', 'c'])).toBe(true);
+    expect(allOf(['a', 'b'], ['a'])).toBe(false);
+    expect(allOf([], ['a'])).toBe(false);
+  });
 });
 
-/** Сетка симок: две группы по Белому списку, внутри — по оператору и округу; без связи не показываем. */
-describe('unitsByMode', () => {
-  it('делит доступные симки на «с Белым списком» и «без», сортируя по оператору и округу', () => {
-    const groups = unitsByMode(UNITS);
-    expect(groups.bs.map((u) => u.op_key)).toEqual([
-      'beeline|цфо|on',
-      'mts|пфо|on',
-      'tele2|цфо|on',
+/** Округа как на bsbord.com: в порядке каталога, счёт и отметка только по доступным симкам. */
+describe('округа', () => {
+  it('groupByDistrict группирует по коду округа в порядке появления', () => {
+    expect(groupByDistrict(UNITS).map((d) => [d.code, d.label, d.units.length])).toEqual([
+      ['cfo', 'CFO', 3],
+      ['pfo', 'PFO', 1],
+      ['urfo', 'URFO', 1],
     ]);
-    expect(groups.regular.map((u) => u.op_key)).toEqual(['mts|цфо|off']);
   });
-});
-
-/** Быстрый выбор подсвечивается, только когда выбор совпадает с ним целиком. */
-describe('activeQuickPick', () => {
-  it('узнаёт «с Белым списком», «без» и «все» независимо от порядка ключей', () => {
-    expect(activeQuickPick(UNITS, ['mts|пфо|on', 'beeline|цфо|on', 'tele2|цфо|on'])).toBe('bs');
-    expect(activeQuickPick(UNITS, ['mts|цфо|off'])).toBe('regular');
-    expect(
-      activeQuickPick(UNITS, ['mts|цфо|off', 'tele2|цфо|on', 'mts|пфо|on', 'beeline|цфо|on']),
-    ).toBe('all');
-  });
-  it('часть набора или пустой выбор — ничего не подсвечено', () => {
-    expect(activeQuickPick(UNITS, ['tele2|цфо|on'])).toBeNull();
-    expect(activeQuickPick(UNITS, [])).toBeNull();
+  it('districtState и toggleDistrict считают только доступные симки', () => {
+    const [cfo, , urfo] = groupByDistrict(UNITS);
+    expect(districtState(cfo, [])).toBe('none');
+    expect(districtState(cfo, ['mts|цфо|off'])).toBe('some');
+    expect(districtState(cfo, ['mts|цфо|off', 'tele2|цфо|on'])).toBe('all');
+    expect(toggleDistrict(['x'], cfo)).toEqual(['x', 'mts|цфо|off', 'tele2|цфо|on']);
+    expect(toggleDistrict(['x', 'mts|цфо|off', 'tele2|цфо|on'], cfo)).toEqual(['x']);
+    // в УФО единственная симка без связи — отмечать нечего
+    expect(districtState(urfo, [])).toBe('none');
+    expect(toggleDistrict([], urfo)).toEqual([]);
   });
 });
 

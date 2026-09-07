@@ -40,18 +40,11 @@ export interface DeepLink {
   serverKey: string | null;
   /** Идущая пачка проверок серверов: её прогресс возвращается после перезагрузки. */
   batchId: number | null;
-  /** Режим «Выбрать вручную»: чекбоксы в списке серверов. */
-  picking: boolean;
-  /** Что вставили в поле быстрой проверки: подставляется в форму нужной вкладки. */
-  query: string | null;
 }
 
 export const REACHABILITY_PATH = '/admin/reachability';
-/** Журнал всех проверок и проверка адреса / подсети / подписки — отдельные экраны раздела. */
+/** Журнал всех проверок — отдельный экран раздела. */
 export const REACHABILITY_HISTORY_PATH = `${REACHABILITY_PATH}/history`;
-export const REACHABILITY_OTHER_PATH = `${REACHABILITY_PATH}/other`;
-/** Вкладки экрана «Проверить адрес или подписку»: без хостов панели, они живут на экране флота. */
-export const OTHER_MODES: readonly LaunchMode[] = ['ip', 'cidr', 'vless'];
 /** Раздел BSCHEKER в настройках кабинета (подпункт дерева `sys_reachability`). */
 export const REACHABILITY_SETTINGS_PATH = '/admin/settings?section=sys_reachability';
 /** Сайт сервиса: ключ API и тариф. */
@@ -107,8 +100,6 @@ export function parseReachabilityDeepLink(params: URLSearchParams): DeepLink {
     runningJobId: parseId(params.get('running')),
     serverKey: params.get('server') || null,
     batchId: parseId(params.get('batch')),
-    picking: params.get('pick') === '1',
-    query: params.get('q') || null,
   };
 }
 
@@ -126,7 +117,5 @@ export function buildReachabilityLink(input: Partial<DeepLink>): string {
   if (input.runningJobId) params.set('running', String(input.runningJobId));
   if (input.serverKey) params.set('server', input.serverKey);
   if (input.batchId) params.set('batch', String(input.batchId));
-  if (input.picking) params.set('pick', '1');
-  if (input.query) params.set('q', input.query);
   return `${REACHABILITY_PATH}?${params.toString()}`;
 }

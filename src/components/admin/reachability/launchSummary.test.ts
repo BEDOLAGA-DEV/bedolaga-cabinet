@@ -1,30 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import type { PreviewResponse } from '@/api/reachability';
+import type { LaunchPreview } from './launchAdapters';
 import { formatList, launchSummary } from './launchSummary';
 
-const preview = (overrides: Partial<PreviewResponse> = {}): PreviewResponse => ({
-  kind: 'probe',
+const preview = (overrides: Partial<LaunchPreview> = {}): LaunchPreview => ({
   targets: [
-    {
-      kind: 'host',
-      label: 'RU-BS',
-      address: 'bs.example',
-      port: 443,
-      target_key: 'bs.example:443',
-      sni: null,
-      ref: {},
-      purpose: 'bs',
-    },
-    {
-      kind: 'custom',
-      label: '',
-      address: '203.0.113.5',
-      port: null,
-      target_key: '203.0.113.5',
-      sni: null,
-      ref: {},
-      purpose: 'unknown',
-    },
+    { label: 'RU-BS', target_key: 'bs.example:443' },
+    { label: '', target_key: '203.0.113.5' },
   ],
   units_resolved: ['mts|цфо|on', 'tele2|цфо|on'],
   skipped: { dpi_off: [], unavailable: [], unknown: [], blocked_targets: [] },
@@ -32,6 +13,7 @@ const preview = (overrides: Partial<PreviewResponse> = {}): PreviewResponse => (
   estimate_is_exact: true,
   warnings: [],
   balance_kopeks: 10_000,
+  estimated_minutes: null,
   ...overrides,
 });
 

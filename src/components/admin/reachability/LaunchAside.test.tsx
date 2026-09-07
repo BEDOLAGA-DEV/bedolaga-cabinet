@@ -41,8 +41,24 @@ vi.mock('@/platform/hooks/useNotify', () => ({
 import { useState } from 'react';
 import { reachabilityApi } from '@/api/reachability';
 import { LaunchAside, LaunchBar } from './LaunchAside';
+import { jobAdapterFor } from './launchAdapters';
 import { installMatchMedia, renderWithProviders } from './testUtils';
 import { recallSelection } from './unitSelection';
+import { useLaunch } from './useLaunch';
+
+/** Панель получает состояние запуска снаружи: здесь — одиночная задача (probe). */
+function Panel({
+  body: initial,
+  onStarted = vi.fn(),
+  bar = false,
+}: {
+  body: JobCreateRequest;
+  onStarted?: (job: Job) => void;
+  bar?: boolean;
+}) {
+  const launch = useLaunch(initial, status, onStarted, jobAdapterFor('probe'));
+  return bar ? <LaunchBar launch={launch} /> : <LaunchAside launch={launch} />;
+}
 
 const body: JobCreateRequest = {
   kind: 'probe',
@@ -109,9 +125,7 @@ beforeEach(() => {
 afterEach(cleanup);
 
 async function renderPanel(onStarted = vi.fn()) {
-  renderWithProviders(
-    <LaunchAside kind="probe" targetsCount={1} body={body} status={status} onStarted={onStarted} />,
-  );
+  renderWithProviders(<Panel body={body} onStarted={onStarted} />);
   const run = await screen.findByRole('button', { name: 'Проверить 1 цель · ◈ 640 cred' });
   await waitFor(() => expect((run as HTMLButtonElement).disabled).toBe(false));
   return { run, onStarted };
@@ -158,18 +172,13 @@ describe('LaunchAside в браузере: второй шаг в панели, 
   it('изменение набора целей/симок сбрасывает второй шаг', async () => {
     function Harness() {
       const [current, setCurrent] = useState(body);
+      const launch = useLaunch(current, status, vi.fn(), jobAdapterFor('probe'));
       return (
         <>
           <button type="button" onClick={() => setCurrent({ ...body, units: ['mts|цфо|on'] })}>
             swap
           </button>
-          <LaunchAside
-            kind="probe"
-            targetsCount={1}
-            body={current}
-            status={status}
-            onStarted={vi.fn()}
-          />
+          <LaunchAside launch={launch} />
         </>
       );
     }
@@ -189,9 +198,7 @@ describe('LaunchAside в браузере: второй шаг в панели, 
 describe('LaunchBar в браузере', () => {
   it('первый тап раскрывает детали со вторым шагом, «Списать» создаёт задачу', async () => {
     const onStarted = vi.fn();
-    renderWithProviders(
-      <LaunchBar kind="probe" targetsCount={1} body={body} status={status} onStarted={onStarted} />,
-    );
+    renderWithProviders(<Panel body={body} onStarted={onStarted} bar />);
     const run = await screen.findByRole('button', { name: 'Проверить 1 цель' });
     await waitFor(() => expect((run as HTMLButtonElement).disabled).toBe(false));
 
@@ -246,15 +253,7 @@ describe('LaunchAside в Mini App: родной попап', () => {
 
 describe('LaunchAside: панель без лишнего', () => {
   it('пока запуск невозможен, сумм нет — только причина', async () => {
-    renderWithProviders(
-      <LaunchAside
-        kind="probe"
-        targetsCount={1}
-        body={{ ...body, units: [] }}
-        status={status}
-        onStarted={vi.fn()}
-      />,
-    );
+    renderWithProviders(<Panel body={{ ...body, units: [] }} />);
     expect(await screen.findByText('Выберите хотя бы одну симку')).toBeTruthy();
     expect(screen.queryByText('Итого')).toBeNull();
     expect(screen.queryByText('Остаток после')).toBeNull();

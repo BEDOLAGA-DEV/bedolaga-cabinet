@@ -12,8 +12,8 @@ import { FleetList } from './FleetList';
 installMatchMedia();
 
 /**
- * Список серверов группами «проблемы сначала»: свёрнутые «Работают», строка со словом-вердиктом,
- * выбор строки, режим отметки вручную и живой прогресс «Проверяем…».
+ * Список серверов группами «проблемы сначала»: свёрнутые «Работают», строка со словом-вердиктом
+ * и чекбоксом (это цель проверки), «Подробнее» открывает карточку, живой прогресс «Проверяем…».
  */
 
 afterEach(cleanup);
@@ -49,11 +49,16 @@ function fleet(): FleetRow[] {
   ];
 }
 
+const noop = {
+  picked: new Set<string>(),
+  onToggle: vi.fn(),
+  onDetails: vi.fn(),
+  emptyText: 'пусто',
+};
+
 describe('FleetList', () => {
   it('groups servers, collapses the healthy ones and expands them on demand', () => {
-    renderWithProviders(
-      <FleetList rows={fleet()} selectedKey={null} onSelect={vi.fn()} emptyText="пусто" />,
-    );
+    renderWithProviders(<FleetList rows={fleet()} {...noop} />);
     for (const [name, count] of [
       ['Не работают', 3],
       ['Работают не у всех', 1],
@@ -69,31 +74,25 @@ describe('FleetList', () => {
     expect(screen.getByRole('button', { name: 'Свернуть' })).toBeTruthy();
   });
 
-  it('says the verdict in words and reports the picked server', () => {
-    const onSelect = vi.fn();
-    const rows = fleet();
-    renderWithProviders(
-      <FleetList rows={rows} selectedKey={rows[3].key} onSelect={onSelect} emptyText="пусто" />,
-    );
+  it('говорит вердикт словами и показывает назначение «под Белый список»', () => {
+    renderWithProviders(<FleetList rows={fleet()} {...noop} />);
     const partial = screen.getByRole('button', { name: /Russia \| LTE \| БС/ });
-    expect(partial.getAttribute('aria-current')).toBe('true');
     expect(within(partial).getAllByText('Работает не у всех').length).toBeGreaterThan(0);
     expect(within(partial).getAllByText(/у 7 из 15/).length).toBeGreaterThan(0);
-    fireEvent.click(partial);
-    expect(onSelect).toHaveBeenCalledWith(rows[3]);
+    expect(within(partial).getByText('под Белый список')).toBeTruthy();
   });
 
-  it('shows checkboxes in picking mode and toggles refs instead of opening', () => {
-    const onSelect = vi.fn();
+  it('строка — чекбокс цели: тап отмечает сервер, «Подробнее» открывает карточку', () => {
     const onToggle = vi.fn();
+    const onDetails = vi.fn();
     const rows = fleet().slice(0, 4);
     renderWithProviders(
       <FleetList
         rows={rows}
-        selectedKey={null}
-        onSelect={onSelect}
+        picked={new Set(['h1'])}
+        onToggle={onToggle}
+        onDetails={onDetails}
         emptyText="пусто"
-        picking={{ picked: new Set(['h1']), onToggle }}
       />,
     );
     const boxes = screen.getAllByRole('checkbox');
@@ -101,7 +100,9 @@ describe('FleetList', () => {
     expect(boxes[0].getAttribute('aria-checked')).toBe('true');
     fireEvent.click(screen.getByRole('button', { name: /Server 2/ }));
     expect(onToggle).toHaveBeenCalledWith('h2');
-    expect(onSelect).not.toHaveBeenCalled();
+    expect(onDetails).not.toHaveBeenCalled();
+    fireEvent.click(screen.getAllByRole('button', { name: 'Подробнее' })[0]);
+    expect(onDetails).toHaveBeenCalledWith(rows[0]);
   });
 
   it('shows live progress words while a batch runs', () => {
@@ -110,15 +111,7 @@ describe('FleetList', () => {
       [rows[0].key, { state: 'checking', ok: 3, total: 15, done: 5 }],
       [rows[1].key, { state: 'queued', ok: 0, total: 0, done: 0 }],
     ]);
-    renderWithProviders(
-      <FleetList
-        rows={rows}
-        selectedKey={null}
-        onSelect={vi.fn()}
-        emptyText="пусто"
-        progress={progress}
-      />,
-    );
+    renderWithProviders(<FleetList rows={rows} {...noop} progress={progress} />);
     const first = screen.getByRole('button', { name: /Server 1/ });
     expect(within(first).getAllByText('Проверяем…').length).toBeGreaterThan(0);
     expect(within(first).getAllByText(/у 3 из 15/).length).toBeGreaterThan(0);
@@ -128,12 +121,7 @@ describe('FleetList', () => {
 
   it('shows the empty text when nothing matches', () => {
     renderWithProviders(
-      <FleetList
-        rows={[]}
-        selectedKey={null}
-        onSelect={vi.fn()}
-        emptyText="По этому фильтру серверов нет"
-      />,
+      <FleetList rows={[]} {...noop} emptyText="По этому фильтру серверов нет" />,
     );
     expect(screen.getByText('По этому фильтру серверов нет')).toBeTruthy();
   });

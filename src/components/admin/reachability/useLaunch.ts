@@ -1,31 +1,34 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  type Job,
-  type JobCreateRequest,
-  type ReachabilityStatus,
-  reachabilityApi,
-} from '@/api/reachability';
+import type { JobKind, ReachabilityStatus } from '@/api/reachability';
 import { useNativeDialog } from '@/platform/hooks/useNativeDialog';
 import { useNotify } from '@/platform/hooks/useNotify';
 import { getApiErrorMessage } from '@/utils/api-error';
 import { REACHABILITY_JOBS_KEY } from './jobsRefetch';
+import type { LaunchAdapter, LaunchPreview } from './launchAdapters';
 import { type LaunchSummary, formatList, launchSummary } from './launchSummary';
 import { formatMoney } from './money';
-import { rememberSelection } from './unitSelection';
-import { useJobPreview } from './useJobPreview';
 import { REACHABILITY_STATUS_KEY } from './useReachabilityStatus';
+
+export const REACHABILITY_PREVIEW_KEY = 'admin-reachability-preview';
 
 /** Родной попап Telegram вмещает 256 символов — в Mini App списки короче. */
 const LISTED_WEB = 5;
 const LISTED_NATIVE = 2;
 
 export interface LaunchState {
-  preview: ReturnType<typeof useJobPreview>;
+  kind: JobKind;
+  noun: 'targets' | 'servers';
+  targetsCount: number;
+  unitsCount: number;
+  preview: LaunchPreview | undefined;
+  previewError: unknown;
   cost: number | null;
   balance: number | null;
   balanceAfter: number | null;
+  /** Оценка времени пачки из превью; у одиночной задачи нет. */
+  eta: number | null;
   /** Почему запускать нельзя; null — можно. */
   blocker: string | null;
   isPricing: boolean;
@@ -36,7 +39,7 @@ export interface LaunchState {
   /** Сводка для второго шага; null — цена ещё не посчитана. */
   summary: LaunchSummary | null;
   /**
-   * Mini App: родной попап со сводкой, затем POST /jobs. Браузер: первый вызов включает второй
+   * Mini App: родной попап со сводкой, затем создание. Браузер: первый вызов включает второй
    * шаг в панели, второй — отправляет. Отказ ничего не отправляет.
    */
   run: () => Promise<void>;
@@ -44,42 +47,57 @@ export interface LaunchState {
   cancel: () => void;
 }
 
-export function useLaunch(
-  body: JobCreateRequest | null,
+/**
+ * Панель «Запуск» одинакова для одиночной задачи и пачки серверов: бесплатное превью на каждое
+ * изменение, причины «нельзя», подтверждение перед списанием, память симок после запуска.
+ */
+export function useLaunch<B, R>(
+  body: B | null,
   status: ReachabilityStatus | undefined,
-  onStarted: (job: Job) => void,
+  onStarted: (result: R) => void,
+  adapter: LaunchAdapter<B, R>,
 ): LaunchState {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const dialog = useNativeDialog();
   const notify = useNotify();
-  const preview = useJobPreview(body);
+  const enabled = body !== null && adapter.enabled(body);
+  const preview = useQuery<LaunchPreview>({
+    queryKey: [REACHABILITY_PREVIEW_KEY, adapter.kind, adapter.noun, body],
+    queryFn: () => adapter.preview(body as B),
+    enabled,
+    staleTime: 0,
+    retry: false,
+  });
   const create = useMutation({
-    mutationFn: (request: JobCreateRequest) => reachabilityApi.createJob(request),
-    onSuccess: (job, request) => {
-      rememberSelection(request.kind, request.units);
+    mutationFn: (request: B) => adapter.create(request),
+    onSuccess: (result, request) => {
+      adapter.remember(request);
       queryClient.invalidateQueries({ queryKey: REACHABILITY_STATUS_KEY });
       queryClient.invalidateQueries({ queryKey: [REACHABILITY_JOBS_KEY] });
-      notify.success(t('admin.reachability.launch.started', { id: job.id }));
-      onStarted(job);
+      const started = adapter.started(result);
+      notify.success(t(started.key, started.options));
+      onStarted(result);
     },
     onError: (error) =>
       notify.error(getApiErrorMessage(error, t('admin.reachability.progress.failed'))),
   });
 
-  const busy = status?.active_jobs.find((job) => job.kind === body?.kind);
+  const targetsCount = body ? adapter.targetsCount(body) : 0;
+  const unitsCount = body ? adapter.units(body).length : 0;
+  const busy = body ? adapter.busy(status, body) : null;
   const limit = status?.cost_limit_kopeks ?? 0;
   const cost = preview.data?.cost_kopeks ?? null;
   const balance = preview.data?.balance_kopeks ?? status?.balance_kopeks ?? null;
   const balanceAfter = cost !== null && balance !== null ? balance - cost : null;
 
   let blocker: string | null = null;
-  if (!body || body.targets.length === 0) blocker = t('admin.reachability.launch.noTargets');
-  else if (body.units.length === 0) blocker = t('admin.reachability.launch.noUnitsChosen');
+  if (!body || targetsCount === 0) blocker = t('admin.reachability.launch.noTargets');
+  else if (unitsCount === 0) blocker = t('admin.reachability.launch.noUnitsChosen');
   else if (busy)
-    blocker = t('admin.reachability.launch.busy', {
-      kind: t(`admin.reachability.kinds.${busy.kind}`),
-      id: busy.id,
+    blocker = t(busy.key, {
+      ...busy.options,
+      kind: t(`admin.reachability.kinds.${String(busy.options?.kind ?? adapter.kind)}`),
     });
   else if (preview.isError)
     blocker = `${t('admin.reachability.launch.previewFailed')}: ${getApiErrorMessage(preview.error, '')}`;
@@ -90,18 +108,23 @@ export function useLaunch(
   else if (balance !== null && cost !== null && cost > balance)
     blocker = t('admin.reachability.launch.overBalance');
 
-  const confirmText = (summary: LaunchSummary, kind: JobCreateRequest['kind']): string => {
+  const confirmText = (summary: LaunchSummary): string => {
     const listed = dialog.isNative ? LISTED_NATIVE : LISTED_WEB;
     const more = (count: number) => t('admin.reachability.launch.confirmMore', { count });
     const price = formatMoney(summary.cost);
     return [
       t('admin.reachability.launch.confirmQuestion', {
-        kind: t(`admin.reachability.kinds.${kind}`),
+        kind: t(`admin.reachability.kinds.${adapter.kind}`),
       }),
-      t('admin.reachability.launch.confirmTargets', {
-        count: summary.targets.length,
-        list: formatList(summary.targets, listed, more),
-      }),
+      t(
+        adapter.noun === 'servers'
+          ? 'admin.reachability.launch.confirmServers'
+          : 'admin.reachability.launch.confirmTargets',
+        {
+          count: summary.targets.length,
+          list: formatList(summary.targets, listed, more),
+        },
+      ),
       t('admin.reachability.launch.confirmUnits', {
         count: summary.units.length,
         list: formatList(summary.units, listed, more),
@@ -132,7 +155,7 @@ export function useLaunch(
     if (!body || !preview.data || !canRun) return;
     if (dialog.isNative) {
       const confirmed = await dialog.confirm(
-        confirmText(launchSummary(preview.data), body.kind),
+        confirmText(launchSummary(preview.data)),
         t('admin.reachability.launch.confirmTitle'),
       );
       if (confirmed) create.mutate(body);
@@ -147,10 +170,16 @@ export function useLaunch(
   };
 
   return {
-    preview,
+    kind: adapter.kind,
+    noun: adapter.noun,
+    targetsCount,
+    unitsCount,
+    preview: preview.data,
+    previewError: preview.error,
     cost,
     balance,
     balanceAfter,
+    eta: preview.data?.estimated_minutes ?? null,
     blocker,
     isPricing,
     isPending: create.isPending,

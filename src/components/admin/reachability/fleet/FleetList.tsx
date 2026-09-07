@@ -9,12 +9,12 @@ import { type FleetRow, type FleetState, groupRows } from './fleet';
 interface FleetListProps {
   /** Уже отфильтрованные строки; группировка «проблемы сначала» делается здесь. */
   rows: FleetRow[];
-  selectedKey: string | null;
-  onSelect: (row: FleetRow) => void;
+  /** Отмеченные серверы (refs) — цели проверки. */
+  picked: Set<string>;
+  onToggle: (ref: string) => void;
+  onDetails: (row: FleetRow) => void;
   /** Живой прогресс идущей пачки по target_key. */
   progress?: Map<string, TargetProgress>;
-  /** Режим «Выбрать вручную»: чекбоксы вместо точек, клик отмечает, а не открывает. */
-  picking?: { picked: Set<string>; onToggle: (ref: string) => void };
   emptyText: string;
 }
 
@@ -23,14 +23,14 @@ const COLLAPSE_OK_FROM = 6;
 
 /**
  * Список серверов группами: не работают → не у всех → не проверяли → работают (свёрнуты).
- * Так страница на сотню серверов остаётся короткой: сначала то, что требует внимания.
+ * Каждая строка — цель проверки с чекбоксом; так страница на сотню серверов остаётся короткой.
  */
 export function FleetList({
   rows,
-  selectedKey,
-  onSelect,
+  picked,
+  onToggle,
+  onDetails,
   progress,
-  picking,
   emptyText,
 }: FleetListProps) {
   const { t } = useTranslation();
@@ -68,17 +68,10 @@ export function FleetList({
                   <FleetRowItem
                     key={row.key}
                     row={row}
-                    selected={row.key === selectedKey}
-                    onSelect={onSelect}
+                    picked={row.ref !== null && picked.has(row.ref)}
+                    onToggle={onToggle}
+                    onDetails={onDetails}
                     progress={progress?.get(row.key)}
-                    picking={
-                      picking
-                        ? {
-                            picked: row.ref !== null && picking.picked.has(row.ref),
-                            onToggle: picking.onToggle,
-                          }
-                        : undefined
-                    }
                   />
                 ))}
               </div>

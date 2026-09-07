@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { CheckIcon, ChevronRightIcon } from '@/components/icons';
 import { Spinner } from '@/components/ui/Spinner';
 import { cn } from '@/lib/utils';
+import { PurposeChip } from '../PurposeChip';
 import { relativeAge } from '../relativeAge';
 import type { TargetProgress } from './batchProgress';
 import type { FleetRow, FleetState } from './fleet';
@@ -23,10 +24,10 @@ export const STATE_DOT: Record<FleetState, string> = {
 
 interface FleetRowItemProps {
   row: FleetRow;
-  selected: boolean;
-  onSelect: (row: FleetRow) => void;
+  picked: boolean;
+  onToggle: (ref: string) => void;
+  onDetails: (row: FleetRow) => void;
   progress?: TargetProgress;
-  picking?: { picked: boolean; onToggle: (ref: string) => void };
 }
 
 /** Слово-вердикт, счёт «у 7 из 15» и давность — с учётом идущей проверки. */
@@ -53,64 +54,78 @@ function useWords(row: FleetRow, progress: TargetProgress | undefined) {
 }
 
 /**
- * Строка сервера: точка тона (или спиннер, или чекбокс), имя и адрес, слово-вердикт, счёт, давность.
- * На телефоне вторая строка собирает слово, счёт и давность через «·».
+ * Строка сервера: чекбокс (это цель проверки), имя, адрес и назначение, слово-вердикт, счёт,
+ * давность и «Подробнее». Тап по строке отмечает сервер; шеврон открывает карточку.
  */
-export function FleetRowItem({ row, selected, onSelect, progress, picking }: FleetRowItemProps) {
+export function FleetRowItem({ row, picked, onToggle, onDetails, progress }: FleetRowItemProps) {
   const { t } = useTranslation();
   const { word, tone, count, age } = useWords(row, progress);
-  const lead = picking ? (
-    <span
-      role="checkbox"
-      aria-checked={picking.picked}
-      className={cn(
-        'flex h-5 w-5 shrink-0 items-center justify-center rounded-md border',
-        picking.picked ? 'border-accent-500 bg-accent-500 text-on-accent' : 'border-dark-500',
-      )}
-    >
-      {picking.picked && <CheckIcon className="h-3.5 w-3.5" />}
-    </span>
-  ) : progress?.state === 'checking' ? (
-    <Spinner className="h-4 w-4 shrink-0 text-accent-400" />
-  ) : (
-    <span
-      aria-hidden="true"
-      className={cn('h-2 w-2 shrink-0 rounded-full', STATE_DOT[row.state])}
-    />
-  );
-  const secondary = [row.address, row.purpose === 'bs' ? t('admin.reachability.purpose.bs') : '']
-    .filter(Boolean)
-    .join(' · ');
+  const selectable = row.ref !== null && !progress;
+  const lead =
+    progress?.state === 'checking' ? (
+      <Spinner className="h-4 w-4 shrink-0 text-accent-400" />
+    ) : (
+      <span
+        role="checkbox"
+        aria-checked={picked}
+        aria-disabled={!selectable}
+        className={cn(
+          'flex h-5 w-5 shrink-0 items-center justify-center rounded-md border',
+          picked ? 'border-accent-500 bg-accent-500 text-on-accent' : 'border-dark-500',
+          !selectable && 'opacity-40',
+        )}
+      >
+        {picked && <CheckIcon className="h-3.5 w-3.5" />}
+      </span>
+    );
   const mobileLine = [word, count, age].filter(Boolean);
 
   return (
-    <button
-      type="button"
-      aria-current={selected ? 'true' : undefined}
-      onClick={() => (picking && row.ref ? picking.onToggle(row.ref) : onSelect(row))}
+    <div
       className={cn(
-        'flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors md:grid md:min-h-[52px] md:grid-cols-[1.25rem_minmax(0,1fr)_11rem_5.5rem_7rem_1rem] md:gap-3',
-        selected ? 'bg-accent-500/10' : 'hover:bg-dark-800/40',
+        'flex items-center gap-2 rounded-xl px-2 transition-colors',
+        picked ? 'bg-accent-500/10' : 'hover:bg-dark-800/40',
       )}
     >
-      <span className="flex w-5 shrink-0 justify-center">{lead}</span>
-      <span className="min-w-0 flex-1">
-        <span className="block truncate text-[15px] font-semibold text-dark-100 md:text-sm">
-          {row.label}
+      <button
+        type="button"
+        disabled={!selectable}
+        aria-pressed={picked}
+        onClick={() => row.ref && onToggle(row.ref)}
+        className="flex min-w-0 flex-1 items-center gap-3 py-2.5 text-left md:grid md:min-h-[52px] md:grid-cols-[1.25rem_minmax(0,1fr)_11rem_5.5rem_7rem] md:gap-3"
+      >
+        <span className="flex w-5 shrink-0 justify-center">{lead}</span>
+        <span className="min-w-0 flex-1">
+          <span className="block truncate text-[15px] font-semibold text-dark-100 md:text-sm">
+            {row.label}
+          </span>
+          <span className="mt-0.5 flex min-w-0 items-center gap-2">
+            <span className="truncate font-mono text-xs text-dark-500">{row.address}</span>
+            {row.purpose === 'bs' && <PurposeChip purpose="bs" />}
+          </span>
+          <span className="mt-0.5 flex flex-wrap items-center gap-x-1.5 text-[13px] md:hidden">
+            {mobileLine.map((part, index) => (
+              <span
+                key={part}
+                className={index === 0 ? cn('font-semibold', tone) : 'text-dark-400'}
+              >
+                {index > 0 ? `· ${part}` : part}
+              </span>
+            ))}
+          </span>
         </span>
-        <span className="block truncate font-mono text-xs text-dark-500 md:block">{secondary}</span>
-        <span className="mt-0.5 flex flex-wrap items-center gap-x-1.5 text-[13px] md:hidden">
-          {mobileLine.map((part, index) => (
-            <span key={part} className={index === 0 ? cn('font-semibold', tone) : 'text-dark-400'}>
-              {index > 0 ? `· ${part}` : part}
-            </span>
-          ))}
-        </span>
-      </span>
-      <span className={cn('hidden text-sm font-semibold md:block', tone)}>{word}</span>
-      <span className="hidden text-xs text-dark-400 md:block">{count}</span>
-      <span className="hidden text-xs text-dark-400 md:block">{age}</span>
-      <ChevronRightIcon className="h-4 w-4 shrink-0 text-dark-500" />
-    </button>
+        <span className={cn('hidden text-sm font-semibold md:block', tone)}>{word}</span>
+        <span className="hidden text-xs text-dark-400 md:block">{count}</span>
+        <span className="hidden text-xs text-dark-400 md:block">{age}</span>
+      </button>
+      <button
+        type="button"
+        aria-label={t('admin.reachability.fleet.details')}
+        onClick={() => onDetails(row)}
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-dark-500 hover:bg-dark-800 hover:text-dark-200"
+      >
+        <ChevronRightIcon className="h-4 w-4" />
+      </button>
+    </div>
   );
 }

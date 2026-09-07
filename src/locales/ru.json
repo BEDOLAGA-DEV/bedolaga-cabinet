@@ -2040,31 +2040,12 @@
         "referenceConfigs_few": "{{count}} конфига",
         "referenceConfigs_many": "{{count}} конфигов",
         "activity": "Сейчас",
-        "idle": "свободно",
-        "tierUntil": "тариф {{tier}} до {{date}}"
+        "idle": "свободно"
       },
       "units": {
         "dpiOn": "с Белым списком",
         "dpiOff": "без Белого списка",
-        "dpiAny": "все",
-        "title": "Симки",
-        "hint": "каждая симка списывается отдельно",
-        "quick": {
-          "label": "Быстрый выбор",
-          "bs": "С Белым списком",
-          "regular": "Без Белого списка",
-          "all": "Все",
-          "recall": "Как в прошлый раз"
-        },
-        "selectedOf": "выбрано {{selected}} из {{total}}",
-        "none": "Симки не выбраны",
-        "detailsShow": "Отдельные симки",
-        "detailsHide": "Свернуть список",
-        "groupBs": "С Белым списком",
-        "groupRegular": "Без Белого списка",
-        "pickGroup": "Все",
-        "unpickGroup": "Снять",
-        "empty": "Список симок пуст: сервис недоступен"
+        "dpiAny": "все"
       },
       "launch": {
         "price": "Цена",
@@ -2122,7 +2103,19 @@
         "summaryTargets_many": "{{count}} целей",
         "summaryUnits_one": "{{count}} симка",
         "summaryUnits_few": "{{count}} симки",
-        "summaryUnits_many": "{{count}} симок"
+        "summaryUnits_many": "{{count}} симок",
+        "runHosts_one": "Проверить {{count}} сервер · {{price}}",
+        "runHosts_few": "Проверить {{count}} сервера · {{price}}",
+        "runHosts_many": "Проверить {{count}} серверов · {{price}}",
+        "runShortHosts_one": "Проверить {{count}} сервер",
+        "runShortHosts_few": "Проверить {{count}} сервера",
+        "runShortHosts_many": "Проверить {{count}} серверов",
+        "summaryServers_one": "{{count}} сервер",
+        "summaryServers_few": "{{count}} сервера",
+        "summaryServers_many": "{{count}} серверов",
+        "busyBatch": "Уже идёт проверка серверов — дождитесь завершения",
+        "timeRow": "Время",
+        "confirmServers": "Серверы ({{count}}): {{list}}"
       },
       "progress": {
         "submitting": "Отправляем запрос…",
@@ -2203,7 +2196,7 @@
         "sourceSubscription": "подписка · {{count}}",
         "pickAll": "Все",
         "pickNone": "Сбросить",
-        "orPick": "или подставьте готовую подписку",
+        "orPick": "Или свой конфиг / другая подписка",
         "fromInput": "показаны конфиги из поля выше",
         "selectedOf": "выбрано {{selected}} / {{total}}",
         "rejectedReasons": {
@@ -2341,25 +2334,26 @@
         "ofUnits": "у {{ok}} из {{total}}",
         "justNow": "только что",
         "empty": "По этому фильтру серверов нет",
-        "check": "Проверить серверы",
         "history": "История проверок",
-        "other": "Проверить адрес или подписку",
-        "pick": "Выбрать вручную",
-        "pickDone": "Готово",
-        "picked_one": "Выбран {{count}} сервер",
-        "picked_few": "Выбрано {{count}} сервера",
-        "picked_many": "Выбрано {{count}} серверов",
-        "checkShort": "Проверить"
+        "pick": {
+          "problems": "С проблемами",
+          "stale": "Давно не проверяли",
+          "all": "Все"
+        },
+        "clear": "Снять",
+        "details": "Подробнее",
+        "targets": "Серверы",
+        "quickLabel": "Быстрый выбор серверов"
       },
       "switch": {
         "label": "Что проверяем",
         "hosts": "Хосты",
-        "hostsHint": "хосты и ноды панели Remnawave, до 10 целей за запуск",
+        "hostsHint": "серверы панели Remnawave: состояние и проверка выбранных",
         "ip": "IP / домен",
         "ipHint": "свои адреса: IP, IP:порт, домен или https://…, до 10 целей за запуск",
-        "cidr": "CIDR",
+        "cidr": "Скан CIDR",
         "cidrHint": "скан подсети /24: живые адреса глазами симок",
-        "vless": "Подписка",
+        "vless": "VPN-тест",
         "vlessHint": "конфиги подписки через VLESS-туннель, до 20 за тест"
       },
       "sections": {
@@ -2451,23 +2445,8 @@
         "close": "Закрыть"
       },
       "batch": {
-        "title": "Что проверить?",
-        "scope": {
-          "problems": "С проблемами",
-          "stale": "Давно не проверяли",
-          "all": "Все серверы",
-          "manual": "Выбрать вручную",
-          "staleHint": "старше недели",
-          "manualHint": "отметьте нужные в списке"
-        },
-        "servers_one": "{{count}} сервер",
-        "servers_few": "{{count}} сервера",
-        "servers_many": "{{count}} серверов",
         "minutes": "около {{count}} минут",
-        "balanceAfter": "Остаток после: {{balance}}",
         "onlyChecked": "Списывается только за проверенные симки. Проверку можно остановить.",
-        "run": "Запустить за {{price}}",
-        "running": "Запускаем…",
         "progressTitle_one": "Проверяем {{count}} сервер",
         "progressTitle_few": "Проверяем {{count}} сервера",
         "progressTitle_many": "Проверяем {{count}} серверов",
@@ -2482,14 +2461,21 @@
         "started": "Проверка запущена",
         "finishedOk": "Проверка закончена",
         "finishedCancelled": "Проверка остановлена",
-        "finishedFailed": "Проверка не удалась",
-        "nothingToCheck": "Под этот выбор серверов не попало"
+        "finishedFailed": "Проверка не удалась"
       },
-      "quick": {
-        "placeholder": "IP, домен, vless:// или ссылка на подписку",
-        "check": "Проверить",
-        "hint": "Один адрес, конфиг или подписка целиком",
-        "cidr": "Скан подсети /24"
+      "operators": {
+        "title": "Операторы",
+        "hint": "каждая симка списывается отдельно",
+        "bs": "БС",
+        "regular": "без БС",
+        "noBs": "без БС",
+        "offline": "нет связи",
+        "selected": "выбрано {{selected}} / {{total}}",
+        "reset": "Сбросить",
+        "recall": "Как в прошлый раз",
+        "pickDistrict": "Все симки {{code}}",
+        "unpickDistrict": "Снять симки {{code}}",
+        "empty": "Список симок пуст: сервис недоступен"
       }
     },
     "wheel": {

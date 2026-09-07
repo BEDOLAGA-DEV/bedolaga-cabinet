@@ -2024,31 +2024,12 @@
         "referenceConfigs_one": "{{count}} config",
         "referenceConfigs_other": "{{count}} configs",
         "activity": "Now",
-        "idle": "idle",
-        "tierUntil": "{{tier}} plan until {{date}}"
+        "idle": "idle"
       },
       "units": {
         "dpiOn": "with whitelist",
         "dpiOff": "without whitelist",
-        "dpiAny": "all",
-        "title": "SIMs",
-        "hint": "each SIM is charged separately",
-        "quick": {
-          "label": "Quick pick",
-          "bs": "With whitelist",
-          "regular": "Without whitelist",
-          "all": "All",
-          "recall": "Same as last time"
-        },
-        "selectedOf": "{{selected}} of {{total}} selected",
-        "none": "No SIMs selected",
-        "detailsShow": "Individual SIMs",
-        "detailsHide": "Collapse list",
-        "groupBs": "With whitelist",
-        "groupRegular": "Without whitelist",
-        "pickGroup": "All",
-        "unpickGroup": "Clear",
-        "empty": "No SIMs: service unavailable"
+        "dpiAny": "all"
       },
       "launch": {
         "price": "Price",
@@ -2100,7 +2081,16 @@
         "summaryTargets_one": "{{count}} target",
         "summaryTargets_other": "{{count}} targets",
         "summaryUnits_one": "{{count}} SIM",
-        "summaryUnits_other": "{{count}} SIMs"
+        "summaryUnits_other": "{{count}} SIMs",
+        "runHosts_one": "Check {{count}} server · {{price}}",
+        "runHosts_other": "Check {{count}} servers · {{price}}",
+        "runShortHosts_one": "Check {{count}} server",
+        "runShortHosts_other": "Check {{count}} servers",
+        "summaryServers_one": "{{count}} server",
+        "summaryServers_other": "{{count}} servers",
+        "busyBatch": "A server check is already running — wait for it",
+        "timeRow": "Time",
+        "confirmServers": "Servers ({{count}}): {{list}}"
       },
       "progress": {
         "submitting": "Sending request…",
@@ -2179,7 +2169,7 @@
         "sourceSubscription": "subscription · {{count}}",
         "pickAll": "All",
         "pickNone": "Reset",
-        "orPick": "or use a ready subscription",
+        "orPick": "Or your own config / another subscription",
         "fromInput": "showing configs from the field above",
         "selectedOf": "selected {{selected}} / {{total}}",
         "rejectedReasons": {
@@ -2310,24 +2300,26 @@
         "ofUnits": "{{ok}} of {{total}}",
         "justNow": "just now",
         "empty": "No servers match this filter",
-        "check": "Check servers",
         "history": "Check history",
-        "other": "Check an address or a subscription",
-        "pick": "Pick manually",
-        "pickDone": "Done",
-        "picked_one": "{{count}} server selected",
-        "picked_other": "{{count}} servers selected",
-        "checkShort": "Check"
+        "pick": {
+          "problems": "With problems",
+          "stale": "Not checked lately",
+          "all": "All"
+        },
+        "clear": "Clear",
+        "details": "Details",
+        "targets": "Servers",
+        "quickLabel": "Quick pick of servers"
       },
       "switch": {
         "label": "What to check",
         "hosts": "Hosts",
-        "hostsHint": "Remnawave panel hosts and nodes, up to 10 targets per run",
+        "hostsHint": "Remnawave panel servers: state and checking the picked ones",
         "ip": "IP / domain",
         "ipHint": "your own addresses: IP, IP:port, domain or https://…, up to 10 targets per run",
-        "cidr": "CIDR",
-        "cidrHint": "scan a /24 subnet: live addresses as seen by SIMs",
-        "vless": "Subscription",
+        "cidr": "CIDR scan",
+        "cidrHint": "scan a /24 subnet: live addresses as SIMs see them",
+        "vless": "VPN test",
         "vlessHint": "subscription configs through a VLESS tunnel, up to 20 per test"
       },
       "sections": {
@@ -2415,22 +2407,8 @@
         "close": "Close"
       },
       "batch": {
-        "title": "What to check?",
-        "scope": {
-          "problems": "With problems",
-          "stale": "Not checked for a while",
-          "all": "All servers",
-          "manual": "Pick manually",
-          "staleHint": "older than a week",
-          "manualHint": "tick the servers in the list"
-        },
-        "servers_one": "{{count}} server",
-        "servers_other": "{{count}} servers",
         "minutes": "about {{count}} minutes",
-        "balanceAfter": "Balance after: {{balance}}",
         "onlyChecked": "You pay only for SIMs that were checked. The check can be stopped.",
-        "run": "Run for {{price}}",
-        "running": "Starting…",
         "progressTitle_one": "Checking {{count}} server",
         "progressTitle_other": "Checking {{count}} servers",
         "progressLine": "Done {{done}} of {{total}} · {{eta}} left",
@@ -2444,14 +2422,21 @@
         "started": "Check started",
         "finishedOk": "Check finished",
         "finishedCancelled": "Check stopped",
-        "finishedFailed": "Check failed",
-        "nothingToCheck": "No servers match this choice"
+        "finishedFailed": "Check failed"
       },
-      "quick": {
-        "placeholder": "IP, domain, vless:// or subscription link",
-        "check": "Check",
-        "hint": "One address, a config or a whole subscription",
-        "cidr": "Scan a /24 subnet"
+      "operators": {
+        "title": "Operators",
+        "hint": "each SIM is charged separately",
+        "bs": "WL",
+        "regular": "no WL",
+        "noBs": "no WL",
+        "offline": "offline",
+        "selected": "{{selected}} / {{total}} selected",
+        "reset": "Clear",
+        "recall": "Same as last time",
+        "pickDistrict": "All SIMs in {{code}}",
+        "unpickDistrict": "Clear SIMs in {{code}}",
+        "empty": "No SIMs: service unavailable"
       }
     },
     "wheel": {
