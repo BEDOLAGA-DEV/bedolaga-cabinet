@@ -4033,13 +4033,6 @@
         },
         "list": "按 SIM 卡的结果"
       },
-      "summary": {
-        "openJob": "打开任务",
-        "dpiFilter": "SIM 卡",
-        "panelError": "面板不可用：{{error}}",
-        "notInPanel": "不在面板中",
-        "notInCatalog": "不在目录中"
-      },
       "history": {
         "columns": {
           "targets": "目标"
@@ -4060,7 +4053,6 @@
         "checkNode": "在 BSCHEKER 中检查"
       },
       "fleet": {
-        "offline": "运营商暂时不可用，请 1–2 分钟后重试",
         "onAir_other": "{{total}} 张 SIM 卡在线：{{bs}} 张有白名单，{{regular}} 张无",
         "statement": "{{total}} 台服务器中 {{ok}} 台正常",
         "statementAllOk": "全部 {{total}} 台服务器正常",
@@ -4103,10 +4095,6 @@
         "pickDone": "完成",
         "picked_other": "已选择 {{count}} 台服务器",
         "checkShort": "检查"
-      },
-      "health": {
-        "checked": "检查于 {{age}}",
-        "none": "面板中没有标记为“白名单”的主机"
       },
       "switch": {
         "label": "检查内容",
@@ -4196,18 +4184,6 @@
         "unhealthyHint": "请在 bsbord.com 检查 API 密钥和套餐"
       },
       "subtitle": "从俄罗斯的服务器可达性",
-      "answer": {
-        "title": "服务器状态",
-        "bs_other": "{{total}} 张白名单 SIM 卡中 {{ok}} 张可打开",
-        "regular_other": "{{total}} 张无白名单 SIM 卡中 {{ok}} 张可打开",
-        "blocked": "被拦截：{{list}}",
-        "unchecked": "尚未检测",
-        "again": "重新检测",
-        "first": "检测",
-        "details": "详情",
-        "hideDetails": "收起",
-        "running": "检测中…"
-      },
       "unitsSummary": {
         "title": "SIM 卡",
         "none": "未选择 SIM 卡",

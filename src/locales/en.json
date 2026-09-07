@@ -2232,13 +2232,6 @@
         },
         "list": "Result by SIM"
       },
-      "summary": {
-        "openJob": "Open job",
-        "dpiFilter": "SIMs",
-        "panelError": "Panel unavailable: {{error}}",
-        "notInPanel": "not in panel",
-        "notInCatalog": "not in catalog"
-      },
       "history": {
         "columns": {
           "targets": "Targets"
@@ -2260,7 +2253,6 @@
         "checkNode": "Check in BSCHEKER"
       },
       "fleet": {
-        "offline": "operators are unavailable right now, try again in 1–2 minutes",
         "onAir_one": "{{total}} SIM online: {{bs}} with the whitelist, {{regular}} without",
         "onAir_other": "{{total}} SIMs online: {{bs}} with the whitelist, {{regular}} without",
         "statement": "{{ok}} of {{total}} servers are working",
@@ -2308,10 +2300,6 @@
         "picked_one": "{{count}} server selected",
         "picked_other": "{{count}} servers selected",
         "checkShort": "Check"
-      },
-      "health": {
-        "checked": "checked {{age}}",
-        "none": "No hosts marked as “whitelist” in the panel"
       },
       "switch": {
         "label": "What to check",
@@ -2405,20 +2393,6 @@
         "unhealthyHint": "Check the API key and plan at bsbord.com"
       },
       "subtitle": "server reachability from Russia",
-      "answer": {
-        "title": "Server status",
-        "bs_one": "opens on {{ok}} of {{total}} whitelist SIM",
-        "bs_other": "opens on {{ok}} of {{total}} whitelist SIMs",
-        "regular_one": "opens on {{ok}} of {{total}} non-whitelist SIM",
-        "regular_other": "opens on {{ok}} of {{total}} non-whitelist SIMs",
-        "blocked": "Blocked: {{list}}",
-        "unchecked": "not checked yet",
-        "again": "Check again",
-        "first": "Check",
-        "details": "Details",
-        "hideDetails": "Hide details",
-        "running": "Checking…"
-      },
       "unitsSummary": {
         "title": "SIMs",
         "none": "No SIMs selected",
