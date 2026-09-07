@@ -51,11 +51,11 @@ function ModeDot({ dpi }: { dpi: string }) {
 }
 
 /**
- * Операторы как в оригинале bsbord.com: один ряд «● БС · 16 / ● без БС · 18» (точки — легенда),
- * в его конце «выбрано 18 / 34 · Сбросить»; округа строками с чекбоксом и счётом, внутри чипы
- * операторов с точкой режима и заметной обводкой у выбранных. Каждая симка списывается
- * отдельно — ничего не отмечается само. Место под «Сбросить» держится всегда, чтобы округа
- * не прыгали, когда выбор появляется или исчезает.
+ * Операторы как в оригинале bsbord.com: в строке заголовка «выбрано 18 / 34 · Сбросить», ниже ряд
+ * «● БС · 16 / ● без БС · 18 / Как в прошлый раз» (точки — легенда); округа строками с чекбоксом
+ * и счётом, внутри чипы операторов с точкой режима и заметной обводкой у выбранных. Каждая симка
+ * списывается отдельно — ничего не отмечается само. Место под «Сбросить» держится всегда, чтобы
+ * ничего не прыгало, когда выбор появляется или исчезает.
  */
 export function OperatorPicker({ kind, units, selected, onChange, loading }: OperatorPickerProps) {
   const { t } = useTranslation();
@@ -100,6 +100,26 @@ export function OperatorPicker({ kind, units, selected, onChange, loading }: Ope
         id="reachability-operators"
         title={t(`${base}.title`)}
         hint={t(`${base}.hint`)}
+        aside={
+          <span className="flex items-center gap-3">
+            <span className="tabular-nums">
+              {t(`${base}.selected`, { selected: chosen.length, total: alive.length })}
+            </span>
+            <button
+              type="button"
+              onClick={() => onChange([])}
+              disabled={chosen.length === 0}
+              aria-hidden={chosen.length === 0}
+              tabIndex={chosen.length === 0 ? -1 : undefined}
+              className={cn(
+                'min-h-[36px] text-sm text-dark-400 hover:text-dark-200',
+                chosen.length === 0 && 'invisible',
+              )}
+            >
+              {t(`${base}.reset`)}
+            </button>
+          </span>
+        }
       />
 
       <div className="flex flex-wrap items-center gap-2">
@@ -134,24 +154,6 @@ export function OperatorPicker({ kind, units, selected, onChange, loading }: Ope
             {t(`${base}.recall`)}
           </button>
         )}
-        <span className="ms-auto flex items-center gap-3 text-xs text-dark-400">
-          <span className="tabular-nums">
-            {t(`${base}.selected`, { selected: chosen.length, total: alive.length })}
-          </span>
-          <button
-            type="button"
-            onClick={() => onChange([])}
-            disabled={chosen.length === 0}
-            aria-hidden={chosen.length === 0}
-            tabIndex={chosen.length === 0 ? -1 : undefined}
-            className={cn(
-              'min-h-[36px] text-sm text-dark-400 hover:text-dark-200',
-              chosen.length === 0 && 'invisible',
-            )}
-          >
-            {t(`${base}.reset`)}
-          </button>
-        </span>
       </div>
 
       <ul className="space-y-1.5">

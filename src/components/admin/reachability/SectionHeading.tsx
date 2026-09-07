@@ -8,17 +8,21 @@ interface SectionHeadingProps {
   aside?: ReactNode;
 }
 
-/** Заголовок секции внутри страницы: без карточки, с подсказкой и местом под счётчик. */
+/**
+ * Заголовок секции внутри страницы: без карточки. Заголовок и aside — одной строкой, подсказка
+ * под ними во всю ширину, поэтому на телефоне aside не уезжает на отдельную строку из-за длинной
+ * подсказки.
+ */
 export function SectionHeading({ id, title, hint, aside }: SectionHeadingProps) {
   return (
-    <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-      <div className="min-w-0">
-        <h2 id={id} className="text-lg font-semibold text-dark-100">
+    <div className="space-y-0.5">
+      <div className="flex items-baseline justify-between gap-x-4">
+        <h2 id={id} className="min-w-0 text-lg font-semibold text-dark-100">
           {title}
         </h2>
-        {hint && <p className="text-xs text-dark-400">{hint}</p>}
+        {aside && <div className="shrink-0 text-xs text-dark-400">{aside}</div>}
       </div>
-      {aside && <div className="shrink-0 text-xs text-dark-400">{aside}</div>}
+      {hint && <p className="text-xs text-dark-400">{hint}</p>}
     </div>
   );
 }
