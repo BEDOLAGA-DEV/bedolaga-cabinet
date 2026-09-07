@@ -56,3 +56,12 @@ export function repeatFromJob(job: Job): RepeatState {
     sniHosts: (job.sni_hosts ?? []).join(', '),
   };
 }
+
+/**
+ * Можно ли повторить задачу той же формой: вставленные ссылки конфигов бот в ответах не хранит
+ * (в них ключи доступа), поэтому VPN-тест по вставленным ссылкам повторяется только новой вставкой.
+ */
+export function canRepeat(job: Pick<Job, 'kind' | 'targets'>): boolean {
+  if (job.kind !== 'vless') return true;
+  return (job.targets ?? []).every((target) => target.kind !== 'custom');
+}

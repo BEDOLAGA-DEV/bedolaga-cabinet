@@ -15,7 +15,7 @@ import { buildReachabilityLink } from './deepLink';
 import { type Outcome, jobOutcome } from './jobOutcome';
 import { formatCredits } from './money';
 import { relativeAge } from './relativeAge';
-import { repeatFromJob } from './repeatFromJob';
+import { canRepeat, repeatFromJob } from './repeatFromJob';
 
 const KINDS: Array<JobKind | ''> = ['', 'probe', 'vless', 'scan'];
 const STATUSES: Array<JobStatus | ''> = ['', 'running', 'done', 'failed', 'cancelled'];
@@ -219,16 +219,18 @@ export function RecentJobs({ initialJobId }: RecentJobsProps) {
                       )}
                       <JobResult job={job} />
                       <div className="flex flex-wrap gap-2 pt-1">
-                        <Link
-                          to={buildReachabilityLink({
-                            mode: repeatFromJob(job).mode,
-                            repeatJobId: job.id,
-                          })}
-                          className="btn-secondary min-h-[40px] px-3 text-sm"
-                          onClick={scrollToLauncher}
-                        >
-                          {t('admin.reachability.recent.repeat')}
-                        </Link>
+                        {canRepeat(job) && (
+                          <Link
+                            to={buildReachabilityLink({
+                              mode: repeatFromJob(job).mode,
+                              repeatJobId: job.id,
+                            })}
+                            className="btn-secondary min-h-[40px] px-3 text-sm"
+                            onClick={scrollToLauncher}
+                          >
+                            {t('admin.reachability.recent.repeat')}
+                          </Link>
+                        )}
                         <button
                           type="button"
                           className="btn-ghost min-h-[40px] px-3 text-sm"

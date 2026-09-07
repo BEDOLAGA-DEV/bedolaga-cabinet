@@ -270,9 +270,7 @@ export function Launcher({ status, link, runningJobId, onRunning }: LauncherProp
       <div className="hidden lg:block">
         <LaunchAside launch={launch} />
       </div>
-      <div className="lg:hidden">
-        <LaunchBar launch={launch} />
-      </div>
+      <div className="lg:hidden">{launch.targetsCount > 0 && <LaunchBar launch={launch} />}</div>
     </div>
   );
 }

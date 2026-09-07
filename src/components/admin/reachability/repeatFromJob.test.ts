@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Job } from '@/api/reachability';
-import { repeatFromJob } from './repeatFromJob';
+import { canRepeat, repeatFromJob } from './repeatFromJob';
 
 /** «Повторить» в журнале: из задачи собирается состояние формы запуска — те же цели, симки, пробы. */
 
@@ -75,5 +75,19 @@ describe('repeatFromJob', () => {
       shortUuid: 'ref-1',
       configIndexes: [2, 4],
     });
+  });
+});
+
+describe('canRepeat', () => {
+  it('VPN-тест по вставленным ссылкам не повторить: ссылок в задаче нет', () => {
+    expect(canRepeat({ kind: 'vless', targets: [{ kind: 'custom' }] } as unknown as Job)).toBe(
+      false,
+    );
+    expect(
+      canRepeat({ kind: 'vless', targets: [{ kind: 'subscription_config' }] } as unknown as Job),
+    ).toBe(true);
+    expect(canRepeat({ kind: 'probe', targets: [{ kind: 'custom' }] } as unknown as Job)).toBe(
+      true,
+    );
   });
 });

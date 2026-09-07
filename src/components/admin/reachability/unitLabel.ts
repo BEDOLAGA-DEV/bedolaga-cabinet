@@ -1,5 +1,6 @@
 import type { Job, Leg, Unit } from '@/api/reachability';
 import { operatorCode } from './operatorIcons';
+import { regionLabel } from './unitSelection';
 
 /** Подписи строк таблицы результата: симка оператора и цель. Чистые функции. */
 
@@ -23,7 +24,7 @@ export function unitLabel(
   return {
     code,
     name: unit?.name ?? fallbackName ?? code,
-    region: (leg.region ?? unit?.region ?? region).toUpperCase(),
+    region: regionLabel(leg.region ?? unit?.region ?? region),
   };
 }
 
@@ -36,7 +37,7 @@ export function targetLabel(job: Pick<Job, 'targets'>, targetKey: string): strin
 export function unitNameList(opKeys: readonly string[], catalog: readonly Unit[]): string[] {
   return opKeys.map((opKey) => {
     const unit = catalog.find((item) => item.op_key === opKey);
-    return unit ? `${unit.name} ${unit.region}` : opKey;
+    return unit ? `${unit.name} ${regionLabel(unit.region)}` : opKey;
   });
 }
 
