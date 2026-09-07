@@ -1,5 +1,6 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router';
 import {
   type Purpose,
   type ReachabilityStatus,
@@ -14,6 +15,7 @@ import { useNotify } from '@/platform/hooks/useNotify';
 import { getApiErrorMessage } from '@/utils/api-error';
 import { OperatorIcon } from '../OperatorIcon';
 import { PurposeChip } from '../PurposeChip';
+import { buildReachabilityLink } from '../deepLink';
 import { formatCredits } from '../money';
 import { relativeAge } from '../relativeAge';
 import { resultHeadline } from '../resultHeadline';
@@ -32,8 +34,6 @@ interface ServerDetailsProps {
 }
 
 const HISTORY_ROWS = 3;
-/** Заголовок журнала внизу страницы: «Все» прошлые проверки прокручивают к нему. */
-const HISTORY_ANCHOR = 'reachability-recent';
 const TONE: Record<'ok' | 'warn' | 'down' | 'na' | 'pending', string> = {
   ok: 'bg-success-400',
   warn: 'bg-warning-400',
@@ -58,7 +58,8 @@ function operatorWords(
 /**
  * Карточка под строкой сервера. Имя и вердикт уже в строке, поэтому здесь только новое:
  * адрес с назначением и кнопка «Проверить этот сервер · цена», счёт симок словами,
- * операторы сеткой в две колонки, прошлые проверки одной строкой.
+ * операторы сеткой в две колонки, прошлые проверки одной строкой; «Все» ведёт во вкладку
+ * «История» с фильтром по этому серверу.
  */
 export function ServerDetails({ row, summaryRow, units, status, onCheck }: ServerDetailsProps) {
   const { t, i18n } = useTranslation();
@@ -108,8 +109,6 @@ export function ServerDetails({ row, summaryRow, units, status, onCheck }: Serve
           .filter(Boolean)
           .join(' · ');
   const priceLabel = price.data?.cost_kopeks != null ? formatCredits(price.data.cost_kopeks) : null;
-  const scrollToHistory = () =>
-    document.getElementById(HISTORY_ANCHOR)?.scrollIntoView?.({ behavior: 'smooth' });
 
   return (
     <div className="space-y-4">
@@ -161,13 +160,12 @@ export function ServerDetails({ row, summaryRow, units, status, onCheck }: Serve
       <section className="space-y-1.5">
         <div className="flex items-center gap-3">
           <h4 className="text-[13px] font-semibold text-dark-400">{t(`${base}.server.history`)}</h4>
-          <button
-            type="button"
-            onClick={scrollToHistory}
+          <Link
+            to={buildReachabilityLink({ mode: 'history', serverKey: row.key })}
             className="text-[13px] font-medium text-accent-400 hover:underline"
           >
             {t(`${base}.server.allHistory`)}
-          </button>
+          </Link>
         </div>
         {history.isLoading && <Skeleton className="h-5 w-64" />}
         {history.data && history.data.items.length === 0 && (

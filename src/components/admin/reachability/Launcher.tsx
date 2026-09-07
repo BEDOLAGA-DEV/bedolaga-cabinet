@@ -49,7 +49,7 @@ const SCAN_DEFAULT: Probes = { icmp: true, tcp: true, sni: false };
  * «Запуск» справа (на телефоне — панель снизу). Хосты панели живут на своей вкладке.
  */
 export function Launcher({ status, link, runningJobId, onRunning }: LauncherProps) {
-  const mode = link.mode === 'hosts' ? 'ip' : link.mode;
+  const mode = link.mode === 'hosts' || link.mode === 'history' ? 'ip' : link.mode;
   const kind = jobKindOf(mode);
   const { data: catalog = [], isLoading: unitsLoading } = useUnits();
 

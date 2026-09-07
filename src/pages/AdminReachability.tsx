@@ -10,7 +10,7 @@ import { RecentJobs } from '../components/admin/reachability/RecentJobs';
 import { SetupGuide } from '../components/admin/reachability/SetupGuide';
 import { TierBadge } from '../components/admin/reachability/TierBadge';
 import {
-  type LaunchMode,
+  type PageTab,
   REACHABILITY_SETTINGS_PATH,
   parseReachabilityDeepLink,
 } from '../components/admin/reachability/deepLink';
@@ -21,8 +21,8 @@ import { useReachabilityStatus } from '../components/admin/reachability/useReach
 type ParamPatch = Record<string, string | null>;
 
 /**
- * BSCHEKER одной страницей, как bsbord.com: вкладки «Хосты · IP / домен · Скан CIDR · VPN-тест»,
- * под ними цели, пробы, операторы по округам и «Запуск», внизу — история проверок.
+ * BSCHEKER одной страницей, как bsbord.com: вкладки «Хосты · IP / домен · Скан CIDR · VPN-тест ·
+ * История», под ними цели, пробы, операторы по округам и «Запуск»; история — журнал во вкладке.
  */
 export default function AdminReachability() {
   const { t } = useTranslation();
@@ -39,7 +39,7 @@ export default function AdminReachability() {
     }
     setSearchParams(next, { replace: true });
   };
-  const setMode = (mode: LaunchMode) => patchParams({ kind: mode, server: null });
+  const setMode = (mode: PageTab) => patchParams({ kind: mode, server: null });
   const setRunning = (jobId: number | null) =>
     patchParams({ running: jobId === null ? null : String(jobId), repeat: null });
 
@@ -80,18 +80,24 @@ export default function AdminReachability() {
 
       {status && !ready && <SetupGuide status={status} />}
       {ready && <ModeSwitch value={link.mode} onChange={setMode} />}
-      {ready &&
-        (link.mode === 'hosts' ? (
-          <FleetCheck status={status} link={link} patchParams={patchParams} />
-        ) : (
-          <Launcher
-            status={status}
-            link={link}
-            runningJobId={link.runningJobId}
-            onRunning={setRunning}
-          />
-        ))}
-      {ready && <RecentJobs initialJobId={link.jobId} />}
+      {ready && link.mode === 'hosts' && (
+        <FleetCheck status={status} link={link} patchParams={patchParams} />
+      )}
+      {ready && link.mode === 'history' && (
+        <RecentJobs
+          initialJobId={link.jobId}
+          targetKey={link.serverKey}
+          onClearTarget={() => patchParams({ server: null })}
+        />
+      )}
+      {ready && link.mode !== 'hosts' && link.mode !== 'history' && (
+        <Launcher
+          status={status}
+          link={link}
+          runningJobId={link.runningJobId}
+          onRunning={setRunning}
+        />
+      )}
     </div>
   );
 }

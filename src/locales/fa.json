@@ -4128,7 +4128,9 @@
         "cidr": "اسکن CIDR",
         "cidrHint": "اسکن زیرشبکه /24: آدرس‌های فعال از دید سیم‌کارت‌ها",
         "vless": "تست VPN",
-        "vlessHint": "پیکربندی‌های اشتراک از طریق تونل VLESS، تا ۲۰ در هر تست"
+        "vlessHint": "پیکربندی‌های اشتراک از طریق تونل VLESS، تا ۲۰ در هر تست",
+        "history": "تاریخچه",
+        "historyHint": "همه بررسی‌ها: چه چیزی بررسی شد، نتیجه و مبلغ کسرشده"
       },
       "sections": {
         "targets": "اهداف",
@@ -4171,7 +4173,12 @@
           "scan": "آدرس‌های فعال: {{ok}} از {{total}}",
           "empty": "نتیجه‌ای نیست",
           "blockedList": "مسدود یا بی‌پاسخ: {{list}}"
-        }
+        },
+        "batchTargets_one": "{{count}} سرور",
+        "batchTargets_other": "{{count}} سرور",
+        "batchOutcome": "{{ok}} از {{total}} کار می‌کنند",
+        "server": "سرور",
+        "allServers": "همه سرورها"
       },
       "addresses": {
         "label": "آدرس‌ها",

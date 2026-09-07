@@ -2358,7 +2358,9 @@
         "cidr": "Скан CIDR",
         "cidrHint": "скан подсети /24: живые адреса глазами симок",
         "vless": "VPN-тест",
-        "vlessHint": "конфиги подписки через VLESS-туннель, до 20 за тест"
+        "vlessHint": "конфиги подписки через VLESS-туннель, до 20 за тест",
+        "history": "История",
+        "historyHint": "все проверки: что проверяли, что вышло и сколько списано"
       },
       "sections": {
         "targets": "Цели",
@@ -2404,7 +2406,13 @@
           "scan": "Живых адресов: {{ok}} из {{total}}",
           "empty": "Результата нет",
           "blockedList": "Режется или не отвечает: {{list}}"
-        }
+        },
+        "batchTargets_one": "{{count}} сервер",
+        "batchTargets_few": "{{count}} сервера",
+        "batchTargets_many": "{{count}} серверов",
+        "batchOutcome": "работают {{ok}} из {{total}}",
+        "server": "Сервер",
+        "allServers": "Все серверы"
       },
       "addresses": {
         "label": "Адреса",

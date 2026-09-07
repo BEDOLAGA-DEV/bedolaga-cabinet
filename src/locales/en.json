@@ -2324,7 +2324,9 @@
         "cidr": "CIDR scan",
         "cidrHint": "scan a /24 subnet: live addresses as SIMs see them",
         "vless": "VPN test",
-        "vlessHint": "subscription configs through a VLESS tunnel, up to 20 per test"
+        "vlessHint": "subscription configs through a VLESS tunnel, up to 20 per test",
+        "history": "History",
+        "historyHint": "every check: what was checked, the outcome and the charge"
       },
       "sections": {
         "targets": "Targets",
@@ -2367,7 +2369,12 @@
           "scan": "Alive addresses: {{ok}} of {{total}}",
           "empty": "No result",
           "blockedList": "Blocked or no answer: {{list}}"
-        }
+        },
+        "batchTargets_one": "{{count}} server",
+        "batchTargets_other": "{{count}} servers",
+        "batchOutcome": "{{ok}} of {{total}} working",
+        "server": "Server",
+        "allServers": "All servers"
       },
       "addresses": {
         "label": "Addresses",

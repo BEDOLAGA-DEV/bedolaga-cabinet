@@ -2,8 +2,11 @@ import type { JobKind } from '@/api/reachability';
 
 /** Вкладка запуска — как в оригинале bsbord.com: хосты панели, IP / домен, CIDR, подписка. */
 export type LaunchMode = 'hosts' | 'ip' | 'cidr' | 'vless';
+/** Вкладки страницы: четыре запуска и история проверок. */
+export type PageTab = LaunchMode | 'history';
 
 export const MODE_KEYS: readonly LaunchMode[] = ['hosts', 'ip', 'cidr', 'vless'];
+export const TAB_KEYS: readonly PageTab[] = [...MODE_KEYS, 'history'];
 
 /** Старые значения `?kind=` из сохранённых ссылок: проверка хостов и скан подсети. */
 const LEGACY_MODES: Record<string, LaunchMode> = { probe: 'hosts', scan: 'cidr' };
@@ -26,17 +29,17 @@ export interface DeepLinkTarget {
 }
 
 export interface DeepLink {
-  mode: LaunchMode;
+  mode: PageTab;
   targets: DeepLinkTarget[];
   userId: number | null;
   shortUuid: string | null;
-  /** Задача, которую раскрыть в «моих проверках». */
+  /** Задача, которую раскрыть в истории; без вкладки открывает историю. */
   jobId: number | null;
   /** «Повторить»: задача, чьи цели, симки и пробы подставить в форму. */
   repeatJobId: number | null;
   /** Идущая проверка: экран ожидания переживает перезагрузку страницы. */
   runningJobId: number | null;
-  /** Открытая карточка сервера (target_key). */
+  /** Открытая карточка сервера (target_key); во вкладке «История» — фильтр по серверу. */
   serverKey: string | null;
   /** Идущая пачка проверок серверов: её прогресс возвращается после перезагрузки. */
   batchId: number | null;
@@ -48,9 +51,9 @@ export const REACHABILITY_SETTINGS_PATH = '/admin/settings?section=sys_reachabil
 /** Сайт сервиса: ключ API и тариф. */
 export const BSBORD_URL = 'https://bsbord.com';
 
-function parseMode(value: string | null): LaunchMode | null {
+function parseMode(value: string | null): PageTab | null {
   if (value === null) return null;
-  if ((MODE_KEYS as readonly string[]).includes(value)) return value as LaunchMode;
+  if ((TAB_KEYS as readonly string[]).includes(value)) return value as PageTab;
   return LEGACY_MODES[value] ?? null;
 }
 
@@ -70,15 +73,16 @@ function parseId(raw: string | null): number | null {
   return raw && /^\d+$/.test(raw) ? Number(raw) : null;
 }
 
-function defaultMode(input: Pick<DeepLink, 'targets' | 'userId' | 'shortUuid'>): LaunchMode {
+function defaultMode(input: Pick<DeepLink, 'targets' | 'userId' | 'shortUuid' | 'jobId'>): PageTab {
   if (input.targets.length) return 'hosts';
   if (input.userId || input.shortUuid) return 'vless';
+  if (input.jobId) return 'history';
   return 'hosts';
 }
 
 /**
  * `?kind=&target=host:<uuid>&target=node:<uuid>&user=<id>&sub=<shortUuid>&job=<id>`.
- * Цель без kind открывает хосты панели, пользователь или подписка — подписку.
+ * Цель без kind открывает хосты панели, пользователь или подписка — подписку, задача — историю.
  */
 export function parseReachabilityDeepLink(params: URLSearchParams): DeepLink {
   const targets = params
@@ -87,13 +91,14 @@ export function parseReachabilityDeepLink(params: URLSearchParams): DeepLink {
     .filter((target): target is DeepLinkTarget => target !== null);
   const userId = parseId(params.get('user'));
   const shortUuid = params.get('sub') || null;
-  const mode = parseMode(params.get('kind')) ?? defaultMode({ targets, userId, shortUuid });
+  const jobId = parseId(params.get('job'));
+  const mode = parseMode(params.get('kind')) ?? defaultMode({ targets, userId, shortUuid, jobId });
   return {
     mode,
     targets,
     userId,
     shortUuid,
-    jobId: parseId(params.get('job')),
+    jobId,
     repeatJobId: parseId(params.get('repeat')),
     runningJobId: parseId(params.get('running')),
     serverKey: params.get('server') || null,
@@ -105,8 +110,9 @@ export function buildReachabilityLink(input: Partial<DeepLink>): string {
   const targets = input.targets ?? [];
   const userId = input.userId ?? null;
   const shortUuid = input.shortUuid ?? null;
+  const jobId = input.jobId ?? null;
   const params = new URLSearchParams();
-  params.set('kind', input.mode ?? defaultMode({ targets, userId, shortUuid }));
+  params.set('kind', input.mode ?? defaultMode({ targets, userId, shortUuid, jobId }));
   for (const target of targets) params.append('target', `${target.kind}:${target.ref}`);
   if (userId) params.set('user', String(userId));
   if (shortUuid) params.set('sub', shortUuid);

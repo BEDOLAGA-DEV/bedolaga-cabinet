@@ -115,7 +115,8 @@ export function FleetCheck({ status, link, patchParams }: FleetCheckProps) {
     if (!repeat.data || appliedRepeat.current === repeat.data.id) return;
     appliedRepeat.current = repeat.data.id;
     const state = repeatFromJob(repeat.data);
-    setPicked(state.hosts);
+    // Пачка повторяется ссылкой ?target=host:… на все серверы плюс ?repeat= первой задачи: складываем.
+    setPicked((current) => mergeKeys(current, state.hosts));
     setManualUnits(state.units);
     if (state.probes) setProbes(state.probes);
     if (state.sniHosts) setSniText(state.sniHosts);
