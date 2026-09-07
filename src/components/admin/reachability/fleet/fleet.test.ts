@@ -182,13 +182,13 @@ describe('state, counts, filters, groups, scope', () => {
     expect(isStale(rows[0], NOW)).toBe(false);
   });
 
-  it('filters by kind and by text in label or address', () => {
-    expect(filterRows(rows, 'problems', '').map((r) => r.key)).toEqual(['a', 'd']);
-    expect(filterRows(rows, 'unchecked', '').map((r) => r.key)).toEqual(['c']);
-    expect(filterRows(rows, 'bs', '').map((r) => r.key)).toEqual(['a']);
-    expect(filterRows(rows, 'regular', '').map((r) => r.key)).toEqual(['b', 'c', 'd']);
-    expect(filterRows(rows, 'all', 'BE.exa').map((r) => r.key)).toEqual(['b']);
-    expect(filterRows(rows, 'all', 'chi').map((r) => r.key)).toEqual(['c']);
+  it('фильтрует по состоянию, давности, назначению и тексту в имени или адресе', () => {
+    expect(filterRows(rows, 'problems', '', NOW).map((r) => r.key)).toEqual(['a', 'd']);
+    expect(filterRows(rows, 'stale', '', NOW).map((r) => r.key)).toEqual(['b', 'c']);
+    expect(filterRows(rows, 'bs', '', NOW).map((r) => r.key)).toEqual(['a']);
+    expect(filterRows(rows, 'regular', '', NOW).map((r) => r.key)).toEqual(['b', 'c', 'd']);
+    expect(filterRows(rows, 'all', 'BE.exa', NOW).map((r) => r.key)).toEqual(['b']);
+    expect(filterRows(rows, 'all', 'chi', NOW).map((r) => r.key)).toEqual(['c']);
   });
 
   it('groups problems first and omits empty groups', () => {

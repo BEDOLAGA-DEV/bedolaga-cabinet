@@ -1,6 +1,5 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router';
 import {
   type Purpose,
   type ReachabilityStatus,
@@ -8,7 +7,6 @@ import {
   type Unit,
   reachabilityApi,
 } from '@/api/reachability';
-import { CloseIcon } from '@/components/icons';
 import { Button } from '@/components/primitives';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
@@ -16,7 +14,6 @@ import { useNotify } from '@/platform/hooks/useNotify';
 import { getApiErrorMessage } from '@/utils/api-error';
 import { OperatorIcon } from '../OperatorIcon';
 import { PurposeChip } from '../PurposeChip';
-import { REACHABILITY_PATH } from '../deepLink';
 import { formatCredits } from '../money';
 import { relativeAge } from '../relativeAge';
 import { resultHeadline } from '../resultHeadline';
@@ -30,14 +27,13 @@ interface ServerDetailsProps {
   summaryRow: SummaryRow | undefined;
   units: Unit[];
   status: ReachabilityStatus | undefined;
-  onClose: () => void;
-  /** «Проверить этот сервер» открывает «Что проверить?» с этим сервером: симки и пробы выбираются там. */
+  /** «Проверить этот сервер» отмечает его целью; симки и пробы выбираются на странице. */
   onCheck: () => void;
-  /** В шите заголовок и «закрыть» даёт сама обёртка. */
-  withHeader?: boolean;
 }
 
 const HISTORY_ROWS = 3;
+/** Заголовок журнала внизу страницы: «Все» прошлые проверки прокручивают к нему. */
+const HISTORY_ANCHOR = 'reachability-recent';
 const TONE: Record<'ok' | 'warn' | 'down' | 'na' | 'pending', string> = {
   ok: 'bg-success-400',
   warn: 'bg-warning-400',
@@ -60,18 +56,11 @@ function operatorWords(
 }
 
 /**
- * Карточка сервера: вердикт словом, «ловит у 7 из 15 симок с Белым списком», разбор по операторам
- * словами, прошлые проверки и кнопка проверить один этот сервер с ценой по симкам его назначения.
+ * Карточка под строкой сервера. Имя и вердикт уже в строке, поэтому здесь только новое:
+ * адрес с назначением и кнопка «Проверить этот сервер · цена», счёт симок словами,
+ * операторы сеткой в две колонки, прошлые проверки одной строкой.
  */
-export function ServerDetails({
-  row,
-  summaryRow,
-  units,
-  status,
-  onClose,
-  onCheck,
-  withHeader = true,
-}: ServerDetailsProps) {
+export function ServerDetails({ row, summaryRow, units, status, onCheck }: ServerDetailsProps) {
   const { t, i18n } = useTranslation();
   const notify = useNotify();
   const invalidate = useInvalidateTargets();
@@ -112,65 +101,54 @@ export function ServerDetails({
   const checked = row.checkedAt
     ? t(`${base}.server.checked`, { age: relativeAge(row.checkedAt, i18n.language) })
     : '';
+  const sentence =
+    row.state === 'unchecked'
+      ? t(`${base}.server.unchecked`)
+      : [t(`${base}.server.${summaryKey}`, { ok: row.ok, total: row.total }), checked]
+          .filter(Boolean)
+          .join(' · ');
   const priceLabel = price.data?.cost_kopeks != null ? formatCredits(price.data.cost_kopeks) : null;
+  const scrollToHistory = () =>
+    document.getElementById(HISTORY_ANCHOR)?.scrollIntoView?.({ behavior: 'smooth' });
 
   return (
-    <div className="space-y-5">
-      {withHeader && (
-        <div className="flex items-start justify-between gap-3">
-          <h3 className="min-w-0 truncate text-lg font-bold text-dark-50">{row.label}</h3>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label={t(`${base}.server.close`)}
-            className="-mr-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-dark-400 hover:bg-dark-800 hover:text-dark-200"
-          >
-            <CloseIcon className="h-4 w-4" />
-          </button>
-        </div>
-      )}
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="font-mono text-xs text-dark-400">{row.address}</span>
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+        <span className="font-mono text-xs text-dark-300">{row.address}</span>
         <PurposeChip
           purpose={row.purpose}
           disabled={row.ref === null || setPurpose.isPending}
           onToggle={() => setPurpose.mutate(row.purpose === 'bs' ? 'regular' : 'bs')}
         />
+        {row.ref !== null && (
+          <Button
+            variant="secondary"
+            className="min-h-[44px] w-full sm:ms-auto sm:min-h-0 sm:w-auto"
+            disabled={price.isLoading || priceLabel === null}
+            onClick={onCheck}
+          >
+            {t(`${base}.server.checkOne`, { price: priceLabel ?? '…' })}
+          </Button>
+        )}
       </div>
-
-      <div className="space-y-1">
-        <p
-          className={cn('text-xl font-semibold tracking-tight md:text-2xl', STATE_TEXT[row.state])}
-        >
-          {t(`${base}.fleet.state.${row.state}`)}
-        </p>
-        <p className="text-sm text-dark-300">
-          {row.state === 'unchecked'
-            ? t(`${base}.server.unchecked`)
-            : [t(`${base}.server.${summaryKey}`, { ok: row.ok, total: row.total }), checked]
-                .filter(Boolean)
-                .join(' · ')}
-        </p>
-      </div>
+      <p className="text-sm text-dark-300">{sentence}</p>
 
       {breakdown.length > 0 && (
         <section className="space-y-1">
           <h4 className="text-[13px] font-semibold text-dark-400">
             {t(`${base}.server.byOperators`)}
           </h4>
-          <ul className="divide-y divide-dark-700/30">
+          <ul className="grid gap-x-6 sm:grid-cols-2">
             {breakdown.map((item) => {
               const words = operatorWords(t, item);
               return (
-                <li key={item.operator} className="flex min-h-[44px] items-center gap-3 py-1.5">
-                  <OperatorIcon operator={item.operator} className="h-6 w-6" />
+                <li key={item.operator} className="flex min-h-[40px] items-center gap-2.5 py-1">
+                  <OperatorIcon operator={item.operator} className="h-5 w-5 rounded" />
                   <span className="min-w-0 flex-1">
-                    <span className="block text-sm font-semibold text-dark-100">{item.name}</span>
-                    <span className={cn('block text-[13px] font-medium', words.tone)}>
-                      {words.text}
-                    </span>
+                    <span className="block truncate text-sm text-dark-100">{item.name}</span>
+                    <span className={cn('block text-xs', words.tone)}>{words.text}</span>
                   </span>
-                  <span className="text-xs text-dark-400">
+                  <span className="text-xs tabular-nums text-dark-400">
                     {t(`${base}.server.ofUnits`, { ok: item.ok, total: item.total })}
                   </span>
                 </li>
@@ -180,21 +158,22 @@ export function ServerDetails({
         </section>
       )}
 
-      <section className="space-y-1">
-        <div className="flex items-center justify-between">
+      <section className="space-y-1.5">
+        <div className="flex items-center gap-3">
           <h4 className="text-[13px] font-semibold text-dark-400">{t(`${base}.server.history`)}</h4>
-          <Link
-            to={`${REACHABILITY_PATH}/history`}
+          <button
+            type="button"
+            onClick={scrollToHistory}
             className="text-[13px] font-medium text-accent-400 hover:underline"
           >
             {t(`${base}.server.allHistory`)}
-          </Link>
+          </button>
         </div>
-        {history.isLoading && <Skeleton className="h-9 w-full" />}
+        {history.isLoading && <Skeleton className="h-5 w-64" />}
         {history.data && history.data.items.length === 0 && (
           <p className="text-[13px] text-dark-500">{t(`${base}.recent.empty`)}</p>
         )}
-        <ul className="divide-y divide-dark-700/30">
+        <ul className="flex flex-wrap gap-x-5 gap-y-1">
           {history.data?.items.map((job) => {
             const headline = resultHeadline(job, row.key);
             const words =
@@ -206,35 +185,20 @@ export function ServerDetails({
                     count: headline.total,
                   });
             return (
-              <li key={job.id} className="flex min-h-[36px] items-center gap-2.5 py-1">
+              <li key={job.id} className="flex min-h-[28px] items-center gap-2 text-[13px]">
                 <span
                   aria-hidden="true"
-                  className={cn('h-1.5 w-1.5 shrink-0 rounded-full', TONE[headline.tone])}
+                  className={cn('h-2 w-2 shrink-0 rounded-full', TONE[headline.tone])}
                 />
-                <span className="text-[13px] text-dark-400">
+                <span className="text-dark-400">
                   {relativeAge(job.finished_at ?? job.created_at, i18n.language)}
                 </span>
-                <span className="flex-1" />
-                <span className="text-[13px] font-semibold text-dark-200">{words}</span>
+                <span className="font-medium text-dark-200">{words}</span>
               </li>
             );
           })}
         </ul>
       </section>
-
-      {row.ref !== null && (
-        <Button
-          variant="primary"
-          fullWidth
-          className="min-h-[44px]"
-          disabled={price.isLoading || priceLabel === null}
-          onClick={onCheck}
-        >
-          {priceLabel
-            ? t(`${base}.server.checkOne`, { price: priceLabel })
-            : t(`${base}.server.checkOne`, { price: '…' })}
-        </Button>
-      )}
     </div>
   );
 }

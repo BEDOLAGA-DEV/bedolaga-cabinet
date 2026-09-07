@@ -5,11 +5,9 @@ import {
   type BatchCreateRequest,
   type Probes,
   type ReachabilityStatus,
-  type ScopeKind,
   reachabilityApi,
 } from '@/api/reachability';
 import { Button } from '@/components/primitives';
-import { cn } from '@/lib/utils';
 import { useNotify } from '@/platform/hooks/useNotify';
 import { ListRowSkeleton } from '../../ListRowSkeleton';
 import { CheckOptions } from '../CheckOptions';
@@ -42,7 +40,6 @@ import {
   fleetCounts,
   lastCheckedAt,
   scopeKindFor,
-  scopeRefs,
 } from './fleet';
 import { FLEET_PROBES, dpiForRows } from './scopeDefaults';
 import { useBatch, useCancelBatch } from './useBatch';
@@ -56,21 +53,11 @@ interface FleetCheckProps {
   patchParams: (patch: ParamPatch) => void;
 }
 
-const QUICK: readonly Exclude<ScopeKind, 'manual'>[] = ['problems', 'stale', 'all'];
-const TOGGLE =
-  'flex min-h-[36px] items-center gap-1.5 rounded-lg border px-3 text-sm font-medium transition-colors disabled:opacity-50';
-const TOGGLE_ON = 'border-accent-500/50 bg-accent-500/10 text-dark-50';
-const TOGGLE_OFF = 'border-dark-700/50 bg-dark-900/30 text-dark-200 hover:border-dark-600';
-
-function sameSet(a: readonly string[], b: readonly string[]): boolean {
-  return a.length === b.length && a.every((item) => b.includes(item));
-}
-
 /**
  * Вкладка «Хосты»: состояние серверов панели и проверка выбранных одной формой, как на bsbord.com:
- * строки серверов с чекбоксами (быстрые выборы «с проблемами / давно / все»), карточка сервера
- * раскрывается под строкой, под списком пробы и операторы по округам, справа «Запуск» с ценой.
- * Идущая проверка занимает место сводки. Никаких модалок и шитов.
+ * серверы таблицей с чекбоксами («Выбрать все», чекбокс на группу, фильтры с числами), карточка
+ * сервера раскрывается под строкой, под таблицей пробы и операторы по округам, справа «Запуск»
+ * с ценой. Идущая проверка занимает место сводки. Никаких модалок и шитов.
  */
 export function FleetCheck({ status, link, patchParams }: FleetCheckProps) {
   const { t } = useTranslation();
@@ -92,7 +79,10 @@ export function FleetCheck({ status, link, patchParams }: FleetCheckProps) {
   };
 
   const counts = useMemo(() => fleetCounts(fleet.rows, now), [fleet.rows, now]);
-  const visible = useMemo(() => filterRows(fleet.rows, filter, query), [fleet.rows, filter, query]);
+  const visible = useMemo(
+    () => filterRows(fleet.rows, filter, query, now),
+    [fleet.rows, filter, query, now],
+  );
 
   // Ярлык с карточки ноды (?target=host:<uuid>) отмечает свои серверы один раз, когда список загрузился.
   const preselectKey = link.targets
@@ -197,13 +187,6 @@ export function FleetCheck({ status, link, patchParams }: FleetCheckProps) {
     batchAdapter,
   );
 
-  const quickRefs = useMemo(
-    () =>
-      Object.fromEntries(
-        QUICK.map((kind) => [kind, scopeRefs(fleet.rows, kind, now, [])]),
-      ) as Record<(typeof QUICK)[number], string[]>,
-    [fleet.rows, now],
-  );
   const selectedForDetails = useMemo(
     () => (link.serverKey ? (fleet.rows.find((row) => row.key === link.serverKey) ?? null) : null),
     [fleet.rows, link.serverKey],
@@ -213,11 +196,14 @@ export function FleetCheck({ status, link, patchParams }: FleetCheckProps) {
     : undefined;
   const openDetails = (row: FleetRow) =>
     patchParams({ server: link.serverKey === row.key ? null : row.key });
-  const closeDetails = () => patchParams({ server: null });
   const checkOne = () => {
     if (selectedForDetails?.ref) setPicked([selectedForDetails.ref]);
-    closeDetails();
+    patchParams({ server: null });
   };
+  const toggleMany = (refs: string[], on: boolean) =>
+    setPicked((current) =>
+      on ? mergeKeys(current, refs) : current.filter((ref) => !refs.includes(ref)),
+    );
   const stop = () => {
     if (batch) cancel.mutate(batch.id);
   };
@@ -233,7 +219,10 @@ export function FleetCheck({ status, link, patchParams }: FleetCheckProps) {
   const unitsLine = onAir ? onAir.charAt(0).toLowerCase() + onAir.slice(1) : '';
 
   return (
-    <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start lg:gap-8">
+    <div
+      id="reachability-launcher"
+      className="lg:grid lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start lg:gap-8"
+    >
       <div className="space-y-6">
         {isActive && batch ? (
           <BatchRunning
@@ -251,45 +240,7 @@ export function FleetCheck({ status, link, patchParams }: FleetCheckProps) {
         )}
 
         <section className="space-y-3" aria-label={t(`${base}.fleet.targets`)}>
-          <div
-            role="group"
-            aria-label={t(`${base}.fleet.quickLabel`)}
-            className="flex flex-wrap items-center gap-2"
-          >
-            {QUICK.map((kind) => {
-              const refs = quickRefs[kind];
-              const on = refs.length > 0 && sameSet(refs, picked);
-              return (
-                <button
-                  key={kind}
-                  type="button"
-                  aria-pressed={on}
-                  disabled={refs.length === 0 || Boolean(isActive && batch)}
-                  onClick={() => setPicked(on ? [] : [...refs])}
-                  className={cn(TOGGLE, on ? TOGGLE_ON : TOGGLE_OFF)}
-                >
-                  {t(`${base}.fleet.pick.${kind}`)}{' '}
-                  <span className="text-xs tabular-nums text-dark-400">{refs.length}</span>
-                </button>
-              );
-            })}
-            {picked.length > 0 && (
-              <button
-                type="button"
-                onClick={() => setPicked([])}
-                className="ms-auto min-h-[36px] text-sm text-dark-400 hover:text-dark-200"
-              >
-                {t(`${base}.fleet.clear`)}
-              </button>
-            )}
-          </div>
-          <FleetToolbar
-            counts={counts}
-            filter={filter}
-            onFilter={setFilter}
-            query={query}
-            onQuery={setQuery}
-          />
+          <FleetToolbar counts={counts} filter={filter} onFilter={setFilter} />
           {fleet.isLoading ? (
             <ListRowSkeleton count={5} />
           ) : (
@@ -297,7 +248,10 @@ export function FleetCheck({ status, link, patchParams }: FleetCheckProps) {
               rows={visible}
               picked={pickedSet}
               onToggle={(ref) => setPicked((current) => toggleKey(current, ref))}
+              onToggleMany={toggleMany}
               onDetails={openDetails}
+              query={query}
+              onQuery={setQuery}
               expandedKey={link.serverKey}
               renderDetails={(row) => (
                 <ServerDetails
@@ -305,9 +259,7 @@ export function FleetCheck({ status, link, patchParams }: FleetCheckProps) {
                   summaryRow={summaryRow}
                   units={fleet.units}
                   status={status}
-                  onClose={closeDetails}
                   onCheck={checkOne}
-                  withHeader={false}
                 />
               )}
               progress={progress}

@@ -4,9 +4,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Batch, BatchPreview, HostTarget, Summary, Unit } from '@/api/reachability';
 
 /**
- * Вкладка «Хосты» одной формой: быстрый выбор серверов отмечает строки, симки подбираются по их
- * назначению, «Запуск» считает цену пачки и после подтверждения создаёт её; «Подробнее» открывает
- * карточку, откуда сервер выбирается одной кнопкой.
+ * Вкладка «Хосты» одной формой: «Выбрать все» и чекбоксы групп отмечают строки, симки подбираются
+ * по их назначению, «Запуск» считает цену пачки и после подтверждения создаёт её; «Подробнее»
+ * открывает карточку под строкой, откуда сервер выбирается одной кнопкой.
  */
 
 const notify = vi.hoisted(() => ({ success: vi.fn(), error: vi.fn() }));
@@ -153,10 +153,9 @@ function open(search = '') {
 }
 
 describe('FleetCheck', () => {
-  it('«С проблемами» отмечает серверы, симки берутся по их назначению, цена считается пачкой', async () => {
+  it('«Выбрать все» отмечает серверы, симки берутся по их назначению, цена считается пачкой', async () => {
     open();
-    const quick = await screen.findByRole('group', { name: 'Быстрый выбор серверов' });
-    fireEvent.click(await within(quick).findByRole('button', { name: /^С проблемами 2/ }));
+    fireEvent.click(await screen.findByRole('checkbox', { name: 'Выбрать все' }));
     await waitFor(() =>
       expect(reachabilityApi.previewBatch).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -167,18 +166,33 @@ describe('FleetCheck', () => {
         }),
       ),
     );
-    expect(
-      screen.getAllByRole('checkbox').filter((box) => box.getAttribute('aria-checked') === 'true'),
-    ).toHaveLength(2);
+    for (const box of screen.getAllByRole('checkbox', { name: /Russia \| LTE \| БС|Germany/ })) {
+      expect(box.getAttribute('aria-checked')).toBe('true');
+    }
     expect(
       await screen.findByRole('button', { name: /Проверить 2 сервера · ◈ 1 280 cred/ }),
     ).toBeTruthy();
   });
 
+  it('чекбокс группы отмечает только её серверы', async () => {
+    open();
+    fireEvent.click(await screen.findByRole('checkbox', { name: /^Не работают/ }));
+    await waitFor(() =>
+      expect(reachabilityApi.previewBatch).toHaveBeenCalledWith(
+        expect.objectContaining({ host_refs: ['h2'], dpi: 'off', scope_kind: 'manual' }),
+      ),
+    );
+    expect(screen.getByRole('checkbox', { name: /Germany/ }).getAttribute('aria-checked')).toBe(
+      'true',
+    );
+    expect(
+      screen.getByRole('checkbox', { name: /Russia \| LTE \| БС/ }).getAttribute('aria-checked'),
+    ).toBe('false');
+  });
+
   it('запуск с подтверждением создаёт пачку и уводит на её прогресс', async () => {
     const patchParams = open();
-    const quick = await screen.findByRole('group', { name: 'Быстрый выбор серверов' });
-    fireEvent.click(await within(quick).findByRole('button', { name: /^Все 2/ }));
+    fireEvent.click(await screen.findByRole('checkbox', { name: 'Выбрать все' }));
     const run = await screen.findByRole('button', { name: /Проверить 2 сервера · ◈ 1 280 cred/ });
     await waitFor(() => expect((run as HTMLButtonElement).disabled).toBe(false));
     fireEvent.click(run);
@@ -193,8 +207,8 @@ describe('FleetCheck', () => {
 
   it('карточка раскрывается под строкой, оттуда сервер выбирается одной кнопкой', async () => {
     const patchParams = open();
-    const rowButton = await screen.findByRole('button', { name: /Russia \| LTE \| БС/ });
-    const row = rowButton.parentElement as HTMLElement;
+    const rowBox = await screen.findByRole('checkbox', { name: /Russia \| LTE \| БС/ });
+    const row = rowBox.parentElement as HTMLElement;
     fireEvent.click(within(row).getByRole('button', { name: 'Подробнее' }));
     expect(patchParams).toHaveBeenCalledWith({ server: 'bs.example:9443' });
     cleanup();

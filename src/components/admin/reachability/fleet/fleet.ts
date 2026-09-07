@@ -1,4 +1,5 @@
 import type { HostTarget, Purpose, ScopeKind, Summary, SummaryRow, Unit } from '@/api/reachability';
+import type { GroupState } from '../unitSelection';
 
 /**
  * Состояние флота: сервер панели глазами симок своего назначения. Чистые функции над сводкой
@@ -37,7 +38,7 @@ export interface FleetCounts {
   stale: number;
 }
 
-export type FleetFilter = 'all' | 'problems' | 'unchecked' | 'bs' | 'regular';
+export type FleetFilter = 'all' | 'problems' | 'stale' | 'bs' | 'regular';
 
 export interface FleetGroup {
   state: FleetState;
@@ -147,12 +148,12 @@ export function fleetCounts(rows: FleetRow[], now: Date): FleetCounts {
   return counts;
 }
 
-function matchesFilter(row: FleetRow, filter: FleetFilter): boolean {
+function matchesFilter(row: FleetRow, filter: FleetFilter, now: Date): boolean {
   switch (filter) {
     case 'problems':
       return row.state === 'down' || row.state === 'partial';
-    case 'unchecked':
-      return row.state === 'unchecked';
+    case 'stale':
+      return isStale(row, now);
     case 'bs':
       return row.purpose === 'bs';
     case 'regular':
@@ -162,15 +163,27 @@ function matchesFilter(row: FleetRow, filter: FleetFilter): boolean {
   }
 }
 
-export function filterRows(rows: FleetRow[], filter: FleetFilter, query: string): FleetRow[] {
+export function filterRows(
+  rows: FleetRow[],
+  filter: FleetFilter,
+  query: string,
+  now: Date,
+): FleetRow[] {
   const needle = query.trim().toLowerCase();
   return rows.filter(
     (row) =>
-      matchesFilter(row, filter) &&
+      matchesFilter(row, filter, now) &&
       (needle === '' ||
         row.label.toLowerCase().includes(needle) ||
         row.address.toLowerCase().includes(needle)),
   );
+}
+
+/** Ни одного, часть или все серверы набора отмечены: состояние чекбокса группы и «Выбрать все». */
+export function selectionState(refs: readonly string[], picked: ReadonlySet<string>): GroupState {
+  const chosen = refs.filter((ref) => picked.has(ref)).length;
+  if (refs.length === 0 || chosen === 0) return 'none';
+  return chosen === refs.length ? 'all' : 'some';
 }
 
 export function groupRows(rows: FleetRow[]): FleetGroup[] {

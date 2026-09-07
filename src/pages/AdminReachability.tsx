@@ -6,11 +6,11 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { AdminBackButton } from '../components/admin/AdminBackButton';
 import { Launcher } from '../components/admin/reachability/Launcher';
 import { ModeSwitch } from '../components/admin/reachability/ModeSwitch';
+import { RecentJobs } from '../components/admin/reachability/RecentJobs';
 import { SetupGuide } from '../components/admin/reachability/SetupGuide';
 import { TierBadge } from '../components/admin/reachability/TierBadge';
 import {
   type LaunchMode,
-  REACHABILITY_HISTORY_PATH,
   REACHABILITY_SETTINGS_PATH,
   parseReachabilityDeepLink,
 } from '../components/admin/reachability/deepLink';
@@ -22,7 +22,7 @@ type ParamPatch = Record<string, string | null>;
 
 /**
  * BSCHEKER одной страницей, как bsbord.com: вкладки «Хосты · IP / домен · Скан CIDR · VPN-тест»,
- * под ними цели, пробы, операторы по округам и «Запуск». Журнал — отдельный экран.
+ * под ними цели, пробы, операторы по округам и «Запуск», внизу — история проверок.
  */
 export default function AdminReachability() {
   const { t } = useTranslation();
@@ -60,15 +60,7 @@ export default function AdminReachability() {
           </div>
           <p className="text-xs text-dark-400">{t('admin.reachability.subtitle')}</p>
         </div>
-        <div className="ml-auto flex items-center gap-4">
-          {ready && (
-            <Link
-              to={REACHABILITY_HISTORY_PATH}
-              className="text-sm text-accent-400 hover:underline"
-            >
-              {t('admin.reachability.fleet.history')}
-            </Link>
-          )}
+        <div className="ms-auto flex items-center gap-4">
           {isLoading && <Skeleton className="h-6 w-28" />}
           {status && ready && (
             <span className="text-sm font-semibold tabular-nums text-dark-100">
@@ -99,6 +91,7 @@ export default function AdminReachability() {
             onRunning={setRunning}
           />
         ))}
+      {ready && <RecentJobs initialJobId={link.jobId} />}
     </div>
   );
 }

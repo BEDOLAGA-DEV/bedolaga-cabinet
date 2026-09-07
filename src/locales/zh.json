@@ -3927,6 +3927,11 @@
         "unknown": "未确定",
         "guessed": "推测"
       },
+      "purposeShort": {
+        "bs": "白名单",
+        "regular": "普通",
+        "unknown": "未设置"
+      },
       "targets": {
         "hosts": "面板主机",
         "includeDisabled": "显示已禁用",
@@ -4070,13 +4075,12 @@
         "legendUnchecked_other": "{{count}} 台未检查",
         "meta": "检查于{{age}} · {{units}}",
         "search": "查找服务器",
-        "sort": "问题优先",
         "filter": {
-          "all": "全部 {{count}}",
-          "problems": "有问题 {{count}}",
-          "unchecked": "未检查 {{count}}",
-          "bs": "白名单 {{count}}",
-          "regular": "普通 {{count}}"
+          "all": "全部",
+          "problems": "有问题",
+          "stale": "久未检查",
+          "bs": "白名单",
+          "regular": "普通"
         },
         "group": {
           "down": "不可用",
@@ -4096,16 +4100,13 @@
         "ofUnits": "{{total}} 张中 {{ok}} 张",
         "justNow": "刚刚",
         "empty": "此筛选下没有服务器",
-        "history": "检查历史",
-        "pick": {
-          "problems": "有问题",
-          "stale": "久未检查",
-          "all": "全部"
-        },
-        "clear": "清除",
         "details": "详情",
         "targets": "服务器",
-        "quickLabel": "快速选择服务器"
+        "selectAll": "全选",
+        "columns": {
+          "units": "SIM 卡",
+          "checked": "检查时间"
+        }
       },
       "switch": {
         "label": "检查什么",
@@ -4123,7 +4124,7 @@
         "probes": "探测"
       },
       "recent": {
-        "title": "我的检查",
+        "title": "检查历史",
         "empty": "尚无检查",
         "open": "详情",
         "close": "收起",
@@ -4195,8 +4196,7 @@
         "unchecked": "此服务器尚未检查",
         "history": "以往检查",
         "allHistory": "全部",
-        "checkOne": "检查此服务器 · {{price}}",
-        "close": "关闭"
+        "checkOne": "检查此服务器 · {{price}}"
       },
       "batch": {
         "minutes": "约 {{count}} 分钟",

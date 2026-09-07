@@ -2125,6 +2125,11 @@
         "unknown": "undefined",
         "guessed": "guess"
       },
+      "purposeShort": {
+        "bs": "Whitelist",
+        "regular": "regular",
+        "unknown": "not set"
+      },
       "targets": {
         "hosts": "Panel hosts",
         "includeDisabled": "show disabled",
@@ -2277,13 +2282,12 @@
         "legendUnchecked_other": "{{count}} unchecked",
         "meta": "checked {{age}} · {{units}}",
         "search": "Find a server",
-        "sort": "problems first",
         "filter": {
-          "all": "All {{count}}",
-          "problems": "Problems {{count}}",
-          "unchecked": "Unchecked {{count}}",
-          "bs": "Whitelist {{count}}",
-          "regular": "Regular {{count}}"
+          "all": "All",
+          "problems": "Problems",
+          "stale": "Not checked lately",
+          "bs": "Whitelist",
+          "regular": "Regular"
         },
         "group": {
           "down": "Down",
@@ -2303,16 +2307,13 @@
         "ofUnits": "{{ok}} of {{total}}",
         "justNow": "just now",
         "empty": "No servers match this filter",
-        "history": "Check history",
-        "pick": {
-          "problems": "With problems",
-          "stale": "Not checked lately",
-          "all": "All"
-        },
-        "clear": "Clear",
         "details": "Details",
         "targets": "Servers",
-        "quickLabel": "Quick pick of servers"
+        "selectAll": "Select all",
+        "columns": {
+          "units": "SIMs",
+          "checked": "Checked"
+        }
       },
       "switch": {
         "label": "What to check",
@@ -2330,7 +2331,7 @@
         "probes": "Probes"
       },
       "recent": {
-        "title": "My checks",
+        "title": "Check history",
         "empty": "No checks yet",
         "open": "Details",
         "close": "Collapse",
@@ -2406,8 +2407,7 @@
         "unchecked": "This server has not been checked yet",
         "history": "Past checks",
         "allHistory": "All",
-        "checkOne": "Check this server · {{price}}",
-        "close": "Close"
+        "checkOne": "Check this server · {{price}}"
       },
       "batch": {
         "minutes": "about {{count}} minutes",
