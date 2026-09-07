@@ -30,6 +30,7 @@ const job = (overrides: Partial<Job>): Job => ({
   refunded_kopeks: null,
   probes: null,
   sni_hosts: [],
+  batch_id: null,
   result: null,
   error_code: null,
   error_message: null,

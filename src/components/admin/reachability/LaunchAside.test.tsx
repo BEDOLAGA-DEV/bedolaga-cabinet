@@ -89,6 +89,7 @@ const status: ReachabilityStatus = {
   cost_limit_kopeks: 0,
   cores: {},
   default_sni: null,
+  active_batch: null,
 };
 const job = { id: 7, kind: 'probe', status: 'pending' } as Job;
 
