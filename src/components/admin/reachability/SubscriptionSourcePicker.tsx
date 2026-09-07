@@ -27,9 +27,10 @@ const CHIP_ON = 'border-accent-500/50 bg-accent-500/10 text-dark-50';
 const CHIP_OFF = 'border-dark-700/50 bg-dark-900/30 text-dark-200 hover:border-dark-500';
 
 /**
- * Откуда брать конфиги: подписка по умолчанию из настроек (с её именем и числом конфигов)
- * одной строкой, рядом поиск пользователя, чтобы подставить его подписку. Без подписки по
- * умолчанию объясняем, что делать, вместо пустого списка целей.
+ * Откуда брать конфиги: подписка по умолчанию из настроек (число конфигов и её имя) — на
+ * телефоне в две строки во всю ширину, на десктопе одной строкой; рядом поиск пользователя,
+ * чтобы подставить его подписку. Без подписки по умолчанию объясняем, что делать, вместо
+ * пустого списка целей.
  */
 export function SubscriptionSourcePicker({
   userId,
@@ -61,15 +62,26 @@ export function SubscriptionSourcePicker({
             type="button"
             aria-pressed={current === 'reference'}
             onClick={() => onSource({ userId: null, shortUuid: null })}
-            className={cn(CHIP, current === 'reference' ? CHIP_ON : CHIP_OFF)}
+            className={cn(
+              CHIP,
+              'w-full py-1.5 text-left sm:w-auto',
+              current === 'reference' ? CHIP_ON : CHIP_OFF,
+            )}
           >
             <span aria-hidden="true" className="text-accent-400">
               ◈
             </span>
-            {t(`${base}.reference`)}
-            <span className="font-mono text-xs text-dark-400">{reference.short_uuid}</span>
-            <span className="text-xs text-dark-400">
-              · {t(`${base}.configs`, { count: reference.configs })}
+            <span className="flex min-w-0 flex-1 flex-col gap-x-2 sm:flex-row sm:items-center">
+              <span className="whitespace-nowrap">
+                {t(`${base}.reference`)}
+                <span className="text-xs font-normal text-dark-400">
+                  {' '}
+                  · {t(`${base}.configs`, { count: reference.configs })}
+                </span>
+              </span>
+              <span className="truncate font-mono text-xs font-normal text-dark-400">
+                {reference.short_uuid}
+              </span>
             </span>
           </button>
         )}
