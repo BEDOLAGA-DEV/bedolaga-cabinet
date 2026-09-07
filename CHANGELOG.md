@@ -1,5 +1,65 @@
 # Changelog
 
+## [1.70.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.69.1...v1.70.0) (2026-09-07)
+
+
+### Features
+
+* **reachability:** «Что проверить?» — объём с ценой и временем, запуск пачки ([c056216](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/c056216842bd73b7ae9d45947103a79c99e8dfff))
+* **reachability:** BSCHEKER одной страницей как bsbord.com — вкладки, операторы по округам, «Запуск» рядом ([149635d](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/149635dcdb043cd92470ed1d7073c4c91a3c454b))
+* **reachability:** выбор симок и панель запуска с ценой ([f67d51f](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/f67d51f0184d6d455448a46d3c87c9da58b2a2cc))
+* **reachability:** выбор целей и вкладки запуска probe / VLESS / скан ([9d770e4](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/9d770e4f8eb69169cd9d21da2ec679a62124b206))
+* **reachability:** иконка оператора svyaz1 («Связь сразу») ([9ffd8a6](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/9ffd8a62cff48cc4abe2209cc554e7f6ce8d9eb2))
+* **reachability:** иконки операторов в группах симок, чипах и шапках таблиц ([1146559](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/1146559e0cbacea8e63e7caba36bd90d3c5002c9))
+* **reachability:** история проверок — вкладка со значком, пачка одной строкой, фильтр по серверу ([cabfd84](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/cabfd8450d1b7b5573d4d6e25852c552a2464f05))
+* **reachability:** карточка настройки BSCHEKER вместо голого предупреждения ([a1a2952](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/a1a2952d778a4590de7d6a5e4fbead1b3d406cb4))
+* **reachability:** карточка сервера — по операторам словами, история, проверка одного сервера ([ba8b1a2](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/ba8b1a22ebd772085e057661c9da56ffc1687343))
+* **reachability:** карточка сервера раскрывается под строкой — в разделе не осталось модалок и шитов ([a89d760](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/a89d7608bf103fdb75055734f9a5acbb96532b8b))
+* **reachability:** локали раздела как состояния флота ([e4f74a3](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/e4f74a3e3670d1d294f0449b454a4e55cca52a95))
+* **reachability:** модуль API раздела и форматирование копеек ([3cb9b0a](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/3cb9b0aca8924d63b956f2dfe8d2fbb970d9ae3d))
+* **reachability:** переделка по ревью — явный выбор и подтверждение списания, общие компоненты, мобильная вёрстка ([fc5090a](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/fc5090acd6041d87261dfc7cae0cd57995f6aa26))
+* **reachability:** пересборка BSCHEKER — один поток запуска, операторы по округам, «Запуск» под рукой ([77d92ca](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/77d92ca025ac3e173a9ddb21b7760ad63da234f3))
+* **reachability:** подтверждение запуска в браузере — второй шаг в панели вместо системного окна ([69a80a4](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/69a80a4ee5f15159a8a220e6dab47a7ffb6187b4))
+* **reachability:** прогресс задачи с опросом и результаты probe / VLESS / скана ([413d531](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/413d531870e6319f53b26680b3648c66639474b8))
+* **reachability:** прогресс пачки по целям из частичных результатов ([bd68ef0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/bd68ef0dfe4a38d16b413ee32b39d93e45b3af24))
+* **reachability:** раздел «Доступность из РФ» — маршрут, меню, статус, локали ([1ccce54](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/1ccce544392ed0fc9920231700bb742e0e77000f))
+* **reachability:** раздел как состояние флота — страница, карточка, запуск, прогресс, история и одиночные проверки отдельными экранами ([8c121a8](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/8c121a850ff89ddffa7104c569a5d1b4af4a4a4f))
+* **reachability:** сводка флота одним предложением ([022f168](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/022f1681c29be737ba30350ac03ea0af7277c52d))
+* **reachability:** сводка хост × симка и история задач ([3d58387](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/3d583876c623b5e8e6a98184a6e835d5ecd18d6d))
+* **reachability:** серверы одной таблицей, карточка без дублей, история внизу страницы ([e8ee7cf](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/e8ee7cf126759d25f633307c86ddf56f38a0b938))
+* **reachability:** симки, пробы и SNI на виду, быстрая проверка адреса или подписки первым блоком ([cbb0171](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/cbb01710ca3f658846a6df7a17d7f27e6d17907a))
+* **reachability:** состояние флота — чистые функции ([85bb407](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/85bb407d216f0de7bd1cae3b787218f10afc03f6))
+* **reachability:** список серверов группами, проблемы сначала ([8b2fbeb](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/8b2fbeb4c2b159bc1c3b2d354c15fd37918b32a4))
+* **reachability:** суммы в кредитах BSCHEKER, рубли справочно ([573601b](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/573601bb79aa95ad492e245796031a7aa980fa1d))
+* **reachability:** типы и клиент пачек проверок, частичного результата, active_batch ([8d8ec35](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/8d8ec359a777803e8645908be89997420d543aac))
+* **reachability:** фильтры и поиск по серверам ([d13969a](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/d13969a9a1491a56bc7c967eaa9dad0d7a71839e))
+* **reachability:** хуки состояния флота и опроса пачки ([13d4921](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/13d4921f84fee8cb3f55b53283981a647605df48))
+* **reachability:** экран идущей проверки — прогресс, остановка, список по серверам ([2da479b](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/2da479b51950317265b23475bfee8039e912e86c))
+* **reachability:** ярлыки проверки на карточке ноды и у подписки пользователя ([12531f9](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/12531f90580c68353e417d57a0de41ef89ff5b21))
+* **reachability:** ярлыки, цвета вердиктов и выбор симок — чистые модули ([cc0b412](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/cc0b4123c51c642bbb8280328a5ebfa3323b8547))
+
+
+### Bug Fixes
+
+* **reachability:** «Сбросить» не сдвигает округа, чип подписки по умолчанию в две строки на телефоне ([0249ba1](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/0249ba1823e36d90036364b3fdf50bb2cffe4b9b))
+* **reachability:** SNI-хост без переменной — дефолт ads.x5.ru в коде, поле помнит последний ввод как в оригинале ([141a4bf](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/141a4bfb069bd3b554fd319c9249cccae4ec967d))
+* **reachability:** вкладка «Подписка» — кнопки словами без символов, одно предупреждение про оценку цены ([393c6a8](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/393c6a8fd416f324bf973e15646b00b40efd093a))
+* **reachability:** вкладки как в оригинале — Хосты · IP / домен · CIDR · Подписка, пробы с пояснениями, ядро Xray номером ([08a8c6a](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/08a8c6a7b60b37aab44477d757977816bc183c4b))
+* **reachability:** для обычных людей — журнал и прогресс обновляются сами, без сырых ответов, кодов и кнопки «Забрать результат» ([16a4e30](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/16a4e3088ed8a1de06bffd9c4499e2cded1f5c5c))
+* **reachability:** журнал и результаты для людей — ответ словами, вердикт первым, телефон без сломанных углов ([a56bbcc](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/a56bbcc30c14b942c69e64e776fc7876b77c7ccc))
+* **reachability:** как в оригинале — SNI-хост с дефолтом и своими именами, поле «Конфиг или подписка», таблица результата по пробам, журнал проверок, матрица точками ([6996767](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/699676747fc1c105eef887373185c344e3a8b59f))
+* **reachability:** контраст мелкого текста и перенос строки хоста на узких экранах ([a9b6a0a](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/a9b6a0a3fd4af0d8753e984036516785fa48dc19))
+* **reachability:** матрица без сводки «N из M в норме», последний ответ API на экране зависшей пробы ([d704418](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/d7044185c4bb0b4b104df17103cc72a5447cc919))
+* **reachability:** нижние плашки прилипали к концу страницы — &lt;main&gt; с contain: content был containing block для fixed; шиты с отступами, объём по умолчанию от живых счётчиков ([e205dfa](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/e205dfa8466e86d1e46c7d74bcddf78168e9af3e))
+* **reachability:** первый экран с ответом словами, форма без нагромождений, симки сами по хостам ([81e793e](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/81e793eb2f797103d19864b627310f340dda2db8))
+* **reachability:** повтор адреса и порта в списке серверов помечается «тот же сервер» (балансировщик «АВТО») ([198ed32](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/198ed32b0cb8b89520261b70360c00cd62bc4c19))
+* **reachability:** подсказка про длительность пробы по всему флоту — 10–20 минут, результат придёт сам ([15d6969](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/15d6969079e10e29e4cc6051323359533f978279))
+* **reachability:** правки по ручной проверке BSCHEKER ([1371afc](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/1371afce066d8bba83220c2bb070e6ea836d47ba))
+* **reachability:** результат VLESS-теста и матрица на мобильном — таблицей как пробы, нажатая проба с галочкой, иконка «Связи» ([adf7ea6](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/adf7ea6df601721b4a59d110319d9e7b7644b888))
+* **reachability:** счётчик симок и «Сбросить» — в строке заголовка «Операторы» ([b4b6698](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/b4b66989e4e4dcff8a8c6f24b93ed672bf7f0ef4))
+* **reachability:** хвосты — плашка только при целях, округа по порядку и кириллицей, скан и настройка словами ([e7a344a](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/e7a344ac9362aae8a30204e4adf5b454a2b5312d))
+* **ui:** нижний шит в Mini App — не залезает под шапку Telegram, отступ под полоску Home, кнопка «Закрыть» ([bc0ab8b](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/bc0ab8b9e61924b40fc6a8d980303bf0fc165a3b))
+
 ## [1.69.1](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.69.0...v1.69.1) (2026-09-05)
 
 
