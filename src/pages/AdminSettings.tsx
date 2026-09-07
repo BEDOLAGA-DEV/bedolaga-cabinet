@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router';
+import { useNavigate, useSearchParams } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { adminSettingsApi, type SettingDefinition } from '../api/adminSettings';
@@ -10,6 +10,7 @@ import {
   SETTINGS_TREE,
   findTreeLocation,
   formatSettingKey,
+  findSettingsSection,
   getMappedCategoryKeys,
 } from '../components/admin';
 import { usePlatform } from '../platform/hooks/usePlatform';
@@ -30,10 +31,13 @@ const TARIFF_MODE_SETTINGS = ['MULTI_TARIFF_ENABLED', 'MAX_ACTIVE_SUBSCRIPTIONS'
 export default function AdminSettings() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { capabilities } = usePlatform();
 
-  // State
-  const [activeSection, setActiveSection] = useState('branding');
+  // State: `?section=<id>` открывает нужный раздел сразу (ссылки из других разделов админки).
+  const [activeSection, setActiveSection] = useState(
+    () => findSettingsSection(searchParams.get('section')) ?? 'branding',
+  );
   const [searchQuery, setSearchQuery] = useState('');
 
   // Favorites hook
