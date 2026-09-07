@@ -5,7 +5,7 @@ import type { Batch, HostTarget, ReachabilityStatus, Summary, Unit } from '@/api
 
 /**
  * Страница флота: сводка словами, список группами, карточка сервера по клику (в адресе ?server=),
- * идущая пачка из статуса показывает прогресс и «Остановить», история проверок внизу страницы.
+ * идущая пачка из статуса показывает прогресс и «Остановить», история проверок — своя вкладка.
  */
 
 const notify = vi.hoisted(() => ({ success: vi.fn(), error: vi.fn() }));
@@ -190,8 +190,16 @@ describe('AdminReachability (флот)', () => {
     await waitFor(() => expect(screen.getByText('ловит во всех округах')).toBeTruthy());
     expect(screen.getByText('не ловит')).toBeTruthy();
     expect(screen.getByRole('button', { name: /Проверить этот сервер/ })).toBeTruthy();
-    expect(screen.getByRole('heading', { name: 'История проверок' })).toBeTruthy();
+    expect(screen.queryByRole('heading', { name: 'История проверок' })).toBeNull();
     expect(screen.queryByRole('link', { name: 'История проверок' })).toBeNull();
+  });
+
+  it('вкладка «История» показывает журнал вместо флота', async () => {
+    renderWithProviders(<AdminReachability />);
+    fireEvent.click(await screen.findByRole('tab', { name: 'История' }));
+    expect(await screen.findByRole('heading', { name: 'История проверок' })).toBeTruthy();
+    expect(screen.queryByText('Работают 0 из 2 серверов')).toBeNull();
+    expect(screen.getByRole('tab', { name: 'История' }).getAttribute('aria-selected')).toBe('true');
   });
 
   it('shows the running batch from status with a stop button', async () => {

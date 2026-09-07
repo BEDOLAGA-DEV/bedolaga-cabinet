@@ -135,15 +135,11 @@ describe('ServerDetails', () => {
     expect(reachabilityApi.createBatch).not.toHaveBeenCalled();
   });
 
-  it('«Все» прошлые проверки ведёт к истории внизу страницы', () => {
-    const anchor = document.createElement('div');
-    anchor.id = 'reachability-recent';
-    anchor.scrollIntoView = vi.fn();
-    document.body.appendChild(anchor);
+  it('«Все» прошлые проверки ведёт во вкладку «История» с фильтром по этому серверу', () => {
     renderDetails();
-    fireEvent.click(screen.getByRole('button', { name: 'Все' }));
-    expect(anchor.scrollIntoView).toHaveBeenCalled();
-    anchor.remove();
+    expect(screen.getByRole('link', { name: 'Все' }).getAttribute('href')).toBe(
+      '/admin/reachability?kind=history&server=bs.example%3A9443',
+    );
   });
 
   it('changes the purpose through the chip and tells about it', async () => {

@@ -3,7 +3,10 @@ import { cleanup, fireEvent, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Job } from '@/api/reachability';
 
-/** История без модалок: строка раскрывается на месте, задача из ссылки открыта сразу. */
+/**
+ * История без модалок: строка раскрывается на месте, задача из ссылки открыта сразу,
+ * пачка серверов — одной строкой с итогом словами, фильтр по серверу из его карточки.
+ */
 
 vi.mock('react-i18next', async () => (await import('./testUtils')).i18nMock());
 vi.mock('@/api/reachability', () => ({ reachabilityApi: { listJobs: vi.fn() } }));
@@ -29,6 +32,9 @@ const job = (id: number, kind: Job['kind']): Job =>
     result: { ok: true },
     started_at: '2026-09-05T12:00:00+00:00',
     created_at: '2026-09-05T12:00:00+00:00',
+    batch_id: null,
+    sni_hosts: [],
+    probes: null,
   }) as unknown as Job;
 
 installMatchMedia();
@@ -125,6 +131,70 @@ describe('RecentJobs', () => {
     expect(repeat.getAttribute('href')).toContain('kind=hosts');
     fireEvent.click(screen.getByRole('button', { name: 'Свернуть' }));
     expect(screen.queryByText('Открывается у 1 из 2 симок')).toBeNull();
+  });
+
+  it('пачка серверов — одна строка «N серверов · работают X из N», раскрытие и «Повторить» на всех', async () => {
+    const host = (key: string, uuid: string) => ({
+      kind: 'host',
+      label: key,
+      target_key: `${key}:443`,
+      ref: { host_uuid: uuid },
+    });
+    const leg = (key: string, verdict: string) => ({
+      id: 1,
+      target_key: `${key}:443`,
+      op_key: 'mts|цфо|on',
+      operator: 'mts',
+      verdict,
+      raw: null,
+    });
+    vi.mocked(reachabilityApi.listJobs).mockResolvedValue({
+      items: [
+        {
+          ...job(11, 'probe'),
+          batch_id: 7,
+          targets: [host('Alpha', 'h-a'), host('Beta', 'h-b')],
+          legs: [leg('Alpha', 'reachable'), leg('Beta', 'blocked')],
+        } as unknown as Job,
+        {
+          ...job(12, 'probe'),
+          batch_id: 7,
+          targets: [host('Gamma', 'h-c')],
+          legs: [leg('Gamma', 'reachable')],
+        } as unknown as Job,
+        job(2, 'vless'),
+      ],
+      total: 3,
+      offset: 0,
+      limit: 20,
+    });
+    renderWithProviders(<RecentJobs initialJobId={null} />);
+    const row = await screen.findByRole('button', { name: /3 сервера/ });
+    expect(row.textContent).toContain('работают 2 из 3');
+    expect(row.textContent).toContain('◈ 2 300 cred');
+    expect(screen.queryByText('Host 11')).toBeNull();
+    fireEvent.click(row);
+    expect(screen.getByText('Alpha:')).toBeTruthy();
+    expect(screen.getByText('Gamma:')).toBeTruthy();
+    const repeat = screen.getByRole('link', { name: 'Повторить' });
+    const href = repeat.getAttribute('href') ?? '';
+    expect(href).toContain('kind=hosts');
+    expect(href).toContain('repeat=11');
+    for (const uuid of ['h-a', 'h-b', 'h-c']) expect(href).toContain(`target=host%3A${uuid}`);
+  });
+
+  it('фильтр по серверу из карточки: чип с именем, крестик снимает', async () => {
+    const onClearTarget = vi.fn();
+    renderWithProviders(
+      <RecentJobs initialJobId={null} targetKey="h1:443" onClearTarget={onClearTarget} />,
+    );
+    await screen.findByText('Host 1');
+    expect(reachabilityApi.listJobs).toHaveBeenLastCalledWith(
+      expect.objectContaining({ target_key: 'h1:443' }),
+    );
+    expect(screen.getByText('Сервер: Host 1')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Все серверы' }));
+    expect(onClearTarget).toHaveBeenCalled();
   });
 
   it('фильтр появляется, когда проверок больше двадцати', async () => {

@@ -4117,7 +4117,9 @@
         "cidr": "CIDR 扫描",
         "cidrHint": "扫描 /24 子网：SIM 卡视角的存活地址",
         "vless": "VPN 测试",
-        "vlessHint": "通过 VLESS 隧道检查订阅配置，每次最多 20 个"
+        "vlessHint": "通过 VLESS 隧道检查订阅配置，每次最多 20 个",
+        "history": "历史",
+        "historyHint": "全部检查：检查了什么、结果如何、扣了多少"
       },
       "sections": {
         "targets": "目标",
@@ -4157,7 +4159,11 @@
           "scan": "存活地址：{{ok}} / {{total}}",
           "empty": "没有结果",
           "blockedList": "被拦截或无响应：{{list}}"
-        }
+        },
+        "batchTargets_other": "{{count}} 台服务器",
+        "batchOutcome": "{{total}} 台中 {{ok}} 台正常",
+        "server": "服务器",
+        "allServers": "全部服务器"
       },
       "addresses": {
         "label": "地址",
