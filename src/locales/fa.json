@@ -3828,31 +3828,12 @@
         "referenceConfigs_one": "{{count}} پیکربندی",
         "referenceConfigs_other": "{{count}} پیکربندی",
         "activity": "اکنون",
-        "idle": "آزاد",
-        "tierUntil": "طرح {{tier}} تا {{date}}"
+        "idle": "آزاد"
       },
       "units": {
         "dpiOn": "با لیست سفید",
         "dpiOff": "بدون لیست سفید",
-        "dpiAny": "همه",
-        "title": "سیم‌کارت‌ها",
-        "hint": "هر سیم‌کارت جداگانه محاسبه می‌شود",
-        "quick": {
-          "label": "انتخاب سریع",
-          "bs": "با لیست سفید",
-          "regular": "بدون لیست سفید",
-          "all": "همه",
-          "recall": "مثل دفعه قبل"
-        },
-        "selectedOf": "{{selected}} از {{total}} انتخاب شد",
-        "none": "سیم‌کارتی انتخاب نشده",
-        "detailsShow": "سیم‌کارت‌های جداگانه",
-        "detailsHide": "بستن فهرست",
-        "groupBs": "با لیست سفید",
-        "groupRegular": "بدون لیست سفید",
-        "pickGroup": "همه",
-        "unpickGroup": "پاک کردن",
-        "empty": "فهرست سیم‌کارت‌ها خالی است: سرویس در دسترس نیست"
+        "dpiAny": "همه"
       },
       "launch": {
         "price": "قیمت",
@@ -3904,7 +3885,16 @@
         "summaryTargets_one": "{{count}} هدف",
         "summaryTargets_other": "{{count}} هدف",
         "summaryUnits_one": "{{count}} سیم‌کارت",
-        "summaryUnits_other": "{{count}} سیم‌کارت"
+        "summaryUnits_other": "{{count}} سیم‌کارت",
+        "runHosts_one": "بررسی {{count}} سرور · {{price}}",
+        "runHosts_other": "بررسی {{count}} سرور · {{price}}",
+        "runShortHosts_one": "بررسی {{count}} سرور",
+        "runShortHosts_other": "بررسی {{count}} سرور",
+        "summaryServers_one": "{{count}} سرور",
+        "summaryServers_other": "{{count}} سرور",
+        "busyBatch": "بررسی سرورها در حال انجام است — منتظر بمانید",
+        "timeRow": "زمان",
+        "confirmServers": "سرورها ({{count}}): {{list}}"
       },
       "progress": {
         "submitting": "در حال ارسال درخواست…",
@@ -3983,7 +3973,7 @@
         "sourceSubscription": "اشتراک · {{count}}",
         "pickAll": "همه",
         "pickNone": "بازنشانی",
-        "orPick": "یا از اشتراک آماده استفاده کنید",
+        "orPick": "یا پیکربندی خودتان / اشتراک دیگر",
         "fromInput": "کانفیگ‌های فیلد بالا نمایش داده می‌شوند",
         "selectedOf": "انتخاب‌شده {{selected}} / {{total}}",
         "rejectedReasons": {
@@ -4114,25 +4104,27 @@
         "ofUnits": "{{ok}} از {{total}}",
         "justNow": "همین حالا",
         "empty": "با این فیلتر سروری نیست",
-        "check": "بررسی سرورها",
         "history": "تاریخچه بررسی‌ها",
-        "other": "بررسی آدرس یا اشتراک",
-        "pick": "انتخاب دستی",
-        "pickDone": "انجام شد",
-        "picked_one": "{{count}} سرور انتخاب شد",
-        "picked_other": "{{count}} سرور انتخاب شد",
-        "checkShort": "بررسی"
+        "pick": {
+          "problems": "با مشکل",
+          "stale": "مدت‌ها بررسی نشده",
+          "all": "همه"
+        },
+        "clear": "پاک کردن",
+        "details": "جزئیات",
+        "targets": "سرورها",
+        "quickLabel": "انتخاب سریع سرورها"
       },
       "switch": {
         "label": "چه چیزی بررسی شود",
-        "hosts": "میزبان‌ها",
-        "hostsHint": "میزبان‌ها و نودهای پنل Remnawave، تا ۱۰ هدف در هر اجرا",
+        "hosts": "هاست‌ها",
+        "hostsHint": "سرورهای پنل Remnawave: وضعیت و بررسی انتخاب‌شده‌ها",
         "ip": "IP / دامنه",
         "ipHint": "آدرس‌های خودتان: IP، IP:پورت، دامنه یا https://…، تا ۱۰ هدف در هر اجرا",
-        "cidr": "CIDR",
-        "cidrHint": "اسکن زیرشبکه /24: آدرس‌های زنده از دید سیم‌کارت‌ها",
-        "vless": "اشتراک",
-        "vlessHint": "پیکربندی‌های اشتراک از طریق تونل VLESS، تا ۲۰ در هر آزمون"
+        "cidr": "اسکن CIDR",
+        "cidrHint": "اسکن زیرشبکه /24: آدرس‌های فعال از دید سیم‌کارت‌ها",
+        "vless": "تست VPN",
+        "vlessHint": "پیکربندی‌های اشتراک از طریق تونل VLESS، تا ۲۰ در هر تست"
       },
       "sections": {
         "targets": "اهداف",
@@ -4219,22 +4211,8 @@
         "close": "بستن"
       },
       "batch": {
-        "title": "چه چیزی بررسی شود؟",
-        "scope": {
-          "problems": "مشکل‌دارها",
-          "stale": "مدت‌ها بررسی‌نشده",
-          "all": "همه سرورها",
-          "manual": "انتخاب دستی",
-          "staleHint": "قدیمی‌تر از یک هفته",
-          "manualHint": "در فهرست علامت بزنید"
-        },
-        "servers_one": "{{count}} سرور",
-        "servers_other": "{{count}} سرور",
         "minutes": "حدود {{count}} دقیقه",
-        "balanceAfter": "موجودی پس از آن: {{balance}}",
         "onlyChecked": "فقط برای سیم‌کارت‌های بررسی‌شده هزینه کسر می‌شود. بررسی را می‌توان متوقف کرد.",
-        "run": "اجرا با {{price}}",
-        "running": "در حال شروع…",
         "progressTitle_one": "بررسی {{count}} سرور",
         "progressTitle_other": "بررسی {{count}} سرور",
         "progressLine": "انجام‌شده {{done}} از {{total}} · {{eta}} باقی",
@@ -4248,14 +4226,21 @@
         "started": "بررسی شروع شد",
         "finishedOk": "بررسی پایان یافت",
         "finishedCancelled": "بررسی متوقف شد",
-        "finishedFailed": "بررسی ناموفق بود",
-        "nothingToCheck": "سروری با این انتخاب مطابقت ندارد"
+        "finishedFailed": "بررسی ناموفق بود"
       },
-      "quick": {
-        "placeholder": "IP، دامنه، vless:// یا لینک اشتراک",
-        "check": "بررسی",
-        "hint": "یک آدرس، پیکربندی یا کل اشتراک",
-        "cidr": "اسکن زیرشبکه /24"
+      "operators": {
+        "title": "اپراتورها",
+        "hint": "هر سیم‌کارت جداگانه محاسبه می‌شود",
+        "bs": "ل.س",
+        "regular": "بدون ل.س",
+        "noBs": "بدون ل.س",
+        "offline": "آفلاین",
+        "selected": "{{selected}} / {{total}} انتخاب شد",
+        "reset": "پاک کردن",
+        "recall": "مثل دفعه قبل",
+        "pickDistrict": "همه سیم‌کارت‌های {{code}}",
+        "unpickDistrict": "برداشتن سیم‌کارت‌های {{code}}",
+        "empty": "فهرست سیم‌کارت‌ها خالی است: سرویس در دسترس نیست"
       }
     },
     "theme": {

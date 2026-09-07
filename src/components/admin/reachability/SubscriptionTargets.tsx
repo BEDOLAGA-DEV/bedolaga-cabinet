@@ -36,7 +36,7 @@ export interface SubscriptionTargetsProps {
   onClear: () => void;
 }
 
-/** Вкладка «Подписка»: поле «Конфиг или подписка», готовые источники, серверы. */
+/** Вкладка «VPN-тест»: подписка по умолчанию из настроек первой строкой, её серверы, ниже — свой конфиг или другая подписка. */
 export function SubscriptionTargets(props: SubscriptionTargetsProps) {
   const { t } = useTranslation();
   const pastedMode = props.pasted.trim().length > 0;
@@ -54,23 +54,13 @@ export function SubscriptionTargets(props: SubscriptionTargetsProps) {
         hint={t('admin.reachability.switch.vlessHint')}
         aside={t('admin.reachability.targets.count', { count: props.selected.length })}
       />
-      <SubscriptionInput
-        value={props.pasted}
-        onChange={props.onPastedChange}
-        parsed={props.parsed}
-      />
-      {pastedMode ? (
-        <p className="text-xs text-dark-400">{t('admin.reachability.subscription.fromInput')}</p>
-      ) : (
-        <div className="space-y-2">
-          <p className="text-xs text-dark-400">{t('admin.reachability.subscription.orPick')}</p>
-          <SubscriptionSourcePicker
-            userId={props.userId}
-            shortUuid={props.shortUuid}
-            onSource={props.onSource}
-            reference={props.reference}
-          />
-        </div>
+      {!pastedMode && (
+        <SubscriptionSourcePicker
+          userId={props.userId}
+          shortUuid={props.shortUuid}
+          onSource={props.onSource}
+          reference={props.reference}
+        />
       )}
       {loading && (
         <SkeletonGroup aria-label={t('admin.reachability.subscription.title')}>
@@ -90,6 +80,20 @@ export function SubscriptionTargets(props: SubscriptionTargetsProps) {
           onClear={props.onClear}
         />
       )}
+      <div className="space-y-1">
+        <p className="text-xs text-dark-400">
+          {t(
+            pastedMode
+              ? 'admin.reachability.subscription.fromInput'
+              : 'admin.reachability.subscription.orPick',
+          )}
+        </p>
+        <SubscriptionInput
+          value={props.pasted}
+          onChange={props.onPastedChange}
+          parsed={props.parsed}
+        />
+      </div>
     </section>
   );
 }

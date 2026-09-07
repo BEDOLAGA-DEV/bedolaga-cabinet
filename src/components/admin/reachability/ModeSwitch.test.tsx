@@ -2,7 +2,7 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-/** Вкладки как в оригинале bsbord.com: хосты панели, IP / домен, CIDR, подписка. */
+/** Вкладки как в оригинале bsbord.com: хосты панели, IP / домен, скан CIDR, VPN-тест. */
 
 vi.mock('react-i18next', async () => (await import('./testUtils')).i18nMock());
 
@@ -17,11 +17,11 @@ describe('ModeSwitch', () => {
     expect(screen.getAllByRole('tab').map((tab) => tab.textContent)).toEqual([
       'Хосты',
       'IP / домен',
-      'CIDR',
-      'Подписка',
+      'Скан CIDR',
+      'VPN-тест',
     ]);
     expect(screen.getByRole('tab', { name: 'Хосты' }).getAttribute('aria-selected')).toBe('true');
-    fireEvent.click(screen.getByRole('tab', { name: 'CIDR' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Скан CIDR' }));
     expect(onChange).toHaveBeenCalledWith('cidr');
   });
 });

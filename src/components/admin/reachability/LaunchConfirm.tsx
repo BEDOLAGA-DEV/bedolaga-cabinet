@@ -27,10 +27,15 @@ export function LaunchConfirm({ launch }: { launch: LaunchState }) {
         {t('admin.reachability.launch.confirmTitle')}
       </p>
       <p className="break-words text-xs text-dark-300">
-        {t('admin.reachability.launch.confirmTargets', {
-          count: summary.targets.length,
-          list: formatList(summary.targets, LISTED, more),
-        })}
+        {t(
+          launch.noun === 'servers'
+            ? 'admin.reachability.launch.confirmServers'
+            : 'admin.reachability.launch.confirmTargets',
+          {
+            count: summary.targets.length,
+            list: formatList(summary.targets, LISTED, more),
+          },
+        )}
       </p>
       <p className="break-words text-xs text-dark-300">
         {t('admin.reachability.launch.confirmUnits', {

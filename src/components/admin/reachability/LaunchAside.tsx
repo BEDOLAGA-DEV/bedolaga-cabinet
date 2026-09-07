@@ -1,27 +1,19 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import type {
-  Job,
-  JobCreateRequest,
-  JobKind,
-  ReachabilityStatus,
-  SkippedUnit,
-} from '@/api/reachability';
+import type { SkippedUnit } from '@/api/reachability';
 import { ChevronDownIcon } from '@/components/icons';
 import { Button } from '@/components/primitives';
 import { cn } from '@/lib/utils';
 import { LaunchConfirm } from './LaunchConfirm';
-import { type LaunchState, useLaunch } from './useLaunch';
+import type { LaunchState } from './useLaunch';
 import { formatCredits, formatKopeks, formatMoney } from './money';
 import { unitNames } from './unitLabel';
 import { useUnits } from './useUnits';
 
 export interface LaunchProps {
-  kind: JobKind;
-  targetsCount: number;
-  body: JobCreateRequest | null;
-  status: ReachabilityStatus | undefined;
-  onStarted: (job: Job) => void;
+  launch: LaunchState;
+  /** Строка под итогом: «Списывается только за проверенные симки…». */
+  hint?: string;
 }
 
 function skippedNames(list: SkippedUnit[] | undefined, catalog: Parameters<typeof unitNames>[1]) {
@@ -31,66 +23,51 @@ function skippedNames(list: SkippedUnit[] | undefined, catalog: Parameters<typeo
   return unitNames(opKeys, catalog);
 }
 
-const RUN_KEY: Record<JobKind, string> = { probe: 'runProbe', vless: 'runVless', scan: 'runScan' };
-const RUN_SHORT_KEY: Record<JobKind, string> = {
-  probe: 'runShortProbe',
-  vless: 'runShortVless',
-  scan: 'runShortScan',
-};
+type Translate = (key: string, options?: Record<string, unknown>) => string;
+
+/** Ключ подписи кнопки: по виду задачи, для пачки серверов — своё слово. */
+function runKey(launch: LaunchState, short: boolean): string {
+  const suffix = short ? 'Short' : '';
+  if (launch.noun === 'servers') return `run${suffix}Hosts`;
+  if (launch.kind === 'vless') return `run${suffix}Vless`;
+  if (launch.kind === 'scan') return `run${suffix}Scan`;
+  return `run${suffix}Probe`;
+}
 
 /** Подпись главной кнопки: «Запускаем…» → «Списать …» на втором шаге → «Проверить N …». */
-function primaryLabel(
-  t: (key: string, options?: Record<string, unknown>) => string,
-  launch: LaunchState,
-  kind: JobKind,
-  count: number,
-  short: boolean,
-): string {
+export function primaryLabel(t: Translate, launch: LaunchState, short: boolean): string {
   if (launch.isPending) return t('admin.reachability.launch.running');
   if (launch.confirming) {
     return t('admin.reachability.launch.confirmCharge', { price: formatCredits(launch.cost) });
   }
   const price = launch.cost === null ? null : formatCredits(launch.cost);
-  return runLabel(t, kind, count, price, short);
+  if (launch.targetsCount === 0 || (!short && price === null)) {
+    return t('admin.reachability.launch.runEmpty');
+  }
+  return t(`admin.reachability.launch.${runKey(launch, short)}`, {
+    count: launch.targetsCount,
+    price,
+  });
 }
 
-function runLabel(
-  t: (key: string, options?: Record<string, unknown>) => string,
-  kind: JobKind,
-  count: number,
-  price: string | null,
-  short: boolean,
-): string {
-  if (count === 0 || (!short && price === null)) return t('admin.reachability.launch.runEmpty');
-  const key = short ? RUN_SHORT_KEY[kind] : RUN_KEY[kind];
-  return t(`admin.reachability.launch.${key}`, { count, price });
-}
-
-/** Строки итога: цели × симки, цена, остаток, пропуски. Общие для aside и нижней панели. */
-function LaunchDetails({
-  launch,
-  targetsCount,
-  unitsCount,
-}: {
-  launch: LaunchState;
-  targetsCount: number;
-  unitsCount: number;
-}) {
+/** Строки итога: цели × симки, цена, остаток, время, пропуски. Общие для aside и нижней панели. */
+function LaunchDetails({ launch }: { launch: LaunchState }) {
   const { t } = useTranslation();
   const { data: catalog = [] } = useUnits();
-  const skipped = launch.preview.data?.skipped;
+  const skipped = launch.preview?.skipped ?? undefined;
+  const targetsKey = launch.noun === 'servers' ? 'summaryServers' : 'summaryTargets';
   return (
     <dl className="space-y-1.5 text-sm">
       <div className="flex justify-between gap-3">
         <dt className="text-dark-400">{t('admin.reachability.launch.targetsRow')}</dt>
         <dd className="text-dark-100">
-          {t('admin.reachability.launch.summaryTargets', { count: targetsCount })}
+          {t(`admin.reachability.launch.${targetsKey}`, { count: launch.targetsCount })}
         </dd>
       </div>
       <div className="flex justify-between gap-3">
         <dt className="text-dark-400">{t('admin.reachability.launch.unitsRow')}</dt>
         <dd className="text-dark-100">
-          {t('admin.reachability.launch.summaryUnits', { count: unitsCount })}
+          {t('admin.reachability.launch.summaryUnits', { count: launch.unitsCount })}
         </dd>
       </div>
       {!launch.blocker && (
@@ -112,9 +89,17 @@ function LaunchDetails({
           <dd className="tabular-nums text-dark-200">{formatMoney(launch.balanceAfter)}</dd>
         </div>
       )}
-      {launch.preview.data &&
-        !launch.preview.data.estimate_is_exact &&
-        launch.preview.data.warnings.length === 0 && (
+      {!launch.blocker && launch.eta !== null && (
+        <div className="flex justify-between gap-3">
+          <dt className="text-dark-400">{t('admin.reachability.launch.timeRow')}</dt>
+          <dd className="text-dark-200">
+            {t('admin.reachability.batch.minutes', { count: launch.eta })}
+          </dd>
+        </div>
+      )}
+      {launch.preview &&
+        !launch.preview.estimate_is_exact &&
+        launch.preview.warnings.length === 0 && (
           <p className="text-xs text-warning-400">{t('admin.reachability.launch.estimate')}</p>
         )}
       {skipped && skipped.dpi_off.length > 0 && (
@@ -131,7 +116,7 @@ function LaunchDetails({
           })}
         </p>
       )}
-      {launch.preview.data?.warnings.map((warning) => (
+      {launch.preview?.warnings.map((warning) => (
         <p key={warning} className="text-xs text-warning-400">
           {warning}
         </p>
@@ -141,10 +126,8 @@ function LaunchDetails({
 }
 
 /** Десктоп: прилипающий блок «Запуск» справа от формы. */
-export function LaunchAside(props: LaunchProps) {
+export function LaunchAside({ launch, hint }: LaunchProps) {
   const { t } = useTranslation();
-  const launch = useLaunch(props.body, props.status, props.onStarted);
-  const unitsCount = props.body?.units.length ?? 0;
   return (
     <aside
       aria-labelledby="reachability-launch-title"
@@ -157,15 +140,7 @@ export function LaunchAside(props: LaunchProps) {
         {t('admin.reachability.launch.title')}
       </h2>
       <div className="mt-3">
-        {launch.confirming ? (
-          <LaunchConfirm launch={launch} />
-        ) : (
-          <LaunchDetails
-            launch={launch}
-            targetsCount={props.targetsCount}
-            unitsCount={unitsCount}
-          />
-        )}
+        {launch.confirming ? <LaunchConfirm launch={launch} /> : <LaunchDetails launch={launch} />}
       </div>
       {launch.blocker && !launch.confirming && (
         <p className="mt-3 text-sm text-dark-400">{launch.blocker}</p>
@@ -182,20 +157,20 @@ export function LaunchAside(props: LaunchProps) {
           disabled={!launch.canRun}
           onClick={launch.run}
         >
-          {primaryLabel(t, launch, props.kind, props.targetsCount, false)}
+          {primaryLabel(t, launch, false)}
         </Button>
       </div>
+      {hint && !launch.confirming && <p className="mt-3 text-xs text-dark-500">{hint}</p>}
     </aside>
   );
 }
 
 /** Телефон и Mini App: панель над нижней навигацией, детали раскрываются тапом по итогу. */
-export function LaunchBar(props: LaunchProps) {
+export function LaunchBar({ launch }: LaunchProps) {
   const { t } = useTranslation();
-  const launch = useLaunch(props.body, props.status, props.onStarted);
   const [open, setOpen] = useState(false);
-  const unitsCount = props.body?.units.length ?? 0;
   const showDetails = open || launch.confirming;
+  const targetsKey = launch.noun === 'servers' ? 'summaryServers' : 'summaryTargets';
   return (
     <div className="fixed inset-x-0 bottom-[var(--mobile-nav-clearance)] z-40 px-3">
       <div
@@ -209,11 +184,7 @@ export function LaunchBar(props: LaunchProps) {
             {launch.confirming ? (
               <LaunchConfirm launch={launch} />
             ) : (
-              <LaunchDetails
-                launch={launch}
-                targetsCount={props.targetsCount}
-                unitsCount={unitsCount}
-              />
+              <LaunchDetails launch={launch} />
             )}
             {launch.blocker && !launch.confirming && (
               <p className="mt-2 text-xs text-dark-400">{launch.blocker}</p>
@@ -239,10 +210,12 @@ export function LaunchBar(props: LaunchProps) {
                 <span className="block truncate text-xs text-dark-400">
                   {launch.blocker ??
                     t('admin.reachability.launch.formula', {
-                      targets: t('admin.reachability.launch.summaryTargets', {
-                        count: props.targetsCount,
+                      targets: t(`admin.reachability.launch.${targetsKey}`, {
+                        count: launch.targetsCount,
                       }),
-                      units: t('admin.reachability.launch.summaryUnits', { count: unitsCount }),
+                      units: t('admin.reachability.launch.summaryUnits', {
+                        count: launch.unitsCount,
+                      }),
                     })}
                 </span>
               </span>
@@ -252,7 +225,7 @@ export function LaunchBar(props: LaunchProps) {
             </button>
           )}
           <Button variant="primary" disabled={!launch.canRun} onClick={launch.run}>
-            {primaryLabel(t, launch, props.kind, props.targetsCount, true)}
+            {primaryLabel(t, launch, true)}
           </Button>
         </div>
       </div>

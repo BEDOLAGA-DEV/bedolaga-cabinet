@@ -1,8 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
-  type HostTarget,
-  type NodeTarget,
   type Probes,
   type ReachabilityStatus,
   type TargetIn,
@@ -11,27 +9,26 @@ import {
 } from '@/api/reachability';
 import { AddressTargets } from './AddressTargets';
 import { CheckOptions } from './CheckOptions';
-import { HostTargets } from './HostTargets';
 import { JobProgress } from './JobProgress';
 import { LaunchAside, LaunchBar } from './LaunchAside';
-import { ModeSwitch } from './ModeSwitch';
+import { OperatorPicker } from './OperatorPicker';
 import { ScanTargets } from './ScanTargets';
 import { type ConfigItem, SubscriptionTargets } from './SubscriptionTargets';
-import { UnitsPicker } from './UnitsPicker';
 import { autoUnitsFor } from './autoUnits';
-import { type DeepLink, type LaunchMode, jobKindOf } from './deepLink';
+import { type DeepLink, jobKindOf } from './deepLink';
 import { buildProbeBody, buildScanBody, buildVlessBody } from './jobBodies';
+import { jobAdapterFor } from './launchAdapters';
+import { repeatFromJob } from './repeatFromJob';
 import {
   DEFAULT_SNI_HOST,
   parseSniHosts,
   recallSniHosts,
   rememberSniHosts,
-  sniNamesFor,
   sniNamesForAddresses,
 } from './sniNames';
-import { repeatFromJob } from './repeatFromJob';
 import { parseTargets, scanSubnet } from './targetsInput';
 import { dpiForSelection } from './unitSelection';
+import { useLaunch } from './useLaunch';
 import { REACHABILITY_JOB_KEY } from './useReachabilityJob';
 import { useParsedInput, useSubscriptionConfigs } from './useTargets';
 import { useUnits } from './useUnits';
@@ -39,46 +36,29 @@ import { useUnits } from './useUnits';
 interface LauncherProps {
   status: ReachabilityStatus | undefined;
   link: DeepLink;
-  onModeChange: (mode: LaunchMode) => void;
   /** Идущая проверка живёт в адресе страницы (?running=), чтобы пережить перезагрузку. */
   runningJobId: number | null;
   onRunning: (jobId: number | null) => void;
-  /** Какие вкладки доступны; по умолчанию все четыре. */
-  modes?: readonly LaunchMode[];
 }
 
 const PROBE_DEFAULT: Probes = { icmp: false, tcp: true, sni: true };
 const SCAN_DEFAULT: Probes = { icmp: true, tcp: true, sni: false };
 
-function toggleBy<T extends { uuid: string }>(list: T[], item: T): T[] {
-  return list.some((entry) => entry.uuid === item.uuid)
-    ? list.filter((entry) => entry.uuid !== item.uuid)
-    : [...list, item];
-}
-
-/** Один запуск на все вкладки: цели по вкладке, пробы, SNI-хост, операторы, итог и кнопка. */
-export function Launcher({
-  status,
-  link,
-  onModeChange,
-  runningJobId,
-  onRunning,
-  modes,
-}: LauncherProps) {
-  const mode = link.mode;
+/**
+ * Одиночные проверки как на bsbord.com: цели вкладки, пробы под ними, операторы по округам,
+ * «Запуск» справа (на телефоне — панель снизу). Хосты панели живут на своей вкладке.
+ */
+export function Launcher({ status, link, runningJobId, onRunning }: LauncherProps) {
+  const mode = link.mode === 'hosts' ? 'ip' : link.mode;
   const kind = jobKindOf(mode);
-  const { data: catalog = [] } = useUnits();
+  const { data: catalog = [], isLoading: unitsLoading } = useUnits();
 
-  // Ввод из поля быстрой проверки на странице флота попадает в поле своей вкладки.
-  const prefill = (forMode: LaunchMode) => (link.mode === forMode ? (link.query ?? '') : '');
-  const [hosts, setHosts] = useState<HostTarget[]>([]);
-  const [nodes, setNodes] = useState<NodeTarget[]>([]);
-  const [addresses, setAddresses] = useState(() => prefill('ip'));
+  const [addresses, setAddresses] = useState('');
   const [source, setSource] = useState({ userId: link.userId, shortUuid: link.shortUuid });
-  const [pasted, setPasted] = useState(() => prefill('vless'));
+  const [pasted, setPasted] = useState('');
   const [configIndexes, setConfigIndexes] = useState<number[]>([]);
   const [core, setCore] = useState<VlessCore>('');
-  const [cidr, setCidr] = useState(() => prefill('cidr'));
+  const [cidr, setCidr] = useState('');
   // Симки: сами по назначению целей; null — человек не трогал руками.
   const [manualUnits, setManualUnits] = useState<string[] | null>(null);
   const [probes, setProbes] = useState<Probes>(PROBE_DEFAULT);
@@ -150,14 +130,6 @@ export function Launcher({
     setConfigIndexes(parsed.data.configs.map((config) => config.index));
   }, [pastedMode, pasted, parsed.data]);
 
-  const toggleHost = useCallback(
-    (host: HostTarget) => setHosts((list) => toggleBy(list, host)),
-    [],
-  );
-  const toggleNode = useCallback(
-    (node: NodeTarget) => setNodes((list) => toggleBy(list, node)),
-    [],
-  );
   const toggleConfig = (index: number) =>
     setConfigIndexes((list) =>
       list.includes(index) ? list.filter((item) => item !== index) : [...list, index],
@@ -173,39 +145,19 @@ export function Launcher({
     setConfigIndexes([]);
   };
 
+  const ownTargets = useMemo(() => parseTargets(addresses).targets, [addresses]);
   const targetPurposes = useMemo(() => {
-    if (mode === 'hosts') {
-      return [...hosts.map((host) => host.purpose), ...nodes.map(() => 'unknown' as const)];
-    }
     if (mode === 'vless') {
       return configIndexes
         .map((index) => configList.find((config) => config.index === index)?.purpose)
         .filter((purpose): purpose is NonNullable<typeof purpose> => purpose !== undefined);
     }
-    const hasTargets =
-      mode === 'ip' ? parseTargets(addresses).targets.length > 0 : Boolean(scanSubnet(cidr));
+    const hasTargets = mode === 'ip' ? ownTargets.length > 0 : Boolean(scanSubnet(cidr));
     return hasTargets ? ['unknown' as const] : [];
-  }, [mode, hosts, nodes, configIndexes, configList, addresses, cidr]);
+  }, [mode, configIndexes, configList, ownTargets, cidr]);
   const autoUnits = useMemo(() => autoUnitsFor(targetPurposes, catalog), [targetPurposes, catalog]);
   const units = manualUnits ?? autoUnits;
   const dpi = dpiForSelection(catalog, units);
-  const preselectedHosts = useMemo(
-    () => [
-      ...link.targets.filter((item) => item.kind === 'host').map((item) => item.ref),
-      ...(repeatState?.hosts ?? []),
-    ],
-    [link.targets, repeatState],
-  );
-  const preselectedNodes = useMemo(
-    () => [
-      ...link.targets.filter((item) => item.kind === 'node').map((item) => item.ref),
-      ...(repeatState?.nodes ?? []),
-    ],
-    [link.targets, repeatState],
-  );
-  const ownTargets = useMemo(() => parseTargets(addresses).targets, [addresses]);
-  // Нода проверяется только ping-ом — при нодах ICMP не выключить.
-  const hostProbes: Probes = { ...probes, icmp: probes.icmp || nodes.length > 0 };
   const sniParsed = useMemo(() => parseSniHosts(sniHosts), [sniHosts]);
   const vlessTargets = useMemo<TargetIn[]>(
     () =>
@@ -216,17 +168,6 @@ export function Launcher({
   );
 
   const body = useMemo(() => {
-    if (mode === 'hosts') {
-      return buildProbeBody({
-        hosts: hosts.map((host) => host.uuid),
-        nodes: nodes.map((node) => node.uuid),
-        custom: [],
-        units,
-        dpi,
-        probes,
-        sniHosts: sniParsed.names,
-      });
-    }
     if (mode === 'ip') {
       return buildProbeBody({
         hosts: [],
@@ -248,40 +189,18 @@ export function Launcher({
       probes: scanProbes,
       sniHosts: sniParsed.names,
     });
-  }, [
-    mode,
-    hosts,
-    nodes,
-    ownTargets,
-    units,
-    dpi,
-    probes,
-    sniParsed,
-    vlessTargets,
-    core,
-    cidr,
-    scanProbes,
-  ]);
+  }, [mode, ownTargets, units, dpi, probes, sniParsed, vlessTargets, core, cidr, scanProbes]);
 
-  const targetsCount =
-    mode === 'hosts'
-      ? hosts.length + nodes.length
-      : mode === 'ip'
-        ? ownTargets.length
-        : mode === 'vless'
-          ? vlessTargets.length
-          : scanSubnet(cidr)
-            ? 1
-            : 0;
-
-  // Имена, которые бот возьмёт сам при пустом поле: SNI хоста или его домен; у IP имени нет.
+  // Имена, которые бот возьмёт сам при пустом поле: домен цели; у IP имени нет.
   const autoSniNames = useMemo(
-    () =>
-      mode === 'hosts' ? sniNamesFor(hosts) : mode === 'ip' ? sniNamesForAddresses(ownTargets) : [],
-    [mode, hosts, ownTargets],
+    () => (mode === 'ip' ? sniNamesForAddresses(ownTargets) : []),
+    [mode, ownTargets],
   );
-  const activeProbes = mode === 'cidr' ? scanProbes : mode === 'hosts' ? hostProbes : probes;
+  const activeProbes = mode === 'cidr' ? scanProbes : probes;
   const showSni = mode !== 'vless' && activeProbes.sni;
+
+  const adapter = useMemo(() => jobAdapterFor(kind), [kind]);
+  const launch = useLaunch(body, status, (job) => onRunning(job.id), adapter);
 
   if (runningJobId !== null) {
     return (
@@ -291,80 +210,68 @@ export function Launcher({
     );
   }
 
-  const launchProps = {
-    kind,
-    targetsCount,
-    body,
-    status,
-    onStarted: (job: { id: number }) => onRunning(job.id),
-  };
-
   return (
-    <div id="reachability-launcher" className="space-y-6">
-      <ModeSwitch value={mode} onChange={onModeChange} modes={modes} />
-      <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start lg:gap-8">
-        <div className="space-y-8">
-          {mode === 'hosts' && (
-            <HostTargets
-              hosts={hosts}
-              onToggleHost={toggleHost}
-              nodes={nodes}
-              onToggleNode={toggleNode}
-              preselectedHosts={preselectedHosts}
-              preselectedNodes={preselectedNodes}
-            />
-          )}
-          {mode === 'ip' && <AddressTargets value={addresses} onChange={setAddresses} />}
-          {mode === 'vless' && (
-            <SubscriptionTargets
-              pasted={pasted}
-              onPastedChange={changePasted}
-              parsed={parsed}
-              userId={source.userId}
-              shortUuid={source.shortUuid}
-              onSource={changeSource}
-              subscription={subscription}
-              reference={status?.reference ?? null}
-              list={configList}
-              rejected={rejected}
-              selected={configIndexes}
-              onToggle={toggleConfig}
-              onSelectMany={selectConfigs}
-              onClear={() => setConfigIndexes([])}
-            />
-          )}
-          {mode === 'cidr' && <ScanTargets cidr={cidr} onChange={setCidr} />}
+    <div
+      id="reachability-launcher"
+      className="lg:grid lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start lg:gap-8"
+    >
+      <div className="space-y-8">
+        {mode === 'ip' && <AddressTargets value={addresses} onChange={setAddresses} />}
+        {mode === 'vless' && (
+          <SubscriptionTargets
+            pasted={pasted}
+            onPastedChange={changePasted}
+            parsed={parsed}
+            userId={source.userId}
+            shortUuid={source.shortUuid}
+            onSource={changeSource}
+            subscription={subscription}
+            reference={status?.reference ?? null}
+            list={configList}
+            rejected={rejected}
+            selected={configIndexes}
+            onToggle={toggleConfig}
+            onSelectMany={selectConfigs}
+            onClear={() => setConfigIndexes([])}
+          />
+        )}
+        {mode === 'cidr' && <ScanTargets cidr={cidr} onChange={setCidr} />}
 
-          <UnitsPicker kind={kind} units={catalog} selected={units} onChange={setManualUnits} />
-          {mode === 'vless' ? (
-            <CheckOptions core={core} onCoreChange={setCore} cores={status?.cores} />
-          ) : mode === 'cidr' ? (
-            <CheckOptions
-              probes={scanProbes}
-              onProbesChange={setScanProbes}
-              sniHosts={sniHosts}
-              onSniChange={changeSni}
-              autoSniNames={autoSniNames}
-              showSni={showSni}
-            />
-          ) : (
-            <CheckOptions
-              probes={mode === 'hosts' ? hostProbes : probes}
-              onProbesChange={setProbes}
-              locked={mode === 'hosts' && nodes.length ? ['icmp'] : []}
-              sniHosts={sniHosts}
-              onSniChange={changeSni}
-              autoSniNames={autoSniNames}
-              showSni={showSni}
-            />
-          )}
-        </div>
-        <div className="hidden lg:block">
-          <LaunchAside {...launchProps} />
-        </div>
-        <div className="lg:hidden">
-          <LaunchBar {...launchProps} />
-        </div>
+        {mode === 'vless' ? (
+          <CheckOptions core={core} onCoreChange={setCore} cores={status?.cores} />
+        ) : mode === 'cidr' ? (
+          <CheckOptions
+            probes={scanProbes}
+            onProbesChange={setScanProbes}
+            sniHosts={sniHosts}
+            onSniChange={changeSni}
+            autoSniNames={autoSniNames}
+            showSni={showSni}
+          />
+        ) : (
+          <CheckOptions
+            probes={probes}
+            onProbesChange={setProbes}
+            sniHosts={sniHosts}
+            onSniChange={changeSni}
+            autoSniNames={autoSniNames}
+            showSni={showSni}
+          />
+        )}
+
+        <OperatorPicker
+          kind={kind}
+          units={catalog}
+          selected={units}
+          onChange={setManualUnits}
+          loading={unitsLoading}
+        />
+      </div>
+      <div className="hidden lg:block">
+        <LaunchAside launch={launch} />
+      </div>
+      <div className="lg:hidden">
+        <LaunchBar launch={launch} />
       </div>
     </div>
   );

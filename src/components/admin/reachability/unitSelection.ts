@@ -3,9 +3,6 @@ import { safeLocal } from '@/utils/safeStorage';
 
 export type DpiFilter = 'on' | 'off' | 'any';
 
-/** Быстрый выбор симок: все с Белым списком, все без него, все вместе. */
-export type QuickPick = 'bs' | 'regular' | 'all';
-
 /** Всегда новый массив: выбор хранится в состоянии React. */
 export function toggleKey(selected: string[], key: string): string[] {
   return selected.includes(key) ? selected.filter((k) => k !== key) : [...selected, key];
@@ -21,40 +18,48 @@ export function pickUnits(units: readonly Unit[], dpi: 'on' | 'off'): string[] {
   return units.filter((unit) => unit.probeable && unit.dpi === dpi).map((unit) => unit.op_key);
 }
 
-export interface UnitsByMode {
-  bs: Unit[];
-  regular: Unit[];
+/** Все ли ключи из набора выбраны; пустой набор — нет. */
+export function allOf(keys: readonly string[], selected: readonly string[]): boolean {
+  return keys.length > 0 && keys.every((key) => selected.includes(key));
 }
 
-function byOperatorAndRegion(a: Unit, b: Unit): number {
-  return a.name.localeCompare(b.name, 'ru') || a.region.localeCompare(b.region, 'ru');
+export interface District {
+  code: string;
+  label: string;
+  units: Unit[];
 }
 
-/** Сетка симок: две группы по Белому списку, внутри по оператору и округу; без связи не показываем. */
-export function unitsByMode(units: readonly Unit[]): UnitsByMode {
-  const alive = units.filter((unit) => unit.probeable);
-  return {
-    bs: alive.filter((unit) => unit.dpi === 'on').sort(byOperatorAndRegion),
-    regular: alive.filter((unit) => unit.dpi !== 'on').sort(byOperatorAndRegion),
-  };
+export type GroupState = 'none' | 'some' | 'all';
+
+/** Операторы по федеральным округам в порядке появления в каталоге, как в оригинале bsbord.com. */
+export function groupByDistrict(units: readonly Unit[]): District[] {
+  const map = new Map<string, District>();
+  for (const unit of units) {
+    const current = map.get(unit.region_code);
+    if (current) map.set(unit.region_code, { ...current, units: [...current.units, unit] });
+    else map.set(unit.region_code, { code: unit.region_code, label: unit.region, units: [unit] });
+  }
+  return [...map.values()];
 }
 
-function sameKeys(a: readonly string[], b: readonly string[]): boolean {
-  return a.length === b.length && a.every((key) => b.includes(key));
+function probeableKeys(district: District): string[] {
+  return district.units.filter((unit) => unit.probeable).map((unit) => unit.op_key);
 }
 
-/** Какой быстрый выбор совпадает с выбором целиком; свой набор или пусто — null. */
-export function activeQuickPick(
-  units: readonly Unit[],
-  selected: readonly string[],
-): QuickPick | null {
-  if (selected.length === 0) return null;
-  const bs = pickUnits(units, 'on');
-  const regular = pickUnits(units, 'off');
-  if (sameKeys(bs, selected)) return 'bs';
-  if (sameKeys(regular, selected)) return 'regular';
-  if (sameKeys([...bs, ...regular], selected)) return 'all';
-  return null;
+/** Недоступные симки не считаются: округ «весь отмечен», когда отмечены все доступные. */
+export function districtState(district: District, selected: readonly string[]): GroupState {
+  const keys = probeableKeys(district);
+  const chosen = keys.filter((key) => selected.includes(key)).length;
+  if (keys.length === 0 || chosen === 0) return 'none';
+  return chosen === keys.length ? 'all' : 'some';
+}
+
+export function toggleDistrict(selected: string[], district: District): string[] {
+  const keys = probeableKeys(district);
+  if (districtState(district, selected) === 'all') {
+    return selected.filter((key) => !keys.includes(key));
+  }
+  return mergeKeys(selected, keys);
 }
 
 /** Режим Белого списка следует за выбранными симками: только с БС → on, только без → off, иначе any. */
