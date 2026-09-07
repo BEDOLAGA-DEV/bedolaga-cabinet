@@ -1,85 +1,34 @@
 import { describe, expect, it } from 'vitest';
-import type { Unit } from '@/api/reachability';
 import { resetSafeStorage } from '@/utils/safeStorage';
+import { unit } from './testUtils';
 import {
-  defaultDpiFor,
-  districtState,
+  activeQuickPick,
   dpiForSelection,
-  filterUnits,
-  groupByDistrict,
-  groupByOperator,
-  groupState,
   mergeKeys,
   pickUnits,
   recallSelection,
-  regionsOf,
   rememberSelection,
-  toggleDistrict,
-  toggleGroup,
   toggleKey,
+  unitsByMode,
 } from './unitSelection';
 
-const unit = (op_key: string, dpi: 'on' | 'off', region_code: string, probeable = true): Unit => ({
-  op_key,
-  operator: op_key.split('|')[0],
-  name: op_key.split('|')[0].toUpperCase(),
-  region: region_code.toUpperCase(),
-  region_code,
-  dpi,
-  channel_state: dpi === 'on' ? 'DPI_ON' : 'DPI_OFF',
-  probeable,
-  in_catalog: true,
-});
 const UNITS = [
-  unit('mts|цфо|off', 'off', 'cfo'),
-  unit('mts|пфо|on', 'on', 'pfo'),
-  unit('tele2|цфо|on', 'on', 'cfo'),
-  unit('yota|уфо|off', 'off', 'urfo', false),
-  unit('yota|цфо|on', 'on', 'cfo', false),
+  { ...unit('tele2|цфо|on', 'on', 'cfo'), name: 'Tele2' },
+  { ...unit('mts|цфо|off', 'off', 'cfo'), name: 'МТС' },
+  { ...unit('mts|пфо|on', 'on', 'pfo'), name: 'МТС' },
+  { ...unit('beeline|цфо|on', 'on', 'cfo'), name: 'Билайн' },
+  { ...unit('yota|уфо|off', 'off', 'urfo', false), name: 'Yota' },
 ];
 
-describe('filterUnits', () => {
-  it('фильтрует по режиму Белого списка и округу', () => {
-    expect(filterUnits(UNITS, { dpi: 'on', region: null }).map((u) => u.op_key)).toEqual([
-      'mts|пфо|on',
-      'tele2|цфо|on',
-      'yota|цфо|on',
-    ]);
-    expect(filterUnits(UNITS, { dpi: 'any', region: 'cfo' }).map((u) => u.op_key)).toEqual([
-      'mts|цфо|off',
-      'tele2|цфо|on',
-      'yota|цфо|on',
-    ]);
-    expect(filterUnits(UNITS, { dpi: 'any', region: null })).toHaveLength(5);
-  });
-});
-
-describe('regionsOf / toggleKey / defaultDpiFor', () => {
-  it('округа уникальны и подписаны', () => {
-    expect(regionsOf(UNITS)).toEqual([
-      { code: 'cfo', label: 'CFO' },
-      { code: 'pfo', label: 'PFO' },
-      { code: 'urfo', label: 'URFO' },
-    ]);
-  });
+describe('toggleKey / mergeKeys / pickUnits', () => {
   it('toggleKey возвращает новый массив', () => {
     const selected = ['a'];
     expect(toggleKey(selected, 'b')).toEqual(['a', 'b']);
     expect(toggleKey(['a', 'b'], 'a')).toEqual(['b']);
     expect(selected).toEqual(['a']);
   });
-  it('назначение задаёт режим по умолчанию', () => {
-    expect(defaultDpiFor(['bs'])).toBe('on');
-    expect(defaultDpiFor(['regular'])).toBe('off');
-    expect(defaultDpiFor(['regular', 'unknown'])).toBe('off');
-    expect(defaultDpiFor(['bs', 'regular'])).toBe('on');
-    expect(defaultDpiFor([])).toBe('on');
-  });
-});
-
-describe('быстрый выбор симок', () => {
   it('pickUnits берёт только доступные симки нужного режима', () => {
-    expect(pickUnits(UNITS, 'on')).toEqual(['mts|пфо|on', 'tele2|цфо|on']);
+    expect(pickUnits(UNITS, 'on')).toEqual(['tele2|цфо|on', 'mts|пфо|on', 'beeline|цфо|on']);
     expect(pickUnits(UNITS, 'off')).toEqual(['mts|цфо|off']);
   });
   it('mergeKeys объединяет без дублей и не трогает исходный массив', () => {
@@ -89,27 +38,31 @@ describe('быстрый выбор симок', () => {
   });
 });
 
-describe('группы по оператору', () => {
-  it('groupByOperator сохраняет порядок первого появления', () => {
-    expect(groupByOperator(UNITS).map((g) => [g.operator, g.units.length])).toEqual([
-      ['MTS', 2],
-      ['TELE2', 1],
-      ['YOTA', 2],
+/** Сетка симок: две группы по Белому списку, внутри — по оператору и округу; без связи не показываем. */
+describe('unitsByMode', () => {
+  it('делит доступные симки на «с Белым списком» и «без», сортируя по оператору и округу', () => {
+    const groups = unitsByMode(UNITS);
+    expect(groups.bs.map((u) => u.op_key)).toEqual([
+      'beeline|цфо|on',
+      'mts|пфо|on',
+      'tele2|цфо|on',
     ]);
+    expect(groups.regular.map((u) => u.op_key)).toEqual(['mts|цфо|off']);
   });
-  it('groupState считает только доступные симки', () => {
-    const [mts, , yota] = groupByOperator(UNITS);
-    expect(groupState(mts, [])).toBe('none');
-    expect(groupState(mts, ['mts|цфо|off'])).toBe('some');
-    expect(groupState(mts, ['mts|цфо|off', 'mts|пфо|on'])).toBe('all');
-    // у yota нет доступных симок — отмечать нечего
-    expect(groupState(yota, [])).toBe('none');
+});
+
+/** Быстрый выбор подсвечивается, только когда выбор совпадает с ним целиком. */
+describe('activeQuickPick', () => {
+  it('узнаёт «с Белым списком», «без» и «все» независимо от порядка ключей', () => {
+    expect(activeQuickPick(UNITS, ['mts|пфо|on', 'beeline|цфо|on', 'tele2|цфо|on'])).toBe('bs');
+    expect(activeQuickPick(UNITS, ['mts|цфо|off'])).toBe('regular');
+    expect(
+      activeQuickPick(UNITS, ['mts|цфо|off', 'tele2|цфо|on', 'mts|пфо|on', 'beeline|цфо|on']),
+    ).toBe('all');
   });
-  it('toggleGroup отмечает все доступные, а при полном выборе снимает группу', () => {
-    const [mts] = groupByOperator(UNITS);
-    expect(toggleGroup(['x'], mts)).toEqual(['x', 'mts|цфо|off', 'mts|пфо|on']);
-    expect(toggleGroup(['x', 'mts|цфо|off'], mts)).toEqual(['x', 'mts|цфо|off', 'mts|пфо|on']);
-    expect(toggleGroup(['x', 'mts|цфо|off', 'mts|пфо|on'], mts)).toEqual(['x']);
+  it('часть набора или пустой выбор — ничего не подсвечено', () => {
+    expect(activeQuickPick(UNITS, ['tele2|цфо|on'])).toBeNull();
+    expect(activeQuickPick(UNITS, [])).toBeNull();
   });
 });
 
@@ -120,26 +73,6 @@ describe('память последнего запуска', () => {
     rememberSelection('probe', ['mts|пфо|on']);
     expect(recallSelection('probe')).toEqual(['mts|пфо|on']);
     expect(recallSelection('scan')).toEqual([]);
-  });
-});
-
-describe('округа', () => {
-  it('groupByDistrict группирует по коду округа в порядке появления', () => {
-    expect(groupByDistrict(UNITS).map((d) => [d.code, d.label, d.units.length])).toEqual([
-      ['cfo', 'CFO', 3],
-      ['pfo', 'PFO', 1],
-      ['urfo', 'URFO', 1],
-    ]);
-  });
-  it('districtState и toggleDistrict считают только доступные симки', () => {
-    const [cfo, , urfo] = groupByDistrict(UNITS);
-    expect(districtState(cfo, [])).toBe('none');
-    expect(districtState(cfo, ['mts|цфо|off'])).toBe('some');
-    expect(toggleDistrict(['x'], cfo)).toEqual(['x', 'mts|цфо|off', 'tele2|цфо|on']);
-    expect(toggleDistrict(['x', 'mts|цфо|off', 'tele2|цфо|on'], cfo)).toEqual(['x']);
-    // в УФО обе симки недоступны — отмечать нечего
-    expect(districtState(urfo, [])).toBe('none');
-    expect(toggleDistrict([], urfo)).toEqual([]);
   });
 });
 

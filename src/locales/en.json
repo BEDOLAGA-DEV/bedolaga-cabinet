@@ -2030,7 +2030,25 @@
       "units": {
         "dpiOn": "with whitelist",
         "dpiOff": "without whitelist",
-        "dpiAny": "all"
+        "dpiAny": "all",
+        "title": "SIMs",
+        "hint": "each SIM is charged separately",
+        "quick": {
+          "label": "Quick pick",
+          "bs": "With whitelist",
+          "regular": "Without whitelist",
+          "all": "All",
+          "recall": "Same as last time"
+        },
+        "selectedOf": "{{selected}} of {{total}} selected",
+        "none": "No SIMs selected",
+        "detailsShow": "Individual SIMs",
+        "detailsHide": "Collapse list",
+        "groupBs": "With whitelist",
+        "groupRegular": "Without whitelist",
+        "pickGroup": "All",
+        "unpickGroup": "Clear",
+        "empty": "No SIMs: service unavailable"
       },
       "launch": {
         "price": "Price",
@@ -2314,20 +2332,7 @@
       },
       "sections": {
         "targets": "Targets",
-        "probes": "Probes",
-        "more": "More"
-      },
-      "operators": {
-        "pickBs": "All with whitelist",
-        "unpickBs": "Unselect all with whitelist",
-        "pickRegular": "All without whitelist",
-        "unpickRegular": "Unselect all without whitelist",
-        "recall": "Same as last time",
-        "reset": "Reset",
-        "empty": "SIM list is empty: service unavailable",
-        "pickOperator": "All {{name}} SIMs",
-        "unpickOperator": "Unselect {{name}} SIMs",
-        "noBsShort": "no WL"
+        "probes": "Probes"
       },
       "recent": {
         "title": "My checks",
@@ -2393,26 +2398,6 @@
         "unhealthyHint": "Check the API key and plan at bsbord.com"
       },
       "subtitle": "server reachability from Russia",
-      "unitsSummary": {
-        "title": "SIMs",
-        "none": "No SIMs selected",
-        "bs_one": "{{count}} whitelist SIM",
-        "bs_other": "{{count}} whitelist SIMs",
-        "regular_one": "{{count}} non-whitelist SIM",
-        "regular_other": "{{count}} non-whitelist SIMs",
-        "mixed_one": "{{count}} SIM: {{bs}} whitelist, {{regular}} without",
-        "mixed_other": "{{count}} SIMs: {{bs}} whitelist, {{regular}} without",
-        "auto": "by target purpose",
-        "manual": "chosen manually",
-        "edit": "Change",
-        "hide": "Hide",
-        "reset": "As per targets"
-      },
-      "advanced": {
-        "probes": "Probes: {{probes}}",
-        "sni": "SNI: {{sni}}",
-        "core": "Xray core: {{core}}"
-      },
       "server": {
         "byOperators": "By operator",
         "catchesAll": "works in every district",
@@ -2442,9 +2427,6 @@
         "servers_one": "{{count}} server",
         "servers_other": "{{count}} servers",
         "minutes": "about {{count}} minutes",
-        "unitsLine": "SIMs: by server purpose, {{units}}",
-        "change": "Change",
-        "advanced": "Advanced: {{summary}}",
         "balanceAfter": "Balance after: {{balance}}",
         "onlyChecked": "You pay only for SIMs that were checked. The check can be stopped.",
         "run": "Run for {{price}}",
@@ -2464,6 +2446,12 @@
         "finishedCancelled": "Check stopped",
         "finishedFailed": "Check failed",
         "nothingToCheck": "No servers match this choice"
+      },
+      "quick": {
+        "placeholder": "IP, domain, vless:// or subscription link",
+        "check": "Check",
+        "hint": "One address, a config or a whole subscription",
+        "cidr": "Scan a /24 subnet"
       }
     },
     "wheel": {

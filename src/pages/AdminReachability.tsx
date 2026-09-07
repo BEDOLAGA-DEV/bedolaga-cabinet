@@ -8,10 +8,10 @@ import { useNotify } from '@/platform/hooks/useNotify';
 import { formatShortDate } from '@/utils/format';
 import { AdminBackButton } from '../components/admin/AdminBackButton';
 import { ListRowSkeleton } from '../components/admin/ListRowSkeleton';
+import { QuickCheck } from '../components/admin/reachability/QuickCheck';
 import { SetupGuide } from '../components/admin/reachability/SetupGuide';
 import {
   type DeepLink,
-  REACHABILITY_HISTORY_PATH,
   REACHABILITY_OTHER_PATH,
   REACHABILITY_SETTINGS_PATH,
   parseReachabilityDeepLink,
@@ -87,16 +87,6 @@ export default function AdminReachability() {
           </p>
         </div>
         <div className="ml-auto flex items-center gap-4">
-          {ready && (
-            <nav className="hidden items-center gap-4 text-sm md:flex">
-              <Link to={REACHABILITY_HISTORY_PATH} className="text-accent-400 hover:underline">
-                {t('admin.reachability.fleet.history')}
-              </Link>
-              <Link to={REACHABILITY_OTHER_PATH} className="text-accent-400 hover:underline">
-                {t('admin.reachability.fleet.other')}
-              </Link>
-            </nav>
-          )}
           {isLoading && <Skeleton className="h-6 w-28" />}
           {status && ready && (
             <span className="text-sm font-semibold tabular-nums text-dark-100">
@@ -115,6 +105,7 @@ export default function AdminReachability() {
       </header>
 
       {status && !ready && <SetupGuide status={status} />}
+      {ready && <QuickCheck />}
       {ready && <FleetView status={status} link={link} patchParams={patchParams} />}
     </div>
   );
@@ -208,7 +199,17 @@ function FleetView({ status, link, patchParams }: FleetViewProps) {
     setPicked([]);
     patchParams({ batch: String(started.id), pick: null, server: null });
   };
-  const onRunningOne = (batchId: number) => patchParams({ batch: String(batchId), server: null });
+  // Из карточки: «Что проверить?» с одним этим сервером, симки и пробы выбираются там.
+  const checkOne = (row: FleetRow) => {
+    if (row.ref === null) return;
+    setPicked([row.ref]);
+    patchParams({ server: null });
+    setScopeOpen(true);
+  };
+  const closeScope = () => {
+    setScopeOpen(false);
+    if (!link.picking) setPicked([]);
+  };
   const stop = () => {
     if (batch) cancel.mutate(batch.id);
   };
@@ -221,7 +222,7 @@ function FleetView({ status, link, patchParams }: FleetViewProps) {
       units={fleet.units}
       status={status}
       onClose={closeServer}
-      onRunning={onRunningOne}
+      onCheck={() => checkOne(selected)}
     />
   ) : null;
 
@@ -293,14 +294,6 @@ function FleetView({ status, link, patchParams }: FleetViewProps) {
               </Button>
             </div>
           )}
-          <nav className="flex flex-wrap gap-4 text-sm md:hidden">
-            <Link to={REACHABILITY_HISTORY_PATH} className="text-accent-400 hover:underline">
-              {t('admin.reachability.fleet.history')}
-            </Link>
-            <Link to={REACHABILITY_OTHER_PATH} className="text-accent-400 hover:underline">
-              {t('admin.reachability.fleet.other')}
-            </Link>
-          </nav>
         </div>
         <aside className="hidden lg:sticky lg:top-24 lg:block">
           {isDesktop && isActive && batch && <BatchAside batch={batch} rows={fleet.rows} />}
@@ -320,14 +313,14 @@ function FleetView({ status, link, patchParams }: FleetViewProps) {
           units={fleet.units}
           status={status}
           onClose={closeServer}
-          onRunning={onRunningOne}
+          onCheck={() => checkOne(selected)}
         />
       )}
 
       {scopeOpen && (
         <BatchScope
           isOpen
-          onClose={() => setScopeOpen(false)}
+          onClose={closeScope}
           rows={fleet.rows}
           counts={counts}
           status={status}

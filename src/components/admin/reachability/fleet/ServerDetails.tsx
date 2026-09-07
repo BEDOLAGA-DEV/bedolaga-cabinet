@@ -2,7 +2,6 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import {
-  type Batch,
   type Purpose,
   type ReachabilityStatus,
   type SummaryRow,
@@ -32,8 +31,8 @@ interface ServerDetailsProps {
   units: Unit[];
   status: ReachabilityStatus | undefined;
   onClose: () => void;
-  /** «Проверить этот сервер» создаёт пачку из одного сервера; страница показывает её прогресс. */
-  onRunning: (batchId: number) => void;
+  /** «Проверить этот сервер» открывает «Что проверить?» с этим сервером: симки и пробы выбираются там. */
+  onCheck: () => void;
   /** В шите заголовок и «закрыть» даёт сама обёртка. */
   withHeader?: boolean;
 }
@@ -62,7 +61,7 @@ function operatorWords(
 
 /**
  * Карточка сервера: вердикт словом, «ловит у 7 из 15 симок с Белым списком», разбор по операторам
- * словами, прошлые проверки и кнопка проверить один этот сервер с ценой.
+ * словами, прошлые проверки и кнопка проверить один этот сервер с ценой по симкам его назначения.
  */
 export function ServerDetails({
   row,
@@ -70,7 +69,7 @@ export function ServerDetails({
   units,
   status,
   onClose,
-  onRunning,
+  onCheck,
   withHeader = true,
 }: ServerDetailsProps) {
   const { t, i18n } = useTranslation();
@@ -90,14 +89,6 @@ export function ServerDetails({
     queryKey: ['admin-reachability-server-history', row.key],
     queryFn: () => reachabilityApi.listJobs({ target_key: row.key, limit: HISTORY_ROWS }),
     staleTime: 30_000,
-  });
-  const run = useMutation({
-    mutationFn: () => reachabilityApi.createBatch(body),
-    onSuccess: (batch: Batch) => {
-      notify.success(t(`${base}.batch.started`));
-      onRunning(batch.id);
-    },
-    onError: (error) => notify.error(getApiErrorMessage(error, '')),
   });
   const setPurpose = useMutation({
     mutationFn: (purpose: Purpose) =>
@@ -236,9 +227,8 @@ export function ServerDetails({
           variant="primary"
           fullWidth
           className="min-h-[44px]"
-          loading={run.isPending}
           disabled={price.isLoading || priceLabel === null}
-          onClick={() => run.mutate()}
+          onClick={onCheck}
         >
           {priceLabel
             ? t(`${base}.server.checkOne`, { price: priceLabel })

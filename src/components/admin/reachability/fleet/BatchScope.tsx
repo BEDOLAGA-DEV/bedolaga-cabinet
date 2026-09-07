@@ -9,21 +9,25 @@ import {
   type Unit,
   reachabilityApi,
 } from '@/api/reachability';
-import { ChevronDownIcon } from '@/components/icons';
 import { Button } from '@/components/primitives';
 import { ResponsiveSheet } from '@/components/ui/ResponsiveSheet';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { useNotify } from '@/platform/hooks/useNotify';
 import { getApiErrorMessage } from '@/utils/api-error';
-import { ProbesRow } from '../ProbesRow';
-import { SniHostsField } from '../SniHostsField';
-import { UnitsSummary } from '../UnitsSummary';
+import { CheckOptions } from '../CheckOptions';
+import { UnitsPicker } from '../UnitsPicker';
 import { formatCredits, formatMoney } from '../money';
-import { DEFAULT_SNI_HOST, parseSniHosts, recallSniHosts, rememberSniHosts } from '../sniNames';
-import { pickUnits } from '../unitSelection';
+import {
+  DEFAULT_SNI_HOST,
+  parseSniHosts,
+  recallSniHosts,
+  rememberSniHosts,
+  sniNamesForAddresses,
+} from '../sniNames';
+import { dpiForSelection, pickUnits, rememberSelection } from '../unitSelection';
 import { type FleetCounts, type FleetRow, scopeRefs } from './fleet';
-import { FLEET_PROBES, batchBody } from './scopeDefaults';
+import { FLEET_PROBES, batchBody, dpiForRows } from './scopeDefaults';
 
 interface BatchScopeProps {
   isOpen: boolean;
@@ -32,7 +36,7 @@ interface BatchScopeProps {
   counts: FleetCounts;
   status: ReachabilityStatus | undefined;
   units: Unit[];
-  /** Серверы, отмеченные вручную в списке (refs). */
+  /** Серверы, отмеченные вручную в списке или один сервер из карточки (refs). */
   picked: string[];
   /** «Выбрать вручную» без отмеченных: закрыть шит и включить чекбоксы в списке. */
   onPickManually: () => void;
@@ -42,7 +46,8 @@ interface BatchScopeProps {
 const KINDS: readonly ScopeKind[] = ['problems', 'stale', 'all', 'manual'];
 export const BATCH_PREVIEW_KEY = 'admin-reachability-batch-preview';
 
-function defaultKind(counts: FleetCounts): ScopeKind {
+function defaultKind(counts: FleetCounts, picked: readonly string[]): ScopeKind {
+  if (picked.length > 0) return 'manual';
   if (counts.partial + counts.down > 0) return 'problems';
   if (counts.stale > 0) return 'stale';
   return 'all';
@@ -50,9 +55,10 @@ function defaultKind(counts: FleetCounts): ScopeKind {
 
 /**
  * «Что проверить?»: объём с числом серверов, для выбранного — цена и примерное время;
- * симки подбираются по назначению серверов, ручной выбор и пробы спрятаны за «Изменить» и
- * «Дополнительно». Запуск списывает деньги только за проверенные симки, поэтому шит и есть
- * подтверждение: в Mini App никакого системного окна.
+ * симки, пробы и SNI на виду: симки подобраны по назначению серверов, но быстрый выбор
+ * «с Белым списком / без / все» и отдельные симки в одном касании. Запуск списывает деньги
+ * только за проверенные симки, поэтому шит и есть подтверждение: в Mini App никакого
+ * системного окна.
  */
 export function BatchScope({
   isOpen,
@@ -69,13 +75,12 @@ export function BatchScope({
   const notify = useNotify();
   const base = 'admin.reachability';
   const now = useMemo(() => new Date(), []);
-  const [kind, setKind] = useState<ScopeKind>(() => defaultKind(counts));
+  const [kind, setKind] = useState<ScopeKind>(() => defaultKind(counts, picked));
   const [manualUnits, setManualUnits] = useState<string[] | null>(null);
   const [probes, setProbes] = useState<Probes>({ ...FLEET_PROBES });
   const [sniText, setSniText] = useState(
     () => recallSniHosts() ?? status?.default_sni ?? DEFAULT_SNI_HOST,
   );
-  const [advanced, setAdvanced] = useState(false);
 
   const refsByKind = useMemo(
     () =>
@@ -90,20 +95,34 @@ export function BatchScope({
     return rows.filter((row) => row.ref !== null && wanted.has(row.ref));
   }, [rows, refsByKind, kind]);
 
-  const body = useMemo(() => {
-    const draft = batchBody(selected, kind, status, manualUnits);
-    return { ...draft, probes: { ...probes }, sni_hosts: parseSniHosts(sniText).names };
-  }, [selected, kind, status, manualUnits, probes, sniText]);
+  // Симки по назначению серверов, пока человек не выбрал сам.
   const alive = useMemo(() => units.filter((u) => u.probeable), [units]);
+  const scopeDpi = dpiForRows(selected);
   const autoKeys = useMemo(
-    () => (body.dpi === 'any' ? alive.map((u) => u.op_key) : pickUnits(alive, body.dpi)),
-    [alive, body.dpi],
+    () => (scopeDpi === 'any' ? alive.map((u) => u.op_key) : pickUnits(alive, scopeDpi)),
+    [alive, scopeDpi],
   );
+  const selectedUnits = manualUnits ?? autoKeys;
+  const autoSniNames = useMemo(
+    () => sniNamesForAddresses(selected.map((row) => row.address)),
+    [selected],
+  );
+
+  const body = useMemo(
+    () => ({
+      ...batchBody(selected, kind, status, selectedUnits),
+      dpi: dpiForSelection(alive, selectedUnits),
+      probes: { ...probes },
+      sni_hosts: probes.sni ? parseSniHosts(sniText).names : [],
+    }),
+    [selected, kind, status, selectedUnits, alive, probes, sniText],
+  );
+  const canPrice = body.host_refs.length > 0 && body.units.length > 0;
 
   const preview = useQuery({
     queryKey: [BATCH_PREVIEW_KEY, body],
     queryFn: () => reachabilityApi.previewBatch(body),
-    enabled: isOpen && body.host_refs.length > 0,
+    enabled: isOpen && canPrice,
     staleTime: 30_000,
     retry: false,
   });
@@ -111,6 +130,7 @@ export function BatchScope({
     mutationFn: () => reachabilityApi.createBatch(body),
     onSuccess: (batch) => {
       rememberSniHosts(sniText);
+      rememberSelection('probe', body.units);
       notify.success(t(`${base}.batch.started`));
       onStarted(batch);
     },
@@ -142,11 +162,9 @@ export function BatchScope({
     return parts.join(' · ');
   };
 
-  const advancedSummary = `${[probes.icmp && 'ICMP', probes.tcp && 'TCP', probes.sni && 'TLS-SNI'].filter(Boolean).join(', ')} · SNI ${sniText}`;
-
   return (
-    <ResponsiveSheet isOpen={isOpen} onClose={onClose} title={t(`${base}.batch.title`)}>
-      <div className="space-y-4 px-5 pb-6 pt-1">
+    <ResponsiveSheet isOpen={isOpen} onClose={onClose} title={t(`${base}.batch.title`)} size="lg">
+      <div className="space-y-5 px-5 pb-6 pt-1">
         <div role="radiogroup" aria-label={t(`${base}.batch.title`)} className="space-y-2">
           {KINDS.map((k) => {
             const active = k === kind;
@@ -192,35 +210,26 @@ export function BatchScope({
           })}
         </div>
 
-        <UnitsSummary
+        <UnitsPicker
           kind="probe"
-          selected={manualUnits ?? autoKeys}
-          auto={manualUnits === null}
+          units={units}
+          selected={selectedUnits}
           onChange={setManualUnits}
-          onReset={() => setManualUnits(null)}
         />
 
-        <div className="space-y-3">
-          <button
-            type="button"
-            aria-expanded={advanced}
-            onClick={() => setAdvanced((value) => !value)}
-            className="flex w-full items-center justify-between gap-3 text-left text-[13px] text-dark-400 hover:text-dark-200"
-          >
-            <span>{t(`${base}.batch.advanced`, { summary: advancedSummary })}</span>
-            <ChevronDownIcon
-              className={cn('h-4 w-4 shrink-0 transition-transform', advanced && 'rotate-180')}
-            />
-          </button>
-          {advanced && (
-            <div className="space-y-3">
-              <ProbesRow probes={probes} onChange={setProbes} />
-              <SniHostsField value={sniText} onChange={setSniText} autoNames={[]} />
-            </div>
-          )}
-        </div>
+        <CheckOptions
+          probes={probes}
+          onProbesChange={setProbes}
+          sniHosts={sniText}
+          onSniChange={setSniText}
+          autoSniNames={autoSniNames}
+          showSni={probes.sni}
+        />
 
         <div className="space-y-1 border-t border-dark-700/40 pt-3 text-xs text-dark-400">
+          {body.units.length === 0 && (
+            <p className="text-warning-400">{t(`${base}.launch.noUnitsChosen`)}</p>
+          )}
           {balanceAfter !== null && (
             <p>{t(`${base}.batch.balanceAfter`, { balance: formatMoney(balanceAfter) })}</p>
           )}
@@ -241,7 +250,7 @@ export function BatchScope({
             size="lg"
             className="w-full sm:w-auto"
             loading={run.isPending}
-            disabled={body.host_refs.length === 0 || price === null}
+            disabled={!canPrice || price === null}
             onClick={() => run.mutate()}
           >
             {t(`${base}.batch.run`, { price: price ?? '…' })}

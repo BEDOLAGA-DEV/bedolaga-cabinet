@@ -42,6 +42,8 @@ export interface DeepLink {
   batchId: number | null;
   /** Режим «Выбрать вручную»: чекбоксы в списке серверов. */
   picking: boolean;
+  /** Что вставили в поле быстрой проверки: подставляется в форму нужной вкладки. */
+  query: string | null;
 }
 
 export const REACHABILITY_PATH = '/admin/reachability';
@@ -106,6 +108,7 @@ export function parseReachabilityDeepLink(params: URLSearchParams): DeepLink {
     serverKey: params.get('server') || null,
     batchId: parseId(params.get('batch')),
     picking: params.get('pick') === '1',
+    query: params.get('q') || null,
   };
 }
 
@@ -124,5 +127,6 @@ export function buildReachabilityLink(input: Partial<DeepLink>): string {
   if (input.serverKey) params.set('server', input.serverKey);
   if (input.batchId) params.set('batch', String(input.batchId));
   if (input.picking) params.set('pick', '1');
+  if (input.query) params.set('q', input.query);
   return `${REACHABILITY_PATH}?${params.toString()}`;
 }
