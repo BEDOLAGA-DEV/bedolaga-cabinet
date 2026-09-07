@@ -73,3 +73,10 @@ export function isBatchActive(batch: Pick<Batch, 'status'> | null | undefined): 
 export function spentSoFar(batch: Batch): number {
   return batch.jobs.reduce((sum, job) => sum + (job.cost_kopeks ?? 0), 0);
 }
+
+/** Оценка на всю пачку, как считает бот: чашки по 10 серверов, по 3 параллельно, раунд по числу симок. */
+export function estimateBatchMinutes(totalTargets: number, units = 15): number {
+  const chunks = Math.max(1, Math.ceil(totalTargets / 10));
+  const rounds = Math.max(1, Math.ceil(chunks / 3));
+  return Math.max(1, rounds * Math.round(3 + 0.8 * Math.max(1, units)));
+}

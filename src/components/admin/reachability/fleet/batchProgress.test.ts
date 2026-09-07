@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import type { Batch } from '@/api/reachability';
-import { batchEtaMinutes, batchTargets, isBatchActive, spentSoFar } from './batchProgress';
+import {
+  batchEtaMinutes,
+  batchTargets,
+  estimateBatchMinutes,
+  isBatchActive,
+  spentSoFar,
+} from './batchProgress';
 
 /** Прогресс пачки по целям из частичных результатов идущих проб. */
 
@@ -131,5 +137,13 @@ describe('money, eta, activity', () => {
     expect(isBatchActive(batch)).toBe(true);
     expect(isBatchActive({ ...batch, status: 'done' })).toBe(false);
     expect(isBatchActive(null)).toBe(false);
+  });
+});
+
+describe('estimateBatchMinutes', () => {
+  it('mirrors the bot: 15 minutes per round of three chunks of ten', () => {
+    expect(estimateBatchMinutes(12)).toBe(15);
+    expect(estimateBatchMinutes(100)).toBe(60);
+    expect(estimateBatchMinutes(1, 1)).toBeGreaterThanOrEqual(1);
   });
 });

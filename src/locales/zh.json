@@ -4101,7 +4101,8 @@
         "other": "检查地址或订阅",
         "pick": "手动选择",
         "pickDone": "完成",
-        "picked_other": "已选择 {{count}} 台服务器"
+        "picked_other": "已选择 {{count}} 台服务器",
+        "checkShort": "检查"
       },
       "health": {
         "checked": "检查于 {{age}}",

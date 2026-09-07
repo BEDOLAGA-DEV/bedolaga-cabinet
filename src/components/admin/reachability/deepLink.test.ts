@@ -17,6 +17,9 @@ describe('parseReachabilityDeepLink', () => {
       jobId: null,
       repeatJobId: null,
       runningJobId: null,
+      serverKey: null,
+      batchId: null,
+      picking: false,
     });
   });
 
@@ -84,6 +87,9 @@ describe('parseReachabilityDeepLink', () => {
       jobId: null,
       repeatJobId: null,
       runningJobId: null,
+      serverKey: null,
+      batchId: null,
+      picking: false,
     });
   });
 });

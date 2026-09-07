@@ -8,7 +8,7 @@ import { formatCredits } from '../money';
 import { type TargetProgress, batchEtaMinutes, batchTargets, spentSoFar } from './batchProgress';
 import type { FleetRow } from './fleet';
 
-interface BatchProgressProps {
+interface BatchRunningProps {
   batch: Batch;
   onStop: () => void;
   stopping: boolean;
@@ -20,7 +20,7 @@ interface BatchProgressProps {
  * Вместо сводки, пока идёт проверка: «Проверяем 12 серверов», полоса, «Готово 5 из 12 · ещё около
  * 10 минут», «Остановить». Списывается только за проверенные симки, страницу можно закрыть.
  */
-export function BatchProgress({ batch, onStop, stopping, estimatedMinutes }: BatchProgressProps) {
+export function BatchRunning({ batch, onStop, stopping, estimatedMinutes }: BatchRunningProps) {
   const { t } = useTranslation();
   const base = 'admin.reachability.batch';
   const eta = batchEtaMinutes(batch, estimatedMinutes);

@@ -4110,7 +4110,8 @@
         "pick": "انتخاب دستی",
         "pickDone": "انجام شد",
         "picked_one": "{{count}} سرور انتخاب شد",
-        "picked_other": "{{count}} سرور انتخاب شد"
+        "picked_other": "{{count}} سرور انتخاب شد",
+        "checkShort": "بررسی"
       },
       "health": {
         "checked": "بررسی شده {{age}}",

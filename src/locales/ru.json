@@ -2338,7 +2338,8 @@
         "pickDone": "Готово",
         "picked_one": "Выбран {{count}} сервер",
         "picked_few": "Выбрано {{count}} сервера",
-        "picked_many": "Выбрано {{count}} серверов"
+        "picked_many": "Выбрано {{count}} серверов",
+        "checkShort": "Проверить"
       },
       "health": {
         "checked": "проверено {{age}}",

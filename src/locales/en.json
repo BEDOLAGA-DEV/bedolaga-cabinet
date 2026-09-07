@@ -2306,7 +2306,8 @@
         "pick": "Pick manually",
         "pickDone": "Done",
         "picked_one": "{{count}} server selected",
-        "picked_other": "{{count}} servers selected"
+        "picked_other": "{{count}} servers selected",
+        "checkShort": "Check"
       },
       "health": {
         "checked": "checked {{age}}",

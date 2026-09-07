@@ -36,9 +36,20 @@ export interface DeepLink {
   repeatJobId: number | null;
   /** Идущая проверка: экран ожидания переживает перезагрузку страницы. */
   runningJobId: number | null;
+  /** Открытая карточка сервера (target_key). */
+  serverKey: string | null;
+  /** Идущая пачка проверок серверов: её прогресс возвращается после перезагрузки. */
+  batchId: number | null;
+  /** Режим «Выбрать вручную»: чекбоксы в списке серверов. */
+  picking: boolean;
 }
 
 export const REACHABILITY_PATH = '/admin/reachability';
+/** Журнал всех проверок и проверка адреса / подсети / подписки — отдельные экраны раздела. */
+export const REACHABILITY_HISTORY_PATH = `${REACHABILITY_PATH}/history`;
+export const REACHABILITY_OTHER_PATH = `${REACHABILITY_PATH}/other`;
+/** Вкладки экрана «Проверить адрес или подписку»: без хостов панели, они живут на экране флота. */
+export const OTHER_MODES: readonly LaunchMode[] = ['ip', 'cidr', 'vless'];
 /** Раздел BSCHEKER в настройках кабинета (подпункт дерева `sys_reachability`). */
 export const REACHABILITY_SETTINGS_PATH = '/admin/settings?section=sys_reachability';
 /** Сайт сервиса: ключ API и тариф. */
@@ -92,6 +103,9 @@ export function parseReachabilityDeepLink(params: URLSearchParams): DeepLink {
     jobId: parseId(params.get('job')),
     repeatJobId: parseId(params.get('repeat')),
     runningJobId: parseId(params.get('running')),
+    serverKey: params.get('server') || null,
+    batchId: parseId(params.get('batch')),
+    picking: params.get('pick') === '1',
   };
 }
 
@@ -107,5 +121,8 @@ export function buildReachabilityLink(input: Partial<DeepLink>): string {
   if (input.jobId) params.set('job', String(input.jobId));
   if (input.repeatJobId) params.set('repeat', String(input.repeatJobId));
   if (input.runningJobId) params.set('running', String(input.runningJobId));
+  if (input.serverKey) params.set('server', input.serverKey);
+  if (input.batchId) params.set('batch', String(input.batchId));
+  if (input.picking) params.set('pick', '1');
   return `${REACHABILITY_PATH}?${params.toString()}`;
 }

@@ -6,7 +6,7 @@ import type { Batch } from '@/api/reachability';
 vi.mock('react-i18next', async () => (await import('../testUtils')).i18nMock());
 
 import { installMatchMedia, renderWithProviders } from '../testUtils';
-import { BatchAside, BatchProgress } from './BatchRunning';
+import { BatchAside, BatchRunning } from './BatchRunning';
 import type { FleetRow } from './fleet';
 
 /** Экран идущей проверки: заголовок с числом серверов, полоса, остаток времени, «Остановить», список по серверам. */
@@ -116,11 +116,11 @@ const rows = [
   row('d.example:443', 'Delta'),
 ];
 
-describe('BatchProgress', () => {
+describe('BatchRunning', () => {
   it('tells how far the check went and lets it stop', () => {
     const onStop = vi.fn();
     renderWithProviders(
-      <BatchProgress batch={batch} onStop={onStop} stopping={false} estimatedMinutes={15} />,
+      <BatchRunning batch={batch} onStop={onStop} stopping={false} estimatedMinutes={15} />,
     );
     expect(screen.getByRole('heading', { level: 2 }).textContent).toBe('Проверяем 3 сервера');
     expect(screen.getByText('Готово 1 из 3 · ещё около 10 минут')).toBeTruthy();
@@ -132,7 +132,7 @@ describe('BatchProgress', () => {
 
   it('shows only the done count while the estimate is unknown', () => {
     renderWithProviders(
-      <BatchProgress batch={batch} onStop={vi.fn()} stopping={false} estimatedMinutes={null} />,
+      <BatchRunning batch={batch} onStop={vi.fn()} stopping={false} estimatedMinutes={null} />,
     );
     expect(screen.getByText('Готово 1 из 3')).toBeTruthy();
   });

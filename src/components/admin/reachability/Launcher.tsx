@@ -43,6 +43,8 @@ interface LauncherProps {
   /** Идущая проверка живёт в адресе страницы (?running=), чтобы пережить перезагрузку. */
   runningJobId: number | null;
   onRunning: (jobId: number | null) => void;
+  /** Какие вкладки доступны; по умолчанию все четыре. */
+  modes?: readonly LaunchMode[];
 }
 
 const PROBE_DEFAULT: Probes = { icmp: false, tcp: true, sni: true };
@@ -55,7 +57,14 @@ function toggleBy<T extends { uuid: string }>(list: T[], item: T): T[] {
 }
 
 /** Один запуск на все вкладки: цели по вкладке, пробы, SNI-хост, операторы, итог и кнопка. */
-export function Launcher({ status, link, onModeChange, runningJobId, onRunning }: LauncherProps) {
+export function Launcher({
+  status,
+  link,
+  onModeChange,
+  runningJobId,
+  onRunning,
+  modes,
+}: LauncherProps) {
   const mode = link.mode;
   const kind = jobKindOf(mode);
   const { data: catalog = [] } = useUnits();
@@ -290,7 +299,7 @@ export function Launcher({ status, link, onModeChange, runningJobId, onRunning }
 
   return (
     <div id="reachability-launcher" className="space-y-6">
-      <ModeSwitch value={mode} onChange={onModeChange} />
+      <ModeSwitch value={mode} onChange={onModeChange} modes={modes} />
       <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start lg:gap-8">
         <div className="space-y-8">
           {mode === 'hosts' && (
