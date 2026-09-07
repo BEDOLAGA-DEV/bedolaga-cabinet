@@ -89,7 +89,7 @@ describe('RecentJobs', () => {
     renderWithProviders(<RecentJobs initialJobId={null} />);
     await screen.findByText('Host 1');
     expect(
-      screen.getByRole('heading', { name: 'Мои проверки' }).parentElement?.textContent,
+      screen.getByRole('heading', { name: 'История проверок' }).parentElement?.textContent,
     ).not.toMatch(/\d/);
     expect(screen.queryByRole('button', { name: 'Фильтр' })).toBeNull();
     expect(screen.queryByText('Вид')).toBeNull();

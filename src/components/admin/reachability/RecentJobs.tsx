@@ -50,7 +50,8 @@ interface RecentJobsProps {
 }
 
 /**
- * «Мои проверки» для людей: строка — точка итога, цели, итог словом, симки, время, списано;
+ * История проверок внизу страницы, как на bsbord.com: строка — точка итога, цели, итог словом,
+ * симки, время, списано;
  * раскрытие показывает ответ словами и результат, «Повторить» подставляет всё в форму.
  * Журнал обновляется сам, пока есть незавершённые задачи.
  */
@@ -92,8 +93,11 @@ export function RecentJobs({ initialJobId }: RecentJobsProps) {
       ? t(`admin.reachability.recent.outcome.${outcome}`)
       : t(`admin.reachability.history.statuses.${job.status}`);
   const showFilters = (jobs.data?.total ?? 0) > FILTER_THRESHOLD || kind !== '' || status !== '';
-  const scrollToLauncher = () =>
-    document.getElementById('reachability-launcher')?.scrollIntoView?.({ behavior: 'smooth' });
+  const scrollToLauncher = () => {
+    const launcher = document.getElementById('reachability-launcher');
+    if (launcher) launcher.scrollIntoView?.({ behavior: 'smooth' });
+    else window.scrollTo?.({ top: 0, behavior: 'smooth' });
+  };
 
   return (
     <section aria-labelledby="reachability-recent" className="space-y-4">

@@ -16,12 +16,25 @@ interface PurposeChipProps {
   /** Если задано, чип становится кнопкой «Сменить назначение». */
   onToggle?: () => void;
   disabled?: boolean;
+  /** Метка в строке списка: короткое «БС», полное название в подсказке. */
+  compact?: boolean;
 }
 
 /** Назначение цели. Хосты под Белый список — предмет проверки, они выделены акцентом. */
-export function PurposeChip({ purpose, onToggle, disabled }: PurposeChipProps) {
+export function PurposeChip({ purpose, onToggle, disabled, compact = false }: PurposeChipProps) {
   const { t } = useTranslation();
   const label = t(`admin.reachability.purpose.${purpose}`);
+  if (compact) {
+    return (
+      <span
+        title={label}
+        aria-label={label}
+        className={cn('shrink-0 rounded px-1 py-px text-[11px] font-semibold', CLASS[purpose])}
+      >
+        {t(`admin.reachability.purposeShort.${purpose}`)}
+      </span>
+    );
+  }
   const className = cn(
     'shrink-0 whitespace-nowrap rounded-md px-1.5 py-0.5 text-xs font-medium',
     CLASS[purpose],

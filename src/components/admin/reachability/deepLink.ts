@@ -43,8 +43,6 @@ export interface DeepLink {
 }
 
 export const REACHABILITY_PATH = '/admin/reachability';
-/** Журнал всех проверок — отдельный экран раздела. */
-export const REACHABILITY_HISTORY_PATH = `${REACHABILITY_PATH}/history`;
 /** Раздел BSCHEKER в настройках кабинета (подпункт дерева `sys_reachability`). */
 export const REACHABILITY_SETTINGS_PATH = '/admin/settings?section=sys_reachability';
 /** Сайт сервиса: ключ API и тариф. */

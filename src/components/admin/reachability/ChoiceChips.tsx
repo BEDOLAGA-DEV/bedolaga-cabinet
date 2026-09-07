@@ -3,6 +3,8 @@ import { cn } from '@/lib/utils';
 export interface ChoiceOption<T extends string> {
   value: T;
   label: string;
+  /** Число рядом с подписью, приглушённое: «Проблемы 8». */
+  count?: number;
 }
 
 interface ChoiceChipsProps<T extends string> {
@@ -40,13 +42,19 @@ export function ChoiceChips<T extends string>({
             aria-pressed={active}
             onClick={() => onChange(option.value)}
             className={cn(
-              'rounded-lg px-3 py-1.5 text-xs font-medium transition-all',
+              'shrink-0 whitespace-nowrap rounded-lg px-3 py-1.5 text-xs font-medium transition-all',
               active
                 ? 'bg-accent-500/15 text-accent-400 ring-1 ring-accent-500/30'
                 : 'bg-dark-800/50 text-dark-400 hover:bg-dark-700/50 hover:text-dark-300',
             )}
           >
             {option.label}
+            {option.count !== undefined && (
+              <>
+                {' '}
+                <span className="tabular-nums opacity-70">{option.count}</span>
+              </>
+            )}
           </button>
         );
       })}

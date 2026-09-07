@@ -4,8 +4,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { Batch, BatchPreview, JobList, SummaryRow, Unit } from '@/api/reachability';
 
 /**
- * Карточка сервера: вердикт словом, разбор по операторам словами, прошлые проверки,
- * смена назначения и кнопка с ценой, ведущая в «Что проверить?» с этим сервером.
+ * Карточка под строкой сервера: строка уже назвала сервер и вердикт, карточка добавляет
+ * адрес с назначением, счёт симок словами, разбор по операторам, прошлые проверки
+ * и кнопку с ценой, которая отмечает этот сервер целью.
  */
 
 const notify = vi.hoisted(() => ({ success: vi.fn(), error: vi.fn() }));
@@ -100,7 +101,6 @@ function renderDetails(onCheck = vi.fn()) {
       summaryRow={summaryRow}
       units={units}
       status={undefined}
-      onClose={vi.fn()}
       onCheck={onCheck}
     />,
   );
@@ -110,9 +110,11 @@ function renderDetails(onCheck = vi.fn()) {
 describe('ServerDetails', () => {
   it('tells the verdict and the operators in words', async () => {
     renderDetails();
-    expect(screen.getByRole('heading', { name: 'Russia | LTE | БС' })).toBeTruthy();
-    expect(screen.getByText('Работает не у всех')).toBeTruthy();
+    expect(screen.queryByRole('heading', { name: 'Russia | LTE | БС' })).toBeNull();
+    expect(screen.queryByText('Работает не у всех')).toBeNull();
+    expect(screen.getByText('bs.example:9443')).toBeTruthy();
     expect(screen.getByText(/ловит у 1 из 3 симок с Белым списком/)).toBeTruthy();
+    expect(screen.getByText('1 из 2')).toBeTruthy();
     expect(screen.getByText('не ловит в ПФО')).toBeTruthy();
     expect(screen.getByText('не ловит')).toBeTruthy();
     await waitFor(() =>
@@ -131,6 +133,17 @@ describe('ServerDetails', () => {
     fireEvent.click(button);
     expect(onCheck).toHaveBeenCalled();
     expect(reachabilityApi.createBatch).not.toHaveBeenCalled();
+  });
+
+  it('«Все» прошлые проверки ведёт к истории внизу страницы', () => {
+    const anchor = document.createElement('div');
+    anchor.id = 'reachability-recent';
+    anchor.scrollIntoView = vi.fn();
+    document.body.appendChild(anchor);
+    renderDetails();
+    fireEvent.click(screen.getByRole('button', { name: 'Все' }));
+    expect(anchor.scrollIntoView).toHaveBeenCalled();
+    anchor.remove();
   });
 
   it('changes the purpose through the chip and tells about it', async () => {

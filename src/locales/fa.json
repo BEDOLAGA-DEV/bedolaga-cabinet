@@ -3929,6 +3929,11 @@
         "unknown": "تعیین نشده",
         "guessed": "حدس"
       },
+      "purposeShort": {
+        "bs": "لیست سفید",
+        "regular": "معمولی",
+        "unknown": "تعیین‌نشده"
+      },
       "targets": {
         "hosts": "هاست‌های پنل",
         "includeDisabled": "نمایش غیرفعال‌ها",
@@ -4081,13 +4086,12 @@
         "legendUnchecked_other": "{{count}} بررسی‌نشده",
         "meta": "بررسی {{age}} · {{units}}",
         "search": "جستجوی سرور",
-        "sort": "ابتدا مشکل‌دارها",
         "filter": {
-          "all": "همه {{count}}",
-          "problems": "مشکل‌دار {{count}}",
-          "unchecked": "بررسی‌نشده {{count}}",
-          "bs": "لیست سفید {{count}}",
-          "regular": "معمولی {{count}}"
+          "all": "همه",
+          "problems": "مشکل‌دار",
+          "stale": "مدت‌ها بررسی نشده",
+          "bs": "لیست سفید",
+          "regular": "معمولی"
         },
         "group": {
           "down": "کار نمی‌کنند",
@@ -4107,16 +4111,13 @@
         "ofUnits": "{{ok}} از {{total}}",
         "justNow": "همین حالا",
         "empty": "با این فیلتر سروری نیست",
-        "history": "تاریخچه بررسی‌ها",
-        "pick": {
-          "problems": "با مشکل",
-          "stale": "مدت‌ها بررسی نشده",
-          "all": "همه"
-        },
-        "clear": "پاک کردن",
         "details": "جزئیات",
         "targets": "سرورها",
-        "quickLabel": "انتخاب سریع سرورها"
+        "selectAll": "انتخاب همه",
+        "columns": {
+          "units": "سیم‌کارت‌ها",
+          "checked": "بررسی"
+        }
       },
       "switch": {
         "label": "چه چیزی بررسی شود",
@@ -4134,7 +4135,7 @@
         "probes": "پروب‌ها"
       },
       "recent": {
-        "title": "بررسی‌های من",
+        "title": "تاریخچه بررسی‌ها",
         "empty": "هنوز بررسی‌ای نیست",
         "open": "جزئیات",
         "close": "جمع کردن",
@@ -4210,8 +4211,7 @@
         "unchecked": "این سرور هنوز بررسی نشده",
         "history": "بررسی‌های قبلی",
         "allHistory": "همه",
-        "checkOne": "بررسی این سرور · {{price}}",
-        "close": "بستن"
+        "checkOne": "بررسی این سرور · {{price}}"
       },
       "batch": {
         "minutes": "حدود {{count}} دقیقه",
