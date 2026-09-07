@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { CheckIcon, ChevronRightIcon } from '@/components/icons';
+import { CheckIcon, ChevronDownIcon, ChevronRightIcon } from '@/components/icons';
 import { Spinner } from '@/components/ui/Spinner';
 import { cn } from '@/lib/utils';
 import { PurposeChip } from '../PurposeChip';
@@ -27,6 +27,8 @@ interface FleetRowItemProps {
   picked: boolean;
   onToggle: (ref: string) => void;
   onDetails: (row: FleetRow) => void;
+  /** Карточка сервера раскрыта прямо под строкой. */
+  expanded?: boolean;
   progress?: TargetProgress;
 }
 
@@ -55,9 +57,17 @@ function useWords(row: FleetRow, progress: TargetProgress | undefined) {
 
 /**
  * Строка сервера: чекбокс (это цель проверки), имя, адрес и назначение, слово-вердикт, счёт,
- * давность и «Подробнее». Тап по строке отмечает сервер; шеврон открывает карточку.
+ * давность и «Подробнее». Тап по строке отмечает сервер; шеврон раскрывает карточку под строкой —
+ * без модалок и шитов.
  */
-export function FleetRowItem({ row, picked, onToggle, onDetails, progress }: FleetRowItemProps) {
+export function FleetRowItem({
+  row,
+  picked,
+  onToggle,
+  onDetails,
+  expanded = false,
+  progress,
+}: FleetRowItemProps) {
   const { t } = useTranslation();
   const { word, tone, count, age } = useWords(row, progress);
   const selectable = row.ref !== null && !progress;
@@ -121,10 +131,18 @@ export function FleetRowItem({ row, picked, onToggle, onDetails, progress }: Fle
       <button
         type="button"
         aria-label={t('admin.reachability.fleet.details')}
+        aria-expanded={expanded}
         onClick={() => onDetails(row)}
-        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-dark-500 hover:bg-dark-800 hover:text-dark-200"
+        className={cn(
+          'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg hover:bg-dark-800 hover:text-dark-200',
+          expanded ? 'text-dark-200' : 'text-dark-500',
+        )}
       >
-        <ChevronRightIcon className="h-4 w-4" />
+        {expanded ? (
+          <ChevronDownIcon className="h-4 w-4" />
+        ) : (
+          <ChevronRightIcon className="h-4 w-4" />
+        )}
       </button>
     </div>
   );

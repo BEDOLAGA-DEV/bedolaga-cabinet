@@ -189,7 +189,7 @@ describe('AdminReachability (флот)', () => {
     fireEvent.click(within(row).getByRole('button', { name: 'Подробнее' }));
     await waitFor(() => expect(screen.getByText('ловит во всех округах')).toBeTruthy());
     expect(screen.getByText('не ловит')).toBeTruthy();
-    expect(screen.getAllByText('Russia | LTE | БС').length).toBeGreaterThan(1);
+    expect(screen.getByRole('button', { name: /Проверить этот сервер/ })).toBeTruthy();
   });
 
   it('shows the running batch from status with a stop button', async () => {
