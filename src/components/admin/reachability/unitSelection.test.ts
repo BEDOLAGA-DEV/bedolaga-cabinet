@@ -9,17 +9,18 @@ import {
   mergeKeys,
   pickUnits,
   recallSelection,
+  regionLabel,
   rememberSelection,
   toggleDistrict,
   toggleKey,
 } from './unitSelection';
 
 const UNITS = [
-  unit('mts|цфо|off', 'off', 'cfo'),
-  unit('mts|пфо|on', 'on', 'pfo'),
-  unit('tele2|цфо|on', 'on', 'cfo'),
-  unit('yota|уфо|off', 'off', 'urfo', false),
-  unit('yota|цфо|on', 'on', 'cfo', false),
+  { ...unit('mts|цфо|off', 'off', 'cfo'), region: 'ЦФО' },
+  { ...unit('mts|пфо|on', 'on', 'pfo'), region: 'ПФО' },
+  { ...unit('tele2|цфо|on', 'on', 'cfo'), region: 'ЦФО' },
+  { ...unit('yota|уфо|off', 'off', 'urfo', false), region: 'УФО' },
+  { ...unit('yota|цфо|on', 'on', 'cfo', false), region: 'ЦФО' },
 ];
 
 describe('toggleKey / mergeKeys / pickUnits / allOf', () => {
@@ -47,12 +48,20 @@ describe('toggleKey / mergeKeys / pickUnits / allOf', () => {
 
 /** Округа как на bsbord.com: в порядке каталога, счёт и отметка только по доступным симкам. */
 describe('округа', () => {
-  it('groupByDistrict группирует по коду округа в порядке появления', () => {
+  it('groupByDistrict группирует по коду округа, порядок с запада на восток, подписи кириллицей', () => {
     expect(groupByDistrict(UNITS).map((d) => [d.code, d.label, d.units.length])).toEqual([
-      ['cfo', 'CFO', 3],
-      ['pfo', 'PFO', 1],
-      ['urfo', 'URFO', 1],
+      ['cfo', 'ЦФО', 3],
+      ['pfo', 'ПФО', 1],
+      ['urfo', 'УФО', 1],
     ]);
+    const kgdFirst = [
+      { ...unit('beeline|kgd|on', 'on', 'kgd'), region: 'KGD' },
+      { ...unit('mts|дфо|off', 'off', 'dfo'), region: 'ДФО' },
+      { ...unit('mts|цфо|on', 'on', 'cfo'), region: 'ЦФО' },
+    ];
+    expect(groupByDistrict(kgdFirst).map((d) => d.label)).toEqual(['ЦФО', 'ДФО', 'КГД']);
+    expect(regionLabel('kgd')).toBe('КГД');
+    expect(regionLabel('пфо')).toBe('ПФО');
   });
   it('districtState и toggleDistrict считают только доступные симки', () => {
     const [cfo, , urfo] = groupByDistrict(UNITS);

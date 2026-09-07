@@ -31,15 +31,34 @@ export interface District {
 
 export type GroupState = 'none' | 'some' | 'all';
 
-/** Операторы по федеральным округам в порядке появления в каталоге, как в оригинале bsbord.com. */
+/** Округа с запада на восток; чего нет в списке — после, по алфавиту. */
+const DISTRICT_ORDER = ['ЦФО', 'СЗФО', 'ЮФО', 'ПФО', 'УФО', 'СФО', 'ДФО', 'КРЫМ', 'КГД'];
+/** Коды округов, которые сервис отдаёт латиницей. */
+const REGION_ALIASES: Record<string, string> = { KGD: 'КГД', CRIMEA: 'КРЫМ' };
+
+/** Подпись округа кириллицей и заглавными: KGD → КГД. */
+export function regionLabel(region: string): string {
+  const upper = region.trim().toUpperCase();
+  return REGION_ALIASES[upper] ?? upper;
+}
+
+function districtRank(label: string): number {
+  const index = DISTRICT_ORDER.indexOf(label);
+  return index === -1 ? DISTRICT_ORDER.length : index;
+}
+
+/** Операторы по федеральным округам: порядок с запада на восток, подписи кириллицей. */
 export function groupByDistrict(units: readonly Unit[]): District[] {
   const map = new Map<string, District>();
   for (const unit of units) {
     const current = map.get(unit.region_code);
+    const label = regionLabel(unit.region);
     if (current) map.set(unit.region_code, { ...current, units: [...current.units, unit] });
-    else map.set(unit.region_code, { code: unit.region_code, label: unit.region, units: [unit] });
+    else map.set(unit.region_code, { code: unit.region_code, label, units: [unit] });
   }
-  return [...map.values()];
+  return [...map.values()].sort(
+    (a, b) => districtRank(a.label) - districtRank(b.label) || a.label.localeCompare(b.label, 'ru'),
+  );
 }
 
 function probeableKeys(district: District): string[] {
