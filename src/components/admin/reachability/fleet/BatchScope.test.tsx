@@ -49,7 +49,10 @@ const rows: FleetRow[] = [
   ...Array.from({ length: 30 }, () => row({ checkedAt: '2026-08-01T00:00:00Z' })),
   ...Array.from({ length: 58 }, () => row({})),
 ];
-const units: Unit[] = [{ ...unit('mts|цфо|on', 'on', 'цфо'), name: 'МТС' }];
+const units: Unit[] = [
+  { ...unit('mts|цфо|on', 'on', 'цфо'), name: 'МТС' },
+  { ...unit('yota|уфо|off', 'off', 'уфо'), name: 'Yota' },
+];
 const preview: BatchPreview = {
   targets: [],
   units_resolved: ['mts|цфо|on'],
@@ -68,7 +71,7 @@ beforeEach(() => {
   vi.mocked(reachabilityApi.getUnits).mockResolvedValue(units);
 });
 
-function open(onStarted = vi.fn(), onPickManually = vi.fn()) {
+function open(onStarted = vi.fn(), onPickManually = vi.fn(), picked: string[] = []) {
   renderWithProviders(
     <BatchScope
       isOpen
@@ -77,7 +80,7 @@ function open(onStarted = vi.fn(), onPickManually = vi.fn()) {
       counts={fleetCounts(rows, new Date())}
       status={undefined}
       units={units}
-      picked={[]}
+      picked={picked}
       onPickManually={onPickManually}
       onStarted={onStarted}
     />,
@@ -128,6 +131,30 @@ describe('BatchScope', () => {
       expect.objectContaining({ scope_kind: 'stale' }),
     );
     expect(notify.success).toHaveBeenCalledWith('Проверка запущена');
+  });
+
+  it('симки по назначению серверов, быстрый выбор «Все» переоценивает пачку', async () => {
+    open();
+    await waitFor(() =>
+      expect(reachabilityApi.previewBatch).toHaveBeenCalledWith(
+        expect.objectContaining({ units: ['mts|цфо|on'], dpi: 'on' }),
+      ),
+    );
+    expect(screen.getByRole('button', { name: /^ICMP/ })).toBeTruthy();
+    expect(screen.getByRole('textbox', { name: 'SNI-хост' })).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: /^Все \d+/ }));
+    await waitFor(() =>
+      expect(reachabilityApi.previewBatch).toHaveBeenLastCalledWith(
+        expect.objectContaining({ units: ['mts|цфо|on', 'yota|уфо|off'], dpi: 'any' }),
+      ),
+    );
+  });
+
+  it('отмеченные серверы (из списка или карточки) сразу дают объём «Выбрать вручную»', () => {
+    open(vi.fn(), vi.fn(), ['h1', 'h2']);
+    const manual = screen.getByRole('radio', { name: /Выбрать вручную/ });
+    expect(manual.getAttribute('aria-checked')).toBe('true');
+    expect(manual.textContent).toContain('2 сервера');
   });
 
   it('hands over to manual picking when nothing is picked yet', () => {

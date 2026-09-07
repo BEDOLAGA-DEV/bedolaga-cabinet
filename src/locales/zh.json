@@ -3841,7 +3841,25 @@
       "units": {
         "dpiOn": "带白名单",
         "dpiOff": "不带白名单",
-        "dpiAny": "全部"
+        "dpiAny": "全部",
+        "title": "SIM 卡",
+        "hint": "每张 SIM 卡单独计费",
+        "quick": {
+          "label": "快速选择",
+          "bs": "带白名单",
+          "regular": "不带白名单",
+          "all": "全部",
+          "recall": "同上次"
+        },
+        "selectedOf": "已选 {{selected}} / {{total}}",
+        "none": "未选择 SIM 卡",
+        "detailsShow": "单独选择 SIM 卡",
+        "detailsHide": "收起列表",
+        "groupBs": "带白名单",
+        "groupRegular": "不带白名单",
+        "pickGroup": "全选",
+        "unpickGroup": "清除",
+        "empty": "没有 SIM 卡：服务不可用"
       },
       "launch": {
         "price": "价格",
@@ -4109,20 +4127,7 @@
       },
       "sections": {
         "targets": "目标",
-        "probes": "探测",
-        "more": "更多"
-      },
-      "operators": {
-        "pickBs": "全部有白名单",
-        "unpickBs": "取消全部有白名单",
-        "pickRegular": "全部无白名单",
-        "unpickRegular": "取消全部无白名单",
-        "recall": "与上次相同",
-        "reset": "重置",
-        "empty": "SIM 列表为空：服务不可用",
-        "pickOperator": "{{name}} 的全部 SIM 卡",
-        "unpickOperator": "取消 {{name}} 的 SIM 卡",
-        "noBsShort": "无白名单"
+        "probes": "探测"
       },
       "recent": {
         "title": "我的检查",
@@ -4184,23 +4189,6 @@
         "unhealthyHint": "请在 bsbord.com 检查 API 密钥和套餐"
       },
       "subtitle": "从俄罗斯的服务器可达性",
-      "unitsSummary": {
-        "title": "SIM 卡",
-        "none": "未选择 SIM 卡",
-        "bs_other": "{{count}} 张白名单 SIM 卡",
-        "regular_other": "{{count}} 张无白名单 SIM 卡",
-        "mixed_other": "{{count}} 张 SIM 卡：{{bs}} 张有白名单，{{regular}} 张无",
-        "auto": "按目标用途",
-        "manual": "手动选择",
-        "edit": "更改",
-        "hide": "收起",
-        "reset": "按目标"
-      },
-      "advanced": {
-        "probes": "探测：{{probes}}",
-        "sni": "SNI：{{sni}}",
-        "core": "Xray 内核：{{core}}"
-      },
       "server": {
         "byOperators": "按运营商",
         "catchesAll": "所有地区可用",
@@ -4229,9 +4217,6 @@
         },
         "servers_other": "{{count}} 台服务器",
         "minutes": "约 {{count}} 分钟",
-        "unitsLine": "SIM 卡：按服务器用途，{{units}}",
-        "change": "更改",
-        "advanced": "高级：{{summary}}",
         "balanceAfter": "之后余额：{{balance}}",
         "onlyChecked": "只按已检查的 SIM 卡收费。检查可随时停止。",
         "run": "以 {{price}} 启动",
@@ -4250,6 +4235,12 @@
         "finishedCancelled": "检查已停止",
         "finishedFailed": "检查失败",
         "nothingToCheck": "没有符合此选择的服务器"
+      },
+      "quick": {
+        "placeholder": "IP、域名、vless:// 或订阅链接",
+        "check": "检查",
+        "hint": "单个地址、配置或整个订阅",
+        "cidr": "扫描 /24 子网"
       }
     },
     "roles": {

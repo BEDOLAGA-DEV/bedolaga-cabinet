@@ -5,7 +5,7 @@ import type { Batch, BatchPreview, JobList, SummaryRow, Unit } from '@/api/reach
 
 /**
  * Карточка сервера: вердикт словом, разбор по операторам словами, прошлые проверки,
- * смена назначения и проверка одного сервера с ценой.
+ * смена назначения и кнопка с ценой, ведущая в «Что проверить?» с этим сервером.
  */
 
 const notify = vi.hoisted(() => ({ success: vi.fn(), error: vi.fn() }));
@@ -93,7 +93,7 @@ beforeEach(() => {
   });
 });
 
-function renderDetails(onRunning = vi.fn()) {
+function renderDetails(onCheck = vi.fn()) {
   renderWithProviders(
     <ServerDetails
       row={row}
@@ -101,10 +101,10 @@ function renderDetails(onRunning = vi.fn()) {
       units={units}
       status={undefined}
       onClose={vi.fn()}
-      onRunning={onRunning}
+      onCheck={onCheck}
     />,
   );
-  return onRunning;
+  return onCheck;
 }
 
 describe('ServerDetails', () => {
@@ -125,14 +125,12 @@ describe('ServerDetails', () => {
     );
   });
 
-  it('starts a one-server batch and hands over its id', async () => {
-    const onRunning = renderDetails();
+  it('кнопка с ценой ведёт в «Что проверить?», сама ничего не запускает', async () => {
+    const onCheck = renderDetails();
     const button = await screen.findByRole('button', { name: /◈ 640 cred/ });
     fireEvent.click(button);
-    await waitFor(() => expect(onRunning).toHaveBeenCalledWith(3));
-    expect(reachabilityApi.createBatch).toHaveBeenCalledWith(
-      expect.objectContaining({ host_refs: ['h-bs'], scope_kind: 'manual' }),
-    );
+    expect(onCheck).toHaveBeenCalled();
+    expect(reachabilityApi.createBatch).not.toHaveBeenCalled();
   });
 
   it('changes the purpose through the chip and tells about it', async () => {

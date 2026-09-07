@@ -10,14 +10,14 @@ import {
   reachabilityApi,
 } from '@/api/reachability';
 import { AddressTargets } from './AddressTargets';
-import { AdvancedOptions } from './AdvancedOptions';
+import { CheckOptions } from './CheckOptions';
 import { HostTargets } from './HostTargets';
 import { JobProgress } from './JobProgress';
 import { LaunchAside, LaunchBar } from './LaunchAside';
 import { ModeSwitch } from './ModeSwitch';
 import { ScanTargets } from './ScanTargets';
 import { type ConfigItem, SubscriptionTargets } from './SubscriptionTargets';
-import { UnitsSummary } from './UnitsSummary';
+import { UnitsPicker } from './UnitsPicker';
 import { autoUnitsFor } from './autoUnits';
 import { type DeepLink, type LaunchMode, jobKindOf } from './deepLink';
 import { buildProbeBody, buildScanBody, buildVlessBody } from './jobBodies';
@@ -69,14 +69,16 @@ export function Launcher({
   const kind = jobKindOf(mode);
   const { data: catalog = [] } = useUnits();
 
+  // Ввод из поля быстрой проверки на странице флота попадает в поле своей вкладки.
+  const prefill = (forMode: LaunchMode) => (link.mode === forMode ? (link.query ?? '') : '');
   const [hosts, setHosts] = useState<HostTarget[]>([]);
   const [nodes, setNodes] = useState<NodeTarget[]>([]);
-  const [addresses, setAddresses] = useState('');
+  const [addresses, setAddresses] = useState(() => prefill('ip'));
   const [source, setSource] = useState({ userId: link.userId, shortUuid: link.shortUuid });
-  const [pasted, setPasted] = useState('');
+  const [pasted, setPasted] = useState(() => prefill('vless'));
   const [configIndexes, setConfigIndexes] = useState<number[]>([]);
   const [core, setCore] = useState<VlessCore>('');
-  const [cidr, setCidr] = useState('');
+  const [cidr, setCidr] = useState(() => prefill('cidr'));
   // Симки: сами по назначению целей; null — человек не трогал руками.
   const [manualUnits, setManualUnits] = useState<string[] | null>(null);
   const [probes, setProbes] = useState<Probes>(PROBE_DEFAULT);
@@ -333,17 +335,11 @@ export function Launcher({
           )}
           {mode === 'cidr' && <ScanTargets cidr={cidr} onChange={setCidr} />}
 
-          <UnitsSummary
-            kind={kind}
-            selected={units}
-            auto={manualUnits === null}
-            onChange={setManualUnits}
-            onReset={() => setManualUnits(null)}
-          />
+          <UnitsPicker kind={kind} units={catalog} selected={units} onChange={setManualUnits} />
           {mode === 'vless' ? (
-            <AdvancedOptions core={core} onCoreChange={setCore} cores={status?.cores} />
+            <CheckOptions core={core} onCoreChange={setCore} cores={status?.cores} />
           ) : mode === 'cidr' ? (
-            <AdvancedOptions
+            <CheckOptions
               probes={scanProbes}
               onProbesChange={setScanProbes}
               sniHosts={sniHosts}
@@ -352,7 +348,7 @@ export function Launcher({
               showSni={showSni}
             />
           ) : (
-            <AdvancedOptions
+            <CheckOptions
               probes={mode === 'hosts' ? hostProbes : probes}
               onProbesChange={setProbes}
               locked={mode === 'hosts' && nodes.length ? ['icmp'] : []}

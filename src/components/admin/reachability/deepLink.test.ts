@@ -20,7 +20,16 @@ describe('parseReachabilityDeepLink', () => {
       serverKey: null,
       batchId: null,
       picking: false,
+      query: null,
     });
+  });
+
+  it('?q= несёт ввод быстрой проверки в форму и обратно в ссылку', () => {
+    expect(parseReachabilityDeepLink(new URLSearchParams('kind=ip&q=ya.ru')).query).toBe('ya.ru');
+    expect(parseReachabilityDeepLink(new URLSearchParams('q=')).query).toBeNull();
+    expect(buildReachabilityLink({ mode: 'vless', query: 'vless://x@h:443' })).toBe(
+      '/admin/reachability?kind=vless&q=vless%3A%2F%2Fx%40h%3A443',
+    );
   });
 
   it('четыре вкладки; старые probe и scan сводятся к hosts и cidr', () => {
@@ -90,6 +99,7 @@ describe('parseReachabilityDeepLink', () => {
       serverKey: null,
       batchId: null,
       picking: false,
+      query: null,
     });
   });
 });

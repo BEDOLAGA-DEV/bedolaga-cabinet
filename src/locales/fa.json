@@ -3834,7 +3834,25 @@
       "units": {
         "dpiOn": "با لیست سفید",
         "dpiOff": "بدون لیست سفید",
-        "dpiAny": "همه"
+        "dpiAny": "همه",
+        "title": "سیم‌کارت‌ها",
+        "hint": "هر سیم‌کارت جداگانه محاسبه می‌شود",
+        "quick": {
+          "label": "انتخاب سریع",
+          "bs": "با لیست سفید",
+          "regular": "بدون لیست سفید",
+          "all": "همه",
+          "recall": "مثل دفعه قبل"
+        },
+        "selectedOf": "{{selected}} از {{total}} انتخاب شد",
+        "none": "سیم‌کارتی انتخاب نشده",
+        "detailsShow": "سیم‌کارت‌های جداگانه",
+        "detailsHide": "بستن فهرست",
+        "groupBs": "با لیست سفید",
+        "groupRegular": "بدون لیست سفید",
+        "pickGroup": "همه",
+        "unpickGroup": "پاک کردن",
+        "empty": "فهرست سیم‌کارت‌ها خالی است: سرویس در دسترس نیست"
       },
       "launch": {
         "price": "قیمت",
@@ -4118,20 +4136,7 @@
       },
       "sections": {
         "targets": "اهداف",
-        "probes": "پروب‌ها",
-        "more": "بیشتر"
-      },
-      "operators": {
-        "pickBs": "همه با لیست سفید",
-        "unpickBs": "لغو همه با لیست سفید",
-        "pickRegular": "همه بدون لیست سفید",
-        "unpickRegular": "لغو همه بدون لیست سفید",
-        "recall": "مانند دفعه قبل",
-        "reset": "بازنشانی",
-        "empty": "فهرست سیم‌کارت‌ها خالی است: سرویس در دسترس نیست",
-        "pickOperator": "همه سیم‌کارت‌های {{name}}",
-        "unpickOperator": "لغو سیم‌کارت‌های {{name}}",
-        "noBsShort": "بدون"
+        "probes": "پروب‌ها"
       },
       "recent": {
         "title": "بررسی‌های من",
@@ -4197,26 +4202,6 @@
         "unhealthyHint": "کلید API و طرح را در bsbord.com بررسی کنید"
       },
       "subtitle": "دسترس‌پذیری سرورها از روسیه",
-      "unitsSummary": {
-        "title": "سیم‌کارت‌ها",
-        "none": "سیم‌کارتی انتخاب نشده",
-        "bs_one": "{{count}} سیم‌کارت لیست سفید",
-        "bs_other": "{{count}} سیم‌کارت لیست سفید",
-        "regular_one": "{{count}} سیم‌کارت بدون لیست سفید",
-        "regular_other": "{{count}} سیم‌کارت بدون لیست سفید",
-        "mixed_one": "{{count}} سیم‌کارت: {{bs}} لیست سفید، {{regular}} بدون",
-        "mixed_other": "{{count}} سیم‌کارت: {{bs}} لیست سفید، {{regular}} بدون",
-        "auto": "بر اساس هدف",
-        "manual": "دستی انتخاب شده",
-        "edit": "تغییر",
-        "hide": "پنهان",
-        "reset": "مطابق اهداف"
-      },
-      "advanced": {
-        "probes": "پروب‌ها: {{probes}}",
-        "sni": "SNI: {{sni}}",
-        "core": "هستهٔ Xray: {{core}}"
-      },
       "server": {
         "byOperators": "بر اساس اپراتور",
         "catchesAll": "در همه مناطق کار می‌کند",
@@ -4246,9 +4231,6 @@
         "servers_one": "{{count}} سرور",
         "servers_other": "{{count}} سرور",
         "minutes": "حدود {{count}} دقیقه",
-        "unitsLine": "سیم‌کارت‌ها: بر اساس کاربری سرورها، {{units}}",
-        "change": "تغییر",
-        "advanced": "پیشرفته: {{summary}}",
         "balanceAfter": "موجودی پس از آن: {{balance}}",
         "onlyChecked": "فقط برای سیم‌کارت‌های بررسی‌شده هزینه کسر می‌شود. بررسی را می‌توان متوقف کرد.",
         "run": "اجرا با {{price}}",
@@ -4268,6 +4250,12 @@
         "finishedCancelled": "بررسی متوقف شد",
         "finishedFailed": "بررسی ناموفق بود",
         "nothingToCheck": "سروری با این انتخاب مطابقت ندارد"
+      },
+      "quick": {
+        "placeholder": "IP، دامنه، vless:// یا لینک اشتراک",
+        "check": "بررسی",
+        "hint": "یک آدرس، پیکربندی یا کل اشتراک",
+        "cidr": "اسکن زیرشبکه /24"
       }
     },
     "theme": {
