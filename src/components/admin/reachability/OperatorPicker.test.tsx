@@ -75,10 +75,13 @@ describe('OperatorPicker', () => {
     );
   });
 
-  it('«Сбросить» есть только при выборе и очищает его', () => {
+  it('«Сбросить» стоит в строке заголовка рядом со счётчиком, есть только при выборе и очищает его', () => {
     const onChange = vi.fn();
     renderWithProviders(<Picker initial={['mts|пфо|on', 'mts|цфо|off']} onChange={onChange} />);
-    expect(screen.getByText('выбрано 2 / 3')).toBeTruthy();
+    const heading = screen.getByRole('heading', { name: 'Операторы' });
+    const headerRow = heading.parentElement as HTMLElement;
+    expect(headerRow.textContent).toContain('выбрано 2 / 3');
+    expect(headerRow.textContent).toContain('Сбросить');
     fireEvent.click(screen.getByRole('button', { name: 'Сбросить' }));
     expect(onChange).toHaveBeenLastCalledWith([]);
     expect(screen.queryByRole('button', { name: 'Сбросить' })).toBeNull();
