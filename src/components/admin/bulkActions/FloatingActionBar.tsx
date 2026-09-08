@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
+import { HIDDEN_UNDER_KEYBOARD, useVirtualKeyboard } from '@/hooks/useVirtualKeyboard';
 import { TrashIcon } from '@/components/icons';
 import { ChevronDownIcon } from './DropdownSelect';
 import { isSubscriptionLevelAction } from './actionTargets';
@@ -45,6 +46,7 @@ export function FloatingActionBar({
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const keyboardOpen = useVirtualKeyboard();
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -158,8 +160,14 @@ export function FloatingActionBar({
 
   return (
     // Снизу — просвет под мобильной панелью (на 5rem бар наезжал на неё на 12px);
-    // на десктопе панели нет, там прежние 5rem.
-    <div className="fixed inset-x-0 bottom-0 z-[9999] flex justify-center px-4 pb-[var(--mobile-nav-clearance)] lg:pb-20">
+    // на десктопе панели нет, там прежние 5rem. Пока открыта экранная клавиатура
+    // (фокус в фильтрах), бар прячется — иначе всплывает над клавиатурой.
+    <div
+      className={cn(
+        'fixed inset-x-0 bottom-0 z-[9999] flex justify-center px-4 pb-[var(--mobile-nav-clearance)] transition-opacity duration-200 lg:pb-20',
+        keyboardOpen && HIDDEN_UNDER_KEYBOARD,
+      )}
+    >
       <div
         ref={menuRef}
         className="relative flex w-full max-w-2xl items-center gap-3 rounded-2xl border border-dark-700/60 bg-dark-800/80 px-5 py-3 shadow-2xl backdrop-blur-xl"

@@ -107,7 +107,15 @@
     --mobile-nav-height: 76px;
     --mobile-nav-offset: max(16px, env(safe-area-inset-bottom, 0px));
     --mobile-nav-clearance: calc(var(--mobile-nav-height) + var(--mobile-nav-offset) + 12px);
+  }
 
+  /* Экраны без панели (вложенные страницы, админка): AppShell ставит
+     data-mobile-nav="off", и прижатым к низу элементам остаётся только отступ от края. */
+  [data-mobile-nav="off"] {
+    --mobile-nav-clearance: var(--mobile-nav-offset);
+  }
+
+  :root {
     /* Unified Card System */
     --bento-radius: 16px;
     --bento-radius-lg: 20px;

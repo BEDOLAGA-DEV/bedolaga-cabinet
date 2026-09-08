@@ -12,6 +12,7 @@ import { useTheme } from '@/hooks/useTheme';
 import { useBranding } from '@/hooks/useBranding';
 import { useFeatureFlags } from '@/hooks/useFeatureFlags';
 import { useScrollRestoration } from '@/hooks/useScrollRestoration';
+import { resetVirtualKeyboard } from '@/hooks/useVirtualKeyboard';
 import { themeColorsApi } from '@/api/themeColors';
 import { isLogoPreloaded } from '@/api/branding';
 import { cn } from '@/lib/utils';
@@ -38,6 +39,7 @@ import {
 } from '@/components/icons';
 
 import { MobileBottomNav } from './MobileBottomNav';
+import { isMobileNavScreen, mobileNavItems } from './mobileNavRoutes';
 import { AppHeader } from './AppHeader';
 import { useBackgroundConsumer } from '@/components/backgrounds/BackgroundHost';
 
@@ -76,42 +78,19 @@ export function AppShell({ children }: AppShellProps) {
   const isMobileFullscreen = isFullscreen && isMobile;
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
 
-  // Reset keyboard state on route change — prevents bottom nav staying hidden after navigation
+  // Смена экрана закрывает сигнал «клавиатура открыта» (useVirtualKeyboard):
+  // поле с фокусом размонтировано, blur не приходит, и прижатые к низу элементы
+  // иначе остаются спрятанными.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: путь нужен как триггер — сброс на каждой смене экрана
   useEffect(() => {
-    setIsKeyboardOpen(false);
+    resetVirtualKeyboard();
   }, [location.pathname]);
 
-  // Keyboard detection for hiding bottom nav
-  useEffect(() => {
-    const handleFocusIn = (e: FocusEvent) => {
-      const target = e.target as HTMLElement;
-      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
-        setIsKeyboardOpen(true);
-      }
-    };
-
-    const handleFocusOut = (e: FocusEvent) => {
-      const relatedTarget = e.relatedTarget as HTMLElement | null;
-      if (
-        !relatedTarget ||
-        (relatedTarget.tagName !== 'INPUT' &&
-          relatedTarget.tagName !== 'TEXTAREA' &&
-          !relatedTarget.isContentEditable)
-      ) {
-        setIsKeyboardOpen(false);
-      }
-    };
-
-    document.addEventListener('focusin', handleFocusIn);
-    document.addEventListener('focusout', handleFocusOut);
-
-    return () => {
-      document.removeEventListener('focusin', handleFocusIn);
-      document.removeEventListener('focusout', handleFocusOut);
-    };
-  }, []);
+  // Нижняя панель живёт только на экранах своих кнопок; на остальных её нет и
+  // место под неё не резервируется (data-mobile-nav="off" → --mobile-nav-clearance).
+  const navItems = mobileNavItems({ wheelEnabled, referralEnabled });
+  const showMobileNav = isMobileNavScreen(location.pathname, navItems);
 
   // Desktop navigation — labels always visible (no hover-reveal gimmick)
   const desktopNav = [
@@ -182,7 +161,7 @@ export function AppShell({ children }: AppShellProps) {
   // headerHeight comes from useHeaderHeight() — accounts for TG safe area in fullscreen
 
   return (
-    <div className="min-h-viewport">
+    <div className="min-h-viewport" data-mobile-nav={showMobileNav ? 'on' : 'off'}>
       {/* Global components */}
       <WebSocketNotifications />
       <CampaignBonusNotifier />
@@ -307,13 +286,8 @@ export function AppShell({ children }: AppShellProps) {
         {children}
       </main>
 
-      {/* Mobile Bottom Navigation */}
-      <MobileBottomNav
-        isKeyboardOpen={isKeyboardOpen}
-        isMenuOpen={mobileMenuOpen}
-        referralEnabled={referralEnabled}
-        wheelEnabled={wheelEnabled}
-      />
+      {/* Mobile Bottom Navigation — только на экранах её кнопок */}
+      {showMobileNav && <MobileBottomNav items={navItems} isMenuOpen={mobileMenuOpen} />}
     </div>
   );
 }
