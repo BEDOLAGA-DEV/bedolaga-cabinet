@@ -1678,6 +1678,23 @@
       "testHint": "发送当前编辑器内容，变量将替换为示例值。",
       "variablesCommon": "通用变量（适用于所有模板）"
     },
+    "emailQueue": {
+      "title": "邮件队列",
+      "counts": "等待发送：{{pending}} · 已发送：{{sent}} · 未发送：{{dead}}",
+      "clearPending": "清除等待中",
+      "clearAll": "清空",
+      "confirmPending": "清除等待发送的邮件？",
+      "confirmAll": "清空整个队列，包括历史记录？",
+      "cleared": "队列已清空：{{count}}",
+      "noSmtp": "未配置邮件服务器，邮件不会发送。请在 SMTP 设置中填写服务器地址，或保持现状——邮件功能已关闭。",
+      "statusPending": "等待发送",
+      "statusSent": "已发送",
+      "statusDead": "未发送",
+      "reasonNoSmtp": "未配置邮件服务器",
+      "reasonExpired": "邮件内容已过期",
+      "reasonFailed": "发送失败",
+      "more": "还有 {{count}} 封"
+    },
     "payments": {
       "title": "支付",
       "description": "搜索和管理支付",
