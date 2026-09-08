@@ -146,6 +146,10 @@ export interface PurchaseStatus {
   is_claimable: boolean;
   claim_url: string | null;
   bot_claim_link: string | null;
+  /** Canonical claim artifacts. Absent on older backends and while the gift is not claimable. */
+  gift_code?: string | null;
+  bot_claim_url?: string | null;
+  cabinet_claim_url?: string | null;
 }
 
 /** Result returned to the recipient after a successful web (email) gift claim. */

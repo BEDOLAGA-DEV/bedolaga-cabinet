@@ -83,9 +83,10 @@ export async function loadHtml5Qrcode(): Promise<WindowWithHtml5['Html5Qrcode'] 
 /**
  * Достаёт код подарка из отсканированной строки.
  *
- * Один и тот же подарок распространяется тремя способами, и скан должен понимать
- * все: deep-link бота (``?start=GIFT_<code>``), ссылка кабинета
- * (``/gift?tab=activate&code=<code>``) и просто код (``GIFT-xxxx`` или голый).
+ * Один и тот же подарок распространяется несколькими способами, и скан должен понимать
+ * все: канонический URL кабинета (`/buy/gift/<token>`), deep-link бота
+ * (`?start=GIFT_<code>`), ссылка кабинета (`/gift?tab=activate&code=<code>`) и
+ * просто код (`GIFT-xxxx` или голый).
  */
 export function parseGiftCode(raw: string | null | undefined): string | null {
   const value = (raw || '').trim();
@@ -94,13 +95,16 @@ export function parseGiftCode(raw: string | null | undefined): string | null {
   const startParam = value.match(/[?&]start=GIFT_([A-Za-z0-9_-]+)/i);
   if (startParam) return startParam[1];
 
+  const cabinetClaimPath = value.match(/\/buy\/gift\/([A-Za-z0-9_-]{48,64})(?:[/?#]|$)/i);
+  if (cabinetClaimPath) return cabinetClaimPath[1];
+
   const cabinetParam = value.match(/[?&]code=([A-Za-z0-9_-]+)/i);
   if (cabinetParam) return cabinetParam[1];
 
   // Голый код: допускаем префикс GIFT- и разделители, но не произвольный текст —
   // иначе сканер «распознал» бы любую ссылку и подставил мусор в поле.
   const bare = value.replace(/^GIFT[-_]/i, '');
-  if (/^[A-Za-z0-9]{6,64}$/.test(bare)) return bare;
+  if (/^[A-Za-z0-9_-]{6,64}$/.test(bare)) return bare;
 
   return null;
 }

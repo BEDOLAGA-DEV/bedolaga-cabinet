@@ -57,9 +57,14 @@ export interface GiftPurchaseRequest {
 
 export interface GiftPurchaseResponse {
   status: 'ok' | 'created' | 'paid';
+  /** Short display id only — NOT claimable. Sharing must use gift_code / *_claim_url. */
   purchase_token: string;
   payment_url: string | null;
   warning: string | null;
+  /** Canonical claim artifacts. Absent on older backends and while the gift is not claimable. */
+  gift_code?: string | null;
+  bot_claim_url?: string | null;
+  cabinet_claim_url?: string | null;
 }
 
 export type GiftPurchaseStatusValue =
@@ -75,12 +80,17 @@ export interface GiftPurchaseStatus {
   is_gift: boolean;
   is_code_only: boolean;
   is_claimable: boolean;
+  /** Short display id only — NOT claimable. Sharing must use gift_code / *_claim_url. */
   purchase_token: string | null;
   recipient_contact_value: string | null;
   gift_message: string | null;
   tariff_name: string | null;
   period_days: number | null;
   warning: string | null;
+  /** Canonical claim artifacts. Absent on older backends and while the gift is not claimable. */
+  gift_code?: string | null;
+  bot_claim_url?: string | null;
+  cabinet_claim_url?: string | null;
 }
 
 export interface PendingGift {
