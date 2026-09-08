@@ -189,6 +189,8 @@ export interface PartnerSettings {
   withdrawal_requisites_text: string;
   partner_section_visible: boolean;
   referral_program_enabled: boolean;
+  /** Поля, закреплённые в .env: из кабинета их не изменить. */
+  env_locked?: string[];
 }
 
 export interface PartnerSettingsUpdate {

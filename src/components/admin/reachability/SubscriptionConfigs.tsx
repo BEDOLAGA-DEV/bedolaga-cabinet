@@ -113,7 +113,7 @@ export function SubscriptionConfigs({
               {firstByKey.get(config.target_key) !== config.index && (
                 <span
                   title={t('admin.reachability.subscription.duplicateHint')}
-                  className="rounded-md bg-dark-700/60 px-1.5 py-0.5 text-[10px] text-dark-300"
+                  className="rounded-md bg-dark-700/60 px-1.5 py-0.5 text-xs text-dark-300"
                 >
                   {t('admin.reachability.subscription.duplicate')}
                 </span>

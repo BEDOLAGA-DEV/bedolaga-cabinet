@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router';
+import { useLocation, useParams, useNavigate, Link } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { campaignsApi, type CampaignBonusType } from '../api/campaigns';
 import type { AdminCampaignChartData } from '../api/campaigns';
-import { AdminBackButton } from '../components/admin';
+import { AdminBackButton, backTo } from '../components/admin';
 import { DailyChart, PeriodComparison, StatCard } from '../components/stats';
 import { PARTNER_STATS } from '../constants/partner';
 import { useCurrency } from '../hooks/useCurrency';
@@ -46,6 +46,7 @@ export default function AdminCampaignStats() {
   const numericId = id ? Number(id) : null;
   const isValidId = numericId !== null && !isNaN(numericId);
   const navigate = useNavigate();
+  const location = useLocation();
   const haptic = useHaptic();
   const { formatWithCurrency } = useCurrency();
   const [copiedBot, setCopiedBot] = useState(false);
@@ -406,6 +407,7 @@ export default function AdminCampaignStats() {
                       <Link
                         key={reg.id}
                         to={`/admin/users/${reg.id}`}
+                        {...backTo(location)}
                         className="flex items-center justify-between rounded-xl border border-dark-700/30 bg-dark-800/30 p-3 transition-colors hover:bg-dark-700/50"
                       >
                         <div className="min-w-0 flex-1">
@@ -473,6 +475,7 @@ export default function AdminCampaignStats() {
                     <Link
                       key={reg.id}
                       to={`/admin/users/${reg.user_id}`}
+                      {...backTo(location)}
                       className="flex items-center justify-between rounded-lg bg-dark-700/50 p-3 transition-colors hover:bg-dark-700"
                     >
                       <div>

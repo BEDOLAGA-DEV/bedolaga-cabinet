@@ -550,7 +550,7 @@ export default function TopUpAmount() {
                   {formatAmount(a, 0)}
                 </span>
                 <span
-                  className={`mt-0.5 text-xs ${isSelected ? 'text-accent-400/70' : 'text-dark-500'}`}
+                  className={`mt-0.5 text-xs ${isSelected ? 'text-accent-400' : 'text-dark-500'}`}
                 >
                   {currencySymbol}
                 </span>

@@ -77,6 +77,10 @@ export interface TariffDetail {
   tier_level: number;
   display_order: number;
   period_prices: PeriodPrice[];
+  /** Период, отмеченный как самый выгодный (дни). null — не выделен. */
+  highlight_period_days?: number | null;
+  /** Тариф отмечен как выгодный — выделяется в списке. */
+  is_highlighted?: boolean;
   allowed_squads: string[];
   server_traffic_limits: Record<string, ServerTrafficLimit>;
   servers: ServerInfo[];
@@ -120,6 +124,10 @@ export interface TariffCreateRequest {
   max_device_limit?: number;
   tier_level?: number;
   period_prices?: PeriodPrice[];
+  /** Дни выделенного периода; 0 снимает выделение. */
+  highlight_period_days?: number | null;
+  /** Тариф отмечен как выгодный — выделяется в списке. */
+  is_highlighted?: boolean;
   allowed_squads?: string[];
   server_traffic_limits?: Record<string, ServerTrafficLimit>;
   promo_group_ids?: number[];
@@ -166,6 +174,10 @@ export interface TariffUpdateRequest {
   tier_level?: number;
   display_order?: number;
   period_prices?: PeriodPrice[];
+  /** Дни выделенного периода; 0 снимает выделение. */
+  highlight_period_days?: number | null;
+  /** Тариф отмечен как выгодный — выделяется в списке. */
+  is_highlighted?: boolean;
   allowed_squads?: string[];
   server_traffic_limits?: Record<string, ServerTrafficLimit>;
   promo_group_ids?: number[];

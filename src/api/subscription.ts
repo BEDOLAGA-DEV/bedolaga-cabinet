@@ -229,6 +229,7 @@ export const subscriptionApi = {
   ): Promise<{
     available: boolean;
     reason?: string;
+    reason_code?: string;
     devices?: number;
     price_per_device_kopeks?: number;
     price_per_device_label?: string;
@@ -265,6 +266,7 @@ export const subscriptionApi = {
   ): Promise<{
     available: boolean;
     reason?: string;
+    reason_code?: string;
     current_device_limit: number;
     min_device_limit: number;
     can_reduce: number;

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { useNavigate } from 'react-router';
+import { useLocation, useNavigate } from 'react-router';
+import { backTo } from '@/components/admin';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -119,6 +120,7 @@ function ProgressBar({ loading }: { loading: boolean }) {
 export default function AdminTrafficUsage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   const { capabilities } = usePlatform();
 
   const [items, setItems] = useState<UserTrafficItem[]>([]);
@@ -912,7 +914,9 @@ export default function AdminTrafficUsage() {
                       key={row.id}
                       className="cursor-pointer border-b border-dark-700/50 transition-colors hover:bg-dark-800/50"
                       style={{ backgroundColor: rowBg }}
-                      onClick={() => navigate(`/admin/users/${row.original.user_id}`)}
+                      onClick={() =>
+                        navigate(`/admin/users/${row.original.user_id}`, backTo(location))
+                      }
                     >
                       {row.getVisibleCells().map((cell) => {
                         const meta = cell.column.columnDef.meta;

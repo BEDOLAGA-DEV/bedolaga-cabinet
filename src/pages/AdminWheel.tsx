@@ -783,7 +783,7 @@ export default function AdminWheel() {
                   <p className="text-sm font-medium text-warning-400">
                     {t('admin.wheel.prizes.unsavedOrder')}
                   </p>
-                  <p className="text-xs text-warning-400/70">
+                  <p className="text-xs text-warning-400">
                     {t('admin.wheel.prizes.unsavedOrderHint')}
                   </p>
                 </div>

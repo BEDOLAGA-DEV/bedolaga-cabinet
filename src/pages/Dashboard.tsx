@@ -320,7 +320,7 @@ export default function Dashboard() {
       {isMultiTariff && multiSubData?.subscriptions && multiSubData.subscriptions.length > 0 && (
         <div className="space-y-3">
           <div className="flex items-center justify-between px-1">
-            <span className="text-sm font-medium opacity-60">
+            <span className="text-sm font-medium text-dark-400">
               {t('dashboard.subscriptions', 'Подписки')}
             </span>
             <Link to="/subscriptions" className="text-xs text-accent-400 hover:underline">

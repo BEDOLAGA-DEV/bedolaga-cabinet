@@ -41,6 +41,7 @@ import {
   PiDotsSixVertical,
   PiHeartbeat,
   PiClockCounterClockwise,
+  PiScan,
   PiImage,
   PiInfinity,
   PiLink,
@@ -318,6 +319,9 @@ export const HealthIcon = ({ className }: IconProps) => (
 
 export const HistoryIcon = ({ className }: IconProps) => (
   <PiClockCounterClockwise className={cn('h-5 w-5', className)} />
+);
+export const ScanIcon = ({ className }: IconProps) => (
+  <PiScan className={cn('h-5 w-5', className)} />
 );
 
 export const LifebuoyIcon = ({ className }: IconProps) => (

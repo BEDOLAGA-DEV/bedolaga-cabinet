@@ -1,12 +1,12 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, screen } from '@testing-library/react';
+import { cleanup, fireEvent, screen, within } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Job } from '@/api/reachability';
 
 /**
  * Результат VLESS-теста в том же стиле, что таблица проб: строки — симки операторов,
  * столбцы — туннель · цели · задержка · Xray · причина, справа вердикт; серверы — группами;
- * диагноз и сырой ответ — по тапу на строку.
+ * причина словами, диагноз — по тапу на строку; сырого ответа нет.
  */
 
 vi.mock('react-i18next', async () => (await import('./testUtils')).i18nMock());
@@ -80,34 +80,35 @@ describe('VlessResult', () => {
     renderWithProviders(<VlessResult job={job} />);
     expect(screen.getAllByRole('columnheader').map((th) => th.textContent)).toEqual([
       'Оператор',
+      'Вердикт',
       'Туннель',
       'Цели',
       'Задержка',
       'Xray',
       'Причина',
-      'Вердикт',
     ]);
-    expect(screen.getByText('🇩🇪 Germany')).toBeTruthy();
+    expect(screen.getAllByText('🇩🇪 Germany').length).toBeGreaterThan(0);
     expect(screen.getByText('eu.example:443')).toBeTruthy();
-    expect(screen.getByText('🇷🇺 Russia | LTE | БС')).toBeTruthy();
+    expect(screen.getAllByText('🇷🇺 Russia | LTE | БС').length).toBeGreaterThan(0);
     expect(screen.getByText('2/3')).toBeTruthy();
     expect(screen.getByText('0/2')).toBeTruthy();
     expect(screen.getByText('82 ms')).toBeTruthy();
-    expect(screen.getByText('zombie_tcp')).toBeTruthy();
-    expect(screen.getByText('tcp_timeout')).toBeTruthy();
-    expect(screen.getByText('без БС')).toBeTruthy();
-    expect(screen.getByText('МТС')).toBeTruthy();
-    expect(screen.getByText('режется')).toBeTruthy();
-    expect(screen.getByText('недоступен')).toBeTruthy();
-    expect(await screen.findAllByText('26.3.27')).toHaveLength(2);
+    expect(screen.getByText('рвётся после TLS')).toBeTruthy();
+    expect(screen.getByText('нет ответа')).toBeTruthy();
+    expect(screen.queryByText('zombie_tcp')).toBeNull();
+    expect(screen.getAllByText('без БС').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('МТС').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('режется').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('недоступен').length).toBeGreaterThan(0);
+    expect((await screen.findAllByText('26.3.27')).length).toBeGreaterThanOrEqual(2);
   });
 
-  it('диагноз и сырой ответ показываются по тапу на строку', () => {
+  it('диагноз словами показывается по тапу на строку, сырого ответа нет', () => {
     renderWithProviders(<VlessResult job={job} />);
     expect(screen.queryByText('Сервер режется на этом операторе')).toBeNull();
-    fireEvent.click(screen.getByRole('button', { name: /МТС/ }));
-    expect(screen.getByText('Сервер режется на этом операторе')).toBeTruthy();
-    expect(screen.getByText(/"fail_reason": "tcp_timeout"/)).toBeTruthy();
+    fireEvent.click(within(screen.getByRole('table')).getByRole('button', { name: /МТС/ }));
+    expect(screen.getAllByText('Сервер режется на этом операторе').length).toBeGreaterThan(0);
+    expect(screen.queryByText(/fail_reason/)).toBeNull();
     expect(screen.queryByText('Туннель до сервера есть, но целевые сайты режутся')).toBeNull();
   });
 

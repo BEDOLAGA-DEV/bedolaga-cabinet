@@ -31,6 +31,7 @@ const base: ReachabilityStatus = {
   cost_limit_kopeks: 0,
   cores: {},
   default_sni: null,
+  active_batch: null,
 };
 
 describe('SetupGuide', () => {

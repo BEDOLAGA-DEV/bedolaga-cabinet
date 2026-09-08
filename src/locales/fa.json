@@ -216,6 +216,13 @@
     "checkEmail": "ایمیل خود را بررسی کنید",
     "verificationSent": "لینک تایید به این آدرس ارسال شد:",
     "clickLinkToVerify": "روی لینک موجود در ایمیل کلیک کنید تا حساب خود را تایید و وارد شوید.",
+    "spamHint": "ایمیل را پیدا نکردید؟ پوشه‌های «هرزنامه» و «تبلیغات» را بررسی کنید — گاهی ارسال چند دقیقه طول می‌کشد.",
+    "resendVerification": "ارسال دوباره ایمیل",
+    "resendIn": "ارسال دوباره تا {{seconds}} ثانیه دیگر",
+    "resendSent": "ایمیل ارسال شد. صندوق ورودی را بررسی کنید.",
+    "resendError": "ارسال ایمیل ممکن نشد. بعداً دوباره تلاش کنید.",
+    "resendTooOften": "تلاش‌های بیش از حد. چند دقیقه دیگر دوباره تلاش کنید.",
+    "useAnotherEmail": "استفاده از ایمیل دیگر",
     "backToLogin": "بازگشت به ورود",
     "emailNotVerified": "لطفاً ابتدا ایمیل خود را تایید کنید",
     "emailAlreadyRegistered": "این ایمیل قبلاً ثبت شده",
@@ -354,6 +361,7 @@
     "renew": "تمدید",
     "free": "رایگان",
     "extend": "تمدید اشتراک",
+    "bestValue": "به‌صرفه",
     "buyTraffic": "خرید ترافیک",
     "buyDevices": "خرید دستگاه",
     "renewalOptions": "گزینه‌های تمدید",
@@ -476,6 +484,14 @@
       "reduceDevicesDescription": "می‌توانید تعداد دستگاه‌ها را تا حداقل مجاز در تعرفه کاهش دهید",
       "reduceDevicesTitle": "کاهش تعداد دستگاه‌ها",
       "reduceUnavailable": "در حال حاضر کاهش تعداد دستگاه‌ها امکان‌پذیر نیست",
+      "alreadyAtMinDeviceLimit": "حداقل تعداد دستگاه برای تعرفه شما از قبل اعمال شده است",
+      "reasons": {
+        "noSubscription": "اشتراکی یافت نشد",
+        "noActiveSubscription": "اشتراک فعالی وجود ندارد",
+        "maxDevicesReached": "به حداکثر تعداد دستگاه رسیده‌اید ({{count}})",
+        "canAddLimited": "حداکثر {{count}} دستگاه می‌توانید اضافه کنید",
+        "trialNotAllowed": "کاهش تعداد دستگاه برای اشتراک آزمایشی در دسترس نیست"
+      },
       "reducing": "در حال کاهش…"
     },
     "serverManagement": {
@@ -917,6 +933,7 @@
     "partner": {
       "becomePartner": "شریک شوید",
       "becomePartnerDesc": "برای دریافت نرخ کمیسیون بالاتر و امکان برداشت درآمد، درخواست شراکت دهید.",
+      "becomePartnerDescNoWithdrawal": "برای دریافت نرخ کمیسیون بالاتر، درخواست شراکت دهید.",
       "applyButton": "درخواست",
       "applyTitle": "درخواست شراکت",
       "applyDesc": "فرم زیر را برای درخواست برنامه شراکت پر کنید. تمام فیلدها اختیاری هستند.",
@@ -1610,6 +1627,27 @@
       "testRecipientPlaceholder": "ایمیل گیرنده (پیش‌فرض: ایمیل شما)",
       "testHint": "محتوای فعلی ویرایشگر با مقادیر نمونه به جای متغیرها ارسال می‌شود.",
       "variablesCommon": "متغیرهای عمومی (در همه قالب‌ها کار می‌کنند)"
+    },
+    "emailQueue": {
+      "title": "صف ایمیل‌ها",
+      "hint": "فقط ایمیل‌های ناموفق در تلاش اول",
+      "clearPending": "حذف در انتظارها",
+      "clearAll": "پاک‌سازی",
+      "confirmPending": "ایمیل‌های در انتظار ارسال حذف شوند؟",
+      "confirmAll": "کل صف همراه با تاریخچه پاک شود؟",
+      "cleared": "صف پاک شد: {{count}}",
+      "noSmtp": "سرور ایمیل پیکربندی نشده و ایمیل‌ها ارسال نمی‌شوند. آدرس را در بخش SMTP تنظیمات وارد کنید.",
+      "statusPending": "در انتظار تلاش دوباره",
+      "statusSent": "تحویل‌شده در تلاش بعدی",
+      "statusDead": "تحویل‌نشده",
+      "reasonNoSmtp": "سرور ایمیل پیکربندی نشده است",
+      "reasonExpired": "محتوای ایمیل منقضی شده است",
+      "reasonFailed": "ارسال ناموفق بود",
+      "more": "{{count}} مورد دیگر",
+      "unavailable": "وضعیت صف ایمیل در دسترس نیست. شاید ربات هنوز به‌روزرسانی نشده باشد.",
+      "captionPending": "در انتظار",
+      "captionSent": "تحویل‌شده",
+      "captionDead": "تحویل‌نشده"
     },
     "wheel": {
       "title": "تنظیمات چرخ شانس",
@@ -2503,6 +2541,9 @@
       "addButton": "افزودن",
       "noPeriodsHint": "هیچ دوره‌ای اضافه نشده. حداقل یک دوره اضافه کنید.",
       "daysShort": "روز",
+      "bestValueHint": "این دوره را به‌عنوان به‌صرفه‌ترین علامت بزنید — مشتری آن را برجسته می‌بیند",
+      "highlightLabel": "برجسته‌سازی تعرفه",
+      "highlightHint": "مشتری این تعرفه را با کادر و نشان «به‌صرفه» می‌بیند",
       "serversTitle": "سرورها",
       "premiumLimitsTitle": "سقف ویژه به تفکیک سرور",
       "premiumLimitsHint": "سقف مصرف جداگانه برای هر سرور. با پر شدن آن، کاربر فقط دسترسی همان سرور را از دست می‌دهد و بقیه کار می‌کنند. صفر یعنی این سرور سقف ویژه ندارد.",
@@ -3881,6 +3922,7 @@
         "confirmEstimate": "قیمت: ≈{{price}} (تخمینی، مبلغ دقیق پس از شروع)",
         "confirmBalanceAfter": "موجودی پس از کسر: {{balance}}",
         "confirmMore": "و {{count}} مورد دیگر",
+        "confirmCharge": "شروع با {{price}}",
         "started": "کار #{{id}} شروع شد",
         "title": "اجرا",
         "targetsRow": "اهداف",
@@ -3908,23 +3950,34 @@
         "summaryTargets_one": "{{count}} هدف",
         "summaryTargets_other": "{{count}} هدف",
         "summaryUnits_one": "{{count}} سیم‌کارت",
-        "summaryUnits_other": "{{count}} سیم‌کارت"
+        "summaryUnits_other": "{{count}} سیم‌کارت",
+        "runHosts_one": "بررسی {{count}} سرور · {{price}}",
+        "runHosts_other": "بررسی {{count}} سرور · {{price}}",
+        "runShortHosts_one": "بررسی {{count}} سرور",
+        "runShortHosts_other": "بررسی {{count}} سرور",
+        "summaryServers_one": "{{count}} سرور",
+        "summaryServers_other": "{{count}} سرور",
+        "busyBatch": "بررسی سرورها در حال انجام است — منتظر بمانید",
+        "timeRow": "زمان",
+        "confirmServers": "سرورها ({{count}}): {{list}}"
       },
       "progress": {
         "submitting": "در حال ارسال درخواست…",
         "waiting": "در انتظار اپراتورها ({{elapsed}})",
-        "retrieving": "بیش از معمول طول می‌کشد، در حال دریافت نتیجه ({{elapsed}})",
+        "retrieving": "هنوز در حال بررسی، صبر کنید ({{elapsed}})",
         "polling": "بررسی در حال انجام ({{elapsed}})",
         "cancelling": "در حال لغو…",
-        "hintProbe": "معمولاً ۵–۶۰ ثانیه، همه سیم‌کارت‌ها تا ۱۰ دقیقه",
-        "hintVless": "تا ۳ دقیقه برای هر سرور",
-        "hintScan": "۱۵–۴۰ ثانیه برای هر سیم‌کارت",
-        "stalled": "نظرسنجی متوقف شد، نتیجه در تاریخچه ظاهر می‌شود",
+        "hintProbe": "هرچه سیم‌کارت بیشتر، طولانی‌تر: مجموعهٔ کامل ۱۰–۲۰ دقیقه. صفحه خودش به‌روز می‌شود.",
+        "hintVless": "تا ۳ دقیقه برای هر سرور. صفحه خودش به‌روز می‌شود.",
+        "hintScan": "۱۵–۴۰ ثانیه برای هر سیم‌کارت. صفحه خودش به‌روز می‌شود.",
         "cancel": "لغو",
-        "retrieve": "دریافت نتیجه",
         "failed": "بررسی ناموفق بود",
         "retry": "تلاش مجدد",
-        "cancelled": "لغو شد"
+        "cancelled": "لغو شد",
+        "units": "سیم‌کارت‌ها",
+        "waitingUnit": "در انتظار…",
+        "answered": "{{answered}} از {{total}} سیم‌کارت پاسخ دادند",
+        "canLeave": "می‌توانید صفحه را ببندید: نتیجه در «بررسی‌های من» ظاهر می‌شود."
       },
       "verdict": {
         "reachable": "در دسترس",
@@ -3941,12 +3994,17 @@
         "unknown": "تعیین نشده",
         "guessed": "حدس"
       },
+      "purposeShort": {
+        "bs": "لیست سفید",
+        "regular": "معمولی",
+        "unknown": "تعیین‌نشده"
+      },
       "targets": {
         "hosts": "هاست‌های پنل",
         "includeDisabled": "نمایش غیرفعال‌ها",
         "search": "جستجوی هاست‌ها",
         "empty": "پنل هاستی برنگرداند",
-        "pickAllBs": "انتخاب همه میزبان‌های لیست سفید",
+        "pickAllBs": "انتخاب همهٔ میزبان‌های لیست سفید",
         "nodesTitle": "نودها",
         "nodesHint": "فقط ping",
         "purposeToggle": "تغییر کاربرد میزبان",
@@ -3954,7 +4012,9 @@
         "count_other": "{{count}} هدف",
         "showAll": "نمایش همه میزبان‌ها ({{count}})",
         "showLess": "جمع کردن فهرست",
-        "purposeHint": "برچسب میزبان کاربرد آن است: «لیست سفید» باید از سیم‌کارت‌های لیست سفید در دسترس باشد، «معمولی» از سیم‌کارت‌های بدون آن. برای تغییر روی برچسب بزنید."
+        "whatIsWhitelist": "لیست سفید چیست؟",
+        "whitelistHelp": "لیست سفید حالت اپراتور است که بدون VPN فقط سایت‌های مجاز باز می‌شوند. میزبان‌های لیست سفید با سیم‌کارت‌های آن بررسی می‌شوند و میزبان‌های عادی با سیم‌کارت‌های بدون آن.",
+        "purposeChanged": "هدف تغییر کرد"
       },
       "subscription": {
         "title": "پیکربندی‌های اشتراک",
@@ -3970,7 +4030,7 @@
         "coreStable": "Stable",
         "corePrerelease": "Prerelease",
         "empty": "اشتراک پیکربندی قابل‌استفاده‌ای ندارد",
-        "pickBs": "انتخاب همه پیکربندی‌های لیست سفید ({{count}})",
+        "pickBs": "لیست سفید ({{count}})",
         "source": "منبع",
         "userLabel": "کاربر #{{id}}",
         "noReference": "اشتراک پیش‌فرض تنظیم نشده است",
@@ -3981,9 +4041,9 @@
         "parseFailed": "تجزیه ناموفق بود",
         "sourceLinks": "لینک‌ها · {{count}}",
         "sourceSubscription": "اشتراک · {{count}}",
-        "pickAll": "✓ همه",
-        "pickNone": "↺ بازنشانی",
-        "orPick": "یا از اشتراک آماده استفاده کنید",
+        "pickAll": "همه",
+        "pickNone": "بازنشانی",
+        "orPick": "یا پیکربندی خودتان / اشتراک دیگر",
         "fromInput": "کانفیگ‌های فیلد بالا نمایش داده می‌شوند",
         "selectedOf": "انتخاب‌شده {{selected}} / {{total}}",
         "rejectedReasons": {
@@ -4004,11 +4064,14 @@
         "alive_other": "{{count}} آدرس فعال",
         "copy": "کپی فهرست",
         "copied": "کپی شد",
-        "perUnit": "به تفکیک سیم‌کارت",
+        "perUnit": "نمایش نتیجه هر کدام",
         "ofTotal": "از {{total}}",
         "willScan": "زیرشبکه {{subnet}} اسکن می‌شود",
         "cidrHint": "یک زیرشبکه /24؛ از IP زیرشبکه‌اش گرفته می‌شود",
-        "perUnitProbes": "{{icmp}} icmp · {{tcp}} tcp · {{sni}} sni"
+        "probeIcmp": "پینگ",
+        "probeTcp": "پورت",
+        "probeSni": "SNI",
+        "byOperator": "به تفکیک اپراتور"
       },
       "probes": {
         "icmp": "ICMP",
@@ -4036,7 +4099,6 @@
         "targets": "اهداف",
         "latency": "تأخیر",
         "core": "Xray",
-        "raw": "جزئیات",
         "diagnosis": "تشخیص",
         "empty": "نتیجه خالی است",
         "failReason": "دلیل",
@@ -4046,14 +4108,14 @@
         "http": "HTTP",
         "sniMulti": "{{count}}×SNI",
         "sniList": "SNI: {{names}}",
-        "noBs": "بدون لیست سفید"
-      },
-      "summary": {
-        "openJob": "باز کردن کار",
-        "dpiFilter": "سیم‌کارت‌ها",
-        "panelError": "پنل در دسترس نیست: {{error}}",
-        "notInPanel": "در پنل نیست",
-        "notInCatalog": "در فهرست نیست"
+        "noBs": "بدون لیست سفید",
+        "reasons": {
+          "tcp_timeout": "بی‌پاسخ",
+          "zombie_tcp": "بعد از TLS قطع می‌شود",
+          "dataplane_dead": "سایت‌ها باز نمی‌شوند",
+          "cancelled": "لغو شد"
+        },
+        "list": "نتیجه به تفکیک سیم‌کارت"
       },
       "history": {
         "columns": {
@@ -4068,7 +4130,6 @@
         },
         "loadMore": "نمایش بیشتر",
         "more": "+{{count}}",
-        "rawJson": "پاسخ خام",
         "units_one": "{{count}} سیم‌کارت",
         "units_other": "{{count}} سیم‌کارت"
       },
@@ -4077,55 +4138,71 @@
         "checkNode": "بررسی در BSCHEKER"
       },
       "fleet": {
-        "onAir": "روی خط: {{bs}} با لیست سفید · {{regular}} بدون",
-        "offline": "اپراتورها اکنون در دسترس نیستند، ۱–۲ دقیقه بعد دوباره امتحان کنید"
-      },
-      "health": {
-        "title": "میزبان‌های لیست سفید",
-        "summary": "{{ok}} از {{total}} سالم",
-        "failing_one": "{{count}} با مشکل",
-        "failing_other": "{{count}} با مشکل",
-        "unchecked_one": "{{count}} بررسی‌نشده",
-        "unchecked_other": "{{count}} بررسی‌نشده",
-        "checked": "بررسی شده {{age}}",
-        "none": "هیچ میزبانی با کاربرد «لیست سفید» در پنل نیست",
-        "empty": "هنوز بررسی‌ای نیست: میزبان‌ها را انتخاب و اولین بررسی را اجرا کنید",
-        "showMatrix": "نمایش ماتریس",
-        "hideMatrix": "پنهان کردن ماتریس"
+        "onAir_one": "{{total}} سیم‌کارت آنلاین: {{bs}} با لیست سفید، {{regular}} بدون",
+        "onAir_other": "{{total}} سیم‌کارت آنلاین: {{bs}} با لیست سفید، {{regular}} بدون",
+        "statement": "{{ok}} از {{total}} سرور کار می‌کنند",
+        "statementAllOk": "همه {{total}} سرور کار می‌کنند",
+        "statementNone": "در پنل سروری نیست",
+        "legendPartial_one": "{{count}} نه برای همه",
+        "legendPartial_other": "{{count}} نه برای همه",
+        "legendDown_one": "{{count}} کار نمی‌کند",
+        "legendDown_other": "{{count}} کار نمی‌کنند",
+        "legendUnchecked_one": "{{count}} بررسی‌نشده",
+        "legendUnchecked_other": "{{count}} بررسی‌نشده",
+        "meta": "بررسی {{age}} · {{units}}",
+        "search": "جستجوی سرور",
+        "filter": {
+          "all": "همه",
+          "problems": "مشکل‌دار",
+          "stale": "مدت‌ها بررسی نشده",
+          "bs": "لیست سفید",
+          "regular": "معمولی"
+        },
+        "group": {
+          "down": "کار نمی‌کنند",
+          "partial": "نه برای همه",
+          "unchecked": "بررسی‌نشده",
+          "ok": "کار می‌کنند"
+        },
+        "showAll": "نمایش همه {{count}}",
+        "hide": "جمع کردن",
+        "state": {
+          "ok": "کار می‌کند",
+          "partial": "نه برای همه",
+          "down": "کار نمی‌کند",
+          "unchecked": "بررسی‌نشده",
+          "checking": "در حال بررسی…"
+        },
+        "ofUnits": "{{ok}} از {{total}}",
+        "justNow": "همین حالا",
+        "empty": "با این فیلتر سروری نیست",
+        "details": "جزئیات",
+        "targets": "سرورها",
+        "selectAll": "انتخاب همه",
+        "columns": {
+          "units": "سیم‌کارت‌ها",
+          "checked": "بررسی"
+        }
       },
       "switch": {
         "label": "چه چیزی بررسی شود",
-        "hosts": "میزبان‌ها",
-        "hostsHint": "میزبان‌ها و نودهای پنل Remnawave، تا ۱۰ هدف در هر اجرا",
+        "hosts": "هاست‌ها",
+        "hostsHint": "سرورهای پنل Remnawave: وضعیت و بررسی انتخاب‌شده‌ها",
         "ip": "IP / دامنه",
         "ipHint": "آدرس‌های خودتان: IP، IP:پورت، دامنه یا https://…، تا ۱۰ هدف در هر اجرا",
-        "cidr": "CIDR",
-        "cidrHint": "اسکن زیرشبکه /24: آدرس‌های زنده از دید سیم‌کارت‌ها",
-        "vless": "اشتراک",
-        "vlessHint": "پیکربندی‌های اشتراک از طریق تونل VLESS، تا ۲۰ در هر آزمون"
+        "cidr": "اسکن CIDR",
+        "cidrHint": "اسکن زیرشبکه /24: آدرس‌های فعال از دید سیم‌کارت‌ها",
+        "vless": "تست VPN",
+        "vlessHint": "پیکربندی‌های اشتراک از طریق تونل VLESS، تا ۲۰ در هر تست",
+        "history": "تاریخچه",
+        "historyHint": "همه بررسی‌ها: چه چیزی بررسی شد، نتیجه و مبلغ کسرشده"
       },
       "sections": {
         "targets": "اهداف",
-        "probes": "پروب‌ها",
-        "more": "بیشتر"
-      },
-      "operators": {
-        "title": "اپراتورها",
-        "hint": "هر سیم‌کارت جداگانه کسر می‌شود",
-        "pickBs": "انتخاب همه با لیست سفید",
-        "unpickBs": "لغو انتخاب همه با لیست سفید",
-        "pickRegular": "انتخاب همه بدون لیست سفید",
-        "unpickRegular": "لغو انتخاب همه بدون لیست سفید",
-        "recall": "مانند دفعه قبل",
-        "reset": "بازنشانی انتخاب",
-        "selected": "{{selected}} / {{total}} انتخاب شده",
-        "pickDistrict": "انتخاب کل منطقه {{code}}",
-        "unpickDistrict": "لغو انتخاب کل منطقه {{code}}",
-        "noBs": "بدون لیست سفید",
-        "empty": "فهرست سیم‌کارت‌ها خالی است: سرویس در دسترس نیست"
+        "probes": "پروب‌ها"
       },
       "recent": {
-        "title": "بررسی‌های من",
+        "title": "تاریخچه بررسی‌ها",
         "empty": "هنوز بررسی‌ای نیست",
         "open": "جزئیات",
         "close": "جمع کردن",
@@ -4134,10 +4211,10 @@
         "all": "همه",
         "columns": {
           "target": "هدف",
-          "probes": "بررسی‌ها",
-          "operators": "اپراتورها",
           "time": "زمان",
-          "cost": "کسر شده"
+          "cost": "کسر شده",
+          "outcome": "نتیجه",
+          "units": "سیم‌کارت‌ها"
         },
         "outcome": {
           "ok": "همه در دسترس",
@@ -4145,7 +4222,28 @@
           "down": "در دسترس نیست",
           "pending": "در حال انجام",
           "na": "بدون نتیجه"
-        }
+        },
+        "filter": "فیلتر",
+        "repeat": "تکرار",
+        "headline": {
+          "all_one": "روی تنها سیم‌کارت بررسی‌شده باز می‌شود",
+          "all_other": "روی هر {{total}} سیم‌کارت باز می‌شود",
+          "partial_one": "روی {{ok}} از {{total}} سیم‌کارت باز می‌شود",
+          "partial_other": "روی {{ok}} از {{total}} سیم‌کارت باز می‌شود",
+          "none_one": "روی تنها سیم‌کارت بررسی‌شده باز نمی‌شود",
+          "none_other": "روی هیچ‌یک از {{total}} سیم‌کارت باز نمی‌شود",
+          "failed": "بررسی ناموفق بود",
+          "cancelled": "بررسی لغو شد",
+          "pending": "بررسی در حال انجام است",
+          "scan": "آدرس‌های فعال: {{ok}} از {{total}}",
+          "empty": "نتیجه‌ای نیست",
+          "blockedList": "مسدود یا بی‌پاسخ: {{list}}"
+        },
+        "batchTargets_one": "{{count}} سرور",
+        "batchTargets_other": "{{count}} سرور",
+        "batchOutcome": "{{ok}} از {{total}} کار می‌کنند",
+        "server": "سرور",
+        "allServers": "همه سرورها"
       },
       "addresses": {
         "label": "آدرس‌ها",
@@ -4157,19 +4255,67 @@
       "setup": {
         "titleDisabled": "BSCHEKER خاموش است",
         "titleNotConfigured": "BSCHEKER پیکربندی نشده است",
-        "intro": "بررسی میزبان‌ها، اشتراک‌ها و زیرشبکه‌ها از دید سیم‌کارت‌های اپراتورهای روسیه از طریق سرویس bschekbot. برای شروع:",
-        "key": "کلید API سرویس bschekbot",
-        "keyHint": "آن را از bsbord.com بگیرید (طرح Bronze یا بالاتر) و در تنظیم BSCHEK_API_KEY قرار دهید",
-        "enable": "یکپارچه‌سازی را روشن کنید",
-        "enableHint": "تنظیم BSCHEK_ENABLED",
-        "reference": "اشتراک پیش‌فرض — اختیاری",
-        "referenceHint": "shortUuid یک اشتراک پنل در BSCHEK_REFERENCE_SUBSCRIPTION: تست VLESS بدون انتخاب کاربر",
-        "rights": "دسترسی مدیران",
-        "rightsHint": "reachability:read برای دیدن بخش، reachability:run برای اجرای بررسی‌ها (اعتبار مصرف می‌کنند)",
+        "intro": "بررسی سرورها، اشتراک‌ها و زیرشبکه‌ها از دید سیم‌کارت‌های اپراتورهای روسیه از طریق bschekbot. برای فعال شدن بخش:",
+        "key": "کلید دسترسی",
+        "keyHint": "آن را در bsbord.com بگیرید (طرح Bronze یا بالاتر) و در تنظیمات بخش بگذارید",
+        "enable": "BSCHEKER را روشن کنید",
+        "enableHint": "کلیدی در همان تنظیمات",
+        "reference": "اشتراک پیش‌فرض، اختیاری",
+        "referenceHint": "اشتراک پنل که تست VPN سرورهایش را بدون انتخاب کاربر می‌گیرد",
+        "rights": "دسترسی ادمین‌ها",
+        "rightsHint": "چه کسی بخش را ببیند و چه کسی بررسی اجرا کند: بررسی‌ها اعتبار مصرف می‌کنند",
         "openSettings": "باز کردن تنظیمات BSCHEKER",
         "openSite": "دریافت کلید در bsbord.com",
-        "envNote": "اگر ربات از طریق .env پیکربندی شده، متغیرهای محیطی بر تنظیمات کابینت اولویت دارند — .env را ویرایش کرده و ربات را دوباره راه‌اندازی کنید.",
+        "envNote": "اگر ربات از طریق فایل محیط تنظیم شده، مقادیر آن بر تنظیمات کابینت مقدم است: فایل را ویرایش و ربات را ری‌استارت کنید.",
         "unhealthyHint": "کلید API و طرح را در bsbord.com بررسی کنید"
+      },
+      "subtitle": "دسترس‌پذیری سرورها از روسیه",
+      "server": {
+        "byOperators": "بر اساس اپراتور",
+        "catchesAll": "در همه مناطق کار می‌کند",
+        "catchesNone": "کار نمی‌کند",
+        "catchesNot": "در {{regions}} کار نمی‌کند",
+        "ofUnits": "{{ok}} از {{total}}",
+        "summaryBs": "برای {{ok}} از {{total}} سیم‌کارت با لیست سفید کار می‌کند",
+        "summaryRegular": "برای {{ok}} از {{total}} سیم‌کارت بدون لیست سفید کار می‌کند",
+        "summaryAny": "برای {{ok}} از {{total}} سیم‌کارت کار می‌کند",
+        "checked": "بررسی {{age}}",
+        "unchecked": "این سرور هنوز بررسی نشده",
+        "history": "بررسی‌های قبلی",
+        "allHistory": "همه",
+        "checkOne": "بررسی این سرور · {{price}}"
+      },
+      "batch": {
+        "minutes": "حدود {{count}} دقیقه",
+        "onlyChecked": "فقط برای سیم‌کارت‌های بررسی‌شده هزینه کسر می‌شود. بررسی را می‌توان متوقف کرد.",
+        "progressTitle_one": "بررسی {{count}} سرور",
+        "progressTitle_other": "بررسی {{count}} سرور",
+        "progressLine": "انجام‌شده {{done}} از {{total}} · {{eta}} باقی",
+        "progressDone": "انجام‌شده {{done}} از {{total}}",
+        "canLeave": "می‌توانید صفحه را ببندید، بررسی ادامه دارد.",
+        "stop": "توقف",
+        "stopping": "در حال توقف…",
+        "spentSoFar": "تا کنون کسر شده: {{price}}",
+        "aside": "بررسی در جریان است",
+        "queued": "در صف",
+        "started": "بررسی شروع شد",
+        "finishedOk": "بررسی پایان یافت",
+        "finishedCancelled": "بررسی متوقف شد",
+        "finishedFailed": "بررسی ناموفق بود"
+      },
+      "operators": {
+        "title": "اپراتورها",
+        "hint": "هر سیم‌کارت جداگانه محاسبه می‌شود",
+        "bs": "ل.س",
+        "regular": "بدون ل.س",
+        "noBs": "بدون ل.س",
+        "offline": "آفلاین",
+        "selected": "{{selected}} / {{total}} انتخاب شد",
+        "reset": "پاک کردن",
+        "recall": "مثل دفعه قبل",
+        "pickDistrict": "همه سیم‌کارت‌های {{code}}",
+        "unpickDistrict": "برداشتن سیم‌کارت‌های {{code}}",
+        "empty": "فهرست سیم‌کارت‌ها خالی است: سرویس در دسترس نیست"
       }
     },
     "theme": {

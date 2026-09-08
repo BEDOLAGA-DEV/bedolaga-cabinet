@@ -44,11 +44,15 @@ function StatusBadge({
     );
   }
 
+  // Подложка и рамка берут шейд 500, а текст — 400. В светлой теме 300/400
+  // ремапятся в тёмный шейд (иначе статусный текст на белом не читается), и
+  // подложка из того же 400 темнела вместе с текстом: контраст надписи падал до
+  // 4.2. Шейд 500 в ремап не входит, поэтому плашка остаётся светлой подкраской.
   const color = isActive
-    ? 'bg-success-400/15 text-success-400 border-success-400/20'
+    ? 'bg-success-500/15 text-success-400 border-success-500/20'
     : isLimited
-      ? 'bg-warning-400/15 text-warning-400 border-warning-400/20'
-      : 'bg-error-400/15 text-error-400 border-error-400/20';
+      ? 'bg-warning-500/15 text-warning-400 border-warning-500/20'
+      : 'bg-error-500/15 text-error-400 border-error-500/20';
 
   const label = isActive
     ? t('subscription.statusActive', 'Активна')
@@ -214,7 +218,7 @@ export default function SubscriptionListCard({
                 : t('subscription.autopay', 'Автопродление');
               return (
                 <span
-                  className={`flex items-center gap-1 ${enabled ? 'text-success-400/70' : 'text-error-400/50'}`}
+                  className={`flex items-center gap-1 ${enabled ? 'text-success-400' : 'text-error-400'}`}
                 >
                   {enabled ? (
                     <CheckIcon className="h-3 w-3" />

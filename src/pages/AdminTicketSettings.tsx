@@ -7,6 +7,7 @@ import { AdminBackButton } from '../components/admin';
 import { SettingsIcon } from '@/components/icons';
 import { toNumber } from '../utils/inputHelpers';
 import { PageSkeleton, Skeleton } from '@/components/ui/skeleton';
+import { EnvLockedBadge } from '@/components/admin/EnvLockedBadge';
 
 type NumberOrEmpty = number | '';
 
@@ -23,6 +24,8 @@ export default function AdminTicketSettings() {
     queryKey: ['ticket-settings'],
     queryFn: adminApi.getTicketSettings,
   });
+  // Поля, закреплённые в .env: сервер их не применит — переключатель отключаем и помечаем.
+  const envLocked = new Set(settings?.env_locked ?? []);
 
   const [formData, setFormData] = useState<{
     sla_enabled: boolean;
@@ -218,11 +221,15 @@ export default function AdminTicketSettings() {
               <input
                 type="checkbox"
                 checked={formData.sla_enabled}
+                disabled={envLocked.has('sla_enabled')}
                 onChange={(e) => setFormData({ ...formData, sla_enabled: e.target.checked })}
                 className="h-5 w-5 rounded border-dark-700 bg-dark-800 text-accent-500 focus:ring-2 focus:ring-accent-500 focus:ring-offset-0"
               />
               <div>
-                <div className="font-medium text-dark-100">{t('admin.tickets.slaEnabled')}</div>
+                <div className="flex items-center gap-2 font-medium text-dark-100">
+                  {t('admin.tickets.slaEnabled')}
+                  {envLocked.has('sla_enabled') && <EnvLockedBadge />}
+                </div>
                 <div className="text-sm text-dark-500">{t('admin.tickets.slaEnabledDesc')}</div>
               </div>
             </label>
@@ -230,8 +237,9 @@ export default function AdminTicketSettings() {
 
           {/* SLA Minutes */}
           <div className="mb-4">
-            <label className="mb-2 block text-sm font-medium text-dark-300">
+            <label className="mb-2 flex items-center gap-2 text-sm font-medium text-dark-300">
               {t('admin.tickets.slaMinutes')}
+              {envLocked.has('sla_minutes') && <EnvLockedBadge />}
             </label>
             <input
               type="number"
@@ -245,7 +253,7 @@ export default function AdminTicketSettings() {
                 if (!isNaN(num)) setFormData({ ...formData, sla_minutes: num });
               }}
               className={`input ${formData.sla_enabled && !isSlaMinutesValid && formData.sla_minutes !== '' ? 'border-error-500/50' : ''}`}
-              disabled={!formData.sla_enabled}
+              disabled={!formData.sla_enabled || envLocked.has('sla_minutes')}
             />
             {formData.sla_enabled && formData.sla_minutes !== '' && !isSlaMinutesValid && (
               <p className="mt-1 text-xs text-error-400">
@@ -257,8 +265,9 @@ export default function AdminTicketSettings() {
 
           {/* Check Interval */}
           <div className="mb-4">
-            <label className="mb-2 block text-sm font-medium text-dark-300">
+            <label className="mb-2 flex items-center gap-2 text-sm font-medium text-dark-300">
               {t('admin.tickets.checkInterval')}
+              {envLocked.has('sla_check_interval_seconds') && <EnvLockedBadge />}
             </label>
             <input
               type="number"
@@ -272,7 +281,7 @@ export default function AdminTicketSettings() {
                 if (!isNaN(num)) setFormData({ ...formData, sla_check_interval_seconds: num });
               }}
               className={`input ${formData.sla_enabled && !isCheckIntervalValid && formData.sla_check_interval_seconds !== '' ? 'border-error-500/50' : ''}`}
-              disabled={!formData.sla_enabled}
+              disabled={!formData.sla_enabled || envLocked.has('sla_check_interval_seconds')}
             />
             {formData.sla_enabled &&
               formData.sla_check_interval_seconds !== '' &&
@@ -286,8 +295,9 @@ export default function AdminTicketSettings() {
 
           {/* Reminder Cooldown */}
           <div>
-            <label className="mb-2 block text-sm font-medium text-dark-300">
+            <label className="mb-2 flex items-center gap-2 text-sm font-medium text-dark-300">
               {t('admin.tickets.reminderCooldown')}
+              {envLocked.has('sla_reminder_cooldown_minutes') && <EnvLockedBadge />}
             </label>
             <input
               type="number"
@@ -302,7 +312,7 @@ export default function AdminTicketSettings() {
                 if (!isNaN(num)) setFormData({ ...formData, sla_reminder_cooldown_minutes: num });
               }}
               className={`input ${formData.sla_enabled && !isReminderCooldownValid && formData.sla_reminder_cooldown_minutes !== '' ? 'border-error-500/50' : ''}`}
-              disabled={!formData.sla_enabled}
+              disabled={!formData.sla_enabled || envLocked.has('sla_reminder_cooldown_minutes')}
             />
             {formData.sla_enabled &&
               formData.sla_reminder_cooldown_minutes !== '' &&

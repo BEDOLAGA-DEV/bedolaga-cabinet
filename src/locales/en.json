@@ -235,6 +235,13 @@
     "checkEmail": "Check your email",
     "verificationSent": "We sent a verification link to:",
     "clickLinkToVerify": "Click the link in the email to verify your account and log in.",
+    "spamHint": "No email? Check your Spam and Promotions folders — delivery can take a few minutes.",
+    "resendVerification": "Send the email again",
+    "resendIn": "Send again in {{seconds}} s",
+    "resendSent": "Email sent. Check your inbox.",
+    "resendError": "Could not send the email. Please try again later.",
+    "resendTooOften": "Too many attempts. Try again in a few minutes.",
+    "useAnotherEmail": "Use a different email",
     "backToLogin": "Back to login",
     "emailNotVerified": "Please verify your email first",
     "forgotPasswordHint": "Enter your email to receive a reset link",
@@ -382,6 +389,7 @@
     "renew": "Renew",
     "free": "Free",
     "extend": "Extend Subscription",
+    "bestValue": "Best value",
     "buyTraffic": "Buy Traffic",
     "buyDevices": "Buy Devices",
     "renewalOptions": "Renewal Options",
@@ -605,6 +613,14 @@
       "disconnectDevicesFirst_other": "Disconnect devices first to reduce the limit below {{count}} devices",
       "reduceUnavailable": "Device reduction is not available",
       "alreadyAtMinDeviceLimit": "Already at minimum device limit for your tariff",
+      "reasons": {
+        "noSubscription": "Subscription not found",
+        "noActiveSubscription": "No active subscription",
+        "maxDevicesReached": "Device limit reached ({{count}})",
+        "canAddLimited_one": "You can add at most {{count}} device",
+        "canAddLimited_other": "You can add at most {{count}} devices",
+        "trialNotAllowed": "Device reduction is not available for trial subscriptions"
+      },
       "reduce": "Reduce",
       "reducing": "Reducing...",
       "newDeviceLimit_one": "New limit: {{count}} device",
@@ -1042,6 +1058,7 @@
     "partner": {
       "becomePartner": "Become a Partner",
       "becomePartnerDesc": "Apply for the partner program to get higher commission rates and the ability to withdraw your earnings.",
+      "becomePartnerDescNoWithdrawal": "Apply for the partner program to get higher commission rates.",
       "applyButton": "Apply",
       "applyTitle": "Partner Application",
       "applyDesc": "Fill out the form below to apply for our partner program. All fields are optional.",
@@ -1752,6 +1769,27 @@
       "testHint": "Sends the current editor content with sample values in place of variables.",
       "variablesCommon": "Common variables (work in all templates)"
     },
+    "emailQueue": {
+      "title": "Email queue",
+      "hint": "Only emails that failed on the first attempt",
+      "clearPending": "Drop waiting",
+      "clearAll": "Clear",
+      "confirmPending": "Drop the emails waiting to be sent?",
+      "confirmAll": "Clear the whole queue, history included?",
+      "cleared": "Queue cleared: {{count}}",
+      "noSmtp": "No mail server is configured, so emails are not sent. Set the address in settings, SMTP section.",
+      "statusPending": "Awaiting retry",
+      "statusSent": "Delivered on retry",
+      "statusDead": "Undelivered",
+      "reasonNoSmtp": "Mail server is not configured",
+      "reasonExpired": "Email content has expired",
+      "reasonFailed": "Delivery failed",
+      "more": "{{count}} more",
+      "unavailable": "Email queue state is unavailable. The bot may not be updated yet.",
+      "captionPending": "waiting",
+      "captionSent": "delivered",
+      "captionDead": "undelivered"
+    },
     "payments": {
       "title": "Payments",
       "description": "Search and manage payments",
@@ -2061,6 +2099,7 @@
         "confirmEstimate": "Price: ≈{{price}} (estimate, exact after start)",
         "confirmBalanceAfter": "Balance after charge: {{balance}}",
         "confirmMore": "and {{count}} more",
+        "confirmCharge": "Start for {{price}}",
         "started": "Job #{{id}} started",
         "title": "Launch",
         "targetsRow": "Targets",
@@ -2088,23 +2127,34 @@
         "summaryTargets_one": "{{count}} target",
         "summaryTargets_other": "{{count}} targets",
         "summaryUnits_one": "{{count}} SIM",
-        "summaryUnits_other": "{{count}} SIMs"
+        "summaryUnits_other": "{{count}} SIMs",
+        "runHosts_one": "Check {{count}} server · {{price}}",
+        "runHosts_other": "Check {{count}} servers · {{price}}",
+        "runShortHosts_one": "Check {{count}} server",
+        "runShortHosts_other": "Check {{count}} servers",
+        "summaryServers_one": "{{count}} server",
+        "summaryServers_other": "{{count}} servers",
+        "busyBatch": "A server check is already running — wait for it",
+        "timeRow": "Time",
+        "confirmServers": "Servers ({{count}}): {{list}}"
       },
       "progress": {
         "submitting": "Sending request…",
         "waiting": "Waiting for operators ({{elapsed}})",
-        "retrieving": "Taking longer than usual, fetching the result ({{elapsed}})",
+        "retrieving": "Still checking, please wait ({{elapsed}})",
         "polling": "Check in progress ({{elapsed}})",
         "cancelling": "Cancelling…",
-        "hintProbe": "Usually 5–60 s, whole fleet up to 10 min",
-        "hintVless": "Up to 3 min per server",
-        "hintScan": "15–40 s per SIM",
-        "stalled": "Polling stopped, the result will appear in History",
+        "hintProbe": "More SIMs take longer: the full set takes 10–20 minutes. The page updates by itself.",
+        "hintVless": "Up to 3 minutes per server. The page updates by itself.",
+        "hintScan": "15–40 seconds per SIM. The page updates by itself.",
         "cancel": "Cancel",
-        "retrieve": "Fetch result",
         "failed": "Check failed",
         "retry": "Retry",
-        "cancelled": "Cancelled"
+        "cancelled": "Cancelled",
+        "units": "SIMs",
+        "waitingUnit": "waiting…",
+        "answered": "{{answered}} of {{total}} SIMs answered",
+        "canLeave": "You can close the page: the result will appear in “My checks”."
       },
       "verdict": {
         "reachable": "reachable",
@@ -2121,6 +2171,11 @@
         "unknown": "undefined",
         "guessed": "guess"
       },
+      "purposeShort": {
+        "bs": "Whitelist",
+        "regular": "regular",
+        "unknown": "not set"
+      },
       "targets": {
         "hosts": "Panel hosts",
         "includeDisabled": "show disabled",
@@ -2134,7 +2189,9 @@
         "count_other": "{{count}} targets",
         "showAll": "Show all hosts ({{count}})",
         "showLess": "Collapse list",
-        "purposeHint": "The host tag is its purpose: “whitelist” must be reachable from whitelist SIMs, “regular” from SIMs without it. Tap the tag to change."
+        "whatIsWhitelist": "What is the whitelist?",
+        "whitelistHelp": "The whitelist is a carrier mode where only approved sites open without a VPN. Whitelist hosts are checked with whitelist SIMs, regular hosts with SIMs without it.",
+        "purposeChanged": "Purpose changed"
       },
       "subscription": {
         "title": "Subscription configs",
@@ -2150,7 +2207,7 @@
         "coreStable": "Stable",
         "corePrerelease": "Prerelease",
         "empty": "The subscription has no usable configs",
-        "pickBs": "Select all whitelist configs ({{count}})",
+        "pickBs": "Whitelist ({{count}})",
         "source": "Source",
         "userLabel": "user #{{id}}",
         "noReference": "Default subscription is not set",
@@ -2161,9 +2218,9 @@
         "parseFailed": "Could not parse",
         "sourceLinks": "links · {{count}}",
         "sourceSubscription": "subscription · {{count}}",
-        "pickAll": "✓ All",
-        "pickNone": "↺ Reset",
-        "orPick": "or use a ready subscription",
+        "pickAll": "All",
+        "pickNone": "Reset",
+        "orPick": "Or your own config / another subscription",
         "fromInput": "showing configs from the field above",
         "selectedOf": "selected {{selected}} / {{total}}",
         "rejectedReasons": {
@@ -2184,11 +2241,14 @@
         "alive_other": "{{count}} live addresses",
         "copy": "Copy list",
         "copied": "Copied",
-        "perUnit": "per SIM",
+        "perUnit": "show who saw what",
         "ofTotal": "of {{total}}",
         "willScan": "Subnet {{subnet}} will be scanned",
         "cidrHint": "One /24 subnet; an IP is expanded to its subnet",
-        "perUnitProbes": "{{icmp}} icmp · {{tcp}} tcp · {{sni}} sni"
+        "probeIcmp": "ping",
+        "probeTcp": "port",
+        "probeSni": "SNI",
+        "byOperator": "By operators"
       },
       "probes": {
         "icmp": "ICMP",
@@ -2216,7 +2276,6 @@
         "targets": "Targets",
         "latency": "Latency",
         "core": "Xray",
-        "raw": "Details",
         "diagnosis": "Diagnosis",
         "empty": "Empty result",
         "failReason": "Reason",
@@ -2226,14 +2285,14 @@
         "http": "HTTP",
         "sniMulti": "{{count}}×SNI",
         "sniList": "SNI: {{names}}",
-        "noBs": "no WL"
-      },
-      "summary": {
-        "openJob": "Open job",
-        "dpiFilter": "SIMs",
-        "panelError": "Panel unavailable: {{error}}",
-        "notInPanel": "not in panel",
-        "notInCatalog": "not in catalog"
+        "noBs": "no WL",
+        "reasons": {
+          "tcp_timeout": "no answer",
+          "zombie_tcp": "drops after TLS",
+          "dataplane_dead": "sites don't open",
+          "cancelled": "cancelled"
+        },
+        "list": "Result by SIM"
       },
       "history": {
         "columns": {
@@ -2248,7 +2307,6 @@
         },
         "loadMore": "Show more",
         "more": "+{{count}}",
-        "rawJson": "Raw response",
         "units_one": "{{count}} SIM",
         "units_other": "{{count}} SIMs"
       },
@@ -2257,55 +2315,71 @@
         "checkNode": "Check in BSCHEKER"
       },
       "fleet": {
-        "onAir": "on air: {{bs}} with whitelist · {{regular}} without",
-        "offline": "operators are unavailable right now, try again in 1–2 minutes"
-      },
-      "health": {
-        "title": "Whitelist hosts",
-        "summary": "{{ok}} of {{total}} healthy",
-        "failing_one": "{{count}} with a problem",
-        "failing_other": "{{count}} with problems",
-        "unchecked_one": "{{count}} unchecked",
-        "unchecked_other": "{{count}} unchecked",
-        "checked": "checked {{age}}",
-        "none": "No hosts marked as “whitelist” in the panel",
-        "empty": "No checks yet: pick hosts and run the first one",
-        "showMatrix": "Show matrix",
-        "hideMatrix": "Hide matrix"
+        "onAir_one": "{{total}} SIM online: {{bs}} with the whitelist, {{regular}} without",
+        "onAir_other": "{{total}} SIMs online: {{bs}} with the whitelist, {{regular}} without",
+        "statement": "{{ok}} of {{total}} servers are working",
+        "statementAllOk": "All {{total}} servers are working",
+        "statementNone": "The panel has no servers",
+        "legendPartial_one": "{{count}} not for everyone",
+        "legendPartial_other": "{{count}} not for everyone",
+        "legendDown_one": "{{count}} down",
+        "legendDown_other": "{{count}} down",
+        "legendUnchecked_one": "{{count}} unchecked",
+        "legendUnchecked_other": "{{count}} unchecked",
+        "meta": "checked {{age}} · {{units}}",
+        "search": "Find a server",
+        "filter": {
+          "all": "All",
+          "problems": "Problems",
+          "stale": "Not checked lately",
+          "bs": "Whitelist",
+          "regular": "Regular"
+        },
+        "group": {
+          "down": "Down",
+          "partial": "Not working for everyone",
+          "unchecked": "Unchecked",
+          "ok": "Working"
+        },
+        "showAll": "Show all {{count}}",
+        "hide": "Collapse",
+        "state": {
+          "ok": "Working",
+          "partial": "Not for everyone",
+          "down": "Down",
+          "unchecked": "Unchecked",
+          "checking": "Checking…"
+        },
+        "ofUnits": "{{ok}} of {{total}}",
+        "justNow": "just now",
+        "empty": "No servers match this filter",
+        "details": "Details",
+        "targets": "Servers",
+        "selectAll": "Select all",
+        "columns": {
+          "units": "SIMs",
+          "checked": "Checked"
+        }
       },
       "switch": {
         "label": "What to check",
         "hosts": "Hosts",
-        "hostsHint": "Remnawave panel hosts and nodes, up to 10 targets per run",
+        "hostsHint": "Remnawave panel servers: state and checking the picked ones",
         "ip": "IP / domain",
         "ipHint": "your own addresses: IP, IP:port, domain or https://…, up to 10 targets per run",
-        "cidr": "CIDR",
-        "cidrHint": "scan a /24 subnet: live addresses as seen by SIMs",
-        "vless": "Subscription",
-        "vlessHint": "subscription configs through a VLESS tunnel, up to 20 per test"
+        "cidr": "CIDR scan",
+        "cidrHint": "scan a /24 subnet: live addresses as SIMs see them",
+        "vless": "VPN test",
+        "vlessHint": "subscription configs through a VLESS tunnel, up to 20 per test",
+        "history": "History",
+        "historyHint": "every check: what was checked, the outcome and the charge"
       },
       "sections": {
         "targets": "Targets",
-        "probes": "Probes",
-        "more": "More"
-      },
-      "operators": {
-        "title": "Operators",
-        "hint": "each SIM is charged separately",
-        "pickBs": "Select all with whitelist",
-        "unpickBs": "Deselect all with whitelist",
-        "pickRegular": "Select all without whitelist",
-        "unpickRegular": "Deselect all without whitelist",
-        "recall": "Same as last time",
-        "reset": "Reset selection",
-        "selected": "{{selected}} / {{total}} selected",
-        "pickDistrict": "Select whole district {{code}}",
-        "unpickDistrict": "Deselect whole district {{code}}",
-        "noBs": "no whitelist",
-        "empty": "SIM list is empty: service unavailable"
+        "probes": "Probes"
       },
       "recent": {
-        "title": "My checks",
+        "title": "Check history",
         "empty": "No checks yet",
         "open": "Details",
         "close": "Collapse",
@@ -2314,10 +2388,10 @@
         "all": "all",
         "columns": {
           "target": "Target",
-          "probes": "Probes",
-          "operators": "Operators",
           "time": "Time",
-          "cost": "Charged"
+          "cost": "Charged",
+          "outcome": "Outcome",
+          "units": "SIMs"
         },
         "outcome": {
           "ok": "all reachable",
@@ -2325,7 +2399,28 @@
           "down": "unreachable",
           "pending": "in progress",
           "na": "no verdict"
-        }
+        },
+        "filter": "Filter",
+        "repeat": "Repeat",
+        "headline": {
+          "all_one": "Opens on the only SIM checked",
+          "all_other": "Opens on all {{total}} SIMs",
+          "partial_one": "Opens on {{ok}} of {{total}} SIM",
+          "partial_other": "Opens on {{ok}} of {{total}} SIMs",
+          "none_one": "Does not open on the only SIM checked",
+          "none_other": "Does not open on any of {{total}} SIMs",
+          "failed": "Check failed",
+          "cancelled": "Check cancelled",
+          "pending": "Check in progress",
+          "scan": "Alive addresses: {{ok}} of {{total}}",
+          "empty": "No result",
+          "blockedList": "Blocked or no answer: {{list}}"
+        },
+        "batchTargets_one": "{{count}} server",
+        "batchTargets_other": "{{count}} servers",
+        "batchOutcome": "{{ok}} of {{total}} working",
+        "server": "Server",
+        "allServers": "All servers"
       },
       "addresses": {
         "label": "Addresses",
@@ -2337,19 +2432,67 @@
       "setup": {
         "titleDisabled": "BSCHEKER is disabled",
         "titleNotConfigured": "BSCHEKER is not configured",
-        "intro": "Checks hosts, subscriptions and subnets as seen by Russian mobile SIMs via the bschekbot service. To get started:",
-        "key": "bschekbot API key",
-        "keyHint": "Get it at bsbord.com (Bronze plan or higher) and put it into the BSCHEK_API_KEY setting",
-        "enable": "Enable the integration",
-        "enableHint": "BSCHEK_ENABLED setting",
-        "reference": "Default subscription — optional",
-        "referenceHint": "shortUuid of a panel subscription in BSCHEK_REFERENCE_SUBSCRIPTION: VLESS test without picking a user",
-        "rights": "Admin permissions",
-        "rightsHint": "reachability:read to view the section, reachability:run to launch checks (they spend credits)",
+        "intro": "Checking servers, subscriptions and subnets as SIMs of Russian operators see them, via bschekbot. To make the section work:",
+        "key": "Access key",
+        "keyHint": "Get it on bsbord.com (Bronze plan or higher) and paste it in the section settings",
+        "enable": "Turn BSCHEKER on",
+        "enableHint": "A switch in the same settings",
+        "reference": "Default subscription, optional",
+        "referenceHint": "A panel subscription whose servers the VPN test takes without picking a user",
+        "rights": "Admin rights",
+        "rightsHint": "Who may view the section and who may run checks: they spend credits",
         "openSettings": "Open BSCHEKER settings",
         "openSite": "Get a key at bsbord.com",
-        "envNote": "If the bot is configured via .env, environment variables override cabinet settings — edit .env and restart the bot instead.",
+        "envNote": "If the bot is configured through the environment file, its values override the cabinet settings: edit the file and restart the bot.",
         "unhealthyHint": "Check the API key and plan at bsbord.com"
+      },
+      "subtitle": "server reachability from Russia",
+      "server": {
+        "byOperators": "By operator",
+        "catchesAll": "works in every district",
+        "catchesNone": "does not work",
+        "catchesNot": "does not work in {{regions}}",
+        "ofUnits": "{{ok}} of {{total}}",
+        "summaryBs": "works for {{ok}} of {{total}} whitelist SIMs",
+        "summaryRegular": "works for {{ok}} of {{total}} SIMs without the whitelist",
+        "summaryAny": "works for {{ok}} of {{total}} SIMs",
+        "checked": "checked {{age}}",
+        "unchecked": "This server has not been checked yet",
+        "history": "Past checks",
+        "allHistory": "All",
+        "checkOne": "Check this server · {{price}}"
+      },
+      "batch": {
+        "minutes": "about {{count}} minutes",
+        "onlyChecked": "You pay only for SIMs that were checked. The check can be stopped.",
+        "progressTitle_one": "Checking {{count}} server",
+        "progressTitle_other": "Checking {{count}} servers",
+        "progressLine": "Done {{done}} of {{total}} · {{eta}} left",
+        "progressDone": "Done {{done}} of {{total}}",
+        "canLeave": "You can close the page, the check continues.",
+        "stop": "Stop",
+        "stopping": "Stopping…",
+        "spentSoFar": "Spent so far: {{price}}",
+        "aside": "Check in progress",
+        "queued": "waiting in queue",
+        "started": "Check started",
+        "finishedOk": "Check finished",
+        "finishedCancelled": "Check stopped",
+        "finishedFailed": "Check failed"
+      },
+      "operators": {
+        "title": "Operators",
+        "hint": "each SIM is charged separately",
+        "bs": "WL",
+        "regular": "no WL",
+        "noBs": "no WL",
+        "offline": "offline",
+        "selected": "{{selected}} / {{total}} selected",
+        "reset": "Clear",
+        "recall": "Same as last time",
+        "pickDistrict": "All SIMs in {{code}}",
+        "unpickDistrict": "Clear SIMs in {{code}}",
+        "empty": "No SIMs: service unavailable"
       }
     },
     "wheel": {
@@ -3341,6 +3484,9 @@
       "addButton": "Add",
       "noPeriodsHint": "No added periods. Add at least one period.",
       "daysShort": "d.",
+      "bestValueHint": "Mark this period as the best value — customers see it highlighted",
+      "highlightLabel": "Highlight tariff",
+      "highlightHint": "Customers see this tariff framed with a “Best value” badge",
       "serversTitle": "Servers",
       "premiumLimitsTitle": "Per-server premium limits",
       "premiumLimitsHint": "A separate traffic limit per server. Once it runs out the user loses access to that server only, the rest keep working. 0 means no premium limit on the server.",

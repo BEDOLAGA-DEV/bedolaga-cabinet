@@ -5,9 +5,9 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { ParsedInput, ReferenceStatus, SubscriptionConfigs } from '@/api/reachability';
 
 /**
- * Вкладка «Подписка»: поле «Конфиг или подписка» всегда сверху; без подписки по умолчанию —
- * говорим, что делать; с заполненным полем показываются разобранные конфиги, готовые
- * источники прячутся; ядро Xray подписано номером версии.
+ * Вкладка «VPN-тест»: подписка по умолчанию первой строкой с именем и числом конфигов; без неё
+ * говорим, что делать; поле «Конфиг или подписка» ниже; с заполненным полем показываются
+ * разобранные конфиги, готовые источники прячутся.
  */
 
 vi.mock('react-i18next', async () => (await import('./testUtils')).i18nMock());
@@ -19,7 +19,6 @@ import { installMatchMedia, renderWithProviders } from './testUtils';
 installMatchMedia();
 afterEach(cleanup);
 
-const CORES = { stable: '26.3.27', prerelease: '26.7.11' };
 const missing: ReferenceStatus = { short_uuid: null, configs: 0, rejected: 0, error: 'не задана' };
 const ready: ReferenceStatus = { short_uuid: 'ref-1', configs: 3, rejected: 0, error: null };
 
@@ -64,16 +63,13 @@ function render(
       onToggle={vi.fn()}
       onSelectMany={vi.fn()}
       onClear={vi.fn()}
-      core=""
-      onCoreChange={vi.fn()}
-      cores={CORES}
       {...overrides}
     />,
   );
 }
 
 describe('SubscriptionTargets', () => {
-  it('поле «Конфиг или подписка» сверху; без подписки по умолчанию объясняет, что делать', () => {
+  it('поле «Конфиг или подписка» есть; без подписки по умолчанию объясняет, что делать', () => {
     render(missing);
     expect(screen.getByRole('textbox', { name: 'Конфиг или подписка' })).toBeTruthy();
     expect(screen.getByText('Подписка по умолчанию не задана')).toBeTruthy();
@@ -86,14 +82,12 @@ describe('SubscriptionTargets', () => {
     expect(screen.queryByRole('button', { name: /подписка по умолчанию/ })).toBeNull();
   });
 
-  it('с подпиской по умолчанию показывает её как источник, ядро Xray — номером версии', () => {
+  it('с подпиской по умолчанию показывает её как источник', () => {
     render(ready);
-    expect(screen.getByRole('button', { name: /подписка по умолчанию/ })).toBeTruthy();
+    const chip = screen.getByRole('button', { name: /подписка по умолчанию/ });
+    expect(chip.textContent).toContain('ref-1');
+    expect(chip.textContent).toContain('3 конфига');
     expect(screen.queryByText('Подписка по умолчанию не задана')).toBeNull();
-    const chips = screen.getByRole('group', { name: 'Ядро Xray' });
-    expect(chips.textContent).toContain('26.3.27');
-    expect(chips.textContent).toContain('26.7.11');
-    expect(chips.textContent).not.toContain('Stable');
   });
 
   it('с заполненным полем показывает разобранные конфиги и прячет готовые источники', () => {

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { Leg } from '@/api/reachability';
 import { unit } from './testUtils';
-import { unitLabel } from './unitLabel';
+import { unitLabel, unitNames } from './unitLabel';
 
 /** Подпись симки в строке таблицы результата: код для иконки, имя оператора, округ. */
 
@@ -48,5 +48,13 @@ describe('unitLabel', () => {
       name: 'МТС',
       region: 'ПФО',
     });
+  });
+});
+
+describe('unitNames', () => {
+  it('имена с округом из каталога через запятую, неизвестные — ключом', () => {
+    const catalog = [{ ...unit('mts|цфо|on', 'on', 'цфо'), name: 'МТС' }];
+    expect(unitNames(['mts|цфо|on', 'yota|уфо|off'], catalog)).toBe('МТС ЦФО, yota|уфо|off');
+    expect(unitNames([], catalog)).toBe('');
   });
 });
