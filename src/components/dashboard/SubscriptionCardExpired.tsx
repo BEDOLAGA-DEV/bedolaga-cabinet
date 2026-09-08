@@ -206,7 +206,7 @@ export default function SubscriptionCardExpired({
         }}
       >
         <div className="flex items-center">
-          <div className="mb-0.5 font-mono text-[10px] font-medium uppercase tracking-wider text-dark-50/30">
+          <div className="mb-0.5 font-mono text-[10px] font-medium uppercase tracking-wider text-dark-400">
             {isLimited
               ? t('dashboard.expired.activeUntil')
               : t('dashboard.expired.expiredDate', {
@@ -218,11 +218,11 @@ export default function SubscriptionCardExpired({
           </div>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="text-[10px] font-medium uppercase tracking-wider text-dark-50/30">
+          <span className="text-[10px] font-medium uppercase tracking-wider text-dark-400">
             {t('dashboard.expired.balance')}
           </span>
           <span
-            className={`text-sm font-semibold ${hasBalance ? 'text-success-400' : 'text-dark-50/30'}`}
+            className={`text-sm font-semibold ${hasBalance ? 'text-success-400' : 'text-dark-400'}`}
           >
             {formatAmount(balanceRubles)} {currencySymbol}
           </span>

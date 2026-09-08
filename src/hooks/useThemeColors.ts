@@ -140,6 +140,12 @@ function tripletOf({ r, g, b }: Rgb): string {
 // так на средних по светлоте цветах (синий #3b82f6: белый 3.7, тёмный 4.8)
 // сохраняется привычный белый на кнопках. Ниже порога берётся сторона с
 // лучшим контрастом: на пастельном акценте это тёмный текст.
+//
+// Замер 2026-09-08: на дефолтном синем белая надпись даёт 3.68 — ниже AA для
+// текста. Порог оставлен прежним осознанно: поднять его значит перекрасить
+// надписи всех первичных кнопок дефолтной палитры в тёмный, а это уже смена
+// облика продукта, а не правка читаемости. Операторские палитры сюда не
+// попадают: на зелёном и жёлтом тёмный текст выбирается и так.
 const ON_COLOR_WHITE_MIN_RATIO = 3;
 
 const WHITE: Rgb = { r: 255, g: 255, b: 255 };
@@ -207,14 +213,16 @@ export function computeThemeCssVars(themeColors: ThemeColors): Record<string, st
   const darkTextSecRgb = hexToRgb(colors.darkTextSecondary);
 
   // Contrast floors: secondary text must stay readable on the card surface
-  // regardless of the operator-chosen palette (AA 4.5 for dark-400, a softer
-  // 3.5 floor for the blended hint token dark-500).
+  // regardless of the operator-chosen palette. dark-400 keeps a comfortable 5.0;
+  // dark-500 is held at AA 4.5 — it is not a decorative hint but the workhorse
+  // secondary token (700+ usages, mostly 11-12px), and the previous 3.8 floor
+  // measured 4.26 on a real operator palette: legible only just.
   const darkTextSecReadable = ensureReadable(darkTextSecRgb, darkTextRgb, darkSurfaceRgb, 5.0);
   const darkHintReadable = ensureReadable(
     mixRgb(darkTextSecRgb, darkSurfaceRgb, 0.4),
     darkTextRgb,
     darkSurfaceRgb,
-    3.8,
+    4.5,
   );
 
   // Dark palette with actual user colors:
@@ -247,7 +255,7 @@ export function computeThemeCssVars(themeColors: ThemeColors): Record<string, st
     mixRgb(lightBgRgb, lightTextSecRgb, 0.6),
     lightTextRgb,
     lightSurfaceRgb,
-    3.8,
+    4.5,
   );
   const lightTextSecReadable = ensureReadable(lightTextSecRgb, lightTextRgb, lightSurfaceRgb, 5.0);
 
