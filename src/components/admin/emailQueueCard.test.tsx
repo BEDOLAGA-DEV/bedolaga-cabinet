@@ -84,10 +84,24 @@ async function renderCard() {
 }
 
 describe('карточка очереди писем', () => {
-  it('молчит, когда очередь пуста и почта настроена', async () => {
-    const { container } = await renderCard();
-    await new Promise((resolve) => setTimeout(resolve, 0));
-    expect(container.textContent).toBe('');
+  it('на пустой очереди говорит «пусто», а не исчезает', async () => {
+    // Карточку ищут глазами в разделе писем: пустое место неотличимо от
+    // «раздела нет» — именно так её и не нашли после обновления.
+    await renderCard();
+    expect(await screen.findByText(/Очередь пуста/)).toBeTruthy();
+    expect(screen.getByText(/Очередь писем/)).toBeTruthy();
+  });
+
+  it('сообщает, когда состояние очереди недоступно', async () => {
+    const failing = await import('@/api/adminEmailQueue');
+    const original = failing.adminEmailQueueApi.getQueue;
+    failing.adminEmailQueueApi.getQueue = () => Promise.reject(new Error('404'));
+    try {
+      await renderCard();
+      expect(await screen.findByText(/Состояние очереди писем недоступно/)).toBeTruthy();
+    } finally {
+      failing.adminEmailQueueApi.getQueue = original;
+    }
   });
 
   it('объясняет словами, что почтовый сервер не настроен', async () => {
