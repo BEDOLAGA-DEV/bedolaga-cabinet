@@ -194,7 +194,7 @@ export default function SubscriptionPurchase() {
                     >
                       {t('subscription.trialUpgrade.title')}
                     </div>
-                    <div className="mt-1 text-[12px] text-dark-50/40">
+                    <div className="mt-1 text-[12px] text-dark-400">
                       {t('subscription.trialUpgrade.description')}
                     </div>
                   </div>
@@ -231,7 +231,7 @@ export default function SubscriptionPurchase() {
                     >
                       {t('subscription.expiredBanner.title')}
                     </div>
-                    <div className="mt-1 text-[12px] text-dark-50/40">
+                    <div className="mt-1 text-[12px] text-dark-400">
                       {t('subscription.expiredBanner.selectTariff')}
                     </div>
                   </div>

@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { deviceUnavailableText } from '../deviceReasons';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { subscriptionApi } from '../../../api/subscription';
@@ -109,7 +110,11 @@ export function DeviceReductionSheet({
 
       {deviceReductionInfo?.available === false ? (
         <div className="py-4 text-center text-sm text-dark-400">
-          {deviceReductionInfo.reason || t('subscription.additionalOptions.reduceUnavailable')}
+          {deviceUnavailableText(
+            t,
+            deviceReductionInfo,
+            'subscription.additionalOptions.reduceUnavailable',
+          )}
         </div>
       ) : deviceReductionInfo ? (
         <div className="space-y-4">

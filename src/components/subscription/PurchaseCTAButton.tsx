@@ -81,12 +81,12 @@ export default function PurchaseCTAButton({
             </div>
             <div>
               <div className="text-[15px] font-semibold text-dark-50">{buttonText}</div>
-              <div className="text-[12px] text-dark-50/40">{hintText}</div>
+              <div className="text-[12px] text-dark-400">{hintText}</div>
             </div>
           </div>
 
           {/* Right: chevron */}
-          <ChevronRightIcon className="h-5 w-5 flex-shrink-0 text-dark-50/30 transition-transform duration-300 group-hover:translate-x-1" />
+          <ChevronRightIcon className="h-5 w-5 flex-shrink-0 text-dark-400 transition-transform duration-300 group-hover:translate-x-1" />
         </div>
       </HoverBorderGradient>
     </Link>
