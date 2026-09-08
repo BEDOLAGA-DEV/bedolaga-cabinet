@@ -1,6 +1,6 @@
-import type { PreviewResponse } from '@/api/reachability';
+import type { LaunchPreview } from './launchAdapters';
 
-/** Сводка для диалога подтверждения перед списанием: что, сколькими симками, за сколько. */
+/** Сводка для подтверждения перед списанием: что, сколькими симками, за сколько. */
 export interface LaunchSummary {
   targets: string[];
   units: string[];
@@ -9,7 +9,7 @@ export interface LaunchSummary {
   balanceAfter: number | null;
 }
 
-export function launchSummary(preview: PreviewResponse): LaunchSummary {
+export function launchSummary(preview: LaunchPreview): LaunchSummary {
   const cost = preview.cost_kopeks;
   const balance = preview.balance_kopeks;
   return {

@@ -45,7 +45,7 @@ describe('SubscriptionConfigs', () => {
         onClear={vi.fn()}
       />,
     );
-    fireEvent.click(screen.getByRole('button', { name: /Отметить все конфиги под БС \(1\)/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Под Белый список \(1\)/ }));
     expect(onSelectMany).toHaveBeenCalledWith([0]);
   });
 
@@ -63,7 +63,7 @@ describe('SubscriptionConfigs', () => {
     expect(screen.getAllByText('тот же сервер')).toHaveLength(1);
   });
 
-  it('«✓ Все» отмечает остальные, «↺ Сбросить» снимает всё', () => {
+  it('«Все» отмечает остальные, «Сбросить» снимает всё', () => {
     const onSelectMany = vi.fn();
     const onClear = vi.fn();
     render(
@@ -77,9 +77,9 @@ describe('SubscriptionConfigs', () => {
       />,
     );
     expect(screen.getByText('выбрано 1 / 2')).toBeTruthy();
-    fireEvent.click(screen.getByRole('button', { name: '✓ Все' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Все' }));
     expect(onSelectMany).toHaveBeenCalledWith([1]);
-    fireEvent.click(screen.getByRole('button', { name: '↺ Сбросить' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Сбросить' }));
     expect(onClear).toHaveBeenCalled();
   });
 });

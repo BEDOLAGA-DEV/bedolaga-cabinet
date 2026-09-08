@@ -22,7 +22,7 @@ export function OperatorIcon({ operator, className }: OperatorIconProps) {
       aria-hidden="true"
       className={cn(
         box,
-        'inline-flex items-center justify-center bg-dark-700 text-[10px] font-semibold uppercase text-dark-300',
+        'inline-flex items-center justify-center bg-dark-700 text-xs font-semibold text-dark-300',
       )}
     >
       {(operator ?? '?').charAt(0).toUpperCase()}

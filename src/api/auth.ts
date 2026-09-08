@@ -144,6 +144,18 @@ export const authApi = {
     return response.data;
   },
 
+  /**
+   * Повторная отправка письма с экрана «Проверьте почту» — до входа в аккаунт.
+   *
+   * Отдельная ручка от resendVerification: та требует токен, которого у только
+   * что зарегистрировавшегося ещё нет. Ответ одинаковый для любого адреса,
+   * поэтому по нему нельзя судить, существует ли аккаунт.
+   */
+  resendVerificationPublic: async (email: string): Promise<{ message: string }> => {
+    const response = await apiClient.post('/cabinet/auth/email/register/resend', { email });
+    return response.data;
+  },
+
   refreshToken: async (refreshToken: string): Promise<TokenResponse> => {
     const response = await apiClient.post<TokenResponse>('/cabinet/auth/refresh', {
       refresh_token: refreshToken,

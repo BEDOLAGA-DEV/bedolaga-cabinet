@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router';
+import { useLocation, useNavigate } from 'react-router';
+import { backTo } from '../AdminBackButton';
 import { useNotify } from '../../../platform/hooks/useNotify';
 import { useCurrency } from '../../../hooks/useCurrency';
 import { createNumberInputHandler } from '../../../utils/inputHelpers';
@@ -96,6 +97,7 @@ export function InfoTab(props: InfoTabProps) {
   const { t } = useTranslation();
   const { formatWithCurrency } = useCurrency();
   const navigate = useNavigate();
+  const location = useLocation();
   const notify = useNotify();
 
   // «Отправить сообщение» — паритет с бот-кнопкой в карточке юзера
@@ -454,7 +456,7 @@ export function InfoTab(props: InfoTabProps) {
               {referrals.map((ref) => (
                 <button
                   key={ref.id}
-                  onClick={() => navigate(`/admin/users/${ref.id}`)}
+                  onClick={() => navigate(`/admin/users/${ref.id}`, backTo(location))}
                   className="flex w-full items-center justify-between rounded-lg bg-dark-700/50 p-2 text-left transition-colors hover:bg-dark-700"
                 >
                   <div className="flex min-w-0 items-center gap-2">

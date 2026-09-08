@@ -1,11 +1,11 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, screen } from '@testing-library/react';
+import { cleanup, fireEvent, screen, within } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { Job } from '@/api/reachability';
 
 /**
  * Таблица результата как в оригинале: строки — симки операторов с округом, столбцы — пробы,
- * в ячейке точка и значение, справа наш вердикт; список SNI-имён под таблицей.
+ * в ячейке точка и значение, справа наш вердикт; список SNI-имён под таблицей. Сырого ответа нет.
  */
 
 vi.mock('react-i18next', async () => (await import('./testUtils')).i18nMock());
@@ -63,17 +63,34 @@ describe('ProbeResult', () => {
     renderWithProviders(<ProbeResult job={job} />);
     expect(screen.getAllByRole('columnheader').map((th) => th.textContent)).toEqual([
       'Оператор',
+      'Вердикт',
       'ICMP',
       'TCP',
       '2×SNI',
-      'Вердикт',
     ]);
     expect(screen.getByText('50 ms')).toBeTruthy();
     expect(screen.getByText('(tls)')).toBeTruthy();
     expect(screen.getByText('1/2')).toBeTruthy();
-    expect(screen.getByText('без БС')).toBeTruthy();
+    expect(screen.getAllByText('без БС').length).toBeGreaterThan(0);
     expect(screen.getByText('SNI: 1 ads.x5.ru · 2 vk.com')).toBeTruthy();
-    fireEvent.click(screen.getByRole('button', { name: /mts/ }));
-    expect(screen.getByText(/"rtt_avg_ms": 49.6/)).toBeTruthy();
+    expect(screen.queryByText(/rtt_avg_ms/)).toBeNull();
+    // Заголовков в капсе нет, шрифт не мельче 12 px.
+    for (const th of screen.getAllByRole('columnheader')) {
+      expect(th.className).not.toMatch(/uppercase/);
+      expect(th.className).not.toMatch(/text-\[(8|9|10|11)px\]/);
+    }
+  });
+
+  it('на телефоне — список «оператор → вердикт», пробы раскрываются по тапу', () => {
+    renderWithProviders(<ProbeResult job={job} />);
+    const list = screen.getByRole('list', { name: 'Результат по симкам' });
+    const rows = within(list).getAllByRole('button');
+    expect(rows).toHaveLength(2);
+    expect(rows[0].textContent).toContain('mts');
+    expect(rows[0].textContent).toContain('доступен');
+    expect(within(list).queryByText('50 ms')).toBeNull();
+    fireEvent.click(rows[0]);
+    expect(within(list).getByText('50 ms')).toBeTruthy();
+    expect(within(list).getByText('ICMP')).toBeTruthy();
   });
 });

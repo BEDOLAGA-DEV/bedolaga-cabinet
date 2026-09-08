@@ -55,6 +55,8 @@ export interface ReachabilityStatus {
   cores: Record<string, string>;
   /** «SNI-хост по умолчанию» из настроек бота — подставляется в поле SNI. */
   default_sni: string | null;
+  /** Идущая проверка серверов: её экран открывается снова после перезагрузки страницы. */
+  active_batch: ActiveBatch | null;
 }
 
 export interface HostTarget {
@@ -228,6 +230,8 @@ export interface Job {
   /** Из тела запроса к API: заказанные пробы и SNI-имена. */
   probes: Probes | null;
   sni_hosts: string[];
+  /** Пачка (проверка многих серверов одной кнопкой), в которую входит задача. */
+  batch_id: number | null;
 }
 
 export interface JobList {
@@ -244,6 +248,87 @@ export interface JobListParams {
   user_id?: number;
   offset?: number;
   limit?: number;
+}
+
+// === Пачка: проверка многих серверов одной кнопкой ===
+
+export type BatchStatus = JobStatus;
+export type ScopeKind = 'problems' | 'stale' | 'all' | 'manual';
+
+/** Симка в частичном результате идущей пробы: ждёт, проверяем или уже есть вердикт. */
+export interface PartialLeg {
+  target: string;
+  operator: string | null;
+  region: string | null;
+  dpi: string | null;
+  state: 'queued' | 'pending' | 'running' | 'done' | string;
+  verdict: Verdict | null;
+  latency_ms: number | null;
+}
+
+export interface ProbePartial {
+  done: number;
+  total: number;
+  elapsed_sec: number | null;
+  legs: PartialLeg[];
+}
+
+export interface BatchJob {
+  id: number;
+  status: JobStatus;
+  phase: JobPhase | null;
+  target_keys: string[];
+  cost_kopeks: number | null;
+  partial: ProbePartial | null;
+}
+
+export interface Batch {
+  id: number;
+  status: BatchStatus;
+  phase: string | null;
+  scope: { kind: ScopeKind; host_refs: string[] };
+  total_targets: number;
+  done_targets: number;
+  estimated_kopeks: number | null;
+  cost_kopeks: number | null;
+  error_message: string | null;
+  created_at: string | null;
+  started_at: string | null;
+  finished_at: string | null;
+  jobs: BatchJob[];
+}
+
+export interface BatchList {
+  items: Batch[];
+  total: number;
+  offset: number;
+  limit: number;
+}
+
+export interface BatchCreateRequest {
+  host_refs: string[];
+  units: string[];
+  dpi: Dpi;
+  probes: Probes;
+  sni_hosts: string[];
+  scope_kind: ScopeKind;
+}
+
+export interface BatchPreview {
+  targets: TargetOut[];
+  units_resolved: string[];
+  chunks: number;
+  cost_kopeks: number | null;
+  estimated_minutes: number;
+  warnings: string[];
+  balance_kopeks: number | null;
+}
+
+export interface ActiveBatch {
+  id: number;
+  total_targets: number;
+  done_targets: number;
+  started_at: string | null;
 }
 
 export interface SummaryCell {
@@ -342,9 +427,21 @@ export const reachabilityApi = {
   cancelJob: async (id: number): Promise<Job> =>
     (await apiClient.post(`${BASE}/jobs/${id}/cancel`)).data,
 
-  retrieveJob: async (id: number): Promise<Job> =>
-    (await apiClient.post(`${BASE}/jobs/${id}/retrieve`)).data,
-
   getSummary: async (dpi: Dpi = 'on'): Promise<Summary> =>
     (await apiClient.get(`${BASE}/summary/hosts`, { params: { dpi } })).data,
+
+  previewBatch: async (body: BatchCreateRequest): Promise<BatchPreview> =>
+    (await apiClient.post(`${BASE}/batches/preview`, body)).data,
+
+  createBatch: async (body: BatchCreateRequest): Promise<Batch> =>
+    (await apiClient.post(`${BASE}/batches`, body)).data,
+
+  listBatches: async (params: { offset?: number; limit?: number } = {}): Promise<BatchList> =>
+    (await apiClient.get(`${BASE}/batches`, { params })).data,
+
+  getBatch: async (id: number): Promise<Batch> =>
+    (await apiClient.get(`${BASE}/batches/${id}`)).data,
+
+  cancelBatch: async (id: number): Promise<Batch> =>
+    (await apiClient.post(`${BASE}/batches/${id}/cancel`)).data,
 };

@@ -1,5 +1,10 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { type ParsedInput, type SubscriptionConfigs, reachabilityApi } from '@/api/reachability';
+import {
+  type Dpi,
+  type ParsedInput,
+  type SubscriptionConfigs,
+  reachabilityApi,
+} from '@/api/reachability';
 
 export const REACHABILITY_HOSTS_KEY = 'admin-reachability-hosts';
 export const REACHABILITY_NODES_KEY = ['admin-reachability-nodes'] as const;
@@ -43,6 +48,15 @@ export function useSubscriptionConfigs(
     staleTime: 60_000,
     retry: false,
     enabled,
+  });
+}
+
+/** Сводка последних проверок по хостам панели глазами симок с фильтром по Белому списку. */
+export function useSummary(dpi: Dpi) {
+  return useQuery({
+    queryKey: [REACHABILITY_SUMMARY_KEY, dpi],
+    queryFn: () => reachabilityApi.getSummary(dpi),
+    staleTime: 30_000,
   });
 }
 

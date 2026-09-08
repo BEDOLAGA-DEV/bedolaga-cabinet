@@ -15,11 +15,15 @@ describe('parseReachabilityDeepLink', () => {
       userId: null,
       shortUuid: null,
       jobId: null,
+      repeatJobId: null,
+      runningJobId: null,
+      serverKey: null,
+      batchId: null,
     });
   });
 
-  it('четыре вкладки; старые probe и scan сводятся к hosts и cidr', () => {
-    for (const mode of ['hosts', 'ip', 'cidr', 'vless']) {
+  it('пять вкладок; старые probe и scan сводятся к hosts и cidr', () => {
+    for (const mode of ['hosts', 'ip', 'cidr', 'vless', 'history']) {
       expect(parseReachabilityDeepLink(new URLSearchParams(`kind=${mode}`)).mode).toBe(mode);
     }
     expect(parseReachabilityDeepLink(new URLSearchParams('kind=probe')).mode).toBe('hosts');
@@ -45,8 +49,11 @@ describe('parseReachabilityDeepLink', () => {
     expect(parseReachabilityDeepLink(new URLSearchParams('sub=abc')).shortUuid).toBe('abc');
   });
 
-  it('job= раскрывает задачу в «моих проверках»', () => {
-    expect(parseReachabilityDeepLink(new URLSearchParams('job=42')).jobId).toBe(42);
+  it('job= без вкладки открывает историю с раскрытой задачей', () => {
+    expect(parseReachabilityDeepLink(new URLSearchParams('job=42'))).toMatchObject({
+      mode: 'history',
+      jobId: 42,
+    });
     expect(parseReachabilityDeepLink(new URLSearchParams('job=x')).jobId).toBeNull();
   });
 
@@ -67,7 +74,10 @@ describe('parseReachabilityDeepLink', () => {
     expect(buildReachabilityLink({ shortUuid: 's-1' })).toBe(
       '/admin/reachability?kind=vless&sub=s-1',
     );
-    expect(buildReachabilityLink({ jobId: 5 })).toBe('/admin/reachability?kind=hosts&job=5');
+    expect(buildReachabilityLink({ jobId: 5 })).toBe('/admin/reachability?kind=history&job=5');
+    expect(buildReachabilityLink({ mode: 'history', serverKey: 'a:443' })).toBe(
+      '/admin/reachability?kind=history&server=a%3A443',
+    );
     expect(buildReachabilityLink({})).toBe('/admin/reachability?kind=hosts');
   });
 
@@ -80,6 +90,10 @@ describe('parseReachabilityDeepLink', () => {
       userId: 3,
       shortUuid: null,
       jobId: null,
+      repeatJobId: null,
+      runningJobId: null,
+      serverKey: null,
+      batchId: null,
     });
   });
 });
@@ -90,5 +104,20 @@ describe('jobKindOf', () => {
     expect(jobKindOf('ip')).toBe('probe');
     expect(jobKindOf('cidr')).toBe('scan');
     expect(jobKindOf('vless')).toBe('vless');
+  });
+
+  it('«Повторить»: ?repeat=<id> читается и пишется вместе с видом', () => {
+    const link = parseReachabilityDeepLink(new URLSearchParams('kind=ip&repeat=12'));
+    expect([link.mode, link.repeatJobId]).toEqual(['ip', 12]);
+    expect(buildReachabilityLink({ mode: 'ip', repeatJobId: 12 })).toBe(
+      '/admin/reachability?kind=ip&repeat=12',
+    );
+  });
+
+  it('идущая проверка живёт в адресе: ?running=<id>', () => {
+    expect(parseReachabilityDeepLink(new URLSearchParams('running=15')).runningJobId).toBe(15);
+    expect(buildReachabilityLink({ runningJobId: 15 })).toBe(
+      '/admin/reachability?kind=hosts&running=15',
+    );
   });
 });

@@ -216,6 +216,13 @@
     "checkEmail": "请查收邮件",
     "verificationSent": "我们已发送验证链接至：",
     "clickLinkToVerify": "点击邮件中的链接验证账户并登录。",
+    "spamHint": "没收到邮件？请检查「垃圾邮件」和「推广」文件夹——投递有时需要几分钟。",
+    "resendVerification": "重新发送邮件",
+    "resendIn": "{{seconds}} 秒后可重新发送",
+    "resendSent": "邮件已发送，请查收。",
+    "resendError": "邮件发送失败，请稍后重试。",
+    "resendTooOften": "操作过于频繁，请几分钟后再试。",
+    "useAnotherEmail": "换一个邮箱",
     "backToLogin": "返回登录",
     "emailNotVerified": "请先验证邮箱",
     "emailAlreadyRegistered": "此邮箱已注册",
@@ -354,6 +361,7 @@
     "renew": "续费",
     "free": "免费",
     "extend": "延长订阅",
+    "bestValue": "超值",
     "buyTraffic": "购买流量",
     "buyDevices": "增加设备",
     "renewalOptions": "续费选项",
@@ -476,6 +484,14 @@
       "reduceDevicesDescription": "您可以将设备数量减少至套餐的最低限制",
       "reduceDevicesTitle": "减少设备数量",
       "reduceUnavailable": "当前无法减少设备数量",
+      "alreadyAtMinDeviceLimit": "已是您套餐的最低设备数",
+      "reasons": {
+        "noSubscription": "未找到订阅",
+        "noActiveSubscription": "没有有效的订阅",
+        "maxDevicesReached": "已达到设备上限（{{count}}）",
+        "canAddLimited": "最多还能添加 {{count}} 台设备",
+        "trialNotAllowed": "试用订阅不支持减少设备数"
+      },
       "reducing": "正在减少…"
     },
     "serverManagement": {
@@ -917,6 +933,7 @@
     "partner": {
       "becomePartner": "成为合作伙伴",
       "becomePartnerDesc": "申请加入合作伙伴计划，获得更高的佣金率并可以提现您的收益。",
+      "becomePartnerDescNoWithdrawal": "申请加入合作伙伴计划，获得更高的佣金率。",
       "applyButton": "申请",
       "applyTitle": "合作伙伴申请",
       "applyDesc": "填写以下表格申请我们的合作伙伴计划。所有字段均为可选。",
@@ -1677,6 +1694,27 @@
       "testRecipientPlaceholder": "收件人邮箱（默认为您的邮箱）",
       "testHint": "发送当前编辑器内容，变量将替换为示例值。",
       "variablesCommon": "通用变量（适用于所有模板）"
+    },
+    "emailQueue": {
+      "title": "邮件队列",
+      "hint": "仅首次发送失败的邮件",
+      "clearPending": "清除等待中",
+      "clearAll": "清空",
+      "confirmPending": "清除等待发送的邮件？",
+      "confirmAll": "清空整个队列，包括历史记录？",
+      "cleared": "队列已清空：{{count}}",
+      "noSmtp": "未配置邮件服务器，邮件不会发送。请在设置的 SMTP 部分填写地址。",
+      "statusPending": "等待重试",
+      "statusSent": "重试后送达",
+      "statusDead": "未送达",
+      "reasonNoSmtp": "未配置邮件服务器",
+      "reasonExpired": "邮件内容已过期",
+      "reasonFailed": "发送失败",
+      "more": "还有 {{count}} 封",
+      "unavailable": "无法获取邮件队列状态，机器人可能尚未更新。",
+      "captionPending": "等待中",
+      "captionSent": "已送达",
+      "captionDead": "未送达"
     },
     "payments": {
       "title": "支付",
@@ -2569,6 +2607,9 @@
       "addButton": "添加",
       "noPeriodsHint": "没有添加的周期。请至少添加一个周期。",
       "daysShort": "天",
+      "bestValueHint": "将此周期标记为超值——客户会看到它被突出显示",
+      "highlightLabel": "突出显示套餐",
+      "highlightHint": "客户会看到该套餐带边框和「超值」标签",
       "serversTitle": "服务器",
       "premiumLimitsTitle": "按节点的高级流量额度",
       "premiumLimitsHint": "为单个节点设置独立流量额度。用尽后用户仅失去该节点的访问权限，其他节点仍可使用。0 表示该节点没有高级额度。",
@@ -3888,6 +3929,7 @@
         "confirmEstimate": "价格：≈{{price}}（估算，启动后确定）",
         "confirmBalanceAfter": "扣费后余额：{{balance}}",
         "confirmMore": "还有 {{count}} 个",
+        "confirmCharge": "以 {{price}} 启动",
         "started": "任务 #{{id}} 已启动",
         "title": "启动",
         "targetsRow": "目标",
@@ -3909,23 +3951,31 @@
         "runShortScan": "扫描",
         "formula": "{{targets}} × {{units}}",
         "summaryTargets_other": "{{count}} 个目标",
-        "summaryUnits_other": "{{count}} 张 SIM"
+        "summaryUnits_other": "{{count}} 张 SIM",
+        "runHosts_other": "检查 {{count}} 台服务器 · {{price}}",
+        "runShortHosts_other": "检查 {{count}} 台服务器",
+        "summaryServers_other": "{{count}} 台服务器",
+        "busyBatch": "服务器检查已在进行 — 请等待完成",
+        "timeRow": "时间",
+        "confirmServers": "服务器（{{count}}）：{{list}}"
       },
       "progress": {
         "submitting": "正在发送请求…",
         "waiting": "等待运营商响应（{{elapsed}}）",
-        "retrieving": "耗时比平常长，正在获取结果（{{elapsed}}）",
+        "retrieving": "仍在检测，请稍候（{{elapsed}}）",
         "polling": "检查进行中（{{elapsed}}）",
         "cancelling": "正在取消…",
-        "hintProbe": "通常 5–60 秒，全部 SIM 卡最多 10 分钟",
-        "hintVless": "每台服务器最多 3 分钟",
-        "hintScan": "每张 SIM 卡 15–40 秒",
-        "stalled": "轮询已停止，结果将出现在历史中",
+        "hintProbe": "SIM 卡越多耗时越长：全部约需 10–20 分钟。页面会自动更新。",
+        "hintVless": "每台服务器最多 3 分钟。页面会自动更新。",
+        "hintScan": "每张 SIM 卡 15–40 秒。页面会自动更新。",
         "cancel": "取消",
-        "retrieve": "获取结果",
         "failed": "检查失败",
         "retry": "重试",
-        "cancelled": "已取消"
+        "cancelled": "已取消",
+        "units": "SIM 卡",
+        "waitingUnit": "等待中…",
+        "answered": "{{total}} 张 SIM 卡中 {{answered}} 张已响应",
+        "canLeave": "可以关闭页面：结果会出现在“我的检测”中。"
       },
       "verdict": {
         "reachable": "可达",
@@ -3942,19 +3992,26 @@
         "unknown": "未确定",
         "guessed": "推测"
       },
+      "purposeShort": {
+        "bs": "白名单",
+        "regular": "普通",
+        "unknown": "未设置"
+      },
       "targets": {
         "hosts": "面板主机",
         "includeDisabled": "显示已禁用",
         "search": "搜索主机",
         "empty": "面板未返回主机",
-        "pickAllBs": "选择所有白名单主机",
+        "pickAllBs": "选择全部白名单主机",
         "nodesTitle": "节点",
         "nodesHint": "仅 ping",
         "purposeToggle": "更改主机用途",
         "count_other": "{{count}} 个目标",
         "showAll": "显示全部主机（{{count}}）",
         "showLess": "收起列表",
-        "purposeHint": "主机标签表示用途：“白名单”应能从白名单 SIM 访问，“普通”从无白名单 SIM 访问。点击标签可更改。"
+        "whatIsWhitelist": "什么是白名单？",
+        "whitelistHelp": "白名单是运营商模式：不开 VPN 只能打开允许的网站。白名单主机用有白名单的 SIM 卡检测，普通主机用无白名单的 SIM 卡检测。",
+        "purposeChanged": "用途已更改"
       },
       "subscription": {
         "title": "订阅配置",
@@ -3969,7 +4026,7 @@
         "coreStable": "Stable",
         "corePrerelease": "Prerelease",
         "empty": "订阅中没有可用配置",
-        "pickBs": "选择所有白名单配置（{{count}}）",
+        "pickBs": "白名单（{{count}}）",
         "source": "来源",
         "userLabel": "用户 #{{id}}",
         "noReference": "未设置默认订阅",
@@ -3980,9 +4037,9 @@
         "parseFailed": "无法解析",
         "sourceLinks": "链接 · {{count}}",
         "sourceSubscription": "订阅 · {{count}}",
-        "pickAll": "✓ 全部",
-        "pickNone": "↺ 重置",
-        "orPick": "或使用现成的订阅",
+        "pickAll": "全部",
+        "pickNone": "重置",
+        "orPick": "或自己的配置 / 其他订阅",
         "fromInput": "显示上方字段中的配置",
         "selectedOf": "已选 {{selected}} / {{total}}",
         "rejectedReasons": {
@@ -4002,11 +4059,14 @@
         "alive_other": "{{count}} 个存活地址",
         "copy": "复制列表",
         "copied": "已复制",
-        "perUnit": "按 SIM 卡",
+        "perUnit": "显示各自结果",
         "ofTotal": "共 {{total}}",
         "willScan": "将扫描子网 {{subnet}}",
         "cidrHint": "一个 /24 子网；输入 IP 将取其子网",
-        "perUnitProbes": "{{icmp}} icmp · {{tcp}} tcp · {{sni}} sni"
+        "probeIcmp": "ping",
+        "probeTcp": "端口",
+        "probeSni": "SNI",
+        "byOperator": "按运营商"
       },
       "probes": {
         "icmp": "ICMP",
@@ -4033,7 +4093,6 @@
         "targets": "目标",
         "latency": "延迟",
         "core": "Xray",
-        "raw": "详情",
         "diagnosis": "诊断",
         "empty": "结果为空",
         "failReason": "原因",
@@ -4043,14 +4102,14 @@
         "http": "HTTP",
         "sniMulti": "{{count}}×SNI",
         "sniList": "SNI：{{names}}",
-        "noBs": "无白名单"
-      },
-      "summary": {
-        "openJob": "打开任务",
-        "dpiFilter": "SIM 卡",
-        "panelError": "面板不可用：{{error}}",
-        "notInPanel": "不在面板中",
-        "notInCatalog": "不在目录中"
+        "noBs": "无白名单",
+        "reasons": {
+          "tcp_timeout": "无响应",
+          "zombie_tcp": "TLS 后断开",
+          "dataplane_dead": "网站打不开",
+          "cancelled": "已取消"
+        },
+        "list": "按 SIM 卡的结果"
       },
       "history": {
         "columns": {
@@ -4065,7 +4124,6 @@
         },
         "loadMore": "显示更多",
         "more": "+{{count}}",
-        "rawJson": "原始响应",
         "units_other": "{{count}} 张 SIM"
       },
       "shortcuts": {
@@ -4073,53 +4131,67 @@
         "checkNode": "在 BSCHEKER 中检查"
       },
       "fleet": {
-        "onAir": "在线：{{bs}} 有白名单 · {{regular}} 无白名单",
-        "offline": "运营商暂时不可用，请 1–2 分钟后重试"
-      },
-      "health": {
-        "title": "白名单主机",
-        "summary": "{{total}} 台中 {{ok}} 台正常",
-        "failing_other": "{{count}} 台有问题",
-        "unchecked_other": "{{count}} 台未检查",
-        "checked": "检查于 {{age}}",
-        "none": "面板中没有标记为“白名单”的主机",
-        "empty": "尚无检查：选择主机并运行第一次检查",
-        "showMatrix": "显示矩阵",
-        "hideMatrix": "隐藏矩阵"
+        "onAir_other": "{{total}} 张 SIM 卡在线：{{bs}} 张有白名单，{{regular}} 张无",
+        "statement": "{{total}} 台服务器中 {{ok}} 台正常",
+        "statementAllOk": "全部 {{total}} 台服务器正常",
+        "statementNone": "面板中没有服务器",
+        "legendPartial_other": "{{count}} 台部分可用",
+        "legendDown_other": "{{count}} 台不可用",
+        "legendUnchecked_other": "{{count}} 台未检查",
+        "meta": "检查于{{age}} · {{units}}",
+        "search": "查找服务器",
+        "filter": {
+          "all": "全部",
+          "problems": "有问题",
+          "stale": "久未检查",
+          "bs": "白名单",
+          "regular": "普通"
+        },
+        "group": {
+          "down": "不可用",
+          "partial": "部分可用",
+          "unchecked": "未检查",
+          "ok": "正常"
+        },
+        "showAll": "显示全部 {{count}}",
+        "hide": "收起",
+        "state": {
+          "ok": "正常",
+          "partial": "部分可用",
+          "down": "不可用",
+          "unchecked": "未检查",
+          "checking": "检查中…"
+        },
+        "ofUnits": "{{total}} 张中 {{ok}} 张",
+        "justNow": "刚刚",
+        "empty": "此筛选下没有服务器",
+        "details": "详情",
+        "targets": "服务器",
+        "selectAll": "全选",
+        "columns": {
+          "units": "SIM 卡",
+          "checked": "检查时间"
+        }
       },
       "switch": {
-        "label": "检查内容",
+        "label": "检查什么",
         "hosts": "主机",
-        "hostsHint": "Remnawave 面板的主机和节点，每次最多 10 个目标",
+        "hostsHint": "Remnawave 面板服务器：状态与所选服务器的检查",
         "ip": "IP / 域名",
-        "ipHint": "自定义地址：IP、IP:端口、域名或 https://…，每次最多 10 个目标",
-        "cidr": "CIDR",
-        "cidrHint": "扫描 /24 子网：通过 SIM 查看存活地址",
-        "vless": "订阅",
-        "vlessHint": "通过 VLESS 隧道检查订阅配置，每次最多 20 个"
+        "ipHint": "自己的地址：IP、IP:端口、域名或 https://…，每次最多 10 个目标",
+        "cidr": "CIDR 扫描",
+        "cidrHint": "扫描 /24 子网：SIM 卡视角的存活地址",
+        "vless": "VPN 测试",
+        "vlessHint": "通过 VLESS 隧道检查订阅配置，每次最多 20 个",
+        "history": "历史",
+        "historyHint": "全部检查：检查了什么、结果如何、扣了多少"
       },
       "sections": {
         "targets": "目标",
-        "probes": "探测",
-        "more": "更多"
-      },
-      "operators": {
-        "title": "运营商",
-        "hint": "每张 SIM 单独计费",
-        "pickBs": "选择所有有白名单的",
-        "unpickBs": "取消所有有白名单的",
-        "pickRegular": "选择所有无白名单的",
-        "unpickRegular": "取消所有无白名单的",
-        "recall": "与上次相同",
-        "reset": "重置选择",
-        "selected": "已选 {{selected}} / {{total}}",
-        "pickDistrict": "选择整个地区 {{code}}",
-        "unpickDistrict": "取消整个地区 {{code}}",
-        "noBs": "无白名单",
-        "empty": "SIM 列表为空：服务不可用"
+        "probes": "探测"
       },
       "recent": {
-        "title": "我的检查",
+        "title": "检查历史",
         "empty": "尚无检查",
         "open": "详情",
         "close": "收起",
@@ -4128,10 +4200,10 @@
         "all": "全部",
         "columns": {
           "target": "目标",
-          "probes": "探测",
-          "operators": "运营商",
           "time": "时间",
-          "cost": "扣费"
+          "cost": "扣费",
+          "outcome": "结果",
+          "units": "SIM 卡"
         },
         "outcome": {
           "ok": "全部可达",
@@ -4139,7 +4211,24 @@
           "down": "不可达",
           "pending": "进行中",
           "na": "无结论"
-        }
+        },
+        "filter": "筛选",
+        "repeat": "重复",
+        "headline": {
+          "all_other": "全部 {{total}} 张 SIM 卡均可打开",
+          "partial_other": "{{total}} 张 SIM 卡中 {{ok}} 张可打开",
+          "none_other": "{{total}} 张 SIM 卡均无法打开",
+          "failed": "检测失败",
+          "cancelled": "检测已取消",
+          "pending": "检测进行中",
+          "scan": "存活地址：{{ok}} / {{total}}",
+          "empty": "没有结果",
+          "blockedList": "被拦截或无响应：{{list}}"
+        },
+        "batchTargets_other": "{{count}} 台服务器",
+        "batchOutcome": "{{total}} 台中 {{ok}} 台正常",
+        "server": "服务器",
+        "allServers": "全部服务器"
       },
       "addresses": {
         "label": "地址",
@@ -4150,19 +4239,66 @@
       "setup": {
         "titleDisabled": "BSCHEKER 已关闭",
         "titleNotConfigured": "BSCHEKER 未配置",
-        "intro": "通过 bschekbot 服务，用俄罗斯运营商的真实 SIM 检查主机、订阅和子网。开始前请：",
-        "key": "bschekbot API 密钥",
-        "keyHint": "在 bsbord.com 获取（需 Bronze 及以上套餐），填入 BSCHEK_API_KEY 设置",
-        "enable": "启用集成",
-        "enableHint": "BSCHEK_ENABLED 设置",
-        "reference": "默认订阅 — 可选",
-        "referenceHint": "在 BSCHEK_REFERENCE_SUBSCRIPTION 填入面板订阅的 shortUuid：无需选择用户即可进行 VLESS 测试",
+        "intro": "通过 bschekbot 服务，以俄罗斯运营商 SIM 卡的视角检查服务器、订阅和子网。要启用本板块：",
+        "key": "访问密钥",
+        "keyHint": "在 bsbord.com 获取（需要 Bronze 及以上套餐）并粘贴到本板块设置",
+        "enable": "开启 BSCHEKER",
+        "enableHint": "同一设置中的开关",
+        "reference": "默认订阅（可选）",
+        "referenceHint": "面板订阅：VPN 测试无需选择用户即可取其服务器",
         "rights": "管理员权限",
-        "rightsHint": "reachability:read 查看该板块，reachability:run 发起检查（消耗积分）",
+        "rightsHint": "谁可以查看板块、谁可以启动检查：检查会消耗积分",
         "openSettings": "打开 BSCHEKER 设置",
         "openSite": "前往 bsbord.com 获取密钥",
-        "envNote": "如果机器人通过 .env 配置，环境变量会覆盖后台设置——请改 .env 并重启机器人。",
+        "envNote": "如果机器人通过环境文件配置，其值优先于后台设置：请修改文件并重启机器人。",
         "unhealthyHint": "请在 bsbord.com 检查 API 密钥和套餐"
+      },
+      "subtitle": "从俄罗斯的服务器可达性",
+      "server": {
+        "byOperators": "按运营商",
+        "catchesAll": "所有地区可用",
+        "catchesNone": "不可用",
+        "catchesNot": "在{{regions}}不可用",
+        "ofUnits": "{{total}} 张中 {{ok}} 张",
+        "summaryBs": "{{total}} 张白名单 SIM 卡中 {{ok}} 张可用",
+        "summaryRegular": "{{total}} 张无白名单 SIM 卡中 {{ok}} 张可用",
+        "summaryAny": "{{total}} 张 SIM 卡中 {{ok}} 张可用",
+        "checked": "检查于{{age}}",
+        "unchecked": "此服务器尚未检查",
+        "history": "以往检查",
+        "allHistory": "全部",
+        "checkOne": "检查此服务器 · {{price}}"
+      },
+      "batch": {
+        "minutes": "约 {{count}} 分钟",
+        "onlyChecked": "只按已检查的 SIM 卡收费。检查可随时停止。",
+        "progressTitle_other": "正在检查 {{count}} 台服务器",
+        "progressLine": "已完成 {{done}}/{{total}} · 还需{{eta}}",
+        "progressDone": "已完成 {{done}}/{{total}}",
+        "canLeave": "可以关闭页面，检查会继续。",
+        "stop": "停止",
+        "stopping": "正在停止…",
+        "spentSoFar": "已扣费：{{price}}",
+        "aside": "检查进行中",
+        "queued": "排队中",
+        "started": "检查已启动",
+        "finishedOk": "检查完成",
+        "finishedCancelled": "检查已停止",
+        "finishedFailed": "检查失败"
+      },
+      "operators": {
+        "title": "运营商",
+        "hint": "每张 SIM 卡单独计费",
+        "bs": "白名单",
+        "regular": "无白名单",
+        "noBs": "无白名单",
+        "offline": "离线",
+        "selected": "已选 {{selected}} / {{total}}",
+        "reset": "清除",
+        "recall": "同上次",
+        "pickDistrict": "{{code}} 全部 SIM 卡",
+        "unpickDistrict": "取消 {{code}} 的 SIM 卡",
+        "empty": "没有 SIM 卡：服务不可用"
       }
     },
     "roles": {

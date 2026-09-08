@@ -20,5 +20,6 @@ export function relativeAge(iso: string | null, language: string, nowMs = Date.n
   const format = new Intl.RelativeTimeFormat(language, { numeric: 'always', style: 'short' });
   if (diff < HOUR) return format.format(-Math.round(diff / MINUTE), 'minute');
   if (diff < DAY) return format.format(-Math.round(diff / HOUR), 'hour');
-  return format.format(-Math.round(diff / DAY), 'day');
+  const days = new Intl.RelativeTimeFormat(language, { numeric: 'auto', style: 'long' });
+  return days.format(-Math.round(diff / DAY), 'day');
 }

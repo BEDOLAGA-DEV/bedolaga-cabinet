@@ -1,5 +1,6 @@
 import type { Job, Leg, Unit } from '@/api/reachability';
 import { operatorCode } from './operatorIcons';
+import { regionLabel } from './unitSelection';
 
 /** Подписи строк таблицы результата: симка оператора и цель. Чистые функции. */
 
@@ -23,11 +24,23 @@ export function unitLabel(
   return {
     code,
     name: unit?.name ?? fallbackName ?? code,
-    region: (leg.region ?? unit?.region ?? region).toUpperCase(),
+    region: regionLabel(leg.region ?? unit?.region ?? region),
   };
 }
 
 /** Подпись цели из задачи; цели нет в списке — undefined, вызывающий подставляет свою. */
 export function targetLabel(job: Pick<Job, 'targets'>, targetKey: string): string | undefined {
   return job.targets.find((target) => target.target_key === targetKey)?.label;
+}
+
+/** Имена симок с округом по каталогу («МТС ЦФО»); неизвестная симка — своим ключом. */
+export function unitNameList(opKeys: readonly string[], catalog: readonly Unit[]): string[] {
+  return opKeys.map((opKey) => {
+    const unit = catalog.find((item) => item.op_key === opKey);
+    return unit ? `${unit.name} ${regionLabel(unit.region)}` : opKey;
+  });
+}
+
+export function unitNames(opKeys: readonly string[], catalog: readonly Unit[]): string {
+  return unitNameList(opKeys, catalog).join(', ');
 }

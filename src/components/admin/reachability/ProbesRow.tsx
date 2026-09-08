@@ -51,8 +51,8 @@ export function ProbesRow({ probes, onChange, locked = [] }: ProbesRowProps) {
             </span>
             <span
               className={cn(
-                'block text-[11px] leading-tight',
-                on ? 'text-accent-400/80' : 'text-dark-400',
+                'block text-xs leading-tight',
+                on ? 'text-accent-400' : 'text-dark-400',
               )}
             >
               {t(`admin.reachability.probes.${name}Desc`)}

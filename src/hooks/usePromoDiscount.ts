@@ -26,6 +26,44 @@ export interface PromoDiscountResult {
   isPromoGroup: boolean;
 }
 
+/**
+ * Наложить активную скидку промокода на серверную цену (уже со скидкой группы).
+ * Чистая часть хука: сервер промокод в цену НЕ вкладывает, клиент накладывает
+ * его ровно один раз — здесь. `existingOriginalPrice` — цена до групповой скидки,
+ * от неё считается суммарный процент.
+ */
+export function combinePromoDiscount(
+  priceKopeks: number,
+  existingOriginalPrice: number | null | undefined,
+  activePercent: number,
+): PromoDiscountResult {
+  const hasExisting = (existingOriginalPrice ?? 0) > priceKopeks;
+  const hasPromo = activePercent > 0;
+
+  if (!hasExisting && !hasPromo) {
+    return { price: priceKopeks, original: null, percent: null, isPromoGroup: false };
+  }
+
+  const finalPrice = hasPromo ? Math.round(priceKopeks * (1 - activePercent / 100)) : priceKopeks;
+
+  if (hasExisting) {
+    const original = existingOriginalPrice as number;
+    return {
+      price: finalPrice,
+      original,
+      percent: Math.round((1 - finalPrice / original) * 100),
+      isPromoGroup: true,
+    };
+  }
+
+  return { price: finalPrice, original: priceKopeks, percent: activePercent, isPromoGroup: false };
+}
+
+export type ApplyPromoDiscount = (
+  priceKopeks: number,
+  existingOriginalPrice?: number | null,
+) => PromoDiscountResult;
+
 export function usePromoDiscount() {
   const { data: activeDiscount } = useQuery({
     queryKey: ['active-discount'],
@@ -33,40 +71,12 @@ export function usePromoDiscount() {
     staleTime: 30000,
   });
 
-  const applyPromoDiscount = useCallback(
-    (priceKopeks: number, existingOriginalPrice?: number | null): PromoDiscountResult => {
-      const hasExisting = (existingOriginalPrice ?? 0) > priceKopeks;
-      const hasPromo = !!activeDiscount?.is_active && !!activeDiscount.discount_percent;
+  const activePercent = activeDiscount?.is_active ? (activeDiscount.discount_percent ?? 0) : 0;
 
-      if (!hasExisting && !hasPromo) {
-        return { price: priceKopeks, original: null, percent: null, isPromoGroup: false };
-      }
-
-      let finalPrice = priceKopeks;
-      if (hasPromo) {
-        finalPrice = Math.round(priceKopeks * (1 - activeDiscount!.discount_percent! / 100));
-      }
-
-      if (hasExisting) {
-        const combinedPercent = hasPromo
-          ? Math.round((1 - finalPrice / existingOriginalPrice!) * 100)
-          : Math.round((1 - priceKopeks / existingOriginalPrice!) * 100);
-        return {
-          price: finalPrice,
-          original: existingOriginalPrice!,
-          percent: combinedPercent,
-          isPromoGroup: true,
-        };
-      }
-
-      return {
-        price: finalPrice,
-        original: priceKopeks,
-        percent: activeDiscount!.discount_percent!,
-        isPromoGroup: false,
-      };
-    },
-    [activeDiscount],
+  const applyPromoDiscount = useCallback<ApplyPromoDiscount>(
+    (priceKopeks, existingOriginalPrice) =>
+      combinePromoDiscount(priceKopeks, existingOriginalPrice, activePercent),
+    [activePercent],
   );
 
   return { activeDiscount, applyPromoDiscount };

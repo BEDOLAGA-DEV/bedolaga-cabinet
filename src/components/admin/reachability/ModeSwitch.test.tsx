@@ -2,7 +2,7 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-/** Вкладки как в оригинале bsbord.com: хосты панели, IP / домен, CIDR, подписка. */
+/** Вкладки как в оригинале bsbord.com: хосты панели, IP / домен, скан CIDR, VPN-тест — и история проверок. */
 
 vi.mock('react-i18next', async () => (await import('./testUtils')).i18nMock());
 
@@ -11,17 +11,20 @@ import { ModeSwitch } from './ModeSwitch';
 afterEach(cleanup);
 
 describe('ModeSwitch', () => {
-  it('четыре вкладки, активная отмечена, клик отдаёт вкладку наверх', () => {
+  it('пять вкладок, активная отмечена, клик отдаёт вкладку наверх', () => {
     const onChange = vi.fn();
     render(<ModeSwitch value="hosts" onChange={onChange} />);
     expect(screen.getAllByRole('tab').map((tab) => tab.textContent)).toEqual([
       'Хосты',
       'IP / домен',
-      'CIDR',
-      'Подписка',
+      'Скан CIDR',
+      'VPN-тест',
+      'История',
     ]);
     expect(screen.getByRole('tab', { name: 'Хосты' }).getAttribute('aria-selected')).toBe('true');
-    fireEvent.click(screen.getByRole('tab', { name: 'CIDR' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Скан CIDR' }));
     expect(onChange).toHaveBeenCalledWith('cidr');
+    fireEvent.click(screen.getByRole('tab', { name: 'История' }));
+    expect(onChange).toHaveBeenCalledWith('history');
   });
 });
