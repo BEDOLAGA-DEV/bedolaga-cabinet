@@ -127,6 +127,52 @@ describe('PremiumSquadLimits', () => {
     expect(onChange).toHaveBeenCalledWith({ [LTE]: { traffic_limit_gb: 10 } });
   });
 
+  it('очищенное числовое поле остаётся пустым, а не подставляет ноль', () => {
+    // Иначе ноль возвращается под курсор на каждом нажатии, и вместо «10»
+    // набирается «010», а стереть его невозможно.
+    const onChange = render({ [LTE]: { traffic_limit_gb: 5 } }, [LTE]);
+    const field = screen.getByLabelText('Лимит, ГБ') as HTMLInputElement;
+
+    fireEvent.change(field, { target: { value: '' } });
+
+    expect(field.value).toBe('');
+    expect(onChange).toHaveBeenCalledWith({ [LTE]: { traffic_limit_gb: 0 } });
+  });
+
+  it('после очистки набирается ровно то, что вводят', () => {
+    const onChange = render({ [LTE]: { traffic_limit_gb: 5 } }, [LTE]);
+    const field = screen.getByLabelText('Лимит, ГБ') as HTMLInputElement;
+
+    fireEvent.change(field, { target: { value: '' } });
+    fireEvent.change(field, { target: { value: '1' } });
+    fireEvent.change(field, { target: { value: '10' } });
+
+    expect(field.value).toBe('10');
+    const calls = onChange.mock.calls;
+    expect(calls[calls.length - 1][0][LTE].traffic_limit_gb).toBe(10);
+  });
+
+  it('по уходу фокуса текст приводится к каноническому виду', () => {
+    render({ [LTE]: { traffic_limit_gb: 5 } }, [LTE]);
+    const field = screen.getByLabelText('Лимит, ГБ') as HTMLInputElement;
+
+    fireEvent.change(field, { target: { value: '010' } });
+    fireEvent.blur(field);
+
+    expect(field.value).toBe('10');
+  });
+
+  it('цена пакета тоже очищается без подстановки нуля', () => {
+    render({ [LTE]: { traffic_limit_gb: 5, topup_enabled: true, topup_packages: { '5': 2000 } } }, [
+      LTE,
+    ]);
+    const price = screen.getByLabelText('Цена пакета, ₽') as HTMLInputElement;
+
+    fireEvent.change(price, { target: { value: '' } });
+
+    expect(price.value).toBe('');
+  });
+
   it('отрицательный лимит превращается в ноль', () => {
     const onChange = render({ [LTE]: { traffic_limit_gb: 5 } }, [LTE]);
 
