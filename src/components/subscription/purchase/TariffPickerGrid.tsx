@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { BestValueBadge } from '../BestValueBadge';
 import { useNavigate } from 'react-router';
 import { useTheme } from '../../../hooks/useTheme';
 import { useCurrency } from '../../../hooks/useCurrency';
@@ -161,9 +162,16 @@ export function TariffPickerGrid({
               <div
                 key={tariff.id}
                 className={`bento-card-hover p-5 text-left transition-all ${
-                  isCurrentTariff ? 'bento-card-glow border-accent-500' : ''
+                  isCurrentTariff
+                    ? 'bento-card-glow border-accent-500'
+                    : tariff.is_highlighted
+                      ? // Текущий тариф важнее подсказки: две «активные» рамки
+                        // сразу не дают понять, что именно сейчас куплено.
+                        'border-2 border-urgent-400'
+                      : ''
                 }`}
               >
+                {tariff.is_highlighted && !isCurrentTariff && <BestValueBadge className="mb-2" />}
                 <div className="mb-3 flex items-start justify-between">
                   <div>
                     <div className="text-lg font-semibold text-dark-100">{tariff.name}</div>

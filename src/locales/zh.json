@@ -2600,6 +2600,8 @@
       "noPeriodsHint": "没有添加的周期。请至少添加一个周期。",
       "daysShort": "天",
       "bestValueHint": "将此周期标记为超值——客户会看到它被突出显示",
+      "highlightLabel": "突出显示套餐",
+      "highlightHint": "客户会看到该套餐带边框和「超值」标签",
       "serversTitle": "服务器",
       "externalSquadTitle": "外部小组",
       "externalSquadHint": "为此套餐的用户分配Remnawave外部小组。创建订阅时，用户将自动添加到所选小组。",
