@@ -239,5 +239,9 @@ export function createWebAdapter(): PlatformContext {
         window.onbeforeunload = null;
       }
     },
+
+    hideKeyboard() {
+      // В браузере клавиатуру закрывает потеря фокуса полем.
+    },
   };
 }
