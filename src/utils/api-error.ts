@@ -10,6 +10,14 @@ export function isEndpointMissingError(err: unknown): boolean {
   return axios.isAxiosError(err) && err.response?.status === 404;
 }
 
+/**
+ * True when the backend answered 429 — the caller hit a rate limit and should
+ * say «слишком часто, попробуйте позже» rather than «не удалось отправить».
+ */
+export function isRateLimitedError(err: unknown): boolean {
+  return axios.isAxiosError(err) && err.response?.status === 429;
+}
+
 export function getApiErrorMessage(err: unknown, fallback: string): string {
   if (axios.isAxiosError(err)) {
     const detail = err.response?.data?.detail;
