@@ -1693,7 +1693,9 @@
       "reasonNoSmtp": "未配置邮件服务器",
       "reasonExpired": "邮件内容已过期",
       "reasonFailed": "发送失败",
-      "more": "还有 {{count}} 封"
+      "more": "还有 {{count}} 封",
+      "empty": "队列为空——所有邮件均已发送。",
+      "unavailable": "无法获取邮件队列状态，机器人可能尚未更新。"
     },
     "payments": {
       "title": "支付",

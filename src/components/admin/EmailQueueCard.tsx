@@ -5,6 +5,7 @@ import { useNativeDialog } from '../../platform/hooks/useNativeDialog';
 import { useNotify } from '@/platform';
 import { getApiErrorMessage } from '@/utils/api-error';
 import { ClockIcon, TrashIcon, WarningIcon } from '@/components/icons';
+import { Skeleton } from '@/components/ui/skeleton';
 
 /**
  * Состояние очереди писем: сколько ждёт отправки, сколько дошло, сколько потеряно.
@@ -69,7 +70,7 @@ export function EmailQueueCard() {
   const dialog = useNativeDialog();
   const queryClient = useQueryClient();
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ['admin', 'email-queue'],
     queryFn: adminEmailQueueApi.getQueue,
     refetchInterval: 60_000,
@@ -86,10 +87,28 @@ export function EmailQueueCard() {
     onError: (error) => notify.error(getApiErrorMessage(error, t('common.error'))),
   });
 
-  if (isLoading || !data) return null;
+  // Карточку не прячем ни при загрузке, ни при пустой очереди, ни при ошибке:
+  // её ищут глазами в разделе писем, и «ничего нет» неотличимо от «раздела нет».
+  if (isLoading) {
+    return (
+      <div className="rounded-xl border border-dark-700 bg-dark-800 p-3 sm:p-4">
+        <Skeleton className="h-5 w-40" />
+      </div>
+    );
+  }
+
+  if (isError || !data) {
+    return (
+      <div className="rounded-xl border border-dark-700 bg-dark-800 p-3 text-xs text-dark-400 sm:p-4">
+        {t(
+          'admin.emailQueue.unavailable',
+          'Состояние очереди писем недоступно. Возможно, бот ещё не обновлён.',
+        )}
+      </div>
+    );
+  }
 
   const total = data.pending + data.sent + data.dead;
-  if (total === 0 && data.smtp_configured) return null;
 
   const handleClear = async (pendingOnly: boolean) => {
     const message = pendingOnly
@@ -159,6 +178,12 @@ export function EmailQueueCard() {
             )}
           </p>
         </div>
+      )}
+
+      {total === 0 && data.smtp_configured && (
+        <p className="mt-3 text-xs text-dark-500">
+          {t('admin.emailQueue.empty', 'Очередь пуста — все письма отправлены.')}
+        </p>
       )}
 
       {visible.length > 0 && (
