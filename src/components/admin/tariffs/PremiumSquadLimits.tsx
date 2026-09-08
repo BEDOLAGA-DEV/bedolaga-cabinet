@@ -114,16 +114,10 @@ export function PremiumSquadLimits({
                 </span>
                 <label className="flex items-center gap-2 text-xs text-dark-400">
                   {t('admin.tariffs.premiumLimitGb')}
-                  <input
-                    type="number"
-                    min={0}
-                    aria-label={t('admin.tariffs.premiumLimitGb')}
+                  <NumberField
+                    ariaLabel={t('admin.tariffs.premiumLimitGb')}
                     value={limit.traffic_limit_gb ?? 0}
-                    onChange={(e) =>
-                      patch(server.squad_uuid, {
-                        traffic_limit_gb: Math.max(0, Number(e.target.value) || 0),
-                      })
-                    }
+                    onChange={(traffic_limit_gb) => patch(server.squad_uuid, { traffic_limit_gb })}
                     className="input w-24"
                   />
                 </label>
@@ -176,15 +170,10 @@ export function PremiumSquadLimits({
                       />
                       <label className="flex items-center gap-2 text-xs text-dark-400">
                         {t('admin.tariffs.premiumMaxTopupGb')}
-                        <input
-                          type="number"
-                          min={0}
+                        <NumberField
+                          ariaLabel={t('admin.tariffs.premiumMaxTopupGb')}
                           value={limit.max_topup_gb ?? 0}
-                          onChange={(e) =>
-                            patch(server.squad_uuid, {
-                              max_topup_gb: Math.max(0, Number(e.target.value) || 0),
-                            })
-                          }
+                          onChange={(max_topup_gb) => patch(server.squad_uuid, { max_topup_gb })}
                           className="input w-24"
                         />
                         <span className="text-dark-500">
@@ -276,22 +265,16 @@ function PackagesEditor({
             aria-label={t('admin.tariffs.premiumPackageGb')}
           />
           <span className="text-xs text-dark-500">{t('common.units.gb')}</span>
-          <input
-            type="number"
-            min={0}
-            step="0.01"
+          <NumberField
+            ariaLabel={t('admin.tariffs.premiumPackagePrice')}
             value={row.kopeks / 100}
-            onChange={(e) =>
+            step="0.01"
+            onChange={(rubles) =>
               emit(
-                rows.map((r, i) =>
-                  i === index
-                    ? { ...r, kopeks: Math.max(0, Math.round((Number(e.target.value) || 0) * 100)) }
-                    : r,
-                ),
+                rows.map((r, i) => (i === index ? { ...r, kopeks: Math.round(rubles * 100) } : r)),
               )
             }
             className="input w-28"
-            aria-label={t('admin.tariffs.premiumPackagePrice')}
           />
           <span className="text-xs text-dark-500">₽</span>
           <button
@@ -341,4 +324,64 @@ function nextFreeGb(rows: PackageRow[]): number {
   let gb = 1;
   while (taken.has(gb)) gb += 1;
   return gb;
+}
+
+/**
+ * Числовое поле, которое не мешает набирать.
+ *
+ * Обычный контролируемый `<input type="number">` со значением-числом
+ * подставляет ноль сразу, как поле очистили: `Number('') || 0`. Ноль тут же
+ * появляется в поле, и следующая цифра дописывается к нему — вместо «10»
+ * выходит «010», а стереть ноль невозможно, он возвращается на каждом нажатии.
+ *
+ * Поэтому набранный текст живёт своей жизнью, а наверх уходит разобранное
+ * число. По уходу фокуса текст приводится к каноническому виду, чтобы «010» не
+ * осталось на экране.
+ */
+function NumberField({
+  value,
+  onChange,
+  ariaLabel,
+  className,
+  step,
+}: {
+  value: number;
+  onChange: (value: number) => void;
+  ariaLabel: string;
+  className?: string;
+  step?: string;
+}) {
+  const [text, setText] = useState(String(value));
+  // Что мы сами отдали наверх: приход этого же числа обратно — эхо, и
+  // переписывать по нему набранный текст нельзя.
+  const emitted = useRef(value);
+
+  useEffect(() => {
+    if (value !== emitted.current) {
+      emitted.current = value;
+      setText(String(value));
+    }
+  }, [value]);
+
+  const handle = (raw: string) => {
+    setText(raw);
+    // Пустое поле — незаконченный ввод: наверх отдаём ноль, но текст не трогаем,
+    // иначе ноль появится под курсором.
+    const parsed = raw === '' ? 0 : Math.max(0, Number(raw) || 0);
+    emitted.current = parsed;
+    onChange(parsed);
+  };
+
+  return (
+    <input
+      type="number"
+      min={0}
+      step={step}
+      value={text}
+      aria-label={ariaLabel}
+      className={className}
+      onChange={(e) => handle(e.target.value)}
+      onBlur={() => setText(String(emitted.current))}
+    />
+  );
 }
