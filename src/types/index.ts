@@ -839,6 +839,8 @@ export interface TicketSettings {
   support_system_mode: string;
   cabinet_user_notifications_enabled: boolean;
   cabinet_admin_notifications_enabled: boolean;
+  /** Поля, закреплённые в .env: из кабинета их не изменить. */
+  env_locked?: string[];
 }
 
 // Payment method config types (admin)
