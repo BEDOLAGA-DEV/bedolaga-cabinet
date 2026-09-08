@@ -12,6 +12,7 @@ import { openPaymentUrl } from '../../../utils/openPaymentUrl';
 import { getMonthlyPriceKopeks } from '../../../utils/pricing';
 import InsufficientBalancePrompt from '../../InsufficientBalancePrompt';
 import type { Tariff, TariffPeriod } from '../../../types';
+import { BestValueBadge } from '../BestValueBadge';
 
 // ──────────────────────────────────────────────────────────────────
 // TariffPurchaseForm
@@ -355,10 +356,12 @@ export function TariffPurchaseForm({
                         setSelectedTariffPeriod(period);
                         setUseCustomDays(false);
                       }}
-                      className={`relative rounded-xl border p-4 text-left transition-all ${
+                      className={`relative rounded-xl p-4 text-left transition-all ${
                         selectedTariffPeriod?.days === period.days && !useCustomDays
-                          ? 'border-accent-500 bg-accent-500/10'
-                          : 'border-dark-700/50 bg-dark-800/50 hover:border-dark-600'
+                          ? 'border border-accent-500 bg-accent-500/10'
+                          : period.is_highlighted
+                            ? 'border-2 border-urgent-400 bg-dark-800/50'
+                            : 'border border-dark-700/50 bg-dark-800/50 hover:border-dark-600'
                       }`}
                     >
                       {displayDiscount && displayDiscount > 0 && (
@@ -386,6 +389,8 @@ export function TariffPurchaseForm({
                           {formatPrice(displayPerMonth)}/{t('subscription.month')}
                         </div>
                       )}
+                      {/* Под ценой, а не в углу: правый верхний угол занят скидкой. */}
+                      {period.is_highlighted && <BestValueBadge className="mt-2" />}
                     </button>
                   );
                 })}

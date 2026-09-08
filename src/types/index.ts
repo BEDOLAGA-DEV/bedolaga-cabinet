@@ -160,6 +160,8 @@ export interface RenewalOption {
   price_rubles: number;
   discount_percent: number;
   original_price_kopeks: number | null;
+  /** Период, отмеченный оператором как самый выгодный. */
+  is_highlighted?: boolean;
 }
 
 export interface TrafficPackage {
@@ -276,6 +278,8 @@ export interface TariffPeriod {
   extra_devices_cost_label?: string;
   base_tariff_price_kopeks?: number;
   base_tariff_price_label?: string;
+  /** Период, отмеченный оператором как самый выгодный. */
+  is_highlighted?: boolean;
 }
 
 export interface TariffServer {

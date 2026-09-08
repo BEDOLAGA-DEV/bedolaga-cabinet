@@ -22,6 +22,7 @@ import {
   PlusIcon,
   RefreshIcon,
   SunIcon,
+  StarIcon,
   TrashIcon,
 } from '@/components/icons';
 
@@ -47,6 +48,9 @@ export default function AdminTariffCreate() {
   const [maxDeviceLimit, setMaxDeviceLimit] = useState<number | ''>(0);
   const [tierLevel, setTierLevel] = useState<number | ''>(1);
   const [periodPrices, setPeriodPrices] = useState<PeriodPrice[]>([]);
+  // Период, отмеченный как самый выгодный. Хранится днями: набор периодов правят
+  // прямо на этой форме, и индекс после правки указывал бы на другой период.
+  const [highlightPeriodDays, setHighlightPeriodDays] = useState<number | null>(null);
   const [selectedSquads, setSelectedSquads] = useState<string[]>([]);
   const [selectedExternalSquad, setSelectedExternalSquad] = useState<string | null>(null);
   const [selectedPromoGroups, setSelectedPromoGroups] = useState<number[]>([]);
@@ -118,6 +122,7 @@ export default function AdminTariffCreate() {
       setMaxDeviceLimit(data.max_device_limit || 0);
       setTierLevel(data.tier_level || 1);
       setPeriodPrices(data.period_prices?.length ? data.period_prices : []);
+      setHighlightPeriodDays(data.highlight_period_days ?? null);
       setSelectedSquads(data.allowed_squads || []);
       setSelectedExternalSquad(data.external_squad_uuid || null);
       setSelectedPromoGroups(
@@ -171,6 +176,8 @@ export default function AdminTariffCreate() {
       max_device_limit: toNumber(maxDeviceLimit) > 0 ? toNumber(maxDeviceLimit) : undefined,
       tier_level: toNumber(tierLevel, 1),
       period_prices: isDaily ? [] : periodPrices.filter((p) => p.price_kopeks >= 0),
+      // 0 — «снять выделение»: пустое поле означало бы «не трогать».
+      highlight_period_days: isDaily ? 0 : (highlightPeriodDays ?? 0),
       allowed_squads: selectedSquads,
       external_squad_uuid: selectedExternalSquad || null,
       promo_group_ids: selectedPromoGroups,
@@ -220,6 +227,13 @@ export default function AdminTariffCreate() {
 
   const removePeriod = (days: number) => {
     setPeriodPrices((prev) => prev.filter((p) => p.days !== days));
+    // Удалённый период не может оставаться выделенным.
+    setHighlightPeriodDays((current) => (current === days ? null : current));
+  };
+
+  /** Повторное нажатие снимает выделение — отдельной кнопки «снять» не нужно. */
+  const toggleHighlight = (days: number) => {
+    setHighlightPeriodDays((current) => (current === days ? null : days));
   };
 
   const updatePeriodPrice = (days: number, priceRubles: number) => {
@@ -652,6 +666,19 @@ export default function AdminTariffCreate() {
                   />
                   <span className="text-dark-400">₽</span>
                   <div className="flex-1" />
+                  <button
+                    type="button"
+                    onClick={() => toggleHighlight(period.days)}
+                    title={t('admin.tariffs.bestValueHint')}
+                    aria-pressed={highlightPeriodDays === period.days}
+                    className={`rounded-lg p-2 transition-colors ${
+                      highlightPeriodDays === period.days
+                        ? 'bg-urgent-400/20 text-urgent-400'
+                        : 'text-dark-400 hover:bg-dark-700 hover:text-dark-200'
+                    }`}
+                  >
+                    <StarIcon filled={highlightPeriodDays === period.days} className="h-4 w-4" />
+                  </button>
                   <button
                     onClick={() => removePeriod(period.days)}
                     className="rounded-lg p-2 text-dark-400 transition-colors hover:bg-error-500/20 hover:text-error-400"
