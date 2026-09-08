@@ -9,6 +9,7 @@ import { usePromoDiscount } from '../../../hooks/usePromoDiscount';
 import { usePlatform } from '../../../platform';
 import { openPaymentUrl } from '../../../utils/openPaymentUrl';
 import { getMonthlyPriceKopeks } from '../../../utils/pricing';
+import { getCustomDaysTariffPricing } from '../../../utils/tariffPricing';
 import InsufficientBalancePrompt from '../../InsufficientBalancePrompt';
 import type { Tariff, TariffPeriod } from '../../../types';
 
@@ -106,7 +107,7 @@ export function TariffPurchaseForm({
   // СБП-оформление: первое списание = подтверждение привязки в банке; период
   // на форме не участвует — списания идут по каденс-правилу тарифа.
   const sbpPurchaseMutation = useMutation({
-    mutationFn: () => subscriptionApi.purchaseWithSbpRecurring(tariff.id),
+    mutationFn: () => subscriptionApi.purchaseWithSbpRecurring(tariff.id, subscriptionId),
     onSuccess: (data) => {
       if (data.redirect_url) {
         openPaymentUrl(data.redirect_url, platform, openLink);
@@ -147,7 +148,7 @@ export function TariffPurchaseForm({
   );
 
   const lavaPurchaseMutation = useMutation({
-    mutationFn: () => subscriptionApi.purchaseWithLavaRecurring(tariff.id),
+    mutationFn: () => subscriptionApi.purchaseWithLavaRecurring(tariff.id, subscriptionId),
     onSuccess: (data) => {
       if (data.redirect_url) {
         openPaymentUrl(data.redirect_url, platform, openLink);
@@ -443,11 +444,11 @@ export function TariffPurchaseForm({
                       />
                     </div>
                     {(() => {
-                      const basePrice = customDays * (tariff.price_per_day_kopeks ?? 0);
+                      const customPricing = getCustomDaysTariffPricing(tariff, customDays);
+                      const basePrice = customPricing.price;
                       const existingOriginal =
-                        tariff.original_price_per_day_kopeks &&
-                        tariff.original_price_per_day_kopeks > (tariff.price_per_day_kopeks ?? 0)
-                          ? customDays * tariff.original_price_per_day_kopeks
+                        customPricing.originalPrice > customPricing.price
+                          ? customPricing.originalPrice
                           : undefined;
                       const promoCustom = applyPromoDiscount(basePrice, existingOriginal);
                       return (
@@ -575,13 +576,13 @@ export function TariffPurchaseForm({
           {(selectedTariffPeriod || useCustomDays) && (
             <div className="rounded-xl bg-dark-800/50 p-5">
               {(() => {
+                const customDaysPricing = getCustomDaysTariffPricing(tariff, customDays);
                 const basePeriodPrice = useCustomDays
-                  ? customDays * (tariff.price_per_day_kopeks ?? 0)
+                  ? customDaysPricing.price
                   : selectedTariffPeriod?.price_kopeks || 0;
                 const existingPeriodOriginal = useCustomDays
-                  ? tariff.original_price_per_day_kopeks &&
-                    tariff.original_price_per_day_kopeks > (tariff.price_per_day_kopeks ?? 0)
-                    ? customDays * tariff.original_price_per_day_kopeks
+                  ? customDaysPricing.originalPrice > customDaysPricing.price
+                    ? customDaysPricing.originalPrice
                     : undefined
                   : selectedTariffPeriod?.original_price_kopeks &&
                       selectedTariffPeriod.original_price_kopeks > selectedTariffPeriod.price_kopeks
