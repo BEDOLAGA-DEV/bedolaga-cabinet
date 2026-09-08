@@ -468,6 +468,14 @@
       "reduceDevicesDescription": "می‌توانید تعداد دستگاه‌ها را تا حداقل مجاز در تعرفه کاهش دهید",
       "reduceDevicesTitle": "کاهش تعداد دستگاه‌ها",
       "reduceUnavailable": "در حال حاضر کاهش تعداد دستگاه‌ها امکان‌پذیر نیست",
+      "alreadyAtMinDeviceLimit": "حداقل تعداد دستگاه برای تعرفه شما از قبل اعمال شده است",
+      "reasons": {
+        "noSubscription": "اشتراکی یافت نشد",
+        "noActiveSubscription": "اشتراک فعالی وجود ندارد",
+        "maxDevicesReached": "به حداکثر تعداد دستگاه رسیده‌اید ({{count}})",
+        "canAddLimited": "حداکثر {{count}} دستگاه می‌توانید اضافه کنید",
+        "trialNotAllowed": "کاهش تعداد دستگاه برای اشتراک آزمایشی در دسترس نیست"
+      },
       "reducing": "در حال کاهش…"
     },
     "serverManagement": {
