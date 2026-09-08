@@ -84,6 +84,15 @@ async function renderCard() {
 }
 
 describe('карточка очереди писем', () => {
+  it('объясняет, что счётчики только про непрошедшие с первого раза письма', async () => {
+    // Иначе «отправлено: 0» читается как «почта не работает», хотя обычные
+    // письма сюда не попадают вовсе.
+    state.payload = { pending: 0, sent: 0, dead: 0, smtp_configured: true, items: [] };
+    await renderCard();
+    // Фраза звучит и в подсказке, и в строке про пустую очередь — обе уместны.
+    expect((await screen.findAllByText(/не ушли с первого раза/)).length).toBeGreaterThan(0);
+  });
+
   it('на пустой очереди говорит «пусто», а не исчезает', async () => {
     // Карточку ищут глазами в разделе писем: пустое место неотличимо от
     // «раздела нет» — именно так её и не нашли после обновления.
@@ -113,7 +122,7 @@ describe('карточка очереди писем', () => {
   it('показывает счётчики и кнопки очистки', async () => {
     state.payload = { pending: 2, sent: 5, dead: 1, smtp_configured: true, items: [] };
     await renderCard();
-    expect(await screen.findByText(/Ждут отправки: 2/)).toBeTruthy();
+    expect(await screen.findByText(/Ждут повтора: 2/)).toBeTruthy();
     expect(screen.getByText('Убрать ожидающие')).toBeTruthy();
     expect(screen.getByText('Очистить')).toBeTruthy();
   });
@@ -121,7 +130,7 @@ describe('карточка очереди писем', () => {
   it('без ожидающих писем кнопки «убрать ожидающие» нет', async () => {
     state.payload = { pending: 0, sent: 3, dead: 0, smtp_configured: true, items: [] };
     await renderCard();
-    await screen.findByText(/отправлено: 3/);
+    await screen.findByText(/доставлены повтором: 3/);
     expect(screen.queryByText('Убрать ожидающие')).toBeNull();
   });
 
@@ -148,6 +157,6 @@ describe('карточка очереди писем', () => {
     const { container } = await renderCard();
     expect(await screen.findByText('user@example.com')).toBeTruthy();
     expect(container.textContent).not.toContain('отправлять письмо некому');
-    expect(container.textContent).toContain('Не отправлено');
+    expect(container.textContent).toContain('Не доставлено');
   });
 });
