@@ -27,9 +27,14 @@ export function getGlassColors(isDark: boolean) {
     // для CSS-свойств: в SVG-атрибутах var() не раскрывается — там передавать
     // через style={{ stroke }}.
     text: `rgb(var(${TEXT_VAR}))`,
-    textSecondary: `rgba(var(${TEXT_VAR}), ${isDark ? 0.4 : 0.5})`,
-    textMuted: `rgba(var(${TEXT_VAR}), ${isDark ? 0.3 : 0.35})`,
-    textFaint: `rgba(var(${TEXT_VAR}), 0.25)`,
+    // Вторичный текст — готовые токены палитры, а не доля основного цвета.
+    // Доля (0.4 / 0.3 / 0.25) давала контраст 3.4 и ниже: подписи «Трафик»,
+    // «104.0 / 1500 ГБ» и дата в карточке подписки читались с трудом. Токены
+    // dark-400/500 клампятся по контрасту в applyThemeColors, поэтому остаются
+    // читаемыми на любой палитре оператора.
+    textSecondary: 'rgb(var(--color-dark-400))',
+    textMuted: 'rgb(var(--color-dark-500))',
+    textFaint: 'rgb(var(--color-dark-500))',
     textGhost: `rgba(var(${TEXT_VAR}), ${isDark ? 0.08 : 0.06})`,
 
     // Progress bar track

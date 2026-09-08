@@ -84,7 +84,7 @@ export default function ConnectDeviceTile({
         <div className="text-sm font-semibold tracking-tight text-dark-50">
           {t('dashboard.connectDevice')}
         </div>
-        <div className="mt-0.5 text-[11px] text-dark-50/30">
+        <div className="mt-0.5 text-[11px] text-dark-400">
           {subscription.device_limit === 0
             ? t('dashboard.devicesConnectedUnlimited', { used: connectedDevices })
             : t('dashboard.devicesOfMax', {
@@ -104,7 +104,7 @@ export default function ConnectDeviceTile({
 
       {/* Device indicator */}
       {subscription.device_limit === 0 ? (
-        <div className="flex flex-shrink-0 items-center text-lg text-dark-50/40" aria-hidden="true">
+        <div className="flex flex-shrink-0 items-center text-lg text-dark-400" aria-hidden="true">
           ∞
         </div>
       ) : subscription.device_limit <= 10 ? (

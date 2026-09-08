@@ -384,11 +384,11 @@ function NodeCard({ node, providerName, realtime, onAction, isLoading }: NodeCar
               {(rx > 0 || tx > 0) && (
                 <div className="flex items-center gap-4">
                   <span className="flex items-center gap-1">
-                    <DownloadIcon className="h-3 w-3 shrink-0 text-success-400/70" />
+                    <DownloadIcon className="h-3 w-3 shrink-0 text-success-400" />
                     {formatSpeed(rx)}
                   </span>
                   <span className="flex items-center gap-1">
-                    <UploadIcon className="h-3 w-3 shrink-0 text-accent-400/70" />
+                    <UploadIcon className="h-3 w-3 shrink-0 text-accent-400" />
                     {formatSpeed(tx)}
                   </span>
                 </div>
@@ -433,11 +433,11 @@ function NodeCard({ node, providerName, realtime, onAction, isLoading }: NodeCar
               )}
               <span className="flex items-center gap-2">
                 <span className="flex items-center gap-0.5">
-                  <DownloadIcon className="h-3 w-3 text-success-400/70" />
+                  <DownloadIcon className="h-3 w-3 text-success-400" />
                   {formatSpeed(rx)}
                 </span>
                 <span className="flex items-center gap-0.5">
-                  <UploadIcon className="h-3 w-3 text-accent-400/70" />
+                  <UploadIcon className="h-3 w-3 text-accent-400" />
                   {formatSpeed(tx)}
                 </span>
               </span>
@@ -1120,11 +1120,11 @@ function NodesTab({
             {t('admin.remnawave.traffic.realtimeTitle', 'Realtime traffic')}
           </span>
           <span className="flex items-center gap-1">
-            <DownloadIcon className="h-3 w-3 text-success-400/70" />
+            <DownloadIcon className="h-3 w-3 text-success-400" />
             {formatBytes(traffic.download)}
           </span>
           <span className="flex items-center gap-1">
-            <UploadIcon className="h-3 w-3 text-accent-400/70" />
+            <UploadIcon className="h-3 w-3 text-accent-400" />
             {formatBytes(traffic.upload)}
           </span>
           <span className="text-dark-300">
