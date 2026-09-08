@@ -1767,7 +1767,9 @@
       "reasonNoSmtp": "Mail server is not configured",
       "reasonExpired": "Email content has expired",
       "reasonFailed": "Delivery failed",
-      "more": "{{count}} more"
+      "more": "{{count}} more",
+      "empty": "The queue is empty — every email has been sent.",
+      "unavailable": "Email queue state is unavailable. The bot may not be updated yet."
     },
     "payments": {
       "title": "Payments",
