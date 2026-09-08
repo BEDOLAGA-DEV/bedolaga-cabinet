@@ -602,6 +602,14 @@
       "disconnectDevicesFirst_other": "Disconnect devices first to reduce the limit below {{count}} devices",
       "reduceUnavailable": "Device reduction is not available",
       "alreadyAtMinDeviceLimit": "Already at minimum device limit for your tariff",
+      "reasons": {
+        "noSubscription": "Subscription not found",
+        "noActiveSubscription": "No active subscription",
+        "maxDevicesReached": "Device limit reached ({{count}})",
+        "canAddLimited_one": "You can add at most {{count}} device",
+        "canAddLimited_other": "You can add at most {{count}} devices",
+        "trialNotAllowed": "Device reduction is not available for trial subscriptions"
+      },
       "reduce": "Reduce",
       "reducing": "Reducing...",
       "newDeviceLimit_one": "New limit: {{count}} device",

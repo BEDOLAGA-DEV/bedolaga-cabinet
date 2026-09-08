@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { deviceUnavailableText } from '../deviceReasons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { subscriptionApi } from '../../../api/subscription';
 import { getErrorMessage } from '../../../utils/subscriptionHelpers';
@@ -105,7 +106,11 @@ export function DeviceTopupSheet({
 
       {devicePriceData?.available === false ? (
         <div className="py-4 text-center text-sm text-dark-400">
-          {devicePriceData.reason || t('subscription.additionalOptions.devicesUnavailable')}
+          {deviceUnavailableText(
+            t,
+            devicePriceData,
+            'subscription.additionalOptions.devicesUnavailable',
+          )}
         </div>
       ) : (
         <div className="space-y-4">
