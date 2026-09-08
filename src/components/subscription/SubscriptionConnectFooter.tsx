@@ -70,7 +70,7 @@ export function SubscriptionConnectFooter({
       style={{ borderColor }}
     >
       {isFull ? (
-        <WarningIcon className="h-4 w-4 shrink-0 text-warning-400/80" />
+        <WarningIcon className="h-4 w-4 shrink-0 text-warning-400" />
       ) : (
         <DevicesIcon
           className={cn('h-4 w-4 shrink-0', highlight ? 'text-accent-400' : 'opacity-40')}
@@ -85,7 +85,7 @@ export function SubscriptionConnectFooter({
           : t('subscription.connectFooter.connect', 'Подключить устройство')}
       </span>
       <span
-        className={cn('ml-auto text-[11px] tabular-nums', isFull && 'text-warning-400/80')}
+        className={cn('ml-auto text-[11px] tabular-nums', isFull && 'text-warning-400')}
         style={isFull ? undefined : { color: mutedColor }}
       >
         {counter}

@@ -530,9 +530,7 @@ export default function AdminGraceAccess() {
             <LockIcon className="h-4 w-4" />
             {t('admin.graceAccess.fullyLocked.title')}
           </div>
-          <p className="mt-1 text-sm text-warning-200/80">
-            {t('admin.graceAccess.fullyLocked.body')}
-          </p>
+          <p className="mt-1 text-sm text-warning-200">{t('admin.graceAccess.fullyLocked.body')}</p>
         </div>
       )}
 
@@ -542,7 +540,7 @@ export default function AdminGraceAccess() {
             <RestartIcon className="h-4 w-4" />
             {t('admin.graceAccess.restart.title')}
           </div>
-          <p className="mt-1 text-sm text-warning-200/80">
+          <p className="mt-1 text-sm text-warning-200">
             {t('admin.graceAccess.restart.body', {
               running: t(`admin.graceAccess.badge.${data.runtime.running_mode}`, {
                 defaultValue: data.runtime.running_mode,
@@ -581,7 +579,7 @@ export default function AdminGraceAccess() {
               </div>
               <ul
                 className={`mt-2 space-y-1 text-sm ${
-                  severe ? 'text-error-200/90' : 'text-warning-200/80'
+                  severe ? 'text-error-200' : 'text-warning-200'
                 }`}
               >
                 {data.issues.map((issue) => (

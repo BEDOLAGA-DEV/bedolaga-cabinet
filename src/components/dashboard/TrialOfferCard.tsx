@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
-import { UseMutationResult } from '@tanstack/react-query';
+import type { UseMutationResult } from '@tanstack/react-query';
 import type { TrialInfo } from '../../types';
 import { useCurrency } from '../../hooks/useCurrency';
 import { useTheme } from '../../hooks/useTheme';
@@ -127,7 +127,7 @@ export default function TrialOfferCard({
       <h2 className="mb-1.5 text-[22px] font-bold tracking-tight text-dark-50">
         {isFree ? t('dashboard.trialOffer.freeTitle') : t('dashboard.trialOffer.paidTitle')}
       </h2>
-      <p className="mb-5 text-sm text-dark-50/40">
+      <p className="mb-5 text-sm text-dark-400">
         {isFree ? t('dashboard.trialOffer.freeDesc') : t('dashboard.trialOffer.paidDesc')}
       </p>
 
@@ -172,7 +172,7 @@ export default function TrialOfferCard({
             <div className="text-4xl font-extrabold leading-none tracking-tight text-dark-50">
               {stat.value}
             </div>
-            <div className="mt-1 text-xs font-medium text-dark-50/30">{stat.label}</div>
+            <div className="mt-1 text-xs font-medium text-dark-400">{stat.label}</div>
           </div>
         ))}
       </div>
@@ -184,7 +184,7 @@ export default function TrialOfferCard({
           style={{ background: g.innerBg, border: `1px solid ${g.innerBorder}` }}
         >
           <div className="flex items-center justify-between">
-            <span className="text-sm text-dark-50/40">{t('balance.currentBalance')}</span>
+            <span className="text-sm text-dark-400">{t('balance.currentBalance')}</span>
             <span
               className={`font-display text-sm font-semibold ${canAfford ? 'text-success-400' : 'text-warning-400'}`}
             >
