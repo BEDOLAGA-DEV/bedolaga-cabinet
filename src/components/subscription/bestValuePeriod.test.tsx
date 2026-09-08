@@ -8,7 +8,7 @@ import ruLocale from '@/locales/ru.json';
 import type { RenewalOption } from '@/types';
 
 /**
- * Выделение периода как самого выгодного.
+ * Выделение выгодного: период внутри тарифа и сам тариф в списке.
  *
  * Механизма не было вовсе: клиент видел одинаковые строки и брал самую дешёвую,
  * хотя оператору выгоднее длинный период. Тесты держат само выделение и его
@@ -151,5 +151,31 @@ describe('выделенный период при продлении', () => {
 
     expect(await screen.findByText(ru('subscription.bestValue'))).toBeTruthy();
     expect(screen.getByText('-25%')).toBeTruthy();
+  });
+});
+
+// ==================== выделение самого тарифа ====================
+
+describe('выделенный тариф в списке', () => {
+  it('обведён рамкой и подписан, остальные — нет', async () => {
+    const { render: renderGrid, cardFor: tariffCard } = await import('./tariffGridHarness');
+    renderGrid([
+      { id: 1, name: 'Базовый', is_highlighted: false },
+      { id: 2, name: 'Про', is_highlighted: true },
+    ]);
+
+    const badges = await screen.findAllByText(ru('subscription.bestValue'));
+    expect(badges).toHaveLength(1);
+    expect(tariffCard('Про').contains(badges[0])).toBe(true);
+    expect(tariffCard('Про').className).toContain('border-2');
+    expect(tariffCard('Базовый').className).not.toContain('border-2');
+  });
+
+  it('текущий тариф важнее подсказки: двух рамок сразу не бывает', async () => {
+    const { render: renderGrid, cardFor: tariffCard } = await import('./tariffGridHarness');
+    renderGrid([{ id: 2, name: 'Про', is_highlighted: true }], { currentTariffId: 2 });
+
+    expect(screen.queryByText(ru('subscription.bestValue'))).toBeNull();
+    expect(tariffCard('Про').className).toContain('border-accent-500');
   });
 });

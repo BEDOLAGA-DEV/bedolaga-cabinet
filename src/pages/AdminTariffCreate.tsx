@@ -74,6 +74,8 @@ export default function AdminTariffCreate() {
 
   // Gift visibility
   const [showInGift, setShowInGift] = useState(true);
+  // Тариф отмечен как выгодный — выделяется в списке тарифов у клиента.
+  const [isTariffHighlighted, setIsTariffHighlighted] = useState(false);
 
   // New period for adding
   const [newPeriodDays, setNewPeriodDays] = useState<number | ''>(30);
@@ -135,6 +137,7 @@ export default function AdminTariffCreate() {
       setTrafficTopupPackages(data.traffic_topup_packages || {});
       setTrafficResetMode(data.traffic_reset_mode || null);
       setShowInGift(data.show_in_gift ?? true);
+      setIsTariffHighlighted(data.is_highlighted ?? false);
       return data;
     }, []),
   });
@@ -169,6 +172,7 @@ export default function AdminTariffCreate() {
       description: isEdit ? description : description || undefined,
       is_active: isActive,
       show_in_gift: showInGift,
+      is_highlighted: isTariffHighlighted,
       traffic_limit_gb: toNumber(trafficLimitGb, 100),
       device_limit: toNumber(deviceLimit, 1),
       device_price_kopeks:
@@ -1152,6 +1156,31 @@ export default function AdminTariffCreate() {
                 <span
                   className={`absolute top-1 h-4 w-4 rounded-full bg-white transition-transform ${
                     isActive ? 'left-6' : 'left-1'
+                  }`}
+                />
+              </button>
+            </div>
+            {/* Highlight tariff toggle */}
+            <div className="flex items-center justify-between rounded-lg bg-dark-800 p-3">
+              <div>
+                <span className="text-sm font-medium text-dark-200">
+                  {t('admin.tariffs.highlightLabel')}
+                </span>
+                <p className="text-xs text-dark-500">{t('admin.tariffs.highlightHint')}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsTariffHighlighted(!isTariffHighlighted)}
+                role="switch"
+                aria-checked={isTariffHighlighted}
+                aria-label={t('admin.tariffs.highlightLabel')}
+                className={`relative h-6 w-11 rounded-full transition-colors ${
+                  isTariffHighlighted ? 'bg-urgent-400' : 'bg-dark-600'
+                }`}
+              >
+                <span
+                  className={`absolute top-1 h-4 w-4 rounded-full bg-white transition-transform ${
+                    isTariffHighlighted ? 'left-6' : 'left-1'
                   }`}
                 />
               </button>

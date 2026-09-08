@@ -3477,6 +3477,8 @@
       "noPeriodsHint": "No added periods. Add at least one period.",
       "daysShort": "d.",
       "bestValueHint": "Mark this period as the best value — customers see it highlighted",
+      "highlightLabel": "Highlight tariff",
+      "highlightHint": "Customers see this tariff framed with a “Best value” badge",
       "serversTitle": "Servers",
       "externalSquadTitle": "External Squad",
       "externalSquadHint": "Assign a Remnawave external squad for users on this tariff. When a subscription is created, the user will be automatically added to the selected squad.",

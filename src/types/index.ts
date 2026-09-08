@@ -291,6 +291,8 @@ export interface Tariff {
   id: number;
   name: string;
   description: string | null;
+  /** Тариф отмечен оператором как выгодный — выделяется в списке. */
+  is_highlighted?: boolean;
   tier_level: number;
   traffic_limit_gb: number;
   traffic_limit_label: string;
