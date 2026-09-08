@@ -1680,14 +1680,13 @@
     },
     "emailQueue": {
       "title": "邮件队列",
-      "hint": "只有首次发送失败的邮件才会出现在这里。",
-      "counts": "等待重试：{{pending}} · 重试后送达：{{sent}} · 未送达：{{dead}}",
+      "hint": "仅首次发送失败的邮件",
       "clearPending": "清除等待中",
       "clearAll": "清空",
       "confirmPending": "清除等待发送的邮件？",
       "confirmAll": "清空整个队列，包括历史记录？",
       "cleared": "队列已清空：{{count}}",
-      "noSmtp": "未配置邮件服务器，邮件不会发送。请在 SMTP 设置中填写服务器地址，或保持现状——邮件功能已关闭。",
+      "noSmtp": "未配置邮件服务器，邮件不会发送。请在设置的 SMTP 部分填写地址。",
       "statusPending": "等待重试",
       "statusSent": "重试后送达",
       "statusDead": "未送达",
@@ -1695,8 +1694,10 @@
       "reasonExpired": "邮件内容已过期",
       "reasonFailed": "发送失败",
       "more": "还有 {{count}} 封",
-      "empty": "目前队列为空。",
-      "unavailable": "无法获取邮件队列状态，机器人可能尚未更新。"
+      "unavailable": "无法获取邮件队列状态，机器人可能尚未更新。",
+      "captionPending": "等待中",
+      "captionSent": "已送达",
+      "captionDead": "未送达"
     },
     "payments": {
       "title": "支付",
