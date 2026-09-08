@@ -1754,14 +1754,13 @@
     },
     "emailQueue": {
       "title": "Email queue",
-      "hint": "Only emails that failed on the first attempt land here.",
-      "counts": "Awaiting retry: {{pending}} · delivered on retry: {{sent}} · undelivered: {{dead}}",
+      "hint": "Only emails that failed on the first attempt",
       "clearPending": "Drop waiting",
       "clearAll": "Clear",
       "confirmPending": "Drop the emails waiting to be sent?",
       "confirmAll": "Clear the whole queue, history included?",
       "cleared": "Queue cleared: {{count}}",
-      "noSmtp": "No mail server is configured, so emails are not sent. Set the server address in the SMTP settings, or leave it as is — email is simply off.",
+      "noSmtp": "No mail server is configured, so emails are not sent. Set the address in settings, SMTP section.",
       "statusPending": "Awaiting retry",
       "statusSent": "Delivered on retry",
       "statusDead": "Undelivered",
@@ -1769,8 +1768,10 @@
       "reasonExpired": "Email content has expired",
       "reasonFailed": "Delivery failed",
       "more": "{{count}} more",
-      "empty": "The queue is empty right now.",
-      "unavailable": "Email queue state is unavailable. The bot may not be updated yet."
+      "unavailable": "Email queue state is unavailable. The bot may not be updated yet.",
+      "captionPending": "waiting",
+      "captionSent": "delivered",
+      "captionDead": "undelivered"
     },
     "payments": {
       "title": "Payments",

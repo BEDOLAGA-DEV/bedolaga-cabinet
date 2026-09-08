@@ -84,16 +84,16 @@ async function renderCard() {
 }
 
 describe('карточка очереди писем', () => {
-  it('подсказку и счётчики не обрезает: на телефоне фраза уходила в многоточие', async () => {
+  it('ничего из объяснений не обрезает: на телефоне фразы уходили в многоточие', async () => {
     state.payload = { pending: 1, sent: 0, dead: 0, smtp_configured: true, items: [] };
     const { container } = await renderCard();
-    await screen.findByText(/Ждут повтора: 1/);
-    const clipped = Array.from(container.querySelectorAll('p')).filter((node) =>
-      node.className.includes('truncate'),
-    );
-    const clippedText = clipped.map((node) => node.textContent || '');
-    expect(clippedText.some((text) => text.includes('первого раза'))).toBe(false);
-    expect(clippedText.some((text) => text.includes('Ждут повтора'))).toBe(false);
+    await screen.findByText(/не ушедшие с первого раза/);
+    const clipped = Array.from(container.querySelectorAll('p'))
+      .filter((node) => node.className.includes('truncate'))
+      .map((node) => node.textContent || '');
+    // Обрезка допустима только у длинных адресов и тем в списке писем.
+    expect(clipped.some((text) => text.includes('первого раза'))).toBe(false);
+    expect(clipped.some((text) => text.includes('в ожидании'))).toBe(false);
   });
 
   it('объясняет, что счётчики только про непрошедшие с первого раза письма', async () => {
@@ -101,15 +101,15 @@ describe('карточка очереди писем', () => {
     // письма сюда не попадают вовсе.
     state.payload = { pending: 0, sent: 0, dead: 0, smtp_configured: true, items: [] };
     await renderCard();
-    expect(await screen.findByText(/не ушли с первого раза/)).toBeTruthy();
+    expect(await screen.findByText(/не ушедшие с первого раза/)).toBeTruthy();
   });
 
-  it('на пустой очереди говорит «пусто», а не исчезает', async () => {
+  it('на пустой очереди показывает нули, а не исчезает', async () => {
     // Карточку ищут глазами в разделе писем: пустое место неотличимо от
     // «раздела нет» — именно так её и не нашли после обновления.
     await renderCard();
-    expect(await screen.findByText(/Сейчас очередь пуста/)).toBeTruthy();
-    expect(screen.getByText(/Очередь писем/)).toBeTruthy();
+    expect(await screen.findByText(/Очередь писем/)).toBeTruthy();
+    expect(screen.getAllByText('0')).toHaveLength(3);
   });
 
   it('сообщает, когда состояние очереди недоступно', async () => {
@@ -133,7 +133,9 @@ describe('карточка очереди писем', () => {
   it('показывает счётчики и кнопки очистки', async () => {
     state.payload = { pending: 2, sent: 5, dead: 1, smtp_configured: true, items: [] };
     await renderCard();
-    expect(await screen.findByText(/Ждут повтора: 2/)).toBeTruthy();
+    expect(await screen.findByText('в ожидании')).toBeTruthy();
+    expect(screen.getByText('2')).toBeTruthy();
+    expect(screen.getByText('5')).toBeTruthy();
     expect(screen.getByText('Убрать ожидающие')).toBeTruthy();
     expect(screen.getByText('Очистить')).toBeTruthy();
   });
@@ -141,7 +143,8 @@ describe('карточка очереди писем', () => {
   it('без ожидающих писем кнопки «убрать ожидающие» нет', async () => {
     state.payload = { pending: 0, sent: 3, dead: 0, smtp_configured: true, items: [] };
     await renderCard();
-    await screen.findByText(/доставлены повтором: 3/);
+    await screen.findByText('доставлены');
+    expect(screen.getByText('3')).toBeTruthy();
     expect(screen.queryByText('Убрать ожидающие')).toBeNull();
   });
 
