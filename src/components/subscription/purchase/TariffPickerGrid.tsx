@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router';
 import { useTheme } from '../../../hooks/useTheme';
 import { useCurrency } from '../../../hooks/useCurrency';
 import { usePromoDiscount } from '../../../hooks/usePromoDiscount';
+import { dailyPriceQuote } from './dailyPrice';
 import { getGlassColors } from '../../../utils/glassTheme';
 import { ArrowDownIcon, DevicesIcon, RestartIcon } from '@/components/icons';
 import type { Tariff, Subscription, PurchaseOptions } from '../../../types';
@@ -201,14 +202,8 @@ export function TariffPickerGrid({
                 {/* Price info */}
                 <div className="mt-3 border-t border-dark-700/50 pt-3 text-sm text-dark-400">
                   {(() => {
-                    const dailyPrice =
-                      tariff.daily_price_kopeks ?? tariff.price_per_day_kopeks ?? 0;
-                    const originalDailyPrice = tariff.original_daily_price_kopeks || 0;
-                    if (dailyPrice > 0 || originalDailyPrice > 0) {
-                      const promoDaily = applyPromoDiscount(
-                        dailyPrice,
-                        originalDailyPrice > dailyPrice ? originalDailyPrice : undefined,
-                      );
+                    const promoDaily = dailyPriceQuote(tariff, applyPromoDiscount);
+                    if (promoDaily) {
                       return (
                         <span className="flex items-center gap-2">
                           <span className="font-medium text-accent-400">

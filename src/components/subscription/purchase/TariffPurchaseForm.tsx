@@ -6,6 +6,7 @@ import { subscriptionApi } from '../../../api/subscription';
 import { getErrorMessage, getInsufficientBalanceError } from '../../../utils/subscriptionHelpers';
 import { useCurrency } from '../../../hooks/useCurrency';
 import { usePromoDiscount } from '../../../hooks/usePromoDiscount';
+import { dailyPriceQuote } from './dailyPrice';
 import { usePlatform } from '../../../platform';
 import { openPaymentUrl } from '../../../utils/openPaymentUrl';
 import { getMonthlyPriceKopeks } from '../../../utils/pricing';
@@ -54,6 +55,8 @@ export function TariffPurchaseForm({
   const queryClient = useQueryClient();
   const { formatAmount, currencySymbol } = useCurrency();
   const { applyPromoDiscount } = usePromoDiscount();
+  // Та же котировка, что на карточке тарифа: серверная цена + промокод один раз.
+  const dailyQuote = dailyPriceQuote(tariff, applyPromoDiscount);
   const { openLink, platform } = usePlatform();
   const ref = useRef<HTMLDivElement>(null);
 
@@ -235,8 +238,26 @@ export function TariffPurchaseForm({
               {t('subscription.dailyPurchase.costPerDay')}
             </div>
             <div className="text-3xl font-bold text-accent-400">
-              {formatPrice(tariff.daily_price_kopeks || 0)}
+              {formatPrice(dailyQuote?.price ?? 0)}
             </div>
+            {dailyQuote?.original && dailyQuote.original > dailyQuote.price && (
+              <div className="mt-1 flex items-center justify-center gap-2 text-sm">
+                <span className="text-dark-500 line-through">
+                  {formatPrice(dailyQuote.original)}
+                </span>
+                {dailyQuote.percent && dailyQuote.percent > 0 && (
+                  <span
+                    className={`rounded px-1.5 py-0.5 text-xs ${
+                      dailyQuote.isPromoGroup
+                        ? 'bg-success-500/20 text-success-400'
+                        : 'bg-warning-500/20 text-warning-400'
+                    }`}
+                  >
+                    -{dailyQuote.percent}%
+                  </span>
+                )}
+              </div>
+            )}
           </div>
           <div className="space-y-2 text-sm text-dark-400">
             <div className="flex items-start gap-2">
@@ -254,7 +275,7 @@ export function TariffPurchaseForm({
           </div>
 
           {(() => {
-            const dailyPrice = tariff.daily_price_kopeks || 0;
+            const dailyPrice = dailyQuote?.price ?? 0;
             const hasEnoughBalance = balanceKopeks !== undefined && dailyPrice <= balanceKopeks;
 
             return (
