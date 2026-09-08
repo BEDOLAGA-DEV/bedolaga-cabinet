@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router';
+import { useLocation, useNavigate } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { partnerApi } from '../api/partners';
-import { AdminBackButton } from '../components/admin';
+import { AdminBackButton, backTo } from '../components/admin';
 import { toNumber } from '../utils/inputHelpers';
 import { SettingsIcon } from '@/components/icons';
 import { PageSkeleton, Skeleton } from '@/components/ui/skeleton';
@@ -14,6 +14,7 @@ type NumberOrEmpty = number | '';
 export default function AdminPartnerSettings() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   const queryClient = useQueryClient();
 
   const {
@@ -132,7 +133,7 @@ export default function AdminPartnerSettings() {
           настройка — отдельный экран с собственной моделью данных. */}
       <button
         type="button"
-        onClick={() => navigate('/admin/partners/referral-levels')}
+        onClick={() => navigate('/admin/partners/referral-levels', backTo(location))}
         className="card mb-6 flex w-full items-center justify-between text-left transition-colors hover:border-accent-500/40"
       >
         <div>

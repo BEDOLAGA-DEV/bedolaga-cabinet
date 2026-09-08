@@ -108,7 +108,7 @@ export default function AdminReferralLevels() {
     return (
       <div className="animate-fade-in">
         <div className="mb-6 flex items-center gap-3">
-          <AdminBackButton to="/admin/partners/settings" />
+          <AdminBackButton to="/admin" />
           <h1 className="text-xl font-semibold text-dark-100">{t('admin.referralLevels.title')}</h1>
         </div>
         <div className="rounded-xl border border-error-500/30 bg-error-500/10 p-6 text-center">
@@ -175,7 +175,7 @@ export default function AdminReferralLevels() {
   return (
     <div className="animate-fade-in">
       <div className="mb-6 flex items-center gap-3">
-        <AdminBackButton to="/admin/partners/settings" />
+        <AdminBackButton to="/admin" />
         <div className="rounded-lg bg-accent-500/20 p-2 text-accent-400">
           <SettingsIcon className="h-6 w-6" />
         </div>
