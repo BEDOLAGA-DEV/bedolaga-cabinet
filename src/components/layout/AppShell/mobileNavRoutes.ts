@@ -50,8 +50,19 @@ function withoutTrailingSlash(pathname: string): string {
   return pathname.length > 1 && pathname.endsWith('/') ? pathname.slice(0, -1) : pathname;
 }
 
-/** Точное совпадение с экраном кнопки: детали подписки или пополнение — уже не экран панели. */
+/**
+ * Экраны, куда кнопка панели приводит не напрямую.
+ *
+ * «Подписка» ведёт на список, а список с единственной подпиской сам открывает её
+ * карточку (Subscriptions.tsx). Для клиента это и есть экран кнопки: он нажал
+ * «Подписка» и оказался здесь — панель пропадать не должна. Продление и покупка
+ * сюда не попадают: туда уходят уже изнутри карточки.
+ */
+const NAV_SCREEN_PATTERNS: readonly RegExp[] = [/^\/subscriptions\/\d+$/];
+
+/** Экран кнопки: сам путь пункта или то, во что он разворачивается. */
 export function isMobileNavScreen(pathname: string, items: readonly MobileNavItem[]): boolean {
   const path = withoutTrailingSlash(pathname);
-  return items.some((item) => item.path === path);
+  if (items.some((item) => item.path === path)) return true;
+  return NAV_SCREEN_PATTERNS.some((pattern) => pattern.test(path));
 }
