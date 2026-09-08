@@ -69,14 +69,14 @@ function PremiumTrafficItem({
             </span>
           </div>
           {item.is_limited && (
-            <div className="mt-0.5 text-[11px] text-dark-50/45">
+            <div className="mt-0.5 text-[11px] text-dark-400">
               {label('dashboard.premiumTrafficPaused')}
             </div>
           )}
           {!item.is_limited && item.extra_gb > 0 && (
             // Докупленное показываем отдельно: иначе выросший лимит выглядит
             // как ошибка, а не как результат покупки.
-            <div className="mt-0.5 text-[11px] text-dark-50/45">
+            <div className="mt-0.5 text-[11px] text-dark-400">
               {label('dashboard.premiumTrafficTopped', {
                 amount: formatTraffic(item.extra_gb),
               })}
@@ -84,7 +84,7 @@ function PremiumTrafficItem({
           )}
         </div>
 
-        <div className="shrink-0 text-right font-mono text-[11px] text-dark-50/40">
+        <div className="shrink-0 text-right font-mono text-[11px] text-dark-500">
           {formatTraffic(item.used_gb)} / {formatTraffic(totalGb)}
         </div>
       </div>
