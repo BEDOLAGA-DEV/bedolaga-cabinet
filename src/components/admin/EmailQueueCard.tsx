@@ -123,56 +123,57 @@ export function EmailQueueCard() {
 
   return (
     <div className="rounded-xl border border-dark-700 bg-dark-800 p-3 sm:p-4">
-      <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-2">
-        <div className="flex min-w-0 flex-1 items-start gap-2">
-          <ClockIcon className="mt-0.5 h-5 w-5 flex-shrink-0 text-dark-400" />
-          <div className="min-w-0">
-            <h2 className="text-sm font-semibold text-dark-100">
-              {t('admin.emailQueue.title', 'Очередь писем')}
-            </h2>
-            <p className="text-[11px] leading-snug text-dark-500">
-              {t(
-                'admin.emailQueue.hint',
-                'Сюда попадают только письма, которые не ушли с первого раза.',
-              )}
-            </p>
-            <p className="mt-0.5 text-xs leading-snug text-dark-400">
-              {t(
-                'admin.emailQueue.counts',
-                'Ждут повтора: {{pending}} · доставлены повтором: {{sent}} · не доставлены: {{dead}}',
-                {
-                  pending: data.pending,
-                  sent: data.sent,
-                  dead: data.dead,
-                },
-              )}
-            </p>
+      <div className="flex items-center gap-2">
+        <ClockIcon className="h-5 w-5 flex-shrink-0 text-dark-400" />
+        <h2 className="text-sm font-semibold text-dark-100">
+          {t('admin.emailQueue.title', 'Очередь писем')}
+        </h2>
+      </div>
+
+      {/* Числа плитками: длинная строка «ждут повтора: 0 · доставлены…» рвалась
+          посреди фразы на телефоне и читалась плохо. */}
+      <div className="mt-3 grid grid-cols-3 gap-2">
+        {(
+          [
+            [data.pending, t('admin.emailQueue.captionPending', 'в ожидании')],
+            [data.sent, t('admin.emailQueue.captionSent', 'доставлены')],
+            [data.dead, t('admin.emailQueue.captionDead', 'не дошли')],
+          ] as const
+        ).map(([value, caption]) => (
+          <div key={caption} className="rounded-lg bg-dark-900/50 px-2 py-1.5 text-center">
+            <p className="text-base font-semibold tabular-nums text-dark-100">{value}</p>
+            <p className="text-[10px] leading-tight text-dark-400">{caption}</p>
           </div>
-        </div>
-        {total > 0 && (
-          <div className="flex flex-shrink-0 gap-1.5">
-            {data.pending > 0 && (
-              <button
-                type="button"
-                onClick={() => handleClear(true)}
-                disabled={clearMutation.isPending}
-                className="rounded-lg border border-dark-700 px-2 py-1 text-xs text-dark-300 transition-colors hover:bg-dark-700 disabled:opacity-50"
-              >
-                {t('admin.emailQueue.clearPending', 'Убрать ожидающие')}
-              </button>
-            )}
+        ))}
+      </div>
+
+      <p className="mt-2 text-[11px] leading-snug text-dark-500">
+        {t('admin.emailQueue.hint', 'Только письма, не ушедшие с первого раза')}
+      </p>
+
+      {total > 0 && (
+        <div className="mt-2 flex flex-wrap gap-1.5">
+          {data.pending > 0 && (
             <button
               type="button"
-              onClick={() => handleClear(false)}
+              onClick={() => handleClear(true)}
               disabled={clearMutation.isPending}
-              className="flex items-center gap-1 rounded-lg border border-dark-700 px-2 py-1 text-xs text-dark-300 transition-colors hover:bg-dark-700 disabled:opacity-50"
+              className="flex-1 rounded-lg border border-dark-700 px-2 py-1.5 text-xs text-dark-300 transition-colors hover:bg-dark-700 disabled:opacity-50"
             >
-              <TrashIcon className="h-3.5 w-3.5" />
-              {t('admin.emailQueue.clearAll', 'Очистить')}
+              {t('admin.emailQueue.clearPending', 'Убрать ожидающие')}
             </button>
-          </div>
-        )}
-      </div>
+          )}
+          <button
+            type="button"
+            onClick={() => handleClear(false)}
+            disabled={clearMutation.isPending}
+            className="flex flex-1 items-center justify-center gap-1 rounded-lg border border-dark-700 px-2 py-1.5 text-xs text-dark-300 transition-colors hover:bg-dark-700 disabled:opacity-50"
+          >
+            <TrashIcon className="h-3.5 w-3.5" />
+            {t('admin.emailQueue.clearAll', 'Очистить')}
+          </button>
+        </div>
+      )}
 
       {!data.smtp_configured && (
         <div className="mt-3 flex items-start gap-2 rounded-lg bg-amber-500/10 p-2.5">
@@ -180,19 +181,10 @@ export function EmailQueueCard() {
           <p className="text-xs text-amber-200">
             {t(
               'admin.emailQueue.noSmtp',
-              'Почтовый сервер не настроен, письма не отправляются. Укажите адрес сервера в настройках раздела SMTP или оставьте как есть — почта просто выключена.',
+              'Почтовый сервер не настроен, письма не отправляются. Адрес сервера задаётся в настройках, раздел SMTP.',
             )}
           </p>
         </div>
-      )}
-
-      {total === 0 && data.smtp_configured && (
-        <p className="mt-3 text-xs text-dark-500">
-          {t(
-            'admin.emailQueue.empty',
-            'Очередь пуста — писем, которые не ушли с первого раза, нет.',
-          )}
-        </p>
       )}
 
       {visible.length > 0 && (
@@ -200,22 +192,19 @@ export function EmailQueueCard() {
           {visible.map((item) => {
             const reason = humanReason(item, t);
             return (
-              <li
-                key={item.id}
-                className="flex items-center justify-between gap-2 rounded-lg bg-dark-900/50 px-2.5 py-1.5"
-              >
-                <div className="min-w-0">
+              <li key={item.id} className="rounded-lg bg-dark-900/50 px-2.5 py-1.5">
+                <div className="flex items-center justify-between gap-2">
                   <p className="truncate text-xs text-dark-200">{item.to_email}</p>
-                  <p className="truncate text-[11px] text-dark-400">
+                  <StatusPill item={item} />
+                </div>
+                <div className="mt-0.5 flex items-baseline justify-between gap-2 text-[11px]">
+                  <p className="truncate text-dark-400">
                     {item.subject}
                     {reason ? ` · ${reason}` : ''}
                   </p>
-                </div>
-                <div className="flex flex-shrink-0 items-center gap-2">
-                  <span className="text-[11px] text-dark-500">
+                  <span className="flex-shrink-0 text-dark-500">
                     {formatMoment(item.sent_at || item.created_at, i18n.language || 'ru')}
                   </span>
-                  <StatusPill item={item} />
                 </div>
               </li>
             );
