@@ -110,4 +110,8 @@ export interface PlatformContext {
 
   // Closing confirmation
   setClosingConfirmation: (enabled: boolean) => void;
+
+  // Экранная клавиатура: спрятать средствами платформы (Telegram — Bot API 9.1+).
+  // В браузере достаточно потери фокуса полем, там это no-op.
+  hideKeyboard: () => void;
 }
