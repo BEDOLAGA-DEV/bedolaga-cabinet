@@ -1695,7 +1695,7 @@
       "reasonExpired": "邮件内容已过期",
       "reasonFailed": "发送失败",
       "more": "还有 {{count}} 封",
-      "empty": "队列为空——没有首次发送失败的邮件。",
+      "empty": "目前队列为空。",
       "unavailable": "无法获取邮件队列状态，机器人可能尚未更新。"
     },
     "payments": {

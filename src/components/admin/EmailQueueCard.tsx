@@ -123,20 +123,20 @@ export function EmailQueueCard() {
 
   return (
     <div className="rounded-xl border border-dark-700 bg-dark-800 p-3 sm:p-4">
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-2">
-          <ClockIcon className="h-5 w-5 flex-shrink-0 text-dark-400" />
+      <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-2">
+        <div className="flex min-w-0 flex-1 items-start gap-2">
+          <ClockIcon className="mt-0.5 h-5 w-5 flex-shrink-0 text-dark-400" />
           <div className="min-w-0">
-            <h2 className="truncate text-sm font-semibold text-dark-100">
+            <h2 className="text-sm font-semibold text-dark-100">
               {t('admin.emailQueue.title', 'Очередь писем')}
             </h2>
-            <p className="truncate text-[11px] text-dark-500">
+            <p className="text-[11px] leading-snug text-dark-500">
               {t(
                 'admin.emailQueue.hint',
                 'Сюда попадают только письма, которые не ушли с первого раза.',
               )}
             </p>
-            <p className="truncate text-xs text-dark-400">
+            <p className="mt-0.5 text-xs leading-snug text-dark-400">
               {t(
                 'admin.emailQueue.counts',
                 'Ждут повтора: {{pending}} · доставлены повтором: {{sent}} · не доставлены: {{dead}}',
