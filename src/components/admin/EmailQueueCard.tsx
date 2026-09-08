@@ -51,9 +51,9 @@ function StatusPill({ item }: { item: EmailQueueItem }) {
     dead: 'bg-rose-500/10 text-rose-400',
   };
   const labels: Record<EmailQueueItem['status'], string> = {
-    pending: t('admin.emailQueue.statusPending', 'Ждёт отправки'),
-    sent: t('admin.emailQueue.statusSent', 'Отправлено'),
-    dead: t('admin.emailQueue.statusDead', 'Не отправлено'),
+    pending: t('admin.emailQueue.statusPending', 'Ждёт повтора'),
+    sent: t('admin.emailQueue.statusSent', 'Доставлено повтором'),
+    dead: t('admin.emailQueue.statusDead', 'Не доставлено'),
   };
   return (
     <span
@@ -130,10 +130,16 @@ export function EmailQueueCard() {
             <h2 className="truncate text-sm font-semibold text-dark-100">
               {t('admin.emailQueue.title', 'Очередь писем')}
             </h2>
+            <p className="truncate text-[11px] text-dark-500">
+              {t(
+                'admin.emailQueue.hint',
+                'Сюда попадают только письма, которые не ушли с первого раза.',
+              )}
+            </p>
             <p className="truncate text-xs text-dark-400">
               {t(
                 'admin.emailQueue.counts',
-                'Ждут отправки: {{pending}} · отправлено: {{sent}} · не отправлено: {{dead}}',
+                'Ждут повтора: {{pending}} · доставлены повтором: {{sent}} · не доставлены: {{dead}}',
                 {
                   pending: data.pending,
                   sent: data.sent,
@@ -182,7 +188,10 @@ export function EmailQueueCard() {
 
       {total === 0 && data.smtp_configured && (
         <p className="mt-3 text-xs text-dark-500">
-          {t('admin.emailQueue.empty', 'Очередь пуста — все письма отправлены.')}
+          {t(
+            'admin.emailQueue.empty',
+            'Очередь пуста — писем, которые не ушли с первого раза, нет.',
+          )}
         </p>
       )}
 
