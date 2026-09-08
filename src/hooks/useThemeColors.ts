@@ -136,20 +136,42 @@ function tripletOf({ r, g, b }: Rgb): string {
   return rgbToString(r, g, b);
 }
 
-// Белый текст на заливке остаётся, пока даёт AA для UI-элементов (3:1) —
-// так на средних по светлоте цветах (синий #3b82f6: белый 3.7, тёмный 4.8)
-// сохраняется привычный белый на кнопках. Ниже порога берётся сторона с
-// лучшим контрастом: на пастельном акценте это тёмный текст.
-//
-// Замер 2026-09-08: на дефолтном синем белая надпись даёт 3.68 — ниже AA для
-// текста. Порог оставлен прежним осознанно: поднять его значит перекрасить
-// надписи всех первичных кнопок дефолтной палитры в тёмный, а это уже смена
-// облика продукта, а не правка читаемости. Операторские палитры сюда не
-// попадают: на зелёном и жёлтом тёмный текст выбирается и так.
-const ON_COLOR_WHITE_MIN_RATIO = 3;
+// Надпись на заливке — это текст, и ему нужен AA 4.5, а не 3:1 для нетекстовых
+// элементов. Порог 3 оставлял белый на средних по светлоте заливках, где тёмный
+// текст читается вдвое лучше: синий #3b82f6 (белый 3.68 против тёмного 4.85),
+// розовый #ec4899 (3.4 против 5.2). Теперь белый держится, только пока сам даёт
+// AA; иначе берётся сторона с лучшим контрастом. Плата за это — тёмная надпись
+// на первичных кнопках дефолтной синей палитры.
+const ON_COLOR_WHITE_MIN_RATIO = 4.5;
 
 const WHITE: Rgb = { r: 255, g: 255, b: 255 };
 const INK: Rgb = { r: 15, g: 23, b: 42 };
+
+/**
+ * Подтянуть заливку так, чтобы надпись на ней читалась.
+ *
+ * Бывают акценты, на которых ни белый, ни тёмный текст не дают AA: фиолетовый
+ * #8b5cf6 отдаёт 4.23 обеим сторонам. Сдвигаем сам цвет на минимум — в ту
+ * сторону, где норма достигается быстрее. На практике хватает 5 %, глаз такой
+ * сдвиг не замечает, а надпись кнопки перестаёт быть на грани.
+ */
+function ensureFillCarriesText(bg: Rgb): Rgb {
+  const best = (c: Rgb) => Math.max(contrastRatio(WHITE, c), contrastRatio(INK, c));
+  if (best(bg) >= ON_COLOR_WHITE_MIN_RATIO) return bg;
+
+  for (let step = 1; step <= 40; step += 1) {
+    const k = step / 100;
+    const darker: Rgb = { r: bg.r * (1 - k), g: bg.g * (1 - k), b: bg.b * (1 - k) };
+    if (contrastRatio(WHITE, darker) >= ON_COLOR_WHITE_MIN_RATIO) return darker;
+    const lighter: Rgb = {
+      r: bg.r + (255 - bg.r) * k,
+      g: bg.g + (255 - bg.g) * k,
+      b: bg.b + (255 - bg.b) * k,
+    };
+    if (contrastRatio(INK, lighter) >= ON_COLOR_WHITE_MIN_RATIO) return lighter;
+  }
+  return bg;
+}
 
 function prefersWhiteText(bg: Rgb): boolean {
   const whiteRatio = contrastRatio(WHITE, bg);
@@ -169,9 +191,14 @@ export function readableTextOnHex(hex: string): string {
 
 type ThemeSurfaces = { surface: Rgb; text: Rgb };
 const TEXT_SHADE_MIN_RATIO = 4.5;
+// Светлой теме нужен запас: тот же текст встречается на подкрашенной плашке
+// (бейдж «Активна» на bg-success-400/10), и AA ровно по поверхности там уже
+// не выполняется — замер давал 3.39 на неоновом акценте, а с порогом 5.0 всё
+// ещё 4.27. Подкраска съедает около 15 % контраста, отсюда 5.5.
+const LIGHT_TEXT_SHADE_MIN_RATIO = 5.5;
 
 // Текстовые шейды статусных палитр: 300/400 — текст в тёмной теме (ссылки,
-// суммы, бейджи), 700 — их замена в светлой (.light ремапит *-300/400 -> *-700).
+// суммы, бейджи), 700/800 — их замена в светлой (.light ремапит *-300/400 -> *-800).
 // Лестница привязана к базовому цвету, поэтому у тёмного акцента светлые шейды
 // сжимаются, у светлого — тёмные; здесь им гарантируется AA на поверхности
 // своей темы. Палитры, которые и так читаются, остаются нетронутыми.
@@ -180,13 +207,15 @@ function withReadableTextShades(
   dark: ThemeSurfaces,
   light: ThemeSurfaces,
 ): ColorPalette {
-  const readable = (shade: ShadeLevel, towards: Rgb, bg: Rgb) =>
-    tripletOf(ensureReadable(parseTriplet(palette[shade]), towards, bg, TEXT_SHADE_MIN_RATIO));
+  const readable = (shade: ShadeLevel, towards: Rgb, bg: Rgb, min: number) =>
+    tripletOf(ensureReadable(parseTriplet(palette[shade]), towards, bg, min));
   return {
     ...palette,
-    300: readable(300, dark.text, dark.surface),
-    400: readable(400, dark.text, dark.surface),
-    700: readable(700, light.text, light.surface),
+    500: tripletOf(ensureFillCarriesText(parseTriplet(palette[500]))),
+    300: readable(300, dark.text, dark.surface, TEXT_SHADE_MIN_RATIO),
+    400: readable(400, dark.text, dark.surface, TEXT_SHADE_MIN_RATIO),
+    700: readable(700, light.text, light.surface, LIGHT_TEXT_SHADE_MIN_RATIO),
+    800: readable(800, light.text, light.surface, LIGHT_TEXT_SHADE_MIN_RATIO),
   };
 }
 
@@ -251,11 +280,14 @@ export function computeThemeCssVars(themeColors: ThemeColors): Record<string, st
 
   // Same contrast floors as the dark palette: champagne-600 backs dark-400
   // (secondary text) in the light theme, champagne-500 backs dark-500 (hints).
+  // Порог у светлой темы выше: карточки стоят не на самой светлой поверхности,
+  // а на слегка отличном фоне, и ровно 4.5 по surface давало 4.41 на реальной
+  // плитке («Баланс», «Рефералы», сумма под ними).
   const lightHintReadable = ensureReadable(
     mixRgb(lightBgRgb, lightTextSecRgb, 0.6),
     lightTextRgb,
     lightSurfaceRgb,
-    4.5,
+    5.0,
   );
   const lightTextSecReadable = ensureReadable(lightTextSecRgb, lightTextRgb, lightSurfaceRgb, 5.0);
 
