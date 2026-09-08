@@ -917,6 +917,7 @@
     "partner": {
       "becomePartner": "成为合作伙伴",
       "becomePartnerDesc": "申请加入合作伙伴计划，获得更高的佣金率并可以提现您的收益。",
+      "becomePartnerDescNoWithdrawal": "申请加入合作伙伴计划，获得更高的佣金率。",
       "applyButton": "申请",
       "applyTitle": "合作伙伴申请",
       "applyDesc": "填写以下表格申请我们的合作伙伴计划。所有字段均为可选。",

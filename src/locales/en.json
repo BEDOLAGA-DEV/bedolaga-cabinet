@@ -1042,6 +1042,7 @@
     "partner": {
       "becomePartner": "Become a Partner",
       "becomePartnerDesc": "Apply for the partner program to get higher commission rates and the ability to withdraw your earnings.",
+      "becomePartnerDescNoWithdrawal": "Apply for the partner program to get higher commission rates.",
       "applyButton": "Apply",
       "applyTitle": "Partner Application",
       "applyDesc": "Fill out the form below to apply for our partner program. All fields are optional.",

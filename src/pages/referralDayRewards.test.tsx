@@ -104,7 +104,7 @@ vi.mock('@/api/referral', () => ({
   },
 }));
 
-vi.mock('@/api/partner', () => ({
+vi.mock('@/api/partners', () => ({
   partnerApi: { getStatus: () => Promise.resolve({ partner_status: 'none' }) },
 }));
 
@@ -112,7 +112,7 @@ vi.mock('@/api/branding', () => ({
   brandingApi: { getBranding: () => Promise.resolve({}) },
 }));
 
-vi.mock('@/api/withdrawal', () => ({
+vi.mock('@/api/withdrawals', () => ({
   withdrawalApi: {
     getBalance: () => Promise.resolve({}),
     getHistory: () => Promise.resolve({ items: [] }),
