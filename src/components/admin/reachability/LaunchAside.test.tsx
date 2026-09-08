@@ -211,6 +211,28 @@ describe('LaunchBar в браузере', () => {
   });
 });
 
+describe('LaunchBar при открытой клавиатуре', () => {
+  it('прячется, пока фокус в поле ввода, и возвращается после', async () => {
+    const { container } = renderWithProviders(
+      <>
+        <input aria-label="search" />
+        <Panel body={body} bar />
+      </>,
+    );
+    await screen.findByRole('button', { name: 'Проверить 1 цель' });
+    const bar = container.querySelector('.fixed') as HTMLElement;
+    const input = container.querySelector('input') as HTMLInputElement;
+    expect(bar.className).not.toContain('opacity-0');
+
+    fireEvent.focusIn(input);
+    expect(bar.className).toContain('opacity-0');
+    expect(bar.className).toContain('pointer-events-none');
+
+    fireEvent.focusOut(input);
+    expect(bar.className).not.toContain('opacity-0');
+  });
+});
+
 describe('LaunchAside в Mini App: родной попап', () => {
   beforeEach(() => {
     dialog.isNative = true;
