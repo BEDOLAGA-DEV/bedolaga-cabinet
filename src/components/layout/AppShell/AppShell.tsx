@@ -135,7 +135,7 @@ export function AppShell({ children }: AppShellProps) {
               ? 'text-warning-300'
               : 'text-dark-50'
             : admin
-              ? 'text-warning-500/70 hover:bg-warning-500/10 hover:text-warning-300'
+              ? 'text-warning-500 hover:bg-warning-500/10 hover:text-warning-300'
               : 'text-dark-400 hover:bg-dark-800/60 hover:text-dark-100',
         )}
       >

@@ -214,7 +214,7 @@ export default function SubscriptionListCard({
                 : t('subscription.autopay', 'Автопродление');
               return (
                 <span
-                  className={`flex items-center gap-1 ${enabled ? 'text-success-400/70' : 'text-error-400/50'}`}
+                  className={`flex items-center gap-1 ${enabled ? 'text-success-400' : 'text-error-400'}`}
                 >
                   {enabled ? (
                     <CheckIcon className="h-3 w-3" />

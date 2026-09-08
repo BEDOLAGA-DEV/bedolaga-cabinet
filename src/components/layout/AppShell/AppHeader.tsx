@@ -369,9 +369,7 @@ export function AppHeader({
                       onClick={() => setMobileMenuOpen(false)}
                       className={cn(
                         'nav-item',
-                        isAdminActive()
-                          ? 'bg-warning-500/10 text-warning-400'
-                          : 'text-warning-500/70',
+                        isAdminActive() ? 'bg-warning-500/10 text-warning-400' : 'text-warning-500',
                       )}
                     >
                       <CogIcon className="h-5 w-5" />
