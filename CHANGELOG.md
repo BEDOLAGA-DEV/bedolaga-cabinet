@@ -1,5 +1,33 @@
 # Changelog
 
+## [1.71.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.70.0...v1.71.0) (2026-09-08)
+
+
+### Features
+
+* **admin:** очередь писем видна в разделе шаблонов — состояние и очистка ([15e02d4](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/15e02d4b9a7204f18c7403490ec14b10ee2ba300))
+* **admin:** пометка «Задано в .env» в настройках партнёрки и тикетов ([d6ec246](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/d6ec24685d214159bdae165e5553ee80eb41f106))
+* **auth:** экран «Проверьте почту» перестал быть тупиком ([b1d03ec](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/b1d03ec60667709b4ffc92847f30369f30cdcbf1))
+* **tariffs:** выгодный период обведён рамкой при покупке и продлении ([bb239a4](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/bb239a42c85383099455b18ee8c40157d4722e7a))
+* **tariffs:** выделенный тариф обведён рамкой в списке покупки ([81bb73d](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/81bb73dc156006ee9abf95e5c8f3c8bdfff7bf69))
+* **ui:** клавиша «Готово» на экранной клавиатуре для всех однострочных полей ([525a6f3](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/525a6f38c1a7a6b2d9b247cfa70609bb57c50aeb))
+
+
+### Bug Fixes
+
+* **admin:** «назад» возвращает туда, откуда экран открыли ([8d688b4](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/8d688b42bf0c9611a521b7c0a81fa8b26539b546))
+* **admin:** карточка очереди писем видна всегда, а не только когда есть что показать ([2a95c06](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/2a95c06e319a0653b4d0d97ffc7f4d179420182b))
+* **admin:** карточка очереди писем на телефоне — числа плитками, кнопки своим рядом ([1a3c887](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/1a3c887de35b9604f4cab3e8bd6ea26532dac044))
+* **admin:** счётчики очереди писем названы честно — они не про всю почту ([0a8b63e](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/0a8b63e09b38db64cabd4980fb041987aa0bc166))
+* **admin:** текст карточки очереди писем не обрезается на телефоне ([93e7182](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/93e71823b141e2569d61645e5d5e3400a62c5f9e))
+* **dashboard:** «Продлить» открывает выбор периода вместо молчаливого месяца ([5ce535a](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/5ce535aead7d7aa295767eeef93a3d69d46fa72c))
+* **purchase:** суточная цена с промокодом считается одной функцией на карточке и экране активации ([881e557](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/881e557d4a8165a6037af05d204780b7db2122e4))
+* **referral:** выключенный вывод средств больше не занимает место на странице ([2f9a92b](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/2f9a92b0fe39c534e95c32a08f0a5455d4b697d6))
+* **subscription:** причины по устройствам из локали, срок действия на своей строке на телефоне ([a1058d7](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/a1058d73d612e531dc053ba36662fe9ae98912e6))
+* **ui:** вторичный текст читается на всех темах — токены вместо прозрачности ([c507c24](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/c507c244a8a762195dc6e8840b809914ca9780b8))
+* **ui:** нижняя панель только на экранах своих кнопок, плашки не всплывают над клавиатурой ([7bcfd1a](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/7bcfd1a7f465805ee46125bf1250b03a086e3b4e))
+* **ui:** читаемость держится и на операторских палитрах, а не только на дефолтных ([fe77867](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/fe7786727b63838b31066d1a911d99e1b87d6096))
+
 ## [1.70.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.69.1...v1.70.0) (2026-09-07)
 
 
