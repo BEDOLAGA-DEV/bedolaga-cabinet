@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.71.1](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.71.0...v1.71.1) (2026-09-08)
+
+
+### Bug Fixes
+
+* **ui:** нижняя панель остаётся на карточке подписки ([fee203b](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/fee203bcfef79897745b3c4ee7472763f57f6233))
+
 ## [1.71.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.70.0...v1.71.0) (2026-09-08)
 
 
