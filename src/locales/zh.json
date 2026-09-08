@@ -468,6 +468,14 @@
       "reduceDevicesDescription": "您可以将设备数量减少至套餐的最低限制",
       "reduceDevicesTitle": "减少设备数量",
       "reduceUnavailable": "当前无法减少设备数量",
+      "alreadyAtMinDeviceLimit": "已是您套餐的最低设备数",
+      "reasons": {
+        "noSubscription": "未找到订阅",
+        "noActiveSubscription": "没有有效的订阅",
+        "maxDevicesReached": "已达到设备上限（{{count}}）",
+        "canAddLimited": "最多还能添加 {{count}} 台设备",
+        "trialNotAllowed": "试用订阅不支持减少设备数"
+      },
       "reducing": "正在减少…"
     },
     "serverManagement": {

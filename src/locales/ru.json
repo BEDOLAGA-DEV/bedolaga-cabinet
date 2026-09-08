@@ -620,6 +620,15 @@
       "disconnectDevicesFirst_many": "Сначала отключите устройства, чтобы уменьшить лимит ниже {{count}} устройств",
       "reduceUnavailable": "Уменьшение устройств недоступно",
       "alreadyAtMinDeviceLimit": "Уже достигнут минимальный лимит устройств для вашего тарифа",
+      "reasons": {
+        "noSubscription": "Подписка не найдена",
+        "noActiveSubscription": "Нет активной подписки",
+        "maxDevicesReached": "Достигнут максимум устройств ({{count}})",
+        "canAddLimited_one": "Можно добавить максимум {{count}} устройство",
+        "canAddLimited_few": "Можно добавить максимум {{count}} устройства",
+        "canAddLimited_many": "Можно добавить максимум {{count}} устройств",
+        "trialNotAllowed": "Для пробной подписки уменьшение лимита недоступно"
+      },
       "reduce": "Уменьшить",
       "reducing": "Уменьшение...",
       "newDeviceLimit_one": "Новый лимит: {{count}} устройство",
