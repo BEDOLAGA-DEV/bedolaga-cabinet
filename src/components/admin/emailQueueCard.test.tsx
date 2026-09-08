@@ -84,20 +84,31 @@ async function renderCard() {
 }
 
 describe('карточка очереди писем', () => {
+  it('подсказку и счётчики не обрезает: на телефоне фраза уходила в многоточие', async () => {
+    state.payload = { pending: 1, sent: 0, dead: 0, smtp_configured: true, items: [] };
+    const { container } = await renderCard();
+    await screen.findByText(/Ждут повтора: 1/);
+    const clipped = Array.from(container.querySelectorAll('p')).filter((node) =>
+      node.className.includes('truncate'),
+    );
+    const clippedText = clipped.map((node) => node.textContent || '');
+    expect(clippedText.some((text) => text.includes('первого раза'))).toBe(false);
+    expect(clippedText.some((text) => text.includes('Ждут повтора'))).toBe(false);
+  });
+
   it('объясняет, что счётчики только про непрошедшие с первого раза письма', async () => {
     // Иначе «отправлено: 0» читается как «почта не работает», хотя обычные
     // письма сюда не попадают вовсе.
     state.payload = { pending: 0, sent: 0, dead: 0, smtp_configured: true, items: [] };
     await renderCard();
-    // Фраза звучит и в подсказке, и в строке про пустую очередь — обе уместны.
-    expect((await screen.findAllByText(/не ушли с первого раза/)).length).toBeGreaterThan(0);
+    expect(await screen.findByText(/не ушли с первого раза/)).toBeTruthy();
   });
 
   it('на пустой очереди говорит «пусто», а не исчезает', async () => {
     // Карточку ищут глазами в разделе писем: пустое место неотличимо от
     // «раздела нет» — именно так её и не нашли после обновления.
     await renderCard();
-    expect(await screen.findByText(/Очередь пуста/)).toBeTruthy();
+    expect(await screen.findByText(/Сейчас очередь пуста/)).toBeTruthy();
     expect(screen.getByText(/Очередь писем/)).toBeTruthy();
   });
 
