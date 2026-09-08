@@ -444,7 +444,7 @@ export function ActionModal({
               <p className="text-sm font-medium text-error-400">
                 {t('admin.bulkActions.deleteSubscription.warning')}
               </p>
-              <p className="mt-1 text-xs text-error-300/70">
+              <p className="mt-1 text-xs text-error-300">
                 {t('admin.bulkActions.deleteSubscription.hint')}
               </p>
             </div>
@@ -492,7 +492,7 @@ export function ActionModal({
               <p className="text-sm font-medium text-error-400">
                 {t('admin.bulkActions.deleteUser.warning')}
               </p>
-              <p className="mt-1 text-xs text-error-300/70">
+              <p className="mt-1 text-xs text-error-300">
                 {t('admin.bulkActions.deleteUser.hint')}
               </p>
             </div>

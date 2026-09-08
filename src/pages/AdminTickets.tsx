@@ -2,7 +2,8 @@ import { useState, useRef, useEffect } from 'react';
 import logger from '../utils/logger';
 import { linkifyText } from '../utils/linkify';
 import { MessageMediaGrid } from '../components/tickets/MessageMediaGrid';
-import { Link, useNavigate, useParams } from 'react-router';
+import { Link, useLocation, useNavigate, useParams } from 'react-router';
+import { backTo } from '@/components/admin';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { adminApi, type AdminTicket, type AdminTicketDetail } from '../api/admin';
@@ -54,6 +55,7 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 export default function AdminTickets() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   const { ticketId } = useParams<{ ticketId: string }>();
   const queryClient = useQueryClient();
   const { capabilities } = usePlatform();
@@ -489,6 +491,7 @@ export default function AdminTickets() {
                     {selectedTicket.user ? (
                       <Link
                         to={`/admin/users/${selectedTicket.user.id}`}
+                        {...backTo(location)}
                         title={t('admin.tickets.viewUser')}
                         className="font-medium text-accent-400 underline decoration-accent-400/40 underline-offset-2 transition-colors hover:text-accent-300 hover:decoration-accent-300"
                       >

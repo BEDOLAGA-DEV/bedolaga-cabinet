@@ -111,20 +111,31 @@ describe('applyThemeColors: статусные палитры', () => {
     ).toBeGreaterThanOrEqual(4.5);
   });
 
-  it('текст поверх светлого акцента — тёмный, поверх тёмного и дефолтного — белый', () => {
+  it('надпись на заливке выбирается по AA, а не «белый пока терпимо»', () => {
     applyThemeColors({ ...DEFAULT_THEME_COLORS, accent: PASTEL_ACCENT });
     expect(readVar('--color-on-accent')).toBe('15, 23, 42');
 
     applyThemeColors({ ...DEFAULT_THEME_COLORS, accent: NAVY_ACCENT });
     expect(readVar('--color-on-accent')).toBe('255, 255, 255');
 
-    // На дефолтном синем белый даёт 3.7:1 — привычный белый текст кнопок
-    // остаётся, хотя формально тёмный контрастнее (4.8:1).
+    // Дефолтный синий: белый даёт 3.68 — ниже AA для текста, поэтому берётся
+    // тёмная надпись (4.85). Прежнее правило («белый пока ≥3:1») оставляло
+    // кнопку на грани, и это же правило роняло надписи операторских палитр:
+    // розовый #ec4899 держал белый на 3.4 против тёмного 5.2.
     applyThemeColors(DEFAULT_THEME_COLORS);
-    expect(readVar('--color-on-accent')).toBe('255, 255, 255');
-    expect(readVar('--color-on-error')).toBe('255, 255, 255');
+    expect(readVar('--color-on-accent')).toBe('15, 23, 42');
+    expect(readVar('--color-on-error')).toBe('15, 23, 42');
     expect(readVar('--color-on-success')).toBe('15, 23, 42');
     expect(readVar('--color-on-warning')).toBe('15, 23, 42');
+  });
+
+  it('заливка, на которой не читается ни белый, ни тёмный, подтягивается', () => {
+    // #8b5cf6 отдаёт 4.23 обеим сторонам — надпись кнопки не дотягивает до AA
+    // ни в каком цвете. Сам цвет заливки сдвигается на минимум.
+    applyThemeColors({ ...DEFAULT_THEME_COLORS, accent: '#8b5cf6' });
+    const fill = parseTriplet(readVar('--color-accent-500'));
+    const label = parseTriplet(readVar('--color-on-accent'));
+    expect(contrast(label, fill)).toBeGreaterThanOrEqual(4.5);
   });
 });
 

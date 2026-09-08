@@ -107,7 +107,15 @@
     --mobile-nav-height: 76px;
     --mobile-nav-offset: max(16px, env(safe-area-inset-bottom, 0px));
     --mobile-nav-clearance: calc(var(--mobile-nav-height) + var(--mobile-nav-offset) + 12px);
+  }
 
+  /* Экраны без панели (вложенные страницы, админка): AppShell ставит
+     data-mobile-nav="off", и прижатым к низу элементам остаётся только отступ от края. */
+  [data-mobile-nav="off"] {
+    --mobile-nav-clearance: var(--mobile-nav-offset);
+  }
+
+  :root {
     /* Unified Card System */
     --bento-radius: 16px;
     --bento-radius-lg: 20px;
@@ -365,17 +373,19 @@
 
     /* Статусные палитры генерируются под тёмную тему: текстовые оттенки
        300/400 (зелёные суммы, жёлтая «Админка», бейджи) на светлом фоне
-       дают контраст 1.3–1.6. В светлой теме подменяем их тёмными шейдами —
+       дают контраст 1.3–1.6. В светлой теме подменяем их тёмными шейдами (700
+       не хватало: ссылка «Управлять всеми» и бейдж «Активна» держались на
+       3.6–4.3, поэтому 800) —
        зеркально ремапу серых выше. Фоновые употребления (bg-*-500/15 и т.п.)
        используют 500+ и не затрагиваются. */
-    --color-accent-300: var(--color-accent-700) !important;
-    --color-accent-400: var(--color-accent-700) !important;
-    --color-success-300: var(--color-success-700) !important;
-    --color-success-400: var(--color-success-700) !important;
-    --color-warning-300: var(--color-warning-700) !important;
-    --color-warning-400: var(--color-warning-700) !important;
-    --color-error-300: var(--color-error-700) !important;
-    --color-error-400: var(--color-error-700) !important;
+    --color-accent-300: var(--color-accent-800) !important;
+    --color-accent-400: var(--color-accent-800) !important;
+    --color-success-300: var(--color-success-800) !important;
+    --color-success-400: var(--color-success-800) !important;
+    --color-warning-300: var(--color-warning-800) !important;
+    --color-warning-400: var(--color-warning-800) !important;
+    --color-error-300: var(--color-error-800) !important;
+    --color-error-400: var(--color-error-800) !important;
   }
 
   /* Custom scrollbar - Dark */

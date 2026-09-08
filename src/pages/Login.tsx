@@ -25,6 +25,7 @@ import OAuthProviderIcon from '../components/OAuthProviderIcon';
 import { saveOAuthState } from '../utils/oauth';
 import { getPendingReferralCode } from '../utils/referral';
 import { UsersIcon, EmailIcon, RefreshIcon, ChevronDownIcon } from '@/components/icons';
+import { CheckEmailCard } from '@/components/auth/CheckEmailCard';
 import LegalFooter from '../components/LegalFooter';
 import LegalConsent from '../components/LegalConsent';
 import LegalConsentGate from '../components/LegalConsentGate';
@@ -427,33 +428,20 @@ export default function Login() {
           <LegalConsentGate gate={consent} />
         ) : /* Check Email Screen */
         registeredEmail ? (
-          <div className="card text-center">
-            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-success-500/20">
-              <EmailIcon className="h-7 w-7 text-success-400" />
-            </div>
-            <h2 className="mb-2 text-lg font-bold text-dark-50">
-              {t('auth.checkEmail', 'Check your email')}
-            </h2>
-            <p className="mb-3 text-sm text-dark-400">
-              {t('auth.verificationSent', 'We sent a verification link to:')}
-            </p>
-            <p className="mb-4 text-sm font-medium text-accent-400">{registeredEmail}</p>
-            <p className="mb-5 text-xs text-dark-500">
-              {t(
-                'auth.clickLinkToVerify',
-                'Click the link in the email to verify your account and log in.',
-              )}
-            </p>
-            <button
-              onClick={() => {
-                setRegisteredEmail(null);
-                setAuthMode('login');
-              }}
-              className="btn-secondary w-full"
-            >
-              {t('auth.backToLogin', 'Back to login')}
-            </button>
-          </div>
+          <CheckEmailCard
+            email={registeredEmail}
+            onBackToLogin={() => {
+              setRegisteredEmail(null);
+              setAuthMode('login');
+            }}
+            onChangeEmail={() => {
+              // Адрес остаётся в поле: чаще всего его не меняют, а правят опечатку.
+              setEmail(registeredEmail);
+              setRegisteredEmail(null);
+              setAuthMode('register');
+              setShowEmailForm(true);
+            }}
+          />
         ) : (
           /* Main auth card */
           <div className="card">
@@ -569,6 +557,11 @@ export default function Login() {
                                 'auth.passwordResetSent',
                                 'If an account exists with this email, we sent password reset instructions.',
                               )}
+                            </p>
+                            {/* Тот же тупик, что и после регистрации: письма нет,
+                                и человек не знает, где смотреть. */}
+                            <p className="rounded-xl border border-dark-700 bg-dark-800/60 p-3 text-left text-xs leading-relaxed text-dark-400">
+                              {t('auth.spamHint')}
                             </p>
                             <button
                               type="button"

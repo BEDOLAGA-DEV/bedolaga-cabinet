@@ -188,7 +188,7 @@ export default function TrafficProgressBar({
       {/* Scale labels */}
       {!compact && limitGb > 0 && (
         <div
-          className="mt-1.5 flex justify-between px-0.5 font-mono text-[10px] font-medium text-dark-50/20"
+          className="mt-1.5 flex justify-between px-0.5 font-mono text-[10px] font-medium text-dark-400"
           aria-hidden="true"
         >
           {[0, 25, 50, 75, 100].map((v) => (

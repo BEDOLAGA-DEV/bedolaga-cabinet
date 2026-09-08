@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import type { SkippedUnit } from '@/api/reachability';
 import { ChevronDownIcon } from '@/components/icons';
 import { Button } from '@/components/primitives';
+import { HIDDEN_UNDER_KEYBOARD, useVirtualKeyboard } from '@/hooks/useVirtualKeyboard';
 import { cn } from '@/lib/utils';
 import { LaunchConfirm } from './LaunchConfirm';
 import type { LaunchState } from './useLaunch';
@@ -165,14 +166,23 @@ export function LaunchAside({ launch, hint }: LaunchProps) {
   );
 }
 
-/** Телефон и Mini App: панель над нижней навигацией, детали раскрываются тапом по итогу. */
+/**
+ * Телефон и Mini App: панель у низа экрана, детали раскрываются тапом по итогу.
+ * Пока открыта экранная клавиатура, прячется — иначе всплывает над клавиатурой.
+ */
 export function LaunchBar({ launch }: LaunchProps) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
+  const keyboardOpen = useVirtualKeyboard();
   const showDetails = open || launch.confirming;
   const targetsKey = launch.noun === 'servers' ? 'summaryServers' : 'summaryTargets';
   return (
-    <div className="fixed inset-x-0 bottom-[var(--mobile-nav-clearance)] z-40 px-3">
+    <div
+      className={cn(
+        'fixed inset-x-0 bottom-[var(--mobile-nav-clearance)] z-40 px-3 transition-opacity duration-200',
+        keyboardOpen && HIDDEN_UNDER_KEYBOARD,
+      )}
+    >
       <div
         className={cn(
           'mx-auto max-w-2xl rounded-2xl border bg-dark-900 p-3 shadow-2xl transition-colors',

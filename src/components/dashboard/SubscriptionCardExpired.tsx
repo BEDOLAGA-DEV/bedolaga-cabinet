@@ -47,6 +47,18 @@ export default function SubscriptionCardExpired({
   const isDaily = subscription.is_daily;
   const isDisabledDaily = subscription.status === 'disabled' && isDaily;
 
+  /*
+   * Списывать с баланса прямо из карточки можно только там, где выбирать нечего:
+   * суточный тариф стоит один день, а приостановленный просто возобновляется.
+   *
+   * Обычной подписке период выбирает клиент. Кнопка раньше молча продлевала на
+   * 30 дней — то есть решала за него и мимо скидок за длинные периоды (месяц за
+   * 600 ₽ против полугода со скидкой). Хуже того, тариф вообще мог не
+   * продаваться месяцем: тогда сервер отвечал «период недоступен», и кнопка
+   * выглядела сломанной. Теперь она открывает выбор периода текущего тарифа.
+   */
+  const isInstantRenew = isDisabledDaily || (isDaily && !!subscription.tariff_id);
+
   // For daily subs, check if balance covers daily price; otherwise 100 kopeks minimum
   const dailyPrice = subscription.daily_price_kopeks ?? 0;
   const hasBalance = isDaily ? balanceKopeks >= dailyPrice && dailyPrice > 0 : balanceKopeks >= 100;
@@ -67,7 +79,11 @@ export default function SubscriptionCardExpired({
         // panel webhooks (would surface as "Тариф уже активен" + refund).
         await subscriptionApi.purchaseTariff(subscription.tariff_id, 1, undefined, subscription.id);
       } else {
-        await subscriptionApi.renewSubscription(30, subscription.id);
+        // Сюда кнопка не ведёт: обычной подписке период выбирает клиент. Если
+        // условия показа когда-нибудь разъедутся, открываем выбор периода, а не
+        // списываем месяц молча.
+        navigate(`/subscriptions/${subscription.id}/renew`);
+        return;
       }
       haptic.success();
       queryClient.invalidateQueries({
@@ -206,7 +222,7 @@ export default function SubscriptionCardExpired({
         }}
       >
         <div className="flex items-center">
-          <div className="mb-0.5 font-mono text-[10px] font-medium uppercase tracking-wider text-dark-50/30">
+          <div className="mb-0.5 font-mono text-[10px] font-medium uppercase tracking-wider text-dark-400">
             {isLimited
               ? t('dashboard.expired.activeUntil')
               : t('dashboard.expired.expiredDate', {
@@ -218,11 +234,11 @@ export default function SubscriptionCardExpired({
           </div>
         </div>
         <div className="flex items-center gap-1.5">
-          <span className="text-[10px] font-medium uppercase tracking-wider text-dark-50/30">
+          <span className="text-[10px] font-medium uppercase tracking-wider text-dark-400">
             {t('dashboard.expired.balance')}
           </span>
           <span
-            className={`text-sm font-semibold ${hasBalance ? 'text-success-400' : 'text-dark-50/30'}`}
+            className={`text-sm font-semibold ${hasBalance ? 'text-success-400' : 'text-dark-400'}`}
           >
             {formatAmount(balanceRubles)} {currencySymbol}
           </span>
@@ -258,7 +274,20 @@ export default function SubscriptionCardExpired({
             {/* Quick Renew or Top Up button (hidden for expired trials) */}
             {!subscription.is_trial && (
               <>
-                {hasBalance ? (
+                {!isInstantRenew ? (
+                  <Link
+                    to={`/subscriptions/${subscription.id}/renew`}
+                    onClick={() => haptic.buttonPressHeavy()}
+                    className="flex flex-1 items-center justify-center gap-2 rounded-[14px] py-3.5 text-[15px] font-semibold tracking-tight text-white transition-all duration-300"
+                    style={{
+                      background: accent.gradient,
+                      boxShadow: `0 4px 20px rgba(${accent.r},${accent.g},${accent.b},0.2)`,
+                    }}
+                  >
+                    <SubscriptionIcon className="h-4 w-4" />
+                    {t('dashboard.expired.quickRenew')}
+                  </Link>
+                ) : hasBalance ? (
                   <button
                     type="button"
                     onClick={handleQuickRenew}

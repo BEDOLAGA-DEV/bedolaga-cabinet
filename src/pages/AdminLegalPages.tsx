@@ -747,7 +747,7 @@ export default function AdminLegalPages() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <AdminBackButton to="/admin/info-pages" />
+        <AdminBackButton to="/admin" />
         <div>
           <h1 className="text-xl font-bold text-dark-100">{t('admin.legalPages.title')}</h1>
           <p className="text-sm text-dark-400">{t('admin.legalPages.subtitle')}</p>
