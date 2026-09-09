@@ -418,19 +418,30 @@ function BuyTabContent({
   const [selectedSubOption, setSelectedSubOption] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  // Auto-select tariff, period, method on config load. Отмеченные оператором
-  // выгодные тариф и период выбираются сразу — иначе клиент видит подсказку на
-  // одной карточке, а к оплате идёт другая.
+  // Тариф и период выбираются ОДНИМ эффектом: отмеченные оператором выгодными,
+  // иначе первые по счёту. Двумя эффектами это разъезжалось — второй записывал
+  // «прошлый тариф» уже после того, как первый выбрал период, и затирал выбор,
+  // сделанный человеком между этими двумя проходами.
+  const lastTariffIdRef = useRef<number | null>(null);
   useEffect(() => {
-    if (config.tariffs.length > 0 && selectedTariffId === null) {
-      const firstTariff = pickBestValue(config.tariffs) ?? config.tariffs[0];
-      setSelectedTariffId(firstTariff.id);
-      if (firstTariff.periods.length > 0 && selectedPeriodDays === null) {
-        const period = pickBestValue(firstTariff.periods) ?? firstTariff.periods[0];
-        setSelectedPeriodDays(period.days);
-      }
+    if (config.tariffs.length === 0) return;
+    const tariff = selectedTariffId
+      ? config.tariffs.find((t) => t.id === selectedTariffId)
+      : (pickBestValue(config.tariffs) ?? config.tariffs[0]);
+    if (!tariff) return;
+    if (selectedTariffId !== tariff.id) setSelectedTariffId(tariff.id);
+    // Период пересчитываем только при смене тарифа: внутри одного тарифа выбор
+    // человека важнее отметки оператора.
+    if (lastTariffIdRef.current === tariff.id) return;
+    lastTariffIdRef.current = tariff.id;
+    if (tariff.periods.length > 0) {
+      const period = pickBestValue(tariff.periods) ?? tariff.periods[0];
+      setSelectedPeriodDays(period.days);
     }
+  }, [config.tariffs, selectedTariffId]);
 
+  // Способ оплаты по умолчанию — первый из доступных.
+  useEffect(() => {
     if (config.payment_methods.length > 0 && selectedMethod === null) {
       const firstMethod = config.payment_methods[0];
       setSelectedMethod(firstMethod.method_id);
@@ -440,20 +451,7 @@ function BuyTabContent({
         setSelectedSubOption(null);
       }
     }
-  }, [config, selectedTariffId, selectedPeriodDays, selectedMethod]);
-
-  // When tariff changes, auto-select its best-value period (or the first one)
-  useEffect(() => {
-    if (!selectedTariffId) return;
-    const tariff = config.tariffs.find((t) => t.id === selectedTariffId);
-    if (tariff && tariff.periods.length > 0) {
-      const hasCurrent = tariff.periods.some((p) => p.days === selectedPeriodDays);
-      if (!hasCurrent) {
-        const period = pickBestValue(tariff.periods) ?? tariff.periods[0];
-        setSelectedPeriodDays(period.days);
-      }
-    }
-  }, [selectedTariffId, config.tariffs, selectedPeriodDays]);
+  }, [config.payment_methods, selectedMethod]);
 
   // Derived data
   const selectedTariff = useMemo(

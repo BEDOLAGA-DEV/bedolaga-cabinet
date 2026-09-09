@@ -87,8 +87,11 @@ afterEach(() => {
   state.options = [];
 });
 
-const SELECTED = 'border-accent-500';
-// Продление красит рамку выбранного варианта инлайновым стилем, а не классом.
+// Признак выбора у покупки — заливка accent; рамка выбранного варианта
+// остаётся жёлтой, если оператор отметил его выгодным.
+const SELECTED = 'bg-accent-500/10';
+const BEST_VALUE_RING = 'border-urgent-400';
+// Продление красит рамку и заливку инлайновым стилем, а не классом.
 const SELECTED_BORDER = '--color-accent-400';
 
 // ==================== покупка тарифа ====================
@@ -114,6 +117,18 @@ describe('покупка: выбранный по умолчанию перио�
 
     expect(harness.cardFor('1 месяц').className).toContain(SELECTED);
     expect(harness.cardFor('12 месяцев').className).not.toContain(SELECTED);
+  });
+
+  it('выбранный выгодный период сохраняет жёлтый контур: выбран И выгоден', async () => {
+    const harness = await import('./purchase/tariffPurchaseHarness');
+    harness.render([
+      harness.period({ days: 30, label: '1 месяц' }),
+      harness.period({ days: 360, label: '12 месяцев', is_highlighted: true }),
+    ]);
+
+    const card = harness.cardFor('12 месяцев');
+    expect(card.className).toContain(BEST_VALUE_RING);
+    expect(card.className).toContain(SELECTED);
   });
 
   it('итог внизу считает выбранный выгодный период, а не первый', async () => {
@@ -145,8 +160,11 @@ describe('продление: выбранный по умолчанию пер�
     await renderRenew();
     await screen.findByText(ru('subscription.bestValue'));
 
-    expect(cardFor(360).style.borderColor).toContain(SELECTED_BORDER);
-    expect(cardFor(30).style.borderColor).not.toContain(SELECTED_BORDER);
+    // Рамка выбранного выгодного остаётся жёлтой, выбор виден заливкой и
+    // внутренним контуром — обе метки сразу.
+    expect(cardFor(360).style.borderColor).toContain('--color-urgent-400');
+    expect(cardFor(360).style.background).toContain(SELECTED_BORDER);
+    expect(cardFor(30).style.background).not.toContain(SELECTED_BORDER);
   });
 
   it('без отметки оператора не выбирает ничего — как было', async () => {
@@ -155,7 +173,7 @@ describe('продление: выбранный по умолчанию пер�
     await renderRenew();
     await screen.findByText(/^30 /);
 
-    expect(cardFor(30).style.borderColor).not.toContain(SELECTED_BORDER);
-    expect(cardFor(360).style.borderColor).not.toContain(SELECTED_BORDER);
+    expect(cardFor(30).style.background).not.toContain(SELECTED_BORDER);
+    expect(cardFor(360).style.background).not.toContain(SELECTED_BORDER);
   });
 });

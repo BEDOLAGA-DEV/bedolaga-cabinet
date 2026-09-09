@@ -359,9 +359,15 @@ export function TariffPurchaseForm({
                         setSelectedTariffPeriod(period);
                         setUseCustomDays(false);
                       }}
+                      // Две метки уживаются: жёлтый контур говорит «выгодный»,
+                      // заливка и внутреннее кольцо — «выбран». Раньше выбор
+                      // затирал жёлтую рамку, и подсказка исчезала ровно у того
+                      // варианта, к которому вела.
                       className={`relative rounded-xl p-4 text-left transition-all ${
                         selectedTariffPeriod?.days === period.days && !useCustomDays
-                          ? 'border border-accent-500 bg-accent-500/10'
+                          ? period.is_highlighted
+                            ? 'border-2 border-urgent-400 bg-accent-500/10 ring-1 ring-inset ring-accent-500'
+                            : 'border border-accent-500 bg-accent-500/10'
                           : period.is_highlighted
                             ? 'border-2 border-urgent-400 bg-dark-800/50'
                             : 'border border-dark-700/50 bg-dark-800/50 hover:border-dark-600'
