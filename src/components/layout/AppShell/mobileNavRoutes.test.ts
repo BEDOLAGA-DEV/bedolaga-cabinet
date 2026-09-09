@@ -55,9 +55,22 @@ describe('isMobileNavScreen', () => {
   });
 
   it('админка и вложенные страницы — нет', () => {
-    for (const path of ['/admin', '/admin/reachability', '/subscriptions/12', '/balance/top-up']) {
+    for (const path of ['/admin', '/admin/reachability', '/balance/top-up']) {
       expect(isMobileNavScreen(path, items), path).toBe(false);
     }
+  });
+
+  it('карточка подписки — да: кнопка «Подписка» приводит именно сюда', () => {
+    // Список с единственной подпиской сам открывает её карточку, так что человек
+    // нажимает кнопку панели и оказывается здесь. Пропадающая панель на этом
+    // экране и была багом.
+    expect(isMobileNavScreen('/subscriptions/12', items)).toBe(true);
+    expect(isMobileNavScreen('/subscriptions/12/', items)).toBe(true);
+  });
+
+  it('но продление изнутри карточки — уже нет', () => {
+    expect(isMobileNavScreen('/subscriptions/12/renew', items)).toBe(false);
+    expect(isMobileNavScreen('/subscription/purchase', items)).toBe(false);
   });
 
   it('экран выключенного слота — нет', () => {

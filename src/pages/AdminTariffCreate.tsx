@@ -224,7 +224,10 @@ export default function AdminTariffCreate() {
   const addPeriod = () => {
     const days = toNumber(newPeriodDays, 0);
     const price = toNumber(newPeriodPrice, 0);
-    if (days > 0 && price > 0) {
+    // Нулевая цена допустима: бесплатный тариф — штатная настройка, и бот с
+    // кабинетом такой период продают. Раньше кнопка на нуле молча ничего
+    // не делала, а поле ввода само подменяло ноль единицей.
+    if (days > 0 && price >= 0) {
       const exists = periodPrices.some((p) => p.days === days);
       if (!exists) {
         setPeriodPrices((prev) =>
@@ -611,10 +614,12 @@ export default function AdminTariffCreate() {
                 <label className="mb-1 block text-xs text-dark-500">
                   {t('admin.tariffs.priceLabel')}
                 </label>
+                {/* Минимум 0, а не 1: бесплатный тариф — штатная настройка,
+                    и набранный ноль не должен превращаться в рубль. */}
                 <input
                   type="number"
                   value={newPeriodPrice}
-                  onChange={createNumberInputHandler(setNewPeriodPrice, 1)}
+                  onChange={createNumberInputHandler(setNewPeriodPrice, 0)}
                   className="input w-28"
                   placeholder="300"
                 />
