@@ -8,6 +8,8 @@ export interface GiftTariffPeriod {
   price_label: string;
   original_price_kopeks: number | null;
   discount_percent: number | null;
+  /** Период, отмеченный оператором как самый выгодный. */
+  is_highlighted?: boolean;
 }
 
 export interface GiftTariff {
@@ -17,6 +19,8 @@ export interface GiftTariff {
   traffic_limit_gb: number;
   device_limit: number;
   periods: GiftTariffPeriod[];
+  /** Тариф, отмеченный оператором как выгодный. */
+  is_highlighted?: boolean;
 }
 
 export interface GiftPaymentMethodSubOption {
