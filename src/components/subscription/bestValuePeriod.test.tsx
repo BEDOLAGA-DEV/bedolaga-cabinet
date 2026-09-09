@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter, Route, Routes } from 'react-router';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -117,13 +117,16 @@ describe('выделенный период при продлении', () => {
     expect(cardFor(180).contains(badges[0])).toBe(true);
   });
 
-  it('обведён рамкой, а не только подписан', async () => {
+  it('обведён рамкой, а не только подписан, когда выбран другой период', async () => {
+    // Сам по себе выгодный период выбран сразу, и рамка выбора уступает ему
+    // рамку-подсказку. Подсказка видна, когда человек ушёл на другой период.
     state.options = [
       option({ period_days: 30 }),
       option({ period_days: 180, price_kopeks: 270000, is_highlighted: true }),
     ];
     await renderRenew();
     await screen.findByText(ru('subscription.bestValue'));
+    fireEvent.click(cardFor(30));
 
     expect(cardFor(180).className).toContain('border-2');
     expect(cardFor(30).className).not.toContain('border-2');

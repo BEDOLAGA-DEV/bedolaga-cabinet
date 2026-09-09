@@ -7,6 +7,8 @@ import { fireAnalyticsEvent, getYandexCid } from '../hooks/useAnalyticsCounters'
 import { motion, AnimatePresence } from 'framer-motion';
 import DOMPurify from 'dompurify';
 import { landingApi } from '../api/landings';
+import { pickBestValue } from '../utils/bestValue';
+import { BestValueBadge } from '../components/subscription/BestValueBadge';
 import type {
   LandingConfig,
   LandingTariff,
@@ -281,7 +283,11 @@ function TariffCard({
       {/* Header */}
       <div className="mb-3 flex items-start justify-between">
         <div>
-          <h3 className="text-base font-semibold text-dark-50">{tariff.name}</h3>
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 className="text-base font-semibold text-dark-50">{tariff.name}</h3>
+            {/* Отметка оператора: этот тариф выбран сразу — подпись объясняет почему. */}
+            {tariff.is_highlighted && <BestValueBadge />}
+          </div>
           {tariff.description && (
             <p className="mt-0.5 text-xs text-dark-400">{tariff.description}</p>
           )}
@@ -873,18 +879,29 @@ export default function QuickPurchase() {
     );
   }, [config, selectedPeriodDays]);
 
-  // Auto-select first tariff, period, method on config load
+  // Тариф по умолчанию: отмеченный оператором как выгодный, иначе первый по
+  // счёту. Считается один раз на оба эффекта ниже — они срабатывают в одном
+  // проходе, и разойдись они в выборе, победил бы второй.
+  const defaultTariff = useMemo(
+    () => pickBestValue(visibleTariffs) ?? visibleTariffs[0],
+    [visibleTariffs],
+  );
+
+  // Auto-select tariff, period, method on config load. Отмеченные оператором
+  // выгодные тариф и период выбираются сразу, вместо первого по счёту и самого
+  // короткого периода; период берётся у того же тарифа, что выбран.
   useEffect(() => {
     if (!config) return;
 
-    // Auto-select first period from all available periods
+    // Auto-select the best-value period, else the first of all available
     if (allPeriods.length > 0 && selectedPeriodDays === null) {
-      setSelectedPeriodDays(allPeriods[0].days);
+      const best = pickBestValue(defaultTariff?.periods);
+      setSelectedPeriodDays(best?.days ?? allPeriods[0].days);
     }
 
-    // Auto-select first visible tariff
-    if (visibleTariffs.length > 0 && selectedTariffId === null) {
-      setSelectedTariffId(visibleTariffs[0].id);
+    // Auto-select the best-value visible tariff, else the first one
+    if (defaultTariff && selectedTariffId === null) {
+      setSelectedTariffId(defaultTariff.id);
     }
 
     if (config.payment_methods.length > 0 && selectedMethod === null) {
@@ -896,16 +913,16 @@ export default function QuickPurchase() {
         setSelectedSubOption(null);
       }
     }
-  }, [config, allPeriods, visibleTariffs, selectedTariffId, selectedPeriodDays, selectedMethod]);
+  }, [config, allPeriods, defaultTariff, selectedTariffId, selectedPeriodDays, selectedMethod]);
 
-  // When period changes, auto-select first visible tariff if current is hidden
+  // When period changes, auto-select the default tariff if current is hidden
   useEffect(() => {
-    if (!visibleTariffs.length) return;
+    if (!defaultTariff) return;
     const currentVisible = visibleTariffs.find((tariff) => tariff.id === selectedTariffId);
     if (!currentVisible) {
-      setSelectedTariffId(visibleTariffs[0].id);
+      setSelectedTariffId(defaultTariff.id);
     }
-  }, [visibleTariffs, selectedTariffId]);
+  }, [defaultTariff, visibleTariffs, selectedTariffId]);
 
   // SEO: set document title. Fall back to the landing's own title when no
   // dedicated meta_title is set — otherwise the tab keeps the static
