@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Navigate, useNavigate, useParams } from 'react-router';
@@ -6,6 +6,7 @@ import { subscriptionApi } from '../api/subscription';
 import { useTheme } from '../hooks/useTheme';
 import { getGlassColors } from '../utils/glassTheme';
 import { getMonthlyPriceKopeks } from '../utils/pricing';
+import { pickBestValue } from '../utils/bestValue';
 import { useCurrency } from '../hooks/useCurrency';
 import { useHaptic } from '../platform';
 import InsufficientBalancePrompt from '../components/InsufficientBalancePrompt';
@@ -45,6 +46,14 @@ export default function RenewSubscription() {
     staleTime: 0,
     refetchOnMount: 'always',
   });
+
+  // Отмеченный оператором вариант выбираем сразу, как только приехал список.
+  // Без отметки выбор остаётся за человеком: сами выгоду не выдумываем.
+  useEffect(() => {
+    if (selectedPeriod !== null) return;
+    const best = pickBestValue(options);
+    if (best) setSelectedPeriod(best.period_days);
+  }, [options, selectedPeriod]);
 
   // Load balance
   const { data: purchaseOptions } = useQuery({
