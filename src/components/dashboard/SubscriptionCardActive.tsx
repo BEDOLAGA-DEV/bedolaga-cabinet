@@ -161,13 +161,16 @@ export default function SubscriptionCardActive({
       />
 
       {/* ─── Stats row: Tariff + Days Left ─── */}
+      {/* Обеим плиткам нужен `min-w-0`: без него минимальная ширина флекс-элемента
+          равна ширине неразрывного имени тарифа, и длинное имя («🟡 Компания -
+          10 устройств») выпихивало плитку «Осталось» за правый край карточки. */}
       <div className="mb-5 flex gap-2.5">
         {/* Tariff badge — clickable. Neutral chrome: the tariff name has
             no traffic-zone semantics, so tinting it by the traffic zone
             (DESIGN.md Status-Hue Lockout) was wrong. */}
         <Link
           to={`/subscriptions/${subscription.id}`}
-          className="flex-1 rounded-[14px] p-3.5 transition-colors"
+          className="min-w-0 flex-1 rounded-[14px] p-3.5 transition-colors"
           style={{
             background: g.innerBg,
             border: `1px solid ${g.innerBorder}`,
@@ -179,7 +182,10 @@ export default function SubscriptionCardActive({
           >
             {t('dashboard.tariff')}
           </div>
-          <div className="min-w-0 truncate text-base font-bold leading-tight tracking-tight text-dark-50">
+          {/* Две строки вместо обрезки в одну: на телефоне плитка шириной ~145px,
+              и «🟡 Компания - 10 устройств» превращалось в «🟡 Компани…» —
+              пользователь переставал понимать, какой у него тариф. */}
+          <div className="line-clamp-2 min-w-0 break-words text-base font-bold leading-tight tracking-tight text-dark-50">
             {subscription.tariff_name || t('subscription.currentPlan')}
           </div>
           <div className="mt-0.5 font-mono text-[10px] text-dark-400">
@@ -189,7 +195,7 @@ export default function SubscriptionCardActive({
 
         {/* Days remaining */}
         <div
-          className="flex-1 rounded-[14px] p-3.5 transition-colors duration-300"
+          className="min-w-0 flex-1 rounded-[14px] p-3.5 transition-colors duration-300"
           style={{
             background: g.innerBg,
             border:

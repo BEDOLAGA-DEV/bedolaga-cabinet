@@ -6,6 +6,16 @@ import { useTrafficZone } from '../../hooks/useTrafficZone';
 import { getGlassColors } from '../../utils/glassTheme';
 import { HoverBorderGradient } from '../ui/hover-border-gradient';
 
+/**
+ * До скольких устройств лимит показываем точками.
+ *
+ * Точка занимает 13px вместе с зазором, поэтому десять точек съедали 124px из
+ * ~272px плитки — тексту оставалось 80px, и «Подключить устройство» ломалось
+ * на четыре строки. Полоска-индикатор занимает фиксированные 64px при любом
+ * лимите, так что выше этого порога показываем её.
+ */
+const DOTS_MAX = 5;
+
 interface ConnectDeviceTileProps {
   subscription: {
     id: number;
@@ -107,7 +117,7 @@ export default function ConnectDeviceTile({
         <div className="flex flex-shrink-0 items-center text-lg text-dark-400" aria-hidden="true">
           ∞
         </div>
-      ) : subscription.device_limit <= 10 ? (
+      ) : subscription.device_limit <= DOTS_MAX ? (
         <div className="flex flex-shrink-0 gap-1.5" aria-hidden="true">
           {Array.from({ length: subscription.device_limit }, (_, i) => (
             <div
