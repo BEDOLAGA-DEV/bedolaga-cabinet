@@ -10,6 +10,7 @@ import { dailyPriceQuote } from './dailyPrice';
 import { usePlatform } from '../../../platform';
 import { openPaymentUrl } from '../../../utils/openPaymentUrl';
 import { getMonthlyPriceKopeks } from '../../../utils/pricing';
+import { pickBestValue } from '../../../utils/bestValue';
 import InsufficientBalancePrompt from '../../InsufficientBalancePrompt';
 import type { Tariff, TariffPeriod } from '../../../types';
 import { BestValueBadge } from '../BestValueBadge';
@@ -68,8 +69,10 @@ export function TariffPurchaseForm({
 
   // Form-internal state — seeded from the tariff prop. Resets via
   // `key={tariff.id}` on the parent's render.
+  // Отмеченный оператором период выбран сразу: рамка «Выгодно» и итог внизу
+  // должны говорить об одном и том же периоде.
   const [selectedTariffPeriod, setSelectedTariffPeriod] = useState<TariffPeriod | null>(
-    tariff.periods[0] || null,
+    pickBestValue(tariff.periods) || tariff.periods[0] || null,
   );
   const [customDays, setCustomDays] = useState<number>(30);
   const [customTrafficGb, setCustomTrafficGb] = useState<number>(50);
@@ -356,9 +359,15 @@ export function TariffPurchaseForm({
                         setSelectedTariffPeriod(period);
                         setUseCustomDays(false);
                       }}
+                      // Две метки уживаются: жёлтый контур говорит «выгодный»,
+                      // заливка и внутреннее кольцо — «выбран». Раньше выбор
+                      // затирал жёлтую рамку, и подсказка исчезала ровно у того
+                      // варианта, к которому вела.
                       className={`relative rounded-xl p-4 text-left transition-all ${
                         selectedTariffPeriod?.days === period.days && !useCustomDays
-                          ? 'border border-accent-500 bg-accent-500/10'
+                          ? period.is_highlighted
+                            ? 'border-2 border-urgent-400 bg-accent-500/10 ring-1 ring-inset ring-accent-500'
+                            : 'border border-accent-500 bg-accent-500/10'
                           : period.is_highlighted
                             ? 'border-2 border-urgent-400 bg-dark-800/50'
                             : 'border border-dark-700/50 bg-dark-800/50 hover:border-dark-600'
@@ -374,12 +383,15 @@ export function TariffPurchaseForm({
                         </div>
                       )}
                       <div className="text-lg font-semibold text-dark-100">{period.label}</div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium text-accent-400">
+                      {/* Цена не рвётся между числом и знаком валюты: две цены в
+                          карточку шириной в полэкрана не влезают, и без переноса
+                          целиком «₽» уезжал на свою строку. */}
+                      <div className="flex flex-wrap items-center gap-x-2">
+                        <span className="whitespace-nowrap font-medium text-accent-400">
                           {formatPrice(displayPrice)}
                         </span>
                         {displayOriginal && displayOriginal > displayPrice && (
-                          <span className="text-sm text-dark-500 line-through">
+                          <span className="whitespace-nowrap text-sm text-dark-500 line-through">
                             {formatPrice(displayOriginal)}
                           </span>
                         )}

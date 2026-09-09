@@ -105,13 +105,26 @@ export default function SavedCards() {
   });
   const nonTrialSubs = (subscriptionsData?.subscriptions ?? []).filter((sub) => !sub.is_trial);
 
-  const sbpQueries = useQueries({
-    queries: nonTrialSubs.map((sub) => ({
+  // Опций покупки здесь нет, поэтому фичу проверяем пробой: спрашиваем первую
+  // подписку, а остальные — только если ответ пришёл. Выключенная автооплата
+  // отвечает 403, и без пробы браузер печатал бы красную строку с полным стеком
+  // на КАЖДУЮ подписку человека.
+  const probeSub = nonTrialSubs[0];
+  const probeQuery = useQuery({
+    queryKey: ['sbp-recurring', probeSub?.id],
+    queryFn: () => subscriptionApi.getSbpRecurring(probeSub.id),
+    enabled: !!probeSub,
+    retry: false,
+  });
+  const restQueries = useQueries({
+    queries: nonTrialSubs.slice(1).map((sub) => ({
       queryKey: ['sbp-recurring', sub.id],
       queryFn: () => subscriptionApi.getSbpRecurring(sub.id),
+      enabled: probeQuery.isSuccess,
       retry: false,
     })),
   });
+  const sbpQueries = [probeQuery, ...restQueries];
 
   // No section at all when nothing is bound: either the feature is off
   // (every query 403s) or none of the subscriptions has an active binding.
