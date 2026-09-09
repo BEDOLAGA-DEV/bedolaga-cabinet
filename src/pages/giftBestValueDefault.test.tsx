@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, screen } from '@testing-library/react';
+import { cleanup, fireEvent, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router';
 import { render } from '@testing-library/react';
@@ -198,6 +198,35 @@ describe('подарок: выбранные по умолчанию тариф 
     await screen.findByText('1 месяц');
 
     expect(screen.queryByText(ru('subscription.bestValue'))).toBeNull();
+  });
+
+  it('смена тарифа переносит выбор на выгодный период нового тарифа', async () => {
+    state.config = config([
+      tariff({ id: 1, name: 'Базовый', periods: [period(30), period(180)] }),
+      tariff({ id: 2, name: 'Премиум', periods: [period(30), period(180, true)] }),
+    ]);
+    await renderGift();
+    await screen.findByText('Премиум');
+    expect(periodCard('1 месяц').className).toContain(SELECTED_PERIOD);
+
+    fireEvent.click(tariffCard('Премиум'));
+
+    expect(periodCard('6 месяцев').className).toContain(SELECTED_PERIOD);
+    expect(periodCard('1 месяц').className).not.toContain(SELECTED_PERIOD);
+  });
+
+  it('свой выбор периода не перебивается', async () => {
+    state.config = config([
+      tariff({ id: 1, name: 'Базовый', periods: [period(30), period(180, true)] }),
+      tariff({ id: 2, name: 'Премиум', periods: [period(30), period(180)] }),
+    ]);
+    await renderGift();
+    await screen.findByText('Базовый');
+
+    fireEvent.click(periodCard('1 месяц'));
+
+    expect(periodCard('1 месяц').className).toContain(SELECTED_PERIOD);
+    expect(periodCard('6 месяцев').className).not.toContain(SELECTED_PERIOD);
   });
 
   it('без отметок остаётся первый тариф и первый период', async () => {
