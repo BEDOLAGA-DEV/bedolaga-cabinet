@@ -29,6 +29,8 @@ import { copyToClipboard } from '../utils/clipboard';
 import { buildGiftClaimArtifacts } from '../utils/giftShare';
 import { getApiErrorMessage } from '../utils/api-error';
 import { formatPrice } from '../utils/format';
+import { pickBestValue } from '../utils/bestValue';
+import { BestValueBadge } from '../components/subscription/BestValueBadge';
 import { useCurrency } from '../hooks/useCurrency';
 import { usePlatform, useHaptic } from '@/platform';
 import { openPaymentUrl } from '../utils/openPaymentUrl';
@@ -182,7 +184,11 @@ function TariffCard({
 
       {/* Info */}
       <div className="min-w-0 flex-1">
-        <p className="text-base font-bold text-dark-50">{tariff.name}</p>
+        <div className="flex flex-wrap items-center gap-2">
+          <p className="text-base font-bold text-dark-50">{tariff.name}</p>
+          {/* Отметка оператора: этот тариф выбран сразу — подпись объясняет почему. */}
+          {tariff.is_highlighted && <BestValueBadge />}
+        </div>
         <p
           className={cn(
             'text-xs font-medium uppercase tracking-wider transition-colors',
@@ -237,6 +243,8 @@ function PeriodCard({
       {/* Left: period + discount */}
       <div className="flex flex-col items-start gap-1">
         <span className="text-lg font-bold">{formatPeriodLabel(period.days, t)}</span>
+        {/* Отметка оператора: этот период выбран сразу — подпись объясняет почему. */}
+        {period.is_highlighted && <BestValueBadge />}
         {hasDiscount && period.discount_percent != null && (
           <span
             className={cn(
@@ -410,16 +418,30 @@ function BuyTabContent({
   const [selectedSubOption, setSelectedSubOption] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  // Auto-select first tariff, period, method on config load
+  // Тариф и период выбираются ОДНИМ эффектом: отмеченные оператором выгодными,
+  // иначе первые по счёту. Двумя эффектами это разъезжалось — второй записывал
+  // «прошлый тариф» уже после того, как первый выбрал период, и затирал выбор,
+  // сделанный человеком между этими двумя проходами.
+  const lastTariffIdRef = useRef<number | null>(null);
   useEffect(() => {
-    if (config.tariffs.length > 0 && selectedTariffId === null) {
-      const firstTariff = config.tariffs[0];
-      setSelectedTariffId(firstTariff.id);
-      if (firstTariff.periods.length > 0 && selectedPeriodDays === null) {
-        setSelectedPeriodDays(firstTariff.periods[0].days);
-      }
+    if (config.tariffs.length === 0) return;
+    const tariff = selectedTariffId
+      ? config.tariffs.find((t) => t.id === selectedTariffId)
+      : (pickBestValue(config.tariffs) ?? config.tariffs[0]);
+    if (!tariff) return;
+    if (selectedTariffId !== tariff.id) setSelectedTariffId(tariff.id);
+    // Период пересчитываем только при смене тарифа: внутри одного тарифа выбор
+    // человека важнее отметки оператора.
+    if (lastTariffIdRef.current === tariff.id) return;
+    lastTariffIdRef.current = tariff.id;
+    if (tariff.periods.length > 0) {
+      const period = pickBestValue(tariff.periods) ?? tariff.periods[0];
+      setSelectedPeriodDays(period.days);
     }
+  }, [config.tariffs, selectedTariffId]);
 
+  // Способ оплаты по умолчанию — первый из доступных.
+  useEffect(() => {
     if (config.payment_methods.length > 0 && selectedMethod === null) {
       const firstMethod = config.payment_methods[0];
       setSelectedMethod(firstMethod.method_id);
@@ -429,19 +451,7 @@ function BuyTabContent({
         setSelectedSubOption(null);
       }
     }
-  }, [config, selectedTariffId, selectedPeriodDays, selectedMethod]);
-
-  // When tariff changes, auto-select its first period
-  useEffect(() => {
-    if (!selectedTariffId) return;
-    const tariff = config.tariffs.find((t) => t.id === selectedTariffId);
-    if (tariff && tariff.periods.length > 0) {
-      const hasCurrent = tariff.periods.some((p) => p.days === selectedPeriodDays);
-      if (!hasCurrent) {
-        setSelectedPeriodDays(tariff.periods[0].days);
-      }
-    }
-  }, [selectedTariffId, config.tariffs, selectedPeriodDays]);
+  }, [config.payment_methods, selectedMethod]);
 
   // Derived data
   const selectedTariff = useMemo(

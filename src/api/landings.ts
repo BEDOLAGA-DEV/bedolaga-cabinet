@@ -15,6 +15,8 @@ export interface LandingTariffPeriod {
   original_price_kopeks: number | null;
   original_price_label: string | null;
   discount_percent: number | null;
+  /** Период, отмеченный оператором как самый выгодный. */
+  is_highlighted?: boolean;
 }
 
 export interface LandingTariff {
@@ -25,6 +27,8 @@ export interface LandingTariff {
   device_limit: number;
   tier_level: number;
   periods: LandingTariffPeriod[];
+  /** Тариф, отмеченный оператором как выгодный. */
+  is_highlighted?: boolean;
   /** Daily tariff: the single purchasable period is 1 day, priced per day. */
   is_daily?: boolean;
   daily_price_kopeks?: number;
