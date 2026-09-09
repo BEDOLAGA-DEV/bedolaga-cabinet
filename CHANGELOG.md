@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.72.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.71.1...v1.72.0) (2026-09-09)
+
+
+### Features
+
+* **subscription:** выгодный период выбирается сразу, а не первый по счёту ([14832d0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/14832d0d219506e629c25005520c297801bdf585))
+
+
+### Bug Fixes
+
+* **admin:** цену периода тарифа можно поставить нулём ([e53803a](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/e53803a153ad551008a18481e365ad827b0698d4))
+* **subscription:** выбранный выгодный вариант не теряет жёлтый контур ([388b974](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/388b974fbd148fda82bf489d65303987bafcb8e9))
+* **subscription:** не спрашивать состояние выключенной автооплаты ([57a3d94](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/57a3d94d0b4c61d2042557c037d267e67a9e6e47))
+* **ui:** карточка подписки не уезжает за край на телефоне ([db7344c](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/db7344c0ccfbc80af29446017f9b07309ed96abb))
+
 ## [1.71.1](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.71.0...v1.71.1) (2026-09-08)
 
 
