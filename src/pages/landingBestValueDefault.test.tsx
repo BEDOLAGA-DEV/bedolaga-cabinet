@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter, Route, Routes } from 'react-router';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -188,6 +188,33 @@ describe('лендинг: выбранные по умолчанию тариф 
     await screen.findAllByText('Базовый');
 
     expect(screen.queryByText(ru('subscription.bestValue'))).toBeNull();
+  });
+
+  it('свой выбор периода не перебивается', async () => {
+    state.config = config([
+      tariff({ id: 1, name: 'Базовый', periods: [period(30), period(180, true)] }),
+    ]);
+    await renderLanding();
+    await screen.findAllByText('Базовый');
+
+    fireEvent.click(periodTab('1 месяц'));
+
+    expect(periodTab('1 месяц').className).toContain(SELECTED_PERIOD);
+    expect(periodTab('6 месяцев').className).not.toContain(SELECTED_PERIOD);
+  });
+
+  it('свой выбор тарифа не перебивается', async () => {
+    state.config = config([
+      tariff({ id: 1, name: 'Базовый', periods: [period(30)] }),
+      tariff({ id: 2, name: 'Годовой', is_highlighted: true, periods: [period(30)] }),
+    ]);
+    await renderLanding();
+    await screen.findAllByText('Базовый');
+
+    fireEvent.click(tariffCard('Базовый'));
+
+    expect(tariffCard('Базовый').className).toContain(SELECTED_TARIFF);
+    expect(tariffCard('Годовой').className).not.toContain(SELECTED_TARIFF);
   });
 
   it('без отметок остаётся первый тариф и самый короткий период', async () => {

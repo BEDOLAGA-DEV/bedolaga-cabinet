@@ -172,7 +172,7 @@ export default function RenewSubscription() {
                   setError(null);
                 }}
                 className={`w-full rounded-2xl p-4 text-left transition-all duration-200 ${
-                  isBestValue && !isSelected ? 'border-2' : 'border'
+                  isBestValue ? 'border-2' : 'border'
                 }`}
                 style={{
                   background: isSelected
@@ -180,11 +180,18 @@ export default function RenewSubscription() {
                       ? 'rgba(var(--color-accent-400), 0.08)'
                       : 'rgba(var(--color-accent-400), 0.05)'
                     : g.cardBg,
-                  borderColor: isSelected
-                    ? 'rgb(var(--color-accent-400))'
-                    : isBestValue
-                      ? BEST_VALUE_BORDER
+                  borderColor: isBestValue
+                    ? BEST_VALUE_BORDER
+                    : isSelected
+                      ? 'rgb(var(--color-accent-400))'
                       : g.cardBorder,
+                  // Выбранный выгодный вариант несёт обе метки: жёлтый контур
+                  // снаружи и контур выбора внутри — иначе подсказка пропадала
+                  // ровно тогда, когда человек ей последовал.
+                  boxShadow:
+                    isSelected && isBestValue
+                      ? 'inset 0 0 0 2px rgb(var(--color-accent-400))'
+                      : undefined,
                 }}
               >
                 {isBestValue && <BestValueBadge className="mb-2" />}

@@ -117,19 +117,20 @@ describe('выделенный период при продлении', () => {
     expect(cardFor(180).contains(badges[0])).toBe(true);
   });
 
-  it('обведён рамкой, а не только подписан, когда выбран другой период', async () => {
-    // Сам по себе выгодный период выбран сразу, и рамка выбора уступает ему
-    // рамку-подсказку. Подсказка видна, когда человек ушёл на другой период.
+  it('обведён рамкой, а не только подписан — и когда выбран, и когда нет', async () => {
     state.options = [
       option({ period_days: 30 }),
       option({ period_days: 180, price_kopeks: 270000, is_highlighted: true }),
     ];
     await renderRenew();
     await screen.findByText(ru('subscription.bestValue'));
-    fireEvent.click(cardFor(30));
 
     expect(cardFor(180).className).toContain('border-2');
     expect(cardFor(30).className).not.toContain('border-2');
+
+    // Человек ушёл на другой период — жёлтая рамка выгодного никуда не делась.
+    fireEvent.click(cardFor(30));
+    expect(cardFor(180).className).toContain('border-2');
   });
 
   it('ничего не выделяет, когда оператор не выбрал период', async () => {
