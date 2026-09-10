@@ -4958,7 +4958,9 @@
             "button_click": "Кнопка в боте",
             "cabinet_action": "Действие в кабинете",
             "miniapp_action": "Действие в Mini App",
-            "screen": "Открыл экран"
+            "screen": "Открыл экран",
+            "click": "Нажал",
+            "message": "Сообщение боту"
           },
           "sources": {
             "bot": "Бот",
@@ -4994,7 +4996,9 @@
             "completed": "Выполнена",
             "command": "Команда",
             "payment": "Оплата",
-            "screen": "Экран"
+            "screen": "Экран",
+            "click": "Нажатие",
+            "message": "Сообщение"
           },
           "screens": {
             "dashboard": "Главная",
@@ -5062,6 +5066,20 @@
             "ticketMessage": "Сообщение в тикет",
             "logout": "Выход",
             "wheelSpin": "Прокрут колеса"
+          },
+          "messageKinds": {
+            "text": "текст",
+            "photo": "фото",
+            "document": "файл",
+            "video": "видео",
+            "video_note": "видеосообщение",
+            "voice": "голосовое",
+            "audio": "аудио",
+            "sticker": "стикер",
+            "animation": "GIF",
+            "contact": "контакт",
+            "location": "геопозиция",
+            "other": "сообщение"
           }
         }
       },

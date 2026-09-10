@@ -19,7 +19,7 @@ import {
   WheelIcon,
 } from '@/components/icons';
 import { StatCard } from '@/components/stats';
-import { humanTitle } from './activityLabels';
+import { describeItem } from './activityLabels';
 
 // ──────────────────────────────────────────────────────────────────
 // Activity tab — unified timeline of the user's actions in the bot
@@ -205,14 +205,9 @@ export function ActivityTab({ userId, formatDate }: ActivityTabProps) {
           {items.map((item, index) => {
             const visual = TYPE_VISUALS[item.type] || FALLBACK_VISUAL;
             const Icon = visual.icon;
-            // Открытие экрана — свой заголовок, подпись экрана вместо пути;
-            // действие в вебе — имя действия вместо «POST /cabinet/…».
-            const isScreen = item.subtype === 'screen';
-            const typeLabel = isScreen
-              ? t('admin.users.detail.activity.types.screen')
-              : t(`admin.users.detail.activity.types.${item.type}`, { defaultValue: '' }) ||
-                item.type;
-            const title = humanTitle(item, t);
+            // Экран, нажатие, сообщение — свой заголовок и человеческая подпись
+            // вместо пути или «POST /cabinet/…».
+            const { typeLabel, title, showSubtype } = describeItem(item, t);
             const isLast = index === items.length - 1;
 
             return (
@@ -232,7 +227,7 @@ export function ActivityTab({ userId, formatDate }: ActivityTabProps) {
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex min-w-0 flex-wrap items-center gap-2">
                       <span className="text-sm font-medium text-dark-100">{typeLabel}</span>
-                      {item.subtype && !isScreen && <SubtypeBadge subtype={item.subtype} />}
+                      {showSubtype && item.subtype && <SubtypeBadge subtype={item.subtype} />}
                       {item.source && (
                         <span className="rounded-full bg-dark-700/40 px-2 py-0.5 text-[10px] uppercase tracking-wider text-dark-500">
                           {t(`admin.users.detail.activity.sources.${item.source}`, {

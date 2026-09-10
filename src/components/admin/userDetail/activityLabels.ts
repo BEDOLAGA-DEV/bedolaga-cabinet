@@ -140,14 +140,57 @@ export function actionLabelKey(buttonId: string): string | null {
 }
 
 const WEB_TYPES = new Set(['cabinet_action', 'miniapp_action']);
+const MESSAGE_KINDS = new Set([
+  'text',
+  'photo',
+  'document',
+  'video',
+  'video_note',
+  'voice',
+  'audio',
+  'sticker',
+  'animation',
+  'contact',
+  'location',
+  'other',
+]);
 
 /** Подпись записи для админа: имя экрана, имя действия или исходный заголовок. */
 export function humanTitle(item: UserActivityItem, t: Translate): string | null {
-  if (!item.title || !WEB_TYPES.has(item.type)) return item.title;
+  if (!item.title) return item.title;
+  if (item.type === 'button_click' && item.subtype === 'message') {
+    return MESSAGE_KINDS.has(item.title)
+      ? t(`${NS}.messageKinds.${item.title}`)
+      : t(`${NS}.messageKinds.other`);
+  }
+  if (!WEB_TYPES.has(item.type)) return item.title;
   if (item.subtype === 'screen') {
     const key = screenLabelKey(item.title);
     return key ? t(`${NS}.screens.${key}`) : item.title;
   }
+  if (item.subtype === 'click') return item.title;
   const key = actionLabelKey(item.title);
   return key ? t(`${NS}.actions.${key}`) : item.title;
+}
+
+/** Подтипы, которые сами задают заголовок записи — бейдж подтипа для них лишний. */
+const HEADLINE_SUBTYPES: Record<string, string> = {
+  screen: 'screen',
+  click: 'click',
+  message: 'message',
+};
+
+export interface ItemDescription {
+  typeLabel: string;
+  title: string | null;
+  showSubtype: boolean;
+}
+
+/** Заголовок, подпись и нужен ли бейдж подтипа — одно место для всех веток. */
+export function describeItem(item: UserActivityItem, t: Translate): ItemDescription {
+  const headline = item.subtype ? HEADLINE_SUBTYPES[item.subtype] : undefined;
+  const typeLabel = headline
+    ? t(`${NS}.types.${headline}`)
+    : t(`${NS}.types.${item.type}`, { defaultValue: '' }) || item.type;
+  return { typeLabel, title: humanTitle(item, t), showSubtype: !headline && !!item.subtype };
 }

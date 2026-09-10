@@ -1,13 +1,21 @@
 import apiClient from './client';
 
+/** Событие следа: открытие экрана или нажатие с подписью кнопки. */
+export interface ActivityEvent {
+  kind: 'screen' | 'click';
+  /** Путь экрана без query и фрагмента — там бывают токены. */
+  path: string;
+  label?: string;
+}
+
 /**
- * След пользователя: кабинет сообщает серверу об открытии каждого экрана —
- * раздел «Активность» у админа показывает и просмотры, а не только покупки.
+ * След пользователя: кабинет сообщает серверу о каждом открытом экране и каждом
+ * нажатии — раздел «Активность» у админа показывает всё, что делал человек.
  * Fire-and-forget: ответ не нужен, сбой не должен мешать экрану.
  */
 export const activityApi = {
-  reportScreen: (path: string): Promise<void> =>
-    apiClient.post('/cabinet/activity/screen', { path }).then(
+  sendEvents: (events: ActivityEvent[]): Promise<void> =>
+    apiClient.post('/cabinet/activity/events', { events }).then(
       () => undefined,
       () => undefined,
     ),
