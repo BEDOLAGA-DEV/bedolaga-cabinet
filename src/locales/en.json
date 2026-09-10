@@ -2040,7 +2040,7 @@
         "enabled": "Enabled",
         "disabled": "Disabled",
         "success": "Success",
-        "runAutoSyncNow": "Run Auto Sync Now",
+        "runAutoSyncNow": "Full sync now",
         "fromPanel": "From Panel",
         "fromPanelDesc": "Import users from Remnawave to bot",
         "toPanel": "To Panel",
