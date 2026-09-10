@@ -3516,7 +3516,9 @@
             "button_click": "机器人按钮",
             "cabinet_action": "后台操作",
             "miniapp_action": "Mini App 操作",
-            "screen": "打开了页面"
+            "screen": "打开了页面",
+            "click": "点击了",
+            "message": "发给机器人的消息"
           },
           "sources": {
             "bot": "机器人",
@@ -3552,7 +3554,9 @@
             "completed": "已完成",
             "command": "命令",
             "payment": "支付",
-            "screen": "页面"
+            "screen": "页面",
+            "click": "点击",
+            "message": "消息"
           },
           "screens": {
             "dashboard": "首页",
@@ -3620,6 +3624,20 @@
             "ticketMessage": "工单消息",
             "logout": "退出登录",
             "wheelSpin": "转动转盘"
+          },
+          "messageKinds": {
+            "text": "文本",
+            "photo": "照片",
+            "document": "文件",
+            "video": "视频",
+            "video_note": "视频消息",
+            "voice": "语音",
+            "audio": "音频",
+            "sticker": "贴纸",
+            "animation": "GIF",
+            "contact": "联系人",
+            "location": "位置",
+            "other": "消息"
           }
         }
       },

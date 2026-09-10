@@ -4534,7 +4534,9 @@
             "button_click": "Bot button",
             "cabinet_action": "Cabinet action",
             "miniapp_action": "Mini App action",
-            "screen": "Opened screen"
+            "screen": "Opened screen",
+            "click": "Clicked",
+            "message": "Message to bot"
           },
           "sources": {
             "bot": "Bot",
@@ -4570,7 +4572,9 @@
             "completed": "Completed",
             "command": "Command",
             "payment": "Payment",
-            "screen": "Screen"
+            "screen": "Screen",
+            "click": "Click",
+            "message": "Message"
           },
           "screens": {
             "dashboard": "Home",
@@ -4638,6 +4642,20 @@
             "ticketMessage": "Ticket message",
             "logout": "Logout",
             "wheelSpin": "Wheel spin"
+          },
+          "messageKinds": {
+            "text": "text",
+            "photo": "photo",
+            "document": "file",
+            "video": "video",
+            "video_note": "video note",
+            "voice": "voice",
+            "audio": "audio",
+            "sticker": "sticker",
+            "animation": "GIF",
+            "contact": "contact",
+            "location": "location",
+            "other": "message"
           }
         }
       },
