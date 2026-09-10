@@ -3948,7 +3948,7 @@
         "enabled": "已启用",
         "disabled": "已禁用",
         "success": "成功",
-        "runAutoSyncNow": "立即运行自动同步",
+        "runAutoSyncNow": "立即完整同步",
         "fromPanel": "从面板",
         "fromPanelDesc": "从Remnawave导入用户到机器人",
         "toPanel": "到面板",
