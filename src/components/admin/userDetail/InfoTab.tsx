@@ -204,7 +204,7 @@ export function InfoTab(props: InfoTabProps) {
           <div className="text-dark-100">{formatDate(user.created_at)}</div>
         </div>
         <div className="rounded-xl bg-dark-800/50 p-3">
-          <div className="mb-1 text-xs text-dark-500">{t('admin.users.detail.botActivity')}</div>
+          <div className="mb-1 text-xs text-dark-500">{t('admin.users.detail.lastActivity')}</div>
           <div className="text-dark-100">{formatDate(user.last_activity)}</div>
         </div>
         <div className="rounded-xl bg-dark-800/50 p-3">
