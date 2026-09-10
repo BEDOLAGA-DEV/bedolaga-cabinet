@@ -32,8 +32,15 @@ const response: UserActivityResponse = {
     item({ type: 'cabinet_action', source: 'cabinet', title: 'POST /cabinet/subscription/trial' }),
     item({ type: 'cabinet_action', source: 'cabinet', title: 'POST /cabinet/unknown/thing' }),
     item({ type: 'button_click', subtype: 'payment', source: 'bot', title: 'successful_payment' }),
+    item({
+      type: 'cabinet_action',
+      subtype: 'click',
+      source: 'cabinet',
+      title: 'Скопировать ключ',
+    }),
+    item({ type: 'button_click', subtype: 'message', source: 'bot', title: 'photo' }),
   ],
-  total: 5,
+  total: 7,
   offset: 0,
   limit: 25,
 };
@@ -78,6 +85,11 @@ it('экраны и действия подписаны по-человечес�
   expect(screen.getByText('Оплата')).toBeTruthy();
   expect(screen.getByText('Mini App')).toBeTruthy();
   expect(screen.queryByText('miniapp_action')).toBeNull();
+  // Нажатие — заголовок «Нажал» и подпись кнопки; сообщение — вид без содержимого.
+  expect(screen.getByText('Нажал')).toBeTruthy();
+  expect(screen.getByText('Скопировать ключ')).toBeTruthy();
+  expect(screen.getByText('Сообщение боту')).toBeTruthy();
+  expect(screen.getByText('фото')).toBeTruthy();
 });
 
 it('фильтр «Клики» запрашивает и Mini App', async () => {

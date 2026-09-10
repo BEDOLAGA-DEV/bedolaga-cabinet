@@ -3517,7 +3517,9 @@
             "button_click": "دکمه ربات",
             "cabinet_action": "اقدام در پنل",
             "miniapp_action": "اقدام در مینی‌اپ",
-            "screen": "صفحه باز شد"
+            "screen": "صفحه باز شد",
+            "click": "کلیک کرد",
+            "message": "پیام به ربات"
           },
           "sources": {
             "bot": "ربات",
@@ -3553,7 +3555,9 @@
             "completed": "انجام شده",
             "command": "دستور",
             "payment": "پرداخت",
-            "screen": "صفحه"
+            "screen": "صفحه",
+            "click": "کلیک",
+            "message": "پیام"
           },
           "screens": {
             "dashboard": "صفحه اصلی",
@@ -3621,6 +3625,20 @@
             "ticketMessage": "پیام در تیکت",
             "logout": "خروج",
             "wheelSpin": "چرخش گردونه"
+          },
+          "messageKinds": {
+            "text": "متن",
+            "photo": "عکس",
+            "document": "فایل",
+            "video": "ویدیو",
+            "video_note": "پیام ویدیویی",
+            "voice": "پیام صوتی",
+            "audio": "صدا",
+            "sticker": "استیکر",
+            "animation": "گیف",
+            "contact": "مخاطب",
+            "location": "موقعیت",
+            "other": "پیام"
           }
         }
       },
