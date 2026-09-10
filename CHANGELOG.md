@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.73.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.72.0...v1.73.0) (2026-09-10)
+
+
+### Features
+
+* **admin:** «Активность» — каждое нажатие в кабинете ([4118115](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/41181155cb73494f7232479c60af81ebff547571))
+* **admin:** «Активность» — каждый экран и каждое действие, по-человечески ([8c076d8](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/8c076d89c5a0f075886bf63938803c214547148f))
+* **admin:** тег панели Remnawave и дни триала в форме тарифа ([46be70e](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/46be70ed009c990296f7cbac8ebdce2b43c3493d))
+
+
+### Bug Fixes
+
+* **admin:** не слать ноль выгодного периода при создании тарифа ([8b36331](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/8b363311db8673ddd174ae80473fd61731a65584))
+
 ## [1.72.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.71.1...v1.72.0) (2026-09-09)
 
 
