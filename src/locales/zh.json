@@ -2677,7 +2677,11 @@
         "trafficPackagesRequired": "请添加至少一个流量包（或关闭流量购买）"
       },
       "lavaProductLabel": "Lava 产品（自动续订）",
-      "lavaProductDesc": "来自 Lava 后台的产品 UUID：价格与扣款周期在那里设置。留空则该套餐不支持自动续订。"
+      "lavaProductDesc": "来自 Lava 后台的产品 UUID：价格与扣款周期在那里设置。留空则该套餐不支持自动续订。",
+      "panelTagLabel": "Remnawave 面板标签",
+      "panelTagDesc": "最多 16 个字符：拉丁字母、数字和下划线。留空则使用设置中的通用标签（试用或付费）。面板中通过该标签可看出用户所用套餐。",
+      "trialDaysLabel": "此套餐的试用天数",
+      "trialDaysDesc": "留空则使用全局试用时长设置。"
     },
     "servers": {
       "title": "服务器管理",
