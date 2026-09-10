@@ -163,6 +163,7 @@ export default function AdminTariffCreate() {
 
   const handleSubmit = () => {
     const isDaily = tariffType === 'daily';
+    const highlightPayload = isDaily ? null : highlightPeriodDays;
 
     // PATCH applies a field only when it is present in the payload, so empty
     // values ('' / []) must still be sent when editing — omitting them makes
@@ -180,8 +181,10 @@ export default function AdminTariffCreate() {
       max_device_limit: toNumber(maxDeviceLimit) > 0 ? toNumber(maxDeviceLimit) : undefined,
       tier_level: toNumber(tierLevel, 1),
       period_prices: isDaily ? [] : periodPrices.filter((p) => p.price_kopeks >= 0),
-      // 0 — «снять выделение»: пустое поле означало бы «не трогать».
-      highlight_period_days: isDaily ? 0 : (highlightPeriodDays ?? 0),
+      // Выделение необязательно. На правке 0 — «снять выделение» (пустое поле
+      // означало бы «не трогать»); на создании снимать нечего, и без отметки
+      // поле не уходит — сервер отверг бы ноль.
+      highlight_period_days: isEdit ? (highlightPayload ?? 0) : (highlightPayload ?? undefined),
       allowed_squads: selectedSquads,
       external_squad_uuid: selectedExternalSquad || null,
       promo_group_ids: selectedPromoGroups,
