@@ -2056,7 +2056,7 @@
         "enabled": "Включено",
         "disabled": "Выключено",
         "success": "Успешно",
-        "runAutoSyncNow": "Запустить автосинхронизацию",
+        "runAutoSyncNow": "Полная синхронизация сейчас",
         "fromPanel": "Из панели",
         "fromPanelDesc": "Импорт пользователей из Remnawave в бота",
         "toPanel": "В панель",

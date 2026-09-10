@@ -3940,7 +3940,7 @@
         "enabled": "فعال",
         "disabled": "غیرفعال",
         "success": "موفق",
-        "runAutoSyncNow": "اجرای همگام‌سازی خودکار",
+        "runAutoSyncNow": "همگام‌سازی کامل اکنون",
         "fromPanel": "از پنل",
         "fromPanelDesc": "وارد کردن کاربران از Remnawave به ربات",
         "toPanel": "به پنل",
