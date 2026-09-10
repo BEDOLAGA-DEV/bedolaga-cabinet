@@ -3554,7 +3554,11 @@
         "trafficPackagesRequired": "Add at least one traffic package (or disable traffic topup)"
       },
       "lavaProductLabel": "Lava product (auto-renewal)",
-      "lavaProductDesc": "Product UUID from the Lava dashboard: price and charge period are configured there. Empty — auto-renewal is unavailable for this tariff."
+      "lavaProductDesc": "Product UUID from the Lava dashboard: price and charge period are configured there. Empty — auto-renewal is unavailable for this tariff.",
+      "panelTagLabel": "Remnawave panel tag",
+      "panelTagDesc": "Up to 16 characters: Latin letters, digits and underscore. Empty — the global tag from settings (trial or paid). The tag shows in the panel which tariff a user is on.",
+      "trialDaysLabel": "Trial days on this tariff",
+      "trialDaysDesc": "Empty — the global trial duration setting."
     },
     "servers": {
       "title": "Squad Management",

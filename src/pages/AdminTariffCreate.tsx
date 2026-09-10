@@ -56,6 +56,10 @@ export default function AdminTariffCreate() {
   const [selectedPromoGroups, setSelectedPromoGroups] = useState<number[]>([]);
   const [dailyPriceKopeks, setDailyPriceKopeks] = useState<number | ''>(0);
   const [lavaProductId, setLavaProductId] = useState('');
+  // Тег панели Remnawave: сервер поднимает регистр и проверяет формат
+  const [panelTag, setPanelTag] = useState('');
+  // Дни триала на этом тарифе; '' — глобальная настройка
+  const [trialDurationDays, setTrialDurationDays] = useState<number | ''>('');
 
   // Traffic topup
   const [trafficTopupEnabled, setTrafficTopupEnabled] = useState(false);
@@ -132,6 +136,8 @@ export default function AdminTariffCreate() {
       );
       setDailyPriceKopeks(data.daily_price_kopeks || 0);
       setLavaProductId(data.lava_product_id || '');
+      setPanelTag(data.panel_tag || '');
+      setTrialDurationDays(data.trial_duration_days ?? '');
       setTrafficTopupEnabled(data.traffic_topup_enabled || false);
       setMaxTopupTrafficGb(data.max_topup_traffic_gb || 0);
       setTrafficTopupPackages(data.traffic_topup_packages || {});
@@ -195,6 +201,10 @@ export default function AdminTariffCreate() {
       daily_price_kopeks: isDaily ? toNumber(dailyPriceKopeks) : 0,
       // Пустая строка отвязывает тариф от продукта Lava
       lava_product_id: lavaProductId.trim(),
+      // Пустая строка снимает тег панели (на правке); формат проверяет сервер
+      panel_tag: panelTag.trim(),
+      // Дни триала: пусто — глобальная настройка
+      trial_duration_days: toNumber(trialDurationDays) > 0 ? toNumber(trialDurationDays) : null,
       traffic_reset_mode: trafficResetMode,
     };
 
@@ -509,6 +519,47 @@ export default function AdminTariffCreate() {
               placeholder="6be21df9-0bcd-44ac-9c2c-3be7bc94decc"
             />
             <p className="mt-2 text-xs text-dark-500">{t('admin.tariffs.lavaProductDesc')}</p>
+          </div>
+
+          {/* Remnawave panel tag */}
+          <div>
+            <label
+              htmlFor="tariff-panel-tag"
+              className="mb-2 block text-sm font-medium text-dark-300"
+            >
+              {t('admin.tariffs.panelTagLabel')}
+            </label>
+            <input
+              id="tariff-panel-tag"
+              type="text"
+              value={panelTag}
+              onChange={(e) => setPanelTag(e.target.value)}
+              className="input w-full uppercase"
+              maxLength={16}
+              placeholder="PAID_PRO"
+            />
+            <p className="mt-2 text-xs text-dark-500">{t('admin.tariffs.panelTagDesc')}</p>
+          </div>
+
+          {/* Trial days on this tariff */}
+          <div>
+            <label
+              htmlFor="tariff-trial-days"
+              className="mb-2 block text-sm font-medium text-dark-300"
+            >
+              {t('admin.tariffs.trialDaysLabel')}
+            </label>
+            <input
+              id="tariff-trial-days"
+              type="number"
+              min={1}
+              value={trialDurationDays}
+              onChange={(e) =>
+                setTrialDurationDays(e.target.value === '' ? '' : Number(e.target.value))
+              }
+              className="input w-full"
+            />
+            <p className="mt-2 text-xs text-dark-500">{t('admin.tariffs.trialDaysDesc')}</p>
           </div>
 
           {/* Traffic Limit */}
