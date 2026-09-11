@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import type { GeoProbeMode, VlessCore } from '@/api/reachability';
+import { Toggle } from '@/components/admin/Toggle';
 import { ChoiceChips } from './ChoiceChips';
 import { SectionHeading } from './SectionHeading';
 import { type CoreVersions, coreVersion } from './cores';
@@ -46,15 +47,8 @@ export function GeoMethod(props: GeoMethodProps) {
       {props.hostsSelected && (
         <p className="text-xs text-dark-400">{t('admin.reachability.geo.method.hostsHint')}</p>
       )}
-      <label className="flex items-start gap-3">
-        <input
-          type="checkbox"
-          checked={heavyOn}
-          disabled={tcp || !props.heavyAllowed}
-          onChange={(event) => patch({ heavy: event.target.checked })}
-          className="mt-1"
-        />
-        <span>
+      <div className="flex items-center justify-between gap-4">
+        <span className="min-w-0">
           <span className="block text-sm text-dark-100">
             {t('admin.reachability.geo.method.heavy')}
           </span>
@@ -62,7 +56,14 @@ export function GeoMethod(props: GeoMethodProps) {
             {t('admin.reachability.geo.method.heavyHint')}
           </span>
         </span>
-      </label>
+        <Toggle
+          checked={heavyOn}
+          disabled={tcp || !props.heavyAllowed}
+          onChange={() => patch({ heavy: !heavyOn })}
+          aria-label={t('admin.reachability.geo.method.heavy')}
+          className="shrink-0"
+        />
+      </div>
       {props.hasTunnel && (
         <ChoiceChips<VlessCore>
           label={t('admin.reachability.subscription.core')}

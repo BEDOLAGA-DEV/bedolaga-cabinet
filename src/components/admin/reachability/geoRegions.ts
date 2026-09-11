@@ -1,11 +1,15 @@
+import REGION_ISO from './assets/geo-region-iso.json';
+
 /**
- * Регион сервиса (русское имя из справочника) → id региона на карте `assets/russia-regions.svg`
- * (ISO 3166-2 без префикса RU-, как в «ISO codes of subjects of Russia.svg»; Забайкальский край
- * в файле подписан словом). Крым, Севастополь, ДНР и ЛНР контура на карте не имеют — их коды
- * условные, регион остаётся серым, а строки в таблице показываются как обычно.
+ * Регион сервиса → код региона на карте (ISO 3166-2 без «RU-», как в `assets/russia-regions.json`).
+ * Основной путь — токен региона из строки прогона (таблица собрана генератором карты из пула
+ * сервиса); запасной — русское имя, если токен незнаком. Крым, Севастополь, ДНР и ЛНР контура
+ * на карте не имеют: их строки в таблице обычные, на карте им нечего красить.
  */
 
-export const REGION_CODES: Record<string, string> = {
+const REGION_BY_TOKEN: Record<string, string> = REGION_ISO;
+
+const REGION_BY_NAME: Record<string, string> = {
   адыгея: 'AD',
   алтай: 'AL',
   алтайский: 'ALT',
@@ -21,9 +25,8 @@ export const REGION_CODES: Record<string, string> = {
   вологодская: 'VLG',
   воронежская: 'VOR',
   дагестан: 'DA',
-  'донецкая народная': 'DON',
   еврейская: 'YEV',
-  забайкальский: 'Zabaykalsky',
+  забайкальский: 'ZAB',
   ивановская: 'IVA',
   ингушетия: 'IN',
   иркутская: 'IRK',
@@ -43,12 +46,10 @@ export const REGION_CODES: Record<string, string> = {
   костромская: 'KOS',
   краснодарский: 'KDA',
   красноярский: 'KYA',
-  крым: 'CR',
   курганская: 'KGN',
   курская: 'KRS',
   ленинградская: 'LEN',
   липецкая: 'LIP',
-  'луганская народная': 'LUG',
   магаданская: 'MAG',
   'марий эл': 'ME',
   мордовия: 'MO',
@@ -76,7 +77,6 @@ export const REGION_CODES: Record<string, string> = {
   якутия: 'SA',
   сахалинская: 'SAK',
   свердловская: 'SVE',
-  севастополь: 'SEV',
   'северная осетия - алания': 'SE',
   'северная осетия': 'SE',
   смоленская: 'SMO',
@@ -105,9 +105,6 @@ export const REGION_CODES: Record<string, string> = {
   ярославская: 'YAR',
 };
 
-/** Регионы, для которых на карте нет контура: красить нечего, но строки в таблице обычные. */
-export const OFF_MAP_CODES: ReadonlySet<string> = new Set(['CR', 'SEV', 'DON', 'LUG']);
-
 const NOISE =
   /(^|\s)(республика|область|обл\.|край|автономный округ|автономная область|ао|город|г\.)(?=\s|$)/g;
 
@@ -122,9 +119,10 @@ export function normalizeRegionName(name: string): string {
     .trim();
 }
 
-/** Код региона на карте по русскому имени из справочника; неизвестный — null (регион серый). */
-export function regionCodeFor(regionRu: string): string | null {
-  const key = normalizeRegionName(regionRu);
-  if (!key) return null;
-  return REGION_CODES[key] ?? null;
+/** Код региона на карте: сначала по токену сервиса, потом по русскому имени; неизвестный — null. */
+export function regionCodeFor(region: string, regionRu = ''): string | null {
+  const byToken = REGION_BY_TOKEN[region];
+  if (byToken) return byToken;
+  const key = normalizeRegionName(regionRu || region);
+  return key ? (REGION_BY_NAME[key] ?? null) : null;
 }

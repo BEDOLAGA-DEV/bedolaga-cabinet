@@ -9,18 +9,14 @@ import { GEO_VERDICTS, TONE_DOT, isResultVerdict, verdictTone } from './geoVerdi
 
 const KEY = 'admin.reachability.geo';
 
-/** Результат GEO: фраза-вывод, чипы вердиктов (фильтр), карта регионов (фильтр), поиск, города. */
+/** Результат GEO: фраза-вывод, чипы вердиктов (фильтр списка и подсветка точек), карта, поиск, города. */
 export function GeoResult({ job }: { job: Job }) {
   const { t } = useTranslation();
   const rows = useMemo(() => sortGeoRows(geoRowsOf(job)), [job]);
   const summary = geoSummaryOf(job);
   const [verdict, setVerdict] = useState<string | null>(null);
-  const [regionCode, setRegionCode] = useState<string | null>(null);
   const [query, setQuery] = useState('');
-  const shown = useMemo(
-    () => filterGeoRows(rows, { verdict, regionCode, query }),
-    [rows, verdict, regionCode, query],
-  );
+  const shown = useMemo(() => filterGeoRows(rows, { verdict, query }), [rows, verdict, query]);
   if (!summary) {
     return <p className="text-sm text-dark-400">{t('admin.reachability.result.empty')}</p>;
   }
@@ -62,7 +58,7 @@ export function GeoResult({ job }: { job: Job }) {
           </span>
         )}
       </div>
-      <GeoMap rows={rows} selected={regionCode} onSelect={setRegionCode} />
+      <GeoMap rows={rows} highlightVerdict={verdict} />
       <input
         type="search"
         value={query}

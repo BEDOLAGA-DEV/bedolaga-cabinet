@@ -20,10 +20,16 @@ import { initialSelection } from './autoSelect';
 import { type ConfigItem, SubscriptionTargets } from './SubscriptionTargets';
 import { autoUnitsFor } from './autoUnits';
 import { type DeepLink, jobKindOf } from './deepLink';
-import { DEFAULT_GEO_FORM, type GeoFormState, recallGeoForm, rememberGeoForm } from './geoForm';
+import {
+  DEFAULT_GEO_FORM,
+  type GeoFormState,
+  type GeoTargetKind,
+  recallGeoForm,
+  rememberGeoForm,
+} from './geoForm';
 import { buildGeoBody, buildProbeBody, buildScanBody, buildVlessBody } from './jobBodies';
 import { jobAdapterFor } from './launchAdapters';
-import { repeatFromJob } from './repeatFromJob';
+import { type RepeatState, repeatFromJob } from './repeatFromJob';
 import {
   DEFAULT_SNI_HOST,
   parseSniHosts,
@@ -53,6 +59,13 @@ const SCAN_DEFAULT: Probes = { icmp: true, tcp: true, sni: false };
  * Одиночные проверки как на bsbord.com: цели вкладки, пробы под ними, операторы по округам,
  * «Запуск» справа (на телефоне — панель снизу). Хосты панели живут на своей вкладке.
  */
+/** Вид целей GEO по прошлой задаче: что в ней было, то и выбираем. */
+function geoTargetKindOf(repeat: RepeatState): GeoTargetKind {
+  if (repeat.hosts.length > 0) return 'hosts';
+  if (repeat.addresses.trim().length > 0) return 'addresses';
+  return 'vless';
+}
+
 export function Launcher({ status, link, runningJobId, onRunning }: LauncherProps) {
   const { t } = useTranslation();
   const mode = link.mode === 'hosts' || link.mode === 'history' ? 'ip' : link.mode;
@@ -70,7 +83,13 @@ export function Launcher({ status, link, runningJobId, onRunning }: LauncherProp
     link.targets.filter((target) => target.kind === 'host').map((target) => target.ref),
   );
   const [geoAddresses, setGeoAddresses] = useState('');
-  const [geoForm, setGeoForm] = useState<GeoFormState>(() => recallGeoForm() ?? DEFAULT_GEO_FORM);
+  const [geoForm, setGeoForm] = useState<GeoFormState>(() => {
+    const recalled = recallGeoForm() ?? DEFAULT_GEO_FORM;
+    // Хост из ссылки (карточка сервера) — сразу вид «хосты панели», что бы ни помнилось.
+    return link.targets.some((target) => target.kind === 'host')
+      ? { ...recalled, targetKind: 'hosts' }
+      : recalled;
+  });
   // Человек трогал «Откуда/Метод» руками — автоматика (TCP для хостов панели) больше не вмешивается.
   const geoTouched = useRef(false);
   const changeGeoForm = (next: GeoFormState) => {
@@ -123,6 +142,7 @@ export function Launcher({ status, link, runningJobId, onRunning }: LauncherProp
     if (repeatState.mode === 'geo') {
       setGeoHosts(repeatState.hosts);
       setGeoAddresses(repeatState.addresses);
+      setGeoForm((form) => ({ ...form, targetKind: geoTargetKindOf(repeatState) }));
     }
     if (repeatState.shortUuid) {
       setSource({ userId: null, shortUuid: repeatState.shortUuid });
@@ -198,7 +218,8 @@ export function Launcher({ status, link, runningJobId, onRunning }: LauncherProp
     [configIndexes, configList],
   );
 
-  const geoConfig = mode === 'geo' ? (vlessTargets[0] ?? null) : null;
+  const geoConfig =
+    mode === 'geo' && geoForm.targetKind === 'vless' ? (vlessTargets[0] ?? null) : null;
 
   const body = useMemo(() => {
     if (mode === 'geo') {
