@@ -36,6 +36,10 @@ export interface GeoRow {
   sid?: string | null;
   sid_hold_s?: number | null;
   exit_changed?: boolean;
+  /** Строка пришла повтором с другого выхода; прежние строки города помечены `rechecked`. */
+  new_exit?: boolean;
+  rechecked?: boolean;
+  recheck_job_id?: number | null;
 }
 
 export interface GeoSummary {

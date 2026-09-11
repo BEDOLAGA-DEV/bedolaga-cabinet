@@ -188,9 +188,14 @@ export interface GeoOptions {
   city_limit: number;
   probe_mode: GeoProbeMode;
   heavy: boolean;
-  /** Повтор через тот же выход: sid строки прошлого прогона и ожидаемый exit_ip; только с одним городом. */
-  session?: string;
-  expect_exit_ip?: string;
+}
+
+/** Перепроверка одного проваленного города из отчёта GEO: «тот же IP» или «сменить IP». */
+export interface GeoRecheckRequest {
+  region: string;
+  city: string;
+  req_isp: string | null;
+  same_exit: boolean;
 }
 
 /** Числа сервиса из расчёта: города, потолок трафика, резерв, прогноз времени, потолок городов режима. */
@@ -531,6 +536,8 @@ export const reachabilityApi = {
     (await apiClient.get(`${BASE}/jobs`, { params })).data,
 
   getJob: async (id: number): Promise<Job> => (await apiClient.get(`${BASE}/jobs/${id}`)).data,
+  recheckGeo: async (jobId: number, body: GeoRecheckRequest): Promise<Job> =>
+    (await apiClient.post(`${BASE}/jobs/${jobId}/geo/recheck`, body)).data,
 
   cancelJob: async (id: number): Promise<Job> =>
     (await apiClient.post(`${BASE}/jobs/${id}/cancel`)).data,

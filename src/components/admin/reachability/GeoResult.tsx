@@ -4,6 +4,7 @@ import type { Job } from '@/api/reachability';
 import { cn } from '@/lib/utils';
 import { GeoMap } from './GeoMap';
 import { GeoRows } from './GeoRows';
+import { useGeoRecheck } from './useGeoRecheck';
 import { filterGeoRows, geoRowsOf, geoSummaryOf, sortGeoRows } from './geoRowsView';
 import { GEO_VERDICTS, TONE_DOT, isResultVerdict, verdictTone } from './geoVerdicts';
 
@@ -13,6 +14,7 @@ const KEY = 'admin.reachability.geo';
 export function GeoResult({ job }: { job: Job }) {
   const { t } = useTranslation();
   const rows = useMemo(() => sortGeoRows(geoRowsOf(job)), [job]);
+  const recheck = useGeoRecheck(job);
   const summary = geoSummaryOf(job);
   const [verdict, setVerdict] = useState<string | null>(null);
   const [query, setQuery] = useState('');
@@ -58,7 +60,7 @@ export function GeoResult({ job }: { job: Job }) {
           </span>
         )}
       </div>
-      <GeoMap rows={rows} highlightVerdict={verdict} job={job} />
+      <GeoMap rows={rows} highlightVerdict={verdict} job={job} recheck={recheck} />
       <input
         type="search"
         value={query}
@@ -67,7 +69,7 @@ export function GeoResult({ job }: { job: Job }) {
         placeholder={t(`${KEY}.result.find`)}
         className="input w-full text-sm"
       />
-      <GeoRows rows={shown} job={job} />
+      <GeoRows rows={shown} job={job} recheck={recheck} />
     </div>
   );
 }

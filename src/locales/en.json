@@ -2536,9 +2536,7 @@
           "cityTruncated": "Not all shown: {{total}} found, refine the name",
           "removeCity": "Remove city",
           "isps_one": "{{count}} ISP",
-          "isps_other": "{{count}} ISPs",
-          "sessionNote": "Repeat through the same exit {{ip}}",
-          "sessionDrop": "Pick a new exit"
+          "isps_other": "{{count}} ISPs"
         },
         "network": {
           "label": "Network",
@@ -2593,7 +2591,15 @@
           "latency": "{{value}} ms",
           "kbps": "{{value}} kbps",
           "froze": "freeze",
-          "recheck": "Repeat"
+          "recheck": "Repeat",
+          "tags": {
+            "newExit": "new exit",
+            "newExitTitle": "another exit after a re-check — the previous row is kept",
+            "exitChanged": "exit changed",
+            "exitChangedTitle": "the same exit was requested, the proxy swapped it",
+            "flaky": "2nd attempt",
+            "flakyTitle": "the first probe failed, a repeat from the same exit succeeded; the operator line flickers"
+          }
         },
         "launch": {
           "citiesRow": "Cities",
@@ -2608,10 +2614,19 @@
           "zoomIn": "Zoom in",
           "zoomOut": "Zoom out",
           "reset": "Whole map",
-          "recheck": "Again",
-          "sameExit": "Same IP",
-          "more": "{{count}} more",
-          "exitChanged": "exit changed"
+          "more": "{{count}} more"
+        },
+        "recheck": {
+          "sameIp": "🔄 Same IP",
+          "newIp": "🔀 Change IP",
+          "busy": "⏳ checking…",
+          "done": "⤴ re-checked",
+          "doneTitle": "this row was re-checked — the fresh result is a separate row",
+          "sameIpNoSid": "Repeat the check (the exit is picked anew)",
+          "sameIpHold": "Repeat through the SAME IP {{ip}} — the exit is held for ~{{seconds}} s more",
+          "sameIpExpired": "Repeat through the same IP {{ip}} — the hold has expired; if the proxy swaps the exit the row is marked \"exit changed\"",
+          "newIpTitle": "Change IP: another exit / provider in this city. This row stays, a new one is added with a tag",
+          "failed": "Could not start the re-check"
         }
       }
     },

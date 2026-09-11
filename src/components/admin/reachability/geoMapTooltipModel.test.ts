@@ -1,8 +1,9 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import type { Job } from '@/api/reachability';
 import type { CityMarker, RegionSummary } from './geoMapModel';
 import {
   MAX_TOOLTIP_ROWS,
+  type RecheckContext,
   cityTooltip,
   regionSubtitle,
   regionTooltip,
@@ -11,8 +12,8 @@ import {
 
 const t = (key: string, options?: Record<string, unknown>) => {
   const words: Record<string, string> = {
-    'admin.reachability.geo.map.recheck': 'Ещё раз',
-    'admin.reachability.geo.map.sameExit': 'Тот же IP',
+    'admin.reachability.geo.recheck.sameIp': '🔄 Тот же IP',
+    'admin.reachability.geo.recheck.newIp': '🔀 Сменить IP',
     'admin.reachability.geo.map.noCities': 'городов в проверке нет',
     'admin.reachability.geo.verdicts.ok': 'работает',
     'admin.reachability.geo.verdicts.blocked': 'блокируется',
@@ -21,7 +22,13 @@ const t = (key: string, options?: Record<string, unknown>) => {
   return words[key] ?? String(options?.defaultValue ?? key);
 };
 
-const job = { id: 44, kind: 'geo', status: 'done', targets: [] } as unknown as Job;
+const job = {
+  id: 44,
+  kind: 'geo',
+  status: 'done',
+  targets: [],
+  finished_at: new Date().toISOString(),
+} as unknown as Job;
 const row = (
   city: string,
   verdict: string,
@@ -54,14 +61,14 @@ const marker = (city: string, rows: ReturnType<typeof row>[]): CityMarker => ({
   tone: 'ok',
   rows,
 });
+const context = (busy: string[] = []): RecheckContext => ({
+  job,
+  recheck: { busy: new Set(busy), start: vi.fn() },
+});
 
 describe('geoMapTooltipModel', () => {
-  it('город: по строке на провайдера — вердикт, выход, подпроверки; с задачей — кнопки повтора', () => {
-    const model = cityTooltip(
-      marker('Тюмень', [row('Тюмень', 'ok', 'Ростелеком', { sid: 's-1' })]),
-      job,
-      t,
-    );
+  it('город: по строке на провайдера — вердикт, выход, подпроверки', () => {
+    const model = cityTooltip(marker('Тюмень', [row('Тюмень', 'ok', 'Ростелеком')]), null, t);
     expect(model.title).toBe('Тюмень');
     expect(model.subtitle).toBe('Тюменская область');
     const [line] = model.rows;
@@ -72,10 +79,32 @@ describe('geoMapTooltipModel', () => {
       'Google:723',
       'YouTube:724',
     ]);
-    expect(line.actions.map((action) => action.label)).toEqual(['Ещё раз', 'Тот же IP']);
-    expect(line.actions[1].to).toContain('session=s-1');
-    const noJob = cityTooltip(marker('Тюмень', [row('Тюмень', 'ok', 'МТС')]), null, t);
-    expect(noJob.rows[0].actions).toEqual([]);
+    expect(line.recheck).toBeNull();
+  });
+  it('повтор как у оригинала: у зелёной строки кнопок нет, у проваленной — «тот же IP» и «сменить IP»', () => {
+    const ctx = context();
+    const ok = cityTooltip(marker('Тюмень', [row('Тюмень', 'ok', 'МТС')]), ctx, t);
+    expect(ok.rows[0].recheck).toBeNull();
+    const failed = row('Тюмень', 'blocked', 'МТС', { sid: 's-1', sid_hold_s: 200 });
+    const bad = cityTooltip(marker('Тюмень', [failed]), ctx, t);
+    const recheck = bad.rows[0].recheck;
+    expect(recheck?.state).toBe('buttons');
+    expect(recheck?.actions.map((action) => action.label)).toEqual([
+      '🔄 Тот же IP',
+      '🔀 Сменить IP',
+    ]);
+    recheck?.actions[0].onPress();
+    expect(ctx.recheck.start).toHaveBeenCalledWith(failed, true);
+    recheck?.actions[1].onPress();
+    expect(ctx.recheck.start).toHaveBeenLastCalledWith(failed, false);
+    const busy = cityTooltip(marker('Тюмень', [failed]), context(['tyumen_oblast|Тюмень|']), t);
+    expect(busy.rows[0].recheck).toEqual({ state: 'busy', actions: [] });
+    const spent = cityTooltip(
+      marker('Тюмень', [row('Тюмень', 'blocked', 'МТС', { rechecked: true })]),
+      ctx,
+      t,
+    );
+    expect(spent.rows[0].recheck?.state).toBe('rechecked');
   });
   it('регион: подпись «N городов · вердикты», строки с именами городов, лишние — «ещё N»', () => {
     const summary: RegionSummary = {
@@ -97,11 +126,7 @@ describe('geoMapTooltipModel', () => {
     expect(empty.emptyText).toBe('городов в проверке нет');
   });
   it('высота растёт со строками, выходами, подпроверками и кнопками закреплённой подсказки', () => {
-    const model = cityTooltip(
-      marker('Тюмень', [row('Тюмень', 'ok', 'МТС', { sid: 's-1' })]),
-      job,
-      t,
-    );
+    const model = cityTooltip(marker('Тюмень', [row('Тюмень', 'blocked', 'МТС')]), context(), t);
     const hover = tooltipHeight(model, false);
     const pinned = tooltipHeight(model, true);
     expect(hover).toBe(48 + 24 + 18 + 18 * 2);

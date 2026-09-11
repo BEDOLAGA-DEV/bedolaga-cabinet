@@ -14,7 +14,14 @@ import {
 import { cn } from '@/lib/utils';
 import type { Job } from '@/api/reachability';
 import { GeoMapTooltip } from './GeoMapTooltip';
-import { cityTooltip, regionTooltip, tooltipHeight } from './geoMapTooltipModel';
+import {
+  type RecheckContext,
+  cityTooltip,
+  regionTooltip,
+  tooltipHeight,
+} from './geoMapTooltipModel';
+import type { GeoRecheck } from './useGeoRecheck';
+import { useNarrowScreen } from './useNarrowScreen';
 import { type GeoMapData, MAP_ASPECT, type RussiaMap, useGeoMapData } from './geoMapData';
 import {
   type CityMarker,
@@ -30,8 +37,9 @@ export interface GeoMapProps {
   rows: readonly GeoMapRow[];
   /** Активный чип-фильтр: точки других вердиктов приглушены, регионы остаются как есть. */
   highlightVerdict?: string | null;
-  /** Задача отчёта — для кнопок «ещё раз» / «тот же IP» в закреплённой подсказке. */
+  /** Задача отчёта и перепроверка — для кнопок «тот же IP» / «сменить IP» в закреплённой подсказке. */
   job?: Job | null;
+  recheck?: GeoRecheck | null;
 }
 
 /**
@@ -157,8 +165,17 @@ const MOVE_PX = 4;
 const insideTooltip = (target: EventTarget | null): boolean =>
   Boolean((target as Element | null)?.closest?.('[role="tooltip"]'));
 
-function GeoMapBody({ rows, highlightVerdict = null, job = null, data }: GeoMapBodyProps) {
+function GeoMapBody({
+  rows,
+  highlightVerdict = null,
+  job = null,
+  recheck = null,
+  data,
+}: GeoMapBodyProps) {
   const { t } = useTranslation();
+  // На телефоне подсказка не влезает в карту 330 px шириной — она становится панелью под картой.
+  const narrow = useNarrowScreen();
+  const context: RecheckContext | null = job && recheck ? { job, recheck } : null;
   const host = useRef<HTMLDivElement>(null);
   const [hover, setHover] = useState<Focus | null>(null);
   const [pinned, setPinned] = useState<Focus | null>(null);
@@ -277,7 +294,7 @@ function GeoMapBody({ rows, highlightVerdict = null, job = null, data }: GeoMapB
   };
   const onPointerMove = (event: PointerEvent<HTMLDivElement>) => {
     if (onGestureMove(event)) return;
-    if (pinned || event.pointerType !== 'mouse') return;
+    if (pinned || narrow || event.pointerType !== 'mouse') return;
     const next = focusOf(event.target);
     if (next?.kind !== hover?.kind || next?.key !== hover?.key) setHover(next);
     if (next) locate(event);
@@ -302,16 +319,28 @@ function GeoMapBody({ rows, highlightVerdict = null, job = null, data }: GeoMapB
   const tooltip = focus
     ? focus.kind === 'city'
       ? byKey.has(focus.key)
-        ? cityTooltip(byKey.get(focus.key) as CityMarker, job, t)
+        ? cityTooltip(byKey.get(focus.key) as CityMarker, context, t)
         : null
       : regionTooltip(
           focus.key,
           regionNames.get(focus.key) ?? focus.key,
           regions.get(focus.key),
           markers,
-          job,
+          context,
           t,
         )
+    : null;
+  const tooltipProps = tooltip
+    ? {
+        ...tooltip,
+        x: point.x,
+        y: point.y,
+        width: size.width,
+        height: size.height,
+        estimatedHeight: tooltipHeight(tooltip, pinned !== null),
+        pinned: pinned !== null,
+        onClose: () => setPinned(null),
+      }
     : null;
   const zoomButton = (
     label: string,
@@ -334,61 +363,53 @@ function GeoMapBody({ rows, highlightVerdict = null, job = null, data }: GeoMapB
     </button>
   );
   return (
-    <div
-      ref={host}
-      data-zoom={zoomOf(view, W).toFixed(2)}
-      className="relative overflow-hidden rounded-2xl border border-dark-700/60 bg-dark-900/40"
-      // Приближено — карта ловит палец сама (сдвиг, щипок); иначе страница листается как обычно.
-      style={{ touchAction: zoomed ? 'none' : 'pan-y' }}
-      onPointerDown={onPointerDown}
-      onPointerMove={onPointerMove}
-      onPointerUp={onPointerUp}
-      onPointerCancel={onPointerUp}
-      onPointerLeave={() => setHover(null)}
-      onClick={onClick}
-    >
-      <MapSvg
-        map={data.map}
-        markers={markers}
-        regions={regions}
-        highlightVerdict={highlightVerdict}
-        viewBox={viewBoxOf(view)}
-        outline={focus?.kind === 'region' ? focus.key : null}
-      />
-      {/* Зум только на телефоне: на широком экране карта и так вся перед глазами, владелец зум не хочет. */}
-      <div className="absolute right-2 top-2 flex flex-col gap-1 md:hidden">
-        {zoomButton(
-          t('admin.reachability.geo.map.zoomIn'),
-          () => zoomCenter(ZOOM_STEP),
-          PlusIcon,
-          zoomOf(view, W) >= 5.99,
-        )}
-        {zoomButton(
-          t('admin.reachability.geo.map.zoomOut'),
-          () => zoomCenter(1 / ZOOM_STEP),
-          MinusIcon,
-          !zoomed,
-        )}
-        {zoomed &&
-          zoomButton(
-            t('admin.reachability.geo.map.reset'),
-            () => changeView(fullView(W, H)),
-            ResetIcon,
-          )}
-      </div>
-      {tooltip && (
-        <GeoMapTooltip
-          {...tooltip}
-          x={point.x}
-          y={point.y}
-          width={size.width}
-          height={size.height}
-          estimatedHeight={tooltipHeight(tooltip, pinned !== null)}
-          pinned={pinned !== null}
-          onClose={() => setPinned(null)}
+    <>
+      <div
+        ref={host}
+        data-zoom={zoomOf(view, W).toFixed(2)}
+        className="relative overflow-hidden rounded-2xl border border-dark-700/60 bg-dark-900/40"
+        // Приближено — карта ловит палец сама (сдвиг, щипок); иначе страница листается как обычно.
+        style={{ touchAction: zoomed ? 'none' : 'pan-y' }}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerUp}
+        onPointerLeave={() => setHover(null)}
+        onClick={onClick}
+      >
+        <MapSvg
+          map={data.map}
+          markers={markers}
+          regions={regions}
+          highlightVerdict={highlightVerdict}
+          viewBox={viewBoxOf(view)}
+          outline={focus?.kind === 'region' ? focus.key : null}
         />
-      )}
-    </div>
+        {/* Зум только на телефоне: на широком экране карта и так вся перед глазами, владелец зум не хочет. */}
+        <div className="absolute right-2 top-2 flex flex-col gap-1 md:hidden">
+          {zoomButton(
+            t('admin.reachability.geo.map.zoomIn'),
+            () => zoomCenter(ZOOM_STEP),
+            PlusIcon,
+            zoomOf(view, W) >= 5.99,
+          )}
+          {zoomButton(
+            t('admin.reachability.geo.map.zoomOut'),
+            () => zoomCenter(1 / ZOOM_STEP),
+            MinusIcon,
+            !zoomed,
+          )}
+          {zoomed &&
+            zoomButton(
+              t('admin.reachability.geo.map.reset'),
+              () => changeView(fullView(W, H)),
+              ResetIcon,
+            )}
+        </div>
+        {tooltipProps && !narrow && <GeoMapTooltip {...tooltipProps} />}
+      </div>
+      {tooltipProps && narrow && pinned && <GeoMapTooltip {...tooltipProps} panel />}
+    </>
   );
 }
 

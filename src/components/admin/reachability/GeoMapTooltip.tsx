@@ -1,8 +1,7 @@
-import { Link } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { CloseIcon } from '@/components/icons';
 import { cn } from '@/lib/utils';
-import type { TooltipModel, TooltipRow } from './geoMapTooltipModel';
+import type { TooltipModel, TooltipRecheck, TooltipRow } from './geoMapTooltipModel';
 import { TONE_DOT, verdictTone } from './geoVerdicts';
 
 export interface GeoMapTooltipProps extends TooltipModel {
@@ -15,6 +14,8 @@ export interface GeoMapTooltipProps extends TooltipModel {
   estimatedHeight: number;
   /** Закреплена касанием или кликом: ловит указатель, показывает крестик и кнопки повтора. */
   pinned: boolean;
+  /** Панель под картой (телефон): не плавает над картой, а занимает всю ширину. */
+  panel?: boolean;
   onClose: () => void;
 }
 
@@ -48,6 +49,37 @@ function Dot({ verdict, ok }: { verdict?: string; ok?: boolean }) {
   return <span className={cn('inline-block h-2 w-2 shrink-0 rounded-full', tone)} />;
 }
 
+/** Повтор как у оригинала: «⏳ идёт проверка…», «⤴ перепроверено» или две кнопки. */
+function RecheckLine({ recheck }: { recheck: TooltipRecheck }) {
+  const { t } = useTranslation();
+  const KEY = 'admin.reachability.geo.recheck';
+  if (recheck.state === 'busy') {
+    return <div className="pl-3.5 pt-0.5 text-dark-400">{t(`${KEY}.busy`)}</div>;
+  }
+  if (recheck.state === 'rechecked') {
+    return (
+      <div className="pl-3.5 pt-0.5 text-dark-400" title={t(`${KEY}.doneTitle`)}>
+        {t(`${KEY}.done`)}
+      </div>
+    );
+  }
+  return (
+    <div className="flex flex-wrap gap-1 pl-3.5 pt-0.5">
+      {recheck.actions.map((action) => (
+        <button
+          key={action.label}
+          type="button"
+          title={action.title}
+          onClick={action.onPress}
+          className="rounded-md border border-dark-700/60 bg-dark-800/80 px-2 py-0.5 text-[11px] text-dark-100 hover:border-accent-500/40 hover:text-accent-400"
+        >
+          {action.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 function Row({ row, pinned }: { row: TooltipRow; pinned: boolean }) {
   const { t } = useTranslation();
   const KEY = 'admin.reachability.geo';
@@ -68,8 +100,13 @@ function Row({ row, pinned }: { row: TooltipRow; pinned: boolean }) {
       {row.exitIp && (
         <div className="pl-3.5 font-mono text-[11px] text-dark-300">
           {row.exitIp}
+          {row.newExit && (
+            <span className="ml-1.5 font-sans text-dark-400">{t(`${KEY}.rows.tags.newExit`)}</span>
+          )}
           {row.exitChanged && (
-            <span className="ml-1.5 font-sans text-warning-400">{t(`${KEY}.map.exitChanged`)}</span>
+            <span className="ml-1.5 font-sans text-warning-400">
+              {t(`${KEY}.rows.tags.exitChanged`)}
+            </span>
           )}
         </div>
       )}
@@ -86,19 +123,7 @@ function Row({ row, pinned }: { row: TooltipRow; pinned: boolean }) {
           ))}
         </ul>
       )}
-      {pinned && row.actions.length > 0 && (
-        <div className="flex flex-wrap gap-1 pl-3.5 pt-0.5">
-          {row.actions.map((action) => (
-            <Link
-              key={action.to}
-              to={action.to}
-              className="rounded-md border border-dark-700/60 bg-dark-800/80 px-2 py-0.5 text-[11px] text-dark-100 hover:border-accent-500/40 hover:text-accent-400"
-            >
-              {action.label}
-            </Link>
-          ))}
-        </div>
-      )}
+      {pinned && row.recheck && <RecheckLine recheck={row.recheck} />}
     </li>
   );
 }
@@ -109,14 +134,19 @@ function Row({ row, pinned }: { row: TooltipRow; pinned: boolean }) {
  */
 export function GeoMapTooltip(props: GeoMapTooltipProps) {
   const { t } = useTranslation();
-  const style = tooltipPlacement(props, props.estimatedHeight);
+  const style = props.panel ? undefined : tooltipPlacement(props, props.estimatedHeight);
   return (
     <div
       role="tooltip"
       style={style}
       className={cn(
-        'absolute z-10 w-max rounded-xl border border-dark-700/60 bg-dark-900/95 p-2.5 text-xs shadow-lg backdrop-blur',
-        props.pinned ? 'pointer-events-auto' : 'pointer-events-none',
+        'rounded-xl border border-dark-700/60 bg-dark-900/95 p-2.5 text-xs',
+        props.panel
+          ? 'mt-2 w-full'
+          : cn(
+              'absolute z-10 w-max shadow-lg backdrop-blur',
+              props.pinned ? 'pointer-events-auto' : 'pointer-events-none',
+            ),
       )}
     >
       <div className="flex items-start justify-between gap-2">

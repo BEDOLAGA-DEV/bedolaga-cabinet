@@ -1,7 +1,6 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { MemoryRouter } from 'react-router';
 
 vi.mock('react-i18next', async () => (await import('./testUtils')).i18nMock());
 
@@ -99,27 +98,44 @@ describe('GeoRows', () => {
 });
 
 describe('GeoRows · повтор из отчёта', () => {
-  const job = { id: 44, kind: 'geo', status: 'done', targets: [] } as unknown as Job;
-  it('у завершённой задачи каждая строка получает «Ещё раз», а с sid — ещё и «Тот же IP»', () => {
-    render(
-      <MemoryRouter>
-        <GeoRows rows={[ROWS[0], { ...ROWS[2], sid: 's-1', exit_ip: '203.0.113.7' }]} job={job} />
-      </MemoryRouter>,
-    );
-    const again = screen.getAllByRole('link', { name: 'Ещё раз' });
-    expect(again.length).toBeGreaterThanOrEqual(2);
-    expect(again[0].getAttribute('href')).toBe(
-      '/admin/reachability?kind=geo&repeat=44&city=moscow%7Cmoscow',
-    );
-    const same = screen.getAllByRole('link', { name: 'Тот же IP' });
-    expect(same[0].getAttribute('href')).toContain('session=s-1&exit=203.0.113.7');
+  const job = {
+    id: 44,
+    kind: 'geo',
+    status: 'done',
+    targets: [],
+    finished_at: new Date().toISOString(),
+  } as unknown as Job;
+  const recheck = () => ({ busy: new Set<string>(), start: vi.fn() });
+  it('кнопки «тот же IP» и «сменить IP» только у проваленных строк; клик запускает повтор', () => {
+    const control = recheck();
+    render(<GeoRows rows={ROWS} job={job} recheck={control} />);
+    // ROWS: Москва ok, Омск no_ru_node, Петербург throttled — кнопки у двух последних.
+    expect(screen.getAllByRole('button', { name: /Сменить IP/ })).toHaveLength(4);
+    fireEvent.click(screen.getAllByRole('button', { name: /Тот же IP/ })[0]);
+    expect(control.start).toHaveBeenCalledWith(expect.objectContaining({ city: 'omsk' }), true);
   });
-  it('идущая задача — без кнопок повтора', () => {
+  it('пока идёт — «⏳», после повтора — «⤴ перепроверено» и пометка «новый выход» у свежей строки', () => {
+    const control = { busy: new Set(['omsk_oblast|omsk|']), start: vi.fn() };
     render(
-      <MemoryRouter>
-        <GeoRows rows={ROWS} job={{ ...job, status: 'running' }} />
-      </MemoryRouter>,
+      <GeoRows
+        rows={[
+          ROWS[1],
+          { ...ROWS[2], rechecked: true },
+          { ...ROWS[2], exit_ip: '9.9.9.9', verdict: 'ok', new_exit: true },
+        ]}
+        job={job}
+        recheck={control}
+      />,
     );
-    expect(screen.queryByRole('link', { name: 'Ещё раз' })).toBeNull();
+    expect(screen.getAllByText('⏳ идёт проверка…').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('⤴ перепроверено').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('новый выход').length).toBeGreaterThan(0);
+  });
+  it('идущая задача и задача без перепроверки — без колонки повтора', () => {
+    render(<GeoRows rows={ROWS} job={{ ...job, status: 'running' }} recheck={recheck()} />);
+    expect(screen.queryByRole('button', { name: /Сменить IP/ })).toBeNull();
+    cleanup();
+    render(<GeoRows rows={ROWS} job={job} />);
+    expect(screen.queryByRole('button', { name: /Сменить IP/ })).toBeNull();
   });
 });

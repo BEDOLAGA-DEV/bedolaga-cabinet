@@ -4,13 +4,7 @@ import type { GeoCity, GeoNetwork, GeoScopeKind } from '@/api/reachability';
 import { DropdownSelect } from '@/components/admin/bulkActions/DropdownSelect';
 import { ChoiceChips } from './ChoiceChips';
 import { SectionHeading } from './SectionHeading';
-import {
-  ALL_ISPS,
-  CITY_LIMITS,
-  type GeoCityPick,
-  type GeoFormState,
-  sessionAllowed,
-} from './geoForm';
+import { ALL_ISPS, CITY_LIMITS, type GeoCityPick, type GeoFormState } from './geoForm';
 import { useGeoCatalog, useGeoCitySearch } from './useGeoCatalog';
 
 export interface GeoScopeProps {
@@ -167,18 +161,6 @@ export function GeoScope({ value, onChange }: GeoScopeProps) {
       )}
 
       {value.scopeKind === 'cities' && <CityPicker value={value} onChange={patch} />}
-      {sessionAllowed(value) && (
-        <p className="flex flex-wrap items-center gap-2 text-xs text-dark-300">
-          <span>{t(`${KEY}.scope.sessionNote`, { ip: value.expectExitIp || '' })}</span>
-          <button
-            type="button"
-            onClick={() => patch({ session: null, expectExitIp: null })}
-            className="text-accent-400 hover:underline"
-          >
-            {t(`${KEY}.scope.sessionDrop`)}
-          </button>
-        </p>
-      )}
 
       <ChoiceChips<string>
         label={t(`${KEY}.limit.label`)}
