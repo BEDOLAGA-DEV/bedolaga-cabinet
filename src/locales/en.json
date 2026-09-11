@@ -2587,7 +2587,8 @@
           "maxNodes": "mode cap {{count}}",
           "applyLimit": "Set the cap to {{count}}",
           "confirmCities": "Cities: {{count}}"
-        }
+        },
+        "fromHost": "Check from Russian cities"
       }
     },
     "wheel": {

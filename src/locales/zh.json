@@ -4465,7 +4465,8 @@
           "maxNodes": "该模式上限 {{count}}",
           "applyLimit": "将上限设为 {{count}}",
           "confirmCities": "城市数：{{count}}"
-        }
+        },
+        "fromHost": "从俄罗斯城市检查"
       }
     },
     "roles": {

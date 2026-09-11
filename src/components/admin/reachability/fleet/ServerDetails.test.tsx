@@ -142,6 +142,12 @@ describe('ServerDetails', () => {
     );
   });
 
+  it('из карточки хоста есть ярлык «Проверить из городов РФ» на вкладку GEO с этим хостом', () => {
+    renderDetails();
+    const link = screen.getByRole('link', { name: 'Проверить из городов РФ' });
+    expect(link.getAttribute('href')).toBe('/admin/reachability?kind=geo&target=host%3Ah-bs');
+  });
+
   it('changes the purpose through the chip and tells about it', async () => {
     renderDetails();
     fireEvent.click(screen.getByRole('button', { name: /Сменить назначение/ }));
