@@ -8,6 +8,7 @@ import {
   CabinetIcon,
   ChartBarIcon,
   ChatIcon,
+  DevicesIcon,
   GiftIcon,
   HistoryIcon,
   PulseIcon,
@@ -18,6 +19,7 @@ import {
   WheelIcon,
 } from '@/components/icons';
 import { StatCard } from '@/components/stats';
+import { describeItem } from './activityLabels';
 
 // ──────────────────────────────────────────────────────────────────
 // Activity tab — unified timeline of the user's actions in the bot
@@ -42,7 +44,7 @@ const FILTERS: Array<{ key: string; types: string | null }> = [
   { key: 'tickets', types: 'ticket' },
   { key: 'gifts', types: 'gift_sent,gift_received' },
   { key: 'referrals', types: 'referral_earning' },
-  { key: 'clicks', types: 'button_click,cabinet_action' },
+  { key: 'clicks', types: 'button_click,cabinet_action,miniapp_action' },
   { key: 'logins', types: 'cabinet_login' },
 ];
 
@@ -61,6 +63,7 @@ const TYPE_VISUALS: Record<string, { icon: typeof WalletIcon; tint: string }> = 
   withdrawal: { icon: BanknotesIcon, tint: 'bg-error-500/15 text-error-400' },
   button_click: { icon: BotIcon, tint: 'bg-dark-700/60 text-dark-300' },
   cabinet_action: { icon: BoltIcon, tint: 'bg-dark-700/60 text-dark-300' },
+  miniapp_action: { icon: DevicesIcon, tint: 'bg-dark-700/60 text-dark-300' },
 };
 
 const FALLBACK_VISUAL = { icon: HistoryIcon, tint: 'bg-dark-700/60 text-dark-300' };
@@ -202,9 +205,9 @@ export function ActivityTab({ userId, formatDate }: ActivityTabProps) {
           {items.map((item, index) => {
             const visual = TYPE_VISUALS[item.type] || FALLBACK_VISUAL;
             const Icon = visual.icon;
-            const typeLabel =
-              t(`admin.users.detail.activity.types.${item.type}`, { defaultValue: '' }) ||
-              item.type;
+            // Экран, нажатие, сообщение — свой заголовок и человеческая подпись
+            // вместо пути или «POST /cabinet/…».
+            const { typeLabel, title, showSubtype } = describeItem(item, t);
             const isLast = index === items.length - 1;
 
             return (
@@ -224,7 +227,7 @@ export function ActivityTab({ userId, formatDate }: ActivityTabProps) {
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex min-w-0 flex-wrap items-center gap-2">
                       <span className="text-sm font-medium text-dark-100">{typeLabel}</span>
-                      {item.subtype && <SubtypeBadge subtype={item.subtype} />}
+                      {showSubtype && item.subtype && <SubtypeBadge subtype={item.subtype} />}
                       {item.source && (
                         <span className="rounded-full bg-dark-700/40 px-2 py-0.5 text-[10px] uppercase tracking-wider text-dark-500">
                           {t(`admin.users.detail.activity.sources.${item.source}`, {
@@ -235,9 +238,9 @@ export function ActivityTab({ userId, formatDate }: ActivityTabProps) {
                     </div>
                     <AmountChip item={item} />
                   </div>
-                  {item.title && (
-                    <p className="mt-0.5 break-words text-sm text-dark-400" title={item.title}>
-                      {item.title.length > 160 ? `${item.title.slice(0, 160)}…` : item.title}
+                  {title && (
+                    <p className="mt-0.5 break-words text-sm text-dark-400" title={title}>
+                      {title.length > 160 ? `${title.slice(0, 160)}…` : title}
                     </p>
                   )}
                   <p className="mt-1 text-xs text-dark-500" title={formatDate(item.timestamp)}>

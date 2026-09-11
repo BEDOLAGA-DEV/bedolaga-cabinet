@@ -99,6 +99,14 @@ function SortableTariffCard({
                     {t('admin.tariffs.periodType')}
                   </span>
                 )}
+                {tariff.panel_tag && (
+                  <span
+                    className="rounded bg-dark-600 px-2 py-0.5 font-mono text-xs text-dark-200"
+                    title={t('admin.tariffs.panelTagLabel')}
+                  >
+                    {tariff.panel_tag}
+                  </span>
+                )}
                 {tariff.is_trial_available && (
                   <span className="rounded bg-success-500/20 px-2 py-0.5 text-xs text-success-400">
                     {t('admin.tariffs.trial')}
