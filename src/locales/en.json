@@ -2396,7 +2396,7 @@
           "time": "Time",
           "cost": "Charged",
           "outcome": "Outcome",
-          "units": "SIMs"
+          "units": "From"
         },
         "outcome": {
           "ok": "all reachable",
@@ -2509,7 +2509,18 @@
           "hint": "Domain, IP, address with port or a site link. GEO does not check subnets.",
           "noCidr": "A subnet cannot be checked here — that is the “CIDR scan” tab",
           "configTitle": "Tunnel config",
-          "configHint": "one server from the panel subscription or a pasted link — vless or hysteria2"
+          "configHint": "one server from the panel subscription or a pasted link — vless or hysteria2",
+          "kindLabel": "What to check",
+          "kinds": {
+            "hosts": "Panel hosts",
+            "addresses": "IP / Domain",
+            "vless": "VLESS"
+          },
+          "kindHint": {
+            "hosts": "Remnawave panel servers: up to 20 per run, probe on the server port",
+            "addresses": "IP · IP:port · domain · https://… — comma- or line-separated; subnets are not checked",
+            "vless": "one vless or hysteria2 config from the panel subscription or a pasted link"
+          }
         },
         "scope": {
           "title": "From where",
@@ -2575,7 +2586,6 @@
         "rows": {
           "city": "City",
           "provider": "ISP",
-          "speed": "Speed",
           "empty": "No city matches the filter",
           "notChecked": "not checked: {{reason}}",
           "latency": "{{value}} ms",
@@ -2588,7 +2598,11 @@
           "applyLimit": "Set the cap to {{count}}",
           "confirmCities": "Cities: {{count}}"
         },
-        "fromHost": "Check from Russian cities"
+        "fromHost": "Check from Russian cities",
+        "map": {
+          "close": "Close",
+          "noCities": "no cities in this check"
+        }
       }
     },
     "wheel": {

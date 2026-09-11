@@ -57,7 +57,7 @@ describe('geoForm', () => {
       scopeKind: 'district',
       district: 'pfo',
       probeMode: 'tcp',
-      cities: [{ region: 'x', city: 'y' }],
+      cities: [{ region: 'x', city: 'y', label: 'Игрек · Икс' }],
     });
     expect(recallGeoForm()).toEqual({
       ...DEFAULT_GEO_FORM,
@@ -71,30 +71,37 @@ describe('geoForm', () => {
 });
 
 describe('buildGeoBody', () => {
-  it('хосты, адреса и один конфиг — в одном теле, симок нет, вид geo', () => {
-    const body = buildGeoBody({
-      hosts: ['h-1'],
-      custom: ['example.com'],
-      config: { kind: 'subscription_config', short_uuid: 'ref-1', index: 0 },
-      form: DEFAULT_GEO_FORM,
-      core: '',
-    });
-    expect(body).toEqual({
-      kind: 'geo',
-      targets: [
-        { kind: 'host', ref: 'h-1' },
-        { kind: 'custom', value: 'example.com' },
-        { kind: 'subscription_config', short_uuid: 'ref-1', index: 0 },
-      ],
-      units: [],
-      dpi: 'any',
-      probes: { icmp: false, tcp: false, sni: false },
-      core: '',
-      sni_hosts: [],
-      geo: toGeoOptions(DEFAULT_GEO_FORM),
-    });
+  const selection = {
+    hosts: ['h-1'],
+    custom: ['example.com'],
+    config: { kind: 'subscription_config' as const, short_uuid: 'ref-1', index: 0 },
+    core: '' as const,
+  };
+  const expected = (targets: unknown[], form = DEFAULT_GEO_FORM) => ({
+    kind: 'geo',
+    targets,
+    units: [],
+    dpi: 'any',
+    probes: { icmp: false, tcp: false, sni: false },
+    core: '',
+    sni_hosts: [],
+    geo: toGeoOptions(form),
   });
-  it('без целей — null', () => {
+  it('в тело уходят цели только выбранного вида — хосты, адреса или один конфиг', () => {
+    expect(buildGeoBody({ ...selection, form: DEFAULT_GEO_FORM })).toEqual(
+      expected([{ kind: 'host', ref: 'h-1' }]),
+    );
+    const addresses = { ...DEFAULT_GEO_FORM, targetKind: 'addresses' as const };
+    expect(buildGeoBody({ ...selection, form: addresses })).toEqual(
+      expected([{ kind: 'custom', value: 'example.com' }], addresses),
+    );
+    const vless = { ...DEFAULT_GEO_FORM, targetKind: 'vless' as const };
+    expect(buildGeoBody({ ...selection, form: vless })).toEqual(
+      expected([{ kind: 'subscription_config', short_uuid: 'ref-1', index: 0 }], vless),
+    );
+  });
+  it('без целей выбранного вида — null, даже если другие виды заполнены', () => {
+    expect(buildGeoBody({ ...selection, hosts: [], form: DEFAULT_GEO_FORM })).toBeNull();
     expect(
       buildGeoBody({ hosts: [], custom: [], config: null, form: DEFAULT_GEO_FORM, core: '' }),
     ).toBeNull();

@@ -48,7 +48,7 @@ import { DEFAULT_GEO_FORM } from './geoForm';
 afterEach(cleanup);
 
 describe('GeoScope', () => {
-  it('сеть, охват и потолок — чипами; округ и провайдер из справочника', () => {
+  it('сеть, охват и потолок — чипами; провайдер и регион — списками кабинета из справочника', () => {
     const onChange = vi.fn();
     render(<GeoScope value={DEFAULT_GEO_FORM} onChange={onChange} />);
     fireEvent.click(screen.getByRole('button', { name: 'Мобильный' }));
@@ -59,6 +59,14 @@ describe('GeoScope', () => {
     expect(onChange).toHaveBeenLastCalledWith({ ...DEFAULT_GEO_FORM, cityLimit: 30 });
     fireEvent.change(screen.getByLabelText('Провайдер'), { target: { value: 'mts' } });
     expect(onChange).toHaveBeenLastCalledWith({ ...DEFAULT_GEO_FORM, isp: 'mts' });
+    cleanup();
+    render(<GeoScope value={{ ...DEFAULT_GEO_FORM, scopeKind: 'region' }} onChange={onChange} />);
+    fireEvent.change(screen.getByLabelText('— выберите регион —'), { target: { value: 'moscow' } });
+    expect(onChange).toHaveBeenLastCalledWith({
+      ...DEFAULT_GEO_FORM,
+      scopeKind: 'region',
+      region: 'moscow',
+    });
   });
   it('в режиме «Округ» показаны чипы округов, «каждый в городе» доступен', () => {
     const onChange = vi.fn();
@@ -89,7 +97,9 @@ describe('GeoScope', () => {
     const withCity = {
       ...DEFAULT_GEO_FORM,
       scopeKind: 'cities' as const,
-      cities: [{ region: 'voronezh_oblast', city: 'voronezh' }],
+      cities: [
+        { region: 'voronezh_oblast', city: 'voronezh', label: 'Воронеж · Воронежская область' },
+      ],
     };
     const { rerender } = render(
       <GeoScope value={{ ...DEFAULT_GEO_FORM, scopeKind: 'cities' }} onChange={onChange} />,
@@ -98,8 +108,12 @@ describe('GeoScope', () => {
     fireEvent.click(screen.getByRole('button', { name: /Воронеж/ }));
     expect(onChange).toHaveBeenLastCalledWith(withCity);
     rerender(<GeoScope value={withCity} onChange={onChange} />);
-    fireEvent.click(screen.getByRole('button', { name: /Воронеж · Воронежская/ }));
+    fireEvent.click(screen.getByRole('button', { name: /^Воронеж · Воронежская область · / }));
     expect(onChange).toHaveBeenCalledTimes(1);
+    // Чип города — по-русски, а не токеном.
+    expect(
+      screen.getByRole('button', { name: /Убрать город: Воронеж · Воронежская/ }),
+    ).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: /Убрать город/ }));
     expect(onChange).toHaveBeenLastCalledWith({ ...withCity, cities: [] });
   });

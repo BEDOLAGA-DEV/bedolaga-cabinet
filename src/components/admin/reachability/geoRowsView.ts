@@ -1,5 +1,4 @@
 import type { Job } from '@/api/reachability';
-import { regionCodeFor } from './geoRegions';
 import { GEO_VERDICTS, isGeoVerdict } from './geoVerdicts';
 
 /** Строка города из `Job.result.rows` (форма бота, часть 1). */
@@ -48,7 +47,6 @@ export interface GeoSummary {
 
 export interface GeoFilter {
   verdict: string | null;
-  regionCode: string | null;
   query: string;
 }
 
@@ -108,7 +106,6 @@ export function filterGeoRows(rows: readonly GeoRow[], filter: GeoFilter): GeoRo
   return rows.filter(
     (row) =>
       (filter.verdict === null || row.verdict === filter.verdict) &&
-      (filter.regionCode === null || regionCodeFor(row.region_ru) === filter.regionCode) &&
       (query === '' || `${row.city_ru} ${row.city} ${row.region_ru}`.toLowerCase().includes(query)),
   );
 }

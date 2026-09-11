@@ -4283,7 +4283,7 @@
           "time": "时间",
           "cost": "扣费",
           "outcome": "结果",
-          "units": "SIM 卡"
+          "units": "来源"
         },
         "outcome": {
           "ok": "全部可达",
@@ -4389,7 +4389,18 @@
           "hint": "域名、IP、带端口的地址或网站链接。GEO 不检查子网。",
           "noCidr": "子网无法在这里检查，请使用「CIDR 扫描」标签页",
           "configTitle": "隧道配置",
-          "configHint": "来自面板订阅或粘贴链接的一个服务器 — vless 或 hysteria2"
+          "configHint": "来自面板订阅或粘贴链接的一个服务器 — vless 或 hysteria2",
+          "kindLabel": "检查对象",
+          "kinds": {
+            "hosts": "面板主机",
+            "addresses": "IP / 域名",
+            "vless": "VLESS"
+          },
+          "kindHint": {
+            "hosts": "Remnawave 面板服务器：每次最多 20 个，按服务器端口探测",
+            "addresses": "IP · IP:端口 · 域名 · https://… — 用逗号或换行分隔；不检查子网",
+            "vless": "来自面板订阅或粘贴链接的一个 vless 或 hysteria2 配置"
+          }
         },
         "scope": {
           "title": "从哪里",
@@ -4453,7 +4464,6 @@
         "rows": {
           "city": "城市",
           "provider": "运营商",
-          "speed": "速度",
           "empty": "没有符合筛选的城市",
           "notChecked": "未检查：{{reason}}",
           "latency": "{{value}} 毫秒",
@@ -4466,7 +4476,11 @@
           "applyLimit": "将上限设为 {{count}}",
           "confirmCities": "城市数：{{count}}"
         },
-        "fromHost": "从俄罗斯城市检查"
+        "fromHost": "从俄罗斯城市检查",
+        "map": {
+          "close": "关闭",
+          "noCities": "本次检查未覆盖此地区的城市"
+        }
       }
     },
     "roles": {

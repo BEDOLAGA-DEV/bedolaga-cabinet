@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { GeoCity, GeoCityRef, GeoNetwork, GeoScopeKind } from '@/api/reachability';
+import type { GeoCity, GeoNetwork, GeoScopeKind } from '@/api/reachability';
+import { DropdownSelect } from '@/components/admin/bulkActions/DropdownSelect';
 import { ChoiceChips } from './ChoiceChips';
 import { SectionHeading } from './SectionHeading';
-import { ALL_ISPS, CITY_LIMITS, type GeoFormState } from './geoForm';
+import { ALL_ISPS, CITY_LIMITS, type GeoCityPick, type GeoFormState } from './geoForm';
 import { useGeoCatalog, useGeoCitySearch } from './useGeoCatalog';
 
 export interface GeoScopeProps {
@@ -11,7 +12,8 @@ export interface GeoScopeProps {
   onChange: (next: GeoFormState) => void;
 }
 
-const sameCity = (a: GeoCityRef, b: GeoCityRef) => a.region === b.region && a.city === b.city;
+const KEY = 'admin.reachability.geo';
+const sameCity = (a: GeoCityPick, b: GeoCityPick) => a.region === b.region && a.city === b.city;
 
 function CityPicker({
   value,
@@ -25,9 +27,13 @@ function CityPicker({
   const search = useGeoCitySearch(value.network, query);
   const found = search.data?.cities ?? [];
   const addCity = (city: GeoCity) => {
-    const ref = { region: city.region, city: city.city };
-    if (value.cities.some((item) => sameCity(item, ref))) return;
-    onChange({ cities: [...value.cities, ref] });
+    const pick: GeoCityPick = {
+      region: city.region,
+      city: city.city,
+      label: `${city.city_ru || city.city} · ${city.region_ru || city.region}`,
+    };
+    if (value.cities.some((item) => sameCity(item, pick))) return;
+    onChange({ cities: [...value.cities, pick] });
   };
   return (
     <div className="space-y-2">
@@ -35,8 +41,8 @@ function CityPicker({
         type="search"
         value={query}
         onChange={(event) => setQuery(event.target.value)}
-        aria-label={t('admin.reachability.geo.scope.cityFind')}
-        placeholder={t('admin.reachability.geo.scope.cityFind')}
+        aria-label={t(`${KEY}.scope.cityFind`)}
+        placeholder={t(`${KEY}.scope.cityFind`)}
         className="input w-full text-sm"
       />
       {found.length > 0 && (
@@ -50,8 +56,7 @@ function CityPicker({
               >
                 {city.city_ru}{' '}
                 <span className="text-xs text-dark-400">
-                  · {city.region_ru} ·{' '}
-                  {t('admin.reachability.geo.scope.isps', { count: city.isps.length })}
+                  · {city.region_ru} · {t(`${KEY}.scope.isps`, { count: city.isps.length })}
                 </span>
               </button>
             </li>
@@ -60,9 +65,7 @@ function CityPicker({
       )}
       {search.data?.cities_truncated && (
         <p className="text-xs text-dark-400">
-          {t('admin.reachability.geo.scope.cityTruncated', {
-            total: search.data.cities_total ?? 0,
-          })}
+          {t(`${KEY}.scope.cityTruncated`, { total: search.data.cities_total ?? 0 })}
         </p>
       )}
       <div className="flex flex-wrap gap-1.5">
@@ -71,11 +74,11 @@ function CityPicker({
             key={`${city.region}:${city.city}`}
             type="button"
             onClick={() => onChange({ cities: value.cities.filter((item) => item !== city) })}
-            aria-label={`${t('admin.reachability.geo.scope.removeCity')}: ${city.city}`}
-            title={t('admin.reachability.geo.scope.removeCity')}
+            aria-label={`${t(`${KEY}.scope.removeCity`)}: ${city.label ?? city.city}`}
+            title={t(`${KEY}.scope.removeCity`)}
             className="rounded-full bg-accent-500/10 px-2.5 py-1 text-xs text-accent-400"
           >
-            {city.city}
+            {city.label ?? city.city}
             {city.isp ? ` · ${city.isp}` : ''} ×
           </button>
         ))}
@@ -87,13 +90,13 @@ function CityPicker({
 /** Блок «Откуда» как у оригинала: сеть, охват, потолок городов, провайдер; города — поиском по справочнику. */
 export function GeoScope({ value, onChange }: GeoScopeProps) {
   const { t } = useTranslation();
-  const { data: catalog, isLoading } = useGeoCatalog(value.network);
+  const { data: catalog } = useGeoCatalog(value.network);
   const patch = (fields: Partial<GeoFormState>) => onChange({ ...value, ...fields });
   const scopeOptions: Array<{ value: GeoScopeKind; label: string }> = [
-    { value: 'all', label: t('admin.reachability.geo.scope.all') },
-    { value: 'district', label: t('admin.reachability.geo.scope.district') },
-    { value: 'region', label: t('admin.reachability.geo.scope.region') },
-    { value: 'cities', label: t('admin.reachability.geo.scope.cities') },
+    { value: 'all', label: t(`${KEY}.scope.all`) },
+    { value: 'district', label: t(`${KEY}.scope.district`) },
+    { value: 'region', label: t(`${KEY}.scope.region`) },
+    { value: 'cities', label: t(`${KEY}.scope.cities`) },
   ];
   const allIspsAllowed = value.scopeKind !== 'all';
   const everyIsp = value.isp === ALL_ISPS;
@@ -102,23 +105,23 @@ export function GeoScope({ value, onChange }: GeoScopeProps) {
     <section aria-labelledby="reachability-geo-scope" className="space-y-4">
       <SectionHeading
         id="reachability-geo-scope"
-        title={t('admin.reachability.geo.scope.title')}
-        hint={t('admin.reachability.geo.scope.hint')}
+        title={t(`${KEY}.scope.title`)}
+        hint={t(`${KEY}.scope.hint`)}
       />
 
       <ChoiceChips<GeoNetwork>
-        label={t('admin.reachability.geo.network.label')}
+        label={t(`${KEY}.network.label`)}
         showLabel
         value={value.network}
         options={[
-          { value: 'res', label: t('admin.reachability.geo.network.res') },
-          { value: 'mob', label: t('admin.reachability.geo.network.mob') },
+          { value: 'res', label: t(`${KEY}.network.res`) },
+          { value: 'mob', label: t(`${KEY}.network.mob`) },
         ]}
         onChange={(network) => patch({ network })}
       />
 
       <ChoiceChips<GeoScopeKind>
-        label={t('admin.reachability.geo.scope.label')}
+        label={t(`${KEY}.scope.label`)}
         showLabel
         value={value.scopeKind}
         options={scopeOptions}
@@ -130,7 +133,7 @@ export function GeoScope({ value, onChange }: GeoScopeProps) {
 
       {value.scopeKind === 'district' && (
         <ChoiceChips<string>
-          label={t('admin.reachability.geo.scope.pickDistrict')}
+          label={t(`${KEY}.scope.pickDistrict`)}
           value={value.district ?? ''}
           options={(catalog?.districts ?? []).map((item) => ({
             value: item.code,
@@ -141,61 +144,60 @@ export function GeoScope({ value, onChange }: GeoScopeProps) {
       )}
 
       {value.scopeKind === 'region' && (
-        <select
-          aria-label={t('admin.reachability.geo.scope.pickRegion')}
-          value={value.region ?? ''}
-          onChange={(event) => patch({ region: event.target.value || null })}
-          className="input w-full text-sm"
-        >
-          <option value="">{t('admin.reachability.geo.scope.pickRegion')}</option>
-          {(catalog?.regions ?? []).map((region) => (
-            <option key={region.token} value={region.token}>
-              {region.name} · {region.district}
-            </option>
-          ))}
-        </select>
+        <label className="block">
+          <span className="sr-only">{t(`${KEY}.scope.pickRegion`)}</span>
+          <DropdownSelect
+            value={value.region ?? ''}
+            onChange={(region) => patch({ region: region || null })}
+            options={[
+              { value: '', label: t(`${KEY}.scope.pickRegion`) },
+              ...(catalog?.regions ?? []).map((region) => ({
+                value: region.token,
+                label: region.district ? `${region.name} · ${region.district}` : region.name,
+              })),
+            ]}
+          />
+        </label>
       )}
 
       {value.scopeKind === 'cities' && <CityPicker value={value} onChange={patch} />}
 
       <ChoiceChips<string>
-        label={t('admin.reachability.geo.limit.label')}
+        label={t(`${KEY}.limit.label`)}
         showLabel
         value={String(value.cityLimit)}
         options={CITY_LIMITS.map((limit) => ({
           value: String(limit),
-          label: limit === 0 ? t('admin.reachability.geo.limit.all') : String(limit),
+          label: limit === 0 ? t(`${KEY}.limit.all`) : String(limit),
         }))}
         onChange={(limit) => patch({ cityLimit: Number(limit) })}
       />
 
-      <div className="flex flex-wrap items-center gap-2">
-        <label htmlFor="reachability-geo-isp" className="text-xs text-dark-400">
-          {t('admin.reachability.geo.isp.label')}
+      <div className="space-y-2">
+        <label className="block">
+          <span className="mb-1 block text-xs text-dark-400">{t(`${KEY}.isp.label`)}</span>
+          <DropdownSelect
+            value={everyIsp ? '' : (value.isp ?? '')}
+            onChange={(isp) => patch({ isp: isp || null })}
+            className={everyIsp ? 'pointer-events-none opacity-50' : undefined}
+            options={[
+              { value: '', label: t(`${KEY}.isp.any`) },
+              ...(catalog?.isps ?? []).map((isp) => ({
+                value: isp.token,
+                label: `${isp.name} (${isp.cities})`,
+              })),
+            ]}
+          />
         </label>
-        <select
-          id="reachability-geo-isp"
-          value={everyIsp ? '' : (value.isp ?? '')}
-          onChange={(event) => patch({ isp: event.target.value || null })}
-          disabled={isLoading || everyIsp}
-          className="input min-w-0 flex-1 text-sm"
-        >
-          <option value="">{t('admin.reachability.geo.isp.any')}</option>
-          {(catalog?.isps ?? []).map((isp) => (
-            <option key={isp.token} value={isp.token}>
-              {isp.name} ({isp.cities})
-            </option>
-          ))}
-        </select>
         <button
           type="button"
           aria-pressed={everyIsp}
           disabled={!allIspsAllowed}
           onClick={() => patch({ isp: everyIsp ? null : ALL_ISPS })}
           className="btn-secondary px-3 py-1.5 text-xs disabled:opacity-50"
-          title={allIspsAllowed ? undefined : t('admin.reachability.geo.isp.allNeedsScope')}
+          title={allIspsAllowed ? undefined : t(`${KEY}.isp.allNeedsScope`)}
         >
-          {t('admin.reachability.geo.isp.all')}
+          {t(`${KEY}.isp.all`)}
         </button>
       </div>
     </section>

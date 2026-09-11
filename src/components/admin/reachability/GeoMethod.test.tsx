@@ -19,12 +19,12 @@ const base = {
 };
 
 describe('GeoMethod', () => {
-  it('TCP и TLS чипами; тяжёлая проба недоступна в TCP и без доменной цели', () => {
+  it('TCP и TLS чипами; тяжёлая проба — тумблером, недоступна в TCP и без доменной цели', () => {
     const onChange = vi.fn();
     render(<GeoMethod {...base} value={DEFAULT_GEO_FORM} onChange={onChange} />);
     fireEvent.click(screen.getByRole('button', { name: 'TCP-порт' }));
     expect(onChange).toHaveBeenLastCalledWith({ ...DEFAULT_GEO_FORM, probeMode: 'tcp' });
-    const heavy = screen.getByRole('checkbox');
+    const heavy = screen.getByRole('switch');
     expect((heavy as HTMLButtonElement).disabled).toBe(false);
     fireEvent.click(heavy);
     expect(onChange).toHaveBeenLastCalledWith({ ...DEFAULT_GEO_FORM, heavy: true });
@@ -32,12 +32,12 @@ describe('GeoMethod', () => {
     render(
       <GeoMethod {...base} value={{ ...DEFAULT_GEO_FORM, probeMode: 'tcp' }} onChange={onChange} />,
     );
-    expect((screen.getByRole('checkbox') as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByRole('switch') as HTMLButtonElement).disabled).toBe(true);
     cleanup();
     render(
       <GeoMethod {...base} heavyAllowed={false} value={DEFAULT_GEO_FORM} onChange={onChange} />,
     );
-    expect((screen.getByRole('checkbox') as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByRole('switch') as HTMLButtonElement).disabled).toBe(true);
   });
   it('ядро Xray с номерами версий показано только при туннеле', () => {
     render(<GeoMethod {...base} hasTunnel value={DEFAULT_GEO_FORM} onChange={vi.fn()} />);

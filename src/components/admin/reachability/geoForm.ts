@@ -8,13 +8,22 @@ import type {
 } from '@/api/reachability';
 import { safeLocal } from '@/utils/safeStorage';
 
-/** Состояние блоков «Откуда» и «Метод» вкладки GEO. */
+/** Вид целей GEO: хосты панели, свои адреса или один конфиг туннеля — один за раз. */
+export type GeoTargetKind = 'hosts' | 'addresses' | 'vless';
+
+/** Город в форме: токены для запуска плюс подпись по-русски для чипа. */
+export interface GeoCityPick extends GeoCityRef {
+  label?: string;
+}
+
+/** Состояние блоков «Цели» (вид), «Откуда» и «Метод» вкладки GEO. */
 export interface GeoFormState {
+  targetKind: GeoTargetKind;
   network: GeoNetwork;
   scopeKind: GeoScopeKind;
   district: string | null;
   region: string | null;
-  cities: GeoCityRef[];
+  cities: GeoCityPick[];
   isp: string | null;
   cityLimit: number;
   probeMode: GeoProbeMode;
@@ -29,6 +38,7 @@ export const ALL_ISPS = '__ALL__';
 export const MAX_GEO_TARGETS = 20;
 
 export const DEFAULT_GEO_FORM: GeoFormState = {
+  targetKind: 'hosts',
   network: 'res',
   scopeKind: 'all',
   district: null,
@@ -51,7 +61,13 @@ function scopeOf(state: GeoFormState): GeoScope {
     return { kind: 'region', region: state.region };
   }
   if (state.scopeKind === 'cities' && state.cities.length > 0) {
-    return { kind: 'cities', cities: state.cities };
+    // Сервису — только токены; подпись чипа остаётся в форме.
+    return {
+      kind: 'cities',
+      cities: state.cities.map(({ region, city, isp }) =>
+        isp ? { region, city, isp } : { region, city },
+      ),
+    };
   }
   return { kind: 'all' };
 }
