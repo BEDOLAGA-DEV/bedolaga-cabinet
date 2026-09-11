@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('react-i18next', async () => (await import('./testUtils')).i18nMock());
 
+import type { Job } from '@/api/reachability';
 import { GeoMap } from './GeoMap';
 
 afterEach(cleanup);
@@ -170,5 +171,54 @@ describe('GeoMap на телефоне: зум и сдвиг', () => {
       fireEvent.pointerUp(host, { pointerId: tap, pointerType: 'touch', clientX: 50, clientY: 50 });
     }
     expect(host.getAttribute('data-zoom')).toBe('1.80');
+  });
+});
+
+describe('GeoMap · повтор и телефон', () => {
+  const job = {
+    id: 44,
+    kind: 'geo',
+    status: 'done',
+    targets: [],
+    finished_at: new Date().toISOString(),
+  } as unknown as Job;
+  it('в закреплённой подсказке проваленного города — «тот же IP» и «сменить IP», клик запускает повтор', async () => {
+    const control = { busy: new Set<string>(), start: vi.fn() };
+    const { container } = render(<GeoMap rows={rows} job={job} recheck={control} />);
+    await waitFor(() => expect(container.querySelector('svg')).toBeTruthy());
+    fireEvent.click(container.querySelector('[data-city="voronezh_oblast|liski"]') as Element);
+    fireEvent.click(screen.getByRole('button', { name: /Сменить IP/ }));
+    expect(control.start).toHaveBeenCalledWith(expect.objectContaining({ city: 'liski' }), false);
+    fireEvent.click(screen.getByRole('button', { name: 'Закрыть' }));
+    fireEvent.click(container.querySelector('[data-city="voronezh_oblast|voronezh"]') as Element);
+    expect(screen.queryByRole('button', { name: /Сменить IP/ })).toBeNull();
+  });
+  it('на телефоне подсказка — панель под картой, а не поверх неё', async () => {
+    const original = window.matchMedia;
+    window.matchMedia = ((query: string) => ({
+      matches: query.includes('max-width'),
+      media: query,
+      onchange: null,
+      addListener: () => {},
+      removeListener: () => {},
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      dispatchEvent: () => false,
+    })) as unknown as typeof window.matchMedia;
+    try {
+      const { container } = render(<GeoMap rows={rows} />);
+      await waitFor(() => expect(container.querySelector('svg')).toBeTruthy());
+      const map = container.firstElementChild as HTMLElement;
+      fireEvent.pointerMove(container.querySelector('[data-region="VOR"]') as Element, {
+        pointerType: 'mouse',
+      });
+      expect(screen.queryByRole('tooltip')).toBeNull();
+      fireEvent.click(container.querySelector('[data-city="voronezh_oblast|liski"]') as Element);
+      const panel = screen.getByRole('tooltip');
+      expect(map.contains(panel)).toBe(false);
+      expect(panel.textContent).toContain('Лиски');
+    } finally {
+      window.matchMedia = original;
+    }
   });
 });

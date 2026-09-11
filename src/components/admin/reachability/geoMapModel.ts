@@ -16,6 +16,10 @@ export interface GeoMapRow {
   exit_ip?: string | null;
   exit_changed?: boolean;
   sid?: string | null;
+  sid_hold_s?: number | null;
+  rechecked?: boolean;
+  new_exit?: boolean;
+  flaky?: boolean;
   targets?: Array<{ key: string; ok: boolean; ms: number | null }>;
   tunnel?: { checks: Array<{ name: string; ok: boolean; ms: number | null }> } | null;
 }

@@ -1,12 +1,23 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { MemoryRouter } from 'react-router';
 import type { Job } from '@/api/reachability';
 
 vi.mock('react-i18next', async () => (await import('./testUtils')).i18nMock());
+vi.mock('@/platform/hooks/useNotify', () => ({
+  useNotify: () => ({
+    success: vi.fn(),
+    error: vi.fn(),
+    notify: vi.fn(),
+    warning: vi.fn(),
+    info: vi.fn(),
+  }),
+}));
 
 import { GeoResult } from './GeoResult';
+import { installMatchMedia, renderWithProviders } from './testUtils';
+
+installMatchMedia();
 
 afterEach(cleanup);
 
@@ -52,11 +63,7 @@ const job = {
 
 describe('GeoResult', () => {
   it('фраза-вывод, чипы вердиктов со счётом; чип фильтрует города, повторный клик снимает', () => {
-    render(
-      <MemoryRouter>
-        <GeoResult job={job} />
-      </MemoryRouter>,
-    );
+    renderWithProviders(<GeoResult job={job} />);
     expect(screen.getByText('Смешанная картина')).toBeTruthy();
     expect(screen.getByText('не результат: 1')).toBeTruthy();
     const blocked = screen.getByRole('button', { name: /блокируется.*· 1/ });
@@ -67,11 +74,7 @@ describe('GeoResult', () => {
     expect(screen.getAllByText('Москва').length).toBeGreaterThan(0);
   });
   it('поиск по городу или региону сужает список', () => {
-    render(
-      <MemoryRouter>
-        <GeoResult job={job} />
-      </MemoryRouter>,
-    );
+    renderWithProviders(<GeoResult job={job} />);
     fireEvent.change(screen.getByLabelText('Найти город или регион…'), {
       target: { value: 'омск' },
     });
@@ -79,11 +82,7 @@ describe('GeoResult', () => {
     expect(screen.queryAllByText('Воронеж')).toHaveLength(0);
   });
   it('без результата — подпись', () => {
-    render(
-      <MemoryRouter>
-        <GeoResult job={{ ...job, result: null }} />
-      </MemoryRouter>,
-    );
+    renderWithProviders(<GeoResult job={{ ...job, result: null }} />);
     expect(screen.getByText('Результат пуст')).toBeTruthy();
   });
 });

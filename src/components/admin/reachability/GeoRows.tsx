@@ -1,11 +1,11 @@
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router';
 import type { Job } from '@/api/reachability';
 import { cn } from '@/lib/utils';
 import { TABLE_STYLES } from './ResultTable';
+import { canRecheckJob, recheckButtons, recheckState } from './geoRecheck';
 import type { GeoRow } from './geoRowsView';
-import { canRecheck, recheckLink } from './recheckLinks';
 import { TONE_DOT, verdictTone } from './geoVerdicts';
+import type { GeoRecheck } from './useGeoRecheck';
 
 const KEY = 'admin.reachability.geo';
 
@@ -68,43 +68,103 @@ function Targets({ row }: { row: GeoRow }) {
   );
 }
 
-export interface GeoRowsProps {
-  rows: readonly GeoRow[];
-  /** Задача отчёта — для «ещё раз» / «тот же IP» у каждой строки; идущая задача кнопок не получает. */
-  job?: Job | null;
-}
-
-/** Повтор города: «ещё раз» (новый выход) и «тот же IP» (пока сервис держит выход). */
-function Recheck({ job, row }: { job: Job; row: GeoRow }) {
+/** Ячейка повтора как у оригинала: кнопки у проваленных, «⏳» пока идёт, «⤴ перепроверено» после. */
+function RecheckCell({ job, row, recheck }: { job: Job; row: GeoRow; recheck: GeoRecheck }) {
   const { t } = useTranslation();
-  const links = [
-    { label: t(`${KEY}.map.recheck`), to: recheckLink(job, row) },
-    { label: t(`${KEY}.map.sameExit`), to: recheckLink(job, row, true) },
-  ].filter((link): link is { label: string; to: string } => link.to !== null);
+  const state = recheckState(job, row, recheck.busy);
+  if (state === 'none') return null;
+  if (state === 'busy') {
+    return <span className="text-xs text-dark-400">{t(`${KEY}.recheck.busy`)}</span>;
+  }
+  if (state === 'rechecked') {
+    return (
+      <span className="text-xs text-dark-400" title={t(`${KEY}.recheck.doneTitle`)}>
+        {t(`${KEY}.recheck.done`)}
+      </span>
+    );
+  }
   return (
     <span className="flex flex-wrap gap-1">
-      {links.map((link) => (
-        <Link
-          key={link.to}
-          to={link.to}
+      {recheckButtons(job, row, t).map((button) => (
+        <button
+          key={button.label}
+          type="button"
+          title={button.title}
+          onClick={() => recheck.start(row, button.sameExit)}
           className="whitespace-nowrap rounded-md border border-dark-700/60 px-2 py-0.5 text-[11px] text-dark-200 hover:border-accent-500/40 hover:text-accent-400"
         >
-          {link.label}
-        </Link>
+          {button.label}
+        </button>
       ))}
     </span>
   );
 }
 
-const rowKey = (row: GeoRow) => `${row.region}:${row.city}:${row.provider ?? ''}`;
+interface RowTag {
+  text: string;
+  title: string;
+  warn: boolean;
+}
 
-/** Города списком: город · регион · провайдер · вердикт (и скорость) · задержка · цели; на телефоне — карточки. */
-export function GeoRows({ rows, job = null }: GeoRowsProps) {
+/** Пометки строки как у оригинала: «новый выход», «выход сменился», «со 2-й попытки». */
+function RowTags({ row }: { row: GeoRow }) {
   const { t } = useTranslation();
-  const recheck = job !== null && canRecheck(job) ? job : null;
+  const tag = (name: string, warn = false): RowTag => ({
+    text: t(`${KEY}.rows.tags.${name}`),
+    title: t(`${KEY}.rows.tags.${name}Title`),
+    warn,
+  });
+  const tags = [
+    ...(row.new_exit ? [tag('newExit')] : []),
+    ...(row.exit_changed ? [tag('exitChanged', true)] : []),
+    ...(row.flaky ? [tag('flaky')] : []),
+  ];
+  if (tags.length === 0) return null;
+  return (
+    <span className="inline-flex flex-wrap gap-1">
+      {tags.map((item) => (
+        <span
+          key={item.text}
+          title={item.title}
+          className={cn(
+            'rounded-md px-1.5 py-0.5 text-[11px]',
+            item.warn ? 'bg-warning-500/10 text-warning-400' : 'bg-dark-700/60 text-dark-300',
+          )}
+        >
+          {item.text}
+        </span>
+      ))}
+    </span>
+  );
+}
+
+export interface GeoRowsProps {
+  rows: readonly GeoRow[];
+  /** Задача отчёта и перепроверка — кнопки «тот же IP» / «сменить IP» у проваленных строк. */
+  job?: Job | null;
+  recheck?: GeoRecheck | null;
+}
+
+const rowKey = (row: GeoRow) =>
+  `${row.region}:${row.city}:${row.provider ?? ''}:${row.exit_ip ?? ''}`;
+
+/**
+ * Города списком: город · регион · провайдер (с пометками) · вердикт (и скорость) · задержка · цели ·
+ * повтор; на телефоне — карточки.
+ */
+export function GeoRows({ rows, job = null, recheck = null }: GeoRowsProps) {
+  const { t } = useTranslation();
   if (rows.length === 0) return <p className="text-sm text-dark-400">{t(`${KEY}.rows.empty`)}</p>;
   const latency = (row: GeoRow) =>
     row.latency_ms === null ? '—' : t(`${KEY}.rows.latency`, { value: row.latency_ms });
+  // Колонка повтора — только когда есть кому: у зелёных строк кнопок нет.
+  const recheckJob =
+    job !== null &&
+    recheck !== null &&
+    canRecheckJob(job) &&
+    rows.some((row) => row.verdict !== 'ok')
+      ? job
+      : null;
   return (
     <>
       <div className={cn(TABLE_STYLES.wrap, 'hidden md:block')}>
@@ -116,7 +176,7 @@ export function GeoRows({ rows, job = null }: GeoRowsProps) {
               <th className={TABLE_STYLES.th}>{t('admin.reachability.result.verdict')}</th>
               <th className={TABLE_STYLES.th}>{t('admin.reachability.result.latency')}</th>
               <th className={TABLE_STYLES.th}>{t('admin.reachability.result.targets')}</th>
-              {recheck && <th className={TABLE_STYLES.th}>{t(`${KEY}.rows.recheck`)}</th>}
+              {recheckJob && <th className={TABLE_STYLES.th}>{t(`${KEY}.rows.recheck`)}</th>}
             </tr>
           </thead>
           <tbody>
@@ -128,7 +188,9 @@ export function GeoRows({ rows, job = null }: GeoRowsProps) {
                     {[row.district, row.region_ru].filter(Boolean).join(' · ')}
                   </span>
                 </td>
-                <td className={cn(TABLE_STYLES.cell, TABLE_STYLES.value)}>{row.provider ?? '—'}</td>
+                <td className={cn(TABLE_STYLES.cell, TABLE_STYLES.value)}>
+                  {row.provider ?? '—'} <RowTags row={row} />
+                </td>
                 <td className={TABLE_STYLES.cell}>
                   <Verdict row={row} />
                 </td>
@@ -136,9 +198,9 @@ export function GeoRows({ rows, job = null }: GeoRowsProps) {
                 <td className={cn(TABLE_STYLES.cell, 'text-left')}>
                   <Targets row={row} />
                 </td>
-                {recheck && (
+                {recheckJob && recheck && (
                   <td className={cn(TABLE_STYLES.cell, 'text-left')}>
-                    <Recheck job={recheck} row={row} />
+                    <RecheckCell job={recheckJob} row={row} recheck={recheck} />
                   </td>
                 )}
               </tr>
@@ -157,6 +219,7 @@ export function GeoRows({ rows, job = null }: GeoRowsProps) {
                 <span className="block text-xs text-dark-400">
                   {[row.district, row.region_ru, row.provider].filter(Boolean).join(' · ')}
                 </span>
+                <RowTags row={row} />
               </span>
               <span className="shrink-0 text-xs tabular-nums text-dark-300">{latency(row)}</span>
             </div>
@@ -166,9 +229,9 @@ export function GeoRows({ rows, job = null }: GeoRowsProps) {
             <div className="mt-2">
               <Targets row={row} />
             </div>
-            {recheck && (
+            {recheckJob && recheck && (
               <div className="mt-2">
-                <Recheck job={recheck} row={row} />
+                <RecheckCell job={recheckJob} row={row} recheck={recheck} />
               </div>
             )}
           </li>

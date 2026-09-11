@@ -28,9 +28,6 @@ export interface GeoFormState {
   cityLimit: number;
   probeMode: GeoProbeMode;
   heavy: boolean;
-  /** Повтор через тот же выход (из отчёта): sid строки и её exit_ip; живёт только до запуска. */
-  session: string | null;
-  expectExitIp: string | null;
 }
 
 /** Потолок городов чипами, как у оригинала: топ по населению; 0 — все. */
@@ -51,8 +48,6 @@ export const DEFAULT_GEO_FORM: GeoFormState = {
   cityLimit: 0,
   probeMode: 'tls',
   heavy: false,
-  session: null,
-  expectExitIp: null,
 };
 
 const STORAGE_KEY = 'reachability.geo.form';
@@ -77,16 +72,8 @@ function scopeOf(state: GeoFormState): GeoScope {
   return { kind: 'all' };
 }
 
-/** Повтор на том же выходе сервис принимает только с одним городом — иначе sid не уходит. */
-export function sessionAllowed(state: GeoFormState): boolean {
-  return state.session !== null && state.scopeKind === 'cities' && state.cities.length === 1;
-}
-
 export function toGeoOptions(state: GeoFormState): GeoOptions {
   const scope = scopeOf(state);
-  const session = sessionAllowed(state)
-    ? { session: state.session as string, expect_exit_ip: state.expectExitIp ?? '' }
-    : {};
   return {
     network: state.network,
     scope,
@@ -95,17 +82,16 @@ export function toGeoOptions(state: GeoFormState): GeoOptions {
     city_limit: state.cityLimit,
     probe_mode: state.probeMode,
     heavy: state.probeMode === 'tcp' ? false : state.heavy,
-    ...session,
   };
 }
 
-/** Список городов и повтор выхода не запоминаем: они привязаны к конкретной проверке, остальное — привычка. */
+/** Список городов не запоминаем: он привязан к конкретной проверке, остальное — привычка. */
 export function rememberGeoForm(state: GeoFormState): void {
-  safeLocal.setJson(STORAGE_KEY, { ...state, cities: [], session: null, expectExitIp: null });
+  safeLocal.setJson(STORAGE_KEY, { ...state, cities: [] });
 }
 
 export function recallGeoForm(): GeoFormState | null {
   const stored = safeLocal.getJson<Partial<GeoFormState> | null>(STORAGE_KEY, null);
   if (!stored || typeof stored !== 'object') return null;
-  return { ...DEFAULT_GEO_FORM, ...stored, cities: [], session: null, expectExitIp: null };
+  return { ...DEFAULT_GEO_FORM, ...stored, cities: [] };
 }

@@ -19,8 +19,6 @@ describe('parseReachabilityDeepLink', () => {
       runningJobId: null,
       serverKey: null,
       batchId: null,
-      geoCity: null,
-      geoSession: null,
     });
   });
 
@@ -96,29 +94,6 @@ describe('parseReachabilityDeepLink', () => {
       runningJobId: null,
       serverKey: null,
       batchId: null,
-      geoCity: null,
-      geoSession: null,
-    });
-  });
-
-  it('перепроверка города из отчёта GEO: city=<регион>|<город>, isp=, session= и exit=', () => {
-    const link = buildReachabilityLink({
-      mode: 'geo',
-      repeatJobId: 44,
-      geoCity: { region: 'tyumen_oblast', city: 'tyumen', isp: 'rostelecom' },
-      geoSession: { sid: 's-1', exitIp: '109.248.255.118' },
-    });
-    expect(link).toBe(
-      '/admin/reachability?kind=geo&repeat=44&city=tyumen_oblast%7Ctyumen&isp=rostelecom&session=s-1&exit=109.248.255.118',
-    );
-    const parsed = parseReachabilityDeepLink(new URL(link, 'https://x').searchParams);
-    expect(parsed.geoCity).toEqual({ region: 'tyumen_oblast', city: 'tyumen', isp: 'rostelecom' });
-    expect(parsed.geoSession).toEqual({ sid: 's-1', exitIp: '109.248.255.118' });
-    expect(parseReachabilityDeepLink(new URLSearchParams('city=moscow')).geoCity).toBeNull();
-    expect(parseReachabilityDeepLink(new URLSearchParams('city=moscow|')).geoCity).toBeNull();
-    expect(parseReachabilityDeepLink(new URLSearchParams('city=moscow|moscow')).geoCity).toEqual({
-      region: 'moscow',
-      city: 'moscow',
     });
   });
 });
