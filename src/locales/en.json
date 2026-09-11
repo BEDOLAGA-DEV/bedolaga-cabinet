@@ -2601,7 +2601,10 @@
         "fromHost": "Check from Russian cities",
         "map": {
           "close": "Close",
-          "noCities": "no cities in this check"
+          "noCities": "no cities in this check",
+          "zoomIn": "Zoom in",
+          "zoomOut": "Zoom out",
+          "reset": "Whole map"
         }
       }
     },
