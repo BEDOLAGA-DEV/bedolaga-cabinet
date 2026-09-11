@@ -2155,7 +2155,13 @@
         "summaryServers_many": "{{count}} серверов",
         "busyBatch": "Уже идёт проверка серверов — дождитесь завершения",
         "timeRow": "Время",
-        "confirmServers": "Серверы ({{count}}): {{list}}"
+        "confirmServers": "Серверы ({{count}}): {{list}}",
+        "runGeo_one": "Проверить {{count}} город · {{price}}",
+        "runGeo_few": "Проверить {{count}} города · {{price}}",
+        "runGeo_many": "Проверить {{count}} городов · {{price}}",
+        "runShortGeo_one": "Проверить {{count}} город",
+        "runShortGeo_few": "Проверить {{count}} города",
+        "runShortGeo_many": "Проверить {{count}} городов"
       },
       "progress": {
         "submitting": "Отправляем запрос…",
@@ -2621,6 +2627,12 @@
           "latency": "{{value}} мс",
           "kbps": "{{value}} кбит/с",
           "froze": "заморозка"
+        },
+        "launch": {
+          "citiesRow": "Городов",
+          "maxNodes": "потолок для режима {{count}}",
+          "applyLimit": "Поставить потолок {{count}}",
+          "confirmCities": "Городов: {{count}}"
         }
       }
     },

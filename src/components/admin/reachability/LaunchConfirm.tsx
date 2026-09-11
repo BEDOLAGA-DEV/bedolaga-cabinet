@@ -38,10 +38,12 @@ export function LaunchConfirm({ launch }: { launch: LaunchState }) {
         )}
       </p>
       <p className="break-words text-xs text-dark-300">
-        {t('admin.reachability.launch.confirmUnits', {
-          count: summary.units.length,
-          list: formatList(unitNameList(summary.units, catalog), LISTED, more),
-        })}
+        {launch.kind === 'geo'
+          ? t('admin.reachability.geo.launch.confirmCities', { count: launch.geo?.n_nodes ?? 0 })
+          : t('admin.reachability.launch.confirmUnits', {
+              count: summary.units.length,
+              list: formatList(unitNameList(summary.units, catalog), LISTED, more),
+            })}
       </p>
       <p className="text-sm text-dark-100">
         {t(
