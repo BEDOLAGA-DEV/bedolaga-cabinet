@@ -2494,6 +2494,59 @@
         "pickDistrict": "All SIMs in {{code}}",
         "unpickDistrict": "Clear SIMs in {{code}}",
         "empty": "No SIMs: service unavailable"
+      },
+      "geo": {
+        "targets": {
+          "count": "{{count}} of {{max}} targets",
+          "overLimit": "No more than {{max}} targets per run — drop the extra ones",
+          "placeholder": "example.com · 1.2.3.4:443 · https://… — comma-separated or one per line",
+          "hint": "Domain, IP, address with port or a site link. GEO does not check subnets.",
+          "noCidr": "A subnet cannot be checked here — that is the “CIDR scan” tab",
+          "configTitle": "Tunnel config",
+          "configHint": "one server from the panel subscription or a pasted link — vless or hysteria2"
+        },
+        "scope": {
+          "title": "From where",
+          "hint": "network, geography, ISP",
+          "label": "Coverage",
+          "all": "All of Russia",
+          "district": "District",
+          "region": "Region",
+          "cities": "Cities",
+          "pickDistrict": "District",
+          "pickRegion": "— pick a region —",
+          "cityFind": "Find a city…",
+          "cityTruncated": "Not all shown: {{total}} found, refine the name",
+          "removeCity": "Remove city",
+          "isps_one": "{{count}} ISP",
+          "isps_other": "{{count}} ISPs"
+        },
+        "network": {
+          "label": "Network",
+          "res": "Home",
+          "mob": "Mobile"
+        },
+        "limit": {
+          "label": "Cities · top by population",
+          "all": "all"
+        },
+        "isp": {
+          "label": "ISP",
+          "any": "Any (random in the city)",
+          "all": "One probe per ISP in each city",
+          "allNeedsScope": "Only with a district, a region or a list of cities"
+        },
+        "method": {
+          "title": "Method",
+          "label": "Probe",
+          "tcp": "TCP port",
+          "tls": "TLS handshake",
+          "tcpHint": "the port accepts a connection",
+          "tlsHint": "the site really opens",
+          "hostsHint": "For a VPN host TLS without the right SNI shows a false refusal — panel hosts default to TCP",
+          "heavy": "Heavy probe: TSPU throttling detection",
+          "heavyHint": "transfers >16 KB per target; domains only; ≈ +0.055 MB per target in every city"
+        }
       }
     },
     "wheel": {
