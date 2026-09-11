@@ -45,9 +45,9 @@ export function regionFills(rows: readonly GeoMapRow[]): Record<string, GeoTone>
  */
 const MAP_STYLES = cn(
   'w-full overflow-hidden rounded-2xl border border-dark-700/60 bg-dark-900/40 [&>svg]:h-auto [&>svg]:w-full',
-  '[&_[data-layer=Other_State_Boundarys]]:fill-dark-800/70 [&_[data-layer=Other_State_Boundarys]]:stroke-dark-700',
-  '[&_[data-layer=State_Outline]]:fill-none [&_[data-layer=State_Outline]]:stroke-dark-600 [&_[data-layer=State_Outline]]:stroke-[0.6]',
-  '[&_[data-layer=District_Outline]]:fill-none [&_[data-layer=District_Outline]]:stroke-dark-500 [&_[data-layer=District_Outline]]:stroke-[0.8]',
+  '[&_[data-layer=countries]]:fill-dark-800/70 [&_[data-layer=countries]]:stroke-dark-700',
+  '[&_[data-layer=borders]]:fill-none [&_[data-layer=borders]]:stroke-dark-600 [&_[data-layer=borders]]:stroke-[0.6]',
+  '[&_[data-layer=districts]]:fill-none [&_[data-layer=districts]]:stroke-dark-500 [&_[data-layer=districts]]:stroke-[0.8]',
   '[&_[data-region]]:cursor-pointer [&_[data-region]]:stroke-dark-900 [&_[data-region]]:stroke-[0.5] [&_[data-region]]:transition-colors',
   '[&_[data-tone=empty]]:fill-dark-700 [&_[data-tone=na]]:fill-dark-500',
   '[&_[data-tone=ok]]:fill-success-400/80 [&_[data-tone=warn]]:fill-warning-400/80 [&_[data-tone=orange]]:fill-orange-400/80',
