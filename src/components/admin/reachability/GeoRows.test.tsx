@@ -1,9 +1,11 @@
 // @vitest-environment jsdom
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { MemoryRouter } from 'react-router';
 
 vi.mock('react-i18next', async () => (await import('./testUtils')).i18nMock());
 
+import type { Job } from '@/api/reachability';
 import { GeoRows } from './GeoRows';
 import type { GeoRow } from './geoRowsView';
 
@@ -93,5 +95,31 @@ describe('GeoRows', () => {
   it('пусто под фильтром — подпись', () => {
     render(<GeoRows rows={[]} />);
     expect(screen.getByText('Ни одного города под фильтром')).toBeTruthy();
+  });
+});
+
+describe('GeoRows · повтор из отчёта', () => {
+  const job = { id: 44, kind: 'geo', status: 'done', targets: [] } as unknown as Job;
+  it('у завершённой задачи каждая строка получает «Ещё раз», а с sid — ещё и «Тот же IP»', () => {
+    render(
+      <MemoryRouter>
+        <GeoRows rows={[ROWS[0], { ...ROWS[2], sid: 's-1', exit_ip: '203.0.113.7' }]} job={job} />
+      </MemoryRouter>,
+    );
+    const again = screen.getAllByRole('link', { name: 'Ещё раз' });
+    expect(again.length).toBeGreaterThanOrEqual(2);
+    expect(again[0].getAttribute('href')).toBe(
+      '/admin/reachability?kind=geo&repeat=44&city=moscow%7Cmoscow',
+    );
+    const same = screen.getAllByRole('link', { name: 'Тот же IP' });
+    expect(same[0].getAttribute('href')).toContain('session=s-1&exit=203.0.113.7');
+  });
+  it('идущая задача — без кнопок повтора', () => {
+    render(
+      <MemoryRouter>
+        <GeoRows rows={ROWS} job={{ ...job, status: 'running' }} />
+      </MemoryRouter>,
+    );
+    expect(screen.queryByRole('link', { name: 'Ещё раз' })).toBeNull();
   });
 });

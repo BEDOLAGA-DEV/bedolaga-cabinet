@@ -46,6 +46,20 @@ describe('geoForm', () => {
     expect(options.scope).toEqual({ kind: 'all' });
     expect(options.isp).toBeNull();
   });
+  it('повтор через тот же выход уходит только с одним городом в списке', () => {
+    const one = {
+      ...DEFAULT_GEO_FORM,
+      scopeKind: 'cities' as const,
+      cities: [{ region: 'moscow', city: 'moscow' }],
+      session: 's-1',
+      expectExitIp: '203.0.113.7',
+    };
+    expect(toGeoOptions(one)).toMatchObject({ session: 's-1', expect_exit_ip: '203.0.113.7' });
+    const two = { ...one, cities: [...one.cities, { region: 'spb', city: 'spb' }] };
+    expect('session' in toGeoOptions(two)).toBe(false);
+    expect('session' in toGeoOptions({ ...one, scopeKind: 'all' })).toBe(false);
+    expect(toGeoOptions({ ...one, expectExitIp: null }).expect_exit_ip).toBe('');
+  });
   it('тяжёлая проба в TCP не уходит', () => {
     expect(toGeoOptions({ ...DEFAULT_GEO_FORM, probeMode: 'tcp', heavy: true }).heavy).toBe(false);
   });
@@ -58,6 +72,8 @@ describe('geoForm', () => {
       district: 'pfo',
       probeMode: 'tcp',
       cities: [{ region: 'x', city: 'y', label: 'Игрек · Икс' }],
+      session: 's-1',
+      expectExitIp: '203.0.113.7',
     });
     expect(recallGeoForm()).toEqual({
       ...DEFAULT_GEO_FORM,

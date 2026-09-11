@@ -4436,7 +4436,9 @@
           "cityTruncated": "همه نمایش داده نشده‌اند: {{total}} یافت شد، نام را دقیق‌تر کنید",
           "removeCity": "حذف شهر",
           "isps_one": "{{count}} ارائه‌دهنده",
-          "isps_other": "{{count}} ارائه‌دهنده"
+          "isps_other": "{{count}} ارائه‌دهنده",
+          "sessionNote": "تکرار از همان خروجی {{ip}}",
+          "sessionDrop": "انتخاب خروجی جدید"
         },
         "network": {
           "label": "شبکه",
@@ -4490,7 +4492,8 @@
           "notChecked": "بررسی نشد: {{reason}}",
           "latency": "{{value}} میلی‌ثانیه",
           "kbps": "{{value}} کیلوبیت/ثانیه",
-          "froze": "توقف"
+          "froze": "توقف",
+          "recheck": "تکرار"
         },
         "launch": {
           "citiesRow": "شهرها",
@@ -4504,7 +4507,11 @@
           "noCities": "شهری در این بررسی نیست",
           "zoomIn": "بزرگ‌نمایی",
           "zoomOut": "کوچک‌نمایی",
-          "reset": "کل نقشه"
+          "reset": "کل نقشه",
+          "recheck": "دوباره",
+          "sameExit": "همان IP",
+          "more": "{{count}} مورد دیگر",
+          "exitChanged": "خروجی عوض شد"
         }
       }
     },

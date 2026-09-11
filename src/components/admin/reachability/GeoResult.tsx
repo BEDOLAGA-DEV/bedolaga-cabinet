@@ -58,7 +58,7 @@ export function GeoResult({ job }: { job: Job }) {
           </span>
         )}
       </div>
-      <GeoMap rows={rows} highlightVerdict={verdict} />
+      <GeoMap rows={rows} highlightVerdict={verdict} job={job} />
       <input
         type="search"
         value={query}
@@ -67,7 +67,7 @@ export function GeoResult({ job }: { job: Job }) {
         placeholder={t(`${KEY}.result.find`)}
         className="input w-full text-sm"
       />
-      <GeoRows rows={shown} />
+      <GeoRows rows={shown} job={job} />
     </div>
   );
 }

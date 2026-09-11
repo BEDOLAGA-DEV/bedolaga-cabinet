@@ -3,7 +3,7 @@ import { projectPoint } from './geoProjection';
 import { regionCodeFor } from './geoRegions';
 import { GEO_VERDICTS, type GeoTone, verdictTone, worstVerdict } from './geoVerdicts';
 
-/** Что карте нужно от строки прогона: где город, чей выход, какой итог. */
+/** Что карте нужно от строки прогона: где город, чей выход, какой итог; остальное — для подсказки. */
 export interface GeoMapRow {
   region: string;
   region_ru: string;
@@ -12,6 +12,12 @@ export interface GeoMapRow {
   verdict: string;
   provider: string | null;
   latency_ms: number | null;
+  req_isp?: string | null;
+  exit_ip?: string | null;
+  exit_changed?: boolean;
+  sid?: string | null;
+  targets?: Array<{ key: string; ok: boolean; ms: number | null }>;
+  tunnel?: { checks: Array<{ name: string; ok: boolean; ms: number | null }> } | null;
 }
 
 /** Точка города: одна на город, строк может быть несколько (по провайдеру на каждую). */

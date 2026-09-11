@@ -2581,7 +2581,9 @@
           "removeCity": "Убрать город",
           "isps_one": "{{count}} провайдер",
           "isps_few": "{{count}} провайдера",
-          "isps_many": "{{count}} провайдеров"
+          "isps_many": "{{count}} провайдеров",
+          "sessionNote": "Повтор через тот же выход {{ip}}",
+          "sessionDrop": "Выбрать выход заново"
         },
         "network": {
           "label": "Сеть",
@@ -2636,7 +2638,8 @@
           "notChecked": "не проверен: {{reason}}",
           "latency": "{{value}} мс",
           "kbps": "{{value}} кбит/с",
-          "froze": "заморозка"
+          "froze": "заморозка",
+          "recheck": "Повтор"
         },
         "launch": {
           "citiesRow": "Городов",
@@ -2650,7 +2653,11 @@
           "noCities": "городов в проверке нет",
           "zoomIn": "Приблизить",
           "zoomOut": "Отдалить",
-          "reset": "Вся карта"
+          "reset": "Вся карта",
+          "recheck": "Ещё раз",
+          "sameExit": "Тот же IP",
+          "more": "ещё {{count}}",
+          "exitChanged": "выход сменился"
         }
       }
     },
