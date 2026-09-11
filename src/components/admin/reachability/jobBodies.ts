@@ -1,4 +1,5 @@
 import type { Dpi, JobCreateRequest, Probes, TargetIn, VlessCore } from '@/api/reachability';
+import { type GeoFormState, toGeoOptions } from './geoScope';
 
 /** Чистая сборка тела ``POST /jobs`` из состояния вкладок; null — запускать нечего. */
 
@@ -89,4 +90,33 @@ export function cidrFromAddress(address: string): string | null {
   const octets = match.slice(1, 5).map(Number);
   if (octets.some((octet) => octet > 255)) return null;
   return `${octets[0]}.${octets[1]}.${octets[2]}.0/24`;
+}
+
+export interface GeoSelection {
+  hosts: string[];
+  custom: string[];
+  /** Один конфиг туннеля из подписки или вставленной ссылки; null — только сайт-цели. */
+  config: TargetIn | null;
+  form: GeoFormState;
+  core: VlessCore;
+}
+
+/** GEO-РФ: цели трёх источников в одном теле, симок нет, «откуда» и метод — блоком `geo`. */
+export function buildGeoBody(selection: GeoSelection): JobCreateRequest | null {
+  const targets: TargetIn[] = [
+    ...selection.hosts.map((ref) => ({ kind: 'host' as const, ref })),
+    ...selection.custom.map((value) => ({ kind: 'custom' as const, value })),
+    ...(selection.config ? [selection.config] : []),
+  ];
+  if (targets.length === 0) return null;
+  return {
+    kind: 'geo',
+    targets,
+    units: [],
+    dpi: 'any',
+    probes: { icmp: false, tcp: false, sni: false },
+    core: selection.core,
+    sni_hosts: [],
+    geo: toGeoOptions(selection.form),
+  };
 }
