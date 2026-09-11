@@ -1,5 +1,35 @@
 # Changelog
 
+## [1.74.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.73.0...v1.74.0) (2026-09-11)
+
+
+### Features
+
+* **admin:** в сводке пользователей карточка «Удалено» — «Всего» складывается из активных, заблокированных и удалённых ([867d88f](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/867d88f251fb73c326adf1ba39f3150e72559b73))
+* **reachability:** вердикты GEO, коды регионов карты, состояние «откуда» и тело запроса ([41c3c00](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/41c3c00e2baa488a84430790fabd90b048872fe4))
+* **reachability:** вкладка GEO — режим, типы и справочник в API кабинета ([ef13faa](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/ef13faad45f36f15db2689e26360c14df3670bfd))
+* **reachability:** вкладка GEO по образцу оригинала — карта РФ с границами, цели переключателем ([d8bae0a](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/d8bae0a1e372a345f936e4082aa9dc9239d59685))
+* **reachability:** запуск GEO из вкладки — цели, откуда, метод, резерв и потолок городов в панели ([c2c6bf1](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/c2c6bf114a6d4760d1b676fe143def810f33f6e9))
+* **reachability:** карта GEO на телефоне — зум и сдвиг ([59c1b9b](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/59c1b9bc3ce2f23c58e1043e201ce3108de9d798))
+* **reachability:** карта регионов РФ для GEO — регион красится по худшему результату его городов ([a3d66cf](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/a3d66cf12e6e9b150f0f614c5483426aa5349a5f))
+* **reachability:** повтор города GEO — в тот же тест, без новой строки в истории ([ead124a](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/ead124a311cf58001f7c2402ccbf3a80343c5f9e))
+* **reachability:** повтор города GEO один в один с оригиналом и подсказка панелью на телефоне ([fb365d5](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/fb365d56a2263e67debe195ac5e3ecf0fe690d49))
+* **reachability:** подписка на тысячи серверов и причины отказа словами ([c661b60](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/c661b6040e46f189917405337076f5deae9ece47))
+* **reachability:** подсказка карты GEO как в оригинале и перепроверка города из отчёта ([0d1be2c](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/0d1be2cdb506a8e1bdb02941fc5acf232950062c))
+* **reachability:** результат GEO — сводка вердиктов, карта, города с фильтрами, история ([7ad64fd](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/7ad64fd48471316a041848faf2de76c45b5b0889))
+* **reachability:** форма GEO — цели из трёх источников, «откуда» по справочнику, метод пробы ([d691209](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/d691209fb050f9bfd0429ba0bfa80d26b4dbaa8a))
+* **reachability:** ярлык «Проверить из городов РФ» с карточки хоста ([2795aa7](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/2795aa76a30a9aa540bd35e75e95978dc8b5eeaa))
+
+
+### Bug Fixes
+
+* **admin:** карточка пользователя пересоздаётся при переходе к другому пользователю ([16f83b2](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/16f83b2ddfa7f82c339fe26d35a7636a74ff8edc))
+* **reachability:** без прокрутки к списку при касании карты GEO на телефоне ([a6aa3fe](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/a6aa3fe6f8da418cc36aa0cb9ea6485a6911071c))
+* **reachability:** карта GEO на телефоне — касание сужает список, а не дублирует его панелью ([903f67a](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/903f67aec56414c7152a1aaa9ddf973c2d4397cd))
+* **reachability:** карта без глифов подписей — они перехватывали клики по регионам ([5e39ccd](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/5e39ccdad6b05904ddde480b1d68afcf90c2d390))
+* **reachability:** кнопки повтора GEO в каноне кабинета — логика оригинала, вид свой ([ea87ee2](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/ea87ee2543a2352f80c3b0c7f0c73c73d3da95ac))
+* **reachability:** слои карты без подчёркиваний — в произвольных вариантах Tailwind они становились пробелами ([a0dd1c9](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/a0dd1c98e62f272e9790ff248e3ce0ce564d3160))
+
 ## [1.73.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.72.0...v1.73.0) (2026-09-10)
 
 
