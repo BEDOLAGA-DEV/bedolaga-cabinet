@@ -2052,7 +2052,8 @@
       "kinds": {
         "probe": "probe",
         "vless": "VLESS test",
-        "scan": "scan /24"
+        "scan": "scan /24",
+        "geo": "GEO from cities"
       },
       "status": {
         "openSettings": "Open settings",
@@ -2146,7 +2147,8 @@
         "units": "SIMs",
         "waitingUnit": "waiting…",
         "answered": "{{answered}} of {{total}} SIMs answered",
-        "canLeave": "You can close the page: the result will appear in “My checks”."
+        "canLeave": "You can close the page: the result will appear in “My checks”.",
+        "hintGeo": "Sites: half a second per city, tunnel: two to three seconds; cities run in parallel. The page updates by itself."
       },
       "verdict": {
         "reachable": "reachable",
@@ -2369,7 +2371,9 @@
         "vless": "VPN test",
         "vlessHint": "subscription configs through a VLESS tunnel, up to 20 per test",
         "history": "History",
-        "historyHint": "every check: what was checked, the outcome and the charge"
+        "historyHint": "every check: what was checked, the outcome and the charge",
+        "geo": "GEO",
+        "geoHint": "from Russian cities through home and mobile ISPs, up to 20 targets and one config"
       },
       "sections": {
         "targets": "Targets",

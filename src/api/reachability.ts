@@ -2,7 +2,7 @@ import apiClient from './client';
 
 // === Типы контракта (бот: app/cabinet/schemas/reachability.py) ===
 
-export type JobKind = 'probe' | 'vless' | 'scan';
+export type JobKind = 'probe' | 'vless' | 'scan' | 'geo';
 export type Dpi = 'on' | 'off' | 'any';
 export type Purpose = 'bs' | 'regular' | 'unknown';
 export type Verdict = 'reachable' | 'blocked' | 'down' | 'unknown' | 'cancelled';
@@ -157,6 +157,91 @@ export interface JobCreateRequest {
   core: VlessCore;
   /** Свои имена для TLS-SNI (до 5); пусто — имена целей или дефолт из настроек. */
   sni_hosts: string[];
+  /** GEO-РФ: откуда проверять и каким методом; для остальных видов не уходит. */
+  geo?: GeoOptions;
+}
+
+// === GEO-РФ: проверка из городов глазами домашних и мобильных провайдеров ===
+
+export type GeoNetwork = 'res' | 'mob';
+export type GeoScopeKind = 'all' | 'district' | 'region' | 'cities';
+export type GeoProbeMode = 'tls' | 'tcp';
+
+export interface GeoCityRef {
+  region: string;
+  city: string;
+  isp?: string;
+}
+
+export interface GeoScope {
+  kind: GeoScopeKind;
+  district?: string;
+  region?: string;
+  cities?: GeoCityRef[];
+}
+
+/** Блок «Откуда» и «Метод» вкладки GEO — как уходит в бот. */
+export interface GeoOptions {
+  network: GeoNetwork;
+  scope: GeoScope;
+  isp: string | null;
+  city_limit: number;
+  probe_mode: GeoProbeMode;
+  heavy: boolean;
+}
+
+/** Числа сервиса из расчёта: города, потолок трафика, резерв, прогноз времени, потолок городов режима. */
+export interface GeoPreview {
+  n_nodes: number | null;
+  cap_mb: number | null;
+  reserve_credits: number | null;
+  estimated_sec: number | null;
+  max_nodes: number | null;
+}
+
+export interface GeoDistrict {
+  code: string;
+  name: string;
+}
+
+export interface GeoRegion {
+  token: string;
+  name: string;
+  district: string;
+}
+
+export interface GeoIsp {
+  token: string;
+  name: string;
+  cities: number;
+}
+
+export interface GeoCity {
+  region: string;
+  region_ru: string;
+  district: string;
+  city: string;
+  city_ru: string;
+  isps: string[];
+}
+
+export interface GeoCatalog {
+  networks: string[];
+  districts: GeoDistrict[];
+  regions: GeoRegion[];
+  isps: GeoIsp[];
+  cities: GeoCity[];
+  cities_total: number | null;
+  cities_truncated: boolean;
+}
+
+export interface GeoCatalogParams {
+  network: GeoNetwork;
+  q?: string;
+  isp?: string;
+  region?: string;
+  district?: string;
+  cities_limit?: number;
 }
 
 export type SkippedUnit = Partial<Unit> & { op_key?: string };
@@ -188,6 +273,8 @@ export interface PreviewResponse {
   estimate_is_exact: boolean;
   warnings: string[];
   balance_kopeks: number | null;
+  /** Только у GEO: расчёт сервиса по городам и резерву. */
+  geo?: GeoPreview | null;
 }
 
 export interface Leg {
@@ -423,6 +510,10 @@ export const reachabilityApi = {
         { timeout: PARSE_TIMEOUT_MS },
       )
     ).data,
+
+  /** Справочник GEO: округа, регионы, провайдеры; города — по фильтру или поиску (бесплатно). */
+  getGeoCatalog: async (params: GeoCatalogParams): Promise<GeoCatalog> =>
+    (await apiClient.get(`${BASE}/geo/catalog`, { params })).data,
 
   updatePref: async (body: PrefUpdate): Promise<Pref> =>
     (await apiClient.put(`${BASE}/targets/prefs`, body)).data,
