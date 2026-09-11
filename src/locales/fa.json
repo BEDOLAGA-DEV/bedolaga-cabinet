@@ -4481,7 +4481,9 @@
           "noise": "نتیجه نیست: {{count}}",
           "find": "جستجوی شهر یا منطقه…",
           "cities_one": "{{count}} شهر",
-          "cities_other": "{{count}} شهر"
+          "cities_other": "{{count}} شهر",
+          "picked": "روی نقشه: {{label}} · {{count}}",
+          "pickedClear": "نمایش همه"
         },
         "rows": {
           "city": "شهر",

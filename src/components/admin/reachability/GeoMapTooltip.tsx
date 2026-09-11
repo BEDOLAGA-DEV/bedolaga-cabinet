@@ -14,8 +14,6 @@ export interface GeoMapTooltipProps extends TooltipModel {
   estimatedHeight: number;
   /** Закреплена касанием или кликом: ловит указатель, показывает крестик и кнопки повтора. */
   pinned: boolean;
-  /** Панель под картой (телефон): не плавает над картой, а занимает всю ширину. */
-  panel?: boolean;
   onClose: () => void;
 }
 
@@ -134,19 +132,14 @@ function Row({ row, pinned }: { row: TooltipRow; pinned: boolean }) {
  */
 export function GeoMapTooltip(props: GeoMapTooltipProps) {
   const { t } = useTranslation();
-  const style = props.panel ? undefined : tooltipPlacement(props, props.estimatedHeight);
+  const style = tooltipPlacement(props, props.estimatedHeight);
   return (
     <div
       role="tooltip"
       style={style}
       className={cn(
-        'rounded-xl border border-dark-700/60 bg-dark-900/95 p-2.5 text-xs',
-        props.panel
-          ? 'mt-2 w-full'
-          : cn(
-              'absolute z-10 w-max shadow-lg backdrop-blur',
-              props.pinned ? 'pointer-events-auto' : 'pointer-events-none',
-            ),
+        'absolute z-10 w-max rounded-xl border border-dark-700/60 bg-dark-900/95 p-2.5 text-xs shadow-lg backdrop-blur',
+        props.pinned ? 'pointer-events-auto' : 'pointer-events-none',
       )}
     >
       <div className="flex items-start justify-between gap-2">

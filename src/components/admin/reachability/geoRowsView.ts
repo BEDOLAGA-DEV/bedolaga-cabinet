@@ -1,4 +1,5 @@
 import type { Job } from '@/api/reachability';
+import { regionCodeFor } from './geoRegions';
 import { GEO_VERDICTS, isGeoVerdict } from './geoVerdicts';
 
 /** Строка города из `Job.result.rows` (форма бота, часть 1). */
@@ -53,9 +54,18 @@ export interface GeoSummary {
   note: string | null;
 }
 
+/** Что выбрано касанием на карте (телефон): город или регион — список ниже сужается до него. */
+export interface MapPick {
+  kind: 'city' | 'region';
+  /** Город — `region|city`, регион — код на карте (ISO без «RU-»). */
+  key: string;
+  label: string;
+}
+
 export interface GeoFilter {
   verdict: string | null;
   query: string;
+  pick?: MapPick | null;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -111,11 +121,19 @@ export function sortGeoRows(rows: readonly GeoRow[]): GeoRow[] {
 
 export function filterGeoRows(rows: readonly GeoRow[], filter: GeoFilter): GeoRow[] {
   const query = filter.query.trim().toLowerCase();
+  const pick = filter.pick ?? null;
   return rows.filter(
     (row) =>
       (filter.verdict === null || row.verdict === filter.verdict) &&
+      (pick === null || matchesPick(row, pick)) &&
       (query === '' || `${row.city_ru} ${row.city} ${row.region_ru}`.toLowerCase().includes(query)),
   );
+}
+
+function matchesPick(row: GeoRow, pick: MapPick): boolean {
+  return pick.kind === 'city'
+    ? `${row.region}|${row.city}` === pick.key
+    : regionCodeFor(row.region, row.region_ru) === pick.key;
 }
 
 export function verdictOrUnknown(value: string): string {
