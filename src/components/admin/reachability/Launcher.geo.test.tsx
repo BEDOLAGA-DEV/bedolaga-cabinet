@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, screen } from '@testing-library/react';
+import { cleanup, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('react-i18next', async () => (await import('./testUtils')).i18nMock());
@@ -52,12 +52,18 @@ vi.mock('@/api/reachability', async () => {
   };
 });
 
+import { reachabilityApi } from '@/api/reachability';
 import { Launcher } from './Launcher';
 import { parseReachabilityDeepLink } from './deepLink';
 import { installMatchMedia, renderWithProviders } from './testUtils';
 
 installMatchMedia();
-afterEach(cleanup);
+// Запросы формы (хосты, справочник) отвечают асинхронно: на медленном раннере уведомление
+// react-query прилетало уже после сноса jsdom («window is not defined»). Даём таймерам дойти.
+afterEach(async () => {
+  await new Promise((resolve) => setTimeout(resolve, 20));
+  cleanup();
+});
 
 describe('Launcher · geo', () => {
   it('во вкладке GEO показаны блоки «Цели», «Откуда», «Метод», а не симки', async () => {
@@ -72,6 +78,9 @@ describe('Launcher · geo', () => {
     expect(await screen.findByRole('heading', { name: 'Откуда' })).toBeTruthy();
     expect(screen.getByRole('heading', { name: 'Метод' })).toBeTruthy();
     expect(screen.getByRole('heading', { name: 'Цели' })).toBeTruthy();
+    // Справочник и хосты дочитались — дальше в тесте ничего асинхронного не остаётся.
+    await waitFor(() => expect(reachabilityApi.getGeoCatalog).toHaveBeenCalled());
+    await waitFor(() => expect(reachabilityApi.getHosts).toHaveBeenCalled());
     expect(screen.queryByRole('heading', { name: 'Операторы' })).toBeNull();
     expect(screen.queryByRole('heading', { name: 'Пробы' })).toBeNull();
   });
