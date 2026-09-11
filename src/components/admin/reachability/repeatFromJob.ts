@@ -38,9 +38,11 @@ export function repeatFromJob(job: Job): RepeatState {
       ? 'cidr'
       : job.kind === 'vless'
         ? 'vless'
-        : custom.length > 0 && hosts.length === 0 && nodes.length === 0
-          ? 'ip'
-          : 'hosts';
+        : job.kind === 'geo'
+          ? 'geo'
+          : custom.length > 0 && hosts.length === 0 && nodes.length === 0
+            ? 'ip'
+            : 'hosts';
   return {
     mode,
     hosts,

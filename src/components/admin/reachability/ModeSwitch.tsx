@@ -1,6 +1,13 @@
 import type { ComponentType } from 'react';
 import { useTranslation } from 'react-i18next';
-import { GlobeIcon, HistoryIcon, ScanIcon, ServerIcon, ShieldIcon } from '@/components/icons';
+import {
+  GlobeIcon,
+  HistoryIcon,
+  MapPinIcon,
+  ScanIcon,
+  ServerIcon,
+  ShieldIcon,
+} from '@/components/icons';
 import { cn } from '@/lib/utils';
 import { type PageTab, TAB_KEYS } from './deepLink';
 
@@ -11,19 +18,20 @@ interface ModeSwitchProps {
   modes?: readonly PageTab[];
 }
 
-/** Значки вкладок, как у подвкладок оригинала bsbord.com: сервер, глобус, рамка скана, щит, часы. */
+/** Значки вкладок, как у подвкладок оригинала bsbord.com: сервер, глобус, рамка скана, щит, булавка, часы. */
 const ICONS: Record<PageTab, ComponentType<{ className?: string }>> = {
   hosts: ServerIcon,
   ip: GlobeIcon,
   cidr: ScanIcon,
   vless: ShieldIcon,
+  geo: MapPinIcon,
   history: HistoryIcon,
 };
 
 /**
- * Вкладки как в оригинале bsbord.com: хосты панели, IP / домен, CIDR, подписка — и «История»
+ * Вкладки как в оригинале bsbord.com: хосты панели, IP / домен, CIDR, подписка, GEO — и «История»
  * последней, в той же полосе, где её ищут первым делом. На телефоне значок над подписью, чтобы
- * все пять умещались в строку без переносов; на десктопе значок рядом с подписью.
+ * все шесть умещались в строку без переносов; на десктопе значок рядом с подписью.
  */
 export function ModeSwitch({ value, onChange, modes = TAB_KEYS }: ModeSwitchProps) {
   const { t } = useTranslation();
