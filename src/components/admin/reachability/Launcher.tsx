@@ -13,6 +13,7 @@ import { JobProgress } from './JobProgress';
 import { LaunchAside, LaunchBar } from './LaunchAside';
 import { OperatorPicker } from './OperatorPicker';
 import { ScanTargets } from './ScanTargets';
+import { initialSelection } from './autoSelect';
 import { type ConfigItem, SubscriptionTargets } from './SubscriptionTargets';
 import { autoUnitsFor } from './autoUnits';
 import { type DeepLink, jobKindOf } from './deepLink';
@@ -127,7 +128,7 @@ export function Launcher({ status, link, runningJobId, onRunning }: LauncherProp
     const key = pastedMode ? pasted.trim() : null;
     if (!key || !parsed.data || autoSelectedFor.current === key) return;
     autoSelectedFor.current = key;
-    setConfigIndexes(parsed.data.configs.map((config) => config.index));
+    setConfigIndexes(initialSelection(parsed.data.configs));
   }, [pastedMode, pasted, parsed.data]);
 
   const toggleConfig = (index: number) =>
