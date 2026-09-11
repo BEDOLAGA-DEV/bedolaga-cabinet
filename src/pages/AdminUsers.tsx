@@ -19,6 +19,7 @@ import {
   SubscriptionIcon,
   UserPlusIcon,
   BanIcon,
+  TrashIcon,
 } from '@/components/icons';
 
 function StatusBadge({ status }: { status: string }) {
@@ -189,7 +190,7 @@ export default function AdminUsers() {
 
       {/* Stats */}
       {stats && (
-        <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+        <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
           <StatCard
             label={t('admin.users.stats.total')}
             value={stats.total_users}
@@ -219,6 +220,12 @@ export default function AdminUsers() {
             value={stats.blocked_users}
             icon={<BanIcon className="h-5 w-5" />}
             tone="error"
+          />
+          <StatCard
+            label={t('admin.users.stats.deleted')}
+            value={stats.deleted_users}
+            icon={<TrashIcon className="h-5 w-5" />}
+            tone="neutral"
           />
         </div>
       )}

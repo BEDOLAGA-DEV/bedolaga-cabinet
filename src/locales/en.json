@@ -4360,7 +4360,8 @@
         "active": "Active",
         "withSubscription": "With subscription",
         "newToday": "New today",
-        "blocked": "Blocked"
+        "blocked": "Blocked",
+        "deleted": "Deleted"
       },
       "status": {
         "active": "Active",
