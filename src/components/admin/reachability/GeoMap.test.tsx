@@ -193,7 +193,7 @@ describe('GeoMap · повтор и телефон', () => {
     fireEvent.click(container.querySelector('[data-city="voronezh_oblast|voronezh"]') as Element);
     expect(screen.queryByRole('button', { name: /Сменить IP/ })).toBeNull();
   });
-  it('на телефоне подсказка — панель под картой, а не поверх неё', async () => {
+  it('на телефоне касание не открывает подсказку, а отдаёт выбор наружу; повтор снимает', async () => {
     const original = window.matchMedia;
     window.matchMedia = ((query: string) => ({
       matches: query.includes('max-width'),
@@ -206,17 +206,31 @@ describe('GeoMap · повтор и телефон', () => {
       dispatchEvent: () => false,
     })) as unknown as typeof window.matchMedia;
     try {
-      const { container } = render(<GeoMap rows={rows} />);
+      const onPick = vi.fn();
+      const { container, rerender } = render(<GeoMap rows={rows} onPick={onPick} />);
       await waitFor(() => expect(container.querySelector('svg')).toBeTruthy());
-      const map = container.firstElementChild as HTMLElement;
       fireEvent.pointerMove(container.querySelector('[data-region="VOR"]') as Element, {
         pointerType: 'mouse',
       });
       expect(screen.queryByRole('tooltip')).toBeNull();
       fireEvent.click(container.querySelector('[data-city="voronezh_oblast|liski"]') as Element);
-      const panel = screen.getByRole('tooltip');
-      expect(map.contains(panel)).toBe(false);
-      expect(panel.textContent).toContain('Лиски');
+      expect(screen.queryByRole('tooltip')).toBeNull();
+      expect(onPick).toHaveBeenLastCalledWith({
+        kind: 'city',
+        key: 'voronezh_oblast|liski',
+        label: 'Лиски',
+      });
+      fireEvent.click(container.querySelector('[data-region="VOR"]') as Element);
+      expect(onPick).toHaveBeenLastCalledWith({
+        kind: 'region',
+        key: 'VOR',
+        label: 'Воронежская область',
+      });
+      const picked = { kind: 'region' as const, key: 'VOR', label: 'Воронежская область' };
+      rerender(<GeoMap rows={rows} onPick={onPick} picked={picked} />);
+      expect(container.querySelector('[data-outline]')).toBeTruthy();
+      fireEvent.click(container.querySelector('[data-region="VOR"]') as Element);
+      expect(onPick).toHaveBeenLastCalledWith(null);
     } finally {
       window.matchMedia = original;
     }

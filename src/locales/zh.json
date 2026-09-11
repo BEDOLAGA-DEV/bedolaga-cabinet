@@ -4459,7 +4459,9 @@
           "progress": "已完成 {{done}} / {{total}}",
           "noise": "不算结果：{{count}}",
           "find": "查找城市或地区…",
-          "cities_other": "{{count}} 个城市"
+          "cities_other": "{{count}} 个城市",
+          "picked": "地图上：{{label}} · {{count}}",
+          "pickedClear": "显示全部"
         },
         "rows": {
           "city": "城市",

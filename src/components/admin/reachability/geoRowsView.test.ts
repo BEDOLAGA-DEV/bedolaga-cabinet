@@ -96,5 +96,20 @@ describe('geoRowsView', () => {
     expect(pick({ verdict: 'blocked', query: '' })).toEqual(['voronezh']);
     expect(pick({ verdict: null, query: 'ом' })).toEqual(['omsk']);
     expect(pick({ verdict: null, query: 'Воронеж' })).toEqual(['voronezh']);
+    // Выбор на карте (телефон): город — по токенам, регион — по коду на карте.
+    expect(
+      pick({
+        verdict: null,
+        query: '',
+        pick: { kind: 'city', key: 'omsk_oblast|omsk', label: 'Омск' },
+      }),
+    ).toEqual(['omsk']);
+    expect(
+      pick({
+        verdict: null,
+        query: '',
+        pick: { kind: 'region', key: 'VOR', label: 'Воронежская' },
+      }),
+    ).toEqual(['voronezh']);
   });
 });

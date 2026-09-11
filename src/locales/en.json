@@ -2581,7 +2581,9 @@
           "noise": "not a result: {{count}}",
           "find": "Find a city or region…",
           "cities_one": "{{count}} city",
-          "cities_other": "{{count}} cities"
+          "cities_other": "{{count}} cities",
+          "picked": "On the map: {{label}} · {{count}}",
+          "pickedClear": "Show all"
         },
         "rows": {
           "city": "City",

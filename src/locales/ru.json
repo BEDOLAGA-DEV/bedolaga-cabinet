@@ -2627,7 +2627,9 @@
           "find": "Найти город или регион…",
           "cities_one": "{{count}} город",
           "cities_few": "{{count}} города",
-          "cities_many": "{{count}} городов"
+          "cities_many": "{{count}} городов",
+          "picked": "На карте: {{label}} · {{count}}",
+          "pickedClear": "Показать все"
         },
         "rows": {
           "city": "Город",
