@@ -15,6 +15,7 @@ import { DEVICE_ALIAS_MAX_LENGTH } from '../../../constants/devices';
 import { createNumberInputHandler } from '../../../utils/inputHelpers';
 import { getFlagEmoji } from '../../../utils/subscriptionHelpers';
 import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
+import { PremiumTrafficAdmin } from './PremiumTrafficAdmin';
 import type {
   UserAvailableTariff,
   UserPanelInfo,
@@ -564,6 +565,16 @@ export function SubscriptionTab(props: SubscriptionTabProps) {
                 </div>
               </div>
             )}
+
+          {/* Premium traffic — сам скрывается, если премиум-серверов в тарифе нет */}
+          {hasPermission('traffic:read') && (
+            <PremiumTrafficAdmin
+              subscriptionId={selectedSub.id}
+              canManage={hasPermission('traffic:manage')}
+              formatDate={formatDate}
+              onRegularReset={onLoadSubscriptionData}
+            />
+          )}
 
           {props.reachabilityLink && (
             <Link to={props.reachabilityLink} className="btn-secondary w-full text-center">
