@@ -2,7 +2,8 @@ import { useTranslation } from 'react-i18next';
 import type { Job } from '@/api/reachability';
 import { cn } from '@/lib/utils';
 import { TABLE_STYLES } from './ResultTable';
-import { canRecheckJob, recheckButtons, recheckState } from './geoRecheck';
+import { RecheckButtons } from './RecheckButtons';
+import { canRecheckJob, recheckState } from './geoRecheck';
 import type { GeoRow } from './geoRowsView';
 import { TONE_DOT, verdictTone } from './geoVerdicts';
 import type { GeoRecheck } from './useGeoRecheck';
@@ -68,35 +69,15 @@ function Targets({ row }: { row: GeoRow }) {
   );
 }
 
-/** Ячейка повтора как у оригинала: кнопки у проваленных, «⏳» пока идёт, «⤴ перепроверено» после. */
+/** Ячейка повтора: состояние строки — из логики оригинала, вид — кнопки кабинета. */
 function RecheckCell({ job, row, recheck }: { job: Job; row: GeoRow; recheck: GeoRecheck }) {
-  const { t } = useTranslation();
-  const state = recheckState(job, row, recheck.busy);
-  if (state === 'none') return null;
-  if (state === 'busy') {
-    return <span className="text-xs text-dark-400">{t(`${KEY}.recheck.busy`)}</span>;
-  }
-  if (state === 'rechecked') {
-    return (
-      <span className="text-xs text-dark-400" title={t(`${KEY}.recheck.doneTitle`)}>
-        {t(`${KEY}.recheck.done`)}
-      </span>
-    );
-  }
   return (
-    <span className="flex flex-wrap gap-1">
-      {recheckButtons(job, row, t).map((button) => (
-        <button
-          key={button.label}
-          type="button"
-          title={button.title}
-          onClick={() => recheck.start(row, button.sameExit)}
-          className="whitespace-nowrap rounded-md border border-dark-700/60 px-2 py-0.5 text-[11px] text-dark-200 hover:border-accent-500/40 hover:text-accent-400"
-        >
-          {button.label}
-        </button>
-      ))}
-    </span>
+    <RecheckButtons
+      job={job}
+      row={row}
+      state={recheckState(job, row, recheck.busy)}
+      onStart={(sameExit) => recheck.start(row, sameExit)}
+    />
   );
 }
 

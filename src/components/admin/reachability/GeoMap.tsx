@@ -340,7 +340,7 @@ function GeoMapBody({
   const tooltip = focus
     ? focus.kind === 'city'
       ? byKey.has(focus.key)
-        ? cityTooltip(byKey.get(focus.key) as CityMarker, context, t)
+        ? cityTooltip(byKey.get(focus.key) as CityMarker, context)
         : null
       : regionTooltip(
           focus.key,
