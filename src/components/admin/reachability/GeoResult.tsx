@@ -1,11 +1,12 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Job } from '@/api/reachability';
 import { cn } from '@/lib/utils';
 import { GeoMap } from './GeoMap';
 import { GeoRows } from './GeoRows';
 import { useGeoRecheck } from './useGeoRecheck';
-import { filterGeoRows, geoRowsOf, geoSummaryOf, sortGeoRows } from './geoRowsView';
+import { CloseIcon } from '@/components/icons';
+import { type MapPick, filterGeoRows, geoRowsOf, geoSummaryOf, sortGeoRows } from './geoRowsView';
 import { GEO_VERDICTS, TONE_DOT, isResultVerdict, verdictTone } from './geoVerdicts';
 
 const KEY = 'admin.reachability.geo';
@@ -18,7 +19,17 @@ export function GeoResult({ job }: { job: Job }) {
   const summary = geoSummaryOf(job);
   const [verdict, setVerdict] = useState<string | null>(null);
   const [query, setQuery] = useState('');
-  const shown = useMemo(() => filterGeoRows(rows, { verdict, query }), [rows, verdict, query]);
+  // Телефон: касание на карте сужает список до города или региона; чип над списком снимает.
+  const [pick, setPick] = useState<MapPick | null>(null);
+  const list = useRef<HTMLDivElement>(null);
+  const choose = (next: MapPick | null) => {
+    setPick(next);
+    if (next) list.current?.scrollIntoView?.({ block: 'start', behavior: 'smooth' });
+  };
+  const shown = useMemo(
+    () => filterGeoRows(rows, { verdict, query, pick }),
+    [rows, verdict, query, pick],
+  );
   if (!summary) {
     return <p className="text-sm text-dark-400">{t('admin.reachability.result.empty')}</p>;
   }
@@ -60,7 +71,29 @@ export function GeoResult({ job }: { job: Job }) {
           </span>
         )}
       </div>
-      <GeoMap rows={rows} highlightVerdict={verdict} job={job} recheck={recheck} />
+      <GeoMap
+        rows={rows}
+        highlightVerdict={verdict}
+        job={job}
+        recheck={recheck}
+        onPick={choose}
+        picked={pick}
+      />
+      {pick && (
+        <div ref={list} className="flex items-center gap-2 text-sm text-dark-200">
+          <span className="min-w-0 truncate">
+            {t(`${KEY}.result.picked`, { label: pick.label, count: shown.length })}
+          </span>
+          <button
+            type="button"
+            onClick={() => choose(null)}
+            className="inline-flex shrink-0 items-center gap-1 rounded-md px-1.5 py-0.5 text-xs text-accent-400 hover:underline"
+          >
+            {t(`${KEY}.result.pickedClear`)}
+            <CloseIcon className="h-3 w-3" />
+          </button>
+        </div>
+      )}
       <input
         type="search"
         value={query}
