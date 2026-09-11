@@ -75,6 +75,7 @@ export function SubscriptionTargets(props: SubscriptionTargetsProps) {
           configs={props.list}
           rejected={props.rejected}
           selected={props.selected}
+          note={pastedMode ? null : (props.subscription.data?.note ?? null)}
           onToggle={props.onToggle}
           onSelectMany={props.onSelectMany}
           onClear={props.onClear}
