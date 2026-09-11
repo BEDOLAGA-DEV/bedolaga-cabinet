@@ -2633,7 +2633,8 @@
           "maxNodes": "потолок для режима {{count}}",
           "applyLimit": "Поставить потолок {{count}}",
           "confirmCities": "Городов: {{count}}"
-        }
+        },
+        "fromHost": "Проверить из городов РФ"
       }
     },
     "wheel": {

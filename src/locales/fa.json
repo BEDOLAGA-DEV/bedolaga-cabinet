@@ -4487,7 +4487,8 @@
           "maxNodes": "سقف این حالت {{count}}",
           "applyLimit": "سقف را روی {{count}} بگذارید",
           "confirmCities": "شهرها: {{count}}"
-        }
+        },
+        "fromHost": "بررسی از شهرهای روسیه"
       }
     },
     "theme": {
