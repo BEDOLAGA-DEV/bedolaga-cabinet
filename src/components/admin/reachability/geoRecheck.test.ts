@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import type { Job } from '@/api/reachability';
-import { holdLeftSeconds, recheckButtons, recheckKey, recheckState } from './geoRecheck';
+import {
+  holdLeftSeconds,
+  recheckButtons,
+  recheckEntries,
+  recheckKey,
+  recheckState,
+  runningRechecks,
+} from './geoRecheck';
 
 const t = (key: string, options?: Record<string, unknown>) =>
   `${key.split('.').pop()}${options ? ` ${JSON.stringify(options)}` : ''}`;
@@ -42,5 +49,27 @@ describe('geoRecheck', () => {
     const noSid = recheckButtons(job, { ...row, sid: null }, t);
     expect(noSid[0].label).toBe('sameIp');
     expect(noSid[0].title).toBe('sameIpNoSid');
+  });
+  it('записи повторов читаются из result.rechecks: занят только город «идёт», мусор пропускается', () => {
+    const withEntries = {
+      result: {
+        rechecks: {
+          'r|c|': { status: 'running', run_id: 812, started_at: '2026-09-11T10:00:00Z' },
+          'r|d|': { status: 'failed', error: 'Прогон пропал на стороне сервиса' },
+          'r|e|': 'мусор',
+          'r|f|': { status: 'неизвестно' },
+        },
+      },
+    } as unknown as Job;
+    const entries = recheckEntries(withEntries);
+    expect([...entries.keys()]).toEqual(['r|c|', 'r|d|']);
+    expect(entries.get('r|c|')).toEqual({ status: 'running' });
+    expect(entries.get('r|d|')).toEqual({
+      status: 'failed',
+      error: 'Прогон пропал на стороне сервиса',
+    });
+    expect([...runningRechecks(withEntries)]).toEqual(['r|c|']);
+    expect(runningRechecks({ result: null } as Job).size).toBe(0);
+    expect(recheckEntries({ result: { rechecks: 'мусор' } } as unknown as Job).size).toBe(0);
   });
 });

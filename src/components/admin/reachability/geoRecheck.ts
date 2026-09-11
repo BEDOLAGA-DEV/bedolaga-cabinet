@@ -76,3 +76,36 @@ export function recheckButtons(
     { sameExit: false, label: t(`${base}.newIp`), title: t(`${base}.newIpTitle`), icon: 'shuffle' },
   ];
 }
+
+/** Запись повтора в отчёте родителя: бот держит «идёт», пока прогон у сервиса не кончился. */
+export interface GeoRecheckEntry {
+  status: 'running' | 'failed';
+  /** Причина словами, если повтор не удался; кнопки у строки при этом возвращаются. */
+  error?: string;
+}
+
+/** Записи `result.rechecks` — ключ «регион|город|провайдер», как у recheckKey; мусор пропускается. */
+export function recheckEntries(job: Pick<Job, 'result'>): Map<string, GeoRecheckEntry> {
+  const entries = new Map<string, GeoRecheckEntry>();
+  const raw = job.result?.rechecks;
+  if (!raw || typeof raw !== 'object') return entries;
+  for (const [key, value] of Object.entries(raw as Record<string, unknown>)) {
+    if (!value || typeof value !== 'object') continue;
+    const entry = value as Record<string, unknown>;
+    if (entry.status !== 'running' && entry.status !== 'failed') continue;
+    entries.set(key, {
+      status: entry.status,
+      ...(typeof entry.error === 'string' ? { error: entry.error } : {}),
+    });
+  }
+  return entries;
+}
+
+/** Города, по которым повтор идёт прямо сейчас по данным самого отчёта. */
+export function runningRechecks(job: Pick<Job, 'result'>): ReadonlySet<string> {
+  const running = new Set<string>();
+  for (const [key, entry] of recheckEntries(job)) {
+    if (entry.status === 'running') running.add(key);
+  }
+  return running;
+}
