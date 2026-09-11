@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildReachabilityLink, jobKindOf, parseReachabilityDeepLink } from './deepLink';
+import { MODE_KEYS, buildReachabilityLink, jobKindOf, parseReachabilityDeepLink } from './deepLink';
 
 /**
  * `?kind=hosts|ip|cidr|vless&target=host:<uuid>&user=<id>&sub=<shortUuid>&job=<id>`.
@@ -22,8 +22,8 @@ describe('parseReachabilityDeepLink', () => {
     });
   });
 
-  it('пять вкладок; старые probe и scan сводятся к hosts и cidr', () => {
-    for (const mode of ['hosts', 'ip', 'cidr', 'vless', 'history']) {
+  it('шесть вкладок; старые probe и scan сводятся к hosts и cidr', () => {
+    for (const mode of ['hosts', 'ip', 'cidr', 'vless', 'geo', 'history']) {
       expect(parseReachabilityDeepLink(new URLSearchParams(`kind=${mode}`)).mode).toBe(mode);
     }
     expect(parseReachabilityDeepLink(new URLSearchParams('kind=probe')).mode).toBe('hosts');
@@ -111,6 +111,17 @@ describe('jobKindOf', () => {
     expect([link.mode, link.repeatJobId]).toEqual(['ip', 12]);
     expect(buildReachabilityLink({ mode: 'ip', repeatJobId: 12 })).toBe(
       '/admin/reachability?kind=ip&repeat=12',
+    );
+  });
+
+  it('режим geo — своя вкладка и свой вид задачи', () => {
+    expect(MODE_KEYS).toContain('geo');
+    expect(jobKindOf('geo')).toBe('geo');
+    expect(parseReachabilityDeepLink(new URLSearchParams('kind=geo&target=host:h-1')).mode).toBe(
+      'geo',
+    );
+    expect(buildReachabilityLink({ mode: 'geo', targets: [{ kind: 'host', ref: 'h-1' }] })).toBe(
+      '/admin/reachability?kind=geo&target=host%3Ah-1',
     );
   });
 

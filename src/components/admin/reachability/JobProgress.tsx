@@ -21,6 +21,7 @@ const HINT_KEY: Record<Job['kind'], string> = {
   probe: 'hintProbe',
   vless: 'hintVless',
   scan: 'hintScan',
+  geo: 'hintGeo',
 };
 
 function elapsedLabel(startedAt: string | null): string {

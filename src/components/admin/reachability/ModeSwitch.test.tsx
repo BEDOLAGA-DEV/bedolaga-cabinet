@@ -2,7 +2,7 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-/** Вкладки как в оригинале bsbord.com: хосты панели, IP / домен, скан CIDR, VPN-тест — и история проверок. */
+/** Вкладки как в оригинале bsbord.com: хосты панели, IP / домен, скан CIDR, VPN-тест, GEO — и история проверок. */
 
 vi.mock('react-i18next', async () => (await import('./testUtils')).i18nMock());
 
@@ -11,7 +11,7 @@ import { ModeSwitch } from './ModeSwitch';
 afterEach(cleanup);
 
 describe('ModeSwitch', () => {
-  it('пять вкладок, активная отмечена, клик отдаёт вкладку наверх', () => {
+  it('шесть вкладок, активная отмечена, клик отдаёт вкладку наверх', () => {
     const onChange = vi.fn();
     render(<ModeSwitch value="hosts" onChange={onChange} />);
     expect(screen.getAllByRole('tab').map((tab) => tab.textContent)).toEqual([
@@ -19,6 +19,7 @@ describe('ModeSwitch', () => {
       'IP / домен',
       'Скан CIDR',
       'VPN-тест',
+      'GEO',
       'История',
     ]);
     expect(screen.getByRole('tab', { name: 'Хосты' }).getAttribute('aria-selected')).toBe('true');
