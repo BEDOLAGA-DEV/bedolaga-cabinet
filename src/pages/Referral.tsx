@@ -457,7 +457,11 @@ export default function Referral() {
   // section is gated only by the admin visibility flag.
   const withdrawalVisible = terms?.partner_section_visible !== false;
 
-  const { data: withdrawalBalance } = useQuery({
+  const {
+    data: withdrawalBalance,
+    isPending: withdrawalBalancePending,
+    isError: withdrawalBalanceFailed,
+  } = useQuery({
     queryKey: ['withdrawal-balance'],
     queryFn: withdrawalApi.getBalance,
     enabled: withdrawalVisible,
@@ -468,6 +472,25 @@ export default function Referral() {
     queryFn: withdrawalApi.getHistory,
     enabled: withdrawalVisible,
   });
+
+  /*
+   * Выключенный вывод показывать нечем: сервер обнуляет всю статистику, кнопка
+   * навсегда серая, а под ней стоит служебная фраза «Функция вывода
+   * реферального баланса отключена». Бот в этом случае просто не рисует кнопку —
+   * кабинет теперь тоже убирает весь раздел.
+   *
+   * Кроме одного случая: заявки, поданные до выключения, никуда не деваются и
+   * остаются видны — иначе человек потеряет из виду деньги, которые ещё в
+   * обработке. Пока ответ не пришёл, раздела нет вовсе: иначе «История выводов»
+   * успевает мигнуть у того, кому вывод вообще не положен. Если ответ не пришёл
+   * совсем, показываем как раньше — молча прятать чужие деньги хуже.
+   */
+  const withdrawalEnabled = withdrawalBalance?.is_withdrawal_enabled ?? withdrawalBalanceFailed;
+  /* Строго «знаем, что выключен»: пока ответа нет, текст не должен дёргаться. */
+  const withdrawalTurnedOff = withdrawalBalance?.is_withdrawal_enabled === false;
+  const hasWithdrawalHistory = (withdrawalHistory?.items?.length ?? 0) > 0;
+  const withdrawalSectionVisible =
+    withdrawalVisible && !withdrawalBalancePending && (withdrawalEnabled || hasWithdrawalHistory);
 
   // Withdrawal cancel mutation
   const cancelWithdrawalMutation = useMutation({
@@ -873,7 +896,13 @@ export default function Referral() {
                 {t('referral.partner.becomePartner')}
               </h2>
               <p className="mt-1 text-sm text-dark-400">
-                {t('referral.partner.becomePartnerDesc')}
+                {/* Обещать вывод заработка, когда вывод выключен, нельзя: заявку
+                    подадут ради того, чего не будет. */}
+                {t(
+                  withdrawalTurnedOff
+                    ? 'referral.partner.becomePartnerDescNoWithdrawal'
+                    : 'referral.partner.becomePartnerDesc',
+                )}
               </p>
               <button
                 onClick={() => navigate('/referral/partner/apply')}
@@ -932,9 +961,11 @@ export default function Referral() {
                 })}
               </p>
             </div>
-            <a href="#withdrawal-section" className="btn-secondary hidden px-4 sm:flex">
-              {t('referral.withdrawal.goToWithdrawal')}
-            </a>
+            {withdrawalSectionVisible && (
+              <a href="#withdrawal-section" className="btn-secondary hidden px-4 sm:flex">
+                {t('referral.withdrawal.goToWithdrawal')}
+              </a>
+            )}
           </div>
         </div>
       )}
@@ -990,10 +1021,10 @@ export default function Referral() {
 
       {/* ==================== Withdrawal Section ==================== */}
 
-      {withdrawalVisible && (
+      {withdrawalSectionVisible && (
         <div id="withdrawal-section" className="space-y-6">
           {/* Withdrawal Balance Card */}
-          {withdrawalBalance && (
+          {withdrawalEnabled && withdrawalBalance && (
             <div className="bento-card">
               <div className="mb-4 flex items-center gap-3">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent-500/10 text-accent-400">

@@ -1,9 +1,9 @@
 import { useCallback, useState, memo } from 'react';
-import { useNavigate } from 'react-router';
+import { useLocation, useNavigate } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { infoPagesApi } from '../api/infoPages';
-import { AdminBackButton } from '../components/admin';
+import { AdminBackButton, backTo } from '../components/admin';
 import { Toggle } from '../components/admin/Toggle';
 import { useHapticFeedback } from '../platform/hooks/useHaptic';
 import { useDestructiveConfirm } from '../platform/hooks/useNativeDialog';
@@ -145,6 +145,7 @@ const PageRowWrapper = memo(function PageRowWrapper({
 export default function AdminInfoPages() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   const queryClient = useQueryClient();
   const haptic = useHapticFeedback();
   const confirm = useDestructiveConfirm();
@@ -219,7 +220,7 @@ export default function AdminInfoPages() {
           <button
             onClick={() => {
               haptic.buttonPress();
-              navigate('/admin/legal-pages');
+              navigate('/admin/legal-pages', backTo(location));
             }}
             className="flex min-h-[44px] items-center gap-2 rounded-lg bg-dark-800 px-4 py-2.5 text-dark-200 transition-colors hover:bg-dark-700"
             aria-label={t('admin.legalPages.open')}

@@ -125,7 +125,7 @@ export default function SubscriptionCardActive({
               >
                 &#8734;
               </div>
-              <div className="mt-1 font-mono text-[11px] text-dark-50/30">
+              <div className="mt-1 font-mono text-[11px] text-dark-400">
                 {formatTraffic(usedGb)} {t('dashboard.usedSuffix')}
               </div>
             </>
@@ -133,9 +133,9 @@ export default function SubscriptionCardActive({
             <>
               <div className="font-display text-[38px] font-extrabold leading-none tracking-tight text-dark-50">
                 {animatedPercent.toFixed(0)}
-                <span className="ml-px text-lg font-medium text-dark-50/35">%</span>
+                <span className="ml-px text-lg font-medium text-dark-400">%</span>
               </div>
-              <div className="mt-0.5 font-mono text-[11px] text-dark-50/30">
+              <div className="mt-0.5 font-mono text-[11px] text-dark-400">
                 {formatTraffic(usedGb)} / {formatTraffic(subscription.traffic_limit_gb)}
               </div>
             </>
@@ -161,13 +161,16 @@ export default function SubscriptionCardActive({
       />
 
       {/* ─── Stats row: Tariff + Days Left ─── */}
+      {/* Обеим плиткам нужен `min-w-0`: без него минимальная ширина флекс-элемента
+          равна ширине неразрывного имени тарифа, и длинное имя («🟡 Компания -
+          10 устройств») выпихивало плитку «Осталось» за правый край карточки. */}
       <div className="mb-5 flex gap-2.5">
         {/* Tariff badge — clickable. Neutral chrome: the tariff name has
             no traffic-zone semantics, so tinting it by the traffic zone
             (DESIGN.md Status-Hue Lockout) was wrong. */}
         <Link
           to={`/subscriptions/${subscription.id}`}
-          className="flex-1 rounded-[14px] p-3.5 transition-colors"
+          className="min-w-0 flex-1 rounded-[14px] p-3.5 transition-colors"
           style={{
             background: g.innerBg,
             border: `1px solid ${g.innerBorder}`,
@@ -179,17 +182,20 @@ export default function SubscriptionCardActive({
           >
             {t('dashboard.tariff')}
           </div>
-          <div className="min-w-0 truncate text-base font-bold leading-tight tracking-tight text-dark-50">
+          {/* Две строки вместо обрезки в одну: на телефоне плитка шириной ~145px,
+              и «🟡 Компания - 10 устройств» превращалось в «🟡 Компани…» —
+              пользователь переставал понимать, какой у него тариф. */}
+          <div className="line-clamp-2 min-w-0 break-words text-base font-bold leading-tight tracking-tight text-dark-50">
             {subscription.tariff_name || t('subscription.currentPlan')}
           </div>
-          <div className="mt-0.5 font-mono text-[10px] text-dark-50/30">
+          <div className="mt-0.5 font-mono text-[10px] text-dark-400">
             {t('dashboard.validUntil', { date: formattedDate })}
           </div>
         </Link>
 
         {/* Days remaining */}
         <div
-          className="flex-1 rounded-[14px] p-3.5 transition-colors duration-300"
+          className="min-w-0 flex-1 rounded-[14px] p-3.5 transition-colors duration-300"
           style={{
             background: g.innerBg,
             border:
@@ -198,7 +204,7 @@ export default function SubscriptionCardActive({
                 : `1px solid ${g.innerBorder}`,
           }}
         >
-          <div className="mb-1 flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-wider text-dark-50/35">
+          <div className="mb-1 flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-wider text-dark-400">
             <div
               className="flex h-6 w-6 items-center justify-center rounded-[7px] transition-colors duration-300"
               style={{
@@ -223,9 +229,7 @@ export default function SubscriptionCardActive({
             >
               {daysLeft}
             </span>
-            <span className="text-xs font-medium text-dark-50/25">
-              {t('subscription.daysShort')}
-            </span>
+            <span className="text-xs font-medium text-dark-400">{t('subscription.daysShort')}</span>
           </div>
         </div>
       </div>
@@ -235,7 +239,7 @@ export default function SubscriptionCardActive({
         <button
           onClick={() => refreshTrafficMutation.mutate()}
           disabled={refreshTrafficMutation.isPending || trafficRefreshCooldown > 0}
-          className="flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium text-dark-50/35 transition-colors hover:bg-dark-50/[0.05] hover:text-dark-50/50 disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium text-dark-400 transition-colors hover:bg-dark-50/[0.05] hover:text-dark-50/50 disabled:cursor-not-allowed disabled:opacity-50"
           aria-label={t('common.refresh')}
         >
           <RefreshIcon
@@ -245,7 +249,7 @@ export default function SubscriptionCardActive({
         </button>
         <Link
           to={`/subscriptions/${subscription.id}`}
-          className="text-[11px] font-medium text-dark-50/25 transition-colors hover:text-dark-50/40"
+          className="text-[11px] font-medium text-accent-400 transition-colors hover:text-accent-300"
         >
           {t('dashboard.viewSubscription')} &rarr;
         </Link>
@@ -258,10 +262,10 @@ export default function SubscriptionCardActive({
           style={{ background: g.innerBg, border: `1px solid ${g.innerBorder}` }}
         >
           <div className="mb-2.5 flex items-center justify-between">
-            <span className="text-[11px] font-medium uppercase tracking-wider text-dark-50/40">
+            <span className="text-[11px] font-medium uppercase tracking-wider text-dark-400">
               {t('dashboard.usageLast14Days')}
             </span>
-            <span className="font-mono text-[11px] text-dark-50/25">
+            <span className="font-mono text-[11px] text-dark-400">
               {t('dashboard.maxUsage', { amount: formatTraffic(Math.max(...dailyUsage)) })}
             </span>
           </div>

@@ -9,6 +9,7 @@ import {
 } from '../api/adminEmailTemplates';
 import { AdminBackButton, BackIcon } from '../components/admin';
 import { Toggle } from '../components/admin/Toggle';
+import { EmailQueueCard } from '../components/admin/EmailQueueCard';
 import { useNativeDialog } from '../platform/hooks/useNativeDialog';
 import { useNotify } from '@/platform';
 import { getApiErrorMessage } from '@/utils/api-error';
@@ -613,6 +614,9 @@ export default function AdminEmailTemplates() {
         />
       ) : (
         <>
+          {/* Состояние очереди писем — видно сразу, без похода в базу */}
+          <EmailQueueCard />
+
           {/* Template List */}
           {typesLoading ? (
             <SkeletonGroup className="space-y-3">

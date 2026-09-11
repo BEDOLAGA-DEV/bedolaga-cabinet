@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router';
+import { useLocation, useNavigate } from 'react-router';
+import { backTo } from '@/components/admin';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { adminPaymentsApi, type SearchStats } from '../api/adminPayments';
@@ -45,6 +46,7 @@ function StatusBadge({ status }: StatusBadgeProps) {
 export default function AdminPayments() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   const queryClient = useQueryClient();
   const { formatAmount, currencySymbol } = useCurrency();
   const { capabilities } = usePlatform();
@@ -448,7 +450,7 @@ export default function AdminPayments() {
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                navigate(`/admin/users/${payment.user_id}`);
+                                navigate(`/admin/users/${payment.user_id}`, backTo(location));
                               }}
                               className="inline-flex items-center gap-1 transition-colors hover:underline"
                             >

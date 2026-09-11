@@ -6,11 +6,14 @@ import { subscriptionApi } from '../../../api/subscription';
 import { getErrorMessage, getInsufficientBalanceError } from '../../../utils/subscriptionHelpers';
 import { useCurrency } from '../../../hooks/useCurrency';
 import { usePromoDiscount } from '../../../hooks/usePromoDiscount';
+import { dailyPriceQuote } from './dailyPrice';
 import { usePlatform } from '../../../platform';
 import { openPaymentUrl } from '../../../utils/openPaymentUrl';
 import { getMonthlyPriceKopeks } from '../../../utils/pricing';
+import { pickBestValue } from '../../../utils/bestValue';
 import InsufficientBalancePrompt from '../../InsufficientBalancePrompt';
 import type { Tariff, TariffPeriod } from '../../../types';
+import { BestValueBadge } from '../BestValueBadge';
 
 // ──────────────────────────────────────────────────────────────────
 // TariffPurchaseForm
@@ -54,6 +57,8 @@ export function TariffPurchaseForm({
   const queryClient = useQueryClient();
   const { formatAmount, currencySymbol } = useCurrency();
   const { applyPromoDiscount } = usePromoDiscount();
+  // Та же котировка, что на карточке тарифа: серверная цена + промокод один раз.
+  const dailyQuote = dailyPriceQuote(tariff, applyPromoDiscount);
   const { openLink, platform } = usePlatform();
   const ref = useRef<HTMLDivElement>(null);
 
@@ -64,8 +69,10 @@ export function TariffPurchaseForm({
 
   // Form-internal state — seeded from the tariff prop. Resets via
   // `key={tariff.id}` on the parent's render.
+  // Отмеченный оператором период выбран сразу: рамка «Выгодно» и итог внизу
+  // должны говорить об одном и том же периоде.
   const [selectedTariffPeriod, setSelectedTariffPeriod] = useState<TariffPeriod | null>(
-    tariff.periods[0] || null,
+    pickBestValue(tariff.periods) || tariff.periods[0] || null,
   );
   const [customDays, setCustomDays] = useState<number>(30);
   const [customTrafficGb, setCustomTrafficGb] = useState<number>(50);
@@ -235,8 +242,26 @@ export function TariffPurchaseForm({
               {t('subscription.dailyPurchase.costPerDay')}
             </div>
             <div className="text-3xl font-bold text-accent-400">
-              {formatPrice(tariff.daily_price_kopeks || 0)}
+              {formatPrice(dailyQuote?.price ?? 0)}
             </div>
+            {dailyQuote?.original && dailyQuote.original > dailyQuote.price && (
+              <div className="mt-1 flex items-center justify-center gap-2 text-sm">
+                <span className="text-dark-500 line-through">
+                  {formatPrice(dailyQuote.original)}
+                </span>
+                {dailyQuote.percent && dailyQuote.percent > 0 && (
+                  <span
+                    className={`rounded px-1.5 py-0.5 text-xs ${
+                      dailyQuote.isPromoGroup
+                        ? 'bg-success-500/20 text-success-400'
+                        : 'bg-warning-500/20 text-warning-400'
+                    }`}
+                  >
+                    -{dailyQuote.percent}%
+                  </span>
+                )}
+              </div>
+            )}
           </div>
           <div className="space-y-2 text-sm text-dark-400">
             <div className="flex items-start gap-2">
@@ -254,7 +279,7 @@ export function TariffPurchaseForm({
           </div>
 
           {(() => {
-            const dailyPrice = tariff.daily_price_kopeks || 0;
+            const dailyPrice = dailyQuote?.price ?? 0;
             const hasEnoughBalance = balanceKopeks !== undefined && dailyPrice <= balanceKopeks;
 
             return (
@@ -334,10 +359,18 @@ export function TariffPurchaseForm({
                         setSelectedTariffPeriod(period);
                         setUseCustomDays(false);
                       }}
-                      className={`relative rounded-xl border p-4 text-left transition-all ${
+                      // Две метки уживаются: жёлтый контур говорит «выгодный»,
+                      // заливка и внутреннее кольцо — «выбран». Раньше выбор
+                      // затирал жёлтую рамку, и подсказка исчезала ровно у того
+                      // варианта, к которому вела.
+                      className={`relative rounded-xl p-4 text-left transition-all ${
                         selectedTariffPeriod?.days === period.days && !useCustomDays
-                          ? 'border-accent-500 bg-accent-500/10'
-                          : 'border-dark-700/50 bg-dark-800/50 hover:border-dark-600'
+                          ? period.is_highlighted
+                            ? 'border-2 border-urgent-400 bg-accent-500/10 ring-1 ring-inset ring-accent-500'
+                            : 'border border-accent-500 bg-accent-500/10'
+                          : period.is_highlighted
+                            ? 'border-2 border-urgent-400 bg-dark-800/50'
+                            : 'border border-dark-700/50 bg-dark-800/50 hover:border-dark-600'
                       }`}
                     >
                       {displayDiscount && displayDiscount > 0 && (
@@ -350,12 +383,15 @@ export function TariffPurchaseForm({
                         </div>
                       )}
                       <div className="text-lg font-semibold text-dark-100">{period.label}</div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium text-accent-400">
+                      {/* Цена не рвётся между числом и знаком валюты: две цены в
+                          карточку шириной в полэкрана не влезают, и без переноса
+                          целиком «₽» уезжал на свою строку. */}
+                      <div className="flex flex-wrap items-center gap-x-2">
+                        <span className="whitespace-nowrap font-medium text-accent-400">
                           {formatPrice(displayPrice)}
                         </span>
                         {displayOriginal && displayOriginal > displayPrice && (
-                          <span className="text-sm text-dark-500 line-through">
+                          <span className="whitespace-nowrap text-sm text-dark-500 line-through">
                             {formatPrice(displayOriginal)}
                           </span>
                         )}
@@ -365,6 +401,8 @@ export function TariffPurchaseForm({
                           {formatPrice(displayPerMonth)}/{t('subscription.month')}
                         </div>
                       )}
+                      {/* Под ценой, а не в углу: правый верхний угол занят скидкой. */}
+                      {period.is_highlighted && <BestValueBadge className="mt-2" />}
                     </button>
                   );
                 })}

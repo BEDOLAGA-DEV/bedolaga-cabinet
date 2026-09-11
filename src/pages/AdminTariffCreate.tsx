@@ -22,6 +22,7 @@ import {
   PlusIcon,
   RefreshIcon,
   SunIcon,
+  StarIcon,
   TrashIcon,
 } from '@/components/icons';
 
@@ -47,11 +48,18 @@ export default function AdminTariffCreate() {
   const [maxDeviceLimit, setMaxDeviceLimit] = useState<number | ''>(0);
   const [tierLevel, setTierLevel] = useState<number | ''>(1);
   const [periodPrices, setPeriodPrices] = useState<PeriodPrice[]>([]);
+  // Период, отмеченный как самый выгодный. Хранится днями: набор периодов правят
+  // прямо на этой форме, и индекс после правки указывал бы на другой период.
+  const [highlightPeriodDays, setHighlightPeriodDays] = useState<number | null>(null);
   const [selectedSquads, setSelectedSquads] = useState<string[]>([]);
   const [selectedExternalSquad, setSelectedExternalSquad] = useState<string | null>(null);
   const [selectedPromoGroups, setSelectedPromoGroups] = useState<number[]>([]);
   const [dailyPriceKopeks, setDailyPriceKopeks] = useState<number | ''>(0);
   const [lavaProductId, setLavaProductId] = useState('');
+  // Тег панели Remnawave: сервер поднимает регистр и проверяет формат
+  const [panelTag, setPanelTag] = useState('');
+  // Дни триала на этом тарифе; '' — глобальная настройка
+  const [trialDurationDays, setTrialDurationDays] = useState<number | ''>('');
 
   // Traffic topup
   const [trafficTopupEnabled, setTrafficTopupEnabled] = useState(false);
@@ -70,6 +78,8 @@ export default function AdminTariffCreate() {
 
   // Gift visibility
   const [showInGift, setShowInGift] = useState(true);
+  // Тариф отмечен как выгодный — выделяется в списке тарифов у клиента.
+  const [isTariffHighlighted, setIsTariffHighlighted] = useState(false);
 
   // New period for adding
   const [newPeriodDays, setNewPeriodDays] = useState<number | ''>(30);
@@ -118,6 +128,7 @@ export default function AdminTariffCreate() {
       setMaxDeviceLimit(data.max_device_limit || 0);
       setTierLevel(data.tier_level || 1);
       setPeriodPrices(data.period_prices?.length ? data.period_prices : []);
+      setHighlightPeriodDays(data.highlight_period_days ?? null);
       setSelectedSquads(data.allowed_squads || []);
       setSelectedExternalSquad(data.external_squad_uuid || null);
       setSelectedPromoGroups(
@@ -125,11 +136,14 @@ export default function AdminTariffCreate() {
       );
       setDailyPriceKopeks(data.daily_price_kopeks || 0);
       setLavaProductId(data.lava_product_id || '');
+      setPanelTag(data.panel_tag || '');
+      setTrialDurationDays(data.trial_duration_days ?? '');
       setTrafficTopupEnabled(data.traffic_topup_enabled || false);
       setMaxTopupTrafficGb(data.max_topup_traffic_gb || 0);
       setTrafficTopupPackages(data.traffic_topup_packages || {});
       setTrafficResetMode(data.traffic_reset_mode || null);
       setShowInGift(data.show_in_gift ?? true);
+      setIsTariffHighlighted(data.is_highlighted ?? false);
       return data;
     }, []),
   });
@@ -155,6 +169,7 @@ export default function AdminTariffCreate() {
 
   const handleSubmit = () => {
     const isDaily = tariffType === 'daily';
+    const highlightPayload = isDaily ? null : highlightPeriodDays;
 
     // PATCH applies a field only when it is present in the payload, so empty
     // values ('' / []) must still be sent when editing — omitting them makes
@@ -164,6 +179,7 @@ export default function AdminTariffCreate() {
       description: isEdit ? description : description || undefined,
       is_active: isActive,
       show_in_gift: showInGift,
+      is_highlighted: isTariffHighlighted,
       traffic_limit_gb: toNumber(trafficLimitGb, 100),
       device_limit: toNumber(deviceLimit, 1),
       device_price_kopeks:
@@ -171,6 +187,10 @@ export default function AdminTariffCreate() {
       max_device_limit: toNumber(maxDeviceLimit) > 0 ? toNumber(maxDeviceLimit) : undefined,
       tier_level: toNumber(tierLevel, 1),
       period_prices: isDaily ? [] : periodPrices.filter((p) => p.price_kopeks >= 0),
+      // Выделение необязательно. На правке 0 — «снять выделение» (пустое поле
+      // означало бы «не трогать»); на создании снимать нечего, и без отметки
+      // поле не уходит — сервер отверг бы ноль.
+      highlight_period_days: isEdit ? (highlightPayload ?? 0) : (highlightPayload ?? undefined),
       allowed_squads: selectedSquads,
       external_squad_uuid: selectedExternalSquad || null,
       promo_group_ids: selectedPromoGroups,
@@ -181,6 +201,10 @@ export default function AdminTariffCreate() {
       daily_price_kopeks: isDaily ? toNumber(dailyPriceKopeks) : 0,
       // Пустая строка отвязывает тариф от продукта Lava
       lava_product_id: lavaProductId.trim(),
+      // Пустая строка снимает тег панели (на правке); формат проверяет сервер
+      panel_tag: panelTag.trim(),
+      // Дни триала: пусто — глобальная настройка
+      trial_duration_days: toNumber(trialDurationDays) > 0 ? toNumber(trialDurationDays) : null,
       traffic_reset_mode: trafficResetMode,
     };
 
@@ -206,7 +230,10 @@ export default function AdminTariffCreate() {
   const addPeriod = () => {
     const days = toNumber(newPeriodDays, 0);
     const price = toNumber(newPeriodPrice, 0);
-    if (days > 0 && price > 0) {
+    // Нулевая цена допустима: бесплатный тариф — штатная настройка, и бот с
+    // кабинетом такой период продают. Раньше кнопка на нуле молча ничего
+    // не делала, а поле ввода само подменяло ноль единицей.
+    if (days > 0 && price >= 0) {
       const exists = periodPrices.some((p) => p.days === days);
       if (!exists) {
         setPeriodPrices((prev) =>
@@ -220,6 +247,13 @@ export default function AdminTariffCreate() {
 
   const removePeriod = (days: number) => {
     setPeriodPrices((prev) => prev.filter((p) => p.days !== days));
+    // Удалённый период не может оставаться выделенным.
+    setHighlightPeriodDays((current) => (current === days ? null : current));
+  };
+
+  /** Повторное нажатие снимает выделение — отдельной кнопки «снять» не нужно. */
+  const toggleHighlight = (days: number) => {
+    setHighlightPeriodDays((current) => (current === days ? null : days));
   };
 
   const updatePeriodPrice = (days: number, priceRubles: number) => {
@@ -487,6 +521,47 @@ export default function AdminTariffCreate() {
             <p className="mt-2 text-xs text-dark-500">{t('admin.tariffs.lavaProductDesc')}</p>
           </div>
 
+          {/* Remnawave panel tag */}
+          <div>
+            <label
+              htmlFor="tariff-panel-tag"
+              className="mb-2 block text-sm font-medium text-dark-300"
+            >
+              {t('admin.tariffs.panelTagLabel')}
+            </label>
+            <input
+              id="tariff-panel-tag"
+              type="text"
+              value={panelTag}
+              onChange={(e) => setPanelTag(e.target.value)}
+              className="input w-full uppercase"
+              maxLength={16}
+              placeholder="PAID_PRO"
+            />
+            <p className="mt-2 text-xs text-dark-500">{t('admin.tariffs.panelTagDesc')}</p>
+          </div>
+
+          {/* Trial days on this tariff */}
+          <div>
+            <label
+              htmlFor="tariff-trial-days"
+              className="mb-2 block text-sm font-medium text-dark-300"
+            >
+              {t('admin.tariffs.trialDaysLabel')}
+            </label>
+            <input
+              id="tariff-trial-days"
+              type="number"
+              min={1}
+              value={trialDurationDays}
+              onChange={(e) =>
+                setTrialDurationDays(e.target.value === '' ? '' : Number(e.target.value))
+              }
+              className="input w-full"
+            />
+            <p className="mt-2 text-xs text-dark-500">{t('admin.tariffs.trialDaysDesc')}</p>
+          </div>
+
           {/* Traffic Limit */}
           <div>
             <label
@@ -586,10 +661,12 @@ export default function AdminTariffCreate() {
                 <label className="mb-1 block text-xs text-dark-500">
                   {t('admin.tariffs.priceLabel')}
                 </label>
+                {/* Минимум 0, а не 1: бесплатный тариф — штатная настройка,
+                    и набранный ноль не должен превращаться в рубль. */}
                 <input
                   type="number"
                   value={newPeriodPrice}
-                  onChange={createNumberInputHandler(setNewPeriodPrice, 1)}
+                  onChange={createNumberInputHandler(setNewPeriodPrice, 0)}
                   className="input w-28"
                   placeholder="300"
                 />
@@ -652,6 +729,19 @@ export default function AdminTariffCreate() {
                   />
                   <span className="text-dark-400">₽</span>
                   <div className="flex-1" />
+                  <button
+                    type="button"
+                    onClick={() => toggleHighlight(period.days)}
+                    title={t('admin.tariffs.bestValueHint')}
+                    aria-pressed={highlightPeriodDays === period.days}
+                    className={`rounded-lg p-2 transition-colors ${
+                      highlightPeriodDays === period.days
+                        ? 'bg-urgent-400/20 text-urgent-400'
+                        : 'text-dark-400 hover:bg-dark-700 hover:text-dark-200'
+                    }`}
+                  >
+                    <StarIcon filled={highlightPeriodDays === period.days} className="h-4 w-4" />
+                  </button>
                   <button
                     onClick={() => removePeriod(period.days)}
                     className="rounded-lg p-2 text-dark-400 transition-colors hover:bg-error-500/20 hover:text-error-400"
@@ -1125,6 +1215,31 @@ export default function AdminTariffCreate() {
                 <span
                   className={`absolute top-1 h-4 w-4 rounded-full bg-white transition-transform ${
                     isActive ? 'left-6' : 'left-1'
+                  }`}
+                />
+              </button>
+            </div>
+            {/* Highlight tariff toggle */}
+            <div className="flex items-center justify-between rounded-lg bg-dark-800 p-3">
+              <div>
+                <span className="text-sm font-medium text-dark-200">
+                  {t('admin.tariffs.highlightLabel')}
+                </span>
+                <p className="text-xs text-dark-500">{t('admin.tariffs.highlightHint')}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsTariffHighlighted(!isTariffHighlighted)}
+                role="switch"
+                aria-checked={isTariffHighlighted}
+                aria-label={t('admin.tariffs.highlightLabel')}
+                className={`relative h-6 w-11 rounded-full transition-colors ${
+                  isTariffHighlighted ? 'bg-urgent-400' : 'bg-dark-600'
+                }`}
+              >
+                <span
+                  className={`absolute top-1 h-4 w-4 rounded-full bg-white transition-transform ${
+                    isTariffHighlighted ? 'left-6' : 'left-1'
                   }`}
                 />
               </button>
