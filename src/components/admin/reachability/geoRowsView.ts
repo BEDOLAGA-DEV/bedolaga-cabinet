@@ -40,7 +40,8 @@ export interface GeoRow {
   /** Строка пришла повтором с другого выхода; прежние строки города помечены `rechecked`. */
   new_exit?: boolean;
   rechecked?: boolean;
-  recheck_job_id?: number | null;
+  /** Номер прогона сервиса, которым строка получена при повторе. */
+  recheck_run_id?: number | null;
 }
 
 export interface GeoSummary {
