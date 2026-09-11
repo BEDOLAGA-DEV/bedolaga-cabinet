@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Job } from '@/api/reachability';
 import { cn } from '@/lib/utils';
@@ -20,12 +20,8 @@ export function GeoResult({ job }: { job: Job }) {
   const [verdict, setVerdict] = useState<string | null>(null);
   const [query, setQuery] = useState('');
   // Телефон: касание на карте сужает список до города или региона; чип над списком снимает.
+  // Прокрутки к списку нет: владелец счёл её бесполезной — листала криво и мимо списка.
   const [pick, setPick] = useState<MapPick | null>(null);
-  const list = useRef<HTMLDivElement>(null);
-  const choose = (next: MapPick | null) => {
-    setPick(next);
-    if (next) list.current?.scrollIntoView?.({ block: 'start', behavior: 'smooth' });
-  };
   const shown = useMemo(
     () => filterGeoRows(rows, { verdict, query, pick }),
     [rows, verdict, query, pick],
@@ -76,17 +72,17 @@ export function GeoResult({ job }: { job: Job }) {
         highlightVerdict={verdict}
         job={job}
         recheck={recheck}
-        onPick={choose}
+        onPick={setPick}
         picked={pick}
       />
       {pick && (
-        <div ref={list} className="flex items-center gap-2 text-sm text-dark-200">
+        <div className="flex items-center gap-2 text-sm text-dark-200">
           <span className="min-w-0 truncate">
             {t(`${KEY}.result.picked`, { label: pick.label, count: shown.length })}
           </span>
           <button
             type="button"
-            onClick={() => choose(null)}
+            onClick={() => setPick(null)}
             className="inline-flex shrink-0 items-center gap-1 rounded-md px-1.5 py-0.5 text-xs text-accent-400 hover:underline"
           >
             {t(`${KEY}.result.pickedClear`)}
