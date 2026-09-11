@@ -3240,7 +3240,8 @@
         "active": "活跃",
         "withSubscription": "有订阅",
         "newToday": "今日新增",
-        "blocked": "已封禁"
+        "blocked": "已封禁",
+        "deleted": "已删除"
       },
       "status": {
         "active": "活跃",

@@ -4789,7 +4789,8 @@
         "active": "Активных",
         "withSubscription": "С подпиской",
         "newToday": "Новых сегодня",
-        "blocked": "Заблокировано"
+        "blocked": "Заблокировано",
+        "deleted": "Удалено"
       },
       "status": {
         "active": "Активные",
