@@ -25,13 +25,18 @@ export interface GeoLauncherProps {
 export const isDomainLike = (value: string): boolean =>
   /[a-zA-Zа-яёА-ЯЁ]/.test(value.split(':')[0]);
 
-/** Вкладка GEO: цели трёх источников, «откуда», метод — три блока в порядке оригинала. */
+/** Вкладка GEO: цели одного вида, «откуда», метод — три блока в порядке оригинала. */
 export function GeoLauncherForm(props: GeoLauncherProps) {
+  const kind = props.form.targetKind;
   const parsed = parseGeoAddresses(props.addresses);
-  const hasTunnel = props.config !== null;
+  const hasTunnel = kind === 'vless' && props.config !== null;
+  const hostsSelected = kind === 'hosts' && props.hosts.length > 0;
+  const domainTarget = kind === 'addresses' && parsed.targets.some(isDomainLike);
   return (
     <>
       <GeoTargets
+        kind={kind}
+        onKindChange={(targetKind) => props.onFormChange({ ...props.form, targetKind })}
         hosts={props.hosts}
         onHostsChange={props.onHostsChange}
         addresses={props.addresses}
@@ -46,8 +51,8 @@ export function GeoLauncherForm(props: GeoLauncherProps) {
         core={props.core}
         onCoreChange={props.onCoreChange}
         cores={props.cores}
-        heavyAllowed={hasTunnel || parsed.targets.some(isDomainLike)}
-        hostsSelected={props.hosts.length > 0}
+        heavyAllowed={hasTunnel || domainTarget}
+        hostsSelected={hostsSelected}
         hasTunnel={hasTunnel}
       />
     </>

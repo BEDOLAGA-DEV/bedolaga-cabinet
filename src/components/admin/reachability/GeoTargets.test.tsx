@@ -39,9 +39,20 @@ vi.mock('./useTargets', () => ({
   }),
 }));
 
-import { GeoTargets, parseGeoAddresses } from './GeoTargets';
+import { GeoTargets, geoTargetsCount, parseGeoAddresses } from './GeoTargets';
+import type { GeoTargetKind } from './geoForm';
 
 afterEach(cleanup);
+
+const base = {
+  hosts: [] as string[],
+  onHostsChange: vi.fn(),
+  addresses: '',
+  onAddressesChange: vi.fn(),
+  configCount: 0,
+  configPicker: <div>picker</div>,
+  onKindChange: vi.fn(),
+};
 
 describe('parseGeoAddresses', () => {
   it('адреса через запятую и построчно, без дублей; подсеть отделяется', () => {
@@ -50,50 +61,68 @@ describe('parseGeoAddresses', () => {
       hasCidr: true,
     });
   });
+  it('счётчик целей — только выбранного вида', () => {
+    const counts = { hosts: 2, addresses: 5, configs: 1 };
+    expect(geoTargetsCount('hosts', counts)).toBe(2);
+    expect(geoTargetsCount('addresses', counts)).toBe(5);
+    expect(geoTargetsCount('vless', counts)).toBe(1);
+  });
 });
 
 describe('GeoTargets', () => {
-  it('хост панели отмечается галочкой, счётчик считает все три источника', () => {
+  it('один вид за раз: хосты панели галочками, адреса текстом, VLESS — блок конфига', () => {
+    const onKind = vi.fn();
+    const { rerender } = render(<GeoTargets {...base} kind="hosts" onKindChange={onKind} />);
+    expect(screen.getByRole('button', { name: /DE/ })).toBeTruthy();
+    expect(screen.queryByPlaceholderText(/example\.com/)).toBeNull();
+    expect(screen.queryByText('picker')).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'IP / Домен' }));
+    expect(onKind).toHaveBeenCalledWith('addresses');
+    rerender(<GeoTargets {...base} kind="addresses" onKindChange={onKind} />);
+    expect(screen.getByPlaceholderText(/example\.com/)).toBeTruthy();
+    expect(screen.queryByRole('button', { name: /DE/ })).toBeNull();
+    rerender(<GeoTargets {...base} kind="vless" onKindChange={onKind} configCount={1} />);
+    expect(screen.getByText('picker')).toBeTruthy();
+    expect(screen.getByText('целей 1 из 20')).toBeTruthy();
+  });
+  it('хост панели отмечается галочкой; счётчик не смешивает виды', () => {
     const onHosts = vi.fn();
     render(
       <GeoTargets
-        hosts={[]}
+        {...base}
+        kind="hosts"
         onHostsChange={onHosts}
         addresses={'example.com\nya.ru'}
-        onAddressesChange={vi.fn()}
         configCount={1}
-        configPicker={<div>picker</div>}
       />,
     );
-    expect(screen.getByText('целей 3 из 20')).toBeTruthy();
-    expect(screen.getByText('picker')).toBeTruthy();
+    expect(screen.getByText('целей 0 из 20')).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: /DE/ }));
     expect(onHosts).toHaveBeenCalledWith(['h-1']);
   });
   it('подсеть в поле адресов — подсказка про вкладку CIDR; сверх 20 целей — предупреждение', () => {
-    render(
-      <GeoTargets
-        hosts={['h-1', 'h-2']}
-        onHostsChange={vi.fn()}
-        addresses={[...Array(19).keys()].map((i) => `s${i}.example`).join(',')}
-        onAddressesChange={vi.fn()}
-        configCount={0}
-        configPicker={null}
-      />,
-    );
+    const many = [...Array(21).keys()].map((i) => `s${i}.example`).join(',');
+    render(<GeoTargets {...base} kind="addresses" addresses={many} />);
     expect(screen.getByText('целей 21 из 20')).toBeTruthy();
     expect(screen.getByText(/Не больше 20 целей/)).toBeTruthy();
     cleanup();
-    render(
-      <GeoTargets
-        hosts={[]}
-        onHostsChange={vi.fn()}
-        addresses="192.0.2.0/24"
-        onAddressesChange={vi.fn()}
-        configCount={0}
-        configPicker={null}
-      />,
-    );
+    render(<GeoTargets {...base} kind="addresses" addresses="192.0.2.0/24" />);
     expect(screen.getByText(/CIDR/)).toBeTruthy();
+  });
+  it('у каждого вида своя подсказка под заголовком', () => {
+    const kinds: GeoTargetKind[] = ['hosts', 'addresses', 'vless'];
+    for (const kind of kinds) {
+      render(<GeoTargets {...base} kind={kind} />);
+      expect(
+        screen.getByText(
+          kind === 'hosts'
+            ? /серверы панели/
+            : kind === 'addresses'
+              ? /через запятую или с новой строки/
+              : /hysteria2/,
+        ),
+      ).toBeTruthy();
+      cleanup();
+    }
   });
 });

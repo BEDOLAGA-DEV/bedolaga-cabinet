@@ -6,12 +6,29 @@ import { TONE_DOT, verdictTone } from './geoVerdicts';
 
 const KEY = 'admin.reachability.geo';
 
-function Verdict({ verdict }: { verdict: string }) {
+/** Тяжёлая проба: скорость и «заморозка» — подписью под вердиктом, своей колонки не заслуживает. */
+function Speed({ row }: { row: GeoRow }) {
+  const { t } = useTranslation();
+  if (!row.heavy) return null;
+  const speed = row.heavy.kbps === null ? '—' : t(`${KEY}.rows.kbps`, { value: row.heavy.kbps });
+  return <>{row.heavy.froze ? `${speed} · ${t(`${KEY}.rows.froze`)}` : speed}</>;
+}
+
+function Verdict({ row }: { row: GeoRow }) {
   const { t } = useTranslation();
   return (
-    <span className="inline-flex items-center gap-1.5 text-sm text-dark-100">
-      <span className={cn('inline-block h-2 w-2 rounded-full', TONE_DOT[verdictTone(verdict)])} />
-      {t(`${KEY}.verdicts.${verdict}`, { defaultValue: verdict })}
+    <span className="block">
+      <span className="inline-flex items-center gap-1.5 text-sm text-dark-100">
+        <span
+          className={cn('inline-block h-2 w-2 rounded-full', TONE_DOT[verdictTone(row.verdict)])}
+        />
+        {t(`${KEY}.verdicts.${row.verdict}`, { defaultValue: row.verdict })}
+      </span>
+      {row.heavy && (
+        <span className="block text-xs text-dark-400">
+          <Speed row={row} />
+        </span>
+      )}
     </span>
   );
 }
@@ -48,26 +65,18 @@ function Targets({ row }: { row: GeoRow }) {
   );
 }
 
-function Speed({ row }: { row: GeoRow }) {
-  const { t } = useTranslation();
-  if (!row.heavy) return <>—</>;
-  const speed = row.heavy.kbps === null ? '—' : t(`${KEY}.rows.kbps`, { value: row.heavy.kbps });
-  return <>{row.heavy.froze ? `${speed} · ${t(`${KEY}.rows.froze`)}` : speed}</>;
-}
-
 export interface GeoRowsProps {
   rows: readonly GeoRow[];
 }
 
 const rowKey = (row: GeoRow) => `${row.region}:${row.city}:${row.provider ?? ''}`;
 
-/** Города списком: город · регион · провайдер · вердикт · задержка · цели; на телефоне — карточки. */
+/** Города списком: город · регион · провайдер · вердикт (и скорость) · задержка · цели; на телефоне — карточки. */
 export function GeoRows({ rows }: GeoRowsProps) {
   const { t } = useTranslation();
   if (rows.length === 0) return <p className="text-sm text-dark-400">{t(`${KEY}.rows.empty`)}</p>;
   const latency = (row: GeoRow) =>
     row.latency_ms === null ? '—' : t(`${KEY}.rows.latency`, { value: row.latency_ms });
-  const withSpeed = rows.some((row) => row.heavy);
   return (
     <>
       <div className={cn(TABLE_STYLES.wrap, 'hidden md:block')}>
@@ -79,7 +88,6 @@ export function GeoRows({ rows }: GeoRowsProps) {
               <th className={TABLE_STYLES.th}>{t('admin.reachability.result.verdict')}</th>
               <th className={TABLE_STYLES.th}>{t('admin.reachability.result.latency')}</th>
               <th className={TABLE_STYLES.th}>{t('admin.reachability.result.targets')}</th>
-              {withSpeed && <th className={TABLE_STYLES.th}>{t(`${KEY}.rows.speed`)}</th>}
             </tr>
           </thead>
           <tbody>
@@ -93,17 +101,12 @@ export function GeoRows({ rows }: GeoRowsProps) {
                 </td>
                 <td className={cn(TABLE_STYLES.cell, TABLE_STYLES.value)}>{row.provider ?? '—'}</td>
                 <td className={TABLE_STYLES.cell}>
-                  <Verdict verdict={row.verdict} />
+                  <Verdict row={row} />
                 </td>
                 <td className={cn(TABLE_STYLES.cell, TABLE_STYLES.value)}>{latency(row)}</td>
                 <td className={cn(TABLE_STYLES.cell, 'text-left')}>
                   <Targets row={row} />
                 </td>
-                {withSpeed && (
-                  <td className={cn(TABLE_STYLES.cell, TABLE_STYLES.value)}>
-                    <Speed row={row} />
-                  </td>
-                )}
               </tr>
             ))}
           </tbody>
@@ -124,16 +127,11 @@ export function GeoRows({ rows }: GeoRowsProps) {
               <span className="shrink-0 text-xs tabular-nums text-dark-300">{latency(row)}</span>
             </div>
             <div className="mt-2">
-              <Verdict verdict={row.verdict} />
+              <Verdict row={row} />
             </div>
             <div className="mt-2">
               <Targets row={row} />
             </div>
-            {row.heavy && (
-              <div className="mt-2 text-xs text-dark-400">
-                <Speed row={row} />
-              </div>
-            )}
           </li>
         ))}
       </ul>

@@ -102,12 +102,20 @@ export interface GeoSelection {
 }
 
 /** GEO-РФ: цели трёх источников в одном теле, симок нет, «откуда» и метод — блоком `geo`. */
+/** Цели одного вида — того, что выбран в блоке «Цели»; остальные не уходят, даже если заполнены. */
+function geoTargets(selection: GeoSelection): TargetIn[] {
+  switch (selection.form.targetKind) {
+    case 'hosts':
+      return selection.hosts.map((ref) => ({ kind: 'host' as const, ref }));
+    case 'addresses':
+      return selection.custom.map((value) => ({ kind: 'custom' as const, value }));
+    default:
+      return selection.config ? [selection.config] : [];
+  }
+}
+
 export function buildGeoBody(selection: GeoSelection): JobCreateRequest | null {
-  const targets: TargetIn[] = [
-    ...selection.hosts.map((ref) => ({ kind: 'host' as const, ref })),
-    ...selection.custom.map((value) => ({ kind: 'custom' as const, value })),
-    ...(selection.config ? [selection.config] : []),
-  ];
+  const targets = geoTargets(selection);
   if (targets.length === 0) return null;
   return {
     kind: 'geo',

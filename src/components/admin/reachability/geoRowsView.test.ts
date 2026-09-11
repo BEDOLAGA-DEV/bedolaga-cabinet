@@ -88,14 +88,13 @@ describe('geoRowsView', () => {
     expect(geoSummaryOf({ ...job, result: null })).toBeNull();
     expect(geoRowsOf({ ...job, result: { rows: 'нет' } })).toEqual([]);
   });
-  it('сортировка: хуже — выше, потом по округу и региону; фильтр по вердикту, региону на карте, поиску', () => {
+  it('сортировка: хуже — выше, потом по округу и региону; фильтр по вердикту и поиску', () => {
     const sorted = sortGeoRows(geoRowsOf(job));
     expect(sorted.map((item) => item.city)).toEqual(['voronezh', 'moscow', 'omsk']);
     const pick = (filter: Parameters<typeof filterGeoRows>[1]) =>
       filterGeoRows(sorted, filter).map((item) => item.city);
-    expect(pick({ verdict: 'blocked', regionCode: null, query: '' })).toEqual(['voronezh']);
-    expect(pick({ verdict: null, regionCode: 'MOW', query: '' })).toEqual(['moscow']);
-    expect(pick({ verdict: null, regionCode: null, query: 'ом' })).toEqual(['omsk']);
-    expect(pick({ verdict: null, regionCode: null, query: 'Воронеж' })).toEqual(['voronezh']);
+    expect(pick({ verdict: 'blocked', query: '' })).toEqual(['voronezh']);
+    expect(pick({ verdict: null, query: 'ом' })).toEqual(['omsk']);
+    expect(pick({ verdict: null, query: 'Воронеж' })).toEqual(['voronezh']);
   });
 });
