@@ -3960,7 +3960,8 @@
       "kinds": {
         "probe": "探测",
         "vless": "VLESS 测试",
-        "scan": "扫描 /24"
+        "scan": "扫描 /24",
+        "geo": "城市 GEO"
       },
       "status": {
         "openSettings": "打开设置",
@@ -4044,7 +4045,8 @@
         "units": "SIM 卡",
         "waitingUnit": "等待中…",
         "answered": "{{total}} 张 SIM 卡中 {{answered}} 张已响应",
-        "canLeave": "可以关闭页面：结果会出现在“我的检测”中。"
+        "canLeave": "可以关闭页面：结果会出现在“我的检测”中。",
+        "hintGeo": "网站：每个城市半秒，隧道：两到三秒；城市并行检查。页面会自动更新。"
       },
       "verdict": {
         "reachable": "可达",
@@ -4258,7 +4260,9 @@
         "vless": "VPN 测试",
         "vlessHint": "通过 VLESS 隧道检查订阅配置，每次最多 20 个",
         "history": "历史",
-        "historyHint": "全部检查：检查了什么、结果如何、扣了多少"
+        "historyHint": "全部检查：检查了什么、结果如何、扣了多少",
+        "geo": "GEO",
+        "geoHint": "从俄罗斯城市以家庭和移动运营商的视角检查，每次最多 20 个目标和一个配置"
       },
       "sections": {
         "targets": "目标",
