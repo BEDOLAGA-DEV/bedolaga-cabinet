@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { type Job, reachabilityApi } from '@/api/reachability';
 import { Card } from '@/components/data-display';
 import { Button } from '@/components/primitives';
+import { GeoResult } from './GeoResult';
 import { getApiErrorMessage } from '@/utils/api-error';
 import { JobResult } from './JobResult';
 import { ProgressUnits } from './ProgressUnits';
@@ -86,7 +87,7 @@ export function JobProgress({ jobId, onReset }: JobProgressProps) {
             {t('admin.reachability.progress.canLeave')}
           </p>
           <div className="mt-3">
-            <ProgressUnits job={job} />
+            {job.kind === 'geo' ? <GeoResult job={job} /> : <ProgressUnits job={job} />}
           </div>
           {canCancel && (
             <div className="mt-3 flex gap-2">

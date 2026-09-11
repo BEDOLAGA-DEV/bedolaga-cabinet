@@ -4029,7 +4029,11 @@
         "summaryServers_other": "{{count}} سرور",
         "busyBatch": "بررسی سرورها در حال انجام است — منتظر بمانید",
         "timeRow": "زمان",
-        "confirmServers": "سرورها ({{count}}): {{list}}"
+        "confirmServers": "سرورها ({{count}}): {{list}}",
+        "runGeo_one": "بررسی {{count}} شهر · {{price}}",
+        "runGeo_other": "بررسی {{count}} شهر · {{price}}",
+        "runShortGeo_one": "بررسی {{count}} شهر",
+        "runShortGeo_other": "بررسی {{count}} شهر"
       },
       "progress": {
         "submitting": "در حال ارسال درخواست…",
@@ -4477,6 +4481,12 @@
           "latency": "{{value}} میلی‌ثانیه",
           "kbps": "{{value}} کیلوبیت/ثانیه",
           "froze": "توقف"
+        },
+        "launch": {
+          "citiesRow": "شهرها",
+          "maxNodes": "سقف این حالت {{count}}",
+          "applyLimit": "سقف را روی {{count}} بگذارید",
+          "confirmCities": "شهرها: {{count}}"
         }
       }
     },

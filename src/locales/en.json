@@ -2129,7 +2129,11 @@
         "summaryServers_other": "{{count}} servers",
         "busyBatch": "A server check is already running — wait for it",
         "timeRow": "Time",
-        "confirmServers": "Servers ({{count}}): {{list}}"
+        "confirmServers": "Servers ({{count}}): {{list}}",
+        "runGeo_one": "Check {{count}} city · {{price}}",
+        "runGeo_other": "Check {{count}} cities · {{price}}",
+        "runShortGeo_one": "Check {{count}} city",
+        "runShortGeo_other": "Check {{count}} cities"
       },
       "progress": {
         "submitting": "Sending request…",
@@ -2577,6 +2581,12 @@
           "latency": "{{value}} ms",
           "kbps": "{{value}} kbps",
           "froze": "freeze"
+        },
+        "launch": {
+          "citiesRow": "Cities",
+          "maxNodes": "mode cap {{count}}",
+          "applyLimit": "Set the cap to {{count}}",
+          "confirmCities": "Cities: {{count}}"
         }
       }
     },

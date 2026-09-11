@@ -1,6 +1,7 @@
 import {
   type Batch,
   type BatchCreateRequest,
+  type GeoPreview,
   type Job,
   type JobCreateRequest,
   type JobKind,
@@ -20,6 +21,8 @@ export interface LaunchPreview {
   estimate_is_exact: boolean;
   skipped: Skipped | null;
   estimated_minutes: number | null;
+  /** Только у GEO: города, резерв, прогноз времени, потолок городов режима. */
+  geo?: GeoPreview | null;
 }
 
 export interface Started {
@@ -63,6 +66,7 @@ export const jobAdapter: LaunchAdapter<JobCreateRequest, Job> = {
       estimate_is_exact: preview.estimate_is_exact,
       skipped: preview.skipped,
       estimated_minutes: null,
+      geo: preview.geo ?? null,
     };
   },
   create: (body) => reachabilityApi.createJob(body),
@@ -101,6 +105,7 @@ export const batchAdapter: LaunchAdapter<BatchCreateRequest, Batch> = {
       estimate_is_exact: true,
       skipped: null,
       estimated_minutes: preview.estimated_minutes,
+      geo: null,
     };
   },
   create: (body) => reachabilityApi.createBatch(body),

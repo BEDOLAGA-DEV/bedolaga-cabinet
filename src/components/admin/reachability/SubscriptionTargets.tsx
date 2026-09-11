@@ -34,6 +34,8 @@ export interface SubscriptionTargetsProps {
   onToggle: (index: number) => void;
   onSelectMany: (indexes: number[]) => void;
   onClear: () => void;
+  /** Внутри чужого блока целей (GEO): свой маленький заголовок вместо заголовка секции. */
+  embedded?: { title: string; hint?: string };
 }
 
 /** Вкладка «VPN-тест»: подписка по умолчанию из настроек первой строкой, её серверы, ниже — свой конфиг или другая подписка. */
@@ -47,13 +49,24 @@ export function SubscriptionTargets(props: SubscriptionTargetsProps) {
   const showList = pastedMode ? Boolean(props.parsed.data) : Boolean(props.subscription.data);
 
   return (
-    <section aria-labelledby="reachability-targets" className="space-y-4">
-      <SectionHeading
-        id="reachability-targets"
-        title={t('admin.reachability.sections.targets')}
-        hint={t('admin.reachability.switch.vlessHint')}
-        aside={t('admin.reachability.targets.count', { count: props.selected.length })}
-      />
+    <section
+      aria-labelledby={props.embedded ? undefined : 'reachability-targets'}
+      aria-label={props.embedded?.title}
+      className="space-y-4"
+    >
+      {props.embedded ? (
+        <div>
+          <h3 className="text-sm font-medium text-dark-200">{props.embedded.title}</h3>
+          {props.embedded.hint && <p className="text-xs text-dark-400">{props.embedded.hint}</p>}
+        </div>
+      ) : (
+        <SectionHeading
+          id="reachability-targets"
+          title={t('admin.reachability.sections.targets')}
+          hint={t('admin.reachability.switch.vlessHint')}
+          aside={t('admin.reachability.targets.count', { count: props.selected.length })}
+        />
+      )}
       {!pastedMode && (
         <SubscriptionSourcePicker
           userId={props.userId}
