@@ -52,4 +52,53 @@ describe('SubscriptionInput', () => {
     expect(screen.getByText('ссылки · 1')).toBeTruthy();
     expect(screen.getByText('Пропущено: 1').getAttribute('title')).toContain('заглушка');
   });
+
+  it('причина, по которой подписка не загрузилась, видна словами, а не только по наведению', () => {
+    render(
+      <SubscriptionInput
+        value="https://dead.example/abc"
+        onChange={vi.fn()}
+        parsed={query({
+          data: {
+            configs: [],
+            rejected: [
+              {
+                reason: 'subscription_failed',
+                preview: 'dead.example/abc',
+                detail: 'Подписка истекла 01.09.2024',
+              },
+            ],
+            sources: [{ kind: 'subscription', label: 'https://dead.example/abc', count: 0 }],
+          },
+        })}
+      />,
+    );
+    const alert = screen.getByRole('alert');
+    expect(alert.textContent).toContain('Подписка не загружена');
+    expect(alert.textContent).toContain('Подписка истекла 01.09.2024');
+  });
+
+  it('подписка загрузилась, но панель предупреждает — предупреждение видно', () => {
+    render(
+      <SubscriptionInput
+        value="https://sub.example/x"
+        onChange={vi.fn()}
+        parsed={query({
+          data: {
+            configs: [],
+            rejected: [],
+            sources: [
+              {
+                kind: 'subscription',
+                label: 'https://sub.example/x',
+                count: 9,
+                note: 'Трафик подписки исчерпан: 100 из 100 ГБ',
+              },
+            ],
+          },
+        })}
+      />,
+    );
+    expect(screen.getByText('Трафик подписки исчерпан: 100 из 100 ГБ')).toBeTruthy();
+  });
 });

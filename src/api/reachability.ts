@@ -98,12 +98,16 @@ export interface SubscriptionConfig {
 export interface RejectedConfig {
   reason: string;
   preview: string;
+  /** Причина словами («Подписка истекла 01.09.2024»), если бот её знает. */
+  detail?: string | null;
 }
 
 export interface SubscriptionConfigs {
   short_uuid: string;
   configs: SubscriptionConfig[];
   rejected: RejectedConfig[];
+  /** Панель на что-то жалуется: истекла, отключена, трафик исчерпан. */
+  note?: string | null;
 }
 
 /** Конфиг из поля «Конфиг или подписка» — с готовой целью для задачи. */
@@ -115,6 +119,7 @@ export interface ParsedSource {
   kind: 'links' | 'subscription';
   label: string;
   count: number;
+  note?: string | null;
 }
 
 export interface ParsedInput {
@@ -380,6 +385,7 @@ export interface UnitsParams {
 }
 
 const BASE = '/cabinet/admin/reachability';
+const PARSE_TIMEOUT_MS = 180_000;
 
 export const reachabilityApi = {
   getStatus: async (): Promise<ReachabilityStatus> => (await apiClient.get(`${BASE}/status`)).data,
@@ -407,8 +413,16 @@ export const reachabilityApi = {
       })
     ).data,
 
+  // Чужую подписку бот скачивает сам: у подписки на тысячи серверов это десятки мегабайт
+  // с чужого сервера — обычных 30 секунд на запрос не хватает.
   parseInput: async (rawInput: string): Promise<ParsedInput> =>
-    (await apiClient.post(`${BASE}/targets/parse`, { raw_input: rawInput })).data,
+    (
+      await apiClient.post(
+        `${BASE}/targets/parse`,
+        { raw_input: rawInput },
+        { timeout: PARSE_TIMEOUT_MS },
+      )
+    ).data,
 
   updatePref: async (body: PrefUpdate): Promise<Pref> =>
     (await apiClient.put(`${BASE}/targets/prefs`, body)).data,
