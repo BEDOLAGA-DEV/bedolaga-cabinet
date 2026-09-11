@@ -11,6 +11,23 @@ const base = {
 } as unknown as Job;
 
 describe('repeatFromJob', () => {
+  it('GEO: вкладка geo, хосты и адреса — как у проверки хостов', () => {
+    const job = {
+      ...base,
+      kind: 'geo',
+      targets: [
+        { kind: 'host', ref: { host_uuid: 'h-1' }, target_key: 'a:443' },
+        { kind: 'custom', ref: {}, target_key: 'example.com:443' },
+      ],
+    } as unknown as Job;
+    expect(repeatFromJob(job)).toMatchObject({
+      mode: 'geo',
+      hosts: ['h-1'],
+      addresses: 'example.com:443',
+    });
+    expect(canRepeat(job)).toBe(true);
+  });
+
   it('проверка хостов: ссылки на хосты и ноды, симки, пробы, SNI', () => {
     const job = {
       ...base,

@@ -2,6 +2,7 @@ import {
   PiArrowsInSimple,
   PiArrowsOutSimple,
   PiCode,
+  PiMapPin,
   PiMapTrifold,
   PiNetwork,
   PiSlidersHorizontal,
@@ -523,4 +524,9 @@ export const CellSignalIcon = ({ className }: IconProps) => (
 /** Раздел BSCHEKER: радар. */
 export const RadarIcon = ({ className }: IconProps) => (
   <LuRadar className={cn('h-5 w-5', className)} />
+);
+
+/** GEO-РФ — проверка из городов. */
+export const MapPinIcon = ({ className }: IconProps) => (
+  <PiMapPin className={cn('h-5 w-5', className)} />
 );

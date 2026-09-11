@@ -1,22 +1,23 @@
 import type { JobKind } from '@/api/reachability';
 
-/** Вкладка запуска — как в оригинале bsbord.com: хосты панели, IP / домен, CIDR, подписка. */
-export type LaunchMode = 'hosts' | 'ip' | 'cidr' | 'vless';
-/** Вкладки страницы: четыре запуска и история проверок. */
+/** Вкладка запуска — как в оригинале bsbord.com: хосты панели, IP / домен, CIDR, подписка, GEO из городов. */
+export type LaunchMode = 'hosts' | 'ip' | 'cidr' | 'vless' | 'geo';
+/** Вкладки страницы: пять запусков и история проверок. */
 export type PageTab = LaunchMode | 'history';
 
-export const MODE_KEYS: readonly LaunchMode[] = ['hosts', 'ip', 'cidr', 'vless'];
+export const MODE_KEYS: readonly LaunchMode[] = ['hosts', 'ip', 'cidr', 'vless', 'geo'];
 export const TAB_KEYS: readonly PageTab[] = [...MODE_KEYS, 'history'];
 
 /** Старые значения `?kind=` из сохранённых ссылок: проверка хостов и скан подсети. */
 const LEGACY_MODES: Record<string, LaunchMode> = { probe: 'hosts', scan: 'cidr' };
 
-/** Хосты и свои адреса — одна и та же probe-задача бота, CIDR — скан. */
+/** Хосты и свои адреса — одна и та же probe-задача бота, CIDR — скан, GEO — свой вид. */
 const JOB_KIND: Record<LaunchMode, JobKind> = {
   hosts: 'probe',
   ip: 'probe',
   cidr: 'scan',
   vless: 'vless',
+  geo: 'geo',
 };
 
 export function jobKindOf(mode: LaunchMode): JobKind {
