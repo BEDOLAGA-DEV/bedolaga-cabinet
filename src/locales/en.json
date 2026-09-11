@@ -2536,7 +2536,9 @@
           "cityTruncated": "Not all shown: {{total}} found, refine the name",
           "removeCity": "Remove city",
           "isps_one": "{{count}} ISP",
-          "isps_other": "{{count}} ISPs"
+          "isps_other": "{{count}} ISPs",
+          "sessionNote": "Repeat through the same exit {{ip}}",
+          "sessionDrop": "Pick a new exit"
         },
         "network": {
           "label": "Network",
@@ -2590,7 +2592,8 @@
           "notChecked": "not checked: {{reason}}",
           "latency": "{{value}} ms",
           "kbps": "{{value}} kbps",
-          "froze": "freeze"
+          "froze": "freeze",
+          "recheck": "Repeat"
         },
         "launch": {
           "citiesRow": "Cities",
@@ -2604,7 +2607,11 @@
           "noCities": "no cities in this check",
           "zoomIn": "Zoom in",
           "zoomOut": "Zoom out",
-          "reset": "Whole map"
+          "reset": "Whole map",
+          "recheck": "Again",
+          "sameExit": "Same IP",
+          "more": "{{count}} more",
+          "exitChanged": "exit changed"
         }
       }
     },

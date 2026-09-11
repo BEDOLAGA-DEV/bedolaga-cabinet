@@ -1,4 +1,4 @@
-import type { JobKind } from '@/api/reachability';
+import type { GeoCityRef, JobKind } from '@/api/reachability';
 
 /** Вкладка запуска — как в оригинале bsbord.com: хосты панели, IP / домен, CIDR, подписка, GEO из городов. */
 export type LaunchMode = 'hosts' | 'ip' | 'cidr' | 'vless' | 'geo';
@@ -44,6 +44,10 @@ export interface DeepLink {
   serverKey: string | null;
   /** Идущая пачка проверок серверов: её прогресс возвращается после перезагрузки. */
   batchId: number | null;
+  /** Перепроверка одного города из отчёта GEO (вместе с `repeat`): охват — только он. */
+  geoCity: GeoCityRef | null;
+  /** Повтор через тот же выход: sid строки и её exit_ip — сервис сверит, что выход не подменили. */
+  geoSession: { sid: string; exitIp: string } | null;
 }
 
 export const REACHABILITY_PATH = '/admin/reachability';
@@ -72,6 +76,15 @@ function parseTarget(raw: string): DeepLinkTarget | null {
 
 function parseId(raw: string | null): number | null {
   return raw && /^\d+$/.test(raw) ? Number(raw) : null;
+}
+
+/** `city=<регион>|<город>` (+ `isp=`): токены справочника, оба обязательны. */
+function parseGeoCity(raw: string | null, isp: string | null): GeoCityRef | null {
+  if (!raw) return null;
+  const separator = raw.indexOf('|');
+  if (separator <= 0 || separator === raw.length - 1) return null;
+  const city: GeoCityRef = { region: raw.slice(0, separator), city: raw.slice(separator + 1) };
+  return isp ? { ...city, isp } : city;
 }
 
 function defaultMode(input: Pick<DeepLink, 'targets' | 'userId' | 'shortUuid' | 'jobId'>): PageTab {
@@ -104,6 +117,10 @@ export function parseReachabilityDeepLink(params: URLSearchParams): DeepLink {
     runningJobId: parseId(params.get('running')),
     serverKey: params.get('server') || null,
     batchId: parseId(params.get('batch')),
+    geoCity: parseGeoCity(params.get('city'), params.get('isp')),
+    geoSession: params.get('session')
+      ? { sid: params.get('session') as string, exitIp: params.get('exit') ?? '' }
+      : null,
   };
 }
 
@@ -122,5 +139,13 @@ export function buildReachabilityLink(input: Partial<DeepLink>): string {
   if (input.runningJobId) params.set('running', String(input.runningJobId));
   if (input.serverKey) params.set('server', input.serverKey);
   if (input.batchId) params.set('batch', String(input.batchId));
+  if (input.geoCity) {
+    params.set('city', `${input.geoCity.region}|${input.geoCity.city}`);
+    if (input.geoCity.isp) params.set('isp', input.geoCity.isp);
+  }
+  if (input.geoSession) {
+    params.set('session', input.geoSession.sid);
+    if (input.geoSession.exitIp) params.set('exit', input.geoSession.exitIp);
+  }
   return `${REACHABILITY_PATH}?${params.toString()}`;
 }
