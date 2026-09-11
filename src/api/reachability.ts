@@ -188,6 +188,9 @@ export interface GeoOptions {
   city_limit: number;
   probe_mode: GeoProbeMode;
   heavy: boolean;
+  /** Повтор через тот же выход: sid строки прошлого прогона и ожидаемый exit_ip; только с одним городом. */
+  session?: string;
+  expect_exit_ip?: string;
 }
 
 /** Числа сервиса из расчёта: города, потолок трафика, резерв, прогноз времени, потолок городов режима. */

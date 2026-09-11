@@ -1,34 +1,26 @@
+import { Link } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { CloseIcon } from '@/components/icons';
 import { cn } from '@/lib/utils';
+import type { TooltipModel, TooltipRow } from './geoMapTooltipModel';
 import { TONE_DOT, verdictTone } from './geoVerdicts';
 
-export interface TooltipLine {
-  verdict: string;
-  /** Что справа от слова вердикта: провайдер и задержка у города, число у региона. */
-  detail?: string;
-}
-
-export interface GeoMapTooltipProps {
-  title: string;
-  subtitle?: string;
-  lines: TooltipLine[];
-  /** Пусто в списке — подпись «городов нет» вместо строк. */
-  emptyText?: string;
+export interface GeoMapTooltipProps extends TooltipModel {
   /** Положение в пикселях относительно контейнера карты и его размер — чтобы не вылезать за край. */
   x: number;
   y: number;
   width: number;
   height: number;
-  /** Закреплена касанием: ловит указатель и показывает крестик. */
+  /** Ожидаемая высота — для прижима к краю; считается по строкам моделью. */
+  estimatedHeight: number;
+  /** Закреплена касанием или кликом: ловит указатель, показывает крестик и кнопки повтора. */
   pinned: boolean;
   onClose: () => void;
 }
 
 const OFFSET = 14;
 const EDGE = 6;
-const MAX_WIDTH = 260;
-const ROW_HEIGHT = 22;
+const MAX_WIDTH = 300;
 
 const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(value, max));
 
@@ -38,10 +30,9 @@ const clamp = (value: number, min: number, max: number) => Math.max(min, Math.mi
  */
 export function tooltipPlacement(
   props: Pick<GeoMapTooltipProps, 'x' | 'y' | 'width' | 'height'>,
-  lines: number,
+  estimatedHeight: number,
 ): { left: number; top: number; maxWidth: number } {
   const maxWidth = Math.max(120, Math.min(MAX_WIDTH, props.width - EDGE * 2));
-  const estimatedHeight = 48 + ROW_HEIGHT * Math.max(1, lines);
   const fitsBelow = props.y + OFFSET + estimatedHeight <= props.height - EDGE;
   const top = fitsBelow ? props.y + OFFSET : props.y - OFFSET - estimatedHeight;
   return {
@@ -51,16 +42,80 @@ export function tooltipPlacement(
   };
 }
 
-/** Подсказка карты: город или регион словами; на телефоне закрепляется касанием и закрывается крестиком. */
+function Dot({ verdict, ok }: { verdict?: string; ok?: boolean }) {
+  const tone =
+    verdict !== undefined ? TONE_DOT[verdictTone(verdict)] : ok ? 'bg-success-400' : 'bg-error-400';
+  return <span className={cn('inline-block h-2 w-2 shrink-0 rounded-full', tone)} />;
+}
+
+function Row({ row, pinned }: { row: TooltipRow; pinned: boolean }) {
+  const { t } = useTranslation();
+  const KEY = 'admin.reachability.geo';
+  const verdict = t(`${KEY}.verdicts.${row.verdict}`, { defaultValue: row.verdict });
+  const latency =
+    row.latencyMs === null ? null : t(`${KEY}.rows.latency`, { value: row.latencyMs });
+  return (
+    <li className="space-y-0.5">
+      <div className="flex items-center gap-1.5">
+        <Dot verdict={row.verdict} />
+        <span className="min-w-0 truncate">
+          {row.name && <span className="font-medium text-dark-100">{row.name} </span>}
+          <span className={cn(row.name ? 'text-dark-300' : 'text-dark-200')}>
+            {[verdict, row.provider, latency].filter(Boolean).join(' · ')}
+          </span>
+        </span>
+      </div>
+      {row.exitIp && (
+        <div className="pl-3.5 font-mono text-[11px] text-dark-300">
+          {row.exitIp}
+          {row.exitChanged && (
+            <span className="ml-1.5 font-sans text-warning-400">{t(`${KEY}.map.exitChanged`)}</span>
+          )}
+        </div>
+      )}
+      {row.checks.length > 0 && (
+        <ul className="space-y-0.5 pl-3.5">
+          {row.checks.map((check) => (
+            <li key={check.name} className="flex items-center gap-1.5 text-dark-300">
+              <Dot ok={check.ok} />
+              <span className="min-w-0 flex-1 truncate">{check.name}</span>
+              <span className="shrink-0 tabular-nums text-dark-400">
+                {check.ms === null ? '—' : t(`${KEY}.rows.latency`, { value: check.ms })}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+      {pinned && row.actions.length > 0 && (
+        <div className="flex flex-wrap gap-1 pl-3.5 pt-0.5">
+          {row.actions.map((action) => (
+            <Link
+              key={action.to}
+              to={action.to}
+              className="rounded-md border border-dark-700/60 bg-dark-800/80 px-2 py-0.5 text-[11px] text-dark-100 hover:border-accent-500/40 hover:text-accent-400"
+            >
+              {action.label}
+            </Link>
+          ))}
+        </div>
+      )}
+    </li>
+  );
+}
+
+/**
+ * Подсказка карты как у оригинала: город или регион, по строке на наблюдение — вердикт, провайдер,
+ * задержка, выход, подпроверки; закреплённая — с крестиком и кнопками «ещё раз» / «тот же IP».
+ */
 export function GeoMapTooltip(props: GeoMapTooltipProps) {
   const { t } = useTranslation();
-  const style = tooltipPlacement(props, props.lines.length);
+  const style = tooltipPlacement(props, props.estimatedHeight);
   return (
     <div
       role="tooltip"
       style={style}
       className={cn(
-        'absolute z-10 rounded-xl border border-dark-700/60 bg-dark-900/95 p-2.5 text-xs shadow-lg backdrop-blur',
+        'absolute z-10 w-max rounded-xl border border-dark-700/60 bg-dark-900/95 p-2.5 text-xs shadow-lg backdrop-blur',
         props.pinned ? 'pointer-events-auto' : 'pointer-events-none',
       )}
     >
@@ -80,30 +135,19 @@ export function GeoMapTooltip(props: GeoMapTooltipProps) {
           </button>
         )}
       </div>
-      {props.lines.length === 0 ? (
+      {props.rows.length === 0 ? (
         <div className="mt-1 text-dark-400">{props.emptyText}</div>
       ) : (
-        <ul className="mt-1.5 space-y-1">
-          {props.lines.map((line, index) => (
-            <li
-              key={`${line.verdict}:${line.detail ?? index}`}
-              className="flex items-center gap-1.5 text-dark-200"
-            >
-              <span
-                className={cn(
-                  'inline-block h-2 w-2 shrink-0 rounded-full',
-                  TONE_DOT[verdictTone(line.verdict)],
-                )}
-              />
-              <span className="truncate">
-                {t(`admin.reachability.geo.verdicts.${line.verdict}`, {
-                  defaultValue: line.verdict,
-                })}
-                {line.detail ? ` · ${line.detail}` : ''}
-              </span>
-            </li>
+        <ul className="mt-1.5 space-y-1.5">
+          {props.rows.map((row) => (
+            <Row key={row.key} row={row} pinned={props.pinned} />
           ))}
         </ul>
+      )}
+      {props.moreCount > 0 && (
+        <div className="mt-1 text-dark-400">
+          {t('admin.reachability.geo.map.more', { count: props.moreCount })}
+        </div>
       )}
     </div>
   );

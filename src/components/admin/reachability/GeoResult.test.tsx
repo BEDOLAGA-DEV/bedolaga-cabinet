@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { MemoryRouter } from 'react-router';
 import type { Job } from '@/api/reachability';
 
 vi.mock('react-i18next', async () => (await import('./testUtils')).i18nMock());
@@ -51,7 +52,11 @@ const job = {
 
 describe('GeoResult', () => {
   it('фраза-вывод, чипы вердиктов со счётом; чип фильтрует города, повторный клик снимает', () => {
-    render(<GeoResult job={job} />);
+    render(
+      <MemoryRouter>
+        <GeoResult job={job} />
+      </MemoryRouter>,
+    );
     expect(screen.getByText('Смешанная картина')).toBeTruthy();
     expect(screen.getByText('не результат: 1')).toBeTruthy();
     const blocked = screen.getByRole('button', { name: /блокируется.*· 1/ });
@@ -62,7 +67,11 @@ describe('GeoResult', () => {
     expect(screen.getAllByText('Москва').length).toBeGreaterThan(0);
   });
   it('поиск по городу или региону сужает список', () => {
-    render(<GeoResult job={job} />);
+    render(
+      <MemoryRouter>
+        <GeoResult job={job} />
+      </MemoryRouter>,
+    );
     fireEvent.change(screen.getByLabelText('Найти город или регион…'), {
       target: { value: 'омск' },
     });
@@ -70,7 +79,11 @@ describe('GeoResult', () => {
     expect(screen.queryAllByText('Воронеж')).toHaveLength(0);
   });
   it('без результата — подпись', () => {
-    render(<GeoResult job={{ ...job, result: null }} />);
+    render(
+      <MemoryRouter>
+        <GeoResult job={{ ...job, result: null }} />
+      </MemoryRouter>,
+    );
     expect(screen.getByText('Результат пуст')).toBeTruthy();
   });
 });

@@ -1,7 +1,10 @@
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router';
+import type { Job } from '@/api/reachability';
 import { cn } from '@/lib/utils';
 import { TABLE_STYLES } from './ResultTable';
 import type { GeoRow } from './geoRowsView';
+import { canRecheck, recheckLink } from './recheckLinks';
 import { TONE_DOT, verdictTone } from './geoVerdicts';
 
 const KEY = 'admin.reachability.geo';
@@ -67,13 +70,38 @@ function Targets({ row }: { row: GeoRow }) {
 
 export interface GeoRowsProps {
   rows: readonly GeoRow[];
+  /** Задача отчёта — для «ещё раз» / «тот же IP» у каждой строки; идущая задача кнопок не получает. */
+  job?: Job | null;
+}
+
+/** Повтор города: «ещё раз» (новый выход) и «тот же IP» (пока сервис держит выход). */
+function Recheck({ job, row }: { job: Job; row: GeoRow }) {
+  const { t } = useTranslation();
+  const links = [
+    { label: t(`${KEY}.map.recheck`), to: recheckLink(job, row) },
+    { label: t(`${KEY}.map.sameExit`), to: recheckLink(job, row, true) },
+  ].filter((link): link is { label: string; to: string } => link.to !== null);
+  return (
+    <span className="flex flex-wrap gap-1">
+      {links.map((link) => (
+        <Link
+          key={link.to}
+          to={link.to}
+          className="whitespace-nowrap rounded-md border border-dark-700/60 px-2 py-0.5 text-[11px] text-dark-200 hover:border-accent-500/40 hover:text-accent-400"
+        >
+          {link.label}
+        </Link>
+      ))}
+    </span>
+  );
 }
 
 const rowKey = (row: GeoRow) => `${row.region}:${row.city}:${row.provider ?? ''}`;
 
 /** Города списком: город · регион · провайдер · вердикт (и скорость) · задержка · цели; на телефоне — карточки. */
-export function GeoRows({ rows }: GeoRowsProps) {
+export function GeoRows({ rows, job = null }: GeoRowsProps) {
   const { t } = useTranslation();
+  const recheck = job !== null && canRecheck(job) ? job : null;
   if (rows.length === 0) return <p className="text-sm text-dark-400">{t(`${KEY}.rows.empty`)}</p>;
   const latency = (row: GeoRow) =>
     row.latency_ms === null ? '—' : t(`${KEY}.rows.latency`, { value: row.latency_ms });
@@ -88,6 +116,7 @@ export function GeoRows({ rows }: GeoRowsProps) {
               <th className={TABLE_STYLES.th}>{t('admin.reachability.result.verdict')}</th>
               <th className={TABLE_STYLES.th}>{t('admin.reachability.result.latency')}</th>
               <th className={TABLE_STYLES.th}>{t('admin.reachability.result.targets')}</th>
+              {recheck && <th className={TABLE_STYLES.th}>{t(`${KEY}.rows.recheck`)}</th>}
             </tr>
           </thead>
           <tbody>
@@ -107,6 +136,11 @@ export function GeoRows({ rows }: GeoRowsProps) {
                 <td className={cn(TABLE_STYLES.cell, 'text-left')}>
                   <Targets row={row} />
                 </td>
+                {recheck && (
+                  <td className={cn(TABLE_STYLES.cell, 'text-left')}>
+                    <Recheck job={recheck} row={row} />
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>
@@ -132,6 +166,11 @@ export function GeoRows({ rows }: GeoRowsProps) {
             <div className="mt-2">
               <Targets row={row} />
             </div>
+            {recheck && (
+              <div className="mt-2">
+                <Recheck job={recheck} row={row} />
+              </div>
+            )}
           </li>
         ))}
       </ul>

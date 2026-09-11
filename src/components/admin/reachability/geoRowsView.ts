@@ -32,6 +32,10 @@ export interface GeoRow {
   err: string | null;
   flaky: boolean;
   retries: number | null;
+  /** Повтор через тот же выход: sid строки и остаток удержания; «выход сменился» — пометка повтора. */
+  sid?: string | null;
+  sid_hold_s?: number | null;
+  exit_changed?: boolean;
 }
 
 export interface GeoSummary {

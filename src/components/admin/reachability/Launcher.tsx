@@ -2,6 +2,8 @@ import { useQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
+  type GeoCityRef,
+  type Job,
   type Probes,
   type ReachabilityStatus,
   type TargetIn,
@@ -22,11 +24,13 @@ import { autoUnitsFor } from './autoUnits';
 import { type DeepLink, jobKindOf } from './deepLink';
 import {
   DEFAULT_GEO_FORM,
+  type GeoCityPick,
   type GeoFormState,
   type GeoTargetKind,
   recallGeoForm,
   rememberGeoForm,
 } from './geoForm';
+import { geoRowsOf } from './geoRowsView';
 import { buildGeoBody, buildProbeBody, buildScanBody, buildVlessBody } from './jobBodies';
 import { jobAdapterFor } from './launchAdapters';
 import { type RepeatState, repeatFromJob } from './repeatFromJob';
@@ -59,6 +63,13 @@ const SCAN_DEFAULT: Probes = { icmp: true, tcp: true, sni: false };
  * Одиночные проверки как на bsbord.com: цели вкладки, пробы под ними, операторы по округам,
  * «Запуск» справа (на телефоне — панель снизу). Хосты панели живут на своей вкладке.
  */
+/** Город для перепроверки из отчёта: подпись по-русски берётся из строк той же задачи. */
+function geoCityPick(job: Job, ref: GeoCityRef): GeoCityPick {
+  const row = geoRowsOf(job).find((item) => item.region === ref.region && item.city === ref.city);
+  const label = row ? `${row.city_ru || row.city} · ${row.region_ru || row.region}` : ref.city;
+  return { ...ref, label };
+}
+
 /** Вид целей GEO по прошлой задаче: что в ней было, то и выбираем. */
 function geoTargetKindOf(repeat: RepeatState): GeoTargetKind {
   if (repeat.hosts.length > 0) return 'hosts';
@@ -142,13 +153,27 @@ export function Launcher({ status, link, runningJobId, onRunning }: LauncherProp
     if (repeatState.mode === 'geo') {
       setGeoHosts(repeatState.hosts);
       setGeoAddresses(repeatState.addresses);
-      setGeoForm((form) => ({ ...form, targetKind: geoTargetKindOf(repeatState) }));
+      const city = link.geoCity ? geoCityPick(repeat.data, link.geoCity) : null;
+      setGeoForm((form) => ({
+        ...form,
+        targetKind: geoTargetKindOf(repeatState),
+        ...(city
+          ? {
+              scopeKind: 'cities' as const,
+              cities: [city],
+              isp: null,
+              cityLimit: 0,
+              session: link.geoSession?.sid ?? null,
+              expectExitIp: link.geoSession?.exitIp ?? null,
+            }
+          : {}),
+      }));
     }
     if (repeatState.shortUuid) {
       setSource({ userId: null, shortUuid: repeatState.shortUuid });
       setConfigIndexes(repeatState.configIndexes);
     }
-  }, [repeat.data, repeatState]);
+  }, [repeat.data, repeatState, link.geoCity, link.geoSession]);
 
   const hasReference = Boolean(status?.reference?.short_uuid);
   const pastedMode = pasted.trim().length > 0;

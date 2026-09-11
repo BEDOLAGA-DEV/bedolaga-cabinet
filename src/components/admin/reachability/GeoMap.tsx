@@ -12,7 +12,9 @@ import {
   zoomView,
 } from './geoMapView';
 import { cn } from '@/lib/utils';
-import { GeoMapTooltip, type TooltipLine } from './GeoMapTooltip';
+import type { Job } from '@/api/reachability';
+import { GeoMapTooltip } from './GeoMapTooltip';
+import { cityTooltip, regionTooltip, tooltipHeight } from './geoMapTooltipModel';
 import { type GeoMapData, MAP_ASPECT, type RussiaMap, useGeoMapData } from './geoMapData';
 import {
   type CityMarker,
@@ -28,6 +30,8 @@ export interface GeoMapProps {
   rows: readonly GeoMapRow[];
   /** Активный чип-фильтр: точки других вердиктов приглушены, регионы остаются как есть. */
   highlightVerdict?: string | null;
+  /** Задача отчёта — для кнопок «ещё раз» / «тот же IP» в закреплённой подсказке. */
+  job?: Job | null;
 }
 
 /**
@@ -51,6 +55,7 @@ const MAP_STYLES = cn(
   '[&_[data-city][data-tone=na]]:stroke-dark-400 [&_[data-city][data-tone=violet]]:stroke-violet-400',
   '[&_[data-city][data-tone=blue]]:stroke-sky-400',
   '[&_[data-dim=true]]:opacity-25',
+  '[&_[data-outline]]:fill-none [&_[data-outline]]:stroke-accent-400 [&_[data-outline]]:[stroke-width:2px] [&_[data-outline]]:[vector-effect:non-scaling-stroke] [&_[data-outline]]:pointer-events-none',
 );
 
 interface Focus {
@@ -64,6 +69,8 @@ interface MapSvgProps {
   regions: Map<string, RegionSummary>;
   highlightVerdict: string | null;
   viewBox: string;
+  /** Регион под курсором или закреплённый — обводится поверх соседей. */
+  outline: string | null;
 }
 
 /** Сам SVG без обработчиков — мемоизирован, чтобы движение курсора не перерисовывало тысячу точек. */
@@ -73,9 +80,11 @@ const MapSvg = memo(function MapSvg({
   regions,
   highlightVerdict,
   viewBox,
+  outline,
 }: MapSvgProps) {
   const dim = (marker: CityMarker) =>
     highlightVerdict !== null && !marker.rows.some((row) => row.verdict === highlightVerdict);
+  const outlined = outline ? map.regions.find((region) => region.iso === outline) : undefined;
   return (
     <svg
       viewBox={viewBox}
@@ -94,6 +103,7 @@ const MapSvg = memo(function MapSvg({
           />
         ))}
       </g>
+      {outlined && <path d={outlined.d} data-outline="" />}
       <g>
         {markers.map((marker) => (
           <path
@@ -144,7 +154,10 @@ const TAP_MS = 300;
 const TAP_PX = 30;
 const MOVE_PX = 4;
 
-function GeoMapBody({ rows, highlightVerdict = null, data }: GeoMapBodyProps) {
+const insideTooltip = (target: EventTarget | null): boolean =>
+  Boolean((target as Element | null)?.closest?.('[role="tooltip"]'));
+
+function GeoMapBody({ rows, highlightVerdict = null, job = null, data }: GeoMapBodyProps) {
   const { t } = useTranslation();
   const host = useRef<HTMLDivElement>(null);
   const [hover, setHover] = useState<Focus | null>(null);
@@ -180,6 +193,7 @@ function GeoMapBody({ rows, highlightVerdict = null, data }: GeoMapBodyProps) {
   const zoomCenter = (factor: number) => changeView(zoomView(view, W, H, factor));
 
   const onPointerDown = (event: PointerEvent<HTMLDivElement>) => {
+    if (insideTooltip(event.target)) return;
     if (event.pointerType === 'mouse' && !zoomed) return;
     const p = local(event);
     pointers.current.set(event.pointerId ?? 0, { x: p.x, y: p.y });
@@ -196,6 +210,7 @@ function GeoMapBody({ rows, highlightVerdict = null, data }: GeoMapBodyProps) {
     }
   };
   const onPointerUp = (event: PointerEvent<HTMLDivElement>) => {
+    if (insideTooltip(event.target)) return;
     pointers.current.delete(event.pointerId ?? 0);
     const active = gesture.current;
     if (active?.moved) skipClick.current = true;
@@ -284,7 +299,20 @@ function GeoMapBody({ rows, highlightVerdict = null, data }: GeoMapBodyProps) {
   };
 
   const focus = pinned ?? hover;
-  const tooltip = focus ? describe(focus, byKey, regions, regionNames, t) : null;
+  const tooltip = focus
+    ? focus.kind === 'city'
+      ? byKey.has(focus.key)
+        ? cityTooltip(byKey.get(focus.key) as CityMarker, job, t)
+        : null
+      : regionTooltip(
+          focus.key,
+          regionNames.get(focus.key) ?? focus.key,
+          regions.get(focus.key),
+          markers,
+          job,
+          t,
+        )
+    : null;
   const zoomButton = (
     label: string,
     onPress: () => void,
@@ -325,6 +353,7 @@ function GeoMapBody({ rows, highlightVerdict = null, data }: GeoMapBodyProps) {
         regions={regions}
         highlightVerdict={highlightVerdict}
         viewBox={viewBoxOf(view)}
+        outline={focus?.kind === 'region' ? focus.key : null}
       />
       {/* Зум только на телефоне: на широком экране карта и так вся перед глазами, владелец зум не хочет. */}
       <div className="absolute right-2 top-2 flex flex-col gap-1 md:hidden">
@@ -354,56 +383,13 @@ function GeoMapBody({ rows, highlightVerdict = null, data }: GeoMapBodyProps) {
           y={point.y}
           width={size.width}
           height={size.height}
+          estimatedHeight={tooltipHeight(tooltip, pinned !== null)}
           pinned={pinned !== null}
           onClose={() => setPinned(null)}
         />
       )}
     </div>
   );
-}
-
-type Translate = (key: string, options?: Record<string, unknown>) => string;
-
-function describe(
-  focus: Focus,
-  markers: Map<string, CityMarker>,
-  regions: Map<string, RegionSummary>,
-  regionNames: Map<string, string>,
-  t: Translate,
-): { title: string; subtitle?: string; lines: TooltipLine[]; emptyText?: string } | null {
-  if (focus.kind === 'city') {
-    const marker = markers.get(focus.key);
-    if (!marker) return null;
-    return {
-      title: marker.name,
-      subtitle: marker.regionName,
-      lines: marker.rows.map((row) => ({
-        verdict: row.verdict,
-        detail: [
-          row.provider,
-          row.latency_ms === null
-            ? null
-            : t('admin.reachability.geo.rows.latency', { value: row.latency_ms }),
-        ]
-          .filter(Boolean)
-          .join(' · '),
-      })),
-    };
-  }
-  const summary = regions.get(focus.key);
-  return {
-    title: regionNames.get(focus.key) ?? focus.key,
-    subtitle: summary
-      ? t('admin.reachability.geo.result.cities', { count: summary.cities })
-      : undefined,
-    lines: summary
-      ? Object.entries(summary.counts).map(([verdict, count]) => ({
-          verdict,
-          detail: String(count),
-        }))
-      : [],
-    emptyText: t('admin.reachability.geo.map.noCities'),
-  };
 }
 
 /**

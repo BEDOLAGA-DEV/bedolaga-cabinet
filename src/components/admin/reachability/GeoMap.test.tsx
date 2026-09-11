@@ -71,8 +71,9 @@ describe('GeoMap', () => {
     });
     const tip = screen.getByRole('tooltip').textContent ?? '';
     expect(tip).toContain('Воронежская область');
-    expect(tip).toContain('2 города');
-    expect(tip).toContain('блокируется (подтверждено) · 1');
+    expect(tip).toContain('2 города · 1 работает · 1 блокируется (подтверждено)');
+    expect(tip).toContain('Лиски');
+    expect(tip).toContain('Воронеж работает · Ростелеком · 120 мс');
     fireEvent.pointerMove(container.querySelector('[data-region="TA"]') as Element, {
       pointerType: 'mouse',
     });
