@@ -1,6 +1,6 @@
 import type { Job } from '@/api/reachability';
 import type { CityMarker, GeoMapRow, RegionSummary } from './geoMapModel';
-import { type RecheckState, recheckButtons, recheckState } from './geoRecheck';
+import { type RecheckState, recheckState } from './geoRecheck';
 import type { GeoRow } from './geoRowsView';
 import type { GeoRecheck } from './useGeoRecheck';
 
@@ -11,16 +11,12 @@ export interface TooltipCheck {
   ms: number | null;
 }
 
-export interface TooltipAction {
-  label: string;
-  title: string;
-  onPress: () => void;
-}
-
-/** Повтор для строки подсказки: состояние как у оригинала и кнопки, если они положены. */
+/** Повтор для строки подсказки: состояние как у оригинала; кнопки рисует RecheckButtons. */
 export interface TooltipRecheck {
   state: RecheckState;
-  actions: TooltipAction[];
+  job: Pick<Job, 'finished_at'>;
+  row: Pick<GeoRow, 'sid' | 'sid_hold_s' | 'exit_ip'>;
+  onStart: (sameExit: boolean) => void;
 }
 
 export interface RecheckContext {
@@ -64,29 +60,21 @@ function checksOf(row: GeoMapRow): TooltipCheck[] {
   return (row.targets ?? []).map((target) => ({ name: target.key, ok: target.ok, ms: target.ms }));
 }
 
-function recheckOf(
-  row: GeoMapRow,
-  context: RecheckContext | null,
-  t: Translate,
-): TooltipRecheck | null {
+function recheckOf(row: GeoMapRow, context: RecheckContext | null): TooltipRecheck | null {
   if (!context) return null;
   const state = recheckState(context.job, row, context.recheck.busy);
   if (state === 'none') return null;
-  const actions =
-    state === 'buttons'
-      ? recheckButtons(context.job, row, t).map((button) => ({
-          label: button.label,
-          title: button.title,
-          onPress: () => context.recheck.start(row as GeoRow, button.sameExit),
-        }))
-      : [];
-  return { state, actions };
+  return {
+    state,
+    job: context.job,
+    row,
+    onStart: (sameExit) => context.recheck.start(row as GeoRow, sameExit),
+  };
 }
 
 export function tooltipRow(
   row: GeoMapRow,
   context: RecheckContext | null,
-  t: Translate,
   name?: string,
 ): TooltipRow {
   return {
@@ -99,20 +87,16 @@ export function tooltipRow(
     exitChanged: Boolean(row.exit_changed),
     newExit: Boolean(row.new_exit),
     checks: checksOf(row),
-    recheck: recheckOf(row, context, t),
+    recheck: recheckOf(row, context),
   };
 }
 
 /** Подсказка города: регион подписью, по строке на провайдера с выходом и подпроверками. */
-export function cityTooltip(
-  marker: CityMarker,
-  context: RecheckContext | null,
-  t: Translate,
-): TooltipModel {
+export function cityTooltip(marker: CityMarker, context: RecheckContext | null): TooltipModel {
   return {
     title: marker.name,
     subtitle: marker.regionName,
-    rows: marker.rows.map((row) => tooltipRow(row, context, t)),
+    rows: marker.rows.map((row) => tooltipRow(row, context)),
     moreCount: 0,
   };
 }
@@ -141,7 +125,7 @@ export function regionTooltip(
 ): TooltipModel {
   const inRegion = markers.filter((marker) => marker.regionCode === code);
   const rows = inRegion.flatMap((marker) =>
-    marker.rows.map((row) => tooltipRow(row, context, t, marker.name)),
+    marker.rows.map((row) => tooltipRow(row, context, marker.name)),
   );
   const shown = rows.slice(0, MAX_TOOLTIP_ROWS);
   const hiddenCities = new Set(rows.slice(MAX_TOOLTIP_ROWS).map((row) => row.name)).size;
