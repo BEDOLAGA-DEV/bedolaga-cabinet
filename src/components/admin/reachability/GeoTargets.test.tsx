@@ -69,17 +69,20 @@ describe('parseGeoAddresses', () => {
   });
 });
 
+// Точная подпись поля адресов из ru.json: регулярка без якорей ловила бы адрес «где угодно».
+const ADDRESS_PLACEHOLDER = 'example.com · 1.2.3.4:443 · https://… — через запятую или построчно';
+
 describe('GeoTargets', () => {
   it('один вид за раз: хосты панели галочками, адреса текстом, VLESS — блок конфига', () => {
     const onKind = vi.fn();
     const { rerender } = render(<GeoTargets {...base} kind="hosts" onKindChange={onKind} />);
     expect(screen.getByRole('button', { name: /DE/ })).toBeTruthy();
-    expect(screen.queryByPlaceholderText(/example\.com/)).toBeNull();
+    expect(screen.queryByPlaceholderText(ADDRESS_PLACEHOLDER)).toBeNull();
     expect(screen.queryByText('picker')).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'IP / Домен' }));
     expect(onKind).toHaveBeenCalledWith('addresses');
     rerender(<GeoTargets {...base} kind="addresses" onKindChange={onKind} />);
-    expect(screen.getByPlaceholderText(/example\.com/)).toBeTruthy();
+    expect(screen.getByPlaceholderText(ADDRESS_PLACEHOLDER)).toBeTruthy();
     expect(screen.queryByRole('button', { name: /DE/ })).toBeNull();
     rerender(<GeoTargets {...base} kind="vless" onKindChange={onKind} configCount={1} />);
     expect(screen.getByText('picker')).toBeTruthy();
