@@ -19,12 +19,13 @@ import {
   groupHistory,
   mergeBatchJobs,
 } from './historyEntries';
+import { geoRowsOf, geoSummaryOf } from './geoRowsView';
 import { type Outcome, jobOutcome } from './jobOutcome';
 import { formatCredits } from './money';
 import { relativeAge } from './relativeAge';
 import { canRepeat, repeatFromJob } from './repeatFromJob';
 
-const KINDS: Array<JobKind | ''> = ['', 'probe', 'vless', 'scan'];
+const KINDS: Array<JobKind | ''> = ['', 'probe', 'vless', 'scan', 'geo'];
 const STATUSES: Array<JobStatus | ''> = ['', 'running', 'done', 'failed', 'cancelled'];
 const PAGE = 20;
 /** Фильтры нужны только длинному журналу; короткий читается глазами. */
@@ -134,13 +135,20 @@ export function RecentJobs({ initialJobId, targetKey = null, onClearTarget }: Re
   const rowOf = (entry: HistoryEntry): RowView => {
     if (entry.kind === 'job') {
       const outcome = jobOutcome(entry.job);
+      // GEO: вместо симок — города, в подписи — охват («GEO · сайты · проводной · округ ЦФО»).
+      const geo = entry.job.kind === 'geo' ? geoSummaryOf(entry.job) : null;
+      const cities = geo ? (geo.nNodes ?? geoRowsOf(entry.job).length) : 0;
       return {
         key: entry.key,
         anchorId: entry.job.id,
         tone: outcome,
-        label: targetsLabel(entry.job.targets),
+        label: geo?.scopeLabel
+          ? `${t(`${base}.switch.geo`)} · ${geo.scopeLabel}`
+          : targetsLabel(entry.job.targets),
         word: statusWord(entry.job, outcome),
-        units: t(`${base}.history.units`, { count: unitsCount(entry.job) }),
+        units: geo
+          ? t(`${base}.geo.result.cities`, { count: cities })
+          : t(`${base}.history.units`, { count: unitsCount(entry.job) }),
         age: age(entry.job.started_at ?? entry.job.created_at),
         cost: formatCredits(entry.job.cost_kopeks),
       };

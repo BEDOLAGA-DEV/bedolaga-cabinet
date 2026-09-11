@@ -4315,7 +4315,9 @@
           "pending": "بررسی در حال انجام است",
           "scan": "آدرس‌های فعال: {{ok}} از {{total}}",
           "empty": "نتیجه‌ای نیست",
-          "blockedList": "مسدود یا بی‌پاسخ: {{list}}"
+          "blockedList": "مسدود یا بی‌پاسخ: {{list}}",
+          "geo_one": "در {{ok}} از {{total}} شهر کار می‌کند",
+          "geo_other": "در {{ok}} از {{total}} شهر کار می‌کند"
         },
         "batchTargets_one": "{{count}} سرور",
         "batchTargets_other": "{{count}} سرور",
@@ -4458,6 +4460,23 @@
           "no_ru_node": "گره RU وجود ندارد",
           "no_udp": "خروجی بدون UDP (hy2)",
           "port_blocked": "پورت قابل بررسی نیست (شبکه پروکسی اجازه نمی‌دهد)"
+        },
+        "result": {
+          "progress": "{{done}} از {{total}} انجام شد",
+          "noise": "نتیجه نیست: {{count}}",
+          "find": "جستجوی شهر یا منطقه…",
+          "cities_one": "{{count}} شهر",
+          "cities_other": "{{count}} شهر"
+        },
+        "rows": {
+          "city": "شهر",
+          "provider": "ارائه‌دهنده",
+          "speed": "سرعت",
+          "empty": "هیچ شهری با فیلتر مطابقت ندارد",
+          "notChecked": "بررسی نشد: {{reason}}",
+          "latency": "{{value}} میلی‌ثانیه",
+          "kbps": "{{value}} کیلوبیت/ثانیه",
+          "froze": "توقف"
         }
       }
     },
