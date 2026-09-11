@@ -8,6 +8,7 @@ import {
   type Unit,
   reachabilityApi,
 } from '@/api/reachability';
+import { MapPinIcon } from '@/components/icons';
 import { Button } from '@/components/primitives';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
@@ -128,6 +129,15 @@ export function ServerDetails({ row, summaryRow, units, status, onCheck }: Serve
           >
             {t(`${base}.server.checkOne`, { price: priceLabel ?? '…' })}
           </Button>
+        )}
+        {row.ref !== null && (
+          <Link
+            to={buildReachabilityLink({ mode: 'geo', targets: [{ kind: 'host', ref: row.ref }] })}
+            className="btn-secondary inline-flex min-h-[44px] w-full items-center justify-center gap-1.5 px-3 text-sm sm:min-h-0 sm:w-auto sm:py-1.5 sm:text-xs"
+          >
+            <MapPinIcon className="h-4 w-4" />
+            {t(`${base}.geo.fromHost`)}
+          </Link>
         )}
       </div>
       <p className="text-sm text-dark-300">{sentence}</p>

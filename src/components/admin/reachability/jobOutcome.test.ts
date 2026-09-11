@@ -17,6 +17,15 @@ const job = (overrides: Record<string, unknown>): Job =>
   }) as unknown as Job;
 
 describe('jobOutcome', () => {
+  it('GEO — по городам с результатом, без легов', () => {
+    const geo = (by_verdict: Record<string, number>, result_rows: number) =>
+      job({ kind: 'geo', result: { rows: [], summary: { by_verdict, result_rows } } });
+    expect(jobOutcome(geo({ ok: 2 }, 2))).toBe('ok');
+    expect(jobOutcome(geo({ ok: 1, throttled: 1 }, 2))).toBe('warn');
+    expect(jobOutcome(geo({ blocked: 2, no_ru_node: 5 }, 2))).toBe('down');
+    expect(jobOutcome(geo({ no_ru_node: 5 }, 0))).toBe('na');
+  });
+
   it('идёт → pending, ошибка → down, отмена → na, по легам — ok/warn/down', () => {
     expect(jobOutcome(job({ status: 'running' }))).toBe('pending');
     expect(jobOutcome(job({ status: 'failed' }))).toBe('down');
