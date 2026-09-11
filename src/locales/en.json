@@ -2546,6 +2546,18 @@
           "hostsHint": "For a VPN host TLS without the right SNI shows a false refusal — panel hosts default to TCP",
           "heavy": "Heavy probe: TSPU throttling detection",
           "heavyHint": "transfers >16 KB per target; domains only; ≈ +0.055 MB per target in every city"
+        },
+        "verdicts": {
+          "ok": "works",
+          "partial": "partial",
+          "throttled": "throttled",
+          "blocked": "blocked (confirmed)",
+          "unconfirmed": "unconfirmed — repeat",
+          "exit_bad": "ISP line did not answer (not a result)",
+          "target_error": "target answers with an error",
+          "no_ru_node": "no RU node",
+          "no_udp": "exit without UDP (hy2)",
+          "port_blocked": "port cannot be checked (forbidden by the proxy network)"
         }
       }
     },
