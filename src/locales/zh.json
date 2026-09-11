@@ -4415,9 +4415,7 @@
           "cityFind": "查找城市…",
           "cityTruncated": "未全部显示：找到 {{total}} 个，请细化名称",
           "removeCity": "移除城市",
-          "isps_other": "{{count}} 个运营商",
-          "sessionNote": "通过同一出口 {{ip}} 重复",
-          "sessionDrop": "重新选择出口"
+          "isps_other": "{{count}} 个运营商"
         },
         "network": {
           "label": "网络",
@@ -4471,7 +4469,15 @@
           "latency": "{{value}} 毫秒",
           "kbps": "{{value}} kbps",
           "froze": "冻结",
-          "recheck": "重复"
+          "recheck": "重复",
+          "tags": {
+            "newExit": "新出口",
+            "newExitTitle": "复查后使用了另一出口 — 原行保留",
+            "exitChanged": "出口已更换",
+            "exitChangedTitle": "请求同一出口，但代理更换了它",
+            "flaky": "第二次成功",
+            "flakyTitle": "第一次探测失败，同一出口重试成功；运营商线路不稳定"
+          }
         },
         "launch": {
           "citiesRow": "城市数",
@@ -4486,10 +4492,19 @@
           "zoomIn": "放大",
           "zoomOut": "缩小",
           "reset": "整张地图",
-          "recheck": "再查一次",
-          "sameExit": "同一 IP",
-          "more": "还有 {{count}} 个",
-          "exitChanged": "出口已更换"
+          "more": "还有 {{count}} 个"
+        },
+        "recheck": {
+          "sameIp": "🔄 同一 IP",
+          "newIp": "🔀 更换 IP",
+          "busy": "⏳ 检查中…",
+          "done": "⤴ 已复查",
+          "doneTitle": "此行已复查 — 新结果单独成行",
+          "sameIpNoSid": "重复检查（出口将重新选择）",
+          "sameIpHold": "通过同一 IP {{ip}} 重复 — 出口还会保持约 {{seconds}} 秒",
+          "sameIpExpired": "通过同一 IP {{ip}} 重复 — 保持已到期；若代理更换出口，该行将标记为“出口已更换”",
+          "newIpTitle": "更换 IP：此城市的另一出口/提供商。此行保留，新行带标记加入",
+          "failed": "无法启动复查"
         }
       }
     },

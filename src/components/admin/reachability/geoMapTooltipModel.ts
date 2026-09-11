@@ -1,6 +1,8 @@
 import type { Job } from '@/api/reachability';
 import type { CityMarker, GeoMapRow, RegionSummary } from './geoMapModel';
-import { recheckLink } from './recheckLinks';
+import { type RecheckState, recheckButtons, recheckState } from './geoRecheck';
+import type { GeoRow } from './geoRowsView';
+import type { GeoRecheck } from './useGeoRecheck';
 
 /** Подпроверка цели в подсказке: имя (host:port или «Google»), ответила ли, за сколько. */
 export interface TooltipCheck {
@@ -11,7 +13,19 @@ export interface TooltipCheck {
 
 export interface TooltipAction {
   label: string;
-  to: string;
+  title: string;
+  onPress: () => void;
+}
+
+/** Повтор для строки подсказки: состояние как у оригинала и кнопки, если они положены. */
+export interface TooltipRecheck {
+  state: RecheckState;
+  actions: TooltipAction[];
+}
+
+export interface RecheckContext {
+  job: Job;
+  recheck: GeoRecheck;
 }
 
 /** Строка подсказки — одно наблюдение: город × провайдер × выход. */
@@ -24,8 +38,9 @@ export interface TooltipRow {
   latencyMs: number | null;
   exitIp: string | null;
   exitChanged: boolean;
+  newExit: boolean;
   checks: TooltipCheck[];
-  actions: TooltipAction[];
+  recheck: TooltipRecheck | null;
 }
 
 export interface TooltipModel {
@@ -42,11 +57,6 @@ export const MAX_TOOLTIP_ROWS = 8;
 
 export type Translate = (key: string, options?: Record<string, unknown>) => string;
 
-interface Labels {
-  recheck: string;
-  sameExit: string;
-}
-
 function checksOf(row: GeoMapRow): TooltipCheck[] {
   if (row.tunnel) {
     return row.tunnel.checks.map((check) => ({ name: check.name, ok: check.ok, ms: check.ms }));
@@ -54,20 +64,29 @@ function checksOf(row: GeoMapRow): TooltipCheck[] {
   return (row.targets ?? []).map((target) => ({ name: target.key, ok: target.ok, ms: target.ms }));
 }
 
-function actionsOf(row: GeoMapRow, job: Job | null, labels: Labels): TooltipAction[] {
-  if (!job) return [];
-  const again = recheckLink(job, row);
-  const same = recheckLink(job, row, true);
-  return [
-    ...(again ? [{ label: labels.recheck, to: again }] : []),
-    ...(same ? [{ label: labels.sameExit, to: same }] : []),
-  ];
+function recheckOf(
+  row: GeoMapRow,
+  context: RecheckContext | null,
+  t: Translate,
+): TooltipRecheck | null {
+  if (!context) return null;
+  const state = recheckState(context.job, row, context.recheck.busy);
+  if (state === 'none') return null;
+  const actions =
+    state === 'buttons'
+      ? recheckButtons(context.job, row, t).map((button) => ({
+          label: button.label,
+          title: button.title,
+          onPress: () => context.recheck.start(row as GeoRow, button.sameExit),
+        }))
+      : [];
+  return { state, actions };
 }
 
 export function tooltipRow(
   row: GeoMapRow,
-  job: Job | null,
-  labels: Labels,
+  context: RecheckContext | null,
+  t: Translate,
   name?: string,
 ): TooltipRow {
   return {
@@ -78,23 +97,22 @@ export function tooltipRow(
     latencyMs: row.latency_ms ?? null,
     exitIp: row.exit_ip ?? null,
     exitChanged: Boolean(row.exit_changed),
+    newExit: Boolean(row.new_exit),
     checks: checksOf(row),
-    actions: actionsOf(row, job, labels),
+    recheck: recheckOf(row, context, t),
   };
 }
 
-const labelsOf = (t: Translate): Labels => ({
-  recheck: t('admin.reachability.geo.map.recheck'),
-  sameExit: t('admin.reachability.geo.map.sameExit'),
-});
-
 /** Подсказка города: регион подписью, по строке на провайдера с выходом и подпроверками. */
-export function cityTooltip(marker: CityMarker, job: Job | null, t: Translate): TooltipModel {
-  const labels = labelsOf(t);
+export function cityTooltip(
+  marker: CityMarker,
+  context: RecheckContext | null,
+  t: Translate,
+): TooltipModel {
   return {
     title: marker.name,
     subtitle: marker.regionName,
-    rows: marker.rows.map((row) => tooltipRow(row, job, labels)),
+    rows: marker.rows.map((row) => tooltipRow(row, context, t)),
     moreCount: 0,
   };
 }
@@ -118,13 +136,12 @@ export function regionTooltip(
   name: string,
   summary: RegionSummary | undefined,
   markers: readonly CityMarker[],
-  job: Job | null,
+  context: RecheckContext | null,
   t: Translate,
 ): TooltipModel {
-  const labels = labelsOf(t);
   const inRegion = markers.filter((marker) => marker.regionCode === code);
   const rows = inRegion.flatMap((marker) =>
-    marker.rows.map((row) => tooltipRow(row, job, labels, marker.name)),
+    marker.rows.map((row) => tooltipRow(row, context, t, marker.name)),
   );
   const shown = rows.slice(0, MAX_TOOLTIP_ROWS);
   const hiddenCities = new Set(rows.slice(MAX_TOOLTIP_ROWS).map((row) => row.name)).size;
@@ -144,11 +161,7 @@ export function tooltipHeight(
 ): number {
   const rows = model.rows.reduce(
     (sum, row) =>
-      sum +
-      24 +
-      (row.exitIp ? 18 : 0) +
-      row.checks.length * 18 +
-      (pinned && row.actions.length ? 30 : 0),
+      sum + 24 + (row.exitIp ? 18 : 0) + row.checks.length * 18 + (pinned && row.recheck ? 30 : 0),
     0,
   );
   return 48 + Math.max(24, rows) + (model.moreCount ? 18 : 0);
