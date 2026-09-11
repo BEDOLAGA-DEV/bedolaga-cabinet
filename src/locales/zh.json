@@ -4027,7 +4027,9 @@
         "summaryServers_other": "{{count}} 台服务器",
         "busyBatch": "服务器检查已在进行 — 请等待完成",
         "timeRow": "时间",
-        "confirmServers": "服务器（{{count}}）：{{list}}"
+        "confirmServers": "服务器（{{count}}）：{{list}}",
+        "runGeo_other": "检查 {{count}} 个城市 · {{price}}",
+        "runShortGeo_other": "检查 {{count}} 个城市"
       },
       "progress": {
         "submitting": "正在发送请求…",
@@ -4457,6 +4459,12 @@
           "latency": "{{value}} 毫秒",
           "kbps": "{{value}} kbps",
           "froze": "冻结"
+        },
+        "launch": {
+          "citiesRow": "城市数",
+          "maxNodes": "该模式上限 {{count}}",
+          "applyLimit": "将上限设为 {{count}}",
+          "confirmCities": "城市数：{{count}}"
         }
       }
     },

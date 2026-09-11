@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   type Probes,
   type ReachabilityStatus,
@@ -9,6 +10,8 @@ import {
 } from '@/api/reachability';
 import { AddressTargets } from './AddressTargets';
 import { CheckOptions } from './CheckOptions';
+import { GeoLauncherForm } from './GeoLauncher';
+import { parseGeoAddresses } from './GeoTargets';
 import { JobProgress } from './JobProgress';
 import { LaunchAside, LaunchBar } from './LaunchAside';
 import { OperatorPicker } from './OperatorPicker';
@@ -17,7 +20,8 @@ import { initialSelection } from './autoSelect';
 import { type ConfigItem, SubscriptionTargets } from './SubscriptionTargets';
 import { autoUnitsFor } from './autoUnits';
 import { type DeepLink, jobKindOf } from './deepLink';
-import { buildProbeBody, buildScanBody, buildVlessBody } from './jobBodies';
+import { DEFAULT_GEO_FORM, type GeoFormState, recallGeoForm, rememberGeoForm } from './geoForm';
+import { buildGeoBody, buildProbeBody, buildScanBody, buildVlessBody } from './jobBodies';
 import { jobAdapterFor } from './launchAdapters';
 import { repeatFromJob } from './repeatFromJob';
 import {
@@ -50,6 +54,7 @@ const SCAN_DEFAULT: Probes = { icmp: true, tcp: true, sni: false };
  * «Запуск» справа (на телефоне — панель снизу). Хосты панели живут на своей вкладке.
  */
 export function Launcher({ status, link, runningJobId, onRunning }: LauncherProps) {
+  const { t } = useTranslation();
   const mode = link.mode === 'hosts' || link.mode === 'history' ? 'ip' : link.mode;
   const kind = jobKindOf(mode);
   const { data: catalog = [], isLoading: unitsLoading } = useUnits();
@@ -60,6 +65,25 @@ export function Launcher({ status, link, runningJobId, onRunning }: LauncherProp
   const [configIndexes, setConfigIndexes] = useState<number[]>([]);
   const [core, setCore] = useState<VlessCore>('');
   const [cidr, setCidr] = useState('');
+  // GEO: хосты из ссылки (?target=host:…), свои адреса, блоки «Откуда/Метод» — как в прошлый раз.
+  const [geoHosts, setGeoHosts] = useState<string[]>(() =>
+    link.targets.filter((target) => target.kind === 'host').map((target) => target.ref),
+  );
+  const [geoAddresses, setGeoAddresses] = useState('');
+  const [geoForm, setGeoForm] = useState<GeoFormState>(() => recallGeoForm() ?? DEFAULT_GEO_FORM);
+  // Человек трогал «Откуда/Метод» руками — автоматика (TCP для хостов панели) больше не вмешивается.
+  const geoTouched = useRef(false);
+  const changeGeoForm = (next: GeoFormState) => {
+    geoTouched.current = true;
+    setGeoForm(next);
+  };
+  const changeGeoHosts = (next: string[]) => {
+    setGeoHosts(next);
+    // У VPN-хоста TLS без нужного SNI покажет ложный отказ — хостам панели по умолчанию TCP.
+    if (next.length > 0 && geoForm.probeMode !== 'tcp' && !geoTouched.current) {
+      setGeoForm({ ...geoForm, probeMode: 'tcp' });
+    }
+  };
   // Симки: сами по назначению целей; null — человек не трогал руками.
   const [manualUnits, setManualUnits] = useState<string[] | null>(null);
   const [probes, setProbes] = useState<Probes>(PROBE_DEFAULT);
@@ -96,6 +120,10 @@ export function Launcher({ status, link, runningJobId, onRunning }: LauncherProp
     if (repeatState.sniHosts) setSniHosts(repeatState.sniHosts);
     setAddresses(repeatState.addresses);
     setCidr(repeatState.cidr);
+    if (repeatState.mode === 'geo') {
+      setGeoHosts(repeatState.hosts);
+      setGeoAddresses(repeatState.addresses);
+    }
     if (repeatState.shortUuid) {
       setSource({ userId: null, shortUuid: repeatState.shortUuid });
       setConfigIndexes(repeatState.configIndexes);
@@ -128,8 +156,10 @@ export function Launcher({ status, link, runningJobId, onRunning }: LauncherProp
     const key = pastedMode ? pasted.trim() : null;
     if (!key || !parsed.data || autoSelectedFor.current === key) return;
     autoSelectedFor.current = key;
-    setConfigIndexes(initialSelection(parsed.data.configs));
-  }, [pastedMode, pasted, parsed.data]);
+    const selected = initialSelection(parsed.data.configs);
+    // GEO берёт один конфиг туннеля.
+    setConfigIndexes(mode === 'geo' ? selected.slice(0, 1) : selected);
+  }, [pastedMode, pasted, parsed.data, mode]);
 
   const toggleConfig = (index: number) =>
     setConfigIndexes((list) =>
@@ -168,7 +198,18 @@ export function Launcher({ status, link, runningJobId, onRunning }: LauncherProp
     [configIndexes, configList],
   );
 
+  const geoConfig = mode === 'geo' ? (vlessTargets[0] ?? null) : null;
+
   const body = useMemo(() => {
+    if (mode === 'geo') {
+      return buildGeoBody({
+        hosts: geoHosts,
+        custom: parseGeoAddresses(geoAddresses).targets,
+        config: geoConfig,
+        form: geoForm,
+        core,
+      });
+    }
     if (mode === 'ip') {
       return buildProbeBody({
         hosts: [],
@@ -190,7 +231,22 @@ export function Launcher({ status, link, runningJobId, onRunning }: LauncherProp
       probes: scanProbes,
       sniHosts: sniParsed.names,
     });
-  }, [mode, ownTargets, units, dpi, probes, sniParsed, vlessTargets, core, cidr, scanProbes]);
+  }, [
+    mode,
+    ownTargets,
+    units,
+    dpi,
+    probes,
+    sniParsed,
+    vlessTargets,
+    core,
+    cidr,
+    scanProbes,
+    geoHosts,
+    geoAddresses,
+    geoConfig,
+    geoForm,
+  ]);
 
   // Имена, которые бот возьмёт сам при пустом поле: домен цели; у IP имени нет.
   const autoSniNames = useMemo(
@@ -201,7 +257,16 @@ export function Launcher({ status, link, runningJobId, onRunning }: LauncherProp
   const showSni = mode !== 'vless' && activeProbes.sni;
 
   const adapter = useMemo(() => jobAdapterFor(kind), [kind]);
-  const launch = useLaunch(body, status, (job) => onRunning(job.id), adapter);
+  const launch = useLaunch(
+    body,
+    status,
+    (job) => {
+      if (mode === 'geo') rememberGeoForm(geoForm);
+      onRunning(job.id);
+    },
+    adapter,
+  );
+  const applyCityLimit = (limit: number) => changeGeoForm({ ...geoForm, cityLimit: limit });
 
   if (runningJobId !== null) {
     return (
@@ -237,8 +302,44 @@ export function Launcher({ status, link, runningJobId, onRunning }: LauncherProp
           />
         )}
         {mode === 'cidr' && <ScanTargets cidr={cidr} onChange={setCidr} />}
+        {mode === 'geo' && (
+          <GeoLauncherForm
+            hosts={geoHosts}
+            onHostsChange={changeGeoHosts}
+            addresses={geoAddresses}
+            onAddressesChange={setGeoAddresses}
+            config={geoConfig}
+            configPicker={
+              <SubscriptionTargets
+                embedded={{
+                  title: t('admin.reachability.geo.targets.configTitle'),
+                  hint: t('admin.reachability.geo.targets.configHint'),
+                }}
+                pasted={pasted}
+                onPastedChange={changePasted}
+                parsed={parsed}
+                userId={source.userId}
+                shortUuid={source.shortUuid}
+                onSource={changeSource}
+                subscription={subscription}
+                reference={status?.reference ?? null}
+                list={configList}
+                rejected={rejected}
+                selected={configIndexes.slice(0, 1)}
+                onToggle={(index) => setConfigIndexes(configIndexes[0] === index ? [] : [index])}
+                onSelectMany={(indexes) => setConfigIndexes(indexes.slice(0, 1))}
+                onClear={() => setConfigIndexes([])}
+              />
+            }
+            form={geoForm}
+            onFormChange={changeGeoForm}
+            core={core}
+            onCoreChange={setCore}
+            cores={status?.cores}
+          />
+        )}
 
-        {mode === 'vless' ? (
+        {mode === 'geo' ? null : mode === 'vless' ? (
           <CheckOptions core={core} onCoreChange={setCore} cores={status?.cores} />
         ) : mode === 'cidr' ? (
           <CheckOptions
@@ -260,18 +361,22 @@ export function Launcher({ status, link, runningJobId, onRunning }: LauncherProp
           />
         )}
 
-        <OperatorPicker
-          kind={kind}
-          units={catalog}
-          selected={units}
-          onChange={setManualUnits}
-          loading={unitsLoading}
-        />
+        {mode !== 'geo' && (
+          <OperatorPicker
+            kind={kind}
+            units={catalog}
+            selected={units}
+            onChange={setManualUnits}
+            loading={unitsLoading}
+          />
+        )}
       </div>
       <div className="hidden lg:block">
-        <LaunchAside launch={launch} />
+        <LaunchAside launch={launch} onApplyCityLimit={applyCityLimit} />
       </div>
-      <div className="lg:hidden">{launch.targetsCount > 0 && <LaunchBar launch={launch} />}</div>
+      <div className="lg:hidden">
+        {launch.targetsCount > 0 && <LaunchBar launch={launch} onApplyCityLimit={applyCityLimit} />}
+      </div>
     </div>
   );
 }
