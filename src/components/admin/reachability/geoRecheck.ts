@@ -2,9 +2,10 @@ import type { Job } from '@/api/reachability';
 import type { GeoRow } from './geoRowsView';
 
 /**
- * Перепроверка проваленного города из отчёта GEO — ровно как у оригинала bsbord.com:
- * у зелёных строк кнопок нет; у остальных — «🔄 тот же IP» и «🔀 сменить IP»; пока идёт —
- * «⏳ идёт проверка…»; строка, по которой уже перепроверяли, — «⤴ перепроверено».
+ * Перепроверка проваленного города из отчёта GEO — логика ровно как у оригинала bsbord.com:
+ * у зелёных строк кнопок нет; у остальных — «Тот же IP» и «Сменить IP»; пока идёт —
+ * «Идёт проверка…»; строка, по которой уже перепроверяли, — «Перепроверено».
+ * Вид кнопок — канон кабинета (RecheckButtons), не оригинала.
  */
 
 export type RecheckState = 'none' | 'buttons' | 'busy' | 'rechecked';
@@ -45,6 +46,8 @@ export interface RecheckButton {
   sameExit: boolean;
   label: string;
   title: string;
+  /** Иконка из общего набора кабинета: повтор — стрелки по кругу, смена выхода — перемешать. */
+  icon: 'refresh' | 'shuffle';
 }
 
 /** Две кнопки строки с подписями оригинала: «тот же IP» (с « ?», если удержание истекло) и «сменить IP». */
@@ -68,7 +71,8 @@ export function recheckButtons(
       sameExit: true,
       label: `${t(`${base}.sameIp`)}${row.sid && !fresh ? ' ?' : ''}`,
       title: sameTitle,
+      icon: 'refresh',
     },
-    { sameExit: false, label: t(`${base}.newIp`), title: t(`${base}.newIpTitle`) },
+    { sameExit: false, label: t(`${base}.newIp`), title: t(`${base}.newIpTitle`), icon: 'shuffle' },
   ];
 }

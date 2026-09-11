@@ -127,8 +127,8 @@ describe('GeoRows · повтор из отчёта', () => {
         recheck={control}
       />,
     );
-    expect(screen.getAllByText('⏳ идёт проверка…').length).toBeGreaterThan(0);
-    expect(screen.getAllByText('⤴ перепроверено').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Идёт проверка…').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Перепроверено').length).toBeGreaterThan(0);
     expect(screen.getAllByText('новый выход').length).toBeGreaterThan(0);
   });
   it('идущая задача и задача без перепроверки — без колонки повтора', () => {

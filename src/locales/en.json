@@ -2619,10 +2619,10 @@
           "more": "{{count}} more"
         },
         "recheck": {
-          "sameIp": "🔄 Same IP",
-          "newIp": "🔀 Change IP",
-          "busy": "⏳ checking…",
-          "done": "⤴ re-checked",
+          "sameIp": "Same IP",
+          "newIp": "Change IP",
+          "busy": "Checking…",
+          "done": "Re-checked",
           "doneTitle": "this row was re-checked — the fresh result is a separate row",
           "sameIpNoSid": "Repeat the check (the exit is picked anew)",
           "sameIpHold": "Repeat through the SAME IP {{ip}} — the exit is held for ~{{seconds}} s more",

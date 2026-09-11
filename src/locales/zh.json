@@ -4497,10 +4497,10 @@
           "more": "还有 {{count}} 个"
         },
         "recheck": {
-          "sameIp": "🔄 同一 IP",
-          "newIp": "🔀 更换 IP",
-          "busy": "⏳ 检查中…",
-          "done": "⤴ 已复查",
+          "sameIp": "同一 IP",
+          "newIp": "更换 IP",
+          "busy": "检查中…",
+          "done": "已复查",
           "doneTitle": "此行已复查 — 新结果单独成行",
           "sameIpNoSid": "重复检查（出口将重新选择）",
           "sameIpHold": "通过同一 IP {{ip}} 重复 — 出口还会保持约 {{seconds}} 秒",

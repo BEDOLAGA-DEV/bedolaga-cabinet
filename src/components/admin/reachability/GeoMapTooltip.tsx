@@ -1,7 +1,8 @@
 import { useTranslation } from 'react-i18next';
 import { CloseIcon } from '@/components/icons';
 import { cn } from '@/lib/utils';
-import type { TooltipModel, TooltipRecheck, TooltipRow } from './geoMapTooltipModel';
+import { RecheckButtons } from './RecheckButtons';
+import type { TooltipModel, TooltipRow } from './geoMapTooltipModel';
 import { TONE_DOT, verdictTone } from './geoVerdicts';
 
 export interface GeoMapTooltipProps extends TooltipModel {
@@ -47,37 +48,6 @@ function Dot({ verdict, ok }: { verdict?: string; ok?: boolean }) {
   return <span className={cn('inline-block h-2 w-2 shrink-0 rounded-full', tone)} />;
 }
 
-/** Повтор как у оригинала: «⏳ идёт проверка…», «⤴ перепроверено» или две кнопки. */
-function RecheckLine({ recheck }: { recheck: TooltipRecheck }) {
-  const { t } = useTranslation();
-  const KEY = 'admin.reachability.geo.recheck';
-  if (recheck.state === 'busy') {
-    return <div className="pl-3.5 pt-0.5 text-dark-400">{t(`${KEY}.busy`)}</div>;
-  }
-  if (recheck.state === 'rechecked') {
-    return (
-      <div className="pl-3.5 pt-0.5 text-dark-400" title={t(`${KEY}.doneTitle`)}>
-        {t(`${KEY}.done`)}
-      </div>
-    );
-  }
-  return (
-    <div className="flex flex-wrap gap-1 pl-3.5 pt-0.5">
-      {recheck.actions.map((action) => (
-        <button
-          key={action.label}
-          type="button"
-          title={action.title}
-          onClick={action.onPress}
-          className="rounded-md border border-dark-700/60 bg-dark-800/80 px-2 py-0.5 text-[11px] text-dark-100 hover:border-accent-500/40 hover:text-accent-400"
-        >
-          {action.label}
-        </button>
-      ))}
-    </div>
-  );
-}
-
 function Row({ row, pinned }: { row: TooltipRow; pinned: boolean }) {
   const { t } = useTranslation();
   const KEY = 'admin.reachability.geo';
@@ -121,14 +91,22 @@ function Row({ row, pinned }: { row: TooltipRow; pinned: boolean }) {
           ))}
         </ul>
       )}
-      {pinned && row.recheck && <RecheckLine recheck={row.recheck} />}
+      {pinned && row.recheck && (
+        <RecheckButtons
+          job={row.recheck.job}
+          row={row.recheck.row}
+          state={row.recheck.state}
+          onStart={row.recheck.onStart}
+          className="pl-3.5 pt-1"
+        />
+      )}
     </li>
   );
 }
 
 /**
  * Подсказка карты как у оригинала: город или регион, по строке на наблюдение — вердикт, провайдер,
- * задержка, выход, подпроверки; закреплённая — с крестиком и кнопками «ещё раз» / «тот же IP».
+ * задержка, выход, подпроверки; закреплённая — с крестиком и кнопками «Тот же IP» / «Сменить IP».
  */
 export function GeoMapTooltip(props: GeoMapTooltipProps) {
   const { t } = useTranslation();
