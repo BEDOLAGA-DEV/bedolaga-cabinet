@@ -2415,7 +2415,9 @@
           "pending": "Check in progress",
           "scan": "Alive addresses: {{ok}} of {{total}}",
           "empty": "No result",
-          "blockedList": "Blocked or no answer: {{list}}"
+          "blockedList": "Blocked or no answer: {{list}}",
+          "geo_one": "Works in {{ok}} of {{total}} city",
+          "geo_other": "Works in {{ok}} of {{total}} cities"
         },
         "batchTargets_one": "{{count}} server",
         "batchTargets_other": "{{count}} servers",
@@ -2558,6 +2560,23 @@
           "no_ru_node": "no RU node",
           "no_udp": "exit without UDP (hy2)",
           "port_blocked": "port cannot be checked (forbidden by the proxy network)"
+        },
+        "result": {
+          "progress": "{{done}} of {{total}} done",
+          "noise": "not a result: {{count}}",
+          "find": "Find a city or region…",
+          "cities_one": "{{count}} city",
+          "cities_other": "{{count}} cities"
+        },
+        "rows": {
+          "city": "City",
+          "provider": "ISP",
+          "speed": "Speed",
+          "empty": "No city matches the filter",
+          "notChecked": "not checked: {{reason}}",
+          "latency": "{{value}} ms",
+          "kbps": "{{value}} kbps",
+          "froze": "freeze"
         }
       }
     },

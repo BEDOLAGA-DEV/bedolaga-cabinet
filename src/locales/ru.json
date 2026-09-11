@@ -2453,7 +2453,10 @@
           "pending": "Проверка идёт",
           "scan": "Живых адресов: {{ok}} из {{total}}",
           "empty": "Результата нет",
-          "blockedList": "Режется или не отвечает: {{list}}"
+          "blockedList": "Режется или не отвечает: {{list}}",
+          "geo_one": "Работает в {{ok}} из {{total}} города",
+          "geo_few": "Работает в {{ok}} из {{total}} городов",
+          "geo_many": "Работает в {{ok}} из {{total}} городов"
         },
         "batchTargets_one": "{{count}} сервер",
         "batchTargets_few": "{{count}} сервера",
@@ -2600,6 +2603,24 @@
           "no_ru_node": "нет RU-ноды",
           "no_udp": "выход без UDP (hy2)",
           "port_blocked": "порт не проверить (запрещён прокси-сетью)"
+        },
+        "result": {
+          "progress": "сделано {{done}} из {{total}}",
+          "noise": "не результат: {{count}}",
+          "find": "Найти город или регион…",
+          "cities_one": "{{count}} город",
+          "cities_few": "{{count}} города",
+          "cities_many": "{{count}} городов"
+        },
+        "rows": {
+          "city": "Город",
+          "provider": "Провайдер",
+          "speed": "Скорость",
+          "empty": "Ни одного города под фильтром",
+          "notChecked": "не проверен: {{reason}}",
+          "latency": "{{value}} мс",
+          "kbps": "{{value}} кбит/с",
+          "froze": "заморозка"
         }
       }
     },

@@ -10,6 +10,27 @@ const job = (patch: Partial<Job>): Job =>
   ({ kind: 'probe', status: 'done', legs: [], result: null, ...patch }) as unknown as Job;
 
 describe('resultHeadline', () => {
+  it('GEO: работает в N из M городов с результатом; шум сервиса не считается', () => {
+    const geo = (by_verdict: Record<string, number>, result_rows: number) =>
+      job({ kind: 'geo', result: { rows: [], summary: { by_verdict, result_rows } } });
+    expect(resultHeadline(geo({ ok: 3 }, 3))).toEqual({
+      key: 'geo',
+      tone: 'ok',
+      ok: 3,
+      total: 3,
+      blocked: [],
+    });
+    expect(resultHeadline(geo({ ok: 1, blocked: 2, exit_bad: 4 }, 3))).toEqual({
+      key: 'geo',
+      tone: 'warn',
+      ok: 1,
+      total: 3,
+      blocked: [],
+    });
+    expect(resultHeadline(geo({ blocked: 2 }, 2)).tone).toBe('down');
+    expect(resultHeadline(geo({ exit_bad: 2 }, 0)).key).toBe('empty');
+  });
+
   it('все симки открывают — «везде»', () => {
     expect(
       resultHeadline(

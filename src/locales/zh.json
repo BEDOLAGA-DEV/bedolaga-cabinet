@@ -4301,7 +4301,8 @@
           "pending": "检测进行中",
           "scan": "存活地址：{{ok}} / {{total}}",
           "empty": "没有结果",
-          "blockedList": "被拦截或无响应：{{list}}"
+          "blockedList": "被拦截或无响应：{{list}}",
+          "geo_other": "{{total}} 个城市中 {{ok}} 个正常"
         },
         "batchTargets_other": "{{count}} 台服务器",
         "batchOutcome": "{{total}} 台中 {{ok}} 台正常",
@@ -4440,6 +4441,22 @@
           "no_ru_node": "没有 RU 节点",
           "no_udp": "出口不支持 UDP (hy2)",
           "port_blocked": "端口无法检查（代理网络禁止）"
+        },
+        "result": {
+          "progress": "已完成 {{done}} / {{total}}",
+          "noise": "不算结果：{{count}}",
+          "find": "查找城市或地区…",
+          "cities_other": "{{count}} 个城市"
+        },
+        "rows": {
+          "city": "城市",
+          "provider": "运营商",
+          "speed": "速度",
+          "empty": "没有符合筛选的城市",
+          "notChecked": "未检查：{{reason}}",
+          "latency": "{{value}} 毫秒",
+          "kbps": "{{value}} kbps",
+          "froze": "冻结"
         }
       }
     },

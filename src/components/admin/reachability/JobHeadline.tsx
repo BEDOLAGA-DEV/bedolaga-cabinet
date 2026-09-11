@@ -55,7 +55,8 @@ function HeadlineLine({ job, targetKey, prefix }: LineProps) {
  * Несколько целей — по строке на каждую, чтобы симки разных серверов не складывались.
  */
 export function JobHeadline({ job, className }: { job: Job; className?: string }) {
-  const perTarget = job.status === 'done' && job.kind !== 'scan' && job.targets.length > 1;
+  const perTarget =
+    job.status === 'done' && job.kind !== 'scan' && job.kind !== 'geo' && job.targets.length > 1;
   if (!perTarget) {
     return (
       <div className={className}>
