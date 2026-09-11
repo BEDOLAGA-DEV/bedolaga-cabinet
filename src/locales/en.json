@@ -4685,6 +4685,34 @@
             "location": "location",
             "other": "message"
           }
+        },
+        "premiumTraffic": {
+          "title": "Premium traffic",
+          "limited": "cut off",
+          "notMeasured": "not measured yet",
+          "extra": "+{{gb}} GB bought",
+          "period": "Period since {{date}}",
+          "checked": "measured {{date}}",
+          "grantLabel": "Gigabytes to grant on {{name}}",
+          "grant": "Grant",
+          "resetSquad": "Reset",
+          "resetTitle": "Reset traffic",
+          "resetButton": "Reset",
+          "scope": {
+            "premium": "Premium only",
+            "regular": "Regular only",
+            "both": "Premium and regular"
+          },
+          "scopeHint": {
+            "premium": "Premium limits start a new period and cut-off servers come back. Regular traffic stays as is.",
+            "regular": "Regular traffic is reset in the panel. Premium limits stay as they are.",
+            "both": "Both regular traffic in the panel and premium limits are reset."
+          },
+          "granted": "Granted {{gb}} GB on {{name}}.",
+          "resetPremiumDone": "Premium period started over.",
+          "resetRegularDone": "Regular traffic reset.",
+          "restoredNote": "The server comes back to the client on the next pass — within 5 minutes.",
+          "error": "Action failed"
         }
       },
       "notFound": "User not found",

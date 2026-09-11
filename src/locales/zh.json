@@ -3667,6 +3667,34 @@
             "location": "位置",
             "other": "消息"
           }
+        },
+        "premiumTraffic": {
+          "title": "高级流量",
+          "limited": "已切断",
+          "notMeasured": "尚未统计",
+          "extra": "已加购 {{gb}} GB",
+          "period": "周期起始 {{date}}",
+          "checked": "统计于 {{date}}",
+          "grantLabel": "为 {{name}} 发放多少 GB",
+          "grant": "发放",
+          "resetSquad": "重置",
+          "resetTitle": "重置流量",
+          "resetButton": "重置",
+          "scope": {
+            "premium": "仅高级",
+            "regular": "仅普通",
+            "both": "高级和普通"
+          },
+          "scopeHint": {
+            "premium": "高级限额将开始新周期，已切断的服务器会恢复。普通流量不变。",
+            "regular": "将在面板中重置普通流量。高级限额不变。",
+            "both": "面板中的普通流量和高级限额都将重置。"
+          },
+          "granted": "已为 {{name}} 发放 {{gb}} GB。",
+          "resetPremiumDone": "高级周期已重新开始。",
+          "resetRegularDone": "普通流量已重置。",
+          "restoredNote": "服务器将在下一次检查时恢复给用户，最多 5 分钟。",
+          "error": "操作失败"
         }
       },
       "notFound": "未找到用户",

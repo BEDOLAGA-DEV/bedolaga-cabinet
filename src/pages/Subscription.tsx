@@ -7,6 +7,7 @@ import { subscriptionApi } from '../api/subscription';
 import { DEVICE_ALIAS_MAX_LENGTH } from '../constants/devices';
 import { WebBackButton } from '../components/WebBackButton';
 import { useDestructiveConfirm } from '../platform/hooks/useNativeDialog';
+import PremiumTrafficRow from '../components/dashboard/PremiumTrafficRow';
 import TrafficProgressBar from '../components/dashboard/TrafficProgressBar';
 import { HoverBorderGradient } from '../components/ui/hover-border-gradient';
 import { useTrafficZone } from '../hooks/useTrafficZone';
@@ -977,6 +978,9 @@ export default function Subscription() {
                   compact
                 />
               </div>
+
+              {/* ─── Premium Traffic — серверы с отдельным лимитом, как на главной ─── */}
+              <PremiumTrafficRow items={subscription.premium_traffic ?? []} />
 
               {/* ─── Connect Device Button ─── */}
               {subscription.subscription_url && (
