@@ -1,11 +1,11 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { resetSafeStorage } from '@/utils/safeStorage';
-import { DEFAULT_GEO_FORM, recallGeoForm, rememberGeoForm, toGeoOptions } from './geoScope';
+import { DEFAULT_GEO_FORM, recallGeoForm, rememberGeoForm, toGeoOptions } from './geoForm';
 import { buildGeoBody } from './jobBodies';
 
 beforeEach(() => resetSafeStorage());
 
-describe('geoScope', () => {
+describe('geoForm', () => {
   it('значения по умолчанию как у оригинала: проводной, вся РФ, любой провайдер, TLS, без тяжёлой', () => {
     expect(toGeoOptions(DEFAULT_GEO_FORM)).toEqual({
       network: 'res',

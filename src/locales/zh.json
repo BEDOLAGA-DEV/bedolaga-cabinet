@@ -4377,6 +4377,58 @@
         "pickDistrict": "{{code}} 全部 SIM 卡",
         "unpickDistrict": "取消 {{code}} 的 SIM 卡",
         "empty": "没有 SIM 卡：服务不可用"
+      },
+      "geo": {
+        "targets": {
+          "count": "目标 {{count}} / {{max}}",
+          "overLimit": "每次最多 {{max}} 个目标，请去掉多余的",
+          "placeholder": "example.com · 1.2.3.4:443 · https://… — 用逗号或换行分隔",
+          "hint": "域名、IP、带端口的地址或网站链接。GEO 不检查子网。",
+          "noCidr": "子网无法在这里检查，请使用「CIDR 扫描」标签页",
+          "configTitle": "隧道配置",
+          "configHint": "来自面板订阅或粘贴链接的一个服务器 — vless 或 hysteria2"
+        },
+        "scope": {
+          "title": "从哪里",
+          "hint": "网络、地理、运营商",
+          "label": "范围",
+          "all": "全俄罗斯",
+          "district": "联邦区",
+          "region": "地区",
+          "cities": "城市",
+          "pickDistrict": "联邦区",
+          "pickRegion": "— 选择地区 —",
+          "cityFind": "查找城市…",
+          "cityTruncated": "未全部显示：找到 {{total}} 个，请细化名称",
+          "removeCity": "移除城市",
+          "isps_other": "{{count}} 个运营商"
+        },
+        "network": {
+          "label": "网络",
+          "res": "家庭宽带",
+          "mob": "移动网络"
+        },
+        "limit": {
+          "label": "城市数 · 按人口排名",
+          "all": "全部"
+        },
+        "isp": {
+          "label": "运营商",
+          "any": "任意（城市内随机）",
+          "all": "每个城市的每家运营商各测一次",
+          "allNeedsScope": "仅在选择联邦区、地区或城市列表时可用"
+        },
+        "method": {
+          "title": "方法",
+          "label": "探测",
+          "tcp": "TCP 端口",
+          "tls": "TLS 握手",
+          "tcpHint": "端口接受连接",
+          "tlsHint": "网站真的能打开",
+          "hostsHint": "VPN 主机在没有正确 SNI 时 TLS 会误报拒绝 — 面板主机默认用 TCP",
+          "heavy": "重探测：检测 TSPU 限速",
+          "heavyHint": "每个目标传输 >16 KB；仅限域名；每个城市每个目标约 +0.055 MB"
+        }
       }
     },
     "roles": {

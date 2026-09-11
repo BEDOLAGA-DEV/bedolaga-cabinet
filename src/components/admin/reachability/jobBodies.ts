@@ -1,5 +1,5 @@
 import type { Dpi, JobCreateRequest, Probes, TargetIn, VlessCore } from '@/api/reachability';
-import { type GeoFormState, toGeoOptions } from './geoScope';
+import { type GeoFormState, toGeoOptions } from './geoForm';
 
 /** Чистая сборка тела ``POST /jobs`` из состояния вкладок; null — запускать нечего. */
 
