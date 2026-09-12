@@ -1,19 +1,20 @@
 import apiClient from './client';
 import { getYandexCid } from '../utils/yandexCid';
 import type {
-  Subscription,
-  SubscriptionStatusResponse,
-  SubscriptionListItem,
-  SubscriptionsListResponse,
+  AppConfig,
+  LavaRecurringInfo,
+  PremiumTrafficOptions,
+  PurchaseOptions,
+  PurchasePreview,
+  PurchaseSelection,
   RenewalOption,
+  SbpRecurringInfo,
+  Subscription,
+  SubscriptionListItem,
+  SubscriptionStatusResponse,
+  SubscriptionsListResponse,
   TrafficPackage,
   TrialInfo,
-  PurchaseOptions,
-  PurchaseSelection,
-  PurchasePreview,
-  AppConfig,
-  SbpRecurringInfo,
-  LavaRecurringInfo,
 } from '../types';
 
 /** Helper: build query params with optional subscription_id */
@@ -115,6 +116,36 @@ export const subscriptionApi = {
     const response = await apiClient.post(
       '/cabinet/subscription/traffic',
       ...bodyWithSubId({ gb, yandex_cid: getYandexCid() || undefined }, subscriptionId),
+    );
+    return response.data;
+  },
+
+  // ── Premium traffic (посквадные лимиты) ────────────────────────────
+
+  getPremiumTrafficOptions: async (subscriptionId?: number): Promise<PremiumTrafficOptions[]> => {
+    const response = await apiClient.get<PremiumTrafficOptions[]>(
+      '/cabinet/subscription/premium-traffic',
+      withSubId(subscriptionId),
+    );
+    return response.data;
+  },
+
+  purchasePremiumTraffic: async (
+    squadUuid: string,
+    gb: number,
+    subscriptionId?: number,
+  ): Promise<{
+    success: boolean;
+    squad_uuid: string;
+    gb: number;
+    price_kopeks: number;
+    discount_percent: number;
+    squad_restored: boolean;
+    balance_kopeks: number;
+  }> => {
+    const response = await apiClient.post(
+      '/cabinet/subscription/premium-traffic',
+      ...bodyWithSubId({ squad_uuid: squadUuid, gb }, subscriptionId),
     );
     return response.data;
   },
