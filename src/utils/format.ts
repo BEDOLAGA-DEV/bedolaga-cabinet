@@ -61,6 +61,15 @@ export function formatPrice(kopeks: number, lang?: string): string {
   }
 }
 
+/** A date-only string (YYYY-MM-DD) is a calendar day, not UTC midnight: parsed as a local
+ * date so the day label never slips back a day for viewers west of UTC. Full timestamps
+ * stay instants. */
+export function parseCalendarDate(value: string): Date {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!match) return new Date(value);
+  return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+}
+
 /** Date-only (dd.mm.yyyy) in the active UI locale; '-' for a null date. */
 export function formatShortDate(date: string | null): string {
   if (!date) return '-';
