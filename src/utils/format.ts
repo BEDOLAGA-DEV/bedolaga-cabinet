@@ -61,6 +61,29 @@ export function formatPrice(kopeks: number, lang?: string): string {
   }
 }
 
+/** A date-only string (YYYY-MM-DD) is a calendar day, not UTC midnight: parsed as a local
+ * date so the day label never slips back a day for viewers west of UTC. Full timestamps
+ * stay instants. */
+export function parseCalendarDate(value: string): Date {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!match) return new Date(value);
+  return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+}
+
+/** A machine date rendered for the locale; a string the browser cannot parse is shown as is.
+ * Bot 4.8.0 sent a human-formatted date in WebSocket events and the success modal printed
+ * "Invalid Date" — the raw text is always better than that. */
+export function formatDateOrRaw(
+  value: string | null | undefined,
+  locale: string,
+  options: Intl.DateTimeFormatOptions,
+): string | null {
+  if (!value) return null;
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return value;
+  return parsed.toLocaleDateString(locale, options);
+}
+
 /** Date-only (dd.mm.yyyy) in the active UI locale; '-' for a null date. */
 export function formatShortDate(date: string | null): string {
   if (!date) return '-';

@@ -2060,7 +2060,8 @@
       "kinds": {
         "probe": "probe",
         "vless": "VLESS test",
-        "scan": "scan /24"
+        "scan": "scan /24",
+        "geo": "GEO from cities"
       },
       "status": {
         "openSettings": "Open settings",
@@ -2136,7 +2137,11 @@
         "summaryServers_other": "{{count}} servers",
         "busyBatch": "A server check is already running — wait for it",
         "timeRow": "Time",
-        "confirmServers": "Servers ({{count}}): {{list}}"
+        "confirmServers": "Servers ({{count}}): {{list}}",
+        "runGeo_one": "Check {{count}} city · {{price}}",
+        "runGeo_other": "Check {{count}} cities · {{price}}",
+        "runShortGeo_one": "Check {{count}} city",
+        "runShortGeo_other": "Check {{count}} cities"
       },
       "progress": {
         "submitting": "Sending request…",
@@ -2154,7 +2159,8 @@
         "units": "SIMs",
         "waitingUnit": "waiting…",
         "answered": "{{answered}} of {{total}} SIMs answered",
-        "canLeave": "You can close the page: the result will appear in “My checks”."
+        "canLeave": "You can close the page: the result will appear in “My checks”.",
+        "hintGeo": "Sites: half a second per city, tunnel: two to three seconds; cities run in parallel. The page updates by itself."
       },
       "verdict": {
         "reachable": "reachable",
@@ -2216,10 +2222,15 @@
         "inputPlaceholder": "vless:// · vmess:// · trojan:// · ss:// · hysteria2:// · subscription URL · base64 — one link per line",
         "loading": "Loading subscription…",
         "parseFailed": "Could not parse",
+        "notLoaded": "Subscription not loaded",
+        "noteTitle": "Subscription",
         "sourceLinks": "links · {{count}}",
         "sourceSubscription": "subscription · {{count}}",
         "pickAll": "All",
         "pickNone": "Reset",
+        "filter": "Find by name or address",
+        "filterNone": "Nothing found",
+        "filterShown": "showing {{shown}} of {{total}}",
         "orPick": "Or your own config / another subscription",
         "fromInput": "showing configs from the field above",
         "selectedOf": "selected {{selected}} / {{total}}",
@@ -2372,7 +2383,9 @@
         "vless": "VPN test",
         "vlessHint": "subscription configs through a VLESS tunnel, up to 20 per test",
         "history": "History",
-        "historyHint": "every check: what was checked, the outcome and the charge"
+        "historyHint": "every check: what was checked, the outcome and the charge",
+        "geo": "GEO",
+        "geoHint": "from Russian cities through home and mobile ISPs, up to 20 targets and one config"
       },
       "sections": {
         "targets": "Targets",
@@ -2391,7 +2404,7 @@
           "time": "Time",
           "cost": "Charged",
           "outcome": "Outcome",
-          "units": "SIMs"
+          "units": "From"
         },
         "outcome": {
           "ok": "all reachable",
@@ -2414,7 +2427,9 @@
           "pending": "Check in progress",
           "scan": "Alive addresses: {{ok}} of {{total}}",
           "empty": "No result",
-          "blockedList": "Blocked or no answer: {{list}}"
+          "blockedList": "Blocked or no answer: {{list}}",
+          "geo_one": "Works in {{ok}} of {{total}} city",
+          "geo_other": "Works in {{ok}} of {{total}} cities"
         },
         "batchTargets_one": "{{count}} server",
         "batchTargets_other": "{{count}} servers",
@@ -2493,6 +2508,136 @@
         "pickDistrict": "All SIMs in {{code}}",
         "unpickDistrict": "Clear SIMs in {{code}}",
         "empty": "No SIMs: service unavailable"
+      },
+      "geo": {
+        "targets": {
+          "count": "{{count}} of {{max}} targets",
+          "overLimit": "No more than {{max}} targets per run — drop the extra ones",
+          "placeholder": "example.com · 1.2.3.4:443 · https://… — comma-separated or one per line",
+          "hint": "Domain, IP, address with port or a site link. GEO does not check subnets.",
+          "noCidr": "A subnet cannot be checked here — that is the “CIDR scan” tab",
+          "configTitle": "Tunnel config",
+          "configHint": "one server from the panel subscription or a pasted link — vless or hysteria2",
+          "kindLabel": "What to check",
+          "kinds": {
+            "hosts": "Panel hosts",
+            "addresses": "IP / Domain",
+            "vless": "VLESS"
+          },
+          "kindHint": {
+            "hosts": "Remnawave panel servers: up to 20 per run, probe on the server port",
+            "addresses": "IP · IP:port · domain · https://… — comma- or line-separated; subnets are not checked",
+            "vless": "one vless or hysteria2 config from the panel subscription or a pasted link"
+          }
+        },
+        "scope": {
+          "title": "From where",
+          "hint": "network, geography, ISP",
+          "label": "Coverage",
+          "all": "All of Russia",
+          "district": "District",
+          "region": "Region",
+          "cities": "Cities",
+          "pickDistrict": "District",
+          "pickRegion": "— pick a region —",
+          "cityFind": "Find a city…",
+          "cityTruncated": "Not all shown: {{total}} found, refine the name",
+          "removeCity": "Remove city",
+          "isps_one": "{{count}} ISP",
+          "isps_other": "{{count}} ISPs"
+        },
+        "network": {
+          "label": "Network",
+          "res": "Home",
+          "mob": "Mobile"
+        },
+        "limit": {
+          "label": "Cities · top by population",
+          "all": "all"
+        },
+        "isp": {
+          "label": "ISP",
+          "any": "Any (random in the city)",
+          "all": "One probe per ISP in each city",
+          "allNeedsScope": "Only with a district, a region or a list of cities"
+        },
+        "method": {
+          "title": "Method",
+          "label": "Probe",
+          "tcp": "TCP port",
+          "tls": "TLS handshake",
+          "tcpHint": "the port accepts a connection",
+          "tlsHint": "the site really opens",
+          "hostsHint": "For a VPN host TLS without the right SNI shows a false refusal — panel hosts default to TCP",
+          "heavy": "Heavy probe: TSPU throttling detection",
+          "heavyHint": "transfers >16 KB per target; domains only; ≈ +0.055 MB per target in every city"
+        },
+        "verdicts": {
+          "ok": "works",
+          "partial": "partial",
+          "throttled": "throttled",
+          "blocked": "blocked (confirmed)",
+          "unconfirmed": "unconfirmed — repeat",
+          "exit_bad": "ISP line did not answer (not a result)",
+          "target_error": "target answers with an error",
+          "no_ru_node": "no RU node",
+          "no_udp": "exit without UDP (hy2)",
+          "port_blocked": "port cannot be checked (forbidden by the proxy network)"
+        },
+        "result": {
+          "progress": "{{done}} of {{total}} done",
+          "noise": "not a result: {{count}}",
+          "find": "Find a city or region…",
+          "cities_one": "{{count}} city",
+          "cities_other": "{{count}} cities",
+          "picked": "On the map: {{label}} · {{count}}",
+          "pickedClear": "Show all"
+        },
+        "rows": {
+          "city": "City",
+          "provider": "ISP",
+          "empty": "No city matches the filter",
+          "notChecked": "not checked: {{reason}}",
+          "latency": "{{value}} ms",
+          "kbps": "{{value}} kbps",
+          "froze": "freeze",
+          "recheck": "Repeat",
+          "tags": {
+            "newExit": "new exit",
+            "newExitTitle": "another exit after a re-check — the previous row is kept",
+            "exitChanged": "exit changed",
+            "exitChangedTitle": "the same exit was requested, the proxy swapped it",
+            "flaky": "2nd attempt",
+            "flakyTitle": "the first probe failed, a repeat from the same exit succeeded; the operator line flickers"
+          }
+        },
+        "launch": {
+          "citiesRow": "Cities",
+          "maxNodes": "mode cap {{count}}",
+          "applyLimit": "Set the cap to {{count}}",
+          "confirmCities": "Cities: {{count}}"
+        },
+        "fromHost": "Check from Russian cities",
+        "map": {
+          "close": "Close",
+          "noCities": "no cities in this check",
+          "zoomIn": "Zoom in",
+          "zoomOut": "Zoom out",
+          "reset": "Whole map",
+          "more": "{{count}} more"
+        },
+        "recheck": {
+          "sameIp": "Same IP",
+          "newIp": "Change IP",
+          "busy": "Checking…",
+          "done": "Re-checked",
+          "doneTitle": "this row was re-checked — the fresh result is a separate row",
+          "sameIpNoSid": "Repeat the check (the exit is picked anew)",
+          "sameIpHold": "Repeat through the SAME IP {{ip}} — the exit is held for ~{{seconds}} s more",
+          "sameIpExpired": "Repeat through the same IP {{ip}} — the hold has expired; if the proxy swaps the exit the row is marked \"exit changed\"",
+          "newIpTitle": "Change IP: another exit / provider in this city. This row stays, a new one is added with a tag",
+          "failed": "Could not start the re-check"
+        }
       }
     },
     "wheel": {
@@ -4239,7 +4384,8 @@
         "active": "Active",
         "withSubscription": "With subscription",
         "newToday": "New today",
-        "blocked": "Blocked"
+        "blocked": "Blocked",
+        "deleted": "Deleted"
       },
       "status": {
         "active": "Active",
