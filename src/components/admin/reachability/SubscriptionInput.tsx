@@ -76,6 +76,22 @@ export function SubscriptionInput({ value, onChange, parsed }: SubscriptionInput
           </span>
         )}
       </div>
+      {data?.rejected
+        .filter((item) => item.reason === 'subscription_failed')
+        .map((item) => (
+          <p key={item.preview} role="alert" className="mt-1.5 text-xs text-error-400">
+            {t('admin.reachability.subscription.notLoaded')}:{' '}
+            {item.detail ??
+              t('admin.reachability.subscription.rejectedReasons.subscription_failed')}
+          </p>
+        ))}
+      {data?.sources
+        .filter((source) => source.note)
+        .map((source) => (
+          <p key={`${source.kind}:${source.label}`} className="mt-1.5 text-xs text-warning-400">
+            {source.note}
+          </p>
+        ))}
     </div>
   );
 }

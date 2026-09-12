@@ -13,7 +13,8 @@
       "!public",
       "!package-lock.json",
       "!**/*.min.js",
-      "!**/*.min.css"
+      "!**/*.min.css",
+      "!src/components/admin/reachability/assets/*.json"
     ]
   },
   "formatter": {
