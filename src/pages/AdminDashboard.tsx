@@ -4,7 +4,7 @@ import { backTo } from '@/components/admin';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { statsApi, type NodeStatus } from '../api/admin';
-import { formatUptime } from '../utils/format';
+import { formatUptime, parseCalendarDate } from '../utils/format';
 
 const CABINET_VERSION = __APP_VERSION__;
 import { useCurrency } from '../hooks/useCurrency';
@@ -170,7 +170,7 @@ function RevenueChart({ data }: { data: { date: string; amount_rubles: number }[
     <div className="space-y-3">
       {last7Days.map((item) => {
         const percentage = (item.amount_rubles / maxValue) * 100;
-        const date = new Date(item.date);
+        const date = parseCalendarDate(item.date);
         const dayName = date.toLocaleDateString('ru-RU', { weekday: 'short' });
         const dayNum = date.getDate();
 

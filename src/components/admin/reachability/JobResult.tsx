@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import type { Job } from '@/api/reachability';
+import { GeoResult } from './GeoResult';
 import { ProbeResult } from './ProbeResult';
 import { JobHeadline } from './JobHeadline';
 import { ScanResult } from './ScanResult';
@@ -26,6 +27,7 @@ export function JobResult({ job }: { job: Job }) {
       {job.kind === 'probe' && <ProbeResult job={job} />}
       {job.kind === 'vless' && <VlessResult job={job} />}
       {job.kind === 'scan' && <ScanResult job={job} />}
+      {job.kind === 'geo' && <GeoResult job={job} />}
     </div>
   );
 }

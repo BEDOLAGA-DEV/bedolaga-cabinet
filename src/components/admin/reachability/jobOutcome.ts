@@ -1,4 +1,5 @@
 import type { Job } from '@/api/reachability';
+import { geoSummaryOf } from './geoRowsView';
 import type { CellState } from './probeCells';
 
 /** Итог задачи одной точкой, как в журнале оригинала: всё доступно · частично · недоступно. */
@@ -18,6 +19,12 @@ export function jobOutcome(job: Pick<Job, 'status' | 'legs' | 'kind' | 'result'>
     const upN =
       result && typeof result === 'object' ? (result as Record<string, unknown>).up_n : null;
     return typeof upN === 'number' ? (upN > 0 ? 'ok' : 'down') : 'na';
+  }
+  if (job.kind === 'geo') {
+    const summary = geoSummaryOf(job);
+    if (!summary || summary.resultRows === 0) return 'na';
+    const ok = summary.byVerdict.ok ?? 0;
+    return ok === summary.resultRows ? 'ok' : ok === 0 ? 'down' : 'warn';
   }
   const judged = job.legs.filter((leg) => leg.verdict !== 'cancelled');
   if (judged.length === 0) return 'na';

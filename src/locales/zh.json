@@ -3264,7 +3264,8 @@
         "active": "活跃",
         "withSubscription": "有订阅",
         "newToday": "今日新增",
-        "blocked": "已封禁"
+        "blocked": "已封禁",
+        "deleted": "已删除"
       },
       "status": {
         "active": "活跃",
@@ -4012,7 +4013,8 @@
       "kinds": {
         "probe": "探测",
         "vless": "VLESS 测试",
-        "scan": "扫描 /24"
+        "scan": "扫描 /24",
+        "geo": "城市 GEO"
       },
       "status": {
         "openSettings": "打开设置",
@@ -4078,7 +4080,9 @@
         "summaryServers_other": "{{count}} 台服务器",
         "busyBatch": "服务器检查已在进行 — 请等待完成",
         "timeRow": "时间",
-        "confirmServers": "服务器（{{count}}）：{{list}}"
+        "confirmServers": "服务器（{{count}}）：{{list}}",
+        "runGeo_other": "检查 {{count}} 个城市 · {{price}}",
+        "runShortGeo_other": "检查 {{count}} 个城市"
       },
       "progress": {
         "submitting": "正在发送请求…",
@@ -4096,7 +4100,8 @@
         "units": "SIM 卡",
         "waitingUnit": "等待中…",
         "answered": "{{total}} 张 SIM 卡中 {{answered}} 张已响应",
-        "canLeave": "可以关闭页面：结果会出现在“我的检测”中。"
+        "canLeave": "可以关闭页面：结果会出现在“我的检测”中。",
+        "hintGeo": "网站：每个城市半秒，隧道：两到三秒；城市并行检查。页面会自动更新。"
       },
       "verdict": {
         "reachable": "可达",
@@ -4156,10 +4161,15 @@
         "inputPlaceholder": "vless:// · vmess:// · trojan:// · ss:// · hysteria2:// · 订阅 URL · base64 — 每行一条",
         "loading": "正在加载订阅…",
         "parseFailed": "无法解析",
+        "notLoaded": "订阅未加载",
+        "noteTitle": "订阅",
         "sourceLinks": "链接 · {{count}}",
         "sourceSubscription": "订阅 · {{count}}",
         "pickAll": "全部",
         "pickNone": "重置",
+        "filter": "按名称或地址查找",
+        "filterNone": "未找到",
+        "filterShown": "显示 {{shown}} / {{total}}",
         "orPick": "或自己的配置 / 其他订阅",
         "fromInput": "显示上方字段中的配置",
         "selectedOf": "已选 {{selected}} / {{total}}",
@@ -4305,7 +4315,9 @@
         "vless": "VPN 测试",
         "vlessHint": "通过 VLESS 隧道检查订阅配置，每次最多 20 个",
         "history": "历史",
-        "historyHint": "全部检查：检查了什么、结果如何、扣了多少"
+        "historyHint": "全部检查：检查了什么、结果如何、扣了多少",
+        "geo": "GEO",
+        "geoHint": "从俄罗斯城市以家庭和移动运营商的视角检查，每次最多 20 个目标和一个配置"
       },
       "sections": {
         "targets": "目标",
@@ -4324,7 +4336,7 @@
           "time": "时间",
           "cost": "扣费",
           "outcome": "结果",
-          "units": "SIM 卡"
+          "units": "来源"
         },
         "outcome": {
           "ok": "全部可达",
@@ -4344,7 +4356,8 @@
           "pending": "检测进行中",
           "scan": "存活地址：{{ok}} / {{total}}",
           "empty": "没有结果",
-          "blockedList": "被拦截或无响应：{{list}}"
+          "blockedList": "被拦截或无响应：{{list}}",
+          "geo_other": "{{total}} 个城市中 {{ok}} 个正常"
         },
         "batchTargets_other": "{{count}} 台服务器",
         "batchOutcome": "{{total}} 台中 {{ok}} 台正常",
@@ -4420,6 +4433,134 @@
         "pickDistrict": "{{code}} 全部 SIM 卡",
         "unpickDistrict": "取消 {{code}} 的 SIM 卡",
         "empty": "没有 SIM 卡：服务不可用"
+      },
+      "geo": {
+        "targets": {
+          "count": "目标 {{count}} / {{max}}",
+          "overLimit": "每次最多 {{max}} 个目标，请去掉多余的",
+          "placeholder": "example.com · 1.2.3.4:443 · https://… — 用逗号或换行分隔",
+          "hint": "域名、IP、带端口的地址或网站链接。GEO 不检查子网。",
+          "noCidr": "子网无法在这里检查，请使用「CIDR 扫描」标签页",
+          "configTitle": "隧道配置",
+          "configHint": "来自面板订阅或粘贴链接的一个服务器 — vless 或 hysteria2",
+          "kindLabel": "检查对象",
+          "kinds": {
+            "hosts": "面板主机",
+            "addresses": "IP / 域名",
+            "vless": "VLESS"
+          },
+          "kindHint": {
+            "hosts": "Remnawave 面板服务器：每次最多 20 个，按服务器端口探测",
+            "addresses": "IP · IP:端口 · 域名 · https://… — 用逗号或换行分隔；不检查子网",
+            "vless": "来自面板订阅或粘贴链接的一个 vless 或 hysteria2 配置"
+          }
+        },
+        "scope": {
+          "title": "从哪里",
+          "hint": "网络、地理、运营商",
+          "label": "范围",
+          "all": "全俄罗斯",
+          "district": "联邦区",
+          "region": "地区",
+          "cities": "城市",
+          "pickDistrict": "联邦区",
+          "pickRegion": "— 选择地区 —",
+          "cityFind": "查找城市…",
+          "cityTruncated": "未全部显示：找到 {{total}} 个，请细化名称",
+          "removeCity": "移除城市",
+          "isps_other": "{{count}} 个运营商"
+        },
+        "network": {
+          "label": "网络",
+          "res": "家庭宽带",
+          "mob": "移动网络"
+        },
+        "limit": {
+          "label": "城市数 · 按人口排名",
+          "all": "全部"
+        },
+        "isp": {
+          "label": "运营商",
+          "any": "任意（城市内随机）",
+          "all": "每个城市的每家运营商各测一次",
+          "allNeedsScope": "仅在选择联邦区、地区或城市列表时可用"
+        },
+        "method": {
+          "title": "方法",
+          "label": "探测",
+          "tcp": "TCP 端口",
+          "tls": "TLS 握手",
+          "tcpHint": "端口接受连接",
+          "tlsHint": "网站真的能打开",
+          "hostsHint": "VPN 主机在没有正确 SNI 时 TLS 会误报拒绝 — 面板主机默认用 TCP",
+          "heavy": "重探测：检测 TSPU 限速",
+          "heavyHint": "每个目标传输 >16 KB；仅限域名；每个城市每个目标约 +0.055 MB"
+        },
+        "verdicts": {
+          "ok": "正常",
+          "partial": "部分",
+          "throttled": "被限速",
+          "blocked": "被封锁（已确认）",
+          "unconfirmed": "未确认，请重试",
+          "exit_bad": "运营商线路无响应（不算结果）",
+          "target_error": "目标返回错误",
+          "no_ru_node": "没有 RU 节点",
+          "no_udp": "出口不支持 UDP (hy2)",
+          "port_blocked": "端口无法检查（代理网络禁止）"
+        },
+        "result": {
+          "progress": "已完成 {{done}} / {{total}}",
+          "noise": "不算结果：{{count}}",
+          "find": "查找城市或地区…",
+          "cities_other": "{{count}} 个城市",
+          "picked": "地图上：{{label}} · {{count}}",
+          "pickedClear": "显示全部"
+        },
+        "rows": {
+          "city": "城市",
+          "provider": "运营商",
+          "empty": "没有符合筛选的城市",
+          "notChecked": "未检查：{{reason}}",
+          "latency": "{{value}} 毫秒",
+          "kbps": "{{value}} kbps",
+          "froze": "冻结",
+          "recheck": "重复",
+          "tags": {
+            "newExit": "新出口",
+            "newExitTitle": "复查后使用了另一出口 — 原行保留",
+            "exitChanged": "出口已更换",
+            "exitChangedTitle": "请求同一出口，但代理更换了它",
+            "flaky": "第二次成功",
+            "flakyTitle": "第一次探测失败，同一出口重试成功；运营商线路不稳定"
+          }
+        },
+        "launch": {
+          "citiesRow": "城市数",
+          "maxNodes": "该模式上限 {{count}}",
+          "applyLimit": "将上限设为 {{count}}",
+          "confirmCities": "城市数：{{count}}"
+        },
+        "fromHost": "从俄罗斯城市检查",
+        "map": {
+          "close": "关闭",
+          "noCities": "本次检查未覆盖此地区的城市",
+          "zoomIn": "放大",
+          "zoomOut": "缩小",
+          "reset": "整张地图",
+          "more": "还有 {{count}} 个"
+        },
+        "recheck": {
+          "sameIp": "同一 IP",
+          "newIp": "更换 IP",
+          "busy": "检查中…",
+          "done": "已复查",
+          "doneTitle": "此行已复查 — 新结果单独成行",
+          "sameIpNoSid": "重复检查（出口将重新选择）",
+          "sameIpHold": "通过同一 IP {{ip}} 重复 — 出口还会保持约 {{seconds}} 秒",
+          "sameIpExpired": "通过同一 IP {{ip}} 重复 — 保持已到期；若代理更换出口，该行将标记为“出口已更换”",
+          "newIpTitle": "更换 IP：此城市的另一出口/提供商。此行保留，新行带标记加入",
+          "failed": "无法启动复查"
+        }
       }
     },
     "roles": {

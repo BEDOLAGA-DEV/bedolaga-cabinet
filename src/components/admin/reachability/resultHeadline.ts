@@ -1,4 +1,5 @@
 import type { Job } from '@/api/reachability';
+import { geoSummaryOf } from './geoRowsView';
 
 /**
  * Ответ словами по задаче — первая строка результата и строки журнала: «открывается везде»,
@@ -12,6 +13,7 @@ export type HeadlineKey =
   | 'cancelled'
   | 'pending'
   | 'scan'
+  | 'geo'
   | 'empty';
 
 export interface ResultHeadline {
@@ -56,6 +58,15 @@ export function resultHeadline(
     const counts = scanCounts(job.result);
     if (!counts) return empty('empty', 'na');
     return { key: 'scan', tone: counts.ok > 0 ? 'ok' : 'down', ...counts, blocked: [] };
+  }
+  if (job.kind === 'geo') {
+    // По городам с результатом: шум сервиса (линия не отвечала, ноды нет) не считается.
+    const summary = geoSummaryOf(job);
+    if (!summary || summary.resultRows === 0) return empty('empty', 'na');
+    const ok = summary.byVerdict.ok ?? 0;
+    const total = summary.resultRows;
+    const tone = ok === total ? 'ok' : ok === 0 ? 'down' : 'warn';
+    return { key: 'geo', tone, ok, total, blocked: [] };
   }
   const judged = job.legs.filter(
     (leg) =>
