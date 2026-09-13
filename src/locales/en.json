@@ -3093,7 +3093,7 @@
     },
     "graceAccess": {
       "title": "Grace access",
-      "subtitle": "Temporary Telegram-only access so a user can open the bot and renew",
+      "subtitle": "The subscription ended, but what matters stays reachable so the user can renew",
       "loadError": "Could not load grace access settings",
       "saveError": "Could not save the settings",
       "save": "Save",
