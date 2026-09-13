@@ -3187,7 +3187,7 @@
         "durationDesc": "How many hours the temporary access lasts if the subscription is never renewed",
         "trafficDesc": "How many new gigabytes can be spent in that time: counted on top of what is already used, the old remainder is not carried over",
         "hint": "While grace lasts the panel account is active but reaches the network only through the grace squad.",
-        "allowedDesc": "How the user will see it in the bot message and the email: “access to … only”. What the grace squad really lets through is up to the nodes — the bot only says so.",
+        "allowedDesc": "How the user will see it in the bot message and the email: “only this stays available: …”. What the grace squad really lets through is up to the nodes — the bot only says so.",
         "allowedPlaceholder": "Telegram and the dashboard"
       },
       "coverage": {
