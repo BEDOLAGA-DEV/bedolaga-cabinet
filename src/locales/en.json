@@ -3144,7 +3144,8 @@
         "traffic_required": "The traffic limit must be at least 1 GB",
         "open_sessions_stranded": "Sessions are still open but this mode never finishes them, so the overlay stays in the panel. Switch to “Drain”.",
         "number_required": "Number is empty: {{field}}",
-        "mode_invalid": "An unknown mode is stored. The bot fails on it at startup and leaves grace disabled — pick a mode again."
+        "mode_invalid": "An unknown mode is stored. The bot fails on it at startup and leaves grace disabled — pick a mode again.",
+        "allowed_required": "Say what stays reachable: without it the user message makes no sense"
       },
       "fields": {
         "mode": "Mode",
@@ -3155,7 +3156,10 @@
         "traffic_gb": "Traffic, GB",
         "reconcile_interval_seconds": "Reconcile interval, sec",
         "reconcile_batch_size": "Batch size",
-        "candidate_lookback_minutes": "Lookback window, min"
+        "candidate_lookback_minutes": "Lookback window, min",
+        "allowed_services": "What stays reachable",
+        "notify_admins": "Notify admins",
+        "notify_user": "Tell the user"
       },
       "squads": {
         "title": "Squads",
@@ -3182,7 +3186,9 @@
         "title": "What the user gets",
         "durationDesc": "How many hours the temporary access lasts if the subscription is never renewed",
         "trafficDesc": "How many new gigabytes can be spent in that time: counted on top of what is already used, the old remainder is not carried over",
-        "hint": "While grace lasts the panel account is active but reaches the network only through the grace squad."
+        "hint": "While grace lasts the panel account is active but reaches the network only through the grace squad.",
+        "allowedDesc": "How the user will see it in the bot message and the email: “access to … only”. What the grace squad really lets through is up to the nodes — the bot only says so.",
+        "allowedPlaceholder": "Telegram and the dashboard"
       },
       "coverage": {
         "title": "Which subscriptions get it",
@@ -3258,6 +3264,14 @@
       "fullyLocked": {
         "title": "This section is read-only",
         "body": "Every grace setting is pinned in .env, so the file shadows the database and edits made here would not apply. Remove the GRACE_ACCESS_* lines from .env and restart the bot to manage them from here."
+      },
+      "notifications": {
+        "title": "Notifications",
+        "hint": "Who is told when grace is granted and when it ends. Emails are edited in “Email templates”.",
+        "notify_admins": "Admins in the notification chat",
+        "notify_adminsDesc": "Who got it, why, until when and how it ended — in the “Renewals” category",
+        "notify_user": "The user in the bot and by email",
+        "notify_userDesc": "The subscription ended but access to what is named above is kept for a while, with a renew button; and when that access closes"
       }
     },
     "bulkActions": {
