@@ -141,6 +141,8 @@ async function renderPage() {
 
 const saveButton = () => screen.getByRole('button', { name: 'Сохранить' }) as HTMLButtonElement;
 const modeCard = (label: string) => screen.getByRole('button', { name: new RegExp(label) });
+// Внешний сквад живёт в свёрнутом блоке «Дополнительно»: пока он «Снять», блок закрыт.
+const openAdvanced = () => fireEvent.click(screen.getByRole('button', { name: 'Показать' }));
 
 describe('раздел grace-доступа', () => {
   it('до правок сохранять нечего', async () => {
@@ -250,7 +252,7 @@ describe('раздел grace-доступа', () => {
     expect(screen.queryByText('Раздел открыт только на чтение')).toBeNull();
   });
 
-  it('«Отцепить» можно сохранить', async () => {
+  it('«Снять на время grace» можно сохранить', async () => {
     // Пропуск любой пустой строки делал безопасное значение единственным,
     // которое нельзя было записать: внешний сквад навсегда оставался keep.
     state.overview = overview({ config: config({ external_squad_uuid: 'keep' }) });
@@ -273,11 +275,12 @@ describe('раздел grace-доступа', () => {
     await waitFor(() => expect(state.saves).toEqual([{ expired_squad_uuid: '' }]));
   });
 
-  it('аварийный сквад из пробелов не сохраняется как «Отцепить»', async () => {
+  it('указанный внешний сквад из пробелов не сохраняется как «Снять»', async () => {
     await renderPage();
+    openAdvanced();
 
     fireEvent.change(screen.getByLabelText('Внешний сквад'), { target: { value: 'custom' } });
-    fireEvent.change(screen.getByLabelText('Аварийный сквад'), { target: { value: '   ' } });
+    fireEvent.change(screen.getByLabelText('UUID внешнего сквада'), { target: { value: '   ' } });
 
     expect(saveButton().disabled).toBe(true);
     expect(state.saves).toEqual([]);
@@ -367,20 +370,22 @@ describe('раздел grace-доступа', () => {
     expect(field.value).toBe(EXPIRED_UUID);
   });
 
-  it('выбор «Аварийный сквад» не сбрасывается обратно на «Отцепить»', async () => {
+  it('выбор «Заменить на указанный» не сбрасывается обратно на «Снять»', async () => {
     // Вариант начинается с пустого поля, и вывод варианта из самого значения
     // возвращал бы список к «Отцепить» сразу после выбора.
     await renderPage();
+    openAdvanced();
 
     const select = screen.getByLabelText('Внешний сквад') as HTMLSelectElement;
     fireEvent.change(select, { target: { value: 'custom' } });
 
     expect(select.value).toBe('custom');
-    expect(screen.getByLabelText('Аварийный сквад')).toBeTruthy();
+    expect(screen.getByLabelText('UUID внешнего сквада')).toBeTruthy();
   });
 
-  it('пустой аварийный сквад не сохраняется как «Отцепить»', async () => {
+  it('пустой указанный внешний сквад не сохраняется как «Снять»', async () => {
     await renderPage();
+    openAdvanced();
 
     fireEvent.change(screen.getByLabelText('Внешний сквад'), { target: { value: 'custom' } });
 
@@ -438,8 +443,9 @@ describe('раздел grace-доступа', () => {
     expect(screen.queryByText(/Некорректный UUID/)).toBeNull();
   });
 
-  it('«оставить как есть» отправляется как keep', async () => {
+  it('«Не трогать» отправляется как keep', async () => {
     await renderPage();
+    openAdvanced();
 
     fireEvent.change(screen.getByLabelText('Внешний сквад'), { target: { value: 'keep' } });
     fireEvent.click(saveButton());

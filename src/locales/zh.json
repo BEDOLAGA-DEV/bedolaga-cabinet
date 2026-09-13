@@ -2197,7 +2197,7 @@
     },
     "graceAccess": {
       "title": "宽限访问",
-      "subtitle": "临时受限访问，让用户仍有机会续订",
+      "subtitle": "仅限 Telegram 的临时访问，让用户能打开机器人并续订",
       "loadError": "无法加载宽限访问设置",
       "saveError": "无法保存设置",
       "save": "保存",
@@ -2263,45 +2263,53 @@
       },
       "squads": {
         "title": "小队",
-        "hint": "宽限期间用户被移动到哪里。原始状态会被快照保存，结束时恢复。",
+        "hint": "机器人临时把账户移入的面板内部小队。只放行 Telegram 需由节点的网络实现——机器人不做限制。两种情况可以选同一个小队；原始小队会被记录并在结束时恢复。",
         "choose": "选择小队",
         "manual": "手动输入 UUID…",
         "members": "{{n}} 人",
         "unavailable": "面板不可用 — 可手动输入 UUID",
-        "expiredDesc": "订阅到期时使用",
-        "limitedDesc": "流量上限耗尽时使用"
+        "expiredDesc": "订阅期限结束时",
+        "limitedDesc": "流量上限耗尽时"
       },
       "external": {
-        "detach": "移除",
-        "keep": "保持不变",
-        "custom": "备用小队",
-        "detachDesc": "宽限期间移除外部小队，结束后恢复",
-        "keepDesc": "不改动用户的外部小队",
-        "customDesc": "宽限期间使用指定的小队"
+        "detach": "宽限期间移除",
+        "keep": "不改动",
+        "custom": "替换为指定小队",
+        "detachDesc": "移除账户的外部小队，使访问只经过宽限小队，结束时恢复",
+        "keepDesc": "账户的外部小队保持不变——经由它的访问不受限制",
+        "customDesc": "宽限期间分配指定的外部小队，之后恢复原来的",
+        "hint": "面板中的外部小队是带有其他主机和模板的独立订阅配置（例如用于绕过封锁）。如果不使用，请保持“宽限期间移除”。",
+        "uuid": "外部小队 UUID"
       },
       "limits": {
-        "title": "限制",
-        "durationDesc": "如果一直没有续订，访问可持续多久",
-        "trafficDesc": "宽限期间的流量上限"
+        "title": "用户获得什么",
+        "durationDesc": "如果一直没有续订，临时访问持续多少小时",
+        "trafficDesc": "这段时间可以使用多少新流量（GB）：在已用流量之上计算，原有余量不结转",
+        "hint": "宽限期间面板账户处于活跃状态，但只能通过宽限小队访问网络。"
       },
       "coverage": {
-        "title": "发放对象",
-        "hint": "默认只有付费订阅可获得宽限访问。",
-        "trial_enabled": "试用订阅",
-        "trial_enabledDesc": "试用结束后也发放宽限访问",
-        "daily_enabled": "按日订阅",
-        "daily_enabledDesc": "为按日计费的订阅发放宽限访问",
-        "free_enabled": "免费订阅",
-        "free_enabledDesc": "为零费用订阅发放宽限访问"
+        "title": "哪些订阅可获得",
+        "hint": "订阅类型按资费判断：试用 → 按日 → 免费 → 普通付费。",
+        "trial_enabled": "试用期",
+        "trial_enabledDesc": "免费试用期结束后",
+        "daily_enabled": "按日资费",
+        "daily_enabledDesc": "按天扣费的资费",
+        "free_enabled": "免费资费",
+        "free_enabledDesc": "价格为零的资费",
+        "paid": "付费资费",
+        "paidDesc": "普通付费订阅——只要模式开启就始终发放",
+        "always": "始终"
       },
       "reconcile": {
-        "title": "后台核对",
-        "hint": "机器人多久查找一次候选并处理未结束的会话",
+        "title": "高级",
+        "hint": "外部小队与后台核对——很少需要改动",
         "show": "展开",
         "hide": "收起",
         "reconcile_interval_secondsDesc": "两次核对之间的间隔",
         "reconcile_batch_sizeDesc": "一次处理多少个会话",
-        "candidate_lookback_minutesDesc": "向前查找多久之内的到期和限额"
+        "candidate_lookback_minutesDesc": "向前查找多久之内的到期和限额",
+        "background": "后台核对",
+        "backgroundHint": "机器人多久查找一次候选并处理未结束的会话"
       },
       "health": {
         "title": "状态",

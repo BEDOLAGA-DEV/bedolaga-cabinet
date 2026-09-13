@@ -1,4 +1,4 @@
-import { type ReactElement, useEffect, useMemo, useState } from 'react';
+import { type ReactElement, type ReactNode, useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import {
@@ -8,16 +8,37 @@ import {
   type GraceAccessMode,
   type GraceAccessOverview,
   type GraceSessionFilter,
+  type GraceSessionItem,
   type GraceSquadOption,
 } from '@/api/adminGraceAccess';
 import { AdminBackButton, Toggle } from '@/components/admin';
-import { BanIcon, BoltIcon, EyeIcon, LockIcon, RestartIcon, WarningIcon } from '@/components/icons';
+import { DropdownSelect } from '@/components/admin/bulkActions/DropdownSelect';
+import {
+  AdjustmentsIcon,
+  BanIcon,
+  BoltIcon,
+  CheckCircleIcon,
+  ClockIcon,
+  EyeIcon,
+  HeartbeatIcon,
+  HistoryIcon,
+  LifebuoyIcon,
+  LockIcon,
+  PowerIcon,
+  RestartIcon,
+  TagIcon,
+  UsersIcon,
+  WarningIcon,
+  XCircleIcon,
+} from '@/components/icons';
+import { StatCard } from '@/components/stats';
 import { PageSkeleton, Skeleton } from '@/components/ui/skeleton';
+import { cn } from '@/lib/utils';
 import { getApiErrorMessage } from '@/utils/api-error';
 
 /**
- * Grace access: temporary restricted VPN for an expired or traffic-limited
- * subscription, so a user who forgot to pay can still reach the payment page.
+ * Grace access: temporary Telegram-only VPN for an expired or traffic-limited
+ * subscription, so a user who forgot to pay can still open the bot and renew.
  *
  * The same twelve keys are reachable from the generic settings page, one flat row
  * each. They are grouped here because they only mean anything together — and
@@ -76,6 +97,8 @@ const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{
 const EXTERNAL_KEEP = 'keep';
 
 type ExternalChoice = 'detach' | 'keep' | 'custom';
+
+const EXTERNAL_CHOICES: ExternalChoice[] = ['detach', 'keep', 'custom'];
 
 export function externalChoiceOf(value: string): ExternalChoice {
   const normalized = value.trim().toLowerCase();
@@ -156,6 +179,92 @@ function useIssueText() {
 
 // ─── Pieces ───
 
+/**
+ * Секция страницы: карточка канона с иконкой, заголовком H2 и подсказкой.
+ * Подсказка идёт под заголовком во всю ширину, поэтому aside не уезжает на
+ * отдельную строку из-за длинного текста на телефоне.
+ */
+function SectionCard({
+  id,
+  icon,
+  title,
+  hint,
+  aside,
+  children,
+}: {
+  id: string;
+  icon: ReactNode;
+  title: string;
+  hint?: string;
+  aside?: ReactNode;
+  children?: ReactNode;
+}) {
+  return (
+    <section aria-labelledby={id} className="card">
+      <div className="flex items-start gap-3">
+        <span
+          aria-hidden="true"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent-500/15 text-accent-400 [&>svg]:h-5 [&>svg]:w-5"
+        >
+          {icon}
+        </span>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-baseline justify-between gap-x-4">
+            <h2 id={id} className="min-w-0 text-lg font-semibold text-dark-100">
+              {title}
+            </h2>
+            {aside && <div className="shrink-0">{aside}</div>}
+          </div>
+          {hint && <p className="mt-0.5 text-xs text-dark-400">{hint}</p>}
+        </div>
+      </div>
+      {children !== undefined && children !== null && children !== false && (
+        <div className="mt-4">{children}</div>
+      )}
+    </section>
+  );
+}
+
+function Notice({
+  tone,
+  icon,
+  title,
+  children,
+}: {
+  tone: 'warning' | 'error';
+  icon: ReactNode;
+  title: string;
+  children: ReactNode;
+}) {
+  const styles =
+    tone === 'error'
+      ? 'border-error-500/30 bg-error-500/10 text-error-300'
+      : 'border-warning-500/30 bg-warning-500/10 text-warning-300';
+  return (
+    <div className={cn('rounded-2xl border p-4', styles)}>
+      <div className="flex items-center gap-2 font-medium [&>svg]:h-4 [&>svg]:w-4">
+        {icon}
+        {title}
+      </div>
+      <div className={cn('mt-1 text-sm', tone === 'error' ? 'text-error-200' : 'text-warning-200')}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function FieldLabel({ htmlFor, children }: { htmlFor: string; children: ReactNode }) {
+  return (
+    <label htmlFor={htmlFor} className="mb-2 block text-sm font-medium text-dark-300">
+      {children}
+    </label>
+  );
+}
+
+function FieldHint({ children }: { children: ReactNode }) {
+  return <p className="mt-1 text-xs text-dark-400">{children}</p>;
+}
+
 function SquadField({
   id,
   label,
@@ -189,36 +298,34 @@ function SquadField({
 
   return (
     <div>
-      <label htmlFor={id} className="mb-2 block text-sm font-medium text-dark-300">
-        {label}
-      </label>
+      <FieldLabel htmlFor={id}>{label}</FieldLabel>
       {usePicker ? (
-        <select
+        <DropdownSelect
           id={id}
-          className={`input ${invalid ? 'border-error-500/50' : ''}`}
           value={listed ? value : ''}
           disabled={disabled}
-          onChange={(event) => {
-            if (event.target.value === '__manual__') {
+          invalid={invalid}
+          options={[
+            { value: '', label: t('admin.graceAccess.squads.choose') },
+            ...squads.map((squad) => ({
+              value: squad.uuid,
+              label: `${squad.name} · ${t('admin.graceAccess.squads.members', { n: squad.members_count })}`,
+            })),
+            { value: '__manual__', label: t('admin.graceAccess.squads.manual') },
+          ]}
+          onChange={(next) => {
+            if (next === '__manual__') {
               setManualOverride(true);
               return;
             }
-            onChange(event.target.value);
+            onChange(next);
           }}
-        >
-          <option value="">{t('admin.graceAccess.squads.choose')}</option>
-          {squads.map((squad) => (
-            <option key={squad.uuid} value={squad.uuid}>
-              {squad.name} · {t('admin.graceAccess.squads.members', { n: squad.members_count })}
-            </option>
-          ))}
-          <option value="__manual__">{t('admin.graceAccess.squads.manual')}</option>
-        </select>
+        />
       ) : (
         <input
           id={id}
           type="text"
-          className={`input font-mono text-xs ${invalid ? 'border-error-500/50' : ''}`}
+          className={cn('input font-mono text-xs', invalid && 'border-error-500/50')}
           placeholder="00000000-0000-0000-0000-000000000000"
           value={value}
           disabled={disabled}
@@ -230,7 +337,7 @@ function SquadField({
           }}
         />
       )}
-      <p className="mt-1 text-xs text-dark-500">{description}</p>
+      <FieldHint>{description}</FieldHint>
       {!squadsAvailable && (
         <p className="mt-1 text-xs text-warning-400">{t('admin.graceAccess.squads.unavailable')}</p>
       )}
@@ -238,19 +345,50 @@ function SquadField({
   );
 }
 
-function StatTile({ label, value, tone }: { label: string; value: number; tone?: 'error' }) {
-  const alarming = tone === 'error' && value > 0;
+function FilterChip({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: ReactNode;
+}) {
   return (
-    <div
-      className={`rounded-xl border p-3 ${
-        alarming ? 'border-error-500/30 bg-error-500/10' : 'border-dark-700/40 bg-dark-800/30'
-      }`}
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={cn(
+        'rounded-lg px-3 py-1.5 text-xs font-medium transition-colors',
+        active
+          ? 'bg-accent-500/15 text-accent-400 ring-1 ring-accent-500/30'
+          : 'bg-dark-800/50 text-dark-400 hover:text-dark-200',
+      )}
     >
-      <div className={`text-2xl font-semibold ${alarming ? 'text-error-300' : 'text-dark-100'}`}>
-        {value}
+      {children}
+    </button>
+  );
+}
+
+function SessionState({ session }: { session: GraceSessionItem }) {
+  const { t } = useTranslation();
+  return (
+    <>
+      <div className="text-dark-200">
+        {t(`admin.graceAccess.sessions.states.${session.state}`, { defaultValue: session.state })}
       </div>
-      <div className="mt-0.5 text-xs text-dark-400">{label}</div>
-    </div>
+      {session.completion_reason && (
+        <div className="text-xs text-dark-400">
+          {t(`admin.graceAccess.sessions.completion.${session.completion_reason}`, {
+            defaultValue: session.completion_reason,
+          })}
+        </div>
+      )}
+      {session.last_error && (
+        <div className="mt-1 break-words text-xs text-error-400">{session.last_error}</div>
+      )}
+    </>
   );
 }
 
@@ -265,32 +403,28 @@ function SessionsSection() {
   });
 
   const pages = data ? Math.max(1, Math.ceil(data.total / data.limit)) : 1;
+  const userLine = (session: GraceSessionItem) =>
+    session.user?.username ? `@${session.user.username}` : session.user?.telegram_id;
 
   return (
-    <div className="card">
-      <h3 className="text-lg font-semibold text-dark-100">
-        {t('admin.graceAccess.sessions.title')}
-      </h3>
-      <p className="mt-1 text-sm text-dark-500">{t('admin.graceAccess.sessions.hint')}</p>
-
-      <div className="mt-3 flex flex-wrap gap-2">
+    <SectionCard
+      id="grace-sessions"
+      icon={<HistoryIcon />}
+      title={t('admin.graceAccess.sessions.title')}
+      hint={t('admin.graceAccess.sessions.hint')}
+    >
+      <div className="flex flex-wrap gap-2">
         {SESSION_FILTERS.map((value) => (
-          <button
+          <FilterChip
             key={value}
-            type="button"
+            active={filter === value}
             onClick={() => {
               setFilter(value);
               setPage(1);
             }}
-            aria-pressed={filter === value}
-            className={`rounded-lg border px-3 py-1.5 text-xs transition-colors ${
-              filter === value
-                ? 'border-accent-500/50 bg-accent-500/10 text-dark-100'
-                : 'border-dark-700/40 bg-dark-800/30 text-dark-300 hover:border-dark-600'
-            }`}
           >
             {t(`admin.graceAccess.sessions.filter.${value}`)}
-          </button>
+          </FilterChip>
         ))}
       </div>
 
@@ -310,59 +444,74 @@ function SessionsSection() {
       )}
 
       {data && data.items.length > 0 && (
-        <div className="mt-4 overflow-x-auto">
-          <table className="w-full min-w-[640px] text-left text-sm">
-            <thead>
-              <tr className="text-xs uppercase tracking-wide text-dark-500">
-                <th className="pb-2 pr-3 font-medium">{t('admin.graceAccess.sessions.user')}</th>
-                <th className="pb-2 pr-3 font-medium">{t('admin.graceAccess.sessions.reason')}</th>
-                <th className="pb-2 pr-3 font-medium">{t('admin.graceAccess.sessions.state')}</th>
-                <th className="pb-2 pr-3 font-medium">{t('admin.graceAccess.sessions.until')}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.items.map((session) => (
-                <tr key={session.id} className="border-t border-dark-700/40 align-top">
-                  <td className="py-2 pr-3">
-                    <div className="text-dark-100">
+        <>
+          {/* Телефон: карточки, как в остальных админских списках. */}
+          <ul className="mt-4 space-y-2 md:hidden">
+            {data.items.map((session) => (
+              <li key={session.id} className="rounded-xl bg-dark-800/30 p-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="truncate text-sm font-medium text-dark-100">
                       {session.user?.full_name || `#${session.subscription_id}`}
                     </div>
-                    <div className="text-xs text-dark-500">
-                      {session.user?.username
-                        ? `@${session.user.username}`
-                        : session.user?.telegram_id}
-                    </div>
-                  </td>
-                  <td className="py-2 pr-3 text-dark-300">
+                    <div className="text-xs text-dark-400">{userLine(session)}</div>
+                  </div>
+                  <div className="shrink-0 text-right text-xs">
+                    <SessionState session={session} />
+                  </div>
+                </div>
+                <div className="mt-2 flex flex-wrap justify-between gap-x-3 text-xs text-dark-400">
+                  <span>
                     {t(`admin.graceAccess.sessions.reasons.${session.reason}`, {
                       defaultValue: session.reason,
                     })}
-                  </td>
-                  <td className="py-2 pr-3">
-                    <div className="text-dark-200">
-                      {t(`admin.graceAccess.sessions.states.${session.state}`, {
-                        defaultValue: session.state,
-                      })}
-                    </div>
-                    {session.completion_reason && (
-                      <div className="text-xs text-dark-500">
-                        {t(`admin.graceAccess.sessions.completion.${session.completion_reason}`, {
-                          defaultValue: session.completion_reason,
-                        })}
-                      </div>
-                    )}
-                    {session.last_error && (
-                      <div className="mt-1 text-xs text-error-400">{session.last_error}</div>
-                    )}
-                  </td>
-                  <td className="py-2 pr-3 text-dark-300">
+                  </span>
+                  <span>
+                    {t('admin.graceAccess.sessions.until')}:{' '}
                     {new Date(session.grace_until).toLocaleString()}
-                  </td>
+                  </span>
+                </div>
+              </li>
+            ))}
+          </ul>
+          <div className="mt-4 hidden overflow-x-auto md:block">
+            <table className="w-full text-left text-sm">
+              <thead>
+                <tr className="text-xs uppercase tracking-wide text-dark-400">
+                  <th className="pb-2 pr-3 font-medium">{t('admin.graceAccess.sessions.user')}</th>
+                  <th className="pb-2 pr-3 font-medium">
+                    {t('admin.graceAccess.sessions.reason')}
+                  </th>
+                  <th className="pb-2 pr-3 font-medium">{t('admin.graceAccess.sessions.state')}</th>
+                  <th className="pb-2 pr-3 font-medium">{t('admin.graceAccess.sessions.until')}</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {data.items.map((session) => (
+                  <tr key={session.id} className="border-t border-dark-700/40 align-top">
+                    <td className="py-2 pr-3">
+                      <div className="text-dark-100">
+                        {session.user?.full_name || `#${session.subscription_id}`}
+                      </div>
+                      <div className="text-xs text-dark-400">{userLine(session)}</div>
+                    </td>
+                    <td className="py-2 pr-3 text-dark-300">
+                      {t(`admin.graceAccess.sessions.reasons.${session.reason}`, {
+                        defaultValue: session.reason,
+                      })}
+                    </td>
+                    <td className="py-2 pr-3">
+                      <SessionState session={session} />
+                    </td>
+                    <td className="py-2 pr-3 text-dark-300">
+                      {new Date(session.grace_until).toLocaleString()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
 
       {data && pages > 1 && (
@@ -388,7 +537,7 @@ function SessionsSection() {
           </button>
         </div>
       )}
-    </div>
+    </SectionCard>
   );
 }
 
@@ -413,7 +562,7 @@ export default function AdminGraceAccess() {
   const [form, setForm] = useState<GraceForm | null>(null);
   const [externalChoice, setExternalChoice] = useState<ExternalChoice>('detach');
   const [saveError, setSaveError] = useState<string | null>(null);
-  const [showReconcile, setShowReconcile] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   useEffect(() => {
     if (!data) return;
@@ -446,15 +595,19 @@ export default function AdminGraceAccess() {
   // config is already broken must still be able to turn grace off or drain it.
   const modeBlockers = form?.mode === 'true' ? blockers : [];
   const emptyNumbers = form ? emptyNumericFields(form) : [];
-  // "Fallback squad" with an empty box silently means "detach" — the opposite of
-  // what was picked, so it is refused rather than quietly reinterpreted.
+  // "Replace with a chosen one" with an empty box silently means "detach" — the
+  // opposite of what was picked, so it is refused rather than quietly reinterpreted.
   // Сравнение по обрезанной строке: сервер всё равно обрежет, и пробел прошёл бы
-  // мимо обеих проверок, а сохранился бы как «Отцепить» — ровно та подмена, от
+  // мимо обеих проверок, а сохранился бы как «Снять» — ровно та подмена, от
   // которой этот флаг и защищает.
   const externalIncomplete =
     externalChoice === 'custom' && (form?.external_squad_uuid ?? '').trim() === '';
   const blocksSave = modeBlockers.length > 0 || emptyNumbers.length > 0 || externalIncomplete;
   const invalidFields = new Set(blockers.map((issue) => issue.field));
+  // Расширенный блок открывается сам, если там есть что показать: настроенный
+  // внешний сквад или ошибка в нём — иначе она пряталась бы за «Показать».
+  const advancedOpen =
+    showAdvanced || externalChoice !== 'detach' || invalidFields.has('external_squad_uuid');
 
   if (isLoading || (!form && !error)) {
     return (
@@ -469,9 +622,9 @@ export default function AdminGraceAccess() {
       <div className="animate-fade-in">
         <div className="mb-6 flex items-center gap-3">
           <AdminBackButton to="/admin" />
-          <h1 className="text-xl font-semibold text-dark-100">{t('admin.graceAccess.title')}</h1>
+          <h1 className="text-xl font-bold text-dark-100">{t('admin.graceAccess.title')}</h1>
         </div>
-        <div className="rounded-xl border border-error-500/30 bg-error-500/10 p-6 text-center">
+        <div className="rounded-2xl border border-error-500/30 bg-error-500/10 p-6 text-center">
           <p className="text-error-400">{t('admin.graceAccess.loadError')}</p>
         </div>
       </div>
@@ -485,6 +638,9 @@ export default function AdminGraceAccess() {
   // мелких замков этого не объясняют — нужна одна строка о том, что делать.
   const fullyLocked = data.env_locked.length >= Object.keys(data.config).length;
   const restartOnly = new Set(data.restart_only);
+  const runningLabel = t(`admin.graceAccess.badge.${data.runtime.running_mode}`, {
+    defaultValue: data.runtime.running_mode,
+  });
 
   const update = <K extends keyof GraceForm>(field: K, value: GraceForm[K]) =>
     setForm((current) => (current ? { ...current, [field]: value } : current));
@@ -503,54 +659,79 @@ export default function AdminGraceAccess() {
       </p>
     ) : null;
 
+  const restartNote = (field: keyof GraceAccessConfig) =>
+    restartOnly.has(field) ? (
+      <p className="mt-1 text-xs text-dark-400">{t('admin.graceAccess.restartOnly')}</p>
+    ) : null;
+
+  const numberField = (
+    field: NumericField,
+    { min, max, description }: { min: number; max: number; description: string },
+  ) => (
+    <div key={field}>
+      <FieldLabel htmlFor={`grace-${field}`}>{t(`admin.graceAccess.fields.${field}`)}</FieldLabel>
+      <input
+        id={`grace-${field}`}
+        type="number"
+        min={min}
+        max={max}
+        className={cn('input', invalidFields.has(field) && 'border-error-500/50')}
+        value={form[field]}
+        disabled={isLocked(field)}
+        onChange={(event) => updateNumber(field, event.target.value)}
+      />
+      <FieldHint>{description}</FieldHint>
+      {restartNote(field)}
+      {lockNote(field)}
+    </div>
+  );
+
+  const openErrors = data.stats.open_errors;
+  const completedErrors = data.stats.completed_errors;
+
   return (
     <div className="animate-fade-in space-y-6 pb-24">
-      <div className="flex items-center gap-3">
+      <header className="flex flex-wrap items-center gap-3">
         <AdminBackButton to="/admin" />
-        <div className="min-w-0">
-          <h1 className="text-xl font-semibold text-dark-100">{t('admin.graceAccess.title')}</h1>
-          <p className="text-sm text-dark-500">{t('admin.graceAccess.subtitle')}</p>
-        </div>
-        <span
-          className={`ml-auto shrink-0 rounded-full border px-3 py-1 text-xs ${
-            data.runtime.running_mode === 'true'
-              ? 'border-success-500/40 bg-success-500/10 text-success-300'
-              : 'border-dark-700/50 bg-dark-800/40 text-dark-300'
-          }`}
+        <div
+          aria-hidden="true"
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent-500/10 text-accent-400"
         >
-          {t(`admin.graceAccess.badge.${data.runtime.running_mode}`, {
-            defaultValue: data.runtime.running_mode,
-          })}
-        </span>
-      </div>
+          <LifebuoyIcon className="h-5 w-5" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="text-xl font-bold text-dark-100">{t('admin.graceAccess.title')}</h1>
+            <span
+              className={cn(
+                'rounded-full px-2.5 py-0.5 text-xs font-medium',
+                data.runtime.running_mode === 'true'
+                  ? 'bg-success-500/15 text-success-400'
+                  : 'bg-dark-800/50 text-dark-400',
+              )}
+            >
+              {runningLabel}
+            </span>
+          </div>
+          <p className="text-xs text-dark-400">{t('admin.graceAccess.subtitle')}</p>
+        </div>
+      </header>
 
       {fullyLocked && (
-        <div className="rounded-xl border border-warning-500/30 bg-warning-500/10 p-4">
-          <div className="flex items-center gap-2 font-medium text-warning-300">
-            <LockIcon className="h-4 w-4" />
-            {t('admin.graceAccess.fullyLocked.title')}
-          </div>
-          <p className="mt-1 text-sm text-warning-200">{t('admin.graceAccess.fullyLocked.body')}</p>
-        </div>
+        <Notice tone="warning" icon={<LockIcon />} title={t('admin.graceAccess.fullyLocked.title')}>
+          {t('admin.graceAccess.fullyLocked.body')}
+        </Notice>
       )}
 
       {data.runtime.restart_required && (
-        <div className="rounded-xl border border-warning-500/30 bg-warning-500/10 p-4">
-          <div className="flex items-center gap-2 font-medium text-warning-300">
-            <RestartIcon className="h-4 w-4" />
-            {t('admin.graceAccess.restart.title')}
-          </div>
-          <p className="mt-1 text-sm text-warning-200">
-            {t('admin.graceAccess.restart.body', {
-              running: t(`admin.graceAccess.badge.${data.runtime.running_mode}`, {
-                defaultValue: data.runtime.running_mode,
-              }),
-              configured: t(`admin.graceAccess.badge.${data.runtime.configured_mode}`, {
-                defaultValue: data.runtime.configured_mode,
-              }),
-            })}
-          </p>
-        </div>
+        <Notice tone="warning" icon={<RestartIcon />} title={t('admin.graceAccess.restart.title')}>
+          {t('admin.graceAccess.restart.body', {
+            running: runningLabel,
+            configured: t(`admin.graceAccess.badge.${data.runtime.configured_mode}`, {
+              defaultValue: data.runtime.configured_mode,
+            }),
+          })}
+        </Notice>
       )}
 
       {data.issues.length > 0 &&
@@ -560,43 +741,31 @@ export default function AdminGraceAccess() {
           // установке приучает не читать этот блок вовсе.
           const severe = data.issues.some((issue) => issue.severity === 'error');
           return (
-            <div
-              className={`rounded-xl border p-4 ${
+            <Notice
+              tone={severe ? 'error' : 'warning'}
+              icon={<WarningIcon />}
+              title={
                 severe
-                  ? 'border-error-500/30 bg-error-500/10'
-                  : 'border-warning-500/30 bg-warning-500/10'
-              }`}
-            >
-              <div
-                className={`flex items-center gap-2 font-medium ${
-                  severe ? 'text-error-300' : 'text-warning-300'
-                }`}
-              >
-                <WarningIcon className="h-4 w-4" />
-                {severe
                   ? t('admin.graceAccess.issues.title')
-                  : t('admin.graceAccess.issues.titleBeforeEnabling')}
-              </div>
-              <ul
-                className={`mt-2 space-y-1 text-sm ${
-                  severe ? 'text-error-200' : 'text-warning-200'
-                }`}
-              >
+                  : t('admin.graceAccess.issues.titleBeforeEnabling')
+              }
+            >
+              <ul className="space-y-1">
                 {data.issues.map((issue) => (
                   <li key={`${issue.field}-${issue.code}`}>· {issueText(issue)}</li>
                 ))}
               </ul>
-            </div>
+            </Notice>
           );
         })()}
 
-      {/* Mode */}
-      <div className="card">
-        <h3 className="text-lg font-semibold text-dark-100">
-          {t('admin.graceAccess.modeSection.title')}
-        </h3>
-        <p className="mt-1 text-sm text-dark-500">{t('admin.graceAccess.modeSection.hint')}</p>
-        <div className="mt-4 grid gap-2 sm:grid-cols-2">
+      <SectionCard
+        id="grace-mode"
+        icon={<PowerIcon />}
+        title={t('admin.graceAccess.modeSection.title')}
+        hint={t('admin.graceAccess.modeSection.hint')}
+      >
+        <div className="grid gap-2 sm:grid-cols-2">
           {MODES.map((mode) => {
             const selected = form.mode === mode;
             return (
@@ -606,23 +775,28 @@ export default function AdminGraceAccess() {
                 aria-pressed={selected}
                 disabled={isLocked('mode')}
                 onClick={() => update('mode', mode)}
-                className={`flex items-start gap-3 rounded-xl border p-3 text-left transition-colors disabled:opacity-60 ${
+                className={cn(
+                  'flex items-start gap-3 rounded-xl border p-3 text-left transition-colors disabled:opacity-60',
                   selected
                     ? 'border-accent-500/50 bg-accent-500/10'
-                    : 'border-dark-700/40 bg-dark-800/30 hover:border-dark-600'
-                }`}
+                    : 'border-dark-700/40 bg-dark-800/30 hover:border-dark-600',
+                )}
               >
                 <span
                   aria-hidden="true"
-                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
-                    selected ? 'bg-accent-500/20 text-accent-300' : 'bg-dark-700/60 text-dark-400'
-                  }`}
+                  className={cn(
+                    'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg',
+                    selected ? 'bg-accent-500/20 text-accent-300' : 'bg-dark-700/60 text-dark-400',
+                  )}
                 >
                   {MODE_ICONS[mode]}
                 </span>
                 <span className="min-w-0">
                   <span
-                    className={`block text-sm font-medium ${selected ? 'text-dark-100' : 'text-dark-200'}`}
+                    className={cn(
+                      'block text-sm font-medium',
+                      selected ? 'text-dark-100' : 'text-dark-200',
+                    )}
                   >
                     {t(`admin.graceAccess.modes.${mode}.label`)}
                   </span>
@@ -634,46 +808,50 @@ export default function AdminGraceAccess() {
             );
           })}
         </div>
-        {restartOnly.has('mode') && (
-          <p className="mt-3 text-xs text-dark-500">{t('admin.graceAccess.restartOnly')}</p>
-        )}
+        {restartNote('mode')}
         {lockNote('mode')}
-      </div>
+      </SectionCard>
 
-      {/* Health */}
-      <div className="card">
-        <h3 className="text-lg font-semibold text-dark-100">
-          {t('admin.graceAccess.health.title')}
-        </h3>
-        <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
-          <StatTile label={t('admin.graceAccess.health.open')} value={data.stats.open} />
-          <StatTile
+      <SectionCard
+        id="grace-health"
+        icon={<HeartbeatIcon />}
+        title={t('admin.graceAccess.health.title')}
+      >
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          <StatCard
+            label={t('admin.graceAccess.health.open')}
+            value={data.stats.open}
+            icon={<LifebuoyIcon />}
+            tone="accent"
+          />
+          <StatCard
             label={t('admin.graceAccess.health.completed')}
             value={data.stats.states.completed ?? 0}
+            icon={<CheckCircleIcon />}
+            tone="success"
           />
-          <StatTile
+          <StatCard
             label={t('admin.graceAccess.health.openErrors')}
-            value={data.stats.open_errors}
-            tone="error"
+            value={openErrors}
+            icon={<WarningIcon />}
+            tone={openErrors > 0 ? 'error' : 'neutral'}
           />
-          <StatTile
+          <StatCard
             label={t('admin.graceAccess.health.completedErrors')}
-            value={data.stats.completed_errors}
-            tone="error"
+            value={completedErrors}
+            icon={<XCircleIcon />}
+            tone={completedErrors > 0 ? 'warning' : 'neutral'}
           />
         </div>
 
         {data.recent_errors.length > 0 && (
           <div className="mt-4">
-            <h4 className="text-sm font-medium text-dark-200">
+            <h3 className="text-sm font-medium text-dark-200">
               {t('admin.graceAccess.health.recentErrors')}
-            </h4>
+            </h3>
             <ul className="mt-2 space-y-2">
               {data.recent_errors.map((row) => (
-                <li
-                  key={row.id}
-                  className="rounded-lg border border-dark-700/40 bg-dark-800/30 p-2"
-                >
+                <li key={row.id} className="rounded-xl bg-dark-800/30 p-3">
                   <div className="text-xs text-dark-400">
                     {t('admin.graceAccess.health.subscription', { id: row.subscription_id })} ·{' '}
                     {t(`admin.graceAccess.sessions.states.${row.state}`, {
@@ -686,166 +864,93 @@ export default function AdminGraceAccess() {
             </ul>
           </div>
         )}
-      </div>
+      </SectionCard>
 
-      {/* Squads */}
-      <div className="card space-y-4">
-        <div>
-          <h3 className="text-lg font-semibold text-dark-100">
-            {t('admin.graceAccess.squads.title')}
-          </h3>
-          <p className="mt-1 text-sm text-dark-500">{t('admin.graceAccess.squads.hint')}</p>
+      <SectionCard
+        id="grace-limits"
+        icon={<ClockIcon />}
+        title={t('admin.graceAccess.limits.title')}
+        hint={t('admin.graceAccess.limits.hint')}
+      >
+        <div className="grid gap-4 sm:grid-cols-2">
+          {numberField('duration_hours', {
+            min: 1,
+            max: 8760,
+            description: t('admin.graceAccess.limits.durationDesc'),
+          })}
+          {numberField('traffic_gb', {
+            min: 0,
+            max: 1024,
+            description: t('admin.graceAccess.limits.trafficDesc'),
+          })}
         </div>
+      </SectionCard>
 
-        <SquadField
-          id="grace-expired-squad"
-          label={t('admin.graceAccess.fields.expired_squad_uuid')}
-          description={t('admin.graceAccess.squads.expiredDesc')}
-          value={form.expired_squad_uuid}
-          onChange={(value) => update('expired_squad_uuid', value)}
-          squads={squads?.items ?? []}
-          squadsAvailable={squads?.available ?? true}
-          disabled={isLocked('expired_squad_uuid')}
-          invalid={invalidFields.has('expired_squad_uuid')}
-        />
-        {lockNote('expired_squad_uuid')}
-
-        <SquadField
-          id="grace-limited-squad"
-          label={t('admin.graceAccess.fields.limited_squad_uuid')}
-          description={t('admin.graceAccess.squads.limitedDesc')}
-          value={form.limited_squad_uuid}
-          onChange={(value) => update('limited_squad_uuid', value)}
-          squads={squads?.items ?? []}
-          squadsAvailable={squads?.available ?? true}
-          disabled={isLocked('limited_squad_uuid')}
-          invalid={invalidFields.has('limited_squad_uuid')}
-        />
-        {lockNote('limited_squad_uuid')}
-
-        <div>
-          <label
-            htmlFor="grace-external-squad"
-            className="mb-2 block text-sm font-medium text-dark-300"
-          >
-            {t('admin.graceAccess.fields.external_squad_uuid')}
-          </label>
-          <select
-            id="grace-external-squad"
-            className="input"
-            value={externalChoice}
-            disabled={isLocked('external_squad_uuid')}
-            onChange={(event) => {
-              const next = event.target.value as ExternalChoice;
-              // The choice is its own state: "fallback squad" starts with an empty
-              // box, and deriving the choice from that empty value would snap the
-              // select straight back to "detach".
-              setExternalChoice(next);
-              if (next === 'detach') update('external_squad_uuid', '');
-              if (next === 'keep') update('external_squad_uuid', EXTERNAL_KEEP);
-              if (
-                next === 'custom' &&
-                form.external_squad_uuid.trim().toLowerCase() === EXTERNAL_KEEP
-              ) {
-                update('external_squad_uuid', '');
-              }
-            }}
-          >
-            <option value="detach">{t('admin.graceAccess.external.detach')}</option>
-            <option value="keep">{t('admin.graceAccess.external.keep')}</option>
-            <option value="custom">{t('admin.graceAccess.external.custom')}</option>
-          </select>
-          <p className="mt-1 text-xs text-dark-500">
-            {t(`admin.graceAccess.external.${externalChoice}Desc`)}
-          </p>
-          {externalChoice === 'custom' && (
-            <input
-              id="grace-external-squad-uuid"
-              type="text"
-              aria-label={t('admin.graceAccess.external.custom')}
-              className={`input mt-2 font-mono text-xs ${
-                invalidFields.has('external_squad_uuid') || externalIncomplete
-                  ? 'border-error-500/50'
-                  : ''
-              }`}
-              placeholder="00000000-0000-0000-0000-000000000000"
-              value={
-                externalChoiceOf(form.external_squad_uuid) === 'keep'
-                  ? ''
-                  : form.external_squad_uuid
-              }
-              disabled={isLocked('external_squad_uuid')}
-              onChange={(event) => update('external_squad_uuid', event.target.value)}
-            />
-          )}
-          {lockNote('external_squad_uuid')}
-        </div>
-      </div>
-
-      {/* Limits */}
-      <div className="card">
-        <h3 className="text-lg font-semibold text-dark-100">
-          {t('admin.graceAccess.limits.title')}
-        </h3>
-        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+      <SectionCard
+        id="grace-squads"
+        icon={<UsersIcon />}
+        title={t('admin.graceAccess.squads.title')}
+        hint={t('admin.graceAccess.squads.hint')}
+      >
+        <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <label
-              htmlFor="grace-duration"
-              className="mb-2 block text-sm font-medium text-dark-300"
-            >
-              {t('admin.graceAccess.fields.duration_hours')}
-            </label>
-            <input
-              id="grace-duration"
-              type="number"
-              min={1}
-              max={8760}
-              className="input"
-              value={form.duration_hours}
-              disabled={isLocked('duration_hours')}
-              onChange={(event) => updateNumber('duration_hours', event.target.value)}
+            <SquadField
+              id="grace-expired-squad"
+              label={t('admin.graceAccess.fields.expired_squad_uuid')}
+              description={t('admin.graceAccess.squads.expiredDesc')}
+              value={form.expired_squad_uuid}
+              onChange={(value) => update('expired_squad_uuid', value)}
+              squads={squads?.items ?? []}
+              squadsAvailable={squads?.available ?? true}
+              disabled={isLocked('expired_squad_uuid')}
+              invalid={invalidFields.has('expired_squad_uuid')}
             />
-            <p className="mt-1 text-xs text-dark-500">
-              {t('admin.graceAccess.limits.durationDesc')}
-            </p>
-            {lockNote('duration_hours')}
+            {lockNote('expired_squad_uuid')}
           </div>
           <div>
-            <label htmlFor="grace-traffic" className="mb-2 block text-sm font-medium text-dark-300">
-              {t('admin.graceAccess.fields.traffic_gb')}
-            </label>
-            <input
-              id="grace-traffic"
-              type="number"
-              min={0}
-              max={1024}
-              className={`input ${invalidFields.has('traffic_gb') ? 'border-error-500/50' : ''}`}
-              value={form.traffic_gb}
-              disabled={isLocked('traffic_gb')}
-              onChange={(event) => updateNumber('traffic_gb', event.target.value)}
+            <SquadField
+              id="grace-limited-squad"
+              label={t('admin.graceAccess.fields.limited_squad_uuid')}
+              description={t('admin.graceAccess.squads.limitedDesc')}
+              value={form.limited_squad_uuid}
+              onChange={(value) => update('limited_squad_uuid', value)}
+              squads={squads?.items ?? []}
+              squadsAvailable={squads?.available ?? true}
+              disabled={isLocked('limited_squad_uuid')}
+              invalid={invalidFields.has('limited_squad_uuid')}
             />
-            <p className="mt-1 text-xs text-dark-500">
-              {t('admin.graceAccess.limits.trafficDesc')}
-            </p>
-            {lockNote('traffic_gb')}
+            {lockNote('limited_squad_uuid')}
           </div>
         </div>
-      </div>
+      </SectionCard>
 
-      {/* Coverage */}
-      <div className="card">
-        <h3 className="text-lg font-semibold text-dark-100">
-          {t('admin.graceAccess.coverage.title')}
-        </h3>
-        <p className="mt-1 text-sm text-dark-500">{t('admin.graceAccess.coverage.hint')}</p>
-        <div className="mt-4 space-y-3">
+      <SectionCard
+        id="grace-coverage"
+        icon={<TagIcon />}
+        title={t('admin.graceAccess.coverage.title')}
+        hint={t('admin.graceAccess.coverage.hint')}
+      >
+        <div className="divide-y divide-dark-700/40">
+          <div className="flex items-center justify-between gap-3 py-3">
+            <div className="min-w-0">
+              <div className="text-sm font-medium text-dark-100">
+                {t('admin.graceAccess.coverage.paid')}
+              </div>
+              <div className="text-xs text-dark-400">
+                {t('admin.graceAccess.coverage.paidDesc')}
+              </div>
+            </div>
+            <span className="shrink-0 rounded-full bg-success-500/15 px-2.5 py-1 text-xs font-medium text-success-400">
+              {t('admin.graceAccess.coverage.always')}
+            </span>
+          </div>
           {(['trial_enabled', 'daily_enabled', 'free_enabled'] as const).map((field) => (
-            <div key={field} className="flex items-center justify-between gap-3">
+            <div key={field} className="flex items-center justify-between gap-3 py-2">
               <div className="min-w-0">
                 <div className="text-sm font-medium text-dark-100">
                   {t(`admin.graceAccess.coverage.${field}`)}
                 </div>
-                <div className="text-xs text-dark-500">
+                <div className="text-xs text-dark-400">
                   {t(`admin.graceAccess.coverage.${field}Desc`)}
                 </div>
                 {lockNote(field)}
@@ -859,75 +964,115 @@ export default function AdminGraceAccess() {
             </div>
           ))}
         </div>
-      </div>
+      </SectionCard>
 
-      {/* Reconcile */}
-      <div className="card">
-        <button
-          type="button"
-          className="flex w-full items-center justify-between text-left"
-          onClick={() => setShowReconcile((current) => !current)}
-          aria-expanded={showReconcile}
-        >
-          <span>
-            <span className="block text-lg font-semibold text-dark-100">
-              {t('admin.graceAccess.reconcile.title')}
-            </span>
-            <span className="mt-1 block text-sm text-dark-500">
-              {t('admin.graceAccess.reconcile.hint')}
-            </span>
-          </span>
-          <span className="text-sm text-accent-400">
-            {showReconcile
+      <SectionCard
+        id="grace-advanced"
+        icon={<AdjustmentsIcon />}
+        title={t('admin.graceAccess.reconcile.title')}
+        hint={t('admin.graceAccess.reconcile.hint')}
+        aside={
+          <button
+            type="button"
+            className="text-sm font-medium text-accent-400 hover:text-accent-300"
+            onClick={() => setShowAdvanced((current) => !current)}
+            aria-expanded={advancedOpen}
+            aria-controls="grace-advanced-body"
+          >
+            {advancedOpen
               ? t('admin.graceAccess.reconcile.hide')
               : t('admin.graceAccess.reconcile.show')}
-          </span>
-        </button>
-
-        {showReconcile && (
-          <div className="mt-4 grid gap-4 sm:grid-cols-3">
-            {(
-              [
-                ['reconcile_interval_seconds', 5, 86400],
-                ['reconcile_batch_size', 1, 10000],
-                ['candidate_lookback_minutes', 1, 10080],
-              ] as const
-            ).map(([field, min, max]) => (
-              <div key={field}>
-                <label
-                  htmlFor={`grace-${field}`}
-                  className="mb-2 block text-sm font-medium text-dark-300"
-                >
-                  {t(`admin.graceAccess.fields.${field}`)}
-                </label>
+          </button>
+        }
+      >
+        {advancedOpen && (
+          <div id="grace-advanced-body" className="space-y-6">
+            <div>
+              <FieldLabel htmlFor="grace-external-squad">
+                {t('admin.graceAccess.fields.external_squad_uuid')}
+              </FieldLabel>
+              <p className="mb-2 text-xs text-dark-400">{t('admin.graceAccess.external.hint')}</p>
+              <DropdownSelect
+                id="grace-external-squad"
+                value={externalChoice}
+                disabled={isLocked('external_squad_uuid')}
+                options={EXTERNAL_CHOICES.map((choice) => ({
+                  value: choice,
+                  label: t(`admin.graceAccess.external.${choice}`),
+                }))}
+                onChange={(raw) => {
+                  const next = raw as ExternalChoice;
+                  // The choice is its own state: "replace with a chosen one" starts
+                  // with an empty box, and deriving the choice from that empty value
+                  // would snap the select straight back to "detach".
+                  setExternalChoice(next);
+                  if (next === 'detach') update('external_squad_uuid', '');
+                  if (next === 'keep') update('external_squad_uuid', EXTERNAL_KEEP);
+                  if (
+                    next === 'custom' &&
+                    form.external_squad_uuid.trim().toLowerCase() === EXTERNAL_KEEP
+                  ) {
+                    update('external_squad_uuid', '');
+                  }
+                }}
+              />
+              <FieldHint>{t(`admin.graceAccess.external.${externalChoice}Desc`)}</FieldHint>
+              {externalChoice === 'custom' && (
                 <input
-                  id={`grace-${field}`}
-                  type="number"
-                  min={min}
-                  max={max}
-                  className="input"
-                  value={form[field]}
-                  disabled={isLocked(field)}
-                  onChange={(event) => updateNumber(field, event.target.value)}
+                  id="grace-external-squad-uuid"
+                  type="text"
+                  aria-label={t('admin.graceAccess.external.uuid')}
+                  className={cn(
+                    'input mt-2 font-mono text-xs',
+                    (invalidFields.has('external_squad_uuid') || externalIncomplete) &&
+                      'border-error-500/50',
+                  )}
+                  placeholder="00000000-0000-0000-0000-000000000000"
+                  value={
+                    externalChoiceOf(form.external_squad_uuid) === 'keep'
+                      ? ''
+                      : form.external_squad_uuid
+                  }
+                  disabled={isLocked('external_squad_uuid')}
+                  onChange={(event) => update('external_squad_uuid', event.target.value)}
                 />
-                <p className="mt-1 text-xs text-dark-500">
-                  {t(`admin.graceAccess.reconcile.${field}Desc`)}
-                </p>
-                {restartOnly.has(field) && (
-                  <p className="mt-1 text-xs text-dark-500">{t('admin.graceAccess.restartOnly')}</p>
-                )}
-                {lockNote(field)}
+              )}
+              {lockNote('external_squad_uuid')}
+            </div>
+
+            <div>
+              <h3 className="text-sm font-medium text-dark-200">
+                {t('admin.graceAccess.reconcile.background')}
+              </h3>
+              <p className="mt-0.5 text-xs text-dark-400">
+                {t('admin.graceAccess.reconcile.backgroundHint')}
+              </p>
+              <div className="mt-3 grid gap-4 sm:grid-cols-3">
+                {numberField('reconcile_interval_seconds', {
+                  min: 5,
+                  max: 86400,
+                  description: t('admin.graceAccess.reconcile.reconcile_interval_secondsDesc'),
+                })}
+                {numberField('reconcile_batch_size', {
+                  min: 1,
+                  max: 10000,
+                  description: t('admin.graceAccess.reconcile.reconcile_batch_sizeDesc'),
+                })}
+                {numberField('candidate_lookback_minutes', {
+                  min: 1,
+                  max: 10080,
+                  description: t('admin.graceAccess.reconcile.candidate_lookback_minutesDesc'),
+                })}
               </div>
-            ))}
+            </div>
           </div>
         )}
-      </div>
+      </SectionCard>
 
       <SessionsSection />
 
-      {/* Save */}
       <div className="sticky bottom-4 z-10">
-        <div className="rounded-xl border border-dark-700/50 bg-dark-900/90 p-3 backdrop-blur">
+        <div className="rounded-2xl border border-dark-700/50 bg-dark-900/90 p-3 backdrop-blur">
           {(modeBlockers.length > 0 || emptyNumbers.length > 0 || externalIncomplete) && (
             <ul className="mb-2 space-y-1 text-xs text-error-400">
               {modeBlockers.map((issue) => (

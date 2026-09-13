@@ -3093,7 +3093,7 @@
     },
     "graceAccess": {
       "title": "Grace access",
-      "subtitle": "Temporary restricted access so a user can still renew",
+      "subtitle": "Temporary Telegram-only access so a user can open the bot and renew",
       "loadError": "Could not load grace access settings",
       "saveError": "Could not save the settings",
       "save": "Save",
@@ -3159,45 +3159,53 @@
       },
       "squads": {
         "title": "Squads",
-        "hint": "Where the user is moved for the duration of grace. The original state is snapshotted and restored at the end.",
+        "hint": "Internal panel squads the bot temporarily moves the account to. Letting only Telegram through them is up to the network on the nodes — the bot does not restrict it. The same squad may serve both cases; the original squads are snapshotted and restored at the end.",
         "choose": "Pick a squad",
         "manual": "Enter a UUID manually…",
         "members": "{{n}} members",
         "unavailable": "The panel is unreachable — enter the UUID manually",
-        "expiredDesc": "Used when the subscription has expired",
-        "limitedDesc": "Used when the traffic limit is exhausted"
+        "expiredDesc": "When the subscription period has ended",
+        "limitedDesc": "When the traffic limit is exhausted"
       },
       "external": {
-        "detach": "Detach",
-        "keep": "Leave as is",
-        "custom": "Fallback squad",
-        "detachDesc": "The external squad is removed for the grace period and restored afterwards",
-        "keepDesc": "The external squad is left untouched",
-        "customDesc": "The chosen squad is used for the grace period"
+        "detach": "Detach for grace",
+        "keep": "Leave untouched",
+        "custom": "Replace with a chosen one",
+        "detachDesc": "The account’s external squad is removed so access goes only through the grace squad, and restored at the end",
+        "keepDesc": "The account’s external squad stays as is — access through it is not restricted",
+        "customDesc": "The chosen external squad is assigned for the grace period, then the previous one is restored",
+        "hint": "An external squad in the panel is a separate subscription profile with other hosts and templates (for example, for censorship workarounds). If you do not use them, keep “Detach for grace”.",
+        "uuid": "External squad UUID"
       },
       "limits": {
-        "title": "Limits",
-        "durationDesc": "How long access lasts if the subscription is never renewed",
-        "trafficDesc": "Traffic limit for the grace period"
+        "title": "What the user gets",
+        "durationDesc": "How many hours the temporary access lasts if the subscription is never renewed",
+        "trafficDesc": "How many new gigabytes can be spent in that time: counted on top of what is already used, the old remainder is not carried over",
+        "hint": "While grace lasts the panel account is active but reaches the network only through the grace squad."
       },
       "coverage": {
-        "title": "Who gets it",
-        "hint": "By default only paid subscriptions receive grace.",
-        "trial_enabled": "Trial subscriptions",
-        "trial_enabledDesc": "Grant grace after a trial ends",
-        "daily_enabled": "Daily subscriptions",
-        "daily_enabledDesc": "Grant grace to per-day subscriptions",
-        "free_enabled": "Free subscriptions",
-        "free_enabledDesc": "Grant grace to zero-cost subscriptions"
+        "title": "Which subscriptions get it",
+        "hint": "The kind is derived from the tariff: trial → daily → free → regular paid.",
+        "trial_enabled": "Trial period",
+        "trial_enabledDesc": "After a free trial period ends",
+        "daily_enabled": "Daily tariffs",
+        "daily_enabledDesc": "Tariffs charged per day",
+        "free_enabled": "Free tariffs",
+        "free_enabledDesc": "Tariffs with a zero price",
+        "paid": "Paid tariffs",
+        "paidDesc": "Regular paid subscriptions — always, while the mode is on",
+        "always": "Always"
       },
       "reconcile": {
-        "title": "Background reconciliation",
-        "hint": "How often the bot looks for candidates and finishes open sessions",
+        "title": "Advanced",
+        "hint": "External squad and background reconciliation — rarely changed",
         "show": "Show",
         "hide": "Hide",
         "reconcile_interval_secondsDesc": "Pause between reconciliation passes",
         "reconcile_batch_sizeDesc": "How many sessions one pass handles",
-        "candidate_lookback_minutesDesc": "How far back recent expirations and limits are searched"
+        "candidate_lookback_minutesDesc": "How far back recent expirations and limits are searched",
+        "background": "Background reconciliation",
+        "backgroundHint": "How often the bot looks for candidates and finishes open sessions"
       },
       "health": {
         "title": "Health",
