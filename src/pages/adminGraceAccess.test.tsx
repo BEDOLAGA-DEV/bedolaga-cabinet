@@ -62,6 +62,9 @@ const config = (overrides: Partial<GraceAccessConfig> = {}): GraceAccessConfig =
   reconcile_interval_seconds: 60,
   reconcile_batch_size: 200,
   candidate_lookback_minutes: 30,
+  allowed_services: 'Telegram',
+  notify_admins: true,
+  notify_user: true,
   ...overrides,
 });
 
@@ -552,5 +555,33 @@ describe('changedFields', () => {
     const stored = config();
 
     expect(changedFields({ ...stored }, stored)).toEqual({});
+  });
+});
+
+describe('уведомления и «что доступно»', () => {
+  it('фраза о доступном и выключатели уходят на сервер', async () => {
+    await renderPage();
+
+    fireEvent.change(screen.getByLabelText('Что остаётся доступным'), {
+      target: { value: 'Telegram и личный кабинет' },
+    });
+    fireEvent.click(screen.getByRole('switch', { name: 'Админам в чат уведомлений' }));
+    fireEvent.click(saveButton());
+
+    await waitFor(() =>
+      expect(state.saves).toEqual([
+        { allowed_services: 'Telegram и личный кабинет', notify_admins: false },
+      ]),
+    );
+  });
+
+  it('пустая фраза при включённых сообщениях человеку блокирует сохранение', async () => {
+    state.overview = overview({ config: config({ mode: 'true' }) });
+    await renderPage();
+
+    fireEvent.change(screen.getByLabelText('Что остаётся доступным'), { target: { value: '  ' } });
+
+    expect(saveButton().disabled).toBe(true);
+    expect(screen.getAllByText(/Не заполнено, что остаётся доступным/).length).toBeGreaterThan(0);
   });
 });

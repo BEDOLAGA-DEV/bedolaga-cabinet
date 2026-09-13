@@ -16,6 +16,7 @@ import { DropdownSelect } from '@/components/admin/bulkActions/DropdownSelect';
 import {
   AdjustmentsIcon,
   BanIcon,
+  BellIcon,
   BoltIcon,
   CheckCircleIcon,
   ClockIcon,
@@ -136,6 +137,11 @@ export function graceFormIssues(form: GraceForm): GraceAccessIssue[] {
 
   if (form.traffic_gb === '' || form.traffic_gb < 1) {
     issues.push({ field: 'traffic_gb', code: 'traffic_required', severity: 'error' });
+  }
+
+  if (form.notify_user && form.allowed_services.trim() === '') {
+    // Сообщение человеку начинается с «доступ только к …» — без фразы оно бессмысленно.
+    issues.push({ field: 'allowed_services', code: 'allowed_required', severity: 'error' });
   }
 
   return issues;
@@ -888,6 +894,55 @@ export default function AdminGraceAccess() {
             max: 1024,
             description: t('admin.graceAccess.limits.trafficDesc'),
           })}
+          <div className="sm:col-span-2">
+            <FieldLabel htmlFor="grace-allowed-services">
+              {t('admin.graceAccess.fields.allowed_services')}
+            </FieldLabel>
+            <input
+              id="grace-allowed-services"
+              type="text"
+              maxLength={120}
+              className={cn(
+                'input',
+                invalidFields.has('allowed_services') && 'border-error-500/50',
+              )}
+              placeholder={t('admin.graceAccess.limits.allowedPlaceholder')}
+              value={form.allowed_services}
+              disabled={isLocked('allowed_services')}
+              onChange={(event) => update('allowed_services', event.target.value)}
+            />
+            <FieldHint>{t('admin.graceAccess.limits.allowedDesc')}</FieldHint>
+            {lockNote('allowed_services')}
+          </div>
+        </div>
+      </SectionCard>
+
+      <SectionCard
+        id="grace-notifications"
+        icon={<BellIcon />}
+        title={t('admin.graceAccess.notifications.title')}
+        hint={t('admin.graceAccess.notifications.hint')}
+      >
+        <div className="divide-y divide-dark-700/40">
+          {(['notify_admins', 'notify_user'] as const).map((field) => (
+            <div key={field} className="flex items-center justify-between gap-3 py-2">
+              <div className="min-w-0">
+                <div className="text-sm font-medium text-dark-100">
+                  {t(`admin.graceAccess.notifications.${field}`)}
+                </div>
+                <div className="text-xs text-dark-400">
+                  {t(`admin.graceAccess.notifications.${field}Desc`)}
+                </div>
+                {lockNote(field)}
+              </div>
+              <Toggle
+                checked={form[field]}
+                disabled={isLocked(field)}
+                aria-label={t(`admin.graceAccess.notifications.${field}`)}
+                onChange={() => update(field, !form[field])}
+              />
+            </div>
+          ))}
         </div>
       </SectionCard>
 

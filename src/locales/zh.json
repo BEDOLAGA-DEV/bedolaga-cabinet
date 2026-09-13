@@ -2248,7 +2248,8 @@
         "traffic_required": "流量上限不得少于 1 GB",
         "open_sessions_stranded": "仍有未结束的会话，而当前模式不会处理它们，面板中的覆盖状态会一直保留。请切换到「排空」。",
         "number_required": "数值未填写：{{field}}",
-        "mode_invalid": "保存了未知的模式。机器人启动时会因此失败并保持宽限访问关闭——请重新选择模式。"
+        "mode_invalid": "保存了未知的模式。机器人启动时会因此失败并保持宽限访问关闭——请重新选择模式。",
+        "allowed_required": "请填写保留可访问的内容：否则给用户的消息没有意义"
       },
       "fields": {
         "mode": "模式",
@@ -2259,7 +2260,10 @@
         "traffic_gb": "流量（GB）",
         "reconcile_interval_seconds": "核对间隔（秒）",
         "reconcile_batch_size": "批量大小",
-        "candidate_lookback_minutes": "回溯窗口（分钟）"
+        "candidate_lookback_minutes": "回溯窗口（分钟）",
+        "allowed_services": "保留可访问的内容",
+        "notify_admins": "通知管理员",
+        "notify_user": "告知用户"
       },
       "squads": {
         "title": "小队",
@@ -2286,7 +2290,9 @@
         "title": "用户获得什么",
         "durationDesc": "如果一直没有续订，临时访问持续多少小时",
         "trafficDesc": "这段时间可以使用多少新流量（GB）：在已用流量之上计算，原有余量不结转",
-        "hint": "宽限期间面板账户处于活跃状态，但只能通过宽限小队访问网络。"
+        "hint": "宽限期间面板账户处于活跃状态，但只能通过宽限小队访问网络。",
+        "allowedDesc": "用户在机器人消息和邮件中会这样看到：“仅可访问 …”。宽限小队实际放行什么由节点决定——机器人只是告知。",
+        "allowedPlaceholder": "Telegram 和个人中心"
       },
       "coverage": {
         "title": "哪些订阅可获得",
@@ -2362,6 +2368,14 @@
       "fullyLocked": {
         "title": "本页面仅可查看",
         "body": "所有宽限设置都固定在 .env 中，文件会覆盖数据库，这里的修改不会生效。请从 .env 中删除 GRACE_ACCESS_* 行并重启机器人，即可在此管理。"
+      },
+      "notifications": {
+        "title": "通知",
+        "hint": "宽限发放和结束时通知谁。邮件在“邮件模板”中编辑。",
+        "notify_admins": "通知聊天中的管理员",
+        "notify_adminsDesc": "发给谁、原因、截止时间以及结果——归入“续订”类别",
+        "notify_user": "在机器人和邮件中告知用户",
+        "notify_userDesc": "订阅已到期，但暂时保留对上述内容的访问，并附续订按钮；以及访问关闭时"
       }
     },
     "buttons": {

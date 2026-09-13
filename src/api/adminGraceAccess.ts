@@ -25,6 +25,10 @@ export interface GraceAccessConfig {
   reconcile_interval_seconds: number;
   reconcile_batch_size: number;
   candidate_lookback_minutes: number;
+  /** What stays reachable during grace, in the operator's words — goes into user messages. */
+  allowed_services: string;
+  notify_admins: boolean;
+  notify_user: boolean;
 }
 
 export interface GraceAccessRuntimeState {
