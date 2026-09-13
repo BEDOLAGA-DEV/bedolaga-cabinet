@@ -2197,7 +2197,7 @@
     },
     "graceAccess": {
       "title": "宽限访问",
-      "subtitle": "仅限 Telegram 的临时访问，让用户能打开机器人并续订",
+      "subtitle": "订阅到期后仍保留最必要的访问，让用户能够续订",
       "loadError": "无法加载宽限访问设置",
       "saveError": "无法保存设置",
       "save": "保存",
