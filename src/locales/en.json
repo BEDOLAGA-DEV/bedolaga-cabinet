@@ -3115,19 +3115,19 @@
       "modes": {
         "false": {
           "label": "Off",
-          "desc": "No grace sessions are granted or finished"
+          "desc": "Grace does not run. Switch here only when no sessions are open — otherwise people stay in the grace squad forever"
         },
         "observe": {
           "label": "Observe",
-          "desc": "Candidates are only logged, the panel is left alone"
+          "desc": "Dry run: the bot only logs who would get grace. The panel is untouched, nobody gets access"
         },
         "true": {
           "label": "On",
-          "desc": "Grants temporary access and restores it afterwards"
+          "desc": "Live: grants temporary access, watches it and puts everything back after payment or when the time is up"
         },
         "drain": {
           "label": "Drain",
-          "desc": "No new sessions, the open ones are seen through"
+          "desc": "Gentle shutdown: nothing new is granted, existing sessions run until payment or their deadline. Then switch to “Off”"
         }
       },
       "restart": {
@@ -3159,13 +3159,14 @@
       },
       "squads": {
         "title": "Squads",
-        "hint": "Internal panel squads the bot temporarily moves the account to. Letting only Telegram through them is up to the network on the nodes — the bot does not restrict it. The same squad may serve both cases; the original squads are snapshotted and restored at the end.",
+        "hint": "The list comes from the panel, like the “Squads” section. The bot temporarily moves the account into the chosen squad; letting only Telegram through it is up to the network on the nodes — the bot does not restrict it. The same squad may serve both cases; the original squads are snapshotted and restored at the end.",
         "choose": "Pick a squad",
-        "manual": "Enter a UUID manually…",
+        "manual": "Enter an identifier manually…",
         "members": "{{n}} members",
-        "unavailable": "The panel is unreachable — enter the UUID manually",
+        "unavailable": "The panel is not responding and squads have not been synced yet — the identifier has to be entered manually",
         "expiredDesc": "When the subscription period has ended",
-        "limitedDesc": "When the traffic limit is exhausted"
+        "limitedDesc": "When the traffic limit is exhausted",
+        "synced": "The panel is not responding — showing the last synced list"
       },
       "external": {
         "detach": "Detach for grace",
@@ -3214,7 +3215,9 @@
         "openErrors": "Errors in open",
         "completedErrors": "Errors in completed",
         "recentErrors": "Recent errors",
-        "subscription": "Subscription #{{id}}"
+        "subscription": "Subscription #{{id}}",
+        "withErrors": "errors: {{n}}",
+        "noErrors": "no errors"
       },
       "sessions": {
         "title": "Sessions",

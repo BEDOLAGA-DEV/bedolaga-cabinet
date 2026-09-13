@@ -310,7 +310,7 @@ describe('раздел grace-доступа', () => {
     state.squads = { available: false, items: [] };
     await renderPage();
 
-    expect(screen.getAllByText(/Панель недоступна/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Панель не отвечает/).length).toBeGreaterThan(0);
   });
 
   it('живая панель без сквадов недоступной не объявляется', async () => {
@@ -319,7 +319,7 @@ describe('раздел grace-доступа', () => {
     state.squads = { available: true, items: [] };
     await renderPage();
 
-    expect(screen.queryByText(/Панель недоступна/)).toBeNull();
+    expect(screen.queryByText(/Панель не отвечает/)).toBeNull();
   });
 
   it('без права на список сессий объясняет, какого права не хватает', async () => {
