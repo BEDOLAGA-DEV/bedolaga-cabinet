@@ -29,7 +29,6 @@ import {
   TagIcon,
   UsersIcon,
   WarningIcon,
-  XCircleIcon,
 } from '@/components/icons';
 import { StatCard } from '@/components/stats';
 import { PageSkeleton, Skeleton } from '@/components/ui/skeleton';
@@ -273,6 +272,7 @@ function SquadField({
   onChange,
   squads,
   squadsAvailable,
+  synced,
   disabled,
   invalid,
 }: {
@@ -283,6 +283,7 @@ function SquadField({
   onChange: (value: string) => void;
   squads: GraceSquadOption[];
   squadsAvailable: boolean;
+  synced?: boolean;
   disabled: boolean;
   invalid: boolean;
 }) {
@@ -340,6 +341,9 @@ function SquadField({
       <FieldHint>{description}</FieldHint>
       {!squadsAvailable && (
         <p className="mt-1 text-xs text-warning-400">{t('admin.graceAccess.squads.unavailable')}</p>
+      )}
+      {squadsAvailable && synced && (
+        <p className="mt-1 text-xs text-warning-400">{t('admin.graceAccess.squads.synced')}</p>
       )}
     </div>
   );
@@ -817,30 +821,31 @@ export default function AdminGraceAccess() {
         icon={<HeartbeatIcon />}
         title={t('admin.graceAccess.health.title')}
       >
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+        {/* Две карточки, а не четыре: на телефоне длинные подписи переносились на
+            две строки, и ряд с иконкой съезжал относительно соседней карточки.
+            Ошибки — подстрочником и тоном, а не отдельной карточкой. */}
+        <div className="grid grid-cols-2 gap-2">
           <StatCard
             label={t('admin.graceAccess.health.open')}
             value={data.stats.open}
             icon={<LifebuoyIcon />}
-            tone="accent"
+            tone={openErrors > 0 ? 'error' : 'accent'}
+            subValue={
+              openErrors > 0
+                ? t('admin.graceAccess.health.withErrors', { n: openErrors })
+                : t('admin.graceAccess.health.noErrors')
+            }
           />
           <StatCard
             label={t('admin.graceAccess.health.completed')}
             value={data.stats.states.completed ?? 0}
             icon={<CheckCircleIcon />}
-            tone="success"
-          />
-          <StatCard
-            label={t('admin.graceAccess.health.openErrors')}
-            value={openErrors}
-            icon={<WarningIcon />}
-            tone={openErrors > 0 ? 'error' : 'neutral'}
-          />
-          <StatCard
-            label={t('admin.graceAccess.health.completedErrors')}
-            value={completedErrors}
-            icon={<XCircleIcon />}
-            tone={completedErrors > 0 ? 'warning' : 'neutral'}
+            tone={completedErrors > 0 ? 'warning' : 'success'}
+            subValue={
+              completedErrors > 0
+                ? t('admin.graceAccess.health.withErrors', { n: completedErrors })
+                : t('admin.graceAccess.health.noErrors')
+            }
           />
         </div>
 
@@ -902,6 +907,7 @@ export default function AdminGraceAccess() {
               onChange={(value) => update('expired_squad_uuid', value)}
               squads={squads?.items ?? []}
               squadsAvailable={squads?.available ?? true}
+              synced={squads?.source === 'synced'}
               disabled={isLocked('expired_squad_uuid')}
               invalid={invalidFields.has('expired_squad_uuid')}
             />
@@ -916,6 +922,7 @@ export default function AdminGraceAccess() {
               onChange={(value) => update('limited_squad_uuid', value)}
               squads={squads?.items ?? []}
               squadsAvailable={squads?.available ?? true}
+              synced={squads?.source === 'synced'}
               disabled={isLocked('limited_squad_uuid')}
               invalid={invalidFields.has('limited_squad_uuid')}
             />
