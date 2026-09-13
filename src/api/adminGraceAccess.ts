@@ -112,8 +112,10 @@ export interface GraceSquadOption {
 }
 
 export interface GraceSquadsResponse {
-  /** False when the panel could not be reached — the UUID stays a manual field. */
+  /** False when neither the panel nor the synced copy has squads — the identifier stays a manual field. */
   available: boolean;
+  /** Where the list came from: the panel right now, or the bot's last synced copy. */
+  source?: 'panel' | 'synced';
   items: GraceSquadOption[];
 }
 
