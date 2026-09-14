@@ -3273,7 +3273,6 @@
       "title": "کاربران",
       "subtitle": "مدیریت کاربران ربات",
       "search": "شناسه، نام، @نام‌کاربری یا ایمیل",
-      "searchEmail": "جستجو بر اساس ایمیل...",
       "noData": "کاربری یافت نشد",
       "purchaseCount_other": "{{count}} خرید",
       "noPurchases": "بدون خرید",
@@ -3301,9 +3300,6 @@
         "bySpent": "بر اساس هزینه",
         "byExpiry": "بر اساس انقضا"
       },
-      "pagination": {
-        "showing": "نمایش {{from}}-{{to}} از {{total}}"
-      },
       "actions": {
         "block": "مسدود کردن",
         "unblock": "رفع مسدودیت",
@@ -3315,12 +3311,8 @@
       },
       "detail": {
         "tabs": {
-          "info": "اطلاعات",
           "subscription": "اشتراک",
           "balance": "موجودی",
-          "sync": "همگام‌سازی",
-          "tickets": "تیکت‌ها",
-          "gifts": "هدایا",
           "referrals": "معرفی‌ها",
           "activity": "فعالیت",
           "overview": "نمای کلی"

@@ -4391,7 +4391,6 @@
       "title": "Users",
       "subtitle": "Bot user management",
       "search": "ID, name, @username or email",
-      "searchEmail": "Search by email...",
       "noData": "No users found",
       "purchaseCount_one": "{{count}} purchase",
       "purchaseCount_other": "{{count}} purchases",
@@ -4419,9 +4418,6 @@
         "byActivity": "By activity",
         "bySpent": "By spending",
         "byExpiry": "By expiry"
-      },
-      "pagination": {
-        "showing": "Showing {{from}}-{{to}} of {{total}}"
       },
       "actions": {
         "block": "Block",
@@ -4477,12 +4473,8 @@
       },
       "detail": {
         "tabs": {
-          "info": "Information",
           "subscription": "Subscription",
           "balance": "Balance",
-          "sync": "Synchronization",
-          "tickets": "Tickets",
-          "gifts": "Gifts",
           "referrals": "Referrals",
           "activity": "Activity",
           "overview": "Overview"

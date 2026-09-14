@@ -4824,7 +4824,6 @@
       "title": "Пользователи",
       "subtitle": "Управление пользователями бота",
       "search": "ID, имя, @username или email",
-      "searchEmail": "Поиск по email...",
       "noData": "Пользователи не найдены",
       "purchaseCount_one": "{{count}} покупка",
       "purchaseCount_few": "{{count}} покупки",
@@ -4853,9 +4852,6 @@
         "byActivity": "По активности",
         "bySpent": "По расходам",
         "byExpiry": "По истечению подписки"
-      },
-      "pagination": {
-        "showing": "Показано {{from}}-{{to}} из {{total}}"
       },
       "actions": {
         "block": "Заблокировать",
@@ -4911,12 +4907,8 @@
       },
       "detail": {
         "tabs": {
-          "info": "Информация",
           "subscription": "Подписка",
           "balance": "Баланс",
-          "sync": "Синхронизация",
-          "tickets": "Тикеты",
-          "gifts": "Подарки",
           "referrals": "Рефералы",
           "activity": "Активность",
           "overview": "Обзор"
