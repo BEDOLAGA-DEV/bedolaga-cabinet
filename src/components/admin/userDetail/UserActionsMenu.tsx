@@ -1,213 +1,166 @@
-import { useEffect, useId, useRef, useState } from 'react';
-import { Link } from 'react-router';
+import { useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
-import type { UserDetailResponse } from '@/api/adminUsers';
 import { MoreIcon } from '@/components/icons';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/primitives';
 import { cn } from '@/lib/utils';
 import { useDestructiveConfirm, useNativeDialog } from '@/platform/hooks/useNativeDialog';
 
-interface UserActionsMenuProps {
-  user: UserDetailResponse;
-  disabled: boolean;
-  /** Ссылка на проверку конфигов через операторов РФ; null — раздел недоступен. */
-  reachabilityLink: string | null;
-  can: { block: boolean; subscription: boolean; delete: boolean };
-  onBlock: () => Promise<void>;
-  onUnblock: () => Promise<void>;
-  onResetTrial: () => Promise<void>;
-  onResetSubscription: () => Promise<void>;
-  onDisable: () => Promise<void>;
-  onDelete: () => Promise<void>;
+export interface UserMenuActions {
+  block: () => Promise<boolean>;
+  unblock: () => Promise<boolean>;
+  resetTrial: () => Promise<boolean>;
+  resetSubscriptions: () => Promise<boolean>;
+  disable: () => Promise<boolean>;
+  deleteUser: () => Promise<boolean>;
 }
 
-interface Item {
-  key: string;
-  label: string;
-  danger?: boolean;
-  run: () => Promise<void>;
+interface UserActionsMenuProps {
+  blocked: boolean;
+  busy: boolean;
+  /** Проверка конфигов через операторов РФ; null — раздел недоступен. */
+  reachabilityLink: string | null;
+  can: {
+    block: boolean;
+    subscription: boolean;
+    delete: boolean;
+    promoGroup: boolean;
+    restrictions: boolean;
+  };
+  actions: UserMenuActions;
+  /** Открыть правку промогруппы / ограничений в «Обзоре». */
+  onEditPromoGroup: () => void;
+  onEditRestrictions: () => void;
+  className?: string;
 }
 
 /**
- * Редкие и опасные действия — за «⋯», а не в ряду с «Написать».
- * Опасное подтверждается системным диалогом кабинета (в Mini App — родным попапом).
+ * Редкие и опасные действия — за «⋯», а не в ряду с «Написать». Меню на Radix:
+ * стрелки, Esc, фокус. Опасное подтверждается системным диалогом кабинета
+ * (в Mini App — родным попапом), красным — только удаление.
  */
 export function UserActionsMenu({
-  user,
-  disabled,
+  blocked,
+  busy,
   reachabilityLink,
   can,
-  onBlock,
-  onUnblock,
-  onResetTrial,
-  onResetSubscription,
-  onDisable,
-  onDelete,
+  actions,
+  onEditPromoGroup,
+  onEditRestrictions,
+  className,
 }: UserActionsMenuProps) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const dialog = useNativeDialog();
   const confirmDestructive = useDestructiveConfirm();
-  const [open, setOpen] = useState(false);
-  const rootRef = useRef<HTMLDivElement>(null);
-  const menuId = useId();
+  const ns = 'admin.users.userActions';
 
-  useEffect(() => {
-    if (!open) return;
-    const onPointer = (event: MouseEvent | TouchEvent) => {
-      if (rootRef.current && !rootRef.current.contains(event.target as Node)) setOpen(false);
+  /** Системное подтверждение: текст и заголовок из `confirmX`, кнопка — названием действия. */
+  const confirmThen =
+    (key: string, actionKey: string, action: () => Promise<boolean>) => async () => {
+      const ok = await confirmDestructive(
+        t(`${ns}.${key}.message`),
+        t(`${ns}.${actionKey}`),
+        t(`${ns}.${key}.title`),
+      );
+      if (ok) await action();
     };
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setOpen(false);
-    };
-    document.addEventListener('mousedown', onPointer);
-    document.addEventListener('touchstart', onPointer);
-    document.addEventListener('keydown', onKey);
-    return () => {
-      document.removeEventListener('mousedown', onPointer);
-      document.removeEventListener('touchstart', onPointer);
-      document.removeEventListener('keydown', onKey);
-    };
-  }, [open]);
 
-  const confirmed = async (messageKey: string, actionKey: string, titleKey: string) =>
-    confirmDestructive(t(messageKey), t(actionKey), t(titleKey));
+  const rare = [
+    reachabilityLink && {
+      key: 'configs',
+      label: t('admin.users.detail.menu.checkConfigs'),
+      run: () => navigate(reachabilityLink),
+    },
+    can.promoGroup && {
+      key: 'promo',
+      label: t('admin.users.detail.menu.promoGroup'),
+      run: onEditPromoGroup,
+    },
+    can.restrictions && {
+      key: 'restrictions',
+      label: t('admin.users.detail.menu.restrictions'),
+      run: onEditRestrictions,
+    },
+  ].filter(Boolean) as { key: string; label: string; run: () => void }[];
 
-  const dangerous: Item[] = [];
-  if (can.block) {
-    dangerous.push(
-      user.status === 'blocked'
-        ? { key: 'unblock', label: t('admin.users.actions.unblock'), run: onUnblock }
+  const dangerous = [
+    can.block &&
+      (blocked
+        ? {
+            key: 'unblock',
+            label: t('admin.users.actions.unblock'),
+            run: () => void actions.unblock(),
+          }
         : {
             key: 'block',
             label: t('admin.users.actions.block'),
             run: async () => {
-              if (await dialog.confirm(t('admin.users.confirm.block'))) await onBlock();
+              if (await dialog.confirm(t('admin.users.confirm.block'))) await actions.block();
             },
-          },
-    );
-  }
-  if (can.subscription) {
-    dangerous.push(
-      {
-        key: 'resetTrial',
-        label: t('admin.users.userActions.resetTrial'),
-        run: async () => {
-          if (
-            await confirmed(
-              'admin.users.userActions.confirmResetTrial.message',
-              'admin.users.userActions.resetTrial',
-              'admin.users.userActions.confirmResetTrial.title',
-            )
-          )
-            await onResetTrial();
-        },
-      },
-      {
-        key: 'resetSubscription',
-        label: t('admin.users.userActions.resetSubscription'),
-        run: async () => {
-          if (
-            await confirmed(
-              'admin.users.userActions.confirmResetSubscription.message',
-              'admin.users.userActions.resetSubscription',
-              'admin.users.userActions.confirmResetSubscription.title',
-            )
-          )
-            await onResetSubscription();
-        },
-      },
-    );
-  }
-  if (can.block) {
-    dangerous.push({
+          }),
+    can.subscription && {
+      key: 'resetTrial',
+      label: t(`${ns}.resetTrial`),
+      run: confirmThen('confirmResetTrial', 'resetTrial', actions.resetTrial),
+    },
+    can.subscription && {
+      key: 'resetSubscriptions',
+      label: `${t(`${ns}.resetSubscription`)}…`,
+      run: confirmThen('confirmResetSubscription', 'resetSubscription', actions.resetSubscriptions),
+    },
+    can.block && {
       key: 'disable',
-      label: t('admin.users.userActions.disable'),
-      run: async () => {
-        if (
-          await confirmed(
-            'admin.users.userActions.confirmDisable.message',
-            'admin.users.userActions.disable',
-            'admin.users.userActions.confirmDisable.title',
-          )
-        )
-          await onDisable();
-      },
-    });
-  }
-  if (can.delete) {
-    dangerous.push({
+      label: `${t(`${ns}.disable`)}…`,
+      run: confirmThen('confirmDisable', 'disable', actions.disable),
+    },
+    can.delete && {
       key: 'delete',
-      label: t('admin.users.userActions.delete'),
+      label: `${t(`${ns}.delete`)}…`,
       danger: true,
-      run: async () => {
-        if (
-          await confirmed(
-            'admin.users.userActions.confirmDelete.message',
-            'admin.users.userActions.delete',
-            'admin.users.userActions.confirmDelete.title',
-          )
-        )
-          await onDelete();
-      },
-    });
-  }
+      run: confirmThen('confirmDelete', 'delete', actions.deleteUser),
+    },
+  ].filter(Boolean) as { key: string; label: string; danger?: boolean; run: () => void }[];
 
-  const itemClass =
-    'block w-full rounded-lg px-3 py-2 text-left text-sm text-dark-200 transition-colors hover:bg-dark-700 focus-visible:bg-dark-700 focus-visible:outline-none disabled:opacity-50';
+  if (rare.length === 0 && dangerous.length === 0) return null;
 
   return (
-    <div ref={rootRef} className="relative">
-      <button
-        type="button"
+    <DropdownMenu modal={false}>
+      <DropdownMenuTrigger
         aria-label={t('admin.users.detail.menu.more')}
-        aria-haspopup="menu"
-        aria-expanded={open}
-        aria-controls={menuId}
-        onClick={() => setOpen((value) => !value)}
-        className="btn-secondary h-11 w-11 shrink-0 p-0 sm:h-10 sm:w-10"
+        className={cn('btn-secondary h-11 w-11 shrink-0 p-0 sm:h-10 sm:w-10', className)}
       >
         <MoreIcon className="h-5 w-5" />
-      </button>
-      {open && (
-        <div
-          id={menuId}
-          role="menu"
-          className="absolute right-0 top-12 z-30 w-64 rounded-2xl border border-dark-700 bg-dark-800 p-1.5 shadow-2xl"
-        >
-          {reachabilityLink && (
-            <Link
-              role="menuitem"
-              to={reachabilityLink}
-              onClick={() => setOpen(false)}
-              className={itemClass}
-            >
-              {t('admin.users.detail.menu.checkConfigs')}
-            </Link>
-          )}
-          {dangerous.length > 0 && (
-            <>
-              {reachabilityLink && <div className="my-1.5 border-t border-dark-700" />}
-              <div className="px-3 pb-1 pt-1.5 text-[11px] font-semibold uppercase tracking-wide text-dark-500">
-                {t('admin.users.detail.menu.confirmRequired')}
-              </div>
-              {dangerous.map((item) => (
-                <button
-                  key={item.key}
-                  type="button"
-                  role="menuitem"
-                  disabled={disabled}
-                  onClick={() => {
-                    setOpen(false);
-                    item.run().catch(() => {});
-                  }}
-                  className={cn(itemClass, item.danger && 'text-error-400 hover:bg-error-500/10')}
-                >
-                  {item.label}
-                </button>
-              ))}
-            </>
-          )}
-        </div>
-      )}
-    </div>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-64">
+        {rare.map((item) => (
+          <DropdownMenuItem key={item.key} onSelect={item.run}>
+            {item.label}
+          </DropdownMenuItem>
+        ))}
+        {rare.length > 0 && dangerous.length > 0 && <DropdownMenuSeparator />}
+        {dangerous.length > 0 && (
+          <DropdownMenuLabel className="text-[11px] uppercase tracking-wide text-dark-500">
+            {t('admin.users.detail.menu.confirmRequired')}
+          </DropdownMenuLabel>
+        )}
+        {dangerous.map((item) => (
+          <DropdownMenuItem
+            key={item.key}
+            disabled={busy}
+            destructive={item.danger}
+            onSelect={item.run}
+          >
+            {item.label}
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

@@ -2,24 +2,24 @@ import { Link, useLocation } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import type { UserListItem } from '@/api/adminUsers';
 import { backTo } from '@/components/admin/AdminBackButton';
-import { useCurrency } from '@/hooks/useCurrency';
 import { cn } from '@/lib/utils';
 import { RelativeTime } from './RelativeTime';
 import { TrafficBar } from './TrafficBar';
 import { UserAvatar } from './UserAvatar';
 import { UserStatusChip } from './UserStatusChip';
 import { isMutedUser, subscriptionCaption } from './UsersTable';
+import { useMoney } from './useMoney';
 
 interface UserCardsProps {
   users: UserListItem[];
   className?: string;
 }
 
-/** Карточки для телефона: то же, что колонки таблицы, в три строки. */
+/** Карточки для телефона: то же, что колонки таблицы. Чип статуса — единственное цветное пятно. */
 export function UserCards({ users, className }: UserCardsProps) {
   const { t } = useTranslation();
   const location = useLocation();
-  const { formatWithCurrency } = useCurrency();
+  const money = useMoney();
 
   return (
     <div className={cn('flex flex-col gap-2', className)}>
@@ -48,18 +48,16 @@ export function UserCards({ users, className }: UserCardsProps) {
               <UserStatusChip user={user} />
             </div>
 
-            {user.has_subscription ? (
+            {user.has_subscription && (
               <>
-                <div className="flex items-center gap-2 text-sm">
+                <div className="flex min-w-0 items-baseline gap-1.5 text-sm">
                   {user.tariff_name && (
-                    <span className="font-medium text-dark-100">{user.tariff_name}</span>
+                    <span className="truncate font-medium text-dark-100">{user.tariff_name}</span>
                   )}
-                  {caption && <span className="text-xs text-dark-500">· {caption}</span>}
+                  {caption && <span className="shrink-0 text-xs text-dark-500">· {caption}</span>}
                 </div>
                 <TrafficBar usedGb={user.traffic_used_gb} limitGb={user.traffic_limit_gb} />
               </>
-            ) : (
-              caption && <div className="text-xs text-dark-500">{caption}</div>
             )}
 
             <div className="flex items-center justify-between gap-3">
@@ -70,7 +68,7 @@ export function UserCards({ users, className }: UserCardsProps) {
                   user.balance_rubles > 0 ? 'text-dark-100' : 'text-dark-500',
                 )}
               >
-                {formatWithCurrency(user.balance_rubles)}
+                {money(user.balance_rubles)}
               </span>
             </div>
           </Link>

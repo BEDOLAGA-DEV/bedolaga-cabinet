@@ -46,7 +46,13 @@
       "hours_other": "{{count}} 小时前",
       "days_other": "{{count}} 天前",
       "weeks_other": "{{count}} 周前",
-      "months_other": "{{count}} 个月前"
+      "months_other": "{{count}} 个月前",
+      "yesterday": "昨天"
+    },
+    "clear": "清除",
+    "dayTime": {
+      "today": "今天 {{time}}",
+      "yesterday": "昨天 {{time}}"
     }
   },
   "nav": {
@@ -3268,8 +3274,6 @@
       "subtitle": "机器人用户管理",
       "search": "ID、姓名、@用户名或邮箱",
       "noData": "未找到用户",
-      "purchaseCount_other": "{{count}} 次购买",
-      "noPurchases": "无购买记录",
       "stats": {
         "total": "总计",
         "active": "活跃",
@@ -3447,7 +3451,7 @@
           "cancelButton": "取消订阅…",
           "dangerZone": {
             "title": "危险区",
-            "description": "取消会立即停止订阅；删除会连同设备从机器人和面板移除。两者都需要确认。"
+            "description": "取消会立即终止订阅；删除会将其及设备从机器人和面板中清除。"
           },
           "support": {
             "title": "技术支持",
@@ -3460,27 +3464,40 @@
             "deleteDevice": "删除设备“{{name}}”？需要重新连接。",
             "resetDevices": "重置所有设备？所有客户端需要重新连接。",
             "cancelSbp": "关闭 SBP 自动扣款？"
-          }
+          },
+          "lastPayment": "最近付款",
+          "autopay": "自动续费",
+          "autopayOn": "已开启",
+          "autopayOff": "已关闭",
+          "extendDays": "延长天数",
+          "shortenDays": "减少天数",
+          "newTariff": "新套餐",
+          "package": "流量包",
+          "devicesLimit_other": "最多 {{count}} 台设备"
         },
         "balance": {
           "current": "当前余额",
-          "amountPlaceholder": "金额（卢布）",
-          "descriptionPlaceholder": "描述（可选）",
+          "amountPlaceholder": "0",
+          "descriptionPlaceholder": "例如：停机补偿",
           "add": "充值",
           "subtract": "扣除",
           "addByAdmin": "管理员充值",
           "subtractByAdmin": "管理员扣除",
           "recentTransactions": "最近交易",
           "title": "余额",
-          "spentSummary": "累计消费 {{amount}}",
           "amountLabel": "金额",
           "commentLabel": "日志备注",
           "confirmSubtract": "从余额扣除 {{amount}}？",
           "confirmDeactivate": "关闭 {{percent}}% 折扣？",
           "discountTitle": "个人折扣",
-          "noOffer": "当前没有有效优惠",
+          "noOffer": "没有有效优惠",
           "offerFormOpen": "发送优惠…",
-          "noOperations": "暂无记录"
+          "noOperations": "暂无记录",
+          "added": "已充值 {{amount}}",
+          "subtracted": "已扣除 {{amount}}",
+          "offerNow": "当前",
+          "offerValue": "−{{percent}}%，至 {{date}}",
+          "spentSummary_other": "共消费 {{amount}} · {{count}} 次购买"
         },
         "sync": {
           "selectSubscription": "选择订阅",
@@ -3530,13 +3547,16 @@
           "balance": "余额",
           "unknownUser": "未知",
           "totalSent": "已发送总数",
-          "totalReceived": "已收到总数"
+          "totalReceived": "已收到总数",
+          "to": "给：",
+          "from": "来自：",
+          "periodValue_other": "{{count}} 天"
         },
         "referrals": {
-          "referredBy": "推荐人",
+          "referredBy": "邀请人",
           "noReferrer": "未分配推荐人",
           "assignReferrer": "分配推荐人",
-          "removeReferrer": "移除",
+          "removeReferrer": "解除",
           "referrerAssigned": "推荐人已分配",
           "referrerRemoved": "推荐人已移除",
           "totalReferrals": "总推荐数",
@@ -3552,7 +3572,18 @@
           "referralAdded": "推荐已添加",
           "searchPlaceholder": "按名称、邮箱或 Telegram ID 搜索...",
           "alreadyReferred": "已有推荐人",
-          "noUsersFound": "未找到用户"
+          "noUsersFound": "未找到用户",
+          "assign": "指定",
+          "invited": "已邀请",
+          "earned": "已赚取",
+          "code": "邀请码",
+          "commissionLink": "佣金：{{value}} · 修改",
+          "commissionValue": "佣金：{{value}}",
+          "commissionPercent": "佣金，%",
+          "commissionSaved": "佣金已保存",
+          "spentHint": "在服务中的消费",
+          "confirmRemoveReferrer": "解除邀请人？其将不再从该用户获得收益。",
+          "confirmRemoveReferral": "将 {{name}} 移出推荐？相关收益将停止。"
         },
         "actions": {
           "areYouSure": "确定要继续？",
@@ -3560,19 +3591,7 @@
         },
         "noVpnData": "无 VPN 数据",
         "activity": {
-          "total": "事件总数",
           "empty": "暂无活动记录",
-          "filters": {
-            "all": "全部",
-            "payments": "支付",
-            "events": "事件",
-            "promo": "促销",
-            "tickets": "工单",
-            "gifts": "礼物",
-            "referrals": "推荐",
-            "logins": "登录",
-            "clicks": "点击"
-          },
           "types": {
             "transaction": "交易",
             "event": "事件",
@@ -3588,7 +3607,7 @@
             "withdrawal": "提现申请",
             "button_click": "机器人按钮",
             "cabinet_action": "后台操作",
-            "miniapp_action": "Mini App 操作",
+            "miniapp_action": "个人中心操作",
             "screen": "打开了页面",
             "click": "点击了",
             "message": "发给机器人的消息"
@@ -3596,7 +3615,7 @@
           "sources": {
             "bot": "机器人",
             "cabinet": "后台",
-            "miniapp": "Mini App"
+            "miniapp": "个人中心"
           },
           "subtypes": {
             "deposit": "充值",
@@ -3713,10 +3732,16 @@
             "other": "消息"
           },
           "views": {
-            "timeline": "时间线",
             "tickets": "工单",
-            "gifts": "礼物"
-          }
+            "gifts": "礼物",
+            "all": "全部",
+            "payments": "支付",
+            "subscription": "订阅",
+            "actions": "操作",
+            "logins": "登录"
+          },
+          "fromBalance": "余额支付",
+          "loadError": "无法加载动态"
         },
         "header": {
           "copy": "复制",
@@ -3726,7 +3751,9 @@
           "onlineAt": "在线 · {{node}}",
           "write": "发消息",
           "extend": "续期",
-          "topUp": "充值"
+          "topUp": "充值",
+          "group": "分组：{{name}}",
+          "create": "开通"
         },
         "facts": {
           "balance": "余额",
@@ -3741,14 +3768,16 @@
         "menu": {
           "more": "更多操作",
           "confirmRequired": "需要确认",
-          "checkConfigs": "通过俄罗斯运营商检查配置"
+          "checkConfigs": "检查配置（俄罗斯）",
+          "promoGroup": "更改推广分组",
+          "restrictions": "限制…"
         },
         "overview": {
           "subscription": "订阅",
           "allDetails": "全部详情",
           "autopayOn": "已开启自动续费",
           "autopayOff": "未开启自动续费",
-          "trafficPeriod": "本周期流量",
+          "trafficPeriod": "流量",
           "devicesShort": "设备 {{used}} / {{limit}}",
           "extend": "续期",
           "changeTariff": "更换套餐",
@@ -3783,28 +3812,84 @@
           "tickets": "工单",
           "open": "打开",
           "gifts": "礼物",
-          "promocodesUsed": "已用优惠码",
           "recent": "最近事件",
           "allActivity": "全部活动",
-          "noActivity": "暂无记录"
+          "noActivity": "暂无记录",
+          "devicesLink": "设备",
+          "assign": "指定",
+          "none": "无",
+          "list": "列表",
+          "promocodes": "优惠码",
+          "restrictTopupFull": "禁止充值",
+          "restrictSubscriptionFull": "禁止购买订阅",
+          "promocodesUsed_other": "已使用 {{count}} 个",
+          "ticketsOpen_other": "{{count}} 个进行中",
+          "ticketsClosed_other": "{{count}} 个已关闭",
+          "giftsSent_other": "已送出 {{count}}",
+          "giftsReceived_other": "已收到 {{count}}",
+          "all": "全部",
+          "details": "详情",
+          "lastActivity": "最近活动"
         },
         "restrictionsSaved": "限制已更新",
         "panel": {
           "title": "Remnawave 面板",
-          "matches": "与面板一致",
+          "matches": "一致",
           "differs": "存在差异",
           "unknown": "尚未检查",
           "checked": "已检查",
-          "truth": "面板是数据来源，机器人会自动同步其变更",
           "checkNow": "立即比对",
           "pull": "从面板拉取…",
           "pushManual": "手动推送到面板…",
           "confirmPull": "从面板拉取数据到机器人？机器人数据库中的到期时间和流量将被覆盖。",
-          "confirmPush": "将机器人数据推送到面板？面板中的到期时间、流量和分组将被覆盖。"
-        }
+          "confirmPush": "将机器人数据推送到面板？面板中的到期时间、流量和分组将被覆盖。",
+          "notLinked": "面板中不存在",
+          "live": "可用",
+          "notLive": "不可用",
+          "pullTitle": "从面板获取",
+          "pushTitle": "推送到面板",
+          "remnawaveId": "Remnawave 面板 ID",
+          "rows": {
+            "status": "访问",
+            "until": "有效期至",
+            "trafficLimit": "流量上限",
+            "trafficUsed": "已用",
+            "devices": "设备",
+            "squads": "分组"
+          }
+        },
+        "loadError": "无法加载用户",
+        "done": {
+          "subscription": {
+            "extend": "已延长 {{count}} 天，至 {{date}}",
+            "shorten": "已缩短 {{count}} 天，至 {{date}}",
+            "change_tariff": "套餐已更换",
+            "activate": "订阅已激活，至 {{date}}",
+            "cancel": "订阅已取消",
+            "create": "订阅已开通，至 {{date}}"
+          },
+          "pulled": "已从面板获取数据",
+          "pushed": "已推送到面板",
+          "promoGroup": "推广分组已更改",
+          "blocked": "用户已封禁",
+          "unblocked": "用户已解封",
+          "pulledWithWarning": "机器人中的到期日晚于面板，已采用面板日期。请检查是否有自动续费"
+        },
+        "operations": {
+          "title": "交易",
+          "operation": "交易",
+          "notCompleted": "未完成",
+          "filters": {
+            "all": "全部",
+            "deposit": "充值",
+            "withdrawal": "扣款",
+            "subscription_payment": "购买"
+          }
+        },
+        "messages_other": "{{count}} 条消息",
+        "ticketLoadError": "无法打开工单"
       },
       "notFound": "未找到用户",
-      "purchaseCount": "购买次数：{{count}}",
       "sendMessage": {
         "button": "✉️ 发送消息",
         "title": "向用户发送消息",
@@ -3832,11 +3917,14 @@
           "resetTrial": "试用已重置"
         }
       },
-      "summary": "{{total}} 位用户 · {{subscribed}} 位有效订阅 · 今日新增 {{newToday}} · 已封禁 {{blocked}}",
+      "summary": {
+        "total_other": "{{value}} 位用户",
+        "subscribed": "{{value}} 位有效订阅",
+        "newToday_other": "今日新增 {{value}}",
+        "blocked_other": "已封禁 {{value}}"
+      },
       "shown": "显示 {{shown}} / {{total}}",
-      "scrollHint": "向下滚动自动加载",
       "loadingMore": "正在加载",
-      "endOfList": "已显示全部 {{total}} 位",
       "noneFound": "未找到任何人，请换个关键词或清除筛选",
       "loadError": "列表加载失败",
       "reset": "清除全部",
@@ -3906,7 +3994,47 @@
         "expiredAgo": "{{count}} 天前到期",
         "limited": "流量用尽"
       },
-      "summaryShort": "{{total}} · {{subscribed}} 订阅 · {{newToday}} 新"
+      "summaryShort": {
+        "total_other": "{{value}}",
+        "subscribed": "{{value}} 位订阅",
+        "newToday_other": "新增 {{value}}"
+      },
+      "endOfList_other": "已显示全部 {{total}} 位",
+      "subscriptionState": {
+        "active": "有效",
+        "trial": "试用",
+        "limited": "流量已用尽",
+        "expired": "已过期",
+        "disabled": "已停用",
+        "pending": "待支付",
+        "other": "订阅"
+      },
+      "purchaseCount_other": "{{count}} 次购买",
+      "errors": {
+        "generic": "操作失败，请重试",
+        "insufficientBalance": "余额为 {{current}}，但需扣除 {{requested}}",
+        "tariffTaken": "该套餐已有有效订阅，请续费",
+        "singleTariff": "已有订阅。第二个订阅需开启多套餐模式",
+        "graceActive": "临时访问进行中——请等待结束或恢复订阅",
+        "badDays": "请输入大于零的天数",
+        "selfReferrer": "用户不能成为自己的邀请人",
+        "circularReferral": "这会在推荐链中形成循环",
+        "noReferrer": "未设置邀请人",
+        "notReferral": "该用户不是所选用户的推荐",
+        "ownCommission": "不能修改自己的佣金",
+        "adminProtected": "该用户是管理员，无法封禁",
+        "notInPanel": "该用户不在 Remnawave 面板中",
+        "panelUnreachable": "无法连接面板，请稍后再试",
+        "resetNotFinished": "面板未停用订阅，重置未完成",
+        "noSubscription": "没有订阅",
+        "noDevices": "没有设备",
+        "deviceNotFound": "设备已被删除",
+        "packageNotFound": "未找到流量包",
+        "tariffNotFound": "未找到套餐",
+        "promoGroupNotFound": "未找到推广分组",
+        "subscriptionNotFound": "未找到订阅",
+        "userNotFound": "未找到用户"
+      }
     },
     "promoOffers": {
       "title": "促销优惠",
@@ -5800,7 +5928,8 @@
     "ru": "Русский",
     "en": "English",
     "zh": "中文",
-    "fa": "فارسی"
+    "fa": "فارسی",
+    "ua": "乌克兰语"
   },
   "contests": {
     "title": "活动",

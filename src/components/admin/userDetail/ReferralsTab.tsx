@@ -1,583 +1,332 @@
-import { useState, useEffect, useRef } from 'react';
-import { usePermissionStore } from '../../../store/permissions';
+import { useId, useState } from 'react';
+import { Link, useLocation } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
-import { useLocation, useNavigate } from 'react-router';
-import { backTo } from '../AdminBackButton';
-import { useCurrency } from '../../../hooks/useCurrency';
-import { useNotify } from '../../../platform/hooks/useNotify';
-import { adminUsersApi, type UserDetailResponse, type UserListItem } from '../../../api/adminUsers';
-import { getApiErrorMessage } from '../../../utils/api-error';
-import { StatCard } from '@/components/stats';
-import { BanknotesIcon, PercentIcon, TagIcon, UsersIcon, XIcon } from '@/components/icons';
+import { adminUsersApi, type UserDetailResponse } from '@/api/adminUsers';
+import { backTo } from '@/components/admin/AdminBackButton';
+import { SubscriptionStateChip, UserAvatar, useMoney } from '@/components/admin/users';
+import { CopyIcon, UsersIcon, XIcon } from '@/components/icons';
 import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
-
-// ──────────────────────────────────────────────────────────────────
-// Referrals tab — top-of-graph referrer + stats + referrals list,
-// plus inline search/assign/remove flows. All state stays local;
-// the parent only owns the user query and tells us when it refreshes.
-// ──────────────────────────────────────────────────────────────────
+import { useNotify } from '@/platform/hooks/useNotify';
+import { useDestructiveConfirm } from '@/platform/hooks/useNativeDialog';
+import { copyToClipboard } from '@/utils/clipboard';
+import { formatShortDate } from '@/utils/format';
+import { UserPicker } from './UserPicker';
+import { KeyValues, LinkAction, Section } from './sectionParts';
+import { useAdminAction } from './useAdminAction';
 
 export interface ReferralsTabProps {
   user: UserDetailResponse;
   userId: number;
-  onUserRefresh: () => Promise<void> | void;
+  canEdit: boolean;
+  onUserRefresh: () => Promise<unknown>;
 }
 
-export function ReferralsTab({ user, userId, onUserRefresh }: ReferralsTabProps) {
+const LIST_LIMIT = 100;
+
+/**
+ * «Рефералы»: цифры программы, кто пригласил этого человека, его рефералы
+ * и комиссия. Снятие связей подтверждается — вернуть их можно только вручную.
+ */
+export function ReferralsTab({ user, userId, canEdit, onUserRefresh }: ReferralsTabProps) {
   const { t } = useTranslation();
-  const { formatWithCurrency } = useCurrency();
-  const navigate = useNavigate();
   const location = useLocation();
   const notify = useNotify();
+  const money = useMoney();
+  const confirmDestructive = useDestructiveConfirm();
+  const { busy, run } = useAdminAction();
+  const [picker, setPicker] = useState<'referrer' | 'referral' | null>(null);
+  const [commissionOpen, setCommissionOpen] = useState(false);
+  const ns = 'admin.users.detail.referrals';
+  const referral = user.referral;
 
-  // Referrals list — owned here, not in the parent.
-  const referralsListQuery = useQuery({
+  const listQuery = useQuery({
     queryKey: ['admin-user-referrals-list', userId] as const,
-    queryFn: () => adminUsersApi.getReferrals(userId, 0, 100),
-    enabled: !!userId,
+    queryFn: () => adminUsersApi.getReferrals(userId, 0, LIST_LIMIT),
   });
-  const referralsList = referralsListQuery.data?.users ?? [];
-  const referralsTotal = referralsListQuery.data?.total ?? 0;
-  const referralsListLoading = referralsListQuery.isFetching;
+  const referrals = listQuery.data?.users ?? [];
+  const refreshAll = () => Promise.all([onUserRefresh(), listQuery.refetch()]);
+  const excludeIds = new Set([userId, ...referrals.map((item) => item.id)]);
 
-  // Action gating — local so other tabs' buttons aren't dimmed during a
-  // referral mutation here.
-  const [actionLoading, setActionLoading] = useState(false);
-
-  // Inline referrer search dropdown
-  const [showReferrerSearch, setShowReferrerSearch] = useState(false);
-  const [referrerSearchQuery, setReferrerSearchQuery] = useState('');
-  const [referrerSearchResults, setReferrerSearchResults] = useState<UserListItem[]>([]);
-  const [referrerSearchLoading, setReferrerSearchLoading] = useState(false);
-  const referrerSearchRef = useRef<HTMLDivElement>(null);
-
-  // Inline add-referral search dropdown
-  const [showAddReferral, setShowAddReferral] = useState(false);
-  const [addReferralSearchQuery, setAddReferralSearchQuery] = useState('');
-  const [addReferralSearchResults, setAddReferralSearchResults] = useState<UserListItem[]>([]);
-  const [addReferralSearchLoading, setAddReferralSearchLoading] = useState(false);
-  const addReferralSearchRef = useRef<HTMLDivElement>(null);
-
-  // Debounced search for referrer
-  useEffect(() => {
-    if (referrerSearchQuery.length < 2 || !showReferrerSearch) {
-      setReferrerSearchResults([]);
-      setReferrerSearchLoading(false);
-      return;
-    }
-    setReferrerSearchLoading(true);
-    setReferrerSearchResults([]);
-    let cancelled = false;
-    const timer = setTimeout(async () => {
-      try {
-        const data = await adminUsersApi.getUsers({ search: referrerSearchQuery, limit: 10 });
-        if (!cancelled) {
-          setReferrerSearchResults(data.users || []);
-          setReferrerSearchLoading(false);
-        }
-      } catch {
-        if (!cancelled) {
-          setReferrerSearchResults([]);
-          setReferrerSearchLoading(false);
-        }
-      }
-    }, 300);
-    return () => {
-      cancelled = true;
-      clearTimeout(timer);
-    };
-  }, [referrerSearchQuery, showReferrerSearch]);
-
-  // Close referrer dropdown on click outside
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (referrerSearchRef.current && !referrerSearchRef.current.contains(e.target as Node)) {
-        setShowReferrerSearch(false);
-        setReferrerSearchQuery('');
-        setReferrerSearchResults([]);
-      }
-    };
-    if (showReferrerSearch) {
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
-    }
-  }, [showReferrerSearch]);
-
-  // Debounced search for adding referral
-  useEffect(() => {
-    if (addReferralSearchQuery.length < 2 || !showAddReferral) {
-      setAddReferralSearchResults([]);
-      setAddReferralSearchLoading(false);
-      return;
-    }
-    setAddReferralSearchLoading(true);
-    setAddReferralSearchResults([]);
-    let cancelled = false;
-    const timer = setTimeout(async () => {
-      try {
-        const data = await adminUsersApi.getUsers({ search: addReferralSearchQuery, limit: 10 });
-        if (!cancelled) {
-          setAddReferralSearchResults(data.users || []);
-          setAddReferralSearchLoading(false);
-        }
-      } catch {
-        if (!cancelled) {
-          setAddReferralSearchResults([]);
-          setAddReferralSearchLoading(false);
-        }
-      }
-    }, 300);
-    return () => {
-      cancelled = true;
-      clearTimeout(timer);
-    };
-  }, [addReferralSearchQuery, showAddReferral]);
-
-  // Close add-referral dropdown on click outside
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (
-        addReferralSearchRef.current &&
-        !addReferralSearchRef.current.contains(e.target as Node)
-      ) {
-        setShowAddReferral(false);
-        setAddReferralSearchQuery('');
-        setAddReferralSearchResults([]);
-      }
-    };
-    if (showAddReferral) {
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
-    }
-  }, [showAddReferral]);
-
-  // ─── Mutation handlers ───────────────────────────────────────────
-
-  const handleAssignReferrer = async (referrerId: number) => {
-    setActionLoading(true);
+  const copyCode = async () => {
     try {
-      await adminUsersApi.assignReferrer(userId, referrerId);
-      await onUserRefresh();
-      setShowReferrerSearch(false);
-      setReferrerSearchQuery('');
-      setReferrerSearchResults([]);
-      notify.success(t('admin.users.detail.referrals.referrerAssigned'));
-    } catch (error: unknown) {
-      notify.error(getApiErrorMessage(error, t('common.error')));
-    } finally {
-      setActionLoading(false);
+      await copyToClipboard(referral.referral_code);
+      notify.success(t('admin.users.detail.copied'));
+    } catch {
+      notify.error(t('common.error'));
     }
   };
 
-  const handleRemoveReferrer = async () => {
-    setActionLoading(true);
-    try {
-      await adminUsersApi.removeReferrer(userId);
-      await onUserRefresh();
-      notify.success(t('admin.users.detail.referrals.referrerRemoved'));
-    } catch (error: unknown) {
-      notify.error(getApiErrorMessage(error, t('common.error')));
-    } finally {
-      setActionLoading(false);
-    }
+  const removeReferrer = async () => {
+    const ok = await confirmDestructive(
+      t(`${ns}.confirmRemoveReferrer`),
+      t(`${ns}.removeReferrer`),
+    );
+    if (ok)
+      await run(() => adminUsersApi.removeReferrer(userId), {
+        success: t(`${ns}.referrerRemoved`),
+        after: onUserRefresh,
+      });
   };
 
-  const handleRemoveReferral = async (referralUserId: number) => {
-    setActionLoading(true);
-    try {
-      await adminUsersApi.removeReferral(userId, referralUserId);
-      await referralsListQuery.refetch();
-      await onUserRefresh();
-      notify.success(t('admin.users.detail.referrals.referralRemoved'));
-    } catch (error: unknown) {
-      notify.error(getApiErrorMessage(error, t('common.error')));
-    } finally {
-      setActionLoading(false);
-    }
+  const removeReferral = async (id: number, name: string) => {
+    const ok = await confirmDestructive(
+      t(`${ns}.confirmRemoveReferral`, { name }),
+      t(`${ns}.removeReferral`),
+    );
+    if (ok)
+      await run(() => adminUsersApi.removeReferral(userId, id), {
+        success: t(`${ns}.referralRemoved`),
+        after: refreshAll,
+      });
   };
 
-  const handleAddReferral = async (targetUserId: number) => {
-    setActionLoading(true);
-    try {
-      await adminUsersApi.assignReferrer(targetUserId, userId);
-      await referralsListQuery.refetch();
-      await onUserRefresh();
-      setShowAddReferral(false);
-      setAddReferralSearchQuery('');
-      setAddReferralSearchResults([]);
-      notify.success(t('admin.users.detail.referrals.referralAdded'));
-    } catch (error: unknown) {
-      notify.error(getApiErrorMessage(error, t('common.error')));
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
-  // ─── Render ──────────────────────────────────────────────────────
+  const commissionLabel =
+    referral.commission_percent != null ? `${referral.commission_percent} %` : t(`${ns}.default`);
 
   return (
-    <div className="space-y-6">
-      {/* Section 1: Who referred this user */}
-      <div className="rounded-2xl border border-dark-700/30 bg-dark-800/40 p-5">
-        <h3 className="mb-4 text-base font-semibold text-dark-100">
-          {t('admin.users.detail.referrals.referredBy')}
-        </h3>
+    <Section
+      icon={<UsersIcon className="h-5 w-5" />}
+      title={t('admin.users.detail.referral.title')}
+      action={
+        canEdit ? (
+          <LinkAction onClick={() => setCommissionOpen((open) => !open)}>
+            {t(`${ns}.commissionLink`, { value: commissionLabel })}
+          </LinkAction>
+        ) : (
+          <span className="text-xs text-dark-400">
+            {t(`${ns}.commissionValue`, { value: commissionLabel })}
+          </span>
+        )
+      }
+    >
+      {commissionOpen && (
+        <CommissionEditor
+          current={referral.commission_percent}
+          busy={busy}
+          onClose={() => setCommissionOpen(false)}
+          onSave={(percent) =>
+            run(() => adminUsersApi.updateReferralCommission(userId, percent), {
+              success: t(`${ns}.commissionSaved`),
+              after: onUserRefresh,
+            })
+          }
+        />
+      )}
 
-        {user.referral.referred_by_id ? (
-          <div className="flex items-center justify-between gap-3">
+      <dl className="m-0 grid grid-cols-3 overflow-hidden rounded-xl border border-dark-700/60">
+        <Fact label={t(`${ns}.invited`)} value={String(referral.referrals_count)} />
+        <Fact label={t(`${ns}.earned`)} value={money(referral.total_earnings_kopeks / 100)} />
+        <div className="flex min-w-0 flex-col gap-0.5 px-3 py-2.5">
+          <dt className="text-[11px] font-semibold uppercase tracking-wide text-dark-500">
+            {t(`${ns}.code`)}
+          </dt>
+          <dd className="m-0 min-w-0">
             <button
-              onClick={() =>
-                navigate(`/admin/users/${user.referral.referred_by_id}`, backTo(location))
-              }
-              className="flex items-center gap-3 rounded-xl bg-dark-700/30 px-4 py-3 transition-colors hover:bg-dark-700/50"
+              type="button"
+              onClick={() => void copyCode()}
+              title={t('common.copy')}
+              className="inline-flex max-w-full items-center gap-1 font-mono text-sm font-semibold text-dark-100 hover:text-accent-400"
             >
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent-500/20 text-sm font-bold text-accent-400">
-                {(user.referral.referred_by_username || '?')[0].toUpperCase()}
-              </div>
-              <div>
-                <div className="text-sm font-medium text-dark-100">
-                  {user.referral.referred_by_username || `ID: ${user.referral.referred_by_id}`}
-                </div>
-                <div className="text-xs text-dark-500">ID: {user.referral.referred_by_id}</div>
-              </div>
+              <span className="truncate">{referral.referral_code}</span>
+              <CopyIcon className="h-3.5 w-3.5 shrink-0 text-dark-500" />
             </button>
-            <button onClick={handleRemoveReferrer} disabled={actionLoading} className="btn-danger">
-              {t('admin.users.detail.referrals.removeReferrer')}
-            </button>
-          </div>
-        ) : (
-          <div>
-            {showReferrerSearch ? (
-              <div ref={referrerSearchRef} className="relative">
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={referrerSearchQuery}
-                    onChange={(e) => setReferrerSearchQuery(e.target.value)}
-                    placeholder={t('admin.users.detail.referrals.searchPlaceholder')}
-                    className="flex-1 rounded-lg border border-dark-600 bg-dark-700 px-3 py-2.5 text-sm text-dark-100 placeholder-dark-500 focus:border-accent-500 focus:outline-none"
-                    autoFocus
-                  />
-                  <button
-                    onClick={() => {
-                      setShowReferrerSearch(false);
-                      setReferrerSearchQuery('');
-                      setReferrerSearchResults([]);
-                    }}
-                    className="rounded-lg bg-dark-700 px-3 py-2.5 text-sm text-dark-400 hover:bg-dark-600"
-                  >
-                    {t('common.cancel')}
-                  </button>
-                </div>
-                {referrerSearchQuery.length >= 2 && referrerSearchResults.length > 0 && (
-                  <div className="absolute left-0 right-0 top-full z-50 mt-1 max-h-60 overflow-y-auto rounded-xl border border-dark-700 bg-dark-800 py-1 shadow-xl">
-                    {referrerSearchResults
-                      .filter((u) => u.id !== userId)
-                      .map((u) => (
-                        <button
-                          key={u.id}
-                          onClick={() => handleAssignReferrer(u.id)}
-                          className="flex w-full items-center gap-3 px-3 py-2.5 text-left hover:bg-dark-700/50"
-                        >
-                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-dark-600/50 text-xs font-bold text-dark-300">
-                            {(u.full_name || u.username || '?')[0].toUpperCase()}
-                          </div>
-                          <div>
-                            <div className="text-sm text-dark-100">
-                              {u.full_name || u.username || `ID: ${u.id}`}
-                            </div>
-                            <div className="text-xs text-dark-500">
-                              {u.telegram_id ? `TG: ${u.telegram_id}` : `ID: ${u.id}`}
-                            </div>
-                          </div>
-                        </button>
-                      ))}
-                    {referrerSearchResults.filter((u) => u.id !== userId).length === 0 && (
-                      <div className="px-3 py-4 text-center text-sm text-dark-500">
-                        {t('admin.users.detail.referrals.noUsersFound')}
-                      </div>
-                    )}
-                  </div>
-                )}
-                {referrerSearchQuery.length >= 2 &&
-                  !referrerSearchLoading &&
-                  referrerSearchResults.length === 0 && (
-                    <div className="absolute left-0 right-0 top-full z-50 mt-1 rounded-xl border border-dark-700 bg-dark-800 py-4 text-center text-sm text-dark-500 shadow-xl">
-                      {t('admin.users.detail.referrals.noUsersFound')}
-                    </div>
-                  )}
-              </div>
-            ) : (
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-dark-500">
-                  {t('admin.users.detail.referrals.noReferrer')}
-                </span>
-                <button onClick={() => setShowReferrerSearch(true)} className="btn-secondary">
-                  {t('admin.users.detail.referrals.assignReferrer')}
-                </button>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* Section 2: Referral stats */}
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <StatCard
-          label={t('admin.users.detail.referrals.totalReferrals')}
-          value={user.referral.referrals_count}
-          icon={<UsersIcon className="h-5 w-5" />}
-          tone="neutral"
-        />
-        <StatCard
-          label={t('admin.users.detail.referrals.totalEarnings')}
-          value={formatWithCurrency(user.referral.total_earnings_kopeks / 100)}
-          icon={<BanknotesIcon className="h-5 w-5" />}
-          tone="neutral"
-        />
-        <CommissionCard user={user} userId={userId} onUserRefresh={onUserRefresh} />
-        <StatCard
-          label={t('admin.users.detail.referrals.referralCode')}
-          value={user.referral.referral_code}
-          icon={<TagIcon className="h-5 w-5" />}
-          tone="neutral"
-          valueClassName="font-mono"
-        />
-      </div>
-
-      {/* Section 3: Referrals list */}
-      <div className="rounded-2xl border border-dark-700/30 bg-dark-800/40 p-5">
-        <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-base font-semibold text-dark-100">
-            {t('admin.users.detail.referrals.referralsList')} ({referralsTotal})
-          </h3>
-          {!showAddReferral && (
-            <button onClick={() => setShowAddReferral(true)} className="btn-secondary">
-              {t('admin.users.detail.referrals.addReferral')}
-            </button>
-          )}
+          </dd>
         </div>
+      </dl>
 
-        {/* Add referral search */}
-        {showAddReferral && (
-          <div ref={addReferralSearchRef} className="relative mb-4">
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={addReferralSearchQuery}
-                onChange={(e) => setAddReferralSearchQuery(e.target.value)}
-                placeholder={t('admin.users.detail.referrals.searchPlaceholder')}
-                className="flex-1 rounded-lg border border-dark-600 bg-dark-700 px-3 py-2.5 text-sm text-dark-100 placeholder-dark-500 focus:border-accent-500 focus:outline-none"
-                autoFocus
-              />
-              <button
-                onClick={() => {
-                  setShowAddReferral(false);
-                  setAddReferralSearchQuery('');
-                  setAddReferralSearchResults([]);
-                }}
-                className="rounded-lg bg-dark-700 px-3 py-2.5 text-sm text-dark-400 hover:bg-dark-600"
-              >
-                {t('common.cancel')}
-              </button>
-            </div>
-            {addReferralSearchQuery.length >= 2 && addReferralSearchResults.length > 0 && (
-              <div className="absolute left-0 right-0 top-full z-50 mt-1 max-h-60 overflow-y-auto rounded-xl border border-dark-700 bg-dark-800 py-1 shadow-xl">
-                {addReferralSearchResults
-                  .filter((u) => u.id !== userId && !referralsList.some((r) => r.id === u.id))
-                  .map((u) => (
-                    <button
-                      key={u.id}
-                      onClick={() => handleAddReferral(u.id)}
-                      disabled={actionLoading}
-                      className="flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors hover:bg-dark-700/50 disabled:opacity-50"
-                    >
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-dark-600/50 text-xs font-bold text-dark-300">
-                        {(u.full_name || u.username || '?')[0].toUpperCase()}
-                      </div>
-                      <div>
-                        <div className="text-sm text-dark-100">
-                          {u.full_name || u.username || `ID: ${u.id}`}
-                        </div>
-                        <div className="text-xs text-dark-500">
-                          {u.telegram_id ? `TG: ${u.telegram_id}` : `ID: ${u.id}`}
-                        </div>
-                      </div>
-                    </button>
-                  ))}
-                {addReferralSearchResults.filter(
-                  (u) => u.id !== userId && !referralsList.some((r) => r.id === u.id),
-                ).length === 0 && (
-                  <div className="px-3 py-4 text-center text-sm text-dark-500">
-                    {t('admin.users.detail.referrals.noUsersFound')}
-                  </div>
-                )}
-              </div>
-            )}
-            {addReferralSearchQuery.length >= 2 &&
-              !addReferralSearchLoading &&
-              addReferralSearchResults.length === 0 && (
-                <div className="absolute left-0 right-0 top-full z-50 mt-1 rounded-xl border border-dark-700 bg-dark-800 py-4 text-center text-sm text-dark-500 shadow-xl">
-                  {t('admin.users.detail.referrals.noUsersFound')}
-                </div>
-              )}
-          </div>
-        )}
-
-        {referralsListLoading ? (
-          <SkeletonGroup className="space-y-3">
-            <Skeleton variant="card" count={3} className="h-16" />
-          </SkeletonGroup>
-        ) : referralsList.length === 0 ? (
-          <div className="py-8 text-center text-dark-500">
-            {t('admin.users.detail.referrals.noReferrals')}
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {referralsList.map((ref) => (
-              <div
-                key={ref.id}
-                className="flex items-center justify-between rounded-xl bg-dark-700/20 px-4 py-3"
-              >
-                <button
-                  onClick={() => navigate(`/admin/users/${ref.id}`, backTo(location))}
-                  className="flex min-w-0 items-center gap-3 text-left"
+      <KeyValues
+        rows={[
+          {
+            key: 'referrer',
+            label: t(`${ns}.referredBy`),
+            value: referral.referred_by_id ? (
+              <span className="inline-flex flex-wrap items-center gap-x-2">
+                <Link
+                  to={`/admin/users/${referral.referred_by_id}`}
+                  state={backTo(location).state}
+                  className="text-accent-400 hover:text-accent-300"
                 >
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-dark-600/50 text-sm font-bold text-dark-300">
-                    {(ref.full_name || ref.username || '?')[0].toUpperCase()}
-                  </div>
-                  <div className="min-w-0">
-                    <div className="truncate text-sm font-medium text-dark-100">
-                      {ref.full_name || ref.username || `ID: ${ref.id}`}
-                    </div>
-                    <div className="text-xs text-dark-500">
-                      {ref.telegram_id ? `TG: ${ref.telegram_id}` : `ID: ${ref.id}`}
-                    </div>
-                  </div>
-                </button>
+                  {referral.referred_by_username
+                    ? `@${referral.referred_by_username}`
+                    : `#${referral.referred_by_id}`}
+                </Link>
+                {canEdit && (
+                  <LinkAction onClick={() => void removeReferrer()} disabled={busy}>
+                    {t(`${ns}.removeReferrer`)}
+                  </LinkAction>
+                )}
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-x-2">
+                <span className="text-dark-500">—</span>
+                {canEdit && picker !== 'referrer' && (
+                  <LinkAction onClick={() => setPicker('referrer')}>{t(`${ns}.assign`)}</LinkAction>
+                )}
+              </span>
+            ),
+          },
+        ]}
+      />
+      {picker === 'referrer' && (
+        <UserPicker
+          excludeIds={excludeIds}
+          busy={busy}
+          onClose={() => setPicker(null)}
+          onPick={async (target) => {
+            const done = await run(() => adminUsersApi.assignReferrer(userId, target.id), {
+              success: t(`${ns}.referrerAssigned`),
+              after: onUserRefresh,
+            });
+            if (done) setPicker(null);
+          }}
+        />
+      )}
+
+      {listQuery.isLoading ? (
+        <SkeletonGroup className="space-y-2">
+          <Skeleton variant="line" count={3} className="h-12" />
+        </SkeletonGroup>
+      ) : referrals.length === 0 ? (
+        <p className="text-sm text-dark-500">{t(`${ns}.noReferrals`)}</p>
+      ) : (
+        <ul className="m-0 list-none divide-y divide-dark-800/80 p-0">
+          {referrals.map((item) => (
+            <li key={item.id} className="flex items-center gap-3 py-2.5">
+              <span className="w-11 shrink-0 font-mono text-xs tabular-nums text-dark-500">
+                {formatShortDate(item.created_at).slice(0, 5)}
+              </span>
+              <UserAvatar
+                firstName={item.first_name}
+                username={item.username}
+                size="sm"
+                className="hidden sm:flex"
+              />
+              <Link
+                to={`/admin/users/${item.id}`}
+                state={backTo(location).state}
+                className="min-w-0 flex-1"
+              >
+                <span className="block truncate text-sm text-dark-100 hover:text-accent-400">
+                  {item.full_name}
+                </span>
+                <span className="flex min-w-0 items-center gap-1.5 text-xs text-dark-500">
+                  <span className="truncate">
+                    {[item.username ? `@${item.username}` : null, item.tariff_name]
+                      .filter(Boolean)
+                      .join(' · ') || item.telegram_id}
+                  </span>
+                  {item.has_subscription && item.subscription_status && (
+                    <SubscriptionStateChip status={item.subscription_status} />
+                  )}
+                </span>
+              </Link>
+              <span
+                className="shrink-0 text-sm font-medium tabular-nums text-dark-200"
+                title={t(`${ns}.spentHint`)}
+              >
+                {money(item.total_spent_kopeks / 100)}
+              </span>
+              {canEdit && (
                 <button
-                  onClick={() => handleRemoveReferral(ref.id)}
-                  disabled={actionLoading}
-                  className="shrink-0 rounded-lg p-2 text-dark-500 transition-colors hover:bg-error-500/10 hover:text-error-400 disabled:opacity-50"
-                  title={t('admin.users.detail.referrals.removeReferral')}
+                  type="button"
+                  onClick={() => void removeReferral(item.id, item.full_name)}
+                  disabled={busy}
+                  aria-label={t(`${ns}.removeReferral`)}
+                  className="btn-ghost shrink-0 p-2 hover:text-error-400"
                 >
                   <XIcon className="h-4 w-4" />
                 </button>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {canEdit &&
+        (picker === 'referral' ? (
+          <UserPicker
+            excludeIds={excludeIds}
+            busy={busy}
+            onClose={() => setPicker(null)}
+            onPick={async (target) => {
+              const done = await run(() => adminUsersApi.assignReferrer(target.id, userId), {
+                success: t(`${ns}.referralAdded`),
+                after: refreshAll,
+              });
+              if (done) setPicker(null);
+            }}
+          />
+        ) : (
+          <button
+            type="button"
+            onClick={() => setPicker('referral')}
+            className="btn-secondary self-start"
+          >
+            {t(`${ns}.addReferral`)}…
+          </button>
+        ))}
+    </Section>
+  );
+}
+
+function Fact({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex min-w-0 flex-col gap-0.5 border-r border-dark-800 px-3 py-2.5">
+      <dt className="text-[11px] font-semibold uppercase tracking-wide text-dark-500">{label}</dt>
+      <dd className="m-0 truncate text-base font-semibold tabular-nums text-dark-100">{value}</dd>
     </div>
   );
 }
 
-/**
- * Комиссия реферала с правкой на месте. Редактор жил во вкладке «Информация»,
- * которой больше нет: у комиссии одно место — рядом с остальной реферальной статистикой.
- */
-function CommissionCard({
-  user,
-  userId,
-  onUserRefresh,
+function CommissionEditor({
+  current,
+  busy,
+  onSave,
+  onClose,
 }: {
-  user: UserDetailResponse;
-  userId: number;
-  onUserRefresh: () => Promise<void> | void;
+  current: number | null;
+  busy: boolean;
+  onSave: (percent: number | null) => Promise<boolean>;
+  onClose: () => void;
 }) {
   const { t } = useTranslation();
   const notify = useNotify();
-  const canEdit = usePermissionStore((s) => s.hasPermission)('users:referral');
-  const [editing, setEditing] = useState(false);
-  const [value, setValue] = useState<string>('');
-  const [saving, setSaving] = useState(false);
+  const id = useId();
+  const [value, setValue] = useState(current != null ? String(current) : '');
+  const ns = 'admin.users.detail';
 
   const save = async () => {
     const parsed = value.trim() === '' ? null : Number(value);
     if (parsed !== null && (!Number.isFinite(parsed) || parsed < 0 || parsed > 100)) {
-      notify.error(t('admin.users.detail.referral.invalidPercent'), t('common.error'));
+      notify.error(t(`${ns}.referral.invalidPercent`), t('common.error'));
       return;
     }
-    setSaving(true);
-    try {
-      await adminUsersApi.updateReferralCommission(userId, parsed);
-      await onUserRefresh();
-      setEditing(false);
-    } catch (err) {
-      notify.error(getApiErrorMessage(err, t('admin.users.userActions.error')), t('common.error'));
-    } finally {
-      setSaving(false);
-    }
+    if (await onSave(parsed)) onClose();
   };
 
-  if (editing) {
-    return (
-      <div className="rounded-2xl border border-dark-700/40 bg-dark-900/70 p-4">
-        <label className="mb-2 block text-xs text-dark-500" htmlFor="referral-commission">
-          {t('admin.users.detail.referrals.commission')}
-        </label>
-        <div className="flex items-center gap-2">
-          <input
-            id="referral-commission"
-            type="number"
-            min={0}
-            max={100}
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-            placeholder={t('admin.users.detail.referrals.default')}
-            className="input w-24 py-2 text-center"
-          />
-          <span className="text-sm text-dark-400">%</span>
-          <button
-            type="button"
-            onClick={save}
-            disabled={saving}
-            className="btn-primary px-3 py-2 text-sm"
-          >
-            {t('common.save')}
-          </button>
-          <button
-            type="button"
-            onClick={() => setEditing(false)}
-            disabled={saving}
-            className="btn-ghost px-3 py-2 text-sm"
-          >
-            {t('common.cancel')}
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <StatCard
-      label={t('admin.users.detail.referrals.commission')}
-      value={
-        user.referral.commission_percent != null
-          ? `${user.referral.commission_percent}%`
-          : t('admin.users.detail.referrals.default')
-      }
-      icon={<PercentIcon className="h-5 w-5" />}
-      tone="neutral"
-      trailing={
-        canEdit ? (
-          <button
-            type="button"
-            onClick={() => {
-              setValue(
-                user.referral.commission_percent != null
-                  ? String(user.referral.commission_percent)
-                  : '',
-              );
-              setEditing(true);
-            }}
-            className="text-xs font-medium text-accent-400 hover:text-accent-300"
-          >
-            {t('common.edit')}
-          </button>
-        ) : undefined
-      }
-    />
+    <div className="flex flex-wrap items-end gap-2 rounded-xl border border-dark-700 bg-dark-800/60 p-3">
+      <label htmlFor={id} className="flex flex-col gap-1 text-xs text-dark-500">
+        {t(`${ns}.referrals.commissionPercent`)}
+        <input
+          id={id}
+          type="number"
+          inputMode="numeric"
+          min={0}
+          max={100}
+          value={value}
+          onChange={(event) => setValue(event.target.value)}
+          placeholder={t(`${ns}.referrals.default`)}
+          className="input w-28 py-2"
+        />
+      </label>
+      <button type="button" onClick={() => void save()} disabled={busy} className="btn-primary">
+        {t('common.save')}
+      </button>
+      <button type="button" onClick={onClose} className="btn-ghost">
+        {t('common.cancel')}
+      </button>
+    </div>
   );
 }
