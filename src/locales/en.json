@@ -37,7 +37,22 @@
     "no_results": "No results",
     "ok": "OK",
     "processing": "Processing…",
-    "rangeTo": "to"
+    "rangeTo": "to",
+    "relative": {
+      "online": "online",
+      "now": "just now",
+      "never": "never",
+      "minutes_one": "{{count}} min ago",
+      "minutes_other": "{{count}} min ago",
+      "hours_one": "{{count}} h ago",
+      "hours_other": "{{count}} h ago",
+      "days_one": "{{count}} day ago",
+      "days_other": "{{count}} days ago",
+      "weeks_one": "{{count}} wk ago",
+      "weeks_other": "{{count}} wks ago",
+      "months_one": "{{count}} mo ago",
+      "months_other": "{{count}} mo ago"
+    }
   },
   "nav": {
     "dashboard": "Dashboard",

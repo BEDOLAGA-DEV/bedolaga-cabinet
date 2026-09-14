@@ -37,7 +37,27 @@
     "no_results": "Ничего не найдено",
     "ok": "ОК",
     "processing": "Обработка…",
-    "rangeTo": "до"
+    "rangeTo": "до",
+    "relative": {
+      "online": "онлайн",
+      "now": "только что",
+      "never": "не было",
+      "minutes_one": "{{count}} мин назад",
+      "minutes_few": "{{count}} мин назад",
+      "minutes_many": "{{count}} мин назад",
+      "hours_one": "{{count}} ч назад",
+      "hours_few": "{{count}} ч назад",
+      "hours_many": "{{count}} ч назад",
+      "days_one": "{{count}} день назад",
+      "days_few": "{{count}} дня назад",
+      "days_many": "{{count}} дней назад",
+      "weeks_one": "{{count}} нед назад",
+      "weeks_few": "{{count}} нед назад",
+      "weeks_many": "{{count}} нед назад",
+      "months_one": "{{count}} мес назад",
+      "months_few": "{{count}} мес назад",
+      "months_many": "{{count}} мес назад"
+    }
   },
   "nav": {
     "dashboard": "Главная",
