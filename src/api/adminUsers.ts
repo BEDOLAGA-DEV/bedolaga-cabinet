@@ -436,30 +436,40 @@ export interface AdminUserGiftsResponse {
   received_total: number;
 }
 
+export interface UsersListParams {
+  offset?: number;
+  limit?: number;
+  search?: string;
+  email?: string;
+  status?: 'active' | 'blocked' | 'deleted';
+  subscription_status?: string;
+  tariff_id?: string;
+  promo_group_id?: number;
+  campaign_id?: number;
+  partner_id?: number;
+  /** Подписка со статусом active истекает в ближайшие N дней (сегмент «истекают»). */
+  expires_within_days?: number;
+  /** Была активность в боте или кабинете за последние N минут (сегмент «онлайн»). */
+  active_within_minutes?: number;
+  /** Есть запрет пополнения или покупки. */
+  has_restrictions?: boolean;
+  /** false — ни одной подписки. */
+  has_subscription?: boolean;
+  /** 0 — ни одной покупки (сегмент «без покупок»). */
+  purchase_count?: number;
+  sort_by?:
+    | 'created_at'
+    | 'balance'
+    | 'traffic'
+    | 'last_activity'
+    | 'total_spent'
+    | 'purchase_count'
+    | 'subscription_end_date';
+}
+
 export const adminUsersApi = {
   // List users
-  getUsers: async (
-    params: {
-      offset?: number;
-      limit?: number;
-      search?: string;
-      email?: string;
-      status?: 'active' | 'blocked' | 'deleted';
-      subscription_status?: string;
-      tariff_id?: string;
-      promo_group_id?: number;
-      campaign_id?: number;
-      partner_id?: number;
-      sort_by?:
-        | 'created_at'
-        | 'balance'
-        | 'traffic'
-        | 'last_activity'
-        | 'total_spent'
-        | 'purchase_count'
-        | 'subscription_end_date';
-    } = {},
-  ): Promise<UsersListResponse> => {
+  getUsers: async (params: UsersListParams = {}): Promise<UsersListResponse> => {
     const response = await apiClient.get('/cabinet/admin/users', { params });
     return response.data;
   },
