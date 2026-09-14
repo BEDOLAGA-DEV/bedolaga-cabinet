@@ -572,12 +572,19 @@ export default function AdminGraceAccess() {
   const [form, setForm] = useState<GraceForm | null>(null);
   const [externalChoice, setExternalChoice] = useState<ExternalChoice>('detach');
   const [saveError, setSaveError] = useState<string | null>(null);
-  const [showAdvanced, setShowAdvanced] = useState(false);
+  // null — ещё не решали: первый ответ сервера раскрывает «Дополнительно», если там
+  // есть что показать (настроенный внешний сквад). Дальше блоком управляет только
+  // кнопка: вычислять «открыт» из настройки нельзя — она переопределяла бы «Скрыть»
+  // (владелец 2026-09-14: «кнопка тупо не работает»), а повторные ответы сервера
+  // после сохранения раскрывали бы свёрнутое заново.
+  const [showAdvanced, setShowAdvanced] = useState<boolean | null>(null);
 
   useEffect(() => {
     if (!data) return;
     setForm(toForm(data.config));
-    setExternalChoice(externalChoiceOf(data.config.external_squad_uuid));
+    const choice = externalChoiceOf(data.config.external_squad_uuid);
+    setExternalChoice(choice);
+    setShowAdvanced((current) => current ?? choice !== 'detach');
   }, [data]);
 
   const saveMutation = useMutation({
@@ -614,10 +621,9 @@ export default function AdminGraceAccess() {
     externalChoice === 'custom' && (form?.external_squad_uuid ?? '').trim() === '';
   const blocksSave = modeBlockers.length > 0 || emptyNumbers.length > 0 || externalIncomplete;
   const invalidFields = new Set(blockers.map((issue) => issue.field));
-  // Расширенный блок открывается сам, если там есть что показать: настроенный
-  // внешний сквад или ошибка в нём — иначе она пряталась бы за «Показать».
-  const advancedOpen =
-    showAdvanced || externalChoice !== 'detach' || invalidFields.has('external_squad_uuid');
+  // Ошибка внешнего сквада за свёрнутым блоком не теряется: она продублирована
+  // в списке причин у кнопки «Сохранить».
+  const advancedOpen = showAdvanced ?? false;
 
   if (isLoading || (!form && !error)) {
     return (
