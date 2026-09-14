@@ -37,7 +37,22 @@
     "no_results": "نتیجه‌ای یافت نشد",
     "ok": "تأیید",
     "processing": "در حال پردازش…",
-    "rangeTo": "تا"
+    "rangeTo": "تا",
+    "relative": {
+      "online": "آنلاین",
+      "now": "همین حالا",
+      "never": "هرگز",
+      "minutes_one": "{{count}} دقیقه پیش",
+      "minutes_other": "{{count}} دقیقه پیش",
+      "hours_one": "{{count}} ساعت پیش",
+      "hours_other": "{{count}} ساعت پیش",
+      "days_one": "{{count}} روز پیش",
+      "days_other": "{{count}} روز پیش",
+      "weeks_one": "{{count}} هفته پیش",
+      "weeks_other": "{{count}} هفته پیش",
+      "months_one": "{{count}} ماه پیش",
+      "months_other": "{{count}} ماه پیش"
+    }
   },
   "nav": {
     "dashboard": "داشبورد",

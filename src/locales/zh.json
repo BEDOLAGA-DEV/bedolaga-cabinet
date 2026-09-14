@@ -37,7 +37,17 @@
     "no_results": "无结果",
     "ok": "确定",
     "processing": "处理中…",
-    "rangeTo": "至"
+    "rangeTo": "至",
+    "relative": {
+      "online": "在线",
+      "now": "刚刚",
+      "never": "从未",
+      "minutes_other": "{{count}} 分钟前",
+      "hours_other": "{{count}} 小时前",
+      "days_other": "{{count}} 天前",
+      "weeks_other": "{{count}} 周前",
+      "months_other": "{{count}} 个月前"
+    }
   },
   "nav": {
     "dashboard": "首页",
