@@ -129,7 +129,11 @@ export function SubscriptionTab(props: SubscriptionTabProps) {
       {showDetail && selectedSub && (
         <>
           {multi && (
-            <button type="button" onClick={() => setDetailView(false)} className="btn-ghost -ml-2">
+            <button
+              type="button"
+              onClick={() => setDetailView(false)}
+              className="btn-secondary self-start"
+            >
               <BackIcon className="h-4 w-4" />
               {t('admin.users.detail.subscription.backToList')}
             </button>

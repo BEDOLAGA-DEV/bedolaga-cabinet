@@ -157,7 +157,7 @@ function TicketChat({
           >
             {t('common.retry')}
           </button>
-          <button type="button" onClick={onBack} className="btn-ghost">
+          <button type="button" onClick={onBack} className="btn-secondary">
             {t('common.back')}
           </button>
         </div>
@@ -179,7 +179,7 @@ function TicketChat({
           type="button"
           onClick={onBack}
           aria-label={t('common.back')}
-          className="btn-ghost h-10 w-10 shrink-0 p-0"
+          className="btn-secondary h-10 w-10 shrink-0 p-0"
         >
           <BackIcon className="h-4 w-4" />
         </button>

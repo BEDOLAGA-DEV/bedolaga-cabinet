@@ -53,7 +53,7 @@ function FormButtons({
       >
         {label}
       </button>
-      <button type="button" onClick={onClose} className="btn-ghost">
+      <button type="button" onClick={onClose} className="btn-secondary">
         {t('common.cancel')}
       </button>
     </>

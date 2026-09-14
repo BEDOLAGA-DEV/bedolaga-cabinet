@@ -32,21 +32,17 @@ export function NodeUsageCard({ usage }: { usage: UserNodeUsageResponse | null }
       : `${formatGb(Math.round(bytes / 1024 ** 2))} ${t('common.units.mb')}`;
 
   return (
-    <Section
-      icon={<ChartIcon className="h-5 w-5" />}
-      title={t('admin.users.detail.nodeUsage')}
-      action={
-        <Segmented
-          label={t('admin.users.detail.nodeUsage')}
-          value={String(days)}
-          options={PERIODS.map((period) => ({
-            value: String(period),
-            label: t('admin.users.detail.subscription.periodDays', { count: period }),
-          }))}
-          onChange={(value) => setDays(Number(value))}
-        />
-      }
-    >
+    <Section icon={<ChartIcon className="h-5 w-5" />} title={t('admin.users.detail.nodeUsage')}>
+      {/* Переключатель — под заголовком, а не рядом: на телефоне он обрезал «Расход по нодам». */}
+      <Segmented
+        label={t('admin.users.detail.nodeUsage')}
+        value={String(days)}
+        options={PERIODS.map((period) => ({
+          value: String(period),
+          label: t('admin.users.detail.subscription.periodDays', { count: period }),
+        }))}
+        onChange={(value) => setDays(Number(value))}
+      />
       {items.length > 0 ? (
         <div className="flex flex-col gap-3">
           {items.map((item) => (
