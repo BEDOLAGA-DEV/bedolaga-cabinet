@@ -242,11 +242,7 @@ export function ReferralsTab({ user, userId, onUserRefresh }: ReferralsTabProps)
                 <div className="text-xs text-dark-500">ID: {user.referral.referred_by_id}</div>
               </div>
             </button>
-            <button
-              onClick={handleRemoveReferrer}
-              disabled={actionLoading}
-              className="rounded-lg border border-error-500/30 bg-error-500/10 px-3 py-2 text-sm text-error-400 transition-colors hover:bg-error-500/20 disabled:opacity-50"
-            >
+            <button onClick={handleRemoveReferrer} disabled={actionLoading} className="btn-danger">
               {t('admin.users.detail.referrals.removeReferrer')}
             </button>
           </div>
@@ -317,10 +313,7 @@ export function ReferralsTab({ user, userId, onUserRefresh }: ReferralsTabProps)
                 <span className="text-sm text-dark-500">
                   {t('admin.users.detail.referrals.noReferrer')}
                 </span>
-                <button
-                  onClick={() => setShowReferrerSearch(true)}
-                  className="rounded-lg bg-accent-500/15 px-3 py-2 text-sm text-accent-400 transition-colors hover:bg-accent-500/25"
-                >
+                <button onClick={() => setShowReferrerSearch(true)} className="btn-secondary">
                   {t('admin.users.detail.referrals.assignReferrer')}
                 </button>
               </div>
@@ -360,10 +353,7 @@ export function ReferralsTab({ user, userId, onUserRefresh }: ReferralsTabProps)
             {t('admin.users.detail.referrals.referralsList')} ({referralsTotal})
           </h3>
           {!showAddReferral && (
-            <button
-              onClick={() => setShowAddReferral(true)}
-              className="rounded-lg bg-accent-500/15 px-3 py-2 text-sm text-accent-400 transition-colors hover:bg-accent-500/25"
-            >
+            <button onClick={() => setShowAddReferral(true)} className="btn-secondary">
               {t('admin.users.detail.referrals.addReferral')}
             </button>
           )}

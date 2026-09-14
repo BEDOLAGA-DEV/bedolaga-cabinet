@@ -4651,7 +4651,17 @@
           "subtract": "Deduct",
           "addByAdmin": "Added by admin",
           "subtractByAdmin": "Deducted by admin",
-          "recentTransactions": "Recent transactions"
+          "recentTransactions": "Recent transactions",
+          "title": "Balance",
+          "spentSummary": "spent in total {{amount}}",
+          "amountLabel": "Amount",
+          "commentLabel": "Comment for the log",
+          "confirmSubtract": "Take {{amount}} off the balance?",
+          "confirmDeactivate": "Turn off the {{percent}}% discount?",
+          "discountTitle": "Personal discount",
+          "noOffer": "No active offer right now",
+          "offerFormOpen": "Send an offer…",
+          "noOperations": "No operations yet"
         },
         "sync": {
           "selectSubscription": "Select subscription",

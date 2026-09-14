@@ -5085,7 +5085,17 @@
           "subtract": "Списать",
           "addByAdmin": "Начисление админом",
           "subtractByAdmin": "Списание админом",
-          "recentTransactions": "Последние транзакции"
+          "recentTransactions": "Последние транзакции",
+          "title": "Баланс",
+          "spentSummary": "потрачено всего {{amount}}",
+          "amountLabel": "Сумма",
+          "commentLabel": "Комментарий для журнала",
+          "confirmSubtract": "Списать {{amount}} с баланса?",
+          "confirmDeactivate": "Отключить скидку {{percent}}%?",
+          "discountTitle": "Персональная скидка",
+          "noOffer": "Сейчас нет активного предложения",
+          "offerFormOpen": "Отправить предложение…",
+          "noOperations": "Операций пока не было"
         },
         "sync": {
           "selectSubscription": "Выберите подписку",

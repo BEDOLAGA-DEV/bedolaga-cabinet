@@ -3478,7 +3478,17 @@
           "subtract": "扣除",
           "addByAdmin": "管理员充值",
           "subtractByAdmin": "管理员扣除",
-          "recentTransactions": "最近交易"
+          "recentTransactions": "最近交易",
+          "title": "余额",
+          "spentSummary": "累计消费 {{amount}}",
+          "amountLabel": "金额",
+          "commentLabel": "日志备注",
+          "confirmSubtract": "从余额扣除 {{amount}}？",
+          "confirmDeactivate": "关闭 {{percent}}% 折扣？",
+          "discountTitle": "个人折扣",
+          "noOffer": "当前没有有效优惠",
+          "offerFormOpen": "发送优惠…",
+          "noOperations": "暂无记录"
         },
         "sync": {
           "selectSubscription": "选择订阅",
