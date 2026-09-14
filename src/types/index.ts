@@ -928,6 +928,8 @@ export interface LinkedProvider {
   provider: string;
   linked: boolean;
   identifier: string | null;
+  /** Email that unlinking forgets: it came from this provider and no password makes it a login. */
+  forgets_email?: string | null;
 }
 
 export interface LinkedProvidersResponse {
