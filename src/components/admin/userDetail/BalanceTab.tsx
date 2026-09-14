@@ -272,7 +272,7 @@ function DiscountCard({
               >
                 {t(`${ns}.sendOffer`)}
               </button>
-              <button type="button" onClick={() => setFormOpen(false)} className="btn-ghost">
+              <button type="button" onClick={() => setFormOpen(false)} className="btn-secondary">
                 {t('common.cancel')}
               </button>
             </div>

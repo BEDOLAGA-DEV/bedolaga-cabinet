@@ -96,12 +96,12 @@ export function UserActionsMenu({
     },
     can.block && {
       key: 'disable',
-      label: `${t(`${ns}.disable`)}…`,
+      label: t(`${ns}.disable`),
       run: confirmThen('confirmDisable', 'disable', actions.disable),
     },
     can.delete && {
       key: 'delete',
-      label: `${t(`${ns}.delete`)}…`,
+      label: t(`${ns}.delete`),
       danger: true,
       run: confirmThen('confirmDelete', 'delete', actions.deleteUser),
     },

@@ -78,7 +78,7 @@ export function FiltersPopover({ fields, onChange, onReset }: FiltersPopoverProp
             <button
               type="button"
               onClick={onReset}
-              className="text-xs font-semibold text-accent-400 transition-colors hover:text-accent-300"
+              className="btn-secondary min-h-0 px-2.5 py-1 text-xs"
             >
               {t('admin.users.filters.reset')}
             </button>

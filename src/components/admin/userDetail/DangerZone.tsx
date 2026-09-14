@@ -48,7 +48,7 @@ export function DangerZone({ busy, canCancel, onCancel, onDelete }: DangerZonePr
           </button>
         )}
         <button type="button" onClick={remove} disabled={busy} className="btn-danger">
-          {t(`${ns}.deleteButton`)}…
+          {t(`${ns}.deleteButton`)}
         </button>
       </div>
     </Card>

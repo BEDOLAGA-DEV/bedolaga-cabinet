@@ -148,7 +148,7 @@ export function PanelSyncCard({
           <RefreshIcon className={cn('h-4 w-4', loading && 'animate-spin')} />
           {t(`${ns}.checkNow`)}
         </button>
-        <button type="button" onClick={push} disabled={busy} className="btn-ghost">
+        <button type="button" onClick={push} disabled={busy} className="btn-secondary">
           {t(`${ns}.pushManual`)}
         </button>
       </div>
