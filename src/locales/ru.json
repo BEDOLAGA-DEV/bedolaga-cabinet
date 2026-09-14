@@ -4823,7 +4823,7 @@
     "users": {
       "title": "Пользователи",
       "subtitle": "Управление пользователями бота",
-      "search": "Поиск по ID, имени, username...",
+      "search": "ID, имя, @username или email",
       "searchEmail": "Поиск по email...",
       "noData": "Пользователи не найдены",
       "purchaseCount_one": "{{count}} покупка",
@@ -5285,7 +5285,82 @@
         }
       },
       "notFound": "Пользователь не найден",
-      "purchaseCount": "Покупок: {{count}}"
+      "purchaseCount": "Покупок: {{count}}",
+      "summary": "{{total}} человек · {{subscribed}} с активной подпиской · {{newToday}} новых сегодня · {{blocked}} заблокировано",
+      "shown": "Показано {{shown}} из {{total}}",
+      "scrollHint": "Дальше подгрузится само",
+      "loadingMore": "Загружаем ещё",
+      "endOfList": "Это все {{total}} по вашему запросу",
+      "noneFound": "Никого не нашли — попробуйте другой запрос или уберите фильтры",
+      "loadError": "Не удалось загрузить список",
+      "reset": "Сбросить всё",
+      "toTop": "Наверх",
+      "unlimited": "безлимит",
+      "until": "до {{date}}",
+      "sort": {
+        "label": "Сортировка",
+        "expires": "по истечению",
+        "activity": "по активности",
+        "created": "по дате регистрации",
+        "balance": "по балансу",
+        "spent": "по расходам",
+        "traffic": "по трафику",
+        "purchases": "по покупкам"
+      },
+      "views": {
+        "all": "Все",
+        "expiring": "Истекают за {{days}} дней",
+        "traffic": "Трафик на исходе",
+        "nopay": "Без покупок",
+        "online": "Онлайн",
+        "blocked": "Заблокированные"
+      },
+      "filterLabels": {
+        "status": "Статус",
+        "sub": "Подписка",
+        "tariff": "Тариф",
+        "group": "Промогруппа",
+        "campaign": "Кампания"
+      },
+      "filterAny": {
+        "status": "любой",
+        "sub": "любая",
+        "tariff": "любой",
+        "group": "любая",
+        "campaign": "любая"
+      },
+      "subFilters": {
+        "active": "активна",
+        "trial": "триал",
+        "expiring": "истекает",
+        "expired": "истекла",
+        "limited": "трафик исчерпан",
+        "none": "нет подписки"
+      },
+      "columns": {
+        "user": "Пользователь",
+        "subscription": "Подписка",
+        "activity": "Активность",
+        "balance": "Баланс"
+      },
+      "statuses": {
+        "active": "Активен",
+        "blocked": "Заблокирован",
+        "deleted": "Удалён",
+        "noSubscription": "Без подписки",
+        "disabled": "Отключена",
+        "pending": "Ожидает оплаты",
+        "other": "Подписка"
+      },
+      "subscriptionChips": {
+        "trial": "Триал · {{count}} дн.",
+        "daysLeft": "{{count}} дн.",
+        "today": "истекает сегодня",
+        "expiredToday": "истекла сегодня",
+        "expiredAgo": "истекла {{count}} дн. назад",
+        "limited": "трафик исчерпан"
+      },
+      "summaryShort": "{{total}} · {{subscribed}} с подпиской · {{newToday}} новых"
     },
     "promoOffers": {
       "title": "Промопредложения",

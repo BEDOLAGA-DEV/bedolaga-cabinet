@@ -103,16 +103,22 @@ function pick<T extends string>(value: string | null, allowed: readonly T[], fal
   return value !== null && (allowed as readonly string[]).includes(value) ? (value as T) : fallback;
 }
 
+/**
+ * Адрес с одним `view=` (ссылка из уведомления, закладка) разворачивается в пресет
+ * сегмента; явные параметры в адресе сильнее пресета.
+ */
 export function parseUsersListState(params: URLSearchParams): UsersListState {
+  const view = pick(params.get('view'), VIEW_KEYS, DEFAULT_STATE.view);
+  const base = applyView(DEFAULT_STATE, view);
   return {
     q: params.get('q') ?? '',
-    status: pick(params.get('status'), STATUS_FILTERS, ''),
-    sub: pick(params.get('sub'), SUB_FILTERS, ''),
+    status: pick(params.get('status'), STATUS_FILTERS, base.status),
+    sub: pick(params.get('sub'), SUB_FILTERS, base.sub),
     tariff: params.get('tariff') ?? '',
     group: params.get('group') ?? '',
     campaign: params.get('campaign') ?? '',
-    sort: pick(params.get('sort'), SORT_KEYS, DEFAULT_STATE.sort),
-    view: pick(params.get('view'), VIEW_KEYS, DEFAULT_STATE.view),
+    sort: pick(params.get('sort'), SORT_KEYS, base.sort),
+    view,
   };
 }
 

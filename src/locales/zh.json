@@ -3266,7 +3266,7 @@
     "users": {
       "title": "用户",
       "subtitle": "机器人用户管理",
-      "search": "按ID、姓名、用户名搜索...",
+      "search": "ID、姓名、@用户名或邮箱",
       "searchEmail": "按邮箱搜索...",
       "noData": "未找到用户",
       "purchaseCount_other": "{{count}} 次购买",
@@ -3710,7 +3710,82 @@
           "resetSubscription": "订阅已重置",
           "resetTrial": "试用已重置"
         }
-      }
+      },
+      "summary": "{{total}} 位用户 · {{subscribed}} 位有效订阅 · 今日新增 {{newToday}} · 已封禁 {{blocked}}",
+      "shown": "显示 {{shown}} / {{total}}",
+      "scrollHint": "向下滚动自动加载",
+      "loadingMore": "正在加载",
+      "endOfList": "已显示全部 {{total}} 位",
+      "noneFound": "未找到任何人，请换个关键词或清除筛选",
+      "loadError": "列表加载失败",
+      "reset": "清除全部",
+      "toTop": "回到顶部",
+      "unlimited": "不限",
+      "until": "至 {{date}}",
+      "sort": {
+        "label": "排序",
+        "expires": "按到期",
+        "activity": "按活跃",
+        "created": "按注册日期",
+        "balance": "按余额",
+        "spent": "按消费",
+        "traffic": "按流量",
+        "purchases": "按购买"
+      },
+      "views": {
+        "all": "全部",
+        "expiring": "{{days}} 天内到期",
+        "traffic": "流量将尽",
+        "nopay": "未购买",
+        "online": "在线",
+        "blocked": "已封禁"
+      },
+      "filterLabels": {
+        "status": "状态",
+        "sub": "订阅",
+        "tariff": "套餐",
+        "group": "促销组",
+        "campaign": "活动"
+      },
+      "filterAny": {
+        "status": "任意",
+        "sub": "任意",
+        "tariff": "任意",
+        "group": "任意",
+        "campaign": "任意"
+      },
+      "subFilters": {
+        "active": "有效",
+        "trial": "试用",
+        "expiring": "即将到期",
+        "expired": "已到期",
+        "limited": "流量用尽",
+        "none": "无订阅"
+      },
+      "columns": {
+        "user": "用户",
+        "subscription": "订阅",
+        "activity": "活跃",
+        "balance": "余额"
+      },
+      "statuses": {
+        "active": "正常",
+        "blocked": "已封禁",
+        "deleted": "已删除",
+        "noSubscription": "无订阅",
+        "disabled": "已停用",
+        "pending": "待支付",
+        "other": "订阅"
+      },
+      "subscriptionChips": {
+        "trial": "试用 · {{count}} 天",
+        "daysLeft": "{{count}} 天",
+        "today": "今天到期",
+        "expiredToday": "今天已到期",
+        "expiredAgo": "{{count}} 天前到期",
+        "limited": "流量用尽"
+      },
+      "summaryShort": "{{total}} · {{subscribed}} 订阅 · {{newToday}} 新"
     },
     "promoOffers": {
       "title": "促销优惠",
