@@ -62,6 +62,9 @@ const config = (overrides: Partial<GraceAccessConfig> = {}): GraceAccessConfig =
   reconcile_interval_seconds: 60,
   reconcile_batch_size: 200,
   candidate_lookback_minutes: 30,
+  allowed_services: 'Telegram',
+  notify_admins: true,
+  notify_user: true,
   ...overrides,
 });
 
@@ -79,12 +82,16 @@ const overview = (overrides: Partial<GraceAccessOverview> = {}): GraceAccessOver
 const state: {
   overview: GraceAccessOverview;
   squads: GraceSquadsResponse;
+  externalSquads: GraceSquadsResponse;
   saves: unknown[];
 } = {
   overview: overview(),
   squads: { available: true, items: [] },
+  externalSquads: { available: true, items: [] },
   saves: [],
 };
+
+const EXTERNAL_UUID = '17b2c1de-9f47-4a3d-8c11-5b6a0f9e2d34';
 
 vi.mock('@/api/adminGraceAccess', async (importOriginal) => {
   const original = await importOriginal<typeof import('@/api/adminGraceAccess')>();
@@ -93,6 +100,7 @@ vi.mock('@/api/adminGraceAccess', async (importOriginal) => {
     adminGraceAccessApi: {
       getOverview: () => Promise.resolve(state.overview),
       getSquads: () => Promise.resolve(state.squads),
+      getExternalSquads: () => Promise.resolve(state.externalSquads),
       getSessions: () => Promise.resolve({ items: [], total: 0, page: 1, limit: 20 }),
       update: (patch: unknown) => {
         state.saves.push(patch);
@@ -121,6 +129,7 @@ afterEach(() => {
   cleanup();
   state.overview = overview();
   state.squads = { available: true, items: [] };
+  state.externalSquads = { available: true, items: [] };
   state.saves = [];
 });
 
@@ -141,6 +150,8 @@ async function renderPage() {
 
 const saveButton = () => screen.getByRole('button', { name: 'Сохранить' }) as HTMLButtonElement;
 const modeCard = (label: string) => screen.getByRole('button', { name: new RegExp(label) });
+// Внешний сквад живёт в свёрнутом блоке «Дополнительно»: пока он «Снять», блок закрыт.
+const openAdvanced = () => fireEvent.click(screen.getByRole('button', { name: 'Показать' }));
 
 describe('раздел grace-доступа', () => {
   it('до правок сохранять нечего', async () => {
@@ -250,7 +261,7 @@ describe('раздел grace-доступа', () => {
     expect(screen.queryByText('Раздел открыт только на чтение')).toBeNull();
   });
 
-  it('«Отцепить» можно сохранить', async () => {
+  it('«Снять на время grace» можно сохранить', async () => {
     // Пропуск любой пустой строки делал безопасное значение единственным,
     // которое нельзя было записать: внешний сквад навсегда оставался keep.
     state.overview = overview({ config: config({ external_squad_uuid: 'keep' }) });
@@ -273,11 +284,14 @@ describe('раздел grace-доступа', () => {
     await waitFor(() => expect(state.saves).toEqual([{ expired_squad_uuid: '' }]));
   });
 
-  it('аварийный сквад из пробелов не сохраняется как «Отцепить»', async () => {
+  it('указанный внешний сквад из пробелов не сохраняется как «Снять»', async () => {
     await renderPage();
+    openAdvanced();
 
     fireEvent.change(screen.getByLabelText('Внешний сквад'), { target: { value: 'custom' } });
-    fireEvent.change(screen.getByLabelText('Аварийный сквад'), { target: { value: '   ' } });
+    fireEvent.change(screen.getByLabelText('Какой внешний сквад назначить'), {
+      target: { value: '   ' },
+    });
 
     expect(saveButton().disabled).toBe(true);
     expect(state.saves).toEqual([]);
@@ -307,7 +321,7 @@ describe('раздел grace-доступа', () => {
     state.squads = { available: false, items: [] };
     await renderPage();
 
-    expect(screen.getAllByText(/Панель недоступна/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Панель не отвечает/).length).toBeGreaterThan(0);
   });
 
   it('живая панель без сквадов недоступной не объявляется', async () => {
@@ -316,7 +330,7 @@ describe('раздел grace-доступа', () => {
     state.squads = { available: true, items: [] };
     await renderPage();
 
-    expect(screen.queryByText(/Панель недоступна/)).toBeNull();
+    expect(screen.queryByText(/Панель не отвечает/)).toBeNull();
   });
 
   it('без права на список сессий объясняет, какого права не хватает', async () => {
@@ -367,20 +381,22 @@ describe('раздел grace-доступа', () => {
     expect(field.value).toBe(EXPIRED_UUID);
   });
 
-  it('выбор «Аварийный сквад» не сбрасывается обратно на «Отцепить»', async () => {
+  it('выбор «Заменить на указанный» не сбрасывается обратно на «Снять»', async () => {
     // Вариант начинается с пустого поля, и вывод варианта из самого значения
     // возвращал бы список к «Отцепить» сразу после выбора.
     await renderPage();
+    openAdvanced();
 
     const select = screen.getByLabelText('Внешний сквад') as HTMLSelectElement;
     fireEvent.change(select, { target: { value: 'custom' } });
 
     expect(select.value).toBe('custom');
-    expect(screen.getByLabelText('Аварийный сквад')).toBeTruthy();
+    expect(screen.getByLabelText('Какой внешний сквад назначить')).toBeTruthy();
   });
 
-  it('пустой аварийный сквад не сохраняется как «Отцепить»', async () => {
+  it('пустой указанный внешний сквад не сохраняется как «Снять»', async () => {
     await renderPage();
+    openAdvanced();
 
     fireEvent.change(screen.getByLabelText('Внешний сквад'), { target: { value: 'custom' } });
 
@@ -438,8 +454,82 @@ describe('раздел grace-доступа', () => {
     expect(screen.queryByText(/Некорректный UUID/)).toBeNull();
   });
 
-  it('«оставить как есть» отправляется как keep', async () => {
+  it('«Скрыть» сворачивает «Дополнительно» и при настроенном внешнем скваде', async () => {
+    // Владелец 2026-09-14: «оно должно по кнопке скрываться, но она тупо не работает».
+    // Блок раскрывался сам, пока внешний сквад настроен, — и это переопределяло кнопку.
+    state.overview = overview({ config: config({ external_squad_uuid: 'keep' }) });
     await renderPage();
+
+    expect(screen.getByLabelText('Внешний сквад')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Скрыть' }));
+    expect(screen.queryByLabelText('Внешний сквад')).toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Показать' }));
+    expect(screen.getByLabelText('Внешний сквад')).toBeTruthy();
+  });
+
+  it('после сохранения свёрнутое «Дополнительно» не раскрывается заново', async () => {
+    // Ответ сервера после сохранения снова несёт настроенный внешний сквад; раскрывать
+    // блок по нему можно только один раз — при первой загрузке.
+    state.overview = overview({ config: config({ external_squad_uuid: 'keep' }) });
+    await renderPage();
+    fireEvent.click(screen.getByRole('button', { name: 'Скрыть' }));
+
+    fireEvent.change(screen.getByLabelText('Сквад для истёкшей подписки'), {
+      target: { value: '' },
+    });
+    fireEvent.click(saveButton());
+    await waitFor(() => expect(state.saves).toEqual([{ expired_squad_uuid: '' }]));
+
+    expect(screen.queryByLabelText('Внешний сквад')).toBeNull();
+  });
+
+  it('«Заменить на указанный» выбирает внешний сквад из списка панели', async () => {
+    // Владелец 2026-09-14: «есть 3 варианта по внешнему скваду, бот тоже их получает,
+    // поэтому ввод вручную там тоже не нужен».
+    state.externalSquads = {
+      available: true,
+      source: 'panel',
+      items: [{ uuid: EXTERNAL_UUID, name: 'Blocked hosts', members_count: 2 }],
+    };
+    await renderPage();
+    openAdvanced();
+    fireEvent.change(screen.getByLabelText('Внешний сквад'), { target: { value: 'custom' } });
+
+    // Список приходит после выбора варианта: до него поле — текстовое, потом — выбор.
+    await waitFor(() =>
+      expect(screen.getByLabelText('Какой внешний сквад назначить').tagName).toBe('SELECT'),
+    );
+    expect(screen.getByText(/Blocked hosts/)).toBeTruthy();
+    fireEvent.change(screen.getByLabelText('Какой внешний сквад назначить'), {
+      target: { value: EXTERNAL_UUID },
+    });
+    fireEvent.click(saveButton());
+
+    await waitFor(() => expect(state.saves).toEqual([{ external_squad_uuid: EXTERNAL_UUID }]));
+  });
+
+  it('при недоступной панели внешний сквад вводится вручную', async () => {
+    state.externalSquads = { available: false, items: [] };
+    await renderPage();
+    openAdvanced();
+    fireEvent.change(screen.getByLabelText('Внешний сквад'), { target: { value: 'custom' } });
+
+    const field = (await screen.findByLabelText(
+      'Какой внешний сквад назначить',
+    )) as HTMLInputElement;
+    expect(field.tagName).toBe('INPUT');
+    // Ответ «панель недоступна» приходит после появления поля — ждём предупреждение.
+    await screen.findByText(/идентификатор внешнего сквада придётся ввести вручную/);
+    fireEvent.change(field, { target: { value: EXTERNAL_UUID } });
+    fireEvent.click(saveButton());
+
+    await waitFor(() => expect(state.saves).toEqual([{ external_squad_uuid: EXTERNAL_UUID }]));
+  });
+
+  it('«Не трогать» отправляется как keep', async () => {
+    await renderPage();
+    openAdvanced();
 
     fireEvent.change(screen.getByLabelText('Внешний сквад'), { target: { value: 'keep' } });
     fireEvent.click(saveButton());
@@ -546,5 +636,33 @@ describe('changedFields', () => {
     const stored = config();
 
     expect(changedFields({ ...stored }, stored)).toEqual({});
+  });
+});
+
+describe('уведомления и «что доступно»', () => {
+  it('фраза о доступном и выключатели уходят на сервер', async () => {
+    await renderPage();
+
+    fireEvent.change(screen.getByLabelText('Что остаётся доступным'), {
+      target: { value: 'Telegram и личный кабинет' },
+    });
+    fireEvent.click(screen.getByRole('switch', { name: 'Админам в чат уведомлений' }));
+    fireEvent.click(saveButton());
+
+    await waitFor(() =>
+      expect(state.saves).toEqual([
+        { allowed_services: 'Telegram и личный кабинет', notify_admins: false },
+      ]),
+    );
+  });
+
+  it('пустая фраза при включённых сообщениях человеку блокирует сохранение', async () => {
+    state.overview = overview({ config: config({ mode: 'true' }) });
+    await renderPage();
+
+    fireEvent.change(screen.getByLabelText('Что остаётся доступным'), { target: { value: '  ' } });
+
+    expect(saveButton().disabled).toBe(true);
+    expect(screen.getAllByText(/Не заполнено, что остаётся доступным/).length).toBeGreaterThan(0);
   });
 });
