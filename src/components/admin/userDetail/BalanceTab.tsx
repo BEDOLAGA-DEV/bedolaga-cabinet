@@ -6,13 +6,15 @@ import { adminUsersApi, type UserDetailResponse } from '../../../api/adminUsers'
 import { promocodesApi } from '../../../api/promocodes';
 import { promoOffersApi } from '../../../api/promoOffers';
 import { createNumberInputHandler, toNumber } from '../../../utils/inputHelpers';
-import { PlusIcon, MinusIcon } from '@/components/icons';
+import { Card } from '@/components/data-display';
+import { WalletIcon, GiftIcon, HistoryIcon } from '@/components/icons';
+import { cn } from '@/lib/utils';
+import { useDestructiveConfirm } from '../../../platform/hooks/useNativeDialog';
 
 // ──────────────────────────────────────────────────────────────────
-// Balance tab — current balance, add/subtract form, active promo
-// offer summary, send-offer form, recent transactions list. State
-// (form inputs + inline-confirm arm) is local; the parent only
-// owns the user query and is told when to refresh.
+// Balance tab — баланс с одной формой «начислить / списать», персональная
+// скидка отдельной карточкой и операции. Списание и отключение скидки
+// подтверждаются системным диалогом; родитель только обновляет пользователя.
 // ──────────────────────────────────────────────────────────────────
 
 export interface BalanceTabProps {
@@ -42,24 +44,24 @@ export function BalanceTab({
   const [actionLoading, setActionLoading] = useState(false);
   const [offerSending, setOfferSending] = useState(false);
 
-  // Inline two-click confirm — local so other tabs aren't dimmed.
-  const [confirmingAction, setConfirmingAction] = useState<string | null>(null);
-  const handleInlineConfirm = (actionKey: string, executeFn: () => Promise<void>) => {
-    if (confirmingAction === actionKey) {
-      setConfirmingAction(null);
-      executeFn();
-    } else {
-      setConfirmingAction(actionKey);
-      setTimeout(() => {
-        setConfirmingAction((current) => (current === actionKey ? null : current));
-      }, 3000);
-    }
-  };
+  const [mode, setMode] = useState<'add' | 'subtract'>('add');
+  const [offerFormOpen, setOfferFormOpen] = useState(false);
+  const confirmDestructive = useDestructiveConfirm();
 
   // ─── Mutations ──────────────────────────────────────────────────
 
   const handleUpdateBalance = async (isAdd: boolean) => {
     if (balanceAmount === '') return;
+    if (
+      !isAdd &&
+      !(await confirmDestructive(
+        t('admin.users.detail.balance.confirmSubtract', {
+          amount: formatWithCurrency(Math.abs(toNumber(balanceAmount))),
+        }),
+        t('admin.users.detail.balance.subtract'),
+      ))
+    )
+      return;
     setActionLoading(true);
     try {
       const amount = Math.abs(toNumber(balanceAmount) * 100);
@@ -82,6 +84,15 @@ export function BalanceTab({
   };
 
   const handleDeactivateOffer = async () => {
+    if (
+      !(await confirmDestructive(
+        t('admin.users.detail.balance.confirmDeactivate', {
+          percent: user.promo_offer_discount_percent,
+        }),
+        t('admin.users.detail.deactivateOffer'),
+      ))
+    )
+      return;
     setActionLoading(true);
     try {
       await promocodesApi.deactivateDiscount(userId);
@@ -109,6 +120,7 @@ export function BalanceTab({
       notify.success(t('admin.users.detail.offerSent'), t('common.success'));
       setOfferDiscountPercent('');
       setOfferValidHours(24);
+      setOfferFormOpen(false);
       await onUserRefresh();
     } catch {
       notify.error(t('admin.users.detail.offerSendError'), t('common.error'));
@@ -119,160 +131,214 @@ export function BalanceTab({
 
   // ─── Render ─────────────────────────────────────────────────────
 
+  const amountValid = balanceAmount !== '' && toNumber(balanceAmount) > 0;
+  const segment = (value: 'add' | 'subtract') =>
+    cn(
+      'rounded-lg px-3.5 py-1.5 text-sm font-medium transition-colors',
+      mode === value ? 'bg-dark-700 text-dark-100' : 'text-dark-400 hover:text-dark-200',
+    );
+
   return (
-    <div className="space-y-4">
-      {/* Current balance */}
-      <div className="rounded-xl border border-accent-500/30 bg-gradient-to-r from-accent-500/20 to-accent-700/20 p-4">
-        <div className="mb-1 text-sm text-dark-400">{t('admin.users.detail.balance.current')}</div>
-        <div className="text-3xl font-bold text-dark-100">
-          {formatWithCurrency(user.balance_rubles)}
+    <div className="grid gap-4 lg:grid-cols-2">
+      <Card size="md" className="flex flex-col gap-4">
+        <div className="flex items-center gap-2.5">
+          <WalletIcon className="h-5 w-5 text-accent-400" />
+          <h2 className="text-lg font-semibold text-dark-100">
+            {t('admin.users.detail.balance.title')}
+          </h2>
         </div>
-      </div>
+        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+          <span className="text-3xl font-bold tabular-nums text-dark-100">
+            {formatWithCurrency(user.balance_rubles)}
+          </span>
+          <span className="text-sm text-dark-400">
+            {t('admin.users.detail.balance.spentSummary', {
+              amount: formatWithCurrency(user.total_spent_kopeks / 100),
+            })}
+          </span>
+        </div>
 
-      {/* Add/subtract form */}
-      {hasPermission('users:balance') && (
-        <div className="space-y-3 rounded-xl bg-dark-800/50 p-4">
-          <input
-            type="number"
-            value={balanceAmount}
-            onChange={createNumberInputHandler(setBalanceAmount)}
-            placeholder={t('admin.users.detail.balance.amountPlaceholder')}
-            className="input"
-          />
-          <input
-            type="text"
-            value={balanceDescription}
-            onChange={(e) => setBalanceDescription(e.target.value)}
-            placeholder={t('admin.users.detail.balance.descriptionPlaceholder')}
-            className="input"
-            maxLength={500}
-          />
-          <div className="flex gap-2">
+        {hasPermission('users:balance') && (
+          <div className="flex flex-col gap-3">
+            <div className="inline-flex self-start rounded-xl bg-dark-800 p-1" role="radiogroup">
+              <button
+                type="button"
+                role="radio"
+                aria-checked={mode === 'add'}
+                onClick={() => setMode('add')}
+                className={segment('add')}
+              >
+                {t('admin.users.detail.balance.add')}
+              </button>
+              <button
+                type="button"
+                role="radio"
+                aria-checked={mode === 'subtract'}
+                onClick={() => setMode('subtract')}
+                className={segment('subtract')}
+              >
+                {t('admin.users.detail.balance.subtract')}
+              </button>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-[160px_1fr]">
+              <label className="flex flex-col gap-1 text-xs text-dark-500">
+                {t('admin.users.detail.balance.amountLabel')}
+                <input
+                  type="number"
+                  min={0}
+                  value={balanceAmount}
+                  onChange={createNumberInputHandler(setBalanceAmount)}
+                  placeholder={t('admin.users.detail.balance.amountPlaceholder')}
+                  className="input py-2.5"
+                />
+              </label>
+              <label className="flex flex-col gap-1 text-xs text-dark-500">
+                {t('admin.users.detail.balance.commentLabel')}
+                <input
+                  type="text"
+                  value={balanceDescription}
+                  onChange={(e) => setBalanceDescription(e.target.value)}
+                  placeholder={t('admin.users.detail.balance.descriptionPlaceholder')}
+                  className="input py-2.5"
+                  maxLength={500}
+                />
+              </label>
+            </div>
             <button
-              onClick={() => handleUpdateBalance(true)}
-              disabled={actionLoading || balanceAmount === ''}
-              className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-success-500 py-2 text-white transition-colors hover:bg-success-600 disabled:opacity-50"
+              type="button"
+              onClick={() => handleUpdateBalance(mode === 'add')}
+              disabled={actionLoading || !amountValid}
+              className={cn('self-start', mode === 'add' ? 'btn-primary' : 'btn-danger')}
             >
-              <PlusIcon className="h-4 w-4" /> {t('admin.users.detail.balance.add')}
-            </button>
-            <button
-              onClick={() => handleUpdateBalance(false)}
-              disabled={actionLoading || balanceAmount === ''}
-              className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-error-500 py-2 text-white transition-colors hover:bg-error-600 disabled:opacity-50"
-            >
-              <MinusIcon className="h-4 w-4" /> {t('admin.users.detail.balance.subtract')}
+              {mode === 'add'
+                ? t('admin.users.detail.balance.add')
+                : t('admin.users.detail.balance.subtract')}
             </button>
           </div>
-        </div>
-      )}
+        )}
+      </Card>
 
-      {/* Active promo offer */}
-      {user.promo_offer_discount_percent > 0 && (
-        <div className="rounded-xl border border-accent-500/20 bg-accent-500/5 p-4">
-          <div className="mb-3 flex items-center justify-between">
-            <span className="text-sm font-medium text-accent-400">
-              {t('admin.users.detail.activePromoOffer')}
-            </span>
-            <button
-              onClick={() => handleInlineConfirm('deactivateOffer', handleDeactivateOffer)}
-              disabled={actionLoading}
-              className={`rounded-lg px-3 py-1 text-xs font-medium transition-all disabled:opacity-50 ${
-                confirmingAction === 'deactivateOffer'
-                  ? 'bg-error-500 text-white'
-                  : 'bg-error-500/15 text-error-400 hover:bg-error-500/25'
-              }`}
-            >
-              {confirmingAction === 'deactivateOffer'
-                ? t('admin.users.detail.actions.areYouSure')
-                : t('admin.users.detail.deactivateOffer')}
-            </button>
-          </div>
-          <div className="grid grid-cols-3 gap-3 text-center">
-            <div>
-              <div className="text-lg font-bold text-dark-100">
-                {user.promo_offer_discount_percent}%
-              </div>
-              <div className="text-xs text-dark-500">{t('admin.users.detail.discount')}</div>
-            </div>
-            <div>
-              <div className="text-sm font-medium text-dark-100">
-                {user.promo_offer_discount_source || '-'}
-              </div>
-              <div className="text-xs text-dark-500">{t('admin.users.detail.source')}</div>
-            </div>
-            <div>
-              <div className="text-sm font-medium text-dark-100">
+      <Card size="md" className="flex flex-col gap-3">
+        <div className="flex items-center gap-2.5">
+          <GiftIcon className="h-5 w-5 text-accent-400" />
+          <h2 className="text-lg font-semibold text-dark-100">
+            {t('admin.users.detail.balance.discountTitle')}
+          </h2>
+        </div>
+        {user.promo_offer_discount_percent > 0 ? (
+          <div className="flex flex-col gap-2 rounded-xl bg-accent-500/10 p-3">
+            <dl className="m-0 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-sm">
+              <dt className="text-dark-500">{t('admin.users.detail.discount')}</dt>
+              <dd className="m-0 font-semibold text-accent-400">
+                −{user.promo_offer_discount_percent}%
+              </dd>
+              <dt className="text-dark-500">{t('admin.users.detail.source')}</dt>
+              <dd className="m-0 text-dark-100">{user.promo_offer_discount_source || '—'}</dd>
+              <dt className="text-dark-500">{t('admin.users.detail.expiresAt')}</dt>
+              <dd className="m-0 text-dark-100">
                 {user.promo_offer_discount_expires_at
                   ? formatDate(user.promo_offer_discount_expires_at)
-                  : '-'}
-              </div>
-              <div className="text-xs text-dark-500">{t('admin.users.detail.expiresAt')}</div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Send promo offer */}
-      {hasPermission('users:send_offer') && (
-        <div className="rounded-xl bg-dark-800/50 p-4">
-          <div className="mb-3 text-sm font-medium text-dark-200">
-            {t('admin.users.detail.sendOffer')}
-          </div>
-          <div className="space-y-3">
-            <input
-              type="number"
-              value={offerDiscountPercent}
-              onChange={createNumberInputHandler(setOfferDiscountPercent, 1)}
-              placeholder={t('admin.users.detail.discountPercent')}
-              className="input"
-              min={1}
-              max={100}
-            />
-            <input
-              type="number"
-              value={offerValidHours}
-              onChange={createNumberInputHandler(setOfferValidHours, 1)}
-              placeholder={t('admin.users.detail.validHours')}
-              className="input"
-              min={1}
-              max={8760}
-            />
+                  : '—'}
+              </dd>
+            </dl>
             <button
-              onClick={handleSendOffer}
-              disabled={offerSending || offerDiscountPercent === '' || offerValidHours === ''}
-              className="btn-primary w-full disabled:opacity-50"
+              type="button"
+              onClick={handleDeactivateOffer}
+              disabled={actionLoading}
+              className="btn-ghost self-start px-2.5 py-1.5 text-sm text-error-400 hover:bg-error-500/10 hover:text-error-400"
             >
-              {offerSending ? t('common.loading') : t('admin.users.detail.sendOffer')}
+              {t('admin.users.detail.deactivateOffer')}
             </button>
           </div>
-        </div>
-      )}
+        ) : (
+          <p className="text-sm text-dark-400">{t('admin.users.detail.balance.noOffer')}</p>
+        )}
 
-      {/* Recent transactions */}
-      {user.recent_transactions.length > 0 && (
-        <div className="rounded-xl bg-dark-800/50 p-4">
-          <div className="mb-3 font-medium text-dark-200">
-            {t('admin.users.detail.balance.recentTransactions')}
-          </div>
-          <div className="max-h-48 space-y-2 overflow-y-auto">
-            {user.recent_transactions.map((tx) => (
-              <div
-                key={tx.id}
-                className="flex items-center justify-between border-b border-dark-700 py-2 last:border-0"
-              >
-                <div>
-                  <div className="text-sm text-dark-200">{tx.description || tx.type}</div>
-                  <div className="text-xs text-dark-500">{formatDate(tx.created_at)}</div>
-                </div>
-                <div className={tx.amount_kopeks >= 0 ? 'text-success-400' : 'text-error-400'}>
-                  {tx.amount_kopeks >= 0 ? '+' : ''}
-                  {formatWithCurrency(tx.amount_rubles)}
-                </div>
+        {hasPermission('users:send_offer') &&
+          (offerFormOpen ? (
+            <div className="flex flex-col gap-3 rounded-xl border border-dark-700 bg-dark-800/60 p-3">
+              <div className="grid grid-cols-2 gap-3">
+                <label className="flex flex-col gap-1 text-xs text-dark-500">
+                  {t('admin.users.detail.discountPercent')}
+                  <input
+                    type="number"
+                    value={offerDiscountPercent}
+                    onChange={createNumberInputHandler(setOfferDiscountPercent, 1)}
+                    className="input py-2"
+                    min={1}
+                    max={100}
+                  />
+                </label>
+                <label className="flex flex-col gap-1 text-xs text-dark-500">
+                  {t('admin.users.detail.validHours')}
+                  <input
+                    type="number"
+                    value={offerValidHours}
+                    onChange={createNumberInputHandler(setOfferValidHours, 1)}
+                    className="input py-2"
+                    min={1}
+                    max={8760}
+                  />
+                </label>
               </div>
-            ))}
-          </div>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={handleSendOffer}
+                  disabled={offerSending || offerDiscountPercent === '' || offerValidHours === ''}
+                  className="btn-primary"
+                >
+                  {offerSending ? t('common.loading') : t('admin.users.detail.sendOffer')}
+                </button>
+                <button type="button" onClick={() => setOfferFormOpen(false)} className="btn-ghost">
+                  {t('common.cancel')}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setOfferFormOpen(true)}
+              className="btn-secondary self-start"
+            >
+              {t('admin.users.detail.balance.offerFormOpen')}
+            </button>
+          ))}
+      </Card>
+
+      <Card size="md" className="flex flex-col gap-3 lg:col-span-2">
+        <div className="flex items-center gap-2.5">
+          <HistoryIcon className="h-5 w-5 text-accent-400" />
+          <h2 className="text-lg font-semibold text-dark-100">
+            {t('admin.users.detail.balance.recentTransactions')}
+          </h2>
         </div>
-      )}
+        {user.recent_transactions.length > 0 ? (
+          <ul className="m-0 list-none divide-y divide-dark-800 p-0">
+            {user.recent_transactions.map((tx) => (
+              <li key={tx.id} className="flex items-center justify-between gap-3 py-2.5">
+                <div className="min-w-0">
+                  <div className="truncate text-sm text-dark-200">{tx.description || tx.type}</div>
+                  <div className="text-xs text-dark-500">
+                    {formatDate(tx.created_at)} · #{tx.id}
+                  </div>
+                </div>
+                <div
+                  className={cn(
+                    'shrink-0 font-mono text-sm tabular-nums',
+                    tx.amount_kopeks >= 0 ? 'text-success-400' : 'text-error-400',
+                  )}
+                >
+                  {tx.amount_kopeks >= 0 ? '+' : '−'}
+                  {formatWithCurrency(Math.abs(tx.amount_rubles))}
+                </div>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-sm text-dark-500">{t('admin.users.detail.balance.noOperations')}</p>
+        )}
+      </Card>
     </div>
   );
 }

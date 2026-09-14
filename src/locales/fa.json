@@ -3484,7 +3484,17 @@
           "subtract": "کسر",
           "addByAdmin": "افزوده شده توسط مدیر",
           "subtractByAdmin": "کسر شده توسط مدیر",
-          "recentTransactions": "تراکنش‌های اخیر"
+          "recentTransactions": "تراکنش‌های اخیر",
+          "title": "موجودی",
+          "spentSummary": "مجموع هزینه {{amount}}",
+          "amountLabel": "مبلغ",
+          "commentLabel": "توضیح برای گزارش",
+          "confirmSubtract": "{{amount}} از موجودی کسر شود؟",
+          "confirmDeactivate": "تخفیف {{percent}}٪ خاموش شود؟",
+          "discountTitle": "تخفیف شخصی",
+          "noOffer": "در حال حاضر پیشنهاد فعالی نیست",
+          "offerFormOpen": "ارسال پیشنهاد…",
+          "noOperations": "هنوز عملیاتی نبوده"
         },
         "sync": {
           "selectSubscription": "انتخاب اشتراک",

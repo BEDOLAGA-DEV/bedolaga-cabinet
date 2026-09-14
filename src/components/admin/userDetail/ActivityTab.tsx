@@ -20,6 +20,7 @@ import {
 } from '@/components/icons';
 import { StatCard } from '@/components/stats';
 import { describeItem } from './activityLabels';
+import { Spinner } from '@/components/ui/Spinner';
 
 // ──────────────────────────────────────────────────────────────────
 // Activity tab — unified timeline of the user's actions in the bot
@@ -193,7 +194,7 @@ export function ActivityTab({ userId, formatDate }: ActivityTabProps) {
       {/* Timeline */}
       {!initialLoaded && loading ? (
         <div className="flex items-center justify-center py-12">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
+          <Spinner />
         </div>
       ) : items.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-xl bg-dark-800/50 py-12">
@@ -256,13 +257,9 @@ export function ActivityTab({ userId, formatDate }: ActivityTabProps) {
             <button
               onClick={() => void load(offset, true)}
               disabled={loading}
-              className="mt-3 flex min-h-[44px] w-full items-center justify-center rounded-lg bg-dark-700/50 py-2.5 text-sm text-dark-300 transition-colors hover:bg-dark-700 disabled:opacity-50"
+              className="btn-secondary mt-3 w-full"
             >
-              {loading ? (
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-              ) : (
-                t('admin.users.detail.loadMore')
-              )}
+              {loading ? <Spinner className="h-4 w-4" /> : t('admin.users.detail.loadMore')}
             </button>
           )}
         </div>
