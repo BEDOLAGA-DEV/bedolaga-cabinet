@@ -4,7 +4,7 @@ import { adminUsersApi } from '@/api/adminUsers';
 import { ClockIcon } from '@/components/icons';
 import { ActivityTab } from './ActivityTab';
 import { GiftsTab } from './GiftsTab';
-import { Segmented } from './Segmented';
+import { Segmented } from '@/components/admin/Segmented';
 import { TicketsTab } from './TicketsTab';
 import { Section } from './sectionParts';
 

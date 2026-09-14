@@ -17,7 +17,6 @@ import { useDestructiveConfirm, useNativeDialog } from '@/platform/hooks/useNati
 import { formatShortDate } from '@/utils/format';
 import { formatGb } from '@/utils/formatNumber';
 import { uiLocale } from '@/utils/uiLocale';
-import { ExtendMenu } from './ExtendMenu';
 import { usePaymentMethodLabel } from './ActivityRows';
 import { DaysForm, DeviceLimitForm, TariffForm, TrafficForm } from './SubscriptionForms';
 import { KeyValues, LinkAction, Section } from './sectionParts';
@@ -216,12 +215,9 @@ export function SubscriptionCard({
 
       {canManage && (
         <>
+          {/* «Продлить ▾» — в шапке карточки, на всех вкладках; здесь его не повторяем.
+              Её «другой срок…» открывает форму ниже (`?do=extend`). */}
           <div className="flex flex-wrap gap-2">
-            <ExtendMenu
-              disabled={busy}
-              onPick={(days) => void actions.extend(days)}
-              onCustom={() => onOpenPanel('extend')}
-            />
             {inactive && (
               <button
                 type="button"

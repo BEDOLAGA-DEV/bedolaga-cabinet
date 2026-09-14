@@ -4830,6 +4830,7 @@
       "title": "Пользователи",
       "subtitle": "Управление пользователями бота",
       "search": "ID, имя, @username или email",
+      "searchShort": "Имя, ID, @ник, email",
       "noData": "Пользователи не найдены",
       "stats": {
         "total": "Всего",
@@ -4848,12 +4849,12 @@
         "expired": "Истекла"
       },
       "filters": {
-        "allStatuses": "Все статусы",
-        "byDate": "По дате",
-        "byBalance": "По балансу",
-        "byActivity": "По активности",
-        "bySpent": "По расходам",
-        "byExpiry": "По истечению подписки"
+        "title": "Фильтры",
+        "buttonApplied_one": "Фильтры: выбран {{count}}",
+        "buttonApplied_few": "Фильтры: выбрано {{count}}",
+        "buttonApplied_many": "Фильтры: выбрано {{count}}",
+        "reset": "Сбросить",
+        "remove": "Убрать фильтр «{{name}}»"
       },
       "actions": {
         "block": "Заблокировать",
@@ -4881,13 +4882,11 @@
       "userActions": {
         "delete": "Удалить пользователя",
         "resetTrial": "Сбросить триал",
-        "resetSubscription": "Сбросить подписку",
         "disable": "Отключить пользователя",
         "error": "Не удалось выполнить действие",
         "success": {
           "delete": "Пользователь успешно удалён",
           "resetTrial": "Триал успешно сброшен",
-          "resetSubscription": "Подписка успешно сброшена",
           "disable": "Пользователь успешно отключён"
         },
         "confirmDelete": {
@@ -4897,10 +4896,6 @@
         "confirmResetTrial": {
           "title": "Сбросить триал?",
           "message": "Пользователь сможет снова воспользоваться пробным периодом."
-        },
-        "confirmResetSubscription": {
-          "title": "Сбросить подписку?",
-          "message": "Текущая подписка пользователя будет отменена."
         },
         "confirmDisable": {
           "title": "Отключить пользователя?",
@@ -5353,11 +5348,9 @@
           "copy": "Скопировать",
           "emailVerified": "подтверждён",
           "emailUnverified": "не подтверждён",
-          "tariffUntil": "{{tariff}} · до {{date}}",
           "onlineAt": "онлайн · {{node}}",
           "write": "Написать",
           "extend": "Продлить",
-          "topUp": "Начислить",
           "group": "Группа: {{name}}",
           "create": "Выдать"
         },
@@ -5374,25 +5367,12 @@
         "menu": {
           "more": "Ещё действия",
           "confirmRequired": "Требуют подтверждения",
-          "checkConfigs": "Проверить конфиги (РФ)",
-          "promoGroup": "Сменить промогруппу",
-          "restrictions": "Ограничения…"
+          "checkConfigs": "Проверить конфиги (РФ)"
         },
         "overview": {
-          "subscription": "Подписка",
-          "allDetails": "Все детали",
-          "autopayOn": "автопродление включено",
-          "autopayOff": "автопродление выключено",
           "trafficPeriod": "Трафик",
-          "devicesShort": "устройства {{used}} из {{limit}}",
           "extend": "Продлить",
-          "changeTariff": "Сменить тариф",
-          "addTraffic": "Добавить трафик",
-          "deviceLimit": "Лимит устройств",
-          "noSubscription": "Подписки нет",
-          "createSubscription": "Создать подписку",
           "connection": "Подключение",
-          "devicesAndTech": "Устройства и техданные",
           "now": "Сейчас",
           "firstConnection": "Подключён с",
           "devices": "Устройства",
@@ -5406,7 +5386,6 @@
           "change": "Изменить",
           "noPromoGroup": "без группы",
           "referrer": "Пригласил",
-          "nobody": "никто",
           "cabinetLogin": "Вход в кабинет",
           "restrictionsAndSupport": "Ограничения и обращения",
           "restrictions": "Ограничения",
@@ -5421,7 +5400,6 @@
           "recent": "Последние события",
           "allActivity": "Вся активность",
           "noActivity": "Пока ничего не происходило",
-          "devicesLink": "Устройства",
           "assign": "Назначить",
           "none": "нет",
           "list": "Список",
@@ -5444,7 +5422,6 @@
           "giftsReceived_few": "{{count}} получено",
           "giftsReceived_many": "{{count}} получено",
           "all": "Все",
-          "details": "Детали",
           "lastActivity": "Последняя активность"
         },
         "restrictionsSaved": "Ограничения обновлены",
@@ -5524,6 +5501,8 @@
       "loadingMore": "Загружаем ещё",
       "noneFound": "Никого не нашли — попробуйте другой запрос или уберите фильтры",
       "loadError": "Не удалось загрузить список",
+      "connectedNow": "подключён сейчас",
+      "onlineUnavailable": "Панель не ответила — не удалось узнать, кто сейчас подключён. Попробуйте ещё раз.",
       "reset": "Сбросить всё",
       "toTop": "Наверх",
       "unlimited": "безлимит",
@@ -5546,6 +5525,7 @@
         "online": "Онлайн",
         "blocked": "Заблокированные"
       },
+      "viewsLabel": "Выборка",
       "filterLabels": {
         "status": "Статус",
         "sub": "Подписка",

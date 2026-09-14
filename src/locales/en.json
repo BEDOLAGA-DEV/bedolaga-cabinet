@@ -4397,6 +4397,7 @@
       "title": "Users",
       "subtitle": "Bot user management",
       "search": "ID, name, @username or email",
+      "searchShort": "Name, ID, @user, email",
       "noData": "No users found",
       "stats": {
         "total": "Total",
@@ -4415,12 +4416,11 @@
         "expired": "Expired"
       },
       "filters": {
-        "allStatuses": "All statuses",
-        "byDate": "By date",
-        "byBalance": "By balance",
-        "byActivity": "By activity",
-        "bySpent": "By spending",
-        "byExpiry": "By expiry"
+        "title": "Filters",
+        "buttonApplied_one": "Filters: {{count}} applied",
+        "buttonApplied_other": "Filters: {{count}} applied",
+        "reset": "Reset",
+        "remove": "Remove filter “{{name}}”"
       },
       "actions": {
         "block": "Block",
@@ -4448,13 +4448,11 @@
       "userActions": {
         "delete": "Delete user",
         "resetTrial": "Reset trial",
-        "resetSubscription": "Reset subscription",
         "disable": "Disable user",
         "error": "Failed to perform action",
         "success": {
           "delete": "User successfully deleted",
           "resetTrial": "Trial successfully reset",
-          "resetSubscription": "Subscription successfully reset",
           "disable": "User successfully disabled"
         },
         "confirmDelete": {
@@ -4464,10 +4462,6 @@
         "confirmResetTrial": {
           "title": "Reset trial?",
           "message": "The user will be able to use the trial period again."
-        },
-        "confirmResetSubscription": {
-          "title": "Reset subscription?",
-          "message": "The user's current subscription will be cancelled."
         },
         "confirmDisable": {
           "title": "Disable user?",
@@ -4917,11 +4911,9 @@
           "copy": "Copy",
           "emailVerified": "verified",
           "emailUnverified": "not verified",
-          "tariffUntil": "{{tariff}} · until {{date}}",
           "onlineAt": "online · {{node}}",
           "write": "Message",
           "extend": "Extend",
-          "topUp": "Add funds",
           "group": "Group: {{name}}",
           "create": "Grant"
         },
@@ -4938,25 +4930,12 @@
         "menu": {
           "more": "More actions",
           "confirmRequired": "Require confirmation",
-          "checkConfigs": "Check configs (RU)",
-          "promoGroup": "Change promo group",
-          "restrictions": "Restrictions…"
+          "checkConfigs": "Check configs (RU)"
         },
         "overview": {
-          "subscription": "Subscription",
-          "allDetails": "All details",
-          "autopayOn": "auto-renew on",
-          "autopayOff": "auto-renew off",
           "trafficPeriod": "Traffic",
-          "devicesShort": "devices {{used}} of {{limit}}",
           "extend": "Extend",
-          "changeTariff": "Change plan",
-          "addTraffic": "Add traffic",
-          "deviceLimit": "Device limit",
-          "noSubscription": "No subscription",
-          "createSubscription": "Create subscription",
           "connection": "Connection",
-          "devicesAndTech": "Devices and technical data",
           "now": "Now",
           "firstConnection": "Connected since",
           "devices": "Devices",
@@ -4970,7 +4949,6 @@
           "change": "Change",
           "noPromoGroup": "no group",
           "referrer": "Invited by",
-          "nobody": "nobody",
           "cabinetLogin": "Cabinet login",
           "restrictionsAndSupport": "Restrictions and support",
           "restrictions": "Restrictions",
@@ -4985,7 +4963,6 @@
           "recent": "Recent events",
           "allActivity": "All activity",
           "noActivity": "Nothing has happened yet",
-          "devicesLink": "Devices",
           "assign": "Assign",
           "none": "none",
           "list": "List",
@@ -5003,7 +4980,6 @@
           "giftsReceived_one": "{{count}} received",
           "giftsReceived_other": "{{count}} received",
           "all": "All",
-          "details": "Details",
           "lastActivity": "Last activity"
         },
         "restrictionsSaved": "Restrictions updated",
@@ -5079,6 +5055,8 @@
       "loadingMore": "Loading more",
       "noneFound": "No one found — try another query or clear the filters",
       "loadError": "Could not load the list",
+      "connectedNow": "connected now",
+      "onlineUnavailable": "The panel didn't respond — couldn't tell who is connected right now. Try again.",
       "reset": "Clear all",
       "toTop": "To top",
       "unlimited": "unlimited",
@@ -5101,6 +5079,7 @@
         "online": "Online",
         "blocked": "Blocked"
       },
+      "viewsLabel": "View",
       "filterLabels": {
         "status": "Status",
         "sub": "Subscription",
