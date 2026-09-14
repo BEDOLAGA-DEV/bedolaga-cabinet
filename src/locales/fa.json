@@ -3492,6 +3492,7 @@
           "subtractByAdmin": "کسر شده توسط مدیر",
           "recentTransactions": "تراکنش‌های اخیر",
           "title": "موجودی",
+          "changeTitle": "افزودن یا کسر",
           "amountLabel": "مبلغ",
           "commentLabel": "توضیح برای گزارش",
           "confirmSubtract": "{{amount}} از موجودی کسر شود؟",
@@ -3503,9 +3504,7 @@
           "added": "{{amount}} افزوده شد",
           "subtracted": "{{amount}} کسر شد",
           "offerNow": "اکنون",
-          "offerValue": "−{{percent}}٪ تا {{date}}",
-          "spentSummary_one": "خرج کرده {{amount}} · {{count}} خرید",
-          "spentSummary_other": "خرج کرده {{amount}} · {{count}} خرید"
+          "offerValue": "−{{percent}}٪ تا {{date}}"
         },
         "sync": {
           "selectSubscription": "انتخاب اشتراک",
@@ -3586,8 +3585,6 @@
           "invited": "دعوت شده",
           "earned": "درآمد",
           "code": "کد",
-          "commissionLink": "کمیسیون: {{value}} · تغییر",
-          "commissionValue": "کمیسیون: {{value}}",
           "commissionPercent": "کمیسیون، ٪",
           "commissionSaved": "کمیسیون ذخیره شد",
           "spentHint": "خرج در سرویس",

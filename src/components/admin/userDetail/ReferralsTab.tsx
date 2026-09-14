@@ -5,7 +5,8 @@ import { useQuery } from '@tanstack/react-query';
 import { adminUsersApi, type UserDetailResponse } from '@/api/adminUsers';
 import { backTo } from '@/components/admin/AdminBackButton';
 import { SubscriptionStateChip, UserAvatar, useMoney } from '@/components/admin/users';
-import { CopyIcon, UsersIcon, XIcon } from '@/components/icons';
+import { CopyIcon, LinkIcon, UsersIcon, WalletIcon, XIcon } from '@/components/icons';
+import { StatCard } from '@/components/stats';
 import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 import { useNotify } from '@/platform/hooks/useNotify';
 import { useDestructiveConfirm } from '@/platform/hooks/useNativeDialog';
@@ -88,52 +89,44 @@ export function ReferralsTab({ user, userId, canEdit, onUserRefresh }: Referrals
     <Section
       icon={<UsersIcon className="h-5 w-5" />}
       title={t('admin.users.detail.referral.title')}
-      action={
-        canEdit ? (
-          <LinkAction onClick={() => setCommissionOpen((open) => !open)}>
-            {t(`${ns}.commissionLink`, { value: commissionLabel })}
-          </LinkAction>
-        ) : (
-          <span className="text-xs text-dark-400">
-            {t(`${ns}.commissionValue`, { value: commissionLabel })}
-          </span>
-        )
-      }
     >
-      {commissionOpen && (
-        <CommissionEditor
-          current={referral.commission_percent}
-          busy={busy}
-          onClose={() => setCommissionOpen(false)}
-          onSave={(percent) =>
-            run(() => adminUsersApi.updateReferralCommission(userId, percent), {
-              success: t(`${ns}.commissionSaved`),
-              after: onUserRefresh,
-            })
-          }
+      {/* Те же плитки StatCard с иконками, что над вкладками карточки. */}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        <StatCard
+          label={t(`${ns}.invited`)}
+          value={referral.referrals_count}
+          icon={<UsersIcon />}
+          tone="accent"
+          valueClassName="text-dark-100 tabular-nums"
         />
-      )}
-
-      <dl className="m-0 grid grid-cols-3 overflow-hidden rounded-xl border border-dark-700/60">
-        <Fact label={t(`${ns}.invited`)} value={String(referral.referrals_count)} />
-        <Fact label={t(`${ns}.earned`)} value={money(referral.total_earnings_kopeks / 100)} />
-        <div className="flex min-w-0 flex-col gap-0.5 px-3 py-2.5">
-          <dt className="text-[11px] font-semibold uppercase tracking-wide text-dark-500">
-            {t(`${ns}.code`)}
-          </dt>
-          <dd className="m-0 min-w-0">
-            <button
-              type="button"
-              onClick={() => void copyCode()}
-              title={t('common.copy')}
-              className="inline-flex max-w-full items-center gap-1 font-mono text-sm font-semibold text-dark-100 hover:text-accent-400"
-            >
-              <span className="truncate">{referral.referral_code}</span>
-              <CopyIcon className="h-3.5 w-3.5 shrink-0 text-dark-500" />
-            </button>
-          </dd>
+        <StatCard
+          label={t(`${ns}.earned`)}
+          value={money(referral.total_earnings_kopeks / 100)}
+          icon={<WalletIcon />}
+          tone={referral.total_earnings_kopeks > 0 ? 'success' : 'neutral'}
+          valueClassName="text-dark-100 tabular-nums"
+        />
+        <div className="col-span-2 min-w-0 sm:col-span-1">
+          <StatCard
+            label={t(`${ns}.code`)}
+            value={referral.referral_code}
+            icon={<LinkIcon />}
+            tone="neutral"
+            valueClassName="font-mono text-base text-dark-100 sm:text-lg"
+            trailing={
+              <button
+                type="button"
+                onClick={() => void copyCode()}
+                aria-label={t('common.copy')}
+                title={t('common.copy')}
+                className="-m-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-dark-500 transition-colors hover:bg-dark-700/60 hover:text-dark-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/40"
+              >
+                <CopyIcon className="h-4 w-4" />
+              </button>
+            }
+          />
         </div>
-      </dl>
+      </div>
 
       <KeyValues
         rows={[
@@ -166,8 +159,37 @@ export function ReferralsTab({ user, userId, canEdit, onUserRefresh }: Referrals
               </span>
             ),
           },
+          {
+            // Комиссия — строкой, а не ссылкой в заголовке: на телефоне она выталкивала
+            // название секции до «Реф…».
+            key: 'commission',
+            label: t(`${ns}.commission`),
+            value: (
+              <span className="inline-flex flex-wrap items-center gap-x-2">
+                {commissionLabel}
+                {canEdit && !commissionOpen && (
+                  <LinkAction onClick={() => setCommissionOpen(true)}>
+                    {t('admin.users.detail.overview.change')}
+                  </LinkAction>
+                )}
+              </span>
+            ),
+          },
         ]}
       />
+      {commissionOpen && (
+        <CommissionEditor
+          current={referral.commission_percent}
+          busy={busy}
+          onClose={() => setCommissionOpen(false)}
+          onSave={(percent) =>
+            run(() => adminUsersApi.updateReferralCommission(userId, percent), {
+              success: t(`${ns}.commissionSaved`),
+              after: onUserRefresh,
+            })
+          }
+        />
+      )}
       {picker === 'referrer' && (
         <UserPicker
           excludeIds={excludeIds}
@@ -267,15 +289,6 @@ export function ReferralsTab({ user, userId, canEdit, onUserRefresh }: Referrals
           </button>
         ))}
     </Section>
-  );
-}
-
-function Fact({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex min-w-0 flex-col gap-0.5 border-r border-dark-800 px-3 py-2.5">
-      <dt className="text-[11px] font-semibold uppercase tracking-wide text-dark-500">{label}</dt>
-      <dd className="m-0 truncate text-base font-semibold tabular-nums text-dark-100">{value}</dd>
-    </div>
   );
 }
 
