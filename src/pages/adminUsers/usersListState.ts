@@ -78,6 +78,8 @@ export const DEFAULT_STATE: UsersListState = {
 /** Окно «истекают скоро» и «был в сети» — те же числа, что в подписях сегментов. */
 export const EXPIRING_DAYS = 7;
 export const ONLINE_MINUTES = 5;
+/** «Трафик на исходе» — израсходовано от стольких процентов лимита. */
+export const TRAFFIC_LOW_PERCENT = 80;
 
 const SORT_TO_API: Record<SortKey, NonNullable<UsersQuery['sort_by']>> = {
   expires: 'subscription_end_date',
@@ -93,7 +95,7 @@ const SORT_TO_API: Record<SortKey, NonNullable<UsersQuery['sort_by']>> = {
 const VIEW_PRESETS: Record<ViewKey, Partial<Omit<UsersListState, 'q' | 'view'>>> = {
   all: {},
   expiring: { sub: 'expiring', sort: 'expires' },
-  traffic: { sub: 'limited', sort: 'traffic' },
+  traffic: { sort: 'traffic' },
   nopay: { sort: 'purchases' },
   online: { sort: 'activity' },
   blocked: { status: 'blocked' },
@@ -168,6 +170,7 @@ export function buildUsersQuery(state: UsersListState): UsersQuery {
   if (state.campaign) query.campaign_id = Number(state.campaign);
   if (state.view === 'online') query.active_within_minutes = ONLINE_MINUTES;
   if (state.view === 'nopay') query.purchase_count = 0;
+  if (state.view === 'traffic') query.traffic_used_percent_min = TRAFFIC_LOW_PERCENT;
   return query;
 }
 

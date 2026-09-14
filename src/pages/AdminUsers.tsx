@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { type CSSProperties, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
@@ -17,6 +17,7 @@ import {
 } from '@/components/admin/users';
 import { ArrowRightIcon, RefreshIcon } from '@/components/icons';
 import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
+import { useHeaderHeight } from '@/hooks/useHeaderHeight';
 import { cn } from '@/lib/utils';
 import { safeLocal } from '@/utils/safeStorage';
 import {
@@ -35,6 +36,31 @@ const OPTIONS_STALE_MS = 5 * 60_000;
 const TO_TOP_AFTER_PX = 600;
 
 const number = (value: number, locale: string) => value.toLocaleString(locale);
+
+type Translate = (key: string, options?: Record<string, unknown>) => string;
+
+/**
+ * «1 873 человека · 944 с активной подпиской · 14 новых сегодня · 61 заблокирован».
+ * Каждая часть со своим склонением; нулевые «новых» и «заблокированных» не показываются.
+ */
+function summaryLine(
+  stats: { total: number; subscribed: number; newToday: number; blocked: number },
+  locale: string,
+  t: Translate,
+  short: boolean,
+): string {
+  const ns = short ? 'admin.users.summaryShort' : 'admin.users.summary';
+  const part = (key: string, count: number) =>
+    t(`${ns}.${key}`, { count, value: number(count, locale) });
+  return [
+    part('total', stats.total),
+    part('subscribed', stats.subscribed),
+    stats.newToday > 0 ? part('newToday', stats.newToday) : null,
+    !short && stats.blocked > 0 ? part('blocked', stats.blocked) : null,
+  ]
+    .filter(Boolean)
+    .join(' · ');
+}
 
 export default function AdminUsers() {
   const { t, i18n } = useTranslation();
@@ -129,29 +155,33 @@ export default function AdminUsers() {
 
   const locale = i18n.language;
   const stats = statsQuery.data;
-  const summaryValues = stats && {
-    total: number(stats.total_users, locale),
-    subscribed: number(stats.users_with_active_subscription, locale),
-    newToday: number(stats.new_today, locale),
-    blocked: number(stats.blocked_users, locale),
+  const summaryStats = stats && {
+    total: stats.total_users,
+    subscribed: stats.users_with_active_subscription,
+    newToday: stats.new_today,
+    blocked: stats.blocked_users,
   };
+  const { mobileCss } = useHeaderHeight();
 
   const refreshing = usersQuery.isFetching && !usersQuery.isFetchingNextPage;
 
   return (
-    <div className="animate-fade-in">
+    <div
+      className="animate-fade-in [--sticky-top:var(--mobile-header)] lg:[--sticky-top:3.5rem]"
+      style={{ '--mobile-header': mobileCss } as CSSProperties}
+    >
       <div className="mb-5 flex items-start justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
           <AdminBackButton to="/admin" />
           <div className="min-w-0">
             <h1 className="text-xl font-bold text-dark-100">{t('admin.users.title')}</h1>
-            {summaryValues ? (
+            {summaryStats ? (
               <>
-                <p className="hidden text-sm text-dark-400 sm:block">
-                  {t('admin.users.summary', summaryValues)}
+                <p className="hidden text-sm tabular-nums text-dark-400 sm:block">
+                  {summaryLine(summaryStats, locale, t, false)}
                 </p>
-                <p className="text-sm text-dark-400 sm:hidden">
-                  {t('admin.users.summaryShort', summaryValues)}
+                <p className="text-sm tabular-nums text-dark-400 sm:hidden">
+                  {summaryLine(summaryStats, locale, t, true)}
                 </p>
               </>
             ) : (
@@ -172,23 +202,19 @@ export default function AdminUsers() {
         </button>
       </div>
 
-      <div className="mb-4">
+      {/* На телефоне поиск и чипы прилипают под шапкой: фильтр меняют, не листая наверх. */}
+      <div className="sticky top-[var(--sticky-top)] z-20 -mx-4 mb-3 border-b border-dark-800/70 bg-dark-950 px-4 pb-2.5 pt-2 md:static md:mx-0 md:mb-4 md:border-0 md:bg-transparent md:p-0">
         <UsersToolbar state={state} onChange={update} options={options} />
       </div>
 
-      <div className="mb-3 flex items-center justify-between gap-3 text-sm text-dark-400">
-        <span>
-          {usersQuery.isLoading
-            ? t('common.loading')
-            : t('admin.users.shown', {
-                shown: number(users.length, locale),
-                total: number(total, locale),
-              })}
-        </span>
-        {usersQuery.hasNextPage && (
-          <span className="hidden sm:inline">{t('admin.users.scrollHint')}</span>
-        )}
-      </div>
+      <p className="mb-3 text-sm tabular-nums text-dark-400">
+        {usersQuery.isLoading
+          ? t('common.loading')
+          : t('admin.users.shown', {
+              shown: number(users.length, locale),
+              total: number(total, locale),
+            })}
+      </p>
 
       {usersQuery.isLoading ? (
         <ListRowSkeleton count={6} actions={[]} />
@@ -238,7 +264,7 @@ export default function AdminUsers() {
       <div ref={sentinelRef} aria-hidden="true" className="h-px" />
       {!usersQuery.isLoading && !usersQuery.hasNextPage && users.length > 0 && (
         <p className="py-6 text-center text-sm text-dark-500">
-          {t('admin.users.endOfList', { total: number(total, locale) })}
+          {t('admin.users.endOfList', { count: users.length, total: number(users.length, locale) })}
         </p>
       )}
 
