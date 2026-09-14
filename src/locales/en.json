@@ -6128,6 +6128,7 @@
       "unlink": "Disconnect",
       "unlinkConfirm": "Are you sure? You won't be able to sign in with this service after disconnecting.",
       "unlinkConfirmBtn": "Confirm disconnect?",
+      "unlinkForgetsEmail": "The email {{email}} will be forgotten with it: it came from this service and no password is set for email sign-in.",
       "cannotUnlinkLast": "Cannot disconnect the last sign-in method",
       "linkSuccess": "Account connected successfully",
       "unlinkSuccess": "Account disconnected successfully",
