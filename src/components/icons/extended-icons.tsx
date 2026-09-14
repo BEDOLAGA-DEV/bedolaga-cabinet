@@ -39,6 +39,7 @@ import {
   PiEye,
   PiFunnel,
   PiDotsSix,
+  PiDotsThree,
   PiDotsSixVertical,
   PiHeartbeat,
   PiClockCounterClockwise,
@@ -304,6 +305,11 @@ export const FileTextIcon = ({ className }: IconProps) => (
 
 export const FilterIcon = ({ className }: IconProps) => (
   <PiFunnel className={cn('h-5 w-5', className)} />
+);
+
+/** «Ещё действия» — меню ⋯ в шапках карточек. */
+export const MoreIcon = ({ className }: IconProps) => (
+  <PiDotsThree className={cn('h-5 w-5', className)} />
 );
 
 export const GripIcon = ({ className }: IconProps) => (

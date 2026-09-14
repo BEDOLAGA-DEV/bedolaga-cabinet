@@ -29,14 +29,12 @@ import { OverviewTab, type DetailTab } from '../components/admin/userDetail/Over
 import { ReferralsTab } from '../components/admin/userDetail/ReferralsTab';
 import { SendMessageDialog } from '../components/admin/userDetail/SendMessageDialog';
 import { SubscriptionTab } from '../components/admin/userDetail/SubscriptionTab';
-import { SyncTab } from '../components/admin/userDetail/SyncTab';
 import { UserActionsMenu } from '../components/admin/userDetail/UserActionsMenu';
 import { UserFacts } from '../components/admin/userDetail/UserFacts';
 import { UserHeader } from '../components/admin/userDetail/UserHeader';
 import { buildReachabilityLink } from '../components/admin/reachability/deepLink';
 import { useReachabilityAvailable } from '../components/admin/reachability/useReachabilityStatus';
 import { getApiErrorMessage } from '../utils/api-error';
-import { toNumber } from '../utils/inputHelpers';
 import { usePermissionStore } from '../store/permissions';
 import { TelegramSmallIcon } from '@/components/icons';
 import { PageSkeleton, Skeleton } from '@/components/ui/skeleton';
@@ -84,24 +82,13 @@ export default function AdminUserDetail() {
 
   // Panel info & node usage
   const [panelInfo, setPanelInfo] = useState<UserPanelInfo | null>(null);
-  const [panelInfoLoading, setPanelInfoLoading] = useState(false);
   const [nodeUsage, setNodeUsage] = useState<UserNodeUsageResponse | null>(null);
   const [nodeUsageDays, setNodeUsageDays] = useState(7);
 
-  // Inline confirm state (остаётся до переделки вкладки «Подписка»)
-  const [confirmingAction, setConfirmingAction] = useState<string | null>(null);
-  const confirmTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  // Subscription form
-  const [subAction, setSubAction] = useState<string>('extend');
-  const [subDays, setSubDays] = useState<number | ''>(30);
-  const [selectedTariffId, setSelectedTariffId] = useState<number | null>(null);
+  // Subscription selection (multi-tariff)
   const [activeSubscriptionId, setActiveSubscriptionId] = useState<number | null>(null);
   const hasAutoSelectedSub = useRef(false);
   const [subscriptionDetailView, setSubscriptionDetailView] = useState(false);
-
-  // Traffic packages
-  const [selectedTrafficGb, setSelectedTrafficGb] = useState<string>('');
 
   // Devices
   const [devices, setDevices] = useState<
@@ -144,14 +131,10 @@ export default function AdminUserDetail() {
       else next.set('tab', tab);
       if (tab === 'activity' && view) next.set('view', view);
       else next.delete('view');
+      // Вкладка «Подписка» сама откроет нужную форму и подкрутит к ней.
+      if (tab === 'subscription' && view) next.set('do', view);
+      else next.delete('do');
       setParams(next, { replace: true });
-      if (tab === 'subscription' && view) {
-        requestAnimationFrame(() => {
-          document
-            .getElementById(`subscription-${view}`)
-            ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        });
-      }
     },
     [params, setParams],
   );
@@ -242,8 +225,7 @@ export default function AdminUserDetail() {
   }, [tariffsQuery.data]);
   useEffect(() => {
     if (panelInfoQuery.data) setPanelInfo(panelInfoQuery.data);
-    setPanelInfoLoading(panelInfoQuery.isFetching);
-  }, [panelInfoQuery.data, panelInfoQuery.isFetching]);
+  }, [panelInfoQuery.data]);
   useEffect(() => {
     if (nodeUsageQuery.data) setNodeUsage(nodeUsageQuery.data);
   }, [nodeUsageQuery.data]);
@@ -327,10 +309,13 @@ export default function AdminUserDetail() {
 
   // ---- Обработчики мутаций --------------------------------------------------
 
-  const handleUpdateSubscription = async (overrideAction?: string) => {
+  const handleUpdateSubscription = async (
+    action: string,
+    extra: { days?: number; tariffId?: number | null } = {},
+  ) => {
     if (!userId) return;
-    const action = overrideAction || subAction;
-    if ((action === 'extend' || action === 'shorten') && toNumber(subDays, 0) <= 0) {
+    const days = extra.days ?? 30;
+    if ((action === 'extend' || action === 'shorten') && days <= 0) {
       notify.error(t('admin.users.detail.subscription.invalidDays'));
       return;
     }
@@ -341,19 +326,16 @@ export default function AdminUserDetail() {
         ...(activeSubscriptionId && action !== 'create'
           ? { subscription_id: activeSubscriptionId }
           : {}),
-        ...(action === 'extend' || action === 'shorten' ? { days: toNumber(subDays, 30) } : {}),
-        ...(action === 'change_tariff' && selectedTariffId ? { tariff_id: selectedTariffId } : {}),
+        ...(action === 'extend' || action === 'shorten' ? { days } : {}),
+        ...(action === 'change_tariff' && extra.tariffId ? { tariff_id: extra.tariffId } : {}),
         ...(action === 'create'
-          ? {
-              days: toNumber(subDays, 30),
-              ...(selectedTariffId ? { tariff_id: selectedTariffId } : {}),
-            }
+          ? { days, ...(extra.tariffId ? { tariff_id: extra.tariffId } : {}) }
           : {}),
       };
       await adminUsersApi.updateSubscription(userId, data);
       await loadUser();
-    } catch (error) {
-      console.error('Failed to update subscription:', error);
+    } catch (err) {
+      notify.error(getApiErrorMessage(err, t('admin.users.userActions.error')), t('common.error'));
     } finally {
       setActionLoading(false);
     }
@@ -421,18 +403,6 @@ export default function AdminUserDetail() {
     }
   };
 
-  const handleInlineConfirm = (actionKey: string, executeFn: () => Promise<void>) => {
-    if (confirmingAction === actionKey) {
-      if (confirmTimerRef.current) clearTimeout(confirmTimerRef.current);
-      setConfirmingAction(null);
-      executeFn().catch(() => {});
-    } else {
-      if (confirmTimerRef.current) clearTimeout(confirmTimerRef.current);
-      setConfirmingAction(actionKey);
-      confirmTimerRef.current = setTimeout(() => setConfirmingAction(null), 3000);
-    }
-  };
-
   const handleDeleteDevice = async (hwid: string) => {
     if (!userId) return;
     setActionLoading(true);
@@ -493,7 +463,6 @@ export default function AdminUserDetail() {
         ...(activeSubscriptionId ? { subscription_id: activeSubscriptionId } : {}),
       });
       notify.success(t('admin.users.detail.subscription.trafficAdded'));
-      setSelectedTrafficGb('');
       await loadUser();
     } catch {
       notify.error(t('admin.users.userActions.error'), t('common.error'));
@@ -773,9 +742,9 @@ export default function AdminUserDetail() {
           onClick={() => setSendMessageOpen(true)}
           disabled={actionLoading || !user.telegram_id}
           title={!user.telegram_id ? t('admin.users.sendMessage.noTelegram') : undefined}
-          className="btn-secondary flex-1 sm:flex-none"
+          className="btn-secondary min-w-0 flex-1 px-3 sm:flex-none sm:px-4"
         >
-          <TelegramSmallIcon className="h-4 w-4" />
+          <TelegramSmallIcon className="hidden h-4 w-4 sm:block" />
           {t('admin.users.detail.header.write')}
         </button>
       )}
@@ -783,7 +752,7 @@ export default function AdminUserDetail() {
         <button
           type="button"
           onClick={() => goTo('subscription', selectedSub ? 'extend' : 'create')}
-          className="btn-primary flex-1 sm:flex-none"
+          className="btn-primary min-w-0 flex-1 px-3 sm:flex-none sm:px-4"
         >
           {t('admin.users.detail.header.extend')}
         </button>
@@ -792,7 +761,7 @@ export default function AdminUserDetail() {
         <button
           type="button"
           onClick={() => goTo('balance')}
-          className="btn-secondary flex-1 sm:flex-none"
+          className="btn-secondary min-w-0 flex-1 px-3 sm:flex-none sm:px-4"
         >
           {t('admin.users.detail.header.topUp')}
         </button>
@@ -890,82 +859,64 @@ export default function AdminUserDetail() {
         )}
 
         {activeTab === 'subscription' && (
-          <>
-            <SubscriptionTab
-              userSubscriptions={userSubscriptions}
-              selectedSub={selectedSub}
-              onCancelSbpRecurring={handleCancelSbpRecurring}
-              onDeleteSubscription={handleDeleteSubscription}
-              activeSubscriptionId={activeSubscriptionId}
-              onActiveSubscriptionChange={setActiveSubscriptionId}
-              subscriptionDetailView={subscriptionDetailView}
-              onSubscriptionDetailViewChange={setSubscriptionDetailView}
-              tariffs={tariffs}
-              currentTariff={currentTariff}
-              subAction={subAction}
-              subDays={subDays}
-              onSubActionChange={setSubAction}
-              onSubDaysChange={setSubDays}
-              selectedTariffId={selectedTariffId}
-              onSelectedTariffIdChange={setSelectedTariffId}
-              selectedTrafficGb={selectedTrafficGb}
-              onSelectedTrafficGbChange={setSelectedTrafficGb}
-              panelInfo={panelInfo}
-              panelInfoLoading={panelInfoLoading}
-              copyToClipboard={copyToClipboard}
-              formatBytes={formatBytes}
-              nodeUsageDays={nodeUsageDays}
-              onNodeUsageDaysChange={setNodeUsageDays}
-              nodeUsageForPeriod={nodeUsageForPeriod}
-              devices={devices}
-              devicesLoading={devicesLoading}
-              devicesTotal={devicesTotal}
-              deviceLimit={deviceLimit}
-              editingDeviceHwid={editingDeviceHwid}
-              editingDeviceName={editingDeviceName}
-              onEditingDeviceHwidChange={setEditingDeviceHwid}
-              onEditingDeviceNameChange={setEditingDeviceName}
-              renameSaving={renameSaving}
-              requestHistory={requestHistory}
-              requestHistoryLoading={requestHistoryLoading}
-              requestHistoryTotal={requestHistoryTotal}
-              requestHistoryOffset={requestHistoryOffset}
-              requestHistorySubId={requestHistorySubId}
-              requestHistoryExpanded={requestHistoryExpanded}
-              onRequestHistoryExpandedChange={setRequestHistoryExpanded}
-              onRequestHistorySubIdChange={setRequestHistorySubId}
-              actionLoading={actionLoading}
-              confirmingAction={confirmingAction}
-              onInlineConfirm={handleInlineConfirm}
-              onUpdateSubscription={handleUpdateSubscription}
-              onSetDeviceLimit={handleSetDeviceLimit}
-              onAddTraffic={handleAddTraffic}
-              onRemoveTraffic={handleRemoveTraffic}
-              onResetDevices={handleResetDevices}
-              onDeleteDevice={handleDeleteDevice}
-              onRenameDevice={handleRenameDevice}
-              onLoadDevices={loadDevices}
-              onLoadSubscriptionData={loadSubscriptionData}
-              onLoadRequestHistory={loadRequestHistory}
-              hasPermission={hasPermission}
-              formatDate={formatDate}
-              locale={locale}
-              reachabilityLink={reachabilityLink}
-            />
-            {hasPermission('users:sync') && (
-              <SyncTab
-                user={user}
-                syncStatus={syncStatus}
-                userSubscriptions={userSubscriptions}
-                activeSubscriptionId={activeSubscriptionId}
-                onActiveSubscriptionChange={setActiveSubscriptionId}
-                actionLoading={actionLoading}
-                onSyncFromPanel={handleSyncFromPanel}
-                onSyncToPanel={handleSyncToPanel}
-                locale={locale}
-              />
-            )}
-          </>
+          <SubscriptionTab
+            accountStatus={user.status}
+            userSubscriptions={userSubscriptions}
+            selectedSub={selectedSub}
+            activeSubscriptionId={activeSubscriptionId}
+            onActiveSubscriptionChange={setActiveSubscriptionId}
+            subscriptionDetailView={subscriptionDetailView}
+            onSubscriptionDetailViewChange={setSubscriptionDetailView}
+            tariffs={tariffs}
+            currentTariff={currentTariff}
+            panelInfo={panelInfo}
+            copyToClipboard={copyToClipboard}
+            formatBytes={formatBytes}
+            nodeUsageDays={nodeUsageDays}
+            onNodeUsageDaysChange={setNodeUsageDays}
+            nodeUsageForPeriod={nodeUsageForPeriod}
+            devices={devices}
+            devicesLoading={devicesLoading}
+            devicesTotal={devicesTotal}
+            deviceLimit={deviceLimit}
+            editingDeviceHwid={editingDeviceHwid}
+            editingDeviceName={editingDeviceName}
+            onEditingDeviceHwidChange={setEditingDeviceHwid}
+            onEditingDeviceNameChange={setEditingDeviceName}
+            renameSaving={renameSaving}
+            requestHistory={requestHistory}
+            requestHistoryLoading={requestHistoryLoading}
+            requestHistoryTotal={requestHistoryTotal}
+            requestHistoryOffset={requestHistoryOffset}
+            requestHistorySubId={requestHistorySubId}
+            requestHistoryExpanded={requestHistoryExpanded}
+            onRequestHistoryExpandedChange={setRequestHistoryExpanded}
+            onRequestHistorySubIdChange={setRequestHistorySubId}
+            actionLoading={actionLoading}
+            onUpdateSubscription={handleUpdateSubscription}
+            onSetDeviceLimit={handleSetDeviceLimit}
+            onAddTraffic={handleAddTraffic}
+            onRemoveTraffic={handleRemoveTraffic}
+            onResetDevices={handleResetDevices}
+            onCancelSbpRecurring={handleCancelSbpRecurring}
+            onDeleteSubscription={handleDeleteSubscription}
+            onDeleteDevice={handleDeleteDevice}
+            onRenameDevice={handleRenameDevice}
+            onLoadDevices={loadDevices}
+            onLoadSubscriptionData={loadSubscriptionData}
+            onLoadRequestHistory={loadRequestHistory}
+            syncStatus={syncStatus}
+            syncLoading={syncStatusQuery.isFetching}
+            canSync={hasPermission('users:sync')}
+            remnawaveId={user.remnawave_id}
+            onReloadSyncStatus={() => loadSyncStatus()}
+            onSyncFromPanel={handleSyncFromPanel}
+            onSyncToPanel={handleSyncToPanel}
+            hasPermission={hasPermission}
+            formatDate={formatDate}
+            locale={locale}
+            reachabilityLink={reachabilityLink}
+          />
         )}
 
         {activeTab === 'balance' && userId && (
