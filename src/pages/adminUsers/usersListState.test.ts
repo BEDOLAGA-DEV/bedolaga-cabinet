@@ -54,6 +54,16 @@ describe('URL round-trip', () => {
     });
     expect(serializeUsersListState(state).toString()).toBe(params.toString());
   });
+  it('один view в адресе разворачивается в пресет, явные параметры сильнее', () => {
+    expect(parseUsersListState(new URLSearchParams('view=expiring'))).toMatchObject({
+      view: 'expiring',
+      sub: 'expiring',
+      sort: 'expires',
+    });
+    expect(parseUsersListState(new URLSearchParams('view=expiring&sort=balance')).sort).toBe(
+      'balance',
+    );
+  });
   it('мусор в адресе падает в дефолт', () => {
     expect(parseUsersListState(new URLSearchParams('sub=hacker&sort=nope&view=x'))).toEqual(
       DEFAULT_STATE,

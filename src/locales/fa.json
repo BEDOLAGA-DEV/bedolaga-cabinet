@@ -3272,7 +3272,7 @@
     "users": {
       "title": "کاربران",
       "subtitle": "مدیریت کاربران ربات",
-      "search": "جستجو بر اساس شناسه، نام، نام کاربری...",
+      "search": "شناسه، نام، @نام‌کاربری یا ایمیل",
       "searchEmail": "جستجو بر اساس ایمیل...",
       "noData": "کاربری یافت نشد",
       "purchaseCount_other": "{{count}} خرید",
@@ -3716,7 +3716,82 @@
           "resetSubscription": "اشتراک بازنشانی شد",
           "resetTrial": "دوره آزمایشی بازنشانی شد"
         }
-      }
+      },
+      "summary": "{{total}} کاربر · {{subscribed}} اشتراک فعال · {{newToday}} جدید امروز · {{blocked}} مسدود",
+      "shown": "نمایش {{shown}} از {{total}}",
+      "scrollHint": "با اسکرول بیشتر بارگذاری می‌شود",
+      "loadingMore": "در حال بارگذاری",
+      "endOfList": "همه {{total}} نفر نمایش داده شد",
+      "noneFound": "کسی پیدا نشد — عبارت دیگری بزنید یا فیلترها را بردارید",
+      "loadError": "فهرست بارگذاری نشد",
+      "reset": "پاک کردن همه",
+      "toTop": "بالا",
+      "unlimited": "نامحدود",
+      "until": "تا {{date}}",
+      "sort": {
+        "label": "مرتب‌سازی",
+        "expires": "بر اساس انقضا",
+        "activity": "بر اساس فعالیت",
+        "created": "بر اساس تاریخ ثبت‌نام",
+        "balance": "بر اساس موجودی",
+        "spent": "بر اساس هزینه",
+        "traffic": "بر اساس ترافیک",
+        "purchases": "بر اساس خرید"
+      },
+      "views": {
+        "all": "همه",
+        "expiring": "انقضا تا {{days}} روز",
+        "traffic": "ترافیک رو به اتمام",
+        "nopay": "بدون خرید",
+        "online": "آنلاین",
+        "blocked": "مسدود"
+      },
+      "filterLabels": {
+        "status": "وضعیت",
+        "sub": "اشتراک",
+        "tariff": "تعرفه",
+        "group": "گروه تبلیغاتی",
+        "campaign": "کمپین"
+      },
+      "filterAny": {
+        "status": "هر",
+        "sub": "هر",
+        "tariff": "هر",
+        "group": "هر",
+        "campaign": "هر"
+      },
+      "subFilters": {
+        "active": "فعال",
+        "trial": "آزمایشی",
+        "expiring": "در حال انقضا",
+        "expired": "منقضی",
+        "limited": "ترافیک تمام شده",
+        "none": "بدون اشتراک"
+      },
+      "columns": {
+        "user": "کاربر",
+        "subscription": "اشتراک",
+        "activity": "فعالیت",
+        "balance": "موجودی"
+      },
+      "statuses": {
+        "active": "فعال",
+        "blocked": "مسدود",
+        "deleted": "حذف‌شده",
+        "noSubscription": "بدون اشتراک",
+        "disabled": "غیرفعال",
+        "pending": "در انتظار پرداخت",
+        "other": "اشتراک"
+      },
+      "subscriptionChips": {
+        "trial": "آزمایشی · {{count}} روز",
+        "daysLeft": "{{count}} روز",
+        "today": "امروز منقضی می‌شود",
+        "expiredToday": "امروز منقضی شد",
+        "expiredAgo": "{{count}} روز پیش منقضی شد",
+        "limited": "ترافیک تمام شده"
+      },
+      "summaryShort": "{{total}} · {{subscribed}} مشترک · {{newToday}} جدید"
     },
     "promoOffers": {
       "title": "پیشنهادات تبلیغاتی",

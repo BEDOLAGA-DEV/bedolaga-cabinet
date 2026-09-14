@@ -4390,7 +4390,7 @@
     "users": {
       "title": "Users",
       "subtitle": "Bot user management",
-      "search": "Search by ID, name, username...",
+      "search": "ID, name, @username or email",
       "searchEmail": "Search by email...",
       "noData": "No users found",
       "purchaseCount_one": "{{count}} purchase",
@@ -4851,7 +4851,82 @@
         }
       },
       "notFound": "User not found",
-      "purchaseCount": "Purchases: {{count}}"
+      "purchaseCount": "Purchases: {{count}}",
+      "summary": "{{total}} users · {{subscribed}} with an active subscription · {{newToday}} new today · {{blocked}} blocked",
+      "shown": "Showing {{shown}} of {{total}}",
+      "scrollHint": "More loads as you scroll",
+      "loadingMore": "Loading more",
+      "endOfList": "That is all {{total}} for this query",
+      "noneFound": "No one found — try another query or clear the filters",
+      "loadError": "Could not load the list",
+      "reset": "Clear all",
+      "toTop": "To top",
+      "unlimited": "unlimited",
+      "until": "until {{date}}",
+      "sort": {
+        "label": "Sort",
+        "expires": "by expiry",
+        "activity": "by activity",
+        "created": "by sign-up date",
+        "balance": "by balance",
+        "spent": "by spending",
+        "traffic": "by traffic",
+        "purchases": "by purchases"
+      },
+      "views": {
+        "all": "All",
+        "expiring": "Expiring in {{days}} days",
+        "traffic": "Traffic running out",
+        "nopay": "No purchases",
+        "online": "Online",
+        "blocked": "Blocked"
+      },
+      "filterLabels": {
+        "status": "Status",
+        "sub": "Subscription",
+        "tariff": "Plan",
+        "group": "Promo group",
+        "campaign": "Campaign"
+      },
+      "filterAny": {
+        "status": "any",
+        "sub": "any",
+        "tariff": "any",
+        "group": "any",
+        "campaign": "any"
+      },
+      "subFilters": {
+        "active": "active",
+        "trial": "trial",
+        "expiring": "expiring",
+        "expired": "expired",
+        "limited": "traffic exhausted",
+        "none": "no subscription"
+      },
+      "columns": {
+        "user": "User",
+        "subscription": "Subscription",
+        "activity": "Activity",
+        "balance": "Balance"
+      },
+      "statuses": {
+        "active": "Active",
+        "blocked": "Blocked",
+        "deleted": "Deleted",
+        "noSubscription": "No subscription",
+        "disabled": "Disabled",
+        "pending": "Awaiting payment",
+        "other": "Subscription"
+      },
+      "subscriptionChips": {
+        "trial": "Trial · {{count}} d",
+        "daysLeft": "{{count}} d",
+        "today": "expires today",
+        "expiredToday": "expired today",
+        "expiredAgo": "expired {{count}} d ago",
+        "limited": "traffic exhausted"
+      },
+      "summaryShort": "{{total}} · {{subscribed}} subscribed · {{newToday}} new"
     },
     "promoOffers": {
       "title": "Promo Offers",
