@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { usePermissionStore } from '../../../store/permissions';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { useLocation, useNavigate } from 'react-router';
@@ -342,16 +343,7 @@ export function ReferralsTab({ user, userId, onUserRefresh }: ReferralsTabProps)
           icon={<BanknotesIcon className="h-5 w-5" />}
           tone="neutral"
         />
-        <StatCard
-          label={t('admin.users.detail.referrals.commission')}
-          value={
-            user.referral.commission_percent != null
-              ? `${user.referral.commission_percent}%`
-              : t('admin.users.detail.referrals.default')
-          }
-          icon={<PercentIcon className="h-5 w-5" />}
-          tone="neutral"
-        />
+        <CommissionCard user={user} userId={userId} onUserRefresh={onUserRefresh} />
         <StatCard
           label={t('admin.users.detail.referrals.referralCode')}
           value={user.referral.referral_code}
@@ -488,5 +480,114 @@ export function ReferralsTab({ user, userId, onUserRefresh }: ReferralsTabProps)
         )}
       </div>
     </div>
+  );
+}
+
+/**
+ * Комиссия реферала с правкой на месте. Редактор жил во вкладке «Информация»,
+ * которой больше нет: у комиссии одно место — рядом с остальной реферальной статистикой.
+ */
+function CommissionCard({
+  user,
+  userId,
+  onUserRefresh,
+}: {
+  user: UserDetailResponse;
+  userId: number;
+  onUserRefresh: () => Promise<void> | void;
+}) {
+  const { t } = useTranslation();
+  const notify = useNotify();
+  const canEdit = usePermissionStore((s) => s.hasPermission)('users:referral');
+  const [editing, setEditing] = useState(false);
+  const [value, setValue] = useState<string>('');
+  const [saving, setSaving] = useState(false);
+
+  const save = async () => {
+    const parsed = value.trim() === '' ? null : Number(value);
+    if (parsed !== null && (!Number.isFinite(parsed) || parsed < 0 || parsed > 100)) {
+      notify.error(t('admin.users.detail.referral.invalidPercent'), t('common.error'));
+      return;
+    }
+    setSaving(true);
+    try {
+      await adminUsersApi.updateReferralCommission(userId, parsed);
+      await onUserRefresh();
+      setEditing(false);
+    } catch (err) {
+      notify.error(getApiErrorMessage(err, t('admin.users.userActions.error')), t('common.error'));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (editing) {
+    return (
+      <div className="rounded-2xl border border-dark-700/40 bg-dark-900/70 p-4">
+        <label className="mb-2 block text-xs text-dark-500" htmlFor="referral-commission">
+          {t('admin.users.detail.referrals.commission')}
+        </label>
+        <div className="flex items-center gap-2">
+          <input
+            id="referral-commission"
+            type="number"
+            min={0}
+            max={100}
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            placeholder={t('admin.users.detail.referrals.default')}
+            className="input w-24 py-2 text-center"
+          />
+          <span className="text-sm text-dark-400">%</span>
+          <button
+            type="button"
+            onClick={save}
+            disabled={saving}
+            className="btn-primary px-3 py-2 text-sm"
+          >
+            {t('common.save')}
+          </button>
+          <button
+            type="button"
+            onClick={() => setEditing(false)}
+            disabled={saving}
+            className="btn-ghost px-3 py-2 text-sm"
+          >
+            {t('common.cancel')}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <StatCard
+      label={t('admin.users.detail.referrals.commission')}
+      value={
+        user.referral.commission_percent != null
+          ? `${user.referral.commission_percent}%`
+          : t('admin.users.detail.referrals.default')
+      }
+      icon={<PercentIcon className="h-5 w-5" />}
+      tone="neutral"
+      trailing={
+        canEdit ? (
+          <button
+            type="button"
+            onClick={() => {
+              setValue(
+                user.referral.commission_percent != null
+                  ? String(user.referral.commission_percent)
+                  : '',
+              );
+              setEditing(true);
+            }}
+            className="text-xs font-medium text-accent-400 hover:text-accent-300"
+          >
+            {t('common.edit')}
+          </button>
+        ) : undefined
+      }
+    />
   );
 }

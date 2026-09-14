@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { useParams, useNavigate } from 'react-router';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate, useParams, useSearchParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import i18n from '../i18n';
@@ -9,37 +9,58 @@ import {
   adminUsersApi,
   type UserDetailResponse,
   type UserAvailableTariff,
-  type UserListItem,
   type UserPanelInfo,
   type UserNodeUsageResponse,
   type PanelSyncStatusResponse,
+  type UpdateRestrictionsRequest,
   type UpdateSubscriptionRequest,
-  type AdminUserGiftsResponse,
   type SubscriptionRequestRecord,
 } from '../api/adminUsers';
-import { promocodesApi, type PromoGroup } from '../api/promocodes';
-import { RefreshIcon, TelegramSmallIcon as TelegramIcon } from '@/components/icons';
+import { adminApi } from '../api/admin';
+import { promocodesApi } from '../api/promocodes';
 import { AdminBackButton } from '../components/admin';
-import { GiftsTab } from '../components/admin/userDetail/GiftsTab';
-import { SyncTab } from '../components/admin/userDetail/SyncTab';
-import { ReferralsTab } from '../components/admin/userDetail/ReferralsTab';
+import {
+  ActivityHub,
+  ACTIVITY_VIEWS,
+  type ActivityView,
+} from '../components/admin/userDetail/ActivityHub';
 import { BalanceTab } from '../components/admin/userDetail/BalanceTab';
-import { ActivityTab } from '../components/admin/userDetail/ActivityTab';
-import { TicketsTab } from '../components/admin/userDetail/TicketsTab';
-import { InfoTab } from '../components/admin/userDetail/InfoTab';
+import { OverviewTab, type DetailTab } from '../components/admin/userDetail/OverviewTab';
+import { ReferralsTab } from '../components/admin/userDetail/ReferralsTab';
+import { SendMessageDialog } from '../components/admin/userDetail/SendMessageDialog';
 import { SubscriptionTab } from '../components/admin/userDetail/SubscriptionTab';
+import { SyncTab } from '../components/admin/userDetail/SyncTab';
+import { UserActionsMenu } from '../components/admin/userDetail/UserActionsMenu';
+import { UserFacts } from '../components/admin/userDetail/UserFacts';
+import { UserHeader } from '../components/admin/userDetail/UserHeader';
 import { buildReachabilityLink } from '../components/admin/reachability/deepLink';
 import { useReachabilityAvailable } from '../components/admin/reachability/useReachabilityStatus';
 import { getApiErrorMessage } from '../utils/api-error';
 import { toNumber } from '../utils/inputHelpers';
 import { usePermissionStore } from '../store/permissions';
+import { TelegramSmallIcon } from '@/components/icons';
 import { PageSkeleton, Skeleton } from '@/components/ui/skeleton';
+import { cn } from '@/lib/utils';
 
-// (Subscription-tab helpers: getCountryFlag / PlusIcon / MinusIcon /
-// StatusBadge / GiftStatusBadge / GiftCard moved to
-// components/admin/userDetail/{SubscriptionTab,GiftsTab,InfoTab,SyncTab}.tsx)
+// ──────────────────────────────────────────────────────────────────
+// Карточка пользователя. Страница держит запросы и обработчики мутаций,
+// вкладки — «фасады» над ними (components/admin/userDetail/*). Вкладка и
+// подвид «Активности» живут в адресе (`?tab=&view=`), чтобы обновление
+// страницы и ссылка коллеге открывали то же место.
+// ──────────────────────────────────────────────────────────────────
 
-// ============ Main Page ============
+const TABS: readonly DetailTab[] = ['overview', 'subscription', 'balance', 'referrals', 'activity'];
+const RECENT_EVENTS = 5;
+
+function pickTab(value: string | null): DetailTab {
+  return value && (TABS as readonly string[]).includes(value) ? (value as DetailTab) : 'overview';
+}
+
+function pickView(value: string | null): ActivityView {
+  return value && (ACTIVITY_VIEWS as readonly string[]).includes(value)
+    ? (value as ActivityView)
+    : 'timeline';
+}
 
 export default function AdminUserDetail() {
   const { t } = useTranslation();
@@ -47,25 +68,19 @@ export default function AdminUserDetail() {
   const notify = useNotify();
   const { id } = useParams<{ id: string }>();
   const hasPermission = usePermissionStore((s) => s.hasPermission);
+  const [params, setParams] = useSearchParams();
 
   const localeMap: Record<string, string> = { ru: 'ru-RU', en: 'en-US', zh: 'zh-CN', fa: 'fa-IR' };
   const locale = localeMap[i18n.language] || 'ru-RU';
 
+  const activeTab = pickTab(params.get('tab'));
+  const activityView = pickView(params.get('view'));
+
   const [user, setUser] = useState<UserDetailResponse | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<
-    'info' | 'subscription' | 'balance' | 'sync' | 'tickets' | 'gifts' | 'referrals' | 'activity'
-  >('info');
   const [syncStatus, setSyncStatus] = useState<PanelSyncStatusResponse | null>(null);
   const [tariffs, setTariffs] = useState<UserAvailableTariff[]>([]);
   const [actionLoading, setActionLoading] = useState(false);
-
-  // Referrals
-  const [referrals, setReferrals] = useState<UserListItem[]>([]);
-  const [referralsLoading, setReferralsLoading] = useState(false);
-
-  // (Referrals-tab state, query, handlers, click-outside + debounced search
-  // effects moved into components/admin/userDetail/ReferralsTab.tsx)
+  const [sendMessageOpen, setSendMessageOpen] = useState(false);
 
   // Panel info & node usage
   const [panelInfo, setPanelInfo] = useState<UserPanelInfo | null>(null);
@@ -73,13 +88,9 @@ export default function AdminUserDetail() {
   const [nodeUsage, setNodeUsage] = useState<UserNodeUsageResponse | null>(null);
   const [nodeUsageDays, setNodeUsageDays] = useState(7);
 
-  // Inline confirm state
+  // Inline confirm state (остаётся до переделки вкладки «Подписка»)
   const [confirmingAction, setConfirmingAction] = useState<string | null>(null);
   const confirmTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  // (Balance form state moved into BalanceTab.tsx)
-
-  // (Tickets-tab state + query + chat-view state moved into TicketsTab.tsx)
 
   // Subscription form
   const [subAction, setSubAction] = useState<string>('extend');
@@ -88,16 +99,6 @@ export default function AdminUserDetail() {
   const [activeSubscriptionId, setActiveSubscriptionId] = useState<number | null>(null);
   const hasAutoSelectedSub = useRef(false);
   const [subscriptionDetailView, setSubscriptionDetailView] = useState(false);
-
-  // Promo group
-  const [promoGroups, setPromoGroups] = useState<PromoGroup[]>([]);
-  const [editingPromoGroup, setEditingPromoGroup] = useState(false);
-
-  // Referral commission
-  const [editingReferralCommission, setEditingReferralCommission] = useState(false);
-  const [referralCommissionValue, setReferralCommissionValue] = useState<number | ''>('');
-
-  // (Send-promo-offer form state moved into BalanceTab.tsx)
 
   // Traffic packages
   const [selectedTrafficGb, setSelectedTrafficGb] = useState<string>('');
@@ -119,10 +120,6 @@ export default function AdminUserDetail() {
   const [editingDeviceName, setEditingDeviceName] = useState('');
   const [renameSaving, setRenameSaving] = useState(false);
 
-  // Gifts
-  const [giftsData, setGiftsData] = useState<AdminUserGiftsResponse | null>(null);
-  const [giftsLoading, setGiftsLoading] = useState(false);
-
   // Subscription request history
   const [requestHistory, setRequestHistory] = useState<SubscriptionRequestRecord[]>([]);
   const [requestHistoryLoading, setRequestHistoryLoading] = useState(false);
@@ -132,32 +129,45 @@ export default function AdminUserDetail() {
   const [requestHistorySubId, setRequestHistorySubId] = useState<number | null>(null);
 
   const userId = id ? parseInt(id, 10) : null;
+  const validUserId = !!userId && !Number.isNaN(userId);
   // Ярлык «Проверить через операторов РФ» у подписки: право запуска + включённая интеграция.
   const reachabilityAvailable = useReachabilityAvailable();
   const reachabilityLink =
-    hasPermission('reachability:run') && reachabilityAvailable && userId && !Number.isNaN(userId)
+    hasPermission('reachability:run') && reachabilityAvailable && validUserId
       ? buildReachabilityLink({ mode: 'vless', userId })
       : null;
 
-  // React Query owns the main user fetch: caching across navigations + auto-loading
-  // state. loadUser is kept as a thin refetch wrapper so the 25+ mutation handlers
-  // that call `await loadUser()` after writes need no changes.
+  const goTo = useCallback(
+    (tab: DetailTab, view?: string) => {
+      const next = new URLSearchParams(params);
+      if (tab === 'overview') next.delete('tab');
+      else next.set('tab', tab);
+      if (tab === 'activity' && view) next.set('view', view);
+      else next.delete('view');
+      setParams(next, { replace: true });
+      if (tab === 'subscription' && view) {
+        requestAnimationFrame(() => {
+          document
+            .getElementById(`subscription-${view}`)
+            ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+      }
+    },
+    [params, setParams],
+  );
+
   const userQuery = useQuery({
     queryKey: ['admin-user-detail', userId] as const,
     queryFn: () => {
       if (!userId) throw new Error('No userId');
       return adminUsersApi.getUser(userId);
     },
-    enabled: !!userId && !isNaN(userId),
+    enabled: validUserId,
   });
 
   useEffect(() => {
     if (userQuery.data) setUser(userQuery.data);
   }, [userQuery.data]);
-
-  useEffect(() => {
-    setLoading(userQuery.isFetching);
-  }, [userQuery.isFetching]);
 
   useEffect(() => {
     if (userQuery.isError) {
@@ -170,76 +180,66 @@ export default function AdminUserDetail() {
     async () => {
       await userQuery.refetch();
     },
-    // userQuery.refetch is a stable function across renders; including the whole
-    // userQuery object would re-create loadUser on every render and cascade into
-    // useEffects that depend on it.
+    // userQuery.refetch стабилен между рендерами; сам объект userQuery — нет.
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [userQuery.refetch],
   );
 
-  // ---- React Query hooks for the rest of the leaf loaders -----------------
-  // Each loader callback below becomes a thin refetch wrapper so existing call
-  // sites (mutation handlers, useEffects) continue to work unchanged. queryKey
-  // includes the inputs that drive the request (userId / activeSubscriptionId)
-  // so changing them auto-invalidates.
-
+  // ---- Запросы вкладок: включаются по activeTab / activeSubscriptionId ----
   const syncStatusQuery = useQuery({
     queryKey: ['admin-user-sync-status', userId, activeSubscriptionId] as const,
     queryFn: () => adminUsersApi.getSyncStatus(userId as number, activeSubscriptionId ?? undefined),
-    enabled: !!userId && !isNaN(userId) && activeTab === 'sync' && hasPermission('users:sync'),
+    enabled: validUserId && activeTab === 'subscription' && hasPermission('users:sync'),
   });
   const tariffsQuery = useQuery({
     queryKey: ['admin-user-tariffs', userId] as const,
     queryFn: () => adminUsersApi.getAvailableTariffs(userId as number, true),
-    enabled: !!userId && !isNaN(userId) && activeTab === 'subscription',
+    enabled: validUserId && activeTab === 'subscription',
   });
-  // (ticketsQuery moved into TicketsTab.tsx)
-  const referralsQuery = useQuery({
-    queryKey: ['admin-user-referrals', userId] as const,
-    queryFn: () => adminUsersApi.getReferrals(userId as number, 0, 50),
-    enabled: !!userId && !isNaN(userId) && activeTab === 'info',
-  });
-  // (referralsListQuery moved into ReferralsTab.tsx — the tab owns it now)
   const panelInfoQuery = useQuery({
     queryKey: ['admin-user-panel-info', userId, activeSubscriptionId] as const,
     queryFn: () => adminUsersApi.getPanelInfo(userId as number, activeSubscriptionId ?? undefined),
-    enabled: !!userId && !isNaN(userId),
+    enabled: validUserId,
   });
   const nodeUsageQuery = useQuery({
     queryKey: ['admin-user-node-usage', userId, activeSubscriptionId] as const,
     queryFn: () => adminUsersApi.getNodeUsage(userId as number, activeSubscriptionId ?? undefined),
-    enabled: !!userId && !isNaN(userId) && activeTab === 'subscription',
+    enabled: validUserId && activeTab === 'subscription',
   });
+  // Устройства нужны и фактам под шапкой, и «Обзору» — грузим всегда.
   const devicesQuery = useQuery({
     queryKey: ['admin-user-devices', userId, activeSubscriptionId] as const,
     queryFn: () =>
       adminUsersApi.getUserDevices(userId as number, activeSubscriptionId ?? undefined),
-    enabled: !!userId && !isNaN(userId) && activeTab === 'subscription',
-  });
-  const giftsQuery = useQuery({
-    queryKey: ['admin-user-gifts', userId] as const,
-    queryFn: () => adminUsersApi.getUserGifts(userId as number),
-    enabled: !!userId && !isNaN(userId) && activeTab === 'gifts',
+    enabled: validUserId,
   });
   const promoGroupsQuery = useQuery({
     queryKey: ['admin-promo-groups-all'] as const,
     queryFn: () => promocodesApi.getPromoGroups({ limit: 100 }),
-    enabled: activeTab === 'info' && hasPermission('users:promo_group'),
+    enabled: activeTab === 'overview' && hasPermission('users:promo_group'),
+  });
+  const recentActivityQuery = useQuery({
+    queryKey: ['admin-user-recent-activity', userId] as const,
+    queryFn: () => adminUsersApi.getUserActivity(userId as number, 0, RECENT_EVENTS),
+    enabled: validUserId && activeTab === 'overview',
+  });
+  const ticketsCountQuery = useQuery({
+    queryKey: ['admin-user-tickets-count', userId] as const,
+    queryFn: () => adminApi.getTickets({ user_id: userId as number, per_page: 1 }),
+    enabled: validUserId && activeTab === 'overview',
+  });
+  const giftsCountQuery = useQuery({
+    queryKey: ['admin-user-gifts', userId] as const,
+    queryFn: () => adminUsersApi.getUserGifts(userId as number),
+    enabled: validUserId && activeTab === 'overview',
   });
 
-  // --- Sync each query's data + isFetching into existing state vars --------
   useEffect(() => {
     if (syncStatusQuery.data) setSyncStatus(syncStatusQuery.data);
   }, [syncStatusQuery.data]);
   useEffect(() => {
     if (tariffsQuery.data) setTariffs(tariffsQuery.data.tariffs);
   }, [tariffsQuery.data]);
-  // (ticketsQuery sync moved into TicketsTab.tsx)
-  useEffect(() => {
-    if (referralsQuery.data) setReferrals(referralsQuery.data.users || []);
-    setReferralsLoading(referralsQuery.isFetching);
-  }, [referralsQuery.data, referralsQuery.isFetching]);
-  // (referralsListQuery sync moved into ReferralsTab.tsx)
   useEffect(() => {
     if (panelInfoQuery.data) setPanelInfo(panelInfoQuery.data);
     setPanelInfoLoading(panelInfoQuery.isFetching);
@@ -255,15 +255,6 @@ export default function AdminUserDetail() {
     }
     setDevicesLoading(devicesQuery.isFetching);
   }, [devicesQuery.data, devicesQuery.isFetching]);
-  useEffect(() => {
-    if (giftsQuery.data) setGiftsData(giftsQuery.data);
-    setGiftsLoading(giftsQuery.isFetching);
-  }, [giftsQuery.data, giftsQuery.isFetching]);
-  useEffect(() => {
-    if (promoGroupsQuery.data) setPromoGroups(promoGroupsQuery.data.items);
-  }, [promoGroupsQuery.data]);
-
-  // --- Loader callbacks: thin refetch wrappers (signatures unchanged) ------
 
   const loadSyncStatus = useCallback(
     async () => {
@@ -272,11 +263,6 @@ export default function AdminUserDetail() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [syncStatusQuery.refetch],
   );
-
-  // (loadTickets / loadTicketDetail moved into TicketsTab.tsx)
-
-  // (loadReferralsList moved into ReferralsTab.tsx)
-
   const loadPanelInfo = useCallback(
     async () => {
       await panelInfoQuery.refetch();
@@ -284,6 +270,23 @@ export default function AdminUserDetail() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [panelInfoQuery.refetch],
   );
+  const loadNodeUsage = useCallback(
+    async () => {
+      await nodeUsageQuery.refetch();
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [nodeUsageQuery.refetch],
+  );
+  const loadDevices = useCallback(
+    async () => {
+      await devicesQuery.refetch();
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [devicesQuery.refetch],
+  );
+  const loadSubscriptionData = useCallback(async () => {
+    await Promise.all([loadPanelInfo(), loadNodeUsage(), loadDevices()]);
+  }, [loadPanelInfo, loadNodeUsage, loadDevices]);
 
   const loadRequestHistory = useCallback(
     async (offset = 0, append = false) => {
@@ -308,37 +311,12 @@ export default function AdminUserDetail() {
     [userId, requestHistorySubId],
   );
 
-  const loadNodeUsage = useCallback(
-    async () => {
-      await nodeUsageQuery.refetch();
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [nodeUsageQuery.refetch],
-  );
-
-  const loadDevices = useCallback(
-    async () => {
-      await devicesQuery.refetch();
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [devicesQuery.refetch],
-  );
-
-  const loadSubscriptionData = useCallback(async () => {
-    await Promise.all([loadPanelInfo(), loadNodeUsage(), loadDevices()]);
-  }, [loadPanelInfo, loadNodeUsage, loadDevices]);
-
-  // (handleTicketReply / handleTicketStatusChange + selected-ticket/scroll
-  // useEffects moved into TicketsTab.tsx)
-
   useEffect(() => {
-    if (!userId || isNaN(userId)) {
-      navigate('/admin/users');
-    }
-    // user data is auto-loaded by userQuery (enabled when userId is valid)
-  }, [userId, navigate]);
+    if (!validUserId) navigate('/admin/users');
+  }, [validUserId, navigate]);
 
   // Reload request history when the request-history subscription selector changes
+  // biome-ignore lint/correctness/useExhaustiveDependencies: перезагрузка только при смене выбранной подписки
   useEffect(() => {
     if (!requestHistoryExpanded || requestHistorySubId === null) return;
     setRequestHistory([]);
@@ -347,10 +325,7 @@ export default function AdminUserDetail() {
     loadRequestHistory(0);
   }, [requestHistorySubId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // All other per-tab data fetching is driven by useQuery `enabled` gating
-  // wired to userId / activeSubscriptionId / activeTab — no manual triggers needed.
-
-  // (handleUpdateBalance moved into BalanceTab.tsx)
+  // ---- Обработчики мутаций --------------------------------------------------
 
   const handleUpdateSubscription = async (overrideAction?: string) => {
     if (!userId) return;
@@ -385,7 +360,7 @@ export default function AdminUserDetail() {
   };
 
   const handleBlockUser = async () => {
-    if (!userId || !confirm(t('admin.users.confirm.block'))) return;
+    if (!userId) return;
     setActionLoading(true);
     try {
       await adminUsersApi.blockUser(userId);
@@ -416,10 +391,7 @@ export default function AdminUserDetail() {
     try {
       await adminUsersApi.syncFromPanel(
         userId,
-        {
-          update_subscription: true,
-          update_traffic: true,
-        },
+        { update_subscription: true, update_traffic: true },
         activeSubscriptionId ?? undefined,
       );
       await loadUser();
@@ -486,7 +458,6 @@ export default function AdminUserDetail() {
     try {
       await adminUsersApi.renameUserDevice(userId, hwid, snapshotName || null);
       notify.success(t('admin.users.detail.devices.renamed', 'Имя устройства обновлено'));
-      // Reset edit state only if user is still on the saved row.
       setEditingDeviceHwid((current) => (current === hwid ? null : current));
       await loadDevices();
     } catch (err) {
@@ -560,6 +531,7 @@ export default function AdminUserDetail() {
       });
       notify.success(t('admin.users.detail.subscription.deviceLimitUpdated'));
       await loadUser();
+      await loadDevices();
     } catch {
       notify.error(t('admin.users.userActions.error'), t('common.error'));
     } finally {
@@ -582,7 +554,7 @@ export default function AdminUserDetail() {
     }
   }, [user, userSubscriptions]);
 
-  const currentTariff = tariffs.find((t) => t.id === selectedSub?.tariff_id) || null;
+  const currentTariff = tariffs.find((item) => item.id === selectedSub?.tariff_id) || null;
 
   const handleChangePromoGroup = async (groupId: number | null) => {
     if (!userId) return;
@@ -590,37 +562,26 @@ export default function AdminUserDetail() {
     try {
       await adminUsersApi.updatePromoGroup(userId, groupId);
       await loadUser();
-      setEditingPromoGroup(false);
-    } catch {
-      notify.error(t('admin.users.userActions.error'), t('common.error'));
+    } catch (err) {
+      notify.error(getApiErrorMessage(err, t('admin.users.userActions.error')), t('common.error'));
     } finally {
       setActionLoading(false);
     }
   };
 
-  const handleUpdateReferralCommission = async () => {
+  const handleUpdateRestrictions = async (data: UpdateRestrictionsRequest) => {
     if (!userId) return;
     setActionLoading(true);
     try {
-      const value = referralCommissionValue === '' ? null : toNumber(referralCommissionValue);
-      if (value !== null && (value < 0 || value > 100)) {
-        notify.error(t('admin.users.detail.referral.invalidPercent'), t('common.error'));
-        return;
-      }
-      await adminUsersApi.updateReferralCommission(userId, value);
+      await adminUsersApi.updateRestrictions(userId, data);
+      notify.success(t('admin.users.detail.restrictionsSaved'), t('common.success'));
       await loadUser();
-      setEditingReferralCommission(false);
-    } catch {
-      notify.error(t('admin.users.userActions.error'), t('common.error'));
+    } catch (err) {
+      notify.error(getApiErrorMessage(err, t('admin.users.userActions.error')), t('common.error'));
     } finally {
       setActionLoading(false);
     }
   };
-
-  // (handleDeactivateOffer / handleSendOffer moved into BalanceTab.tsx)
-
-  // (Referrals-tab handlers + debounced search useEffects + click-outside
-  // useEffects moved into components/admin/userDetail/ReferralsTab.tsx)
 
   const handleResetTrial = async () => {
     if (!userId) return;
@@ -677,17 +638,15 @@ export default function AdminUserDetail() {
     setActionLoading(true);
     try {
       // Активную платную подписку сервер по умолчанию бережёт — админ уже
-      // подтвердил намерение кнопкой, поэтому просим удалить именно её.
+      // подтвердил намерение, поэтому просим удалить именно её.
       const force = Boolean(selectedSub.is_active) && !selectedSub.is_trial;
       await adminUsersApi.deleteSubscription(userId, selectedSub.id, force);
       notify.success(t('admin.users.detail.subscription.deleted'), t('common.success'));
       setSubscriptionDetailView(false);
       await loadUser();
     } catch (err) {
-      // Отказы тут осмысленные и действенные: открытый временный доступ
-      // (409, «сначала заверши или восстанови grace»), активная платная без
-      // force (409), подписки нет (404). Общее «Ошибка» оставило бы админа
-      // гадать, почему кнопка не сработала, — показываем текст сервера.
+      // Отказы тут осмысленные (открытый grace, активная платная без force,
+      // подписки нет) — показываем текст сервера, а не общее «Ошибка».
       notify.error(getApiErrorMessage(err, t('admin.users.userActions.error')), t('common.error'));
     } finally {
       setActionLoading(false);
@@ -767,17 +726,15 @@ export default function AdminUserDetail() {
       await copyText(text);
       notify.success(t('admin.users.detail.copied'));
     } catch {
-      // copy adapter already handles fallback + permission errors; surface
-      // the failure to the user instead of swallowing it silently.
       notify.error(t('common.error'));
     }
   };
 
-  if (loading) {
+  if (!user && userQuery.isLoading) {
     return (
       <PageSkeleton
         variant="admin"
-        leading={['h-10 w-10 rounded-xl', 'h-12 w-12 rounded-full']}
+        leading={['h-10 w-10 rounded-xl', 'h-14 w-14 rounded-full']}
         titleWidth="w-56"
         className="space-y-6"
       >
@@ -788,189 +745,229 @@ export default function AdminUserDetail() {
 
   if (!user) {
     return (
-      <div className="flex min-h-[50vh] flex-col items-center justify-center gap-4">
-        <p className="text-dark-400">{t('admin.users.notFound')}</p>
-        <button
-          onClick={() => navigate('/admin/users')}
-          className="rounded-lg bg-accent-500 px-4 py-2 text-on-accent transition-colors hover:bg-accent-600"
-        >
+      <div className="animate-fade-in">
+        <div className="mb-6 flex items-center gap-3">
+          <AdminBackButton to="/admin/users" />
+          <h1 className="text-xl font-bold text-dark-100">{t('admin.users.notFound')}</h1>
+        </div>
+        <button type="button" onClick={() => navigate('/admin/users')} className="btn-secondary">
           {t('common.back')}
         </button>
       </div>
     );
   }
 
-  return (
-    <div className="animate-fade-in">
-      {/* Header */}
-      <div className="mb-6 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <AdminBackButton to="/admin/users" />
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-accent-500 to-accent-700 text-lg font-bold text-white">
-            {user.first_name?.[0] || user.username?.[0] || '?'}
-          </div>
-          <div>
-            <div className="font-semibold text-dark-100">{user.full_name}</div>
-            <div className="flex items-center gap-2 text-sm text-dark-400">
-              <TelegramIcon />
-              {user.telegram_id}
-              {user.username && <span>@{user.username}</span>}
-            </div>
-          </div>
-        </div>
-        <button onClick={loadUser} className="rounded-lg p-2 transition-colors hover:bg-dark-700">
-          <RefreshIcon className={loading ? 'animate-spin' : ''} />
-        </button>
-      </div>
+  const overviewDevices = devicesQuery.data
+    ? {
+        total: devicesTotal,
+        limit: deviceLimit,
+        names: devices.map((device) => device.local_name || device.device_model || device.platform),
+      }
+    : null;
 
-      {/* Tabs */}
+  const headerActions = (
+    <>
+      {hasPermission('users:send_message') && (
+        <button
+          type="button"
+          onClick={() => setSendMessageOpen(true)}
+          disabled={actionLoading || !user.telegram_id}
+          title={!user.telegram_id ? t('admin.users.sendMessage.noTelegram') : undefined}
+          className="btn-secondary flex-1 sm:flex-none"
+        >
+          <TelegramSmallIcon className="h-4 w-4" />
+          {t('admin.users.detail.header.write')}
+        </button>
+      )}
+      {hasPermission('users:subscription') && (
+        <button
+          type="button"
+          onClick={() => goTo('subscription', selectedSub ? 'extend' : 'create')}
+          className="btn-primary flex-1 sm:flex-none"
+        >
+          {t('admin.users.detail.header.extend')}
+        </button>
+      )}
+      {hasPermission('users:balance') && (
+        <button
+          type="button"
+          onClick={() => goTo('balance')}
+          className="btn-secondary flex-1 sm:flex-none"
+        >
+          {t('admin.users.detail.header.topUp')}
+        </button>
+      )}
+      <UserActionsMenu
+        user={user}
+        disabled={actionLoading}
+        reachabilityLink={reachabilityLink}
+        can={{
+          block: hasPermission('users:block'),
+          subscription: hasPermission('users:subscription'),
+          delete: hasPermission('users:delete'),
+        }}
+        onBlock={handleBlockUser}
+        onUnblock={handleUnblockUser}
+        onResetTrial={handleResetTrial}
+        onResetSubscription={handleResetSubscription}
+        onDisable={handleDisableUser}
+        onDelete={handleFullDeleteUser}
+      />
+    </>
+  );
+
+  return (
+    <div className="animate-fade-in space-y-5">
+      <UserHeader
+        user={user}
+        subscription={selectedSub}
+        panelInfo={panelInfo}
+        refreshing={userQuery.isFetching}
+        onRefresh={loadUser}
+        actions={headerActions}
+      />
+
+      <UserFacts
+        user={user}
+        subscription={selectedSub}
+        devicesTotal={devicesQuery.data ? devicesTotal : null}
+      />
+
       <div
-        className="scrollbar-hide -mx-4 mb-6 flex gap-2 overflow-x-auto px-4 py-1"
+        role="tablist"
+        aria-label={t('admin.users.title')}
+        className="scrollbar-hide -mx-4 flex gap-2 overflow-x-auto px-4 py-1"
         style={{ WebkitOverflowScrolling: 'touch' }}
       >
-        {(
-          [
-            'info',
-            'subscription',
-            'balance',
-            'sync',
-            'tickets',
-            'gifts',
-            'referrals',
-            'activity',
-          ] as const
-        )
-          .filter((tab) => tab !== 'sync' || hasPermission('users:sync'))
-          .map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`shrink-0 whitespace-nowrap rounded-xl px-4 py-2.5 text-sm font-medium transition-all ${
-                activeTab === tab
-                  ? 'bg-accent-500/15 text-accent-400 ring-1 ring-accent-500/30'
-                  : 'bg-dark-800/50 text-dark-400 active:bg-dark-700'
-              }`}
-            >
-              {tab === 'info' && t('admin.users.detail.tabs.info')}
-              {tab === 'subscription' && t('admin.users.detail.tabs.subscription')}
-              {tab === 'balance' && t('admin.users.detail.tabs.balance')}
-              {tab === 'sync' && t('admin.users.detail.tabs.sync')}
-              {tab === 'tickets' && t('admin.users.detail.tabs.tickets')}
-              {tab === 'gifts' && t('admin.users.detail.tabs.gifts')}
-              {tab === 'referrals' && t('admin.users.detail.tabs.referrals')}
-              {tab === 'activity' && t('admin.users.detail.tabs.activity')}
-            </button>
-          ))}
+        {TABS.map((tab) => (
+          <button
+            key={tab}
+            type="button"
+            role="tab"
+            aria-selected={activeTab === tab}
+            onClick={() => goTo(tab)}
+            className={cn(
+              'shrink-0 whitespace-nowrap rounded-xl px-4 py-2.5 text-sm font-medium transition-all',
+              activeTab === tab
+                ? 'bg-accent-500/15 text-accent-400 ring-1 ring-accent-500/30'
+                : 'bg-dark-800/50 text-dark-400 active:bg-dark-700',
+            )}
+          >
+            {t(`admin.users.detail.tabs.${tab}`)}
+            {tab === 'referrals' && user.referral.referrals_count > 0 && (
+              <span className="ml-1.5 rounded-full bg-dark-700 px-1.5 text-[11px] text-dark-200">
+                {user.referral.referrals_count}
+              </span>
+            )}
+          </button>
+        ))}
       </div>
 
-      {/* Content */}
       <div className="space-y-4">
-        {/* Info Tab */}
-        {activeTab === 'info' && (
-          <InfoTab
+        {activeTab === 'overview' && (
+          <OverviewTab
             user={user}
-            hasPermission={hasPermission}
-            formatDate={formatDate}
-            locale={locale}
+            subscription={selectedSub}
             panelInfo={panelInfo}
-            panelInfoLoading={panelInfoLoading}
-            userSubscriptions={userSubscriptions}
-            activeSubscriptionId={activeSubscriptionId}
-            onActiveSubscriptionChange={setActiveSubscriptionId}
-            promoGroups={promoGroups}
-            editingPromoGroup={editingPromoGroup}
-            onToggleEditingPromoGroup={() => setEditingPromoGroup(!editingPromoGroup)}
+            devices={overviewDevices}
+            promoGroups={promoGroupsQuery.data?.items ?? []}
+            canEditPromoGroup={hasPermission('users:promo_group')}
+            canEditRestrictions={hasPermission('users:edit')}
+            canManageSubscription={hasPermission('users:subscription')}
+            actionLoading={actionLoading}
             onChangePromoGroup={handleChangePromoGroup}
-            editingReferralCommission={editingReferralCommission}
-            referralCommissionValue={referralCommissionValue}
-            onSetReferralCommissionValue={setReferralCommissionValue}
-            onToggleEditingReferralCommission={() => {
-              if (!editingReferralCommission) {
-                setReferralCommissionValue(user.referral.commission_percent ?? '');
-              }
-              setEditingReferralCommission(!editingReferralCommission);
-            }}
-            onUpdateReferralCommission={handleUpdateReferralCommission}
-            referrals={referrals}
-            referralsLoading={referralsLoading}
-            actionLoading={actionLoading}
-            onBlockUser={handleBlockUser}
-            onUnblockUser={handleUnblockUser}
-            confirmingAction={confirmingAction}
-            onInlineConfirm={handleInlineConfirm}
-            onResetTrial={handleResetTrial}
-            onResetSubscription={handleResetSubscription}
-            onDisableUser={handleDisableUser}
-            onFullDeleteUser={handleFullDeleteUser}
-          />
-        )}
-
-        {/* Subscription Tab */}
-        {activeTab === 'subscription' && (
-          <SubscriptionTab
-            userSubscriptions={userSubscriptions}
-            selectedSub={selectedSub}
-            onCancelSbpRecurring={handleCancelSbpRecurring}
-            onDeleteSubscription={handleDeleteSubscription}
-            activeSubscriptionId={activeSubscriptionId}
-            onActiveSubscriptionChange={setActiveSubscriptionId}
-            subscriptionDetailView={subscriptionDetailView}
-            onSubscriptionDetailViewChange={setSubscriptionDetailView}
-            tariffs={tariffs}
-            currentTariff={currentTariff}
-            subAction={subAction}
-            subDays={subDays}
-            onSubActionChange={setSubAction}
-            onSubDaysChange={setSubDays}
-            selectedTariffId={selectedTariffId}
-            onSelectedTariffIdChange={setSelectedTariffId}
-            selectedTrafficGb={selectedTrafficGb}
-            onSelectedTrafficGbChange={setSelectedTrafficGb}
-            panelInfo={panelInfo}
-            panelInfoLoading={panelInfoLoading}
-            copyToClipboard={copyToClipboard}
-            formatBytes={formatBytes}
-            nodeUsageDays={nodeUsageDays}
-            onNodeUsageDaysChange={setNodeUsageDays}
-            nodeUsageForPeriod={nodeUsageForPeriod}
-            devices={devices}
-            devicesLoading={devicesLoading}
-            devicesTotal={devicesTotal}
-            deviceLimit={deviceLimit}
-            editingDeviceHwid={editingDeviceHwid}
-            editingDeviceName={editingDeviceName}
-            onEditingDeviceHwidChange={setEditingDeviceHwid}
-            onEditingDeviceNameChange={setEditingDeviceName}
-            renameSaving={renameSaving}
-            requestHistory={requestHistory}
-            requestHistoryLoading={requestHistoryLoading}
-            requestHistoryTotal={requestHistoryTotal}
-            requestHistoryOffset={requestHistoryOffset}
-            requestHistorySubId={requestHistorySubId}
-            requestHistoryExpanded={requestHistoryExpanded}
-            onRequestHistoryExpandedChange={setRequestHistoryExpanded}
-            onRequestHistorySubIdChange={setRequestHistorySubId}
-            actionLoading={actionLoading}
-            confirmingAction={confirmingAction}
-            onInlineConfirm={handleInlineConfirm}
-            onUpdateSubscription={handleUpdateSubscription}
-            onSetDeviceLimit={handleSetDeviceLimit}
-            onAddTraffic={handleAddTraffic}
-            onRemoveTraffic={handleRemoveTraffic}
-            onResetDevices={handleResetDevices}
-            onDeleteDevice={handleDeleteDevice}
-            onRenameDevice={handleRenameDevice}
-            onLoadDevices={loadDevices}
-            onLoadSubscriptionData={loadSubscriptionData}
-            onLoadRequestHistory={loadRequestHistory}
-            hasPermission={hasPermission}
+            onUpdateRestrictions={handleUpdateRestrictions}
+            onGoTo={goTo}
+            ticketsCount={ticketsCountQuery.data ? ticketsCountQuery.data.total : null}
+            giftsCount={
+              giftsCountQuery.data
+                ? giftsCountQuery.data.sent_total + giftsCountQuery.data.received_total
+                : null
+            }
+            recentActivity={recentActivityQuery.data?.items ?? null}
             formatDate={formatDate}
-            locale={locale}
-            reachabilityLink={reachabilityLink}
           />
         )}
 
-        {/* Balance Tab */}
+        {activeTab === 'subscription' && (
+          <>
+            <SubscriptionTab
+              userSubscriptions={userSubscriptions}
+              selectedSub={selectedSub}
+              onCancelSbpRecurring={handleCancelSbpRecurring}
+              onDeleteSubscription={handleDeleteSubscription}
+              activeSubscriptionId={activeSubscriptionId}
+              onActiveSubscriptionChange={setActiveSubscriptionId}
+              subscriptionDetailView={subscriptionDetailView}
+              onSubscriptionDetailViewChange={setSubscriptionDetailView}
+              tariffs={tariffs}
+              currentTariff={currentTariff}
+              subAction={subAction}
+              subDays={subDays}
+              onSubActionChange={setSubAction}
+              onSubDaysChange={setSubDays}
+              selectedTariffId={selectedTariffId}
+              onSelectedTariffIdChange={setSelectedTariffId}
+              selectedTrafficGb={selectedTrafficGb}
+              onSelectedTrafficGbChange={setSelectedTrafficGb}
+              panelInfo={panelInfo}
+              panelInfoLoading={panelInfoLoading}
+              copyToClipboard={copyToClipboard}
+              formatBytes={formatBytes}
+              nodeUsageDays={nodeUsageDays}
+              onNodeUsageDaysChange={setNodeUsageDays}
+              nodeUsageForPeriod={nodeUsageForPeriod}
+              devices={devices}
+              devicesLoading={devicesLoading}
+              devicesTotal={devicesTotal}
+              deviceLimit={deviceLimit}
+              editingDeviceHwid={editingDeviceHwid}
+              editingDeviceName={editingDeviceName}
+              onEditingDeviceHwidChange={setEditingDeviceHwid}
+              onEditingDeviceNameChange={setEditingDeviceName}
+              renameSaving={renameSaving}
+              requestHistory={requestHistory}
+              requestHistoryLoading={requestHistoryLoading}
+              requestHistoryTotal={requestHistoryTotal}
+              requestHistoryOffset={requestHistoryOffset}
+              requestHistorySubId={requestHistorySubId}
+              requestHistoryExpanded={requestHistoryExpanded}
+              onRequestHistoryExpandedChange={setRequestHistoryExpanded}
+              onRequestHistorySubIdChange={setRequestHistorySubId}
+              actionLoading={actionLoading}
+              confirmingAction={confirmingAction}
+              onInlineConfirm={handleInlineConfirm}
+              onUpdateSubscription={handleUpdateSubscription}
+              onSetDeviceLimit={handleSetDeviceLimit}
+              onAddTraffic={handleAddTraffic}
+              onRemoveTraffic={handleRemoveTraffic}
+              onResetDevices={handleResetDevices}
+              onDeleteDevice={handleDeleteDevice}
+              onRenameDevice={handleRenameDevice}
+              onLoadDevices={loadDevices}
+              onLoadSubscriptionData={loadSubscriptionData}
+              onLoadRequestHistory={loadRequestHistory}
+              hasPermission={hasPermission}
+              formatDate={formatDate}
+              locale={locale}
+              reachabilityLink={reachabilityLink}
+            />
+            {hasPermission('users:sync') && (
+              <SyncTab
+                user={user}
+                syncStatus={syncStatus}
+                userSubscriptions={userSubscriptions}
+                activeSubscriptionId={activeSubscriptionId}
+                onActiveSubscriptionChange={setActiveSubscriptionId}
+                actionLoading={actionLoading}
+                onSyncFromPanel={handleSyncFromPanel}
+                onSyncToPanel={handleSyncToPanel}
+                locale={locale}
+              />
+            )}
+          </>
+        )}
+
         {activeTab === 'balance' && userId && (
           <BalanceTab
             user={user}
@@ -981,46 +978,29 @@ export default function AdminUserDetail() {
           />
         )}
 
-        {/* Sync Tab */}
-        {activeTab === 'sync' && (
-          <SyncTab
-            user={user}
-            syncStatus={syncStatus}
-            userSubscriptions={userSubscriptions}
-            activeSubscriptionId={activeSubscriptionId}
-            onActiveSubscriptionChange={setActiveSubscriptionId}
-            actionLoading={actionLoading}
-            onSyncFromPanel={handleSyncFromPanel}
-            onSyncToPanel={handleSyncToPanel}
-            locale={locale}
-          />
-        )}
-
-        {/* Tickets Tab */}
-        {activeTab === 'tickets' && userId && (
-          <TicketsTab userId={userId} formatDate={formatDate} />
-        )}
-
-        {/* Gifts Tab */}
-        {activeTab === 'gifts' && (
-          <GiftsTab
-            giftsLoading={giftsLoading}
-            giftsData={giftsData}
-            locale={locale}
-            onNavigateToUser={(id) => navigate(`/admin/users/${id}`)}
-          />
-        )}
-
-        {/* Referrals Tab */}
-        {activeTab === 'referrals' && user && userId && (
+        {activeTab === 'referrals' && userId && (
           <ReferralsTab user={user} userId={userId} onUserRefresh={loadUser} />
         )}
 
-        {/* Activity Tab */}
         {activeTab === 'activity' && userId && (
-          <ActivityTab userId={userId} formatDate={formatDate} />
+          <ActivityHub
+            userId={userId}
+            view={activityView}
+            onViewChange={(view) => goTo('activity', view)}
+            formatDate={formatDate}
+            locale={locale}
+            onNavigateToUser={(targetId) => navigate(`/admin/users/${targetId}`)}
+          />
         )}
       </div>
+
+      {userId && (
+        <SendMessageDialog
+          userId={userId}
+          open={sendMessageOpen}
+          onClose={() => setSendMessageOpen(false)}
+        />
+      )}
     </div>
   );
 }
