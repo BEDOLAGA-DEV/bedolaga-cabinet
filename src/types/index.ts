@@ -74,6 +74,43 @@ export interface TrafficPurchase {
   progress_percent: number;
 }
 
+// Остаток по премиум-скваду («Мобильный резерв» и подобные): отдельный лимит
+// трафика внутри подписки. Пусто у тарифов без посквадных лимитов — тогда блок
+// не рендерится вовсе.
+export interface PremiumTrafficInfo {
+  squad_uuid: string;
+  name?: string | null;
+  limit_gb: number;
+  /** Докупленное сверх лимита — показываем отдельно от базового. */
+  extra_gb: number;
+  used_gb: number;
+  used_percent: number;
+  /** Лимит исчерпан, доступ к серверам сквада приостановлен. */
+  is_limited: boolean;
+  period_start_at?: string | null;
+  topup_available: boolean;
+}
+
+// Что можно докупить по одному премиум-скваду. Цены и пакеты у него свои,
+// заданные в тарифе отдельно от общей докупки трафика.
+export interface PremiumTrafficPackage {
+  gb: number;
+  price_kopeks: number;
+  price_rubles: number;
+}
+
+export interface PremiumTrafficOptions {
+  squad_uuid: string;
+  name?: string | null;
+  limit_gb: number;
+  extra_gb: number;
+  used_gb: number;
+  is_limited: boolean;
+  /** 0 = без ограничения сверху. */
+  max_topup_gb: number;
+  packages: PremiumTrafficPackage[];
+}
+
 export interface Subscription {
   id: number;
   status: string;
@@ -107,6 +144,7 @@ export interface Subscription {
   tariff_id?: number;
   tariff_name?: string;
   traffic_reset_mode?: string;
+  premium_traffic?: PremiumTrafficInfo[];
 }
 
 // Response wrapper for subscription status endpoint
