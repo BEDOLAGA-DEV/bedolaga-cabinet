@@ -3279,6 +3279,7 @@
       "title": "کاربران",
       "subtitle": "مدیریت کاربران ربات",
       "search": "شناسه، نام، @نام‌کاربری یا ایمیل",
+      "searchShort": "نام، شناسه، ‎@user، ایمیل",
       "noData": "کاربری یافت نشد",
       "stats": {
         "total": "کل",
@@ -3297,12 +3298,11 @@
         "expired": "منقضی شده"
       },
       "filters": {
-        "allStatuses": "همه وضعیت‌ها",
-        "byDate": "بر اساس تاریخ",
-        "byBalance": "بر اساس موجودی",
-        "byActivity": "بر اساس فعالیت",
-        "bySpent": "بر اساس هزینه",
-        "byExpiry": "بر اساس انقضا"
+        "title": "فیلترها",
+        "buttonApplied_one": "فیلترها: {{count}} مورد",
+        "buttonApplied_other": "فیلترها: {{count}} مورد",
+        "reset": "بازنشانی",
+        "remove": "حذف فیلتر «{{name}}»"
       },
       "actions": {
         "block": "مسدود کردن",
@@ -3756,11 +3756,9 @@
           "copy": "کپی",
           "emailVerified": "تأیید شده",
           "emailUnverified": "تأیید نشده",
-          "tariffUntil": "{{tariff}} · تا {{date}}",
           "onlineAt": "آنلاین · {{node}}",
           "write": "پیام",
           "extend": "تمدید",
-          "topUp": "افزایش موجودی",
           "group": "گروه: {{name}}",
           "create": "اعطا"
         },
@@ -3777,25 +3775,12 @@
         "menu": {
           "more": "عملیات بیشتر",
           "confirmRequired": "نیاز به تأیید",
-          "checkConfigs": "بررسی پیکربندی (روسیه)",
-          "promoGroup": "تغییر گروه تبلیغاتی",
-          "restrictions": "محدودیت‌ها…"
+          "checkConfigs": "بررسی پیکربندی (روسیه)"
         },
         "overview": {
-          "subscription": "اشتراک",
-          "allDetails": "همه جزئیات",
-          "autopayOn": "تمدید خودکار روشن",
-          "autopayOff": "تمدید خودکار خاموش",
           "trafficPeriod": "ترافیک",
-          "devicesShort": "دستگاه‌ها {{used}} از {{limit}}",
           "extend": "تمدید",
-          "changeTariff": "تغییر تعرفه",
-          "addTraffic": "افزودن ترافیک",
-          "deviceLimit": "محدودیت دستگاه",
-          "noSubscription": "اشتراکی نیست",
-          "createSubscription": "ایجاد اشتراک",
           "connection": "اتصال",
-          "devicesAndTech": "دستگاه‌ها و داده‌های فنی",
           "now": "اکنون",
           "firstConnection": "متصل از",
           "devices": "دستگاه‌ها",
@@ -3809,7 +3794,6 @@
           "change": "تغییر",
           "noPromoGroup": "بدون گروه",
           "referrer": "دعوت‌کننده",
-          "nobody": "هیچ‌کس",
           "cabinetLogin": "ورود به کابینت",
           "restrictionsAndSupport": "محدودیت‌ها و درخواست‌ها",
           "restrictions": "محدودیت‌ها",
@@ -3824,7 +3808,6 @@
           "recent": "رویدادهای اخیر",
           "allActivity": "همه فعالیت‌ها",
           "noActivity": "هنوز چیزی رخ نداده",
-          "devicesLink": "دستگاه‌ها",
           "assign": "تعیین",
           "none": "ندارد",
           "list": "فهرست",
@@ -3842,7 +3825,6 @@
           "giftsReceived_one": "{{count}} دریافت شده",
           "giftsReceived_other": "{{count}} دریافت شده",
           "all": "همه",
-          "details": "جزئیات",
           "lastActivity": "آخرین فعالیت"
         },
         "restrictionsSaved": "محدودیت‌ها به‌روزرسانی شد",
@@ -3923,12 +3905,10 @@
         "delete": "حذف کاربر",
         "disable": "غیرفعال‌سازی",
         "error": "انجام عملیات ناموفق بود",
-        "resetSubscription": "بازنشانی اشتراک",
         "resetTrial": "بازنشانی دوره آزمایشی",
         "success": {
           "delete": "کاربر حذف شد",
           "disable": "کاربر غیرفعال شد",
-          "resetSubscription": "اشتراک بازنشانی شد",
           "resetTrial": "دوره آزمایشی بازنشانی شد"
         }
       },
@@ -3945,6 +3925,8 @@
       "loadingMore": "در حال بارگذاری",
       "noneFound": "کسی پیدا نشد — عبارت دیگری بزنید یا فیلترها را بردارید",
       "loadError": "فهرست بارگذاری نشد",
+      "connectedNow": "اکنون متصل",
+      "onlineUnavailable": "پنل پاسخ نداد — مشخص نشد چه کسی اکنون متصل است. دوباره تلاش کنید.",
       "reset": "پاک کردن همه",
       "toTop": "بالا",
       "unlimited": "نامحدود",
@@ -3967,6 +3949,7 @@
         "online": "آنلاین",
         "blocked": "مسدود"
       },
+      "viewsLabel": "نما",
       "filterLabels": {
         "status": "وضعیت",
         "sub": "اشتراک",

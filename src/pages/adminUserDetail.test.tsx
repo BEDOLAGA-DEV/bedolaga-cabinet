@@ -226,11 +226,11 @@ async function renderDetail(initial = '/admin/users/42') {
 }
 
 describe('AdminUserDetail', () => {
-  it('в шапке видны тариф, группа и онлайн; «Активен» чипом не пишется', async () => {
+  it('в шапке видны группа и онлайн; тариф и срок — в плитке, «Активен» чипом не пишется', async () => {
     await renderDetail();
     expect(screen.queryByText('admin.users.statuses.active')).toBeNull();
     expect(screen.getByText('admin.users.detail.header.group')).toBeTruthy();
-    expect(screen.getByText('admin.users.detail.header.tariffUntil')).toBeTruthy();
+    expect(screen.getByText('admin.users.detail.facts.until')).toBeTruthy();
     expect(await screen.findByText('admin.users.detail.header.onlineAt')).toBeTruthy();
     // Мок t отдаёт defaultValue — у языка это код заглавными, если перевода нет.
     expect(screen.getByText('RU')).toBeTruthy();
@@ -247,7 +247,7 @@ describe('AdminUserDetail', () => {
       'admin.users.detail.tabs.overview',
     );
     expect(
-      screen.getByRole('heading', { level: 2, name: 'admin.users.detail.overview.subscription' }),
+      screen.getByRole('heading', { level: 2, name: 'admin.users.detail.overview.connection' }),
     ).toBeTruthy();
   });
 
@@ -291,6 +291,29 @@ describe('AdminUserDetail', () => {
         'admin.users.detail.tabs.subscription',
       ),
     );
+  });
+
+  it('каждое действие — в одном месте: «Продлить» только в шапке, «Начислить» — это вкладка', async () => {
+    const extendButtons = () =>
+      screen.getAllByRole('button', { name: 'admin.users.detail.subscription.extend' });
+    await renderDetail();
+    expect(extendButtons()).toHaveLength(1);
+    expect(screen.queryByRole('button', { name: 'admin.users.detail.header.topUp' })).toBeNull();
+    expect(screen.queryByText('admin.users.detail.overview.changeTariff')).toBeNull();
+    cleanup();
+    await renderDetail('/admin/users/42?tab=subscription');
+    await screen.findByText('admin.users.detail.panel.title');
+    expect(extendButtons()).toHaveLength(1);
+  });
+
+  it('в «⋯» только действия с аккаунтом: промогруппа, ограничения и подписка — на своих местах', async () => {
+    await renderDetail();
+    fireEvent.click(screen.getByRole('button', { name: 'admin.users.detail.menu.more' }));
+    const items = (await screen.findAllByRole('menuitem')).map((item) => item.textContent ?? '');
+    expect(items.some((label) => label.includes('menu.promoGroup'))).toBe(false);
+    expect(items.some((label) => label.includes('menu.restrictions'))).toBe(false);
+    expect(items.some((label) => label.includes('resetSubscription'))).toBe(false);
+    expect(items.some((label) => label.includes('userActions.delete'))).toBe(true);
   });
 
   it('«Подписка»: опасная зона последняя, формы «Создать» нет при живой подписке', async () => {

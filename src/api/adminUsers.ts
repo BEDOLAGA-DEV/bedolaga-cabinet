@@ -60,6 +60,8 @@ export interface UserListItem {
   balance_rubles: number;
   created_at: string;
   last_activity: string | null;
+  /** Подключён к VPN прямо сейчас (по панели); null/нет поля — панель не ответила или бот старый. */
+  is_online?: boolean | null;
   has_subscription: boolean;
   subscription_status: string | null;
   subscription_is_trial: boolean;
@@ -449,8 +451,10 @@ export interface UsersListParams {
   partner_id?: number;
   /** Подписка со статусом active истекает в ближайшие N дней (сегмент «истекают»). */
   expires_within_days?: number;
-  /** Была активность в боте или кабинете за последние N минут (сегмент «онлайн»). */
+  /** Была активность в боте или кабинете за последние N минут. */
   active_within_minutes?: number;
+  /** Только подключённые к VPN прямо сейчас — по панели (сегмент «онлайн»). */
+  online?: boolean;
   /** Есть запрет пополнения или покупки. */
   has_restrictions?: boolean;
   /** false — ни одной подписки. */

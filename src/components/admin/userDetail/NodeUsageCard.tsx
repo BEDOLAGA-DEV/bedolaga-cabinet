@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { UserNodeUsageResponse } from '@/api/adminUsers';
 import { ChartIcon } from '@/components/icons';
-import { cn } from '@/lib/utils';
+import { Segmented } from '@/components/admin/Segmented';
 import { formatGb } from '@/utils/formatNumber';
 import { getFlagEmoji } from '../../../utils/subscriptionHelpers';
 import { Section } from './sectionParts';
@@ -36,22 +36,15 @@ export function NodeUsageCard({ usage }: { usage: UserNodeUsageResponse | null }
       icon={<ChartIcon className="h-5 w-5" />}
       title={t('admin.users.detail.nodeUsage')}
       action={
-        <div className="flex items-center gap-0.5 rounded-xl bg-dark-800 p-0.5" role="group">
-          {PERIODS.map((period) => (
-            <button
-              key={period}
-              type="button"
-              onClick={() => setDays(period)}
-              aria-pressed={days === period}
-              className={cn(
-                'rounded-lg px-2.5 py-1 text-xs font-medium transition-colors',
-                days === period ? 'bg-dark-700 text-dark-100' : 'text-dark-500 hover:text-dark-300',
-              )}
-            >
-              {t('admin.users.detail.subscription.periodDays', { count: period })}
-            </button>
-          ))}
-        </div>
+        <Segmented
+          label={t('admin.users.detail.nodeUsage')}
+          value={String(days)}
+          options={PERIODS.map((period) => ({
+            value: String(period),
+            label: t('admin.users.detail.subscription.periodDays', { count: period }),
+          }))}
+          onChange={(value) => setDays(Number(value))}
+        />
       }
     >
       {items.length > 0 ? (

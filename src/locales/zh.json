@@ -3273,6 +3273,7 @@
       "title": "用户",
       "subtitle": "机器人用户管理",
       "search": "ID、姓名、@用户名或邮箱",
+      "searchShort": "姓名、ID、@用户名、邮箱",
       "noData": "未找到用户",
       "stats": {
         "total": "总计",
@@ -3291,12 +3292,10 @@
         "expired": "已过期"
       },
       "filters": {
-        "allStatuses": "所有状态",
-        "byDate": "按日期",
-        "byBalance": "按余额",
-        "byActivity": "按活跃度",
-        "bySpent": "按消费",
-        "byExpiry": "按到期时间"
+        "title": "筛选",
+        "buttonApplied_other": "筛选：已选 {{count}} 项",
+        "reset": "重置",
+        "remove": "移除筛选“{{name}}”"
       },
       "actions": {
         "block": "封禁",
@@ -3747,11 +3746,9 @@
           "copy": "复制",
           "emailVerified": "已验证",
           "emailUnverified": "未验证",
-          "tariffUntil": "{{tariff}} · 至 {{date}}",
           "onlineAt": "在线 · {{node}}",
           "write": "发消息",
           "extend": "续期",
-          "topUp": "充值",
           "group": "分组：{{name}}",
           "create": "开通"
         },
@@ -3768,25 +3765,12 @@
         "menu": {
           "more": "更多操作",
           "confirmRequired": "需要确认",
-          "checkConfigs": "检查配置（俄罗斯）",
-          "promoGroup": "更改推广分组",
-          "restrictions": "限制…"
+          "checkConfigs": "检查配置（俄罗斯）"
         },
         "overview": {
-          "subscription": "订阅",
-          "allDetails": "全部详情",
-          "autopayOn": "已开启自动续费",
-          "autopayOff": "未开启自动续费",
           "trafficPeriod": "流量",
-          "devicesShort": "设备 {{used}} / {{limit}}",
           "extend": "续期",
-          "changeTariff": "更换套餐",
-          "addTraffic": "添加流量",
-          "deviceLimit": "设备上限",
-          "noSubscription": "没有订阅",
-          "createSubscription": "创建订阅",
           "connection": "连接",
-          "devicesAndTech": "设备与技术数据",
           "now": "当前",
           "firstConnection": "首次连接",
           "devices": "设备",
@@ -3800,7 +3784,6 @@
           "change": "更改",
           "noPromoGroup": "无分组",
           "referrer": "邀请人",
-          "nobody": "无",
           "cabinetLogin": "登录面板",
           "restrictionsAndSupport": "限制与工单",
           "restrictions": "限制",
@@ -3815,7 +3798,6 @@
           "recent": "最近事件",
           "allActivity": "全部活动",
           "noActivity": "暂无记录",
-          "devicesLink": "设备",
           "assign": "指定",
           "none": "无",
           "list": "列表",
@@ -3828,7 +3810,6 @@
           "giftsSent_other": "已送出 {{count}}",
           "giftsReceived_other": "已收到 {{count}}",
           "all": "全部",
-          "details": "详情",
           "lastActivity": "最近活动"
         },
         "restrictionsSaved": "限制已更新",
@@ -3908,12 +3889,10 @@
         "delete": "删除用户",
         "disable": "禁用",
         "error": "操作失败",
-        "resetSubscription": "重置订阅",
         "resetTrial": "重置试用",
         "success": {
           "delete": "用户已删除",
           "disable": "用户已禁用",
-          "resetSubscription": "订阅已重置",
           "resetTrial": "试用已重置"
         }
       },
@@ -3927,6 +3906,8 @@
       "loadingMore": "正在加载",
       "noneFound": "未找到任何人，请换个关键词或清除筛选",
       "loadError": "列表加载失败",
+      "connectedNow": "当前已连接",
+      "onlineUnavailable": "面板未响应——无法获取当前已连接的用户。请重试。",
       "reset": "清除全部",
       "toTop": "回到顶部",
       "unlimited": "不限",
@@ -3949,6 +3930,7 @@
         "online": "在线",
         "blocked": "已封禁"
       },
+      "viewsLabel": "视图",
       "filterLabels": {
         "status": "状态",
         "sub": "订阅",

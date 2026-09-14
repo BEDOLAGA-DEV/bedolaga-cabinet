@@ -7,7 +7,7 @@ import { HistoryIcon } from '@/components/icons';
 import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { usePaymentMethodLabel } from './ActivityRows';
-import { Segmented } from './Segmented';
+import { Segmented } from '@/components/admin/Segmented';
 import { Section } from './sectionParts';
 
 type OperationsFilter = 'all' | 'deposit' | 'withdrawal' | 'subscription_payment';
