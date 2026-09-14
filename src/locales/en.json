@@ -4910,9 +4910,7 @@
           "emailUnverified": "not verified",
           "onlineAt": "online · {{node}}",
           "write": "Message",
-          "extend": "Extend",
-          "group": "Group: {{name}}",
-          "create": "Grant"
+          "group": "Group: {{name}}"
         },
         "facts": {
           "balance": "Balance",
@@ -4922,7 +4920,13 @@
           "devices": "Devices",
           "devicesValue": "{{used}} of {{limit}}",
           "spent": "Spent",
-          "noSubscription": "none"
+          "noSubscription": "none",
+          "subscriptions": "Subscriptions",
+          "subscriptionsLive_one": "{{count}} active",
+          "subscriptionsLive_other": "{{count}} active",
+          "noLive": "none active",
+          "nearest": "next ends {{date}}",
+          "tariffUntil": "{{tariff}} · until {{date}}"
         },
         "menu": {
           "more": "More actions",

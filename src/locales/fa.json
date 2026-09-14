@@ -3755,9 +3755,7 @@
           "emailUnverified": "تأیید نشده",
           "onlineAt": "آنلاین · {{node}}",
           "write": "پیام",
-          "extend": "تمدید",
-          "group": "گروه: {{name}}",
-          "create": "اعطا"
+          "group": "گروه: {{name}}"
         },
         "facts": {
           "balance": "موجودی",
@@ -3767,7 +3765,13 @@
           "devices": "دستگاه‌ها",
           "devicesValue": "{{used}} از {{limit}}",
           "spent": "هزینه‌شده",
-          "noSubscription": "ندارد"
+          "noSubscription": "ندارد",
+          "subscriptions": "اشتراک‌ها",
+          "subscriptionsLive_one": "{{count}} فعال",
+          "subscriptionsLive_other": "{{count}} فعال",
+          "noLive": "هیچ‌کدام فعال نیست",
+          "nearest": "نزدیک‌ترین تا {{date}}",
+          "tariffUntil": "{{tariff}} · تا {{date}}"
         },
         "menu": {
           "more": "عملیات بیشتر",

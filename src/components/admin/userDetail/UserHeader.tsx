@@ -12,7 +12,7 @@ import { isConnectedNow } from '@/utils/relativeTime';
 interface UserHeaderProps {
   user: UserDetailResponse;
   panelInfo: UserPanelInfo | null;
-  /** «Написать» и «Продлить» — два частых действия; начисление — во вкладке «Баланс». */
+  /** «Написать»; продление — у подписки во вкладке «Подписка», начисление — во вкладке «Баланс». */
   actions: ReactNode;
   /** Меню «⋯»: на телефоне стоит у имени, на широком экране — после кнопок. */
   menu: ReactNode;
@@ -42,9 +42,8 @@ export function UserHeader({ user, panelInfo, actions, menu }: UserHeaderProps) 
   };
 
   return (
-    // Одна сетка на оба экрана — каждая кнопка в DOM один раз. Телефон: «⋯» у имени,
-    // три кнопки строкой ниже; широкий экран: кнопки и «⋯» справа в строке имени.
-    <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-x-3 gap-y-4 lg:grid-cols-[auto_minmax(0,1fr)_auto_auto]">
+    // Одна сетка на оба экрана: «Написать» и «⋯» справа в строке имени, чипы — строкой ниже.
+    <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-x-3 gap-y-4">
       <div className="flex items-start gap-3">
         <AdminBackButton to="/admin/users" />
         <UserAvatar
@@ -95,7 +94,7 @@ export function UserHeader({ user, panelInfo, actions, menu }: UserHeaderProps) 
         </div>
       </div>
       {/* Чипы — своей ячейкой: на телефоне им тесно в колонке под именем рядом с «⋯». */}
-      <div className="col-span-2 col-start-2 row-start-2 -mt-2 flex flex-wrap items-center gap-1.5 lg:col-span-1 lg:col-start-2">
+      <div className="col-span-2 col-start-2 row-start-2 -mt-2 flex flex-wrap items-center gap-1.5">
         {/* «Активен» — обычное состояние, чипом только отклонение: заблокирован, удалён.
             Тариф и срок — в плитке «Подписка до», здесь не повторяются. */}
         {user.status !== 'active' && <AccountStatusChip status={user.status} />}
@@ -118,10 +117,10 @@ export function UserHeader({ user, panelInfo, actions, menu }: UserHeaderProps) 
           </span>
         )}
       </div>
-      <div className="col-span-3 row-start-3 grid grid-cols-2 gap-2 lg:col-span-1 lg:col-start-3 lg:row-start-1 lg:flex lg:items-center">
+      <div className="col-start-3 row-start-1 flex items-center gap-2">
         {actions}
+        {menu}
       </div>
-      <div className="col-start-3 row-start-1 lg:col-start-4">{menu}</div>
     </div>
   );
 }

@@ -8,7 +8,6 @@ import {
   pickActivityView,
 } from '@/components/admin/userDetail/ActivityHub';
 import { BalanceTab } from '@/components/admin/userDetail/BalanceTab';
-import { ExtendMenu } from '@/components/admin/userDetail/ExtendMenu';
 import { OverviewTab, type DetailTab } from '@/components/admin/userDetail/OverviewTab';
 import { ReferralsTab } from '@/components/admin/userDetail/ReferralsTab';
 import { SendMessageDialog } from '@/components/admin/userDetail/SendMessageDialog';
@@ -24,6 +23,7 @@ import { cn } from '@/lib/utils';
 import { usePermissionStore } from '@/store/permissions';
 import { getApiErrorMessage } from '@/utils/api-error';
 import { useUserDetailActions } from './adminUserDetail/useUserDetailActions';
+import { salesModeOf } from './adminUserDetail/salesMode';
 import { useUserDetailData } from './adminUserDetail/useUserDetailData';
 
 // ──────────────────────────────────────────────────────────────────
@@ -125,6 +125,7 @@ export default function AdminUserDetail() {
     );
   }
 
+  const mode = salesModeOf(user);
   const can = {
     message: hasPermission('users:send_message'),
     subscription: hasPermission('users:subscription'),
@@ -140,43 +141,25 @@ export default function AdminUserDetail() {
     deactivateOffer: hasPermission('promocodes:edit'),
   };
   const devices = data.devicesQuery.data?.devices ?? null;
-  // На телефоне две кнопки делят строку поровну; на широком экране — по содержимому.
-  // «Начислить» тут больше нет: она только открывала вкладку «Баланс» — повтор вкладки.
-  const actionClass = 'min-w-0 justify-center px-3 lg:px-4';
-
-  const headerActions = (
-    <>
-      {can.message && (
-        <button
-          type="button"
-          onClick={() => setSendMessageOpen(true)}
-          disabled={!user.telegram_id}
-          title={!user.telegram_id ? t('admin.users.sendMessage.noTelegram') : undefined}
-          className={cn('btn-secondary', actionClass)}
-        >
-          <TelegramSmallIcon className="hidden h-4 w-4 sm:block" />
-          {t('admin.users.detail.header.write')}
-        </button>
-      )}
-      {can.subscription &&
-        (selectedSub ? (
-          <ExtendMenu
-            disabled={actions.busy}
-            align="end"
-            onPick={(days) => void actions.extend(days)}
-            onCustom={() => goTo('subscription', 'extend')}
-            className={actionClass}
-          />
-        ) : (
-          <button
-            type="button"
-            onClick={() => goTo('subscription', 'create')}
-            className={cn('btn-primary', actionClass)}
-          >
-            {t('admin.users.detail.header.create')}
-          </button>
-        ))}
-    </>
+  // В шапке — только «Написать» и «⋯». «Продлить» / «Выдать» живут у самой подписки во
+  // вкладке «Подписка»: в мультитарифе кнопка в шапке не говорила, какую подписку продлит.
+  // На телефоне «Написать» — иконкой рядом с «⋯», в строке имени.
+  const headerActions = can.message && (
+    <button
+      type="button"
+      onClick={() => setSendMessageOpen(true)}
+      disabled={!user.telegram_id}
+      aria-label={t('admin.users.detail.header.write')}
+      title={
+        !user.telegram_id
+          ? t('admin.users.sendMessage.noTelegram')
+          : t('admin.users.detail.header.write')
+      }
+      className="btn-secondary h-11 w-11 shrink-0 p-0 sm:h-10 sm:w-auto sm:px-4"
+    >
+      <TelegramSmallIcon className="h-4 w-4" />
+      <span className="hidden sm:inline">{t('admin.users.detail.header.write')}</span>
+    </button>
   );
 
   const menu = (
@@ -199,6 +182,7 @@ export default function AdminUserDetail() {
 
       <UserFacts
         user={user}
+        mode={mode}
         subscription={selectedSub}
         devicesTotal={devices ? devices.length : null}
       />
@@ -252,6 +236,7 @@ export default function AdminUserDetail() {
 
       {activeTab === 'subscription' && (
         <SubscriptionTab
+          mode={mode}
           userId={userId}
           user={user}
           subscriptions={data.subscriptions}

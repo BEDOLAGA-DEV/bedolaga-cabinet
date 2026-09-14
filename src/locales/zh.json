@@ -3746,9 +3746,7 @@
           "emailUnverified": "未验证",
           "onlineAt": "在线 · {{node}}",
           "write": "发消息",
-          "extend": "续期",
-          "group": "分组：{{name}}",
-          "create": "开通"
+          "group": "分组：{{name}}"
         },
         "facts": {
           "balance": "余额",
@@ -3758,7 +3756,12 @@
           "devices": "设备",
           "devicesValue": "{{used}} / {{limit}}",
           "spent": "已消费",
-          "noSubscription": "无"
+          "noSubscription": "无",
+          "subscriptions": "订阅",
+          "subscriptionsLive_other": "{{count}} 个有效",
+          "noLive": "无有效订阅",
+          "nearest": "最近到期 {{date}}",
+          "tariffUntil": "{{tariff}} · 至 {{date}}"
         },
         "menu": {
           "more": "更多操作",

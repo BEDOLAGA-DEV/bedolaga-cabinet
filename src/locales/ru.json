@@ -5346,9 +5346,7 @@
           "emailUnverified": "не подтверждён",
           "onlineAt": "онлайн · {{node}}",
           "write": "Написать",
-          "extend": "Продлить",
-          "group": "Группа: {{name}}",
-          "create": "Выдать"
+          "group": "Группа: {{name}}"
         },
         "facts": {
           "balance": "Баланс",
@@ -5358,7 +5356,14 @@
           "devices": "Устройства",
           "devicesValue": "{{used}} из {{limit}}",
           "spent": "Потрачено",
-          "noSubscription": "нет"
+          "noSubscription": "нет",
+          "subscriptions": "Подписки",
+          "subscriptionsLive_one": "{{count}} активная",
+          "subscriptionsLive_few": "{{count}} активные",
+          "subscriptionsLive_many": "{{count}} активных",
+          "noLive": "нет активных",
+          "nearest": "ближайшая до {{date}}",
+          "tariffUntil": "{{tariff}} · до {{date}}"
         },
         "menu": {
           "more": "Ещё действия",
