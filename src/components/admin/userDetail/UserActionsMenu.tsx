@@ -2,7 +2,7 @@ import { useEffect, useId, useRef, useState } from 'react';
 import { Link } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import type { UserDetailResponse } from '@/api/adminUsers';
-import { MenuIcon } from '@/components/icons';
+import { MoreIcon } from '@/components/icons';
 import { cn } from '@/lib/utils';
 import { useDestructiveConfirm, useNativeDialog } from '@/platform/hooks/useNativeDialog';
 
@@ -163,9 +163,9 @@ export function UserActionsMenu({
         aria-expanded={open}
         aria-controls={menuId}
         onClick={() => setOpen((value) => !value)}
-        className="btn-secondary h-10 w-10 p-0"
+        className="btn-secondary h-11 w-11 shrink-0 p-0 sm:h-10 sm:w-10"
       >
-        <MenuIcon className="h-5 w-5" />
+        <MoreIcon className="h-5 w-5" />
       </button>
       {open && (
         <div

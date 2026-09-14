@@ -136,7 +136,30 @@ vi.mock('@/api/adminUsers', () => ({
         current_tariff_name: 'Командный',
       }),
     getNodeUsage: () => Promise.resolve({ items: [], categories: [], period_days: 7 }),
-    getSyncStatus: () => Promise.reject(new Error('nope')),
+    getSyncStatus: () =>
+      Promise.resolve({
+        user_id: 42,
+        telegram_id: 453205530,
+        remnawave_id: 9001,
+        subscription_id: 2424,
+        subscription_tariff_name: 'Командный',
+        last_sync: new Date().toISOString(),
+        bot_subscription_status: 'active',
+        bot_subscription_end_date: '2026-12-13T12:14:00Z',
+        bot_traffic_limit_gb: 1500,
+        bot_traffic_used_gb: 0,
+        bot_device_limit: 10,
+        bot_squads: ['a'],
+        panel_found: true,
+        panel_status: 'ACTIVE',
+        panel_expire_at: '2026-12-13T12:14:00Z',
+        panel_traffic_limit_gb: 1500,
+        panel_traffic_used_gb: 0,
+        panel_device_limit: 10,
+        panel_squads: ['a'],
+        has_differences: false,
+        differences: [],
+      }),
     getSubscriptionRequestHistory: () => Promise.resolve({ total: 0, records: [] }),
     getReferrals: () => Promise.resolve({ users: [], total: 0, offset: 0, limit: 100 }),
     getTransactions: () => Promise.resolve({ items: [], total: 0 }),
@@ -261,5 +284,30 @@ describe('AdminUserDetail', () => {
         'admin.users.detail.tabs.subscription',
       ),
     );
+  });
+
+  it('«Подписка»: опасная зона последняя, формы «Создать» нет при живой подписке', async () => {
+    await renderDetail('/admin/users/42?tab=subscription');
+    await screen.findByText('admin.users.detail.panel.title');
+    const headings = screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent ?? '');
+    expect(headings[headings.length - 1]).toBe('admin.users.detail.subscription.dangerZone.title');
+    expect(screen.queryByText('admin.users.detail.subscription.createNew')).toBeNull();
+    expect(screen.queryByText('admin.users.detail.tabs.sync')).toBeNull();
+  });
+
+  it('«Подписка» без подписок показывает только форму «Создать»', async () => {
+    getUser.mockResolvedValue({ ...detail, subscription: null, subscriptions: [] });
+    await renderDetail('/admin/users/42?tab=subscription');
+    expect(await screen.findByText('admin.users.detail.subscription.createNew')).toBeTruthy();
+    expect(screen.queryByText('admin.users.detail.subscription.dangerZone.title')).toBeNull();
+  });
+
+  it('удаление подписки из опасной зоны требует подтверждения', async () => {
+    await renderDetail('/admin/users/42?tab=subscription');
+    await screen.findByText('admin.users.detail.subscription.dangerZone.title');
+    fireEvent.click(
+      screen.getByRole('button', { name: /admin\.users\.detail\.subscription\.deleteButton/ }),
+    );
+    await waitFor(() => expect(confirm).toHaveBeenCalled());
   });
 });

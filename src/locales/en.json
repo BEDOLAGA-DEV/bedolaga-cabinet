@@ -4612,7 +4612,36 @@
           "deleteTitle": "Delete subscription",
           "deleteHint": "The subscription and its devices will be removed permanently",
           "deleteButton": "Delete subscription",
-          "deleted": "Subscription deleted"
+          "deleted": "Subscription deleted",
+          "extendBy": "by {{count}} d",
+          "customDays": "custom…",
+          "shortenTitle": "Shorten",
+          "deviceLimitTitle": "Device limit",
+          "deviceLimitHint": "Plan maximum: {{max}}",
+          "removePackage": "Remove package",
+          "purchasedExtra": "{{gb}} GB purchased",
+          "periodDays": "{{count}}d",
+          "noNodeUsage": "No node traffic in this period",
+          "deviceSince": "since {{date}}",
+          "sbpShort": "SBP",
+          "cancelTitle": "Cancel subscription",
+          "cancelButton": "Cancel subscription…",
+          "dangerZone": {
+            "title": "Danger zone",
+            "description": "Cancelling stops the subscription at once; deleting removes it with its devices from the bot and the panel. Both ask for confirmation."
+          },
+          "support": {
+            "title": "For support",
+            "hint": "subscription link, HAPP, keys, request history"
+          },
+          "confirm": {
+            "cancelSubscription": "Cancel the subscription? Time and traffic will not come back.",
+            "shorten": "Take {{count}} d off the subscription?",
+            "removePackage": "Remove the {{gb}} GB package? Its traffic will be gone.",
+            "deleteDevice": "Delete device “{{name}}”? It will have to reconnect.",
+            "resetDevices": "Reset all devices? Every client will have to reconnect.",
+            "cancelSbp": "Disable the SBP auto-payment?"
+          }
         },
         "balance": {
           "current": "Current balance",
@@ -4925,7 +4954,20 @@
           "allActivity": "All activity",
           "noActivity": "Nothing has happened yet"
         },
-        "restrictionsSaved": "Restrictions updated"
+        "restrictionsSaved": "Restrictions updated",
+        "panel": {
+          "title": "Remnawave panel",
+          "matches": "Matches the panel",
+          "differs": "Differences found",
+          "unknown": "Not checked yet",
+          "checked": "Checked",
+          "truth": "the panel is the source of truth, the bot picks up its changes itself",
+          "checkNow": "Compare now",
+          "pull": "Pull from panel…",
+          "pushManual": "Push to panel manually…",
+          "confirmPull": "Pull data from the panel into the bot? Expiry and traffic in the bot database will be overwritten.",
+          "confirmPush": "Push bot data to the panel? Expiry, traffic and squads in the panel will be overwritten."
+        }
       },
       "notFound": "User not found",
       "purchaseCount": "Purchases: {{count}}",
