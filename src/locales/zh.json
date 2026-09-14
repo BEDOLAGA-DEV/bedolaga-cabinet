@@ -3267,7 +3267,6 @@
       "title": "用户",
       "subtitle": "机器人用户管理",
       "search": "ID、姓名、@用户名或邮箱",
-      "searchEmail": "按邮箱搜索...",
       "noData": "未找到用户",
       "purchaseCount_other": "{{count}} 次购买",
       "noPurchases": "无购买记录",
@@ -3295,9 +3294,6 @@
         "bySpent": "按消费",
         "byExpiry": "按到期时间"
       },
-      "pagination": {
-        "showing": "显示 {{from}}-{{to}}，共 {{total}}"
-      },
       "actions": {
         "block": "封禁",
         "unblock": "解封",
@@ -3309,12 +3305,8 @@
       },
       "detail": {
         "tabs": {
-          "info": "信息",
           "subscription": "订阅",
           "balance": "余额",
-          "sync": "同步",
-          "tickets": "工单",
-          "gifts": "礼物",
           "referrals": "推荐",
           "activity": "活动记录",
           "overview": "概览"
