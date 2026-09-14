@@ -185,11 +185,6 @@ export function useUserDetailActions(userId: number, data: UserDetailData) {
         success: t('admin.users.userActions.success.resetTrial'),
         after: refreshCard,
       }),
-    resetSubscriptions: () =>
-      run(() => adminUsersApi.resetSubscription(userId), {
-        success: t('admin.users.userActions.success.resetSubscription'),
-        after: refreshCard,
-      }),
     disable: () =>
       run(() => adminUsersApi.disableUser(userId), {
         success: t('admin.users.userActions.success.disable'),

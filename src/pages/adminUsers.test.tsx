@@ -172,7 +172,7 @@ describe('AdminUsers', () => {
   it('сегмент «истекают» пишет view в адрес и ставит серверный фильтр', async () => {
     getUsers.mockResolvedValue(page([], 0));
     await renderPage();
-    fireEvent.click(await screen.findByRole('button', { name: 'admin.users.views.expiring' }));
+    fireEvent.click(await screen.findByRole('radio', { name: 'admin.users.views.expiring' }));
     await waitFor(() => expect(lastSearch).toContain('view=expiring'));
     await waitFor(() =>
       expect(getUsers).toHaveBeenLastCalledWith(
@@ -206,6 +206,46 @@ describe('AdminUsers', () => {
     expect((await screen.findAllByText('Имя60')).length).toBeGreaterThan(0);
     expect(getUsers.mock.calls[1][0]).toMatchObject({ offset: 50 });
     expect(screen.getAllByText('Имя1').length).toBeGreaterThan(0);
+  });
+
+  it('«Онлайн» — подключение к VPN по панели: уходит online=true, выбранный сегмент отмечен', async () => {
+    getUsers.mockResolvedValue(
+      page([user(1, { is_online: true }), user(2, { is_online: false })], 2),
+    );
+    await renderPage();
+    const online = await screen.findByRole('radio', { name: 'admin.users.views.online' });
+    fireEvent.click(online);
+    await waitFor(() =>
+      expect(getUsers).toHaveBeenLastCalledWith(expect.objectContaining({ online: true })),
+    );
+    expect(getUsers.mock.lastCall?.[0]).not.toHaveProperty('active_within_minutes');
+    expect(online.getAttribute('aria-checked')).toBe('true');
+    expect(
+      screen.getByRole('radio', { name: 'admin.users.views.all' }).getAttribute('aria-checked'),
+    ).toBe('false');
+    // Подключённого видно (точка на аватаре, для скринридера — словами), остальных — нет.
+    expect(screen.getAllByText(', admin.users.connectedNow').length).toBeGreaterThan(0);
+  });
+
+  it('выбранный фильтр виден чипом и снимается крестиком', async () => {
+    getUsers.mockResolvedValue(page([], 0));
+    await renderPage('/admin/users?sub=expired');
+    expect(await screen.findByText('admin.users.subFilters.expired')).toBeTruthy();
+    // Кнопка «Фильтры» говорит, сколько выбрано.
+    expect(screen.getByRole('button', { name: 'admin.users.filters.buttonApplied' })).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'admin.users.filters.remove' }));
+    await waitFor(() => expect(lastSearch).not.toContain('sub='));
+    expect(screen.queryByText('admin.users.subFilters.expired')).toBeNull();
+  });
+
+  it('сортировка — кнопка-иконка, текущий порядок в подписи', async () => {
+    getUsers.mockResolvedValue(page([], 0));
+    await renderPage('/admin/users?sort=balance');
+    expect(
+      await screen.findByRole('button', {
+        name: 'admin.users.sort.label: admin.users.sort.balance',
+      }),
+    ).toBeTruthy();
   });
 
   it('сырые статусы не показываются — только словарь', async () => {

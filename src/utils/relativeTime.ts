@@ -18,36 +18,47 @@ export type RelativeKey =
 export interface RelativeTimeParts {
   key: RelativeKey;
   count: number;
-  /** Активность моложе пяти минут считается «онлайн» — то же окно, что у панели. */
-  isOnline: boolean;
 }
 
-export const ONLINE_WINDOW_MS = 5 * 60_000;
+/**
+ * Панель красит пользователя зелёным, пока с `userTraffic.onlineAt` прошло не больше минуты.
+ * «Подключён сейчас» в кабинете — то же окно, иначе карточка спорит с панелью.
+ * Давность действий в боте (`last_activity`) подключением не считается.
+ */
+export const PANEL_ONLINE_WINDOW_MS = 60_000;
 
 const MINUTE = 60_000;
 const HOUR = 60 * MINUTE;
 const DAY = 24 * HOUR;
 
+export function isConnectedNow(
+  onlineAt: string | null | undefined,
+  now: number = Date.now(),
+): boolean {
+  if (!onlineAt) return false;
+  const ts = new Date(onlineAt).getTime();
+  return !Number.isNaN(ts) && now - ts <= PANEL_ONLINE_WINDOW_MS;
+}
+
 export function relativeTimeParts(
   value: string | null | undefined,
   now: number = Date.now(),
 ): RelativeTimeParts {
-  if (!value) return { key: 'never', count: 0, isOnline: false };
+  if (!value) return { key: 'never', count: 0 };
   const ts = new Date(value).getTime();
-  if (Number.isNaN(ts)) return { key: 'never', count: 0, isOnline: false };
+  if (Number.isNaN(ts)) return { key: 'never', count: 0 };
 
   const diff = Math.max(0, now - ts);
-  const isOnline = diff < ONLINE_WINDOW_MS;
   const minutes = Math.floor(diff / MINUTE);
-  if (minutes < 1) return { key: 'now', count: 0, isOnline };
-  if (minutes < 60) return { key: 'minutes', count: minutes, isOnline };
+  if (minutes < 1) return { key: 'now', count: 0 };
+  if (minutes < 60) return { key: 'minutes', count: minutes };
   const hours = Math.floor(diff / HOUR);
-  if (hours < 24) return { key: 'hours', count: hours, isOnline: false };
+  if (hours < 24) return { key: 'hours', count: hours };
   const days = Math.floor(diff / DAY);
-  if (days === 1) return { key: 'yesterday', count: 1, isOnline: false };
-  if (days < 14) return { key: 'days', count: days, isOnline: false };
-  if (days < 60) return { key: 'weeks', count: Math.floor(days / 7), isOnline: false };
-  return { key: 'months', count: Math.floor(days / 30), isOnline: false };
+  if (days === 1) return { key: 'yesterday', count: 1 };
+  if (days < 14) return { key: 'days', count: days };
+  if (days < 60) return { key: 'weeks', count: Math.floor(days / 7) };
+  return { key: 'months', count: Math.floor(days / 30) };
 }
 
 export type CalendarDay = 'today' | 'yesterday' | 'other';

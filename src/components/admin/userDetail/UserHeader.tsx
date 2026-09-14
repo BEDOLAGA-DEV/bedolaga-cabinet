@@ -1,20 +1,18 @@
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { UserDetailResponse, UserPanelInfo, UserSubscriptionInfo } from '@/api/adminUsers';
+import type { UserDetailResponse, UserPanelInfo } from '@/api/adminUsers';
 import { AdminBackButton } from '@/components/admin/AdminBackButton';
 import { AccountStatusChip, UserAvatar } from '@/components/admin/users';
 import { CopyIcon, TelegramSmallIcon } from '@/components/icons';
 import { cn } from '@/lib/utils';
 import { useNotify } from '@/platform/hooks/useNotify';
 import { copyToClipboard } from '@/utils/clipboard';
-import { formatShortDate } from '@/utils/format';
-import { relativeTimeParts } from '@/utils/relativeTime';
+import { isConnectedNow } from '@/utils/relativeTime';
 
 interface UserHeaderProps {
   user: UserDetailResponse;
-  subscription: UserSubscriptionInfo | null;
   panelInfo: UserPanelInfo | null;
-  /** «Написать», «Продлить», «Начислить» — три частых действия. */
+  /** «Написать» и «Продлить» — два частых действия; начисление — во вкладке «Баланс». */
   actions: ReactNode;
   /** Меню «⋯»: на телефоне стоит у имени, на широком экране — после кнопок. */
   menu: ReactNode;
@@ -27,10 +25,11 @@ const CHIP =
  * Шапка отвечает на первые вопросы поддержки, не заставляя листать: кто это,
  * в каком состоянии аккаунт и подписка, онлайн ли сейчас, что с ним сделать.
  */
-export function UserHeader({ user, subscription, panelInfo, actions, menu }: UserHeaderProps) {
+export function UserHeader({ user, panelInfo, actions, menu }: UserHeaderProps) {
   const { t } = useTranslation();
   const notify = useNotify();
-  const online = relativeTimeParts(panelInfo?.online_at ?? null);
+  // Как зелёная точка в самой панели: отметка подключения не старше минуты.
+  const online = isConnectedNow(panelInfo?.online_at);
   const muted = user.status === 'blocked' || user.status === 'deleted';
 
   const copy = async (value: string) => {
@@ -97,22 +96,15 @@ export function UserHeader({ user, subscription, panelInfo, actions, menu }: Use
       </div>
       {/* Чипы — своей ячейкой: на телефоне им тесно в колонке под именем рядом с «⋯». */}
       <div className="col-span-2 col-start-2 row-start-2 -mt-2 flex flex-wrap items-center gap-1.5 lg:col-span-1 lg:col-start-2">
-        {/* «Активен» — обычное состояние, чипом только отклонение: заблокирован, удалён. */}
+        {/* «Активен» — обычное состояние, чипом только отклонение: заблокирован, удалён.
+            Тариф и срок — в плитке «Подписка до», здесь не повторяются. */}
         {user.status !== 'active' && <AccountStatusChip status={user.status} />}
-        {subscription && (
-          <span className={cn(CHIP, 'bg-accent-500/15 text-accent-400')}>
-            {t('admin.users.detail.header.tariffUntil', {
-              tariff: subscription.tariff_name ?? t('admin.users.detail.subscription.notSpecified'),
-              date: formatShortDate(subscription.end_date),
-            })}
-          </span>
-        )}
         {user.promo_group && (
           <span className={cn(CHIP, 'bg-dark-800 text-dark-300')}>
             {t('admin.users.detail.header.group', { name: user.promo_group.name })}
           </span>
         )}
-        {online.isOnline && (
+        {online && (
           <span className={cn(CHIP, 'gap-1.5 bg-success-500/15 text-success-400')}>
             <span
               aria-hidden="true"
@@ -126,7 +118,7 @@ export function UserHeader({ user, subscription, panelInfo, actions, menu }: Use
           </span>
         )}
       </div>
-      <div className="col-span-3 row-start-3 grid grid-cols-3 gap-2 lg:col-span-1 lg:col-start-3 lg:row-start-1 lg:flex lg:items-center">
+      <div className="col-span-3 row-start-3 grid grid-cols-2 gap-2 lg:col-span-1 lg:col-start-3 lg:row-start-1 lg:flex lg:items-center">
         {actions}
       </div>
       <div className="col-start-3 row-start-1 lg:col-start-4">{menu}</div>

@@ -47,41 +47,26 @@ export function stampParts(value: string): { day: string; time: string } {
 interface RelativeTimeProps {
   value: string | null | undefined;
   className?: string;
-  /** Точка-индикатор слева: зелёная, если человек онлайн. */
-  dot?: boolean;
 }
 
-/** «онлайн», «2 ч назад», «вчера» — последняя активность человека. */
-export function RelativeTime({ value, className, dot = true }: RelativeTimeProps) {
+/**
+ * «2 ч назад», «вчера» — когда человек последний раз что-то делал в боте или кабинете.
+ * Не «онлайн»: подключение к VPN знает только панель, его показывает точка на аватаре.
+ */
+export function RelativeTime({ value, className }: RelativeTimeProps) {
   const { t } = useTranslation();
   const parts = relativeTimeParts(value);
-  const label = parts.isOnline ? t('common.relative.online') : relativeLabel(parts, t);
 
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1.5 whitespace-nowrap text-sm',
-        parts.isOnline
-          ? 'font-medium text-success-400'
-          : parts.key === 'never'
-            ? 'text-dark-500'
-            : 'text-dark-300',
+        'whitespace-nowrap text-sm',
+        parts.key === 'never' ? 'text-dark-500' : 'text-dark-300',
         className,
       )}
       title={value ? new Date(value).toLocaleString(uiLocale()) : undefined}
     >
-      {dot && (
-        <span
-          aria-hidden="true"
-          className={cn(
-            'h-2 w-2 shrink-0 rounded-full',
-            parts.isOnline
-              ? 'bg-success-400 shadow-[0_0_6px_rgba(var(--color-success-400),0.6)]'
-              : 'bg-dark-600',
-          )}
-        />
-      )}
-      {label}
+      {relativeLabel(parts, t)}
     </span>
   );
 }

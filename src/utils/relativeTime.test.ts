@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { calendarDay, relativeTimeParts } from './relativeTime';
+import {
+  PANEL_ONLINE_WINDOW_MS,
+  calendarDay,
+  isConnectedNow,
+  relativeTimeParts,
+} from './relativeTime';
 
 const NOW = Date.parse('2026-09-14T12:00:00Z');
 const ago = (ms: number) => new Date(NOW - ms).toISOString();
@@ -10,23 +15,16 @@ const ago = (ms: number) => new Date(NOW - ms).toISOString();
  */
 describe('relativeTimeParts', () => {
   it('null — never', () => {
-    expect(relativeTimeParts(null, NOW)).toEqual({ key: 'never', count: 0, isOnline: false });
+    expect(relativeTimeParts(null, NOW)).toEqual({ key: 'never', count: 0 });
   });
   it('мусор вместо даты — never', () => {
     expect(relativeTimeParts('когда-то', NOW).key).toBe('never');
   });
-  it('меньше минуты — now и онлайн', () => {
-    expect(relativeTimeParts(ago(20_000), NOW)).toEqual({ key: 'now', count: 0, isOnline: true });
+  it('меньше минуты — now', () => {
+    expect(relativeTimeParts(ago(20_000), NOW)).toEqual({ key: 'now', count: 0 });
   });
-  it('4 минуты — онлайн', () => {
-    expect(relativeTimeParts(ago(4 * 60_000), NOW)).toEqual({
-      key: 'minutes',
-      count: 4,
-      isOnline: true,
-    });
-  });
-  it('6 минут — уже не онлайн', () => {
-    expect(relativeTimeParts(ago(6 * 60_000), NOW).isOnline).toBe(false);
+  it('4 минуты — минуты, без «онлайн»: давность действий в боте не значит подключение', () => {
+    expect(relativeTimeParts(ago(4 * 60_000), NOW)).toEqual({ key: 'minutes', count: 4 });
   });
   it('часы, дни, недели, месяцы', () => {
     expect(relativeTimeParts(ago(3 * 3_600_000), NOW)).toMatchObject({ key: 'hours', count: 3 });
@@ -40,6 +38,26 @@ describe('relativeTimeParts', () => {
   });
   it('будущее считается «сейчас»', () => {
     expect(relativeTimeParts(new Date(NOW + 60_000).toISOString(), NOW).key).toBe('now');
+  });
+});
+
+/**
+ * «Подключён сейчас» — по отметке панели `onlineAt`, как зелёная точка в самой панели:
+ * не старше минуты. Раньше карточка держала пять минут и спорила с панелью.
+ */
+describe('isConnectedNow', () => {
+  it('отметка моложе минуты — подключён', () => {
+    expect(isConnectedNow(ago(59_000), NOW)).toBe(true);
+  });
+  it('старше минуты — уже нет', () => {
+    expect(isConnectedNow(ago(61_000), NOW)).toBe(false);
+  });
+  it('никогда не подключался или мусор — нет', () => {
+    expect(isConnectedNow(null, NOW)).toBe(false);
+    expect(isConnectedNow('когда-то', NOW)).toBe(false);
+  });
+  it('окно — минута, как у панели', () => {
+    expect(PANEL_ONLINE_WINDOW_MS).toBe(60_000);
   });
 });
 

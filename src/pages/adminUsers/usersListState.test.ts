@@ -119,7 +119,7 @@ describe('buildUsersQuery', () => {
       has_subscription: false,
     });
     expect(buildUsersQuery(applyView(DEFAULT_STATE, 'online'))).toMatchObject({
-      active_within_minutes: 5,
+      online: true,
       sort_by: 'last_activity',
     });
     expect(buildUsersQuery(applyView(DEFAULT_STATE, 'nopay'))).toMatchObject({

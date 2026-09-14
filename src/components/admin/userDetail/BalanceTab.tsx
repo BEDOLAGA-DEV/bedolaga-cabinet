@@ -11,7 +11,7 @@ import { useDestructiveConfirm } from '@/platform/hooks/useNativeDialog';
 import { formatShortDate } from '@/utils/format';
 import { createNumberInputHandler, toNumber } from '@/utils/inputHelpers';
 import { OperationsFeed, operationsQueryKey } from './OperationsFeed';
-import { Segmented } from './Segmented';
+import { Segmented } from '@/components/admin/Segmented';
 import { KeyValues, LinkAction, Section } from './sectionParts';
 import { useAdminAction } from './useAdminAction';
 

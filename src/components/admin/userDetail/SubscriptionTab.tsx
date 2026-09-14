@@ -94,7 +94,7 @@ export function SubscriptionTab(props: SubscriptionTabProps) {
         (tx) => tx.type === 'subscription_payment' && tx.is_completed,
       ) ?? null);
 
-  // Кнопки «Обзора» и шапки приходят сюда с `?do=extend|tariff|…`: открываем нужную
+  // «Продлить ▾ → другой срок…» и «Выдать» из шапки приходят сюда с `?do=extend|create|…`: открываем нужную
   // форму, подкручиваем к ней и убираем параметр из адреса.
   useEffect(() => {
     const wanted = params.get('do');

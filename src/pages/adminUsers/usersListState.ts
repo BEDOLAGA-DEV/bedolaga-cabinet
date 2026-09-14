@@ -75,9 +75,8 @@ export const DEFAULT_STATE: UsersListState = {
   view: 'all',
 };
 
-/** Окно «истекают скоро» и «был в сети» — те же числа, что в подписях сегментов. */
+/** Окно «истекают скоро» — то же число, что в подписи сегмента. */
 export const EXPIRING_DAYS = 7;
-export const ONLINE_MINUTES = 5;
 /** «Трафик на исходе» — израсходовано от стольких процентов лимита. */
 export const TRAFFIC_LOW_PERCENT = 80;
 
@@ -168,7 +167,8 @@ export function buildUsersQuery(state: UsersListState): UsersQuery {
   if (state.tariff) query.tariff_id = state.tariff;
   if (state.group) query.promo_group_id = Number(state.group);
   if (state.campaign) query.campaign_id = Number(state.campaign);
-  if (state.view === 'online') query.active_within_minutes = ONLINE_MINUTES;
+  // «Онлайн» — подключён к VPN сейчас: бот спрашивает панель, а не смотрит на кнопки в боте.
+  if (state.view === 'online') query.online = true;
   if (state.view === 'nopay') query.purchase_count = 0;
   if (state.view === 'traffic') query.traffic_used_percent_min = TRAFFIC_LOW_PERCENT;
   return query;

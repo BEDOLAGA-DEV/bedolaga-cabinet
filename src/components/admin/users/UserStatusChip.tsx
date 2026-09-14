@@ -113,7 +113,7 @@ export function AccountStatusChip({ status, className }: { status: string; class
   );
 }
 
-const SUBSCRIPTION_STATE_TONE: Record<string, ChipTone> = {
+export const SUBSCRIPTION_STATE_TONE: Record<string, ChipTone> = {
   active: 'success',
   trial: 'accent',
   limited: 'warning',

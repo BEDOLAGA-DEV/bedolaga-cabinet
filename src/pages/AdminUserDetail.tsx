@@ -87,7 +87,7 @@ export default function AdminUserDetail() {
       next.delete('view');
       next.delete('do');
       if (tab === 'activity' && view) next.set('view', view);
-      if ((tab === 'subscription' || tab === 'overview') && view) next.set('do', view);
+      if (tab === 'subscription' && view) next.set('do', view);
       setParams(next, { replace: true });
     },
     [params, setParams],
@@ -140,7 +140,8 @@ export default function AdminUserDetail() {
     deactivateOffer: hasPermission('promocodes:edit'),
   };
   const devices = data.devicesQuery.data?.devices ?? null;
-  // На телефоне три кнопки делят строку поровну; на широком экране — по содержимому.
+  // На телефоне две кнопки делят строку поровну; на широком экране — по содержимому.
+  // «Начислить» тут больше нет: она только открывала вкладку «Баланс» — повтор вкладки.
   const actionClass = 'min-w-0 justify-center px-3 lg:px-4';
 
   const headerActions = (
@@ -175,15 +176,6 @@ export default function AdminUserDetail() {
             {t('admin.users.detail.header.create')}
           </button>
         ))}
-      {can.balance && (
-        <button
-          type="button"
-          onClick={() => goTo('balance')}
-          className={cn('btn-secondary', actionClass)}
-        >
-          {t('admin.users.detail.header.topUp')}
-        </button>
-      )}
     </>
   );
 
@@ -196,24 +188,14 @@ export default function AdminUserDetail() {
         block: can.block,
         subscription: can.subscription,
         delete: can.remove,
-        promoGroup: can.promoGroup,
-        restrictions: can.restrictions,
       }}
       actions={actions}
-      onEditPromoGroup={() => goTo('overview', 'promo')}
-      onEditRestrictions={() => goTo('overview', 'restrictions')}
     />
   );
 
   return (
     <div className="animate-fade-in space-y-5">
-      <UserHeader
-        user={user}
-        subscription={selectedSub}
-        panelInfo={data.panelInfo}
-        actions={headerActions}
-        menu={menu}
-      />
+      <UserHeader user={user} panelInfo={data.panelInfo} actions={headerActions} menu={menu} />
 
       <UserFacts
         user={user}
@@ -254,21 +236,14 @@ export default function AdminUserDetail() {
       {activeTab === 'overview' && (
         <OverviewTab
           user={user}
-          subscription={selectedSub}
           panelInfo={data.panelInfo}
           devices={devices}
-          currentTariff={data.currentTariff}
           promoGroups={data.promoGroups}
           tickets={data.tickets}
           gifts={data.gifts}
           recentActivity={data.recentActivity}
-          can={{
-            subscription: can.subscription,
-            promoGroup: can.promoGroup,
-            restrictions: can.restrictions,
-          }}
+          can={{ promoGroup: can.promoGroup, restrictions: can.restrictions }}
           busy={actions.busy}
-          onExtend={actions.extend}
           onChangePromoGroup={actions.changePromoGroup}
           onUpdateRestrictions={actions.updateRestrictions}
           onGoTo={goTo}

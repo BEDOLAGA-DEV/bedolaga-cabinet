@@ -1,22 +1,24 @@
-import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState, useSyncExternalStore } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { DropdownOption } from '@/components/admin/bulkActions/DropdownSelect';
+import { Segmented } from '@/components/admin/Segmented';
 import { SearchIcon, XIcon } from '@/components/icons';
-import { cn } from '@/lib/utils';
 import {
   type SortKey,
   type StatusFilter,
   type SubFilter,
   type UsersListState,
   type ViewKey,
+  DEFAULT_STATE,
   EXPIRING_DAYS,
   SORT_KEYS,
   SUB_FILTERS,
   VIEW_KEYS,
   applyView,
-  hasActiveFilters,
 } from '@/pages/adminUsers/usersListState';
-import { FilterMenu } from './FilterMenu';
+import { AppliedFilters } from './AppliedFilters';
+import { type FilterField, type FilterKey, FiltersPopover } from './FiltersPopover';
+import { SortMenu } from './SortMenu';
 
 export interface ToolbarOptions {
   tariffs: DropdownOption[];
@@ -30,19 +32,35 @@ interface UsersToolbarProps {
   options: ToolbarOptions;
 }
 
+const WIDE_QUERY = '(min-width: 640px)';
+const subscribeWide = (onChange: () => void) => {
+  const query = window.matchMedia?.(WIDE_QUERY);
+  query?.addEventListener?.('change', onChange);
+  return () => query?.removeEventListener?.('change', onChange);
+};
+/** Широкий ли экран — для подсказки в поиске: на телефоне длинная обрезалась на «…или e». */
+const useWideScreen = () =>
+  useSyncExternalStore(
+    subscribeWide,
+    () => window.matchMedia?.(WIDE_QUERY).matches ?? true,
+    () => true,
+  );
+
 /** Пауза после последней буквы перед запросом; Enter отправляет сразу. */
 export const SEARCH_DEBOUNCE_MS = 300;
 
 const STATUS_OPTIONS: StatusFilter[] = ['active', 'blocked', 'deleted'];
 
 /**
- * Одно поле поиска, сегменты и чипы фильтров. Состояние выборки живёт в адресе
- * страницы — здесь только текст поиска до отправки.
+ * Одно поле поиска, кнопки «Фильтры» и сортировки, выборки переключателем и чипы
+ * выбранных фильтров. Состояние живёт в адресе страницы — здесь только текст поиска
+ * до отправки.
  */
 export function UsersToolbar({ state, onChange, options }: UsersToolbarProps) {
   const { t } = useTranslation();
   const searchId = useId();
   const [text, setText] = useState(state.q);
+  const wide = useWideScreen();
   const inputRef = useRef<HTMLInputElement>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Отложенный поиск берёт выборку на момент отправки, а не ввода: чип, выбранный
@@ -86,34 +104,62 @@ export function UsersToolbar({ state, onChange, options }: UsersToolbarProps) {
   const patch = (partial: Partial<UsersListState>) =>
     onChange({ ...state, ...partial, view: 'all' });
 
-  const sortOptions: DropdownOption[] = SORT_KEYS.map((key: SortKey) => ({
-    value: key,
-    label: t(`admin.users.sort.${key}`),
-  }));
-  const statusOptions: DropdownOption[] = [
-    { value: '', label: t('admin.users.filterAny.status') },
-    ...STATUS_OPTIONS.map((value) => ({ value, label: t(`admin.users.status.${value}`) })),
-  ];
-  const subOptions: DropdownOption[] = SUB_FILTERS.map((value: SubFilter) => ({
-    value,
-    label: value ? t(`admin.users.subFilters.${value}`) : t('admin.users.filterAny.sub'),
-  }));
   const withAny = (list: DropdownOption[], anyKey: string): DropdownOption[] => [
     { value: '', label: t(`admin.users.filterAny.${anyKey}`) },
     ...list,
   ];
+  const fields: FilterField[] = [
+    {
+      key: 'status',
+      label: t('admin.users.filterLabels.status'),
+      value: state.status,
+      options: withAny(
+        STATUS_OPTIONS.map((value) => ({ value, label: t(`admin.users.status.${value}`) })),
+        'status',
+      ),
+    },
+    {
+      key: 'sub',
+      label: t('admin.users.filterLabels.sub'),
+      value: state.sub,
+      options: withAny(
+        SUB_FILTERS.filter(Boolean).map((value: SubFilter) => ({
+          value,
+          label: t(`admin.users.subFilters.${value}`),
+        })),
+        'sub',
+      ),
+    },
+    {
+      key: 'tariff',
+      label: t('admin.users.filterLabels.tariff'),
+      value: state.tariff,
+      options: withAny(options.tariffs, 'tariff'),
+    },
+    {
+      key: 'group',
+      label: t('admin.users.filterLabels.group'),
+      value: state.group,
+      options: withAny(options.groups, 'group'),
+    },
+    {
+      key: 'campaign',
+      label: t('admin.users.filterLabels.campaign'),
+      value: state.campaign,
+      options: withAny(options.campaigns, 'campaign'),
+    },
+  ];
+  const setFilter = (key: FilterKey, value: string) => patch({ [key]: value });
+  const clearFilters = () => patch({ status: '', sub: '', tariff: '', group: '', campaign: '' });
 
-  const sortMenu = (className: string, align: 'start' | 'end') => (
-    <FilterMenu
-      label={t('admin.users.sort.label')}
-      value={state.sort}
-      options={sortOptions}
-      onChange={(value) => onChange({ ...state, sort: value as SortKey })}
-      active={false}
-      align={align}
-      className={className}
-    />
-  );
+  const sortOptions: DropdownOption[] = SORT_KEYS.map((key: SortKey) => ({
+    value: key,
+    label: t(`admin.users.sort.${key}`),
+  }));
+  const viewOptions = VIEW_KEYS.map((view: ViewKey) => ({
+    value: view,
+    label: t(`admin.users.views.${view}`, { days: EXPIRING_DAYS }),
+  }));
 
   return (
     <div className="flex flex-col gap-2.5">
@@ -145,7 +191,7 @@ export function UsersToolbar({ state, onChange, options }: UsersToolbarProps) {
                 commit('');
               }
             }}
-            placeholder={t('admin.users.search')}
+            placeholder={wide ? t('admin.users.search') : t('admin.users.searchShort')}
             className="h-11 w-full appearance-none rounded-xl border border-dark-700 bg-dark-800 pl-10 pr-10 text-sm text-dark-100 placeholder-dark-500 outline-none transition-colors focus:border-accent-500/40 focus:shadow-[0_0_0_3px_rgba(var(--color-accent-500),0.08)] [&::-webkit-search-cancel-button]:hidden"
           />
           <SearchIcon className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-dark-500" />
@@ -171,74 +217,32 @@ export function UsersToolbar({ state, onChange, options }: UsersToolbarProps) {
             </kbd>
           )}
         </div>
-        {sortMenu('hidden h-11 sm:inline-flex', 'end')}
+        <FiltersPopover fields={fields} onChange={setFilter} onReset={clearFilters} />
+        <SortMenu
+          label={t('admin.users.sort.label')}
+          value={state.sort}
+          options={sortOptions}
+          onChange={(value) => onChange({ ...state, sort: value as SortKey })}
+          changed={state.sort !== DEFAULT_STATE.sort}
+        />
       </div>
 
-      <div className="scrollbar-hide -mx-4 flex gap-2 overflow-x-auto px-4 sm:mx-0 sm:flex-wrap sm:px-0">
-        {VIEW_KEYS.map((view: ViewKey) => (
-          <button
-            key={view}
-            type="button"
-            aria-pressed={state.view === view}
-            onClick={() => onChange(applyView(state, view))}
-            className={cn(
-              'h-9 shrink-0 whitespace-nowrap rounded-xl px-3.5 text-sm font-medium transition-colors',
-              state.view === view
-                ? 'bg-accent-500/15 text-accent-400 ring-1 ring-accent-500/30'
-                : 'bg-dark-800/50 text-dark-400 hover:text-dark-200',
-            )}
-          >
-            {t(`admin.users.views.${view}`, { days: EXPIRING_DAYS })}
-          </button>
-        ))}
-      </div>
+      <Segmented
+        size="md"
+        label={t('admin.users.viewsLabel')}
+        value={state.view}
+        options={viewOptions}
+        onChange={(view) => onChange(applyView(state, view))}
+      />
 
-      <div className="scrollbar-hide -mx-4 flex items-center gap-2 overflow-x-auto px-4 sm:mx-0 sm:flex-wrap sm:px-0">
-        <FilterMenu
-          label={t('admin.users.filterLabels.status')}
-          value={state.status}
-          options={statusOptions}
-          onChange={(value) => patch({ status: value as StatusFilter })}
-        />
-        <FilterMenu
-          label={t('admin.users.filterLabels.sub')}
-          value={state.sub}
-          options={subOptions}
-          onChange={(value) => patch({ sub: value as SubFilter })}
-        />
-        <FilterMenu
-          label={t('admin.users.filterLabels.tariff')}
-          value={state.tariff}
-          options={withAny(options.tariffs, 'tariff')}
-          onChange={(value) => patch({ tariff: value })}
-        />
-        <FilterMenu
-          label={t('admin.users.filterLabels.group')}
-          value={state.group}
-          options={withAny(options.groups, 'group')}
-          onChange={(value) => patch({ group: value })}
-        />
-        <FilterMenu
-          label={t('admin.users.filterLabels.campaign')}
-          value={state.campaign}
-          options={withAny(options.campaigns, 'campaign')}
-          onChange={(value) => patch({ campaign: value })}
-        />
-        {/* На телефоне сортировка — последним чипом: фильтры нужнее и видны без прокрутки ряда. */}
-        {sortMenu('sm:hidden', 'end')}
-        {hasActiveFilters(state) && (
-          <button
-            type="button"
-            onClick={() => {
-              setText('');
-              onChange({ ...applyView(state, 'all'), q: '' });
-            }}
-            className="h-9 shrink-0 whitespace-nowrap rounded-xl px-3 text-sm font-medium text-accent-400 transition-colors hover:bg-accent-500/10"
-          >
-            {t('admin.users.reset')}
-          </button>
-        )}
-      </div>
+      <AppliedFilters
+        fields={fields}
+        onRemove={(key) => setFilter(key, '')}
+        onResetAll={() => {
+          setText('');
+          onChange({ ...applyView(state, 'all'), q: '' });
+        }}
+      />
     </div>
   );
 }

@@ -72,9 +72,15 @@ export function UsersTable({ users, className }: UsersTableProps) {
                 firstName={user.first_name}
                 username={user.username}
                 muted={isMutedUser(user)}
+                online={user.is_online === true}
               />
               <div className="min-w-0">
-                <div className="truncate font-medium text-dark-100">{user.full_name}</div>
+                <div className="truncate font-medium text-dark-100">
+                  {user.full_name}
+                  {user.is_online && (
+                    <span className="sr-only">, {t('admin.users.connectedNow')}</span>
+                  )}
+                </div>
                 <div className="truncate text-xs tabular-nums text-dark-500">
                   {user.username ? `@${user.username} · ` : ''}
                   <span className="text-dark-400">{user.telegram_id}</span>

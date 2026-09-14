@@ -16,7 +16,6 @@ export interface UserMenuActions {
   block: () => Promise<boolean>;
   unblock: () => Promise<boolean>;
   resetTrial: () => Promise<boolean>;
-  resetSubscriptions: () => Promise<boolean>;
   disable: () => Promise<boolean>;
   deleteUser: () => Promise<boolean>;
 }
@@ -30,18 +29,15 @@ interface UserActionsMenuProps {
     block: boolean;
     subscription: boolean;
     delete: boolean;
-    promoGroup: boolean;
-    restrictions: boolean;
   };
   actions: UserMenuActions;
-  /** Открыть правку промогруппы / ограничений в «Обзоре». */
-  onEditPromoGroup: () => void;
-  onEditRestrictions: () => void;
   className?: string;
 }
 
 /**
- * Редкие и опасные действия — за «⋯», а не в ряду с «Написать». Меню на Radix:
+ * Редкие и опасные действия с аккаунтом — за «⋯», а не в ряду с «Написать». Промогруппа
+ * и ограничения правятся на месте в «Обзоре», подписка — в своей вкладке: здесь их не
+ * повторяем. Меню на Radix:
  * стрелки, Esc, фокус. Опасное подтверждается системным диалогом кабинета
  * (в Mini App — родным попапом), красным — только удаление.
  */
@@ -51,8 +47,6 @@ export function UserActionsMenu({
   reachabilityLink,
   can,
   actions,
-  onEditPromoGroup,
-  onEditRestrictions,
   className,
 }: UserActionsMenuProps) {
   const { t } = useTranslation();
@@ -78,16 +72,6 @@ export function UserActionsMenu({
       label: t('admin.users.detail.menu.checkConfigs'),
       run: () => navigate(reachabilityLink),
     },
-    can.promoGroup && {
-      key: 'promo',
-      label: t('admin.users.detail.menu.promoGroup'),
-      run: onEditPromoGroup,
-    },
-    can.restrictions && {
-      key: 'restrictions',
-      label: t('admin.users.detail.menu.restrictions'),
-      run: onEditRestrictions,
-    },
   ].filter(Boolean) as { key: string; label: string; run: () => void }[];
 
   const dangerous = [
@@ -109,11 +93,6 @@ export function UserActionsMenu({
       key: 'resetTrial',
       label: t(`${ns}.resetTrial`),
       run: confirmThen('confirmResetTrial', 'resetTrial', actions.resetTrial),
-    },
-    can.subscription && {
-      key: 'resetSubscriptions',
-      label: `${t(`${ns}.resetSubscription`)}…`,
-      run: confirmThen('confirmResetSubscription', 'resetSubscription', actions.resetSubscriptions),
     },
     can.block && {
       key: 'disable',

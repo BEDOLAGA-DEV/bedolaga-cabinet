@@ -2,6 +2,7 @@ import { type CSSProperties, useCallback, useEffect, useMemo, useRef, useState }
 import { useSearchParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
+import { isAxiosError } from 'axios';
 import { adminUsersApi } from '@/api/adminUsers';
 import { campaignsApi } from '@/api/campaigns';
 import { promocodesApi } from '@/api/promocodes';
@@ -15,7 +16,7 @@ import {
   UsersToolbar,
   useInfiniteScroll,
 } from '@/components/admin/users';
-import { ArrowRightIcon, RefreshIcon } from '@/components/icons';
+import { ArrowRightIcon, RefreshIcon, UsersIcon } from '@/components/icons';
 import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 import { useHeaderHeight } from '@/hooks/useHeaderHeight';
 import { cn } from '@/lib/utils';
@@ -55,7 +56,8 @@ function summaryLine(
   return [
     part('total', stats.total),
     part('subscribed', stats.subscribed),
-    stats.newToday > 0 ? part('newToday', stats.newToday) : null,
+    // На телефоне строка короче: рядом с иконкой раздела и кнопками ей тесно.
+    !short && stats.newToday > 0 ? part('newToday', stats.newToday) : null,
     !short && stats.blocked > 0 ? part('blocked', stats.blocked) : null,
   ]
     .filter(Boolean)
@@ -170,9 +172,15 @@ export default function AdminUsers() {
       className="animate-fade-in [--sticky-top:var(--mobile-header)] lg:[--sticky-top:3.5rem]"
       style={{ '--mobile-header': mobileCss } as CSSProperties}
     >
-      <div className="mb-5 flex items-start justify-between gap-3">
+      <div className="mb-5 flex items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
           <AdminBackButton to="/admin" />
+          <div
+            aria-hidden="true"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent-500/10 text-accent-400"
+          >
+            <UsersIcon className="h-5 w-5" />
+          </div>
           <div className="min-w-0">
             <h1 className="text-xl font-bold text-dark-100">{t('admin.users.title')}</h1>
             {summaryStats ? (
@@ -196,7 +204,9 @@ export default function AdminUsers() {
             statsQuery.refetch();
           }}
           aria-label={t('common.refresh')}
-          className="btn-ghost shrink-0 p-2"
+          title={t('common.refresh')}
+          disabled={refreshing}
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 text-dark-300 transition-colors hover:border-dark-600 hover:text-dark-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/40 disabled:cursor-wait"
         >
           <RefreshIcon className={cn('h-5 w-5', refreshing && 'animate-spin')} />
         </button>
@@ -220,7 +230,13 @@ export default function AdminUsers() {
         <ListRowSkeleton count={6} actions={[]} />
       ) : usersQuery.isError ? (
         <div className="rounded-2xl border border-error-500/30 bg-error-500/10 p-6 text-center">
-          <p className="mb-3 text-error-400">{t('admin.users.loadError')}</p>
+          <p className="mb-3 text-error-400">
+            {state.view === 'online' &&
+            isAxiosError(usersQuery.error) &&
+            usersQuery.error.response?.status === 503
+              ? t('admin.users.onlineUnavailable')
+              : t('admin.users.loadError')}
+          </p>
           <button type="button" onClick={() => usersQuery.refetch()} className="btn-secondary">
             {t('common.retry')}
           </button>
