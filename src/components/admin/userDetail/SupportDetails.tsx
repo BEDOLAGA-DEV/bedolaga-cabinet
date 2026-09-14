@@ -3,7 +3,7 @@ import { Link } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { adminUsersApi, type UserPanelInfo } from '@/api/adminUsers';
-import { ChevronDownIcon, CopyIcon } from '@/components/icons';
+import { ChevronDownIcon, CopyIcon, RadarIcon } from '@/components/icons';
 import { Spinner } from '@/components/ui/Spinner';
 import { useNotify } from '@/platform/hooks/useNotify';
 import { copyToClipboard } from '@/utils/clipboard';
@@ -95,25 +95,37 @@ export function SupportDetails({
           <p className="text-sm text-dark-500">{t(`${ns}.panelNotFound`)}</p>
         )}
         {secrets.map((item) => (
-          <button
+          <div
             key={item.key}
-            type="button"
-            onClick={() => void copy(item.value)}
-            title={t('common.copy')}
-            className="flex w-full items-center gap-3 rounded-xl bg-dark-800/60 px-3 py-2 text-left transition-colors hover:bg-dark-800"
+            className="flex flex-wrap items-center gap-x-2 gap-y-1.5 rounded-xl bg-dark-800/60 py-1.5 pl-3 pr-1.5"
           >
-            <div className="min-w-0 flex-1">
+            <div className="min-w-0 flex-1 basis-56">
               <div className="text-xs text-dark-500">{item.label}</div>
               <div className="truncate font-mono text-xs text-dark-200">{item.value}</div>
             </div>
-            <CopyIcon className="h-4 w-4 shrink-0 text-dark-500" />
-          </button>
+            {/* Проверка — у той ссылки, которую проверяет BSCHEKER, а не отдельной кнопкой под
+                списком и не пунктом «Проверить конфиги (РФ)» в «⋯», где не было видно, что это он. */}
+            {item.key === 'url' && reachabilityLink && (
+              <Link
+                to={reachabilityLink}
+                // На телефоне — отдельной строкой под ссылкой: рядом она сжимала адрес до «https://…».
+                className="btn-secondary order-last mb-1 min-h-0 shrink-0 gap-1.5 px-2.5 py-1.5 text-xs sm:order-none sm:mb-0"
+              >
+                <RadarIcon className="h-4 w-4" />
+                {t('admin.reachability.shortcuts.checkSubscription')}
+              </Link>
+            )}
+            <button
+              type="button"
+              onClick={() => void copy(item.value)}
+              aria-label={`${t('common.copy')}: ${item.label}`}
+              title={t('common.copy')}
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-dark-500 transition-colors hover:bg-dark-700/60 hover:text-dark-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/40"
+            >
+              <CopyIcon className="h-4 w-4" />
+            </button>
+          </div>
         ))}
-        {reachabilityLink && (
-          <Link to={reachabilityLink} className="btn-secondary self-start">
-            {t('admin.reachability.shortcuts.checkSubscription')}
-          </Link>
-        )}
 
         <div className="mt-1 flex items-center gap-2">
           <span className="text-sm font-semibold text-dark-200">{t(`${ns}.requestHistory`)}</span>

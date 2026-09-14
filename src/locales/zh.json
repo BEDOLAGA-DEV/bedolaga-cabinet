@@ -3454,7 +3454,7 @@
           },
           "support": {
             "title": "技术支持",
-            "hint": "订阅链接、HAPP、密钥、请求历史"
+            "hint": "订阅链接、密钥、请求历史"
           },
           "confirm": {
             "cancelSubscription": "取消订阅？时间和流量不会退回。",
@@ -3567,7 +3567,7 @@
           "noReferrals": "暂无推荐",
           "removeReferral": "移除推荐",
           "referralRemoved": "推荐已移除",
-          "addReferral": "添加推荐",
+          "add": "添加",
           "referralAdded": "推荐已添加",
           "searchPlaceholder": "按名称、邮箱或 Telegram ID 搜索...",
           "alreadyReferred": "已有推荐人",
@@ -3764,9 +3764,7 @@
           "tariffUntil": "{{tariff}} · 至 {{date}}"
         },
         "menu": {
-          "more": "更多操作",
-          "confirmRequired": "需要确认",
-          "checkConfigs": "检查配置（俄罗斯）"
+          "more": "更多操作"
         },
         "overview": {
           "trafficPeriod": "流量",
@@ -3819,17 +3817,16 @@
           "matches": "一致",
           "differs": "存在差异",
           "unknown": "尚未检查",
-          "checked": "已检查",
-          "checkNow": "立即比对",
-          "pull": "从面板拉取",
-          "pushManual": "手动推送到面板",
+          "checked": "已同步",
+          "pull": "面板 → 机器人",
+          "pushManual": "机器人 → 面板",
           "confirmPull": "从面板拉取数据到机器人？机器人数据库中的到期时间和流量将被覆盖。",
           "confirmPush": "将机器人数据推送到面板？面板中的到期时间、流量和分组将被覆盖。",
           "notLinked": "面板中不存在",
           "live": "可用",
           "notLive": "不可用",
-          "pullTitle": "从面板获取",
-          "pushTitle": "推送到面板",
+          "pullTitle": "面板 → 机器人",
+          "pushTitle": "机器人 → 面板",
           "remnawaveId": "Remnawave 面板 ID",
           "rows": {
             "status": "访问",

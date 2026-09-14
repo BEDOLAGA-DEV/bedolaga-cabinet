@@ -4621,7 +4621,7 @@
           },
           "support": {
             "title": "For support",
-            "hint": "subscription link, HAPP, keys, request history"
+            "hint": "subscription link, keys, request history"
           },
           "confirm": {
             "cancelSubscription": "Cancel the subscription? Time and traffic will not come back.",
@@ -4736,7 +4736,7 @@
           "noReferrals": "No referrals yet",
           "removeReferral": "Remove referral",
           "referralRemoved": "Referral removed successfully",
-          "addReferral": "Add Referral",
+          "add": "Add",
           "referralAdded": "Referral added successfully",
           "searchPlaceholder": "Search by name, email, or Telegram ID...",
           "alreadyReferred": "already has referrer",
@@ -4929,9 +4929,7 @@
           "tariffUntil": "{{tariff}} · until {{date}}"
         },
         "menu": {
-          "more": "More actions",
-          "confirmRequired": "Require confirmation",
-          "checkConfigs": "Check configs (RU)"
+          "more": "More actions"
         },
         "overview": {
           "trafficPeriod": "Traffic",
@@ -4989,17 +4987,16 @@
           "matches": "In sync",
           "differs": "Differences found",
           "unknown": "Not checked yet",
-          "checked": "Checked",
-          "checkNow": "Compare now",
-          "pull": "Pull from panel",
-          "pushManual": "Push to panel manually",
+          "checked": "Synced",
+          "pull": "Panel → bot",
+          "pushManual": "Bot → panel",
           "confirmPull": "Pull data from the panel into the bot? Expiry and traffic in the bot database will be overwritten.",
           "confirmPush": "Push bot data to the panel? Expiry, traffic and squads in the panel will be overwritten.",
           "notLinked": "Not in panel",
           "live": "active",
           "notLive": "inactive",
-          "pullTitle": "Pull from panel",
-          "pushTitle": "Push to panel",
+          "pullTitle": "Panel → bot",
+          "pushTitle": "Bot → panel",
           "remnawaveId": "Remnawave panel ID",
           "rows": {
             "status": "Access",

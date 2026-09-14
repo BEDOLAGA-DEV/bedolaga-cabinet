@@ -1,4 +1,4 @@
-import { useId, useState } from 'react';
+import { useState } from 'react';
 import { Link, useLocation } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
@@ -8,6 +8,7 @@ import { SubscriptionStateChip, UserAvatar, useMoney } from '@/components/admin/
 import { CopyIcon, LinkIcon, UsersIcon, WalletIcon, XIcon } from '@/components/icons';
 import { StatCard } from '@/components/stats';
 import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
+import { cn } from '@/lib/utils';
 import { useNotify } from '@/platform/hooks/useNotify';
 import { useDestructiveConfirm } from '@/platform/hooks/useNativeDialog';
 import { copyToClipboard } from '@/utils/clipboard';
@@ -36,7 +37,6 @@ export function ReferralsTab({ user, userId, canEdit, onUserRefresh }: Referrals
   const money = useMoney();
   const confirmDestructive = useDestructiveConfirm();
   const { busy, run } = useAdminAction();
-  const [picker, setPicker] = useState<'referrer' | 'referral' | null>(null);
   const [commissionOpen, setCommissionOpen] = useState(false);
   const ns = 'admin.users.detail.referrals';
   const referral = user.referral;
@@ -153,21 +153,43 @@ export function ReferralsTab({ user, userId, canEdit, onUserRefresh }: Referrals
             ) : (
               <span className="inline-flex items-center gap-x-2">
                 <span className="text-dark-500">—</span>
-                {canEdit && picker !== 'referrer' && (
-                  <LinkAction onClick={() => setPicker('referrer')}>{t(`${ns}.assign`)}</LinkAction>
+                {canEdit && (
+                  <UserPicker
+                    trigger={t(`${ns}.assign`)}
+                    excludeIds={excludeIds}
+                    busy={busy}
+                    onPick={(target) =>
+                      run(() => adminUsersApi.assignReferrer(userId, target.id), {
+                        success: t(`${ns}.referrerAssigned`),
+                        after: onUserRefresh,
+                      })
+                    }
+                  />
                 )}
               </span>
             ),
           },
           {
             // Комиссия — строкой, а не ссылкой в заголовке: на телефоне она выталкивала
-            // название секции до «Реф…».
+            // название секции до «Реф…». Правка — тут же, в строке, без отдельной рамки.
             key: 'commission',
             label: t(`${ns}.commission`),
-            value: (
+            value: commissionOpen ? (
+              <CommissionEditor
+                current={referral.commission_percent}
+                busy={busy}
+                onClose={() => setCommissionOpen(false)}
+                onSave={(percent) =>
+                  run(() => adminUsersApi.updateReferralCommission(userId, percent), {
+                    success: t(`${ns}.commissionSaved`),
+                    after: onUserRefresh,
+                  })
+                }
+              />
+            ) : (
               <span className="inline-flex flex-wrap items-center gap-x-2">
                 {commissionLabel}
-                {canEdit && !commissionOpen && (
+                {canEdit && (
                   <LinkAction onClick={() => setCommissionOpen(true)}>
                     {t('admin.users.detail.overview.change')}
                   </LinkAction>
@@ -177,33 +199,30 @@ export function ReferralsTab({ user, userId, canEdit, onUserRefresh }: Referrals
           },
         ]}
       />
-      {commissionOpen && (
-        <CommissionEditor
-          current={referral.commission_percent}
-          busy={busy}
-          onClose={() => setCommissionOpen(false)}
-          onSave={(percent) =>
-            run(() => adminUsersApi.updateReferralCommission(userId, percent), {
-              success: t(`${ns}.commissionSaved`),
-              after: onUserRefresh,
-            })
-          }
-        />
-      )}
-      {picker === 'referrer' && (
-        <UserPicker
-          excludeIds={excludeIds}
-          busy={busy}
-          onClose={() => setPicker(null)}
-          onPick={async (target) => {
-            const done = await run(() => adminUsersApi.assignReferrer(userId, target.id), {
-              success: t(`${ns}.referrerAssigned`),
-              after: onUserRefresh,
-            });
-            if (done) setPicker(null);
-          }}
-        />
-      )}
+
+      {/* Рефералы: заголовок с числом и «Добавить» справа — окно поиска у самой кнопки. */}
+      <div className="flex items-center justify-between gap-3 border-t border-dark-800/80 pt-3">
+        <h3 className="text-sm font-semibold text-dark-200">
+          {t(`${ns}.referralsList`)}
+          {referrals.length > 0 && (
+            <span className="ml-2 font-normal tabular-nums text-dark-500">{referrals.length}</span>
+          )}
+        </h3>
+        {canEdit && (
+          <UserPicker
+            trigger={t(`${ns}.add`)}
+            align="end"
+            excludeIds={excludeIds}
+            busy={busy}
+            onPick={(target) =>
+              run(() => adminUsersApi.assignReferrer(target.id, userId), {
+                success: t(`${ns}.referralAdded`),
+                after: refreshAll,
+              })
+            }
+          />
+        )}
+      </div>
 
       {listQuery.isLoading ? (
         <SkeletonGroup className="space-y-2">
@@ -264,34 +283,11 @@ export function ReferralsTab({ user, userId, canEdit, onUserRefresh }: Referrals
           ))}
         </ul>
       )}
-
-      {canEdit &&
-        (picker === 'referral' ? (
-          <UserPicker
-            excludeIds={excludeIds}
-            busy={busy}
-            onClose={() => setPicker(null)}
-            onPick={async (target) => {
-              const done = await run(() => adminUsersApi.assignReferrer(target.id, userId), {
-                success: t(`${ns}.referralAdded`),
-                after: refreshAll,
-              });
-              if (done) setPicker(null);
-            }}
-          />
-        ) : (
-          <button
-            type="button"
-            onClick={() => setPicker('referral')}
-            className="btn-secondary self-start"
-          >
-            {t(`${ns}.addReferral`)}
-          </button>
-        ))}
     </Section>
   );
 }
 
+/** Комиссия в строке: поле «%», «Сохранить», «По умолчанию» (если своя), «Отмена». */
 function CommissionEditor({
   current,
   busy,
@@ -305,41 +301,68 @@ function CommissionEditor({
 }) {
   const { t } = useTranslation();
   const notify = useNotify();
-  const id = useId();
   const [value, setValue] = useState(current != null ? String(current) : '');
   const ns = 'admin.users.detail';
+  const compact = 'min-h-0 px-2.5 py-1 text-xs';
 
-  const save = async () => {
-    const parsed = value.trim() === '' ? null : Number(value);
-    if (parsed !== null && (!Number.isFinite(parsed) || parsed < 0 || parsed > 100)) {
+  const save = async (percent: number | null) => {
+    if (percent !== null && (!Number.isFinite(percent) || percent < 0 || percent > 100)) {
       notify.error(t(`${ns}.referral.invalidPercent`), t('common.error'));
       return;
     }
-    if (await onSave(parsed)) onClose();
+    if (await onSave(percent)) onClose();
   };
+  const typed = value.trim() === '' ? null : Number(value);
 
   return (
-    <div className="flex flex-wrap items-end gap-2 rounded-xl border border-dark-700 bg-dark-800/60 p-3">
-      <label htmlFor={id} className="flex flex-col gap-1 text-xs text-dark-500">
-        {t(`${ns}.referrals.commissionPercent`)}
+    <span className="inline-flex flex-wrap items-center gap-2">
+      <span className="inline-flex items-center gap-1.5">
         <input
-          id={id}
           type="number"
           inputMode="numeric"
           min={0}
           max={100}
+          autoFocus
           value={value}
+          aria-label={t(`${ns}.referrals.commissionPercent`)}
           onChange={(event) => setValue(event.target.value)}
-          placeholder={t(`${ns}.referrals.default`)}
-          className="input w-28 py-2"
+          onKeyDown={(event) => {
+            if (event.key === 'Enter') void save(typed);
+            if (event.key === 'Escape') onClose();
+          }}
+          placeholder="0–100"
+          className="input h-8 w-20 px-2.5 py-1 text-sm"
         />
-      </label>
-      <button type="button" onClick={() => void save()} disabled={busy} className="btn-primary">
+        <span className="text-dark-400">%</span>
+      </span>
+      <button
+        type="button"
+        onClick={() => void save(typed)}
+        disabled={busy}
+        className={cn('btn-primary', compact)}
+      >
         {t('common.save')}
       </button>
-      <button type="button" onClick={onClose} className="btn-secondary">
-        {t('common.cancel')}
+      {current != null && (
+        <button
+          type="button"
+          onClick={() => void save(null)}
+          disabled={busy}
+          className={cn('btn-secondary', compact)}
+        >
+          {t(`${ns}.referrals.default`)}
+        </button>
+      )}
+      {/* «Отмена» — крестиком: на телефоне текстовая кнопка переносилась на вторую строку. */}
+      <button
+        type="button"
+        onClick={onClose}
+        aria-label={t('common.cancel')}
+        title={t('common.cancel')}
+        className="btn-secondary h-8 min-h-0 w-8 p-0"
+      >
+        <XIcon className="h-4 w-4" />
       </button>
-    </div>
+    </span>
   );
 }

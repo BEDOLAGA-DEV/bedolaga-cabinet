@@ -59,7 +59,6 @@ export interface SubscriptionTabProps {
   nodeUsage: UserNodeUsageResponse | null;
   syncStatus: PanelSyncStatusResponse | null;
   syncLoading: boolean;
-  onCheckSync: () => void;
   can: { manage: boolean; sync: boolean; devices: boolean };
   busy: boolean;
   actions: SubscriptionTabActions;
@@ -178,7 +177,6 @@ export function SubscriptionTab(props: SubscriptionTabProps) {
               status={props.syncStatus}
               loading={props.syncLoading}
               busy={busy}
-              onCheck={props.onCheckSync}
               onPull={actions.syncFromPanel}
               onPush={actions.syncToPanel}
             />
@@ -200,7 +198,6 @@ export function SubscriptionTab(props: SubscriptionTabProps) {
           status={props.syncStatus}
           loading={props.syncLoading}
           busy={busy}
-          onCheck={props.onCheckSync}
           onPull={actions.syncFromPanel}
           onPush={actions.syncToPanel}
         />

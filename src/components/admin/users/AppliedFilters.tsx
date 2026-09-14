@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { XIcon } from '@/components/icons';
-import { type FilterField, type FilterKey, currentLabel } from './FiltersPopover';
+import { type FilterField, type FilterKey, currentLabel, isApplied } from './FiltersPopover';
 
 interface AppliedFiltersProps {
   fields: FilterField[];
@@ -11,7 +11,7 @@ interface AppliedFiltersProps {
 /** «Подписка: истекла ✕» — что сейчас сужает список; крестик убирает один фильтр. */
 export function AppliedFilters({ fields, onRemove, onResetAll }: AppliedFiltersProps) {
   const { t } = useTranslation();
-  const applied = fields.filter((field) => field.value !== '');
+  const applied = fields.filter(isApplied);
   if (applied.length === 0) return null;
 
   return (
