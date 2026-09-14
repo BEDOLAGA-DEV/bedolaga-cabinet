@@ -3439,7 +3439,36 @@
           "deleteTitle": "删除订阅",
           "deleteHint": "订阅及其设备将被永久删除",
           "deleteButton": "删除订阅",
-          "deleted": "订阅已删除"
+          "deleted": "订阅已删除",
+          "extendBy": "延长 {{count}} 天",
+          "customDays": "自定义…",
+          "shortenTitle": "缩短",
+          "deviceLimitTitle": "设备上限",
+          "deviceLimitHint": "套餐上限：{{max}}",
+          "removePackage": "移除流量包",
+          "purchasedExtra": "已加购 {{gb}} GB",
+          "periodDays": "{{count}}天",
+          "noNodeUsage": "该时段没有节点流量",
+          "deviceSince": "自 {{date}}",
+          "sbpShort": "SBP",
+          "cancelTitle": "取消订阅",
+          "cancelButton": "取消订阅…",
+          "dangerZone": {
+            "title": "危险区",
+            "description": "取消会立即停止订阅；删除会连同设备从机器人和面板移除。两者都需要确认。"
+          },
+          "support": {
+            "title": "技术支持",
+            "hint": "订阅链接、HAPP、密钥、请求历史"
+          },
+          "confirm": {
+            "cancelSubscription": "取消订阅？时间和流量不会退回。",
+            "shorten": "从订阅中扣除 {{count}} 天？",
+            "removePackage": "移除 {{gb}} GB 流量包？其流量将消失。",
+            "deleteDevice": "删除设备“{{name}}”？需要重新连接。",
+            "resetDevices": "重置所有设备？所有客户端需要重新连接。",
+            "cancelSbp": "关闭 SBP 自动扣款？"
+          }
         },
         "balance": {
           "current": "当前余额",
@@ -3757,7 +3786,20 @@
           "allActivity": "全部活动",
           "noActivity": "暂无记录"
         },
-        "restrictionsSaved": "限制已更新"
+        "restrictionsSaved": "限制已更新",
+        "panel": {
+          "title": "Remnawave 面板",
+          "matches": "与面板一致",
+          "differs": "存在差异",
+          "unknown": "尚未检查",
+          "checked": "已检查",
+          "truth": "面板是数据来源，机器人会自动同步其变更",
+          "checkNow": "立即比对",
+          "pull": "从面板拉取…",
+          "pushManual": "手动推送到面板…",
+          "confirmPull": "从面板拉取数据到机器人？机器人数据库中的到期时间和流量将被覆盖。",
+          "confirmPush": "将机器人数据推送到面板？面板中的到期时间、流量和分组将被覆盖。"
+        }
       },
       "notFound": "未找到用户",
       "purchaseCount": "购买次数：{{count}}",
