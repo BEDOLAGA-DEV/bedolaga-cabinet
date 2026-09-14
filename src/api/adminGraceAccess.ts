@@ -142,6 +142,14 @@ export const adminGraceAccessApi = {
     return response.data;
   },
 
+  /** External squads for «Replace with a chosen one» — the bot has no synced copy, so only the panel. */
+  getExternalSquads: async (): Promise<GraceSquadsResponse> => {
+    const response = await apiClient.get<GraceSquadsResponse>(
+      '/cabinet/admin/grace-access/external-squads',
+    );
+    return response.data;
+  },
+
   getSessions: async (params: {
     state?: GraceSessionFilter;
     page?: number;

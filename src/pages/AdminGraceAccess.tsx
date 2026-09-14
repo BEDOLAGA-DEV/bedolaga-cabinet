@@ -279,17 +279,20 @@ function SquadField({
   squads,
   squadsAvailable,
   synced,
+  unavailableHint,
   disabled,
   invalid,
 }: {
   id: string;
   label: string;
-  description: string;
+  description?: string;
   value: string;
   onChange: (value: string) => void;
   squads: GraceSquadOption[];
   squadsAvailable: boolean;
   synced?: boolean;
+  /** Что сказать, когда списка нет; по умолчанию — про панель и синхронизацию внутренних сквадов. */
+  unavailableHint?: string;
   disabled: boolean;
   invalid: boolean;
 }) {
@@ -344,9 +347,11 @@ function SquadField({
           }}
         />
       )}
-      <FieldHint>{description}</FieldHint>
+      {description && <FieldHint>{description}</FieldHint>}
       {!squadsAvailable && (
-        <p className="mt-1 text-xs text-warning-400">{t('admin.graceAccess.squads.unavailable')}</p>
+        <p className="mt-1 text-xs text-warning-400">
+          {unavailableHint ?? t('admin.graceAccess.squads.unavailable')}
+        </p>
       )}
       {squadsAvailable && synced && (
         <p className="mt-1 text-xs text-warning-400">{t('admin.graceAccess.squads.synced')}</p>
@@ -571,6 +576,14 @@ export default function AdminGraceAccess() {
 
   const [form, setForm] = useState<GraceForm | null>(null);
   const [externalChoice, setExternalChoice] = useState<ExternalChoice>('detach');
+  // Владелец (2026-09-14): «бот тоже их получает, ввод вручную там не нужен» — внешний
+  // сквад для «Заменить на указанный» выбирается по имени из списка панели.
+  const { data: externalSquads } = useQuery({
+    queryKey: ['grace-access-external-squads'],
+    queryFn: adminGraceAccessApi.getExternalSquads,
+    staleTime: 60_000,
+    enabled: externalChoice === 'custom',
+  });
   const [saveError, setSaveError] = useState<string | null>(null);
   // null — ещё не решали: первый ответ сервера раскрывает «Дополнительно», если там
   // есть что показать (настроенный внешний сквад). Дальше блоком управляет только
@@ -1086,24 +1099,23 @@ export default function AdminGraceAccess() {
               />
               <FieldHint>{t(`admin.graceAccess.external.${externalChoice}Desc`)}</FieldHint>
               {externalChoice === 'custom' && (
-                <input
-                  id="grace-external-squad-uuid"
-                  type="text"
-                  aria-label={t('admin.graceAccess.external.uuid')}
-                  className={cn(
-                    'input mt-2 font-mono text-xs',
-                    (invalidFields.has('external_squad_uuid') || externalIncomplete) &&
-                      'border-error-500/50',
-                  )}
-                  placeholder="00000000-0000-0000-0000-000000000000"
-                  value={
-                    externalChoiceOf(form.external_squad_uuid) === 'keep'
-                      ? ''
-                      : form.external_squad_uuid
-                  }
-                  disabled={isLocked('external_squad_uuid')}
-                  onChange={(event) => update('external_squad_uuid', event.target.value)}
-                />
+                <div className="mt-3">
+                  <SquadField
+                    id="grace-external-squad-uuid"
+                    label={t('admin.graceAccess.external.squad')}
+                    value={
+                      externalChoiceOf(form.external_squad_uuid) === 'keep'
+                        ? ''
+                        : form.external_squad_uuid
+                    }
+                    onChange={(value) => update('external_squad_uuid', value)}
+                    squads={externalSquads?.items ?? []}
+                    squadsAvailable={externalSquads?.available ?? true}
+                    unavailableHint={t('admin.graceAccess.external.unavailable')}
+                    disabled={isLocked('external_squad_uuid')}
+                    invalid={invalidFields.has('external_squad_uuid') || externalIncomplete}
+                  />
+                </div>
               )}
               {lockNote('external_squad_uuid')}
             </div>

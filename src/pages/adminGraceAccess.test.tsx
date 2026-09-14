@@ -82,12 +82,16 @@ const overview = (overrides: Partial<GraceAccessOverview> = {}): GraceAccessOver
 const state: {
   overview: GraceAccessOverview;
   squads: GraceSquadsResponse;
+  externalSquads: GraceSquadsResponse;
   saves: unknown[];
 } = {
   overview: overview(),
   squads: { available: true, items: [] },
+  externalSquads: { available: true, items: [] },
   saves: [],
 };
+
+const EXTERNAL_UUID = '17b2c1de-9f47-4a3d-8c11-5b6a0f9e2d34';
 
 vi.mock('@/api/adminGraceAccess', async (importOriginal) => {
   const original = await importOriginal<typeof import('@/api/adminGraceAccess')>();
@@ -96,6 +100,7 @@ vi.mock('@/api/adminGraceAccess', async (importOriginal) => {
     adminGraceAccessApi: {
       getOverview: () => Promise.resolve(state.overview),
       getSquads: () => Promise.resolve(state.squads),
+      getExternalSquads: () => Promise.resolve(state.externalSquads),
       getSessions: () => Promise.resolve({ items: [], total: 0, page: 1, limit: 20 }),
       update: (patch: unknown) => {
         state.saves.push(patch);
@@ -124,6 +129,7 @@ afterEach(() => {
   cleanup();
   state.overview = overview();
   state.squads = { available: true, items: [] };
+  state.externalSquads = { available: true, items: [] };
   state.saves = [];
 });
 
@@ -283,7 +289,9 @@ describe('раздел grace-доступа', () => {
     openAdvanced();
 
     fireEvent.change(screen.getByLabelText('Внешний сквад'), { target: { value: 'custom' } });
-    fireEvent.change(screen.getByLabelText('UUID внешнего сквада'), { target: { value: '   ' } });
+    fireEvent.change(screen.getByLabelText('Какой внешний сквад назначить'), {
+      target: { value: '   ' },
+    });
 
     expect(saveButton().disabled).toBe(true);
     expect(state.saves).toEqual([]);
@@ -383,7 +391,7 @@ describe('раздел grace-доступа', () => {
     fireEvent.change(select, { target: { value: 'custom' } });
 
     expect(select.value).toBe('custom');
-    expect(screen.getByLabelText('UUID внешнего сквада')).toBeTruthy();
+    expect(screen.getByLabelText('Какой внешний сквад назначить')).toBeTruthy();
   });
 
   it('пустой указанный внешний сквад не сохраняется как «Снять»', async () => {
@@ -474,6 +482,49 @@ describe('раздел grace-доступа', () => {
     await waitFor(() => expect(state.saves).toEqual([{ expired_squad_uuid: '' }]));
 
     expect(screen.queryByLabelText('Внешний сквад')).toBeNull();
+  });
+
+  it('«Заменить на указанный» выбирает внешний сквад из списка панели', async () => {
+    // Владелец 2026-09-14: «есть 3 варианта по внешнему скваду, бот тоже их получает,
+    // поэтому ввод вручную там тоже не нужен».
+    state.externalSquads = {
+      available: true,
+      source: 'panel',
+      items: [{ uuid: EXTERNAL_UUID, name: 'Blocked hosts', members_count: 2 }],
+    };
+    await renderPage();
+    openAdvanced();
+    fireEvent.change(screen.getByLabelText('Внешний сквад'), { target: { value: 'custom' } });
+
+    // Список приходит после выбора варианта: до него поле — текстовое, потом — выбор.
+    await waitFor(() =>
+      expect(screen.getByLabelText('Какой внешний сквад назначить').tagName).toBe('SELECT'),
+    );
+    expect(screen.getByText(/Blocked hosts/)).toBeTruthy();
+    fireEvent.change(screen.getByLabelText('Какой внешний сквад назначить'), {
+      target: { value: EXTERNAL_UUID },
+    });
+    fireEvent.click(saveButton());
+
+    await waitFor(() => expect(state.saves).toEqual([{ external_squad_uuid: EXTERNAL_UUID }]));
+  });
+
+  it('при недоступной панели внешний сквад вводится вручную', async () => {
+    state.externalSquads = { available: false, items: [] };
+    await renderPage();
+    openAdvanced();
+    fireEvent.change(screen.getByLabelText('Внешний сквад'), { target: { value: 'custom' } });
+
+    const field = (await screen.findByLabelText(
+      'Какой внешний сквад назначить',
+    )) as HTMLInputElement;
+    expect(field.tagName).toBe('INPUT');
+    // Ответ «панель недоступна» приходит после появления поля — ждём предупреждение.
+    await screen.findByText(/идентификатор внешнего сквада придётся ввести вручную/);
+    fireEvent.change(field, { target: { value: EXTERNAL_UUID } });
+    fireEvent.click(saveButton());
+
+    await waitFor(() => expect(state.saves).toEqual([{ external_squad_uuid: EXTERNAL_UUID }]));
   });
 
   it('«Не трогать» отправляется как keep', async () => {
