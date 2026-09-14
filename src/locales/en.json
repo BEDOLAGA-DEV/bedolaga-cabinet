@@ -3180,7 +3180,8 @@
         "keepDesc": "The account’s external squad stays as is — access through it is not restricted",
         "customDesc": "The chosen external squad is assigned for the grace period, then the previous one is restored",
         "hint": "An external squad in the panel is a separate subscription profile with other hosts and templates (for example, for censorship workarounds). If you do not use them, keep “Detach for grace”.",
-        "uuid": "External squad UUID"
+        "squad": "Which external squad to assign",
+        "unavailable": "The panel is not responding — the external squad identifier has to be typed by hand"
       },
       "limits": {
         "title": "What the user gets",
