@@ -126,6 +126,12 @@ describe('buildUsersQuery', () => {
       purchase_count: 0,
     });
   });
+  it('«трафик на исходе» — от 80 % лимита, а не только исчерпанные', () => {
+    const query = buildUsersQuery(applyView(DEFAULT_STATE, 'traffic'));
+    expect(query.traffic_used_percent_min).toBe(80);
+    expect(query.subscription_status).toBeUndefined();
+    expect(query.sort_by).toBe('traffic');
+  });
   it('hasActiveFilters не считает сортировку', () => {
     expect(hasActiveFilters({ ...DEFAULT_STATE, sort: 'balance' })).toBe(false);
     expect(hasActiveFilters({ ...DEFAULT_STATE, status: 'blocked' })).toBe(true);

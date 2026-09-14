@@ -1,19 +1,99 @@
 import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
 import { motion } from 'framer-motion';
-import { forwardRef, type ComponentPropsWithoutRef } from 'react';
+import {
+  createContext,
+  forwardRef,
+  useCallback,
+  useContext,
+  useRef,
+  useState,
+  type ComponentPropsWithoutRef,
+} from 'react';
 import { CheckIcon, ChevronRightIcon, DotIcon } from '@/components/icons';
 import { cn } from '@/lib/utils';
 import { usePlatform } from '@/platform';
 import { dropdown, dropdownTransition } from '../../motion/transitions';
 
 export {
-  Root as DropdownMenu,
-  Trigger as DropdownMenuTrigger,
   Group as DropdownMenuGroup,
   Portal as DropdownMenuPortal,
   Sub as DropdownMenuSub,
   RadioGroup as DropdownMenuRadioGroup,
 } from '@radix-ui/react-dropdown-menu';
+
+// Root + Trigger
+//
+// Radix открывает меню уже на pointerdown, и касание тоже считается. В ряду чипов,
+// который листают пальцем, любой свайп раскрывал бы фильтр. Для касания открываем
+// по click (он не приходит, если палец поехал). Мышь и клавиатура — как у Radix.
+// Click без pointerdown (VoiceOver, программный) Radix не открывает вовсе — открываем мы.
+
+const TouchToggleContext = createContext<(() => void) | null>(null);
+
+export type DropdownMenuProps = ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Root>;
+
+export function DropdownMenu({
+  open: openProp,
+  defaultOpen,
+  onOpenChange,
+  ...props
+}: DropdownMenuProps) {
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen ?? false);
+  const controlled = openProp !== undefined;
+  const open = controlled ? openProp : uncontrolledOpen;
+  const setOpen = useCallback(
+    (next: boolean) => {
+      if (!controlled) setUncontrolledOpen(next);
+      onOpenChange?.(next);
+    },
+    [controlled, onOpenChange],
+  );
+  const toggle = useCallback(() => setOpen(!open), [open, setOpen]);
+  return (
+    <TouchToggleContext.Provider value={toggle}>
+      <DropdownMenuPrimitive.Root open={open} onOpenChange={setOpen} {...props} />
+    </TouchToggleContext.Provider>
+  );
+}
+
+export type DropdownMenuTriggerProps = ComponentPropsWithoutRef<
+  typeof DropdownMenuPrimitive.Trigger
+>;
+
+export const DropdownMenuTrigger = forwardRef<HTMLButtonElement, DropdownMenuTriggerProps>(
+  ({ onPointerDown, onPointerLeave, onClick, ...props }, ref) => {
+    const toggle = useContext(TouchToggleContext);
+    const pointerRef = useRef<'mouse' | 'touch' | null>(null);
+    return (
+      <DropdownMenuPrimitive.Trigger
+        ref={ref}
+        {...props}
+        onPointerDown={(event) => {
+          onPointerDown?.(event);
+          pointerRef.current = event.pointerType === 'mouse' ? 'mouse' : 'touch';
+          // defaultPrevented выключает обработчик Radix — откроем сами по click.
+          if (pointerRef.current === 'touch') event.preventDefault();
+        }}
+        // Нажали и увели указатель (или правая кнопка) — click не придёт; не держим «мышь»,
+        // иначе следующий click без указателя (экранный диктор) проглотится.
+        onPointerLeave={(event) => {
+          onPointerLeave?.(event);
+          pointerRef.current = null;
+        }}
+        onClick={(event) => {
+          onClick?.(event);
+          const pointer = pointerRef.current;
+          pointerRef.current = null;
+          // Мышь уже открыла меню на нажатии; касание и click без указателя — открываем здесь.
+          if (pointer === 'mouse' || event.defaultPrevented) return;
+          toggle?.();
+        }}
+      />
+    );
+  },
+);
+
+DropdownMenuTrigger.displayName = 'DropdownMenuTrigger';
 
 // SubTrigger
 export interface DropdownMenuSubTriggerProps
@@ -49,13 +129,13 @@ export type DropdownMenuSubContentProps = ComponentPropsWithoutRef<
 >;
 
 export const DropdownMenuSubContent = forwardRef<HTMLDivElement, DropdownMenuSubContentProps>(
-  ({ className, ...props }, ref) => (
+  ({ className, children, ...props }, ref) => (
     <DropdownMenuPrimitive.SubContent
       ref={ref}
       className={cn(
         'z-50 min-w-[8rem] overflow-hidden',
-        'rounded-linear-lg border border-dark-700/50 bg-dark-900/95 backdrop-blur-linear',
-        'p-1 text-dark-100 shadow-linear-lg',
+        'rounded-xl border border-dark-700 bg-dark-900',
+        'p-1 text-dark-100 shadow-2xl shadow-black/40',
         className,
       )}
       asChild
@@ -67,7 +147,9 @@ export const DropdownMenuSubContent = forwardRef<HTMLDivElement, DropdownMenuSub
         animate="animate"
         exit="exit"
         transition={dropdownTransition}
-      />
+      >
+        {children}
+      </motion.div>
     </DropdownMenuPrimitive.SubContent>
   ),
 );
@@ -80,7 +162,9 @@ export type DropdownMenuContentProps = ComponentPropsWithoutRef<
 >;
 
 export const DropdownMenuContent = forwardRef<HTMLDivElement, DropdownMenuContentProps>(
-  ({ className, sideOffset = 4, ...props }, ref) => {
+  // children — внутрь motion.div: при asChild Radix отдаёт свои props ребёнку, и пункты,
+  // оставленные в {...props}, перетирались бы пустым <motion.div/> — меню открывалось пустым.
+  ({ className, sideOffset = 4, children, ...props }, ref) => {
     const { haptic } = usePlatform();
 
     return (
@@ -90,8 +174,10 @@ export const DropdownMenuContent = forwardRef<HTMLDivElement, DropdownMenuConten
           sideOffset={sideOffset}
           className={cn(
             'z-50 min-w-[8rem] overflow-hidden',
-            'rounded-linear-lg border border-dark-700/50 bg-dark-900/95 backdrop-blur-linear',
-            'p-1 text-dark-100 shadow-linear-lg',
+            // Непрозрачный фон: полупрозрачный пропускал текст страницы сквозь пункты
+            // (backdrop-blur есть не во всех WebView).
+            'rounded-xl border border-dark-700 bg-dark-900',
+            'p-1 text-dark-100 shadow-2xl shadow-black/40',
             className,
           )}
           onCloseAutoFocus={() => haptic.impact('light')}
@@ -104,7 +190,9 @@ export const DropdownMenuContent = forwardRef<HTMLDivElement, DropdownMenuConten
             animate="animate"
             exit="exit"
             transition={dropdownTransition}
-          />
+          >
+            {children}
+          </motion.div>
         </DropdownMenuPrimitive.Content>
       </DropdownMenuPrimitive.Portal>
     );

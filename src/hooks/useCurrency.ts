@@ -3,6 +3,8 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { currencyApi, type ExchangeRates } from '../api/currency';
 import { setExchangeRates as setGlobalExchangeRates } from '../utils/format';
+import { formatDecimal } from '../utils/formatNumber';
+import { uiLocale } from '../utils/uiLocale';
 
 // Map language to currency
 const LANGUAGE_CURRENCY_MAP: Record<string, keyof ExchangeRates | 'RUB'> = {
@@ -50,8 +52,9 @@ export function useCurrency() {
   // Format amount with currency conversion
   const formatAmount = useCallback(
     (rubAmount: number, decimals: number = 2): string => {
+      // Разряды и дробь — по правилам языка: «3 002,00», а не «3002.00».
       if (isRussian) {
-        return rubAmount.toFixed(decimals);
+        return formatDecimal(rubAmount, decimals, uiLocale());
       }
 
       // Convert to target currency
@@ -66,7 +69,7 @@ export function useCurrency() {
         return Math.round(convertedAmount).toLocaleString('fa-IR');
       }
 
-      return convertedAmount.toFixed(decimals);
+      return formatDecimal(convertedAmount, decimals, uiLocale());
     },
     [isRussian, targetCurrency, exchangeRates],
   );

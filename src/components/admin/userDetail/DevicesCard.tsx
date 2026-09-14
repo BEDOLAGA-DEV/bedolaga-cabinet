@@ -1,9 +1,11 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Card } from '@/components/data-display';
-import { CheckIcon, EditIcon, RefreshIcon, XIcon } from '@/components/icons';
+import { CheckIcon, DevicesIcon, EditIcon, XIcon } from '@/components/icons';
 import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 import { useDestructiveConfirm } from '@/platform/hooks/useNativeDialog';
+import { formatShortDate } from '@/utils/format';
 import { DEVICE_ALIAS_MAX_LENGTH } from '../../../constants/devices';
+import { LinkAction, Section } from './sectionParts';
 
 export interface DeviceRow {
   hwid: string;
@@ -13,134 +15,126 @@ export interface DeviceRow {
   local_name?: string | null;
 }
 
-interface DevicesCardProps {
-  devices: DeviceRow[];
-  loading: boolean;
-  total: number;
-  limit: number;
-  disabled: boolean;
-  editingHwid: string | null;
-  editingName: string;
-  renameSaving: boolean;
-  locale: string;
-  onEditingHwidChange: (hwid: string | null) => void;
-  onEditingNameChange: (name: string) => void;
-  onRename: (hwid: string) => Promise<void>;
-  onDelete: (hwid: string) => Promise<void>;
-  onResetAll: () => Promise<void>;
-  onRefresh: () => void;
-}
-
+/** Имя устройства для человека: своё название, иначе модель, иначе платформа. */
 export function deviceDisplayName(device: DeviceRow): string {
   return (
-    device.local_name?.trim() || device.platform || device.device_model || device.hwid.slice(0, 12)
+    device.local_name?.trim() || device.device_model || device.platform || device.hwid.slice(0, 12)
   );
 }
 
+/** «Айфон (iPhone 15 Pro)» — своё название и модель, если они разные. */
+export function deviceLongName(device: DeviceRow): string {
+  const name = deviceDisplayName(device);
+  const model = device.device_model;
+  return device.local_name?.trim() && model && model !== name ? `${name} (${model})` : name;
+}
+
+interface DevicesCardProps {
+  devices: DeviceRow[];
+  loading: boolean;
+  limit: number;
+  busy: boolean;
+  canManage: boolean;
+  onRename: (hwid: string, name: string) => Promise<boolean>;
+  onDelete: (hwid: string) => Promise<boolean>;
+  onResetAll: () => Promise<boolean>;
+}
+
 /** Устройства подписки: переименование на месте, удаление и сброс через подтверждение. */
-export function DevicesCard(props: DevicesCardProps) {
+export function DevicesCard({
+  devices,
+  loading,
+  limit,
+  busy,
+  canManage,
+  onRename,
+  onDelete,
+  onResetAll,
+}: DevicesCardProps) {
   const { t } = useTranslation();
   const confirmDestructive = useDestructiveConfirm();
-  const {
-    devices,
-    loading,
-    total,
-    limit,
-    disabled,
-    editingHwid,
-    editingName,
-    renameSaving,
-    locale,
-    onEditingHwidChange,
-    onEditingNameChange,
-    onRename,
-    onDelete,
-    onResetAll,
-    onRefresh,
-  } = props;
+  const [editing, setEditing] = useState<{ hwid: string; name: string } | null>(null);
+  const ns = 'admin.users.detail';
+
+  const save = async () => {
+    if (editing && (await onRename(editing.hwid, editing.name))) setEditing(null);
+  };
 
   const remove = async (device: DeviceRow) => {
-    if (
-      await confirmDestructive(
-        t('admin.users.detail.subscription.confirm.deleteDevice', {
-          name: deviceDisplayName(device),
-        }),
-        t('common.delete'),
-      )
-    )
-      await onDelete(device.hwid);
+    const ok = await confirmDestructive(
+      t(`${ns}.subscription.confirm.deleteDevice`, { name: deviceDisplayName(device) }),
+      t('common.delete'),
+    );
+    if (ok) await onDelete(device.hwid);
   };
 
   const resetAll = async () => {
-    if (
-      await confirmDestructive(
-        t('admin.users.detail.subscription.confirm.resetDevices'),
-        t('admin.users.detail.devices.resetAll'),
-      )
-    )
-      await onResetAll();
+    const ok = await confirmDestructive(
+      t(`${ns}.subscription.confirm.resetDevices`),
+      t(`${ns}.devices.resetAll`),
+    );
+    if (ok) await onResetAll();
   };
 
   return (
-    <Card size="md" id="subscription-devices" className="flex flex-col gap-3 scroll-mt-24">
-      <div className="flex flex-wrap items-center gap-2">
-        <h2 className="min-w-0 flex-1 text-lg font-semibold text-dark-100">
-          {t('admin.users.detail.devices.title')}
+    <Section
+      id="subscription-devices"
+      icon={<DevicesIcon className="h-5 w-5" />}
+      title={
+        <>
+          {t(`${ns}.devices.title`)}
           <span className="ml-2 text-sm font-medium text-dark-400">
-            {t('admin.users.detail.facts.devicesValue', { used: total, limit })}
+            {t(`${ns}.facts.devicesValue`, { used: devices.length, limit })}
           </span>
-        </h2>
-        <button
-          type="button"
-          onClick={onRefresh}
-          aria-label={t('common.refresh')}
-          className="btn-ghost p-1.5"
-        >
-          <RefreshIcon className="h-4 w-4" />
-        </button>
-        {devices.length > 0 && (
-          <button
-            type="button"
-            onClick={resetAll}
-            disabled={disabled}
-            className="btn-ghost px-2.5 py-1.5 text-xs text-error-400 hover:bg-error-500/10 hover:text-error-400"
-          >
-            {t('admin.users.detail.devices.resetAll')}
-          </button>
-        )}
-      </div>
-
+        </>
+      }
+      action={
+        canManage &&
+        devices.length > 0 && (
+          <LinkAction onClick={resetAll} disabled={busy}>
+            {t(`${ns}.devices.resetAll`)}
+          </LinkAction>
+        )
+      }
+    >
       {loading && devices.length === 0 ? (
         <SkeletonGroup className="space-y-2">
           <Skeleton variant="card" count={2} className="h-12" />
         </SkeletonGroup>
       ) : devices.length === 0 ? (
-        <p className="text-sm text-dark-500">{t('admin.users.detail.devices.none')}</p>
+        <p className="text-sm text-dark-500">{t(`${ns}.devices.none`)}</p>
       ) : (
-        <ul className="m-0 list-none divide-y divide-dark-800 p-0">
+        <ul className="m-0 list-none divide-y divide-dark-800/80 p-0">
           {devices.map((device) => {
-            const editing = editingHwid === device.hwid;
+            const isEditing = editing?.hwid === device.hwid;
+            const subtitle = [
+              device.local_name?.trim() ? device.device_model : null,
+              device.platform,
+              device.created_at
+                ? t(`${ns}.subscription.deviceSince`, { date: formatShortDate(device.created_at) })
+                : null,
+            ].filter(Boolean);
             return (
-              <li key={device.hwid} className="flex items-center gap-3 py-2.5">
+              <li key={device.hwid} className="flex items-center gap-3 py-2.5" title={device.hwid}>
                 <div className="min-w-0 flex-1">
-                  {editing ? (
+                  {isEditing ? (
                     <input
                       type="text"
                       autoFocus
-                      value={editingName}
+                      value={editing.name}
                       maxLength={DEVICE_ALIAS_MAX_LENGTH}
-                      placeholder={
-                        device.platform || device.device_model || device.hwid.slice(0, 12)
+                      placeholder={device.device_model || device.platform}
+                      aria-label={t(`${ns}.devices.rename`)}
+                      onChange={(event) =>
+                        setEditing({ hwid: device.hwid, name: event.target.value })
                       }
-                      onChange={(event) => onEditingNameChange(event.target.value)}
                       onKeyDown={(event) => {
                         if (event.key === 'Enter') {
                           event.preventDefault();
-                          onRename(device.hwid);
+                          void save();
                         } else if (event.key === 'Escape') {
                           event.preventDefault();
-                          onEditingHwidChange(null);
-                          onEditingNameChange('');
+                          setEditing(null);
                         }
                       }}
                       className="input py-1.5 text-sm"
@@ -150,73 +144,63 @@ export function DevicesCard(props: DevicesCardProps) {
                       {deviceDisplayName(device)}
                     </div>
                   )}
-                  <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs text-dark-500">
-                    {device.device_model && device.platform && <span>{device.device_model}</span>}
-                    <span className="font-mono">{device.hwid.slice(0, 8)}…</span>
-                    {device.created_at && (
-                      <span>
-                        {t('admin.users.detail.subscription.deviceSince', {
-                          date: new Date(device.created_at).toLocaleDateString(locale),
-                        })}
-                      </span>
-                    )}
+                  <div className="mt-0.5 truncate text-xs text-dark-500">
+                    {subtitle.join(' · ')}
                   </div>
                 </div>
-                <div className="flex shrink-0 items-center gap-1">
-                  {editing ? (
-                    <>
-                      <button
-                        type="button"
-                        onClick={() => onRename(device.hwid)}
-                        disabled={renameSaving}
-                        aria-label={t('admin.users.detail.devices.renameSave')}
-                        className="btn-ghost p-1.5 text-success-400 hover:text-success-400"
-                      >
-                        <CheckIcon className="h-4 w-4" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          onEditingHwidChange(null);
-                          onEditingNameChange('');
-                        }}
-                        disabled={renameSaving}
-                        aria-label={t('common.cancel')}
-                        className="btn-ghost p-1.5"
-                      >
-                        <XIcon className="h-4 w-4" />
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          onEditingHwidChange(device.hwid);
-                          onEditingNameChange(device.local_name || '');
-                        }}
-                        aria-label={t('admin.users.detail.devices.rename')}
-                        className="btn-ghost p-1.5"
-                      >
-                        <EditIcon className="h-4 w-4" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => remove(device)}
-                        disabled={disabled}
-                        aria-label={t('common.delete')}
-                        className="btn-ghost p-1.5 hover:text-error-400"
-                      >
-                        <XIcon className="h-4 w-4" />
-                      </button>
-                    </>
-                  )}
-                </div>
+                {canManage && (
+                  <div className="flex shrink-0 items-center gap-1">
+                    {isEditing ? (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => void save()}
+                          disabled={busy}
+                          aria-label={t(`${ns}.devices.renameSave`)}
+                          className="btn-ghost p-2 text-success-400 hover:text-success-400"
+                        >
+                          <CheckIcon className="h-4 w-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setEditing(null)}
+                          disabled={busy}
+                          aria-label={t('common.cancel')}
+                          className="btn-ghost p-2"
+                        >
+                          <XIcon className="h-4 w-4" />
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setEditing({ hwid: device.hwid, name: device.local_name ?? '' })
+                          }
+                          aria-label={t(`${ns}.devices.rename`)}
+                          className="btn-ghost p-2"
+                        >
+                          <EditIcon className="h-4 w-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => void remove(device)}
+                          disabled={busy}
+                          aria-label={t('common.delete')}
+                          className="btn-ghost p-2 hover:text-error-400"
+                        >
+                          <XIcon className="h-4 w-4" />
+                        </button>
+                      </>
+                    )}
+                  </div>
+                )}
               </li>
             );
           })}
         </ul>
       )}
-    </Card>
+    </Section>
   );
 }

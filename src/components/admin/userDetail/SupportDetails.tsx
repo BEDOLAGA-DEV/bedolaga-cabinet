@@ -1,98 +1,104 @@
+import { useState } from 'react';
 import { Link } from 'react-router';
 import { useTranslation } from 'react-i18next';
-import type {
-  SubscriptionRequestRecord,
-  UserPanelInfo,
-  UserSubscriptionInfo,
-} from '@/api/adminUsers';
-import { DropdownSelect } from '@/components/admin/bulkActions/DropdownSelect';
+import { useInfiniteQuery } from '@tanstack/react-query';
+import { adminUsersApi, type UserPanelInfo } from '@/api/adminUsers';
 import { ChevronDownIcon, CopyIcon } from '@/components/icons';
 import { Spinner } from '@/components/ui/Spinner';
+import { useNotify } from '@/platform/hooks/useNotify';
+import { copyToClipboard } from '@/utils/clipboard';
+import { uiLocale } from '@/utils/uiLocale';
 
 interface SupportDetailsProps {
+  userId: number;
+  /** История запросов и ключи — по выбранной подписке (мультитариф). */
+  subscriptionId: number | null;
   panelInfo: UserPanelInfo | null;
-  copyToClipboard: (text: string) => void | Promise<void>;
-  reachabilityLink?: string | null;
-  userSubscriptions: UserSubscriptionInfo[];
-  requestHistory: SubscriptionRequestRecord[];
-  requestHistoryLoading: boolean;
-  requestHistoryTotal: number;
-  requestHistoryOffset: number;
-  requestHistorySubId: number | null;
-  requestHistoryExpanded: boolean;
-  onRequestHistoryExpandedChange: (open: boolean) => void;
-  onRequestHistorySubIdChange: (id: number | null) => void;
-  onLoadRequestHistory: (offset: number, append?: boolean) => Promise<void>;
-  formatDate: (date: string | null) => string;
+  remnawaveId: number | null;
+  reachabilityLink: string | null;
 }
 
-/**
- * Свёрнутые техданные: ссылки, ключи и история запросов подписки.
- * Нужны поддержке раз в неделю, поэтому не спорят с действиями сверху.
- */
-export function SupportDetails(props: SupportDetailsProps) {
-  const { t } = useTranslation();
-  const {
-    panelInfo,
-    copyToClipboard,
-    reachabilityLink,
-    userSubscriptions,
-    requestHistory,
-    requestHistoryLoading,
-    requestHistoryTotal,
-    requestHistoryOffset,
-    requestHistorySubId,
-    requestHistoryExpanded,
-    onRequestHistoryExpandedChange,
-    onRequestHistorySubIdChange,
-    onLoadRequestHistory,
-    formatDate,
-  } = props;
+const HISTORY_PAGE = 20;
 
-  const secrets: { key: string; label: string; value: string | null }[] = panelInfo?.found
-    ? [
-        {
-          key: 'url',
-          label: t('admin.users.detail.subscriptionUrl'),
-          value: panelInfo.subscription_url,
-        },
-        { key: 'happ', label: t('admin.users.detail.happLink'), value: panelInfo.happ_link },
-        { key: 'vless', label: t('admin.users.detail.vlessUuid'), value: panelInfo.vless_uuid },
-        {
-          key: 'trojan',
-          label: t('admin.users.detail.trojanPassword'),
-          value: panelInfo.trojan_password,
-        },
-        { key: 'ss', label: t('admin.users.detail.ssPassword'), value: panelInfo.ss_password },
-      ].filter((item) => item.value)
-    : [];
+/**
+ * Свёрнутые техданные: ссылки, ключи, номер в панели и история запросов подписки.
+ * Нужны поддержке раз в неделю, поэтому не спорят с действиями сверху.
+ * История грузится только когда блок раскрыт.
+ */
+export function SupportDetails({
+  userId,
+  subscriptionId,
+  panelInfo,
+  remnawaveId,
+  reachabilityLink,
+}: SupportDetailsProps) {
+  const { t } = useTranslation();
+  const notify = useNotify();
+  const [open, setOpen] = useState(false);
+  const ns = 'admin.users.detail';
+
+  const history = useInfiniteQuery({
+    queryKey: ['admin-user-request-history', userId, subscriptionId] as const,
+    queryFn: ({ pageParam }) =>
+      adminUsersApi.getSubscriptionRequestHistory(
+        userId,
+        subscriptionId ?? undefined,
+        pageParam,
+        HISTORY_PAGE,
+      ),
+    initialPageParam: 0,
+    getNextPageParam: (last, pages) => {
+      const loaded = pages.reduce((sum, page) => sum + page.records.length, 0);
+      return last.records.length > 0 && loaded < last.total ? loaded : undefined;
+    },
+    enabled: open,
+  });
+  const records = history.data?.pages.flatMap((page) => page.records) ?? [];
+
+  const copy = async (value: string) => {
+    try {
+      await copyToClipboard(value);
+      notify.success(t(`${ns}.copied`));
+    } catch {
+      notify.error(t('common.error'));
+    }
+  };
+
+  const secrets = [
+    { key: 'url', label: t(`${ns}.subscriptionUrl`), value: panelInfo?.subscription_url },
+    { key: 'happ', label: t(`${ns}.happLink`), value: panelInfo?.happ_link },
+    { key: 'vless', label: t(`${ns}.vlessUuid`), value: panelInfo?.vless_uuid },
+    { key: 'trojan', label: t(`${ns}.trojanPassword`), value: panelInfo?.trojan_password },
+    { key: 'ss', label: t(`${ns}.ssPassword`), value: panelInfo?.ss_password },
+    {
+      key: 'panelId',
+      label: t(`${ns}.panel.remnawaveId`),
+      value: remnawaveId ? String(remnawaveId) : null,
+    },
+  ].filter((item): item is { key: string; label: string; value: string } => Boolean(item.value));
 
   return (
     <details
-      open={requestHistoryExpanded}
-      onToggle={(event) => {
-        const open = (event.currentTarget as HTMLDetailsElement).open;
-        onRequestHistoryExpandedChange(open);
-        if (open && requestHistory.length === 0) onLoadRequestHistory(0);
-      }}
+      open={open}
+      onToggle={(event) => setOpen((event.currentTarget as HTMLDetailsElement).open)}
       className="group rounded-2xl border border-dark-700/40 bg-dark-900/40"
     >
       <summary className="flex cursor-pointer list-none items-center gap-2.5 px-4 py-3.5 text-dark-300 [&::-webkit-details-marker]:hidden">
         <ChevronDownIcon className="h-4 w-4 shrink-0 text-dark-500 transition-transform group-open:rotate-180" />
-        <span className="font-semibold">{t('admin.users.detail.subscription.support.title')}</span>
+        <span className="font-semibold">{t(`${ns}.subscription.support.title`)}</span>
         <span className="hidden min-w-0 truncate text-xs text-dark-500 sm:inline">
-          {t('admin.users.detail.subscription.support.hint')}
+          {t(`${ns}.subscription.support.hint`)}
         </span>
       </summary>
       <div className="flex flex-col gap-3 px-4 pb-4">
         {panelInfo && !panelInfo.found && (
-          <p className="text-sm text-dark-500">{t('admin.users.detail.panelNotFound')}</p>
+          <p className="text-sm text-dark-500">{t(`${ns}.panelNotFound`)}</p>
         )}
         {secrets.map((item) => (
           <button
             key={item.key}
             type="button"
-            onClick={() => copyToClipboard(item.value as string)}
+            onClick={() => void copy(item.value)}
             title={t('common.copy')}
             className="flex w-full items-center gap-3 rounded-xl bg-dark-800/60 px-3 py-2 text-left transition-colors hover:bg-dark-800"
           >
@@ -109,80 +115,53 @@ export function SupportDetails(props: SupportDetailsProps) {
           </Link>
         )}
 
-        <div className="mt-1 flex flex-wrap items-center gap-2">
-          <span className="text-sm font-semibold text-dark-200">
-            {t('admin.users.detail.requestHistory')}
-          </span>
-          {requestHistoryTotal > 0 && (
-            <span className="rounded-full bg-accent-500/15 px-2 py-0.5 text-xs font-medium text-accent-400">
-              {requestHistoryTotal}
+        <div className="mt-1 flex items-center gap-2">
+          <span className="text-sm font-semibold text-dark-200">{t(`${ns}.requestHistory`)}</span>
+          {history.data && history.data.pages[0].total > 0 && (
+            <span className="text-xs tabular-nums text-dark-500">
+              {history.data.pages[0].total}
             </span>
-          )}
-          {userSubscriptions.length > 1 && (
-            <label className="ml-auto flex items-center gap-2 text-xs text-dark-500">
-              <span className="sr-only">{t('admin.users.detail.sync.selectSubscription')}</span>
-              <DropdownSelect
-                value={requestHistorySubId ? String(requestHistorySubId) : ''}
-                onChange={(value) => onRequestHistorySubIdChange(Number(value) || null)}
-                className="min-w-[180px]"
-                options={userSubscriptions.map((sub) => ({
-                  value: String(sub.id),
-                  label: sub.tariff_name || `#${sub.id}`,
-                }))}
-              />
-            </label>
           )}
         </div>
 
-        {requestHistoryLoading && requestHistory.length === 0 ? (
+        {history.isLoading ? (
           <div className="flex justify-center py-4">
             <Spinner className="h-5 w-5" />
           </div>
-        ) : requestHistory.length === 0 ? (
-          <p className="text-sm text-dark-500">{t('admin.users.detail.noRequests')}</p>
+        ) : records.length === 0 ? (
+          <p className="text-sm text-dark-500">{t(`${ns}.noRequests`)}</p>
         ) : (
           <>
-            <div className="-mx-4 overflow-x-auto px-4">
-              <table className="w-full min-w-[480px] text-left text-sm">
-                <thead>
-                  <tr className="border-b border-dark-700/50 text-xs text-dark-500">
-                    <th className="pb-2 pr-3 font-medium">{t('admin.users.detail.requestAt')}</th>
-                    <th className="pb-2 pr-3 font-medium">{t('admin.users.detail.requestIp')}</th>
-                    <th className="pb-2 font-medium">{t('admin.users.detail.requestUserAgent')}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {requestHistory.map((record) => (
-                    <tr key={record.id} className="border-b border-dark-800">
-                      <td className="whitespace-nowrap py-2 pr-3 text-dark-200">
-                        {formatDate(record.requestAt)}
-                      </td>
-                      <td className="whitespace-nowrap py-2 pr-3 font-mono text-xs text-dark-300">
-                        {record.requestIp || '—'}
-                      </td>
-                      <td
-                        className="max-w-[240px] truncate py-2 text-xs text-dark-400"
-                        title={record.userAgent || ''}
-                      >
-                        {record.userAgent || '—'}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            {requestHistory.length < requestHistoryTotal && (
+            <ul className="m-0 list-none divide-y divide-dark-800/80 p-0">
+              {records.map((record) => (
+                <li key={record.id} className="flex items-start gap-3 py-2 text-sm">
+                  <span className="w-28 shrink-0 tabular-nums text-dark-300">
+                    {new Date(record.requestAt).toLocaleString(uiLocale(), {
+                      day: '2-digit',
+                      month: '2-digit',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-dark-200" title={record.userAgent ?? ''}>
+                      {record.userAgent || '—'}
+                    </span>
+                    <span className="block font-mono text-xs text-dark-500">
+                      {record.requestIp || '—'}
+                    </span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+            {history.hasNextPage && (
               <button
                 type="button"
-                onClick={() => onLoadRequestHistory(requestHistoryOffset, true)}
-                disabled={requestHistoryLoading}
+                onClick={() => void history.fetchNextPage()}
+                disabled={history.isFetchingNextPage}
                 className="btn-secondary self-start"
               >
-                {requestHistoryLoading ? (
-                  <Spinner className="h-4 w-4" />
-                ) : (
-                  t('admin.users.detail.loadMore')
-                )}
+                {history.isFetchingNextPage ? <Spinner className="h-4 w-4" /> : t(`${ns}.loadMore`)}
               </button>
             )}
           </>

@@ -2,26 +2,28 @@ import { useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { UserAvailableTariff } from '@/api/adminUsers';
 import { DropdownSelect } from '@/components/admin/bulkActions/DropdownSelect';
-import { Card } from '@/components/data-display';
+import { PlusIcon } from '@/components/icons';
+import { Section } from './sectionParts';
 
 interface CreateSubscriptionFormProps {
   tariffs: UserAvailableTariff[];
   /** Тарифы, по которым уже есть живая подписка — их второй раз не создают. */
   excludeTariffIds: ReadonlySet<number>;
-  disabled: boolean;
-  /** Показать подсказку, что подписки нет вовсе. */
-  noActive?: boolean;
-  onCreate: (tariffId: number | null, days: number) => Promise<void>;
+  busy: boolean;
+  /** Подписок нет вовсе — сказать об этом. */
+  noSubscriptions?: boolean;
+  onCreate: (tariffId: number | null, days: number) => Promise<boolean>;
 }
 
 const DEFAULT_DAYS = 30;
+const MAX_DAYS = 3650;
 
-/** Форма «Создать подписку»: показывается только когда подписки нет или в мультитарифе. */
+/** «Создать подписку»: только когда подписки нет или в списке мультитарифа. */
 export function CreateSubscriptionForm({
   tariffs,
   excludeTariffIds,
-  disabled,
-  noActive,
+  busy,
+  noSubscriptions,
   onCreate,
 }: CreateSubscriptionFormProps) {
   const { t } = useTranslation();
@@ -30,26 +32,25 @@ export function CreateSubscriptionForm({
   const [tariff, setTariff] = useState('');
   const [days, setDays] = useState(String(DEFAULT_DAYS));
   const parsedDays = Number(days);
-  const valid = Number.isInteger(parsedDays) && parsedDays >= 1 && parsedDays <= 3650;
+  const valid = Number.isInteger(parsedDays) && parsedDays >= 1 && parsedDays <= MAX_DAYS;
+  const ns = 'admin.users.detail.subscription';
 
   return (
-    <Card size="md" id="subscription-create" className="flex scroll-mt-24 flex-col gap-3">
-      <h2 className="text-lg font-semibold text-dark-100">
-        {t('admin.users.detail.subscription.createNew')}
-      </h2>
-      {noActive && (
-        <p className="text-sm text-dark-400">{t('admin.users.detail.subscription.noActive')}</p>
-      )}
-      <div className="grid gap-3 sm:grid-cols-[1fr_140px_auto] sm:items-end">
+    <Section
+      id="subscription-create"
+      icon={<PlusIcon className="h-5 w-5" />}
+      title={noSubscriptions ? t(`${ns}.noActive`) : t(`${ns}.createNew`)}
+    >
+      <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_8rem_auto] sm:items-end">
         <label className="flex flex-col gap-1 text-xs text-dark-500" htmlFor={tariffId}>
-          {t('admin.users.detail.subscription.tariff')}
+          {t(`${ns}.tariff`)}
           <DropdownSelect
             id={tariffId}
             value={tariff}
             onChange={setTariff}
-            disabled={disabled}
+            disabled={busy}
             options={[
-              { value: '', label: t('admin.users.detail.subscription.selectTariff') },
+              { value: '', label: t(`${ns}.selectTariff`) },
               ...tariffs
                 .filter((item) => !excludeTariffIds.has(item.id))
                 .map((item) => ({ value: String(item.id), label: item.name })),
@@ -57,29 +58,28 @@ export function CreateSubscriptionForm({
           />
         </label>
         <label className="flex flex-col gap-1 text-xs text-dark-500" htmlFor={daysId}>
-          {t('admin.users.detail.subscription.days')}
+          {t(`${ns}.days`)}
           <input
             id={daysId}
             type="number"
+            inputMode="numeric"
             min={1}
-            max={3650}
+            max={MAX_DAYS}
             value={days}
-            disabled={disabled}
+            disabled={busy}
             onChange={(event) => setDays(event.target.value)}
             className="input py-2.5"
           />
         </label>
         <button
           type="button"
-          disabled={disabled || !valid}
-          onClick={() => onCreate(tariff ? Number(tariff) : null, parsedDays)}
+          disabled={busy || !valid}
+          onClick={() => void onCreate(tariff ? Number(tariff) : null, parsedDays)}
           className="btn-primary"
         >
-          {disabled
-            ? t('admin.users.detail.subscription.creating')
-            : t('admin.users.detail.subscription.create')}
+          {t(`${ns}.create`)}
         </button>
       </div>
-    </Card>
+    </Section>
   );
 }

@@ -455,6 +455,8 @@ export interface UsersListParams {
   has_restrictions?: boolean;
   /** false — ни одной подписки. */
   has_subscription?: boolean;
+  /** Живая подписка израсходовала от N % лимита (сегмент «трафик на исходе»). */
+  traffic_used_percent_min?: number;
   /** 0 — ни одной покупки (сегмент «без покупок»). */
   purchase_count?: number;
   sort_by?:

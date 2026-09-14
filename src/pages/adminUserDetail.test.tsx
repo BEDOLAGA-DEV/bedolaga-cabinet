@@ -226,12 +226,14 @@ async function renderDetail(initial = '/admin/users/42') {
 }
 
 describe('AdminUserDetail', () => {
-  it('в шапке видны статус, тариф и онлайн', async () => {
+  it('в шапке видны тариф, группа и онлайн; «Активен» чипом не пишется', async () => {
     await renderDetail();
-    expect(screen.getByText('admin.users.statuses.active')).toBeTruthy();
+    expect(screen.queryByText('admin.users.statuses.active')).toBeNull();
+    expect(screen.getByText('admin.users.detail.header.group')).toBeTruthy();
     expect(screen.getByText('admin.users.detail.header.tariffUntil')).toBeTruthy();
-    expect(screen.getByText('admin.users.detail.header.onlineAt')).toBeTruthy();
-    expect(screen.getByText('languages.ru')).toBeTruthy();
+    expect(await screen.findByText('admin.users.detail.header.onlineAt')).toBeTruthy();
+    // Мок t отдаёт defaultValue — у языка это код заглавными, если перевода нет.
+    expect(screen.getByText('RU')).toBeTruthy();
   });
 
   it('вкладка берётся из адреса, невалидная — обзор', async () => {
@@ -262,7 +264,7 @@ describe('AdminUserDetail', () => {
     await renderDetail();
     expect(screen.queryByRole('button', { name: 'admin.users.userActions.delete' })).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'admin.users.detail.menu.more' }));
-    fireEvent.click(screen.getByRole('menuitem', { name: 'admin.users.userActions.delete' }));
+    fireEvent.click(screen.getByRole('menuitem', { name: /admin\.users\.userActions\.delete/ }));
     await waitFor(() => expect(confirm).toHaveBeenCalled());
     expect(fullDeleteUser).not.toHaveBeenCalled();
   });
@@ -272,13 +274,18 @@ describe('AdminUserDetail', () => {
     fullDeleteUser.mockResolvedValue({ success: true, message: '' });
     await renderDetail();
     fireEvent.click(screen.getByRole('button', { name: 'admin.users.detail.menu.more' }));
-    fireEvent.click(screen.getByRole('menuitem', { name: 'admin.users.userActions.delete' }));
+    fireEvent.click(screen.getByRole('menuitem', { name: /admin\.users\.userActions\.delete/ }));
     await waitFor(() => expect(fullDeleteUser).toHaveBeenCalled());
   });
 
-  it('«Продлить» из шапки переключает на вкладку подписки', async () => {
+  it('«Продлить ▾» из шапки: «другой срок…» открывает вкладку подписки', async () => {
     await renderDetail();
-    fireEvent.click(screen.getByRole('button', { name: 'admin.users.detail.header.extend' }));
+    fireEvent.click(
+      screen.getAllByRole('button', { name: 'admin.users.detail.subscription.extend' })[0],
+    );
+    fireEvent.click(
+      await screen.findByRole('menuitem', { name: 'admin.users.detail.subscription.customDays' }),
+    );
     await waitFor(() =>
       expect(screen.getByRole('tab', { selected: true }).textContent).toContain(
         'admin.users.detail.tabs.subscription',
@@ -298,7 +305,7 @@ describe('AdminUserDetail', () => {
   it('«Подписка» без подписок показывает только форму «Создать»', async () => {
     getUser.mockResolvedValue({ ...detail, subscription: null, subscriptions: [] });
     await renderDetail('/admin/users/42?tab=subscription');
-    expect(await screen.findByText('admin.users.detail.subscription.createNew')).toBeTruthy();
+    expect(await screen.findByText('admin.users.detail.subscription.noActive')).toBeTruthy();
     expect(screen.queryByText('admin.users.detail.subscription.dangerZone.title')).toBeNull();
   });
 

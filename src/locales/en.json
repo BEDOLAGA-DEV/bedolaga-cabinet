@@ -51,7 +51,13 @@
       "weeks_one": "{{count}} wk ago",
       "weeks_other": "{{count}} wks ago",
       "months_one": "{{count}} mo ago",
-      "months_other": "{{count}} mo ago"
+      "months_other": "{{count}} mo ago",
+      "yesterday": "yesterday"
+    },
+    "clear": "Clear",
+    "dayTime": {
+      "today": "today, {{time}}",
+      "yesterday": "yesterday, {{time}}"
     }
   },
   "nav": {
@@ -4392,9 +4398,6 @@
       "subtitle": "Bot user management",
       "search": "ID, name, @username or email",
       "noData": "No users found",
-      "purchaseCount_one": "{{count}} purchase",
-      "purchaseCount_other": "{{count}} purchases",
-      "noPurchases": "No purchases",
       "stats": {
         "total": "Total",
         "active": "Active",
@@ -4620,7 +4623,7 @@
           "cancelButton": "Cancel subscription…",
           "dangerZone": {
             "title": "Danger zone",
-            "description": "Cancelling stops the subscription at once; deleting removes it with its devices from the bot and the panel. Both ask for confirmation."
+            "description": "Cancelling ends the subscription now; deleting erases it and its devices from the bot and the panel."
           },
           "support": {
             "title": "For support",
@@ -4633,27 +4636,42 @@
             "deleteDevice": "Delete device “{{name}}”? It will have to reconnect.",
             "resetDevices": "Reset all devices? Every client will have to reconnect.",
             "cancelSbp": "Disable the SBP auto-payment?"
-          }
+          },
+          "lastPayment": "Last payment",
+          "autopay": "Auto-renewal",
+          "autopayOn": "on",
+          "autopayOff": "off",
+          "extendDays": "Extend by, days",
+          "shortenDays": "Take off, days",
+          "newTariff": "New plan",
+          "package": "Package",
+          "devicesLimit_one": "up to {{count}} device",
+          "devicesLimit_other": "up to {{count}} devices"
         },
         "balance": {
           "current": "Current balance",
-          "amountPlaceholder": "Amount in rubles",
-          "descriptionPlaceholder": "Description (optional)",
+          "amountPlaceholder": "0",
+          "descriptionPlaceholder": "For example, compensation for downtime",
           "add": "Add",
           "subtract": "Deduct",
           "addByAdmin": "Added by admin",
           "subtractByAdmin": "Deducted by admin",
           "recentTransactions": "Recent transactions",
           "title": "Balance",
-          "spentSummary": "spent in total {{amount}}",
           "amountLabel": "Amount",
           "commentLabel": "Comment for the log",
           "confirmSubtract": "Take {{amount}} off the balance?",
           "confirmDeactivate": "Turn off the {{percent}}% discount?",
           "discountTitle": "Personal discount",
-          "noOffer": "No active offer right now",
+          "noOffer": "no active offer",
           "offerFormOpen": "Send an offer…",
-          "noOperations": "No operations yet"
+          "noOperations": "No operations yet",
+          "added": "{{amount}} added",
+          "subtracted": "{{amount}} deducted",
+          "offerNow": "Now",
+          "offerValue": "−{{percent}}% until {{date}}",
+          "spentSummary_one": "spent {{amount}} · {{count}} purchase",
+          "spentSummary_other": "spent {{amount}} · {{count}} purchases"
         },
         "sync": {
           "selectSubscription": "Select subscription",
@@ -4703,13 +4721,17 @@
           "balance": "balance",
           "unknownUser": "Unknown",
           "totalSent": "Total sent",
-          "totalReceived": "Total received"
+          "totalReceived": "Total received",
+          "to": "to:",
+          "from": "from:",
+          "periodValue_one": "{{count}} day",
+          "periodValue_other": "{{count}} days"
         },
         "referrals": {
-          "referredBy": "Referred By",
+          "referredBy": "Invited by",
           "noReferrer": "No referrer assigned",
           "assignReferrer": "Assign Referrer",
-          "removeReferrer": "Remove",
+          "removeReferrer": "Unlink",
           "referrerAssigned": "Referrer assigned successfully",
           "referrerRemoved": "Referrer removed successfully",
           "totalReferrals": "Total Referrals",
@@ -4725,22 +4747,21 @@
           "referralAdded": "Referral added successfully",
           "searchPlaceholder": "Search by name, email, or Telegram ID...",
           "alreadyReferred": "already has referrer",
-          "noUsersFound": "No users found"
+          "noUsersFound": "No users found",
+          "assign": "Assign",
+          "invited": "Invited",
+          "earned": "Earned",
+          "code": "Code",
+          "commissionLink": "Commission: {{value}} · change",
+          "commissionValue": "Commission: {{value}}",
+          "commissionPercent": "Commission, %",
+          "commissionSaved": "Commission saved",
+          "spentHint": "Spent in the service",
+          "confirmRemoveReferrer": "Unlink the referrer? They will stop earning from this user.",
+          "confirmRemoveReferral": "Remove {{name}} from referrals? Earnings from them will stop."
         },
         "activity": {
-          "total": "Total events",
           "empty": "No activity yet",
-          "filters": {
-            "all": "All",
-            "payments": "Payments",
-            "events": "Events",
-            "promo": "Promo",
-            "tickets": "Tickets",
-            "gifts": "Gifts",
-            "referrals": "Referrals",
-            "logins": "Logins",
-            "clicks": "Clicks"
-          },
           "types": {
             "transaction": "Transaction",
             "event": "Event",
@@ -4756,7 +4777,7 @@
             "withdrawal": "Withdrawal request",
             "button_click": "Bot button",
             "cabinet_action": "Cabinet action",
-            "miniapp_action": "Mini App action",
+            "miniapp_action": "Action in the cabinet",
             "screen": "Opened screen",
             "click": "Clicked",
             "message": "Message to bot"
@@ -4764,7 +4785,7 @@
           "sources": {
             "bot": "Bot",
             "cabinet": "Cabinet",
-            "miniapp": "Mini App"
+            "miniapp": "Cabinet"
           },
           "subtypes": {
             "deposit": "Deposit",
@@ -4881,10 +4902,16 @@
             "other": "message"
           },
           "views": {
-            "timeline": "Timeline",
             "tickets": "Tickets",
-            "gifts": "Gifts"
-          }
+            "gifts": "Gifts",
+            "all": "All",
+            "payments": "Payments",
+            "subscription": "Subscription",
+            "actions": "Actions",
+            "logins": "Logins"
+          },
+          "fromBalance": "from balance",
+          "loadError": "Could not load activity"
         },
         "header": {
           "copy": "Copy",
@@ -4894,7 +4921,9 @@
           "onlineAt": "online · {{node}}",
           "write": "Message",
           "extend": "Extend",
-          "topUp": "Add funds"
+          "topUp": "Add funds",
+          "group": "Group: {{name}}",
+          "create": "Grant"
         },
         "facts": {
           "balance": "Balance",
@@ -4909,14 +4938,16 @@
         "menu": {
           "more": "More actions",
           "confirmRequired": "Require confirmation",
-          "checkConfigs": "Check configs via Russian carriers"
+          "checkConfigs": "Check configs (RU)",
+          "promoGroup": "Change promo group",
+          "restrictions": "Restrictions…"
         },
         "overview": {
           "subscription": "Subscription",
           "allDetails": "All details",
           "autopayOn": "auto-renew on",
           "autopayOff": "auto-renew off",
-          "trafficPeriod": "Traffic this period",
+          "trafficPeriod": "Traffic",
           "devicesShort": "devices {{used}} of {{limit}}",
           "extend": "Extend",
           "changeTariff": "Change plan",
@@ -4927,7 +4958,7 @@
           "connection": "Connection",
           "devicesAndTech": "Devices and technical data",
           "now": "Now",
-          "firstConnection": "First connection",
+          "firstConnection": "Connected since",
           "devices": "Devices",
           "lifetimeTraffic": "All time",
           "noDevices": "none",
@@ -4951,33 +4982,101 @@
           "tickets": "Tickets",
           "open": "Open",
           "gifts": "Gifts",
-          "promocodesUsed": "Promo codes used",
           "recent": "Recent events",
           "allActivity": "All activity",
-          "noActivity": "Nothing has happened yet"
+          "noActivity": "Nothing has happened yet",
+          "devicesLink": "Devices",
+          "assign": "Assign",
+          "none": "none",
+          "list": "List",
+          "promocodes": "Promo codes",
+          "restrictTopupFull": "Block balance top-ups",
+          "restrictSubscriptionFull": "Block subscription purchases",
+          "promocodesUsed_one": "{{count}} used",
+          "promocodesUsed_other": "{{count}} used",
+          "ticketsOpen_one": "{{count}} open",
+          "ticketsOpen_other": "{{count}} open",
+          "ticketsClosed_one": "{{count}} closed",
+          "ticketsClosed_other": "{{count}} closed",
+          "giftsSent_one": "{{count}} sent",
+          "giftsSent_other": "{{count}} sent",
+          "giftsReceived_one": "{{count}} received",
+          "giftsReceived_other": "{{count}} received",
+          "all": "All",
+          "details": "Details",
+          "lastActivity": "Last activity"
         },
         "restrictionsSaved": "Restrictions updated",
         "panel": {
           "title": "Remnawave panel",
-          "matches": "Matches the panel",
+          "matches": "In sync",
           "differs": "Differences found",
           "unknown": "Not checked yet",
           "checked": "Checked",
-          "truth": "the panel is the source of truth, the bot picks up its changes itself",
           "checkNow": "Compare now",
           "pull": "Pull from panel…",
           "pushManual": "Push to panel manually…",
           "confirmPull": "Pull data from the panel into the bot? Expiry and traffic in the bot database will be overwritten.",
-          "confirmPush": "Push bot data to the panel? Expiry, traffic and squads in the panel will be overwritten."
-        }
+          "confirmPush": "Push bot data to the panel? Expiry, traffic and squads in the panel will be overwritten.",
+          "notLinked": "Not in panel",
+          "live": "active",
+          "notLive": "inactive",
+          "pullTitle": "Pull from panel",
+          "pushTitle": "Push to panel",
+          "remnawaveId": "Remnawave panel ID",
+          "rows": {
+            "status": "Access",
+            "until": "Valid until",
+            "trafficLimit": "Traffic limit",
+            "trafficUsed": "Used",
+            "devices": "Devices",
+            "squads": "Squads"
+          }
+        },
+        "loadError": "Could not load the user",
+        "done": {
+          "subscription": {
+            "extend": "Extended by {{count}} d — until {{date}}",
+            "shorten": "Shortened by {{count}} d — until {{date}}",
+            "change_tariff": "Plan changed",
+            "activate": "Subscription activated until {{date}}",
+            "cancel": "Subscription cancelled",
+            "create": "Subscription granted until {{date}}"
+          },
+          "pulled": "Data pulled from the panel",
+          "pushed": "Data pushed to the panel",
+          "promoGroup": "Promo group changed",
+          "blocked": "User blocked",
+          "unblocked": "User unblocked",
+          "pulledWithWarning": "The bot had a later end date than the panel — the panel date was applied. Check for an auto-renewal"
+        },
+        "operations": {
+          "title": "Transactions",
+          "operation": "Transaction",
+          "notCompleted": "not completed",
+          "filters": {
+            "all": "All",
+            "deposit": "Top-ups",
+            "withdrawal": "Withdrawals",
+            "subscription_payment": "Purchases"
+          }
+        },
+        "messages_one": "{{count}} message",
+        "messages_other": "{{count}} messages",
+        "ticketLoadError": "Could not open the ticket"
       },
       "notFound": "User not found",
-      "purchaseCount": "Purchases: {{count}}",
-      "summary": "{{total}} users · {{subscribed}} with an active subscription · {{newToday}} new today · {{blocked}} blocked",
+      "summary": {
+        "total_one": "{{value}} user",
+        "total_other": "{{value}} users",
+        "subscribed": "{{value}} with an active subscription",
+        "newToday_one": "{{value}} new today",
+        "newToday_other": "{{value}} new today",
+        "blocked_one": "{{value}} blocked",
+        "blocked_other": "{{value}} blocked"
+      },
       "shown": "Showing {{shown}} of {{total}}",
-      "scrollHint": "More loads as you scroll",
       "loadingMore": "Loading more",
-      "endOfList": "That is all {{total}} for this query",
       "noneFound": "No one found — try another query or clear the filters",
       "loadError": "Could not load the list",
       "reset": "Clear all",
@@ -5047,7 +5146,51 @@
         "expiredAgo": "expired {{count}} d ago",
         "limited": "traffic exhausted"
       },
-      "summaryShort": "{{total}} · {{subscribed}} subscribed · {{newToday}} new"
+      "summaryShort": {
+        "total_one": "{{value}}",
+        "total_other": "{{value}}",
+        "subscribed": "{{value}} subscribed",
+        "newToday_one": "{{value}} new",
+        "newToday_other": "{{value}} new"
+      },
+      "endOfList_one": "That is everyone: {{total}} user",
+      "endOfList_other": "That is everyone: {{total}} users",
+      "subscriptionState": {
+        "active": "Active",
+        "trial": "Trial",
+        "limited": "Traffic exhausted",
+        "expired": "Expired",
+        "disabled": "Disabled",
+        "pending": "Awaiting payment",
+        "other": "Subscription"
+      },
+      "purchaseCount_one": "{{count}} purchase",
+      "purchaseCount_other": "{{count}} purchases",
+      "errors": {
+        "generic": "The action failed. Please try again",
+        "insufficientBalance": "Balance is {{current}}, but {{requested}} was requested",
+        "tariffTaken": "There is already a live subscription for this plan — extend it",
+        "singleTariff": "A subscription already exists. A second one needs multi-plan mode",
+        "graceActive": "Temporary access is active — wait for it to end or restore the subscription",
+        "badDays": "Enter a number of days above zero",
+        "selfReferrer": "A user cannot be their own referrer",
+        "circularReferral": "This would create a loop in the referral chain",
+        "noReferrer": "No referrer is assigned",
+        "notReferral": "This user is not a referral of the selected one",
+        "ownCommission": "You cannot change your own referral commission",
+        "adminProtected": "This is an administrator and cannot be blocked",
+        "notInPanel": "This user is not in the Remnawave panel",
+        "panelUnreachable": "Could not reach the panel. Try again later",
+        "resetNotFinished": "The panel did not disable the subscription — reset not finished",
+        "noSubscription": "There is no subscription",
+        "noDevices": "There are no devices",
+        "deviceNotFound": "The device is already gone",
+        "packageNotFound": "Traffic package not found",
+        "tariffNotFound": "Plan not found",
+        "promoGroupNotFound": "Promo group not found",
+        "subscriptionNotFound": "Subscription not found",
+        "userNotFound": "User not found"
+      }
     },
     "promoOffers": {
       "title": "Promo Offers",
@@ -6399,7 +6542,8 @@
     "ru": "Русский",
     "en": "English",
     "zh": "中文",
-    "fa": "فارسی"
+    "fa": "فارسی",
+    "ua": "Ukrainian"
   },
   "contests": {
     "title": "Contests",

@@ -112,3 +112,35 @@ export function AccountStatusChip({ status, className }: { status: string; class
     </span>
   );
 }
+
+const SUBSCRIPTION_STATE_TONE: Record<string, ChipTone> = {
+  active: 'success',
+  trial: 'accent',
+  limited: 'warning',
+  expired: 'error',
+  disabled: 'neutral',
+  pending: 'neutral',
+};
+
+/** Состояние подписки словом: «Активна», «Триал», «Трафик исчерпан», «Истекла». */
+export function SubscriptionStateChip({
+  status,
+  className,
+}: {
+  status: string;
+  className?: string;
+}) {
+  const { t } = useTranslation();
+  const known = status in SUBSCRIPTION_STATE_TONE;
+  return (
+    <span
+      className={cn(
+        'inline-flex shrink-0 items-center whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-semibold',
+        TONE[SUBSCRIPTION_STATE_TONE[status] ?? 'neutral'],
+        className,
+      )}
+    >
+      {t(`admin.users.subscriptionState.${known ? status : 'other'}`)}
+    </span>
+  );
+}

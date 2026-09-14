@@ -1,17 +1,25 @@
-import { type ReactNode, useState } from 'react';
+import { useEffect, useState } from 'react';
+import { Link, useLocation, useSearchParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
+import type { AdminTicket } from '@/api/admin';
 import type {
+  AdminUserGiftsResponse,
   UpdateRestrictionsRequest,
   UserActivityItem,
+  UserAvailableTariff,
   UserDetailResponse,
   UserPanelInfo,
   UserSubscriptionInfo,
 } from '@/api/adminUsers';
 import type { PromoGroup } from '@/api/promocodes';
-import { Toggle } from '@/components/admin/Toggle';
-import { DropdownSelect } from '@/components/admin/bulkActions/DropdownSelect';
-import { TrafficBar, UserStatusChip } from '@/components/admin/users';
-import { Card } from '@/components/data-display';
+import { backTo } from '@/components/admin/AdminBackButton';
+import {
+  SubscriptionStateChip,
+  TrafficBar,
+  dayTimeLabel,
+  relativeLabel,
+  useTrafficLabel,
+} from '@/components/admin/users';
 import {
   CampaignIcon,
   ClockIcon,
@@ -19,11 +27,15 @@ import {
   ShieldIcon,
   SubscriptionIcon,
 } from '@/components/icons';
-import { useCurrency } from '@/hooks/useCurrency';
 import { cn } from '@/lib/utils';
 import { formatShortDate } from '@/utils/format';
+import { formatGb } from '@/utils/formatNumber';
 import { relativeTimeParts } from '@/utils/relativeTime';
-import { describeItem } from './activityLabels';
+import { ActivityRows } from './ActivityRows';
+import { type DeviceRow, deviceLongName } from './DevicesCard';
+import { ExtendMenu } from './ExtendMenu';
+import { PromoGroupEditor, RestrictionsEditor } from './OverviewEditors';
+import { KeyValues, LinkAction, Section } from './sectionParts';
 
 export type DetailTab = 'overview' | 'subscription' | 'balance' | 'referrals' | 'activity';
 
@@ -31,23 +43,22 @@ export interface OverviewTabProps {
   user: UserDetailResponse;
   subscription: UserSubscriptionInfo | null;
   panelInfo: UserPanelInfo | null;
-  devices: { total: number; limit: number; names: string[] } | null;
+  devices: DeviceRow[] | null;
+  currentTariff: UserAvailableTariff | null;
   promoGroups: PromoGroup[];
-  canEditPromoGroup: boolean;
-  canEditRestrictions: boolean;
-  canManageSubscription: boolean;
-  actionLoading: boolean;
-  onChangePromoGroup: (groupId: number | null) => Promise<void>;
-  onUpdateRestrictions: (data: UpdateRestrictionsRequest) => Promise<void>;
-  onGoTo: (tab: DetailTab, view?: string) => void;
-  ticketsCount: number | null;
-  giftsCount: number | null;
+  tickets: AdminTicket[] | null;
+  gifts: AdminUserGiftsResponse | null;
   recentActivity: UserActivityItem[] | null;
-  formatDate: (date: string | null) => string;
+  can: { subscription: boolean; promoGroup: boolean; restrictions: boolean };
+  busy: boolean;
+  onExtend: (days: number) => Promise<boolean>;
+  onChangePromoGroup: (groupId: number | null) => Promise<boolean>;
+  onUpdateRestrictions: (request: UpdateRestrictionsRequest) => Promise<boolean>;
+  onGoTo: (tab: DetailTab, view?: string) => void;
 }
 
-const EXPENSE_SUBTYPES = new Set(['withdrawal', 'subscription_payment', 'gift_payment']);
 const BYTES_IN_GB = 1024 ** 3;
+type Editor = 'promo' | 'restrictions';
 
 /**
  * «Обзор» — первый экран карточки: подписка с действиями, подключение, откуда
@@ -56,607 +67,461 @@ const BYTES_IN_GB = 1024 ** 3;
  */
 export function OverviewTab(props: OverviewTabProps) {
   const { t } = useTranslation();
-  const { formatWithCurrency } = useCurrency();
-  const {
-    user,
-    subscription,
-    panelInfo,
-    devices,
-    promoGroups,
-    canEditPromoGroup,
-    canEditRestrictions,
-    canManageSubscription,
-    actionLoading,
-    onChangePromoGroup,
-    onUpdateRestrictions,
-    onGoTo,
-    ticketsCount,
-    giftsCount,
-    recentActivity,
-    formatDate,
-  } = props;
+  const { subscription, panelInfo, devices, onGoTo } = props;
+  const [params, setParams] = useSearchParams();
+  const [editor, setEditor] = useState<Editor | null>(null);
+  const ns = 'admin.users.detail.overview';
 
-  const online = relativeTimeParts(panelInfo?.online_at ?? null);
-  const hasRestrictions = user.restriction_topup || user.restriction_subscription;
+  // Пункты меню «⋯» приходят сюда с `?do=promo|restrictions`: открываем правку и убираем параметр.
+  useEffect(() => {
+    const wanted = params.get('do');
+    if (wanted !== 'promo' && wanted !== 'restrictions') return;
+    setEditor(wanted);
+    const target = wanted === 'promo' ? 'overview-origin' : 'overview-support';
+    requestAnimationFrame(() =>
+      document.getElementById(target)?.scrollIntoView?.({ behavior: 'smooth', block: 'center' }),
+    );
+    const next = new URLSearchParams(params);
+    next.delete('do');
+    setParams(next, { replace: true });
+  }, [params, setParams]);
 
   return (
     <div className="grid gap-4 lg:grid-cols-2">
-      <Section
-        icon={<SubscriptionIcon className="h-5 w-5" />}
-        title={t('admin.users.detail.overview.subscription')}
-        action={
-          subscription && (
-            <TabLink onClick={() => onGoTo('subscription')}>
-              {t('admin.users.detail.overview.allDetails')}
-            </TabLink>
-          )
-        }
-      >
-        {subscription ? (
-          <div className="flex flex-col gap-3">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-lg font-bold text-dark-100">
-                {subscription.tariff_name ?? t('admin.users.detail.subscription.notSpecified')}
-              </span>
-              <UserStatusChip
-                user={{
-                  status: user.status,
-                  has_subscription: true,
-                  subscription_status: subscription.status,
-                  subscription_is_trial: subscription.is_trial,
-                  days_remaining: subscription.days_remaining,
-                  subscription_end_date: subscription.end_date,
-                }}
-              />
-              <span className="text-xs text-dark-500">
-                #{subscription.id} ·{' '}
-                {subscription.autopay_enabled
-                  ? t('admin.users.detail.overview.autopayOn')
-                  : t('admin.users.detail.overview.autopayOff')}
-              </span>
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <div className="flex items-center justify-between text-xs text-dark-400">
-                <span>{t('admin.users.detail.overview.trafficPeriod')}</span>
-              </div>
-              <TrafficBar
-                usedGb={subscription.traffic_used_gb}
-                limitGb={subscription.traffic_limit_gb}
-              />
-              <div className="flex items-center justify-between text-xs text-dark-400">
-                <span>
-                  {t('admin.users.until', { date: formatShortDate(subscription.end_date) })}
-                  {subscription.days_remaining > 0 &&
-                    ` · ${t('admin.users.detail.facts.days', { count: subscription.days_remaining })}`}
-                </span>
-                {devices && (
-                  <span>
-                    {t('admin.users.detail.overview.devicesShort', {
-                      used: devices.total,
-                      limit: subscription.device_limit,
-                    })}
-                  </span>
-                )}
-              </div>
-            </div>
-            {canManageSubscription && (
-              <div className="flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  onClick={() => onGoTo('subscription', 'extend')}
-                  className="btn-primary px-3 py-2 text-sm"
-                >
-                  {t('admin.users.detail.overview.extend')}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onGoTo('subscription', 'tariff')}
-                  className="btn-secondary px-3 py-2 text-sm"
-                >
-                  {t('admin.users.detail.overview.changeTariff')}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onGoTo('subscription', 'traffic')}
-                  className="btn-secondary px-3 py-2 text-sm"
-                >
-                  {t('admin.users.detail.overview.addTraffic')}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onGoTo('subscription', 'devices')}
-                  className="btn-secondary px-3 py-2 text-sm"
-                >
-                  {t('admin.users.detail.overview.deviceLimit')}
-                </button>
-              </div>
-            )}
-          </div>
-        ) : (
-          <div className="flex flex-col items-start gap-3">
-            <p className="text-sm text-dark-400">
-              {t('admin.users.detail.overview.noSubscription')}
-            </p>
-            {canManageSubscription && (
-              <button
-                type="button"
-                onClick={() => onGoTo('subscription', 'create')}
-                className="btn-primary px-3 py-2 text-sm"
-              >
-                {t('admin.users.detail.overview.createSubscription')}
-              </button>
-            )}
-          </div>
-        )}
-      </Section>
+      <SubscriptionSummary {...props} />
 
       <Section
         icon={<GlobeIcon className="h-5 w-5" />}
-        title={t('admin.users.detail.overview.connection')}
+        title={t(`${ns}.connection`)}
         action={
           subscription && (
-            <TabLink onClick={() => onGoTo('subscription', 'devices')}>
-              {t('admin.users.detail.overview.devicesAndTech')}
-            </TabLink>
+            <LinkAction arrow onClick={() => onGoTo('subscription')}>
+              {t(`${ns}.devicesLink`)}
+            </LinkAction>
           )
         }
       >
         {panelInfo?.found ? (
-          <Facts
-            rows={[
-              {
-                label: t('admin.users.detail.overview.now'),
-                value: (
-                  <span
-                    className={cn(
-                      'inline-flex items-center gap-2',
-                      online.isOnline && 'text-success-400',
-                    )}
-                  >
-                    <span
-                      aria-hidden="true"
-                      className={cn(
-                        'h-2 w-2 rounded-full',
-                        online.isOnline
-                          ? 'bg-success-400 shadow-[0_0_6px_rgba(var(--color-success-400),0.6)]'
-                          : 'bg-dark-600',
-                      )}
-                    />
-                    {online.isOnline
-                      ? t('common.relative.online')
-                      : online.key === 'never'
-                        ? t('common.relative.never')
-                        : t(`common.relative.${online.key}`, { count: online.count })}
-                    {panelInfo.last_connected_node_name && (
-                      <span className="text-dark-400">· {panelInfo.last_connected_node_name}</span>
-                    )}
-                  </span>
-                ),
-              },
-              {
-                label: t('admin.users.detail.overview.firstConnection'),
-                value: panelInfo.first_connected_at
-                  ? formatShortDate(panelInfo.first_connected_at)
-                  : '—',
-              },
-              {
-                label: t('admin.users.detail.overview.devices'),
-                value:
-                  devices && devices.names.length > 0
-                    ? devices.names.join(', ')
-                    : t('admin.users.detail.overview.noDevices'),
-              },
-              {
-                label: t('admin.users.detail.overview.lifetimeTraffic'),
-                value: `${(panelInfo.lifetime_used_traffic_bytes / BYTES_IN_GB).toFixed(1).replace(/\.0$/, '')} ${t('common.units.gb')}`,
-              },
-            ]}
-          />
+          <ConnectionFacts panelInfo={panelInfo} devices={devices} />
         ) : (
-          <p className="text-sm text-dark-500">{t('admin.users.detail.overview.noPanelData')}</p>
+          <p className="text-sm text-dark-500">{t(`${ns}.noPanelData`)}</p>
         )}
       </Section>
 
       <Section
+        id="overview-origin"
         icon={<CampaignIcon className="h-5 w-5" />}
-        title={t('admin.users.detail.overview.origin')}
+        title={t(`${ns}.origin`)}
       >
-        <Facts
-          rows={[
-            {
-              label: t('admin.users.detail.overview.registered'),
-              value: formatDate(user.created_at),
-            },
-            {
-              label: t('admin.users.detail.overview.campaign'),
-              value: user.campaign_name ?? '—',
-            },
-            {
-              label: t('admin.users.detail.overview.promoGroup'),
-              value: (
-                <PromoGroupField
-                  user={user}
-                  promoGroups={promoGroups}
-                  canEdit={canEditPromoGroup}
-                  disabled={actionLoading}
-                  onChange={onChangePromoGroup}
-                />
-              ),
-            },
-            {
-              label: t('admin.users.detail.overview.referrer'),
-              value: user.referral.referred_by_username ? (
-                `@${user.referral.referred_by_username}`
-              ) : (
-                <span className="inline-flex items-center gap-2">
-                  <span className="text-dark-500">{t('admin.users.detail.overview.nobody')}</span>
-                  <TabLink onClick={() => onGoTo('referrals')}>
-                    {t('admin.users.detail.referrals.assignReferrer')}
-                  </TabLink>
-                </span>
-              ),
-            },
-            {
-              label: t('admin.users.detail.overview.cabinetLogin'),
-              value: user.cabinet_last_login ? formatDate(user.cabinet_last_login) : '—',
-            },
-          ]}
-        />
+        <OriginFacts {...props} editor={editor} onEditor={setEditor} />
       </Section>
 
       <Section
+        id="overview-support"
         icon={<ShieldIcon className="h-5 w-5" />}
-        title={t('admin.users.detail.overview.restrictionsAndSupport')}
+        title={t(`${ns}.restrictionsAndSupport`)}
       >
-        <div className="flex flex-col gap-3">
-          <RestrictionsField
-            user={user}
-            canEdit={canEditRestrictions}
-            disabled={actionLoading}
-            onSave={onUpdateRestrictions}
-            hasRestrictions={hasRestrictions}
-          />
-          <Facts
-            rows={[
-              {
-                label: t('admin.users.detail.overview.tickets'),
-                value: (
-                  <span className="inline-flex items-center gap-2">
-                    {ticketsCount ?? '—'}
-                    <TabLink onClick={() => onGoTo('activity', 'tickets')}>
-                      {t('admin.users.detail.overview.open')}
-                    </TabLink>
-                  </span>
-                ),
-              },
-              {
-                label: t('admin.users.detail.overview.gifts'),
-                value: (
-                  <span className="inline-flex items-center gap-2">
-                    {giftsCount ?? '—'}
-                    <TabLink onClick={() => onGoTo('activity', 'gifts')}>
-                      {t('admin.users.detail.overview.open')}
-                    </TabLink>
-                  </span>
-                ),
-              },
-              {
-                label: t('admin.users.detail.overview.promocodesUsed'),
-                value: String(user.used_promocodes),
-              },
-            ]}
-          />
-        </div>
+        <SupportFacts {...props} editor={editor} onEditor={setEditor} />
       </Section>
 
       <Section
         className="lg:col-span-2"
         icon={<ClockIcon className="h-5 w-5" />}
-        title={t('admin.users.detail.overview.recent')}
+        title={t(`${ns}.recent`)}
         action={
-          <TabLink onClick={() => onGoTo('activity')}>
-            {t('admin.users.detail.overview.allActivity')}
-          </TabLink>
+          <LinkAction arrow short={t(`${ns}.all`)} onClick={() => onGoTo('activity')}>
+            {t(`${ns}.allActivity`)}
+          </LinkAction>
         }
       >
-        {recentActivity && recentActivity.length > 0 ? (
-          <ul className="m-0 list-none divide-y divide-dark-800 p-0">
-            {recentActivity.map((item, index) => {
-              const { typeLabel, title } = describeItem(item, t);
-              const amount = amountLabel(item, formatWithCurrency);
-              return (
-                <li
-                  key={`${item.timestamp}-${index}`}
-                  className="grid grid-cols-[auto_1fr_auto] items-baseline gap-3 py-2 text-sm"
-                >
-                  <span className="whitespace-nowrap font-mono text-xs text-dark-500">
-                    {formatDate(item.timestamp)}
-                  </span>
-                  <span className="min-w-0 text-dark-200">
-                    <span className="block truncate">{title ?? typeLabel}</span>
-                    {title && (
-                      <span className="block truncate text-xs text-dark-500">{typeLabel}</span>
-                    )}
-                  </span>
-                  {amount && (
-                    <span
-                      className={cn(
-                        'whitespace-nowrap font-mono text-xs tabular-nums',
-                        amount.expense ? 'text-error-400' : 'text-success-400',
-                      )}
-                    >
-                      {amount.text}
-                    </span>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
+        {props.recentActivity && props.recentActivity.length > 0 ? (
+          <ActivityRows items={props.recentActivity} compact />
         ) : (
-          <p className="text-sm text-dark-500">{t('admin.users.detail.overview.noActivity')}</p>
+          <p className="text-sm text-dark-500">{t(`${ns}.noActivity`)}</p>
         )}
       </Section>
     </div>
   );
 }
 
-function amountLabel(
-  item: UserActivityItem,
-  format: (rub: number) => string,
-): { text: string; expense: boolean } | null {
-  if (item.amount_kopeks == null || item.amount_kopeks === 0) return null;
-  const rubles = Math.abs(item.amount_kopeks) / 100;
-  const expense =
-    item.type === 'withdrawal' ||
-    (item.type === 'transaction' && item.subtype != null && EXPENSE_SUBTYPES.has(item.subtype)) ||
-    item.amount_kopeks < 0;
-  return { text: `${expense ? '−' : '+'}${format(rubles)}`, expense };
-}
-
-interface SectionProps {
-  icon: ReactNode;
-  title: string;
-  action?: ReactNode;
-  className?: string;
-  children: ReactNode;
-}
-
-function Section({ icon, title, action, className, children }: SectionProps) {
-  return (
-    <Card size="md" className={cn('flex flex-col gap-3', className)}>
-      <div className="flex items-start gap-2.5">
-        <span className="mt-0.5 text-accent-400">{icon}</span>
-        <h2 className="min-w-0 flex-1 text-lg font-semibold leading-tight text-dark-100">
-          {title}
-        </h2>
-        {action && <div className="shrink-0 pt-0.5">{action}</div>}
-      </div>
-      {children}
-    </Card>
+function SubscriptionSummary({
+  subscription,
+  devices,
+  currentTariff,
+  can,
+  busy,
+  onExtend,
+  onGoTo,
+}: OverviewTabProps) {
+  const { t } = useTranslation();
+  const trafficLabel = useTrafficLabel();
+  const ns = 'admin.users.detail.overview';
+  const canTopUp = Boolean(
+    currentTariff?.traffic_topup_enabled &&
+      Object.keys(currentTariff.traffic_topup_packages ?? {}).length > 0,
   );
-}
 
-function TabLink({ onClick, children }: { onClick: () => void; children: ReactNode }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="shrink-0 text-xs font-semibold text-accent-400 transition-colors hover:text-accent-300"
+    <Section
+      icon={<SubscriptionIcon className="h-5 w-5" />}
+      title={t(`${ns}.subscription`)}
+      action={
+        subscription && (
+          <LinkAction arrow short={t(`${ns}.details`)} onClick={() => onGoTo('subscription')}>
+            {t(`${ns}.allDetails`)}
+          </LinkAction>
+        )
+      }
     >
-      {children} →
-    </button>
-  );
-}
-
-function Facts({ rows }: { rows: { label: string; value: ReactNode }[] }) {
-  return (
-    <dl className="m-0 grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
-      {rows.map((row) => (
-        <div key={row.label} className="contents">
-          <dt className="whitespace-nowrap text-dark-500">{row.label}</dt>
-          <dd className="m-0 min-w-0 text-dark-100">{row.value}</dd>
-        </div>
-      ))}
-    </dl>
-  );
-}
-
-interface PromoGroupFieldProps {
-  user: UserDetailResponse;
-  promoGroups: PromoGroup[];
-  canEdit: boolean;
-  disabled: boolean;
-  onChange: (groupId: number | null) => Promise<void>;
-}
-
-function PromoGroupField({ user, promoGroups, canEdit, disabled, onChange }: PromoGroupFieldProps) {
-  const { t } = useTranslation();
-  const [editing, setEditing] = useState(false);
-  const [value, setValue] = useState(user.promo_group ? String(user.promo_group.id) : '');
-
-  if (!editing) {
-    return (
-      <span className="inline-flex items-center gap-2">
-        {user.promo_group?.name ?? (
-          <span className="text-dark-500">{t('admin.users.detail.overview.noPromoGroup')}</span>
-        )}
-        {canEdit && (
-          <TabLink
-            onClick={() => {
-              setValue(user.promo_group ? String(user.promo_group.id) : '');
-              setEditing(true);
-            }}
-          >
-            {t('admin.users.detail.overview.change')}
-          </TabLink>
-        )}
-      </span>
-    );
-  }
-
-  return (
-    <div className="flex flex-wrap items-center gap-2">
-      <label htmlFor="overview-promo-group" className="sr-only">
-        {t('admin.users.detail.overview.promoGroup')}
-      </label>
-      <DropdownSelect
-        id="overview-promo-group"
-        value={value}
-        onChange={setValue}
-        disabled={disabled}
-        className="min-w-[180px]"
-        options={[
-          { value: '', label: t('admin.users.detail.overview.noPromoGroup') },
-          ...promoGroups.map((group) => ({ value: String(group.id), label: group.name })),
-        ]}
-      />
-      <button
-        type="button"
-        disabled={disabled}
-        onClick={async () => {
-          await onChange(value ? Number(value) : null);
-          setEditing(false);
-        }}
-        className="btn-primary px-3 py-2 text-sm"
-      >
-        {t('common.save')}
-      </button>
-      <button
-        type="button"
-        disabled={disabled}
-        onClick={() => setEditing(false)}
-        className="btn-ghost px-3 py-2 text-sm"
-      >
-        {t('common.cancel')}
-      </button>
-    </div>
-  );
-}
-
-interface RestrictionsFieldProps {
-  user: UserDetailResponse;
-  canEdit: boolean;
-  disabled: boolean;
-  hasRestrictions: boolean;
-  onSave: (data: UpdateRestrictionsRequest) => Promise<void>;
-}
-
-function RestrictionsField({
-  user,
-  canEdit,
-  disabled,
-  hasRestrictions,
-  onSave,
-}: RestrictionsFieldProps) {
-  const { t } = useTranslation();
-  const [editing, setEditing] = useState(false);
-  const [topup, setTopup] = useState(user.restriction_topup);
-  const [subscription, setSubscription] = useState(user.restriction_subscription);
-  const [reason, setReason] = useState(user.restriction_reason ?? '');
-
-  if (!editing) {
-    return (
-      <div
-        className={cn(
-          'flex flex-col gap-1 rounded-xl px-3 py-2.5 text-sm',
-          hasRestrictions ? 'bg-error-500/10 text-error-300' : 'bg-dark-800/60 text-dark-300',
-        )}
-      >
-        <div className="flex items-center justify-between gap-3">
-          <span className="font-medium">
-            {t('admin.users.detail.overview.restrictions')}:{' '}
-            {hasRestrictions
-              ? [
-                  user.restriction_topup && t('admin.users.detail.overview.restrictTopup'),
-                  user.restriction_subscription &&
-                    t('admin.users.detail.overview.restrictSubscription'),
-                ]
-                  .filter(Boolean)
-                  .join(', ')
-              : t('admin.users.detail.overview.noRestrictions')}
-          </span>
-          {canEdit && (
-            <TabLink
-              onClick={() => {
-                setTopup(user.restriction_topup);
-                setSubscription(user.restriction_subscription);
-                setReason(user.restriction_reason ?? '');
-                setEditing(true);
-              }}
-            >
-              {t('admin.users.detail.overview.configure')}
-            </TabLink>
+      {subscription ? (
+        <div className="flex flex-col gap-3">
+          <div className="flex min-w-0 flex-wrap items-center gap-x-2.5 gap-y-1">
+            <span className="text-lg font-bold text-dark-100">
+              {subscription.tariff_name ?? t('admin.users.detail.subscription.notSpecified')}
+            </span>
+            <SubscriptionStateChip status={subscription.status} />
+            <span className="text-xs text-dark-500">
+              #{subscription.id} ·{' '}
+              {subscription.autopay_enabled ? t(`${ns}.autopayOn`) : t(`${ns}.autopayOff`)}
+            </span>
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <div className="flex items-baseline justify-between gap-3 text-xs">
+              <span className="text-dark-500">{t(`${ns}.trafficPeriod`)}</span>
+              <span className="font-medium tabular-nums text-dark-200">
+                {trafficLabel(subscription.traffic_used_gb, subscription.traffic_limit_gb)}
+              </span>
+            </div>
+            <TrafficBar
+              usedGb={subscription.traffic_used_gb}
+              limitGb={subscription.traffic_limit_gb}
+              label={false}
+            />
+            <div className="flex items-center justify-between gap-3 text-xs text-dark-500">
+              <span>
+                {t('admin.users.until', { date: formatShortDate(subscription.end_date) })}
+                {subscription.days_remaining > 0 &&
+                  ` · ${t('admin.users.detail.facts.days', { count: subscription.days_remaining })}`}
+              </span>
+              {devices && (
+                <span>
+                  {t(`${ns}.devicesShort`, {
+                    used: devices.length,
+                    limit: subscription.device_limit,
+                  })}
+                </span>
+              )}
+            </div>
+          </div>
+          {can.subscription && (
+            <div className="flex flex-wrap gap-2">
+              <ExtendMenu
+                disabled={busy}
+                onPick={(days) => void onExtend(days)}
+                onCustom={() => onGoTo('subscription', 'extend')}
+              />
+              <button
+                type="button"
+                onClick={() => onGoTo('subscription', 'tariff')}
+                className="btn-secondary"
+              >
+                {t(`${ns}.changeTariff`)}
+              </button>
+              {canTopUp && (
+                <button
+                  type="button"
+                  onClick={() => onGoTo('subscription', 'traffic')}
+                  className="btn-secondary"
+                >
+                  {t(`${ns}.addTraffic`)}
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => onGoTo('subscription', 'devices')}
+                className="btn-secondary"
+              >
+                {t(`${ns}.deviceLimit`)}
+              </button>
+            </div>
           )}
         </div>
-        {hasRestrictions && user.restriction_reason && (
-          <span className="text-xs text-dark-400">
-            {t('admin.users.detail.restrictions.reason')}: {user.restriction_reason}
-          </span>
-        )}
-      </div>
-    );
-  }
+      ) : (
+        <div className="flex flex-col items-start gap-3">
+          <p className="text-sm text-dark-400">{t(`${ns}.noSubscription`)}</p>
+          {can.subscription && (
+            <button
+              type="button"
+              onClick={() => onGoTo('subscription', 'create')}
+              className="btn-primary"
+            >
+              {t(`${ns}.createSubscription`)}
+            </button>
+          )}
+        </div>
+      )}
+    </Section>
+  );
+}
+
+function ConnectionFacts({
+  panelInfo,
+  devices,
+}: {
+  panelInfo: UserPanelInfo;
+  devices: DeviceRow[] | null;
+}) {
+  const { t } = useTranslation();
+  const ns = 'admin.users.detail.overview';
+  const online = relativeTimeParts(panelInfo.online_at);
 
   return (
-    <div className="flex flex-col gap-3 rounded-xl border border-dark-700 bg-dark-800/60 p-3 text-sm">
-      <div className="flex items-center justify-between gap-3">
-        <span className="text-dark-200">{t('admin.users.detail.overview.restrictTopup')}</span>
-        <Toggle
-          checked={topup}
-          onChange={() => setTopup((value) => !value)}
-          disabled={disabled}
-          aria-label={t('admin.users.detail.overview.restrictTopup')}
+    <KeyValues
+      rows={[
+        {
+          key: 'now',
+          label: t(`${ns}.now`),
+          value: (
+            <span className="inline-flex flex-wrap items-center gap-x-1.5">
+              <span
+                aria-hidden="true"
+                className={cn(
+                  'h-2 w-2 shrink-0 rounded-full',
+                  online.isOnline
+                    ? 'bg-success-400 shadow-[0_0_6px_rgba(var(--color-success-400),0.6)]'
+                    : 'bg-dark-600',
+                )}
+              />
+              <span className={cn(online.isOnline && 'text-success-400')}>
+                {online.isOnline ? t('common.relative.online') : relativeLabel(online, t)}
+              </span>
+              {panelInfo.last_connected_node_name && (
+                <span className="text-dark-400">· {panelInfo.last_connected_node_name}</span>
+              )}
+            </span>
+          ),
+        },
+        {
+          key: 'first',
+          label: t(`${ns}.firstConnection`),
+          value: panelInfo.first_connected_at ? formatShortDate(panelInfo.first_connected_at) : '—',
+        },
+        {
+          key: 'devices',
+          label: t(`${ns}.devices`),
+          value:
+            devices && devices.length > 0
+              ? devices.map(deviceLongName).join(', ')
+              : t(`${ns}.noDevices`),
+        },
+        {
+          key: 'lifetime',
+          label: t(`${ns}.lifetimeTraffic`),
+          value: `${formatGb(panelInfo.lifetime_used_traffic_bytes / BYTES_IN_GB)} ${t('common.units.gb')}`,
+        },
+      ]}
+    />
+  );
+}
+
+interface EditorProps {
+  editor: Editor | null;
+  onEditor: (editor: Editor | null) => void;
+}
+
+function OriginFacts({
+  user,
+  promoGroups,
+  can,
+  busy,
+  onChangePromoGroup,
+  onGoTo,
+  editor,
+  onEditor,
+}: OverviewTabProps & EditorProps) {
+  const { t } = useTranslation();
+  const location = useLocation();
+  const ns = 'admin.users.detail.overview';
+  const referrer = user.referral;
+
+  return (
+    <KeyValues
+      rows={[
+        {
+          key: 'registered',
+          label: t(`${ns}.registered`),
+          value: formatShortDate(user.created_at),
+        },
+        { key: 'campaign', label: t(`${ns}.campaign`), value: user.campaign_name ?? '—' },
+        {
+          key: 'promo',
+          label: t(`${ns}.promoGroup`),
+          value:
+            editor === 'promo' ? (
+              <PromoGroupEditor
+                user={user}
+                promoGroups={promoGroups}
+                busy={busy}
+                onSave={onChangePromoGroup}
+                onClose={() => onEditor(null)}
+              />
+            ) : (
+              <span className="inline-flex flex-wrap items-center gap-x-2">
+                {user.promo_group?.name ?? (
+                  <span className="text-dark-500">{t(`${ns}.noPromoGroup`)}</span>
+                )}
+                {can.promoGroup && (
+                  <LinkAction onClick={() => onEditor('promo')}>{t(`${ns}.change`)}</LinkAction>
+                )}
+              </span>
+            ),
+        },
+        {
+          key: 'referrer',
+          label: t(`${ns}.referrer`),
+          value: referrer.referred_by_id ? (
+            <Link
+              to={`/admin/users/${referrer.referred_by_id}`}
+              state={backTo(location).state}
+              className="text-accent-400 hover:text-accent-300"
+            >
+              {referrer.referred_by_username
+                ? `@${referrer.referred_by_username}`
+                : `#${referrer.referred_by_id}`}
+            </Link>
+          ) : (
+            <span className="inline-flex items-center gap-x-2">
+              <span className="text-dark-500">—</span>
+              <LinkAction onClick={() => onGoTo('referrals')}>{t(`${ns}.assign`)}</LinkAction>
+            </span>
+          ),
+        },
+        {
+          key: 'activity',
+          label: t(`${ns}.lastActivity`),
+          value: user.last_activity ? relativeLabel(relativeTimeParts(user.last_activity), t) : '—',
+        },
+        {
+          key: 'login',
+          label: t(`${ns}.cabinetLogin`),
+          value: user.cabinet_last_login ? dayTimeLabel(user.cabinet_last_login, t) : '—',
+        },
+      ]}
+    />
+  );
+}
+
+function SupportFacts({
+  user,
+  tickets,
+  gifts,
+  can,
+  busy,
+  onUpdateRestrictions,
+  onGoTo,
+  editor,
+  onEditor,
+}: OverviewTabProps & EditorProps) {
+  const { t } = useTranslation();
+  const ns = 'admin.users.detail.overview';
+  const restricted = [
+    user.restriction_topup && t(`${ns}.restrictTopup`),
+    user.restriction_subscription && t(`${ns}.restrictSubscription`),
+  ].filter(Boolean) as string[];
+  const openTickets = tickets?.filter((ticket) => ticket.status !== 'closed').length ?? 0;
+  const closedTickets = (tickets?.length ?? 0) - openTickets;
+
+  const countsOrNone = (parts: (string | false)[]) => {
+    const shown = parts.filter(Boolean);
+    return shown.length > 0 ? shown.join(', ') : t(`${ns}.none`);
+  };
+
+  return (
+    <div className="flex flex-col gap-3">
+      <KeyValues
+        rows={[
+          {
+            key: 'restrictions',
+            label: t(`${ns}.restrictions`),
+            value: (
+              <span className="inline-flex flex-wrap items-center gap-x-2">
+                <span className={cn(restricted.length > 0 && 'text-error-400')}>
+                  {restricted.length > 0 ? restricted.join(', ') : t(`${ns}.noRestrictions`)}
+                </span>
+                {can.restrictions && editor !== 'restrictions' && (
+                  <LinkAction onClick={() => onEditor('restrictions')}>
+                    {t(`${ns}.configure`)}
+                  </LinkAction>
+                )}
+              </span>
+            ),
+          },
+          ...(restricted.length > 0 && user.restriction_reason
+            ? [
+                {
+                  key: 'reason',
+                  label: t('admin.users.detail.restrictions.reason'),
+                  value: user.restriction_reason,
+                },
+              ]
+            : []),
+          {
+            key: 'tickets',
+            label: t(`${ns}.tickets`),
+            value: (
+              <span className="inline-flex flex-wrap items-center gap-x-2">
+                {tickets === null
+                  ? '—'
+                  : countsOrNone([
+                      openTickets > 0 && t(`${ns}.ticketsOpen`, { count: openTickets }),
+                      closedTickets > 0 && t(`${ns}.ticketsClosed`, { count: closedTickets }),
+                    ])}
+                {tickets && tickets.length > 0 && (
+                  <LinkAction arrow onClick={() => onGoTo('activity', 'tickets')}>
+                    {t(`${ns}.open`)}
+                  </LinkAction>
+                )}
+              </span>
+            ),
+          },
+          {
+            key: 'gifts',
+            label: t(`${ns}.gifts`),
+            value: (
+              <span className="inline-flex flex-wrap items-center gap-x-2">
+                {gifts === null
+                  ? '—'
+                  : countsOrNone([
+                      gifts.sent_total > 0 && t(`${ns}.giftsSent`, { count: gifts.sent_total }),
+                      gifts.received_total > 0 &&
+                        t(`${ns}.giftsReceived`, { count: gifts.received_total }),
+                    ])}
+                {gifts && gifts.sent_total + gifts.received_total > 0 && (
+                  <LinkAction arrow onClick={() => onGoTo('activity', 'gifts')}>
+                    {t(`${ns}.list`)}
+                  </LinkAction>
+                )}
+              </span>
+            ),
+          },
+          {
+            key: 'promocodes',
+            label: t(`${ns}.promocodes`),
+            value:
+              user.used_promocodes > 0
+                ? t(`${ns}.promocodesUsed`, { count: user.used_promocodes })
+                : t(`${ns}.none`),
+          },
+        ]}
+      />
+      {editor === 'restrictions' && (
+        <RestrictionsEditor
+          user={user}
+          busy={busy}
+          onSave={onUpdateRestrictions}
+          onClose={() => onEditor(null)}
         />
-      </div>
-      <div className="flex items-center justify-between gap-3">
-        <span className="text-dark-200">
-          {t('admin.users.detail.overview.restrictSubscription')}
-        </span>
-        <Toggle
-          checked={subscription}
-          onChange={() => setSubscription((value) => !value)}
-          disabled={disabled}
-          aria-label={t('admin.users.detail.overview.restrictSubscription')}
-        />
-      </div>
-      <label className="flex flex-col gap-1">
-        <span className="text-xs text-dark-500">
-          {t('admin.users.detail.overview.restrictionReason')}
-        </span>
-        <input
-          type="text"
-          value={reason}
-          onChange={(event) => setReason(event.target.value)}
-          maxLength={255}
-          disabled={disabled}
-          className="input py-2"
-        />
-      </label>
-      <div className="flex gap-2">
-        <button
-          type="button"
-          disabled={disabled}
-          onClick={async () => {
-            await onSave({
-              restriction_topup: topup,
-              restriction_subscription: subscription,
-              restriction_reason: reason.trim(),
-            });
-            setEditing(false);
-          }}
-          className="btn-primary px-3 py-2 text-sm"
-        >
-          {t('common.save')}
-        </button>
-        <button
-          type="button"
-          disabled={disabled}
-          onClick={() => setEditing(false)}
-          className="btn-ghost px-3 py-2 text-sm"
-        >
-          {t('common.cancel')}
-        </button>
-      </div>
+      )}
     </div>
   );
 }
