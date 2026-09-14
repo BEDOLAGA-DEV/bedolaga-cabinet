@@ -100,6 +100,14 @@ const VIEW_PRESETS: Record<ViewKey, Partial<Omit<UsersListState, 'q' | 'view'>>>
   blocked: { status: 'blocked' },
 };
 
+/**
+ * Значение фильтра, которое ставит сама выборка («Заблокированные» — статус «заблокирован»).
+ * Чипом и в счётчике «Фильтры» его не показываем: это повтор выбранной выборки.
+ */
+export function viewFilterValue(view: ViewKey, key: 'status' | 'sub'): string | undefined {
+  return VIEW_PRESETS[view][key];
+}
+
 function pick<T extends string>(value: string | null, allowed: readonly T[], fallback: T): T {
   return value !== null && (allowed as readonly string[]).includes(value) ? (value as T) : fallback;
 }

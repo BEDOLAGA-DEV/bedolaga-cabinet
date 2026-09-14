@@ -166,7 +166,6 @@ export default function AdminUserDetail() {
     <UserActionsMenu
       blocked={user.status === 'blocked'}
       busy={actions.busy}
-      reachabilityLink={reachabilityLink}
       can={{
         block: can.block,
         subscription: can.subscription,
@@ -250,7 +249,6 @@ export default function AdminUserDetail() {
           nodeUsage={data.nodeUsage}
           syncStatus={data.syncStatusQuery.data ?? null}
           syncLoading={data.syncStatusQuery.isFetching}
-          onCheckSync={() => void data.syncStatusQuery.refetch()}
           can={{ manage: can.subscription, sync: can.sync, devices: can.devices }}
           busy={actions.busy}
           actions={actions}
