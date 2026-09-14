@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.75.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.74.0...v1.75.0) (2026-09-14)
+
+
+### Features
+
+* **accounts:** предупреждение, какой email будет забыт при отвязке провайдера ([394c59c](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/394c59cefe000ea0000b4d3c35186969645e8573))
+* **grace:** внешний сквад для «Заменить на указанный» выбирается из списка панели ([6e42870](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/6e42870f9535cfc290fb27b6a2c0b4a64060ab5f))
+* **grace:** поле «что остаётся доступным» и выключатели уведомлений ([d9be0bd](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/d9be0bd804e2eaad19adf7a156b1912f8423cab9))
+
+
+### Bug Fixes
+
+* «Действует до: Invalid Date» в карточке успеха — нераспознанную дату показывать как есть ([603fdd0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/603fdd098af197b8392ee7b8eca57e35b7356046))
+* **grace:** кнопка «Скрыть» у блока «Дополнительно» не работала при настроенном внешнем скваде ([ddd3504](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/ddd350421da35260812cadbb867f4e6a2808712f))
+* **grace:** подзаголовок раздела без прибитого Telegram ([29af2c5](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/29af2c536dcfdc0b5787908c1b7a1b2243e17b10))
+* **grace:** подсказка поля «что остаётся доступным» — фраза в сообщениях теперь после двоеточия ([6553146](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/655314660db44063e3f3fc1a397dfa882d96c983))
+* **grace:** раздел grace-доступа по канону дизайна и человеческими словами ([974c7c8](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/974c7c829d70616b4b96dd921fc8fb0bf07e7ad4))
+* **grace:** состояние в две карточки, режимы и сквады описаны словами ([09f4485](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/09f44858ed76a77572c53cbd7596acac7eb8e71c))
+* дни на графике дохода — календарные, а не полночь UTC (bot [#3136](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/issues/3136)) ([06c9802](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/06c9802829c0fdc58556408843e9f87fd60c40a1))
+
 ## [1.74.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.73.0...v1.74.0) (2026-09-11)
 
 
