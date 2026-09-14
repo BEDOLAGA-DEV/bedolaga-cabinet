@@ -18,6 +18,7 @@ import { formatShortDate } from '@/utils/format';
 import { formatGb } from '@/utils/formatNumber';
 import { uiLocale } from '@/utils/uiLocale';
 import { usePaymentMethodLabel } from './ActivityRows';
+import { ExtendMenu } from './ExtendMenu';
 import { DaysForm, DeviceLimitForm, TariffForm, TrafficForm } from './SubscriptionForms';
 import { KeyValues, LinkAction, Section } from './sectionParts';
 
@@ -46,6 +47,8 @@ interface SubscriptionCardProps {
   openPanel: SubscriptionPanel | null;
   onOpenPanel: (panel: SubscriptionPanel | null) => void;
   actions: SubscriptionCardActions;
+  /** Классика: тарифов нет — ни названия тарифа, ни «Сменить тариф». */
+  classic?: boolean;
 }
 
 const BYTES_IN_GB = 1024 ** 3;
@@ -67,6 +70,7 @@ export function SubscriptionCard({
   openPanel,
   onOpenPanel,
   actions,
+  classic = false,
 }: SubscriptionCardProps) {
   const { t } = useTranslation();
   const dialog = useNativeDialog();
@@ -153,7 +157,11 @@ export function SubscriptionCard({
     <Section
       id="subscription-extend"
       icon={<SubscriptionIcon className="h-5 w-5" />}
-      title={`${sub.tariff_name ?? t(`${ns}.notSpecified`)} · #${sub.id}`}
+      title={`${
+        classic
+          ? t('admin.users.detail.tabs.subscription')
+          : (sub.tariff_name ?? t(`${ns}.notSpecified`))
+      } · #${sub.id}`}
       action={<SubscriptionStateChip status={sub.status} />}
     >
       <div className="grid gap-x-8 gap-y-4 lg:grid-cols-2">
@@ -215,9 +223,14 @@ export function SubscriptionCard({
 
       {canManage && (
         <>
-          {/* «Продлить ▾» — в шапке карточки, на всех вкладках; здесь его не повторяем.
-              Её «другой срок…» открывает форму ниже (`?do=extend`). */}
+          {/* «Продлить ▾» — здесь, у самой подписки: в мультитарифе кнопка в шапке карточки
+              не говорила, какую подписку продлит. «Другой срок» открывает форму ниже. */}
           <div className="flex flex-wrap gap-2">
+            <ExtendMenu
+              disabled={busy}
+              onPick={(days) => void actions.extend(days)}
+              onCustom={() => onOpenPanel('extend')}
+            />
             {inactive && (
               <button
                 type="button"
@@ -228,9 +241,11 @@ export function SubscriptionCard({
                 {t(`${ns}.activate`)}
               </button>
             )}
-            <PanelButton active={openPanel === 'tariff'} onClick={() => toggle('tariff')}>
-              {t(`${ns}.changeTariff`)}
-            </PanelButton>
+            {!classic && (
+              <PanelButton active={openPanel === 'tariff'} onClick={() => toggle('tariff')}>
+                {t(`${ns}.changeTariff`)}
+              </PanelButton>
+            )}
             {topupPackages.length > 0 && (
               <PanelButton active={openPanel === 'traffic'} onClick={() => toggle('traffic')}>
                 {t(`${ns}.addTraffic`)}

@@ -145,6 +145,9 @@ export interface UserDetailResponse {
   promo_offer_discount_expires_at: string | null;
   recent_transactions: UserTransactionItem[];
   remnawave_id: number | null;
+  /** Режим продаж бота; старый бот не присылает — см. `salesModeOf`. */
+  sales_mode?: 'classic' | 'tariffs';
+  multi_tariff_enabled?: boolean;
 }
 
 export interface UserPanelInfo {

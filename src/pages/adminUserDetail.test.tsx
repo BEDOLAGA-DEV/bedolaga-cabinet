@@ -278,32 +278,68 @@ describe('AdminUserDetail', () => {
     await waitFor(() => expect(fullDeleteUser).toHaveBeenCalled());
   });
 
-  it('«Продлить ▾» из шапки: «другой срок…» открывает вкладку подписки', async () => {
-    await renderDetail();
-    fireEvent.click(
-      screen.getAllByRole('button', { name: 'admin.users.detail.subscription.extend' })[0],
-    );
+  it('«Продлить ▾» — у самой подписки: «другой срок» открывает форму под карточкой', async () => {
+    await renderDetail('/admin/users/42?tab=subscription');
+    await screen.findByText('admin.users.detail.panel.title');
+    fireEvent.click(screen.getByRole('button', { name: 'admin.users.detail.subscription.extend' }));
     fireEvent.click(
       await screen.findByRole('menuitem', { name: 'admin.users.detail.subscription.customDays' }),
     );
-    await waitFor(() =>
-      expect(screen.getByRole('tab', { selected: true }).textContent).toContain(
-        'admin.users.detail.tabs.subscription',
-      ),
-    );
+    expect(await screen.findByLabelText('admin.users.detail.subscription.extendDays')).toBeTruthy();
   });
 
-  it('каждое действие — в одном месте: «Продлить» только в шапке, «Начислить» — это вкладка', async () => {
+  it('в шапке нет «Продлить» — в мультитарифе не понять, какую подписку он продлит', async () => {
     const extendButtons = () =>
-      screen.getAllByRole('button', { name: 'admin.users.detail.subscription.extend' });
+      screen.queryAllByRole('button', { name: 'admin.users.detail.subscription.extend' });
     await renderDetail();
-    expect(extendButtons()).toHaveLength(1);
+    await screen.findByText('admin.users.detail.facts.balance');
+    expect(extendButtons()).toHaveLength(0);
     expect(screen.queryByRole('button', { name: 'admin.users.detail.header.topUp' })).toBeNull();
-    expect(screen.queryByText('admin.users.detail.overview.changeTariff')).toBeNull();
+    expect(screen.getByRole('button', { name: 'admin.users.detail.header.write' })).toBeTruthy();
     cleanup();
     await renderDetail('/admin/users/42?tab=subscription');
     await screen.findByText('admin.users.detail.panel.title');
     expect(extendButtons()).toHaveLength(1);
+  });
+
+  it('мультитариф: плитка «Подписки» вместо срока, трафика и устройств одной из них', async () => {
+    const second = {
+      ...(detail.subscription as NonNullable<typeof detail.subscription>),
+      id: 2425,
+      tariff_name: 'Семейный',
+      end_date: '2026-10-01T00:00:00Z',
+    };
+    getUser.mockResolvedValue({
+      ...detail,
+      multi_tariff_enabled: true,
+      sales_mode: 'tariffs',
+      subscriptions: [detail.subscription, second],
+    });
+    await renderDetail();
+    expect(await screen.findByText('admin.users.detail.facts.subscriptions')).toBeTruthy();
+    expect(screen.getByText('admin.users.detail.facts.subscriptionsLive')).toBeTruthy();
+    expect(screen.queryByText('admin.users.detail.facts.until')).toBeNull();
+    expect(screen.queryByText('admin.users.detail.facts.traffic')).toBeNull();
+    expect(screen.queryByText('admin.users.detail.facts.devices')).toBeNull();
+  });
+
+  it('мультитариф с одной подпиской: карточка сразу и можно выдать ещё одну', async () => {
+    getUser.mockResolvedValue({ ...detail, multi_tariff_enabled: true, sales_mode: 'tariffs' });
+    await renderDetail('/admin/users/42?tab=subscription');
+    await screen.findByText('admin.users.detail.panel.title');
+    expect(screen.getByText('admin.users.detail.subscription.createNew')).toBeTruthy();
+    const headings = screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent ?? '');
+    expect(headings[headings.length - 1]).toBe('admin.users.detail.subscription.dangerZone.title');
+  });
+
+  it('классика: без «Сменить тариф» и без названия тарифа в плитке', async () => {
+    getUser.mockResolvedValue({ ...detail, sales_mode: 'classic', multi_tariff_enabled: false });
+    await renderDetail('/admin/users/42?tab=subscription');
+    await screen.findByText('admin.users.detail.panel.title');
+    expect(
+      screen.queryByRole('button', { name: 'admin.users.detail.subscription.changeTariff' }),
+    ).toBeNull();
+    expect(screen.queryByText(/Командный/)).toBeNull();
   });
 
   it('в «⋯» только действия с аккаунтом: промогруппа, ограничения и подписка — на своих местах', async () => {
