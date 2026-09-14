@@ -239,14 +239,9 @@ export function SubscriptionCard({
             <PanelButton active={openPanel === 'devices'} onClick={() => toggle('devices')}>
               {t(`${ns}.deviceLimitTitle`)}
             </PanelButton>
-            <button
-              type="button"
-              onClick={() => toggle('shorten')}
-              aria-expanded={openPanel === 'shorten'}
-              className={cn('btn-ghost', openPanel === 'shorten' && 'bg-dark-800 text-dark-100')}
-            >
-              {t(`${ns}.shortenTitle`)}…
-            </button>
+            <PanelButton active={openPanel === 'shorten'} onClick={() => toggle('shorten')}>
+              {t(`${ns}.shortenTitle`)}
+            </PanelButton>
           </div>
 
           {openPanel === 'extend' && (

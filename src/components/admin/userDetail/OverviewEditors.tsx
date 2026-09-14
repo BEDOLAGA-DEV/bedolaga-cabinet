@@ -54,7 +54,7 @@ export function PromoGroupEditor({
         type="button"
         disabled={busy}
         onClick={onClose}
-        className="btn-ghost px-3 py-2 text-sm"
+        className="btn-secondary px-3 py-2 text-sm"
       >
         {t('common.cancel')}
       </button>
@@ -130,7 +130,7 @@ export function RestrictionsEditor({ user, busy, onSave, onClose }: Restrictions
           type="button"
           disabled={busy}
           onClick={onClose}
-          className="btn-ghost px-3 py-2 text-sm"
+          className="btn-secondary px-3 py-2 text-sm"
         >
           {t('common.cancel')}
         </button>

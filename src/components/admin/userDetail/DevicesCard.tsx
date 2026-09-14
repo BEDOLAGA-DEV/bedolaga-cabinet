@@ -5,7 +5,7 @@ import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 import { useDestructiveConfirm } from '@/platform/hooks/useNativeDialog';
 import { formatShortDate } from '@/utils/format';
 import { DEVICE_ALIAS_MAX_LENGTH } from '../../../constants/devices';
-import { LinkAction, Section } from './sectionParts';
+import { Section } from './sectionParts';
 
 export interface DeviceRow {
   hwid: string;
@@ -91,9 +91,15 @@ export function DevicesCard({
       action={
         canManage &&
         devices.length > 0 && (
-          <LinkAction onClick={resetAll} disabled={busy}>
+          // Действие, а не переход — кнопкой, как остальные действия карточки.
+          <button
+            type="button"
+            onClick={resetAll}
+            disabled={busy}
+            className="btn-secondary min-h-0 px-3 py-1.5 text-xs"
+          >
             {t(`${ns}.devices.resetAll`)}
-          </LinkAction>
+          </button>
         )
       }
     >

@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { Card } from '@/components/data-display';
+import { ArrowRightIcon } from '@/components/icons';
 import { cn } from '@/lib/utils';
 
 interface SectionProps {
@@ -28,7 +29,11 @@ export function Section({ icon, title, action, className, id, children }: Sectio
   );
 }
 
-/** Ссылка-действие внутри секции: «Изменить», «Все детали →». */
+/**
+ * Действие внутри секции: «Изменить», «Назначить», «Вся активность →». Маленькая кнопка
+ * (`.btn-secondary` в компактном размере), а не голубой текст: владелец не узнавал в
+ * тексте кнопку, и рядом с настоящими кнопками это выглядело как надпись.
+ */
 export function LinkAction({
   onClick,
   children,
@@ -48,7 +53,7 @@ export function LinkAction({
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className="shrink-0 whitespace-nowrap text-xs font-semibold text-accent-400 transition-colors hover:text-accent-300 disabled:opacity-50"
+      className="btn-secondary min-h-0 shrink-0 gap-1 whitespace-nowrap px-2.5 py-1 text-xs"
     >
       {short ? (
         <>
@@ -58,7 +63,7 @@ export function LinkAction({
       ) : (
         children
       )}
-      {arrow && ' →'}
+      {arrow && <ArrowRightIcon className="h-3.5 w-3.5" />}
     </button>
   );
 }
@@ -74,7 +79,9 @@ export function KeyValues({ rows, className }: { rows: KeyValueRow[]; className?
   return (
     <dl
       className={cn(
-        'm-0 grid grid-cols-[minmax(0,auto)_minmax(0,1fr)] gap-x-4 gap-y-2 text-sm',
+        // По первой строке текста: иначе рядом с маленькой кнопкой («Изменить») подпись
+        // слева сидела выше значения.
+        'm-0 grid grid-cols-[minmax(0,auto)_minmax(0,1fr)] items-baseline gap-x-4 gap-y-2 text-sm',
         className,
       )}
     >

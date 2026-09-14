@@ -285,7 +285,7 @@ export function ReferralsTab({ user, userId, canEdit, onUserRefresh }: Referrals
             onClick={() => setPicker('referral')}
             className="btn-secondary self-start"
           >
-            {t(`${ns}.addReferral`)}…
+            {t(`${ns}.addReferral`)}
           </button>
         ))}
     </Section>
@@ -337,7 +337,7 @@ function CommissionEditor({
       <button type="button" onClick={() => void save()} disabled={busy} className="btn-primary">
         {t('common.save')}
       </button>
-      <button type="button" onClick={onClose} className="btn-ghost">
+      <button type="button" onClick={onClose} className="btn-secondary">
         {t('common.cancel')}
       </button>
     </div>
