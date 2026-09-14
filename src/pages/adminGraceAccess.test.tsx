@@ -446,6 +446,36 @@ describe('раздел grace-доступа', () => {
     expect(screen.queryByText(/Некорректный UUID/)).toBeNull();
   });
 
+  it('«Скрыть» сворачивает «Дополнительно» и при настроенном внешнем скваде', async () => {
+    // Владелец 2026-09-14: «оно должно по кнопке скрываться, но она тупо не работает».
+    // Блок раскрывался сам, пока внешний сквад настроен, — и это переопределяло кнопку.
+    state.overview = overview({ config: config({ external_squad_uuid: 'keep' }) });
+    await renderPage();
+
+    expect(screen.getByLabelText('Внешний сквад')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Скрыть' }));
+    expect(screen.queryByLabelText('Внешний сквад')).toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Показать' }));
+    expect(screen.getByLabelText('Внешний сквад')).toBeTruthy();
+  });
+
+  it('после сохранения свёрнутое «Дополнительно» не раскрывается заново', async () => {
+    // Ответ сервера после сохранения снова несёт настроенный внешний сквад; раскрывать
+    // блок по нему можно только один раз — при первой загрузке.
+    state.overview = overview({ config: config({ external_squad_uuid: 'keep' }) });
+    await renderPage();
+    fireEvent.click(screen.getByRole('button', { name: 'Скрыть' }));
+
+    fireEvent.change(screen.getByLabelText('Сквад для истёкшей подписки'), {
+      target: { value: '' },
+    });
+    fireEvent.click(saveButton());
+    await waitFor(() => expect(state.saves).toEqual([{ expired_squad_uuid: '' }]));
+
+    expect(screen.queryByLabelText('Внешний сквад')).toBeNull();
+  });
+
   it('«Не трогать» отправляется как keep', async () => {
     await renderPage();
     openAdvanced();
