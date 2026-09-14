@@ -3484,6 +3484,7 @@
           "subtractByAdmin": "管理员扣除",
           "recentTransactions": "最近交易",
           "title": "余额",
+          "changeTitle": "充值或扣除",
           "amountLabel": "金额",
           "commentLabel": "日志备注",
           "confirmSubtract": "从余额扣除 {{amount}}？",
@@ -3495,8 +3496,7 @@
           "added": "已充值 {{amount}}",
           "subtracted": "已扣除 {{amount}}",
           "offerNow": "当前",
-          "offerValue": "−{{percent}}%，至 {{date}}",
-          "spentSummary_other": "共消费 {{amount}} · {{count}} 次购买"
+          "offerValue": "−{{percent}}%，至 {{date}}"
         },
         "sync": {
           "selectSubscription": "选择订阅",
@@ -3576,8 +3576,6 @@
           "invited": "已邀请",
           "earned": "已赚取",
           "code": "邀请码",
-          "commissionLink": "佣金：{{value}} · 修改",
-          "commissionValue": "佣金：{{value}}",
           "commissionPercent": "佣金，%",
           "commissionSaved": "佣金已保存",
           "spentHint": "在服务中的消费",
