@@ -4,6 +4,7 @@
  */
 
 import { uiLocale } from '@/utils/uiLocale';
+import { formatDateOrRaw } from '@/utils/format';
 import { useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
@@ -96,13 +97,11 @@ export default function SuccessNotificationModal() {
       : null;
 
   // Format expiry date
-  const formattedExpiry = data.expiresAt
-    ? new Date(data.expiresAt).toLocaleDateString(uiLocale(), {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-      })
-    : null;
+  const formattedExpiry = formatDateOrRaw(data.expiresAt, uiLocale(), {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
 
   // Determine title and message
   let title = data.title;
