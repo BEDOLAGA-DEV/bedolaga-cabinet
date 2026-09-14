@@ -238,6 +238,20 @@ describe('AdminUsers', () => {
     expect(screen.queryByText('admin.users.subFilters.expired')).toBeNull();
   });
 
+  it('выборка не дублируется чипом фильтра: «Заблокированные» — без «Статус: заблокирован ✕»', async () => {
+    getUsers.mockResolvedValue(page([], 0));
+    await renderPage('/admin/users?view=blocked');
+    await waitFor(() =>
+      expect(getUsers).toHaveBeenLastCalledWith(expect.objectContaining({ status: 'blocked' })),
+    );
+    expect(screen.queryByRole('button', { name: 'admin.users.filters.remove' })).toBeNull();
+    expect(screen.getByRole('button', { name: 'admin.users.filters.title' })).toBeTruthy();
+    cleanup();
+    await renderPage('/admin/users?view=expiring');
+    await screen.findByRole('radio', { name: 'admin.users.views.expiring' });
+    expect(screen.queryByRole('button', { name: 'admin.users.filters.remove' })).toBeNull();
+  });
+
   it('сортировка — кнопка-иконка, текущий порядок в подписи', async () => {
     getUsers.mockResolvedValue(page([], 0));
     await renderPage('/admin/users?sort=balance');

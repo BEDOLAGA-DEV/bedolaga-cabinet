@@ -1,12 +1,9 @@
-import { useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { MoreIcon } from '@/components/icons';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/primitives';
 import { cn } from '@/lib/utils';
@@ -23,8 +20,6 @@ export interface UserMenuActions {
 interface UserActionsMenuProps {
   blocked: boolean;
   busy: boolean;
-  /** Проверка конфигов через операторов РФ; null — раздел недоступен. */
-  reachabilityLink: string | null;
   can: {
     block: boolean;
     subscription: boolean;
@@ -41,16 +36,8 @@ interface UserActionsMenuProps {
  * стрелки, Esc, фокус. Опасное подтверждается системным диалогом кабинета
  * (в Mini App — родным попапом), красным — только удаление.
  */
-export function UserActionsMenu({
-  blocked,
-  busy,
-  reachabilityLink,
-  can,
-  actions,
-  className,
-}: UserActionsMenuProps) {
+export function UserActionsMenu({ blocked, busy, can, actions, className }: UserActionsMenuProps) {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const dialog = useNativeDialog();
   const confirmDestructive = useDestructiveConfirm();
   const ns = 'admin.users.userActions';
@@ -65,14 +52,6 @@ export function UserActionsMenu({
       );
       if (ok) await action();
     };
-
-  const rare = [
-    reachabilityLink && {
-      key: 'configs',
-      label: t('admin.users.detail.menu.checkConfigs'),
-      run: () => navigate(reachabilityLink),
-    },
-  ].filter(Boolean) as { key: string; label: string; run: () => void }[];
 
   const dangerous = [
     can.block &&
@@ -107,7 +86,7 @@ export function UserActionsMenu({
     },
   ].filter(Boolean) as { key: string; label: string; danger?: boolean; run: () => void }[];
 
-  if (rare.length === 0 && dangerous.length === 0) return null;
+  if (dangerous.length === 0) return null;
 
   return (
     <DropdownMenu modal={false}>
@@ -118,17 +97,6 @@ export function UserActionsMenu({
         <MoreIcon className="h-5 w-5" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-64">
-        {rare.map((item) => (
-          <DropdownMenuItem key={item.key} onSelect={item.run}>
-            {item.label}
-          </DropdownMenuItem>
-        ))}
-        {rare.length > 0 && dangerous.length > 0 && <DropdownMenuSeparator />}
-        {dangerous.length > 0 && (
-          <DropdownMenuLabel className="text-[11px] uppercase tracking-wide text-dark-500">
-            {t('admin.users.detail.menu.confirmRequired')}
-          </DropdownMenuLabel>
-        )}
         {dangerous.map((item) => (
           <DropdownMenuItem
             key={item.key}

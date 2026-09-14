@@ -15,6 +15,7 @@ import {
   SUB_FILTERS,
   VIEW_KEYS,
   applyView,
+  viewFilterValue,
 } from '@/pages/adminUsers/usersListState';
 import { AppliedFilters } from './AppliedFilters';
 import { type FilterField, type FilterKey, FiltersPopover } from './FiltersPopover';
@@ -113,6 +114,7 @@ export function UsersToolbar({ state, onChange, options }: UsersToolbarProps) {
       key: 'status',
       label: t('admin.users.filterLabels.status'),
       value: state.status,
+      fromView: state.status === viewFilterValue(state.view, 'status'),
       options: withAny(
         STATUS_OPTIONS.map((value) => ({ value, label: t(`admin.users.status.${value}`) })),
         'status',
@@ -122,6 +124,7 @@ export function UsersToolbar({ state, onChange, options }: UsersToolbarProps) {
       key: 'sub',
       label: t('admin.users.filterLabels.sub'),
       value: state.sub,
+      fromView: state.sub === viewFilterValue(state.view, 'sub'),
       options: withAny(
         SUB_FILTERS.filter(Boolean).map((value: SubFilter) => ({
           value,

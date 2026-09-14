@@ -13,6 +13,13 @@ export interface FilterField {
   /** '' — «любой»: первый пункт `options`. */
   value: string;
   options: DropdownOption[];
+  /** Значение поставила выбранная выборка — не чип и не в счётчике, это её повтор. */
+  fromView?: boolean;
+}
+
+/** Фильтр выбран руками: не «любой» и не повтор выборки. */
+export function isApplied(field: FilterField): boolean {
+  return field.value !== '' && !field.fromView;
 }
 
 interface FiltersPopoverProps {
@@ -36,7 +43,7 @@ export function currentLabel(field: FilterField): string {
 export function FiltersPopover({ fields, onChange, onReset }: FiltersPopoverProps) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState<FilterKey | null>(null);
-  const applied = fields.filter((field) => field.value !== '').length;
+  const applied = fields.filter(isApplied).length;
   const baseId = useId();
 
   return (

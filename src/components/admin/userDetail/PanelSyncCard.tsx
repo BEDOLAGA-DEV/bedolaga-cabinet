@@ -1,7 +1,8 @@
 import { useTranslation } from 'react-i18next';
 import type { PanelSyncStatusResponse } from '@/api/adminUsers';
 import { relativeLabel } from '@/components/admin/users';
-import { RefreshIcon, RemnawaveIcon } from '@/components/icons';
+import { RemnawaveIcon } from '@/components/icons';
+import { Spinner } from '@/components/ui/Spinner';
 import { cn } from '@/lib/utils';
 import { useNativeDialog } from '@/platform/hooks/useNativeDialog';
 import { formatShortDate } from '@/utils/format';
@@ -13,13 +14,13 @@ import {
   isPanelStatusLive,
   panelSyncRows,
 } from './panelSyncRows';
-import { KeyValues, Section } from './sectionParts';
+import { Section } from './sectionParts';
 
 interface PanelSyncCardProps {
   status: PanelSyncStatusResponse | null;
+  /** Сверка обновляется сама (открытие вкладки, возврат в окно, после действий). */
   loading: boolean;
   busy: boolean;
-  onCheck: () => void;
   onPull: () => Promise<boolean>;
   onPush: () => Promise<boolean>;
 }
@@ -33,18 +34,12 @@ const TONE: Record<Tone, string> = {
 };
 
 /**
- * Блок «Панель Remnawave» во вкладке «Подписка». Панель — источник истины:
- * бот сам забирает её изменения, поэтому «Забрать из панели» появляется только
- * при отличиях, а ручная отправка — редкая и спрашивает подтверждение.
+ * Блок «Панель Remnawave» во вкладке «Подписка»: что в боте и что в панели — таблицей,
+ * всегда, отличия подсвечены строкой. Направлений ровно два: из панели в бота и из
+ * бота в панель; обе кнопки спрашивают подтверждение. Отдельной «Сверить сейчас» нет —
+ * сверка обновляется сама.
  */
-export function PanelSyncCard({
-  status,
-  loading,
-  busy,
-  onCheck,
-  onPull,
-  onPush,
-}: PanelSyncCardProps) {
+export function PanelSyncCard({ status, loading, busy, onPull, onPush }: PanelSyncCardProps) {
   const { t } = useTranslation();
   const dialog = useNativeDialog();
   const ns = 'admin.users.detail.panel';
@@ -90,42 +85,61 @@ export function PanelSyncCard({
       icon={<RemnawaveIcon className="h-5 w-5" />}
       title={t(`${ns}.title`)}
       action={
-        <span className={cn('rounded-full px-2 py-0.5 text-[11px] font-semibold', TONE[tone])}>
+        <span
+          className={cn(
+            'inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-semibold',
+            TONE[tone],
+          )}
+        >
+          {loading && <Spinner className="h-3 w-3" />}
           {label}
         </span>
       }
     >
-      <KeyValues
-        rows={[
-          {
-            key: 'checked',
-            label: t(`${ns}.checked`),
-            value: relativeLabel(relativeTimeParts(status?.last_sync ?? null), t),
-          },
-        ]}
-      />
-
-      {differs && status && (
-        <div className="overflow-x-auto rounded-xl border border-warning-500/25">
-          <table className="w-full min-w-[20rem] text-left text-sm">
+      {status?.panel_found && (
+        <div className="overflow-x-auto rounded-xl bg-dark-800/40">
+          <table className="w-full whitespace-nowrap text-left text-[13px] sm:text-sm">
             <thead>
               <tr className="text-xs text-dark-500">
-                <th className="px-3 py-2 font-medium" />
-                <th className="px-3 py-2 font-medium">{t('admin.users.detail.sync.bot')}</th>
-                <th className="px-3 py-2 font-medium">{t('admin.users.detail.sync.panel')}</th>
+                <th scope="col" className="w-2/5 px-2.5 py-2.5 font-medium sm:px-3">
+                  <span className="sr-only">{t(`${ns}.title`)}</span>
+                </th>
+                <th scope="col" className="px-2.5 py-2.5 font-medium sm:px-3">
+                  {t('admin.users.detail.sync.bot')}
+                </th>
+                <th scope="col" className="px-2.5 py-2.5 font-medium sm:px-3">
+                  {t('admin.users.detail.sync.panel')}
+                </th>
               </tr>
             </thead>
             <tbody>
               {panelSyncRows(status).map((row) => {
                 const [bot, panel] = cells[row.key](status);
                 return (
-                  <tr key={row.key} className="border-t border-dark-800">
-                    <td className="px-3 py-1.5 text-dark-500">{t(`${ns}.rows.${row.key}`)}</td>
-                    <td className="px-3 py-1.5 tabular-nums text-dark-200">{bot}</td>
+                  <tr
+                    key={row.key}
+                    className={cn(
+                      'border-t border-dark-700/40',
+                      row.differs && 'bg-warning-500/[0.06]',
+                    )}
+                  >
+                    <th scope="row" className="px-2.5 py-2 font-normal text-dark-400 sm:px-3">
+                      <span className="inline-flex items-center gap-2">
+                        <span
+                          aria-hidden="true"
+                          className={cn(
+                            'h-1.5 w-1.5 shrink-0 rounded-full',
+                            row.differs ? 'bg-warning-400' : 'bg-transparent',
+                          )}
+                        />
+                        {t(`${ns}.rows.${row.key}`)}
+                      </span>
+                    </th>
+                    <td className="px-2.5 py-2 tabular-nums text-dark-100 sm:px-3">{bot}</td>
                     <td
                       className={cn(
-                        'px-3 py-1.5 tabular-nums',
-                        row.differs ? 'font-medium text-warning-400' : 'text-dark-200',
+                        'px-2.5 py-2 tabular-nums sm:px-3',
+                        row.differs ? 'font-medium text-warning-400' : 'text-dark-100',
                       )}
                     >
                       {panel}
@@ -138,16 +152,24 @@ export function PanelSyncCard({
         </div>
       )}
 
+      {status?.last_sync && (
+        <p className="text-xs text-dark-500">
+          {t(`${ns}.checked`)}: {relativeLabel(relativeTimeParts(status.last_sync), t)}
+        </p>
+      )}
+
       <div className="flex flex-wrap gap-2">
-        {differs && (
-          <button type="button" onClick={pull} disabled={busy} className="btn-primary">
+        {/* Два направления, других нет. При отличиях главная — «из панели в бота»: панель — истина. */}
+        {status?.panel_found && (
+          <button
+            type="button"
+            onClick={pull}
+            disabled={busy}
+            className={differs ? 'btn-primary' : 'btn-secondary'}
+          >
             {t(`${ns}.pull`)}
           </button>
         )}
-        <button type="button" onClick={onCheck} disabled={loading} className="btn-secondary">
-          <RefreshIcon className={cn('h-4 w-4', loading && 'animate-spin')} />
-          {t(`${ns}.checkNow`)}
-        </button>
         <button type="button" onClick={push} disabled={busy} className="btn-secondary">
           {t(`${ns}.pushManual`)}
         </button>
