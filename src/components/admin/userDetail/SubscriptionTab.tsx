@@ -12,6 +12,7 @@ import type {
 import { SubscriptionStateChip, useTrafficLabel } from '@/components/admin/users';
 import { BackIcon, ChevronRightIcon } from '@/components/icons';
 import { formatShortDate } from '@/utils/format';
+import type { SalesMode } from '@/pages/adminUserDetail/salesMode';
 import { CreateSubscriptionForm } from './CreateSubscriptionForm';
 import { DangerZone } from './DangerZone';
 import { type DeviceRow, DevicesCard } from './DevicesCard';
@@ -63,6 +64,7 @@ export interface SubscriptionTabProps {
   busy: boolean;
   actions: SubscriptionTabActions;
   reachabilityLink: string | null;
+  mode: SalesMode;
 }
 
 /**
@@ -75,12 +77,16 @@ export function SubscriptionTab(props: SubscriptionTabProps) {
   const [params, setParams] = useSearchParams();
   const [openPanel, setOpenPanel] = useState<SubscriptionPanel | null>(null);
   const [detailView, setDetailView] = useState(false);
-  const { user, subscriptions, selectedSub, can, busy, actions } = props;
+  const { user, subscriptions, selectedSub, can, busy, actions, mode } = props;
 
+  // Список — когда подписок несколько; одна открывается сразу. «Создать» в мультитарифе
+  // есть всегда (кроме карточки одной из многих — там оно в списке): раньше с одной
+  // подпиской вторую было не выдать.
   const multi = subscriptions.length > 1;
   const showDetail = (detailView || !multi) && selectedSub !== null;
   const showList = multi && !detailView;
-  const showCreate = can.manage && (showList || subscriptions.length === 0);
+  const showCreate =
+    can.manage && (subscriptions.length === 0 || (mode === 'multi' && (showList || !multi)));
   const liveTariffIds = new Set(
     subscriptions
       .filter((sub) => sub.is_active || sub.status === 'trial' || sub.status === 'limited')
@@ -94,8 +100,8 @@ export function SubscriptionTab(props: SubscriptionTabProps) {
         (tx) => tx.type === 'subscription_payment' && tx.is_completed,
       ) ?? null);
 
-  // «Продлить ▾ → другой срок…» и «Выдать» из шапки приходят сюда с `?do=extend|create|…`: открываем нужную
-  // форму, подкручиваем к ней и убираем параметр из адреса.
+  // Ссылка с `?do=extend|tariff|…` открывает нужную форму, подкручивает к ней и убирает
+  // параметр из адреса.
   useEffect(() => {
     const wanted = params.get('do');
     if (!wanted) return;
@@ -150,6 +156,7 @@ export function SubscriptionTab(props: SubscriptionTabProps) {
             openPanel={openPanel}
             onOpenPanel={setOpenPanel}
             actions={actions}
+            classic={mode === 'classic'}
           />
 
           <div className="grid gap-4 lg:grid-cols-2">
@@ -184,19 +191,6 @@ export function SubscriptionTab(props: SubscriptionTabProps) {
             remnawaveId={user.remnawave_id}
             reachabilityLink={props.reachabilityLink}
           />
-
-          {can.manage && (
-            <DangerZone
-              busy={busy}
-              canCancel={selectedSub.is_active}
-              onCancel={actions.cancelSubscription}
-              onDelete={async () => {
-                const deleted = await actions.deleteSubscription();
-                if (deleted) setDetailView(false);
-                return deleted;
-              }}
-            />
-          )}
         </>
       )}
 
@@ -219,6 +213,20 @@ export function SubscriptionTab(props: SubscriptionTabProps) {
           busy={busy}
           noSubscriptions={subscriptions.length === 0}
           onCreate={actions.createSubscription}
+        />
+      )}
+
+      {/* Опасная зона — всегда последней, и под формой «Создать» тоже. */}
+      {showDetail && selectedSub && can.manage && (
+        <DangerZone
+          busy={busy}
+          canCancel={selectedSub.is_active}
+          onCancel={actions.cancelSubscription}
+          onDelete={async () => {
+            const deleted = await actions.deleteSubscription();
+            if (deleted) setDetailView(false);
+            return deleted;
+          }}
         />
       )}
     </div>
