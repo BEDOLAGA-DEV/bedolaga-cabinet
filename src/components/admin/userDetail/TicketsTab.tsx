@@ -5,6 +5,7 @@ import { adminApi, type AdminTicket, type AdminTicketDetail } from '../../../api
 import { MessageMediaGrid } from '../../tickets/MessageMediaGrid';
 import { linkifyText } from '../../../utils/linkify';
 import { ChatIcon, BackIcon, SendIcon } from '@/components/icons';
+import { Spinner } from '@/components/ui/Spinner';
 
 // ──────────────────────────────────────────────────────────────────
 // Tickets tab — list view + chat view (selected ticket replaces list).
@@ -111,7 +112,7 @@ export function TicketsTab({ userId, formatDate }: TicketsTabProps) {
         /* Ticket Chat View */
         ticketDetailLoading ? (
           <div className="flex items-center justify-center py-12">
-            <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
+            <Spinner />
           </div>
         ) : selectedTicket ? (
           <ChatView
@@ -132,7 +133,7 @@ export function TicketsTab({ userId, formatDate }: TicketsTabProps) {
         ) : null
       ) : ticketsLoading ? (
         <div className="flex items-center justify-center py-12">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
+          <Spinner />
         </div>
       ) : tickets.length === 0 ? (
         <EmptyState />
@@ -351,7 +352,7 @@ function ChatView({
             className="min-h-[44px] min-w-[44px] shrink-0 self-end rounded-lg bg-accent-500 px-4 py-2 text-sm text-on-accent transition-colors hover:bg-accent-600 disabled:opacity-50 sm:min-h-0 sm:min-w-0"
           >
             {replySending ? (
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+              <Spinner className="h-4 w-4 border-on-accent/30 border-t-on-accent" />
             ) : (
               <SendIcon className="h-5 w-5" />
             )}

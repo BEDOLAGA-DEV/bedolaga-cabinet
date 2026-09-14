@@ -68,8 +68,13 @@ export function UserFacts({ user, subscription, devicesTotal }: UserFactsProps) 
           key={fact.key}
           className={[
             'flex flex-col gap-0.5 px-4 py-3',
-            index % 2 === 0 ? 'border-r border-dark-800' : '',
-            index < facts.length - 2 ? 'border-b border-dark-800 md:border-b-0' : '',
+            // Пятый факт на телефоне — один в ряду: растягиваем на обе колонки.
+            index === facts.length - 1 && facts.length % 2 === 1
+              ? 'col-span-2 md:col-span-1'
+              : index % 2 === 0
+                ? 'border-r border-dark-800'
+                : '',
+            index < facts.length - 1 ? 'border-b border-dark-800 md:border-b-0' : '',
             'md:border-r md:border-dark-800 md:last:border-r-0',
           ].join(' ')}
         >
