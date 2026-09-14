@@ -81,20 +81,10 @@ export function BalanceTab({ user, userId, can, onUserRefresh }: BalanceTabProps
 
   return (
     <div className="grid gap-4 lg:grid-cols-2">
-      <Section icon={<WalletIcon className="h-5 w-5" />} title={t(`${ns}.title`)}>
-        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-          <span className="text-3xl font-bold tabular-nums text-dark-100">
-            {money(user.balance_rubles)}
-          </span>
-          <span className="text-sm text-dark-400">
-            {t(`${ns}.spentSummary`, {
-              amount: money(user.total_spent_kopeks / 100),
-              count: user.purchase_count,
-            })}
-          </span>
-        </div>
-
-        {can.balance && (
+      {/* Сколько на балансе и сколько потрачено — в плитках над вкладками; здесь только
+          начисление и списание, без повтора тех же сумм крупным шрифтом. */}
+      {can.balance && (
+        <Section icon={<WalletIcon className="h-5 w-5" />} title={t(`${ns}.changeTitle`)}>
           <div className="flex flex-col gap-3">
             <Segmented
               label={t(`${ns}.title`)}
@@ -142,8 +132,8 @@ export function BalanceTab({ user, userId, can, onUserRefresh }: BalanceTabProps
               {mode === 'add' ? t(`${ns}.add`) : t(`${ns}.subtract`)}
             </button>
           </div>
-        )}
-      </Section>
+        </Section>
+      )}
 
       <DiscountCard
         user={user}

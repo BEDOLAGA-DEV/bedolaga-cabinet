@@ -4652,6 +4652,7 @@
           "subtractByAdmin": "Deducted by admin",
           "recentTransactions": "Recent transactions",
           "title": "Balance",
+          "changeTitle": "Add or deduct",
           "amountLabel": "Amount",
           "commentLabel": "Comment for the log",
           "confirmSubtract": "Take {{amount}} off the balance?",
@@ -4663,9 +4664,7 @@
           "added": "{{amount}} added",
           "subtracted": "{{amount}} deducted",
           "offerNow": "Now",
-          "offerValue": "−{{percent}}% until {{date}}",
-          "spentSummary_one": "spent {{amount}} · {{count}} purchase",
-          "spentSummary_other": "spent {{amount}} · {{count}} purchases"
+          "offerValue": "−{{percent}}% until {{date}}"
         },
         "sync": {
           "selectSubscription": "Select subscription",
@@ -4746,8 +4745,6 @@
           "invited": "Invited",
           "earned": "Earned",
           "code": "Code",
-          "commissionLink": "Commission: {{value}} · change",
-          "commissionValue": "Commission: {{value}}",
           "commissionPercent": "Commission, %",
           "commissionSaved": "Commission saved",
           "spentHint": "Spent in the service",

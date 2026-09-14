@@ -31,8 +31,8 @@ interface Tile {
   subValue?: string;
   icon: ReactNode;
   tone: ChipTone;
-  /** На телефоне прячется: сетка 2×2, «Потрачено» есть во вкладке «Баланс». */
-  wideOnly?: boolean;
+  /** На телефоне — во всю ширину: пятая плитка в сетке 2×2. */
+  wide?: boolean;
 }
 
 const TRAFFIC_WARN_SHARE = 0.8;
@@ -116,14 +116,14 @@ export function UserFacts({ user, subscription, devicesTotal }: UserFactsProps) 
       subValue: t('admin.users.purchaseCount', { count: user.purchase_count }),
       icon: <ReceiptIcon />,
       tone: 'neutral',
-      wideOnly: true,
+      wide: true,
     },
   ];
 
   return (
     <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
       {tiles.map((tile) => (
-        <div key={tile.key} className={cn('min-w-0', tile.wideOnly && 'hidden lg:block')}>
+        <div key={tile.key} className={cn('min-w-0', tile.wide && 'col-span-2 lg:col-span-1')}>
           <StatCard
             label={tile.label}
             value={tile.value}

@@ -5087,6 +5087,7 @@
           "subtractByAdmin": "Списание админом",
           "recentTransactions": "Последние транзакции",
           "title": "Баланс",
+          "changeTitle": "Начислить или списать",
           "amountLabel": "Сумма",
           "commentLabel": "Комментарий для журнала",
           "confirmSubtract": "Списать {{amount}} с баланса?",
@@ -5098,10 +5099,7 @@
           "added": "Начислено {{amount}}",
           "subtracted": "Списано {{amount}}",
           "offerNow": "Сейчас",
-          "offerValue": "−{{percent}} % до {{date}}",
-          "spentSummary_one": "потратил {{amount}} · {{count}} покупка",
-          "spentSummary_few": "потратил {{amount}} · {{count}} покупки",
-          "spentSummary_many": "потратил {{amount}} · {{count}} покупок"
+          "offerValue": "−{{percent}} % до {{date}}"
         },
         "sync": {
           "selectSubscription": "Выберите подписку",
@@ -5183,8 +5181,6 @@
           "invited": "Приглашено",
           "earned": "Заработано",
           "code": "Код",
-          "commissionLink": "Комиссия: {{value}} · изменить",
-          "commissionValue": "Комиссия: {{value}}",
           "commissionPercent": "Комиссия, %",
           "commissionSaved": "Комиссия сохранена",
           "spentHint": "Сколько потратил в сервисе",
