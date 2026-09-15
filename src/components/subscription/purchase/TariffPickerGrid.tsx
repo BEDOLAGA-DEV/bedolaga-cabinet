@@ -223,7 +223,7 @@ export function TariffPickerGrid({
                             </span>
                           )}
                           <span>{t('subscription.tariff.perDay')}</span>
-                          {promoDaily.percent && promoDaily.percent > 0 && (
+                          {promoDaily.percent != null && promoDaily.percent > 0 && (
                             <span
                               className={`rounded px-1.5 py-0.5 text-xs ${
                                 promoDaily.isPromoGroup
@@ -254,7 +254,7 @@ export function TariffPickerGrid({
                               {formatPrice(promoPeriod.original)}
                             </span>
                           )}
-                          {promoPeriod.percent && promoPeriod.percent > 0 && (
+                          {promoPeriod.percent != null && promoPeriod.percent > 0 && (
                             <span
                               className={`rounded px-1.5 py-0.5 text-xs ${
                                 promoPeriod.isPromoGroup

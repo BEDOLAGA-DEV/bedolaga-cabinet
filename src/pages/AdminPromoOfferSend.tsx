@@ -323,7 +323,7 @@ export default function AdminPromoOfferSend() {
                 >
                   <div className="flex items-center gap-3">
                     <span className="text-2xl">{getOfferTypeIcon(template.offer_type)}</span>
-                    <div className="flex-1">
+                    <div className="min-w-0 flex-1">
                       <div className="font-medium text-dark-100">{template.name}</div>
                       <div className="text-sm text-dark-400">
                         {template.discount_percent > 0 &&

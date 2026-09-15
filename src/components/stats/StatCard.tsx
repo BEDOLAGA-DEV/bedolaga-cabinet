@@ -24,6 +24,9 @@ const TONE = {
   error: { chip: 'text-error-400 tile-wide:bg-error-500/15', value: 'text-error-400' },
 } as const;
 
+/** С какой длины значение считается длинным (≈ «1 234 567,89 ₽» и длиннее). */
+const LONG_VALUE_CHARS = 11;
+
 interface StatCardProps {
   /** Необязателен в режиме загрузки: тогда вместо подписи рисуется заглушка. */
   label?: string;
@@ -56,6 +59,10 @@ export function StatCard({
   const toneStyle = TONE[tone];
   const valueClass = valueClassName ?? toneStyle.value;
   const trendStyle = delta ? (TREND_STYLES[delta.trend] ?? TREND_STYLES.stable) : null;
+  // Длинное значение («87 654 321,00 ₽») в узкой плитке не влезало и рвалось посреди
+  // числа. Такому значению шрифт подстраивается под ширину плитки (единицы cqi
+  // контейнера stat-tile), короткие числа остаются крупными.
+  const longValue = value !== undefined && String(value).length > LONG_VALUE_CHARS;
 
   // Раскладка зависит от ширины самой плитки (вариант tile-wide), колонки одни:
   //   широкая — подпись сверху, ниже «чип-иконка · значение», как у Remnawave;
@@ -78,7 +85,7 @@ export function StatCard({
             // responsive-вариант text-sm перебивает leading-tight и даёт 20px.
             <Skeleton className="h-[15px] w-24 sm:h-5" />
           ) : (
-            <span className="line-clamp-2 text-xs leading-tight text-dark-500 sm:text-sm">
+            <span className="line-clamp-2 hyphens-auto text-xs leading-tight text-dark-500 sm:text-sm">
               {label}
             </span>
           )}
@@ -106,7 +113,11 @@ export function StatCard({
               {/* Не обрезать: сумма с многоточием теряет цифры. Если не влезла
                   и во всю ширину — переносится. */}
               <div
-                className={`text-base font-semibold [overflow-wrap:anywhere] tile-wide:text-lg sm:tile-wide:text-xl ${valueClass}`}
+                className={cn(
+                  'font-semibold [overflow-wrap:anywhere] tile-wide:text-lg sm:tile-wide:text-xl',
+                  longValue ? 'text-[length:clamp(0.75rem,10cqi,1rem)]' : 'text-base',
+                  valueClass,
+                )}
               >
                 {value}
               </div>

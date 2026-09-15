@@ -130,7 +130,7 @@ export function CampaignCard({ campaign }: CampaignCardProps) {
               type="text"
               readOnly
               value={campaign.deep_link}
-              className="input flex-1 text-xs"
+              className="input min-w-0 flex-1 text-xs"
             />
             <button
               onClick={() => handleCopy(campaign.deep_link!, botKey)}
@@ -155,7 +155,7 @@ export function CampaignCard({ campaign }: CampaignCardProps) {
               type="text"
               readOnly
               value={campaign.web_link}
-              className="input flex-1 text-xs"
+              className="input min-w-0 flex-1 text-xs"
             />
             <button
               onClick={() => handleCopy(campaign.web_link!, webKey)}

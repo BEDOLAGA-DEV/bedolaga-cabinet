@@ -256,7 +256,7 @@ function TicketChat({
             placeholder={t('admin.tickets.replyPlaceholder')}
             aria-label={t('admin.tickets.replyPlaceholder')}
             rows={2}
-            className="input flex-1 resize-none"
+            className="input min-w-0 flex-1 resize-none"
             onKeyDown={(event) => {
               if (event.key === 'Enter' && !event.shiftKey) {
                 event.preventDefault();

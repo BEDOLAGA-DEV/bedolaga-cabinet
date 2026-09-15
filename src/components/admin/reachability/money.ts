@@ -12,16 +12,18 @@ export function formatKopeks(kopeks: number | null | undefined): string {
   const abs = Math.abs(kopeks);
   const rub = Math.trunc(abs / 100);
   const kop = abs % 100;
-  return `${sign}${rub},${String(kop).padStart(2, '0')} ₽`;
+  const groupedRub = String(rub).replace(/\B(?=(\d{3})+(?!\d))/g, '\u00A0');
+  return `${sign}${groupedRub},${String(kop).padStart(2, '0')}\u00A0₽`;
 }
 
-/** «◈ 96 367 cred» — разряды через пробел, как показывает bschekbot. */
+/** «◈ 96 367 cred» — разряды через пробел, как показывает bschekbot. Пробелы
+ * неразрывные: в узкой кнопке «cred» переносился на строку один. */
 export function formatCredits(credits: number | null | undefined): string {
   if (credits === null || credits === undefined) return '—';
   const sign = credits < 0 ? '-' : '';
   const digits = String(Math.abs(Math.trunc(credits)));
-  const grouped = digits.replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
-  return `${CREDIT_MARK} ${sign}${grouped} ${CREDIT_UNIT}`;
+  const grouped = digits.replace(/\B(?=(\d{3})+(?!\d))/g, '\u00A0');
+  return `${CREDIT_MARK}\u00A0${sign}${grouped}\u00A0${CREDIT_UNIT}`;
 }
 
 /** Кредиты и рублёвый эквивалент рядом: «◈ 640 cred ≈ 6,40 ₽». */

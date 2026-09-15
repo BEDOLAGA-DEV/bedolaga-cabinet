@@ -464,14 +464,18 @@ function SessionsSection() {
           <ul className="mt-4 space-y-2 md:hidden">
             {data.items.map((session) => (
               <li key={session.id} className="rounded-xl bg-dark-800/30 p-3">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
+                {/* Состояние с текстом ошибки уходит под имя, а не распирает строку:
+                    длинная ошибка панели делала страницу шириной 908 px. */}
+                <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-1">
+                  <div className="min-w-0 flex-1 basis-40">
                     <div className="truncate text-sm font-medium text-dark-100">
                       {session.user?.full_name || `#${session.subscription_id}`}
                     </div>
-                    <div className="text-xs text-dark-400">{userLine(session)}</div>
+                    <div className="text-xs text-dark-400 [overflow-wrap:anywhere]">
+                      {userLine(session)}
+                    </div>
                   </div>
-                  <div className="shrink-0 text-right text-xs">
+                  <div className="min-w-0 max-w-full text-right text-xs [overflow-wrap:anywhere]">
                     <SessionState session={session} />
                   </div>
                 </div>
