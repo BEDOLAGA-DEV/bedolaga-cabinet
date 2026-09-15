@@ -87,13 +87,13 @@ export default function SuccessNotificationModal() {
 
   // Format amount
   const formattedAmount = data.amountKopeks
-    ? `${formatAmount(data.amountKopeks / 100)} ${currencySymbol}`
+    ? `${formatAmount(data.amountKopeks / 100)}\u00A0${currencySymbol}`
     : null;
 
   // Format new balance
   const formattedBalance =
     data.newBalanceKopeks !== undefined
-      ? `${formatAmount(data.newBalanceKopeks / 100)} ${currencySymbol}`
+      ? `${formatAmount(data.newBalanceKopeks / 100)}\u00A0${currencySymbol}`
       : null;
 
   // Format expiry date

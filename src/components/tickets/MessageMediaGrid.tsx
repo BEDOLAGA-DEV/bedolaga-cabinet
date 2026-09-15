@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { useTranslation } from 'react-i18next';
 
 import { ChevronLeftIcon, ChevronRightIcon, DocumentIcon, XIcon } from '@/components/icons';
 
@@ -50,6 +51,7 @@ export function MessageMediaGrid({
   message: MessageLike;
   translateError?: string;
 }) {
+  const { t } = useTranslation();
   const items = getItems(message);
   const photoItems = items.filter((i) => i.type === 'photo');
   const otherItems = items.filter((i) => i.type !== 'photo');
@@ -155,10 +157,14 @@ export function MessageMediaGrid({
             href={mediaUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-lg bg-dark-700 px-3 py-2 text-sm text-dark-200 transition-colors hover:bg-dark-600"
+            // Длинное имя файла переносится внутри пузыря, а не выталкивает его
+            // за карточку; без подписи — «Скачать файл», а не «Download document».
+            className="inline-flex max-w-full items-center gap-2 rounded-lg bg-dark-700 px-3 py-2 text-sm text-dark-200 transition-colors hover:bg-dark-600"
           >
             <DocumentIcon className="h-4 w-4" />
-            {item.caption || `Download ${item.type}`}
+            <span className="min-w-0 [overflow-wrap:anywhere]">
+              {item.caption || t('support.downloadFile')}
+            </span>
           </a>
         );
       })}

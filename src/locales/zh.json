@@ -55,6 +55,9 @@
       "yesterday": "昨天 {{time}}"
     }
   },
+  "navShort": {
+    "wheel": "转盘"
+  },
   "nav": {
     "dashboard": "首页",
     "subscription": "订阅",
@@ -352,6 +355,7 @@
     "expiresAt": "到期时间",
     "daysLeft": "剩余天数",
     "devices": "设备",
+    "devicesWord_other": "设备",
     "devices_other": "{{count}} 个设备",
     "extraDevices": "额外设备",
     "extraDevicesIncluded": "含 {{count}} 个额外设备",
@@ -776,6 +780,11 @@
     "withdrawal": "支出",
     "subscriptionPayment": "订阅付款",
     "referralReward": "推荐奖励",
+    "refund": "退款",
+    "failedRefund": "退款失败",
+    "pollReward": "问卷奖励",
+    "giftPayment": "礼物付款",
+    "otherOperation": "操作",
     "minAmount": "最小",
     "maxAmount": "最大",
     "notAvailable": "不可用",
@@ -1092,6 +1101,7 @@
       "closed": "已关闭"
     },
     "attachImage": "附加图片",
+    "downloadFile": "下载文件",
     "invalidFileType": "文件类型无效。请使用JPEG、PNG、GIF或WebP。",
     "fileTooLarge": "文件过大。最大10MB。",
     "uploadFailed": "图片上传失败",

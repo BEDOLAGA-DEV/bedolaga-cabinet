@@ -316,6 +316,19 @@
     /* iOS smooth scrolling */
     -webkit-overflow-scrolling: touch;
     position: relative;
+    /* Почта, ник, номер платежа без пробелов длиннее строки — переносим, а не
+       выпускаем за край карточки (карточка его обрезает). break-word не
+       меняет раскладку: он срабатывает, только когда слово уже не влезло.
+       В гибких рядах этого мало — там у текста ещё нужен min-w-0 или
+       [overflow-wrap:anywhere] на месте. */
+    overflow-wrap: break-word;
+  }
+
+  /* Иконка в гибком ряду не сжимается: рядом с длинным текстом (почта в
+     способах входа, длинный вопрос справки) иконка 24px сплющивалась до 9px,
+     шеврон 20px — до 7px. Нужно сжимаемое — класс shrink на месте. */
+  svg {
+    flex-shrink: 0;
   }
 
   /* Global Noise Texture — no mix-blend-mode to avoid fullscreen GPU compositing */

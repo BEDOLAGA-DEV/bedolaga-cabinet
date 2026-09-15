@@ -60,6 +60,9 @@
       "yesterday": "yesterday, {{time}}"
     }
   },
+  "navShort": {
+    "wheel": "Wheel"
+  },
   "nav": {
     "dashboard": "Dashboard",
     "subscription": "Subscription",
@@ -386,6 +389,8 @@
     "expiresAt": "Expires at",
     "daysLeft": "Days left",
     "devices": "Devices",
+    "devicesWord_one": "device",
+    "devicesWord_other": "devices",
     "devices_one": "{{count}} device",
     "devices_other": "{{count}} devices",
     "serversLabel": "Servers",
@@ -782,8 +787,10 @@
       "connectedDevices": "Connected devices",
       "disconnect": "Disconnect",
       "addSlots": "Add slots",
-      "limitExplained": "The «{{name}}» plan gives {{count}} slots and all are in use. Free one up or add more.",
-      "limitExplainedNoTopup": "The «{{name}}» plan gives {{count}} slots and all are in use. Free up a slot to continue.",
+      "limitExplained_one": "The «{{name}}» plan gives {{count}} slot and it is in use. Free it up or add more.",
+      "limitExplained_other": "The «{{name}}» plan gives {{count}} slots and all are in use. Free one up or add more.",
+      "limitExplainedNoTopup_one": "The «{{name}}» plan gives {{count}} slot and it is in use. Free it up to continue.",
+      "limitExplainedNoTopup_other": "The «{{name}}» plan gives {{count}} slots and all are in use. Free up a slot to continue.",
       "noTopupHint": "Slots cannot be bought on a trial subscription — free one up or switch to a paid plan."
     },
     "delete": "Delete",
@@ -904,6 +911,11 @@
     "withdrawal": "Withdrawal",
     "subscriptionPayment": "Subscription Payment",
     "referralReward": "Referral Reward",
+    "refund": "Refund",
+    "failedRefund": "Failed refund",
+    "pollReward": "Poll reward",
+    "giftPayment": "Gift payment",
+    "otherOperation": "Operation",
     "minAmount": "Min.",
     "maxAmount": "Max.",
     "notAvailable": "Not available",
@@ -1222,6 +1234,7 @@
       "closed": "Closed"
     },
     "attachImage": "Attach image",
+    "downloadFile": "Download file",
     "invalidFileType": "Invalid file type. Use JPEG, PNG, GIF or WebP.",
     "fileTooLarge": "File is too large. Maximum size is 10MB.",
     "uploadFailed": "Failed to upload image",

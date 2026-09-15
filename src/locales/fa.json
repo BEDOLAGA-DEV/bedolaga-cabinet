@@ -60,6 +60,9 @@
       "yesterday": "دیروز، {{time}}"
     }
   },
+  "navShort": {
+    "wheel": "گردونه"
+  },
   "nav": {
     "dashboard": "داشبورد",
     "subscription": "اشتراک",
@@ -357,6 +360,8 @@
     "expiresAt": "تاریخ انقضا",
     "daysLeft": "روز باقی‌مانده",
     "devices": "دستگاه‌ها",
+    "devicesWord_one": "دستگاه",
+    "devicesWord_other": "دستگاه",
     "devices_other": "{{count}} دستگاه",
     "extraDevices": "دستگاه‌های اضافی",
     "extraDevicesIncluded": "شامل {{count}} دستگاه اضافی",
@@ -781,6 +786,11 @@
     "withdrawal": "برداشت",
     "subscriptionPayment": "پرداخت اشتراک",
     "referralReward": "پاداش معرفی",
+    "refund": "بازپرداخت",
+    "failedRefund": "بازپرداخت ناموفق",
+    "pollReward": "پاداش نظرسنجی",
+    "giftPayment": "پرداخت هدیه",
+    "otherOperation": "تراکنش",
     "minAmount": "حداقل",
     "maxAmount": "حداکثر",
     "notAvailable": "در دسترس نیست",
@@ -1097,6 +1107,7 @@
       "closed": "بسته"
     },
     "attachImage": "پیوست تصویر",
+    "downloadFile": "دانلود فایل",
     "invalidFileType": "نوع فایل نامعتبر. از JPEG، PNG، GIF یا WebP استفاده کنید.",
     "fileTooLarge": "فایل خیلی بزرگ است. حداکثر 10MB.",
     "uploadFailed": "آپلود تصویر ناموفق",

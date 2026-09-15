@@ -46,11 +46,13 @@ export function TopReferrals({ referrals }: TopReferralsProps) {
         {referrals.map((ref) => (
           <div
             key={ref.id}
-            className="flex items-center justify-between rounded-xl border border-dark-700/30 bg-dark-800/30 p-3"
+            // Имя не режется до «Ма…»: переносится, бейдж при нехватке места
+            // уходит строкой ниже; сумма отделена зазором и не сжимается.
+            className="flex items-center justify-between gap-3 rounded-xl border border-dark-700/30 bg-dark-800/30 p-3"
           >
             <div className="min-w-0 flex-1">
-              <div className="flex min-w-0 items-center gap-2">
-                <span className="min-w-0 truncate text-sm font-medium text-dark-100">
+              <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+                <span className="min-w-0 text-sm font-medium text-dark-100 [overflow-wrap:anywhere]">
                   {ref.full_name}
                 </span>
                 <StatusBadge hasPaid={ref.has_paid} isActive={ref.is_active} />
@@ -59,7 +61,7 @@ export function TopReferrals({ referrals }: TopReferralsProps) {
                 {new Date(ref.created_at).toLocaleDateString(i18n.language)}
               </div>
             </div>
-            <div className="text-sm font-semibold text-success-400">
+            <div className="shrink-0 whitespace-nowrap text-sm font-semibold text-success-400">
               {formatWithCurrency(ref.total_earnings_kopeks / PARTNER_STATS.KOPEKS_DIVISOR)}
             </div>
           </div>

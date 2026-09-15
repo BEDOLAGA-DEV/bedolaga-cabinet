@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { BestValueBadge } from '../BestValueBadge';
+import { BestValueBadge, bestValueFrame } from '../BestValueBadge';
 import { useNavigate } from 'react-router';
 import { useTheme } from '../../../hooks/useTheme';
 import { useCurrency } from '../../../hooks/useCurrency';
@@ -53,7 +53,7 @@ export function TariffPickerGrid({
   const formatPrice = (kopeks: number) =>
     kopeks === 0
       ? t('subscription.free', 'Бесплатно')
-      : `${formatAmount(kopeks / 100)} ${currencySymbol}`;
+      : `${formatAmount(kopeks / 100)}\u00A0${currencySymbol}`;
 
   return (
     <>
@@ -167,7 +167,7 @@ export function TariffPickerGrid({
                     : tariff.is_highlighted
                       ? // Текущий тариф важнее подсказки: две «активные» рамки
                         // сразу не дают понять, что именно сейчас куплено.
-                        'border-2 border-urgent-400'
+                        bestValueFrame(false)
                       : ''
                 }`}
               >
