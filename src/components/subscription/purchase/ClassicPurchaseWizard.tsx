@@ -290,7 +290,7 @@ export function ClassicPurchaseWizard({
                       <div className="min-w-0 text-lg font-semibold text-dark-100">
                         {period.label}
                       </div>
-                      {promoPeriod.percent && promoPeriod.percent > 0 && (
+                      {promoPeriod.percent != null && promoPeriod.percent > 0 && (
                         <div
                           className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium text-white shadow-sm ${
                             promoPeriod.isPromoGroup ? 'bg-success-500' : 'bg-warning-500'
@@ -340,7 +340,7 @@ export function ClassicPurchaseWizard({
                       <div className="min-w-0 text-lg font-semibold text-dark-100">
                         {option.label}
                       </div>
-                      {promoTraffic.percent && promoTraffic.percent > 0 && (
+                      {promoTraffic.percent != null && promoTraffic.percent > 0 && (
                         <div
                           className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium text-white shadow-sm ${
                             promoTraffic.isPromoGroup ? 'bg-success-500' : 'bg-warning-500'
@@ -417,7 +417,10 @@ export function ClassicPurchaseWizard({
                         </div>
                         <div className="min-w-0">
                           <div className="truncate font-medium text-dark-100">
-                            <Twemoji options={{ className: 'twemoji', folder: 'svg', ext: '.svg' }}>
+                            <Twemoji
+                              tag="span"
+                              options={{ className: 'twemoji', folder: 'svg', ext: '.svg' }}
+                            >
                               {server.name}
                             </Twemoji>
                           </div>

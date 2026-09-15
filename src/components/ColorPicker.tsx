@@ -337,7 +337,7 @@ export function ColorPicker({ value, onChange, label, description, disabled }: C
             type="text"
             value={localValue}
             onChange={handleHexInputChange}
-            className="h-9 flex-1 rounded-lg border border-dark-700 bg-dark-800 px-3 font-mono text-sm uppercase text-dark-100 focus:border-accent-500 focus:outline-none"
+            className="h-9 min-w-0 flex-1 rounded-lg border border-dark-700 bg-dark-800 px-3 font-mono text-sm uppercase text-dark-100 focus:border-accent-500 focus:outline-none"
             placeholder="#000000"
             maxLength={7}
           />

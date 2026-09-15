@@ -498,7 +498,7 @@
     "currentTariff": "Текущий",
     "from": "от",
     "month": "мес",
-    "insufficientBalance": "Недостаточно средств. Не хватает {{missing}} ₽",
+    "insufficientBalance": "Недостаточно средств. Не хватает {{missing}} ₽",
     "trial": {
       "title": "Бесплатный пробный период",
       "titlePaid": "Пробная подписка",
@@ -765,7 +765,7 @@
       "statusActive": "Активен",
       "statusPastDue": "Платёж не прошёл — попробуйте снова",
       "nextCharge": "следующее списание {{date}}",
-      "amountPerInterval": "{{amount}} ₽ {{interval}}",
+      "amountPerInterval": "{{amount}} ₽ {{interval}}",
       "interval": {
         "day": "ежедневно",
         "week": "еженедельно",
@@ -789,8 +789,8 @@
       "statusActive": "Активно",
       "statusPastDue": "Платёж не прошёл — попробуйте снова",
       "nextCharge": "следующее списание {{date}}",
-      "amountPerPeriod": "{{amount}} ₽ {{period}}",
-      "amountPerDays": "{{amount}} ₽ раз в {{days}} дн.",
+      "amountPerPeriod": "{{amount}} ₽ {{period}}",
+      "amountPerDays": "{{amount}} ₽ раз в {{days}} дн.",
       "period": {
         "day": "ежедневно",
         "week": "еженедельно",
@@ -956,7 +956,7 @@
       "activate": "Активировать",
       "activating": "Активация...",
       "success": "Промокод успешно активирован!",
-      "balanceAdded": "На баланс начислено: {{amount}} ₽",
+      "balanceAdded": "На баланс начислено: {{amount}} ₽",
       "errors": {
         "not_found": "Промокод не найден",
         "expired": "Срок действия промокода истёк",
@@ -977,8 +977,8 @@
       "daysLeft": "Осталось дней: {{count}}",
       "selectSubscription": "Выберите подписку"
     },
-    "minAmountError": "Минимальная сумма: {{amount}} ₽",
-    "maxAmountError": "Максимальная сумма: {{amount}} ₽",
+    "minAmountError": "Минимальная сумма: {{amount}} ₽",
+    "maxAmountError": "Максимальная сумма: {{amount}} ₽",
     "paymentOption": "Способ оплаты",
     "selectPaymentOption": "Выберите способ оплаты",
     "selectPaymentMethod": "Выберите способ оплаты",
@@ -1020,7 +1020,7 @@
       "rateLimit": "Подождите {{seconds}} сек.",
       "selectMethod": "Выберите способ",
       "enterAmount": "Введите сумму",
-      "amountRange": "Сумма: {{min}} – {{max}} ₽"
+      "amountRange": "Сумма: {{min}} – {{max}} ₽"
     },
     "paymentSuccess": {
       "title": "Оплата прошла успешно",
@@ -1897,12 +1897,12 @@
       "minAmount": "Мин. сумма (коп.)",
       "maxAmount": "Макс. сумма (коп.)",
       "quickAmounts": "Быстрые суммы (₽)",
-      "quickAmountsHint": "Кнопки быстрого выбора суммы пополнения. Пусто — используются значения по умолчанию: {{defaults}} ₽",
+      "quickAmountsHint": "Кнопки быстрого выбора суммы пополнения. Пусто — используются значения по умолчанию: {{defaults}} ₽",
       "quickAmountsPlaceholder": "Сумма в рублях",
       "quickAmountsAdd": "Добавить",
       "quickAmountsInvalid": "Введите положительную сумму в рублях",
       "quickAmountsLimit": "Не более 10 сумм",
-      "quickAmountsRemove": "Удалить сумму {{value}} ₽",
+      "quickAmountsRemove": "Удалить сумму {{value}} ₽",
       "overpayCertTitle": "Сертификат mTLS (Overpay)",
       "overpayCertValid": "✅ Действует до {{date}}",
       "overpayCertExpired": "⚠️ Срок действия истёк {{date}}",
@@ -2771,7 +2771,13 @@
           "active": "Активен",
           "worth": "Стоимость",
           "probability": "Ручная вероятность (0–1)",
-          "probabilityHint": "Пусто — авто по RTP"
+          "probabilityHint": "Пусто — авто по RTP",
+          "displayNamePlaceholder": "Например: 7 дней бесплатно",
+          "valueUnits": {
+            "kopeks": "в копейках",
+            "days": "в днях",
+            "gb": "в ГБ"
+          }
         },
         "promo": {
           "title": "Настройки промокода",
@@ -4016,6 +4022,12 @@
         "checkIntervalRange": "Интервал проверки должен быть от 1 до 1440 мин",
         "reminderCooldownRange": "Кулдаун напоминания должен быть от 0 до 1440 мин",
         "slaMinutesRange": "SLA должен быть от 1 до 10080 мин"
+      },
+      "priorities": {
+        "low": "Низкий",
+        "normal": "Обычный",
+        "high": "Высокий",
+        "urgent": "Срочный"
       }
     },
     "tariffs": {
@@ -4425,7 +4437,32 @@
         "rejectTitle": "Отклонить заявку?",
         "rejectDescription": "При необходимости добавьте комментарий с причиной отклонения.",
         "commentPlaceholder": "Причина отклонения (необязательно)...",
-        "confirmReject": "Подтвердить отклонение"
+        "confirmReject": "Подтвердить отклонение",
+        "risk": {
+          "balance": {
+            "total_earned": "Заработано с рефералов",
+            "own_deposits": "Свои пополнения",
+            "spending": "Потрачено",
+            "referral_spent": "Из них реферальных",
+            "withdrawn": "Уже выведено",
+            "pending": "На рассмотрении",
+            "available_referral": "Доступно реферального",
+            "available_total": "Всего доступно к выводу"
+          },
+          "deposits": {
+            "referral_count": "Рефералов",
+            "paying_referrals": "Платящих рефералов",
+            "total_deposits": "Пополнений рефералов",
+            "total_amount": "Сумма их пополнений"
+          },
+          "recent": {
+            "week": "Начислено за неделю"
+          },
+          "recentTitle": "Активность за неделю",
+          "times_one": "· {{count}} раз",
+          "times_few": "· {{count}} раза",
+          "times_many": "· {{count}} раз"
+        }
       }
     },
     "partners": {
@@ -4769,7 +4806,7 @@
         "applyToAddons": "Применять к дополнительным услугам",
         "default": "По умолчанию",
         "daysShort": "{{days}} дн.",
-        "autoFrom": "Авто от {{amount}} руб.",
+        "autoFrom": "Авто от {{amount}}",
         "members_one": "{{count}} участник",
         "members_few": "{{count}} участника",
         "members_many": "{{count}} участников"
@@ -4790,7 +4827,8 @@
         "discountPercentInvalid": "Процент скидки должен быть от 1 до 100",
         "discountHoursRequired": "Укажите время действия скидки в часах",
         "trafficRequired": "Объём трафика должен быть больше 0"
-      }
+      },
+      "cannotSave": "Невозможно сохранить промокод:"
     },
     "promoGroups": {
       "title": "Группы скидок",
@@ -4802,7 +4840,7 @@
       "traffic": "Трафик",
       "devices": "Устройства",
       "daysShort": "{{days}} дн.",
-      "autoFrom": "Авто от {{amount}} руб.",
+      "autoFrom": "Авто от {{amount}}",
       "members": "{{count}} участников",
       "createTitle": "Создание группы скидок",
       "editTitle": "Редактирование группы",
@@ -5943,7 +5981,14 @@
           "email_templates": "Шаблоны писем",
           "pinned_messages": "Закреплённые сообщения",
           "landings": "Лендинги",
-          "updates": "Обновления"
+          "updates": "Обновления",
+          "bulk_actions": "Массовые действия",
+          "coupons": "Купоны",
+          "info_pages": "Справочные страницы",
+          "news": "Новости",
+          "reachability": "Доступность из РФ",
+          "system_errors": "Ошибки системы",
+          "user": "Пользователь"
         },
         "permissionActions": {
           "read": "Чтение",
@@ -5969,7 +6014,10 @@
           "balance": "Баланс",
           "subscription": "Подписка",
           "send_offer": "Промо-предложение",
-          "referral": "Реф. процент"
+          "referral": "Реф. процент",
+          "execute": "Выполнение",
+          "run": "Запуск",
+          "send_message": "Отправка сообщения"
         },
         "toggleSection": "Переключить все права {{section}}",
         "selectedPermissions_one": "{{count}} разрешение выбрано",
@@ -6232,7 +6280,11 @@
         "loadFailed": "Не удалось загрузить журнал аудита",
         "retry": "Попробовать снова"
       },
-      "totalEntries": "Всего записей: {{count}}"
+      "totalEntries": "Всего записей: {{count}}",
+      "actions": {
+        "phantom_claimed": "Вход в заготовленный аккаунт",
+        "phantom_merged": "Слияние заготовленного аккаунта"
+      }
     },
     "landings": {
       "title": "Лендинги",
@@ -6368,7 +6420,8 @@
       "methodMaxAmount": "Максимальная сумма",
       "methodMinAmount": "Минимальная сумма",
       "methodReturnUrl": "URL возврата",
-      "stickyPayButton": "Закреплённая кнопка оплаты"
+      "stickyPayButton": "Закреплённая кнопка оплаты",
+      "stickyPayButtonHint": "Кнопка оплаты прикреплена к низу экрана на телефоне"
     },
     "infoPages": {
       "title": "Информационные страницы",
@@ -7349,7 +7402,7 @@
     "chooseSubscription": "Выберите подписку, которую хотите сохранить",
     "afterMerge": "После объединения",
     "allAuthMethodsMerged": "Все способы входа объединятся",
-    "balanceSummed": "Баланс: {{amount}} ₽ (сумма)",
+    "balanceSummed": "Баланс: {{amount}} ₽ (сумма)",
     "unselectedSubscriptionDeleted": "Невыбранная подписка будет удалена",
     "historyPreserved": "История операций сохранится",
     "confirm": "Объединить аккаунты",

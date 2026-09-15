@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import { backTo } from '@/components/admin';
 import { useTranslation } from 'react-i18next';
+import { METHOD_LABELS } from '../constants/paymentMethods';
 import { useQuery } from '@tanstack/react-query';
 import { statsApi, type NodeStatus } from '../api/admin';
 import { formatUptime, parseCalendarDate } from '../utils/format';
@@ -72,17 +73,19 @@ function NodeCard({ node, onRestart, onToggle, isLoading }: NodeCardProps) {
     <div
       className={`rounded-xl border bg-dark-800/50 ${node.is_disabled ? 'border-dark-700' : node.is_connected ? 'border-success-500/30' : 'border-error-500/30'} p-4 transition-colors hover:border-dark-600`}
     >
-      <div className="mb-3 flex items-start justify-between">
-        <div className="flex items-center gap-3">
+      <div className="mb-3 flex items-start justify-between gap-2">
+        <div className="flex min-w-0 items-center gap-3">
           <div
-            className={`h-3 w-3 rounded-full ${node.is_disabled ? 'bg-dark-500' : node.is_connected ? 'animate-pulse bg-success-500' : 'bg-error-500'}`}
+            className={`h-3 w-3 shrink-0 rounded-full ${node.is_disabled ? 'bg-dark-500' : node.is_connected ? 'animate-pulse bg-success-500' : 'bg-error-500'}`}
           />
-          <div>
-            <div className="font-medium text-dark-100">{node.name}</div>
-            <div className="text-xs text-dark-500">{node.address}</div>
+          <div className="min-w-0">
+            <div className="font-medium text-dark-100 [overflow-wrap:anywhere]">{node.name}</div>
+            <div className="text-xs text-dark-500 break-all">{node.address}</div>
           </div>
         </div>
-        <span className={`rounded-full px-2 py-1 text-xs ${getStatusColor()}`}>
+        <span
+          className={`shrink-0 whitespace-nowrap rounded-full px-2 py-1 text-xs ${getStatusColor()}`}
+        >
           {getStatusText()}
         </span>
       </div>
@@ -292,13 +295,13 @@ export default function AdminDashboard() {
   return (
     <div className="animate-fade-in space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex min-w-0 flex-1 basis-48 items-center gap-3">
           {/* Show back button only on web, not in Telegram Mini App */}
           {!capabilities.hasBackButton && (
             <button
               onClick={() => navigate('/admin')}
-              className="flex h-10 w-10 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
             >
               <BackIcon />
             </button>
@@ -492,7 +495,7 @@ export default function AdminDashboard() {
               <div className="mb-3 text-sm font-medium text-dark-300">
                 {t('adminDashboard.subscriptions.newSubscriptions')}
               </div>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 max-sm:[&>*:last-child:nth-child(odd)]:col-span-2">
                 <StatCard
                   label={t('adminDashboard.subscriptions.today')}
                   value={stats?.subscriptions.purchased_today || 0}
@@ -704,7 +707,7 @@ export default function AdminDashboard() {
             </div>
 
             {/* Period Stats */}
-            <div className="mt-4 grid grid-cols-3 gap-2 border-t border-dark-700 pt-4 sm:gap-3">
+            <div className="mt-4 grid grid-cols-2 gap-2 border-t border-dark-700 pt-4 sm:grid-cols-3 sm:gap-3 max-sm:[&>*:last-child:nth-child(odd)]:col-span-2">
               <StatCard
                 label={t('adminDashboard.period.today')}
                 value={`${formatAmount(
@@ -899,7 +902,11 @@ export default function AdminDashboard() {
                       </span>
                     </td>
                     <td className="px-2 py-3">
-                      <span className="text-xs text-dark-400">{payment.payment_method || '-'}</span>
+                      <span className="text-xs text-dark-400">
+                        {payment.payment_method
+                          ? (METHOD_LABELS[payment.payment_method] ?? payment.payment_method)
+                          : '-'}
+                      </span>
                     </td>
                     <td className="px-2 py-3 text-right">
                       <span className="text-xs text-dark-400">
@@ -923,15 +930,6 @@ export default function AdminDashboard() {
               <div key={payment.id} className="rounded-lg bg-dark-900/50 p-3">
                 <div className="mb-2 flex items-center justify-between">
                   <div className="flex min-w-0 flex-1 items-center gap-2">
-                    <span
-                      className={`whitespace-nowrap rounded-full px-1.5 py-0.5 text-[10px] ${
-                        payment.type === 'deposit'
-                          ? 'bg-success-500/20 text-success-400'
-                          : 'bg-accent-500/20 text-accent-400'
-                      }`}
-                    >
-                      {payment.type_display}
-                    </span>
                     <button
                       onClick={() => navigate(`/admin/users/${payment.user_id}`, backTo(location))}
                       className="truncate text-sm font-medium text-dark-100 underline decoration-dark-600 underline-offset-2 transition-colors hover:decoration-dark-400"
@@ -945,8 +943,23 @@ export default function AdminDashboard() {
                     {currencySymbol}
                   </span>
                 </div>
-                <div className="flex items-center justify-between text-xs text-dark-500">
-                  <span>{payment.payment_method || '-'}</span>
+                <div className="flex items-center justify-between gap-2 text-xs text-dark-500">
+                  <span className="flex min-w-0 items-center gap-2">
+                    <span
+                      className={`shrink-0 whitespace-nowrap rounded-full px-1.5 py-0.5 text-[10px] ${
+                        payment.type === 'deposit'
+                          ? 'bg-success-500/20 text-success-400'
+                          : 'bg-accent-500/20 text-accent-400'
+                      }`}
+                    >
+                      {payment.type_display}
+                    </span>
+                    <span className="truncate">
+                      {payment.payment_method
+                        ? (METHOD_LABELS[payment.payment_method] ?? payment.payment_method)
+                        : '-'}
+                    </span>
+                  </span>
                   <span>
                     {new Date(payment.created_at).toLocaleString('ru-RU', {
                       day: '2-digit',

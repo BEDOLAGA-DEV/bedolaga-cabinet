@@ -288,7 +288,9 @@ export default function AdminPromoGroupCreate() {
                     min={1}
                     placeholder={t('admin.promoGroups.form.daysPlaceholder')}
                   />
-                  <span className="text-xs text-dark-400">{t('admin.promoGroups.form.arrow')}</span>
+                  <span className="shrink-0 whitespace-nowrap text-xs text-dark-400">
+                    {t('admin.promoGroups.form.arrow')}
+                  </span>
                   <input
                     type="number"
                     value={pd.percent}
