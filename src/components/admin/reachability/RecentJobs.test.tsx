@@ -171,7 +171,7 @@ describe('RecentJobs', () => {
     renderWithProviders(<RecentJobs initialJobId={null} />);
     const row = await screen.findByRole('button', { name: /3 сервера/ });
     expect(row.textContent).toContain('работают 2 из 3');
-    expect(row.textContent).toContain('◈ 2 300 cred');
+    expect(row.textContent).toContain('◈\u00A02\u00A0300\u00A0cred');
     expect(screen.queryByText('Host 11')).toBeNull();
     fireEvent.click(row);
     expect(screen.getByText('Alpha:')).toBeTruthy();

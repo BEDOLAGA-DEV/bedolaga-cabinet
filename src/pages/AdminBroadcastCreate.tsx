@@ -465,7 +465,7 @@ export default function AdminBroadcastCreate() {
                   : t('admin.broadcasts.selectEmailFilterPlaceholder')}
             </span>
             {recipientsCount !== null && (
-              <span className="rounded-full bg-accent-500/20 px-2 py-0.5 text-xs text-accent-400">
+              <span className="shrink-0 whitespace-nowrap rounded-full bg-accent-500/20 px-2 py-0.5 text-xs text-accent-400">
                 {recipientsCount} {t('admin.broadcasts.recipients')}
               </span>
             )}
@@ -927,8 +927,8 @@ export default function AdminBroadcastCreate() {
       )}
 
       {/* Footer */}
-      <div className="card flex items-center justify-between">
-        <div className="text-sm text-dark-400">
+      <div className="card flex flex-wrap items-center justify-between gap-3">
+        <div className="min-w-0 text-sm text-dark-400">
           {(telegramRecipientsCount !== null || emailRecipientsCount !== null) && (
             <span>
               {t('admin.broadcasts.willBeSent')}:{' '}
@@ -946,7 +946,7 @@ export default function AdminBroadcastCreate() {
             </span>
           )}
         </div>
-        <div className="flex gap-3">
+        <div className="ml-auto flex gap-3">
           <button onClick={() => navigate('/admin/broadcasts')} className="btn-secondary">
             {t('common.cancel')}
           </button>

@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { SettingDefinition } from '../../api/adminSettings';
+import type { SettingDefinition } from '../../api/adminSettings';
 import { cn } from '../../lib/utils';
 import { StarIcon, LockIcon, RefreshIcon } from './icons';
 import { SettingInput } from './SettingInput';
@@ -117,8 +117,10 @@ export function SettingsTableRow({
         {/* Right side: control + action buttons */}
         <div
           className={cn(
-            'flex items-center gap-2',
-            isLongValue ? 'w-full' : 'max-lg:self-end lg:flex-shrink-0',
+            // На телефоне правая часть во всю ширину строки и справа: выровненная
+            // self-end, она не помещалась и уезжала за левый край таблицы.
+            'flex min-w-0 items-center gap-2',
+            isLongValue ? 'w-full' : 'max-lg:w-full max-lg:justify-end lg:flex-shrink-0',
           )}
         >
           {locked ? (
@@ -137,7 +139,9 @@ export function SettingsTableRow({
               aria-label={displayName}
             />
           ) : (
-            <div className={cn(isLongValue && 'w-full')}>
+            <div
+              className={cn('min-w-0', isLongValue ? 'flex-1' : 'max-lg:flex max-lg:justify-end')}
+            >
               <SettingInput setting={setting} onUpdate={onUpdate} disabled={isUpdating} />
             </div>
           )}

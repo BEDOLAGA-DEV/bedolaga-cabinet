@@ -569,7 +569,7 @@ export default function AdminBulkActions() {
               <button
                 onClick={table.getToggleAllRowsSelectedHandler()}
                 className={cn(
-                  'flex h-5 w-5 items-center justify-center rounded-md border-2 transition-all duration-150',
+                  'flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 transition-all duration-150',
                   table.getIsAllRowsSelected()
                     ? 'border-accent-500 bg-accent-500 shadow-[0_0_8px_rgba(var(--color-accent-500),0.4)]'
                     : table.getIsSomeRowsSelected()
@@ -589,7 +589,7 @@ export default function AdminBulkActions() {
                 <button
                   onClick={toggleAllSubscriptions}
                   className={cn(
-                    'flex h-5 w-5 items-center justify-center rounded-md border-2 transition-all duration-150',
+                    'flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 transition-all duration-150',
                     allSubsSelected
                       ? 'border-success-500 bg-success-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]'
                       : someSubsSelected
@@ -614,7 +614,7 @@ export default function AdminBulkActions() {
               <button
                 onClick={row.getToggleSelectedHandler()}
                 className={cn(
-                  'flex h-5 w-5 items-center justify-center rounded-md border-2 transition-all duration-150',
+                  'flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 transition-all duration-150',
                   row.getIsSelected()
                     ? 'border-accent-500 bg-accent-500 shadow-[0_0_8px_rgba(var(--color-accent-500),0.4)]'
                     : 'border-dark-500 bg-dark-700/60 hover:border-accent-500/50 hover:bg-dark-600/60',
@@ -837,12 +837,12 @@ export default function AdminBulkActions() {
       <ProgressBar loading={loading} />
 
       {/* Header */}
-      <div className="mb-5 flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex min-w-0 flex-1 basis-48 items-center gap-3">
           {!capabilities.hasBackButton && (
             <button
               onClick={() => navigate('/admin')}
-              className="flex h-10 w-10 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
               aria-label={t('common.back')}
             >
               <BackIcon />
@@ -928,7 +928,7 @@ export default function AdminBulkActions() {
               setOffset(0);
             }}
             className={cn(
-              'flex h-5 w-5 items-center justify-center rounded-md border-2 transition-all duration-150',
+              'flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 transition-all duration-150',
               trialOnly
                 ? 'border-warning-500 bg-warning-500 shadow-[0_0_8px_rgba(245,158,11,0.4)]'
                 : 'border-dark-500 bg-dark-700/60 hover:border-warning-500/50 hover:bg-dark-600/60',

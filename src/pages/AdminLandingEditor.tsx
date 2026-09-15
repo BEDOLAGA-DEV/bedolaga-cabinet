@@ -12,7 +12,7 @@ import {
   type SupportedLocale,
   toLocaleDict,
 } from '../api/landings';
-import { tariffsApi, TariffListItem, PeriodPrice } from '../api/tariffs';
+import { tariffsApi, type TariffListItem, type PeriodPrice } from '../api/tariffs';
 import { formatPrice } from '../utils/format';
 import { useCurrency } from '../hooks/useCurrency';
 import { adminPaymentMethodsApi } from '../api/adminPaymentMethods';
@@ -569,7 +569,7 @@ export default function AdminLandingEditor() {
           {!capabilities.hasBackButton && (
             <button
               onClick={() => navigate('/admin/landings')}
-              className="flex h-10 w-10 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
             >
               <BackIcon />
             </button>
@@ -843,7 +843,7 @@ export default function AdminLandingEditor() {
                       max={99}
                       value={discountPercent}
                       onChange={(e) => setDiscountPercent(Number(e.target.value))}
-                      className="h-2 flex-1 cursor-pointer appearance-none rounded-lg bg-dark-700 accent-accent-500"
+                      className="h-2 min-w-0 flex-1 cursor-pointer appearance-none rounded-lg bg-dark-700 accent-accent-500"
                     />
                     <div className="flex w-20 items-center rounded-lg border border-dark-700 bg-dark-800">
                       <input
@@ -978,15 +978,20 @@ export default function AdminLandingEditor() {
                           Math.floor((firstPeriod.price_kopeks * pct) / 100),
                       );
                       return (
-                        <div key={tariffId} className="flex items-center gap-2 py-1">
-                          <span className="text-sm text-dark-300">{tariff.name}:</span>
+                        <div
+                          key={tariffId}
+                          className="flex flex-wrap items-center gap-x-2 gap-y-1 py-1"
+                        >
+                          <span className="min-w-0 text-sm text-dark-300 [overflow-wrap:anywhere]">
+                            {tariff.name}:
+                          </span>
                           <span className="text-xs text-dark-500 line-through">
                             {formatPrice(firstPeriod.price_kopeks)}
                           </span>
                           <span className="text-sm font-semibold text-accent-400">
                             {formatPrice(discounted)}
                           </span>
-                          <span className="rounded-full bg-accent-500/20 px-1.5 py-0.5 text-[10px] font-medium text-accent-400">
+                          <span className="shrink-0 whitespace-nowrap rounded-full bg-accent-500/20 px-1.5 py-0.5 text-[10px] font-medium text-accent-400">
                             -{pct}%
                           </span>
                         </div>
@@ -1030,11 +1035,13 @@ export default function AdminLandingEditor() {
                         onChange={() => togglePaymentMethod(sysMethod.method_id)}
                         className="h-4 w-4 rounded border-dark-600 bg-dark-700 text-accent-500"
                       />
-                      <span className="flex items-center gap-2 text-sm font-medium text-dark-100">
-                        {sysMethod.display_name ?? sysMethod.default_display_name}
+                      <span className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-sm font-medium text-dark-100">
+                        <span className="min-w-0 [overflow-wrap:anywhere]">
+                          {sysMethod.display_name ?? sysMethod.default_display_name}
+                        </span>
                         {sysMethod.available_sub_options &&
                           sysMethod.available_sub_options.length > 0 && (
-                            <span className="rounded-full bg-dark-700 px-1.5 py-0.5 text-[10px] text-dark-400">
+                            <span className="whitespace-nowrap rounded-full bg-dark-700 px-1.5 py-0.5 text-[10px] text-dark-400">
                               {sysMethod.available_sub_options.map((o) => o.name).join(' / ')}
                             </span>
                           )}
@@ -1103,7 +1110,7 @@ export default function AdminLandingEditor() {
           <div className="space-y-4">
             {/* View Goal */}
             <div className="flex items-center justify-between gap-4">
-              <div className="flex-1">
+              <div className="min-w-0 flex-1">
                 <label className="mb-1 block text-sm text-dark-400">
                   {t('admin.landings.viewGoal', 'View goal')}
                 </label>
@@ -1124,7 +1131,7 @@ export default function AdminLandingEditor() {
 
             {/* Click Goal */}
             <div className="flex items-center justify-between gap-4">
-              <div className="flex-1">
+              <div className="min-w-0 flex-1">
                 <label className="mb-1 block text-sm text-dark-400">
                   {t('admin.landings.clickGoal', 'Payment click goal')}
                 </label>

@@ -365,14 +365,18 @@ export default function Support() {
         supportConfig.support_username &&
         resolveSupportContact(supportConfig) && (
           <motion.div variants={staggerItem} initial="initial" animate="animate">
-            <Card className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-dark-800">
+            {/* Длинный ник поддержки уводил «Написать» за край карточки, а карточка
+                обрезает всё, что за краем: текст сжимается, кнопка — нет. */}
+            <Card className="flex items-center justify-between gap-3">
+              <div className="flex min-w-0 items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-dark-800">
                   <ChatIcon className="h-5 w-5 text-dark-400" />
                 </div>
-                <div>
+                <div className="min-w-0">
                   <div className="text-sm font-medium text-dark-100">{t('support.contactUs')}</div>
-                  <div className="text-xs text-dark-400">{supportConfig.support_username}</div>
+                  <div className="truncate text-xs text-dark-400">
+                    {supportConfig.support_username}
+                  </div>
                 </div>
               </div>
               <Button
@@ -634,7 +638,7 @@ export default function Support() {
                   <div className="space-y-3">
                     <div className="flex gap-3">
                       <textarea
-                        className="input min-h-[80px] flex-1"
+                        className="input min-h-[80px] min-w-0 flex-1"
                         placeholder={t('support.replyPlaceholder')}
                         value={replyMessage}
                         onChange={(e) => setReplyMessage(e.target.value)}
