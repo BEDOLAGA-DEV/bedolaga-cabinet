@@ -249,7 +249,7 @@ export function TariffPurchaseForm({
                 <span className="text-dark-500 line-through">
                   {formatPrice(dailyQuote.original)}
                 </span>
-                {dailyQuote.percent && dailyQuote.percent > 0 && (
+                {dailyQuote.percent != null && dailyQuote.percent > 0 && (
                   <span
                     className={`rounded px-1.5 py-0.5 text-xs ${
                       dailyQuote.isPromoGroup
@@ -372,7 +372,7 @@ export function TariffPurchaseForm({
                       {/* Плашка первой строкой, как в продлении; скидка — в правом
                           верхнем углу поверх рамки, они не пересекаются. */}
                       {period.is_highlighted && <BestValueBadge className="mb-2" />}
-                      {displayDiscount && displayDiscount > 0 && (
+                      {displayDiscount != null && displayDiscount > 0 && (
                         <div
                           className={`absolute -right-2 -top-2 rounded-full px-2 py-0.5 text-xs font-medium text-white ${
                             promoPeriod.isPromoGroup ? 'bg-success-500' : 'bg-warning-500'
@@ -456,7 +456,7 @@ export function TariffPurchaseForm({
                         max={tariff.max_days ?? 365}
                         value={customDays}
                         onChange={(e) => setCustomDays(parseInt(e.target.value))}
-                        className="flex-1 accent-accent-500"
+                        className="min-w-0 flex-1 accent-accent-500"
                       />
                       <input
                         type="number"

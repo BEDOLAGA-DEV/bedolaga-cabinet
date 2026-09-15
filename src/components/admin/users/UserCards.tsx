@@ -40,7 +40,7 @@ export function UserCards({ users, className }: UserCardsProps) {
                 online={user.is_online === true}
               />
               <div className="min-w-0 flex-1">
-                <div className="truncate font-medium text-dark-100">
+                <div className="relative truncate font-medium text-dark-100">
                   {user.full_name}
                   {user.is_online && (
                     <span className="sr-only">, {t('admin.users.connectedNow')}</span>

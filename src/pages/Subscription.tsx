@@ -1137,7 +1137,10 @@ export default function Subscription() {
                         {server.country_code && (
                           <span className="text-xs">{getFlagEmoji(server.country_code)}</span>
                         )}
-                        <Twemoji options={{ className: 'twemoji', folder: 'svg', ext: '.svg' }}>
+                        <Twemoji
+                          tag="span"
+                          options={{ className: 'twemoji', folder: 'svg', ext: '.svg' }}
+                        >
                           {server.name}
                         </Twemoji>
                       </span>

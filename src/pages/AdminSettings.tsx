@@ -260,7 +260,7 @@ export default function AdminSettings() {
               {!capabilities.hasBackButton && (
                 <button
                   onClick={() => navigate('/admin')}
-                  className="flex h-10 w-10 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
                   aria-label={t('admin.settings.backToAdmin')}
                 >
                   <BackIcon />

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { SettingDefinition } from '../../api/adminSettings';
+import type { SettingDefinition } from '../../api/adminSettings';
 import { CheckIcon, CloseIcon, EditIcon } from './icons';
 
 interface SettingInputProps {
@@ -83,7 +83,7 @@ export function SettingInput({ setting, onUpdate, disabled }: SettingInputProps)
         value={currentValue}
         onChange={(e) => onUpdate(e.target.value)}
         disabled={disabled}
-        className="min-w-[140px] cursor-pointer rounded-lg border border-dark-600 bg-dark-700 px-3 py-2 text-sm text-dark-100 focus:border-accent-500 focus:outline-none focus:ring-1 focus:ring-accent-500/30 disabled:opacity-50"
+        className="min-w-[140px] max-w-full cursor-pointer rounded-lg border border-dark-600 bg-dark-700 px-3 py-2 text-sm text-dark-100 focus:border-accent-500 focus:outline-none focus:ring-1 focus:ring-accent-500/30 disabled:opacity-50"
       >
         {setting.choices.map((choice, idx) => (
           <option key={idx} value={String(choice.value)}>
@@ -111,9 +111,9 @@ export function SettingInput({ setting, onUpdate, disabled }: SettingInputProps)
           placeholder={t('admin.settings.inputPlaceholder')}
           className="min-h-[100px] w-full resize-none rounded-xl border border-accent-500 bg-dark-700 px-4 py-3 font-mono text-sm text-dark-100 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
         />
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <span className="text-xs text-dark-500">{t('admin.settings.ctrlEnterHint')}</span>
-          <div className="flex items-center gap-2">
+          <div className="ml-auto flex items-center gap-2">
             <button
               onClick={handleCancel}
               className="rounded-lg bg-dark-600 px-3 py-1.5 text-sm text-dark-300 transition-colors hover:bg-dark-500"
@@ -136,7 +136,7 @@ export function SettingInput({ setting, onUpdate, disabled }: SettingInputProps)
   // Editing mode - Regular input
   if (isEditing) {
     return (
-      <div className="flex items-center gap-2">
+      <div className="flex min-w-0 items-center gap-2">
         <input
           ref={inputRef}
           type={
@@ -155,18 +155,18 @@ export function SettingInput({ setting, onUpdate, disabled }: SettingInputProps)
           }}
           autoFocus
           placeholder={t('admin.settings.inputPlaceholder')}
-          className="w-48 rounded-lg border border-accent-500 bg-dark-700 px-3 py-2 text-sm text-dark-100 focus:outline-none focus:ring-2 focus:ring-accent-500/30 sm:w-56"
+          className="w-48 min-w-0 shrink rounded-lg border border-accent-500 bg-dark-700 px-3 py-2 text-sm text-dark-100 focus:outline-none focus:ring-2 focus:ring-accent-500/30 sm:w-56"
         />
         <button
           onClick={handleSave}
-          className="rounded-lg bg-accent-500 p-2 text-on-accent transition-colors hover:bg-accent-600"
+          className="shrink-0 rounded-lg bg-accent-500 p-2 text-on-accent transition-colors hover:bg-accent-600"
           title={t('admin.settings.saveHint')}
         >
           <CheckIcon />
         </button>
         <button
           onClick={handleCancel}
-          className="rounded-lg bg-dark-600 p-2 text-dark-300 transition-colors hover:bg-dark-500"
+          className="shrink-0 rounded-lg bg-dark-600 p-2 text-dark-300 transition-colors hover:bg-dark-500"
           title={t('admin.settings.cancelHint')}
         >
           <CloseIcon />

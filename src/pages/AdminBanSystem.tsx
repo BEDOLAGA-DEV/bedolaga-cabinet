@@ -440,8 +440,8 @@ export default function AdminBanSystem() {
   return (
     <div className="animate-fade-in space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex min-w-0 flex-1 basis-48 items-center gap-3">
           <AdminBackButton />
           <div className="rounded-xl bg-error-500/20 p-3">
             <ShieldIcon className="h-6 w-6" />
@@ -553,8 +553,11 @@ export default function AdminBanSystem() {
             <div className="space-y-4">
               {/* Search */}
               <div className="flex gap-2">
-                <div className="relative flex-1">
-                  <SearchIcon />
+                <div className="relative min-w-0 flex-1">
+                  {/* Значок стоял над полем, а не внутри: не был прижат к его левому краю. */}
+                  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-dark-500">
+                    <SearchIcon />
+                  </span>
                   <input
                     type="text"
                     value={searchQuery}
@@ -573,8 +576,8 @@ export default function AdminBanSystem() {
               </div>
 
               {/* Users Table */}
-              <div className="overflow-hidden rounded-xl border border-dark-700 bg-dark-800/50">
-                <table className="w-full">
+              <div className="overflow-x-auto rounded-xl border border-dark-700 bg-dark-800/50">
+                <table className="w-full min-w-[36rem]">
                   <thead>
                     <tr className="border-b border-dark-700">
                       <th className="px-4 py-3 text-left text-xs font-medium text-dark-500">
@@ -646,8 +649,8 @@ export default function AdminBanSystem() {
 
           {/* Punishments Tab */}
           {activeTab === 'punishments' && (
-            <div className="overflow-hidden rounded-xl border border-dark-700 bg-dark-800/50">
-              <table className="w-full">
+            <div className="overflow-x-auto rounded-xl border border-dark-700 bg-dark-800/50">
+              <table className="w-full min-w-[36rem]">
                 <thead>
                   <tr className="border-b border-dark-700">
                     <th className="px-4 py-3 text-left text-xs font-medium text-dark-500">
@@ -793,8 +796,8 @@ export default function AdminBanSystem() {
               )}
 
               {/* Agents List */}
-              <div className="overflow-hidden rounded-xl border border-dark-700 bg-dark-800/50">
-                <table className="w-full">
+              <div className="overflow-x-auto rounded-xl border border-dark-700 bg-dark-800/50">
+                <table className="w-full min-w-[36rem]">
                   <thead>
                     <tr className="border-b border-dark-700">
                       <th className="px-4 py-3 text-left text-xs font-medium text-dark-500">
@@ -876,8 +879,8 @@ export default function AdminBanSystem() {
 
           {/* Violations Tab */}
           {activeTab === 'violations' && (
-            <div className="overflow-hidden rounded-xl border border-dark-700 bg-dark-800/50">
-              <table className="w-full">
+            <div className="overflow-x-auto rounded-xl border border-dark-700 bg-dark-800/50">
+              <table className="w-full min-w-[36rem]">
                 <thead>
                   <tr className="border-b border-dark-700">
                     <th className="px-4 py-3 text-left text-xs font-medium text-dark-500">
@@ -949,13 +952,13 @@ export default function AdminBanSystem() {
 
               {/* Top Users by Traffic */}
               {traffic.top_users && traffic.top_users.length > 0 && (
-                <div className="overflow-hidden rounded-xl border border-dark-700 bg-dark-800/50">
+                <div className="overflow-x-auto rounded-xl border border-dark-700 bg-dark-800/50">
                   <div className="border-b border-dark-700 p-4">
                     <h3 className="text-sm font-medium text-dark-200">
                       {t('banSystem.traffic.topUsers')}
                     </h3>
                   </div>
-                  <table className="w-full">
+                  <table className="w-full min-w-[36rem]">
                     <thead>
                       <tr className="border-b border-dark-700">
                         <th className="px-4 py-3 text-left text-xs font-medium text-dark-500">
@@ -1004,13 +1007,13 @@ export default function AdminBanSystem() {
 
               {/* Recent Violations */}
               {traffic.recent_violations && traffic.recent_violations.length > 0 && (
-                <div className="overflow-hidden rounded-xl border border-dark-700 bg-dark-800/50">
+                <div className="overflow-x-auto rounded-xl border border-dark-700 bg-dark-800/50">
                   <div className="border-b border-dark-700 p-4">
                     <h3 className="text-sm font-medium text-dark-200">
                       {t('banSystem.traffic.recentViolations')}
                     </h3>
                   </div>
-                  <table className="w-full">
+                  <table className="w-full min-w-[36rem]">
                     <thead>
                       <tr className="border-b border-dark-700">
                         <th className="px-4 py-3 text-left text-xs font-medium text-dark-500">
@@ -1089,13 +1092,13 @@ export default function AdminBanSystem() {
 
                   {/* Top Violators */}
                   {report.top_violators && report.top_violators.length > 0 && (
-                    <div className="overflow-hidden rounded-xl border border-dark-700 bg-dark-800/50">
+                    <div className="overflow-x-auto rounded-xl border border-dark-700 bg-dark-800/50">
                       <div className="border-b border-dark-700 p-4">
                         <h3 className="text-sm font-medium text-dark-200">
                           {t('banSystem.reports.topViolators')}
                         </h3>
                       </div>
-                      <table className="w-full">
+                      <table className="w-full min-w-[36rem]">
                         <thead>
                           <tr className="border-b border-dark-700">
                             <th className="px-4 py-3 text-left text-xs font-medium text-dark-500">
@@ -1184,9 +1187,9 @@ export default function AdminBanSystem() {
                       {grouped[category].map((setting) => (
                         <div
                           key={setting.key}
-                          className="flex items-center justify-between gap-4 p-4"
+                          className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 p-4"
                         >
-                          <div className="min-w-0 flex-1">
+                          <div className="min-w-0 flex-1 basis-40">
                             <div className="font-medium text-dark-100">
                               {formatSettingKey(setting.key)}
                             </div>
@@ -1196,7 +1199,7 @@ export default function AdminBanSystem() {
                               </div>
                             )}
                           </div>
-                          <div className="flex-shrink-0">
+                          <div className="min-w-0 max-w-full shrink-0">
                             {setting.type === 'bool' ? (
                               <button
                                 onClick={() => handleToggleSetting(setting.key)}
@@ -1222,12 +1225,12 @@ export default function AdminBanSystem() {
                                 className="input w-24"
                               />
                             ) : setting.type === 'list' ? (
-                              <div className="flex max-w-xs flex-wrap justify-end gap-1.5">
+                              <div className="flex max-w-full flex-wrap justify-end gap-1.5 sm:max-w-xs">
                                 {Array.isArray(setting.value) && setting.value.length > 0 ? (
                                   setting.value.map((item, idx) => (
                                     <span
                                       key={idx}
-                                      className="rounded bg-accent-500/20 px-2 py-0.5 text-xs text-accent-400"
+                                      className="max-w-full rounded bg-accent-500/20 px-2 py-0.5 text-xs text-accent-400 [overflow-wrap:anywhere]"
                                     >
                                       {String(item)}
                                     </span>
@@ -1428,8 +1431,8 @@ export default function AdminBanSystem() {
                 <h4 className="mb-2 text-sm font-medium text-dark-200">
                   {t('banSystem.userDetail.ipHistory')}
                 </h4>
-                <div className="overflow-hidden rounded-lg bg-dark-900/50">
-                  <table className="w-full text-sm">
+                <div className="overflow-x-auto rounded-lg bg-dark-900/50">
+                  <table className="w-full min-w-[36rem] text-sm">
                     <thead>
                       <tr className="border-b border-dark-700">
                         <th className="px-3 py-2 text-left text-xs text-dark-500">

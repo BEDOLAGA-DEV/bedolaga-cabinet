@@ -83,7 +83,7 @@ export function DevicesCard({
       title={
         <>
           {t(`${ns}.devices.title`)}
-          <span className="ml-2 text-sm font-medium text-dark-400">
+          <span className="ml-2 whitespace-nowrap text-sm font-medium text-dark-400">
             {t(`${ns}.facts.devicesValue`, { used: devices.length, limit })}
           </span>
         </>

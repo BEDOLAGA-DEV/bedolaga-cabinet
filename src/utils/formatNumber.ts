@@ -37,3 +37,21 @@ export function formatGbPair(
 ): string {
   return `${formatGb(usedGb, locale)} / ${formatGb(limitGb, locale)} ${unit}`;
 }
+
+/** С какого значения подписи оси сокращаются («12 тыс.», «4 млн»). */
+const AXIS_COMPACT_FROM = 10_000;
+
+/**
+ * Подпись оси графика. Ширина оси считается по самой длинной подписи, и «4000000»
+ * съедало пол-графика на телефоне (а при фиксированной ширине — обрезалось до «00000»).
+ * Крупные значения — коротко, по правилам языка: «4 млн», «4M», «400万».
+ */
+export function formatAxisTick(value: number, locale: string = uiLocale()): string {
+  if (!Number.isFinite(value)) return '';
+  if (Math.abs(value) < AXIS_COMPACT_FROM) {
+    return new Intl.NumberFormat(locale, { maximumFractionDigits: 0 }).format(value);
+  }
+  return new Intl.NumberFormat(locale, { notation: 'compact', maximumFractionDigits: 1 }).format(
+    value,
+  );
+}

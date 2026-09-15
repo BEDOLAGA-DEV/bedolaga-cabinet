@@ -170,7 +170,9 @@ describe('FleetCheck', () => {
       expect(box.getAttribute('aria-checked')).toBe('true');
     }
     expect(
-      await screen.findByRole('button', { name: /Проверить 2 сервера · ◈ 1 280 cred/ }),
+      await screen.findByRole('button', {
+        name: /Проверить 2 сервера · ◈\u00A01\u00A0280\u00A0cred/,
+      }),
     ).toBeTruthy();
   });
 
@@ -193,10 +195,14 @@ describe('FleetCheck', () => {
   it('запуск с подтверждением создаёт пачку и уводит на её прогресс', async () => {
     const patchParams = open();
     fireEvent.click(await screen.findByRole('checkbox', { name: 'Выбрать все' }));
-    const run = await screen.findByRole('button', { name: /Проверить 2 сервера · ◈ 1 280 cred/ });
+    const run = await screen.findByRole('button', {
+      name: /Проверить 2 сервера · ◈\u00A01\u00A0280\u00A0cred/,
+    });
     await waitFor(() => expect((run as HTMLButtonElement).disabled).toBe(false));
     fireEvent.click(run);
-    fireEvent.click(screen.getAllByRole('button', { name: 'Запустить за ◈ 1 280 cred' })[0]);
+    fireEvent.click(
+      screen.getAllByRole('button', { name: 'Запустить за ◈\u00A01\u00A0280\u00A0cred' })[0],
+    );
     await waitFor(() => expect(reachabilityApi.createBatch).toHaveBeenCalled());
     expect(vi.mocked(reachabilityApi.createBatch).mock.calls[0][0]).toEqual(
       expect.objectContaining({ host_refs: ['h1', 'h2'], scope_kind: 'problems' }),

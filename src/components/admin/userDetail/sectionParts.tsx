@@ -19,7 +19,8 @@ export function Section({ icon, title, action, className, id, children }: Sectio
     <Card size="md" id={id} className={cn('flex scroll-mt-24 flex-col gap-3', className)}>
       <div className="flex min-h-7 items-center gap-2.5">
         {icon && <span className="shrink-0 text-accent-400">{icon}</span>}
-        <h2 className="min-w-0 flex-1 truncate text-lg font-semibold leading-tight text-dark-100">
+        {/* Переносится, а не обрезается: многоточие съедало счётчик «3 из 10» у устройств. */}
+        <h2 className="min-w-0 flex-1 text-lg font-semibold leading-tight text-dark-100 [overflow-wrap:anywhere]">
           {title}
         </h2>
         {action && <div className="flex shrink-0 items-center gap-2">{action}</div>}

@@ -223,9 +223,10 @@ function NodeCard({ node, providerName, realtime, onAction, isLoading }: NodeCar
         }`}
         onClick={hasBreakdown ? () => setExpanded((v) => !v) : undefined}
       >
-        {/* Identity + actions */}
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex min-w-0 items-center gap-2">
+        {/* Identity + actions. На телефоне кнопки уходят второй строкой: в одной
+            строке с ними имя ноды сжималось до одной-двух букв. */}
+        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+          <div className="flex min-w-0 flex-1 basis-48 items-center gap-2">
             <span
               className={`h-2 w-2 shrink-0 rounded-full ${dotColor} ${isUp ? 'animate-pulse' : ''}`}
               title={statusText}
@@ -237,7 +238,7 @@ function NodeCard({ node, providerName, realtime, onAction, isLoading }: NodeCar
             <span className="shrink-0 text-base leading-none">
               {getCountryFlag(node.country_code)}
             </span>
-            <h3 className="truncate font-semibold text-dark-100">{node.name}</h3>
+            <h3 className="min-w-0 truncate font-semibold text-dark-100">{node.name}</h3>
             {(providerLabel || providerFavicon) && (
               <span className="flex min-w-0 max-w-[7rem] shrink items-center gap-1 rounded-md bg-accent-500/15 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-accent-300">
                 {providerFavicon && (
@@ -255,7 +256,7 @@ function NodeCard({ node, providerName, realtime, onAction, isLoading }: NodeCar
             )}
           </div>
 
-          <div className="flex shrink-0 items-center gap-1.5">
+          <div className="ml-auto flex shrink-0 items-center gap-1.5">
             {canReach && (
               <button
                 onClick={(e) => {
@@ -503,19 +504,19 @@ function SquadCard({ squad, onClick }: SquadCardProps) {
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <span className="text-lg">{getCountryFlag(squad.country_code)}</span>
-            <h3 className="truncate font-medium text-dark-100">
-              <Twemoji options={{ className: 'twemoji', folder: 'svg', ext: '.svg' }}>
+            <h3 className="min-w-0 font-medium text-dark-100 [overflow-wrap:anywhere]">
+              <Twemoji tag="span" options={{ className: 'twemoji', folder: 'svg', ext: '.svg' }}>
                 {squad.display_name || squad.name}
               </Twemoji>
             </h3>
             {squad.is_synced ? (
-              <span className="rounded-full bg-success-500/20 px-2 py-0.5 text-xs text-success-400">
+              <span className="whitespace-nowrap rounded-full bg-success-500/20 px-2 py-0.5 text-xs text-success-400">
                 {t('admin.remnawave.squads.synced', 'Synced')}
               </span>
             ) : (
-              <span className="rounded-full bg-warning-500/20 px-2 py-0.5 text-xs text-warning-400">
+              <span className="whitespace-nowrap rounded-full bg-warning-500/20 px-2 py-0.5 text-xs text-warning-400">
                 {t('admin.remnawave.squads.notSynced', 'Not synced')}
               </span>
             )}
@@ -927,7 +928,7 @@ function OverviewTab({
             {topConsumers.users.map((u, i) => (
               <div
                 key={u.username}
-                className="flex items-center justify-between px-4 py-2.5 text-sm"
+                className="flex items-center justify-between gap-3 px-4 py-2.5 text-sm"
               >
                 <span className="flex min-w-0 items-center gap-2">
                   <span className="w-5 shrink-0 text-dark-500">{i + 1}</span>
@@ -1609,13 +1610,13 @@ export default function AdminRemnawave() {
   return (
     <div className="animate-fade-in">
       {/* Header */}
-      <div className="mb-6 flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex min-w-0 flex-1 basis-48 items-center gap-3">
           {/* Show back button only on web, not in Telegram Mini App */}
           {!capabilities.hasBackButton && (
             <button
               onClick={() => navigate('/admin')}
-              className="flex h-10 w-10 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
             >
               <BackIcon className="text-dark-400" />
             </button>

@@ -732,7 +732,7 @@ export default function Referral() {
                   type="text"
                   readOnly
                   value={botReferralLink}
-                  className="input flex-1 text-sm"
+                  className="input min-w-0 flex-1 text-sm"
                 />
                 <button
                   onClick={() => copyLink(botReferralLink, 'bot')}
@@ -755,7 +755,12 @@ export default function Referral() {
               {t('referral.cabinetLink')}
             </div>
             <div className="flex flex-col gap-2 sm:flex-row">
-              <input type="text" readOnly value={referralLink} className="input flex-1 text-sm" />
+              <input
+                type="text"
+                readOnly
+                value={referralLink}
+                className="input min-w-0 flex-1 text-sm"
+              />
               {/* На телефоне кнопки делят ряд поровну: в своих размерах
                   «Поделиться» вылезала за поле на 360. */}
               <div className="grid grid-cols-2 gap-2 sm:flex">

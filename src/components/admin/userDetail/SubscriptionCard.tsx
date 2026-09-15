@@ -209,7 +209,7 @@ export function SubscriptionCard({
                         );
                         if (ok) await actions.removeTraffic(purchase.id);
                       }}
-                      className="flex h-5 w-5 items-center justify-center rounded-full text-dark-500 hover:bg-error-500/15 hover:text-error-400"
+                      className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-dark-500 hover:bg-error-500/15 hover:text-error-400"
                     >
                       <XIcon className="h-3 w-3" />
                     </button>

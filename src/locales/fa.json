@@ -638,7 +638,7 @@
       "statusActive": "فعال",
       "statusPastDue": "پرداخت ناموفق بود — دوباره تلاش کنید",
       "nextCharge": "برداشت بعدی {{date}}",
-      "amountPerInterval": "{{amount}} ₽ {{interval}}",
+      "amountPerInterval": "{{amount}} ₽ {{interval}}",
       "interval": {
         "day": "روزانه",
         "week": "هفتگی",
@@ -662,8 +662,8 @@
       "statusActive": "فعال",
       "statusPastDue": "پرداخت ناموفق بود — دوباره تلاش کنید",
       "nextCharge": "برداشت بعدی {{date}}",
-      "amountPerPeriod": "{{amount}} ₽ {{period}}",
-      "amountPerDays": "هر {{days}} روز {{amount}} ₽",
+      "amountPerPeriod": "{{amount}} ₽ {{period}}",
+      "amountPerDays": "هر {{days}} روز {{amount}} ₽",
       "period": {
         "day": "روزانه",
         "week": "هفتگی",
@@ -837,7 +837,7 @@
       "rateLimit": "لطفاً {{seconds}} ثانیه صبر کنید",
       "selectMethod": "روش را انتخاب کنید",
       "enterAmount": "مبلغ را وارد کنید",
-      "amountRange": "مبلغ: {{min}} – {{max}} ₽"
+      "amountRange": "مبلغ: {{min}} – {{max}} ₽"
     },
     "insufficientFunds": "موجودی ناکافی",
     "missing": "کمبود",
@@ -1724,7 +1724,13 @@
           "active": "فعال",
           "worth": "ارزش",
           "probability": "احتمال دستی (۰–۱)",
-          "probabilityHint": "خالی = خودکار بر اساس RTP"
+          "probabilityHint": "خالی = خودکار بر اساس RTP",
+          "displayNamePlaceholder": "مثلاً: ۷ روز رایگان",
+          "valueUnits": {
+            "kopeks": "به کوپک",
+            "days": "به روز",
+            "gb": "به گیگابایت"
+          }
         },
         "promo": {
           "title": "تنظیمات کد تخفیف",
@@ -2508,6 +2514,12 @@
         "checkIntervalRange": "بازه بررسی باید بین ۱ تا ۱۴۴۰ دقیقه باشد",
         "reminderCooldownRange": "زمان تأخیر یادآوری باید بین ۰ تا ۱۴۴۰ دقیقه باشد",
         "slaMinutesRange": "SLA باید بین ۱ تا ۱۰۰۸۰ دقیقه باشد"
+      },
+      "priorities": {
+        "low": "کم",
+        "normal": "عادی",
+        "high": "زیاد",
+        "urgent": "فوری"
       }
     },
     "tariffs": {
@@ -2752,12 +2764,12 @@
       "saveButton": "ذخیره",
       "notFound": "روش پرداخت یافت نشد",
       "quickAmounts": "مبالغ سریع (₽)",
-      "quickAmountsHint": "دکمه‌های مبلغ شارژ سریع. خالی — مقادیر پیش‌فرض استفاده می‌شوند: {{defaults}} ₽",
+      "quickAmountsHint": "دکمه‌های مبلغ شارژ سریع. خالی — مقادیر پیش‌فرض استفاده می‌شوند: {{defaults}} ₽",
       "quickAmountsPlaceholder": "مبلغ به روبل",
       "quickAmountsAdd": "افزودن",
       "quickAmountsInvalid": "یک مبلغ مثبت به روبل وارد کنید",
       "quickAmountsLimit": "حداکثر ۱۰ مبلغ مجاز است",
-      "quickAmountsRemove": "حذف مبلغ {{value}} ₽",
+      "quickAmountsRemove": "حذف مبلغ {{value}} ₽",
       "overpayCertTitle": "گواهی mTLS (Overpay)",
       "overpayCertValid": "✅ معتبر تا {{date}}",
       "overpayCertExpired": "⚠️ در تاریخ {{date}} منقضی شده است",
@@ -2967,7 +2979,31 @@
         "rejectTitle": "رد درخواست برداشت؟",
         "rejectDescription": "در صورت تمایل دلیل رد را بنویسید.",
         "commentPlaceholder": "دلیل رد (اختیاری)...",
-        "confirmReject": "تأیید رد"
+        "confirmReject": "تأیید رد",
+        "risk": {
+          "balance": {
+            "total_earned": "درآمد از معرفی",
+            "own_deposits": "واریزهای خود",
+            "spending": "هزینه شده",
+            "referral_spent": "از آن معرفی",
+            "withdrawn": "برداشت شده",
+            "pending": "در حال بررسی",
+            "available_referral": "موجودی معرفی قابل برداشت",
+            "available_total": "کل قابل برداشت"
+          },
+          "deposits": {
+            "referral_count": "معرفی‌ها",
+            "paying_referrals": "معرفی‌های پرداخت‌کننده",
+            "total_deposits": "واریزهای معرفی‌ها",
+            "total_amount": "مجموع واریزهای آن‌ها"
+          },
+          "recent": {
+            "week": "درآمد این هفته"
+          },
+          "recentTitle": "۷ روز اخیر",
+          "times_one": "· {{count}} بار",
+          "times_other": "· {{count}} بار"
+        }
       }
     },
     "partners": {
@@ -3215,7 +3251,7 @@
         "applyToAddons": "اعمال به خدمات اضافی",
         "default": "پیش‌فرض",
         "daysShort": "{{days}} روز",
-        "autoFrom": "خودکار از {{amount}} روبل",
+        "autoFrom": "خودکار از {{amount}}",
         "members_other": "{{count}} عضو"
       },
       "confirm": {
@@ -3234,7 +3270,8 @@
         "discountPercentInvalid": "درصد تخفیف باید بین 1 تا 100 باشد",
         "discountHoursRequired": "مدت اعتبار تخفیف را به ساعت مشخص کنید",
         "trafficRequired": "حجم ترافیک باید بیشتر از ۰ باشد"
-      }
+      },
+      "cannotSave": "امکان ذخیره کد تخفیف وجود ندارد:"
     },
     "promoGroups": {
       "title": "گروه‌های تخفیف",
@@ -3246,7 +3283,7 @@
       "traffic": "ترافیک",
       "devices": "دستگاه‌ها",
       "daysShort": "{{days}} روز",
-      "autoFrom": "خودکار از {{amount}} روبل",
+      "autoFrom": "خودکار از {{amount}}",
       "members": "{{count}} عضو",
       "createTitle": "ایجاد گروه تخفیف",
       "editTitle": "ویرایش گروه",
@@ -4978,7 +5015,14 @@
           "email_templates": "قالب‌های ایمیل",
           "pinned_messages": "پیام‌های سنجاق‌شده",
           "landings": "صفحات فرود",
-          "updates": "به‌روزرسانی‌ها"
+          "updates": "به‌روزرسانی‌ها",
+          "bulk_actions": "اقدامات گروهی",
+          "coupons": "کوپن‌ها",
+          "info_pages": "صفحات اطلاعات",
+          "news": "اخبار",
+          "reachability": "دسترس‌پذیری",
+          "system_errors": "خطاهای سیستم",
+          "user": "کاربر"
         },
         "permissionActions": {
           "read": "خواندن",
@@ -5004,7 +5048,10 @@
           "balance": "موجودی",
           "subscription": "اشتراک",
           "send_offer": "ارسال پیشنهاد",
-          "referral": "درصد ارجاع"
+          "referral": "درصد ارجاع",
+          "execute": "اجرا",
+          "run": "اجرا کردن",
+          "send_message": "ارسال پیام"
         },
         "toggleSection": "تغییر وضعیت تمام مجوزهای {{section}}",
         "selectedPermissions_other": "{{count}} مجوز انتخاب شده",
@@ -5253,7 +5300,11 @@
         "loadFailed": "بارگذاری گزارش بازرسی ناموفق بود",
         "retry": "تلاش مجدد"
       },
-      "totalEntries": "مجموع موارد: {{count}}"
+      "totalEntries": "مجموع موارد: {{count}}",
+      "actions": {
+        "phantom_claimed": "دریافت حساب از پیش ساخته",
+        "phantom_merged": "ادغام حساب از پیش ساخته"
+      }
     },
     "landings": {
       "title": "صفحات فرود",
@@ -5389,7 +5440,8 @@
       "methodMaxAmount": "حداکثر مبلغ",
       "methodMinAmount": "حداقل مبلغ",
       "methodReturnUrl": "آدرس بازگشت",
-      "stickyPayButton": "دکمه پرداخت ثابت"
+      "stickyPayButton": "دکمه پرداخت ثابت",
+      "stickyPayButtonHint": "دکمه پرداخت در موبایل پایین صفحه ثابت می‌ماند"
     },
     "infoPages": {
       "title": "صفحات اطلاعات",
@@ -6299,7 +6351,7 @@
     "chooseSubscription": "اشتراک مورد نظر را انتخاب کنید",
     "afterMerge": "پس از ادغام",
     "allAuthMethodsMerged": "تمام روش‌های ورود ادغام خواهند شد",
-    "balanceSummed": "موجودی: {{amount}} ₽ (مجموع)",
+    "balanceSummed": "موجودی: {{amount}} ₽ (مجموع)",
     "unselectedSubscriptionDeleted": "اشتراک انتخاب نشده حذف خواهد شد",
     "historyPreserved": "تاریخچه تراکنش‌ها حفظ خواهد شد",
     "confirm": "ادغام حساب‌ها",

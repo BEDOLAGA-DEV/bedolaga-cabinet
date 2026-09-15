@@ -632,7 +632,7 @@
       "statusActive": "已启用",
       "statusPastDue": "扣款失败 — 请重试",
       "nextCharge": "下次扣款 {{date}}",
-      "amountPerInterval": "{{amount}} ₽ {{interval}}",
+      "amountPerInterval": "{{amount}} ₽ {{interval}}",
       "interval": {
         "day": "每天",
         "week": "每周",
@@ -656,8 +656,8 @@
       "statusActive": "已启用",
       "statusPastDue": "扣款失败 — 请重试",
       "nextCharge": "下次扣款 {{date}}",
-      "amountPerPeriod": "{{amount}} ₽ {{period}}",
-      "amountPerDays": "每 {{days}} 天 {{amount}} ₽",
+      "amountPerPeriod": "{{amount}} ₽ {{period}}",
+      "amountPerDays": "每 {{days}} 天 {{amount}} ₽",
       "period": {
         "day": "每天",
         "week": "每周",
@@ -831,7 +831,7 @@
       "rateLimit": "请等待 {{seconds}} 秒",
       "selectMethod": "请选择支付方式",
       "enterAmount": "请输入金额",
-      "amountRange": "金额：{{min}} – {{max}} ₽"
+      "amountRange": "金额：{{min}} – {{max}} ₽"
     },
     "insufficientFunds": "余额不足",
     "missing": "缺少",
@@ -1655,12 +1655,12 @@
       "saveButton": "保存",
       "notFound": "未找到支付方式",
       "quickAmounts": "快捷金额（₽）",
-      "quickAmountsHint": "快捷充值金额按钮。留空 — 使用默认值：{{defaults}} ₽",
+      "quickAmountsHint": "快捷充值金额按钮。留空 — 使用默认值：{{defaults}} ₽",
       "quickAmountsPlaceholder": "金额（卢布）",
       "quickAmountsAdd": "添加",
       "quickAmountsInvalid": "请输入正的卢布金额",
       "quickAmountsLimit": "最多 10 个金额",
-      "quickAmountsRemove": "删除金额 {{value}} ₽",
+      "quickAmountsRemove": "删除金额 {{value}} ₽",
       "overpayCertTitle": "mTLS 证书（Overpay）",
       "overpayCertValid": "✅ 有效期至 {{date}}",
       "overpayCertExpired": "⚠️ 已于 {{date}} 过期",
@@ -1821,7 +1821,13 @@
           "active": "启用",
           "worth": "价值",
           "probability": "手动概率 (0–1)",
-          "probabilityHint": "留空 = 按 RTP 自动"
+          "probabilityHint": "留空 = 按 RTP 自动",
+          "displayNamePlaceholder": "例如：免费 7 天",
+          "valueUnits": {
+            "kopeks": "单位：戈比",
+            "days": "单位：天",
+            "gb": "单位：GB"
+          }
         },
         "promo": {
           "title": "优惠码设置",
@@ -2569,6 +2575,12 @@
         "checkIntervalRange": "检查间隔必须在 1 到 1440 分钟之间",
         "reminderCooldownRange": "提醒冷却时间必须在 0 到 1440 分钟之间",
         "slaMinutesRange": "SLA 必须在 1 到 10080 分钟之间"
+      },
+      "priorities": {
+        "low": "低",
+        "normal": "普通",
+        "high": "高",
+        "urgent": "紧急"
       }
     },
     "tariffs": {
@@ -2960,7 +2972,30 @@
         "rejectTitle": "拒绝提现？",
         "rejectDescription": "可选择添加备注说明拒绝原因。",
         "commentPlaceholder": "拒绝原因（可选）...",
-        "confirmReject": "确认拒绝"
+        "confirmReject": "确认拒绝",
+        "risk": {
+          "balance": {
+            "total_earned": "推荐收入",
+            "own_deposits": "自己充值",
+            "spending": "已消费",
+            "referral_spent": "其中推荐余额",
+            "withdrawn": "已提现",
+            "pending": "审核中",
+            "available_referral": "可用推荐余额",
+            "available_total": "可提现总额"
+          },
+          "deposits": {
+            "referral_count": "推荐人数",
+            "paying_referrals": "付费推荐人数",
+            "total_deposits": "推荐充值次数",
+            "total_amount": "推荐充值总额"
+          },
+          "recent": {
+            "week": "本周收入"
+          },
+          "recentTitle": "近 7 天",
+          "times_other": "· {{count}} 次"
+        }
       }
     },
     "partners": {
@@ -3208,7 +3243,7 @@
         "applyToAddons": "应用于附加服务",
         "default": "默认",
         "daysShort": "{{days}} 天",
-        "autoFrom": "自动 从 {{amount}} 卢布",
+        "autoFrom": "自动 从 {{amount}}",
         "members_other": "{{count}} 名成员"
       },
       "confirm": {
@@ -3227,7 +3262,8 @@
         "discountPercentInvalid": "折扣百分比必须在1到100之间",
         "discountHoursRequired": "请指定折扣有效期（小时）",
         "trafficRequired": "流量额度必须大于 0"
-      }
+      },
+      "cannotSave": "无法保存促销码："
     },
     "promoGroups": {
       "title": "折扣组",
@@ -3239,7 +3275,7 @@
       "traffic": "流量",
       "devices": "设备",
       "daysShort": "{{days}} 天",
-      "autoFrom": "自动 从 {{amount}} 卢布",
+      "autoFrom": "自动 从 {{amount}}",
       "members": "{{count}} 名成员",
       "createTitle": "创建折扣组",
       "editTitle": "编辑组",
@@ -4924,7 +4960,14 @@
           "email_templates": "邮件模板",
           "pinned_messages": "置顶消息",
           "landings": "落地页",
-          "updates": "更新"
+          "updates": "更新",
+          "bulk_actions": "批量操作",
+          "coupons": "优惠券",
+          "info_pages": "信息页面",
+          "news": "新闻",
+          "reachability": "可达性",
+          "system_errors": "系统错误",
+          "user": "用户"
         },
         "permissionActions": {
           "read": "读取",
@@ -4950,7 +4993,10 @@
           "balance": "余额",
           "subscription": "订阅",
           "send_offer": "发送优惠",
-          "referral": "推荐佣金"
+          "referral": "推荐佣金",
+          "execute": "执行",
+          "run": "运行",
+          "send_message": "发送消息"
         },
         "toggleSection": "切换所有 {{section}} 权限",
         "selectedPermissions_other": "已选择 {{count}} 个权限",
@@ -5199,7 +5245,11 @@
         "loadFailed": "加载审计日志失败",
         "retry": "重试"
       },
-      "totalEntries": "总条目数：{{count}}"
+      "totalEntries": "总条目数：{{count}}",
+      "actions": {
+        "phantom_claimed": "认领预置账户",
+        "phantom_merged": "合并预置账户"
+      }
     },
     "landings": {
       "title": "落地页",
@@ -5335,7 +5385,8 @@
       "methodMaxAmount": "最大金额",
       "methodMinAmount": "最小金额",
       "methodReturnUrl": "回调 URL",
-      "stickyPayButton": "固定支付按钮"
+      "stickyPayButton": "固定支付按钮",
+      "stickyPayButtonHint": "手机上支付按钮固定在屏幕底部"
     },
     "infoPages": {
       "title": "信息页面",
@@ -6245,7 +6296,7 @@
     "chooseSubscription": "选择要保留的订阅",
     "afterMerge": "合并后",
     "allAuthMethodsMerged": "所有登录方式将合并",
-    "balanceSummed": "余额：{{amount}} ₽（合计）",
+    "balanceSummed": "余额：{{amount}} ₽（合计）",
     "unselectedSubscriptionDeleted": "未选择的订阅将被删除",
     "historyPreserved": "交易记录将保留",
     "confirm": "合并账户",

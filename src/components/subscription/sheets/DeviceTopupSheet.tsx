@@ -165,7 +165,7 @@ export function DeviceTopupSheet({
           {devicePriceData?.available && devicePriceData.price_per_device_label && (
             <div className="text-center">
               <div className="mb-2 text-sm text-dark-400">
-                {devicePriceData.discount_percent &&
+                {devicePriceData.discount_percent != null &&
                 devicePriceData.discount_percent > 0 &&
                 devicePriceData.original_price_per_device_kopeks ? (
                   <span>
@@ -180,7 +180,7 @@ export function DeviceTopupSheet({
                 /{t('subscription.perDevice').replace('/ ', '')} (
                 {t('subscription.days', { count: devicePriceData.days_left })})
               </div>
-              {devicePriceData.discount_percent && devicePriceData.discount_percent > 0 && (
+              {devicePriceData.discount_percent != null && devicePriceData.discount_percent > 0 && (
                 <div className="mb-2">
                   <span className="inline-block rounded-full bg-success-500/20 px-2.5 py-0.5 text-sm font-medium text-success-400">
                     -{devicePriceData.discount_percent}%
@@ -193,7 +193,7 @@ export function DeviceTopupSheet({
                 </div>
               ) : (
                 <div className="text-2xl font-bold text-accent-400">
-                  {devicePriceData.discount_percent &&
+                  {devicePriceData.discount_percent != null &&
                     devicePriceData.discount_percent > 0 &&
                     devicePriceData.base_total_price_kopeks && (
                       <span className="mr-2 text-lg text-dark-500 line-through">

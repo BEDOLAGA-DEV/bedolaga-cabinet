@@ -17,7 +17,9 @@ function sources(dir: string): string[] {
   });
 }
 
-const BREAKABLE = [/\} \{currencySymbol\}/, / \$\{currencySymbol\}/];
+// И буквальный знак после выражения: «{price} ₽» в разметке и `${price} ₽` в строке —
+// прошлый сторож их не видел, в админке таких мест было полсотни.
+const BREAKABLE = [/\} \{currencySymbol\}/, / \$\{currencySymbol\}/, /\} ₽/];
 
 describe('сумма и знак валюты не разрываются', () => {
   it('нигде нет обычного пробела перед currencySymbol', () => {
@@ -28,6 +30,19 @@ describe('сумма и знак валюты не разрываются', () =
         .filter(({ line }) => BREAKABLE.some((re) => re.test(line)))
         .map(({ at }) => at),
     );
+    expect(offenders).toEqual([]);
+  });
+
+  it('в переводах знак приклеен к подстановке суммы', () => {
+    const offenders = readdirSync(join(SRC, 'locales'))
+      .filter((name) => name.endsWith('.json'))
+      .flatMap((name) =>
+        readFileSync(join(SRC, 'locales', name), 'utf8')
+          .split('\n')
+          .map((line, i) => ({ line, at: `locales/${name}:${i + 1}` }))
+          .filter(({ line }) => /\}\} ₽/.test(line))
+          .map(({ at }) => at),
+      );
     expect(offenders).toEqual([]);
   });
 });
