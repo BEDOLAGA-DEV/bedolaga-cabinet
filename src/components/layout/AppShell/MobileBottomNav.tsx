@@ -71,7 +71,11 @@ export function MobileBottomNav({ items, isMenuOpen = false }: MobileBottomNavPr
               to={item.path}
               onClick={handleNavClick}
               className={cn(
-                'relative flex min-w-[56px] flex-1 shrink-0 flex-col items-center justify-center rounded-2xl px-3 py-2.5 transition-all duration-200',
+                // На 360 пяти пунктам достаётся по ~64 px: при px-3 подпись
+                // «Колесо удачи» заходила на соседа. Боковых полей нет (подсветка —
+                // по всему пункту), подпись короткая (navShort), а если и она не
+                // влезла — многоточие, не наезд.
+                'relative flex min-w-0 flex-1 flex-col items-center justify-center rounded-2xl px-0 py-2.5 transition-all duration-200',
                 isActive(item.path) ? 'text-accent-400' : 'text-dark-400 hover:text-dark-200',
               )}
             >
@@ -83,8 +87,8 @@ export function MobileBottomNav({ items, isMenuOpen = false }: MobileBottomNavPr
                 />
               )}
               <Icon className="relative z-10 h-5 w-5" />
-              <span className="relative z-10 mt-1 whitespace-nowrap text-2xs">
-                {t(`nav.${item.key}`)}
+              <span className="relative z-10 mt-1 max-w-full truncate text-2xs">
+                {t(`navShort.${item.key}`, { defaultValue: t(`nav.${item.key}`) })}
               </span>
             </Link>
           );

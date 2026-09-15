@@ -10,7 +10,7 @@ export function EnvLockedBadge() {
   const { t } = useTranslation();
   return (
     <span
-      className="inline-flex items-center gap-1 rounded-full bg-dark-600/50 px-2 py-0.5 text-xs font-medium text-dark-400"
+      className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full bg-dark-600/50 px-2 py-0.5 text-xs font-medium text-dark-400"
       title={t('admin.settings.envLockedHint')}
     >
       <LockIcon />

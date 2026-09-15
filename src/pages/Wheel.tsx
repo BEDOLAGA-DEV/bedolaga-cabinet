@@ -536,7 +536,10 @@ export default function Wheel() {
 
       {/* Wheel Section */}
       <Card>
-        <div className="grid gap-6 p-6 sm:p-8 lg:grid-cols-[1fr,280px]">
+        {/* grid-cols-1 = minmax(0,1fr): колонка не растёт по длинному названию
+            приза (колесо уезжало вправо и обрезалось наполовину). Внутренний
+            отступ — только с sm: у карточки свой, на телефоне двойной сжимал колесо. */}
+        <div className="grid grid-cols-1 gap-6 sm:p-2 lg:grid-cols-[minmax(0,1fr),280px] lg:p-4">
           {/* Left: Wheel and Controls */}
           <div>
             {/* Wheel */}
@@ -790,10 +793,10 @@ export default function Wheel() {
                       <motion.div
                         key={item.id}
                         variants={staggerItem}
-                        className="flex items-center justify-between rounded-linear border border-dark-700/30 bg-dark-800/30 p-3"
+                        className="flex items-center justify-between gap-3 rounded-linear border border-dark-700/30 bg-dark-800/30 p-3"
                       >
-                        <div className="flex items-center gap-3">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-linear bg-dark-700/50 text-xl">
+                        <div className="flex min-w-0 flex-1 items-center gap-3">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-linear bg-dark-700/50 text-xl">
                             {item.emoji}
                           </div>
                           <div className="min-w-0">
@@ -805,7 +808,7 @@ export default function Wheel() {
                             </div>
                           </div>
                         </div>
-                        <div className="whitespace-nowrap text-sm text-dark-400">
+                        <div className="shrink-0 whitespace-nowrap text-sm text-dark-400">
                           -
                           {item.payment_type === 'telegram_stars'
                             ? `${item.payment_amount} ⭐`

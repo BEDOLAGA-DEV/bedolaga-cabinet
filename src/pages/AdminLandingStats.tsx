@@ -62,7 +62,7 @@ const PURCHASES_PAGE_SIZE = 20;
 // Contact display helper
 function ContactDisplay({ type, value }: { type: 'email' | 'telegram'; value: string }) {
   return (
-    <span className="flex items-center gap-1 text-dark-300">
+    <span className="flex min-w-0 items-center gap-1 text-dark-300">
       {type === 'email' ? (
         <EmailIcon className="h-3.5 w-3.5" />
       ) : (
@@ -120,7 +120,7 @@ function PurchaseCard({ item, formatPrice, lang, t }: PurchaseCardProps) {
           <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-3">
             <ContactDisplay type={item.contact_type} value={item.contact_value} />
             {item.is_gift && item.gift_recipient_type && item.gift_recipient_value && (
-              <span className="flex items-center gap-1">
+              <span className="flex min-w-0 items-center gap-1">
                 <ArrowRightIcon className="h-3 w-3" />
                 <ContactDisplay type={item.gift_recipient_type} value={item.gift_recipient_value} />
               </span>

@@ -44,14 +44,14 @@ export function NetworkStats({ data, className }: NetworkStatsProps) {
         />
         <StatCard
           label={t('admin.referralNetwork.stats.subscriptionRevenue')}
-          value={`${formatKopeksToRubles(data.total_subscription_revenue_kopeks)} ₽`}
+          value={`${formatKopeksToRubles(data.total_subscription_revenue_kopeks)}\u00A0₽`}
           icon={<BanknotesIcon className="h-5 w-5" />}
           tone="accent"
         />
         <div className="col-span-2">
           <StatCard
             label={t('admin.referralNetwork.stats.totalEarnings')}
-            value={`${formatKopeksToRubles(data.total_earnings_kopeks)} ₽`}
+            value={`${formatKopeksToRubles(data.total_earnings_kopeks)}\u00A0₽`}
             icon={<WalletIcon className="h-5 w-5" />}
             tone="neutral"
           />

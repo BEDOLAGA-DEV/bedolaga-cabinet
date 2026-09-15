@@ -214,14 +214,16 @@ export default function SubscriptionCardExpired({
 
       {/* Expired date + Balance row */}
       <div
-        className="mb-5 flex items-center justify-between rounded-[14px]"
+        // Дата и баланс разведены зазором; не влезли в строку — баланс уходит
+        // ниже. Было «01.09.2026БАЛАНС», а крупная сумма вылезала за плашку.
+        className="mb-5 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-[14px]"
         style={{
           background: `rgba(${accent.r},${accent.g},${accent.b},0.04)`,
           border: `1px solid rgba(${accent.r},${accent.g},${accent.b},0.08)`,
           padding: '14px 18px',
         }}
       >
-        <div className="flex items-center">
+        <div className="flex min-w-0 items-center gap-3">
           <div className="mb-0.5 font-mono text-[10px] font-medium uppercase tracking-wider text-dark-400">
             {isLimited
               ? t('dashboard.expired.activeUntil')
@@ -229,18 +231,18 @@ export default function SubscriptionCardExpired({
                   context: subscription.is_trial ? 'trial' : '',
                 })}
           </div>
-          <div className="ml-3 text-base font-bold tracking-tight text-dark-50/50">
-            {formattedDate}
-          </div>
+          <div className="text-base font-bold tracking-tight text-dark-50/50">{formattedDate}</div>
         </div>
         <div className="flex items-center gap-1.5">
           <span className="text-[10px] font-medium uppercase tracking-wider text-dark-400">
             {t('dashboard.expired.balance')}
           </span>
           <span
-            className={`text-sm font-semibold ${hasBalance ? 'text-success-400' : 'text-dark-400'}`}
+            className={`whitespace-nowrap text-sm font-semibold ${hasBalance ? 'text-success-400' : 'text-dark-400'}`}
           >
-            {formatAmount(balanceRubles)} {currencySymbol}
+            {formatAmount(balanceRubles)}
+            {'\u00A0'}
+            {currencySymbol}
           </span>
         </div>
       </div>

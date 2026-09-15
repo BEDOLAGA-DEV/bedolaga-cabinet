@@ -68,28 +68,28 @@ export default function AdminRemnawaveSquadDetail() {
   return (
     <div className="animate-fade-in space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3">
         <AdminBackButton to="/admin/remnawave" />
-        <div className="flex items-center gap-3">
+        <div className="flex shrink-0 items-center gap-3">
           <span className="text-2xl">{getCountryFlag(squad.country_code)}</span>
           <div className="rounded-lg bg-accent-500/20 p-2 text-accent-400">
             <ServerIcon />
           </div>
         </div>
-        <div>
-          <h1 className="text-xl font-semibold text-dark-100">
-            <Twemoji options={{ className: 'twemoji', folder: 'svg', ext: '.svg' }}>
+        <div className="min-w-0 flex-1 basis-40">
+          <h1 className="text-xl font-semibold text-dark-100 [overflow-wrap:anywhere]">
+            <Twemoji tag="span" options={{ className: 'twemoji', folder: 'svg', ext: '.svg' }}>
               {squad.display_name || squad.name}
             </Twemoji>
           </h1>
-          <p className="text-sm text-dark-400">{squad.name}</p>
+          <p className="text-sm text-dark-400 [overflow-wrap:anywhere]">{squad.name}</p>
         </div>
         {squad.is_synced ? (
-          <span className="rounded-full bg-success-500/20 px-3 py-1 text-xs text-success-400">
+          <span className="whitespace-nowrap rounded-full bg-success-500/20 px-3 py-1 text-xs text-success-400">
             {t('admin.remnawave.squads.synced', 'Synced')}
           </span>
         ) : (
-          <span className="rounded-full bg-warning-500/20 px-3 py-1 text-xs text-warning-400">
+          <span className="whitespace-nowrap rounded-full bg-warning-500/20 px-3 py-1 text-xs text-warning-400">
             {t('admin.remnawave.squads.notSynced', 'Not synced')}
           </span>
         )}
@@ -151,7 +151,7 @@ export default function AdminRemnawaveSquadDetail() {
               />
               <StatCard
                 label={t('admin.remnawave.squads.price', 'Price')}
-                value={`${((squad.price_kopeks ?? 0) / 100).toFixed(0)} ₽`}
+                value={`${((squad.price_kopeks ?? 0) / 100).toFixed(0)}\u00A0₽`}
                 icon={<BanknotesIcon className="h-5 w-5" />}
                 tone="neutral"
               />

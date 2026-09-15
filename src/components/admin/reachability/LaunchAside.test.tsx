@@ -126,12 +126,14 @@ afterEach(cleanup);
 
 async function renderPanel(onStarted = vi.fn()) {
   renderWithProviders(<Panel body={body} onStarted={onStarted} />);
-  const run = await screen.findByRole('button', { name: 'Проверить 1 цель · ◈ 640 cred' });
+  const run = await screen.findByRole('button', {
+    name: 'Проверить 1 цель · ◈\u00A0640\u00A0cred',
+  });
   await waitFor(() => expect((run as HTMLButtonElement).disabled).toBe(false));
   return { run, onStarted };
 }
 
-const CHARGE = 'Запустить за ◈ 640 cred';
+const CHARGE = 'Запустить за ◈\u00A0640\u00A0cred';
 
 describe('LaunchAside в браузере: второй шаг в панели, без модалки', () => {
   it('первый клик показывает сводку и «Списать», диалог не зовётся, задача не создаётся', async () => {
@@ -153,7 +155,9 @@ describe('LaunchAside в браузере: второй шаг в панели, 
     fireEvent.click(screen.getByRole('button', { name: 'Отмена' }));
 
     expect(screen.queryByRole('button', { name: CHARGE })).toBeNull();
-    expect(screen.getByRole('button', { name: 'Проверить 1 цель · ◈ 640 cred' })).toBeTruthy();
+    expect(
+      screen.getByRole('button', { name: 'Проверить 1 цель · ◈\u00A0640\u00A0cred' }),
+    ).toBeTruthy();
     expect(reachabilityApi.createJob).not.toHaveBeenCalled();
   });
 
@@ -183,7 +187,9 @@ describe('LaunchAside в браузере: второй шаг в панели, 
       );
     }
     renderWithProviders(<Harness />);
-    const run = await screen.findByRole('button', { name: 'Проверить 1 цель · ◈ 640 cred' });
+    const run = await screen.findByRole('button', {
+      name: 'Проверить 1 цель · ◈\u00A0640\u00A0cred',
+    });
     await waitFor(() => expect((run as HTMLButtonElement).disabled).toBe(false));
     fireEvent.click(run);
     expect(screen.getByRole('button', { name: CHARGE })).toBeTruthy();
@@ -251,8 +257,8 @@ describe('LaunchAside в Mini App: родной попап', () => {
       'RU-BS',
       'mts|цфо|on',
       'tele2|цфо|on',
-      '◈ 640 cred ≈ 6,40 ₽',
-      '◈ 9 360 cred ≈ 93,60 ₽',
+      '◈\u00A0640\u00A0cred ≈ 6,40\u00A0₽',
+      '◈\u00A09\u00A0360\u00A0cred ≈ 93,60\u00A0₽',
     ]) {
       expect(text).toContain(part);
     }

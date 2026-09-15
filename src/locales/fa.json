@@ -37,7 +37,31 @@
     "no_results": "نتیجه‌ای یافت نشد",
     "ok": "تأیید",
     "processing": "در حال پردازش…",
-    "rangeTo": "تا"
+    "rangeTo": "تا",
+    "relative": {
+      "online": "آنلاین",
+      "now": "همین حالا",
+      "never": "هرگز",
+      "minutes_one": "{{count}} دقیقه پیش",
+      "minutes_other": "{{count}} دقیقه پیش",
+      "hours_one": "{{count}} ساعت پیش",
+      "hours_other": "{{count}} ساعت پیش",
+      "days_one": "{{count}} روز پیش",
+      "days_other": "{{count}} روز پیش",
+      "weeks_one": "{{count}} هفته پیش",
+      "weeks_other": "{{count}} هفته پیش",
+      "months_one": "{{count}} ماه پیش",
+      "months_other": "{{count}} ماه پیش",
+      "yesterday": "دیروز"
+    },
+    "clear": "پاک کردن",
+    "dayTime": {
+      "today": "امروز، {{time}}",
+      "yesterday": "دیروز، {{time}}"
+    }
+  },
+  "navShort": {
+    "wheel": "گردونه"
   },
   "nav": {
     "dashboard": "داشبورد",
@@ -336,6 +360,8 @@
     "expiresAt": "تاریخ انقضا",
     "daysLeft": "روز باقی‌مانده",
     "devices": "دستگاه‌ها",
+    "devicesWord_one": "دستگاه",
+    "devicesWord_other": "دستگاه",
     "devices_other": "{{count}} دستگاه",
     "extraDevices": "دستگاه‌های اضافی",
     "extraDevicesIncluded": "شامل {{count}} دستگاه اضافی",
@@ -612,7 +638,7 @@
       "statusActive": "فعال",
       "statusPastDue": "پرداخت ناموفق بود — دوباره تلاش کنید",
       "nextCharge": "برداشت بعدی {{date}}",
-      "amountPerInterval": "{{amount}} ₽ {{interval}}",
+      "amountPerInterval": "{{amount}} ₽ {{interval}}",
       "interval": {
         "day": "روزانه",
         "week": "هفتگی",
@@ -636,8 +662,8 @@
       "statusActive": "فعال",
       "statusPastDue": "پرداخت ناموفق بود — دوباره تلاش کنید",
       "nextCharge": "برداشت بعدی {{date}}",
-      "amountPerPeriod": "{{amount}} ₽ {{period}}",
-      "amountPerDays": "هر {{days}} روز {{amount}} ₽",
+      "amountPerPeriod": "{{amount}} ₽ {{period}}",
+      "amountPerDays": "هر {{days}} روز {{amount}} ₽",
       "period": {
         "day": "روزانه",
         "week": "هفتگی",
@@ -760,6 +786,11 @@
     "withdrawal": "برداشت",
     "subscriptionPayment": "پرداخت اشتراک",
     "referralReward": "پاداش معرفی",
+    "refund": "بازپرداخت",
+    "failedRefund": "بازپرداخت ناموفق",
+    "pollReward": "پاداش نظرسنجی",
+    "giftPayment": "پرداخت هدیه",
+    "otherOperation": "تراکنش",
     "minAmount": "حداقل",
     "maxAmount": "حداکثر",
     "notAvailable": "در دسترس نیست",
@@ -806,7 +837,7 @@
       "rateLimit": "لطفاً {{seconds}} ثانیه صبر کنید",
       "selectMethod": "روش را انتخاب کنید",
       "enterAmount": "مبلغ را وارد کنید",
-      "amountRange": "مبلغ: {{min}} – {{max}} ₽"
+      "amountRange": "مبلغ: {{min}} – {{max}} ₽"
     },
     "insufficientFunds": "موجودی ناکافی",
     "missing": "کمبود",
@@ -1076,6 +1107,7 @@
       "closed": "بسته"
     },
     "attachImage": "پیوست تصویر",
+    "downloadFile": "دانلود فایل",
     "invalidFileType": "نوع فایل نامعتبر. از JPEG، PNG، GIF یا WebP استفاده کنید.",
     "fileTooLarge": "فایل خیلی بزرگ است. حداکثر 10MB.",
     "uploadFailed": "آپلود تصویر ناموفق",
@@ -1692,7 +1724,13 @@
           "active": "فعال",
           "worth": "ارزش",
           "probability": "احتمال دستی (۰–۱)",
-          "probabilityHint": "خالی = خودکار بر اساس RTP"
+          "probabilityHint": "خالی = خودکار بر اساس RTP",
+          "displayNamePlaceholder": "مثلاً: ۷ روز رایگان",
+          "valueUnits": {
+            "kopeks": "به کوپک",
+            "days": "به روز",
+            "gb": "به گیگابایت"
+          }
         },
         "promo": {
           "title": "تنظیمات کد تخفیف",
@@ -2476,6 +2514,12 @@
         "checkIntervalRange": "بازه بررسی باید بین ۱ تا ۱۴۴۰ دقیقه باشد",
         "reminderCooldownRange": "زمان تأخیر یادآوری باید بین ۰ تا ۱۴۴۰ دقیقه باشد",
         "slaMinutesRange": "SLA باید بین ۱ تا ۱۰۰۸۰ دقیقه باشد"
+      },
+      "priorities": {
+        "low": "کم",
+        "normal": "عادی",
+        "high": "زیاد",
+        "urgent": "فوری"
       }
     },
     "tariffs": {
@@ -2720,12 +2764,12 @@
       "saveButton": "ذخیره",
       "notFound": "روش پرداخت یافت نشد",
       "quickAmounts": "مبالغ سریع (₽)",
-      "quickAmountsHint": "دکمه‌های مبلغ شارژ سریع. خالی — مقادیر پیش‌فرض استفاده می‌شوند: {{defaults}} ₽",
+      "quickAmountsHint": "دکمه‌های مبلغ شارژ سریع. خالی — مقادیر پیش‌فرض استفاده می‌شوند: {{defaults}} ₽",
       "quickAmountsPlaceholder": "مبلغ به روبل",
       "quickAmountsAdd": "افزودن",
       "quickAmountsInvalid": "یک مبلغ مثبت به روبل وارد کنید",
       "quickAmountsLimit": "حداکثر ۱۰ مبلغ مجاز است",
-      "quickAmountsRemove": "حذف مبلغ {{value}} ₽",
+      "quickAmountsRemove": "حذف مبلغ {{value}} ₽",
       "overpayCertTitle": "گواهی mTLS (Overpay)",
       "overpayCertValid": "✅ معتبر تا {{date}}",
       "overpayCertExpired": "⚠️ در تاریخ {{date}} منقضی شده است",
@@ -2935,7 +2979,31 @@
         "rejectTitle": "رد درخواست برداشت؟",
         "rejectDescription": "در صورت تمایل دلیل رد را بنویسید.",
         "commentPlaceholder": "دلیل رد (اختیاری)...",
-        "confirmReject": "تأیید رد"
+        "confirmReject": "تأیید رد",
+        "risk": {
+          "balance": {
+            "total_earned": "درآمد از معرفی",
+            "own_deposits": "واریزهای خود",
+            "spending": "هزینه شده",
+            "referral_spent": "از آن معرفی",
+            "withdrawn": "برداشت شده",
+            "pending": "در حال بررسی",
+            "available_referral": "موجودی معرفی قابل برداشت",
+            "available_total": "کل قابل برداشت"
+          },
+          "deposits": {
+            "referral_count": "معرفی‌ها",
+            "paying_referrals": "معرفی‌های پرداخت‌کننده",
+            "total_deposits": "واریزهای معرفی‌ها",
+            "total_amount": "مجموع واریزهای آن‌ها"
+          },
+          "recent": {
+            "week": "درآمد این هفته"
+          },
+          "recentTitle": "۷ روز اخیر",
+          "times_one": "· {{count}} بار",
+          "times_other": "· {{count}} بار"
+        }
       }
     },
     "partners": {
@@ -3183,7 +3251,7 @@
         "applyToAddons": "اعمال به خدمات اضافی",
         "default": "پیش‌فرض",
         "daysShort": "{{days}} روز",
-        "autoFrom": "خودکار از {{amount}} روبل",
+        "autoFrom": "خودکار از {{amount}}",
         "members_other": "{{count}} عضو"
       },
       "confirm": {
@@ -3202,7 +3270,8 @@
         "discountPercentInvalid": "درصد تخفیف باید بین 1 تا 100 باشد",
         "discountHoursRequired": "مدت اعتبار تخفیف را به ساعت مشخص کنید",
         "trafficRequired": "حجم ترافیک باید بیشتر از ۰ باشد"
-      }
+      },
+      "cannotSave": "امکان ذخیره کد تخفیف وجود ندارد:"
     },
     "promoGroups": {
       "title": "گروه‌های تخفیف",
@@ -3214,7 +3283,7 @@
       "traffic": "ترافیک",
       "devices": "دستگاه‌ها",
       "daysShort": "{{days}} روز",
-      "autoFrom": "خودکار از {{amount}} روبل",
+      "autoFrom": "خودکار از {{amount}}",
       "members": "{{count}} عضو",
       "createTitle": "ایجاد گروه تخفیف",
       "editTitle": "ویرایش گروه",
@@ -3257,11 +3326,9 @@
     "users": {
       "title": "کاربران",
       "subtitle": "مدیریت کاربران ربات",
-      "search": "جستجو بر اساس شناسه، نام، نام کاربری...",
-      "searchEmail": "جستجو بر اساس ایمیل...",
+      "search": "شناسه، نام، @نام‌کاربری یا ایمیل",
+      "searchShort": "نام، شناسه، ‎@user، ایمیل",
       "noData": "کاربری یافت نشد",
-      "purchaseCount_other": "{{count}} خرید",
-      "noPurchases": "بدون خرید",
       "stats": {
         "total": "کل",
         "active": "فعال",
@@ -3279,15 +3346,11 @@
         "expired": "منقضی شده"
       },
       "filters": {
-        "allStatuses": "همه وضعیت‌ها",
-        "byDate": "بر اساس تاریخ",
-        "byBalance": "بر اساس موجودی",
-        "byActivity": "بر اساس فعالیت",
-        "bySpent": "بر اساس هزینه",
-        "byExpiry": "بر اساس انقضا"
-      },
-      "pagination": {
-        "showing": "نمایش {{from}}-{{to}} از {{total}}"
+        "title": "فیلترها",
+        "buttonApplied_one": "فیلترها: {{count}} مورد",
+        "buttonApplied_other": "فیلترها: {{count}} مورد",
+        "reset": "بازنشانی",
+        "remove": "حذف فیلتر «{{name}}»"
       },
       "actions": {
         "block": "مسدود کردن",
@@ -3300,14 +3363,11 @@
       },
       "detail": {
         "tabs": {
-          "info": "اطلاعات",
           "subscription": "اشتراک",
           "balance": "موجودی",
-          "sync": "همگام‌سازی",
-          "tickets": "تیکت‌ها",
-          "gifts": "هدایا",
           "referrals": "معرفی‌ها",
-          "activity": "فعالیت"
+          "activity": "فعالیت",
+          "overview": "نمای کلی"
         },
         "noTickets": "این کاربر تیکتی ندارد",
         "ticketsCount": "تیکت",
@@ -3429,17 +3489,70 @@
           "deleteTitle": "حذف اشتراک",
           "deleteHint": "اشتراک و دستگاه‌های آن برای همیشه حذف می‌شوند",
           "deleteButton": "حذف اشتراک",
-          "deleted": "اشتراک حذف شد"
+          "deleted": "اشتراک حذف شد",
+          "extendBy": "{{count}} روز",
+          "customDays": "مدت دلخواه",
+          "shortenTitle": "کوتاه کردن",
+          "deviceLimitTitle": "محدودیت دستگاه",
+          "deviceLimitHint": "حداکثر تعرفه: {{max}}",
+          "removePackage": "حذف بسته",
+          "purchasedExtra": "{{gb}} گیگ خریداری‌شده",
+          "periodDays": "{{count}} روز",
+          "noNodeUsage": "در این بازه ترافیکی روی نودها نبود",
+          "deviceSince": "از {{date}}",
+          "sbpShort": "SBP",
+          "cancelTitle": "لغو اشتراک",
+          "cancelButton": "لغو اشتراک",
+          "dangerZone": {
+            "title": "ناحیه خطر",
+            "description": "لغو، اشتراک را همین حالا پایان می‌دهد؛ حذف آن را همراه دستگاه‌ها از ربات و پنل پاک می‌کند."
+          },
+          "support": {
+            "title": "برای پشتیبانی",
+            "hint": "لینک اشتراک، کلیدها، تاریخچه درخواست‌ها"
+          },
+          "confirm": {
+            "cancelSubscription": "اشتراک لغو شود؟ زمان و ترافیک برنمی‌گردد.",
+            "shorten": "{{count}} روز از اشتراک کم شود؟",
+            "removePackage": "بسته {{gb}} گیگ حذف شود؟ ترافیک آن از بین می‌رود.",
+            "deleteDevice": "دستگاه «{{name}}» حذف شود؟ باید دوباره متصل شود.",
+            "resetDevices": "همه دستگاه‌ها بازنشانی شوند؟ همه باید دوباره متصل شوند.",
+            "cancelSbp": "پرداخت خودکار SBP خاموش شود؟"
+          },
+          "lastPayment": "آخرین پرداخت",
+          "autopay": "تمدید خودکار",
+          "autopayOn": "روشن",
+          "autopayOff": "خاموش",
+          "extendDays": "تمدید، روز",
+          "shortenDays": "کم کردن، روز",
+          "newTariff": "طرح جدید",
+          "package": "بسته",
+          "devicesLimit_one": "تا {{count}} دستگاه",
+          "devicesLimit_other": "تا {{count}} دستگاه"
         },
         "balance": {
           "current": "موجودی فعلی",
-          "amountPlaceholder": "مبلغ به روبل",
-          "descriptionPlaceholder": "توضیحات (اختیاری)",
+          "amountPlaceholder": "0",
+          "descriptionPlaceholder": "مثلاً جبران قطعی",
           "add": "افزودن",
           "subtract": "کسر",
           "addByAdmin": "افزوده شده توسط مدیر",
           "subtractByAdmin": "کسر شده توسط مدیر",
-          "recentTransactions": "تراکنش‌های اخیر"
+          "recentTransactions": "تراکنش‌های اخیر",
+          "title": "موجودی",
+          "changeTitle": "افزودن یا کسر",
+          "amountLabel": "مبلغ",
+          "commentLabel": "توضیح برای گزارش",
+          "confirmSubtract": "{{amount}} از موجودی کسر شود؟",
+          "confirmDeactivate": "تخفیف {{percent}}٪ خاموش شود؟",
+          "discountTitle": "تخفیف شخصی",
+          "noOffer": "پیشنهاد فعالی نیست",
+          "offerFormOpen": "ارسال پیشنهاد",
+          "noOperations": "هنوز عملیاتی نبوده",
+          "added": "{{amount}} افزوده شد",
+          "subtracted": "{{amount}} کسر شد",
+          "offerNow": "اکنون",
+          "offerValue": "−{{percent}}٪ تا {{date}}"
         },
         "sync": {
           "selectSubscription": "انتخاب اشتراک",
@@ -3489,13 +3602,17 @@
           "balance": "موجودی",
           "unknownUser": "ناشناس",
           "totalSent": "کل ارسال شده",
-          "totalReceived": "کل دریافت شده"
+          "totalReceived": "کل دریافت شده",
+          "to": "به:",
+          "from": "از:",
+          "periodValue_one": "{{count}} روز",
+          "periodValue_other": "{{count}} روز"
         },
         "referrals": {
-          "referredBy": "معرفی‌شده توسط",
+          "referredBy": "دعوت‌کننده",
           "noReferrer": "معرفی‌کننده‌ای تعیین نشده",
           "assignReferrer": "تعیین معرفی‌کننده",
-          "removeReferrer": "حذف",
+          "removeReferrer": "جدا کردن",
           "referrerAssigned": "معرفی‌کننده تعیین شد",
           "referrerRemoved": "معرفی‌کننده حذف شد",
           "totalReferrals": "کل معرفی‌ها",
@@ -3507,11 +3624,20 @@
           "noReferrals": "هنوز معرفی‌ای نیست",
           "removeReferral": "حذف معرفی",
           "referralRemoved": "معرفی حذف شد",
-          "addReferral": "افزودن معرفی",
+          "add": "افزودن",
           "referralAdded": "معرفی اضافه شد",
           "searchPlaceholder": "جستجو بر اساس نام، ایمیل یا شناسه تلگرام...",
           "alreadyReferred": "قبلاً معرفی شده",
-          "noUsersFound": "کاربری یافت نشد"
+          "noUsersFound": "کاربری یافت نشد",
+          "assign": "تعیین",
+          "invited": "دعوت شده",
+          "earned": "درآمد",
+          "code": "کد",
+          "commissionPercent": "کمیسیون، ٪",
+          "commissionSaved": "کمیسیون ذخیره شد",
+          "spentHint": "خرج در سرویس",
+          "confirmRemoveReferrer": "دعوت‌کننده جدا شود؟ دیگر از این کاربر درآمدی نمی‌گیرد.",
+          "confirmRemoveReferral": "{{name}} از زیرمجموعه‌ها حذف شود؟ درآمد از او متوقف می‌شود."
         },
         "actions": {
           "areYouSure": "آیا مطمئنید می‌خواهید ادامه دهید؟",
@@ -3519,19 +3645,7 @@
         },
         "noVpnData": "داده‌ای از VPN وجود ندارد",
         "activity": {
-          "total": "مجموع رویدادها",
           "empty": "هنوز فعالیتی وجود ندارد",
-          "filters": {
-            "all": "همه",
-            "payments": "پرداخت‌ها",
-            "events": "رویدادها",
-            "promo": "تخفیف‌ها",
-            "tickets": "تیکت‌ها",
-            "gifts": "هدایا",
-            "referrals": "دعوت‌ها",
-            "logins": "ورودها",
-            "clicks": "کلیک‌ها"
-          },
           "types": {
             "transaction": "تراکنش",
             "event": "رویداد",
@@ -3547,7 +3661,7 @@
             "withdrawal": "درخواست برداشت",
             "button_click": "دکمه ربات",
             "cabinet_action": "اقدام در پنل",
-            "miniapp_action": "اقدام در مینی‌اپ",
+            "miniapp_action": "اقدام در کابینت",
             "screen": "صفحه باز شد",
             "click": "کلیک کرد",
             "message": "پیام به ربات"
@@ -3555,7 +3669,7 @@
           "sources": {
             "bot": "ربات",
             "cabinet": "پنل",
-            "miniapp": "مینی‌اپ"
+            "miniapp": "کابینت"
           },
           "subtypes": {
             "deposit": "واریز",
@@ -3670,11 +3784,155 @@
             "contact": "مخاطب",
             "location": "موقعیت",
             "other": "پیام"
+          },
+          "views": {
+            "tickets": "تیکت‌ها",
+            "gifts": "هدیه‌ها",
+            "all": "همه",
+            "payments": "پرداخت‌ها",
+            "subscription": "اشتراک",
+            "actions": "اقدامات",
+            "logins": "ورودها"
+          },
+          "fromBalance": "از موجودی",
+          "loadError": "بارگیری فعالیت ممکن نشد"
+        },
+        "header": {
+          "copy": "کپی",
+          "emailVerified": "تأیید شده",
+          "emailUnverified": "تأیید نشده",
+          "onlineAt": "آنلاین · {{node}}",
+          "write": "پیام",
+          "group": "گروه: {{name}}"
+        },
+        "facts": {
+          "balance": "موجودی",
+          "until": "اشتراک تا",
+          "days": "{{count}} روز",
+          "traffic": "ترافیک",
+          "devices": "دستگاه‌ها",
+          "devicesValue": "{{used}} از {{limit}}",
+          "spent": "هزینه‌شده",
+          "noSubscription": "ندارد",
+          "subscriptions": "اشتراک‌ها",
+          "subscriptionsLive_one": "{{count}} فعال",
+          "subscriptionsLive_other": "{{count}} فعال",
+          "noLive": "هیچ‌کدام فعال نیست",
+          "nearest": "نزدیک‌ترین تا {{date}}",
+          "tariffUntil": "{{tariff}} · تا {{date}}"
+        },
+        "menu": {
+          "more": "عملیات بیشتر"
+        },
+        "overview": {
+          "trafficPeriod": "ترافیک",
+          "extend": "تمدید",
+          "connection": "اتصال",
+          "now": "اکنون",
+          "firstConnection": "متصل از",
+          "devices": "دستگاه‌ها",
+          "lifetimeTraffic": "در کل",
+          "noDevices": "ندارد",
+          "noPanelData": "پنل هنوز این کاربر را ندیده است",
+          "origin": "از کجا آمده",
+          "registered": "ثبت‌نام",
+          "campaign": "کمپین",
+          "promoGroup": "گروه تبلیغاتی",
+          "change": "تغییر",
+          "noPromoGroup": "بدون گروه",
+          "referrer": "دعوت‌کننده",
+          "cabinetLogin": "ورود به کابینت",
+          "restrictionsAndSupport": "محدودیت‌ها و درخواست‌ها",
+          "restrictions": "محدودیت‌ها",
+          "noRestrictions": "ندارد",
+          "configure": "تنظیم",
+          "restrictTopup": "منع افزایش موجودی",
+          "restrictSubscription": "منع خرید اشتراک",
+          "restrictionReason": "دلیل (فقط برای ادمین‌ها)",
+          "tickets": "تیکت‌ها",
+          "open": "باز کردن",
+          "gifts": "هدایا",
+          "recent": "رویدادهای اخیر",
+          "allActivity": "همه فعالیت‌ها",
+          "noActivity": "هنوز چیزی رخ نداده",
+          "assign": "تعیین",
+          "none": "ندارد",
+          "list": "فهرست",
+          "promocodes": "کدهای تخفیف",
+          "restrictTopupFull": "منع شارژ حساب",
+          "restrictSubscriptionFull": "منع خرید اشتراک",
+          "promocodesUsed_one": "{{count}} استفاده شده",
+          "promocodesUsed_other": "{{count}} استفاده شده",
+          "ticketsOpen_one": "{{count}} باز",
+          "ticketsOpen_other": "{{count}} باز",
+          "ticketsClosed_one": "{{count}} بسته",
+          "ticketsClosed_other": "{{count}} بسته",
+          "giftsSent_one": "{{count}} ارسال شده",
+          "giftsSent_other": "{{count}} ارسال شده",
+          "giftsReceived_one": "{{count}} دریافت شده",
+          "giftsReceived_other": "{{count}} دریافت شده",
+          "all": "همه",
+          "lastActivity": "آخرین فعالیت"
+        },
+        "restrictionsSaved": "محدودیت‌ها به‌روزرسانی شد",
+        "panel": {
+          "title": "پنل Remnawave",
+          "matches": "همگام",
+          "differs": "تفاوت وجود دارد",
+          "unknown": "هنوز بررسی نشده",
+          "checked": "همگام‌سازی شده",
+          "pull": "از پنل به ربات",
+          "pushManual": "از ربات به پنل",
+          "confirmPull": "داده‌ها از پنل به ربات گرفته شود؟ تاریخ انقضا و ترافیک در پایگاه ربات بازنویسی می‌شود.",
+          "confirmPush": "داده‌های ربات به پنل ارسال شود؟ تاریخ انقضا، ترافیک و اسکوادها در پنل بازنویسی می‌شود.",
+          "notLinked": "در پنل نیست",
+          "live": "فعال",
+          "notLive": "غیرفعال",
+          "pullTitle": "از پنل به ربات",
+          "pushTitle": "از ربات به پنل",
+          "remnawaveId": "شناسه در پنل Remnawave",
+          "rows": {
+            "status": "دسترسی",
+            "until": "معتبر تا",
+            "trafficLimit": "سقف ترافیک",
+            "trafficUsed": "مصرف",
+            "devices": "دستگاه‌ها",
+            "squads": "اسکوادها"
           }
-        }
+        },
+        "loadError": "بارگیری کاربر ممکن نشد",
+        "done": {
+          "subscription": {
+            "extend": "{{count}} روز تمدید شد — تا {{date}}",
+            "shorten": "{{count}} روز کم شد — تا {{date}}",
+            "change_tariff": "طرح تغییر کرد",
+            "activate": "اشتراک تا {{date}} فعال شد",
+            "cancel": "اشتراک لغو شد",
+            "create": "اشتراک تا {{date}} اعطا شد"
+          },
+          "pulled": "داده‌ها از پنل دریافت شد",
+          "pushed": "داده‌ها به پنل ارسال شد",
+          "promoGroup": "گروه تبلیغاتی تغییر کرد",
+          "blocked": "کاربر مسدود شد",
+          "unblocked": "کاربر آزاد شد",
+          "pulledWithWarning": "تاریخ پایان در ربات دیرتر از پنل بود — تاریخ پنل اعمال شد. تمدید خودکار را بررسی کنید"
+        },
+        "operations": {
+          "title": "تراکنش‌ها",
+          "operation": "تراکنش",
+          "notCompleted": "تکمیل نشده",
+          "filters": {
+            "all": "همه",
+            "deposit": "شارژها",
+            "withdrawal": "برداشت‌ها",
+            "subscription_payment": "خریدها"
+          }
+        },
+        "messages_one": "{{count}} پیام",
+        "messages_other": "{{count}} پیام",
+        "ticketLoadError": "باز کردن تیکت ممکن نشد"
       },
       "notFound": "کاربر یافت نشد",
-      "purchaseCount": "تعداد خرید: {{count}}",
       "sendMessage": {
         "button": "✉️ ارسال پیام",
         "title": "ارسال پیام به کاربر",
@@ -3693,14 +3951,140 @@
         "delete": "حذف کاربر",
         "disable": "غیرفعال‌سازی",
         "error": "انجام عملیات ناموفق بود",
-        "resetSubscription": "بازنشانی اشتراک",
         "resetTrial": "بازنشانی دوره آزمایشی",
         "success": {
           "delete": "کاربر حذف شد",
           "disable": "کاربر غیرفعال شد",
-          "resetSubscription": "اشتراک بازنشانی شد",
           "resetTrial": "دوره آزمایشی بازنشانی شد"
         }
+      },
+      "summary": {
+        "total_one": "{{value}} کاربر",
+        "total_other": "{{value}} کاربر",
+        "subscribed": "{{value}} اشتراک فعال",
+        "newToday_one": "{{value}} جدید امروز",
+        "newToday_other": "{{value}} جدید امروز",
+        "blocked_one": "{{value}} مسدود",
+        "blocked_other": "{{value}} مسدود"
+      },
+      "shown": "نمایش {{shown}} از {{total}}",
+      "loadingMore": "در حال بارگذاری",
+      "noneFound": "کسی پیدا نشد — عبارت دیگری بزنید یا فیلترها را بردارید",
+      "loadError": "فهرست بارگذاری نشد",
+      "connectedNow": "اکنون متصل",
+      "onlineUnavailable": "پنل پاسخ نداد — مشخص نشد چه کسی اکنون متصل است. دوباره تلاش کنید.",
+      "reset": "پاک کردن همه",
+      "toTop": "بالا",
+      "unlimited": "نامحدود",
+      "until": "تا {{date}}",
+      "sort": {
+        "label": "مرتب‌سازی",
+        "expires": "بر اساس انقضا",
+        "activity": "بر اساس فعالیت",
+        "created": "بر اساس تاریخ ثبت‌نام",
+        "balance": "بر اساس موجودی",
+        "spent": "بر اساس هزینه",
+        "traffic": "بر اساس ترافیک",
+        "purchases": "بر اساس خرید"
+      },
+      "views": {
+        "all": "همه",
+        "expiring": "انقضا تا {{days}} روز",
+        "traffic": "ترافیک رو به اتمام",
+        "nopay": "بدون خرید",
+        "online": "آنلاین",
+        "blocked": "مسدود"
+      },
+      "viewsLabel": "نما",
+      "filterLabels": {
+        "status": "وضعیت",
+        "sub": "اشتراک",
+        "tariff": "تعرفه",
+        "group": "گروه تبلیغاتی",
+        "campaign": "کمپین"
+      },
+      "filterAny": {
+        "status": "هر",
+        "sub": "هر",
+        "tariff": "هر",
+        "group": "هر",
+        "campaign": "هر"
+      },
+      "subFilters": {
+        "active": "فعال",
+        "trial": "آزمایشی",
+        "expiring": "در حال انقضا",
+        "expired": "منقضی",
+        "limited": "ترافیک تمام شده",
+        "none": "بدون اشتراک"
+      },
+      "columns": {
+        "user": "کاربر",
+        "subscription": "اشتراک",
+        "activity": "فعالیت",
+        "balance": "موجودی"
+      },
+      "statuses": {
+        "active": "فعال",
+        "blocked": "مسدود",
+        "deleted": "حذف‌شده",
+        "noSubscription": "بدون اشتراک",
+        "disabled": "غیرفعال",
+        "pending": "در انتظار پرداخت",
+        "other": "اشتراک"
+      },
+      "subscriptionChips": {
+        "trial": "آزمایشی · {{count}} روز",
+        "daysLeft": "{{count}} روز",
+        "today": "امروز منقضی می‌شود",
+        "expiredToday": "امروز منقضی شد",
+        "expiredAgo": "{{count}} روز پیش منقضی شد",
+        "limited": "ترافیک تمام شده"
+      },
+      "summaryShort": {
+        "total_one": "{{value}}",
+        "total_other": "{{value}}",
+        "subscribed": "{{value}} مشترک",
+        "newToday_one": "{{value}} جدید",
+        "newToday_other": "{{value}} جدید"
+      },
+      "endOfList_one": "همه {{total}} نفر نمایش داده شد",
+      "endOfList_other": "همه {{total}} نفر نمایش داده شد",
+      "subscriptionState": {
+        "active": "فعال",
+        "trial": "آزمایشی",
+        "limited": "ترافیک تمام شده",
+        "expired": "منقضی شده",
+        "disabled": "غیرفعال",
+        "pending": "در انتظار پرداخت",
+        "other": "اشتراک"
+      },
+      "purchaseCount_one": "{{count}} خرید",
+      "purchaseCount_other": "{{count}} خرید",
+      "errors": {
+        "generic": "انجام نشد. دوباره تلاش کنید",
+        "insufficientBalance": "موجودی {{current}} است، اما {{requested}} درخواست شد",
+        "tariffTaken": "برای این طرح اشتراک فعال وجود دارد — آن را تمدید کنید",
+        "singleTariff": "اشتراک وجود دارد. دومی فقط در حالت چندطرحی",
+        "graceActive": "دسترسی موقت فعال است — منتظر پایان آن بمانید یا اشتراک را بازیابی کنید",
+        "badDays": "تعداد روز را بیشتر از صفر وارد کنید",
+        "selfReferrer": "کاربر نمی‌تواند دعوت‌کننده خودش باشد",
+        "circularReferral": "این کار حلقه‌ای در زنجیره دعوت ایجاد می‌کند",
+        "noReferrer": "دعوت‌کننده‌ای تعیین نشده",
+        "notReferral": "این کاربر زیرمجموعه کاربر انتخاب‌شده نیست",
+        "ownCommission": "نمی‌توانید کمیسیون خودتان را تغییر دهید",
+        "adminProtected": "این کاربر مدیر است و مسدود نمی‌شود",
+        "notInPanel": "این کاربر در پنل Remnawave نیست",
+        "panelUnreachable": "اتصال به پنل ممکن نشد. بعداً تلاش کنید",
+        "resetNotFinished": "پنل اشتراک را غیرفعال نکرد — بازنشانی کامل نشد",
+        "noSubscription": "اشتراکی وجود ندارد",
+        "noDevices": "دستگاهی وجود ندارد",
+        "deviceNotFound": "دستگاه قبلاً حذف شده",
+        "packageNotFound": "بسته ترافیک پیدا نشد",
+        "tariffNotFound": "طرح پیدا نشد",
+        "promoGroupNotFound": "گروه تبلیغاتی پیدا نشد",
+        "subscriptionNotFound": "اشتراک پیدا نشد",
+        "userNotFound": "کاربر پیدا نشد"
       }
     },
     "promoOffers": {
@@ -4631,7 +5015,14 @@
           "email_templates": "قالب‌های ایمیل",
           "pinned_messages": "پیام‌های سنجاق‌شده",
           "landings": "صفحات فرود",
-          "updates": "به‌روزرسانی‌ها"
+          "updates": "به‌روزرسانی‌ها",
+          "bulk_actions": "اقدامات گروهی",
+          "coupons": "کوپن‌ها",
+          "info_pages": "صفحات اطلاعات",
+          "news": "اخبار",
+          "reachability": "دسترس‌پذیری",
+          "system_errors": "خطاهای سیستم",
+          "user": "کاربر"
         },
         "permissionActions": {
           "read": "خواندن",
@@ -4657,7 +5048,10 @@
           "balance": "موجودی",
           "subscription": "اشتراک",
           "send_offer": "ارسال پیشنهاد",
-          "referral": "درصد ارجاع"
+          "referral": "درصد ارجاع",
+          "execute": "اجرا",
+          "run": "اجرا کردن",
+          "send_message": "ارسال پیام"
         },
         "toggleSection": "تغییر وضعیت تمام مجوزهای {{section}}",
         "selectedPermissions_other": "{{count}} مجوز انتخاب شده",
@@ -4906,7 +5300,11 @@
         "loadFailed": "بارگذاری گزارش بازرسی ناموفق بود",
         "retry": "تلاش مجدد"
       },
-      "totalEntries": "مجموع موارد: {{count}}"
+      "totalEntries": "مجموع موارد: {{count}}",
+      "actions": {
+        "phantom_claimed": "دریافت حساب از پیش ساخته",
+        "phantom_merged": "ادغام حساب از پیش ساخته"
+      }
     },
     "landings": {
       "title": "صفحات فرود",
@@ -5042,7 +5440,8 @@
       "methodMaxAmount": "حداکثر مبلغ",
       "methodMinAmount": "حداقل مبلغ",
       "methodReturnUrl": "آدرس بازگشت",
-      "stickyPayButton": "دکمه پرداخت ثابت"
+      "stickyPayButton": "دکمه پرداخت ثابت",
+      "stickyPayButtonHint": "دکمه پرداخت در موبایل پایین صفحه ثابت می‌ماند"
     },
     "infoPages": {
       "title": "صفحات اطلاعات",
@@ -5625,7 +6024,8 @@
     "ru": "Русский",
     "en": "English",
     "zh": "中文",
-    "fa": "فارسی"
+    "fa": "فارسی",
+    "ua": "اوکراینی"
   },
   "contests": {
     "title": "مسابقات",
@@ -5951,7 +6351,7 @@
     "chooseSubscription": "اشتراک مورد نظر را انتخاب کنید",
     "afterMerge": "پس از ادغام",
     "allAuthMethodsMerged": "تمام روش‌های ورود ادغام خواهند شد",
-    "balanceSummed": "موجودی: {{amount}} ₽ (مجموع)",
+    "balanceSummed": "موجودی: {{amount}} ₽ (مجموع)",
     "unselectedSubscriptionDeleted": "اشتراک انتخاب نشده حذف خواهد شد",
     "historyPreserved": "تاریخچه تراکنش‌ها حفظ خواهد شد",
     "confirm": "ادغام حساب‌ها",

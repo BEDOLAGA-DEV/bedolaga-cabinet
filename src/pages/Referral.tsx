@@ -560,7 +560,7 @@ export default function Referral() {
           />
           <StatCard
             label={t('referral.terms.minTopup')}
-            value={`${formatAmount(terms.minimum_topup_rubles)} ${currencySymbol}`}
+            value={`${formatAmount(terms.minimum_topup_rubles)}\u00A0${currencySymbol}`}
             icon={<BanknotesIcon className="h-5 w-5" />}
             tone="neutral"
           />
@@ -732,7 +732,7 @@ export default function Referral() {
                   type="text"
                   readOnly
                   value={botReferralLink}
-                  className="input flex-1 text-sm"
+                  className="input min-w-0 flex-1 text-sm"
                 />
                 <button
                   onClick={() => copyLink(botReferralLink, 'bot')}
@@ -755,12 +755,19 @@ export default function Referral() {
               {t('referral.cabinetLink')}
             </div>
             <div className="flex flex-col gap-2 sm:flex-row">
-              <input type="text" readOnly value={referralLink} className="input flex-1 text-sm" />
-              <div className="flex gap-2">
+              <input
+                type="text"
+                readOnly
+                value={referralLink}
+                className="input min-w-0 flex-1 text-sm"
+              />
+              {/* На телефоне кнопки делят ряд поровну: в своих размерах
+                  «Поделиться» вылезала за поле на 360. */}
+              <div className="grid grid-cols-2 gap-2 sm:flex">
                 <button
                   onClick={() => copyLink(referralLink, 'cabinet')}
                   disabled={!referralLink}
-                  className={`btn-primary shrink-0 px-4 ${
+                  className={`btn-primary min-w-0 shrink-0 px-4 ${
                     copiedLink === 'cabinet' ? 'bg-success-500 hover:bg-success-500' : ''
                   } ${!referralLink ? 'cursor-not-allowed opacity-50' : ''}`}
                 >
@@ -772,7 +779,7 @@ export default function Referral() {
                 <button
                   onClick={shareLink}
                   disabled={!referralLink}
-                  className={`btn-secondary flex shrink-0 items-center px-4 ${
+                  className={`btn-secondary flex min-w-0 shrink-0 items-center justify-center px-4 ${
                     !referralLink ? 'cursor-not-allowed opacity-50' : ''
                   }`}
                 >
@@ -822,10 +829,11 @@ export default function Referral() {
             {referralList.items.map((ref) => (
               <div
                 key={ref.id}
-                className="flex items-center justify-between rounded-xl border border-dark-700/30 bg-dark-800/30 p-3"
+                // Ник без пробелов выталкивал бейдж статуса за карточку.
+                className="flex items-center justify-between gap-3 rounded-xl border border-dark-700/30 bg-dark-800/30 p-3"
               >
-                <div>
-                  <div className="font-medium text-dark-100">
+                <div className="min-w-0 flex-1">
+                  <div className="font-medium text-dark-100 [overflow-wrap:anywhere]">
                     {ref.first_name || ref.username || t('referral.anonymousUser', { id: ref.id })}
                   </div>
                   <div className="mt-0.5 text-xs text-dark-500">
@@ -833,9 +841,9 @@ export default function Referral() {
                   </div>
                 </div>
                 {ref.has_paid ? (
-                  <span className="badge-success">{t('referral.status.paid')}</span>
+                  <span className="badge-success shrink-0">{t('referral.status.paid')}</span>
                 ) : (
-                  <span className="badge-neutral">{t('referral.status.pending')}</span>
+                  <span className="badge-neutral shrink-0">{t('referral.status.pending')}</span>
                 )}
               </div>
             ))}
@@ -860,10 +868,12 @@ export default function Referral() {
             {earnings.items.map((earning) => (
               <div
                 key={earning.id}
-                className="flex items-center justify-between rounded-xl border border-dark-700/30 bg-dark-800/30 p-3"
+                // Начисление бывает длинным («+1 234,56 ₽ + 90 дн. «Тариф»»): оно
+                // занимает не больше половины строки и переносится, имя — остаток.
+                className="flex items-start justify-between gap-3 rounded-xl border border-dark-700/30 bg-dark-800/30 p-3"
               >
-                <div>
-                  <div className="text-dark-100">
+                <div className="min-w-0 flex-1">
+                  <div className="text-dark-100 [overflow-wrap:anywhere]">
                     {earning.referral_first_name ||
                       earning.referral_username ||
                       t('referral.anonymousReferral')}
@@ -875,7 +885,9 @@ export default function Referral() {
                     • {new Date(earning.created_at).toLocaleDateString(i18n.language)}
                   </div>
                 </div>
-                <div className="font-semibold text-success-400">{formatEarning(earning)}</div>
+                <div className="min-w-0 max-w-[55%] text-right font-semibold text-success-400">
+                  {formatEarning(earning)}
+                </div>
               </div>
             ))}
           </div>
@@ -977,12 +989,13 @@ export default function Referral() {
             <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-error-500/10 text-error-400">
               <ExclamationIcon className="h-8 w-8" />
             </div>
-            <div className="flex-1">
+            {/* Ссылка в комментарии администратора распирала колонку — обрезался заголовок. */}
+            <div className="min-w-0 flex-1">
               <h2 className="text-lg font-semibold text-dark-100">
                 {t('referral.partner.rejected')}
               </h2>
               {partnerStatus?.latest_application?.admin_comment && (
-                <p className="mt-1 text-sm text-dark-300">
+                <p className="mt-1 text-sm text-dark-300 [overflow-wrap:anywhere]">
                   {partnerStatus.latest_application.admin_comment}
                 </p>
               )}
@@ -1107,14 +1120,18 @@ export default function Referral() {
                 {withdrawalHistory.items.map((item) => (
                   <div
                     key={item.id}
-                    className="flex items-center justify-between rounded-xl border border-dark-700/30 bg-dark-800/30 p-3"
+                    className="flex items-center justify-between gap-3 rounded-xl border border-dark-700/30 bg-dark-800/30 p-3"
                   >
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium text-dark-100">
+                      {/* Сумма и статус не рвутся внутри себя: не влезли рядом —
+                          статус уходит строкой ниже, а не «₽» и полбейджа. */}
+                      <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                        <span className="whitespace-nowrap font-medium text-dark-100">
                           {formatWithCurrency(item.amount_rubles)}
                         </span>
-                        <span className={getWithdrawalStatusBadge(item.status)}>
+                        <span
+                          className={`whitespace-nowrap ${getWithdrawalStatusBadge(item.status)}`}
+                        >
                           {t(`referral.withdrawal.status.${item.status}`, item.status)}
                         </span>
                       </div>
@@ -1130,14 +1147,16 @@ export default function Referral() {
                         )}
                       </div>
                       {item.admin_comment && (
-                        <div className="mt-1 text-xs text-dark-400">{item.admin_comment}</div>
+                        <div className="mt-1 text-xs text-dark-400 [overflow-wrap:anywhere]">
+                          {item.admin_comment}
+                        </div>
                       )}
                     </div>
                     {item.status === 'pending' && (
                       <button
                         onClick={() => cancelWithdrawalMutation.mutate(item.id)}
                         disabled={cancelWithdrawalMutation.isPending}
-                        className="ml-3 shrink-0 text-sm text-error-400 transition-colors hover:text-error-300"
+                        className="btn-secondary shrink-0 px-3 py-1.5 text-sm text-error-400 hover:text-error-300"
                       >
                         {t('common.cancel')}
                       </button>

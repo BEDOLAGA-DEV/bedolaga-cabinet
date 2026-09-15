@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import DOMPurify from 'dompurify';
 import { landingApi } from '../api/landings';
 import { pickBestValue } from '../utils/bestValue';
-import { BestValueBadge } from '../components/subscription/BestValueBadge';
+import { BestValueBadge, bestValueFrame } from '../components/subscription/BestValueBadge';
 import type {
   LandingConfig,
   LandingTariff,
@@ -274,20 +274,21 @@ function TariffCard({
       aria-checked={isSelected}
       onClick={onSelect}
       className={cn(
-        'relative flex w-full flex-col rounded-2xl border p-5 text-start transition-all duration-200',
-        isSelected
-          ? 'border-accent-500/50 bg-accent-500/5 ring-1 ring-accent-500/25'
-          : 'border-dark-800/50 bg-dark-900/50 hover:border-dark-700/50 hover:bg-dark-800/30',
+        'relative flex w-full flex-col rounded-2xl p-5 text-start transition-all duration-200',
+        tariff.is_highlighted
+          ? cn(bestValueFrame(isSelected), isSelected ? 'bg-accent-500/5' : 'bg-dark-900/50')
+          : isSelected
+            ? 'border border-accent-500/50 bg-accent-500/5 ring-1 ring-accent-500/25'
+            : 'border border-dark-800/50 bg-dark-900/50 hover:border-dark-700/50 hover:bg-dark-800/30',
       )}
     >
+      {/* Отметка оператора первой строкой, как в покупке и продлении: этот тариф
+          выбран сразу — подпись объясняет почему. */}
+      {tariff.is_highlighted && <BestValueBadge className="mb-3 self-start" />}
       {/* Header */}
-      <div className="mb-3 flex items-start justify-between">
-        <div>
-          <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-base font-semibold text-dark-50">{tariff.name}</h3>
-            {/* Отметка оператора: этот тариф выбран сразу — подпись объясняет почему. */}
-            {tariff.is_highlighted && <BestValueBadge />}
-          </div>
+      <div className="mb-3 flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <h3 className="text-base font-semibold text-dark-50">{tariff.name}</h3>
           {tariff.description && (
             <p className="mt-0.5 text-xs text-dark-400">{tariff.description}</p>
           )}

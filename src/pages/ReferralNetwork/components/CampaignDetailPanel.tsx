@@ -104,7 +104,8 @@ export function CampaignDetailPanel({ campaignId, className }: CampaignDetailPan
                     {t('admin.referralNetwork.campaign.totalRevenue')}
                   </span>
                   <span className="font-mono text-accent-400">
-                    {formatKopeksToRubles(campaign.total_revenue_kopeks)} ₽
+                    {formatKopeksToRubles(campaign.total_revenue_kopeks)}
+                    {'\u00A0'}₽
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
@@ -120,7 +121,8 @@ export function CampaignDetailPanel({ campaignId, className }: CampaignDetailPan
                     {t('admin.referralNetwork.campaign.avgCheck')}
                   </span>
                   <span className="font-mono text-dark-100">
-                    {formatKopeksToRubles(campaign.avg_check_kopeks)} ₽
+                    {formatKopeksToRubles(campaign.avg_check_kopeks)}
+                    {'\u00A0'}₽
                   </span>
                 </div>
               </div>

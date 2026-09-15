@@ -142,7 +142,7 @@ function periodTab(label: string): HTMLElement {
   return tab;
 }
 
-const SELECTED_TARIFF = 'border-accent-500/50';
+// Тариф выбран — по aria-checked, а не по классам оформления.
 const SELECTED_PERIOD = 'bg-accent-500';
 
 describe('лендинг: выбранные по умолчанию тариф и период', () => {
@@ -154,8 +154,8 @@ describe('лендинг: выбранные по умолчанию тариф 
     await renderLanding();
     await screen.findAllByText('Годовой');
 
-    expect(tariffCard('Годовой').className).toContain(SELECTED_TARIFF);
-    expect(tariffCard('Базовый').className).not.toContain(SELECTED_TARIFF);
+    expect(tariffCard('Годовой').getAttribute('aria-checked')).toBe('true');
+    expect(tariffCard('Базовый').getAttribute('aria-checked')).toBe('false');
   });
 
   it('выгодный период выбран сразу, а не самый короткий', async () => {
@@ -213,8 +213,8 @@ describe('лендинг: выбранные по умолчанию тариф 
 
     fireEvent.click(tariffCard('Базовый'));
 
-    expect(tariffCard('Базовый').className).toContain(SELECTED_TARIFF);
-    expect(tariffCard('Годовой').className).not.toContain(SELECTED_TARIFF);
+    expect(tariffCard('Базовый').getAttribute('aria-checked')).toBe('true');
+    expect(tariffCard('Годовой').getAttribute('aria-checked')).toBe('false');
   });
 
   it('без отметок остаётся первый тариф и самый короткий период', async () => {
@@ -225,7 +225,7 @@ describe('лендинг: выбранные по умолчанию тариф 
     await renderLanding();
     await screen.findAllByText('Базовый');
 
-    expect(tariffCard('Базовый').className).toContain(SELECTED_TARIFF);
+    expect(tariffCard('Базовый').getAttribute('aria-checked')).toBe('true');
     expect(periodTab('1 месяц').className).toContain(SELECTED_PERIOD);
   });
 });

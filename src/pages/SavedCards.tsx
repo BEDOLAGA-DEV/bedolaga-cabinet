@@ -237,12 +237,12 @@ export default function SavedCards() {
               {savedCards.map((card) => (
                 <div
                   key={card.id}
-                  className="flex items-center justify-between rounded-linear border border-dark-700/30 bg-dark-800/30 p-4"
+                  className="flex items-center justify-between gap-3 rounded-linear border border-dark-700/30 bg-dark-800/30 p-4"
                 >
-                  <div className="flex items-center gap-3">
-                    <span className="text-xl">💳</span>
-                    <div>
-                      <div className="font-medium text-dark-100">
+                  <div className="flex min-w-0 items-center gap-3">
+                    <span className="shrink-0 text-xl">💳</span>
+                    <div className="min-w-0">
+                      <div className="font-medium text-dark-100 [overflow-wrap:anywhere]">
                         {card.title ||
                           `${card.card_type || t('balance.savedCards.card')} ${card.card_last4 ? `*${card.card_last4}` : ''}`}
                       </div>
@@ -258,7 +258,7 @@ export default function SavedCards() {
                     size="sm"
                     onClick={() => handleDeleteCard(card.id)}
                     loading={deletingCardId === card.id}
-                    className="text-error-400 hover:text-error-300"
+                    className="shrink-0 text-error-400 hover:text-error-300"
                   >
                     {t('balance.savedCards.unlink')}
                   </Button>
@@ -297,11 +297,13 @@ export default function SavedCards() {
                 return (
                   <div
                     key={sub.id}
-                    className="flex items-center justify-between rounded-linear border border-dark-700/30 bg-dark-800/30 p-4"
+                    // Кнопка с длинной подписью на телефоне — под текстом: рядом
+                    // она сжималась в три строки и вываливалась из своей рамки.
+                    className="flex flex-col gap-3 rounded-linear border border-dark-700/30 bg-dark-800/30 p-4 sm:flex-row sm:items-center sm:justify-between"
                   >
-                    <div className="flex items-center gap-3">
-                      <span className="text-xl">🔁</span>
-                      <div>
+                    <div className="flex min-w-0 items-center gap-3">
+                      <span className="shrink-0 text-xl">🔁</span>
+                      <div className="min-w-0">
                         <div className="font-medium text-dark-100">
                           {sub.tariff_name || `#${sub.id}`}
                         </div>
@@ -325,7 +327,7 @@ export default function SavedCards() {
                       size="sm"
                       onClick={() => handleUnlinkSbp(sub.id)}
                       loading={unlinkingSubId === sub.id}
-                      className="text-error-400 hover:text-error-300"
+                      className="shrink-0 self-start whitespace-nowrap text-error-400 hover:text-error-300 sm:self-auto"
                     >
                       {t('balance.savedCards.sbpUnlink')}
                     </Button>

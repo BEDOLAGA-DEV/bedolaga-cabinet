@@ -193,8 +193,9 @@ export function BrandingTab({ accentColor = '#3b82f6' }: BrandingTabProps) {
             </div>
           </div>
 
-          {/* Name */}
-          <div className="flex-1">
+          {/* Name. min-w-0: без него колонка росла по полю ввода, и кнопки ✓/✕
+              уезжали за экран. */}
+          <div className="min-w-0 flex-1">
             <label className="mb-2 block text-sm font-medium text-dark-300">
               {t('admin.settings.projectName')}
             </label>
@@ -204,19 +205,19 @@ export function BrandingTab({ accentColor = '#3b82f6' }: BrandingTabProps) {
                   type="text"
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
-                  className="flex-1 rounded-xl border border-dark-600 bg-dark-700 px-4 py-2 text-dark-100 focus:border-accent-500 focus:outline-none"
+                  className="min-w-0 flex-1 rounded-xl border border-dark-600 bg-dark-700 px-4 py-2 text-dark-100 focus:border-accent-500 focus:outline-none"
                   maxLength={50}
                 />
                 <button
                   onClick={() => updateBrandingMutation.mutate(newName)}
                   disabled={updateBrandingMutation.isPending}
-                  className="rounded-xl bg-accent-500 px-4 py-2 text-on-accent transition-colors hover:bg-accent-600 disabled:opacity-50"
+                  className="shrink-0 rounded-xl bg-accent-500 px-4 py-2 text-on-accent transition-colors hover:bg-accent-600 disabled:opacity-50"
                 >
                   <CheckIcon />
                 </button>
                 <button
                   onClick={() => setEditingName(false)}
-                  className="rounded-xl bg-dark-700 px-4 py-2 text-dark-300 transition-colors hover:bg-dark-600"
+                  className="shrink-0 rounded-xl bg-dark-700 px-4 py-2 text-dark-300 transition-colors hover:bg-dark-600"
                 >
                   <CloseIcon />
                 </button>

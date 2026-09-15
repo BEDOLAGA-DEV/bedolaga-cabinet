@@ -119,7 +119,7 @@ describe('ServerDetails', () => {
     expect(screen.getByText('не ловит')).toBeTruthy();
     await waitFor(() =>
       expect(
-        screen.getByRole('button', { name: /Проверить этот сервер · ◈ 640 cred/ }),
+        screen.getByRole('button', { name: /Проверить этот сервер · ◈\u00A0640\u00A0cred/ }),
       ).toBeTruthy(),
     );
     expect(reachabilityApi.previewBatch).toHaveBeenCalledWith(
@@ -129,7 +129,7 @@ describe('ServerDetails', () => {
 
   it('кнопка с ценой ведёт в «Что проверить?», сама ничего не запускает', async () => {
     const onCheck = renderDetails();
-    const button = await screen.findByRole('button', { name: /◈ 640 cred/ });
+    const button = await screen.findByRole('button', { name: /◈\u00A0640\u00A0cred/ });
     fireEvent.click(button);
     expect(onCheck).toHaveBeenCalled();
     expect(reachabilityApi.createBatch).not.toHaveBeenCalled();

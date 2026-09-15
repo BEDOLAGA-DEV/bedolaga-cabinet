@@ -112,11 +112,11 @@ export default function AdminBroadcastDetail() {
   return (
     <div className="animate-fade-in space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex min-w-0 flex-1 basis-48 items-center gap-3">
           <AdminBackButton to="/admin/broadcasts" />
-          <div>
-            <div className="flex items-center gap-3">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
               <h1 className="text-xl font-bold text-dark-100">
                 {t('admin.broadcasts.detail')} #{broadcast.id}
               </h1>
@@ -202,14 +202,16 @@ export default function AdminBroadcastDetail() {
       )}
 
       {/* Admin info */}
-      <div className="flex justify-between rounded-xl border border-dark-700 bg-dark-800/50 p-4 text-sm">
-        <span className="text-dark-400">
+      <div className="flex flex-wrap justify-between gap-x-4 gap-y-1 rounded-xl border border-dark-700 bg-dark-800/50 p-4 text-sm">
+        <span className="min-w-0 text-dark-400 [overflow-wrap:anywhere]">
           {t('admin.broadcasts.createdBy')}:{' '}
           <span className="text-dark-100">
             {broadcast.admin_name || t('admin.broadcasts.unknownAdmin')}
           </span>
         </span>
-        <span className="text-dark-400">{new Date(broadcast.created_at).toLocaleString()}</span>
+        <span className="whitespace-nowrap text-dark-400">
+          {new Date(broadcast.created_at).toLocaleString()}
+        </span>
       </div>
 
       {/* Stop button */}

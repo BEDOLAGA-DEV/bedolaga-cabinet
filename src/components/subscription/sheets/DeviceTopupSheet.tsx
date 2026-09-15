@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { useCurrency } from '../../../hooks/useCurrency';
 import { deviceUnavailableText } from '../deviceReasons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { subscriptionApi } from '../../../api/subscription';
@@ -42,9 +43,12 @@ export function DeviceTopupSheet({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
+  // Общий формат суммы, как на соседних экранах: «1 490,50 ₽», а не «1490.50 ₽»;
+  // знак валюты приклеен неразрывным пробелом.
+  const { formatAmount, currencySymbol } = useCurrency();
   const formatPrice = (kopeks: number) => {
     const rubles = kopeks / 100;
-    return rubles % 1 === 0 ? `${rubles} ₽` : `${rubles.toFixed(2)} ₽`;
+    return `${formatAmount(rubles, rubles % 1 === 0 ? 0 : 2)}\u00A0${currencySymbol}`;
   };
 
   const { data: devicePriceData } = useQuery({
@@ -161,7 +165,7 @@ export function DeviceTopupSheet({
           {devicePriceData?.available && devicePriceData.price_per_device_label && (
             <div className="text-center">
               <div className="mb-2 text-sm text-dark-400">
-                {devicePriceData.discount_percent &&
+                {devicePriceData.discount_percent != null &&
                 devicePriceData.discount_percent > 0 &&
                 devicePriceData.original_price_per_device_kopeks ? (
                   <span>
@@ -176,7 +180,7 @@ export function DeviceTopupSheet({
                 /{t('subscription.perDevice').replace('/ ', '')} (
                 {t('subscription.days', { count: devicePriceData.days_left })})
               </div>
-              {devicePriceData.discount_percent && devicePriceData.discount_percent > 0 && (
+              {devicePriceData.discount_percent != null && devicePriceData.discount_percent > 0 && (
                 <div className="mb-2">
                   <span className="inline-block rounded-full bg-success-500/20 px-2.5 py-0.5 text-sm font-medium text-success-400">
                     -{devicePriceData.discount_percent}%
@@ -189,7 +193,7 @@ export function DeviceTopupSheet({
                 </div>
               ) : (
                 <div className="text-2xl font-bold text-accent-400">
-                  {devicePriceData.discount_percent &&
+                  {devicePriceData.discount_percent != null &&
                     devicePriceData.discount_percent > 0 &&
                     devicePriceData.base_total_price_kopeks && (
                       <span className="mr-2 text-lg text-dark-500 line-through">
