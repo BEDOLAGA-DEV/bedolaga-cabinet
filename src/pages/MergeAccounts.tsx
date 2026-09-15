@@ -167,8 +167,12 @@ function AccountCard({ account, label, isSelected, onSelect, showRadio }: Accoun
               </p>
             )}
             <p className="text-sm text-dark-400">
-              {t('merge.traffic')}: {account.subscription.traffic_limit_gb} GB, {t('merge.devices')}
-              : {account.subscription.device_limit}
+              {/* 0 ГБ у панели и бота — безлимит, а не «нет трафика». */}
+              {t('merge.traffic')}:{' '}
+              {account.subscription.traffic_limit_gb > 0
+                ? `${account.subscription.traffic_limit_gb} ${t('common.units.gb')}`
+                : t('subscription.unlimited')}
+              , {t('merge.devices')}: {account.subscription.device_limit}
             </p>
           </div>
         ) : (
@@ -210,7 +214,7 @@ function LoadingSkeleton() {
   return (
     <SkeletonGroup>
       <motion.div
-        className="space-y-6"
+        className="mx-auto max-w-lg space-y-6 px-4 py-6"
         variants={staggerContainer}
         initial="initial"
         animate="animate"
@@ -462,8 +466,10 @@ export default function MergeAccounts() {
   }
 
   return (
+    // Экран живёт вне общей обвязки кабинета — отступы от краёв задаёт сам,
+    // иначе карточки и кнопка «Объединить» стояли вплотную к краю экрана.
     <motion.div
-      className="mx-auto max-w-lg space-y-6"
+      className="mx-auto max-w-lg space-y-6 px-4 py-6"
       variants={staggerContainer}
       initial="initial"
       animate="animate"

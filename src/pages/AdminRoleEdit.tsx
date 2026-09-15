@@ -166,12 +166,12 @@ function PermissionMatrix({
                 <button
                   type="button"
                   onClick={() => toggleExpand(section.section)}
-                  className="flex flex-1 items-center justify-between"
+                  className="flex min-w-0 flex-1 items-center justify-between gap-3 text-left"
                 >
-                  <span className="text-sm font-medium text-dark-200">
+                  <span className="min-w-0 text-sm font-medium text-dark-200 [overflow-wrap:anywhere]">
                     {t(`admin.roles.form.permissionSections.${section.section}`, section.section)}
                   </span>
-                  <div className="flex items-center gap-2">
+                  <div className="flex shrink-0 items-center gap-2">
                     <span className="text-xs text-dark-500">
                       {section.actions.filter((a) => isPermSelected(section.section, a)).length}/
                       {section.actions.length}
@@ -429,7 +429,7 @@ export default function AdminRoleEdit() {
                   onChange={(e) =>
                     setFormData((prev) => ({ ...prev, level: Number(e.target.value) }))
                   }
-                  className="flex-1 accent-accent-500"
+                  className="min-w-0 flex-1 accent-accent-500"
                 />
                 <input
                   type="number"

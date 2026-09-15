@@ -114,8 +114,10 @@ export default function Polls() {
       {/* Poll Modal */}
       {selectedPoll && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          {/* Окно поверх списка — сплошное, подложка размыта: сквозь
+              полупрозрачную карточку текст страницы ложился на текст вопроса. */}
           <div
-            className="absolute inset-0 bg-dark-950/60"
+            className="absolute inset-0 bg-dark-950/70 backdrop-blur-sm"
             onClick={handleClosePoll}
             aria-hidden="true"
           />
@@ -125,7 +127,7 @@ export default function Polls() {
             aria-modal="true"
             aria-labelledby="poll-dialog-title"
             tabIndex={-1}
-            className="card relative max-h-[80vh] w-full max-w-lg overflow-y-auto"
+            className="card relative max-h-[80vh] w-full max-w-lg overflow-y-auto bg-dark-900"
           >
             <div className="mb-4 flex items-center justify-between">
               <h2 id="poll-dialog-title" className="text-xl font-bold">
@@ -203,14 +205,16 @@ export default function Polls() {
 
       {/* Polls List */}
       {polls && polls.length > 0 ? (
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {polls.map((poll) => (
             <div key={poll.id} className="card">
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0 flex-1">
                   <h3 className="break-words text-lg font-semibold">{poll.title}</h3>
                   {poll.description && (
-                    <p className="mt-1 text-sm text-dark-400">{poll.description}</p>
+                    <p className="mt-1 text-sm text-dark-400 [overflow-wrap:anywhere]">
+                      {poll.description}
+                    </p>
                   )}
                   <div className="mt-2 flex items-center gap-4 text-sm text-dark-400">
                     <span>

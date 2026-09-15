@@ -28,7 +28,7 @@ function PendingState() {
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="flex flex-col items-center gap-6 text-center"
+      className="flex flex-col items-center gap-6 text-center [overflow-wrap:anywhere]"
     >
       <Spinner className="h-16 w-16 border-[3px]" />
       <div>
@@ -99,7 +99,7 @@ function CodeOnlySuccessState({
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="flex flex-col items-center gap-6 text-center"
+      className="flex flex-col items-center gap-6 text-center [overflow-wrap:anywhere]"
     >
       <AnimatedCheckmark />
 
@@ -212,7 +212,7 @@ function DeliveredState({
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="flex flex-col items-center gap-6 text-center"
+      className="flex flex-col items-center gap-6 text-center [overflow-wrap:anywhere]"
     >
       <AnimatedCheckmark />
 
@@ -271,7 +271,7 @@ function PendingActivationState({
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="flex flex-col items-center gap-6 text-center"
+      className="flex flex-col items-center gap-6 text-center [overflow-wrap:anywhere]"
     >
       {/* Info icon */}
       <div className="flex h-20 w-20 items-center justify-center rounded-full bg-warning-500/10">
@@ -328,7 +328,7 @@ function FailedState() {
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="flex flex-col items-center gap-6 text-center"
+      className="flex flex-col items-center gap-6 text-center [overflow-wrap:anywhere]"
     >
       <AnimatedCrossmark />
 
@@ -360,7 +360,7 @@ function PollErrorState() {
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="flex flex-col items-center gap-6 text-center"
+      className="flex flex-col items-center gap-6 text-center [overflow-wrap:anywhere]"
     >
       <div className="flex h-20 w-20 items-center justify-center rounded-full bg-warning-500/10">
         <ExclamationIcon className="h-10 w-10 text-warning-400" />
@@ -396,7 +396,7 @@ function PollTimedOutState({ onRetry }: { onRetry: () => void }) {
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="flex flex-col items-center gap-6 text-center"
+      className="flex flex-col items-center gap-6 text-center [overflow-wrap:anywhere]"
     >
       <div className="flex h-20 w-20 items-center justify-center rounded-full bg-dark-800/50">
         <ClockIcon className="h-10 w-10 text-dark-400" />
@@ -431,7 +431,7 @@ function NoTokenState() {
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="flex flex-col items-center gap-6 text-center"
+      className="flex flex-col items-center gap-6 text-center [overflow-wrap:anywhere]"
     >
       <div className="flex h-20 w-20 items-center justify-center rounded-full bg-dark-800/50">
         <ExclamationIcon className="h-10 w-10 text-dark-400" />

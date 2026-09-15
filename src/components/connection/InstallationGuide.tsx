@@ -215,25 +215,27 @@ export default function InstallationGuide({
 
   return (
     <div className="space-y-6 pb-6">
-      {/* Header + platform dropdown */}
-      <div className="flex items-center gap-3">
+      {/* Header + platform dropdown. На телефоне список платформ — своей строкой
+          во всю ширину: в одном ряду длинное название платформы распирало
+          страницу вбок, а кнопки «назад» и QR сжимались с 40 до 22 px. */}
+      <div className="flex flex-wrap items-center gap-3">
         {!isTelegramWebApp && (
           <button
             onClick={onGoBack}
             aria-label={t('common.back', 'Back')}
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
           >
             <BackIcon className="h-6 w-6" />
           </button>
         )}
-        <h2 className="flex-1 text-lg font-bold text-dark-100">
+        <h2 className="min-w-0 flex-1 text-lg font-bold text-dark-100">
           {getBaseTranslation('installationGuideHeader', 'subscription.connection.title')}
         </h2>
         {appConfig.subscriptionUrl && onOpenQR && (
           <button
             onClick={() => onOpenQR()}
             aria-label={t('subscription.connection.openQr', 'Open QR code')}
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 text-dark-200 transition-colors hover:border-dark-600"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 text-dark-200 transition-colors hover:border-dark-600"
           >
             <svg
               className="h-5 w-5"
@@ -256,7 +258,7 @@ export default function InstallationGuide({
           </button>
         )}
         {availablePlatforms.length > 1 && (
-          <div className="relative flex items-center">
+          <div className="relative flex w-full items-center sm:w-auto sm:max-w-[45%]">
             {currentPlatformSvg && (
               <div
                 className="pointer-events-none absolute left-3 z-10 h-5 w-5 text-dark-400 [&>svg]:h-full [&>svg]:w-full"
@@ -279,7 +281,7 @@ export default function InstallationGuide({
                   if (app) setSelectedApp(app);
                 }
               }}
-              className={`appearance-none rounded-xl border py-2 pr-8 text-sm font-medium outline-none transition-colors ${
+              className={`w-full min-w-0 appearance-none truncate rounded-xl border py-2 pr-8 text-sm font-medium outline-none transition-colors ${
                 isLight
                   ? 'border-dark-700/60 bg-white/80 text-dark-200 shadow-sm hover:border-dark-600'
                   : 'border-dark-700 bg-dark-800 text-dark-200 hover:border-dark-600'

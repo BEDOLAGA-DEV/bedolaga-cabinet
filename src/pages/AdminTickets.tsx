@@ -289,7 +289,7 @@ export default function AdminTickets() {
           {!capabilities.hasBackButton && (
             <button
               onClick={() => navigate('/admin')}
-              className="flex h-10 w-10 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
             >
               <BackIcon />
             </button>
@@ -470,18 +470,20 @@ export default function AdminTickets() {
             <div className="flex h-full flex-col">
               {/* Header */}
               <div className="mb-4 border-b border-dark-800/50 pb-4">
-                <div className="mb-3 flex items-start justify-between">
-                  <h3 className="text-lg font-semibold text-dark-100">
+                <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
+                  <h3 className="min-w-0 flex-1 basis-48 text-lg font-semibold text-dark-100 [overflow-wrap:anywhere]">
                     #{selectedTicket.id} {selectedTicket.title}
                   </h3>
-                  <div className="flex gap-2">
+                  <div className="flex shrink-0 gap-2">
                     <span className={getStatusBadge(selectedTicket.status)}>
                       {t(
                         `admin.tickets.status${selectedTicket.status.charAt(0).toUpperCase() + selectedTicket.status.slice(1)}`,
                       )}
                     </span>
                     <span className={getPriorityBadge(selectedTicket.priority)}>
-                      {selectedTicket.priority}
+                      {t(`admin.tickets.priorities.${selectedTicket.priority}`, {
+                        defaultValue: selectedTicket.priority,
+                      })}
                     </span>
                   </div>
                 </div>
@@ -632,7 +634,7 @@ export default function AdminTickets() {
                     </div>
                   )}
 
-                  <div className="mt-3 flex items-center justify-between">
+                  <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
                     <button
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
