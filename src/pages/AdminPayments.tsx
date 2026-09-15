@@ -432,7 +432,9 @@ export default function AdminPayments() {
                           isCancelled ? 'text-dark-500 line-through opacity-60' : 'text-dark-50'
                         }`}
                       >
-                        {formatAmount(payment.amount_rubles)} {currencySymbol}
+                        {formatAmount(payment.amount_rubles)}
+                        {'\u00A0'}
+                        {currencySymbol}
                       </div>
 
                       {/* Invoice ID */}
