@@ -181,7 +181,9 @@ function RevenueChart({ data }: { data: { date: string; amount_rubles: number }[
                 {dayName}, {dayNum}
               </span>
               <span className="text-sm font-semibold text-dark-100">
-                {formatAmount(item.amount_rubles)} {currencySymbol}
+                {formatAmount(item.amount_rubles)}
+                {'\u00A0'}
+                {currencySymbol}
               </span>
             </div>
             <div className="h-3 overflow-hidden rounded-full bg-dark-700/50">
@@ -333,13 +335,13 @@ export default function AdminDashboard() {
         />
         <StatCard
           label={t('adminDashboard.stats.incomeToday')}
-          value={`${formatAmount(stats?.financial.income_today_rubles || 0)} ${currencySymbol}`}
+          value={`${formatAmount(stats?.financial.income_today_rubles || 0)}\u00A0${currencySymbol}`}
           icon={<WalletIcon className="h-5 w-5" />}
           tone="warning"
         />
         <StatCard
           label={t('adminDashboard.stats.incomeMonth')}
-          value={`${formatAmount(stats?.financial.income_month_rubles || 0)} ${currencySymbol}`}
+          value={`${formatAmount(stats?.financial.income_month_rubles || 0)}\u00A0${currencySymbol}`}
           icon={<ChartBarIcon className="h-5 w-5" />}
           tone="accent"
         />
@@ -431,13 +433,13 @@ export default function AdminDashboard() {
           <div className="mt-4 grid grid-cols-2 gap-4 border-t border-dark-700 pt-4">
             <StatCard
               label={t('adminDashboard.stats.incomeTotal')}
-              value={`${formatAmount(stats?.financial.income_total_rubles || 0)} ${currencySymbol}`}
+              value={`${formatAmount(stats?.financial.income_total_rubles || 0)}\u00A0${currencySymbol}`}
               icon={<BanknotesIcon className="h-5 w-5" />}
               tone="neutral"
             />
             <StatCard
               label={t('adminDashboard.stats.subscriptionIncome')}
-              value={`${formatAmount(stats?.financial.subscription_income_rubles || 0)} ${currencySymbol}`}
+              value={`${formatAmount(stats?.financial.subscription_income_rubles || 0)}\u00A0${currencySymbol}`}
               icon={<SparklesIcon className="h-5 w-5" />}
               tone="accent"
             />
@@ -676,7 +678,9 @@ export default function AdminDashboard() {
                       {referrersTab === 'earnings' ? (
                         <>
                           <div className="text-xs font-semibold text-success-400 sm:text-sm">
-                            {formatAmount(ref.earnings_total_kopeks / 100)} {currencySymbol}
+                            {formatAmount(ref.earnings_total_kopeks / 100)}
+                            {'\u00A0'}
+                            {currencySymbol}
                           </div>
                           <div className="text-[10px] text-dark-500 sm:text-xs">
                             {ref.invited_count} {t('adminDashboard.topReferrers.invites')}
@@ -688,7 +692,9 @@ export default function AdminDashboard() {
                             {ref.invited_count} {t('adminDashboard.topReferrers.people')}
                           </div>
                           <div className="text-[10px] text-dark-500 sm:text-xs">
-                            {formatAmount(ref.earnings_total_kopeks / 100)} {currencySymbol}
+                            {formatAmount(ref.earnings_total_kopeks / 100)}
+                            {'\u00A0'}
+                            {currencySymbol}
                           </div>
                         </>
                       )}
@@ -706,7 +712,7 @@ export default function AdminDashboard() {
                     ? referrers.by_earnings
                     : referrers.by_invited
                   ).reduce((sum, r) => sum + r.earnings_today_kopeks, 0) / 100,
-                )} ${currencySymbol}`}
+                )}\u00A0${currencySymbol}`}
                 icon={<ClockIcon className="h-5 w-5" />}
                 tone="neutral"
               />
@@ -717,7 +723,7 @@ export default function AdminDashboard() {
                     ? referrers.by_earnings
                     : referrers.by_invited
                   ).reduce((sum, r) => sum + r.earnings_week_kopeks, 0) / 100,
-                )} ${currencySymbol}`}
+                )}\u00A0${currencySymbol}`}
                 icon={<CalendarBlankIcon className="h-5 w-5" />}
                 tone="neutral"
               />
@@ -728,7 +734,7 @@ export default function AdminDashboard() {
                     ? referrers.by_earnings
                     : referrers.by_invited
                   ).reduce((sum, r) => sum + r.earnings_month_kopeks, 0) / 100,
-                )} ${currencySymbol}`}
+                )}\u00A0${currencySymbol}`}
                 icon={<CalendarIcon className="h-5 w-5" />}
                 tone="neutral"
               />
@@ -775,7 +781,9 @@ export default function AdminDashboard() {
                   </div>
                   <div className="flex-shrink-0 text-right">
                     <div className="text-xs font-semibold text-warning-400 sm:text-sm">
-                      {formatAmount(campaign.total_revenue_kopeks / 100)} {currencySymbol}
+                      {formatAmount(campaign.total_revenue_kopeks / 100)}
+                      {'\u00A0'}
+                      {currencySymbol}
                     </div>
                     <div className="text-[10px] text-dark-500 sm:text-xs">
                       {campaign.registrations} · {campaign.conversion_rate.toFixed(0)}%
@@ -791,7 +799,9 @@ export default function AdminDashboard() {
                   {t('adminDashboard.topCampaigns.total')}
                 </span>
                 <span className="text-sm font-bold text-warning-400 sm:text-base">
-                  {formatAmount(campaigns.total_revenue_kopeks / 100)} {currencySymbol}
+                  {formatAmount(campaigns.total_revenue_kopeks / 100)}
+                  {'\u00A0'}
+                  {currencySymbol}
                 </span>
               </div>
             </div>
@@ -813,13 +823,13 @@ export default function AdminDashboard() {
                 </h2>
                 <p className="text-xs text-dark-400 sm:text-sm">
                   {t('adminDashboard.recentPayments.today', {
-                    amount: `${formatAmount(payments.total_today_kopeks / 100)} ${currencySymbol}`,
+                    amount: `${formatAmount(payments.total_today_kopeks / 100)}\u00A0${currencySymbol}`,
                   })}
                   <span className="hidden sm:inline">
                     {' '}
                     ·{' '}
                     {t('adminDashboard.recentPayments.week', {
-                      amount: `${formatAmount(payments.total_week_kopeks / 100)} ${currencySymbol}`,
+                      amount: `${formatAmount(payments.total_week_kopeks / 100)}\u00A0${currencySymbol}`,
                     })}
                   </span>
                 </p>
@@ -883,7 +893,9 @@ export default function AdminDashboard() {
                     </td>
                     <td className="px-2 py-3 text-right">
                       <span className="font-semibold text-dark-100">
-                        {formatAmount(payment.amount_rubles)} {currencySymbol}
+                        {formatAmount(payment.amount_rubles)}
+                        {'\u00A0'}
+                        {currencySymbol}
                       </span>
                     </td>
                     <td className="px-2 py-3">
@@ -928,7 +940,9 @@ export default function AdminDashboard() {
                     </button>
                   </div>
                   <span className="ml-2 whitespace-nowrap text-sm font-semibold text-dark-100">
-                    {formatAmount(payment.amount_rubles)} {currencySymbol}
+                    {formatAmount(payment.amount_rubles)}
+                    {'\u00A0'}
+                    {currencySymbol}
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-xs text-dark-500">

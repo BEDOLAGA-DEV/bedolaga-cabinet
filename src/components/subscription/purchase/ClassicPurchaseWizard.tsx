@@ -61,7 +61,7 @@ export function ClassicPurchaseWizard({
   const formatPrice = (kopeks: number) =>
     kopeks === 0
       ? t('subscription.free', 'Бесплатно')
-      : `${formatAmount(kopeks / 100)} ${currencySymbol}`;
+      : `${formatAmount(kopeks / 100)}\u00A0${currencySymbol}`;
 
   // Wizard state
   const [currentStep, setCurrentStep] = useState<PurchaseStep>('period');
@@ -284,16 +284,22 @@ export function ClassicPurchaseWizard({
                       selectedPeriod?.id === period.id ? 'bento-card-glow border-accent-500' : ''
                     }`}
                   >
-                    {promoPeriod.percent && promoPeriod.percent > 0 && (
-                      <div
-                        className={`absolute right-2 top-2 z-10 rounded-full px-2 py-0.5 text-xs font-medium text-white shadow-sm ${
-                          promoPeriod.isPromoGroup ? 'bg-success-500' : 'bg-warning-500'
-                        }`}
-                      >
-                        -{promoPeriod.percent}%
+                    {/* Скидка — в строке с названием, а не поверх него: значок в углу
+                        наезжал на «3 месяца». */}
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0 text-lg font-semibold text-dark-100">
+                        {period.label}
                       </div>
-                    )}
-                    <div className="text-lg font-semibold text-dark-100">{period.label}</div>
+                      {promoPeriod.percent && promoPeriod.percent > 0 && (
+                        <div
+                          className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium text-white shadow-sm ${
+                            promoPeriod.isPromoGroup ? 'bg-success-500' : 'bg-warning-500'
+                          }`}
+                        >
+                          -{promoPeriod.percent}%
+                        </div>
+                      )}
+                    </div>
                     <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
                       <span className="font-medium text-accent-400">
                         {formatPrice(promoPeriod.price)}
@@ -328,16 +334,22 @@ export function ClassicPurchaseWizard({
                       selectedTraffic === option.value ? 'bento-card-glow border-accent-500' : ''
                     } ${!option.is_available ? 'cursor-not-allowed opacity-50' : ''}`}
                   >
-                    {promoTraffic.percent && promoTraffic.percent > 0 && (
-                      <div
-                        className={`absolute right-2 top-2 z-10 rounded-full px-2 py-0.5 text-xs font-medium text-white shadow-sm ${
-                          promoTraffic.isPromoGroup ? 'bg-success-500' : 'bg-warning-500'
-                        }`}
-                      >
-                        -{promoTraffic.percent}%
+                    {/* Скидка — в строке с названием, а не поверх него: значок в углу
+                        наезжал на «3 месяца». */}
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0 text-lg font-semibold text-dark-100">
+                        {option.label}
                       </div>
-                    )}
-                    <div className="text-lg font-semibold text-dark-100">{option.label}</div>
+                      {promoTraffic.percent && promoTraffic.percent > 0 && (
+                        <div
+                          className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium text-white shadow-sm ${
+                            promoTraffic.isPromoGroup ? 'bg-success-500' : 'bg-warning-500'
+                          }`}
+                        >
+                          -{promoTraffic.percent}%
+                        </div>
+                      )}
+                    </div>
                     <div className="mt-1 flex flex-wrap items-center justify-center gap-x-2 gap-y-1">
                       <span className="text-accent-400">{formatPrice(promoTraffic.price)}</span>
                       {promoTraffic.original && promoTraffic.original > promoTraffic.price && (
@@ -384,7 +396,9 @@ export function ClassicPurchaseWizard({
                     >
                       {promoServer.percent && promoServer.percent > 0 ? (
                         <div
-                          className={`absolute right-2 top-2 z-10 rounded-full px-2 py-0.5 text-xs font-medium text-white shadow-sm ${
+                          // За угол, как у периодов в покупке тарифа: внутри угла
+                          // значок наезжал на название сервера.
+                          className={`absolute -right-2 -top-2 z-10 rounded-full px-2 py-0.5 text-xs font-medium text-white shadow-sm ${
                             promoServer.isPromoGroup ? 'bg-success-500' : 'bg-warning-500'
                           }`}
                         >
@@ -511,12 +525,12 @@ export function ClassicPurchaseWizard({
                     );
 
                     return (
-                      <div className="flex items-center justify-between border-t border-dark-700/50 pt-4">
+                      <div className="flex items-center justify-between gap-3 border-t border-dark-700/50 pt-4">
                         <span className="text-lg font-semibold text-dark-100">
                           {t('subscription.total')}
                         </span>
                         <div className="text-right">
-                          <div className="text-2xl font-bold text-accent-400">
+                          <div className="whitespace-nowrap text-2xl font-bold text-accent-400">
                             {formatPrice(promoTotal.price)}
                           </div>
                           {promoTotal.original && promoTotal.original > promoTotal.price && (

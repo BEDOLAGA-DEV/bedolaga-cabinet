@@ -65,6 +65,9 @@
       "yesterday": "вчера, {{time}}"
     }
   },
+  "navShort": {
+    "wheel": "Колесо"
+  },
   "nav": {
     "dashboard": "Главная",
     "subscription": "Подписка",
@@ -394,6 +397,9 @@
     "expiresAt": "Действует до",
     "daysLeft": "Осталось дней",
     "devices": "Устройства",
+    "devicesWord_one": "устройство",
+    "devicesWord_few": "устройства",
+    "devicesWord_many": "устройств",
     "devices_one": "{{count}} устройство",
     "devices_few": "{{count}} устройства",
     "devices_many": "{{count}} устройств",
@@ -807,8 +813,12 @@
       "connectedDevices": "Подключённые устройства",
       "disconnect": "Отключить",
       "addSlots": "Добавить слоты",
-      "limitExplained": "Тариф «{{name}}» даёт {{count}} слота, и все заняты. Освободите слот или добавьте ещё.",
-      "limitExplainedNoTopup": "Тариф «{{name}}» даёт {{count}} слота, и все заняты. Освободите занятый слот.",
+      "limitExplained_one": "Тариф «{{name}}» даёт {{count}} слот, и он занят. Освободите его или добавьте ещё.",
+      "limitExplained_few": "Тариф «{{name}}» даёт {{count}} слота, и все заняты. Освободите слот или добавьте ещё.",
+      "limitExplained_many": "Тариф «{{name}}» даёт {{count}} слотов, и все заняты. Освободите слот или добавьте ещё.",
+      "limitExplainedNoTopup_one": "Тариф «{{name}}» даёт {{count}} слот, и он занят. Освободите его.",
+      "limitExplainedNoTopup_few": "Тариф «{{name}}» даёт {{count}} слота, и все заняты. Освободите занятый слот.",
+      "limitExplainedNoTopup_many": "Тариф «{{name}}» даёт {{count}} слотов, и все заняты. Освободите занятый слот.",
       "noTopupHint": "На тестовой подписке слоты докупить нельзя — освободите занятый или оформите платный тариф."
     },
     "delete": "Удалить",
@@ -929,6 +939,11 @@
     "withdrawal": "Списание",
     "subscriptionPayment": "Оплата подписки",
     "referralReward": "Реферальный бонус",
+    "refund": "Возврат",
+    "failedRefund": "Неудачный возврат",
+    "pollReward": "Награда за опрос",
+    "giftPayment": "Оплата подарка",
+    "otherOperation": "Операция",
     "minAmount": "Мин.",
     "maxAmount": "Макс.",
     "notAvailable": "Недоступно",
@@ -1247,6 +1262,7 @@
       "closed": "Закрыт"
     },
     "attachImage": "Прикрепить изображение",
+    "downloadFile": "Скачать файл",
     "invalidFileType": "Неверный тип файла. Используйте JPEG, PNG, GIF или WebP.",
     "fileTooLarge": "Файл слишком большой. Максимальный размер 10МБ.",
     "uploadFailed": "Не удалось загрузить изображение",

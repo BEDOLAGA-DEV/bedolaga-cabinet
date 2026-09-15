@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { useCurrency } from '../../../hooks/useCurrency';
 import { deviceUnavailableText } from '../deviceReasons';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { subscriptionApi } from '../../../api/subscription';
@@ -42,9 +43,12 @@ export function DeviceTopupSheet({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
+  // Общий формат суммы, как на соседних экранах: «1 490,50 ₽», а не «1490.50 ₽»;
+  // знак валюты приклеен неразрывным пробелом.
+  const { formatAmount, currencySymbol } = useCurrency();
   const formatPrice = (kopeks: number) => {
     const rubles = kopeks / 100;
-    return rubles % 1 === 0 ? `${rubles} ₽` : `${rubles.toFixed(2)} ₽`;
+    return `${formatAmount(rubles, rubles % 1 === 0 ? 0 : 2)}\u00A0${currencySymbol}`;
   };
 
   const { data: devicePriceData } = useQuery({

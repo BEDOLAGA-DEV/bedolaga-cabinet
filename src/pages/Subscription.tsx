@@ -222,7 +222,7 @@ export default function Subscription() {
   const formatPrice = (kopeks: number) =>
     kopeks === 0
       ? t('subscription.free', 'Бесплатно')
-      : `${formatAmount(kopeks / 100)} ${currencySymbol}`;
+      : `${formatAmount(kopeks / 100)}\u00A0${currencySymbol}`;
 
   // Device/traffic topup state
   const [showDeviceTopup, setShowDeviceTopup] = useState(false);
@@ -924,8 +924,12 @@ export default function Subscription() {
                           >
                             {subscription.device_limit === 0 ? '∞' : subscription.device_limit}
                           </span>
+                          {/* Слово по числу: было «1 Устройства». Безлимит — «∞ устройств». */}
                           <span className="text-[11px] text-dark-400">
-                            {t('subscription.devices')}
+                            {t('subscription.devicesWord', {
+                              count:
+                                subscription.device_limit === 0 ? 5 : subscription.device_limit,
+                            })}
                           </span>
                         </div>
                       </div>
@@ -1027,7 +1031,16 @@ export default function Subscription() {
                       ∞
                     </div>
                   ) : subscription.device_limit <= 10 ? (
-                    <div className="flex flex-shrink-0 gap-1.5" aria-hidden="true">
+                    // Больше пяти точек — в два ряда по пять: десять в ряд занимали
+                    // 124 px, и текст кнопки на телефоне шёл в 5–7 строк.
+                    <div
+                      className={
+                        subscription.device_limit > 5
+                          ? 'grid flex-shrink-0 grid-cols-5 gap-1'
+                          : 'flex flex-shrink-0 gap-1.5'
+                      }
+                      aria-hidden="true"
+                    >
                       {Array.from({ length: subscription.device_limit }, (_, i) => (
                         <div
                           key={i}
