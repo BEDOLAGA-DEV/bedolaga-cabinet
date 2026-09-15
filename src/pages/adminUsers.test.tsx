@@ -89,15 +89,17 @@ const page = (users: UserListItem[], total: number, offset = 0) => ({
   limit: 50,
 });
 
-let observer: { cb: IntersectionObserverCallback } | null = null;
+type ObserverStub = { cb: IntersectionObserverCallback; options?: IntersectionObserverInit };
+let observer: ObserverStub | null = null;
 
 beforeEach(() => {
   getUsers.mockReset();
   observer = null;
   window.localStorage.clear();
   (globalThis as { IntersectionObserver?: unknown }).IntersectionObserver = class {
-    constructor(cb: IntersectionObserverCallback) {
-      observer = { cb };
+    // Сигнатура как у настоящего IntersectionObserver: лента передаёт rootMargin вторым аргументом.
+    constructor(cb: IntersectionObserverCallback, options?: IntersectionObserverInit) {
+      observer = { cb, options };
     }
     observe() {}
     unobserve() {}
