@@ -5,6 +5,7 @@ import { useTheme } from '../../hooks/useTheme';
 import { useTrafficZone } from '../../hooks/useTrafficZone';
 import { getGlassColors } from '../../utils/glassTheme';
 import { HoverBorderGradient } from '../ui/hover-border-gradient';
+import { MonitorIcon } from '@/components/icons';
 
 /**
  * До скольких устройств лимит показываем точками.
@@ -70,23 +71,9 @@ export default function ConnectDeviceTile({
       {/* Monitor icon */}
       <div
         className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-[10px] transition-colors duration-500"
-        style={{ background: `rgba(${zone.mainVarRaw}, 0.07)` }}
+        style={{ background: `rgba(${zone.mainVarRaw}, 0.07)`, color: zone.mainVar }}
       >
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke={zone.mainVar}
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden="true"
-        >
-          <rect x="2" y="3" width="20" height="14" rx="2" />
-          <path d="M12 17v4M8 21h8" />
-          <path d="M12 8v4M10 10h4" opacity="0.7" />
-        </svg>
+        <MonitorIcon className="h-4 w-4" />
       </div>
 
       {/* Text */}

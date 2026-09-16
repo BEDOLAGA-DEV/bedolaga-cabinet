@@ -20,7 +20,13 @@ import {
   BackgroundRenderer,
   StaticBackgroundRenderer,
 } from '../components/backgrounds/BackgroundRenderer';
-import { CheckCircleIcon, CheckIcon, DevicesIcon, DownloadIcon } from '@/components/icons';
+import {
+  CheckCircleIcon,
+  CheckIcon,
+  DevicesIcon,
+  DownloadIcon,
+  WarningCircleIcon,
+} from '@/components/icons';
 import LanguageSwitcher from '../components/LanguageSwitcher';
 import { cn } from '../lib/utils';
 import { getApiErrorMessage } from '../utils/api-error';
@@ -77,19 +83,7 @@ function ErrorState({ message }: { message: string }) {
     <div className="flex min-h-dvh items-center justify-center bg-dark-950 px-4">
       <div className="flex max-w-sm flex-col items-center gap-4 text-center">
         <div className="flex h-16 w-16 items-center justify-center rounded-full bg-error-500/10">
-          <svg
-            className="h-8 w-8 text-error-400"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={1.5}
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
-            />
-          </svg>
+          <WarningCircleIcon className="h-8 w-8 text-error-400" />
         </div>
         <h2 className="text-lg font-semibold text-dark-50">{t('landing.error', 'Error')}</h2>
         <p className="text-sm text-dark-300">{message}</p>
