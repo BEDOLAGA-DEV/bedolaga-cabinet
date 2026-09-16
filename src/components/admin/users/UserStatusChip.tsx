@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import type { UserListItem } from '@/api/adminUsers';
 import { cn } from '@/lib/utils';
+import { formatShortDate } from '@/utils/format';
 
 export type ChipTone = 'success' | 'warning' | 'error' | 'accent' | 'neutral';
 
@@ -24,6 +25,7 @@ export type StatusSource = Pick<
   | 'subscription_is_trial'
   | 'days_remaining'
   | 'subscription_end_date'
+  | 'grace_until'
 >;
 
 export interface StatusDescription {
@@ -31,6 +33,8 @@ export interface StatusDescription {
   key: string;
   tone: ChipTone;
   count?: number;
+  /** Готовая дата для ключей с `{{date}}` — чип их не форматирует сам. */
+  date?: string;
 }
 
 /**
@@ -46,6 +50,15 @@ export function describeUserStatus(
   if (user.status === 'deleted') return { key: 'statuses.deleted', tone: 'neutral' };
   if (!user.has_subscription || !user.subscription_status) {
     return { key: 'statuses.noSubscription', tone: 'neutral' };
+  }
+  // Временный доступ важнее «истекла»: подписка кончилась, но человек ещё в VPN,
+  // и по строке это должно быть видно сразу — иначе непонятно, почему он в сети.
+  if (user.grace_until && new Date(user.grace_until).getTime() > now) {
+    return {
+      key: 'subscriptionChips.graceUntil',
+      tone: 'warning',
+      date: formatShortDate(user.grace_until),
+    };
   }
   const days = Math.max(0, user.days_remaining ?? 0);
   switch (user.subscription_status) {
@@ -79,7 +92,7 @@ export function describeUserStatus(
 
 export function UserStatusChip({ user, className }: { user: StatusSource; className?: string }) {
   const { t } = useTranslation();
-  const { key, tone, count } = describeUserStatus(user);
+  const { key, tone, count, date } = describeUserStatus(user);
   return (
     <span
       className={cn(
@@ -88,7 +101,7 @@ export function UserStatusChip({ user, className }: { user: StatusSource; classN
         className,
       )}
     >
-      {t(`admin.users.${key}`, { count })}
+      {t(`admin.users.${key}`, { count, date })}
     </span>
   );
 }
@@ -141,6 +154,37 @@ export function SubscriptionStateChip({
       )}
     >
       {t(`admin.users.subscriptionState.${known ? status : 'other'}`)}
+    </span>
+  );
+}
+
+/**
+ * «Временный доступ до …» — подписка истекла, но VPN ещё работает (грейс).
+ *
+ * Без этой пометки в списке и в карточке видно только «истекла», и непонятно,
+ * почему человек продолжает пользоваться. Ничего не рисует, когда грейса нет
+ * или он уже кончился.
+ */
+export function GraceAccessChip({
+  until,
+  className,
+  now = Date.now(),
+}: {
+  until: string | null | undefined;
+  className?: string;
+  now?: number;
+}) {
+  const { t } = useTranslation();
+  if (!until || new Date(until).getTime() <= now) return null;
+  return (
+    <span
+      className={cn(
+        'inline-flex shrink-0 items-center whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-semibold',
+        TONE.warning,
+        className,
+      )}
+    >
+      {t('admin.users.subscriptionChips.graceUntil', { date: formatShortDate(until) })}
     </span>
   );
 }
