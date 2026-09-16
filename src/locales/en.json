@@ -373,7 +373,10 @@
     },
     "manageAll": "Manage all",
     "showAll": "Show all",
-    "subscriptions": "Subscriptions"
+    "subscriptions": "Subscriptions",
+    "premiumTraffic": "Premium traffic",
+    "premiumTrafficPaused": "Limit reached — access paused until the end of the period",
+    "premiumTrafficTopped": "{{amount}} topped up"
   },
   "subscription": {
     "title": "Subscription",
@@ -664,7 +667,12 @@
       "disconnectDevicesFirst": "Disconnect extra devices first",
       "incrementDevices": "Add devices",
       "minDeviceLimit": "Minimum device limit",
-      "newDeviceLimit": "New device limit"
+      "newDeviceLimit": "New device limit",
+      "buyPremiumTraffic": "Buy premium traffic",
+      "buyPremiumTrafficTitle": "Premium traffic",
+      "premiumTrafficHint": "A separate limit for premium servers",
+      "premiumTrafficExhausted": "Limit reached — top up to restore access",
+      "premiumTopupCapReached": "Up to {{cap}} GB can be added per period"
     },
     "serverManagement": {
       "statusLegend": "✅ — connected • ➕ — will be added (paid) • ➖ — will be disconnected",
@@ -791,7 +799,9 @@
       "limitExplained_other": "The «{{name}}» plan gives {{count}} slots and all are in use. Free one up or add more.",
       "limitExplainedNoTopup_one": "The «{{name}}» plan gives {{count}} slot and it is in use. Free it up to continue.",
       "limitExplainedNoTopup_other": "The «{{name}}» plan gives {{count}} slots and all are in use. Free up a slot to continue.",
-      "noTopupHint": "Slots cannot be bought on a trial subscription — free one up or switch to a paid plan."
+      "noTopupHint": "Slots cannot be bought on a trial subscription — free one up or switch to a paid plan.",
+      "limitExplained": "The «{{name}}» plan gives {{count}} slots and all are in use. Free one up or add more.",
+      "limitExplainedNoTopup": "The «{{name}}» plan gives {{count}} slots and all are in use. Free up a slot to continue."
     },
     "delete": "Delete",
     "deleteTitle": "Delete subscription",
@@ -3775,7 +3785,23 @@
       "panelTagLabel": "Remnawave panel tag",
       "panelTagDesc": "Up to 16 characters: Latin letters, digits and underscore. Empty — the global tag from settings (trial or paid). The tag shows in the panel which tariff a user is on.",
       "trialDaysLabel": "Trial days on this tariff",
-      "trialDaysDesc": "Empty — the global trial duration setting."
+      "trialDaysDesc": "Empty — the global trial duration setting.",
+      "premiumLimitsTitle": "Per-server premium limits",
+      "premiumLimitsHint": "A separate traffic limit per server. Once it runs out the user loses access to that server only, the rest keep working. 0 means no premium limit on the server.",
+      "premiumLimitsNoServers": "Select the tariff servers first",
+      "premiumLimitGb": "Limit, GB",
+      "premiumLimitName": "Label",
+      "premiumMoveUp": "Move up",
+      "premiumMoveDown": "Move down",
+      "premiumTopupEnabled": "Allow top-up",
+      "premiumPackages": "Top-up packages",
+      "premiumPackagesEmpty": "No packages — there will be nothing to buy",
+      "premiumPackageGb": "Package size, GB",
+      "premiumPackagePrice": "Package price",
+      "premiumPackageAdd": "Add package",
+      "premiumPackageDuplicate": "Packages with the same size will be merged on save",
+      "premiumMaxTopupGb": "Cap, GB",
+      "premiumMaxTopupHint": "0 means no cap"
     },
     "servers": {
       "title": "Squad Management",
@@ -4470,7 +4496,13 @@
         "buttonApplied_one": "Filters: {{count}} applied",
         "buttonApplied_other": "Filters: {{count}} applied",
         "reset": "Reset",
-        "remove": "Remove filter “{{name}}”"
+        "remove": "Remove filter “{{name}}”",
+        "allStatuses": "All statuses",
+        "byDate": "By date",
+        "byBalance": "By balance",
+        "byActivity": "By activity",
+        "bySpent": "By spending",
+        "byExpiry": "By expiry"
       },
       "actions": {
         "block": "Block",
@@ -4503,7 +4535,8 @@
         "success": {
           "delete": "User successfully deleted",
           "resetTrial": "Trial successfully reset",
-          "disable": "User successfully disabled"
+          "disable": "User successfully disabled",
+          "resetSubscription": "Subscription successfully reset"
         },
         "confirmDelete": {
           "title": "Delete user?",
@@ -4516,6 +4549,11 @@
         "confirmDisable": {
           "title": "Disable user?",
           "message": "The user will not be able to use the service until reactivated."
+        },
+        "resetSubscription": "Reset subscription",
+        "confirmResetSubscription": {
+          "title": "Reset subscription?",
+          "message": "The user's current subscription will be cancelled."
         }
       },
       "detail": {
@@ -4524,7 +4562,11 @@
           "balance": "Balance",
           "referrals": "Referrals",
           "activity": "Activity",
-          "overview": "Overview"
+          "overview": "Overview",
+          "info": "Information",
+          "sync": "Synchronization",
+          "tickets": "Tickets",
+          "gifts": "Gifts"
         },
         "noTickets": "No tickets from this user",
         "ticketsCount": "tickets",
@@ -4799,7 +4841,8 @@
           "commissionSaved": "Commission saved",
           "spentHint": "Spent in the service",
           "confirmRemoveReferrer": "Unlink the referrer? They will stop earning from this user.",
-          "confirmRemoveReferral": "Remove {{name}} from referrals? Earnings from them will stop."
+          "confirmRemoveReferral": "Remove {{name}} from referrals? Earnings from them will stop.",
+          "addReferral": "Add Referral"
         },
         "activity": {
           "empty": "No activity yet",
@@ -4952,7 +4995,19 @@
             "logins": "Logins"
           },
           "fromBalance": "from balance",
-          "loadError": "Could not load activity"
+          "loadError": "Could not load activity",
+          "total": "Total events",
+          "filters": {
+            "all": "All",
+            "payments": "Payments",
+            "events": "Events",
+            "promo": "Promo",
+            "tickets": "Tickets",
+            "gifts": "Gifts",
+            "referrals": "Referrals",
+            "logins": "Logins",
+            "clicks": "Clicks"
+          }
         },
         "header": {
           "copy": "Copy",
@@ -5245,7 +5300,13 @@
         "promoGroupNotFound": "Promo group not found",
         "subscriptionNotFound": "Subscription not found",
         "userNotFound": "User not found"
-      }
+      },
+      "searchEmail": "Search by email...",
+      "noPurchases": "No purchases",
+      "pagination": {
+        "showing": "Showing {{from}}-{{to}} of {{total}}"
+      },
+      "purchaseCount": "Purchases: {{count}}"
     },
     "promoOffers": {
       "title": "Promo Offers",
