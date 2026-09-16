@@ -3898,7 +3898,8 @@
             "trafficUsed": "مصرف",
             "devices": "دستگاه‌ها",
             "squads": "اسکوادها"
-          }
+          },
+          "graceNote": "این کاربر تا {{date}} دسترسی موقت دارد — تا آن زمان تنظیمات آن در پنل اعمال است. این مغایرت نیست و نیازی به همگام‌سازی ندارد."
         },
         "loadError": "بارگیری کاربر ممکن نشد",
         "done": {
@@ -4039,7 +4040,8 @@
         "today": "امروز منقضی می‌شود",
         "expiredToday": "امروز منقضی شد",
         "expiredAgo": "{{count}} روز پیش منقضی شد",
-        "limited": "ترافیک تمام شده"
+        "limited": "ترافیک تمام شده",
+        "graceUntil": "موقت تا {{date}}"
       },
       "summaryShort": {
         "total_one": "{{value}}",
@@ -4084,8 +4086,10 @@
         "tariffNotFound": "طرح پیدا نشد",
         "promoGroupNotFound": "گروه تبلیغاتی پیدا نشد",
         "subscriptionNotFound": "اشتراک پیدا نشد",
-        "userNotFound": "کاربر پیدا نشد"
-      }
+        "userNotFound": "کاربر پیدا نشد",
+        "trialBlockedBySubscription": "دوره آزمایشی همچنان در دسترس نیست: این کاربر اشتراک دیگری دارد. ابتدا آن را حذف کنید."
+      },
+      "moreTariffs": "{{count}} مورد دیگر"
     },
     "promoOffers": {
       "title": "پیشنهادات تبلیغاتی",

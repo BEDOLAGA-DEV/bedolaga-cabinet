@@ -177,7 +177,7 @@ export function UsersToolbar({ state, onChange, options }: UsersToolbarProps) {
             type="search"
             value={text}
             autoComplete="off"
-            enterKeyHint="search"
+            enterKeyHint="done"
             onChange={(event) => {
               const next = event.target.value;
               setText(next);
@@ -188,6 +188,8 @@ export function UsersToolbar({ state, onChange, options }: UsersToolbarProps) {
               if (event.key === 'Enter') {
                 event.preventDefault();
                 commit(text);
+                // На телефоне клавиатура закрывает пол-экрана, а результат уже под ней.
+                inputRef.current?.blur();
               }
               if (event.key === 'Escape' && text) {
                 setText('');
