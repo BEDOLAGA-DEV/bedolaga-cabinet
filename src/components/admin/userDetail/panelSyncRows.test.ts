@@ -65,3 +65,57 @@ describe('panelSyncRows', () => {
     ).toEqual(['trafficLimit', 'trafficUsed', 'devices', 'squads']);
   });
 });
+
+describe('открытый временный доступ', () => {
+  /** Панель с оверлеем грейса: живая, своя дата, урезанный лимит, свой сквад. */
+  const withOverlay = (extra: Partial<PanelSyncStatusResponse> = {}): PanelSyncStatusResponse => ({
+    ...base,
+    bot_subscription_status: 'expired',
+    bot_subscription_end_date: '2026-09-15T00:00:00Z',
+    bot_traffic_limit_gb: 300,
+    bot_squads: ['own'],
+    panel_status: 'ACTIVE',
+    panel_expire_at: '2026-09-16T00:00:00Z',
+    panel_traffic_limit_gb: 74,
+    panel_squads: ['grace'],
+    ...extra,
+  });
+
+  it('оверлей грейса не считается расхождением', () => {
+    const rows = panelSyncRows(
+      withOverlay({ grace_open: true, grace_until: '2026-09-16T00:00:00Z' }),
+    );
+    expect(rows.filter((row) => row.differs).map((row) => row.key)).toEqual([]);
+    expect(
+      rows
+        .filter((row) => row.byGrace)
+        .map((row) => row.key)
+        .sort(),
+    ).toEqual(['squads', 'status', 'trafficLimit', 'until']);
+  });
+
+  it('без грейса те же данные остаются расхождением', () => {
+    const rows = panelSyncRows(withOverlay());
+    expect(
+      rows
+        .filter((row) => row.differs)
+        .map((row) => row.key)
+        .sort(),
+    ).toEqual(['squads', 'status', 'trafficLimit', 'until']);
+    expect(rows.every((row) => !row.byGrace)).toBe(true);
+  });
+
+  it('расход трафика сверяется и в грейсе', () => {
+    const rows = panelSyncRows(
+      withOverlay({ grace_open: true, bot_traffic_used_gb: 5, panel_traffic_used_gb: 71 }),
+    );
+    const used = rows.find((row) => row.key === 'trafficUsed');
+    expect(used?.differs).toBe(true);
+    expect(used?.byGrace).toBe(false);
+  });
+
+  it('совпадающие строки грейс не красит', () => {
+    const rows = panelSyncRows({ ...base, grace_open: true });
+    expect(rows.every((row) => !row.differs && !row.byGrace)).toBe(true);
+  });
+});
