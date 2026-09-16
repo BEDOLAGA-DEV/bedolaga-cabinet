@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { useCurrency } from '../../../hooks/useCurrency';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { subscriptionApi } from '../../../api/subscription';
 import { getErrorMessage } from '../../../utils/subscriptionHelpers';
@@ -41,9 +42,12 @@ export function TrafficTopupSheet({
   const { t } = useTranslation();
   const queryClient = useQueryClient();
 
+  // Общий формат суммы, как на соседних экранах: «1 490,50 ₽», а не «1490.50 ₽»;
+  // знак валюты приклеен неразрывным пробелом.
+  const { formatAmount, currencySymbol } = useCurrency();
   const formatPrice = (kopeks: number) => {
     const rubles = kopeks / 100;
-    return rubles % 1 === 0 ? `${rubles} ₽` : `${rubles.toFixed(2)} ₽`;
+    return `${formatAmount(rubles, rubles % 1 === 0 ? 0 : 2)}\u00A0${currencySymbol}`;
   };
 
   const { data: trafficPackages } = useQuery({
@@ -120,12 +124,15 @@ export function TrafficTopupSheet({
         </div>
       ) : (
         <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-3">
+          {/* Лист сидит в карточке с большими полями: на телефоне плитке в две
+              колонки оставалось ~78 px, и «Безлимит» и цены рвались посреди слова.
+              Поля плитки меньше, крупный шрифт — с sm, цены не рвутся. */}
+          <div className="grid grid-cols-2 gap-2 sm:gap-3">
             {trafficPackages.map((pkg) => (
               <button
                 key={pkg.gb}
                 onClick={() => onSelectedTrafficPackageChange(pkg.gb)}
-                className={`rounded-xl border p-4 text-center transition-all ${
+                className={`min-w-0 rounded-xl border px-2 py-3 text-center transition-all sm:p-4 ${
                   selectedTrafficPackage === pkg.gb
                     ? 'border-accent-500 bg-accent-500/10'
                     : isDark
@@ -133,12 +140,12 @@ export function TrafficTopupSheet({
                       : 'border-champagne-300/60 bg-champagne-200/40 hover:border-champagne-400'
                 }`}
               >
-                <div className="text-lg font-semibold text-dark-100">
+                <div className="text-base font-semibold text-dark-100 sm:text-lg">
                   {pkg.is_unlimited
                     ? '♾️ ' + t('subscription.additionalOptions.unlimited')
                     : `${pkg.gb} ${t('common.units.gb')}`}
                 </div>
-                {pkg.discount_percent && pkg.discount_percent > 0 && (
+                {pkg.discount_percent != null && pkg.discount_percent > 0 && (
                   <div className="mb-1">
                     <span className="inline-block rounded-full bg-success-500/20 px-2 py-0.5 text-xs font-medium text-success-400">
                       -{pkg.discount_percent}%
@@ -146,13 +153,15 @@ export function TrafficTopupSheet({
                   </div>
                 )}
                 <div className="font-medium text-accent-400">
-                  {pkg.discount_percent && pkg.discount_percent > 0 && pkg.base_price_kopeks ? (
-                    <>
-                      <span className="mr-1 text-sm text-dark-500 line-through">
+                  {pkg.discount_percent != null &&
+                  pkg.discount_percent > 0 &&
+                  pkg.base_price_kopeks ? (
+                    <div className="flex flex-wrap items-baseline justify-center gap-x-1">
+                      <span className="whitespace-nowrap text-sm text-dark-500 line-through">
                         {formatPrice(pkg.base_price_kopeks)}
                       </span>
-                      {formatPrice(pkg.price_kopeks)}
-                    </>
+                      <span className="whitespace-nowrap">{formatPrice(pkg.price_kopeks)}</span>
+                    </div>
                   ) : (
                     formatPrice(pkg.price_kopeks)
                   )}

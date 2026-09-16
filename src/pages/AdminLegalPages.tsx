@@ -468,14 +468,14 @@ function FaqQuestionRow({
 
   return (
     <div className="space-y-3 rounded-xl border border-dark-700 bg-dark-800/50 p-4">
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <input
           value={title}
           onChange={(e) => {
             setSaveError(null);
             setTitle(e.target.value);
           }}
-          className="input flex-1"
+          className="input min-w-0 flex-1 basis-full sm:basis-0"
           placeholder={t('admin.legalPages.questionTitle')}
         />
         <Toggle

@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, screen, waitFor } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 /**
  * Премиум-трафик в карточке пользователя у админа.
@@ -17,6 +17,18 @@ const getStates = vi.fn();
 const reset = vi.fn();
 const grant = vi.fn();
 
+// Права блок берёт из общего хранилища сам — подменяем его, как в соседних тестах.
+const granted = new Set<string>();
+
+vi.mock('@/store/permissions', () => ({
+  usePermissionStore: (selector: (state: unknown) => unknown) =>
+    selector({
+      hasPermission: (perm: string) => granted.has(perm),
+      hasAnyPermission: (...perms: string[]) => perms.some((p) => granted.has(p)),
+      hasAllPermissions: (...perms: string[]) => perms.every((p) => granted.has(p)),
+    }),
+}));
+
 vi.mock('../../../api/adminPremiumTraffic', () => ({
   adminPremiumTrafficApi: {
     getStates: (...args: unknown[]) => getStates(...args),
@@ -30,6 +42,12 @@ import { installMatchMedia, renderWithProviders } from '../reachability/testUtil
 import { PremiumTrafficAdmin } from './PremiumTrafficAdmin';
 
 installMatchMedia();
+beforeEach(() => {
+  granted.clear();
+  granted.add('traffic:read');
+  granted.add('traffic:manage');
+});
+
 afterEach(() => {
   cleanup();
   getStates.mockReset();
@@ -56,15 +74,8 @@ function state(overrides: Partial<AdminPremiumTrafficState> = {}): AdminPremiumT
   };
 }
 
-function renderBlock(props: { canManage?: boolean; onRegularReset?: () => void } = {}) {
-  return renderWithProviders(
-    <PremiumTrafficAdmin
-      subscriptionId={15}
-      canManage={props.canManage ?? true}
-      formatDate={(date) => date ?? ''}
-      onRegularReset={props.onRegularReset}
-    />,
-  );
+function renderBlock() {
+  return renderWithProviders(<PremiumTrafficAdmin subscriptionId={15} />);
 }
 
 function resetButtons() {
@@ -99,8 +110,9 @@ describe('PremiumTrafficAdmin', () => {
   });
 
   it('без права управления — только просмотр', async () => {
+    granted.delete('traffic:manage');
     getStates.mockResolvedValue([state()]);
-    renderBlock({ canManage: false });
+    renderBlock();
 
     await screen.findByText(NAME);
     expect(screen.queryByRole('button', { name: 'Начислить' })).toBeNull();
@@ -160,8 +172,7 @@ describe('PremiumTrafficAdmin', () => {
   it('обычный сброс не трогает премиум и перечитывает подписку', async () => {
     getStates.mockResolvedValue([state()]);
     reset.mockResolvedValue({ scope: 'regular', regular_reset: true, premium_squads: [] });
-    const onRegularReset = vi.fn();
-    renderBlock({ onRegularReset });
+    renderBlock();
 
     await screen.findByText(NAME);
     fireEvent.change(screen.getByLabelText('Сбросить трафик'), { target: { value: 'regular' } });
@@ -173,8 +184,16 @@ describe('PremiumTrafficAdmin', () => {
     fireEvent.click(generalReset);
 
     await waitFor(() => expect(reset).toHaveBeenCalledWith(15, 'regular', undefined));
-    await waitFor(() => expect(onRegularReset).toHaveBeenCalled());
     expect(await screen.findByText('Общий трафик сброшен.')).toBeTruthy();
+  });
+
+  it('без права на просмотр блока нет вовсе', async () => {
+    granted.clear();
+    getStates.mockResolvedValue([state()]);
+    renderBlock();
+
+    await waitFor(() => expect(getStates).toHaveBeenCalled());
+    expect(screen.queryByText('Премиум-трафик')).toBeNull();
   });
 
   it('показывает ошибку, если действие не удалось', async () => {

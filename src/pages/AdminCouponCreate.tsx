@@ -102,11 +102,11 @@ export default function AdminCouponCreate() {
         </div>
 
         <div className="mb-4 rounded-xl border border-dark-700 bg-dark-800 p-4">
-          <div className="mb-3 flex items-center justify-between">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
             <span className="text-sm font-medium text-dark-200">
               {t('admin.coupons.created.linksLabel', { count: created.links.length })}
             </span>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <button
                 onClick={handleCopyAll}
                 className="flex items-center gap-1.5 rounded-lg bg-dark-700 px-3 py-1.5 text-sm text-dark-200 transition-colors hover:bg-dark-600"
@@ -153,7 +153,7 @@ export default function AdminCouponCreate() {
         {!capabilities.hasBackButton && (
           <button
             onClick={() => navigate('/admin/coupons')}
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
           >
             <BackIcon />
           </button>

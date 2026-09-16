@@ -82,7 +82,7 @@ export default function Contests() {
       {selectedContest && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-dark-950/70 p-4 backdrop-blur-sm">
           <div
-            className="bento-card max-h-[80vh] w-full max-w-lg overflow-y-auto"
+            className="bento-card max-h-[80vh] w-full max-w-lg overflow-y-auto bg-dark-900"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mb-4 flex items-center justify-between">
@@ -196,14 +196,18 @@ export default function Contests() {
 
       {/* Contests List */}
       {contests && contests.length > 0 ? (
-        <div className="grid gap-4 sm:grid-cols-2">
+        // grid-cols-1 = minmax(0,1fr): без него колонка росла по самой длинной
+        // ссылке в описании, и вся страница листалась вбок.
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {contests.map((contest) => (
             <div key={contest.id} className="card">
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
                   <h3 className="break-words text-lg font-semibold">{contest.name}</h3>
                   {contest.description && (
-                    <p className="mt-1 text-sm text-dark-400">{contest.description}</p>
+                    <p className="mt-1 text-sm text-dark-400 [overflow-wrap:anywhere]">
+                      {contest.description}
+                    </p>
                   )}
                 </div>
                 <div className="flex shrink-0 items-center gap-1 text-accent-400">

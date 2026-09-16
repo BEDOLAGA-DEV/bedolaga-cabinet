@@ -53,21 +53,25 @@ export default function InsufficientBalancePrompt({
   if (compact) {
     return (
       <div
-        className={`flex items-center justify-between gap-3 rounded-xl border border-error-500/30 bg-error-500/10 p-3 ${className}`}
+        // В узком листе текст и «Пополнить» рядом не помещались — кнопка
+        // вылезала за плашку. Не влезли — кнопка уходит строкой ниже.
+        className={`flex flex-wrap items-center justify-between gap-3 rounded-xl border border-error-500/30 bg-error-500/10 p-3 ${className}`}
       >
-        <div className="flex items-center gap-2 text-sm text-error-400">
+        <div className="flex min-w-0 flex-1 basis-40 items-center gap-2 text-sm text-error-400">
           <InfoIcon className="h-4 w-4 flex-shrink-0" />
           <span>
             {message || t('balance.insufficientFunds')}:{' '}
-            <span className="font-semibold">
-              {displayAmount} {currencySymbol}
+            <span className="whitespace-nowrap font-semibold">
+              {displayAmount}
+              {'\u00A0'}
+              {currencySymbol}
             </span>
           </span>
         </div>
         <button
           onClick={handleTopUpClick}
           disabled={isPreparingTopUp}
-          className="btn-primary whitespace-nowrap px-3 py-1.5 text-xs"
+          className="btn-primary shrink-0 whitespace-nowrap px-3 py-1.5 text-xs"
         >
           {isPreparingTopUp ? (
             <span className="h-3 w-3 animate-spin rounded-full border border-white/30 border-t-white" />
@@ -94,7 +98,9 @@ export default function InsufficientBalancePrompt({
             <div className="text-lg font-bold text-dark-100">
               {t('balance.missing')}:{' '}
               <span className="text-error-400">
-                {displayAmount} {currencySymbol}
+                {displayAmount}
+                {'\u00A0'}
+                {currencySymbol}
               </span>
             </div>
           </div>

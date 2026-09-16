@@ -714,12 +714,12 @@ export default function AdminTrafficUsage() {
       )}
 
       {/* Header */}
-      <div className="mb-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex min-w-0 flex-1 basis-48 items-center gap-3">
           {!capabilities.hasBackButton && (
             <button
               onClick={() => navigate('/admin')}
-              className="flex h-10 w-10 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
             >
               <ChevronLeftIcon />
             </button>
@@ -740,7 +740,9 @@ export default function AdminTrafficUsage() {
 
       {/* Controls */}
       <div className="mb-4 flex flex-col gap-3">
-        <div className="flex flex-wrap items-center gap-3">
+        {/* На телефоне выпадашки фильтров во всю ширину ряда: привязанные к кнопке,
+            они уходили за правый край экрана. */}
+        <div className="relative flex flex-wrap items-center gap-3">
           <PeriodSelector
             value={period}
             onChange={handlePeriodChange}

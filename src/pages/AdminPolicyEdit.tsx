@@ -166,7 +166,7 @@ function IpTagInput({ values, onChange }: IpTagInputProps) {
         value={inputValue}
         onChange={(e) => setInputValue(e.target.value)}
         onKeyDown={handleKeyDown}
-        className="min-w-[120px] flex-1 bg-transparent text-sm text-dark-100 placeholder-dark-500 outline-none"
+        className="min-w-[120px] min-w-0 flex-1 bg-transparent text-sm text-dark-100 placeholder-dark-500 outline-none"
         placeholder={values.length === 0 ? t('admin.policies.conditions.ipPlaceholder') : ''}
       />
     </div>

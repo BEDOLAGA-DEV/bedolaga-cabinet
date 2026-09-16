@@ -7,6 +7,8 @@ import {
   type PremiumTrafficResetScope,
 } from '../../../api/adminPremiumTraffic';
 import { getApiErrorMessage } from '../../../utils/api-error';
+import { formatShortDate } from '@/utils/format';
+import { usePermissionStore } from '@/store/permissions';
 
 // ──────────────────────────────────────────────────────────────────
 // Премиум-трафик подписки в карточке пользователя: расход по серверам с
@@ -20,11 +22,6 @@ import { getApiErrorMessage } from '../../../utils/api-error';
 
 export interface PremiumTrafficAdminProps {
   subscriptionId: number;
-  /** Право `traffic:manage`: без него блок только показывает расход. */
-  canManage: boolean;
-  formatDate: (date: string | null) => string;
-  /** Общий трафик сброшен в панели — родителю перечитать подписку. */
-  onRegularReset?: () => void | Promise<void>;
 }
 
 const SCOPES: PremiumTrafficResetScope[] = ['premium', 'regular', 'both'];
@@ -37,14 +34,14 @@ function formatGb(value: number): string {
   return Number.isInteger(value) ? String(value) : value.toFixed(2);
 }
 
-export function PremiumTrafficAdmin({
-  subscriptionId,
-  canManage,
-  formatDate,
-  onRegularReset,
-}: PremiumTrafficAdminProps) {
+export function PremiumTrafficAdmin({ subscriptionId }: PremiumTrafficAdminProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  // Права и формат даты берём сами: вкладку «Подписка» в админке переписывают
+  // от релиза к релизу, и чем меньше блок просит у родителя, тем меньше он
+  // ломается при очередной переделке.
+  const hasPermission = usePermissionStore((state) => state.hasPermission);
+  const canManage = hasPermission('traffic:manage');
   const queryKey = ['admin-premium-traffic', subscriptionId];
   const { data: states } = useQuery({
     queryKey,
@@ -91,14 +88,21 @@ export function PremiumTrafficAdmin({
         if (wasLimited) parts.push(t(`${KEY}.restoredNote`));
       }
       setNotice({ kind: 'ok', text: parts.join(' ') });
-      if (result.regular_reset) await onRegularReset?.();
+      // Общий трафик сбросили в панели — карточка пользователя устарела.
+      // Признак тот же, что у действий самой страницы: ключи `admin-user-*`.
+      if (result.regular_reset) {
+        await queryClient.invalidateQueries({
+          predicate: (query) =>
+            typeof query.queryKey[0] === 'string' && query.queryKey[0].startsWith('admin-user-'),
+        });
+      }
       void refresh();
     },
     onError: fail,
   });
 
   // Премиум-серверов в тарифе нет — блоку показывать нечего.
-  if (!states || states.length === 0) return null;
+  if (!hasPermission('traffic:read') || !states || states.length === 0) return null;
 
   const busy = grant.isPending || reset.isPending;
   const confirmThen = (key: string, run: () => void) => {
@@ -124,7 +128,6 @@ export function PremiumTrafficAdmin({
               state={state}
               canManage={canManage}
               busy={busy}
-              formatDate={formatDate}
               resetLabel={confirming === resetKey ? areYouSure : t(`${KEY}.resetSquad`)}
               resetArmed={confirming === resetKey}
               onGrant={(gb) => {
@@ -192,7 +195,6 @@ interface PremiumStateRowProps {
   state: AdminPremiumTrafficState;
   canManage: boolean;
   busy: boolean;
-  formatDate: (date: string | null) => string;
   resetLabel: string;
   resetArmed: boolean;
   onGrant: (gb: number) => void;
@@ -203,7 +205,6 @@ function PremiumStateRow({
   state,
   canManage,
   busy,
-  formatDate,
   resetLabel,
   resetArmed,
   onGrant,
@@ -250,9 +251,9 @@ function PremiumStateRow({
 
       {state.period_start_at && (
         <div className="mt-2 text-xs text-dark-500">
-          {t(`${KEY}.period`, { date: formatDate(state.period_start_at) })}
+          {t(`${KEY}.period`, { date: formatShortDate(state.period_start_at) })}
           {state.last_checked_at &&
-            ` · ${t(`${KEY}.checked`, { date: formatDate(state.last_checked_at) })}`}
+            ` · ${t(`${KEY}.checked`, { date: formatShortDate(state.last_checked_at) })}`}
         </div>
       )}
 

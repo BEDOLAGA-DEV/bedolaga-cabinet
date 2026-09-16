@@ -120,7 +120,7 @@ export default function AdminCouponDetail() {
         titleWidth="w-56"
         className="mx-auto max-w-2xl space-y-6"
       >
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 max-sm:[&>*:last-child:nth-child(odd)]:col-span-2">
           <StatCard loading />
           <StatCard loading />
           <StatCard loading />
@@ -145,7 +145,7 @@ export default function AdminCouponDetail() {
         {!capabilities.hasBackButton && (
           <button
             onClick={() => navigate('/admin/coupons')}
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
           >
             <BackIcon />
           </button>
@@ -166,7 +166,7 @@ export default function AdminCouponDetail() {
       </div>
 
       {/* Stats */}
-      <div className="mb-6 grid grid-cols-3 gap-3">
+      <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 max-sm:[&>*:last-child:nth-child(odd)]:col-span-2">
         <StatCard
           label={t('admin.coupons.stats.active')}
           value={batch.active_count}
@@ -256,27 +256,30 @@ export default function AdminCouponDetail() {
         </div>
       )}
 
-      {/* Revoke */}
-      {hasActive && (
+      {/* Кнопки стояли вплотную друг к другу — теперь с зазором. */}
+      <div className="space-y-3">
+        {/* Revoke */}
+        {hasActive && (
+          <PermissionGate permission="coupons:edit" fallback={null}>
+            <button
+              onClick={() => setRevokeConfirm(true)}
+              className="w-full rounded-lg border border-error-500/30 bg-error-500/10 px-4 py-2.5 text-error-400 transition-colors hover:bg-error-500/20"
+            >
+              {t('admin.coupons.revoke.button', { count: batch.active_count })}
+            </button>
+          </PermissionGate>
+        )}
+
+        {/* Delete — полностью убирает партию, в отличие от отзыва */}
         <PermissionGate permission="coupons:edit" fallback={null}>
           <button
-            onClick={() => setRevokeConfirm(true)}
-            className="w-full rounded-lg border border-error-500/30 bg-error-500/10 px-4 py-2.5 text-error-400 transition-colors hover:bg-error-500/20"
+            onClick={() => setDeleteConfirm(true)}
+            className="w-full rounded-lg border border-error-500/30 px-4 py-2.5 text-error-400 transition-colors hover:bg-error-500/20"
           >
-            {t('admin.coupons.revoke.button', { count: batch.active_count })}
+            {t('admin.coupons.delete.button')}
           </button>
         </PermissionGate>
-      )}
-
-      {/* Delete — полностью убирает партию, в отличие от отзыва */}
-      <PermissionGate permission="coupons:edit" fallback={null}>
-        <button
-          onClick={() => setDeleteConfirm(true)}
-          className="w-full rounded-lg border border-error-500/30 px-4 py-2.5 text-error-400 transition-colors hover:bg-error-500/20"
-        >
-          {t('admin.coupons.delete.button')}
-        </button>
-      </PermissionGate>
+      </div>
 
       {/* Delete confirmation */}
       {deleteConfirm && (

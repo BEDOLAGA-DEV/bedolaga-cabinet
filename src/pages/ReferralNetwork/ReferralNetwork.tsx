@@ -134,7 +134,9 @@ export function ReferralNetwork() {
             <>
               <NetworkGraph data={networkData} className="absolute inset-0 h-full w-full" />
 
-              <div className="absolute bottom-[calc(12px+var(--safe-bottom,0px))] left-3 z-10 sm:bottom-4 sm:left-4">
+              {/* Своя ширина: без неё плашка сжималась по самому узкому содержимому
+                  до столбика в 80 px («1 2/34/5/67»). На телефоне — над кнопками масштаба. */}
+              <div className="absolute bottom-[calc(60px+var(--safe-bottom,0px))] left-3 z-10 w-[min(18rem,calc(100%-1.5rem))] sm:bottom-4 sm:left-4 sm:w-72">
                 <NetworkStats data={networkData} />
               </div>
 
