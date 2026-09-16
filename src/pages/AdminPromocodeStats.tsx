@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import { useCurrency } from '../hooks/useCurrency';
 import i18n from '../i18n';
 import { promocodesApi, type PromoCodeType } from '../api/promocodes';
 import { AdminBackButton } from '../components/admin';
@@ -66,6 +67,7 @@ const formatDateTime = (date: string | null): string => {
 
 export default function AdminPromocodeStats() {
   const { t } = useTranslation();
+  const { formatPositive } = useCurrency();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
 
@@ -174,7 +176,7 @@ export default function AdminPromocodeStats() {
               <div className="flex justify-between rounded-lg bg-dark-700/50 p-3">
                 <span className="text-dark-400">{t('admin.promocodes.stats.bonus')}:</span>
                 <span className="text-success-400">
-                  +{promocode.balance_bonus_rubles} {t('admin.promocodes.form.rub')}
+                  {formatPositive(promocode.balance_bonus_rubles)}
                 </span>
               </div>
             )}

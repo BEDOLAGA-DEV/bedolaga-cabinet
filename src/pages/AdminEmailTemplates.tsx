@@ -58,7 +58,7 @@ function TemplateCard({
     >
       <div className="flex items-start justify-between gap-2 sm:gap-3">
         <div className="min-w-0 flex-1">
-          <h3 className="truncate text-sm font-medium text-dark-100 transition-colors group-hover:text-accent-400">
+          <h3 className="line-clamp-2 text-sm font-medium text-dark-100 transition-colors group-hover:text-accent-400">
             {label}
           </h3>
           <p className="mt-1 line-clamp-2 text-xs text-dark-400">{description}</p>
@@ -284,8 +284,8 @@ function TemplateEditor({
   return (
     <div className="space-y-3 sm:space-y-4">
       {/* Header */}
-      <div className="flex items-start justify-between gap-2 sm:items-center">
-        <div className="flex min-w-0 items-start gap-2 sm:items-center sm:gap-3">
+      <div className="flex flex-wrap items-start justify-between gap-2 sm:items-center">
+        <div className="flex min-w-0 flex-1 basis-48 items-start gap-2 sm:items-center sm:gap-3">
           <button
             onClick={onClose}
             className="mt-0.5 flex-shrink-0 rounded-lg p-1 transition-colors hover:bg-dark-700 sm:mt-0"
@@ -547,7 +547,7 @@ function TemplateEditor({
             type="email"
             value={testEmail}
             onChange={(e) => setTestEmail(e.target.value)}
-            className="input flex-1"
+            className="input min-w-0 flex-1"
             placeholder={t('admin.emailTemplates.testRecipientPlaceholder')}
           />
           <button

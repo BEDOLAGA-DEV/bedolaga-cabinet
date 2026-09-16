@@ -45,7 +45,7 @@ export function ServerManagementSheet({
 
   const formatPrice = (kopeks: number) => {
     const rubles = kopeks / 100;
-    return rubles % 1 === 0 ? `${rubles} ₽` : `${rubles.toFixed(2)} ₽`;
+    return rubles % 1 === 0 ? `${rubles}\u00A0₽` : `${rubles.toFixed(2)}\u00A0₽`;
   };
 
   const { data: countriesData, isLoading: countriesLoading } = useQuery({
@@ -157,7 +157,7 @@ export function ServerManagementSheet({
                       }
                     }}
                     disabled={!country.is_available && !isCurrentlyConnected}
-                    className={`flex w-full items-center justify-between rounded-xl border p-3 text-left transition-all ${
+                    className={`flex w-full items-center justify-between gap-3 rounded-xl border p-3 text-left transition-all ${
                       isSelected
                         ? willBeAdded
                           ? 'border-success-500 bg-success-500/10'

@@ -79,7 +79,7 @@ export function SwitchTariffSheet({
   const formatPrice = (kopeks: number) =>
     kopeks === 0
       ? t('subscription.free', 'Бесплатно')
-      : `${formatAmount(kopeks / 100)} ${currencySymbol}`;
+      : `${formatAmount(kopeks / 100)}\u00A0${currencySymbol}`;
 
   const { data: switchPreview, isLoading: switchPreviewLoading } = useQuery({
     queryKey: ['tariff-switch-preview', tariffId],
@@ -183,31 +183,35 @@ export function SwitchTariffSheet({
                 </div>
               )}
 
-              <div className="flex items-center justify-between border-t border-dark-700/50 pt-3">
-                <div>
+              {/* Цены — столбиком справа и целиком, без отрыва «₽»; подпись и
+                  скидка — слева в остатке строки. */}
+              <div className="flex items-start justify-between gap-3 border-t border-dark-700/50 pt-3">
+                <div className="min-w-0">
                   <span className="font-medium text-dark-100">
                     {t('subscription.switchTariff.upgradeCost')}
                   </span>
-                  {switchPreview.discount_percent && switchPreview.discount_percent > 0 && (
+                  {switchPreview.discount_percent != null && switchPreview.discount_percent > 0 && (
                     <span className="ml-2 inline-block rounded-full bg-success-500/20 px-2 py-0.5 text-xs font-medium text-success-400">
                       -{switchPreview.discount_percent}%
                     </span>
                   )}
                 </div>
-                <div className="text-right">
-                  {switchPreview.discount_percent &&
+                <div className="flex shrink-0 flex-col items-end">
+                  {switchPreview.discount_percent != null &&
                     switchPreview.discount_percent > 0 &&
                     switchPreview.base_upgrade_cost_kopeks &&
                     switchPreview.base_upgrade_cost_kopeks > 0 && (
-                      <span className="mr-2 text-sm text-dark-500 line-through">
+                      <span className="whitespace-nowrap text-sm text-dark-500 line-through">
                         {formatPrice(switchPreview.base_upgrade_cost_kopeks)}
                       </span>
                     )}
                   <span
-                    className={`text-lg font-bold ${switchPreview.upgrade_cost_kopeks === 0 ? 'text-success-400' : 'text-accent-400'}`}
+                    className={`whitespace-nowrap text-lg font-bold ${switchPreview.upgrade_cost_kopeks === 0 ? 'text-success-400' : 'text-accent-400'}`}
                   >
+                    {/* Свой формат, как у зачёркнутой цены рядом: подпись бота
+                        приходит как «1234567.89 ₽». */}
                     {switchPreview.upgrade_cost_kopeks > 0
-                      ? switchPreview.upgrade_cost_label
+                      ? formatPrice(switchPreview.upgrade_cost_kopeks)
                       : t('subscription.switchTariff.free')}
                   </span>
                 </div>

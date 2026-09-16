@@ -60,7 +60,11 @@ export function ModeSwitch({ value, onChange, modes = TAB_KEYS }: ModeSwitchProp
             )}
           >
             <Icon className="h-[18px] w-[18px] shrink-0 sm:h-4 sm:w-4" />
-            <span className="whitespace-nowrap">{t(`admin.reachability.switch.${mode}`)}</span>
+            {/* На телефоне подпись в две строки: в одну шесть вкладок налезали друг
+                на друга («IP / доменСкан CIDRVPN-тест»). */}
+            <span className="text-center sm:whitespace-nowrap">
+              {t(`admin.reachability.switch.${mode}`)}
+            </span>
           </button>
         );
       })}

@@ -699,8 +699,10 @@ export default function AdminTariffCreate() {
                   key={period.days}
                   className="flex items-center gap-3 rounded-lg bg-dark-800 p-3"
                 >
-                  <div className="w-20 font-medium text-dark-300">
-                    {period.days} {t('admin.tariffs.daysShort')}
+                  <div className="w-16 shrink-0 whitespace-nowrap font-medium text-dark-300">
+                    {period.days}
+                    {'\u00A0'}
+                    {t('admin.tariffs.daysShort')}
                   </div>
                   <input
                     type="number"
@@ -730,11 +732,11 @@ export default function AdminTariffCreate() {
                         return copy;
                       });
                     }}
-                    className="input w-28"
+                    className="input w-28 min-w-0"
                     step={1}
                     placeholder="0"
                   />
-                  <span className="text-dark-400">₽</span>
+                  <span className="shrink-0 text-dark-400">₽</span>
                   <div className="flex-1" />
                   <button
                     type="button"
@@ -784,7 +786,7 @@ export default function AdminTariffCreate() {
                   }`}
                 >
                   <div
-                    className={`flex h-5 w-5 items-center justify-center rounded-full ${
+                    className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${
                       !selectedExternalSquad
                         ? isDaily
                           ? 'bg-warning-500 text-white'
@@ -814,7 +816,7 @@ export default function AdminTariffCreate() {
                       }`}
                     >
                       <div
-                        className={`flex h-5 w-5 items-center justify-center rounded-full ${
+                        className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${
                           isSelected
                             ? isDaily
                               ? 'bg-warning-500 text-white'
@@ -824,11 +826,15 @@ export default function AdminTariffCreate() {
                       >
                         {isSelected && <CheckIcon />}
                       </div>
-                      <span className="min-w-0 flex-1 truncate text-sm font-medium">
-                        {squad.name}
-                      </span>
-                      <span className="shrink-0 text-xs text-dark-500">
-                        {squad.members_count} {t('admin.tariffs.externalSquadUsers')}
+                      {/* Имя важнее счётчика: раньше «123456 пользователей» съедало
+                          строку, а имя сквада обрезалось до «Внешний …». */}
+                      <span className="flex min-w-0 flex-1 flex-col">
+                        <span className="text-sm font-medium [overflow-wrap:anywhere]">
+                          {squad.name}
+                        </span>
+                        <span className="text-xs text-dark-500">
+                          {squad.members_count} {t('admin.tariffs.externalSquadUsers')}
+                        </span>
                       </span>
                     </button>
                   );
@@ -863,7 +869,7 @@ export default function AdminTariffCreate() {
                       }`}
                     >
                       <div
-                        className={`flex h-5 w-5 items-center justify-center rounded ${
+                        className={`flex h-5 w-5 shrink-0 items-center justify-center rounded ${
                           isSelected
                             ? isDaily
                               ? 'bg-warning-500 text-white'
@@ -874,7 +880,10 @@ export default function AdminTariffCreate() {
                         {isSelected && <CheckIcon />}
                       </div>
                       <span className="flex-1 text-sm font-medium">
-                        <Twemoji options={{ className: 'twemoji', folder: 'svg', ext: '.svg' }}>
+                        <Twemoji
+                          tag="span"
+                          options={{ className: 'twemoji', folder: 'svg', ext: '.svg' }}
+                        >
                           {server.display_name}
                         </Twemoji>
                       </span>
@@ -1185,7 +1194,7 @@ export default function AdminTariffCreate() {
                       }`}
                     >
                       <div
-                        className={`flex h-5 w-5 items-center justify-center rounded ${
+                        className={`flex h-5 w-5 shrink-0 items-center justify-center rounded ${
                           isSelected
                             ? isDaily
                               ? 'bg-warning-500 text-white'

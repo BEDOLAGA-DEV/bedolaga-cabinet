@@ -14,6 +14,8 @@ export {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuRadioGroup,
+  type DropdownMenuProps,
+  type DropdownMenuTriggerProps,
   type DropdownMenuContentProps,
   type DropdownMenuItemProps,
   type DropdownMenuCheckboxItemProps,

@@ -243,8 +243,8 @@ export function BackgroundConfigEditor({ value: config, onChange }: BackgroundCo
           {/* Global settings */}
           <div className="rounded-xl border border-dark-700/50 bg-dark-800/30 p-4">
             <div className="space-y-3">
-              <div className="flex items-center justify-between gap-4">
-                <label className="text-sm text-dark-300">
+              <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+                <label className="min-w-0 text-sm text-dark-300">
                   {t('admin.backgrounds.globalOpacity')}
                 </label>
                 <div className="flex items-center gap-2">
@@ -263,8 +263,10 @@ export function BackgroundConfigEditor({ value: config, onChange }: BackgroundCo
                 </div>
               </div>
 
-              <div className="flex items-center justify-between gap-4">
-                <label className="text-sm text-dark-300">{t('admin.backgrounds.globalBlur')}</label>
+              <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+                <label className="min-w-0 text-sm text-dark-300">
+                  {t('admin.backgrounds.globalBlur')}
+                </label>
                 <div className="flex items-center gap-2">
                   <input
                     type="range"

@@ -108,7 +108,7 @@ export function AnalyticsTab() {
                 value={yandexValue}
                 onChange={(e) => setYandexValue(e.target.value.replace(/\D/g, ''))}
                 placeholder={t('admin.settings.yandexIdPlaceholder')}
-                className="flex-1 rounded-xl border border-dark-600 bg-dark-700 px-4 py-2.5 text-dark-100 placeholder-dark-500 transition-colors focus:border-accent-500 focus:outline-none"
+                className="min-w-0 flex-1 rounded-xl border border-dark-600 bg-dark-700 px-4 py-2.5 text-dark-100 placeholder-dark-500 transition-colors focus:border-accent-500 focus:outline-none"
                 autoFocus
               />
               <button
@@ -247,7 +247,7 @@ export function AnalyticsTab() {
                   value={googleIdValue}
                   onChange={(e) => setGoogleIdValue(e.target.value)}
                   placeholder={t('admin.settings.googleIdPlaceholder')}
-                  className="flex-1 rounded-xl border border-dark-600 bg-dark-700 px-4 py-2.5 text-dark-100 placeholder-dark-500 transition-colors focus:border-accent-500 focus:outline-none"
+                  className="min-w-0 flex-1 rounded-xl border border-dark-600 bg-dark-700 px-4 py-2.5 text-dark-100 placeholder-dark-500 transition-colors focus:border-accent-500 focus:outline-none"
                   autoFocus
                 />
                 <button
@@ -301,7 +301,7 @@ export function AnalyticsTab() {
                   value={googleLabelValue}
                   onChange={(e) => setGoogleLabelValue(e.target.value)}
                   placeholder={t('admin.settings.googleLabelPlaceholder')}
-                  className="flex-1 rounded-xl border border-dark-600 bg-dark-700 px-4 py-2.5 text-dark-100 placeholder-dark-500 transition-colors focus:border-accent-500 focus:outline-none"
+                  className="min-w-0 flex-1 rounded-xl border border-dark-600 bg-dark-700 px-4 py-2.5 text-dark-100 placeholder-dark-500 transition-colors focus:border-accent-500 focus:outline-none"
                   autoFocus
                 />
                 <button

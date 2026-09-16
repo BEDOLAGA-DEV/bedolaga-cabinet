@@ -1,356 +1,304 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router';
+import { type CSSProperties, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
-import { useQuery } from '@tanstack/react-query';
-import { useCurrency } from '../hooks/useCurrency';
-import { adminUsersApi, type UserListItem } from '../api/adminUsers';
-import { usePlatform } from '../platform/hooks/usePlatform';
-import { StatCard } from '@/components/stats';
-import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
+import { isAxiosError } from 'axios';
+import { adminUsersApi } from '@/api/adminUsers';
+import { campaignsApi } from '@/api/campaigns';
+import { promocodesApi } from '@/api/promocodes';
+import { tariffsApi } from '@/api/tariffs';
+import { AdminBackButton } from '@/components/admin/AdminBackButton';
+import { ListRowSkeleton } from '@/components/admin/ListRowSkeleton';
 import {
-  BackIcon,
-  SearchIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  RefreshIcon,
-  TelegramSmallIcon as TelegramIcon,
-  UsersIcon,
-  CheckCircleIcon,
-  SubscriptionIcon,
-  UserPlusIcon,
-  BanIcon,
-  TrashIcon,
-} from '@/components/icons';
+  type ToolbarOptions,
+  UserCards,
+  UsersTable,
+  UsersToolbar,
+  useInfiniteScroll,
+} from '@/components/admin/users';
+import { ArrowRightIcon, RefreshIcon, UsersIcon } from '@/components/icons';
+import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
+import { useHeaderHeight } from '@/hooks/useHeaderHeight';
+import { cn } from '@/lib/utils';
+import { safeLocal } from '@/utils/safeStorage';
+import {
+  type UsersListState,
+  buildUsersQuery,
+  hasActiveFilters,
+  parseUsersListState,
+  serializeUsersListState,
+} from './adminUsers/usersListState';
 
-function StatusBadge({ status }: { status: string }) {
-  const styles: Record<string, string> = {
-    active: 'bg-success-500/20 text-success-400 border-success-500/30',
-    blocked: 'bg-error-500/20 text-error-400 border-error-500/30',
-    deleted: 'bg-dark-600 text-dark-400 border-dark-500',
-    trial: 'bg-accent-500/20 text-accent-400 border-accent-500/30',
-    expired: 'bg-warning-500/20 text-warning-400 border-warning-500/30',
-    disabled: 'bg-dark-600 text-dark-400 border-dark-500',
-  };
+/** Порция ленты: сервер отдаёт до 200, 50 хватает на два экрана десктопа. */
+export const PAGE_SIZE = 50;
+/** Как часто список перечитывает отметки «в сети» панели (окно панели — минута). */
+const ONLINE_REFRESH_MS = 30_000;
+/** Последняя выборка: раздел, открытый из меню без параметров, продолжает с неё. */
+const LAST_VIEW_KEY = 'admin-users:last-view';
+const OPTIONS_STALE_MS = 5 * 60_000;
+const TO_TOP_AFTER_PX = 600;
 
-  return (
-    <span className={`rounded-full border px-2 py-0.5 text-xs ${styles[status] || styles.active}`}>
-      {status}
-    </span>
-  );
-}
+const number = (value: number, locale: string) => value.toLocaleString(locale);
 
-interface UserRowProps {
-  user: UserListItem;
-  onClick: () => void;
-  formatAmount: (rubAmount: number) => string;
-}
+type Translate = (key: string, options?: Record<string, unknown>) => string;
 
-function UserRow({ user, onClick, formatAmount }: UserRowProps) {
-  const { t } = useTranslation();
-  return (
-    <div
-      onClick={onClick}
-      className="flex cursor-pointer items-start gap-3 rounded-xl border border-dark-700 bg-dark-800/50 p-3 transition-all hover:border-dark-600 hover:bg-dark-800 sm:items-center sm:gap-4 sm:p-4"
-    >
-      {/* Avatar */}
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-accent-500 to-accent-700 text-sm font-medium text-white sm:text-base">
-        {user.first_name?.[0] || user.username?.[0] || '?'}
-      </div>
-
-      {/* Info - flex column on mobile, row on desktop */}
-      <div className="min-w-0 flex-1">
-        {/* Name and username */}
-        <div className="mb-1 flex flex-col gap-0.5 sm:flex-row sm:items-center sm:gap-2">
-          <span className="truncate font-medium text-dark-100">{user.full_name}</span>
-          {user.username && (
-            <span className="truncate text-xs text-dark-500 sm:text-xs">@{user.username}</span>
-          )}
-        </div>
-
-        {/* Telegram ID - full width on mobile */}
-        <div className="mb-1 flex items-center gap-1 text-xs text-dark-400 sm:mb-0">
-          <TelegramIcon />
-          <span className="truncate">{user.telegram_id}</span>
-        </div>
-
-        {/* Status badges - wrap on mobile */}
-        <div className="mt-1 flex flex-wrap items-center gap-1.5">
-          {user.status !== 'active' && <StatusBadge status={user.status} />}
-          {user.has_subscription && user.subscription_status && (
-            <span
-              className={`rounded-full border px-2 py-0.5 text-xs ${
-                user.subscription_status === 'active'
-                  ? 'border-success-500/30 bg-success-500/20 text-success-400'
-                  : user.subscription_status === 'trial'
-                    ? 'border-accent-500/30 bg-accent-500/20 text-accent-400'
-                    : user.subscription_status === 'limited'
-                      ? 'border-warning-500/30 bg-warning-500/20 text-warning-400'
-                      : 'border-warning-500/30 bg-warning-500/20 text-warning-400'
-              }`}
-            >
-              {user.subscription_status === 'active'
-                ? t('admin.users.status.subscription')
-                : user.subscription_status === 'trial'
-                  ? t('admin.users.status.trial')
-                  : user.subscription_status === 'limited'
-                    ? t('subscription.trafficLimited')
-                    : t('admin.users.status.expired')}
-            </span>
-          )}
-        </div>
-      </div>
-
-      {/* Balance - smaller on mobile, show inline */}
-      <div className="shrink-0 text-right">
-        <div className="text-sm font-medium text-dark-100 sm:text-base">
-          {formatAmount(user.balance_rubles)}
-        </div>
-        <div className="hidden text-xs text-dark-500 sm:block">
-          {user.purchase_count > 0
-            ? t('admin.users.purchaseCount', { count: user.purchase_count })
-            : t('admin.users.noPurchases')}
-        </div>
-      </div>
-
-      <ChevronRightIcon />
-    </div>
-  );
+/**
+ * «1 873 человека · 944 с активной подпиской · 14 новых сегодня · 61 заблокирован».
+ * Каждая часть со своим склонением; нулевые «новых» и «заблокированных» не показываются.
+ */
+function summaryLine(
+  stats: { total: number; subscribed: number; newToday: number; blocked: number },
+  locale: string,
+  t: Translate,
+  short: boolean,
+): string {
+  const ns = short ? 'admin.users.summaryShort' : 'admin.users.summary';
+  const part = (key: string, count: number) =>
+    t(`${ns}.${key}`, { count, value: number(count, locale) });
+  return [
+    part('total', stats.total),
+    part('subscribed', stats.subscribed),
+    // На телефоне строка короче: рядом с иконкой раздела и кнопками ей тесно.
+    !short && stats.newToday > 0 ? part('newToday', stats.newToday) : null,
+    !short && stats.blocked > 0 ? part('blocked', stats.blocked) : null,
+  ]
+    .filter(Boolean)
+    .join(' · ');
 }
 
 export default function AdminUsers() {
-  const { t } = useTranslation();
-  const { formatWithCurrency } = useCurrency();
-  const navigate = useNavigate();
-  const { capabilities } = usePlatform();
+  const { t, i18n } = useTranslation();
+  const [params, setParams] = useSearchParams();
+  const state = useMemo(() => parseUsersListState(params), [params]);
 
-  const [search, setSearch] = useState('');
-  const [emailSearch, setEmailSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('');
-  const [sortBy, setSortBy] = useState<string>('created_at');
-  const [offset, setOffset] = useState(0);
+  // Чистый вход в раздел продолжает последнюю выборку; адрес с параметрами — главнее.
+  const restored = useRef(false);
+  useEffect(() => {
+    if (restored.current) return;
+    restored.current = true;
+    if (params.toString() !== '') return;
+    const saved = safeLocal.getItem(LAST_VIEW_KEY);
+    if (saved) setParams(new URLSearchParams(saved), { replace: true });
+  }, [params, setParams]);
 
-  const limit = 20;
+  useEffect(() => {
+    safeLocal.setItem(LAST_VIEW_KEY, serializeUsersListState(state).toString());
+  }, [state]);
 
-  const usersQuery = useQuery({
-    queryKey: ['admin-users', offset, limit, sortBy, search, emailSearch, statusFilter] as const,
-    queryFn: () => {
-      const params: Record<string, unknown> = { offset, limit, sort_by: sortBy };
-      if (search) params.search = search;
-      if (emailSearch) params.email = emailSearch;
-      if (statusFilter) params.status = statusFilter;
-      return adminUsersApi.getUsers(params as Parameters<typeof adminUsersApi.getUsers>[0]);
+  const update = useCallback(
+    (next: UsersListState) => setParams(serializeUsersListState(next), { replace: true }),
+    [setParams],
+  );
+
+  const query = useMemo(() => buildUsersQuery(state), [state]);
+  const usersQuery = useInfiniteQuery({
+    queryKey: ['admin-users', query] as const,
+    queryFn: ({ pageParam }) =>
+      adminUsersApi.getUsers({ ...query, offset: pageParam, limit: PAGE_SIZE }),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages) => {
+      const loaded = allPages.reduce((sum, page) => sum + page.users.length, 0);
+      return lastPage.users.length > 0 && loaded < lastPage.total ? loaded : undefined;
     },
+    // Отметки подключения живут минуту: без обновления открытый список к концу
+    // минуты погасил бы все точки и больше их не зажёг. Обновляется только
+    // видимая вкладка — фоновая ничего не опрашивает.
+    refetchInterval: ONLINE_REFRESH_MS,
   });
-  const users = usersQuery.data?.users ?? [];
-  const total = usersQuery.data?.total ?? 0;
-  const loading = usersQuery.isLoading;
+  const users = useMemo(
+    () => usersQuery.data?.pages.flatMap((page) => page.users) ?? [],
+    [usersQuery.data],
+  );
+  const pages = usersQuery.data?.pages ?? [];
+  const total = pages.length > 0 ? pages[pages.length - 1].total : 0;
 
   const statsQuery = useQuery({
     queryKey: ['admin-users-stats'] as const,
     queryFn: () => adminUsersApi.getStats(),
   });
-  const stats = statsQuery.data ?? null;
 
-  const handleSearch = (e: React.SyntheticEvent) => {
-    e.preventDefault();
+  const tariffsQuery = useQuery({
+    queryKey: ['admin-users-filter-tariffs'] as const,
+    queryFn: () => tariffsApi.getTariffs(true),
+    staleTime: OPTIONS_STALE_MS,
+  });
+  const groupsQuery = useQuery({
+    queryKey: ['admin-users-filter-groups'] as const,
+    queryFn: () => promocodesApi.getPromoGroups({ limit: 100 }),
+    staleTime: OPTIONS_STALE_MS,
+  });
+  const campaignsQuery = useQuery({
+    queryKey: ['admin-users-filter-campaigns'] as const,
+    queryFn: () => campaignsApi.getCampaigns(true, 0, 100),
+    staleTime: OPTIONS_STALE_MS,
+  });
+  const options = useMemo<ToolbarOptions>(
+    () => ({
+      tariffs: (tariffsQuery.data?.tariffs ?? []).map((item) => ({
+        value: String(item.id),
+        label: item.name,
+      })),
+      groups: (groupsQuery.data?.items ?? []).map((item) => ({
+        value: String(item.id),
+        label: item.name,
+      })),
+      campaigns: (campaignsQuery.data?.campaigns ?? []).map((item) => ({
+        value: String(item.id),
+        label: item.name,
+      })),
+    }),
+    [tariffsQuery.data, groupsQuery.data, campaignsQuery.data],
+  );
+
+  const sentinelRef = useInfiniteScroll(() => usersQuery.fetchNextPage(), {
+    enabled: Boolean(usersQuery.hasNextPage) && !usersQuery.isFetchingNextPage,
+  });
+
+  const [showToTop, setShowToTop] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setShowToTop(window.scrollY > TO_TOP_AFTER_PX);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  const locale = i18n.language;
+  const stats = statsQuery.data;
+  const summaryStats = stats && {
+    total: stats.total_users,
+    subscribed: stats.users_with_active_subscription,
+    newToday: stats.new_today,
+    blocked: stats.blocked_users,
   };
+  const { mobileCss } = useHeaderHeight();
 
-  const totalPages = Math.ceil(total / limit);
-  const currentPage = Math.floor(offset / limit) + 1;
+  const refreshing = usersQuery.isFetching && !usersQuery.isFetchingNextPage;
 
   return (
-    <div className="animate-fade-in">
-      {/* Header */}
-      <div className="mb-6 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          {/* Show back button only on web, not in Telegram Mini App */}
-          {!capabilities.hasBackButton && (
-            <button
-              onClick={() => navigate('/admin')}
-              className="flex h-10 w-10 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
-            >
-              <BackIcon />
-            </button>
-          )}
-          <div>
+    <div
+      className="animate-fade-in [--sticky-top:var(--mobile-header)] lg:[--sticky-top:3.5rem]"
+      style={{ '--mobile-header': mobileCss } as CSSProperties}
+    >
+      <div className="mb-5 flex items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-3">
+          <AdminBackButton to="/admin" />
+          <div
+            aria-hidden="true"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent-500/10 text-accent-400"
+          >
+            <UsersIcon className="h-5 w-5" />
+          </div>
+          <div className="min-w-0">
             <h1 className="text-xl font-bold text-dark-100">{t('admin.users.title')}</h1>
-            <p className="text-sm text-dark-400">{t('admin.users.subtitle')}</p>
+            {summaryStats ? (
+              <>
+                <p className="hidden text-sm tabular-nums text-dark-400 sm:block">
+                  {summaryLine(summaryStats, locale, t, false)}
+                </p>
+                <p className="text-sm tabular-nums text-dark-400 sm:hidden">
+                  {summaryLine(summaryStats, locale, t, true)}
+                </p>
+              </>
+            ) : (
+              <p className="text-sm text-dark-400">{t('admin.users.subtitle')}</p>
+            )}
           </div>
         </div>
         <button
+          type="button"
           onClick={() => {
             usersQuery.refetch();
             statsQuery.refetch();
           }}
-          className="rounded-lg p-2 transition-colors hover:bg-dark-700"
+          aria-label={t('common.refresh')}
+          title={t('common.refresh')}
+          disabled={refreshing}
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 text-dark-300 transition-colors hover:border-dark-600 hover:text-dark-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/40 disabled:cursor-wait"
         >
-          <RefreshIcon className={loading ? 'animate-spin' : ''} />
+          <RefreshIcon className={cn('h-5 w-5', refreshing && 'animate-spin')} />
         </button>
       </div>
 
-      {/* Stats */}
-      {stats && (
-        <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-          <StatCard
-            label={t('admin.users.stats.total')}
-            value={stats.total_users}
-            icon={<UsersIcon className="h-5 w-5" />}
-            tone="accent"
-          />
-          <StatCard
-            label={t('admin.users.stats.active')}
-            value={stats.active_users}
-            icon={<CheckCircleIcon className="h-5 w-5" />}
-            tone="success"
-          />
-          <StatCard
-            label={t('admin.users.stats.withSubscription')}
-            value={stats.users_with_active_subscription}
-            icon={<SubscriptionIcon className="h-5 w-5" />}
-            tone="accent"
-          />
-          <StatCard
-            label={t('admin.users.stats.newToday')}
-            value={stats.new_today}
-            icon={<UserPlusIcon className="h-5 w-5" />}
-            tone="warning"
-          />
-          <StatCard
-            label={t('admin.users.stats.blocked')}
-            value={stats.blocked_users}
-            icon={<BanIcon className="h-5 w-5" />}
-            tone="error"
-          />
-          <StatCard
-            label={t('admin.users.stats.deleted')}
-            value={stats.deleted_users}
-            icon={<TrashIcon className="h-5 w-5" />}
-            tone="neutral"
-          />
+      {/* На телефоне поиск и чипы прилипают под шапкой: фильтр меняют, не листая наверх. */}
+      <div className="sticky top-[var(--sticky-top)] z-20 -mx-4 mb-3 border-b border-dark-800/70 bg-dark-950 px-4 pb-2.5 pt-2 md:static md:mx-0 md:mb-4 md:border-0 md:bg-transparent md:p-0">
+        <UsersToolbar state={state} onChange={update} options={options} />
+      </div>
+
+      <p className="mb-3 text-sm tabular-nums text-dark-400">
+        {usersQuery.isLoading
+          ? t('common.loading')
+          : t('admin.users.shown', {
+              shown: number(users.length, locale),
+              total: number(total, locale),
+            })}
+      </p>
+
+      {usersQuery.isLoading ? (
+        <ListRowSkeleton count={6} actions={[]} />
+      ) : usersQuery.isError ? (
+        <div className="rounded-2xl border border-error-500/30 bg-error-500/10 p-6 text-center">
+          <p className="mb-3 text-error-400">
+            {state.view === 'online' &&
+            isAxiosError(usersQuery.error) &&
+            usersQuery.error.response?.status === 503
+              ? t('admin.users.onlineUnavailable')
+              : t('admin.users.loadError')}
+          </p>
+          <button type="button" onClick={() => usersQuery.refetch()} className="btn-secondary">
+            {t('common.retry')}
+          </button>
         </div>
+      ) : users.length === 0 ? (
+        <div className="rounded-2xl border border-dark-700/60 bg-dark-900/40 px-6 py-12 text-center">
+          <p className="text-dark-400">{t('admin.users.noneFound')}</p>
+          {hasActiveFilters(state) && (
+            <button
+              type="button"
+              onClick={() =>
+                update({
+                  ...state,
+                  q: '',
+                  status: '',
+                  sub: '',
+                  tariff: '',
+                  group: '',
+                  campaign: '',
+                  view: 'all',
+                })
+              }
+              className="btn-secondary mt-4"
+            >
+              {t('admin.users.reset')}
+            </button>
+          )}
+        </div>
+      ) : (
+        <>
+          <UsersTable users={users} className="hidden md:block" />
+          <UserCards users={users} className="md:hidden" />
+        </>
       )}
 
-      {/* Filters */}
-      <div className="mb-4 flex flex-col gap-3">
-        {/* Search fields row */}
-        <div className="flex flex-col gap-3 sm:flex-row">
-          <form onSubmit={handleSearch} className="flex-1">
-            <div className="relative">
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => {
-                  setSearch(e.target.value);
-                  setOffset(0);
-                }}
-                placeholder={t('admin.users.search')}
-                className="w-full rounded-xl border border-dark-700 bg-dark-800 py-2 pl-10 pr-4 text-dark-100 placeholder-dark-500 focus:border-dark-600 focus:outline-none"
-              />
-              <div className="absolute left-3 top-1/2 -translate-y-1/2 text-dark-500">
-                <SearchIcon />
-              </div>
-            </div>
-          </form>
-          <form onSubmit={handleSearch} className="flex-1">
-            <div className="relative">
-              <input
-                type="email"
-                value={emailSearch}
-                onChange={(e) => {
-                  setEmailSearch(e.target.value);
-                  setOffset(0);
-                }}
-                placeholder={t('admin.users.searchEmail')}
-                className="w-full rounded-xl border border-dark-700 bg-dark-800 py-2 pl-10 pr-4 text-dark-100 placeholder-dark-500 focus:border-dark-600 focus:outline-none"
-              />
-              <div className="absolute left-3 top-1/2 -translate-y-1/2 text-dark-500">
-                <SearchIcon />
-              </div>
-            </div>
-          </form>
-        </div>
-        {/* Filters row */}
-        <div className="flex flex-col gap-3 sm:flex-row">
-          <select
-            value={statusFilter}
-            onChange={(e) => {
-              setStatusFilter(e.target.value);
-              setOffset(0);
-            }}
-            className="rounded-xl border border-dark-700 bg-dark-800 px-3 py-2 text-dark-100"
-          >
-            <option value="">{t('admin.users.filters.allStatuses')}</option>
-            <option value="active">{t('admin.users.status.active')}</option>
-            <option value="blocked">{t('admin.users.status.blocked')}</option>
-            <option value="deleted">{t('admin.users.status.deleted')}</option>
-          </select>
-          <select
-            value={sortBy}
-            onChange={(e) => {
-              setSortBy(e.target.value);
-              setOffset(0);
-            }}
-            className="rounded-xl border border-dark-700 bg-dark-800 px-3 py-2 text-dark-100"
-          >
-            <option value="created_at">{t('admin.users.filters.byDate')}</option>
-            <option value="balance">{t('admin.users.filters.byBalance')}</option>
-            <option value="last_activity">{t('admin.users.filters.byActivity')}</option>
-            <option value="total_spent">{t('admin.users.filters.bySpent')}</option>
-            <option value="subscription_end_date">{t('admin.users.filters.byExpiry')}</option>
-          </select>
-        </div>
-      </div>
+      {usersQuery.isFetchingNextPage && (
+        <SkeletonGroup className="mt-2">
+          <Skeleton variant="card" className="h-16" />
+        </SkeletonGroup>
+      )}
+      <div ref={sentinelRef} aria-hidden="true" className="h-px" />
+      {!usersQuery.isLoading && !usersQuery.hasNextPage && users.length > 0 && (
+        <p className="py-6 text-center text-sm text-dark-500">
+          {t('admin.users.endOfList', { count: users.length, total: number(users.length, locale) })}
+        </p>
+      )}
 
-      {/* Users list */}
-      <div className="mb-4 space-y-2">
-        {loading ? (
-          <SkeletonGroup className="space-y-3">
-            <Skeleton variant="card" count={3} className="h-16" />
-          </SkeletonGroup>
-        ) : users.length === 0 ? (
-          <div className="py-12 text-center text-dark-400">{t('admin.users.noData')}</div>
-        ) : (
-          users.map((user) => (
-            <UserRow
-              key={user.id}
-              user={user}
-              onClick={() => navigate(`/admin/users/${user.id}`)}
-              formatAmount={(amount) => formatWithCurrency(amount)}
-            />
-          ))
-        )}
-      </div>
-
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between">
-          <div className="text-sm text-dark-400">
-            {t('admin.users.pagination.showing', {
-              from: offset + 1,
-              to: Math.min(offset + limit, total),
-              total,
-            })}
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setOffset(Math.max(0, offset - limit))}
-              disabled={offset === 0}
-              className="rounded-lg border border-dark-700 bg-dark-800 p-2 transition-colors hover:bg-dark-700 disabled:opacity-50"
-            >
-              <ChevronLeftIcon />
-            </button>
-            <span className="px-3 py-2 text-dark-300">
-              {currentPage} / {totalPages}
-            </span>
-            <button
-              onClick={() => setOffset(offset + limit)}
-              disabled={offset + limit >= total}
-              className="rounded-lg border border-dark-700 bg-dark-800 p-2 transition-colors hover:bg-dark-700 disabled:opacity-50"
-            >
-              <ChevronRightIcon />
-            </button>
-          </div>
-        </div>
+      {showToTop && (
+        <button
+          type="button"
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          className="btn-secondary fixed bottom-24 right-4 z-20 shadow-lg md:bottom-6 md:right-6"
+        >
+          <ArrowRightIcon className="h-4 w-4 -rotate-90" />
+          {t('admin.users.toTop')}
+        </button>
       )}
     </div>
   );

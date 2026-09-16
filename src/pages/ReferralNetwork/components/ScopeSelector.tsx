@@ -304,7 +304,8 @@ export function ScopeSelector({
           )}
 
           {/* Tab bar + search input */}
-          <div className="flex items-center gap-2 border-b border-dark-700/50 px-3 py-2">
+          {/* На телефоне поиск строкой ниже вкладок: рядом с ними ему оставалось 0 px. */}
+          <div className="flex flex-wrap items-center gap-2 border-b border-dark-700/50 px-3 py-2">
             <div
               className="flex shrink-0 rounded-lg border border-dark-700/50 bg-dark-900 p-0.5"
               role="tablist"
@@ -326,7 +327,7 @@ export function ScopeSelector({
               ))}
             </div>
 
-            <div className="relative min-w-0 flex-1">
+            <div className="relative min-w-0 flex-1 basis-40">
               <SearchIcon className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-dark-500" />
               <input
                 ref={inputRef}

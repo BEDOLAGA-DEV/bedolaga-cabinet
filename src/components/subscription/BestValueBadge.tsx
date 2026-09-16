@@ -23,3 +23,16 @@ export function BestValueBadge({ className }: { className?: string }) {
 
 /** Цвет рамки выделенного периода — тот же токен, что и у отметки. */
 export const BEST_VALUE_BORDER = 'rgb(var(--color-urgent-400))';
+
+/**
+ * Рамка отмеченного варианта — одна на все витрины: золотой контур снаружи,
+ * а у выбранного ещё и кольцо выбора внутри. Выбор не затирает золото, иначе
+ * подсказка пропадала ровно у того варианта, к которому вела. Плашку при этом
+ * ставить первой строкой карточки. Продление рисует то же самое через
+ * BEST_VALUE_BORDER — там стили карточки инлайновые.
+ */
+export function bestValueFrame(selected: boolean): string {
+  return selected
+    ? 'border-2 border-urgent-400 ring-2 ring-inset ring-accent-500'
+    : 'border-2 border-urgent-400';
+}

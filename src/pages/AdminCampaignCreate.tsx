@@ -2,12 +2,13 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import { transliterate } from '../utils/transliterate';
 import {
   campaignsApi,
-  CampaignCreateRequest,
-  CampaignBonusType,
-  ServerSquadInfo,
-  TariffListItem,
+  type CampaignCreateRequest,
+  type CampaignBonusType,
+  type ServerSquadInfo,
+  type TariffListItem,
 } from '../api/campaigns';
 import { partnerApi } from '../api/partners';
 import { AdminBackButton } from '../components/admin';
@@ -78,7 +79,7 @@ function ServerSelector({
             }`}
           >
             <div
-              className={`flex h-5 w-5 items-center justify-center rounded ${
+              className={`flex h-5 w-5 shrink-0 items-center justify-center rounded ${
                 selected.includes(server.squad_uuid)
                   ? 'bg-accent-500 text-on-accent'
                   : 'bg-dark-600'
@@ -86,8 +87,8 @@ function ServerSelector({
             >
               {selected.includes(server.squad_uuid) && <CheckIcon />}
             </div>
-            <span className="text-sm font-medium">
-              <Twemoji options={{ className: 'twemoji', folder: 'svg', ext: '.svg' }}>
+            <span className="min-w-0 text-sm font-medium [overflow-wrap:anywhere]">
+              <Twemoji tag="span" options={{ className: 'twemoji', folder: 'svg', ext: '.svg' }}>
                 {server.display_name}
               </Twemoji>
             </span>
@@ -137,8 +138,7 @@ function TariffSelector({
 }
 
 function slugify(text: string): string {
-  return text
-    .toLowerCase()
+  return transliterate(text)
     .replace(/[^a-z0-9]+/gi, '_')
     .replace(/^_|_$/g, '')
     .slice(0, 30);

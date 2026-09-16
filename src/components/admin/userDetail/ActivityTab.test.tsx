@@ -1,13 +1,17 @@
 // @vitest-environment jsdom
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { afterEach, beforeEach, expect, it, vi } from 'vitest';
+import type { ReactElement, ReactNode } from 'react';
+import { MemoryRouter } from 'react-router';
+import { afterEach, beforeAll, beforeEach, expect, it, vi } from 'vitest';
 import type { UserActivityItem, UserActivityResponse } from '@/api/adminUsers';
+import { installMatchMedia } from '@/components/admin/reachability/testUtils';
+import { PlatformProvider } from '@/platform/PlatformProvider';
 
 /**
- * Вкладка «Активность» показывает след человека по-человечески: открытый экран —
- * как экран с его названием, действие в кабинете — как действие, записи
- * Mini App — не сырой строкой «miniapp_action», а с подписью и источником.
- * Фильтр «Клики» включает и Mini App.
+ * «Активность» пишет след человека по-человечески: заголовок — что произошло,
+ * подпись — одна полезная деталь. Сырых кодов («successful_payment»,
+ * «GRACE_GRANTED», «miniapp_action») и бейджей источника на экране нет.
  */
 
 vi.mock('react-i18next', async () =>
@@ -39,8 +43,16 @@ const response: UserActivityResponse = {
       title: 'Скопировать ключ',
     }),
     item({ type: 'button_click', subtype: 'message', source: 'bot', title: 'photo' }),
+    item({ type: 'event', subtype: 'grace_granted', title: 'Выдан временный доступ' }),
+    item({
+      type: 'transaction',
+      subtype: 'subscription_payment',
+      title: 'Продление 90 дней',
+      amount_kopeks: -212500,
+      meta: { payment_method: 'balance' },
+    }),
   ],
-  total: 7,
+  total: 9,
   offset: 0,
   limit: 25,
 };
@@ -51,10 +63,12 @@ vi.mock('@/api/adminUsers', () => ({
       requested.push(types ?? 'all');
       return Promise.resolve(response);
     },
+    getUserGifts: () =>
+      Promise.resolve({ sent: [], received: [], sent_total: 0, received_total: 0 }),
   },
 }));
 
-import { ActivityTab } from './ActivityTab';
+import { ActivityHub, type ActivityView } from './ActivityHub';
 
 function item(partial: Partial<UserActivityItem>): UserActivityItem {
   return {
@@ -69,36 +83,73 @@ function item(partial: Partial<UserActivityItem>): UserActivityItem {
   } as UserActivityItem;
 }
 
+function Hub({
+  view = 'all',
+  onViewChange = () => {},
+}: {
+  view?: ActivityView;
+  onViewChange?: (v: ActivityView) => void;
+}) {
+  return (
+    <ActivityHub userId={7} view={view} onViewChange={onViewChange} onNavigateToUser={() => {}} />
+  );
+}
+
+/** Провайдеры запросов, платформы и роутера — обёрткой, чтобы `rerender` их не терял. */
+function renderHub(ui: ReactElement) {
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  const wrapper = ({ children }: { children: ReactNode }) => (
+    <QueryClientProvider client={client}>
+      <PlatformProvider>
+        <MemoryRouter>{children}</MemoryRouter>
+      </PlatformProvider>
+    </QueryClientProvider>
+  );
+  return render(ui, { wrapper });
+}
+
+beforeAll(installMatchMedia);
 beforeEach(() => {
   requested.length = 0;
 });
 afterEach(cleanup);
 
-it('экраны и действия подписаны по-человечески, Mini App не сырой строкой', async () => {
-  render(<ActivityTab userId={7} formatDate={(d) => String(d)} />);
+it('заголовок и одна подпись — по-человечески, без сырых кодов', async () => {
+  renderHub(<Hub />);
 
-  expect(await screen.findAllByText('Открыл экран')).toHaveLength(2);
-  expect(screen.getAllByText('Подписка')).toHaveLength(2);
-  expect(screen.getByText('Активация триала')).toBeTruthy();
+  expect(await screen.findByText('Активация триала')).toBeTruthy();
+  expect(screen.getAllByText('Открыл экран')).toHaveLength(2);
   // Незнакомое действие — как есть, но не пропадает.
   expect(screen.getByText('POST /cabinet/unknown/thing')).toBeTruthy();
+  // Оплата в боте — словом, служебная строка не видна.
   expect(screen.getByText('Оплата')).toBeTruthy();
-  expect(screen.getByText('Mini App')).toBeTruthy();
-  expect(screen.queryByText('miniapp_action')).toBeNull();
-  // Нажатие — заголовок «Нажал» и подпись кнопки; сообщение — вид без содержимого.
-  expect(screen.getByText('Нажал')).toBeTruthy();
+  expect(screen.queryByText('successful_payment')).toBeNull();
+  // Нажатие — подпись кнопки и «Нажал»; сообщение — вид без содержимого.
   expect(screen.getByText('Скопировать ключ')).toBeTruthy();
-  expect(screen.getByText('Сообщение боту')).toBeTruthy();
+  expect(screen.getByText('Нажал')).toBeTruthy();
   expect(screen.getByText('фото')).toBeTruthy();
+  // Событие без бейджа подтипа, трата — со знаком минус и способом оплаты.
+  expect(screen.getByText('Выдан временный доступ')).toBeTruthy();
+  expect(screen.queryByText(/grace_granted/i)).toBeNull();
+  expect(screen.getByText('Продление 90 дней')).toBeTruthy();
+  expect(screen.getByText('с баланса')).toBeTruthy();
+  expect(screen.getByText(/^−2\s?125/)).toBeTruthy();
+  expect(screen.queryByText('miniapp_action')).toBeNull();
+  expect(screen.queryByText('Mini App')).toBeNull();
 });
 
-it('фильтр «Клики» запрашивает и Mini App', async () => {
-  render(<ActivityTab userId={7} formatDate={(d) => String(d)} />);
-  await screen.findAllByText('Открыл экран');
+it('фильтр «Действия» запрашивает нажатия бота и кабинета вместе', async () => {
+  const onViewChange = vi.fn();
+  const { rerender } = renderHub(<Hub onViewChange={onViewChange} />);
+  await screen.findByText('Активация триала');
 
-  fireEvent.click(screen.getByText('Клики'));
+  fireEvent.click(screen.getByRole('radio', { name: 'Действия' }));
+  expect(onViewChange).toHaveBeenCalledWith('actions');
 
+  rerender(<Hub view="actions" onViewChange={onViewChange} />);
   await waitFor(() =>
-    expect(requested[requested.length - 1]).toBe('button_click,cabinet_action,miniapp_action'),
+    expect(requested[requested.length - 1]).toBe(
+      'button_click,cabinet_action,miniapp_action,wheel_spin,poll',
+    ),
   );
 });

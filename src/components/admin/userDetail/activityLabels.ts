@@ -194,3 +194,117 @@ export function describeItem(item: UserActivityItem, t: Translate): ItemDescript
     : t(`${NS}.types.${item.type}`, { defaultValue: '' }) || item.type;
   return { typeLabel, title: humanTitle(item, t), showSubtype: !headline && !!item.subtype };
 }
+
+/** Подтипы транзакций-трат: красные и со знаком минус. */
+const EXPENSE_SUBTYPES = new Set(['withdrawal', 'subscription_payment', 'gift_payment']);
+
+export interface ActivityLine {
+  /** Что произошло — по-человечески: «Продление 90 дней», «Подписка», «Вход в кабинет». */
+  title: string;
+  /** Одна полезная подпись: способ оплаты, устройство, «Открыл экран». Сырых кодов здесь нет. */
+  detail: string | null;
+  /** Сумма в рублях со знаком: трата отрицательная. */
+  amountRubles: number | null;
+  /** Номер тикета — строка ведёт в переписку. */
+  ticketId: number | null;
+}
+
+/** Подпись подтипа, только если она есть в словаре: незнакомый код на экран не попадает. */
+function knownSubtype(item: UserActivityItem, t: Translate): string | null {
+  if (!item.subtype) return null;
+  return t(`${NS}.subtypes.${item.subtype}`, { defaultValue: '' }) || null;
+}
+
+function typeLabel(type: string, t: Translate): string {
+  return t(`${NS}.types.${type}`, { defaultValue: '' }) || t(`${NS}.types.event`);
+}
+
+function signedAmount(item: UserActivityItem): number | null {
+  if (item.amount_kopeks == null || item.amount_kopeks === 0) return null;
+  const rubles = Math.abs(item.amount_kopeks) / 100;
+  const expense =
+    item.amount_kopeks < 0 ||
+    item.type === 'withdrawal' ||
+    item.type === 'gift_sent' ||
+    (item.type === 'transaction' && !!item.subtype && EXPENSE_SUBTYPES.has(item.subtype));
+  return expense ? -rubles : rubles;
+}
+
+/** Экран, нажатие, действие в кабинете: имя экрана/действия и что это было. */
+function describeWeb(
+  item: UserActivityItem,
+  t: Translate,
+  base: Pick<ActivityLine, 'amountRubles' | 'ticketId'>,
+): ActivityLine {
+  const { typeLabel: action, title } = describeItem(item, t);
+  return { ...base, title: title ?? action, detail: title ? action : null };
+}
+
+/**
+ * Строка ленты: заголовок и одна подпись вместо «Транзакция · ОПЛАТА ПОДПИСКИ · WEB».
+ * Одно место для «Обзора» и вкладки «Активность».
+ */
+export function describeActivity(
+  item: UserActivityItem,
+  t: Translate,
+  methodLabel: (method: string) => string | null,
+): ActivityLine {
+  const amountRubles = signedAmount(item);
+  const base = { amountRubles, ticketId: null };
+  const meta = item.meta ?? {};
+
+  switch (item.type) {
+    case 'transaction': {
+      const method =
+        typeof meta.payment_method === 'string' ? methodLabel(meta.payment_method) : null;
+      return {
+        ...base,
+        title: item.title || knownSubtype(item, t) || typeLabel(item.type, t),
+        detail: method,
+      };
+    }
+    case 'event':
+      return {
+        ...base,
+        title: item.title || knownSubtype(item, t) || typeLabel(item.type, t),
+        detail: null,
+      };
+    case 'ticket':
+      return {
+        ...base,
+        title: item.title || typeLabel(item.type, t),
+        detail: [typeLabel(item.type, t), knownSubtype(item, t)?.toLowerCase()]
+          .filter(Boolean)
+          .join(', '),
+        ticketId: typeof meta.ticket_id === 'number' ? meta.ticket_id : null,
+      };
+    case 'cabinet_login':
+      return { ...base, title: typeLabel(item.type, t), detail: item.title };
+    case 'button_click':
+      // Оплата в боте — служебная запись вида «successful_payment»: хватит слова «Оплата».
+      if (item.subtype === 'payment') {
+        return {
+          ...base,
+          title: knownSubtype(item, t) || typeLabel(item.type, t),
+          detail: typeLabel(item.type, t),
+        };
+      }
+      if (item.subtype === 'command') {
+        return {
+          ...base,
+          title: knownSubtype(item, t) || typeLabel(item.type, t),
+          detail: item.title,
+        };
+      }
+      return describeWeb(item, t, base);
+    case 'cabinet_action':
+    case 'miniapp_action':
+      return describeWeb(item, t, base);
+    default:
+      return {
+        ...base,
+        title: typeLabel(item.type, t),
+        detail: item.title || knownSubtype(item, t),
+      };
+  }
+}
