@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.76.1](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.76.0...v1.76.1) (2026-09-16)
+
+
+### Bug Fixes
+
+* в строке списка видно временный доступ и сколько у человека тарифов ([29c54f4](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/29c54f431b169a934fc1d58b49f1c8fd5db1400f))
+* зелёная точка «в сети» гаснет сама, без ответа сервера ([051a8d8](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/051a8d8a2a63201e515e035d579b87d962465850))
+* карточка сверки объясняет временный доступ вместо «Есть отличия» ([3e443f6](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/3e443f6cfc48045ddab956ef4a1629495c8a949b))
+* отказ сброса триала объясняется словами, а не английской строкой ([82bf3ac](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/82bf3ac074d64ef921f008986346f8279704afd3))
+* телефон — пометка временного доступа, клавиша ввода в поиске, кнопка «Наверх» ([82326b0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/82326b09e04aa9badf70171bc528077cb8ce77c7))
+
 ## [1.76.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.75.0...v1.76.0) (2026-09-15)
 
 
