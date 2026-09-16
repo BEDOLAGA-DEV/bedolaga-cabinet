@@ -188,7 +188,9 @@ export default function TrialOfferCard({
             <span
               className={`font-display text-sm font-semibold ${canAfford ? 'text-success-400' : 'text-warning-400'}`}
             >
-              {formatAmount(balanceRubles)} {currencySymbol}
+              {formatAmount(balanceRubles)}
+              {'\u00A0'}
+              {currencySymbol}
             </span>
           </div>
           {!canAfford && (

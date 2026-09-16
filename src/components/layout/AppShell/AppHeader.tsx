@@ -323,7 +323,9 @@ export function AppHeader({
             <div className="mx-auto max-w-6xl py-4 pl-[max(1rem,env(safe-area-inset-left,0px))] pr-[max(1rem,env(safe-area-inset-right,0px))]">
               {/* User info */}
               <div className="mb-4 flex items-center justify-between border-b border-dark-800/50 pb-4">
-                <div className="flex items-center gap-3">
+                {/* min-w-0 — иначе truncate у имени не срабатывал, и длинное имя
+                    уходило за правый край экрана. */}
+                <div className="flex min-w-0 flex-1 items-center gap-3">
                   {/* Заглушка — через состояние, а не правкой DOM: прежний onError прятал
                       картинку руками, и любой ре-рендер возвращал класс hidden заглушке,
                       оставляя пустое место. */}
@@ -331,11 +333,11 @@ export function AppHeader({
                     <img
                       src={avatar.src}
                       alt="Avatar"
-                      className="h-10 w-10 rounded-full object-cover"
+                      className="h-10 w-10 shrink-0 rounded-full object-cover"
                       onError={avatar.onError}
                     />
                   ) : (
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-dark-700">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-dark-700">
                       <UserIcon className="h-5 w-5" />
                     </div>
                   )}

@@ -260,7 +260,7 @@ export default function AdminPromocodeCreate() {
         {!capabilities.hasBackButton && (
           <button
             onClick={() => navigate('/admin/promocodes')}
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
           >
             <BackIcon />
           </button>
@@ -635,7 +635,7 @@ export default function AdminPromocodeCreate() {
         {validationErrors.length > 0 && (
           <div className="rounded-lg border border-error-500/30 bg-error-500/10 p-3">
             <p className="mb-1 text-sm font-medium text-error-400">
-              {t('admin.tariffs.cannotSave')}
+              {t('admin.promocodes.cannotSave')}
             </p>
             <ul className="list-inside list-disc space-y-1 text-xs text-error-300">
               {validationErrors.map((error) => (

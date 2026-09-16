@@ -99,10 +99,10 @@ function SortableLandingCard({
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0 flex-1">
               <div className="mb-1 flex flex-wrap items-center gap-1.5 sm:gap-2">
-                <h3 className="truncate font-medium text-dark-100">
+                <h3 className="min-w-0 font-medium text-dark-100 [overflow-wrap:anywhere]">
                   {resolveLocaleDisplay(landing.title)}
                 </h3>
-                <span className="shrink-0 rounded bg-dark-800 px-2 py-0.5 text-xs text-dark-400">
+                <span className="min-w-0 max-w-full rounded bg-dark-800 px-2 py-0.5 text-xs text-dark-400 break-all">
                   {landing.slug}
                 </span>
                 {landing.is_active ? (
@@ -398,7 +398,7 @@ export default function AdminLandings() {
           {!capabilities.hasBackButton && (
             <button
               onClick={() => navigate('/admin')}
-              className="flex h-10 w-10 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
             >
               <BackIcon />
             </button>

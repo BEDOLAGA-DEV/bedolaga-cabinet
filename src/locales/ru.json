@@ -37,7 +37,36 @@
     "no_results": "Ничего не найдено",
     "ok": "ОК",
     "processing": "Обработка…",
-    "rangeTo": "до"
+    "rangeTo": "до",
+    "relative": {
+      "online": "онлайн",
+      "now": "только что",
+      "never": "не было",
+      "minutes_one": "{{count}} мин назад",
+      "minutes_few": "{{count}} мин назад",
+      "minutes_many": "{{count}} мин назад",
+      "hours_one": "{{count}} ч назад",
+      "hours_few": "{{count}} ч назад",
+      "hours_many": "{{count}} ч назад",
+      "days_one": "{{count}} день назад",
+      "days_few": "{{count}} дня назад",
+      "days_many": "{{count}} дней назад",
+      "weeks_one": "{{count}} нед назад",
+      "weeks_few": "{{count}} нед назад",
+      "weeks_many": "{{count}} нед назад",
+      "months_one": "{{count}} мес назад",
+      "months_few": "{{count}} мес назад",
+      "months_many": "{{count}} мес назад",
+      "yesterday": "вчера"
+    },
+    "clear": "Очистить",
+    "dayTime": {
+      "today": "сегодня, {{time}}",
+      "yesterday": "вчера, {{time}}"
+    }
+  },
+  "navShort": {
+    "wheel": "Колесо"
   },
   "nav": {
     "dashboard": "Главная",
@@ -368,6 +397,9 @@
     "expiresAt": "Действует до",
     "daysLeft": "Осталось дней",
     "devices": "Устройства",
+    "devicesWord_one": "устройство",
+    "devicesWord_few": "устройства",
+    "devicesWord_many": "устройств",
     "devices_one": "{{count}} устройство",
     "devices_few": "{{count}} устройства",
     "devices_many": "{{count}} устройств",
@@ -466,7 +498,7 @@
     "currentTariff": "Текущий",
     "from": "от",
     "month": "мес",
-    "insufficientBalance": "Недостаточно средств. Не хватает {{missing}} ₽",
+    "insufficientBalance": "Недостаточно средств. Не хватает {{missing}} ₽",
     "trial": {
       "title": "Бесплатный пробный период",
       "titlePaid": "Пробная подписка",
@@ -733,7 +765,7 @@
       "statusActive": "Активен",
       "statusPastDue": "Платёж не прошёл — попробуйте снова",
       "nextCharge": "следующее списание {{date}}",
-      "amountPerInterval": "{{amount}} ₽ {{interval}}",
+      "amountPerInterval": "{{amount}} ₽ {{interval}}",
       "interval": {
         "day": "ежедневно",
         "week": "еженедельно",
@@ -757,8 +789,8 @@
       "statusActive": "Активно",
       "statusPastDue": "Платёж не прошёл — попробуйте снова",
       "nextCharge": "следующее списание {{date}}",
-      "amountPerPeriod": "{{amount}} ₽ {{period}}",
-      "amountPerDays": "{{amount}} ₽ раз в {{days}} дн.",
+      "amountPerPeriod": "{{amount}} ₽ {{period}}",
+      "amountPerDays": "{{amount}} ₽ раз в {{days}} дн.",
       "period": {
         "day": "ежедневно",
         "week": "еженедельно",
@@ -781,8 +813,12 @@
       "connectedDevices": "Подключённые устройства",
       "disconnect": "Отключить",
       "addSlots": "Добавить слоты",
-      "limitExplained": "Тариф «{{name}}» даёт {{count}} слота, и все заняты. Освободите слот или добавьте ещё.",
-      "limitExplainedNoTopup": "Тариф «{{name}}» даёт {{count}} слота, и все заняты. Освободите занятый слот.",
+      "limitExplained_one": "Тариф «{{name}}» даёт {{count}} слот, и он занят. Освободите его или добавьте ещё.",
+      "limitExplained_few": "Тариф «{{name}}» даёт {{count}} слота, и все заняты. Освободите слот или добавьте ещё.",
+      "limitExplained_many": "Тариф «{{name}}» даёт {{count}} слотов, и все заняты. Освободите слот или добавьте ещё.",
+      "limitExplainedNoTopup_one": "Тариф «{{name}}» даёт {{count}} слот, и он занят. Освободите его.",
+      "limitExplainedNoTopup_few": "Тариф «{{name}}» даёт {{count}} слота, и все заняты. Освободите занятый слот.",
+      "limitExplainedNoTopup_many": "Тариф «{{name}}» даёт {{count}} слотов, и все заняты. Освободите занятый слот.",
       "noTopupHint": "На тестовой подписке слоты докупить нельзя — освободите занятый или оформите платный тариф."
     },
     "delete": "Удалить",
@@ -903,6 +939,11 @@
     "withdrawal": "Списание",
     "subscriptionPayment": "Оплата подписки",
     "referralReward": "Реферальный бонус",
+    "refund": "Возврат",
+    "failedRefund": "Неудачный возврат",
+    "pollReward": "Награда за опрос",
+    "giftPayment": "Оплата подарка",
+    "otherOperation": "Операция",
     "minAmount": "Мин.",
     "maxAmount": "Макс.",
     "notAvailable": "Недоступно",
@@ -915,7 +956,7 @@
       "activate": "Активировать",
       "activating": "Активация...",
       "success": "Промокод успешно активирован!",
-      "balanceAdded": "На баланс начислено: {{amount}} ₽",
+      "balanceAdded": "На баланс начислено: {{amount}} ₽",
       "errors": {
         "not_found": "Промокод не найден",
         "expired": "Срок действия промокода истёк",
@@ -936,8 +977,8 @@
       "daysLeft": "Осталось дней: {{count}}",
       "selectSubscription": "Выберите подписку"
     },
-    "minAmountError": "Минимальная сумма: {{amount}} ₽",
-    "maxAmountError": "Максимальная сумма: {{amount}} ₽",
+    "minAmountError": "Минимальная сумма: {{amount}} ₽",
+    "maxAmountError": "Максимальная сумма: {{amount}} ₽",
     "paymentOption": "Способ оплаты",
     "selectPaymentOption": "Выберите способ оплаты",
     "selectPaymentMethod": "Выберите способ оплаты",
@@ -979,7 +1020,7 @@
       "rateLimit": "Подождите {{seconds}} сек.",
       "selectMethod": "Выберите способ",
       "enterAmount": "Введите сумму",
-      "amountRange": "Сумма: {{min}} – {{max}} ₽"
+      "amountRange": "Сумма: {{min}} – {{max}} ₽"
     },
     "paymentSuccess": {
       "title": "Оплата прошла успешно",
@@ -1221,6 +1262,7 @@
       "closed": "Закрыт"
     },
     "attachImage": "Прикрепить изображение",
+    "downloadFile": "Скачать файл",
     "invalidFileType": "Неверный тип файла. Используйте JPEG, PNG, GIF или WebP.",
     "fileTooLarge": "Файл слишком большой. Максимальный размер 10МБ.",
     "uploadFailed": "Не удалось загрузить изображение",
@@ -1855,12 +1897,12 @@
       "minAmount": "Мин. сумма (коп.)",
       "maxAmount": "Макс. сумма (коп.)",
       "quickAmounts": "Быстрые суммы (₽)",
-      "quickAmountsHint": "Кнопки быстрого выбора суммы пополнения. Пусто — используются значения по умолчанию: {{defaults}} ₽",
+      "quickAmountsHint": "Кнопки быстрого выбора суммы пополнения. Пусто — используются значения по умолчанию: {{defaults}} ₽",
       "quickAmountsPlaceholder": "Сумма в рублях",
       "quickAmountsAdd": "Добавить",
       "quickAmountsInvalid": "Введите положительную сумму в рублях",
       "quickAmountsLimit": "Не более 10 сумм",
-      "quickAmountsRemove": "Удалить сумму {{value}} ₽",
+      "quickAmountsRemove": "Удалить сумму {{value}} ₽",
       "overpayCertTitle": "Сертификат mTLS (Overpay)",
       "overpayCertValid": "✅ Действует до {{date}}",
       "overpayCertExpired": "⚠️ Срок действия истёк {{date}}",
@@ -2729,7 +2771,13 @@
           "active": "Активен",
           "worth": "Стоимость",
           "probability": "Ручная вероятность (0–1)",
-          "probabilityHint": "Пусто — авто по RTP"
+          "probabilityHint": "Пусто — авто по RTP",
+          "displayNamePlaceholder": "Например: 7 дней бесплатно",
+          "valueUnits": {
+            "kopeks": "в копейках",
+            "days": "в днях",
+            "gb": "в ГБ"
+          }
         },
         "promo": {
           "title": "Настройки промокода",
@@ -3628,7 +3676,7 @@
     },
     "graceAccess": {
       "title": "Grace-доступ",
-      "subtitle": "Временный ограниченный доступ, чтобы человек успел продлить подписку",
+      "subtitle": "Подписка закончилась, а связь с самым нужным осталась, чтобы человек смог продлить",
       "loadError": "Не удалось загрузить настройки grace-доступа",
       "saveError": "Не удалось сохранить настройки",
       "save": "Сохранить",
@@ -3650,19 +3698,19 @@
       "modes": {
         "false": {
           "label": "Выключен",
-          "desc": "Grace-сессии не выдаются и не завершаются"
+          "desc": "Grace не работает. Переключать сюда только когда открытых сессий нет — иначе люди останутся в скваде grace навсегда"
         },
         "observe": {
           "label": "Наблюдение",
-          "desc": "Кандидаты только записываются в журнал, панель не меняется"
+          "desc": "Пробный запуск: бот только пишет в журнал, кому выдал бы grace. Панель не трогает, доступ никому не даёт"
         },
         "true": {
           "label": "Включён",
-          "desc": "Выдаёт временный доступ и возвращает всё обратно"
+          "desc": "Боевой режим: выдаёт временный доступ, следит за ним и возвращает всё обратно после оплаты или по сроку"
         },
         "drain": {
           "label": "Слив",
-          "desc": "Новых сессий нет, уже открытые доводятся до конца"
+          "desc": "Плавное выключение: новым не выдаёт, а у кого уже есть — доводит до оплаты или до конца срока. Потом можно ставить «Выключен»"
         }
       },
       "restart": {
@@ -3679,7 +3727,8 @@
         "traffic_required": "Лимит трафика должен быть не меньше 1 ГБ",
         "open_sessions_stranded": "Есть незакрытые сессии, а режим их не доводит: в панели останется наложенный доступ. Переключите на «Слив».",
         "number_required": "Не заполнено число: {{field}}",
-        "mode_invalid": "Сохранён неизвестный режим. При старте бот на нём упадёт и оставит grace выключенным — выберите режим заново."
+        "mode_invalid": "Сохранён неизвестный режим. При старте бот на нём упадёт и оставит grace выключенным — выберите режим заново.",
+        "allowed_required": "Не заполнено, что остаётся доступным: без этого сообщение человеку бессмысленно"
       },
       "fields": {
         "mode": "Режим",
@@ -3690,49 +3739,64 @@
         "traffic_gb": "Трафик, ГБ",
         "reconcile_interval_seconds": "Интервал сверки, сек",
         "reconcile_batch_size": "Размер пачки",
-        "candidate_lookback_minutes": "Окно поиска, мин"
+        "candidate_lookback_minutes": "Окно поиска, мин",
+        "allowed_services": "Что остаётся доступным",
+        "notify_admins": "Уведомлять админов",
+        "notify_user": "Сообщать человеку"
       },
       "squads": {
         "title": "Сквады",
-        "hint": "Куда переводится пользователь на время grace-доступа. Исходное состояние сохраняется и возвращается при завершении.",
+        "hint": "Список подтягивается из панели, как и в разделе «Сквады». Бот временно переводит аккаунт в выбранный сквад; пропускать через него только Telegram должна сеть на нодах — бот этого не ограничивает. Можно выбрать один и тот же сквад для обоих случаев, исходные сквады запоминаются и возвращаются при завершении.",
         "choose": "Выберите сквад",
-        "manual": "Указать UUID вручную…",
+        "manual": "Ввести идентификатор вручную…",
         "members": "{{n}} чел.",
-        "unavailable": "Панель недоступна — UUID можно ввести вручную",
-        "expiredDesc": "Применяется, когда срок подписки закончился",
-        "limitedDesc": "Применяется, когда исчерпан лимит трафика"
+        "unavailable": "Панель не отвечает, а синхронизация сквадов ещё не проходила — идентификатор придётся ввести вручную",
+        "expiredDesc": "Когда закончился срок подписки",
+        "limitedDesc": "Когда исчерпан лимит трафика",
+        "synced": "Панель не отвечает — список из последней синхронизации"
       },
       "external": {
-        "detach": "Отцепить",
-        "keep": "Оставить как есть",
-        "custom": "Аварийный сквад",
-        "detachDesc": "На время grace внешний сквад снимается и возвращается при завершении",
-        "keepDesc": "Внешний сквад пользователя не трогаем",
-        "customDesc": "На время grace подставляется указанный сквад"
+        "detach": "Снять на время grace",
+        "keep": "Не трогать",
+        "custom": "Заменить на указанный",
+        "detachDesc": "Внешний сквад у аккаунта снимается, чтобы доступ шёл только через сквад grace, и возвращается при завершении",
+        "keepDesc": "Внешний сквад аккаунта остаётся как есть — доступ через него не ограничивается",
+        "customDesc": "На время grace назначается указанный внешний сквад, потом возвращается прежний",
+        "hint": "Внешний сквад в панели — отдельный профиль подписки с другими хостами и шаблонами (например, под блокировки). Если вы их не используете, оставьте «Снять на время grace».",
+        "squad": "Какой внешний сквад назначить",
+        "unavailable": "Панель не отвечает — идентификатор внешнего сквада придётся ввести вручную"
       },
       "limits": {
-        "title": "Ограничения",
-        "durationDesc": "Сколько действует доступ, если подписку так и не продлили",
-        "trafficDesc": "Лимит трафика на время доступа"
+        "title": "Что получает человек",
+        "durationDesc": "Сколько часов действует временный доступ, если подписку так и не продлили",
+        "trafficDesc": "Сколько новых гигабайт можно потратить за это время: считается поверх уже израсходованного, старый остаток не переносится",
+        "hint": "Пока действует grace, аккаунт в панели активен, но выходит в сеть только через сквад grace.",
+        "allowedDesc": "Так это увидит человек в сообщении бота и в письме: «доступно только: …». Что реально пропускает сквад grace, решают ноды — бот только сообщает.",
+        "allowedPlaceholder": "Telegram и личный кабинет"
       },
       "coverage": {
-        "title": "Кому выдавать",
-        "hint": "По умолчанию grace получают только платные подписки.",
-        "trial_enabled": "Пробные подписки",
-        "trial_enabledDesc": "Выдавать grace после окончания триала",
-        "daily_enabled": "Суточные подписки",
-        "daily_enabledDesc": "Выдавать grace подпискам с посуточной оплатой",
-        "free_enabled": "Бесплатные подписки",
-        "free_enabledDesc": "Выдавать grace подпискам с нулевой стоимостью"
+        "title": "Каким подпискам выдавать",
+        "hint": "Вид подписки определяется по тарифу: пробная → суточная → бесплатная → обычная платная.",
+        "trial_enabled": "Пробный период",
+        "trial_enabledDesc": "После окончания бесплатного пробного периода",
+        "daily_enabled": "Суточные тарифы",
+        "daily_enabledDesc": "Тарифы с посуточным списанием",
+        "free_enabled": "Бесплатные тарифы",
+        "free_enabledDesc": "Тарифы с нулевой ценой",
+        "paid": "Платные тарифы",
+        "paidDesc": "Обычные платные подписки — всегда, пока режим включён",
+        "always": "Всегда"
       },
       "reconcile": {
-        "title": "Фоновая сверка",
-        "hint": "Как часто бот ищет кандидатов и доводит открытые сессии",
+        "title": "Дополнительно",
+        "hint": "Внешний сквад и фоновая сверка — менять редко",
         "show": "Показать",
         "hide": "Скрыть",
         "reconcile_interval_secondsDesc": "Пауза между проходами сверки",
         "reconcile_batch_sizeDesc": "Сколько сессий обрабатывается за один проход",
-        "candidate_lookback_minutesDesc": "Насколько назад ищутся свежие истечения и лимиты"
+        "candidate_lookback_minutesDesc": "Насколько назад ищутся свежие истечения и лимиты",
+        "background": "Фоновая сверка",
+        "backgroundHint": "Как часто бот ищет кандидатов и доводит открытые сессии"
       },
       "health": {
         "title": "Состояние",
@@ -3741,7 +3805,9 @@
         "openErrors": "Ошибок в открытых",
         "completedErrors": "Ошибок в завершённых",
         "recentErrors": "Последние ошибки",
-        "subscription": "Подписка #{{id}}"
+        "subscription": "Подписка #{{id}}",
+        "withErrors": "ошибок: {{n}}",
+        "noErrors": "без ошибок"
       },
       "sessions": {
         "title": "Сессии",
@@ -3782,6 +3848,14 @@
       "fullyLocked": {
         "title": "Раздел открыт только на чтение",
         "body": "Все настройки grace закреплены в .env, поэтому файл перекрывает базу и правки отсюда не применятся. Удалите строки GRACE_ACCESS_* из .env и перезапустите бота, чтобы управлять ими здесь."
+      },
+      "notifications": {
+        "title": "Уведомления",
+        "hint": "Кому сообщать о выдаче и завершении grace. Письма редактируются в разделе «Email-шаблоны».",
+        "notify_admins": "Админам в чат уведомлений",
+        "notify_adminsDesc": "Кому выдано, почему, до какого срока и чем закончилось — в категорию «Продления»",
+        "notify_user": "Человеку в бота и на почту",
+        "notify_userDesc": "Подписка закончилась, но на время оставлен доступ к тому, что указано выше, с кнопкой продления; и когда доступ закрылся"
       }
     },
     "buttons": {
@@ -3948,6 +4022,12 @@
         "checkIntervalRange": "Интервал проверки должен быть от 1 до 1440 мин",
         "reminderCooldownRange": "Кулдаун напоминания должен быть от 0 до 1440 мин",
         "slaMinutesRange": "SLA должен быть от 1 до 10080 мин"
+      },
+      "priorities": {
+        "low": "Низкий",
+        "normal": "Обычный",
+        "high": "Высокий",
+        "urgent": "Срочный"
       }
     },
     "tariffs": {
@@ -4357,7 +4437,32 @@
         "rejectTitle": "Отклонить заявку?",
         "rejectDescription": "При необходимости добавьте комментарий с причиной отклонения.",
         "commentPlaceholder": "Причина отклонения (необязательно)...",
-        "confirmReject": "Подтвердить отклонение"
+        "confirmReject": "Подтвердить отклонение",
+        "risk": {
+          "balance": {
+            "total_earned": "Заработано с рефералов",
+            "own_deposits": "Свои пополнения",
+            "spending": "Потрачено",
+            "referral_spent": "Из них реферальных",
+            "withdrawn": "Уже выведено",
+            "pending": "На рассмотрении",
+            "available_referral": "Доступно реферального",
+            "available_total": "Всего доступно к выводу"
+          },
+          "deposits": {
+            "referral_count": "Рефералов",
+            "paying_referrals": "Платящих рефералов",
+            "total_deposits": "Пополнений рефералов",
+            "total_amount": "Сумма их пополнений"
+          },
+          "recent": {
+            "week": "Начислено за неделю"
+          },
+          "recentTitle": "Активность за неделю",
+          "times_one": "· {{count}} раз",
+          "times_few": "· {{count}} раза",
+          "times_many": "· {{count}} раз"
+        }
       }
     },
     "partners": {
@@ -4701,7 +4806,7 @@
         "applyToAddons": "Применять к дополнительным услугам",
         "default": "По умолчанию",
         "daysShort": "{{days}} дн.",
-        "autoFrom": "Авто от {{amount}} руб.",
+        "autoFrom": "Авто от {{amount}}",
         "members_one": "{{count}} участник",
         "members_few": "{{count}} участника",
         "members_many": "{{count}} участников"
@@ -4722,7 +4827,8 @@
         "discountPercentInvalid": "Процент скидки должен быть от 1 до 100",
         "discountHoursRequired": "Укажите время действия скидки в часах",
         "trafficRequired": "Объём трафика должен быть больше 0"
-      }
+      },
+      "cannotSave": "Невозможно сохранить промокод:"
     },
     "promoGroups": {
       "title": "Группы скидок",
@@ -4734,7 +4840,7 @@
       "traffic": "Трафик",
       "devices": "Устройства",
       "daysShort": "{{days}} дн.",
-      "autoFrom": "Авто от {{amount}} руб.",
+      "autoFrom": "Авто от {{amount}}",
       "members": "{{count}} участников",
       "createTitle": "Создание группы скидок",
       "editTitle": "Редактирование группы",
@@ -4777,13 +4883,9 @@
     "users": {
       "title": "Пользователи",
       "subtitle": "Управление пользователями бота",
-      "search": "Поиск по ID, имени, username...",
-      "searchEmail": "Поиск по email...",
+      "search": "ID, имя, @username или email",
+      "searchShort": "Имя, ID, @ник, email",
       "noData": "Пользователи не найдены",
-      "purchaseCount_one": "{{count}} покупка",
-      "purchaseCount_few": "{{count}} покупки",
-      "purchaseCount_many": "{{count}} покупок",
-      "noPurchases": "Нет покупок",
       "stats": {
         "total": "Всего",
         "active": "Активных",
@@ -4801,15 +4903,12 @@
         "expired": "Истекла"
       },
       "filters": {
-        "allStatuses": "Все статусы",
-        "byDate": "По дате",
-        "byBalance": "По балансу",
-        "byActivity": "По активности",
-        "bySpent": "По расходам",
-        "byExpiry": "По истечению подписки"
-      },
-      "pagination": {
-        "showing": "Показано {{from}}-{{to}} из {{total}}"
+        "title": "Фильтры",
+        "buttonApplied_one": "Фильтры: выбран {{count}}",
+        "buttonApplied_few": "Фильтры: выбрано {{count}}",
+        "buttonApplied_many": "Фильтры: выбрано {{count}}",
+        "reset": "Сбросить",
+        "remove": "Убрать фильтр «{{name}}»"
       },
       "actions": {
         "block": "Заблокировать",
@@ -4837,13 +4936,11 @@
       "userActions": {
         "delete": "Удалить пользователя",
         "resetTrial": "Сбросить триал",
-        "resetSubscription": "Сбросить подписку",
         "disable": "Отключить пользователя",
         "error": "Не удалось выполнить действие",
         "success": {
           "delete": "Пользователь успешно удалён",
           "resetTrial": "Триал успешно сброшен",
-          "resetSubscription": "Подписка успешно сброшена",
           "disable": "Пользователь успешно отключён"
         },
         "confirmDelete": {
@@ -4854,10 +4951,6 @@
           "title": "Сбросить триал?",
           "message": "Пользователь сможет снова воспользоваться пробным периодом."
         },
-        "confirmResetSubscription": {
-          "title": "Сбросить подписку?",
-          "message": "Текущая подписка пользователя будет отменена."
-        },
         "confirmDisable": {
           "title": "Отключить пользователя?",
           "message": "Пользователь не сможет пользоваться сервисом до повторной активации."
@@ -4865,14 +4958,11 @@
       },
       "detail": {
         "tabs": {
-          "info": "Информация",
           "subscription": "Подписка",
           "balance": "Баланс",
-          "sync": "Синхронизация",
-          "tickets": "Тикеты",
-          "gifts": "Подарки",
           "referrals": "Рефералы",
-          "activity": "Активность"
+          "activity": "Активность",
+          "overview": "Обзор"
         },
         "noTickets": "У пользователя нет тикетов",
         "ticketsCount": "тикетов",
@@ -4999,17 +5089,71 @@
           "deleteTitle": "Удаление подписки",
           "deleteHint": "Подписка и её устройства будут удалены безвозвратно",
           "deleteButton": "Удалить подписку",
-          "deleted": "Подписка удалена"
+          "deleted": "Подписка удалена",
+          "extendBy": "на {{count}} дн.",
+          "customDays": "другой срок",
+          "shortenTitle": "Сократить срок",
+          "deviceLimitTitle": "Лимит устройств",
+          "deviceLimitHint": "Максимум по тарифу: {{max}}",
+          "removePackage": "Убрать пакет",
+          "purchasedExtra": "докуплено {{gb}} ГБ",
+          "periodDays": "{{count}} д",
+          "noNodeUsage": "За этот период трафика по нодам не было",
+          "deviceSince": "с {{date}}",
+          "sbpShort": "СБП",
+          "cancelTitle": "Отменить подписку",
+          "cancelButton": "Отменить подписку",
+          "dangerZone": {
+            "title": "Опасная зона",
+            "description": "Отмена обрывает подписку сейчас, удаление стирает её вместе с устройствами из бота и панели."
+          },
+          "support": {
+            "title": "Для поддержки",
+            "hint": "ссылка подписки, ключи, история запросов"
+          },
+          "confirm": {
+            "cancelSubscription": "Отменить подписку? Срок и трафик не вернутся.",
+            "shorten": "Списать {{count}} дн. со срока подписки?",
+            "removePackage": "Убрать пакет {{gb}} ГБ? Трафик из него пропадёт.",
+            "deleteDevice": "Удалить устройство «{{name}}»? Ему придётся подключиться заново.",
+            "resetDevices": "Сбросить все устройства? Всем клиентам придётся подключиться заново.",
+            "cancelSbp": "Отключить автоплатёж по СБП?"
+          },
+          "lastPayment": "Оплачено",
+          "autopay": "Автопродление",
+          "autopayOn": "включено",
+          "autopayOff": "выключено",
+          "extendDays": "Продлить на, дней",
+          "shortenDays": "Списать, дней",
+          "newTariff": "Новый тариф",
+          "package": "Пакет",
+          "devicesLimit_one": "до {{count}} устройства",
+          "devicesLimit_few": "до {{count}} устройств",
+          "devicesLimit_many": "до {{count}} устройств"
         },
         "balance": {
           "current": "Текущий баланс",
-          "amountPlaceholder": "Сумма в рублях",
-          "descriptionPlaceholder": "Описание (опционально)",
+          "amountPlaceholder": "0 ₽",
+          "descriptionPlaceholder": "Например, компенсация за простой",
           "add": "Начислить",
           "subtract": "Списать",
           "addByAdmin": "Начисление админом",
           "subtractByAdmin": "Списание админом",
-          "recentTransactions": "Последние транзакции"
+          "recentTransactions": "Последние транзакции",
+          "title": "Баланс",
+          "changeTitle": "Начислить или списать",
+          "amountLabel": "Сумма",
+          "commentLabel": "Комментарий для журнала",
+          "confirmSubtract": "Списать {{amount}} с баланса?",
+          "confirmDeactivate": "Отключить скидку {{percent}}%?",
+          "discountTitle": "Персональная скидка",
+          "noOffer": "нет активного предложения",
+          "offerFormOpen": "Отправить предложение",
+          "noOperations": "Операций пока не было",
+          "added": "Начислено {{amount}}",
+          "subtracted": "Списано {{amount}}",
+          "offerNow": "Сейчас",
+          "offerValue": "−{{percent}} % до {{date}}"
         },
         "sync": {
           "selectSubscription": "Выберите подписку",
@@ -5059,44 +5203,46 @@
           "balance": "баланс",
           "unknownUser": "Неизвестный",
           "totalSent": "Всего отправлено",
-          "totalReceived": "Всего получено"
+          "totalReceived": "Всего получено",
+          "to": "кому:",
+          "from": "от:",
+          "periodValue_one": "{{count}} день",
+          "periodValue_few": "{{count}} дня",
+          "periodValue_many": "{{count}} дней"
         },
         "referrals": {
-          "referredBy": "Приглашён",
+          "referredBy": "Пригласил",
           "noReferrer": "Реферер не назначен",
           "assignReferrer": "Назначить реферера",
-          "removeReferrer": "Удалить",
+          "removeReferrer": "Отвязать",
           "referrerAssigned": "Реферер назначен",
           "referrerRemoved": "Реферер удалён",
           "totalReferrals": "Всего рефералов",
           "totalEarnings": "Всего заработано",
           "commission": "Комиссия",
           "referralCode": "Реферальный код",
-          "default": "стандарт",
+          "default": "по умолчанию",
           "referralsList": "Рефералы",
           "noReferrals": "Рефералов пока нет",
           "removeReferral": "Удалить реферала",
           "referralRemoved": "Реферал удалён",
-          "addReferral": "Добавить реферала",
+          "add": "Добавить",
           "referralAdded": "Реферал добавлен",
           "searchPlaceholder": "Поиск по имени, email или Telegram ID...",
           "alreadyReferred": "уже чей-то реферал",
-          "noUsersFound": "Пользователи не найдены"
+          "noUsersFound": "Пользователи не найдены",
+          "assign": "Назначить",
+          "invited": "Приглашено",
+          "earned": "Заработано",
+          "code": "Код",
+          "commissionPercent": "Комиссия, %",
+          "commissionSaved": "Комиссия сохранена",
+          "spentHint": "Сколько потратил в сервисе",
+          "confirmRemoveReferrer": "Отвязать пригласившего? Начисления ему по этому человеку прекратятся.",
+          "confirmRemoveReferral": "Убрать {{name}} из рефералов? Начисления по нему прекратятся."
         },
         "activity": {
-          "total": "Всего событий",
           "empty": "Активности пока нет",
-          "filters": {
-            "all": "Все",
-            "payments": "Платежи",
-            "events": "События",
-            "promo": "Промо",
-            "tickets": "Тикеты",
-            "gifts": "Подарки",
-            "referrals": "Рефералы",
-            "logins": "Входы",
-            "clicks": "Клики"
-          },
           "types": {
             "transaction": "Транзакция",
             "event": "Событие",
@@ -5112,7 +5258,7 @@
             "withdrawal": "Заявка на вывод",
             "button_click": "Кнопка в боте",
             "cabinet_action": "Действие в кабинете",
-            "miniapp_action": "Действие в Mini App",
+            "miniapp_action": "Действие в кабинете",
             "screen": "Открыл экран",
             "click": "Нажал",
             "message": "Сообщение боту"
@@ -5120,7 +5266,7 @@
           "sources": {
             "bot": "Бот",
             "cabinet": "Кабинет",
-            "miniapp": "Mini App"
+            "miniapp": "Кабинет"
           },
           "subtypes": {
             "deposit": "Пополнение",
@@ -5235,11 +5381,298 @@
             "contact": "контакт",
             "location": "геопозиция",
             "other": "сообщение"
+          },
+          "views": {
+            "tickets": "Обращения",
+            "gifts": "Подарки",
+            "all": "Всё",
+            "payments": "Оплаты",
+            "subscription": "Подписка",
+            "actions": "Действия",
+            "logins": "Входы"
+          },
+          "fromBalance": "с баланса",
+          "loadError": "Не удалось загрузить активность"
+        },
+        "header": {
+          "copy": "Скопировать",
+          "emailVerified": "подтверждён",
+          "emailUnverified": "не подтверждён",
+          "onlineAt": "онлайн · {{node}}",
+          "write": "Написать",
+          "group": "Группа: {{name}}"
+        },
+        "facts": {
+          "balance": "Баланс",
+          "until": "Подписка до",
+          "days": "{{count}} дн.",
+          "traffic": "Трафик",
+          "devices": "Устройства",
+          "devicesValue": "{{used}} из {{limit}}",
+          "spent": "Потрачено",
+          "noSubscription": "нет",
+          "subscriptions": "Подписки",
+          "subscriptionsLive_one": "{{count}} активная",
+          "subscriptionsLive_few": "{{count}} активные",
+          "subscriptionsLive_many": "{{count}} активных",
+          "noLive": "нет активных",
+          "nearest": "ближайшая до {{date}}",
+          "tariffUntil": "{{tariff}} · до {{date}}"
+        },
+        "menu": {
+          "more": "Ещё действия"
+        },
+        "overview": {
+          "trafficPeriod": "Трафик",
+          "extend": "Продлить",
+          "connection": "Подключение",
+          "now": "Сейчас",
+          "firstConnection": "Подключён с",
+          "devices": "Устройства",
+          "lifetimeTraffic": "За всё время",
+          "noDevices": "нет",
+          "noPanelData": "Панель ещё не видела этого человека",
+          "origin": "Откуда пришёл",
+          "registered": "Регистрация",
+          "campaign": "Кампания",
+          "promoGroup": "Промогруппа",
+          "change": "Изменить",
+          "noPromoGroup": "без группы",
+          "referrer": "Пригласил",
+          "cabinetLogin": "Вход в кабинет",
+          "restrictionsAndSupport": "Ограничения и обращения",
+          "restrictions": "Ограничения",
+          "noRestrictions": "нет",
+          "configure": "Настроить",
+          "restrictTopup": "запрет пополнения",
+          "restrictSubscription": "запрет покупки подписки",
+          "restrictionReason": "Причина (видна только админам)",
+          "tickets": "Тикеты",
+          "open": "Открыть",
+          "gifts": "Подарки",
+          "recent": "Последние события",
+          "allActivity": "Вся активность",
+          "noActivity": "Пока ничего не происходило",
+          "assign": "Назначить",
+          "none": "нет",
+          "list": "Список",
+          "promocodes": "Промокоды",
+          "restrictTopupFull": "Запретить пополнение баланса",
+          "restrictSubscriptionFull": "Запретить покупку подписки",
+          "promocodesUsed_one": "{{count}} использован",
+          "promocodesUsed_few": "{{count}} использовано",
+          "promocodesUsed_many": "{{count}} использовано",
+          "ticketsOpen_one": "{{count}} открытый",
+          "ticketsOpen_few": "{{count}} открытых",
+          "ticketsOpen_many": "{{count}} открытых",
+          "ticketsClosed_one": "{{count}} закрытый",
+          "ticketsClosed_few": "{{count}} закрытых",
+          "ticketsClosed_many": "{{count}} закрытых",
+          "giftsSent_one": "{{count}} отправлен",
+          "giftsSent_few": "{{count}} отправлено",
+          "giftsSent_many": "{{count}} отправлено",
+          "giftsReceived_one": "{{count}} получен",
+          "giftsReceived_few": "{{count}} получено",
+          "giftsReceived_many": "{{count}} получено",
+          "all": "Все",
+          "lastActivity": "Последняя активность"
+        },
+        "restrictionsSaved": "Ограничения обновлены",
+        "panel": {
+          "title": "Панель Remnawave",
+          "matches": "Совпадает",
+          "differs": "Есть отличия",
+          "unknown": "Не проверялось",
+          "checked": "Синхронизировано",
+          "pull": "Из панели в бота",
+          "pushManual": "Из бота в панель",
+          "confirmPull": "Забрать данные из панели в бота? Срок и трафик в базе бота будут перезаписаны.",
+          "confirmPush": "Отправить данные бота в панель? Срок, трафик и сквады в панели будут перезаписаны.",
+          "notLinked": "Нет в панели",
+          "live": "работает",
+          "notLive": "не работает",
+          "pullTitle": "Из панели в бота",
+          "pushTitle": "Из бота в панель",
+          "remnawaveId": "Номер в панели Remnawave",
+          "rows": {
+            "status": "Доступ",
+            "until": "Действует до",
+            "trafficLimit": "Лимит трафика",
+            "trafficUsed": "Расход",
+            "devices": "Устройства",
+            "squads": "Сквады"
           }
-        }
+        },
+        "loadError": "Не удалось загрузить пользователя",
+        "done": {
+          "subscription": {
+            "extend": "Продлено на {{count}} дн. — до {{date}}",
+            "shorten": "Срок сокращён на {{count}} дн. — до {{date}}",
+            "change_tariff": "Тариф сменён",
+            "activate": "Подписка активирована до {{date}}",
+            "cancel": "Подписка отменена",
+            "create": "Подписка выдана до {{date}}"
+          },
+          "pulled": "Данные забраны из панели",
+          "pushed": "Данные отправлены в панель",
+          "promoGroup": "Промогруппа изменена",
+          "blocked": "Пользователь заблокирован",
+          "unblocked": "Пользователь разблокирован",
+          "pulledWithWarning": "В боте срок был позже, чем в панели, — применена дата панели. Проверьте, не было ли автопродления"
+        },
+        "operations": {
+          "title": "Операции",
+          "operation": "Операция",
+          "notCompleted": "не завершена",
+          "filters": {
+            "all": "Все",
+            "deposit": "Пополнения",
+            "withdrawal": "Списания",
+            "subscription_payment": "Покупки"
+          }
+        },
+        "messages_one": "{{count}} сообщение",
+        "messages_few": "{{count}} сообщения",
+        "messages_many": "{{count}} сообщений",
+        "ticketLoadError": "Не удалось открыть обращение"
       },
       "notFound": "Пользователь не найден",
-      "purchaseCount": "Покупок: {{count}}"
+      "summary": {
+        "total_one": "{{value}} человек",
+        "total_few": "{{value}} человека",
+        "total_many": "{{value}} человек",
+        "subscribed": "{{value}} с активной подпиской",
+        "newToday_one": "{{value}} новый сегодня",
+        "newToday_few": "{{value}} новых сегодня",
+        "newToday_many": "{{value}} новых сегодня",
+        "blocked_one": "{{value}} заблокирован",
+        "blocked_few": "{{value}} заблокированы",
+        "blocked_many": "{{value}} заблокировано"
+      },
+      "shown": "Показано {{shown}} из {{total}}",
+      "loadingMore": "Загружаем ещё",
+      "noneFound": "Никого не нашли — попробуйте другой запрос или уберите фильтры",
+      "loadError": "Не удалось загрузить список",
+      "connectedNow": "подключён сейчас",
+      "onlineUnavailable": "Панель не ответила — не удалось узнать, кто сейчас подключён. Попробуйте ещё раз.",
+      "reset": "Сбросить всё",
+      "toTop": "Наверх",
+      "unlimited": "безлимит",
+      "until": "до {{date}}",
+      "sort": {
+        "label": "Сортировка",
+        "expires": "по истечению",
+        "activity": "по активности",
+        "created": "по дате регистрации",
+        "balance": "по балансу",
+        "spent": "по расходам",
+        "traffic": "по трафику",
+        "purchases": "по покупкам"
+      },
+      "views": {
+        "all": "Все",
+        "expiring": "Истекают за {{days}} дней",
+        "traffic": "Трафик на исходе",
+        "nopay": "Без покупок",
+        "online": "Онлайн",
+        "blocked": "Заблокированные"
+      },
+      "viewsLabel": "Выборка",
+      "filterLabels": {
+        "status": "Статус",
+        "sub": "Подписка",
+        "tariff": "Тариф",
+        "group": "Промогруппа",
+        "campaign": "Кампания"
+      },
+      "filterAny": {
+        "status": "любой",
+        "sub": "любая",
+        "tariff": "любой",
+        "group": "любая",
+        "campaign": "любая"
+      },
+      "subFilters": {
+        "active": "активна",
+        "trial": "триал",
+        "expiring": "истекает",
+        "expired": "истекла",
+        "limited": "трафик исчерпан",
+        "none": "нет подписки"
+      },
+      "columns": {
+        "user": "Пользователь",
+        "subscription": "Подписка",
+        "activity": "Активность",
+        "balance": "Баланс"
+      },
+      "statuses": {
+        "active": "Активен",
+        "blocked": "Заблокирован",
+        "deleted": "Удалён",
+        "noSubscription": "Без подписки",
+        "disabled": "Отключена",
+        "pending": "Ожидает оплаты",
+        "other": "Подписка"
+      },
+      "subscriptionChips": {
+        "trial": "Триал · {{count}} дн.",
+        "daysLeft": "{{count}} дн.",
+        "today": "истекает сегодня",
+        "expiredToday": "истекла сегодня",
+        "expiredAgo": "истекла {{count}} дн. назад",
+        "limited": "трафик исчерпан"
+      },
+      "summaryShort": {
+        "total_one": "{{value}}",
+        "total_few": "{{value}}",
+        "total_many": "{{value}}",
+        "subscribed": "{{value}} с подпиской",
+        "newToday_one": "{{value}} новый",
+        "newToday_few": "{{value}} новых",
+        "newToday_many": "{{value}} новых"
+      },
+      "endOfList_one": "Это все: {{total}} человек по запросу",
+      "endOfList_other": "Это все: {{total}} человек по запросу",
+      "endOfList_few": "Это все: {{total}} человека по запросу",
+      "endOfList_many": "Это все: {{total}} человек по запросу",
+      "subscriptionState": {
+        "active": "Активна",
+        "trial": "Триал",
+        "limited": "Трафик исчерпан",
+        "expired": "Истекла",
+        "disabled": "Отключена",
+        "pending": "Ожидает оплаты",
+        "other": "Подписка"
+      },
+      "purchaseCount_one": "{{count}} покупка",
+      "purchaseCount_few": "{{count}} покупки",
+      "purchaseCount_many": "{{count}} покупок",
+      "errors": {
+        "generic": "Не удалось выполнить действие. Попробуйте ещё раз",
+        "insufficientBalance": "На балансе {{current}}, а списать нужно {{requested}}",
+        "tariffTaken": "На этот тариф уже есть живая подписка — продлите её",
+        "singleTariff": "Подписка уже есть. Вторую можно выдать только в мультитарифе",
+        "graceActive": "Сейчас действует временный доступ — дождитесь его конца или восстановите подписку",
+        "badDays": "Укажите количество дней больше нуля",
+        "selfReferrer": "Нельзя назначить человека пригласившим самого себя",
+        "circularReferral": "Так получится круг: этот человек уже в цепочке приглашённых",
+        "noReferrer": "Пригласивший не назначен",
+        "notReferral": "Этот человек не реферал выбранного пользователя",
+        "ownCommission": "Свою реферальную комиссию менять нельзя",
+        "adminProtected": "Это администратор — его нельзя заблокировать",
+        "notInPanel": "Этого человека нет в панели Remnawave",
+        "panelUnreachable": "Не удалось связаться с панелью. Попробуйте позже",
+        "resetNotFinished": "Панель не отключила подписку — сброс не завершён",
+        "noSubscription": "Подписки нет",
+        "noDevices": "Устройств нет",
+        "deviceNotFound": "Устройство уже удалено",
+        "packageNotFound": "Пакет трафика не найден",
+        "tariffNotFound": "Тариф не найден",
+        "promoGroupNotFound": "Промогруппа не найдена",
+        "subscriptionNotFound": "Подписка не найдена",
+        "userNotFound": "Пользователь не найден"
+      }
     },
     "promoOffers": {
       "title": "Промопредложения",
@@ -5548,7 +5981,14 @@
           "email_templates": "Шаблоны писем",
           "pinned_messages": "Закреплённые сообщения",
           "landings": "Лендинги",
-          "updates": "Обновления"
+          "updates": "Обновления",
+          "bulk_actions": "Массовые действия",
+          "coupons": "Купоны",
+          "info_pages": "Справочные страницы",
+          "news": "Новости",
+          "reachability": "Доступность из РФ",
+          "system_errors": "Ошибки системы",
+          "user": "Пользователь"
         },
         "permissionActions": {
           "read": "Чтение",
@@ -5574,7 +6014,10 @@
           "balance": "Баланс",
           "subscription": "Подписка",
           "send_offer": "Промо-предложение",
-          "referral": "Реф. процент"
+          "referral": "Реф. процент",
+          "execute": "Выполнение",
+          "run": "Запуск",
+          "send_message": "Отправка сообщения"
         },
         "toggleSection": "Переключить все права {{section}}",
         "selectedPermissions_one": "{{count}} разрешение выбрано",
@@ -5837,7 +6280,11 @@
         "loadFailed": "Не удалось загрузить журнал аудита",
         "retry": "Попробовать снова"
       },
-      "totalEntries": "Всего записей: {{count}}"
+      "totalEntries": "Всего записей: {{count}}",
+      "actions": {
+        "phantom_claimed": "Вход в заготовленный аккаунт",
+        "phantom_merged": "Слияние заготовленного аккаунта"
+      }
     },
     "landings": {
       "title": "Лендинги",
@@ -5973,7 +6420,8 @@
       "methodMaxAmount": "Максимальная сумма",
       "methodMinAmount": "Минимальная сумма",
       "methodReturnUrl": "URL возврата",
-      "stickyPayButton": "Закреплённая кнопка оплаты"
+      "stickyPayButton": "Закреплённая кнопка оплаты",
+      "stickyPayButtonHint": "Кнопка оплаты прикреплена к низу экрана на телефоне"
     },
     "infoPages": {
       "title": "Информационные страницы",
@@ -6678,6 +7126,7 @@
       "unlink": "Отвязать",
       "unlinkConfirm": "Вы уверены? После отвязки вы не сможете входить через этот сервис.",
       "unlinkConfirmBtn": "Точно отвязать?",
+      "unlinkForgetsEmail": "Вместе с ним будет забыт email {{email}}: он получен от этого сервиса, а пароль для входа по почте не задан.",
       "cannotUnlinkLast": "Нельзя отвязать последний способ входа",
       "linkSuccess": "Аккаунт успешно привязан",
       "unlinkSuccess": "Аккаунт успешно отвязан",
@@ -6737,7 +7186,8 @@
     "ru": "Русский",
     "en": "English",
     "zh": "中文",
-    "fa": "فارسی"
+    "fa": "فارسی",
+    "ua": "Украинский"
   },
   "contests": {
     "title": "Конкурсы",
@@ -6952,7 +7402,7 @@
     "chooseSubscription": "Выберите подписку, которую хотите сохранить",
     "afterMerge": "После объединения",
     "allAuthMethodsMerged": "Все способы входа объединятся",
-    "balanceSummed": "Баланс: {{amount}} ₽ (сумма)",
+    "balanceSummed": "Баланс: {{amount}} ₽ (сумма)",
     "unselectedSubscriptionDeleted": "Невыбранная подписка будет удалена",
     "historyPreserved": "История операций сохранится",
     "confirm": "Объединить аккаунты",

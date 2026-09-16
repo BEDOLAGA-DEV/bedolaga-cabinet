@@ -69,7 +69,7 @@ export default function AdminRoles() {
           {!capabilities.hasBackButton && (
             <button
               onClick={() => navigate('/admin')}
-              className="flex h-10 w-10 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
             >
               <BackIcon />
             </button>
@@ -186,7 +186,7 @@ export default function AdminRoles() {
                     <button
                       onClick={() => navigate(`/admin/roles/${role.id}/edit`)}
                       disabled={!canManageRole(role.level)}
-                      className="flex-1 rounded-lg bg-dark-700 p-2 text-dark-300 transition-colors hover:bg-dark-600 hover:text-dark-100 disabled:cursor-not-allowed disabled:opacity-40 sm:flex-none"
+                      className="flex flex-1 justify-center rounded-lg bg-dark-700 p-2 text-dark-300 transition-colors hover:bg-dark-600 hover:text-dark-100 disabled:cursor-not-allowed disabled:opacity-40 sm:flex-none"
                       title={t('admin.roles.actions.edit')}
                     >
                       <EditIcon />
@@ -196,7 +196,7 @@ export default function AdminRoles() {
                     <button
                       onClick={() => setDeleteConfirm(role.id)}
                       disabled={role.is_system || !canManageRole(role.level)}
-                      className="flex-1 rounded-lg bg-dark-700 p-2 text-dark-300 transition-colors hover:bg-error-500/20 hover:text-error-400 disabled:cursor-not-allowed disabled:opacity-40 sm:flex-none"
+                      className="flex flex-1 justify-center rounded-lg bg-dark-700 p-2 text-dark-300 transition-colors hover:bg-error-500/20 hover:text-error-400 disabled:cursor-not-allowed disabled:opacity-40 sm:flex-none"
                       title={t('admin.roles.actions.delete')}
                     >
                       <TrashIcon className="h-4 w-4" />

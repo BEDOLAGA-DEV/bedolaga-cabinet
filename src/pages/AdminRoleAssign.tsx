@@ -130,9 +130,11 @@ function UserSearchDropdown({
                     <div className="truncate text-sm font-medium text-dark-100">
                       {user.full_name}
                     </div>
-                    <div className="flex items-center gap-2 text-xs text-dark-400">
-                      {user.username && <span>@{user.username}</span>}
-                      <span>ID: {user.telegram_id}</span>
+                    <div className="flex flex-wrap items-center gap-x-2 text-xs text-dark-400">
+                      {user.username && (
+                        <span className="min-w-0 [overflow-wrap:anywhere]">@{user.username}</span>
+                      )}
+                      <span className="whitespace-nowrap">ID: {user.telegram_id}</span>
                     </div>
                   </div>
                 </button>
@@ -340,7 +342,7 @@ export default function AdminRoleAssign() {
         {!capabilities.hasBackButton && (
           <button
             onClick={() => navigate('/admin')}
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
           >
             <BackIcon />
           </button>
@@ -377,7 +379,7 @@ export default function AdminRoleAssign() {
             {/* Role dropdown + Expiry in row */}
             <div className="flex flex-col gap-4 sm:flex-row">
               {/* Role dropdown */}
-              <div className="flex-1">
+              <div className="min-w-0 flex-1">
                 <label
                   htmlFor="assign-role"
                   className="mb-1 block text-sm font-medium text-dark-200"
@@ -405,7 +407,7 @@ export default function AdminRoleAssign() {
               </div>
 
               {/* Expiry date */}
-              <div className="flex-1">
+              <div className="min-w-0 flex-1">
                 <label
                   htmlFor="assign-expires"
                   className="mb-1 block text-sm font-medium text-dark-200"

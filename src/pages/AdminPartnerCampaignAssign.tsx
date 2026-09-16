@@ -83,19 +83,21 @@ export default function AdminPartnerCampaignAssign() {
             <div key={campaign.id} className="rounded-xl border border-dark-700 bg-dark-800 p-4">
               <div className="flex items-center justify-between gap-4">
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium text-dark-100">{campaign.name}</span>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="min-w-0 font-medium text-dark-100 [overflow-wrap:anywhere]">
+                      {campaign.name}
+                    </span>
                     {!campaign.is_active && (
                       <span className="rounded bg-dark-600 px-1.5 py-0.5 text-xs text-dark-400">
                         {t('admin.campaigns.table.inactive')}
                       </span>
                     )}
                   </div>
-                  <div className="mt-1 flex min-w-0 items-center gap-3 text-xs text-dark-500">
-                    <span className="min-w-0 truncate font-mono">
+                  <div className="mt-1 flex min-w-0 flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-dark-500">
+                    <span className="min-w-0 font-mono break-all">
                       ?start={campaign.start_parameter}
                     </span>
-                    <span className="shrink-0">
+                    <span className="whitespace-nowrap">
                       {campaign.registrations_count}{' '}
                       {t('admin.campaigns.overview.registrations').toLowerCase()}
                     </span>
@@ -120,14 +122,16 @@ export default function AdminPartnerCampaignAssign() {
             >
               <div className="flex items-center justify-between gap-4">
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium text-dark-300">{campaign.name}</span>
-                    <span className="rounded bg-purple-500/20 px-1.5 py-0.5 text-xs text-purple-400">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="min-w-0 font-medium text-dark-300 [overflow-wrap:anywhere]">
+                      {campaign.name}
+                    </span>
+                    <span className="min-w-0 max-w-full rounded bg-purple-500/20 px-1.5 py-0.5 text-xs text-purple-400 [overflow-wrap:anywhere]">
                       {campaign.partner_name}
                     </span>
                   </div>
-                  <div className="mt-1 flex items-center gap-3 text-xs text-dark-500">
-                    <span className="font-mono">?start={campaign.start_parameter}</span>
+                  <div className="mt-1 text-xs text-dark-500">
+                    <span className="font-mono break-all">?start={campaign.start_parameter}</span>
                   </div>
                 </div>
               </div>

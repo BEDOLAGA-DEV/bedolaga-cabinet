@@ -61,7 +61,7 @@ export function SortableSelectedMethodCard({
           <GripIcon />
         </button>
         <button onClick={() => setExpanded((v) => !v)} className="min-w-0 flex-1 text-start">
-          <span className="truncate text-sm text-dark-100">{method.display_name}</span>
+          <span className="block truncate text-sm text-dark-100">{method.display_name}</span>
         </button>
         <button
           onClick={() => setExpanded((v) => !v)}

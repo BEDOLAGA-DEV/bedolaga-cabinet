@@ -25,6 +25,10 @@ export interface GraceAccessConfig {
   reconcile_interval_seconds: number;
   reconcile_batch_size: number;
   candidate_lookback_minutes: number;
+  /** What stays reachable during grace, in the operator's words — goes into user messages. */
+  allowed_services: string;
+  notify_admins: boolean;
+  notify_user: boolean;
 }
 
 export interface GraceAccessRuntimeState {
@@ -112,8 +116,10 @@ export interface GraceSquadOption {
 }
 
 export interface GraceSquadsResponse {
-  /** False when the panel could not be reached — the UUID stays a manual field. */
+  /** False when neither the panel nor the synced copy has squads — the identifier stays a manual field. */
   available: boolean;
+  /** Where the list came from: the panel right now, or the bot's last synced copy. */
+  source?: 'panel' | 'synced';
   items: GraceSquadOption[];
 }
 
@@ -133,6 +139,14 @@ export const adminGraceAccessApi = {
 
   getSquads: async (): Promise<GraceSquadsResponse> => {
     const response = await apiClient.get<GraceSquadsResponse>('/cabinet/admin/grace-access/squads');
+    return response.data;
+  },
+
+  /** External squads for «Replace with a chosen one» — the bot has no synced copy, so only the panel. */
+  getExternalSquads: async (): Promise<GraceSquadsResponse> => {
+    const response = await apiClient.get<GraceSquadsResponse>(
+      '/cabinet/admin/grace-access/external-squads',
+    );
     return response.data;
   },
 

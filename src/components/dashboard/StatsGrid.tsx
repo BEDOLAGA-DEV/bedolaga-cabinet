@@ -27,7 +27,7 @@ export default function StatsGrid({
       <Link to="/balance" className="block h-full" data-onboarding="balance">
         <StatCard
           label={t('dashboard.stats.balance')}
-          value={`${formatAmount(balanceRubles)} ${currencySymbol}`}
+          value={`${formatAmount(balanceRubles)}\u00A0${currencySymbol}`}
           icon={<CardIcon className="h-5 w-5" />}
           tone="accent"
           trailing={chevron}
@@ -37,7 +37,7 @@ export default function StatsGrid({
         <StatCard
           label={t('dashboard.stats.referrals')}
           value={`${referralCount}`}
-          subValue={`+${formatAmount(earningsRubles)} ${currencySymbol}`}
+          subValue={`+${formatAmount(earningsRubles)}\u00A0${currencySymbol}`}
           icon={<UsersIcon className="h-5 w-5" />}
           tone="neutral"
           loading={refLoading}
