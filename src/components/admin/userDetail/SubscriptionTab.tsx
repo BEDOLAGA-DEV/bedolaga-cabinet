@@ -9,7 +9,7 @@ import type {
   UserPanelInfo,
   UserSubscriptionInfo,
 } from '@/api/adminUsers';
-import { SubscriptionStateChip, useTrafficLabel } from '@/components/admin/users';
+import { GraceAccessChip, SubscriptionStateChip, useTrafficLabel } from '@/components/admin/users';
 import { BackIcon, ChevronRightIcon } from '@/components/icons';
 import { formatShortDate } from '@/utils/format';
 import type { SalesMode } from '@/pages/adminUserDetail/salesMode';
@@ -256,6 +256,7 @@ function SubscriptionList({
             <div className="flex flex-wrap items-center gap-2">
               <span className="font-semibold text-dark-100">{sub.tariff_name || `#${sub.id}`}</span>
               <SubscriptionStateChip status={sub.status} />
+              <GraceAccessChip until={sub.grace_until} />
             </div>
             <div className="mt-1 flex flex-wrap gap-x-3 text-xs tabular-nums text-dark-400">
               <span>{t('admin.users.until', { date: formatShortDate(sub.end_date) })}</span>

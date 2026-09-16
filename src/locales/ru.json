@@ -5704,7 +5704,8 @@
         "today": "истекает сегодня",
         "expiredToday": "истекла сегодня",
         "expiredAgo": "истекла {{count}} дн. назад",
-        "limited": "трафик исчерпан"
+        "limited": "трафик исчерпан",
+        "graceUntil": "временно до {{date}}"
       },
       "summaryShort": {
         "total_one": "{{value}}",
@@ -5756,6 +5757,7 @@
         "subscriptionNotFound": "Подписка не найдена",
         "userNotFound": "Пользователь не найден"
       },
+      "moreTariffs": "ещё {{count}}",
       "searchEmail": "Поиск по email...",
       "noPurchases": "Нет покупок",
       "pagination": {
