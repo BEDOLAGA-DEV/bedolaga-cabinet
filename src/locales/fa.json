@@ -4086,7 +4086,8 @@
         "tariffNotFound": "طرح پیدا نشد",
         "promoGroupNotFound": "گروه تبلیغاتی پیدا نشد",
         "subscriptionNotFound": "اشتراک پیدا نشد",
-        "userNotFound": "کاربر پیدا نشد"
+        "userNotFound": "کاربر پیدا نشد",
+        "trialBlockedBySubscription": "دوره آزمایشی همچنان در دسترس نیست: این کاربر اشتراک دیگری دارد. ابتدا آن را حذف کنید."
       },
       "moreTariffs": "{{count}} مورد دیگر"
     },

@@ -5673,7 +5673,8 @@
         "tariffNotFound": "Тариф не найден",
         "promoGroupNotFound": "Промогруппа не найдена",
         "subscriptionNotFound": "Подписка не найдена",
-        "userNotFound": "Пользователь не найден"
+        "userNotFound": "Пользователь не найден",
+        "trialBlockedBySubscription": "Триал всё равно закрыт: у человека есть другая подписка. Сначала удалите её."
       },
       "moreTariffs": "ещё {{count}}"
     },
