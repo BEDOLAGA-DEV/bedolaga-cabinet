@@ -4,7 +4,9 @@ import type { UserListItem } from '@/api/adminUsers';
 import { backTo } from '@/components/admin/AdminBackButton';
 import { ChevronRightIcon } from '@/components/icons';
 import { cn } from '@/lib/utils';
+import { useNow } from '@/hooks/useNow';
 import { formatShortDate } from '@/utils/format';
+import { ONLINE_TICK_MS, isUserOnline } from './online';
 import { RelativeTime } from './RelativeTime';
 import { TrafficBar } from './TrafficBar';
 import { UserAvatar } from './UserAvatar';
@@ -18,6 +20,11 @@ interface UsersTableProps {
 
 const GRID =
   'grid grid-cols-[minmax(0,1.35fr)_minmax(0,1.45fr)_140px_120px_20px] items-center gap-4 px-4';
+
+/** Сколько тарифов у человека сверх показанного в строке: `0` — показывать нечего. */
+export function extraTariffsCount(user: Pick<UserListItem, 'subscriptions'>): number {
+  return Math.max(0, (user.subscriptions?.length ?? 0) - 1);
+}
 
 export function isMutedUser(user: Pick<UserListItem, 'status'>): boolean {
   return user.status === 'blocked' || user.status === 'deleted';
@@ -39,6 +46,7 @@ export function UsersTable({ users, className }: UsersTableProps) {
   const { t } = useTranslation();
   const location = useLocation();
   const money = useMoney();
+  const now = useNow(ONLINE_TICK_MS);
 
   return (
     <div className={cn('rounded-2xl border border-dark-700/60 bg-dark-900/40', className)}>
@@ -72,12 +80,12 @@ export function UsersTable({ users, className }: UsersTableProps) {
                 firstName={user.first_name}
                 username={user.username}
                 muted={isMutedUser(user)}
-                online={user.is_online === true}
+                online={isUserOnline(user, now)}
               />
               <div className="min-w-0">
                 <div className="relative truncate font-medium text-dark-100">
                   {user.full_name}
-                  {user.is_online && (
+                  {isUserOnline(user, now) && (
                     <span className="sr-only">, {t('admin.users.connectedNow')}</span>
                   )}
                 </div>
@@ -94,6 +102,11 @@ export function UsersTable({ users, className }: UsersTableProps) {
                 {user.has_subscription && user.tariff_name && (
                   <span className="truncate text-sm font-medium text-dark-100">
                     {user.tariff_name}
+                  </span>
+                )}
+                {extraTariffsCount(user) > 0 && (
+                  <span className="shrink-0 rounded-full bg-dark-800 px-2 py-0.5 text-[11px] font-semibold text-dark-400">
+                    {t('admin.users.moreTariffs', { count: extraTariffsCount(user) })}
                   </span>
                 )}
                 <UserStatusChip user={user} />
