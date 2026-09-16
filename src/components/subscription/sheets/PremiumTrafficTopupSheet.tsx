@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { subscriptionApi } from '../../../api/subscription';
 import type { PremiumTrafficOptions, PurchaseOptions } from '../../../types';
+import { useCurrency } from '../../../hooks/useCurrency';
 import { getErrorMessage } from '../../../utils/subscriptionHelpers';
 import { ChevronRightIcon } from '../../icons';
 import InsufficientBalancePrompt from '../../InsufficientBalancePrompt';
@@ -37,11 +38,14 @@ export function PremiumTrafficTopupSheet({
 }: PremiumTrafficTopupSheetProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const { formatAmount, currencySymbol } = useCurrency();
   const [selected, setSelected] = useState<{ squad: string; gb: number } | null>(null);
 
+  // Как в соседних листах докупки: валюта пользователя, а не жёсткий рубль, и
+  // неразрывный пробел перед знаком — сумма не должна переноситься отдельно.
   const formatPrice = (kopeks: number) => {
     const rubles = kopeks / 100;
-    return rubles % 1 === 0 ? `${rubles} ₽` : `${rubles.toFixed(2)} ₽`;
+    return `${formatAmount(rubles, rubles % 1 === 0 ? 0 : 2)} ${currencySymbol}`;
   };
 
   const { data: options } = useQuery({

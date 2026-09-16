@@ -17,6 +17,14 @@ vi.mock('react-i18next', async () =>
 const getOptions = vi.fn();
 const purchase = vi.fn();
 
+// Валюта — общая для кабинета: суммы идут через хук, а не рисуются рублём.
+vi.mock('../../../hooks/useCurrency', () => ({
+  useCurrency: () => ({
+    formatAmount: (value: number, decimals = 0) => value.toFixed(decimals),
+    currencySymbol: '₽',
+  }),
+}));
+
 vi.mock('../../../api/subscription', () => ({
   subscriptionApi: {
     getPremiumTrafficOptions: (...args: unknown[]) => getOptions(...args),
@@ -107,6 +115,8 @@ describe('PremiumTrafficTopupSheet', () => {
     render({ open: true });
 
     expect(await screen.findByText('Мобильный резерв')).toBeTruthy();
+    // Неразрывный пробел в разметке: библиотека приводит текст элемента к
+    // обычным пробелам, а образец оставляет как есть — ищем с обычным.
     expect(screen.getByText('5 ₽')).toBeTruthy();
     expect(screen.getByText('20 ₽')).toBeTruthy();
     expect(screen.getByText(/2\.0 \/ 5\.0/)).toBeTruthy();
