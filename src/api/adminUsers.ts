@@ -62,6 +62,8 @@ export interface UserListItem {
   last_activity: string | null;
   /** Подключён к VPN прямо сейчас (по панели); null/нет поля — панель не ответила или бот старый. */
   is_online?: boolean | null;
+  /** Отметка последнего подключения из панели: по ней строка сама гасит точку «в сети». */
+  online_at?: string | null;
   has_subscription: boolean;
   subscription_status: string | null;
   subscription_is_trial: boolean;

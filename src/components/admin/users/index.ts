@@ -1,3 +1,4 @@
+export * from './online';
 export * from './RelativeTime';
 export * from './TrafficBar';
 export * from './UserAvatar';
