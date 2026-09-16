@@ -5055,7 +5055,8 @@
             "trafficUsed": "Used",
             "devices": "Devices",
             "squads": "Squads"
-          }
+          },
+          "graceNote": "This person has temporary access until {{date}} — while it lasts, the panel holds its settings. That is not a mismatch, nothing needs syncing."
         },
         "loadError": "Could not load the user",
         "done": {

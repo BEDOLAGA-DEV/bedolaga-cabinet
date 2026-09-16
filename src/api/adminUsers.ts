@@ -333,6 +333,9 @@ export interface PanelSyncStatusResponse {
   panel_traffic_used_gb: number;
   panel_device_limit: number;
   panel_squads: string[];
+  /** Открыт временный доступ (грейс): панель намеренно держит его настройки. */
+  grace_open?: boolean;
+  grace_until?: string | null;
   has_differences: boolean;
   differences: string[];
 }
