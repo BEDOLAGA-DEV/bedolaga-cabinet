@@ -294,7 +294,10 @@ export default function AdminUsers() {
         <button
           type="button"
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          className="btn-secondary fixed bottom-24 right-4 z-20 shadow-lg md:bottom-6 md:right-6"
+          // Прижата к низу по общему правилу кабинета (--mobile-nav-clearance), а не
+          // на глазок: иначе висела посреди списка и читалась как часть карточки.
+          style={{ bottom: 'var(--mobile-nav-clearance)' }}
+          className="btn-primary fixed right-4 z-20 md:right-6"
         >
           <ArrowRightIcon className="h-4 w-4 -rotate-90" />
           {t('admin.users.toTop')}

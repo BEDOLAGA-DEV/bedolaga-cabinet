@@ -9,7 +9,7 @@ import { RelativeTime } from './RelativeTime';
 import { TrafficBar } from './TrafficBar';
 import { UserAvatar } from './UserAvatar';
 import { UserStatusChip } from './UserStatusChip';
-import { isMutedUser, subscriptionCaption } from './UsersTable';
+import { extraTariffsCount, isMutedUser, subscriptionCaption } from './UsersTable';
 import { useMoney } from './useMoney';
 
 interface UserCardsProps {
@@ -43,7 +43,10 @@ export function UserCards({ users, className }: UserCardsProps) {
                 online={isUserOnline(user, now)}
               />
               <div className="min-w-0 flex-1">
-                <div className="relative truncate font-medium text-dark-100">
+                {/* Имя переносится второй строкой, а не режется многоточием: чип
+                    справа шириной не поступится, и на телефоне от длинного имени
+                    оставалось два слога. Две строки — потолок. */}
+                <div className="relative line-clamp-2 break-words font-medium text-dark-100">
                   {user.full_name}
                   {isUserOnline(user, now) && (
                     <span className="sr-only">, {t('admin.users.connectedNow')}</span>
@@ -62,6 +65,11 @@ export function UserCards({ users, className }: UserCardsProps) {
                 <div className="flex min-w-0 items-baseline gap-1.5 text-sm">
                   {user.tariff_name && (
                     <span className="truncate font-medium text-dark-100">{user.tariff_name}</span>
+                  )}
+                  {extraTariffsCount(user) > 0 && (
+                    <span className="shrink-0 rounded-full bg-dark-800 px-2 py-0.5 text-[11px] font-semibold text-dark-400">
+                      {t('admin.users.moreTariffs', { count: extraTariffsCount(user) })}
+                    </span>
                   )}
                   {caption && <span className="shrink-0 text-xs text-dark-500">· {caption}</span>}
                 </div>
