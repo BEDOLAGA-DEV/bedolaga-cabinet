@@ -5622,7 +5622,7 @@
         "expiredToday": "истекла сегодня",
         "expiredAgo": "истекла {{count}} дн. назад",
         "limited": "трафик исчерпан",
-        "graceUntil": "временный доступ до {{date}}"
+        "graceUntil": "временно до {{date}}"
       },
       "summaryShort": {
         "total_one": "{{value}}",
