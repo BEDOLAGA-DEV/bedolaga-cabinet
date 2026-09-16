@@ -5,7 +5,7 @@ import { RemnawaveIcon } from '@/components/icons';
 import { Spinner } from '@/components/ui/Spinner';
 import { cn } from '@/lib/utils';
 import { useNativeDialog } from '@/platform/hooks/useNativeDialog';
-import { formatShortDate } from '@/utils/format';
+import { formatDayMonth, formatShortDate } from '@/utils/format';
 import { formatGb } from '@/utils/formatNumber';
 import { relativeTimeParts } from '@/utils/relativeTime';
 import {
@@ -48,14 +48,21 @@ export function PanelSyncCard({ status, loading, busy, onPull, onPush }: PanelSy
 
   const notLinked = status !== null && !status.panel_found;
   const differs = Boolean(status?.panel_found && status.has_differences);
-  const tone: Tone = !status ? 'neutral' : notLinked || differs ? 'warning' : 'success';
+  // Временный доступ — не поломка: пока он открыт, панель держит его настройки,
+  // и карточка объясняет это вместо красного «Есть отличия».
+  const onGrace = Boolean(status?.panel_found && status.grace_open);
+  const tone: Tone = !status ? 'neutral' : notLinked || differs || onGrace ? 'warning' : 'success';
   const label = !status
     ? t(`${ns}.unknown`)
     : notLinked
       ? t(`${ns}.notLinked`)
       : differs
         ? t(`${ns}.differs`)
-        : t(`${ns}.matches`);
+        : onGrace
+          ? t('admin.users.subscriptionChips.graceUntil', {
+              date: formatDayMonth(status.grace_until ?? null),
+            })
+          : t(`${ns}.matches`);
 
   const pull = async () => {
     if (await dialog.confirm(t(`${ns}.confirmPull`), t(`${ns}.pullTitle`))) await onPull();
@@ -120,7 +127,7 @@ export function PanelSyncCard({ status, loading, busy, onPull, onPush }: PanelSy
                     key={row.key}
                     className={cn(
                       'border-t border-dark-700/40',
-                      row.differs && 'bg-warning-500/[0.06]',
+                      (row.differs || row.byGrace) && 'bg-warning-500/[0.06]',
                     )}
                   >
                     <th scope="row" className="px-2.5 py-2 font-normal text-dark-400 sm:px-3">
@@ -129,7 +136,7 @@ export function PanelSyncCard({ status, loading, busy, onPull, onPush }: PanelSy
                           aria-hidden="true"
                           className={cn(
                             'h-1.5 w-1.5 shrink-0 rounded-full',
-                            row.differs ? 'bg-warning-400' : 'bg-transparent',
+                            row.differs || row.byGrace ? 'bg-warning-400' : 'bg-transparent',
                           )}
                         />
                         {t(`${ns}.rows.${row.key}`)}
@@ -139,7 +146,9 @@ export function PanelSyncCard({ status, loading, busy, onPull, onPush }: PanelSy
                     <td
                       className={cn(
                         'px-2.5 py-2 tabular-nums sm:px-3',
-                        row.differs ? 'font-medium text-warning-400' : 'text-dark-100',
+                        row.differs || row.byGrace
+                          ? 'font-medium text-warning-400'
+                          : 'text-dark-100',
                       )}
                     >
                       {panel}
@@ -150,6 +159,12 @@ export function PanelSyncCard({ status, loading, busy, onPull, onPush }: PanelSy
             </tbody>
           </table>
         </div>
+      )}
+
+      {onGrace && (
+        <p className="text-xs text-warning-400/90">
+          {t(`${ns}.graceNote`, { date: formatShortDate(status?.grace_until ?? null) })}
+        </p>
       )}
 
       {status?.last_sync && (

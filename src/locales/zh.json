@@ -3881,7 +3881,8 @@
             "trafficUsed": "已用",
             "devices": "设备",
             "squads": "分组"
-          }
+          },
+          "graceNote": "该用户拥有至 {{date}} 的临时访问权限，在此期间面板保留其设置。这不是差异，无需同步。"
         },
         "loadError": "无法加载用户",
         "done": {
