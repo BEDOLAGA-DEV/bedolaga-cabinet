@@ -4061,7 +4061,8 @@
         "tariffNotFound": "未找到套餐",
         "promoGroupNotFound": "未找到推广分组",
         "subscriptionNotFound": "未找到订阅",
-        "userNotFound": "未找到用户"
+        "userNotFound": "未找到用户",
+        "trialBlockedBySubscription": "试用仍不可用：该用户还有其他订阅，请先删除。"
       },
       "moreTariffs": "另有 {{count}} 个"
     },

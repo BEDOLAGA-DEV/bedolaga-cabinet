@@ -5218,7 +5218,8 @@
         "tariffNotFound": "Plan not found",
         "promoGroupNotFound": "Promo group not found",
         "subscriptionNotFound": "Subscription not found",
-        "userNotFound": "User not found"
+        "userNotFound": "User not found",
+        "trialBlockedBySubscription": "The trial is still unavailable: this person has another subscription. Remove it first."
       },
       "moreTariffs": "{{count}} more"
     },
