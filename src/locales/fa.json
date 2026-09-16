@@ -4040,7 +4040,7 @@
         "expiredToday": "امروز منقضی شد",
         "expiredAgo": "{{count}} روز پیش منقضی شد",
         "limited": "ترافیک تمام شده",
-        "graceUntil": "دسترسی موقت تا {{date}}"
+        "graceUntil": "موقت تا {{date}}"
       },
       "summaryShort": {
         "total_one": "{{value}}",

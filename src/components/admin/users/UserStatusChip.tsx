@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import type { UserListItem } from '@/api/adminUsers';
 import { cn } from '@/lib/utils';
-import { formatShortDate } from '@/utils/format';
+import { formatDayMonth } from '@/utils/format';
 
 export type ChipTone = 'success' | 'warning' | 'error' | 'accent' | 'neutral';
 
@@ -57,7 +57,7 @@ export function describeUserStatus(
     return {
       key: 'subscriptionChips.graceUntil',
       tone: 'warning',
-      date: formatShortDate(user.grace_until),
+      date: formatDayMonth(user.grace_until),
     };
   }
   const days = Math.max(0, user.days_remaining ?? 0);
@@ -184,7 +184,7 @@ export function GraceAccessChip({
         className,
       )}
     >
-      {t('admin.users.subscriptionChips.graceUntil', { date: formatShortDate(until) })}
+      {t('admin.users.subscriptionChips.graceUntil', { date: formatDayMonth(until) })}
     </span>
   );
 }

@@ -84,6 +84,17 @@ export function formatDateOrRaw(
   return parsed.toLocaleDateString(locale, options);
 }
 
+/**
+ * День и месяц без года — для пометок, живущих считаные дни («временно до 16.09»).
+ *
+ * Год в таком чипе занимает место, которого на телефоне нет: имя человека рядом
+ * уезжало в многоточие.
+ */
+export function formatDayMonth(date: string | null): string {
+  if (!date) return '-';
+  return new Date(date).toLocaleDateString(uiLocale(), { day: '2-digit', month: '2-digit' });
+}
+
 /** Date-only (dd.mm.yyyy) in the active UI locale; '-' for a null date. */
 export function formatShortDate(date: string | null): string {
   if (!date) return '-';

@@ -4019,7 +4019,7 @@
         "expiredToday": "今天已到期",
         "expiredAgo": "{{count}} 天前到期",
         "limited": "流量用尽",
-        "graceUntil": "临时访问至 {{date}}"
+        "graceUntil": "临时至 {{date}}"
       },
       "summaryShort": {
         "total_other": "{{value}}",
