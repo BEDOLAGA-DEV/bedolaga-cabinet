@@ -4,7 +4,9 @@ import type { UserListItem } from '@/api/adminUsers';
 import { backTo } from '@/components/admin/AdminBackButton';
 import { ChevronRightIcon } from '@/components/icons';
 import { cn } from '@/lib/utils';
+import { useNow } from '@/hooks/useNow';
 import { formatShortDate } from '@/utils/format';
+import { ONLINE_TICK_MS, isUserOnline } from './online';
 import { RelativeTime } from './RelativeTime';
 import { TrafficBar } from './TrafficBar';
 import { UserAvatar } from './UserAvatar';
@@ -39,6 +41,7 @@ export function UsersTable({ users, className }: UsersTableProps) {
   const { t } = useTranslation();
   const location = useLocation();
   const money = useMoney();
+  const now = useNow(ONLINE_TICK_MS);
 
   return (
     <div className={cn('rounded-2xl border border-dark-700/60 bg-dark-900/40', className)}>
@@ -72,12 +75,12 @@ export function UsersTable({ users, className }: UsersTableProps) {
                 firstName={user.first_name}
                 username={user.username}
                 muted={isMutedUser(user)}
-                online={user.is_online === true}
+                online={isUserOnline(user, now)}
               />
               <div className="min-w-0">
                 <div className="relative truncate font-medium text-dark-100">
                   {user.full_name}
-                  {user.is_online && (
+                  {isUserOnline(user, now) && (
                     <span className="sr-only">, {t('admin.users.connectedNow')}</span>
                   )}
                 </div>

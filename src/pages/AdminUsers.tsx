@@ -31,6 +31,8 @@ import {
 
 /** Порция ленты: сервер отдаёт до 200, 50 хватает на два экрана десктопа. */
 export const PAGE_SIZE = 50;
+/** Как часто список перечитывает отметки «в сети» панели (окно панели — минута). */
+const ONLINE_REFRESH_MS = 30_000;
 /** Последняя выборка: раздел, открытый из меню без параметров, продолжает с неё. */
 const LAST_VIEW_KEY = 'admin-users:last-view';
 const OPTIONS_STALE_MS = 5 * 60_000;
@@ -98,6 +100,10 @@ export default function AdminUsers() {
       const loaded = allPages.reduce((sum, page) => sum + page.users.length, 0);
       return lastPage.users.length > 0 && loaded < lastPage.total ? loaded : undefined;
     },
+    // Отметки подключения живут минуту: без обновления открытый список к концу
+    // минуты погасил бы все точки и больше их не зажёг. Обновляется только
+    // видимая вкладка — фоновая ничего не опрашивает.
+    refetchInterval: ONLINE_REFRESH_MS,
   });
   const users = useMemo(
     () => usersQuery.data?.pages.flatMap((page) => page.users) ?? [],
