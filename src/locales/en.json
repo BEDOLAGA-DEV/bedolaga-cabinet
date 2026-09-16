@@ -5110,7 +5110,8 @@
             "trafficUsed": "Used",
             "devices": "Devices",
             "squads": "Squads"
-          }
+          },
+          "graceNote": "This person has temporary access until {{date}} — while it lasts, the panel holds its settings. That is not a mismatch, nothing needs syncing."
         },
         "loadError": "Could not load the user",
         "done": {
@@ -5300,7 +5301,8 @@
         "tariffNotFound": "Plan not found",
         "promoGroupNotFound": "Promo group not found",
         "subscriptionNotFound": "Subscription not found",
-        "userNotFound": "User not found"
+        "userNotFound": "User not found",
+        "trialBlockedBySubscription": "The trial is still unavailable: this person has another subscription. Remove it first."
       },
       "moreTariffs": "{{count}} more",
       "searchEmail": "Search by email...",
