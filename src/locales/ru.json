@@ -5621,7 +5621,8 @@
         "today": "истекает сегодня",
         "expiredToday": "истекла сегодня",
         "expiredAgo": "истекла {{count}} дн. назад",
-        "limited": "трафик исчерпан"
+        "limited": "трафик исчерпан",
+        "graceUntil": "временный доступ до {{date}}"
       },
       "summaryShort": {
         "total_one": "{{value}}",
@@ -5672,7 +5673,8 @@
         "promoGroupNotFound": "Промогруппа не найдена",
         "subscriptionNotFound": "Подписка не найдена",
         "userNotFound": "Пользователь не найден"
-      }
+      },
+      "moreTariffs": "ещё {{count}}"
     },
     "promoOffers": {
       "title": "Промопредложения",
