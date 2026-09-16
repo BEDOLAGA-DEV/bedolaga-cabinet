@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { HIDDEN_UNDER_KEYBOARD, useVirtualKeyboard } from '@/hooks/useVirtualKeyboard';
-import { TrashIcon } from '@/components/icons';
+import { PhoneIcon, TrashIcon, UserMinusIcon } from '@/components/icons';
 import { ChevronDownIcon } from './DropdownSelect';
 import { isSubscriptionLevelAction } from './actionTargets';
 import type { BulkActionType } from '../../../api/adminBulkActions';
@@ -95,21 +95,7 @@ export function FloatingActionBar({
     {
       type: 'set_devices',
       labelKey: 'admin.bulkActions.actions.setDevices',
-      icon: (
-        <svg
-          className="h-3.5 w-3.5"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          strokeWidth={2}
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3"
-          />
-        </svg>
-      ),
+      icon: <PhoneIcon className="h-3.5 w-3.5" />,
       colorClass: 'text-accent-400 hover:bg-accent-500/10',
     },
     {
@@ -139,21 +125,7 @@ export function FloatingActionBar({
     {
       type: 'delete_user',
       labelKey: 'admin.bulkActions.actions.deleteUser',
-      icon: (
-        <svg
-          className="h-3.5 w-3.5"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          strokeWidth={2}
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M22 10.5h-6m-8.25-4.5a3.75 3.75 0 117.5 0 3.75 3.75 0 01-7.5 0zM1.5 21a8.25 8.25 0 0115 0"
-          />
-        </svg>
-      ),
+      icon: <UserMinusIcon className="h-3.5 w-3.5" />,
       colorClass: 'text-error-400 hover:bg-error-500/10',
     },
   ];
