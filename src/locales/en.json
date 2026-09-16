@@ -5172,7 +5172,7 @@
         "expiredToday": "expired today",
         "expiredAgo": "expired {{count}} d ago",
         "limited": "traffic exhausted",
-        "graceUntil": "temporary access until {{date}}"
+        "graceUntil": "temporary until {{date}}"
       },
       "summaryShort": {
         "total_one": "{{value}}",

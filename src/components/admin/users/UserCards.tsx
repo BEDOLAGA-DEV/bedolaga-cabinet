@@ -43,7 +43,10 @@ export function UserCards({ users, className }: UserCardsProps) {
                 online={isUserOnline(user, now)}
               />
               <div className="min-w-0 flex-1">
-                <div className="relative truncate font-medium text-dark-100">
+                {/* Имя переносится второй строкой, а не режется многоточием: чип
+                    справа шириной не поступится, и на телефоне от длинного имени
+                    оставалось два слога. Две строки — потолок. */}
+                <div className="relative line-clamp-2 break-words font-medium text-dark-100">
                   {user.full_name}
                   {isUserOnline(user, now) && (
                     <span className="sr-only">, {t('admin.users.connectedNow')}</span>
