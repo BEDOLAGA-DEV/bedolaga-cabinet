@@ -5171,7 +5171,8 @@
         "today": "expires today",
         "expiredToday": "expired today",
         "expiredAgo": "expired {{count}} d ago",
-        "limited": "traffic exhausted"
+        "limited": "traffic exhausted",
+        "graceUntil": "temporary access until {{date}}"
       },
       "summaryShort": {
         "total_one": "{{value}}",
@@ -5217,7 +5218,8 @@
         "promoGroupNotFound": "Promo group not found",
         "subscriptionNotFound": "Subscription not found",
         "userNotFound": "User not found"
-      }
+      },
+      "moreTariffs": "{{count}} more"
     },
     "promoOffers": {
       "title": "Promo Offers",

@@ -4018,7 +4018,8 @@
         "today": "今天到期",
         "expiredToday": "今天已到期",
         "expiredAgo": "{{count}} 天前到期",
-        "limited": "流量用尽"
+        "limited": "流量用尽",
+        "graceUntil": "临时访问至 {{date}}"
       },
       "summaryShort": {
         "total_other": "{{value}}",
@@ -4060,7 +4061,8 @@
         "promoGroupNotFound": "未找到推广分组",
         "subscriptionNotFound": "未找到订阅",
         "userNotFound": "未找到用户"
-      }
+      },
+      "moreTariffs": "另有 {{count}} 个"
     },
     "promoOffers": {
       "title": "促销优惠",

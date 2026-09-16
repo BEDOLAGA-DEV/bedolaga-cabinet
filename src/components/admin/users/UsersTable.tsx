@@ -21,6 +21,11 @@ interface UsersTableProps {
 const GRID =
   'grid grid-cols-[minmax(0,1.35fr)_minmax(0,1.45fr)_140px_120px_20px] items-center gap-4 px-4';
 
+/** Сколько тарифов у человека сверх показанного в строке: `0` — показывать нечего. */
+export function extraTariffsCount(user: Pick<UserListItem, 'subscriptions'>): number {
+  return Math.max(0, (user.subscriptions?.length ?? 0) - 1);
+}
+
 export function isMutedUser(user: Pick<UserListItem, 'status'>): boolean {
   return user.status === 'blocked' || user.status === 'deleted';
 }
@@ -97,6 +102,11 @@ export function UsersTable({ users, className }: UsersTableProps) {
                 {user.has_subscription && user.tariff_name && (
                   <span className="truncate text-sm font-medium text-dark-100">
                     {user.tariff_name}
+                  </span>
+                )}
+                {extraTariffsCount(user) > 0 && (
+                  <span className="shrink-0 rounded-full bg-dark-800 px-2 py-0.5 text-[11px] font-semibold text-dark-400">
+                    {t('admin.users.moreTariffs', { count: extraTariffsCount(user) })}
                   </span>
                 )}
                 <UserStatusChip user={user} />

@@ -25,6 +25,8 @@ export interface UserSubscriptionInfo {
   sbp_recurring_id: number | null;
   is_active: boolean;
   days_remaining: number;
+  /** Открыт временный доступ (грейс) до этого числа; null — обычная подписка. */
+  grace_until?: string | null;
   purchased_traffic_gb: number;
   traffic_purchases: TrafficPurchaseInfo[];
 }
@@ -46,6 +48,8 @@ export interface UserListItemSubscription {
   traffic_used_gb: number;
   traffic_limit_gb: number;
   device_limit: number;
+  /** Открыт временный доступ (грейс) до этого числа; null — обычная подписка. */
+  grace_until?: string | null;
 }
 
 export interface UserListItem {
@@ -64,6 +68,8 @@ export interface UserListItem {
   is_online?: boolean | null;
   /** Отметка последнего подключения из панели: по ней строка сама гасит точку «в сети». */
   online_at?: string | null;
+  /** Открыт временный доступ (грейс) до этого числа — подписка истекла, а VPN ещё работает. */
+  grace_until?: string | null;
   has_subscription: boolean;
   subscription_status: string | null;
   subscription_is_trial: boolean;

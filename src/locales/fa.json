@@ -4039,7 +4039,8 @@
         "today": "امروز منقضی می‌شود",
         "expiredToday": "امروز منقضی شد",
         "expiredAgo": "{{count}} روز پیش منقضی شد",
-        "limited": "ترافیک تمام شده"
+        "limited": "ترافیک تمام شده",
+        "graceUntil": "دسترسی موقت تا {{date}}"
       },
       "summaryShort": {
         "total_one": "{{value}}",
@@ -4085,7 +4086,8 @@
         "promoGroupNotFound": "گروه تبلیغاتی پیدا نشد",
         "subscriptionNotFound": "اشتراک پیدا نشد",
         "userNotFound": "کاربر پیدا نشد"
-      }
+      },
+      "moreTariffs": "{{count}} مورد دیگر"
     },
     "promoOffers": {
       "title": "پیشنهادات تبلیغاتی",
