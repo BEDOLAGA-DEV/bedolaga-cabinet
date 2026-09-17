@@ -5112,17 +5112,43 @@
       "until": "until {{date}}",
       "sort": {
         "label": "Sort",
-        "expires": "by expiry",
-        "activity": "by activity",
-        "created": "by sign-up date",
-        "balance": "by balance",
-        "spent": "by spending",
-        "traffic": "by traffic",
-        "purchases": "by purchases"
+        "expires": {
+          "asc": "Expiring soonest",
+          "desc": "Expiring latest"
+        },
+        "grace": {
+          "asc": "Grace ends soonest",
+          "desc": "Grace ends latest"
+        },
+        "activity": {
+          "asc": "Least recently active",
+          "desc": "Most recently active"
+        },
+        "created": {
+          "asc": "Oldest first",
+          "desc": "Newest first"
+        },
+        "balance": {
+          "asc": "Lowest balance",
+          "desc": "Highest balance"
+        },
+        "spent": {
+          "asc": "Least spent",
+          "desc": "Most spent"
+        },
+        "traffic": {
+          "asc": "Least traffic",
+          "desc": "Most traffic"
+        },
+        "purchases": {
+          "asc": "Fewest purchases",
+          "desc": "Most purchases"
+        }
       },
       "views": {
         "all": "All",
         "expiring": "Expiring in {{days}} days",
+        "grace": "In grace",
         "traffic": "Traffic running out",
         "nopay": "No purchases",
         "online": "Online",
