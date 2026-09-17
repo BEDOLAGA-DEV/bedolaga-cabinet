@@ -21,7 +21,7 @@ export type SortKey =
   | 'purchases';
 /** Направление сортировки; пусто — привычное для ключа (см. NATURAL_DIRECTION). */
 export type SortDirection = 'asc' | 'desc';
-export type ViewKey = 'all' | 'expiring' | 'traffic' | 'nopay' | 'online' | 'blocked';
+export type ViewKey = 'all' | 'expiring' | 'grace' | 'traffic' | 'nopay' | 'online' | 'blocked';
 
 export interface UsersListState {
   /** Строка поиска как её ввели — разбирается в `classifySearch`. */
@@ -65,6 +65,7 @@ export const SORT_DIRECTIONS: readonly SortDirection[] = ['asc', 'desc'];
 export const VIEW_KEYS: readonly ViewKey[] = [
   'all',
   'expiring',
+  'grace',
   'traffic',
   'nopay',
   'online',
@@ -137,6 +138,9 @@ export function withSort(
 const VIEW_PRESETS: Record<ViewKey, Partial<Omit<UsersListState, 'q' | 'view'>>> = {
   all: {},
   expiring: { sub: 'expiring', sort: 'expires' },
+  // Открытый временный доступ; сортировка по его концу без сегмента никого не
+  // выделяет, когда открытых грейсов нет, — сегмент отвечает прямо, кто в грейсе.
+  grace: { sort: 'grace' },
   traffic: { sort: 'traffic' },
   nopay: { sort: 'purchases' },
   online: { sort: 'activity' },
@@ -222,6 +226,7 @@ export function buildUsersQuery(state: UsersListState): UsersQuery {
   if (state.campaign) query.campaign_id = Number(state.campaign);
   // «Онлайн» — подключён к VPN сейчас: бот спрашивает панель, а не смотрит на кнопки в боте.
   if (state.view === 'online') query.online = true;
+  if (state.view === 'grace') query.in_grace = true;
   if (state.view === 'nopay') query.purchase_count = 0;
   if (state.view === 'traffic') query.traffic_used_percent_min = TRAFFIC_LOW_PERCENT;
   return query;
