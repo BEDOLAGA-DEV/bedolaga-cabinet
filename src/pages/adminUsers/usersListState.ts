@@ -62,6 +62,15 @@ export const SORT_KEYS: readonly SortKey[] = [
   'purchases',
 ];
 export const SORT_DIRECTIONS: readonly SortDirection[] = ['asc', 'desc'];
+
+/**
+ * Ключи для меню сортировки. Порядок по концу грейса есть только в сегменте
+ * «в грейсе»: вне его ключ пуст у всех, и список показывал бы просто всех подряд —
+ * на вид мусор и повтор сегмента.
+ */
+export function sortKeysForView(view: ViewKey): readonly SortKey[] {
+  return view === 'grace' ? SORT_KEYS : SORT_KEYS.filter((key) => key !== 'grace');
+}
 export const VIEW_KEYS: readonly ViewKey[] = [
   'all',
   'expiring',
@@ -173,7 +182,7 @@ export function parseUsersListState(params: URLSearchParams): UsersListState {
     tariff: params.get('tariff') ?? '',
     group: params.get('group') ?? '',
     campaign: params.get('campaign') ?? '',
-    sort: pick(params.get('sort'), SORT_KEYS, base.sort),
+    sort: pick(params.get('sort'), sortKeysForView(view), base.sort),
     dir: pick<'' | SortDirection>(params.get('dir'), SORT_DIRECTIONS, base.dir),
     view,
   };

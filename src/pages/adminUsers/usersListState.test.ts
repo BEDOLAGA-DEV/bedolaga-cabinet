@@ -9,6 +9,7 @@ import {
   serializeUsersListState,
   sortDirection,
   withSort,
+  sortKeysForView,
 } from './usersListState';
 
 /**
@@ -172,12 +173,28 @@ describe('направление сортировки', () => {
     expect(withSort(reversed, 'created').dir).toBe('asc');
   });
   it('«грейс кончается» — свой ключ ручки, с ближайших, как истечение', () => {
-    const state = parseUsersListState(new URLSearchParams('sort=grace'));
+    const state = parseUsersListState(new URLSearchParams('sort=grace&view=grace'));
     expect(state.sort).toBe('grace');
     expect(sortDirection(state)).toBe('asc');
     expect(buildUsersQuery(state)).toMatchObject({ sort_by: 'grace_until' });
     expect(buildUsersQuery(state).sort_order).toBeUndefined();
     expect(withSort(DEFAULT_STATE, 'grace', 'desc').dir).toBe('desc');
+  });
+  it('порядок по концу грейса живёт только в сегменте «в грейсе»', () => {
+    // Вне сегмента ключ пуст у всех, и «сортировка по грейсу» показывала бы просто всех
+    // подряд — владелец принял это за мусор и дублирование сегмента.
+    expect(sortKeysForView('all')).not.toContain('grace');
+    expect(sortKeysForView('expiring')).not.toContain('grace');
+    expect(sortKeysForView('grace')).toContain('grace');
+    expect(parseUsersListState(new URLSearchParams('sort=grace')).sort).toBe(DEFAULT_STATE.sort);
+    expect(
+      parseUsersListState(new URLSearchParams('sort=grace&dir=desc&view=grace')),
+    ).toMatchObject({
+      view: 'grace',
+      sort: 'grace',
+      dir: 'desc',
+    });
+    expect(applyView(applyView(DEFAULT_STATE, 'grace'), 'all').sort).toBe(DEFAULT_STATE.sort);
   });
   it('мусорное направление и сегмент сбрасывают его', () => {
     expect(parseUsersListState(new URLSearchParams('dir=up')).dir).toBe('');
