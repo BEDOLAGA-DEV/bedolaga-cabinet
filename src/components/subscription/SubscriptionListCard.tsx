@@ -2,7 +2,14 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../hooks/useTheme';
 import { getGlassColors } from '../../utils/glassTheme';
 import { useHaptic } from '../../platform';
-import { CalendarIcon, CheckIcon, ChevronRightIcon, DevicesIcon } from '@/components/icons';
+import {
+  CalendarIcon,
+  CheckIcon,
+  ChevronRightIcon,
+  DevicesIcon,
+  StarIcon,
+  XIcon,
+} from '@/components/icons';
 import type { SubscriptionListItem } from '../../types';
 import { connectFooterState } from './connectFooterState';
 import { SubscriptionConnectFooter } from './SubscriptionConnectFooter';
@@ -36,9 +43,7 @@ function StatusBadge({
   if (isTrial) {
     return (
       <span className="inline-flex items-center gap-1 rounded-full border border-warning-400/25 bg-warning-400/10 px-2 py-0.5 text-[10px] font-semibold text-warning-400">
-        <svg className="h-2.5 w-2.5" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
-        </svg>
+        <StarIcon filled className="h-2.5 w-2.5" />
         {t('subscription.statusTrial', 'Тестовая')}
       </span>
     );
@@ -220,19 +225,7 @@ export default function SubscriptionListCard({
                 <span
                   className={`flex items-center gap-1 ${enabled ? 'text-success-400' : 'text-error-400'}`}
                 >
-                  {enabled ? (
-                    <CheckIcon className="h-3 w-3" />
-                  ) : (
-                    <svg
-                      className="h-3 w-3"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth={2.5}
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  )}
+                  {enabled ? <CheckIcon className="h-3 w-3" /> : <XIcon className="h-3 w-3" />}
                   {label}
                 </span>
               );

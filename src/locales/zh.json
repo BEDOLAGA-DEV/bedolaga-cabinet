@@ -3959,17 +3959,43 @@
       "until": "至 {{date}}",
       "sort": {
         "label": "排序",
-        "expires": "按到期",
-        "activity": "按活跃",
-        "created": "按注册日期",
-        "balance": "按余额",
-        "spent": "按消费",
-        "traffic": "按流量",
-        "purchases": "按购买"
+        "expires": {
+          "asc": "最早到期",
+          "desc": "最晚到期"
+        },
+        "grace": {
+          "asc": "临时访问最早结束",
+          "desc": "临时访问最晚结束"
+        },
+        "activity": {
+          "asc": "最久未活跃",
+          "desc": "最近活跃"
+        },
+        "created": {
+          "asc": "最早注册",
+          "desc": "最新注册"
+        },
+        "balance": {
+          "asc": "余额最少",
+          "desc": "余额最多"
+        },
+        "spent": {
+          "asc": "消费最少",
+          "desc": "消费最多"
+        },
+        "traffic": {
+          "asc": "流量最少",
+          "desc": "流量最多"
+        },
+        "purchases": {
+          "asc": "购买最少",
+          "desc": "购买最多"
+        }
       },
       "views": {
         "all": "全部",
         "expiring": "{{days}} 天内到期",
+        "grace": "临时访问中",
         "traffic": "流量将尽",
         "nopay": "未购买",
         "online": "在线",

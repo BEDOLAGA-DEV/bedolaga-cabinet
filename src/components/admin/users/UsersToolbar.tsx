@@ -4,6 +4,7 @@ import type { DropdownOption } from '@/components/admin/bulkActions/DropdownSele
 import { Segmented } from '@/components/admin/Segmented';
 import { SearchIcon, XIcon } from '@/components/icons';
 import {
+  type SortDirection,
   type SortKey,
   type StatusFilter,
   type SubFilter,
@@ -11,11 +12,14 @@ import {
   type ViewKey,
   DEFAULT_STATE,
   EXPIRING_DAYS,
-  SORT_KEYS,
+  sortKeysForView,
   SUB_FILTERS,
   VIEW_KEYS,
   applyView,
+  naturalDirection,
+  sortDirection,
   viewFilterValue,
+  withSort,
 } from '@/pages/adminUsers/usersListState';
 import { AppliedFilters } from './AppliedFilters';
 import { type FilterField, type FilterKey, FiltersPopover } from './FiltersPopover';
@@ -155,10 +159,14 @@ export function UsersToolbar({ state, onChange, options }: UsersToolbarProps) {
   const setFilter = (key: FilterKey, value: string) => patch({ [key]: value });
   const clearFilters = () => patch({ status: '', sub: '', tariff: '', group: '', campaign: '' });
 
-  const sortOptions: DropdownOption[] = SORT_KEYS.map((key: SortKey) => ({
-    value: key,
-    label: t(`admin.users.sort.${key}`),
-  }));
+  // Пункт меню — ключ и направление сразу («Сначала новые»); привычное направление ключа первым в паре.
+  const sortGroups: DropdownOption[][] = sortKeysForView(state.view).map((key: SortKey) => {
+    const natural = naturalDirection(key);
+    return [natural, natural === 'asc' ? 'desc' : 'asc'].map((dir) => ({
+      value: `${key}:${dir}`,
+      label: t(`admin.users.sort.${key}.${dir}`),
+    }));
+  });
   const viewOptions = VIEW_KEYS.map((view: ViewKey) => ({
     value: view,
     label: t(`admin.users.views.${view}`, { days: EXPIRING_DAYS }),
@@ -225,10 +233,14 @@ export function UsersToolbar({ state, onChange, options }: UsersToolbarProps) {
         <FiltersPopover fields={fields} onChange={setFilter} onReset={clearFilters} />
         <SortMenu
           label={t('admin.users.sort.label')}
-          value={state.sort}
-          options={sortOptions}
-          onChange={(value) => onChange({ ...state, sort: value as SortKey })}
-          changed={state.sort !== DEFAULT_STATE.sort}
+          value={`${state.sort}:${sortDirection(state)}`}
+          groups={sortGroups}
+          onChange={(value) => {
+            const [sort, dir] = value.split(':') as [SortKey, SortDirection];
+            onChange(withSort(state, sort, dir));
+          }}
+          direction={sortDirection(state)}
+          changed={state.sort !== DEFAULT_STATE.sort || state.dir !== DEFAULT_STATE.dir}
         />
       </div>
 
