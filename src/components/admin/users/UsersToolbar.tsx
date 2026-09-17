@@ -12,7 +12,7 @@ import {
   type ViewKey,
   DEFAULT_STATE,
   EXPIRING_DAYS,
-  SORT_KEYS,
+  sortKeysForView,
   SUB_FILTERS,
   VIEW_KEYS,
   applyView,
@@ -160,7 +160,7 @@ export function UsersToolbar({ state, onChange, options }: UsersToolbarProps) {
   const clearFilters = () => patch({ status: '', sub: '', tariff: '', group: '', campaign: '' });
 
   // Пункт меню — ключ и направление сразу («Сначала новые»); привычное направление ключа первым в паре.
-  const sortGroups: DropdownOption[][] = SORT_KEYS.map((key: SortKey) => {
+  const sortGroups: DropdownOption[][] = sortKeysForView(state.view).map((key: SortKey) => {
     const natural = naturalDirection(key);
     return [natural, natural === 'asc' ? 'desc' : 'asc'].map((dir) => ({
       value: `${key}:${dir}`,
