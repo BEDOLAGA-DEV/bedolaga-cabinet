@@ -159,15 +159,14 @@ export function UsersToolbar({ state, onChange, options }: UsersToolbarProps) {
   const setFilter = (key: FilterKey, value: string) => patch({ [key]: value });
   const clearFilters = () => patch({ status: '', sub: '', tariff: '', group: '', campaign: '' });
 
-  const sortOptions: DropdownOption[] = SORT_KEYS.map((key: SortKey) => ({
-    value: key,
-    label: t(`admin.users.sort.${key}`),
-  }));
-  // Привычное направление ключа первым: «по дате регистрации» → «сначала новые», потом «сначала старые».
-  const natural = naturalDirection(state.sort);
-  const directionOptions: DropdownOption[] = [natural, natural === 'asc' ? 'desc' : 'asc'].map(
-    (dir) => ({ value: dir, label: t(`admin.users.sortOrder.${state.sort}.${dir}`) }),
-  );
+  // Пункт меню — ключ и направление сразу («Сначала новые»); привычное направление ключа первым в паре.
+  const sortGroups: DropdownOption[][] = SORT_KEYS.map((key: SortKey) => {
+    const natural = naturalDirection(key);
+    return [natural, natural === 'asc' ? 'desc' : 'asc'].map((dir) => ({
+      value: `${key}:${dir}`,
+      label: t(`admin.users.sort.${key}.${dir}`),
+    }));
+  });
   const viewOptions = VIEW_KEYS.map((view: ViewKey) => ({
     value: view,
     label: t(`admin.users.views.${view}`, { days: EXPIRING_DAYS }),
@@ -234,13 +233,13 @@ export function UsersToolbar({ state, onChange, options }: UsersToolbarProps) {
         <FiltersPopover fields={fields} onChange={setFilter} onReset={clearFilters} />
         <SortMenu
           label={t('admin.users.sort.label')}
-          value={state.sort}
-          options={sortOptions}
-          onChange={(value) => onChange(withSort(state, value as SortKey))}
-          directionLabel={t('admin.users.sortOrder.label')}
+          value={`${state.sort}:${sortDirection(state)}`}
+          groups={sortGroups}
+          onChange={(value) => {
+            const [sort, dir] = value.split(':') as [SortKey, SortDirection];
+            onChange(withSort(state, sort, dir));
+          }}
           direction={sortDirection(state)}
-          directionOptions={directionOptions}
-          onDirectionChange={(dir: SortDirection) => onChange(withSort(state, state.sort, dir))}
           changed={state.sort !== DEFAULT_STATE.sort || state.dir !== DEFAULT_STATE.dir}
         />
       </div>

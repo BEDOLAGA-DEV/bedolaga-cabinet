@@ -280,7 +280,7 @@ describe('AdminUsers', () => {
     await renderPage('/admin/users?sort=balance');
     expect(
       await screen.findByRole('button', {
-        name: 'admin.users.sort.label: admin.users.sort.balance, admin.users.sortOrder.balance.desc',
+        name: 'admin.users.sort.label: admin.users.sort.balance.desc',
       }),
     ).toBeTruthy();
   });
@@ -290,7 +290,7 @@ describe('AdminUsers', () => {
     await renderPage('/admin/users?dir=asc');
     expect(
       await screen.findByRole('button', {
-        name: 'admin.users.sort.label: admin.users.sort.created, admin.users.sortOrder.created.asc',
+        name: 'admin.users.sort.label: admin.users.sort.created.asc',
       }),
     ).toBeTruthy();
     await waitFor(() =>
