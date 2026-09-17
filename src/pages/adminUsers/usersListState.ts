@@ -12,6 +12,7 @@ export type StatusFilter = '' | 'active' | 'blocked' | 'deleted';
 export type SubFilter = '' | 'active' | 'trial' | 'expiring' | 'expired' | 'limited' | 'none';
 export type SortKey =
   | 'expires'
+  | 'grace'
   | 'activity'
   | 'created'
   | 'balance'
@@ -52,6 +53,7 @@ export const SUB_FILTERS: readonly SubFilter[] = [
 ];
 export const SORT_KEYS: readonly SortKey[] = [
   'expires',
+  'grace',
   'activity',
   'created',
   'balance',
@@ -88,6 +90,7 @@ export const TRAFFIC_LOW_PERCENT = 80;
 
 const SORT_TO_API: Record<SortKey, NonNullable<UsersQuery['sort_by']>> = {
   expires: 'subscription_end_date',
+  grace: 'grace_until',
   activity: 'last_activity',
   created: 'created_at',
   balance: 'balance',
@@ -96,9 +99,10 @@ const SORT_TO_API: Record<SortKey, NonNullable<UsersQuery['sort_by']>> = {
   purchases: 'purchase_count',
 };
 
-/** Как ключ сортируется, пока направление не выбрано: истечение — с ближайших, остальное — с больших и новых. */
+/** Как ключ сортируется, пока направление не выбрано: истечение и грейс — с ближайших, остальное — с больших и новых. */
 const NATURAL_DIRECTION: Record<SortKey, SortDirection> = {
   expires: 'asc',
+  grace: 'asc',
   activity: 'desc',
   created: 'desc',
   balance: 'desc',

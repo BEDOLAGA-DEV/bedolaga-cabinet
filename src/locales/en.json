@@ -5116,6 +5116,10 @@
           "asc": "Expiring soonest",
           "desc": "Expiring latest"
         },
+        "grace": {
+          "asc": "Grace ends soonest",
+          "desc": "Grace ends latest"
+        },
         "activity": {
           "asc": "Least recently active",
           "desc": "Most recently active"
