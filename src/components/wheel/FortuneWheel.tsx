@@ -219,16 +219,6 @@ const FortuneWheel = memo(function FortuneWheel({
           {/* Background shadow */}
           <circle cx={center} cy={center + 6} r={outerRadius + 5} fill="rgba(0,0,0,0.3)" />
 
-          {/* Outer decorative ring */}
-          <circle
-            cx={center}
-            cy={center}
-            r={outerRadius}
-            fill="none"
-            stroke="url(#ringGrad)"
-            strokeWidth="15"
-          />
-
           {/* Inner ring border */}
           <circle
             cx={center}
@@ -238,54 +228,6 @@ const FortuneWheel = memo(function FortuneWheel({
             stroke="rgba(255,255,255,0.2)"
             strokeWidth="2"
           />
-
-          {/* LED chase animation — pure CSS, no React re-renders */}
-          <style>
-            {`
-              @keyframes ledChase {
-                0%, 100% { fill: #374151; stroke: #1F2937; }
-                10%, 30% { fill: #FEF08A; stroke: #FDE047; }
-              }
-              @keyframes ledGlow {
-                0%, 100% { opacity: 0; }
-                10%, 30% { opacity: 0.4; }
-              }
-              .led-dot { animation: ledChase 6s linear infinite; }
-              .led-glow { opacity: 0; animation: ledGlow 6s linear infinite; }
-              .led-spinning .led-dot { animation-duration: 2s; }
-              .led-spinning .led-glow { animation-duration: 2s; }
-            `}
-          </style>
-          <g className={isSpinning ? 'led-spinning' : undefined}>
-            {Array.from({ length: 20 }).map((_, i) => {
-              const angle = (i * 18 - 90) * (Math.PI / 180);
-              const ledRadius = outerRadius + 3;
-              const dotX = center + ledRadius * Math.cos(angle);
-              const dotY = center + ledRadius * Math.sin(angle);
-              // Delay as fraction of full cycle — CSS handles speed via animation-duration
-              const delay = `${(i / 20) * 6}s`;
-              return (
-                <g key={`led-${i}`}>
-                  <circle
-                    className="led-glow"
-                    cx={dotX}
-                    cy={dotY}
-                    r={9}
-                    fill="url(#ledGlowGrad)"
-                    style={{ animationDelay: delay }}
-                  />
-                  <circle
-                    className="led-dot"
-                    cx={dotX}
-                    cy={dotY}
-                    r={3.5}
-                    strokeWidth="1"
-                    style={{ animationDelay: delay }}
-                  />
-                </g>
-              );
-            })}
-          </g>
 
           {/* Rotating wheel group */}
           <g
@@ -347,6 +289,72 @@ const FortuneWheel = memo(function FortuneWheel({
             })}
 
             {/* Prize content - Text removed, only emoji visible on wheel */}
+          </g>
+
+          {/* Обод и лампочки рисуются ПОСЛЕ вращающейся группы. Они с ней не
+              пересекаются (сектора кончаются на prizeRadius, обод начинается
+              дальше), поэтому на вид порядок безразличен. Но у группы есть
+              CSS-transform, и Android WebView на части устройств (Xiaomi 12,
+              17.09.2026) выносит её в отдельный слой, чьи прозрачные пиксели
+              «пробивают» всё, что нарисовано ниже, до подложки Telegram: обод
+              пропадал везде, где его накрывал квадрат группы. Выше группы обод
+              ничем не накрыт. */}
+          {/* Outer decorative ring */}
+          <circle
+            cx={center}
+            cy={center}
+            r={outerRadius}
+            fill="none"
+            stroke="url(#ringGrad)"
+            strokeWidth="15"
+          />
+
+          {/* LED chase animation — pure CSS, no React re-renders */}
+          <style>
+            {`
+              @keyframes ledChase {
+                0%, 100% { fill: #374151; stroke: #1F2937; }
+                10%, 30% { fill: #FEF08A; stroke: #FDE047; }
+              }
+              @keyframes ledGlow {
+                0%, 100% { opacity: 0; }
+                10%, 30% { opacity: 0.4; }
+              }
+              .led-dot { animation: ledChase 6s linear infinite; }
+              .led-glow { opacity: 0; animation: ledGlow 6s linear infinite; }
+              .led-spinning .led-dot { animation-duration: 2s; }
+              .led-spinning .led-glow { animation-duration: 2s; }
+            `}
+          </style>
+          <g className={isSpinning ? 'led-spinning' : undefined}>
+            {Array.from({ length: 20 }).map((_, i) => {
+              const angle = (i * 18 - 90) * (Math.PI / 180);
+              const ledRadius = outerRadius + 3;
+              const dotX = center + ledRadius * Math.cos(angle);
+              const dotY = center + ledRadius * Math.sin(angle);
+              // Delay as fraction of full cycle — CSS handles speed via animation-duration
+              const delay = `${(i / 20) * 6}s`;
+              return (
+                <g key={`led-${i}`}>
+                  <circle
+                    className="led-glow"
+                    cx={dotX}
+                    cy={dotY}
+                    r={9}
+                    fill="url(#ledGlowGrad)"
+                    style={{ animationDelay: delay }}
+                  />
+                  <circle
+                    className="led-dot"
+                    cx={dotX}
+                    cy={dotY}
+                    r={3.5}
+                    strokeWidth="1"
+                    style={{ animationDelay: delay }}
+                  />
+                </g>
+              );
+            })}
           </g>
 
           {/* Center hub */}
