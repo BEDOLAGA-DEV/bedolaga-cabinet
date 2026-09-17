@@ -484,8 +484,9 @@ export interface UsersListParams {
     | 'last_activity'
     | 'total_spent'
     | 'purchase_count'
-    | 'subscription_end_date';
-  /** Не задано — привычное направление ключа (истечение с ближайших, остальное с больших). */
+    | 'subscription_end_date'
+    | 'grace_until';
+  /** Не задано — привычное направление ключа (истечение и грейс с ближайших, остальное с больших). */
   sort_order?: 'asc' | 'desc';
 }
 
