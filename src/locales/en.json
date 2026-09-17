@@ -5148,6 +5148,7 @@
       "views": {
         "all": "All",
         "expiring": "Expiring in {{days}} days",
+        "grace": "In grace",
         "traffic": "Traffic running out",
         "nopay": "No purchases",
         "online": "Online",

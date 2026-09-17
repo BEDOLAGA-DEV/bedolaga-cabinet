@@ -3995,6 +3995,7 @@
       "views": {
         "all": "全部",
         "expiring": "{{days}} 天内到期",
+        "grace": "临时访问中",
         "traffic": "流量将尽",
         "nopay": "未购买",
         "online": "在线",
