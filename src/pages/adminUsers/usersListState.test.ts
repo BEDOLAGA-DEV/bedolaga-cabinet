@@ -164,6 +164,14 @@ describe('направление сортировки', () => {
     expect(withSort(reversed, 'balance').dir).toBe('');
     expect(withSort(reversed, 'created').dir).toBe('asc');
   });
+  it('«грейс кончается» — свой ключ ручки, с ближайших, как истечение', () => {
+    const state = parseUsersListState(new URLSearchParams('sort=grace'));
+    expect(state.sort).toBe('grace');
+    expect(sortDirection(state)).toBe('asc');
+    expect(buildUsersQuery(state)).toMatchObject({ sort_by: 'grace_until' });
+    expect(buildUsersQuery(state).sort_order).toBeUndefined();
+    expect(withSort(DEFAULT_STATE, 'grace', 'desc').dir).toBe('desc');
+  });
   it('мусорное направление и сегмент сбрасывают его', () => {
     expect(parseUsersListState(new URLSearchParams('dir=up')).dir).toBe('');
     expect(applyView({ ...DEFAULT_STATE, dir: 'asc' }, 'online').dir).toBe('');
