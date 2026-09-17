@@ -52,6 +52,10 @@ export interface DialogController {
 export interface ThemeController {
   setHeaderColor: (color: string) => void;
   setBottomBarColor: (color: string) => void;
+  /** Фон самого мини-приложения под страницей — обязан совпадать с фоном
+   *  страницы: на Android WebView прозрачен, и всё, что клиент не успел
+   *  отрисовать, просвечивает этим цветом. */
+  setBackgroundColor: (color: string) => void;
   getThemeParams: () => TelegramThemeParams | null;
 }
 
