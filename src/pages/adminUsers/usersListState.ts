@@ -18,6 +18,8 @@ export type SortKey =
   | 'spent'
   | 'traffic'
   | 'purchases';
+/** Направление сортировки; пусто — привычное для ключа (см. NATURAL_DIRECTION). */
+export type SortDirection = 'asc' | 'desc';
 export type ViewKey = 'all' | 'expiring' | 'traffic' | 'nopay' | 'online' | 'blocked';
 
 export interface UsersListState {
@@ -30,6 +32,8 @@ export interface UsersListState {
   group: string;
   campaign: string;
   sort: SortKey;
+  /** Пусто — привычное направление ключа; в адрес пишется только обратное. */
+  dir: '' | SortDirection;
   /** Сегмент — готовый набор параметров, см. VIEW_PRESETS. */
   view: ViewKey;
 }
@@ -55,6 +59,7 @@ export const SORT_KEYS: readonly SortKey[] = [
   'traffic',
   'purchases',
 ];
+export const SORT_DIRECTIONS: readonly SortDirection[] = ['asc', 'desc'];
 export const VIEW_KEYS: readonly ViewKey[] = [
   'all',
   'expiring',
@@ -72,6 +77,7 @@ export const DEFAULT_STATE: UsersListState = {
   group: '',
   campaign: '',
   sort: 'created',
+  dir: '',
   view: 'all',
 };
 
@@ -89,6 +95,39 @@ const SORT_TO_API: Record<SortKey, NonNullable<UsersQuery['sort_by']>> = {
   traffic: 'traffic',
   purchases: 'purchase_count',
 };
+
+/** Как ключ сортируется, пока направление не выбрано: истечение — с ближайших, остальное — с больших и новых. */
+const NATURAL_DIRECTION: Record<SortKey, SortDirection> = {
+  expires: 'asc',
+  activity: 'desc',
+  created: 'desc',
+  balance: 'desc',
+  spent: 'desc',
+  traffic: 'desc',
+  purchases: 'desc',
+};
+
+/** Привычное направление ключа — первым пунктом в меню. */
+export function naturalDirection(sort: SortKey): SortDirection {
+  return NATURAL_DIRECTION[sort];
+}
+
+/** Направление, в котором список отсортирован сейчас. */
+export function sortDirection(state: UsersListState): SortDirection {
+  return state.dir || NATURAL_DIRECTION[state.sort];
+}
+
+/**
+ * Выбор в меню сортировки. Новый ключ начинает с привычного направления;
+ * привычное направление хранится пустым, чтобы не засорять адрес.
+ */
+export function withSort(
+  state: UsersListState,
+  sort: SortKey,
+  dir: SortDirection = sort === state.sort ? sortDirection(state) : NATURAL_DIRECTION[sort],
+): UsersListState {
+  return { ...state, sort, dir: dir === NATURAL_DIRECTION[sort] ? '' : dir };
+}
 
 /** Сегмент — набор параметров поверх дефолта; `all` снимает всё, кроме строки поиска. */
 const VIEW_PRESETS: Record<ViewKey, Partial<Omit<UsersListState, 'q' | 'view'>>> = {
@@ -127,6 +166,7 @@ export function parseUsersListState(params: URLSearchParams): UsersListState {
     group: params.get('group') ?? '',
     campaign: params.get('campaign') ?? '',
     sort: pick(params.get('sort'), SORT_KEYS, base.sort),
+    dir: pick<'' | SortDirection>(params.get('dir'), SORT_DIRECTIONS, base.dir),
     view,
   };
 }
@@ -163,6 +203,7 @@ export function classifySearch(raw: string): Pick<UsersQuery, 'search' | 'email'
 /** Параметры ручки списка без `offset`/`limit` — их добавляет лента. */
 export function buildUsersQuery(state: UsersListState): UsersQuery {
   const query: UsersQuery = { ...classifySearch(state.q), sort_by: SORT_TO_API[state.sort] };
+  if (state.dir) query.sort_order = state.dir;
   if (state.status) query.status = state.status;
   if (state.sub === 'expiring') {
     query.subscription_status = 'active';

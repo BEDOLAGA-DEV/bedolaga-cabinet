@@ -4,6 +4,7 @@ import type { DropdownOption } from '@/components/admin/bulkActions/DropdownSele
 import { Segmented } from '@/components/admin/Segmented';
 import { SearchIcon, XIcon } from '@/components/icons';
 import {
+  type SortDirection,
   type SortKey,
   type StatusFilter,
   type SubFilter,
@@ -15,7 +16,10 @@ import {
   SUB_FILTERS,
   VIEW_KEYS,
   applyView,
+  naturalDirection,
+  sortDirection,
   viewFilterValue,
+  withSort,
 } from '@/pages/adminUsers/usersListState';
 import { AppliedFilters } from './AppliedFilters';
 import { type FilterField, type FilterKey, FiltersPopover } from './FiltersPopover';
@@ -159,6 +163,11 @@ export function UsersToolbar({ state, onChange, options }: UsersToolbarProps) {
     value: key,
     label: t(`admin.users.sort.${key}`),
   }));
+  // Привычное направление ключа первым: «по дате регистрации» → «сначала новые», потом «сначала старые».
+  const natural = naturalDirection(state.sort);
+  const directionOptions: DropdownOption[] = [natural, natural === 'asc' ? 'desc' : 'asc'].map(
+    (dir) => ({ value: dir, label: t(`admin.users.sortOrder.${state.sort}.${dir}`) }),
+  );
   const viewOptions = VIEW_KEYS.map((view: ViewKey) => ({
     value: view,
     label: t(`admin.users.views.${view}`, { days: EXPIRING_DAYS }),
@@ -227,8 +236,12 @@ export function UsersToolbar({ state, onChange, options }: UsersToolbarProps) {
           label={t('admin.users.sort.label')}
           value={state.sort}
           options={sortOptions}
-          onChange={(value) => onChange({ ...state, sort: value as SortKey })}
-          changed={state.sort !== DEFAULT_STATE.sort}
+          onChange={(value) => onChange(withSort(state, value as SortKey))}
+          directionLabel={t('admin.users.sortOrder.label')}
+          direction={sortDirection(state)}
+          directionOptions={directionOptions}
+          onDirectionChange={(dir: SortDirection) => onChange(withSort(state, state.sort, dir))}
+          changed={state.sort !== DEFAULT_STATE.sort || state.dir !== DEFAULT_STATE.dir}
         />
       </div>
 
