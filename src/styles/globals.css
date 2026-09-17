@@ -308,6 +308,16 @@
     }
   }
 
+  /* Схема цветов за классом темы (см. <meta name="color-scheme"> и <style> в
+     index.html): страница сама ведёт обе темы, Android WebView её не затемняет,
+     нативные контролы и скроллбары идут в цвет выбранной темы. */
+  .dark {
+    color-scheme: dark;
+  }
+  .light {
+    color-scheme: light;
+  }
+
   /* Dark theme (default) */
   body,
   .dark body {
