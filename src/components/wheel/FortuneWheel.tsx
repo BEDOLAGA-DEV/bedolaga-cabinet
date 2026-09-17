@@ -1,6 +1,40 @@
 import { useEffect, useRef, useState, memo } from 'react';
 import type { WheelPrize } from '../../api/wheel';
 
+const SIZE = 400;
+const CENTER = SIZE / 2;
+const SPIN_DURATION_MS = 5000;
+/** Пять полных оборотов до целевого сектора. */
+const SPIN_EXTRA_TURNS_DEG = 1800;
+
+// Та же кривая, что раньше стояла в CSS-переходе: cubic-bezier(0.15, 0.6, 0.1, 1).
+const [EASE_X1, EASE_Y1, EASE_X2, EASE_Y2] = [0.15, 0.6, 0.1, 1];
+
+function bezierAxis(a1: number, a2: number, t: number): number {
+  return (((1 - 3 * a2 + 3 * a1) * t + (3 * a2 - 6 * a1)) * t + 3 * a1) * t;
+}
+
+function bezierSlope(a1: number, a2: number, t: number): number {
+  return 3 * (1 - 3 * a2 + 3 * a1) * t * t + 2 * (3 * a2 - 6 * a1) * t + 3 * a1;
+}
+
+/** Доля пути по времени 0..1 → доля поворота 0..1. */
+export function spinEasing(x: number): number {
+  if (x <= 0) return 0;
+  if (x >= 1) return 1;
+  let t = x;
+  for (let i = 0; i < 8; i += 1) {
+    const slope = bezierSlope(EASE_X1, EASE_X2, t);
+    if (slope === 0) break;
+    t -= (bezierAxis(EASE_X1, EASE_X2, t) - x) / slope;
+  }
+  return bezierAxis(EASE_Y1, EASE_Y2, Math.min(1, Math.max(0, t)));
+}
+
+function rotateAttr(angle: number): string {
+  return `rotate(${angle} ${CENTER} ${CENTER})`;
+}
+
 interface FortuneWheelProps {
   prizes: WheelPrize[];
   isSpinning: boolean;
@@ -16,25 +50,41 @@ const FortuneWheel = memo(function FortuneWheel({
 }: FortuneWheelProps) {
   const wheelRef = useRef<SVGGElement>(null);
   const accumulatedRotation = useRef(0);
-  const [displayRotation, setDisplayRotation] = useState(0);
+  // Угол покоя: пока идёт спин, React рисует прежний угол и в DOM не лезет,
+  // атрибут ведёт кадр за кадром сам спин; по его концу угол покоя догоняет.
+  const [restAngle, setRestAngle] = useState(0);
+  const latestOnComplete = useRef(onSpinComplete);
+  latestOnComplete.current = onSpinComplete;
 
   useEffect(() => {
-    if (isSpinning && targetRotation !== null && wheelRef.current) {
-      const currentPos = accumulatedRotation.current % 360;
-      let delta = targetRotation - currentPos;
-      // Normalize delta to positive
-      while (delta < 0) delta += 360;
-      const newRotation = accumulatedRotation.current + 1800 + delta;
-      accumulatedRotation.current = newRotation;
-      setDisplayRotation(newRotation);
+    if (!isSpinning || targetRotation === null) return;
+    const group = wheelRef.current;
+    if (!group) return;
+    const from = accumulatedRotation.current;
+    let delta = targetRotation - (from % 360);
+    while (delta < 0) delta += 360;
+    const to = from + SPIN_EXTRA_TURNS_DEG + delta;
+    accumulatedRotation.current = to;
 
-      const timeout = setTimeout(() => {
-        onSpinComplete();
-      }, 5000);
-
-      return () => clearTimeout(timeout);
-    }
-  }, [isSpinning, targetRotation, onSpinComplete]);
+    // Крутим SVG-атрибутом по requestAnimationFrame, а не CSS-transform с переходом:
+    // CSS-transform на <g> заводит отдельный композитный слой, и Android WebView на
+    // части устройств (Xiaomi 12, 17.09.2026) рисует его плитки чёрными квадратами
+    // поверх секторов. Атрибут рисуется вместе со всем SVG — компоновать нечего.
+    const started = performance.now();
+    let frame = 0;
+    const tick = (now: number) => {
+      const progress = Math.min(1, (now - started) / SPIN_DURATION_MS);
+      group.setAttribute('transform', rotateAttr(from + (to - from) * spinEasing(progress)));
+      if (progress < 1) {
+        frame = requestAnimationFrame(tick);
+        return;
+      }
+      setRestAngle(to);
+      latestOnComplete.current();
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [isSpinning, targetRotation]);
 
   if (prizes.length === 0) {
     return (
@@ -44,8 +94,8 @@ const FortuneWheel = memo(function FortuneWheel({
     );
   }
 
-  const size = 400;
-  const center = size / 2;
+  const size = SIZE;
+  const center = CENTER;
   const outerRadius = size / 2 - 20;
   const innerRadius = outerRadius - 15;
   const prizeRadius = innerRadius - 5;
@@ -229,15 +279,8 @@ const FortuneWheel = memo(function FortuneWheel({
             strokeWidth="2"
           />
 
-          {/* Rotating wheel group */}
-          <g
-            ref={wheelRef}
-            style={{
-              transformOrigin: `${center}px ${center}px`,
-              transform: `rotate(${displayRotation}deg)`,
-              transition: isSpinning ? 'transform 5s cubic-bezier(0.15, 0.6, 0.1, 1)' : 'none',
-            }}
-          >
+          {/* Rotating wheel group — угол атрибутом, см. эффект спина выше */}
+          <g ref={wheelRef} transform={rotateAttr(restAngle)}>
             {/* Sectors */}
             {prizes.map((prize, index) => (
               <path
@@ -317,11 +360,11 @@ const FortuneWheel = memo(function FortuneWheel({
                 10%, 30% { fill: #FEF08A; stroke: #FDE047; }
               }
               @keyframes ledGlow {
-                0%, 100% { opacity: 0; }
-                10%, 30% { opacity: 0.4; }
+                0%, 100% { fill-opacity: 0; }
+                10%, 30% { fill-opacity: 0.4; }
               }
               .led-dot { animation: ledChase 6s linear infinite; }
-              .led-glow { opacity: 0; animation: ledGlow 6s linear infinite; }
+              .led-glow { fill-opacity: 0; animation: ledGlow 6s linear infinite; }
               .led-spinning .led-dot { animation-duration: 2s; }
               .led-spinning .led-glow { animation-duration: 2s; }
             `}
