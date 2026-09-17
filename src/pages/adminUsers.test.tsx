@@ -280,9 +280,24 @@ describe('AdminUsers', () => {
     await renderPage('/admin/users?sort=balance');
     expect(
       await screen.findByRole('button', {
-        name: 'admin.users.sort.label: admin.users.sort.balance',
+        name: 'admin.users.sort.label: admin.users.sort.balance, admin.users.sortOrder.balance.desc',
       }),
     ).toBeTruthy();
+  });
+
+  it('обратное направление из адреса — в подписи кнопки и в запросе', async () => {
+    getUsers.mockResolvedValue(page([], 0));
+    await renderPage('/admin/users?dir=asc');
+    expect(
+      await screen.findByRole('button', {
+        name: 'admin.users.sort.label: admin.users.sort.created, admin.users.sortOrder.created.asc',
+      }),
+    ).toBeTruthy();
+    await waitFor(() =>
+      expect(getUsers).toHaveBeenLastCalledWith(
+        expect.objectContaining({ sort_by: 'created_at', sort_order: 'asc' }),
+      ),
+    );
   });
 
   it('сырые статусы не показываются — только словарь', async () => {

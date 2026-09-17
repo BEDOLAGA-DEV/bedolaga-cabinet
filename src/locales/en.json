@@ -5120,6 +5120,37 @@
         "traffic": "by traffic",
         "purchases": "by purchases"
       },
+      "sortOrder": {
+        "label": "Order",
+        "expires": {
+          "asc": "soonest first",
+          "desc": "latest first"
+        },
+        "activity": {
+          "asc": "longest ago first",
+          "desc": "most recent first"
+        },
+        "created": {
+          "asc": "oldest first",
+          "desc": "newest first"
+        },
+        "balance": {
+          "asc": "lowest first",
+          "desc": "highest first"
+        },
+        "spent": {
+          "asc": "lowest first",
+          "desc": "highest first"
+        },
+        "traffic": {
+          "asc": "lowest first",
+          "desc": "highest first"
+        },
+        "purchases": {
+          "asc": "fewest first",
+          "desc": "most first"
+        }
+      },
       "views": {
         "all": "All",
         "expiring": "Expiring in {{days}} days",

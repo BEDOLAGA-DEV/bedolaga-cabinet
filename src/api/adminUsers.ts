@@ -485,6 +485,8 @@ export interface UsersListParams {
     | 'total_spent'
     | 'purchase_count'
     | 'subscription_end_date';
+  /** Не задано — привычное направление ключа (истечение с ближайших, остальное с больших). */
+  sort_order?: 'asc' | 'desc';
 }
 
 export const adminUsersApi = {

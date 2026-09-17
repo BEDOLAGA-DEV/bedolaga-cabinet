@@ -3967,6 +3967,37 @@
         "traffic": "按流量",
         "purchases": "按购买"
       },
+      "sortOrder": {
+        "label": "顺序",
+        "expires": {
+          "asc": "最早到期优先",
+          "desc": "最晚到期优先"
+        },
+        "activity": {
+          "asc": "最久未活跃优先",
+          "desc": "最近活跃优先"
+        },
+        "created": {
+          "asc": "最早注册优先",
+          "desc": "最新注册优先"
+        },
+        "balance": {
+          "asc": "从低到高",
+          "desc": "从高到低"
+        },
+        "spent": {
+          "asc": "从低到高",
+          "desc": "从高到低"
+        },
+        "traffic": {
+          "asc": "从少到多",
+          "desc": "从多到少"
+        },
+        "purchases": {
+          "asc": "从少到多",
+          "desc": "从多到少"
+        }
+      },
       "views": {
         "all": "全部",
         "expiring": "{{days}} 天内到期",

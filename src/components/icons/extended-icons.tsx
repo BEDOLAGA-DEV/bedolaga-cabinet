@@ -12,6 +12,7 @@ import {
   PiArrowsInSimple,
   PiReceipt,
   PiSortAscending,
+  PiSortDescending,
   PiArrowsOutSimple,
   PiCode,
   PiMapPin,
@@ -549,8 +550,19 @@ export const MapPinIcon = ({ className }: IconProps) => (
   <PiMapPin className={cn('h-5 w-5', className)} />
 );
 
-/** Сортировка списка — кнопка-иконка рядом с поиском. */
+/*
+ * Сортировка списка — кнопка-иконка рядом с поиском. Имена у Phosphor перевёрнуты
+ * относительно рисунка: на PiSortAscending длинная полоса сверху и стрелка вниз
+ * («от больших к меньшим»), на PiSortDescending — короткая сверху. Наши имена — по рисунку.
+ */
+
+/** Сначала меньшие, старые, ближайшие: короткая полоса сверху. */
 export const SortAscendingIcon = ({ className }: IconProps) => (
+  <PiSortDescending className={cn('h-5 w-5', className)} />
+);
+
+/** Сначала большие, новые, недавние: длинная полоса сверху. */
+export const SortDescendingIcon = ({ className }: IconProps) => (
   <PiSortAscending className={cn('h-5 w-5', className)} />
 );
 

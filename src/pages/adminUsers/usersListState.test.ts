@@ -7,6 +7,8 @@ import {
   hasActiveFilters,
   parseUsersListState,
   serializeUsersListState,
+  sortDirection,
+  withSort,
 } from './usersListState';
 
 /**
@@ -136,5 +138,34 @@ describe('buildUsersQuery', () => {
     expect(hasActiveFilters({ ...DEFAULT_STATE, sort: 'balance' })).toBe(false);
     expect(hasActiveFilters({ ...DEFAULT_STATE, status: 'blocked' })).toBe(true);
     expect(hasActiveFilters(applyView(DEFAULT_STATE, 'online'))).toBe(true);
+  });
+});
+
+describe('направление сортировки', () => {
+  it('без выбора — привычное для ключа: истечение с ближайших, остальное с больших и новых', () => {
+    expect(sortDirection(DEFAULT_STATE)).toBe('desc');
+    expect(sortDirection({ ...DEFAULT_STATE, sort: 'expires' })).toBe('asc');
+    expect(buildUsersQuery(DEFAULT_STATE).sort_order).toBeUndefined();
+  });
+  it('выбранное направление уходит в ручку и живёт в адресе', () => {
+    const state = parseUsersListState(new URLSearchParams('sort=created&dir=asc'));
+    expect(sortDirection(state)).toBe('asc');
+    expect(buildUsersQuery(state)).toMatchObject({ sort_by: 'created_at', sort_order: 'asc' });
+    expect(serializeUsersListState(state).toString()).toBe('dir=asc');
+  });
+  it('привычное направление в адрес не пишется', () => {
+    const state = withSort(DEFAULT_STATE, 'created', 'desc');
+    expect(state.dir).toBe('');
+    expect(serializeUsersListState(state).toString()).toBe('');
+    expect(withSort(DEFAULT_STATE, 'expires', 'desc').dir).toBe('desc');
+  });
+  it('смена ключа возвращает его привычное направление', () => {
+    const reversed = withSort(DEFAULT_STATE, 'created', 'asc');
+    expect(withSort(reversed, 'balance').dir).toBe('');
+    expect(withSort(reversed, 'created').dir).toBe('asc');
+  });
+  it('мусорное направление и сегмент сбрасывают его', () => {
+    expect(parseUsersListState(new URLSearchParams('dir=up')).dir).toBe('');
+    expect(applyView({ ...DEFAULT_STATE, dir: 'asc' }, 'online').dir).toBe('');
   });
 });
