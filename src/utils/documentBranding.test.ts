@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { STORAGE_KEYS } from '@/config/constants';
 import {
   buildWebManifest,
+  hasSameOriginManifest,
   readBrandHint,
   setAppNameMeta,
   setAppleTouchIcon,
@@ -129,6 +130,30 @@ describe('веб-манифест', () => {
     expect(href.startsWith('data:application/manifest+json,')).toBe(true);
     const parsed = JSON.parse(decodeURIComponent(href.slice(href.indexOf(',') + 1)));
     expect(parsed.name).toBe('ZeroPing VPN');
+  });
+});
+
+describe('манифест бота из index.html', () => {
+  it('ссылка на эндпоинт того же сайта считается рабочим манифестом', () => {
+    document.head.insertAdjacentHTML(
+      'beforeend',
+      '<link rel="manifest" href="/api/cabinet/branding/manifest.webmanifest" />',
+    );
+    expect(hasSameOriginManifest()).toBe(true);
+  });
+
+  it('без ссылки, с data: URI или с API на другом домене — нет', () => {
+    expect(hasSameOriginManifest()).toBe(false);
+
+    const link = document.createElement('link');
+    link.rel = 'manifest';
+    link.href = 'data:application/manifest+json,%7B%7D';
+    document.head.appendChild(link);
+    expect(hasSameOriginManifest()).toBe(false);
+
+    // start_url манифеста с чужого домена не приведёт на сайт кабинета.
+    link.href = 'https://api.example/cabinet/branding/manifest.webmanifest';
+    expect(hasSameOriginManifest()).toBe(false);
   });
 });
 

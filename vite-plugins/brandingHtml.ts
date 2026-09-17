@@ -10,6 +10,9 @@ import type { Plugin } from 'vite';
  * чтобы статическая ссылка сразу вела на него. У ссылки свой адрес, а не
  * /cabinet/branding/logo: фавикон грузится без Origin, и попади его ответ в кеш,
  * fetch() логотипа получил бы копию без CORS-заголовков.
+ * Манифест — ссылкой на /cabinet/branding/manifest.webmanifest у бота: Chrome на
+ * Android собирает установленное приложение на серверах Google, и те скачивают
+ * манифест и иконки по адресам — манифест в data: URI ставился ярлыком во вкладке.
  * Адрес API (VITE_API_URL) — в инлайн-скрипт, который запрашивает имя до бандла.
  */
 
@@ -23,6 +26,7 @@ export interface BrandingHtmlOptions {
 export const BRANDING_PLACEHOLDERS = {
   name: '__APP_NAME__',
   icon: '__APP_ICON__',
+  manifest: '__APP_MANIFEST__',
   apiUrl: '__API_URL__',
 } as const;
 
@@ -30,6 +34,8 @@ export const DEFAULT_APP_NAME = 'Cabinet';
 export const DEFAULT_API_URL = '/api';
 /** Эндпоинт бота: логотип из админки, без него — монограмма. Никогда не 404. */
 export const FAVICON_PATH = '/cabinet/branding/favicon';
+/** Эндпоинт бота: манифест приложения с иконками по обычным URL. */
+export const MANIFEST_PATH = '/cabinet/branding/manifest.webmanifest';
 
 function escapeHtml(value: string): string {
   return value
@@ -60,12 +66,21 @@ export function faviconUrl(apiUrl: string): string {
   return `${apiUrl.replace(/\/+$/, '')}${FAVICON_PATH}`;
 }
 
+export function manifestUrl(apiUrl: string): string {
+  return `${apiUrl.replace(/\/+$/, '')}${MANIFEST_PATH}`;
+}
+
 export function renderBrandingHtml(html: string, options: BrandingHtmlOptions): string {
   const name = options.name.trim() || DEFAULT_APP_NAME;
   const apiUrl = resolveApiUrl(options.apiUrl);
   const withName = replaceAll(html, BRANDING_PLACEHOLDERS.name, escapeHtml(name));
   const withIcon = replaceAll(withName, BRANDING_PLACEHOLDERS.icon, escapeHtml(faviconUrl(apiUrl)));
-  return replaceAll(withIcon, BRANDING_PLACEHOLDERS.apiUrl, escapeJsString(apiUrl));
+  const withManifest = replaceAll(
+    withIcon,
+    BRANDING_PLACEHOLDERS.manifest,
+    escapeHtml(manifestUrl(apiUrl)),
+  );
+  return replaceAll(withManifest, BRANDING_PLACEHOLDERS.apiUrl, escapeJsString(apiUrl));
 }
 
 export function brandingHtml(options: BrandingHtmlOptions): Plugin {
