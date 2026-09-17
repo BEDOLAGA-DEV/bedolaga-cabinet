@@ -5112,43 +5112,33 @@
       "until": "until {{date}}",
       "sort": {
         "label": "Sort",
-        "expires": "by expiry",
-        "activity": "by activity",
-        "created": "by sign-up date",
-        "balance": "by balance",
-        "spent": "by spending",
-        "traffic": "by traffic",
-        "purchases": "by purchases"
-      },
-      "sortOrder": {
-        "label": "Order",
         "expires": {
-          "asc": "soonest first",
-          "desc": "latest first"
+          "asc": "Expiring soonest",
+          "desc": "Expiring latest"
         },
         "activity": {
-          "asc": "longest ago first",
-          "desc": "most recent first"
+          "asc": "Least recently active",
+          "desc": "Most recently active"
         },
         "created": {
-          "asc": "oldest first",
-          "desc": "newest first"
+          "asc": "Oldest first",
+          "desc": "Newest first"
         },
         "balance": {
-          "asc": "lowest first",
-          "desc": "highest first"
+          "asc": "Lowest balance",
+          "desc": "Highest balance"
         },
         "spent": {
-          "asc": "lowest first",
-          "desc": "highest first"
+          "asc": "Least spent",
+          "desc": "Most spent"
         },
         "traffic": {
-          "asc": "lowest first",
-          "desc": "highest first"
+          "asc": "Least traffic",
+          "desc": "Most traffic"
         },
         "purchases": {
-          "asc": "fewest first",
-          "desc": "most first"
+          "asc": "Fewest purchases",
+          "desc": "Most purchases"
         }
       },
       "views": {
