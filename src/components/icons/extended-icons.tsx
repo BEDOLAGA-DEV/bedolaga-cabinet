@@ -1,7 +1,18 @@
 import {
+  PiDeviceMobile,
+  PiTrendUp,
+  PiTranslate,
+  PiArchive,
+  PiUserMinus,
+  PiArrowsLeftRight,
+  PiPaperclip,
+  PiMonitor,
+  PiCamera,
+  PiQrCode,
   PiArrowsInSimple,
   PiReceipt,
   PiSortAscending,
+  PiSortDescending,
   PiArrowsOutSimple,
   PiCode,
   PiMapPin,
@@ -539,12 +550,73 @@ export const MapPinIcon = ({ className }: IconProps) => (
   <PiMapPin className={cn('h-5 w-5', className)} />
 );
 
-/** Сортировка списка — кнопка-иконка рядом с поиском. */
+/*
+ * Сортировка списка — кнопка-иконка рядом с поиском. Имена у Phosphor перевёрнуты
+ * относительно рисунка: на PiSortAscending длинная полоса сверху и стрелка вниз
+ * («от больших к меньшим»), на PiSortDescending — короткая сверху. Наши имена — по рисунку.
+ */
+
+/** Сначала меньшие, старые, ближайшие: короткая полоса сверху. */
 export const SortAscendingIcon = ({ className }: IconProps) => (
+  <PiSortDescending className={cn('h-5 w-5', className)} />
+);
+
+/** Сначала большие, новые, недавние: длинная полоса сверху. */
+export const SortDescendingIcon = ({ className }: IconProps) => (
   <PiSortAscending className={cn('h-5 w-5', className)} />
 );
 
 /** Потрачено за всё время — плитка карточки пользователя. */
 export const ReceiptIcon = ({ className }: IconProps) => (
   <PiReceipt className={cn('h-5 w-5', className)} />
+);
+
+/** Телефон — устройство пользователя. */
+export const PhoneIcon = ({ className }: IconProps) => (
+  <PiDeviceMobile className={cn('h-5 w-5', className)} />
+);
+
+/** Рост показателя. */
+export const TrendUpIcon = ({ className }: IconProps) => (
+  <PiTrendUp className={cn('h-5 w-5', className)} />
+);
+
+/** Язык / перевод. */
+export const TranslateIcon = ({ className }: IconProps) => (
+  <PiTranslate className={cn('h-5 w-5', className)} />
+);
+
+/** Архив. */
+export const ArchiveIcon = ({ className }: IconProps) => (
+  <PiArchive className={cn('h-5 w-5', className)} />
+);
+
+/** Убрать пользователя. */
+export const UserMinusIcon = ({ className }: IconProps) => (
+  <PiUserMinus className={cn('h-5 w-5', className)} />
+);
+
+/** Обмен / связи в обе стороны. */
+export const ArrowsLeftRightIcon = ({ className }: IconProps) => (
+  <PiArrowsLeftRight className={cn('h-5 w-5', className)} />
+);
+
+/** Вложение. */
+export const PaperclipIcon = ({ className }: IconProps) => (
+  <PiPaperclip className={cn('h-5 w-5', className)} />
+);
+
+/** Экран — подключение устройства. */
+export const MonitorIcon = ({ className }: IconProps) => (
+  <PiMonitor className={cn('h-5 w-5', className)} />
+);
+
+/** Камера — сканирование QR. */
+export const CameraIcon = ({ className }: IconProps) => (
+  <PiCamera className={cn('h-5 w-5', className)} />
+);
+
+/** QR-код. */
+export const QrCodeIcon = ({ className }: IconProps) => (
+  <PiQrCode className={cn('h-5 w-5', className)} />
 );

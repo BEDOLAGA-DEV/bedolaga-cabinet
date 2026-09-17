@@ -1,11 +1,13 @@
+import { Fragment } from 'react';
 import type { DropdownOption } from '@/components/admin/bulkActions/DropdownSelect';
-import { SortAscendingIcon } from '@/components/icons';
+import { SortAscendingIcon, SortDescendingIcon } from '@/components/icons';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuLabel,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/primitives';
 import { cn } from '@/lib/utils';
@@ -13,19 +15,22 @@ import { cn } from '@/lib/utils';
 interface SortMenuProps {
   label: string;
   value: string;
-  options: DropdownOption[];
+  /** Пары пунктов одного ключа («Сначала новые» / «Сначала старые») — между парами тонкий разделитель. */
+  groups: DropdownOption[][];
   onChange: (value: string) => void;
+  direction: 'asc' | 'desc';
   /** Выбран не порядок по умолчанию — кнопка подсвечивается, чтобы было видно, что список пересортирован. */
   changed: boolean;
 }
 
 /**
- * Сортировка — кнопка-иконка рядом с поиском: текущий порядок виден в подсказке и в
- * меню с отметкой, а не отдельной широкой кнопкой «Сортировка: по дате регистрации».
+ * Сортировка — кнопка-иконка рядом с поиском. Каждый пункт меню — готовый порядок
+ * целиком («Больше всего трафика»), выбор одним касанием; стрелка кнопки показывает направление.
  */
-export function SortMenu({ label, value, options, onChange, changed }: SortMenuProps) {
-  const current = options.find((option) => option.value === value) ?? options[0];
+export function SortMenu({ label, value, groups, onChange, direction, changed }: SortMenuProps) {
+  const current = groups.flat().find((option) => option.value === value);
   const title = `${label}: ${current?.label ?? ''}`;
+  const Icon = direction === 'asc' ? SortAscendingIcon : SortDescendingIcon;
 
   return (
     <DropdownMenu modal={false}>
@@ -40,21 +45,30 @@ export function SortMenu({ label, value, options, onChange, changed }: SortMenuP
             : 'border-dark-700 bg-dark-800 text-dark-300 hover:border-dark-600 hover:text-dark-100',
         )}
       >
-        <SortAscendingIcon className="h-5 w-5" />
+        <Icon className="h-5 w-5" />
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="min-w-[14rem]">
+      <DropdownMenuContent
+        align="end"
+        collisionPadding={12}
+        className="max-h-[var(--radix-dropdown-menu-content-available-height)] min-w-[15rem] overflow-y-auto overscroll-contain"
+      >
         <DropdownMenuLabel className="text-[11px] uppercase tracking-wide text-dark-500">
           {label}
         </DropdownMenuLabel>
         <DropdownMenuRadioGroup value={value} onValueChange={onChange}>
-          {options.map((option) => (
-            <DropdownMenuRadioItem
-              key={option.value}
-              value={option.value}
-              className="data-[state=checked]:font-medium data-[state=checked]:text-accent-400"
-            >
-              {option.label}
-            </DropdownMenuRadioItem>
+          {groups.map((group, index) => (
+            <Fragment key={group[0]?.value ?? index}>
+              {index > 0 && <DropdownMenuSeparator />}
+              {group.map((option) => (
+                <DropdownMenuRadioItem
+                  key={option.value}
+                  value={option.value}
+                  className="data-[state=checked]:font-medium data-[state=checked]:text-accent-400"
+                >
+                  {option.label}
+                </DropdownMenuRadioItem>
+              ))}
+            </Fragment>
           ))}
         </DropdownMenuRadioGroup>
       </DropdownMenuContent>

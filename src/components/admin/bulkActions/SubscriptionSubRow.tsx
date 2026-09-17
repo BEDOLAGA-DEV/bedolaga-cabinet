@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
-import { CheckIcon } from '@/components/icons';
+import { ArchiveIcon, CheckIcon, PhoneIcon } from '@/components/icons';
 import type { UserListItemSubscription } from '../../../api/adminUsers';
 
 // ──────────────────────────────────────────────────────────────────
@@ -79,19 +79,7 @@ export function SubscriptionSubRow({
         <div className="flex items-center gap-3 pl-9">
           <div className="flex items-center gap-1.5">
             <span className="text-[10px] text-dark-500" aria-hidden="true">
-              <svg
-                className="h-3.5 w-3.5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={1.5}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"
-                />
-              </svg>
+              <ArchiveIcon className="h-3.5 w-3.5" />
             </span>
             <span className="min-w-0 flex-1 truncate text-xs font-semibold text-dark-200">
               {subscription.tariff_name || '—'}
@@ -121,19 +109,7 @@ export function SubscriptionSubRow({
           </div>
 
           <span className="flex items-center gap-1 text-xs text-dark-400">
-            <svg
-              className="h-3 w-3"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={1.5}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3"
-              />
-            </svg>
+            <PhoneIcon className="h-3 w-3" />
             {subscription.device_limit}
           </span>
         </div>

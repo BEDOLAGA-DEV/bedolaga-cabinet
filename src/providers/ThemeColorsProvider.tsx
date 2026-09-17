@@ -28,9 +28,14 @@ export function ThemeColorsProvider({ children }: ThemeColorsProviderProps) {
     const themeColors = colors || DEFAULT_THEME_COLORS;
     // Use surface color for header/bottom bar to match app UI
     const headerColor = isDark ? themeColors.darkSurface : themeColors.lightSurface;
+    // Фон клиента под страницей — тот же, что у самой страницы. Иначе на
+    // Android всё, что WebView не успел отрисовать, просвечивает цветом
+    // клиента: чёрные прямоугольники и «прыгающие» цвета на Xiaomi.
+    const pageColor = isDark ? themeColors.darkBackground : themeColors.lightBackground;
 
     platformTheme.setHeaderColor(headerColor);
     platformTheme.setBottomBarColor(headerColor);
+    platformTheme.setBackgroundColor(pageColor);
   }, [capabilities.hasThemeSync, colors, isDark, platformTheme]);
 
   // Apply Telegram colors when theme or colors change
