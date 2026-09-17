@@ -81,6 +81,13 @@ describe('applyView', () => {
       sort: 'expires',
     });
   });
+  it('сегмент «в грейсе» — только открытый временный доступ, с ближайших к концу', () => {
+    const state = applyView(DEFAULT_STATE, 'grace');
+    expect(state).toMatchObject({ view: 'grace', sort: 'grace', sub: '' });
+    expect(buildUsersQuery(state)).toMatchObject({ in_grace: true, sort_by: 'grace_until' });
+    expect(buildUsersQuery(DEFAULT_STATE).in_grace).toBeUndefined();
+    expect(parseUsersListState(new URLSearchParams('view=grace')).view).toBe('grace');
+  });
   it('сегмент «все» сбрасывает фильтры, но не поиск', () => {
     const state = applyView(
       { ...DEFAULT_STATE, q: 'x', status: 'blocked', view: 'blocked' },

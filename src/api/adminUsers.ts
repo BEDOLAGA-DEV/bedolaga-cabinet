@@ -477,6 +477,8 @@ export interface UsersListParams {
   traffic_used_percent_min?: number;
   /** 0 — ни одной покупки (сегмент «без покупок»). */
   purchase_count?: number;
+  /** Только с открытым временным доступом (сегмент «в грейсе»). */
+  in_grace?: boolean;
   sort_by?:
     | 'created_at'
     | 'balance'
