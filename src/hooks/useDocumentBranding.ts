@@ -11,6 +11,7 @@ import {
 import { themeColorsQueryOptions } from '@/api/themeColors';
 import { DEFAULT_THEME_COLORS } from '@/types/theme';
 import {
+  hasSameOriginManifest,
   type ManifestIcon,
   markBrandApplied,
   setAppNameMeta,
@@ -181,12 +182,16 @@ export function useDocumentBranding(): void {
         // С этого момента ранний инлайн-скрипт index.html бренд не трогает.
         markBrandApplied();
         setAppleTouchIcon(icons.touch);
-        setWebManifest({
-          name,
-          icons: icons.manifest,
-          themeColor: background,
-          backgroundColor: background,
-        });
+        // Манифест бота из index.html (иконки по URL) не подменяем: из data: URI
+        // Chrome на Android ставит ярлык вместо приложения.
+        if (!hasSameOriginManifest()) {
+          setWebManifest({
+            name,
+            icons: icons.manifest,
+            themeColor: background,
+            backgroundColor: background,
+          });
+        }
         writeBrandHint({ name, letter, icon: icons.hint ?? undefined });
       })
       .catch(() => {

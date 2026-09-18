@@ -13,6 +13,7 @@ import InsufficientBalancePrompt from '../components/InsufficientBalancePrompt';
 import { WebBackButton } from '../components/WebBackButton';
 import { BEST_VALUE_BORDER, BestValueBadge } from '../components/subscription/BestValueBadge';
 import { PageSkeleton, Skeleton } from '../components/ui/skeleton';
+import { needsTariff, tariffSelectionPath } from '../utils/legacySubscription';
 
 export default function RenewSubscription() {
   const { subscriptionId } = useParams<{ subscriptionId: string }>();
@@ -30,7 +31,7 @@ export default function RenewSubscription() {
   const [error, setError] = useState<string | null>(null);
 
   // Load subscription detail for tariff name
-  const { data: subscriptionResponse } = useQuery({
+  const { data: subscriptionResponse, isLoading: isSubscriptionLoading } = useQuery({
     queryKey: ['subscription', subId],
     queryFn: () => subscriptionApi.getSubscription(subId),
     enabled: !!subId,
@@ -99,7 +100,13 @@ export default function RenewSubscription() {
     return <Navigate to="/subscriptions" replace />;
   }
 
-  if (isLoading) {
+  // Старая подписка (куплена в классике, тарифа нет): продлевать нечего, бот
+  // отдаёт пустой список — уводим на витрину тарифов с этой подпиской.
+  if (needsTariff(subscription)) {
+    return <Navigate to={tariffSelectionPath(subId)} replace />;
+  }
+
+  if (isLoading || isSubscriptionLoading) {
     return (
       <PageSkeleton leading={1} titleWidth="w-56" className="space-y-5">
         <Skeleton variant="card" className="h-16" />

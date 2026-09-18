@@ -65,3 +65,20 @@ describe('extraTariffsCount', () => {
     expect(extraTariffsCount({} as UserListItem)).toBe(0);
   });
 });
+
+describe('триал', () => {
+  it('чип «Триал N дн.», когда ручка прислала сегмент trial — и для классического триала тоже', () => {
+    // Бот присылает subscription_status как сегмент (триал лежит в базе со статусом active + is_trial),
+    // иначе классический триал выглядел бы как «N дней» обычной подписки.
+    const row = {
+      status: 'active',
+      has_subscription: true,
+      subscription_status: 'trial',
+      subscription_is_trial: true,
+      days_remaining: 3,
+    } as UserListItem;
+    const chip = describeUserStatus(row, Date.parse('2026-09-18T12:00:00Z'));
+    expect(chip.key).toBe('subscriptionChips.trial');
+    expect(chip.count).toBe(3);
+  });
+});

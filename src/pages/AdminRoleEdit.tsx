@@ -9,7 +9,7 @@ import {
   type UpdateRolePayload,
 } from '@/api/rbac';
 import { AdminBackButton } from '@/components/admin';
-import { ChevronDownIcon } from '@/components/icons';
+import { CheckIcon, ChevronDownIcon, MinusIcon } from '@/components/icons';
 import { PageSkeleton, Skeleton } from '@/components/ui/skeleton';
 
 // === Constants ===
@@ -143,25 +143,12 @@ function PermissionMatrix({
                   }`}
                   aria-label={t('admin.roles.form.toggleSection', { section: section.section })}
                 >
-                  {(allSelected || partialSelected) && (
-                    <svg
-                      className="h-3 w-3 text-white"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={3}
-                    >
-                      {allSelected ? (
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M4.5 12.75l6 6 9-13.5"
-                        />
-                      ) : (
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14" />
-                      )}
-                    </svg>
-                  )}
+                  {(allSelected || partialSelected) &&
+                    (allSelected ? (
+                      <CheckIcon className="h-3 w-3 text-white" />
+                    ) : (
+                      <MinusIcon className="h-3 w-3 text-white" />
+                    ))}
                 </button>
                 <button
                   type="button"

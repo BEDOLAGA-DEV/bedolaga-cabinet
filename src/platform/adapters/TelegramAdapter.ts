@@ -11,6 +11,7 @@ import {
   showPopup,
   setMiniAppHeaderColor,
   setMiniAppBottomBarColor,
+  setMiniAppBackgroundColor,
   themeParamsState,
   getCloudStorageItem,
   setCloudStorageItem,
@@ -204,6 +205,13 @@ function createThemeController(): ThemeController {
       if (!inTelegram) return;
       try {
         setMiniAppBottomBarColor(color as `#${string}`);
+      } catch {}
+    },
+
+    setBackgroundColor(color: string) {
+      if (!inTelegram) return;
+      try {
+        setMiniAppBackgroundColor(color as `#${string}`);
       } catch {}
     },
 
