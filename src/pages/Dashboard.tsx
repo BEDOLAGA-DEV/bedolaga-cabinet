@@ -14,6 +14,7 @@ import PromoOffersSection from '../components/PromoOffersSection';
 import NewsSection from '../components/news/NewsSection';
 import SubscriptionCardActive from '../components/dashboard/SubscriptionCardActive';
 import SubscriptionCardExpired from '../components/dashboard/SubscriptionCardExpired';
+import { hasLegacySubscription } from '../utils/legacySubscription';
 import TrialOfferCard from '../components/dashboard/TrialOfferCard';
 import StatsGrid from '../components/dashboard/StatsGrid';
 import { giftApi } from '../api/gift';
@@ -236,6 +237,9 @@ export default function Dashboard() {
   const hasActivePaid = (multiSubData?.subscriptions ?? []).some(
     (s) => !s.is_trial && (s.status === 'active' || s.status === 'limited'),
   );
+  // Старая подписка (без тарифа при включённых тарифах) в списке: «купить ещё»
+  // не предлагаем, её карточка ведёт на переход на тариф.
+  const hasLegacy = hasLegacySubscription(multiSubData?.subscriptions);
 
   // Show onboarding for new users after data loads
   useEffect(() => {
@@ -347,7 +351,7 @@ export default function Dashboard() {
               {t('dashboard.showAll', 'Показать все')} ({multiSubData.subscriptions.length})
             </Link>
           )}
-          {hasActivePaid ? (
+          {hasLegacy ? null : hasActivePaid ? (
             <Link
               to="/subscription/purchase"
               className="flex w-full items-center justify-center gap-2 rounded-2xl bg-accent-500/15 p-3.5 text-sm font-medium text-accent-400 transition-all hover:bg-accent-500/25"
