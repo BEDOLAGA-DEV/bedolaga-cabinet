@@ -13,6 +13,17 @@ export function needsTariff(
   return subscription?.requires_tariff_selection === true;
 }
 
+/**
+ * Есть ли в списке старая подписка. Пока есть — «Купить ещё тариф» не предлагаем:
+ * покупка с витрины завела бы вторую подписку рядом с непродлеваемой старой,
+ * а её единственный путь — «Перейти на тариф» на своей карточке.
+ */
+export function hasLegacySubscription(
+  subscriptions: ReadonlyArray<Pick<Subscription, 'requires_tariff_selection'>> | undefined,
+): boolean {
+  return (subscriptions ?? []).some(needsTariff);
+}
+
 /** Витрина тарифов для этой подписки: покупка переводит на тариф именно её. */
 export function tariffSelectionPath(subscriptionId: number): string {
   return `/subscription/purchase?subscriptionId=${subscriptionId}`;
