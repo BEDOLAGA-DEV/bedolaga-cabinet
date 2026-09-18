@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.78.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.77.0...v1.78.0) (2026-09-18)
+
+
+### Features
+
+* **subscription:** старая подписка без тарифа ведёт на переход на тариф, а не на продление ([4fea85e](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/4fea85e4b1e05f1f3165926e6853196f824811f6))
+
+
+### Bug Fixes
+
+* **shell:** кнопка «Выйти» только в браузере ([c083353](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/c083353adbb32c796ad42bc44e7958929c59498d))
+* **subscription:** не предлагать «купить ещё», пока есть старая подписка ([78c4ba4](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/78c4ba42e83258073daab3baec5a6320f83914e2))
+* **subscription:** старой подписке не показывать докупки, на карточке — настоящая кнопка перехода ([645b5d1](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/645b5d1969e39e406eb822adf561b631c3ab9528))
+
 ## [1.77.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.76.1...v1.77.0) (2026-09-17)
 
 
