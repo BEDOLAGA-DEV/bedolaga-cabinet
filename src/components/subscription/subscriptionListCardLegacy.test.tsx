@@ -68,10 +68,12 @@ async function renderCard(sub: SubscriptionListItem) {
 }
 
 describe('старая подписка в списке', () => {
-  it('подсказывает переход на тариф вместо статуса автопродления', async () => {
+  it('даёт настоящую кнопку-ссылку на витрину вместо статуса автопродления', async () => {
     await renderCard(item({ requires_tariff_selection: true }));
 
-    expect(await screen.findByText('subscription.cta.moveToTariff')).toBeTruthy();
+    const move = await screen.findByRole('link', { name: 'subscription.cta.moveToTariff' });
+    expect(move.getAttribute('href')).toBe('/subscription/purchase?subscriptionId=42');
+    expect(move.className).toContain('btn-');
     expect(screen.queryByText('subscription.autopay')).toBeNull();
   });
 
