@@ -18,6 +18,7 @@ import InsufficientBalancePrompt from '../components/InsufficientBalancePrompt';
 import { useCurrency } from '../hooks/useCurrency';
 import { useCloseOnSuccessNotification } from '../store/successNotification';
 import PurchaseCTAButton from '../components/subscription/PurchaseCTAButton';
+import { planTitle, showsAutopayToggle } from '../utils/legacySubscription';
 import {
   ArrowPathIcon,
   CalendarIcon,
@@ -776,7 +777,7 @@ export default function Subscription() {
 
                   {/* Plan name */}
                   <h2 className="text-lg font-bold tracking-tight text-dark-50">
-                    {subscription.tariff_name || t('subscription.currentPlan')}
+                    {planTitle(subscription, t)}
                   </h2>
                 </div>
 
@@ -1204,7 +1205,7 @@ export default function Subscription() {
               )}
 
               {/* ─── Autopay Toggle ─── */}
-              {!subscription.is_trial && !subscription.is_daily && (
+              {showsAutopayToggle(subscription) && (
                 <div
                   className="flex items-center justify-between rounded-[14px] p-3.5"
                   style={{

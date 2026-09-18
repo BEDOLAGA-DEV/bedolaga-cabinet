@@ -107,6 +107,8 @@ export interface Subscription {
   tariff_id?: number;
   tariff_name?: string;
   traffic_reset_mode?: string;
+  /** Старая подписка (куплена в классике, тарифа нет, оператор на тарифах): продления и автоплатежа нет, только переход на тариф. */
+  requires_tariff_selection?: boolean;
 }
 
 // Response wrapper for subscription status endpoint
@@ -132,6 +134,8 @@ export interface SubscriptionListItem {
   is_daily_paused?: boolean;
   autopay_enabled: boolean;
   connected_squads: string[] | null;
+  /** Старая подписка (куплена в классике, тарифа нет, оператор на тарифах): карточка ведёт на выбор тарифа. */
+  requires_tariff_selection?: boolean;
 }
 
 // Response from GET /cabinet/subscriptions (multi-tariff)

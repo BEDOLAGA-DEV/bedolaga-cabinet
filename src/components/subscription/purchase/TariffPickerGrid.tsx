@@ -8,6 +8,7 @@ import { dailyPriceQuote } from './dailyPrice';
 import { getGlassColors } from '../../../utils/glassTheme';
 import { ArrowDownIcon, DevicesIcon, GiftIcon, RestartIcon } from '@/components/icons';
 import type { Tariff, Subscription, PurchaseOptions } from '../../../types';
+import { needsTariff } from '@/utils/legacySubscription';
 
 // ──────────────────────────────────────────────────────────────────
 // TariffPickerGrid
@@ -143,8 +144,7 @@ export function TariffPickerGrid({
               !isSubscriptionExpired &&
               !isOnFreeTariff &&
               (subscription.is_active || subscription.is_limited);
-            const isLegacySubscription =
-              subscription && !subscription.is_trial && !subscription.tariff_id;
+            const isLegacySubscription = needsTariff(subscription);
 
             return (
               <div
@@ -284,7 +284,7 @@ export function TariffPickerGrid({
                       onClick={() => onSelectTariff(tariff)}
                       className="btn-primary flex-1 py-2 text-sm"
                     >
-                      {t('subscription.tariff.selectForRenewal')}
+                      {t('subscription.cta.moveToTariff')}
                     </button>
                   ) : canSwitch ? (
                     <button

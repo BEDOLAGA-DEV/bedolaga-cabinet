@@ -430,6 +430,8 @@
     "noSubscription": "You don't have an active subscription",
     "getSubscription": "Get Subscription",
     "cta": {
+      "moveToTariff": "Switch to a plan",
+      "moveToTariffHint": "Bought before plans were introduced",
       "expiredHint": "Choose a plan and pay",
       "trialHint": "More traffic and devices",
       "activeHint": "Renewal and plan change",
@@ -688,9 +690,10 @@
       "cooldown": "Available in {{minutes}} min {{seconds}} sec"
     },
     "legacy": {
-      "selectTariffTitle": "Select a tariff to renew",
-      "selectTariffDescription": "Your current subscription was created before tariffs were introduced. To renew, please select one of the available tariffs.",
-      "currentSubContinues": "Your current subscription will remain active until it expires."
+      "noTariff": "No plan",
+      "selectTariffTitle": "Bought before plans were introduced",
+      "selectTariffDescription": "Choose a plan: it applies to this same subscription, your connection link stays the same.",
+      "currentSubContinues": "Remaining days are kept and added to the paid period."
     },
     "promoGroup": {
       "yourGroup": "Your group: {{name}}",

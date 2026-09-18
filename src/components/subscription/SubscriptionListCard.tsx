@@ -11,6 +11,7 @@ import {
   XIcon,
 } from '@/components/icons';
 import type { SubscriptionListItem } from '../../types';
+import { needsTariff } from '@/utils/legacySubscription';
 import { connectFooterState } from './connectFooterState';
 import { SubscriptionConnectFooter } from './SubscriptionConnectFooter';
 
@@ -212,7 +213,15 @@ export default function SubscriptionListCard({
             <CalendarIcon className="h-3.5 w-3.5 opacity-50" />
             {formatDate(subscription.end_date, i18n.language)}
           </span>
-          {!isTrial &&
+          {needsTariff(subscription) ? (
+            // Старая подписка (куплена в классике, тарифа нет): автоплатёж ей
+            // недоступен, единственный путь — выбрать тариф.
+            <span className="flex items-center gap-1 text-accent-400">
+              {t('subscription.cta.moveToTariff')}
+              <ChevronRightIcon className="h-3 w-3" />
+            </span>
+          ) : (
+            !isTrial &&
             (() => {
               const isDaily = subscription.is_daily;
               const enabled = isDaily
@@ -229,7 +238,8 @@ export default function SubscriptionListCard({
                   {label}
                 </span>
               );
-            })()}
+            })()
+          )}
         </div>
       </button>
 
