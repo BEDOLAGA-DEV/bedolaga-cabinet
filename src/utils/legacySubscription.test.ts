@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  hasLegacySubscription,
   needsTariff,
   planTitle,
   showsAddonOptions,
@@ -80,5 +81,23 @@ describe('showsAddonOptions', () => {
     expect(showsAddonOptions({ ...live, is_trial: true })).toBe(false);
     expect(showsAddonOptions({ ...live, is_active: false })).toBe(false);
     expect(showsAddonOptions({ ...live, device_limit: 0 })).toBe(false);
+  });
+});
+
+describe('hasLegacySubscription', () => {
+  it('верно, пока хоть одна подписка в списке требует перехода на тариф', () => {
+    expect(hasLegacySubscription([{ requires_tariff_selection: true }])).toBe(true);
+    expect(
+      hasLegacySubscription([
+        { requires_tariff_selection: false },
+        { requires_tariff_selection: true },
+      ]),
+    ).toBe(true);
+  });
+
+  it('ложно для списка обычных подписок и для пустого списка', () => {
+    expect(hasLegacySubscription([{ requires_tariff_selection: false }, {}])).toBe(false);
+    expect(hasLegacySubscription([])).toBe(false);
+    expect(hasLegacySubscription(undefined)).toBe(false);
   });
 });
