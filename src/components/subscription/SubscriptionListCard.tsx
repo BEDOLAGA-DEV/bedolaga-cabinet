@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router';
 import { useTheme } from '../../hooks/useTheme';
 import { getGlassColors } from '../../utils/glassTheme';
 import { useHaptic } from '../../platform';
@@ -11,7 +12,7 @@ import {
   XIcon,
 } from '@/components/icons';
 import type { SubscriptionListItem } from '../../types';
-import { needsTariff } from '@/utils/legacySubscription';
+import { needsTariff, tariffSelectionPath } from '@/utils/legacySubscription';
 import { connectFooterState } from './connectFooterState';
 import { SubscriptionConnectFooter } from './SubscriptionConnectFooter';
 
@@ -213,14 +214,9 @@ export default function SubscriptionListCard({
             <CalendarIcon className="h-3.5 w-3.5 opacity-50" />
             {formatDate(subscription.end_date, i18n.language)}
           </span>
-          {needsTariff(subscription) ? (
-            // Старая подписка (куплена в классике, тарифа нет): автоплатёж ей
-            // недоступен, единственный путь — выбрать тариф.
-            <span className="flex items-center gap-1 text-accent-400">
-              {t('subscription.cta.moveToTariff')}
-              <ChevronRightIcon className="h-3 w-3" />
-            </span>
-          ) : (
+          {/* Старая подписка (куплена в классике, тарифа нет): автоплатёж ей
+              недоступен — статус не показываем, кнопка перехода ниже. */}
+          {!needsTariff(subscription) &&
             !isTrial &&
             (() => {
               const isDaily = subscription.is_daily;
@@ -238,10 +234,23 @@ export default function SubscriptionListCard({
                   {label}
                 </span>
               );
-            })()
-          )}
+            })()}
         </div>
       </button>
+
+      {needsTariff(subscription) && (
+        // Старая подписка: единственный путь — витрина тарифов с этой подпиской.
+        // Настоящая кнопка, а не подпись внутри карточки: вся карточка ведёт на
+        // страницу подписки, а эта кнопка — сразу на выбор тарифа.
+        <Link
+          to={tariffSelectionPath(subscription.id)}
+          onClick={() => impact('light')}
+          className="btn-primary mx-4 mb-4 flex items-center justify-center gap-2 py-2.5 text-sm"
+        >
+          {t('subscription.cta.moveToTariff')}
+          <ChevronRightIcon className="h-4 w-4" />
+        </Link>
+      )}
 
       <SubscriptionConnectFooter
         state={footer}

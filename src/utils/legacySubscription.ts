@@ -27,6 +27,25 @@ export function planTitle(
   return subscription.tariff_name || t('subscription.currentPlan');
 }
 
+/**
+ * Блок «Дополнительные опции» (докупка устройств и трафика): живой платной
+ * подписке с устройствами. Старой подписке — нет: докупки считались бы по
+ * классическим ценам, а её единственный путь — перейти на тариф.
+ */
+export function showsAddonOptions(
+  subscription: Pick<
+    Subscription,
+    'is_active' | 'is_limited' | 'is_trial' | 'device_limit' | 'requires_tariff_selection'
+  >,
+): boolean {
+  return (
+    (subscription.is_active || subscription.is_limited) &&
+    !subscription.is_trial &&
+    subscription.device_limit !== 0 &&
+    !needsTariff(subscription)
+  );
+}
+
 /** Тумблер автоплатежа: не у пробных, не у суточных и не у старых подписок. */
 export function showsAutopayToggle(
   subscription: Pick<Subscription, 'is_trial' | 'is_daily' | 'requires_tariff_selection'>,

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   needsTariff,
   planTitle,
+  showsAddonOptions,
   showsAutopayToggle,
   tariffSelectionPath,
 } from './legacySubscription';
@@ -60,5 +61,24 @@ describe('planTitle', () => {
       'Базовый',
     );
     expect(planTitle({ tariff_name: undefined }, t)).toBe('subscription.currentPlan');
+  });
+});
+
+describe('showsAddonOptions', () => {
+  const live = { is_active: true, is_limited: false, is_trial: false, device_limit: 3 };
+
+  it('прячет докупки у старой подписки: цены там были бы классические', () => {
+    expect(showsAddonOptions({ ...live, requires_tariff_selection: true })).toBe(false);
+  });
+
+  it('показывает докупки живой подписке с тарифом, как раньше', () => {
+    expect(showsAddonOptions({ ...live, requires_tariff_selection: false })).toBe(true);
+    expect(showsAddonOptions({ ...live, is_active: false, is_limited: true })).toBe(true);
+  });
+
+  it('по-прежнему прячет докупки у пробной, истёкшей и без устройств', () => {
+    expect(showsAddonOptions({ ...live, is_trial: true })).toBe(false);
+    expect(showsAddonOptions({ ...live, is_active: false })).toBe(false);
+    expect(showsAddonOptions({ ...live, device_limit: 0 })).toBe(false);
   });
 });

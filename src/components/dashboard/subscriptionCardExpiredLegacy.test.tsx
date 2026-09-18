@@ -47,7 +47,7 @@ vi.mock('@/api/currency', () => ({
   currencyApi: { getExchangeRates: () => Promise.resolve({ USD: 100, CNY: 14, IRR: 0.0024 }) },
 }));
 
-const legacyExpired = (): Subscription => ({
+const legacyExpired = (overrides: Partial<Subscription> = {}): Subscription => ({
   id: 42,
   status: 'expired',
   is_trial: false,
@@ -71,6 +71,7 @@ const legacyExpired = (): Subscription => ({
   is_expired: true,
   is_limited: false,
   requires_tariff_selection: true,
+  ...overrides,
 });
 
 if (!window.matchMedia) {
@@ -133,5 +134,17 @@ describe('истёкшая старая подписка', () => {
     await screen.findByText('subscription.cta.moveToTariff');
     const links = screen.getAllByRole('link').map((a) => a.getAttribute('href'));
     expect(links.filter((h) => h?.startsWith('/subscription/purchase'))).toHaveLength(1);
+  });
+});
+
+describe('старая подписка с исчерпанным трафиком', () => {
+  it('зовёт перейти на тариф, а не докупать трафик по классическим ценам', async () => {
+    await renderCard(legacyExpired({ status: 'limited', is_expired: false, is_limited: true }));
+
+    const move = await screen.findByText('subscription.cta.moveToTariff');
+    expect(screen.queryByText('subscription.buyTraffic')).toBeNull();
+    expect(move.closest('a')?.getAttribute('href')).toBe(
+      '/subscription/purchase?subscriptionId=42',
+    );
   });
 });

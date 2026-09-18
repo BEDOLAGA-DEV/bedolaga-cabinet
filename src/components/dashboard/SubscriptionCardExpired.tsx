@@ -265,7 +265,11 @@ export default function SubscriptionCardExpired({
       <div className="flex gap-2.5">
         {isLimited ? (
           <Link
-            to={`/subscriptions/${subscription.id}`}
+            to={
+              requiresTariff
+                ? tariffSelectionPath(subscription.id)
+                : `/subscriptions/${subscription.id}`
+            }
             className="flex flex-1 items-center justify-center gap-2 rounded-[14px] py-3.5 text-[15px] font-semibold tracking-tight text-white transition-all duration-300"
             style={{
               background: accent.gradient,
@@ -273,7 +277,7 @@ export default function SubscriptionCardExpired({
             }}
           >
             <PlusIcon className="h-4 w-4" />
-            {t('subscription.buyTraffic')}
+            {requiresTariff ? t('subscription.cta.moveToTariff') : t('subscription.buyTraffic')}
           </Link>
         ) : (
           <>
