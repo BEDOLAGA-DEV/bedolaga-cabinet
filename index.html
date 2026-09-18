@@ -3,11 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" href="__APP_ICON__" />
+    <link rel="manifest" href="__APP_MANIFEST__" />
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
     />
     <meta name="theme-color" content="#0a0f1a" />
+    <!-- Страница сама ведёт обе темы. Без этого Android WebView (Telegram на
+         Xiaomi с системным «тёмным режимом для приложений») затемняет её
+         алгоритмом — по слоям и не за один кадр: цвета «прыгают». -->
+    <meta name="color-scheme" content="dark light" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -58,6 +63,15 @@
       }
       :where(html.light) body {
         background-color: #f7e7ce;
+      }
+      /* Схема следует классу темы, а не системной настройке: нативные контролы
+         и скроллбары должны совпадать с выбранной темой. Дублируется в
+         globals.css — здесь для первой отрисовки до его загрузки. */
+      html.dark {
+        color-scheme: dark;
+      }
+      html.light {
+        color-scheme: light;
       }
     </style>
     <script>

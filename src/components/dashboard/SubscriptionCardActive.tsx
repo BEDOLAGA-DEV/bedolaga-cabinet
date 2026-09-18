@@ -11,7 +11,7 @@ import { useTheme } from '../../hooks/useTheme';
 import { useTrafficZone } from '../../hooks/useTrafficZone';
 import { formatTraffic } from '../../utils/formatTraffic';
 import { getGlassColors } from '../../utils/glassTheme';
-import { CalendarIcon, RefreshIcon } from '@/components/icons';
+import { CalendarIcon, RefreshIcon, SparklesIcon } from '@/components/icons';
 import type { Subscription } from '../../types';
 
 interface SubscriptionCardActiveProps {
@@ -90,21 +90,7 @@ export default function SubscriptionCardActive({
             </span>
             {subscription.is_trial && (
               <span className="inline-flex items-center gap-1 rounded-md border border-accent-400/25 bg-accent-400/10 px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-widest text-accent-400">
-                <svg
-                  width="10"
-                  height="10"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  aria-hidden="true"
-                >
-                  <path
-                    d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+                <SparklesIcon className="h-2.5 w-2.5" />
                 {t('subscription.trialStatus')}
               </span>
             )}

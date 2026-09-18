@@ -141,6 +141,25 @@ export function buildWebManifest(input: WebManifestInput): Record<string, unknow
   };
 }
 
+/**
+ * Манифест из index.html ведёт на эндпоинт бота на том же сайте — его и оставляем.
+ *
+ * Chrome на Android собирает приложение из манифеста на серверах Google: data: URI
+ * им недоступен, и вместо приложения ставится ярлык. Но start_url и scope обязаны
+ * быть на сайте кабинета, а при API на другом домене (VITE_API_URL вида
+ * https://api.…) манифест бота их туда не приведёт — тогда остаётся data: URI.
+ */
+export function hasSameOriginManifest(): boolean {
+  const link = document.head.querySelector<HTMLLinkElement>('link[rel="manifest"]');
+  const href = link?.getAttribute('href');
+  if (!link || !href || href.startsWith('data:')) return false;
+  try {
+    return new URL(link.href, window.location.href).origin === window.location.origin;
+  } catch {
+    return false;
+  }
+}
+
 export function setWebManifest(input: WebManifestInput): void {
   const json = JSON.stringify(buildWebManifest(input));
   upsertLink('manifest').href = `data:application/manifest+json,${encodeURIComponent(json)}`;
