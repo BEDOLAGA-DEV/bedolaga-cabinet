@@ -528,9 +528,10 @@
       "cooldown": "{{minutes}}分{{seconds}}秒后可用"
     },
     "legacy": {
-      "selectTariffTitle": "选择续费套餐",
-      "selectTariffDescription": "您的当前订阅是在引入套餐之前创建的。要续费，请选择一个可用的套餐。",
-      "currentSubContinues": "您的当前订阅将继续有效直到到期。"
+      "noTariff": "无套餐",
+      "selectTariffTitle": "订阅购买于套餐推出之前",
+      "selectTariffDescription": "请选择套餐：它将应用于当前订阅，连接链接不会改变。",
+      "currentSubContinues": "剩余天数将保留并计入已付费周期。"
     },
     "switchTariff": {
       "dailyPayment": "每日付费",
@@ -673,6 +674,8 @@
     "backToList": "返回订阅列表",
     "confirmDelete": "删除订阅？",
     "cta": {
+      "moveToTariff": "切换到套餐",
+      "moveToTariffHint": "订阅购买于套餐推出之前",
       "renewHint": "订阅已过期 — 续订以继续使用",
       "activeHint": "续费和更换套餐",
       "expiredHint": "选择套餐并付款",

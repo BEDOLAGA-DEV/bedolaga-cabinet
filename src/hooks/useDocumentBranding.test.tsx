@@ -136,6 +136,20 @@ describe('DocumentBranding', () => {
     expect(hint).toEqual({ name: 'ZeroPing', letter: 'Z' });
   });
 
+  // Chrome на Android собирает приложение из манифеста на серверах Google: data: URI
+  // им недоступен. Ссылку index.html на манифест бота подменять нельзя.
+  it('не подменяет манифест бота из index.html на data: URI', async () => {
+    const manifestUrl = '/api/cabinet/branding/manifest.webmanifest';
+    document.head.insertAdjacentHTML('beforeend', `<link rel="manifest" href="${manifestUrl}" />`);
+
+    await renderBranding();
+
+    await waitFor(() => expect(localStorage.getItem(STORAGE_KEYS.BRAND_HINT)).not.toBeNull());
+    const links = document.querySelectorAll('link[rel="manifest"]');
+    expect(links).toHaveLength(1);
+    expect(links[0].getAttribute('href')).toBe(manifestUrl);
+  });
+
   it('вкладке — плитка как в шапке, подсказке для Safari — с меньшим скруглением', async () => {
     // Safari в тёмной теме подрисовывает иконке с прозрачными углами белую
     // плитку-подложку, если скругление заметное: при 0,16 стороны и больше
