@@ -35,6 +35,10 @@ export default function AdminPartnerSettings() {
     withdrawal_min_amount_kopeks: NumberOrEmpty;
     withdrawal_cooldown_days: NumberOrEmpty;
     withdrawal_requisites_text: string;
+    withdrawal_reminder_enabled: boolean;
+    withdrawal_reminder_minutes: NumberOrEmpty;
+    withdrawal_reminder_cooldown_minutes: NumberOrEmpty;
+    withdrawal_reminder_check_interval_seconds: NumberOrEmpty;
   }>({
     referral_program_enabled: true,
     partner_section_visible: true,
@@ -42,6 +46,10 @@ export default function AdminPartnerSettings() {
     withdrawal_min_amount_kopeks: 100000,
     withdrawal_cooldown_days: 30,
     withdrawal_requisites_text: '',
+    withdrawal_reminder_enabled: false,
+    withdrawal_reminder_minutes: 60,
+    withdrawal_reminder_cooldown_minutes: 30,
+    withdrawal_reminder_check_interval_seconds: 300,
   });
 
   useEffect(() => {
@@ -53,6 +61,12 @@ export default function AdminPartnerSettings() {
         withdrawal_min_amount_kopeks: settings.withdrawal_min_amount_kopeks,
         withdrawal_cooldown_days: settings.withdrawal_cooldown_days,
         withdrawal_requisites_text: settings.withdrawal_requisites_text,
+        // Кабинет может выехать раньше бота: без полей в ответе показываем дефолты.
+        withdrawal_reminder_enabled: settings.withdrawal_reminder_enabled ?? false,
+        withdrawal_reminder_minutes: settings.withdrawal_reminder_minutes ?? 60,
+        withdrawal_reminder_cooldown_minutes: settings.withdrawal_reminder_cooldown_minutes ?? 30,
+        withdrawal_reminder_check_interval_seconds:
+          settings.withdrawal_reminder_check_interval_seconds ?? 300,
       });
     }
   }, [settings]);
@@ -75,7 +89,24 @@ export default function AdminPartnerSettings() {
     formData.withdrawal_cooldown_days !== '' &&
     formData.withdrawal_cooldown_days >= 0 &&
     formData.withdrawal_cooldown_days <= 365;
-  const isValid = !formData.withdrawal_enabled || (isMinAmountValid && isCooldownValid);
+  const isWithdrawalValid = !formData.withdrawal_enabled || (isMinAmountValid && isCooldownValid);
+  // Напоминания о заявках без решения: границы те же, что в PartnerSettingsUpdateRequest.
+  const isReminderMinutesValid =
+    formData.withdrawal_reminder_minutes !== '' &&
+    formData.withdrawal_reminder_minutes >= 1 &&
+    formData.withdrawal_reminder_minutes <= 10080;
+  const isReminderCooldownValid =
+    formData.withdrawal_reminder_cooldown_minutes !== '' &&
+    formData.withdrawal_reminder_cooldown_minutes >= 1 &&
+    formData.withdrawal_reminder_cooldown_minutes <= 10080;
+  const isReminderIntervalValid =
+    formData.withdrawal_reminder_check_interval_seconds !== '' &&
+    formData.withdrawal_reminder_check_interval_seconds >= 30 &&
+    formData.withdrawal_reminder_check_interval_seconds <= 3600;
+  const isReminderValid =
+    !formData.withdrawal_reminder_enabled ||
+    (isReminderMinutesValid && isReminderCooldownValid && isReminderIntervalValid);
+  const isValid = isWithdrawalValid && isReminderValid;
 
   const handleSubmit = (e: React.SyntheticEvent) => {
     e.preventDefault();
@@ -84,6 +115,15 @@ export default function AdminPartnerSettings() {
       ...formData,
       withdrawal_min_amount_kopeks: toNumber(formData.withdrawal_min_amount_kopeks, 100000),
       withdrawal_cooldown_days: toNumber(formData.withdrawal_cooldown_days, 30),
+      withdrawal_reminder_minutes: toNumber(formData.withdrawal_reminder_minutes, 60),
+      withdrawal_reminder_cooldown_minutes: toNumber(
+        formData.withdrawal_reminder_cooldown_minutes,
+        30,
+      ),
+      withdrawal_reminder_check_interval_seconds: toNumber(
+        formData.withdrawal_reminder_check_interval_seconds,
+        300,
+      ),
     });
   };
 
@@ -300,6 +340,129 @@ export default function AdminPartnerSettings() {
             />
             <p className="mt-1 text-xs text-dark-500">
               {t('admin.partners.settingsFields.requisitesTextDesc')}
+            </p>
+          </div>
+        </div>
+
+        {/* Withdrawal Reminders Section: напоминания о заявках без решения, аналог SLA тикетов */}
+        <div className="card">
+          <h3 className="mb-4 text-lg font-semibold text-dark-100">
+            {t('admin.partners.settingsSection.withdrawalReminders')}
+          </h3>
+
+          {/* Reminder Enabled */}
+          <div className="mb-6">
+            <label className="flex cursor-pointer items-center gap-3">
+              <input
+                type="checkbox"
+                checked={formData.withdrawal_reminder_enabled}
+                disabled={envLocked.has('withdrawal_reminder_enabled')}
+                onChange={(e) =>
+                  setFormData({ ...formData, withdrawal_reminder_enabled: e.target.checked })
+                }
+                className="h-5 w-5 rounded border-dark-700 bg-dark-800 text-accent-500 focus:ring-2 focus:ring-accent-500 focus:ring-offset-0"
+              />
+              <div>
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-1 font-medium text-dark-100">
+                  {t('admin.partners.settingsFields.reminderEnabled')}
+                  {envLocked.has('withdrawal_reminder_enabled') && <EnvLockedBadge />}
+                </div>
+                <div className="text-sm text-dark-500">
+                  {t('admin.partners.settingsFields.reminderEnabledDesc')}
+                </div>
+              </div>
+            </label>
+          </div>
+
+          {/* Reminder Minutes */}
+          <div className="mb-4">
+            <label className="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm font-medium text-dark-300">
+              {t('admin.partners.settingsFields.reminderMinutes')}
+              {envLocked.has('withdrawal_reminder_minutes') && <EnvLockedBadge />}
+            </label>
+            <input
+              type="number"
+              min={1}
+              max={10080}
+              value={formData.withdrawal_reminder_minutes}
+              onChange={(e) => {
+                const val = e.target.value;
+                if (val === '')
+                  return setFormData({ ...formData, withdrawal_reminder_minutes: '' });
+                const num = parseInt(val);
+                if (!isNaN(num)) setFormData({ ...formData, withdrawal_reminder_minutes: num });
+              }}
+              className="input"
+              disabled={
+                !formData.withdrawal_reminder_enabled ||
+                envLocked.has('withdrawal_reminder_minutes')
+              }
+            />
+            <p className="mt-1 text-xs text-dark-500">
+              {t('admin.partners.settingsFields.reminderMinutesDesc')}
+            </p>
+          </div>
+
+          {/* Reminder Cooldown */}
+          <div className="mb-4">
+            <label className="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm font-medium text-dark-300">
+              {t('admin.partners.settingsFields.reminderCooldownMinutes')}
+              {envLocked.has('withdrawal_reminder_cooldown_minutes') && <EnvLockedBadge />}
+            </label>
+            <input
+              type="number"
+              min={1}
+              max={10080}
+              value={formData.withdrawal_reminder_cooldown_minutes}
+              onChange={(e) => {
+                const val = e.target.value;
+                if (val === '')
+                  return setFormData({ ...formData, withdrawal_reminder_cooldown_minutes: '' });
+                const num = parseInt(val);
+                if (!isNaN(num))
+                  setFormData({ ...formData, withdrawal_reminder_cooldown_minutes: num });
+              }}
+              className="input"
+              disabled={
+                !formData.withdrawal_reminder_enabled ||
+                envLocked.has('withdrawal_reminder_cooldown_minutes')
+              }
+            />
+            <p className="mt-1 text-xs text-dark-500">
+              {t('admin.partners.settingsFields.reminderCooldownMinutesDesc')}
+            </p>
+          </div>
+
+          {/* Reminder Check Interval */}
+          <div>
+            <label className="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm font-medium text-dark-300">
+              {t('admin.partners.settingsFields.reminderCheckIntervalSeconds')}
+              {envLocked.has('withdrawal_reminder_check_interval_seconds') && <EnvLockedBadge />}
+            </label>
+            <input
+              type="number"
+              min={30}
+              max={3600}
+              value={formData.withdrawal_reminder_check_interval_seconds}
+              onChange={(e) => {
+                const val = e.target.value;
+                if (val === '')
+                  return setFormData({
+                    ...formData,
+                    withdrawal_reminder_check_interval_seconds: '',
+                  });
+                const num = parseInt(val);
+                if (!isNaN(num))
+                  setFormData({ ...formData, withdrawal_reminder_check_interval_seconds: num });
+              }}
+              className="input"
+              disabled={
+                !formData.withdrawal_reminder_enabled ||
+                envLocked.has('withdrawal_reminder_check_interval_seconds')
+              }
+            />
+            <p className="mt-1 text-xs text-dark-500">
+              {t('admin.partners.settingsFields.reminderCheckIntervalSecondsDesc')}
             </p>
           </div>
         </div>

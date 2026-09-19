@@ -189,6 +189,12 @@ export interface PartnerSettings {
   withdrawal_requisites_text: string;
   partner_section_visible: boolean;
   referral_program_enabled: boolean;
+  /** Напоминания о заявках на вывод без решения (аналог SLA тикетов).
+   *  Бот старше этой фичи полей не отдаёт — форма подставляет дефолты. */
+  withdrawal_reminder_enabled?: boolean;
+  withdrawal_reminder_minutes?: number;
+  withdrawal_reminder_cooldown_minutes?: number;
+  withdrawal_reminder_check_interval_seconds?: number;
   /** Поля, закреплённые в .env: из кабинета их не изменить. */
   env_locked?: string[];
 }
@@ -200,6 +206,10 @@ export interface PartnerSettingsUpdate {
   withdrawal_requisites_text?: string;
   partner_section_visible?: boolean;
   referral_program_enabled?: boolean;
+  withdrawal_reminder_enabled?: boolean;
+  withdrawal_reminder_minutes?: number;
+  withdrawal_reminder_cooldown_minutes?: number;
+  withdrawal_reminder_check_interval_seconds?: number;
 }
 
 export const partnerApi = {
