@@ -824,7 +824,7 @@ export default function Login() {
         </div>
         <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
           <a
-            href="https://berlin-connection.ru/docs/docs.html#agreement"
+            href="https://berlin-connection.ru/docs/#agreement"
             target="_blank"
             rel="noopener noreferrer"
             className="text-xs text-dark-400 transition-colors hover:text-dark-200"
@@ -833,7 +833,7 @@ export default function Login() {
           </a>
           <span className="text-xs text-dark-600">·</span>
           <a
-            href="https://berlin-connection.ru/docs/docs.html#policy"
+            href="https://berlin-connection.ru/docs/#policy"
             target="_blank"
             rel="noopener noreferrer"
             className="text-xs text-dark-400 transition-colors hover:text-dark-200"
@@ -842,7 +842,7 @@ export default function Login() {
           </a>
           <span className="text-xs text-dark-600">·</span>
           <a
-            href="https://berlin-connection.ru/docs/docs.html#soglasie"
+            href="https://berlin-connection.ru/docs/#soglasie"
             target="_blank"
             rel="noopener noreferrer"
             className="text-xs text-dark-400 transition-colors hover:text-dark-200"

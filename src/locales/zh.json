@@ -291,6 +291,11 @@
     "currentBalance": "当前余额",
     "activeUntil": "有效期至",
     "noActiveSubscription": "无有效订阅",
+    "linkAccountBanner": {
+      "title": "添加登录方式",
+      "subtitle": "您目前只有一种登录方式。请绑定邮箱或 Telegram，以免无法访问账户。",
+      "cta": "绑定邮箱"
+    },
     "devicesUsed": "设备：{{used}} / {{total}}",
     "trafficUsed": "流量：{{used}} / {{total}} GB",
     "unlimitedTraffic": "无限流量",

@@ -23,7 +23,8 @@ import PendingGiftCard from '../components/dashboard/PendingGiftCard';
 import SubscriptionListCard from '../components/subscription/SubscriptionListCard';
 import { DeviceLimitSheet } from '../components/subscription/DeviceLimitSheet';
 import { API } from '../config/constants';
-import { ChevronRightIcon, StarIcon } from '@/components/icons';
+import { ChevronRightIcon, StarIcon, LockIcon } from '@/components/icons';
+import { authApi } from '../api/auth';
 import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 import { safeLocal } from '../utils/safeStorage';
 import { getApiErrorMessage } from '../utils/api-error';
@@ -51,6 +52,18 @@ export default function Dashboard() {
     staleTime: API.BALANCE_STALE_TIME_MS,
     refetchOnMount: 'always',
   });
+
+  // Способы входа: тот же queryKey, что на /profile/accounts, — кэш общий,
+  // переход туда не стоит лишнего запроса. Баннер «привязать email» на
+  // главной показываем только пока привязан ровно один способ входа —
+  // единственная точка входа означает риск потерять доступ к аккаунту.
+  const { data: linkedProvidersData } = useQuery({
+    queryKey: ['linked-providers'],
+    queryFn: () => authApi.getLinkedProviders(),
+    staleTime: 60_000,
+  });
+  const linkedProvidersCount = linkedProvidersData?.providers.filter((p) => p.linked).length ?? 0;
+  const showLinkAccountBanner = linkedProvidersCount === 1;
 
   // Multi-tariff: check if user has multiple subscriptions
   const { data: multiSubData } = useQuery({
@@ -314,6 +327,29 @@ export default function Dashboard() {
           )}
         </div>
       </div>
+
+      {/* Единственный способ входа — риск потерять доступ к аккаунту.
+          Показываем только пока привязан ровно 1 провайдер; при 0 (не должно
+          случаться, юзер всегда авторизован хоть чем-то) или 2+ баннер скрыт. */}
+      {showLinkAccountBanner && (
+        <Link
+          to="/profile/accounts"
+          className="flex items-center gap-3 rounded-2xl border border-accent-500/30 bg-accent-500/10 p-4 transition-colors hover:bg-accent-500/15"
+        >
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent-500/20 text-accent-400">
+            <LockIcon className="h-5 w-5" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="font-medium text-dark-50">{t('dashboard.linkAccountBanner.title')}</p>
+            <p className="mt-0.5 text-sm text-dark-400">
+              {t('dashboard.linkAccountBanner.subtitle')}
+            </p>
+          </div>
+          <span className="shrink-0 whitespace-nowrap rounded-xl bg-accent-500 px-3.5 py-2 text-sm font-semibold text-on-accent">
+            {t('dashboard.linkAccountBanner.cta')}
+          </span>
+        </Link>
+      )}
 
       {/* Pending Gift Activations */}
       {pendingGifts && pendingGifts.length > 0 && <PendingGiftCard gifts={pendingGifts} />}

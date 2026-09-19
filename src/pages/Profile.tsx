@@ -745,7 +745,7 @@ export default function Profile() {
           <h2 className="mb-4 text-lg font-semibold text-dark-50">Документы</h2>
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
             <a
-              href="https://berlin-connection.ru/docs/docs.html#agreement"
+              href="https://berlin-connection.ru/docs/#agreement"
               target="_blank"
               rel="noopener noreferrer"
               className="text-sm text-dark-400 transition-colors hover:text-dark-200"
@@ -754,7 +754,7 @@ export default function Profile() {
             </a>
             <span className="text-dark-700">·</span>
             <a
-              href="https://berlin-connection.ru/docs/docs.html#policy"
+              href="https://berlin-connection.ru/docs/#policy"
               target="_blank"
               rel="noopener noreferrer"
               className="text-sm text-dark-400 transition-colors hover:text-dark-200"
@@ -763,7 +763,7 @@ export default function Profile() {
             </a>
             <span className="text-dark-700">·</span>
             <a
-              href="https://berlin-connection.ru/docs/docs.html#soglasie"
+              href="https://berlin-connection.ru/docs/#soglasie"
               target="_blank"
               rel="noopener noreferrer"
               className="text-sm text-dark-400 transition-colors hover:text-dark-200"

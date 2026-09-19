@@ -319,6 +319,11 @@
     "currentBalance": "Текущий баланс",
     "activeUntil": "Активна до",
     "noActiveSubscription": "Нет активной подписки",
+    "linkAccountBanner": {
+      "title": "Добавьте способ входа",
+      "subtitle": "Сейчас доступен только один способ входа. Привяжите email или Telegram, чтобы не потерять доступ к аккаунту.",
+      "cta": "Привязать email"
+    },
     "devicesUsed": "Устройств: {{used}} из {{total}}",
     "trafficUsed": "Трафик: {{used}} из {{total}} ГБ",
     "unlimitedTraffic": "Безлимитный трафик",
