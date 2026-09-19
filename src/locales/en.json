@@ -4408,6 +4408,12 @@
       "daysShort": "{{days}} days",
       "autoFrom": "Auto from {{amount}}",
       "members": "{{count}} members",
+      "recalculate": "Recalculate members",
+      "recalculateHint": "Assign groups by spending to everyone who has paid. This happens automatically after a group with a threshold is created, changed or deleted.",
+      "recalculating": "Recalculating members by spending…",
+      "recalculateStarted": "Recalculation started. Members will update within a minute.",
+      "recalculateDone": "Recalculation finished: {{checked}} checked, {{changed}} reassigned.",
+      "recalculateFailed": "Recalculation failed. Please try again.",
       "createTitle": "Create Discount Group",
       "editTitle": "Edit Group",
       "stats": {

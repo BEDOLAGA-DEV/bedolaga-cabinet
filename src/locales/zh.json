@@ -3280,6 +3280,12 @@
       "daysShort": "{{days}} 天",
       "autoFrom": "自动 从 {{amount}}",
       "members": "{{count}} 名成员",
+      "recalculate": "重新计算成员",
+      "recalculateHint": "按消费金额为所有付费用户重新分配折扣组。创建、修改或删除带门槛的折扣组后会自动执行。",
+      "recalculating": "正在按消费重新计算成员…",
+      "recalculateStarted": "已开始重新计算，成员将在一分钟内更新。",
+      "recalculateDone": "重新计算完成：已检查 {{checked}} 人，已重新分配 {{changed}} 人。",
+      "recalculateFailed": "重新计算失败，请重试。",
       "createTitle": "创建折扣组",
       "editTitle": "编辑组",
       "stats": {
