@@ -381,7 +381,10 @@
     },
     "manageAll": "Управлять всеми",
     "showAll": "Показать все",
-    "subscriptions": "Подписки"
+    "subscriptions": "Подписки",
+    "premiumTraffic": "Премиум-трафик",
+    "premiumTrafficPaused": "Лимит исчерпан — доступ приостановлен до конца периода",
+    "premiumTrafficTopped": "Докуплено {{amount}}"
   },
   "subscription": {
     "title": "Подписка",
@@ -692,7 +695,12 @@
       "disconnectDevicesFirst": "Сначала отключите лишние устройства",
       "incrementDevices": "Увеличить кол-во устройств",
       "minDeviceLimit": "Минимальный лимит устройств",
-      "newDeviceLimit": "Новый лимит устройств"
+      "newDeviceLimit": "Новый лимит устройств",
+      "buyPremiumTraffic": "Докупить премиум-трафик",
+      "buyPremiumTrafficTitle": "Премиум-трафик",
+      "premiumTrafficHint": "Отдельный лимит для премиум-серверов",
+      "premiumTrafficExhausted": "Лимит исчерпан — докупите, чтобы вернуть доступ",
+      "premiumTopupCapReached": "За период можно докупить не больше {{cap}} ГБ"
     },
     "serverManagement": {
       "statusLegend": "✅ — подключено • ➕ — будет добавлено (платно) • ➖ — будет отключено",
@@ -822,7 +830,9 @@
       "limitExplainedNoTopup_one": "Тариф «{{name}}» даёт {{count}} слот, и он занят. Освободите его.",
       "limitExplainedNoTopup_few": "Тариф «{{name}}» даёт {{count}} слота, и все заняты. Освободите занятый слот.",
       "limitExplainedNoTopup_many": "Тариф «{{name}}» даёт {{count}} слотов, и все заняты. Освободите занятый слот.",
-      "noTopupHint": "На тестовой подписке слоты докупить нельзя — освободите занятый или оформите платный тариф."
+      "noTopupHint": "На тестовой подписке слоты докупить нельзя — освободите занятый или оформите платный тариф.",
+      "limitExplained": "Тариф «{{name}}» даёт {{count}} слота, и все заняты. Освободите слот или добавьте ещё.",
+      "limitExplainedNoTopup": "Тариф «{{name}}» даёт {{count}} слота, и все заняты. Освободите занятый слот."
     },
     "delete": "Удалить",
     "deleteTitle": "Удаление подписки",
@@ -4207,7 +4217,23 @@
       "panelTagLabel": "Тег в панели Remnawave",
       "panelTagDesc": "До 16 символов: латинские буквы, цифры и подчёркивание. Пусто — общий тег из настроек (триальный или платный). По тегу в панели видно, на каком тарифе пользователь.",
       "trialDaysLabel": "Дней триала на этом тарифе",
-      "trialDaysDesc": "Пусто — глобальная настройка длительности триала."
+      "trialDaysDesc": "Пусто — глобальная настройка длительности триала.",
+      "premiumLimitsTitle": "Премиум-лимиты по серверам",
+      "premiumLimitsHint": "Отдельный лимит трафика на сервер. При исчерпании пользователь теряет доступ только к нему, остальные серверы продолжают работать. 0 — премиума на сервере нет.",
+      "premiumLimitsNoServers": "Сначала выберите серверы тарифа",
+      "premiumLimitGb": "Лимит, ГБ",
+      "premiumLimitName": "Название",
+      "premiumMoveUp": "Выше",
+      "premiumMoveDown": "Ниже",
+      "premiumTopupEnabled": "Разрешить докупку",
+      "premiumPackages": "Пакеты докупки",
+      "premiumPackagesEmpty": "Пакетов нет — докупать будет нечего",
+      "premiumPackageGb": "Объём пакета, ГБ",
+      "premiumPackagePrice": "Цена пакета, ₽",
+      "premiumPackageAdd": "Добавить пакет",
+      "premiumPackageDuplicate": "Одинаковые объёмы схлопнутся при сохранении",
+      "premiumMaxTopupGb": "Потолок, ГБ",
+      "premiumMaxTopupHint": "0 — без ограничения"
     },
     "servers": {
       "title": "Управление сквадами",
@@ -4917,7 +4943,13 @@
         "buttonApplied_few": "Фильтры: выбрано {{count}}",
         "buttonApplied_many": "Фильтры: выбрано {{count}}",
         "reset": "Сбросить",
-        "remove": "Убрать фильтр «{{name}}»"
+        "remove": "Убрать фильтр «{{name}}»",
+        "allStatuses": "Все статусы",
+        "byDate": "По дате",
+        "byBalance": "По балансу",
+        "byActivity": "По активности",
+        "bySpent": "По расходам",
+        "byExpiry": "По истечению подписки"
       },
       "actions": {
         "block": "Заблокировать",
@@ -4950,7 +4982,8 @@
         "success": {
           "delete": "Пользователь успешно удалён",
           "resetTrial": "Триал успешно сброшен",
-          "disable": "Пользователь успешно отключён"
+          "disable": "Пользователь успешно отключён",
+          "resetSubscription": "Подписка успешно сброшена"
         },
         "confirmDelete": {
           "title": "Удалить пользователя?",
@@ -4963,6 +4996,11 @@
         "confirmDisable": {
           "title": "Отключить пользователя?",
           "message": "Пользователь не сможет пользоваться сервисом до повторной активации."
+        },
+        "resetSubscription": "Сбросить подписку",
+        "confirmResetSubscription": {
+          "title": "Сбросить подписку?",
+          "message": "Текущая подписка пользователя будет отменена."
         }
       },
       "detail": {
@@ -4971,7 +5009,11 @@
           "balance": "Баланс",
           "referrals": "Рефералы",
           "activity": "Активность",
-          "overview": "Обзор"
+          "overview": "Обзор",
+          "info": "Информация",
+          "sync": "Синхронизация",
+          "tickets": "Тикеты",
+          "gifts": "Подарки"
         },
         "noTickets": "У пользователя нет тикетов",
         "ticketsCount": "тикетов",
@@ -5248,7 +5290,8 @@
           "commissionSaved": "Комиссия сохранена",
           "spentHint": "Сколько потратил в сервисе",
           "confirmRemoveReferrer": "Отвязать пригласившего? Начисления ему по этому человеку прекратятся.",
-          "confirmRemoveReferral": "Убрать {{name}} из рефералов? Начисления по нему прекратятся."
+          "confirmRemoveReferral": "Убрать {{name}} из рефералов? Начисления по нему прекратятся.",
+          "addReferral": "Добавить реферала"
         },
         "activity": {
           "empty": "Активности пока нет",
@@ -5401,7 +5444,19 @@
             "logins": "Входы"
           },
           "fromBalance": "с баланса",
-          "loadError": "Не удалось загрузить активность"
+          "loadError": "Не удалось загрузить активность",
+          "total": "Всего событий",
+          "filters": {
+            "all": "Все",
+            "payments": "Платежи",
+            "events": "События",
+            "promo": "Промо",
+            "tickets": "Тикеты",
+            "gifts": "Подарки",
+            "referrals": "Рефералы",
+            "logins": "Входы",
+            "clicks": "Клики"
+          }
         },
         "header": {
           "copy": "Скопировать",
@@ -5544,7 +5599,35 @@
         "messages_one": "{{count}} сообщение",
         "messages_few": "{{count}} сообщения",
         "messages_many": "{{count}} сообщений",
-        "ticketLoadError": "Не удалось открыть обращение"
+        "ticketLoadError": "Не удалось открыть обращение",
+        "premiumTraffic": {
+          "title": "Премиум-трафик",
+          "limited": "снят",
+          "notMeasured": "ещё не замерен",
+          "extra": "докуплено {{gb}} ГБ",
+          "period": "Период с {{date}}",
+          "checked": "замер {{date}}",
+          "grantLabel": "Сколько гигабайтов начислить на {{name}}",
+          "grant": "Начислить",
+          "resetSquad": "Сбросить",
+          "resetTitle": "Сбросить трафик",
+          "resetButton": "Сбросить",
+          "scope": {
+            "premium": "Только премиум",
+            "regular": "Только обычный",
+            "both": "Премиум и обычный"
+          },
+          "scopeHint": {
+            "premium": "Премиум-лимиты начнут период заново, снятые серверы вернутся. Общий трафик не изменится.",
+            "regular": "Сбросится общий трафик в панели. Премиум-лимиты не изменятся.",
+            "both": "Сбросятся и общий трафик в панели, и премиум-лимиты."
+          },
+          "granted": "Начислено {{gb}} ГБ на {{name}}.",
+          "resetPremiumDone": "Премиум-период начат заново.",
+          "resetRegularDone": "Общий трафик сброшен.",
+          "restoredNote": "Сервер вернётся клиенту на ближайшем проходе — до 5 минут.",
+          "error": "Не удалось выполнить действие"
+        }
       },
       "notFound": "Пользователь не найден",
       "summary": {
@@ -5711,7 +5794,13 @@
         "userNotFound": "Пользователь не найден",
         "trialBlockedBySubscription": "Триал всё равно закрыт: у человека есть другая подписка. Сначала удалите её."
       },
-      "moreTariffs": "ещё {{count}}"
+      "moreTariffs": "ещё {{count}}",
+      "searchEmail": "Поиск по email...",
+      "noPurchases": "Нет покупок",
+      "pagination": {
+        "showing": "Показано {{from}}-{{to}} из {{total}}"
+      },
+      "purchaseCount": "Покупок: {{count}}"
     },
     "promoOffers": {
       "title": "Промопредложения",

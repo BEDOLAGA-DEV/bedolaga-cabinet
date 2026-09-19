@@ -339,7 +339,10 @@
     "unlimited": "无限",
     "usageLast14Days": "近 14 天使用情况",
     "usedSuffix": "已用",
-    "validUntil": "有效期至 {{date}}"
+    "validUntil": "有效期至 {{date}}",
+    "premiumTraffic": "高级流量",
+    "premiumTrafficPaused": "流量已用尽 — 本期结束前暂停访问",
+    "premiumTrafficTopped": "已充值 {{amount}}"
   },
   "subscription": {
     "title": "订阅",
@@ -504,7 +507,12 @@
         "canAddLimited": "最多还能添加 {{count}} 台设备",
         "trialNotAllowed": "试用订阅不支持减少设备数"
       },
-      "reducing": "正在减少…"
+      "reducing": "正在减少…",
+      "buyPremiumTraffic": "购买高级流量",
+      "buyPremiumTrafficTitle": "高级流量",
+      "premiumTrafficHint": "高级节点的独立流量额度",
+      "premiumTrafficExhausted": "额度已用尽 — 充值即可恢复访问",
+      "premiumTopupCapReached": "每期最多可充值 {{cap}} GB"
     },
     "serverManagement": {
       "statusLegend": "✅ — 已连接 • ➕ — 将添加（付费）• ➖ — 将断开",
@@ -2748,7 +2756,23 @@
       "panelTagLabel": "Remnawave 面板标签",
       "panelTagDesc": "最多 16 个字符：拉丁字母、数字和下划线。留空则使用设置中的通用标签（试用或付费）。面板中通过该标签可看出用户所用套餐。",
       "trialDaysLabel": "此套餐的试用天数",
-      "trialDaysDesc": "留空则使用全局试用时长设置。"
+      "trialDaysDesc": "留空则使用全局试用时长设置。",
+      "premiumLimitsTitle": "按节点的高级流量额度",
+      "premiumLimitsHint": "为单个节点设置独立流量额度。用尽后用户仅失去该节点的访问权限，其他节点仍可使用。0 表示该节点没有高级额度。",
+      "premiumLimitsNoServers": "请先选择套餐的节点",
+      "premiumLimitGb": "额度（GB）",
+      "premiumLimitName": "名称",
+      "premiumMoveUp": "上移",
+      "premiumMoveDown": "下移",
+      "premiumTopupEnabled": "允许充值",
+      "premiumPackages": "充值套餐",
+      "premiumPackagesEmpty": "暂无套餐 — 将无法充值",
+      "premiumPackageGb": "套餐容量（GB）",
+      "premiumPackagePrice": "套餐价格",
+      "premiumPackageAdd": "添加套餐",
+      "premiumPackageDuplicate": "容量相同的套餐在保存时会被合并",
+      "premiumMaxTopupGb": "上限（GB）",
+      "premiumMaxTopupHint": "0 表示不限制"
     },
     "servers": {
       "title": "服务器管理",
@@ -3350,7 +3374,13 @@
         "title": "筛选",
         "buttonApplied_other": "筛选：已选 {{count}} 项",
         "reset": "重置",
-        "remove": "移除筛选“{{name}}”"
+        "remove": "移除筛选“{{name}}”",
+        "allStatuses": "所有状态",
+        "byDate": "按日期",
+        "byBalance": "按余额",
+        "byActivity": "按活跃度",
+        "bySpent": "按消费",
+        "byExpiry": "按到期时间"
       },
       "actions": {
         "block": "封禁",
@@ -3367,7 +3397,11 @@
           "balance": "余额",
           "referrals": "推荐",
           "activity": "活动记录",
-          "overview": "概览"
+          "overview": "概览",
+          "info": "信息",
+          "sync": "同步",
+          "tickets": "工单",
+          "gifts": "礼物"
         },
         "noTickets": "该用户没有工单",
         "ticketsCount": "个工单",
@@ -3635,7 +3669,8 @@
           "commissionSaved": "佣金已保存",
           "spentHint": "在服务中的消费",
           "confirmRemoveReferrer": "解除邀请人？其将不再从该用户获得收益。",
-          "confirmRemoveReferral": "将 {{name}} 移出推荐？相关收益将停止。"
+          "confirmRemoveReferral": "将 {{name}} 移出推荐？相关收益将停止。",
+          "addReferral": "添加推荐"
         },
         "actions": {
           "areYouSure": "确定要继续？",
@@ -3793,7 +3828,19 @@
             "logins": "登录"
           },
           "fromBalance": "余额支付",
-          "loadError": "无法加载动态"
+          "loadError": "无法加载动态",
+          "total": "事件总数",
+          "filters": {
+            "all": "全部",
+            "payments": "支付",
+            "events": "事件",
+            "promo": "促销",
+            "tickets": "工单",
+            "gifts": "礼物",
+            "referrals": "推荐",
+            "logins": "登录",
+            "clicks": "点击"
+          }
         },
         "header": {
           "copy": "复制",
@@ -3922,7 +3969,35 @@
           }
         },
         "messages_other": "{{count}} 条消息",
-        "ticketLoadError": "无法打开工单"
+        "ticketLoadError": "无法打开工单",
+        "premiumTraffic": {
+          "title": "高级流量",
+          "limited": "已切断",
+          "notMeasured": "尚未统计",
+          "extra": "已加购 {{gb}} GB",
+          "period": "周期起始 {{date}}",
+          "checked": "统计于 {{date}}",
+          "grantLabel": "为 {{name}} 发放多少 GB",
+          "grant": "发放",
+          "resetSquad": "重置",
+          "resetTitle": "重置流量",
+          "resetButton": "重置",
+          "scope": {
+            "premium": "仅高级",
+            "regular": "仅普通",
+            "both": "高级和普通"
+          },
+          "scopeHint": {
+            "premium": "高级限额将开始新周期，已切断的服务器会恢复。普通流量不变。",
+            "regular": "将在面板中重置普通流量。高级限额不变。",
+            "both": "面板中的普通流量和高级限额都将重置。"
+          },
+          "granted": "已为 {{name}} 发放 {{gb}} GB。",
+          "resetPremiumDone": "高级周期已重新开始。",
+          "resetRegularDone": "普通流量已重置。",
+          "restoredNote": "服务器将在下一次检查时恢复给用户，最多 5 分钟。",
+          "error": "操作失败"
+        }
       },
       "notFound": "未找到用户",
       "sendMessage": {
@@ -3947,8 +4022,10 @@
         "success": {
           "delete": "用户已删除",
           "disable": "用户已禁用",
-          "resetTrial": "试用已重置"
-        }
+          "resetTrial": "试用已重置",
+          "resetSubscription": "订阅已重置"
+        },
+        "resetSubscription": "重置订阅"
       },
       "summary": {
         "total_other": "{{value}} 位用户",
@@ -4099,7 +4176,13 @@
         "userNotFound": "未找到用户",
         "trialBlockedBySubscription": "试用仍不可用：该用户还有其他订阅，请先删除。"
       },
-      "moreTariffs": "另有 {{count}} 个"
+      "moreTariffs": "另有 {{count}} 个",
+      "searchEmail": "按邮箱搜索...",
+      "noPurchases": "无购买记录",
+      "pagination": {
+        "showing": "显示 {{from}}-{{to}}，共 {{total}}"
+      },
+      "purchaseCount": "购买次数：{{count}}"
     },
     "promoOffers": {
       "title": "促销优惠",

@@ -18,6 +18,7 @@ import { DangerZone } from './DangerZone';
 import { type DeviceRow, DevicesCard } from './DevicesCard';
 import { NodeUsageCard } from './NodeUsageCard';
 import { PanelSyncCard } from './PanelSyncCard';
+import { PremiumTrafficAdmin } from './PremiumTrafficAdmin';
 import {
   SubscriptionCard,
   type SubscriptionCardActions,
@@ -157,6 +158,9 @@ export function SubscriptionTab(props: SubscriptionTabProps) {
             actions={actions}
             classic={mode === 'classic'}
           />
+
+          {/* Премиум-трафик: сам скрывается, если премиум-серверов в тарифе нет */}
+          <PremiumTrafficAdmin subscriptionId={selectedSub.id} />
 
           <div className="grid gap-4 lg:grid-cols-2">
             <DevicesCard
