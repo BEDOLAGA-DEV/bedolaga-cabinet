@@ -26,7 +26,6 @@ import { saveOAuthState } from '../utils/oauth';
 import { getPendingReferralCode } from '../utils/referral';
 import { UsersIcon, EmailIcon, RefreshIcon, ChevronDownIcon } from '@/components/icons';
 import { CheckEmailCard } from '@/components/auth/CheckEmailCard';
-import LegalFooter from '../components/LegalFooter';
 import LegalConsent from '../components/LegalConsent';
 import LegalConsentGate from '../components/LegalConsentGate';
 import { useLegalConsentGate } from '../hooks/useLegalConsentGate';
