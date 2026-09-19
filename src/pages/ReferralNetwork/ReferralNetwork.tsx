@@ -12,26 +12,32 @@ import { CampaignDetailPanel } from './components/CampaignDetailPanel';
 import { NetworkStats } from './components/NetworkStats';
 import { NetworkLegend } from './components/NetworkLegend';
 import { NetworkControls } from './components/NetworkControls';
+import { ArrowsLeftRightIcon } from '@/components/icons';
 
 export function ReferralNetwork() {
   const { t } = useTranslation();
   const selectedNode = useReferralNetworkStore((s) => s.selectedNode);
   const scope = useReferralNetworkStore((s) => s.scope);
+  const isFullNetwork = useReferralNetworkStore((s) => s.isFullNetwork);
   const addScope = useReferralNetworkStore((s) => s.addScope);
   const removeScope = useReferralNetworkStore((s) => s.removeScope);
   const clearScope = useReferralNetworkStore((s) => s.clearScope);
+  const setFullNetwork = useReferralNetworkStore((s) => s.setFullNetwork);
 
   const { mobile: mobileHeaderHeight, bottomSafeArea } = useHeaderHeight();
 
-  const hasScope = scope.length > 0;
+  const hasScope = isFullNetwork || scope.length > 0;
 
   const {
     data: networkData,
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ['referral-network', 'scoped', scope.map((s) => `${s.type}:${s.id}`).sort()],
-    queryFn: () => referralNetworkApi.getScopedGraph(scope),
+    queryKey: isFullNetwork
+      ? ['referral-network', 'full']
+      : ['referral-network', 'scoped', scope.map((s) => `${s.type}:${s.id}`).sort()],
+    queryFn: () =>
+      isFullNetwork ? referralNetworkApi.getFullGraph() : referralNetworkApi.getScopedGraph(scope),
     enabled: hasScope,
     staleTime: 120_000,
   });
@@ -60,9 +66,11 @@ export function ReferralNetwork() {
           </div>
           <ScopeSelector
             value={scope}
+            isFullNetwork={isFullNetwork}
             onAdd={addScope}
             onRemove={removeScope}
             onClear={clearScope}
+            onFullNetworkChange={setFullNetwork}
             className="min-w-0 flex-1 sm:max-w-xl"
           />
         </div>
@@ -73,19 +81,7 @@ export function ReferralNetwork() {
         {!hasScope && (
           <div className="absolute inset-0 z-10 flex items-center justify-center">
             <div className="text-center">
-              <svg
-                className="mx-auto mb-4 h-12 w-12 text-dark-600"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={1}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5"
-                />
-              </svg>
+              <ArrowsLeftRightIcon className="mx-auto mb-4 h-12 w-12 text-dark-600" />
               <p className="max-w-xs text-sm text-dark-500">
                 {t('admin.referralNetwork.scope.emptyState')}
               </p>
@@ -127,7 +123,9 @@ export function ReferralNetwork() {
             <>
               <NetworkGraph data={networkData} className="absolute inset-0 h-full w-full" />
 
-              <div className="absolute bottom-[calc(12px+var(--safe-bottom,0px))] left-3 z-10 sm:bottom-4 sm:left-4">
+              {/* Своя ширина: без неё плашка сжималась по самому узкому содержимому
+                  до столбика в 80 px («1 2/34/5/67»). На телефоне — над кнопками масштаба. */}
+              <div className="absolute bottom-[calc(60px+var(--safe-bottom,0px))] left-3 z-10 w-[min(18rem,calc(100%-1.5rem))] sm:bottom-4 sm:left-4 sm:w-72">
                 <NetworkStats data={networkData} />
               </div>
 

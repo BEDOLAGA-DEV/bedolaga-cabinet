@@ -3,10 +3,11 @@ import { useNavigate } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
-import { rbacApi, AuditLogEntry, AuditLogFilters } from '@/api/rbac';
+import { rbacApi, type AuditLogEntry, type AuditLogFilters } from '@/api/rbac';
 import { PermissionGate } from '@/components/auth/PermissionGate';
 import { DateField } from '@/components/DateField';
 import { usePlatform } from '@/platform/hooks/usePlatform';
+import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 import {
   BackIcon,
   ChevronDownIcon,
@@ -81,7 +82,8 @@ function translateAction(action: string, t: TFunction): string {
     .map((perm: string) => {
       const trimmed = perm.trim();
       const [section, act] = trimmed.split(':', 2);
-      if (!section || !act) return trimmed;
+      // Действия без раздела (phantom_claimed…) — своими словами, если перевод есть.
+      if (!section || !act) return t(`admin.auditLog.actions.${trimmed}`, trimmed) as string;
       const sectionLabel = t(`admin.roles.form.permissionSections.${section}`, section) as string;
       const actionLabel = t(`admin.roles.form.permissionActions.${act}`, act) as string;
       return `${sectionLabel}: ${actionLabel}`;
@@ -498,7 +500,7 @@ export default function AdminAuditLog() {
           {!capabilities.hasBackButton && (
             <button
               onClick={() => navigate('/admin')}
-              className="flex h-10 w-10 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
               aria-label={t('admin.auditLog.back')}
             >
               <BackIcon />
@@ -510,7 +512,7 @@ export default function AdminAuditLog() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {/* Auto-refresh toggle */}
           <button
             onClick={() => setAutoRefresh((prev) => !prev)}
@@ -522,7 +524,8 @@ export default function AdminAuditLog() {
             title={t('admin.auditLog.autoRefresh.tooltip')}
           >
             <RefreshIcon className={`h-4 w-4 ${isFetching && autoRefresh ? 'animate-spin' : ''}`} />
-            <span className="hidden sm:inline">{t('admin.auditLog.autoRefresh.label')}</span>
+            {/* Подпись и на телефоне: без неё рядом стояли две одинаковые иконки обновления. */}
+            <span>{t('admin.auditLog.autoRefresh.label')}</span>
           </button>
 
           {/* Manual refresh */}
@@ -777,9 +780,9 @@ export default function AdminAuditLog() {
 
       {/* Content */}
       {isLoading ? (
-        <div className="flex items-center justify-center py-12">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-        </div>
+        <SkeletonGroup className="space-y-3">
+          <Skeleton variant="card" count={3} className="h-16" />
+        </SkeletonGroup>
       ) : error ? (
         <div className="py-12 text-center">
           <p className="text-error-400">{t('admin.auditLog.errors.loadFailed')}</p>

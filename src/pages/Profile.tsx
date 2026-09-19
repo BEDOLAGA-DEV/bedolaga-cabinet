@@ -1,3 +1,4 @@
+import { uiLocale } from '@/utils/uiLocale';
 import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
@@ -9,19 +10,23 @@ import { useAuthStore } from '../store/auth';
 import { displayName } from '../utils/displayName';
 import { authApi } from '../api/auth';
 import { isValidEmail } from '../utils/validation';
+import { useCountdown } from '../hooks/useCountdown';
+import { getApiErrorMessage } from '../utils/api-error';
 import {
   notificationsApi,
-  NotificationSettings,
-  NotificationSettingsUpdate,
+  type NotificationSettings,
+  type NotificationSettingsUpdate,
 } from '../api/notifications';
 import { referralApi } from '../api/referral';
 import { brandingApi, type EmailAuthEnabled } from '../api/branding';
 import { UI } from '../config/constants';
 import { Card } from '@/components/data-display/Card';
+import { InfoRow } from '@/components/data-display/InfoRow';
 import { Button } from '@/components/primitives/Button';
 import { Switch } from '@/components/primitives/Switch';
 import { staggerContainer, staggerItem } from '@/components/motion/transitions';
 import { CopyIcon, CheckIcon, ShareIcon, ArrowRightIcon, PencilIcon } from '@/components/icons';
+import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 
 export default function Profile() {
   const { t } = useTranslation();
@@ -39,8 +44,8 @@ export default function Profile() {
   const [newEmail, setNewEmail] = useState('');
   const [changeCode, setChangeCode] = useState('');
   const [changeError, setChangeError] = useState<string | null>(null);
-  const [resendCooldown, setResendCooldown] = useState(0);
-  const [verificationResendCooldown, setVerificationResendCooldown] = useState(0);
+  const [resendCooldown, startResendCooldown] = useCountdown();
+  const [verificationResendCooldown, startVerificationResendCooldown] = useCountdown();
   const newEmailInputRef = useRef<HTMLInputElement>(null);
   const codeInputRef = useRef<HTMLInputElement>(null);
 
@@ -110,10 +115,10 @@ export default function Profile() {
     onSuccess: () => {
       setSuccess(t('profile.verificationResent'));
       setError(null);
-      setVerificationResendCooldown(UI.RESEND_COOLDOWN_SEC);
+      startVerificationResendCooldown(UI.RESEND_COOLDOWN_SEC);
     },
-    onError: (err: { response?: { data?: { detail?: string } } }) => {
-      setError(err.response?.data?.detail || t('common.error'));
+    onError: (err: unknown) => {
+      setError(getApiErrorMessage(err, t('common.error')));
       setSuccess(null);
     },
   });
@@ -130,16 +135,16 @@ export default function Profile() {
         setUser(updatedUser);
       } else {
         setChangeEmailStep('code');
-        setResendCooldown(UI.RESEND_COOLDOWN_SEC);
+        startResendCooldown(UI.RESEND_COOLDOWN_SEC);
       }
     },
-    onError: (err: { response?: { data?: { detail?: string } } }) => {
-      const detail = err.response?.data?.detail;
-      if (detail?.includes('already registered') || detail?.includes('already in use')) {
+    onError: (err: unknown) => {
+      const detail = getApiErrorMessage(err, '');
+      if (detail.includes('already registered') || detail.includes('already in use')) {
         setChangeError(t('profile.changeEmail.emailAlreadyUsed'));
-      } else if (detail?.includes('same as current')) {
+      } else if (detail.includes('same as current')) {
         setChangeError(t('profile.changeEmail.sameEmail'));
-      } else if (detail?.includes('rate limit') || detail?.includes('too many')) {
+      } else if (detail.includes('rate limit') || detail.includes('too many')) {
         setChangeError(t('profile.changeEmail.tooManyRequests'));
       } else {
         setChangeError(detail || t('common.error'));
@@ -157,34 +162,17 @@ export default function Profile() {
       // Note: auth user lives in the zustand store, not in React Query —
       // the explicit setUser above IS the refresh. No ['user'] query exists.
     },
-    onError: (err: { response?: { data?: { detail?: string } } }) => {
-      const detail = err.response?.data?.detail;
-      if (detail?.includes('invalid') || detail?.includes('wrong')) {
+    onError: (err: unknown) => {
+      const detail = getApiErrorMessage(err, '');
+      if (detail.includes('invalid') || detail.includes('wrong')) {
         setChangeError(t('profile.changeEmail.invalidCode'));
-      } else if (detail?.includes('expired')) {
+      } else if (detail.includes('expired')) {
         setChangeError(t('profile.changeEmail.codeExpired'));
       } else {
         setChangeError(detail || t('common.error'));
       }
     },
   });
-
-  // Resend cooldown timers
-  useEffect(() => {
-    if (resendCooldown <= 0) return;
-    const timer = setInterval(() => {
-      setResendCooldown((prev) => Math.max(0, prev - 1));
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [resendCooldown]);
-
-  useEffect(() => {
-    if (verificationResendCooldown <= 0) return;
-    const timer = setInterval(() => {
-      setVerificationResendCooldown((prev) => Math.max(0, prev - 1));
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [verificationResendCooldown]);
 
   // Auto-focus inputs on step change (skip on Telegram — keyboard hides bottom nav)
   const { platform: profilePlatform, openTelegramLink } = usePlatform();
@@ -209,7 +197,7 @@ export default function Profile() {
     setNewEmail('');
     setChangeCode('');
     setChangeError(null);
-    setResendCooldown(0);
+    startResendCooldown(0);
   };
 
   const handleSendChangeCode = () => {
@@ -285,26 +273,17 @@ export default function Profile() {
         <Card>
           <h2 className="mb-6 text-lg font-semibold text-dark-100">{t('profile.accountInfo')}</h2>
           <div className="space-y-4">
-            <div className="flex items-center justify-between border-b border-dark-800/50 py-3">
-              <span className="text-dark-400">{t('profile.telegramId')}</span>
-              <span className="font-medium text-dark-100">{user?.telegram_id}</span>
-            </div>
+            <InfoRow divider label={t('profile.telegramId')} value={user?.telegram_id} />
             {user?.username && (
-              <div className="flex items-center justify-between border-b border-dark-800/50 py-3">
-                <span className="text-dark-400">{t('profile.username')}</span>
-                <span className="font-medium text-dark-100">@{user.username}</span>
-              </div>
+              <InfoRow divider label={t('profile.username')} value={`@${user.username}`} />
             )}
-            <div className="flex items-center justify-between border-b border-dark-800/50 py-3">
-              <span className="text-dark-400">{t('profile.name')}</span>
-              <span className="font-medium text-dark-100">{displayName(user)}</span>
-            </div>
-            <div className="flex items-center justify-between py-3">
-              <span className="text-dark-400">{t('profile.registeredAt')}</span>
-              <span className="font-medium text-dark-100">
-                {user?.created_at ? new Date(user.created_at).toLocaleDateString() : '-'}
-              </span>
-            </div>
+            <InfoRow divider label={t('profile.name')} value={displayName(user)} />
+            <InfoRow
+              label={t('profile.registeredAt')}
+              value={
+                user?.created_at ? new Date(user.created_at).toLocaleDateString(uiLocale()) : '-'
+              }
+            />
           </div>
         </Card>
       </motion.div>
@@ -324,9 +303,11 @@ export default function Profile() {
         </Card>
       </motion.div>
 
-      {/* Referral Link Widget */}
+      {/* Referral Link Widget — self-animated: mounts after the referral queries
+          resolve, when the parent stagger orchestration has already finished and
+          would leave it stuck at opacity 0 */}
       {referralTerms?.is_enabled && referralLink && (
-        <motion.div variants={staggerItem}>
+        <motion.div variants={staggerItem} initial="initial" animate="animate">
           <Card>
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-semibold text-dark-100">{t('referral.yourLink')}</h2>
@@ -374,24 +355,27 @@ export default function Profile() {
 
             {user?.email ? (
               <div className="space-y-4">
-                <div className="flex items-center justify-between border-b border-dark-800/50 py-3">
-                  <span className="text-dark-400">Email</span>
-                  <div className="flex items-center gap-3">
-                    <span className="font-medium text-dark-100">{user.email}</span>
-                    {user.email_verified ? (
-                      <span className="badge-success">{t('profile.verified')}</span>
-                    ) : isEmailVerificationEnabled ? (
-                      <span className="badge-warning">{t('profile.notVerified')}</span>
-                    ) : null}
-                  </div>
-                </div>
+                <InfoRow
+                  divider
+                  label="Email"
+                  value={
+                    <>
+                      <span>{user.email}</span>
+                      {user.email_verified ? (
+                        <span className="badge-success">{t('profile.verified')}</span>
+                      ) : isEmailVerificationEnabled ? (
+                        <span className="badge-warning">{t('profile.notVerified')}</span>
+                      ) : null}
+                    </>
+                  }
+                />
 
                 {!user.email_verified && isEmailVerificationEnabled && (
                   <div className="rounded-linear border border-warning-500/30 bg-warning-500/10 p-4">
                     <p className="mb-4 text-sm text-warning-400">
                       {t('profile.verificationRequired')}
                     </p>
-                    <div className="flex items-center gap-3">
+                    <div className="flex flex-wrap items-center gap-3">
                       <Button
                         onClick={() => resendVerificationMutation.mutate()}
                         loading={resendVerificationMutation.isPending}
@@ -401,26 +385,28 @@ export default function Profile() {
                           ? t('profile.resendIn', { seconds: verificationResendCooldown })
                           : t('profile.resendVerification')}
                       </Button>
-                      <button
-                        onClick={() => setChangeEmailStep('email')}
-                        className="text-sm text-accent-400 transition-colors hover:text-accent-300"
-                      >
+                      <Button variant="secondary" onClick={() => setChangeEmailStep('email')}>
+                        <PencilIcon className="h-4 w-4" />
                         {t('profile.changeEmail.button')}
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 )}
 
                 {user.email_verified && (
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm text-dark-400">{t('profile.canLoginWithEmail')}</p>
-                    <button
+                  // Кнопка не сжимается в две строки: не хватает места — уходит под текст.
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <p className="min-w-0 flex-1 basis-48 text-sm text-dark-400">
+                      {t('profile.canLoginWithEmail')}
+                    </p>
+                    <Button
+                      variant="secondary"
+                      className="shrink-0 whitespace-nowrap"
                       onClick={() => setChangeEmailStep('email')}
-                      className="flex items-center gap-2 text-sm text-accent-400 transition-colors hover:text-accent-300"
                     >
-                      <PencilIcon />
-                      <span>{t('profile.changeEmail.button')}</span>
-                    </button>
+                      <PencilIcon className="h-4 w-4" />
+                      {t('profile.changeEmail.button')}
+                    </Button>
                   </div>
                 )}
 
@@ -454,7 +440,7 @@ export default function Profile() {
                           autoComplete="email"
                         />
                         {changeError && <p className="text-sm text-error-400">{changeError}</p>}
-                        <div className="flex items-center gap-3">
+                        <div className="flex flex-wrap items-center gap-3">
                           <Button
                             onClick={handleSendChangeCode}
                             loading={requestEmailChangeMutation.isPending}
@@ -462,12 +448,9 @@ export default function Profile() {
                           >
                             {t('profile.changeEmail.sendCode')}
                           </Button>
-                          <button
-                            onClick={resetChangeEmail}
-                            className="text-sm text-dark-400 hover:text-dark-200"
-                          >
+                          <Button variant="secondary" onClick={resetChangeEmail}>
                             {t('common.cancel')}
-                          </button>
+                          </Button>
                         </div>
                       </div>
                     </motion.div>
@@ -508,35 +491,34 @@ export default function Profile() {
                           autoComplete="one-time-code"
                         />
                         {changeError && <p className="text-sm text-error-400">{changeError}</p>}
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <Button
-                              onClick={handleVerifyChangeCode}
-                              loading={verifyEmailChangeMutation.isPending}
-                              disabled={!changeCode.trim()}
-                            >
-                              {t('profile.changeEmail.verify')}
-                            </Button>
-                            <button
-                              onClick={() => {
-                                setChangeEmailStep('email');
-                                setChangeCode('');
-                                setChangeError(null);
-                              }}
-                              className="text-sm text-dark-400 hover:text-dark-200"
-                            >
-                              {t('common.back')}
-                            </button>
-                          </div>
-                          <button
+                        {/* Три действия на телефон в строку не влезают — переносятся. */}
+                        <div className="flex flex-wrap items-center gap-3">
+                          <Button
+                            onClick={handleVerifyChangeCode}
+                            loading={verifyEmailChangeMutation.isPending}
+                            disabled={!changeCode.trim()}
+                          >
+                            {t('profile.changeEmail.verify')}
+                          </Button>
+                          <Button
+                            variant="secondary"
+                            onClick={() => {
+                              setChangeEmailStep('email');
+                              setChangeCode('');
+                              setChangeError(null);
+                            }}
+                          >
+                            {t('common.back')}
+                          </Button>
+                          <Button
+                            variant="secondary"
                             onClick={handleResendChangeCode}
                             disabled={resendCooldown > 0 || requestEmailChangeMutation.isPending}
-                            className={`text-sm ${resendCooldown > 0 ? 'text-dark-500' : 'text-accent-400 hover:text-accent-300'}`}
                           >
                             {resendCooldown > 0
                               ? t('profile.changeEmail.resendIn', { seconds: resendCooldown })
                               : t('profile.changeEmail.resendCode')}
-                          </button>
+                          </Button>
                         </div>
                       </div>
                     </motion.div>
@@ -600,9 +582,9 @@ export default function Profile() {
           </h2>
 
           {notificationsLoading ? (
-            <div className="flex justify-center py-4">
-              <div className="h-6 w-6 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-            </div>
+            <SkeletonGroup className="space-y-3">
+              <Skeleton variant="card" count={3} className="h-16" />
+            </SkeletonGroup>
           ) : notificationSettings ? (
             <div className="space-y-6">
               {/* Subscription Expiry */}

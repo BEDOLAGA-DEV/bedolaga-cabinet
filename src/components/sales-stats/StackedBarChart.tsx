@@ -11,6 +11,8 @@ import {
   YAxis,
 } from 'recharts';
 
+import { formatAxisTick } from '../../utils/formatNumber';
+
 import { SALES_STATS } from '../../constants/salesStats';
 import { useChartColors } from '../../hooks/useChartColors';
 
@@ -98,7 +100,8 @@ export function StackedBarChart({
             tick={{ fill: colors.tick, fontSize: SALES_STATS.AXIS.TICK_FONT_SIZE }}
             tickLine={false}
             axisLine={false}
-            width={SALES_STATS.AXIS.WIDTH}
+            width="auto"
+            tickFormatter={(value: number) => formatAxisTick(value)}
             allowDecimals={false}
           />
           <Tooltip
@@ -112,9 +115,9 @@ export function StackedBarChart({
             }}
             labelStyle={{ color: colors.label }}
             itemStyle={{ color: colors.label }}
-            formatter={(value: number | undefined, name: string | undefined) => [
-              valueFormatter ? valueFormatter(value ?? 0) : (value ?? 0),
-              name || '',
+            formatter={(value, name) => [
+              valueFormatter ? valueFormatter(Number(value) || 0) : Number(value) || 0,
+              String(name ?? ''),
             ]}
           />
           <Legend />

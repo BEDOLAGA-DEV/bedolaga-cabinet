@@ -4,16 +4,17 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import {
   campaignsApi,
-  CampaignUpdateRequest,
-  CampaignBonusType,
-  ServerSquadInfo,
-  TariffListItem,
-  AvailablePartner,
+  type CampaignUpdateRequest,
+  type CampaignBonusType,
+  type ServerSquadInfo,
+  type TariffListItem,
+  type AvailablePartner,
 } from '../api/campaigns';
 import { AdminBackButton } from '../components/admin';
 import { CheckIcon, CampaignIcon } from '../components/icons';
 import { createNumberInputHandler, toNumber } from '../utils/inputHelpers';
 import Twemoji from 'react-twemoji';
+import { PageSkeleton, Skeleton } from '../components/ui/skeleton';
 
 // Bonus type config
 const bonusTypeConfig: Record<
@@ -78,7 +79,7 @@ function ServerSelector({
             }`}
           >
             <div
-              className={`flex h-5 w-5 items-center justify-center rounded ${
+              className={`flex h-5 w-5 shrink-0 items-center justify-center rounded ${
                 selected.includes(server.squad_uuid)
                   ? 'bg-accent-500 text-on-accent'
                   : 'bg-dark-600'
@@ -86,8 +87,8 @@ function ServerSelector({
             >
               {selected.includes(server.squad_uuid) && <CheckIcon />}
             </div>
-            <span className="text-sm font-medium">
-              <Twemoji options={{ className: 'twemoji', folder: 'svg', ext: '.svg' }}>
+            <span className="min-w-0 text-sm font-medium [overflow-wrap:anywhere]">
+              <Twemoji tag="span" options={{ className: 'twemoji', folder: 'svg', ext: '.svg' }}>
                 {server.display_name}
               </Twemoji>
             </span>
@@ -304,9 +305,9 @@ export default function AdminCampaignEdit() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-      </div>
+      <PageSkeleton variant="admin" leading={2} titleWidth="w-56" className="space-y-6">
+        <Skeleton variant="card" className="h-96" />
+      </PageSkeleton>
     );
   }
 
@@ -337,15 +338,15 @@ export default function AdminCampaignEdit() {
       {/* Header */}
       <div className="flex items-center gap-3">
         <AdminBackButton to="/admin/campaigns" />
-        <div className="flex items-center gap-3">
-          <div className="rounded-lg bg-accent-500/20 p-2 text-accent-400">
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="shrink-0 rounded-lg bg-accent-500/20 p-2 text-accent-400">
             <CampaignIcon />
           </div>
-          <div>
+          <div className="min-w-0">
             <h1 className="text-xl font-bold text-dark-100">
               {t('admin.campaigns.modal.editTitle')}
             </h1>
-            <p className="text-sm text-dark-400">{campaign.name}</p>
+            <p className="text-sm text-dark-400 [overflow-wrap:anywhere]">{campaign.name}</p>
           </div>
         </div>
       </div>

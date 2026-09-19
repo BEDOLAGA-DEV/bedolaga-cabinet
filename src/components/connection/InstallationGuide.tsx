@@ -12,7 +12,7 @@ import { useTheme } from '@/hooks/useTheme';
 import { CardsBlock, TimelineBlock, AccordionBlock, MinimalBlock, BlockButtons } from './blocks';
 import type { BlockRendererProps, RenderBlock } from './blocks';
 import TvQuickConnect from './TvQuickConnect';
-import { BackIcon, BookOpenIcon, ChevronIcon } from '@/components/icons';
+import { BackIcon, BookOpenIcon, ChevronIcon, QrCodeIcon } from '@/components/icons';
 
 const platformOrder = ['ios', 'android', 'windows', 'macos', 'linux', 'androidTV', 'appleTV'];
 
@@ -48,6 +48,7 @@ interface Props {
   isTelegramWebApp: boolean;
   onGoBack: () => void;
   onOpenQR?: () => void;
+  username?: string;
 }
 
 export default function InstallationGuide({
@@ -56,6 +57,7 @@ export default function InstallationGuide({
   isTelegramWebApp,
   onGoBack,
   onOpenQR,
+  username,
 }: Props) {
   const { t, i18n } = useTranslation();
   const { isLight } = useTheme();
@@ -131,6 +133,7 @@ export default function InstallationGuide({
         subscriptionUrl={appConfig.subscriptionUrl}
         hideLink={appConfig.hideLink}
         deepLink={selectedApp?.deepLink}
+        username={username}
         getLocalizedText={getLocalizedText}
         getBaseTranslation={getBaseTranslation}
         getSvgHtml={getSvgHtml}
@@ -141,6 +144,7 @@ export default function InstallationGuide({
       appConfig.subscriptionUrl,
       appConfig.hideLink,
       selectedApp?.deepLink,
+      username,
       isLight,
       getLocalizedText,
       getBaseTranslation,
@@ -211,48 +215,33 @@ export default function InstallationGuide({
 
   return (
     <div className="space-y-6 pb-6">
-      {/* Header + platform dropdown */}
-      <div className="flex items-center gap-3">
+      {/* Header + platform dropdown. На телефоне список платформ — своей строкой
+          во всю ширину: в одном ряду длинное название платформы распирало
+          страницу вбок, а кнопки «назад» и QR сжимались с 40 до 22 px. */}
+      <div className="flex flex-wrap items-center gap-3">
         {!isTelegramWebApp && (
           <button
             onClick={onGoBack}
             aria-label={t('common.back', 'Back')}
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
           >
             <BackIcon className="h-6 w-6" />
           </button>
         )}
-        <h2 className="flex-1 text-lg font-bold text-dark-100">
+        <h2 className="min-w-0 flex-1 text-lg font-bold text-dark-100">
           {getBaseTranslation('installationGuideHeader', 'subscription.connection.title')}
         </h2>
         {appConfig.subscriptionUrl && onOpenQR && (
           <button
             onClick={() => onOpenQR()}
             aria-label={t('subscription.connection.openQr', 'Open QR code')}
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 text-dark-200 transition-colors hover:border-dark-600"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 text-dark-200 transition-colors hover:border-dark-600"
           >
-            <svg
-              className="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={1.5}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z"
-              />
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M6.75 6.75h.75v.75h-.75v-.75zM6.75 16.5h.75v.75h-.75v-.75zM16.5 6.75h.75v.75H16.5v-.75zM13.5 13.5h.75v.75h-.75v-.75zM13.5 19.5h.75v.75h-.75v-.75zM19.5 13.5h.75v.75h-.75v-.75zM19.5 19.5h.75v.75h-.75v-.75zM16.5 16.5h3v3h-3v-3z"
-              />
-            </svg>
+            <QrCodeIcon className="h-5 w-5" />
           </button>
         )}
         {availablePlatforms.length > 1 && (
-          <div className="relative flex items-center">
+          <div className="relative flex w-full items-center sm:w-auto sm:max-w-[45%]">
             {currentPlatformSvg && (
               <div
                 className="pointer-events-none absolute left-3 z-10 h-5 w-5 text-dark-400 [&>svg]:h-full [&>svg]:w-full"
@@ -275,7 +264,7 @@ export default function InstallationGuide({
                   if (app) setSelectedApp(app);
                 }
               }}
-              className={`appearance-none rounded-xl border py-2 pr-8 text-sm font-medium outline-none transition-colors ${
+              className={`w-full min-w-0 appearance-none truncate rounded-xl border py-2 pr-8 text-sm font-medium outline-none transition-colors ${
                 isLight
                   ? 'border-dark-700/60 bg-white/80 text-dark-200 shadow-sm hover:border-dark-600'
                   : 'border-dark-700 bg-dark-800 text-dark-200 hover:border-dark-600'

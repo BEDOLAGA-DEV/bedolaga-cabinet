@@ -10,6 +10,8 @@ import {
   YAxis,
 } from 'recharts';
 
+import { formatAxisTick } from '../../utils/formatNumber';
+
 import type { DailyStatItem } from './types';
 import { PARTNER_STATS } from '../../constants/partner';
 import { useCurrency } from '../../hooks/useCurrency';
@@ -94,7 +96,8 @@ export function DailyChart({ data, chartId, title, earningsLabel, countLabel }: 
             tick={{ fill: colors.earnings, fontSize: PARTNER_STATS.AXIS.TICK_FONT_SIZE }}
             tickLine={false}
             axisLine={false}
-            width={PARTNER_STATS.AXIS.EARNINGS_WIDTH}
+            width="auto"
+            tickFormatter={(value: number) => formatAxisTick(value)}
           />
           <YAxis
             yAxisId="referrals"
@@ -102,7 +105,8 @@ export function DailyChart({ data, chartId, title, earningsLabel, countLabel }: 
             tick={{ fill: colors.referrals, fontSize: PARTNER_STATS.AXIS.TICK_FONT_SIZE }}
             tickLine={false}
             axisLine={false}
-            width={PARTNER_STATS.AXIS.REFERRALS_WIDTH}
+            width="auto"
+            tickFormatter={(value: number) => formatAxisTick(value)}
             allowDecimals={false}
           />
           <Tooltip
@@ -115,8 +119,8 @@ export function DailyChart({ data, chartId, title, earningsLabel, countLabel }: 
             }}
             labelStyle={{ color: colors.label }}
             itemStyle={{ color: colors.label }}
-            formatter={(value: number | undefined, name: string | undefined) => {
-              const displayValue = value ?? 0;
+            formatter={(value, name) => {
+              const displayValue = Number(value) || 0;
               if (name === 'earnings_display') {
                 return [formatWithCurrency(displayValue), resolvedEarningsLabel];
               }

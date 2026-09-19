@@ -11,6 +11,8 @@ import {
   YAxis,
 } from 'recharts';
 
+import { formatAxisTick } from '../../utils/formatNumber';
+
 import { SALES_STATS } from '../../constants/salesStats';
 import { useChartColors } from '../../hooks/useChartColors';
 
@@ -67,7 +69,8 @@ export function SimpleBarChart({
             tick={{ fill: colors.tick, fontSize: SALES_STATS.AXIS.TICK_FONT_SIZE }}
             tickLine={false}
             axisLine={false}
-            width={SALES_STATS.AXIS.WIDTH}
+            width="auto"
+            tickFormatter={(value: number) => formatAxisTick(value)}
             allowDecimals={false}
           />
           <Tooltip
@@ -81,8 +84,8 @@ export function SimpleBarChart({
             }}
             labelStyle={{ color: colors.label }}
             itemStyle={{ color: colors.label }}
-            formatter={(value: number | undefined) => [
-              valueFormatter ? valueFormatter(value ?? 0) : (value ?? 0),
+            formatter={(value) => [
+              valueFormatter ? valueFormatter(Number(value) || 0) : Number(value) || 0,
             ]}
           />
           <Bar dataKey="value" radius={[4, 4, 0, 0]}>

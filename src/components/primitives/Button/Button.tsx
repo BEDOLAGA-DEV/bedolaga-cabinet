@@ -7,7 +7,8 @@ import { buttonTap, buttonHover, springTransition } from '../../motion/transitio
 import { buttonVariants, type ButtonVariants } from './Button.variants';
 
 export interface ButtonProps
-  extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'disabled'>, ButtonVariants {
+  extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'disabled'>,
+    ButtonVariants {
   children: ReactNode;
   asChild?: boolean;
   disabled?: boolean;

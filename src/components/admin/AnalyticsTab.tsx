@@ -2,7 +2,9 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { brandingApi } from '../../api/branding';
+import { getApiErrorMessage } from '../../utils/api-error';
 import { CheckIcon, CloseIcon, PencilIcon } from './icons';
+import { GlobeIcon, TranslateIcon, TrendUpIcon } from '@/components/icons';
 
 export function AnalyticsTab() {
   const { t } = useTranslation();
@@ -31,8 +33,7 @@ export function AnalyticsTab() {
       setError(null);
     },
     onError: (err: unknown) => {
-      const detail = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail;
-      setError(detail || t('common.error'));
+      setError(getApiErrorMessage(err, t('common.error')));
     },
   });
 
@@ -74,9 +75,7 @@ export function AnalyticsTab() {
         <div className="mb-1 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-warning-500/20 to-error-500/20">
-              <svg className="h-5 w-5 text-warning-400" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" />
-              </svg>
+              <GlobeIcon className="h-5 w-5 text-warning-400" />
             </div>
             <h3 className="text-lg font-semibold text-dark-100">
               {t('admin.settings.yandexMetrika')}
@@ -108,7 +107,7 @@ export function AnalyticsTab() {
                 value={yandexValue}
                 onChange={(e) => setYandexValue(e.target.value.replace(/\D/g, ''))}
                 placeholder={t('admin.settings.yandexIdPlaceholder')}
-                className="flex-1 rounded-xl border border-dark-600 bg-dark-700 px-4 py-2.5 text-dark-100 placeholder-dark-500 transition-colors focus:border-accent-500 focus:outline-none"
+                className="min-w-0 flex-1 rounded-xl border border-dark-600 bg-dark-700 px-4 py-2.5 text-dark-100 placeholder-dark-500 transition-colors focus:border-accent-500 focus:outline-none"
                 autoFocus
               />
               <button
@@ -155,9 +154,7 @@ export function AnalyticsTab() {
             <div className="my-5 border-t border-dark-700/30" />
             <div className="mb-4 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <svg className="h-4 w-4 text-warning-400" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z" />
-                </svg>
+                <TrendUpIcon className="h-4 w-4 text-warning-400" />
                 <span className="text-sm font-medium text-dark-200">
                   {t('admin.settings.offlineConv', 'Offline Conversions')}
                 </span>
@@ -215,9 +212,7 @@ export function AnalyticsTab() {
         <div className="mb-1 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-accent-500/20 to-success-500/20">
-              <svg className="h-5 w-5 text-accent-400" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12.87 15.07l-2.54-2.51.03-.03A17.52 17.52 0 0014.07 6H17V4h-7V2H8v2H1v1.99h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z" />
-              </svg>
+              <TranslateIcon className="h-5 w-5 text-accent-400" />
             </div>
             <h3 className="text-lg font-semibold text-dark-100">{t('admin.settings.googleAds')}</h3>
           </div>
@@ -247,7 +242,7 @@ export function AnalyticsTab() {
                   value={googleIdValue}
                   onChange={(e) => setGoogleIdValue(e.target.value)}
                   placeholder={t('admin.settings.googleIdPlaceholder')}
-                  className="flex-1 rounded-xl border border-dark-600 bg-dark-700 px-4 py-2.5 text-dark-100 placeholder-dark-500 transition-colors focus:border-accent-500 focus:outline-none"
+                  className="min-w-0 flex-1 rounded-xl border border-dark-600 bg-dark-700 px-4 py-2.5 text-dark-100 placeholder-dark-500 transition-colors focus:border-accent-500 focus:outline-none"
                   autoFocus
                 />
                 <button
@@ -301,7 +296,7 @@ export function AnalyticsTab() {
                   value={googleLabelValue}
                   onChange={(e) => setGoogleLabelValue(e.target.value)}
                   placeholder={t('admin.settings.googleLabelPlaceholder')}
-                  className="flex-1 rounded-xl border border-dark-600 bg-dark-700 px-4 py-2.5 text-dark-100 placeholder-dark-500 transition-colors focus:border-accent-500 focus:outline-none"
+                  className="min-w-0 flex-1 rounded-xl border border-dark-600 bg-dark-700 px-4 py-2.5 text-dark-100 placeholder-dark-500 transition-colors focus:border-accent-500 focus:outline-none"
                   autoFocus
                 />
                 <button

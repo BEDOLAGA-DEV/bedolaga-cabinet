@@ -5,6 +5,7 @@ import { authApi } from '../api/auth';
 import { useToast } from '../components/Toast';
 import { LINK_TELEGRAM_STATE_KEY } from './ConnectedAccounts';
 import { getErrorDetail } from '../utils/oauth';
+import { safeSession } from '../utils/safeStorage';
 
 export default function LinkTelegramCallback() {
   const { t } = useTranslation();
@@ -23,8 +24,8 @@ export default function LinkTelegramCallback() {
     const linkAccount = async () => {
       // 1. Validate CSRF state
       const csrfState = searchParams.get('csrf_state');
-      const savedState = sessionStorage.getItem(LINK_TELEGRAM_STATE_KEY);
-      sessionStorage.removeItem(LINK_TELEGRAM_STATE_KEY);
+      const savedState = safeSession.getItem(LINK_TELEGRAM_STATE_KEY);
+      safeSession.removeItem(LINK_TELEGRAM_STATE_KEY);
 
       if (!csrfState || !savedState || csrfState !== savedState) {
         showToast({ type: 'error', message: t('profile.accounts.linkError') });

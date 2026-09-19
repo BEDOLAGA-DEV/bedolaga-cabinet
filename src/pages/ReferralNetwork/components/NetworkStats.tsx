@@ -1,3 +1,4 @@
+import { uiLocale } from '@/utils/uiLocale';
 import { useTranslation } from 'react-i18next';
 import { StatCard } from '@/components/stats';
 import {
@@ -25,32 +26,32 @@ export function NetworkStats({ data, className }: NetworkStatsProps) {
       <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 sm:gap-x-6 sm:gap-y-2">
         <StatCard
           label={t('admin.referralNetwork.stats.totalUsers')}
-          value={data.total_users.toLocaleString()}
+          value={data.total_users.toLocaleString(uiLocale())}
           icon={<UsersIcon className="h-5 w-5" />}
           tone="neutral"
         />
         <StatCard
           label={t('admin.referralNetwork.stats.totalReferrers')}
-          value={data.total_referrers.toLocaleString()}
+          value={data.total_referrers.toLocaleString(uiLocale())}
           icon={<PartnerIcon className="h-5 w-5" />}
           tone="neutral"
         />
         <StatCard
           label={t('admin.referralNetwork.stats.totalCampaigns')}
-          value={data.total_campaigns.toLocaleString()}
+          value={data.total_campaigns.toLocaleString(uiLocale())}
           icon={<CampaignIcon className="h-5 w-5" />}
           tone="neutral"
         />
         <StatCard
           label={t('admin.referralNetwork.stats.subscriptionRevenue')}
-          value={`${formatKopeksToRubles(data.total_subscription_revenue_kopeks)} ₽`}
+          value={`${formatKopeksToRubles(data.total_subscription_revenue_kopeks)}\u00A0₽`}
           icon={<BanknotesIcon className="h-5 w-5" />}
           tone="accent"
         />
         <div className="col-span-2">
           <StatCard
             label={t('admin.referralNetwork.stats.totalEarnings')}
-            value={`${formatKopeksToRubles(data.total_earnings_kopeks)} ₽`}
+            value={`${formatKopeksToRubles(data.total_earnings_kopeks)}\u00A0₽`}
             icon={<WalletIcon className="h-5 w-5" />}
             tone="neutral"
           />

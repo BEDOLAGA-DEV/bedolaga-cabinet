@@ -5,10 +5,11 @@ import { useTranslation } from 'react-i18next';
 import { ticketNotificationsApi } from '../api/ticketNotifications';
 import { useAuthStore } from '../store/auth';
 import { useToast } from './Toast';
-import { useWebSocket, WSMessage } from '../hooks/useWebSocket';
+import { useWebSocket, type WSMessage } from '../hooks/useWebSocket';
 import { useHeaderHeight } from '../hooks/useHeaderHeight';
 import type { TicketNotification } from '../types';
 import { BellIcon, CheckIcon } from '@/components/icons';
+import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 
 interface TicketNotificationBellProps {
   isAdmin?: boolean;
@@ -262,9 +263,9 @@ export default function TicketNotificationBell({ isAdmin = false }: TicketNotifi
           {/* Notifications list */}
           <div className="max-h-80 overflow-y-auto">
             {isLoading ? (
-              <div className="p-8 text-center text-dark-500">
-                <div className="mx-auto h-6 w-6 animate-spin rounded-full border-2 border-accent-500 border-t-transparent"></div>
-              </div>
+              <SkeletonGroup className="space-y-3">
+                <Skeleton variant="card" count={3} className="h-16" />
+              </SkeletonGroup>
             ) : notificationsData?.items && notificationsData.items.length > 0 ? (
               notificationsData.items.map((notification: TicketNotification) => (
                 <button

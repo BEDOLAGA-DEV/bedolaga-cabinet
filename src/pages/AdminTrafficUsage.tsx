@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { useNavigate } from 'react-router';
+import { useLocation, useNavigate } from 'react-router';
+import { backTo } from '@/components/admin';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
@@ -37,6 +38,7 @@ import { TariffFilter } from '../components/admin/trafficUsage/filters/TariffFil
 import { StatusFilter } from '../components/admin/trafficUsage/filters/StatusFilter';
 import { NodeFilter } from '../components/admin/trafficUsage/filters/NodeFilter';
 import { CountryFilter } from '../components/admin/trafficUsage/filters/CountryFilter';
+import { Skeleton } from '../components/ui/skeleton';
 import {
   SearchIcon,
   ChevronLeftIcon,
@@ -52,6 +54,11 @@ import {
 // (TanStack Table augmentation + utils + risk helpers moved into ./trafficUsage/trafficUsageHelpers.ts)
 
 // (Icons moved into ./trafficUsage/TrafficIcons.tsx)
+
+// Заглушка ячейки, пока догружается обогащение строки. SkeletonGroup здесь не
+// применяется: заглушки живут в разных ячейках таблицы, и объявлять role="status"
+// в каждой значило бы заставить скринридер зачитать «загрузка» по разу на ячейку.
+const cellSkeleton = (width: string) => <Skeleton className={`mx-auto h-4 ${width}`} />;
 
 // ============ Progress Bar ============
 
@@ -113,6 +120,7 @@ function ProgressBar({ loading }: { loading: boolean }) {
 export default function AdminTrafficUsage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   const { capabilities } = usePlatform();
 
   const [items, setItems] = useState<UserTrafficItem[]>([]);
@@ -493,8 +501,7 @@ export default function AdminTrafficUsage() {
         meta: { align: 'center' as const },
         cell: ({ row }) => {
           const e = enrichment?.[row.original.user_id];
-          if (enrichmentLoading && !enrichment)
-            return <div className="mx-auto h-4 w-8 animate-pulse rounded bg-dark-700" />;
+          if (enrichmentLoading && !enrichment) return cellSkeleton('w-8');
           return <span className="text-xs text-dark-300">{e?.devices_connected ?? '\u2014'}</span>;
         },
       },
@@ -507,8 +514,7 @@ export default function AdminTrafficUsage() {
         meta: { align: 'center' as const },
         cell: ({ row }) => {
           const e = enrichment?.[row.original.user_id];
-          if (enrichmentLoading && !enrichment)
-            return <div className="mx-auto h-4 w-12 animate-pulse rounded bg-dark-700" />;
+          if (enrichmentLoading && !enrichment) return cellSkeleton('w-12');
           if (!e || e.total_spent_kopeks === 0)
             return <span className="text-xs text-dark-300">{'\u2014'}</span>;
           return (
@@ -525,8 +531,7 @@ export default function AdminTrafficUsage() {
         meta: { align: 'center' as const },
         cell: ({ row }) => {
           const e = enrichment?.[row.original.user_id];
-          if (enrichmentLoading && !enrichment)
-            return <div className="mx-auto h-4 w-14 animate-pulse rounded bg-dark-700" />;
+          if (enrichmentLoading && !enrichment) return cellSkeleton('w-14');
           return (
             <span className="text-xs text-dark-300">
               {formatShortDate(e?.subscription_start_date ?? null)}
@@ -543,8 +548,7 @@ export default function AdminTrafficUsage() {
         meta: { align: 'center' as const },
         cell: ({ row }) => {
           const e = enrichment?.[row.original.user_id];
-          if (enrichmentLoading && !enrichment)
-            return <div className="mx-auto h-4 w-14 animate-pulse rounded bg-dark-700" />;
+          if (enrichmentLoading && !enrichment) return cellSkeleton('w-14');
           return (
             <span className="text-xs text-dark-300">
               {formatShortDate(e?.subscription_end_date ?? null)}
@@ -561,8 +565,7 @@ export default function AdminTrafficUsage() {
         meta: { align: 'center' as const },
         cell: ({ row }) => {
           const e = enrichment?.[row.original.user_id];
-          if (enrichmentLoading && !enrichment)
-            return <div className="mx-auto h-4 w-16 animate-pulse rounded bg-dark-700" />;
+          if (enrichmentLoading && !enrichment) return cellSkeleton('w-16');
           return <span className="text-xs text-dark-300">{e?.last_node_name ?? '\u2014'}</span>;
         },
       },
@@ -711,12 +714,12 @@ export default function AdminTrafficUsage() {
       )}
 
       {/* Header */}
-      <div className="mb-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex min-w-0 flex-1 basis-48 items-center gap-3">
           {!capabilities.hasBackButton && (
             <button
               onClick={() => navigate('/admin')}
-              className="flex h-10 w-10 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
             >
               <ChevronLeftIcon />
             </button>
@@ -737,7 +740,9 @@ export default function AdminTrafficUsage() {
 
       {/* Controls */}
       <div className="mb-4 flex flex-col gap-3">
-        <div className="flex flex-wrap items-center gap-3">
+        {/* На телефоне выпадашки фильтров во всю ширину ряда: привязанные к кнопке,
+            они уходили за правый край экрана. */}
+        <div className="relative flex flex-wrap items-center gap-3">
           <PeriodSelector
             value={period}
             onChange={handlePeriodChange}
@@ -911,7 +916,9 @@ export default function AdminTrafficUsage() {
                       key={row.id}
                       className="cursor-pointer border-b border-dark-700/50 transition-colors hover:bg-dark-800/50"
                       style={{ backgroundColor: rowBg }}
-                      onClick={() => navigate(`/admin/users/${row.original.user_id}`)}
+                      onClick={() =>
+                        navigate(`/admin/users/${row.original.user_id}`, backTo(location))
+                      }
                     >
                       {row.getVisibleCells().map((cell) => {
                         const meta = cell.column.columnDef.meta;

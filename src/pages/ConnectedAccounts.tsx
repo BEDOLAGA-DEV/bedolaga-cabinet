@@ -10,12 +10,14 @@ import { Card } from '@/components/data-display/Card';
 import { Button } from '@/components/primitives/Button';
 import { staggerContainer, staggerItem } from '@/components/motion/transitions';
 import ProviderIcon from '../components/ProviderIcon';
-import { LINK_OAUTH_STATE_KEY, LINK_OAUTH_PROVIDER_KEY, getErrorDetail } from '../utils/oauth';
+import { getErrorDetail, saveLinkOAuthState } from '../utils/oauth';
+import { getApiErrorMessage } from '../utils/api-error';
 import { getTelegramInitData } from '../hooks/useTelegramSDK';
 import { usePlatform, useIsTelegram } from '@/platform/hooks/usePlatform';
 import { useAuthStore } from '../store/auth';
 import { isValidEmail } from '../utils/validation';
 import type { LinkedProvider } from '../types';
+import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 
 const OAUTH_PROVIDERS = ['google', 'yandex', 'discord', 'vk'];
 
@@ -30,7 +32,7 @@ export const LINK_TELEGRAM_STATE_KEY = 'link_telegram_state';
 const LINK_SCRIPT_LOAD_TIMEOUT_MS = 8000;
 
 /** Telegram account linking widget (browser only). Supports OIDC popup and legacy widget. */
-function TelegramLinkWidget() {
+export function TelegramLinkWidget() {
   const containerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const { showToast } = useToast();
@@ -239,8 +241,12 @@ function TelegramLinkWidget() {
 
   // Script failed to load - show unavailable message with bot link
   if (scriptFailed) {
+    // Свой key: без него React отдавал подсказке тот же <div>, что был
+    // контейнером виджета, а уборка виджета вручную чистит этот контейнер —
+    // подсказка и ссылка на бота появлялись и тут же пропадали, карточка
+    // оставалась пустой (в РФ без VPN telegram.org часто не грузится).
     return (
-      <div className="flex max-w-[200px] flex-col items-center gap-1.5">
+      <div key="telegram-fallback" className="flex max-w-[200px] flex-col items-center gap-1.5">
         <p className="break-words text-center text-xs text-dark-400">
           {t('profile.accounts.telegramLinkUnavailable')}
         </p>
@@ -277,27 +283,27 @@ function TelegramLinkWidget() {
     );
   }
 
-  return <div ref={containerRef} className="flex items-center" />;
+  return <div key="telegram-widget" ref={containerRef} className="flex items-center" />;
 }
 
 function LoadingSkeleton() {
   return (
-    <div className="space-y-3">
+    <SkeletonGroup className="space-y-3">
       {Array.from({ length: 4 }).map((_, i) => (
         <Card key={i}>
-          <div className="flex animate-pulse items-center justify-between">
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="h-6 w-6 rounded-full bg-dark-700" />
+              <Skeleton circle className="h-6 w-6 shrink-0" />
               <div className="space-y-2">
-                <div className="h-4 w-24 rounded bg-dark-700" />
-                <div className="h-3 w-32 rounded bg-dark-700" />
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-3 w-32" />
               </div>
             </div>
-            <div className="h-8 w-20 rounded bg-dark-700" />
+            <Skeleton className="h-8 w-20 shrink-0" />
           </div>
         </Card>
       ))}
-    </div>
+    </SkeletonGroup>
   );
 }
 
@@ -422,16 +428,16 @@ export default function ConnectedAccounts() {
       // Note: auth user lives in the zustand store, not in React Query —
       // the explicit setUser above IS the refresh. No ['user'] query exists.
     },
-    onError: (err: { response?: { data?: { detail?: string } } }) => {
-      const detail = err.response?.data?.detail;
+    onError: (err: unknown) => {
+      const detail = getApiErrorMessage(err, '');
       // The email belongs to another account and merging it requires proving
       // ownership: the backend asks for THAT account's password (account-takeover
       // fix). Guide the user to enter it rather than showing a dead-end error.
-      if (detail?.includes('merge')) {
+      if (detail.includes('merge')) {
         setEmailError(t('profile.emailMergePasswordRequired'));
-      } else if (detail?.includes('already registered')) {
+      } else if (detail.includes('already registered')) {
         setEmailError(t('profile.emailAlreadyRegistered'));
-      } else if (detail?.includes('already have a verified email')) {
+      } else if (detail.includes('already have a verified email')) {
         setEmailError(t('profile.alreadyHaveEmail'));
       } else {
         setEmailError(detail || t('common.error'));
@@ -447,8 +453,8 @@ export default function ConnectedAccounts() {
         navigate(`/merge/${response.merge_token}`, { replace: true });
       }
     },
-    onError: (err: { response?: { data?: { detail?: string } } }) => {
-      setEmailError(err.response?.data?.detail || t('profile.emailMergeCodeInvalid'));
+    onError: (err: unknown) => {
+      setEmailError(getApiErrorMessage(err, t('profile.emailMergeCodeInvalid')));
     },
   });
 
@@ -533,8 +539,9 @@ export default function ConnectedAccounts() {
       } else {
         // Regular browser: navigate within the same tab.
         // Save state in sessionStorage for the callback page to verify.
-        sessionStorage.setItem(LINK_OAUTH_STATE_KEY, state);
-        sessionStorage.setItem(LINK_OAUTH_PROVIDER_KEY, provider);
+        if (!saveLinkOAuthState(state, provider)) {
+          throw new Error('OAuth state is not persistable');
+        }
         window.location.href = authorize_url;
       }
     } catch (err: unknown) {
@@ -639,7 +646,11 @@ export default function ConnectedAccounts() {
   };
 
   return (
+    // key: remount the container when loading resolves — stagger orchestration
+    // runs once on mount, so provider cards arriving from the API later would
+    // otherwise stay stuck at their initial variant (opacity 0) after a hard refresh
     <motion.div
+      key={isLoading ? 'loading' : 'ready'}
       className="space-y-6"
       variants={staggerContainer}
       initial="initial"
@@ -715,6 +726,12 @@ export default function ConnectedAccounts() {
                 )}
               </div>
             </div>
+
+            {confirmingUnlink === provider.provider && provider.forgets_email && (
+              <p className="mt-2 text-xs text-warning-400">
+                {t('profile.accounts.unlinkForgetsEmail', { email: provider.forgets_email })}
+              </p>
+            )}
 
             {/* Inline email linking form */}
             {provider.provider === 'email' && !provider.linked && (

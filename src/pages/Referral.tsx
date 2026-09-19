@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { referralApi } from '../api/referral';
+import { referralApi, type ReferralEarning } from '../api/referral';
+import type { ReferralDaysTargetOption, ReferralTerms } from '../types';
 import { usePlatform } from '../platform';
 import { copyToClipboard } from '../utils/clipboard';
 import { brandingApi } from '../api/branding';
@@ -11,10 +12,12 @@ import { withdrawalApi } from '../api/withdrawals';
 import { CampaignCard } from '../components/partner/CampaignCard';
 import { useCurrency } from '../hooks/useCurrency';
 import { StatCard } from '@/components/stats';
+import { PageSkeleton, Skeleton } from '@/components/ui/skeleton';
 import {
   ArrowDownIcon,
   ArrowUpIcon,
   BanknotesIcon,
+  CalendarIcon,
   CardIcon,
   CheckIcon,
   ClockIcon,
@@ -47,12 +50,352 @@ function getWithdrawalStatusBadge(status: string): string {
   }
 }
 
+/**
+ * The rank line under the programme terms, or null when there is nothing to say.
+ *
+ * Three states, and only two of them produce text: no rank reached yet, and a
+ * rank with a next step ahead. A partner standing on the TOP rank has no next
+ * step — rendering an empty paragraph for them left a stray margin on the one
+ * screen that should read as "you are done climbing".
+ *
+ * Under `chain` there are no ranks at all, so nothing is shown: the server sends
+ * tier_current_level = null there, and a naive check would tell every single user
+ * "no rank reached yet" about a concept that does not exist in their programme.
+ *
+ * Exported for tests: the decision is worth checking on its own, without
+ * mounting the whole page.
+ */
+/**
+ * Programme terms under the `levels` scheme.
+ *
+ * Exported so the card can be tested on its own: mounting the whole Referral page
+ * needs a dozen mocks, and the part worth checking is this one — whether the card
+ * states which mode is in force and marks the level the viewer is actually on.
+ */
+/**
+ * What the user chose: the form of the reward and where the days land.
+ *
+ * Rendered only for the parts an administrator allowed — a control that changes
+ * nothing promises an influence it does not have. Each option shows whether it is
+ * the one in force, because a settings screen that does not say what is selected
+ * makes people guess.
+ *
+ * Exported for tests: mounting the whole page needs a dozen mocks, and the part
+ * worth checking is this one.
+ */
+export function RewardSettings({
+  terms,
+  onChange,
+  pending = false,
+}: {
+  terms: ReferralTerms;
+  onChange: (payload: {
+    reward_preference?: string | null;
+    days_target_subscription_id?: number | null;
+    set_reward_preference?: boolean;
+    set_days_target?: boolean;
+  }) => void;
+  pending?: boolean;
+}) {
+  const { t } = useTranslation();
+  const kindChoice = terms.allow_reward_kind_choice === true;
+  const targetChoice = terms.allow_days_target_choice === true;
+  if (!kindChoice && !targetChoice) return null;
+
+  const options = terms.days_target_options ?? [];
+  // Выбор двоичный: деньги ИЛИ дни. Не выбиравший получает деньги — так же, как
+  // их выдаст расчёт, поэтому и отмечены они, а не «ничего не выбрано».
+  const kinds = [
+    {
+      value: 'money',
+      label: t('referral.rewardSettings.kindMoney'),
+      // Сумма важнее общей фразы: без неё выбор делается вслепую — непонятно,
+      // от чего отказываешься. Общая фраза остаётся, когда суммы нет.
+      hint: terms.reward_choice_money || t('referral.rewardSettings.kindMoneyHint'),
+      amount: Boolean(terms.reward_choice_money),
+      icon: <BanknotesIcon className="h-5 w-5" />,
+    },
+    {
+      value: 'days',
+      label: t('referral.rewardSettings.kindDays'),
+      hint: terms.reward_choice_days || t('referral.rewardSettings.kindDaysHint'),
+      amount: Boolean(terms.reward_choice_days),
+      icon: <CalendarIcon className="h-5 w-5" />,
+    },
+  ];
+  const currentKind = terms.reward_preference === 'days' ? 'days' : 'money';
+
+  const optionLabel = (option: ReferralDaysTargetOption) => {
+    const name = option.tariff_name || t('referral.rewardSettings.subscription');
+    if (!option.end_date) return name;
+    const until = t('referral.rewardSettings.until', {
+      date: new Date(option.end_date).toLocaleDateString(),
+    });
+    return `${name} — ${until}`;
+  };
+
+  const choice = (key: string, selected: boolean, label: string, onSelect: () => void) => (
+    <button
+      key={key}
+      type="button"
+      disabled={pending}
+      onClick={onSelect}
+      aria-pressed={selected}
+      className={`flex w-full items-center gap-3 rounded-xl border p-3 text-left text-sm transition-colors disabled:opacity-60 ${
+        selected
+          ? 'border-accent-500/40 bg-accent-500/10 text-dark-100'
+          : 'border-dark-700/40 bg-dark-800/30 text-dark-200 hover:border-dark-600'
+      }`}
+    >
+      <span
+        aria-hidden="true"
+        className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border ${
+          selected ? 'border-accent-400' : 'border-dark-600'
+        }`}
+      >
+        {selected && <span className="h-2 w-2 rounded-full bg-accent-400" />}
+      </span>
+      <span>{label}</span>
+    </button>
+  );
+
+  return (
+    <div className="bento-card">
+      <h2 className="text-lg font-semibold text-dark-100">{t('referral.rewardSettings.title')}</h2>
+      <p className="mt-1 text-sm text-dark-400">{t('referral.rewardSettings.intro')}</p>
+
+      {kindChoice && (
+        <section className="mt-4">
+          <h3 className="text-sm font-medium text-dark-200">
+            {t('referral.rewardSettings.kindHeader')}
+          </h3>
+          <p className="mt-1 text-xs text-dark-500">{t('referral.rewardSettings.kindHint')}</p>
+          <div className="mt-2 grid gap-2 sm:grid-cols-2">
+            {kinds.map((kind) => {
+              const selected = currentKind === kind.value;
+              return (
+                <button
+                  key={kind.value}
+                  type="button"
+                  disabled={pending}
+                  aria-pressed={selected}
+                  onClick={() =>
+                    onChange({ reward_preference: kind.value, set_reward_preference: true })
+                  }
+                  className={`flex items-start gap-3 rounded-xl border p-3 text-left transition-colors disabled:opacity-60 ${
+                    selected
+                      ? 'border-accent-500/50 bg-accent-500/10'
+                      : 'border-dark-700/40 bg-dark-800/30 hover:border-dark-600'
+                  }`}
+                >
+                  <span
+                    aria-hidden="true"
+                    className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
+                      selected ? 'bg-accent-500/20 text-accent-300' : 'bg-dark-700/60 text-dark-400'
+                    }`}
+                  >
+                    {kind.icon}
+                  </span>
+                  <span className="min-w-0">
+                    <span
+                      className={`block text-sm font-medium ${selected ? 'text-dark-100' : 'text-dark-200'}`}
+                    >
+                      {kind.label}
+                    </span>
+                    <span
+                      className={`mt-0.5 block text-xs ${
+                        kind.amount
+                          ? selected
+                            ? 'font-medium text-accent-300'
+                            : 'font-medium text-dark-300'
+                          : 'text-dark-500'
+                      }`}
+                    >
+                      {kind.hint}
+                    </span>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      {/* Куда класть дни спрашиваем, только когда человек выбрал дни: выбравшему
+          деньги эта настройка ни на что не влияет, и раздел обещал бы влияние,
+          которого нет. Если выбор вида админ не разрешил, спрашиваем всегда —
+          дни тогда приходят по правилу, и цель у них есть. */}
+      {targetChoice && (!kindChoice || currentKind === 'days') && (
+        <section className="mt-5">
+          <h3 className="text-sm font-medium text-dark-200">
+            {t('referral.rewardSettings.targetHeader')}
+          </h3>
+          <p className="mt-1 text-xs text-dark-500">{t('referral.rewardSettings.targetHint')}</p>
+          {options.length === 0 ? (
+            <p className="mt-2 text-sm text-dark-400">{t('referral.rewardSettings.targetNone')}</p>
+          ) : (
+            <div className="mt-2 space-y-2">
+              {/* Автоподбор — тоже вариант, и он обязан быть виден как выбранный:
+                  иначе непонятно, что происходит сейчас. */}
+              {choice(
+                'auto',
+                (terms.days_target_subscription_id ?? null) === null,
+                t('referral.rewardSettings.targetAuto'),
+                () => onChange({ days_target_subscription_id: null, set_days_target: true }),
+              )}
+              {options.map((option) =>
+                choice(
+                  String(option.id),
+                  terms.days_target_subscription_id === option.id,
+                  optionLabel(option),
+                  () => onChange({ days_target_subscription_id: option.id, set_days_target: true }),
+                ),
+              )}
+            </div>
+          )}
+        </section>
+      )}
+    </div>
+  );
+}
+
+export function ProgrammeTerms({ terms }: { terms: ReferralTerms }) {
+  const { t } = useTranslation();
+  const isTiers = terms.levels_mode === 'tiers';
+  const levels = terms.levels ?? [];
+  // Строки-описания остаются запасным путём: они приходят из того же источника
+  // и покрывают старый сервер, который ещё не отдаёт разбор по частям.
+  const fallbackLines = terms.level_descriptions ?? [];
+  const progress = tierProgressText(terms, t);
+
+  return (
+    <div className="bento-card">
+      <div className="mb-4">
+        <h2 className="text-lg font-semibold text-dark-100">{t('referral.terms.title')}</h2>
+        {/* Правило режима — одной фразой над лестницей. Без неё список
+              уровней в режиме «за приглашённых» читается как складывающиеся
+              награды, а в цепочке — наоборот, как выбор одной из них. */}
+        <p className="mt-1 text-sm text-dark-400">
+          {isTiers ? t('referral.terms.modeTiers') : t('referral.terms.modeChain')}
+        </p>
+      </div>
+
+      {levels.length > 0 ? (
+        <ol className="space-y-2">
+          {levels.map((lvl) => (
+            <li
+              key={lvl.level}
+              className={`rounded-xl border p-3 transition-colors ${
+                lvl.is_current
+                  ? 'border-accent-500/40 bg-accent-500/10'
+                  : 'border-dark-700/40 bg-dark-800/30'
+              }`}
+            >
+              <div className="flex flex-wrap items-center gap-2">
+                <span
+                  className={`inline-flex h-7 min-w-7 items-center justify-center rounded-lg px-2 text-sm font-semibold ${
+                    lvl.is_current ? 'bg-accent-500 text-dark-900' : 'bg-dark-700 text-dark-200'
+                  }`}
+                >
+                  {lvl.level}
+                </span>
+                <span className="text-sm font-medium text-dark-100">
+                  {t('referral.terms.levelLabel', { level: lvl.level })}
+                </span>
+                {lvl.is_current && (
+                  <span className="rounded-full bg-accent-500/20 px-2 py-0.5 text-xs text-accent-300">
+                    {t('referral.terms.currentBadge')}
+                  </span>
+                )}
+              </div>
+
+              <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                {lvl.pays_referrer ? (
+                  lvl.rewards.map((reward) => (
+                    <span
+                      key={reward}
+                      className="rounded-lg bg-success-500/15 px-2 py-1 text-sm text-success-300"
+                    >
+                      {reward}
+                    </span>
+                  ))
+                ) : (
+                  <span className="rounded-lg bg-dark-700/60 px-2 py-1 text-sm text-dark-400">
+                    {t('referral.terms.paysNothing')}
+                  </span>
+                )}
+                {lvl.pays_referrer && lvl.trigger_label && (
+                  <span className="text-xs text-dark-400">{lvl.trigger_label}</span>
+                )}
+              </div>
+
+              <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-dark-400">
+                {/* Условие показывается только там, где оно есть смысл: в
+                      цепочке уровень открывается порогом, а в режиме за
+                      приглашённых порог и определяет, какой уровень ваш. */}
+                <span>
+                  {lvl.required_referrals > 0
+                    ? lvl.required_referrals_active_only
+                      ? t('referral.terms.fromActive', { count: lvl.required_referrals })
+                      : t('referral.terms.fromAny', { count: lvl.required_referrals })
+                    : t('referral.terms.startingLevel')}
+                </span>
+                {lvl.referee_reward && (
+                  <span>{t('referral.terms.refereeGets', { reward: lvl.referee_reward })}</span>
+                )}
+              </div>
+            </li>
+          ))}
+        </ol>
+      ) : fallbackLines.length > 0 ? (
+        <ul className="space-y-2">
+          {fallbackLines.map((line) => (
+            <li key={line} className="flex items-start gap-2 text-sm text-dark-200">
+              <span aria-hidden="true" className="mt-1 text-accent-400">
+                •
+              </span>
+              <span>{line}</span>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="text-sm text-dark-400">{t('referral.terms.noLevels')}</p>
+      )}
+
+      {terms.personal_percent != null && (
+        <p className="mt-4 rounded-xl border border-warning-500/25 bg-warning-500/10 p-3 text-sm text-warning-300">
+          {t('referral.terms.personalRate', { percent: terms.personal_percent })}
+        </p>
+      )}
+
+      {progress && <p className="mt-4 text-sm text-dark-300">{progress}</p>}
+    </div>
+  );
+}
+
+export function tierProgressText(
+  terms: Pick<
+    ReferralTerms,
+    'levels_mode' | 'tier_current_level' | 'tier_next_level' | 'tier_next_remaining'
+  >,
+  t: (key: string, options?: Record<string, unknown>) => string,
+): string | null {
+  if (terms.levels_mode !== 'tiers') return null;
+  if (terms.tier_current_level == null) return t('referral.terms.tierNone');
+  if (terms.tier_next_level == null) return null;
+  return t('referral.terms.tierNext', {
+    level: terms.tier_next_level,
+    count: terms.tier_next_remaining ?? 0,
+  });
+}
+
 export default function Referral() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { formatAmount, currencySymbol, formatPositive, formatWithCurrency } = useCurrency();
   const queryClient = useQueryClient();
   const [copiedLink, setCopiedLink] = useState<'cabinet' | 'bot' | null>(null);
+  const [rewardChoiceError, setRewardChoiceError] = useState<string | null>(null);
   const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -71,6 +414,14 @@ export default function Referral() {
     ? `${window.location.origin}/login?ref=${info.referral_code}`
     : '';
   const botReferralLink = info?.bot_referral_link || '';
+
+  const rewardChoiceMutation = useMutation({
+    mutationFn: referralApi.updateRewardChoice,
+    // Ответ эндпоинта — те же условия целиком, поэтому кладём их в кэш сразу:
+    // повторный запрос показал бы прежний выбор на долю секунды.
+    onSuccess: (updated) => queryClient.setQueryData(['referral-terms'], updated),
+    onError: () => setRewardChoiceError(t('referral.rewardSettings.saveError')),
+  });
 
   const { data: terms } = useQuery({
     queryKey: ['referral-terms'],
@@ -101,18 +452,45 @@ export default function Referral() {
 
   const isPartner = partnerStatus?.partner_status === 'approved';
 
-  // Withdrawal queries (only when partner is approved)
-  const { data: withdrawalBalance } = useQuery({
+  // Withdrawal is available to any referrer: the backend endpoints
+  // (/cabinet/referral/withdrawal/*) do not require partner_status, so the
+  // section is gated only by the admin visibility flag.
+  const withdrawalVisible = terms?.partner_section_visible !== false;
+
+  const {
+    data: withdrawalBalance,
+    isPending: withdrawalBalancePending,
+    isError: withdrawalBalanceFailed,
+  } = useQuery({
     queryKey: ['withdrawal-balance'],
     queryFn: withdrawalApi.getBalance,
-    enabled: isPartner,
+    enabled: withdrawalVisible,
   });
 
   const { data: withdrawalHistory } = useQuery({
     queryKey: ['withdrawal-history'],
     queryFn: withdrawalApi.getHistory,
-    enabled: isPartner,
+    enabled: withdrawalVisible,
   });
+
+  /*
+   * Выключенный вывод показывать нечем: сервер обнуляет всю статистику, кнопка
+   * навсегда серая, а под ней стоит служебная фраза «Функция вывода
+   * реферального баланса отключена». Бот в этом случае просто не рисует кнопку —
+   * кабинет теперь тоже убирает весь раздел.
+   *
+   * Кроме одного случая: заявки, поданные до выключения, никуда не деваются и
+   * остаются видны — иначе человек потеряет из виду деньги, которые ещё в
+   * обработке. Пока ответ не пришёл, раздела нет вовсе: иначе «История выводов»
+   * успевает мигнуть у того, кому вывод вообще не положен. Если ответ не пришёл
+   * совсем, показываем как раньше — молча прятать чужие деньги хуже.
+   */
+  const withdrawalEnabled = withdrawalBalance?.is_withdrawal_enabled ?? withdrawalBalanceFailed;
+  /* Строго «знаем, что выключен»: пока ответа нет, текст не должен дёргаться. */
+  const withdrawalTurnedOff = withdrawalBalance?.is_withdrawal_enabled === false;
+  const hasWithdrawalHistory = (withdrawalHistory?.items?.length ?? 0) > 0;
+  const withdrawalSectionVisible =
+    withdrawalVisible && !withdrawalBalancePending && (withdrawalEnabled || hasWithdrawalHistory);
 
   // Withdrawal cancel mutation
   const cancelWithdrawalMutation = useMutation({
@@ -123,8 +501,43 @@ export default function Referral() {
     },
   });
 
+  const isLevelsScheme = terms?.scheme === 'levels';
+  const isTiersScheme = isLevelsScheme && terms?.levels_mode === 'tiers';
+
+  /**
+   * A reward can be money, subscription days, or both. Days carry
+   * amount_kopeks = 0 by design, so formatting by the money amount alone renders
+   * a real "+7 days" reward as "+0.00 ₽". Zero money is omitted next to days for
+   * the same reason it is on the bot side: it reports the absence of something
+   * this programme never promised.
+   */
+  const formatEarning = useCallback(
+    (earning: ReferralEarning) => {
+      const days = earning.days_granted ?? 0;
+      const money = earning.amount_rubles ?? 0;
+      const daysLabel = days
+        ? earning.tariff_name
+          ? t('referral.daysWithTariff', { count: days, tariff: earning.tariff_name })
+          : t('referral.days', { count: days })
+        : '';
+
+      if (days && !money) return `+${daysLabel}`;
+      if (days) return `${formatPositive(money)} + ${daysLabel}`;
+      return formatPositive(money);
+    },
+    [formatPositive, t],
+  );
+
   const programTerms = useMemo(() => {
     if (!terms) return null;
+
+    // Под схемой `levels` плоские поля ниже не управляют ни одним начислением:
+    // выплаты идут по таблице уровней. Показывать их как «условия программы»
+    // значило бы обещать пользователю то, чего бот не платит.
+    if (terms.scheme === 'levels') {
+      return <ProgrammeTerms terms={terms} />;
+    }
+
     const showNewUserBonus = terms.first_topup_bonus_kopeks > 0;
     const showInviterBonus = terms.inviter_bonus_kopeks > 0;
     const cardCount = 2 + (showNewUserBonus ? 1 : 0) + (showInviterBonus ? 1 : 0);
@@ -147,7 +560,7 @@ export default function Referral() {
           />
           <StatCard
             label={t('referral.terms.minTopup')}
-            value={`${formatAmount(terms.minimum_topup_rubles)} ${currencySymbol}`}
+            value={`${formatAmount(terms.minimum_topup_rubles)}\u00A0${currencySymbol}`}
             icon={<BanknotesIcon className="h-5 w-5" />}
             tone="neutral"
           />
@@ -188,10 +601,16 @@ export default function Referral() {
 
   const shareLink = () => {
     if (!referralLink) return;
-    const shareText = t('referral.shareMessage', {
-      percent: info?.commission_percent || 0,
-      botName: branding?.name || import.meta.env.VITE_APP_NAME || 'Cabinet',
-    });
+    // Under the levels scheme commission_percent governs nothing — payouts come
+    // from the level table — so the invite must not name a rate. This text is what
+    // the user forwards to a friend; a wrong number here is a promise made in their
+    // name. The bot's own invite was fixed the same way.
+    const botName = branding?.name || import.meta.env.VITE_APP_NAME || 'Cabinet';
+    const shareText = isLevelsScheme
+      ? terms?.referee_bonus_description
+        ? t('referral.shareMessageBonus', { bonus: terms.referee_bonus_description, botName })
+        : t('referral.shareMessagePlain', { botName })
+      : t('referral.shareMessage', { percent: info?.commission_percent || 0, botName });
 
     if (navigator.share) {
       navigator
@@ -212,9 +631,16 @@ export default function Referral() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-64 items-center justify-center">
-        <div className="h-10 w-10 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-      </div>
+      <PageSkeleton titleWidth="w-40">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4">
+          <div className="col-span-2 md:col-span-1">
+            <StatCard loading />
+          </div>
+          <StatCard loading />
+          <StatCard loading />
+        </div>
+        <Skeleton variant="card" className="h-48" />
+      </PageSkeleton>
     );
   }
 
@@ -259,10 +685,32 @@ export default function Referral() {
           value={formatPositive(info?.total_earnings_rubles || 0)}
           icon={<BanknotesIcon className="h-5 w-5" />}
           tone="success"
+          subValue={
+            info?.total_earnings_days
+              ? t('referral.stats.earnedDays', { count: info.total_earnings_days })
+              : undefined
+          }
         />
         <StatCard
-          label={t('referral.stats.commissionRate')}
-          value={`${info?.commission_percent || 0}%`}
+          label={
+            // В режиме «за приглашённых» глубины сети не существует — цепочка не
+            // обходится вовсе. Показывать её там значит обещать выплаты за
+            // приглашённых чужими приглашёнными, которых в этом режиме не бывает.
+            isTiersScheme
+              ? t('referral.stats.yourLevel')
+              : isLevelsScheme
+                ? t('referral.stats.chainDepth')
+                : t('referral.stats.commissionRate')
+          }
+          value={
+            isTiersScheme
+              ? (terms?.tier_current_level ?? null) === null
+                ? t('referral.stats.levelNotReached')
+                : String(terms?.tier_current_level)
+              : isLevelsScheme
+                ? t('referral.stats.levelsValue', { count: terms?.max_level_depth || 1 })
+                : `${info?.commission_percent || 0}%`
+          }
           icon={<PercentIcon className="h-5 w-5" />}
           tone="accent"
         />
@@ -284,7 +732,7 @@ export default function Referral() {
                   type="text"
                   readOnly
                   value={botReferralLink}
-                  className="input flex-1 text-sm"
+                  className="input min-w-0 flex-1 text-sm"
                 />
                 <button
                   onClick={() => copyLink(botReferralLink, 'bot')}
@@ -307,12 +755,19 @@ export default function Referral() {
               {t('referral.cabinetLink')}
             </div>
             <div className="flex flex-col gap-2 sm:flex-row">
-              <input type="text" readOnly value={referralLink} className="input flex-1 text-sm" />
-              <div className="flex gap-2">
+              <input
+                type="text"
+                readOnly
+                value={referralLink}
+                className="input min-w-0 flex-1 text-sm"
+              />
+              {/* На телефоне кнопки делят ряд поровну: в своих размерах
+                  «Поделиться» вылезала за поле на 360. */}
+              <div className="grid grid-cols-2 gap-2 sm:flex">
                 <button
                   onClick={() => copyLink(referralLink, 'cabinet')}
                   disabled={!referralLink}
-                  className={`btn-primary shrink-0 px-4 ${
+                  className={`btn-primary min-w-0 shrink-0 px-4 ${
                     copiedLink === 'cabinet' ? 'bg-success-500 hover:bg-success-500' : ''
                   } ${!referralLink ? 'cursor-not-allowed opacity-50' : ''}`}
                 >
@@ -324,7 +779,7 @@ export default function Referral() {
                 <button
                   onClick={shareLink}
                   disabled={!referralLink}
-                  className={`btn-secondary flex shrink-0 items-center px-4 ${
+                  className={`btn-secondary flex min-w-0 shrink-0 items-center justify-center px-4 ${
                     !referralLink ? 'cursor-not-allowed opacity-50' : ''
                   }`}
                 >
@@ -336,12 +791,35 @@ export default function Referral() {
           </div>
         </div>
         <p className="mt-3 text-sm text-dark-500">
-          {t('referral.shareHint', { percent: info?.commission_percent || 0 })}
+          {isLevelsScheme
+            ? t('referral.shareHintLevels')
+            : t('referral.shareHint', { percent: info?.commission_percent || 0 })}
         </p>
       </div>
 
       {/* Program Terms */}
       {programTerms}
+
+      {/* Reward Settings */}
+      {terms && (
+        <div className="mt-6">
+          <RewardSettings
+            terms={terms}
+            pending={rewardChoiceMutation.isPending}
+            onChange={(payload) => {
+              setRewardChoiceError(null);
+              rewardChoiceMutation.mutate(payload);
+            }}
+          />
+          {/* Ошибка сохранения обязана быть видна: без неё нажатие выглядит
+              принятым, а выбор остаётся прежним. */}
+          {rewardChoiceError && (
+            <p className="mt-2 rounded-xl border border-error-500/30 bg-error-500/10 p-3 text-sm text-error-400">
+              {rewardChoiceError}
+            </p>
+          )}
+        </div>
+      )}
 
       {/* Referrals List */}
       <div className="bento-card">
@@ -351,10 +829,11 @@ export default function Referral() {
             {referralList.items.map((ref) => (
               <div
                 key={ref.id}
-                className="flex items-center justify-between rounded-xl border border-dark-700/30 bg-dark-800/30 p-3"
+                // Ник без пробелов выталкивал бейдж статуса за карточку.
+                className="flex items-center justify-between gap-3 rounded-xl border border-dark-700/30 bg-dark-800/30 p-3"
               >
-                <div>
-                  <div className="font-medium text-dark-100">
+                <div className="min-w-0 flex-1">
+                  <div className="font-medium text-dark-100 [overflow-wrap:anywhere]">
                     {ref.first_name || ref.username || t('referral.anonymousUser', { id: ref.id })}
                   </div>
                   <div className="mt-0.5 text-xs text-dark-500">
@@ -362,9 +841,9 @@ export default function Referral() {
                   </div>
                 </div>
                 {ref.has_paid ? (
-                  <span className="badge-success">{t('referral.status.paid')}</span>
+                  <span className="badge-success shrink-0">{t('referral.status.paid')}</span>
                 ) : (
-                  <span className="badge-neutral">{t('referral.status.pending')}</span>
+                  <span className="badge-neutral shrink-0">{t('referral.status.pending')}</span>
                 )}
               </div>
             ))}
@@ -389,21 +868,25 @@ export default function Referral() {
             {earnings.items.map((earning) => (
               <div
                 key={earning.id}
-                className="flex items-center justify-between rounded-xl border border-dark-700/30 bg-dark-800/30 p-3"
+                // Начисление бывает длинным («+1 234,56 ₽ + 90 дн. «Тариф»»): оно
+                // занимает не больше половины строки и переносится, имя — остаток.
+                className="flex items-start justify-between gap-3 rounded-xl border border-dark-700/30 bg-dark-800/30 p-3"
               >
-                <div>
-                  <div className="text-dark-100">
+                <div className="min-w-0 flex-1">
+                  <div className="text-dark-100 [overflow-wrap:anywhere]">
                     {earning.referral_first_name ||
                       earning.referral_username ||
                       t('referral.anonymousReferral')}
                   </div>
                   <div className="mt-0.5 text-xs text-dark-500">
-                    {t(`referral.reasons.${earning.reason}`, earning.reason)} •{' '}
-                    {new Date(earning.created_at).toLocaleDateString(i18n.language)}
+                    {t(`referral.reasons.${earning.reason}`, earning.reason)}
+                    {(earning.level ?? 1) > 1 &&
+                      ` • ${t('referral.levelBadge', { count: earning.level ?? 1 })}`}{' '}
+                    • {new Date(earning.created_at).toLocaleDateString(i18n.language)}
                   </div>
                 </div>
-                <div className="font-semibold text-success-400">
-                  {formatPositive(earning.amount_rubles)}
+                <div className="min-w-0 max-w-[55%] text-right font-semibold text-success-400">
+                  {formatEarning(earning)}
                 </div>
               </div>
             ))}
@@ -425,7 +908,13 @@ export default function Referral() {
                 {t('referral.partner.becomePartner')}
               </h2>
               <p className="mt-1 text-sm text-dark-400">
-                {t('referral.partner.becomePartnerDesc')}
+                {/* Обещать вывод заработка, когда вывод выключен, нельзя: заявку
+                    подадут ради того, чего не будет. */}
+                {t(
+                  withdrawalTurnedOff
+                    ? 'referral.partner.becomePartnerDescNoWithdrawal'
+                    : 'referral.partner.becomePartnerDesc',
+                )}
               </p>
               <button
                 onClick={() => navigate('/referral/partner/apply')}
@@ -484,9 +973,11 @@ export default function Referral() {
                 })}
               </p>
             </div>
-            <a href="#withdrawal-section" className="btn-secondary hidden px-4 sm:flex">
-              {t('referral.withdrawal.goToWithdrawal')}
-            </a>
+            {withdrawalSectionVisible && (
+              <a href="#withdrawal-section" className="btn-secondary hidden px-4 sm:flex">
+                {t('referral.withdrawal.goToWithdrawal')}
+              </a>
+            )}
           </div>
         </div>
       )}
@@ -498,12 +989,13 @@ export default function Referral() {
             <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-error-500/10 text-error-400">
               <ExclamationIcon className="h-8 w-8" />
             </div>
-            <div className="flex-1">
+            {/* Ссылка в комментарии администратора распирала колонку — обрезался заголовок. */}
+            <div className="min-w-0 flex-1">
               <h2 className="text-lg font-semibold text-dark-100">
                 {t('referral.partner.rejected')}
               </h2>
               {partnerStatus?.latest_application?.admin_comment && (
-                <p className="mt-1 text-sm text-dark-300">
+                <p className="mt-1 text-sm text-dark-300 [overflow-wrap:anywhere]">
                   {partnerStatus.latest_application.admin_comment}
                 </p>
               )}
@@ -540,12 +1032,12 @@ export default function Referral() {
           </div>
         )}
 
-      {/* ==================== Withdrawal Section (approved partners only) ==================== */}
+      {/* ==================== Withdrawal Section ==================== */}
 
-      {terms?.partner_section_visible !== false && isPartner && (
+      {withdrawalSectionVisible && (
         <div id="withdrawal-section" className="space-y-6">
           {/* Withdrawal Balance Card */}
-          {withdrawalBalance && (
+          {withdrawalEnabled && withdrawalBalance && (
             <div className="bento-card">
               <div className="mb-4 flex items-center gap-3">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent-500/10 text-accent-400">
@@ -628,14 +1120,18 @@ export default function Referral() {
                 {withdrawalHistory.items.map((item) => (
                   <div
                     key={item.id}
-                    className="flex items-center justify-between rounded-xl border border-dark-700/30 bg-dark-800/30 p-3"
+                    className="flex items-center justify-between gap-3 rounded-xl border border-dark-700/30 bg-dark-800/30 p-3"
                   >
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium text-dark-100">
+                      {/* Сумма и статус не рвутся внутри себя: не влезли рядом —
+                          статус уходит строкой ниже, а не «₽» и полбейджа. */}
+                      <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                        <span className="whitespace-nowrap font-medium text-dark-100">
                           {formatWithCurrency(item.amount_rubles)}
                         </span>
-                        <span className={getWithdrawalStatusBadge(item.status)}>
+                        <span
+                          className={`whitespace-nowrap ${getWithdrawalStatusBadge(item.status)}`}
+                        >
                           {t(`referral.withdrawal.status.${item.status}`, item.status)}
                         </span>
                       </div>
@@ -651,14 +1147,16 @@ export default function Referral() {
                         )}
                       </div>
                       {item.admin_comment && (
-                        <div className="mt-1 text-xs text-dark-400">{item.admin_comment}</div>
+                        <div className="mt-1 text-xs text-dark-400 [overflow-wrap:anywhere]">
+                          {item.admin_comment}
+                        </div>
                       )}
                     </div>
                     {item.status === 'pending' && (
                       <button
                         onClick={() => cancelWithdrawalMutation.mutate(item.id)}
                         disabled={cancelWithdrawalMutation.isPending}
-                        className="ml-3 shrink-0 text-sm text-error-400 transition-colors hover:text-error-300"
+                        className="btn-secondary shrink-0 px-3 py-1.5 text-sm text-error-400 hover:text-error-300"
                       >
                         {t('common.cancel')}
                       </button>

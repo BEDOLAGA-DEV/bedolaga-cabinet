@@ -55,7 +55,27 @@ i18n
 // Load detected language + fallback on startup
 const detectedLng = i18n.language?.split('-')[0] || FALLBACK_LNG;
 const langsToLoad = [FALLBACK_LNG, ...(detectedLng !== FALLBACK_LNG ? [detectedLng] : [])];
-Promise.all(langsToLoad.map(loadLanguage));
+
+// Сколько ждать словари, прежде чем рисовать без них. Белый экран хуже
+// непереведённого текста: если чанк локали не приехал (сеть отвалилась, прокси
+// отдал 502), приложение обязано появиться.
+const READY_TIMEOUT_MS = 5000;
+
+/**
+ * Резолвится, когда словари активного языка зарегистрированы в i18next.
+ *
+ * Локали лежат в отдельных ленивых чанках (~75 КБ gzip), а `useSuspense`
+ * выключен — значит react-i18next не приостановит отрисовку и `t('auth.login')`
+ * вернёт сам ключ. С прогретым кэшем чанк приходил раньше первой отрисовки и
+ * этого не было видно; на холодном интерфейс успевал нарисоваться с сырыми
+ * ключами. Точка входа ждёт этот промис перед `createRoot().render()`.
+ *
+ * Никогда не реджектится и не висит дольше READY_TIMEOUT_MS.
+ */
+export const i18nReady: Promise<void> = Promise.race([
+  Promise.all(langsToLoad.map(loadLanguage)).then(() => undefined),
+  new Promise<void>((resolve) => setTimeout(resolve, READY_TIMEOUT_MS)),
+]).catch(() => undefined);
 
 // Keep <html lang> + dir in sync with i18n so screen readers pronounce
 // content correctly, browsers don't offer to translate it, and RTL
@@ -87,16 +107,21 @@ i18n.on('languageChanged', (lng: string) => {
  * Telegram client language. Must be called after the Telegram SDK is initialised
  * (e.g. from main.tsx), since launch params are unavailable before init().
  */
-export function applyTelegramLanguage(): void {
+export function applyTelegramLanguage(): Promise<void> {
   try {
-    if (localStorage.getItem(LANGUAGE_STORAGE_KEY)) return; // explicit choice wins
+    if (localStorage.getItem(LANGUAGE_STORAGE_KEY)) return Promise.resolve(); // explicit choice wins
   } catch {
-    return;
+    return Promise.resolve();
   }
   const code = getTelegramLanguageCode();
   if (code && SUPPORTED_LANGS.includes(code) && i18n.language?.split('-')[0] !== code) {
     i18n.changeLanguage(code);
+    // Возвращаем именно загрузку словаря, а не changeLanguage: обработчик
+    // languageChanged тянет чанк отдельно, и без этого ожидания точка входа
+    // нарисовала бы новый язык до его словаря — те же сырые ключи.
+    return loadLanguage(code).catch(() => undefined);
   }
+  return Promise.resolve();
 }
 
 export default i18n;

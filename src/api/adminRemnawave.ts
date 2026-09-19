@@ -112,6 +112,23 @@ export interface SystemStatsResponse {
 }
 
 // Nodes
+export type NodeIpStatus =
+  | 'INBOUND'
+  | 'OUTBOUND'
+  | 'MANAGEMENT'
+  | 'TRANSIT'
+  | 'MONITORING'
+  | 'RESERVE'
+  | 'BLOCKED'
+  | 'FLAGGED'
+  | 'DEPRECATED'
+  | 'UNKNOWN';
+
+export interface NodeIpAddress {
+  ip: string;
+  status: NodeIpStatus;
+}
+
 export interface NodeInfo {
   uuid: string;
   name: string;
@@ -165,6 +182,8 @@ export interface NodeInfo {
     };
   } | null;
   active_plugin_uuid?: string;
+  /** Адреса узла из панели — варианты исходного адреса для GeoCheck. */
+  ips?: NodeIpAddress[];
   config_profile?: {
     active_config_profile_uuid: string | null;
     active_inbounds: Array<{
@@ -204,6 +223,40 @@ export interface NodeActionResponse {
   success: boolean;
   message?: string;
   is_disabled?: boolean;
+}
+
+// GeoCheck (Remnawave 3.3.0)
+/** С какого маршрута гнать проверку: пусто — маршрут узла по умолчанию. */
+export interface GeoCheckRequest {
+  ip?: string;
+  interface?: string;
+}
+
+export interface GeoCheckStartResponse {
+  job_id: string;
+}
+
+/** SVG-отчёт в base64, готовый для data: URL. */
+export interface GeoCheckImage {
+  format: string;
+  media_type: string;
+  encoding: string;
+  data: string;
+}
+
+export interface GeoCheckResult {
+  success: boolean;
+  node_uuid?: string | null;
+  image?: GeoCheckImage | null;
+  raw_report?: Record<string, unknown> | null;
+  message?: string | null;
+}
+
+export interface GeoCheckJobResponse {
+  job_id: string;
+  is_completed: boolean;
+  is_failed: boolean;
+  result?: GeoCheckResult | null;
 }
 
 // Realtime Traffic
@@ -400,6 +453,21 @@ export const adminRemnawaveApi = {
     const response = await apiClient.post(`/cabinet/admin/remnawave/nodes/${uuid}/action`, {
       action,
     });
+    return response.data;
+  },
+
+  /** Ставит GeoCheck ноды в очередь; результат забирается по job_id. */
+  startNodeGeoCheck: async (
+    uuid: string,
+    body: GeoCheckRequest = {},
+  ): Promise<GeoCheckStartResponse> => {
+    const response = await apiClient.post(`/cabinet/admin/remnawave/nodes/${uuid}/geocheck`, body);
+    return response.data;
+  },
+
+  /** Статус задачи GeoCheck — нода отвечает до минуты. */
+  getGeoCheckJob: async (jobId: string): Promise<GeoCheckJobResponse> => {
+    const response = await apiClient.get(`/cabinet/admin/remnawave/geocheck/${jobId}`);
     return response.data;
   },
 

@@ -10,9 +10,11 @@ import type { Tariff, ClassicPurchaseOptions } from '../types';
 import { useCloseOnSuccessNotification } from '../store/successNotification';
 import { SwitchTariffSheet } from '../components/subscription/sheets/SwitchTariffSheet';
 import { TariffPurchaseForm } from '../components/subscription/purchase/TariffPurchaseForm';
+import { needsTariff } from '../utils/legacySubscription';
 import { TariffPickerGrid } from '../components/subscription/purchase/TariffPickerGrid';
 import { ClassicPurchaseWizard } from '../components/subscription/purchase/ClassicPurchaseWizard';
 import { ExclamationIcon, SparklesIcon } from '@/components/icons';
+import { PageSkeleton, Skeleton } from '@/components/ui/skeleton';
 
 export default function SubscriptionPurchase() {
   const { t } = useTranslation();
@@ -99,9 +101,10 @@ export default function SubscriptionPurchase() {
 
   if (isLoading || optionsLoading) {
     return (
-      <div className="flex min-h-64 items-center justify-center">
-        <div className="h-10 w-10 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-      </div>
+      <PageSkeleton leading={1} titleWidth="w-56">
+        <Skeleton variant="card" className="h-32" />
+        <Skeleton variant="card" count={2} className="h-40" />
+      </PageSkeleton>
     );
   }
 
@@ -138,13 +141,15 @@ export default function SubscriptionPurchase() {
           to={subscriptionId ? `/subscriptions/${subscriptionId}` : '/subscriptions'}
         />
         <h1 className="text-2xl font-bold text-dark-50 sm:text-3xl">
-          {isMultiTariff && !subscriptionId
-            ? t('subscription.newTariff', 'Новый тариф')
-            : !isMultiTariff && subscription?.is_daily && !subscription?.is_trial
-              ? t('subscription.switchTariff.title')
-              : subscription && !subscription.is_trial
-                ? t('subscription.extend')
-                : t('subscription.getSubscription')}
+          {needsTariff(subscription)
+            ? t('subscription.cta.moveToTariff')
+            : isMultiTariff && !subscriptionId
+              ? t('subscription.newTariff', 'Новый тариф')
+              : !isMultiTariff && subscription?.is_daily && !subscription?.is_trial
+                ? t('subscription.switchTariff.title')
+                : subscription && !subscription.is_trial
+                  ? t('subscription.extend')
+                  : t('subscription.getSubscription')}
         </h1>
       </div>
 
@@ -192,7 +197,7 @@ export default function SubscriptionPurchase() {
                     >
                       {t('subscription.trialUpgrade.title')}
                     </div>
-                    <div className="mt-1 text-[12px] text-dark-50/40">
+                    <div className="mt-1 text-[12px] text-dark-400">
                       {t('subscription.trialUpgrade.description')}
                     </div>
                   </div>
@@ -229,7 +234,7 @@ export default function SubscriptionPurchase() {
                     >
                       {t('subscription.expiredBanner.title')}
                     </div>
-                    <div className="mt-1 text-[12px] text-dark-50/40">
+                    <div className="mt-1 text-[12px] text-dark-400">
                       {t('subscription.expiredBanner.selectTariff')}
                     </div>
                   </div>
@@ -237,8 +242,8 @@ export default function SubscriptionPurchase() {
               </div>
             )}
 
-          {/* Legacy subscription notice */}
-          {subscription && !subscription.is_trial && !subscription.tariff_id && (
+          {/* Старая подписка (куплена в классике, тарифа нет): тариф надевается на неё же */}
+          {needsTariff(subscription) && (
             <div className="mb-6 rounded-xl border border-accent-500/30 bg-accent-500/10 p-4">
               <div className="mb-2 font-medium text-accent-400">
                 {t('subscription.legacy.selectTariffTitle')}
@@ -286,6 +291,18 @@ export default function SubscriptionPurchase() {
                 tariff={selectedTariff}
                 subscriptionId={subscriptionId}
                 balanceKopeks={purchaseOptions?.balance_kopeks}
+                sbpPurchaseEnabled={
+                  isTariffsMode &&
+                  purchaseOptions !== undefined &&
+                  'platega_recurrent_enabled' in purchaseOptions &&
+                  purchaseOptions.platega_recurrent_enabled === true
+                }
+                lavaPurchaseEnabled={
+                  isTariffsMode &&
+                  purchaseOptions !== undefined &&
+                  'lava_recurrent_enabled' in purchaseOptions &&
+                  purchaseOptions.lava_recurrent_enabled === true
+                }
                 onBack={() => {
                   setShowTariffPurchase(false);
                   setSelectedTariff(null);

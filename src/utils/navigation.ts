@@ -10,16 +10,6 @@
  */
 
 /**
- * React Router stores the current position in the history stack on
- * `window.history.state.idx`. The first/entry record is `0`. When `idx === 0`
- * there is no in-app history to go back to (the page is the deep-link entry).
- */
-export function hasInAppHistory(): boolean {
-  const idx = (window.history.state as { idx?: number } | null)?.idx ?? 0;
-  return idx > 0;
-}
-
-/**
  * Derive a parent route by dropping the last path segment.
  *
  *   /admin/users/123  → /admin/users

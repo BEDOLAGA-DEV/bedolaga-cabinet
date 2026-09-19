@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import DOMPurify from 'dompurify';
-import { adminUpdatesApi, ReleaseItem, ProjectReleasesInfo } from '../api/adminUpdates';
+import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
+import { adminUpdatesApi, type ReleaseItem, type ProjectReleasesInfo } from '../api/adminUpdates';
 import {
   BackIcon,
   RefreshIcon,
@@ -97,7 +98,7 @@ function VersionBadge({ hasUpdate }: { hasUpdate: boolean }) {
 
   if (hasUpdate) {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-warning-500/20 px-2.5 py-0.5 text-xs font-medium text-warning-400">
+      <span className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full bg-warning-500/20 px-2.5 py-0.5 text-xs font-medium text-warning-400">
         <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-warning-400" />
         {t('adminUpdates.updateAvailable')}
       </span>
@@ -105,7 +106,7 @@ function VersionBadge({ hasUpdate }: { hasUpdate: boolean }) {
   }
 
   return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-success-500/20 px-2.5 py-0.5 text-xs font-medium text-success-400">
+    <span className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full bg-success-500/20 px-2.5 py-0.5 text-xs font-medium text-success-400">
       <span className="h-1.5 w-1.5 rounded-full bg-success-400" />
       {t('adminUpdates.upToDate')}
     </span>
@@ -263,14 +264,9 @@ export default function AdminUpdates() {
 
       {/* Loading skeleton */}
       {isLoading && (
-        <div className="space-y-4">
-          {[0, 1].map((i) => (
-            <div
-              key={i}
-              className="h-64 animate-pulse rounded-xl border border-dark-700/50 bg-dark-800/40"
-            />
-          ))}
-        </div>
+        <SkeletonGroup className="space-y-4">
+          <Skeleton variant="card" count={2} className="h-64 rounded-xl" />
+        </SkeletonGroup>
       )}
 
       {/* Content */}

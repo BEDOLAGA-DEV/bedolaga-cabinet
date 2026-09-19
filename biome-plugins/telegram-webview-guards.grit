@@ -1,0 +1,35 @@
+language js
+
+// Cross-platform guard (was eslint no-restricted-properties): these browser
+// APIs misbehave inside the Telegram WebView. Route them through the platform
+// abstraction instead. The platform adapters and the clipboard util (the
+// canonical implementations) are exempted by the filename conditions below.
+
+file(name=$name, body=$body) where {
+  // Exempt the canonical implementations only, matching the old eslint override
+  // scope (`src/platform/**`, `src/utils/clipboard.ts`) — an anchored path
+  // fragment, not a bare "platform" substring that would also spare any
+  // unrelated file with "platform" in its name.
+  $name <: not includes "src/platform/",
+  $name <: not includes or {
+    "utils/clipboard.ts",
+    "utils/clipboard.js"
+  },
+  $body <: contains bubble or {
+    `window.confirm` as $use where {
+      register_diagnostic(span=$use, message="Use useNativeDialog().confirm — window.confirm is silently ignored in the Telegram WebView.", severity="error")
+    },
+    `window.alert` as $use where {
+      register_diagnostic(span=$use, message="Use useNativeDialog().alert — window.alert is silently ignored in the Telegram WebView.", severity="error")
+    },
+    `window.open` as $use where {
+      register_diagnostic(span=$use, message="Use usePlatform().openLink / openTelegramLink — window.open is intercepted by the Telegram WebView.", severity="error")
+    },
+    `window.prompt` as $use where {
+      register_diagnostic(span=$use, message="Use usePrompt() (PromptDialogHost) — window.prompt is not supported in the Telegram WebView.", severity="error")
+    },
+    `navigator.clipboard` as $use where {
+      register_diagnostic(span=$use, message="Use copyToClipboard from @/utils/clipboard — it falls back to execCommand when the Clipboard API is unavailable (Telegram WebView).", severity="error")
+    }
+  }
+}

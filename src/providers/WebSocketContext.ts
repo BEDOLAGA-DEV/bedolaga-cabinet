@@ -21,6 +21,9 @@ export interface WSMessage {
   new_expires_at?: string;
   tariff_name?: string;
   days_left?: number;
+  // SBP recurring events
+  status?: string;
+  next_charge_at?: string | null;
   // Device purchase events
   devices_added?: number;
   new_device_limit?: number;

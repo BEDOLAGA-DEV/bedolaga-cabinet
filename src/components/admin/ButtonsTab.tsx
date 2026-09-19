@@ -3,10 +3,10 @@ import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   buttonStylesApi,
-  ButtonStylesConfig,
+  type ButtonStylesConfig,
   DEFAULT_BUTTON_STYLES,
   BUTTON_SECTIONS,
-  ButtonSection,
+  type ButtonSection,
   BOT_LOCALES,
 } from '../../api/buttonStyles';
 import { ChevronDownIcon } from '@/components/icons';
@@ -18,7 +18,10 @@ type StyleValue = 'primary' | 'success' | 'danger' | 'default';
 
 const STYLE_OPTIONS: { value: StyleValue; colorClass: string }[] = [
   { value: 'default', colorClass: 'bg-dark-500' },
-  { value: 'primary', colorClass: 'bg-accent-500' },
+  // 'primary' — синяя кнопка Telegram Bot API: свотч фиксированный телеграм-синий,
+  // а не bg-accent-500 — акцент темы кабинета перекрашивается (например, в оранжевый)
+  // и не имеет отношения к цвету реальной кнопки в боте.
+  { value: 'primary', colorClass: 'bg-[#54a9eb]' },
   { value: 'success', colorClass: 'bg-success-500' },
   { value: 'danger', colorClass: 'bg-error-500' },
 ];
@@ -228,7 +231,7 @@ export function ButtonsTab() {
                           ? 'bg-success-500 text-white'
                           : cfg.style === 'danger'
                             ? 'bg-error-500 text-white'
-                            : 'bg-accent-500 text-on-accent'
+                            : 'bg-[#54a9eb] text-white'
                     }`}
                   >
                     {t(`admin.buttons.styles.${cfg.style}`)}

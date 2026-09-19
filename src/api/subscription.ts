@@ -12,6 +12,8 @@ import type {
   PurchaseSelection,
   PurchasePreview,
   AppConfig,
+  SbpRecurringInfo,
+  LavaRecurringInfo,
 } from '../types';
 
 /** Helper: build query params with optional subscription_id */
@@ -196,6 +198,7 @@ export const subscriptionApi = {
   ): Promise<{
     available: boolean;
     reason?: string;
+    reason_code?: string;
     devices?: number;
     price_per_device_kopeks?: number;
     price_per_device_label?: string;
@@ -232,6 +235,7 @@ export const subscriptionApi = {
   ): Promise<{
     available: boolean;
     reason?: string;
+    reason_code?: string;
     current_device_limit: number;
     min_device_limit: number;
     can_reduce: number;
@@ -345,6 +349,93 @@ export const subscriptionApi = {
       '/cabinet/subscription/autopay',
       { enabled, days_before: daysBefore },
       withSubId(subscriptionId),
+    );
+    return response.data;
+  },
+
+  // ── SBP recurring (Platega) ───────────────────────────────────────────
+
+  getSbpRecurring: async (subscriptionId?: number): Promise<SbpRecurringInfo> => {
+    const response = await apiClient.get<SbpRecurringInfo>(
+      '/cabinet/subscription/platega-recurrent',
+      withSubId(subscriptionId),
+    );
+    return response.data;
+  },
+
+  enableSbpRecurring: async (
+    subscriptionId?: number,
+  ): Promise<{ status: string; redirect_url: string | null }> => {
+    const response = await apiClient.post(
+      '/cabinet/subscription/platega-recurrent/enable',
+      ...bodyWithSubId({}, subscriptionId),
+    );
+    return response.data;
+  },
+
+  cancelSbpRecurring: async (subscriptionId?: number): Promise<{ status: string }> => {
+    const response = await apiClient.post(
+      '/cabinet/subscription/platega-recurrent/cancel',
+      ...bodyWithSubId({}, subscriptionId),
+    );
+    return response.data;
+  },
+
+  /**
+   * Оформление подписки на тариф через СБП-автопродление: первое списание =
+   * подтверждение привязки в банке. Для нового тарифа бэкенд создаёт
+   * неактивную заготовку, которую активирует первый чардж.
+   */
+  purchaseWithSbpRecurring: async (
+    tariffId: number,
+  ): Promise<{ status: string; redirect_url: string | null; subscription_id: number }> => {
+    const response = await apiClient.post(
+      '/cabinet/subscription/platega-recurrent/purchase',
+      {},
+      { params: { tariff_id: tariffId } },
+    );
+    return response.data;
+  },
+
+  // ── Recurring (Lava) ──────────────────────────────────────────────────
+
+  getLavaRecurring: async (subscriptionId?: number): Promise<LavaRecurringInfo> => {
+    const response = await apiClient.get<LavaRecurringInfo>(
+      '/cabinet/subscription/lava-recurrent',
+      withSubId(subscriptionId),
+    );
+    return response.data;
+  },
+
+  enableLavaRecurring: async (
+    subscriptionId?: number,
+  ): Promise<{ status: string; redirect_url: string | null }> => {
+    const response = await apiClient.post(
+      '/cabinet/subscription/lava-recurrent/enable',
+      ...bodyWithSubId({}, subscriptionId),
+    );
+    return response.data;
+  },
+
+  cancelLavaRecurring: async (subscriptionId?: number): Promise<{ status: string }> => {
+    const response = await apiClient.post(
+      '/cabinet/subscription/lava-recurrent/cancel',
+      ...bodyWithSubId({}, subscriptionId),
+    );
+    return response.data;
+  },
+
+  /**
+   * Оформление подписки на тариф привязкой Lava: первое списание оплачивается
+   * по возвращённой ссылке и активирует подписку.
+   */
+  purchaseWithLavaRecurring: async (
+    tariffId: number,
+  ): Promise<{ status: string; redirect_url: string | null; subscription_id: number }> => {
+    const response = await apiClient.post(
+      '/cabinet/subscription/lava-recurrent/purchase',
+      {},
+      { params: { tariff_id: tariffId } },
     );
     return response.data;
   },

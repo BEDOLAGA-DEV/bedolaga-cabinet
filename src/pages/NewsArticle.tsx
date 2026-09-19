@@ -7,6 +7,7 @@ import DOMPurify from 'dompurify';
 import { newsApi } from '../api/news';
 import { usePlatform } from '../platform/hooks/usePlatform';
 import { BackIcon, ClockIcon, CalendarIcon } from '@/components/icons';
+import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 
 /**
  * Sanitizes HTML content using DOMPurify to prevent XSS attacks.
@@ -252,17 +253,17 @@ export default function NewsArticlePage() {
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
-        <div className="skeleton h-8 w-32 rounded-lg" />
-        <div className="skeleton h-10 w-3/4 rounded-lg" />
-        <div className="skeleton h-5 w-48 rounded-lg" />
-        <div className="skeleton h-64 w-full rounded-xl" />
+      <SkeletonGroup className="space-y-6">
+        <Skeleton className="h-8 w-32 rounded-lg" />
+        <Skeleton className="h-10 w-3/4 rounded-lg" />
+        <Skeleton className="h-5 w-48 rounded-lg" />
+        <Skeleton className="h-64 w-full rounded-xl" />
         <div className="space-y-3">
-          <div className="skeleton h-4 w-full rounded" />
-          <div className="skeleton h-4 w-5/6 rounded" />
-          <div className="skeleton h-4 w-4/6 rounded" />
+          <Skeleton className="h-4 w-full rounded" />
+          <Skeleton className="h-4 w-5/6 rounded" />
+          <Skeleton className="h-4 w-4/6 rounded" />
         </div>
-      </div>
+      </SkeletonGroup>
     );
   }
 

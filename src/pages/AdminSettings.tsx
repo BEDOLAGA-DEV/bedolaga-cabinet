@@ -1,11 +1,18 @@
 import { useState, useMemo, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router';
+import { useNavigate, useSearchParams } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { adminSettingsApi, SettingDefinition } from '../api/adminSettings';
+import { adminSettingsApi, type SettingDefinition } from '../api/adminSettings';
 import { themeColorsApi } from '../api/themeColors';
 import { useFavoriteSettings } from '../hooks/useFavoriteSettings';
-import { SETTINGS_TREE, findTreeLocation, formatSettingKey } from '../components/admin';
+import {
+  OTHER_CATEGORIES,
+  SETTINGS_TREE,
+  findTreeLocation,
+  formatSettingKey,
+  findSettingsSection,
+  getMappedCategoryKeys,
+} from '../components/admin';
 import { usePlatform } from '../platform/hooks/usePlatform';
 import { AnalyticsTab } from '../components/admin/AnalyticsTab';
 import { BrandingTab } from '../components/admin/BrandingTab';
@@ -24,10 +31,13 @@ const TARIFF_MODE_SETTINGS = ['MULTI_TARIFF_ENABLED', 'MAX_ACTIVE_SUBSCRIPTIONS'
 export default function AdminSettings() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { capabilities } = usePlatform();
 
-  // State
-  const [activeSection, setActiveSection] = useState('branding');
+  // State: `?section=<id>` открывает нужный раздел сразу (ссылки из других разделов админки).
+  const [activeSection, setActiveSection] = useState(
+    () => findSettingsSection(searchParams.get('section')) ?? 'branding',
+  );
   const [searchQuery, setSearchQuery] = useState('');
 
   // Favorites hook
@@ -75,10 +85,18 @@ export default function AdminSettings() {
     if (!activeTreeInfo || !allSettings || !Array.isArray(allSettings)) return [];
 
     const categoryKeys = activeTreeInfo.child.categories;
+    // Пункт-сборник показывает всё, чему не нашлось места в дереве: категории на
+    // бэкенде выводятся из имени ключа, поэтому новая настройка легко создаёт
+    // категорию, которой здесь нет — раньше такие настройки просто исчезали.
+    const isOtherSection = categoryKeys.includes(OTHER_CATEGORIES);
+    const mappedCategories = isOtherSection ? getMappedCategoryKeys() : null;
     const categoryMap = new Map<string, SettingDefinition[]>();
 
     for (const setting of allSettings) {
-      if (categoryKeys.includes(setting.category.key)) {
+      const belongsHere = mappedCategories
+        ? !mappedCategories.has(setting.category.key)
+        : categoryKeys.includes(setting.category.key);
+      if (belongsHere) {
         // Hide tariff-dependent settings when not in tariffs mode
         if (!isTariffsMode && TARIFF_MODE_SETTINGS.includes(setting.key)) continue;
 
@@ -242,7 +260,7 @@ export default function AdminSettings() {
               {!capabilities.hasBackButton && (
                 <button
                   onClick={() => navigate('/admin')}
-                  className="flex h-10 w-10 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
                   aria-label={t('admin.settings.backToAdmin')}
                 >
                   <BackIcon />

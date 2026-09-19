@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { adminLandingsApi, LandingListItem, resolveLocaleDisplay } from '../api/landings';
+import { adminLandingsApi, type LandingListItem, resolveLocaleDisplay } from '../api/landings';
 import { useNotify } from '@/platform';
 import { copyToClipboard } from '../utils/clipboard';
 import { getApiErrorMessage } from '../utils/api-error';
@@ -34,6 +34,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 
 // ============ Sortable Landing Card ============
 
@@ -98,10 +99,10 @@ function SortableLandingCard({
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0 flex-1">
               <div className="mb-1 flex flex-wrap items-center gap-1.5 sm:gap-2">
-                <h3 className="truncate font-medium text-dark-100">
+                <h3 className="min-w-0 font-medium text-dark-100 [overflow-wrap:anywhere]">
                   {resolveLocaleDisplay(landing.title)}
                 </h3>
-                <span className="shrink-0 rounded bg-dark-800 px-2 py-0.5 text-xs text-dark-400">
+                <span className="min-w-0 max-w-full rounded bg-dark-800 px-2 py-0.5 text-xs text-dark-400 break-all">
                   {landing.slug}
                 </span>
                 {landing.is_active ? (
@@ -397,7 +398,7 @@ export default function AdminLandings() {
           {!capabilities.hasBackButton && (
             <button
               onClick={() => navigate('/admin')}
-              className="flex h-10 w-10 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
             >
               <BackIcon />
             </button>
@@ -439,9 +440,9 @@ export default function AdminLandings() {
 
       {/* Landings List */}
       {isLoading ? (
-        <div className="flex items-center justify-center py-12">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-        </div>
+        <SkeletonGroup className="space-y-3">
+          <Skeleton variant="card" count={3} className="h-16" />
+        </SkeletonGroup>
       ) : localLandings.length === 0 ? (
         <div className="py-12 text-center">
           <p className="text-dark-400">{t('common.noData')}</p>

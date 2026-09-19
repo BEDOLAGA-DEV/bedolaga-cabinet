@@ -15,8 +15,6 @@ export const PARTNER_STATS = {
   /** Axis tick styling */
   AXIS: {
     TICK_FONT_SIZE: CHART_COMMON.AXIS.TICK_FONT_SIZE,
-    EARNINGS_WIDTH: 45,
-    REFERRALS_WIDTH: 30,
   },
   /** Tooltip styling */
   TOOLTIP: CHART_COMMON.TOOLTIP,

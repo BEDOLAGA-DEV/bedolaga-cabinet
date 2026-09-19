@@ -17,6 +17,7 @@ import { StatCard } from '../stats';
 
 import { BreakdownList } from './BreakdownList';
 import { DualAreaChart } from './DualAreaChart';
+import { StatsTabSkeleton } from './StatsTabSkeleton';
 
 interface AddonsTabProps {
   params: SalesStatsParams;
@@ -46,13 +47,7 @@ export function AddonsTab({ params }: AddonsTabProps) {
   }, [data]);
 
   if (isLoading) {
-    return (
-      <div className="animate-pulse space-y-4">
-        {Array.from({ length: 3 }, (_, i) => (
-          <div key={i} className="h-24 rounded-xl bg-dark-800/30" />
-        ))}
-      </div>
-    );
+    return <StatsTabSkeleton />;
   }
 
   if (isError || !data) {

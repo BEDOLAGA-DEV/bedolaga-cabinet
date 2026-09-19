@@ -8,6 +8,7 @@ import { SALES_STATS } from '../../constants/salesStats';
 import { CardIcon, PercentIcon, WarningIcon } from '../../components/icons';
 import PaymentMethodIcon from '../PaymentMethodIcon';
 import { StatCard } from '../stats';
+import { StatsTabSkeleton } from './StatsTabSkeleton';
 
 interface PaymentHealthTabProps {
   params: SalesStatsParams;
@@ -37,13 +38,7 @@ export function PaymentHealthTab({ params }: PaymentHealthTabProps) {
   });
 
   if (isLoading) {
-    return (
-      <div className="animate-pulse space-y-4">
-        {Array.from({ length: 3 }, (_, i) => (
-          <div key={i} className="h-24 rounded-xl bg-dark-800/30" />
-        ))}
-      </div>
-    );
+    return <StatsTabSkeleton />;
   }
 
   if (isError || !data) {

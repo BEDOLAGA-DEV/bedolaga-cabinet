@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { createJSONStorage, persist } from 'zustand/middleware';
 import type { CampaignBonusInfo, RegisterResponse, User } from '../types';
 import { authApi } from '../api/auth';
 import { apiClient } from '../api/client';
@@ -20,6 +20,7 @@ import {
   restoreRefreshTokenFromCloud,
 } from '../utils/token';
 import { usePermissionStore } from './permissions';
+import { safeLocal } from '../utils/safeStorage';
 
 export interface TelegramWidgetData {
   id: number;
@@ -48,9 +49,12 @@ interface AuthState {
   initialize: () => Promise<void>;
   refreshUser: () => Promise<void>;
   checkAdminStatus: () => Promise<void>;
-  loginWithTelegram: (initData: string) => Promise<void>;
-  loginWithTelegramWidget: (data: TelegramWidgetData) => Promise<void>;
-  loginWithTelegramOIDC: (idToken: string) => Promise<void>;
+  loginWithTelegram: (initData: string, acceptedLegalDocuments?: string[]) => Promise<void>;
+  loginWithTelegramWidget: (
+    data: TelegramWidgetData,
+    acceptedLegalDocuments?: string[],
+  ) => Promise<void>;
+  loginWithTelegramOIDC: (idToken: string, acceptedLegalDocuments?: string[]) => Promise<void>;
   loginWithEmail: (email: string, password: string) => Promise<void>;
   loginWithOAuth: (
     provider: string,
@@ -64,6 +68,7 @@ interface AuthState {
     password: string,
     firstName?: string,
     referralCode?: string,
+    acceptedLegalDocuments?: string[],
   ) => Promise<RegisterResponse>;
 }
 
@@ -261,10 +266,15 @@ export const useAuthStore = create<AuthState>()(
         return initState.promise;
       },
 
-      loginWithTelegram: async (initData) => {
+      loginWithTelegram: async (initData, acceptedLegalDocuments) => {
         const campaignSlug = getPendingCampaignSlug();
         const referralCode = getPendingReferralCode();
-        const response = await authApi.loginTelegram(initData, campaignSlug, referralCode);
+        const response = await authApi.loginTelegram(
+          initData,
+          campaignSlug,
+          referralCode,
+          acceptedLegalDocuments,
+        );
         // Clear only after successful auth — retry keeps the slugs
         consumeCampaignSlug();
         consumeReferralCode();
@@ -279,10 +289,15 @@ export const useAuthStore = create<AuthState>()(
         await get().checkAdminStatus();
       },
 
-      loginWithTelegramWidget: async (data) => {
+      loginWithTelegramWidget: async (data, acceptedLegalDocuments) => {
         const campaignSlug = getPendingCampaignSlug();
         const referralCode = getPendingReferralCode();
-        const response = await authApi.loginTelegramWidget(data, campaignSlug, referralCode);
+        const response = await authApi.loginTelegramWidget(
+          data,
+          campaignSlug,
+          referralCode,
+          acceptedLegalDocuments,
+        );
         consumeCampaignSlug();
         consumeReferralCode();
         tokenStorage.setTokens(response.access_token, response.refresh_token);
@@ -296,10 +311,15 @@ export const useAuthStore = create<AuthState>()(
         await get().checkAdminStatus();
       },
 
-      loginWithTelegramOIDC: async (idToken) => {
+      loginWithTelegramOIDC: async (idToken, acceptedLegalDocuments) => {
         const campaignSlug = getPendingCampaignSlug();
         const referralCode = getPendingReferralCode();
-        const response = await authApi.loginTelegramOIDC(idToken, campaignSlug, referralCode);
+        const response = await authApi.loginTelegramOIDC(
+          idToken,
+          campaignSlug,
+          referralCode,
+          acceptedLegalDocuments,
+        );
         consumeCampaignSlug();
         consumeReferralCode();
         tokenStorage.setTokens(response.access_token, response.refresh_token);
@@ -370,7 +390,13 @@ export const useAuthStore = create<AuthState>()(
         await get().checkAdminStatus();
       },
 
-      registerWithEmail: async (email, password, firstName, referralCode) => {
+      registerWithEmail: async (
+        email,
+        password,
+        firstName,
+        referralCode,
+        acceptedLegalDocuments,
+      ) => {
         const code = referralCode || getPendingReferralCode() || undefined;
         const campaignSlug = getPendingCampaignSlug() || undefined;
         const response = await authApi.registerEmailStandalone({
@@ -380,6 +406,7 @@ export const useAuthStore = create<AuthState>()(
           language: navigator.language.split('-')[0] || 'ru',
           referral_code: code,
           campaign_slug: campaignSlug,
+          accepted_legal_documents: acceptedLegalDocuments,
         });
         consumeReferralCode();
         return response;
@@ -387,6 +414,22 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: 'cabinet-auth',
+      // Дефолт persist ходит в голый localStorage. createJSONStorage ловит только
+      // БРОСОК геттера (заблокированное хранилище деградирует штатно), но не
+      // случай, когда глобала попросту нет: тогда он строит хранилище поверх
+      // undefined и роняет TypeError на каждом set(). Ровно так ведёт себя node
+      // 25+ под jsdom и часть встроенных вебвью. Явный safeLocal это закрывает.
+      // Тонкая обёртка, а не safeLocal напрямую: StateStorage у zustand выводит
+      // generic из setItem, и boolean оттуда потребовал бы boolean и от removeItem.
+      storage: createJSONStorage(() => ({
+        getItem: (name) => safeLocal.getItem(name),
+        setItem: (name, value) => {
+          safeLocal.setItem(name, value);
+        },
+        removeItem: (name) => {
+          safeLocal.removeItem(name);
+        },
+      })),
       partialize: (state) => ({
         user: state.user,
       }),

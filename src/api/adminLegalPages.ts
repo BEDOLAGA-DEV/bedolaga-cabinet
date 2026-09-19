@@ -111,6 +111,23 @@ export const adminLegalPagesApi = {
     return response.data;
   },
 
+  getRecurrentPayments: async (): Promise<LegalDocumentResponse> => {
+    const response = await apiClient.get<LegalDocumentResponse>(
+      '/cabinet/admin/legal-pages/recurrent-payments',
+    );
+    return response.data;
+  },
+
+  updateRecurrentPayments: async (
+    data: LegalDocumentUpdateRequest,
+  ): Promise<LegalDocumentResponse> => {
+    const response = await apiClient.put<LegalDocumentResponse>(
+      '/cabinet/admin/legal-pages/recurrent-payments',
+      data,
+    );
+    return response.data;
+  },
+
   getRules: async (): Promise<AdminRulesResponse> => {
     const response = await apiClient.get<AdminRulesResponse>('/cabinet/admin/legal-pages/rules');
     return response.data;

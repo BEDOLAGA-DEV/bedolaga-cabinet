@@ -9,9 +9,8 @@ import { dropdown, dropdownTransition } from '../../motion/transitions';
 export { Root as Select, Group as SelectGroup } from '@radix-ui/react-select';
 
 // Trigger
-export interface SelectTriggerProps extends ComponentPropsWithoutRef<
-  typeof SelectPrimitive.Trigger
-> {
+export interface SelectTriggerProps
+  extends ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger> {
   placeholder?: string;
 }
 

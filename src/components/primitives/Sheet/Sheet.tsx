@@ -1,5 +1,5 @@
 import * as DialogPrimitive from '@radix-ui/react-dialog';
-import { motion, AnimatePresence, useDragControls, PanInfo } from 'framer-motion';
+import { motion, AnimatePresence, useDragControls, type PanInfo } from 'framer-motion';
 import {
   forwardRef,
   type ComponentPropsWithoutRef,
@@ -97,9 +97,8 @@ export const SheetOverlay = forwardRef<HTMLDivElement, SheetOverlayProps>(
 SheetOverlay.displayName = 'SheetOverlay';
 
 // Content
-export interface SheetContentProps extends ComponentPropsWithoutRef<
-  typeof DialogPrimitive.Content
-> {
+export interface SheetContentProps
+  extends ComponentPropsWithoutRef<typeof DialogPrimitive.Content> {
   showDragHandle?: boolean;
   showCloseButton?: boolean;
   enableDragToClose?: boolean;

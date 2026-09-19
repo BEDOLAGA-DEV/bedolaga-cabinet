@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router';
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import i18n from '../i18n';
-import { campaignsApi, CampaignListItem, CampaignBonusType } from '../api/campaigns';
+import { campaignsApi, type CampaignListItem, type CampaignBonusType } from '../api/campaigns';
 import {
   PlusIcon,
   EditIcon,
@@ -20,6 +20,7 @@ import {
 import { StatCard } from '../components/stats';
 import { usePlatform } from '../platform/hooks/usePlatform';
 import { useFocusTrap } from '../hooks/useFocusTrap';
+import { Skeleton, SkeletonGroup } from '../components/ui/skeleton';
 
 const PAGE_SIZE = 50;
 
@@ -124,7 +125,7 @@ export default function AdminCampaigns() {
           {!capabilities.hasBackButton && (
             <button
               onClick={() => navigate('/admin')}
-              className="flex h-10 w-10 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
             >
               <BackIcon />
             </button>
@@ -175,9 +176,9 @@ export default function AdminCampaigns() {
 
       {/* Campaigns List */}
       {isLoading ? (
-        <div className="flex items-center justify-center py-12">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-        </div>
+        <SkeletonGroup className="space-y-3">
+          <Skeleton variant="card" count={3} className="h-16" />
+        </SkeletonGroup>
       ) : campaigns.length === 0 ? (
         <div className="py-12 text-center">
           <p className="text-dark-400">{t('admin.campaigns.noData')}</p>
@@ -191,17 +192,22 @@ export default function AdminCampaigns() {
                 campaign.is_active ? 'border-dark-700' : 'border-dark-700/50 opacity-60'
               }`}
             >
-              <div className="flex items-start justify-between gap-4">
+              {/* Как у промокодов: на телефоне название, чипы и кнопки — отдельными
+                  строками. В одну строку с четырьмя кнопками название сжималось до
+                  «Осен…», а чип партнёра налезал на кнопки. */}
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
                 <div className="min-w-0 flex-1">
-                  <div className="mb-1 flex items-center gap-2">
-                    <h3 className="truncate font-medium text-dark-100">{campaign.name}</h3>
+                  <h3 className="mb-2 font-medium text-dark-100 [overflow-wrap:anywhere]">
+                    {campaign.name}
+                  </h3>
+                  <div className="mb-2 flex flex-wrap gap-1.5">
                     <span
                       className={`rounded px-2 py-0.5 text-xs ${bonusTypeConfig[campaign.bonus_type].bgColor} ${bonusTypeConfig[campaign.bonus_type].color}`}
                     >
                       {t(bonusTypeConfig[campaign.bonus_type].labelKey)}
                     </span>
                     {campaign.partner_name && (
-                      <span className="rounded bg-purple-500/20 px-2 py-0.5 text-xs text-purple-400">
+                      <span className="max-w-full rounded bg-purple-500/20 px-2 py-0.5 text-xs text-purple-400 [overflow-wrap:anywhere]">
                         {campaign.partner_name}
                       </span>
                     )}
@@ -212,7 +218,9 @@ export default function AdminCampaigns() {
                     )}
                   </div>
                   <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-dark-400">
-                    <span className="font-mono text-xs">?start={campaign.start_parameter}</span>
+                    <span className="w-full font-mono text-xs break-all">
+                      ?start={campaign.start_parameter}
+                    </span>
                     <span>
                       {t('admin.campaigns.table.registrations', {
                         count: campaign.registrations_count,
@@ -229,11 +237,11 @@ export default function AdminCampaigns() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 border-t border-dark-700 pt-3 sm:border-0 sm:pt-0">
                   {/* Stats */}
                   <button
                     onClick={() => navigate(`/admin/campaigns/${campaign.id}/stats`)}
-                    className="rounded-lg bg-dark-700 p-2 text-dark-300 transition-colors hover:bg-dark-600 hover:text-dark-100"
+                    className="flex flex-1 justify-center rounded-lg bg-dark-700 p-2 text-dark-300 transition-colors hover:bg-dark-600 hover:text-dark-100 sm:flex-none"
                     title={t('admin.campaigns.table.statistics')}
                   >
                     <ChartIcon />
@@ -242,7 +250,7 @@ export default function AdminCampaigns() {
                   {/* Toggle Active */}
                   <button
                     onClick={() => toggleMutation.mutate(campaign.id)}
-                    className={`rounded-lg p-2 transition-colors ${
+                    className={`flex flex-1 justify-center rounded-lg p-2 transition-colors sm:flex-none ${
                       campaign.is_active
                         ? 'bg-success-500/20 text-success-400 hover:bg-success-500/30'
                         : 'bg-dark-700 text-dark-400 hover:bg-dark-600'
@@ -259,7 +267,7 @@ export default function AdminCampaigns() {
                   {/* Edit */}
                   <button
                     onClick={() => navigate(`/admin/campaigns/${campaign.id}/edit`)}
-                    className="rounded-lg bg-dark-700 p-2 text-dark-300 transition-colors hover:bg-dark-600 hover:text-dark-100"
+                    className="flex flex-1 justify-center rounded-lg bg-dark-700 p-2 text-dark-300 transition-colors hover:bg-dark-600 hover:text-dark-100 sm:flex-none"
                     title={t('admin.campaigns.table.edit')}
                   >
                     <EditIcon />
@@ -268,7 +276,7 @@ export default function AdminCampaigns() {
                   {/* Delete */}
                   <button
                     onClick={() => setDeleteConfirm(campaign.id)}
-                    className="rounded-lg bg-dark-700 p-2 text-dark-300 transition-colors hover:bg-error-500/20 hover:text-error-400"
+                    className="flex flex-1 justify-center rounded-lg bg-dark-700 p-2 text-dark-300 transition-colors hover:bg-error-500/20 hover:text-error-400 sm:flex-none"
                     title={t('admin.campaigns.table.delete')}
                     disabled={campaign.registrations_count > 0}
                   >

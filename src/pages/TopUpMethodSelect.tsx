@@ -8,6 +8,7 @@ import { useCurrency } from '../hooks/useCurrency';
 import { Card } from '@/components/data-display/Card';
 import { staggerContainer, staggerItem } from '@/components/motion/transitions';
 import PaymentMethodIcon from '@/components/PaymentMethodIcon';
+import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 
 export default function TopUpMethodSelect() {
   const { t } = useTranslation();
@@ -46,9 +47,9 @@ export default function TopUpMethodSelect() {
       <motion.div variants={staggerItem}>
         <Card>
           {isLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-            </div>
+            <SkeletonGroup className="space-y-3">
+              <Skeleton variant="card" count={3} className="h-16" />
+            </SkeletonGroup>
           ) : !paymentMethods || paymentMethods.length === 0 ? (
             <div className="py-6 text-center text-sm text-dark-400">
               {t('balance.noPaymentMethods')}
@@ -74,17 +75,19 @@ export default function TopUpMethodSelect() {
                     <div className="flex items-center gap-3">
                       <PaymentMethodIcon method={methodKey} className="h-8 w-8 flex-shrink-0" />
                       <div className="font-semibold text-dark-100">
-                        {translatedName || method.name}
+                        {method.name || translatedName}
                       </div>
                     </div>
-                    {(translatedDesc || method.description) && (
+                    {(method.description || translatedDesc) && (
                       <div className="mt-1 text-sm text-dark-500">
-                        {translatedDesc || method.description}
+                        {method.description || translatedDesc}
                       </div>
                     )}
                     <div className="mt-3 text-xs text-dark-400">
                       {formatAmount(method.min_amount_kopeks / 100, 0)} –{' '}
-                      {formatAmount(method.max_amount_kopeks / 100, 0)} {currencySymbol}
+                      {formatAmount(method.max_amount_kopeks / 100, 0)}
+                      {'\u00A0'}
+                      {currencySymbol}
                     </div>
                   </Card>
                 );

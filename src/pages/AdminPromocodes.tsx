@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import { useCurrency } from '../hooks/useCurrency';
 import i18n from '../i18n';
-import { promocodesApi, PromoCode, PromoCodeType } from '../api/promocodes';
+import { promocodesApi, type PromoCode, type PromoCodeType } from '../api/promocodes';
 import { usePlatform } from '../platform/hooks/usePlatform';
 import { copyToClipboard } from '../utils/clipboard';
 import {
@@ -20,6 +21,7 @@ import {
   TicketIcon,
 } from '@/components/icons';
 import { StatCard } from '../components/stats';
+import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 
 // Helper functions
 const getTypeLabel = (type: PromoCodeType): string => {
@@ -29,6 +31,7 @@ const getTypeLabel = (type: PromoCodeType): string => {
     trial_subscription: i18n.t('admin.promocodes.type.trialSubscription'),
     promo_group: i18n.t('admin.promocodes.type.promoGroup'),
     discount: i18n.t('admin.promocodes.type.discount'),
+    balance_and_days: i18n.t('admin.promocodes.type.balanceAndDays'),
   };
   return labels[type] || type;
 };
@@ -40,6 +43,7 @@ const getTypeColor = (type: PromoCodeType): string => {
     trial_subscription: 'bg-accent-500/20 text-accent-400',
     promo_group: 'bg-warning-500/20 text-warning-400',
     discount: 'bg-pink-500/20 text-pink-400',
+    balance_and_days: 'bg-success-500/20 text-success-400',
   };
   return colors[type] || 'bg-dark-600 text-dark-300';
 };
@@ -57,6 +61,7 @@ const formatDate = (date: string | null): string => {
 
 export default function AdminPromocodes() {
   const { t } = useTranslation();
+  const { formatPositive } = useCurrency();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { capabilities } = usePlatform();
@@ -96,7 +101,7 @@ export default function AdminPromocodes() {
           {!capabilities.hasBackButton && (
             <button
               onClick={() => navigate('/admin')}
-              className="flex h-10 w-10 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
             >
               <BackIcon />
             </button>
@@ -147,9 +152,9 @@ export default function AdminPromocodes() {
 
       {/* Promocodes List */}
       {isLoading ? (
-        <div className="flex items-center justify-center py-12">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-        </div>
+        <SkeletonGroup className="space-y-3">
+          <Skeleton variant="card" count={3} className="h-16" />
+        </SkeletonGroup>
       ) : promocodes.length === 0 ? (
         <div className="py-12 text-center">
           <p className="text-dark-400">{t('admin.promocodes.noPromocodes')}</p>
@@ -167,12 +172,14 @@ export default function AdminPromocodes() {
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
                 <div className="min-w-0 flex-1">
                   {/* Code with copy button */}
-                  <div className="mb-2 flex items-center gap-2">
+                  <div className="mb-2 flex min-w-0 items-center gap-2">
+                    {/* Код до 50 символов без пробелов: без переноса он уводил
+                        страницу вбок на телефоне. */}
                     <button
                       onClick={() => handleCopyCode(promo.code)}
-                      className="flex items-center gap-1.5 font-mono font-medium text-dark-100 transition-colors hover:text-accent-400"
+                      className="flex min-w-0 items-center gap-1.5 text-left font-mono font-medium text-dark-100 transition-colors hover:text-accent-400"
                     >
-                      {promo.code}
+                      <span className="min-w-0 break-all">{promo.code}</span>
                       {copiedCode === promo.code ? <CheckIcon /> : <CopyIcon />}
                     </button>
                   </div>
@@ -194,15 +201,27 @@ export default function AdminPromocodes() {
                   </div>
                   {/* Info line */}
                   <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-dark-400">
-                    {promo.type === 'balance' && (
-                      <span className="text-success-400">
-                        +{promo.balance_bonus_rubles} {t('admin.promocodes.form.rub')}
-                      </span>
-                    )}
+                    {/* Составляющие показываем по значению, а не по типу:
+                        balance_and_days теперь стоит и у набора, где баланса
+                        или дней нет вовсе, — иначе в списке висело бы «+0 ₽
+                        +0 дн.» у кода, который на самом деле раздаёт трафик. */}
+                    {(promo.type === 'balance' || promo.type === 'balance_and_days') &&
+                      promo.balance_bonus_rubles > 0 && (
+                        <span className="text-success-400">
+                          {formatPositive(promo.balance_bonus_rubles)}
+                        </span>
+                      )}
                     {(promo.type === 'subscription_days' ||
-                      promo.type === 'trial_subscription') && (
+                      promo.type === 'trial_subscription' ||
+                      promo.type === 'balance_and_days') &&
+                      promo.subscription_days > 0 && (
+                        <span className="text-accent-400">
+                          +{promo.subscription_days} {t('admin.promocodes.form.days')}
+                        </span>
+                      )}
+                    {promo.type === 'balance_and_days' && (promo.traffic_gb || 0) > 0 && (
                       <span className="text-accent-400">
-                        +{promo.subscription_days} {t('admin.promocodes.form.days')}
+                        +{promo.traffic_gb} {t('admin.promocodes.form.gb')}
                       </span>
                     )}
                     {promo.type === 'discount' && (
@@ -229,21 +248,21 @@ export default function AdminPromocodes() {
                 <div className="flex items-center gap-2 border-t border-dark-700 pt-3 sm:border-0 sm:pt-0">
                   <button
                     onClick={() => navigate(`/admin/promocodes/${promo.id}/stats`)}
-                    className="flex-1 rounded-lg bg-dark-700 p-2 text-dark-300 transition-colors hover:bg-accent-500/20 hover:text-accent-400 sm:flex-none"
+                    className="flex flex-1 justify-center rounded-lg bg-dark-700 p-2 text-dark-300 transition-colors hover:bg-accent-500/20 hover:text-accent-400 sm:flex-none"
                     title={t('admin.promocodes.actions.stats')}
                   >
                     <ChartIcon />
                   </button>
                   <button
                     onClick={() => navigate(`/admin/promocodes/${promo.id}/edit`)}
-                    className="flex-1 rounded-lg bg-dark-700 p-2 text-dark-300 transition-colors hover:bg-dark-600 hover:text-dark-100 sm:flex-none"
+                    className="flex flex-1 justify-center rounded-lg bg-dark-700 p-2 text-dark-300 transition-colors hover:bg-dark-600 hover:text-dark-100 sm:flex-none"
                     title={t('admin.promocodes.actions.edit')}
                   >
                     <EditIcon />
                   </button>
                   <button
                     onClick={() => setDeleteConfirm(promo.id)}
-                    className="flex-1 rounded-lg bg-dark-700 p-2 text-dark-300 transition-colors hover:bg-error-500/20 hover:text-error-400 sm:flex-none"
+                    className="flex flex-1 justify-center rounded-lg bg-dark-700 p-2 text-dark-300 transition-colors hover:bg-error-500/20 hover:text-error-400 sm:flex-none"
                     title={t('admin.promocodes.actions.delete')}
                   >
                     <TrashIcon className="h-4 w-4" />
@@ -257,7 +276,7 @@ export default function AdminPromocodes() {
 
       {/* Delete Confirmation */}
       {deleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-dark-950/70 p-4">
           <div className="w-full max-w-sm rounded-xl bg-dark-800 p-6">
             <h3 className="mb-2 text-lg font-semibold text-dark-100">
               {t('admin.promocodes.confirm.deletePromocode')}

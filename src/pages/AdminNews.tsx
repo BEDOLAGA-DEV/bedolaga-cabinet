@@ -8,6 +8,7 @@ import { Toggle } from '../components/admin/Toggle';
 import { useHapticFeedback } from '../platform/hooks/useHaptic';
 import { useDestructiveConfirm } from '../platform/hooks/useNativeDialog';
 import type { NewsListItem } from '../types/news';
+import { ListRowSkeleton } from '@/components/admin/ListRowSkeleton';
 import {
   PlusIcon,
   RefreshIcon,
@@ -43,11 +44,12 @@ const ArticleRow = memo(function ArticleRow({
 
   return (
     <div className="rounded-xl border border-dark-700 bg-dark-800/50 p-4 transition-all hover:border-dark-600">
-      <div className="flex items-start gap-4">
+      {/* На телефоне кнопки — отдельной строкой: рядом с ними заголовку оставалось 72 px. */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-4">
         <div className="min-w-0 flex-1">
           <div className="mb-1.5 flex flex-wrap items-center gap-2">
             <span
-              className="inline-flex items-center gap-1 rounded px-2 py-0.5 font-mono text-[10px] font-bold uppercase"
+              className="inline-flex max-w-full items-center gap-1 rounded px-2 py-0.5 font-mono text-[10px] font-bold uppercase [overflow-wrap:anywhere]"
               style={{
                 color,
                 background: `${color}15`,
@@ -79,20 +81,20 @@ const ArticleRow = memo(function ArticleRow({
             <p className="mt-1 truncate text-xs text-dark-400">{article.excerpt}</p>
           )}
 
-          <div className="mt-2 flex items-center gap-4 text-xs text-dark-500">
-            <span>
+          <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-dark-500">
+            <span className="whitespace-nowrap">
               {article.published_at ? new Date(article.published_at).toLocaleDateString() : '-'}
             </span>
-            <span>
+            <span className="whitespace-nowrap">
               {article.read_time_minutes} {t('news.readTime')}
             </span>
-            <span>
+            <span className="whitespace-nowrap">
               {article.views_count} {t('news.views')}
             </span>
           </div>
         </div>
 
-        <div className="flex shrink-0 items-center gap-1.5">
+        <div className="flex shrink-0 items-center justify-end gap-1.5 border-t border-dark-700/50 pt-2 sm:border-0 sm:pt-0">
           <button
             type="button"
             onClick={onToggleFeatured}
@@ -253,8 +255,8 @@ export default function AdminNews() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex min-w-0 flex-1 basis-48 items-center gap-3">
           <AdminBackButton />
           <div>
             <h1 className="text-xl font-bold text-dark-100">{t('news.admin.title')}</h1>
@@ -284,30 +286,9 @@ export default function AdminNews() {
 
       {/* Articles list */}
       {isLoading ? (
-        <div className="space-y-3">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div
-              key={i}
-              className="animate-pulse rounded-xl border border-dark-700 bg-dark-800/50 p-4"
-            >
-              <div className="flex items-start gap-4">
-                <div className="min-w-0 flex-1 space-y-2">
-                  <div className="flex gap-2">
-                    <div className="h-4 w-16 rounded bg-dark-700" />
-                    <div className="h-4 w-12 rounded bg-dark-700" />
-                  </div>
-                  <div className="h-5 w-3/4 rounded bg-dark-700" />
-                  <div className="h-3 w-1/2 rounded bg-dark-700" />
-                </div>
-                <div className="flex gap-2">
-                  <div className="h-8 w-8 rounded-lg bg-dark-700" />
-                  <div className="h-8 w-14 rounded-full bg-dark-700" />
-                  <div className="h-8 w-8 rounded-lg bg-dark-700" />
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+        <ListRowSkeleton
+          actions={[{ width: 'w-8' }, { width: 'w-14', pill: true }, { width: 'w-8' }]}
+        />
       ) : articles.length === 0 ? (
         <div className="flex flex-col items-center rounded-xl border border-dark-700 bg-dark-800/50 p-8 text-center text-dark-400">
           <NewsIcon className="h-6 w-6" />

@@ -1,5 +1,5 @@
 import apiClient from './client';
-import type { SupportConfig } from '../types';
+import type { LegalConsentConfig, SupportConfig } from '../types';
 
 export interface FaqPage {
   id: number;
@@ -23,6 +23,11 @@ export interface PublicOfferResponse {
   updated_at: string | null;
 }
 
+export interface RecurrentPaymentsResponse {
+  content: string;
+  updated_at: string | null;
+}
+
 export interface ServiceInfo {
   name: string;
   description: string | null;
@@ -42,6 +47,7 @@ export interface InfoVisibility {
   rules: boolean;
   privacy: boolean;
   offer: boolean;
+  recurrent: boolean;
 }
 
 export const infoApi = {
@@ -72,6 +78,14 @@ export const infoApi = {
   // Get public offer
   getPublicOffer: async (): Promise<PublicOfferResponse> => {
     const response = await apiClient.get<PublicOfferResponse>('/cabinet/info/public-offer');
+    return response.data;
+  },
+
+  // Get recurring-payments document
+  getRecurrentPayments: async (): Promise<RecurrentPaymentsResponse> => {
+    const response = await apiClient.get<RecurrentPaymentsResponse>(
+      '/cabinet/info/recurrent-payments',
+    );
     return response.data;
   },
 
@@ -109,6 +123,14 @@ export const infoApi = {
 
   getVisibility: async (): Promise<InfoVisibility> => {
     const response = await apiClient.get<InfoVisibility>('/cabinet/info/visibility');
+    return response.data;
+  },
+
+  // Публичный: экран логина запрашивает это ДО авторизации.
+  getLegalConsentConfig: async (language?: string): Promise<LegalConsentConfig> => {
+    const response = await apiClient.get<LegalConsentConfig>('/cabinet/info/legal-consent', {
+      params: language ? { language } : undefined,
+    });
     return response.data;
   },
 };

@@ -15,6 +15,7 @@ export function BrandingTab({ accentColor = '#3b82f6' }: BrandingTabProps) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const startVideoInputRef = useRef<HTMLInputElement>(null);
 
   const [editingName, setEditingName] = useState(false);
   const [newName, setNewName] = useState('');
@@ -23,6 +24,12 @@ export function BrandingTab({ accentColor = '#3b82f6' }: BrandingTabProps) {
   const { data: branding } = useQuery({
     queryKey: ['branding'],
     queryFn: brandingApi.getBranding,
+  });
+
+  // Видео стартового меню бота: хранится как Telegram file_id
+  const { data: startVideo } = useQuery({
+    queryKey: ['bot-start-video'],
+    queryFn: brandingApi.getBotStartVideo,
   });
 
   const { data: fullscreenSettings } = useQuery({
@@ -100,6 +107,29 @@ export function BrandingTab({ accentColor = '#3b82f6' }: BrandingTabProps) {
     },
   });
 
+  const uploadStartVideoMutation = useMutation({
+    mutationFn: brandingApi.uploadBotStartVideo,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['bot-start-video'] });
+    },
+  });
+
+  const deleteStartVideoMutation = useMutation({
+    mutationFn: brandingApi.deleteBotStartVideo,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['bot-start-video'] });
+    },
+  });
+
+  const handleStartVideoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      uploadStartVideoMutation.mutate(file);
+    }
+    // Сбрасываем input, чтобы повторный выбор того же файла снова сработал
+    e.target.value = '';
+  };
+
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -163,8 +193,9 @@ export function BrandingTab({ accentColor = '#3b82f6' }: BrandingTabProps) {
             </div>
           </div>
 
-          {/* Name */}
-          <div className="flex-1">
+          {/* Name. min-w-0: без него колонка росла по полю ввода, и кнопки ✓/✕
+              уезжали за экран. */}
+          <div className="min-w-0 flex-1">
             <label className="mb-2 block text-sm font-medium text-dark-300">
               {t('admin.settings.projectName')}
             </label>
@@ -174,19 +205,19 @@ export function BrandingTab({ accentColor = '#3b82f6' }: BrandingTabProps) {
                   type="text"
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
-                  className="flex-1 rounded-xl border border-dark-600 bg-dark-700 px-4 py-2 text-dark-100 focus:border-accent-500 focus:outline-none"
+                  className="min-w-0 flex-1 rounded-xl border border-dark-600 bg-dark-700 px-4 py-2 text-dark-100 focus:border-accent-500 focus:outline-none"
                   maxLength={50}
                 />
                 <button
                   onClick={() => updateBrandingMutation.mutate(newName)}
                   disabled={updateBrandingMutation.isPending}
-                  className="rounded-xl bg-accent-500 px-4 py-2 text-on-accent transition-colors hover:bg-accent-600 disabled:opacity-50"
+                  className="shrink-0 rounded-xl bg-accent-500 px-4 py-2 text-on-accent transition-colors hover:bg-accent-600 disabled:opacity-50"
                 >
                   <CheckIcon />
                 </button>
                 <button
                   onClick={() => setEditingName(false)}
-                  className="rounded-xl bg-dark-700 px-4 py-2 text-dark-300 transition-colors hover:bg-dark-600"
+                  className="shrink-0 rounded-xl bg-dark-700 px-4 py-2 text-dark-300 transition-colors hover:bg-dark-600"
                 >
                   <CloseIcon />
                 </button>
@@ -209,6 +240,57 @@ export function BrandingTab({ accentColor = '#3b82f6' }: BrandingTabProps) {
             )}
           </div>
         </div>
+      </div>
+
+      {/* Видео стартового меню бота */}
+      <div className="rounded-2xl border border-dark-700/50 bg-dark-800/50 p-6">
+        <h3 className="mb-1 text-lg font-semibold text-dark-100">
+          {t('admin.settings.botStartVideo')}
+        </h3>
+        <p className="mb-4 text-sm text-dark-400">{t('admin.settings.botStartVideoDesc')}</p>
+
+        <div className="flex flex-wrap items-center gap-3">
+          <input
+            ref={startVideoInputRef}
+            type="file"
+            accept="video/*"
+            onChange={handleStartVideoUpload}
+            className="hidden"
+          />
+          <button
+            onClick={() => startVideoInputRef.current?.click()}
+            disabled={uploadStartVideoMutation.isPending}
+            className="rounded-xl bg-dark-700 px-4 py-2 text-sm text-dark-200 transition-colors hover:bg-dark-600 disabled:opacity-50"
+          >
+            {uploadStartVideoMutation.isPending
+              ? t('common.loading')
+              : startVideo?.has_video
+                ? t('admin.settings.botStartVideoReplace')
+                : t('admin.settings.botStartVideoUpload')}
+          </button>
+
+          {startVideo?.has_video && (
+            <button
+              onClick={() => deleteStartVideoMutation.mutate()}
+              disabled={deleteStartVideoMutation.isPending}
+              className="rounded-xl bg-dark-700 px-4 py-2 text-sm text-dark-400 transition-colors hover:bg-error-500/20 hover:text-error-400 disabled:opacity-50"
+            >
+              {t('admin.settings.botStartVideoRemove')}
+            </button>
+          )}
+
+          <span className="text-sm text-dark-400">
+            {startVideo?.has_video
+              ? t('admin.settings.botStartVideoActive')
+              : t('admin.settings.botStartVideoNone')}
+          </span>
+        </div>
+
+        {uploadStartVideoMutation.isError && (
+          <div className="mt-3 text-sm text-error-400">
+            {t('admin.settings.botStartVideoError')}
+          </div>
+        )}
       </div>
 
       {/* Animated Background Editor */}

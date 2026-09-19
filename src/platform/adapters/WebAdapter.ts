@@ -132,6 +132,10 @@ function createThemeController(): ThemeController {
       // No-op in web - no bottom bar to sync
     },
 
+    setBackgroundColor(_color: string) {
+      // В вебе фон под страницей и есть сама страница — красить нечего
+    },
+
     getThemeParams() {
       return null;
     },
@@ -238,6 +242,10 @@ export function createWebAdapter(): PlatformContext {
       } else {
         window.onbeforeunload = null;
       }
+    },
+
+    hideKeyboard() {
+      // В браузере клавиатуру закрывает потеря фокуса полем.
     },
   };
 }

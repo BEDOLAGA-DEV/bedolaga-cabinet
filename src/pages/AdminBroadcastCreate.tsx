@@ -4,10 +4,10 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import {
   adminBroadcastsApi,
-  BroadcastFilter,
-  TariffFilter,
-  CombinedBroadcastCreateRequest,
-  CustomBroadcastButton,
+  type BroadcastFilter,
+  type TariffFilter,
+  type CombinedBroadcastCreateRequest,
+  type CustomBroadcastButton,
 } from '../api/adminBroadcasts';
 import { AdminBackButton } from '../components/admin';
 import { TelegramPreview, EmailPreview } from '../components/broadcasts/BroadcastPreview';
@@ -63,6 +63,7 @@ export default function AdminBroadcastCreate() {
   const [newButtonLabel, setNewButtonLabel] = useState('');
   const [newButtonActionType, setNewButtonActionType] = useState<'callback' | 'url'>('callback');
   const [newButtonActionValue, setNewButtonActionValue] = useState('');
+  const [newButtonEmojiId, setNewButtonEmojiId] = useState('');
   const [mediaFile, setMediaFile] = useState<File | null>(null);
   const [mediaType, setMediaType] = useState<'photo' | 'video' | 'document'>('photo');
   const [mediaPreview, setMediaPreview] = useState<string | null>(null);
@@ -305,6 +306,8 @@ export default function AdminBroadcastCreate() {
   // Custom button validation
   const isNewButtonValid = useMemo(() => {
     if (!newButtonLabel.trim() || !newButtonActionValue.trim()) return false;
+    // custom_emoji_id — необязательное поле, но если задано — числовая строка (Bot API)
+    if (newButtonEmojiId.trim() && !/^\d{1,64}$/.test(newButtonEmojiId.trim())) return false;
     if (newButtonActionType === 'url') {
       return /^https:\/\/|^tg:\/\//.test(newButtonActionValue.trim());
     }
@@ -312,22 +315,25 @@ export default function AdminBroadcastCreate() {
       return new TextEncoder().encode(newButtonActionValue.trim()).length <= 64;
     }
     return true;
-  }, [newButtonLabel, newButtonActionType, newButtonActionValue]);
+  }, [newButtonLabel, newButtonActionType, newButtonActionValue, newButtonEmojiId]);
 
   // Custom button handlers
   const addCustomButton = () => {
     if (!isNewButtonValid) return;
+    const emojiId = newButtonEmojiId.trim();
     setCustomButtons((prev) => [
       ...prev,
       {
         label: newButtonLabel.trim(),
         action_type: newButtonActionType,
         action_value: newButtonActionValue.trim(),
+        ...(emojiId ? { icon_custom_emoji_id: emojiId } : {}),
       },
     ]);
     setNewButtonLabel('');
     setNewButtonActionValue('');
     setNewButtonActionType('callback');
+    setNewButtonEmojiId('');
     setIsAddingCustomButton(false);
   };
 
@@ -459,7 +465,7 @@ export default function AdminBroadcastCreate() {
                   : t('admin.broadcasts.selectEmailFilterPlaceholder')}
             </span>
             {recipientsCount !== null && (
-              <span className="rounded-full bg-accent-500/20 px-2 py-0.5 text-xs text-accent-400">
+              <span className="shrink-0 whitespace-nowrap rounded-full bg-accent-500/20 px-2 py-0.5 text-xs text-accent-400">
                 {recipientsCount} {t('admin.broadcasts.recipients')}
               </span>
             )}
@@ -800,6 +806,15 @@ export default function AdminBroadcastCreate() {
                   maxLength={newButtonActionType === 'callback' ? 64 : 256}
                   className="input"
                 />
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={newButtonEmojiId}
+                  onChange={(e) => setNewButtonEmojiId(e.target.value)}
+                  placeholder={t('admin.broadcasts.customButtonEmojiIdPlaceholder')}
+                  maxLength={64}
+                  className="input"
+                />
                 <div className="flex gap-2">
                   <button
                     type="button"
@@ -807,6 +822,7 @@ export default function AdminBroadcastCreate() {
                       setIsAddingCustomButton(false);
                       setNewButtonLabel('');
                       setNewButtonActionValue('');
+                      setNewButtonEmojiId('');
                     }}
                     className="btn-secondary flex-1"
                   >
@@ -911,8 +927,8 @@ export default function AdminBroadcastCreate() {
       )}
 
       {/* Footer */}
-      <div className="card flex items-center justify-between">
-        <div className="text-sm text-dark-400">
+      <div className="card flex flex-wrap items-center justify-between gap-3">
+        <div className="min-w-0 text-sm text-dark-400">
           {(telegramRecipientsCount !== null || emailRecipientsCount !== null) && (
             <span>
               {t('admin.broadcasts.willBeSent')}:{' '}
@@ -930,7 +946,7 @@ export default function AdminBroadcastCreate() {
             </span>
           )}
         </div>
-        <div className="flex gap-3">
+        <div className="ml-auto flex gap-3">
           <button onClick={() => navigate('/admin/broadcasts')} className="btn-secondary">
             {t('common.cancel')}
           </button>

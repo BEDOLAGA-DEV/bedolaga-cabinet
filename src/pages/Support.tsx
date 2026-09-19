@@ -1,4 +1,5 @@
-import { useState, useRef, useEffect } from 'react';
+import { uiLocale } from '@/utils/uiLocale';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
@@ -8,7 +9,9 @@ import { infoApi } from '../api/info';
 import { useAuthStore } from '../store/auth';
 import { logger } from '../utils/logger';
 import { checkRateLimit, getRateLimitResetTime, RATE_LIMIT_KEYS } from '../utils/rateLimit';
-import type { TicketDetail } from '../types';
+import { getApiErrorMessage } from '../utils/api-error';
+import { isOpenTicketConflict } from '../utils/ticketErrors';
+import type { SupportConfig, TicketDetail } from '../types';
 import { Card } from '@/components/data-display/Card';
 import { Button } from '@/components/primitives/Button';
 import { staggerContainer, staggerItem } from '@/components/motion/transitions';
@@ -16,6 +19,8 @@ import { ChatIcon, CloseIcon, ImageIcon, PlusIcon, SendIcon } from '@/components
 import { usePlatform } from '@/platform';
 import { linkifyText } from '../utils/linkify';
 import { InfoIcon } from '@/components/icons';
+import { resolveSupportContact } from '../utils/supportContact';
+import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 
 const log = logger.createLogger('Support');
 
@@ -36,12 +41,28 @@ export default function Support() {
   const isAdmin = useAuthStore((state) => state.isAdmin);
   const queryClient = useQueryClient();
   const { openTelegramLink, openLink } = usePlatform();
+
+  const openSupportContact = useCallback(
+    (config: SupportConfig) => {
+      const target = resolveSupportContact(config);
+      if (!target) return;
+      if (target.kind === 'external') {
+        openLink(target.url, { tryInstantView: false });
+      } else {
+        openTelegramLink(target.url);
+      }
+    },
+    [openLink, openTelegramLink],
+  );
   const [selectedTicket, setSelectedTicket] = useState<TicketDetail | null>(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newTitle, setNewTitle] = useState('');
   const [newMessage, setNewMessage] = useState('');
   const [replyMessage, setReplyMessage] = useState('');
-  const [rateLimitError, setRateLimitError] = useState<string | null>(null);
+  // Ошибка активной формы: и клиентский rate-limit, и отказ бэка (409 «уже есть
+  // открытый тикет», 403 «поддержка выключена/пользователь заблокирован» и т.п.).
+  // Формы create и reply взаимоисключающие, поэтому состояние одно на обе.
+  const [formError, setFormError] = useState<string | null>(null);
 
   // Media attachment states (multi-upload, up to 10)
   const [createAttachments, setCreateAttachments] = useState<MediaAttachment[]>([]);
@@ -140,10 +161,25 @@ export default function Support() {
     onSuccess: (ticket) => {
       queryClient.invalidateQueries({ queryKey: ['tickets'] });
       setShowCreateForm(false);
+      setFormError(null);
       setNewTitle('');
       setNewMessage('');
       clearCreateAttachments();
       setSelectedTicket(ticket);
+    },
+    onError: (error) => {
+      // Без этого отказ бэка (чаще всего 409 «уже есть открытый тикет») уходил
+      // в никуда: форма просто оставалась на месте, и пользователь жал «Отправить»
+      // снова и снова, не понимая, почему обращение не создаётся.
+      log.error('Ticket creation failed', error);
+      if (isOpenTicketConflict(error)) {
+        setFormError(t('support.errors.alreadyOpenTicket'));
+        // Открытый тикет мог появиться в другой сессии (бот, второе устройство) —
+        // подтягиваем список, чтобы пользователю было куда перейти.
+        queryClient.invalidateQueries({ queryKey: ['tickets'] });
+        return;
+      }
+      setFormError(getApiErrorMessage(error, t('support.errors.createFailed')));
     },
   });
 
@@ -162,8 +198,15 @@ export default function Support() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['ticket', selectedTicket?.id] });
+      setFormError(null);
       setReplyMessage('');
       clearReplyAttachments();
+    },
+    onError: (error) => {
+      // Ответ в тикет молчал ровно так же: 403 (блокировка в поддержке) и 400
+      // (тикет уже закрыт) выглядели как «кнопка не работает».
+      log.error('Ticket reply failed', error);
+      setFormError(getApiErrorMessage(error, t('support.errors.replyFailed')));
     },
   });
 
@@ -189,9 +232,9 @@ export default function Support() {
   // Show loading while checking configuration
   if (configLoading) {
     return (
-      <div className="flex items-center justify-center py-24">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-      </div>
+      <SkeletonGroup className="space-y-3">
+        <Skeleton variant="card" count={3} className="h-16" />
+      </SkeletonGroup>
     );
   }
 
@@ -199,65 +242,29 @@ export default function Support() {
   if (supportConfig && !supportConfig.tickets_enabled) {
     log.debug('Tickets disabled, config:', supportConfig);
 
+    // Куда и чем открывать контакт — один резолв на весь блок. null → открывать
+    // нечего (пустой/битый конфиг), и кнопку тогда не рендерим вовсе.
+    const contact = resolveSupportContact(supportConfig);
+
     const getSupportMessage = () => {
       log.debug('Getting support message for type:', supportConfig.support_type);
 
-      if (supportConfig.support_type === 'profile') {
-        const supportUsername = supportConfig.support_username || '@support';
-        log.debug('Opening profile:', supportUsername);
-        return {
-          title: isAdmin ? t('support.ticketsDisabled') : t('support.title'),
-          message: t('support.contactSupport', { username: supportUsername }),
-          buttonText: t('support.contactUs'),
-          buttonAction: () => {
-            log.debug('Button clicked, opening:', supportUsername);
-
-            // Extract username without @
-            const username = supportUsername.startsWith('@')
-              ? supportUsername.slice(1)
-              : supportUsername;
-
-            const webUrl = `https://t.me/${username}`;
-            log.debug('Web URL:', webUrl);
-
-            // Use platform's openTelegramLink
-            openTelegramLink(webUrl);
-          },
-        };
-      }
+      const title = isAdmin ? t('support.ticketsDisabled') : t('support.title');
 
       if (supportConfig.support_type === 'url' && supportConfig.support_url) {
         return {
-          title: isAdmin ? t('support.ticketsDisabled') : t('support.title'),
+          title,
           message: t('support.useExternalLink'),
           buttonText: t('support.openSupport'),
-          buttonAction: () => {
-            openLink(supportConfig.support_url!, { tryInstantView: false });
-          },
         };
       }
 
-      // Fallback: contact support (should not normally happen if config is correct)
+      // profile и любой fallback — контакт в телеграме
       const supportUsername = supportConfig.support_username || '@support';
-      log.debug('Fallback: Opening profile:', supportUsername);
       return {
-        title: isAdmin ? t('support.ticketsDisabled') : t('support.title'),
+        title,
         message: t('support.contactSupport', { username: supportUsername }),
         buttonText: t('support.contactUs'),
-        buttonAction: () => {
-          log.debug('Fallback button clicked, opening:', supportUsername);
-
-          // Extract username without @
-          const username = supportUsername.startsWith('@')
-            ? supportUsername.slice(1)
-            : supportUsername;
-
-          const webUrl = `https://t.me/${username}`;
-          log.debug('Fallback opening URL:', webUrl);
-
-          // Use platform's openTelegramLink
-          openTelegramLink(webUrl);
-        },
       };
     };
 
@@ -271,9 +278,11 @@ export default function Support() {
           </div>
           <h2 className="mb-2 text-xl font-semibold text-dark-100">{supportMessage.title}</h2>
           <p className="mb-6 text-dark-400">{supportMessage.message}</p>
-          <Button onClick={supportMessage.buttonAction} fullWidth>
-            {supportMessage.buttonText}
-          </Button>
+          {contact && (
+            <Button onClick={() => openSupportContact(supportConfig)} fullWidth>
+              {supportMessage.buttonText}
+            </Button>
+          )}
         </Card>
       </div>
     );
@@ -341,6 +350,7 @@ export default function Support() {
           onClick={() => {
             setShowCreateForm(true);
             setSelectedTicket(null);
+            setFormError(null);
             clearCreateAttachments();
           }}
         >
@@ -349,34 +359,37 @@ export default function Support() {
         </Button>
       </motion.div>
 
-      {/* Contact support card for "both" mode */}
-      {supportConfig?.support_type === 'both' && supportConfig.support_username && (
-        <motion.div variants={staggerItem}>
-          <Card className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-dark-800">
-                <ChatIcon className="h-5 w-5 text-dark-400" />
+      {/* Contact support card for "both" mode — self-animated: mounts after the
+          config query resolves, when the parent stagger orchestration has already
+          finished and would leave it stuck at opacity 0 */}
+      {supportConfig?.support_type === 'both' &&
+        supportConfig.support_username &&
+        resolveSupportContact(supportConfig) && (
+          <motion.div variants={staggerItem} initial="initial" animate="animate">
+            {/* Длинный ник поддержки уводил «Написать» за край карточки, а карточка
+                обрезает всё, что за краем: текст сжимается, кнопка — нет. */}
+            <Card className="flex items-center justify-between gap-3">
+              <div className="flex min-w-0 items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-dark-800">
+                  <ChatIcon className="h-5 w-5 text-dark-400" />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-sm font-medium text-dark-100">{t('support.contactUs')}</div>
+                  <div className="truncate text-xs text-dark-400">
+                    {supportConfig.support_username}
+                  </div>
+                </div>
               </div>
-              <div>
-                <div className="text-sm font-medium text-dark-100">{t('support.contactUs')}</div>
-                <div className="text-xs text-dark-400">{supportConfig.support_username}</div>
-              </div>
-            </div>
-            <Button
-              variant="secondary"
-              className="shrink-0 whitespace-nowrap"
-              onClick={() => {
-                const username = supportConfig.support_username!.startsWith('@')
-                  ? supportConfig.support_username!.slice(1)
-                  : supportConfig.support_username!;
-                openTelegramLink(`https://t.me/${username}`);
-              }}
-            >
-              {t('support.writeButton', 'Написать')}
-            </Button>
-          </Card>
-        </motion.div>
-      )}
+              <Button
+                variant="secondary"
+                className="shrink-0 whitespace-nowrap"
+                onClick={() => openSupportContact(supportConfig)}
+              >
+                {t('support.writeButton', 'Написать')}
+              </Button>
+            </Card>
+          </motion.div>
+        )}
 
       {/* FAQ Link */}
       <motion.div variants={staggerItem}>
@@ -405,9 +418,9 @@ export default function Support() {
           <h2 className="mb-4 text-lg font-semibold text-dark-100">{t('support.yourTickets')}</h2>
 
           {isLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-            </div>
+            <SkeletonGroup className="space-y-3">
+              <Skeleton variant="card" count={3} className="h-16" />
+            </SkeletonGroup>
           ) : tickets?.items && tickets.items.length > 0 ? (
             <div className="space-y-2">
               {tickets.items.map((ticket) => (
@@ -416,6 +429,7 @@ export default function Support() {
                   onClick={() => {
                     setSelectedTicket(ticket as unknown as TicketDetail);
                     setShowCreateForm(false);
+                    setFormError(null);
                     clearReplyAttachments();
                   }}
                   className={`w-full rounded-bento border p-4 text-left transition-all ${
@@ -431,7 +445,7 @@ export default function Support() {
                     </span>
                   </div>
                   <div className="text-xs text-dark-500">
-                    {new Date(ticket.updated_at).toLocaleDateString()}
+                    {new Date(ticket.updated_at).toLocaleDateString(uiLocale())}
                   </div>
                 </button>
               ))}
@@ -456,11 +470,11 @@ export default function Support() {
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
-                  setRateLimitError(null);
+                  setFormError(null);
                   // Rate limit: max 3 tickets per 60 seconds
                   if (!checkRateLimit(RATE_LIMIT_KEYS.TICKET_CREATE, 3, 60000)) {
                     const resetTime = getRateLimitResetTime(RATE_LIMIT_KEYS.TICKET_CREATE);
-                    setRateLimitError(t('support.tooManyRequests', { seconds: resetTime }));
+                    setFormError(t('support.tooManyRequests', { seconds: resetTime }));
                     return;
                   }
                   createMutation.mutate();
@@ -537,9 +551,9 @@ export default function Support() {
                   )}
                 </div>
 
-                {rateLimitError && (
+                {formError && (
                   <div className="rounded-xl border border-error-500/30 bg-error-500/10 p-3 text-sm text-error-400">
-                    {rateLimitError}
+                    {formError}
                   </div>
                 )}
 
@@ -557,6 +571,7 @@ export default function Support() {
                     variant="secondary"
                     onClick={() => {
                       setShowCreateForm(false);
+                      setFormError(null);
                       clearCreateAttachments();
                     }}
                   >
@@ -578,7 +593,7 @@ export default function Support() {
                     </span>
                     <span className="text-xs text-dark-500">
                       {t('support.created')}{' '}
-                      {new Date(selectedTicket.created_at).toLocaleDateString()}
+                      {new Date(selectedTicket.created_at).toLocaleDateString(uiLocale())}
                     </span>
                   </div>
                 </div>
@@ -586,9 +601,9 @@ export default function Support() {
 
               {/* Messages */}
               {detailLoading ? (
-                <div className="flex items-center justify-center py-12">
-                  <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-                </div>
+                <SkeletonGroup className="space-y-3">
+                  <Skeleton variant="card" count={3} className="h-16" />
+                </SkeletonGroup>
               ) : ticketDetail?.messages ? (
                 <div className="scrollbar-hide mb-6 max-h-96 flex-1 space-y-4 overflow-y-auto">
                   {ticketDetail.messages.map((msg) => (
@@ -607,12 +622,12 @@ export default function Support() {
                           {msg.is_from_admin ? t('support.supportTeam') : t('support.you')}
                         </span>
                         <span className="text-xs text-dark-500">
-                          {new Date(msg.created_at).toLocaleString()}
+                          {new Date(msg.created_at).toLocaleString(uiLocale())}
                         </span>
                       </div>
                       {msg.message_text && (
                         <div
-                          className="whitespace-pre-wrap text-dark-200 [&_a]:text-accent-400 [&_a]:underline"
+                          className="whitespace-pre-wrap break-words text-dark-200 [&_a]:text-accent-400 [&_a]:underline"
                           dangerouslySetInnerHTML={{ __html: linkifyText(msg.message_text) }}
                         />
                       )}
@@ -631,11 +646,11 @@ export default function Support() {
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();
-                    setRateLimitError(null);
+                    setFormError(null);
                     // Rate limit: max 5 replies per 30 seconds
                     if (!checkRateLimit(RATE_LIMIT_KEYS.TICKET_REPLY, 5, 30000)) {
                       const resetTime = getRateLimitResetTime(RATE_LIMIT_KEYS.TICKET_REPLY);
-                      setRateLimitError(t('support.tooManyRequests', { seconds: resetTime }));
+                      setFormError(t('support.tooManyRequests', { seconds: resetTime }));
                       return;
                     }
                     replyMutation.mutate();
@@ -645,7 +660,7 @@ export default function Support() {
                   <div className="space-y-3">
                     <div className="flex gap-3">
                       <textarea
-                        className="input min-h-[80px] flex-1"
+                        className="input min-h-[80px] min-w-0 flex-1"
                         placeholder={t('support.replyPlaceholder')}
                         value={replyMessage}
                         onChange={(e) => setReplyMessage(e.target.value)}
@@ -704,9 +719,9 @@ export default function Support() {
                         <SendIcon className="h-4 w-4" />
                       </Button>
                     </div>
-                    {rateLimitError && (
+                    {formError && (
                       <div className="mt-2 rounded-lg border border-error-500/30 bg-error-500/10 p-2 text-sm text-error-400">
-                        {rateLimitError}
+                        {formError}
                       </div>
                     )}
                   </div>
@@ -722,19 +737,7 @@ export default function Support() {
           ) : (
             <div className="flex flex-col items-center justify-center py-16">
               <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-dark-800">
-                <svg
-                  className="h-8 w-8 text-dark-500"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={1.5}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 01-.825-.242m9.345-8.334a2.126 2.126 0 00-.476-.095 48.64 48.64 0 00-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0011.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155"
-                  />
-                </svg>
+                <ChatIcon className="h-8 w-8 text-dark-500" />
               </div>
               <div className="text-dark-400">{t('support.selectTicket')}</div>
             </div>

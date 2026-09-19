@@ -1,6 +1,8 @@
 import apiClient from './client';
+import { isEndpointMissingError } from '../utils/api-error';
 import type { AnimationConfig } from '@/components/ui/backgrounds/types';
 import { DEFAULT_ANIMATION_CONFIG } from '@/components/ui/backgrounds/types';
+import { safeSession } from '../utils/safeStorage';
 
 export type { AnimationConfig };
 
@@ -36,6 +38,8 @@ export interface TelegramWidgetConfig {
   request_access: boolean;
   oidc_enabled: boolean;
   oidc_client_id: string;
+  /** The bot answered 404 on the config route — build older than v3.24.0. */
+  endpoint_missing?: boolean;
 }
 
 export interface OfflineConvGoal {
@@ -59,6 +63,8 @@ const LOGO_PRELOADED_KEY = 'cabinet_logo_preloaded';
 
 // In-memory blob URL cache to avoid exposing backend URL
 let _logoBlobUrl: string | null = null;
+// Идущая сейчас загрузка: параллельные вызовы preloadLogo делят её.
+let _logoInFlight: Promise<void> | null = null;
 
 // Check if logo was already preloaded in this session
 export const isLogoPreloaded = (): boolean => {
@@ -68,7 +74,7 @@ export const isLogoPreloaded = (): boolean => {
     if (!cached?.has_custom_logo || !cached?.logo_url) {
       return false;
     }
-    const preloaded = sessionStorage.getItem(LOGO_PRELOADED_KEY);
+    const preloaded = safeSession.getItem(LOGO_PRELOADED_KEY);
     return preloaded === cached.logo_url;
   } catch {
     return false;
@@ -102,38 +108,61 @@ export const setCachedBranding = (branding: BrandingInfo) => {
   } catch {}
 };
 
-// Preload logo image as blob to hide backend URL
+/**
+ * Логотип с API, с самолечением кеша браузера.
+ *
+ * Тот же URL браузер мог уже запросить без заголовка Origin — как фавикон или
+ * <img> (старые сборки кабинета так и делали). Ответ без CORS-заголовков ложится
+ * в кеш, и обычный fetch() получает из кеша копию без Access-Control-Allow-Origin:
+ * это выглядит как CORS-ошибка, хотя сервер отвечает правильно. Повтор в режиме
+ * reload идёт мимо кеша и перезаписывает отравленную запись.
+ */
+async function fetchLogo(url: string): Promise<Response> {
+  try {
+    return await fetch(url);
+  } catch {
+    return fetch(url, { cache: 'reload' });
+  }
+}
+
+/**
+ * Логотип одним blob-адресом на страницу.
+ *
+ * Его просят одновременно запрос брендинга и сборка иконок вкладки. Раньше
+ * каждый вызов делал свой fetch, а закончивший вторым отзывал blob-адрес
+ * первого — под <img> шапки или под canvas фавикона: картинка не грузилась,
+ * вкладка получала монограмму вместо логотипа, и она же уходила в подсказку
+ * следующего визита. Теперь параллельные вызовы делят одну загрузку, а готовый
+ * blob-адрес никто не отзывает, пока логотип не сменили в админке.
+ */
 export const preloadLogo = async (branding: BrandingInfo): Promise<void> => {
   if (!branding.has_custom_logo || !branding.logo_url) {
     return;
   }
-
-  // Check if already preloaded in this session
   if (_logoBlobUrl) {
     return;
   }
-
-  const preloaded = sessionStorage.getItem(LOGO_PRELOADED_KEY);
-  if (preloaded === branding.logo_url && _logoBlobUrl) {
-    return;
+  if (!_logoInFlight) {
+    _logoInFlight = loadLogoBlob(branding.logo_url).finally(() => {
+      _logoInFlight = null;
+    });
   }
+  return _logoInFlight;
+};
 
+async function loadLogoBlob(logoPath: string): Promise<void> {
   try {
-    const logoUrl = `${import.meta.env.VITE_API_URL || ''}${branding.logo_url}`;
-    const response = await fetch(logoUrl);
+    const logoUrl = `${import.meta.env.VITE_API_URL || ''}${logoPath}`;
+    const response = await fetchLogo(logoUrl);
     if (!response.ok) return;
 
     const blob = await response.blob();
-    // Revoke previous blob URL if exists
-    if (_logoBlobUrl) {
-      URL.revokeObjectURL(_logoBlobUrl);
-    }
     _logoBlobUrl = URL.createObjectURL(blob);
-    sessionStorage.setItem(LOGO_PRELOADED_KEY, branding.logo_url);
+    safeSession.setItem(LOGO_PRELOADED_KEY, logoPath);
   } catch {
     // Fetch failed, logo will use letter fallback
   }
-};
+}
 
 // Get the blob URL for the logo (safe, doesn't expose backend)
 export const getLogoBlobUrl = (): string | null => _logoBlobUrl;
@@ -145,6 +174,11 @@ export const initLogoPreload = () => {
     preloadLogo(cached);
   }
 };
+
+export interface BotStartVideoInfo {
+  has_video: boolean;
+  file_id?: string | null;
+}
 
 export const brandingApi = {
   // Get current branding (public, no auth required)
@@ -169,7 +203,30 @@ export const brandingApi = {
       URL.revokeObjectURL(_logoBlobUrl);
       _logoBlobUrl = null;
     }
-    sessionStorage.removeItem(LOGO_PRELOADED_KEY);
+    safeSession.removeItem(LOGO_PRELOADED_KEY);
+    return response.data;
+  },
+
+  // ── Видео стартового меню бота ────────────────────────────────────────
+  // Хранится как Telegram file_id: файл на нашей стороне не сохраняется.
+
+  getBotStartVideo: async (): Promise<BotStartVideoInfo> => {
+    const response = await apiClient.get<BotStartVideoInfo>('/cabinet/branding/bot-start-video');
+    return response.data;
+  },
+
+  uploadBotStartVideo: async (file: File): Promise<BotStartVideoInfo> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await apiClient.post<BotStartVideoInfo>(
+      '/cabinet/branding/bot-start-video',
+      formData,
+    );
+    return response.data;
+  },
+
+  deleteBotStartVideo: async (): Promise<BotStartVideoInfo> => {
+    const response = await apiClient.delete<BotStartVideoInfo>('/cabinet/branding/bot-start-video');
     return response.data;
   },
 
@@ -180,7 +237,7 @@ export const brandingApi = {
       URL.revokeObjectURL(_logoBlobUrl);
       _logoBlobUrl = null;
     }
-    sessionStorage.removeItem(LOGO_PRELOADED_KEY);
+    safeSession.removeItem(LOGO_PRELOADED_KEY);
     return response.data;
   },
 
@@ -321,7 +378,7 @@ export const brandingApi = {
         '/cabinet/branding/telegram-widget',
       );
       return response.data;
-    } catch {
+    } catch (err) {
       return {
         bot_username: import.meta.env.VITE_TELEGRAM_BOT_USERNAME || '',
         size: 'large',
@@ -330,6 +387,7 @@ export const brandingApi = {
         request_access: true,
         oidc_enabled: false,
         oidc_client_id: '',
+        endpoint_missing: isEndpointMissingError(err),
       };
     }
   },

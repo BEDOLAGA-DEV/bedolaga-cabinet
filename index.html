@@ -2,18 +2,26 @@
 <html lang="ru" class="dark">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" href="https://fav.farm/🤟" />
+    <link rel="icon" href="__APP_ICON__" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="__APP_MANIFEST__" />
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
     />
     <meta name="theme-color" content="#0a0f1a" />
+    <!-- Страница сама ведёт обе темы. Без этого Android WebView (Telegram на
+         Xiaomi с системным «тёмным режимом для приложений») затемняет её
+         алгоритмом — по слоям и не за один кадр: цвета «прыгают». -->
+    <meta name="color-scheme" content="dark light" />
     <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="format-detection" content="telephone=no" />
     <meta name="referrer" content="strict-origin-when-cross-origin" />
-    <title>VPN</title>
+    <title>__APP_NAME__</title>
+    <meta name="application-name" content="__APP_NAME__" />
+    <meta name="apple-mobile-web-app-title" content="__APP_NAME__" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -44,10 +52,207 @@
       })();
     </script>
     <style>
+      /* Фон первой отрисовки — до того, как приедет CSS приложения. Светлый
+         вариант соответствует champagne-200 из globals.css (.light body).
+         Специфичность обоих правил обязана оставаться (0,0,1): фон темы в
+         globals.css задаёт `.light body` (0,1,1) операторским цветом, а
+         @layer base в Tailwind v3 — не настоящий каскадный слой. Более
+         специфичный селектор здесь (например `html.light body`) навсегда
+         перекрывал бы кастомный светлый фон. :where() обнуляет вклад класса. */
       body {
         background-color: #0a0f1a;
       }
+      :where(html.light) body {
+        background-color: #f7e7ce;
+      }
+      /* Схема следует классу темы, а не системной настройке: нативные контролы
+         и скроллбары должны совпадать с выбранной темой. Дублируется в
+         globals.css — здесь для первой отрисовки до его загрузки. */
+      html.dark {
+        color-scheme: dark;
+      }
+      html.light {
+        color-scheme: light;
+      }
     </style>
+    <script>
+      // Тема ДО первой отрисовки. useTheme вешает класс в useEffect, то есть уже
+      // после неё, а тут зашиты class="dark" и тёмный фон — пользователь светлой
+      // темы видел тёмную вспышку. Порядок разрешения повторяет useTheme:
+      // сохранённый выбор -> системная тема -> тёмная. Ветку Telegram намеренно
+      // не трогаем: colorScheme доступен только после init() SDK, а внутри
+      // Telegram фон и так задаёт клиент.
+      (function () {
+        try {
+          var enabled = { dark: true, light: true };
+          try {
+            var rawEnabled = localStorage.getItem('cabinet-enabled-themes');
+            if (rawEnabled) {
+              var parsed = JSON.parse(rawEnabled);
+              if (parsed && typeof parsed === 'object') {
+                enabled = { dark: parsed.dark !== false, light: parsed.light !== false };
+              }
+            }
+          } catch (e) {}
+          if (!enabled.dark && !enabled.light) enabled = { dark: true, light: true };
+
+          var stored = null;
+          try {
+            stored = localStorage.getItem('cabinet-theme');
+          } catch (e) {}
+
+          var theme;
+          if (stored === 'light' || stored === 'dark') {
+            theme = enabled[stored] ? stored : enabled.dark ? 'dark' : 'light';
+          } else if (window.matchMedia('(prefers-color-scheme: light)').matches && enabled.light) {
+            theme = 'light';
+          } else {
+            theme = enabled.dark ? 'dark' : 'light';
+          }
+
+          var root = document.documentElement;
+          root.classList.remove('dark', 'light');
+          root.classList.add(theme);
+          if (theme === 'light') {
+            var meta = document.querySelector('meta[name="theme-color"]');
+            if (meta) meta.setAttribute('content', '#f7e7ce');
+          }
+        } catch (e) {
+          // Хранилище заблокировано — остаётся тёмная тема из разметки.
+        }
+      })();
+    </script>
+    <script data-hint="theme-colors">
+      // Палитра оператора ДО первой отрисовки. Цвета приходят с бэкенда уже после
+      // загрузки JS, и каждая загрузка сначала показывала палитру по умолчанию,
+      // а потом прыгала в операторскую. applyThemeColors записывает применённые
+      // переменные в localStorage (ключ = STORAGE_KEYS.THEME_COLORS_HINT), здесь
+      // они ставятся на :root теми же именами. Принимаются только --color-* с
+      // hex или RGB-триплетом: подсказка не может подменить прочие токены.
+      // Фон страницы и theme-color тоже берутся отсюда — до прихода CSS приложения
+      // они иначе остаются цветами сборки. Специфичность правил фона (0,0,1)
+      // обязательна, см. <style> выше.
+      (function () {
+        try {
+          var raw = localStorage.getItem('cabinet-theme-colors-hint');
+          if (!raw) return;
+          var hint = JSON.parse(raw);
+          var vars = hint && hint.vars;
+          if (!vars || typeof vars !== 'object') return;
+          var NAME = /^--color-[a-z0-9-]+$/;
+          var VALUE = /^(#[0-9a-f]{6}|\d{1,3}, \d{1,3}, \d{1,3})$/i;
+          var root = document.documentElement;
+          var applied = {};
+          for (var name in vars) {
+            var value = vars[name];
+            if (NAME.test(name) && typeof value === 'string' && VALUE.test(value)) {
+              root.style.setProperty(name, value);
+              applied[name] = value;
+            }
+          }
+          var css = function (v) {
+            return v.charAt(0) === '#' ? v : 'rgb(' + v + ')';
+          };
+          var dark = applied['--color-dark-950'];
+          var light = applied['--color-champagne-200'];
+          if (dark || light) {
+            var style = document.createElement('style');
+            style.textContent =
+              (dark ? 'body{background-color:' + css(dark) + '}' : '') +
+              (light ? ':where(html.light) body{background-color:' + css(light) + '}' : '');
+            document.head.appendChild(style);
+          }
+          var isLight = root.classList.contains('light');
+          var chrome = isLight ? applied['--color-light-bg'] : applied['--color-dark-bg'];
+          var meta = document.querySelector('meta[name="theme-color"]');
+          if (meta && chrome) meta.setAttribute('content', css(chrome));
+        } catch (e) {
+          // Хранилище заблокировано или подсказка битая — остаётся палитра сборки.
+        }
+      })();
+    </script>
+    <script>
+      // Имя бренда до первой отрисовки — без шагов при установке.
+      //
+      // Имя живёт у бота, а страница у всех вариантов установки одна и та же
+      // (готовый образ собран с «Cabinet»). Ждать React — секунды на медленной
+      // сети, и вкладка с ярлыками успевают взять значение сборки. Поэтому здесь,
+      // ещё до загрузки бандла: (1) подсказка прошлого визита из localStorage
+      // (её пишет useDocumentBranding, ключ STORAGE_KEYS.BRAND_HINT); (2) запрос
+      // /cabinet/branding к API — он публичный, и прокси на API есть у каждой
+      // установки. React, когда доберётся, поставит data-brand-ready на <html> —
+      // после этого мы уже ничего не трогаем.
+      //
+      // Фавикон здесь НЕ трогаем: <link rel="icon"> выше ведёт на
+      // /cabinet/branding/favicon у бота — Safari берёт иконку только при
+      // загрузке страницы и не замечает смену через JS. И ни в коем случае не
+      // на /cabinet/branding/logo: запрос фавикона идёт без Origin, его ответ
+      // без CORS-заголовков ложится в кеш, и fetch() логотипа из React получает
+      // из кеша копию без Access-Control-Allow-Origin. Подсказка прошлого визита
+      // (PNG data: URI) — единственное исключение: сети в ней нет. SVG из
+      // подсказки не берём: Safari рисует SVG-фавикон монохромной плиткой с
+      // буквой, и подменив ссылку, мы лишили бы его логотипа с эндпоинта бота.
+      // __API_URL__ подставляет vite-plugins/brandingHtml из VITE_API_URL.
+      (function () {
+        var API = '__API_URL__';
+        var HINT_KEY = 'cabinet-brand-hint';
+
+        function applyName(name) {
+          document.title = name;
+          var metas = document.querySelectorAll(
+            'meta[name="application-name"], meta[name="apple-mobile-web-app-title"]'
+          );
+          for (var i = 0; i < metas.length; i++) metas[i].setAttribute('content', name);
+        }
+        function setIcon(href) {
+          var icon = document.querySelector('link[rel="icon"]');
+          if (icon) icon.setAttribute('href', href);
+        }
+        function firstLetter(value, fallback) {
+          var ch = (value || '').replace(/^\s+/, '').charAt(0).toUpperCase();
+          return ch || fallback;
+        }
+
+        var hint = null;
+        try {
+          hint = JSON.parse(localStorage.getItem(HINT_KEY) || 'null');
+          if (hint && typeof hint.name === 'string' && hint.name.trim()) applyName(hint.name.trim());
+          if (hint && typeof hint.icon === 'string' && hint.icon.indexOf('data:image/png;') === 0) {
+            setIcon(hint.icon);
+          }
+        } catch (e) {
+          // Хранилище заблокировано или подсказка битая — остаются значения сборки.
+          hint = null;
+        }
+
+        if (typeof fetch !== 'function') return;
+        var base = API.replace(/\/+$/, '');
+        fetch(base + '/cabinet/branding', { credentials: 'omit' })
+          .then(function (response) {
+            return response.ok ? response.json() : null;
+          })
+          .then(function (brand) {
+            if (!brand || typeof brand.name !== 'string') return;
+            if (document.documentElement.hasAttribute('data-brand-ready')) return;
+            var name = brand.name.trim();
+            var letter = firstLetter(
+              typeof brand.logo_letter === 'string' ? brand.logo_letter : '',
+              firstLetter(name, 'V')
+            );
+            if (name) applyName(name);
+            if (!hint) {
+              try {
+                localStorage.setItem(HINT_KEY, JSON.stringify({ name: name, letter: letter }));
+              } catch (e) {
+                // Хранилище заблокировано — следующий визит снова спросит API.
+              }
+            }
+          })
+          .catch(function () {
+            // API недоступен — React покажет свой экран, вкладка останется со сборкой.
+          });
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

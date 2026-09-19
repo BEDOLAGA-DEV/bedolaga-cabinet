@@ -4,16 +4,16 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import {
   adminRemnawaveApi,
-  NodeInfo,
-  NodeRealtimeStats,
-  SquadWithLocalInfo,
-  SystemStatsResponse,
-  AutoSyncStatus,
-  RecapResponse,
-  DevicesStatsResponse,
-  TopConsumersResponse,
-  HealthResponse,
-  SubscriptionRequestStatsResponse,
+  type NodeInfo,
+  type NodeRealtimeStats,
+  type SquadWithLocalInfo,
+  type SystemStatsResponse,
+  type AutoSyncStatus,
+  type RecapResponse,
+  type DevicesStatsResponse,
+  type TopConsumersResponse,
+  type HealthResponse,
+  type SubscriptionRequestStatsResponse,
 } from '../api/adminRemnawave';
 import { usePlatform } from '../platform/hooks/usePlatform';
 import { formatUptime } from '../utils/format';
@@ -54,14 +54,22 @@ import {
   SubscriptionIcon,
   BackIcon,
   ChevronRightIcon,
+  GeoCheckIcon,
+  RadarIcon,
 } from '../components/icons';
+import { GeoCheckModal } from '../components/admin/remnawave/GeoCheckModal';
+import { buildReachabilityLink } from '../components/admin/reachability/deepLink';
+import { useReachabilityAvailable } from '../components/admin/reachability/useReachabilityStatus';
+import { usePermissionStore } from '../store/permissions';
+import { supportsGeoCheck } from '../utils/nodeVersion';
+import { Skeleton, SkeletonGroup } from '../components/ui/skeleton';
 
 const formatBytes = (bytes: number): string => {
   if (bytes === 0) return '0 B';
   const k = 1024;
   const sizes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB'];
   const i = Math.min(Math.floor(Math.log(bytes) / Math.log(k)), sizes.length - 1);
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  return parseFloat((bytes / k ** i).toFixed(2)) + ' ' + sizes[i];
 };
 
 // Алгоритмический ISO 3166-1 alpha-2 → regional indicator. Глобус-fallback
@@ -149,6 +157,17 @@ interface NodeCardProps {
 function NodeCard({ node, providerName, realtime, onAction, isLoading }: NodeCardProps) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
+  const [geoCheckOpen, setGeoCheckOpen] = useState(false);
+
+  // GeoCheck умеет только узел 3.3.0+; на старом узле кнопку не показываем,
+  // чтобы админ не упирался в ошибку панели.
+  const canGeoCheck = supportsGeoCheck(node.versions);
+  // Ярлык в BSCHEKER: только с правом запуска и при включённой интеграции.
+  // Оба хука вызываются безусловно — правило хуков, объединяем результат после.
+  const navigate = useNavigate();
+  const canRunReachability = usePermissionStore((s) => s.hasPermission('reachability:run'));
+  const reachabilityAvailable = useReachabilityAvailable();
+  const canReach = canRunReachability && reachabilityAvailable;
 
   const isUp = node.is_connected && node.is_node_online && !node.is_disabled;
   const dotColor = node.is_disabled ? 'bg-dark-500' : isUp ? 'bg-success-400' : 'bg-error-400';
@@ -193,245 +212,280 @@ function NodeCard({ node, providerName, realtime, onAction, isLoading }: NodeCar
           ? 'text-warning-400'
           : 'text-dark-400';
 
+  // Модалка — сосед кликабельного блока, а не его потомок: портал уносит её
+  // в document.body только по DOM, а события React прогоняет по дереву
+  // компонентов, и клики внутри неё всплывали бы в onClick карточки.
   return (
-    <div
-      className={`rounded-xl border border-dark-700 bg-dark-800/50 p-3.5 transition-colors hover:border-dark-600 ${
-        hasBreakdown ? 'cursor-pointer' : ''
-      }`}
-      onClick={hasBreakdown ? () => setExpanded((v) => !v) : undefined}
-    >
-      {/* Identity + actions */}
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-2">
-          <span
-            className={`h-2 w-2 shrink-0 rounded-full ${dotColor} ${isUp ? 'animate-pulse' : ''}`}
-            title={statusText}
-          />
-          <span className="flex shrink-0 items-center gap-1 rounded-md bg-dark-700/60 px-1.5 py-0.5 text-[11px] text-dark-300">
-            <UsersIcon className="h-3 w-3" />
-            {node.users_online ?? 0}
-          </span>
-          <span className="shrink-0 text-base leading-none">
-            {getCountryFlag(node.country_code)}
-          </span>
-          <h3 className="truncate font-semibold text-dark-100">{node.name}</h3>
-          {(providerLabel || providerFavicon) && (
-            <span className="flex min-w-0 max-w-[7rem] shrink items-center gap-1 rounded-md bg-accent-500/15 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-accent-300">
-              {providerFavicon && (
-                <img
-                  src={providerFavicon}
-                  alt=""
-                  className="h-3 w-3 shrink-0 rounded-[2px]"
-                  onError={(e) => {
-                    e.currentTarget.style.display = 'none';
-                  }}
-                />
-              )}
-              {providerLabel && <span className="truncate">{providerLabel}</span>}
-            </span>
-          )}
-        </div>
-
-        <div className="flex shrink-0 items-center gap-1.5">
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onAction(node.uuid, 'restart');
-            }}
-            disabled={isLoading || node.is_disabled}
-            className="rounded-lg bg-dark-700 p-1.5 text-dark-300 transition-colors hover:bg-dark-600 hover:text-dark-100 disabled:cursor-not-allowed disabled:opacity-50"
-            title={t('admin.remnawave.nodes.restart', 'Restart')}
-          >
-            <ArrowPathIcon className="h-3.5 w-3.5" />
-          </button>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onAction(node.uuid, node.is_disabled ? 'enable' : 'disable');
-            }}
-            disabled={isLoading}
-            className={`rounded-lg p-1.5 transition-colors disabled:opacity-50 ${
-              node.is_disabled
-                ? 'bg-success-500/20 text-success-400 hover:bg-success-500/30'
-                : 'bg-error-500/20 text-error-400 hover:bg-error-500/30'
-            }`}
-            title={
-              node.is_disabled
-                ? t('admin.remnawave.nodes.enable', 'Enable')
-                : t('admin.remnawave.nodes.disable', 'Disable')
-            }
-          >
-            {node.is_disabled ? (
-              <PlayIcon className="h-3.5 w-3.5" />
-            ) : (
-              <StopIcon className="h-3.5 w-3.5" />
-            )}
-          </button>
-          {hasBreakdown && (
-            <ChevronRightIcon
-              className={`h-4 w-4 text-dark-500 transition-transform ${
-                expanded ? 'rotate-90' : ''
-              }`}
+    <>
+      <div
+        className={`rounded-xl border border-dark-700 bg-dark-800/50 p-3.5 transition-colors hover:border-dark-600 ${
+          hasBreakdown ? 'cursor-pointer' : ''
+        }`}
+        onClick={hasBreakdown ? () => setExpanded((v) => !v) : undefined}
+      >
+        {/* Identity + actions. На телефоне кнопки уходят второй строкой: в одной
+            строке с ними имя ноды сжималось до одной-двух букв. */}
+        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+          <div className="flex min-w-0 flex-1 basis-48 items-center gap-2">
+            <span
+              className={`h-2 w-2 shrink-0 rounded-full ${dotColor} ${isUp ? 'animate-pulse' : ''}`}
+              title={statusText}
             />
-          )}
-        </div>
-      </div>
+            <span className="flex shrink-0 items-center gap-1 rounded-md bg-dark-700/60 px-1.5 py-0.5 text-[11px] text-dark-300">
+              <UsersIcon className="h-3 w-3" />
+              {node.users_online ?? 0}
+            </span>
+            <span className="shrink-0 text-base leading-none">
+              {getCountryFlag(node.country_code)}
+            </span>
+            <h3 className="min-w-0 truncate font-semibold text-dark-100">{node.name}</h3>
+            {(providerLabel || providerFavicon) && (
+              <span className="flex min-w-0 max-w-[7rem] shrink items-center gap-1 rounded-md bg-accent-500/15 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-accent-300">
+                {providerFavicon && (
+                  <img
+                    src={providerFavicon}
+                    alt=""
+                    className="h-3 w-3 shrink-0 rounded-[2px]"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                )}
+                {providerLabel && <span className="truncate">{providerLabel}</span>}
+              </span>
+            )}
+          </div>
 
-      {/* Address + traffic + uptime */}
-      <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-dark-400">
-        <span className="flex min-w-0 max-w-full items-center gap-1 font-mono text-dark-500">
-          <GlobeIcon className="h-3 w-3 shrink-0" />
-          <span className="truncate">{node.address}</span>
-        </span>
-        <span className="flex items-center gap-1.5">
-          <span className="text-dark-300">{formatBytes(used)}</span>
-          {trafficPct !== null && (
-            <span className="h-1 w-16 overflow-hidden rounded-full bg-dark-700">
-              <span
-                className="block h-full rounded-full bg-accent-500"
-                style={{ width: `${trafficPct}%` }}
+          <div className="ml-auto flex shrink-0 items-center gap-1.5">
+            {canReach && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate(buildReachabilityLink({ targets: [{ kind: 'node', ref: node.uuid }] }));
+                }}
+                className="rounded-lg bg-dark-700 p-1.5 text-dark-300 transition-colors hover:bg-dark-600 hover:text-dark-100"
+                title={t('admin.reachability.shortcuts.checkNode')}
+                aria-label={t('admin.reachability.shortcuts.checkNode')}
+              >
+                <RadarIcon className="h-3.5 w-3.5" />
+              </button>
+            )}
+            {canGeoCheck && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setGeoCheckOpen(true);
+                }}
+                disabled={node.is_disabled || !node.is_connected}
+                className="rounded-lg bg-dark-700 p-1.5 text-dark-300 transition-colors hover:bg-dark-600 hover:text-dark-100 disabled:cursor-not-allowed disabled:opacity-50"
+                title={t('admin.remnawave.geoCheck.title', 'GeoCheck')}
+                aria-label={t('admin.remnawave.geoCheck.title', 'GeoCheck')}
+              >
+                <GeoCheckIcon className="h-3.5 w-3.5" />
+              </button>
+            )}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onAction(node.uuid, 'restart');
+              }}
+              disabled={isLoading || node.is_disabled}
+              className="rounded-lg bg-dark-700 p-1.5 text-dark-300 transition-colors hover:bg-dark-600 hover:text-dark-100 disabled:cursor-not-allowed disabled:opacity-50"
+              title={t('admin.remnawave.nodes.restart', 'Restart')}
+            >
+              <ArrowPathIcon className="h-3.5 w-3.5" />
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onAction(node.uuid, node.is_disabled ? 'enable' : 'disable');
+              }}
+              disabled={isLoading}
+              className={`rounded-lg p-1.5 transition-colors disabled:opacity-50 ${
+                node.is_disabled
+                  ? 'bg-success-500/20 text-success-400 hover:bg-success-500/30'
+                  : 'bg-error-500/20 text-error-400 hover:bg-error-500/30'
+              }`}
+              title={
+                node.is_disabled
+                  ? t('admin.remnawave.nodes.enable', 'Enable')
+                  : t('admin.remnawave.nodes.disable', 'Disable')
+              }
+            >
+              {node.is_disabled ? (
+                <PlayIcon className="h-3.5 w-3.5" />
+              ) : (
+                <StopIcon className="h-3.5 w-3.5" />
+              )}
+            </button>
+            {hasBreakdown && (
+              <ChevronRightIcon
+                className={`h-4 w-4 text-dark-500 transition-transform ${
+                  expanded ? 'rotate-90' : ''
+                }`}
               />
+            )}
+          </div>
+        </div>
+
+        {/* Address + traffic + uptime */}
+        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-dark-400">
+          <span className="flex min-w-0 max-w-full items-center gap-1 font-mono text-dark-500">
+            <GlobeIcon className="h-3 w-3 shrink-0" />
+            <span className="truncate">{node.address}</span>
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="text-dark-300">{formatBytes(used)}</span>
+            {trafficPct !== null && (
+              <span className="h-1 w-16 overflow-hidden rounded-full bg-dark-700">
+                <span
+                  className="block h-full rounded-full bg-accent-500"
+                  style={{ width: `${trafficPct}%` }}
+                />
+              </span>
+            )}
+            <span className="text-dark-500">/ {limit > 0 ? formatBytes(limit) : '∞'}</span>
+          </span>
+          {node.xray_uptime > 0 && (
+            <span className="flex items-center gap-1 text-dark-500">
+              <StatUptimeIcon className="h-3 w-3" />
+              {formatUptime(node.xray_uptime)}
             </span>
           )}
-          <span className="text-dark-500">/ {limit > 0 ? formatBytes(limit) : '∞'}</span>
-        </span>
-        {node.xray_uptime > 0 && (
-          <span className="flex items-center gap-1 text-dark-500">
-            <StatUptimeIcon className="h-3 w-3" />
-            {formatUptime(node.xray_uptime)}
-          </span>
+        </div>
+
+        {/* Live metrics — mobile: 3 fixed rows so wrapping speeds don't reflow;
+          desktop (sm+): the original single wrap row, wide enough not to jump. */}
+        {(ramPct !== null || loadAvg || rx > 0 || tx > 0 || node.versions) && (
+          <>
+            {/* Mobile: processor · traffic · versions */}
+            <div className="mt-2 space-y-1 border-t border-dark-700/60 pt-2 font-mono text-[10.5px] tabular-nums text-dark-500 sm:hidden">
+              {(loadAvg || ramPct !== null) && (
+                <div className="flex items-center gap-3">
+                  {loadAvg && (
+                    <span className="flex items-center gap-1" title="load average 1 / 5 / 15 min">
+                      <CpuIcon className="h-3 w-3 shrink-0 text-dark-500" />
+                      {loadAvg}
+                    </span>
+                  )}
+                  {ramPct !== null && (
+                    <span className="flex items-center gap-1.5" title="RAM">
+                      <MemoryIcon className="h-3 w-3 shrink-0 text-dark-500" />
+                      <span className={ramColorClass}>{ramPct}%</span>
+                      <span className="h-1 w-10 overflow-hidden rounded-full bg-dark-700">
+                        <span
+                          className="block h-full rounded-full bg-dark-400"
+                          style={{ width: `${ramPct}%` }}
+                        />
+                      </span>
+                    </span>
+                  )}
+                </div>
+              )}
+              {(rx > 0 || tx > 0) && (
+                <div className="flex items-center gap-4">
+                  <span className="flex items-center gap-1">
+                    <DownloadIcon className="h-3 w-3 shrink-0 text-success-400" />
+                    {formatSpeed(rx)}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <UploadIcon className="h-3 w-3 shrink-0 text-accent-400" />
+                    {formatSpeed(tx)}
+                  </span>
+                </div>
+              )}
+              {(node.versions?.node || node.versions?.xray) && (
+                <div className="flex items-center gap-3 text-dark-600">
+                  {node.versions?.node && (
+                    <span className="flex items-center gap-1" title="remnanode">
+                      <RemnawaveIcon className="h-3 w-3 shrink-0" />
+                      {node.versions.node}
+                    </span>
+                  )}
+                  {node.versions?.xray && (
+                    <span className="flex items-center gap-1" title="xray core">
+                      <XrayIcon className="h-3 w-3 shrink-0" />
+                      {node.versions.xray}
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Desktop: single wrap row (original) */}
+            <div className="mt-2 hidden flex-wrap items-center gap-x-3 gap-y-1 border-t border-dark-700/60 pt-2 font-mono text-[10.5px] tabular-nums text-dark-500 sm:flex">
+              {ramPct !== null && (
+                <span className="flex items-center gap-1.5" title="RAM">
+                  <MemoryIcon className="h-3 w-3 text-dark-500" />
+                  <span className={ramColorClass}>{ramPct}%</span>
+                  <span className="h-1 w-10 overflow-hidden rounded-full bg-dark-700">
+                    <span
+                      className="block h-full rounded-full bg-dark-400"
+                      style={{ width: `${ramPct}%` }}
+                    />
+                  </span>
+                </span>
+              )}
+              {loadAvg && (
+                <span className="flex items-center gap-1" title="load average 1 / 5 / 15 min">
+                  <CpuIcon className="h-3 w-3 text-dark-500" />
+                  {loadAvg}
+                </span>
+              )}
+              <span className="flex items-center gap-2">
+                <span className="flex items-center gap-0.5">
+                  <DownloadIcon className="h-3 w-3 text-success-400" />
+                  {formatSpeed(rx)}
+                </span>
+                <span className="flex items-center gap-0.5">
+                  <UploadIcon className="h-3 w-3 text-accent-400" />
+                  {formatSpeed(tx)}
+                </span>
+              </span>
+              {(node.versions?.node || node.versions?.xray) && (
+                <span className="ml-auto flex items-center gap-2.5 text-dark-600">
+                  {node.versions?.node && (
+                    <span className="flex items-center gap-1" title="remnanode">
+                      <RemnawaveIcon className="h-3 w-3" />
+                      {node.versions.node}
+                    </span>
+                  )}
+                  {node.versions?.xray && (
+                    <span className="flex items-center gap-1" title="xray core">
+                      <XrayIcon className="h-3 w-3" />
+                      {node.versions.xray}
+                    </span>
+                  )}
+                </span>
+              )}
+            </div>
+          </>
+        )}
+
+        {/* Per-node traffic accordion (merged from the former Traffic tab) */}
+        {expanded && hasBreakdown && (
+          <div
+            className="mt-3 space-y-3 border-t border-dark-700/60 pt-3"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {inbounds.length > 0 && (
+              <NodeTrafficBreakdown
+                title={t('admin.remnawave.traffic.inbounds', 'Inbounds')}
+                items={inbounds}
+              />
+            )}
+            {outbounds.length > 0 && (
+              <NodeTrafficBreakdown
+                title={t('admin.remnawave.traffic.outbounds', 'Outbounds')}
+                items={outbounds}
+              />
+            )}
+          </div>
         )}
       </div>
 
-      {/* Live metrics — mobile: 3 fixed rows so wrapping speeds don't reflow;
-          desktop (sm+): the original single wrap row, wide enough not to jump. */}
-      {(ramPct !== null || loadAvg || rx > 0 || tx > 0 || node.versions) && (
-        <>
-          {/* Mobile: processor · traffic · versions */}
-          <div className="mt-2 space-y-1 border-t border-dark-700/60 pt-2 font-mono text-[10.5px] tabular-nums text-dark-500 sm:hidden">
-            {(loadAvg || ramPct !== null) && (
-              <div className="flex items-center gap-3">
-                {loadAvg && (
-                  <span className="flex items-center gap-1" title="load average 1 / 5 / 15 min">
-                    <CpuIcon className="h-3 w-3 shrink-0 text-dark-500" />
-                    {loadAvg}
-                  </span>
-                )}
-                {ramPct !== null && (
-                  <span className="flex items-center gap-1.5" title="RAM">
-                    <MemoryIcon className="h-3 w-3 shrink-0 text-dark-500" />
-                    <span className={ramColorClass}>{ramPct}%</span>
-                    <span className="h-1 w-10 overflow-hidden rounded-full bg-dark-700">
-                      <span
-                        className="block h-full rounded-full bg-dark-400"
-                        style={{ width: `${ramPct}%` }}
-                      />
-                    </span>
-                  </span>
-                )}
-              </div>
-            )}
-            {(rx > 0 || tx > 0) && (
-              <div className="flex items-center gap-4">
-                <span className="flex items-center gap-1">
-                  <DownloadIcon className="h-3 w-3 shrink-0 text-success-400/70" />
-                  {formatSpeed(rx)}
-                </span>
-                <span className="flex items-center gap-1">
-                  <UploadIcon className="h-3 w-3 shrink-0 text-accent-400/70" />
-                  {formatSpeed(tx)}
-                </span>
-              </div>
-            )}
-            {(node.versions?.node || node.versions?.xray) && (
-              <div className="flex items-center gap-3 text-dark-600">
-                {node.versions?.node && (
-                  <span className="flex items-center gap-1" title="remnanode">
-                    <RemnawaveIcon className="h-3 w-3 shrink-0" />
-                    {node.versions.node}
-                  </span>
-                )}
-                {node.versions?.xray && (
-                  <span className="flex items-center gap-1" title="xray core">
-                    <XrayIcon className="h-3 w-3 shrink-0" />
-                    {node.versions.xray}
-                  </span>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Desktop: single wrap row (original) */}
-          <div className="mt-2 hidden flex-wrap items-center gap-x-3 gap-y-1 border-t border-dark-700/60 pt-2 font-mono text-[10.5px] tabular-nums text-dark-500 sm:flex">
-            {ramPct !== null && (
-              <span className="flex items-center gap-1.5" title="RAM">
-                <MemoryIcon className="h-3 w-3 text-dark-500" />
-                <span className={ramColorClass}>{ramPct}%</span>
-                <span className="h-1 w-10 overflow-hidden rounded-full bg-dark-700">
-                  <span
-                    className="block h-full rounded-full bg-dark-400"
-                    style={{ width: `${ramPct}%` }}
-                  />
-                </span>
-              </span>
-            )}
-            {loadAvg && (
-              <span className="flex items-center gap-1" title="load average 1 / 5 / 15 min">
-                <CpuIcon className="h-3 w-3 text-dark-500" />
-                {loadAvg}
-              </span>
-            )}
-            <span className="flex items-center gap-2">
-              <span className="flex items-center gap-0.5">
-                <DownloadIcon className="h-3 w-3 text-success-400/70" />
-                {formatSpeed(rx)}
-              </span>
-              <span className="flex items-center gap-0.5">
-                <UploadIcon className="h-3 w-3 text-accent-400/70" />
-                {formatSpeed(tx)}
-              </span>
-            </span>
-            {(node.versions?.node || node.versions?.xray) && (
-              <span className="ml-auto flex items-center gap-2.5 text-dark-600">
-                {node.versions?.node && (
-                  <span className="flex items-center gap-1" title="remnanode">
-                    <RemnawaveIcon className="h-3 w-3" />
-                    {node.versions.node}
-                  </span>
-                )}
-                {node.versions?.xray && (
-                  <span className="flex items-center gap-1" title="xray core">
-                    <XrayIcon className="h-3 w-3" />
-                    {node.versions.xray}
-                  </span>
-                )}
-              </span>
-            )}
-          </div>
-        </>
-      )}
-
-      {/* Per-node traffic accordion (merged from the former Traffic tab) */}
-      {expanded && hasBreakdown && (
-        <div
-          className="mt-3 space-y-3 border-t border-dark-700/60 pt-3"
-          onClick={(e) => e.stopPropagation()}
-        >
-          {inbounds.length > 0 && (
-            <NodeTrafficBreakdown
-              title={t('admin.remnawave.traffic.inbounds', 'Inbounds')}
-              items={inbounds}
-            />
-          )}
-          {outbounds.length > 0 && (
-            <NodeTrafficBreakdown
-              title={t('admin.remnawave.traffic.outbounds', 'Outbounds')}
-              items={outbounds}
-            />
-          )}
-        </div>
-      )}
-    </div>
+      {geoCheckOpen && <GeoCheckModal node={node} onClose={() => setGeoCheckOpen(false)} />}
+    </>
   );
 }
 
@@ -450,19 +504,19 @@ function SquadCard({ squad, onClick }: SquadCardProps) {
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <span className="text-lg">{getCountryFlag(squad.country_code)}</span>
-            <h3 className="truncate font-medium text-dark-100">
-              <Twemoji options={{ className: 'twemoji', folder: 'svg', ext: '.svg' }}>
+            <h3 className="min-w-0 font-medium text-dark-100 [overflow-wrap:anywhere]">
+              <Twemoji tag="span" options={{ className: 'twemoji', folder: 'svg', ext: '.svg' }}>
                 {squad.display_name || squad.name}
               </Twemoji>
             </h3>
             {squad.is_synced ? (
-              <span className="rounded-full bg-success-500/20 px-2 py-0.5 text-xs text-success-400">
+              <span className="whitespace-nowrap rounded-full bg-success-500/20 px-2 py-0.5 text-xs text-success-400">
                 {t('admin.remnawave.squads.synced', 'Synced')}
               </span>
             ) : (
-              <span className="rounded-full bg-warning-500/20 px-2 py-0.5 text-xs text-warning-400">
+              <span className="whitespace-nowrap rounded-full bg-warning-500/20 px-2 py-0.5 text-xs text-warning-400">
                 {t('admin.remnawave.squads.notSynced', 'Not synced')}
               </span>
             )}
@@ -609,9 +663,15 @@ function OverviewTab({
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-      </div>
+      <SkeletonGroup className="space-y-6">
+        <Skeleton className="h-5 w-40" />
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <StatCard loading />
+          <StatCard loading />
+          <StatCard loading />
+          <StatCard loading />
+        </div>
+      </SkeletonGroup>
     );
   }
 
@@ -868,7 +928,7 @@ function OverviewTab({
             {topConsumers.users.map((u, i) => (
               <div
                 key={u.username}
-                className="flex items-center justify-between px-4 py-2.5 text-sm"
+                className="flex items-center justify-between gap-3 px-4 py-2.5 text-sm"
               >
                 <span className="flex min-w-0 items-center gap-2">
                   <span className="w-5 shrink-0 text-dark-500">{i + 1}</span>
@@ -983,9 +1043,19 @@ function NodesTab({
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-      </div>
+      <SkeletonGroup className="space-y-4">
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
+          <StatCard loading />
+          <StatCard loading />
+          <StatCard loading />
+          <StatCard loading />
+          <StatCard loading />
+        </div>
+        <div className="flex gap-2">
+          <Skeleton count={3} className="h-9 w-24 shrink-0 rounded-lg" />
+        </div>
+        <Skeleton variant="card" count={2} className="h-32" />
+      </SkeletonGroup>
     );
   }
 
@@ -1051,11 +1121,11 @@ function NodesTab({
             {t('admin.remnawave.traffic.realtimeTitle', 'Realtime traffic')}
           </span>
           <span className="flex items-center gap-1">
-            <DownloadIcon className="h-3 w-3 text-success-400/70" />
+            <DownloadIcon className="h-3 w-3 text-success-400" />
             {formatBytes(traffic.download)}
           </span>
           <span className="flex items-center gap-1">
-            <UploadIcon className="h-3 w-3 text-accent-400/70" />
+            <UploadIcon className="h-3 w-3 text-accent-400" />
             {formatBytes(traffic.upload)}
           </span>
           <span className="text-dark-300">
@@ -1116,9 +1186,15 @@ function SquadsTab({
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-      </div>
+      <SkeletonGroup className="space-y-4">
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <StatCard loading />
+          <StatCard loading />
+          <StatCard loading />
+          <StatCard loading />
+        </div>
+        <Skeleton variant="card" count={2} className="h-32" />
+      </SkeletonGroup>
     );
   }
 
@@ -1210,9 +1286,9 @@ function SyncTab({
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-      </div>
+      <SkeletonGroup className="space-y-6">
+        <Skeleton variant="card" count={2} className="h-40" />
+      </SkeletonGroup>
     );
   }
 
@@ -1534,13 +1610,13 @@ export default function AdminRemnawave() {
   return (
     <div className="animate-fade-in">
       {/* Header */}
-      <div className="mb-6 flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex min-w-0 flex-1 basis-48 items-center gap-3">
           {/* Show back button only on web, not in Telegram Mini App */}
           {!capabilities.hasBackButton && (
             <button
               onClick={() => navigate('/admin')}
-              className="flex h-10 w-10 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
             >
               <BackIcon className="text-dark-400" />
             </button>

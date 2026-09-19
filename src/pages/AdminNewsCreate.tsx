@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import { transliterate } from '../utils/transliterate';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import ImageExtension from '@tiptap/extension-image';
@@ -19,6 +20,7 @@ import { Toggle } from '../components/admin/Toggle';
 import { useHapticFeedback } from '../platform/hooks/useHaptic';
 import { cn } from '../lib/utils';
 import type { NewsCategory, NewsTag, NewsCreateRequest } from '../types/news';
+import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 import {
   BoldIcon,
   ItalicIcon,
@@ -82,47 +84,8 @@ function isSafeUrl(url: string | null | undefined): boolean {
 }
 
 // --- Slug utility ---
-const TRANSLIT_MAP: Record<string, string> = {
-  а: 'a',
-  б: 'b',
-  в: 'v',
-  г: 'g',
-  д: 'd',
-  е: 'e',
-  ё: 'yo',
-  ж: 'zh',
-  з: 'z',
-  и: 'i',
-  й: 'y',
-  к: 'k',
-  л: 'l',
-  м: 'm',
-  н: 'n',
-  о: 'o',
-  п: 'p',
-  р: 'r',
-  с: 's',
-  т: 't',
-  у: 'u',
-  ф: 'f',
-  х: 'kh',
-  ц: 'ts',
-  ч: 'ch',
-  ш: 'sh',
-  щ: 'shch',
-  ъ: '',
-  ы: 'y',
-  ь: '',
-  э: 'e',
-  ю: 'yu',
-  я: 'ya',
-};
-
 function generateSlug(title: string): string {
-  const lower = title.toLowerCase();
-  const transliterated = Array.from(lower)
-    .map((ch) => TRANSLIT_MAP[ch] ?? ch)
-    .join('');
+  const transliterated = transliterate(title);
   return transliterated
     .replace(/[^a-z0-9\s-]/g, '')
     .replace(/[\s_]+/g, '-')
@@ -537,19 +500,19 @@ export default function AdminNewsCreate() {
 
   if (isEdit && isLoadingArticle) {
     return (
-      <div className="space-y-6">
-        <div className="skeleton h-8 w-48 rounded-lg" />
-        <div className="skeleton h-12 w-full rounded-xl" />
-        <div className="skeleton h-64 w-full rounded-xl" />
-      </div>
+      <SkeletonGroup className="space-y-6">
+        <Skeleton className="h-8 w-48 rounded-lg" />
+        <Skeleton className="h-12 w-full rounded-xl" />
+        <Skeleton className="h-64 w-full rounded-xl" />
+      </SkeletonGroup>
     );
   }
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex min-w-0 flex-1 basis-48 items-center gap-3">
           <AdminBackButton to="/admin/news" />
           <h1 className="text-xl font-bold text-dark-100">
             {isEdit ? t('news.admin.edit') : t('news.admin.create')}
@@ -668,7 +631,7 @@ export default function AdminNewsCreate() {
               type="text"
               value={featuredImageUrl}
               onChange={(e) => setFeaturedImageUrl(e.target.value)}
-              className="input flex-1"
+              className="input min-w-0 flex-1"
               placeholder="https://..."
             />
             <button

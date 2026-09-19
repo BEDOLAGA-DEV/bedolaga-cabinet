@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { serversApi, ServerListItem } from '../api/servers';
+import { serversApi, type ServerListItem } from '../api/servers';
 import {
   SyncIcon,
   EditIcon,
@@ -16,6 +16,7 @@ import Twemoji from 'react-twemoji';
 
 // Country flags (simple emoji mapping)
 import { getFlagEmoji as getCountryFlag } from '../utils/subscriptionHelpers';
+import { Skeleton, SkeletonGroup } from '../components/ui/skeleton';
 
 export default function AdminServers() {
   const { t } = useTranslation();
@@ -63,7 +64,7 @@ export default function AdminServers() {
           {!capabilities.hasBackButton && (
             <button
               onClick={() => navigate('/admin')}
-              className="flex h-10 w-10 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
             >
               <BackIcon />
             </button>
@@ -85,9 +86,9 @@ export default function AdminServers() {
 
       {/* Servers List */}
       {isLoading ? (
-        <div className="flex items-center justify-center py-12">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-        </div>
+        <SkeletonGroup className="space-y-3">
+          <Skeleton variant="card" count={3} className="h-16" />
+        </SkeletonGroup>
       ) : servers.length === 0 ? (
         <div className="py-12 text-center">
           <p className="text-dark-400">{t('admin.servers.noServers')}</p>
@@ -107,12 +108,15 @@ export default function AdminServers() {
                 server.is_available ? 'border-dark-700' : 'border-dark-700/50 opacity-60'
               }`}
             >
-              <div className="flex items-start justify-between gap-4">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
                 <div className="min-w-0 flex-1">
-                  <div className="mb-1 flex items-center gap-2">
+                  <div className="mb-1 flex flex-wrap items-center gap-2">
                     <span className="text-lg">{getCountryFlag(server.country_code)}</span>
-                    <h3 className="truncate font-medium text-dark-100">
-                      <Twemoji options={{ className: 'twemoji', folder: 'svg', ext: '.svg' }}>
+                    <h3 className="min-w-0 font-medium text-dark-100 [overflow-wrap:anywhere]">
+                      <Twemoji
+                        tag="span"
+                        options={{ className: 'twemoji', folder: 'svg', ext: '.svg' }}
+                      >
                         {server.display_name}
                       </Twemoji>
                     </h3>
@@ -138,18 +142,21 @@ export default function AdminServers() {
                       {server.current_users}
                       {server.max_users ? ` / ${server.max_users}` : ''}
                     </span>
-                    <span>{server.price_rubles} ₽</span>
+                    <span>
+                      {server.price_rubles}
+                      {'\u00A0'}₽
+                    </span>
                     <span className="max-w-[200px] truncate font-mono text-xs text-dark-500">
                       {server.squad_uuid}
                     </span>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 border-t border-dark-700 pt-3 sm:border-0 sm:pt-0">
                   {/* Toggle Available */}
                   <button
                     onClick={() => toggleMutation.mutate(server.id)}
-                    className={`rounded-lg p-2 transition-colors ${
+                    className={`flex flex-1 justify-center rounded-lg p-2 transition-colors sm:flex-none ${
                       server.is_available
                         ? 'bg-error-500/20 text-error-400 hover:bg-error-500/30'
                         : 'bg-success-500/20 text-success-400 hover:bg-success-500/30'
@@ -164,7 +171,7 @@ export default function AdminServers() {
                   {/* Toggle Trial */}
                   <button
                     onClick={() => toggleTrialMutation.mutate(server.id)}
-                    className={`rounded-lg p-2 transition-colors ${
+                    className={`flex flex-1 justify-center rounded-lg p-2 transition-colors sm:flex-none ${
                       server.is_trial_eligible
                         ? 'bg-warning-500/20 text-warning-400 hover:bg-warning-500/30'
                         : 'bg-dark-700 text-dark-400 hover:bg-dark-600'
@@ -177,7 +184,7 @@ export default function AdminServers() {
                   {/* Edit */}
                   <button
                     onClick={() => navigate(`/admin/servers/${server.id}/edit`)}
-                    className="rounded-lg bg-dark-700 p-2 text-dark-300 transition-colors hover:bg-dark-600 hover:text-dark-100"
+                    className="flex flex-1 justify-center rounded-lg bg-dark-700 p-2 text-dark-300 transition-colors hover:bg-dark-600 hover:text-dark-100 sm:flex-none"
                     title={t('admin.servers.edit')}
                   >
                     <EditIcon />

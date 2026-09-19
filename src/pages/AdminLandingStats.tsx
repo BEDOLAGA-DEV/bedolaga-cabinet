@@ -17,6 +17,7 @@ import { BreakdownList } from '../components/sales-stats/BreakdownList';
 import { DonutChart } from '../components/sales-stats/DonutChart';
 import { SimpleAreaChart } from '../components/sales-stats/SimpleAreaChart';
 import { MultiSeriesAreaChart } from '../components/sales-stats/MultiSeriesAreaChart';
+import { PageSkeleton, Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 import {
   ChartIcon,
   EmailIcon,
@@ -61,7 +62,7 @@ const PURCHASES_PAGE_SIZE = 20;
 // Contact display helper
 function ContactDisplay({ type, value }: { type: 'email' | 'telegram'; value: string }) {
   return (
-    <span className="flex items-center gap-1 text-dark-300">
+    <span className="flex min-w-0 items-center gap-1 text-dark-300">
       {type === 'email' ? (
         <EmailIcon className="h-3.5 w-3.5" />
       ) : (
@@ -119,7 +120,7 @@ function PurchaseCard({ item, formatPrice, lang, t }: PurchaseCardProps) {
           <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-3">
             <ContactDisplay type={item.contact_type} value={item.contact_value} />
             {item.is_gift && item.gift_recipient_type && item.gift_recipient_value && (
-              <span className="flex items-center gap-1">
+              <span className="flex min-w-0 items-center gap-1">
                 <ArrowRightIcon className="h-3 w-3" />
                 <ContactDisplay type={item.gift_recipient_type} value={item.gift_recipient_value} />
               </span>
@@ -290,9 +291,15 @@ export default function AdminLandingStats() {
   // Loading state
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-      </div>
+      <PageSkeleton variant="admin" leading={2} titleWidth="w-56" className="space-y-6">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <StatCard loading />
+          <StatCard loading />
+          <StatCard loading />
+          <StatCard loading />
+        </div>
+        <Skeleton variant="card" className="h-64" />
+      </PageSkeleton>
     );
   }
 
@@ -551,9 +558,9 @@ export default function AdminLandingStats() {
 
           {/* Content */}
           {purchasesLoading ? (
-            <div className="flex items-center justify-center py-8">
-              <div className="h-6 w-6 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-            </div>
+            <SkeletonGroup className="space-y-3">
+              <Skeleton variant="card" count={3} className="h-16" />
+            </SkeletonGroup>
           ) : purchaseItems.length === 0 ? (
             <div className="py-8 text-center text-sm text-dark-500">
               {t('admin.landings.purchases.noPurchases')}

@@ -6,6 +6,7 @@ import { getErrorMessage, getFlagEmoji } from '../../../utils/subscriptionHelper
 import InsufficientBalancePrompt from '../../InsufficientBalancePrompt';
 import { ChevronRightIcon } from '../../icons';
 import type { PurchaseOptions, Subscription } from '../../../types';
+import { Skeleton, SkeletonGroup } from '../../ui/skeleton';
 
 // ──────────────────────────────────────────────────────────────────
 // Manage-servers sheet (classic-mode only — caller decides whether to
@@ -44,7 +45,7 @@ export function ServerManagementSheet({
 
   const formatPrice = (kopeks: number) => {
     const rubles = kopeks / 100;
-    return rubles % 1 === 0 ? `${rubles} ₽` : `${rubles.toFixed(2)} ₽`;
+    return rubles % 1 === 0 ? `${rubles}\u00A0₽` : `${rubles.toFixed(2)}\u00A0₽`;
   };
 
   const { data: countriesData, isLoading: countriesLoading } = useQuery({
@@ -116,9 +117,9 @@ export function ServerManagementSheet({
       </div>
 
       {countriesLoading ? (
-        <div className="flex items-center justify-center py-8">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-        </div>
+        <SkeletonGroup className="space-y-3">
+          <Skeleton variant="card" count={3} className="h-16" />
+        </SkeletonGroup>
       ) : countriesData && countriesData.countries.length > 0 ? (
         <div className="space-y-4">
           <div
@@ -156,7 +157,7 @@ export function ServerManagementSheet({
                       }
                     }}
                     disabled={!country.is_available && !isCurrentlyConnected}
-                    className={`flex w-full items-center justify-between rounded-xl border p-3 text-left transition-all ${
+                    className={`flex w-full items-center justify-between gap-3 rounded-xl border p-3 text-left transition-all ${
                       isSelected
                         ? willBeAdded
                           ? 'border-success-500 bg-success-500/10'

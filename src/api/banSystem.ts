@@ -207,10 +207,6 @@ export interface BanSettingsResponse {
   settings: BanSettingDefinition[];
 }
 
-export interface BanWhitelistRequest {
-  username: string;
-}
-
 // === Report Types ===
 
 export interface BanReportTopViolator {
@@ -284,11 +280,7 @@ export const banSystemApi = {
 
   // Users
   getUsers: async (
-    params: {
-      offset?: number;
-      limit?: number;
-      status?: string;
-    } = {},
+    params: { offset?: number; limit?: number; status?: string } = {},
   ): Promise<BanUsersListResponse> => {
     const response = await apiClient.get('/cabinet/admin/ban-system/users', { params });
     return response.data;
@@ -349,11 +341,7 @@ export const banSystemApi = {
 
   // Agents
   getAgents: async (
-    params: {
-      search?: string;
-      health?: string;
-      status?: string;
-    } = {},
+    params: { search?: string; health?: string; status?: string } = {},
   ): Promise<BanAgentsListResponse> => {
     const response = await apiClient.get('/cabinet/admin/ban-system/agents', { params });
     return response.data;

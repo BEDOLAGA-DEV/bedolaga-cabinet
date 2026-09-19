@@ -367,6 +367,68 @@ export default function PaymentMethodIcon({
       );
     }
 
+    case 'cispay': {
+      const cispayGradId = `${uid}-cispay`;
+      return (
+        <svg className={className} viewBox="0 0 40 40">
+          <defs>
+            <linearGradient id={cispayGradId} x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="#0d9488" />
+              <stop offset="100%" stopColor="#2563eb" />
+            </linearGradient>
+          </defs>
+          <circle cx="20" cy="20" r="20" fill={`url(#${cispayGradId})`} />
+          <rect x="6.5" y="14" width="17" height="12.5" rx="2.5" fill="#fff" opacity="0.95" />
+          <rect x="6.5" y="17" width="17" height="2.3" fill="#0d9488" opacity="0.85" />
+          <rect x="9.5" y="21.5" width="5" height="3" rx="0.8" fill="#2563eb" opacity="0.5" />
+          <g fill="none" stroke="#fff" strokeWidth="1.7" strokeLinecap="round">
+            <path d="M26 15a7 7 0 0 1 0 10" />
+            <path d="M26 17.6a3.8 3.8 0 0 1 0 4.8" />
+          </g>
+        </svg>
+      );
+    }
+
+    case 'tabpay': {
+      const tabpayGradId = `${uid}-tabpay`;
+      return (
+        <svg className={className} viewBox="0 0 40 40">
+          <defs>
+            <linearGradient id={tabpayGradId} x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="#0891b2" />
+              <stop offset="100%" stopColor="#4338ca" />
+            </linearGradient>
+          </defs>
+          <circle cx="20" cy="20" r="20" fill={`url(#${tabpayGradId})`} />
+          <g fill="#fff" fontFamily="Arial,sans-serif" fontWeight="700">
+            <text x="20" y="26" textAnchor="middle" fontSize="14">
+              TP
+            </text>
+          </g>
+        </svg>
+      );
+    }
+
+    case 'paritypay': {
+      const paritypayGradId = `${uid}-paritypay`;
+      return (
+        <svg className={className} viewBox="0 0 40 40">
+          <defs>
+            <linearGradient id={paritypayGradId} x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="#7c3aed" />
+              <stop offset="100%" stopColor="#a21caf" />
+            </linearGradient>
+          </defs>
+          <circle cx="20" cy="20" r="20" fill={`url(#${paritypayGradId})`} />
+          <g fill="#fff" fontFamily="Arial,sans-serif" fontWeight="700">
+            <text x="20" y="26" textAnchor="middle" fontSize="14">
+              PP
+            </text>
+          </g>
+        </svg>
+      );
+    }
+
     case 'donut': {
       const donutBgGradId = `${uid}-donut-bg`;
       const donutGlazeGradId = `${uid}-donut-glaze`;

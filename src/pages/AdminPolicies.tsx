@@ -2,11 +2,12 @@ import { useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { rbacApi, AccessPolicy, AdminRole } from '@/api/rbac';
+import { rbacApi, type AccessPolicy, type AdminRole } from '@/api/rbac';
 import { PermissionGate } from '@/components/auth/PermissionGate';
 import { usePlatform } from '@/platform/hooks/usePlatform';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
 import { StatCard } from '@/components/stats';
+import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 import {
   BackIcon,
   BoltIcon,
@@ -215,7 +216,7 @@ export default function AdminPolicies() {
           {!capabilities.hasBackButton && (
             <button
               onClick={() => navigate('/admin')}
-              className="flex h-10 w-10 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
             >
               <BackIcon />
             </button>
@@ -275,9 +276,9 @@ export default function AdminPolicies() {
 
       {/* Policies List */}
       {policiesLoading ? (
-        <div className="flex items-center justify-center py-12">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-        </div>
+        <SkeletonGroup className="space-y-3">
+          <Skeleton variant="card" count={3} className="h-16" />
+        </SkeletonGroup>
       ) : policiesError ? (
         <div className="py-12 text-center">
           <p className="text-error-400">{t('admin.policies.errors.loadFailed')}</p>
@@ -315,13 +316,15 @@ export default function AdminPolicies() {
 
                     {/* Resource + actions */}
                     <div className="mb-2 flex flex-wrap items-center gap-2 text-sm">
-                      <span className="rounded bg-dark-700 px-2 py-0.5 text-xs text-accent-400">
-                        {t(
-                          `admin.roles.form.permissionSections.${policy.resource}`,
-                          policy.resource,
-                        )}
+                      <span className="whitespace-nowrap">
+                        <span className="rounded bg-dark-700 px-2 py-0.5 text-xs text-accent-400">
+                          {t(
+                            `admin.roles.form.permissionSections.${policy.resource}`,
+                            policy.resource,
+                          )}
+                        </span>
+                        <span className="text-dark-500">:</span>
                       </span>
-                      <span className="text-dark-500">:</span>
                       <span className="text-xs text-dark-300">
                         {(policy.actions ?? [])
                           .map((a) => t(`admin.roles.form.permissionActions.${a}`, a))
@@ -350,7 +353,7 @@ export default function AdminPolicies() {
                     <PermissionGate permission="roles:edit">
                       <button
                         onClick={() => navigate(`/admin/policies/${policy.id}/edit`)}
-                        className="flex-1 rounded-lg bg-dark-700 p-2 text-dark-300 transition-colors hover:bg-dark-600 hover:text-dark-100 sm:flex-none"
+                        className="flex flex-1 justify-center rounded-lg bg-dark-700 p-2 text-dark-300 transition-colors hover:bg-dark-600 hover:text-dark-100 sm:flex-none"
                         title={t('admin.policies.actions.edit')}
                       >
                         <EditIcon />
@@ -359,7 +362,7 @@ export default function AdminPolicies() {
                     <PermissionGate permission="roles:delete">
                       <button
                         onClick={() => setDeleteConfirm(policy.id)}
-                        className="flex-1 rounded-lg bg-dark-700 p-2 text-dark-300 transition-colors hover:bg-error-500/20 hover:text-error-400 sm:flex-none"
+                        className="flex flex-1 justify-center rounded-lg bg-dark-700 p-2 text-dark-300 transition-colors hover:bg-error-500/20 hover:text-error-400 sm:flex-none"
                         title={t('admin.policies.actions.delete')}
                       >
                         <TrashIcon className="h-4 w-4" />

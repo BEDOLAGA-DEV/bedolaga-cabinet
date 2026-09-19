@@ -8,15 +8,15 @@
    of the font stacks fixes every flag everywhere without touching any markup
    and without affecting any other text. Root fix, not a per-component wrap. */
 @font-face {
-  font-family: 'Twemoji Country Flags';
+  font-family: "Twemoji Country Flags";
   unicode-range: U+1F1E6-1F1FF, U+1F3F4, U+E0062-E007F;
-  src: url('/fonts/TwemojiCountryFlags.woff2') format('woff2');
+  src: url("/fonts/TwemojiCountryFlags.woff2") format("woff2");
   font-display: swap;
 }
 
 /* Animated gradient border — @property enables CSS-only angle animation */
 @property --border-angle {
-  syntax: '<angle>';
+  syntax: "<angle>";
   initial-value: 0deg;
   inherits: false;
 }
@@ -28,13 +28,13 @@
   background:
     linear-gradient(var(--_bg), var(--_bg)) padding-box,
     conic-gradient(
-        from var(--border-angle),
-        var(--_accent) 0%,
-        transparent 25%,
-        transparent 75%,
-        var(--_accent) 100%
-      )
-      border-box;
+      from var(--border-angle),
+      var(--_accent) 0%,
+      transparent 25%,
+      transparent 75%,
+      var(--_accent) 100%
+    )
+    border-box;
   animation: border-rotate var(--border-duration, 3s) linear infinite;
 }
 
@@ -100,8 +100,22 @@
 
 @layer base {
   :root {
-    --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+    /* Мобильная нижняя панель (MobileBottomNav): отступ от края и место, которое
+       она занимает. Всё, что прижато к низу на мобильном (тосты, бары действий,
+       низ контента), встаёт выше --mobile-nav-clearance — иначе панель это
+       перекрывает. Высота панели — константа дизайна (иконка + подпись). */
+    --mobile-nav-height: 76px;
+    --mobile-nav-offset: max(16px, env(safe-area-inset-bottom, 0px));
+    --mobile-nav-clearance: calc(var(--mobile-nav-height) + var(--mobile-nav-offset) + 12px);
+  }
 
+  /* Экраны без панели (вложенные страницы, админка): AppShell ставит
+     data-mobile-nav="off", и прижатым к низу элементам остаётся только отступ от края. */
+  [data-mobile-nav="off"] {
+    --mobile-nav-clearance: var(--mobile-nav-offset);
+  }
+
+  :root {
     /* Unified Card System */
     --bento-radius: 16px;
     --bento-radius-lg: 20px;
@@ -235,6 +249,17 @@
     scrollbar-color: rgb(var(--color-dark-700)) transparent;
   }
 
+  body {
+    /* 100vw включает ширину скроллбара, поэтому центрированный контент не
+       сдвигается, когда при навигации появляется/исчезает вертикальный
+       скроллбар; лишние ~6px справа уходят под скроллбар и срезаются
+       overflow-x: hidden на html. Вариант со scrollbar-gutter: stable не
+       подошёл: фоновый слой (fixed-портал) не красит зарезервированный жёлоб,
+       и справа остаётся пустая полоса. На мобильных overlay-скроллбары места
+       не занимают — правило ни на что не влияет. */
+    width: 100vw;
+  }
+
   /* Hide scrollbar on mobile (iOS/Android) */
   @media (max-width: 1023px) {
     html,
@@ -283,6 +308,16 @@
     }
   }
 
+  /* Схема цветов за классом темы (см. <meta name="color-scheme"> и <style> в
+     index.html): страница сама ведёт обе темы, Android WebView её не затемняет,
+     нативные контролы и скроллбары идут в цвет выбранной темы. */
+  .dark {
+    color-scheme: dark;
+  }
+  .light {
+    color-scheme: light;
+  }
+
   /* Dark theme (default) */
   body,
   .dark body {
@@ -291,11 +326,24 @@
     /* iOS smooth scrolling */
     -webkit-overflow-scrolling: touch;
     position: relative;
+    /* Почта, ник, номер платежа без пробелов длиннее строки — переносим, а не
+       выпускаем за край карточки (карточка его обрезает). break-word не
+       меняет раскладку: он срабатывает, только когда слово уже не влезло.
+       В гибких рядах этого мало — там у текста ещё нужен min-w-0 или
+       [overflow-wrap:anywhere] на месте. */
+    overflow-wrap: break-word;
+  }
+
+  /* Иконка в гибком ряду не сжимается: рядом с длинным текстом (почта в
+     способах входа, длинный вопрос справки) иконка 24px сплющивалась до 9px,
+     шеврон 20px — до 7px. Нужно сжимаемое — класс shrink на месте. */
+  svg {
+    flex-shrink: 0;
   }
 
   /* Global Noise Texture — no mix-blend-mode to avoid fullscreen GPU compositing */
   body::before {
-    content: '';
+    content: "";
     position: fixed;
     inset: 0;
     z-index: -1;
@@ -313,10 +361,13 @@
     }
   }
 
-  /* Main content — containment removed to avoid GPU layer conflicts
-     with isolation: isolate on content wrapper */
+  /* Main content: только style-containment. Layout/paint-containment (contain: content)
+     делало <main> containing block для position: fixed внутри него — нижние плашки
+     (LaunchBar, FleetActionBar, FloatingActionBar, панели подарка и TV) прилипали к концу
+     страницы вместо низа экрана. Слой от анимированного фона изолирует isolation: isolate
+     на обёртке контента. */
   main {
-    contain: content;
+    contain: style;
   }
 
   /* Light theme - Champagne */
@@ -345,17 +396,19 @@
 
     /* Статусные палитры генерируются под тёмную тему: текстовые оттенки
        300/400 (зелёные суммы, жёлтая «Админка», бейджи) на светлом фоне
-       дают контраст 1.3–1.6. В светлой теме подменяем их тёмными шейдами —
+       дают контраст 1.3–1.6. В светлой теме подменяем их тёмными шейдами (700
+       не хватало: ссылка «Управлять всеми» и бейдж «Активна» держались на
+       3.6–4.3, поэтому 800) —
        зеркально ремапу серых выше. Фоновые употребления (bg-*-500/15 и т.п.)
        используют 500+ и не затрагиваются. */
-    --color-accent-300: var(--color-accent-700) !important;
-    --color-accent-400: var(--color-accent-700) !important;
-    --color-success-300: var(--color-success-700) !important;
-    --color-success-400: var(--color-success-700) !important;
-    --color-warning-300: var(--color-warning-700) !important;
-    --color-warning-400: var(--color-warning-700) !important;
-    --color-error-300: var(--color-error-700) !important;
-    --color-error-400: var(--color-error-700) !important;
+    --color-accent-300: var(--color-accent-800) !important;
+    --color-accent-400: var(--color-accent-800) !important;
+    --color-success-300: var(--color-success-800) !important;
+    --color-success-400: var(--color-success-800) !important;
+    --color-warning-300: var(--color-warning-800) !important;
+    --color-warning-400: var(--color-warning-800) !important;
+    --color-error-300: var(--color-error-800) !important;
+    --color-error-400: var(--color-error-800) !important;
   }
 
   /* Custom scrollbar - Dark */
@@ -450,7 +503,7 @@ img.twemoji {
 
   /* CSS Spotlight Effect via pseudo-element */
   .bento-card-hover::after {
-    content: '';
+    content: "";
     position: absolute;
     inset: 0;
     background: radial-gradient(circle at top, rgba(255, 255, 255, 0.06), transparent 60%);
@@ -569,6 +622,19 @@ img.twemoji {
     @apply border border-dark-700/30 bg-dark-900/80;
   }
 
+  /* Ярлык «На экран Домой» (standalone): мобильная шапка продолжается под
+     статус-бар, и стекло на всю эту высоту читается как лишний светлый блок, а
+     полоса цвета страницы над стеклом — как жёсткая граница. Поэтому в этом
+     режиме шапка берёт тон десктопной (bg-dark-950/95, в светлой теме ремап
+     сам): статус-бар и шапка сливаются с фоном, границу даёт только нижняя
+     обводка. В браузере и в Mini App display-mode = browser, тут ничего не
+     меняется. */
+  @media (display-mode: standalone) {
+    .glass.app-mobile-header {
+      @apply border-x-0 border-t-0 bg-dark-950/95;
+    }
+  }
+
   /* Enable backdrop-blur only on desktop where it's performant */
   @media (min-width: 1024px) {
     .glass {
@@ -625,7 +691,7 @@ img.twemoji {
   /* Remove tap highlight and focus outline on mobile */
   button,
   a,
-  [role='button'] {
+  [role="button"] {
     -webkit-tap-highlight-color: transparent;
     outline: none;
   }
@@ -633,13 +699,13 @@ img.twemoji {
   /* Only show focus ring for keyboard navigation */
   button:focus-visible,
   a:focus-visible,
-  [role='button']:focus-visible {
+  [role="button"]:focus-visible {
     @apply ring-2 ring-accent-500/50 ring-offset-2 ring-offset-dark-900;
   }
 
   .light button:focus-visible,
   .light a:focus-visible,
-  .light [role='button']:focus-visible {
+  .light [role="button"]:focus-visible {
     @apply ring-offset-champagne-100;
   }
 
@@ -689,39 +755,6 @@ img.twemoji {
 
   .nav-item-active {
     @apply nav-item bg-accent-500/10 text-accent-400;
-  }
-
-  .bottom-nav {
-    @apply fixed z-50 bg-dark-900/95;
-    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
-    left: 16px;
-    right: 16px;
-    border-radius: var(--bento-radius);
-    padding: 8px 4px;
-    transform: translateZ(0);
-    box-shadow:
-      0 4px 30px rgba(0, 0, 0, 0.4),
-      0 0 0 1px rgba(255, 255, 255, 0.05) inset;
-  }
-
-  @media (min-width: 1024px) {
-    .bottom-nav {
-      @apply bg-dark-900/80 backdrop-blur-xl;
-    }
-  }
-
-  .bottom-nav-item {
-    @apply flex min-w-[56px] flex-1 shrink-0 flex-col items-center justify-center rounded-2xl px-3 py-2.5 text-dark-500 duration-200;
-    transition-property: color, background-color;
-  }
-
-  .bottom-nav-item:hover {
-    @apply text-dark-300;
-  }
-
-  .bottom-nav-item-active {
-    @apply flex min-w-[56px] flex-1 shrink-0 flex-col items-center justify-center rounded-2xl bg-accent-500/15 px-3 py-2.5 text-accent-400 duration-200;
-    transition-property: color, background-color;
   }
 
   /* Divider - Dark */
@@ -776,6 +809,16 @@ img.twemoji {
   @media (min-width: 1024px) {
     .light .glass {
       @apply bg-champagne-50/60 backdrop-blur-xl;
+    }
+  }
+
+  /* Ярлык «На экран Домой» в светлой теме — то же, что для тёмной выше: шапка
+     берёт тон страницы (dark-950 здесь ремапится в champagne-200) без верхней
+     и боковых обводок. Правило обязано стоять ПОСЛЕ `.light .glass`: у них
+     одинаковая специфичность, и иначе стекло светлой темы перебивало бы его. */
+  @media (display-mode: standalone) {
+    .light .glass.app-mobile-header {
+      @apply border-x-0 border-t-0 bg-dark-950/95;
     }
   }
 
@@ -856,54 +899,12 @@ img.twemoji {
     @apply bg-champagne-200/70 text-champagne-800;
   }
 
-  .light .bottom-nav {
-    @apply bg-white/95;
-    box-shadow:
-      0 4px 30px rgba(0, 0, 0, 0.1),
-      0 0 0 1px rgba(0, 0, 0, 0.05);
-  }
-
-  @media (min-width: 1024px) {
-    .light .bottom-nav {
-      @apply bg-white/80 backdrop-blur-xl;
-    }
-  }
-
-  .light .bottom-nav-item {
-    @apply text-champagne-500;
-  }
-
-  .light .bottom-nav-item:hover {
-    @apply text-champagne-700;
-  }
-
-  .light .bottom-nav-item-active {
-    @apply bg-champagne-300/40 text-champagne-800;
-  }
-
   /* Divider - Light */
   .light .divider {
     @apply border-t border-champagne-200;
   }
 
-  /* Safe area */
-  .safe-area-pb {
-    padding-bottom: calc(0.5rem + var(--safe-area-inset-bottom));
-  }
-
-  .pt-safe {
-    padding-top: env(safe-area-inset-top, 0px);
-  }
-
   /* Skeleton loader */
-  .skeleton {
-    @apply animate-pulse rounded-lg bg-dark-800;
-  }
-
-  .light .skeleton {
-    @apply bg-champagne-300;
-  }
-
   /* Link */
   .link {
     @apply text-accent-400 transition-colors duration-200 hover:text-accent-300;
@@ -1181,11 +1182,11 @@ img.twemoji {
 
   /* Glow effects */
   .glow-accent {
-    box-shadow: 0 0 20px theme('colors.accent.500 / 30%');
+    box-shadow: 0 0 20px theme("colors.accent.500 / 30%");
   }
 
   .glow-success {
-    box-shadow: 0 0 20px theme('colors.success.500 / 30%');
+    box-shadow: 0 0 20px theme("colors.success.500 / 30%");
   }
 
   /* Blur backdrop */
@@ -1229,9 +1230,9 @@ img.twemoji {
 .shimmer {
   background: linear-gradient(
     90deg,
-    theme('colors.dark.800') 0%,
-    theme('colors.dark.700') 50%,
-    theme('colors.dark.800') 100%
+    theme("colors.dark.800") 0%,
+    theme("colors.dark.700") 50%,
+    theme("colors.dark.800") 100%
   );
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
@@ -1240,9 +1241,9 @@ img.twemoji {
 .light .shimmer {
   background: linear-gradient(
     90deg,
-    theme('colors.champagne.200') 0%,
-    theme('colors.champagne.300') 50%,
-    theme('colors.champagne.200') 100%
+    theme("colors.champagne.200") 0%,
+    theme("colors.champagne.300") 50%,
+    theme("colors.champagne.200") 100%
   );
 }
 
@@ -1256,7 +1257,7 @@ img.twemoji {
 }
 
 /* Color picker range input styling */
-input[type='range'] {
+input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
   height: 12px;
@@ -1267,13 +1268,13 @@ input[type='range'] {
 
 /* Desktop: smaller track */
 @media (min-width: 640px) {
-  input[type='range'] {
+  input[type="range"] {
     height: 8px;
     border-radius: 4px;
   }
 }
 
-input[type='range']::-webkit-slider-thumb {
+input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
   width: 24px;
@@ -1290,26 +1291,26 @@ input[type='range']::-webkit-slider-thumb {
     box-shadow 0.15s ease;
 }
 
-input[type='range']::-webkit-slider-thumb:hover {
+input[type="range"]::-webkit-slider-thumb:hover {
   transform: scale(1.1);
   box-shadow:
     0 3px 8px rgba(0, 0, 0, 0.4),
     0 0 0 2px rgba(255, 255, 255, 0.2);
 }
 
-input[type='range']::-webkit-slider-thumb:active {
+input[type="range"]::-webkit-slider-thumb:active {
   transform: scale(0.95);
 }
 
 /* Desktop: smaller thumb */
 @media (min-width: 640px) {
-  input[type='range']::-webkit-slider-thumb {
+  input[type="range"]::-webkit-slider-thumb {
     width: 18px;
     height: 18px;
   }
 }
 
-input[type='range']::-moz-range-thumb {
+input[type="range"]::-moz-range-thumb {
   width: 24px;
   height: 24px;
   border-radius: 50%;
@@ -1324,7 +1325,7 @@ input[type='range']::-moz-range-thumb {
     box-shadow 0.15s ease;
 }
 
-input[type='range']::-moz-range-thumb:hover {
+input[type="range"]::-moz-range-thumb:hover {
   transform: scale(1.1);
   box-shadow:
     0 3px 8px rgba(0, 0, 0, 0.4),
@@ -1333,25 +1334,25 @@ input[type='range']::-moz-range-thumb:hover {
 
 /* Desktop: smaller thumb */
 @media (min-width: 640px) {
-  input[type='range']::-moz-range-thumb {
+  input[type="range"]::-moz-range-thumb {
     width: 18px;
     height: 18px;
   }
 }
 
 /* Hide number input spinners for cleaner look */
-input[type='number']::-webkit-inner-spin-button,
-input[type='number']::-webkit-outer-spin-button {
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
 
-input[type='number'] {
+input[type="number"] {
   -moz-appearance: textfield;
 }
 
 /* Custom checkbox styling - more visible */
-input[type='checkbox'] {
+input[type="checkbox"] {
   -webkit-appearance: none;
   appearance: none;
   width: 1.25rem;
@@ -1367,13 +1368,13 @@ input[type='checkbox'] {
   flex-shrink: 0;
 }
 
-input[type='checkbox']:checked {
+input[type="checkbox"]:checked {
   background-color: rgb(var(--color-accent-500));
   border-color: rgb(var(--color-accent-500));
 }
 
-input[type='checkbox']:checked::after {
-  content: '';
+input[type="checkbox"]:checked::after {
+  content: "";
   position: absolute;
   left: 50%;
   top: 45%;
@@ -1384,12 +1385,12 @@ input[type='checkbox']:checked::after {
   transform: translate(-50%, -50%) rotate(45deg);
 }
 
-input[type='checkbox']:focus {
+input[type="checkbox"]:focus {
   outline: none;
   box-shadow: 0 0 0 2px rgba(var(--color-accent-500), 0.3);
 }
 
-input[type='checkbox']:hover:not(:checked) {
+input[type="checkbox"]:hover:not(:checked) {
   border-color: rgb(var(--color-dark-500));
   background-color: rgb(var(--color-dark-600));
 }
@@ -1477,17 +1478,17 @@ input[type='checkbox']:hover:not(:checked) {
   background-color: rgb(var(--color-dark-700));
 }
 
-.light input[type='checkbox'] {
+.light input[type="checkbox"] {
   border-color: rgb(var(--color-champagne-400));
   background-color: rgb(var(--color-champagne-100));
 }
 
-.light input[type='checkbox']:checked {
+.light input[type="checkbox"]:checked {
   background-color: rgb(var(--color-accent-500));
   border-color: rgb(var(--color-accent-500));
 }
 
-.light input[type='checkbox']:hover:not(:checked) {
+.light input[type="checkbox"]:hover:not(:checked) {
   border-color: rgb(var(--color-champagne-500));
   background-color: rgb(var(--color-champagne-200));
 }
@@ -1523,7 +1524,7 @@ input[type='checkbox']:hover:not(:checked) {
 }
 
 .onboarding-tooltip::before {
-  content: '';
+  content: "";
   @apply absolute h-3 w-3 border-l border-t border-accent-500/30 bg-dark-900;
   transform: rotate(45deg);
 }

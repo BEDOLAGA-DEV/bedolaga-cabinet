@@ -49,6 +49,7 @@ import { BreakdownList } from '@/components/sales-stats/BreakdownList';
 import { useCurrency } from '@/hooks/useCurrency';
 import { usePlatform } from '../platform/hooks/usePlatform';
 import { toNumber } from '../utils/inputHelpers';
+import { PageSkeleton, Skeleton } from '@/components/ui/skeleton';
 
 const PRIZE_TYPE_KEYS = [
   { value: 'subscription_days', key: 'subscription_days', emoji: '📅' },
@@ -369,9 +370,12 @@ export default function AdminWheel() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-[400px] items-center justify-center">
-        <div className="h-10 w-10 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-      </div>
+      <PageSkeleton variant="admin" titleWidth="w-56" className="space-y-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <Skeleton variant="card" count={4} className="h-24" />
+        </div>
+        <Skeleton variant="card" className="h-64" />
+      </PageSkeleton>
     );
   }
 
@@ -382,13 +386,13 @@ export default function AdminWheel() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex min-w-0 flex-1 basis-48 items-center gap-3">
           {/* Show back button only on web, not in Telegram Mini App */}
           {!capabilities.hasBackButton && (
             <button
               onClick={() => navigate('/admin')}
-              className="flex h-10 w-10 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
             >
               <BackIcon />
             </button>
@@ -508,7 +512,7 @@ export default function AdminWheel() {
                     }}
                     min={1}
                     max={1000}
-                    className="input flex-1"
+                    className="input min-w-0 flex-1"
                   />
                   <label className="flex items-center gap-2">
                     <input
@@ -548,7 +552,7 @@ export default function AdminWheel() {
                     }}
                     min={1}
                     max={30}
-                    className="input flex-1"
+                    className="input min-w-0 flex-1"
                   />
                   <label className="flex items-center gap-2">
                     <input
@@ -758,9 +762,9 @@ export default function AdminWheel() {
 
       {/* Prizes Tab */}
       {activeTab === 'prizes' && (
-        <div className="grid gap-6 lg:grid-cols-[1fr,300px]">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr),300px]">
           {/* Prize list */}
-          <div className="space-y-4">
+          <div className="min-w-0 space-y-4">
             <div className="flex items-center justify-between gap-2">
               <p className="text-sm text-dark-400">{t('admin.wheel.prizes.dragToReorder')}</p>
               <button
@@ -775,11 +779,11 @@ export default function AdminWheel() {
             {/* Unsaved order changes banner */}
             {hasUnsavedOrder && (
               <div className="flex items-center gap-3 rounded-xl border border-warning-500/30 bg-warning-500/10 p-4">
-                <div className="flex-1">
+                <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-warning-400">
                     {t('admin.wheel.prizes.unsavedOrder')}
                   </p>
-                  <p className="text-xs text-warning-400/70">
+                  <p className="text-xs text-warning-400">
                     {t('admin.wheel.prizes.unsavedOrderHint')}
                   </p>
                 </div>
@@ -1042,7 +1046,7 @@ function InlinePrizeForm({
             required
             maxLength={100}
             className="input w-full"
-            placeholder="e.g. 7 Days Free"
+            placeholder={t('admin.wheel.prizes.fields.displayNamePlaceholder')}
           />
         </div>
 
@@ -1051,11 +1055,15 @@ function InlinePrizeForm({
           <div>
             <label className="mb-2 block text-sm font-medium text-dark-300">
               {t('admin.wheel.prizes.fields.value')} (
-              {formData.prize_type === 'balance_bonus'
-                ? 'kopeks'
-                : formData.prize_type === 'subscription_days'
-                  ? 'days'
-                  : 'GB'}
+              {t(
+                `admin.wheel.prizes.fields.valueUnits.${
+                  formData.prize_type === 'balance_bonus'
+                    ? 'kopeks'
+                    : formData.prize_type === 'subscription_days'
+                      ? 'days'
+                      : 'gb'
+                }`,
+              )}
               )
             </label>
             <input

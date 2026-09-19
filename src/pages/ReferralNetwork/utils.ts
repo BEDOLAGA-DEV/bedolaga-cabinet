@@ -1,10 +1,11 @@
+import { uiLocale } from '@/utils/uiLocale';
 import type { SubscriptionStatus } from '@/types/referralNetwork';
 
 /**
  * Format kopeks to a human-readable ruble string.
  */
 export function formatKopeksToRubles(kopeks: number): string {
-  return `${(kopeks / 100).toLocaleString('ru-RU')}`;
+  return `${(kopeks / 100).toLocaleString(uiLocale())}`;
 }
 
 /**

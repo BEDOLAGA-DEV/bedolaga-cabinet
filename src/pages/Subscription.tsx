@@ -1,3 +1,4 @@
+import { uiLocale } from '@/utils/uiLocale';
 import { useState, useEffect, useRef, useCallback, useMemo, memo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -17,29 +18,53 @@ import InsufficientBalancePrompt from '../components/InsufficientBalancePrompt';
 import { useCurrency } from '../hooks/useCurrency';
 import { useCloseOnSuccessNotification } from '../store/successNotification';
 import PurchaseCTAButton from '../components/subscription/PurchaseCTAButton';
+import { planTitle, showsAddonOptions, showsAutopayToggle } from '../utils/legacySubscription';
 import {
-  CopyIcon,
-  CheckIcon,
-  PauseIcon,
+  ArrowPathIcon,
   CalendarIcon,
-  RefreshIcon,
+  CheckIcon,
+  ClockIcon,
+  CopyIcon,
   DevicesIcon,
   DownloadIcon,
+  PauseIcon,
+  PencilIcon,
+  PhoneIcon,
+  RefreshIcon,
   TrashIcon,
+  WarningIcon,
+  XIcon,
 } from '../components/icons';
-import { useHaptic } from '../platform';
+import { useHaptic, usePlatform } from '../platform';
 import { resolveConnectionUrlForUi } from '../utils/connectionLink';
 import {
   getErrorMessage,
   getInsufficientBalanceError,
   getFlagEmoji,
 } from '../utils/subscriptionHelpers';
+import { openPaymentUrl } from '../utils/openPaymentUrl';
+import { useToast } from '../components/Toast';
+import {
+  isSbpFeatureDisabledError,
+  sbpIntervalLabelKey,
+  sbpUiState,
+  type SbpUiState,
+} from '../utils/sbpRecurring';
+import {
+  isLavaFeatureDisabledError,
+  lavaPeriodLabelKey,
+  lavaUiState,
+  type LavaUiState,
+} from '../utils/lavaRecurring';
+import { isRecurringFeatureOff } from '../utils/recurringFeature';
 import Twemoji from 'react-twemoji';
 import { DeviceTopupSheet } from '../components/subscription/sheets/DeviceTopupSheet';
 import { DeviceReductionSheet } from '../components/subscription/sheets/DeviceReductionSheet';
 import { TrafficTopupSheet } from '../components/subscription/sheets/TrafficTopupSheet';
 import { ServerManagementSheet } from '../components/subscription/sheets/ServerManagementSheet';
 import { DeleteSubscriptionSheet } from '../components/subscription/sheets/DeleteSubscriptionSheet';
+import { PageSkeleton, Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
+import { safeLocal } from '../utils/safeStorage';
 
 /** Isolated countdown so 1s interval doesn't re-render the whole page */
 const CountdownTimer = memo(function CountdownTimer({
@@ -73,7 +98,7 @@ const CountdownTimer = memo(function CountdownTimer({
   const isExpired = !isActive;
   const isUrgent = countdown.days <= 3;
 
-  const formattedDate = new Date(endDate).toLocaleDateString(undefined, {
+  const formattedDate = new Date(endDate).toLocaleDateString(uiLocale(), {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
@@ -95,7 +120,7 @@ const CountdownTimer = memo(function CountdownTimer({
             : `1px solid ${g.innerBorder}`,
       }}
     >
-      <div className="mb-2 flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-wider text-dark-50/35">
+      <div className="mb-2 flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-wider text-dark-400">
         <div
           className="flex h-6 w-6 items-center justify-center rounded-[7px]"
           style={{
@@ -128,7 +153,8 @@ const CountdownTimer = memo(function CountdownTimer({
           {t('subscription.expired')}
         </div>
       ) : (
-        <div className="flex items-baseline justify-between">
+        <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
+          {/* На телефоне дата уходит на свою строку: рядом с таймером ей не хватало места, и она ломалась посреди «23 сент. / 2026 г.» */}
           <div className="flex items-baseline gap-1 font-mono tabular-nums">
             {countdown.days > 0 && (
               <>
@@ -138,7 +164,7 @@ const CountdownTimer = memo(function CountdownTimer({
                 >
                   {countdown.days}
                 </span>
-                <span className="mr-1 text-[10px] font-medium text-dark-50/25">
+                <span className="mr-1 text-[10px] font-medium text-dark-400">
                   {t('subscription.daysShort')}
                 </span>
               </>
@@ -174,7 +200,7 @@ const CountdownTimer = memo(function CountdownTimer({
               {String(countdown.seconds).padStart(2, '0')}
             </span>
           </div>
-          <div className="text-[10px] font-medium text-dark-50/25">
+          <div className="text-[10px] font-medium text-dark-400">
             {t('subscription.expiresAt')}: {formattedDate}
           </div>
         </div>
@@ -193,6 +219,8 @@ export default function Subscription() {
   const { isDark } = useTheme();
   const g = getGlassColors(isDark);
   const haptic = useHaptic();
+  const { openLink, platform } = usePlatform();
+  const { showToast } = useToast();
   const [copied, setCopied] = useState(false);
   const [showDeleteSheet, setShowDeleteSheet] = useState(false);
   const destructiveConfirm = useDestructiveConfirm();
@@ -201,7 +229,7 @@ export default function Subscription() {
   const formatPrice = (kopeks: number) =>
     kopeks === 0
       ? t('subscription.free', 'Бесплатно')
-      : `${formatAmount(kopeks / 100)} ${currencySymbol}`;
+      : `${formatAmount(kopeks / 100)}\u00A0${currencySymbol}`;
 
   // Device/traffic topup state
   const [showDeviceTopup, setShowDeviceTopup] = useState(false);
@@ -280,14 +308,169 @@ export default function Subscription() {
   const zone = useTrafficZone(usedPercent);
 
   // Purchase options (needed for balance_kopeks in device/traffic/server management)
-  const { data: purchaseOptions } = useQuery({
+  const purchaseOptionsQuery = useQuery({
     queryKey: ['purchase-options', subscriptionId],
     queryFn: () => subscriptionApi.getPurchaseOptions(subscriptionId),
     staleTime: 0,
     refetchOnMount: 'always',
   });
+  const purchaseOptions = purchaseOptionsQuery.data;
+
+  // Состояние автооплаты спрашиваем, только когда она включена: иначе бэкенд
+  // отвечает 403, и браузер печатает красную строку с полным стеком на каждый
+  // такой запрос. Ждём ответа опций — до него неизвестно, включена ли фича.
+  const featureFlagsSettled = purchaseOptionsQuery.isSuccess || purchaseOptionsQuery.isError;
+  const sbpFeatureOff = isRecurringFeatureOff(purchaseOptions, 'platega_recurrent_enabled');
+  const lavaFeatureOff = isRecurringFeatureOff(purchaseOptions, 'lava_recurrent_enabled');
 
   const isTariffsMode = purchaseOptions?.sales_mode === 'tariffs';
+
+  // SBP (Platega) recurring auto-payment status. Polls every 8s while a
+  // payment is PENDING (waiting for bank-app confirmation) so the UI flips
+  // to 'active'/'past_due' without a manual refresh; stops polling otherwise.
+  const sbpQuery = useQuery({
+    queryKey: ['sbp-recurring', subscriptionId],
+    queryFn: () => subscriptionApi.getSbpRecurring(subscriptionId),
+    enabled: !!subscription && !subscription.is_trial && featureFlagsSettled && !sbpFeatureOff,
+    retry: false,
+    refetchInterval: (query) => (query.state.data?.status === 'PENDING' ? 8000 : false),
+  });
+  const sbpInfo = sbpQuery.data;
+  // 403 with a specific detail means the feature itself is disabled on the
+  // backend — distinct from "not resolved yet" or "other error", both of
+  // which must fail quiet (render nothing) rather than flash the 'off' state.
+  const sbpFeatureDisabled = sbpFeatureOff || isSbpFeatureDisabledError(sbpQuery.error);
+  const sbpUiStateValue: SbpUiState =
+    sbpInfo !== undefined || sbpFeatureDisabled
+      ? sbpUiState(sbpInfo, sbpFeatureDisabled)
+      : 'hidden';
+
+  const enableSbpMutation = useMutation({
+    mutationFn: () => subscriptionApi.enableSbpRecurring(subscriptionId),
+    onSuccess: (data) => {
+      if (data.redirect_url) {
+        openPaymentUrl(data.redirect_url, platform, openLink);
+      }
+      queryClient.invalidateQueries({ queryKey: ['sbp-recurring', subscriptionId] });
+      // Backend flips autopay_enabled off when SBP auto-pay is enabled.
+      queryClient.invalidateQueries({ queryKey: ['subscription', subscriptionId] });
+    },
+    onError: (error: unknown) => {
+      const detail = (error as { response?: { data?: { detail?: unknown } } })?.response?.data
+        ?.detail;
+      showToast({
+        type: 'error',
+        title: typeof detail === 'string' ? detail : t('subscription.sbpRecurring.enableError'),
+        message: '',
+        duration: 3000,
+      });
+    },
+  });
+
+  const cancelSbpMutation = useMutation({
+    mutationFn: () => subscriptionApi.cancelSbpRecurring(subscriptionId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['sbp-recurring', subscriptionId] });
+      queryClient.invalidateQueries({ queryKey: ['subscription', subscriptionId] });
+      showToast({
+        type: 'success',
+        title: t('subscription.sbpRecurring.cancelled'),
+        message: '',
+        duration: 3000,
+      });
+    },
+    onError: (error: unknown) => {
+      const detail = (error as { response?: { data?: { detail?: unknown } } })?.response?.data
+        ?.detail;
+      showToast({
+        type: 'error',
+        title: typeof detail === 'string' ? detail : t('subscription.sbpRecurring.cancelError'),
+        message: '',
+        duration: 3000,
+      });
+    },
+  });
+
+  const handleCancelSbp = async () => {
+    const confirmed = await destructiveConfirm(
+      t('subscription.sbpRecurring.confirmCancel'),
+      t('subscription.sbpRecurring.cancel'),
+    );
+    if (!confirmed) return;
+    cancelSbpMutation.mutate();
+  };
+
+  // Автопродление Lava — независимый от Platega движок с той же семантикой
+  // состояний. Поллинг раз в 8с, пока привязка PENDING (ждём оплату первого
+  // счёта), чтобы UI сам перешёл в active/past_due.
+  const lavaQuery = useQuery({
+    queryKey: ['lava-recurring', subscriptionId],
+    queryFn: () => subscriptionApi.getLavaRecurring(subscriptionId),
+    enabled: !!subscription && !subscription.is_trial && featureFlagsSettled && !lavaFeatureOff,
+    retry: false,
+    refetchInterval: (query) => (query.state.data?.status === 'PENDING' ? 8000 : false),
+  });
+  const lavaInfo = lavaQuery.data;
+  const lavaFeatureDisabled = lavaFeatureOff || isLavaFeatureDisabledError(lavaQuery.error);
+  const lavaUiStateValue: LavaUiState =
+    lavaInfo !== undefined || lavaFeatureDisabled
+      ? lavaUiState(lavaInfo, lavaFeatureDisabled)
+      : 'hidden';
+
+  const enableLavaMutation = useMutation({
+    mutationFn: () => subscriptionApi.enableLavaRecurring(subscriptionId),
+    onSuccess: (data) => {
+      if (data.redirect_url) {
+        openPaymentUrl(data.redirect_url, platform, openLink);
+      }
+      queryClient.invalidateQueries({ queryKey: ['lava-recurring', subscriptionId] });
+      // Бэкенд снимает autopay_enabled при включении рекуррента провайдера.
+      queryClient.invalidateQueries({ queryKey: ['subscription', subscriptionId] });
+    },
+    onError: (error: unknown) => {
+      const detail = (error as { response?: { data?: { detail?: unknown } } })?.response?.data
+        ?.detail;
+      showToast({
+        type: 'error',
+        title: typeof detail === 'string' ? detail : t('subscription.lavaRecurring.enableError'),
+        message: '',
+        duration: 3000,
+      });
+    },
+  });
+
+  const cancelLavaMutation = useMutation({
+    mutationFn: () => subscriptionApi.cancelLavaRecurring(subscriptionId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['lava-recurring', subscriptionId] });
+      queryClient.invalidateQueries({ queryKey: ['subscription', subscriptionId] });
+      showToast({
+        type: 'success',
+        title: t('subscription.lavaRecurring.cancelled'),
+        message: '',
+        duration: 3000,
+      });
+    },
+    onError: (error: unknown) => {
+      const detail = (error as { response?: { data?: { detail?: unknown } } })?.response?.data
+        ?.detail;
+      showToast({
+        type: 'error',
+        title: typeof detail === 'string' ? detail : t('subscription.lavaRecurring.cancelError'),
+        message: '',
+        duration: 3000,
+      });
+    },
+  });
+
+  const handleCancelLava = async () => {
+    const confirmed = await destructiveConfirm(
+      t('subscription.lavaRecurring.confirmCancel'),
+      t('subscription.lavaRecurring.cancel'),
+    );
+    if (!confirmed) return;
+    cancelLavaMutation.mutate();
+  };
 
   const autopayMutation = useMutation({
     mutationFn: (enabled: boolean) =>
@@ -295,6 +478,9 @@ export default function Subscription() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['subscription', subscriptionId] });
       queryClient.invalidateQueries({ queryKey: ['subscriptions-list'] });
+      // Enabling balance-autopay cancels SBP auto-pay server-side — refresh so
+      // the SBP block doesn't keep showing a now-stale 'active'/'pending' state.
+      queryClient.invalidateQueries({ queryKey: ['sbp-recurring', subscriptionId] });
     },
   });
 
@@ -379,10 +565,7 @@ export default function Subscription() {
         traffic_used_percent: data.traffic_used_percent,
         is_unlimited: data.is_unlimited,
       });
-      localStorage.setItem(
-        `traffic_refresh_ts_${subscriptionId ?? 'default'}`,
-        Date.now().toString(),
-      );
+      safeLocal.setItem(`traffic_refresh_ts_${subscriptionId ?? 'default'}`, Date.now().toString());
       if (data.rate_limited && data.retry_after_seconds) {
         setTrafficRefreshCooldown(data.retry_after_seconds);
       } else {
@@ -414,7 +597,7 @@ export default function Subscription() {
 
   // Initialize revoke cooldown from localStorage on mount
   useEffect(() => {
-    const ts = localStorage.getItem(`revoke_ts_${subscriptionId ?? 'default'}`);
+    const ts = safeLocal.getItem(`revoke_ts_${subscriptionId ?? 'default'}`);
     if (ts) {
       const elapsed = Math.floor((Date.now() - parseInt(ts, 10)) / 1000);
       const remaining = Math.max(0, 900 - elapsed);
@@ -442,7 +625,7 @@ export default function Subscription() {
       // re-reads the now-empty device list instead of showing the stale cache.
       queryClient.invalidateQueries({ queryKey: ['devices', subscriptionId] });
       haptic.notification('success');
-      localStorage.setItem(`revoke_ts_${subscriptionId ?? 'default'}`, Date.now().toString());
+      safeLocal.setItem(`revoke_ts_${subscriptionId ?? 'default'}`, Date.now().toString());
       setRevokeCooldown(900);
     },
     onError: () => {
@@ -456,7 +639,7 @@ export default function Subscription() {
     if (hasAutoRefreshed.current) return;
     hasAutoRefreshed.current = true;
 
-    const lastRefresh = localStorage.getItem(`traffic_refresh_ts_${subscriptionId ?? 'default'}`);
+    const lastRefresh = safeLocal.getItem(`traffic_refresh_ts_${subscriptionId ?? 'default'}`);
     const now = Date.now();
     const cacheMs = 30 * 1000;
 
@@ -497,9 +680,10 @@ export default function Subscription() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-64 items-center justify-center">
-        <div className="h-10 w-10 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-      </div>
+      <PageSkeleton leading={1} titleWidth="w-48">
+        <Skeleton variant="card" className="h-64" />
+        <Skeleton variant="card" count={2} className="h-20" />
+      </PageSkeleton>
     );
   }
 
@@ -593,7 +777,7 @@ export default function Subscription() {
 
                   {/* Plan name */}
                   <h2 className="text-lg font-bold tracking-tight text-dark-50">
-                    {subscription.tariff_name || t('subscription.currentPlan')}
+                    {planTitle(subscription, t)}
                   </h2>
                 </div>
 
@@ -645,21 +829,7 @@ export default function Subscription() {
                       className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-[10px]"
                       style={{ background: 'rgba(255,184,0,0.12)' }}
                     >
-                      <svg
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="rgb(var(--color-urgent-400))"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        aria-hidden="true"
-                      >
-                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-                        <line x1="12" y1="9" x2="12" y2="13" />
-                        <line x1="12" y1="17" x2="12.01" y2="17" />
-                      </svg>
+                      <WarningIcon className="h-4 w-4 text-urgent-400" />
                     </div>
                     <div className="min-w-0 flex-1">
                       <p
@@ -691,19 +861,7 @@ export default function Subscription() {
                       className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-[10px]"
                       style={{ background: 'rgba(var(--color-accent-400), 0.12)' }}
                     >
-                      <svg
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="rgb(var(--color-accent-400))"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        aria-hidden="true"
-                      >
-                        <path d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
+                      <ClockIcon className="h-4 w-4 text-accent-400" />
                     </div>
                     <div className="flex-1">
                       <div
@@ -712,7 +870,7 @@ export default function Subscription() {
                       >
                         {t('subscription.trialInfo.title')}
                       </div>
-                      <div className="mt-1 text-[12px] text-dark-50/40">
+                      <div className="mt-1 text-[12px] text-dark-400">
                         {t('subscription.trialInfo.description')}
                       </div>
                       <div className="mt-3 flex flex-wrap gap-4">
@@ -725,7 +883,7 @@ export default function Subscription() {
                               ? t('subscription.days', { count: subscription.days_left })
                               : `${subscription.hours_left}${t('subscription.hours')} ${subscription.minutes_left}${t('subscription.minutes')}`}
                           </span>
-                          <span className="text-[11px] text-dark-50/30">
+                          <span className="text-[11px] text-dark-400">
                             {t('subscription.trialInfo.remaining')}
                           </span>
                         </div>
@@ -736,7 +894,7 @@ export default function Subscription() {
                           >
                             {subscription.traffic_limit_gb || '∞'} {t('common.units.gb')}
                           </span>
-                          <span className="text-[11px] text-dark-50/30">
+                          <span className="text-[11px] text-dark-400">
                             {t('subscription.traffic')}
                           </span>
                         </div>
@@ -747,8 +905,12 @@ export default function Subscription() {
                           >
                             {subscription.device_limit === 0 ? '∞' : subscription.device_limit}
                           </span>
-                          <span className="text-[11px] text-dark-50/30">
-                            {t('subscription.devices')}
+                          {/* Слово по числу: было «1 Устройства». Безлимит — «∞ устройств». */}
+                          <span className="text-[11px] text-dark-400">
+                            {t('subscription.devicesWord', {
+                              count:
+                                subscription.device_limit === 0 ? 5 : subscription.device_limit,
+                            })}
                           </span>
                         </div>
                       </div>
@@ -760,11 +922,11 @@ export default function Subscription() {
               {/* ─── Traffic Progress ─── */}
               <div className="mb-6">
                 <div className="mb-2.5 flex items-center justify-between">
-                  <span className="text-[11px] font-medium uppercase tracking-wider text-dark-50/40">
+                  <span className="text-[11px] font-medium uppercase tracking-wider text-dark-400">
                     {t('subscription.traffic')}
                   </span>
                   <div className="flex items-center gap-2">
-                    <span className="font-mono text-[11px] text-dark-50/30">
+                    <span className="font-mono text-[11px] text-dark-400">
                       {isUnlimited
                         ? formatTraffic(usedGb)
                         : `${formatTraffic(usedGb)} / ${formatTraffic(subscription.traffic_limit_gb)}`}
@@ -772,7 +934,7 @@ export default function Subscription() {
                     <button
                       onClick={() => refreshTrafficMutation.mutate()}
                       disabled={refreshTrafficMutation.isPending || trafficRefreshCooldown > 0}
-                      className="flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium text-dark-50/30 transition-colors hover:bg-dark-50/[0.05] hover:text-dark-50/50 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium text-dark-400 transition-colors hover:bg-dark-50/[0.05] hover:text-dark-50/50 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       <RefreshIcon
                         className="h-3 w-3"
@@ -786,7 +948,7 @@ export default function Subscription() {
                 </div>
                 {subscription.traffic_reset_mode &&
                   subscription.traffic_reset_mode !== 'NO_RESET' && (
-                    <div className="mb-2 text-[10px] text-dark-50/25">
+                    <div className="mb-2 text-[10px] text-dark-400">
                       {t(`subscription.trafficReset.${subscription.traffic_reset_mode}`)}
                     </div>
                   )}
@@ -825,7 +987,7 @@ export default function Subscription() {
                     <div className="text-sm font-semibold tracking-tight text-dark-50">
                       {t('dashboard.connectDevice')}
                     </div>
-                    <div className="mt-0.5 text-[11px] text-dark-50/30">
+                    <div className="mt-0.5 text-[11px] text-dark-400">
                       {subscription.device_limit === 0
                         ? t('dashboard.devicesConnectedUnlimited', { used: connectedDevices })
                         : t('dashboard.devicesOfMax', {
@@ -844,13 +1006,22 @@ export default function Subscription() {
                   </div>
                   {subscription.device_limit === 0 ? (
                     <div
-                      className="flex flex-shrink-0 items-center text-lg text-dark-50/40"
+                      className="flex flex-shrink-0 items-center text-lg text-dark-400"
                       aria-hidden="true"
                     >
                       ∞
                     </div>
                   ) : subscription.device_limit <= 10 ? (
-                    <div className="flex flex-shrink-0 gap-1.5" aria-hidden="true">
+                    // Больше пяти точек — в два ряда по пять: десять в ряд занимали
+                    // 124 px, и текст кнопки на телефоне шёл в 5–7 строк.
+                    <div
+                      className={
+                        subscription.device_limit > 5
+                          ? 'grid flex-shrink-0 grid-cols-5 gap-1'
+                          : 'flex flex-shrink-0 gap-1.5'
+                      }
+                      aria-hidden="true"
+                    >
                       {Array.from({ length: subscription.device_limit }, (_, i) => (
                         <div
                           key={i}
@@ -892,7 +1063,7 @@ export default function Subscription() {
               {displayedConnectionUrl && !shouldHideConnectionLink && (
                 <div className="mb-5 flex gap-2">
                   <code
-                    className="block min-w-0 flex-1 truncate whitespace-nowrap rounded-[10px] px-3 py-2 font-mono text-[11px] text-dark-50/30"
+                    className="block min-w-0 flex-1 truncate whitespace-nowrap rounded-[10px] px-3 py-2 font-mono text-[11px] text-dark-400"
                     style={{
                       background: g.codeBg,
                       border: `1px solid ${g.codeBorder}`,
@@ -931,7 +1102,7 @@ export default function Subscription() {
               {/* ─── Locations ─── */}
               {subscription.servers && subscription.servers.length > 0 && (
                 <div className="mb-5">
-                  <div className="mb-2 text-[10px] font-medium uppercase tracking-wider text-dark-50/35">
+                  <div className="mb-2 text-[10px] font-medium uppercase tracking-wider text-dark-400">
                     {t('subscription.locationsLabel')}
                   </div>
                   <div className="flex flex-wrap gap-1.5">
@@ -947,7 +1118,10 @@ export default function Subscription() {
                         {server.country_code && (
                           <span className="text-xs">{getFlagEmoji(server.country_code)}</span>
                         )}
-                        <Twemoji options={{ className: 'twemoji', folder: 'svg', ext: '.svg' }}>
+                        <Twemoji
+                          tag="span"
+                          options={{ className: 'twemoji', folder: 'svg', ext: '.svg' }}
+                        >
                           {server.name}
                         </Twemoji>
                       </span>
@@ -959,7 +1133,7 @@ export default function Subscription() {
               {/* ─── Purchased Traffic Packages ─── */}
               {subscription.traffic_purchases && subscription.traffic_purchases.length > 0 && (
                 <div className="mb-5">
-                  <div className="mb-2 text-[10px] font-medium uppercase tracking-wider text-dark-50/35">
+                  <div className="mb-2 text-[10px] font-medium uppercase tracking-wider text-dark-400">
                     {t('subscription.purchasedTraffic')}
                   </div>
                   <div className="space-y-2">
@@ -995,9 +1169,9 @@ export default function Subscription() {
                                 ? t('subscription.expired')
                                 : t('subscription.days', { count: purchase.days_remaining })}
                             </div>
-                            <div className="mt-0.5 font-mono text-[9px] text-dark-50/20">
+                            <div className="mt-0.5 font-mono text-[9px] text-dark-400">
                               {t('subscription.trafficResetAt')}:{' '}
-                              {new Date(purchase.expires_at).toLocaleDateString(undefined, {
+                              {new Date(purchase.expires_at).toLocaleDateString(uiLocale(), {
                                 day: '2-digit',
                                 month: '2-digit',
                                 year: 'numeric',
@@ -1016,9 +1190,13 @@ export default function Subscription() {
                             }}
                           />
                         </div>
-                        <div className="mt-1 flex justify-between font-mono text-[9px] text-dark-50/20">
-                          <span>{new Date(purchase.created_at).toLocaleDateString()}</span>
-                          <span>{new Date(purchase.expires_at).toLocaleDateString()}</span>
+                        <div className="mt-1 flex justify-between font-mono text-[9px] text-dark-400">
+                          <span>
+                            {new Date(purchase.created_at).toLocaleDateString(uiLocale())}
+                          </span>
+                          <span>
+                            {new Date(purchase.expires_at).toLocaleDateString(uiLocale())}
+                          </span>
                         </div>
                       </div>
                     ))}
@@ -1027,7 +1205,7 @@ export default function Subscription() {
               )}
 
               {/* ─── Autopay Toggle ─── */}
-              {!subscription.is_trial && !subscription.is_daily && (
+              {showsAutopayToggle(subscription) && (
                 <div
                   className="flex items-center justify-between rounded-[14px] p-3.5"
                   style={{
@@ -1039,7 +1217,7 @@ export default function Subscription() {
                     <div className="text-sm font-semibold text-dark-50">
                       {t('subscription.autoRenewal')}
                     </div>
-                    <div className="mt-0.5 text-[11px] text-dark-50/30">
+                    <div className="mt-0.5 text-[11px] text-dark-400">
                       {t('subscription.daysBeforeExpiry', {
                         count: subscription.autopay_days_before,
                       })}
@@ -1071,6 +1249,244 @@ export default function Subscription() {
                   </button>
                 </div>
               )}
+
+              {/* ─── SBP Recurring Auto-payment ───
+                   Sibling of the autopay toggle above, guarded ONLY by
+                   is_trial + uiState — daily-tariff subscriptions must see
+                   this block too (backend supports a day-interval charge). */}
+              {!subscription.is_trial && sbpUiStateValue !== 'hidden' && (
+                <div
+                  className="mt-3 rounded-[14px] p-3.5"
+                  style={{
+                    background: g.innerBg,
+                    border: `1px solid ${g.innerBorder}`,
+                  }}
+                >
+                  {/* Заголовок и статус слева, компактное действие справа —
+                      зеркально соседнему тогглу «Автопродление». На мобиле
+                      кнопка падает вниз на всю ширину (w-full sm:w-auto). */}
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="min-w-0">
+                      <div className="text-sm font-semibold text-dark-50">
+                        {t('subscription.sbpRecurring.title')}
+                      </div>
+
+                      {sbpUiStateValue === 'off' && (
+                        <div className="mt-0.5 text-[11px] text-dark-400">
+                          {t('subscription.sbpRecurring.autopayHint')}
+                        </div>
+                      )}
+                      {sbpUiStateValue === 'pending' && (
+                        <div className="mt-0.5 text-[11px] text-dark-400">
+                          {t('subscription.sbpRecurring.statusPending')}
+                        </div>
+                      )}
+                      {sbpUiStateValue === 'active' && sbpInfo && (
+                        <>
+                          <div className="mt-0.5 text-[11px] text-dark-400">
+                            {t('subscription.sbpRecurring.amountPerInterval', {
+                              amount: formatAmount((sbpInfo.amount_kopeks ?? 0) / 100),
+                              interval: t(sbpIntervalLabelKey(sbpInfo.interval)),
+                            })}
+                          </div>
+                          {sbpInfo.next_charge_at && (
+                            <div className="mt-0.5 text-[11px] text-dark-400">
+                              {t('subscription.sbpRecurring.nextCharge', {
+                                date: new Date(sbpInfo.next_charge_at).toLocaleDateString(
+                                  uiLocale(),
+                                  {
+                                    day: '2-digit',
+                                    month: '2-digit',
+                                    year: 'numeric',
+                                  },
+                                ),
+                              })}
+                            </div>
+                          )}
+                        </>
+                      )}
+                      {sbpUiStateValue === 'past_due' && (
+                        <div className="mt-0.5 text-[11px] font-medium text-warning-400">
+                          {t('subscription.sbpRecurring.statusPastDue')}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex shrink-0 flex-col gap-2 sm:items-end">
+                      {sbpUiStateValue === 'off' && (
+                        <button
+                          onClick={() => enableSbpMutation.mutate()}
+                          disabled={enableSbpMutation.isPending}
+                          className="w-full whitespace-nowrap rounded-xl bg-accent-500 px-5 py-2.5 text-sm font-medium text-on-accent transition-opacity disabled:opacity-50 sm:w-auto"
+                        >
+                          {enableSbpMutation.isPending ? (
+                            <span className="mx-auto block h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                          ) : (
+                            t('subscription.sbpRecurring.connect')
+                          )}
+                        </button>
+                      )}
+
+                      {sbpUiStateValue === 'pending' && (
+                        <>
+                          {sbpInfo?.redirect_url && (
+                            <button
+                              onClick={() => {
+                                if (sbpInfo.redirect_url) {
+                                  openPaymentUrl(sbpInfo.redirect_url, platform, openLink);
+                                }
+                              }}
+                              className="w-full whitespace-nowrap rounded-xl bg-accent-500 px-5 py-2.5 text-sm font-medium text-on-accent transition-opacity sm:w-auto"
+                            >
+                              {t('subscription.sbpRecurring.confirmInBank')}
+                            </button>
+                          )}
+                          <button
+                            onClick={handleCancelSbp}
+                            disabled={cancelSbpMutation.isPending}
+                            className="text-[11px] font-medium transition-colors disabled:opacity-50 sm:text-right"
+                            style={{ color: 'rgb(var(--color-critical-500))' }}
+                          >
+                            {t('subscription.sbpRecurring.cancel')}
+                          </button>
+                        </>
+                      )}
+
+                      {(sbpUiStateValue === 'active' || sbpUiStateValue === 'past_due') && (
+                        <button
+                          onClick={handleCancelSbp}
+                          disabled={cancelSbpMutation.isPending}
+                          className="w-full whitespace-nowrap rounded-xl border border-error-500/30 bg-error-500/10 px-5 py-2.5 text-sm font-medium text-error-400 transition-colors hover:bg-error-500/20 disabled:opacity-50 sm:w-auto"
+                        >
+                          {t('subscription.sbpRecurring.cancel')}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* ─── Автопродление Lava ───
+                   Независимый от Platega движок: сиблинг того же тоггла, те же
+                   состояния. Период задан продуктом в кабинете Lava и приезжает
+                   числом дней, поэтому подпись строится из charge_days. */}
+              {!subscription.is_trial && lavaUiStateValue !== 'hidden' && (
+                <div
+                  className="mt-3 rounded-[14px] p-3.5"
+                  style={{
+                    background: g.innerBg,
+                    border: `1px solid ${g.innerBorder}`,
+                  }}
+                >
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="min-w-0">
+                      <div className="text-sm font-semibold text-dark-50">
+                        {t('subscription.lavaRecurring.title')}
+                      </div>
+
+                      {lavaUiStateValue === 'off' && (
+                        <div className="mt-0.5 text-[11px] text-dark-400">
+                          {t('subscription.lavaRecurring.autopayHint')}
+                        </div>
+                      )}
+                      {lavaUiStateValue === 'pending' && (
+                        <div className="mt-0.5 text-[11px] text-dark-400">
+                          {t('subscription.lavaRecurring.statusPending')}
+                        </div>
+                      )}
+                      {lavaUiStateValue === 'active' && lavaInfo && (
+                        <>
+                          <div className="mt-0.5 text-[11px] text-dark-400">
+                            {(() => {
+                              const periodKey = lavaPeriodLabelKey(lavaInfo.charge_days);
+                              const amount = formatAmount((lavaInfo.amount_kopeks ?? 0) / 100);
+                              return periodKey
+                                ? t('subscription.lavaRecurring.amountPerPeriod', {
+                                    amount,
+                                    period: t(periodKey),
+                                  })
+                                : t('subscription.lavaRecurring.amountPerDays', {
+                                    amount,
+                                    days: lavaInfo.charge_days ?? 0,
+                                  });
+                            })()}
+                          </div>
+                          {lavaInfo.next_charge_at && (
+                            <div className="mt-0.5 text-[11px] text-dark-400">
+                              {t('subscription.lavaRecurring.nextCharge', {
+                                date: new Date(lavaInfo.next_charge_at).toLocaleDateString(
+                                  uiLocale(),
+                                  {
+                                    day: '2-digit',
+                                    month: '2-digit',
+                                    year: 'numeric',
+                                  },
+                                ),
+                              })}
+                            </div>
+                          )}
+                        </>
+                      )}
+                      {lavaUiStateValue === 'past_due' && (
+                        <div className="mt-0.5 text-[11px] font-medium text-warning-400">
+                          {t('subscription.lavaRecurring.statusPastDue')}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex shrink-0 flex-col gap-2 sm:items-end">
+                      {lavaUiStateValue === 'off' && (
+                        <button
+                          onClick={() => enableLavaMutation.mutate()}
+                          disabled={enableLavaMutation.isPending}
+                          className="w-full whitespace-nowrap rounded-xl bg-accent-500 px-5 py-2.5 text-sm font-medium text-on-accent transition-opacity disabled:opacity-50 sm:w-auto"
+                        >
+                          {enableLavaMutation.isPending ? (
+                            <span className="mx-auto block h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                          ) : (
+                            t('subscription.lavaRecurring.connect')
+                          )}
+                        </button>
+                      )}
+
+                      {lavaUiStateValue === 'pending' && (
+                        <>
+                          {lavaInfo?.redirect_url && (
+                            <button
+                              onClick={() => {
+                                if (lavaInfo.redirect_url) {
+                                  openPaymentUrl(lavaInfo.redirect_url, platform, openLink);
+                                }
+                              }}
+                              className="w-full whitespace-nowrap rounded-xl bg-accent-500 px-5 py-2.5 text-sm font-medium text-on-accent transition-opacity sm:w-auto"
+                            >
+                              {t('subscription.lavaRecurring.payFirst')}
+                            </button>
+                          )}
+                          <button
+                            onClick={handleCancelLava}
+                            disabled={cancelLavaMutation.isPending}
+                            className="text-[11px] font-medium transition-colors disabled:opacity-50 sm:text-right"
+                            style={{ color: 'rgb(var(--color-critical-500))' }}
+                          >
+                            {t('subscription.lavaRecurring.cancel')}
+                          </button>
+                        </>
+                      )}
+
+                      {(lavaUiStateValue === 'active' || lavaUiStateValue === 'past_due') && (
+                        <button
+                          onClick={handleCancelLava}
+                          disabled={cancelLavaMutation.isPending}
+                          className="w-full whitespace-nowrap rounded-xl border border-error-500/30 bg-error-500/10 px-5 py-2.5 text-sm font-medium text-error-400 transition-colors hover:bg-error-500/20 disabled:opacity-50 sm:w-auto"
+                        >
+                          {t('subscription.lavaRecurring.cancel')}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           );
         })()
@@ -1089,7 +1505,7 @@ export default function Subscription() {
           >
             <TrashIcon className="h-8 w-8" />
           </div>
-          <div className="text-sm text-dark-50/30">{t('subscription.noSubscription')}</div>
+          <div className="text-sm text-dark-400">{t('subscription.noSubscription')}</div>
         </div>
       )}
 
@@ -1109,7 +1525,7 @@ export default function Subscription() {
               <h2 className="text-base font-bold tracking-tight text-dark-50">
                 {t('subscription.pause.title')}
               </h2>
-              <div className="mt-1 text-[12px] text-dark-50/35">
+              <div className="mt-1 text-[12px] text-dark-400">
                 {subscription.is_limited
                   ? t('subscription.trafficLimited')
                   : subscription.status === 'disabled'
@@ -1201,9 +1617,9 @@ export default function Subscription() {
                   >
                     {t('subscription.pause.pausedInfo')}
                   </div>
-                  <div className="mt-1 text-[12px] text-dark-50/35">
+                  <div className="mt-1 text-[12px] text-dark-400">
                     {t('subscription.pause.pausedDescription')}{' '}
-                    {new Date(subscription.end_date).toLocaleDateString()} (
+                    {new Date(subscription.end_date).toLocaleDateString(uiLocale())} (
                     {t('subscription.pause.days', { count: subscription.days_left })})
                   </div>
                 </div>
@@ -1228,7 +1644,7 @@ export default function Subscription() {
               return (
                 <div className="mt-4">
                   <div className="mb-2 flex items-center justify-between">
-                    <span className="text-[11px] font-medium uppercase tracking-wider text-dark-50/35">
+                    <span className="text-[11px] font-medium uppercase tracking-wider text-dark-400">
                       {t('subscription.pause.nextCharge')}
                     </span>
                     <span className="font-mono text-[12px] font-semibold text-dark-50">
@@ -1251,7 +1667,7 @@ export default function Subscription() {
                     />
                   </div>
                   {subscription.daily_price_kopeks && (
-                    <div className="mt-2 text-center text-[11px] text-dark-50/25">
+                    <div className="mt-2 text-center text-[11px] text-dark-400">
                       {t('subscription.pause.willBeCharged')}:{' '}
                       {formatPrice(subscription.daily_price_kopeks)}
                     </div>
@@ -1288,85 +1704,82 @@ export default function Subscription() {
         )}
 
       {/* Additional Options (Buy Devices) */}
-      {subscription &&
-        (subscription.is_active || subscription.is_limited) &&
-        !subscription.is_trial &&
-        subscription.device_limit !== 0 && (
-          <div
-            className="relative overflow-hidden rounded-3xl"
-            style={{
-              background: g.cardBg,
-              border: `1px solid ${g.cardBorder}`,
-              boxShadow: g.shadow,
-              padding: '24px 28px',
-            }}
-          >
-            <h2 className="mb-4 text-base font-bold tracking-tight text-dark-50">
-              {t('subscription.additionalOptions.title')}
-            </h2>
+      {subscription && showsAddonOptions(subscription) && (
+        <div
+          className="relative overflow-hidden rounded-3xl"
+          style={{
+            background: g.cardBg,
+            border: `1px solid ${g.cardBorder}`,
+            boxShadow: g.shadow,
+            padding: '24px 28px',
+          }}
+        >
+          <h2 className="mb-4 text-base font-bold tracking-tight text-dark-50">
+            {t('subscription.additionalOptions.title')}
+          </h2>
 
-            {/* Buy Devices */}
-            <DeviceTopupSheet
-              open={showDeviceTopup}
-              onOpen={() => setShowDeviceTopup(true)}
-              onClose={() => setShowDeviceTopup(false)}
-              subscription={subscription}
+          {/* Buy Devices */}
+          <DeviceTopupSheet
+            open={showDeviceTopup}
+            onOpen={() => setShowDeviceTopup(true)}
+            onClose={() => setShowDeviceTopup(false)}
+            subscription={subscription}
+            subscriptionId={subscriptionId}
+            devicesToAdd={devicesToAdd}
+            onDevicesToAddChange={setDevicesToAdd}
+            purchaseOptions={purchaseOptions}
+            isDark={isDark}
+          />
+
+          {/* Reduce Devices */}
+          <div className="mt-4">
+            <DeviceReductionSheet
+              open={showDeviceReduction}
+              onOpen={() => setShowDeviceReduction(true)}
+              onClose={() => setShowDeviceReduction(false)}
+              subscriptionPresent={!!subscription}
               subscriptionId={subscriptionId}
-              devicesToAdd={devicesToAdd}
-              onDevicesToAddChange={setDevicesToAdd}
-              purchaseOptions={purchaseOptions}
+              targetDeviceLimit={targetDeviceLimit}
+              onTargetDeviceLimitChange={setTargetDeviceLimit}
               isDark={isDark}
             />
+          </div>
 
-            {/* Reduce Devices */}
+          {/* Buy Traffic */}
+          {subscription.traffic_limit_gb > 0 && (
             <div className="mt-4">
-              <DeviceReductionSheet
-                open={showDeviceReduction}
-                onOpen={() => setShowDeviceReduction(true)}
-                onClose={() => setShowDeviceReduction(false)}
-                subscriptionPresent={!!subscription}
+              <TrafficTopupSheet
+                open={showTrafficTopup}
+                onOpen={() => setShowTrafficTopup(true)}
+                onClose={() => setShowTrafficTopup(false)}
+                subscription={subscription}
                 subscriptionId={subscriptionId}
-                targetDeviceLimit={targetDeviceLimit}
-                onTargetDeviceLimitChange={setTargetDeviceLimit}
+                selectedTrafficPackage={selectedTrafficPackage}
+                onSelectedTrafficPackageChange={setSelectedTrafficPackage}
+                purchaseOptions={purchaseOptions}
                 isDark={isDark}
               />
             </div>
+          )}
 
-            {/* Buy Traffic */}
-            {subscription.traffic_limit_gb > 0 && (
-              <div className="mt-4">
-                <TrafficTopupSheet
-                  open={showTrafficTopup}
-                  onOpen={() => setShowTrafficTopup(true)}
-                  onClose={() => setShowTrafficTopup(false)}
-                  subscription={subscription}
-                  subscriptionId={subscriptionId}
-                  selectedTrafficPackage={selectedTrafficPackage}
-                  onSelectedTrafficPackageChange={setSelectedTrafficPackage}
-                  purchaseOptions={purchaseOptions}
-                  isDark={isDark}
-                />
-              </div>
-            )}
-
-            {/* Server Management - only in classic mode */}
-            {!isTariffsMode && (
-              <div className="mt-4">
-                <ServerManagementSheet
-                  open={showServerManagement}
-                  onOpen={() => setShowServerManagement(true)}
-                  onClose={() => setShowServerManagement(false)}
-                  subscription={subscription}
-                  subscriptionId={subscriptionId}
-                  selectedServers={selectedServersToUpdate}
-                  onSelectedServersChange={setSelectedServersToUpdate}
-                  purchaseOptions={purchaseOptions}
-                  isDark={isDark}
-                />
-              </div>
-            )}
-          </div>
-        )}
+          {/* Server Management - only in classic mode */}
+          {!isTariffsMode && (
+            <div className="mt-4">
+              <ServerManagementSheet
+                open={showServerManagement}
+                onOpen={() => setShowServerManagement(true)}
+                onClose={() => setShowServerManagement(false)}
+                subscription={subscription}
+                subscriptionId={subscriptionId}
+                selectedServers={selectedServersToUpdate}
+                onSelectedServersChange={setSelectedServersToUpdate}
+                purchaseOptions={purchaseOptions}
+                isDark={isDark}
+              />
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Reissue Subscription — standalone block, not dependent on device_limit */}
       {subscription &&
@@ -1404,19 +1817,7 @@ export default function Subscription() {
                   {revokeMutation.isPending ? (
                     <div className="h-5 w-5 animate-spin rounded-full border-2 border-warning-400/30 border-t-amber-400" />
                   ) : (
-                    <svg
-                      className="h-5 w-5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={1.5}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182"
-                      />
-                    </svg>
+                    <ArrowPathIcon className="h-5 w-5" />
                   )}
                 </div>
               </div>
@@ -1466,18 +1867,12 @@ export default function Subscription() {
           </div>
 
           {devicesLoading ? (
-            <div className="flex items-center justify-center py-8">
-              <div
-                className="h-8 w-8 animate-spin rounded-full border-2 border-t-transparent"
-                style={{
-                  borderColor: 'rgb(var(--color-accent-500))',
-                  borderTopColor: 'transparent',
-                }}
-              />
-            </div>
+            <SkeletonGroup className="space-y-3">
+              <Skeleton variant="card" count={3} className="h-16" />
+            </SkeletonGroup>
           ) : devicesData && devicesData.devices.length > 0 ? (
             <div className="space-y-2">
-              <div className="mb-2 font-mono text-[11px] text-dark-50/30">
+              <div className="mb-2 font-mono text-[11px] text-dark-400">
                 {devicesData.device_limit === 0
                   ? `${devicesData.total} · ∞`
                   : `${devicesData.total} / ${t('subscription.devices', { count: devicesData.device_limit })}`}
@@ -1502,21 +1897,9 @@ export default function Subscription() {
                     <div className="flex min-w-0 flex-1 items-center gap-3">
                       <div
                         className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-[10px]"
-                        style={{ background: g.trackBg }}
+                        style={{ background: g.trackBg, color: g.textSecondary }}
                       >
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke={g.textSecondary}
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          aria-hidden="true"
-                        >
-                          <path d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3" />
-                        </svg>
+                        <PhoneIcon className="h-4 w-4" />
                       </div>
                       <div className="min-w-0 flex-1">
                         {isEditing ? (
@@ -1552,9 +1935,9 @@ export default function Subscription() {
                             {displayName}
                           </div>
                         )}
-                        <div className="mt-0.5 flex items-center gap-1.5 text-[11px] text-dark-50/30">
+                        <div className="mt-0.5 flex items-center gap-1.5 text-[11px] text-dark-400">
                           <span className="truncate">{device.platform}</span>
-                          <span className="font-mono text-dark-50/20">
+                          <span className="font-mono text-dark-400">
                             {device.hwid.slice(0, 8).toUpperCase()}
                           </span>
                         </div>
@@ -1578,19 +1961,7 @@ export default function Subscription() {
                             title={t('subscription.renameDeviceSave', 'Сохранить')}
                             aria-label={t('subscription.renameDeviceSave', 'Сохранить')}
                           >
-                            <svg
-                              width="16"
-                              height="16"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              aria-hidden="true"
-                            >
-                              <path d="M5 13l4 4L19 7" />
-                            </svg>
+                            <CheckIcon className="h-4 w-4" />
                           </button>
                           <button
                             type="button"
@@ -1604,19 +1975,7 @@ export default function Subscription() {
                             title={t('subscription.renameDeviceCancel', 'Отмена')}
                             aria-label={t('subscription.renameDeviceCancel', 'Отмена')}
                           >
-                            <svg
-                              width="16"
-                              height="16"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              aria-hidden="true"
-                            >
-                              <path d="M6 18L18 6M6 6l12 12" />
-                            </svg>
+                            <XIcon className="h-4 w-4" />
                           </button>
                         </>
                       ) : (
@@ -1632,19 +1991,7 @@ export default function Subscription() {
                             title={t('subscription.renameDevice', 'Переименовать')}
                             aria-label={t('subscription.renameDevice', 'Переименовать')}
                           >
-                            <svg
-                              width="16"
-                              height="16"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="1.5"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              aria-hidden="true"
-                            >
-                              <path d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125" />
-                            </svg>
+                            <PencilIcon className="h-4 w-4" />
                           </button>
                           <button
                             type="button"
@@ -1662,19 +2009,7 @@ export default function Subscription() {
                             title={t('subscription.deleteDevice')}
                             aria-label={t('subscription.deleteDevice')}
                           >
-                            <svg
-                              width="16"
-                              height="16"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="1.5"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              aria-hidden="true"
-                            >
-                              <path d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                            </svg>
+                            <TrashIcon className="h-4 w-4" />
                           </button>
                         </>
                       )}
@@ -1684,7 +2019,7 @@ export default function Subscription() {
               })}
             </div>
           ) : (
-            <div className="py-8 text-center text-[12px] text-dark-50/25">
+            <div className="py-8 text-center text-[12px] text-dark-400">
               {t('subscription.noDevices')}
             </div>
           )}

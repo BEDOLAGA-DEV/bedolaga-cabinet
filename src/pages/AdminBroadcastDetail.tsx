@@ -3,19 +3,20 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { adminBroadcastsApi, type BroadcastChannel } from '../api/adminBroadcasts';
 import { AdminBackButton } from '../components/admin';
-import { StatCard } from '@/components/stats';
 import {
-  BanIcon,
+  BroadcastDeliveryStats,
+  BroadcastStatusBadge,
+} from '../components/broadcasts/BroadcastDeliveryStats';
+import { broadcastPollInterval, isBroadcastInFlight } from '../utils/broadcastStatus';
+import { PageSkeleton, Skeleton } from '@/components/ui/skeleton';
+import {
   DocumentIcon,
   EmailIcon,
   PhotoIcon,
   RefreshIcon,
-  SendIcon,
   StopIcon,
   TelegramIcon,
-  UsersIcon,
   VideoIcon,
-  XCircleIcon,
 } from '@/components/icons';
 
 // Channel badge component
@@ -47,55 +48,6 @@ function ChannelBadge({ channel }: { channel?: BroadcastChannel }) {
   );
 }
 
-// Status badge component
-const statusConfig: Record<string, { bg: string; text: string; labelKey: string }> = {
-  queued: {
-    bg: 'bg-warning-500/20',
-    text: 'text-warning-400',
-    labelKey: 'admin.broadcasts.status.queued',
-  },
-  in_progress: {
-    bg: 'bg-accent-500/20',
-    text: 'text-accent-400',
-    labelKey: 'admin.broadcasts.status.inProgress',
-  },
-  completed: {
-    bg: 'bg-success-500/20',
-    text: 'text-success-400',
-    labelKey: 'admin.broadcasts.status.completed',
-  },
-  partial: {
-    bg: 'bg-warning-500/20',
-    text: 'text-warning-400',
-    labelKey: 'admin.broadcasts.status.partial',
-  },
-  failed: {
-    bg: 'bg-error-500/20',
-    text: 'text-error-400',
-    labelKey: 'admin.broadcasts.status.failed',
-  },
-  cancelled: {
-    bg: 'bg-dark-500/20',
-    text: 'text-dark-400',
-    labelKey: 'admin.broadcasts.status.cancelled',
-  },
-  cancelling: {
-    bg: 'bg-warning-500/20',
-    text: 'text-warning-400',
-    labelKey: 'admin.broadcasts.status.cancelling',
-  },
-};
-
-function StatusBadge({ status }: { status: string }) {
-  const { t } = useTranslation();
-  const config = statusConfig[status] || statusConfig.queued;
-  return (
-    <span className={`rounded-full px-3 py-1 text-sm font-medium ${config.bg} ${config.text}`}>
-      {t(config.labelKey)}
-    </span>
-  );
-}
-
 export default function AdminBroadcastDetail() {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -116,13 +68,7 @@ export default function AdminBroadcastDetail() {
       return adminBroadcastsApi.get(broadcastId);
     },
     enabled: !!broadcastId && !isNaN(broadcastId),
-    refetchInterval: (query) => {
-      const data = query.state.data;
-      if (data && ['queued', 'in_progress', 'cancelling'].includes(data.status)) {
-        return 3000;
-      }
-      return false;
-    },
+    refetchInterval: (query) => broadcastPollInterval(query.state.data?.status),
   });
 
   // Stop mutation
@@ -134,7 +80,7 @@ export default function AdminBroadcastDetail() {
     },
   });
 
-  const isRunning = broadcast && ['queued', 'in_progress', 'cancelling'].includes(broadcast.status);
+  const isRunning = broadcast && isBroadcastInFlight(broadcast.status);
 
   if (!broadcastId || isNaN(broadcastId)) {
     navigate('/admin/broadcasts');
@@ -143,9 +89,9 @@ export default function AdminBroadcastDetail() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-[50vh] items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-      </div>
+      <PageSkeleton variant="admin" leading={1} titleWidth="w-56" className="space-y-6">
+        <Skeleton variant="card" count={2} className="h-40" />
+      </PageSkeleton>
     );
   }
 
@@ -166,15 +112,15 @@ export default function AdminBroadcastDetail() {
   return (
     <div className="animate-fade-in space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex min-w-0 flex-1 basis-48 items-center gap-3">
           <AdminBackButton to="/admin/broadcasts" />
-          <div>
-            <div className="flex items-center gap-3">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
               <h1 className="text-xl font-bold text-dark-100">
                 {t('admin.broadcasts.detail')} #{broadcast.id}
               </h1>
-              <StatusBadge status={broadcast.status} />
+              <BroadcastStatusBadge status={broadcast.status} />
               <ChannelBadge channel={broadcast.channel} />
             </div>
             <p className="text-sm text-dark-400">
@@ -190,51 +136,15 @@ export default function AdminBroadcastDetail() {
         </button>
       </div>
 
-      {/* Progress */}
-      {isRunning && (
-        <div className="rounded-xl border border-dark-700 bg-dark-800/50 p-4">
-          <div className="mb-2 flex justify-between text-sm">
-            <span className="text-dark-400">{t('admin.broadcasts.progress')}</span>
-            <span className="font-medium text-dark-100">
-              {broadcast.progress_percent.toFixed(1)}%
-            </span>
-          </div>
-          <div className="h-3 overflow-hidden rounded-full bg-dark-700">
-            <div
-              className="h-full bg-gradient-to-r from-accent-500 to-accent-400 transition-all duration-300"
-              style={{ width: `${broadcast.progress_percent}%` }}
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Stats */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <StatCard
-          label={t('admin.broadcasts.total')}
-          value={broadcast.total_count}
-          icon={<UsersIcon className="h-5 w-5" />}
-          tone="neutral"
-        />
-        <StatCard
-          label={t('admin.broadcasts.sent')}
-          value={broadcast.sent_count}
-          icon={<SendIcon className="h-5 w-5" />}
-          tone="success"
-        />
-        <StatCard
-          label={t('admin.broadcasts.blocked')}
-          value={broadcast.blocked_count}
-          icon={<BanIcon className="h-5 w-5" />}
-          tone="warning"
-        />
-        <StatCard
-          label={t('admin.broadcasts.failed')}
-          value={broadcast.failed_count}
-          icon={<XCircleIcon className="h-5 w-5" />}
-          tone="error"
-        />
-      </div>
+      {/* Progress + stats */}
+      <BroadcastDeliveryStats
+        status={broadcast.status}
+        progressPercent={broadcast.progress_percent}
+        totalCount={broadcast.total_count}
+        sentCount={broadcast.sent_count}
+        blockedCount={broadcast.blocked_count}
+        failedCount={broadcast.failed_count}
+      />
 
       {/* Target */}
       <div className="rounded-xl border border-dark-700 bg-dark-800/50 p-4">
@@ -292,14 +202,16 @@ export default function AdminBroadcastDetail() {
       )}
 
       {/* Admin info */}
-      <div className="flex justify-between rounded-xl border border-dark-700 bg-dark-800/50 p-4 text-sm">
-        <span className="text-dark-400">
+      <div className="flex flex-wrap justify-between gap-x-4 gap-y-1 rounded-xl border border-dark-700 bg-dark-800/50 p-4 text-sm">
+        <span className="min-w-0 text-dark-400 [overflow-wrap:anywhere]">
           {t('admin.broadcasts.createdBy')}:{' '}
           <span className="text-dark-100">
             {broadcast.admin_name || t('admin.broadcasts.unknownAdmin')}
           </span>
         </span>
-        <span className="text-dark-400">{new Date(broadcast.created_at).toLocaleString()}</span>
+        <span className="whitespace-nowrap text-dark-400">
+          {new Date(broadcast.created_at).toLocaleString()}
+        </span>
       </div>
 
       {/* Stop button */}

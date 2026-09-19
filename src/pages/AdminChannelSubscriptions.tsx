@@ -12,6 +12,7 @@ import {
 import { adminSettingsApi, type SettingDefinition } from '../api/adminSettings';
 import { AdminBackButton } from '../components/admin';
 import { Toggle } from '../components/admin/Toggle';
+import { PageSkeleton, Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 import {
   ChannelIcon,
   PlusIcon,
@@ -88,14 +89,9 @@ function GlobalSettingsSection() {
 
   if (isLoading) {
     return (
-      <div className="rounded-xl border border-dark-700 bg-dark-800/50 p-6">
-        <div className="flex items-center gap-3">
-          <div className="animate-spin">
-            <RefreshIcon />
-          </div>
-          <span className="text-sm text-dark-400">{t('common.loading')}</span>
-        </div>
-      </div>
+      <PageSkeleton variant="admin" leading={2} titleWidth="w-56" className="space-y-6">
+        <Skeleton variant="card" count={2} className="h-40" />
+      </PageSkeleton>
     );
   }
 
@@ -614,8 +610,8 @@ export default function AdminChannelSubscriptions() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex min-w-0 flex-1 basis-48 items-center gap-3">
           <AdminBackButton />
           <div className="flex items-center gap-3">
             <div className="rounded-lg bg-accent-500/20 p-2 text-accent-400">
@@ -674,12 +670,9 @@ export default function AdminChannelSubscriptions() {
 
       {/* Channel list */}
       {isLoading ? (
-        <div className="rounded-xl border border-dark-700 bg-dark-800/50 p-8 text-center text-dark-400">
-          <div className="mx-auto mb-2 w-fit animate-spin">
-            <RefreshIcon />
-          </div>
-          <p>{t('common.loading')}</p>
-        </div>
+        <SkeletonGroup className="space-y-3">
+          <Skeleton variant="card" count={3} className="h-16" />
+        </SkeletonGroup>
       ) : channels.length === 0 ? (
         <div className="rounded-xl border border-dark-700 bg-dark-800/50 p-8 text-center text-dark-400">
           <div className="mx-auto mb-2 w-fit">

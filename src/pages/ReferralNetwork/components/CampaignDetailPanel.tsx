@@ -4,6 +4,7 @@ import { CloseIcon } from '@/components/icons';
 import { referralNetworkApi } from '@/api/referralNetwork';
 import { useReferralNetworkStore } from '@/store/referralNetwork';
 import { formatKopeksToRubles } from '../utils';
+import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 
 interface CampaignDetailPanelProps {
   campaignId: number;
@@ -45,9 +46,9 @@ export function CampaignDetailPanel({ campaignId, className }: CampaignDetailPan
       {/* Content */}
       <div className="overflow-y-auto p-4 pb-[calc(1rem+var(--safe-bottom,0px))]">
         {isLoading && (
-          <div className="flex items-center justify-center py-8">
-            <div className="h-6 w-6 animate-spin rounded-full border-2 border-dark-600 border-t-accent-400" />
-          </div>
+          <SkeletonGroup className="space-y-3">
+            <Skeleton variant="card" count={3} className="h-16" />
+          </SkeletonGroup>
         )}
 
         {isError && (
@@ -103,7 +104,8 @@ export function CampaignDetailPanel({ campaignId, className }: CampaignDetailPan
                     {t('admin.referralNetwork.campaign.totalRevenue')}
                   </span>
                   <span className="font-mono text-accent-400">
-                    {formatKopeksToRubles(campaign.total_revenue_kopeks)} ₽
+                    {formatKopeksToRubles(campaign.total_revenue_kopeks)}
+                    {'\u00A0'}₽
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
@@ -119,7 +121,8 @@ export function CampaignDetailPanel({ campaignId, className }: CampaignDetailPan
                     {t('admin.referralNetwork.campaign.avgCheck')}
                   </span>
                   <span className="font-mono text-dark-100">
-                    {formatKopeksToRubles(campaign.avg_check_kopeks)} ₽
+                    {formatKopeksToRubles(campaign.avg_check_kopeks)}
+                    {'\u00A0'}₽
                   </span>
                 </div>
               </div>

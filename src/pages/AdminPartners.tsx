@@ -18,6 +18,7 @@ import {
   UserPlusIcon,
 } from '@/components/icons';
 import { StatCard } from '@/components/stats';
+import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 
 export default function AdminPartners() {
   const { t } = useTranslation();
@@ -50,7 +51,7 @@ export default function AdminPartners() {
       {/* Header */}
       <div className="mb-6 flex items-center gap-3">
         <AdminBackButton to="/admin" />
-        <div className="flex-1">
+        <div className="min-w-0 flex-1">
           <h1 className="text-xl font-semibold text-dark-100">{t('admin.partners.title')}</h1>
           <p className="text-sm text-dark-400">{t('admin.partners.subtitle')}</p>
         </div>
@@ -126,9 +127,9 @@ export default function AdminPartners() {
       {activeTab === 'partners' && (
         <>
           {partnersLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-            </div>
+            <SkeletonGroup className="space-y-3">
+              <Skeleton variant="card" count={3} className="h-16" />
+            </SkeletonGroup>
           ) : partners.length === 0 ? (
             <div className="py-12 text-center">
               <p className="text-dark-400">{t('admin.partners.noPartners')}</p>
@@ -143,12 +144,12 @@ export default function AdminPartners() {
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="min-w-0 flex-1">
-                      <div className="mb-1 flex min-w-0 items-center gap-2">
-                        <h3 className="truncate font-medium text-dark-100">
+                      <div className="mb-1 flex min-w-0 flex-wrap items-baseline gap-x-2">
+                        <h3 className="min-w-0 font-medium text-dark-100 [overflow-wrap:anywhere]">
                           {partner.first_name || partner.username || `#${partner.user_id}`}
                         </h3>
                         {partner.username && (
-                          <span className="shrink-0 text-sm text-dark-500">
+                          <span className="min-w-0 text-sm text-dark-500 [overflow-wrap:anywhere]">
                             @{partner.username}
                           </span>
                         )}
@@ -180,9 +181,9 @@ export default function AdminPartners() {
       {activeTab === 'applications' && (
         <>
           {applicationsLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-            </div>
+            <SkeletonGroup className="space-y-3">
+              <Skeleton variant="card" count={3} className="h-16" />
+            </SkeletonGroup>
           ) : applications.length === 0 ? (
             <div className="py-12 text-center">
               <p className="text-dark-400">{t('admin.partners.noApplications')}</p>
@@ -193,12 +194,14 @@ export default function AdminPartners() {
                 <div key={app.id} className="rounded-xl border border-dark-700 bg-dark-800 p-4">
                   <div className="mb-3 flex items-start justify-between gap-4">
                     <div className="min-w-0 flex-1">
-                      <div className="mb-1 flex min-w-0 items-center gap-2">
-                        <h3 className="truncate font-medium text-dark-100">
+                      <div className="mb-1 flex min-w-0 flex-wrap items-baseline gap-x-2">
+                        <h3 className="min-w-0 font-medium text-dark-100 [overflow-wrap:anywhere]">
                           {app.first_name || app.username || `#${app.user_id}`}
                         </h3>
                         {app.username && (
-                          <span className="shrink-0 text-sm text-dark-500">@{app.username}</span>
+                          <span className="min-w-0 text-sm text-dark-500 [overflow-wrap:anywhere]">
+                            @{app.username}
+                          </span>
                         )}
                       </div>
                       {app.company_name && (

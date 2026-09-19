@@ -1,26 +1,49 @@
+import { uiLocale } from '@/utils/uiLocale';
 import { useState } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueries, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 import { motion } from 'framer-motion';
 
 import { balanceApi } from '../api/balance';
+import { subscriptionApi } from '../api/subscription';
 import { useToast } from '../components/Toast';
 import { useDestructiveConfirm } from '../platform/hooks/useNativeDialog';
+import type { SbpRecurringInfo, SubscriptionListItem } from '../types';
 
 import { Card } from '@/components/data-display/Card';
 import { Button } from '@/components/primitives/Button';
 import { BackIcon } from '@/components/icons';
 import { staggerContainer, staggerItem } from '@/components/motion/transitions';
+import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 
 function formatCardDate(dateStr: string): string {
   try {
     const date = new Date(dateStr);
     if (isNaN(date.getTime())) return dateStr;
-    return date.toLocaleDateString();
+    return date.toLocaleDateString(uiLocale());
   } catch {
     return dateStr;
   }
+}
+
+/** Human-readable locale key for an SBP binding status (mirrors Subscription.tsx). */
+function sbpStatusLabelKey(status: string): string | null {
+  switch (status) {
+    case 'PENDING':
+      return 'subscription.sbpRecurring.statusPending';
+    case 'ACTIVE':
+      return 'subscription.sbpRecurring.statusActive';
+    case 'PAST_DUE':
+      return 'subscription.sbpRecurring.statusPastDue';
+    default:
+      return null;
+  }
+}
+
+interface SbpBinding {
+  sub: SubscriptionListItem;
+  info: SbpRecurringInfo;
 }
 
 export default function SavedCards() {
@@ -72,8 +95,86 @@ export default function SavedCards() {
     }
   };
 
+  // ── SBP (Platega) recurring bindings ────────────────────────────────
+  // Same query-key convention as the Subscription page (['sbp-recurring', subId])
+  // so the caches are shared and don't refetch redundantly when navigating
+  // between the two pages.
+  const { data: subscriptionsData } = useQuery({
+    queryKey: ['subscriptions-list'],
+    queryFn: subscriptionApi.getSubscriptions,
+  });
+  const nonTrialSubs = (subscriptionsData?.subscriptions ?? []).filter((sub) => !sub.is_trial);
+
+  // Опций покупки здесь нет, поэтому фичу проверяем пробой: спрашиваем первую
+  // подписку, а остальные — только если ответ пришёл. Выключенная автооплата
+  // отвечает 403, и без пробы браузер печатал бы красную строку с полным стеком
+  // на КАЖДУЮ подписку человека.
+  const probeSub = nonTrialSubs[0];
+  const probeQuery = useQuery({
+    queryKey: ['sbp-recurring', probeSub?.id],
+    queryFn: () => subscriptionApi.getSbpRecurring(probeSub.id),
+    enabled: !!probeSub,
+    retry: false,
+  });
+  const restQueries = useQueries({
+    queries: nonTrialSubs.slice(1).map((sub) => ({
+      queryKey: ['sbp-recurring', sub.id],
+      queryFn: () => subscriptionApi.getSbpRecurring(sub.id),
+      enabled: probeQuery.isSuccess,
+      retry: false,
+    })),
+  });
+  const sbpQueries = [probeQuery, ...restQueries];
+
+  // No section at all when nothing is bound: either the feature is off
+  // (every query 403s) or none of the subscriptions has an active binding.
+  const sbpBindings: SbpBinding[] = nonTrialSubs.reduce<SbpBinding[]>((acc, sub, index) => {
+    const info = sbpQueries[index]?.data;
+    if (info && info.status !== 'none') {
+      acc.push({ sub, info });
+    }
+    return acc;
+  }, []);
+
+  const [unlinkingSubId, setUnlinkingSubId] = useState<number | null>(null);
+  const confirmUnlinkSbp = useDestructiveConfirm();
+
+  const handleUnlinkSbp = async (subId: number) => {
+    if (unlinkingSubId !== null) return;
+    const confirmed = await confirmUnlinkSbp(
+      t('subscription.sbpRecurring.confirmCancel'),
+      t('subscription.sbpRecurring.cancel'),
+    );
+    if (!confirmed) return;
+    setUnlinkingSubId(subId);
+    try {
+      await subscriptionApi.cancelSbpRecurring(subId);
+      await queryClient.invalidateQueries({ queryKey: ['sbp-recurring', subId] });
+      showToast({
+        type: 'success',
+        title: t('subscription.sbpRecurring.cancelled'),
+        message: '',
+        duration: 3000,
+      });
+    } catch (error) {
+      console.error('Failed to unlink SBP binding:', error);
+      showToast({
+        type: 'error',
+        title: t('common.error'),
+        message: '',
+        duration: 3000,
+      });
+    } finally {
+      setUnlinkingSubId(null);
+    }
+  };
+
   return (
+    // key: remount the container when loading resolves — stagger orchestration
+    // runs once on mount, so cards arriving from the API later would otherwise
+    // stay stuck at their initial variant (opacity 0) after a hard refresh
     <motion.div
+      key={isLoading ? 'loading' : 'ready'}
       className="space-y-6"
       variants={staggerContainer}
       initial="initial"
@@ -96,23 +197,23 @@ export default function SavedCards() {
       {isLoading && (
         <motion.div variants={staggerItem}>
           <Card>
-            <div className="space-y-3">
+            <SkeletonGroup className="space-y-3">
               {[1, 2].map((i) => (
                 <div
                   key={i}
                   className="flex items-center justify-between rounded-linear border border-dark-700/30 bg-dark-800/30 p-4"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="h-6 w-6 animate-pulse rounded bg-dark-700" />
+                    <Skeleton className="h-6 w-6 shrink-0" />
                     <div className="space-y-2">
-                      <div className="h-4 w-32 animate-pulse rounded bg-dark-700" />
-                      <div className="h-3 w-24 animate-pulse rounded bg-dark-700" />
+                      <Skeleton className="h-4 w-32" />
+                      <Skeleton className="h-3 w-24" />
                     </div>
                   </div>
-                  <div className="h-8 w-20 animate-pulse rounded bg-dark-700" />
+                  <Skeleton className="h-8 w-20 shrink-0" />
                 </div>
               ))}
-            </div>
+            </SkeletonGroup>
           </Card>
         </motion.div>
       )}
@@ -136,12 +237,12 @@ export default function SavedCards() {
               {savedCards.map((card) => (
                 <div
                   key={card.id}
-                  className="flex items-center justify-between rounded-linear border border-dark-700/30 bg-dark-800/30 p-4"
+                  className="flex items-center justify-between gap-3 rounded-linear border border-dark-700/30 bg-dark-800/30 p-4"
                 >
-                  <div className="flex items-center gap-3">
-                    <span className="text-xl">💳</span>
-                    <div>
-                      <div className="font-medium text-dark-100">
+                  <div className="flex min-w-0 items-center gap-3">
+                    <span className="shrink-0 text-xl">💳</span>
+                    <div className="min-w-0">
+                      <div className="font-medium text-dark-100 [overflow-wrap:anywhere]">
                         {card.title ||
                           `${card.card_type || t('balance.savedCards.card')} ${card.card_last4 ? `*${card.card_last4}` : ''}`}
                       </div>
@@ -157,7 +258,7 @@ export default function SavedCards() {
                     size="sm"
                     onClick={() => handleDeleteCard(card.id)}
                     loading={deletingCardId === card.id}
-                    className="text-error-400 hover:text-error-300"
+                    className="shrink-0 text-error-400 hover:text-error-300"
                   >
                     {t('balance.savedCards.unlink')}
                   </Button>
@@ -179,6 +280,64 @@ export default function SavedCards() {
           </Card>
         </motion.div>
       ) : null}
+
+      {/* SBP (Platega) recurring bindings — convenience mirror of the
+          per-subscription block on the Subscription page. Rendered only
+          when at least one non-trial subscription has an active binding;
+          hidden entirely when the feature is off or nothing is bound. */}
+      {sbpBindings.length > 0 && (
+        <motion.div variants={staggerItem}>
+          <Card>
+            <h2 className="mb-3 text-sm font-semibold text-dark-100">
+              {t('balance.savedCards.sbpSection')}
+            </h2>
+            <div className="space-y-3">
+              {sbpBindings.map(({ sub, info }) => {
+                const statusKey = sbpStatusLabelKey(info.status);
+                return (
+                  <div
+                    key={sub.id}
+                    // Кнопка с длинной подписью на телефоне — под текстом: рядом
+                    // она сжималась в три строки и вываливалась из своей рамки.
+                    className="flex flex-col gap-3 rounded-linear border border-dark-700/30 bg-dark-800/30 p-4 sm:flex-row sm:items-center sm:justify-between"
+                  >
+                    <div className="flex min-w-0 items-center gap-3">
+                      <span className="shrink-0 text-xl">🔁</span>
+                      <div className="min-w-0">
+                        <div className="font-medium text-dark-100">
+                          {sub.tariff_name || `#${sub.id}`}
+                        </div>
+                        <div className="text-xs text-dark-500">
+                          {t('balance.savedCards.sbpBinding')}
+                          {statusKey ? ` · ${t(statusKey)}` : ''}
+                          {info.next_charge_at
+                            ? ` · ${t('subscription.sbpRecurring.nextCharge', {
+                                date: new Date(info.next_charge_at).toLocaleDateString(uiLocale(), {
+                                  day: '2-digit',
+                                  month: '2-digit',
+                                  year: 'numeric',
+                                }),
+                              })}`
+                            : ''}
+                        </div>
+                      </div>
+                    </div>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => handleUnlinkSbp(sub.id)}
+                      loading={unlinkingSubId === sub.id}
+                      className="shrink-0 self-start whitespace-nowrap text-error-400 hover:text-error-300 sm:self-auto"
+                    >
+                      {t('balance.savedCards.sbpUnlink')}
+                    </Button>
+                  </div>
+                );
+              })}
+            </div>
+          </Card>
+        </motion.div>
+      )}
     </motion.div>
   );
 }

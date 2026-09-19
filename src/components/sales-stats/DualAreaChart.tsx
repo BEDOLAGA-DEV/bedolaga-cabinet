@@ -11,6 +11,8 @@ import {
   YAxis,
 } from 'recharts';
 
+import { formatAxisTick } from '../../utils/formatNumber';
+
 import { SALES_STATS } from '../../constants/salesStats';
 import { useChartColors } from '../../hooks/useChartColors';
 
@@ -105,7 +107,8 @@ export function DualAreaChart({
             tick={{ fill: colors.tick, fontSize: SALES_STATS.AXIS.TICK_FONT_SIZE }}
             tickLine={false}
             axisLine={false}
-            width={SALES_STATS.AXIS.WIDTH}
+            width="auto"
+            tickFormatter={(value: number) => formatAxisTick(value)}
             allowDecimals={false}
           />
           <Tooltip
@@ -118,8 +121,8 @@ export function DualAreaChart({
             }}
             labelStyle={{ color: colors.label }}
             itemStyle={{ color: colors.label }}
-            formatter={(value: number | undefined, name: string | undefined) => {
-              const displayValue = value ?? 0;
+            formatter={(value, name) => {
+              const displayValue = Number(value) || 0;
               if (name === 'series1') return [displayValue, series1Label];
               return [displayValue, series2Label];
             }}

@@ -1,14 +1,16 @@
-import { useParams, useNavigate } from 'react-router';
+import { useLocation, useParams, useNavigate } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { partnerApi } from '../api/partners';
 import { campaignsApi } from '../api/campaigns';
-import { AdminBackButton } from '../components/admin';
+import { AdminBackButton, backTo } from '../components/admin';
+import { Skeleton, SkeletonGroup } from '../components/ui/skeleton';
 
 export default function AdminPartnerCampaignAssign() {
   const { t } = useTranslation();
   const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const queryClient = useQueryClient();
 
   // Fetch partner detail to know already assigned campaign IDs
@@ -58,16 +60,18 @@ export default function AdminPartnerCampaignAssign() {
       </div>
 
       {isLoading ? (
-        <div className="flex items-center justify-center py-12">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-        </div>
+        <SkeletonGroup className="space-y-3">
+          <Skeleton variant="card" count={3} className="h-16" />
+        </SkeletonGroup>
       ) : available.length === 0 ? (
         <div className="rounded-xl border border-dark-700 bg-dark-800 p-6">
           <div className="py-4 text-center text-sm text-dark-500">
             {t('admin.partnerDetail.campaigns.noAvailable')}
           </div>
           <button
-            onClick={() => navigate(`/admin/campaigns/create?partnerId=${userId}`)}
+            onClick={() =>
+              navigate(`/admin/campaigns/create?partnerId=${userId}`, backTo(location))
+            }
             className="mt-2 w-full rounded-lg bg-accent-500 px-4 py-3 font-medium text-on-accent transition-colors hover:bg-accent-600"
           >
             {t('admin.partnerDetail.campaigns.createNew')}
@@ -79,19 +83,21 @@ export default function AdminPartnerCampaignAssign() {
             <div key={campaign.id} className="rounded-xl border border-dark-700 bg-dark-800 p-4">
               <div className="flex items-center justify-between gap-4">
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium text-dark-100">{campaign.name}</span>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="min-w-0 font-medium text-dark-100 [overflow-wrap:anywhere]">
+                      {campaign.name}
+                    </span>
                     {!campaign.is_active && (
                       <span className="rounded bg-dark-600 px-1.5 py-0.5 text-xs text-dark-400">
                         {t('admin.campaigns.table.inactive')}
                       </span>
                     )}
                   </div>
-                  <div className="mt-1 flex min-w-0 items-center gap-3 text-xs text-dark-500">
-                    <span className="min-w-0 truncate font-mono">
+                  <div className="mt-1 flex min-w-0 flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-dark-500">
+                    <span className="min-w-0 font-mono break-all">
                       ?start={campaign.start_parameter}
                     </span>
-                    <span className="shrink-0">
+                    <span className="whitespace-nowrap">
                       {campaign.registrations_count}{' '}
                       {t('admin.campaigns.overview.registrations').toLowerCase()}
                     </span>
@@ -116,14 +122,16 @@ export default function AdminPartnerCampaignAssign() {
             >
               <div className="flex items-center justify-between gap-4">
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium text-dark-300">{campaign.name}</span>
-                    <span className="rounded bg-purple-500/20 px-1.5 py-0.5 text-xs text-purple-400">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="min-w-0 font-medium text-dark-300 [overflow-wrap:anywhere]">
+                      {campaign.name}
+                    </span>
+                    <span className="min-w-0 max-w-full rounded bg-purple-500/20 px-1.5 py-0.5 text-xs text-purple-400 [overflow-wrap:anywhere]">
                       {campaign.partner_name}
                     </span>
                   </div>
-                  <div className="mt-1 flex items-center gap-3 text-xs text-dark-500">
-                    <span className="font-mono">?start={campaign.start_parameter}</span>
+                  <div className="mt-1 text-xs text-dark-500">
+                    <span className="font-mono break-all">?start={campaign.start_parameter}</span>
                   </div>
                 </div>
               </div>

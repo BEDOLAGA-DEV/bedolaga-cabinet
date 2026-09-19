@@ -15,7 +15,9 @@ import BentoCard from '../components/ui/BentoCard';
 import { saveTopUpPendingInfo } from '../utils/topUpStorage';
 import { getSafeRedirectPath } from '../utils/safeRedirect';
 import { openPaymentUrl } from '../utils/openPaymentUrl';
+import { getApiErrorMessage } from '../utils/api-error';
 import { copyToClipboard } from '@/utils/clipboard';
+import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 import {
   CardIcon,
   CheckIcon,
@@ -199,8 +201,7 @@ export default function TopUpAmount() {
     },
     onError: (err: unknown) => {
       haptic.notification('error');
-      const axiosError = err as { response?: { data?: { detail?: string }; status?: number } };
-      setError(axiosError?.response?.data?.detail || t('balance.errors.invoiceFailed'));
+      setError(getApiErrorMessage(err, t('balance.errors.invoiceFailed')));
     },
   });
 
@@ -268,8 +269,7 @@ export default function TopUpAmount() {
       }
     },
     onError: (err: unknown) => {
-      const detail =
-        (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail || '';
+      const detail = getApiErrorMessage(err, '');
       setError(
         detail.includes('not yet implemented') ? t('balance.useBot') : detail || t('common.error'),
       );
@@ -295,9 +295,9 @@ export default function TopUpAmount() {
       return null;
     }
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-      </div>
+      <SkeletonGroup className="space-y-3">
+        <Skeleton variant="card" count={3} className="h-16" />
+      </SkeletonGroup>
     );
   }
 
@@ -351,7 +351,7 @@ export default function TopUpAmount() {
       // display-currency rounding step below it, so typing the advertised (rounded)
       // minimum isn't rejected by FX rounding.
       const decimals = targetCurrency === 'IRR' ? 0 : 2;
-      const roundingStep = convertToRub(Math.pow(10, -decimals));
+      const roundingStep = convertToRub(10 ** -decimals);
       if (canonicalRubles < minRubles && canonicalRubles >= minRubles - roundingStep) {
         canonicalRubles = minRubles;
       }
@@ -428,7 +428,9 @@ export default function TopUpAmount() {
         <div className="flex-1">
           <h3 className="text-lg font-bold text-dark-100">{methodName}</h3>
           <p className="text-sm text-dark-400">
-            {formatAmount(minRubles, 0)} – {formatAmount(maxRubles, 0)} {currencySymbol}
+            {formatAmount(minRubles, 0)} – {formatAmount(maxRubles, 0)}
+            {'\u00A0'}
+            {currencySymbol}
           </p>
         </div>
       </motion.div>
@@ -550,7 +552,7 @@ export default function TopUpAmount() {
                   {formatAmount(a, 0)}
                 </span>
                 <span
-                  className={`mt-0.5 text-xs ${isSelected ? 'text-accent-400/70' : 'text-dark-500'}`}
+                  className={`mt-0.5 text-xs ${isSelected ? 'text-accent-400' : 'text-dark-500'}`}
                 >
                   {currencySymbol}
                 </span>

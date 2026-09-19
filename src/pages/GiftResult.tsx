@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
+import { QRCodeSVG } from 'qrcode.react';
 import { giftApi } from '../api/gift';
 import { brandingApi, type TelegramWidgetConfig } from '../api/branding';
 import { Spinner } from '@/components/ui/Spinner';
@@ -27,7 +28,7 @@ function PendingState() {
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="flex flex-col items-center gap-6 text-center"
+      className="flex flex-col items-center gap-6 text-center [overflow-wrap:anywhere]"
     >
       <Spinner className="h-16 w-16 border-[3px]" />
       <div>
@@ -98,7 +99,7 @@ function CodeOnlySuccessState({
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="flex flex-col items-center gap-6 text-center"
+      className="flex flex-col items-center gap-6 text-center [overflow-wrap:anywhere]"
     >
       <AnimatedCheckmark />
 
@@ -120,6 +121,14 @@ function CodeOnlySuccessState({
         </p>
         <p className="select-all font-mono text-lg font-bold text-accent-400">{giftCode}</p>
       </div>
+
+      {/* QR — получателю проще отсканировать, чем копировать ссылку.
+          Кодируем bot-ссылку, если она есть: активация в боте — основной путь,
+          иначе ссылку кабинета. */}
+      <div className="flex w-full flex-col items-center gap-2 rounded-xl border border-dark-700/30 bg-white p-4">
+        <QRCodeSVG value={botLink ?? cabinetLink} size={180} level="M" includeMargin={false} />
+      </div>
+      <p className="-mt-3 text-xs text-dark-400">{t('gift.qrHint', 'Scan to activate the gift')}</p>
 
       {/* Share message preview */}
       <div className="w-full rounded-xl border border-dark-700/30 bg-dark-800/40 p-4 text-left">
@@ -203,7 +212,7 @@ function DeliveredState({
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="flex flex-col items-center gap-6 text-center"
+      className="flex flex-col items-center gap-6 text-center [overflow-wrap:anywhere]"
     >
       <AnimatedCheckmark />
 
@@ -262,7 +271,7 @@ function PendingActivationState({
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="flex flex-col items-center gap-6 text-center"
+      className="flex flex-col items-center gap-6 text-center [overflow-wrap:anywhere]"
     >
       {/* Info icon */}
       <div className="flex h-20 w-20 items-center justify-center rounded-full bg-warning-500/10">
@@ -319,7 +328,7 @@ function FailedState() {
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="flex flex-col items-center gap-6 text-center"
+      className="flex flex-col items-center gap-6 text-center [overflow-wrap:anywhere]"
     >
       <AnimatedCrossmark />
 
@@ -351,7 +360,7 @@ function PollErrorState() {
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="flex flex-col items-center gap-6 text-center"
+      className="flex flex-col items-center gap-6 text-center [overflow-wrap:anywhere]"
     >
       <div className="flex h-20 w-20 items-center justify-center rounded-full bg-warning-500/10">
         <ExclamationIcon className="h-10 w-10 text-warning-400" />
@@ -387,7 +396,7 @@ function PollTimedOutState({ onRetry }: { onRetry: () => void }) {
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="flex flex-col items-center gap-6 text-center"
+      className="flex flex-col items-center gap-6 text-center [overflow-wrap:anywhere]"
     >
       <div className="flex h-20 w-20 items-center justify-center rounded-full bg-dark-800/50">
         <ClockIcon className="h-10 w-10 text-dark-400" />
@@ -422,7 +431,7 @@ function NoTokenState() {
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="flex flex-col items-center gap-6 text-center"
+      className="flex flex-col items-center gap-6 text-center [overflow-wrap:anywhere]"
     >
       <div className="flex h-20 w-20 items-center justify-center rounded-full bg-dark-800/50">
         <ExclamationIcon className="h-10 w-10 text-dark-400" />

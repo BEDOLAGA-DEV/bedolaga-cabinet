@@ -3,9 +3,15 @@ import { useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import i18n from '../i18n';
-import { promoOffersApi, PromoOfferLog, OFFER_TYPE_CONFIG, OfferType } from '../api/promoOffers';
+import {
+  promoOffersApi,
+  type PromoOfferLog,
+  OFFER_TYPE_CONFIG,
+  type OfferType,
+} from '../api/promoOffers';
 import { usePlatform } from '../platform/hooks/usePlatform';
 import { BackIcon, EditIcon, SendIcon, ClockIcon, UserIcon } from '@/components/icons';
+import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 
 // Helper functions
 const formatDateTime = (date: string | null): string => {
@@ -81,7 +87,7 @@ export default function AdminPromoOffers() {
           {!capabilities.hasBackButton && (
             <button
               onClick={() => navigate('/admin')}
-              className="flex h-10 w-10 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
             >
               <BackIcon />
             </button>
@@ -126,9 +132,9 @@ export default function AdminPromoOffers() {
       {activeTab === 'templates' && (
         <>
           {templatesLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-            </div>
+            <SkeletonGroup className="space-y-3">
+              <Skeleton variant="card" count={3} className="h-16" />
+            </SkeletonGroup>
           ) : templates.length === 0 ? (
             <div className="py-12 text-center">
               <p className="text-dark-400">{t('admin.promoOffers.noData.templates')}</p>
@@ -229,9 +235,9 @@ export default function AdminPromoOffers() {
       {activeTab === 'logs' && (
         <>
           {logsLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent-500 border-t-transparent" />
-            </div>
+            <SkeletonGroup className="space-y-3">
+              <Skeleton variant="card" count={3} className="h-16" />
+            </SkeletonGroup>
           ) : logs.length === 0 ? (
             <div className="py-12 text-center">
               <p className="text-dark-400">{t('admin.promoOffers.noData.logs')}</p>
@@ -248,7 +254,9 @@ export default function AdminPromoOffers() {
                       <div className="min-w-0">
                         <div className="mb-1 flex flex-wrap items-center gap-2">
                           <span className="font-medium text-dark-100">
-                            {log.user?.full_name || log.user?.username || `User #${log.user_id}`}
+                            {log.user?.full_name ||
+                              log.user?.username ||
+                              (log.user_id ? `#${log.user_id}` : '—')}
                           </span>
                           <span
                             className={`rounded px-2 py-0.5 text-xs ${getActionColor(log.action)}`}
@@ -258,13 +266,13 @@ export default function AdminPromoOffers() {
                         </div>
                         <div className="text-sm text-dark-400">
                           {log.source && <span>{getOfferTypeLabel(log.source)}</span>}
-                          {log.percent && log.percent > 0 && (
+                          {log.percent != null && log.percent > 0 && (
                             <span className="ml-2 text-accent-400">{log.percent}%</span>
                           )}
                         </div>
                       </div>
                     </div>
-                    <div className="pl-13 flex items-center gap-1 text-xs text-dark-500 sm:pl-0">
+                    <div className="flex items-center gap-1 pl-[3.25rem] text-xs text-dark-500 sm:pl-0">
                       <ClockIcon className="h-4 w-4" />
                       {formatDateTime(log.created_at)}
                     </div>

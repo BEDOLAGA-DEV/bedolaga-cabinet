@@ -8,6 +8,8 @@ export interface GiftTariffPeriod {
   price_label: string;
   original_price_kopeks: number | null;
   discount_percent: number | null;
+  /** Период, отмеченный оператором как самый выгодный. */
+  is_highlighted?: boolean;
 }
 
 export interface GiftTariff {
@@ -17,6 +19,8 @@ export interface GiftTariff {
   traffic_limit_gb: number;
   device_limit: number;
   periods: GiftTariffPeriod[];
+  /** Тариф, отмеченный оператором как выгодный. */
+  is_highlighted?: boolean;
 }
 
 export interface GiftPaymentMethodSubOption {
@@ -93,6 +97,7 @@ export interface PendingGift {
 }
 
 export interface SentGift {
+  /** Short display id only — NOT claimable. Sharing must use gift_code / *_claim_url. */
   token: string;
   tariff_name: string | null;
   period_days: number;
@@ -102,6 +107,10 @@ export interface SentGift {
   gift_message: string | null;
   activated_by_username: string | null;
   created_at: string | null;
+  /** Canonical claim artifacts. Absent on older backends and while the gift is not claimable. */
+  gift_code?: string | null;
+  bot_claim_url?: string | null;
+  cabinet_claim_url?: string | null;
 }
 
 export interface ReceivedGift {

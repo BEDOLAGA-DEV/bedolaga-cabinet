@@ -6,13 +6,14 @@ import { openLink as sdkOpenLink } from '@telegram-apps/sdk-react';
 import { subscriptionApi } from '../api/subscription';
 import { useTelegramSDK } from '../hooks/useTelegramSDK';
 import { useHaptic } from '@/platform';
-import { SettingsIcon } from '@/components/icons';
+import { PhoneIcon, SettingsIcon } from '@/components/icons';
 import { resolveTemplate, hasTemplates } from '../utils/templateEngine';
 import { openAppScheme } from '../utils/openAppScheme';
 import { isHappCryptolinkMode, resolveConnectionUrlForUi } from '../utils/connectionLink';
 import { useAuthStore } from '../store/auth';
 import type { AppConfig, RemnawavePlatformData } from '../types';
 import InstallationGuide from '../components/connection/InstallationGuide';
+import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 
 export default function Connection() {
   const { t, i18n } = useTranslation();
@@ -114,11 +115,19 @@ export default function Connection() {
   const openDeepLink = useCallback(
     (deepLink: string) => {
       let resolved = deepLink;
-      if (isHappCryptolinkMode(connectionLink?.connect_mode) && qrConnectionUrl) {
-        // In HAPP cryptolink mode always open the resolved happ://crypt... URL.
-        resolved = qrConnectionUrl;
-      } else if (hasTemplates(resolved)) {
+      if (hasTemplates(resolved)) {
         resolved = resolveUrl(resolved);
+      }
+      // In HAPP cryptolink mode keep hiding the plain subscription link: force the
+      // happ://crypt... URL only when the button fell back to it or its template
+      // could not be resolved. An explicit link from the panel's Subpage config
+      // (e.g. happ://add/...) wins — admins expect Subpage edits to apply here.
+      if (
+        isHappCryptolinkMode(connectionLink?.connect_mode) &&
+        qrConnectionUrl &&
+        (!resolved || resolved === appConfig?.subscriptionUrl || hasTemplates(resolved))
+      ) {
+        resolved = qrConnectionUrl;
       }
       const isHttpUrl = /^https?:\/\//i.test(resolved);
       const finalUrlForTelegram = isHttpUrl
@@ -140,7 +149,14 @@ export default function Connection() {
       // still navigate normally. (Telegram bug #654272.)
       openAppScheme(resolved);
     },
-    [isTelegramWebApp, i18n.language, resolveUrl, connectionLink?.connect_mode, qrConnectionUrl],
+    [
+      isTelegramWebApp,
+      i18n.language,
+      resolveUrl,
+      connectionLink?.connect_mode,
+      qrConnectionUrl,
+      appConfig?.subscriptionUrl,
+    ],
   );
 
   // Check if any platform has configured apps
@@ -153,9 +169,15 @@ export default function Connection() {
 
   if (isLoading || isConnectionLinkLoading) {
     return (
-      <div className="flex flex-1 items-center justify-center py-20">
-        <div className="h-10 w-10 animate-spin rounded-full border-[3px] border-accent-500/30 border-t-accent-500" />
-      </div>
+      <SkeletonGroup className="space-y-6 pb-6">
+        {/* Повторяет шапку InstallationGuide: кнопка «назад», заголовок, выбор платформы. */}
+        <div className="flex items-center gap-3">
+          <Skeleton className="h-10 w-10 shrink-0 rounded-xl" />
+          <Skeleton className="h-6 flex-1" />
+          <Skeleton className="h-10 w-10 shrink-0 rounded-xl" />
+        </div>
+        <Skeleton variant="card" count={3} className="h-24" />
+      </SkeletonGroup>
     );
   }
 
@@ -163,19 +185,7 @@ export default function Connection() {
     return (
       <div className="flex flex-1 flex-col items-center justify-center p-8 text-center">
         <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-dark-800">
-          <svg
-            className="h-8 w-8 text-dark-400"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={1.5}
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3"
-            />
-          </svg>
+          <PhoneIcon className="h-8 w-8 text-dark-400" />
         </div>
         <h3 className="mb-2 text-xl font-bold text-dark-100">
           {t('subscription.connection.notConfigured')}
@@ -217,6 +227,7 @@ export default function Connection() {
       isTelegramWebApp={isTelegramWebApp}
       onGoBack={handleGoBack}
       onOpenQR={handleOpenQR}
+      username={user?.username ?? undefined}
     />
   );
 }

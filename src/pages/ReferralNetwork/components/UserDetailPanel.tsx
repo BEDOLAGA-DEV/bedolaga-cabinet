@@ -1,9 +1,11 @@
+import { uiLocale } from '@/utils/uiLocale';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { referralNetworkApi } from '@/api/referralNetwork';
 import { CloseIcon } from '@/components/icons';
 import { useReferralNetworkStore } from '@/store/referralNetwork';
 import { formatKopeksToRubles, getSubscriptionStatusColor } from '../utils';
+import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 
 interface UserDetailPanelProps {
   userId: number;
@@ -45,9 +47,9 @@ export function UserDetailPanel({ userId, className }: UserDetailPanelProps) {
       {/* Content */}
       <div className="overflow-y-auto p-4 pb-[calc(1rem+var(--safe-bottom,0px))]">
         {isLoading && (
-          <div className="flex items-center justify-center py-8">
-            <div className="h-6 w-6 animate-spin rounded-full border-2 border-dark-600 border-t-accent-400" />
-          </div>
+          <SkeletonGroup className="space-y-3">
+            <Skeleton variant="card" count={3} className="h-16" />
+          </SkeletonGroup>
         )}
 
         {isError && (
@@ -115,7 +117,7 @@ export function UserDetailPanel({ userId, className }: UserDetailPanelProps) {
                   {user.subscription_end && (
                     <p className="mt-0.5 text-xs text-dark-400">
                       {t('admin.referralNetwork.user.validUntil', {
-                        date: new Date(user.subscription_end).toLocaleDateString(),
+                        date: new Date(user.subscription_end).toLocaleDateString(uiLocale()),
                       })}
                     </p>
                   )}
@@ -138,7 +140,8 @@ export function UserDetailPanel({ userId, className }: UserDetailPanelProps) {
                     {t('admin.referralNetwork.user.totalSpent')}
                   </span>
                   <span className="font-mono text-dark-100">
-                    {formatKopeksToRubles(user.personal_spent_kopeks)} ₽
+                    {formatKopeksToRubles(user.personal_spent_kopeks)}
+                    {'\u00A0'}₽
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-sm">
@@ -146,7 +149,8 @@ export function UserDetailPanel({ userId, className }: UserDetailPanelProps) {
                     {t('admin.referralNetwork.user.referralEarnings')}
                   </span>
                   <span className="font-mono text-accent-400">
-                    {formatKopeksToRubles(user.personal_revenue_kopeks)} ₽
+                    {formatKopeksToRubles(user.personal_revenue_kopeks)}
+                    {'\u00A0'}₽
                   </span>
                 </div>
               </div>
@@ -175,7 +179,8 @@ export function UserDetailPanel({ userId, className }: UserDetailPanelProps) {
                     {t('admin.referralNetwork.user.branchRevenue')}
                   </span>
                   <span className="font-mono text-dark-100">
-                    {formatKopeksToRubles(user.branch_revenue_kopeks)} ₽
+                    {formatKopeksToRubles(user.branch_revenue_kopeks)}
+                    {'\u00A0'}₽
                   </span>
                 </div>
               </div>

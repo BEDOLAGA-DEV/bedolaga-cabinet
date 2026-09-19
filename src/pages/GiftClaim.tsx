@@ -10,6 +10,7 @@ import { Spinner } from '@/components/ui/Spinner';
 import { AnimatedCheckmark } from '@/components/ui/AnimatedCheckmark';
 import { cn } from '@/lib/utils';
 import { CheckCircleIcon, CheckIcon, CopyIcon } from '@/components/icons';
+import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 
 const MAX_POLL_MS = 10 * 60 * 1000; // poll an unsettled payment for up to 10 min
 
@@ -98,10 +99,14 @@ export default function GiftClaim() {
   if (isLoading) {
     return (
       <Shell>
-        <div className="flex flex-col items-center gap-4 py-6 text-center">
-          <Spinner className="h-12 w-12 border-[3px]" />
-          <p className="text-sm text-dark-400">{t('common.loading', 'Loading...')}</p>
-        </div>
+        <SkeletonGroup className="flex flex-col items-center gap-5 text-center [overflow-wrap:anywhere]">
+          <Skeleton className="h-10 w-10" />
+          <div className="w-full space-y-2">
+            <Skeleton className="mx-auto h-7 w-48" />
+            <Skeleton className="mx-auto h-5 w-56" />
+          </div>
+          <Skeleton variant="card" className="h-20 w-full" />
+        </SkeletonGroup>
       </Shell>
     );
   }
@@ -168,7 +173,7 @@ export default function GiftClaim() {
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="flex flex-col items-center gap-5 text-center"
+          className="flex flex-col items-center gap-5 text-center [overflow-wrap:anywhere]"
         >
           <AnimatedCheckmark />
           <h1 className="text-xl font-bold text-dark-50">
@@ -230,7 +235,7 @@ export default function GiftClaim() {
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="flex flex-col items-center gap-5 text-center"
+        className="flex flex-col items-center gap-5 text-center [overflow-wrap:anywhere]"
       >
         <div className="text-4xl">🎁</div>
         <div>
