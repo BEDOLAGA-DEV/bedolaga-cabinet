@@ -12,6 +12,7 @@ import { CampaignDetailPanel } from './components/CampaignDetailPanel';
 import { NetworkStats } from './components/NetworkStats';
 import { NetworkLegend } from './components/NetworkLegend';
 import { NetworkControls } from './components/NetworkControls';
+import { ArrowsLeftRightIcon } from '@/components/icons';
 
 export function ReferralNetwork() {
   const { t } = useTranslation();
@@ -80,19 +81,7 @@ export function ReferralNetwork() {
         {!hasScope && (
           <div className="absolute inset-0 z-10 flex items-center justify-center">
             <div className="text-center">
-              <svg
-                className="mx-auto mb-4 h-12 w-12 text-dark-600"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={1}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5"
-                />
-              </svg>
+              <ArrowsLeftRightIcon className="mx-auto mb-4 h-12 w-12 text-dark-600" />
               <p className="max-w-xs text-sm text-dark-500">
                 {t('admin.referralNetwork.scope.emptyState')}
               </p>

@@ -19,11 +19,13 @@ import type {
 
 import { Card } from '@/components/data-display/Card';
 import { Button } from '@/components/primitives/Button';
-import { ChevronRightIcon, CreditCardIcon, WalletIcon } from '@/components/icons';
+import { ChevronDownIcon, ChevronRightIcon, CreditCardIcon, WalletIcon } from '@/components/icons';
 import { staggerContainer, staggerItem } from '@/components/motion/transitions';
 import { isPaidStatus, isFailedStatus } from '../utils/paymentStatus';
 import { transactionTypeBadge, transactionTypeLabelKey } from '../utils/transactionType';
 import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
+
+const PREVIEW_COUNT = 5;
 
 export default function Balance() {
   const { t } = useTranslation();
@@ -80,6 +82,9 @@ export default function Balance() {
   }> | null>(null);
   const [promoSelectCode, setPromoSelectCode] = useState<string | null>(null);
   const [transactionsPage, setTransactionsPage] = useState(1);
+  // Превью пока список не развёрнут: сразу видно последние операции без клика.
+  // После «показать все» переходит в постраничный режим (см. transactionsPage) —
+  // чтобы не тянуть сотни транзакций одним запросом.
   const [showAllTransactions, setShowAllTransactions] = useState(false);
 
   const { data: transactions, isLoading } = useQuery<PaginatedResponse<Transaction>>({
@@ -205,11 +210,13 @@ export default function Balance() {
     }
   };
 
-  const PREVIEW_COUNT = 5;
-  const visibleTransactions = showAllTransactions
-    ? transactions?.items
-    : transactions?.items?.slice(0, PREVIEW_COUNT);
-  const hasMore = (transactions?.items?.length ?? 0) > PREVIEW_COUNT;
+  // Превью — только первая страница обрезанная до PREVIEW_COUNT; постраничный
+  // режим показывает то, что реально вернул сервер для текущей страницы.
+  const visibleTransactions =
+    showAllTransactions || transactionsPage > 1
+      ? transactions?.items
+      : transactions?.items?.slice(0, PREVIEW_COUNT);
+  const hasMore = !showAllTransactions && (transactions?.items?.length ?? 0) > PREVIEW_COUNT;
 
   const renewal30 = renewalOptions?.find((opt) => opt.period_days === 30) ?? null;
   const balanceKopeks = balanceData?.balance_kopeks ?? 0;
@@ -260,7 +267,7 @@ export default function Balance() {
           ) : (
             <div className="flex items-center gap-3 rounded-[var(--bento-radius)] border border-error-500/30 bg-error-500/10 px-4 py-3 text-sm text-error-400">
               <span className="min-w-0 flex-1">
-                {t('balance.renewal.insufficient', 'Для продления на 30 дней не хватает')}{' '}
+                {t('balance.renewal.insufficient', 'Для продления на 30 дней не хватает')}{' '}
                 <span className="whitespace-nowrap font-semibold">
                   {formatAmount(missingRubles!, 2)}
                   {' '}
@@ -277,76 +284,6 @@ export default function Balance() {
             </div>
           )}
         </motion.div>
-      )}
-
-      {/* Payment Methods */}
-      {paymentMethodsLoading ? (
-        <motion.div variants={staggerItem}>
-          <Card>
-            <SkeletonGroup>
-              <Skeleton className="mb-4 h-6 w-36" />
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {[1, 2, 3].map((i) => (
-                  <div
-                    key={i}
-                    className="rounded-[var(--bento-radius)] border border-dark-700/30 p-4"
-                  >
-                    <Skeleton className="mb-2 h-4 w-24" />
-                    <Skeleton className="h-3 w-32" />
-                  </div>
-                ))}
-              </div>
-            </SkeletonGroup>
-          </Card>
-        </motion.div>
-      ) : (
-        paymentMethods &&
-        paymentMethods.length > 0 && (
-          <motion.div variants={staggerItem}>
-            <Card>
-              <h2 className="mb-4 text-lg font-semibold text-dark-100">
-                {t('balance.topUpBalance')}
-              </h2>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {paymentMethods.map((method) => {
-                  const methodKey = method.id.toLowerCase().replace(/-/g, '_');
-                  const translatedName = t(`balance.paymentMethods.${methodKey}.name`, {
-                    defaultValue: '',
-                  });
-                  const translatedDesc = t(`balance.paymentMethods.${methodKey}.description`, {
-                    defaultValue: '',
-                  });
-
-                  return (
-                    <Card
-                      key={method.id}
-                      interactive={method.is_available}
-                      className={!method.is_available ? 'cursor-not-allowed opacity-50' : ''}
-                      onClick={() =>
-                        method.is_available && navigate(`/balance/top-up/${method.id}`)
-                      }
-                    >
-                      <div className="font-semibold text-dark-100">
-                        {method.name || translatedName}
-                      </div>
-                      {(method.description || translatedDesc) && (
-                        <div className="mt-1 text-sm text-dark-500">
-                          {method.description || translatedDesc}
-                        </div>
-                      )}
-                      <div className="mt-3 text-xs text-dark-600">
-                        {formatAmount(method.min_amount_kopeks / 100, 0)} –{' '}
-                        {formatAmount(method.max_amount_kopeks / 100, 0)}
-                        {' '}
-                        {currencySymbol}
-                      </div>
-                    </Card>
-                  );
-                })}
-              </div>
-            </Card>
-          </motion.div>
-        )
       )}
 
       {/* Promo Code Section */}
@@ -433,16 +370,87 @@ export default function Balance() {
                 }}
                 className="text-xs text-dark-400 hover:text-dark-200"
               >
-                {t('common.cancel')}
+                {t('common.cancel', 'Отмена')}
               </button>
             </motion.div>
           )}
         </Card>
       </motion.div>
 
-      {/* Transaction History */}
+      {/* Payment Methods */}
+      {paymentMethodsLoading ? (
+        <motion.div variants={staggerItem}>
+          <Card>
+            <SkeletonGroup>
+              <Skeleton className="mb-4 h-6 w-36" />
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {[1, 2, 3].map((i) => (
+                  <div
+                    key={i}
+                    className="rounded-[var(--bento-radius)] border border-dark-700/30 p-4"
+                  >
+                    <Skeleton className="mb-2 h-4 w-24" />
+                    <Skeleton className="h-3 w-32" />
+                  </div>
+                ))}
+              </div>
+            </SkeletonGroup>
+          </Card>
+        </motion.div>
+      ) : (
+        paymentMethods &&
+        paymentMethods.length > 0 && (
+          <motion.div variants={staggerItem}>
+            <Card>
+              <h2 className="mb-4 text-lg font-semibold text-dark-100">
+                {t('balance.topUpBalance')}
+              </h2>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {paymentMethods.map((method) => {
+                  const methodKey = method.id.toLowerCase().replace(/-/g, '_');
+                  const translatedName = t(`balance.paymentMethods.${methodKey}.name`, {
+                    defaultValue: '',
+                  });
+                  const translatedDesc = t(`balance.paymentMethods.${methodKey}.description`, {
+                    defaultValue: '',
+                  });
+
+                  return (
+                    <Card
+                      key={method.id}
+                      interactive={method.is_available}
+                      className={!method.is_available ? 'cursor-not-allowed opacity-50' : ''}
+                      onClick={() =>
+                        method.is_available && navigate(`/balance/top-up/${method.id}`)
+                      }
+                    >
+                      <div className="font-semibold text-dark-100">
+                        {method.name || translatedName}
+                      </div>
+                      {(method.description || translatedDesc) && (
+                        <div className="mt-1 text-sm text-dark-500">
+                          {method.description || translatedDesc}
+                        </div>
+                      )}
+                      <div className="mt-3 text-xs text-dark-600">
+                        {formatAmount(method.min_amount_kopeks / 100, 0)} –{' '}
+                        {formatAmount(method.max_amount_kopeks / 100, 0)}
+                        {' '}
+                        {currencySymbol}
+                      </div>
+                    </Card>
+                  );
+                })}
+              </div>
+            </Card>
+          </motion.div>
+        )
+      )}
+
+      {/* Transaction History — превью первых PREVIEW_COUNT сразу видно, «показать
+          все» переключает в постраничный режим (транзакций может быть сотни). */}
       <motion.div variants={staggerItem}>
-        <Card>
+        <Card className="overflow-hidden">
           <h2 className="mb-4 text-lg font-semibold text-dark-100">
             {t('balance.transactionHistory')}
           </h2>
@@ -474,7 +482,7 @@ export default function Balance() {
                     <motion.div
                       key={tx.id}
                       variants={staggerItem}
-                      className="flex items-center justify-between rounded-linear border border-dark-700/30 bg-dark-800/30 p-4"
+                      className="rounded-linear border border-dark-700/30 bg-dark-800/30 p-4"
                     >
                       {/* Сумма — в строке с типом и датой и держит свою ширину;
                           описание — под ними во всю ширину. Рядом с суммой
@@ -510,27 +518,28 @@ export default function Balance() {
                 })}
               </motion.div>
 
-              {(hasMore || showAllTransactions) && (
+              {hasMore && (
                 <button
-                  onClick={() => setShowAllTransactions((prev) => !prev)}
-                  className="mt-4 w-full text-center text-sm text-dark-400 transition-colors hover:text-dark-200"
+                  onClick={() => setShowAllTransactions(true)}
+                  className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-linear border border-dark-700/30 py-2.5 text-sm font-medium text-dark-300 transition-colors hover:bg-dark-800/50 hover:text-dark-100"
                 >
-                  {showAllTransactions ? t('common.collapse') : t('common.all')}
+                  {t('balance.showAll', 'Показать все')}
+                  <ChevronDownIcon className="h-4 w-4" />
                 </button>
               )}
 
               {showAllTransactions && transactions && transactions.pages > 1 && (
-                <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-dark-500">
+                // Три колонки: «Далее» не уезжает отдельной строкой на всю ширину.
+                <div className="mt-4 grid grid-cols-[1fr_auto_1fr] items-center gap-3 text-sm text-dark-500">
                   <Button
                     variant="secondary"
                     size="sm"
                     onClick={() => setTransactionsPage((prev) => Math.max(1, prev - 1))}
                     disabled={transactions.page <= 1}
-                    className="min-w-[120px] flex-1 sm:flex-none"
                   >
                     {t('common.back')}
                   </Button>
-                  <div className="flex-1 text-center">
+                  <div className="whitespace-nowrap text-center">
                     {t('balance.page', {
                       current: transactions.page,
                       total: transactions.pages,
@@ -545,7 +554,6 @@ export default function Balance() {
                       )
                     }
                     disabled={transactions.page >= transactions.pages}
-                    className="min-w-[120px] flex-1 sm:flex-none"
                   >
                     {t('common.next')}
                   </Button>

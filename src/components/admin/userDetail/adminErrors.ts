@@ -48,6 +48,10 @@ const RULES: Rule[] = [
   },
   { pattern: /^Sync error/, key: 'panelUnreachable' },
   { pattern: /^Subscription reset failed/, key: 'resetNotFinished' },
+  {
+    pattern: /^Trial is still unavailable/,
+    key: 'trialBlockedBySubscription',
+  },
   { pattern: /^User has no subscription/, key: 'noSubscription' },
   { pattern: /^No devices to reset/, key: 'noDevices' },
   { pattern: /^Device not found/, key: 'deviceNotFound' },

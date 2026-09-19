@@ -3,16 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { promoApi, type LoyaltyTierInfo } from '../api/promo';
 import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
-
-const StarIcon = () => (
-  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"
-    />
-  </svg>
-);
+import { StarIcon } from '@/components/icons';
 
 export default function Info() {
   const { t } = useTranslation();
@@ -68,7 +59,7 @@ export default function Info() {
     <div className="space-y-6">
       {/* Заголовок */}
       <div className="flex items-center gap-3">
-        <StarIcon />
+        <StarIcon className="h-6 w-6" />
         <h1 className="text-2xl font-bold text-dark-50 sm:text-3xl">Статус</h1>
       </div>
 
@@ -160,19 +151,7 @@ export default function Info() {
                             : 'bg-dark-700 text-dark-400'
                       }`}
                     >
-                      <svg
-                        className="h-5 w-5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={1.5}
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"
-                        />
-                      </svg>
+                      <StarIcon className="h-5 w-5" />
                     </div>
                     <div className="min-w-0">
                       <h4 className="font-semibold text-dark-50 [overflow-wrap:anywhere]">

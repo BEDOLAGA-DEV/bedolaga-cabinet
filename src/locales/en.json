@@ -430,6 +430,8 @@
     "noSubscription": "You don't have an active subscription",
     "getSubscription": "Get Subscription",
     "cta": {
+      "moveToTariff": "Switch to a plan",
+      "moveToTariffHint": "Bought before plans were introduced",
       "expiredHint": "Choose a plan and pay",
       "trialHint": "More traffic and devices",
       "activeHint": "Renewal and plan change",
@@ -688,9 +690,10 @@
       "cooldown": "Available in {{minutes}} min {{seconds}} sec"
     },
     "legacy": {
-      "selectTariffTitle": "Select a tariff to renew",
-      "selectTariffDescription": "Your current subscription was created before tariffs were introduced. To renew, please select one of the available tariffs.",
-      "currentSubContinues": "Your current subscription will remain active until it expires."
+      "noTariff": "No plan",
+      "selectTariffTitle": "Bought before plans were introduced",
+      "selectTariffDescription": "Choose a plan: it applies to this same subscription, your connection link stays the same.",
+      "currentSubContinues": "Remaining days are kept and added to the paid period."
     },
     "promoGroup": {
       "yourGroup": "Your group: {{name}}",
@@ -902,6 +905,7 @@
       }
     },
     "transactionHistory": "Transaction History",
+    "showAll": "Show all",
     "noTransactions": "No transactions",
     "date": "Date",
     "type": "Type",
@@ -5055,7 +5059,8 @@
             "trafficUsed": "Used",
             "devices": "Devices",
             "squads": "Squads"
-          }
+          },
+          "graceNote": "This person has temporary access until {{date}} — while it lasts, the panel holds its settings. That is not a mismatch, nothing needs syncing."
         },
         "loadError": "Could not load the user",
         "done": {
@@ -5111,17 +5116,43 @@
       "until": "until {{date}}",
       "sort": {
         "label": "Sort",
-        "expires": "by expiry",
-        "activity": "by activity",
-        "created": "by sign-up date",
-        "balance": "by balance",
-        "spent": "by spending",
-        "traffic": "by traffic",
-        "purchases": "by purchases"
+        "expires": {
+          "asc": "Expiring soonest",
+          "desc": "Expiring latest"
+        },
+        "grace": {
+          "asc": "Grace ends soonest",
+          "desc": "Grace ends latest"
+        },
+        "activity": {
+          "asc": "Least recently active",
+          "desc": "Most recently active"
+        },
+        "created": {
+          "asc": "Oldest first",
+          "desc": "Newest first"
+        },
+        "balance": {
+          "asc": "Lowest balance",
+          "desc": "Highest balance"
+        },
+        "spent": {
+          "asc": "Least spent",
+          "desc": "Most spent"
+        },
+        "traffic": {
+          "asc": "Least traffic",
+          "desc": "Most traffic"
+        },
+        "purchases": {
+          "asc": "Fewest purchases",
+          "desc": "Most purchases"
+        }
       },
       "views": {
         "all": "All",
         "expiring": "Expiring in {{days}} days",
+        "grace": "In grace",
         "traffic": "Traffic running out",
         "nopay": "No purchases",
         "online": "Online",
@@ -5171,7 +5202,8 @@
         "today": "expires today",
         "expiredToday": "expired today",
         "expiredAgo": "expired {{count}} d ago",
-        "limited": "traffic exhausted"
+        "limited": "traffic exhausted",
+        "graceUntil": "temporary until {{date}}"
       },
       "summaryShort": {
         "total_one": "{{value}}",
@@ -5216,8 +5248,10 @@
         "tariffNotFound": "Plan not found",
         "promoGroupNotFound": "Promo group not found",
         "subscriptionNotFound": "Subscription not found",
-        "userNotFound": "User not found"
-      }
+        "userNotFound": "User not found",
+        "trialBlockedBySubscription": "The trial is still unavailable: this person has another subscription. Remove it first."
+      },
+      "moreTariffs": "{{count}} more"
     },
     "promoOffers": {
       "title": "Promo Offers",

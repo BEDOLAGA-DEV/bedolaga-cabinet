@@ -229,6 +229,27 @@ describe('AdminUsers', () => {
     expect(screen.getAllByText(', admin.users.connectedNow').length).toBeGreaterThan(0);
   });
 
+  it('точка «в сети» гаснет сама, когда отметке панели стало больше минуты', async () => {
+    // Жалоба владельца: список показывал «онлайн» тех, кто отключился минуту назад.
+    // Признак с сервера замирал на открытой странице — теперь строка считает по отметке.
+    getUsers.mockResolvedValue(
+      page(
+        [
+          user(1, { online_at: new Date(Date.now() - 5_000).toISOString() }),
+          user(2, { online_at: new Date(Date.now() - 120_000).toISOString() }),
+        ],
+        2,
+      ),
+    );
+    await renderPage();
+    await screen.findAllByText('Имя1');
+    // Таблица и карточки рисуют по строке на каждого, поэтому подписей вдвое больше
+    // числа подключённых: важно, что все они принадлежат первому человеку.
+    const marks = await screen.findAllByText(', admin.users.connectedNow');
+    expect(marks.length).toBe(2);
+    expect(marks.every((node) => node.parentElement?.textContent?.startsWith('Имя1'))).toBe(true);
+  });
+
   it('выбранный фильтр виден чипом и снимается крестиком', async () => {
     getUsers.mockResolvedValue(page([], 0));
     await renderPage('/admin/users?sub=expired');
@@ -259,9 +280,24 @@ describe('AdminUsers', () => {
     await renderPage('/admin/users?sort=balance');
     expect(
       await screen.findByRole('button', {
-        name: 'admin.users.sort.label: admin.users.sort.balance',
+        name: 'admin.users.sort.label: admin.users.sort.balance.desc',
       }),
     ).toBeTruthy();
+  });
+
+  it('обратное направление из адреса — в подписи кнопки и в запросе', async () => {
+    getUsers.mockResolvedValue(page([], 0));
+    await renderPage('/admin/users?dir=asc');
+    expect(
+      await screen.findByRole('button', {
+        name: 'admin.users.sort.label: admin.users.sort.created.asc',
+      }),
+    ).toBeTruthy();
+    await waitFor(() =>
+      expect(getUsers).toHaveBeenLastCalledWith(
+        expect.objectContaining({ sort_by: 'created_at', sort_order: 'asc' }),
+      ),
+    );
   });
 
   it('сырые статусы не показываются — только словарь', async () => {

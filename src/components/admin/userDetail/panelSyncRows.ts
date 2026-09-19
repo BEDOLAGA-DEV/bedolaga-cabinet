@@ -11,6 +11,8 @@ export type SyncRowKey = 'status' | 'until' | 'trafficLimit' | 'trafficUsed' | '
 export interface SyncRow {
   key: SyncRowKey;
   differs: boolean;
+  /** Значение в панели поставил временный доступ — так и задумано, это не расхождение. */
+  byGrace: boolean;
 }
 
 const HOUR_MS = 3_600_000;
@@ -45,12 +47,22 @@ function setsDiffer(a: string[] | null | undefined, b: string[] | null | undefin
   return false;
 }
 
+/**
+ * Строки, которые во время временного доступа держит сам грейс.
+ *
+ * Пока он открыт, в панели стоит его оверлей — дата, статус, лимит и сквад.
+ * Бот их намеренно не перенимает (`app/services/panel_sync/projection.py`),
+ * поэтому расхождением это не является. Расход трафика панель ведёт и в грейсе,
+ * его сверяем по-прежнему.
+ */
+const GRACE_OWNED: ReadonlySet<SyncRowKey> = new Set(['status', 'until', 'trafficLimit', 'squads']);
+
 export function panelSyncRows(status: PanelSyncStatusResponse): SyncRow[] {
   const statusDiffers =
     status.bot_subscription_status !== null &&
     status.panel_status !== null &&
     isBotStatusLive(status.bot_subscription_status) !== isPanelStatusLive(status.panel_status);
-  return [
+  const rows: Omit<SyncRow, 'byGrace'>[] = [
     { key: 'status', differs: statusDiffers },
     {
       key: 'until',
@@ -71,4 +83,9 @@ export function panelSyncRows(status: PanelSyncStatusResponse): SyncRow[] {
     { key: 'devices', differs: status.bot_device_limit !== status.panel_device_limit },
     { key: 'squads', differs: setsDiffer(status.bot_squads, status.panel_squads) },
   ];
+  const grace = Boolean(status.grace_open);
+  return rows.map((row) => {
+    const byGrace = grace && row.differs && GRACE_OWNED.has(row.key);
+    return { ...row, byGrace, differs: row.differs && !byGrace };
+  });
 }

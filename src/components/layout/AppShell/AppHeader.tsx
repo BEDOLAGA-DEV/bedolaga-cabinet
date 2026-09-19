@@ -21,6 +21,7 @@ import { cn } from '@/lib/utils';
 
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import TicketNotificationBell from '@/components/TicketNotificationBell';
+import { LogoutButton } from './LogoutButton';
 
 // Icons
 import {
@@ -30,7 +31,6 @@ import {
   UsersIcon,
   ChatIcon,
   UserIcon,
-  LogoutIcon,
   GamepadIcon,
   ClipboardIcon,
   StarIcon,
@@ -397,16 +397,13 @@ export function AppHeader({
                   {t('nav.profile')}
                 </Link>
 
-                <button
-                  onClick={() => {
+                <LogoutButton
+                  variant="menu"
+                  onLogout={() => {
                     setMobileMenuOpen(false);
                     logout();
                   }}
-                  className="nav-item w-full text-error-400"
-                >
-                  <LogoutIcon className="h-5 w-5" />
-                  {t('nav.logout')}
-                </button>
+                />
               </nav>
             </div>
           </div>

@@ -1,5 +1,49 @@
 # Changelog
 
+## [1.78.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.77.0...v1.78.0) (2026-09-18)
+
+
+### Features
+
+* **subscription:** старая подписка без тарифа ведёт на переход на тариф, а не на продление ([4fea85e](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/4fea85e4b1e05f1f3165926e6853196f824811f6))
+
+
+### Bug Fixes
+
+* **shell:** кнопка «Выйти» только в браузере ([c083353](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/c083353adbb32c796ad42bc44e7958929c59498d))
+* **subscription:** не предлагать «купить ещё», пока есть старая подписка ([78c4ba4](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/78c4ba42e83258073daab3baec5a6320f83914e2))
+* **subscription:** старой подписке не показывать докупки, на карточке — настоящая кнопка перехода ([645b5d1](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/645b5d1969e39e406eb822adf561b631c3ab9528))
+
+## [1.77.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.76.1...v1.77.0) (2026-09-17)
+
+
+### Features
+
+* сегмент «В грейсе» рядом с «Истекают за 7 дней» ([c18dd81](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/c18dd8178381e52f72008d19853446b2292a35c0))
+* сортировка пользователей одним списком готовых порядков ([0b010ff](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/0b010ffbaf4833f2fdbf6cc9c29a34c25a6fd9b8))
+* сортировка пользователей по концу временного доступа ([ef86033](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/ef86033adea9150460ba2c8d1b518a63854b380b))
+* у сортировки пользователей выбор порядка ([713822b](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/713822b4b18c215f34beca60c003d7cf4f0a71b9))
+
+
+### Bug Fixes
+
+* **ui:** подложка Telegram в цвет страницы, страница объявляет color-scheme ([29ff901](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/29ff901d3240d6ae2f27e8d1f3ce15ddde542c19))
+* **users:** порядок по концу грейса только в сегменте «В грейсе» ([a6dc42e](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/a6dc42e695a9c85aa24814b810e3ce1ba7c03134))
+* **wheel:** колесо рисуется одной картинкой, без отдельных GPU-слоёв ([6c68265](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/6c68265421a2a8da263052414b9b75932bb4c76f))
+* **wheel:** обод и лампочки рисуются поверх вращающейся группы ([5194b8d](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/5194b8dba440f7d731cf82b9293301dcc9301d46))
+* рукописные иконки заменены на Phosphor, «Перевыпустить подписку» больше не рвётся ([800e052](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/800e052379681a88935677bb21b04b7555659473))
+
+## [1.76.1](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.76.0...v1.76.1) (2026-09-16)
+
+
+### Bug Fixes
+
+* в строке списка видно временный доступ и сколько у человека тарифов ([29c54f4](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/29c54f431b169a934fc1d58b49f1c8fd5db1400f))
+* зелёная точка «в сети» гаснет сама, без ответа сервера ([051a8d8](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/051a8d8a2a63201e515e035d579b87d962465850))
+* карточка сверки объясняет временный доступ вместо «Есть отличия» ([3e443f6](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/3e443f6cfc48045ddab956ef4a1629495c8a949b))
+* отказ сброса триала объясняется словами, а не английской строкой ([82bf3ac](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/82bf3ac074d64ef921f008986346f8279704afd3))
+* телефон — пометка временного доступа, клавиша ввода в поиске, кнопка «Наверх» ([82326b0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/82326b09e04aa9badf70171bc528077cb8ce77c7))
+
 ## [1.76.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.75.0...v1.76.0) (2026-09-15)
 
 

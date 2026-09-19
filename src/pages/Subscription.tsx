@@ -18,15 +18,22 @@ import InsufficientBalancePrompt from '../components/InsufficientBalancePrompt';
 import { useCurrency } from '../hooks/useCurrency';
 import { useCloseOnSuccessNotification } from '../store/successNotification';
 import PurchaseCTAButton from '../components/subscription/PurchaseCTAButton';
+import { planTitle, showsAddonOptions, showsAutopayToggle } from '../utils/legacySubscription';
 import {
-  CopyIcon,
-  CheckIcon,
-  PauseIcon,
+  ArrowPathIcon,
   CalendarIcon,
-  RefreshIcon,
+  CheckIcon,
+  ClockIcon,
+  CopyIcon,
   DevicesIcon,
   DownloadIcon,
+  PauseIcon,
+  PencilIcon,
+  PhoneIcon,
+  RefreshIcon,
   TrashIcon,
+  WarningIcon,
+  XIcon,
 } from '../components/icons';
 import { useHaptic, usePlatform } from '../platform';
 import { resolveConnectionUrlForUi } from '../utils/connectionLink';
@@ -770,7 +777,7 @@ export default function Subscription() {
 
                   {/* Plan name */}
                   <h2 className="text-lg font-bold tracking-tight text-dark-50">
-                    {subscription.tariff_name || t('subscription.currentPlan')}
+                    {planTitle(subscription, t)}
                   </h2>
                 </div>
 
@@ -822,21 +829,7 @@ export default function Subscription() {
                       className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-[10px]"
                       style={{ background: 'rgba(255,184,0,0.12)' }}
                     >
-                      <svg
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="rgb(var(--color-urgent-400))"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        aria-hidden="true"
-                      >
-                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-                        <line x1="12" y1="9" x2="12" y2="13" />
-                        <line x1="12" y1="17" x2="12.01" y2="17" />
-                      </svg>
+                      <WarningIcon className="h-4 w-4 text-urgent-400" />
                     </div>
                     <div className="min-w-0 flex-1">
                       <p
@@ -868,19 +861,7 @@ export default function Subscription() {
                       className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-[10px]"
                       style={{ background: 'rgba(var(--color-accent-400), 0.12)' }}
                     >
-                      <svg
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="rgb(var(--color-accent-400))"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        aria-hidden="true"
-                      >
-                        <path d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
+                      <ClockIcon className="h-4 w-4 text-accent-400" />
                     </div>
                     <div className="flex-1">
                       <div
@@ -1224,7 +1205,7 @@ export default function Subscription() {
               )}
 
               {/* ─── Autopay Toggle ─── */}
-              {!subscription.is_trial && !subscription.is_daily && (
+              {showsAutopayToggle(subscription) && (
                 <div
                   className="flex items-center justify-between rounded-[14px] p-3.5"
                   style={{
@@ -1723,85 +1704,82 @@ export default function Subscription() {
         )}
 
       {/* Additional Options (Buy Devices) */}
-      {subscription &&
-        (subscription.is_active || subscription.is_limited) &&
-        !subscription.is_trial &&
-        subscription.device_limit !== 0 && (
-          <div
-            className="relative overflow-hidden rounded-3xl"
-            style={{
-              background: g.cardBg,
-              border: `1px solid ${g.cardBorder}`,
-              boxShadow: g.shadow,
-              padding: '24px 28px',
-            }}
-          >
-            <h2 className="mb-4 text-base font-bold tracking-tight text-dark-50">
-              {t('subscription.additionalOptions.title')}
-            </h2>
+      {subscription && showsAddonOptions(subscription) && (
+        <div
+          className="relative overflow-hidden rounded-3xl"
+          style={{
+            background: g.cardBg,
+            border: `1px solid ${g.cardBorder}`,
+            boxShadow: g.shadow,
+            padding: '24px 28px',
+          }}
+        >
+          <h2 className="mb-4 text-base font-bold tracking-tight text-dark-50">
+            {t('subscription.additionalOptions.title')}
+          </h2>
 
-            {/* Buy Devices */}
-            <DeviceTopupSheet
-              open={showDeviceTopup}
-              onOpen={() => setShowDeviceTopup(true)}
-              onClose={() => setShowDeviceTopup(false)}
-              subscription={subscription}
+          {/* Buy Devices */}
+          <DeviceTopupSheet
+            open={showDeviceTopup}
+            onOpen={() => setShowDeviceTopup(true)}
+            onClose={() => setShowDeviceTopup(false)}
+            subscription={subscription}
+            subscriptionId={subscriptionId}
+            devicesToAdd={devicesToAdd}
+            onDevicesToAddChange={setDevicesToAdd}
+            purchaseOptions={purchaseOptions}
+            isDark={isDark}
+          />
+
+          {/* Reduce Devices */}
+          <div className="mt-4">
+            <DeviceReductionSheet
+              open={showDeviceReduction}
+              onOpen={() => setShowDeviceReduction(true)}
+              onClose={() => setShowDeviceReduction(false)}
+              subscriptionPresent={!!subscription}
               subscriptionId={subscriptionId}
-              devicesToAdd={devicesToAdd}
-              onDevicesToAddChange={setDevicesToAdd}
-              purchaseOptions={purchaseOptions}
+              targetDeviceLimit={targetDeviceLimit}
+              onTargetDeviceLimitChange={setTargetDeviceLimit}
               isDark={isDark}
             />
+          </div>
 
-            {/* Reduce Devices */}
+          {/* Buy Traffic */}
+          {subscription.traffic_limit_gb > 0 && (
             <div className="mt-4">
-              <DeviceReductionSheet
-                open={showDeviceReduction}
-                onOpen={() => setShowDeviceReduction(true)}
-                onClose={() => setShowDeviceReduction(false)}
-                subscriptionPresent={!!subscription}
+              <TrafficTopupSheet
+                open={showTrafficTopup}
+                onOpen={() => setShowTrafficTopup(true)}
+                onClose={() => setShowTrafficTopup(false)}
+                subscription={subscription}
                 subscriptionId={subscriptionId}
-                targetDeviceLimit={targetDeviceLimit}
-                onTargetDeviceLimitChange={setTargetDeviceLimit}
+                selectedTrafficPackage={selectedTrafficPackage}
+                onSelectedTrafficPackageChange={setSelectedTrafficPackage}
+                purchaseOptions={purchaseOptions}
                 isDark={isDark}
               />
             </div>
+          )}
 
-            {/* Buy Traffic */}
-            {subscription.traffic_limit_gb > 0 && (
-              <div className="mt-4">
-                <TrafficTopupSheet
-                  open={showTrafficTopup}
-                  onOpen={() => setShowTrafficTopup(true)}
-                  onClose={() => setShowTrafficTopup(false)}
-                  subscription={subscription}
-                  subscriptionId={subscriptionId}
-                  selectedTrafficPackage={selectedTrafficPackage}
-                  onSelectedTrafficPackageChange={setSelectedTrafficPackage}
-                  purchaseOptions={purchaseOptions}
-                  isDark={isDark}
-                />
-              </div>
-            )}
-
-            {/* Server Management - only in classic mode */}
-            {!isTariffsMode && (
-              <div className="mt-4">
-                <ServerManagementSheet
-                  open={showServerManagement}
-                  onOpen={() => setShowServerManagement(true)}
-                  onClose={() => setShowServerManagement(false)}
-                  subscription={subscription}
-                  subscriptionId={subscriptionId}
-                  selectedServers={selectedServersToUpdate}
-                  onSelectedServersChange={setSelectedServersToUpdate}
-                  purchaseOptions={purchaseOptions}
-                  isDark={isDark}
-                />
-              </div>
-            )}
-          </div>
-        )}
+          {/* Server Management - only in classic mode */}
+          {!isTariffsMode && (
+            <div className="mt-4">
+              <ServerManagementSheet
+                open={showServerManagement}
+                onOpen={() => setShowServerManagement(true)}
+                onClose={() => setShowServerManagement(false)}
+                subscription={subscription}
+                subscriptionId={subscriptionId}
+                selectedServers={selectedServersToUpdate}
+                onSelectedServersChange={setSelectedServersToUpdate}
+                purchaseOptions={purchaseOptions}
+                isDark={isDark}
+              />
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Reissue Subscription — standalone block, not dependent on device_limit */}
       {subscription &&
@@ -1839,19 +1817,7 @@ export default function Subscription() {
                   {revokeMutation.isPending ? (
                     <div className="h-5 w-5 animate-spin rounded-full border-2 border-warning-400/30 border-t-amber-400" />
                   ) : (
-                    <svg
-                      className="h-5 w-5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={1.5}
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182"
-                      />
-                    </svg>
+                    <ArrowPathIcon className="h-5 w-5" />
                   )}
                 </div>
               </div>
@@ -1931,21 +1897,9 @@ export default function Subscription() {
                     <div className="flex min-w-0 flex-1 items-center gap-3">
                       <div
                         className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-[10px]"
-                        style={{ background: g.trackBg }}
+                        style={{ background: g.trackBg, color: g.textSecondary }}
                       >
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          style={{ stroke: g.textSecondary }}
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          aria-hidden="true"
-                        >
-                          <path d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3" />
-                        </svg>
+                        <PhoneIcon className="h-4 w-4" />
                       </div>
                       <div className="min-w-0 flex-1">
                         {isEditing ? (
@@ -2007,19 +1961,7 @@ export default function Subscription() {
                             title={t('subscription.renameDeviceSave', 'Сохранить')}
                             aria-label={t('subscription.renameDeviceSave', 'Сохранить')}
                           >
-                            <svg
-                              width="16"
-                              height="16"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              aria-hidden="true"
-                            >
-                              <path d="M5 13l4 4L19 7" />
-                            </svg>
+                            <CheckIcon className="h-4 w-4" />
                           </button>
                           <button
                             type="button"
@@ -2033,19 +1975,7 @@ export default function Subscription() {
                             title={t('subscription.renameDeviceCancel', 'Отмена')}
                             aria-label={t('subscription.renameDeviceCancel', 'Отмена')}
                           >
-                            <svg
-                              width="16"
-                              height="16"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              aria-hidden="true"
-                            >
-                              <path d="M6 18L18 6M6 6l12 12" />
-                            </svg>
+                            <XIcon className="h-4 w-4" />
                           </button>
                         </>
                       ) : (
@@ -2061,19 +1991,7 @@ export default function Subscription() {
                             title={t('subscription.renameDevice', 'Переименовать')}
                             aria-label={t('subscription.renameDevice', 'Переименовать')}
                           >
-                            <svg
-                              width="16"
-                              height="16"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="1.5"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              aria-hidden="true"
-                            >
-                              <path d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125" />
-                            </svg>
+                            <PencilIcon className="h-4 w-4" />
                           </button>
                           <button
                             type="button"
@@ -2091,19 +2009,7 @@ export default function Subscription() {
                             title={t('subscription.deleteDevice')}
                             aria-label={t('subscription.deleteDevice')}
                           >
-                            <svg
-                              width="16"
-                              height="16"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="1.5"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              aria-hidden="true"
-                            >
-                              <path d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                            </svg>
+                            <TrashIcon className="h-4 w-4" />
                           </button>
                         </>
                       )}
