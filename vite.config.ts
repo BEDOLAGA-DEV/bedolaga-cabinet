@@ -9,6 +9,8 @@ export default defineConfig(({ mode }) => {
   // Переменные из .env и из окружения сборки (Docker передаёт их через ENV);
   // окружение сильнее файла — как и у самого Vite.
   const env = { ...loadEnv(mode, __dirname, 'VITE_'), ...process.env };
+  const proxyTarget = env.VITE_API_PROXY_TARGET || 'http://localhost:8080';
+
   return {
     plugins: [
       react(),
@@ -33,7 +35,7 @@ export default defineConfig(({ mode }) => {
       host: true,
       proxy: {
         '/api': {
-          target: 'http://localhost:8080',
+          target: proxyTarget,
           changeOrigin: true,
           // Strip /api prefix: /api/cabinet/auth -> /cabinet/auth
           rewrite: (path) => path.replace(/^\/api/, ''),
@@ -42,7 +44,7 @@ export default defineConfig(({ mode }) => {
         // /api). Proxy it too so the "service unavailable" detection probe hits the
         // real backend in dev instead of the Vite server (which would mask outages).
         '/health': {
-          target: 'http://localhost:8080',
+          target: proxyTarget,
           changeOrigin: true,
         },
       },

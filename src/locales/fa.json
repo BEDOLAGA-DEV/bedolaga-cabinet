@@ -296,6 +296,11 @@
     "currentBalance": "موجودی فعلی",
     "activeUntil": "فعال تا",
     "noActiveSubscription": "اشتراک فعال ندارید",
+    "linkAccountBanner": {
+      "title": "یک روش ورود اضافه کنید",
+      "subtitle": "در حال حاضر فقط یک روش ورود دارید. ایمیل یا تلگرام را متصل کنید تا دسترسی به حساب خود را از دست ندهید.",
+      "cta": "اتصال ایمیل"
+    },
     "devicesUsed": "دستگاه‌ها: {{used}} از {{total}}",
     "trafficUsed": "ترافیک: {{used}} از {{total}} گیگ",
     "unlimitedTraffic": "ترافیک نامحدود",
@@ -780,6 +785,7 @@
       }
     },
     "transactionHistory": "تاریخچه تراکنش‌ها",
+    "showAll": "نمایش همه",
     "noTransactions": "تراکنشی موجود نیست",
     "date": "تاریخ",
     "type": "نوع",

@@ -311,6 +311,11 @@
     "currentBalance": "Current Balance",
     "activeUntil": "Active until",
     "noActiveSubscription": "No active subscription",
+    "linkAccountBanner": {
+      "title": "Add a sign-in method",
+      "subtitle": "You currently have only one way to sign in. Link an email or Telegram so you don't lose access to your account.",
+      "cta": "Link email"
+    },
     "devicesUsed": "Devices: {{used}} of {{total}}",
     "trafficUsed": "Traffic: {{used}} of {{total}} GB",
     "unlimitedTraffic": "Unlimited traffic",
@@ -905,6 +910,7 @@
       }
     },
     "transactionHistory": "Transaction History",
+    "showAll": "Show all",
     "noTransactions": "No transactions",
     "date": "Date",
     "type": "Type",

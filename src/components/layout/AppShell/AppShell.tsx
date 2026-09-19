@@ -26,13 +26,13 @@ import TicketNotificationBell from '@/components/TicketNotificationBell';
 import {
   SubscriptionIcon,
   GiftIcon,
+  StarIcon,
   HomeIcon,
   CreditCardIcon,
   ChatIcon,
   UserIcon,
   UsersIcon,
   ShieldIcon,
-  InfoIcon,
   SunIcon,
   MoonIcon,
 } from '@/components/icons';
@@ -100,7 +100,7 @@ export function AppShell({ children }: AppShellProps) {
     ...(referralEnabled ? [{ path: '/referral', label: t('nav.referral'), icon: UsersIcon }] : []),
     ...(giftEnabled ? [{ path: '/gift', label: t('nav.gift'), icon: GiftIcon }] : []),
     { path: '/support', label: t('nav.support'), icon: ChatIcon },
-    { path: '/info', label: t('nav.info'), icon: InfoIcon },
+    { path: '/info', label: t('info.loyalty'), icon: StarIcon },
     { path: '/profile', label: t('nav.profile'), icon: UserIcon },
   ];
 
@@ -185,7 +185,13 @@ export function AppShell({ children }: AppShellProps) {
             className="flex shrink-0 items-center gap-2.5 justify-self-start"
             onClick={handleNavClick}
           >
-            <div className="relative flex h-8 w-8 flex-shrink-0 items-center justify-center overflow-hidden rounded-lg bg-dark-800">
+            <div
+              className="relative flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-dark-800"
+              style={{
+                boxShadow:
+                  '0 0 0 1px rgba(var(--color-accent-400), 0.2), 0 4px 12px rgba(0,0,0,0.4)',
+              }}
+            >
               <span
                 className={cn(
                   'absolute text-sm font-bold text-accent-400 transition-opacity duration-200',
