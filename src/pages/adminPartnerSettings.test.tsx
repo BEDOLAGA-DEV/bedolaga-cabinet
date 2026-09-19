@@ -40,6 +40,10 @@ const state: { payload: PartnerSettings } = {
     withdrawal_requisites_text: '',
     partner_section_visible: true,
     referral_program_enabled: true,
+    withdrawal_reminder_enabled: false,
+    withdrawal_reminder_minutes: 60,
+    withdrawal_reminder_cooldown_minutes: 30,
+    withdrawal_reminder_check_interval_seconds: 300,
     env_locked: [],
   },
 };

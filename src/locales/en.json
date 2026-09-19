@@ -4080,7 +4080,8 @@
       "settingsUpdateError": "Failed to save settings",
       "settingsSection": {
         "referralProgram": "Referral Program",
-        "withdrawalSettings": "Withdrawal Settings"
+        "withdrawalSettings": "Withdrawal Settings",
+        "withdrawalReminders": "Withdrawal Request Reminders"
       },
       "settingsFields": {
         "programEnabled": "Referral program enabled",
@@ -4095,7 +4096,15 @@
         "cooldownDaysDesc": "How many days must pass between withdrawal requests",
         "requisitesText": "Requisites field prompt",
         "requisitesTextDesc": "Custom text shown to users to describe what payment details to provide",
-        "requisitesTextPlaceholder": "E.g.: Provide your bank card number or USDT TRC-20 address"
+        "requisitesTextPlaceholder": "E.g.: Provide your bank card number or USDT TRC-20 address",
+        "reminderEnabled": "Remind about pending requests",
+        "reminderEnabledDesc": "Keep notifying admins while a withdrawal request awaits a decision, like the support ticket SLA",
+        "reminderMinutes": "First reminder after (min)",
+        "reminderMinutesDesc": "How many minutes a request may wait for a decision before the first reminder (1–10080)",
+        "reminderCooldownMinutes": "Repeat reminders every (min)",
+        "reminderCooldownMinutesDesc": "Minimum interval between repeated reminders for the same request (1–10080)",
+        "reminderCheckIntervalSeconds": "Check interval (sec)",
+        "reminderCheckIntervalSecondsDesc": "How often the bot checks requests (30–3600); the actual reminder step rounds up to it"
       }
     },
     "partnerDetail": {
