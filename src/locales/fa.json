@@ -3954,13 +3954,9 @@
             "warned": "علامت‌گذاری شده",
             "limited": "محدود شده"
           },
-          "columns": {
-            "date": "تاریخ",
-            "reason": "دلیل",
-            "score": "امتیاز",
-            "action": "اقدام",
-            "warned": "هشدار"
-          }
+          "noReason": "بدون ذکر دلیل",
+          "scoreShort": "امتیاز {{score}}",
+          "warnedOn": "هشدار {{date}}"
         }
       },
       "notFound": "کاربر یافت نشد",

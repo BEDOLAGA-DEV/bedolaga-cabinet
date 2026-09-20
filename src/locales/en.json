@@ -5111,13 +5111,9 @@
             "warned": "Flagged",
             "limited": "Limited"
           },
-          "columns": {
-            "date": "Date",
-            "reason": "Reason",
-            "score": "Score",
-            "action": "Action",
-            "warned": "Warned"
-          }
+          "noReason": "No reason given",
+          "scoreShort": "score {{score}}",
+          "warnedOn": "warned {{date}}"
         }
       },
       "notFound": "User not found",

@@ -3936,13 +3936,9 @@
             "warned": "已标记",
             "limited": "受限"
           },
-          "columns": {
-            "date": "日期",
-            "reason": "原因",
-            "score": "评分",
-            "action": "处理",
-            "warned": "已告知"
-          }
+          "noReason": "未说明原因",
+          "scoreShort": "评分 {{score}}",
+          "warnedOn": "已告知 {{date}}"
         }
       },
       "notFound": "未找到用户",
