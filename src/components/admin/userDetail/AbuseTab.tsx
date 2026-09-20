@@ -12,66 +12,64 @@
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { abuseApi, type AbuseViolation } from '@/api/abuse';
+import { CHIP_CLASS, CHIP_TONE, type ChipTone, stampParts } from '@/components/admin/users';
 import { ShieldIcon } from '@/components/icons';
-import { cn } from '@/lib/utils';
-import { formatShortDate } from '@/utils/format';
 import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
+import { cn } from '@/lib/utils';
 import { Section } from './sectionParts';
 
 export interface AbuseTabProps {
   userId: number;
 }
 
-const LEVEL_TONE: Record<string, string> = {
-  clean: 'bg-success-500/12 text-success-400',
-  warned: 'bg-warning-500/12 text-warning-400',
-  limited: 'bg-error-500/12 text-error-400',
+const LEVEL_TONE: Record<string, ChipTone> = {
+  clean: 'success',
+  warned: 'warning',
+  limited: 'error',
 };
 
-function Badge({ tone, children }: { tone: string; children: React.ReactNode }) {
-  return (
-    <span
-      className={cn(
-        'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold',
-        tone,
-      )}
-    >
-      {children}
-    </span>
-  );
+function Chip({ tone, children }: { tone: ChipTone; children: React.ReactNode }) {
+  return <span className={cn(CHIP_CLASS, CHIP_TONE[tone])}>{children}</span>;
 }
 
+/**
+ * Строка нарушения в каноне ленты событий: слева день и время, дальше причина
+ * и отметки. Таблица здесь не годится — в Mini App её пришлось бы листать
+ * вбок, а на узкой колонке столбцы схлопываются в кашу.
+ */
 function ViolationRow({ item }: { item: AbuseViolation }) {
   const { t } = useTranslation();
+  const stamp = stampParts(item.detected_at ?? '');
+
   return (
-    <tr className="border-b border-dark-700/50 last:border-0">
-      <td className="py-2.5 pr-3 align-top text-sm text-dark-200">
-        {item.detected_at ? formatShortDate(item.detected_at) : '—'}
-      </td>
-      <td className="py-2.5 pr-3 align-top text-sm text-dark-100">
+    <li className="flex items-start gap-3 py-2.5">
+      <span className="w-11 shrink-0 font-mono text-xs leading-5 tabular-nums text-dark-500">
+        {stamp.day}
+        <span className="block">{stamp.time}</span>
+      </span>
+
+      <span className="min-w-0 flex-1">
         {/* Причины формулирует антифрод — показываем как есть, не пересказываем. */}
-        {item.reasons?.length ? item.reasons.join('; ') : '—'}
-      </td>
-      <td className="py-2.5 pr-3 align-top text-sm tabular-nums text-dark-200">
-        {item.score != null ? Math.round(item.score) : '—'}
-      </td>
-      <td className="py-2.5 pr-3 align-top text-sm">
-        {item.action_taken ? (
-          <Badge tone="bg-error-500/12 text-error-400">{item.action_taken}</Badge>
-        ) : (
-          <span className="text-dark-400">—</span>
-        )}
-      </td>
-      <td className="py-2.5 align-top text-sm">
-        {item.notified_at ? (
-          <Badge tone="bg-warning-500/12 text-warning-400">
-            {formatShortDate(item.notified_at)}
-          </Badge>
-        ) : (
-          <span className="text-dark-400">{t('admin.users.detail.abuse.notWarned')}</span>
-        )}
-      </td>
-    </tr>
+        <span className="block text-sm text-dark-100">
+          {item.reasons?.length ? item.reasons.join('; ') : t('admin.users.detail.abuse.noReason')}
+        </span>
+        <span className="mt-1 flex flex-wrap items-center gap-1.5">
+          {item.score != null && (
+            <span className="font-mono text-xs tabular-nums text-dark-500">
+              {t('admin.users.detail.abuse.scoreShort', { score: Math.round(item.score) })}
+            </span>
+          )}
+          {item.action_taken && <Chip tone="error">{item.action_taken}</Chip>}
+          {item.notified_at ? (
+            <Chip tone="warning">
+              {t('admin.users.detail.abuse.warnedOn', { date: stampParts(item.notified_at).day })}
+            </Chip>
+          ) : (
+            <span className="text-xs text-dark-500">{t('admin.users.detail.abuse.notWarned')}</span>
+          )}
+        </span>
+      </span>
+    </li>
   );
 }
 
@@ -108,9 +106,9 @@ export function AbuseTab({ userId }: AbuseTabProps) {
       icon={<ShieldIcon />}
       title={t('admin.users.detail.tabs.abuse')}
       action={
-        <Badge tone={LEVEL_TONE[level] ?? LEVEL_TONE.clean}>
+        <Chip tone={LEVEL_TONE[level] ?? 'neutral'}>
           {t(`admin.users.detail.abuse.level.${level}`)}
-        </Badge>
+        </Chip>
       }
     >
       <p className="text-sm text-dark-300">
@@ -123,34 +121,11 @@ export function AbuseTab({ userId }: AbuseTabProps) {
       </p>
 
       {data.violations.length > 0 ? (
-        <div className="-mx-1 overflow-x-auto px-1">
-          <table className="w-full min-w-[540px] border-collapse">
-            <thead>
-              <tr className="border-b border-dark-700 text-left text-[11px] uppercase tracking-wide text-dark-400">
-                <th className="pb-2 pr-3 font-semibold">
-                  {t('admin.users.detail.abuse.columns.date')}
-                </th>
-                <th className="pb-2 pr-3 font-semibold">
-                  {t('admin.users.detail.abuse.columns.reason')}
-                </th>
-                <th className="pb-2 pr-3 font-semibold">
-                  {t('admin.users.detail.abuse.columns.score')}
-                </th>
-                <th className="pb-2 pr-3 font-semibold">
-                  {t('admin.users.detail.abuse.columns.action')}
-                </th>
-                <th className="pb-2 font-semibold">
-                  {t('admin.users.detail.abuse.columns.warned')}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.violations.map((item, index) => (
-                <ViolationRow key={`${item.detected_at}-${index}`} item={item} />
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <ul className="m-0 list-none divide-y divide-dark-800/80 p-0">
+          {data.violations.map((item, index) => (
+            <ViolationRow key={`${item.detected_at}-${index}`} item={item} />
+          ))}
+        </ul>
       ) : (
         <p className="text-sm text-dark-400">{t('admin.users.detail.abuse.empty')}</p>
       )}

@@ -10,13 +10,15 @@
  * актуальным на стороне антифрода, и её можно убрать вручную — тогда до
  * следующего предупреждения главная остаётся чистой.
  */
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
-import { motion } from 'framer-motion';
-import { useState } from 'react';
 import { abuseApi } from '@/api/abuse';
+import { Card } from '@/components/data-display';
 import { ShieldIcon } from '@/components/icons';
+import { Button } from '@/components/primitives';
+import { formatDayMonth } from '@/utils/format';
 
 const DISMISSED_KEY = 'abuse-notice-dismissed';
 
@@ -56,49 +58,36 @@ export default function AbuseNoticeCard({ className }: { className?: string }) {
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className={
-        className ??
-        'relative overflow-hidden rounded-2xl border border-warning-500/30 bg-warning-500/10 p-5'
-      }
-    >
-      <div className="flex items-start gap-4">
+    <Card size="md" className={className ?? 'border-warning-500/30 bg-warning-500/10'}>
+      <div className="flex items-start gap-3">
         <span className="mt-0.5 shrink-0 text-warning-400">
           <ShieldIcon />
         </span>
-        <div className="min-w-0 flex-1 space-y-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <h3 className="text-base font-semibold text-dark-100">
+
+        <div className="flex min-w-0 flex-1 flex-col gap-3">
+          <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+            <h2 className="text-base font-semibold leading-tight text-dark-100 [overflow-wrap:anywhere]">
               {notice.subject || t('abuse.notice.title')}
-            </h3>
+            </h2>
             {notice.sent_at && (
-              <span className="text-xs text-dark-400">
-                {new Date(notice.sent_at).toLocaleDateString()}
-              </span>
+              <span className="text-xs text-dark-400">{formatDayMonth(notice.sent_at)}</span>
             )}
           </div>
 
           <p className="whitespace-pre-line text-sm leading-relaxed text-dark-200">{notice.body}</p>
 
-          <div className="flex flex-wrap items-center gap-2">
-            <Link
-              to="/support"
-              className="rounded-xl bg-accent-500 px-4 py-2 text-sm font-semibold text-on-accent"
-            >
-              {t('abuse.notice.contactSupport')}
-            </Link>
-            <button
-              type="button"
-              onClick={dismiss}
-              className="rounded-xl border border-dark-700 px-4 py-2 text-sm font-medium text-dark-300"
-            >
+          {/* На узком экране кнопки встают в колонку во всю ширину: в Mini App
+              строка из двух кнопок ломается на половинки. */}
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <Button asChild variant="primary" size="md" className="w-full sm:w-auto">
+              <Link to="/support">{t('abuse.notice.contactSupport')}</Link>
+            </Button>
+            <Button variant="ghost" size="md" onClick={dismiss} className="w-full sm:w-auto">
               {t('abuse.notice.dismiss')}
-            </button>
+            </Button>
           </div>
         </div>
       </div>
-    </motion.div>
+    </Card>
   );
 }
