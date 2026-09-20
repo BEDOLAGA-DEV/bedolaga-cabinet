@@ -3367,7 +3367,8 @@
           "balance": "余额",
           "referrals": "推荐",
           "activity": "活动记录",
-          "overview": "概览"
+          "overview": "概览",
+          "abuse": "违规"
         },
         "noTickets": "该用户没有工单",
         "ticketsCount": "个工单",
@@ -3922,7 +3923,27 @@
           }
         },
         "messages_other": "{{count}} 条消息",
-        "ticketLoadError": "无法打开工单"
+        "ticketLoadError": "无法打开工单",
+        "abuse": {
+          "unavailable": "未接入反滥用服务，暂无违规数据。",
+          "empty": "近期没有记录到违规。",
+          "whitelisted": "该客户在白名单中，不适用检查。",
+          "summary": "30 天内违规：{{count}} · 最高评分 {{score}}",
+          "notWarned": "未告知",
+          "readOnly": "仅供查看：警告、封禁和撤销请在反滥用面板操作。",
+          "level": {
+            "clean": "正常",
+            "warned": "已标记",
+            "limited": "受限"
+          },
+          "columns": {
+            "date": "日期",
+            "reason": "原因",
+            "score": "评分",
+            "action": "处理",
+            "warned": "已告知"
+          }
+        }
       },
       "notFound": "未找到用户",
       "sendMessage": {
@@ -6637,5 +6658,12 @@
     "offer": "公开要约",
     "privacy": "隐私政策",
     "recurrent": "定期付款"
+  },
+  "abuse": {
+    "notice": {
+      "title": "警告",
+      "contactSupport": "这是误判 — 联系客服",
+      "dismiss": "知道了"
+    }
   }
 }

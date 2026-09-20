@@ -8,6 +8,7 @@ import {
   pickActivityView,
 } from '@/components/admin/userDetail/ActivityHub';
 import { BalanceTab } from '@/components/admin/userDetail/BalanceTab';
+import { AbuseTab } from '@/components/admin/userDetail/AbuseTab';
 import { OverviewTab, type DetailTab } from '@/components/admin/userDetail/OverviewTab';
 import { ReferralsTab } from '@/components/admin/userDetail/ReferralsTab';
 import { SendMessageDialog } from '@/components/admin/userDetail/SendMessageDialog';
@@ -33,7 +34,14 @@ import { useUserDetailData } from './adminUserDetail/useUserDetailData';
 // ссылка коллеге открывают то же место.
 // ──────────────────────────────────────────────────────────────────
 
-const TABS: readonly DetailTab[] = ['overview', 'subscription', 'balance', 'referrals', 'activity'];
+const TABS: readonly DetailTab[] = [
+  'overview',
+  'subscription',
+  'balance',
+  'referrals',
+  'activity',
+  'abuse',
+];
 
 function pickTab(value: string | null): DetailTab {
   return value && (TABS as readonly string[]).includes(value) ? (value as DetailTab) : 'overview';
@@ -215,6 +223,8 @@ export default function AdminUserDetail() {
           </button>
         ))}
       </div>
+
+      {activeTab === 'abuse' && <AbuseTab userId={userId} />}
 
       {activeTab === 'overview' && (
         <OverviewTab
