@@ -4533,7 +4533,8 @@
           "balance": "Balance",
           "referrals": "Referrals",
           "activity": "Activity",
-          "overview": "Overview"
+          "overview": "Overview",
+          "abuse": "Abuse"
         },
         "noTickets": "No tickets from this user",
         "ticketsCount": "tickets",
@@ -5097,7 +5098,23 @@
         },
         "messages_one": "{{count}} message",
         "messages_other": "{{count}} messages",
-        "ticketLoadError": "Could not open the ticket"
+        "ticketLoadError": "Could not open the ticket",
+        "abuse": {
+          "unavailable": "Anti-abuse service is not connected — no violation data.",
+          "empty": "No violations recorded recently.",
+          "whitelisted": "Customer is whitelisted: checks do not apply.",
+          "summary": "Violations in 30 days: {{count}} · top score {{score}}",
+          "notWarned": "not warned",
+          "readOnly": "Read-only: warning, blocking and dismissing live in the anti-abuse panel.",
+          "level": {
+            "clean": "Clean",
+            "warned": "Flagged",
+            "limited": "Limited"
+          },
+          "noReason": "No reason given",
+          "scoreShort": "score {{score}}",
+          "warnedOn": "warned {{date}}"
+        }
       },
       "notFound": "User not found",
       "summary": {
@@ -7192,5 +7209,12 @@
     "offer": "Public Offer",
     "privacy": "Privacy Policy",
     "recurrent": "Recurring Payments"
+  },
+  "abuse": {
+    "notice": {
+      "title": "Warning",
+      "contactSupport": "This is a mistake — contact support",
+      "dismiss": "Got it"
+    }
   }
 }

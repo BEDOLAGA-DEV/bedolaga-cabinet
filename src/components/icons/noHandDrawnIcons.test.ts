@@ -1,5 +1,5 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs';
-import { join, relative } from 'node:path';
+import { join, relative, sep } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 /**
@@ -43,7 +43,9 @@ function sourceFiles(dir: string): string[] {
 describe('иконки', () => {
   it('рукописный <svg> только в разрешённых местах', () => {
     const offenders = sourceFiles(SRC)
-      .map((path) => relative(SRC, path))
+      // На Windows relative() отдаёт пути с «\», а список разрешённых написан
+      // через «/» — без нормализации сторож ловил сам себя, а не нарушителей.
+      .map((path) => relative(SRC, path).split(sep).join('/'))
       .filter((path) => !ALLOWED.has(path))
       .filter((path) => /<svg\b/.test(readFileSync(join(SRC, path), 'utf-8')));
 

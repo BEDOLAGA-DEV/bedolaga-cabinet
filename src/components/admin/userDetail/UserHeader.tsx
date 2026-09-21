@@ -16,6 +16,10 @@ interface UserHeaderProps {
   actions: ReactNode;
   /** Меню «⋯»: на телефоне стоит у имени, на широком экране — после кнопок. */
   menu: ReactNode;
+  /** Уровень доверия от антифрода: «замечен» и «ограничен» должны быть видны
+   *  до того, как оператор откроет вкладку, — иначе он решает вопрос клиента,
+   *  не зная, что тот уже попадался. «Чист» не показываем: это норма. */
+  abuseLevel?: 'clean' | 'warned' | 'limited' | null;
 }
 
 const CHIP =
@@ -25,7 +29,7 @@ const CHIP =
  * Шапка отвечает на первые вопросы поддержки, не заставляя листать: кто это,
  * в каком состоянии аккаунт и подписка, онлайн ли сейчас, что с ним сделать.
  */
-export function UserHeader({ user, panelInfo, actions, menu }: UserHeaderProps) {
+export function UserHeader({ user, panelInfo, actions, menu, abuseLevel }: UserHeaderProps) {
   const { t } = useTranslation();
   const notify = useNotify();
   // Как зелёная точка в самой панели: отметка подключения не старше минуты.
@@ -98,6 +102,18 @@ export function UserHeader({ user, panelInfo, actions, menu }: UserHeaderProps) 
         {/* «Активен» — обычное состояние, чипом только отклонение: заблокирован, удалён.
             Тариф и срок — в плитке «Подписка до», здесь не повторяются. */}
         {user.status !== 'active' && <AccountStatusChip status={user.status} />}
+        {(abuseLevel === 'warned' || abuseLevel === 'limited') && (
+          <span
+            className={cn(
+              CHIP,
+              abuseLevel === 'limited'
+                ? 'bg-error-500/15 text-error-400'
+                : 'bg-warning-500/15 text-warning-400',
+            )}
+          >
+            {t(`admin.users.detail.abuse.level.${abuseLevel}`)}
+          </span>
+        )}
         {user.promo_group && (
           <span className={cn(CHIP, 'bg-dark-800 text-dark-300')}>
             {t('admin.users.detail.header.group', { name: user.promo_group.name })}

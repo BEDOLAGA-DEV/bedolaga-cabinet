@@ -251,10 +251,12 @@ describe('AdminUserDetail', () => {
     ).toBeTruthy();
   });
 
-  it('вкладок пять, «Синхронизации» и «Информации» среди них нет', async () => {
+  it('вкладок шесть, «Синхронизации» и «Информации» среди них нет', async () => {
     await renderDetail();
     const tabs = screen.getAllByRole('tab').map((tab) => tab.textContent ?? '');
-    expect(tabs.filter((label) => label.startsWith('admin.users.detail.tabs.'))).toHaveLength(5);
+    // Шестая — нарушения; сторож остаётся на том же месте: разделы, которые
+    // когда-то отсюда выкинули, не должны вернуться.
+    expect(tabs.filter((label) => label.startsWith('admin.users.detail.tabs.'))).toHaveLength(6);
     expect(tabs.some((label) => label.includes('tabs.sync') || label.includes('tabs.info'))).toBe(
       false,
     );

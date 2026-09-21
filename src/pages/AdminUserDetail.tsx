@@ -8,6 +8,9 @@ import {
   pickActivityView,
 } from '@/components/admin/userDetail/ActivityHub';
 import { BalanceTab } from '@/components/admin/userDetail/BalanceTab';
+import { useQuery } from '@tanstack/react-query';
+import { abuseApi } from '@/api/abuse';
+import { AbuseTab } from '@/components/admin/userDetail/AbuseTab';
 import { OverviewTab, type DetailTab } from '@/components/admin/userDetail/OverviewTab';
 import { ReferralsTab } from '@/components/admin/userDetail/ReferralsTab';
 import { SendMessageDialog } from '@/components/admin/userDetail/SendMessageDialog';
@@ -33,7 +36,14 @@ import { useUserDetailData } from './adminUserDetail/useUserDetailData';
 // ссылка коллеге открывают то же место.
 // ──────────────────────────────────────────────────────────────────
 
-const TABS: readonly DetailTab[] = ['overview', 'subscription', 'balance', 'referrals', 'activity'];
+const TABS: readonly DetailTab[] = [
+  'overview',
+  'subscription',
+  'balance',
+  'referrals',
+  'activity',
+  'abuse',
+];
 
 function pickTab(value: string | null): DetailTab {
   return value && (TABS as readonly string[]).includes(value) ? (value as DetailTab) : 'overview';
@@ -54,6 +64,15 @@ export default function AdminUserDetail() {
   const activityView = pickActivityView(params.get('view'));
 
   const data = useUserDetailData(userId, activeTab);
+  // Уровень нужен в шапке на любой вкладке, поэтому запрос живёт здесь, а не
+  // внутри вкладки нарушений; тот же ключ — второго запроса не будет.
+  const abuse = useQuery({
+    queryKey: ['admin-user-abuse', userId],
+    queryFn: () => abuseApi.userOverview(userId as number),
+    enabled: userId != null,
+    staleTime: 60_000,
+    retry: false,
+  });
   const actions = useUserDetailActions(userId ?? 0, data);
   const reachabilityAvailable = useReachabilityAvailable();
   const reachabilityLink =
@@ -177,7 +196,13 @@ export default function AdminUserDetail() {
 
   return (
     <div className="animate-fade-in space-y-5">
-      <UserHeader user={user} panelInfo={data.panelInfo} actions={headerActions} menu={menu} />
+      <UserHeader
+        user={user}
+        panelInfo={data.panelInfo}
+        actions={headerActions}
+        menu={menu}
+        abuseLevel={abuse.data?.available ? abuse.data.level : null}
+      />
 
       <UserFacts
         user={user}
@@ -215,6 +240,8 @@ export default function AdminUserDetail() {
           </button>
         ))}
       </div>
+
+      {activeTab === 'abuse' && <AbuseTab userId={userId} />}
 
       {activeTab === 'overview' && (
         <OverviewTab

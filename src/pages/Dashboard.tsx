@@ -19,6 +19,7 @@ import TrialOfferCard from '../components/dashboard/TrialOfferCard';
 import StatsGrid from '../components/dashboard/StatsGrid';
 import { giftApi } from '../api/gift';
 import { promoApi } from '../api/promo';
+import AbuseNoticeCard from '../components/dashboard/AbuseNoticeCard';
 import PendingGiftCard from '../components/dashboard/PendingGiftCard';
 import SubscriptionListCard from '../components/subscription/SubscriptionListCard';
 import { DeviceLimitSheet } from '../components/subscription/DeviceLimitSheet';
@@ -316,6 +317,10 @@ export default function Dashboard() {
       </div>
 
       {/* Pending Gift Activations */}
+      {/* Предупреждение выше подарков и предложений: человек должен увидеть его
+          раньше, чем всё остальное, иначе объяснение теряется в ленте. */}
+      <AbuseNoticeCard />
+
       {pendingGifts && pendingGifts.length > 0 && <PendingGiftCard gifts={pendingGifts} />}
 
       {/* Multi-tariff: show subscription cards (max 3) — только когда подписки
