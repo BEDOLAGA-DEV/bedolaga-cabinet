@@ -2993,6 +2993,7 @@
         "segment": "Подписка",
         "segmentDays": "Сколько дней до окончания",
         "tariffId": "ID тарифа",
+        "tariffRequired": "Укажите ID тарифа",
         "registeredDays": "Не раньше чем через N дней после регистрации",
         "inactiveDays": "Неактивен N дней",
         "audience": "Подходят сейчас",

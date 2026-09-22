@@ -1937,6 +1937,7 @@
         "segment": "اشتراک",
         "segmentDays": "چند روز تا پایان",
         "tariffId": "شناسه تعرفه",
+        "tariffRequired": "شناسه تعرفه را مشخص کنید",
         "registeredDays": "زودتر از N روز پس از ثبت‌نام نه",
         "inactiveDays": "غیرفعال به مدت N روز",
         "audience": "هم‌اکنون منطبق",
