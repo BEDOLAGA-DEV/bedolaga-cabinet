@@ -74,7 +74,10 @@ export const adminRemindersApi = {
   remove: async (id: number) => {
     await apiClient.delete(`${base}/${id}`);
   },
-  audience: async (req: { conditions: ReminderConditions; channels: ReminderChannels }) =>
-    (await apiClient.post<AudienceResponse>(`${base}/audience`, req)).data,
+  audience: async (req: {
+    conditions: ReminderConditions;
+    channels: ReminderChannels;
+    category: 'service' | 'marketing';
+  }) => (await apiClient.post<AudienceResponse>(`${base}/audience`, req)).data,
   test: async (id: number) => (await apiClient.post<{ ok: boolean }>(`${base}/${id}/test`)).data,
 };

@@ -22,6 +22,9 @@ export default function ReminderCards() {
     queryFn: () => remindersApi.getActive(lang),
     staleTime: 0,
     gcTime: 0,
+    // Глобальный дефолт — false; напоминания должны обновляться при возврате
+    // во вкладку (новое условие подошло / кто-то закрыл в другой вкладке).
+    refetchOnWindowFocus: true,
   });
 
   const cards = (data ?? []).filter((card) => !hidden.has(card.id)).slice(0, MAX_VISIBLE);
