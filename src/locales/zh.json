@@ -2369,6 +2369,7 @@
         "external_squad_uuid": "外部小队",
         "duration_hours": "时长（小时）",
         "traffic_gb": "流量（GB）",
+        "reset_traffic_on_start": "发放时清零流量计数",
         "reconcile_interval_seconds": "核对间隔（秒）",
         "reconcile_batch_size": "批量大小",
         "candidate_lookback_minutes": "回溯窗口（分钟）",
@@ -2402,6 +2403,7 @@
         "title": "用户获得什么",
         "durationDesc": "如果一直没有续订，临时访问持续多少小时",
         "trafficDesc": "这段时间可以使用多少新流量（GB）：在已用流量之上计算，原有余量不结转",
+        "resetTrafficDesc": "面板和应用将显示“0 / 1 GB”，而不是几乎用尽的“64.76 / 65.76 GiB”。仅适用于不限流量的已到期订阅——其计数仅供参考；宽限前的用量将丢失。流量耗尽的订阅永不清零",
         "hint": "宽限期间面板账户处于活跃状态，但只能通过宽限小队访问网络。",
         "allowedDesc": "用户在机器人消息和邮件中会这样看到：“仅可使用：…”。宽限小队实际放行什么由节点决定——机器人只是告知。",
         "allowedPlaceholder": "Telegram 和个人中心"
