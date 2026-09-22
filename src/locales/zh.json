@@ -328,6 +328,9 @@
       "balance": "余额",
       "referrals": "推荐人"
     },
+    "reminders": {
+      "dismiss": "关闭"
+    },
     "tariff": "套餐",
     "trafficUsageTitle": "流量使用",
     "trialOffer": {
@@ -1313,6 +1316,7 @@
       "trafficUsage": "流量使用",
       "updates": "更新",
       "pinnedMessages": "置顶消息",
+      "reminders": "提醒",
       "partners": "合作伙伴",
       "referralLevels": "奖励等级",
       "withdrawals": "提现",
@@ -1364,6 +1368,7 @@
       "trafficUsageDesc": "按节点统计用户流量",
       "updatesDesc": "机器人和面板版本",
       "pinnedMessagesDesc": "管理用户置顶消息",
+      "remindersDesc": "按条件向用户发送提醒",
       "partnersDesc": "管理合作伙伴申请和佣金",
       "withdrawalsDesc": "审核和处理提现请求",
       "channelSubscriptionsDesc": "管理必订频道订阅",
@@ -1894,6 +1899,9 @@
         "cancelling": "取消中"
       },
       "filterGroups": {
+        "email": "电子邮件用户",
+        "promo_group": "按促销组",
+        "recipient": "收件人",
         "basic": "基础",
         "subscription": "按订阅",
         "traffic": "按流量",
@@ -1939,6 +1947,7 @@
       "selectChannel": "群发渠道",
       "selectEmailFilter": "选择邮件受众",
       "selectEmailFilterPlaceholder": "选择筛选器...",
+      "singleUser": "仅 {{name}}",
       "telegramSection": "Telegram 群发"
     },
     "pinnedMessages": {
@@ -1982,6 +1991,75 @@
       "unpinnedCount": "已取消置顶",
       "editMessage": "编辑",
       "cantDeleteActive": "无法删除活跃消息"
+    },
+    "reminders": {
+      "title": "提醒",
+      "description": "按条件向用户发送提醒：在机器人、在个人中心，或两者都发送。",
+      "create": "创建",
+      "createTitle": "新建提醒",
+      "editTitle": "提醒",
+      "empty": "暂无提醒",
+      "active": "已启用",
+      "inactive": "已禁用",
+      "builtin": "内置",
+      "enable": "启用",
+      "disable": "禁用",
+      "edit": "编辑",
+      "delete": "删除",
+      "confirmDelete": "删除提醒「{{name}}」？",
+      "stats": "已发送：{{sent}} · 已关闭：{{dismissed}} · 当前符合条件：机器人 {{bot}}，个人中心 {{cabinet}}",
+      "any": "任意",
+      "channels": { "both": "机器人和个人中心", "bot": "仅机器人", "cabinet": "仅个人中心" },
+      "category": { "service": "服务类 — 所有人", "marketing": "营销类 — 已退订推广的用户除外" },
+      "auth": {
+        "single_method": "仅单一登录方式",
+        "telegram_only": "仅Telegram登录",
+        "email_only": "仅邮箱登录"
+      },
+      "segment": {
+        "active": "有效订阅",
+        "trial": "试用",
+        "expiring": "即将到期",
+        "expired": "订阅已过期",
+        "none": "无订阅",
+        "low_balance": "余额不足",
+        "tariff": "套餐"
+      },
+      "button": { "none": "无按钮", "cabinet": "个人中心页面", "url": "链接" },
+      "form": {
+        "name": "名称（仅管理后台可见）",
+        "channels": "展示位置",
+        "category": "类型",
+        "conditions": "面向对象",
+        "auth": "登录方式",
+        "segment": "订阅",
+        "segmentDays": "距到期天数",
+        "tariffId": "套餐ID",
+        "tariffRequired": "请填写套餐ID",
+        "registeredDays": "注册后至少N天",
+        "inactiveDays": "不活跃N天",
+        "audience": "当前符合条件",
+        "repeatEvery": "机器人内每N天重复一次",
+        "maxSends": "机器人内最大发送次数",
+        "title": "标题",
+        "body": "正文",
+        "buttonKind": "按钮",
+        "buttonTarget": "跳转目标",
+        "buttonText": "按钮文字",
+        "buttonTextRequired": "请填写俄语按钮文字",
+        "partialLanguage": "请填写{{lang}}语言的标题和正文，或将两者都清空",
+        "httpsRequired": "链接必须以 https:// 开头",
+        "preview": "预览",
+        "save": "保存",
+        "sendTest": "发送给自己",
+        "testHint": "发送已保存的版本，不检查条件和限制",
+        "testSent": "已发送到你的机器人",
+        "testFailed": "发送失败",
+        "testNoTelegram": "您尚未绑定Telegram",
+        "testInvalidTexts": "请修正文本后重新保存",
+        "ruRequired": "请填写俄语标题和正文",
+        "saveFailed": "保存失败 — 请检查字段"
+      }
     },
     "channelSubscriptions": {
       "title": "必订频道",
@@ -2076,6 +2154,8 @@
       "accentColor": "强调色",
       "animatedBackground": "动画背景",
       "animatedBackgroundDesc": "显示动画背景效果",
+      "liteMode": "简洁版面板",
+      "liteModeDesc": "用一个页面代替「首页」和「订阅」",
       "autoFullscreen": "自动全屏",
       "autoFullscreenDesc": "在Telegram中自动展开",
       "availableThemes": "可用主题",
@@ -2293,6 +2373,7 @@
         "external_squad_uuid": "外部小队",
         "duration_hours": "时长（小时）",
         "traffic_gb": "流量（GB）",
+        "reset_traffic_on_start": "发放时清零流量计数",
         "reconcile_interval_seconds": "核对间隔（秒）",
         "reconcile_batch_size": "批量大小",
         "candidate_lookback_minutes": "回溯窗口（分钟）",
@@ -2326,6 +2407,7 @@
         "title": "用户获得什么",
         "durationDesc": "如果一直没有续订，临时访问持续多少小时",
         "trafficDesc": "这段时间可以使用多少新流量（GB）：在已用流量之上计算，原有余量不结转",
+        "resetTrafficDesc": "面板和应用将显示“0 / 1 GB”，而不是几乎用尽的“64.76 / 65.76 GiB”。仅适用于不限流量的已到期订阅——其计数仅供参考；宽限前的用量将丢失。流量耗尽的订阅永不清零",
         "hint": "宽限期间面板账户处于活跃状态，但只能通过宽限小队访问网络。",
         "allowedDesc": "用户在机器人消息和邮件中会这样看到：“仅可使用：…”。宽限小队实际放行什么由节点决定——机器人只是告知。",
         "allowedPlaceholder": "Telegram 和个人中心"
@@ -3280,6 +3362,12 @@
       "daysShort": "{{days}} 天",
       "autoFrom": "自动 从 {{amount}}",
       "members": "{{count}} 名成员",
+      "recalculate": "重新计算成员",
+      "recalculateHint": "按消费金额为所有付费用户重新分配折扣组。创建、修改或删除带门槛的折扣组后会自动执行。",
+      "recalculating": "正在按消费重新计算成员…",
+      "recalculateStarted": "已开始重新计算，成员将在一分钟内更新。",
+      "recalculateDone": "重新计算完成：已检查 {{checked}} 人，已重新分配 {{changed}} 人。",
+      "recalculateFailed": "重新计算失败，请重试。",
       "createTitle": "创建折扣组",
       "editTitle": "编辑组",
       "stats": {
@@ -3795,6 +3883,7 @@
           "emailUnverified": "未验证",
           "onlineAt": "在线 · {{node}}",
           "write": "发消息",
+          "writeEmail": "发邮件",
           "group": "分组：{{name}}"
         },
         "facts": {
@@ -6631,5 +6720,64 @@
     "offer": "公开要约",
     "privacy": "隐私政策",
     "recurrent": "定期付款"
+  },
+  "lite": {
+    "status": {
+      "none": "还没有订阅",
+      "active": "订阅有效期至 {{date}}",
+      "trial": "试用期至 {{date}}",
+      "expiring": "订阅将于 {{date}} 到期",
+      "expired": "订阅已于 {{date}} 到期",
+      "limited": "流量已用完",
+      "paused": "订阅已暂停",
+      "legacy": "请选择套餐",
+      "many": "你的订阅"
+    },
+    "action": {
+      "connect": "连接设备",
+      "renew": "续订",
+      "buy": "选择套餐",
+      "manage": "打开管理",
+      "tryFree": "免费试用",
+      "tryPaid": "以 {{price}} 试用",
+      "chooseTariff": "选择套餐"
+    },
+    "traffic": {
+      "label": "流量",
+      "used": "{{total}} 中已用 {{used}}",
+      "unlimited": "流量不限"
+    },
+    "rows": {
+      "devices": "设备",
+      "devicesValue": "{{total}} 台中的 {{used}} 台",
+      "balance": "余额",
+      "manage": "管理订阅",
+      "buyAnother": "再买一个套餐",
+      "buyTraffic": "购买更多流量",
+      "buyDevices": "增加设备数",
+      "reduceDevices": "减少设备数",
+      "servers": "服务器",
+      "myDevices": "我的设备",
+      "allSettings": "全部订阅设置",
+      "delete": "删除订阅",
+      "plans": "查看套餐",
+      "support": "客服"
+    },
+    "error": {
+      "load": "无法加载数据",
+      "hint": "请检查网络后重试",
+      "retry": "重试"
+    },
+    "promo": {
+      "available": "你有一个优惠",
+      "discountActive": "折扣已生效"
+    },
+    "tariff": {
+      "current": "当前",
+      "unlimitedDevices": "设备不限"
+    },
+    "subscription": {
+      "untitled": "订阅"
+    }
   }
 }

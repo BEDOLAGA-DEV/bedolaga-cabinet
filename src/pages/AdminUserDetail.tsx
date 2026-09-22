@@ -17,7 +17,7 @@ import { UserFacts } from '@/components/admin/userDetail/UserFacts';
 import { UserHeader } from '@/components/admin/userDetail/UserHeader';
 import { buildReachabilityLink } from '@/components/admin/reachability/deepLink';
 import { useReachabilityAvailable } from '@/components/admin/reachability/useReachabilityStatus';
-import { TelegramSmallIcon } from '@/components/icons';
+import { EmailIcon, TelegramSmallIcon } from '@/components/icons';
 import { PageSkeleton, Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { usePermissionStore } from '@/store/permissions';
@@ -144,7 +144,25 @@ export default function AdminUserDetail() {
   // В шапке — только «Написать» и «⋯». «Продлить» / «Выдать» живут у самой подписки во
   // вкладке «Подписка»: в мультитарифе кнопка в шапке не говорила, какую подписку продлит.
   // На телефоне «Написать» — иконкой рядом с «⋯», в строке имени.
-  const headerActions = can.message && (
+  // Письмо на почту — через email-рассылку одному человеку; нужна подтверждённая почта.
+  const canEmail = hasPermission('broadcasts:send') && Boolean(user.email && user.email_verified);
+  const emailAction = canEmail && (
+    <button
+      type="button"
+      onClick={() =>
+        navigate(`/admin/broadcasts/create?email_user=${user.id}`, {
+          state: { emailUserLabel: user.email },
+        })
+      }
+      aria-label={t('admin.users.detail.header.writeEmail')}
+      title={t('admin.users.detail.header.writeEmail')}
+      className="btn-secondary h-11 w-11 shrink-0 p-0 sm:h-10 sm:w-auto sm:px-4"
+    >
+      <EmailIcon className="h-4 w-4" />
+      <span className="hidden sm:inline">{t('admin.users.detail.header.writeEmail')}</span>
+    </button>
+  );
+  const messageAction = can.message && (
     <button
       type="button"
       onClick={() => setSendMessageOpen(true)}
@@ -160,6 +178,12 @@ export default function AdminUserDetail() {
       <TelegramSmallIcon className="h-4 w-4" />
       <span className="hidden sm:inline">{t('admin.users.detail.header.write')}</span>
     </button>
+  );
+  const headerActions = (
+    <>
+      {messageAction}
+      {emailAction}
+    </>
   );
 
   const menu = (

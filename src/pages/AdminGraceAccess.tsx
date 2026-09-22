@@ -937,6 +937,23 @@ export default function AdminGraceAccess() {
             <FieldHint>{t('admin.graceAccess.limits.allowedDesc')}</FieldHint>
             {lockNote('allowed_services')}
           </div>
+          <div className="flex items-center justify-between gap-3 sm:col-span-2">
+            <div className="min-w-0">
+              <div className="text-sm font-medium text-dark-100">
+                {t('admin.graceAccess.fields.reset_traffic_on_start')}
+              </div>
+              <div className="text-xs text-dark-400">
+                {t('admin.graceAccess.limits.resetTrafficDesc')}
+              </div>
+              {lockNote('reset_traffic_on_start')}
+            </div>
+            <Toggle
+              checked={form.reset_traffic_on_start}
+              disabled={isLocked('reset_traffic_on_start')}
+              aria-label={t('admin.graceAccess.fields.reset_traffic_on_start')}
+              onChange={() => update('reset_traffic_on_start', !form.reset_traffic_on_start)}
+            />
+          </div>
         </div>
       </SectionCard>
 
