@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { brandingApi, setCachedBranding } from '../../api/branding';
 import { setCachedFullscreenEnabled } from '../../hooks/useTelegramSDK';
+import { LITE_MODE_QUERY_KEY, writeLiteModeHint } from '../../hooks/useLiteMode';
 import { UploadIcon, TrashIcon, PencilIcon, CheckIcon, CloseIcon } from './icons';
 import { Toggle } from './Toggle';
 import { BackgroundEditor } from './BackgroundEditor';
@@ -35,6 +36,11 @@ export function BrandingTab({ accentColor = '#3b82f6' }: BrandingTabProps) {
   const { data: fullscreenSettings } = useQuery({
     queryKey: ['fullscreen-enabled'],
     queryFn: brandingApi.getFullscreenEnabled,
+  });
+
+  const { data: liteModeSettings } = useQuery({
+    queryKey: LITE_MODE_QUERY_KEY,
+    queryFn: brandingApi.getLiteModeEnabled,
   });
 
   const { data: emailAuthSettings } = useQuery({
@@ -83,6 +89,16 @@ export function BrandingTab({ accentColor = '#3b82f6' }: BrandingTabProps) {
     onSuccess: (data) => {
       setCachedFullscreenEnabled(data.enabled);
       queryClient.invalidateQueries({ queryKey: ['fullscreen-enabled'] });
+    },
+  });
+
+  const updateLiteModeMutation = useMutation({
+    mutationFn: (enabled: boolean) => brandingApi.updateLiteModeEnabled(enabled),
+    onSuccess: (data) => {
+      // Подсказку переписываем сразу: иначе админ, переключив режим, увидит
+      // прежний экран до следующего ответа сервера и решит, что не сработало.
+      writeLiteModeHint(data.enabled);
+      queryClient.invalidateQueries({ queryKey: LITE_MODE_QUERY_KEY });
     },
   });
 
@@ -305,6 +321,18 @@ export function BrandingTab({ accentColor = '#3b82f6' }: BrandingTabProps) {
         </h3>
 
         <div className="space-y-4">
+          <div className="flex items-center justify-between rounded-xl bg-dark-700/30 p-4">
+            <div>
+              <span className="font-medium text-dark-100">{t('admin.settings.liteMode')}</span>
+              <p className="text-sm text-dark-400">{t('admin.settings.liteModeDesc')}</p>
+            </div>
+            <Toggle
+              checked={liteModeSettings?.enabled ?? false}
+              onChange={() => updateLiteModeMutation.mutate(!(liteModeSettings?.enabled ?? false))}
+              disabled={updateLiteModeMutation.isPending}
+            />
+          </div>
+
           <div className="flex items-center justify-between rounded-xl bg-dark-700/30 p-4">
             <div>
               <span className="font-medium text-dark-100">
