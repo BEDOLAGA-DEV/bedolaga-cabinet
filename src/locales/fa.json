@@ -333,6 +333,9 @@
       "balance": "موجودی",
       "referrals": "معرفی‌شده‌ها"
     },
+    "reminders": {
+      "dismiss": "بستن"
+    },
     "tariff": "تعرفه",
     "trafficUsageTitle": "مصرف ترافیک",
     "trialOffer": {

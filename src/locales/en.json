@@ -359,6 +359,9 @@
       "title": "Subscription Suspended",
       "resume": "Resume"
     },
+    "reminders": {
+      "dismiss": "Dismiss"
+    },
     "trialOffer": {
       "freeTitle": "Free Trial Available",
       "paidTitle": "Trial Subscription",
