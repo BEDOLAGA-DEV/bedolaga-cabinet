@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { isAxiosError } from 'axios';
@@ -24,6 +24,19 @@ function toInt(value: string): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
+// Локальная валидация — {key, params} для i18n; {text} — сырое сообщение с
+// бэкенда (detail[].msg из 422), которое переводить нечем и не нужно.
+type FormError = { key: string; params?: Record<string, string> } | { text: string };
+
+function firstValidationDetailMessage(data: unknown): string | null {
+  const detail = (data as { detail?: unknown } | undefined)?.detail;
+  if (!Array.isArray(detail)) return null;
+  const withMsg = detail.find(
+    (item): item is { msg: string } => typeof (item as { msg?: unknown })?.msg === 'string',
+  );
+  return withMsg?.msg ?? null;
+}
+
 export default function AdminReminderEdit() {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -47,7 +60,7 @@ export default function AdminReminderEdit() {
   });
   const [buttonKind, setButtonKind] = useState<ReminderButtonKind>('none');
   const [buttonTarget, setButtonTarget] = useState('');
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<FormError | null>(null);
   const [testError, setTestError] = useState<string | null>(null);
 
   const existing = useQuery({
@@ -56,9 +69,15 @@ export default function AdminReminderEdit() {
     enabled: editId !== null,
   });
 
+  // Сеем форму из загруженной записи только один раз на её id — иначе рефетч
+  // (например, после обновления статистики) перезаписывает то, что админ уже
+  // печатает в поля.
+  const seededReminderId = useRef<number | null>(null);
   useEffect(() => {
     const r = existing.data;
     if (!r) return;
+    if (seededReminderId.current === r.id) return;
+    seededReminderId.current = r.id;
     setName(r.name);
     setChannels(r.channels);
     setCategory(r.category);
@@ -100,11 +119,13 @@ export default function AdminReminderEdit() {
     segment === 'tariff' && (toInt(tariffId) === null || (toInt(tariffId) as number) <= 0);
 
   // Счётчик аудитории — с дебаунсом, чтобы не дёргать бэкенд на каждый символ.
-  const [debounced, setDebounced] = useState({ conditions, channels });
+  // category — обязательный параметр запроса (маркетинговые исключают отписавшихся
+  // от промо на стороне бэкенда), поэтому идёт в тот же дебаунс, что и остальные.
+  const [debounced, setDebounced] = useState({ conditions, channels, category });
   useEffect(() => {
-    const timer = window.setTimeout(() => setDebounced({ conditions, channels }), 400);
+    const timer = window.setTimeout(() => setDebounced({ conditions, channels, category }), 400);
     return () => window.clearTimeout(timer);
-  }, [conditions, channels]);
+  }, [conditions, channels, category]);
   const audience = useQuery({
     queryKey: ['admin-reminder-audience', debounced],
     queryFn: () => adminRemindersApi.audience(debounced),
@@ -139,7 +160,17 @@ export default function AdminReminderEdit() {
     mutationFn: (p: ReminderPayload) =>
       editId !== null ? adminRemindersApi.update(editId, p) : adminRemindersApi.create(p),
     onSuccess: () => navigate('/admin/reminders'),
-    onError: () => setError('admin.reminders.form.saveFailed'),
+    onError: (err: unknown) => {
+      // 422 всё ещё может прийти после клиентских проверок (гонка правил
+      // валидации с бэкендом) — показываем первое detail[].msg, если есть,
+      // иначе общее сообщение.
+      const status = isAxiosError(err) ? err.response?.status : undefined;
+      const detailMsg =
+        status === 422 && isAxiosError(err)
+          ? firstValidationDetailMessage(err.response?.data)
+          : null;
+      setError(detailMsg ? { text: detailMsg } : { key: 'admin.reminders.form.saveFailed' });
+    },
   });
 
   const test = useMutation({
@@ -155,12 +186,30 @@ export default function AdminReminderEdit() {
 
   const submit = () => {
     if (tariffMissing) {
-      setError('admin.reminders.form.tariffRequired');
+      setError({ key: 'admin.reminders.form.tariffRequired' });
+      return;
+    }
+    if (buttonKind !== 'none' && !(texts.ru?.button ?? '').trim()) {
+      setError({ key: 'admin.reminders.form.buttonTextRequired' });
+      return;
+    }
+    for (const code of LANGS) {
+      if (code === 'ru') continue;
+      const entry = texts[code];
+      const hasTitle = Boolean(entry?.title?.trim());
+      const hasBody = Boolean(entry?.body?.trim());
+      if (hasTitle !== hasBody) {
+        setError({ key: 'admin.reminders.form.partialLanguage', params: { lang: code } });
+        return;
+      }
+    }
+    if (buttonKind === 'url' && !buttonTarget.trim().startsWith('https://')) {
+      setError({ key: 'admin.reminders.form.httpsRequired' });
       return;
     }
     const p = payload();
     if (!p.texts.ru?.title || !p.texts.ru?.body) {
-      setError('admin.reminders.form.ruRequired');
+      setError({ key: 'admin.reminders.form.ruRequired' });
       return;
     }
     setError(null);
@@ -427,8 +476,12 @@ export default function AdminReminderEdit() {
         <div className="whitespace-pre-line text-sm text-dark-300">{preview.body}</div>
       </section>
 
-      {error && <p className="text-sm text-error-400">{t(error)}</p>}
-      <div className="flex flex-wrap gap-3">
+      {error && (
+        <p className="text-sm text-error-400">
+          {'text' in error ? error.text : t(error.key, error.params)}
+        </p>
+      )}
+      <div className="flex flex-wrap items-center gap-3">
         <button
           type="button"
           onClick={submit}
@@ -447,6 +500,7 @@ export default function AdminReminderEdit() {
             >
               {t('admin.reminders.form.sendTest')}
             </button>
+            <span className="text-xs text-dark-400">{t('admin.reminders.form.testHint')}</span>
           </PermissionGate>
         )}
         {test.isSuccess && (

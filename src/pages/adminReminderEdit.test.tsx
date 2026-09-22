@@ -23,9 +23,11 @@ vi.mock('@/api/adminReminders', () => ({ adminRemindersApi: api }));
 
 import AdminReminderEdit from './AdminReminderEdit';
 
-function renderAt(path: string) {
-  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  return render(
+function renderAt(
+  path: string,
+  client = new QueryClient({ defaultOptions: { queries: { retry: false } } }),
+) {
+  const result = render(
     <QueryClientProvider client={client}>
       <MemoryRouter initialEntries={[path]}>
         <Routes>
@@ -36,6 +38,7 @@ function renderAt(path: string) {
       </MemoryRouter>
     </QueryClientProvider>,
   );
+  return { ...result, client };
 }
 
 const baseReminder: ReminderResponse = {
@@ -98,6 +101,15 @@ describe('AdminReminderEdit', () => {
 
     await waitFor(() => expect(api.audience).toHaveBeenCalled());
     expect(await screen.findByText(/3/)).toBeTruthy();
+    // Аудитория считается по категории напоминания — форма шлёт её в запросе,
+    // после дебаунса, дождавшись финального (заполненного) набора условий.
+    await waitFor(() =>
+      expect(api.audience).toHaveBeenCalledWith({
+        conditions: { auth: 'single_method', registered_days_min: 3 },
+        channels: 'both',
+        category: 'service',
+      }),
+    );
 
     fireEvent.click(screen.getByText('admin.reminders.form.save'));
     await waitFor(() => expect(api.create).toHaveBeenCalled());
@@ -239,6 +251,157 @@ describe('AdminReminderEdit', () => {
     );
     expect((screen.getByLabelText('admin.reminders.form.body') as HTMLTextAreaElement).value).toBe(
       '',
+    );
+  });
+
+  it('requires a Russian button text when a button is enabled', async () => {
+    api.audience.mockResolvedValue({ bot: 0, cabinet: 0 });
+    renderAt('/admin/reminders/create');
+
+    fireEvent.change(screen.getByLabelText('admin.reminders.form.name'), {
+      target: { value: 'Кнопка' },
+    });
+    fireEvent.change(screen.getByLabelText('admin.reminders.form.title'), {
+      target: { value: 'Заголовок' },
+    });
+    fireEvent.change(screen.getByLabelText('admin.reminders.form.body'), {
+      target: { value: 'Текст' },
+    });
+    fireEvent.change(screen.getByLabelText('admin.reminders.form.buttonKind'), {
+      target: { value: 'cabinet' },
+    });
+    fireEvent.change(screen.getByLabelText('admin.reminders.form.buttonTarget'), {
+      target: { value: '/profile/accounts' },
+    });
+    // Текст кнопки на ru намеренно не заполнен.
+
+    fireEvent.click(screen.getByText('admin.reminders.form.save'));
+    expect(await screen.findByText('admin.reminders.form.buttonTextRequired')).toBeTruthy();
+    expect(api.create).not.toHaveBeenCalled();
+  });
+
+  it('requires both title and body for a non-ru language once one of them is filled', async () => {
+    api.audience.mockResolvedValue({ bot: 0, cabinet: 0 });
+    renderAt('/admin/reminders/create');
+
+    fireEvent.change(screen.getByLabelText('admin.reminders.form.name'), {
+      target: { value: 'Частичный язык' },
+    });
+    fireEvent.change(screen.getByLabelText('admin.reminders.form.title'), {
+      target: { value: 'Заголовок' },
+    });
+    fireEvent.change(screen.getByLabelText('admin.reminders.form.body'), {
+      target: { value: 'Текст' },
+    });
+    fireEvent.click(screen.getByText('EN'));
+    fireEvent.change(screen.getByLabelText('admin.reminders.form.title'), {
+      target: { value: 'Only title' },
+    });
+    // Текст (body) для en намеренно не заполнен.
+
+    fireEvent.click(screen.getByText('admin.reminders.form.save'));
+    expect(await screen.findByText('admin.reminders.form.partialLanguage')).toBeTruthy();
+    expect(api.create).not.toHaveBeenCalled();
+  });
+
+  it('requires an https:// link for a url button', async () => {
+    api.audience.mockResolvedValue({ bot: 0, cabinet: 0 });
+    renderAt('/admin/reminders/create');
+
+    fireEvent.change(screen.getByLabelText('admin.reminders.form.name'), {
+      target: { value: 'Ссылка' },
+    });
+    fireEvent.change(screen.getByLabelText('admin.reminders.form.title'), {
+      target: { value: 'Заголовок' },
+    });
+    fireEvent.change(screen.getByLabelText('admin.reminders.form.body'), {
+      target: { value: 'Текст' },
+    });
+    fireEvent.change(screen.getByLabelText('admin.reminders.form.buttonKind'), {
+      target: { value: 'url' },
+    });
+    fireEvent.change(screen.getByLabelText('admin.reminders.form.buttonTarget'), {
+      target: { value: 'http://insecure.example' },
+    });
+    fireEvent.change(screen.getByLabelText('admin.reminders.form.buttonText'), {
+      target: { value: 'Open' },
+    });
+
+    fireEvent.click(screen.getByText('admin.reminders.form.save'));
+    expect(await screen.findByText('admin.reminders.form.httpsRequired')).toBeTruthy();
+    expect(api.create).not.toHaveBeenCalled();
+  });
+
+  it('shows the backend detail message on a 422 that slips past client validation', async () => {
+    api.audience.mockResolvedValue({ bot: 0, cabinet: 0 });
+    api.create.mockRejectedValueOnce({
+      isAxiosError: true,
+      response: { status: 422, data: { detail: [{ msg: 'texts.ru is required' }] } },
+    });
+    renderAt('/admin/reminders/create');
+
+    fireEvent.change(screen.getByLabelText('admin.reminders.form.name'), {
+      target: { value: 'X' },
+    });
+    fireEvent.change(screen.getByLabelText('admin.reminders.form.title'), {
+      target: { value: 'Заголовок' },
+    });
+    fireEvent.change(screen.getByLabelText('admin.reminders.form.body'), {
+      target: { value: 'Текст' },
+    });
+
+    fireEvent.click(screen.getByText('admin.reminders.form.save'));
+    expect(await screen.findByText('texts.ru is required')).toBeTruthy();
+  });
+
+  it('falls back to the generic save-failed message without a detail array', async () => {
+    api.audience.mockResolvedValue({ bot: 0, cabinet: 0 });
+    api.create.mockRejectedValueOnce({ isAxiosError: true, response: { status: 500 } });
+    renderAt('/admin/reminders/create');
+
+    fireEvent.change(screen.getByLabelText('admin.reminders.form.name'), {
+      target: { value: 'X' },
+    });
+    fireEvent.change(screen.getByLabelText('admin.reminders.form.title'), {
+      target: { value: 'Заголовок' },
+    });
+    fireEvent.change(screen.getByLabelText('admin.reminders.form.body'), {
+      target: { value: 'Текст' },
+    });
+
+    fireEvent.click(screen.getByText('admin.reminders.form.save'));
+    expect(await screen.findByText('admin.reminders.form.saveFailed')).toBeTruthy();
+  });
+
+  it('shows a hint next to the send-to-myself button', async () => {
+    api.get.mockResolvedValue(baseReminder);
+    api.audience.mockResolvedValue({ bot: 0, cabinet: 0 });
+    renderAt('/admin/reminders/5/edit');
+
+    await screen.findByDisplayValue('Заголовок');
+    expect(screen.getByText('admin.reminders.form.testHint')).toBeTruthy();
+  });
+
+  it('does not lose what the admin is typing when the reminder refetches', async () => {
+    api.get.mockResolvedValue(baseReminder);
+    api.audience.mockResolvedValue({ bot: 0, cabinet: 0 });
+    const { client } = renderAt('/admin/reminders/5/edit');
+
+    await screen.findByDisplayValue('Заголовок');
+    fireEvent.change(screen.getByLabelText('admin.reminders.form.name'), {
+      target: { value: 'Печатаю новое имя' },
+    });
+
+    // Рефетч вернул тот же id, но другую статистику — форма не должна затереть ввод.
+    client.setQueryData(['admin-reminder', 5], {
+      ...baseReminder,
+      stats: { ...baseReminder.stats, sent_total: 7 },
+    });
+
+    await waitFor(() =>
+      expect((screen.getByLabelText('admin.reminders.form.name') as HTMLInputElement).value).toBe(
+        'Печатаю новое имя',
+      ),
     );
   });
 });
