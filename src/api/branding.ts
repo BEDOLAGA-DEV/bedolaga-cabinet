@@ -21,6 +21,11 @@ export interface FullscreenEnabled {
   enabled: boolean;
 }
 
+/** Простой вид кабинета: один экран покупателя вместо «Главное» + «Подписка». */
+export interface LiteModeEnabled {
+  enabled: boolean;
+}
+
 export interface EmailAuthEnabled {
   enabled: boolean;
   verification_enabled?: boolean;
@@ -293,6 +298,25 @@ export const brandingApi = {
   // Update fullscreen enabled (admin only)
   updateFullscreenEnabled: async (enabled: boolean): Promise<FullscreenEnabled> => {
     const response = await apiClient.patch<FullscreenEnabled>('/cabinet/branding/fullscreen', {
+      enabled,
+    });
+    return response.data;
+  },
+
+  // Get lite mode enabled (public, no auth required)
+  getLiteModeEnabled: async (): Promise<LiteModeEnabled> => {
+    try {
+      const response = await apiClient.get<LiteModeEnabled>('/cabinet/branding/lite-mode');
+      return response.data;
+    } catch {
+      // Панель старее фронта — простого вида там ещё нет, значит он выключен.
+      return { enabled: false };
+    }
+  },
+
+  // Update lite mode enabled (admin only)
+  updateLiteModeEnabled: async (enabled: boolean): Promise<LiteModeEnabled> => {
+    const response = await apiClient.patch<LiteModeEnabled>('/cabinet/branding/lite-mode', {
       enabled,
     });
     return response.data;

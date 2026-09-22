@@ -5,6 +5,8 @@ export const STORAGE_KEYS = {
   BRAND_HINT: 'cabinet-brand-hint',
   /** Подсказка первой отрисовки: палитра оператора (CSS-переменные) для инлайн-скрипта index.html. */
   THEME_COLORS_HINT: 'cabinet-theme-colors-hint',
+  /** Подсказка первой отрисовки: простой вид включён — иначе главный экран мигает полным. */
+  LITE_MODE: 'cabinet-lite-mode',
   FAVORITE_SETTINGS: 'admin_favorite_settings',
 } as const;
 

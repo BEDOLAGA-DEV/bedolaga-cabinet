@@ -16,6 +16,7 @@ import SubscriptionCardActive from '../components/dashboard/SubscriptionCardActi
 import SubscriptionCardExpired from '../components/dashboard/SubscriptionCardExpired';
 import { hasLegacySubscription } from '../utils/legacySubscription';
 import TrialOfferCard from '../components/dashboard/TrialOfferCard';
+import ReminderCards from '../components/dashboard/ReminderCards';
 import StatsGrid from '../components/dashboard/StatsGrid';
 import { giftApi } from '../api/gift';
 import { promoApi } from '../api/promo';
@@ -456,6 +457,9 @@ export default function Dashboard() {
           </div>
         </Link>
       )}
+
+      {/* Напоминания (админка → Напоминания) */}
+      <ReminderCards />
 
       {/* News Section */}
       <NewsSection />

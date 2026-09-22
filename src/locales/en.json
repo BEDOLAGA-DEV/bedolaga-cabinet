@@ -359,6 +359,9 @@
       "title": "Subscription Suspended",
       "resume": "Resume"
     },
+    "reminders": {
+      "dismiss": "Dismiss"
+    },
     "trialOffer": {
       "freeTitle": "Free Trial Available",
       "paidTitle": "Trial Subscription",
@@ -1458,6 +1461,7 @@
       "trafficUsage": "Traffic Usage",
       "updates": "Updates",
       "pinnedMessages": "Pinned Messages",
+      "reminders": "Reminders",
       "partners": "Partners",
       "referralLevels": "Reward levels",
       "withdrawals": "Withdrawals",
@@ -1510,6 +1514,7 @@
       "trafficUsageDesc": "Per-user traffic by nodes",
       "updatesDesc": "Bot & cabinet versions",
       "pinnedMessagesDesc": "Manage pinned messages for users",
+      "remindersDesc": "Condition-based user reminders",
       "partnersDesc": "Manage partner applications and commissions",
       "withdrawalsDesc": "Review and process withdrawal requests",
       "channelSubscriptionsDesc": "Manage required channel subscriptions",
@@ -2798,7 +2803,9 @@
         "activity": "By activity",
         "source": "By source",
         "tariff": "By tariff",
-        "email": "Email users"
+        "email": "Email users",
+        "promo_group": "By promo group",
+        "recipient": "Recipient"
       },
       "channel": {
         "telegram": "Telegram",
@@ -2810,6 +2817,7 @@
       "emailSection": "Email broadcast",
       "selectEmailFilter": "Select email audience",
       "selectEmailFilterPlaceholder": "Select filter...",
+      "singleUser": "Only {{name}}",
       "emailSubject": "Email subject",
       "emailSubjectPlaceholder": "Enter email subject...",
       "emailContent": "Email content",
@@ -2886,6 +2894,78 @@
       "unpinnedCount": "Unpinned",
       "editMessage": "Edit",
       "cantDeleteActive": "Cannot delete active message"
+    },
+    "reminders": {
+      "title": "Reminders",
+      "description": "User reminders based on conditions: in the bot, in the cabinet, or both.",
+      "create": "Create",
+      "createTitle": "New reminder",
+      "editTitle": "Reminder",
+      "empty": "No reminders yet",
+      "active": "Enabled",
+      "inactive": "Disabled",
+      "builtin": "Built-in",
+      "enable": "Enable",
+      "disable": "Disable",
+      "edit": "Edit",
+      "delete": "Delete",
+      "confirmDelete": "Delete reminder \"{{name}}\"?",
+      "stats": "Sent: {{sent}} · dismissed: {{dismissed}} · currently match: bot {{bot}}, cabinet {{cabinet}}",
+      "any": "Any",
+      "channels": { "both": "Bot and cabinet", "bot": "Bot only", "cabinet": "Cabinet only" },
+      "category": {
+        "service": "Service — for everyone",
+        "marketing": "Marketing — except those unsubscribed from promo"
+      },
+      "auth": {
+        "single_method": "Single sign-in method only",
+        "telegram_only": "Telegram sign-in only",
+        "email_only": "Email sign-in only"
+      },
+      "segment": {
+        "active": "Active subscription",
+        "trial": "Trial",
+        "expiring": "Expiring soon",
+        "expired": "Subscription expired",
+        "none": "No subscription",
+        "low_balance": "Low balance",
+        "tariff": "Tariff"
+      },
+      "button": { "none": "No button", "cabinet": "Cabinet section", "url": "Link" },
+      "form": {
+        "name": "Name (admin panel only)",
+        "channels": "Where to show",
+        "category": "Type",
+        "conditions": "Audience",
+        "auth": "Sign-in method",
+        "segment": "Subscription",
+        "segmentDays": "Days before expiry",
+        "tariffId": "Tariff ID",
+        "tariffRequired": "Specify the tariff ID",
+        "registeredDays": "No earlier than N days after registration",
+        "inactiveDays": "Inactive for N days",
+        "audience": "Currently match",
+        "repeatEvery": "Repeat in bot every N days",
+        "maxSends": "Max sends in bot",
+        "title": "Title",
+        "body": "Text",
+        "buttonKind": "Button",
+        "buttonTarget": "Target",
+        "buttonText": "Button text",
+        "buttonTextRequired": "Fill in the button text in Russian",
+        "partialLanguage": "Fill in both the title and text for {{lang}}, or clear both",
+        "httpsRequired": "The link must start with https://",
+        "preview": "Preview",
+        "save": "Save",
+        "sendTest": "Send to myself",
+        "testHint": "Sends the saved version, without checking conditions or limits",
+        "testSent": "Sent to you in the bot",
+        "testFailed": "Failed to send",
+        "testNoTelegram": "You don't have Telegram linked",
+        "testInvalidTexts": "Fix the texts and save",
+        "ruRequired": "Fill in the Russian title and text",
+        "saveFailed": "Failed to save — check the fields"
+      }
     },
     "channelSubscriptions": {
       "title": "Required Channels",
@@ -2982,6 +3062,8 @@
       "accentColor": "Accent color",
       "animatedBackground": "Animated background",
       "animatedBackgroundDesc": "Show animated background effects",
+      "liteMode": "Simple cabinet view",
+      "liteModeDesc": "One buyer screen instead of Home and Subscription",
       "autoFullscreen": "Auto fullscreen",
       "autoFullscreenDesc": "Auto expand in Telegram",
       "availableThemes": "Available themes",
@@ -3197,6 +3279,7 @@
         "external_squad_uuid": "External squad",
         "duration_hours": "Duration, hours",
         "traffic_gb": "Traffic, GB",
+        "reset_traffic_on_start": "Reset the traffic counter on grant",
         "reconcile_interval_seconds": "Reconcile interval, sec",
         "reconcile_batch_size": "Batch size",
         "candidate_lookback_minutes": "Lookback window, min",
@@ -3230,6 +3313,7 @@
         "title": "What the user gets",
         "durationDesc": "How many hours the temporary access lasts if the subscription is never renewed",
         "trafficDesc": "How many new gigabytes can be spent in that time: counted on top of what is already used, the old remainder is not carried over",
+        "resetTrafficDesc": "The panel and the app show “0 of 1 GB” instead of an almost exhausted “64.76 of 65.76 GiB”. Only expired subscriptions with unlimited traffic — there the counter is informational; usage before grace is lost. Exhausted-traffic subscriptions are never reset",
         "hint": "While grace lasts the panel account is active but reaches the network only through the grace squad.",
         "allowedDesc": "How the user will see it in the bot message and the email: “only this stays available: …”. What the grace squad really lets through is up to the nodes — the bot only says so.",
         "allowedPlaceholder": "Telegram and the dashboard"
@@ -4408,6 +4492,12 @@
       "daysShort": "{{days}} days",
       "autoFrom": "Auto from {{amount}}",
       "members": "{{count}} members",
+      "recalculate": "Recalculate members",
+      "recalculateHint": "Assign groups by spending to everyone who has paid. This happens automatically after a group with a threshold is created, changed or deleted.",
+      "recalculating": "Recalculating members by spending…",
+      "recalculateStarted": "Recalculation started. Members will update within a minute.",
+      "recalculateDone": "Recalculation finished: {{checked}} checked, {{changed}} reassigned.",
+      "recalculateFailed": "Recalculation failed. Please try again.",
       "createTitle": "Create Discount Group",
       "editTitle": "Edit Group",
       "stats": {
@@ -4963,6 +5053,7 @@
           "emailUnverified": "not verified",
           "onlineAt": "online · {{node}}",
           "write": "Message",
+          "writeEmail": "Email",
           "group": "Group: {{name}}"
         },
         "facts": {
@@ -7186,5 +7277,64 @@
     "offer": "Public Offer",
     "privacy": "Privacy Policy",
     "recurrent": "Recurring Payments"
+  },
+  "lite": {
+    "status": {
+      "none": "No subscription yet",
+      "active": "Subscription works until {{date}}",
+      "trial": "Trial until {{date}}",
+      "expiring": "Subscription ends on {{date}}",
+      "expired": "Subscription ended on {{date}}",
+      "limited": "Traffic ran out",
+      "paused": "Subscription is paused",
+      "legacy": "Choose a plan to continue",
+      "many": "Your subscriptions"
+    },
+    "action": {
+      "connect": "Connect a device",
+      "renew": "Renew subscription",
+      "buy": "Choose a plan",
+      "manage": "Open settings",
+      "tryFree": "Try it free",
+      "tryPaid": "Try it for {{price}}",
+      "chooseTariff": "Choose a plan"
+    },
+    "traffic": {
+      "label": "Traffic",
+      "used": "{{used}} of {{total}}",
+      "unlimited": "Unlimited traffic"
+    },
+    "rows": {
+      "devices": "Devices",
+      "devicesValue": "{{used}} of {{total}}",
+      "balance": "Balance",
+      "manage": "Manage subscription",
+      "buyAnother": "Buy another plan",
+      "buyTraffic": "Buy more traffic",
+      "buyDevices": "Buy more devices",
+      "reduceDevices": "Reduce device count",
+      "servers": "Servers",
+      "myDevices": "My devices",
+      "allSettings": "All subscription settings",
+      "delete": "Delete subscription",
+      "plans": "See plans",
+      "support": "Support"
+    },
+    "error": {
+      "load": "Could not load your data",
+      "hint": "Check the connection and try again",
+      "retry": "Try again"
+    },
+    "promo": {
+      "available": "You have an offer",
+      "discountActive": "Discount active"
+    },
+    "tariff": {
+      "current": "current",
+      "unlimitedDevices": "Unlimited devices"
+    },
+    "subscription": {
+      "untitled": "Subscription"
+    }
   }
 }
