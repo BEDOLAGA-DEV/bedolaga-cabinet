@@ -4597,7 +4597,8 @@
       "settingsUpdateError": "Не удалось сохранить настройки",
       "settingsSection": {
         "referralProgram": "Реферальная программа",
-        "withdrawalSettings": "Настройки вывода"
+        "withdrawalSettings": "Настройки вывода",
+        "withdrawalReminders": "Напоминания о заявках на вывод"
       },
       "settingsFields": {
         "programEnabled": "Реферальная программа включена",
@@ -4612,7 +4613,15 @@
         "cooldownDaysDesc": "Сколько дней должно пройти между запросами на вывод",
         "requisitesText": "Текст для поля реквизитов",
         "requisitesTextDesc": "Кастомная подсказка пользователю, какие реквизиты указать при выводе",
-        "requisitesTextPlaceholder": "Например: Укажите номер карты Сбербанк / Тинькофф или USDT TRC-20 адрес"
+        "requisitesTextPlaceholder": "Например: Укажите номер карты Сбербанк / Тинькофф или USDT TRC-20 адрес",
+        "reminderEnabled": "Напоминать о заявках без решения",
+        "reminderEnabledDesc": "Повторно уведомлять админов, пока заявка на вывод ждёт решения — как SLA у тикетов поддержки",
+        "reminderMinutes": "Первое напоминание через (мин)",
+        "reminderMinutesDesc": "Сколько минут заявка может ждать решения до первого напоминания (1–10080)",
+        "reminderCooldownMinutes": "Повтор напоминаний (мин)",
+        "reminderCooldownMinutesDesc": "Минимальный интервал между повторными напоминаниями по одной заявке (1–10080)",
+        "reminderCheckIntervalSeconds": "Интервал проверки (сек)",
+        "reminderCheckIntervalSecondsDesc": "Как часто бот проверяет заявки (30–3600); фактический шаг напоминаний округляется до него"
       }
     },
     "partnerDetail": {
