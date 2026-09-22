@@ -1899,6 +1899,9 @@
         "cancelling": "取消中"
       },
       "filterGroups": {
+        "email": "电子邮件用户",
+        "promo_group": "按促销组",
+        "recipient": "收件人",
         "basic": "基础",
         "subscription": "按订阅",
         "traffic": "按流量",
@@ -1944,6 +1947,7 @@
       "selectChannel": "群发渠道",
       "selectEmailFilter": "选择邮件受众",
       "selectEmailFilterPlaceholder": "选择筛选器...",
+      "singleUser": "仅 {{name}}",
       "telegramSection": "Telegram 群发"
     },
     "pinnedMessages": {
@@ -3879,6 +3883,7 @@
           "emailUnverified": "未验证",
           "onlineAt": "在线 · {{node}}",
           "write": "发消息",
+          "writeEmail": "发邮件",
           "group": "分组：{{name}}"
         },
         "facts": {

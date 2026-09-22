@@ -2803,7 +2803,9 @@
         "activity": "By activity",
         "source": "By source",
         "tariff": "By tariff",
-        "email": "Email users"
+        "email": "Email users",
+        "promo_group": "By promo group",
+        "recipient": "Recipient"
       },
       "channel": {
         "telegram": "Telegram",
@@ -2815,6 +2817,7 @@
       "emailSection": "Email broadcast",
       "selectEmailFilter": "Select email audience",
       "selectEmailFilterPlaceholder": "Select filter...",
+      "singleUser": "Only {{name}}",
       "emailSubject": "Email subject",
       "emailSubjectPlaceholder": "Enter email subject...",
       "emailContent": "Email content",
@@ -5050,6 +5053,7 @@
           "emailUnverified": "not verified",
           "onlineAt": "online · {{node}}",
           "write": "Message",
+          "writeEmail": "Email",
           "group": "Group: {{name}}"
         },
         "facts": {
