@@ -1802,6 +1802,9 @@
         "cancelling": "در حال لغو"
       },
       "filterGroups": {
+        "email": "کاربران ایمیل",
+        "promo_group": "بر اساس گروه تبلیغاتی",
+        "recipient": "گیرنده",
         "basic": "پایه",
         "subscription": "بر اساس اشتراک",
         "traffic": "بر اساس ترافیک",
@@ -1847,6 +1850,7 @@
       "selectChannel": "کانال ارسال",
       "selectEmailFilter": "مخاطبان ایمیل را انتخاب کنید",
       "selectEmailFilterPlaceholder": "فیلتر را انتخاب کنید...",
+      "singleUser": "فقط {{name}}",
       "telegramSection": "ارسال انبوه تلگرام"
     },
     "pinnedMessages": {
@@ -3893,6 +3897,7 @@
           "emailUnverified": "تأیید نشده",
           "onlineAt": "آنلاین · {{node}}",
           "write": "پیام",
+          "writeEmail": "ایمیل",
           "group": "گروه: {{name}}"
         },
         "facts": {
