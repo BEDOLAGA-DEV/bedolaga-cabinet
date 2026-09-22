@@ -333,6 +333,9 @@
       "balance": "موجودی",
       "referrals": "معرفی‌شده‌ها"
     },
+    "reminders": {
+      "dismiss": "بستن"
+    },
     "tariff": "تعرفه",
     "trafficUsageTitle": "مصرف ترافیک",
     "trialOffer": {
@@ -1319,6 +1322,7 @@
       "trafficUsage": "مصرف ترافیک",
       "updates": "به‌روزرسانی‌ها",
       "pinnedMessages": "پیام‌های سنجاق‌شده",
+      "reminders": "یادآوری‌ها",
       "partners": "شرکا",
       "referralLevels": "سطوح پاداش",
       "withdrawals": "برداشت‌ها",
@@ -1370,6 +1374,7 @@
       "trafficUsageDesc": "ترافیک هر کاربر بر اساس نود",
       "updatesDesc": "نسخه‌های ربات و کابینت",
       "pinnedMessagesDesc": "مدیریت پیام‌های سنجاق‌شده",
+      "remindersDesc": "یادآوری‌های شرطی برای کاربران",
       "partnersDesc": "مدیریت درخواست‌های شراکت و کمیسیون‌ها",
       "withdrawalsDesc": "بررسی و پردازش درخواست‌های برداشت",
       "channelSubscriptionsDesc": "مدیریت اشتراک‌های اجباری کانال",
@@ -1797,6 +1802,9 @@
         "cancelling": "در حال لغو"
       },
       "filterGroups": {
+        "email": "کاربران ایمیل",
+        "promo_group": "بر اساس گروه تبلیغاتی",
+        "recipient": "گیرنده",
         "basic": "پایه",
         "subscription": "بر اساس اشتراک",
         "traffic": "بر اساس ترافیک",
@@ -1842,6 +1850,7 @@
       "selectChannel": "کانال ارسال",
       "selectEmailFilter": "مخاطبان ایمیل را انتخاب کنید",
       "selectEmailFilterPlaceholder": "فیلتر را انتخاب کنید...",
+      "singleUser": "فقط {{name}}",
       "telegramSection": "ارسال انبوه تلگرام"
     },
     "pinnedMessages": {
@@ -1885,6 +1894,78 @@
       "unpinnedCount": "سنجاق‌برداشته",
       "editMessage": "ویرایش",
       "cantDeleteActive": "نمی‌توان پیام فعال را حذف کرد"
+    },
+    "reminders": {
+      "title": "یادآوری‌ها",
+      "description": "یادآوری به کاربران بر اساس شرایط: در ربات، در پنل کاربری، یا هر دو.",
+      "create": "ایجاد",
+      "createTitle": "یادآوری جدید",
+      "editTitle": "یادآوری",
+      "empty": "هنوز یادآوری‌ای وجود ندارد",
+      "active": "فعال",
+      "inactive": "غیرفعال",
+      "builtin": "داخلی",
+      "enable": "فعال‌سازی",
+      "disable": "غیرفعال‌سازی",
+      "edit": "ویرایش",
+      "delete": "حذف",
+      "confirmDelete": "یادآوری «{{name}}» حذف شود؟",
+      "stats": "ارسال‌شده: {{sent}} · بسته‌شده: {{dismissed}} · هم‌اکنون منطبق: ربات {{bot}}، پنل {{cabinet}}",
+      "any": "هر",
+      "channels": { "both": "ربات و پنل کاربری", "bot": "فقط ربات", "cabinet": "فقط پنل کاربری" },
+      "category": {
+        "service": "خدماتی — برای همه",
+        "marketing": "بازاریابی — به‌جز افرادی که از تبلیغات لغو اشتراک کرده‌اند"
+      },
+      "auth": {
+        "single_method": "فقط یک روش ورود",
+        "telegram_only": "فقط ورود از طریق تلگرام",
+        "email_only": "فقط ورود از طریق ایمیل"
+      },
+      "segment": {
+        "active": "اشتراک فعال",
+        "trial": "آزمایشی",
+        "expiring": "به‌زودی منقضی می‌شود",
+        "expired": "اشتراک منقضی شده",
+        "none": "بدون اشتراک",
+        "low_balance": "موجودی کم",
+        "tariff": "تعرفه"
+      },
+      "button": { "none": "بدون دکمه", "cabinet": "بخش پنل کاربری", "url": "لینک" },
+      "form": {
+        "name": "نام (فقط در پنل مدیریت قابل مشاهده است)",
+        "channels": "محل نمایش",
+        "category": "نوع",
+        "conditions": "مخاطب",
+        "auth": "روش ورود",
+        "segment": "اشتراک",
+        "segmentDays": "چند روز تا پایان",
+        "tariffId": "شناسه تعرفه",
+        "tariffRequired": "شناسه تعرفه را مشخص کنید",
+        "registeredDays": "زودتر از N روز پس از ثبت‌نام نه",
+        "inactiveDays": "غیرفعال به مدت N روز",
+        "audience": "هم‌اکنون منطبق",
+        "repeatEvery": "تکرار در ربات هر N روز",
+        "maxSends": "حداکثر ارسال در ربات",
+        "title": "عنوان",
+        "body": "متن",
+        "buttonKind": "دکمه",
+        "buttonTarget": "مقصد",
+        "buttonText": "متن دکمه",
+        "buttonTextRequired": "متن دکمه را به زبان روسی پر کنید",
+        "partialLanguage": "هم عنوان و هم متن را برای زبان {{lang}} پر کنید یا هر دو را خالی بگذارید",
+        "httpsRequired": "لینک باید با https:// شروع شود",
+        "preview": "پیش‌نمایش",
+        "save": "ذخیره",
+        "sendTest": "ارسال به خودم",
+        "testHint": "نسخه ذخیره‌شده ارسال می‌شود، بدون بررسی شرایط و محدودیت‌ها",
+        "testSent": "به ربات شما ارسال شد",
+        "testFailed": "ارسال ناموفق بود",
+        "testNoTelegram": "شما تلگرام متصل ندارید",
+        "testInvalidTexts": "متن‌ها را اصلاح و ذخیره کنید",
+        "ruRequired": "عنوان و متن روسی را پر کنید",
+        "saveFailed": "ذخیره ناموفق بود — فیلدها را بررسی کنید"
+      }
     },
     "channelSubscriptions": {
       "title": "کانال‌های اجباری",
@@ -2015,6 +2096,8 @@
       "accentColor": "رنگ تأکیدی",
       "animatedBackground": "پس‌زمینه متحرک",
       "animatedBackgroundDesc": "نمایش جلوه‌های پس‌زمینه متحرک",
+      "liteMode": "نمای ساده پنل",
+      "liteModeDesc": "یک صفحه به جای «خانه» و «اشتراک»",
       "autoFullscreen": "تمام صفحه خودکار",
       "autoFullscreenDesc": "باز شدن خودکار در تلگرام",
       "availableThemes": "پوسته‌های موجود",
@@ -2232,6 +2315,7 @@
         "external_squad_uuid": "اسکواد بیرونی",
         "duration_hours": "مدت، ساعت",
         "traffic_gb": "ترافیک، گیگابایت",
+        "reset_traffic_on_start": "صفر کردن شمارندهٔ ترافیک هنگام اعطا",
         "reconcile_interval_seconds": "فاصله تطبیق، ثانیه",
         "reconcile_batch_size": "اندازه دسته",
         "candidate_lookback_minutes": "بازه جست‌وجو، دقیقه",
@@ -2265,6 +2349,7 @@
         "title": "کاربر چه می‌گیرد",
         "durationDesc": "دسترسی موقت چند ساعت دوام می‌آورد اگر اشتراک تمدید نشود",
         "trafficDesc": "در این مدت چند گیگابایت تازه می‌توان مصرف کرد: روی مصرف قبلی حساب می‌شود و باقی‌ماندهٔ قدیمی منتقل نمی‌شود",
+        "resetTrafficDesc": "پنل و برنامه «۰ از ۱ گیگابایت» را نشان می‌دهند، نه «64.76 از 65.76 GiB» تقریباً تمام‌شده. فقط اشتراک‌های منقضی با ترافیک نامحدود — آنجا شمارنده صرفاً اطلاعاتی است؛ مصرف پیش از grace از دست می‌رود. اشتراک‌هایی که ترافیکشان تمام شده هرگز صفر نمی‌شوند",
         "hint": "در مدت مهلت، حساب در پنل فعال است اما فقط از طریق اسکواد مهلت به شبکه می‌رسد.",
         "allowedDesc": "کاربر آن را در پیام ربات و ایمیل به این شکل می‌بیند: «فقط این در دسترس می‌ماند: …». اینکه اسکواد مهلت واقعاً چه چیزی را عبور می‌دهد، بر عهدهٔ نودهاست — ربات فقط می‌گوید.",
         "allowedPlaceholder": "تلگرام و پنل کاربری"
@@ -3288,6 +3373,12 @@
       "daysShort": "{{days}} روز",
       "autoFrom": "خودکار از {{amount}}",
       "members": "{{count}} عضو",
+      "recalculate": "محاسبه مجدد اعضا",
+      "recalculateHint": "گروه‌ها را بر اساس هزینه‌ها به همه کسانی که پرداخت کرده‌اند اختصاص می‌دهد. پس از ایجاد، تغییر یا حذف گروهی با آستانه، این کار خودکار انجام می‌شود.",
+      "recalculating": "در حال محاسبه مجدد اعضا بر اساس هزینه‌ها…",
+      "recalculateStarted": "محاسبه مجدد آغاز شد. اعضا تا یک دقیقه دیگر به‌روزرسانی می‌شوند.",
+      "recalculateDone": "محاسبه مجدد پایان یافت: {{checked}} بررسی شد، {{changed}} جابه‌جا شد.",
+      "recalculateFailed": "محاسبه مجدد ناموفق بود. دوباره تلاش کنید.",
       "createTitle": "ایجاد گروه تخفیف",
       "editTitle": "ویرایش گروه",
       "stats": {
@@ -3806,6 +3897,7 @@
           "emailUnverified": "تأیید نشده",
           "onlineAt": "آنلاین · {{node}}",
           "write": "پیام",
+          "writeEmail": "ایمیل",
           "group": "گروه: {{name}}"
         },
         "facts": {
@@ -6686,5 +6778,64 @@
     "offer": "پیشنهاد عمومی",
     "privacy": "سیاست حفظ حریم خصوصی",
     "recurrent": "پرداخت‌های مکرر"
+  },
+  "lite": {
+    "status": {
+      "none": "هنوز اشتراکی ندارید",
+      "active": "اشتراک تا {{date}} فعال است",
+      "trial": "دوره آزمایشی تا {{date}}",
+      "expiring": "اشتراک در {{date}} تمام می‌شود",
+      "expired": "اشتراک در {{date}} تمام شد",
+      "limited": "ترافیک تمام شد",
+      "paused": "اشتراک متوقف است",
+      "legacy": "یک طرح انتخاب کنید",
+      "many": "اشتراک‌های شما"
+    },
+    "action": {
+      "connect": "اتصال دستگاه",
+      "renew": "تمدید اشتراک",
+      "buy": "انتخاب طرح",
+      "manage": "باز کردن مدیریت",
+      "tryFree": "رایگان امتحان کنید",
+      "tryPaid": "با {{price}} امتحان کنید",
+      "chooseTariff": "انتخاب طرح"
+    },
+    "traffic": {
+      "label": "ترافیک",
+      "used": "{{used}} از {{total}}",
+      "unlimited": "ترافیک نامحدود"
+    },
+    "rows": {
+      "devices": "دستگاه‌ها",
+      "devicesValue": "{{used}} از {{total}}",
+      "balance": "موجودی",
+      "manage": "مدیریت اشتراک",
+      "buyAnother": "خرید طرح دیگر",
+      "buyTraffic": "خرید ترافیک بیشتر",
+      "buyDevices": "افزودن دستگاه",
+      "reduceDevices": "کاهش تعداد دستگاه",
+      "servers": "سرورها",
+      "myDevices": "دستگاه‌های من",
+      "allSettings": "همه تنظیمات اشتراک",
+      "delete": "حذف اشتراک",
+      "plans": "دیدن طرح‌ها",
+      "support": "پشتیبانی"
+    },
+    "error": {
+      "load": "داده‌ها بارگذاری نشد",
+      "hint": "اتصال را بررسی کنید و دوباره تلاش کنید",
+      "retry": "تلاش دوباره"
+    },
+    "promo": {
+      "available": "یک پیشنهاد برای شما هست",
+      "discountActive": "تخفیف فعال است"
+    },
+    "tariff": {
+      "current": "فعلی",
+      "unlimitedDevices": "دستگاه نامحدود"
+    },
+    "subscription": {
+      "untitled": "اشتراک"
+    }
   }
 }
