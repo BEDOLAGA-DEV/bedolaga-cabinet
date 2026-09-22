@@ -3111,6 +3111,8 @@
       "interfaceOptions": "Опции интерфейса",
       "animatedBackground": "Анимированный фон",
       "animatedBackgroundDesc": "Волны на фоне приложения",
+      "liteMode": "Простой вид кабинета",
+      "liteModeDesc": "Один экран покупателя вместо «Главного» и «Подписки»",
       "autoFullscreen": "Авто-Fullscreen",
       "autoFullscreenDesc": "В Telegram WebApp",
       "emailAuth": "Email авторизация",
@@ -7881,5 +7883,64 @@
     "offer": "Публичная оферта",
     "privacy": "Политика конфиденциальности",
     "recurrent": "Рекуррентные платежи"
+  },
+  "lite": {
+    "status": {
+      "none": "Подписки пока нет",
+      "active": "Подписка работает до {{date}}",
+      "trial": "Пробный период до {{date}}",
+      "expiring": "Подписка закончится {{date}}",
+      "expired": "Подписка закончилась {{date}}",
+      "limited": "Трафик закончился",
+      "paused": "Подписка на паузе",
+      "legacy": "Нужно выбрать тариф",
+      "many": "Ваши подписки"
+    },
+    "action": {
+      "connect": "Подключить устройство",
+      "renew": "Продлить подписку",
+      "buy": "Выбрать тариф",
+      "manage": "Открыть управление",
+      "tryFree": "Попробовать бесплатно",
+      "tryPaid": "Попробовать за {{price}}",
+      "chooseTariff": "Выбрать тариф"
+    },
+    "traffic": {
+      "label": "Трафик",
+      "used": "{{used}} из {{total}}",
+      "unlimited": "Трафик без ограничений"
+    },
+    "rows": {
+      "devices": "Устройства",
+      "devicesValue": "{{used}} из {{total}}",
+      "balance": "Баланс",
+      "manage": "Управление подпиской",
+      "buyAnother": "Купить ещё тариф",
+      "buyTraffic": "Докупить трафик",
+      "buyDevices": "Докупить устройства",
+      "reduceDevices": "Уменьшить число устройств",
+      "servers": "Серверы",
+      "myDevices": "Мои устройства",
+      "allSettings": "Все настройки подписки",
+      "delete": "Удалить подписку",
+      "plans": "Посмотреть тарифы",
+      "support": "Поддержка"
+    },
+    "error": {
+      "load": "Не удалось загрузить данные",
+      "hint": "Проверьте связь и повторите",
+      "retry": "Повторить"
+    },
+    "promo": {
+      "available": "Для вас есть предложение",
+      "discountActive": "Скидка активна"
+    },
+    "tariff": {
+      "current": "сейчас",
+      "unlimitedDevices": "Устройств без ограничений"
+    },
+    "subscription": {
+      "untitled": "Подписка"
+    }
   }
 }

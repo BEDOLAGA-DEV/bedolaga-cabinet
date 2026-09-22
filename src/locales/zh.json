@@ -2150,6 +2150,8 @@
       "accentColor": "强调色",
       "animatedBackground": "动画背景",
       "animatedBackgroundDesc": "显示动画背景效果",
+      "liteMode": "简洁版面板",
+      "liteModeDesc": "用一个页面代替「首页」和「订阅」",
       "autoFullscreen": "自动全屏",
       "autoFullscreenDesc": "在Telegram中自动展开",
       "availableThemes": "可用主题",
@@ -6711,5 +6713,64 @@
     "offer": "公开要约",
     "privacy": "隐私政策",
     "recurrent": "定期付款"
+  },
+  "lite": {
+    "status": {
+      "none": "还没有订阅",
+      "active": "订阅有效期至 {{date}}",
+      "trial": "试用期至 {{date}}",
+      "expiring": "订阅将于 {{date}} 到期",
+      "expired": "订阅已于 {{date}} 到期",
+      "limited": "流量已用完",
+      "paused": "订阅已暂停",
+      "legacy": "请选择套餐",
+      "many": "你的订阅"
+    },
+    "action": {
+      "connect": "连接设备",
+      "renew": "续订",
+      "buy": "选择套餐",
+      "manage": "打开管理",
+      "tryFree": "免费试用",
+      "tryPaid": "以 {{price}} 试用",
+      "chooseTariff": "选择套餐"
+    },
+    "traffic": {
+      "label": "流量",
+      "used": "{{total}} 中已用 {{used}}",
+      "unlimited": "流量不限"
+    },
+    "rows": {
+      "devices": "设备",
+      "devicesValue": "{{total}} 台中的 {{used}} 台",
+      "balance": "余额",
+      "manage": "管理订阅",
+      "buyAnother": "再买一个套餐",
+      "buyTraffic": "购买更多流量",
+      "buyDevices": "增加设备数",
+      "reduceDevices": "减少设备数",
+      "servers": "服务器",
+      "myDevices": "我的设备",
+      "allSettings": "全部订阅设置",
+      "delete": "删除订阅",
+      "plans": "查看套餐",
+      "support": "客服"
+    },
+    "error": {
+      "load": "无法加载数据",
+      "hint": "请检查网络后重试",
+      "retry": "重试"
+    },
+    "promo": {
+      "available": "你有一个优惠",
+      "discountActive": "折扣已生效"
+    },
+    "tariff": {
+      "current": "当前",
+      "unlimitedDevices": "设备不限"
+    },
+    "subscription": {
+      "untitled": "订阅"
+    }
   }
 }
