@@ -83,4 +83,21 @@ describe('ReminderCards', () => {
     await waitFor(() => expect(getActive).toHaveBeenCalled());
     expect(container.textContent).toBe('');
   });
+
+  it('refetches on window focus (global default is off)', async () => {
+    getActive.mockResolvedValue([card(1)]);
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <QueryClientProvider client={client}>
+        <MemoryRouter>
+          <ReminderCards />
+        </MemoryRouter>
+      </QueryClientProvider>,
+    );
+    await screen.findByText('T1');
+
+    const query = client.getQueryCache().find({ queryKey: ['reminders', 'active', 'ru'] });
+    const options = query?.options as { refetchOnWindowFocus?: boolean } | undefined;
+    expect(options?.refetchOnWindowFocus).toBe(true);
+  });
 });
