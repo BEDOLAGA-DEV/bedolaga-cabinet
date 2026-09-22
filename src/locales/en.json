@@ -2938,6 +2938,7 @@
         "segment": "Subscription",
         "segmentDays": "Days before expiry",
         "tariffId": "Tariff ID",
+        "tariffRequired": "Specify the tariff ID",
         "registeredDays": "No earlier than N days after registration",
         "inactiveDays": "Inactive for N days",
         "audience": "Currently match",

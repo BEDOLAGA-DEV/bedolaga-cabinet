@@ -2031,6 +2031,7 @@
         "segment": "订阅",
         "segmentDays": "距到期天数",
         "tariffId": "套餐ID",
+        "tariffRequired": "请填写套餐ID",
         "registeredDays": "注册后至少N天",
         "inactiveDays": "不活跃N天",
         "audience": "当前符合条件",
