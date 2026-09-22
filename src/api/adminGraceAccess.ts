@@ -19,6 +19,8 @@ export interface GraceAccessConfig {
   limited_squad_uuid: string;
   external_squad_uuid: string;
   traffic_gb: number;
+  /** Zero the panel usage counter on grant — expired unlimited subscriptions only. */
+  reset_traffic_on_start: boolean;
   trial_enabled: boolean;
   daily_enabled: boolean;
   free_enabled: boolean;

@@ -56,6 +56,7 @@ const config = (overrides: Partial<GraceAccessConfig> = {}): GraceAccessConfig =
   limited_squad_uuid: LIMITED_UUID,
   external_squad_uuid: '',
   traffic_gb: 1,
+  reset_traffic_on_start: false,
   trial_enabled: false,
   daily_enabled: false,
   free_enabled: false,
@@ -654,6 +655,15 @@ describe('уведомления и «что доступно»', () => {
         { allowed_services: 'Telegram и личный кабинет', notify_admins: false },
       ]),
     );
+  });
+
+  it('обнуление счётчика при выдаче уходит на сервер', async () => {
+    await renderPage();
+
+    fireEvent.click(screen.getByRole('switch', { name: 'Обнулять счётчик трафика при выдаче' }));
+    fireEvent.click(saveButton());
+
+    await waitFor(() => expect(state.saves).toEqual([{ reset_traffic_on_start: true }]));
   });
 
   it('пустая фраза при включённых сообщениях человеку блокирует сохранение', async () => {

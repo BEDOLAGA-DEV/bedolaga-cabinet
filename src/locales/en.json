@@ -3276,6 +3276,7 @@
         "external_squad_uuid": "External squad",
         "duration_hours": "Duration, hours",
         "traffic_gb": "Traffic, GB",
+        "reset_traffic_on_start": "Reset the traffic counter on grant",
         "reconcile_interval_seconds": "Reconcile interval, sec",
         "reconcile_batch_size": "Batch size",
         "candidate_lookback_minutes": "Lookback window, min",
@@ -3309,6 +3310,7 @@
         "title": "What the user gets",
         "durationDesc": "How many hours the temporary access lasts if the subscription is never renewed",
         "trafficDesc": "How many new gigabytes can be spent in that time: counted on top of what is already used, the old remainder is not carried over",
+        "resetTrafficDesc": "The panel and the app show “0 of 1 GB” instead of an almost exhausted “64.76 of 65.76 GiB”. Only expired subscriptions with unlimited traffic — there the counter is informational; usage before grace is lost. Exhausted-traffic subscriptions are never reset",
         "hint": "While grace lasts the panel account is active but reaches the network only through the grace squad.",
         "allowedDesc": "How the user will see it in the bot message and the email: “only this stays available: …”. What the grace squad really lets through is up to the nodes — the bot only says so.",
         "allowedPlaceholder": "Telegram and the dashboard"
