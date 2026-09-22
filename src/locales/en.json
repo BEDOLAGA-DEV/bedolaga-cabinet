@@ -3059,6 +3059,8 @@
       "accentColor": "Accent color",
       "animatedBackground": "Animated background",
       "animatedBackgroundDesc": "Show animated background effects",
+      "liteMode": "Simple cabinet view",
+      "liteModeDesc": "One buyer screen instead of Home and Subscription",
       "autoFullscreen": "Auto fullscreen",
       "autoFullscreenDesc": "Auto expand in Telegram",
       "availableThemes": "Available themes",
@@ -7269,5 +7271,64 @@
     "offer": "Public Offer",
     "privacy": "Privacy Policy",
     "recurrent": "Recurring Payments"
+  },
+  "lite": {
+    "status": {
+      "none": "No subscription yet",
+      "active": "Subscription works until {{date}}",
+      "trial": "Trial until {{date}}",
+      "expiring": "Subscription ends on {{date}}",
+      "expired": "Subscription ended on {{date}}",
+      "limited": "Traffic ran out",
+      "paused": "Subscription is paused",
+      "legacy": "Choose a plan to continue",
+      "many": "Your subscriptions"
+    },
+    "action": {
+      "connect": "Connect a device",
+      "renew": "Renew subscription",
+      "buy": "Choose a plan",
+      "manage": "Open settings",
+      "tryFree": "Try it free",
+      "tryPaid": "Try it for {{price}}",
+      "chooseTariff": "Choose a plan"
+    },
+    "traffic": {
+      "label": "Traffic",
+      "used": "{{used}} of {{total}}",
+      "unlimited": "Unlimited traffic"
+    },
+    "rows": {
+      "devices": "Devices",
+      "devicesValue": "{{used}} of {{total}}",
+      "balance": "Balance",
+      "manage": "Manage subscription",
+      "buyAnother": "Buy another plan",
+      "buyTraffic": "Buy more traffic",
+      "buyDevices": "Buy more devices",
+      "reduceDevices": "Reduce device count",
+      "servers": "Servers",
+      "myDevices": "My devices",
+      "allSettings": "All subscription settings",
+      "delete": "Delete subscription",
+      "plans": "See plans",
+      "support": "Support"
+    },
+    "error": {
+      "load": "Could not load your data",
+      "hint": "Check the connection and try again",
+      "retry": "Try again"
+    },
+    "promo": {
+      "available": "You have an offer",
+      "discountActive": "Discount active"
+    },
+    "tariff": {
+      "current": "current",
+      "unlimitedDevices": "Unlimited devices"
+    },
+    "subscription": {
+      "untitled": "Subscription"
+    }
   }
 }

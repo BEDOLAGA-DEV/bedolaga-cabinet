@@ -2092,6 +2092,8 @@
       "accentColor": "رنگ تأکیدی",
       "animatedBackground": "پس‌زمینه متحرک",
       "animatedBackgroundDesc": "نمایش جلوه‌های پس‌زمینه متحرک",
+      "liteMode": "نمای ساده پنل",
+      "liteModeDesc": "یک صفحه به جای «خانه» و «اشتراک»",
       "autoFullscreen": "تمام صفحه خودکار",
       "autoFullscreenDesc": "باز شدن خودکار در تلگرام",
       "availableThemes": "پوسته‌های موجود",
@@ -6769,5 +6771,64 @@
     "offer": "پیشنهاد عمومی",
     "privacy": "سیاست حفظ حریم خصوصی",
     "recurrent": "پرداخت‌های مکرر"
+  },
+  "lite": {
+    "status": {
+      "none": "هنوز اشتراکی ندارید",
+      "active": "اشتراک تا {{date}} فعال است",
+      "trial": "دوره آزمایشی تا {{date}}",
+      "expiring": "اشتراک در {{date}} تمام می‌شود",
+      "expired": "اشتراک در {{date}} تمام شد",
+      "limited": "ترافیک تمام شد",
+      "paused": "اشتراک متوقف است",
+      "legacy": "یک طرح انتخاب کنید",
+      "many": "اشتراک‌های شما"
+    },
+    "action": {
+      "connect": "اتصال دستگاه",
+      "renew": "تمدید اشتراک",
+      "buy": "انتخاب طرح",
+      "manage": "باز کردن مدیریت",
+      "tryFree": "رایگان امتحان کنید",
+      "tryPaid": "با {{price}} امتحان کنید",
+      "chooseTariff": "انتخاب طرح"
+    },
+    "traffic": {
+      "label": "ترافیک",
+      "used": "{{used}} از {{total}}",
+      "unlimited": "ترافیک نامحدود"
+    },
+    "rows": {
+      "devices": "دستگاه‌ها",
+      "devicesValue": "{{used}} از {{total}}",
+      "balance": "موجودی",
+      "manage": "مدیریت اشتراک",
+      "buyAnother": "خرید طرح دیگر",
+      "buyTraffic": "خرید ترافیک بیشتر",
+      "buyDevices": "افزودن دستگاه",
+      "reduceDevices": "کاهش تعداد دستگاه",
+      "servers": "سرورها",
+      "myDevices": "دستگاه‌های من",
+      "allSettings": "همه تنظیمات اشتراک",
+      "delete": "حذف اشتراک",
+      "plans": "دیدن طرح‌ها",
+      "support": "پشتیبانی"
+    },
+    "error": {
+      "load": "داده‌ها بارگذاری نشد",
+      "hint": "اتصال را بررسی کنید و دوباره تلاش کنید",
+      "retry": "تلاش دوباره"
+    },
+    "promo": {
+      "available": "یک پیشنهاد برای شما هست",
+      "discountActive": "تخفیف فعال است"
+    },
+    "tariff": {
+      "current": "فعلی",
+      "unlimitedDevices": "دستگاه نامحدود"
+    },
+    "subscription": {
+      "untitled": "اشتراک"
+    }
   }
 }

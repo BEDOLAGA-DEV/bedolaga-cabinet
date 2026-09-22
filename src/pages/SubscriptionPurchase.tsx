@@ -12,6 +12,8 @@ import { SwitchTariffSheet } from '../components/subscription/sheets/SwitchTarif
 import { TariffPurchaseForm } from '../components/subscription/purchase/TariffPurchaseForm';
 import { needsTariff } from '../utils/legacySubscription';
 import { TariffPickerGrid } from '../components/subscription/purchase/TariffPickerGrid';
+import { TariffPickerLite } from '../components/subscription/purchase/TariffPickerLite';
+import { useLiteMode } from '../hooks/useLiteMode';
 import { ClassicPurchaseWizard } from '../components/subscription/purchase/ClassicPurchaseWizard';
 import { ExclamationIcon, SparklesIcon } from '@/components/icons';
 import { PageSkeleton, Skeleton } from '@/components/ui/skeleton';
@@ -24,6 +26,10 @@ export default function SubscriptionPurchase() {
     : undefined;
   const { isDark } = useTheme();
   const g = getGlassColors(isDark);
+  // Витрина тарифов в двух видах. Обработчики и данные общие, различается
+  // только подача; что делает нажатие — решает tariffAction() внутри обеих.
+  const { lite } = useLiteMode();
+  const TariffPicker = lite ? TariffPickerLite : TariffPickerGrid;
 
   // Subscription query (shares cache with /subscription page)
   const { data: subscriptionResponse, isLoading } = useQuery({
@@ -271,7 +277,7 @@ export default function SubscriptionPurchase() {
           />
 
           {!showTariffPurchase ? (
-            <TariffPickerGrid
+            <TariffPicker
               tariffs={tariffs}
               subscription={subscription}
               purchaseOptions={purchaseOptions}

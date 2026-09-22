@@ -53,12 +53,14 @@ import ResetPassword from './pages/ResetPassword';
 import PublicLegal from './pages/PublicLegal';
 import OAuthCallback from './pages/OAuthCallback';
 
-// Dashboard - load eagerly (default route, LCP-critical)
-import Dashboard from './pages/Dashboard';
+// Dashboard - load eagerly (default route, LCP-critical).
+// HomeScreen выбирает между полным и простым видом по настройке оператора.
+import HomeScreen from './pages/HomeScreen';
 
 // User pages - lazy load
 const Subscriptions = lazyWithRetry(() => import('./pages/Subscriptions'));
-const Subscription = lazyWithRetry(() => import('./pages/Subscription'));
+// Развилка простого и полного вида страницы подписки (оба экрана внутри ленивые).
+const SubscriptionScreen = lazyWithRetry(() => import('./pages/SubscriptionScreen'));
 const SubscriptionPurchase = lazyWithRetry(() => import('./pages/SubscriptionPurchase'));
 const Balance = lazyWithRetry(() => import('./pages/Balance'));
 const SavedCards = lazyWithRetry(() => import('./pages/SavedCards'));
@@ -360,7 +362,7 @@ function App() {
           element={
             <ProtectedRoute>
               <LazyPage>
-                <Dashboard />
+                <HomeScreen />
               </LazyPage>
             </ProtectedRoute>
           }
@@ -380,7 +382,7 @@ function App() {
           element={
             <ProtectedRoute>
               <LazyPage>
-                <Subscription />
+                <SubscriptionScreen />
               </LazyPage>
             </ProtectedRoute>
           }
