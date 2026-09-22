@@ -2858,7 +2858,9 @@
         "activity": "По активности",
         "source": "По источнику",
         "tariff": "По тарифу",
-        "email": "Email-пользователи"
+        "email": "Email-пользователи",
+        "promo_group": "По промогруппе",
+        "recipient": "Получатель"
       },
       "channel": {
         "telegram": "Telegram",
@@ -2870,6 +2872,7 @@
       "emailSection": "Email-рассылка",
       "selectEmailFilter": "Выберите email-аудиторию",
       "selectEmailFilterPlaceholder": "Выберите фильтр...",
+      "singleUser": "Только {{name}}",
       "emailSubject": "Тема письма",
       "emailSubjectPlaceholder": "Введите тему письма...",
       "emailContent": "Содержимое письма",
@@ -5490,6 +5493,7 @@
           "emailUnverified": "не подтверждён",
           "onlineAt": "онлайн · {{node}}",
           "write": "Написать",
+          "writeEmail": "На почту",
           "group": "Группа: {{name}}"
         },
         "facts": {
