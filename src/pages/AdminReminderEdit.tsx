@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { useMutation, useQuery } from '@tanstack/react-query';
+import { isAxiosError } from 'axios';
 import { useTranslation } from 'react-i18next';
 import { PermissionGate } from '@/components/auth/PermissionGate';
 import {
@@ -93,6 +94,11 @@ export default function AdminReminderEdit() {
     return result;
   }, [auth, segment, segmentDays, tariffId, registeredDays, inactiveDays]);
 
+  // Тариф выбран, но ID не введён (или невалиден) — условие ещё не готово:
+  // ни счётчик аудитории, ни сохранение не должны уходить в бэкенд с tariff_id: null.
+  const tariffMissing =
+    segment === 'tariff' && (toInt(tariffId) === null || (toInt(tariffId) as number) <= 0);
+
   // Счётчик аудитории — с дебаунсом, чтобы не дёргать бэкенд на каждый символ.
   const [debounced, setDebounced] = useState({ conditions, channels });
   useEffect(() => {
@@ -103,6 +109,7 @@ export default function AdminReminderEdit() {
     queryKey: ['admin-reminder-audience', debounced],
     queryFn: () => adminRemindersApi.audience(debounced),
     retry: false,
+    enabled: !tariffMissing,
   });
 
   const payload = (): ReminderPayload => {
@@ -112,7 +119,7 @@ export default function AdminReminderEdit() {
       cleaned[code] = {
         title: text.title.trim(),
         body: text.body.trim(),
-        ...(text.button?.trim() ? { button: text.button.trim() } : {}),
+        ...(buttonKind !== 'none' && text.button?.trim() ? { button: text.button.trim() } : {}),
       };
     }
     return {
@@ -139,7 +146,7 @@ export default function AdminReminderEdit() {
     mutationFn: () => adminRemindersApi.test(editId as number),
     onMutate: () => setTestError(null),
     onError: (err: unknown) => {
-      const status = (err as { response?: { status?: number } })?.response?.status;
+      const status = isAxiosError(err) ? err.response?.status : undefined;
       if (status === 400) setTestError('admin.reminders.form.testNoTelegram');
       else if (status === 422) setTestError('admin.reminders.form.testInvalidTexts');
       else setTestError('admin.reminders.form.testFailed');
@@ -147,6 +154,10 @@ export default function AdminReminderEdit() {
   });
 
   const submit = () => {
+    if (tariffMissing) {
+      setError('admin.reminders.form.tariffRequired');
+      return;
+    }
     const p = payload();
     if (!p.texts.ru?.title || !p.texts.ru?.body) {
       setError('admin.reminders.form.ruRequired');
