@@ -25,7 +25,12 @@ export interface BroadcastFiltersResponse {
 
 export interface EmailFiltersResponse {
   filters: BroadcastFilter[];
+  /** By the user's primary promo group; key `promo_group_{id}`. Absent on older bots. */
+  promo_group_filters?: BroadcastFilter[];
 }
+
+/** Email target for exactly one user (sent from the admin user card). */
+export const emailUserTarget = (userId: number) => `user_${userId}`;
 
 export interface TariffForBroadcast {
   id: number;
