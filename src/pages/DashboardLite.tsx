@@ -7,7 +7,7 @@ import { balanceApi } from '@/api/balance';
 import { subscriptionApi } from '@/api/subscription';
 import { LiteMeter } from '@/components/lite/LiteMeter';
 import { LitePromoSlot } from '@/components/lite/LitePromoSlot';
-import { LitePremiumRows } from '@/components/lite/LitePremiumRows';
+import { LitePremiumMeters } from '@/components/lite/LitePremiumMeters';
 import { LiteRow, LiteRowGroup } from '@/components/lite/LiteRow';
 import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 import { API } from '@/config/constants';
@@ -198,6 +198,11 @@ export default function DashboardLite() {
                 limitGb={subscription.traffic_limit_gb}
                 usedPercent={subscription.traffic_used_percent}
               />
+              {/* Серверы с отдельным лимитом — сразу под общей шкалой: свой
+                  расход читается одним движением сверху вниз. Со списком
+                  подписок этой секции на экране нет вовсе, и премиум молчит
+                  вместе со шкалой — иначе непонятно, к какой он подписке. */}
+              <LitePremiumMeters items={subscription.premium_traffic ?? []} />
             </div>
           )}
         </section>
@@ -248,11 +253,6 @@ export default function DashboardLite() {
                   : (devices?.total ?? 0)
               }
             />
-          )}
-          {/* Со списком подписок шкалы на экране нет, и премиум тоже молчит:
-              иначе непонятно, к которой из подписок относится остаток. */}
-          {!hasMany && subscription && (
-            <LitePremiumRows items={subscription.premium_traffic ?? []} />
           )}
           {offersTrial && (
             <LiteRow
