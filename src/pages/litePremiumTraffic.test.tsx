@@ -152,7 +152,7 @@ describe('премиум-трафик в простом виде', () => {
     });
     renderScreen();
 
-    expect(await screen.findByText('dashboard.premiumTrafficPaused')).toBeTruthy();
+    expect(await screen.findByText('Лимит исчерпан')).toBeTruthy();
     expect(screen.queryByText(/5\.4/)).toBeNull();
   });
 
@@ -192,11 +192,19 @@ describe('премиум-трафик в простом виде', () => {
 describe('премиум-трафик на главной простого вида', () => {
   // Главный экран собирает свои данные сам — подписки, устройства, баланс,
   // триал и промо. Докупки здесь нет: она живёт в управлении подпиской.
-  async function renderHome(premium: unknown[]) {
+  async function renderHome(premium: unknown[], opts: { many?: boolean } = {}) {
     vi.resetModules();
     vi.doMock('@/api/subscription', () => ({
       subscriptionApi: {
-        getSubscriptions: () => Promise.resolve({ subscriptions: [], multi_tariff_enabled: false }),
+        getSubscriptions: () =>
+          Promise.resolve(
+            opts.many
+              ? {
+                  subscriptions: [subscription([PREMIUM]), { ...subscription([]), id: 8 }],
+                  multi_tariff_enabled: true,
+                }
+              : { subscriptions: [], multi_tariff_enabled: false },
+          ),
         getSubscription: () =>
           Promise.resolve({ has_subscription: true, subscription: subscription(premium) }),
         getDevices: () => Promise.resolve({ total: 2, devices: [] }),
@@ -235,6 +243,15 @@ describe('премиум-трафик на главной простого ви�
 
     expect(await screen.findByText('Мобильный LTE резерв')).toBeTruthy();
     expect(screen.getByText('3.2 GB / 5.0 GB')).toBeTruthy();
+  });
+
+  it('со списком из нескольких подписок остаток не показывается', async () => {
+    // Здесь на экране нет ни шкалы, ни кнопки действия: они относятся к
+    // подписке, а не к их списку. Остаток премиума — тоже.
+    await renderHome([PREMIUM], { many: true });
+
+    await screen.findByRole('heading');
+    expect(screen.queryByText('Мобильный LTE резерв')).toBeNull();
   });
 
   it('у тарифа без премиум-серверов строк не прибавляется', async () => {
