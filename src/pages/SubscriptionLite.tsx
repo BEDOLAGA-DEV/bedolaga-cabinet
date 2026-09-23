@@ -10,7 +10,7 @@ import { subscriptionApi } from '@/api/subscription';
 
 import { LiteMeter } from '@/components/lite/LiteMeter';
 
-import { LitePremiumRows } from '@/components/lite/LitePremiumRows';
+import { LitePremiumMeters } from '@/components/lite/LitePremiumMeters';
 import { LiteRow, LiteRowGroup } from '@/components/lite/LiteRow';
 
 import { AutopayToggle } from '@/components/subscription/manage/AutopayToggle';
@@ -215,6 +215,7 @@ export default function SubscriptionLite() {
             usedPercent={subscription.traffic_used_percent}
           />
         </div>
+        <LitePremiumMeters items={subscription.premium_traffic ?? []} />
       </section>
 
       <Link
@@ -245,8 +246,6 @@ export default function SubscriptionLite() {
               />
             )
           )}
-
-          <LitePremiumRows items={subscription.premium_traffic ?? []} />
 
           {/* Докупка премиума: лист сам молчит, когда докупать нечего, но
               строку показываем только при премиум-серверах в тарифе — иначе она

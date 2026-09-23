@@ -15,9 +15,19 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
  * пустую панель.
  */
 
+// Как в соседних тестах простого вида, но с подстановкой {{...}}: подпись
+// расхода собирается из значений, и без неё проверять было бы нечего.
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
-    t: (key: string, fallback?: unknown) => (typeof fallback === 'string' ? fallback : key),
+    t: (key: string, fallback?: unknown, options?: Record<string, unknown>) => {
+      const values = (typeof fallback === 'object' ? fallback : options) as
+        | Record<string, unknown>
+        | undefined;
+      const template = typeof fallback === 'string' ? fallback : key;
+      return template.replace(/{{(\w+)}}/g, (whole: string, name: string) =>
+        values && name in values ? String(values[name]) : whole,
+      );
+    },
     i18n: { language: 'ru', changeLanguage: () => Promise.resolve() },
   }),
   Trans: ({ children }: { children?: unknown }) => children ?? null,
@@ -135,14 +145,14 @@ afterEach(() => {
 });
 
 describe('премиум-трафик в простом виде', () => {
-  it('показывает расход по премиум-серверу строкой', async () => {
+  it('показывает расход по премиум-серверу под общей шкалой', async () => {
     renderScreen();
 
     expect(await screen.findByText('Мобильный LTE резерв')).toBeTruthy();
     // Единицы приходят из настоящего i18n (formatTraffic зовёт его напрямую),
     // поэтому здесь «GB», а не «ГБ»; неразрывный пробел Testing Library
     // нормализует в обычный.
-    expect(screen.getByText('3.2 GB / 5.0 GB')).toBeTruthy();
+    expect(screen.getByText('3.2 GB из 5.0 GB')).toBeTruthy();
   });
 
   it('снятый сервер отмечен словом, а не цифрами', async () => {
@@ -238,11 +248,11 @@ describe('премиум-трафик на главной простого ви�
     );
   }
 
-  it('расход по премиум-серверу виден строкой рядом с устройствами и балансом', async () => {
+  it('расход по премиум-серверу виден под общей шкалой', async () => {
     await renderHome([PREMIUM]);
 
     expect(await screen.findByText('Мобильный LTE резерв')).toBeTruthy();
-    expect(screen.getByText('3.2 GB / 5.0 GB')).toBeTruthy();
+    expect(screen.getByText('3.2 GB из 5.0 GB')).toBeTruthy();
   });
 
   it('со списком из нескольких подписок остаток не показывается', async () => {
@@ -254,7 +264,7 @@ describe('премиум-трафик на главной простого ви�
     expect(screen.queryByText('Мобильный LTE резерв')).toBeNull();
   });
 
-  it('у тарифа без премиум-серверов строк не прибавляется', async () => {
+  it('у тарифа без премиум-серверов на экране ничего не прибавляется', async () => {
     await renderHome([]);
 
     await screen.findByRole('heading');
