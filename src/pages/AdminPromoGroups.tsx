@@ -6,6 +6,7 @@ import { useCurrency } from '../hooks/useCurrency';
 import { promocodesApi, type PromoGroup } from '../api/promocodes';
 import { usePlatform } from '../platform/hooks/usePlatform';
 import { useFocusTrap } from '../hooks/useFocusTrap';
+import { usePermissionStore } from '@/store/permissions';
 import {
   BackIcon,
   PlusIcon,
@@ -14,9 +15,12 @@ import {
   UsersIcon,
   TagIcon,
   BoltIcon,
+  RefreshIcon,
 } from '@/components/icons';
 import { StatCard } from '@/components/stats';
 import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
+import { Spinner } from '@/components/ui/Spinner';
+import { useRecalculation } from './adminPromoGroups/useRecalculation';
 
 export default function AdminPromoGroups() {
   const { t } = useTranslation();
@@ -24,6 +28,8 @@ export default function AdminPromoGroups() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { capabilities } = usePlatform();
+  const canEdit = usePermissionStore((state) => state.hasPermission('promo_groups:edit'));
+  const recalculation = useRecalculation();
 
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
   const deleteDialogRef = useFocusTrap<HTMLDivElement>(!!deleteConfirm, {
@@ -66,14 +72,40 @@ export default function AdminPromoGroups() {
             <p className="text-sm text-dark-400">{t('admin.promoGroups.subtitle')}</p>
           </div>
         </div>
-        <button
-          onClick={() => navigate('/admin/promo-groups/create')}
-          className="flex items-center justify-center gap-2 rounded-lg bg-accent-500 px-4 py-2 text-on-accent transition-colors hover:bg-accent-600"
-        >
-          <PlusIcon />
-          {t('admin.promoGroups.addGroup')}
-        </button>
+        <div className="flex flex-wrap gap-2">
+          {canEdit && (
+            <button
+              type="button"
+              onClick={recalculation.start}
+              disabled={recalculation.isRunning || recalculation.isStarting}
+              title={t('admin.promoGroups.recalculateHint')}
+              className="btn-secondary flex items-center justify-center gap-2"
+            >
+              <RefreshIcon spinning={recalculation.isRunning} />
+              {t('admin.promoGroups.recalculate')}
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => navigate('/admin/promo-groups/create')}
+            className="btn-primary flex items-center justify-center gap-2"
+          >
+            <PlusIcon />
+            {t('admin.promoGroups.addGroup')}
+          </button>
+        </div>
       </div>
+
+      {/* Пересчёт участников идёт у бота в фоне — показываем, пока не кончится */}
+      {recalculation.isRunning && (
+        <div
+          role="status"
+          className="mb-6 flex items-center gap-2 rounded-xl border border-dark-700 bg-dark-800 px-4 py-3 text-sm text-dark-300"
+        >
+          <Spinner className="h-4 w-4 shrink-0" />
+          {t('admin.promoGroups.recalculating')}
+        </div>
+      )}
 
       {/* Stats */}
       {groups.length > 0 && (
@@ -157,7 +189,9 @@ export default function AdminPromoGroups() {
                       )}
                     <span className="flex items-center gap-1">
                       <UsersIcon />
-                      {t('admin.promoGroups.members', { count: group.members_count })}
+                      {t('admin.promoGroups.members', {
+                        count: group.members_count,
+                      })}
                     </span>
                   </div>
                 </div>

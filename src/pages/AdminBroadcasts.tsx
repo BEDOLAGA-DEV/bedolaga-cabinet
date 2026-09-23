@@ -101,6 +101,7 @@ export default function AdminBroadcasts() {
     const labels = new Map<string, string>();
     for (const filter of [
       ...(emailFilters?.filters ?? []),
+      ...(emailFilters?.promo_group_filters ?? []),
       ...(tgFilters?.filters ?? []),
       ...(tgFilters?.tariff_filters ?? []),
       ...(tgFilters?.custom_filters ?? []),
@@ -185,7 +186,12 @@ export default function AdminBroadcasts() {
                   <p className="truncate text-sm text-dark-100">{broadcast.message_text}</p>
                   <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-dark-400">
                     <span className="min-w-0 [overflow-wrap:anywhere]">
-                      {audienceLabels.get(broadcast.target_type) ?? broadcast.target_type}
+                      {audienceLabels.get(broadcast.target_type) ??
+                        (/^user_\d+$/.test(broadcast.target_type)
+                          ? t('admin.broadcasts.singleUser', {
+                              name: `#${broadcast.target_type.slice('user_'.length)}`,
+                            })
+                          : broadcast.target_type)}
                     </span>
                     <span>
                       {broadcast.sent_count}/{broadcast.total_count}

@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { MemoryRouter, Route, Routes } from 'react-router';
+import { MemoryRouter, Route, Routes, useLocation } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { UserDetailResponse } from '@/api/adminUsers';
 import { ToastProvider } from '@/components/Toast';
@@ -286,6 +286,53 @@ describe('AdminUserDetail', () => {
       await screen.findByRole('menuitem', { name: 'admin.users.detail.subscription.customDays' }),
     );
     expect(await screen.findByLabelText('admin.users.detail.subscription.extendDays')).toBeTruthy();
+  });
+
+  it('«На почту» ведёт в email-рассылку этому человеку — только при подтверждённой почте', async () => {
+    const AdminUserDetail = (await import('./AdminUserDetail')).default;
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    let landed: { search: string; state: unknown } | null = null;
+    const Landing = () => {
+      const location = useLocation();
+      landed = { search: location.search, state: location.state };
+      return <div>broadcast-create</div>;
+    };
+    render(
+      <QueryClientProvider client={client}>
+        <PlatformProvider>
+          <ToastProvider>
+            <MemoryRouter initialEntries={['/admin/users/42']}>
+              <Routes>
+                <Route path="/admin/users/:id" element={<AdminUserDetail />} />
+                <Route path="/admin/broadcasts/create" element={<Landing />} />
+              </Routes>
+            </MemoryRouter>
+          </ToastProvider>
+        </PlatformProvider>
+      </QueryClientProvider>,
+    );
+    await screen.findByRole('heading', { level: 1, name: 'Егор Ф.' });
+    fireEvent.click(screen.getByRole('button', { name: 'admin.users.detail.header.writeEmail' }));
+    expect(await screen.findByText('broadcast-create')).toBeTruthy();
+    expect(landed).toEqual({
+      search: '?email_user=42',
+      state: { emailUserLabel: 'egor@example.com' },
+    });
+    cleanup();
+
+    getUser.mockResolvedValue({ ...detail, email_verified: false });
+    await renderDetail();
+    expect(
+      screen.queryByRole('button', { name: 'admin.users.detail.header.writeEmail' }),
+    ).toBeNull();
+    cleanup();
+
+    getUser.mockResolvedValue(detail);
+    usePermissionStore.setState({ permissions: ['users:read'], roleLevel: 10 } as never);
+    await renderDetail();
+    expect(
+      screen.queryByRole('button', { name: 'admin.users.detail.header.writeEmail' }),
+    ).toBeNull();
   });
 
   it('в шапке нет «Продлить» — в мультитарифе не понять, какую подписку он продлит', async () => {

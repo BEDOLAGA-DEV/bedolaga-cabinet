@@ -20,13 +20,17 @@ export interface MobileNavItem {
 export interface MobileNavFlags {
   readonly wheelEnabled?: boolean;
   readonly referralEnabled?: boolean;
+  /**
+   * Простой вид: главный экран сам и есть экран подписки, поэтому отдельная
+   * кнопка «Подписка» ведёт человека туда, где он уже стоит. Ровно это
+   * дублирование «Главного» и «Подписки» и заставило завести простой вид.
+   */
+  readonly lite?: boolean;
 }
 
-const HEAD: readonly MobileNavItem[] = [
-  { key: 'dashboard', path: '/' },
-  { key: 'subscription', path: '/subscriptions' },
-  { key: 'balance', path: '/balance' },
-];
+const DASHBOARD: MobileNavItem = { key: 'dashboard', path: '/' };
+const SUBSCRIPTION: MobileNavItem = { key: 'subscription', path: '/subscriptions' };
+const BALANCE: MobileNavItem = { key: 'balance', path: '/balance' };
 const SUPPORT: MobileNavItem = { key: 'support', path: '/support' };
 const WHEEL: MobileNavItem = { key: 'wheel', path: '/wheel' };
 const REFERRAL: MobileNavItem = { key: 'referral', path: '/referral' };
@@ -43,7 +47,8 @@ function slotItems({ wheelEnabled, referralEnabled }: MobileNavFlags): readonly 
 }
 
 export function mobileNavItems(flags: MobileNavFlags): readonly MobileNavItem[] {
-  return [...HEAD, ...slotItems(flags), SUPPORT];
+  const head = flags.lite ? [DASHBOARD, BALANCE] : [DASHBOARD, SUBSCRIPTION, BALANCE];
+  return [...head, ...slotItems(flags), SUPPORT];
 }
 
 function withoutTrailingSlash(pathname: string): string {
@@ -64,5 +69,10 @@ const NAV_SCREEN_PATTERNS: readonly RegExp[] = [/^\/subscriptions\/\d+$/];
 export function isMobileNavScreen(pathname: string, items: readonly MobileNavItem[]): boolean {
   const path = withoutTrailingSlash(pathname);
   if (items.some((item) => item.path === path)) return true;
+
+  // Карточка подписки — экран кнопки только пока такая кнопка есть. В простом
+  // виде её нет, и карточка становится обычной вложенной страницей: панель на
+  // ней показывалась бы без пункта, который туда ведёт.
+  if (!items.some((item) => item.path === SUBSCRIPTION.path)) return false;
   return NAV_SCREEN_PATTERNS.some((pattern) => pattern.test(path));
 }
