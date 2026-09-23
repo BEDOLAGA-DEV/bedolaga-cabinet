@@ -7401,6 +7401,7 @@
       "buyAnother": "Buy another plan",
       "buyTraffic": "Buy more traffic",
       "buyPremiumTraffic": "Buy premium traffic",
+      "premiumPaused": "Limit reached",
       "buyDevices": "Buy more devices",
       "reduceDevices": "Reduce device count",
       "servers": "Servers",

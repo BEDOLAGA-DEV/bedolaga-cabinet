@@ -35,14 +35,17 @@ export function LitePremiumRows({ items }: LitePremiumRowsProps) {
             {item.name || t('dashboard.premiumTraffic')}
           </span>
           <span
-            className={`shrink-0 text-[15px] tabular-nums ${
+            className={`shrink-0 truncate text-[15px] tabular-nums ${
               // Исчерпанный лимит — это отключённые серверы, а не просто цифра:
               // в списке без цвета его иначе не отличить от обычной строки.
               item.is_limited ? 'text-error-400' : 'text-dark-400'
             }`}
           >
+            {/* Короткая подпись, а не фраза из карточки полного вида: длинное
+                «доступ приостановлен до конца периода» занимало всю строку и
+                выдавливало название сервера за край экрана. */}
             {item.is_limited
-              ? t('dashboard.premiumTrafficPaused')
+              ? t('lite.rows.premiumPaused', 'Лимит исчерпан')
               : `${formatTraffic(item.used_gb)} / ${formatTraffic(item.limit_gb + item.extra_gb)}`}
           </span>
         </div>

@@ -249,7 +249,11 @@ export default function DashboardLite() {
               }
             />
           )}
-          {subscription && <LitePremiumRows items={subscription.premium_traffic ?? []} />}
+          {/* Со списком подписок шкалы на экране нет, и премиум тоже молчит:
+              иначе непонятно, к которой из подписок относится остаток. */}
+          {!hasMany && subscription && (
+            <LitePremiumRows items={subscription.premium_traffic ?? []} />
+          )}
           {offersTrial && (
             <LiteRow
               to="/subscription/purchase"
