@@ -1,31 +1,61 @@
 import { useState } from 'react';
+
 import { useQuery } from '@tanstack/react-query';
+
 import { useTranslation } from 'react-i18next';
+
 import { Link, useNavigate, useParams } from 'react-router';
 
 import { subscriptionApi } from '@/api/subscription';
+
 import { LiteMeter } from '@/components/lite/LiteMeter';
+
+import { LitePremiumRows } from '@/components/lite/LitePremiumRows';
 import { LiteRow, LiteRowGroup } from '@/components/lite/LiteRow';
+
 import { AutopayToggle } from '@/components/subscription/manage/AutopayToggle';
+
 import { DailyPausePanel } from '@/components/subscription/manage/DailyPausePanel';
+
 import { DevicesPanel } from '@/components/subscription/manage/DevicesPanel';
+
 import { RecurringPanels } from '@/components/subscription/manage/RecurringPanels';
+
 import {
   canReissueLink,
   ReissueLinkButton,
 } from '@/components/subscription/manage/ReissueLinkButton';
+
 import { DeleteSubscriptionSheet } from '@/components/subscription/sheets/DeleteSubscriptionSheet';
+
 import { DeviceReductionSheet } from '@/components/subscription/sheets/DeviceReductionSheet';
+
 import { DeviceTopupSheet } from '@/components/subscription/sheets/DeviceTopupSheet';
+import { PremiumTrafficTopupSheet } from '@/components/subscription/sheets/PremiumTrafficTopupSheet';
+
 import { ServerManagementSheet } from '@/components/subscription/sheets/ServerManagementSheet';
+
 import { TrafficTopupSheet } from '@/components/subscription/sheets/TrafficTopupSheet';
+
 import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
+
 import { useTheme } from '@/hooks/useTheme';
+
 import { getGlassColors } from '@/utils/glassTheme';
+
 import { showsAddonOptions } from '@/utils/legacySubscription';
+
 import { formatLiteDate } from '@/utils/liteDate';
 
-type OpenPanel = 'traffic' | 'devices' | 'reduce' | 'servers' | 'devicesList' | 'delete' | null;
+type OpenPanel =
+  | 'traffic'
+  | 'premium'
+  | 'devices'
+  | 'reduce'
+  | 'servers'
+  | 'devicesList'
+  | 'delete'
+  | null;
 
 /**
  * Простой вид управления подпиской.
@@ -46,43 +76,65 @@ type OpenPanel = 'traffic' | 'devices' | 'reduce' | 'servers' | 'devicesList' | 
  * перенос платёжных мутаций. Строка «Все настройки подписки» ведёт туда, так
  * что ничего не становится недоступным.
  */
+
 export default function SubscriptionLite() {
   const { t } = useTranslation();
+
   const navigate = useNavigate();
+
   const { subscriptionId: rawId } = useParams();
+
   const subscriptionId = rawId ? Number.parseInt(rawId, 10) : undefined;
+
   const { isDark } = useTheme();
+
   const glass = getGlassColors(isDark);
 
   const [panel, setPanel] = useState<OpenPanel>(null);
+
   const [devicesToAdd, setDevicesToAdd] = useState(1);
+
   const [targetDeviceLimit, setTargetDeviceLimit] = useState(1);
+
   const [trafficPackage, setTrafficPackage] = useState<number | null>(null);
+
   const [servers, setServers] = useState<string[]>([]);
 
   const {
     data: response,
+
     isLoading,
+
     isError,
+
     refetch,
   } = useQuery({
     queryKey: ['subscription', subscriptionId],
+
     queryFn: () => subscriptionApi.getSubscription(subscriptionId),
+
     retry: false,
+
     staleTime: 0,
+
     refetchOnMount: 'always',
   });
+
   const subscription = response?.subscription ?? null;
 
   const { data: devices } = useQuery({
     queryKey: ['devices', subscriptionId],
+
     queryFn: () => subscriptionApi.getDevices(subscriptionId),
+
     enabled: Boolean(subscription),
   });
 
   const { data: purchaseOptions } = useQuery({
     queryKey: ['purchase-options', subscriptionId],
+
     queryFn: () => subscriptionApi.getPurchaseOptions(subscriptionId),
+
     enabled: Boolean(subscription),
   });
 
@@ -122,16 +174,26 @@ export default function SubscriptionLite() {
   }
 
   const showsAddons = showsAddonOptions(subscription);
+
   // Пока режим продаж неизвестен, строку «Серверы» не рисуем вовсе: иначе она
+
   // успевает появиться и тут же исчезнуть, когда приходит ответ о тарифах.
+
   const managesServers = Boolean(purchaseOptions) && purchaseOptions?.sales_mode !== 'tariffs';
+
   const sheetProps = {
     open: true,
+
     onOpen: () => {},
+
     onClose: () => setPanel(null),
+
     subscription,
+
     subscriptionId,
+
     purchaseOptions,
+
     isDark,
   };
 
@@ -184,6 +246,25 @@ export default function SubscriptionLite() {
             )
           )}
 
+          <LitePremiumRows items={subscription.premium_traffic ?? []} />
+
+          {/* Докупка премиума: лист сам молчит, когда докупать нечего, но
+              строку показываем только при премиум-серверах в тарифе — иначе она
+              вела бы в пустую панель. */}
+          {panel === 'premium' ? (
+            <div className="py-4">
+              <PremiumTrafficTopupSheet {...sheetProps} />
+            </div>
+          ) : (
+            showsAddons &&
+            (subscription.premium_traffic ?? []).some((item) => item.topup_available) && (
+              <LiteRow
+                label={t('lite.rows.buyPremiumTraffic', 'Докупить премиум-трафик')}
+                onClick={() => setPanel('premium')}
+              />
+            )
+          )}
+
           {panel === 'devices' ? (
             <div className="py-4">
               <DeviceTopupSheet
@@ -200,6 +281,7 @@ export default function SubscriptionLite() {
                   subscription.device_limit > 0
                     ? t('lite.rows.devicesValue', '{{used}} из {{total}}', {
                         used: devices?.total ?? 0,
+
                         total: subscription.device_limit,
                       })
                     : undefined
@@ -250,8 +332,11 @@ export default function SubscriptionLite() {
           )}
 
           {/* Блоки ниже сами решают, показываться ли им: автоплатёж не бывает у
+
               пробных и старых подписок, автосписания — у выключенной фичи,
+
               перевыпуск — у неактивных, пауза — у непосуточных. Поэтому они
+
               стоят прямо в списке, а не за строкой, которая вела бы в пустоту. */}
           <AutopayToggle
             subscription={subscription}
@@ -273,6 +358,7 @@ export default function SubscriptionLite() {
                 subscription.device_limit > 0
                   ? t('lite.rows.devicesValue', '{{used}} из {{total}}', {
                       used: devices?.total ?? 0,
+
                       total: subscription.device_limit,
                     })
                   : (devices?.total ?? 0)

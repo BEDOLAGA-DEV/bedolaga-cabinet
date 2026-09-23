@@ -7,6 +7,7 @@ import { balanceApi } from '@/api/balance';
 import { subscriptionApi } from '@/api/subscription';
 import { LiteMeter } from '@/components/lite/LiteMeter';
 import { LitePromoSlot } from '@/components/lite/LitePromoSlot';
+import { LitePremiumRows } from '@/components/lite/LitePremiumRows';
 import { LiteRow, LiteRowGroup } from '@/components/lite/LiteRow';
 import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 import { API } from '@/config/constants';
@@ -248,6 +249,7 @@ export default function DashboardLite() {
               }
             />
           )}
+          {subscription && <LitePremiumRows items={subscription.premium_traffic ?? []} />}
           {offersTrial && (
             <LiteRow
               to="/subscription/purchase"
