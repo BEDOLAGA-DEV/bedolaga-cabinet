@@ -6198,6 +6198,10 @@
         "empty": "هنوز اجرایی نیست.",
         "more": "نمایش بیشتر",
         "spend": "هزینه مدیران"
+      },
+      "shortcuts": {
+        "checkSubscription": "بررسی در DPI//CHECKER",
+        "checkNode": "بررسی در DPI//CHECKER"
       }
     }
   },

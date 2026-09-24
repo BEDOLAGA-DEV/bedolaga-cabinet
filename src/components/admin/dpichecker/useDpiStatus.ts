@@ -11,3 +11,9 @@ export function useDpiStatus() {
     staleTime: 30_000,
   });
 }
+
+/** Раздел включён и с ключом — кнопки «Проверить в DPI//CHECKER» на карточках панели показываются. */
+export function useDpiAvailable(): boolean {
+  const { data } = useDpiStatus();
+  return Boolean(data?.enabled && data?.configured);
+}

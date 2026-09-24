@@ -1,5 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { type CheckType, dpicheckerApi } from '@/api/dpichecker';
 import { cn } from '@/lib/utils';
@@ -79,6 +79,14 @@ export function TargetsStep({ checkType, value, onChange, prefill }: TargetsStep
       });
     },
   });
+
+  // Переход с карточки ноды или пользователя: цели грузятся сами, нужная — уже отмечена.
+  const prefillLoaded = useRef(false);
+  useEffect(() => {
+    if (!prefill || prefillLoaded.current) return;
+    prefillLoaded.current = true;
+    panel.mutate(prefill.kind);
+  }, [prefill, panel]);
 
   const toggleResource = (index: number) => {
     const next = value.resources.map((resource, position) =>

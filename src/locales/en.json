@@ -6477,6 +6477,10 @@
         "empty": "No launches yet.",
         "more": "Show more",
         "spend": "Spent by admins"
+      },
+      "shortcuts": {
+        "checkSubscription": "Check in DPI//CHECKER",
+        "checkNode": "Check in DPI//CHECKER"
       }
     }
   },

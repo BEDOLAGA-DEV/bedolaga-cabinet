@@ -56,8 +56,11 @@ import {
   ChevronRightIcon,
   GeoCheckIcon,
   RadarIcon,
+  WallIcon,
 } from '../components/icons';
 import { GeoCheckModal } from '../components/admin/remnawave/GeoCheckModal';
+import { buildLink as buildDpiLink } from '../components/admin/dpichecker/deepLink';
+import { useDpiAvailable } from '../components/admin/dpichecker/useDpiStatus';
 import { buildReachabilityLink } from '../components/admin/reachability/deepLink';
 import { useReachabilityAvailable } from '../components/admin/reachability/useReachabilityStatus';
 import { usePermissionStore } from '../store/permissions';
@@ -168,6 +171,9 @@ function NodeCard({ node, providerName, realtime, onAction, isLoading }: NodeCar
   const canRunReachability = usePermissionStore((s) => s.hasPermission('reachability:run'));
   const reachabilityAvailable = useReachabilityAvailable();
   const canReach = canRunReachability && reachabilityAvailable;
+  const canRunDpi = usePermissionStore((s) => s.hasPermission('dpichecker:run'));
+  const dpiAvailable = useDpiAvailable();
+  const canDpi = canRunDpi && dpiAvailable;
 
   const isUp = node.is_connected && node.is_node_online && !node.is_disabled;
   const dotColor = node.is_disabled ? 'bg-dark-500' : isUp ? 'bg-success-400' : 'bg-error-400';
@@ -268,6 +274,19 @@ function NodeCard({ node, providerName, realtime, onAction, isLoading }: NodeCar
                 aria-label={t('admin.reachability.shortcuts.checkNode')}
               >
                 <RadarIcon className="h-3.5 w-3.5" />
+              </button>
+            )}
+            {canDpi && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate(buildDpiLink({ tab: 'ip', source: 'node', ref: node.uuid }));
+                }}
+                className="rounded-lg bg-dark-700 p-1.5 text-dark-300 transition-colors hover:bg-dark-600 hover:text-dark-100"
+                title={t('admin.dpichecker.shortcuts.checkNode')}
+                aria-label={t('admin.dpichecker.shortcuts.checkNode')}
+              >
+                <WallIcon className="h-3.5 w-3.5" />
               </button>
             )}
             {canGeoCheck && (

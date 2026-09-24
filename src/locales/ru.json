@@ -7072,6 +7072,10 @@
         "empty": "Запусков пока нет.",
         "more": "Показать ещё",
         "spend": "Потрачено по админам"
+      },
+      "shortcuts": {
+        "checkSubscription": "Проверить в DPI//CHECKER",
+        "checkNode": "Проверить в DPI//CHECKER"
       }
     }
   },

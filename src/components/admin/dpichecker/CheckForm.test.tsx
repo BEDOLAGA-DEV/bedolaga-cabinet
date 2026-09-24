@@ -155,3 +155,18 @@ it('«По расписанию» создаёт монитор с интерв�
     notify_on_success: false,
   });
 });
+
+it('переход с карточки ноды сразу подставляет эту ноду', async () => {
+  const { dpicheckerApi } = await import('@/api/dpichecker');
+  vi.mocked(dpicheckerApi.panelTargets).mockResolvedValue([
+    { value: 'nl.example', name: 'NL-1', ref: 'n1' },
+    { value: 'de.example', name: 'DE-1', ref: 'n2' },
+  ]);
+  renderWithProviders(<CheckForm checkType="ip" prefill={{ kind: 'nodes', ref: 'n1' }} />);
+  await waitFor(() =>
+    expect(dpicheckerApi.panelTargets).toHaveBeenCalledWith({ kind: 'nodes', uuids: [] }),
+  );
+  expect(await screen.findByText(/Принято: 1/)).toBeTruthy();
+  expect(screen.getByRole('button', { name: /NL-1/ }).getAttribute('aria-pressed')).toBe('true');
+  expect(screen.getByRole('button', { name: /DE-1/ }).getAttribute('aria-pressed')).toBe('false');
+});

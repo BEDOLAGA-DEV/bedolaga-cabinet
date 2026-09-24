@@ -6143,6 +6143,10 @@
         "empty": "暂无运行记录。",
         "more": "显示更多",
         "spend": "各管理员花费"
+      },
+      "shortcuts": {
+        "checkSubscription": "在 DPI//CHECKER 中检测",
+        "checkNode": "在 DPI//CHECKER 中检测"
       }
     }
   },
