@@ -99,23 +99,25 @@ export default function AdminDpiChecker() {
         >
           <WallIcon className="h-5 w-5" />
         </div>
-        <div className="min-w-0">
+        {/* flex-1: длинный подзаголовок переносится рядом с иконкой, а не уезжает всем блоком под «назад». */}
+        <div className="min-w-0 flex-1">
           <h1 className="text-xl font-bold text-dark-100">{DPI_BRAND}</h1>
           <p className="text-xs text-dark-400">{t('admin.dpichecker.subtitle')}</p>
         </div>
-        <div className="ms-auto flex flex-wrap items-center gap-x-4 gap-y-2">
+        {/* Телефон: своя строка во всю ширину — баланс слева, Соседи справа; широкий экран — справа от названия. */}
+        <div className="flex w-full items-center justify-between gap-x-4 gap-y-1 sm:ms-auto sm:w-auto sm:flex-row-reverse sm:justify-start">
           {isLoading && <Skeleton className="h-6 w-28" />}
+          {ready && status?.balance !== null && status?.balance !== undefined && (
+            <span className="text-sm font-semibold tabular-nums text-dark-100">
+              {t('admin.dpichecker.money.usd', { value: status.balance.toFixed(2) })}
+            </span>
+          )}
           {ready && noisy && !noisy.unlimited && noisy.limit !== null && (
-            <span className="text-xs text-dark-400">
+            <span className="text-end text-xs text-dark-400">
               {t('admin.dpichecker.header.noisyLeft', {
                 left: noisy.remaining ?? 0,
                 limit: noisy.limit,
               })}
-            </span>
-          )}
-          {ready && status?.balance !== null && status?.balance !== undefined && (
-            <span className="text-sm font-semibold tabular-nums text-dark-100">
-              {t('admin.dpichecker.money.usd', { value: status.balance.toFixed(2) })}
             </span>
           )}
         </div>
