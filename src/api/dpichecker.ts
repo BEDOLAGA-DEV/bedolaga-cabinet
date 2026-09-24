@@ -347,6 +347,10 @@ export const dpicheckerApi = {
   cancelCheck: async (id: number): Promise<ActionOut> =>
     (await apiClient.delete(`${BASE}/checks/${id}`)).data,
 
+  /** Сервис не ответил на запуск — спросить ещё раз тем же ключом: второго списания не будет. */
+  resubmit: async (id: number): Promise<ActionOut> =>
+    (await apiClient.post(`${BASE}/checks/${id}/resubmit`)).data,
+
   reportCsv: async (id: number): Promise<Blob> =>
     (await apiClient.get(`${BASE}/checks/${id}/report.csv`, { responseType: 'blob' })).data as Blob,
 
