@@ -67,8 +67,21 @@ export default function AdminBroadcastDetail() {
       if (!broadcastId) throw new Error('Invalid broadcast ID');
       return adminBroadcastsApi.get(broadcastId);
     },
-    enabled: !!broadcastId && !isNaN(broadcastId),
+    enabled: !!broadcastId && !Number.isNaN(broadcastId),
     refetchInterval: (query) => broadcastPollInterval(query.state.data?.status),
+  });
+
+  const { data: audienceFilters } = useQuery({
+    queryKey: ['admin', 'broadcasts', 'detail-filters', broadcast?.channel],
+    queryFn: async () =>
+      broadcast?.channel === 'email'
+        ? {
+            filters: (await adminBroadcastsApi.getEmailFilters()).filters,
+            tariff_filters: [],
+            custom_filters: [],
+          }
+        : adminBroadcastsApi.getFilters(),
+    enabled: !!broadcast?.audience,
   });
 
   // Stop mutation
@@ -82,7 +95,7 @@ export default function AdminBroadcastDetail() {
 
   const isRunning = broadcast && isBroadcastInFlight(broadcast.status);
 
-  if (!broadcastId || isNaN(broadcastId)) {
+  if (!broadcastId || Number.isNaN(broadcastId)) {
     navigate('/admin/broadcasts');
     return null;
   }
@@ -149,7 +162,41 @@ export default function AdminBroadcastDetail() {
       {/* Target */}
       <div className="rounded-xl border border-dark-700 bg-dark-800/50 p-4">
         <p className="mb-1 text-sm text-dark-400">{t('admin.broadcasts.filter')}</p>
-        <p className="font-medium text-dark-100">{broadcast.target_type}</p>
+        {broadcast.audience ? (
+          <div className="space-y-2 text-sm text-dark-100">
+            {broadcast.audience.conditions.map((condition, index) => {
+              const filters = [
+                ...(audienceFilters?.filters || []),
+                ...(audienceFilters?.tariff_filters || []),
+                ...(audienceFilters?.custom_filters || []),
+              ];
+              const label =
+                filters.find((filter) => filter.key === condition.value)?.label || condition.value;
+              const fieldLabel =
+                condition.field === 'auth_type'
+                  ? t('admin.broadcasts.audience.authType')
+                  : t(`admin.broadcasts.filterGroups.${condition.field}`, condition.field);
+              return (
+                <div key={index}>
+                  {index > 0 && (
+                    <strong className="mr-2 text-accent-400">
+                      {condition.join === 'or'
+                        ? t('admin.broadcasts.audience.or')
+                        : t('admin.broadcasts.audience.and')}
+                    </strong>
+                  )}
+                  {fieldLabel}{' '}
+                  {condition.operator === 'ne'
+                    ? t('admin.broadcasts.audience.notEquals')
+                    : t('admin.broadcasts.audience.equals')}{' '}
+                  {label}
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <p className="font-medium text-dark-100">{broadcast.target_type}</p>
+        )}
       </div>
 
       {/* Telegram Message */}

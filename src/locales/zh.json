@@ -1899,6 +1899,25 @@
         "cancelled": "已取消",
         "cancelling": "取消中"
       },
+      "audience": {
+        "authType": "注册方式",
+        "join": "条件关系",
+        "and": "且",
+        "or": "或",
+        "field": "筛选项",
+        "comparison": "比较",
+        "equals": "等于",
+        "notEquals": "不等于",
+        "value": "值",
+        "remove": "删除条件",
+        "add": "添加条件",
+        "loadError": "无法加载收件人",
+        "recipientCount": "收件人数",
+        "showUsers": "查看名单",
+        "users": "群发收件人",
+        "empty": "没有收件人",
+        "conditions": "条件"
+      },
       "filterGroups": {
         "email": "电子邮件用户",
         "promo_group": "按促销组",

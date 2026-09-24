@@ -1802,6 +1802,25 @@
         "cancelled": "لغو شده",
         "cancelling": "در حال لغو"
       },
+      "audience": {
+        "authType": "روش ثبت‌نام",
+        "join": "ارتباط شرط‌ها",
+        "and": "و",
+        "or": "یا",
+        "field": "پارامتر",
+        "comparison": "مقایسه",
+        "equals": "برابر است با",
+        "notEquals": "برابر نیست با",
+        "value": "مقدار",
+        "remove": "حذف شرط",
+        "add": "افزودن شرط",
+        "loadError": "بارگذاری گیرندگان ناموفق بود",
+        "recipientCount": "گیرندگان",
+        "showUsers": "مشاهده فهرست",
+        "users": "گیرندگان پیام",
+        "empty": "گیرنده‌ای وجود ندارد",
+        "conditions": "شرط‌ها"
+      },
       "filterGroups": {
         "email": "کاربران ایمیل",
         "promo_group": "بر اساس گروه تبلیغاتی",

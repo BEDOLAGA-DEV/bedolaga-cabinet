@@ -2796,6 +2796,25 @@
         "cancelled": "Cancelled",
         "cancelling": "Cancelling"
       },
+      "audience": {
+        "authType": "Registration method",
+        "join": "Condition connector",
+        "and": "AND",
+        "or": "OR",
+        "field": "Field",
+        "comparison": "Comparison",
+        "equals": "Equals",
+        "notEquals": "Does not equal",
+        "value": "Value",
+        "remove": "Remove condition",
+        "add": "Add condition",
+        "loadError": "Could not load recipients",
+        "recipientCount": "Recipients",
+        "showUsers": "View list",
+        "users": "Broadcast recipients",
+        "empty": "No recipients",
+        "conditions": "Conditions"
+      },
       "filterGroups": {
         "basic": "Basic",
         "subscription": "By subscription",
