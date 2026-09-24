@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { MemoryRouter } from 'react-router';
 import { afterEach, expect, it, vi } from 'vitest';
 import { BroadcastAudienceEditor } from './BroadcastAudienceEditor';
 
@@ -25,15 +26,17 @@ it('keeps focus in the recipient dialog and restores it after Escape', async () 
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   render(
     <QueryClientProvider client={queryClient}>
-      <BroadcastAudienceEditor
-        channel="telegram"
-        category="system"
-        audience={{ conditions: [{ field: 'basic', value: 'all', operator: 'eq', join: null }] }}
-        onChange={() => {}}
-        filters={[{ key: 'all', label: 'Все', group: 'basic', count: 1 }]}
-        isLoading={false}
-      />
-      <button type="button">Send broadcast</button>
+      <MemoryRouter>
+        <BroadcastAudienceEditor
+          channel="telegram"
+          category="system"
+          audience={{ conditions: [{ field: 'basic', value: 'all', operator: 'eq', join: null }] }}
+          onChange={() => {}}
+          filters={[{ key: 'all', label: 'Все', group: 'basic', count: 1 }]}
+          isLoading={false}
+        />
+        <button type="button">Send broadcast</button>
+      </MemoryRouter>
     </QueryClientProvider>,
   );
 
@@ -42,6 +45,9 @@ it('keeps focus in the recipient dialog and restores it after Escape', async () 
   fireEvent.click(trigger);
 
   const dialog = await screen.findByRole('dialog');
+  const recipient = await screen.findByRole('link', { name: /recipient/ });
+  expect(recipient.getAttribute('href')).toBe('/admin/users/1');
+  expect(recipient.getAttribute('target')).toBe('_blank');
   expect(dialog.contains(document.activeElement)).toBe(true);
   expect(fireEvent.keyDown(document, { key: 'Tab', cancelable: true })).toBe(false);
   expect(dialog.contains(document.activeElement)).toBe(true);

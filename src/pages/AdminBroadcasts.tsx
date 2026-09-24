@@ -184,11 +184,16 @@ export default function AdminBroadcasts() {
                     )}
                   </div>
                   <p className="truncate text-sm text-dark-100">{broadcast.message_text}</p>
-                  <div className="mt-2 flex items-center gap-4 text-xs text-dark-400">
-                    <span>
+                  <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-dark-400">
+                    <span className="min-w-0 [overflow-wrap:anywhere]">
                       {broadcast.audience
                         ? `${t('admin.broadcasts.audience.conditions')} (${broadcast.audience.conditions.length})`
-                        : broadcast.target_type}
+                        : (audienceLabels.get(broadcast.target_type) ??
+                          (/^user_\d+$/.test(broadcast.target_type)
+                            ? t('admin.broadcasts.singleUser', {
+                                name: `#${broadcast.target_type.slice('user_'.length)}`,
+                              })
+                            : broadcast.target_type))}
                     </span>
                     <span>
                       {broadcast.sent_count}/{broadcast.total_count}

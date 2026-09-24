@@ -25,6 +25,13 @@ import {
   XIcon,
 } from '@/components/icons';
 
+/** `?email_user=<id>` opens an Email broadcast for one user from their profile. */
+function parseEmailUserParam(value: string | null): number | null {
+  if (!value || !/^\d+$/.test(value)) return null;
+  const id = Number(value);
+  return Number.isSafeInteger(id) && id > 0 && id <= 2_147_483_647 ? id : null;
+}
+
 export default function AdminBroadcastCreate() {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -43,7 +50,21 @@ export default function AdminBroadcastCreate() {
 
   // Separate audiences per channel, as in the existing form.
   const [telegramAudience, setTelegramAudience] = useState(emptyAudience);
-  const [emailAudience, setEmailAudience] = useState(emptyAudience);
+  const [emailAudience, setEmailAudience] = useState(() =>
+    presetEmailUserId === null
+      ? emptyAudience()
+      : {
+          conditions: [
+            {
+              field: 'email_user',
+              operator: 'eq' as const,
+              value: String(presetEmailUserId),
+              label: presetEmailUserLabel ?? `#${presetEmailUserId}`,
+              join: null,
+            },
+          ],
+        },
+  );
 
   // Broadcast category (system/news/promo)
   const [category, setCategory] = useState<'system' | 'news' | 'promo'>('system');
@@ -718,6 +739,7 @@ export default function AdminBroadcastCreate() {
             onChange={setEmailAudience}
             filters={[
               ...(emailFiltersData?.filters || []),
+              ...(emailFiltersData?.promo_group_filters || []),
               ...(emailTariffsData?.tariffs.map((tariff) => ({
                 key: tariff.filter_key,
                 label: tariff.name,

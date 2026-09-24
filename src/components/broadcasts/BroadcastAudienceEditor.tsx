@@ -383,6 +383,19 @@ export function BroadcastAudienceEditor({
         { value: 'no', label: t('common.no', 'Нет') },
       ],
     },
+    ...(channel === 'email' &&
+    filters.some((filter) => 'group' in filter && filter.group === 'promo_group')
+      ? [
+          {
+            field: 'promo_group',
+            label: t('admin.broadcasts.filterGroups.promo_group', 'Промогруппа'),
+            kind: 'select' as const,
+            values: filters
+              .filter((filter) => filter.key.startsWith('promo_group_'))
+              .map((filter) => ({ value: filter.key, label: filter.label })),
+          },
+        ]
+      : []),
     ...(channel === 'telegram'
       ? [
           { field: 'telegram_id', label: 'Telegram ID', kind: 'user' as const },
