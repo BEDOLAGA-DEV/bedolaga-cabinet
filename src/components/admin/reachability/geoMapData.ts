@@ -25,7 +25,7 @@ export interface GeoMapData {
 }
 
 /** Пропорции холста известны заранее — под них резервируется место, пока данные грузятся. */
-export const MAP_ASPECT = '1000 / 545';
+export const MAP_ASPECT = '1000 / 531';
 
 let cached: Promise<GeoMapData> | null = null;
 let cachedMap: Promise<RussiaMap> | null = null;

@@ -89,6 +89,9 @@ it('без ключа объясняет, где его взять, и ведё�
   const link = screen.getByRole('link', { name: /Открыть настройки/ });
   expect(link.getAttribute('href')).toBe('/admin/settings?section=sys_dpichecker');
   expect(screen.queryByRole('tablist')).toBeNull();
+  // Как у BSCHEKER: подписка по умолчанию — необязательный шаг, и кнопка «Получить ключ на сайте».
+  expect(screen.getByText('Подписка по умолчанию, необязательно')).toBeTruthy();
+  expect(screen.getByRole('button', { name: 'Получить ключ на dpichecker.st' })).toBeTruthy();
 });
 
 it('показывает баланс и остаток Соседей, вкладки — все восемь', async () => {

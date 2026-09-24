@@ -161,7 +161,16 @@ export function TargetsStep({ checkType, value, onChange, prefill }: TargetsStep
         <SubscriptionSourcePicker
           userId={userId}
           shortUuid={null}
-          reference={reference}
+          reference={
+            reference && {
+              ...reference,
+              // Число ключей видно, когда они загружены (статус подписку не разворачивает).
+              configs:
+                userId === null && value.source === 'panel_subscription'
+                  ? value.resources.length
+                  : null,
+            }
+          }
           settingsPath={DPICHECKER_SETTINGS_PATH}
           onSource={(next) => setUserId(next.userId)}
         />

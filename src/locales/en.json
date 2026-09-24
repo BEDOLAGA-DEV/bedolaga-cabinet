@@ -6219,8 +6219,10 @@
         "rights": "Admin rights",
         "rightsHint": "Who can view the section and who can run checks: they spend the DPI//CHECKER balance",
         "openSettings": "Open DPI//CHECKER settings",
-        "openSite": "Open dpichecker.st",
-        "envNote": "If the bot is configured via an environment file, its values override the cabinet settings: edit the file and restart the bot."
+        "openSite": "Get a key at dpichecker.st",
+        "envNote": "If the bot is configured via an environment file, its values override the cabinet settings: edit the file and restart the bot.",
+        "reference": "Default subscription, optional",
+        "referenceHint": "A subscription link or panel shortUuid: VPN “From panel” takes its keys without picking a user"
       },
       "locations": {
         "russia": "Russia",
@@ -6376,7 +6378,8 @@
           "connectionReset": "connection reset",
           "proxyDead": "point does not answer",
           "untestable": "cannot be checked"
-        }
+        },
+        "csvFailed": "Could not download the CSV"
       },
       "noisy": {
         "intro": "TLS certificates (SNI) of hosts in the /24 subnet — how “noisy” your server’s neighbours are (SNI max.ru, vk.ru, google.com etc.). Free, up to 10 scans a day, used today: {{used}}.",
@@ -6453,7 +6456,6 @@
         "refreshed": "Lists updated: {{value}}"
       },
       "monitors": {
-        "intro": "Scheduled checks. Run results go to the bot’s admin chat: alerts and recoveries, every run if “also report success” is on. The DPI//CHECKER bot also messages you about runs in Telegram — turn that off in their bot.",
         "foreign": "Created on the DPI//CHECKER site",
         "every": "every {{hours}} h",
         "active": "Monitor active",
@@ -6467,7 +6469,16 @@
           "insufficient_balance": "Paused: the DPI//CHECKER balance ran out",
           "deleted_via_api": "Off",
           "other": "Paused"
-        }
+        },
+        "howTitle": "How monitors work",
+        "how": {
+          "create": "Create: VPN, IP / domain or MTProto tab → targets and points → “On schedule” → interval.",
+          "runs": "The service checks the targets every N hours. The monitor itself is free; each run costs as one such check.",
+          "alerts": "Results go to the bot admin chat: an alert after the set number of failures in a row and recovery; every run if “Notify on success” is on. The DPI//CHECKER bot also messages you in Telegram — turn that off in their bot.",
+          "manage": "Pause or disable any monitor here, including those created on the DPI//CHECKER site."
+        },
+        "untitled": "Monitor #{{id}}",
+        "deletedBlock": "Disabled · {{count}}"
       },
       "history": {
         "all": "All",

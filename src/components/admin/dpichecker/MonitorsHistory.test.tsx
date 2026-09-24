@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import type { ActionOut, Monitor } from '@/api/dpichecker';
 import { usePermissionStore } from '@/store/permissions';
@@ -8,7 +8,8 @@ import { MonitorsTab } from './MonitorsTab';
 import { renderWithProviders } from './testUtils';
 
 /**
- * Мониторы: свои — пауза и отключение, созданные на сайте — только чтение, подпись про админ-чат.
+ * Мониторы: любым живым монитором аккаунта можно управлять (созданный на сайте кабинет сначала берёт
+ * себе), удалённые у сервиса — в свёрнутом блоке «Отключённые» без кнопок; подпись про админ-чат.
  * История как на сайте: у фильтров счётчики, у строки — имя админа и статус цветом; «только мои» уходят
  * в запрос, строка ведёт к результату. «Потрачено по админам» убрано (владелец 24.09).
  */
@@ -17,6 +18,7 @@ vi.mock('react-i18next', async () => (await import('./testUtils')).i18nMock());
 
 const api = vi.hoisted(() => ({
   listMonitors: vi.fn(),
+  adoptMonitor: vi.fn(),
   patchMonitor: vi.fn(),
   deleteMonitor: vi.fn(),
   monitorRuns: vi.fn(),
@@ -50,8 +52,18 @@ const MONITOR: Monitor = {
   created_at: '2026-09-24T08:29:09Z',
   action_id: 3,
   label: 'Finland',
+  deleted: false,
 };
 const FOREIGN: Monitor = { ...MONITOR, id: 99, action_id: null, label: null };
+const GONE: Monitor = {
+  ...MONITOR,
+  id: 55,
+  action_id: null,
+  label: null,
+  is_active: false,
+  paused_reason: 'deleted_via_api',
+  deleted: true,
+};
 const ACTION: ActionOut = {
   id: 11,
   kind: 'check',
@@ -75,7 +87,8 @@ const ACTION: ActionOut = {
 
 beforeEach(() => {
   usePermissionStore.setState({ permissions: ['dpichecker:*'], isLoaded: true });
-  api.listMonitors.mockResolvedValue([MONITOR, FOREIGN]);
+  api.listMonitors.mockResolvedValue([MONITOR, FOREIGN, GONE]);
+  api.adoptMonitor.mockResolvedValue({ ...ACTION, id: 21, kind: 'monitor', remote_id: 99 });
   api.patchMonitor.mockResolvedValue({ ...MONITOR, is_active: false });
   api.listChecks.mockResolvedValue({
     items: [ACTION],
@@ -88,15 +101,33 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
-it('свой монитор ставится на паузу, чужой — только чтение', async () => {
+it('свой монитор ставится на паузу', async () => {
   renderWithProviders(<MonitorsTab />);
   expect(await screen.findByText('Finland')).toBeTruthy();
-  expect(screen.getByText(/Создан на сайте DPI\/\/CHECKER/)).toBeTruthy();
   expect(screen.getByText(/админ-чат/)).toBeTruthy();
   const toggles = screen.getAllByRole('switch', { name: /Монитор активен/ });
-  expect(toggles).toHaveLength(1);
+  expect(toggles).toHaveLength(2);
   fireEvent.click(toggles[0]);
   await waitFor(() => expect(api.patchMonitor).toHaveBeenCalledWith(3, { is_active: false }));
+  expect(api.adoptMonitor).not.toHaveBeenCalled();
+});
+
+it('монитор с сайта тоже управляется: кабинет сначала берёт его себе', async () => {
+  renderWithProviders(<MonitorsTab />);
+  expect((await screen.findAllByText(/Создан на сайте DPI\/\/CHECKER/)).length).toBeGreaterThan(0);
+  fireEvent.click(screen.getAllByRole('switch', { name: /Монитор активен/ })[1]);
+  await waitFor(() => expect(api.adoptMonitor).toHaveBeenCalledWith(99));
+  await waitFor(() => expect(api.patchMonitor).toHaveBeenCalledWith(21, { is_active: false }));
+});
+
+it('удалённый у сервиса — в «Отключённых», без кнопок', async () => {
+  renderWithProviders(<MonitorsTab />);
+  const block = (await screen.findByText(/Отключённые · 1/)).closest(
+    'details',
+  ) as HTMLDetailsElement;
+  expect(block.open).toBe(false);
+  expect(within(block).queryByRole('switch')).toBeNull();
+  expect(within(block).queryByRole('button', { name: /Отключить/ })).toBeNull();
 });
 
 it('без права запуска у мониторов нет управления', async () => {

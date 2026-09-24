@@ -5,7 +5,7 @@ import apiClient from './client';
 export type Location = 'russia' | 'china' | 'iran' | 'turkmenistan';
 export type CheckType = 'vpn' | 'ip' | 'mtproto';
 export type ProbeMode = 'auto' | 'server' | 'noserver';
-export type TargetSource = 'paste' | 'panel_subscription' | 'panel_hosts' | 'panel_nodes';
+export type TargetSource = 'paste' | 'panel_subscription' | 'panel_hosts' | 'panel_nodes' | 'site';
 export type ActionKind = 'check' | 'probe' | 'noisy' | 'monitor';
 
 export const LOCATIONS: Location[] = ['russia', 'china', 'iran', 'turkmenistan'];
@@ -45,10 +45,13 @@ export interface DpiStatus {
   error: string | null;
 }
 
-/** Как у BSCHEKER: `short_uuid` — shortUuid или хвост ссылки подписки, `configs` — сколько в ней ключей. */
+/**
+ * Как у BSCHEKER: `short_uuid` — shortUuid или хвост ссылки подписки. Статус не разворачивает подписку
+ * (у сервиса это до 10 с), поэтому `configs` — null, а ключи и ошибку показывает загрузка в форме.
+ */
 export interface ReferenceStatus {
   short_uuid: string | null;
-  configs: number;
+  configs: number | null;
   error: string | null;
 }
 
@@ -206,6 +209,8 @@ export interface Monitor {
   /** Своя строка кабинета; null — монитор создан на сайте DPI//CHECKER. */
   action_id: number | null;
   label: string | null;
+  /** Удалён у сервиса (DELETE там не стирает, а ставит паузу) — только посмотреть. */
+  deleted: boolean;
 }
 
 export interface MonitorRun {
@@ -373,8 +378,12 @@ export const dpicheckerApi = {
   resubmit: async (id: number): Promise<ActionOut> =>
     (await apiClient.post(`${BASE}/checks/${id}/resubmit`)).data,
 
-  reportCsv: async (id: number): Promise<Blob> =>
-    (await apiClient.get(`${BASE}/checks/${id}/report.csv`, { responseType: 'blob' })).data as Blob,
+  /** Короткая подписанная ссылка на CSV — качается без Authorization (Telegram downloadFile). */
+  downloadLink: async (
+    kind: 'report' | 'noisy',
+    id: number,
+  ): Promise<{ url: string; file_name: string }> =>
+    (await apiClient.post(`${BASE}/files/${kind}/${id}/link`)).data,
 
   checkMap: async (id: number): Promise<Blob> =>
     (await apiClient.get(`${BASE}/checks/${id}/map.png`, { responseType: 'blob' })).data as Blob,
@@ -388,9 +397,6 @@ export const dpicheckerApi = {
   getScan: async (id: number): Promise<{ action: ActionOut; scan: NoisyScan | ProbeScan }> =>
     (await apiClient.get(`${BASE}/scans/${id}`)).data,
 
-  noisyCsv: async (id: number): Promise<Blob> =>
-    (await apiClient.get(`${BASE}/scans/${id}/noisy.csv`, { responseType: 'blob' })).data as Blob,
-
   cheremsha: async (resources: string[]): Promise<CheremshaResult> =>
     (await apiClient.get(`${BASE}/cheremsha`, { params: { resource: resources.join(',') } })).data,
 
@@ -399,6 +405,10 @@ export const dpicheckerApi = {
 
   createMonitor: async (body: MonitorCreate): Promise<ActionOut> =>
     (await apiClient.post(`${BASE}/monitors`, body)).data,
+
+  /** Монитор с сайта DPI//CHECKER — под управление кабинета; дальше правится по номеру своей строки. */
+  adoptMonitor: async (remoteId: number): Promise<ActionOut> =>
+    (await apiClient.post(`${BASE}/monitors/remote/${remoteId}/adopt`)).data,
 
   patchMonitor: async (actionId: number, patch: MonitorPatch): Promise<Monitor> =>
     (await apiClient.patch(`${BASE}/monitors/${actionId}`, patch)).data,

@@ -244,6 +244,17 @@ export function createWebAdapter(): PlatformContext {
       }
     },
 
+    async downloadFile(url: string, fileName: string) {
+      // Сервер отдаёт файл вложением — переход по ссылке скачивает его, не уводя со страницы.
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileName;
+      link.rel = 'noopener';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    },
+
     hideKeyboard() {
       // В браузере клавиатуру закрывает потеря фокуса полем.
     },

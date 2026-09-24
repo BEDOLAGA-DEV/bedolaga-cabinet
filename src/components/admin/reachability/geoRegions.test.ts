@@ -33,4 +33,14 @@ describe('geoRegions', () => {
     // 83 субъекта geoBoundaries RUS + Крым, Севастополь, Донецк, Луганск (для DPI//CHECKER).
     expect(RUSSIA.regions.length).toBe(87);
   });
+  it('вся страна внутри холста: ни один контур не срезан краем (Крым, Калининград)', () => {
+    const outside = RUSSIA.regions.flatMap((region) =>
+      [...region.d.matchAll(/[ML](-?[\d.]+) (-?[\d.]+)/g)]
+        .map(([, x, y]) => [Number(x), Number(y)])
+        .filter(([x, y]) => x < 0 || y < 0 || x > RUSSIA.width || y > RUSSIA.height)
+        .map(([x, y]) => `${region.iso} ${x},${y}`)
+        .slice(0, 1),
+    );
+    expect(outside).toEqual([]);
+  });
 });

@@ -22,7 +22,7 @@ const POPS: Pop[] = [
 ];
 
 const api = vi.hoisted(() => ({
-  reference: { short_uuid: 'Ab12Cd34Ef56Gh78', configs: 2, error: null } as unknown,
+  reference: { short_uuid: 'Ab12Cd34Ef56Gh78', configs: null, error: null } as unknown,
   parse: vi.fn(),
   estimate: vi.fn(),
   launchCheck: vi.fn(),
@@ -85,7 +85,7 @@ beforeEach(() => {
 afterEach(() => {
   cleanup();
   vi.clearAllMocks();
-  api.reference = { short_uuid: 'Ab12Cd34Ef56Gh78', configs: 2, error: null };
+  api.reference = { short_uuid: 'Ab12Cd34Ef56Gh78', configs: null, error: null };
 });
 
 async function pasteAndPick() {
@@ -187,6 +187,8 @@ it('VPN «Из панели» — как у BSCHEKER: ключи подписк�
     expect(dpicheckerApi.panelTargets).toHaveBeenCalledWith({ kind: 'subscription' }),
   );
   expect(await screen.findByText(/Принято: 2/)).toBeTruthy();
+  // Статус подписку не разворачивает — число ключей появляется, когда они загружены.
+  expect(screen.getByRole('button', { name: /подписка по умолчанию\s*·/ })).toBeTruthy();
   expect(screen.getByRole('button', { name: /Finland/ }).getAttribute('aria-pressed')).toBe('true');
   expect(screen.queryByRole('button', { name: /Взять ключи/ })).toBeNull();
 });

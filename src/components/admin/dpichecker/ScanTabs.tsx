@@ -4,9 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { dpicheckerApi, type NoisyScan, type ProbeScan } from '@/api/dpichecker';
 import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
-import { useIsTelegram } from '@/platform/hooks/usePlatform';
 import { getApiErrorMessage } from '@/utils/api-error';
-import { saveBlob } from './download';
+import { CsvButton } from './CsvButton';
 import { CHECK_POLL_MS } from './pollInterval';
 import { useDpiStatus } from './useDpiStatus';
 
@@ -44,13 +43,15 @@ function PairList({ title, items }: { title: string; items: { ip: string; domain
 
 function NoisyReport({ scan, actionId }: { scan: NoisyScan; actionId: number }) {
   const { t } = useTranslation();
-  const isTelegram = useIsTelegram();
   const analysis = scan.analysis;
   return (
     <div className="space-y-3">
-      <p className="text-sm text-dark-200">
-        {t('admin.dpichecker.noisy.found', { count: scan.result_count ?? 0 })}
-      </p>
+      <div className="flex items-start justify-between gap-3">
+        <p className="text-sm text-dark-200">
+          {t('admin.dpichecker.noisy.found', { count: scan.result_count ?? 0 })}
+        </p>
+        {(scan.result_count ?? 0) > 0 && <CsvButton kind="noisy" actionId={actionId} />}
+      </div>
       {analysis && (
         <>
           <PairList title={t('admin.dpichecker.noisy.badRu')} items={analysis.bad_ru} />
@@ -59,17 +60,6 @@ function NoisyReport({ scan, actionId }: { scan: NoisyScan; actionId: number }) 
           {analysis.bad_ru.length + analysis.vpn_like.length + analysis.bad_foreign.length ===
             0 && <p className="text-sm text-success-400">{t('admin.dpichecker.noisy.quiet')}</p>}
         </>
-      )}
-      {!isTelegram && (scan.result_count ?? 0) > 0 && (
-        <button
-          type="button"
-          className="btn-secondary min-h-[40px] px-4 text-sm"
-          onClick={async () =>
-            saveBlob(await dpicheckerApi.noisyCsv(actionId), `noisy_${actionId}.csv`)
-          }
-        >
-          {t('admin.dpichecker.result.csv')}
-        </button>
       )}
     </div>
   );

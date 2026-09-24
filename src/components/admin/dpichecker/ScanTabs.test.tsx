@@ -121,7 +121,6 @@ vi.mock('@/api/dpichecker', async (importOriginal) => ({
       error: null,
       total_spent: 0,
     })),
-    noisyCsv: vi.fn(),
   },
 }));
 vi.mock('./pollInterval', () => ({ CHECK_POLL_MS: 10, CHECK_WAIT_SEC: 1 }));

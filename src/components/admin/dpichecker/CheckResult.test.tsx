@@ -29,7 +29,7 @@ vi.mock('@/api/dpichecker', async (importOriginal) => {
       getCheck: vi.fn(async () => (api.views.length > 1 ? api.views.shift() : api.views[0])),
       cancelCheck: api.cancelCheck,
       resubmit: api.resubmit,
-      reportCsv: vi.fn(),
+      downloadLink: vi.fn(),
       checkMap: api.checkMap,
       getPops: vi.fn(async () => ({
         pops: [
@@ -189,6 +189,9 @@ it('Россия — карта регионов сразу, без кнопки
   expect(container.querySelector('[data-region="AMU"]')?.getAttribute('data-status')).toBe('red');
   expect(screen.queryByRole('button', { name: 'Карта' })).toBeNull();
   expect(api.checkMap).not.toHaveBeenCalled();
+  // CSV — в шапке результата, а не отдельной строкой между картой и списком.
+  const header = screen.getByRole('heading', { level: 2 }).closest('header') as HTMLElement;
+  expect(header.querySelector('button')?.textContent).toMatch(/CSV/);
 });
 
 it('Китай и другие страны — картинка карты от сервиса сразу', async () => {

@@ -13,7 +13,8 @@ interface SubscriptionSourcePickerProps {
   shortUuid: string | null;
   onSource: (next: { userId: number | null; shortUuid: string | null }) => void;
   /** Подписка по умолчанию из настроек бота; null — статус ещё не пришёл. */
-  reference: Pick<ReferenceStatus, 'short_uuid' | 'configs' | 'error'> | null;
+  /** `configs` null — число ещё не известно (DPI//CHECKER узнаёт его, только загрузив ключи). */
+  reference: (Pick<ReferenceStatus, 'short_uuid' | 'error'> & { configs: number | null }) | null;
   /** Куда вести «Открыть настройки», если подписки по умолчанию нет (у DPI//CHECKER — свой раздел). */
   settingsPath?: string;
 }
@@ -77,10 +78,12 @@ export function SubscriptionSourcePicker({
             <span className="flex min-w-0 flex-1 flex-col gap-x-2 sm:flex-row sm:items-center">
               <span className="whitespace-nowrap">
                 {t(`${base}.reference`)}
-                <span className="text-xs font-normal text-dark-400">
-                  {' '}
-                  · {t(`${base}.configs`, { count: reference.configs })}
-                </span>
+                {reference.configs !== null && (
+                  <span className="text-xs font-normal text-dark-400">
+                    {' '}
+                    · {t(`${base}.configs`, { count: reference.configs })}
+                  </span>
+                )}
               </span>
               <span className="truncate font-mono text-xs font-normal text-dark-400">
                 {reference.short_uuid}

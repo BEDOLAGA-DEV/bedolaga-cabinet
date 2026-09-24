@@ -5885,8 +5885,10 @@
         "rights": "管理员权限",
         "rightsHint": "谁可以查看此分区、谁可以运行检测：检测会消耗 DPI//CHECKER 余额",
         "openSettings": "打开 DPI//CHECKER 设置",
-        "openSite": "打开 dpichecker.st",
-        "envNote": "如果机器人通过环境文件配置，其值优先于面板设置：请修改文件并重启机器人。"
+        "openSite": "在 dpichecker.st 获取密钥",
+        "envNote": "如果机器人通过环境文件配置，其值优先于面板设置：请修改文件并重启机器人。",
+        "reference": "默认订阅（可选）",
+        "referenceHint": "订阅链接或面板 shortUuid：VPN “从面板”无需选择用户即可取用其密钥"
       },
       "locations": {
         "russia": "俄罗斯",
@@ -6042,7 +6044,8 @@
           "connectionReset": "连接被重置",
           "proxyDead": "检测点无响应",
           "untestable": "无法检测"
-        }
+        },
+        "csvFailed": "无法下载 CSV"
       },
       "noisy": {
         "intro": "/24 子网内主机的 TLS 证书（SNI），显示服务器邻居有多“嘈杂”。免费，每天最多 10 次，今天已用：{{used}}。",
@@ -6119,7 +6122,6 @@
         "refreshed": "列表更新时间：{{value}}"
       },
       "monitors": {
-        "intro": "按计划的检测。运行结果发送到机器人的管理员聊天：告警和恢复；开启“成功时也通知”则每次运行都发送。DPI//CHECKER 机器人也会在 Telegram 中给您发消息——请在其机器人中关闭。",
         "foreign": "在 DPI//CHECKER 网站创建",
         "every": "每 {{hours}} 小时",
         "active": "监控已启用",
@@ -6133,7 +6135,16 @@
           "insufficient_balance": "已暂停：DPI//CHECKER 余额不足",
           "deleted_via_api": "已关闭",
           "other": "已暂停"
-        }
+        },
+        "howTitle": "监控如何工作",
+        "how": {
+          "create": "创建：VPN、IP / 域名或 MTProto 标签 → 目标和节点 → “按计划” → 间隔。",
+          "runs": "服务每 N 小时检查一次目标。监控本身免费，每次运行按一次检查计费。",
+          "alerts": "结果发送到机器人管理员群：连续失败达到设定次数时告警并通知恢复；开启“成功也通知”时每次运行都通知。DPI//CHECKER 机器人也会在 Telegram 中通知您，可在其机器人中关闭。",
+          "manage": "在这里可以暂停或停用任何监控，包括在 DPI//CHECKER 网站上创建的监控。"
+        },
+        "untitled": "监控 #{{id}}",
+        "deletedBlock": "已停用 · {{count}}"
       },
       "history": {
         "all": "全部",

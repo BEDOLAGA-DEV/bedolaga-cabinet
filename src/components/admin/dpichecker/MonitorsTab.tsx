@@ -20,16 +20,19 @@ function MonitorCard({ monitor, canRun }: { monitor: Monitor; canRun: boolean })
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [confirmDelete, setConfirmDelete] = useState(false);
-  const own = monitor.action_id !== null;
+  const fromSite = monitor.action_id === null;
+  const manageable = canRun && !monitor.deleted;
   const refresh = () => void queryClient.invalidateQueries({ queryKey: KEY });
+  // Монитор с сайта кабинет сначала берёт себе (своя строка), дальше — как созданный здесь.
+  const ownId = async () => monitor.action_id ?? (await dpicheckerApi.adoptMonitor(monitor.id)).id;
   const patch = useMutation({
-    mutationFn: (body: { is_active: boolean }) =>
-      dpicheckerApi.patchMonitor(monitor.action_id as number, body),
-    onSuccess: refresh,
+    mutationFn: async (body: { is_active: boolean }) =>
+      dpicheckerApi.patchMonitor(await ownId(), body),
+    onSettled: refresh,
   });
   const remove = useMutation({
-    mutationFn: () => dpicheckerApi.deleteMonitor(monitor.action_id as number),
-    onSuccess: refresh,
+    mutationFn: async () => dpicheckerApi.deleteMonitor(await ownId()),
+    onSettled: refresh,
   });
   const down = monitor.consecutive_fails > 0;
   return (
@@ -37,8 +40,11 @@ function MonitorCard({ monitor, canRun }: { monitor: Monitor; canRun: boolean })
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="min-w-0">
           <h3 className="truncate text-base font-semibold text-dark-100">
-            {monitor.label ?? t('admin.dpichecker.monitors.foreign')}
+            {monitor.label ?? t('admin.dpichecker.monitors.untitled', { id: monitor.id })}
           </h3>
+          {fromSite && (
+            <p className="text-xs text-dark-500">{t('admin.dpichecker.monitors.foreign')}</p>
+          )}
           <p className="text-xs text-dark-400">
             {[
               t(`admin.dpichecker.tabs.${monitor.check_type}`),
@@ -48,7 +54,7 @@ function MonitorCard({ monitor, canRun }: { monitor: Monitor; canRun: boolean })
             ].join(' · ')}
           </p>
         </div>
-        {own && canRun && (
+        {manageable && (
           <Toggle
             checked={monitor.is_active}
             onChange={() => patch.mutate({ is_active: !monitor.is_active })}
@@ -71,14 +77,14 @@ function MonitorCard({ monitor, canRun }: { monitor: Monitor; canRun: boolean })
           next: when(monitor.next_run_at),
         })}
       </p>
-      {!monitor.is_active && monitor.paused_reason && (
+      {!monitor.deleted && !monitor.is_active && monitor.paused_reason && (
         <p className="text-xs text-warning-400">
           {t(`admin.dpichecker.monitors.paused.${monitor.paused_reason}`, {
             defaultValue: t('admin.dpichecker.monitors.paused.other'),
           })}
         </p>
       )}
-      {own && canRun && (
+      {manageable && (
         <div className="flex flex-wrap gap-2 pt-1">
           {!confirmDelete ? (
             <button
@@ -118,14 +124,29 @@ function MonitorCard({ monitor, canRun }: { monitor: Monitor; canRun: boolean })
   );
 }
 
-/** Мониторы: свои — пауза и отключение; созданные на сайте DPI//CHECKER — только посмотреть. */
+/**
+ * Мониторы: проверка по расписанию. Любым живым монитором аккаунта можно управлять — и созданным
+ * на сайте DPI//CHECKER; удалённые у сервиса (DELETE там ставит паузу) — в свёрнутом «Отключённые».
+ */
 export function MonitorsTab() {
   const { t } = useTranslation();
   const canRun = usePermissionStore((state) => state.hasPermission('dpichecker:run'));
   const query = useQuery({ queryKey: KEY, queryFn: dpicheckerApi.listMonitors });
+  const live = query.data?.filter((monitor) => !monitor.deleted) ?? [];
+  const gone = query.data?.filter((monitor) => monitor.deleted) ?? [];
   return (
     <div className="space-y-4">
-      <p className="text-sm text-dark-300">{t('admin.dpichecker.monitors.intro')}</p>
+      <section className="bento-card space-y-2 p-4 sm:p-5">
+        <h2 className="text-base font-semibold text-dark-100">
+          {t('admin.dpichecker.monitors.howTitle')}
+        </h2>
+        <ol className="list-decimal space-y-1 ps-5 text-sm text-dark-300">
+          <li>{t('admin.dpichecker.monitors.how.create')}</li>
+          <li>{t('admin.dpichecker.monitors.how.runs')}</li>
+          <li>{t('admin.dpichecker.monitors.how.alerts')}</li>
+          <li>{t('admin.dpichecker.monitors.how.manage')}</li>
+        </ol>
+      </section>
       {query.isLoading && (
         <SkeletonGroup className="space-y-3">
           <Skeleton variant="card" className="h-28 w-full" />
@@ -137,12 +158,24 @@ export function MonitorsTab() {
           {getApiErrorMessage(query.error, t('admin.dpichecker.result.loadFailed'))}
         </p>
       )}
-      {query.data?.length === 0 && (
+      {query.data && live.length === 0 && (
         <p className="text-sm text-dark-400">{t('admin.dpichecker.monitors.empty')}</p>
       )}
-      {query.data?.map((monitor) => (
+      {live.map((monitor) => (
         <MonitorCard key={monitor.id} monitor={monitor} canRun={canRun} />
       ))}
+      {gone.length > 0 && (
+        <details className="group space-y-3">
+          <summary className="cursor-pointer select-none text-sm text-dark-400 hover:text-dark-200">
+            {t('admin.dpichecker.monitors.deletedBlock', { count: gone.length })}
+          </summary>
+          <div className="mt-3 space-y-3 opacity-80">
+            {gone.map((monitor) => (
+              <MonitorCard key={monitor.id} monitor={monitor} canRun={canRun} />
+            ))}
+          </div>
+        </details>
+      )}
     </div>
   );
 }

@@ -5,12 +5,11 @@ import { type CheckResource, type CheckRow, type CheckType, dpicheckerApi } from
 import { StatCard } from '@/components/stats';
 import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
-import { useIsTelegram } from '@/platform/hooks/usePlatform';
 import { usePermissionStore } from '@/store/permissions';
 import { getApiErrorMessage } from '@/utils/api-error';
 import { isRunning, resourceVerdict, rowNote, sortRows } from './checkView';
 import { DpiRegionMap } from './DpiRegionMap';
-import { saveBlob } from './download';
+import { CsvButton } from './CsvButton';
 import { CHECK_POLL_MS, CHECK_WAIT_SEC } from './pollInterval';
 import { regionStates } from './regionMap';
 import { usd4 } from './TotalStep';
@@ -149,7 +148,6 @@ function ServiceMapImage({ actionId, finished }: { actionId: number; finished: b
 export function CheckResult({ actionId }: { actionId: number }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const isTelegram = useIsTelegram();
   const canRun = usePermissionStore((state) => state.hasPermission('dpichecker:run'));
   const key = ['dpichecker', 'check', actionId];
 
@@ -201,9 +199,12 @@ export function CheckResult({ actionId }: { actionId: number }) {
   return (
     <div className="space-y-4">
       <header className="space-y-1">
-        <h2 className="text-lg font-semibold text-dark-100">
-          {t(`admin.dpichecker.result.title.${action.check_type ?? 'ip'}`)} · {action.label}
-        </h2>
+        <div className="flex items-start justify-between gap-3">
+          <h2 className="min-w-0 text-lg font-semibold text-dark-100">
+            {t(`admin.dpichecker.result.title.${action.check_type ?? 'ip'}`)} · {action.label}
+          </h2>
+          {check.resources.length > 0 && <CsvButton kind="report" actionId={actionId} />}
+        </div>
         <p className="text-xs text-dark-400">
           {[
             t(`admin.dpichecker.locations.${action.location ?? 'russia'}`),
@@ -303,19 +304,6 @@ export function CheckResult({ actionId }: { actionId: number }) {
             <RussiaResultMap resources={check.resources} />
           ) : (
             <ServiceMapImage actionId={actionId} finished={!isRunning(status)} />
-          )}
-          {!isTelegram && (
-            <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                className="btn-secondary min-h-[40px] px-4 text-sm"
-                onClick={async () =>
-                  saveBlob(await dpicheckerApi.reportCsv(actionId), `dpichecker_${actionId}.csv`)
-                }
-              >
-                {t('admin.dpichecker.result.csv')}
-              </button>
-            </div>
           )}
           {check.resources.map((resource) => (
             <ResourceCard key={resource.index} resource={resource} checkType={check.check_type} />

@@ -7,7 +7,7 @@ import { usePlatform } from '@/platform';
 export const DPICHECKER_SETTINGS_PATH = '/admin/settings?section=sys_dpichecker';
 export const DPICHECKER_SITE_URL = 'https://dpichecker.st/';
 
-type StepKey = 'key' | 'enable' | 'rights';
+type StepKey = 'key' | 'enable' | 'reference' | 'rights';
 
 /** Раздел выключен или без ключа: что сделать и где, а не пустая страница. */
 export function SetupCard({ status }: { status: DpiStatus }) {
@@ -16,6 +16,7 @@ export function SetupCard({ status }: { status: DpiStatus }) {
   const steps: Array<{ key: StepKey; done: boolean | null }> = [
     { key: 'key', done: status.configured },
     { key: 'enable', done: status.enabled },
+    { key: 'reference', done: status.reference?.short_uuid ? true : null },
     { key: 'rights', done: null },
   ];
   return (

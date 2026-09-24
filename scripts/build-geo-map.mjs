@@ -9,8 +9,8 @@
  *   3. nodes.json — города с полями region и iso: отсюда таблица «токен региона → код ISO».
  *   4. ru-regions-extra.geojson — Крым, Севастополь, Донецк, Луганск (shapeISO «RU-CR» и т.п.), которых
  *      нет в geoBoundaries RUS: из geoBoundaries UKR ADM1 (CC BY 4.0), упрощены до ~0.015°. Точки есть у
- *      DPI//CHECKER, и сайт сервиса рисует их на карте. Рамка и проекция считаются только по основным
- *      регионам — добавка не сдвигает ни контуры, ни города.
+ *      DPI//CHECKER, и сайт сервиса рисует их на карте. Рамка — по всем регионам: в конической проекции
+ *      Крым левее Калининграда, по одним основным регионам он срезался краем.
  *
  * Выход — три JSON в src/components/admin/reachability/assets/:
  *   russia-regions.json   — регионы уже в проекции Альберса как SVG-пути + параметры проекции,
@@ -67,10 +67,9 @@ const projectFeature = (feature) => ({
   name: String(feature.properties.name ?? feature.properties.shapeName ?? ''),
   rings: rings(feature.geometry).map((ring) => ring.map(([lon, lat]) => project(lat, lon))),
 });
-const base = geojson.features.map(projectFeature);
-const projected = [...base, ...extra.features.map(projectFeature)];
+const projected = [...geojson.features, ...extra.features].map(projectFeature);
 
-const points = base.flatMap((region) => region.rings.flat(1));
+const points = projected.flatMap((region) => region.rings.flat(1));
 const minX = Math.min(...points.map((p) => p[0]));
 const maxX = Math.max(...points.map((p) => p[0]));
 const minY = Math.min(...points.map((p) => p[1]));
