@@ -67,16 +67,16 @@ it('«Оптимальный выбор» берёт набор сервиса �
   const optimal = screen.getByRole('button', { name: /Оптимальный выбор/ });
   await waitFor(() => expect((optimal as HTMLButtonElement).disabled).toBe(false));
   fireEvent.click(optimal);
-  await waitFor(() => expect(seen.at(-1)).toEqual([2]));
+  await waitFor(() => expect(seen[seen.length - 1]).toEqual([2]));
 });
 
 it('округ выбирает свои рабочие точки, повторный клик снимает', async () => {
   renderWithProviders(<Harness />);
   const district = await screen.findByRole('button', { name: 'Центральный ФО' });
   fireEvent.click(district);
-  expect(seen.at(-1)).toEqual([1, 2]);
+  expect(seen[seen.length - 1]).toEqual([1, 2]);
   fireEvent.click(district);
-  expect(seen.at(-1)).toEqual([]);
+  expect(seen[seen.length - 1]).toEqual([]);
 });
 
 it('нерабочая точка недоступна', async () => {
