@@ -1477,7 +1477,8 @@
       "bulkActions": "Bulk Actions",
       "infoPages": "Info Pages",
       "legalPages": "System pages",
-      "systemErrors": "System errors"
+      "systemErrors": "System errors",
+      "dpichecker": "DPI//CHECKER"
     },
     "panel": {
       "title": "Admin Panel",
@@ -2912,7 +2913,11 @@
       "confirmDelete": "Delete reminder \"{{name}}\"?",
       "stats": "Sent: {{sent}} · dismissed: {{dismissed}} · currently match: bot {{bot}}, cabinet {{cabinet}}",
       "any": "Any",
-      "channels": { "both": "Bot and cabinet", "bot": "Bot only", "cabinet": "Cabinet only" },
+      "channels": {
+        "both": "Bot and cabinet",
+        "bot": "Bot only",
+        "cabinet": "Cabinet only"
+      },
       "category": {
         "service": "Service — for everyone",
         "marketing": "Marketing — except those unsubscribed from promo"
@@ -2931,7 +2936,11 @@
         "low_balance": "Low balance",
         "tariff": "Tariff"
       },
-      "button": { "none": "No button", "cabinet": "Cabinet section", "url": "Link" },
+      "button": {
+        "none": "No button",
+        "cabinet": "Cabinet section",
+        "url": "Link"
+      },
       "form": {
         "name": "Name (admin panel only)",
         "channels": "Where to show",
@@ -3185,7 +3194,8 @@
         "iface_info": "Legal documents",
         "iface_menu": "Menu button",
         "sys_cabinet": "Cabinet",
-        "sys_other": "Other settings"
+        "sys_other": "Other settings",
+        "sys_dpichecker": "DPI//CHECKER"
       },
       "categories": {
         "CABINET": "Cabinet",
@@ -5525,7 +5535,8 @@
           "news": "News",
           "reachability": "Reachability",
           "system_errors": "System errors",
-          "user": "User"
+          "user": "User",
+          "dpichecker": "DPI//CHECKER"
         },
         "permissionActions": {
           "read": "Read",
@@ -6175,6 +6186,41 @@
         "retry": "Retry delivery",
         "retrySent": "Error sent to the admin chat",
         "retryFailed": "Could not send to the admin chat"
+      }
+    },
+    "dpichecker": {
+      "subtitle": "checks from networks in Russia, China, Iran and Turkmenistan",
+      "tabs": {
+        "label": "DPI//CHECKER sections",
+        "vpn": "VPN",
+        "ip": "IP / domain",
+        "mtproto": "MTProto",
+        "noisy": "Neighbours",
+        "probe": "Probe",
+        "cheremsha": "Cheremsha",
+        "monitors": "Monitors",
+        "history": "History"
+      },
+      "header": {
+        "noisyLeft": "Neighbours: {{left}} of {{limit}} left today",
+        "topup": "Top up"
+      },
+      "money": {
+        "usd": "{{value}} USD"
+      },
+      "setup": {
+        "titleDisabled": "DPI//CHECKER is off",
+        "titleNotConfigured": "DPI//CHECKER is not set up",
+        "intro": "Checks VPN keys, addresses and MTProto proxies from home and mobile networks in Russia, China, Iran and Turkmenistan. To start:",
+        "key": "API key",
+        "keyHint": "Issued in the DPI//CHECKER bot (Main menu → API) or on dpichecker.st; requires a deposit of at least $1",
+        "enable": "Turn DPI//CHECKER on",
+        "enableHint": "The switch is in the same settings",
+        "rights": "Admin rights",
+        "rightsHint": "Who can view the section and who can run checks: they spend the DPI//CHECKER balance",
+        "openSettings": "Open DPI//CHECKER settings",
+        "openSite": "Open dpichecker.st",
+        "envNote": "If the bot is configured via an environment file, its values override the cabinet settings: edit the file and restart the bot."
       }
     }
   },

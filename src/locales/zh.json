@@ -1331,7 +1331,8 @@
       "news": "新闻",
       "infoPages": "信息页面",
       "legalPages": "系统页面",
-      "systemErrors": "系统错误"
+      "systemErrors": "系统错误",
+      "dpichecker": "DPI//CHECKER"
     },
     "panel": {
       "title": "管理面板",
@@ -2009,8 +2010,15 @@
       "confirmDelete": "删除提醒「{{name}}」？",
       "stats": "已发送：{{sent}} · 已关闭：{{dismissed}} · 当前符合条件：机器人 {{bot}}，个人中心 {{cabinet}}",
       "any": "任意",
-      "channels": { "both": "机器人和个人中心", "bot": "仅机器人", "cabinet": "仅个人中心" },
-      "category": { "service": "服务类 — 所有人", "marketing": "营销类 — 已退订推广的用户除外" },
+      "channels": {
+        "both": "机器人和个人中心",
+        "bot": "仅机器人",
+        "cabinet": "仅个人中心"
+      },
+      "category": {
+        "service": "服务类 — 所有人",
+        "marketing": "营销类 — 已退订推广的用户除外"
+      },
       "auth": {
         "single_method": "仅单一登录方式",
         "telegram_only": "仅Telegram登录",
@@ -2025,7 +2033,11 @@
         "low_balance": "余额不足",
         "tariff": "套餐"
       },
-      "button": { "none": "无按钮", "cabinet": "个人中心页面", "url": "链接" },
+      "button": {
+        "none": "无按钮",
+        "cabinet": "个人中心页面",
+        "url": "链接"
+      },
       "form": {
         "name": "名称（仅管理后台可见）",
         "channels": "展示位置",
@@ -2279,7 +2291,8 @@
         "iface_info": "法律文件",
         "iface_menu": "菜单按钮",
         "sys_cabinet": "用户中心",
-        "sys_other": "其他设置"
+        "sys_other": "其他设置",
+        "sys_dpichecker": "DPI//CHECKER"
       },
       "categories": {
         "CABINET": "用户中心",
@@ -5089,7 +5102,8 @@
           "news": "新闻",
           "reachability": "可达性",
           "system_errors": "系统错误",
-          "user": "用户"
+          "user": "用户",
+          "dpichecker": "DPI//CHECKER"
         },
         "permissionActions": {
           "read": "读取",
@@ -5838,6 +5852,41 @@
         "retry": "重新发送",
         "retrySent": "错误已发送至管理员聊天",
         "retryFailed": "无法发送至管理员聊天"
+      }
+    },
+    "dpichecker": {
+      "subtitle": "从俄罗斯、中国、伊朗和土库曼斯坦的网络进行检测",
+      "tabs": {
+        "label": "DPI//CHECKER 分区",
+        "vpn": "VPN",
+        "ip": "IP / 域名",
+        "mtproto": "MTProto",
+        "noisy": "邻居",
+        "probe": "探针",
+        "cheremsha": "Cheremsha",
+        "monitors": "监控",
+        "history": "历史"
+      },
+      "header": {
+        "noisyLeft": "邻居扫描：今天剩余 {{left}} / {{limit}}",
+        "topup": "充值"
+      },
+      "money": {
+        "usd": "{{value}} USD"
+      },
+      "setup": {
+        "titleDisabled": "DPI//CHECKER 已关闭",
+        "titleNotConfigured": "DPI//CHECKER 未配置",
+        "intro": "从俄罗斯、中国、伊朗和土库曼斯坦的家庭和移动网络检测 VPN 密钥、地址和 MTProto 代理。启用步骤：",
+        "key": "API 密钥",
+        "keyHint": "在 DPI//CHECKER 机器人（主菜单 → API）或 dpichecker.st 网站获取；需要至少 $1 的余额",
+        "enable": "启用 DPI//CHECKER",
+        "enableHint": "开关在同一设置中",
+        "rights": "管理员权限",
+        "rightsHint": "谁可以查看此分区、谁可以运行检测：检测会消耗 DPI//CHECKER 余额",
+        "openSettings": "打开 DPI//CHECKER 设置",
+        "openSite": "打开 dpichecker.st",
+        "envNote": "如果机器人通过环境文件配置，其值优先于面板设置：请修改文件并重启机器人。"
       }
     }
   },
