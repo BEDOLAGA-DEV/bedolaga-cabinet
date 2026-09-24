@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
 import {
   adminBroadcastsApi,
@@ -10,6 +11,7 @@ import {
   type TariffFilter,
 } from '../../api/adminBroadcasts';
 import { DateField } from '../DateField';
+import { ExternalLinkIcon } from '../icons/extended-icons';
 
 type Channel = 'telegram' | 'email';
 type Category = 'system' | 'news' | 'promo';
@@ -671,19 +673,27 @@ export function BroadcastAudienceEditor({
                 </p>
               )}
               {preview.data?.users.map((user) => (
-                <div
+                <Link
                   key={user.id}
-                  className="flex items-center justify-between gap-3 border-b border-dark-800 py-2 text-sm"
+                  to={`/admin/users/${user.id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-between gap-3 rounded border-b border-dark-800 px-2 py-2 text-sm transition-colors hover:bg-dark-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent-500"
                 >
                   <span className="min-w-0 truncate text-dark-100">
                     {user.username ||
                       [user.first_name, user.last_name].filter(Boolean).join(' ') ||
                       `#${user.id}`}
                   </span>
-                  <span className="min-w-0 truncate text-dark-400">
-                    {channel === 'telegram' ? user.telegram_id : user.email}
+                  <span className="flex min-w-0 items-center gap-2 text-dark-400">
+                    <span className="truncate">
+                      {channel === 'telegram' ? user.telegram_id : user.email}
+                    </span>
+                    <span aria-hidden="true" className="shrink-0">
+                      <ExternalLinkIcon className="h-4 w-4" />
+                    </span>
                   </span>
-                </div>
+                </Link>
               ))}
             </div>
             <div className="mt-4 flex items-center justify-between">
