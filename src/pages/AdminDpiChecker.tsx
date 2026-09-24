@@ -19,6 +19,8 @@ import { AdminBackButton } from '../components/admin/AdminBackButton';
 import { IconTabs } from '../components/admin/IconTabs';
 import { CheckForm } from '../components/admin/dpichecker/CheckForm';
 import { CheckResult } from '../components/admin/dpichecker/CheckResult';
+import { CheremshaTab } from '../components/admin/dpichecker/CheremshaTab';
+import { NoisyTab, ProbeTab, ScanResult } from '../components/admin/dpichecker/ScanTabs';
 import { type DpiLink, readLink, TABS, type Tab } from '../components/admin/dpichecker/deepLink';
 import type { PanelKind } from '../components/admin/dpichecker/TargetsStep';
 import { SetupCard } from '../components/admin/dpichecker/SetupCard';
@@ -50,6 +52,12 @@ function TabBody({ link, canRun }: { link: DpiLink; canRun: boolean }) {
   const prefill =
     link.source && link.ref ? { kind: PREFILL_KIND[link.source], ref: link.ref } : null;
   if (link.check) return <CheckResult key={link.check} actionId={link.check} />;
+  if (link.scan) return <ScanResult key={link.scan} actionId={link.scan} />;
+  if (link.tab === 'cheremsha') return <CheremshaTab />;
+  if (link.tab === 'noisy' || link.tab === 'probe') {
+    if (!canRun) return <section data-tab={link.tab} />;
+    return link.tab === 'noisy' ? <NoisyTab /> : <ProbeTab />;
+  }
   if (link.tab === 'vpn' || link.tab === 'ip' || link.tab === 'mtproto') {
     if (!canRun) return <section data-tab={link.tab} />;
     return (

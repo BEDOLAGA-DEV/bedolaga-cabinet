@@ -6098,6 +6098,80 @@
           "proxyDead": "نقطه پاسخ نمی‌دهد",
           "untestable": "قابل بررسی نیست"
         }
+      },
+      "noisy": {
+        "intro": "گواهی‌های TLS (SNI) هاست‌های زیرشبکه /24 — همسایه‌های سرور شما چقدر «پرسروصدا» هستند. رایگان، تا ۱۰ اسکن در روز، امروز استفاده شده: {{used}}.",
+        "placeholder": "زیرشبکه /24، IP یا دامنه — هر کدام در یک خط",
+        "run": "اسکن",
+        "exhausted": "سقف اسکن امروز تمام شد.",
+        "found": "هاست‌های یافت‌شده: {{count}}",
+        "badRu": "سرویس‌های روسی در همسایگی",
+        "vpnLike": "شبیه VPN",
+        "badForeign": "سرویس‌های خارجی قابل توجه",
+        "quiet": "همسایه پرسروصدایی پیدا نشد."
+      },
+      "probe": {
+        "intro": "Checks whether the whole /24 subnet is blocked or the DPI hits single addresses (/32). The subnet is checked through its neighbours — nothing needs to be rented in it.",
+        "howTitle": "چگونه کار می‌کند",
+        "how1": "Scan the subnet and collect TLS certificates (SNI) of live hosts.",
+        "how2": "Drop everything that is not a domain and known “bad” SNIs.",
+        "how3": "Check via DNS that the domain still lives in this subnet.",
+        "how4": "Open each domain over HTTPS from abroad and look for a 48 KB+ response.",
+        "how5": "Fetch that response from 10 points in Russia and see whether it arrives in full.",
+        "why": "Why: on some ranges the DPI does not drop the connection but lets ~16–20 KB through and then cuts it. A page under 16 KB opens even through such blocking — so a response well above the threshold is needed.",
+        "price": "Cost: 1.00 USD fixed + 1.50 USD per GB of traffic (actual, after the check). The fixed fee is charged at once and refunded only if DPI//CHECKER infrastructure fails.",
+        "placeholder": "زیرشبکه /24، IP یا دامنه",
+        "confirm": "کسر {{value}} USD + ترافیک",
+        "cost": "Fixed {{fixed}} USD · Traffic {{traffic}} USD ({{mb}} MB)",
+        "stage": {
+          "queued": "در صف",
+          "scan": "در حال اسکن زیرشبکه…",
+          "foreign": "در حال بررسی از خارج…",
+          "russia": "در حال بررسی از روسیه…",
+          "report": "در حال آماده‌سازی گزارش…"
+        },
+        "verdict": {
+          "clean": "زیرشبکه مسدود نیست",
+          "blocked": "کل زیرشبکه مسدود است",
+          "partial": "آدرس‌های جداگانه مسدودند",
+          "unknown": "نتیجه نامشخص"
+        },
+        "blocked": "Blocked addresses: {{blocked}} of {{tested}} checked ({{percent}}%).",
+        "regions": "Regions blocking the whole subnet: {{whole}}, partially: {{part}}, clean: {{clean}}.",
+        "pipeline": "Pipeline: hosts {{scanned}} → domains {{kept}} → in subnet {{inSubnet}} → open from abroad {{foreign}} → checked from Russia {{tested}}.",
+        "byIp": "بر اساس آدرس",
+        "byRegion": "بر اساس منطقه",
+        "pops": "✅ / ⚠️ / ❌ {{green}} / {{yellow}} / {{red}} of {{total}}",
+        "regionLine": "{{name}}: blocked {{blocked}} of {{tested}}",
+        "state": {
+          "open": "✅ open",
+          "blocked": "❌ blocked",
+          "stalled": "⚠️ stalls"
+        },
+        "drops": "حذف‌شده در مراحل فیلتر",
+        "drop": {
+          "bad_sni": "bad SNI",
+          "moved_away": "moved out of the subnet",
+          "dns_failed": "does not resolve",
+          "payload_too_small": "response below threshold",
+          "foreign_failed": "does not open from abroad"
+        }
+      },
+      "cheremsha": {
+        "intro": "آیا دامنه یا IP در فهرست RKN و فهرست‌های CDN هست. رایگان، تا ۲۰ مورد در هر بار.",
+        "placeholder": "دامنه یا IP — هر کدام در یک خط",
+        "run": "بررسی",
+        "verdict": {
+          "blocked": "مسدود",
+          "maybe": "احتمالاً مسدود",
+          "noResolve": "به IP تبدیل نمی‌شود",
+          "notFound": "در فهرست نیست"
+        },
+        "domainHit": "دامنه در فهرست است",
+        "subnet": "{{value}} — مسدودسازی از طریق همسایگی ممکن است",
+        "resolved": "به {{value}} تبدیل می‌شود",
+        "invalid": "رد شد (دامنه یا IP نیست): {{items}}",
+        "refreshed": "به‌روزرسانی فهرست‌ها: {{value}}"
       }
     }
   },

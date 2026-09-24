@@ -6377,6 +6377,80 @@
           "proxyDead": "point does not answer",
           "untestable": "cannot be checked"
         }
+      },
+      "noisy": {
+        "intro": "TLS certificates (SNI) of hosts in the /24 subnet — how “noisy” your server’s neighbours are (SNI max.ru, vk.ru, google.com etc.). Free, up to 10 scans a day, used today: {{used}}.",
+        "placeholder": "/24 subnets, IPs or domains — one per line",
+        "run": "Scan",
+        "exhausted": "Today’s scan limit is used up.",
+        "found": "Hosts found: {{count}}",
+        "badRu": "Russian services nearby",
+        "vpnLike": "Look like VPN",
+        "badForeign": "Notable foreign services",
+        "quiet": "No noisy neighbours found."
+      },
+      "probe": {
+        "intro": "Checks whether the whole /24 subnet is blocked or the DPI hits single addresses (/32). The subnet is checked through its neighbours — nothing needs to be rented in it.",
+        "howTitle": "How it works",
+        "how1": "Scan the subnet and collect TLS certificates (SNI) of live hosts.",
+        "how2": "Drop everything that is not a domain and known “bad” SNIs.",
+        "how3": "Check via DNS that the domain still lives in this subnet.",
+        "how4": "Open each domain over HTTPS from abroad and look for a 48 KB+ response.",
+        "how5": "Fetch that response from 10 points in Russia and see whether it arrives in full.",
+        "why": "Why: on some ranges the DPI does not drop the connection but lets ~16–20 KB through and then cuts it. A page under 16 KB opens even through such blocking — so a response well above the threshold is needed.",
+        "price": "Cost: 1.00 USD fixed + 1.50 USD per GB of traffic (actual, after the check). The fixed fee is charged at once and refunded only if DPI//CHECKER infrastructure fails.",
+        "placeholder": "/24 subnet, IP or domain",
+        "confirm": "Charge {{value}} USD + traffic",
+        "cost": "Fixed {{fixed}} USD · Traffic {{traffic}} USD ({{mb}} MB)",
+        "stage": {
+          "queued": "Queued",
+          "scan": "Scanning the subnet…",
+          "foreign": "Checking from abroad…",
+          "russia": "Checking from Russia…",
+          "report": "Preparing the report…"
+        },
+        "verdict": {
+          "clean": "The subnet is not blocked",
+          "blocked": "The whole subnet is blocked",
+          "partial": "Single addresses are blocked",
+          "unknown": "Result unclear"
+        },
+        "blocked": "Blocked addresses: {{blocked}} of {{tested}} checked ({{percent}}%).",
+        "regions": "Regions blocking the whole subnet: {{whole}}, partially: {{part}}, clean: {{clean}}.",
+        "pipeline": "Pipeline: hosts {{scanned}} → domains {{kept}} → in subnet {{inSubnet}} → open from abroad {{foreign}} → checked from Russia {{tested}}.",
+        "byIp": "By address",
+        "byRegion": "By region",
+        "pops": "✅ / ⚠️ / ❌ {{green}} / {{yellow}} / {{red}} of {{total}}",
+        "regionLine": "{{name}}: blocked {{blocked}} of {{tested}}",
+        "state": {
+          "open": "✅ open",
+          "blocked": "❌ blocked",
+          "stalled": "⚠️ stalls"
+        },
+        "drops": "Filtered out on the way",
+        "drop": {
+          "bad_sni": "bad SNI",
+          "moved_away": "moved out of the subnet",
+          "dns_failed": "does not resolve",
+          "payload_too_small": "response below threshold",
+          "foreign_failed": "does not open from abroad"
+        }
+      },
+      "cheremsha": {
+        "intro": "Whether a domain or IP is in the RKN registry and CDN lists. Free, up to 20 at a time.",
+        "placeholder": "Domains or IPs — one per line",
+        "run": "Check",
+        "verdict": {
+          "blocked": "blocked",
+          "maybe": "possibly blocked",
+          "noResolve": "does not resolve to IP",
+          "notFound": "not in the registry"
+        },
+        "domainHit": "the domain is in the registry",
+        "subnet": "{{value}} — blocking by neighbourhood is possible",
+        "resolved": "Resolves to {{value}}",
+        "invalid": "Skipped (not a domain or IP): {{items}}",
+        "refreshed": "Lists updated: {{value}}"
       }
     }
   },

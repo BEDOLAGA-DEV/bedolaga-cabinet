@@ -6043,6 +6043,80 @@
           "proxyDead": "检测点无响应",
           "untestable": "无法检测"
         }
+      },
+      "noisy": {
+        "intro": "/24 子网内主机的 TLS 证书（SNI），显示服务器邻居有多“嘈杂”。免费，每天最多 10 次，今天已用：{{used}}。",
+        "placeholder": "/24 子网、IP 或域名，每行一个",
+        "run": "扫描",
+        "exhausted": "今天的扫描次数已用完。",
+        "found": "找到的主机：{{count}}",
+        "badRu": "附近的俄罗斯服务",
+        "vpnLike": "疑似 VPN",
+        "badForeign": "明显的境外服务",
+        "quiet": "未发现“嘈杂邻居”。"
+      },
+      "probe": {
+        "intro": "Checks whether the whole /24 subnet is blocked or the DPI hits single addresses (/32). The subnet is checked through its neighbours — nothing needs to be rented in it.",
+        "howTitle": "工作原理",
+        "how1": "Scan the subnet and collect TLS certificates (SNI) of live hosts.",
+        "how2": "Drop everything that is not a domain and known “bad” SNIs.",
+        "how3": "Check via DNS that the domain still lives in this subnet.",
+        "how4": "Open each domain over HTTPS from abroad and look for a 48 KB+ response.",
+        "how5": "Fetch that response from 10 points in Russia and see whether it arrives in full.",
+        "why": "Why: on some ranges the DPI does not drop the connection but lets ~16–20 KB through and then cuts it. A page under 16 KB opens even through such blocking — so a response well above the threshold is needed.",
+        "price": "Cost: 1.00 USD fixed + 1.50 USD per GB of traffic (actual, after the check). The fixed fee is charged at once and refunded only if DPI//CHECKER infrastructure fails.",
+        "placeholder": "/24 子网、IP 或域名",
+        "confirm": "扣款 {{value}} USD + 流量",
+        "cost": "Fixed {{fixed}} USD · Traffic {{traffic}} USD ({{mb}} MB)",
+        "stage": {
+          "queued": "排队中",
+          "scan": "正在扫描子网…",
+          "foreign": "正在从境外检测…",
+          "russia": "正在从俄罗斯检测…",
+          "report": "正在生成报告…"
+        },
+        "verdict": {
+          "clean": "子网未被封锁",
+          "blocked": "整个子网被封锁",
+          "partial": "部分地址被封锁",
+          "unknown": "结果不明"
+        },
+        "blocked": "Blocked addresses: {{blocked}} of {{tested}} checked ({{percent}}%).",
+        "regions": "Regions blocking the whole subnet: {{whole}}, partially: {{part}}, clean: {{clean}}.",
+        "pipeline": "Pipeline: hosts {{scanned}} → domains {{kept}} → in subnet {{inSubnet}} → open from abroad {{foreign}} → checked from Russia {{tested}}.",
+        "byIp": "按地址",
+        "byRegion": "按地区",
+        "pops": "✅ / ⚠️ / ❌ {{green}} / {{yellow}} / {{red}} of {{total}}",
+        "regionLine": "{{name}}: blocked {{blocked}} of {{tested}}",
+        "state": {
+          "open": "✅ open",
+          "blocked": "❌ blocked",
+          "stalled": "⚠️ stalls"
+        },
+        "drops": "筛选过程中排除",
+        "drop": {
+          "bad_sni": "bad SNI",
+          "moved_away": "moved out of the subnet",
+          "dns_failed": "does not resolve",
+          "payload_too_small": "response below threshold",
+          "foreign_failed": "does not open from abroad"
+        }
+      },
+      "cheremsha": {
+        "intro": "域名或 IP 是否在 RKN 登记表和 CDN 列表中。免费，每次最多 20 个。",
+        "placeholder": "域名或 IP，每行一个",
+        "run": "检查",
+        "verdict": {
+          "blocked": "已封锁",
+          "maybe": "可能被封锁",
+          "noResolve": "无法解析为 IP",
+          "notFound": "不在登记表中"
+        },
+        "domainHit": "域名在登记表中",
+        "subnet": "{{value}} — 可能因相邻地址被封锁",
+        "resolved": "解析为 {{value}}",
+        "invalid": "已跳过（不是域名或 IP）：{{items}}",
+        "refreshed": "列表更新时间：{{value}}"
       }
     }
   },
