@@ -6283,11 +6283,7 @@
           "subscription": "Subscription",
           "hosts": "Hosts",
           "nodes": "Nodes",
-          "load": {
-            "subscription": "Take keys of my subscription",
-            "hosts": "Show panel hosts",
-            "nodes": "Show panel nodes"
-          }
+          "loading": "Loading from the panel…"
         },
         "total": {
           "pops": "Points",
@@ -6317,7 +6313,8 @@
         "confirmPay": "Charge {{value}} USD",
         "confirmMonitor": "Create monitor · run {{value}} USD",
         "cancel": "Cancel",
-        "estimateFailed": "Could not price the check"
+        "estimateFailed": "Could not price the check",
+        "pickSome": "Tick what to check"
       },
       "status": {
         "submitting": "Sending to DPI//CHECKER…",

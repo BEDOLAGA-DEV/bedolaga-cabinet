@@ -91,25 +91,23 @@ export function TargetsStep({ checkType, value, onChange, prefill }: TargetsStep
     },
   });
 
-  // Переход с карточки ноды или пользователя: цели грузятся сами, нужная — уже отмечена.
-  const prefillLoaded = useRef(false);
+  // «Из панели» — без кнопок «Показать»: выбрал источник (хосты, ноды, подписку, пользователя) — список
+  // уже грузится; переход с карточки ноды или пользователя приходит сюда же, нужная цель отмечена.
+  // Подписка без пользователя ждёт подписку по умолчанию из настроек (без неё — подсказка, не запрос).
+  const loadKey =
+    origin !== 'panel'
+      ? null
+      : panelKind !== 'subscription'
+        ? panelKind
+        : userId !== null || hasReference
+          ? `subscription:${userId}`
+          : null;
+  const loadedKey = useRef<string | null>(null);
   useEffect(() => {
-    // Подписку пользователя грузит эффект ниже — здесь только хосты и ноды, иначе запрос уйдёт дважды.
-    if (!prefill || prefill.kind === 'subscription' || prefillLoaded.current) return;
-    prefillLoaded.current = true;
-    panel.mutate({ kind: prefill.kind, user: null });
-  }, [prefill, panel]);
-
-  // Подписка — без кнопки: выбрал «Из панели» или другого пользователя — ключи уже грузятся.
-  const subscriptionLoaded = useRef<string | null>(null);
-  const subscriptionReady =
-    origin === 'panel' && panelKind === 'subscription' && (userId !== null || hasReference);
-  useEffect(() => {
-    const key = String(userId);
-    if (!subscriptionReady || subscriptionLoaded.current === key) return;
-    subscriptionLoaded.current = key;
-    panel.mutate({ kind: 'subscription', user: userId });
-  }, [subscriptionReady, userId, panel]);
+    if (loadKey === null || loadedKey.current === loadKey) return;
+    loadedKey.current = loadKey;
+    panel.mutate({ kind: panelKind, user: panelKind === 'subscription' ? userId : null });
+  }, [loadKey, panelKind, userId, panel]);
 
   const toggleResource = (index: number) => {
     const next = value.resources.map((resource, position) =>
@@ -175,28 +173,19 @@ export function TargetsStep({ checkType, value, onChange, prefill }: TargetsStep
           onSource={(next) => setUserId(next.userId)}
         />
       )}
-      {origin === 'panel' && panelKind !== 'subscription' && (
-        <div className="flex flex-wrap items-center gap-2">
-          {kinds.length > 1 && (
-            <ChoiceChips
-              value={panelKind}
-              options={kinds.map((kind) => ({
-                value: kind,
-                label: t(`admin.dpichecker.form.panel.${kind}`),
-              }))}
-              onChange={setPanelKind}
-              label={t('admin.dpichecker.form.panel.label')}
-            />
-          )}
-          <button
-            type="button"
-            className="btn-secondary min-h-[40px] px-4 text-sm"
-            disabled={panel.isPending}
-            onClick={() => panel.mutate({ kind: panelKind, user: null })}
-          >
-            {t(`admin.dpichecker.form.panel.load.${panelKind}`)}
-          </button>
-        </div>
+      {origin === 'panel' && panelKind !== 'subscription' && kinds.length > 1 && (
+        <ChoiceChips
+          value={panelKind}
+          options={kinds.map((kind) => ({
+            value: kind,
+            label: t(`admin.dpichecker.form.panel.${kind}`),
+          }))}
+          onChange={setPanelKind}
+          label={t('admin.dpichecker.form.panel.label')}
+        />
+      )}
+      {origin === 'panel' && panel.isPending && (
+        <p className="text-sm text-dark-300">{t('admin.dpichecker.form.panel.loading')}</p>
       )}
 
       {error && (
@@ -212,7 +201,9 @@ export function TargetsStep({ checkType, value, onChange, prefill }: TargetsStep
         <p className="text-sm text-dark-300">
           {accepted > 0
             ? t('admin.dpichecker.form.accepted', { count: accepted })
-            : t('admin.dpichecker.form.nothingAccepted')}
+            : value.source === 'panel_hosts' || value.source === 'panel_nodes'
+              ? t('admin.dpichecker.form.pickSome')
+              : t('admin.dpichecker.form.nothingAccepted')}
           <NoteLine notes={notes} />
         </p>
       )}

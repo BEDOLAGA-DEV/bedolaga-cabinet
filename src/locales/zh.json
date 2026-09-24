@@ -5949,11 +5949,7 @@
           "subscription": "订阅",
           "hosts": "主机",
           "nodes": "节点",
-          "load": {
-            "subscription": "使用我的订阅密钥",
-            "hosts": "显示面板主机",
-            "nodes": "显示面板节点"
-          }
+          "loading": "正在从面板加载…"
         },
         "total": {
           "pops": "检测点",
@@ -5983,7 +5979,8 @@
         "confirmPay": "扣款 {{value}} USD",
         "confirmMonitor": "创建监控 · 每次 {{value}} USD",
         "cancel": "取消",
-        "estimateFailed": "无法计算价格"
+        "estimateFailed": "无法计算价格",
+        "pickSome": "勾选要检查的项目"
       },
       "status": {
         "submitting": "正在发送到 DPI//CHECKER…",

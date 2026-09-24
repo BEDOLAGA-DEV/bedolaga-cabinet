@@ -6004,11 +6004,7 @@
           "subscription": "اشتراک",
           "hosts": "هاست‌ها",
           "nodes": "نودها",
-          "load": {
-            "subscription": "کلیدهای اشتراک من",
-            "hosts": "نمایش هاست‌های پنل",
-            "nodes": "نمایش نودهای پنل"
-          }
+          "loading": "در حال بارگیری از پنل…"
         },
         "total": {
           "pops": "نقاط",
@@ -6038,7 +6034,8 @@
         "confirmPay": "کسر {{value}} USD",
         "confirmMonitor": "ایجاد پایشگر · هر اجرا {{value}} USD",
         "cancel": "انصراف",
-        "estimateFailed": "محاسبه قیمت ممکن نشد"
+        "estimateFailed": "محاسبه قیمت ممکن نشد",
+        "pickSome": "مواردی را که باید بررسی شوند علامت بزنید"
       },
       "status": {
         "submitting": "در حال ارسال به DPI//CHECKER…",

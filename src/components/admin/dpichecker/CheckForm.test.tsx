@@ -222,3 +222,23 @@ it('заголовки шагов — словами, без номеров «01
   const heading = await screen.findByRole('heading', { level: 2, name: /Что проверяем/ });
   expect(heading.textContent).toBe('Что проверяем');
 });
+
+it('IP «Из панели» — хосты сразу, «Ноды» — сразу ноды, без кнопки «Показать»', async () => {
+  const { dpicheckerApi } = await import('@/api/dpichecker');
+  vi.mocked(dpicheckerApi.panelTargets).mockImplementation(async (body) =>
+    body.kind === 'hosts'
+      ? [{ value: 'fi.example', name: 'FI host', ref: 'h1' }]
+      : [{ value: '203.0.113.5', name: 'NL node', ref: 'n1' }],
+  );
+  renderWithProviders(<CheckForm checkType="ip" />);
+  fireEvent.click(screen.getByRole('button', { name: 'Из панели' }));
+  expect(await screen.findByRole('button', { name: /FI host/ })).toBeTruthy();
+  // Список из панели — выбор, а не разбор: «отметьте», а не «ничего не принято».
+  expect(screen.getByText('Отметьте, что проверить')).toBeTruthy();
+  expect(dpicheckerApi.panelTargets).toHaveBeenCalledWith({ kind: 'hosts', uuids: [] });
+  expect(screen.queryByRole('button', { name: /Показать/ })).toBeNull();
+  fireEvent.click(screen.getByRole('button', { name: 'Ноды' }));
+  expect(await screen.findByRole('button', { name: /NL node/ })).toBeTruthy();
+  expect(dpicheckerApi.panelTargets).toHaveBeenLastCalledWith({ kind: 'nodes', uuids: [] });
+  expect(dpicheckerApi.panelTargets).toHaveBeenCalledTimes(2);
+});

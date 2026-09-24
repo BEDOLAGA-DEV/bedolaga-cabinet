@@ -6878,11 +6878,7 @@
           "subscription": "Подписка",
           "hosts": "Хосты",
           "nodes": "Ноды",
-          "load": {
-            "subscription": "Взять ключи моей подписки",
-            "hosts": "Показать хосты панели",
-            "nodes": "Показать ноды панели"
-          }
+          "loading": "Загружаю из панели…"
         },
         "total": {
           "pops": "Точек",
@@ -6912,7 +6908,8 @@
         "confirmPay": "Списать {{value}} USD",
         "confirmMonitor": "Создать монитор · прогон {{value}} USD",
         "cancel": "Отмена",
-        "estimateFailed": "Не удалось посчитать цену"
+        "estimateFailed": "Не удалось посчитать цену",
+        "pickSome": "Отметьте, что проверить"
       },
       "status": {
         "submitting": "Отправляю в DPI//CHECKER…",
