@@ -216,3 +216,9 @@ it('переход из подписки пользователя — его к�
   expect(await screen.findByText('пользователь #5')).toBeTruthy();
   expect(dpicheckerApi.panelTargets).toHaveBeenCalledTimes(1);
 });
+
+it('заголовки шагов — словами, без номеров «01/02»', async () => {
+  renderWithProviders(<CheckForm checkType="ip" />);
+  const heading = await screen.findByRole('heading', { level: 2, name: /Что проверяем/ });
+  expect(heading.textContent).toBe('Что проверяем');
+});

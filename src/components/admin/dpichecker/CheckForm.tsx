@@ -29,13 +29,11 @@ const DEFAULT_SCHEDULE: ScheduleValue = {
   notifyOnSuccess: false,
 };
 
-function Step({ index, title, children }: { index: string; title: string; children: ReactNode }) {
+/** Шаг формы — заголовок без номера «01/02», как разделы формы BSCHEKER (номера владельцу непонятны). */
+function Step({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="bento-card space-y-3 p-4 sm:p-5">
-      <h2 className="flex items-center gap-2 text-lg font-semibold text-dark-100">
-        <span className="text-sm font-medium tabular-nums text-dark-400">{index}</span>
-        {title}
-      </h2>
+      <h2 className="text-lg font-semibold text-dark-100">{title}</h2>
       {children}
     </section>
   );
@@ -159,7 +157,7 @@ export function CheckForm({ checkType, prefill = null }: CheckFormProps) {
 
   return (
     <div className="space-y-4">
-      <Step index="01" title={t('admin.dpichecker.form.step1')}>
+      <Step title={t('admin.dpichecker.form.step1')}>
         <TargetsStep
           checkType={checkType}
           value={targets}
@@ -168,7 +166,7 @@ export function CheckForm({ checkType, prefill = null }: CheckFormProps) {
         />
       </Step>
       {hasTargets && (
-        <Step index="02" title={t('admin.dpichecker.form.step2')}>
+        <Step title={t('admin.dpichecker.form.step2')}>
           <PopPicker
             location={location}
             onLocation={setLocation}
@@ -179,7 +177,7 @@ export function CheckForm({ checkType, prefill = null }: CheckFormProps) {
         </Step>
       )}
       {hasTargets && popIds.length > 0 && (
-        <Step index="03" title={t('admin.dpichecker.form.step3')}>
+        <Step title={t('admin.dpichecker.form.step3')}>
           <TotalStep
             checkType={checkType}
             pops={popIds.length}

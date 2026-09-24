@@ -61,7 +61,7 @@ function Row({ action, onOpen }: { action: ActionOut; onOpen: () => void }) {
         <span className="hidden text-xs tabular-nums text-dark-500 sm:block">#{action.id}</span>
         <span className="flex min-w-0 items-baseline gap-2">
           <span className="min-w-0 truncate text-sm font-medium text-dark-100">{action.label}</span>
-          <span className="shrink-0 rounded-md bg-dark-800 px-1.5 py-0.5 text-[11px] text-dark-300">
+          <span className="shrink-0 rounded-md bg-dark-800 px-1.5 py-0.5 text-[11px] text-dark-200">
             {t(`admin.dpichecker.tabs.${type}`, { defaultValue: type })}
           </span>
         </span>
@@ -87,7 +87,7 @@ function Row({ action, onOpen }: { action: ActionOut; onOpen: () => void }) {
                 </span>
               ) : null}
             </span>
-            <span className="min-w-0 truncate text-xs text-dark-300">
+            <span className="min-w-0 truncate text-xs text-dark-200">
               {action.admin_name ?? '—'}
             </span>
             <span className="text-xs tabular-nums text-dark-400">

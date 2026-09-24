@@ -99,8 +99,20 @@ function ResourceCard({ resource, checkType }: { resource: CheckResource; checkT
   );
 }
 
-/** Россия — своя карта регионов с подсказками (данные уже на руках, обновляется по ходу проверки). */
-function RussiaResultMap({ resources }: { resources: CheckResource[] }) {
+/**
+ * Россия — своя карта регионов с подсказками (данные уже на руках, обновляется по ходу проверки).
+ * Регион и оператор точки — из справочника точек: пока он грузится — заглушка (серая карта выглядела бы
+ * «ничего не проверено»), не пришёл — картинка карты от сервиса.
+ */
+function RussiaResultMap({
+  actionId,
+  resources,
+  finished,
+}: {
+  actionId: number;
+  resources: CheckResource[];
+  finished: boolean;
+}) {
   const pops = useQuery({
     queryKey: ['dpichecker', 'pops', 'russia'],
     queryFn: () => dpicheckerApi.getPops('russia'),
@@ -110,6 +122,9 @@ function RussiaResultMap({ resources }: { resources: CheckResource[] }) {
     () => regionStates(resources, pops.data?.pops ?? []),
     [resources, pops.data],
   );
+  if (pops.isError) return <ServiceMapImage actionId={actionId} finished={finished} />;
+  if (!pops.data)
+    return <Skeleton variant="card" className="aspect-[1000/531] w-full rounded-2xl" />;
   return <DpiRegionMap states={states} />;
 }
 
@@ -301,7 +316,11 @@ export function CheckResult({ actionId }: { actionId: number }) {
             />
           </div>
           {(action.location ?? 'russia') === 'russia' ? (
-            <RussiaResultMap resources={check.resources} />
+            <RussiaResultMap
+              actionId={actionId}
+              resources={check.resources}
+              finished={!isRunning(status)}
+            />
           ) : (
             <ServiceMapImage actionId={actionId} finished={!isRunning(status)} />
           )}

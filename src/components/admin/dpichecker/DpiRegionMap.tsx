@@ -16,11 +16,16 @@ const MAP_STYLES = cn(
   '[&_[data-outline]]:fill-none [&_[data-outline]]:stroke-accent-400 [&_[data-outline]]:[stroke-width:2px] [&_[data-outline]]:[vector-effect:non-scaling-stroke] [&_[data-outline]]:pointer-events-none',
 );
 
-const DOT: Record<RegionStatus, string> = {
-  green: 'bg-success-400',
-  yellow: 'bg-warning-400',
-  red: 'bg-error-400',
-  gray: 'bg-dark-400',
+/**
+ * Образцы для легенды и подсказки — та же заливка, что у регионов. Текстовые *-400 в светлой теме
+ * затемняются до *-700, а заливка карты — нет: точки легенды с ними расходились с картой.
+ */
+const SWATCH: Record<RegionStatus | 'none', string> = {
+  green: 'bg-success-500/60',
+  yellow: 'bg-warning-500/60',
+  red: 'bg-error-500/60',
+  gray: 'bg-dark-500/70',
+  none: 'bg-dark-700/70',
 };
 const TONE: Record<RegionStatus, string> = {
   green: 'text-success-400',
@@ -28,7 +33,7 @@ const TONE: Record<RegionStatus, string> = {
   red: 'text-error-400',
   gray: 'text-dark-400',
 };
-const LEGEND: RegionStatus[] = ['green', 'yellow', 'red', 'gray'];
+const LEGEND = ['green', 'yellow', 'red', 'none'] as const;
 /** Строка подсказки ~22 px, шапка ~44 px — для прижима к краю карты. */
 const tipHeight = (rows: number) => 48 + rows * 22;
 
@@ -93,7 +98,12 @@ function Tooltip({
     >
       <p className="font-semibold text-dark-50">{name}</p>
       <p className={cn('mt-0.5 flex items-center gap-2', TONE[status])}>
-        <span className={cn('inline-block h-2 w-2 shrink-0 rounded-full', DOT[status])} />
+        <span
+          className={cn(
+            'inline-block h-2.5 w-2.5 shrink-0 rounded-sm',
+            SWATCH[state ? status : 'none'],
+          )}
+        />
         <span>{t(`admin.dpichecker.map.status.${state ? status : 'none'}`)}</span>
       </p>
       {pops.length > 0 && (
@@ -199,7 +209,13 @@ function MapBody({ map, states }: { map: RussiaMap; states: ReadonlyMap<string, 
       <ul className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-dark-400">
         {LEGEND.map((status) => (
           <li key={status} className="flex items-center gap-1.5">
-            <span className={cn('inline-block h-2 w-2 rounded-full', DOT[status])} />
+            <span
+              data-legend={status}
+              className={cn(
+                'inline-block h-2.5 w-2.5 rounded-sm ring-1 ring-dark-400/40',
+                SWATCH[status],
+              )}
+            />
             {t(`admin.dpichecker.map.status.${status}`)}
           </li>
         ))}

@@ -43,7 +43,7 @@ function MonitorCard({ monitor, canRun }: { monitor: Monitor; canRun: boolean })
             {monitor.label ?? t('admin.dpichecker.monitors.untitled', { id: monitor.id })}
           </h3>
           {fromSite && (
-            <p className="text-xs text-dark-500">{t('admin.dpichecker.monitors.foreign')}</p>
+            <p className="text-xs text-dark-400">{t('admin.dpichecker.monitors.foreign')}</p>
           )}
           <p className="text-xs text-dark-400">
             {[
@@ -140,7 +140,7 @@ export function MonitorsTab() {
         <h2 className="text-base font-semibold text-dark-100">
           {t('admin.dpichecker.monitors.howTitle')}
         </h2>
-        <ol className="list-decimal space-y-1 ps-5 text-sm text-dark-300">
+        <ol className="list-decimal space-y-1 ps-5 text-sm text-dark-200">
           <li>{t('admin.dpichecker.monitors.how.create')}</li>
           <li>{t('admin.dpichecker.monitors.how.runs')}</li>
           <li>{t('admin.dpichecker.monitors.how.alerts')}</li>
@@ -169,7 +169,7 @@ export function MonitorsTab() {
           <summary className="cursor-pointer select-none text-sm text-dark-400 hover:text-dark-200">
             {t('admin.dpichecker.monitors.deletedBlock', { count: gone.length })}
           </summary>
-          <div className="mt-3 space-y-3 opacity-80">
+          <div className="mt-3 space-y-3">
             {gone.map((monitor) => (
               <MonitorCard key={monitor.id} monitor={monitor} canRun={canRun} />
             ))}

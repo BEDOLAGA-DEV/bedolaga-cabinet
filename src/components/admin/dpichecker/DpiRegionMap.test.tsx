@@ -82,3 +82,14 @@ it('касание открывает подсказку, повторное к�
   fireEvent.click(region);
   expect(screen.queryByRole('tooltip')).toBeNull();
 });
+
+it('легенда — образцы той же заливки, что у регионов (в светлой теме текстовые цвета темнее заливки)', async () => {
+  const { container } = await renderMap();
+  const swatch = (status: string) =>
+    container.querySelector(`[data-legend="${status}"]`)?.className ?? '';
+  expect(swatch('green')).toContain('bg-success-500/60');
+  expect(swatch('yellow')).toContain('bg-warning-500/60');
+  expect(swatch('red')).toContain('bg-error-500/60');
+  // «Не проверялся» — цвет земли на карте, а не отдельный серый.
+  expect(swatch('none')).toContain('bg-dark-700/70');
+});

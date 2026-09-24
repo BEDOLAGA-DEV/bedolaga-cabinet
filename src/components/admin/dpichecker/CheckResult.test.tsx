@@ -19,6 +19,7 @@ const api = vi.hoisted(() => ({
   cancelCheck: vi.fn(),
   resubmit: vi.fn(),
   checkMap: vi.fn(),
+  popsFail: false,
 }));
 
 vi.mock('@/api/dpichecker', async (importOriginal) => {
@@ -31,13 +32,28 @@ vi.mock('@/api/dpichecker', async (importOriginal) => {
       resubmit: api.resubmit,
       downloadLink: vi.fn(),
       checkMap: api.checkMap,
-      getPops: vi.fn(async () => ({
-        pops: [
-          { id: 1, location: 'russia', region: 'Алтайский край', operator: null, is_healthy: true },
-          { id: 2, location: 'russia', region: 'Амурская обл.', operator: null, is_healthy: true },
-        ],
-        groups: { districts: [], republics: [] },
-      })),
+      getPops: vi.fn(async () => {
+        if (api.popsFail) throw new Error('pops down');
+        return {
+          pops: [
+            {
+              id: 1,
+              location: 'russia',
+              region: 'Алтайский край',
+              operator: null,
+              is_healthy: true,
+            },
+            {
+              id: 2,
+              location: 'russia',
+              region: 'Амурская обл.',
+              operator: null,
+              is_healthy: true,
+            },
+          ],
+          groups: { districts: [], republics: [] },
+        };
+      }),
     },
   };
 });
@@ -135,6 +151,7 @@ beforeEach(() => {
 afterEach(() => {
   cleanup();
   api.views = [];
+  api.popsFail = false;
   vi.clearAllMocks();
 });
 
@@ -203,4 +220,15 @@ it('Китай и другие страны — картинка карты от
   const image = await screen.findByRole('img', { name: 'Карта' });
   expect(image.getAttribute('src')).toBe('blob:map');
   expect(api.checkMap).toHaveBeenCalledWith(11);
+});
+
+it('справочник точек не пришёл — не серая «непроверенная» карта, а картинка сервиса', async () => {
+  globalThis.URL.createObjectURL = vi.fn(() => 'blob:map');
+  globalThis.URL.revokeObjectURL = vi.fn();
+  api.popsFail = true;
+  api.checkMap.mockResolvedValue(new Blob(['png'], { type: 'image/png' }));
+  api.views = [{ action: { ...ACTION, status: 'completed' }, check: DONE }];
+  const { container } = renderWithProviders(<CheckResult actionId={11} />);
+  expect(await screen.findByRole('img', { name: 'Карта' })).toBeTruthy();
+  expect(container.querySelector('[data-region]')).toBeNull();
 });

@@ -128,6 +128,14 @@ it('удалённый у сервиса — в «Отключённых», бе
   expect(block.open).toBe(false);
   expect(within(block).queryByRole('switch')).toBeNull();
   expect(within(block).queryByRole('button', { name: /Отключить/ })).toBeNull();
+  // Не полупрозрачным: подписи и так мелкие — на светлых палитрах контраст падал до 3.6.
+  expect(block.querySelector('[class*="opacity-"]')).toBeNull();
+});
+
+it('подпись «Создан на сайте» читаемым цветом (dark-500 давал 3.4–4 при норме 4.5)', async () => {
+  renderWithProviders(<MonitorsTab />);
+  const [label] = await screen.findAllByText(/Создан на сайте DPI\/\/CHECKER/);
+  expect(label.className).not.toContain('text-dark-500');
 });
 
 it('без права запуска у мониторов нет управления', async () => {
