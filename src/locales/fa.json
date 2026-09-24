@@ -6111,18 +6111,18 @@
         "quiet": "همسایه پرسروصدایی پیدا نشد."
       },
       "probe": {
-        "intro": "Checks whether the whole /24 subnet is blocked or the DPI hits single addresses (/32). The subnet is checked through its neighbours — nothing needs to be rented in it.",
+        "intro": "بررسی اینکه آیا کل زیرشبکه /24 مسدود است یا DPI آدرس‌های جداگانه (/32) را هدف می‌گیرد. زیرشبکه از طریق همسایه‌ها بررسی می‌شود — نیازی به اجاره چیزی در آن نیست.",
         "howTitle": "چگونه کار می‌کند",
-        "how1": "Scan the subnet and collect TLS certificates (SNI) of live hosts.",
-        "how2": "Drop everything that is not a domain and known “bad” SNIs.",
-        "how3": "Check via DNS that the domain still lives in this subnet.",
-        "how4": "Open each domain over HTTPS from abroad and look for a 48 KB+ response.",
-        "how5": "Fetch that response from 10 points in Russia and see whether it arrives in full.",
-        "why": "Why: on some ranges the DPI does not drop the connection but lets ~16–20 KB through and then cuts it. A page under 16 KB opens even through such blocking — so a response well above the threshold is needed.",
-        "price": "Cost: 1.00 USD fixed + 1.50 USD per GB of traffic (actual, after the check). The fixed fee is charged at once and refunded only if DPI//CHECKER infrastructure fails.",
+        "how1": "زیرشبکه را اسکن و گواهی‌های TLS (SNI) هاست‌های زنده را جمع می‌کنم.",
+        "how2": "هر چیزی که دامنه نیست و SNIهای «بد» شناخته‌شده را کنار می‌گذارم.",
+        "how3": "با DNS بررسی می‌کنم که دامنه هنوز در این زیرشبکه است.",
+        "how4": "از خارج هر دامنه را با HTTPS باز می‌کنم و پاسخی بالای ۴۸ کیلوبایت پیدا می‌کنم.",
+        "how5": "این پاسخ را از ۱۰ نقطه در روسیه می‌گیرم و می‌بینم کامل می‌رسد یا نه.",
+        "why": "چرا این‌طور: در برخی بازه‌ها DPI اتصال را قطع نمی‌کند، بلکه حدود ۱۶ تا ۲۰ کیلوبایت عبور می‌دهد و بعد قطع می‌کند. صفحه‌ای کمتر از ۱۶ کیلوبایت حتی با این مسدودسازی باز می‌شود — پس پاسخی بسیار بزرگ‌تر از آستانه لازم است.",
+        "price": "هزینه: ۱.۰۰ دلار ثابت + ۱.۵۰ دلار برای هر گیگابایت ترافیک (واقعی، پس از بررسی). مبلغ ثابت فوراً کسر و فقط در صورت خرابی زیرساخت DPI//CHECKER بازگردانده می‌شود.",
         "placeholder": "زیرشبکه /24، IP یا دامنه",
         "confirm": "کسر {{value}} USD + ترافیک",
-        "cost": "Fixed {{fixed}} USD · Traffic {{traffic}} USD ({{mb}} MB)",
+        "cost": "ثابت {{fixed}} USD · ترافیک {{traffic}} USD ({{mb}} مگابایت)",
         "stage": {
           "queued": "در صف",
           "scan": "در حال اسکن زیرشبکه…",
@@ -6136,25 +6136,25 @@
           "partial": "آدرس‌های جداگانه مسدودند",
           "unknown": "نتیجه نامشخص"
         },
-        "blocked": "Blocked addresses: {{blocked}} of {{tested}} checked ({{percent}}%).",
-        "regions": "Regions blocking the whole subnet: {{whole}}, partially: {{part}}, clean: {{clean}}.",
-        "pipeline": "Pipeline: hosts {{scanned}} → domains {{kept}} → in subnet {{inSubnet}} → open from abroad {{foreign}} → checked from Russia {{tested}}.",
+        "blocked": "آدرس‌های مسدود: {{blocked}} از {{tested}} بررسی‌شده ({{percent}}٪).",
+        "regions": "مناطقی که کل زیرشبکه را مسدود می‌کنند: {{whole}}، جزئی: {{part}}، پاک: {{clean}}.",
+        "pipeline": "روند: هاست {{scanned}} ← دامنه {{kept}} ← در زیرشبکه {{inSubnet}} ← از خارج باز می‌شود {{foreign}} ← از روسیه بررسی شد {{tested}}.",
         "byIp": "بر اساس آدرس",
         "byRegion": "بر اساس منطقه",
-        "pops": "✅ / ⚠️ / ❌ {{green}} / {{yellow}} / {{red}} of {{total}}",
-        "regionLine": "{{name}}: blocked {{blocked}} of {{tested}}",
+        "pops": "✅ / ⚠️ / ❌ {{green}} / {{yellow}} / {{red}} از {{total}}",
+        "regionLine": "{{name}}: مسدود {{blocked}} از {{tested}}",
         "state": {
-          "open": "✅ open",
-          "blocked": "❌ blocked",
-          "stalled": "⚠️ stalls"
+          "open": "✅ باز",
+          "blocked": "❌ مسدود",
+          "stalled": "⚠️ قطع می‌شود"
         },
         "drops": "حذف‌شده در مراحل فیلتر",
         "drop": {
-          "bad_sni": "bad SNI",
-          "moved_away": "moved out of the subnet",
-          "dns_failed": "does not resolve",
-          "payload_too_small": "response below threshold",
-          "foreign_failed": "does not open from abroad"
+          "bad_sni": "SNI بد",
+          "moved_away": "از زیرشبکه رفته",
+          "dns_failed": "resolve نمی‌شود",
+          "payload_too_small": "پاسخ کمتر از آستانه",
+          "foreign_failed": "از خارج باز نمی‌شود"
         }
       },
       "cheremsha": {

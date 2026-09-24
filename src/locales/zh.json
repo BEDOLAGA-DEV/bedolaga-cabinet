@@ -6056,18 +6056,18 @@
         "quiet": "未发现“嘈杂邻居”。"
       },
       "probe": {
-        "intro": "Checks whether the whole /24 subnet is blocked or the DPI hits single addresses (/32). The subnet is checked through its neighbours — nothing needs to be rented in it.",
+        "intro": "检测 /24 子网是整体被封锁，还是 DPI 只针对单个地址（/32）。通过邻居检测子网——无需在其中租用任何东西。",
         "howTitle": "工作原理",
-        "how1": "Scan the subnet and collect TLS certificates (SNI) of live hosts.",
-        "how2": "Drop everything that is not a domain and known “bad” SNIs.",
-        "how3": "Check via DNS that the domain still lives in this subnet.",
-        "how4": "Open each domain over HTTPS from abroad and look for a 48 KB+ response.",
-        "how5": "Fetch that response from 10 points in Russia and see whether it arrives in full.",
-        "why": "Why: on some ranges the DPI does not drop the connection but lets ~16–20 KB through and then cuts it. A page under 16 KB opens even through such blocking — so a response well above the threshold is needed.",
-        "price": "Cost: 1.00 USD fixed + 1.50 USD per GB of traffic (actual, after the check). The fixed fee is charged at once and refunded only if DPI//CHECKER infrastructure fails.",
+        "how1": "扫描子网并收集存活主机的 TLS 证书（SNI）。",
+        "how2": "剔除非域名和已知的“坏” SNI。",
+        "how3": "通过 DNS 确认域名仍在该子网中。",
+        "how4": "从境外通过 HTTPS 打开每个域名，寻找 48 KB 以上的响应。",
+        "how5": "从俄罗斯的 10 个检测点拉取该响应，看是否能完整到达。",
+        "why": "为什么这样做：在部分网段 DPI 不会断开连接，而是放行约 16–20 KB 后中断传输。小于 16 KB 的页面在这种封锁下也能打开——因此需要明显超过阈值的响应。",
+        "price": "费用：固定 1.00 USD + 每 GB 流量 1.50 USD（按实际，检测后计算）。固定费用立即扣除，仅在 DPI//CHECKER 基础设施故障时退回。",
         "placeholder": "/24 子网、IP 或域名",
         "confirm": "扣款 {{value}} USD + 流量",
-        "cost": "Fixed {{fixed}} USD · Traffic {{traffic}} USD ({{mb}} MB)",
+        "cost": "固定 {{fixed}} USD · 流量 {{traffic}} USD（{{mb}} MB）",
         "stage": {
           "queued": "排队中",
           "scan": "正在扫描子网…",
@@ -6081,25 +6081,25 @@
           "partial": "部分地址被封锁",
           "unknown": "结果不明"
         },
-        "blocked": "Blocked addresses: {{blocked}} of {{tested}} checked ({{percent}}%).",
-        "regions": "Regions blocking the whole subnet: {{whole}}, partially: {{part}}, clean: {{clean}}.",
-        "pipeline": "Pipeline: hosts {{scanned}} → domains {{kept}} → in subnet {{inSubnet}} → open from abroad {{foreign}} → checked from Russia {{tested}}.",
+        "blocked": "被封锁的地址：已检测 {{tested}} 个中 {{blocked}} 个（{{percent}}%）。",
+        "regions": "整体封锁子网的地区：{{whole}}，部分封锁：{{part}}，干净：{{clean}}。",
+        "pipeline": "流程：主机 {{scanned}} → 域名 {{kept}} → 在子网中 {{inSubnet}} → 境外可打开 {{foreign}} → 从俄罗斯检测 {{tested}}。",
         "byIp": "按地址",
         "byRegion": "按地区",
-        "pops": "✅ / ⚠️ / ❌ {{green}} / {{yellow}} / {{red}} of {{total}}",
-        "regionLine": "{{name}}: blocked {{blocked}} of {{tested}}",
+        "pops": "✅ / ⚠️ / ❌ {{green}} / {{yellow}} / {{red}}，共 {{total}}",
+        "regionLine": "{{name}}：已封锁 {{blocked}} / {{tested}}",
         "state": {
-          "open": "✅ open",
-          "blocked": "❌ blocked",
-          "stalled": "⚠️ stalls"
+          "open": "✅ 可访问",
+          "blocked": "❌ 被封锁",
+          "stalled": "⚠️ 中断"
         },
         "drops": "筛选过程中排除",
         "drop": {
-          "bad_sni": "bad SNI",
-          "moved_away": "moved out of the subnet",
-          "dns_failed": "does not resolve",
-          "payload_too_small": "response below threshold",
-          "foreign_failed": "does not open from abroad"
+          "bad_sni": "坏 SNI",
+          "moved_away": "已迁出子网",
+          "dns_failed": "无法解析",
+          "payload_too_small": "响应小于阈值",
+          "foreign_failed": "境外无法打开"
         }
       },
       "cheremsha": {
