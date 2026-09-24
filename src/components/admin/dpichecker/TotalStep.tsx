@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import type { CheckType, Estimate, ProbeMode } from '@/api/dpichecker';
+import type { CheckType, Estimate, MonitorNotify, ProbeMode } from '@/api/dpichecker';
 import { DropdownSelect } from '@/components/admin/bulkActions/DropdownSelect';
 import { Toggle } from '@/components/admin/Toggle';
 import { cn } from '@/lib/utils';
@@ -11,6 +11,8 @@ export interface ScheduleValue {
   intervalHours: number;
   alertAfterFails: number;
   notifyOnSuccess: boolean;
+  /** Куда тревоги шлёт бот DPI//CHECKER; итоги в админ-чат бота приходят в любом случае. */
+  notify: MonitorNotify;
 }
 
 interface TotalStepProps {
@@ -47,7 +49,7 @@ function Stat({ label, value, bad = false }: { label: string; value: string; bad
   );
 }
 
-function NumberField({
+export function NumberField({
   label,
   value,
   min,
@@ -168,6 +170,26 @@ export function TotalStep(props: TotalStepProps) {
               />
               {t('admin.dpichecker.form.schedule.notifyOnSuccess')}
             </label>
+          </div>
+        )}
+        {props.runMode === 'schedule' && (
+          <div className="space-y-1">
+            <span className="text-sm font-medium text-dark-100">
+              {t('admin.dpichecker.form.schedule.notify')}
+            </span>
+            <Segmented
+              value={schedule.notify}
+              options={[
+                { value: 'dm', label: t('admin.dpichecker.form.schedule.notifyDm') },
+                { value: 'group', label: t('admin.dpichecker.form.schedule.notifyGroup') },
+              ]}
+              onChange={(notify) => props.onSchedule({ ...schedule, notify })}
+              label={t('admin.dpichecker.form.schedule.notify')}
+              size="md"
+            />
+            <p className="text-xs text-dark-400">
+              {t('admin.dpichecker.form.schedule.notifyHint')}
+            </p>
           </div>
         )}
       </div>

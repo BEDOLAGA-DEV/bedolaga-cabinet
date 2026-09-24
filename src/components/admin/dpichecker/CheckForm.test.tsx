@@ -156,7 +156,18 @@ it('«По расписанию» создаёт монитор с интерв�
     interval_hours: 6,
     alert_after_fails: 2,
     notify_on_success: false,
+    notify: 'dm',
   });
+});
+
+it('монитор с тревогами бота DPI//CHECKER в группу', async () => {
+  await pasteAndPick();
+  fireEvent.click(screen.getByRole('radio', { name: /По расписанию/ }));
+  fireEvent.click(await screen.findByRole('radio', { name: 'В группу' }));
+  fireEvent.click(await screen.findByRole('button', { name: /Создать монитор/ }));
+  fireEvent.click(await screen.findByRole('button', { name: /Создать монитор ·/ }));
+  await waitFor(() => expect(api.createMonitor).toHaveBeenCalledTimes(1));
+  expect(api.createMonitor.mock.calls[0][0]).toMatchObject({ notify: 'group' });
 });
 
 it('переход с карточки ноды сразу подставляет эту ноду', async () => {

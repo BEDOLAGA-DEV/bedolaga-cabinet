@@ -19,6 +19,7 @@ const api = vi.hoisted(() => ({
   cancelCheck: vi.fn(),
   resubmit: vi.fn(),
   checkMap: vi.fn(),
+  reportTable: vi.fn(),
   popsFail: false,
 }));
 
@@ -32,6 +33,7 @@ vi.mock('@/api/dpichecker', async (importOriginal) => {
       resubmit: api.resubmit,
       downloadLink: vi.fn(),
       checkMap: api.checkMap,
+      reportTable: api.reportTable,
       getPops: vi.fn(async () => {
         if (api.popsFail) throw new Error('pops down');
         return {
@@ -231,4 +233,44 @@ it('справочник точек не пришёл — не серая «не
   const { container } = renderWithProviders(<CheckResult actionId={11} />);
   expect(await screen.findByRole('img', { name: 'Карта' })).toBeTruthy();
   expect(container.querySelector('[data-region]')).toBeNull();
+});
+
+it('точка раскрывается: все поля отчёта словами, без ключа', async () => {
+  api.views = [{ action: { ...ACTION, status: 'completed' }, check: DONE }];
+  api.reportTable.mockResolvedValue({
+    id: 5286,
+    check_type: 'vpn',
+    columns: [
+      'name',
+      'host',
+      'pop_id',
+      'pop_name',
+      'connected',
+      'server_ip',
+      'latency_ms',
+      'x_new',
+    ],
+    rows: [
+      {
+        name: '🇫🇮 Finland',
+        host: '🇫🇮 Finland',
+        pop_id: 1,
+        pop_name: 'Алтайский край',
+        connected: true,
+        server_ip: '203.0.113.1',
+        latency_ms: 2792,
+        x_new: 'raw',
+        is_direct: false,
+      },
+    ],
+  });
+  renderWithProviders(<CheckResult actionId={11} />);
+  fireEvent.click(await screen.findByRole('button', { name: /Алтайский край/ }));
+  await waitFor(() => expect(api.reportTable).toHaveBeenCalledWith(11));
+  expect(await screen.findByText('IP сервера')).toBeTruthy();
+  expect(screen.getByText('203.0.113.1')).toBeTruthy();
+  expect(screen.getByText('Подключился')).toBeTruthy();
+  expect(screen.getByText('да')).toBeTruthy();
+  // Неизвестное сервисное поле сырым кодом не показывается.
+  expect(screen.queryByText('x_new')).toBeNull();
 });

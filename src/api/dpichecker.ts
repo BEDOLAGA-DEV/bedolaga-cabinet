@@ -7,6 +7,11 @@ export type CheckType = 'vpn' | 'ip' | 'mtproto';
 export type ProbeMode = 'auto' | 'server' | 'noserver';
 export type TargetSource = 'paste' | 'panel_subscription' | 'panel_hosts' | 'panel_nodes' | 'site';
 export type ActionKind = 'check' | 'probe' | 'noisy' | 'monitor';
+export type AccountKind = 'check' | 'probe' | 'noisy';
+/** Куда тревоги монитора шлёт бот DPI//CHECKER: владельцу ключа в личку или в группу. */
+export type MonitorNotify = 'dm' | 'group';
+/** Откуда запуск у сервиса: сайт, их бот, API (так запускает и кабинет), прогон монитора, инлайн. */
+export type RemoteSource = 'web' | 'bot' | 'api' | 'watcher' | 'inline';
 
 export const LOCATIONS: Location[] = ['russia', 'china', 'iran', 'turkmenistan'];
 
@@ -181,6 +186,7 @@ export interface MonitorCreate extends CheckCreate {
   interval_hours: number;
   alert_after_fails: number;
   notify_on_success: boolean;
+  notify?: MonitorNotify;
 }
 
 export interface MonitorPatch {
@@ -201,6 +207,10 @@ export interface Monitor {
   paused_reason: string | null;
   notify_on_success: boolean;
   alert_after_fails: number;
+  notify?: MonitorNotify;
+  group_linked?: boolean;
+  /** Код привязки группы (`/link <код>` их боту в группе) — пока группа не привязана. */
+  link_code?: string | null;
   last_status: string | null;
   last_checked_at: string | null;
   consecutive_fails: number;
@@ -320,6 +330,58 @@ export interface HistoryPage {
   counts?: HistoryCounts;
 }
 
+/** Запуск аккаунта у сервиса — в том числе не из кабинета; `action_id` — своя строка, если уже открыт. */
+export interface RemoteRun {
+  id: number;
+  status: string;
+  check_type?: CheckType;
+  location?: Location | null;
+  usd_cost: number | null;
+  source: RemoteSource | string;
+  resource_count?: number;
+  pop_count?: number;
+  /** Зонд и Соседи: цель. */
+  cidr?: string | null;
+  raw_target?: string | null;
+  verdict?: string | null;
+  created_at: string | null;
+  completed_at?: string | null;
+  action_id: number | null;
+}
+
+export interface AccountPage {
+  items: RemoteRun[];
+  total: number;
+}
+
+/** Построчный отчёт: `name` — имя ресурса (ключи бот наружу не отдаёт), `is_direct` — «из-за границы». */
+export type ReportRow = Record<string, string | number | boolean | null> & {
+  name: string;
+  is_direct: boolean;
+  pop_id?: number | null;
+};
+
+export interface ReportTable {
+  id: number | null;
+  check_type: CheckType;
+  columns: string[];
+  rows: ReportRow[];
+}
+
+export interface WebhookDelivery {
+  id: number;
+  event: string;
+  object_type: string;
+  object_id: number | null;
+  status: 'delivered' | 'pending' | 'failed' | string;
+  attempts: number;
+  response_code: number | null;
+  last_error: string | null;
+  created_at: string | null;
+  delivered_at: string | null;
+  next_attempt_at: string | null;
+}
+
 const BASE = '/cabinet/admin/dpichecker';
 // Разбор подписки и long-poll проверки держат запрос дольше обычных 30 секунд.
 const LONG_TIMEOUT_MS = 90_000;
@@ -384,6 +446,30 @@ export const dpicheckerApi = {
     id: number,
   ): Promise<{ url: string; file_name: string }> =>
     (await apiClient.post(`${BASE}/files/${kind}/${id}/link`)).data,
+
+  /** Все поля строки ресурс × точка — для «Подробно» у точки в результате. */
+  reportTable: async (id: number): Promise<ReportTable> =>
+    (await apiClient.get(`${BASE}/checks/${id}/report`, { timeout: LONG_TIMEOUT_MS })).data,
+
+  /** Запуски всего аккаунта у сервиса: с сайта, из их бота, через API, прогоны мониторов. */
+  accountRuns: async (
+    kind: AccountKind,
+    params: { check_type?: CheckType; limit?: number; offset?: number } = {},
+  ): Promise<AccountPage> => (await apiClient.get(`${BASE}/account/${kind}`, { params })).data,
+
+  /** Запуск не из кабинета — в историю кабинета; дальше открывается по номеру своей строки. */
+  openRemote: async (kind: AccountKind, remoteId: number): Promise<ActionOut> =>
+    (
+      await apiClient.post(`${BASE}/account/${kind}/${remoteId}/open`, null, {
+        timeout: LONG_TIMEOUT_MS,
+      })
+    ).data,
+
+  webhookDeliveries: async (
+    limit = 25,
+    offset = 0,
+  ): Promise<{ items: WebhookDelivery[]; total: number }> =>
+    (await apiClient.get(`${BASE}/webhooks/deliveries`, { params: { limit, offset } })).data,
 
   checkMap: async (id: number): Promise<Blob> =>
     (await apiClient.get(`${BASE}/checks/${id}/map.png`, { responseType: 'blob' })).data as Blob,

@@ -7,8 +7,10 @@ import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { usePermissionStore } from '@/store/permissions';
 import { getApiErrorMessage } from '@/utils/api-error';
+import { GroupLink, MONITORS_KEY, MonitorRuns, MonitorSettings } from './MonitorExtras';
 
-const KEY = ['dpichecker', 'monitors'];
+const KEY = MONITORS_KEY;
+type Panel = 'runs' | 'settings' | null;
 
 function when(value: string | null): string {
   return value
@@ -20,7 +22,11 @@ function MonitorCard({ monitor, canRun }: { monitor: Monitor; canRun: boolean })
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [panel, setPanel] = useState<Panel>(null);
   const fromSite = monitor.action_id === null;
+  // Прогоны монитора с сайта видны после того, как кабинет возьмёт его себе — это право запуска.
+  const canSeeRuns = !fromSite || canRun;
+  const toggle = (next: Exclude<Panel, null>) => setPanel(panel === next ? null : next);
   const manageable = canRun && !monitor.deleted;
   const refresh = () => void queryClient.invalidateQueries({ queryKey: KEY });
   // Монитор с сайта кабинет сначала берёт себе (своя строка), дальше — как созданный здесь.
@@ -83,6 +89,33 @@ function MonitorCard({ monitor, canRun }: { monitor: Monitor; canRun: boolean })
             defaultValue: t('admin.dpichecker.monitors.paused.other'),
           })}
         </p>
+      )}
+      {monitor.link_code && !monitor.deleted && <GroupLink code={monitor.link_code} />}
+      <div className="flex flex-wrap gap-2 pt-1">
+        {canSeeRuns && (
+          <button
+            type="button"
+            aria-expanded={panel === 'runs'}
+            className="btn-secondary min-h-[40px] px-3 text-sm"
+            onClick={() => toggle('runs')}
+          >
+            {t('admin.dpichecker.monitors.runs')}
+          </button>
+        )}
+        {manageable && (
+          <button
+            type="button"
+            aria-expanded={panel === 'settings'}
+            className="btn-secondary min-h-[40px] px-3 text-sm"
+            onClick={() => toggle('settings')}
+          >
+            {t('admin.dpichecker.monitors.settings')}
+          </button>
+        )}
+      </div>
+      {panel === 'runs' && <MonitorRuns monitor={monitor} resolveId={ownId} />}
+      {panel === 'settings' && (
+        <MonitorSettings monitor={monitor} resolveId={ownId} onDone={() => setPanel(null)} />
       )}
       {manageable && (
         <div className="flex flex-wrap gap-2 pt-1">

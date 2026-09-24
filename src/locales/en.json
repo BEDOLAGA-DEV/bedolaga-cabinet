@@ -6307,7 +6307,11 @@
           "interval": "Every, hours",
           "alertAfter": "Alert after failures in a row",
           "notifyOnSuccess": "Also report success",
-          "perRun": "each run costs as one such check"
+          "perRun": "each run costs as one such check",
+          "notify": "DPI//CHECKER bot alerts",
+          "notifyDm": "To my DMs",
+          "notifyGroup": "To a group",
+          "notifyHint": "For a group, a command appears after creation — send it in a group where the DPI//CHECKER bot is. Results reach the bot’s admin chat either way."
         },
         "pay": "Pay",
         "createMonitor": "Create monitor",
@@ -6341,6 +6345,8 @@
           "mtproto": "MTProto check"
         },
         "points": "{{count}} points",
+        "points_one": "{{count}} point",
+        "points_other": "{{count}} points",
         "resources": "{{count}} res.",
         "charged": "charged {{value}} USD",
         "cancel": "Cancel",
@@ -6377,7 +6383,59 @@
           "proxyDead": "point does not answer",
           "untestable": "cannot be checked"
         },
-        "csvFailed": "Could not download the CSV"
+        "csvFailed": "Could not download the CSV",
+        "details": "Details",
+        "detailsFailed": "Could not load details",
+        "detailsEmpty": "No details for this point.",
+        "yes": "yes",
+        "no": "no",
+        "fields": {
+          "host": "Key",
+          "error": "Error",
+          "pop_name": "Point",
+          "connected": "Connected",
+          "server_ip": "Server IP",
+          "latency_ms": "Latency, ms",
+          "proxy_dead": "Point not responding",
+          "untestable": "Cannot be tested",
+          "proxy_exit_ip": "Point exit",
+          "untestable_reason": "Why it cannot be tested",
+          "control_check": "Point has internet",
+          "mode": "Mode",
+          "dns_ips": "DNS addresses",
+          "exit_ip": "Point exit",
+          "verdict": "Verdict",
+          "resource": "Address",
+          "cert_name": "Certificate",
+          "accessible": "Reachable",
+          "error_code": "Error code",
+          "port_story": "Ports",
+          "samples_ok": "Successful samples",
+          "ssh_status": "SSH",
+          "dns_verdict": "DNS",
+          "ping_avg_ms": "Ping, ms",
+          "scheme_used": "Protocol",
+          "sni_verdict": "SNI",
+          "status_code": "Site response code",
+          "port_80_open": "Port 80 open",
+          "port_443_open": "Port 443 open",
+          "samples_total": "Total samples",
+          "port_443_state": "Port 443",
+          "samples_tls_ok": "Successful TLS",
+          "throughput_kbps": "Speed, kbit/s",
+          "port_80_hijacked": "Port 80 hijacked",
+          "port_443_hijacked": "Port 443 hijacked",
+          "samples_throttled": "Throttled samples",
+          "port_control_state": "Control port",
+          "control_port_number": "Control port number",
+          "error_redirect_host": "Redirects to",
+          "dns_intercepted_ratio": "Share of spoofed DNS",
+          "tcp_latency_ms": "TCP latency, ms",
+          "baseline_unreliable": "Baseline unreliable",
+          "status": "Result",
+          "reached": "Reached",
+          "secret_kind": "Secret type"
+        }
       },
       "noisy": {
         "intro": "TLS certificates (SNI) of hosts in the /24 subnet — how “noisy” your server’s neighbours are (SNI max.ru, vk.ru, google.com etc.). Free, up to 10 scans a day, used today: {{used}}.",
@@ -6472,11 +6530,22 @@
         "how": {
           "create": "Create: VPN, IP / domain or MTProto tab → targets and points → “On schedule” → interval.",
           "runs": "The service checks the targets every N hours. The monitor itself is free; each run costs as one such check.",
-          "alerts": "Results go to the bot admin chat: an alert after the set number of failures in a row and recovery; every run if “Notify on success” is on. The DPI//CHECKER bot also messages you in Telegram — turn that off in their bot.",
-          "manage": "Pause or disable any monitor here, including those created on the DPI//CHECKER site."
+          "alerts": "Results go to the bot’s admin chat: an alert after the set number of failures in a row and a recovery message; every run if “Report successes too” is on. The DPI//CHECKER bot also sends alerts — to your DMs or to a group, chosen when the monitor is created.",
+          "manage": "Here you can pause, disable, adjust and see runs of any monitor, including ones created on the DPI//CHECKER website."
         },
         "untitled": "Monitor #{{id}}",
-        "deletedBlock": "Disabled · {{count}}"
+        "deletedBlock": "Disabled · {{count}}",
+        "runs": "Runs",
+        "runsEmpty": "No runs yet.",
+        "runsFailed": "Could not load runs",
+        "runOpen": "Open run",
+        "runCost": "{{value}} USD",
+        "settings": "Settings",
+        "save": "Save",
+        "groupTitle": "DPI//CHECKER bot alerts — to a group",
+        "groupHow": "Add the DPI//CHECKER bot to the group and send this command there:",
+        "copy": "Copy command",
+        "copied": "Copied"
       },
       "history": {
         "all": "All",
@@ -6492,7 +6561,21 @@
           "cost": "Charged",
           "who": "Who",
           "when": "When",
-          "status": "Result"
+          "status": "Result",
+          "source": "Source"
+        },
+        "scope": "Whose runs",
+        "scopeCabinet": "From the cabinet",
+        "scopeAccount": "Whole account",
+        "accountHint": "Every run of your DPI//CHECKER key: from the website, their bot, the API and monitor runs. Tap a row to open the result here.",
+        "allChecks": "All checks",
+        "openFailed": "Could not open the run",
+        "sources": {
+          "web": "Website",
+          "bot": "DPI//CHECKER bot",
+          "api": "API",
+          "watcher": "Monitor",
+          "inline": "Telegram inline"
         }
       },
       "shortcuts": {
@@ -6511,6 +6594,27 @@
         "okOf": "{{ok}}/{{total}} ok",
         "proxyDead": "proxy down",
         "deadExtra": "+{{count}} without proxy"
+      },
+      "deliveries": {
+        "title": "DPI//CHECKER notifications to the bot",
+        "hint": "When a check finishes, DPI//CHECKER notifies the bot. If a check still shows “running” here but is done on the website, see whether the notification arrived.",
+        "empty": "No notifications yet.",
+        "loadFailed": "Could not load the notification log",
+        "events": {
+          "check_completed": "Check finished",
+          "check_cancelled": "Check cancelled",
+          "probe_done": "Probe finished",
+          "noisy_done": "Neighbours finished",
+          "monitor_run": "Monitor run started"
+        },
+        "status": {
+          "delivered": "Delivered",
+          "pending": "Waiting to retry",
+          "failed": "Not delivered"
+        },
+        "object": "No. {{id}}",
+        "attempts": "attempts: {{count}}",
+        "response": "bot replied {{code}}"
       }
     }
   },

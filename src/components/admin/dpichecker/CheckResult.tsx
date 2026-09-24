@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { type CheckResource, type CheckRow, type CheckType, dpicheckerApi } from '@/api/dpichecker';
+import { ChevronDownIcon } from '@/components/icons';
 import { StatCard } from '@/components/stats';
 import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
@@ -9,6 +10,7 @@ import { usePermissionStore } from '@/store/permissions';
 import { getApiErrorMessage } from '@/utils/api-error';
 import { isRunning, resourceVerdict, rowNote, sortRows } from './checkView';
 import { DpiRegionMap } from './DpiRegionMap';
+import { PointDetails } from './PointDetails';
 import { CsvButton } from './CsvButton';
 import { CHECK_POLL_MS, CHECK_WAIT_SEC } from './pollInterval';
 import { regionStates } from './regionMap';
@@ -28,8 +30,19 @@ function formatDate(value: string | null): string {
     : '';
 }
 
-function RowLine({ row, checkType }: { row: CheckRow; checkType: CheckType }) {
+function RowLine({
+  row,
+  checkType,
+  actionId,
+  resourceName,
+}: {
+  row: CheckRow;
+  checkType: CheckType;
+  actionId: number;
+  resourceName: string;
+}) {
   const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
   const note = rowNote(checkType, row);
   const noteText =
     note === null
@@ -43,20 +56,49 @@ function RowLine({ row, checkType }: { row: CheckRow; checkType: CheckType }) {
       t('admin.dpichecker.result.speed', { host: speed.host, value: speed.mbps }),
     ),
   ].filter(Boolean);
+  // Касание точки — все её поля из отчёта сервиса («Подробно»).
   return (
-    <li className="flex flex-col gap-0.5 border-b border-dark-800/60 py-2 last:border-0 sm:flex-row sm:items-baseline sm:gap-3">
-      <span className="min-w-0 flex-1 text-sm text-dark-100">{row.region}</span>
-      <span className={cn('text-sm font-medium', row.ok ? 'text-success-400' : 'text-error-400')}>
-        {row.ok ? t('admin.dpichecker.result.ok') : t('admin.dpichecker.result.fail')}
-      </span>
-      <span className="text-xs tabular-nums text-dark-400 sm:w-[46%] sm:text-end">
-        {[...details, noteText].filter(Boolean).join(' · ')}
-      </span>
+    <li className="border-b border-dark-800/60 last:border-0">
+      <button
+        type="button"
+        aria-expanded={open}
+        onClick={() => setOpen(!open)}
+        className="flex w-full flex-col gap-0.5 rounded-lg py-2 text-start hover:bg-dark-800/40 sm:flex-row sm:items-baseline sm:gap-3"
+      >
+        <span className="flex min-w-0 flex-1 items-center gap-1.5 text-sm text-dark-100">
+          <ChevronDownIcon
+            className={cn(
+              'h-3.5 w-3.5 shrink-0 text-dark-400 transition-transform',
+              open && 'rotate-180',
+            )}
+          />
+          {row.region}
+        </span>
+        <span className={cn('text-sm font-medium', row.ok ? 'text-success-400' : 'text-error-400')}>
+          {row.ok ? t('admin.dpichecker.result.ok') : t('admin.dpichecker.result.fail')}
+        </span>
+        <span className="text-xs tabular-nums text-dark-400 sm:w-[46%] sm:text-end">
+          {[...details, noteText].filter(Boolean).join(' · ')}
+        </span>
+      </button>
+      {open && (
+        <div className="pb-2">
+          <PointDetails actionId={actionId} resourceName={resourceName} popId={row.pop_id} />
+        </div>
+      )}
     </li>
   );
 }
 
-function ResourceCard({ resource, checkType }: { resource: CheckResource; checkType: CheckType }) {
+function ResourceCard({
+  resource,
+  checkType,
+  actionId,
+}: {
+  resource: CheckResource;
+  checkType: CheckType;
+  actionId: number;
+}) {
   const { t } = useTranslation();
   const [all, setAll] = useState(false);
   const rows = sortRows(resource.rows);
@@ -81,7 +123,13 @@ function ResourceCard({ resource, checkType }: { resource: CheckResource; checkT
       )}
       <ul>
         {shown.map((row) => (
-          <RowLine key={`${row.pop_id}-${row.region}`} row={row} checkType={checkType} />
+          <RowLine
+            key={`${row.pop_id}-${row.region}`}
+            row={row}
+            checkType={checkType}
+            actionId={actionId}
+            resourceName={resource.name}
+          />
         ))}
       </ul>
       {rows.length > ROWS_PREVIEW && (
@@ -325,7 +373,12 @@ export function CheckResult({ actionId }: { actionId: number }) {
             <ServiceMapImage actionId={actionId} finished={!isRunning(status)} />
           )}
           {check.resources.map((resource) => (
-            <ResourceCard key={resource.index} resource={resource} checkType={check.check_type} />
+            <ResourceCard
+              key={resource.index}
+              resource={resource}
+              checkType={check.check_type}
+              actionId={actionId}
+            />
           ))}
         </>
       )}

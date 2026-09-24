@@ -27,6 +27,7 @@ const DEFAULT_SCHEDULE: ScheduleValue = {
   intervalHours: 6,
   alertAfterFails: 2,
   notifyOnSuccess: false,
+  notify: 'dm',
 };
 
 /** Шаг формы — заголовок без номера «01/02», как разделы формы BSCHEKER (номера владельцу непонятны). */
@@ -120,6 +121,7 @@ export function CheckForm({ checkType, prefill = null }: CheckFormProps) {
             interval_hours: schedule.intervalHours,
             alert_after_fails: schedule.alertAfterFails,
             notify_on_success: schedule.notifyOnSuccess,
+            notify: schedule.notify,
           })
         : dpicheckerApi.launchCheck(body);
     },

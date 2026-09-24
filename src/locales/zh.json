@@ -5973,7 +5973,11 @@
           "interval": "每隔（小时）",
           "alertAfter": "连续失败几次后告警",
           "notifyOnSuccess": "成功时也通知",
-          "perRun": "每次运行按一次检测计费"
+          "perRun": "每次运行按一次检测计费",
+          "notify": "DPI//CHECKER 机器人警报",
+          "notifyDm": "发到我的私信",
+          "notifyGroup": "发到群组",
+          "notifyHint": "选择群组后，创建完成会显示一条命令——需在有 DPI//CHECKER 机器人的群组中发送。无论如何，结果都会发到机器人的管理员聊天。"
         },
         "pay": "支付",
         "createMonitor": "创建监控",
@@ -6007,6 +6011,7 @@
           "mtproto": "MTProto 检测"
         },
         "points": "{{count}} 个检测点",
+        "points_other": "{{count}} 个检测点",
         "resources": "{{count}} 个资源",
         "charged": "已扣 {{value}} USD",
         "cancel": "取消",
@@ -6043,7 +6048,59 @@
           "proxyDead": "检测点无响应",
           "untestable": "无法检测"
         },
-        "csvFailed": "无法下载 CSV"
+        "csvFailed": "无法下载 CSV",
+        "details": "详情",
+        "detailsFailed": "无法加载详情",
+        "detailsEmpty": "该节点没有详情。",
+        "yes": "是",
+        "no": "否",
+        "fields": {
+          "host": "密钥",
+          "error": "错误",
+          "pop_name": "节点",
+          "connected": "已连接",
+          "server_ip": "服务器 IP",
+          "latency_ms": "延迟，毫秒",
+          "proxy_dead": "节点无响应",
+          "untestable": "无法检测",
+          "proxy_exit_ip": "节点出口",
+          "untestable_reason": "无法检测的原因",
+          "control_check": "节点可上网",
+          "mode": "模式",
+          "dns_ips": "DNS 地址",
+          "exit_ip": "节点出口",
+          "verdict": "结论",
+          "resource": "地址",
+          "cert_name": "证书",
+          "accessible": "可访问",
+          "error_code": "错误代码",
+          "port_story": "端口情况",
+          "samples_ok": "成功采样",
+          "ssh_status": "SSH",
+          "dns_verdict": "DNS",
+          "ping_avg_ms": "Ping，毫秒",
+          "scheme_used": "协议",
+          "sni_verdict": "SNI",
+          "status_code": "网站响应码",
+          "port_80_open": "80 端口开放",
+          "port_443_open": "443 端口开放",
+          "samples_total": "采样总数",
+          "port_443_state": "443 端口",
+          "samples_tls_ok": "TLS 成功",
+          "throughput_kbps": "速度，kbit/s",
+          "port_80_hijacked": "80 端口被劫持",
+          "port_443_hijacked": "443 端口被劫持",
+          "samples_throttled": "被限速的采样",
+          "port_control_state": "对照端口",
+          "control_port_number": "对照端口号",
+          "error_redirect_host": "重定向到",
+          "dns_intercepted_ratio": "DNS 被篡改比例",
+          "tcp_latency_ms": "TCP 延迟，毫秒",
+          "baseline_unreliable": "基准不可靠",
+          "status": "结果",
+          "reached": "已连通",
+          "secret_kind": "密钥类型"
+        }
       },
       "noisy": {
         "intro": "/24 子网内主机的 TLS 证书（SNI），显示服务器邻居有多“嘈杂”。免费，每天最多 10 次，今天已用：{{used}}。",
@@ -6138,11 +6195,22 @@
         "how": {
           "create": "创建：VPN、IP / 域名或 MTProto 标签 → 目标和节点 → “按计划” → 间隔。",
           "runs": "服务每 N 小时检查一次目标。监控本身免费，每次运行按一次检查计费。",
-          "alerts": "结果发送到机器人管理员群：连续失败达到设定次数时告警并通知恢复；开启“成功也通知”时每次运行都通知。DPI//CHECKER 机器人也会在 Telegram 中通知您，可在其机器人中关闭。",
-          "manage": "在这里可以暂停或停用任何监控，包括在 DPI//CHECKER 网站上创建的监控。"
+          "alerts": "结果发送到机器人的管理员聊天：连续失败达到设定次数后发送警报并在恢复时通知；若开启“成功时也通知”，则每次运行都通知。DPI//CHECKER 机器人也会发送警报——发到私信或群组，在创建监控时选择。",
+          "manage": "在这里可以暂停、停用、调整任何监控并查看其运行记录，包括在 DPI//CHECKER 网站上创建的监控。"
         },
         "untitled": "监控 #{{id}}",
-        "deletedBlock": "已停用 · {{count}}"
+        "deletedBlock": "已停用 · {{count}}",
+        "runs": "运行记录",
+        "runsEmpty": "暂无运行。",
+        "runsFailed": "无法加载运行记录",
+        "runOpen": "打开运行",
+        "runCost": "{{value}} USD",
+        "settings": "设置",
+        "save": "保存",
+        "groupTitle": "DPI//CHECKER 机器人警报——发到群组",
+        "groupHow": "将 DPI//CHECKER 机器人加入群组，并在群里发送以下命令：",
+        "copy": "复制命令",
+        "copied": "已复制"
       },
       "history": {
         "all": "全部",
@@ -6158,7 +6226,21 @@
           "cost": "扣费",
           "who": "操作人",
           "when": "时间",
-          "status": "结果"
+          "status": "结果",
+          "source": "来源"
+        },
+        "scope": "显示哪些运行",
+        "scopeCabinet": "来自面板",
+        "scopeAccount": "整个账户",
+        "accountHint": "您的 DPI//CHECKER 密钥的所有运行：网站、他们的机器人、API 以及监控运行。点击一行即可在此打开结果。",
+        "allChecks": "全部检测",
+        "openFailed": "无法打开该运行",
+        "sources": {
+          "web": "网站",
+          "bot": "DPI//CHECKER 机器人",
+          "api": "API",
+          "watcher": "监控",
+          "inline": "Telegram 内联"
         }
       },
       "shortcuts": {
@@ -6177,6 +6259,27 @@
         "okOf": "{{ok}}/{{total}} 正常",
         "proxyDead": "代理不可用",
         "deadExtra": "+{{count}} 无代理"
+      },
+      "deliveries": {
+        "title": "DPI//CHECKER 发给机器人的通知",
+        "hint": "检测完成后，DPI//CHECKER 会通知机器人。如果这里仍显示“进行中”而网站上已完成，请查看通知是否送达。",
+        "empty": "暂无通知。",
+        "loadFailed": "无法加载通知日志",
+        "events": {
+          "check_completed": "检测完成",
+          "check_cancelled": "检测已取消",
+          "probe_done": "探针完成",
+          "noisy_done": "邻居扫描完成",
+          "monitor_run": "监控开始运行"
+        },
+        "status": {
+          "delivered": "已送达",
+          "pending": "等待重试",
+          "failed": "未送达"
+        },
+        "object": "编号 {{id}}",
+        "attempts": "尝试次数：{{count}}",
+        "response": "机器人响应 {{code}}"
       }
     }
   },
