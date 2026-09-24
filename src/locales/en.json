@@ -6203,7 +6203,8 @@
       },
       "header": {
         "noisyLeft": "Neighbours: {{left}} of {{limit}} left today",
-        "topup": "Top up"
+        "topup": "Top up",
+        "noisyShort": "Neighbours: {{left}} of {{limit}} today"
       },
       "money": {
         "usd": "{{value}} USD"

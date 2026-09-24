@@ -5924,7 +5924,8 @@
       },
       "header": {
         "noisyLeft": "همسایه‌ها: {{left}} از {{limit}} برای امروز باقی مانده",
-        "topup": "شارژ"
+        "topup": "شارژ",
+        "noisyShort": "همسایه‌ها: {{left}} از {{limit}} امروز"
       },
       "money": {
         "usd": "{{value}} USD"

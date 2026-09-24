@@ -6798,7 +6798,8 @@
       },
       "header": {
         "noisyLeft": "Соседи: осталось {{left}} из {{limit}} на сегодня",
-        "topup": "Пополнить"
+        "topup": "Пополнить",
+        "noisyShort": "Соседи: {{left}} из {{limit}} сегодня"
       },
       "money": {
         "usd": "{{value}} USD"

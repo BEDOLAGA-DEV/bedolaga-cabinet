@@ -96,8 +96,10 @@ it('без ключа объясняет, где его взять, и ведё�
 
 it('показывает баланс и остаток Соседей, вкладки — все восемь', async () => {
   await renderPage('/admin/dpichecker');
-  expect(await screen.findByText('53.51 USD')).toBeTruthy();
-  expect(screen.getByText(/9 из 10/)).toBeTruthy();
+  // Шапка рисуется дважды — строкой под подзаголовком (телефон) и справа (десктоп), видна одна по ширине.
+  expect((await screen.findAllByText('53.51 USD')).length).toBe(2);
+  expect(screen.getByText('Соседи: осталось 9 из 10 на сегодня')).toBeTruthy();
+  expect(screen.getByText('Соседи: 9 из 10 сегодня')).toBeTruthy();
   expect(screen.getAllByRole('tab')).toHaveLength(8);
 });
 
@@ -119,6 +121,6 @@ it('неверный ключ — текст бота над вкладками'
 
 it('кнопки «Пополнить» нет — баланс только показывается (владелец 24.09: лишняя)', async () => {
   await renderPage('/admin/dpichecker?tab=ip');
-  await screen.findByText('53.51 USD');
+  await screen.findAllByText('53.51 USD');
   expect(screen.queryByRole('button', { name: /Пополнить/ })).toBeNull();
 });

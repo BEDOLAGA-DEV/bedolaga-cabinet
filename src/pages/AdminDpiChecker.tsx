@@ -1,3 +1,4 @@
+import type { DpiStatus } from '@/api/dpichecker';
 import { type ComponentType, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router';
@@ -13,6 +14,7 @@ import {
   WallIcon,
 } from '@/components/icons';
 import { Skeleton } from '@/components/ui/skeleton';
+import { cn } from '@/lib/utils';
 import { usePermissionStore } from '@/store/permissions';
 import { AdminBackButton } from '../components/admin/AdminBackButton';
 import { IconTabs } from '../components/admin/IconTabs';
@@ -46,6 +48,44 @@ const PREFILL_KIND: Record<NonNullable<DpiLink['source']>, PanelKind> = {
   host: 'hosts',
   user: 'subscription',
 };
+
+/** Баланс и остаток Соседей в шапке; `short` — сжатая подпись Соседей для строки под подзаголовком (телефон). */
+function HeaderStats({
+  className,
+  balance,
+  noisy,
+  loading,
+  short = false,
+}: {
+  className: string;
+  balance: number | null | undefined;
+  noisy: DpiStatus['noisy'] | undefined;
+  loading: boolean;
+  short?: boolean;
+}) {
+  const { t } = useTranslation();
+  const showNoisy = noisy && !noisy.unlimited && noisy.limit !== null;
+  const showBalance = balance !== null && balance !== undefined;
+  if (loading) return <Skeleton className={cn('h-5 w-28', className)} />;
+  if (!showNoisy && !showBalance) return null;
+  return (
+    <div className={className}>
+      {showBalance && (
+        <span className="text-sm font-semibold tabular-nums text-dark-100">
+          {t('admin.dpichecker.money.usd', { value: balance.toFixed(2) })}
+        </span>
+      )}
+      {showNoisy && (
+        <span className="text-xs text-dark-400">
+          {t(short ? 'admin.dpichecker.header.noisyShort' : 'admin.dpichecker.header.noisyLeft', {
+            left: noisy.remaining ?? 0,
+            limit: noisy.limit,
+          })}
+        </span>
+      )}
+    </div>
+  );
+}
 
 /** Содержимое вкладки по адресу; без права запуска формы трат не показываются. */
 function TabBody({ link, canRun }: { link: DpiLink; canRun: boolean }) {
@@ -91,7 +131,7 @@ export default function AdminDpiChecker() {
 
   return (
     <div className="space-y-6 pb-28 lg:pb-0">
-      <header className="flex flex-wrap items-center gap-3">
+      <header className="flex items-start gap-3 sm:items-center">
         <AdminBackButton />
         <div
           aria-hidden="true"
@@ -99,30 +139,27 @@ export default function AdminDpiChecker() {
         >
           <WallIcon className="h-5 w-5" />
         </div>
-        {/* flex-1: длинный подзаголовок переносится рядом с иконкой, а не уезжает всем блоком под «назад». */}
         <div className="min-w-0 flex-1">
           <h1 className="text-xl font-bold text-dark-100">{DPI_BRAND}</h1>
           <p className="text-xs text-dark-400">{t('admin.dpichecker.subtitle')}</p>
+          {/* Телефон: баланс и Соседи — строкой под подзаголовком, в колонке названия. */}
+          <HeaderStats
+            className="mt-1.5 flex flex-wrap items-baseline gap-x-3 gap-y-0.5 sm:hidden"
+            balance={ready ? status?.balance : null}
+            noisy={ready ? noisy : null}
+            loading={isLoading}
+            short
+          />
         </div>
-        {/* Телефон: своя строка во всю ширину — баланс слева, Соседи справа; широкий экран — справа от названия. */}
-        <div className="flex w-full items-center justify-between gap-x-4 gap-y-1 sm:ms-auto sm:w-auto sm:flex-row-reverse sm:justify-start">
-          {isLoading && <Skeleton className="h-6 w-28" />}
-          {ready && status?.balance !== null && status?.balance !== undefined && (
-            <span className="text-sm font-semibold tabular-nums text-dark-100">
-              {t('admin.dpichecker.money.usd', { value: status.balance.toFixed(2) })}
-            </span>
-          )}
-          {ready && noisy && !noisy.unlimited && noisy.limit !== null && (
-            <span className="text-end text-xs text-dark-400">
-              {t('admin.dpichecker.header.noisyLeft', {
-                left: noisy.remaining ?? 0,
-                limit: noisy.limit,
-              })}
-            </span>
-          )}
-        </div>
-        {status?.error && <p className="w-full text-sm text-error-400">{status.error}</p>}
+        {/* Широкий экран: справа от названия. */}
+        <HeaderStats
+          className="ms-auto hidden shrink-0 flex-row-reverse items-center gap-4 sm:flex"
+          balance={ready ? status?.balance : null}
+          noisy={ready ? noisy : null}
+          loading={isLoading}
+        />
       </header>
+      {status?.error && <p className="-mt-3 text-sm text-error-400">{status.error}</p>}
 
       {status && !ready && <SetupCard status={status} />}
       {ready && (

@@ -5869,7 +5869,8 @@
       },
       "header": {
         "noisyLeft": "邻居扫描：今天剩余 {{left}} / {{limit}}",
-        "topup": "充值"
+        "topup": "充值",
+        "noisyShort": "邻居：今日剩余 {{left}}/{{limit}}"
       },
       "money": {
         "usd": "{{value}} USD"
