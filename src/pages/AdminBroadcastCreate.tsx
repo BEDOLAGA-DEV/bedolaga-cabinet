@@ -130,6 +130,11 @@ export default function AdminBroadcastCreate() {
     queryFn: adminBroadcastsApi.getEmailFilters,
     enabled: emailEnabled,
   });
+  const { data: emailTariffsData, isLoading: emailTariffsLoading } = useQuery({
+    queryKey: ['admin', 'broadcasts', 'tariffs'],
+    queryFn: adminBroadcastsApi.getTariffs,
+    enabled: emailEnabled,
+  });
 
   // Fetch buttons
   const { data: buttonsData } = useQuery({
@@ -711,8 +716,16 @@ export default function AdminBroadcastCreate() {
             category={category}
             audience={emailAudience}
             onChange={setEmailAudience}
-            filters={emailFiltersData?.filters || []}
-            isLoading={emailFiltersLoading}
+            filters={[
+              ...(emailFiltersData?.filters || []),
+              ...(emailTariffsData?.tariffs.map((tariff) => ({
+                key: tariff.filter_key,
+                label: tariff.name,
+                tariff_id: tariff.id,
+                count: tariff.active_users_count,
+              })) || []),
+            ]}
+            isLoading={emailFiltersLoading || emailTariffsLoading}
           />
 
           {/* Email subject */}

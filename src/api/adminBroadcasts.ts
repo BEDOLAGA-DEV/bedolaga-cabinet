@@ -4,9 +4,12 @@ import apiClient from './client';
 export type BroadcastChannel = 'telegram' | 'email' | 'both';
 
 export interface BroadcastAudienceCondition {
+  client_id?: string; // Editor key; ignored by the API.
   field: string;
-  operator: 'eq' | 'ne';
+  operator: 'eq' | 'ne' | 'before' | 'after' | 'between';
   value: string;
+  value_to?: string | null;
+  label?: string | null;
   join: 'and' | 'or' | null;
 }
 
@@ -29,6 +32,8 @@ export interface BroadcastAudiencePreviewResponse {
   limit: number;
   users: BroadcastAudiencePreviewUser[];
 }
+
+export interface BroadcastAudienceUserSearchResponse extends BroadcastAudiencePreviewResponse {}
 
 export interface BroadcastFilter {
   key: string;
@@ -177,6 +182,18 @@ export interface MediaUploadResponse {
 }
 
 export const adminBroadcastsApi = {
+  searchAudienceUsers: async (params: {
+    field: 'telegram_id' | 'telegram_username' | 'email_user';
+    q: string;
+    offset?: number;
+    limit?: number;
+  }): Promise<BroadcastAudienceUserSearchResponse> => {
+    const response = await apiClient.get<BroadcastAudienceUserSearchResponse>(
+      '/cabinet/admin/broadcasts/audience/users',
+      { params },
+    );
+    return response.data;
+  },
   previewAudience: async (data: {
     channel: 'telegram' | 'email';
     category: 'system' | 'news' | 'promo';
