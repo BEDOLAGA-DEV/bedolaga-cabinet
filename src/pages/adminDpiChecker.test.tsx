@@ -43,7 +43,6 @@ vi.mock('@/api/dpichecker', async (importOriginal) => {
       getOptimal: vi.fn(async () => []),
       listChecks: vi.fn(async () => ({ items: [], total: 0 })),
       listMonitors: vi.fn(async () => []),
-      spend: vi.fn(async () => []),
     },
   };
 });
@@ -56,6 +55,7 @@ const READY: DpiStatus = {
   noisy: { limit: 10, used: 1, remaining: 9, unlimited: false, resets_at: null },
   monitors: { active: 0, limit: 50 },
   webhook_ready: true,
+  reference: null,
   error: null,
 };
 
@@ -114,8 +114,7 @@ it('неверный ключ — текст бота над вкладками'
   expect(await screen.findByText(/Ключ API DPI\/\/CHECKER неверный/)).toBeTruthy();
 });
 
-it('без права запуска нет кнопки «Пополнить»', async () => {
-  usePermissionStore.setState({ permissions: ['dpichecker:read'], isLoaded: true });
+it('кнопки «Пополнить» нет — баланс только показывается (владелец 24.09: лишняя)', async () => {
   await renderPage('/admin/dpichecker?tab=ip');
   await screen.findByText('53.51 USD');
   expect(screen.queryByRole('button', { name: /Пополнить/ })).toBeNull();

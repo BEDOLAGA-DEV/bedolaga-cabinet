@@ -13,7 +13,9 @@ interface SubscriptionSourcePickerProps {
   shortUuid: string | null;
   onSource: (next: { userId: number | null; shortUuid: string | null }) => void;
   /** Подписка по умолчанию из настроек бота; null — статус ещё не пришёл. */
-  reference: ReferenceStatus | null;
+  reference: Pick<ReferenceStatus, 'short_uuid' | 'configs' | 'error'> | null;
+  /** Куда вести «Открыть настройки», если подписки по умолчанию нет (у DPI//CHECKER — свой раздел). */
+  settingsPath?: string;
 }
 
 const SEARCH_LIMIT = 8;
@@ -37,6 +39,7 @@ export function SubscriptionSourcePicker({
   shortUuid,
   onSource,
   reference,
+  settingsPath = REACHABILITY_SETTINGS_PATH,
 }: SubscriptionSourcePickerProps) {
   const { t } = useTranslation();
   const base = 'admin.reachability.subscription';
@@ -132,7 +135,7 @@ export function SubscriptionSourcePicker({
           <p className="font-medium">{t(`${base}.noReference`)}</p>
           <p className="mt-1 text-xs text-dark-300">{t(`${base}.noReferenceHint`)}</p>
           <Link
-            to={REACHABILITY_SETTINGS_PATH}
+            to={settingsPath}
             className="mt-2 inline-block text-xs text-accent-400 hover:underline"
           >
             {t('admin.reachability.status.openSettings')}

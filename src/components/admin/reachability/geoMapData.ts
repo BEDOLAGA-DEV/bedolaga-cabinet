@@ -28,29 +28,42 @@ export interface GeoMapData {
 export const MAP_ASPECT = '1000 / 545';
 
 let cached: Promise<GeoMapData> | null = null;
+let cachedMap: Promise<RussiaMap> | null = null;
+
+/** Только контуры регионов (без городов) — карта результата DPI//CHECKER. */
+export function loadRussiaMap(): Promise<RussiaMap> {
+  cachedMap ??= import('./assets/russia-regions.json').then(
+    (regions) => regions.default as unknown as RussiaMap,
+  );
+  return cachedMap;
+}
 
 /** Контуры и координаты весят под 200 КБ — грузятся один раз и только на вкладке GEO. */
 export function loadGeoMapData(): Promise<GeoMapData> {
-  cached ??= Promise.all([
-    import('./assets/russia-regions.json'),
-    import('./assets/geo-city-coords.json'),
-  ]).then(([regions, coords]) => ({
-    map: regions.default as unknown as RussiaMap,
-    coords: coords.default as unknown as CityCoords,
-  }));
+  cached ??= Promise.all([loadRussiaMap(), import('./assets/geo-city-coords.json')]).then(
+    ([map, coords]) => ({ map, coords: coords.default as unknown as CityCoords }),
+  );
   return cached;
 }
 
-export function useGeoMapData(): GeoMapData | null {
-  const [data, setData] = useState<GeoMapData | null>(null);
+function useLoaded<T>(load: () => Promise<T>): T | null {
+  const [data, setData] = useState<T | null>(null);
   useEffect(() => {
     let alive = true;
-    loadGeoMapData().then((loaded) => {
+    load().then((loaded) => {
       if (alive) setData(loaded);
     });
     return () => {
       alive = false;
     };
-  }, []);
+  }, [load]);
   return data;
+}
+
+export function useGeoMapData(): GeoMapData | null {
+  return useLoaded(loadGeoMapData);
+}
+
+export function useRussiaMap(): RussiaMap | null {
+  return useLoaded(loadRussiaMap);
 }

@@ -30,6 +30,7 @@ describe('geoRegions', () => {
     const missing = Object.entries(REGION_ISO).filter(([, iso]) => !contours.has(iso));
     expect(missing).toEqual([]);
     expect(Object.keys(REGION_ISO).length).toBe(82);
-    expect(RUSSIA.regions.length).toBe(83);
+    // 83 субъекта geoBoundaries RUS + Крым, Севастополь, Донецк, Луганск (для DPI//CHECKER).
+    expect(RUSSIA.regions.length).toBe(87);
   });
 });

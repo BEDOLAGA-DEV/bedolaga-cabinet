@@ -22,6 +22,7 @@ const POPS: Pop[] = [
 ];
 
 const api = vi.hoisted(() => ({
+  reference: { short_uuid: 'Ab12Cd34Ef56Gh78', configs: 2, error: null } as unknown,
   parse: vi.fn(),
   estimate: vi.fn(),
   launchCheck: vi.fn(),
@@ -44,6 +45,7 @@ vi.mock('@/api/dpichecker', async (importOriginal) => {
         webhook_ready: true,
         error: null,
         total_spent: 0,
+        reference: api.reference,
       })),
       panelTargets: vi.fn(async () => []),
       parse: api.parse,
@@ -83,6 +85,7 @@ beforeEach(() => {
 afterEach(() => {
   cleanup();
   vi.clearAllMocks();
+  api.reference = { short_uuid: 'Ab12Cd34Ef56Gh78', configs: 2, error: null };
 });
 
 async function pasteAndPick() {
@@ -169,4 +172,45 @@ it('переход с карточки ноды сразу подставляе�
   expect(await screen.findByText(/Принято: 1/)).toBeTruthy();
   expect(screen.getByRole('button', { name: /NL-1/ }).getAttribute('aria-pressed')).toBe('true');
   expect(screen.getByRole('button', { name: /DE-1/ }).getAttribute('aria-pressed')).toBe('false');
+});
+
+it('VPN «Из панели» — как у BSCHEKER: ключи подписки по умолчанию сразу, без кнопки', async () => {
+  const { dpicheckerApi } = await import('@/api/dpichecker');
+  vi.mocked(dpicheckerApi.panelTargets).mockResolvedValue([
+    { value: 'vless://a@fi.example:443', name: '🇫🇮 Finland', ref: 'Ab12Cd34Ef56Gh78' },
+    { value: 'vless://b@de.example:443', name: '🇩🇪 Germany', ref: 'Ab12Cd34Ef56Gh78' },
+  ]);
+  renderWithProviders(<CheckForm checkType="vpn" />);
+  fireEvent.click(screen.getByRole('button', { name: 'Из панели' }));
+  expect(await screen.findByRole('button', { name: /подписка по умолчанию/ })).toBeTruthy();
+  await waitFor(() =>
+    expect(dpicheckerApi.panelTargets).toHaveBeenCalledWith({ kind: 'subscription' }),
+  );
+  expect(await screen.findByText(/Принято: 2/)).toBeTruthy();
+  expect(screen.getByRole('button', { name: /Finland/ }).getAttribute('aria-pressed')).toBe('true');
+  expect(screen.queryByRole('button', { name: /Взять ключи/ })).toBeNull();
+});
+
+it('подписки по умолчанию нет — объяснение и путь в настройки DPI//CHECKER', async () => {
+  api.reference = { short_uuid: null, configs: 0, error: 'Подписка по умолчанию не задана' };
+  const { dpicheckerApi } = await import('@/api/dpichecker');
+  renderWithProviders(<CheckForm checkType="vpn" />);
+  fireEvent.click(screen.getByRole('button', { name: 'Из панели' }));
+  expect(await screen.findByText('Подписка по умолчанию не задана')).toBeTruthy();
+  const link = screen.getByRole('link', { name: /Открыть настройки/ });
+  expect(link.getAttribute('href')).toBe('/admin/settings?section=sys_dpichecker');
+  expect(dpicheckerApi.panelTargets).not.toHaveBeenCalled();
+});
+
+it('переход из подписки пользователя — его ключи, а не подписка по умолчанию', async () => {
+  const { dpicheckerApi } = await import('@/api/dpichecker');
+  vi.mocked(dpicheckerApi.panelTargets).mockResolvedValue([
+    { value: 'vless://a@fi.example:443', name: 'FI', ref: 'su-5' },
+  ]);
+  renderWithProviders(<CheckForm checkType="vpn" prefill={{ kind: 'subscription', ref: '5' }} />);
+  await waitFor(() =>
+    expect(dpicheckerApi.panelTargets).toHaveBeenCalledWith({ kind: 'subscription', user_id: 5 }),
+  );
+  expect(await screen.findByText('пользователь #5')).toBeTruthy();
+  expect(dpicheckerApi.panelTargets).toHaveBeenCalledTimes(1);
 });

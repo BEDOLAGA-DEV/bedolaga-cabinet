@@ -6194,14 +6194,35 @@
         "all": "همه",
         "filter": "نمایش",
         "mine": "فقط مال من",
-        "by": "مدیر #{{id}}",
         "empty": "هنوز اجرایی نیست.",
         "more": "نمایش بیشتر",
-        "spend": "هزینه مدیران"
+        "withCount": "{{name}} · {{count}}",
+        "columns": {
+          "what": "چه",
+          "where": "کجا",
+          "resources": "منابع",
+          "cost": "هزینه",
+          "who": "چه کسی",
+          "when": "چه زمانی",
+          "status": "نتیجه"
+        }
       },
       "shortcuts": {
         "checkSubscription": "بررسی در DPI//CHECKER",
         "checkNode": "بررسی در DPI//CHECKER"
+      },
+      "map": {
+        "status": {
+          "green": "در دسترس",
+          "yellow": "جزئی",
+          "red": "در دسترس نیست",
+          "gray": "بررسی نشده",
+          "none": "بررسی نشده"
+        },
+        "any": "هر",
+        "okOf": "{{ok}}/{{total}} سالم",
+        "proxyDead": "پروکسی در دسترس نیست",
+        "deadExtra": "+{{count}} بدون پروکسی"
       }
     }
   },

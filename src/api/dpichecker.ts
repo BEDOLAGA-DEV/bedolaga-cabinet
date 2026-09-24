@@ -39,7 +39,16 @@ export interface DpiStatus {
   noisy: NoisyQuota | null;
   monitors: { active: number; limit: number } | null;
   webhook_ready: boolean;
+  /** Подписка по умолчанию для VPN «из панели» (настройка DPICHECKER_REFERENCE_SUBSCRIPTION). */
+  reference: ReferenceStatus | null;
   /** Ключ неверный, IP не в белом списке и т.п. — уже словами. */
+  error: string | null;
+}
+
+/** Как у BSCHEKER: `short_uuid` — shortUuid или хвост ссылки подписки, `configs` — сколько в ней ключей. */
+export interface ReferenceStatus {
+  short_uuid: string | null;
+  configs: number;
   error: string | null;
 }
 
@@ -59,6 +68,8 @@ export interface ActionOut {
   remote_id: number | null;
   status: string;
   admin_user_id: number | null;
+  /** Имя админа, как его видно в кабинете; null — админ удалён или запуск не из кабинета. */
+  admin_name?: string | null;
   location: Location | null;
   pop_count: number;
   resource_count: number;
@@ -86,6 +97,8 @@ export interface CheckRow {
   mode: ProbeMode | null;
   /** Есть ли у точки интернет вообще (контрольный google.com) — у неудачных VPN-строк. */
   internet_ok: boolean | null;
+  /** Прокси самой точки не поднялся — на карте это «прокси недоступен», а не «недоступно». */
+  proxy_dead: boolean;
 }
 
 export interface CheckResource {
@@ -293,6 +306,15 @@ export interface HistoryParams {
   offset?: number;
 }
 
+/** Сколько запусков у каждого фильтра истории (с учётом «только мои»). */
+export type HistoryCounts = Partial<Record<'all' | CheckType | 'noisy' | 'probe', number>>;
+
+export interface HistoryPage {
+  items: ActionOut[];
+  total: number;
+  counts?: HistoryCounts;
+}
+
 const BASE = '/cabinet/admin/dpichecker';
 // Разбор подписки и long-poll проверки держат запрос дольше обычных 30 секунд.
 const LONG_TIMEOUT_MS = 90_000;
@@ -333,7 +355,7 @@ export const dpicheckerApi = {
   launchCheck: async (body: CheckCreate): Promise<ActionOut> =>
     (await apiClient.post(`${BASE}/checks`, body)).data,
 
-  listChecks: async (params: HistoryParams = {}): Promise<{ items: ActionOut[]; total: number }> =>
+  listChecks: async (params: HistoryParams = {}): Promise<HistoryPage> =>
     (await apiClient.get(`${BASE}/checks`, { params })).data,
 
   getCheck: async (id: number, wait = 0): Promise<{ action: ActionOut; check: CheckView }> =>
@@ -390,7 +412,4 @@ export const dpicheckerApi = {
     offset = 0,
   ): Promise<{ items: MonitorRun[]; total: number }> =>
     (await apiClient.get(`${BASE}/monitors/${actionId}/runs`, { params: { limit, offset } })).data,
-
-  spend: async (): Promise<{ admin_user_id: number | null; spent_usd: number }[]> =>
-    (await apiClient.get(`${BASE}/spend`)).data.items,
 };

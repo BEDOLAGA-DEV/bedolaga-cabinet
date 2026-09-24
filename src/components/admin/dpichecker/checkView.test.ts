@@ -15,6 +15,7 @@ const row = (over: Partial<CheckRow> = {}): CheckRow => ({
   port_story: null,
   mode: null,
   internet_ok: null,
+  proxy_dead: false,
   ...over,
 });
 

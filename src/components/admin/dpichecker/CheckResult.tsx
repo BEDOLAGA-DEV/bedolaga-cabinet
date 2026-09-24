@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { type CheckResource, type CheckRow, type CheckType, dpicheckerApi } from '@/api/dpichecker';
 import { StatCard } from '@/components/stats';
@@ -9,8 +9,10 @@ import { useIsTelegram } from '@/platform/hooks/usePlatform';
 import { usePermissionStore } from '@/store/permissions';
 import { getApiErrorMessage } from '@/utils/api-error';
 import { isRunning, resourceVerdict, rowNote, sortRows } from './checkView';
+import { DpiRegionMap } from './DpiRegionMap';
 import { saveBlob } from './download';
 import { CHECK_POLL_MS, CHECK_WAIT_SEC } from './pollInterval';
+import { regionStates } from './regionMap';
 import { usd4 } from './TotalStep';
 
 const ROWS_PREVIEW = 20;
@@ -98,6 +100,47 @@ function ResourceCard({ resource, checkType }: { resource: CheckResource; checkT
   );
 }
 
+/** Россия — своя карта регионов с подсказками (данные уже на руках, обновляется по ходу проверки). */
+function RussiaResultMap({ resources }: { resources: CheckResource[] }) {
+  const pops = useQuery({
+    queryKey: ['dpichecker', 'pops', 'russia'],
+    queryFn: () => dpicheckerApi.getPops('russia'),
+    staleTime: 10 * 60_000,
+  });
+  const states = useMemo(
+    () => regionStates(resources, pops.data?.pops ?? []),
+    [resources, pops.data],
+  );
+  return <DpiRegionMap states={states} />;
+}
+
+/** Китай, Иран, Туркменистан — карты регионов у нас нет, берём готовую картинку сервиса. */
+function ServiceMapImage({ actionId, finished }: { actionId: number; finished: boolean }) {
+  const { t } = useTranslation();
+  const image = useQuery({
+    queryKey: ['dpichecker', 'check-map', actionId, finished],
+    queryFn: () => dpicheckerApi.checkMap(actionId),
+    staleTime: finished ? Number.POSITIVE_INFINITY : 0,
+  });
+  const [url, setUrl] = useState<string | null>(null);
+  useEffect(() => {
+    if (!image.data) return;
+    const next = URL.createObjectURL(image.data);
+    setUrl(next);
+    return () => URL.revokeObjectURL(next);
+  }, [image.data]);
+  if (image.isLoading)
+    return <Skeleton variant="card" className="aspect-[2/1] w-full rounded-2xl" />;
+  if (!url) return null;
+  return (
+    <img
+      src={url}
+      alt={t('admin.dpichecker.result.map')}
+      className="w-full rounded-2xl border border-dark-700"
+    />
+  );
+}
+
 /**
  * Результат проверки — как на dpichecker.st: сводка, по каждому ресурсу «N из M доступно», «из-за
  * границы» и регионы (сначала недоступные) с пояснениями словами. Пока идёт — прогресс, в очереди —
@@ -108,7 +151,6 @@ export function CheckResult({ actionId }: { actionId: number }) {
   const queryClient = useQueryClient();
   const isTelegram = useIsTelegram();
   const canRun = usePermissionStore((state) => state.hasPermission('dpichecker:run'));
-  const [mapUrl, setMapUrl] = useState<string | null>(null);
   const key = ['dpichecker', 'check', actionId];
 
   const query = useQuery({
@@ -132,11 +174,6 @@ export function CheckResult({ actionId }: { actionId: number }) {
     mutationFn: () => dpicheckerApi.resubmit(actionId),
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: key }),
   });
-  const map = useMutation({
-    mutationFn: () => dpicheckerApi.checkMap(actionId),
-    onSuccess: (blob) => setMapUrl(URL.createObjectURL(blob)),
-  });
-  useEffect(() => () => void (mapUrl && URL.revokeObjectURL(mapUrl)), [mapUrl]);
 
   if (query.isLoading) {
     return (
@@ -159,7 +196,7 @@ export function CheckResult({ actionId }: { actionId: number }) {
   const status = check.status;
   const refunded = cancel.data?.refunded_usd ?? action.refunded_usd;
   const progress = check.progress;
-  const failure = cancel.error ?? resubmit.error ?? map.error;
+  const failure = cancel.error ?? resubmit.error;
 
   return (
     <div className="space-y-4">
@@ -262,8 +299,13 @@ export function CheckResult({ actionId }: { actionId: number }) {
               }
             />
           </div>
-          <div className="flex flex-wrap gap-2">
-            {!isTelegram && (
+          {(action.location ?? 'russia') === 'russia' ? (
+            <RussiaResultMap resources={check.resources} />
+          ) : (
+            <ServiceMapImage actionId={actionId} finished={!isRunning(status)} />
+          )}
+          {!isTelegram && (
+            <div className="flex flex-wrap gap-2">
               <button
                 type="button"
                 className="btn-secondary min-h-[40px] px-4 text-sm"
@@ -273,22 +315,7 @@ export function CheckResult({ actionId }: { actionId: number }) {
               >
                 {t('admin.dpichecker.result.csv')}
               </button>
-            )}
-            <button
-              type="button"
-              className="btn-secondary min-h-[40px] px-4 text-sm"
-              disabled={map.isPending}
-              onClick={() => map.mutate()}
-            >
-              {t('admin.dpichecker.result.map')}
-            </button>
-          </div>
-          {mapUrl && (
-            <img
-              src={mapUrl}
-              alt={t('admin.dpichecker.result.map')}
-              className="w-full rounded-2xl border border-dark-700"
-            />
+            </div>
           )}
           {check.resources.map((resource) => (
             <ResourceCard key={resource.index} resource={resource} checkType={check.check_type} />

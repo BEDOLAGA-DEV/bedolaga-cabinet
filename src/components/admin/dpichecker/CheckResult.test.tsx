@@ -14,7 +14,12 @@ import { renderWithProviders } from './testUtils';
 
 vi.mock('react-i18next', async () => (await import('./testUtils')).i18nMock());
 
-const api = vi.hoisted(() => ({ views: [] as unknown[], cancelCheck: vi.fn(), resubmit: vi.fn() }));
+const api = vi.hoisted(() => ({
+  views: [] as unknown[],
+  cancelCheck: vi.fn(),
+  resubmit: vi.fn(),
+  checkMap: vi.fn(),
+}));
 
 vi.mock('@/api/dpichecker', async (importOriginal) => {
   const original = await importOriginal<typeof import('@/api/dpichecker')>();
@@ -25,7 +30,14 @@ vi.mock('@/api/dpichecker', async (importOriginal) => {
       cancelCheck: api.cancelCheck,
       resubmit: api.resubmit,
       reportCsv: vi.fn(),
-      checkMap: vi.fn(),
+      checkMap: api.checkMap,
+      getPops: vi.fn(async () => ({
+        pops: [
+          { id: 1, location: 'russia', region: 'Алтайский край', operator: null, is_healthy: true },
+          { id: 2, location: 'russia', region: 'Амурская обл.', operator: null, is_healthy: true },
+        ],
+        groups: { districts: [], republics: [] },
+      })),
     },
   };
 });
@@ -94,6 +106,7 @@ const DONE = view({
           port_story: null,
           mode: null,
           internet_ok: null,
+          proxy_dead: false,
         },
         {
           pop_id: 2,
@@ -108,6 +121,7 @@ const DONE = view({
           port_story: null,
           mode: null,
           internet_ok: true,
+          proxy_dead: false,
         },
       ],
     },
@@ -162,4 +176,28 @@ it('сервис не ответил — «Спросить ещё раз» те
   renderWithProviders(<CheckResult actionId={11} />);
   fireEvent.click(await screen.findByRole('button', { name: /Спросить ещё раз/ }));
   await waitFor(() => expect(api.resubmit).toHaveBeenCalledWith(11));
+});
+
+it('Россия — карта регионов сразу, без кнопки «Карта»', async () => {
+  api.views = [{ action: { ...ACTION, status: 'completed' }, check: DONE }];
+  const { container } = renderWithProviders(<CheckResult actionId={11} />);
+  await waitFor(() =>
+    expect(container.querySelector('[data-region="ALT"]')?.getAttribute('data-status')).toBe(
+      'green',
+    ),
+  );
+  expect(container.querySelector('[data-region="AMU"]')?.getAttribute('data-status')).toBe('red');
+  expect(screen.queryByRole('button', { name: 'Карта' })).toBeNull();
+  expect(api.checkMap).not.toHaveBeenCalled();
+});
+
+it('Китай и другие страны — картинка карты от сервиса сразу', async () => {
+  globalThis.URL.createObjectURL = vi.fn(() => 'blob:map');
+  globalThis.URL.revokeObjectURL = vi.fn();
+  api.checkMap.mockResolvedValue(new Blob(['png'], { type: 'image/png' }));
+  api.views = [{ action: { ...ACTION, status: 'completed', location: 'china' }, check: DONE }];
+  renderWithProviders(<CheckResult actionId={11} />);
+  const image = await screen.findByRole('img', { name: 'Карта' });
+  expect(image.getAttribute('src')).toBe('blob:map');
+  expect(api.checkMap).toHaveBeenCalledWith(11);
 });

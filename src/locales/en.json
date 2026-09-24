@@ -6473,14 +6473,35 @@
         "all": "All",
         "filter": "What to show",
         "mine": "Only mine",
-        "by": "admin #{{id}}",
         "empty": "No launches yet.",
         "more": "Show more",
-        "spend": "Spent by admins"
+        "withCount": "{{name}} · {{count}}",
+        "columns": {
+          "what": "What",
+          "where": "Where",
+          "resources": "Res.",
+          "cost": "Charged",
+          "who": "Who",
+          "when": "When",
+          "status": "Result"
+        }
       },
       "shortcuts": {
         "checkSubscription": "Check in DPI//CHECKER",
         "checkNode": "Check in DPI//CHECKER"
+      },
+      "map": {
+        "status": {
+          "green": "available",
+          "yellow": "partial",
+          "red": "unavailable",
+          "gray": "not checked",
+          "none": "not checked"
+        },
+        "any": "Any",
+        "okOf": "{{ok}}/{{total}} ok",
+        "proxyDead": "proxy down",
+        "deadExtra": "+{{count}} without proxy"
       }
     }
   },

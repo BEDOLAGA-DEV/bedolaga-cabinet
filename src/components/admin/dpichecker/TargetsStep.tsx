@@ -6,7 +6,10 @@ import { cn } from '@/lib/utils';
 import { getApiErrorMessage } from '@/utils/api-error';
 import { ChoiceChips } from '../reachability/ChoiceChips';
 import { CheckGlyph, ROW, ROW_BUTTON, ROW_OFF, ROW_ON } from '../reachability/SelectableRow';
+import { SubscriptionSourcePicker } from '../reachability/SubscriptionSourcePicker';
 import { fromPanel, fromParse, type ParseNote, type Resource } from './formState';
+import { DPICHECKER_SETTINGS_PATH } from './SetupCard';
+import { useDpiStatus } from './useDpiStatus';
 
 export type TargetOrigin = 'paste' | 'panel';
 export type PanelKind = 'subscription' | 'hosts' | 'nodes';
@@ -50,6 +53,12 @@ export function TargetsStep({ checkType, value, onChange, prefill }: TargetsStep
   const [panelKind, setPanelKind] = useState<PanelKind>(prefill?.kind ?? kinds[0] ?? 'hosts');
   const [text, setText] = useState('');
   const [notes, setNotes] = useState<ParseNote[]>([]);
+  // Подписка VPN «из панели»: пользователь или (null) подписка по умолчанию из настроек — как у BSCHEKER.
+  const [userId, setUserId] = useState<number | null>(
+    prefill?.kind === 'subscription' ? Number(prefill.ref) : null,
+  );
+  const reference = useDpiStatus().data?.reference ?? null;
+  const hasReference = Boolean(reference?.short_uuid);
 
   const parse = useMutation({
     mutationFn: () => dpicheckerApi.parse(checkType, text),
@@ -60,13 +69,15 @@ export function TargetsStep({ checkType, value, onChange, prefill }: TargetsStep
     },
   });
   const panel = useMutation({
-    mutationFn: (kind: PanelKind) =>
+    mutationFn: ({ kind, user }: { kind: PanelKind; user: number | null }) =>
       dpicheckerApi.panelTargets(
         kind === 'subscription'
-          ? { kind, user_id: prefill?.kind === 'subscription' ? Number(prefill.ref) : undefined }
+          ? user === null
+            ? { kind }
+            : { kind, user_id: user }
           : { kind, uuids: [] },
       ),
-    onSuccess: (targets, kind) => {
+    onSuccess: (targets, { kind }) => {
       const resources = fromPanel(targets).map((resource, index) => ({
         ...resource,
         // Хосты и ноды — список для выбора: включены только отмеченные; подписка — вся.
@@ -83,10 +94,22 @@ export function TargetsStep({ checkType, value, onChange, prefill }: TargetsStep
   // Переход с карточки ноды или пользователя: цели грузятся сами, нужная — уже отмечена.
   const prefillLoaded = useRef(false);
   useEffect(() => {
-    if (!prefill || prefillLoaded.current) return;
+    // Подписку пользователя грузит эффект ниже — здесь только хосты и ноды, иначе запрос уйдёт дважды.
+    if (!prefill || prefill.kind === 'subscription' || prefillLoaded.current) return;
     prefillLoaded.current = true;
-    panel.mutate(prefill.kind);
+    panel.mutate({ kind: prefill.kind, user: null });
   }, [prefill, panel]);
+
+  // Подписка — без кнопки: выбрал «Из панели» или другого пользователя — ключи уже грузятся.
+  const subscriptionLoaded = useRef<string | null>(null);
+  const subscriptionReady =
+    origin === 'panel' && panelKind === 'subscription' && (userId !== null || hasReference);
+  useEffect(() => {
+    const key = String(userId);
+    if (!subscriptionReady || subscriptionLoaded.current === key) return;
+    subscriptionLoaded.current = key;
+    panel.mutate({ kind: 'subscription', user: userId });
+  }, [subscriptionReady, userId, panel]);
 
   const toggleResource = (index: number) => {
     const next = value.resources.map((resource, position) =>
@@ -134,7 +157,16 @@ export function TargetsStep({ checkType, value, onChange, prefill }: TargetsStep
         </div>
       )}
 
-      {origin === 'panel' && (
+      {origin === 'panel' && panelKind === 'subscription' && (
+        <SubscriptionSourcePicker
+          userId={userId}
+          shortUuid={null}
+          reference={reference}
+          settingsPath={DPICHECKER_SETTINGS_PATH}
+          onSource={(next) => setUserId(next.userId)}
+        />
+      )}
+      {origin === 'panel' && panelKind !== 'subscription' && (
         <div className="flex flex-wrap items-center gap-2">
           {kinds.length > 1 && (
             <ChoiceChips
@@ -151,7 +183,7 @@ export function TargetsStep({ checkType, value, onChange, prefill }: TargetsStep
             type="button"
             className="btn-secondary min-h-[40px] px-4 text-sm"
             disabled={panel.isPending}
-            onClick={() => panel.mutate(panelKind)}
+            onClick={() => panel.mutate({ kind: panelKind, user: null })}
           >
             {t(`admin.dpichecker.form.panel.load.${panelKind}`)}
           </button>

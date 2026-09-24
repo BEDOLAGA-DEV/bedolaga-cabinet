@@ -13,7 +13,6 @@ import {
   WallIcon,
 } from '@/components/icons';
 import { Skeleton } from '@/components/ui/skeleton';
-import { usePlatform } from '@/platform';
 import { usePermissionStore } from '@/store/permissions';
 import { AdminBackButton } from '../components/admin/AdminBackButton';
 import { IconTabs } from '../components/admin/IconTabs';
@@ -28,7 +27,6 @@ import type { PanelKind } from '../components/admin/dpichecker/TargetsStep';
 import { SetupCard } from '../components/admin/dpichecker/SetupCard';
 import { useDpiStatus } from '../components/admin/dpichecker/useDpiStatus';
 
-const TOPUP_URL = 'https://dpichecker.st/topup';
 /** Оригинальное название сервиса — не переводится. */
 export const DPI_BRAND = 'DPI//CHECKER';
 
@@ -77,7 +75,6 @@ function TabBody({ link, canRun }: { link: DpiLink; canRun: boolean }) {
  */
 export default function AdminDpiChecker() {
   const { t } = useTranslation();
-  const { openLink } = usePlatform();
   const [searchParams, setSearchParams] = useSearchParams();
   const link = useMemo(() => readLink(searchParams), [searchParams]);
   const canRun = usePermissionStore((state) => state.hasPermission('dpichecker:run'));
@@ -120,15 +117,6 @@ export default function AdminDpiChecker() {
             <span className="text-sm font-semibold tabular-nums text-dark-100">
               {t('admin.dpichecker.money.usd', { value: status.balance.toFixed(2) })}
             </span>
-          )}
-          {ready && canRun && (
-            <button
-              type="button"
-              className="btn-secondary min-h-[36px] px-3 text-sm"
-              onClick={() => openLink(TOPUP_URL)}
-            >
-              {t('admin.dpichecker.header.topup')}
-            </button>
           )}
         </div>
         {status?.error && <p className="w-full text-sm text-error-400">{status.error}</p>}

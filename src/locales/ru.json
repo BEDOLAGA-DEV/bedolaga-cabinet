@@ -7068,14 +7068,35 @@
         "all": "Все",
         "filter": "Что показать",
         "mine": "Только мои",
-        "by": "админ #{{id}}",
         "empty": "Запусков пока нет.",
         "more": "Показать ещё",
-        "spend": "Потрачено по админам"
+        "withCount": "{{name}} · {{count}}",
+        "columns": {
+          "what": "Что",
+          "where": "Где",
+          "resources": "Рес.",
+          "cost": "Списано",
+          "who": "Кто",
+          "when": "Когда",
+          "status": "Итог"
+        }
       },
       "shortcuts": {
         "checkSubscription": "Проверить в DPI//CHECKER",
         "checkNode": "Проверить в DPI//CHECKER"
+      },
+      "map": {
+        "status": {
+          "green": "доступно",
+          "yellow": "частично",
+          "red": "недоступно",
+          "gray": "не проверялся",
+          "none": "не проверялся"
+        },
+        "any": "Любой",
+        "okOf": "{{ok}}/{{total}} ок",
+        "proxyDead": "прокси недоступен",
+        "deadExtra": "+{{count}} без прокси"
       }
     }
   },

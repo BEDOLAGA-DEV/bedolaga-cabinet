@@ -50,7 +50,7 @@ describe('GeoMap', () => {
     const { container } = render(<GeoMap rows={rows} />);
     expect(container.querySelector('[role="status"]')).toBeTruthy();
     await waitFor(() => expect(container.querySelector('svg')).toBeTruthy());
-    expect(container.querySelectorAll('[data-region]')).toHaveLength(83);
+    expect(container.querySelectorAll('[data-region]')).toHaveLength(87);
     expect(container.querySelectorAll('[data-city]')).toHaveLength(3);
     expect(container.querySelector('[data-region="VOR"]')?.getAttribute('data-tone')).toBe('down');
     expect(container.querySelector('[data-region="MOW"]')?.getAttribute('data-tone')).toBe('na');

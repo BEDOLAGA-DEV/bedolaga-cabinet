@@ -7,6 +7,10 @@
  *      первоисточник — geoBoundaries RUS ADM1 (ODbL, © участники OpenStreetMap), упрощённые контуры.
  *   2. citycoords.json — «region|city» → [lat, lon] для городов пула сервиса bschekbot.
  *   3. nodes.json — города с полями region и iso: отсюда таблица «токен региона → код ISO».
+ *   4. ru-regions-extra.geojson — Крым, Севастополь, Донецк, Луганск (shapeISO «RU-CR» и т.п.), которых
+ *      нет в geoBoundaries RUS: из geoBoundaries UKR ADM1 (CC BY 4.0), упрощены до ~0.015°. Точки есть у
+ *      DPI//CHECKER, и сайт сервиса рисует их на карте. Рамка и проекция считаются только по основным
+ *      регионам — добавка не сдвигает ни контуры, ни города.
  *
  * Выход — три JSON в src/components/admin/reachability/assets/:
  *   russia-regions.json   — регионы уже в проекции Альберса как SVG-пути + параметры проекции,
@@ -14,7 +18,7 @@
  *   geo-city-coords.json  — координаты городов как есть;
  *   geo-region-iso.json   — токен региона → код на карте (без префикса RU-).
  *
- * Запуск: node scripts/build-geo-map.mjs [geojson] [citycoords] [nodes]
+ * Запуск: node scripts/build-geo-map.mjs [geojson] [citycoords] [nodes] [extra-geojson]
  */
 import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -23,10 +27,11 @@ const HANDOFF = resolve(
   process.env.HOME ?? '',
   'PycharmProjects/remnawave-bedolaga-telegram-bot/.claude/handoffs/geo',
 );
-const [geojsonPath, coordsPath, nodesPath] = [
+const [geojsonPath, coordsPath, nodesPath, extraPath] = [
   process.argv[2] ?? resolve(HANDOFF, 'ru-regions-lite.geojson'),
   process.argv[3] ?? resolve(HANDOFF, 'citycoords.json'),
   process.argv[4] ?? resolve(HANDOFF, 'nodes.json'),
+  process.argv[5] ?? resolve(HANDOFF, 'ru-regions-extra.geojson'),
 ];
 const OUT = resolve('src/components/admin/reachability/assets');
 
@@ -52,17 +57,20 @@ const project = albers(PROJECTION);
 const geojson = JSON.parse(readFileSync(geojsonPath, 'utf8'));
 const coords = JSON.parse(readFileSync(coordsPath, 'utf8'));
 const nodes = JSON.parse(readFileSync(nodesPath, 'utf8'));
+const extra = JSON.parse(readFileSync(extraPath, 'utf8'));
 
 const rings = (geometry) =>
   geometry.type === 'Polygon' ? geometry.coordinates : geometry.coordinates.flat(1);
 
-const projected = geojson.features.map((feature) => ({
+const projectFeature = (feature) => ({
   iso: String(feature.properties.shapeISO ?? '').replace(/^RU-/, ''),
   name: String(feature.properties.name ?? feature.properties.shapeName ?? ''),
   rings: rings(feature.geometry).map((ring) => ring.map(([lon, lat]) => project(lat, lon))),
-}));
+});
+const base = geojson.features.map(projectFeature);
+const projected = [...base, ...extra.features.map(projectFeature)];
 
-const points = projected.flatMap((region) => region.rings.flat(1));
+const points = base.flatMap((region) => region.rings.flat(1));
 const minX = Math.min(...points.map((p) => p[0]));
 const maxX = Math.max(...points.map((p) => p[0]));
 const minY = Math.min(...points.map((p) => p[1]));

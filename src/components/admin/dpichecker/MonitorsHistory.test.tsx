@@ -9,7 +9,8 @@ import { renderWithProviders } from './testUtils';
 
 /**
  * Мониторы: свои — пауза и отключение, созданные на сайте — только чтение, подпись про админ-чат.
- * История: фильтр видов и «только мои» уходят в запрос, строка ведёт к результату, траты по админам.
+ * История как на сайте: у фильтров счётчики, у строки — имя админа и статус цветом; «только мои» уходят
+ * в запрос, строка ведёт к результату. «Потрачено по админам» убрано (владелец 24.09).
  */
 
 vi.mock('react-i18next', async () => (await import('./testUtils')).i18nMock());
@@ -20,7 +21,6 @@ const api = vi.hoisted(() => ({
   deleteMonitor: vi.fn(),
   monitorRuns: vi.fn(),
   listChecks: vi.fn(),
-  spend: vi.fn(),
 }));
 vi.mock('@/api/dpichecker', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@/api/dpichecker')>()),
@@ -70,14 +70,18 @@ const ACTION: ActionOut = {
   refunded_usd: null,
   error_code: null,
   created_at: '2026-09-24T06:25:52Z',
+  admin_name: 'Егор',
 };
 
 beforeEach(() => {
   usePermissionStore.setState({ permissions: ['dpichecker:*'], isLoaded: true });
   api.listMonitors.mockResolvedValue([MONITOR, FOREIGN]);
   api.patchMonitor.mockResolvedValue({ ...MONITOR, is_active: false });
-  api.listChecks.mockResolvedValue({ items: [ACTION], total: 1 });
-  api.spend.mockResolvedValue([{ admin_user_id: 7, spent_usd: 49.49 }]);
+  api.listChecks.mockResolvedValue({
+    items: [ACTION],
+    total: 1,
+    counts: { all: 20, vpn: 18, ip: 1, mtproto: 1, noisy: 0, probe: 0 },
+  });
 });
 afterEach(() => {
   cleanup();
@@ -107,7 +111,7 @@ it('история: фильтр вида и «только мои» — в за
   renderWithProviders(<HistoryTab />);
   expect(await screen.findByText('Моя подписка')).toBeTruthy();
   expect(screen.getByText(/1\.7460 USD/)).toBeTruthy();
-  fireEvent.click(screen.getByRole('radio', { name: 'IP / домен' }));
+  fireEvent.click(screen.getByRole('radio', { name: /^IP \/ домен/ }));
   await waitFor(() =>
     expect(api.listChecks).toHaveBeenLastCalledWith(
       expect.objectContaining({ kind: 'check', check_type: 'ip' }),
@@ -121,7 +125,13 @@ it('история: фильтр вида и «только мои» — в за
   expect(navigate).toHaveBeenCalledWith('/admin/dpichecker?tab=history&check=11');
 });
 
-it('траты по админам', async () => {
+it('история: у фильтров счётчики, у строки имя админа и итог; трат по админам нет', async () => {
   renderWithProviders(<HistoryTab />);
-  expect(await screen.findByText(/49\.4900 USD/)).toBeTruthy();
+  expect(await screen.findByText('Егор')).toBeTruthy();
+  expect(screen.queryByText(/админ #7/)).toBeNull();
+  expect(screen.getByRole('radio', { name: /VPN\D*18/ })).toBeTruthy();
+  expect(screen.getByRole('radio', { name: /Все\D*20/ })).toBeTruthy();
+  expect(screen.getByText('5 рес.')).toBeTruthy();
+  expect(screen.getByText('Готово')).toBeTruthy();
+  expect(screen.queryByText(/Потрачено по админам/)).toBeNull();
 });
