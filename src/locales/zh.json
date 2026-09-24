@@ -5910,6 +5910,78 @@
         "anyOperator": "任意",
         "optimalFailed": "无法获取最佳组合，请重试。",
         "groupEmpty": "该联邦区当前没有可用检测点。"
+      },
+      "form": {
+        "step1": "检测什么",
+        "step2": "从哪里检测",
+        "step3": "合计",
+        "paste": "粘贴",
+        "fromPanel": "从面板",
+        "originLabel": "目标来源",
+        "hint": {
+          "vpn": "VLESS / VMess / Trojan / Shadowsocks / Hysteria2 密钥或订阅链接，每行一个。",
+          "ip": "最多 50 个 IP 或域名，每行一个。也可以是链接——只取域名。",
+          "mtproto": "MTProto 代理链接（tg://proxy… 或 t.me/proxy…），每行一个。"
+        },
+        "placeholder": {
+          "vpn": "vless://… 或 https://…/subscription",
+          "ip": "example.com\n203.0.113.10",
+          "mtproto": "tg://proxy?server=…&port=…&secret=…"
+        },
+        "continue": "继续",
+        "parsing": "正在解析…",
+        "failed": "未成功，请重试",
+        "fetchFailed": "无法获取订阅，请稍后再试。",
+        "accepted": "已接受：{{count}}",
+        "nothingAccepted": "没有可接受的内容。",
+        "udpOnly": "仅 UDP — 不检测",
+        "notes": {
+          "invalid": "无效：{{count}}",
+          "private": "本地/私有 IP（不检测）：{{count}}",
+          "overflow": "超出行数限制，已丢弃：{{count}}",
+          "duplicate": "重复：{{count}}",
+          "blacklisted": "在黑名单中：{{items}}"
+        },
+        "panel": {
+          "label": "从面板获取",
+          "subscription": "订阅",
+          "hosts": "主机",
+          "nodes": "节点",
+          "load": {
+            "subscription": "使用我的订阅密钥",
+            "hosts": "显示面板主机",
+            "nodes": "显示面板节点"
+          }
+        },
+        "total": {
+          "pops": "检测点",
+          "resources": "资源",
+          "cost": "费用",
+          "balance": "余额",
+          "tariff": "（每个检测点 {{pop}} USD + 每点每资源 {{resource}} USD）"
+        },
+        "probeMode": {
+          "label": "检测模式",
+          "auto": "自动判断",
+          "server": "目标上有 Web 服务器",
+          "noserver": "没有 Web 服务器 — 查找封锁",
+          "hint": "如果地址上没有运行任何服务，无需架设 Web 服务器：检测将改为“是否被封锁”——名称（SNI）、DNS 和端口可达性。"
+        },
+        "runMode": "运行方式",
+        "once": "一次",
+        "scheduled": "按计划",
+        "schedule": {
+          "interval": "每隔（小时）",
+          "alertAfter": "连续失败几次后告警",
+          "notifyOnSuccess": "成功时也通知",
+          "perRun": "每次运行按一次检测计费"
+        },
+        "pay": "支付",
+        "createMonitor": "创建监控",
+        "confirmPay": "扣款 {{value}} USD",
+        "confirmMonitor": "创建监控 · 每次 {{value}} USD",
+        "cancel": "取消",
+        "estimateFailed": "无法计算价格"
       }
     }
   },

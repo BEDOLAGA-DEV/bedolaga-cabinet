@@ -5965,6 +5965,78 @@
         "anyOperator": "هر اپراتور",
         "optimalFailed": "دریافت مجموعه بهینه ناموفق بود، دوباره تلاش کنید.",
         "groupEmpty": "در این منطقه اکنون نقطه‌ای در دسترس نیست."
+      },
+      "form": {
+        "step1": "چه چیزی بررسی شود",
+        "step2": "از کجا بررسی شود",
+        "step3": "جمع",
+        "paste": "چسباندن",
+        "fromPanel": "از پنل",
+        "originLabel": "منبع اهداف",
+        "hint": {
+          "vpn": "کلیدهای VLESS / VMess / Trojan / Shadowsocks / Hysteria2 یا لینک اشتراک — هر کدام در یک خط.",
+          "ip": "حداکثر ۵۰ IP یا دامنه، هر کدام در یک خط. لینک هم قبول است — فقط دامنه برداشته می‌شود.",
+          "mtproto": "لینک پراکسی MTProto (tg://proxy… یا t.me/proxy…) — هر کدام در یک خط."
+        },
+        "placeholder": {
+          "vpn": "vless://… یا https://…/subscription",
+          "ip": "example.com\n203.0.113.10",
+          "mtproto": "tg://proxy?server=…&port=…&secret=…"
+        },
+        "continue": "ادامه",
+        "parsing": "در حال تجزیه…",
+        "failed": "نشد — دوباره تلاش کنید",
+        "fetchFailed": "دریافت اشتراک ممکن نشد. بعداً تلاش کنید.",
+        "accepted": "پذیرفته شد: {{count}}",
+        "nothingAccepted": "چیزی پذیرفته نشد.",
+        "udpOnly": "فقط UDP — بررسی نمی‌شود",
+        "notes": {
+          "invalid": "نامعتبر: {{count}}",
+          "private": "IP محلی/خصوصی (بررسی نمی‌شود): {{count}}",
+          "overflow": "بیش از حد مجاز، حذف شد: {{count}}",
+          "duplicate": "تکراری: {{count}}",
+          "blacklisted": "در فهرست سیاه: {{items}}"
+        },
+        "panel": {
+          "label": "از پنل چه برداشته شود",
+          "subscription": "اشتراک",
+          "hosts": "هاست‌ها",
+          "nodes": "نودها",
+          "load": {
+            "subscription": "کلیدهای اشتراک من",
+            "hosts": "نمایش هاست‌های پنل",
+            "nodes": "نمایش نودهای پنل"
+          }
+        },
+        "total": {
+          "pops": "نقاط",
+          "resources": "منابع",
+          "cost": "هزینه",
+          "balance": "موجودی",
+          "tariff": "({{pop}} USD برای هر نقطه + {{resource}} USD برای هر منبع در هر نقطه)"
+        },
+        "probeMode": {
+          "label": "حالت بررسی",
+          "auto": "خودکار",
+          "server": "روی هدف وب‌سرور هست",
+          "noserver": "وب‌سرور نیست — جستجوی مسدودسازی",
+          "hint": "اگر روی آدرس چیزی اجرا نمی‌شود، وب‌سرور لازم نیست: به جای «باز می‌شود؟» بررسی «مسدود است؟» انجام می‌شود — نام (SNI)، DNS و دسترسی پورت‌ها."
+        },
+        "runMode": "نحوه اجرا",
+        "once": "یک بار",
+        "scheduled": "طبق برنامه",
+        "schedule": {
+          "interval": "هر چند ساعت",
+          "alertAfter": "هشدار پس از چند شکست پیاپی",
+          "notifyOnSuccess": "موفقیت را هم گزارش کن",
+          "perRun": "هر اجرا به اندازه یک بررسی هزینه دارد"
+        },
+        "pay": "پرداخت",
+        "createMonitor": "ایجاد پایشگر",
+        "confirmPay": "کسر {{value}} USD",
+        "confirmMonitor": "ایجاد پایشگر · هر اجرا {{value}} USD",
+        "cancel": "انصراف",
+        "estimateFailed": "محاسبه قیمت ممکن نشد"
       }
     }
   },

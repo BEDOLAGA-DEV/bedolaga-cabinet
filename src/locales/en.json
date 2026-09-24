@@ -6244,6 +6244,78 @@
         "anyOperator": "Any",
         "optimalFailed": "Could not get the optimal set, try again.",
         "groupEmpty": "No points are available in this district right now."
+      },
+      "form": {
+        "step1": "What to check",
+        "step2": "Where to check from",
+        "step3": "Total",
+        "paste": "Paste",
+        "fromPanel": "From panel",
+        "originLabel": "Where to take targets from",
+        "hint": {
+          "vpn": "VLESS / VMess / Trojan / Shadowsocks / Hysteria2 keys or subscription links — one per line.",
+          "ip": "Up to 50 IPs or domains, one per line. Links work too — only the domain is taken.",
+          "mtproto": "MTProto proxy links (tg://proxy… or t.me/proxy…) — one per line."
+        },
+        "placeholder": {
+          "vpn": "vless://… or https://…/subscription",
+          "ip": "example.com\n203.0.113.10",
+          "mtproto": "tg://proxy?server=…&port=…&secret=…"
+        },
+        "continue": "Continue",
+        "parsing": "Parsing…",
+        "failed": "That did not work — try again",
+        "fetchFailed": "Could not fetch the subscription. Try later.",
+        "accepted": "Accepted: {{count}}",
+        "nothingAccepted": "Nothing accepted.",
+        "udpOnly": "UDP only — not checked",
+        "notes": {
+          "invalid": "invalid: {{count}}",
+          "private": "local/private IPs (not checked): {{count}}",
+          "overflow": "over the line limit, dropped: {{count}}",
+          "duplicate": "duplicates: {{count}}",
+          "blacklisted": "blacklisted: {{items}}"
+        },
+        "panel": {
+          "label": "What to take from the panel",
+          "subscription": "Subscription",
+          "hosts": "Hosts",
+          "nodes": "Nodes",
+          "load": {
+            "subscription": "Take keys of my subscription",
+            "hosts": "Show panel hosts",
+            "nodes": "Show panel nodes"
+          }
+        },
+        "total": {
+          "pops": "Points",
+          "resources": "Resources",
+          "cost": "Cost",
+          "balance": "Balance",
+          "tariff": "({{pop}} USD per point + {{resource}} USD per resource per point)"
+        },
+        "probeMode": {
+          "label": "Check mode",
+          "auto": "Auto — detect",
+          "server": "The target runs a web server",
+          "noserver": "No web server — look for blocking",
+          "hint": "If nothing runs on the address, no web server is needed: instead of “does it open” the check looks for blocking — name (SNI), DNS and port reachability."
+        },
+        "runMode": "How to run",
+        "once": "Once",
+        "scheduled": "On schedule",
+        "schedule": {
+          "interval": "Every, hours",
+          "alertAfter": "Alert after failures in a row",
+          "notifyOnSuccess": "Also report success",
+          "perRun": "each run costs as one such check"
+        },
+        "pay": "Pay",
+        "createMonitor": "Create monitor",
+        "confirmPay": "Charge {{value}} USD",
+        "confirmMonitor": "Create monitor · run {{value}} USD",
+        "cancel": "Cancel",
+        "estimateFailed": "Could not price the check"
       }
     }
   },

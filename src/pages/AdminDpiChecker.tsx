@@ -17,7 +17,9 @@ import { usePlatform } from '@/platform';
 import { usePermissionStore } from '@/store/permissions';
 import { AdminBackButton } from '../components/admin/AdminBackButton';
 import { IconTabs } from '../components/admin/IconTabs';
+import { CheckForm } from '../components/admin/dpichecker/CheckForm';
 import { type DpiLink, readLink, TABS, type Tab } from '../components/admin/dpichecker/deepLink';
+import type { PanelKind } from '../components/admin/dpichecker/TargetsStep';
 import { SetupCard } from '../components/admin/dpichecker/SetupCard';
 import { useDpiStatus } from '../components/admin/dpichecker/useDpiStatus';
 
@@ -36,8 +38,22 @@ const TAB_ICONS: Record<Tab, ComponentType<{ className?: string }>> = {
   history: HistoryIcon,
 };
 
-/** Содержимое вкладки; формы, результаты и списки появляются в следующих задачах плана. */
-function TabBody({ link }: { link: DpiLink }) {
+const PREFILL_KIND: Record<NonNullable<DpiLink['source']>, PanelKind> = {
+  node: 'nodes',
+  host: 'hosts',
+  user: 'subscription',
+};
+
+/** Содержимое вкладки по адресу; без права запуска формы трат не показываются. */
+function TabBody({ link, canRun }: { link: DpiLink; canRun: boolean }) {
+  const prefill =
+    link.source && link.ref ? { kind: PREFILL_KIND[link.source], ref: link.ref } : null;
+  if (link.tab === 'vpn' || link.tab === 'ip' || link.tab === 'mtproto') {
+    if (!canRun) return <section data-tab={link.tab} />;
+    return (
+      <CheckForm key={`${link.tab}-${link.ref ?? ''}`} checkType={link.tab} prefill={prefill} />
+    );
+  }
   return <section data-tab={link.tab} />;
 }
 
@@ -113,7 +129,7 @@ export default function AdminDpiChecker() {
             onChange={setTab}
             label={t('admin.dpichecker.tabs.label')}
           />
-          <TabBody link={link} />
+          <TabBody link={link} canRun={canRun} />
         </>
       )}
     </div>
