@@ -347,7 +347,10 @@
     "unlimited": "نامحدود",
     "usageLast14Days": "مصرف ۱۴ روز اخیر",
     "usedSuffix": "مصرف شده",
-    "validUntil": "معتبر تا {{date}}"
+    "validUntil": "معتبر تا {{date}}",
+    "premiumTraffic": "ترافیک ویژه",
+    "premiumTrafficPaused": "سقف مصرف پر شد — دسترسی تا پایان دوره متوقف است",
+    "premiumTrafficTopped": "{{amount}} شارژ شد"
   },
   "subscription": {
     "title": "اشتراک",
@@ -513,7 +516,12 @@
         "canAddLimited": "حداکثر {{count}} دستگاه می‌توانید اضافه کنید",
         "trialNotAllowed": "کاهش تعداد دستگاه برای اشتراک آزمایشی در دسترس نیست"
       },
-      "reducing": "در حال کاهش…"
+      "reducing": "در حال کاهش…",
+      "buyPremiumTraffic": "خرید ترافیک ویژه",
+      "buyPremiumTrafficTitle": "ترافیک ویژه",
+      "premiumTrafficHint": "سقف مصرف جداگانه برای سرورهای ویژه",
+      "premiumTrafficExhausted": "سقف مصرف پر شد — برای بازگردانی دسترسی شارژ کنید",
+      "premiumTopupCapReached": "در هر دوره حداکثر {{cap}} گیگابایت قابل افزودن است"
     },
     "serverManagement": {
       "statusLegend": "✅ — متصل • ➕ — اضافه خواهد شد (پولی) • ➖ — قطع خواهد شد",
@@ -2773,7 +2781,23 @@
       "panelTagLabel": "برچسب در پنل Remnawave",
       "panelTagDesc": "حداکثر ۱۶ نویسه: حروف لاتین، ارقام و زیرخط. خالی — برچسب عمومی از تنظیمات (آزمایشی یا پولی). با این برچسب در پنل مشخص است کاربر روی کدام تعرفه است.",
       "trialDaysLabel": "روزهای آزمایشی در این تعرفه",
-      "trialDaysDesc": "خالی — تنظیم عمومی مدت دوره آزمایشی."
+      "trialDaysDesc": "خالی — تنظیم عمومی مدت دوره آزمایشی.",
+      "premiumLimitsTitle": "سقف ویژه به تفکیک سرور",
+      "premiumLimitsHint": "سقف مصرف جداگانه برای هر سرور. با پر شدن آن، کاربر فقط دسترسی همان سرور را از دست می‌دهد و بقیه کار می‌کنند. صفر یعنی این سرور سقف ویژه ندارد.",
+      "premiumLimitsNoServers": "ابتدا سرورهای تعرفه را انتخاب کنید",
+      "premiumLimitGb": "سقف (گیگابایت)",
+      "premiumLimitName": "برچسب",
+      "premiumMoveUp": "بالا",
+      "premiumMoveDown": "پایین",
+      "premiumTopupEnabled": "اجازه شارژ",
+      "premiumPackages": "بسته‌های شارژ",
+      "premiumPackagesEmpty": "بسته‌ای نیست — چیزی برای خرید وجود نخواهد داشت",
+      "premiumPackageGb": "حجم بسته (گیگابایت)",
+      "premiumPackagePrice": "قیمت بسته",
+      "premiumPackageAdd": "افزودن بسته",
+      "premiumPackageDuplicate": "بسته‌های هم‌حجم هنگام ذخیره ادغام می‌شوند",
+      "premiumMaxTopupGb": "سقف کل (گیگابایت)",
+      "premiumMaxTopupHint": "صفر یعنی بدون محدودیت"
     },
     "servers": {
       "title": "مدیریت اسکوادها",
@@ -3444,7 +3468,13 @@
         "buttonApplied_one": "فیلترها: {{count}} مورد",
         "buttonApplied_other": "فیلترها: {{count}} مورد",
         "reset": "بازنشانی",
-        "remove": "حذف فیلتر «{{name}}»"
+        "remove": "حذف فیلتر «{{name}}»",
+        "allStatuses": "همه وضعیت‌ها",
+        "byDate": "بر اساس تاریخ",
+        "byBalance": "بر اساس موجودی",
+        "byActivity": "بر اساس فعالیت",
+        "bySpent": "بر اساس هزینه",
+        "byExpiry": "بر اساس انقضا"
       },
       "actions": {
         "block": "مسدود کردن",
@@ -3461,7 +3491,11 @@
           "balance": "موجودی",
           "referrals": "معرفی‌ها",
           "activity": "فعالیت",
-          "overview": "نمای کلی"
+          "overview": "نمای کلی",
+          "info": "اطلاعات",
+          "sync": "همگام‌سازی",
+          "tickets": "تیکت‌ها",
+          "gifts": "هدایا"
         },
         "noTickets": "این کاربر تیکتی ندارد",
         "ticketsCount": "تیکت",
@@ -3731,7 +3765,8 @@
           "commissionSaved": "کمیسیون ذخیره شد",
           "spentHint": "خرج در سرویس",
           "confirmRemoveReferrer": "دعوت‌کننده جدا شود؟ دیگر از این کاربر درآمدی نمی‌گیرد.",
-          "confirmRemoveReferral": "{{name}} از زیرمجموعه‌ها حذف شود؟ درآمد از او متوقف می‌شود."
+          "confirmRemoveReferral": "{{name}} از زیرمجموعه‌ها حذف شود؟ درآمد از او متوقف می‌شود.",
+          "addReferral": "افزودن معرفی"
         },
         "actions": {
           "areYouSure": "آیا مطمئنید می‌خواهید ادامه دهید؟",
@@ -3889,7 +3924,19 @@
             "logins": "ورودها"
           },
           "fromBalance": "از موجودی",
-          "loadError": "بارگیری فعالیت ممکن نشد"
+          "loadError": "بارگیری فعالیت ممکن نشد",
+          "total": "مجموع رویدادها",
+          "filters": {
+            "all": "همه",
+            "payments": "پرداخت‌ها",
+            "events": "رویدادها",
+            "promo": "تخفیف‌ها",
+            "tickets": "تیکت‌ها",
+            "gifts": "هدایا",
+            "referrals": "دعوت‌ها",
+            "logins": "ورودها",
+            "clicks": "کلیک‌ها"
+          }
         },
         "header": {
           "copy": "کپی",
@@ -4026,7 +4073,35 @@
         },
         "messages_one": "{{count}} پیام",
         "messages_other": "{{count}} پیام",
-        "ticketLoadError": "باز کردن تیکت ممکن نشد"
+        "ticketLoadError": "باز کردن تیکت ممکن نشد",
+        "premiumTraffic": {
+          "title": "ترافیک پریمیوم",
+          "limited": "قطع شده",
+          "notMeasured": "هنوز اندازه‌گیری نشده",
+          "extra": "{{gb}} گیگابایت خریداری‌شده",
+          "period": "دوره از {{date}}",
+          "checked": "اندازه‌گیری {{date}}",
+          "grantLabel": "چند گیگابایت برای {{name}} افزوده شود",
+          "grant": "افزودن",
+          "resetSquad": "بازنشانی",
+          "resetTitle": "بازنشانی ترافیک",
+          "resetButton": "بازنشانی",
+          "scope": {
+            "premium": "فقط پریمیوم",
+            "regular": "فقط عادی",
+            "both": "پریمیوم و عادی"
+          },
+          "scopeHint": {
+            "premium": "محدودیت‌های پریمیوم دوره جدید را آغاز می‌کنند و سرورهای قطع‌شده بازمی‌گردند. ترافیک عادی تغییر نمی‌کند.",
+            "regular": "ترافیک عادی در پنل بازنشانی می‌شود. محدودیت‌های پریمیوم تغییر نمی‌کنند.",
+            "both": "هم ترافیک عادی در پنل و هم محدودیت‌های پریمیوم بازنشانی می‌شوند."
+          },
+          "granted": "{{gb}} گیگابایت برای {{name}} افزوده شد.",
+          "resetPremiumDone": "دوره پریمیوم از نو آغاز شد.",
+          "resetRegularDone": "ترافیک عادی بازنشانی شد.",
+          "restoredNote": "سرور در نوبت بعدی — حداکثر ۵ دقیقه — به کاربر بازمی‌گردد.",
+          "error": "انجام عملیات ناموفق بود"
+        }
       },
       "notFound": "کاربر یافت نشد",
       "sendMessage": {
@@ -4051,8 +4126,10 @@
         "success": {
           "delete": "کاربر حذف شد",
           "disable": "کاربر غیرفعال شد",
-          "resetTrial": "دوره آزمایشی بازنشانی شد"
-        }
+          "resetTrial": "دوره آزمایشی بازنشانی شد",
+          "resetSubscription": "اشتراک بازنشانی شد"
+        },
+        "resetSubscription": "بازنشانی اشتراک"
       },
       "summary": {
         "total_one": "{{value}} کاربر",
@@ -4210,7 +4287,13 @@
         "userNotFound": "کاربر پیدا نشد",
         "trialBlockedBySubscription": "دوره آزمایشی همچنان در دسترس نیست: این کاربر اشتراک دیگری دارد. ابتدا آن را حذف کنید."
       },
-      "moreTariffs": "{{count}} مورد دیگر"
+      "moreTariffs": "{{count}} مورد دیگر",
+      "searchEmail": "جستجو بر اساس ایمیل...",
+      "noPurchases": "بدون خرید",
+      "pagination": {
+        "showing": "نمایش {{from}}-{{to}} از {{total}}"
+      },
+      "purchaseCount": "تعداد خرید: {{count}}"
     },
     "promoOffers": {
       "title": "پیشنهادات تبلیغاتی",
@@ -6812,6 +6895,8 @@
       "manage": "مدیریت اشتراک",
       "buyAnother": "خرید طرح دیگر",
       "buyTraffic": "خرید ترافیک بیشتر",
+      "buyPremiumTraffic": "خرید ترافیک پریمیوم",
+      "premiumPaused": "سقف مصرف تمام شد",
       "buyDevices": "افزودن دستگاه",
       "reduceDevices": "کاهش تعداد دستگاه",
       "servers": "سرورها",

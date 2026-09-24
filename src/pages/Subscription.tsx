@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Navigate, useNavigate, useParams } from 'react-router';
 import { subscriptionApi } from '../api/subscription';
 import { WebBackButton } from '../components/WebBackButton';
+import PremiumTrafficRow from '../components/dashboard/PremiumTrafficRow';
 import TrafficProgressBar from '../components/dashboard/TrafficProgressBar';
 import { HoverBorderGradient } from '../components/ui/hover-border-gradient';
 import { useTrafficZone } from '../hooks/useTrafficZone';
@@ -40,6 +41,7 @@ import { DevicesPanel } from '../components/subscription/manage/DevicesPanel';
 import { RecurringPanels } from '../components/subscription/manage/RecurringPanels';
 import { DeviceTopupSheet } from '../components/subscription/sheets/DeviceTopupSheet';
 import { DeviceReductionSheet } from '../components/subscription/sheets/DeviceReductionSheet';
+import { PremiumTrafficTopupSheet } from '../components/subscription/sheets/PremiumTrafficTopupSheet';
 import { TrafficTopupSheet } from '../components/subscription/sheets/TrafficTopupSheet';
 import { ServerManagementSheet } from '../components/subscription/sheets/ServerManagementSheet';
 import { DeleteSubscriptionSheet } from '../components/subscription/sheets/DeleteSubscriptionSheet';
@@ -207,6 +209,7 @@ export default function Subscription() {
   const [showDeviceReduction, setShowDeviceReduction] = useState(false);
   const [targetDeviceLimit, setTargetDeviceLimit] = useState<number>(1);
   const [showTrafficTopup, setShowTrafficTopup] = useState(false);
+  const [showPremiumTrafficTopup, setShowPremiumTrafficTopup] = useState(false);
   const [selectedTrafficPackage, setSelectedTrafficPackage] = useState<number | null>(null);
   const [showServerManagement, setShowServerManagement] = useState(false);
   const [selectedServersToUpdate, setSelectedServersToUpdate] = useState<string[]>([]);
@@ -669,6 +672,9 @@ export default function Subscription() {
                 />
               </div>
 
+              {/* ─── Premium Traffic — серверы с отдельным лимитом, как на главной ─── */}
+              <PremiumTrafficRow items={subscription.premium_traffic ?? []} />
+
               {/* ─── Connect Device Button ─── */}
               {subscription.subscription_url && (
                 <HoverBorderGradient
@@ -1041,6 +1047,18 @@ export default function Subscription() {
               />
             </div>
           )}
+
+          {/* Buy premium traffic — сам скрывается, если премиум-серверов нет */}
+          <div className="mt-4">
+            <PremiumTrafficTopupSheet
+              open={showPremiumTrafficTopup}
+              onOpen={() => setShowPremiumTrafficTopup(true)}
+              onClose={() => setShowPremiumTrafficTopup(false)}
+              subscriptionId={subscriptionId}
+              purchaseOptions={purchaseOptions}
+              isDark={isDark}
+            />
+          </div>
 
           {/* Server Management - only in classic mode */}
           {!isTariffsMode && (
