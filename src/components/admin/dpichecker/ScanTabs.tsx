@@ -206,8 +206,8 @@ export function ScanResult({ actionId }: { actionId: number }) {
         {isProbe(scan) && (
           <span className="text-xs tabular-nums text-dark-400">
             {t('admin.dpichecker.probe.cost', {
-              fixed: (scan.fixed_cost ?? 0).toFixed(4),
-              traffic: (scan.traffic_cost ?? 0).toFixed(4),
+              fixed: Number(scan.fixed_cost ?? 0).toFixed(4),
+              traffic: Number(scan.traffic_cost ?? 0).toFixed(4),
               mb: (Number(scan.traffic_bytes ?? 0) / 1_000_000).toFixed(2),
             })}
           </span>

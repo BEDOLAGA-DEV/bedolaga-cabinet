@@ -29,7 +29,7 @@ interface TotalStepProps {
 }
 
 const PROBE_MODES: ProbeMode[] = ['auto', 'server', 'noserver'];
-export const usd4 = (value: number | null | undefined) => (value ?? 0).toFixed(4);
+export const usd4 = (value: number | string | null | undefined) => Number(value ?? 0).toFixed(4);
 
 function Stat({ label, value, bad = false }: { label: string; value: string; bad?: boolean }) {
   return (
