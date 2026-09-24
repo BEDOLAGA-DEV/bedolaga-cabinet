@@ -36,7 +36,8 @@ function chipClass(state: GroupState | 'on' | 'off' | 'dead'): string {
   if (state === 'all' || state === 'on') {
     return cn(CHIP_BASE, 'border-accent-500/50 bg-accent-500/15 text-accent-300');
   }
-  if (state === 'part') return cn(CHIP_BASE, 'border-accent-500/30 bg-accent-500/5 text-dark-100');
+  if (state === 'part')
+    return cn(CHIP_BASE, 'border-accent-500/50 border-dashed bg-transparent text-accent-300');
   if (state === 'dead')
     return cn(CHIP_BASE, 'cursor-not-allowed border-dark-700 text-dark-600 line-through');
   return cn(CHIP_BASE, 'border-dark-700 text-dark-300 hover:border-dark-500 hover:text-dark-100');

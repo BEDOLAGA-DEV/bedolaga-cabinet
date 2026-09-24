@@ -128,6 +128,7 @@ export default function AdminDpiChecker() {
             tabs={tabs}
             onChange={setTab}
             label={t('admin.dpichecker.tabs.label')}
+            scrollOnMobile
           />
           <TabBody link={link} canRun={canRun} />
         </>
