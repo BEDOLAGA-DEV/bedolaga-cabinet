@@ -29,6 +29,7 @@ const api = vi.hoisted(() => ({
   getButtons: vi.fn(),
   preview: vi.fn(),
   previewEmail: vi.fn(),
+  previewAudience: vi.fn(),
   createCombined: vi.fn(),
 }));
 
@@ -50,6 +51,12 @@ beforeEach(() => {
   api.previewEmail.mockImplementation(async (target: string) => ({
     target,
     count: target === 'user_42' ? 1 : 3,
+  }));
+  api.previewAudience.mockImplementation(async ({ audience }) => ({
+    count: audience.conditions[0]?.field === 'email_user' ? 1 : 3,
+    offset: 0,
+    limit: 50,
+    users: [],
   }));
   api.createCombined.mockResolvedValue({ id: 900 });
 });
@@ -81,10 +88,20 @@ describe('AdminBroadcastCreate — email-адресаты', () => {
     });
 
     await waitFor(() =>
-      expect(api.previewEmail).toHaveBeenCalledWith('user_42', expect.anything()),
+      expect(api.previewAudience).toHaveBeenCalledWith(
+        expect.objectContaining({
+          channel: 'email',
+          audience: {
+            conditions: [
+              expect.objectContaining({ field: 'email_user', operator: 'eq', value: '42' }),
+            ],
+          },
+        }),
+      ),
     );
-    expect(await screen.findByText('admin.broadcasts.singleUser:egor@example.com')).toBeTruthy();
-    expect(await screen.findByText(/^1 admin\.broadcasts\.recipients$/)).toBeTruthy();
+    expect((screen.getByRole('combobox', { name: 'Email' }) as HTMLInputElement).value).toBe(
+      'egor@example.com',
+    );
 
     fireEvent.change(screen.getByPlaceholderText('admin.broadcasts.emailSubjectPlaceholder'), {
       target: { value: 'Тема' },
@@ -96,7 +113,14 @@ describe('AdminBroadcastCreate — email-адресаты', () => {
 
     await waitFor(() =>
       expect(api.createCombined).toHaveBeenCalledWith(
-        expect.objectContaining({ channel: 'email', target: 'user_42' }),
+        expect.objectContaining({
+          channel: 'email',
+          audience: {
+            conditions: [
+              expect.objectContaining({ field: 'email_user', operator: 'eq', value: '42' }),
+            ],
+          },
+        }),
         expect.anything(),
       ),
     );
@@ -104,25 +128,36 @@ describe('AdminBroadcastCreate — email-адресаты', () => {
 
   it('после перезагрузки без state подпись — по id', async () => {
     await renderPage('/admin/broadcasts/create?email_user=42');
-    expect(await screen.findByText('admin.broadcasts.singleUser:#42')).toBeTruthy();
+    expect(
+      ((await screen.findByRole('combobox', { name: 'Email' })) as HTMLInputElement).value,
+    ).toBe('#42');
   });
 
   it('промогруппы — отдельной группой фильтров email', async () => {
     await renderPage('/admin/broadcasts/create');
     fireEvent.click(screen.getByText('admin.broadcasts.enableEmail'));
-    fireEvent.click(await screen.findByText('admin.broadcasts.selectEmailFilterPlaceholder'));
-
-    expect(await screen.findByText('admin.broadcasts.filterGroups.promo_group')).toBeTruthy();
-    fireEvent.click(screen.getByText('Продвинутый'));
+    const fields = await screen.findAllByRole('combobox', {
+      name: 'admin.broadcasts.audience.field',
+    });
+    fireEvent.change(fields[1], { target: { value: 'promo_group' } });
+    const values = screen.getAllByRole('combobox', { name: 'admin.broadcasts.audience.value' });
+    fireEvent.change(values[1], { target: { value: 'promo_group_7' } });
 
     await waitFor(() =>
-      expect(api.previewEmail).toHaveBeenCalledWith('promo_group_7', expect.anything()),
+      expect(api.previewAudience).toHaveBeenCalledWith(
+        expect.objectContaining({
+          channel: 'email',
+          audience: {
+            conditions: [expect.objectContaining({ field: 'promo_group', value: 'promo_group_7' })],
+          },
+        }),
+      ),
     );
   });
 
   it('мусор в email_user игнорируется — обычная форма', async () => {
     await renderPage('/admin/broadcasts/create?email_user=abc');
-    expect(screen.queryByText(/admin\.broadcasts\.singleUser/)).toBeNull();
+    expect(screen.queryByRole('combobox', { name: 'Email' })).toBeNull();
     expect(api.previewEmail).not.toHaveBeenCalled();
   });
 });
