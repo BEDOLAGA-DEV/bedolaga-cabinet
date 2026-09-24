@@ -514,7 +514,7 @@ export function BroadcastAudienceEditor({
                     </option>
                   </select>
                 ) : choice?.kind === 'number' || choice?.kind === 'fixed' ? (
-                  <span className="flex items-center text-sm text-dark-400">
+                  <span className="flex items-center justify-center text-center text-sm text-dark-400">
                     {choice.kind === 'number'
                       ? condition.field === 'traffic_gt'
                         ? '>'
@@ -537,7 +537,9 @@ export function BroadcastAudienceEditor({
                   </select>
                 )}
                 {choice?.kind === 'date' ? (
-                  <div className="flex flex-wrap items-center gap-2">
+                  <div
+                    className={`grid min-w-0 gap-2 ${condition.operator === 'between' ? 'grid-cols-1 xl:grid-cols-2' : 'grid-cols-1'}`}
+                  >
                     <DateField
                       value={condition.value}
                       onChange={(value) => changeCondition(index, { value })}
@@ -547,6 +549,7 @@ export function BroadcastAudienceEditor({
                           : undefined
                       }
                       placeholder={t('admin.broadcasts.atomic.dateFrom', 'Дата')}
+                      className="input flex min-w-0 items-center gap-2 whitespace-nowrap text-left"
                     />
                     {condition.operator === 'between' && (
                       <DateField
@@ -554,6 +557,7 @@ export function BroadcastAudienceEditor({
                         onChange={(value) => changeCondition(index, { value_to: value })}
                         min={condition.value || undefined}
                         placeholder={t('admin.broadcasts.atomic.dateTo', 'До')}
+                        className="input flex min-w-0 items-center gap-2 whitespace-nowrap text-left"
                       />
                     )}
                   </div>
