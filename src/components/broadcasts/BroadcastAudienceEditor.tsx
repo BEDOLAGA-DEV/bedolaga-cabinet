@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import { useFocusTrap } from '../../hooks/useFocusTrap';
 import {
   adminBroadcastsApi,
   type BroadcastAudience,
@@ -51,6 +52,9 @@ export function BroadcastAudienceEditor({
 }: Props) {
   const { t } = useTranslation();
   const [showUsers, setShowUsers] = useState(false);
+  const dialogRef = useFocusTrap<HTMLDivElement>(showUsers, {
+    onEscape: () => setShowUsers(false),
+  });
   const [offset, setOffset] = useState(0);
   const pageSize = 50;
 
@@ -212,10 +216,12 @@ export function BroadcastAudienceEditor({
           role="presentation"
         >
           <div
+            ref={dialogRef}
             className="w-full max-w-xl rounded-xl border border-dark-700 bg-dark-900 p-5 shadow-xl"
             role="dialog"
             aria-modal="true"
             aria-label={t('admin.broadcasts.audience.users', 'Получатели рассылки')}
+            tabIndex={-1}
           >
             <div className="mb-4 flex items-center justify-between gap-3">
               <h3 className="text-lg font-semibold text-dark-100">
