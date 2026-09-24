@@ -6451,6 +6451,32 @@
         "resolved": "Resolves to {{value}}",
         "invalid": "Skipped (not a domain or IP): {{items}}",
         "refreshed": "Lists updated: {{value}}"
+      },
+      "monitors": {
+        "intro": "Scheduled checks. Run results go to the bot’s admin chat: alerts and recoveries, every run if “also report success” is on. The DPI//CHECKER bot also messages you about runs in Telegram — turn that off in their bot.",
+        "foreign": "Created on the DPI//CHECKER site",
+        "every": "every {{hours}} h",
+        "active": "Monitor active",
+        "noRuns": "Not run yet",
+        "fails": "failures in a row: {{count}}",
+        "lastNext": "Last run: {{last}} · next: {{next}}",
+        "delete": "Turn off",
+        "deleteConfirm": "Turn off the monitor (history is kept)",
+        "empty": "No monitors yet — create one in the check form with “On schedule”.",
+        "paused": {
+          "insufficient_balance": "Paused: the DPI//CHECKER balance ran out",
+          "deleted_via_api": "Off",
+          "other": "Paused"
+        }
+      },
+      "history": {
+        "all": "All",
+        "filter": "What to show",
+        "mine": "Only mine",
+        "by": "admin #{{id}}",
+        "empty": "No launches yet.",
+        "more": "Show more",
+        "spend": "Spent by admins"
       }
     }
   },

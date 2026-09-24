@@ -6117,6 +6117,32 @@
         "resolved": "解析为 {{value}}",
         "invalid": "已跳过（不是域名或 IP）：{{items}}",
         "refreshed": "列表更新时间：{{value}}"
+      },
+      "monitors": {
+        "intro": "按计划的检测。运行结果发送到机器人的管理员聊天：告警和恢复；开启“成功时也通知”则每次运行都发送。DPI//CHECKER 机器人也会在 Telegram 中给您发消息——请在其机器人中关闭。",
+        "foreign": "在 DPI//CHECKER 网站创建",
+        "every": "每 {{hours}} 小时",
+        "active": "监控已启用",
+        "noRuns": "尚未运行",
+        "fails": "连续失败：{{count}}",
+        "lastNext": "上次运行：{{last}} · 下次：{{next}}",
+        "delete": "关闭",
+        "deleteConfirm": "关闭监控（历史会保留）",
+        "empty": "还没有监控——在检测表单中选择“按计划”创建。",
+        "paused": {
+          "insufficient_balance": "已暂停：DPI//CHECKER 余额不足",
+          "deleted_via_api": "已关闭",
+          "other": "已暂停"
+        }
+      },
+      "history": {
+        "all": "全部",
+        "filter": "显示内容",
+        "mine": "仅我的",
+        "by": "管理员 #{{id}}",
+        "empty": "暂无运行记录。",
+        "more": "显示更多",
+        "spend": "各管理员花费"
       }
     }
   },

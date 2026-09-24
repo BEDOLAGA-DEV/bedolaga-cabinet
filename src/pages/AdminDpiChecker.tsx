@@ -20,6 +20,8 @@ import { IconTabs } from '../components/admin/IconTabs';
 import { CheckForm } from '../components/admin/dpichecker/CheckForm';
 import { CheckResult } from '../components/admin/dpichecker/CheckResult';
 import { CheremshaTab } from '../components/admin/dpichecker/CheremshaTab';
+import { HistoryTab } from '../components/admin/dpichecker/HistoryTab';
+import { MonitorsTab } from '../components/admin/dpichecker/MonitorsTab';
 import { NoisyTab, ProbeTab, ScanResult } from '../components/admin/dpichecker/ScanTabs';
 import { type DpiLink, readLink, TABS, type Tab } from '../components/admin/dpichecker/deepLink';
 import type { PanelKind } from '../components/admin/dpichecker/TargetsStep';
@@ -54,6 +56,8 @@ function TabBody({ link, canRun }: { link: DpiLink; canRun: boolean }) {
   if (link.check) return <CheckResult key={link.check} actionId={link.check} />;
   if (link.scan) return <ScanResult key={link.scan} actionId={link.scan} />;
   if (link.tab === 'cheremsha') return <CheremshaTab />;
+  if (link.tab === 'monitors') return <MonitorsTab />;
+  if (link.tab === 'history') return <HistoryTab />;
   if (link.tab === 'noisy' || link.tab === 'probe') {
     if (!canRun) return <section data-tab={link.tab} />;
     return link.tab === 'noisy' ? <NoisyTab /> : <ProbeTab />;
