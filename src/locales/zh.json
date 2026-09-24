@@ -5887,6 +5887,29 @@
         "openSettings": "打开 DPI//CHECKER 设置",
         "openSite": "打开 dpichecker.st",
         "envNote": "如果机器人通过环境文件配置，其值优先于面板设置：请修改文件并重启机器人。"
+      },
+      "locations": {
+        "russia": "俄罗斯",
+        "china": "中国",
+        "iran": "伊朗",
+        "turkmenistan": "土库曼斯坦"
+      },
+      "pops": {
+        "optimal": "最佳选择",
+        "all": "全部可用",
+        "random": "随机 10 个",
+        "clear": "清除",
+        "districts": "联邦区",
+        "republics": "共和国",
+        "search": "按地区或运营商搜索",
+        "loading": "正在加载检测点",
+        "loadFailed": "无法加载检测点。",
+        "nothingFound": "未找到。",
+        "wholeRegion": "选择整个地区",
+        "dead": "该检测点当前不可用",
+        "anyOperator": "任意",
+        "optimalFailed": "无法获取最佳组合，请重试。",
+        "groupEmpty": "该联邦区当前没有可用检测点。"
       }
     }
   },

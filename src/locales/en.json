@@ -6221,6 +6221,29 @@
         "openSettings": "Open DPI//CHECKER settings",
         "openSite": "Open dpichecker.st",
         "envNote": "If the bot is configured via an environment file, its values override the cabinet settings: edit the file and restart the bot."
+      },
+      "locations": {
+        "russia": "Russia",
+        "china": "China",
+        "iran": "Iran",
+        "turkmenistan": "Turkmenistan"
+      },
+      "pops": {
+        "optimal": "Optimal set",
+        "all": "All available",
+        "random": "Random 10",
+        "clear": "clear",
+        "districts": "Districts",
+        "republics": "Republics",
+        "search": "Search by region or operator",
+        "loading": "Loading points of presence",
+        "loadFailed": "Could not load points.",
+        "nothingFound": "Nothing found.",
+        "wholeRegion": "Select the whole region",
+        "dead": "This point is down right now",
+        "anyOperator": "Any",
+        "optimalFailed": "Could not get the optimal set, try again.",
+        "groupEmpty": "No points are available in this district right now."
       }
     }
   },
