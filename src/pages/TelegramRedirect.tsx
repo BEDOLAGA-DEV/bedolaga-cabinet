@@ -9,6 +9,10 @@ import { isInTelegramWebApp, getTelegramInitData } from '../hooks/useTelegramSDK
 import { tokenStorage } from '../utils/token';
 import { getSafeRedirectPath } from '../utils/safeRedirect';
 import { CheckIcon, XIcon, ExclamationIcon } from '@/components/icons';
+import { safeLocal, safeSession } from '../utils/safeStorage';
+import { useLegalConsentGate } from '../hooks/useLegalConsentGate';
+import LegalConsentGate from '../components/LegalConsentGate';
+import { getApiErrorMessage } from '../utils/api-error';
 
 const MAX_RETRY_ATTEMPTS = 3;
 const RETRY_COUNT_KEY = 'telegram_redirect_retry_count';
@@ -28,10 +32,13 @@ export default function TelegramRedirect() {
       isLoading: state.isLoading,
     })),
   );
-  const [status, setStatus] = useState<'loading' | 'success' | 'error' | 'not-telegram'>('loading');
+  const [status, setStatus] = useState<
+    'loading' | 'success' | 'error' | 'not-telegram' | 'consent'
+  >('loading');
   const [errorMessage, setErrorMessage] = useState('');
+  const consent = useLegalConsentGate();
   const [retryCount, setRetryCount] = useState(() => {
-    const stored = sessionStorage.getItem(RETRY_COUNT_KEY);
+    const stored = safeSession.getItem(RETRY_COUNT_KEY);
     return stored ? parseInt(stored, 10) : 0;
   });
 
@@ -85,9 +92,19 @@ export default function TelegramRedirect() {
         // Small delay for nice UX
         schedule(() => navigate(redirectTo), 800);
       } catch (err: unknown) {
+        // Новый пользователь без согласия: бэк ответил 428 — это не сбой входа,
+        // показываем чекбоксы и повторяем вход с теми же initData и галочками.
+        const needsConsent = consent.capture(err, async (accepted) => {
+          await loginWithTelegram(initData, accepted);
+          setStatus('success');
+          navigate(redirectTo);
+        });
+        if (needsConsent) {
+          setStatus('consent');
+          return;
+        }
         console.error('Telegram auth failed:', err);
-        const error = err as { response?: { data?: { detail?: string } } };
-        setErrorMessage(error.response?.data?.detail || t('auth.telegramRequired'));
+        setErrorMessage(getApiErrorMessage(err, t('auth.telegramRequired')));
         setStatus('error');
       }
     };
@@ -96,25 +113,31 @@ export default function TelegramRedirect() {
     schedule(initTelegram, 300);
 
     return () => timers.forEach(clearTimeout);
-  }, [loginWithTelegram, navigate, isAuthenticated, authLoading, redirectTo, t]);
+  }, [loginWithTelegram, navigate, isAuthenticated, authLoading, redirectTo, t, consent.capture]);
 
   // Handle retry with limit to prevent infinite loops
   const handleRetry = () => {
     if (retryCount >= MAX_RETRY_ATTEMPTS) {
       setErrorMessage(t('telegramRedirect.maxRetries'));
-      sessionStorage.removeItem(RETRY_COUNT_KEY);
+      safeSession.removeItem(RETRY_COUNT_KEY);
       return;
     }
     const newCount = retryCount + 1;
     setRetryCount(newCount);
-    sessionStorage.setItem(RETRY_COUNT_KEY, String(newCount));
+    // Счётчик читается после reload, поэтому память тут не считается: если
+    // сохранить некуда, лимит попыток не сработает никогда и пользователь
+    // останется крутить перезагрузку. Тогда сразу говорим, что попытки исчерпаны.
+    if (!safeSession.setItem(RETRY_COUNT_KEY, String(newCount))) {
+      setErrorMessage(t('telegramRedirect.maxRetries'));
+      return;
+    }
 
     // Clear all cached auth state to prevent stale token/initData loops
     tokenStorage.clearTokens();
-    sessionStorage.removeItem('tapps/launchParams');
-    sessionStorage.removeItem('telegram_init_data');
-    localStorage.removeItem('cabinet-auth');
-    localStorage.removeItem('tg_user_id');
+    safeSession.removeItem('tapps/launchParams');
+    safeSession.removeItem('telegram_init_data');
+    safeLocal.removeItem('cabinet-auth');
+    safeLocal.removeItem('tg_user_id');
 
     setStatus('loading');
     setErrorMessage('');
@@ -124,7 +147,7 @@ export default function TelegramRedirect() {
   // Clear retry count on successful auth
   useEffect(() => {
     if (status === 'success') {
-      sessionStorage.removeItem(RETRY_COUNT_KEY);
+      safeSession.removeItem(RETRY_COUNT_KEY);
     }
   }, [status]);
 
@@ -182,6 +205,13 @@ export default function TelegramRedirect() {
                 {t('telegramRedirect.loginAlternative')}
               </button>
             </div>
+          </div>
+        )}
+
+        {/* Consent State: аккаунт новый, бэк ждёт галочки «ознакомлен» */}
+        {status === 'consent' && (
+          <div className="mt-8 text-left">
+            <LegalConsentGate gate={consent} />
           </div>
         )}
 

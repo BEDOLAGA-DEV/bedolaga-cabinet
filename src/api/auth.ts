@@ -11,6 +11,7 @@ import type {
   ServerCompleteResponse,
   TokenResponse,
   User,
+  UserAvatarResponse,
 } from '../types';
 
 export const authApi = {
@@ -143,6 +144,18 @@ export const authApi = {
     return response.data;
   },
 
+  /**
+   * Повторная отправка письма с экрана «Проверьте почту» — до входа в аккаунт.
+   *
+   * Отдельная ручка от resendVerification: та требует токен, которого у только
+   * что зарегистрировавшегося ещё нет. Ответ одинаковый для любого адреса,
+   * поэтому по нему нельзя судить, существует ли аккаунт.
+   */
+  resendVerificationPublic: async (email: string): Promise<{ message: string }> => {
+    const response = await apiClient.post('/cabinet/auth/email/register/resend', { email });
+    return response.data;
+  },
+
   refreshToken: async (refreshToken: string): Promise<TokenResponse> => {
     const response = await apiClient.post<TokenResponse>('/cabinet/auth/refresh', {
       refresh_token: refreshToken,
@@ -171,6 +184,12 @@ export const authApi = {
 
   getMe: async (): Promise<User> => {
     const response = await apiClient.get<User>('/cabinet/auth/me');
+    return response.data;
+  },
+
+  // Фото профиля Telegram, которое бот берёт у Telegram сам (initData несёт его не всегда).
+  getMyAvatar: async (): Promise<UserAvatarResponse> => {
+    const response = await apiClient.get<UserAvatarResponse>('/cabinet/auth/me/avatar');
     return response.data;
   },
 

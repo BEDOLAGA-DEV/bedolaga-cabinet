@@ -603,7 +603,7 @@ function GiftLinkShareState({
         </h1>
         {tariffName && periodDays !== null && (
           <p className="mt-1 text-sm text-dark-300">
-            {tariffName} — {periodDays} {t('landing.days', 'days')}
+            {tariffName} — {periodDays} {t('landing.daysAccess')}
           </p>
         )}
       </div>
@@ -781,9 +781,12 @@ export default function PurchaseSuccess() {
     purchaseStatus.cabinet_email;
 
   return (
-    <div className="flex min-h-dvh items-center justify-center bg-dark-950 px-4">
+    // py-10 — карточка выше экрана не липнет к его краям (как у подарка и купона).
+    // anywhere — почта получателя в центрованной колонке переносится, а не
+    // растягивает колонку шире карточки (наследуется всеми состояниями).
+    <div className="flex min-h-dvh items-center justify-center bg-dark-950 px-4 py-10">
       <div
-        className="w-full max-w-md rounded-2xl border border-dark-800/50 bg-dark-900/50 p-8"
+        className="w-full max-w-md rounded-2xl border border-dark-800/50 bg-dark-900/50 p-8 [overflow-wrap:anywhere]"
         aria-live="polite"
         aria-atomic="true"
       >

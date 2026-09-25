@@ -15,5 +15,11 @@ export default defineConfig({
   test: {
     include: ['src/**/*.test.{ts,tsx}'],
     environment: 'node',
+    // Node >= 25 включает web storage по умолчанию и заводит собственный
+    // globalThis.localStorage, отдающий undefined без --localstorage-file.
+    // populateGlobal() у vitest пропускает ключ окна jsdom, если такой ключ уже
+    // есть на globalThis и его нет в KEYS, — и Storage от jsdom туда не доезжает.
+    // Сетап возвращает настоящий Storage; на Node 24 (.nvmrc, CI) он ничего не делает.
+    setupFiles: ['./src/test/setup.ts'],
   },
 });

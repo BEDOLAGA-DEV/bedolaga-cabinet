@@ -1,0 +1,206 @@
+// @vitest-environment jsdom
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { STORAGE_KEYS } from '@/config/constants';
+import {
+  buildWebManifest,
+  hasSameOriginManifest,
+  readBrandHint,
+  setAppNameMeta,
+  setAppleTouchIcon,
+  setDocumentTitle,
+  setWebManifest,
+  writeBrandHint,
+} from './documentBranding';
+import { letterFaviconDataUri, setFavicon, squareIconDataUri } from './favicon';
+
+/**
+ * <head> под бренд инсталляции: вкладка, ярлыки Android/iOS, манифест и
+ * подсказка первой отрисовки. Раньше заголовок и фавикон ставились только после
+ * авторизации, а имя приложения для ярлыков не ставилось вовсе — ярлык на
+ * Android получал «VPN» из статического index.html.
+ */
+
+beforeEach(() => {
+  document.head.innerHTML = '<link rel="icon" href="data:image/svg+xml,static" />';
+  document.title = 'VPN';
+  localStorage.clear();
+});
+
+afterEach(() => {
+  document.head.innerHTML = '';
+});
+
+describe('setFavicon', () => {
+  it('заменяет узел <link rel="icon">, а не только href', () => {
+    const before = document.querySelector('link[rel="icon"]');
+    setFavicon('data:image/png;base64,AAAA');
+
+    const links = document.querySelectorAll('link[rel="icon"]');
+    expect(links).toHaveLength(1);
+    expect(links[0]).not.toBe(before);
+    expect(links[0].getAttribute('href')).toBe('data:image/png;base64,AAAA');
+  });
+
+  it('не трогает apple-touch-icon', () => {
+    setAppleTouchIcon('data:image/png;base64,TOUCH');
+    setFavicon('data:image/png;base64,AAAA');
+    expect(document.querySelector('link[rel="apple-touch-icon"]')?.getAttribute('href')).toBe(
+      'data:image/png;base64,TOUCH',
+    );
+  });
+});
+
+describe('letterFaviconDataUri', () => {
+  it('рисует первую букву заглавной и экранирует спецсимволы', () => {
+    const uri = letterFaviconDataUri('zero');
+    expect(uri.startsWith('data:image/svg+xml,')).toBe(true);
+    expect(decodeURIComponent(uri)).toContain('>Z</text>');
+
+    expect(decodeURIComponent(letterFaviconDataUri('<'))).toContain('>&lt;</text>');
+  });
+
+  it('красится в переданные цвета', () => {
+    const svg = decodeURIComponent(
+      letterFaviconDataUri('A', { background: '#123456', foreground: '#ffffff' }),
+    );
+    expect(svg).toContain('fill="#123456"');
+    expect(svg).toContain('fill="#ffffff"');
+  });
+});
+
+describe('squareIconDataUri', () => {
+  it('без canvas отдаёт null сразу, а не ждёт загрузку картинки', async () => {
+    // jsdom не реализует 2D-контекст: раньше ожидание onload было вечным.
+    await expect(
+      squareIconDataUri('data:image/svg+xml,x', 192, { background: '#0a0f1a' }),
+    ).resolves.toBeNull();
+  });
+});
+
+describe('заголовок и имя приложения', () => {
+  it('setDocumentTitle не затирает заголовок, переписанный страницей', () => {
+    const applied = setDocumentTitle('ZeroPing', null);
+    expect(document.title).toBe('ZeroPing');
+
+    // Лендинг поставил свой SEO-заголовок — новое имя бренда его не сбивает.
+    document.title = 'Купить VPN за 99 ₽';
+    expect(setDocumentTitle('ZeroPing 2', applied)).toBe(applied);
+    expect(document.title).toBe('Купить VPN за 99 ₽');
+  });
+
+  it('setAppNameMeta создаёт и обновляет метатеги для ярлыков', () => {
+    setAppNameMeta('ZeroPing');
+    setAppNameMeta('ZeroPing VPN');
+    for (const name of ['application-name', 'apple-mobile-web-app-title']) {
+      const metas = document.querySelectorAll(`meta[name="${name}"]`);
+      expect(metas).toHaveLength(1);
+      expect(metas[0].getAttribute('content')).toBe('ZeroPing VPN');
+    }
+  });
+});
+
+describe('веб-манифест', () => {
+  it('строится с абсолютными start_url/scope и данными бренда', () => {
+    const manifest = buildWebManifest({
+      name: 'ZeroPing',
+      icons: [{ src: 'data:image/png;base64,X', sizes: '192x192', type: 'image/png' }],
+      themeColor: '#0a0f1a',
+      backgroundColor: '#0a0f1a',
+    });
+    expect(manifest.name).toBe('ZeroPing');
+    expect(manifest.short_name).toBe('ZeroPing');
+    expect(String(manifest.start_url)).toBe(`${window.location.origin}/`);
+    expect(String(manifest.scope)).toBe(`${window.location.origin}/`);
+    expect(manifest.display).toBe('standalone');
+  });
+
+  it('setWebManifest вешает один <link rel="manifest"> с data: URI', () => {
+    const input = {
+      name: 'ZeroPing',
+      icons: [],
+      themeColor: '#0a0f1a',
+      backgroundColor: '#0a0f1a',
+    };
+    setWebManifest(input);
+    setWebManifest({ ...input, name: 'ZeroPing VPN' });
+
+    const links = document.querySelectorAll('link[rel="manifest"]');
+    expect(links).toHaveLength(1);
+    const href = links[0].getAttribute('href') ?? '';
+    expect(href.startsWith('data:application/manifest+json,')).toBe(true);
+    const parsed = JSON.parse(decodeURIComponent(href.slice(href.indexOf(',') + 1)));
+    expect(parsed.name).toBe('ZeroPing VPN');
+  });
+});
+
+describe('манифест бота из index.html', () => {
+  it('ссылка на эндпоинт того же сайта считается рабочим манифестом', () => {
+    document.head.insertAdjacentHTML(
+      'beforeend',
+      '<link rel="manifest" href="/api/cabinet/branding/manifest.webmanifest" />',
+    );
+    expect(hasSameOriginManifest()).toBe(true);
+  });
+
+  it('без ссылки, с data: URI или с API на другом домене — нет', () => {
+    expect(hasSameOriginManifest()).toBe(false);
+
+    const link = document.createElement('link');
+    link.rel = 'manifest';
+    link.href = 'data:application/manifest+json,%7B%7D';
+    document.head.appendChild(link);
+    expect(hasSameOriginManifest()).toBe(false);
+
+    // start_url манифеста с чужого домена не приведёт на сайт кабинета.
+    link.href = 'https://api.example/cabinet/branding/manifest.webmanifest';
+    expect(hasSameOriginManifest()).toBe(false);
+  });
+});
+
+describe('подсказка первой отрисовки', () => {
+  it('пишется под ключом STORAGE_KEYS.BRAND_HINT и читается обратно', () => {
+    writeBrandHint({ name: 'ZeroPing', letter: 'Z', icon: 'data:image/png;base64,x' });
+    expect(localStorage.getItem(STORAGE_KEYS.BRAND_HINT)).toContain('ZeroPing');
+    expect(readBrandHint()).toEqual({
+      name: 'ZeroPing',
+      letter: 'Z',
+      icon: 'data:image/png;base64,x',
+    });
+  });
+
+  it('SVG-иконку не сохраняет и не отдаёт: Safari рисует её белой плиткой с буквой', () => {
+    // Инлайн-скрипт index.html ставит иконку из подсказки до загрузки бандла, а
+    // Safari берёт фавикон только в этот момент. SVG в подсказке значил бы, что
+    // Safari никогда не увидит ни логотип по ссылке на бота, ни цвета монограммы.
+    writeBrandHint({ name: 'ZeroPing', letter: 'Z', icon: 'data:image/svg+xml,%3Csvg%3E' });
+    expect(readBrandHint()).toEqual({ name: 'ZeroPing', letter: 'Z', icon: undefined });
+
+    // Подсказка, записанная прошлой сборкой, тоже не должна отдавать SVG.
+    localStorage.setItem(
+      STORAGE_KEYS.BRAND_HINT,
+      JSON.stringify({ name: 'ZeroPing', letter: 'Z', icon: 'data:image/svg+xml,%3Csvg%3E' }),
+    );
+    expect(readBrandHint()).toEqual({ name: 'ZeroPing', letter: 'Z', icon: undefined });
+  });
+
+  it('сохраняет фавикон обычного для логотипа размера', () => {
+    // PNG 64×64 с canvas у фотографичного логотипа — около 20 тысяч символов.
+    // Порог в 16 000 выбрасывал такую иконку, и до старта React вкладка
+    // показывала монограмму сборки, хотя имя из подсказки уже стояло.
+    const icon = `data:image/png;base64,${'A'.repeat(20_000)}`;
+    writeBrandHint({ name: 'ZeroPing', letter: 'Z', icon });
+    expect(readBrandHint()).toEqual({ name: 'ZeroPing', letter: 'Z', icon });
+  });
+
+  it('не сохраняет неправдоподобно большую иконку и отбрасывает мусор', () => {
+    writeBrandHint({
+      name: 'ZeroPing',
+      letter: 'Z',
+      icon: `data:image/png;base64,${'A'.repeat(200_000)}`,
+    });
+    expect(readBrandHint()).toEqual({ name: 'ZeroPing', letter: 'Z', icon: undefined });
+
+    localStorage.setItem(STORAGE_KEYS.BRAND_HINT, '{"name":42}');
+    expect(readBrandHint()).toBeNull();
+  });
+});

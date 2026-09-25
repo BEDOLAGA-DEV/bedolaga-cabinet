@@ -1,9 +1,10 @@
 import { useState, useRef, useMemo, useEffect } from 'react';
-import { useNavigate } from 'react-router';
+import { useLocation, useNavigate, useSearchParams } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import {
   adminBroadcastsApi,
+  emailUserTarget,
   type BroadcastFilter,
   type TariffFilter,
   type CombinedBroadcastCreateRequest,
@@ -34,21 +35,38 @@ const FILTER_GROUP_LABEL_KEYS: Record<string, string> = {
   source: 'admin.broadcasts.filterGroups.source',
   tariff: 'admin.broadcasts.filterGroups.tariff',
   email: 'admin.broadcasts.filterGroups.email',
+  promo_group: 'admin.broadcasts.filterGroups.promo_group',
+  recipient: 'admin.broadcasts.filterGroups.recipient',
 };
+
+/** `?email_user=<id>` — письмо одному человеку, открытое из карточки пользователя. */
+function parseEmailUserParam(value: string | null): number | null {
+  if (!value || !/^\d+$/.test(value)) return null;
+  const id = Number(value);
+  return id > 0 ? id : null;
+}
 
 export default function AdminBroadcastCreate() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [searchParams] = useSearchParams();
+  const location = useLocation();
+  const presetEmailUserId = parseEmailUserParam(searchParams.get('email_user'));
+  // Почту кладёт в state карточка пользователя; после перезагрузки остаётся только id.
+  const presetEmailUserLabel =
+    (location.state as { emailUserLabel?: string } | null)?.emailUserLabel ?? null;
 
   // Channel toggles (both can be enabled)
-  const [telegramEnabled, setTelegramEnabled] = useState(true);
-  const [emailEnabled, setEmailEnabled] = useState(false);
+  const [telegramEnabled, setTelegramEnabled] = useState(presetEmailUserId === null);
+  const [emailEnabled, setEmailEnabled] = useState(presetEmailUserId !== null);
 
   // Separate targets per channel
   const [telegramTarget, setTelegramTarget] = useState('');
-  const [emailTarget, setEmailTarget] = useState('');
+  const [emailTarget, setEmailTarget] = useState(
+    presetEmailUserId !== null ? emailUserTarget(presetEmailUserId) : '',
+  );
   const [showTelegramFilters, setShowTelegramFilters] = useState(false);
   const [showEmailFilters, setShowEmailFilters] = useState(false);
 
@@ -154,6 +172,25 @@ export default function AdminBroadcastCreate() {
     mutationFn: adminBroadcastsApi.previewEmail,
   });
 
+  // Письмо одному человеку: сразу показать, дойдёт ли оно (0 — нет подтверждённой почты).
+  const presetEmailTarget = presetEmailUserId !== null ? emailUserTarget(presetEmailUserId) : null;
+  const previewEmail = emailPreviewMutation.mutate;
+  useEffect(() => {
+    if (presetEmailTarget) previewEmail(presetEmailTarget);
+  }, [presetEmailTarget, previewEmail]);
+
+  const singleUserEmailFilter = useMemo<BroadcastFilter | null>(() => {
+    if (presetEmailTarget === null) return null;
+    return {
+      key: presetEmailTarget,
+      label: t('admin.broadcasts.singleUser', {
+        name: presetEmailUserLabel ?? `#${presetEmailUserId}`,
+      }),
+      count: null,
+      group: 'recipient',
+    };
+  }, [presetEmailTarget, presetEmailUserLabel, presetEmailUserId, t]);
+
   // Create mutation (used for single-channel sends)
   const createMutation = useMutation({
     mutationFn: adminBroadcastsApi.createCombined,
@@ -192,14 +229,23 @@ export default function AdminBroadcastCreate() {
     if (!emailFiltersData) return {};
     const groups: Record<string, BroadcastFilter[]> = {};
 
+    if (singleUserEmailFilter) {
+      groups['recipient'] = [singleUserEmailFilter];
+    }
+
     emailFiltersData.filters.forEach((f) => {
       const group = f.group || 'email';
       if (!groups[group]) groups[group] = [];
       groups[group].push(f);
     });
 
+    const promoGroupFilters = emailFiltersData.promo_group_filters ?? [];
+    if (promoGroupFilters.length > 0) {
+      groups['promo_group'] = promoGroupFilters;
+    }
+
     return groups;
-  }, [emailFiltersData]);
+  }, [emailFiltersData, singleUserEmailFilter]);
 
   // Selected filter info for each channel
   const selectedTelegramFilter = useMemo(() => {
@@ -213,9 +259,12 @@ export default function AdminBroadcastCreate() {
   }, [telegramTarget, filtersData]);
 
   const selectedEmailFilter = useMemo(() => {
-    if (!emailTarget || !emailFiltersData) return null;
-    return emailFiltersData.filters.find((f) => f.key === emailTarget) ?? null;
-  }, [emailTarget, emailFiltersData]);
+    if (!emailTarget) return null;
+    if (singleUserEmailFilter?.key === emailTarget) return singleUserEmailFilter;
+    if (!emailFiltersData) return null;
+    const all = [...emailFiltersData.filters, ...(emailFiltersData.promo_group_filters ?? [])];
+    return all.find((f) => f.key === emailTarget) ?? null;
+  }, [emailTarget, emailFiltersData, singleUserEmailFilter]);
 
   // Handle toggling channels
   const handleToggleTelegram = () => {
@@ -465,7 +514,7 @@ export default function AdminBroadcastCreate() {
                   : t('admin.broadcasts.selectEmailFilterPlaceholder')}
             </span>
             {recipientsCount !== null && (
-              <span className="rounded-full bg-accent-500/20 px-2 py-0.5 text-xs text-accent-400">
+              <span className="shrink-0 whitespace-nowrap rounded-full bg-accent-500/20 px-2 py-0.5 text-xs text-accent-400">
                 {recipientsCount} {t('admin.broadcasts.recipients')}
               </span>
             )}
@@ -927,8 +976,8 @@ export default function AdminBroadcastCreate() {
       )}
 
       {/* Footer */}
-      <div className="card flex items-center justify-between">
-        <div className="text-sm text-dark-400">
+      <div className="card flex flex-wrap items-center justify-between gap-3">
+        <div className="min-w-0 text-sm text-dark-400">
           {(telegramRecipientsCount !== null || emailRecipientsCount !== null) && (
             <span>
               {t('admin.broadcasts.willBeSent')}:{' '}
@@ -946,7 +995,7 @@ export default function AdminBroadcastCreate() {
             </span>
           )}
         </div>
-        <div className="flex gap-3">
+        <div className="ml-auto flex gap-3">
           <button onClick={() => navigate('/admin/broadcasts')} className="btn-secondary">
             {t('common.cancel')}
           </button>

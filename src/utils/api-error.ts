@@ -10,6 +10,14 @@ export function isEndpointMissingError(err: unknown): boolean {
   return axios.isAxiosError(err) && err.response?.status === 404;
 }
 
+/**
+ * True when the backend answered 429 — the caller hit a rate limit and should
+ * say «слишком часто, попробуйте позже» rather than «не удалось отправить».
+ */
+export function isRateLimitedError(err: unknown): boolean {
+  return axios.isAxiosError(err) && err.response?.status === 429;
+}
+
 export function getApiErrorMessage(err: unknown, fallback: string): string {
   if (axios.isAxiosError(err)) {
     const detail = err.response?.data?.detail;
@@ -22,6 +30,12 @@ export function getApiErrorMessage(err: unknown, fallback: string): string {
           return field ? `${field}: ${e.msg}` : (e.msg ?? '');
         })
         .join('; ');
+    }
+    // Структурные ошибки бэка ({code, message, ...}: 428 «нужно согласие», 403
+    // maintenance и т.п.) — берём message. Объект в тексте ошибки роняет React (#31).
+    if (detail && typeof detail === 'object') {
+      const message = (detail as { message?: unknown }).message;
+      if (typeof message === 'string') return message;
     }
     return fallback;
   }

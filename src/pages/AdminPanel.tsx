@@ -9,6 +9,7 @@ import { useTelegramSDK } from '@/hooks/useTelegramSDK';
 import { cn } from '@/lib/utils';
 import {
   ArrowUpIcon,
+  BellIcon,
   BroadcastIcon,
   CabinetIcon,
   ChartBarIcon,
@@ -18,6 +19,7 @@ import {
   FileTextIcon,
   GiftIcon,
   HistoryIcon,
+  LifebuoyIcon,
   LockIcon,
   MailIcon,
   MegaphoneIcon,
@@ -48,6 +50,8 @@ import {
   WalletIcon,
   WheelIcon,
   XIcon,
+  RadarIcon,
+  WallIcon,
 } from '@/components/icons';
 
 const CABINET_VERSION = __APP_VERSION__;
@@ -72,6 +76,7 @@ const icons = {
   megaphone: <MegaphoneIcon />,
   send: <SendIcon />,
   pin: <PinIcon />,
+  bell: <BellIcon />,
   'circle-dot': <WheelIcon />,
   handshake: <PartnerIcon />,
   'arrow-up': <ArrowUpIcon />,
@@ -81,10 +86,13 @@ const icons = {
   app: <CabinetIcon />,
   server: <ServerIcon />,
   remnawave: <RemnawaveIcon />,
+  radar: <RadarIcon />,
+  wall: <WallIcon />,
   mail: <MailIcon />,
   refresh: <SyncIcon />,
   shield: <ShieldIcon />,
   'user-check': <UserPlusIcon />,
+  lifebuoy: <LifebuoyIcon />,
   lock: <LockIcon />,
   scroll: <HistoryIcon />,
   'list-checks': <ClipboardIcon />,
@@ -244,12 +252,29 @@ const sections: AdminSection[] = [
         to: '/admin/pinned-messages',
         permission: 'pinned_messages:read',
       },
+      {
+        name: 'admin.nav.reminders',
+        icon: 'bell',
+        to: '/admin/reminders',
+        permission: 'user_reminders:read',
+      },
       { name: 'admin.nav.wheel', icon: 'circle-dot', to: '/admin/wheel', permission: 'wheel:read' },
       {
         name: 'admin.nav.partners',
         icon: 'handshake',
         to: '/admin/partners',
         permission: 'partners:read',
+      },
+      {
+        // Раньше страница уровней открывалась только из Партнёры → Настройки, и
+        // включив многоуровневую схему, админ не находил её в меню вовсе.
+        // Пункт показывается всегда, а не при включённой схеме: саму схему
+        // переключают с этой же страницы, и условный пункт замкнул бы круг.
+        name: 'admin.nav.referralLevels',
+        icon: 'trending',
+        to: '/admin/partners/referral-levels',
+        // Совпадает с правом, которое требуют и маршрут, и все эндпоинты уровней.
+        permission: 'partners:settings',
       },
       {
         name: 'admin.nav.withdrawals',
@@ -284,6 +309,16 @@ const sections: AdminSection[] = [
         to: '/admin/settings',
         permission: 'settings:read',
       },
+      {
+        // Настройки grace-доступа существуют и на общей странице настроек — там это
+        // двенадцать несвязанных строк. Тут они собраны вместе с проверкой конфигурации
+        // и состоянием сессий, поэтому и пункт меню отдельный.
+        name: 'admin.nav.graceAccess',
+        icon: 'lifebuoy',
+        to: '/admin/grace-access',
+        // То же право, что у страницы настроек и у эндпоинтов раздела.
+        permission: 'settings:read',
+      },
       { name: 'admin.nav.apps', icon: 'app', to: '/admin/apps', permission: 'apps:read' },
       {
         name: 'admin.nav.servers',
@@ -296,6 +331,18 @@ const sections: AdminSection[] = [
         icon: 'remnawave',
         to: '/admin/remnawave',
         permission: 'remnawave:read',
+      },
+      {
+        name: 'admin.nav.reachability',
+        icon: 'radar',
+        to: '/admin/reachability',
+        permission: 'reachability:read',
+      },
+      {
+        name: 'admin.nav.dpichecker',
+        icon: 'wall',
+        to: '/admin/dpichecker',
+        permission: 'dpichecker:read',
       },
       {
         name: 'admin.nav.emailTemplates',
@@ -342,6 +389,12 @@ const sections: AdminSection[] = [
         icon: 'scroll',
         to: '/admin/audit-log',
         permission: 'audit_log:read',
+      },
+      {
+        name: 'admin.nav.systemErrors',
+        icon: 'shield',
+        to: '/admin/system-errors',
+        permission: 'system_errors:read',
       },
     ],
   },

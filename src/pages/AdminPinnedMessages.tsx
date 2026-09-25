@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { adminPinnedMessagesApi, PinnedMessageResponse } from '../api/adminPinnedMessages';
+import { htmlToText } from '../utils/htmlToText';
+import { adminPinnedMessagesApi, type PinnedMessageResponse } from '../api/adminPinnedMessages';
 import { AdminBackButton } from '../components/admin';
 import { useNativeDialog } from '../platform/hooks/useNativeDialog';
 import {
@@ -88,7 +89,7 @@ function PinnedMessageCard({
 
           {/* Content preview */}
           <p className="line-clamp-3 text-sm text-dark-100">
-            {message.content || t('admin.pinnedMessages.noContent')}
+            {htmlToText(message.content) || t('admin.pinnedMessages.noContent')}
           </p>
 
           {/* Date */}
@@ -247,8 +248,8 @@ export default function AdminPinnedMessages() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex min-w-0 flex-1 basis-48 items-center gap-3">
           <AdminBackButton />
           <div className="flex items-center gap-3">
             <div className="rounded-lg bg-error-500/20 p-2 text-error-400">

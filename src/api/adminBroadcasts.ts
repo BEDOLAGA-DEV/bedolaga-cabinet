@@ -25,7 +25,12 @@ export interface BroadcastFiltersResponse {
 
 export interface EmailFiltersResponse {
   filters: BroadcastFilter[];
+  /** By the user's primary promo group; key `promo_group_{id}`. Absent on older bots. */
+  promo_group_filters?: BroadcastFilter[];
 }
+
+/** Email target for exactly one user (sent from the admin user card). */
+export const emailUserTarget = (userId: number) => `user_${userId}`;
 
 export interface TariffForBroadcast {
   id: number;
@@ -182,6 +187,21 @@ export const adminBroadcastsApi = {
       {
         target,
       },
+    );
+    return response.data;
+  },
+
+  // Письмо рассылки так, как его получит адресат: фрагмент — в общей обёртке
+  // писем из редактора шаблонов, полный документ — как есть. Тем же кодом,
+  // что и отправка, чтобы превью не расходилось с письмом.
+  renderEmail: async (data: {
+    subject: string;
+    html_content: string;
+    language?: string;
+  }): Promise<{ subject: string; body_html: string }> => {
+    const response = await apiClient.post<{ subject: string; body_html: string }>(
+      '/cabinet/admin/broadcasts/email-render',
+      data,
     );
     return response.data;
   },

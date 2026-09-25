@@ -468,14 +468,14 @@ function FaqQuestionRow({
 
   return (
     <div className="space-y-3 rounded-xl border border-dark-700 bg-dark-800/50 p-4">
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <input
           value={title}
           onChange={(e) => {
             setSaveError(null);
             setTitle(e.target.value);
           }}
-          className="input flex-1"
+          className="input min-w-0 flex-1 basis-full sm:basis-0"
           placeholder={t('admin.legalPages.questionTitle')}
         />
         <Toggle
@@ -747,7 +747,7 @@ export default function AdminLegalPages() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <AdminBackButton to="/admin/info-pages" />
+        <AdminBackButton to="/admin" />
         <div>
           <h1 className="text-xl font-bold text-dark-100">{t('admin.legalPages.title')}</h1>
           <p className="text-sm text-dark-400">{t('admin.legalPages.subtitle')}</p>

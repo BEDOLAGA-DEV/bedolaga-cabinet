@@ -13,6 +13,7 @@ import { AnimatedCheckmark } from '@/components/ui/AnimatedCheckmark';
 import { AnimatedCrossmark } from '@/components/ui/AnimatedCrossmark';
 import { loadTopUpPendingInfo, clearTopUpPendingInfo } from '../utils/topUpStorage';
 import { isPaidStatus, isFailedStatus } from '../utils/paymentStatus';
+import { ClockIcon } from '@/components/icons';
 
 // ── Constants ────────────────────────────────────────────────
 const MAX_POLL_MS = 10 * 60 * 1000; // 10 minutes
@@ -41,7 +42,7 @@ function PendingState({ amountKopeks }: { amountKopeks: number | null }) {
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="flex flex-col items-center gap-6 text-center"
+      className="flex flex-col items-center gap-6 text-center [overflow-wrap:anywhere]"
     >
       <Spinner className="h-16 w-16 border-[3px]" />
       <div>
@@ -69,7 +70,7 @@ function SuccessState({ amountKopeks }: { amountKopeks: number | null }) {
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="flex flex-col items-center gap-6 text-center"
+      className="flex flex-col items-center gap-6 text-center [overflow-wrap:anywhere]"
     >
       <AnimatedCheckmark />
 
@@ -105,7 +106,7 @@ function FailedState({ amountKopeks }: { amountKopeks: number | null }) {
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="flex flex-col items-center gap-6 text-center"
+      className="flex flex-col items-center gap-6 text-center [overflow-wrap:anywhere]"
     >
       <AnimatedCrossmark />
 
@@ -136,23 +137,10 @@ function TimeoutState({ onRetry, onGoBack }: { onRetry: () => void; onGoBack: ()
     <motion.div
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="flex flex-col items-center gap-6 text-center"
+      className="flex flex-col items-center gap-6 text-center [overflow-wrap:anywhere]"
     >
       <div className="flex h-20 w-20 items-center justify-center rounded-full bg-dark-800/50">
-        <svg
-          className="h-10 w-10 text-dark-400"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          strokeWidth={2}
-          aria-hidden="true"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
-          />
-        </svg>
+        <ClockIcon className="h-10 w-10 text-dark-400" />
       </div>
       <div>
         <h1 className="text-xl font-bold text-dark-50">{t('balance.topUpResult.timeout')}</h1>

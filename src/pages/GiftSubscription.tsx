@@ -29,6 +29,8 @@ import { copyToClipboard } from '../utils/clipboard';
 import { buildGiftClaimArtifacts } from '../utils/giftShare';
 import { getApiErrorMessage } from '../utils/api-error';
 import { formatPrice } from '../utils/format';
+import { pickBestValue } from '../utils/bestValue';
+import { BestValueBadge, bestValueFrame } from '../components/subscription/BestValueBadge';
 import { useCurrency } from '../hooks/useCurrency';
 import { usePlatform, useHaptic } from '@/platform';
 import { openPaymentUrl } from '../utils/openPaymentUrl';
@@ -151,52 +153,59 @@ function TariffCard({
       aria-checked={isSelected}
       onClick={onSelect}
       className={cn(
-        'flex w-full items-center gap-4 rounded-2xl border p-4 text-start transition-all duration-200',
-        isSelected
-          ? 'border-accent-500/50 bg-accent-500/5'
-          : 'border-dark-800/50 bg-dark-900/50 hover:border-dark-700/50',
+        'block w-full rounded-2xl p-4 text-start transition-all duration-200',
+        tariff.is_highlighted
+          ? cn(bestValueFrame(isSelected), isSelected ? 'bg-accent-500/5' : 'bg-dark-900/50')
+          : isSelected
+            ? 'border border-accent-500/50 bg-accent-500/5'
+            : 'border border-dark-800/50 bg-dark-900/50 hover:border-dark-700/50',
       )}
     >
-      {/* Gift circle icon */}
-      <div
-        className={cn(
-          'flex h-12 w-12 shrink-0 items-center justify-center rounded-full transition-colors',
-          isSelected ? 'bg-accent-500/20' : 'bg-dark-800/50',
-        )}
-      >
-        <GiftIcon
+      {/* Отметка оператора первой строкой, как в покупке и продлении: этот тариф
+          выбран сразу — подпись объясняет почему. */}
+      {tariff.is_highlighted && <BestValueBadge className="mb-3" />}
+      <div className="flex items-center gap-4">
+        {/* Gift circle icon */}
+        <div
           className={cn(
-            'h-6 w-6 transition-colors',
-            isSelected ? 'text-accent-400' : 'text-dark-400',
-          )}
-        />
-      </div>
-
-      {/* Info */}
-      <div className="min-w-0 flex-1">
-        <p className="text-base font-bold text-dark-50">{tariff.name}</p>
-        <p
-          className={cn(
-            'text-xs font-medium uppercase tracking-wider transition-colors',
-            isSelected ? 'text-accent-400' : 'text-dark-400',
+            'flex h-12 w-12 shrink-0 items-center justify-center rounded-full transition-colors',
+            isSelected ? 'bg-accent-500/20' : 'bg-dark-800/50',
           )}
         >
-          {tariff.traffic_limit_gb > 0
-            ? `${tariff.traffic_limit_gb} ${t('gift.gbShort')}`
-            : t('gift.unlimitedTraffic')}
-          {' \u2022 '}
-          {t('gift.deviceCount', { count: tariff.device_limit })}
-        </p>
-      </div>
+          <GiftIcon
+            className={cn(
+              'h-6 w-6 transition-colors',
+              isSelected ? 'text-accent-400' : 'text-dark-400',
+            )}
+          />
+        </div>
 
-      {/* Checkmark circle */}
-      <div
-        className={cn(
-          'flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 transition-colors',
-          isSelected ? 'border-accent-500 bg-accent-500' : 'border-dark-600',
-        )}
-      >
-        {isSelected && <CheckIcon className="h-3.5 w-3.5 text-white" />}
+        {/* Info */}
+        <div className="min-w-0 flex-1">
+          <p className="text-base font-bold text-dark-50">{tariff.name}</p>
+          <p
+            className={cn(
+              'text-xs font-medium uppercase tracking-wider transition-colors',
+              isSelected ? 'text-accent-400' : 'text-dark-400',
+            )}
+          >
+            {tariff.traffic_limit_gb > 0
+              ? `${tariff.traffic_limit_gb} ${t('gift.gbShort')}`
+              : t('gift.unlimitedTraffic')}
+            {' \u2022 '}
+            {t('gift.deviceCount', { count: tariff.device_limit })}
+          </p>
+        </div>
+
+        {/* Checkmark circle */}
+        <div
+          className={cn(
+            'flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 transition-colors',
+            isSelected ? 'border-accent-500 bg-accent-500' : 'border-dark-600',
+          )}
+        >
+          {isSelected && <CheckIcon className="h-3.5 w-3.5 text-white" />}
+        </div>
       </div>
     </button>
   );
@@ -219,40 +228,45 @@ function PeriodCard({
     <button
       type="button"
       onClick={onSelect}
+      aria-pressed={isSelected}
+      // Выбор — подсветкой и голубой рамкой, как в покупке и продлении. Сплошная
+      // голубая заливка выбранного съедала золотую плашку «Выгодно».
       className={cn(
-        'flex w-full items-center justify-between rounded-2xl p-4 transition-all duration-200',
-        isSelected
-          ? 'bg-gradient-to-r from-accent-500 to-accent-600 text-white shadow-lg shadow-accent-500/25'
-          : 'bg-dark-800/50 hover:bg-dark-700/50',
+        'block w-full rounded-2xl p-4 text-start transition-all duration-200',
+        period.is_highlighted
+          ? cn(bestValueFrame(isSelected), isSelected ? 'bg-accent-500/10' : 'bg-dark-800/50')
+          : isSelected
+            ? 'border border-accent-500 bg-accent-500/10'
+            : 'border border-transparent bg-dark-800/50 hover:bg-dark-700/50',
       )}
     >
-      {/* Left: period + discount */}
-      <div className="flex flex-col items-start gap-1">
-        <span className="text-lg font-bold">{formatPeriodLabel(period.days, t)}</span>
-        {hasDiscount && period.discount_percent != null && (
-          <span
-            className={cn(
-              'rounded-md px-2 py-0.5 text-xs font-bold',
-              isSelected ? 'bg-white/20 text-on-accent' : 'bg-accent-500/20 text-accent-400',
-            )}
-          >
-            -{period.discount_percent}%
+      {/* Отметка оператора первой строкой: этот период выбран сразу — подпись
+          объясняет почему. */}
+      {period.is_highlighted && <BestValueBadge className="mb-2" />}
+      <div className="flex items-center justify-between gap-3">
+        {/* Left: period + discount */}
+        <div className="flex min-w-0 flex-col items-start gap-1">
+          <span className="text-lg font-bold text-dark-50">
+            {formatPeriodLabel(period.days, t)}
           </span>
-        )}
-      </div>
+          {hasDiscount && period.discount_percent != null && (
+            <span className="rounded-md bg-accent-500/20 px-2 py-0.5 text-xs font-bold text-accent-400">
+              -{period.discount_percent}%
+            </span>
+          )}
+        </div>
 
-      {/* Right: prices */}
-      <div className="flex flex-col items-end gap-0.5">
-        <span className={cn('text-lg font-bold', isSelected ? 'text-white' : 'text-accent-400')}>
-          {formatPrice(period.price_kopeks)}
-        </span>
-        {hasDiscount && period.original_price_kopeks != null && (
-          <span
-            className={cn('text-xs line-through', isSelected ? 'text-white/50' : 'text-dark-500')}
-          >
-            {formatPrice(period.original_price_kopeks)}
+        {/* Right: prices */}
+        <div className="flex shrink-0 flex-col items-end gap-0.5">
+          <span className="whitespace-nowrap text-lg font-bold text-accent-400">
+            {formatPrice(period.price_kopeks)}
           </span>
-        )}
+          {hasDiscount && period.original_price_kopeks != null && (
+            <span className="whitespace-nowrap text-xs text-dark-500 line-through">
+              {formatPrice(period.original_price_kopeks)}
+            </span>
+          )}
+        </div>
       </div>
     </button>
   );
@@ -402,16 +416,30 @@ function BuyTabContent({
   const [selectedSubOption, setSelectedSubOption] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  // Auto-select first tariff, period, method on config load
+  // Тариф и период выбираются ОДНИМ эффектом: отмеченные оператором выгодными,
+  // иначе первые по счёту. Двумя эффектами это разъезжалось — второй записывал
+  // «прошлый тариф» уже после того, как первый выбрал период, и затирал выбор,
+  // сделанный человеком между этими двумя проходами.
+  const lastTariffIdRef = useRef<number | null>(null);
   useEffect(() => {
-    if (config.tariffs.length > 0 && selectedTariffId === null) {
-      const firstTariff = config.tariffs[0];
-      setSelectedTariffId(firstTariff.id);
-      if (firstTariff.periods.length > 0 && selectedPeriodDays === null) {
-        setSelectedPeriodDays(firstTariff.periods[0].days);
-      }
+    if (config.tariffs.length === 0) return;
+    const tariff = selectedTariffId
+      ? config.tariffs.find((t) => t.id === selectedTariffId)
+      : (pickBestValue(config.tariffs) ?? config.tariffs[0]);
+    if (!tariff) return;
+    if (selectedTariffId !== tariff.id) setSelectedTariffId(tariff.id);
+    // Период пересчитываем только при смене тарифа: внутри одного тарифа выбор
+    // человека важнее отметки оператора.
+    if (lastTariffIdRef.current === tariff.id) return;
+    lastTariffIdRef.current = tariff.id;
+    if (tariff.periods.length > 0) {
+      const period = pickBestValue(tariff.periods) ?? tariff.periods[0];
+      setSelectedPeriodDays(period.days);
     }
+  }, [config.tariffs, selectedTariffId]);
 
+  // Способ оплаты по умолчанию — первый из доступных.
+  useEffect(() => {
     if (config.payment_methods.length > 0 && selectedMethod === null) {
       const firstMethod = config.payment_methods[0];
       setSelectedMethod(firstMethod.method_id);
@@ -421,19 +449,7 @@ function BuyTabContent({
         setSelectedSubOption(null);
       }
     }
-  }, [config, selectedTariffId, selectedPeriodDays, selectedMethod]);
-
-  // When tariff changes, auto-select its first period
-  useEffect(() => {
-    if (!selectedTariffId) return;
-    const tariff = config.tariffs.find((t) => t.id === selectedTariffId);
-    if (tariff && tariff.periods.length > 0) {
-      const hasCurrent = tariff.periods.some((p) => p.days === selectedPeriodDays);
-      if (!hasCurrent) {
-        setSelectedPeriodDays(tariff.periods[0].days);
-      }
-    }
-  }, [selectedTariffId, config.tariffs, selectedPeriodDays]);
+  }, [config.payment_methods, selectedMethod]);
 
   // Derived data
   const selectedTariff = useMemo(
@@ -866,7 +882,7 @@ function ActivateTabContent({ initialCode }: { initialCode?: string | null }) {
   return (
     <div className="flex flex-col items-center gap-6 py-8">
       {/* Icon + title */}
-      <div className="flex flex-col items-center gap-3 text-center">
+      <div className="flex flex-col items-center gap-3 text-center [overflow-wrap:anywhere]">
         <div className="flex h-16 w-16 items-center justify-center rounded-full bg-accent-500/20">
           <KeyIcon className="h-8 w-8 text-accent-400" />
         </div>
@@ -965,7 +981,8 @@ function CopiedToast({ onDismiss }: { onDismiss: () => void }) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 20 }}
       transition={{ duration: 0.2, ease: 'easeOut' }}
-      className="fixed inset-x-0 bottom-6 z-50 flex justify-center"
+      // На мобильном стоит над нижней панелью: на bottom-6 тост целиком уходил за неё.
+      className="fixed inset-x-0 bottom-[var(--mobile-nav-clearance)] z-50 flex justify-center lg:bottom-6"
     >
       <div className="flex items-center gap-2 rounded-full border border-dark-700/50 bg-dark-900/95 px-5 py-2.5 shadow-2xl shadow-black/40 backdrop-blur-md">
         <CheckIcon className="h-4 w-4 text-success-400" />
@@ -1345,8 +1362,10 @@ export default function GiftSubscription() {
                 aria-selected={activeTab === tab.id}
                 aria-controls={`tabpanel-${tab.id}`}
                 onClick={() => setActiveTab(tab.id)}
+                // Равные вкладки, узкие поля и шрифт на телефоне: «Мои подарки»
+                // переносилась в две строки, и пилюля была выше соседних.
                 className={cn(
-                  'flex-1 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200',
+                  'min-w-0 flex-1 basis-0 whitespace-nowrap rounded-xl px-1.5 py-2.5 text-[13px] font-medium transition-all duration-200 sm:px-3 sm:text-sm',
                   activeTab === tab.id
                     ? 'bg-accent-500 text-on-accent shadow-sm'
                     : 'text-dark-400 hover:text-dark-200',

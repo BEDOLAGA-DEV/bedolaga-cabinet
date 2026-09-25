@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router';
+import { useLocation, useParams, useNavigate, Link } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { campaignsApi, type CampaignBonusType } from '../api/campaigns';
 import type { AdminCampaignChartData } from '../api/campaigns';
-import { AdminBackButton } from '../components/admin';
+import { AdminBackButton, backTo } from '../components/admin';
 import { DailyChart, PeriodComparison, StatCard } from '../components/stats';
 import { PARTNER_STATS } from '../constants/partner';
 import { useCurrency } from '../hooks/useCurrency';
@@ -46,6 +46,7 @@ export default function AdminCampaignStats() {
   const numericId = id ? Number(id) : null;
   const isValidId = numericId !== null && !isNaN(numericId);
   const navigate = useNavigate();
+  const location = useLocation();
   const haptic = useHaptic();
   const { formatWithCurrency } = useCurrency();
   const [copiedBot, setCopiedBot] = useState(false);
@@ -255,7 +256,8 @@ export default function AdminCampaignStats() {
             <div className="text-xs text-dark-500">{t('admin.campaigns.stats.registrations')}</div>
           </div>
           <div className="rounded-xl border border-dark-700 bg-dark-800 p-4 text-center">
-            <div className="truncate text-xl font-bold text-success-400 sm:text-2xl">
+            {/* Без truncate: многоточие съедало цифры суммы. */}
+            <div className="text-lg font-bold text-success-400 [overflow-wrap:anywhere] sm:text-2xl">
               {formatWithCurrency(stats.total_revenue_kopeks / PARTNER_STATS.KOPEKS_DIVISOR)}
             </div>
             <div className="text-xs text-dark-500">{t('admin.campaigns.stats.revenue')}</div>
@@ -406,7 +408,8 @@ export default function AdminCampaignStats() {
                       <Link
                         key={reg.id}
                         to={`/admin/users/${reg.id}`}
-                        className="flex items-center justify-between rounded-xl border border-dark-700/30 bg-dark-800/30 p-3 transition-colors hover:bg-dark-700/50"
+                        {...backTo(location)}
+                        className="flex items-center justify-between gap-3 rounded-xl border border-dark-700/30 bg-dark-800/30 p-3 transition-colors hover:bg-dark-700/50"
                       >
                         <div className="min-w-0 flex-1">
                           <div className="flex min-w-0 items-center gap-2">
@@ -426,7 +429,7 @@ export default function AdminCampaignStats() {
                             {new Date(reg.created_at).toLocaleDateString(i18n.language)}
                           </div>
                         </div>
-                        <div className="text-sm font-semibold text-success-400">
+                        <div className="shrink-0 text-sm font-semibold text-success-400">
                           {formatWithCurrency(
                             reg.total_earnings_kopeks / PARTNER_STATS.KOPEKS_DIVISOR,
                           )}
@@ -473,17 +476,18 @@ export default function AdminCampaignStats() {
                     <Link
                       key={reg.id}
                       to={`/admin/users/${reg.user_id}`}
-                      className="flex items-center justify-between rounded-lg bg-dark-700/50 p-3 transition-colors hover:bg-dark-700"
+                      {...backTo(location)}
+                      className="flex flex-col gap-2 rounded-lg bg-dark-700/50 p-3 transition-colors hover:bg-dark-700 sm:flex-row sm:items-center sm:justify-between"
                     >
-                      <div>
-                        <div className="font-medium text-dark-100">
+                      <div className="min-w-0">
+                        <div className="font-medium text-dark-100 [overflow-wrap:anywhere]">
                           {reg.first_name ||
                             reg.username ||
                             `${t('admin.campaigns.stats.users')} #${reg.user_id}`}
                         </div>
                         <div className="text-xs text-dark-500">{reg.telegram_id}</div>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-2">
                         {reg.has_paid && (
                           <span className="rounded bg-success-500/20 px-2 py-0.5 text-xs text-success-400">
                             {t('admin.campaigns.stats.paid')}

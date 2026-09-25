@@ -52,6 +52,10 @@ export interface DialogController {
 export interface ThemeController {
   setHeaderColor: (color: string) => void;
   setBottomBarColor: (color: string) => void;
+  /** Фон самого мини-приложения под страницей — обязан совпадать с фоном
+   *  страницы: на Android WebView прозрачен, и всё, что клиент не успел
+   *  отрисовать, просвечивает этим цветом. */
+  setBackgroundColor: (color: string) => void;
   getThemeParams: () => TelegramThemeParams | null;
 }
 
@@ -110,4 +114,13 @@ export interface PlatformContext {
 
   // Closing confirmation
   setClosingConfirmation: (enabled: boolean) => void;
+
+  // Скачать файл по готовой ссылке (сервер отдаёт его вложением). В Telegram — штатный downloadFile
+  // (Bot API 8.0+): `<a download>` там подменяет Mini App blob-страницей. Ссылка должна открываться
+  // без Authorization — бот выдаёт короткую подписанную.
+  downloadFile: (url: string, fileName: string) => Promise<void>;
+
+  // Экранная клавиатура: спрятать средствами платформы (Telegram — Bot API 9.1+).
+  // В браузере достаточно потери фокуса полем, там это no-op.
+  hideKeyboard: () => void;
 }

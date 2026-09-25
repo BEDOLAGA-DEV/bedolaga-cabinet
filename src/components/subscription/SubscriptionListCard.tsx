@@ -1,9 +1,18 @@
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router';
 import { useTheme } from '../../hooks/useTheme';
 import { getGlassColors } from '../../utils/glassTheme';
 import { useHaptic } from '../../platform';
-import { CalendarIcon, CheckIcon, ChevronRightIcon, DevicesIcon } from '@/components/icons';
+import {
+  CalendarIcon,
+  CheckIcon,
+  ChevronRightIcon,
+  DevicesIcon,
+  StarIcon,
+  XIcon,
+} from '@/components/icons';
 import type { SubscriptionListItem } from '../../types';
+import { needsTariff, tariffSelectionPath } from '@/utils/legacySubscription';
 import { connectFooterState } from './connectFooterState';
 import { SubscriptionConnectFooter } from './SubscriptionConnectFooter';
 
@@ -36,19 +45,21 @@ function StatusBadge({
   if (isTrial) {
     return (
       <span className="inline-flex items-center gap-1 rounded-full border border-warning-400/25 bg-warning-400/10 px-2 py-0.5 text-[10px] font-semibold text-warning-400">
-        <svg className="h-2.5 w-2.5" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
-        </svg>
+        <StarIcon filled className="h-2.5 w-2.5" />
         {t('subscription.statusTrial', 'Тестовая')}
       </span>
     );
   }
 
+  // Подложка и рамка берут шейд 500, а текст — 400. В светлой теме 300/400
+  // ремапятся в тёмный шейд (иначе статусный текст на белом не читается), и
+  // подложка из того же 400 темнела вместе с текстом: контраст надписи падал до
+  // 4.2. Шейд 500 в ремап не входит, поэтому плашка остаётся светлой подкраской.
   const color = isActive
-    ? 'bg-success-400/15 text-success-400 border-success-400/20'
+    ? 'bg-success-500/15 text-success-400 border-success-500/20'
     : isLimited
-      ? 'bg-warning-400/15 text-warning-400 border-warning-400/20'
-      : 'bg-error-400/15 text-error-400 border-error-400/20';
+      ? 'bg-warning-500/15 text-warning-400 border-warning-500/20'
+      : 'bg-error-500/15 text-error-400 border-error-500/20';
 
   const label = isActive
     ? t('subscription.statusActive', 'Активна')
@@ -203,7 +214,10 @@ export default function SubscriptionListCard({
             <CalendarIcon className="h-3.5 w-3.5 opacity-50" />
             {formatDate(subscription.end_date, i18n.language)}
           </span>
-          {!isTrial &&
+          {/* Старая подписка (куплена в классике, тарифа нет): автоплатёж ей
+              недоступен — статус не показываем, кнопка перехода ниже. */}
+          {!needsTariff(subscription) &&
+            !isTrial &&
             (() => {
               const isDaily = subscription.is_daily;
               const enabled = isDaily
@@ -214,27 +228,29 @@ export default function SubscriptionListCard({
                 : t('subscription.autopay', 'Автопродление');
               return (
                 <span
-                  className={`flex items-center gap-1 ${enabled ? 'text-success-400/70' : 'text-error-400/50'}`}
+                  className={`flex items-center gap-1 ${enabled ? 'text-success-400' : 'text-error-400'}`}
                 >
-                  {enabled ? (
-                    <CheckIcon className="h-3 w-3" />
-                  ) : (
-                    <svg
-                      className="h-3 w-3"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth={2.5}
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  )}
+                  {enabled ? <CheckIcon className="h-3 w-3" /> : <XIcon className="h-3 w-3" />}
                   {label}
                 </span>
               );
             })()}
         </div>
       </button>
+
+      {needsTariff(subscription) && (
+        // Старая подписка: единственный путь — витрина тарифов с этой подпиской.
+        // Настоящая кнопка, а не подпись внутри карточки: вся карточка ведёт на
+        // страницу подписки, а эта кнопка — сразу на выбор тарифа.
+        <Link
+          to={tariffSelectionPath(subscription.id)}
+          onClick={() => impact('light')}
+          className="btn-primary mx-4 mb-4 flex items-center justify-center gap-2 py-2.5 text-sm"
+        >
+          {t('subscription.cta.moveToTariff')}
+          <ChevronRightIcon className="h-4 w-4" />
+        </Link>
+      )}
 
       <SubscriptionConnectFooter
         state={footer}

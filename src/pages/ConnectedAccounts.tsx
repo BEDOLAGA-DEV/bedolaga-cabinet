@@ -10,7 +10,7 @@ import { Card } from '@/components/data-display/Card';
 import { Button } from '@/components/primitives/Button';
 import { staggerContainer, staggerItem } from '@/components/motion/transitions';
 import ProviderIcon from '../components/ProviderIcon';
-import { LINK_OAUTH_STATE_KEY, LINK_OAUTH_PROVIDER_KEY, getErrorDetail } from '../utils/oauth';
+import { getErrorDetail, saveLinkOAuthState } from '../utils/oauth';
 import { getApiErrorMessage } from '../utils/api-error';
 import { getTelegramInitData } from '../hooks/useTelegramSDK';
 import { usePlatform, useIsTelegram } from '@/platform/hooks/usePlatform';
@@ -32,7 +32,7 @@ export const LINK_TELEGRAM_STATE_KEY = 'link_telegram_state';
 const LINK_SCRIPT_LOAD_TIMEOUT_MS = 8000;
 
 /** Telegram account linking widget (browser only). Supports OIDC popup and legacy widget. */
-function TelegramLinkWidget() {
+export function TelegramLinkWidget() {
   const containerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const { showToast } = useToast();
@@ -241,8 +241,12 @@ function TelegramLinkWidget() {
 
   // Script failed to load - show unavailable message with bot link
   if (scriptFailed) {
+    // Свой key: без него React отдавал подсказке тот же <div>, что был
+    // контейнером виджета, а уборка виджета вручную чистит этот контейнер —
+    // подсказка и ссылка на бота появлялись и тут же пропадали, карточка
+    // оставалась пустой (в РФ без VPN telegram.org часто не грузится).
     return (
-      <div className="flex max-w-[200px] flex-col items-center gap-1.5">
+      <div key="telegram-fallback" className="flex max-w-[200px] flex-col items-center gap-1.5">
         <p className="break-words text-center text-xs text-dark-400">
           {t('profile.accounts.telegramLinkUnavailable')}
         </p>
@@ -279,7 +283,7 @@ function TelegramLinkWidget() {
     );
   }
 
-  return <div ref={containerRef} className="flex items-center" />;
+  return <div key="telegram-widget" ref={containerRef} className="flex items-center" />;
 }
 
 function LoadingSkeleton() {
@@ -449,8 +453,8 @@ export default function ConnectedAccounts() {
         navigate(`/merge/${response.merge_token}`, { replace: true });
       }
     },
-    onError: (err: { response?: { data?: { detail?: string } } }) => {
-      setEmailError(err.response?.data?.detail || t('profile.emailMergeCodeInvalid'));
+    onError: (err: unknown) => {
+      setEmailError(getApiErrorMessage(err, t('profile.emailMergeCodeInvalid')));
     },
   });
 
@@ -535,8 +539,9 @@ export default function ConnectedAccounts() {
       } else {
         // Regular browser: navigate within the same tab.
         // Save state in sessionStorage for the callback page to verify.
-        sessionStorage.setItem(LINK_OAUTH_STATE_KEY, state);
-        sessionStorage.setItem(LINK_OAUTH_PROVIDER_KEY, provider);
+        if (!saveLinkOAuthState(state, provider)) {
+          throw new Error('OAuth state is not persistable');
+        }
         window.location.href = authorize_url;
       }
     } catch (err: unknown) {
@@ -721,6 +726,12 @@ export default function ConnectedAccounts() {
                 )}
               </div>
             </div>
+
+            {confirmingUnlink === provider.provider && provider.forgets_email && (
+              <p className="mt-2 text-xs text-warning-400">
+                {t('profile.accounts.unlinkForgetsEmail', { email: provider.forgets_email })}
+              </p>
+            )}
 
             {/* Inline email linking form */}
             {provider.provider === 'email' && !provider.linked && (

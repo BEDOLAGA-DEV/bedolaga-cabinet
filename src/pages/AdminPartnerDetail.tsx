@@ -1,8 +1,8 @@
-import { useParams, useNavigate } from 'react-router';
+import { useLocation, useParams, useNavigate } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { partnerApi } from '../api/partners';
-import { AdminBackButton } from '../components/admin';
+import { AdminBackButton, backTo } from '../components/admin';
 import { useCurrency } from '../hooks/useCurrency';
 import { StatCard } from '@/components/stats';
 import { PageSkeleton, Skeleton } from '@/components/ui/skeleton';
@@ -52,6 +52,7 @@ export default function AdminPartnerDetail() {
   const { t } = useTranslation();
   const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const queryClient = useQueryClient();
   const { formatWithCurrency } = useCurrency();
 
@@ -227,7 +228,9 @@ export default function AdminPartnerDetail() {
                 {t('admin.partnerDetail.campaigns.assign')}
               </button>
               <button
-                onClick={() => navigate(`/admin/campaigns/create?partnerId=${userId}`)}
+                onClick={() =>
+                  navigate(`/admin/campaigns/create?partnerId=${userId}`, backTo(location))
+                }
                 className="rounded-lg bg-accent-500/20 px-3 py-1.5 text-xs font-medium text-accent-400 transition-colors hover:bg-accent-500/30"
               >
                 {t('admin.partnerDetail.campaigns.createNew')}
@@ -247,14 +250,16 @@ export default function AdminPartnerDetail() {
                     !campaign.is_active ? 'opacity-60' : ''
                   }`}
                 >
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0 flex-1">
-                      <div className="font-medium text-dark-100">{campaign.name}</div>
-                      <div className="font-mono text-xs text-dark-500">
+                      <div className="font-medium text-dark-100 [overflow-wrap:anywhere]">
+                        {campaign.name}
+                      </div>
+                      <div className="font-mono text-xs text-dark-500 break-all">
                         ?start={campaign.start_parameter}
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex shrink-0 items-center gap-2">
                       {campaign.is_active ? (
                         <span className="rounded bg-success-500/20 px-2 py-0.5 text-xs text-success-400">
                           {t('admin.partnerDetail.campaigns.active')}
@@ -274,7 +279,7 @@ export default function AdminPartnerDetail() {
                       </button>
                     </div>
                   </div>
-                  <div className="mt-2 grid grid-cols-3 gap-2 border-t border-dark-600/50 pt-2">
+                  <div className="mt-2 grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] gap-2 border-t border-dark-600/50 pt-2">
                     <div className="text-center">
                       <div className="text-sm font-medium text-dark-200">
                         {campaign.registrations_count}
@@ -293,7 +298,7 @@ export default function AdminPartnerDetail() {
                     </div>
                     <div className="text-center">
                       <div
-                        className={`text-sm font-medium ${campaign.earnings_kopeks > 0 ? 'text-success-400' : 'text-dark-400'}`}
+                        className={`whitespace-nowrap text-sm font-medium ${campaign.earnings_kopeks > 0 ? 'text-success-400' : 'text-dark-400'}`}
                       >
                         {formatWithCurrency(campaign.earnings_kopeks / 100)}
                       </div>

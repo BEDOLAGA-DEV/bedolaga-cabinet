@@ -1,8 +1,10 @@
+import { queryOptions } from '@tanstack/react-query';
+import { readThemeColorsHint } from '@/utils/themeColorsHint';
 import apiClient from './client';
 import {
-  ThemeSettings,
+  type ThemeSettings,
   DEFAULT_THEME_COLORS,
-  EnabledThemes,
+  type EnabledThemes,
   DEFAULT_ENABLED_THEMES,
 } from '../types/theme';
 
@@ -46,3 +48,23 @@ export const themeColorsApi = {
     return response.data;
   },
 };
+
+export const THEME_COLORS_QUERY_KEY = ['theme-colors'] as const;
+
+/**
+ * Единые параметры запроса палитры для всех, кто рисует ею на старте (провайдер,
+ * бренд во вкладке). Стартует с подсказки прошлого визита: initialDataUpdatedAt = 0
+ * помечает её заведомо устаревшей, запрос на сервер уходит сразу, но первый рендер
+ * идёт в операторских цветах, а не в дефолтных.
+ */
+export function themeColorsQueryOptions() {
+  return queryOptions({
+    queryKey: THEME_COLORS_QUERY_KEY,
+    queryFn: themeColorsApi.getColors,
+    initialData: () => readThemeColorsHint()?.colors,
+    initialDataUpdatedAt: 0,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnWindowFocus: false,
+    retry: 1,
+  });
+}

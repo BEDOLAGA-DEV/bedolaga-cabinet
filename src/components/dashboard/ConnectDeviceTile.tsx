@@ -5,6 +5,17 @@ import { useTheme } from '../../hooks/useTheme';
 import { useTrafficZone } from '../../hooks/useTrafficZone';
 import { getGlassColors } from '../../utils/glassTheme';
 import { HoverBorderGradient } from '../ui/hover-border-gradient';
+import { MonitorIcon } from '@/components/icons';
+
+/**
+ * До скольких устройств лимит показываем точками.
+ *
+ * Точка занимает 13px вместе с зазором, поэтому десять точек съедали 124px из
+ * ~272px плитки — тексту оставалось 80px, и «Подключить устройство» ломалось
+ * на четыре строки. Полоска-индикатор занимает фиксированные 64px при любом
+ * лимите, так что выше этого порога показываем её.
+ */
+const DOTS_MAX = 5;
 
 interface ConnectDeviceTileProps {
   subscription: {
@@ -60,23 +71,9 @@ export default function ConnectDeviceTile({
       {/* Monitor icon */}
       <div
         className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-[10px] transition-colors duration-500"
-        style={{ background: `rgba(${zone.mainVarRaw}, 0.07)` }}
+        style={{ background: `rgba(${zone.mainVarRaw}, 0.07)`, color: zone.mainVar }}
       >
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke={zone.mainVar}
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden="true"
-        >
-          <rect x="2" y="3" width="20" height="14" rx="2" />
-          <path d="M12 17v4M8 21h8" />
-          <path d="M12 8v4M10 10h4" opacity="0.7" />
-        </svg>
+        <MonitorIcon className="h-4 w-4" />
       </div>
 
       {/* Text */}
@@ -84,7 +81,7 @@ export default function ConnectDeviceTile({
         <div className="text-sm font-semibold tracking-tight text-dark-50">
           {t('dashboard.connectDevice')}
         </div>
-        <div className="mt-0.5 text-[11px] text-dark-50/30">
+        <div className="mt-0.5 text-[11px] text-dark-400">
           {subscription.device_limit === 0
             ? t('dashboard.devicesConnectedUnlimited', { used: connectedDevices })
             : t('dashboard.devicesOfMax', {
@@ -104,10 +101,10 @@ export default function ConnectDeviceTile({
 
       {/* Device indicator */}
       {subscription.device_limit === 0 ? (
-        <div className="flex flex-shrink-0 items-center text-lg text-dark-50/40" aria-hidden="true">
+        <div className="flex flex-shrink-0 items-center text-lg text-dark-400" aria-hidden="true">
           ∞
         </div>
-      ) : subscription.device_limit <= 10 ? (
+      ) : subscription.device_limit <= DOTS_MAX ? (
         <div className="flex flex-shrink-0 gap-1.5" aria-hidden="true">
           {Array.from({ length: subscription.device_limit }, (_, i) => (
             <div

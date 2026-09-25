@@ -99,7 +99,7 @@ export default function GiftClaim() {
   if (isLoading) {
     return (
       <Shell>
-        <SkeletonGroup className="flex flex-col items-center gap-5 text-center">
+        <SkeletonGroup className="flex flex-col items-center gap-5 text-center [overflow-wrap:anywhere]">
           <Skeleton className="h-10 w-10" />
           <div className="w-full space-y-2">
             <Skeleton className="mx-auto h-7 w-48" />
@@ -173,7 +173,7 @@ export default function GiftClaim() {
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="flex flex-col items-center gap-5 text-center"
+          className="flex flex-col items-center gap-5 text-center [overflow-wrap:anywhere]"
         >
           <AnimatedCheckmark />
           <h1 className="text-xl font-bold text-dark-50">
@@ -237,7 +237,7 @@ export default function GiftClaim() {
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="flex flex-col items-center gap-5 text-center"
+        className="flex flex-col items-center gap-5 text-center [overflow-wrap:anywhere]"
       >
         <div className="text-4xl">🎁</div>
         <div>

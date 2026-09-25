@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { hasLegacySubscription } from '../utils/legacySubscription';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Navigate, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
@@ -8,6 +9,7 @@ import { balanceApi } from '../api/balance';
 import { useTheme } from '../hooks/useTheme';
 import { getGlassColors } from '../utils/glassTheme';
 import { useAuthStore } from '../store/auth';
+import { getApiErrorMessage } from '../utils/api-error';
 import SubscriptionListCard from '../components/subscription/SubscriptionListCard';
 import TrialOfferCard from '../components/dashboard/TrialOfferCard';
 import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
@@ -69,6 +71,9 @@ export default function Subscriptions() {
   const hasActivePaid = subscriptions.some(
     (s) => !s.is_trial && (s.status === 'active' || s.status === 'limited'),
   );
+  // Старая подписка (без тарифа при включённых тарифах) в списке: «купить ещё»
+  // не предлагаем, её карточка ведёт на переход на тариф.
+  const hasLegacy = hasLegacySubscription(subscriptions);
 
   // Если у юзера нет подписок — проверяем доступность триала, иначе
   // (в multi-tariff) ему вообще негде увидеть оффер.
@@ -97,8 +102,8 @@ export default function Subscriptions() {
       queryClient.invalidateQueries({ queryKey: ['purchase-options'] });
       refreshUser();
     },
-    onError: (error: { response?: { data?: { detail?: string } } }) => {
-      setTrialError(error.response?.data?.detail || t('common.error'));
+    onError: (error: unknown) => {
+      setTrialError(getApiErrorMessage(error, t('common.error')));
     },
   });
 
@@ -115,7 +120,7 @@ export default function Subscriptions() {
           {t('subscriptions.title', 'Мои подписки')}
         </h1>
         {/* «+ Купить ещё» — только если уже есть платная активная подписка */}
-        {!isLoading && hasActivePaid && (
+        {!isLoading && !hasLegacy && hasActivePaid && (
           <button
             onClick={() => navigate('/subscription/purchase')}
             className="flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-xl px-4 py-2 text-sm font-medium transition-colors"
@@ -133,7 +138,7 @@ export default function Subscriptions() {
 
       {/* Есть подписки, но платной активной нет (только триал/истёкшие) —
           даём ЯВНУЮ primary-кнопку покупки: мы продаём подписки. */}
-      {!isLoading && subscriptions.length > 0 && !hasActivePaid && (
+      {!isLoading && subscriptions.length > 0 && !hasActivePaid && !hasLegacy && (
         <button
           onClick={() => navigate('/subscription/purchase')}
           className="flex w-full items-center justify-center gap-2 rounded-2xl bg-accent-500 p-3.5 text-sm font-semibold text-on-accent transition-colors hover:bg-accent-600"

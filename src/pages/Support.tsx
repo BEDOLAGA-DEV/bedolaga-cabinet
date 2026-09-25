@@ -365,14 +365,18 @@ export default function Support() {
         supportConfig.support_username &&
         resolveSupportContact(supportConfig) && (
           <motion.div variants={staggerItem} initial="initial" animate="animate">
-            <Card className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-dark-800">
+            {/* Длинный ник поддержки уводил «Написать» за край карточки, а карточка
+                обрезает всё, что за краем: текст сжимается, кнопка — нет. */}
+            <Card className="flex items-center justify-between gap-3">
+              <div className="flex min-w-0 items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-dark-800">
                   <ChatIcon className="h-5 w-5 text-dark-400" />
                 </div>
-                <div>
+                <div className="min-w-0">
                   <div className="text-sm font-medium text-dark-100">{t('support.contactUs')}</div>
-                  <div className="text-xs text-dark-400">{supportConfig.support_username}</div>
+                  <div className="truncate text-xs text-dark-400">
+                    {supportConfig.support_username}
+                  </div>
                 </div>
               </div>
               <Button
@@ -634,7 +638,7 @@ export default function Support() {
                   <div className="space-y-3">
                     <div className="flex gap-3">
                       <textarea
-                        className="input min-h-[80px] flex-1"
+                        className="input min-h-[80px] min-w-0 flex-1"
                         placeholder={t('support.replyPlaceholder')}
                         value={replyMessage}
                         onChange={(e) => setReplyMessage(e.target.value)}
@@ -711,19 +715,7 @@ export default function Support() {
           ) : (
             <div className="flex flex-col items-center justify-center py-16">
               <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-dark-800">
-                <svg
-                  className="h-8 w-8 text-dark-500"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={1.5}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 01-.825-.242m9.345-8.334a2.126 2.126 0 00-.476-.095 48.64 48.64 0 00-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0011.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155"
-                  />
-                </svg>
+                <ChatIcon className="h-8 w-8 text-dark-500" />
               </div>
               <div className="text-dark-400">{t('support.selectTicket')}</div>
             </div>

@@ -661,7 +661,7 @@ describe('Navigation item /gift availability', () => {
                 mobileMenuOpen={true}
                 setMobileMenuOpen={() => {}}
                 onCommandPaletteOpen={() => {}}
-                headerHeight={56}
+                headerHeight="56px"
                 isFullscreen={false}
                 safeAreaInset={{ top: 0, bottom: 0, left: 0, right: 0 }}
                 contentSafeAreaInset={{ top: 0, bottom: 0, left: 0, right: 0 }}

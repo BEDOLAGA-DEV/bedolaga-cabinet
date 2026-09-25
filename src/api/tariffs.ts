@@ -37,6 +37,8 @@ export interface TariffListItem {
   daily_price_kopeks: number;
   /** UUID продукта Lava для рекуррентных подписок (цена/период заданы в кабинете Lava) */
   lava_product_id?: string | null;
+  /** Свой тег панельного пользователя Remnawave; null — общий тег из настроек */
+  panel_tag?: string | null;
   traffic_limit_gb: number;
   device_limit: number;
   tier_level: number;
@@ -65,6 +67,10 @@ export interface TariffDetail {
   tier_level: number;
   display_order: number;
   period_prices: PeriodPrice[];
+  /** Период, отмеченный как самый выгодный (дни). null — не выделен. */
+  highlight_period_days?: number | null;
+  /** Тариф отмечен как выгодный — выделяется в списке. */
+  is_highlighted?: boolean;
   allowed_squads: string[];
   server_traffic_limits: Record<string, ServerTrafficLimit>;
   servers: ServerInfo[];
@@ -89,10 +95,14 @@ export interface TariffDetail {
   daily_price_kopeks: number;
   /** UUID продукта Lava для рекуррентных подписок (цена/период заданы в кабинете Lava) */
   lava_product_id?: string | null;
+  /** Свой тег панельного пользователя Remnawave; null — общий тег из настроек */
+  panel_tag?: string | null;
   // Режим сброса трафика
   traffic_reset_mode: string | null; // 'DAY', 'WEEK', 'MONTH', 'MONTH_ROLLING', 'NO_RESET', null = глобальная настройка
   // Внешний сквад Remnawave
   external_squad_uuid: string | null;
+  /** Дни триала на этом тарифе; null — глобальная настройка */
+  trial_duration_days?: number | null;
   created_at: string;
   updated_at: string | null;
 }
@@ -108,6 +118,10 @@ export interface TariffCreateRequest {
   max_device_limit?: number;
   tier_level?: number;
   period_prices?: PeriodPrice[];
+  /** Дни выделенного периода; 0 снимает выделение. */
+  highlight_period_days?: number | null;
+  /** Тариф отмечен как выгодный — выделяется в списке. */
+  is_highlighted?: boolean;
   allowed_squads?: string[];
   server_traffic_limits?: Record<string, ServerTrafficLimit>;
   promo_group_ids?: number[];
@@ -130,10 +144,14 @@ export interface TariffCreateRequest {
   daily_price_kopeks?: number;
   // Автопродление Lava: продукт из кабинета Lava
   lava_product_id?: string | null;
+  /** Свой тег панельного пользователя Remnawave; null — общий тег из настроек */
+  panel_tag?: string | null;
   // Режим сброса трафика
   traffic_reset_mode?: string | null;
   // Внешний сквад Remnawave
   external_squad_uuid?: string | null;
+  /** Дни триала на этом тарифе; null — глобальная настройка */
+  trial_duration_days?: number | null;
 }
 
 export interface ExternalSquadInfo {
@@ -154,6 +172,10 @@ export interface TariffUpdateRequest {
   tier_level?: number;
   display_order?: number;
   period_prices?: PeriodPrice[];
+  /** Дни выделенного периода; 0 снимает выделение. */
+  highlight_period_days?: number | null;
+  /** Тариф отмечен как выгодный — выделяется в списке. */
+  is_highlighted?: boolean;
   allowed_squads?: string[];
   server_traffic_limits?: Record<string, ServerTrafficLimit>;
   promo_group_ids?: number[];
@@ -176,10 +198,14 @@ export interface TariffUpdateRequest {
   daily_price_kopeks?: number;
   // Автопродление Lava: продукт из кабинета Lava
   lava_product_id?: string | null;
+  /** Свой тег панельного пользователя Remnawave; null — общий тег из настроек */
+  panel_tag?: string | null;
   // Режим сброса трафика
   traffic_reset_mode?: string | null;
   // Внешний сквад Remnawave
   external_squad_uuid?: string | null;
+  /** Дни триала на этом тарифе; null — глобальная настройка */
+  trial_duration_days?: number | null;
 }
 
 export interface TariffToggleResponse {

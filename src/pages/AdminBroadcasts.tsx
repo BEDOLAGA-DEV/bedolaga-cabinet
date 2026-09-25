@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -85,6 +85,32 @@ export default function AdminBroadcasts() {
     },
   });
 
+  // Аудитория хранится ключом фильтра (active_zero, custom_inactive_month) — людям
+  // показываем подпись из того же справочника, что у формы создания.
+  const { data: tgFilters } = useQuery({
+    queryKey: ['admin', 'broadcasts', 'filters'],
+    queryFn: adminBroadcastsApi.getFilters,
+    staleTime: 5 * 60 * 1000,
+  });
+  const { data: emailFilters } = useQuery({
+    queryKey: ['admin', 'broadcasts', 'email-filters'],
+    queryFn: adminBroadcastsApi.getEmailFilters,
+    staleTime: 5 * 60 * 1000,
+  });
+  const audienceLabels = useMemo(() => {
+    const labels = new Map<string, string>();
+    for (const filter of [
+      ...(emailFilters?.filters ?? []),
+      ...(emailFilters?.promo_group_filters ?? []),
+      ...(tgFilters?.filters ?? []),
+      ...(tgFilters?.tariff_filters ?? []),
+      ...(tgFilters?.custom_filters ?? []),
+    ]) {
+      labels.set(filter.key, filter.label);
+    }
+    return labels;
+  }, [tgFilters, emailFilters]);
+
   const broadcasts = data?.items || [];
   const total = data?.total || 0;
   const totalPages = Math.ceil(total / limit);
@@ -92,13 +118,13 @@ export default function AdminBroadcasts() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex min-w-0 flex-1 basis-48 items-center gap-3">
           {/* Show back button only on web, not in Telegram Mini App */}
           {!capabilities.hasBackButton && (
             <button
               onClick={() => navigate('/admin')}
-              className="flex h-10 w-10 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
             >
               <BackIcon />
             </button>
@@ -158,8 +184,15 @@ export default function AdminBroadcasts() {
                     )}
                   </div>
                   <p className="truncate text-sm text-dark-100">{broadcast.message_text}</p>
-                  <div className="mt-2 flex items-center gap-4 text-xs text-dark-400">
-                    <span>{broadcast.target_type}</span>
+                  <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-dark-400">
+                    <span className="min-w-0 [overflow-wrap:anywhere]">
+                      {audienceLabels.get(broadcast.target_type) ??
+                        (/^user_\d+$/.test(broadcast.target_type)
+                          ? t('admin.broadcasts.singleUser', {
+                              name: `#${broadcast.target_type.slice('user_'.length)}`,
+                            })
+                          : broadcast.target_type)}
+                    </span>
                     <span>
                       {broadcast.sent_count}/{broadcast.total_count}
                       {broadcast.blocked_count > 0 && (

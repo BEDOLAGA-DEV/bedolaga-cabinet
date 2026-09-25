@@ -15,6 +15,11 @@ export interface User {
   auth_type: 'telegram' | 'email' | 'google' | 'yandex' | 'discord' | 'vk'; // Тип аутентификации
 }
 
+// Фото профиля Telegram для шапки: подписанная ссылка на прокси медиа бота или null.
+export interface UserAvatarResponse {
+  photo_url: string | null;
+}
+
 // OAuth types
 export interface OAuthProvider {
   name: string;
@@ -102,6 +107,8 @@ export interface Subscription {
   tariff_id?: number;
   tariff_name?: string;
   traffic_reset_mode?: string;
+  /** Старая подписка (куплена в классике, тарифа нет, оператор на тарифах): продления и автоплатежа нет, только переход на тариф. */
+  requires_tariff_selection?: boolean;
 }
 
 // Response wrapper for subscription status endpoint
@@ -127,6 +134,8 @@ export interface SubscriptionListItem {
   is_daily_paused?: boolean;
   autopay_enabled: boolean;
   connected_squads: string[] | null;
+  /** Старая подписка (куплена в классике, тарифа нет, оператор на тарифах): карточка ведёт на выбор тарифа. */
+  requires_tariff_selection?: boolean;
 }
 
 // Response from GET /cabinet/subscriptions (multi-tariff)
@@ -155,6 +164,8 @@ export interface RenewalOption {
   price_rubles: number;
   discount_percent: number;
   original_price_kopeks: number | null;
+  /** Период, отмеченный оператором как самый выгодный. */
+  is_highlighted?: boolean;
 }
 
 export interface TrafficPackage {
@@ -271,6 +282,8 @@ export interface TariffPeriod {
   extra_devices_cost_label?: string;
   base_tariff_price_kopeks?: number;
   base_tariff_price_label?: string;
+  /** Период, отмеченный оператором как самый выгодный. */
+  is_highlighted?: boolean;
 }
 
 export interface TariffServer {
@@ -282,6 +295,8 @@ export interface Tariff {
   id: number;
   name: string;
   description: string | null;
+  /** Тариф отмечен оператором как выгодный — выделяется в списке. */
+  is_highlighted?: boolean;
   tier_level: number;
   traffic_limit_gb: number;
   traffic_limit_label: string;
@@ -442,6 +457,12 @@ export interface ReferralInfo {
   active_referrals: number;
   total_earnings_kopeks: number;
   total_earnings_rubles: number;
+  /**
+   * Days rewards are recorded with amount_kopeks = 0 by design, so they never
+   * show up in the money totals. Without this field a partner on a days-based
+   * programme sees a flat zero while rewards keep arriving.
+   */
+  total_earnings_days?: number;
   commission_percent: number;
   available_balance_kopeks: number;
   available_balance_rubles: number;
@@ -459,6 +480,152 @@ export interface ReferralTerms {
   inviter_bonus_rubles: number;
   max_commission_payments: number;
   partner_section_visible?: boolean;
+  /**
+   * Under the `levels` scheme the flat fields above govern nothing: payouts come
+   * from the reward-level table. `level_descriptions` is generated server-side
+   * from the same config the payout engine reads, so the terms shown here cannot
+   * drift away from what is actually paid.
+   */
+  scheme?: 'legacy' | 'levels';
+  level_descriptions?: string[];
+  referee_bonus_description?: string | null;
+  max_level_depth?: number;
+  /**
+   * What a level number means. Under `chain` the listed levels apply at the same
+   * time, each paying a different person up the chain. Under `tiers` exactly ONE
+   * applies — the highest rank the partner has reached — and only the direct
+   * referrer is ever paid, so the same list must not be read as cumulative.
+   */
+  levels_mode?: ReferralLevelsMode;
+  /** The viewer's own rank. Only meaningful under `tiers`. */
+  tier_current_level?: number | null;
+  tier_next_level?: number | null;
+  tier_next_remaining?: number;
+  tier_referrals_any?: number;
+  tier_referrals_active?: number;
+  /**
+   * Programme levels broken into parts, ordered the way they should be shown:
+   * by number under `chain`, by ascending threshold under `tiers`. Built by the
+   * same server code that formats the bot's text, so the two cannot drift apart.
+   */
+  levels?: ReferralProgramLevel[];
+  /** The partner's personal rate when it overrides the level's own percent. */
+  personal_percent?: number | null;
+  /**
+   * What the user is allowed to choose. Until an administrator allows it the
+   * settings card is not shown at all: a choice that changes nothing promises
+   * an influence it does not have.
+   */
+  allow_reward_kind_choice?: boolean;
+  allow_days_target_choice?: boolean;
+  /** 'money' | 'days' | null — null means "whatever the level gives". */
+  reward_preference?: string | null;
+  days_target_subscription_id?: number | null;
+  days_target_options?: ReferralDaysTargetOption[];
+  /**
+   * What each side of the choice actually gives, computed without regard to the
+   * choice already made: the cards must show what every option yields, not only
+   * the selected one. null means the rule has no such side.
+   */
+  reward_choice_money?: string | null;
+  reward_choice_days?: string | null;
+}
+
+/** A subscription the reward days can be directed to. */
+export interface ReferralDaysTargetOption {
+  id: number;
+  tariff_name: string | null;
+  /** Shown next to the name: several subscriptions may share a tariff. */
+  end_date: string | null;
+}
+
+/** One level of the referral programme, as shown to the user. */
+export interface ReferralProgramLevel {
+  level: number;
+  is_current: boolean;
+  /** Ready-made reward chips: "25% от суммы", "50 ₽", "7 дн. подписки (Про)". */
+  rewards: string[];
+  /** False means this level pays the referrer nothing — shown only when it is theirs. */
+  pays_referrer: boolean;
+  trigger: string;
+  trigger_label: string;
+  required_referrals: number;
+  required_referrals_active_only: boolean;
+  /** What the invited user gets at this level, or null. */
+  referee_reward: string | null;
+}
+
+/** Whether a level number is chain depth or a rank earned by referral count. */
+export type ReferralLevelsMode = 'chain' | 'tiers';
+
+/** A reward level of the referral chain, as edited in the admin cabinet. */
+export interface ReferralRewardLevel {
+  level: number;
+  is_active: boolean;
+  /** Which bonuses are active on this level. */
+  reward_mode: 'money' | 'days' | 'both';
+  trigger: 'registration' | 'first_topup' | 'every_topup';
+  referrer_percent: number | null;
+  referrer_fixed_kopeks: number | null;
+  referrer_days: number;
+  referrer_tariff_id: number | null;
+  referrer_tariff_name?: string | null;
+  referee_fixed_kopeks: number | null;
+  referee_days: number;
+  referee_tariff_id: number | null;
+  referee_tariff_name?: string | null;
+  max_payments: number;
+  /**
+   * How many referrals unlock this level; 0 means available from the start.
+   * The level NUMBER says whose top-up pays you (1 = someone you invited,
+   * 2 = someone they invited); this says when you start earning from that link
+   * at all — which is what "what do I get a level for" was missing.
+   */
+  required_referrals: number;
+  /** Count only referrals who topped up at least once. */
+  required_referrals_active_only: boolean;
+}
+
+export interface ReferralRewardTariffOption {
+  id: number;
+  name: string;
+}
+
+export interface ReferralRewardLevels {
+  scheme: 'legacy' | 'levels';
+  /** Pinned in .env: the switch would not apply and would lose on restart. */
+  scheme_locked_by_env: boolean;
+  /**
+   * Chain depth under `chain`; under `tiers` there is no chain and every level
+   * works as a rank, so this must not gate what is shown.
+   */
+  levels_mode: ReferralLevelsMode;
+  /** Pinned in .env: the switch would not apply and would lose on restart. */
+  levels_mode_locked_by_env: boolean;
+  /**
+   * With multi-tariff off, subscriptions carry no tariff and days aimed at one
+   * are never granted. The tariff dropdown is still full, so without this flag
+   * the setting looks valid and silently does nothing.
+   */
+  multi_tariff_enabled: boolean;
+  /** Pinned in .env: the depth field would be refused with 409 and revert on restart. */
+  max_level_depth_locked_by_env: boolean;
+  /** The chain is not walked deeper than this, so deeper levels never pay. */
+  max_level_depth: number;
+  max_supported_level: number;
+  levels: ReferralRewardLevel[];
+  /**
+   * Served with the levels rather than fetched from /admin/tariffs, which needs a
+   * different permission — an admin holding only partners:settings would otherwise
+   * see no tariff to pick, which is exactly the config where days are dropped.
+   */
+  available_tariffs: ReferralRewardTariffOption[];
+  /**
+   * What the legacy import could not express as a level — commission tiers have
+   * no equivalent here. Only ever populated by the import response; losing them
+   * silently would be worse than not importing them.
+   */
+  import_notes?: string[];
 }
 
 // Ticket types
@@ -682,6 +849,8 @@ export interface TicketSettings {
   support_system_mode: string;
   cabinet_user_notifications_enabled: boolean;
   cabinet_admin_notifications_enabled: boolean;
+  /** Поля, закреплённые в .env: из кабинета их не изменить. */
+  env_locked?: string[];
 }
 
 // Payment method config types (admin)
@@ -725,6 +894,8 @@ export interface LinkedProvider {
   provider: string;
   linked: boolean;
   identifier: string | null;
+  /** Email that unlinking forgets: it came from this provider and no password makes it a login. */
+  forgets_email?: string | null;
 }
 
 export interface LinkedProvidersResponse {

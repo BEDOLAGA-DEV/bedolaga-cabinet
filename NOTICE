@@ -1,0 +1,13 @@
+# Сторонние материалы
+
+## Карта регионов России (`src/components/admin/reachability/assets/russia-regions.svg`)
+
+Источник: «ISO codes of subjects of Russia.svg», Wikimedia Commons
+(https://commons.wikimedia.org/wiki/File:ISO_codes_of_subjects_of_Russia.svg), автор Gajmar
+(ru.wikipedia), собственная работа. Лицензия: Creative Commons CC0 1.0 Universal Public Domain
+Dedication (https://creativecommons.org/publicdomain/zero/1.0/).
+
+Изменения (2026-09-11): оптимизация svgo; сняты инлайновые заливки регионов, стран и контуров
+(цвета задаёт кабинет по вердиктам); регионы помечены `data-region` с кодом ISO 3166-2 без
+префикса `RU-`; безымянному контуру Камчатского края дан `id="KAM"`; удалены подписи кодов регионов (глифы
+контурами поверх регионов), пустой блок стилей и метаданные Inkscape.

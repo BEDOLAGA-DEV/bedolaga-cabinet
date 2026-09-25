@@ -1,9 +1,9 @@
 import { useCallback, useState, memo } from 'react';
-import { useNavigate } from 'react-router';
+import { useLocation, useNavigate } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { infoPagesApi } from '../api/infoPages';
-import { AdminBackButton } from '../components/admin';
+import { AdminBackButton, backTo } from '../components/admin';
 import { Toggle } from '../components/admin/Toggle';
 import { useHapticFeedback } from '../platform/hooks/useHaptic';
 import { useDestructiveConfirm } from '../platform/hooks/useNativeDialog';
@@ -34,11 +34,12 @@ const PageRow = memo(function PageRow({
 
   return (
     <div className="rounded-xl border border-dark-700 bg-dark-800/50 p-4 transition-all hover:border-dark-600">
-      <div className="flex items-start gap-4">
+      {/* На телефоне кнопки — отдельной строкой: рядом с ними заголовку оставалось 72 px. */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:gap-4">
         <div className="min-w-0 flex-1">
           <div className="mb-1.5 flex flex-wrap items-center gap-2">
             {page.icon && <span className="text-base">{page.icon}</span>}
-            <span className="rounded-full bg-dark-700 px-2 py-0.5 font-mono text-[10px] font-medium text-dark-300">
+            <span className="max-w-full rounded bg-dark-700 px-2 py-0.5 font-mono text-[10px] font-medium text-dark-300 break-all">
               /{page.slug}
             </span>
             <span
@@ -69,15 +70,15 @@ const PageRow = memo(function PageRow({
 
           <p className="truncate text-sm font-medium text-dark-100">{resolvedTitle}</p>
 
-          <div className="mt-2 flex items-center gap-4 text-xs text-dark-500">
-            <span>
+          <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-dark-500">
+            <span className="whitespace-nowrap">
               {t('admin.infoPages.fields.sortOrder')}: {page.sort_order}
             </span>
             {page.updated_at && <span>{new Date(page.updated_at).toLocaleDateString()}</span>}
           </div>
         </div>
 
-        <div className="flex shrink-0 items-center gap-1.5">
+        <div className="flex shrink-0 items-center justify-end gap-1.5 border-t border-dark-700/50 pt-2 sm:border-0 sm:pt-0">
           <Toggle
             checked={page.is_active}
             onChange={onToggleActive}
@@ -145,6 +146,7 @@ const PageRowWrapper = memo(function PageRowWrapper({
 export default function AdminInfoPages() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   const queryClient = useQueryClient();
   const haptic = useHapticFeedback();
   const confirm = useDestructiveConfirm();
@@ -203,8 +205,8 @@ export default function AdminInfoPages() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex min-w-0 flex-1 basis-48 items-center gap-3">
           <AdminBackButton />
           <div className="flex items-center gap-2">
             <h1 className="text-xl font-bold text-dark-100">{t('admin.infoPages.title')}</h1>
@@ -219,7 +221,7 @@ export default function AdminInfoPages() {
           <button
             onClick={() => {
               haptic.buttonPress();
-              navigate('/admin/legal-pages');
+              navigate('/admin/legal-pages', backTo(location));
             }}
             className="flex min-h-[44px] items-center gap-2 rounded-lg bg-dark-800 px-4 py-2.5 text-dark-200 transition-colors hover:bg-dark-700"
             aria-label={t('admin.legalPages.open')}

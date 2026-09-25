@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 import { promoApi, type PromoOffer } from '../api/promo';
+import { getApiErrorMessage } from '../utils/api-error';
 import { ClockIcon, CheckIcon, XCircleIcon } from './icons';
 import { useDestructiveConfirm } from '@/platform/hooks/useNativeDialog';
 import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
@@ -112,8 +113,7 @@ export default function PromoOffersSection({ className = '' }: PromoOffersSectio
       setTimeout(() => setSuccessMessage(null), 5000);
     },
     onError: (error: unknown) => {
-      const axiosErr = error as { response?: { data?: { detail?: string } } };
-      setErrorMessage(axiosErr.response?.data?.detail || t('promo.offers.activationFailed'));
+      setErrorMessage(getApiErrorMessage(error, t('promo.offers.activationFailed')));
       setClaimingId(null);
       setTimeout(() => setErrorMessage(null), 5000);
     },

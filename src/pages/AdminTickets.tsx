@@ -2,7 +2,8 @@ import { useState, useRef, useEffect } from 'react';
 import logger from '../utils/logger';
 import { linkifyText } from '../utils/linkify';
 import { MessageMediaGrid } from '../components/tickets/MessageMediaGrid';
-import { Link, useNavigate, useParams } from 'react-router';
+import { Link, useLocation, useNavigate, useParams } from 'react-router';
+import { backTo } from '@/components/admin';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { adminApi, type AdminTicket, type AdminTicketDetail } from '../api/admin';
@@ -14,6 +15,7 @@ import {
   CheckCircleIcon,
   ClockIcon,
   InboxIcon,
+  PaperclipIcon,
   SettingsIcon,
   TicketIcon,
   XCircleIcon,
@@ -54,6 +56,7 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 export default function AdminTickets() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   const { ticketId } = useParams<{ ticketId: string }>();
   const queryClient = useQueryClient();
   const { capabilities } = usePlatform();
@@ -287,7 +290,7 @@ export default function AdminTickets() {
           {!capabilities.hasBackButton && (
             <button
               onClick={() => navigate('/admin')}
-              className="flex h-10 w-10 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
             >
               <BackIcon />
             </button>
@@ -468,18 +471,20 @@ export default function AdminTickets() {
             <div className="flex h-full flex-col">
               {/* Header */}
               <div className="mb-4 border-b border-dark-800/50 pb-4">
-                <div className="mb-3 flex items-start justify-between">
-                  <h3 className="text-lg font-semibold text-dark-100">
+                <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
+                  <h3 className="min-w-0 flex-1 basis-48 text-lg font-semibold text-dark-100 [overflow-wrap:anywhere]">
                     #{selectedTicket.id} {selectedTicket.title}
                   </h3>
-                  <div className="flex gap-2">
+                  <div className="flex shrink-0 gap-2">
                     <span className={getStatusBadge(selectedTicket.status)}>
                       {t(
                         `admin.tickets.status${selectedTicket.status.charAt(0).toUpperCase() + selectedTicket.status.slice(1)}`,
                       )}
                     </span>
                     <span className={getPriorityBadge(selectedTicket.priority)}>
-                      {selectedTicket.priority}
+                      {t(`admin.tickets.priorities.${selectedTicket.priority}`, {
+                        defaultValue: selectedTicket.priority,
+                      })}
                     </span>
                   </div>
                 </div>
@@ -489,6 +494,7 @@ export default function AdminTickets() {
                     {selectedTicket.user ? (
                       <Link
                         to={`/admin/users/${selectedTicket.user.id}`}
+                        {...backTo(location)}
                         title={t('admin.tickets.viewUser')}
                         className="font-medium text-accent-400 underline decoration-accent-400/40 underline-offset-2 transition-colors hover:text-accent-300 hover:decoration-accent-300"
                       >
@@ -629,26 +635,14 @@ export default function AdminTickets() {
                     </div>
                   )}
 
-                  <div className="mt-3 flex items-center justify-between">
+                  <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
                     <button
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
                       disabled={attachments.length >= 10 || attachments.some((a) => a.uploading)}
                       className="flex items-center gap-2 rounded-lg border border-dark-700/50 px-3 py-2 text-sm text-dark-400 transition-colors hover:border-dark-600 hover:text-dark-200 disabled:opacity-50"
                     >
-                      <svg
-                        className="h-4 w-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={1.5}
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="m18.375 12.739-7.693 7.693a4.5 4.5 0 0 1-6.364-6.364l10.94-10.94A3 3 0 1 1 19.5 7.372L8.552 18.32m.009-.01-.01.01m5.699-9.941-7.81 7.81a1.5 1.5 0 0 0 2.112 2.13"
-                        />
-                      </svg>
+                      <PaperclipIcon className="h-4 w-4" />
                       {t('admin.tickets.attachMedia')}{' '}
                       {attachments.length > 0 && `(${attachments.length}/10)`}
                     </button>

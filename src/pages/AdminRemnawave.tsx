@@ -55,8 +55,15 @@ import {
   BackIcon,
   ChevronRightIcon,
   GeoCheckIcon,
+  RadarIcon,
+  WallIcon,
 } from '../components/icons';
 import { GeoCheckModal } from '../components/admin/remnawave/GeoCheckModal';
+import { buildLink as buildDpiLink } from '../components/admin/dpichecker/deepLink';
+import { useDpiAvailable } from '../components/admin/dpichecker/useDpiStatus';
+import { buildReachabilityLink } from '../components/admin/reachability/deepLink';
+import { useReachabilityAvailable } from '../components/admin/reachability/useReachabilityStatus';
+import { usePermissionStore } from '../store/permissions';
 import { supportsGeoCheck } from '../utils/nodeVersion';
 import { Skeleton, SkeletonGroup } from '../components/ui/skeleton';
 
@@ -158,6 +165,15 @@ function NodeCard({ node, providerName, realtime, onAction, isLoading }: NodeCar
   // GeoCheck умеет только узел 3.3.0+; на старом узле кнопку не показываем,
   // чтобы админ не упирался в ошибку панели.
   const canGeoCheck = supportsGeoCheck(node.versions);
+  // Ярлык в BSCHEKER: только с правом запуска и при включённой интеграции.
+  // Оба хука вызываются безусловно — правило хуков, объединяем результат после.
+  const navigate = useNavigate();
+  const canRunReachability = usePermissionStore((s) => s.hasPermission('reachability:run'));
+  const reachabilityAvailable = useReachabilityAvailable();
+  const canReach = canRunReachability && reachabilityAvailable;
+  const canRunDpi = usePermissionStore((s) => s.hasPermission('dpichecker:run'));
+  const dpiAvailable = useDpiAvailable();
+  const canDpi = canRunDpi && dpiAvailable;
 
   const isUp = node.is_connected && node.is_node_online && !node.is_disabled;
   const dotColor = node.is_disabled ? 'bg-dark-500' : isUp ? 'bg-success-400' : 'bg-error-400';
@@ -213,9 +229,10 @@ function NodeCard({ node, providerName, realtime, onAction, isLoading }: NodeCar
         }`}
         onClick={hasBreakdown ? () => setExpanded((v) => !v) : undefined}
       >
-        {/* Identity + actions */}
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex min-w-0 items-center gap-2">
+        {/* Identity + actions. На телефоне кнопки уходят второй строкой: в одной
+            строке с ними имя ноды сжималось до одной-двух букв. */}
+        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
+          <div className="flex min-w-0 flex-1 basis-48 items-center gap-2">
             <span
               className={`h-2 w-2 shrink-0 rounded-full ${dotColor} ${isUp ? 'animate-pulse' : ''}`}
               title={statusText}
@@ -227,7 +244,7 @@ function NodeCard({ node, providerName, realtime, onAction, isLoading }: NodeCar
             <span className="shrink-0 text-base leading-none">
               {getCountryFlag(node.country_code)}
             </span>
-            <h3 className="truncate font-semibold text-dark-100">{node.name}</h3>
+            <h3 className="min-w-0 truncate font-semibold text-dark-100">{node.name}</h3>
             {(providerLabel || providerFavicon) && (
               <span className="flex min-w-0 max-w-[7rem] shrink items-center gap-1 rounded-md bg-accent-500/15 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-accent-300">
                 {providerFavicon && (
@@ -245,7 +262,33 @@ function NodeCard({ node, providerName, realtime, onAction, isLoading }: NodeCar
             )}
           </div>
 
-          <div className="flex shrink-0 items-center gap-1.5">
+          <div className="ml-auto flex shrink-0 items-center gap-1.5">
+            {canReach && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate(buildReachabilityLink({ targets: [{ kind: 'node', ref: node.uuid }] }));
+                }}
+                className="rounded-lg bg-dark-700 p-1.5 text-dark-300 transition-colors hover:bg-dark-600 hover:text-dark-100"
+                title={t('admin.reachability.shortcuts.checkNode')}
+                aria-label={t('admin.reachability.shortcuts.checkNode')}
+              >
+                <RadarIcon className="h-3.5 w-3.5" />
+              </button>
+            )}
+            {canDpi && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate(buildDpiLink({ tab: 'ip', source: 'node', ref: node.uuid }));
+                }}
+                className="rounded-lg bg-dark-700 p-1.5 text-dark-300 transition-colors hover:bg-dark-600 hover:text-dark-100"
+                title={t('admin.dpichecker.shortcuts.checkNode')}
+                aria-label={t('admin.dpichecker.shortcuts.checkNode')}
+              >
+                <WallIcon className="h-3.5 w-3.5" />
+              </button>
+            )}
             {canGeoCheck && (
               <button
                 onClick={(e) => {
@@ -361,11 +404,11 @@ function NodeCard({ node, providerName, realtime, onAction, isLoading }: NodeCar
               {(rx > 0 || tx > 0) && (
                 <div className="flex items-center gap-4">
                   <span className="flex items-center gap-1">
-                    <DownloadIcon className="h-3 w-3 shrink-0 text-success-400/70" />
+                    <DownloadIcon className="h-3 w-3 shrink-0 text-success-400" />
                     {formatSpeed(rx)}
                   </span>
                   <span className="flex items-center gap-1">
-                    <UploadIcon className="h-3 w-3 shrink-0 text-accent-400/70" />
+                    <UploadIcon className="h-3 w-3 shrink-0 text-accent-400" />
                     {formatSpeed(tx)}
                   </span>
                 </div>
@@ -410,11 +453,11 @@ function NodeCard({ node, providerName, realtime, onAction, isLoading }: NodeCar
               )}
               <span className="flex items-center gap-2">
                 <span className="flex items-center gap-0.5">
-                  <DownloadIcon className="h-3 w-3 text-success-400/70" />
+                  <DownloadIcon className="h-3 w-3 text-success-400" />
                   {formatSpeed(rx)}
                 </span>
                 <span className="flex items-center gap-0.5">
-                  <UploadIcon className="h-3 w-3 text-accent-400/70" />
+                  <UploadIcon className="h-3 w-3 text-accent-400" />
                   {formatSpeed(tx)}
                 </span>
               </span>
@@ -480,19 +523,19 @@ function SquadCard({ squad, onClick }: SquadCardProps) {
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <span className="text-lg">{getCountryFlag(squad.country_code)}</span>
-            <h3 className="truncate font-medium text-dark-100">
-              <Twemoji options={{ className: 'twemoji', folder: 'svg', ext: '.svg' }}>
+            <h3 className="min-w-0 font-medium text-dark-100 [overflow-wrap:anywhere]">
+              <Twemoji tag="span" options={{ className: 'twemoji', folder: 'svg', ext: '.svg' }}>
                 {squad.display_name || squad.name}
               </Twemoji>
             </h3>
             {squad.is_synced ? (
-              <span className="rounded-full bg-success-500/20 px-2 py-0.5 text-xs text-success-400">
+              <span className="whitespace-nowrap rounded-full bg-success-500/20 px-2 py-0.5 text-xs text-success-400">
                 {t('admin.remnawave.squads.synced', 'Synced')}
               </span>
             ) : (
-              <span className="rounded-full bg-warning-500/20 px-2 py-0.5 text-xs text-warning-400">
+              <span className="whitespace-nowrap rounded-full bg-warning-500/20 px-2 py-0.5 text-xs text-warning-400">
                 {t('admin.remnawave.squads.notSynced', 'Not synced')}
               </span>
             )}
@@ -904,7 +947,7 @@ function OverviewTab({
             {topConsumers.users.map((u, i) => (
               <div
                 key={u.username}
-                className="flex items-center justify-between px-4 py-2.5 text-sm"
+                className="flex items-center justify-between gap-3 px-4 py-2.5 text-sm"
               >
                 <span className="flex min-w-0 items-center gap-2">
                   <span className="w-5 shrink-0 text-dark-500">{i + 1}</span>
@@ -1097,11 +1140,11 @@ function NodesTab({
             {t('admin.remnawave.traffic.realtimeTitle', 'Realtime traffic')}
           </span>
           <span className="flex items-center gap-1">
-            <DownloadIcon className="h-3 w-3 text-success-400/70" />
+            <DownloadIcon className="h-3 w-3 text-success-400" />
             {formatBytes(traffic.download)}
           </span>
           <span className="flex items-center gap-1">
-            <UploadIcon className="h-3 w-3 text-accent-400/70" />
+            <UploadIcon className="h-3 w-3 text-accent-400" />
             {formatBytes(traffic.upload)}
           </span>
           <span className="text-dark-300">
@@ -1586,13 +1629,13 @@ export default function AdminRemnawave() {
   return (
     <div className="animate-fade-in">
       {/* Header */}
-      <div className="mb-6 flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex min-w-0 flex-1 basis-48 items-center gap-3">
           {/* Show back button only on web, not in Telegram Mini App */}
           {!capabilities.hasBackButton && (
             <button
               onClick={() => navigate('/admin')}
-              className="flex h-10 w-10 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-dark-700 bg-dark-800 transition-colors hover:border-dark-600"
             >
               <BackIcon className="text-dark-400" />
             </button>

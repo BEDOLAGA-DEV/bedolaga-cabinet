@@ -14,65 +14,7 @@ import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import ProviderIcon from '../components/ProviderIcon';
 import type { MergeAccountPreview } from '../types';
-
-// -- Icons --
-
-function WarningIcon({ className = 'h-5 w-5' }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      strokeWidth={2}
-      aria-hidden="true"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-      />
-    </svg>
-  );
-}
-
-function ClockIcon({ className = 'h-4 w-4' }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      strokeWidth={2}
-      aria-hidden="true"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"
-      />
-    </svg>
-  );
-}
-
-function CheckCircleIcon({ className = 'h-5 w-5' }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      strokeWidth={2}
-      aria-hidden="true"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-      />
-    </svg>
-  );
-}
+import { CheckCircleIcon, ClockIcon, WarningIcon } from '@/components/icons';
 
 // -- Helpers --
 
@@ -167,8 +109,12 @@ function AccountCard({ account, label, isSelected, onSelect, showRadio }: Accoun
               </p>
             )}
             <p className="text-sm text-dark-400">
-              {t('merge.traffic')}: {account.subscription.traffic_limit_gb} GB, {t('merge.devices')}
-              : {account.subscription.device_limit}
+              {/* 0 ГБ у панели и бота — безлимит, а не «нет трафика». */}
+              {t('merge.traffic')}:{' '}
+              {account.subscription.traffic_limit_gb > 0
+                ? `${account.subscription.traffic_limit_gb} ${t('common.units.gb')}`
+                : t('subscription.unlimited')}
+              , {t('merge.devices')}: {account.subscription.device_limit}
             </p>
           </div>
         ) : (
@@ -210,7 +156,7 @@ function LoadingSkeleton() {
   return (
     <SkeletonGroup>
       <motion.div
-        className="space-y-6"
+        className="mx-auto max-w-lg space-y-6 px-4 py-6"
         variants={staggerContainer}
         initial="initial"
         animate="animate"
@@ -462,8 +408,10 @@ export default function MergeAccounts() {
   }
 
   return (
+    // Экран живёт вне общей обвязки кабинета — отступы от краёв задаёт сам,
+    // иначе карточки и кнопка «Объединить» стояли вплотную к краю экрана.
     <motion.div
-      className="mx-auto max-w-lg space-y-6"
+      className="mx-auto max-w-lg space-y-6 px-4 py-6"
       variants={staggerContainer}
       initial="initial"
       animate="animate"
