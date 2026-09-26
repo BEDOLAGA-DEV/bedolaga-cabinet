@@ -310,32 +310,32 @@ export default function Info() {
   }, [infoPage, locale]);
 
   const { data: faqPages, isLoading: faqLoading } = useQuery({
-    queryKey: ['faq-pages'],
-    queryFn: infoApi.getFaqPages,
+    queryKey: ['faq-pages', locale],
+    queryFn: () => infoApi.getFaqPages(locale),
     enabled: activeTab === 'faq' && !currentTabSlug && replacementsLoaded,
     staleTime: 0,
     refetchOnMount: 'always',
   });
 
   const { data: rules, isLoading: rulesLoading } = useQuery({
-    queryKey: ['rules'],
-    queryFn: infoApi.getRules,
+    queryKey: ['rules', locale],
+    queryFn: () => infoApi.getRules(locale),
     enabled: activeTab === 'rules' && !currentTabSlug && replacementsLoaded,
     staleTime: 0,
     refetchOnMount: 'always',
   });
 
   const { data: privacy, isLoading: privacyLoading } = useQuery({
-    queryKey: ['privacy-policy'],
-    queryFn: infoApi.getPrivacyPolicy,
+    queryKey: ['privacy-policy', locale],
+    queryFn: () => infoApi.getPrivacyPolicy(locale),
     enabled: activeTab === 'privacy' && !currentTabSlug && replacementsLoaded,
     staleTime: 0,
     refetchOnMount: 'always',
   });
 
   const { data: offer, isLoading: offerLoading } = useQuery({
-    queryKey: ['public-offer'],
-    queryFn: infoApi.getPublicOffer,
+    queryKey: ['public-offer', locale],
+    queryFn: () => infoApi.getPublicOffer(locale),
     enabled: activeTab === 'offer' && !currentTabSlug && replacementsLoaded,
     staleTime: 0,
     refetchOnMount: 'always',
