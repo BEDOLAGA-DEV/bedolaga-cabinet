@@ -376,7 +376,10 @@
     },
     "manageAll": "Manage all",
     "showAll": "Show all",
-    "subscriptions": "Subscriptions"
+    "subscriptions": "Subscriptions",
+    "premiumTraffic": "Premium traffic",
+    "premiumTrafficPaused": "Limit reached — access paused until the end of the period",
+    "premiumTrafficTopped": "{{amount}} topped up"
   },
   "subscription": {
     "title": "Subscription",
@@ -669,7 +672,12 @@
       "disconnectDevicesFirst": "Disconnect extra devices first",
       "incrementDevices": "Add devices",
       "minDeviceLimit": "Minimum device limit",
-      "newDeviceLimit": "New device limit"
+      "newDeviceLimit": "New device limit",
+      "buyPremiumTraffic": "Buy premium traffic",
+      "buyPremiumTrafficTitle": "Premium traffic",
+      "premiumTrafficHint": "A separate limit for premium servers",
+      "premiumTrafficExhausted": "Limit reached — top up to restore access",
+      "premiumTopupCapReached": "Up to {{cap}} GB can be added per period"
     },
     "serverManagement": {
       "statusLegend": "✅ — connected • ➕ — will be added (paid) • ➖ — will be disconnected",
@@ -3961,7 +3969,23 @@
       "panelTagLabel": "Remnawave panel tag",
       "panelTagDesc": "Up to 16 characters: Latin letters, digits and underscore. Empty — the global tag from settings (trial or paid). The tag shows in the panel which tariff a user is on.",
       "trialDaysLabel": "Trial days on this tariff",
-      "trialDaysDesc": "Empty — the global trial duration setting."
+      "trialDaysDesc": "Empty — the global trial duration setting.",
+      "premiumLimitsTitle": "Per-server premium limits",
+      "premiumLimitsHint": "A separate traffic limit per server. Once it runs out the user loses access to that server only, the rest keep working. 0 means no premium limit on the server.",
+      "premiumLimitsNoServers": "Select the tariff servers first",
+      "premiumLimitGb": "Limit, GB",
+      "premiumLimitName": "Label",
+      "premiumMoveUp": "Move up",
+      "premiumMoveDown": "Move down",
+      "premiumTopupEnabled": "Allow top-up",
+      "premiumPackages": "Top-up packages",
+      "premiumPackagesEmpty": "No packages — there will be nothing to buy",
+      "premiumPackageGb": "Package size, GB",
+      "premiumPackagePrice": "Package price",
+      "premiumPackageAdd": "Add package",
+      "premiumPackageDuplicate": "Packages with the same size will be merged on save",
+      "premiumMaxTopupGb": "Cap, GB",
+      "premiumMaxTopupHint": "0 means no cap"
     },
     "servers": {
       "title": "Squad Management",
@@ -5281,7 +5305,35 @@
         },
         "messages_one": "{{count}} message",
         "messages_other": "{{count}} messages",
-        "ticketLoadError": "Could not open the ticket"
+        "ticketLoadError": "Could not open the ticket",
+        "premiumTraffic": {
+          "title": "Premium traffic",
+          "limited": "cut off",
+          "notMeasured": "not measured yet",
+          "extra": "+{{gb}} GB bought",
+          "period": "Period since {{date}}",
+          "checked": "measured {{date}}",
+          "grantLabel": "Gigabytes to grant on {{name}}",
+          "grant": "Grant",
+          "resetSquad": "Reset",
+          "resetTitle": "Reset traffic",
+          "resetButton": "Reset",
+          "scope": {
+            "premium": "Premium only",
+            "regular": "Regular only",
+            "both": "Premium and regular"
+          },
+          "scopeHint": {
+            "premium": "Premium limits start a new period and cut-off servers come back. Regular traffic stays as is.",
+            "regular": "Regular traffic is reset in the panel. Premium limits stay as they are.",
+            "both": "Both regular traffic in the panel and premium limits are reset."
+          },
+          "granted": "Granted {{gb}} GB on {{name}}.",
+          "resetPremiumDone": "Premium period started over.",
+          "resetRegularDone": "Regular traffic reset.",
+          "restoredNote": "The server comes back to the client on the next pass — within 5 minutes.",
+          "error": "Action failed"
+        }
       },
       "notFound": "User not found",
       "summary": {
@@ -7849,7 +7901,9 @@
       "plans": "See plans",
       "support": "Support",
       "copyLink": "Copy subscription link",
-      "copied": "Copied"
+      "copied": "Copied",
+      "buyPremiumTraffic": "Buy premium traffic",
+      "premiumPaused": "Limit reached"
     },
     "error": {
       "load": "Could not load your data",

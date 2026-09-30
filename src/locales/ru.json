@@ -384,7 +384,10 @@
     },
     "manageAll": "Управлять всеми",
     "showAll": "Показать все",
-    "subscriptions": "Подписки"
+    "subscriptions": "Подписки",
+    "premiumTraffic": "Премиум-трафик",
+    "premiumTrafficPaused": "Лимит исчерпан — доступ приостановлен до конца периода",
+    "premiumTrafficTopped": "Докуплено {{amount}}"
   },
   "subscription": {
     "title": "Подписка",
@@ -695,7 +698,12 @@
       "disconnectDevicesFirst": "Сначала отключите лишние устройства",
       "incrementDevices": "Увеличить кол-во устройств",
       "minDeviceLimit": "Минимальный лимит устройств",
-      "newDeviceLimit": "Новый лимит устройств"
+      "newDeviceLimit": "Новый лимит устройств",
+      "buyPremiumTraffic": "Докупить премиум-трафик",
+      "buyPremiumTrafficTitle": "Премиум-трафик",
+      "premiumTrafficHint": "Отдельный лимит для премиум-серверов",
+      "premiumTrafficExhausted": "Лимит исчерпан — докупите, чтобы вернуть доступ",
+      "premiumTopupCapReached": "За период можно докупить не больше {{cap}} ГБ"
     },
     "serverManagement": {
       "statusLegend": "✅ — подключено • ➕ — будет добавлено (платно) • ➖ — будет отключено",
@@ -4390,7 +4398,23 @@
       "panelTagLabel": "Тег в панели Remnawave",
       "panelTagDesc": "До 16 символов: латинские буквы, цифры и подчёркивание. Пусто — общий тег из настроек (триальный или платный). По тегу в панели видно, на каком тарифе пользователь.",
       "trialDaysLabel": "Дней триала на этом тарифе",
-      "trialDaysDesc": "Пусто — глобальная настройка длительности триала."
+      "trialDaysDesc": "Пусто — глобальная настройка длительности триала.",
+      "premiumLimitsTitle": "Премиум-лимиты по серверам",
+      "premiumLimitsHint": "Отдельный лимит трафика на сервер. При исчерпании пользователь теряет доступ только к нему, остальные серверы продолжают работать. 0 — премиума на сервере нет.",
+      "premiumLimitsNoServers": "Сначала выберите серверы тарифа",
+      "premiumLimitGb": "Лимит, ГБ",
+      "premiumLimitName": "Название",
+      "premiumMoveUp": "Выше",
+      "premiumMoveDown": "Ниже",
+      "premiumTopupEnabled": "Разрешить докупку",
+      "premiumPackages": "Пакеты докупки",
+      "premiumPackagesEmpty": "Пакетов нет — докупать будет нечего",
+      "premiumPackageGb": "Объём пакета, ГБ",
+      "premiumPackagePrice": "Цена пакета, ₽",
+      "premiumPackageAdd": "Добавить пакет",
+      "premiumPackageDuplicate": "Одинаковые объёмы схлопнутся при сохранении",
+      "premiumMaxTopupGb": "Потолок, ГБ",
+      "premiumMaxTopupHint": "0 — без ограничения"
     },
     "servers": {
       "title": "Управление сквадами",
@@ -5728,7 +5752,35 @@
         "messages_one": "{{count}} сообщение",
         "messages_few": "{{count}} сообщения",
         "messages_many": "{{count}} сообщений",
-        "ticketLoadError": "Не удалось открыть обращение"
+        "ticketLoadError": "Не удалось открыть обращение",
+        "premiumTraffic": {
+          "title": "Премиум-трафик",
+          "limited": "снят",
+          "notMeasured": "ещё не замерен",
+          "extra": "докуплено {{gb}} ГБ",
+          "period": "Период с {{date}}",
+          "checked": "замер {{date}}",
+          "grantLabel": "Сколько гигабайтов начислить на {{name}}",
+          "grant": "Начислить",
+          "resetSquad": "Сбросить",
+          "resetTitle": "Сбросить трафик",
+          "resetButton": "Сбросить",
+          "scope": {
+            "premium": "Только премиум",
+            "regular": "Только обычный",
+            "both": "Премиум и обычный"
+          },
+          "scopeHint": {
+            "premium": "Премиум-лимиты начнут период заново, снятые серверы вернутся. Общий трафик не изменится.",
+            "regular": "Сбросится общий трафик в панели. Премиум-лимиты не изменятся.",
+            "both": "Сбросятся и общий трафик в панели, и премиум-лимиты."
+          },
+          "granted": "Начислено {{gb}} ГБ на {{name}}.",
+          "resetPremiumDone": "Премиум-период начат заново.",
+          "resetRegularDone": "Общий трафик сброшен.",
+          "restoredNote": "Сервер вернётся клиенту на ближайшем проходе — до 5 минут.",
+          "error": "Не удалось выполнить действие"
+        }
       },
       "notFound": "Пользователь не найден",
       "summary": {
@@ -8462,7 +8514,9 @@
       "plans": "Посмотреть тарифы",
       "support": "Поддержка",
       "copyLink": "Скопировать ссылку подписки",
-      "copied": "Скопировано"
+      "copied": "Скопировано",
+      "buyPremiumTraffic": "Докупить премиум-трафик",
+      "premiumPaused": "Лимит исчерпан"
     },
     "error": {
       "load": "Не удалось загрузить данные",
