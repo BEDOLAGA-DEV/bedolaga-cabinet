@@ -1,5 +1,82 @@
 # Changelog
 
+## [1.80.1](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.80.0...v1.80.1) (2026-09-29)
+
+
+### Bug Fixes
+
+* **deps:** tiptap 3.31.3 — закрыты уязвимости редактора новостей и инфо-страниц ([589ef56](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/589ef566089be0e9fa595e3e9df00f3fa220d341))
+
+
+### Performance Improvements
+
+* **build:** сборка на vite 8 — стартовая загрузка кабинета 390 KB gzip вместо 409 KB ([589ef56](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/589ef566089be0e9fa595e3e9df00f3fa220d341))
+
+## [1.80.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.79.0...v1.80.0) (2026-09-29)
+
+
+### Features
+
+* add atomic broadcast filters and user autocomplete ([4b45740](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/4b457404c8255bd39f3ba62ea7e7b477e1863617))
+* add rule-based broadcast audience editor ([87635df](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/87635df22efd806fe0ff4864bcee744f2f274aa4))
+* **cashera:** автопродление в кабинете — панель, покупка, типы, тексты ([0d5a582](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/0d5a5820dfba11bbbd0049ad5d0446a45dc71484))
+* **cashera:** автопродление СБП в кабинете ([d6d3ab0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/d6d3ab0e04140eb15df0bd319ea0d38c995f8474))
+* **dpichecker:** API сервиса целиком — весь аккаунт, подробности точки, прогоны и настройки мониторов ([036851b](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/036851b3a049e60a815c9968efd90aa2ef0820ef))
+* **dpichecker:** выбор точек как на сайте — пресеты, округа, регионы ([4f45a6a](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/4f45a6a65af22aa18d8bda9f15fb3ee557756602))
+* **dpichecker:** замечания владельца — карта всегда, подсказки регионов, история, из панели как у BSCHEKER ([cd71610](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/cd71610a5cf6af01d2631a72cc2768f28eb00cf8))
+* **dpichecker:** карта целиком, CSV в шапке и в Mini App, мониторы, пустой раздел как у BSCHEKER ([ed6f4de](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/ed6f4decc2e1b21f4927acff504ca638ea4956ad))
+* **dpichecker:** контракт API и адрес раздела ([b8550d0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/b8550d089e30f4bf4f709e5315f7bd8ed8c2aff6))
+* **dpichecker:** мониторы, история и траты по админам ([ac67e37](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/ac67e37b1b89098e6e2ef22457091258f9f62d37))
+* **dpichecker:** переходы с карточки ноды и из подписки пользователя ([f697829](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/f697829bb596733694670ad9d6013381fe4716f4))
+* **dpichecker:** раздел в админке, вкладки и подсказка настройки ([24b07e1](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/24b07e1425874f51e602455394d9efda9d203ec9))
+* **dpichecker:** результат проверки — сводка, регионы словами, отмена, повтор, CSV и карта ([8f78c9b](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/8f78c9b3eacedfc3a0cee2da35dae60b0ff547d6))
+* **dpichecker:** Соседи, Зонд и Черемша ([bfa3e88](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/bfa3e88e112161a853e30f1edca8bf97787b17b6))
+* **dpichecker:** форма проверки в три шага и монитор из неё ([e50397f](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/e50397f38f277c4d6ca251c8f45216f12946edea))
+* link broadcast recipients to user details ([3e2310b](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/3e2310b3f668dac24b3a8d5c67f4561c161289b4))
+* **payments:** Cashera в кабинете — подпись, иконка, раздел настроек, тексты ([e035c27](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/e035c27755ecbdc7fa09dc7884650cca7d269f96))
+* **topup:** свой экран оплаты — QR прямо на карточке пополнения ([20dcfaf](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/20dcfafffefc5ec9fa85e61c36f19788208a9709))
+* более точечная рассылка — редактор аудитории ([bd923c7](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/bd923c7e7f0a82f05b10abacd2ebd1b61d97b76b))
+
+
+### Bug Fixes
+
+* **broadcast:** preserve upstream email targeting ([ebd42a7](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/ebd42a7e6c87e0a2b63da712875ca3fa73f96d1b))
+* **broadcast:** поиск и список получателей — только с правом users:read ([72a7d73](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/72a7d73ef58329738a1f8152d0238b0ff12a0be2))
+* **dpichecker:** «Из панели» грузит хосты и ноды сразу, без кнопок «Показать» ([9bcab38](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/9bcab38ba1d5625afebd57da36006c403878984a))
+* **dpichecker:** вкладки на телефоне листаются вбок, частично выбранный округ заметен ([df9079a](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/df9079a32cb9c692cf9c30c959d4bf3958b36723))
+* **dpichecker:** суммы строкой не роняют отчёт Зонда ([aed7aa2](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/aed7aa2359a4c1f0b59d1759785bf7b6b97721b8))
+* **dpichecker:** темы операторов — легенда карты заливкой, загрузка карты, контраст; шаги без номеров ([4e5de2e](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/4e5de2ef5bdf51f545485ed4928baf10431109ff))
+* **dpichecker:** шапка на телефоне — баланс и Соседи строкой под подзаголовком, в колонке названия ([834187a](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/834187a291bfe8b6acb41257ef196ba7bdd1d877))
+* **dpichecker:** шапка раздела на телефоне — подзаголовок у иконки, баланс и Соседи отдельной строкой ([e9a6f91](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/e9a6f91f3e6e152629ef797cf51a350f397e21eb))
+* **i18n:** единица трафика в окне покупки — из перевода, а не латиницей GB ([8ca6987](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/8ca6987c38bc474f4c58e7766058b1cf71707f65))
+* **i18n:** не показывать {{count}}/{{value}} в окне покупки устройств и трафика ([ce25ace](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/ce25ace13ce54016dfd1093ac4dc9cbfe0fed1bb))
+* **i18n:** не показывать {{count}}/{{value}} в окне покупки устройств и трафика ([05eecd4](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/05eecd4faaada7a04fc1d0e03331ca4618cc5c5e))
+* **info:** документы следуют языку интерфейса ([#570](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/issues/570)) ([2f12c7e](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/2f12c7ed1edb5962e01d15c7eb02998257b2d3ed))
+* **info:** документы следуют языку интерфейса ([#570](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/issues/570)) ([9726d64](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/9726d643344951587535ce4e495a133b55c71894))
+* **lite:** после триала — подключение и тарифы, а не тупик «Продлить»; ссылка подписки в простом виде ([e369e8a](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/e369e8a54517834c532cb2ec5ea37e7781ed1485))
+* **reminders:** упавший список не выдаётся за «напоминаний нет»; после сохранения — свежий список ([0e94eb1](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/0e94eb1170dbb48f2aaa7d64ceabd272a8e1899b))
+* trap focus in broadcast recipient preview ([d989315](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/d989315e4a3f62366e9bb37591fc415a95d6ebf2))
+
+## [1.79.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.78.0...v1.79.0) (2026-09-22)
+
+
+### Features
+
+* **admin:** кнопка «Пересчитать участников» в группах скидок ([fd8d0c2](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/fd8d0c2a87913f801958a53f3c0531022b9bb1bf))
+* **broadcasts:** email по промогруппе и одному пользователю из карточки ([516c16b](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/516c16be777f9e5eabfeccdf27c9622e61831dca))
+* **cabinet:** простой вид кабинета для покупателя ([b247fbf](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/b247fbfa0ae2151b4ab397c60170e58f3eaa6021))
+* **grace:** переключатель обнуления счётчика трафика при выдаче ([347ee33](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/347ee33d8807848849c69c2637d95373045b0007))
+* **reminders:** админ-раздел «Напоминания» — список, форма, аудитория, тест себе ([ea3bd71](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/ea3bd716b3d1bde13f9952eb97b8220f060dc9c9))
+* **reminders:** карточки напоминаний на главной кабинета ([1c0070f](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/1c0070ff98344482096fe74e50f057ad988512e2))
+
+
+### Bug Fixes
+
+* **branding:** иконка ярлыка без рамки цвета темы вокруг логотипа-плитки ([19ecdd5](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/19ecdd5f74c48fb06cf86c2012cd036691b09d16))
+* **cabinet:** платный триал в простом виде не заводит в тупик ([501c9c3](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/501c9c33cbf8b5aef3a01e993ba9d8a26e167897))
+* **reminders:** проверки формы, обновление карточек при возврате во вкладку, форма не сбрасывается при наборе ([5927be8](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/5927be80445b09bfacd49c2d24e52330afbc84c3))
+* **reminders:** форма напоминания — без кнопки не шлёт её тексты, тариф без ID не уходит в запрос ([4ff777a](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/4ff777a1473065fd9a59c740fe5954650de23e08))
+
 ## [1.78.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.77.0...v1.78.0) (2026-09-18)
 
 
