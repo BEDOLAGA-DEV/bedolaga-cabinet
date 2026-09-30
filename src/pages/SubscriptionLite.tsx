@@ -1,50 +1,32 @@
-import { useState } from 'react';
-
+import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-
 import { useTranslation } from 'react-i18next';
-
 import { Link, useNavigate, useParams } from 'react-router';
 
 import { subscriptionApi } from '@/api/subscription';
-
 import { LiteMeter } from '@/components/lite/LiteMeter';
-
 import { LitePremiumMeters } from '@/components/lite/LitePremiumMeters';
 import { LiteRow, LiteRowGroup } from '@/components/lite/LiteRow';
-
 import { AutopayToggle } from '@/components/subscription/manage/AutopayToggle';
-
 import { DailyPausePanel } from '@/components/subscription/manage/DailyPausePanel';
-
 import { DevicesPanel } from '@/components/subscription/manage/DevicesPanel';
-
 import { RecurringPanels } from '@/components/subscription/manage/RecurringPanels';
-
 import {
   canReissueLink,
   ReissueLinkButton,
 } from '@/components/subscription/manage/ReissueLinkButton';
-
 import { DeleteSubscriptionSheet } from '@/components/subscription/sheets/DeleteSubscriptionSheet';
-
 import { DeviceReductionSheet } from '@/components/subscription/sheets/DeviceReductionSheet';
-
 import { DeviceTopupSheet } from '@/components/subscription/sheets/DeviceTopupSheet';
 import { PremiumTrafficTopupSheet } from '@/components/subscription/sheets/PremiumTrafficTopupSheet';
-
 import { ServerManagementSheet } from '@/components/subscription/sheets/ServerManagementSheet';
-
 import { TrafficTopupSheet } from '@/components/subscription/sheets/TrafficTopupSheet';
-
 import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
-
 import { useTheme } from '@/hooks/useTheme';
-
+import { copyToClipboard } from '@/utils/clipboard';
+import { resolveConnectionUrlForUi } from '@/utils/connectionLink';
 import { getGlassColors } from '@/utils/glassTheme';
-
 import { showsAddonOptions } from '@/utils/legacySubscription';
-
 import { formatLiteDate } from '@/utils/liteDate';
 
 type OpenPanel =
@@ -76,67 +58,75 @@ type OpenPanel =
  * перенос платёжных мутаций. Строка «Все настройки подписки» ведёт туда, так
  * что ничего не становится недоступным.
  */
-
 export default function SubscriptionLite() {
   const { t } = useTranslation();
-
   const navigate = useNavigate();
-
   const { subscriptionId: rawId } = useParams();
-
   const subscriptionId = rawId ? Number.parseInt(rawId, 10) : undefined;
-
   const { isDark } = useTheme();
-
   const glass = getGlassColors(isDark);
 
   const [panel, setPanel] = useState<OpenPanel>(null);
-
   const [devicesToAdd, setDevicesToAdd] = useState(1);
-
   const [targetDeviceLimit, setTargetDeviceLimit] = useState(1);
-
   const [trafficPackage, setTrafficPackage] = useState<number | null>(null);
-
   const [servers, setServers] = useState<string[]>([]);
 
   const {
     data: response,
-
     isLoading,
-
     isError,
-
     refetch,
   } = useQuery({
     queryKey: ['subscription', subscriptionId],
-
     queryFn: () => subscriptionApi.getSubscription(subscriptionId),
-
     retry: false,
-
     staleTime: 0,
-
     refetchOnMount: 'always',
   });
-
   const subscription = response?.subscription ?? null;
 
   const { data: devices } = useQuery({
     queryKey: ['devices', subscriptionId],
-
     queryFn: () => subscriptionApi.getDevices(subscriptionId),
-
     enabled: Boolean(subscription),
   });
 
   const { data: purchaseOptions } = useQuery({
     queryKey: ['purchase-options', subscriptionId],
-
     queryFn: () => subscriptionApi.getPurchaseOptions(subscriptionId),
-
     enabled: Boolean(subscription),
   });
+
+  // Ссылка подписки — та же, что показывает полная страница: иначе в простом
+  // виде её не было нигде, и человеку без приложения-импортёра нечего вставить.
+  const { data: connectionLink, isLoading: isConnectionLinkLoading } = useQuery({
+    queryKey: ['connection-link', subscriptionId],
+    queryFn: () => subscriptionApi.getConnectionLink(subscriptionId),
+    enabled: Boolean(subscription),
+    retry: false,
+  });
+  const connectionUrl = useMemo(
+    () =>
+      resolveConnectionUrlForUi({
+        mode: connectionLink?.connect_mode,
+        happSchemeLink: connectionLink?.happ_scheme_link,
+        displayLink: connectionLink?.display_link,
+        subscriptionUrl: connectionLink?.subscription_url,
+        happCryptLink: connectionLink?.happ_cryptolink,
+        happCryptoLink: connectionLink?.happ_crypto_link,
+        happLink: connectionLink?.happ_link,
+        fallbackUrl: isConnectionLinkLoading ? null : (subscription?.subscription_url ?? null),
+      }),
+    [connectionLink, isConnectionLinkLoading, subscription?.subscription_url],
+  );
+  const hidesLink = Boolean(subscription?.hide_subscription_link || connectionLink?.hide_link);
+  const [copied, setCopied] = useState(false);
+  useEffect(() => {
+    if (!copied) return;
+    const timer = window.setTimeout(() => setCopied(false), 2000);
+    return () => window.clearTimeout(timer);
+  }, [copied]);
 
   if (isError) {
     return (
@@ -174,26 +164,16 @@ export default function SubscriptionLite() {
   }
 
   const showsAddons = showsAddonOptions(subscription);
-
   // Пока режим продаж неизвестен, строку «Серверы» не рисуем вовсе: иначе она
-
   // успевает появиться и тут же исчезнуть, когда приходит ответ о тарифах.
-
   const managesServers = Boolean(purchaseOptions) && purchaseOptions?.sales_mode !== 'tariffs';
-
   const sheetProps = {
     open: true,
-
     onOpen: () => {},
-
     onClose: () => setPanel(null),
-
     subscription,
-
     subscriptionId,
-
     purchaseOptions,
-
     isDark,
   };
 
@@ -227,7 +207,29 @@ export default function SubscriptionLite() {
 
       <div className="mt-6">
         <LiteRowGroup>
-          <LiteRow to={`/subscriptions/${subscription.id}/renew`} label={t('lite.action.renew')} />
+          {subscription.is_trial ? (
+            // Пробный период не продлевается: «Продлить» вела на экран «Нет
+            // вариантов продления». После триала покупают тариф.
+            <LiteRow
+              to="/subscription/purchase"
+              label={t('lite.rows.plans', 'Посмотреть тарифы')}
+            />
+          ) : (
+            <LiteRow
+              to={`/subscriptions/${subscription.id}/renew`}
+              label={t('lite.action.renew')}
+            />
+          )}
+
+          {connectionUrl && !hidesLink && (
+            <LiteRow
+              onClick={() => {
+                void copyToClipboard(connectionUrl).then(() => setCopied(true));
+              }}
+              label={t('lite.rows.copyLink', 'Скопировать ссылку подписки')}
+              value={copied ? t('lite.rows.copied', 'Скопировано') : undefined}
+            />
+          )}
 
           {panel === 'traffic' ? (
             <div className="py-4">
@@ -280,7 +282,6 @@ export default function SubscriptionLite() {
                   subscription.device_limit > 0
                     ? t('lite.rows.devicesValue', '{{used}} из {{total}}', {
                         used: devices?.total ?? 0,
-
                         total: subscription.device_limit,
                       })
                     : undefined
@@ -331,11 +332,8 @@ export default function SubscriptionLite() {
           )}
 
           {/* Блоки ниже сами решают, показываться ли им: автоплатёж не бывает у
-
               пробных и старых подписок, автосписания — у выключенной фичи,
-
               перевыпуск — у неактивных, пауза — у непосуточных. Поэтому они
-
               стоят прямо в списке, а не за строкой, которая вела бы в пустоту. */}
           <AutopayToggle
             subscription={subscription}
@@ -357,7 +355,6 @@ export default function SubscriptionLite() {
                 subscription.device_limit > 0
                   ? t('lite.rows.devicesValue', '{{used}} из {{total}}', {
                       used: devices?.total ?? 0,
-
                       total: subscription.device_limit,
                     })
                   : (devices?.total ?? 0)

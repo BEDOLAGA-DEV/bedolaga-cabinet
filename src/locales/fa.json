@@ -187,13 +187,13 @@
     "validUntil": "معتبر تا",
     "goToSubscription": "رفتن به اشتراک",
     "goToBalance": "رفتن به موجودی",
-    "devicesAdded": "+{{count}} دستگاه",
+    "devicesAdded": "دستگاه‌های افزوده‌شده",
     "devicesPurchased": {
       "title": "دستگاه‌ها افزوده شدند"
     },
-    "totalDevices": "مجموع دستگاه‌ها: {{count}}",
-    "totalTraffic": "مجموع ترافیک: {{value}}",
-    "trafficAdded": "+{{value}} ترافیک",
+    "totalDevices": "مجموع دستگاه‌ها",
+    "totalTraffic": "مجموع ترافیک",
+    "trafficAdded": "ترافیک افزوده‌شده",
     "trafficPurchased": {
       "title": "ترافیک افزوده شد"
     }
@@ -737,6 +737,30 @@
     "trialUpgrade": {
       "description": "دوره آزمایشی شما به‌زودی به پایان می‌رسد. برای ادامه استفاده از VPN بدون محدودیت، یک تعرفه مناسب انتخاب کنید.",
       "title": "ارتقای اشتراک"
+    },
+    "casheraRecurring": {
+      "title": "تمدید خودکار Cashera",
+      "connect": "فعال‌سازی",
+      "confirm": "تأیید برداشت خودکار",
+      "cancel": "غیرفعال",
+      "confirmCancel": "تمدید خودکار Cashera غیرفعال شود؟ اشتراک دیگر به‌طور خودکار تمدید نمی‌شود.",
+      "cancelled": "تمدید خودکار Cashera غیرفعال شد",
+      "enableError": "فعال‌سازی تمدید خودکار Cashera ممکن نشد",
+      "cancelError": "لغو تمدید خودکار Cashera ممکن نشد",
+      "statusPending": "در انتظار تأیید از طریق لینک",
+      "statusActive": "فعال",
+      "statusPastDue": "پرداخت ناموفق بود — دوباره تلاش کنید",
+      "nextCharge": "برداشت بعدی {{date}}",
+      "amountPerInterval": "{{amount}} ₽ {{interval}}",
+      "interval": {
+        "daily": "روزانه",
+        "weekly": "هفتگی",
+        "monthly": "ماهانه",
+        "yearly": "سالانه"
+      },
+      "autopayHint": "اشتراک به‌طور خودکار از طریق Cashera تمدید می‌شود",
+      "purchaseButton": "⚡ خرید با پرداخت خودکار Cashera",
+      "purchaseHint": "برداشت خودکار را از طریق لینک Cashera تأیید کنید؛ سپس تمدیدها خودکار برداشت می‌شوند."
     }
   },
   "balance": {
@@ -788,6 +812,9 @@
       },
       "apple_iap": {
         "description": "پرداخت از طریق Apple In-App Purchase"
+      },
+      "cashera": {
+        "description": "SBP، کارت‌ها، رمزارز (Cashera)"
       }
     },
     "transactionHistory": "تاریخچه تراکنش‌ها",
@@ -898,7 +925,8 @@
       "goToBalance": "مشاهده موجودی",
       "tryAgain": "تلاش مجدد"
     },
-    "top_up": "افزایش موجودی"
+    "top_up": "افزایش موجودی",
+    "scanQrToPay": "کد QR را در برنامه بانک اسکن کنید یا صفحه پرداخت را باز کنید"
   },
   "referral": {
     "title": "برنامه معرفی",
@@ -1345,7 +1373,8 @@
       "news": "اخبار",
       "infoPages": "صفحات اطلاعات",
       "legalPages": "صفحات سیستمی",
-      "systemErrors": "خطاهای سیستم"
+      "systemErrors": "خطاهای سیستم",
+      "dpichecker": "DPI//CHECKER"
     },
     "panel": {
       "title": "پنل مدیریت",
@@ -1809,6 +1838,65 @@
         "cancelled": "لغو شده",
         "cancelling": "در حال لغو"
       },
+      "audience": {
+        "authType": "روش ثبت‌نام",
+        "join": "ارتباط شرط‌ها",
+        "and": "و",
+        "or": "یا",
+        "field": "پارامتر",
+        "comparison": "مقایسه",
+        "equals": "برابر است با",
+        "notEquals": "برابر نیست با",
+        "value": "مقدار",
+        "remove": "حذف شرط",
+        "add": "افزودن شرط",
+        "loadError": "بارگذاری گیرندگان ناموفق بود",
+        "recipientCount": "گیرندگان",
+        "showUsers": "مشاهده فهرست",
+        "users": "گیرندگان پیام",
+        "empty": "گیرنده‌ای وجود ندارد",
+        "conditions": "شرط‌ها",
+        "noUsersPermission": "نیاز به مجوز مشاهده کاربران"
+      },
+      "atomic": {
+        "all": "همه کاربران",
+        "subscriptionStatus": "وضعیت اشتراک",
+        "active": "فعال",
+        "expired": "منقضی‌شده",
+        "subscriptionType": "نوع اشتراک",
+        "trial": "آزمایشی",
+        "paid": "پرداختی",
+        "tariff": "تعرفه",
+        "trafficZero": "مصرف ترافیک برابر با صفر",
+        "trafficGt": "مصرف ترافیک بیشتر از",
+        "trafficLt": "مصرف ترافیک کمتر از",
+        "endPreset": "پایان اشتراک: بازه سریع",
+        "next3Days": "در ۳ روز آینده",
+        "endDate": "تاریخ پایان اشتراک",
+        "registrationPreset": "ثبت‌نام: بازه سریع",
+        "today": "امروز",
+        "last7Days": "۷ روز گذشته",
+        "last30Days": "۳۰ روز گذشته",
+        "registrationDate": "تاریخ ثبت‌نام",
+        "activityPreset": "فعالیت: بازه سریع",
+        "activeToday": "امروز فعال",
+        "inactive7Days": "بیش از ۷ روز غیرفعال",
+        "inactive30Days": "بیش از ۳۰ روز غیرفعال",
+        "activityDate": "تاریخ آخرین فعالیت",
+        "source": "منبع ثبت‌نام",
+        "referral": "از طریق معرفی",
+        "direct": "مستقیم",
+        "paidHistory": "قبلاً پرداخت کرده",
+        "telegramUsername": "نام کاربری تلگرام",
+        "searchUser": "برای یافتن و انتخاب کاربر تایپ کنید",
+        "noUsers": "کاربری یافت نشد",
+        "before": "قبل از تاریخ",
+        "after": "بعد از تاریخ",
+        "between": "بین دو تاریخ",
+        "dateFrom": "تاریخ",
+        "dateTo": "تا",
+        "gigabytes": "گیگابایت"
+      },
       "filterGroups": {
         "email": "کاربران ایمیل",
         "promo_group": "بر اساس گروه تبلیغاتی",
@@ -1920,7 +2008,11 @@
       "confirmDelete": "یادآوری «{{name}}» حذف شود؟",
       "stats": "ارسال‌شده: {{sent}} · بسته‌شده: {{dismissed}} · هم‌اکنون منطبق: ربات {{bot}}، پنل {{cabinet}}",
       "any": "هر",
-      "channels": { "both": "ربات و پنل کاربری", "bot": "فقط ربات", "cabinet": "فقط پنل کاربری" },
+      "channels": {
+        "both": "ربات و پنل کاربری",
+        "bot": "فقط ربات",
+        "cabinet": "فقط پنل کاربری"
+      },
       "category": {
         "service": "خدماتی — برای همه",
         "marketing": "بازاریابی — به‌جز افرادی که از تبلیغات لغو اشتراک کرده‌اند"
@@ -1939,7 +2031,11 @@
         "low_balance": "موجودی کم",
         "tariff": "تعرفه"
       },
-      "button": { "none": "بدون دکمه", "cabinet": "بخش پنل کاربری", "url": "لینک" },
+      "button": {
+        "none": "بدون دکمه",
+        "cabinet": "بخش پنل کاربری",
+        "url": "لینک"
+      },
       "form": {
         "name": "نام (فقط در پنل مدیریت قابل مشاهده است)",
         "channels": "محل نمایش",
@@ -1973,7 +2069,8 @@
         "testInvalidTexts": "متن‌ها را اصلاح و ذخیره کنید",
         "ruRequired": "عنوان و متن روسی را پر کنید",
         "saveFailed": "ذخیره ناموفق بود — فیلدها را بررسی کنید"
-      }
+      },
+      "loadFailed": "بارگیری یادآوری‌ها ناموفق بود"
     },
     "channelSubscriptions": {
       "title": "کانال‌های اجباری",
@@ -2229,7 +2326,9 @@
         "iface_info": "اسناد حقوقی",
         "iface_menu": "دکمه منو",
         "sys_cabinet": "کابین",
-        "sys_other": "سایر تنظیمات"
+        "sys_other": "سایر تنظیمات",
+        "sys_dpichecker": "DPI//CHECKER",
+        "payments_cashera": "Cashera"
       },
       "categories": {
         "CABINET": "کابین",
@@ -3468,13 +3567,7 @@
         "buttonApplied_one": "فیلترها: {{count}} مورد",
         "buttonApplied_other": "فیلترها: {{count}} مورد",
         "reset": "بازنشانی",
-        "remove": "حذف فیلتر «{{name}}»",
-        "allStatuses": "همه وضعیت‌ها",
-        "byDate": "بر اساس تاریخ",
-        "byBalance": "بر اساس موجودی",
-        "byActivity": "بر اساس فعالیت",
-        "bySpent": "بر اساس هزینه",
-        "byExpiry": "بر اساس انقضا"
+        "remove": "حذف فیلتر «{{name}}»"
       },
       "actions": {
         "block": "مسدود کردن",
@@ -3491,11 +3584,7 @@
           "balance": "موجودی",
           "referrals": "معرفی‌ها",
           "activity": "فعالیت",
-          "overview": "نمای کلی",
-          "info": "اطلاعات",
-          "sync": "همگام‌سازی",
-          "tickets": "تیکت‌ها",
-          "gifts": "هدایا"
+          "overview": "نمای کلی"
         },
         "noTickets": "این کاربر تیکتی ندارد",
         "ticketsCount": "تیکت",
@@ -3765,8 +3854,7 @@
           "commissionSaved": "کمیسیون ذخیره شد",
           "spentHint": "خرج در سرویس",
           "confirmRemoveReferrer": "دعوت‌کننده جدا شود؟ دیگر از این کاربر درآمدی نمی‌گیرد.",
-          "confirmRemoveReferral": "{{name}} از زیرمجموعه‌ها حذف شود؟ درآمد از او متوقف می‌شود.",
-          "addReferral": "افزودن معرفی"
+          "confirmRemoveReferral": "{{name}} از زیرمجموعه‌ها حذف شود؟ درآمد از او متوقف می‌شود."
         },
         "actions": {
           "areYouSure": "آیا مطمئنید می‌خواهید ادامه دهید؟",
@@ -3924,19 +4012,7 @@
             "logins": "ورودها"
           },
           "fromBalance": "از موجودی",
-          "loadError": "بارگیری فعالیت ممکن نشد",
-          "total": "مجموع رویدادها",
-          "filters": {
-            "all": "همه",
-            "payments": "پرداخت‌ها",
-            "events": "رویدادها",
-            "promo": "تخفیف‌ها",
-            "tickets": "تیکت‌ها",
-            "gifts": "هدایا",
-            "referrals": "دعوت‌ها",
-            "logins": "ورودها",
-            "clicks": "کلیک‌ها"
-          }
+          "loadError": "بارگیری فعالیت ممکن نشد"
         },
         "header": {
           "copy": "کپی",
@@ -4126,10 +4202,8 @@
         "success": {
           "delete": "کاربر حذف شد",
           "disable": "کاربر غیرفعال شد",
-          "resetTrial": "دوره آزمایشی بازنشانی شد",
-          "resetSubscription": "اشتراک بازنشانی شد"
-        },
-        "resetSubscription": "بازنشانی اشتراک"
+          "resetTrial": "دوره آزمایشی بازنشانی شد"
+        }
       },
       "summary": {
         "total_one": "{{value}} کاربر",
@@ -4287,13 +4361,7 @@
         "userNotFound": "کاربر پیدا نشد",
         "trialBlockedBySubscription": "دوره آزمایشی همچنان در دسترس نیست: این کاربر اشتراک دیگری دارد. ابتدا آن را حذف کنید."
       },
-      "moreTariffs": "{{count}} مورد دیگر",
-      "searchEmail": "جستجو بر اساس ایمیل...",
-      "noPurchases": "بدون خرید",
-      "pagination": {
-        "showing": "نمایش {{from}}-{{to}} از {{total}}"
-      },
-      "purchaseCount": "تعداد خرید: {{count}}"
+      "moreTariffs": "{{count}} مورد دیگر"
     },
     "promoOffers": {
       "title": "پیشنهادات تبلیغاتی",
@@ -5230,7 +5298,8 @@
           "news": "اخبار",
           "reachability": "دسترس‌پذیری",
           "system_errors": "خطاهای سیستم",
-          "user": "کاربر"
+          "user": "کاربر",
+          "dpichecker": "DPI//CHECKER"
         },
         "permissionActions": {
           "read": "خواندن",
@@ -5979,6 +6048,434 @@
         "retry": "ارسال دوباره",
         "retrySent": "خطا به چت مدیریت ارسال شد",
         "retryFailed": "ارسال به چت مدیریت ناموفق بود"
+      }
+    },
+    "dpichecker": {
+      "subtitle": "بررسی از شبکه‌های روسیه، چین، ایران و ترکمنستان",
+      "tabs": {
+        "label": "بخش‌های DPI//CHECKER",
+        "vpn": "VPN",
+        "ip": "IP / دامنه",
+        "mtproto": "MTProto",
+        "noisy": "همسایه‌ها",
+        "probe": "کاوشگر",
+        "cheremsha": "Cheremsha",
+        "monitors": "پایشگرها",
+        "history": "تاریخچه"
+      },
+      "header": {
+        "noisyLeft": "همسایه‌ها: {{left}} از {{limit}} برای امروز باقی مانده",
+        "topup": "شارژ",
+        "noisyShort": "همسایه‌ها: {{left}} از {{limit}} امروز"
+      },
+      "money": {
+        "usd": "{{value}} USD"
+      },
+      "setup": {
+        "titleDisabled": "DPI//CHECKER خاموش است",
+        "titleNotConfigured": "DPI//CHECKER تنظیم نشده است",
+        "intro": "بررسی کلیدهای VPN، آدرس‌ها و پراکسی‌های MTProto از شبکه‌های خانگی و موبایل روسیه، چین، ایران و ترکمنستان. برای شروع:",
+        "key": "کلید API",
+        "keyHint": "در ربات DPI//CHECKER (منوی اصلی → API) یا سایت dpichecker.st صادر می‌شود؛ حداقل ۱ دلار موجودی لازم است",
+        "enable": "DPI//CHECKER را روشن کنید",
+        "enableHint": "کلید در همین تنظیمات است",
+        "rights": "دسترسی مدیران",
+        "rightsHint": "چه کسی بخش را می‌بیند و چه کسی بررسی اجرا می‌کند: بررسی‌ها از موجودی DPI//CHECKER هزینه می‌کنند",
+        "openSettings": "باز کردن تنظیمات DPI//CHECKER",
+        "openSite": "دریافت کلید در dpichecker.st",
+        "envNote": "اگر ربات با فایل محیطی تنظیم شده باشد، مقادیر آن بر تنظیمات پنل مقدم است: فایل را ویرایش و ربات را دوباره راه‌اندازی کنید.",
+        "reference": "اشتراک پیش‌فرض، اختیاری",
+        "referenceHint": "لینک اشتراک یا shortUuid پنل: VPN «از پنل» کلیدهای آن را بدون انتخاب کاربر برمی‌دارد"
+      },
+      "locations": {
+        "russia": "روسیه",
+        "china": "چین",
+        "iran": "ایران",
+        "turkmenistan": "ترکمنستان"
+      },
+      "pops": {
+        "optimal": "انتخاب بهینه",
+        "all": "همه در دسترس",
+        "random": "۱۰ تصادفی",
+        "clear": "پاک کردن",
+        "districts": "مناطق فدرال",
+        "republics": "جمهوری‌ها",
+        "search": "جستجو بر اساس منطقه یا اپراتور",
+        "loading": "در حال بارگذاری نقاط حضور",
+        "loadFailed": "بارگذاری نقاط ناموفق بود.",
+        "nothingFound": "چیزی پیدا نشد.",
+        "wholeRegion": "انتخاب کل منطقه",
+        "dead": "این نقطه اکنون در دسترس نیست",
+        "anyOperator": "هر اپراتور",
+        "optimalFailed": "دریافت مجموعه بهینه ناموفق بود، دوباره تلاش کنید.",
+        "groupEmpty": "در این منطقه اکنون نقطه‌ای در دسترس نیست."
+      },
+      "form": {
+        "step1": "چه چیزی بررسی شود",
+        "step2": "از کجا بررسی شود",
+        "step3": "جمع",
+        "paste": "چسباندن",
+        "fromPanel": "از پنل",
+        "originLabel": "منبع اهداف",
+        "hint": {
+          "vpn": "کلیدهای VLESS / VMess / Trojan / Shadowsocks / Hysteria2 یا لینک اشتراک — هر کدام در یک خط.",
+          "ip": "حداکثر ۵۰ IP یا دامنه، هر کدام در یک خط. لینک هم قبول است — فقط دامنه برداشته می‌شود.",
+          "mtproto": "لینک پراکسی MTProto (tg://proxy… یا t.me/proxy…) — هر کدام در یک خط."
+        },
+        "placeholder": {
+          "vpn": "vless://… یا https://…/subscription",
+          "ip": "example.com\n203.0.113.10",
+          "mtproto": "tg://proxy?server=…&port=…&secret=…"
+        },
+        "continue": "ادامه",
+        "parsing": "در حال تجزیه…",
+        "failed": "نشد — دوباره تلاش کنید",
+        "fetchFailed": "دریافت اشتراک ممکن نشد. بعداً تلاش کنید.",
+        "accepted": "پذیرفته شد: {{count}}",
+        "nothingAccepted": "چیزی پذیرفته نشد.",
+        "udpOnly": "فقط UDP — بررسی نمی‌شود",
+        "notes": {
+          "invalid": "نامعتبر: {{count}}",
+          "private": "IP محلی/خصوصی (بررسی نمی‌شود): {{count}}",
+          "overflow": "بیش از حد مجاز، حذف شد: {{count}}",
+          "duplicate": "تکراری: {{count}}",
+          "blacklisted": "در فهرست سیاه: {{items}}"
+        },
+        "panel": {
+          "label": "از پنل چه برداشته شود",
+          "subscription": "اشتراک",
+          "hosts": "هاست‌ها",
+          "nodes": "نودها",
+          "loading": "در حال بارگیری از پنل…"
+        },
+        "total": {
+          "pops": "نقاط",
+          "resources": "منابع",
+          "cost": "هزینه",
+          "balance": "موجودی",
+          "tariff": "({{pop}} USD برای هر نقطه + {{resource}} USD برای هر منبع در هر نقطه)"
+        },
+        "probeMode": {
+          "label": "حالت بررسی",
+          "auto": "خودکار",
+          "server": "روی هدف وب‌سرور هست",
+          "noserver": "وب‌سرور نیست — جستجوی مسدودسازی",
+          "hint": "اگر روی آدرس چیزی اجرا نمی‌شود، وب‌سرور لازم نیست: به جای «باز می‌شود؟» بررسی «مسدود است؟» انجام می‌شود — نام (SNI)، DNS و دسترسی پورت‌ها."
+        },
+        "runMode": "نحوه اجرا",
+        "once": "یک بار",
+        "scheduled": "طبق برنامه",
+        "schedule": {
+          "interval": "هر چند ساعت",
+          "alertAfter": "هشدار پس از چند شکست پیاپی",
+          "notifyOnSuccess": "موفقیت را هم گزارش کن",
+          "perRun": "هر اجرا به اندازه یک بررسی هزینه دارد",
+          "notify": "هشدارهای ربات DPI//CHECKER",
+          "notifyDm": "به پیام خصوصی من",
+          "notifyGroup": "به گروه",
+          "notifyHint": "برای گروه، پس از ساخت یک دستور نمایش داده می‌شود — آن را در گروهی که ربات DPI//CHECKER در آن است بفرستید. نتایج در هر صورت به چت مدیران ربات می‌رسد."
+        },
+        "pay": "پرداخت",
+        "createMonitor": "ایجاد پایشگر",
+        "confirmPay": "کسر {{value}} USD",
+        "confirmMonitor": "ایجاد پایشگر · هر اجرا {{value}} USD",
+        "cancel": "انصراف",
+        "estimateFailed": "محاسبه قیمت ممکن نشد",
+        "pickSome": "مواردی را که باید بررسی شوند علامت بزنید"
+      },
+      "status": {
+        "submitting": "در حال ارسال به DPI//CHECKER…",
+        "pending": "در صف",
+        "active": "در حال بررسی",
+        "running": "در حال اجرا",
+        "completed": "انجام شد",
+        "done": "انجام شد",
+        "failed": "ناموفق",
+        "cancelled": "لغو شد",
+        "rejected": "رد شد",
+        "unknown": "DPI//CHECKER پاسخ نداد",
+        "up": "فعال",
+        "down": "از کار افتاده",
+        "paused": "متوقف",
+        "active_monitor": "فعال",
+        "deleted": "خاموش"
+      },
+      "result": {
+        "title": {
+          "vpn": "بررسی کلیدهای VPN",
+          "ip": "بررسی IP/دامنه",
+          "mtproto": "بررسی MTProto"
+        },
+        "points": "{{count}} نقطه",
+        "points_other": "{{count}} نقطه",
+        "resources": "{{count}} منبع",
+        "charged": "{{value}} USD کسر شد",
+        "cancel": "لغو",
+        "refunded": "{{value}} USD بازگشت داده شد",
+        "resubmit": "دوباره بپرس",
+        "unknownHint": "DPI//CHECKER به اجرا پاسخ نداد. ممکن است هزینه کسر شده باشد. دوباره بپرسید — درخواست با همان کلید می‌رود و دو بار کسر نمی‌شود.",
+        "rejected": "DPI//CHECKER اجرا را رد کرد — هزینه‌ای کسر نشد.",
+        "progress": "{{done}} از {{total}} انجام شد",
+        "available": "در دسترس",
+        "partial": "جزئی",
+        "unavailable": "در دسترس نیست",
+        "avgLatency": "میانگین تأخیر",
+        "ms": "{{value}} میلی‌ثانیه",
+        "speed": "{{host}}: {{value}} مگابیت",
+        "ok": "در دسترس",
+        "fail": "در دسترس نیست",
+        "okOf": "{{ok}} از {{total}} در دسترس",
+        "abroadOk": "از خارج: در دسترس · {{value}} میلی‌ثانیه",
+        "abroadFail": "از خارج: در دسترس نیست — احتمالاً مسدودسازی نیست",
+        "showAll": "نمایش همه {{count}}",
+        "showLess": "بستن",
+        "csv": "CSV",
+        "map": "نقشه",
+        "loadFailed": "بارگذاری بررسی ممکن نشد",
+        "newCheck": "بررسی جدید",
+        "notes": {
+          "noInternet": "نقطه اینترنت ندارد — مسدودسازی نیست",
+          "httpsUpgradeStub": "پورت ۸۰ فقط به HTTPS بی‌پاسخ هدایت می‌کند — شبکه اپراتور پاسخ می‌دهد",
+          "tlsHandshakeFailed": "دست‌دادن TLS ناموفق بود",
+          "dnsFailed": "آدرس resolve نمی‌شود",
+          "timeout": "پاسخی نیست",
+          "connectionRefused": "اتصال رد شد",
+          "connectionReset": "اتصال قطع شد",
+          "proxyDead": "نقطه پاسخ نمی‌دهد",
+          "untestable": "قابل بررسی نیست"
+        },
+        "csvFailed": "دانلود CSV ممکن نشد",
+        "details": "جزئیات",
+        "detailsFailed": "جزئیات بارگیری نشد",
+        "detailsEmpty": "برای این نقطه جزئیاتی نیست.",
+        "yes": "بله",
+        "no": "خیر",
+        "fields": {
+          "host": "کلید",
+          "error": "خطا",
+          "pop_name": "نقطه",
+          "connected": "وصل شد",
+          "server_ip": "IP سرور",
+          "latency_ms": "تأخیر، میلی‌ثانیه",
+          "proxy_dead": "نقطه پاسخ نمی‌دهد",
+          "untestable": "قابل بررسی نیست",
+          "proxy_exit_ip": "خروجی نقطه",
+          "untestable_reason": "چرا قابل بررسی نیست",
+          "control_check": "نقطه اینترنت دارد",
+          "mode": "حالت",
+          "dns_ips": "آدرس‌های DNS",
+          "exit_ip": "خروجی نقطه",
+          "verdict": "نتیجه‌گیری",
+          "resource": "آدرس",
+          "cert_name": "گواهی",
+          "accessible": "در دسترس",
+          "error_code": "کد خطا",
+          "port_story": "وضعیت پورت‌ها",
+          "samples_ok": "نمونه‌های موفق",
+          "ssh_status": "SSH",
+          "dns_verdict": "DNS",
+          "ping_avg_ms": "پینگ، میلی‌ثانیه",
+          "scheme_used": "پروتکل",
+          "sni_verdict": "SNI",
+          "status_code": "کد پاسخ سایت",
+          "port_80_open": "پورت 80 باز",
+          "port_443_open": "پورت 443 باز",
+          "samples_total": "کل نمونه‌ها",
+          "port_443_state": "پورت 443",
+          "samples_tls_ok": "TLS موفق",
+          "throughput_kbps": "سرعت، کیلوبیت/ثانیه",
+          "port_80_hijacked": "پورت 80 ربوده شده",
+          "port_443_hijacked": "پورت 443 ربوده شده",
+          "samples_throttled": "نمونه‌های کندشده",
+          "port_control_state": "پورت کنترلی",
+          "control_port_number": "شماره پورت کنترلی",
+          "error_redirect_host": "هدایت به",
+          "dns_intercepted_ratio": "سهم DNS جعلی",
+          "tcp_latency_ms": "تأخیر TCP، میلی‌ثانیه",
+          "baseline_unreliable": "مبنا نامطمئن",
+          "status": "نتیجه",
+          "reached": "رسید",
+          "secret_kind": "نوع رمز"
+        }
+      },
+      "noisy": {
+        "intro": "گواهی‌های TLS (SNI) هاست‌های زیرشبکه /24 — همسایه‌های سرور شما چقدر «پرسروصدا» هستند. رایگان، تا ۱۰ اسکن در روز، امروز استفاده شده: {{used}}.",
+        "placeholder": "زیرشبکه /24، IP یا دامنه — هر کدام در یک خط",
+        "run": "اسکن",
+        "exhausted": "سقف اسکن امروز تمام شد.",
+        "found": "هاست‌های یافت‌شده: {{count}}",
+        "badRu": "سرویس‌های روسی در همسایگی",
+        "vpnLike": "شبیه VPN",
+        "badForeign": "سرویس‌های خارجی قابل توجه",
+        "quiet": "همسایه پرسروصدایی پیدا نشد."
+      },
+      "probe": {
+        "intro": "بررسی اینکه آیا کل زیرشبکه /24 مسدود است یا DPI آدرس‌های جداگانه (/32) را هدف می‌گیرد. زیرشبکه از طریق همسایه‌ها بررسی می‌شود — نیازی به اجاره چیزی در آن نیست.",
+        "howTitle": "چگونه کار می‌کند",
+        "how1": "زیرشبکه را اسکن و گواهی‌های TLS (SNI) هاست‌های زنده را جمع می‌کنم.",
+        "how2": "هر چیزی که دامنه نیست و SNIهای «بد» شناخته‌شده را کنار می‌گذارم.",
+        "how3": "با DNS بررسی می‌کنم که دامنه هنوز در این زیرشبکه است.",
+        "how4": "از خارج هر دامنه را با HTTPS باز می‌کنم و پاسخی بالای ۴۸ کیلوبایت پیدا می‌کنم.",
+        "how5": "این پاسخ را از ۱۰ نقطه در روسیه می‌گیرم و می‌بینم کامل می‌رسد یا نه.",
+        "why": "چرا این‌طور: در برخی بازه‌ها DPI اتصال را قطع نمی‌کند، بلکه حدود ۱۶ تا ۲۰ کیلوبایت عبور می‌دهد و بعد قطع می‌کند. صفحه‌ای کمتر از ۱۶ کیلوبایت حتی با این مسدودسازی باز می‌شود — پس پاسخی بسیار بزرگ‌تر از آستانه لازم است.",
+        "price": "هزینه: ۱.۰۰ دلار ثابت + ۱.۵۰ دلار برای هر گیگابایت ترافیک (واقعی، پس از بررسی). مبلغ ثابت فوراً کسر و فقط در صورت خرابی زیرساخت DPI//CHECKER بازگردانده می‌شود.",
+        "placeholder": "زیرشبکه /24، IP یا دامنه",
+        "confirm": "کسر {{value}} USD + ترافیک",
+        "cost": "ثابت {{fixed}} USD · ترافیک {{traffic}} USD ({{mb}} مگابایت)",
+        "stage": {
+          "queued": "در صف",
+          "scan": "در حال اسکن زیرشبکه…",
+          "foreign": "در حال بررسی از خارج…",
+          "russia": "در حال بررسی از روسیه…",
+          "report": "در حال آماده‌سازی گزارش…"
+        },
+        "verdict": {
+          "clean": "زیرشبکه مسدود نیست",
+          "blocked": "کل زیرشبکه مسدود است",
+          "partial": "آدرس‌های جداگانه مسدودند",
+          "unknown": "نتیجه نامشخص"
+        },
+        "blocked": "آدرس‌های مسدود: {{blocked}} از {{tested}} بررسی‌شده ({{percent}}٪).",
+        "regions": "مناطقی که کل زیرشبکه را مسدود می‌کنند: {{whole}}، جزئی: {{part}}، پاک: {{clean}}.",
+        "pipeline": "روند: هاست {{scanned}} ← دامنه {{kept}} ← در زیرشبکه {{inSubnet}} ← از خارج باز می‌شود {{foreign}} ← از روسیه بررسی شد {{tested}}.",
+        "byIp": "بر اساس آدرس",
+        "byRegion": "بر اساس منطقه",
+        "pops": "✅ / ⚠️ / ❌ {{green}} / {{yellow}} / {{red}} از {{total}}",
+        "regionLine": "{{name}}: مسدود {{blocked}} از {{tested}}",
+        "state": {
+          "open": "✅ باز",
+          "blocked": "❌ مسدود",
+          "stalled": "⚠️ قطع می‌شود"
+        },
+        "drops": "حذف‌شده در مراحل فیلتر",
+        "drop": {
+          "bad_sni": "SNI بد",
+          "moved_away": "از زیرشبکه رفته",
+          "dns_failed": "resolve نمی‌شود",
+          "payload_too_small": "پاسخ کمتر از آستانه",
+          "foreign_failed": "از خارج باز نمی‌شود"
+        }
+      },
+      "cheremsha": {
+        "intro": "آیا دامنه یا IP در فهرست RKN و فهرست‌های CDN هست. رایگان، تا ۲۰ مورد در هر بار.",
+        "placeholder": "دامنه یا IP — هر کدام در یک خط",
+        "run": "بررسی",
+        "verdict": {
+          "blocked": "مسدود",
+          "maybe": "احتمالاً مسدود",
+          "noResolve": "به IP تبدیل نمی‌شود",
+          "notFound": "در فهرست نیست"
+        },
+        "domainHit": "دامنه در فهرست است",
+        "subnet": "{{value}} — مسدودسازی از طریق همسایگی ممکن است",
+        "resolved": "به {{value}} تبدیل می‌شود",
+        "invalid": "رد شد (دامنه یا IP نیست): {{items}}",
+        "refreshed": "به‌روزرسانی فهرست‌ها: {{value}}"
+      },
+      "monitors": {
+        "foreign": "ایجادشده در سایت DPI//CHECKER",
+        "every": "هر {{hours}} ساعت",
+        "active": "پایشگر فعال",
+        "noRuns": "هنوز اجرا نشده",
+        "fails": "شکست پیاپی: {{count}}",
+        "lastNext": "آخرین اجرا: {{last}} · بعدی: {{next}}",
+        "delete": "خاموش کردن",
+        "deleteConfirm": "خاموش کردن پایشگر (تاریخچه می‌ماند)",
+        "empty": "هنوز پایشگری نیست — در فرم بررسی با «طبق برنامه» بسازید.",
+        "paused": {
+          "insufficient_balance": "متوقف: موجودی DPI//CHECKER تمام شد",
+          "deleted_via_api": "خاموش",
+          "other": "متوقف"
+        },
+        "howTitle": "مانیتورها چگونه کار می‌کنند",
+        "how": {
+          "create": "ایجاد: زبانه VPN، IP / دامنه یا MTProto ← اهداف و نقاط ← «طبق برنامه» ← فاصله.",
+          "runs": "سرویس هر N ساعت اهداف را بررسی می‌کند. خود مانیتور رایگان است و هر اجرا به اندازه یک بررسی هزینه دارد.",
+          "alerts": "نتایج به چت مدیران ربات می‌رسد: هشدار پس از تعداد تعیین‌شده شکست پیاپی و پیام بازیابی؛ اگر «موفقیت را هم گزارش کن» روشن باشد، هر اجرا. ربات DPI//CHECKER هم هشدار می‌فرستد — به پیام خصوصی یا گروه، که هنگام ساخت مانیتور انتخاب می‌شود.",
+          "manage": "اینجا می‌توانید هر مانیتوری را متوقف، غیرفعال یا تنظیم کنید و اجراهایش را ببینید، از جمله مانیتورهای ساخته‌شده در سایت DPI//CHECKER."
+        },
+        "untitled": "مانیتور #{{id}}",
+        "deletedBlock": "غیرفعال · {{count}}",
+        "runs": "اجراها",
+        "runsEmpty": "هنوز اجرایی نبوده است.",
+        "runsFailed": "اجراها بارگیری نشد",
+        "runOpen": "باز کردن اجرا",
+        "runCost": "{{value}} USD",
+        "settings": "تنظیمات",
+        "save": "ذخیره",
+        "groupTitle": "هشدارهای ربات DPI//CHECKER — به گروه",
+        "groupHow": "ربات DPI//CHECKER را به گروه اضافه کنید و این دستور را آنجا بفرستید:",
+        "copy": "کپی دستور",
+        "copied": "کپی شد"
+      },
+      "history": {
+        "all": "همه",
+        "filter": "نمایش",
+        "mine": "فقط مال من",
+        "empty": "هنوز اجرایی نیست.",
+        "more": "نمایش بیشتر",
+        "withCount": "{{name}} · {{count}}",
+        "columns": {
+          "what": "چه",
+          "where": "کجا",
+          "resources": "منابع",
+          "cost": "هزینه",
+          "who": "چه کسی",
+          "when": "چه زمانی",
+          "status": "نتیجه",
+          "source": "منبع"
+        },
+        "scope": "اجراهای چه کسی",
+        "scopeCabinet": "از کابینت",
+        "scopeAccount": "کل حساب",
+        "accountHint": "همه اجراهای کلید DPI//CHECKER شما: از سایت، ربات آن‌ها، API و اجراهای مانیتورها. روی یک ردیف بزنید تا نتیجه همین‌جا باز شود.",
+        "allChecks": "همه بررسی‌ها",
+        "openFailed": "اجرا باز نشد",
+        "sources": {
+          "web": "سایت",
+          "bot": "ربات DPI//CHECKER",
+          "api": "API",
+          "watcher": "مانیتور",
+          "inline": "اینلاین تلگرام"
+        }
+      },
+      "shortcuts": {
+        "checkSubscription": "بررسی در DPI//CHECKER",
+        "checkNode": "بررسی در DPI//CHECKER"
+      },
+      "map": {
+        "status": {
+          "green": "در دسترس",
+          "yellow": "جزئی",
+          "red": "در دسترس نیست",
+          "gray": "بررسی نشده",
+          "none": "بررسی نشده"
+        },
+        "any": "هر",
+        "okOf": "{{ok}}/{{total}} سالم",
+        "proxyDead": "پروکسی در دسترس نیست",
+        "deadExtra": "+{{count}} بدون پروکسی"
+      },
+      "deliveries": {
+        "title": "اعلان‌های DPI//CHECKER به ربات",
+        "hint": "وقتی بررسی تمام می‌شود، DPI//CHECKER به ربات خبر می‌دهد. اگر اینجا بررسی هنوز «در حال اجرا» است ولی در سایت تمام شده، ببینید اعلان رسیده یا نه.",
+        "empty": "هنوز اعلانی نبوده است.",
+        "loadFailed": "گزارش اعلان‌ها بارگیری نشد",
+        "events": {
+          "check_completed": "بررسی تمام شد",
+          "check_cancelled": "بررسی لغو شد",
+          "probe_done": "کاوش تمام شد",
+          "noisy_done": "همسایه‌ها تمام شد",
+          "monitor_run": "اجرای مانیتور شروع شد"
+        },
+        "status": {
+          "delivered": "تحویل شد",
+          "pending": "در انتظار تکرار",
+          "failed": "تحویل نشد"
+        },
+        "object": "شماره {{id}}",
+        "attempts": "تلاش‌ها: {{count}}",
+        "response": "ربات پاسخ داد {{code}}"
       }
     }
   },
@@ -6895,8 +7392,6 @@
       "manage": "مدیریت اشتراک",
       "buyAnother": "خرید طرح دیگر",
       "buyTraffic": "خرید ترافیک بیشتر",
-      "buyPremiumTraffic": "خرید ترافیک پریمیوم",
-      "premiumPaused": "سقف مصرف تمام شد",
       "buyDevices": "افزودن دستگاه",
       "reduceDevices": "کاهش تعداد دستگاه",
       "servers": "سرورها",
@@ -6904,7 +7399,11 @@
       "allSettings": "همه تنظیمات اشتراک",
       "delete": "حذف اشتراک",
       "plans": "دیدن طرح‌ها",
-      "support": "پشتیبانی"
+      "support": "پشتیبانی",
+      "copyLink": "کپی لینک اشتراک",
+      "copied": "کپی شد",
+      "buyPremiumTraffic": "خرید ترافیک پریمیوم",
+      "premiumPaused": "سقف مصرف تمام شد"
     },
     "error": {
       "load": "داده‌ها بارگذاری نشد",

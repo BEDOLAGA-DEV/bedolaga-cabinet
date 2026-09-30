@@ -108,6 +108,7 @@ import {
   PiCpu,
   PiMemory,
   PiPulse,
+  PiWall,
 } from 'react-icons/pi';
 // У Phosphor нет радара — единственная иконка из Lucide, для раздела BSCHEKER.
 import { LuRadar } from 'react-icons/lu';
@@ -538,6 +539,11 @@ export const XMarkIcon = ({ className }: IconProps) => <PiX className={cn('h-5 w
 
 export const CellSignalIcon = ({ className }: IconProps) => (
   <PiCellSignalFull className={cn('h-5 w-5', className)} />
+);
+
+/** Раздел DPI//CHECKER: стена (ТСПУ, фильтрация). */
+export const WallIcon = ({ className }: IconProps) => (
+  <PiWall className={cn('h-5 w-5', className)} />
 );
 
 /** Раздел BSCHEKER: радар. */

@@ -128,6 +128,34 @@ describe('DashboardLite', () => {
     expect(action.getAttribute('href')).toBe('/subscriptions/7/renew');
   });
 
+  it('свежий триал зовёт подключить устройство, а тарифы — строкой', async () => {
+    // Триал на день-три раньше попадал в «заканчивается» и вёл в «Продлить» —
+    // на экран «Нет вариантов продления».
+    getSubscription.mockResolvedValue({
+      has_subscription: true,
+      subscription: { ...baseSubscription, is_trial: true, days_left: 1 },
+    });
+    renderScreen();
+
+    const action = await primaryAction();
+    expect(action.textContent).toContain('lite.action.connect');
+    expect(action.getAttribute('href')).toBe('/connection?sub=7');
+    const plans = await screen.findByRole('link', { name: /Посмотреть тарифы/ });
+    expect(plans.getAttribute('href')).toBe('/subscription/purchase');
+  });
+
+  it('истёкший триал ведёт в витрину тарифов, а не в продление', async () => {
+    getSubscription.mockResolvedValue({
+      has_subscription: true,
+      subscription: { ...baseSubscription, is_trial: true, is_expired: true, days_left: 0 },
+    });
+    renderScreen();
+
+    const action = await primaryAction();
+    expect(action.textContent).toContain('lite.action.buy');
+    expect(action.getAttribute('href')).toBe('/subscription/purchase');
+  });
+
   it('без подписки ведёт в витрину тарифов', async () => {
     getSubscription.mockResolvedValue({ has_subscription: false, subscription: null });
     renderScreen();

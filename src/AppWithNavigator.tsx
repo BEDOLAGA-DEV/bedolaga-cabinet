@@ -8,7 +8,7 @@ import {
   retrieveLaunchParams,
 } from '@telegram-apps/sdk-react';
 import { useQuery } from '@tanstack/react-query';
-import Twemoji from 'react-twemoji';
+import Twemoji from '@/lib/twemoji';
 import App from './App';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { PlatformProvider } from './platform/PlatformProvider';

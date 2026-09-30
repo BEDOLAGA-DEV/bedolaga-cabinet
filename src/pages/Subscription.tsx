@@ -30,7 +30,7 @@ import {
 import { useHaptic } from '../platform';
 import { resolveConnectionUrlForUi } from '../utils/connectionLink';
 import { getFlagEmoji } from '../utils/subscriptionHelpers';
-import Twemoji from 'react-twemoji';
+import Twemoji from '@/lib/twemoji';
 import { AutopayToggle } from '../components/subscription/manage/AutopayToggle';
 import { DailyPausePanel } from '../components/subscription/manage/DailyPausePanel';
 import {

@@ -193,13 +193,13 @@
     "validUntil": "Valid until",
     "goToSubscription": "Go to Subscription",
     "goToBalance": "Go to Balance",
-    "devicesAdded": "+{{count}} devices",
+    "devicesAdded": "Devices added",
     "devicesPurchased": {
       "title": "Devices added"
     },
-    "totalDevices": "Total devices: {{count}}",
-    "totalTraffic": "Total traffic: {{value}}",
-    "trafficAdded": "+{{value}} traffic",
+    "totalDevices": "Total devices",
+    "totalTraffic": "Total traffic",
+    "trafficAdded": "Traffic added",
     "trafficPurchased": {
       "title": "Traffic added"
     }
@@ -805,9 +805,7 @@
       "limitExplained_other": "The «{{name}}» plan gives {{count}} slots and all are in use. Free one up or add more.",
       "limitExplainedNoTopup_one": "The «{{name}}» plan gives {{count}} slot and it is in use. Free it up to continue.",
       "limitExplainedNoTopup_other": "The «{{name}}» plan gives {{count}} slots and all are in use. Free up a slot to continue.",
-      "noTopupHint": "Slots cannot be bought on a trial subscription — free one up or switch to a paid plan.",
-      "limitExplained": "The «{{name}}» plan gives {{count}} slots and all are in use. Free one up or add more.",
-      "limitExplainedNoTopup": "The «{{name}}» plan gives {{count}} slots and all are in use. Free up a slot to continue."
+      "noTopupHint": "Slots cannot be bought on a trial subscription — free one up or switch to a paid plan."
     },
     "delete": "Delete",
     "deleteTitle": "Delete subscription",
@@ -822,7 +820,31 @@
     "statusActive": "Active",
     "statusExpired": "Expired",
     "statusLimited": "Limited",
-    "statusTrial": "Trial"
+    "statusTrial": "Trial",
+    "casheraRecurring": {
+      "title": "Cashera auto-renewal",
+      "connect": "Connect",
+      "confirm": "Confirm auto-charges",
+      "cancel": "Turn off",
+      "confirmCancel": "Turn off Cashera auto-renewal? The subscription will no longer renew automatically.",
+      "cancelled": "Cashera auto-renewal turned off",
+      "enableError": "Could not connect Cashera auto-renewal",
+      "cancelError": "Could not cancel Cashera auto-renewal",
+      "statusPending": "Waiting for confirmation via the link",
+      "statusActive": "Active",
+      "statusPastDue": "Payment failed — please try again",
+      "nextCharge": "next charge {{date}}",
+      "amountPerInterval": "{{amount}} ₽ {{interval}}",
+      "interval": {
+        "daily": "daily",
+        "weekly": "weekly",
+        "monthly": "monthly",
+        "yearly": "yearly"
+      },
+      "autopayHint": "Your subscription will renew automatically via Cashera",
+      "purchaseButton": "⚡ Subscribe with Cashera auto-pay",
+      "purchaseHint": "Confirm auto-charges via the Cashera link; renewals are then charged automatically."
+    }
   },
   "balance": {
     "title": "Balance",
@@ -915,6 +937,9 @@
       },
       "apple_iap": {
         "description": "Pay via Apple In-App Purchase"
+      },
+      "cashera": {
+        "description": "SBP, cards, crypto (Cashera)"
       }
     },
     "transactionHistory": "Transaction History",
@@ -1027,7 +1052,8 @@
       "goToBalance": "Go to Balance",
       "tryAgain": "Try Again"
     },
-    "top_up": "Top up balance"
+    "top_up": "Top up balance",
+    "scanQrToPay": "Scan the QR code in your banking app or open the payment page"
   },
   "referral": {
     "title": "Referral Program",
@@ -1487,7 +1513,8 @@
       "bulkActions": "Bulk Actions",
       "infoPages": "Info Pages",
       "legalPages": "System pages",
-      "systemErrors": "System errors"
+      "systemErrors": "System errors",
+      "dpichecker": "DPI//CHECKER"
     },
     "panel": {
       "title": "Admin Panel",
@@ -2805,6 +2832,65 @@
         "cancelled": "Cancelled",
         "cancelling": "Cancelling"
       },
+      "audience": {
+        "authType": "Registration method",
+        "join": "Condition connector",
+        "and": "AND",
+        "or": "OR",
+        "field": "Field",
+        "comparison": "Comparison",
+        "equals": "Equals",
+        "notEquals": "Does not equal",
+        "value": "Value",
+        "remove": "Remove condition",
+        "add": "Add condition",
+        "loadError": "Could not load recipients",
+        "recipientCount": "Recipients",
+        "showUsers": "View list",
+        "users": "Broadcast recipients",
+        "empty": "No recipients",
+        "conditions": "Conditions",
+        "noUsersPermission": "Requires permission to view users"
+      },
+      "atomic": {
+        "all": "All users",
+        "subscriptionStatus": "Subscription status",
+        "active": "Active",
+        "expired": "Expired",
+        "subscriptionType": "Subscription type",
+        "trial": "Trial",
+        "paid": "Paid",
+        "tariff": "Plan",
+        "trafficZero": "Used traffic equals 0",
+        "trafficGt": "Used traffic greater than",
+        "trafficLt": "Used traffic less than",
+        "endPreset": "Subscription end: quick period",
+        "next3Days": "Within the next 3 days",
+        "endDate": "Subscription end: date",
+        "registrationPreset": "Registration: quick period",
+        "today": "Today",
+        "last7Days": "Last 7 days",
+        "last30Days": "Last 30 days",
+        "registrationDate": "Registration date",
+        "activityPreset": "Activity: quick period",
+        "activeToday": "Active today",
+        "inactive7Days": "Inactive for 7+ days",
+        "inactive30Days": "Inactive for 30+ days",
+        "activityDate": "Last activity: date",
+        "source": "Registration source",
+        "referral": "Referral",
+        "direct": "Direct",
+        "paidHistory": "Paid before",
+        "telegramUsername": "Telegram username",
+        "searchUser": "Type to find and select a user",
+        "noUsers": "No users found",
+        "before": "Before date",
+        "after": "After date",
+        "between": "Between dates",
+        "dateFrom": "Date",
+        "dateTo": "To",
+        "gigabytes": "Gigabytes"
+      },
       "filterGroups": {
         "basic": "Basic",
         "subscription": "By subscription",
@@ -2922,7 +3008,11 @@
       "confirmDelete": "Delete reminder \"{{name}}\"?",
       "stats": "Sent: {{sent}} · dismissed: {{dismissed}} · currently match: bot {{bot}}, cabinet {{cabinet}}",
       "any": "Any",
-      "channels": { "both": "Bot and cabinet", "bot": "Bot only", "cabinet": "Cabinet only" },
+      "channels": {
+        "both": "Bot and cabinet",
+        "bot": "Bot only",
+        "cabinet": "Cabinet only"
+      },
       "category": {
         "service": "Service — for everyone",
         "marketing": "Marketing — except those unsubscribed from promo"
@@ -2941,7 +3031,11 @@
         "low_balance": "Low balance",
         "tariff": "Tariff"
       },
-      "button": { "none": "No button", "cabinet": "Cabinet section", "url": "Link" },
+      "button": {
+        "none": "No button",
+        "cabinet": "Cabinet section",
+        "url": "Link"
+      },
       "form": {
         "name": "Name (admin panel only)",
         "channels": "Where to show",
@@ -2975,7 +3069,8 @@
         "testInvalidTexts": "Fix the texts and save",
         "ruRequired": "Fill in the Russian title and text",
         "saveFailed": "Failed to save — check the fields"
-      }
+      },
+      "loadFailed": "Failed to load reminders"
     },
     "channelSubscriptions": {
       "title": "Required Channels",
@@ -3195,7 +3290,9 @@
         "iface_info": "Legal documents",
         "iface_menu": "Menu button",
         "sys_cabinet": "Cabinet",
-        "sys_other": "Other settings"
+        "sys_other": "Other settings",
+        "sys_dpichecker": "DPI//CHECKER",
+        "payments_cashera": "Cashera"
       },
       "categories": {
         "CABINET": "Cabinet",
@@ -4589,13 +4686,7 @@
         "buttonApplied_one": "Filters: {{count}} applied",
         "buttonApplied_other": "Filters: {{count}} applied",
         "reset": "Reset",
-        "remove": "Remove filter “{{name}}”",
-        "allStatuses": "All statuses",
-        "byDate": "By date",
-        "byBalance": "By balance",
-        "byActivity": "By activity",
-        "bySpent": "By spending",
-        "byExpiry": "By expiry"
+        "remove": "Remove filter “{{name}}”"
       },
       "actions": {
         "block": "Block",
@@ -4628,8 +4719,7 @@
         "success": {
           "delete": "User successfully deleted",
           "resetTrial": "Trial successfully reset",
-          "disable": "User successfully disabled",
-          "resetSubscription": "Subscription successfully reset"
+          "disable": "User successfully disabled"
         },
         "confirmDelete": {
           "title": "Delete user?",
@@ -4642,11 +4732,6 @@
         "confirmDisable": {
           "title": "Disable user?",
           "message": "The user will not be able to use the service until reactivated."
-        },
-        "resetSubscription": "Reset subscription",
-        "confirmResetSubscription": {
-          "title": "Reset subscription?",
-          "message": "The user's current subscription will be cancelled."
         }
       },
       "detail": {
@@ -4655,11 +4740,7 @@
           "balance": "Balance",
           "referrals": "Referrals",
           "activity": "Activity",
-          "overview": "Overview",
-          "info": "Information",
-          "sync": "Synchronization",
-          "tickets": "Tickets",
-          "gifts": "Gifts"
+          "overview": "Overview"
         },
         "noTickets": "No tickets from this user",
         "ticketsCount": "tickets",
@@ -4934,8 +5015,7 @@
           "commissionSaved": "Commission saved",
           "spentHint": "Spent in the service",
           "confirmRemoveReferrer": "Unlink the referrer? They will stop earning from this user.",
-          "confirmRemoveReferral": "Remove {{name}} from referrals? Earnings from them will stop.",
-          "addReferral": "Add Referral"
+          "confirmRemoveReferral": "Remove {{name}} from referrals? Earnings from them will stop."
         },
         "activity": {
           "empty": "No activity yet",
@@ -5088,19 +5168,7 @@
             "logins": "Logins"
           },
           "fromBalance": "from balance",
-          "loadError": "Could not load activity",
-          "total": "Total events",
-          "filters": {
-            "all": "All",
-            "payments": "Payments",
-            "events": "Events",
-            "promo": "Promo",
-            "tickets": "Tickets",
-            "gifts": "Gifts",
-            "referrals": "Referrals",
-            "logins": "Logins",
-            "clicks": "Clicks"
-          }
+          "loadError": "Could not load activity"
         },
         "header": {
           "copy": "Copy",
@@ -5424,13 +5492,7 @@
         "userNotFound": "User not found",
         "trialBlockedBySubscription": "The trial is still unavailable: this person has another subscription. Remove it first."
       },
-      "moreTariffs": "{{count}} more",
-      "searchEmail": "Search by email...",
-      "noPurchases": "No purchases",
-      "pagination": {
-        "showing": "Showing {{from}}-{{to}} of {{total}}"
-      },
-      "purchaseCount": "Purchases: {{count}}"
+      "moreTariffs": "{{count}} more"
     },
     "promoOffers": {
       "title": "Promo Offers",
@@ -5614,7 +5676,8 @@
           "news": "News",
           "reachability": "Reachability",
           "system_errors": "System errors",
-          "user": "User"
+          "user": "User",
+          "dpichecker": "DPI//CHECKER"
         },
         "permissionActions": {
           "read": "Read",
@@ -6264,6 +6327,435 @@
         "retry": "Retry delivery",
         "retrySent": "Error sent to the admin chat",
         "retryFailed": "Could not send to the admin chat"
+      }
+    },
+    "dpichecker": {
+      "subtitle": "checks from networks in Russia, China, Iran and Turkmenistan",
+      "tabs": {
+        "label": "DPI//CHECKER sections",
+        "vpn": "VPN",
+        "ip": "IP / domain",
+        "mtproto": "MTProto",
+        "noisy": "Neighbours",
+        "probe": "Probe",
+        "cheremsha": "Cheremsha",
+        "monitors": "Monitors",
+        "history": "History"
+      },
+      "header": {
+        "noisyLeft": "Neighbours: {{left}} of {{limit}} left today",
+        "topup": "Top up",
+        "noisyShort": "Neighbours: {{left}} of {{limit}} today"
+      },
+      "money": {
+        "usd": "{{value}} USD"
+      },
+      "setup": {
+        "titleDisabled": "DPI//CHECKER is off",
+        "titleNotConfigured": "DPI//CHECKER is not set up",
+        "intro": "Checks VPN keys, addresses and MTProto proxies from home and mobile networks in Russia, China, Iran and Turkmenistan. To start:",
+        "key": "API key",
+        "keyHint": "Issued in the DPI//CHECKER bot (Main menu → API) or on dpichecker.st; requires a deposit of at least $1",
+        "enable": "Turn DPI//CHECKER on",
+        "enableHint": "The switch is in the same settings",
+        "rights": "Admin rights",
+        "rightsHint": "Who can view the section and who can run checks: they spend the DPI//CHECKER balance",
+        "openSettings": "Open DPI//CHECKER settings",
+        "openSite": "Get a key at dpichecker.st",
+        "envNote": "If the bot is configured via an environment file, its values override the cabinet settings: edit the file and restart the bot.",
+        "reference": "Default subscription, optional",
+        "referenceHint": "A subscription link or panel shortUuid: VPN “From panel” takes its keys without picking a user"
+      },
+      "locations": {
+        "russia": "Russia",
+        "china": "China",
+        "iran": "Iran",
+        "turkmenistan": "Turkmenistan"
+      },
+      "pops": {
+        "optimal": "Optimal set",
+        "all": "All available",
+        "random": "Random 10",
+        "clear": "clear",
+        "districts": "Districts",
+        "republics": "Republics",
+        "search": "Search by region or operator",
+        "loading": "Loading points of presence",
+        "loadFailed": "Could not load points.",
+        "nothingFound": "Nothing found.",
+        "wholeRegion": "Select the whole region",
+        "dead": "This point is down right now",
+        "anyOperator": "Any",
+        "optimalFailed": "Could not get the optimal set, try again.",
+        "groupEmpty": "No points are available in this district right now."
+      },
+      "form": {
+        "step1": "What to check",
+        "step2": "Where to check from",
+        "step3": "Total",
+        "paste": "Paste",
+        "fromPanel": "From panel",
+        "originLabel": "Where to take targets from",
+        "hint": {
+          "vpn": "VLESS / VMess / Trojan / Shadowsocks / Hysteria2 keys or subscription links — one per line.",
+          "ip": "Up to 50 IPs or domains, one per line. Links work too — only the domain is taken.",
+          "mtproto": "MTProto proxy links (tg://proxy… or t.me/proxy…) — one per line."
+        },
+        "placeholder": {
+          "vpn": "vless://… or https://…/subscription",
+          "ip": "example.com\n203.0.113.10",
+          "mtproto": "tg://proxy?server=…&port=…&secret=…"
+        },
+        "continue": "Continue",
+        "parsing": "Parsing…",
+        "failed": "That did not work — try again",
+        "fetchFailed": "Could not fetch the subscription. Try later.",
+        "accepted": "Accepted: {{count}}",
+        "nothingAccepted": "Nothing accepted.",
+        "udpOnly": "UDP only — not checked",
+        "notes": {
+          "invalid": "invalid: {{count}}",
+          "private": "local/private IPs (not checked): {{count}}",
+          "overflow": "over the line limit, dropped: {{count}}",
+          "duplicate": "duplicates: {{count}}",
+          "blacklisted": "blacklisted: {{items}}"
+        },
+        "panel": {
+          "label": "What to take from the panel",
+          "subscription": "Subscription",
+          "hosts": "Hosts",
+          "nodes": "Nodes",
+          "loading": "Loading from the panel…"
+        },
+        "total": {
+          "pops": "Points",
+          "resources": "Resources",
+          "cost": "Cost",
+          "balance": "Balance",
+          "tariff": "({{pop}} USD per point + {{resource}} USD per resource per point)"
+        },
+        "probeMode": {
+          "label": "Check mode",
+          "auto": "Auto — detect",
+          "server": "The target runs a web server",
+          "noserver": "No web server — look for blocking",
+          "hint": "If nothing runs on the address, no web server is needed: instead of “does it open” the check looks for blocking — name (SNI), DNS and port reachability."
+        },
+        "runMode": "How to run",
+        "once": "Once",
+        "scheduled": "On schedule",
+        "schedule": {
+          "interval": "Every, hours",
+          "alertAfter": "Alert after failures in a row",
+          "notifyOnSuccess": "Also report success",
+          "perRun": "each run costs as one such check",
+          "notify": "DPI//CHECKER bot alerts",
+          "notifyDm": "To my DMs",
+          "notifyGroup": "To a group",
+          "notifyHint": "For a group, a command appears after creation — send it in a group where the DPI//CHECKER bot is. Results reach the bot’s admin chat either way."
+        },
+        "pay": "Pay",
+        "createMonitor": "Create monitor",
+        "confirmPay": "Charge {{value}} USD",
+        "confirmMonitor": "Create monitor · run {{value}} USD",
+        "cancel": "Cancel",
+        "estimateFailed": "Could not price the check",
+        "pickSome": "Tick what to check"
+      },
+      "status": {
+        "submitting": "Sending to DPI//CHECKER…",
+        "pending": "Queued",
+        "active": "Checking",
+        "running": "Running",
+        "completed": "Done",
+        "done": "Done",
+        "failed": "Failed",
+        "cancelled": "Cancelled",
+        "rejected": "Refused",
+        "unknown": "DPI//CHECKER did not answer",
+        "up": "Up",
+        "down": "Down",
+        "paused": "Paused",
+        "active_monitor": "Active",
+        "deleted": "Off"
+      },
+      "result": {
+        "title": {
+          "vpn": "VPN key check",
+          "ip": "IP/domain check",
+          "mtproto": "MTProto check"
+        },
+        "points": "{{count}} points",
+        "points_one": "{{count}} point",
+        "points_other": "{{count}} points",
+        "resources": "{{count}} res.",
+        "charged": "charged {{value}} USD",
+        "cancel": "Cancel",
+        "refunded": "Refunded {{value}} USD",
+        "resubmit": "Ask again",
+        "unknownHint": "DPI//CHECKER did not answer the launch. Money may have been charged. Ask again — the request goes with the same key, it will not be charged twice.",
+        "rejected": "DPI//CHECKER refused the launch — nothing was charged.",
+        "progress": "{{done}} of {{total}} done",
+        "available": "Available",
+        "partial": "Partial",
+        "unavailable": "Unavailable",
+        "avgLatency": "Average latency",
+        "ms": "{{value}} ms",
+        "speed": "{{host}}: {{value}} Mbit/s",
+        "ok": "available",
+        "fail": "unavailable",
+        "okOf": "{{ok}} of {{total}} available",
+        "abroadOk": "From abroad: available · {{value}} ms",
+        "abroadFail": "From abroad: unavailable — likely not blocking",
+        "showAll": "Show all {{count}}",
+        "showLess": "Collapse",
+        "csv": "CSV",
+        "map": "Map",
+        "loadFailed": "Could not load the check",
+        "newCheck": "New check",
+        "notes": {
+          "noInternet": "the point has no internet — not blocking",
+          "httpsUpgradeStub": "port 80 only redirects to HTTPS that does not answer — the provider network answers",
+          "tlsHandshakeFailed": "TLS handshake failed",
+          "dnsFailed": "address does not resolve",
+          "timeout": "no answer",
+          "connectionRefused": "connection refused",
+          "connectionReset": "connection reset",
+          "proxyDead": "point does not answer",
+          "untestable": "cannot be checked"
+        },
+        "csvFailed": "Could not download the CSV",
+        "details": "Details",
+        "detailsFailed": "Could not load details",
+        "detailsEmpty": "No details for this point.",
+        "yes": "yes",
+        "no": "no",
+        "fields": {
+          "host": "Key",
+          "error": "Error",
+          "pop_name": "Point",
+          "connected": "Connected",
+          "server_ip": "Server IP",
+          "latency_ms": "Latency, ms",
+          "proxy_dead": "Point not responding",
+          "untestable": "Cannot be tested",
+          "proxy_exit_ip": "Point exit",
+          "untestable_reason": "Why it cannot be tested",
+          "control_check": "Point has internet",
+          "mode": "Mode",
+          "dns_ips": "DNS addresses",
+          "exit_ip": "Point exit",
+          "verdict": "Verdict",
+          "resource": "Address",
+          "cert_name": "Certificate",
+          "accessible": "Reachable",
+          "error_code": "Error code",
+          "port_story": "Ports",
+          "samples_ok": "Successful samples",
+          "ssh_status": "SSH",
+          "dns_verdict": "DNS",
+          "ping_avg_ms": "Ping, ms",
+          "scheme_used": "Protocol",
+          "sni_verdict": "SNI",
+          "status_code": "Site response code",
+          "port_80_open": "Port 80 open",
+          "port_443_open": "Port 443 open",
+          "samples_total": "Total samples",
+          "port_443_state": "Port 443",
+          "samples_tls_ok": "Successful TLS",
+          "throughput_kbps": "Speed, kbit/s",
+          "port_80_hijacked": "Port 80 hijacked",
+          "port_443_hijacked": "Port 443 hijacked",
+          "samples_throttled": "Throttled samples",
+          "port_control_state": "Control port",
+          "control_port_number": "Control port number",
+          "error_redirect_host": "Redirects to",
+          "dns_intercepted_ratio": "Share of spoofed DNS",
+          "tcp_latency_ms": "TCP latency, ms",
+          "baseline_unreliable": "Baseline unreliable",
+          "status": "Result",
+          "reached": "Reached",
+          "secret_kind": "Secret type"
+        }
+      },
+      "noisy": {
+        "intro": "TLS certificates (SNI) of hosts in the /24 subnet — how “noisy” your server’s neighbours are (SNI max.ru, vk.ru, google.com etc.). Free, up to 10 scans a day, used today: {{used}}.",
+        "placeholder": "/24 subnets, IPs or domains — one per line",
+        "run": "Scan",
+        "exhausted": "Today’s scan limit is used up.",
+        "found": "Hosts found: {{count}}",
+        "badRu": "Russian services nearby",
+        "vpnLike": "Look like VPN",
+        "badForeign": "Notable foreign services",
+        "quiet": "No noisy neighbours found."
+      },
+      "probe": {
+        "intro": "Checks whether the whole /24 subnet is blocked or the DPI hits single addresses (/32). The subnet is checked through its neighbours — nothing needs to be rented in it.",
+        "howTitle": "How it works",
+        "how1": "Scan the subnet and collect TLS certificates (SNI) of live hosts.",
+        "how2": "Drop everything that is not a domain and known “bad” SNIs.",
+        "how3": "Check via DNS that the domain still lives in this subnet.",
+        "how4": "Open each domain over HTTPS from abroad and look for a 48 KB+ response.",
+        "how5": "Fetch that response from 10 points in Russia and see whether it arrives in full.",
+        "why": "Why: on some ranges the DPI does not drop the connection but lets ~16–20 KB through and then cuts it. A page under 16 KB opens even through such blocking — so a response well above the threshold is needed.",
+        "price": "Cost: 1.00 USD fixed + 1.50 USD per GB of traffic (actual, after the check). The fixed fee is charged at once and refunded only if DPI//CHECKER infrastructure fails.",
+        "placeholder": "/24 subnet, IP or domain",
+        "confirm": "Charge {{value}} USD + traffic",
+        "cost": "Fixed {{fixed}} USD · Traffic {{traffic}} USD ({{mb}} MB)",
+        "stage": {
+          "queued": "Queued",
+          "scan": "Scanning the subnet…",
+          "foreign": "Checking from abroad…",
+          "russia": "Checking from Russia…",
+          "report": "Preparing the report…"
+        },
+        "verdict": {
+          "clean": "The subnet is not blocked",
+          "blocked": "The whole subnet is blocked",
+          "partial": "Single addresses are blocked",
+          "unknown": "Result unclear"
+        },
+        "blocked": "Blocked addresses: {{blocked}} of {{tested}} checked ({{percent}}%).",
+        "regions": "Regions blocking the whole subnet: {{whole}}, partially: {{part}}, clean: {{clean}}.",
+        "pipeline": "Pipeline: hosts {{scanned}} → domains {{kept}} → in subnet {{inSubnet}} → open from abroad {{foreign}} → checked from Russia {{tested}}.",
+        "byIp": "By address",
+        "byRegion": "By region",
+        "pops": "✅ / ⚠️ / ❌ {{green}} / {{yellow}} / {{red}} of {{total}}",
+        "regionLine": "{{name}}: blocked {{blocked}} of {{tested}}",
+        "state": {
+          "open": "✅ open",
+          "blocked": "❌ blocked",
+          "stalled": "⚠️ stalls"
+        },
+        "drops": "Filtered out on the way",
+        "drop": {
+          "bad_sni": "bad SNI",
+          "moved_away": "moved out of the subnet",
+          "dns_failed": "does not resolve",
+          "payload_too_small": "response below threshold",
+          "foreign_failed": "does not open from abroad"
+        }
+      },
+      "cheremsha": {
+        "intro": "Whether a domain or IP is in the RKN registry and CDN lists. Free, up to 20 at a time.",
+        "placeholder": "Domains or IPs — one per line",
+        "run": "Check",
+        "verdict": {
+          "blocked": "blocked",
+          "maybe": "possibly blocked",
+          "noResolve": "does not resolve to IP",
+          "notFound": "not in the registry"
+        },
+        "domainHit": "the domain is in the registry",
+        "subnet": "{{value}} — blocking by neighbourhood is possible",
+        "resolved": "Resolves to {{value}}",
+        "invalid": "Skipped (not a domain or IP): {{items}}",
+        "refreshed": "Lists updated: {{value}}"
+      },
+      "monitors": {
+        "foreign": "Created on the DPI//CHECKER site",
+        "every": "every {{hours}} h",
+        "active": "Monitor active",
+        "noRuns": "Not run yet",
+        "fails": "failures in a row: {{count}}",
+        "lastNext": "Last run: {{last}} · next: {{next}}",
+        "delete": "Turn off",
+        "deleteConfirm": "Turn off the monitor (history is kept)",
+        "empty": "No monitors yet — create one in the check form with “On schedule”.",
+        "paused": {
+          "insufficient_balance": "Paused: the DPI//CHECKER balance ran out",
+          "deleted_via_api": "Off",
+          "other": "Paused"
+        },
+        "howTitle": "How monitors work",
+        "how": {
+          "create": "Create: VPN, IP / domain or MTProto tab → targets and points → “On schedule” → interval.",
+          "runs": "The service checks the targets every N hours. The monitor itself is free; each run costs as one such check.",
+          "alerts": "Results go to the bot’s admin chat: an alert after the set number of failures in a row and a recovery message; every run if “Report successes too” is on. The DPI//CHECKER bot also sends alerts — to your DMs or to a group, chosen when the monitor is created.",
+          "manage": "Here you can pause, disable, adjust and see runs of any monitor, including ones created on the DPI//CHECKER website."
+        },
+        "untitled": "Monitor #{{id}}",
+        "deletedBlock": "Disabled · {{count}}",
+        "runs": "Runs",
+        "runsEmpty": "No runs yet.",
+        "runsFailed": "Could not load runs",
+        "runOpen": "Open run",
+        "runCost": "{{value}} USD",
+        "settings": "Settings",
+        "save": "Save",
+        "groupTitle": "DPI//CHECKER bot alerts — to a group",
+        "groupHow": "Add the DPI//CHECKER bot to the group and send this command there:",
+        "copy": "Copy command",
+        "copied": "Copied"
+      },
+      "history": {
+        "all": "All",
+        "filter": "What to show",
+        "mine": "Only mine",
+        "empty": "No launches yet.",
+        "more": "Show more",
+        "withCount": "{{name}} · {{count}}",
+        "columns": {
+          "what": "What",
+          "where": "Where",
+          "resources": "Res.",
+          "cost": "Charged",
+          "who": "Who",
+          "when": "When",
+          "status": "Result",
+          "source": "Source"
+        },
+        "scope": "Whose runs",
+        "scopeCabinet": "From the cabinet",
+        "scopeAccount": "Whole account",
+        "accountHint": "Every run of your DPI//CHECKER key: from the website, their bot, the API and monitor runs. Tap a row to open the result here.",
+        "allChecks": "All checks",
+        "openFailed": "Could not open the run",
+        "sources": {
+          "web": "Website",
+          "bot": "DPI//CHECKER bot",
+          "api": "API",
+          "watcher": "Monitor",
+          "inline": "Telegram inline"
+        }
+      },
+      "shortcuts": {
+        "checkSubscription": "Check in DPI//CHECKER",
+        "checkNode": "Check in DPI//CHECKER"
+      },
+      "map": {
+        "status": {
+          "green": "available",
+          "yellow": "partial",
+          "red": "unavailable",
+          "gray": "not checked",
+          "none": "not checked"
+        },
+        "any": "Any",
+        "okOf": "{{ok}}/{{total}} ok",
+        "proxyDead": "proxy down",
+        "deadExtra": "+{{count}} without proxy"
+      },
+      "deliveries": {
+        "title": "DPI//CHECKER notifications to the bot",
+        "hint": "When a check finishes, DPI//CHECKER notifies the bot. If a check still shows “running” here but is done on the website, see whether the notification arrived.",
+        "empty": "No notifications yet.",
+        "loadFailed": "Could not load the notification log",
+        "events": {
+          "check_completed": "Check finished",
+          "check_cancelled": "Check cancelled",
+          "probe_done": "Probe finished",
+          "noisy_done": "Neighbours finished",
+          "monitor_run": "Monitor run started"
+        },
+        "status": {
+          "delivered": "Delivered",
+          "pending": "Waiting to retry",
+          "failed": "Not delivered"
+        },
+        "object": "No. {{id}}",
+        "attempts": "attempts: {{count}}",
+        "response": "bot replied {{code}}"
       }
     }
   },
@@ -7400,8 +7892,6 @@
       "manage": "Manage subscription",
       "buyAnother": "Buy another plan",
       "buyTraffic": "Buy more traffic",
-      "buyPremiumTraffic": "Buy premium traffic",
-      "premiumPaused": "Limit reached",
       "buyDevices": "Buy more devices",
       "reduceDevices": "Reduce device count",
       "servers": "Servers",
@@ -7409,7 +7899,11 @@
       "allSettings": "All subscription settings",
       "delete": "Delete subscription",
       "plans": "See plans",
-      "support": "Support"
+      "support": "Support",
+      "copyLink": "Copy subscription link",
+      "copied": "Copied",
+      "buyPremiumTraffic": "Buy premium traffic",
+      "premiumPaused": "Limit reached"
     },
     "error": {
       "load": "Could not load your data",

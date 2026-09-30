@@ -43,9 +43,11 @@ export function liteStatus(subscription: LiteStatusInput | null | undefined): Li
 
   const endDate = subscription.end_date ?? null;
 
-  // Закончилась или выключена — всё остальное про неё уже неважно.
+  // Закончилась или выключена — всё остальное про неё уже неважно. Пробный
+  // период продлить нельзя (у него нет вариантов продления — экран «Нет
+  // вариантов продления» и был тупиком), поэтому после него ведём в покупку.
   if (subscription.is_expired || subscription.status === 'disabled') {
-    return { key: 'expired', action: 'renew', date: endDate };
+    return { key: 'expired', action: subscription.is_trial ? 'buy' : 'renew', date: endDate };
   }
 
   // Старая подписка без тарифа: продлевать нечего, человека ведём выбирать тариф.
@@ -64,13 +66,16 @@ export function liteStatus(subscription: LiteStatusInput | null | undefined): Li
     return { key: 'limited', action: 'manage', date: null };
   }
 
+  // Пробный период раньше «заканчивается»: он длится день-три, и иначе сразу
+  // после активации экран звал «Продлить» — в тупик без вариантов, вместо того
+  // чтобы дать подключить устройство. Тарифы при этом рядом строкой.
+  if (subscription.is_trial) {
+    return { key: 'trial', action: 'connect', date: endDate };
+  }
+
   const daysLeft = subscription.days_left;
   if (typeof daysLeft === 'number' && daysLeft <= RENEW_PROMPT_DAYS) {
     return { key: 'expiring', action: 'renew', date: endDate };
-  }
-
-  if (subscription.is_trial) {
-    return { key: 'trial', action: 'connect', date: endDate };
   }
 
   return { key: 'active', action: 'connect', date: endDate };

@@ -51,7 +51,7 @@ const featureDisabled = () =>
     response: { status: 403, data: { detail: 'Platega recurrent disabled' } },
   });
 
-const calls = { sbp: [] as number[], lava: [] as number[] };
+const calls = { sbp: [] as number[], lava: [] as number[], cashera: [] as number[] };
 const state = { purchaseOptions: {} as Record<string, unknown> };
 
 const subscription = (id: number) => ({
@@ -80,6 +80,10 @@ vi.mock('@/api/subscription', () => ({
     },
     getLavaRecurring: (id: number) => {
       calls.lava.push(id);
+      return featureDisabled();
+    },
+    getCasheraRecurring: (id: number) => {
+      calls.cashera.push(id);
       return featureDisabled();
     },
     getSubscriptions: () =>
@@ -120,12 +124,14 @@ if (!window.matchMedia) {
 beforeEach(() => {
   calls.sbp = [];
   calls.lava = [];
+  calls.cashera = [];
   state.purchaseOptions = {
     sales_mode: 'tariffs',
     tariffs: [],
     balance_kopeks: 0,
     platega_recurrent_enabled: false,
     lava_recurrent_enabled: false,
+    cashera_recurrent_enabled: false,
   };
 });
 
@@ -166,6 +172,7 @@ describe('страница подписки', () => {
 
     expect(calls.sbp).toEqual([]);
     expect(calls.lava).toEqual([]);
+    expect(calls.cashera).toEqual([]);
   });
 
   it('спрашивает, когда автооплата включена', async () => {
@@ -173,12 +180,14 @@ describe('страница подписки', () => {
       ...state.purchaseOptions,
       platega_recurrent_enabled: true,
       lava_recurrent_enabled: true,
+      cashera_recurrent_enabled: true,
     };
     await renderSubscription();
     await new Promise((resolve) => setTimeout(resolve, 50));
 
     expect(calls.sbp).toEqual([1]);
     expect(calls.lava).toEqual([1]);
+    expect(calls.cashera).toEqual([1]);
   });
 });
 

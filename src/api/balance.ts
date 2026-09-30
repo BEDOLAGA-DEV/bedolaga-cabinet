@@ -50,6 +50,8 @@ export const balanceApi = {
     amount_rubles: number;
     status: string;
     expires_at: string | null;
+    /** Свой экран оплаты (Cashera H2H): строка QR СБП или платёжная ссылка. */
+    qr_payload?: string | null;
   }> => {
     const payload: {
       amount_kopeks: number;

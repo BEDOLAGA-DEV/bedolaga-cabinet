@@ -126,6 +126,20 @@ describe('AdminReminderEdit', () => {
     });
   });
 
+  it('после сохранения сбрасывает кэш списка — новое видно сразу', async () => {
+    api.get.mockResolvedValue(baseReminder);
+    api.audience.mockResolvedValue({ bot: 0, cabinet: 0 });
+    api.update.mockResolvedValue(baseReminder);
+    const { client } = renderAt('/admin/reminders/5/edit');
+    const invalidate = vi.spyOn(client, 'invalidateQueries');
+    await screen.findByDisplayValue('Существующее'); // форма подгрузила напоминание
+
+    fireEvent.click(screen.getByText('admin.reminders.form.save'));
+
+    expect(await screen.findByText('list')).toBeTruthy();
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: ['admin-reminders'] });
+  });
+
   it('does not save without a Russian title and body', async () => {
     api.audience.mockResolvedValue({ bot: 0, cabinet: 0 });
     renderAt('/admin/reminders/create');

@@ -12,7 +12,12 @@ export default function AdminReminders() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const dialog = useNativeDialog();
-  const { data = [], isLoading } = useQuery({
+  const {
+    data = [],
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery({
     queryKey: ['admin-reminders'],
     queryFn: adminRemindersApi.list,
   });
@@ -44,7 +49,22 @@ export default function AdminReminders() {
       </div>
       <p className="text-sm text-dark-400">{t('admin.reminders.description')}</p>
       {isLoading && <p className="text-dark-400">…</p>}
-      {!isLoading && data.length === 0 && (
+      {/* Ошибку загрузки нельзя выдавать за «напоминаний нет»: список падал на
+          сервере, и после «Сохранить» админ видел пустоту, как будто ничего не
+          сохранилось. */}
+      {isError && (
+        <div role="alert" className="flex flex-wrap items-center gap-3">
+          <p className="text-error-400">{t('admin.reminders.loadFailed')}</p>
+          <button
+            type="button"
+            onClick={() => refetch()}
+            className="rounded-xl border border-dark-600 px-3 py-1.5 text-sm text-dark-200 hover:border-dark-500"
+          >
+            {t('common.retry')}
+          </button>
+        </div>
+      )}
+      {!isLoading && !isError && data.length === 0 && (
         <p className="text-dark-400">{t('admin.reminders.empty')}</p>
       )}
       <div className="space-y-3">
