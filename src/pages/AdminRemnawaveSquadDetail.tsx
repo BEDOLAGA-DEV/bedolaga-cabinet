@@ -5,7 +5,7 @@ import { adminRemnawaveApi, type SquadWithLocalInfo } from '../api/adminRemnawav
 import { AdminBackButton } from '../components/admin';
 import { ServerIcon, UsersIcon, CheckIcon, XIcon, BanknotesIcon } from '../components/icons';
 import { StatCard } from '@/components/stats';
-import Twemoji from 'react-twemoji';
+import Twemoji from '@/lib/twemoji';
 import { getFlagEmoji } from '../utils/subscriptionHelpers';
 import { PageSkeleton, Skeleton } from '@/components/ui/skeleton';
 

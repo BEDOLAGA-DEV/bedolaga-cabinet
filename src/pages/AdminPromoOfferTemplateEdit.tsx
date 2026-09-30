@@ -11,7 +11,7 @@ import {
 import { serversApi } from '../api/servers';
 import { AdminBackButton } from '../components/admin';
 import { createNumberInputHandler, toNumber } from '../utils/inputHelpers';
-import Twemoji from 'react-twemoji';
+import Twemoji from '@/lib/twemoji';
 import { PageSkeleton, Skeleton } from '../components/ui/skeleton';
 
 const getOfferTypeIcon = (offerType: string): string => {

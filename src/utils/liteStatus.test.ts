@@ -43,8 +43,12 @@ describe('liteStatus', () => {
     expect(liteStatus({ ...active, days_left: RENEW_PROMPT_DAYS + 1 }).key).toBe('active');
   });
 
-  it('исход перебивает пробный период: продлить важнее, чем подключить', () => {
-    expect(liteStatus({ ...active, is_trial: true, days_left: 1 }).key).toBe('expiring');
+  it('пробный период зовёт подключиться, даже когда до конца день-три', () => {
+    // Триал длится день-три: раньше «заканчивается» срабатывало сразу после
+    // активации и вело в «Продлить» — на экран «Нет вариантов продления».
+    const status = liteStatus({ ...active, is_trial: true, days_left: 1 });
+    expect(status.key).toBe('trial');
+    expect(status.action).toBe('connect');
   });
 
   it('истёкшая перебивает всё остальное', () => {
@@ -55,6 +59,13 @@ describe('liteStatus', () => {
       is_limited: true,
       days_left: 0,
     });
+    expect(status.key).toBe('expired');
+    // Пробный период не продлевается — после него покупают тариф.
+    expect(status.action).toBe('buy');
+  });
+
+  it('истёкшую платную зовёт продлить', () => {
+    const status = liteStatus({ ...active, is_expired: true, days_left: 0 });
     expect(status.key).toBe('expired');
     expect(status.action).toBe('renew');
   });

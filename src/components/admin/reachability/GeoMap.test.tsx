@@ -50,7 +50,7 @@ describe('GeoMap', () => {
     const { container } = render(<GeoMap rows={rows} />);
     expect(container.querySelector('[role="status"]')).toBeTruthy();
     await waitFor(() => expect(container.querySelector('svg')).toBeTruthy());
-    expect(container.querySelectorAll('[data-region]')).toHaveLength(83);
+    expect(container.querySelectorAll('[data-region]')).toHaveLength(87);
     expect(container.querySelectorAll('[data-city]')).toHaveLength(3);
     expect(container.querySelector('[data-region="VOR"]')?.getAttribute('data-tone')).toBe('down');
     expect(container.querySelector('[data-region="MOW"]')?.getAttribute('data-tone')).toBe('na');
@@ -114,7 +114,7 @@ describe('GeoMap на телефоне: зум и сдвиг', () => {
     const { container } = await renderMap();
     const svg = container.querySelector('svg') as SVGSVGElement;
     const host = container.firstElementChild as HTMLElement;
-    expect(svg.getAttribute('viewBox')).toBe('0 0 1000 545');
+    expect(svg.getAttribute('viewBox')).toBe('0 0 1000 531');
     expect((screen.getByRole('button', { name: 'Отдалить' }) as HTMLButtonElement).disabled).toBe(
       true,
     );
@@ -125,7 +125,7 @@ describe('GeoMap на телефоне: зум и сдвиг', () => {
     const [, , w] = (svg.getAttribute('viewBox') ?? '').split(' ').map(Number);
     expect(w).toBeCloseTo(1000 / 1.8, 0);
     fireEvent.click(screen.getByRole('button', { name: 'Вся карта' }));
-    expect(svg.getAttribute('viewBox')).toBe('0 0 1000 545');
+    expect(svg.getAttribute('viewBox')).toBe('0 0 1000 531');
     expect(host.style.touchAction).toBe('pan-y');
   });
   it('приближено — палец тянет карту, окно сдвигается, отпускание не считается касанием', async () => {

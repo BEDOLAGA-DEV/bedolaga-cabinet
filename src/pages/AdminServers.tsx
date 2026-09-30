@@ -12,7 +12,7 @@ import {
   BackIcon,
 } from '../components/icons';
 import { usePlatform } from '../platform/hooks/usePlatform';
-import Twemoji from 'react-twemoji';
+import Twemoji from '@/lib/twemoji';
 
 // Country flags (simple emoji mapping)
 import { getFlagEmoji as getCountryFlag } from '../utils/subscriptionHelpers';

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams, useSearchParams } from 'react-router';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
+import { QRCodeSVG } from 'qrcode.react';
 
 import { balanceApi } from '../api/balance';
 import { useCurrency } from '../hooks/useCurrency';
@@ -143,6 +144,7 @@ export default function TopUpAmount() {
     getPreferredOptionId(method?.options),
   );
   const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
+  const [qrPayload, setQrPayload] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [isInputFocused, setIsInputFocused] = useState(false);
   // Canonical RUB amount when the user picked a quick-amount chip. The input shows a
@@ -214,6 +216,7 @@ export default function TopUpAmount() {
       amount_rubles: number;
       status: string;
       expires_at: string | null;
+      qr_payload?: string | null;
     },
     unknown,
     number
@@ -256,6 +259,13 @@ export default function TopUpAmount() {
           lowerUrl.startsWith('https://t.me/') ||
           lowerUrl.startsWith('http://t.me/') ||
           lowerUrl.startsWith('tg://');
+        // Свой экран оплаты: QR показываем здесь же — уводить на страницу провайдера незачем.
+        if (data.qr_payload) {
+          setQrPayload(data.qr_payload);
+          setPaymentUrl(redirectUrl);
+          return;
+        }
+
         if (method?.open_url_direct && !isTelegramDeepLink) {
           // In the Telegram WebView, same-container navigation to the provider page breaks
           // when it hands off to a bank app via a custom scheme (SBP) — Android shows
@@ -313,6 +323,7 @@ export default function TopUpAmount() {
   const handleSubmit = () => {
     setError(null);
     setPaymentUrl(null);
+    setQrPayload(null);
     inputRef.current?.blur();
 
     if (!checkRateLimit(RATE_LIMIT_KEYS.PAYMENT, 3, 30000)) {
@@ -584,7 +595,21 @@ export default function TopUpAmount() {
             <span className="font-semibold">{t('balance.paymentReady')}</span>
           </div>
 
-          <p className="text-sm text-dark-400">{t('balance.clickToOpenPayment')}</p>
+          {qrPayload ? (
+            <div className="flex flex-col items-center gap-2">
+              <div className="rounded-xl bg-white p-3" data-testid="topup-qr">
+                <QRCodeSVG value={qrPayload} size={192} level="M" includeMargin={false} />
+              </div>
+              <p className="text-center text-sm text-dark-400">
+                {t(
+                  'balance.scanQrToPay',
+                  'Отсканируйте QR-код в приложении банка или откройте оплату',
+                )}
+              </p>
+            </div>
+          ) : (
+            <p className="text-sm text-dark-400">{t('balance.clickToOpenPayment')}</p>
+          )}
 
           <button
             type="button"

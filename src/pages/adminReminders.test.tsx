@@ -76,3 +76,24 @@ describe('AdminReminders — права доступа', () => {
     expect(screen.queryByLabelText('admin.reminders.edit')).toBeNull();
   });
 });
+
+describe('AdminReminders — ошибка загрузки', () => {
+  afterEach(() => {
+    cleanup();
+    vi.clearAllMocks();
+  });
+
+  it('не выдаёт упавший список за «напоминаний пока нет» и даёт повторить', async () => {
+    // Отчёт: «нажал Сохранить — ничего не произошло». Сохранение проходило, а
+    // список падал на сервере и рисовался пустым, как будто ничего не сохранилось.
+    usePermissionStore.setState({ permissions: ['*:*'], roleLevel: 100, isLoaded: true });
+    api.list.mockRejectedValueOnce(new Error('500')).mockResolvedValueOnce([]);
+    renderPage();
+
+    expect(await screen.findByText('admin.reminders.loadFailed')).toBeTruthy();
+    expect(screen.queryByText('admin.reminders.empty')).toBeNull();
+
+    screen.getByText('common.retry').click();
+    expect(await screen.findByText('admin.reminders.empty')).toBeTruthy();
+  });
+});

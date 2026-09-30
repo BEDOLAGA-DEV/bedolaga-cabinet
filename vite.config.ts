@@ -1,14 +1,43 @@
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
-import path from 'path';
-import packageJson from './package.json';
-import { brandingHtml } from './vite-plugins/brandingHtml';
+import path from 'node:path';
+import packageJson from './package.json' with { type: 'json' };
+import { brandingHtml } from './vite-plugins/brandingHtml.ts';
+
+// Vendor-чанки: [имя, какие модули в него идут]. Порядок = приоритет группы.
+// Rolldown по умолчанию забирает в группу и все зависимости её модулей, поэтому
+// базовые чанки (react, utils) стоят первыми: общие пакеты (clsx,
+// use-sync-external-store) должны достаться им, а не тяжёлым ленивым
+// recharts/tiptap — иначе стартовая страница тянет чанк графиков.
+const VENDOR_CHUNKS: ReadonlyArray<readonly [string, RegExp]> = [
+  ['vendor-react', /node_modules\/(react|react-dom|react-router|scheduler)\//],
+  [
+    'vendor-utils',
+    /node_modules\/(axios|zustand|clsx|tailwind-merge|class-variance-authority|dompurify)\//,
+  ],
+  ['vendor-query', /@tanstack\/react-query/],
+  ['vendor-i18n', /i18next/],
+  ['vendor-motion', /framer-motion/],
+  ['vendor-radix', /@radix-ui\//],
+  ['vendor-telegram', /@telegram-apps\/|\/@tma\.js\//],
+  ['vendor-twemoji', /node_modules\/.*twemoji/],
+  ['vendor-crypto', /\/jsencrypt\/|@kastov\//],
+  ['vendor-cmdk', /\/cmdk\//],
+  ['vendor-dnd', /@dnd-kit\//],
+  ['vendor-table', /@tanstack\/react-table/],
+  ['vendor-webgl', /\/ogl\//],
+  ['vendor-lottie', /@lottiefiles\//],
+  // Heavy admin-only deps — split so they don't bloat the shared
+  // chunks of other lazy admin pages that don't use them.
+  ['vendor-recharts', /\/recharts\/|\/d3-/],
+  ['vendor-tiptap', /@tiptap\/|\/prosemirror-/],
+];
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
   // Переменные из .env и из окружения сборки (Docker передаёт их через ENV);
   // окружение сильнее файла — как и у самого Vite.
-  const env = { ...loadEnv(mode, __dirname, 'VITE_'), ...process.env };
+  const env = { ...loadEnv(mode, import.meta.dirname, 'VITE_'), ...process.env };
   return {
     plugins: [
       react(),
@@ -22,7 +51,7 @@ export default defineConfig(({ mode }) => {
     },
     resolve: {
       alias: {
-        '@': path.resolve(__dirname, 'src'),
+        '@': path.resolve(import.meta.dirname, 'src'),
       },
     },
     // Base path - use '/' for standalone Docker deployment
@@ -51,42 +80,22 @@ export default defineConfig(({ mode }) => {
       outDir: 'dist',
       sourcemap: false,
       chunkSizeWarningLimit: 550,
-      rollupOptions: {
+      rolldownOptions: {
+        // Barrel-файлы src/**/index.ts(x) — чистые реэкспорты без побочных эффектов.
+        // Без этой пометки Rolldown считает их побочными, и неиспользуемый
+        // реэкспорт тянет модуль в стартовый чанк: StatCard из '@/components/stats'
+        // на дашборде приводил в стартовую загрузку DailyChart и весь recharts.
+        treeshake: {
+          moduleSideEffects: (id: string) =>
+            /\/src\/.+\/index\.tsx?$/.test(id) ? false : undefined,
+        },
         output: {
-          manualChunks(id) {
-            if (!id.includes('node_modules')) return;
-            if (
-              id.includes('react-dom') ||
-              id.includes('react-router') ||
-              id.includes('node_modules/react/')
-            )
-              return 'vendor-react';
-            if (id.includes('@tanstack/react-query')) return 'vendor-query';
-            if (id.includes('@tanstack/react-table')) return 'vendor-table';
-            if (id.includes('i18next') || id.includes('react-i18next')) return 'vendor-i18n';
-            if (id.includes('framer-motion')) return 'vendor-motion';
-            if (id.includes('@radix-ui/')) return 'vendor-radix';
-            if (id.includes('@dnd-kit/')) return 'vendor-dnd';
-            if (id.includes('@telegram-apps/') || id.includes('/@tma.js/'))
-              return 'vendor-telegram';
-            if (id.includes('/ogl/')) return 'vendor-webgl';
-            if (id.includes('/cmdk/')) return 'vendor-cmdk';
-            if (id.includes('twemoji') || id.includes('@twemoji/')) return 'vendor-twemoji';
-            if (id.includes('/jsencrypt/') || id.includes('@kastov/')) return 'vendor-crypto';
-            if (id.includes('@lottiefiles/')) return 'vendor-lottie';
-            // Heavy admin-only deps — split so they don't bloat the shared
-            // chunks of other lazy admin pages that don't use them.
-            if (id.includes('/recharts/') || id.includes('/d3-')) return 'vendor-recharts';
-            if (id.includes('@tiptap/') || id.includes('/prosemirror-')) return 'vendor-tiptap';
-            if (
-              id.includes('/axios/') ||
-              id.includes('/zustand/') ||
-              id.includes('/clsx/') ||
-              id.includes('/tailwind-merge/') ||
-              id.includes('class-variance-authority') ||
-              id.includes('/dompurify/')
-            )
-              return 'vendor-utils';
+          codeSplitting: {
+            groups: VENDOR_CHUNKS.map(([name, test], index) => ({
+              name,
+              test,
+              priority: VENDOR_CHUNKS.length - index,
+            })),
           },
         },
       },

@@ -182,13 +182,13 @@
     "validUntil": "有效期至",
     "goToSubscription": "查看订阅",
     "goToBalance": "查看余额",
-    "devicesAdded": "+{{count}} 设备",
+    "devicesAdded": "已添加设备",
     "devicesPurchased": {
       "title": "设备已添加"
     },
-    "totalDevices": "总设备数：{{count}}",
-    "totalTraffic": "总流量：{{value}}",
-    "trafficAdded": "+{{value}} 流量",
+    "totalDevices": "总设备数",
+    "totalTraffic": "总流量",
+    "trafficAdded": "已添加流量",
     "trafficPurchased": {
       "title": "流量已添加"
     }
@@ -731,6 +731,30 @@
     "trialUpgrade": {
       "description": "您的试用期即将结束。请选择合适的套餐，以继续无限制使用 VPN。",
       "title": "升级订阅"
+    },
+    "casheraRecurring": {
+      "title": "Cashera 自动续费",
+      "connect": "开通",
+      "confirm": "确认自动扣款",
+      "cancel": "关闭",
+      "confirmCancel": "关闭 Cashera 自动续费？订阅将不再自动续订。",
+      "cancelled": "已关闭 Cashera 自动续费",
+      "enableError": "无法开通 Cashera 自动续费",
+      "cancelError": "无法取消 Cashera 自动续费",
+      "statusPending": "等待通过链接确认",
+      "statusActive": "已开通",
+      "statusPastDue": "扣款失败，请重试",
+      "nextCharge": "下次扣款 {{date}}",
+      "amountPerInterval": "{{amount}} ₽ {{interval}}",
+      "interval": {
+        "daily": "每天",
+        "weekly": "每周",
+        "monthly": "每月",
+        "yearly": "每年"
+      },
+      "autopayHint": "订阅将通过 Cashera 自动续费",
+      "purchaseButton": "⚡ 使用 Cashera 自动付款订阅",
+      "purchaseHint": "通过 Cashera 链接确认自动扣款，之后续费将自动扣款。"
     }
   },
   "balance": {
@@ -782,6 +806,9 @@
       },
       "apple_iap": {
         "description": "通过Apple应用内购买支付"
+      },
+      "cashera": {
+        "description": "SBP、银行卡、加密货币（Cashera）"
       }
     },
     "transactionHistory": "交易记录",
@@ -892,7 +919,8 @@
       "goToBalance": "查看余额",
       "tryAgain": "重试"
     },
-    "top_up": "充值"
+    "top_up": "充值",
+    "scanQrToPay": "请在银行应用中扫描二维码，或打开支付页面"
   },
   "referral": {
     "title": "推荐计划",
@@ -1339,7 +1367,8 @@
       "news": "新闻",
       "infoPages": "信息页面",
       "legalPages": "系统页面",
-      "systemErrors": "系统错误"
+      "systemErrors": "系统错误",
+      "dpichecker": "DPI//CHECKER"
     },
     "panel": {
       "title": "管理面板",
@@ -1906,6 +1935,65 @@
         "cancelled": "已取消",
         "cancelling": "取消中"
       },
+      "audience": {
+        "authType": "注册方式",
+        "join": "条件关系",
+        "and": "且",
+        "or": "或",
+        "field": "筛选项",
+        "comparison": "比较",
+        "equals": "等于",
+        "notEquals": "不等于",
+        "value": "值",
+        "remove": "删除条件",
+        "add": "添加条件",
+        "loadError": "无法加载收件人",
+        "recipientCount": "收件人数",
+        "showUsers": "查看名单",
+        "users": "群发收件人",
+        "empty": "没有收件人",
+        "conditions": "条件",
+        "noUsersPermission": "需要查看用户的权限"
+      },
+      "atomic": {
+        "all": "所有用户",
+        "subscriptionStatus": "订阅状态",
+        "active": "有效",
+        "expired": "已过期",
+        "subscriptionType": "订阅类型",
+        "trial": "试用",
+        "paid": "付费",
+        "tariff": "套餐",
+        "trafficZero": "已用流量等于 0",
+        "trafficGt": "已用流量大于",
+        "trafficLt": "已用流量小于",
+        "endPreset": "订阅结束：快捷时间段",
+        "next3Days": "未来 3 天内",
+        "endDate": "订阅结束日期",
+        "registrationPreset": "注册：快捷时间段",
+        "today": "今天",
+        "last7Days": "最近 7 天",
+        "last30Days": "最近 30 天",
+        "registrationDate": "注册日期",
+        "activityPreset": "活跃度：快捷时间段",
+        "activeToday": "今天活跃",
+        "inactive7Days": "超过 7 天未活跃",
+        "inactive30Days": "超过 30 天未活跃",
+        "activityDate": "最后活跃日期",
+        "source": "注册来源",
+        "referral": "邀请注册",
+        "direct": "直接注册",
+        "paidHistory": "曾经付费",
+        "telegramUsername": "Telegram 用户名",
+        "searchUser": "输入并选择用户",
+        "noUsers": "未找到用户",
+        "before": "早于日期",
+        "after": "晚于日期",
+        "between": "日期范围",
+        "dateFrom": "日期",
+        "dateTo": "截至",
+        "gigabytes": "GB"
+      },
       "filterGroups": {
         "email": "电子邮件用户",
         "promo_group": "按促销组",
@@ -2017,8 +2105,15 @@
       "confirmDelete": "删除提醒「{{name}}」？",
       "stats": "已发送：{{sent}} · 已关闭：{{dismissed}} · 当前符合条件：机器人 {{bot}}，个人中心 {{cabinet}}",
       "any": "任意",
-      "channels": { "both": "机器人和个人中心", "bot": "仅机器人", "cabinet": "仅个人中心" },
-      "category": { "service": "服务类 — 所有人", "marketing": "营销类 — 已退订推广的用户除外" },
+      "channels": {
+        "both": "机器人和个人中心",
+        "bot": "仅机器人",
+        "cabinet": "仅个人中心"
+      },
+      "category": {
+        "service": "服务类 — 所有人",
+        "marketing": "营销类 — 已退订推广的用户除外"
+      },
       "auth": {
         "single_method": "仅单一登录方式",
         "telegram_only": "仅Telegram登录",
@@ -2033,7 +2128,11 @@
         "low_balance": "余额不足",
         "tariff": "套餐"
       },
-      "button": { "none": "无按钮", "cabinet": "个人中心页面", "url": "链接" },
+      "button": {
+        "none": "无按钮",
+        "cabinet": "个人中心页面",
+        "url": "链接"
+      },
       "form": {
         "name": "名称（仅管理后台可见）",
         "channels": "展示位置",
@@ -2067,7 +2166,8 @@
         "testInvalidTexts": "请修正文本后重新保存",
         "ruRequired": "请填写俄语标题和正文",
         "saveFailed": "保存失败 — 请检查字段"
-      }
+      },
+      "loadFailed": "无法加载提醒"
     },
     "channelSubscriptions": {
       "title": "必订频道",
@@ -2287,7 +2387,9 @@
         "iface_info": "法律文件",
         "iface_menu": "菜单按钮",
         "sys_cabinet": "用户中心",
-        "sys_other": "其他设置"
+        "sys_other": "其他设置",
+        "sys_dpichecker": "DPI//CHECKER",
+        "payments_cashera": "Cashera"
       },
       "categories": {
         "CABINET": "用户中心",
@@ -3456,13 +3558,7 @@
         "title": "筛选",
         "buttonApplied_other": "筛选：已选 {{count}} 项",
         "reset": "重置",
-        "remove": "移除筛选“{{name}}”",
-        "allStatuses": "所有状态",
-        "byDate": "按日期",
-        "byBalance": "按余额",
-        "byActivity": "按活跃度",
-        "bySpent": "按消费",
-        "byExpiry": "按到期时间"
+        "remove": "移除筛选“{{name}}”"
       },
       "actions": {
         "block": "封禁",
@@ -3479,11 +3575,7 @@
           "balance": "余额",
           "referrals": "推荐",
           "activity": "活动记录",
-          "overview": "概览",
-          "info": "信息",
-          "sync": "同步",
-          "tickets": "工单",
-          "gifts": "礼物"
+          "overview": "概览"
         },
         "noTickets": "该用户没有工单",
         "ticketsCount": "个工单",
@@ -3751,8 +3843,7 @@
           "commissionSaved": "佣金已保存",
           "spentHint": "在服务中的消费",
           "confirmRemoveReferrer": "解除邀请人？其将不再从该用户获得收益。",
-          "confirmRemoveReferral": "将 {{name}} 移出推荐？相关收益将停止。",
-          "addReferral": "添加推荐"
+          "confirmRemoveReferral": "将 {{name}} 移出推荐？相关收益将停止。"
         },
         "actions": {
           "areYouSure": "确定要继续？",
@@ -3910,19 +4001,7 @@
             "logins": "登录"
           },
           "fromBalance": "余额支付",
-          "loadError": "无法加载动态",
-          "total": "事件总数",
-          "filters": {
-            "all": "全部",
-            "payments": "支付",
-            "events": "事件",
-            "promo": "促销",
-            "tickets": "工单",
-            "gifts": "礼物",
-            "referrals": "推荐",
-            "logins": "登录",
-            "clicks": "点击"
-          }
+          "loadError": "无法加载动态"
         },
         "header": {
           "copy": "复制",
@@ -4105,10 +4184,8 @@
         "success": {
           "delete": "用户已删除",
           "disable": "用户已禁用",
-          "resetTrial": "试用已重置",
-          "resetSubscription": "订阅已重置"
-        },
-        "resetSubscription": "重置订阅"
+          "resetTrial": "试用已重置"
+        }
       },
       "summary": {
         "total_other": "{{value}} 位用户",
@@ -4259,13 +4336,7 @@
         "userNotFound": "未找到用户",
         "trialBlockedBySubscription": "试用仍不可用：该用户还有其他订阅，请先删除。"
       },
-      "moreTariffs": "另有 {{count}} 个",
-      "searchEmail": "按邮箱搜索...",
-      "noPurchases": "无购买记录",
-      "pagination": {
-        "showing": "显示 {{from}}-{{to}}，共 {{total}}"
-      },
-      "purchaseCount": "购买次数：{{count}}"
+      "moreTariffs": "另有 {{count}} 个"
     },
     "promoOffers": {
       "title": "促销优惠",
@@ -5172,7 +5243,8 @@
           "news": "新闻",
           "reachability": "可达性",
           "system_errors": "系统错误",
-          "user": "用户"
+          "user": "用户",
+          "dpichecker": "DPI//CHECKER"
         },
         "permissionActions": {
           "read": "读取",
@@ -5921,6 +5993,434 @@
         "retry": "重新发送",
         "retrySent": "错误已发送至管理员聊天",
         "retryFailed": "无法发送至管理员聊天"
+      }
+    },
+    "dpichecker": {
+      "subtitle": "从俄罗斯、中国、伊朗和土库曼斯坦的网络进行检测",
+      "tabs": {
+        "label": "DPI//CHECKER 分区",
+        "vpn": "VPN",
+        "ip": "IP / 域名",
+        "mtproto": "MTProto",
+        "noisy": "邻居",
+        "probe": "探针",
+        "cheremsha": "Cheremsha",
+        "monitors": "监控",
+        "history": "历史"
+      },
+      "header": {
+        "noisyLeft": "邻居扫描：今天剩余 {{left}} / {{limit}}",
+        "topup": "充值",
+        "noisyShort": "邻居：今日剩余 {{left}}/{{limit}}"
+      },
+      "money": {
+        "usd": "{{value}} USD"
+      },
+      "setup": {
+        "titleDisabled": "DPI//CHECKER 已关闭",
+        "titleNotConfigured": "DPI//CHECKER 未配置",
+        "intro": "从俄罗斯、中国、伊朗和土库曼斯坦的家庭和移动网络检测 VPN 密钥、地址和 MTProto 代理。启用步骤：",
+        "key": "API 密钥",
+        "keyHint": "在 DPI//CHECKER 机器人（主菜单 → API）或 dpichecker.st 网站获取；需要至少 $1 的余额",
+        "enable": "启用 DPI//CHECKER",
+        "enableHint": "开关在同一设置中",
+        "rights": "管理员权限",
+        "rightsHint": "谁可以查看此分区、谁可以运行检测：检测会消耗 DPI//CHECKER 余额",
+        "openSettings": "打开 DPI//CHECKER 设置",
+        "openSite": "在 dpichecker.st 获取密钥",
+        "envNote": "如果机器人通过环境文件配置，其值优先于面板设置：请修改文件并重启机器人。",
+        "reference": "默认订阅（可选）",
+        "referenceHint": "订阅链接或面板 shortUuid：VPN “从面板”无需选择用户即可取用其密钥"
+      },
+      "locations": {
+        "russia": "俄罗斯",
+        "china": "中国",
+        "iran": "伊朗",
+        "turkmenistan": "土库曼斯坦"
+      },
+      "pops": {
+        "optimal": "最佳选择",
+        "all": "全部可用",
+        "random": "随机 10 个",
+        "clear": "清除",
+        "districts": "联邦区",
+        "republics": "共和国",
+        "search": "按地区或运营商搜索",
+        "loading": "正在加载检测点",
+        "loadFailed": "无法加载检测点。",
+        "nothingFound": "未找到。",
+        "wholeRegion": "选择整个地区",
+        "dead": "该检测点当前不可用",
+        "anyOperator": "任意",
+        "optimalFailed": "无法获取最佳组合，请重试。",
+        "groupEmpty": "该联邦区当前没有可用检测点。"
+      },
+      "form": {
+        "step1": "检测什么",
+        "step2": "从哪里检测",
+        "step3": "合计",
+        "paste": "粘贴",
+        "fromPanel": "从面板",
+        "originLabel": "目标来源",
+        "hint": {
+          "vpn": "VLESS / VMess / Trojan / Shadowsocks / Hysteria2 密钥或订阅链接，每行一个。",
+          "ip": "最多 50 个 IP 或域名，每行一个。也可以是链接——只取域名。",
+          "mtproto": "MTProto 代理链接（tg://proxy… 或 t.me/proxy…），每行一个。"
+        },
+        "placeholder": {
+          "vpn": "vless://… 或 https://…/subscription",
+          "ip": "example.com\n203.0.113.10",
+          "mtproto": "tg://proxy?server=…&port=…&secret=…"
+        },
+        "continue": "继续",
+        "parsing": "正在解析…",
+        "failed": "未成功，请重试",
+        "fetchFailed": "无法获取订阅，请稍后再试。",
+        "accepted": "已接受：{{count}}",
+        "nothingAccepted": "没有可接受的内容。",
+        "udpOnly": "仅 UDP — 不检测",
+        "notes": {
+          "invalid": "无效：{{count}}",
+          "private": "本地/私有 IP（不检测）：{{count}}",
+          "overflow": "超出行数限制，已丢弃：{{count}}",
+          "duplicate": "重复：{{count}}",
+          "blacklisted": "在黑名单中：{{items}}"
+        },
+        "panel": {
+          "label": "从面板获取",
+          "subscription": "订阅",
+          "hosts": "主机",
+          "nodes": "节点",
+          "loading": "正在从面板加载…"
+        },
+        "total": {
+          "pops": "检测点",
+          "resources": "资源",
+          "cost": "费用",
+          "balance": "余额",
+          "tariff": "（每个检测点 {{pop}} USD + 每点每资源 {{resource}} USD）"
+        },
+        "probeMode": {
+          "label": "检测模式",
+          "auto": "自动判断",
+          "server": "目标上有 Web 服务器",
+          "noserver": "没有 Web 服务器 — 查找封锁",
+          "hint": "如果地址上没有运行任何服务，无需架设 Web 服务器：检测将改为“是否被封锁”——名称（SNI）、DNS 和端口可达性。"
+        },
+        "runMode": "运行方式",
+        "once": "一次",
+        "scheduled": "按计划",
+        "schedule": {
+          "interval": "每隔（小时）",
+          "alertAfter": "连续失败几次后告警",
+          "notifyOnSuccess": "成功时也通知",
+          "perRun": "每次运行按一次检测计费",
+          "notify": "DPI//CHECKER 机器人警报",
+          "notifyDm": "发到我的私信",
+          "notifyGroup": "发到群组",
+          "notifyHint": "选择群组后，创建完成会显示一条命令——需在有 DPI//CHECKER 机器人的群组中发送。无论如何，结果都会发到机器人的管理员聊天。"
+        },
+        "pay": "支付",
+        "createMonitor": "创建监控",
+        "confirmPay": "扣款 {{value}} USD",
+        "confirmMonitor": "创建监控 · 每次 {{value}} USD",
+        "cancel": "取消",
+        "estimateFailed": "无法计算价格",
+        "pickSome": "勾选要检查的项目"
+      },
+      "status": {
+        "submitting": "正在发送到 DPI//CHECKER…",
+        "pending": "排队中",
+        "active": "检测中",
+        "running": "进行中",
+        "completed": "完成",
+        "done": "完成",
+        "failed": "失败",
+        "cancelled": "已取消",
+        "rejected": "被拒绝",
+        "unknown": "DPI//CHECKER 未响应",
+        "up": "正常",
+        "down": "异常",
+        "paused": "已暂停",
+        "active_monitor": "运行中",
+        "deleted": "已关闭"
+      },
+      "result": {
+        "title": {
+          "vpn": "VPN 密钥检测",
+          "ip": "IP/域名检测",
+          "mtproto": "MTProto 检测"
+        },
+        "points": "{{count}} 个检测点",
+        "points_other": "{{count}} 个检测点",
+        "resources": "{{count}} 个资源",
+        "charged": "已扣 {{value}} USD",
+        "cancel": "取消",
+        "refunded": "已退回 {{value}} USD",
+        "resubmit": "再次询问",
+        "unknownHint": "DPI//CHECKER 未响应此次启动，可能已扣款。请再次询问——请求使用相同密钥，不会重复扣款。",
+        "rejected": "DPI//CHECKER 拒绝启动——未扣款。",
+        "progress": "已完成 {{done}} / {{total}}",
+        "available": "可用",
+        "partial": "部分",
+        "unavailable": "不可用",
+        "avgLatency": "平均延迟",
+        "ms": "{{value}} 毫秒",
+        "speed": "{{host}}：{{value}} Mbit/s",
+        "ok": "可用",
+        "fail": "不可用",
+        "okOf": "{{total}} 个中 {{ok}} 个可用",
+        "abroadOk": "境外：可用 · {{value}} 毫秒",
+        "abroadFail": "境外：不可用——看起来不是封锁",
+        "showAll": "显示全部 {{count}}",
+        "showLess": "收起",
+        "csv": "CSV",
+        "map": "地图",
+        "loadFailed": "无法加载检测",
+        "newCheck": "新检测",
+        "notes": {
+          "noInternet": "检测点没有网络——不是封锁",
+          "httpsUpgradeStub": "80 端口只重定向到无响应的 HTTPS——是运营商网络在响应",
+          "tlsHandshakeFailed": "TLS 握手失败",
+          "dnsFailed": "地址无法解析",
+          "timeout": "无响应",
+          "connectionRefused": "连接被拒绝",
+          "connectionReset": "连接被重置",
+          "proxyDead": "检测点无响应",
+          "untestable": "无法检测"
+        },
+        "csvFailed": "无法下载 CSV",
+        "details": "详情",
+        "detailsFailed": "无法加载详情",
+        "detailsEmpty": "该节点没有详情。",
+        "yes": "是",
+        "no": "否",
+        "fields": {
+          "host": "密钥",
+          "error": "错误",
+          "pop_name": "节点",
+          "connected": "已连接",
+          "server_ip": "服务器 IP",
+          "latency_ms": "延迟，毫秒",
+          "proxy_dead": "节点无响应",
+          "untestable": "无法检测",
+          "proxy_exit_ip": "节点出口",
+          "untestable_reason": "无法检测的原因",
+          "control_check": "节点可上网",
+          "mode": "模式",
+          "dns_ips": "DNS 地址",
+          "exit_ip": "节点出口",
+          "verdict": "结论",
+          "resource": "地址",
+          "cert_name": "证书",
+          "accessible": "可访问",
+          "error_code": "错误代码",
+          "port_story": "端口情况",
+          "samples_ok": "成功采样",
+          "ssh_status": "SSH",
+          "dns_verdict": "DNS",
+          "ping_avg_ms": "Ping，毫秒",
+          "scheme_used": "协议",
+          "sni_verdict": "SNI",
+          "status_code": "网站响应码",
+          "port_80_open": "80 端口开放",
+          "port_443_open": "443 端口开放",
+          "samples_total": "采样总数",
+          "port_443_state": "443 端口",
+          "samples_tls_ok": "TLS 成功",
+          "throughput_kbps": "速度，kbit/s",
+          "port_80_hijacked": "80 端口被劫持",
+          "port_443_hijacked": "443 端口被劫持",
+          "samples_throttled": "被限速的采样",
+          "port_control_state": "对照端口",
+          "control_port_number": "对照端口号",
+          "error_redirect_host": "重定向到",
+          "dns_intercepted_ratio": "DNS 被篡改比例",
+          "tcp_latency_ms": "TCP 延迟，毫秒",
+          "baseline_unreliable": "基准不可靠",
+          "status": "结果",
+          "reached": "已连通",
+          "secret_kind": "密钥类型"
+        }
+      },
+      "noisy": {
+        "intro": "/24 子网内主机的 TLS 证书（SNI），显示服务器邻居有多“嘈杂”。免费，每天最多 10 次，今天已用：{{used}}。",
+        "placeholder": "/24 子网、IP 或域名，每行一个",
+        "run": "扫描",
+        "exhausted": "今天的扫描次数已用完。",
+        "found": "找到的主机：{{count}}",
+        "badRu": "附近的俄罗斯服务",
+        "vpnLike": "疑似 VPN",
+        "badForeign": "明显的境外服务",
+        "quiet": "未发现“嘈杂邻居”。"
+      },
+      "probe": {
+        "intro": "检测 /24 子网是整体被封锁，还是 DPI 只针对单个地址（/32）。通过邻居检测子网——无需在其中租用任何东西。",
+        "howTitle": "工作原理",
+        "how1": "扫描子网并收集存活主机的 TLS 证书（SNI）。",
+        "how2": "剔除非域名和已知的“坏” SNI。",
+        "how3": "通过 DNS 确认域名仍在该子网中。",
+        "how4": "从境外通过 HTTPS 打开每个域名，寻找 48 KB 以上的响应。",
+        "how5": "从俄罗斯的 10 个检测点拉取该响应，看是否能完整到达。",
+        "why": "为什么这样做：在部分网段 DPI 不会断开连接，而是放行约 16–20 KB 后中断传输。小于 16 KB 的页面在这种封锁下也能打开——因此需要明显超过阈值的响应。",
+        "price": "费用：固定 1.00 USD + 每 GB 流量 1.50 USD（按实际，检测后计算）。固定费用立即扣除，仅在 DPI//CHECKER 基础设施故障时退回。",
+        "placeholder": "/24 子网、IP 或域名",
+        "confirm": "扣款 {{value}} USD + 流量",
+        "cost": "固定 {{fixed}} USD · 流量 {{traffic}} USD（{{mb}} MB）",
+        "stage": {
+          "queued": "排队中",
+          "scan": "正在扫描子网…",
+          "foreign": "正在从境外检测…",
+          "russia": "正在从俄罗斯检测…",
+          "report": "正在生成报告…"
+        },
+        "verdict": {
+          "clean": "子网未被封锁",
+          "blocked": "整个子网被封锁",
+          "partial": "部分地址被封锁",
+          "unknown": "结果不明"
+        },
+        "blocked": "被封锁的地址：已检测 {{tested}} 个中 {{blocked}} 个（{{percent}}%）。",
+        "regions": "整体封锁子网的地区：{{whole}}，部分封锁：{{part}}，干净：{{clean}}。",
+        "pipeline": "流程：主机 {{scanned}} → 域名 {{kept}} → 在子网中 {{inSubnet}} → 境外可打开 {{foreign}} → 从俄罗斯检测 {{tested}}。",
+        "byIp": "按地址",
+        "byRegion": "按地区",
+        "pops": "✅ / ⚠️ / ❌ {{green}} / {{yellow}} / {{red}}，共 {{total}}",
+        "regionLine": "{{name}}：已封锁 {{blocked}} / {{tested}}",
+        "state": {
+          "open": "✅ 可访问",
+          "blocked": "❌ 被封锁",
+          "stalled": "⚠️ 中断"
+        },
+        "drops": "筛选过程中排除",
+        "drop": {
+          "bad_sni": "坏 SNI",
+          "moved_away": "已迁出子网",
+          "dns_failed": "无法解析",
+          "payload_too_small": "响应小于阈值",
+          "foreign_failed": "境外无法打开"
+        }
+      },
+      "cheremsha": {
+        "intro": "域名或 IP 是否在 RKN 登记表和 CDN 列表中。免费，每次最多 20 个。",
+        "placeholder": "域名或 IP，每行一个",
+        "run": "检查",
+        "verdict": {
+          "blocked": "已封锁",
+          "maybe": "可能被封锁",
+          "noResolve": "无法解析为 IP",
+          "notFound": "不在登记表中"
+        },
+        "domainHit": "域名在登记表中",
+        "subnet": "{{value}} — 可能因相邻地址被封锁",
+        "resolved": "解析为 {{value}}",
+        "invalid": "已跳过（不是域名或 IP）：{{items}}",
+        "refreshed": "列表更新时间：{{value}}"
+      },
+      "monitors": {
+        "foreign": "在 DPI//CHECKER 网站创建",
+        "every": "每 {{hours}} 小时",
+        "active": "监控已启用",
+        "noRuns": "尚未运行",
+        "fails": "连续失败：{{count}}",
+        "lastNext": "上次运行：{{last}} · 下次：{{next}}",
+        "delete": "关闭",
+        "deleteConfirm": "关闭监控（历史会保留）",
+        "empty": "还没有监控——在检测表单中选择“按计划”创建。",
+        "paused": {
+          "insufficient_balance": "已暂停：DPI//CHECKER 余额不足",
+          "deleted_via_api": "已关闭",
+          "other": "已暂停"
+        },
+        "howTitle": "监控如何工作",
+        "how": {
+          "create": "创建：VPN、IP / 域名或 MTProto 标签 → 目标和节点 → “按计划” → 间隔。",
+          "runs": "服务每 N 小时检查一次目标。监控本身免费，每次运行按一次检查计费。",
+          "alerts": "结果发送到机器人的管理员聊天：连续失败达到设定次数后发送警报并在恢复时通知；若开启“成功时也通知”，则每次运行都通知。DPI//CHECKER 机器人也会发送警报——发到私信或群组，在创建监控时选择。",
+          "manage": "在这里可以暂停、停用、调整任何监控并查看其运行记录，包括在 DPI//CHECKER 网站上创建的监控。"
+        },
+        "untitled": "监控 #{{id}}",
+        "deletedBlock": "已停用 · {{count}}",
+        "runs": "运行记录",
+        "runsEmpty": "暂无运行。",
+        "runsFailed": "无法加载运行记录",
+        "runOpen": "打开运行",
+        "runCost": "{{value}} USD",
+        "settings": "设置",
+        "save": "保存",
+        "groupTitle": "DPI//CHECKER 机器人警报——发到群组",
+        "groupHow": "将 DPI//CHECKER 机器人加入群组，并在群里发送以下命令：",
+        "copy": "复制命令",
+        "copied": "已复制"
+      },
+      "history": {
+        "all": "全部",
+        "filter": "显示内容",
+        "mine": "仅我的",
+        "empty": "暂无运行记录。",
+        "more": "显示更多",
+        "withCount": "{{name}} · {{count}}",
+        "columns": {
+          "what": "内容",
+          "where": "位置",
+          "resources": "资源",
+          "cost": "扣费",
+          "who": "操作人",
+          "when": "时间",
+          "status": "结果",
+          "source": "来源"
+        },
+        "scope": "显示哪些运行",
+        "scopeCabinet": "来自面板",
+        "scopeAccount": "整个账户",
+        "accountHint": "您的 DPI//CHECKER 密钥的所有运行：网站、他们的机器人、API 以及监控运行。点击一行即可在此打开结果。",
+        "allChecks": "全部检测",
+        "openFailed": "无法打开该运行",
+        "sources": {
+          "web": "网站",
+          "bot": "DPI//CHECKER 机器人",
+          "api": "API",
+          "watcher": "监控",
+          "inline": "Telegram 内联"
+        }
+      },
+      "shortcuts": {
+        "checkSubscription": "在 DPI//CHECKER 中检测",
+        "checkNode": "在 DPI//CHECKER 中检测"
+      },
+      "map": {
+        "status": {
+          "green": "可访问",
+          "yellow": "部分可访问",
+          "red": "不可访问",
+          "gray": "未检查",
+          "none": "未检查"
+        },
+        "any": "任意",
+        "okOf": "{{ok}}/{{total}} 正常",
+        "proxyDead": "代理不可用",
+        "deadExtra": "+{{count}} 无代理"
+      },
+      "deliveries": {
+        "title": "DPI//CHECKER 发给机器人的通知",
+        "hint": "检测完成后，DPI//CHECKER 会通知机器人。如果这里仍显示“进行中”而网站上已完成，请查看通知是否送达。",
+        "empty": "暂无通知。",
+        "loadFailed": "无法加载通知日志",
+        "events": {
+          "check_completed": "检测完成",
+          "check_cancelled": "检测已取消",
+          "probe_done": "探针完成",
+          "noisy_done": "邻居扫描完成",
+          "monitor_run": "监控开始运行"
+        },
+        "status": {
+          "delivered": "已送达",
+          "pending": "等待重试",
+          "failed": "未送达"
+        },
+        "object": "编号 {{id}}",
+        "attempts": "尝试次数：{{count}}",
+        "response": "机器人响应 {{code}}"
       }
     }
   },
@@ -6837,8 +7337,6 @@
       "manage": "管理订阅",
       "buyAnother": "再买一个套餐",
       "buyTraffic": "购买更多流量",
-      "buyPremiumTraffic": "购买高级流量",
-      "premiumPaused": "流量已用完",
       "buyDevices": "增加设备数",
       "reduceDevices": "减少设备数",
       "servers": "服务器",
@@ -6846,7 +7344,11 @@
       "allSettings": "全部订阅设置",
       "delete": "删除订阅",
       "plans": "查看套餐",
-      "support": "客服"
+      "support": "客服",
+      "copyLink": "复制订阅链接",
+      "copied": "已复制",
+      "buyPremiumTraffic": "购买高级流量",
+      "premiumPaused": "流量已用完"
     },
     "error": {
       "load": "无法加载数据",

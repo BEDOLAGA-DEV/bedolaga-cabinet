@@ -28,6 +28,7 @@ const ALLOWED = new Set([
   'components/wheel/FortuneWheel.tsx',
   'components/dashboard/Sparkline.tsx',
   'components/admin/reachability/GeoMap.tsx',
+  'components/admin/dpichecker/DpiRegionMap.tsx', // карта регионов, не иконка
   'components/ui/backgrounds/background-beams.tsx',
   'components/ui/backgrounds/background-gradient-animation.tsx',
 ]);

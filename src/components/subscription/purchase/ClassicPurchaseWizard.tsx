@@ -11,7 +11,7 @@ import { getGlassColors } from '../../../utils/glassTheme';
 import { getErrorMessage, type PurchaseStep } from '../../../utils/subscriptionHelpers';
 import { CheckIcon } from '../../icons';
 import InsufficientBalancePrompt from '../../InsufficientBalancePrompt';
-import Twemoji from 'react-twemoji';
+import Twemoji from '@/lib/twemoji';
 import { Skeleton, SkeletonGroup } from '../../ui/skeleton';
 import type {
   ClassicPurchaseOptions,

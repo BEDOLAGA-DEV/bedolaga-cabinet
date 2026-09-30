@@ -254,7 +254,7 @@ export default function DashboardLite() {
               }
             />
           )}
-          {offersTrial && (
+          {(offersTrial || subscription?.is_trial) && (
             <LiteRow
               to="/subscription/purchase"
               label={t('lite.rows.plans', 'Посмотреть тарифы')}

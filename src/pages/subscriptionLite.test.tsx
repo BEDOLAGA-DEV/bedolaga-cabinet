@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -25,12 +25,17 @@ vi.mock('@/hooks/useTheme', () => ({ useTheme: () => ({ isDark: true }) }));
 const getSubscription = vi.fn();
 const getDevices = vi.fn();
 const getPurchaseOptions = vi.fn();
+const getConnectionLink = vi.fn();
+const copyToClipboard = vi.fn(async (_text: string) => {});
+
+vi.mock('@/utils/clipboard', () => ({ copyToClipboard: (text: string) => copyToClipboard(text) }));
 
 vi.mock('@/api/subscription', () => ({
   subscriptionApi: {
     getSubscription: (...a: unknown[]) => getSubscription(...a),
     getDevices: (...a: unknown[]) => getDevices(...a),
     getPurchaseOptions: (...a: unknown[]) => getPurchaseOptions(...a),
+    getConnectionLink: (...a: unknown[]) => getConnectionLink(...a),
   },
 }));
 
@@ -110,6 +115,10 @@ beforeEach(() => {
   getSubscription.mockResolvedValue({ has_subscription: true, subscription });
   getDevices.mockResolvedValue({ total: 2, devices: [] });
   getPurchaseOptions.mockResolvedValue({ sales_mode: 'classic' });
+  getConnectionLink.mockResolvedValue({
+    subscription_url: 'https://sub.example/abc',
+    hide_link: false,
+  });
 });
 
 afterEach(() => {
@@ -234,5 +243,39 @@ describe('SubscriptionLite', () => {
     await screen.findByRole('heading');
 
     expect(screen.queryByTestId('reissue')).toBeNull();
+  });
+
+  it('ссылку подписки можно скопировать — в простом виде её больше негде было взять', async () => {
+    renderScreen();
+
+    const row = await screen.findByRole('button', { name: /Скопировать ссылку подписки/ });
+    fireEvent.click(row);
+
+    await waitFor(() => expect(copyToClipboard).toHaveBeenCalledWith('https://sub.example/abc'));
+    expect(await screen.findByText('Скопировано')).toBeTruthy();
+  });
+
+  it('скрытую оператором ссылку не показывает', async () => {
+    getConnectionLink.mockResolvedValue({
+      subscription_url: 'https://sub.example/abc',
+      hide_link: true,
+    });
+    renderScreen();
+    await screen.findByRole('heading');
+    await waitFor(() => expect(getConnectionLink).toHaveBeenCalled());
+
+    expect(screen.queryByRole('button', { name: /Скопировать ссылку подписки/ })).toBeNull();
+  });
+
+  it('пробную подписку не зовёт продлевать — ведёт к тарифам', async () => {
+    getSubscription.mockResolvedValue({
+      has_subscription: true,
+      subscription: { ...subscription, is_trial: true },
+    });
+    renderScreen();
+
+    const plans = await screen.findByRole('link', { name: /Посмотреть тарифы/ });
+    expect(plans.getAttribute('href')).toBe('/subscription/purchase');
+    expect(screen.queryByRole('link', { name: 'lite.action.renew' })).toBeNull();
   });
 });

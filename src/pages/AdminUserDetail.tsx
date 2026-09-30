@@ -17,6 +17,8 @@ import { UserFacts } from '@/components/admin/userDetail/UserFacts';
 import { UserHeader } from '@/components/admin/userDetail/UserHeader';
 import { buildReachabilityLink } from '@/components/admin/reachability/deepLink';
 import { useReachabilityAvailable } from '@/components/admin/reachability/useReachabilityStatus';
+import { buildLink as buildDpiLink } from '@/components/admin/dpichecker/deepLink';
+import { useDpiAvailable } from '@/components/admin/dpichecker/useDpiStatus';
 import { EmailIcon, TelegramSmallIcon } from '@/components/icons';
 import { PageSkeleton, Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
@@ -59,6 +61,11 @@ export default function AdminUserDetail() {
   const reachabilityLink =
     userId !== null && hasPermission('reachability:run') && reachabilityAvailable
       ? buildReachabilityLink({ mode: 'vless', userId })
+      : null;
+  const dpiAvailable = useDpiAvailable();
+  const dpicheckerLink =
+    userId !== null && hasPermission('dpichecker:run') && dpiAvailable
+      ? buildDpiLink({ tab: 'vpn', source: 'user', ref: String(userId) })
       : null;
 
   useEffect(() => {
@@ -277,6 +284,7 @@ export default function AdminUserDetail() {
           busy={actions.busy}
           actions={actions}
           reachabilityLink={reachabilityLink}
+          dpicheckerLink={dpicheckerLink}
         />
       )}
 

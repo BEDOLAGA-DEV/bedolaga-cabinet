@@ -399,6 +399,7 @@ export interface TariffsPurchaseOptions {
   // автооплатой СБП» рядом с покупкой с баланса
   platega_recurrent_enabled?: boolean;
   lava_recurrent_enabled?: boolean;
+  cashera_recurrent_enabled?: boolean;
 }
 
 export interface ClassicPurchaseOptions {
@@ -854,6 +855,15 @@ export interface SbpRecurringInfo {
 export interface LavaRecurringInfo {
   status: string; // 'none' | 'PENDING' | 'ACTIVE' | 'PAST_DUE'
   charge_days?: number;
+  amount_kopeks?: number;
+  next_charge_at?: string | null;
+  redirect_url?: string | null;
+}
+
+export interface CasheraRecurringInfo {
+  status: string; // 'none' | 'PENDING' | 'ACTIVE' | 'PAST_DUE'
+  charge_days?: number;
+  interval?: string; // daily | weekly | monthly | yearly
   amount_kopeks?: number;
   next_charge_at?: string | null;
   redirect_url?: string | null;

@@ -13,7 +13,7 @@ import {
 import { partnerApi } from '../api/partners';
 import { AdminBackButton } from '../components/admin';
 import { createNumberInputHandler, toNumber } from '../utils/inputHelpers';
-import Twemoji from 'react-twemoji';
+import Twemoji from '@/lib/twemoji';
 import { CampaignIcon, CheckIcon, LinkIcon, RefreshIcon } from '@/components/icons';
 
 // Bonus type config
