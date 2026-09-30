@@ -110,7 +110,14 @@ export const authApi = {
   // Confirm an email account merge with the code sent to the existing account.
   verifyEmailMerge: async (
     code: string,
-  ): Promise<{ message: string; merge_required?: boolean; merge_token?: string }> => {
+  ): Promise<{
+    message: string;
+    merge_required?: boolean;
+    merge_token?: string;
+    /** The address was held by a deleted account and is now linked to this one. */
+    email_linked?: boolean;
+    email?: string;
+  }> => {
     const response = await apiClient.post('/cabinet/auth/email/merge/verify', { code });
     return response.data;
   },

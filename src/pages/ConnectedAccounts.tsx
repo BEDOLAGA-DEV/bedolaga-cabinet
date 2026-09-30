@@ -448,9 +448,27 @@ export default function ConnectedAccounts() {
 
   const verifyEmailMergeMutation = useMutation({
     mutationFn: (code: string) => authApi.verifyEmailMerge(code),
-    onSuccess: (response) => {
+    onSuccess: async (response) => {
       if (response.merge_token) {
         navigate(`/merge/${response.merge_token}`, { replace: true });
+        return;
+      }
+      // The address belonged to a deleted account: there is nothing to merge, the
+      // backend linked it to this account right away (already verified by the code).
+      if (response.email_linked) {
+        setEmailMergeCodePending(false);
+        setEmailMergeCode('');
+        setEmailValue('');
+        setEmailPassword('');
+        setEmailConfirmPassword('');
+        setEmailError(null);
+        setEmailSuccess(null);
+        setEmailFormOpen(false);
+        // The form unmounts once the email shows as linked, so confirm with a toast.
+        showToast({ type: 'success', message: t('emailVerification.successMessage') });
+        const updatedUser = await authApi.getMe();
+        setUser(updatedUser);
+        queryClient.invalidateQueries({ queryKey: ['linked-providers'] });
       }
     },
     onError: (err: unknown) => {
