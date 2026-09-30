@@ -5,7 +5,11 @@ import { formatDayMonth } from '@/utils/format';
 
 export type ChipTone = 'success' | 'warning' | 'error' | 'accent' | 'neutral';
 
-const TONE: Record<ChipTone, string> = {
+/** Общий вид чипа: тем же классом набраны чипы статуса, подписки и шапки. */
+export const CHIP_CLASS =
+  'inline-flex shrink-0 items-center whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-semibold';
+
+export const CHIP_TONE: Record<ChipTone, string> = {
   success: 'bg-success-500/15 text-success-400',
   warning: 'bg-warning-500/15 text-warning-400',
   error: 'bg-error-500/15 text-error-400',
@@ -94,13 +98,7 @@ export function UserStatusChip({ user, className }: { user: StatusSource; classN
   const { t } = useTranslation();
   const { key, tone, count, date } = describeUserStatus(user);
   return (
-    <span
-      className={cn(
-        'inline-flex shrink-0 items-center whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-semibold',
-        TONE[tone],
-        className,
-      )}
-    >
+    <span className={cn(CHIP_CLASS, CHIP_TONE[tone], className)}>
       {t(`admin.users.${key}`, { count, date })}
     </span>
   );
@@ -114,13 +112,7 @@ export function AccountStatusChip({ status, className }: { status: string; class
   const key =
     status === 'active' || status === 'blocked' || status === 'deleted' ? status : 'other';
   return (
-    <span
-      className={cn(
-        'inline-flex shrink-0 items-center whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-semibold',
-        TONE[tone],
-        className,
-      )}
-    >
+    <span className={cn(CHIP_CLASS, CHIP_TONE[tone], className)}>
       {t(`admin.users.statuses.${key}`)}
     </span>
   );
@@ -147,11 +139,7 @@ export function SubscriptionStateChip({
   const known = status in SUBSCRIPTION_STATE_TONE;
   return (
     <span
-      className={cn(
-        'inline-flex shrink-0 items-center whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-semibold',
-        TONE[SUBSCRIPTION_STATE_TONE[status] ?? 'neutral'],
-        className,
-      )}
+      className={cn(CHIP_CLASS, CHIP_TONE[SUBSCRIPTION_STATE_TONE[status] ?? 'neutral'], className)}
     >
       {t(`admin.users.subscriptionState.${known ? status : 'other'}`)}
     </span>
@@ -177,13 +165,7 @@ export function GraceAccessChip({
   const { t } = useTranslation();
   if (!until || new Date(until).getTime() <= now) return null;
   return (
-    <span
-      className={cn(
-        'inline-flex shrink-0 items-center whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-semibold',
-        TONE.warning,
-        className,
-      )}
-    >
+    <span className={cn(CHIP_CLASS, CHIP_TONE.warning, className)}>
       {t('admin.users.subscriptionChips.graceUntil', { date: formatDayMonth(until) })}
     </span>
   );

@@ -3560,7 +3560,8 @@
           "balance": "موجودی",
           "referrals": "معرفی‌ها",
           "activity": "فعالیت",
-          "overview": "نمای کلی"
+          "overview": "نمای کلی",
+          "abuse": "تخلفات"
         },
         "noTickets": "این کاربر تیکتی ندارد",
         "ticketsCount": "تیکت",
@@ -4125,7 +4126,23 @@
         },
         "messages_one": "{{count}} پیام",
         "messages_other": "{{count}} پیام",
-        "ticketLoadError": "باز کردن تیکت ممکن نشد"
+        "ticketLoadError": "باز کردن تیکت ممکن نشد",
+        "abuse": {
+          "unavailable": "سرویس ضد سوءاستفاده متصل نیست — داده‌ای وجود ندارد.",
+          "empty": "اخیراً تخلفی ثبت نشده است.",
+          "whitelisted": "کاربر در فهرست سفید است: بررسی‌ها اعمال نمی‌شود.",
+          "summary": "تخلفات ۳۰ روز اخیر: {{count}} · بیشترین امتیاز {{score}}",
+          "notWarned": "هشدار داده نشده",
+          "readOnly": "فقط مشاهده: هشدار، مسدودسازی و لغو در پنل ضد سوءاستفاده انجام می‌شود.",
+          "level": {
+            "clean": "پاک",
+            "warned": "علامت‌گذاری شده",
+            "limited": "محدود شده"
+          },
+          "noReason": "بدون ذکر دلیل",
+          "scoreShort": "امتیاز {{score}}",
+          "warnedOn": "هشدار {{date}}"
+        }
       },
       "notFound": "کاربر یافت نشد",
       "sendMessage": {
@@ -7366,6 +7383,13 @@
     },
     "subscription": {
       "untitled": "اشتراک"
+    }
+  },
+  "abuse": {
+    "notice": {
+      "title": "هشدار",
+      "contactSupport": "اشتباه است — تماس با پشتیبانی",
+      "dismiss": "متوجه شدم"
     }
   }
 }
