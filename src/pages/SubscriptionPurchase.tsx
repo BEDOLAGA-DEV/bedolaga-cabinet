@@ -67,6 +67,14 @@ export default function SubscriptionPurchase() {
     staleTime: 60_000,
   });
   const isMultiTariff = multiSubData?.multi_tariff_enabled ?? false;
+  // Мультитариф: витрина, открытая для живой платной подписки, — это смена её
+  // тарифа (продление живёт на странице продления), а не покупка ещё одной.
+  const isMultiTariffSwitch =
+    isMultiTariff &&
+    subscriptionId !== undefined &&
+    Boolean(subscription?.tariff_id) &&
+    !subscription?.is_trial &&
+    Boolean(subscription?.is_active || subscription?.is_limited);
 
   // (active promo discount + applyPromoDiscount live in usePromoDiscount;
   //  consumed directly by the sub-components, not threaded as props)
@@ -151,7 +159,8 @@ export default function SubscriptionPurchase() {
             ? t('subscription.cta.moveToTariff')
             : isMultiTariff && !subscriptionId
               ? t('subscription.newTariff', 'Новый тариф')
-              : !isMultiTariff && subscription?.is_daily && !subscription?.is_trial
+              : isMultiTariffSwitch ||
+                  (!isMultiTariff && subscription?.is_daily && !subscription?.is_trial)
                 ? t('subscription.switchTariff.title')
                 : subscription && !subscription.is_trial
                   ? t('subscription.extend')
@@ -283,6 +292,7 @@ export default function SubscriptionPurchase() {
               purchaseOptions={purchaseOptions}
               isTariffsMode={isTariffsMode}
               isMultiTariff={isMultiTariff}
+              isPinnedSubscription={subscriptionId !== undefined}
               onSelectTariff={(tariff) => {
                 setSelectedTariff(tariff);
                 setShowTariffPurchase(true);

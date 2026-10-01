@@ -679,6 +679,8 @@
     "cta": {
       "moveToTariff": "切换到套餐",
       "moveToTariffHint": "订阅购买于套餐推出之前",
+      "changeTariff": "更换套餐",
+      "changeTariffHint": "换成其他套餐，按剩余时间重新计算",
       "renewHint": "订阅已过期 — 续订以继续使用",
       "activeHint": "续费和更换套餐",
       "expiredHint": "选择套餐并付款",
@@ -7284,6 +7286,7 @@
       "balance": "余额",
       "manage": "管理订阅",
       "buyAnother": "再买一个套餐",
+      "changeTariff": "更换套餐",
       "buyTraffic": "购买更多流量",
       "buyDevices": "增加设备数",
       "reduceDevices": "减少设备数",

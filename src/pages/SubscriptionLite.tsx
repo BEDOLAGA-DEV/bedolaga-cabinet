@@ -6,6 +6,7 @@ import { Link, useNavigate, useParams } from 'react-router';
 import { subscriptionApi } from '@/api/subscription';
 import { LiteMeter } from '@/components/lite/LiteMeter';
 import { LiteRow, LiteRowGroup } from '@/components/lite/LiteRow';
+import { canChangeTariff } from '@/components/subscription/ChangeTariffCTA';
 import { AutopayToggle } from '@/components/subscription/manage/AutopayToggle';
 import { DailyPausePanel } from '@/components/subscription/manage/DailyPausePanel';
 import { DevicesPanel } from '@/components/subscription/manage/DevicesPanel';
@@ -24,7 +25,7 @@ import { useTheme } from '@/hooks/useTheme';
 import { copyToClipboard } from '@/utils/clipboard';
 import { resolveConnectionUrlForUi } from '@/utils/connectionLink';
 import { getGlassColors } from '@/utils/glassTheme';
-import { showsAddonOptions } from '@/utils/legacySubscription';
+import { showsAddonOptions, tariffSelectionPath } from '@/utils/legacySubscription';
 import { formatLiteDate } from '@/utils/liteDate';
 
 type OpenPanel = 'traffic' | 'devices' | 'reduce' | 'servers' | 'devicesList' | 'delete' | null;
@@ -75,6 +76,15 @@ export default function SubscriptionLite() {
     refetchOnMount: 'always',
   });
   const subscription = response?.subscription ?? null;
+
+  // Режим нужен строке «Сменить тариф»: в мультитарифе смена открывает витрину
+  // этой подписки. Ключ общий с остальными страницами, ответ берётся из кэша.
+  const { data: multiSubData } = useQuery({
+    queryKey: ['subscriptions-list'],
+    queryFn: () => subscriptionApi.getSubscriptions(),
+    staleTime: 60_000,
+  });
+  const isMultiTariff = multiSubData?.multi_tariff_enabled ?? false;
 
   const { data: devices } = useQuery({
     queryKey: ['devices', subscriptionId],
@@ -207,6 +217,13 @@ export default function SubscriptionLite() {
             <LiteRow
               to={`/subscriptions/${subscription.id}/renew`}
               label={t('lite.action.renew')}
+            />
+          )}
+
+          {canChangeTariff(subscription, isMultiTariff) && (
+            <LiteRow
+              to={tariffSelectionPath(subscription.id)}
+              label={t('lite.rows.changeTariff')}
             />
           )}
 

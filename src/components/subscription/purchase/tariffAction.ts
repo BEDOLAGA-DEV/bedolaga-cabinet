@@ -23,11 +23,13 @@ export type TariffActionKind =
   | 'purchase';
 
 export interface TariffActionInput {
-  tariff: Pick<Tariff, 'id' | 'is_current'>;
+  tariff: Pick<Tariff, 'id' | 'is_current' | 'is_purchased'>;
   subscription: Subscription | null;
   purchaseOptions: PurchaseOptions | undefined;
   isTariffsMode: boolean;
   isMultiTariff: boolean;
+  /** Витрина открыта для конкретной подписки (`?subscriptionId=`), а не для покупки новой. */
+  isPinnedSubscription?: boolean;
 }
 
 function flag(purchaseOptions: PurchaseOptions | undefined, key: string): boolean {
@@ -42,6 +44,7 @@ export function tariffAction({
   purchaseOptions,
   isTariffsMode,
   isMultiTariff,
+  isPinnedSubscription = false,
 }: TariffActionInput): TariffActionKind {
   const isCurrent = Boolean(tariff.is_current) || tariff.id === subscription?.tariff_id;
 
@@ -58,8 +61,13 @@ export function tariffAction({
   // (free_tariff_cannot_switch), поэтому ведём обычной покупкой.
   const onFreeTariff = isTariffsMode && flag(purchaseOptions, 'subscription_on_free_tariff');
 
+  // Мультитариф: витрина без подписки — это покупка ещё одной. Тариф меняют,
+  // только когда витрину открыли для конкретной подписки: тогда смена с
+  // пересчётом идёт по ней, как в одиночном режиме. Тариф, который уже есть
+  // отдельной подпиской, целью смены не бывает (бэкенд ответит 409) — его
+  // покупка продлевает ту подписку.
   const canSwitch =
-    !isMultiTariff &&
+    (!isMultiTariff || (isPinnedSubscription && !tariff.is_purchased)) &&
     Boolean(subscription?.tariff_id) &&
     !subscription?.is_trial &&
     !expired &&
