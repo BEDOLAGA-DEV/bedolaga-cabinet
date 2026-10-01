@@ -14,6 +14,7 @@ import { copyToClipboard } from '../utils/clipboard';
 import { useTheme } from '../hooks/useTheme';
 import { useCloseOnSuccessNotification } from '../store/successNotification';
 import PurchaseCTAButton from '../components/subscription/PurchaseCTAButton';
+import ChangeTariffCTA from '../components/subscription/ChangeTariffCTA';
 import { planTitle, showsAddonOptions } from '../utils/legacySubscription';
 import {
   CalendarIcon,
@@ -961,6 +962,9 @@ export default function Subscription() {
 
       {/* Purchase / Renewal CTA */}
       <PurchaseCTAButton subscription={subscription} isMultiTariff={isMultiTariff} />
+
+      {/* Мультитариф: смена тарифа этой подписки с пересчётом остатка */}
+      <ChangeTariffCTA subscription={subscription} isMultiTariff={isMultiTariff} />
 
       {/* Delete expired subscription */}
       {isMultiTariff &&

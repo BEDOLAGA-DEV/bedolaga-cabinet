@@ -104,6 +104,30 @@ describe('tariffAction', () => {
     expect(ask({ isMultiTariff: true })).toBe('purchase');
   });
 
+  it('в мультитарифе витрина конкретной подписки меняет её тариф с пересчётом', () => {
+    expect(ask({ isMultiTariff: true, isPinnedSubscription: true })).toBe('switch');
+  });
+
+  it('тариф, который уже есть отдельной подпиской, не меняют — покупка продлит её', () => {
+    expect(
+      ask({
+        isMultiTariff: true,
+        isPinnedSubscription: true,
+        tariff: { id: 99, is_current: false, is_purchased: true },
+      }),
+    ).toBe('purchase');
+  });
+
+  it('пробную и в витрине подписки покупают, а не меняют', () => {
+    expect(
+      ask({
+        isMultiTariff: true,
+        isPinnedSubscription: true,
+        subscription: { ...activeSub, is_trial: true } as Subscription,
+      }),
+    ).toBe('purchase');
+  });
+
   it('вне режима тарифов флаги истечения не учитываются', () => {
     // subscription_is_expired приходит только в режиме тарифов; в классике
     // тот же ключ не должен превращать смену в покупку.

@@ -38,6 +38,8 @@ export interface TariffPickerGridProps {
   purchaseOptions: PurchaseOptions | undefined;
   isTariffsMode: boolean;
   isMultiTariff: boolean;
+  /** Витрина открыта для конкретной подписки — в мультитарифе тогда доступна смена тарифа. */
+  isPinnedSubscription?: boolean;
   onSelectTariff: (tariff: Tariff) => void;
   onSwitchTariff: (tariffId: number) => void;
 }
@@ -48,6 +50,7 @@ export function TariffPickerGrid({
   purchaseOptions,
   isTariffsMode,
   isMultiTariff,
+  isPinnedSubscription,
   onSelectTariff,
   onSwitchTariff,
 }: TariffPickerGridProps) {
@@ -139,6 +142,7 @@ export function TariffPickerGrid({
               purchaseOptions,
               isTariffsMode,
               isMultiTariff,
+              isPinnedSubscription,
             });
 
             return (

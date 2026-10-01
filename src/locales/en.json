@@ -435,6 +435,8 @@
     "cta": {
       "moveToTariff": "Switch to a plan",
       "moveToTariffHint": "Bought before plans were introduced",
+      "changeTariff": "Change plan",
+      "changeTariffHint": "Another plan, remaining time recalculated",
       "expiredHint": "Choose a plan and pay",
       "trialHint": "More traffic and devices",
       "activeHint": "Renewal and plan change",
@@ -7839,6 +7841,7 @@
       "balance": "Balance",
       "manage": "Manage subscription",
       "buyAnother": "Buy another plan",
+      "changeTariff": "Change plan",
       "buyTraffic": "Buy more traffic",
       "buyDevices": "Buy more devices",
       "reduceDevices": "Reduce device count",
