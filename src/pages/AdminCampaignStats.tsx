@@ -33,6 +33,11 @@ const bonusTypeConfig: Record<
     color: 'text-purple-400',
     bgColor: 'bg-purple-500/20',
   },
+  discount: {
+    labelKey: 'admin.campaigns.bonusType.discount',
+    color: 'text-warning-400',
+    bgColor: 'bg-warning-500/20',
+  },
   none: {
     labelKey: 'admin.campaigns.bonusType.none',
     color: 'text-dark-400',
@@ -301,6 +306,11 @@ export default function AdminCampaignStats() {
               {stats.bonus_type === 'tariff' && (
                 <div className="text-lg font-medium text-accent-400">
                   {t('admin.campaigns.stats.tariffsIssued', { count: stats.subscription_issued })}
+                </div>
+              )}
+              {stats.bonus_type === 'discount' && (
+                <div className="text-lg font-medium text-warning-400">
+                  {t('admin.campaigns.stats.discountsIssued', { count: stats.discount_issued })}
                 </div>
               )}
               {stats.bonus_type === 'none' && (

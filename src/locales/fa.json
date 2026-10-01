@@ -101,7 +101,8 @@
     "title": "!پاداش فعال شد",
     "balance": "شما {{amount}} روبل از کمپین «{{name}}» دریافت کردید",
     "subscription": "شما اشتراک {{days}} روزه از کمپین «{{name}}» دریافت کردید",
-    "tariff": "شما تعرفه «{{tariff}}» از کمپین «{{name}}» دریافت کردید"
+    "tariff": "شما تعرفه «{{tariff}}» از کمپین «{{name}}» دریافت کردید",
+    "discount": "شما تخفیف {{percent}}% برای خرید از کمپین «{{name}}» دریافت کردید"
   },
   "wsNotifications": {
     "balance": {
@@ -1017,7 +1018,8 @@
         "subscription": "{{days}} روز اشتراک",
         "subscriptionDesc": "{{days}} روز اشتراک رایگان",
         "tariff": "تعرفه جایزه",
-        "tariffDesc": "طرح تعرفه رایگان"
+        "tariffDesc": "طرح تعرفه رایگان",
+        "discountDesc": "{{percent}}% تخفیف برای اولین خرید"
       },
       "stats": {
         "registrations": "ثبت‌نام",
@@ -2984,6 +2986,7 @@
         "balance": "موجودی",
         "subscription": "اشتراک",
         "tariff": "تعرفه",
+        "discount": "تخفیف",
         "none": "فقط لینک"
       },
       "overview": {
@@ -3026,6 +3029,10 @@
         "notSelected": "انتخاب نشده",
         "tariffOption": "{{traffic}} GB، {{devices}} دستگاه",
         "durationDays": "مدت (روز)",
+        "discountBonus": "تخفیف خرید",
+        "discountPercent": "تخفیف (%)",
+        "discountHours": "مدت اعتبار (ساعت)",
+        "discountHint": "تخفیف شخصی برای اولین خرید پس از ورود از لینک. ۰ ساعت یعنی بدون محدودیت زمانی تا اولین خرید. اگر کاربر تخفیف بزرگ‌تری داشته باشد، همان حفظ می‌شود.",
         "noBonusDescription": "کمپین بدون پاداش: فقط برای ردیابی کلیک‌ها و ثبت‌نام‌ها.",
         "active": "فعال",
         "cancel": "لغو",
@@ -3047,6 +3054,7 @@
         "bonusesIssued": "پاداش‌های صادر شده",
         "subscriptionsIssued_other": "{{count}} اشتراک",
         "tariffsIssued_other": "{{count}} تعرفه",
+        "discountsIssued_other": "{{count}} تخفیف",
         "avgRevenuePerUser": "میانگین درآمد هر کاربر",
         "avgFirstPayment": "میانگین اولین پرداخت",
         "trialSubscriptions": "اشتراک‌های آزمایشی",
@@ -3072,7 +3080,8 @@
         "vsLastWeek": "نسبت به هفته قبل",
         "topRegistrations": "بالاترین ثبت‌نام‌ها",
         "subscriptionsIssued": "اشتراک‌های صادر شده",
-        "tariffsIssued": "تعرفه‌های صادر شده"
+        "tariffsIssued": "تعرفه‌های صادر شده",
+        "discountsIssued": "تخفیف‌های صادر شده"
       },
       "users": {
         "title": "کاربران کمپین",

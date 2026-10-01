@@ -28,6 +28,11 @@ export default function CampaignBonusNotifier() {
         tariff: bonus.tariff_name,
         name: bonus.campaign_name,
       });
+    } else if (bonus.bonus_type === 'discount' && bonus.discount_percent) {
+      message = t('campaignBonus.discount', {
+        percent: bonus.discount_percent,
+        name: bonus.campaign_name,
+      });
     }
 
     if (message) {

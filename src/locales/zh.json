@@ -96,7 +96,8 @@
     "title": "奖励已激活！",
     "balance": "您从活动「{{name}}」获得了 {{amount}} 卢布",
     "subscription": "您从活动「{{name}}」获得了 {{days}} 天订阅",
-    "tariff": "您从活动「{{name}}」获得了套餐「{{tariff}}」"
+    "tariff": "您从活动「{{name}}」获得了套餐「{{tariff}}」",
+    "discount": "您从活动「{{name}}」获得了 {{percent}}% 的购买折扣"
   },
   "wsNotifications": {
     "balance": {
@@ -1011,7 +1012,8 @@
         "subscription": "{{days}} 天订阅",
         "subscriptionDesc": "{{days}} 天免费订阅",
         "tariff": "奖励套餐",
-        "tariffDesc": "免费套餐方案"
+        "tariffDesc": "免费套餐方案",
+        "discountDesc": "首次购买享 {{percent}}% 折扣"
       },
       "stats": {
         "registrations": "注册",
@@ -2977,6 +2979,7 @@
         "balance": "余额",
         "subscription": "订阅",
         "tariff": "套餐",
+        "discount": "折扣",
         "none": "仅链接"
       },
       "overview": {
@@ -3019,6 +3022,10 @@
         "notSelected": "未选择",
         "tariffOption": "{{traffic}} GB，{{devices}} 台设备",
         "durationDays": "时长（天）",
+        "discountBonus": "购买折扣",
+        "discountPercent": "折扣（%）",
+        "discountHours": "有效期（小时）",
+        "discountHint": "通过链接进入后首次购买的个人折扣。0 小时表示不限时，直到首次购买。若用户已有更大的折扣，则保留原折扣。",
         "noBonusDescription": "无奖励活动:仅用于跟踪点击和注册。",
         "active": "启用",
         "cancel": "取消",
@@ -3040,6 +3047,7 @@
         "bonusesIssued": "已发放奖励",
         "subscriptionsIssued_other": "{{count}} 个订阅",
         "tariffsIssued_other": "{{count}} 个套餐",
+        "discountsIssued_other": "{{count}} 个折扣",
         "avgRevenuePerUser": "每用户平均收入",
         "avgFirstPayment": "平均首次付款",
         "trialSubscriptions": "试用订阅",
@@ -3065,7 +3073,8 @@
         "vsLastWeek": "与上周对比",
         "topRegistrations": "热门注册",
         "subscriptionsIssued": "已发放订阅",
-        "tariffsIssued": "已发放套餐"
+        "tariffsIssued": "已发放套餐",
+        "discountsIssued": "已发放折扣"
       },
       "users": {
         "title": "活动用户",

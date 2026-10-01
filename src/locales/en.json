@@ -107,7 +107,8 @@
     "title": "Bonus activated!",
     "balance": "You received {{amount}} RUB from campaign \"{{name}}\"",
     "subscription": "You received a {{days}}-day subscription from campaign \"{{name}}\"",
-    "tariff": "You received tariff \"{{tariff}}\" from campaign \"{{name}}\""
+    "tariff": "You received tariff \"{{tariff}}\" from campaign \"{{name}}\"",
+    "discount": "You received a {{percent}}% discount on your purchase from campaign \"{{name}}\""
   },
   "wsNotifications": {
     "balance": {
@@ -1144,7 +1145,8 @@
         "subscription": "{{days}} days subscription",
         "subscriptionDesc": "{{days}} days free subscription",
         "tariff": "Bonus tariff",
-        "tariffDesc": "Free tariff plan"
+        "tariffDesc": "Free tariff plan",
+        "discountDesc": "{{percent}}% off the first purchase"
       },
       "stats": {
         "registrations": "Registrations",
@@ -4007,6 +4009,7 @@
         "balance": "Balance",
         "subscription": "Subscription",
         "tariff": "Tariff",
+        "discount": "Discount",
         "none": "Link only"
       },
       "overview": {
@@ -4050,6 +4053,10 @@
         "notSelected": "Not selected",
         "tariffOption": "{{traffic}} GB, {{devices}} dev.",
         "durationDays": "Duration (days)",
+        "discountBonus": "Purchase discount",
+        "discountPercent": "Discount (%)",
+        "discountHours": "Valid for (hours)",
+        "discountHint": "A personal discount on the first purchase after following the link. 0 hours means no time limit — until the first purchase. If the user already has a larger discount, it is kept.",
         "noBonusDescription": "Campaign without bonuses: only for tracking clicks and registrations.",
         "active": "Active",
         "cancel": "Cancel",
@@ -4073,6 +4080,8 @@
         "subscriptionsIssued_other": "{{count}} subscriptions",
         "tariffsIssued_one": "{{count}} tariff",
         "tariffsIssued_other": "{{count}} tariffs",
+        "discountsIssued_one": "{{count}} discount",
+        "discountsIssued_other": "{{count}} discounts",
         "avgRevenuePerUser": "Avg revenue per user",
         "avgFirstPayment": "Avg first payment",
         "trialSubscriptions": "Trial subscriptions",
@@ -4098,7 +4107,8 @@
         "vsLastWeek": "vs last week",
         "topRegistrations": "Top registrations",
         "subscriptionsIssued": "Subscriptions issued",
-        "tariffsIssued": "Tariffs issued"
+        "tariffsIssued": "Tariffs issued",
+        "discountsIssued": "Discounts issued"
       },
       "users": {
         "title": "Campaign Users",

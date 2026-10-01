@@ -39,6 +39,12 @@ const bonusTypeConfig: Record<
     bgColor: 'bg-accent-500/10',
     borderColor: 'border-accent-500/30',
   },
+  discount: {
+    labelKey: 'admin.campaigns.bonusType.discount',
+    color: 'text-warning-400',
+    bgColor: 'bg-warning-500/10',
+    borderColor: 'border-warning-500/30',
+  },
   none: {
     labelKey: 'admin.campaigns.bonusType.none',
     color: 'text-dark-400',
@@ -231,6 +237,10 @@ export default function AdminCampaignEdit() {
   const [tariffId, setTariffId] = useState<number | null>(null);
   const [tariffDays, setTariffDays] = useState<number | ''>(30);
 
+  // Discount bonus: hours = 0 — until the first purchase
+  const [discountPercent, setDiscountPercent] = useState<number | ''>(10);
+  const [discountHours, setDiscountHours] = useState<number | ''>(0);
+
   // Partner
   const [partnerUserId, setPartnerUserId] = useState<number | null>(null);
   const [initialPartnerUserId, setInitialPartnerUserId] = useState<number | null>(null);
@@ -249,6 +259,8 @@ export default function AdminCampaignEdit() {
       setSelectedSquads(campaign.subscription_squads || []);
       setTariffId(campaign.tariff_id || null);
       setTariffDays(campaign.tariff_duration_days || 30);
+      setDiscountPercent(campaign.discount_percent || 10);
+      setDiscountHours(campaign.discount_duration_hours ?? 0);
       setPartnerUserId(campaign.partner_user_id ?? null);
       setInitialPartnerUserId(campaign.partner_user_id ?? null);
     }
@@ -293,6 +305,9 @@ export default function AdminCampaignEdit() {
     } else if (bonusType === 'tariff') {
       data.tariff_id = tariffId || undefined;
       data.tariff_duration_days = toNumber(tariffDays, 30);
+    } else if (bonusType === 'discount') {
+      data.discount_percent = toNumber(discountPercent, 10);
+      data.discount_duration_hours = toNumber(discountHours, 0);
     }
 
     updateMutation.mutate(data);
@@ -301,7 +316,9 @@ export default function AdminCampaignEdit() {
   const isNameValid = name.trim().length > 0;
   const isStartParamValid =
     startParameter.trim().length > 0 && /^[a-zA-Z0-9_-]+$/.test(startParameter);
-  const isValid = isNameValid && isStartParamValid;
+  const discountValue = toNumber(discountPercent, 0);
+  const isDiscountValid = bonusType !== 'discount' || (discountValue >= 1 && discountValue <= 100);
+  const isValid = isNameValid && isStartParamValid && isDiscountValid;
 
   if (isLoading) {
     return (
@@ -571,6 +588,53 @@ export default function AdminCampaignEdit() {
               min={1}
             />
           </div>
+        </div>
+      )}
+
+      {bonusType === 'discount' && (
+        <div
+          className={`card space-y-4 border ${bonusTypeConfig.discount.borderColor} ${bonusTypeConfig.discount.bgColor}`}
+        >
+          <h2 className={`text-lg font-semibold ${bonusTypeConfig.discount.color}`}>
+            {t('admin.campaigns.form.discountBonus')}
+          </h2>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label
+                htmlFor="campaign-discount-percent"
+                className="mb-2 block text-sm font-medium text-dark-300"
+              >
+                {t('admin.campaigns.form.discountPercent')}
+              </label>
+              <input
+                id="campaign-discount-percent"
+                type="number"
+                value={discountPercent}
+                onChange={createNumberInputHandler(setDiscountPercent, 1, 100)}
+                className="input"
+                min={1}
+                max={100}
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="campaign-discount-hours"
+                className="mb-2 block text-sm font-medium text-dark-300"
+              >
+                {t('admin.campaigns.form.discountHours')}
+              </label>
+              <input
+                id="campaign-discount-hours"
+                type="number"
+                value={discountHours}
+                onChange={createNumberInputHandler(setDiscountHours, 0)}
+                className="input"
+                min={0}
+              />
+            </div>
+          </div>
+          <p className="text-sm text-dark-400">{t('admin.campaigns.form.discountHint')}</p>
         </div>
       )}
 

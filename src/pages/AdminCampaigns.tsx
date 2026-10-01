@@ -44,6 +44,11 @@ const bonusTypeConfig: Record<
     color: 'text-accent-400',
     bgColor: 'bg-accent-500/20',
   },
+  discount: {
+    labelKey: 'admin.campaigns.bonusType.discount',
+    color: 'text-warning-400',
+    bgColor: 'bg-warning-500/20',
+  },
   none: {
     labelKey: 'admin.campaigns.bonusType.none',
     color: 'text-dark-400',
