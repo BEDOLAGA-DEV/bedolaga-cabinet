@@ -389,6 +389,31 @@ export default function PaymentMethodIcon({
       );
     }
 
+    case 'paydex':
+    case 'paydex_sbp':
+    case 'paydex_card':
+    case 'paydex_crypto': {
+      const paydexGradId = `${uid}-paydex`;
+      return (
+        <svg className={className} viewBox="0 0 40 40">
+          <defs>
+            <linearGradient id={paydexGradId} x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="#6d28d9" />
+              <stop offset="100%" stopColor="#2563eb" />
+            </linearGradient>
+          </defs>
+          <circle cx="20" cy="20" r="20" fill={`url(#${paydexGradId})`} />
+          <rect x="7" y="13.5" width="18" height="13" rx="2.6" fill="#fff" opacity="0.95" />
+          <rect x="7" y="16.6" width="18" height="2.4" fill="#6d28d9" opacity="0.85" />
+          <rect x="10" y="21.3" width="5.2" height="3" rx="0.8" fill="#2563eb" opacity="0.5" />
+          <g fill="none" stroke="#fff" strokeWidth="1.7" strokeLinecap="round">
+            <path d="M27.5 14.8a7.2 7.2 0 0 1 0 10.4" />
+            <path d="M27.5 17.5a3.9 3.9 0 0 1 0 5" />
+          </g>
+        </svg>
+      );
+    }
+
     case 'cashera': {
       const casheraGradId = `${uid}-cashera`;
       return (
