@@ -115,7 +115,8 @@
     "title": "Бонус активирован!",
     "balance": "Вам начислено {{amount}} руб. по акции «{{name}}»",
     "subscription": "Вам предоставлена подписка на {{days}} дн. по акции «{{name}}»",
-    "tariff": "Вам предоставлен тариф «{{tariff}}» по акции «{{name}}»"
+    "tariff": "Вам предоставлен тариф «{{tariff}}» по акции «{{name}}»",
+    "discount": "Вам доступна скидка {{percent}}% на покупку по акции «{{name}}»"
   },
   "wsNotifications": {
     "balance": {
@@ -1172,7 +1173,8 @@
         "subscription": "{{days}} дн. подписки",
         "subscriptionDesc": "{{days}} дней бесплатной подписки",
         "tariff": "Бонусный тариф",
-        "tariffDesc": "Бесплатный тарифный план"
+        "tariffDesc": "Бесплатный тарифный план",
+        "discountDesc": "Скидка {{percent}}% на первую покупку"
       },
       "stats": {
         "registrations": "Регистрации",
@@ -4436,6 +4438,7 @@
         "balance": "Баланс",
         "subscription": "Подписка",
         "tariff": "Тариф",
+        "discount": "Скидка",
         "none": "Только ссылка"
       },
       "overview": {
@@ -4480,6 +4483,10 @@
         "notSelected": "Не выбран",
         "tariffOption": "{{traffic}} ГБ, {{devices}} уст.",
         "durationDays": "Длительность (дней)",
+        "discountBonus": "Скидка на покупку",
+        "discountPercent": "Скидка (%)",
+        "discountHours": "Срок действия (часов)",
+        "discountHint": "Персональная скидка на первую покупку после перехода по ссылке. 0 часов — без срока, до первой покупки. Если у пользователя уже есть скидка больше, она сохраняется.",
         "noBonusDescription": "Кампания без бонусов - только для отслеживания переходов и регистраций.",
         "active": "Активна",
         "cancel": "Отмена",
@@ -4505,6 +4512,9 @@
         "tariffsIssued_one": "{{count}} тариф",
         "tariffsIssued_few": "{{count}} тарифа",
         "tariffsIssued_many": "{{count}} тарифов",
+        "discountsIssued_one": "{{count}} скидка",
+        "discountsIssued_few": "{{count}} скидки",
+        "discountsIssued_many": "{{count}} скидок",
         "avgRevenuePerUser": "Средний доход с пользователя",
         "avgFirstPayment": "Средний первый платёж",
         "trialSubscriptions": "Пробных подписок",
@@ -4530,7 +4540,8 @@
         "vsLastWeek": "vs прошлая неделя",
         "topRegistrations": "Топ регистрации",
         "subscriptionsIssued": "Выдано подписок",
-        "tariffsIssued": "Выдано тарифов"
+        "tariffsIssued": "Выдано тарифов",
+        "discountsIssued": "Выдано скидок"
       },
       "users": {
         "title": "Пользователи кампании",

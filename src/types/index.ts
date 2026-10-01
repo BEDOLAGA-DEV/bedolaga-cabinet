@@ -29,10 +29,12 @@ export interface OAuthProvider {
 // Campaign bonus info (returned during auth)
 export interface CampaignBonusInfo {
   campaign_name: string;
-  bonus_type: 'balance' | 'subscription' | 'tariff' | 'none';
+  bonus_type: 'balance' | 'subscription' | 'tariff' | 'discount' | 'none';
   balance_kopeks: number;
   subscription_days: number | null;
   tariff_name: string | null;
+  discount_percent?: number | null;
+  discount_expires_at?: string | null;
 }
 
 // Auth types

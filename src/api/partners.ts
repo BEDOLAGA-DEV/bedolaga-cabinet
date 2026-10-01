@@ -26,6 +26,7 @@ export interface PartnerCampaignInfo {
   balance_bonus_kopeks: number;
   subscription_duration_days: number | null;
   subscription_traffic_gb: number | null;
+  discount_percent: number | null;
   deep_link: string | null;
   web_link: string | null;
   // Per-campaign statistics

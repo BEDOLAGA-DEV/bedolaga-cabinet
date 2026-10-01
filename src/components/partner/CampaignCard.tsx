@@ -115,6 +115,10 @@ export function CampaignCard({ campaign }: CampaignCardProps) {
                   : {}),
               })}
             {campaign.bonus_type === 'tariff' && t('referral.partner.campaignBonus.tariffDesc')}
+            {campaign.bonus_type === 'discount' &&
+              t('referral.partner.campaignBonus.discountDesc', {
+                percent: campaign.discount_percent ?? 0,
+              })}
           </div>
         </div>
       )}

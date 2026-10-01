@@ -1,7 +1,7 @@
 import apiClient from './client';
 
 // Types
-export type CampaignBonusType = 'balance' | 'subscription' | 'none' | 'tariff';
+export type CampaignBonusType = 'balance' | 'subscription' | 'none' | 'tariff' | 'discount';
 
 export interface TariffInfo {
   id: number;
@@ -42,6 +42,8 @@ export interface CampaignDetail {
   tariff_id: number | null;
   tariff_duration_days: number | null;
   tariff: TariffInfo | null;
+  discount_percent: number | null;
+  discount_duration_hours: number | null;
   partner_user_id: number | null;
   partner_name: string | null;
   created_by: number | null;
@@ -63,6 +65,8 @@ export interface CampaignCreateRequest {
   subscription_squads?: string[];
   tariff_id?: number;
   tariff_duration_days?: number;
+  discount_percent?: number;
+  discount_duration_hours?: number;
   partner_user_id?: number | null;
 }
 
@@ -78,6 +82,8 @@ export interface CampaignUpdateRequest {
   subscription_squads?: string[];
   tariff_id?: number;
   tariff_duration_days?: number;
+  discount_percent?: number;
+  discount_duration_hours?: number;
   partner_user_id?: number | null;
 }
 
@@ -97,6 +103,7 @@ export interface CampaignStatistics {
   balance_issued_kopeks: number;
   balance_issued_rubles: number;
   subscription_issued: number;
+  discount_issued: number;
   last_registration: string | null;
   total_revenue_kopeks: number;
   total_revenue_rubles: number;
@@ -125,6 +132,7 @@ export interface CampaignRegistrationItem {
   subscription_duration_days: number | null;
   tariff_id: number | null;
   tariff_duration_days: number | null;
+  discount_percent: number | null;
   created_at: string;
   user_balance_kopeks: number;
   has_subscription: boolean;
