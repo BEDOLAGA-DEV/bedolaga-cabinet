@@ -33,7 +33,7 @@ import {
   UserIcon,
   GamepadIcon,
   ClipboardIcon,
-  InfoIcon,
+  StarIcon,
   CogIcon,
   WheelIcon,
   PlusIcon,
@@ -85,7 +85,7 @@ export function CommandPalette({
     ...(hasContests ? [{ label: t('nav.contests'), icon: GamepadIcon, path: '/contests' }] : []),
     ...(hasPolls ? [{ label: t('nav.polls'), icon: ClipboardIcon, path: '/polls' }] : []),
     ...(wheelEnabled ? [{ label: t('nav.wheel'), icon: WheelIcon, path: '/wheel' }] : []),
-    { label: t('nav.info'), icon: InfoIcon, path: '/info' },
+    { label: t('nav.loyalty'), icon: StarIcon, path: '/info' },
     { label: t('nav.profile'), icon: UserIcon, path: '/profile' },
     ...(isAdmin ? [{ label: t('admin.nav.title'), icon: CogIcon, path: '/admin' }] : []),
   ];

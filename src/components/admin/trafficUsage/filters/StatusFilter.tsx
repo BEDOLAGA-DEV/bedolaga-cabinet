@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { CheckIcon } from '@/components/icons';
 import { ChevronDownIcon, StatusIcon } from '../TrafficIcons';
 
-// Status colour pills shared with the StatusFilter dropdown.
+// eslint-disable-next-line react-refresh/only-export-components
 export const STATUS_COLORS: Record<string, string> = {
   active: 'bg-success-500',
   trial: 'bg-warning-500',

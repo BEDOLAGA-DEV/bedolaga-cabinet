@@ -14,6 +14,7 @@ export {
   GamepadIcon,
   ClipboardIcon,
   InfoIcon,
+  StarIcon,
   CogIcon,
   WheelIcon,
   GiftIcon,

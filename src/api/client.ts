@@ -1,4 +1,4 @@
-import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
+import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios';
 import { getTelegramInitData as readTelegramInitData } from '../utils/telegramInitData';
 import {
   tokenStorage,

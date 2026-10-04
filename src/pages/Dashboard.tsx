@@ -24,7 +24,8 @@ import PendingGiftCard from '../components/dashboard/PendingGiftCard';
 import SubscriptionListCard from '../components/subscription/SubscriptionListCard';
 import { DeviceLimitSheet } from '../components/subscription/DeviceLimitSheet';
 import { API } from '../config/constants';
-import { ChevronRightIcon, StarIcon } from '@/components/icons';
+import { ChevronRightIcon, StarIcon, LockIcon } from '@/components/icons';
+import { authApi } from '../api/auth';
 import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 import { safeLocal } from '../utils/safeStorage';
 import { getApiErrorMessage } from '../utils/api-error';
@@ -52,6 +53,18 @@ export default function Dashboard() {
     staleTime: API.BALANCE_STALE_TIME_MS,
     refetchOnMount: 'always',
   });
+
+  // Способы входа: тот же queryKey, что на /profile/accounts, — кэш общий,
+  // переход туда не стоит лишнего запроса. Баннер «привязать email» на
+  // главной показываем только пока привязан ровно один способ входа —
+  // единственная точка входа означает риск потерять доступ к аккаунту.
+  const { data: linkedProvidersData } = useQuery({
+    queryKey: ['linked-providers'],
+    queryFn: () => authApi.getLinkedProviders(),
+    staleTime: 60_000,
+  });
+  const linkedProvidersCount = linkedProvidersData?.providers.filter((p) => p.linked).length ?? 0;
+  const showLinkAccountBanner = linkedProvidersCount === 1;
 
   // Multi-tariff: check if user has multiple subscriptions
   const { data: multiSubData } = useQuery({
@@ -316,6 +329,59 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* Нет подписок: показываем триал (если доступен) и ВСЕГДА одну явную
+          кнопку покупки — обе приоритетнее баннера способа входа, это
+          конверсионный блок. Кнопка не пропадает даже без триала — раньше
+          при доступном триале это был единственный экран без кнопки покупки
+          (Telegram-баг #605056/#605063). Единственная кнопка тут (вместо
+          дубля с мульти-тариф блоком). */}
+      {hasNoSubscription && !trialLoading && (
+        <div className="space-y-3">
+          {trialInfo?.is_available && (
+            <TrialOfferCard
+              trialInfo={trialInfo}
+              balanceKopeks={balanceData?.balance_kopeks || 0}
+              balanceRubles={balanceData?.balance_rubles || 0}
+              activateTrialMutation={activateTrialMutation}
+              trialError={trialError}
+            />
+          )}
+          <Link
+            to="/subscription/purchase"
+            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-accent-500 p-3.5 text-sm font-semibold text-on-accent transition-colors hover:bg-accent-600"
+          >
+            <span className="text-base">+</span>{' '}
+            {t('subscriptions.browsePlans', 'Посмотреть тарифы и купить подписку')}
+          </Link>
+        </div>
+      )}
+
+      {/* Единственный способ входа — риск потерять доступ к аккаунту. Ниже
+          триала (тот конверсионный), но выше hero-блока подписки/баланса.
+          Показываем только пока привязан ровно 1 провайдер; при 0 (не должно
+          случаться, юзер всегда авторизован хоть чем-то) или 2+ баннер скрыт. */}
+      {showLinkAccountBanner && (
+        <Link
+          to="/profile/accounts"
+          className="group flex flex-col gap-3 rounded-2xl border border-accent-500/30 bg-accent-500/10 p-4 transition-colors hover:bg-accent-500/15 sm:flex-row sm:items-center"
+        >
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent-500/20 text-accent-400">
+              <LockIcon className="h-5 w-5" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="font-medium text-dark-50">{t('dashboard.linkAccountBanner.title')}</p>
+              <p className="mt-0.5 text-sm text-dark-400">
+                {t('dashboard.linkAccountBanner.subtitle')}
+              </p>
+            </div>
+          </div>
+          <span className="whitespace-nowrap rounded-xl bg-accent-500 px-3.5 py-2 text-center text-sm font-semibold text-on-accent shadow-linear-sm transition-colors group-hover:bg-accent-600 sm:shrink-0">
+            {t('dashboard.linkAccountBanner.cta')}
+          </span>
+        </Link>
+      )}
+
       {/* Pending Gift Activations */}
       {pendingGifts && pendingGifts.length > 0 && <PendingGiftCard gifts={pendingGifts} />}
 
@@ -404,32 +470,6 @@ export default function Dashboard() {
             connectedDevices={devicesData?.total ?? 0}
           />
         ) : null)}
-
-      {/* Нет подписок: показываем триал (если доступен) и ВСЕГДА одну явную
-          кнопку покупки. Триал не обязателен, чтобы попасть в витрину — раньше
-          при доступном триале это был единственный экран без кнопки покупки
-          (Telegram-баг #605056/#605063). Единственная кнопка тут (вместо дубля
-          с мульти-тариф блоком). */}
-      {hasNoSubscription && !trialLoading && (
-        <div className="space-y-3">
-          {trialInfo?.is_available && (
-            <TrialOfferCard
-              trialInfo={trialInfo}
-              balanceKopeks={balanceData?.balance_kopeks || 0}
-              balanceRubles={balanceData?.balance_rubles || 0}
-              activateTrialMutation={activateTrialMutation}
-              trialError={trialError}
-            />
-          )}
-          <Link
-            to="/subscription/purchase"
-            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-accent-500 p-3.5 text-sm font-semibold text-on-accent transition-colors hover:bg-accent-600"
-          >
-            <span className="text-base">+</span>{' '}
-            {t('subscriptions.browsePlans', 'Посмотреть тарифы и купить подписку')}
-          </Link>
-        </div>
-      )}
 
       {/* Promo Offers */}
       <PromoOffersSection />

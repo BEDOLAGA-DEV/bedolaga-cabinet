@@ -7,9 +7,15 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 import { useAuthStore } from '../store/auth';
 import { balanceApi } from '../api/balance';
+import { subscriptionApi } from '../api/subscription';
 import { useCurrency } from '../hooks/useCurrency';
 import { API } from '../config/constants';
-import type { PaginatedResponse, Transaction } from '../types';
+import type {
+  PaginatedResponse,
+  Transaction,
+  SubscriptionsListResponse,
+  SubscriptionStatusResponse,
+} from '../types';
 
 import { Card } from '@/components/data-display/Card';
 import { Button } from '@/components/primitives/Button';
@@ -18,6 +24,8 @@ import { staggerContainer, staggerItem } from '@/components/motion/transitions';
 import { isPaidStatus, isFailedStatus } from '../utils/paymentStatus';
 import { transactionTypeBadge, transactionTypeLabelKey } from '../utils/transactionType';
 import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
+
+const PREVIEW_COUNT = 5;
 
 export default function Balance() {
   const { t } = useTranslation();
@@ -74,7 +82,10 @@ export default function Balance() {
   }> | null>(null);
   const [promoSelectCode, setPromoSelectCode] = useState<string | null>(null);
   const [transactionsPage, setTransactionsPage] = useState(1);
-  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  // Превью пока список не развёрнут: сразу видно последние операции без клика.
+  // После «показать все» переходит в постраничный режим (см. transactionsPage) —
+  // чтобы не тянуть сотни транзакций одним запросом.
+  const [showAllTransactions, setShowAllTransactions] = useState(false);
 
   const { data: transactions, isLoading } = useQuery<PaginatedResponse<Transaction>>({
     queryKey: ['transactions', transactionsPage],
@@ -82,10 +93,44 @@ export default function Balance() {
     placeholderData: (previousData) => previousData,
   });
 
-  const { data: paymentMethods } = useQuery({
+  const { data: paymentMethods, isLoading: paymentMethodsLoading } = useQuery({
     queryKey: ['payment-methods'],
     queryFn: balanceApi.getPaymentMethods,
   });
+
+  const { data: renewalOptions } = useQuery({
+    queryKey: ['renewal-options'],
+    queryFn: () => subscriptionApi.getRenewalOptions(),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const { data: multiSubData } = useQuery<SubscriptionsListResponse>({
+    queryKey: ['subscriptions-list'],
+    queryFn: () => subscriptionApi.getSubscriptions(),
+    staleTime: 60_000,
+  });
+  const isMultiTariff = multiSubData?.multi_tariff_enabled ?? false;
+
+  const { data: subscriptionResponse } = useQuery<SubscriptionStatusResponse>({
+    queryKey: ['subscription'],
+    queryFn: () => subscriptionApi.getSubscription(),
+    retry: false,
+    staleTime: API.BALANCE_STALE_TIME_MS,
+    enabled: !isMultiTariff,
+  });
+
+  const minDaysLeft = (() => {
+    if (isMultiTariff && multiSubData?.subscriptions?.length) {
+      const days = multiSubData.subscriptions
+        .filter((s) => s.end_date)
+        .map((s) => Math.ceil((new Date(s.end_date!).getTime() - Date.now()) / 86_400_000));
+      return days.length ? Math.min(...days) : null;
+    }
+    if (!isMultiTariff && subscriptionResponse?.subscription) {
+      return subscriptionResponse.subscription.days_left;
+    }
+    return null;
+  })();
 
   // Deferred: only fetch saved cards after payment methods loaded to avoid extra request on first render.
   // The recurrent_enabled flag is cached for 5 min to prevent refetching on every Balance visit.
@@ -165,6 +210,21 @@ export default function Balance() {
     }
   };
 
+  // Превью — только первая страница обрезанная до PREVIEW_COUNT; постраничный
+  // режим показывает то, что реально вернул сервер для текущей страницы.
+  const visibleTransactions =
+    showAllTransactions || transactionsPage > 1
+      ? transactions?.items
+      : transactions?.items?.slice(0, PREVIEW_COUNT);
+  const hasMore = !showAllTransactions && (transactions?.items?.length ?? 0) > PREVIEW_COUNT;
+
+  const renewal30 = renewalOptions?.find((opt) => opt.period_days === 30) ?? null;
+  const balanceKopeks = balanceData?.balance_kopeks ?? 0;
+  const canRenew = renewal30 !== null && balanceKopeks >= renewal30.price_kopeks;
+  const missingRubles = renewal30
+    ? Math.max(0, (renewal30.price_kopeks - balanceKopeks) / 100)
+    : null;
+
   return (
     <motion.div
       className="space-y-6"
@@ -189,6 +249,42 @@ export default function Balance() {
           </div>
         </Card>
       </motion.div>
+
+      {/* Renewal Hint */}
+      {renewal30 !== null && minDaysLeft !== null && minDaysLeft < 10 && (
+        <motion.div variants={staggerItem}>
+          {canRenew ? (
+            <div className="rounded-[var(--bento-radius)] border border-success-500/30 bg-success-500/10 px-4 py-3 text-sm text-success-400">
+              {t('balance.renewal.sufficient', 'Хватает для продления на 30 дней')}
+              {renewal30.discount_percent > 0 && (
+                <span className="ml-2 opacity-70">
+                  {t('balance.renewal.discountApplied', '(скидка {{pct}}%)', {
+                    pct: renewal30.discount_percent,
+                  })}
+                </span>
+              )}
+            </div>
+          ) : (
+            <div className="flex items-center gap-3 rounded-[var(--bento-radius)] border border-error-500/30 bg-error-500/10 px-4 py-3 text-sm text-error-400">
+              <span className="min-w-0 flex-1">
+                {t('balance.renewal.insufficient', 'Для продления на 30 дней не хватает')}{' '}
+                <span className="whitespace-nowrap font-semibold">
+                  {formatAmount(missingRubles!, 2)}
+                  {' '}
+                  {currencySymbol}
+                </span>
+              </span>
+              <Button
+                size="sm"
+                className="flex-shrink-0"
+                onClick={() => navigate(`/balance/top-up?amount=${missingRubles!.toFixed(2)}`)}
+              >
+                {t('balance.topUp', 'Пополнить')}
+              </Button>
+            </div>
+          )}
+        </motion.div>
+      )}
 
       {/* Promo Code Section */}
       <motion.div variants={staggerItem}>
@@ -281,184 +377,197 @@ export default function Balance() {
         </Card>
       </motion.div>
 
-      {/* Payment Methods — self-animated: mounts after its query resolves, when
-          the parent stagger orchestration has already finished and would leave
-          it stuck at opacity 0 */}
-      {paymentMethods && paymentMethods.length > 0 && (
-        <motion.div variants={staggerItem} initial="initial" animate="animate">
+      {/* Payment Methods */}
+      {paymentMethodsLoading ? (
+        <motion.div variants={staggerItem}>
           <Card>
-            <h2 className="mb-4 text-lg font-semibold text-dark-100">
-              {t('balance.topUpBalance')}
-            </h2>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {paymentMethods.map((method) => {
-                const methodKey = method.id.toLowerCase().replace(/-/g, '_');
-                const translatedName = t(`balance.paymentMethods.${methodKey}.name`, {
-                  defaultValue: '',
-                });
-                const translatedDesc = t(`balance.paymentMethods.${methodKey}.description`, {
-                  defaultValue: '',
-                });
-
-                return (
-                  <Card
-                    key={method.id}
-                    interactive={method.is_available}
-                    className={!method.is_available ? 'cursor-not-allowed opacity-50' : ''}
-                    onClick={() => method.is_available && navigate(`/balance/top-up/${method.id}`)}
+            <SkeletonGroup>
+              <Skeleton className="mb-4 h-6 w-36" />
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {[1, 2, 3].map((i) => (
+                  <div
+                    key={i}
+                    className="rounded-[var(--bento-radius)] border border-dark-700/30 p-4"
                   >
-                    <div className="font-semibold text-dark-100">
-                      {method.name || translatedName}
-                    </div>
-                    {(method.description || translatedDesc) && (
-                      <div className="mt-1 text-sm text-dark-500">
-                        {method.description || translatedDesc}
-                      </div>
-                    )}
-                    <div className="mt-3 text-xs text-dark-400">
-                      {formatAmount(method.min_amount_kopeks / 100, 0)} {t('common.rangeTo', 'to')}{' '}
-                      {formatAmount(method.max_amount_kopeks / 100, 0)}
-                      {'\u00A0'}
-                      {currencySymbol}
-                    </div>
-                  </Card>
-                );
-              })}
-            </div>
+                    <Skeleton className="mb-2 h-4 w-24" />
+                    <Skeleton className="h-3 w-32" />
+                  </div>
+                ))}
+              </div>
+            </SkeletonGroup>
           </Card>
         </motion.div>
+      ) : (
+        paymentMethods &&
+        paymentMethods.length > 0 && (
+          <motion.div variants={staggerItem}>
+            <Card>
+              <h2 className="mb-4 text-lg font-semibold text-dark-100">
+                {t('balance.topUpBalance')}
+              </h2>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {paymentMethods.map((method) => {
+                  const methodKey = method.id.toLowerCase().replace(/-/g, '_');
+                  const translatedName = t(`balance.paymentMethods.${methodKey}.name`, {
+                    defaultValue: '',
+                  });
+                  const translatedDesc = t(`balance.paymentMethods.${methodKey}.description`, {
+                    defaultValue: '',
+                  });
+
+                  return (
+                    <Card
+                      key={method.id}
+                      interactive={method.is_available}
+                      className={!method.is_available ? 'cursor-not-allowed opacity-50' : ''}
+                      onClick={() =>
+                        method.is_available && navigate(`/balance/top-up/${method.id}`)
+                      }
+                    >
+                      <div className="font-semibold text-dark-100">
+                        {method.name || translatedName}
+                      </div>
+                      {(method.description || translatedDesc) && (
+                        <div className="mt-1 text-sm text-dark-500">
+                          {method.description || translatedDesc}
+                        </div>
+                      )}
+                      <div className="mt-3 text-xs text-dark-600">
+                        {formatAmount(method.min_amount_kopeks / 100, 0)} –{' '}
+                        {formatAmount(method.max_amount_kopeks / 100, 0)}
+                        {' '}
+                        {currencySymbol}
+                      </div>
+                    </Card>
+                  );
+                })}
+              </div>
+            </Card>
+          </motion.div>
+        )
       )}
 
-      {/* Transaction History */}
+      {/* Transaction History — превью первых PREVIEW_COUNT сразу видно, «показать
+          все» переключает в постраничный режим (транзакций может быть сотни). */}
       <motion.div variants={staggerItem}>
         <Card className="overflow-hidden">
-          <button
-            onClick={() => setIsHistoryOpen(!isHistoryOpen)}
-            className="flex w-full items-center justify-between text-left"
-          >
-            <h2 className="text-lg font-semibold text-dark-100">
-              {t('balance.transactionHistory')}
-            </h2>
-            <ChevronDownIcon
-              className={`h-5 w-5 text-dark-400 transition-transform duration-200 ${isHistoryOpen ? 'rotate-180' : ''}`}
-            />
-          </button>
+          <h2 className="mb-4 text-lg font-semibold text-dark-100">
+            {t('balance.transactionHistory')}
+          </h2>
 
-          <AnimatePresence>
-            {isHistoryOpen && (
+          {isLoading ? (
+            <SkeletonGroup className="space-y-3">
+              <Skeleton variant="card" count={3} className="h-16" />
+            </SkeletonGroup>
+          ) : visibleTransactions && visibleTransactions.length > 0 ? (
+            <>
               <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                className="overflow-hidden"
+                className="space-y-3"
+                variants={staggerContainer}
+                initial="initial"
+                animate="animate"
               >
-                <div className="mt-4">
-                  {isLoading ? (
-                    <SkeletonGroup className="space-y-3">
-                      <Skeleton variant="card" count={3} className="h-16" />
-                    </SkeletonGroup>
-                  ) : transactions?.items && transactions.items.length > 0 ? (
+                {visibleTransactions.map((tx) => {
+                  const isZero = tx.amount_rubles === 0;
+                  const isPositive = tx.amount_rubles > 0;
+                  const displayAmount = Math.abs(tx.amount_rubles);
+                  const sign = isZero ? '' : isPositive ? '+' : '-';
+                  const colorClass = isZero
+                    ? 'text-dark-400'
+                    : isPositive
+                      ? 'text-success-400'
+                      : 'text-error-400';
+
+                  return (
                     <motion.div
-                      className="space-y-3"
-                      variants={staggerContainer}
-                      initial="initial"
-                      animate="animate"
+                      key={tx.id}
+                      variants={staggerItem}
+                      className="rounded-linear border border-dark-700/30 bg-dark-800/30 p-4"
                     >
-                      {transactions.items.map((tx) => {
-                        const isZero = tx.amount_rubles === 0;
-                        const isPositive = tx.amount_rubles > 0;
-                        const displayAmount = Math.abs(tx.amount_rubles);
-                        const sign = isZero ? '' : isPositive ? '+' : '-';
-                        const colorClass = isZero
-                          ? 'text-dark-400'
-                          : isPositive
-                            ? 'text-success-400'
-                            : 'text-error-400';
-
-                        return (
-                          <motion.div
-                            key={tx.id}
-                            variants={staggerItem}
-                            className="rounded-linear border border-dark-700/30 bg-dark-800/30 p-4"
-                          >
-                            {/* Сумма — в строке с типом и датой и держит свою ширину;
-                                описание — под ними во всю ширину. Рядом с суммой
-                                описание сжималось в узкий столбик, а без запрета
-                                сжатия сумму уводило за край карточки, и карточка
-                                её обрезала. */}
-                            <div className="flex items-start justify-between gap-3">
-                              <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
-                                <span className={transactionTypeBadge(tx.type)}>
-                                  {t(transactionTypeLabelKey(tx.type))}
-                                </span>
-                                <span className="text-xs text-dark-500">
-                                  {new Date(tx.created_at).toLocaleDateString(uiLocale())}
-                                </span>
-                              </div>
-                              <div
-                                className={`shrink-0 whitespace-nowrap text-lg font-semibold ${colorClass}`}
-                              >
-                                {sign}
-                                {formatAmount(displayAmount)}
-                                {'\u00A0'}
-                                {currencySymbol}
-                              </div>
-                            </div>
-                            {/* Почта, ник, номер счёта — без пробелов, переносятся где угодно. */}
-                            {tx.description && (
-                              <div className="mt-2 text-sm text-dark-400 [overflow-wrap:anywhere]">
-                                {tx.description}
-                              </div>
-                            )}
-                          </motion.div>
-                        );
-                      })}
+                      {/* Сумма — в строке с типом и датой и держит свою ширину;
+                          описание — под ними во всю ширину. Рядом с суммой
+                          описание сжималось в узкий столбик, а без запрета
+                          сжатия сумму уводило за край карточки, и карточка
+                          её обрезала. */}
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
+                          <span className={transactionTypeBadge(tx.type)}>
+                            {t(transactionTypeLabelKey(tx.type))}
+                          </span>
+                          <span className="text-xs text-dark-500">
+                            {new Date(tx.created_at).toLocaleDateString(uiLocale())}
+                          </span>
+                        </div>
+                        <div
+                          className={`shrink-0 whitespace-nowrap text-lg font-semibold ${colorClass}`}
+                        >
+                          {sign}
+                          {formatAmount(displayAmount)}
+                          {' '}
+                          {currencySymbol}
+                        </div>
+                      </div>
+                      {/* Почта, ник, номер счёта — без пробелов, переносятся где угодно. */}
+                      {tx.description && (
+                        <div className="mt-2 text-sm text-dark-400 [overflow-wrap:anywhere]">
+                          {tx.description}
+                        </div>
+                      )}
                     </motion.div>
-                  ) : (
-                    <div className="py-12 text-center">
-                      <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-linear-lg bg-dark-800">
-                        <WalletIcon className="h-8 w-8 text-dark-500" />
-                      </div>
-                      <div className="text-dark-400">{t('balance.noTransactions')}</div>
-                    </div>
-                  )}
-
-                  {transactions && transactions.pages > 1 && (
-                    // Три колонки: «Далее» не уезжает отдельной строкой на всю ширину.
-                    <div className="mt-4 grid grid-cols-[1fr_auto_1fr] items-center gap-3 text-sm text-dark-500">
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={() => setTransactionsPage((prev) => Math.max(1, prev - 1))}
-                        disabled={transactions.page <= 1}
-                      >
-                        {t('common.back')}
-                      </Button>
-                      <div className="whitespace-nowrap text-center">
-                        {t('balance.page', {
-                          current: transactions.page,
-                          total: transactions.pages,
-                        })}
-                      </div>
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={() =>
-                          setTransactionsPage((prev) =>
-                            transactions.pages ? Math.min(transactions.pages, prev + 1) : prev + 1,
-                          )
-                        }
-                        disabled={transactions.page >= transactions.pages}
-                      >
-                        {t('common.next')}
-                      </Button>
-                    </div>
-                  )}
-                </div>
+                  );
+                })}
               </motion.div>
-            )}
-          </AnimatePresence>
+
+              {hasMore && (
+                <button
+                  onClick={() => setShowAllTransactions(true)}
+                  className="mt-4 flex w-full items-center justify-center gap-1.5 rounded-linear border border-dark-700/30 py-2.5 text-sm font-medium text-dark-300 transition-colors hover:bg-dark-800/50 hover:text-dark-100"
+                >
+                  {t('balance.showAll', 'Показать все')}
+                  <ChevronDownIcon className="h-4 w-4" />
+                </button>
+              )}
+
+              {showAllTransactions && transactions && transactions.pages > 1 && (
+                // Три колонки: «Далее» не уезжает отдельной строкой на всю ширину.
+                <div className="mt-4 grid grid-cols-[1fr_auto_1fr] items-center gap-3 text-sm text-dark-500">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => setTransactionsPage((prev) => Math.max(1, prev - 1))}
+                    disabled={transactions.page <= 1}
+                  >
+                    {t('common.back')}
+                  </Button>
+                  <div className="whitespace-nowrap text-center">
+                    {t('balance.page', {
+                      current: transactions.page,
+                      total: transactions.pages,
+                    })}
+                  </div>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() =>
+                      setTransactionsPage((prev) =>
+                        transactions.pages ? Math.min(transactions.pages, prev + 1) : prev + 1,
+                      )
+                    }
+                    disabled={transactions.page >= transactions.pages}
+                  >
+                    {t('common.next')}
+                  </Button>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="py-12 text-center">
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-linear-lg bg-dark-800">
+                <WalletIcon className="h-8 w-8 text-dark-500" />
+              </div>
+              <div className="text-dark-400">{t('balance.noTransactions')}</div>
+            </div>
+          )}
         </Card>
       </motion.div>
 
