@@ -6749,6 +6749,19 @@
       "showMore_other": "Show {{count}} more nodes",
       "showMore": "Show more"
     },
+    "locations": {
+      "title": "Locations",
+      "hint": "Active in the last 5 minutes, each device counted at its latest location. A person with devices on different locations is counted at each.",
+      "via": "via {{name}} — {{count}}",
+      "noData": "no data",
+      "fromPanel": "from panel data",
+      "hide": "Hide ({{count}})",
+      "showMore_one": "Show {{count}} more location",
+      "showMore_other": "Show {{count}} more locations",
+      "showMore": "Show more",
+      "loadError": "Failed to load locations",
+      "empty": "No locations"
+    },
     "topReferrers": {
       "title": "Top referrers",
       "stats": "ref., {{count}} invites",

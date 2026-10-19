@@ -6413,6 +6413,18 @@
       "showMore_other": "显示更多 {{count}} 个节点",
       "showMore": "显示更多"
     },
+    "locations": {
+      "title": "位置",
+      "hint": "最近 5 分钟内活跃，每台设备按其最近所在位置计数。在不同位置拥有设备的用户会在每个位置分别计数。",
+      "via": "经由 {{name}} — {{count}}",
+      "noData": "无数据",
+      "fromPanel": "来自面板数据",
+      "hide": "隐藏 ({{count}})",
+      "showMore_other": "显示更多 {{count}} 个位置",
+      "showMore": "显示更多",
+      "loadError": "加载位置失败",
+      "empty": "暂无位置"
+    },
     "revenue": {
       "title": "收入",
       "last7Days": "最近7天"

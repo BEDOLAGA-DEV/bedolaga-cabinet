@@ -4,7 +4,8 @@ import { backTo } from '@/components/admin';
 import { useTranslation } from 'react-i18next';
 import { METHOD_LABELS } from '../constants/paymentMethods';
 import { useQuery } from '@tanstack/react-query';
-import { statsApi, type NodeStatus } from '../api/admin';
+import { isAxiosError } from 'axios';
+import { statsApi, type LocationCard, type NodeStatus } from '../api/admin';
 import { formatUptime, parseCalendarDate } from '../utils/format';
 
 const CABINET_VERSION = __APP_VERSION__;
@@ -24,6 +25,7 @@ import {
   ClockIcon,
   CreditCardIcon,
   ExclamationIcon,
+  GlobeIcon,
   MegaphoneIcon,
   PowerIcon,
   RefreshIcon,
@@ -37,6 +39,54 @@ import {
   WalletIcon,
   XCircleIcon,
 } from '@/components/icons';
+
+function isNotFound(error: unknown): boolean {
+  return isAxiosError(error) && error.response?.status === 404;
+}
+
+interface LocationCardViewProps {
+  location: LocationCard;
+}
+
+function LocationCardView({ location }: LocationCardViewProps) {
+  const { t } = useTranslation();
+  return (
+    <div className="rounded-xl border border-dark-700 bg-dark-800/50 p-4">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <div className="truncate font-medium text-dark-100">{location.title}</div>
+          {location.node_name && (
+            <div className="truncate text-xs text-dark-500">{location.node_name}</div>
+          )}
+        </div>
+        <div className="shrink-0 text-right">
+          {location.users === null ? (
+            <>
+              <div aria-hidden="true" className="text-2xl font-bold text-dark-500">
+                —
+              </div>
+              <div className="text-xs text-dark-500">{t('adminDashboard.locations.noData')}</div>
+            </>
+          ) : (
+            <div className="text-2xl font-bold text-dark-100">{location.users}</div>
+          )}
+          {location.source === 'panel' && (
+            <div className="text-xs text-dark-500">{t('adminDashboard.locations.fromPanel')}</div>
+          )}
+        </div>
+      </div>
+      {location.exits.length > 0 && (
+        <div className="mt-2 space-y-0.5 text-xs text-dark-400">
+          {location.exits.map((exit) => (
+            <div key={exit.name}>
+              {t('adminDashboard.locations.via', { name: exit.name, count: exit.users })}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 interface NodeCardProps {
   node: NodeStatus;
@@ -211,6 +261,7 @@ export default function AdminDashboard() {
 
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [showAllNodes, setShowAllNodes] = useState(false);
+  const [showAllLocations, setShowAllLocations] = useState(false);
   const [referrersTab, setReferrersTab] = useState<'earnings' | 'invited'>('earnings');
 
   // Data fetching via React Query: caching, dedupe, and auto-refetch every 30s
@@ -223,6 +274,21 @@ export default function AdminDashboard() {
   const stats = statsQuery.data ?? null;
   const loading = statsQuery.isLoading;
   const error = statsQuery.isError ? t('adminDashboard.loadError') : null;
+
+  // The Locations block needs node counters (bot setting LOCATION_COUNTER_TOKEN). When they are
+  // not configured the backend answers enabled: false, and an older backend has no endpoint at all
+  // (404) — in both cases the block stays hidden and is not polled.
+  const locationsQuery = useQuery({
+    queryKey: ['admin-dashboard-locations'] as const,
+    queryFn: () => statsApi.getLocations(),
+    refetchInterval: (query) =>
+      query.state.data?.enabled === false || isNotFound(query.state.error) ? false : 30_000,
+    retry: (failureCount, err) => !isNotFound(err) && failureCount < 3,
+  });
+  const locations = locationsQuery.data?.locations ?? null;
+  const showLocations = locationsQuery.isError
+    ? !isNotFound(locationsQuery.error)
+    : locationsQuery.data !== undefined && locationsQuery.data.enabled !== false;
 
   const extendedQuery = useQuery({
     queryKey: ['admin-dashboard-extended'] as const,
@@ -312,7 +378,10 @@ export default function AdminDashboard() {
           </div>
         </div>
         <button
-          onClick={() => statsQuery.refetch()}
+          onClick={() => {
+            statsQuery.refetch();
+            locationsQuery.refetch();
+          }}
           disabled={loading}
           className="flex items-center gap-2 rounded-lg bg-dark-800 px-4 py-2 text-dark-300 transition-colors hover:bg-dark-700 hover:text-dark-100 disabled:opacity-50"
         >
@@ -416,6 +485,59 @@ export default function AdminDashboard() {
           <div className="py-8 text-center text-dark-500">{t('adminDashboard.nodes.noNodes')}</div>
         )}
       </div>
+
+      {/* Locations Section */}
+      {showLocations && (
+        <div className="rounded-xl border border-dark-700 bg-dark-800/30 p-5">
+          <div className="mb-4 flex items-center gap-3">
+            <div className="rounded-lg bg-accent-500/20 p-2.5 text-accent-400">
+              <GlobeIcon />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-dark-100">
+                {t('adminDashboard.locations.title')}
+              </h2>
+              <p className="text-sm text-dark-400">{t('adminDashboard.locations.hint')}</p>
+            </div>
+          </div>
+
+          {locationsQuery.isError ? (
+            <div className="py-8 text-center text-dark-500">
+              {t('adminDashboard.locations.loadError')}
+            </div>
+          ) : locations && locations.length > 0 ? (
+            <>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {(showAllLocations ? locations : locations.slice(0, 3)).map((location) => (
+                  <LocationCardView
+                    key={`${location.node_name}:${location.inbound_tag}:${location.title}`}
+                    location={location}
+                  />
+                ))}
+              </div>
+              {locations.length > 3 && (
+                <button
+                  onClick={() => setShowAllLocations(!showAllLocations)}
+                  className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg bg-dark-700/50 px-4 py-3 text-dark-300 transition-colors hover:bg-dark-700 hover:text-dark-100"
+                >
+                  <span
+                    className={`transform transition-transform ${showAllLocations ? 'rotate-180' : ''}`}
+                  >
+                    <ChevronDownIcon />
+                  </span>
+                  {showAllLocations
+                    ? t('adminDashboard.locations.hide', { count: locations.length - 3 })
+                    : t('adminDashboard.locations.showMore', { count: locations.length - 3 })}
+                </button>
+              )}
+            </>
+          ) : (
+            <div className="py-8 text-center text-dark-500">
+              {t('adminDashboard.locations.empty')}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Revenue and Subscriptions */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
