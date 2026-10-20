@@ -1,4 +1,5 @@
 import { expect, it } from 'vitest';
+import { combinePromoDiscount } from '@/hooks/usePromoDiscount';
 import type { Tariff } from '@/types';
 import { customDaysPrice, deviceBillingMonths } from './customDaysPrice';
 
@@ -36,4 +37,49 @@ it('unlimited devices have no extra-device charge', () => {
       75,
     ),
   ).toEqual({ price: 750 });
+});
+
+it.each([
+  [45, false, 1403, undefined],
+  [75, false, 686, 779],
+  [75, true, 585, 779],
+  [105, true, 1333, undefined],
+])('matches exact group rates for %i days (default=%s)', (days, defaultGroup, price, original) => {
+  const tariff = {
+    price_per_day_kopeks: 4,
+    device_price_kopeks: 71,
+    base_device_limit: 1,
+    extra_devices_count: 2,
+    custom_days_pricing: {
+      price_per_day_kopeks: 5,
+      device_price_kopeks: 101,
+      period_prices: { '45': 999 },
+      default_device_discount_percent: 0,
+      discounts_by_days: {
+        '30': { period: 30, devices: defaultGroup ? 30 : 0 },
+        '75': { period: 25, devices: defaultGroup ? 25 : 0 },
+      },
+    },
+  } as unknown as Tariff;
+  const quote = customDaysPrice(tariff, days);
+  expect(quote).toEqual({ price, ...(original ? { original } : {}) });
+  expect(combinePromoDiscount(quote.price, quote.original, 17).price).toBe(
+    price - Math.floor((price * 17) / 100),
+  );
+  expect(combinePromoDiscount(quote.price, quote.original, 100).price).toBe(0);
+});
+
+it('matches the engine custom-day fallback for a zero configured period', () => {
+  const tariff = {
+    base_device_limit: 1,
+    extra_devices_count: 2,
+    custom_days_pricing: {
+      price_per_day_kopeks: 5,
+      device_price_kopeks: 101,
+      period_prices: { '45': 0 },
+      default_device_discount_percent: 0,
+      discounts_by_days: {},
+    },
+  } as unknown as Tariff;
+  expect(customDaysPrice(tariff, 45)).toEqual({ price: 629 });
 });

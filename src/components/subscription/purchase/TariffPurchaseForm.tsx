@@ -63,6 +63,8 @@ export function TariffPurchaseForm({
   const { applyPromoDiscount } = usePromoDiscount();
   // Та же котировка, что на карточке тарифа: серверная цена + промокод один раз.
   const dailyQuote = dailyPriceQuote(tariff, applyPromoDiscount);
+  const customDayUnitPrice =
+    tariff.custom_days_pricing?.price_per_day_kopeks ?? tariff.price_per_day_kopeks ?? 0;
   const { openLink, platform } = usePlatform();
   const ref = useRef<HTMLDivElement>(null);
 
@@ -458,7 +460,7 @@ export function TariffPurchaseForm({
             {/* No periods available fallback */}
             {tariff.periods.length === 0 &&
               !useCustomDays &&
-              !(tariff.custom_days_enabled && (tariff.price_per_day_kopeks ?? 0) > 0) && (
+              !(tariff.custom_days_enabled && customDayUnitPrice > 0) && (
                 <div className="rounded-xl border border-warning-500/30 bg-warning-500/10 p-4 text-center">
                   <div className="mb-2 text-sm font-medium text-warning-400">
                     {t('subscription.noPeriodsAvailable')}
@@ -473,7 +475,7 @@ export function TariffPurchaseForm({
               )}
 
             {/* Custom days option */}
-            {tariff.custom_days_enabled && (tariff.price_per_day_kopeks ?? 0) > 0 && (
+            {tariff.custom_days_enabled && customDayUnitPrice > 0 && (
               <div className="rounded-xl border border-dark-700/50 bg-dark-800/50 p-4">
                 <div className="mb-3 flex items-center justify-between">
                   <span className="font-medium text-dark-200">
@@ -538,7 +540,7 @@ export function TariffPurchaseForm({
                           <span className="text-dark-400">
                             {t('subscription.days', { count: customDays })} ×{' '}
                             <span className="whitespace-nowrap">
-                              {formatPrice(tariff.price_per_day_kopeks ?? 0)}
+                              {formatPrice(customDayUnitPrice)}
                               {t('subscription.customDays.perDay')}
                             </span>
                             {tariff.extra_devices_count > 0 && (

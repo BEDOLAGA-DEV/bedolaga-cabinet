@@ -336,6 +336,13 @@ export interface Tariff {
   daily_discount_percent?: number;
   original_price_per_day_kopeks?: number;
   custom_days_discount_percent?: number;
+  custom_days_pricing?: {
+    price_per_day_kopeks: number;
+    device_price_kopeks: number;
+    period_prices: Record<string, number>;
+    default_device_discount_percent: number;
+    discounts_by_days: Record<string, { period: number; devices: number }>;
+  };
   // Traffic reset
   traffic_reset_mode?: string;
   // Multi-tariff: already purchased by user
