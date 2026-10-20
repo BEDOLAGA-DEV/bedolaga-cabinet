@@ -128,6 +128,7 @@ export default function Balance() {
         queryClient.invalidateQueries({ queryKey: ['transactions'] });
         queryClient.invalidateQueries({ queryKey: ['purchase-options'] });
         queryClient.invalidateQueries({ queryKey: ['subscriptions-list'] });
+        queryClient.invalidateQueries({ queryKey: ['subscription'] });
       }
     } catch (error: unknown) {
       // Backend returns a structured error: detail = { code, message }. We map
