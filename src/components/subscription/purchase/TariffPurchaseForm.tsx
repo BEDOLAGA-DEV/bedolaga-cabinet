@@ -117,7 +117,8 @@ export function TariffPurchaseForm({
   // СБП-оформление: первое списание = подтверждение привязки в банке; период
   // на форме не участвует — списания идут по каденс-правилу тарифа.
   const sbpPurchaseMutation = useMutation({
-    mutationFn: () => subscriptionApi.purchaseWithSbpRecurring(tariff.id),
+    mutationFn: () =>
+      subscriptionApi.purchaseWithSbpRecurring(tariff.id, subscriptionId ?? undefined),
     onSuccess: (data) => {
       if (data.redirect_url) {
         openPaymentUrl(data.redirect_url, platform, openLink);
@@ -158,7 +159,8 @@ export function TariffPurchaseForm({
   );
 
   const lavaPurchaseMutation = useMutation({
-    mutationFn: () => subscriptionApi.purchaseWithLavaRecurring(tariff.id),
+    mutationFn: () =>
+      subscriptionApi.purchaseWithLavaRecurring(tariff.id, subscriptionId ?? undefined),
     onSuccess: (data) => {
       if (data.redirect_url) {
         openPaymentUrl(data.redirect_url, platform, openLink);
@@ -199,7 +201,8 @@ export function TariffPurchaseForm({
   );
 
   const casheraPurchaseMutation = useMutation({
-    mutationFn: () => subscriptionApi.purchaseWithCasheraRecurring(tariff.id),
+    mutationFn: () =>
+      subscriptionApi.purchaseWithCasheraRecurring(tariff.id, subscriptionId ?? undefined),
     onSuccess: (data) => {
       if (data.redirect_url) {
         openPaymentUrl(data.redirect_url, platform, openLink);
