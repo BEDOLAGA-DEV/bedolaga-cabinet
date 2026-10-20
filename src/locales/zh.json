@@ -528,7 +528,8 @@
       "description": "新链接，设备重置",
       "warning": "此操作将生成新的连接链接，重置所有已连接设备，并使旧链接失效。继续？",
       "confirmBtn": "重新签发",
-      "cooldown": "{{minutes}}分{{seconds}}秒后可用"
+      "cooldown": "{{minutes}}分{{seconds}}秒后可用",
+      "partialWarning": "新链接已准备就绪，但未能重置所有设备。请检查设备列表。"
     },
     "legacy": {
       "noTariff": "无套餐",

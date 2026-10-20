@@ -690,7 +690,8 @@
       "description": "New link, device reset",
       "warning": "This will generate a new connection link, reset all connected devices, and invalidate the old link. Continue?",
       "confirmBtn": "Reissue",
-      "cooldown": "Available in {{minutes}} min {{seconds}} sec"
+      "cooldown": "Available in {{minutes}} min {{seconds}} sec",
+      "partialWarning": "Your new link is ready, but not all devices could be reset. Check the device list."
     },
     "legacy": {
       "noTariff": "No plan",

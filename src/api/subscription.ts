@@ -715,7 +715,13 @@ export const subscriptionApi = {
 
   // ── Revoke (reissue) ────────────────────────────────────────────────
 
-  revokeSubscription: async (subscriptionId?: number) => {
+  revokeSubscription: async (
+    subscriptionId?: number,
+  ): Promise<{
+    success: boolean;
+    devices_reset?: boolean;
+    cooldown_seconds: number;
+  }> => {
     const response = await apiClient.post(
       '/cabinet/subscription/revoke',
       undefined,

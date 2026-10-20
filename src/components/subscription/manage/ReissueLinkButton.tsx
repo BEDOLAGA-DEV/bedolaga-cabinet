@@ -13,6 +13,13 @@ import { getErrorMessage } from '@/utils/subscriptionHelpers';
 /** Пауза между перевыпусками, секунды. Ограничение панели, не наше. */
 const REVOKE_COOLDOWN_SECONDS = 900;
 
+function readRevokeCooldown(storageKey: string): number {
+  const last = Number(safeLocal.getItem(storageKey) || '0');
+  if (!last) return 0;
+  const passed = Math.floor((Date.now() - last) / 1000);
+  return Math.max(0, REVOKE_COOLDOWN_SECONDS - passed);
+}
+
 /**
  * Есть ли что перевыпускать.
  *
@@ -47,14 +54,14 @@ export function ReissueLinkButton({ subscription, subscriptionId }: ReissueLinkB
   const queryClient = useQueryClient();
   const haptic = useHaptic();
   const destructiveConfirm = useDestructiveConfirm();
+  const [failedResetStorageKey, setFailedResetStorageKey] = useState<string | null>(null);
   const storageKey = `revoke_ts_${subscriptionId ?? 'default'}`;
 
-  const [cooldown, setCooldown] = useState(() => {
-    const last = Number(safeLocal.getItem(storageKey) || '0');
-    if (!last) return 0;
-    const passed = Math.floor((Date.now() - last) / 1000);
-    return Math.max(0, REVOKE_COOLDOWN_SECONDS - passed);
-  });
+  const [cooldown, setCooldown] = useState(() => readRevokeCooldown(storageKey));
+
+  useEffect(() => {
+    setCooldown(readRevokeCooldown(storageKey));
+  }, [storageKey]);
 
   useEffect(() => {
     if (cooldown <= 0) return;
@@ -63,17 +70,20 @@ export function ReissueLinkButton({ subscription, subscriptionId }: ReissueLinkB
   }, [cooldown]);
 
   const revokeMutation = useMutation({
-    mutationFn: () => subscriptionApi.revokeSubscription(subscriptionId),
-    onSuccess: () => {
+    mutationFn: (targetSubscriptionId: number | undefined) =>
+      subscriptionApi.revokeSubscription(targetSubscriptionId),
+    onSuccess: (result, targetSubscriptionId) => {
+      const targetStorageKey = `revoke_ts_${targetSubscriptionId ?? 'default'}`;
+      setFailedResetStorageKey(result.devices_reset === false ? targetStorageKey : null);
       queryClient.invalidateQueries({ queryKey: ['subscription'] });
-      queryClient.invalidateQueries({ queryKey: ['connection-link', subscriptionId] });
+      queryClient.invalidateQueries({ queryKey: ['connectionLink', targetSubscriptionId] });
+      queryClient.invalidateQueries({ queryKey: ['appConfig', targetSubscriptionId] });
       queryClient.invalidateQueries({ queryKey: ['subscriptions-list'] });
-      // Remnawave resets device HWIDs on revoke — make sure the cabinet
-      // re-reads the now-empty device list instead of showing the stale cache.
-      queryClient.invalidateQueries({ queryKey: ['devices', subscriptionId] });
-      haptic.notification('success');
-      safeLocal.setItem(storageKey, Date.now().toString());
-      setCooldown(REVOKE_COOLDOWN_SECONDS);
+      // Re-read the actual HWID state even when deletion only partially succeeded.
+      queryClient.invalidateQueries({ queryKey: ['devices', targetSubscriptionId] });
+      haptic.notification(result.devices_reset === false ? 'warning' : 'success');
+      safeLocal.setItem(targetStorageKey, Date.now().toString());
+      if (targetSubscriptionId === subscriptionId) setCooldown(REVOKE_COOLDOWN_SECONDS);
     },
     onError: () => {
       haptic.notification('error');
@@ -87,7 +97,7 @@ export function ReissueLinkButton({ subscription, subscriptionId }: ReissueLinkB
       t('subscription.revoke.title'),
     );
     if (!confirmed) return;
-    revokeMutation.mutate();
+    revokeMutation.mutate(subscriptionId);
   };
 
   if (!canReissueLink(subscription)) return null;
@@ -121,6 +131,11 @@ export function ReissueLinkButton({ subscription, subscriptionId }: ReissueLinkB
           </div>
         </div>
       </button>
+      {failedResetStorageKey === storageKey && (
+        <p role="status" className="mt-2 text-sm text-warning-400">
+          {t('subscription.revoke.partialWarning')}
+        </p>
+      )}
       {revokeMutation.error && (
         <p className="mt-2 text-sm text-error-400">{getErrorMessage(revokeMutation.error)}</p>
       )}
