@@ -7,6 +7,7 @@ import { getErrorMessage, getInsufficientBalanceError } from '../../../utils/sub
 import { useCurrency } from '../../../hooks/useCurrency';
 import { usePromoDiscount } from '../../../hooks/usePromoDiscount';
 import { dailyPriceQuote } from './dailyPrice';
+import { customDaysPrice } from './customDaysPrice';
 import { usePlatform } from '../../../platform';
 import { openPaymentUrl } from '../../../utils/openPaymentUrl';
 import { getMonthlyPriceKopeks } from '../../../utils/pricing';
@@ -523,12 +524,10 @@ export function TariffPurchaseForm({
                       />
                     </div>
                     {(() => {
-                      const basePrice = customDays * (tariff.price_per_day_kopeks ?? 0);
-                      const existingOriginal =
-                        tariff.original_price_per_day_kopeks &&
-                        tariff.original_price_per_day_kopeks > (tariff.price_per_day_kopeks ?? 0)
-                          ? customDays * tariff.original_price_per_day_kopeks
-                          : undefined;
+                      const { price: basePrice, original: existingOriginal } = customDaysPrice(
+                        tariff,
+                        customDays,
+                      );
                       const promoCustom = applyPromoDiscount(basePrice, existingOriginal);
                       return (
                         <div className="flex flex-wrap justify-between gap-x-3 text-sm">
@@ -539,6 +538,11 @@ export function TariffPurchaseForm({
                               {formatPrice(tariff.price_per_day_kopeks ?? 0)}
                               {t('subscription.customDays.perDay')}
                             </span>
+                            {tariff.extra_devices_count > 0 && (
+                              <span className="block">
+                                + {t('subscription.extraDevices')} ({tariff.extra_devices_count})
+                              </span>
+                            )}
                           </span>
                           <div className="flex items-center gap-2 whitespace-nowrap">
                             <span className="font-medium text-accent-400">
@@ -662,14 +666,12 @@ export function TariffPurchaseForm({
           {(selectedTariffPeriod || useCustomDays) && (
             <div className="rounded-xl bg-dark-800/50 p-5">
               {(() => {
+                const customQuote = customDaysPrice(tariff, customDays);
                 const basePeriodPrice = useCustomDays
-                  ? customDays * (tariff.price_per_day_kopeks ?? 0)
+                  ? customQuote.price
                   : selectedTariffPeriod?.price_kopeks || 0;
                 const existingPeriodOriginal = useCustomDays
-                  ? tariff.original_price_per_day_kopeks &&
-                    tariff.original_price_per_day_kopeks > (tariff.price_per_day_kopeks ?? 0)
-                    ? customDays * tariff.original_price_per_day_kopeks
-                    : undefined
+                  ? customQuote.original
                   : selectedTariffPeriod?.original_price_kopeks &&
                       selectedTariffPeriod.original_price_kopeks > selectedTariffPeriod.price_kopeks
                     ? selectedTariffPeriod.original_price_kopeks
