@@ -137,11 +137,13 @@ export default function RenewSubscription() {
         </div>
       </div>
 
-      {subscription?.is_active && !subscription.is_trial && !subscription.is_daily && (
-        <Link className="btn-secondary block w-full text-center" to={tariffSelectionPath(subId)}>
-          {t('subscription.switchTariff.title')}
-        </Link>
-      )}
+      {(subscription?.is_active || subscription?.is_limited) &&
+        !subscription.is_trial &&
+        !subscription.is_daily && (
+          <Link className="btn-secondary block w-full text-center" to={tariffSelectionPath(subId)}>
+            {t('subscription.switchTariff.title')}
+          </Link>
+        )}
 
       {/* Balance */}
       <div
