@@ -1,0 +1,63 @@
+// @vitest-environment jsdom
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { MemoryRouter, Route, Routes, useSearchParams } from 'react-router';
+import { afterEach, expect, it, vi } from 'vitest';
+import { PlatformProvider } from '@/platform/PlatformProvider';
+import RenewSubscription from './RenewSubscription';
+
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'ru' } }),
+  initReactI18next: { type: '3rdParty', init: () => {} },
+}));
+vi.mock('../hooks/useCurrency', () => ({
+  useCurrency: () => ({ formatAmount: String, currencySymbol: 'RUB' }),
+}));
+vi.mock('../hooks/useTheme', () => ({ useTheme: () => ({ isDark: true }) }));
+vi.mock('../api/subscription', () => ({
+  subscriptionApi: {
+    getSubscription: async (id: number) => ({
+      subscription: {
+        id,
+        tariff_id: 1,
+        tariff_name: 'Current',
+        is_active: true,
+        is_trial: false,
+        is_daily: false,
+      },
+    }),
+    getRenewalOptions: async () => [
+      { period_days: 30, price_kopeks: 1000, price_rubles: 10, discount_percent: 0 },
+    ],
+    getPurchaseOptions: async () => ({ balance_kopeks: 10000 }),
+  },
+}));
+
+afterEach(cleanup);
+function Catalog() {
+  const [params] = useSearchParams();
+  return <output>Catalog for {params.get('subscriptionId')}</output>;
+}
+it.each([11, 12])(
+  'opens the existing tariff catalog for the subscription being renewed (%s)',
+  async (id) => {
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <QueryClientProvider client={client}>
+        <PlatformProvider>
+          <MemoryRouter initialEntries={[`/subscriptions/${id}/renew`]}>
+            <Routes>
+              <Route path="/subscriptions/:subscriptionId/renew" element={<RenewSubscription />} />
+              <Route path="/subscription/purchase" element={<Catalog />} />
+            </Routes>
+          </MemoryRouter>
+        </PlatformProvider>
+      </QueryClientProvider>,
+    );
+    const link = await screen.findByRole('link', { name: 'subscription.switchTariff.title' });
+    expect(link.getAttribute('href')).toBe(`/subscription/purchase?subscriptionId=${id}`);
+    fireEvent.click(link);
+    expect(await screen.findByText(`Catalog for ${id}`)).toBeTruthy();
+    client.clear();
+  },
+);
