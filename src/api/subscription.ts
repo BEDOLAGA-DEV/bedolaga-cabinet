@@ -547,6 +547,7 @@ export const subscriptionApi = {
      * this is a fresh purchase from the catalog.
      */
     subscriptionId?: number,
+    checkoutId?: string,
   ): Promise<{
     success: boolean;
     message: string;
@@ -561,6 +562,7 @@ export const subscriptionApi = {
       period_days: periodDays,
       traffic_gb: trafficGb,
       subscription_id: subscriptionId,
+      checkout_id: checkoutId,
       yandex_cid: getYandexCid() || undefined,
     });
     return response.data;

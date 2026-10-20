@@ -67,6 +67,7 @@ export function TariffPurchaseForm({
     tariff.custom_days_pricing?.price_per_day_kopeks ?? tariff.price_per_day_kopeks ?? 0;
   const { openLink, platform } = usePlatform();
   const ref = useRef<HTMLDivElement>(null);
+  const checkoutAttempt = useRef<{ signature: string; id: string } | null>(null);
 
   const formatPrice = (kopeks: number) =>
     kopeks === 0
@@ -101,11 +102,25 @@ export function TariffPurchaseForm({
       // uses it to resolve the exact target row by ID, avoiding the
       // race with concurrent panel webhooks that would otherwise hit
       // the partial UNIQUE on uq_subscriptions_user_tariff_active.
+      if (isDailyTariff) {
+        return subscriptionApi.purchaseTariff(tariff.id, days, trafficGb, subscriptionId);
+      }
+      const signature = JSON.stringify([tariff.id, days, trafficGb, subscriptionId]);
+      if (checkoutAttempt.current?.signature !== signature) {
+        // A retry keeps its identity even if the balance or quote was refreshed.
+        const bytes = crypto.getRandomValues(new Uint8Array(16));
+        bytes[6] = (bytes[6] & 0x0f) | 0x40;
+        bytes[8] = (bytes[8] & 0x3f) | 0x80;
+        const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
+        const id = `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+        checkoutAttempt.current = { signature, id };
+      }
       return subscriptionApi.purchaseTariff(
         tariff.id,
         days,
         trafficGb,
-        subscriptionId ?? undefined,
+        subscriptionId,
+        checkoutAttempt.current.id,
       );
     },
     onSuccess: () => {

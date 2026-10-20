@@ -31,7 +31,7 @@ const purchase = vi.hoisted(() => vi.fn().mockResolvedValue({ success: true }));
 vi.mock('@/api/subscription', () => ({ subscriptionApi: { purchaseTariff: purchase } }));
 afterEach(() => {
   cleanup();
-  purchase.mockClear();
+  purchase.mockReset().mockResolvedValue({ success: true });
 });
 
 it.each(['legacy', 'exact75', 'free30'])(
@@ -94,8 +94,25 @@ it.each(['legacy', 'exact75', 'free30'])(
     const button = screen.getByRole('button', {
       name: /subscription\.purchase|subscription\.buy|subscription\.confirm/,
     });
+    purchase.mockRejectedValue(new Error('Connection lost'));
     fireEvent.click(button);
-    await waitFor(() => expect(purchase).toHaveBeenCalledWith(1, 75, undefined, 10));
+    await waitFor(() =>
+      expect(purchase).toHaveBeenCalledWith(1, 75, undefined, 10, expect.any(String)),
+    );
+    const checkout = purchase.mock.calls[0][4];
+    expect(checkout).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/,
+    );
+    await waitFor(() => expect(button.hasAttribute('disabled')).toBe(false));
+    fireEvent.click(button);
+    await waitFor(() => expect(purchase).toHaveBeenCalledTimes(2));
+    expect(purchase.mock.calls[1][4]).toBe(checkout);
+    await waitFor(() => expect(button.hasAttribute('disabled')).toBe(false));
+    fireEvent.change(screen.getByRole('spinbutton'), { target: { value: '76' } });
+    fireEvent.click(button);
+    await waitFor(() => expect(purchase).toHaveBeenCalledTimes(3));
+    expect(purchase.mock.calls[2][1]).toBe(76);
+    expect(purchase.mock.calls[2][4]).not.toBe(checkout);
   },
 );
 
