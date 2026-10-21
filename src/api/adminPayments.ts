@@ -70,17 +70,28 @@ export const adminPaymentsApi = {
   },
 
   // Get specific payment details
-  getPayment: async (method: string, paymentId: number): Promise<PendingPayment> => {
+  getPayment: async (
+    method: string,
+    paymentId: number,
+    source: 'provider' | 'landing' = 'provider',
+  ): Promise<PendingPayment> => {
     const response = await apiClient.get<PendingPayment>(
       `/cabinet/admin/payments/${method}/${paymentId}`,
+      { params: { source } },
     );
     return response.data;
   },
 
   // Manually check payment status
-  checkPaymentStatus: async (method: string, paymentId: number): Promise<ManualCheckResponse> => {
+  checkPaymentStatus: async (
+    method: string,
+    paymentId: number,
+    source: 'provider' | 'landing' = 'provider',
+  ): Promise<ManualCheckResponse> => {
     const response = await apiClient.post<ManualCheckResponse>(
       `/cabinet/admin/payments/${method}/${paymentId}/check`,
+      undefined,
+      { params: { source } },
     );
     return response.data;
   },

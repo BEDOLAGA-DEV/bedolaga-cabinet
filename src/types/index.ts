@@ -764,6 +764,7 @@ export interface AppConfig {
 
 // Pending payment types
 export interface PendingPayment {
+  source?: 'provider' | 'landing';
   id: number;
   method: string;
   method_display: string;
