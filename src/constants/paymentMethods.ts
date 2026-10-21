@@ -7,6 +7,7 @@ export const METHOD_LABELS: Record<string, string> = {
   mulenpay: 'MulenPay',
   pal24: 'PayPalych',
   platega: 'Platega',
+  platega_recurrent: 'Platega СБП',
   wata: 'WATA',
   freekassa: 'Freekassa',
   freekassa_sbp: 'Freekassa СБП',
