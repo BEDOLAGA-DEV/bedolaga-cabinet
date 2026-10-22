@@ -373,12 +373,13 @@ export default function TopUpAmount() {
       return;
     }
 
-    // Round for exact sources; ceil a hand-typed amount so float noise never lands sub-kopeck
-    // under the chosen value.
+    // Round exact sources; ceil genuine fractional kopeks for hand-typed FX amounts.
+    // Remove only floating-point noise at this magnitude (e.g. 6407.000000000001).
+    const kopeks = canonicalRubles * 100;
     const amountKopeks =
       targetCurrency === 'RUB' || usingPrefill || usingQuick
-        ? Math.round(canonicalRubles * 100)
-        : Math.ceil(canonicalRubles * 100);
+        ? Math.round(kopeks)
+        : Math.ceil(kopeks - Number.EPSILON * Math.abs(kopeks));
     if (isStarsMethod) {
       starsPaymentMutation.mutate(amountKopeks);
     } else {

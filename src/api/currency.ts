@@ -2,7 +2,9 @@
 // Uses free exchangerate.host API
 
 import axios from 'axios';
+import { FALLBACK_RATES } from '../utils/currencyUnits';
 
+// RUB per one ISO currency unit. IRR is always rials, never tomans.
 interface ExchangeRates {
   USD: number;
   CNY: number;
@@ -15,13 +17,6 @@ interface CachedRates {
 }
 
 const CACHE_DURATION = 60 * 60 * 1000; // 1 hour in milliseconds
-
-// Fallback rates if API fails (approximate)
-const FALLBACK_RATES: ExchangeRates = {
-  USD: 100, // 1 USD = 100 RUB
-  CNY: 14, // 1 CNY = 14 RUB
-  IRR: 0.0024, // 1 IRR = 0.0024 RUB (or 1 RUB = ~420 IRR)
-};
 
 let cachedRates: CachedRates | null = null;
 
