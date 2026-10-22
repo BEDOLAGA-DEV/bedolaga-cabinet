@@ -51,6 +51,7 @@ vi.mock('../api/balance', () => ({
 }));
 
 import TopUpAmount from './TopUpAmount';
+import { balanceApi } from '../api/balance';
 
 beforeEach(() => {
   localStorage.clear();
@@ -114,4 +115,24 @@ it('без QR — прежнее поведение', async () => {
 
   await waitFor(() => expect(createTopUp).toHaveBeenCalled());
   expect(screen.queryByTestId('topup-qr')).toBeNull();
+});
+
+it('отправляет точный дробный минимум без потери копейки при ручном вводе', async () => {
+  const methods = await balanceApi.getPaymentMethods();
+  vi.mocked(balanceApi.getPaymentMethods).mockResolvedValueOnce(
+    methods.map((method) => ({ ...method, min_amount_kopeks: 6407 })),
+  );
+  createTopUp.mockResolvedValue({
+    payment_id: 'local-invoice',
+    payment_url: 'https://example.com/pay',
+    amount_kopeks: 6407,
+    amount_rubles: 64.07,
+    status: 'pending',
+    expires_at: null,
+  });
+  renderPage();
+  const input = await screen.findByRole('spinbutton');
+  fireEvent.change(input, { target: { value: '64.07' } });
+  await submit();
+  await waitFor(() => expect(createTopUp).toHaveBeenCalledWith(6407, 'cashera', 'sbp'));
 });
