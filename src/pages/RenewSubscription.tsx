@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { Link, Navigate, useNavigate, useParams } from 'react-router';
+import { Navigate, useNavigate, useParams } from 'react-router';
 import { subscriptionApi } from '../api/subscription';
 import { useTheme } from '../hooks/useTheme';
 import { getGlassColors } from '../utils/glassTheme';
@@ -136,14 +136,6 @@ export default function RenewSubscription() {
           )}
         </div>
       </div>
-
-      {(subscription?.is_active || subscription?.is_limited) &&
-        !subscription.is_trial &&
-        !subscription.is_daily && (
-          <Link className="btn-secondary block w-full text-center" to={tariffSelectionPath(subId)}>
-            {t('subscription.switchTariff.title')}
-          </Link>
-        )}
 
       {/* Balance */}
       <div

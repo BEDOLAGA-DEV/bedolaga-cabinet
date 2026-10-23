@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter, Route, Routes, useSearchParams } from 'react-router';
 import { afterEach, expect, it, vi } from 'vitest';
@@ -44,7 +44,7 @@ it.each([
   { id: 11, limited: false },
   { id: 12, limited: false },
   { id: 11, limited: true },
-])('opens the tariff catalog for $id (limited=$limited)', async ({ id, limited }) => {
+])('renewal keeps only renewal actions for $id (limited=$limited)', async ({ id, limited }) => {
   state.limited = limited;
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   render(
@@ -59,9 +59,7 @@ it.each([
       </PlatformProvider>
     </QueryClientProvider>,
   );
-  const link = await screen.findByRole('link', { name: 'subscription.switchTariff.title' });
-  expect(link.getAttribute('href')).toBe(`/subscription/purchase?subscriptionId=${id}`);
-  fireEvent.click(link);
-  expect(await screen.findByText(`Catalog for ${id}`)).toBeTruthy();
+  await screen.findByRole('heading', { name: 'subscription.extend' });
+  expect(screen.queryByRole('link', { name: 'subscription.switchTariff.title' })).toBeNull();
   client.clear();
 });

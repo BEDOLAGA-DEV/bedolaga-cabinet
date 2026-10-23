@@ -13,6 +13,8 @@ import { TariffPurchaseForm } from '../components/subscription/purchase/TariffPu
 import { canOpenTariffSwitch, needsTariff } from '../utils/legacySubscription';
 import { TariffPickerGrid } from '../components/subscription/purchase/TariffPickerGrid';
 import { TariffPickerLite } from '../components/subscription/purchase/TariffPickerLite';
+import { TariffSwitchPicker } from '../components/subscription/purchase/TariffSwitchPicker';
+import { formatLiteDate } from '@/utils/liteDate';
 import { useLiteMode } from '../hooks/useLiteMode';
 import { ClassicPurchaseWizard } from '../components/subscription/purchase/ClassicPurchaseWizard';
 import { ExclamationIcon, SparklesIcon } from '@/components/icons';
@@ -135,6 +137,61 @@ export default function SubscriptionPurchase() {
             {t('common.retry')}
           </button>
         </div>
+      </div>
+    );
+  }
+
+  const isScopedSwitch =
+    isTariffsMode &&
+    subscriptionId === subscription?.id &&
+    canOpenTariffSwitch(subscription) &&
+    !(
+      purchaseOptions &&
+      'subscription_on_free_tariff' in purchaseOptions &&
+      purchaseOptions.subscription_on_free_tariff
+    );
+
+  if (isScopedSwitch && subscription && !showTariffPurchase) {
+    return (
+      <div className="mx-auto max-w-3xl space-y-8">
+        <header className="flex items-start gap-3">
+          <WebBackButton to={`/subscriptions/${subscription.id}`} />
+          <div className="min-w-0">
+            <h1 className="text-2xl font-bold text-dark-50 sm:text-3xl">
+              {t('subscription.switchTariff.title')}
+            </h1>
+            <p className="mt-2 break-words text-sm text-dark-400">
+              {t('subscription.switchTariff.sourceContext', { name: subscription.tariff_name })}
+              {!subscription.is_daily && subscription.end_date && (
+                <span className="mt-1 block">
+                  {t('subscription.switchTariff.validUntil', {
+                    date: formatLiteDate(subscription.end_date),
+                  })}
+                </span>
+              )}
+            </p>
+          </div>
+        </header>
+        {switchTariffId === null ? (
+          <TariffSwitchPicker
+            tariffs={tariffs}
+            subscription={subscription}
+            onSelect={setSwitchTariffId}
+          />
+        ) : (
+          <SwitchTariffSheet
+            open
+            tariffId={switchTariffId}
+            subscriptionId={subscriptionId}
+            subscription={subscription}
+            tariffs={tariffs}
+            onClose={() => setSwitchTariffId(null)}
+            onExpiredFallback={(tariff) => {
+              setSelectedTariff(tariff);
+              setShowTariffPurchase(true);
+            }}
+          />
+        )}
       </div>
     );
   }

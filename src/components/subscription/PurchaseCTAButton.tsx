@@ -41,7 +41,7 @@ export default function PurchaseCTAButton({
             to={`/subscriptions/${subscription.id}/renew`}
             className={cn(
               buttonVariants({ variant: 'primary', size: 'lg' }),
-              'flex-none bg-dark-100 text-dark-950 shadow-none hover:bg-dark-50 hover:shadow-none active:bg-dark-200 focus-visible:ring-dark-100 sm:flex-1',
+              'flex-none shadow-none hover:-translate-y-px hover:bg-accent-500 hover:shadow-none active:translate-y-0 active:bg-accent-500 focus-visible:ring-dark-100 sm:flex-1',
             )}
           >
             {t('subscription.extend')}
