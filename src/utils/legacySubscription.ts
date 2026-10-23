@@ -29,6 +29,21 @@ export function tariffSelectionPath(subscriptionId: number): string {
   return `/subscription/purchase?subscriptionId=${subscriptionId}`;
 }
 
+/** Прямой вход в смену: сервер принимает только активную платную тарифную подписку. */
+export function canOpenTariffSwitch(
+  subscription:
+    | Pick<Subscription, 'tariff_id' | 'is_active' | 'is_trial' | 'requires_tariff_selection'>
+    | null
+    | undefined,
+): boolean {
+  return Boolean(
+    subscription?.tariff_id &&
+      subscription.is_active &&
+      !subscription.is_trial &&
+      !needsTariff(subscription),
+  );
+}
+
 /** Заголовок карточки: у старой подписки честно «без тарифа», а не «текущий тариф». */
 export function planTitle(
   subscription: Pick<Subscription, 'tariff_name' | 'requires_tariff_selection'>,

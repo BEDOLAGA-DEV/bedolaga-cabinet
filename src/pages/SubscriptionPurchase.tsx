@@ -10,7 +10,7 @@ import type { Tariff, ClassicPurchaseOptions } from '../types';
 import { useCloseOnSuccessNotification } from '../store/successNotification';
 import { SwitchTariffSheet } from '../components/subscription/sheets/SwitchTariffSheet';
 import { TariffPurchaseForm } from '../components/subscription/purchase/TariffPurchaseForm';
-import { needsTariff } from '../utils/legacySubscription';
+import { canOpenTariffSwitch, needsTariff } from '../utils/legacySubscription';
 import { TariffPickerGrid } from '../components/subscription/purchase/TariffPickerGrid';
 import { TariffPickerLite } from '../components/subscription/purchase/TariffPickerLite';
 import { useLiteMode } from '../hooks/useLiteMode';
@@ -149,13 +149,15 @@ export default function SubscriptionPurchase() {
         <h1 className="text-2xl font-bold text-dark-50 sm:text-3xl">
           {needsTariff(subscription)
             ? t('subscription.cta.moveToTariff')
-            : isMultiTariff && !subscriptionId
-              ? t('subscription.newTariff', 'Новый тариф')
-              : !isMultiTariff && subscription?.is_daily && !subscription?.is_trial
-                ? t('subscription.switchTariff.title')
-                : subscription && !subscription.is_trial
-                  ? t('subscription.extend')
-                  : t('subscription.getSubscription')}
+            : isTariffsMode && subscriptionId && canOpenTariffSwitch(subscription)
+              ? t('subscription.switchTariff.title')
+              : isMultiTariff && !subscriptionId
+                ? t('subscription.newTariff', 'Новый тариф')
+                : !isMultiTariff && subscription?.is_daily && !subscription?.is_trial
+                  ? t('subscription.switchTariff.title')
+                  : subscription && !subscription.is_trial
+                    ? t('subscription.extend')
+                    : t('subscription.getSubscription')}
         </h1>
       </div>
 

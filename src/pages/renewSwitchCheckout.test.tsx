@@ -111,6 +111,7 @@ it.each([false, true].flatMap((lite) => [11, 12].map((id) => ({ lite, id }))))(
     state.limited = false;
     const client = mount(`/subscriptions/${id}/renew`);
     fireEvent.click(await screen.findByRole('link', { name: 'subscription.switchTariff.title' }));
+    await screen.findByRole('heading', { level: 1, name: 'subscription.switchTariff.title' });
     fireEvent.click(
       await screen.findByRole('button', {
         name: lite ? /Target/ : 'subscription.switchTariff.switch',
