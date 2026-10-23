@@ -52,14 +52,21 @@ vi.mock('../api/balance', () => ({
 
 import TopUpAmount from './TopUpAmount';
 import { balanceApi } from '../api/balance';
+import { loadTopUpPendingInfo } from '../utils/topUpStorage';
 
+let testTime = Date.now();
 beforeEach(() => {
+  // Separate user attempts by more than the real payment rate-limit window.
+  testTime += 31000;
+  vi.spyOn(Date, 'now').mockReturnValue(testTime);
   localStorage.clear();
+  sessionStorage.clear();
 });
 
 afterEach(() => {
   cleanup();
   vi.clearAllMocks();
+  vi.restoreAllMocks();
 });
 
 function renderPage() {
@@ -135,4 +142,25 @@ it('отправляет точный дробный минимум без по�
   fireEvent.change(input, { target: { value: '64.07' } });
   await submit();
   await waitFor(() => expect(createTopUp).toHaveBeenCalledWith(6407, 'cashera', 'sbp'));
+});
+
+it('сохраняет настроенное имя метода на экране суммы и в данных платежа', async () => {
+  const methods = await balanceApi.getPaymentMethods();
+  vi.mocked(balanceApi.getPaymentMethods).mockResolvedValueOnce(
+    methods.map((method) => ({ ...method, name: 'Configured Gateway' })),
+  );
+  createTopUp.mockResolvedValue({
+    payment_id: 'local-name',
+    payment_url: 'https://example.com/pay',
+    amount_kopeks: 50000,
+    amount_rubles: 500,
+    status: 'pending',
+    expires_at: null,
+    qr_payload: 'https://qr.example/pay',
+  });
+  renderPage();
+  expect(await screen.findByRole('heading', { name: 'Configured Gateway' })).toBeTruthy();
+  await submit();
+  await screen.findByTestId('topup-qr');
+  expect(loadTopUpPendingInfo()?.method_name).toBe('Configured Gateway');
 });
