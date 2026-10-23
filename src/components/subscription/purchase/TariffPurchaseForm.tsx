@@ -1,3 +1,4 @@
+import { tariffTrafficLabel } from '../../../utils/tariffTrafficLabel';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
@@ -283,7 +284,9 @@ export function TariffPurchaseForm({
         <div className="flex flex-wrap gap-4 text-sm">
           <div>
             <span className="text-dark-500">{t('subscription.traffic')}:</span>
-            <span className="ml-2 text-dark-200">{tariff.traffic_limit_label}</span>
+            <span className="ml-2 text-dark-200">
+              {tariffTrafficLabel(tariff.traffic_limit_gb, t)}
+            </span>
           </div>
           <div>
             <span className="text-dark-500">{t('subscription.devices')}:</span>
@@ -625,7 +628,7 @@ export function TariffPurchaseForm({
                 {!useCustomTraffic && (
                   <div className="text-sm text-dark-400">
                     {t('subscription.customTraffic.default', {
-                      label: tariff.traffic_limit_label,
+                      label: tariffTrafficLabel(tariff.traffic_limit_gb, t),
                     })}
                   </div>
                 )}

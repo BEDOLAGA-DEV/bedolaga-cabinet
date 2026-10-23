@@ -1,3 +1,4 @@
+import { tariffTrafficLabel } from '../../../utils/tariffTrafficLabel';
 import { useTranslation } from 'react-i18next';
 
 import { ChevronRightIcon } from '@/components/icons';
@@ -62,7 +63,7 @@ export function TariffPickerLite({
       tariff.device_limit === 0
         ? t('lite.tariff.unlimitedDevices', 'Устройств без ограничений')
         : t('subscription.devices', { count: tariff.device_limit });
-    return `${tariff.traffic_limit_label}, ${devices}`;
+    return `${tariffTrafficLabel(tariff.traffic_limit_gb, t)}, ${devices}`;
   };
 
   return (
