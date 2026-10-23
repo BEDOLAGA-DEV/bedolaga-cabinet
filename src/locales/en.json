@@ -896,9 +896,6 @@
       "kassa_ai": {
         "description": "Pay via Kassa AI"
       },
-      "paypear": {
-        "description": "Pay via PayPear"
-      },
       "rollypay": {
         "description": "Pay via RollyPay (SBP)"
       },
@@ -3231,7 +3228,6 @@
         "payments_wata": "Wata",
         "payments_riopay": "RioPay",
         "payments_severpay": "SeverPay",
-        "payments_paypear": "PayPear",
         "payments_rollypay": "RollyPay",
         "payments_aurapay": "AuraPay",
         "payments_etoplatezhi": "Etoplatezhi",
