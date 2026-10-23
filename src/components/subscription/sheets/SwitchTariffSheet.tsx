@@ -137,13 +137,16 @@ export function SwitchTariffSheet({
   const periodicSwitch = subscription && !subscription.is_daily && !targetIsDaily;
 
   return (
-    <section className="space-y-6" aria-labelledby="switch-review-title">
+    <section
+      className="space-y-4 rounded-xl bg-dark-800/50 p-5"
+      aria-labelledby="switch-review-title"
+    >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2
           id="switch-review-title"
           ref={ref}
           tabIndex={-1}
-          className="text-lg font-semibold text-dark-100 outline-none"
+          className="font-medium text-dark-100 outline-none"
         >
           {t('subscription.switchTariff.reviewTitle')}
         </h2>
@@ -174,27 +177,27 @@ export function SwitchTariffSheet({
         </div>
       ) : switchPreview ? (
         <>
-          <dl className="divide-y divide-dark-700/50 border-y border-dark-700/50">
-            <div className="grid gap-2 py-4 sm:grid-cols-2 sm:gap-6">
+          <dl className="space-y-3 text-sm">
+            <div className="flex justify-between gap-3">
               <dt className="text-sm text-dark-400">
                 {t('subscription.switchTariff.currentTariff')}
               </dt>
-              <dd className="break-words font-medium text-dark-100 sm:text-end">
+              <dd className="min-w-0 break-words text-end font-medium text-dark-100">
                 {switchPreview.current_tariff_name || '—'}
               </dd>
             </div>
-            <div className="grid gap-2 py-4 sm:grid-cols-2 sm:gap-6">
+            <div className="flex justify-between gap-3">
               <dt className="text-sm text-dark-400">{t('subscription.switchTariff.newTariff')}</dt>
-              <dd className="break-words font-semibold text-dark-100 sm:text-end">
+              <dd className="min-w-0 break-words text-end font-medium text-accent-400">
                 {switchPreview.new_tariff_name}
               </dd>
             </div>
             {target && (
-              <div className="grid gap-2 py-4 sm:grid-cols-2 sm:gap-6">
+              <div className="flex justify-between gap-3">
                 <dt className="text-sm text-dark-400">
                   {t('subscription.switchTariff.newLimits')}
                 </dt>
-                <dd className="space-y-1 text-sm text-dark-100 sm:text-end">
+                <dd className="min-w-0 space-y-1 text-end text-sm text-dark-100">
                   <div>{tariffTrafficLabel(target.traffic_limit_gb, t)}</div>
                   <div>
                     {target.device_limit === 0
@@ -204,7 +207,7 @@ export function SwitchTariffSheet({
                 </dd>
               </div>
             )}
-            <div className="grid gap-2 py-4 sm:grid-cols-2 sm:gap-6">
+            <div className="flex justify-between gap-3">
               <dt className="text-sm text-dark-400">
                 {t(
                   periodicSwitch
@@ -212,7 +215,7 @@ export function SwitchTariffSheet({
                     : 'subscription.switchTariff.remainingDays',
                 )}
               </dt>
-              <dd className="text-sm text-dark-100 sm:text-end">
+              <dd className="min-w-0 text-end text-sm text-dark-100">
                 {periodicSwitch
                   ? formatLiteDate(subscription.end_date)
                   : switchPreview.remaining_days}
@@ -221,7 +224,7 @@ export function SwitchTariffSheet({
           </dl>
 
           {subscription && (
-            <p className="text-sm leading-relaxed text-dark-400">
+            <p className="text-xs leading-relaxed text-dark-400">
               {t(
                 periodicSwitch
                   ? 'subscription.switchTariff.keepTerm'
@@ -239,12 +242,12 @@ export function SwitchTariffSheet({
               </strong>
             </p>
           )}
-          <p className="text-sm leading-relaxed text-dark-400">
+          <p className="text-xs leading-relaxed text-dark-400">
             {t('subscription.switchTariff.addonsNotice')}
           </p>
 
-          <div className="flex flex-wrap items-end justify-between gap-3">
-            <div className="space-y-1">
+          <div className="flex items-start justify-between gap-3 border-t border-dark-700/50 pt-3">
+            <div className="min-w-0 space-y-1">
               <p className="font-medium text-dark-100">{t('subscription.switchTariff.totalNow')}</p>
               {switchPreview.has_enough_balance && (
                 <p className="text-sm text-dark-400">
@@ -254,14 +257,14 @@ export function SwitchTariffSheet({
                 </p>
               )}
             </div>
-            <div className="text-end">
+            <div className="shrink-0 text-end">
               {switchPreview.base_upgrade_cost_kopeks != null &&
                 switchPreview.base_upgrade_cost_kopeks > switchPreview.upgrade_cost_kopeks && (
                   <p className="text-sm text-dark-500 line-through">
                     {formatPrice(switchPreview.base_upgrade_cost_kopeks)}
                   </p>
                 )}
-              <p className="text-2xl font-semibold tabular-nums text-dark-100">
+              <p className="text-lg font-bold tabular-nums text-accent-400">
                 {formatPrice(switchPreview.upgrade_cost_kopeks)}
               </p>
             </div>

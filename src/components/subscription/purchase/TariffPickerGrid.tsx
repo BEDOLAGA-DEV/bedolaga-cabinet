@@ -40,6 +40,7 @@ export interface TariffPickerGridProps {
   isTariffsMode: boolean;
   isMultiTariff: boolean;
   subscriptionId?: number;
+  switchSelection?: boolean;
   onSelectTariff: (tariff: Tariff) => void;
   onSwitchTariff: (tariffId: number) => void;
 }
@@ -51,6 +52,7 @@ export function TariffPickerGrid({
   isTariffsMode,
   isMultiTariff,
   subscriptionId,
+  switchSelection = false,
   onSelectTariff,
   onSwitchTariff,
 }: TariffPickerGridProps) {
@@ -275,8 +277,17 @@ export function TariffPickerGrid({
                     <button
                       onClick={() => onSwitchTariff(tariff.id)}
                       className="btn-secondary flex-1 py-2 text-sm"
+                      aria-label={
+                        switchSelection
+                          ? `${tariff.name}: ${t('subscription.switchTariff.choose')}`
+                          : undefined
+                      }
                     >
-                      {t('subscription.switchTariff.switch')}
+                      {t(
+                        switchSelection
+                          ? 'subscription.switchTariff.choose'
+                          : 'subscription.switchTariff.switch',
+                      )}
                     </button>
                   ) : (
                     <button
