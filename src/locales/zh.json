@@ -454,6 +454,7 @@
       "yourDevice": "您的设备",
       "copyLink": "复制订阅链接",
       "copied": "链接已复制！",
+      "copyFailed": "无法复制链接。请选中并复制上方文本。",
       "openLink": "打开链接",
       "changeApp": "更换应用",
       "selectPlatform": "选择平台",

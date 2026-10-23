@@ -537,6 +537,7 @@
       "yourDevice": "Your device",
       "copyLink": "Copy subscription link",
       "copied": "Link copied!",
+      "copyFailed": "Could not copy the link. Select and copy the text above.",
       "openLink": "Open link",
       "instructions": "Instructions",
       "changeApp": "Change app",
