@@ -1288,10 +1288,11 @@
       "closed": "Closed"
     },
     "attachImage": "Attach image",
+    "attachMedia": "Attach photo or video",
     "downloadFile": "Download file",
     "invalidFileType": "Invalid file type. Use JPEG, PNG, GIF or WebP.",
     "fileTooLarge": "File is too large. Maximum size is 10MB.",
-    "uploadFailed": "Failed to upload image",
+    "uploadFailed": "Failed to upload attachment",
     "imageLoadFailed": "Failed to load image",
     "tooManyRequests": "Too many requests. Please wait {{seconds}} sec.",
     "ticketsDisabled": "Tickets Disabled",

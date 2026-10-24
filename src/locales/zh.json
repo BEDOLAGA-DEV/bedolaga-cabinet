@@ -1158,10 +1158,11 @@
       "closed": "已关闭"
     },
     "attachImage": "附加图片",
+    "attachMedia": "添加照片或视频",
     "downloadFile": "下载文件",
     "invalidFileType": "文件类型无效。请使用JPEG、PNG、GIF或WebP。",
     "fileTooLarge": "文件过大。最大10MB。",
-    "uploadFailed": "图片上传失败",
+    "uploadFailed": "附件上传失败",
     "imageLoadFailed": "图片加载失败",
     "tooManyRequests": "请求过多。请等待 {{seconds}} 秒。",
     "contactSupport": "如需帮助，请联系{{username}}",

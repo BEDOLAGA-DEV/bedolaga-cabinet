@@ -1164,10 +1164,11 @@
       "closed": "بسته"
     },
     "attachImage": "پیوست تصویر",
+    "attachMedia": "پیوست عکس یا ویدیو",
     "downloadFile": "دانلود فایل",
     "invalidFileType": "نوع فایل نامعتبر. از JPEG، PNG، GIF یا WebP استفاده کنید.",
     "fileTooLarge": "فایل خیلی بزرگ است. حداکثر 10MB.",
-    "uploadFailed": "آپلود تصویر ناموفق",
+    "uploadFailed": "بارگذاری پیوست ناموفق بود",
     "imageLoadFailed": "بارگذاری تصویر ناموفق",
     "tooManyRequests": "درخواست‌های زیادی ارسال شده. لطفاً {{seconds}} ثانیه صبر کنید.",
     "contactSupport": "برای پشتیبانی با {{username}} تماس بگیرید",

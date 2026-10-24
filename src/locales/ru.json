@@ -1316,10 +1316,11 @@
       "closed": "Закрыт"
     },
     "attachImage": "Прикрепить изображение",
+    "attachMedia": "Прикрепить фото или видео",
     "downloadFile": "Скачать файл",
     "invalidFileType": "Неверный тип файла. Используйте JPEG, PNG, GIF или WebP.",
     "fileTooLarge": "Файл слишком большой. Максимальный размер 10МБ.",
-    "uploadFailed": "Не удалось загрузить изображение",
+    "uploadFailed": "Не удалось загрузить вложение",
     "imageLoadFailed": "Не удалось загрузить изображение",
     "tooManyRequests": "Слишком много запросов. Подождите {{seconds}} сек.",
     "ticketsDisabled": "Тикеты отключены",
