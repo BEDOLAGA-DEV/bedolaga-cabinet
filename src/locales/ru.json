@@ -258,6 +258,8 @@
     "invalidEmail": "Введите корректный email адрес",
     "emailAlreadyRegistered": "Этот email уже зарегистрирован",
     "invalidCredentials": "Неверный email или пароль",
+    "registrationInviteRequired": "Регистрация доступна только по приглашению. Обратитесь к администратору сервиса за приглашением.",
+    "emailAuthDisabled": "Вход по email отключён. Используйте другой доступный способ входа.",
     "forgotPasswordHint": "Введите email и мы отправим инструкции для сброса пароля.",
     "passwordResetSent": "Если аккаунт с таким email существует, мы отправили инструкции по сбросу пароля.",
     "sendResetLink": "Отправить ссылку",

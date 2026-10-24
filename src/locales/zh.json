@@ -249,6 +249,8 @@
     "firstNamePlaceholder": "您的名字（可选）",
     "forgotPasswordHint": "输入邮箱以接收重置链接",
     "invalidCredentials": "邮箱或密码无效",
+    "registrationInviteRequired": "仅限受邀用户注册。请联系服务管理员获取邀请。",
+    "emailAuthDisabled": "邮箱登录已停用。请使用其他可用的登录方式。",
     "invalidEmail": "请输入有效的邮箱地址",
     "loginSuccess": "登录成功",
     "passwordMismatch": "密码不匹配",

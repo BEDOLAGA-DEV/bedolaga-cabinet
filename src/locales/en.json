@@ -250,6 +250,8 @@
     "invalidEmail": "Please enter a valid email address",
     "emailAlreadyRegistered": "This email is already registered",
     "invalidCredentials": "Invalid email or password",
+    "registrationInviteRequired": "Registration is by invitation only. Ask the service administrator for an invitation.",
+    "emailAuthDisabled": "Email sign-in is disabled. Use another available sign-in method.",
     "tooManyAttempts": "Too many attempts. Please try again later",
     "verificationEmailNotice": "After registration, a verification email will be sent to your address",
     "legalConsentPrefix": "I have read the",

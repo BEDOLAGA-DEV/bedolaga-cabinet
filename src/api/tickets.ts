@@ -82,8 +82,7 @@ export const ticketsApi = {
   // Get media URL for display. The signed `token` comes from the ticket
   // response and is required by the backend (a raw file_id alone 404s).
   getMediaUrl: (fileId: string, token?: string | null): string => {
-    const baseUrl = import.meta.env.VITE_API_URL || '';
     const suffix = token ? `?token=${encodeURIComponent(token)}` : '';
-    return `${baseUrl}/cabinet/media/${fileId}${suffix}`;
+    return apiClient.getUri({ url: `/cabinet/media/${fileId}${suffix}` });
   },
 };
