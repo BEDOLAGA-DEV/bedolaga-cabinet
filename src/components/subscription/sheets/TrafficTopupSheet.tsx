@@ -1,3 +1,4 @@
+import { isUncertainPurchaseOutcome } from '@/utils/api-error';
 import { useTranslation } from 'react-i18next';
 import { useCurrency } from '../../../hooks/useCurrency';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -57,6 +58,7 @@ export function TrafficTopupSheet({
   });
 
   const purchaseMutation = useMutation({
+    retry: false,
     mutationFn: (gb: number) => subscriptionApi.purchaseTraffic(gb, subscriptionId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['subscription', subscriptionId] });
@@ -220,7 +222,9 @@ export function TrafficTopupSheet({
 
           {purchaseMutation.isError && (
             <div className="text-center text-sm text-error-400">
-              {getErrorMessage(purchaseMutation.error)}
+              {isUncertainPurchaseOutcome(purchaseMutation.error)
+                ? t('subscription.purchaseOutcomeUnknown')
+                : getErrorMessage(purchaseMutation.error)}
             </div>
           )}
         </div>

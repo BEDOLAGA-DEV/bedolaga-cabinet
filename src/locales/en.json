@@ -381,6 +381,7 @@
     "subscriptions": "Subscriptions"
   },
   "subscription": {
+    "purchaseOutcomeUnknown": "No response was received. The operation may have completed. Restore your connection and refresh the subscription in your VPN client, then check your subscription and balance in the cabinet before trying again.",
     "title": "Subscription",
     "currentPlan": "Current Plan",
     "status": "Status",
@@ -862,6 +863,7 @@
     }
   },
   "balance": {
+    "paymentRange": "From {{min}} to {{max}}",
     "title": "Balance",
     "currentBalance": "Current Balance",
     "topUp": "Top Up",
@@ -6074,6 +6076,7 @@
       "stickyPayButtonHint": "Button pinned to bottom of screen on mobile"
     },
     "infoPages": {
+      "botFaq": "Bot FAQ",
       "title": "Information Pages",
       "subtitle": "Manage static information pages",
       "create": "Create Page",

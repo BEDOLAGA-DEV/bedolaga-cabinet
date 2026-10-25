@@ -296,7 +296,7 @@ describe('SubscriptionLite', () => {
     renderScreen();
 
     const plans = await screen.findByRole('link', { name: /Посмотреть тарифы/ });
-    expect(plans.getAttribute('href')).toBe('/subscription/purchase');
+    expect(plans.getAttribute('href')).toBe('/subscription/purchase?subscriptionId=7');
     expect(screen.queryByRole('link', { name: 'lite.action.renew' })).toBeNull();
   });
 });

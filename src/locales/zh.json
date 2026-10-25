@@ -347,6 +347,7 @@
     "validUntil": "有效期至 {{date}}"
   },
   "subscription": {
+    "purchaseOutcomeUnknown": "未收到响应，操作可能已完成。请恢复网络连接并在 VPN 客户端中刷新订阅，然后在个人中心检查订阅和余额，再决定是否重试。",
     "title": "订阅",
     "currentPlan": "当前套餐",
     "status": "状态",
@@ -773,6 +774,7 @@
     }
   },
   "balance": {
+    "paymentRange": "从 {{min}} 至 {{max}}",
     "title": "余额",
     "currentBalance": "当前余额",
     "topUp": "充值",
@@ -5637,6 +5639,7 @@
       "stickyPayButtonHint": "手机上支付按钮固定在屏幕底部"
     },
     "infoPages": {
+      "botFaq": "机器人常见问题",
       "title": "信息页面",
       "subtitle": "管理静态信息页面",
       "create": "创建页面",

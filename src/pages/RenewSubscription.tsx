@@ -1,3 +1,4 @@
+import { isUncertainPurchaseOutcome } from '@/utils/api-error';
 import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -65,6 +66,7 @@ export default function RenewSubscription() {
   const balanceKopeks = purchaseOptions?.balance_kopeks ?? 0;
 
   const renewMutation = useMutation({
+    retry: false,
     mutationFn: (periodDays: number) => subscriptionApi.renewSubscription(periodDays, subId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['subscription', subId] });
@@ -74,6 +76,10 @@ export default function RenewSubscription() {
       navigate(`/subscriptions/${subId}`, { replace: true });
     },
     onError: (err: unknown) => {
+      if (isUncertainPurchaseOutcome(err)) {
+        setError(t('subscription.purchaseOutcomeUnknown'));
+        return;
+      }
       const detail =
         err && typeof err === 'object' && 'response' in err
           ? ((err as { response?: { data?: { detail?: unknown } } }).response?.data?.detail ?? null)

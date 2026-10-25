@@ -129,3 +129,28 @@ export const infoPagesApi = {
     await apiClient.post('/cabinet/admin/info-pages/reorder', data);
   },
 };
+
+export interface LegacyFaqPage {
+  id: number;
+  language: string;
+  title: string;
+  content: string;
+  display_order: number;
+  is_active: boolean;
+  is_enabled: boolean;
+}
+
+export const legacyFaqApi = {
+  getPages: async (): Promise<LegacyFaqPage[]> => {
+    const response = await apiClient.get<LegacyFaqPage[]>('/cabinet/admin/info-pages/legacy-faq');
+    return response.data;
+  },
+  updatePage: async (page: LegacyFaqPage): Promise<LegacyFaqPage> => {
+    const { title, content, display_order, is_active } = page;
+    const response = await apiClient.put<LegacyFaqPage>(
+      `/cabinet/admin/info-pages/legacy-faq/${page.id}`,
+      { title, content, display_order, is_active },
+    );
+    return response.data;
+  },
+};

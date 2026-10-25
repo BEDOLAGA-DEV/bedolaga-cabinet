@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import type { CampaignBonusInfo, RegisterResponse, User } from '../types';
+import { isBackendUnavailableError } from '../api/health';
 import { authApi } from '../api/auth';
 import { apiClient } from '../api/client';
 import {
@@ -196,6 +197,12 @@ export const useAuthStore = create<AuthState>()(
           });
         };
 
+        let retryableFailure = false;
+        const keepSessionForRetry = (): void => {
+          retryableFailure = true;
+          set({ isLoading: false });
+        };
+
         initState.isInitializing = true;
         initState.promise = (async () => {
           try {
@@ -226,7 +233,7 @@ export const useAuthStore = create<AuthState>()(
                 // Backend unreachable, not a rejected token — keep the session
                 // (don't wipe tokens) so the ServiceUnavailableScreen can resume
                 // once the backend returns. Just stop the bootstrap loader.
-                set({ isLoading: false });
+                keepSessionForRetry();
               } else {
                 clearSession();
               }
@@ -237,28 +244,38 @@ export const useAuthStore = create<AuthState>()(
               const user = await authApi.getMe();
               await get().checkAdminStatus();
               applySession(accessToken, refreshToken, user);
-            } catch {
+            } catch (error) {
+              if (isBackendUnavailableError(error)) throw error;
               const newToken = await tokenRefreshManager.refreshAccessToken();
               if (newToken) {
                 try {
                   const user = await authApi.getMe();
                   await get().checkAdminStatus();
                   applySession(newToken, refreshToken, user);
-                } catch {
+                } catch (error) {
+                  if (isBackendUnavailableError(error)) throw error;
                   clearSession();
                 }
               } else if (tokenRefreshManager.lastFailureWasTransport) {
                 // Backend unreachable, not a rejected token — keep the session
                 // (don't wipe tokens) so the ServiceUnavailableScreen can resume
                 // once the backend returns. Just stop the bootstrap loader.
-                set({ isLoading: false });
+                keepSessionForRetry();
               } else {
                 clearSession();
               }
             }
+          } catch (error) {
+            // A profile request may fail after a successful refresh as well.
+            // Keep credentials and allow recovery to rerun the incomplete boot.
+            if (isBackendUnavailableError(error)) {
+              keepSessionForRetry();
+            } else {
+              throw error;
+            }
           } finally {
             initState.isInitializing = false;
-            initState.isInitialized = true;
+            initState.isInitialized = !retryableFailure;
             initState.promise = null;
           }
         })();

@@ -171,10 +171,10 @@ export function DevicesPanel({ subscription, subscriptionId }: DevicesPanelProps
                         {displayName}
                       </div>
                     )}
-                    <div className="mt-0.5 flex items-center gap-1.5 text-[11px] text-dark-400">
+                    <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[11px] text-dark-400">
                       <span className="truncate">{device.platform}</span>
-                      <span className="font-mono text-dark-400">
-                        {device.hwid.slice(0, 8).toUpperCase()}
+                      <span className="min-w-0 select-all break-all font-mono text-dark-400">
+                        {device.hwid}
                       </span>
                     </div>
                   </div>

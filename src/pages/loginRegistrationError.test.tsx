@@ -15,6 +15,7 @@ const logo = vi.hoisted(() => ({
 }));
 
 const auth = vi.hoisted(() => ({
+  emailEnabled: true,
   isAuthenticated: false,
   isLoading: false,
   loginWithTelegram: vi.fn(),
@@ -46,7 +47,7 @@ vi.mock('../api/branding', () => ({
   brandingApi: {
     getLogoUrl: () => logo.blob,
     getBranding: () => logo.fetch(),
-    getEmailAuthEnabled: async () => ({ enabled: true }),
+    getEmailAuthEnabled: async () => ({ enabled: auth.emailEnabled }),
     getFooterEnabled: async () => false,
   },
 }));
@@ -58,6 +59,7 @@ vi.mock('../api/info', () => ({
 let client: QueryClient;
 beforeEach(() => {
   vi.clearAllMocks();
+  auth.emailEnabled = true;
   logo.cached = null;
   logo.blob = null;
   logo.preload.mockResolvedValue(undefined);
@@ -195,3 +197,20 @@ it.each([
     expect(screen.queryByText('auth.invalidCredentials')).toBeNull();
   expect(mode === 'register' ? auth.registerWithEmail : auth.loginWithEmail).toHaveBeenCalledOnce();
 });
+
+it.each([true, false])(
+  'uses the effective email toggle without forcing Telegram (enabled=%s)',
+  async (enabled) => {
+    auth.emailEnabled = enabled;
+    render(
+      <QueryClientProvider client={client}>
+        <MemoryRouter>
+          <Login />
+        </MemoryRouter>
+      </QueryClientProvider>,
+    );
+    await waitFor(() => expect(client.isFetching()).toBe(0));
+    expect(Boolean(screen.queryByRole('button', { name: 'auth.loginWithEmail' }))).toBe(enabled);
+    expect(auth.loginWithTelegram).not.toHaveBeenCalled();
+  },
+);

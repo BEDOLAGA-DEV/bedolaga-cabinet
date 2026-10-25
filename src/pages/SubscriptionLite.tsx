@@ -204,7 +204,7 @@ export default function SubscriptionLite() {
             // Пробный период не продлевается: «Продлить» вела на экран «Нет
             // вариантов продления». После триала покупают тариф.
             <LiteRow
-              to="/subscription/purchase"
+              to={tariffSelectionPath(subscription.id)}
               label={t('lite.rows.plans', 'Посмотреть тарифы')}
             />
           ) : !subscription.is_daily || !subscription.is_active ? (

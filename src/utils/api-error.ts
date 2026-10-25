@@ -49,3 +49,10 @@ export function getApiErrorMessage(err: unknown, fallback: string): string {
   }
   return fallback;
 }
+
+/** A missing response or gateway failure cannot establish whether a purchase committed. */
+export function isUncertainPurchaseOutcome(err: unknown): boolean {
+  return (
+    axios.isAxiosError(err) && (!err.response || [502, 503, 504].includes(err.response.status))
+  );
+}
