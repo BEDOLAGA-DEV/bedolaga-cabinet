@@ -58,7 +58,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
-    "dompurify": "^3.3.3",
+    "dompurify": "^3.4.17",
     "framer-motion": "^12.29.2",
     "graphology": "^0.26.0",
     "graphology-layout-forceatlas2": "^0.10.1",
@@ -96,8 +96,8 @@
     "postcss": "^8.4.31",
     "tailwindcss": "^3.4.19",
     "typescript": "^5.2.2",
-    "vite": "^8.3.1",
-    "vitest": "^5.0.2"
+    "vite": "^8.3.5",
+    "vitest": "^5.0.5"
   },
   "lint-staged": {
     "*.{ts,tsx,json}": [
@@ -108,7 +108,8 @@
     ]
   },
   "overrides": {
-    "valibot": "^1.4.2"
+    "valibot": "^1.4.2",
+    "postcss-selector-parser": "^7.1.7"
   },
   "allowScripts": {
     "esbuild": true,
