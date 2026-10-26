@@ -216,14 +216,17 @@ export default function Login() {
     if (isAuthInitializing) return;
 
     const tryTelegramAuth = async () => {
-      const initData = getTelegramInitData();
-      if (!isInTelegramWebApp() || !initData) return;
+      const initialInitData = getTelegramInitData();
+      if (!isInTelegramWebApp() || !initialInitData) return;
 
       setIsTelegramWebApp(true);
       setIsLoading(true);
 
       const MAX_RETRIES = 1;
       for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+        // The bridge may deliver fresh launch data while a rejected attempt waits.
+        // Keep this attempt's credential for any subsequent consent confirmation.
+        const initData = getTelegramInitData() || initialInitData;
         try {
           await loginWithTelegram(initData);
           navigate(getReturnUrl(), { replace: true });

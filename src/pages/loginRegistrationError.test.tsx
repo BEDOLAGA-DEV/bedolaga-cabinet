@@ -14,6 +14,8 @@ const logo = vi.hoisted(() => ({
   fetch: vi.fn<() => Promise<BrandingInfo>>(),
 }));
 
+const telegram = vi.hoisted(() => ({ active: false, initData: '', t: (key: string) => key }));
+
 const auth = vi.hoisted(() => ({
   emailEnabled: true,
   isAuthenticated: false,
@@ -26,11 +28,11 @@ vi.mock('../store/auth', () => ({
   useAuthStore: (selector: (state: typeof auth) => unknown) => selector(auth),
 }));
 vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'ru' } }),
+  useTranslation: () => ({ t: telegram.t, i18n: { language: 'ru' } }),
 }));
 vi.mock('../hooks/useTelegramSDK', () => ({
-  isInTelegramWebApp: () => false,
-  getTelegramInitData: () => '',
+  isInTelegramWebApp: () => telegram.active,
+  getTelegramInitData: () => telegram.initData,
   useTelegramSDK: () => ({
     safeAreaInset: { top: 0, bottom: 0 },
     contentSafeAreaInset: { top: 0, bottom: 0 },
@@ -60,6 +62,9 @@ let client: QueryClient;
 beforeEach(() => {
   vi.clearAllMocks();
   auth.emailEnabled = true;
+  telegram.active = false;
+  telegram.initData = '';
+  auth.loginWithTelegram.mockReset();
   logo.cached = null;
   logo.blob = null;
   logo.preload.mockResolvedValue(undefined);
@@ -214,3 +219,26 @@ it.each([true, false])(
     expect(auth.loginWithTelegram).not.toHaveBeenCalled();
   },
 );
+
+it('reads refreshed Telegram credentials after a rejected first attempt', async () => {
+  telegram.active = true;
+  telegram.initData = 'auth_date=1&hash=stale';
+  auth.loginWithTelegram
+    .mockImplementationOnce(async () => {
+      telegram.initData = 'auth_date=2&hash=fresh';
+      throw error(401, 'Invalid or expired Telegram authentication data');
+    })
+    .mockResolvedValueOnce(undefined);
+  render(
+    <QueryClientProvider client={client}>
+      <MemoryRouter>
+        <Login />
+      </MemoryRouter>
+    </QueryClientProvider>,
+  );
+  await waitFor(() => expect(auth.loginWithTelegram).toHaveBeenCalledTimes(2), { timeout: 2500 });
+  expect(auth.loginWithTelegram.mock.calls.map(([credential]) => credential)).toEqual([
+    'auth_date=1&hash=stale',
+    'auth_date=2&hash=fresh',
+  ]);
+});
