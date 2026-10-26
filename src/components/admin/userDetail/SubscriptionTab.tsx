@@ -187,7 +187,7 @@ export function SubscriptionTab(props: SubscriptionTabProps) {
             userId={props.userId}
             subscriptionId={selectedSub.id}
             panelInfo={props.panelInfo}
-            remnawaveId={user.remnawave_id}
+            remnawaveId={selectedSub.remnawave_id ?? (mode === 'multi' ? null : user.remnawave_id)}
             reachabilityLink={props.reachabilityLink}
             dpicheckerLink={props.dpicheckerLink ?? null}
           />

@@ -46,6 +46,37 @@ function contrast(a: Rgb, b: Rgb): number {
 const PASTEL_ACCENT = '#a5b4fc'; // светлая лаванда, L≈82
 const NAVY_ACCENT = '#1e3a8a'; // тёмный синий, L≈33
 
+function pixelTriplet(value: string): Rgb {
+  const rgb = parseTriplet(value);
+  return { r: Math.round(rgb.r), g: Math.round(rgb.g), b: Math.round(rgb.b) };
+}
+
+it('rendered accent palette keeps AA across the RGB cube', () => {
+  for (let r = 0; r <= 255; r += 17)
+    for (let g = 0; g <= 255; g += 17)
+      for (let b = 0; b <= 255; b += 17) {
+        const accent = `#${[r, g, b].map((v) => v.toString(16).padStart(2, '0')).join('')}`;
+        const vars = computeThemeCssVars({ ...DEFAULT_THEME_COLORS, accent });
+        expect(
+          contrast(
+            pixelTriplet(vars['--color-accent-500']),
+            pixelTriplet(vars['--color-on-accent']),
+          ),
+          accent,
+        ).toBeGreaterThanOrEqual(4.5);
+      }
+});
+
+it.each(['#bb55bd', '#8b5cf6', '#f4dc52', '#e8edf2'])(
+  'accent button keeps AA after RGB serialization: %s',
+  (accent) => {
+    const vars = computeThemeCssVars({ ...DEFAULT_THEME_COLORS, accent });
+    expect(
+      contrast(pixelTriplet(vars['--color-accent-500']), pixelTriplet(vars['--color-on-accent'])),
+    ).toBeGreaterThanOrEqual(4.5);
+  },
+);
+
 afterEach(() => {
   document.documentElement.removeAttribute('style');
 });

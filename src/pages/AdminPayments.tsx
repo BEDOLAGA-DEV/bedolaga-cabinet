@@ -117,8 +117,15 @@ export default function AdminPayments() {
 
   // Check payment mutation
   const checkPaymentMutation = useMutation({
-    mutationFn: ({ method, paymentId }: { method: string; paymentId: number }) =>
-      adminPaymentsApi.checkPaymentStatus(method, paymentId),
+    mutationFn: ({
+      method,
+      paymentId,
+      source,
+    }: {
+      method: string;
+      paymentId: number;
+      source: 'provider' | 'landing';
+    }) => adminPaymentsApi.checkPaymentStatus(method, paymentId, source),
     onSuccess: async () => {
       await refetch();
       queryClient.invalidateQueries({ queryKey: ['admin-payments-search-stats'] });
@@ -129,8 +136,12 @@ export default function AdminPayments() {
   });
 
   const handleCheckPayment = (payment: PendingPayment) => {
-    setCheckingPaymentId(`${payment.method}_${payment.id}`);
-    checkPaymentMutation.mutate({ method: payment.method, paymentId: payment.id });
+    setCheckingPaymentId(`${payment.source ?? 'provider'}_${payment.method}_${payment.id}`);
+    checkPaymentMutation.mutate({
+      method: payment.method,
+      paymentId: payment.id,
+      source: payment.source ?? 'provider',
+    });
   };
 
   const handleResetSearch = () => {
@@ -403,7 +414,7 @@ export default function AdminPayments() {
         ) : payments?.items && payments.items.length > 0 ? (
           <div className="space-y-3">
             {payments.items.map((payment) => {
-              const paymentKey = `${payment.method}_${payment.id}`;
+              const paymentKey = `${payment.source ?? 'provider'}_${payment.method}_${payment.id}`;
               const isChecking = checkingPaymentId === paymentKey;
               const isCancelled = payment.status.toLowerCase().includes('cancel');
 
@@ -550,6 +561,7 @@ export default function AdminPayments() {
 
                   {/* Show result after check */}
                   {checkPaymentMutation.isSuccess &&
+                    checkPaymentMutation.variables?.source === (payment.source ?? 'provider') &&
                     checkPaymentMutation.variables?.paymentId === payment.id &&
                     checkPaymentMutation.variables?.method === payment.method && (
                       <div
@@ -563,6 +575,7 @@ export default function AdminPayments() {
                       </div>
                     )}
                   {checkPaymentMutation.isError &&
+                    checkPaymentMutation.variables?.source === (payment.source ?? 'provider') &&
                     checkPaymentMutation.variables?.paymentId === payment.id &&
                     checkPaymentMutation.variables?.method === payment.method && (
                       <div className="mt-3 rounded-lg border border-error-500/30 bg-error-500/10 p-2 text-sm text-error-400">

@@ -25,6 +25,7 @@ vi.mock('react-i18next', () => ({
 
 const api = vi.hoisted(() => ({
   getFilters: vi.fn(),
+  getTariffs: vi.fn(),
   getEmailFilters: vi.fn(),
   getButtons: vi.fn(),
   preview: vi.fn(),
@@ -42,6 +43,7 @@ beforeEach(() => {
   for (const fn of Object.values(api)) fn.mockReset();
   api.getFilters.mockResolvedValue({ filters: [], tariff_filters: [], custom_filters: [] });
   api.getButtons.mockResolvedValue({ buttons: [] });
+  api.getTariffs.mockResolvedValue({ tariffs: [] });
   api.getEmailFilters.mockResolvedValue({
     filters: [{ key: 'all_email', label: 'Все с email', count: 10, group: 'basic' }],
     promo_group_filters: [

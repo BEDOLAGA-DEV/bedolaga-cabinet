@@ -24,7 +24,11 @@ import { useTheme } from '@/hooks/useTheme';
 import { copyToClipboard } from '@/utils/clipboard';
 import { resolveConnectionUrlForUi } from '@/utils/connectionLink';
 import { getGlassColors } from '@/utils/glassTheme';
-import { showsAddonOptions } from '@/utils/legacySubscription';
+import {
+  canOpenTariffSwitch,
+  showsAddonOptions,
+  tariffSelectionPath,
+} from '@/utils/legacySubscription';
 import { formatLiteDate } from '@/utils/liteDate';
 
 type OpenPanel = 'traffic' | 'devices' | 'reduce' | 'servers' | 'devicesList' | 'delete' | null;
@@ -200,13 +204,20 @@ export default function SubscriptionLite() {
             // Пробный период не продлевается: «Продлить» вела на экран «Нет
             // вариантов продления». После триала покупают тариф.
             <LiteRow
-              to="/subscription/purchase"
+              to={tariffSelectionPath(subscription.id)}
               label={t('lite.rows.plans', 'Посмотреть тарифы')}
             />
-          ) : (
+          ) : !subscription.is_daily || !subscription.is_active ? (
             <LiteRow
               to={`/subscriptions/${subscription.id}/renew`}
               label={t('lite.action.renew')}
+            />
+          ) : null}
+
+          {purchaseOptions?.sales_mode === 'tariffs' && canOpenTariffSwitch(subscription) && (
+            <LiteRow
+              to={tariffSelectionPath(subscription.id)}
+              label={t('subscription.switchTariff.title')}
             />
           )}
 

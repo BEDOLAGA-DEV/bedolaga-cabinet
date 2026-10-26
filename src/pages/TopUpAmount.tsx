@@ -233,7 +233,7 @@ export default function TopUpAmount() {
         if (method && data.payment_id) {
           const methodKey = method.id.toLowerCase().replace(/-/g, '_');
           const displayName =
-            t(`balance.paymentMethods.${methodKey}.name`, { defaultValue: '' }) || method.name;
+            method.name || t(`balance.paymentMethods.${methodKey}.name`, { defaultValue: '' });
           saveTopUpPendingInfo({
             amount_kopeks: data.amount_kopeks,
             method_id: method.id,
@@ -313,12 +313,14 @@ export default function TopUpAmount() {
 
   const hasOptions = method.options && method.options.length > 0;
   const orderedOptions = sortOptionsWithSbpFirst(method.options);
-  const minRubles = method.min_amount_kopeks / 100;
+  const selectedOptionMinimum =
+    method.options?.find((option) => option.id === selectedOption)?.min_amount_kopeks ?? 0;
+  const minRubles = Math.max(method.min_amount_kopeks, selectedOptionMinimum) / 100;
   const maxRubles = method.max_amount_kopeks / 100;
   const methodKey = method.id.toLowerCase().replace(/-/g, '_');
   const isStarsMethod = methodKey.includes('stars');
   const methodName =
-    t(`balance.paymentMethods.${methodKey}.name`, { defaultValue: '' }) || method.name;
+    method.name || t(`balance.paymentMethods.${methodKey}.name`, { defaultValue: '' });
 
   const handleSubmit = () => {
     setError(null);
@@ -373,12 +375,13 @@ export default function TopUpAmount() {
       return;
     }
 
-    // Round for exact sources; ceil a hand-typed amount so float noise never lands sub-kopeck
-    // under the chosen value.
+    // Round exact sources; ceil genuine fractional kopeks for hand-typed FX amounts.
+    // Remove only floating-point noise at this magnitude (e.g. 6407.000000000001).
+    const kopeks = canonicalRubles * 100;
     const amountKopeks =
       targetCurrency === 'RUB' || usingPrefill || usingQuick
-        ? Math.round(canonicalRubles * 100)
-        : Math.ceil(canonicalRubles * 100);
+        ? Math.round(kopeks)
+        : Math.ceil(kopeks - Number.EPSILON * Math.abs(kopeks));
     if (isStarsMethod) {
       starsPaymentMutation.mutate(amountKopeks);
     } else {

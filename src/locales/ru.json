@@ -258,6 +258,8 @@
     "invalidEmail": "Введите корректный email адрес",
     "emailAlreadyRegistered": "Этот email уже зарегистрирован",
     "invalidCredentials": "Неверный email или пароль",
+    "registrationInviteRequired": "Регистрация доступна только по приглашению. Обратитесь к администратору сервиса за приглашением.",
+    "emailAuthDisabled": "Вход по email отключён. Используйте другой доступный способ входа.",
     "forgotPasswordHint": "Введите email и мы отправим инструкции для сброса пароля.",
     "passwordResetSent": "Если аккаунт с таким email существует, мы отправили инструкции по сбросу пароля.",
     "sendResetLink": "Отправить ссылку",
@@ -387,6 +389,7 @@
     "subscriptions": "Подписки"
   },
   "subscription": {
+    "purchaseOutcomeUnknown": "Ответ не получен. Операция могла выполниться. Восстановите соединение и обновите подписку в VPN-клиенте, затем проверьте подписку и баланс в кабинете перед повторной попыткой.",
     "title": "Подписка",
     "currentPlan": "Текущий тариф",
     "status": "Статус",
@@ -557,6 +560,7 @@
       "yourDevice": "Ваше устройство",
       "copyLink": "Скопировать ссылку",
       "copied": "Ссылка скопирована!",
+      "copyFailed": "Не удалось скопировать ссылку. Выделите и скопируйте текст выше.",
       "openLink": "Открыть ссылку",
       "instructions": "Инструкция",
       "changeApp": "Сменить приложение",
@@ -630,7 +634,26 @@
       "switched": "Тариф изменён",
       "notEnoughBalance": "Недостаточно средств",
       "dailyPayment": "Оплата за день",
-      "dailyChargeDescription": "Списывается ежедневно с баланса"
+      "dailyChargeDescription": "Списывается ежедневно с баланса",
+      "chooseTitle": "Выберите новый тариф",
+      "chooseHint": "На следующем шаге покажем точную стоимость перехода и изменения подписки.",
+      "choose": "Выбрать",
+      "alreadyOwned": "Уже подключён",
+      "noAlternatives": "Других доступных тарифов пока нет.",
+      "sourceContext": "Сейчас: {{name}}",
+      "validUntil": "Оплачено до {{date}}",
+      "reviewTitle": "Проверьте изменения",
+      "chooseAnother": "Выбрать другой тариф",
+      "previewError": "Не удалось рассчитать переход",
+      "newLimits": "Лимиты нового тарифа",
+      "endDate": "Дата окончания",
+      "keepTerm": "Оплаченный срок сохраняется. Смена тарифа не продлевает подписку.",
+      "toDailyTerm": "Остаток оплаченного срока не переносится. После перехода оплата будет списываться ежедневно.",
+      "fromDailyTerm": "При переходе оплачивается минимальный доступный период нового тарифа.",
+      "addonsNotice": "Докупленные устройства и пакеты трафика не переносятся. При смене сбрасываются привязки устройств.",
+      "totalNow": "К оплате сейчас",
+      "balanceAfter": "Останется на балансе: {{amount}}",
+      "confirm": "Подтвердить смену тарифа"
     },
     "switchTraffic": {
       "title": "Изменить трафик",
@@ -716,7 +739,8 @@
       "description": "Новая ссылка, сброс устройств",
       "warning": "Это действие сгенерирует новую ссылку подключения, сбросит все подключённые устройства и сделает старую ссылку недействительной. Продолжить?",
       "confirmBtn": "Перевыпустить",
-      "cooldown": "Доступно через {{minutes}} мин. {{seconds}} сек."
+      "cooldown": "Доступно через {{minutes}} мин. {{seconds}} сек.",
+      "partialWarning": "Новая ссылка готова, но сбросить все устройства не удалось. Проверьте список устройств."
     },
     "legacy": {
       "noTariff": "Без тарифа",
@@ -867,6 +891,7 @@
     }
   },
   "balance": {
+    "paymentRange": "От {{min}} до {{max}}",
     "title": "Баланс",
     "currentBalance": "Текущий баланс",
     "topUp": "Пополнить",
@@ -922,9 +947,6 @@
       "kassa_ai": {
         "description": "Оплата через Kassa AI"
       },
-      "paypear": {
-        "description": "Оплата через PayPear"
-      },
       "rollypay": {
         "description": "Оплата через RollyPay (СБП)"
       },
@@ -941,7 +963,10 @@
         "description": "Оплата СБП через Jupiter (FPGate P2P)"
       },
       "cispay": {
-        "description": "Оплата картой или через СБП (cisPay)"
+        "description": "Оплата через CisPay"
+      },
+      "anore": {
+        "description": "Оплата через Anore"
       },
       "tabpay": {
         "description": "Оплата картой или через СБП (TabPay)"
@@ -1296,10 +1321,11 @@
       "closed": "Закрыт"
     },
     "attachImage": "Прикрепить изображение",
+    "attachMedia": "Прикрепить фото или видео",
     "downloadFile": "Скачать файл",
     "invalidFileType": "Неверный тип файла. Используйте JPEG, PNG, GIF или WebP.",
     "fileTooLarge": "Файл слишком большой. Максимальный размер 10МБ.",
-    "uploadFailed": "Не удалось загрузить изображение",
+    "uploadFailed": "Не удалось загрузить вложение",
     "imageLoadFailed": "Не удалось загрузить изображение",
     "tooManyRequests": "Слишком много запросов. Подождите {{seconds}} сек.",
     "ticketsDisabled": "Тикеты отключены",
@@ -3275,7 +3301,6 @@
         "payments_wata": "Wata",
         "payments_riopay": "RioPay",
         "payments_severpay": "SeverPay",
-        "payments_paypear": "PayPear",
         "payments_rollypay": "RollyPay",
         "payments_aurapay": "AuraPay",
         "payments_etoplatezhi": "Etoplatezhi",
@@ -3283,6 +3308,7 @@
         "payments_jupiter": "Jupiter",
         "payments_cispay": "CisPay",
         "payments_tabpay": "TabPay",
+        "payments_anore": "Anore",
         "payments_paritypay": "ParityPay",
         "payments_donut": "Donut",
         "payments_lava": "Lava",
@@ -3786,6 +3812,8 @@
         "telegramOidcClientSecret": "Client Secret"
       },
       "categories": {
+        "ANORE": "Anore",
+        "CISPAY": "CisPay",
         "CABINET": "Кабинет",
         "INFO_PAGES": "Правовые документы и FAQ",
         "MENU": "Кнопка меню",
@@ -6648,6 +6676,7 @@
       "stickyPayButtonHint": "Кнопка оплаты прикреплена к низу экрана на телефоне"
     },
     "infoPages": {
+      "botFaq": "FAQ из бота",
       "title": "Информационные страницы",
       "subtitle": "Управление статическими информационными страницами",
       "create": "Создать страницу",

@@ -8,8 +8,13 @@ import { getErrorMessage } from '../../../utils/subscriptionHelpers';
 import { useCurrency } from '../../../hooks/useCurrency';
 import { usePromoDiscount } from '../../../hooks/usePromoDiscount';
 import { dailyPriceQuote } from '../purchase/dailyPrice';
+import { buttonVariants } from '@/components/primitives/Button/Button.variants';
+import { cn } from '@/lib/utils';
+import { Spinner } from '@/components/ui/Spinner';
+import { formatLiteDate } from '@/utils/liteDate';
+import { tariffTrafficLabel } from '@/utils/tariffTrafficLabel';
 import InsufficientBalancePrompt from '../../InsufficientBalancePrompt';
-import type { Tariff } from '../../../types';
+import type { Subscription, Tariff } from '../../../types';
 import { Skeleton, SkeletonGroup } from '../../ui/skeleton';
 
 // ──────────────────────────────────────────────────────────────────
@@ -57,6 +62,7 @@ export interface SwitchTariffSheetProps {
   tariffId: number | null;
   subscriptionId: number | undefined;
   tariffs: Tariff[];
+  subscription?: Subscription | null;
   onClose: () => void;
   onExpiredFallback: (tariff: Tariff) => void;
 }
@@ -66,6 +72,7 @@ export function SwitchTariffSheet({
   tariffId,
   subscriptionId,
   tariffs,
+  subscription,
   onClose,
   onExpiredFallback,
 }: SwitchTariffSheetProps) {
@@ -74,17 +81,24 @@ export function SwitchTariffSheet({
   const queryClient = useQueryClient();
   const { formatAmount, currencySymbol } = useCurrency();
   const { applyPromoDiscount } = usePromoDiscount();
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLHeadingElement>(null);
 
   const formatPrice = (kopeks: number) =>
     kopeks === 0
       ? t('subscription.free', 'Бесплатно')
       : `${formatAmount(kopeks / 100)}\u00A0${currencySymbol}`;
 
-  const { data: switchPreview, isLoading: switchPreviewLoading } = useQuery({
-    queryKey: ['tariff-switch-preview', tariffId],
+  const {
+    data: switchPreview,
+    isLoading: switchPreviewLoading,
+    isError: previewError,
+    error: previewFailure,
+    refetch,
+  } = useQuery({
+    queryKey: ['tariff-switch-preview', tariffId, subscriptionId],
     queryFn: () => subscriptionApi.previewTariffSwitch(tariffId!, subscriptionId),
     enabled: !!tariffId,
+    retry: false,
   });
 
   const switchMutation = useMutation({
@@ -92,6 +106,8 @@ export function SwitchTariffSheet({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['subscription', subscriptionId] });
       queryClient.invalidateQueries({ queryKey: ['purchase-options', subscriptionId] });
+      queryClient.invalidateQueries({ queryKey: ['subscriptions-list'] });
+      queryClient.invalidateQueries({ queryKey: ['balance'] });
       onClose();
       navigate('/subscriptions', { replace: true });
     },
@@ -110,152 +126,180 @@ export function SwitchTariffSheet({
     },
   });
 
-  // Smoothly scroll the panel into view when opened.
   useEffect(() => {
-    if (open && ref.current) {
-      const timer = setTimeout(() => {
-        ref.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }, 100);
-      return () => clearTimeout(timer);
-    }
+    if (open) ref.current?.focus();
   }, [open]);
 
   if (!open || !tariffId) return null;
+  const target = tariffs.find((tariff) => tariff.id === tariffId);
+  const dailyQuote = target ? dailyPriceQuote(target, applyPromoDiscount) : null;
+  const targetIsDaily = Boolean(target?.is_daily);
+  const periodicSwitch = subscription && !subscription.is_daily && !targetIsDaily;
 
   return (
-    <div ref={ref} className="mb-6 space-y-4 rounded-xl bg-dark-800/50 p-5">
-      <div className="flex items-center justify-between">
-        <h3 className="font-medium text-dark-100">{t('subscription.switchTariff.title')}</h3>
-        <button
-          onClick={onClose}
-          className="text-sm text-dark-400 hover:text-dark-200"
-          aria-label={t('common.close', 'Close')}
+    <section
+      className="space-y-4 rounded-xl bg-dark-800/50 p-5"
+      aria-labelledby="switch-review-title"
+    >
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h2
+          id="switch-review-title"
+          ref={ref}
+          tabIndex={-1}
+          className="font-medium text-dark-100 outline-none"
         >
-          ✕
+          {t('subscription.switchTariff.reviewTitle')}
+        </h2>
+        <button
+          type="button"
+          onClick={onClose}
+          disabled={switchMutation.isPending}
+          className="min-h-11 py-2 text-sm text-dark-300 underline decoration-dark-600 underline-offset-4 hover:text-dark-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-dark-100 disabled:opacity-50"
+        >
+          {t('subscription.switchTariff.chooseAnother')}
         </button>
       </div>
 
       {switchPreviewLoading ? (
-        <SkeletonGroup className="space-y-3">
-          <Skeleton variant="card" count={3} className="h-16" />
+        <SkeletonGroup className="space-y-4">
+          <Skeleton variant="card" className="h-40" />
+          <Skeleton className="h-12" />
         </SkeletonGroup>
-      ) : (
-        switchPreview &&
-        (() => {
-          const targetTariff = tariffs.find((tariff) => tariff.id === tariffId);
-          // Та же котировка, что на карточке и экране активации: промокод один раз.
-          const dailyQuote = targetTariff
-            ? dailyPriceQuote(targetTariff, applyPromoDiscount)
-            : null;
-          const dailyPrice = dailyQuote?.price ?? 0;
-          const isDailyTariff = dailyPrice > 0;
-
-          return (
-            <>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between gap-2 text-dark-300">
-                  <span className="shrink-0">{t('subscription.switchTariff.currentTariff')}</span>
-                  <span className="min-w-0 truncate font-medium text-dark-100">
-                    {switchPreview.current_tariff_name || '-'}
-                  </span>
-                </div>
-                <div className="flex justify-between gap-2 text-dark-300">
-                  <span className="shrink-0">{t('subscription.switchTariff.newTariff')}</span>
-                  <span className="min-w-0 truncate font-medium text-accent-400">
-                    {switchPreview.new_tariff_name}
-                  </span>
-                </div>
-                <div className="flex justify-between text-dark-300">
-                  <span>{t('subscription.switchTariff.remainingDays')}</span>
-                  <span>{switchPreview.remaining_days}</span>
-                </div>
-              </div>
-
-              {isDailyTariff && (
-                <div className="rounded-lg border border-accent-500/30 bg-accent-500/10 p-3 text-center">
-                  <div className="text-sm text-dark-300">
-                    {t('subscription.switchTariff.dailyPayment')}
+      ) : previewError ? (
+        <div role="alert" className="space-y-3">
+          <p className="text-sm text-dark-100">{t('subscription.switchTariff.previewError')}</p>
+          {previewFailure instanceof AxiosError && previewFailure.response?.data?.detail && (
+            <p className="text-sm text-dark-400">{getErrorMessage(previewFailure)}</p>
+          )}
+          <button type="button" className="btn-secondary" onClick={() => void refetch()}>
+            {t('common.retry')}
+          </button>
+        </div>
+      ) : switchPreview ? (
+        <>
+          <dl className="space-y-3 text-sm">
+            <div className="flex justify-between gap-3">
+              <dt className="text-sm text-dark-400">
+                {t('subscription.switchTariff.currentTariff')}
+              </dt>
+              <dd className="min-w-0 break-words text-end font-medium text-dark-100">
+                {switchPreview.current_tariff_name || '—'}
+              </dd>
+            </div>
+            <div className="flex justify-between gap-3">
+              <dt className="text-sm text-dark-400">{t('subscription.switchTariff.newTariff')}</dt>
+              <dd className="min-w-0 break-words text-end font-medium text-accent-400">
+                {switchPreview.new_tariff_name}
+              </dd>
+            </div>
+            {target && (
+              <div className="flex justify-between gap-3">
+                <dt className="text-sm text-dark-400">
+                  {t('subscription.switchTariff.newLimits')}
+                </dt>
+                <dd className="min-w-0 space-y-1 text-end text-sm text-dark-100">
+                  <div>{tariffTrafficLabel(target.traffic_limit_gb, t)}</div>
+                  <div>
+                    {target.device_limit === 0
+                      ? t('lite.tariff.unlimitedDevices')
+                      : t('subscription.devices', { count: target.device_limit })}
                   </div>
-                  <div className="text-lg font-bold text-accent-400">{formatPrice(dailyPrice)}</div>
-                  <div className="mt-1 text-xs text-dark-400">
-                    {t('subscription.switchTariff.dailyChargeDescription')}
-                  </div>
-                </div>
-              )}
-
-              {/* Цены — столбиком справа и целиком, без отрыва «₽»; подпись и
-                  скидка — слева в остатке строки. */}
-              <div className="flex items-start justify-between gap-3 border-t border-dark-700/50 pt-3">
-                <div className="min-w-0">
-                  <span className="font-medium text-dark-100">
-                    {t('subscription.switchTariff.upgradeCost')}
-                  </span>
-                  {switchPreview.discount_percent != null && switchPreview.discount_percent > 0 && (
-                    <span className="ml-2 inline-block rounded-full bg-success-500/20 px-2 py-0.5 text-xs font-medium text-success-400">
-                      -{switchPreview.discount_percent}%
-                    </span>
-                  )}
-                </div>
-                <div className="flex shrink-0 flex-col items-end">
-                  {switchPreview.discount_percent != null &&
-                    switchPreview.discount_percent > 0 &&
-                    switchPreview.base_upgrade_cost_kopeks &&
-                    switchPreview.base_upgrade_cost_kopeks > 0 && (
-                      <span className="whitespace-nowrap text-sm text-dark-500 line-through">
-                        {formatPrice(switchPreview.base_upgrade_cost_kopeks)}
-                      </span>
-                    )}
-                  <span
-                    className={`whitespace-nowrap text-lg font-bold ${switchPreview.upgrade_cost_kopeks === 0 ? 'text-success-400' : 'text-accent-400'}`}
-                  >
-                    {/* Свой формат, как у зачёркнутой цены рядом: подпись бота
-                        приходит как «1234567.89 ₽». */}
-                    {switchPreview.upgrade_cost_kopeks > 0
-                      ? formatPrice(switchPreview.upgrade_cost_kopeks)
-                      : t('subscription.switchTariff.free')}
-                  </span>
-                </div>
+                </dd>
               </div>
-
-              {!switchPreview.has_enough_balance && switchPreview.upgrade_cost_kopeks > 0 && (
-                <InsufficientBalancePrompt
-                  missingAmountKopeks={switchPreview.missing_amount_kopeks}
-                  compact
-                />
-              )}
-
-              <button
-                onClick={() => switchMutation.mutate(tariffId)}
-                disabled={switchMutation.isPending || !switchPreview.can_switch}
-                className="btn-primary w-full py-2.5"
-              >
-                {switchMutation.isPending ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                  </span>
-                ) : (
-                  t('subscription.switchTariff.switch')
+            )}
+            <div className="flex justify-between gap-3">
+              <dt className="text-sm text-dark-400">
+                {t(
+                  periodicSwitch
+                    ? 'subscription.switchTariff.endDate'
+                    : 'subscription.switchTariff.remainingDays',
                 )}
-              </button>
+              </dt>
+              <dd className="min-w-0 text-end text-sm text-dark-100">
+                {periodicSwitch
+                  ? formatLiteDate(subscription.end_date)
+                  : switchPreview.remaining_days}
+              </dd>
+            </div>
+          </dl>
 
-              {switchMutation.isError &&
-                (() => {
-                  // Suppress the toast when the purchase-flow fallback already
-                  // triggered (expired / trial): the parent is now showing the
-                  // regular purchase form, so the raw axios message would mislead.
-                  if (shouldUsePurchaseFlow(switchMutation.error)) {
-                    return null;
-                  }
-                  return (
-                    <div className="mt-3 text-center text-sm text-error-400">
-                      {getErrorMessage(switchMutation.error)}
-                    </div>
-                  );
-                })()}
-            </>
-          );
-        })()
-      )}
-    </div>
+          {subscription && (
+            <p className="text-xs leading-relaxed text-dark-400">
+              {t(
+                periodicSwitch
+                  ? 'subscription.switchTariff.keepTerm'
+                  : targetIsDaily
+                    ? 'subscription.switchTariff.toDailyTerm'
+                    : 'subscription.switchTariff.fromDailyTerm',
+              )}
+            </p>
+          )}
+          {targetIsDaily && dailyQuote && (
+            <p className="text-sm text-dark-300">
+              {t('subscription.switchTariff.dailyPayment')}:{' '}
+              <strong className="font-semibold text-dark-100">
+                {formatPrice(dailyQuote.price)}
+              </strong>
+            </p>
+          )}
+          <p className="text-xs leading-relaxed text-dark-400">
+            {t('subscription.switchTariff.addonsNotice')}
+          </p>
+
+          <div className="flex items-start justify-between gap-3 border-t border-dark-700/50 pt-3">
+            <div className="min-w-0 space-y-1">
+              <p className="font-medium text-dark-100">{t('subscription.switchTariff.totalNow')}</p>
+              {switchPreview.has_enough_balance && (
+                <p className="text-sm text-dark-400">
+                  {t('subscription.switchTariff.balanceAfter', {
+                    amount: `${formatAmount((switchPreview.balance_kopeks - switchPreview.upgrade_cost_kopeks) / 100)}\u00a0${currencySymbol}`,
+                  })}
+                </p>
+              )}
+            </div>
+            <div className="shrink-0 text-end">
+              {switchPreview.base_upgrade_cost_kopeks != null &&
+                switchPreview.base_upgrade_cost_kopeks > switchPreview.upgrade_cost_kopeks && (
+                  <p className="text-sm text-dark-500 line-through">
+                    {formatPrice(switchPreview.base_upgrade_cost_kopeks)}
+                  </p>
+                )}
+              <p className="text-lg font-bold tabular-nums text-accent-400">
+                {formatPrice(switchPreview.upgrade_cost_kopeks)}
+              </p>
+            </div>
+          </div>
+          {!switchPreview.has_enough_balance && switchPreview.upgrade_cost_kopeks > 0 && (
+            <InsufficientBalancePrompt
+              missingAmountKopeks={switchPreview.missing_amount_kopeks}
+              compact
+            />
+          )}
+          <button
+            type="button"
+            onClick={() => switchMutation.mutate(tariffId)}
+            disabled={switchMutation.isPending || !switchPreview.can_switch}
+            className={cn(
+              buttonVariants({ variant: 'primary', size: 'lg', fullWidth: true }),
+              'shadow-none hover:bg-accent-500 hover:shadow-none active:bg-accent-500 focus-visible:ring-dark-100',
+            )}
+          >
+            {switchMutation.isPending ? (
+              <>
+                <Spinner className="h-4 w-4 border-current border-t-transparent" />
+                {t('common.loading')}
+              </>
+            ) : (
+              t('subscription.switchTariff.confirm')
+            )}
+          </button>
+          {switchMutation.isError && !shouldUsePurchaseFlow(switchMutation.error) && (
+            <p role="alert" className="text-sm text-error-400">
+              {getErrorMessage(switchMutation.error)}
+            </p>
+          )}
+        </>
+      ) : null}
+    </section>
   );
 }

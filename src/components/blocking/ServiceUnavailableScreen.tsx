@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
+import { useAuthStore } from '../../store/auth';
+import { tokenStorage } from '../../utils/token';
 import { useBlockingStore } from '../../store/blocking';
 import { useFocusTrap } from '../../hooks/useFocusTrap';
 import { pingBackend, hasEverReachedBackend } from '../../api/health';
@@ -24,9 +26,18 @@ export default function ServiceUnavailableScreen() {
   const [isChecking, setIsChecking] = useState(false);
   const isCheckingRef = useRef(false);
 
-  const recover = useCallback(() => {
-    clearBlocking();
+  const recover = useCallback(async () => {
     if (hasEverReachedBackend()) {
+      // Branding or another public request can succeed before auth bootstrap.
+      // Resume a transport-interrupted session before uncovering the routes.
+      try {
+        await useAuthStore.getState().initialize();
+      } catch {
+        return false;
+      }
+      if (!useAuthStore.getState().isAuthenticated && tokenStorage.getRefreshToken()) return false;
+      if (useBlockingStore.getState().blockingType !== 'backend_unavailable') return true;
+      clearBlocking();
       // The app was already loaded and merely covered by this overlay — its
       // routes/forms are still mounted with their state. Lift the overlay and
       // refetch instead of a hard reload that would discard unsaved input.
@@ -36,6 +47,7 @@ export default function ServiceUnavailableScreen() {
       // to re-bootstrap cleanly now that it is back.
       window.location.reload();
     }
+    return true;
   }, [clearBlocking, queryClient]);
 
   // Manual retry: immediate probe with a visible checking state.
@@ -45,7 +57,7 @@ export default function ServiceUnavailableScreen() {
     setIsChecking(true);
     try {
       if (await pingBackend()) {
-        recover();
+        await recover();
       }
     } finally {
       isCheckingRef.current = false;
@@ -61,10 +73,7 @@ export default function ServiceUnavailableScreen() {
     let timer: ReturnType<typeof setTimeout> | undefined;
     const tick = async () => {
       if (cancelled) return;
-      if (await pingBackend()) {
-        if (!cancelled) recover();
-        return;
-      }
+      if ((await pingBackend()) && !cancelled && (await recover())) return;
       if (!cancelled) timer = setTimeout(tick, HEALTH.RECOVERY_POLL_INTERVAL_MS);
     };
     void tick();

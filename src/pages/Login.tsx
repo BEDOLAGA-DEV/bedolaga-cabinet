@@ -16,7 +16,7 @@ import {
   type EmailAuthEnabled,
 } from '../api/branding';
 import { getAndClearReturnUrl, tokenStorage } from '../utils/token';
-import { getApiErrorMessage } from '../utils/api-error';
+import { getApiErrorCode, getApiErrorMessage } from '../utils/api-error';
 import { isInTelegramWebApp, getTelegramInitData, useTelegramSDK } from '../hooks/useTelegramSDK';
 import { closeMiniApp } from '@telegram-apps/sdk-react';
 import LanguageSwitcher from '../components/LanguageSwitcher';
@@ -119,6 +119,7 @@ export default function Login() {
       const data = await brandingApi.getBranding();
       setCachedBranding(data);
       await preloadLogo(data);
+      setLogoUrl(brandingApi.getLogoUrl(data));
       return data;
     },
     staleTime: 60000,
@@ -181,7 +182,25 @@ export default function Login() {
 
   const appName = branding ? branding.name : import.meta.env.VITE_APP_NAME || 'VPN';
   const appLogo = branding?.logo_letter || import.meta.env.VITE_APP_LOGO || 'V';
-  const logoUrl = branding ? brandingApi.getLogoUrl(branding) : null;
+  const [logoUrl, setLogoUrl] = useState<string | null>(() =>
+    branding ? brandingApi.getLogoUrl(branding) : null,
+  );
+
+  useEffect(() => {
+    let active = true;
+    if (!branding?.has_custom_logo) {
+      setLogoUrl(null);
+      return;
+    }
+    // Query data may be identical to the cached branding. The blob finishing
+    // still needs its own state update, without waiting for a form interaction.
+    void preloadLogo(branding).then(() => {
+      if (active) setLogoUrl(brandingApi.getLogoUrl(branding));
+    });
+    return () => {
+      active = false;
+    };
+  }, [branding]);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -197,14 +216,17 @@ export default function Login() {
     if (isAuthInitializing) return;
 
     const tryTelegramAuth = async () => {
-      const initData = getTelegramInitData();
-      if (!isInTelegramWebApp() || !initData) return;
+      const initialInitData = getTelegramInitData();
+      if (!isInTelegramWebApp() || !initialInitData) return;
 
       setIsTelegramWebApp(true);
       setIsLoading(true);
 
       const MAX_RETRIES = 1;
       for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+        // The bridge may deliver fresh launch data while a rejected attempt waits.
+        // Keep this attempt's credential for any subsequent consent confirmation.
+        const initData = getTelegramInitData() || initialInitData;
         try {
           await loginWithTelegram(initData);
           navigate(getReturnUrl(), { replace: true });
@@ -320,7 +342,21 @@ export default function Login() {
         return;
       }
 
-      if (status === 400 && detail.includes('already registered')) {
+      if (status === 403 && getApiErrorCode(err) === 'email_auth_disabled') {
+        setError(
+          t(
+            'auth.emailAuthDisabled',
+            'Email sign-in is disabled. Use another available sign-in method.',
+          ),
+        );
+      } else if (status === 403 && getApiErrorCode(err) === 'registration_invite_required') {
+        setError(
+          t(
+            'auth.registrationInviteRequired',
+            'Registration is by invitation only. Ask the service administrator for an invitation.',
+          ),
+        );
+      } else if (status === 400 && detail.includes('already registered')) {
         setError(t('auth.emailAlreadyRegistered', 'This email is already registered'));
       } else if (status === 401 || status === 403) {
         if (detail.includes('verify your email')) {

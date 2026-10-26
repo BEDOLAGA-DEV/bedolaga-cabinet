@@ -1,3 +1,4 @@
+import { tariffTrafficLabel } from '../../../utils/tariffTrafficLabel';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
@@ -7,6 +8,7 @@ import { getErrorMessage, getInsufficientBalanceError } from '../../../utils/sub
 import { useCurrency } from '../../../hooks/useCurrency';
 import { usePromoDiscount } from '../../../hooks/usePromoDiscount';
 import { dailyPriceQuote } from './dailyPrice';
+import { customDaysPrice } from './customDaysPrice';
 import { usePlatform } from '../../../platform';
 import { openPaymentUrl } from '../../../utils/openPaymentUrl';
 import { getMonthlyPriceKopeks } from '../../../utils/pricing';
@@ -62,8 +64,11 @@ export function TariffPurchaseForm({
   const { applyPromoDiscount } = usePromoDiscount();
   // Та же котировка, что на карточке тарифа: серверная цена + промокод один раз.
   const dailyQuote = dailyPriceQuote(tariff, applyPromoDiscount);
+  const customDayUnitPrice =
+    tariff.custom_days_pricing?.price_per_day_kopeks ?? tariff.price_per_day_kopeks ?? 0;
   const { openLink, platform } = usePlatform();
   const ref = useRef<HTMLDivElement>(null);
+  const checkoutAttempt = useRef<{ signature: string; id: string } | null>(null);
 
   const formatPrice = (kopeks: number) =>
     kopeks === 0
@@ -98,11 +103,25 @@ export function TariffPurchaseForm({
       // uses it to resolve the exact target row by ID, avoiding the
       // race with concurrent panel webhooks that would otherwise hit
       // the partial UNIQUE on uq_subscriptions_user_tariff_active.
+      if (isDailyTariff) {
+        return subscriptionApi.purchaseTariff(tariff.id, days, trafficGb, subscriptionId);
+      }
+      const signature = JSON.stringify([tariff.id, days, trafficGb, subscriptionId]);
+      if (checkoutAttempt.current?.signature !== signature) {
+        // A retry keeps its identity even if the balance or quote was refreshed.
+        const bytes = crypto.getRandomValues(new Uint8Array(16));
+        bytes[6] = (bytes[6] & 0x0f) | 0x40;
+        bytes[8] = (bytes[8] & 0x3f) | 0x80;
+        const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
+        const id = `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+        checkoutAttempt.current = { signature, id };
+      }
       return subscriptionApi.purchaseTariff(
         tariff.id,
         days,
         trafficGb,
-        subscriptionId ?? undefined,
+        subscriptionId,
+        checkoutAttempt.current.id,
       );
     },
     onSuccess: () => {
@@ -116,7 +135,8 @@ export function TariffPurchaseForm({
   // СБП-оформление: первое списание = подтверждение привязки в банке; период
   // на форме не участвует — списания идут по каденс-правилу тарифа.
   const sbpPurchaseMutation = useMutation({
-    mutationFn: () => subscriptionApi.purchaseWithSbpRecurring(tariff.id),
+    mutationFn: () =>
+      subscriptionApi.purchaseWithSbpRecurring(tariff.id, subscriptionId ?? undefined),
     onSuccess: (data) => {
       if (data.redirect_url) {
         openPaymentUrl(data.redirect_url, platform, openLink);
@@ -157,7 +177,8 @@ export function TariffPurchaseForm({
   );
 
   const lavaPurchaseMutation = useMutation({
-    mutationFn: () => subscriptionApi.purchaseWithLavaRecurring(tariff.id),
+    mutationFn: () =>
+      subscriptionApi.purchaseWithLavaRecurring(tariff.id, subscriptionId ?? undefined),
     onSuccess: (data) => {
       if (data.redirect_url) {
         openPaymentUrl(data.redirect_url, platform, openLink);
@@ -198,7 +219,8 @@ export function TariffPurchaseForm({
   );
 
   const casheraPurchaseMutation = useMutation({
-    mutationFn: () => subscriptionApi.purchaseWithCasheraRecurring(tariff.id),
+    mutationFn: () =>
+      subscriptionApi.purchaseWithCasheraRecurring(tariff.id, subscriptionId ?? undefined),
     onSuccess: (data) => {
       if (data.redirect_url) {
         openPaymentUrl(data.redirect_url, platform, openLink);
@@ -262,7 +284,9 @@ export function TariffPurchaseForm({
         <div className="flex flex-wrap gap-4 text-sm">
           <div>
             <span className="text-dark-500">{t('subscription.traffic')}:</span>
-            <span className="ml-2 text-dark-200">{tariff.traffic_limit_label}</span>
+            <span className="ml-2 text-dark-200">
+              {tariffTrafficLabel(tariff.traffic_limit_gb, t)}
+            </span>
           </div>
           <div>
             <span className="text-dark-500">{t('subscription.devices')}:</span>
@@ -454,7 +478,7 @@ export function TariffPurchaseForm({
             {/* No periods available fallback */}
             {tariff.periods.length === 0 &&
               !useCustomDays &&
-              !(tariff.custom_days_enabled && (tariff.price_per_day_kopeks ?? 0) > 0) && (
+              !(tariff.custom_days_enabled && customDayUnitPrice > 0) && (
                 <div className="rounded-xl border border-warning-500/30 bg-warning-500/10 p-4 text-center">
                   <div className="mb-2 text-sm font-medium text-warning-400">
                     {t('subscription.noPeriodsAvailable')}
@@ -469,7 +493,7 @@ export function TariffPurchaseForm({
               )}
 
             {/* Custom days option */}
-            {tariff.custom_days_enabled && (tariff.price_per_day_kopeks ?? 0) > 0 && (
+            {tariff.custom_days_enabled && customDayUnitPrice > 0 && (
               <div className="rounded-xl border border-dark-700/50 bg-dark-800/50 p-4">
                 <div className="mb-3 flex items-center justify-between">
                   <span className="font-medium text-dark-200">
@@ -523,12 +547,10 @@ export function TariffPurchaseForm({
                       />
                     </div>
                     {(() => {
-                      const basePrice = customDays * (tariff.price_per_day_kopeks ?? 0);
-                      const existingOriginal =
-                        tariff.original_price_per_day_kopeks &&
-                        tariff.original_price_per_day_kopeks > (tariff.price_per_day_kopeks ?? 0)
-                          ? customDays * tariff.original_price_per_day_kopeks
-                          : undefined;
+                      const { price: basePrice, original: existingOriginal } = customDaysPrice(
+                        tariff,
+                        customDays,
+                      );
                       const promoCustom = applyPromoDiscount(basePrice, existingOriginal);
                       return (
                         <div className="flex flex-wrap justify-between gap-x-3 text-sm">
@@ -536,9 +558,14 @@ export function TariffPurchaseForm({
                           <span className="text-dark-400">
                             {t('subscription.days', { count: customDays })} ×{' '}
                             <span className="whitespace-nowrap">
-                              {formatPrice(tariff.price_per_day_kopeks ?? 0)}
+                              {formatPrice(customDayUnitPrice)}
                               {t('subscription.customDays.perDay')}
                             </span>
+                            {tariff.extra_devices_count > 0 && (
+                              <span className="block">
+                                + {t('subscription.extraDevices')} ({tariff.extra_devices_count})
+                              </span>
+                            )}
                           </span>
                           <div className="flex items-center gap-2 whitespace-nowrap">
                             <span className="font-medium text-accent-400">
@@ -601,7 +628,7 @@ export function TariffPurchaseForm({
                 {!useCustomTraffic && (
                   <div className="text-sm text-dark-400">
                     {t('subscription.customTraffic.default', {
-                      label: tariff.traffic_limit_label,
+                      label: tariffTrafficLabel(tariff.traffic_limit_gb, t),
                     })}
                   </div>
                 )}
@@ -662,14 +689,12 @@ export function TariffPurchaseForm({
           {(selectedTariffPeriod || useCustomDays) && (
             <div className="rounded-xl bg-dark-800/50 p-5">
               {(() => {
+                const customQuote = customDaysPrice(tariff, customDays);
                 const basePeriodPrice = useCustomDays
-                  ? customDays * (tariff.price_per_day_kopeks ?? 0)
+                  ? customQuote.price
                   : selectedTariffPeriod?.price_kopeks || 0;
                 const existingPeriodOriginal = useCustomDays
-                  ? tariff.original_price_per_day_kopeks &&
-                    tariff.original_price_per_day_kopeks > (tariff.price_per_day_kopeks ?? 0)
-                    ? customDays * tariff.original_price_per_day_kopeks
-                    : undefined
+                  ? customQuote.original
                   : selectedTariffPeriod?.original_price_kopeks &&
                       selectedTariffPeriod.original_price_kopeks > selectedTariffPeriod.price_kopeks
                     ? selectedTariffPeriod.original_price_kopeks

@@ -250,6 +250,8 @@
     "invalidEmail": "Please enter a valid email address",
     "emailAlreadyRegistered": "This email is already registered",
     "invalidCredentials": "Invalid email or password",
+    "registrationInviteRequired": "Registration is by invitation only. Ask the service administrator for an invitation.",
+    "emailAuthDisabled": "Email sign-in is disabled. Use another available sign-in method.",
     "tooManyAttempts": "Too many attempts. Please try again later",
     "verificationEmailNotice": "After registration, a verification email will be sent to your address",
     "legalConsentPrefix": "I have read the",
@@ -379,6 +381,7 @@
     "subscriptions": "Subscriptions"
   },
   "subscription": {
+    "purchaseOutcomeUnknown": "No response was received. The operation may have completed. Restore your connection and refresh the subscription in your VPN client, then check your subscription and balance in the cabinet before trying again.",
     "title": "Subscription",
     "currentPlan": "Current Plan",
     "status": "Status",
@@ -537,6 +540,7 @@
       "yourDevice": "Your device",
       "copyLink": "Copy subscription link",
       "copied": "Link copied!",
+      "copyFailed": "Could not copy the link. Select and copy the text above.",
       "openLink": "Open link",
       "instructions": "Instructions",
       "changeApp": "Change app",
@@ -610,7 +614,26 @@
       "switched": "Tariff switched",
       "notEnoughBalance": "Insufficient balance",
       "dailyPayment": "Daily payment",
-      "dailyChargeDescription": "Charged daily from your balance"
+      "dailyChargeDescription": "Charged daily from your balance",
+      "chooseTitle": "Choose a new plan",
+      "chooseHint": "Next, we will show the exact switching cost and subscription changes.",
+      "choose": "Choose",
+      "alreadyOwned": "Already active",
+      "noAlternatives": "No other plans are available yet.",
+      "sourceContext": "Current plan: {{name}}",
+      "validUntil": "Paid until {{date}}",
+      "reviewTitle": "Review changes",
+      "chooseAnother": "Choose another plan",
+      "previewError": "Unable to calculate the switch",
+      "newLimits": "New plan limits",
+      "endDate": "Expiry date",
+      "keepTerm": "Your paid expiry date stays the same. Switching does not extend the subscription.",
+      "toDailyTerm": "Your remaining paid time will not carry over. After switching, payments will be charged daily.",
+      "fromDailyTerm": "Switching charges for the shortest available period of the new plan.",
+      "addonsNotice": "Extra devices and traffic packages do not carry over. Switching resets registered devices.",
+      "totalNow": "Pay now",
+      "balanceAfter": "Balance after switching: {{amount}}",
+      "confirm": "Confirm plan change"
     },
     "switchTraffic": {
       "title": "Change Traffic",
@@ -690,7 +713,8 @@
       "description": "New link, device reset",
       "warning": "This will generate a new connection link, reset all connected devices, and invalidate the old link. Continue?",
       "confirmBtn": "Reissue",
-      "cooldown": "Available in {{minutes}} min {{seconds}} sec"
+      "cooldown": "Available in {{minutes}} min {{seconds}} sec",
+      "partialWarning": "Your new link is ready, but not all devices could be reset. Check the device list."
     },
     "legacy": {
       "noTariff": "No plan",
@@ -839,6 +863,7 @@
     }
   },
   "balance": {
+    "paymentRange": "From {{min}} to {{max}}",
     "title": "Balance",
     "currentBalance": "Current Balance",
     "topUp": "Top Up",
@@ -894,9 +919,6 @@
       "kassa_ai": {
         "description": "Pay via Kassa AI"
       },
-      "paypear": {
-        "description": "Pay via PayPear"
-      },
       "rollypay": {
         "description": "Pay via RollyPay (SBP)"
       },
@@ -913,7 +935,10 @@
         "description": "Pay via SBP through Jupiter (FPGate P2P)"
       },
       "cispay": {
-        "description": "Pay by card or via SBP (cisPay)"
+        "description": "Pay via CisPay"
+      },
+      "anore": {
+        "description": "Pay via Anore"
       },
       "tabpay": {
         "description": "Pay by card or via SBP (TabPay)"
@@ -1268,10 +1293,11 @@
       "closed": "Closed"
     },
     "attachImage": "Attach image",
+    "attachMedia": "Attach photo or video",
     "downloadFile": "Download file",
     "invalidFileType": "Invalid file type. Use JPEG, PNG, GIF or WebP.",
     "fileTooLarge": "File is too large. Maximum size is 10MB.",
-    "uploadFailed": "Failed to upload image",
+    "uploadFailed": "Failed to upload attachment",
     "imageLoadFailed": "Failed to load image",
     "tooManyRequests": "Too many requests. Please wait {{seconds}} sec.",
     "ticketsDisabled": "Tickets Disabled",
@@ -3229,7 +3255,6 @@
         "payments_wata": "Wata",
         "payments_riopay": "RioPay",
         "payments_severpay": "SeverPay",
-        "payments_paypear": "PayPear",
         "payments_rollypay": "RollyPay",
         "payments_aurapay": "AuraPay",
         "payments_etoplatezhi": "Etoplatezhi",
@@ -3237,6 +3262,7 @@
         "payments_jupiter": "Jupiter",
         "payments_cispay": "CisPay",
         "payments_tabpay": "TabPay",
+        "payments_anore": "Anore",
         "payments_paritypay": "ParityPay",
         "payments_donut": "Donut",
         "payments_lava": "Lava",
@@ -3287,6 +3313,8 @@
         "payments_cashera": "Cashera"
       },
       "categories": {
+        "ANORE": "Anore",
+        "CISPAY": "CisPay",
         "CABINET": "Cabinet",
         "INFO_PAGES": "Legal documents and FAQ",
         "MENU": "Menu button",
@@ -6054,6 +6082,7 @@
       "stickyPayButtonHint": "Button pinned to bottom of screen on mobile"
     },
     "infoPages": {
+      "botFaq": "Bot FAQ",
       "title": "Information Pages",
       "subtitle": "Manage static information pages",
       "create": "Create Page",

@@ -254,6 +254,8 @@
     "firstNamePlaceholder": "نام شما (اختیاری)",
     "forgotPasswordHint": "ایمیل خود را وارد کنید تا لینک بازنشانی دریافت کنید",
     "invalidCredentials": "ایمیل یا رمز عبور نامعتبر",
+    "registrationInviteRequired": "ثبت‌نام فقط با دعوت امکان‌پذیر است. برای دریافت دعوت‌نامه با مدیر سرویس تماس بگیرید.",
+    "emailAuthDisabled": "ورود با ایمیل غیرفعال است. از روش دیگری برای ورود استفاده کنید.",
     "invalidEmail": "لطفاً یک آدرس ایمیل معتبر وارد کنید",
     "loginSuccess": "ورود موفق",
     "passwordMismatch": "رمزهای عبور مطابقت ندارند",
@@ -350,6 +352,7 @@
     "validUntil": "معتبر تا {{date}}"
   },
   "subscription": {
+    "purchaseOutcomeUnknown": "پاسخی دریافت نشد. ممکن است عملیات انجام شده باشد. اتصال را برقرار و اشتراک را در برنامه VPN به‌روزرسانی کنید، سپس پیش از تلاش دوباره اشتراک و موجودی را در پنل بررسی کنید.",
     "title": "اشتراک",
     "currentPlan": "پلن فعلی",
     "status": "وضعیت",
@@ -460,6 +463,7 @@
       "yourDevice": "دستگاه شما",
       "copyLink": "کپی لینک اشتراک",
       "copied": "لینک کپی شد!",
+      "copyFailed": "کپی پیوند انجام نشد. متن بالا را انتخاب و کپی کنید.",
       "openLink": "باز کردن لینک",
       "changeApp": "تغییر برنامه",
       "selectPlatform": "انتخاب پلتفرم",
@@ -534,7 +538,8 @@
       "description": "لینک جدید، بازنشانی دستگاه‌ها",
       "warning": "این عمل لینک اتصال جدیدی تولید می‌کند، همه دستگاه‌های متصل را بازنشانی می‌کند و لینک قدیمی را نامعتبر می‌کند. ادامه؟",
       "confirmBtn": "صدور مجدد",
-      "cooldown": "در {{minutes}} دقیقه {{seconds}} ثانیه دیگر"
+      "cooldown": "در {{minutes}} دقیقه {{seconds}} ثانیه دیگر",
+      "partialWarning": "لینک جدید آماده است، اما بازنشانی همه دستگاه‌ها انجام نشد. فهرست دستگاه‌ها را بررسی کنید."
     },
     "legacy": {
       "noTariff": "بدون تعرفه",
@@ -551,7 +556,26 @@
       "remainingDays": "روزهای باقی‌مانده",
       "switch": "تغییر",
       "title": "تغییر تعرفه",
-      "upgradeCost": "هزینه ارتقا"
+      "upgradeCost": "هزینه ارتقا",
+      "chooseTitle": "طرح جدید را انتخاب کنید",
+      "chooseHint": "در مرحله بعد، هزینه دقیق تغییر و جزئیات اشتراک نمایش داده می‌شود.",
+      "choose": "انتخاب",
+      "alreadyOwned": "از قبل فعال است",
+      "noAlternatives": "در حال حاضر طرح دیگری در دسترس نیست.",
+      "sourceContext": "طرح فعلی: {{name}}",
+      "validUntil": "پرداخت‌شده تا {{date}}",
+      "reviewTitle": "بررسی تغییرات",
+      "chooseAnother": "انتخاب طرح دیگر",
+      "previewError": "محاسبه هزینه تغییر ممکن نشد",
+      "newLimits": "محدودیت‌های طرح جدید",
+      "endDate": "تاریخ انقضا",
+      "keepTerm": "تاریخ انقضای پرداخت‌شده حفظ می‌شود. تغییر طرح، اشتراک را تمدید نمی‌کند.",
+      "toDailyTerm": "زمان پرداخت‌شده باقی‌مانده منتقل نمی‌شود. پس از تغییر، هزینه به‌صورت روزانه کسر می‌شود.",
+      "fromDailyTerm": "هنگام تغییر، هزینه کوتاه‌ترین دوره موجود طرح جدید دریافت می‌شود.",
+      "addonsNotice": "دستگاه‌ها و بسته‌های ترافیک اضافه منتقل نمی‌شوند. با تغییر طرح، دستگاه‌های ثبت‌شده بازنشانی می‌شوند.",
+      "totalNow": "مبلغ قابل پرداخت اکنون",
+      "balanceAfter": "موجودی پس از تغییر: {{amount}}",
+      "confirm": "تأیید تغییر طرح"
     },
     "promoGroup": {
       "yourGroup": "گروه شما: {{name}}",
@@ -756,6 +780,7 @@
     }
   },
   "balance": {
+    "paymentRange": "از {{min}} تا {{max}}",
     "title": "موجودی",
     "currentBalance": "موجودی فعلی",
     "topUp": "شارژ",
@@ -788,7 +813,10 @@
         "description": "پرداخت SBP از طریق Jupiter (FPGate P2P)"
       },
       "cispay": {
-        "description": "پرداخت با کارت یا SBP از طریق cisPay"
+        "description": "پرداخت از طریق CisPay"
+      },
+      "anore": {
+        "description": "پرداخت از طریق Anore"
       },
       "tabpay": {
         "description": "پرداخت با کارت یا SBP از طریق TabPay"
@@ -1141,10 +1169,11 @@
       "closed": "بسته"
     },
     "attachImage": "پیوست تصویر",
+    "attachMedia": "پیوست عکس یا ویدیو",
     "downloadFile": "دانلود فایل",
     "invalidFileType": "نوع فایل نامعتبر. از JPEG، PNG، GIF یا WebP استفاده کنید.",
     "fileTooLarge": "فایل خیلی بزرگ است. حداکثر 10MB.",
-    "uploadFailed": "آپلود تصویر ناموفق",
+    "uploadFailed": "بارگذاری پیوست ناموفق بود",
     "imageLoadFailed": "بارگذاری تصویر ناموفق",
     "tooManyRequests": "درخواست‌های زیادی ارسال شده. لطفاً {{seconds}} ثانیه صبر کنید.",
     "contactSupport": "برای پشتیبانی با {{username}} تماس بگیرید",
@@ -2265,7 +2294,6 @@
         "payments_wata": "Wata",
         "payments_riopay": "RioPay",
         "payments_severpay": "SeverPay",
-        "payments_paypear": "PayPear",
         "payments_rollypay": "RollyPay",
         "payments_aurapay": "AuraPay",
         "payments_etoplatezhi": "Etoplatezhi",
@@ -2273,6 +2301,7 @@
         "payments_jupiter": "Jupiter",
         "payments_cispay": "CisPay",
         "payments_tabpay": "TabPay",
+        "payments_anore": "Anore",
         "payments_paritypay": "ParityPay",
         "payments_donut": "Donut",
         "payments_lava": "Lava",
@@ -2323,6 +2352,8 @@
         "payments_cashera": "Cashera"
       },
       "categories": {
+        "ANORE": "Anore",
+        "CISPAY": "CisPay",
         "CABINET": "کابین",
         "INFO_PAGES": "اسناد حقوقی و پرسش‌های متداول",
         "MENU": "دکمه منو",
@@ -5669,6 +5700,7 @@
       "stickyPayButtonHint": "دکمه پرداخت در موبایل پایین صفحه ثابت می‌ماند"
     },
     "infoPages": {
+      "botFaq": "پرسش‌های متداول ربات",
       "title": "صفحات اطلاعات",
       "subtitle": "مدیریت صفحات اطلاعات ثابت",
       "create": "ایجاد صفحه",

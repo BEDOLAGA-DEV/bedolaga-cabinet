@@ -249,6 +249,8 @@
     "firstNamePlaceholder": "您的名字（可选）",
     "forgotPasswordHint": "输入邮箱以接收重置链接",
     "invalidCredentials": "邮箱或密码无效",
+    "registrationInviteRequired": "仅限受邀用户注册。请联系服务管理员获取邀请。",
+    "emailAuthDisabled": "邮箱登录已停用。请使用其他可用的登录方式。",
     "invalidEmail": "请输入有效的邮箱地址",
     "loginSuccess": "登录成功",
     "passwordMismatch": "密码不匹配",
@@ -345,6 +347,7 @@
     "validUntil": "有效期至 {{date}}"
   },
   "subscription": {
+    "purchaseOutcomeUnknown": "未收到响应，操作可能已完成。请恢复网络连接并在 VPN 客户端中刷新订阅，然后在个人中心检查订阅和余额，再决定是否重试。",
     "title": "订阅",
     "currentPlan": "当前套餐",
     "status": "状态",
@@ -454,6 +457,7 @@
       "yourDevice": "您的设备",
       "copyLink": "复制订阅链接",
       "copied": "链接已复制！",
+      "copyFailed": "无法复制链接。请选中并复制上方文本。",
       "openLink": "打开链接",
       "changeApp": "更换应用",
       "selectPlatform": "选择平台",
@@ -528,7 +532,8 @@
       "description": "新链接，设备重置",
       "warning": "此操作将生成新的连接链接，重置所有已连接设备，并使旧链接失效。继续？",
       "confirmBtn": "重新签发",
-      "cooldown": "{{minutes}}分{{seconds}}秒后可用"
+      "cooldown": "{{minutes}}分{{seconds}}秒后可用",
+      "partialWarning": "新链接已准备就绪，但未能重置所有设备。请检查设备列表。"
     },
     "legacy": {
       "noTariff": "无套餐",
@@ -545,7 +550,26 @@
       "remainingDays": "剩余天数",
       "switch": "切换",
       "title": "切换套餐",
-      "upgradeCost": "升级费用"
+      "upgradeCost": "升级费用",
+      "chooseTitle": "选择新套餐",
+      "chooseHint": "下一步将显示更换的准确费用及订阅变更。",
+      "choose": "选择",
+      "alreadyOwned": "已开通",
+      "noAlternatives": "暂无其他可用套餐。",
+      "sourceContext": "当前套餐：{{name}}",
+      "validUntil": "已付费至 {{date}}",
+      "reviewTitle": "确认变更内容",
+      "chooseAnother": "选择其他套餐",
+      "previewError": "无法计算更换费用",
+      "newLimits": "新套餐限额",
+      "endDate": "到期日期",
+      "keepTerm": "已付费的到期日期保持不变。更换套餐不会延长订阅。",
+      "toDailyTerm": "剩余已付费时长不会保留。更换后将每日扣费。",
+      "fromDailyTerm": "更换时将收取新套餐最短可用周期的费用。",
+      "addonsNotice": "额外购买的设备名额和流量包不会转移。更换时将重置已绑定设备。",
+      "totalNow": "本次应付",
+      "balanceAfter": "更换后余额：{{amount}}",
+      "confirm": "确认更换套餐"
     },
     "promoGroup": {
       "yourGroup": "您的组：{{name}}",
@@ -750,6 +774,7 @@
     }
   },
   "balance": {
+    "paymentRange": "从 {{min}} 至 {{max}}",
     "title": "余额",
     "currentBalance": "当前余额",
     "topUp": "充值",
@@ -782,7 +807,10 @@
         "description": "通过 Jupiter (FPGate P2P) 使用 SBP 支付"
       },
       "cispay": {
-        "description": "通过 cisPay 使用银行卡或 SBP 支付"
+        "description": "通过 CisPay 付款"
+      },
+      "anore": {
+        "description": "通过 Anore 支付"
       },
       "tabpay": {
         "description": "通过 TabPay 使用银行卡或 SBP 支付"
@@ -1135,10 +1163,11 @@
       "closed": "已关闭"
     },
     "attachImage": "附加图片",
+    "attachMedia": "添加照片或视频",
     "downloadFile": "下载文件",
     "invalidFileType": "文件类型无效。请使用JPEG、PNG、GIF或WebP。",
     "fileTooLarge": "文件过大。最大10MB。",
-    "uploadFailed": "图片上传失败",
+    "uploadFailed": "附件上传失败",
     "imageLoadFailed": "图片加载失败",
     "tooManyRequests": "请求过多。请等待 {{seconds}} 秒。",
     "contactSupport": "如需帮助，请联系{{username}}",
@@ -2326,7 +2355,6 @@
         "payments_wata": "Wata",
         "payments_riopay": "RioPay",
         "payments_severpay": "SeverPay",
-        "payments_paypear": "PayPear",
         "payments_rollypay": "RollyPay",
         "payments_aurapay": "AuraPay",
         "payments_etoplatezhi": "Etoplatezhi",
@@ -2334,6 +2362,7 @@
         "payments_jupiter": "Jupiter",
         "payments_cispay": "CisPay",
         "payments_tabpay": "TabPay",
+        "payments_anore": "Anore",
         "payments_paritypay": "ParityPay",
         "payments_donut": "Donut",
         "payments_lava": "Lava",
@@ -2384,6 +2413,8 @@
         "payments_cashera": "Cashera"
       },
       "categories": {
+        "ANORE": "Anore",
+        "CISPAY": "CisPay",
         "CABINET": "用户中心",
         "INFO_PAGES": "法律文件与 FAQ",
         "MENU": "菜单按钮",
@@ -5614,6 +5645,7 @@
       "stickyPayButtonHint": "手机上支付按钮固定在屏幕底部"
     },
     "infoPages": {
+      "botFaq": "机器人常见问题",
       "title": "信息页面",
       "subtitle": "管理静态信息页面",
       "create": "创建页面",

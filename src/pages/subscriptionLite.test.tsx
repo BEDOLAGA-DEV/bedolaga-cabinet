@@ -127,6 +127,27 @@ afterEach(() => {
 });
 
 describe('SubscriptionLite', () => {
+  it('смена доступна прямо на странице выбранной оплаченной подписки', async () => {
+    getPurchaseOptions.mockResolvedValue({ sales_mode: 'tariffs' });
+    getSubscription.mockResolvedValue({ subscription: { ...subscription, tariff_id: 3 } });
+    renderScreen();
+    expect(
+      (await screen.findByRole('link', { name: 'subscription.switchTariff.title' })).getAttribute(
+        'href',
+      ),
+    ).toBe('/subscription/purchase?subscriptionId=7');
+  });
+
+  it('у суточного тарифа есть смена без ручного продления', async () => {
+    getPurchaseOptions.mockResolvedValue({ sales_mode: 'tariffs' });
+    getSubscription.mockResolvedValue({
+      subscription: { ...subscription, tariff_id: 3, is_daily: true },
+    });
+    renderScreen();
+    await screen.findByRole('link', { name: 'subscription.switchTariff.title' });
+    expect(screen.queryByRole('link', { name: 'lite.action.renew' })).toBeNull();
+  });
+
   it('показывает тариф, срок и остаток трафика', async () => {
     renderScreen();
 
@@ -275,7 +296,7 @@ describe('SubscriptionLite', () => {
     renderScreen();
 
     const plans = await screen.findByRole('link', { name: /Посмотреть тарифы/ });
-    expect(plans.getAttribute('href')).toBe('/subscription/purchase');
+    expect(plans.getAttribute('href')).toBe('/subscription/purchase?subscriptionId=7');
     expect(screen.queryByRole('link', { name: 'lite.action.renew' })).toBeNull();
   });
 });

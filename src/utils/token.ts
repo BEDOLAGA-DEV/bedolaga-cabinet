@@ -6,7 +6,7 @@ import {
 } from '@telegram-apps/sdk-react';
 import { isInTelegramWebApp } from '../hooks/useTelegramSDK';
 import { API } from '../config/constants';
-import { reportPossibleBackendDown } from '../api/health';
+import { isBackendUnavailableError, reportPossibleBackendDown } from '../api/health';
 import { safeLocal, safeSession } from './safeStorage';
 
 const TOKEN_KEYS = {
@@ -274,7 +274,7 @@ class TokenRefreshManager {
       // here and silently fall through to a login redirect. Distinguish a
       // transport-level failure (no response) from an invalid/expired token (a
       // 4xx response) and surface the service-unavailable screen for the former.
-      if (axios.isAxiosError(err) && !err.response) {
+      if (isBackendUnavailableError(err)) {
         this.lastFailureWasTransport = true;
         void reportPossibleBackendDown();
       }

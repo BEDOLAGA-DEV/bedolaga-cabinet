@@ -11,6 +11,7 @@ export function formatUptime(seconds: number): string {
 
 import i18next from 'i18next';
 import { currencyApi, type ExchangeRates } from '../api/currency';
+import { FALLBACK_RATES, RIALS_PER_TOMAN } from '../utils/currencyUnits';
 import { uiLocale } from './uiLocale';
 
 const LANG_CURRENCY_MAP: Record<
@@ -20,7 +21,7 @@ const LANG_CURRENCY_MAP: Record<
   ru: { currency: 'RUB', locale: 'ru-RU', symbol: '₽' },
   en: { currency: 'USD', locale: 'en-US', symbol: '$', key: 'USD' },
   zh: { currency: 'CNY', locale: 'zh-CN', symbol: '¥', key: 'CNY' },
-  fa: { currency: 'IRR', locale: 'fa-IR', symbol: '﷼', key: 'IRR' },
+  fa: { currency: 'IRR', locale: 'fa-IR', symbol: 'تومان', key: 'IRR' },
 };
 
 const DEFAULT_CURRENCY = { currency: 'RUB', locale: 'ru-RU', symbol: '₽' };
@@ -38,6 +39,11 @@ export function formatPrice(kopeks: number, lang?: string): string {
   const resolvedLang = lang || i18next.language || 'ru';
   const config = LANG_CURRENCY_MAP[resolvedLang] || DEFAULT_CURRENCY;
   let amount = kopeks / 100;
+
+  if (config.currency === 'IRR') {
+    const rials = currencyApi.convertFromRub(amount, 'IRR', cachedExchangeRates ?? FALLBACK_RATES);
+    return `${Math.round(rials / RIALS_PER_TOMAN).toLocaleString('fa-IR')}\u00a0${config.symbol}`;
+  }
 
   // Конвертация по курсу для не-рублёвых локалей. Без rates fallback на сырую сумму
   // (поведение до фикса), чтобы первый рендер до загрузки курсов не отдавал NaN.
