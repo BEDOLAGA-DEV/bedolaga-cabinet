@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.81.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.80.1...v1.81.0) (2026-10-26)
+
+
+### Features
+
+* **payments:** expose Anore hosted checkout in cabinet ([e8cd0ac](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/e8cd0ac8258e8c59f06b71200244d7e81b9a3f4d))
+
+
+### Bug Fixes
+
+* **cabinet:** recover Telegram sessions, support media and localized content ([e8cd0ac](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/e8cd0ac8258e8c59f06b71200244d7e81b9a3f4d))
+* **deps:** resolve dependency security advisories ([e8cd0ac](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/e8cd0ac8258e8c59f06b71200244d7e81b9a3f4d))
+* **payments:** respect CisPay method minimums and configured gateway names ([e8cd0ac](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/e8cd0ac8258e8c59f06b71200244d7e81b9a3f4d))
+* **subscriptions:** retain selected tariff and exact custom-period quotes ([e8cd0ac](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/e8cd0ac8258e8c59f06b71200244d7e81b9a3f4d))
+
 ## [1.80.1](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.80.0...v1.80.1) (2026-09-29)
 
 
