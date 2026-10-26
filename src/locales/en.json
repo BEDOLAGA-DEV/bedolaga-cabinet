@@ -937,6 +937,9 @@
       "cispay": {
         "description": "Pay by card or via SBP (cisPay)"
       },
+      "anore": {
+        "description": "Pay via Anore"
+      },
       "tabpay": {
         "description": "Pay by card or via SBP (TabPay)"
       },
@@ -3259,6 +3262,7 @@
         "payments_jupiter": "Jupiter",
         "payments_cispay": "CisPay",
         "payments_tabpay": "TabPay",
+        "payments_anore": "Anore",
         "payments_paritypay": "ParityPay",
         "payments_donut": "Donut",
         "payments_lava": "Lava",
@@ -3309,6 +3313,7 @@
         "payments_cashera": "Cashera"
       },
       "categories": {
+        "ANORE": "Anore",
         "CABINET": "Cabinet",
         "INFO_PAGES": "Legal documents and FAQ",
         "MENU": "Menu button",

@@ -815,6 +815,9 @@
       "cispay": {
         "description": "پرداخت با کارت یا SBP از طریق cisPay"
       },
+      "anore": {
+        "description": "پرداخت از طریق Anore"
+      },
       "tabpay": {
         "description": "پرداخت با کارت یا SBP از طریق TabPay"
       },
@@ -2298,6 +2301,7 @@
         "payments_jupiter": "Jupiter",
         "payments_cispay": "CisPay",
         "payments_tabpay": "TabPay",
+        "payments_anore": "Anore",
         "payments_paritypay": "ParityPay",
         "payments_donut": "Donut",
         "payments_lava": "Lava",
@@ -2348,6 +2352,7 @@
         "payments_cashera": "Cashera"
       },
       "categories": {
+        "ANORE": "Anore",
         "CABINET": "کابین",
         "INFO_PAGES": "اسناد حقوقی و پرسش‌های متداول",
         "MENU": "دکمه منو",

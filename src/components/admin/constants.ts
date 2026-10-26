@@ -73,6 +73,7 @@ export const SETTINGS_TREE: SettingsTreeConfig = {
         { id: 'payments_cispay', categories: ['CISPAY'] },
         { id: 'payments_cashera', categories: ['CASHERA'] },
         { id: 'payments_tabpay', categories: ['TABPAY'] },
+        { id: 'payments_anore', categories: ['ANORE'] },
         { id: 'payments_paritypay', categories: ['PARITYPAY'] },
         { id: 'payments_donut', categories: ['DONUT'] },
         { id: 'payments_lava', categories: ['LAVA'] },

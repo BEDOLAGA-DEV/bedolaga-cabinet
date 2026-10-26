@@ -965,6 +965,9 @@
       "cispay": {
         "description": "Оплата картой или через СБП (cisPay)"
       },
+      "anore": {
+        "description": "Оплата через Anore"
+      },
       "tabpay": {
         "description": "Оплата картой или через СБП (TabPay)"
       },
@@ -3305,6 +3308,7 @@
         "payments_jupiter": "Jupiter",
         "payments_cispay": "CisPay",
         "payments_tabpay": "TabPay",
+        "payments_anore": "Anore",
         "payments_paritypay": "ParityPay",
         "payments_donut": "Donut",
         "payments_lava": "Lava",
@@ -3808,6 +3812,7 @@
         "telegramOidcClientSecret": "Client Secret"
       },
       "categories": {
+        "ANORE": "Anore",
         "CABINET": "Кабинет",
         "INFO_PAGES": "Правовые документы и FAQ",
         "MENU": "Кнопка меню",

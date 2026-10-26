@@ -809,6 +809,9 @@
       "cispay": {
         "description": "通过 cisPay 使用银行卡或 SBP 支付"
       },
+      "anore": {
+        "description": "通过 Anore 支付"
+      },
       "tabpay": {
         "description": "通过 TabPay 使用银行卡或 SBP 支付"
       },
@@ -2359,6 +2362,7 @@
         "payments_jupiter": "Jupiter",
         "payments_cispay": "CisPay",
         "payments_tabpay": "TabPay",
+        "payments_anore": "Anore",
         "payments_paritypay": "ParityPay",
         "payments_donut": "Donut",
         "payments_lava": "Lava",
@@ -2409,6 +2413,7 @@
         "payments_cashera": "Cashera"
       },
       "categories": {
+        "ANORE": "Anore",
         "CABINET": "用户中心",
         "INFO_PAGES": "法律文件与 FAQ",
         "MENU": "菜单按钮",
