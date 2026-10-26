@@ -807,7 +807,7 @@
         "description": "通过 Jupiter (FPGate P2P) 使用 SBP 支付"
       },
       "cispay": {
-        "description": "通过 cisPay 使用银行卡或 SBP 支付"
+        "description": "通过 CisPay 付款"
       },
       "anore": {
         "description": "通过 Anore 支付"
@@ -2414,6 +2414,7 @@
       },
       "categories": {
         "ANORE": "Anore",
+        "CISPAY": "CisPay",
         "CABINET": "用户中心",
         "INFO_PAGES": "法律文件与 FAQ",
         "MENU": "菜单按钮",

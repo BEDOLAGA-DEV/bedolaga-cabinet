@@ -963,7 +963,7 @@
         "description": "Оплата СБП через Jupiter (FPGate P2P)"
       },
       "cispay": {
-        "description": "Оплата картой или через СБП (cisPay)"
+        "description": "Оплата через CisPay"
       },
       "anore": {
         "description": "Оплата через Anore"
@@ -3813,6 +3813,7 @@
       },
       "categories": {
         "ANORE": "Anore",
+        "CISPAY": "CisPay",
         "CABINET": "Кабинет",
         "INFO_PAGES": "Правовые документы и FAQ",
         "MENU": "Кнопка меню",

@@ -313,7 +313,9 @@ export default function TopUpAmount() {
 
   const hasOptions = method.options && method.options.length > 0;
   const orderedOptions = sortOptionsWithSbpFirst(method.options);
-  const minRubles = method.min_amount_kopeks / 100;
+  const selectedOptionMinimum =
+    method.options?.find((option) => option.id === selectedOption)?.min_amount_kopeks ?? 0;
+  const minRubles = Math.max(method.min_amount_kopeks, selectedOptionMinimum) / 100;
   const maxRubles = method.max_amount_kopeks / 100;
   const methodKey = method.id.toLowerCase().replace(/-/g, '_');
   const isStarsMethod = methodKey.includes('stars');

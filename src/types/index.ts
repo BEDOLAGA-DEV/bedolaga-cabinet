@@ -439,6 +439,7 @@ export interface Transaction {
 export interface PaymentMethodOption {
   id: string;
   name: string;
+  min_amount_kopeks?: number;
   description?: string | null;
 }
 

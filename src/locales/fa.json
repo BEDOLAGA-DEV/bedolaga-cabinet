@@ -813,7 +813,7 @@
         "description": "پرداخت SBP از طریق Jupiter (FPGate P2P)"
       },
       "cispay": {
-        "description": "پرداخت با کارت یا SBP از طریق cisPay"
+        "description": "پرداخت از طریق CisPay"
       },
       "anore": {
         "description": "پرداخت از طریق Anore"
@@ -2353,6 +2353,7 @@
       },
       "categories": {
         "ANORE": "Anore",
+        "CISPAY": "CisPay",
         "CABINET": "کابین",
         "INFO_PAGES": "اسناد حقوقی و پرسش‌های متداول",
         "MENU": "دکمه منو",

@@ -935,7 +935,7 @@
         "description": "Pay via SBP through Jupiter (FPGate P2P)"
       },
       "cispay": {
-        "description": "Pay by card or via SBP (cisPay)"
+        "description": "Pay via CisPay"
       },
       "anore": {
         "description": "Pay via Anore"
@@ -3314,6 +3314,7 @@
       },
       "categories": {
         "ANORE": "Anore",
+        "CISPAY": "CisPay",
         "CABINET": "Cabinet",
         "INFO_PAGES": "Legal documents and FAQ",
         "MENU": "Menu button",
