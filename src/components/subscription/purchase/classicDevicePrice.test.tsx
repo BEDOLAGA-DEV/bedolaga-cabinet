@@ -90,7 +90,7 @@ it.each(['legacy', 'exact75', 'free30'])(
     fireEvent.change(screen.getByRole('spinbutton'), { target: { value: '75' } });
     const total = screen.getByText('subscription.total').parentElement;
     if (!total) throw new Error('Missing total row');
-    expect(within(total).getByText(mode === 'exact75' ? /9\.20/ : /11\.50/)).toBeTruthy();
+    expect(within(total).getByText(mode === 'exact75' ? /10\.00/ : /12\.50/)).toBeTruthy();
     const button = screen.getByRole('button', {
       name: /subscription\.purchase|subscription\.buy|subscription\.confirm/,
     });

@@ -1,17 +1,24 @@
 import { expect, it } from 'vitest';
 import { combinePromoDiscount } from '@/hooks/usePromoDiscount';
 import type { Tariff } from '@/types';
-import { customDaysPrice, deviceBillingMonths } from './customDaysPrice';
+import { customDaysPrice } from './customDaysPrice';
 
-it.each([
-  [15, 1],
-  [30, 1],
-  [45, 2],
-  [75, 2],
-  [105, 4],
-])('bills %i days as %i device months', (days, months) => {
-  expect(deviceBillingMonths(days)).toBe(months);
-});
+it.each([1, 7, 14, 29, 30, 31, 45, 75, 105, 365, 10000])(
+  'prorates additional devices for %i days',
+  (days) => {
+    expect(
+      customDaysPrice(
+        {
+          price_per_day_kopeks: 200,
+          base_device_limit: 2,
+          extra_devices_count: 1,
+          device_price_kopeks: 3000,
+        } as Tariff,
+        days,
+      ),
+    ).toEqual({ price: days * 300 });
+  },
+);
 it('uses the API group-discounted unit prices once for base and extra devices', () => {
   const tariff = {
     price_per_day_kopeks: 4,
@@ -23,7 +30,7 @@ it('uses the API group-discounted unit prices once for base and extra devices', 
     base_device_limit: 1,
     extra_devices_count: 2,
   } as Tariff;
-  expect(customDaysPrice(tariff, 75)).toEqual({ price: 620, original: 775 });
+  expect(customDaysPrice(tariff, 75)).toEqual({ price: 700, original: 875 });
 });
 it('unlimited devices have no extra-device charge', () => {
   expect(
@@ -40,10 +47,10 @@ it('unlimited devices have no extra-device charge', () => {
 });
 
 it.each([
-  [45, false, 1403, undefined],
-  [75, false, 686, 779],
-  [75, true, 585, 779],
-  [105, true, 1333, undefined],
+  [45, false, 1302, undefined],
+  [75, false, 787, 880],
+  [75, true, 661, 880],
+  [105, true, 1232, undefined],
 ])('matches exact group rates for %i days (default=%s)', (days, defaultGroup, price, original) => {
   const tariff = {
     price_per_day_kopeks: 4,
@@ -81,5 +88,5 @@ it('matches the engine custom-day fallback for a zero configured period', () => 
       discounts_by_days: {},
     },
   } as unknown as Tariff;
-  expect(customDaysPrice(tariff, 45)).toEqual({ price: 629 });
+  expect(customDaysPrice(tariff, 45)).toEqual({ price: 528 });
 });
