@@ -863,6 +863,9 @@
     }
   },
   "balance": {
+    "paymentEmail": "Payment email",
+    "paymentEmailHelp": "Antilopay requires a customer contact. Your account email will not change.",
+    "paymentEmailInvalid": "Enter a valid payment email.",
     "paymentRange": "From {{min}} to {{max}}",
     "title": "Balance",
     "currentBalance": "Current Balance",

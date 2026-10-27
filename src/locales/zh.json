@@ -774,6 +774,9 @@
     }
   },
   "balance": {
+    "paymentEmail": "支付邮箱",
+    "paymentEmailHelp": "Antilopay 需要买家的联系方式。账号邮箱不会更改。",
+    "paymentEmailInvalid": "请输入有效的支付邮箱。",
     "paymentRange": "从 {{min}} 至 {{max}}",
     "title": "余额",
     "currentBalance": "当前余额",

@@ -780,6 +780,9 @@
     }
   },
   "balance": {
+    "paymentEmail": "ایمیل پرداخت",
+    "paymentEmailHelp": "Antilopay به اطلاعات تماس خریدار نیاز دارد. ایمیل حساب شما تغییر نمی‌کند.",
+    "paymentEmailInvalid": "یک ایمیل معتبر برای پرداخت وارد کنید.",
     "paymentRange": "از {{min}} تا {{max}}",
     "title": "موجودی",
     "currentBalance": "موجودی فعلی",

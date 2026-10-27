@@ -43,6 +43,7 @@ export const balanceApi = {
     amountKopeks: number,
     paymentMethod: string,
     paymentOption?: string,
+    customerEmail?: string,
   ): Promise<{
     payment_id: string;
     payment_url: string;
@@ -57,11 +58,13 @@ export const balanceApi = {
       amount_kopeks: number;
       payment_method: string;
       payment_option?: string;
+      customer_email?: string;
       language?: string;
     } = {
       amount_kopeks: amountKopeks,
       payment_method: paymentMethod,
     };
+    if (customerEmail && paymentMethod === 'antilopay') payload.customer_email = customerEmail;
     if (paymentOption) {
       payload.payment_option = paymentOption;
     }

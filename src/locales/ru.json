@@ -891,6 +891,9 @@
     }
   },
   "balance": {
+    "paymentEmail": "Email для оплаты",
+    "paymentEmailHelp": "Antilopay нужен контакт покупателя. Email аккаунта не изменится.",
+    "paymentEmailInvalid": "Укажите корректный email для оплаты.",
     "paymentRange": "От {{min}} до {{max}}",
     "title": "Баланс",
     "currentBalance": "Текущий баланс",
