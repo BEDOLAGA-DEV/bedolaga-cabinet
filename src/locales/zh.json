@@ -1704,6 +1704,8 @@
       "description": "描述",
       "descriptionHint": "显示在支付方法名称下方。留空则使用默认文本",
       "subOptions": "支付选项",
+      "providerOptionDisabled": "此支付方式已在支付服务设置中关闭。仅在此处开启并不能启用收款。",
+      "providerSettings": "打开 CisPay 设置",
       "minAmount": "最小金额（戈比）",
       "maxAmount": "最大金额（戈比）",
       "conditions": "显示条件",

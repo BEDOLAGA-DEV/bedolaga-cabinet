@@ -876,6 +876,7 @@ export interface TicketSettings {
 export interface PaymentMethodSubOptionInfo {
   id: string;
   name: string;
+  is_provider_enabled?: boolean;
 }
 
 export interface PaymentMethodConfig {

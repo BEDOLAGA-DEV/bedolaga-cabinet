@@ -1941,6 +1941,8 @@
       "description": "Description",
       "descriptionHint": "Shown under the method name. Empty for default text",
       "subOptions": "Payment options",
+      "providerOptionDisabled": "This option is disabled in the payment provider settings. Enabling it here alone will not make it available for payments.",
+      "providerSettings": "Open CisPay settings",
       "minAmount": "Min amount (kopeks)",
       "maxAmount": "Max amount (kopeks)",
       "quickAmounts": "Quick amounts (₽)",
