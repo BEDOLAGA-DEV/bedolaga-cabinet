@@ -381,6 +381,8 @@
     "subscriptions": "Subscriptions"
   },
   "subscription": {
+    "dailyRenewalExplanation": "This plan renews one day at a time from your balance. Resuming after the paid period ends charges one day.",
+    "dailyRenewalPrice": "Daily price: {{price}}",
     "purchaseOutcomeUnknown": "No response was received. The operation may have completed. Restore your connection and refresh the subscription in your VPN client, then check your subscription and balance in the cabinet before trying again.",
     "title": "Subscription",
     "currentPlan": "Current Plan",
@@ -863,6 +865,9 @@
     }
   },
   "balance": {
+    "paymentEmail": "Payment email",
+    "paymentEmailHelp": "Antilopay requires a customer contact. Your account email will not change.",
+    "paymentEmailInvalid": "Enter a valid payment email.",
     "paymentRange": "From {{min}} to {{max}}",
     "title": "Balance",
     "currentBalance": "Current Balance",

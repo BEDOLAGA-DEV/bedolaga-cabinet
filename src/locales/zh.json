@@ -347,6 +347,8 @@
     "validUntil": "有效期至 {{date}}"
   },
   "subscription": {
+    "dailyRenewalExplanation": "此套餐每天从余额中扣费续订。已付费时段结束后，恢复订阅将扣除一天的费用。",
+    "dailyRenewalPrice": "每日价格：{{price}}",
     "purchaseOutcomeUnknown": "未收到响应，操作可能已完成。请恢复网络连接并在 VPN 客户端中刷新订阅，然后在个人中心检查订阅和余额，再决定是否重试。",
     "title": "订阅",
     "currentPlan": "当前套餐",
@@ -774,6 +776,9 @@
     }
   },
   "balance": {
+    "paymentEmail": "支付邮箱",
+    "paymentEmailHelp": "Antilopay 需要买家的联系方式。账号邮箱不会更改。",
+    "paymentEmailInvalid": "请输入有效的支付邮箱。",
     "paymentRange": "从 {{min}} 至 {{max}}",
     "title": "余额",
     "currentBalance": "当前余额",
