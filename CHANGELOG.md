@@ -5,14 +5,12 @@
 
 ### Bug Fixes
 
-* **payments:** запрашивать контакт покупателя для Antilopay ([4592d9f](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/4592d9f9bf205e518297b6652dc68e214d7471ad))
-* **payments:** запрашивать контакт покупателя для Antilopay ([0101b6c](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/0101b6ca41182ee31b00cb3e38c1e390867dc75e))
-* **payments:** запрашивать контакт покупателя для Antilopay ([60311a8](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/60311a842d31710bb16371d5fb72f547aa3e544e))
-* **payments:** запрашивать контакт покупателя для Antilopay ([c9e41ff](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/c9e41ff572135223e4ddd0401e55883a0df64312))
-* **subscription:** показывать возобновление суточного тарифа на странице продления ([4592d9f](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/4592d9f9bf205e518297b6652dc68e214d7471ad))
-* **subscription:** показывать возобновление суточного тарифа на странице продления ([0101b6c](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/0101b6ca41182ee31b00cb3e38c1e390867dc75e))
-* **subscription:** показывать возобновление суточного тарифа на странице продления ([60311a8](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/60311a842d31710bb16371d5fb72f547aa3e544e))
-* **subscription:** показывать возобновление суточного тарифа на странице продления ([c9e41ff](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/c9e41ff572135223e4ddd0401e55883a0df64312))
+* **payments:** при оплате через Antilopay можно указать контактный email; наличие Telegram ID не требуется.
+* **subscription:** для суточных подписок вместо пустого списка периодов показано возобновление, стоимость суток и обновление баланса после оплаты.
+* **subscription:** истёкшие и приостановленные суточные подписки корректно предлагают возобновление; повторный запрос явно сохраняет нужное действие.
+* **ui:** сумма и знак валюты в суточной цене не разрываются переносом; используются цвета выбранной темы.
+
+Обновлять вместе с Bot 5.1.1.
 
 ## [1.81.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.80.1...v1.81.0) (2026-10-26)
 
