@@ -862,6 +862,18 @@
       "autopayHint": "Your subscription will renew automatically via Cashera",
       "purchaseButton": "⚡ Subscribe with Cashera auto-pay",
       "purchaseHint": "Confirm auto-charges via the Cashera link; renewals are then charged automatically."
+    },
+    "purchaseDevices": {
+      "title": "Number of devices",
+      "included": "Included in the plan: {{count}}",
+      "decrease": "Fewer devices",
+      "increase": "More devices",
+      "range": "Enter a whole number from {{min}} to {{max}}.",
+      "waitForPrice": "Please wait for the price calculation.",
+      "reviewPrice": "The price has been refreshed. Check the total and confirm your purchase.",
+      "priceUnavailable": "Could not calculate the price.",
+      "calculating": "Calculating…",
+      "balanceOnly": "Plans with additional devices are paid from your balance. Top up first if needed."
     }
   },
   "balance": {

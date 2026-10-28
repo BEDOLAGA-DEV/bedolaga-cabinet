@@ -1,5 +1,26 @@
 import apiClient from './client';
 import { getYandexCid } from '../utils/yandexCid';
+
+export interface TariffDeviceQuote {
+  quote_id: string;
+  expires_at: string;
+  purchase_kind: 'new' | 'trial_conversion' | 'paid_renewal' | 'classic_conversion';
+  device_selection: {
+    effective_limit: number;
+    included_limit: number;
+    selectable: boolean;
+    min_limit: number | null;
+    max_limit: number | null;
+    reason: string | null;
+  };
+  tariff_cost_kopeks: number;
+  devices_cost_kopeks: number;
+  traffic_cost_kopeks: number;
+  discount_kopeks: number;
+  total_kopeks: number;
+  balance_kopeks: number;
+  missing_kopeks: number;
+}
 import type {
   Subscription,
   SubscriptionStatusResponse,
@@ -535,6 +556,20 @@ export const subscriptionApi = {
     return response.data;
   },
 
+  previewTariffPurchase: async (parameters: {
+    tariff_id: number;
+    period_days: number;
+    traffic_gb?: number;
+    subscription_id?: number;
+    selected_device_limit?: number;
+  }): Promise<TariffDeviceQuote> => {
+    const response = await apiClient.post(
+      '/cabinet/subscription/purchase-tariff/preview',
+      parameters,
+    );
+    return response.data;
+  },
+
   purchaseTariff: async (
     tariffId: number,
     periodDays: number,
@@ -548,14 +583,18 @@ export const subscriptionApi = {
      */
     subscriptionId?: number,
     checkoutId?: string,
+    devices?: { selected_device_limit: number; quote_id: string },
   ): Promise<{
     success: boolean;
-    message: string;
-    subscription: Subscription;
-    tariff_id: number;
-    tariff_name: string;
-    balance_kopeks: number;
-    balance_label: string;
+    already_processed?: boolean;
+    subscription_id?: number | null;
+    charged_amount?: number;
+    message?: string;
+    subscription?: Subscription;
+    tariff_id?: number;
+    tariff_name?: string;
+    balance_kopeks?: number;
+    balance_label?: string;
   }> => {
     const response = await apiClient.post('/cabinet/subscription/purchase-tariff', {
       tariff_id: tariffId,
@@ -563,6 +602,7 @@ export const subscriptionApi = {
       traffic_gb: trafficGb,
       subscription_id: subscriptionId,
       checkout_id: checkoutId,
+      ...devices,
       yandex_cid: getYandexCid() || undefined,
     });
     return response.data;

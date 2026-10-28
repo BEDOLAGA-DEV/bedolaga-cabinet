@@ -302,6 +302,7 @@ export interface Tariff {
   traffic_limit_label: string;
   is_unlimited_traffic: boolean;
   device_limit: number;
+  purchase_device_selection_supported?: boolean;
   base_device_limit?: number;
   extra_devices_count: number;
   servers_count: number;

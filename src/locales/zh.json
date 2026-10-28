@@ -773,6 +773,18 @@
       "autopayHint": "订阅将通过 Cashera 自动续费",
       "purchaseButton": "⚡ 使用 Cashera 自动付款订阅",
       "purchaseHint": "通过 Cashera 链接确认自动扣款，之后续费将自动扣款。"
+    },
+    "purchaseDevices": {
+      "title": "设备数量",
+      "included": "套餐包含：{{count}}",
+      "decrease": "减少设备数量",
+      "increase": "增加设备数量",
+      "range": "请输入 {{min}} 到 {{max}} 之间的整数。",
+      "waitForPrice": "请等待价格计算完成。",
+      "reviewPrice": "价格已更新。请核对总额并确认购买。",
+      "priceUnavailable": "无法计算价格。",
+      "calculating": "计算中…",
+      "balanceOnly": "包含额外设备的套餐使用账户余额付款。如有需要，请先充值。"
     }
   },
   "balance": {
