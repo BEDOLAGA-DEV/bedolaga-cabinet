@@ -8,10 +8,24 @@ import type { Tariff } from '@/types';
 import { TariffPurchaseForm } from './TariffPurchaseForm';
 
 vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'ru' } }),
+  useTranslation: () => ({
+    t: (key: string, values?: { price?: string }) =>
+      key === 'subscription.dailyPurchase.nextCharge' ? `${key}: ${values?.price}` : key,
+    i18n: { language: 'ru' },
+  }),
   initReactI18next: { type: '3rdParty', init: () => {} },
 }));
-const api = vi.hoisted(() => ({ previewTariffPurchase: vi.fn(), purchaseTariff: vi.fn() }));
+const api = vi.hoisted(() => ({
+  previewTariffPurchase: vi.fn(),
+  purchaseTariff: vi.fn(),
+  previewRecurrentPurchase: vi.fn().mockResolvedValue({
+    amount_kopeks: 50000,
+    charge_days: 30,
+    quote_id: 'recurrent',
+    expires_at: new Date(Date.now() + 300000).toISOString(),
+    selected_device_limit: 3,
+  }),
+}));
 vi.mock('@/api/subscription', () => ({ subscriptionApi: api }));
 beforeEach(() => {
   window.matchMedia = vi
@@ -45,10 +59,12 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
-function show(supported = true) {
+function show(supported = true, daily = false) {
   const tariff = {
     id: 7,
     name: 'Test',
+    is_daily: daily,
+    daily_price_kopeks: daily ? 100 : 0,
     device_limit: 1,
     purchase_device_selection_supported: supported,
     servers: [],
@@ -88,7 +104,7 @@ it('sends the selected devices and matching server quote; retries retain checkou
   });
   expect(
     screen.queryByRole('button', { name: 'subscription.sbpRecurring.purchaseButton' }),
-  ).toBeNull();
+  ).not.toBeNull();
   await waitFor(() => expect((buy as HTMLButtonElement).disabled).toBe(false));
   fireEvent.click(buy);
   await waitFor(() => expect(api.purchaseTariff).toHaveBeenCalledTimes(2));
@@ -124,4 +140,59 @@ it('can retry an uncertain payment without requiring another quote', async () =>
   fireEvent.click(buy);
   await waitFor(() => expect(api.purchaseTariff).toHaveBeenCalledTimes(2));
   expect(api.purchaseTariff.mock.calls[1]).toEqual(api.purchaseTariff.mock.calls[0]);
+});
+
+it('quotes daily selection for one day and sends a bound checkout', async () => {
+  show(true, true);
+  const input = await screen.findByRole('spinbutton');
+  fireEvent.change(input, { target: { value: '3' } });
+  const buy = screen.getByRole('button', { name: 'subscription.dailyPurchase.activate' });
+  await waitFor(() => expect((buy as HTMLButtonElement).disabled).toBe(false));
+  expect(api.previewTariffPurchase.mock.lastCall?.[0]).toMatchObject({
+    period_days: 1,
+    selected_device_limit: 3,
+  });
+  fireEvent.click(buy);
+  await waitFor(() => expect(api.purchaseTariff).toHaveBeenCalled());
+  expect(api.purchaseTariff.mock.lastCall).toEqual([
+    7,
+    1,
+    undefined,
+    undefined,
+    expect.any(String),
+    { selected_device_limit: 3, quote_id: 'quote-3' },
+  ]);
+});
+
+it('shows a one-time daily offer separately from future daily charges after changing devices', async () => {
+  const originalPreview = api.previewTariffPurchase.getMockImplementation();
+  if (!originalPreview) throw new Error('Preview fixture is missing');
+  api.previewTariffPurchase.mockImplementation(async (request) => ({
+    ...(await originalPreview(request)),
+    total_kopeks: request.selected_device_limit === 3 ? 550 : 500,
+    next_daily_charge_kopeks: request.selected_device_limit === 3 ? 1100 : 1000,
+  }));
+  show(true, true);
+  const input = await screen.findByRole('spinbutton');
+  fireEvent.change(input, { target: { value: '3' } });
+  await screen.findByText(/subscription.dailyPurchase.nextCharge: 11/);
+  expect(screen.getByText('subscription.dailyPurchase.firstCharge')).toBeTruthy();
+  expect(screen.queryByText('subscription.dailyPurchase.costPerDay')).toBeNull();
+  expect(screen.getByText(/5[.,]5/)).toBeTruthy();
+});
+
+it('lets the user correct an invalid device count while blocking payment', async () => {
+  show();
+  const input = await screen.findByRole('spinbutton');
+  fireEvent.change(input, { target: { value: '0' } });
+  expect((input as HTMLInputElement).disabled).toBe(false);
+  expect(
+    (screen.getByRole('button', { name: 'subscription.purchase' }) as HTMLButtonElement).disabled,
+  ).toBe(true);
+  fireEvent.change(input, { target: { value: '3' } });
+  await waitFor(() =>
+    expect(
+      (screen.getByRole('button', { name: 'subscription.purchase' }) as HTMLButtonElement).disabled,
+    ).toBe(false),
+  );
 });

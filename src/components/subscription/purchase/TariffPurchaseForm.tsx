@@ -2,7 +2,7 @@ import { tariffTrafficLabel } from '../../../utils/tariffTrafficLabel';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '../../../store/auth';
 import { TariffDeviceSelector } from './TariffDeviceSelector';
 import { subscriptionApi } from '../../../api/subscription';
@@ -97,12 +97,11 @@ export function TariffPurchaseForm({
   const [selectedDevices, setSelectedDevices] = useState<number | undefined>();
   const [deviceInputValid, setDeviceInputValid] = useState(true);
   const quoteUserId = useAuthStore((state) => state.user?.id);
-  const quoteDays = useCustomDays ? customDays : (selectedTariffPeriod?.days ?? 30);
+  const isDaily = Boolean(tariff.is_daily || tariff.daily_price_kopeks);
+  const quoteDays = isDaily ? 1 : useCustomDays ? customDays : (selectedTariffPeriod?.days ?? 30);
   const quoteTraffic =
     useCustomTraffic && tariff.custom_traffic_enabled ? customTrafficGb : undefined;
-  const devicePreviewEnabled = Boolean(
-    tariff.purchase_device_selection_supported && !tariff.is_daily,
-  );
+  const devicePreviewEnabled = Boolean(tariff.purchase_device_selection_supported);
   const deviceQuoteQuery = useQuery({
     queryKey: [
       'tariff-device-quote',
@@ -149,12 +148,9 @@ export function TariffPurchaseForm({
       !deviceQuote ||
       deviceQuoteQuery.isError ||
       (deviceQuote.device_selection.selectable && selectedDevices === undefined));
-  const selectedExtras =
-    selectedDevices !== undefined &&
-    selectedDevices >
-      (deviceQuote?.device_selection.included_limit ??
-        tariff.base_device_limit ??
-        tariff.device_limit);
+  const dailyPriceChanges =
+    deviceQuote?.next_daily_charge_kopeks != null &&
+    deviceQuote.next_daily_charge_kopeks !== deviceQuote.total_kopeks;
   const retryUncertainCheckout =
     uncertainCheckout &&
     checkoutAttempt.current?.signature ===
@@ -194,7 +190,7 @@ export function TariffPurchaseForm({
       // uses it to resolve the exact target row by ID, avoiding the
       // race with concurrent panel webhooks that would otherwise hit
       // the partial UNIQUE on uq_subscriptions_user_tariff_active.
-      if (isDailyTariff) {
+      if (isDailyTariff && !devicePreviewEnabled) {
         checkoutRequestSent.current = true;
         return subscriptionApi.purchaseTariff(tariff.id, days, trafficGb, subscriptionId);
       }
@@ -244,11 +240,130 @@ export function TariffPurchaseForm({
     },
   });
 
+  const recurrentSelectionEnabled =
+    devicePreviewEnabled &&
+    Boolean(deviceQuote?.device_selection.selectable || deviceQuote?.recurrent_checkout_pending) &&
+    deviceQuote?.purchase_kind !== 'trial_conversion';
+  const recurrentDeviceLimit = selectedDevices ?? deviceQuote?.device_selection.effective_limit;
+  const recurrentProviders = ['platega', 'lava', 'cashera'] as const;
+  const recurrentQuotes = useQueries({
+    queries: recurrentProviders.map((provider, index) => ({
+      queryKey: [
+        'tariff-recurrent-quote',
+        quoteUserId,
+        provider,
+        tariff.id,
+        subscriptionId,
+        recurrentDeviceLimit,
+      ],
+      queryFn: () =>
+        subscriptionApi.previewRecurrentPurchase(
+          provider,
+          tariff.id,
+          subscriptionId,
+          recurrentDeviceLimit,
+        ),
+      enabled:
+        recurrentSelectionEnabled &&
+        !quoteBlocked &&
+        [sbpPurchaseEnabled, lavaPurchaseEnabled, casheraPurchaseEnabled][index],
+      retry: false,
+      staleTime: 0,
+      gcTime: 0,
+    })),
+  });
+  const recurrentAttempts = useRef<
+    Record<
+      number,
+      {
+        signature: string;
+        amount_kopeks: number;
+        charge_days: number;
+        selection: { selected_device_limit: number; quote_id: string; checkout_id: string };
+      }
+    >
+  >({});
+  const uncertainRecurrent = useRef<Record<number, boolean>>({});
+  const recurrentSignature = JSON.stringify([tariff.id, subscriptionId, recurrentDeviceLimit]);
+  const canRetryRecurrent = (index: number) =>
+    deviceInputValid &&
+    uncertainRecurrent.current[index] &&
+    recurrentAttempts.current[index]?.signature === recurrentSignature;
+  const recurrentError = (index: number, error: unknown) => {
+    const status = (error as { response?: { status?: number } }).response?.status;
+    uncertainRecurrent.current[index] = status === undefined || status >= 500;
+    if (!uncertainRecurrent.current[index]) {
+      delete recurrentAttempts.current[index];
+      recurrentQuotes[index].refetch();
+    }
+  };
+  const recurrentBlocked = (index: number) =>
+    !canRetryRecurrent(index) &&
+    ((devicePreviewEnabled && quoteBlocked) ||
+      (recurrentSelectionEnabled &&
+        (quoteBlocked ||
+          !deviceInputValid ||
+          recurrentQuotes[index].isFetching ||
+          !recurrentQuotes[index].data ||
+          recurrentQuotes[index].isError)));
+  const recurrentSelection = async (index: number) => {
+    if (canRetryRecurrent(index) && deviceInputValid)
+      return recurrentAttempts.current[index].selection;
+    if (!recurrentSelectionEnabled) return undefined;
+    if (recurrentBlocked(index)) throw new Error(t('subscription.purchaseDevices.waitForPrice'));
+    const quote = recurrentQuotes[index].data;
+    if (!quote) throw new Error(t('subscription.purchaseDevices.waitForPrice'));
+    if (Date.parse(quote.expires_at) <= Date.now()) {
+      await recurrentQuotes[index].refetch();
+      throw new Error(t('subscription.purchaseDevices.reviewPrice'));
+    }
+    const signature = recurrentSignature;
+    if (recurrentAttempts.current[index]?.signature !== signature)
+      recurrentAttempts.current[index] = {
+        signature,
+        amount_kopeks: quote.amount_kopeks,
+        charge_days: quote.charge_days,
+        selection: {
+          selected_device_limit: quote.selected_device_limit,
+          quote_id: quote.quote_id,
+          checkout_id: quote.checkout_id ?? crypto.randomUUID(),
+        },
+      };
+    return recurrentAttempts.current[index].selection;
+  };
+  const recurrentPrice = (index: number) =>
+    recurrentSelectionEnabled && (
+      <div className="mt-1.5 text-center text-xs text-dark-400" aria-live="polite">
+        {canRetryRecurrent(index) ? (
+          t('subscription.purchaseDevices.recurringPrice', {
+            price: formatPrice(recurrentAttempts.current[index].amount_kopeks),
+            days: recurrentAttempts.current[index].charge_days,
+          })
+        ) : recurrentQuotes[index].isError ? (
+          <button className="btn-ghost" onClick={() => recurrentQuotes[index].refetch()}>
+            {t('subscription.purchaseDevices.priceUnavailable')} · {t('common.retry')}
+          </button>
+        ) : recurrentBlocked(index) ? (
+          t('subscription.purchaseDevices.waitForPrice')
+        ) : (
+          t('subscription.purchaseDevices.recurringPrice', {
+            price: formatPrice(recurrentQuotes[index].data?.amount_kopeks ?? 0),
+            days: recurrentQuotes[index].data?.charge_days,
+          })
+        )}
+      </div>
+    );
+
   // СБП-оформление: первое списание = подтверждение привязки в банке; период
   // на форме не участвует — списания идут по каденс-правилу тарифа.
   const sbpPurchaseMutation = useMutation({
-    mutationFn: () =>
-      subscriptionApi.purchaseWithSbpRecurring(tariff.id, subscriptionId ?? undefined),
+    mutationFn: async () => {
+      const selection = await recurrentSelection(0);
+      return selection
+        ? subscriptionApi.purchaseWithSbpRecurring(tariff.id, subscriptionId, selection)
+        : subscriptionApi.purchaseWithSbpRecurring(tariff.id, subscriptionId);
+    },
+    onError: (error) => recurrentError(0, error),
     onSuccess: (data) => {
       if (data.redirect_url) {
         openPaymentUrl(data.redirect_url, platform, openLink);
@@ -261,36 +376,45 @@ export function TariffPurchaseForm({
     },
   });
 
-  const sbpPurchaseButton = sbpPurchaseEnabled && !selectedExtras && (
-    <>
-      <button
-        onClick={() => sbpPurchaseMutation.mutate()}
-        disabled={sbpPurchaseMutation.isPending || purchaseMutation.isPending}
-        className="mt-2 w-full rounded-xl border border-accent-500/40 bg-accent-500/10 py-3 text-sm font-medium text-accent-400 transition-colors hover:bg-accent-500/20 disabled:opacity-50"
-      >
-        {sbpPurchaseMutation.isPending ? (
-          <span className="flex items-center justify-center gap-2">
-            <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-            {t('common.loading')}
-          </span>
-        ) : (
-          t('subscription.sbpRecurring.purchaseButton')
-        )}
-      </button>
-      <div className="mt-1.5 text-center text-[11px] text-dark-500">
-        {t('subscription.sbpRecurring.purchaseHint')}
-      </div>
-      {sbpPurchaseMutation.isError && (
-        <div className="mt-2 text-center text-sm text-error-400">
-          {getErrorMessage(sbpPurchaseMutation.error)}
+  const sbpPurchaseButton = sbpPurchaseEnabled &&
+    deviceQuote?.purchase_kind !== 'trial_conversion' && (
+      <>
+        <button
+          onClick={() => sbpPurchaseMutation.mutate()}
+          disabled={
+            sbpPurchaseMutation.isPending || purchaseMutation.isPending || recurrentBlocked(0)
+          }
+          className="mt-2 w-full rounded-xl border border-accent-500/40 bg-accent-500/10 py-3 text-sm font-medium text-accent-400 transition-colors hover:bg-accent-500/20 disabled:opacity-50"
+        >
+          {sbpPurchaseMutation.isPending ? (
+            <span className="flex items-center justify-center gap-2">
+              <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+              {t('common.loading')}
+            </span>
+          ) : (
+            t('subscription.sbpRecurring.purchaseButton')
+          )}
+        </button>
+        <div className="mt-1.5 text-center text-[11px] text-dark-500">
+          {t('subscription.sbpRecurring.purchaseHint')}
+          {recurrentPrice(0)}
         </div>
-      )}
-    </>
-  );
+        {sbpPurchaseMutation.isError && (
+          <div className="mt-2 text-center text-sm text-error-400">
+            {getErrorMessage(sbpPurchaseMutation.error)}
+          </div>
+        )}
+      </>
+    );
 
   const lavaPurchaseMutation = useMutation({
-    mutationFn: () =>
-      subscriptionApi.purchaseWithLavaRecurring(tariff.id, subscriptionId ?? undefined),
+    mutationFn: async () => {
+      const selection = await recurrentSelection(1);
+      return selection
+        ? subscriptionApi.purchaseWithLavaRecurring(tariff.id, subscriptionId, selection)
+        : subscriptionApi.purchaseWithLavaRecurring(tariff.id, subscriptionId);
+    },
+    onError: (error) => recurrentError(1, error),
     onSuccess: (data) => {
       if (data.redirect_url) {
         openPaymentUrl(data.redirect_url, platform, openLink);
@@ -303,36 +427,45 @@ export function TariffPurchaseForm({
     },
   });
 
-  const lavaPurchaseButton = lavaPurchaseEnabled && !selectedExtras && (
-    <>
-      <button
-        onClick={() => lavaPurchaseMutation.mutate()}
-        disabled={lavaPurchaseMutation.isPending || purchaseMutation.isPending}
-        className="mt-2 w-full rounded-xl border border-accent-500/40 bg-accent-500/10 py-3 text-sm font-medium text-accent-400 transition-colors hover:bg-accent-500/20 disabled:opacity-50"
-      >
-        {lavaPurchaseMutation.isPending ? (
-          <span className="flex items-center justify-center gap-2">
-            <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-            {t('common.loading')}
-          </span>
-        ) : (
-          t('subscription.lavaRecurring.purchaseButton')
-        )}
-      </button>
-      <div className="mt-1.5 text-center text-[11px] text-dark-500">
-        {t('subscription.lavaRecurring.purchaseHint')}
-      </div>
-      {lavaPurchaseMutation.isError && (
-        <div className="mt-2 text-center text-sm text-error-400">
-          {getErrorMessage(lavaPurchaseMutation.error)}
+  const lavaPurchaseButton = lavaPurchaseEnabled &&
+    deviceQuote?.purchase_kind !== 'trial_conversion' && (
+      <>
+        <button
+          onClick={() => lavaPurchaseMutation.mutate()}
+          disabled={
+            lavaPurchaseMutation.isPending || purchaseMutation.isPending || recurrentBlocked(1)
+          }
+          className="mt-2 w-full rounded-xl border border-accent-500/40 bg-accent-500/10 py-3 text-sm font-medium text-accent-400 transition-colors hover:bg-accent-500/20 disabled:opacity-50"
+        >
+          {lavaPurchaseMutation.isPending ? (
+            <span className="flex items-center justify-center gap-2">
+              <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+              {t('common.loading')}
+            </span>
+          ) : (
+            t('subscription.lavaRecurring.purchaseButton')
+          )}
+        </button>
+        <div className="mt-1.5 text-center text-[11px] text-dark-500">
+          {t('subscription.lavaRecurring.purchaseHint')}
+          {recurrentPrice(1)}
         </div>
-      )}
-    </>
-  );
+        {lavaPurchaseMutation.isError && (
+          <div className="mt-2 text-center text-sm text-error-400">
+            {getErrorMessage(lavaPurchaseMutation.error)}
+          </div>
+        )}
+      </>
+    );
 
   const casheraPurchaseMutation = useMutation({
-    mutationFn: () =>
-      subscriptionApi.purchaseWithCasheraRecurring(tariff.id, subscriptionId ?? undefined),
+    mutationFn: async () => {
+      const selection = await recurrentSelection(2);
+      return selection
+        ? subscriptionApi.purchaseWithCasheraRecurring(tariff.id, subscriptionId, selection)
+        : subscriptionApi.purchaseWithCasheraRecurring(tariff.id, subscriptionId);
+    },
+    onError: (error) => recurrentError(2, error),
     onSuccess: (data) => {
       if (data.redirect_url) {
         openPaymentUrl(data.redirect_url, platform, openLink);
@@ -345,32 +478,36 @@ export function TariffPurchaseForm({
     },
   });
 
-  const casheraPurchaseButton = casheraPurchaseEnabled && !selectedExtras && (
-    <>
-      <button
-        onClick={() => casheraPurchaseMutation.mutate()}
-        disabled={casheraPurchaseMutation.isPending || purchaseMutation.isPending}
-        className="mt-2 w-full rounded-xl border border-accent-500/40 bg-accent-500/10 py-3 text-sm font-medium text-accent-400 transition-colors hover:bg-accent-500/20 disabled:opacity-50"
-      >
-        {casheraPurchaseMutation.isPending ? (
-          <span className="flex items-center justify-center gap-2">
-            <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-            {t('common.loading')}
-          </span>
-        ) : (
-          t('subscription.casheraRecurring.purchaseButton')
-        )}
-      </button>
-      <div className="mt-1.5 text-center text-[11px] text-dark-500">
-        {t('subscription.casheraRecurring.purchaseHint')}
-      </div>
-      {casheraPurchaseMutation.isError && (
-        <div className="mt-2 text-center text-sm text-error-400">
-          {getErrorMessage(casheraPurchaseMutation.error)}
+  const casheraPurchaseButton = casheraPurchaseEnabled &&
+    deviceQuote?.purchase_kind !== 'trial_conversion' && (
+      <>
+        <button
+          onClick={() => casheraPurchaseMutation.mutate()}
+          disabled={
+            casheraPurchaseMutation.isPending || purchaseMutation.isPending || recurrentBlocked(2)
+          }
+          className="mt-2 w-full rounded-xl border border-accent-500/40 bg-accent-500/10 py-3 text-sm font-medium text-accent-400 transition-colors hover:bg-accent-500/20 disabled:opacity-50"
+        >
+          {casheraPurchaseMutation.isPending ? (
+            <span className="flex items-center justify-center gap-2">
+              <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+              {t('common.loading')}
+            </span>
+          ) : (
+            t('subscription.casheraRecurring.purchaseButton')
+          )}
+        </button>
+        <div className="mt-1.5 text-center text-[11px] text-dark-500">
+          {t('subscription.casheraRecurring.purchaseHint')}
+          {recurrentPrice(2)}
         </div>
-      )}
-    </>
-  );
+        {casheraPurchaseMutation.isError && (
+          <div className="mt-2 text-center text-sm text-error-400">
+            {getErrorMessage(casheraPurchaseMutation.error)}
+          </div>
+        )}
+      </>
+    );
 
   // Smooth scroll the form into view when first mounted.
   useEffect(() => {
@@ -421,33 +558,69 @@ export function TariffPurchaseForm({
       </div>
 
       {/* Daily Tariff Purchase */}
+      {deviceQuote?.device_selection.selectable && (
+        <TariffDeviceSelector
+          value={selectedDevices ?? deviceQuote.device_selection.effective_limit}
+          min={
+            deviceQuote.device_selection.min_limit ?? deviceQuote.device_selection.included_limit
+          }
+          max={
+            deviceQuote.device_selection.max_limit ?? deviceQuote.device_selection.effective_limit
+          }
+          included={deviceQuote.device_selection.included_limit}
+          disabled={purchaseMutation.isPending}
+          onChange={setSelectedDevices}
+          onValidityChange={setDeviceInputValid}
+        />
+      )}
+      {deviceQuoteQuery.isError && devicePreviewEnabled && (
+        <div role="alert" className="text-sm text-error-400">
+          {t('subscription.purchaseDevices.priceUnavailable')}{' '}
+          <button type="button" className="btn-ghost" onClick={() => deviceQuoteQuery.refetch()}>
+            {t('common.retry')}
+          </button>
+        </div>
+      )}
       {tariff.is_daily || (tariff.daily_price_kopeks && tariff.daily_price_kopeks > 0) ? (
         <div className="rounded-xl border border-accent-500/30 bg-accent-500/10 p-5">
           <div className="mb-4 text-center">
             <div className="mb-2 text-sm text-dark-400">
-              {t('subscription.dailyPurchase.costPerDay')}
+              {t(
+                dailyPriceChanges
+                  ? 'subscription.dailyPurchase.firstCharge'
+                  : 'subscription.dailyPurchase.costPerDay',
+              )}
             </div>
             <div className="text-3xl font-bold text-accent-400">
-              {formatPrice(dailyQuote?.price ?? 0)}
+              {formatPrice(deviceQuote?.total_kopeks ?? dailyQuote?.price ?? 0)}
             </div>
-            {dailyQuote?.original && dailyQuote.original > dailyQuote.price && (
-              <div className="mt-1 flex items-center justify-center gap-2 text-sm">
-                <span className="text-dark-500 line-through">
-                  {formatPrice(dailyQuote.original)}
-                </span>
-                {dailyQuote.percent != null && dailyQuote.percent > 0 && (
-                  <span
-                    className={`rounded px-1.5 py-0.5 text-xs ${
-                      dailyQuote.isPromoGroup
-                        ? 'bg-success-500/20 text-success-400'
-                        : 'bg-warning-500/20 text-warning-400'
-                    }`}
-                  >
-                    -{dailyQuote.percent}%
-                  </span>
-                )}
+            {dailyPriceChanges && deviceQuote?.next_daily_charge_kopeks != null && (
+              <div className="mt-2 text-sm text-dark-400" aria-live="polite">
+                {t('subscription.dailyPurchase.nextCharge', {
+                  price: formatPrice(deviceQuote.next_daily_charge_kopeks),
+                })}
               </div>
             )}
+            {!devicePreviewEnabled &&
+              dailyQuote?.original &&
+              dailyQuote.original > dailyQuote.price && (
+                <div className="mt-1 flex items-center justify-center gap-2 text-sm">
+                  <span className="text-dark-500 line-through">
+                    {formatPrice(dailyQuote.original)}
+                  </span>
+                  {dailyQuote.percent != null && dailyQuote.percent > 0 && (
+                    <span
+                      className={`rounded px-1.5 py-0.5 text-xs ${
+                        dailyQuote.isPromoGroup
+                          ? 'bg-success-500/20 text-success-400'
+                          : 'bg-warning-500/20 text-warning-400'
+                      }`}
+                    >
+                      -{dailyQuote.percent}%
+                    </span>
+                  )}
+                </div>
+              )}
           </div>
           <div className="space-y-2 text-sm text-dark-400">
             <div className="flex items-start gap-2">
@@ -465,7 +638,7 @@ export function TariffPurchaseForm({
           </div>
 
           {(() => {
-            const dailyPrice = dailyQuote?.price ?? 0;
+            const dailyPrice = deviceQuote?.total_kopeks ?? dailyQuote?.price ?? 0;
             const hasEnoughBalance = balanceKopeks !== undefined && dailyPrice <= balanceKopeks;
 
             return (
@@ -480,7 +653,11 @@ export function TariffPurchaseForm({
 
                 <button
                   onClick={() => purchaseMutation.mutate()}
-                  disabled={purchaseMutation.isPending}
+                  disabled={
+                    purchaseMutation.isPending ||
+                    (quoteBlocked && !retryUncertainCheckout) ||
+                    !deviceInputValid
+                  }
                   className="btn-primary w-full py-3"
                 >
                   {purchaseMutation.isPending ? (
@@ -804,35 +981,6 @@ export function TariffPurchaseForm({
           )}
 
           {/* Summary & Purchase */}
-          {deviceQuote?.device_selection.selectable && (
-            <TariffDeviceSelector
-              value={selectedDevices ?? deviceQuote.device_selection.effective_limit}
-              min={
-                deviceQuote.device_selection.min_limit ??
-                deviceQuote.device_selection.included_limit
-              }
-              max={
-                deviceQuote.device_selection.max_limit ??
-                deviceQuote.device_selection.effective_limit
-              }
-              included={deviceQuote.device_selection.included_limit}
-              disabled={purchaseMutation.isPending}
-              onChange={setSelectedDevices}
-              onValidityChange={setDeviceInputValid}
-            />
-          )}
-          {deviceQuoteQuery.isError && devicePreviewEnabled && (
-            <div role="alert" className="text-sm text-error-400">
-              {t('subscription.purchaseDevices.priceUnavailable')}{' '}
-              <button
-                type="button"
-                className="btn-ghost"
-                onClick={() => deviceQuoteQuery.refetch()}
-              >
-                {t('common.retry')}
-              </button>
-            </div>
-          )}
           {(selectedTariffPeriod || useCustomDays) && (
             <div className="rounded-xl bg-dark-800/50 p-5">
               {(() => {
@@ -1013,12 +1161,6 @@ export function TariffPurchaseForm({
                     {sbpPurchaseButton}
                     {lavaPurchaseButton}
                     {casheraPurchaseButton}
-                    {selectedExtras &&
-                      (sbpPurchaseEnabled || lavaPurchaseEnabled || casheraPurchaseEnabled) && (
-                        <p className="mt-3 text-center text-xs text-dark-400">
-                          {t('subscription.purchaseDevices.balanceOnly')}
-                        </p>
-                      )}
                   </>
                 );
               })()}

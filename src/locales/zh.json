@@ -614,6 +614,8 @@
       "activate": "以{{price}}激活",
       "canPause": "可随时暂停",
       "chargedDaily": "每天从余额中扣费",
+      "firstCharge": "首次扣款",
+      "nextCharge": "之后每天 {{price}}",
       "costPerDay": "每天费用",
       "pausedOnLowBalance": "余额不足时订阅将暂停"
     },
@@ -784,6 +786,7 @@
       "reviewPrice": "价格已更新。请核对总额并确认购买。",
       "priceUnavailable": "无法计算价格。",
       "calculating": "计算中…",
+      "recurringPrice": "每 {{days}} 天 {{price}}",
       "balanceOnly": "包含额外设备的套餐使用账户余额付款。如有需要，请先充值。"
     }
   },

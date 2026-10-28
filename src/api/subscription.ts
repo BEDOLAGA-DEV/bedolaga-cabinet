@@ -18,6 +18,8 @@ export interface TariffDeviceQuote {
   traffic_cost_kopeks: number;
   discount_kopeks: number;
   total_kopeks: number;
+  next_daily_charge_kopeks?: number | null;
+  recurrent_checkout_pending?: boolean;
   balance_kopeks: number;
   missing_kopeks: number;
 }
@@ -408,14 +410,39 @@ export const subscriptionApi = {
    * подтверждение привязки в банке. Для нового тарифа бэкенд создаёт
    * неактивную заготовку, которую активирует первый чардж.
    */
+  previewRecurrentPurchase: async (
+    provider: 'platega' | 'lava' | 'cashera',
+    tariffId: number,
+    subscriptionId?: number,
+    selectedDeviceLimit?: number,
+  ): Promise<{
+    amount_kopeks: number;
+    charge_days: number;
+    interval: string | number;
+    selected_device_limit: number;
+    quote_id: string;
+    checkout_id?: string | null;
+    expires_at: string;
+  }> => {
+    const response = await apiClient.get(
+      `/cabinet/subscription/${provider}-recurrent/purchase-preview`,
+      withSubId(subscriptionId, {
+        tariff_id: tariffId,
+        selected_device_limit: selectedDeviceLimit,
+      }),
+    );
+    return response.data;
+  },
+
   purchaseWithSbpRecurring: async (
     tariffId: number,
     subscriptionId?: number,
+    selection?: { selected_device_limit: number; quote_id: string; checkout_id: string },
   ): Promise<{ status: string; redirect_url: string | null; subscription_id: number }> => {
     const response = await apiClient.post(
       '/cabinet/subscription/platega-recurrent/purchase',
       {},
-      withSubId(subscriptionId, { tariff_id: tariffId }),
+      withSubId(subscriptionId, { tariff_id: tariffId, ...selection }),
     );
     return response.data;
   },
@@ -455,11 +482,12 @@ export const subscriptionApi = {
   purchaseWithLavaRecurring: async (
     tariffId: number,
     subscriptionId?: number,
+    selection?: { selected_device_limit: number; quote_id: string; checkout_id: string },
   ): Promise<{ status: string; redirect_url: string | null; subscription_id: number }> => {
     const response = await apiClient.post(
       '/cabinet/subscription/lava-recurrent/purchase',
       {},
-      withSubId(subscriptionId, { tariff_id: tariffId }),
+      withSubId(subscriptionId, { tariff_id: tariffId, ...selection }),
     );
     return response.data;
   },
@@ -496,11 +524,12 @@ export const subscriptionApi = {
   purchaseWithCasheraRecurring: async (
     tariffId: number,
     subscriptionId?: number,
+    selection?: { selected_device_limit: number; quote_id: string; checkout_id: string },
   ): Promise<{ status: string; redirect_url: string | null; subscription_id: number }> => {
     const response = await apiClient.post(
       '/cabinet/subscription/cashera-recurrent/purchase',
       {},
-      withSubId(subscriptionId, { tariff_id: tariffId }),
+      withSubId(subscriptionId, { tariff_id: tariffId, ...selection }),
     );
     return response.data;
   },

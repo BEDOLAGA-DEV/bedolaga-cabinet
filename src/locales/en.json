@@ -598,6 +598,8 @@
       "minutes": "m"
     },
     "dailyPurchase": {
+      "firstCharge": "First charge",
+      "nextCharge": "Then {{price}} per day",
       "costPerDay": "Cost per day",
       "chargedDaily": "Payment is charged daily from balance",
       "canPause": "Can be paused at any time",
@@ -873,6 +875,7 @@
       "reviewPrice": "The price has been refreshed. Check the total and confirm your purchase.",
       "priceUnavailable": "Could not calculate the price.",
       "calculating": "Calculating…",
+      "recurringPrice": "{{price}} every {{days}} days",
       "balanceOnly": "Plans with additional devices are paid from your balance. Top up first if needed."
     }
   },
