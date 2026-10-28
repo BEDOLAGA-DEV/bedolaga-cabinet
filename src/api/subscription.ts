@@ -739,6 +739,7 @@ export const subscriptionApi = {
 
   togglePause: async (
     subscriptionId?: number,
+    paused?: boolean,
   ): Promise<{
     success: boolean;
     message: string;
@@ -749,7 +750,7 @@ export const subscriptionApi = {
     const response = await apiClient.post(
       '/cabinet/subscription/pause',
       undefined,
-      withSubId(subscriptionId),
+      withSubId(subscriptionId, paused === undefined ? undefined : { paused }),
     );
     return response.data;
   },
