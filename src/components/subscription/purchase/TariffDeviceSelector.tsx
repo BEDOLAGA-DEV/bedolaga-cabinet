@@ -38,19 +38,19 @@ export function TariffDeviceSelector({
   };
   return (
     <div className="rounded-xl border border-dark-700/50 bg-dark-800/30 p-4">
-      <div className="flex flex-wrap items-center justify-between gap-4">
+      <div className="flex items-center justify-between gap-3">
         <div className="min-w-0 flex-1">
           <label htmlFor={id} className="block text-sm font-medium text-dark-100">
             {t('subscription.purchaseDevices.title')}
           </label>
-          <p id={`${id}-hint`} className="mt-1 text-xs text-dark-400">
-            {t('subscription.purchaseDevices.included', { count: included })}
-          </p>
         </div>
-        <div className="flex items-center gap-2" dir="ltr">
+        <div
+          className="flex shrink-0 items-center overflow-hidden rounded-xl border border-dark-600 bg-dark-900/50 focus-within:border-accent-500 focus-within:ring-2 focus-within:ring-accent-500/20"
+          dir="ltr"
+        >
           <button
             type="button"
-            className="btn-secondary h-11 w-11 p-0"
+            className="btn-ghost h-11 w-11 rounded-none p-0 disabled:opacity-35"
             disabled={disabled || value <= min}
             aria-label={t('subscription.purchaseDevices.decrease')}
             onClick={() => change(Math.max(min, value - 1))}
@@ -68,7 +68,7 @@ export function TariffDeviceSelector({
             disabled={disabled}
             aria-describedby={`${id}-hint${valid ? '' : ` ${id}-error`}`}
             aria-invalid={!valid}
-            className="h-11 w-20 rounded-lg border border-dark-600 bg-dark-900/50 px-2 text-center text-base tabular-nums text-dark-100 focus:border-accent-500 focus:outline-none focus:ring-2 focus:ring-accent-500/20"
+            className="h-11 w-16 appearance-none border-0 bg-transparent p-0 text-center text-base font-medium tabular-nums text-dark-100 focus:outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none [appearance:textfield]"
             onChange={(event) => {
               const text = event.target.value;
               setDraft(text);
@@ -84,7 +84,7 @@ export function TariffDeviceSelector({
           />
           <button
             type="button"
-            className="btn-secondary h-11 w-11 p-0"
+            className="btn-ghost h-11 w-11 rounded-none p-0 disabled:opacity-35"
             disabled={disabled || value >= max}
             aria-label={t('subscription.purchaseDevices.increase')}
             onClick={() => change(Math.min(max, value + 1))}
@@ -93,11 +93,18 @@ export function TariffDeviceSelector({
           </button>
         </div>
       </div>
-      {!valid && (
-        <p id={`${id}-error`} role="alert" className="mt-2 text-xs text-error-400">
-          {t('subscription.purchaseDevices.range', { min, max })}
+      <div id={`${id}-hint`} className="mt-3 space-y-1 text-xs leading-5 text-dark-400">
+        <p>{t('subscription.purchaseDevices.includedReason', { count: included })}</p>
+        <p
+          id={`${id}-error`}
+          role={valid ? undefined : 'alert'}
+          className={valid ? undefined : 'text-error-400'}
+        >
+          {valid
+            ? t('subscription.purchaseDevices.limitReason', { max })
+            : t('subscription.purchaseDevices.range', { min, max })}
         </p>
-      )}
+      </div>
     </div>
   );
 }

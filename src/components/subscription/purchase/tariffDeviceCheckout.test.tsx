@@ -196,3 +196,18 @@ it('lets the user correct an invalid device count while blocking payment', async
     ).toBe(false),
   );
 });
+
+it('retains the last total and all price rows during a delayed recalculation', async () => {
+  show();
+  const buy = screen.getByRole('button', { name: 'subscription.purchase' });
+  await waitFor(() => expect((buy as HTMLButtonElement).disabled).toBe(false));
+  const total = screen.getByTestId('tariff-purchase-total');
+  const previous = total.textContent;
+  const breakdown = screen.getByTestId('tariff-price-breakdown');
+  const rows = breakdown.children.length;
+  api.previewTariffPurchase.mockImplementation(() => new Promise(() => {}));
+  fireEvent.change(screen.getByRole('spinbutton'), { target: { value: '4' } });
+  expect(total.textContent).toBe(previous);
+  expect(breakdown.children.length).toBe(rows);
+  expect((buy as HTMLButtonElement).disabled).toBe(true);
+});

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '../../../store/auth';
+import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 import { TariffDeviceSelector } from './TariffDeviceSelector';
 import { subscriptionApi } from '../../../api/subscription';
 import { getErrorMessage, getInsufficientBalanceError } from '../../../utils/subscriptionHelpers';
@@ -333,7 +334,10 @@ export function TariffPurchaseForm({
   };
   const recurrentPrice = (index: number) =>
     recurrentSelectionEnabled && (
-      <div className="mt-1.5 text-center text-xs text-dark-400" aria-live="polite">
+      <div
+        className="mt-1.5 flex min-h-10 items-center justify-center text-center text-xs text-dark-400"
+        aria-live="polite"
+      >
         {canRetryRecurrent(index) ? (
           t('subscription.purchaseDevices.recurringPrice', {
             price: formatPrice(recurrentAttempts.current[index].amount_kopeks),
@@ -558,6 +562,24 @@ export function TariffPurchaseForm({
       </div>
 
       {/* Daily Tariff Purchase */}
+      {devicePreviewEnabled && !deviceQuote && !deviceQuoteQuery.isError && (
+        <SkeletonGroup className="rounded-xl border border-dark-700/50 bg-dark-800/30 p-4">
+          <div className="flex h-11 items-center justify-between gap-3">
+            <span className="text-sm font-medium text-dark-100">
+              {t('subscription.purchaseDevices.title')}
+            </span>
+            <Skeleton className="h-11 w-[154px] shrink-0 rounded-xl" />
+          </div>
+          <div className="mt-3 space-y-1 text-xs leading-5 text-dark-400">
+            <p>
+              {t('subscription.purchaseDevices.includedReason', {
+                count: tariff.base_device_limit ?? tariff.device_limit,
+              })}
+            </p>
+            <p>{t('subscription.purchaseDevices.loadingLimits')}</p>
+          </div>
+        </SkeletonGroup>
+      )}
       {deviceQuote?.device_selection.selectable && (
         <TariffDeviceSelector
           value={selectedDevices ?? deviceQuote.device_selection.effective_limit}
@@ -572,6 +594,24 @@ export function TariffPurchaseForm({
           onChange={setSelectedDevices}
           onValidityChange={setDeviceInputValid}
         />
+      )}
+      {deviceQuote && !deviceQuote.device_selection.selectable && (
+        <div className="rounded-xl border border-dark-700/50 bg-dark-800/30 p-4">
+          <div className="flex h-11 items-center justify-between gap-3">
+            <span className="text-sm font-medium text-dark-100">
+              {t('subscription.purchaseDevices.title')}
+            </span>
+            <span className="text-lg font-medium tabular-nums text-dark-100">
+              {deviceQuote.device_selection.effective_limit || '∞'}
+            </span>
+          </div>
+          <p className="mt-3 text-xs leading-5 text-dark-400">
+            {t(
+              `subscription.purchaseDevices.${deviceQuote.device_selection.reason === 'unlimited_devices' ? 'unlimitedReason' : deviceQuote.device_selection.reason === 'existing_paid_subscription' ? 'renewalReason' : 'fixedReason'}`,
+              { count: deviceQuote.device_selection.included_limit },
+            )}
+          </p>
+        </div>
       )}
       {deviceQuoteQuery.isError && devicePreviewEnabled && (
         <div role="alert" className="text-sm text-error-400">
@@ -594,11 +634,15 @@ export function TariffPurchaseForm({
             <div className="text-3xl font-bold text-accent-400">
               {formatPrice(deviceQuote?.total_kopeks ?? dailyQuote?.price ?? 0)}
             </div>
-            {dailyPriceChanges && deviceQuote?.next_daily_charge_kopeks != null && (
-              <div className="mt-2 text-sm text-dark-400" aria-live="polite">
-                {t('subscription.dailyPurchase.nextCharge', {
-                  price: formatPrice(deviceQuote.next_daily_charge_kopeks),
-                })}
+            {devicePreviewEnabled && (
+              <div className="mt-2 min-h-5 text-sm leading-5 text-dark-400" aria-live="polite">
+                {quoteBlocked
+                  ? t('subscription.purchaseDevices.calculating')
+                  : dailyPriceChanges && deviceQuote?.next_daily_charge_kopeks != null
+                    ? t('subscription.dailyPurchase.nextCharge', {
+                        price: formatPrice(deviceQuote.next_daily_charge_kopeks),
+                      })
+                    : '\u00a0'}
               </div>
             )}
             {!devicePreviewEnabled &&
@@ -838,7 +882,7 @@ export function TariffPurchaseForm({
                             ),
                           )
                         }
-                        className="w-20 rounded-lg border border-dark-600 bg-dark-700 px-3 py-2 text-center text-dark-100"
+                        className="w-20 rounded-lg border border-dark-600 bg-dark-900/50 px-3 py-2 text-center tabular-nums text-dark-100 focus:border-accent-500 focus:outline-none focus:ring-2 focus:ring-accent-500/20"
                       />
                     </div>
                     {(() => {
@@ -957,7 +1001,7 @@ export function TariffPurchaseForm({
                               ),
                             )
                           }
-                          className="w-20 rounded-lg border border-dark-600 bg-dark-700 px-3 py-2 text-center text-dark-100"
+                          className="w-20 rounded-lg border border-dark-600 bg-dark-900/50 px-3 py-2 text-center tabular-nums text-dark-100 focus:border-accent-500 focus:outline-none focus:ring-2 focus:ring-accent-500/20"
                         />
                         <span className="text-dark-400">{t('common.units.gb')}</span>
                       </div>
@@ -1012,30 +1056,54 @@ export function TariffPurchaseForm({
 
                 return (
                   <>
-                    {deviceQuote ? (
+                    {devicePreviewEnabled ? (
                       <div
-                        className="mb-4 space-y-2 text-sm text-dark-300"
+                        data-testid="tariff-price-breakdown"
+                        className={`mb-4 space-y-2 text-sm text-dark-300 transition-opacity ${quoteBlocked ? 'opacity-60' : ''}`}
                         aria-busy={quoteBlocked}
                       >
                         <div className="flex justify-between gap-3">
                           <span>{t('subscription.baseTariff')}</span>
-                          <span>{formatPrice(deviceQuote.tariff_cost_kopeks)}</span>
+                          <span>
+                            {deviceQuote ? (
+                              formatPrice(deviceQuote.tariff_cost_kopeks)
+                            ) : (
+                              <Skeleton className="h-5 w-20" />
+                            )}
+                          </span>
                         </div>
-                        {deviceQuote.devices_cost_kopeks > 0 && (
+                        {(tariff.device_price_kopeks != null ||
+                          deviceQuote?.device_selection.selectable) && (
                           <div className="flex justify-between gap-3">
                             <span>
                               {t('subscription.extraDevices')} (
-                              {deviceQuote.device_selection.effective_limit -
-                                deviceQuote.device_selection.included_limit}
+                              {deviceQuote
+                                ? deviceQuote.device_selection.effective_limit -
+                                  deviceQuote.device_selection.included_limit
+                                : 0}
                               )
                             </span>
-                            <span>+{formatPrice(deviceQuote.devices_cost_kopeks)}</span>
+                            <span>
+                              +
+                              {deviceQuote ? (
+                                formatPrice(deviceQuote.devices_cost_kopeks)
+                              ) : (
+                                <Skeleton className="h-5 w-20" />
+                              )}
+                            </span>
                           </div>
                         )}
-                        {deviceQuote.traffic_cost_kopeks > 0 && (
+                        {tariff.custom_traffic_enabled && (
                           <div className="flex justify-between gap-3">
-                            <span>{t('subscription.summary.traffic', { gb: quoteTraffic })}</span>
-                            <span>+{formatPrice(deviceQuote.traffic_cost_kopeks)}</span>
+                            <span>{t('subscription.traffic')}</span>
+                            <span>
+                              +
+                              {deviceQuote ? (
+                                formatPrice(deviceQuote.traffic_cost_kopeks)
+                              ) : (
+                                <Skeleton className="h-5 w-20" />
+                              )}
+                            </span>
                           </div>
                         )}
                       </div>
@@ -1115,7 +1183,7 @@ export function TariffPurchaseForm({
                       </div>
                     )}
 
-                    {!deviceQuote && promoPeriod.percent && (
+                    {!devicePreviewEnabled && promoPeriod.percent && (
                       <div className="mb-4 flex items-center justify-center gap-2 rounded-lg border border-warning-500/30 bg-warning-500/10 p-2">
                         <span className="text-sm font-medium text-warning-400">
                           {t('promo.discountApplied')} -{promoPeriod.percent}%
@@ -1123,19 +1191,28 @@ export function TariffPurchaseForm({
                       </div>
                     )}
 
-                    <div className="mb-4 flex items-center justify-between gap-3 border-t border-dark-700/50 pt-2">
-                      <span className="font-medium text-dark-100">{t('subscription.total')}</span>
-                      <div className="text-right">
-                        <span className="whitespace-nowrap text-2xl font-bold text-accent-400">
-                          {quoteBlocked
-                            ? t('subscription.purchaseDevices.calculating')
-                            : formatPrice(totalPrice)}
+                    <div className="mb-4 border-t border-dark-700/50 pt-3">
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="font-medium text-dark-100">{t('subscription.total')}</span>
+                        <span
+                          data-testid="tariff-purchase-total"
+                          aria-busy={quoteBlocked}
+                          className={`inline-block whitespace-nowrap text-2xl font-bold tabular-nums text-accent-400 transition-opacity ${quoteBlocked ? 'opacity-60' : ''}`}
+                        >
+                          {devicePreviewEnabled && !deviceQuote ? (
+                            <Skeleton className="h-8 w-28" />
+                          ) : (
+                            formatPrice(totalPrice)
+                          )}
                         </span>
-                        {originalTotal && (
-                          <div className="text-sm text-dark-500 line-through">
-                            {formatPrice(originalTotal)}
-                          </div>
-                        )}
+                      </div>
+                      <div className="flex min-h-5 items-center justify-between gap-3 text-xs leading-5 text-dark-400">
+                        <span role="status">
+                          {quoteBlocked ? t('subscription.purchaseDevices.calculating') : null}
+                        </span>
+                        <span className="line-through">
+                          {originalTotal ? formatPrice(originalTotal) : null}
+                        </span>
                       </div>
                     </div>
 

@@ -876,7 +876,13 @@
       "priceUnavailable": "Could not calculate the price.",
       "calculating": "Calculating…",
       "recurringPrice": "{{price}} every {{days}} days",
-      "balanceOnly": "Plans with additional devices are paid from your balance. Top up first if needed."
+      "balanceOnly": "Plans with additional devices are paid from your balance. Top up first if needed.",
+      "includedReason": "{{count}} included in the price. You cannot select fewer.",
+      "limitReason": "Maximum for this plan: {{max}}.",
+      "loadingLimits": "Loading plan limits…",
+      "fixedReason": "This plan includes a fixed number of devices: {{count}}. It cannot be changed at checkout.",
+      "renewalReason": "Renewing keeps your device limit. You can change it in subscription settings.",
+      "unlimitedReason": "This plan has no device limit."
     }
   },
   "balance": {

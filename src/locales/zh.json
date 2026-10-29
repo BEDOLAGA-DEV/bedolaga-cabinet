@@ -787,7 +787,13 @@
       "priceUnavailable": "无法计算价格。",
       "calculating": "计算中…",
       "recurringPrice": "每 {{days}} 天 {{price}}",
-      "balanceOnly": "包含额外设备的套餐使用账户余额付款。如有需要，请先充值。"
+      "balanceOnly": "包含额外设备的套餐使用账户余额付款。如有需要，请先充值。",
+      "includedReason": "价格已包含 {{count}} 台设备，不能减少。",
+      "limitReason": "此套餐最多支持 {{max}} 台设备。",
+      "loadingLimits": "正在加载套餐限制…",
+      "fixedReason": "此套餐的设备数量固定为 {{count}} 台，购买时无法更改。",
+      "renewalReason": "续费会保留您的设备数量，您可以在订阅管理中修改。",
+      "unlimitedReason": "此套餐不限制设备数量。"
     }
   },
   "balance": {

@@ -65,3 +65,18 @@ it('disables decrement at the included limit', () => {
     ).disabled,
   ).toBe(true);
 });
+
+it('explains both the included minimum and the tariff maximum before input errors', () => {
+  render(
+    <TariffDeviceSelector
+      value={3}
+      min={3}
+      max={8}
+      included={3}
+      onChange={vi.fn()}
+      onValidityChange={vi.fn()}
+    />,
+  );
+  expect(screen.getByText('subscription.purchaseDevices.includedReason')).toBeTruthy();
+  expect(screen.getByText('subscription.purchaseDevices.limitReason')).toBeTruthy();
+});
