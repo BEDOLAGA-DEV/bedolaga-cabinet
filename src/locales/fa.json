@@ -783,6 +783,9 @@
       "purchaseHint": "برداشت خودکار را از طریق لینک Cashera تأیید کنید؛ سپس تمدیدها خودکار برداشت می‌شوند."
     },
     "purchaseDevices": {
+      "otherQuantity": "تعداد دیگر",
+      "exactQuantity": "تعداد دستگاه‌ها را وارد کنید",
+      "unlimitedLabel": "نامحدود",
       "title": "تعداد دستگاه‌ها",
       "included": "شامل در طرح: {{count}}",
       "decrease": "کاهش تعداد دستگاه‌ها",

@@ -777,6 +777,9 @@
       "purchaseHint": "通过 Cashera 链接确认自动扣款，之后续费将自动扣款。"
     },
     "purchaseDevices": {
+      "otherQuantity": "其他数量",
+      "exactQuantity": "输入设备数量",
+      "unlimitedLabel": "不限数量",
       "title": "设备数量",
       "included": "套餐包含：{{count}}",
       "decrease": "减少设备数量",

@@ -26,6 +26,8 @@ export function TariffDeviceSelector({
   useEffect(() => {
     setDraft(String(value));
   }, [value]);
+  const presetMax = Math.min(max, min + 19);
+  const [custom, setCustom] = useState(value > presetMax);
   const valid =
     /^\d+$/.test(draft) &&
     Number.isSafeInteger(Number(draft)) &&
@@ -38,27 +40,42 @@ export function TariffDeviceSelector({
   };
   return (
     <div className="rounded-xl border border-dark-700/50 bg-dark-800/30 p-4">
-      <div className="flex items-center justify-between gap-3">
-        <div className="min-w-0 flex-1">
-          <label htmlFor={id} className="block text-sm font-medium text-dark-100">
-            {t('subscription.purchaseDevices.title')}
+      <label htmlFor={id} className="mb-3 block text-sm font-medium text-dark-100">
+        {t('subscription.purchaseDevices.title')}
+      </label>
+      <select
+        id={id}
+        value={custom || value > presetMax ? 'custom' : String(value)}
+        disabled={disabled}
+        aria-describedby={`${id}-hint`}
+        className="h-11 w-full min-w-0 rounded-xl border border-dark-600 bg-dark-900 px-3 text-base text-dark-100 focus:border-accent-500 focus:outline-none focus:ring-2 focus:ring-accent-500/20 disabled:opacity-50"
+        onChange={(event) => {
+          if (event.target.value === 'custom') {
+            setCustom(true);
+            return;
+          }
+          const next = Number(event.target.value);
+          if (!Number.isInteger(next) || next < min || next > max) return;
+          setCustom(false);
+          change(next);
+        }}
+      >
+        {Array.from({ length: presetMax - min + 1 }, (_, index) => min + index).map((count) => (
+          <option key={count} value={count}>
+            {count}
+          </option>
+        ))}
+        {max > presetMax && (
+          <option value="custom">{t('subscription.purchaseDevices.otherQuantity')}</option>
+        )}
+      </select>
+      {(custom || value > presetMax) && (
+        <div className="mt-3">
+          <label htmlFor={`${id}-custom`} className="mb-2 block text-xs text-dark-400">
+            {t('subscription.purchaseDevices.exactQuantity')}
           </label>
-        </div>
-        <div
-          className="flex shrink-0 items-center overflow-hidden rounded-xl border border-dark-600 bg-dark-900/50 focus-within:border-accent-500 focus-within:ring-2 focus-within:ring-accent-500/20"
-          dir="ltr"
-        >
-          <button
-            type="button"
-            className="btn-ghost h-11 w-11 rounded-none p-0 disabled:opacity-35"
-            disabled={disabled || value <= min}
-            aria-label={t('subscription.purchaseDevices.decrease')}
-            onClick={() => change(Math.max(min, value - 1))}
-          >
-            −
-          </button>
           <input
-            id={id}
+            id={`${id}-custom`}
             type="number"
             inputMode="numeric"
             min={min}
@@ -68,7 +85,7 @@ export function TariffDeviceSelector({
             disabled={disabled}
             aria-describedby={`${id}-hint${valid ? '' : ` ${id}-error`}`}
             aria-invalid={!valid}
-            className="h-11 w-16 appearance-none border-0 bg-transparent p-0 text-center text-base font-medium tabular-nums text-dark-100 focus:outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none [appearance:textfield]"
+            className="h-11 w-full min-w-0 rounded-xl border border-dark-600 bg-dark-900 px-3 text-base tabular-nums text-dark-100 focus:border-accent-500 focus:outline-none focus:ring-2 focus:ring-accent-500/20 disabled:opacity-50"
             onChange={(event) => {
               const text = event.target.value;
               setDraft(text);
@@ -82,17 +99,8 @@ export function TariffDeviceSelector({
               if (accepted) onChange(number);
             }}
           />
-          <button
-            type="button"
-            className="btn-ghost h-11 w-11 rounded-none p-0 disabled:opacity-35"
-            disabled={disabled || value >= max}
-            aria-label={t('subscription.purchaseDevices.increase')}
-            onClick={() => change(Math.min(max, value + 1))}
-          >
-            +
-          </button>
         </div>
-      </div>
+      )}
       <div
         id={`${id}-hint`}
         className="mt-3 min-w-0 space-y-1 break-words text-xs leading-5 text-dark-400"

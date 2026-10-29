@@ -59,13 +59,13 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
-function show(supported = true, daily = false) {
+function show(supported = true, daily = false, deviceLimit = 1) {
   const tariff = {
     id: 7,
     name: 'Test',
     is_daily: daily,
     daily_price_kopeks: daily ? 100 : 0,
-    device_limit: 1,
+    device_limit: deviceLimit,
     purchase_device_selection_supported: supported,
     servers: [],
     traffic_limit_gb: 100,
@@ -92,7 +92,7 @@ function show(supported = true, daily = false) {
 
 it('sends the selected devices and matching server quote; retries retain checkout ID', async () => {
   show();
-  const input = await screen.findByRole('spinbutton');
+  const input = await screen.findByRole('combobox');
   fireEvent.change(input, { target: { value: '3' } });
   const buy = screen.getByRole('button', { name: 'subscription.purchase' });
   await waitFor(() => expect((buy as HTMLButtonElement).disabled).toBe(false));
@@ -113,7 +113,7 @@ it('sends the selected devices and matching server quote; retries retain checkou
 
 it('blocks payment while the changed device price is loading', async () => {
   show();
-  const input = await screen.findByRole('spinbutton');
+  const input = await screen.findByRole('combobox');
   api.previewTariffPurchase.mockImplementation(() => new Promise(() => {}));
   fireEvent.change(input, { target: { value: '4' } });
   expect(
@@ -124,13 +124,13 @@ it('blocks payment while the changed device price is loading', async () => {
 
 it('keeps legacy backend compatibility without showing an unsupported selector', () => {
   show(false);
-  expect(screen.queryByRole('spinbutton')).toBeNull();
+  expect(screen.queryByRole('combobox')).toBeNull();
   expect(api.previewTariffPurchase).not.toHaveBeenCalled();
 });
 
 it('can retry an uncertain payment without requiring another quote', async () => {
   show();
-  await screen.findByRole('spinbutton');
+  await screen.findByRole('combobox');
   const buy = screen.getByRole('button', { name: 'subscription.purchase' });
   await waitFor(() => expect((buy as HTMLButtonElement).disabled).toBe(false));
   api.previewTariffPurchase.mockRejectedValue({ response: { status: 409 } });
@@ -144,7 +144,7 @@ it('can retry an uncertain payment without requiring another quote', async () =>
 
 it('quotes daily selection for one day and sends a bound checkout', async () => {
   show(true, true);
-  const input = await screen.findByRole('spinbutton');
+  const input = await screen.findByRole('combobox');
   fireEvent.change(input, { target: { value: '3' } });
   const buy = screen.getByRole('button', { name: 'subscription.dailyPurchase.activate' });
   await waitFor(() => expect((buy as HTMLButtonElement).disabled).toBe(false));
@@ -173,7 +173,7 @@ it('shows a one-time daily offer separately from future daily charges after chan
     next_daily_charge_kopeks: request.selected_device_limit === 3 ? 1100 : 1000,
   }));
   show(true, true);
-  const input = await screen.findByRole('spinbutton');
+  const input = await screen.findByRole('combobox');
   fireEvent.change(input, { target: { value: '3' } });
   await screen.findByText(/subscription.dailyPurchase.nextCharge: 11/);
   expect(screen.getByText('subscription.dailyPurchase.firstCharge')).toBeTruthy();
@@ -182,8 +182,15 @@ it('shows a one-time daily offer separately from future daily charges after chan
 });
 
 it('lets the user correct an invalid device count while blocking payment', async () => {
+  const preview = api.previewTariffPurchase.getMockImplementation();
+  if (!preview) throw new Error('Preview fixture is missing');
+  api.previewTariffPurchase.mockImplementation(async (request) => {
+    const quote = await preview(request);
+    return { ...quote, device_selection: { ...quote.device_selection, max_limit: 10000 } };
+  });
   show();
-  const input = await screen.findByRole('spinbutton');
+  fireEvent.change(await screen.findByRole('combobox'), { target: { value: 'custom' } });
+  const input = screen.getByRole('spinbutton');
   fireEvent.change(input, { target: { value: '0' } });
   expect((input as HTMLInputElement).disabled).toBe(false);
   expect(
@@ -206,7 +213,7 @@ it('retains the last total and all price rows during a delayed recalculation', a
   const breakdown = screen.getByTestId('tariff-price-breakdown');
   const rows = breakdown.children.length;
   api.previewTariffPurchase.mockImplementation(() => new Promise(() => {}));
-  fireEvent.change(screen.getByRole('spinbutton'), { target: { value: '4' } });
+  fireEvent.change(screen.getByRole('combobox'), { target: { value: '4' } });
   expect(total.textContent).toBe(previous);
   expect(breakdown.children.length).toBe(rows);
   expect((buy as HTMLButtonElement).disabled).toBe(true);
@@ -217,10 +224,45 @@ it('uses the shared Skeleton to cover the old total while recalculating', async 
   const buy = screen.getByRole('button', { name: 'subscription.purchase' });
   await waitFor(() => expect((buy as HTMLButtonElement).disabled).toBe(false));
   api.previewTariffPurchase.mockImplementation(() => new Promise(() => {}));
-  fireEvent.change(screen.getByRole('spinbutton'), { target: { value: '4' } });
+  fireEvent.change(screen.getByRole('combobox'), { target: { value: '4' } });
   const total = screen.getByTestId('tariff-purchase-total');
   expect(total.querySelector('[aria-hidden="true"]')).not.toBeNull();
   expect(total.querySelector('.bg-dark-500\\/40')).not.toBeNull();
   expect(screen.queryByText('subscription.purchaseDevices.calculating')).toBeNull();
   expect((buy as HTMLButtonElement).disabled).toBe(true);
 });
+
+it.each([false, true])(
+  'preserves unlimited devices without an explicit count (daily=%s)',
+  async (daily) => {
+    const preview = api.previewTariffPurchase.getMockImplementation();
+    if (!preview) throw new Error('Preview fixture is missing');
+    api.previewTariffPurchase.mockImplementation(async (request) => ({
+      ...(await preview(request)),
+      device_selection: {
+        effective_limit: 0,
+        included_limit: 0,
+        selectable: false,
+        min_limit: null,
+        max_limit: null,
+        reason: 'unlimited_devices',
+      },
+    }));
+    show(true, daily, 0);
+    await screen.findByText('subscription.purchaseDevices.unlimitedLabel');
+    expect(screen.queryByRole('combobox')).toBeNull();
+    expect(screen.queryByRole('spinbutton')).toBeNull();
+    const buy = screen.getByRole('button', {
+      name: daily ? 'subscription.dailyPurchase.activate' : 'subscription.purchase',
+    });
+    await waitFor(() => expect((buy as HTMLButtonElement).disabled).toBe(false));
+    fireEvent.click(buy);
+    await waitFor(() => expect(api.purchaseTariff).toHaveBeenCalled());
+    expect(api.purchaseTariff.mock.lastCall?.[5]?.selected_device_limit).toBeUndefined();
+    expect(
+      api.previewTariffPurchase.mock.calls.every(
+        ([request]) => request.selected_device_limit === undefined,
+      ),
+    ).toBe(true);
+  },
+);

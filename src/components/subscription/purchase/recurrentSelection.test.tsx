@@ -107,10 +107,10 @@ it.each([
       </PlatformProvider>
     </QueryClientProvider>,
   );
-  if (!recovery) await screen.findByRole('spinbutton');
+  if (!recovery) await screen.findByRole('combobox');
   else {
     await screen.findAllByText(/123.*7/);
-    expect(screen.queryByRole('spinbutton')).toBeNull();
+    expect(screen.queryByRole('combobox')).toBeNull();
     expect(purchase.previewRecurrentPurchase).toHaveBeenCalledWith(
       provider === 'sbp' ? 'platega' : provider,
       1,

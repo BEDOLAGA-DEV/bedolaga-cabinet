@@ -866,6 +866,9 @@
       "purchaseHint": "Confirm auto-charges via the Cashera link; renewals are then charged automatically."
     },
     "purchaseDevices": {
+      "otherQuantity": "Other quantity",
+      "exactQuantity": "Enter the number of devices",
+      "unlimitedLabel": "Unlimited",
       "title": "Number of devices",
       "included": "Included in the plan: {{count}}",
       "decrease": "Fewer devices",

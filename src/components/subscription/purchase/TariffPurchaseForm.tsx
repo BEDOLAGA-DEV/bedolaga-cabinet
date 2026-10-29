@@ -576,17 +576,17 @@ export function TariffPurchaseForm({
       {/* Daily Tariff Purchase */}
       {devicePreviewEnabled && !deviceQuote && !deviceQuoteQuery.isError && (
         <SkeletonGroup className="rounded-xl border border-dark-700/50 bg-dark-800/30 p-4">
-          <div className="flex h-11 items-center justify-between gap-3">
-            <span className="text-sm font-medium text-dark-100">
-              {t('subscription.purchaseDevices.title')}
-            </span>
-            <Skeleton className="h-11 w-[154px] shrink-0 rounded-xl" />
-          </div>
+          <span className="mb-3 block text-sm font-medium text-dark-100">
+            {t('subscription.purchaseDevices.title')}
+          </span>
+          <Skeleton className="h-11 w-full rounded-xl" />
           <div className="mt-3 space-y-1 text-xs leading-5 text-dark-400">
             <p>
-              {t('subscription.purchaseDevices.includedReason', {
-                count: tariff.base_device_limit ?? tariff.device_limit,
-              })}
+              {(tariff.base_device_limit ?? tariff.device_limit) === 0
+                ? t('subscription.purchaseDevices.unlimitedReason')
+                : t('subscription.purchaseDevices.includedReason', {
+                    count: tariff.base_device_limit ?? tariff.device_limit,
+                  })}
             </p>
             <p>{t('subscription.purchaseDevices.loadingLimits')}</p>
           </div>
@@ -609,12 +609,14 @@ export function TariffPurchaseForm({
       )}
       {deviceQuote && !deviceQuote.device_selection.selectable && (
         <div className="rounded-xl border border-dark-700/50 bg-dark-800/30 p-4">
-          <div className="flex h-11 items-center justify-between gap-3">
+          <div className="flex min-h-11 flex-wrap items-center justify-between gap-3">
             <span className="text-sm font-medium text-dark-100">
               {t('subscription.purchaseDevices.title')}
             </span>
             <span className="text-lg font-medium tabular-nums text-dark-100">
-              {deviceQuote.device_selection.effective_limit || '∞'}
+              {deviceQuote.device_selection.effective_limit === 0
+                ? t('subscription.purchaseDevices.unlimitedLabel')
+                : deviceQuote.device_selection.effective_limit}
             </span>
           </div>
           <p className="mt-3 text-xs leading-5 text-dark-400">

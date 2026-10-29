@@ -6,28 +6,24 @@ import { TariffDeviceSelector } from './TariffDeviceSelector';
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key }) }));
 afterEach(cleanup);
 
-it('allows only whole device counts inside server limits', () => {
+it('offers exactly the server range, including a minimum above one', () => {
   const change = vi.fn();
-  const validity = vi.fn();
   render(
     <TariffDeviceSelector
-      value={1}
-      min={1}
+      value={3}
+      min={3}
       max={5}
-      included={1}
+      included={3}
       onChange={change}
-      onValidityChange={validity}
+      onValidityChange={vi.fn()}
     />,
   );
-  const input = screen.getByRole('spinbutton');
-  fireEvent.change(input, { target: { value: '3' } });
-  expect(change).toHaveBeenCalledWith(3);
-  change.mockClear();
-  for (const value of ['0', '6', '1.5', '']) {
-    fireEvent.change(input, { target: { value } });
-    expect(change).not.toHaveBeenCalled();
-    expect(validity).toHaveBeenLastCalledWith(false);
-  }
+  expect(
+    screen.getAllByRole('option').map((option) => (option as HTMLOptionElement).value),
+  ).toEqual(['3', '4', '5']);
+  fireEvent.change(screen.getByRole('combobox'), { target: { value: '5' } });
+  expect(change).toHaveBeenCalledWith(5);
+  expect(screen.queryByRole('spinbutton')).toBeNull();
 });
 
 it('supports large configured limits without a hardcoded ceiling of 100', () => {
@@ -42,28 +38,34 @@ it('supports large configured limits without a hardcoded ceiling of 100', () => 
       onValidityChange={vi.fn()}
     />,
   );
+  expect(screen.getAllByRole('option').length).toBeLessThanOrEqual(21);
+  fireEvent.change(screen.getByRole('combobox'), { target: { value: 'custom' } });
   fireEvent.change(screen.getByRole('spinbutton'), { target: { value: '500' } });
   expect(change).toHaveBeenCalledWith(500);
 });
 
-it('disables decrement at the included limit', () => {
+it('blocks invalid custom counts and restores validity when choosing a preset', () => {
+  const change = vi.fn();
+  const validity = vi.fn();
   render(
     <TariffDeviceSelector
-      value={1}
-      min={1}
-      max={5}
-      included={1}
-      onChange={vi.fn()}
-      onValidityChange={vi.fn()}
+      value={3}
+      min={3}
+      max={10000}
+      included={3}
+      onChange={change}
+      onValidityChange={validity}
     />,
   );
-  expect(
-    (
-      screen.getByRole('button', {
-        name: 'subscription.purchaseDevices.decrease',
-      }) as HTMLButtonElement
-    ).disabled,
-  ).toBe(true);
+  fireEvent.change(screen.getByRole('combobox'), { target: { value: 'custom' } });
+  for (const value of ['0', '2', '10001', '3.5', '']) {
+    fireEvent.change(screen.getByRole('spinbutton'), { target: { value } });
+    expect(change).not.toHaveBeenCalled();
+    expect(validity).toHaveBeenLastCalledWith(false);
+  }
+  fireEvent.change(screen.getByRole('combobox'), { target: { value: '4' } });
+  expect(change).toHaveBeenLastCalledWith(4);
+  expect(validity).toHaveBeenLastCalledWith(true);
 });
 
 it('explains both the included minimum and the tariff maximum before input errors', () => {
