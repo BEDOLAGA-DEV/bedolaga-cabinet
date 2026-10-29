@@ -93,7 +93,10 @@ export function TariffDeviceSelector({
           </button>
         </div>
       </div>
-      <div id={`${id}-hint`} className="mt-3 space-y-1 text-xs leading-5 text-dark-400">
+      <div
+        id={`${id}-hint`}
+        className="mt-3 min-w-0 space-y-1 break-words text-xs leading-5 text-dark-400"
+      >
         <p>{t('subscription.purchaseDevices.includedReason', { count: included })}</p>
         <p
           id={`${id}-error`}

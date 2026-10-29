@@ -38,6 +38,18 @@ import { BestValueBadge, bestValueFrame } from '../BestValueBadge';
 // onBack to clear its own selection state.
 // ──────────────────────────────────────────────────────────────────
 
+// Keep the measured price footprint while the shared skeleton covers its value.
+function PurchasePrice({ loading, children }: { loading: boolean; children: string }) {
+  return (
+    <span className="relative inline-grid shrink-0 whitespace-nowrap tabular-nums align-middle">
+      <span aria-hidden={loading || undefined} className={loading ? 'invisible' : undefined}>
+        {children}
+      </span>
+      {loading && children.trim() && <Skeleton className="absolute inset-0 h-full w-full" />}
+    </span>
+  );
+}
+
 export interface TariffPurchaseFormProps {
   tariff: Tariff;
   subscriptionId: number | undefined;
@@ -632,17 +644,22 @@ export function TariffPurchaseForm({
               )}
             </div>
             <div className="text-3xl font-bold text-accent-400">
-              {formatPrice(deviceQuote?.total_kopeks ?? dailyQuote?.price ?? 0)}
+              <PurchasePrice loading={quoteBlocked}>
+                {formatPrice(deviceQuote?.total_kopeks ?? dailyQuote?.price ?? 0)}
+              </PurchasePrice>
             </div>
             {devicePreviewEnabled && (
               <div className="mt-2 min-h-5 text-sm leading-5 text-dark-400" aria-live="polite">
-                {quoteBlocked
-                  ? t('subscription.purchaseDevices.calculating')
-                  : dailyPriceChanges && deviceQuote?.next_daily_charge_kopeks != null
+                <span role="status" className="sr-only">
+                  {quoteBlocked ? t('common.loading') : null}
+                </span>
+                <PurchasePrice loading={quoteBlocked}>
+                  {dailyPriceChanges && deviceQuote?.next_daily_charge_kopeks != null
                     ? t('subscription.dailyPurchase.nextCharge', {
                         price: formatPrice(deviceQuote.next_daily_charge_kopeks),
                       })
                     : '\u00a0'}
+                </PurchasePrice>
               </div>
             )}
             {!devicePreviewEnabled &&
@@ -1059,17 +1076,15 @@ export function TariffPurchaseForm({
                     {devicePreviewEnabled ? (
                       <div
                         data-testid="tariff-price-breakdown"
-                        className={`mb-4 space-y-2 text-sm text-dark-300 transition-opacity ${quoteBlocked ? 'opacity-60' : ''}`}
+                        className="mb-4 space-y-2 text-sm text-dark-300"
                         aria-busy={quoteBlocked}
                       >
                         <div className="flex justify-between gap-3">
                           <span>{t('subscription.baseTariff')}</span>
                           <span>
-                            {deviceQuote ? (
-                              formatPrice(deviceQuote.tariff_cost_kopeks)
-                            ) : (
-                              <Skeleton className="h-5 w-20" />
-                            )}
+                            <PurchasePrice loading={quoteBlocked}>
+                              {formatPrice(deviceQuote?.tariff_cost_kopeks ?? basePeriodPrice)}
+                            </PurchasePrice>
                           </span>
                         </div>
                         {(tariff.device_price_kopeks != null ||
@@ -1084,12 +1099,9 @@ export function TariffPurchaseForm({
                               )
                             </span>
                             <span>
-                              +
-                              {deviceQuote ? (
-                                formatPrice(deviceQuote.devices_cost_kopeks)
-                              ) : (
-                                <Skeleton className="h-5 w-20" />
-                              )}
+                              <PurchasePrice
+                                loading={quoteBlocked}
+                              >{`+${formatPrice(deviceQuote?.devices_cost_kopeks ?? 0)}`}</PurchasePrice>
                             </span>
                           </div>
                         )}
@@ -1097,12 +1109,9 @@ export function TariffPurchaseForm({
                           <div className="flex justify-between gap-3">
                             <span>{t('subscription.traffic')}</span>
                             <span>
-                              +
-                              {deviceQuote ? (
-                                formatPrice(deviceQuote.traffic_cost_kopeks)
-                              ) : (
-                                <Skeleton className="h-5 w-20" />
-                              )}
+                              <PurchasePrice
+                                loading={quoteBlocked}
+                              >{`+${formatPrice(deviceQuote?.traffic_cost_kopeks ?? 0)}`}</PurchasePrice>
                             </span>
                           </div>
                         )}
@@ -1197,21 +1206,23 @@ export function TariffPurchaseForm({
                         <span
                           data-testid="tariff-purchase-total"
                           aria-busy={quoteBlocked}
-                          className={`inline-block whitespace-nowrap text-2xl font-bold tabular-nums text-accent-400 transition-opacity ${quoteBlocked ? 'opacity-60' : ''}`}
+                          className="inline-block whitespace-nowrap text-2xl font-bold tabular-nums text-accent-400"
                         >
-                          {devicePreviewEnabled && !deviceQuote ? (
-                            <Skeleton className="h-8 w-28" />
-                          ) : (
-                            formatPrice(totalPrice)
-                          )}
+                          <PurchasePrice loading={quoteBlocked}>
+                            {formatPrice(totalPrice)}
+                          </PurchasePrice>
                         </span>
                       </div>
                       <div className="flex min-h-5 items-center justify-between gap-3 text-xs leading-5 text-dark-400">
-                        <span role="status">
-                          {quoteBlocked ? t('subscription.purchaseDevices.calculating') : null}
+                        <span role="status" className="sr-only">
+                          {quoteBlocked ? t('common.loading') : null}
                         </span>
-                        <span className="line-through">
-                          {originalTotal ? formatPrice(originalTotal) : null}
+                        <span className="ms-auto line-through">
+                          {originalTotal ? (
+                            <PurchasePrice loading={quoteBlocked}>
+                              {formatPrice(originalTotal)}
+                            </PurchasePrice>
+                          ) : null}
                         </span>
                       </div>
                     </div>

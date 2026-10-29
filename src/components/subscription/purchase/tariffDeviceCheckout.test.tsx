@@ -211,3 +211,16 @@ it('retains the last total and all price rows during a delayed recalculation', a
   expect(breakdown.children.length).toBe(rows);
   expect((buy as HTMLButtonElement).disabled).toBe(true);
 });
+
+it('uses the shared Skeleton to cover the old total while recalculating', async () => {
+  show();
+  const buy = screen.getByRole('button', { name: 'subscription.purchase' });
+  await waitFor(() => expect((buy as HTMLButtonElement).disabled).toBe(false));
+  api.previewTariffPurchase.mockImplementation(() => new Promise(() => {}));
+  fireEvent.change(screen.getByRole('spinbutton'), { target: { value: '4' } });
+  const total = screen.getByTestId('tariff-purchase-total');
+  expect(total.querySelector('[aria-hidden="true"]')).not.toBeNull();
+  expect(total.querySelector('.bg-dark-500\\/40')).not.toBeNull();
+  expect(screen.queryByText('subscription.purchaseDevices.calculating')).toBeNull();
+  expect((buy as HTMLButtonElement).disabled).toBe(true);
+});
