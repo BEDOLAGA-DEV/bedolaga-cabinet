@@ -80,10 +80,24 @@ export default function AdminPartnerSettings() {
   const handleSubmit = (e: React.SyntheticEvent) => {
     e.preventDefault();
     if (!isValid) return;
+    const {
+      withdrawal_min_amount_kopeks,
+      withdrawal_cooldown_days,
+      withdrawal_requisites_text,
+      ...rest
+    } = formData;
     updateMutation.mutate({
-      ...formData,
-      withdrawal_min_amount_kopeks: toNumber(formData.withdrawal_min_amount_kopeks, 100000),
-      withdrawal_cooldown_days: toNumber(formData.withdrawal_cooldown_days, 30),
+      ...rest,
+      // При выключенном выводе его поля отключены и, как disabled-поля HTML-формы,
+      // не отправляются: сервер оставляет прежние значения. Иначе недопустимое
+      // значение, введённое до выключения, отклонило бы весь запрос (422).
+      ...(formData.withdrawal_enabled
+        ? {
+            withdrawal_min_amount_kopeks: toNumber(withdrawal_min_amount_kopeks, 100000),
+            withdrawal_cooldown_days: toNumber(withdrawal_cooldown_days, 30),
+            withdrawal_requisites_text,
+          }
+        : {}),
     });
   };
 
@@ -231,11 +245,15 @@ export default function AdminPartnerSettings() {
 
           {/* Min Amount */}
           <div className="mb-4">
-            <label className="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm font-medium text-dark-300">
+            <label
+              htmlFor="withdrawal-min-amount-kopeks"
+              className="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm font-medium text-dark-300"
+            >
               {t('admin.partners.settingsFields.minAmount')}
               {envLocked.has('withdrawal_min_amount_kopeks') && <EnvLockedBadge />}
             </label>
             <input
+              id="withdrawal-min-amount-kopeks"
               type="number"
               min={0}
               max={100000000}
@@ -259,11 +277,15 @@ export default function AdminPartnerSettings() {
 
           {/* Cooldown Days */}
           <div className="mb-4">
-            <label className="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm font-medium text-dark-300">
+            <label
+              htmlFor="withdrawal-cooldown-days"
+              className="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm font-medium text-dark-300"
+            >
               {t('admin.partners.settingsFields.cooldownDays')}
               {envLocked.has('withdrawal_cooldown_days') && <EnvLockedBadge />}
             </label>
             <input
+              id="withdrawal-cooldown-days"
               type="number"
               min={0}
               max={365}
@@ -284,11 +306,15 @@ export default function AdminPartnerSettings() {
 
           {/* Requisites Text */}
           <div>
-            <label className="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm font-medium text-dark-300">
+            <label
+              htmlFor="withdrawal-requisites-text"
+              className="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm font-medium text-dark-300"
+            >
               {t('admin.partners.settingsFields.requisitesText')}
               {envLocked.has('withdrawal_requisites_text') && <EnvLockedBadge />}
             </label>
             <textarea
+              id="withdrawal-requisites-text"
               value={formData.withdrawal_requisites_text}
               onChange={(e) =>
                 setFormData({ ...formData, withdrawal_requisites_text: e.target.value })
