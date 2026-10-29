@@ -111,19 +111,32 @@ export default function AdminPartnerSettings() {
   const handleSubmit = (e: React.SyntheticEvent) => {
     e.preventDefault();
     if (!isValid) return;
+    const {
+      withdrawal_reminder_minutes,
+      withdrawal_reminder_cooldown_minutes,
+      withdrawal_reminder_check_interval_seconds,
+      ...rest
+    } = formData;
     updateMutation.mutate({
-      ...formData,
+      ...rest,
       withdrawal_min_amount_kopeks: toNumber(formData.withdrawal_min_amount_kopeks, 100000),
       withdrawal_cooldown_days: toNumber(formData.withdrawal_cooldown_days, 30),
-      withdrawal_reminder_minutes: toNumber(formData.withdrawal_reminder_minutes, 60),
-      withdrawal_reminder_cooldown_minutes: toNumber(
-        formData.withdrawal_reminder_cooldown_minutes,
-        30,
-      ),
-      withdrawal_reminder_check_interval_seconds: toNumber(
-        formData.withdrawal_reminder_check_interval_seconds,
-        300,
-      ),
+      // При выключенных напоминаниях поля сроков отключены и, как disabled-поля
+      // HTML-формы, не отправляются: сервер оставляет прежние значения. Иначе
+      // невалидное значение, введённое до выключения, отклонило бы весь запрос (422).
+      ...(formData.withdrawal_reminder_enabled
+        ? {
+            withdrawal_reminder_minutes: toNumber(withdrawal_reminder_minutes, 60),
+            withdrawal_reminder_cooldown_minutes: toNumber(
+              withdrawal_reminder_cooldown_minutes,
+              30,
+            ),
+            withdrawal_reminder_check_interval_seconds: toNumber(
+              withdrawal_reminder_check_interval_seconds,
+              300,
+            ),
+          }
+        : {}),
     });
   };
 
@@ -376,11 +389,15 @@ export default function AdminPartnerSettings() {
 
           {/* Reminder Minutes */}
           <div className="mb-4">
-            <label className="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm font-medium text-dark-300">
+            <label
+              htmlFor="withdrawal-reminder-minutes"
+              className="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm font-medium text-dark-300"
+            >
               {t('admin.partners.settingsFields.reminderMinutes')}
               {envLocked.has('withdrawal_reminder_minutes') && <EnvLockedBadge />}
             </label>
             <input
+              id="withdrawal-reminder-minutes"
               type="number"
               min={1}
               max={10080}
@@ -405,11 +422,15 @@ export default function AdminPartnerSettings() {
 
           {/* Reminder Cooldown */}
           <div className="mb-4">
-            <label className="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm font-medium text-dark-300">
+            <label
+              htmlFor="withdrawal-reminder-cooldown-minutes"
+              className="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm font-medium text-dark-300"
+            >
               {t('admin.partners.settingsFields.reminderCooldownMinutes')}
               {envLocked.has('withdrawal_reminder_cooldown_minutes') && <EnvLockedBadge />}
             </label>
             <input
+              id="withdrawal-reminder-cooldown-minutes"
               type="number"
               min={1}
               max={10080}
@@ -435,11 +456,15 @@ export default function AdminPartnerSettings() {
 
           {/* Reminder Check Interval */}
           <div>
-            <label className="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm font-medium text-dark-300">
+            <label
+              htmlFor="withdrawal-reminder-check-interval-seconds"
+              className="mb-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm font-medium text-dark-300"
+            >
               {t('admin.partners.settingsFields.reminderCheckIntervalSeconds')}
               {envLocked.has('withdrawal_reminder_check_interval_seconds') && <EnvLockedBadge />}
             </label>
             <input
+              id="withdrawal-reminder-check-interval-seconds"
               type="number"
               min={30}
               max={3600}
