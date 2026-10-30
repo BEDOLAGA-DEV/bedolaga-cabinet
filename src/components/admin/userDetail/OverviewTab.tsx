@@ -22,7 +22,13 @@ import { type DeviceRow, deviceLongName } from './DevicesCard';
 import { PromoGroupEditor, RestrictionsEditor } from './OverviewEditors';
 import { KeyValues, LinkAction, Section } from './sectionParts';
 
-export type DetailTab = 'overview' | 'subscription' | 'balance' | 'referrals' | 'activity';
+export type DetailTab =
+  | 'overview'
+  | 'subscription'
+  | 'balance'
+  | 'referrals'
+  | 'activity'
+  | 'abuse';
 
 export interface OverviewTabProps {
   user: UserDetailResponse;

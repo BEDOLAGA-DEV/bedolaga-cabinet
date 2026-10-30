@@ -113,8 +113,11 @@ describe('single source of init data', () => {
   it('is read through this module only', async () => {
     const { readdirSync, readFileSync } = await import('node:fs');
     const { join } = await import('node:path');
+    const { fileURLToPath } = await import('node:url');
 
-    const srcDir = new URL('..', import.meta.url).pathname;
+    // pathname у file:// на Windows выглядит как «/C:/…» — join приклеивал к
+    // нему второй корень и обход падал на ENOENT ещё до проверки.
+    const srcDir = fileURLToPath(new URL('..', import.meta.url));
     const offenders: string[] = [];
 
     const walk = (dir: string): void => {
