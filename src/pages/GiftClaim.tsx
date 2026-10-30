@@ -230,6 +230,8 @@ export default function GiftClaim() {
   }
 
   // Claimable — offer Telegram + web arms
+  const botClaimUrl = gift.bot_claim_url ?? gift.bot_claim_link;
+
   return (
     <Shell>
       <motion.div
@@ -266,9 +268,9 @@ export default function GiftClaim() {
         )}
 
         {/* Telegram arm */}
-        {gift.bot_claim_link && (
+        {botClaimUrl && (
           <a
-            href={gift.bot_claim_link}
+            href={botClaimUrl}
             className="flex w-full items-center justify-center gap-2 rounded-xl bg-accent-500 px-6 py-3.5 text-sm font-bold text-on-accent shadow-lg shadow-accent-500/25 transition-all hover:bg-accent-400 active:scale-[0.98]"
           >
             {t('landing.giftClaim.activateTelegram', 'Activate in Telegram')}
