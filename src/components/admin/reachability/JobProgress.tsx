@@ -1,3 +1,4 @@
+import { getReachabilityErrorMessage } from './reachabilityDisplay';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -5,7 +6,7 @@ import { type Job, reachabilityApi } from '@/api/reachability';
 import { Card } from '@/components/data-display';
 import { Button } from '@/components/primitives';
 import { GeoResult } from './GeoResult';
-import { getApiErrorMessage } from '@/utils/api-error';
+
 import { JobResult } from './JobResult';
 import { ProgressUnits } from './ProgressUnits';
 import { REACHABILITY_JOBS_KEY } from './jobsRefetch';
@@ -101,7 +102,9 @@ export function JobProgress({ jobId, onReset }: JobProgressProps) {
             </div>
           )}
           {cancel.error && (
-            <p className="mt-2 text-sm text-error-400">{getApiErrorMessage(cancel.error, '')}</p>
+            <p className="mt-2 text-sm text-error-400">
+              {getReachabilityErrorMessage(cancel.error, '', t)}
+            </p>
           )}
         </div>
       )}

@@ -173,7 +173,7 @@ export function BrandingTab({ accentColor = '#3b82f6' }: BrandingTabProps) {
               {branding?.has_custom_logo ? (
                 <img
                   src={brandingApi.getLogoUrl(branding) ?? undefined}
-                  alt="Logo"
+                  alt={t('admin.settings.logoAlt')}
                   loading="lazy"
                   className="h-full w-full object-cover"
                 />

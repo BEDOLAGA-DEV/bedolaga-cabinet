@@ -315,7 +315,7 @@ export function EmailPreview({ open, onClose, subject, htmlContent }: EmailPrevi
           </button>
         </div>
         <iframe
-          title="email preview"
+          title={t('common.emailPreview')}
           className="w-full flex-1 bg-white"
           sandbox=""
           srcDoc={previewHtml || emptyHtml}

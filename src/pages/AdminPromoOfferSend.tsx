@@ -1,3 +1,4 @@
+import { getLocalizedApiErrorMessage } from '../utils/api-error-display';
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -18,7 +19,7 @@ import {
   BroadcastStatusBadge,
 } from '../components/broadcasts/BroadcastDeliveryStats';
 import { broadcastPollInterval } from '../utils/broadcastStatus';
-import { getApiErrorMessage } from '../utils/api-error';
+
 import { PageSkeleton, Skeleton } from '@/components/ui/skeleton';
 import {
   SendIcon,
@@ -158,7 +159,7 @@ export default function AdminPromoOfferSend() {
     onError: (error: unknown) => {
       setResult({
         title: t('common.error'),
-        message: getApiErrorMessage(error, t('admin.promoOffers.result.sendError')),
+        message: getLocalizedApiErrorMessage(error, t('admin.promoOffers.result.sendError'), t),
         isSuccess: false,
       });
     },

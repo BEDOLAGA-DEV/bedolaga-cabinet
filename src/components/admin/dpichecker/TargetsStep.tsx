@@ -1,9 +1,10 @@
+import { getLocalizedApiErrorMessage } from '@/utils/api-error-display';
 import { useMutation } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { type CheckType, dpicheckerApi } from '@/api/dpichecker';
 import { cn } from '@/lib/utils';
-import { getApiErrorMessage } from '@/utils/api-error';
+
 import { ChoiceChips } from '../reachability/ChoiceChips';
 import { CheckGlyph, ROW, ROW_BUTTON, ROW_OFF, ROW_ON } from '../reachability/SelectableRow';
 import { SubscriptionSourcePicker } from '../reachability/SubscriptionSourcePicker';
@@ -190,7 +191,7 @@ export function TargetsStep({ checkType, value, onChange, prefill }: TargetsStep
 
       {error && (
         <p className="text-sm text-error-400">
-          {getApiErrorMessage(error, t('admin.dpichecker.form.failed'))}
+          {getLocalizedApiErrorMessage(error, t('admin.dpichecker.form.failed'), t)}
         </p>
       )}
       {parse.data && fromParse(checkType, parse.data).error === 'fetchFailed' && (

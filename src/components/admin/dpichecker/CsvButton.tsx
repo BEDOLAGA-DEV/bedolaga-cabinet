@@ -1,9 +1,9 @@
+import { getLocalizedApiErrorMessage } from '@/utils/api-error-display';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { dpicheckerApi } from '@/api/dpichecker';
 import { DownloadIcon } from '@/components/icons';
 import { usePlatform } from '@/platform';
-import { getApiErrorMessage } from '@/utils/api-error';
 
 /**
  * CSV отчёта или Соседей — одним путём для браузера и Mini App: бот выдаёт подписанную ссылку на
@@ -31,7 +31,7 @@ export function CsvButton({ kind, actionId }: { kind: 'report' | 'noisy'; action
       </button>
       {download.isError && (
         <span role="alert" className="text-xs text-error-400">
-          {getApiErrorMessage(download.error, t('admin.dpichecker.result.csvFailed'))}
+          {getLocalizedApiErrorMessage(download.error, t('admin.dpichecker.result.csvFailed'), t)}
         </span>
       )}
     </span>

@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router';
 import { backTo } from '@/components/admin';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { METHOD_LABELS } from '../constants/paymentMethods';
+import { getPaymentMethodLabel } from '../constants/paymentMethods';
 import { adminPaymentsApi, type SearchStats } from '../api/adminPayments';
 import { DateField } from '../components/DateField';
 import { useCurrency } from '../hooks/useCurrency';
@@ -299,7 +299,7 @@ export default function AdminPayments() {
               <option value="">{t('admin.payments.allMethods')}</option>
               {methodOptions.map((method) => (
                 <option key={method} value={method}>
-                  {METHOD_LABELS[method] ?? method}
+                  {getPaymentMethodLabel(method, t) ?? method}
                 </option>
               ))}
             </select>

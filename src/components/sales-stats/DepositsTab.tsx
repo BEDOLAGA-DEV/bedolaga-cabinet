@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import type { SalesStatsParams } from '../../api/adminSalesStats';
 import { salesStatsApi } from '../../api/adminSalesStats';
-import { METHOD_LABELS } from '../../constants/paymentMethods';
+import { getPaymentMethodLabel } from '../../constants/paymentMethods';
 import { SALES_STATS } from '../../constants/salesStats';
 import { useCurrency } from '../../hooks/useCurrency';
 import { BanknotesIcon, CardIcon, WalletIcon } from '../../components/icons';
@@ -38,11 +38,11 @@ export function DepositsTab({ params }: DepositsTabProps) {
     () =>
       data?.by_method.map((item) => ({
         key: item.method,
-        label: METHOD_LABELS[item.method] || item.method,
+        label: getPaymentMethodLabel(item.method, t) || item.method,
         value: item.amount_kopeks / SALES_STATS.KOPEKS_DIVISOR,
         icon: <PaymentMethodIcon method={item.method} className="h-5 w-5 shrink-0" />,
       })) ?? [],
-    [data?.by_method],
+    [data?.by_method, t],
   );
 
   const dailyData = useMemo(
@@ -58,10 +58,10 @@ export function DepositsTab({ params }: DepositsTabProps) {
     () =>
       data?.daily_by_method.map((i) => ({
         date: i.date,
-        key: METHOD_LABELS[i.method] || i.method,
+        key: getPaymentMethodLabel(i.method, t) || i.method,
         value: i.amount_kopeks / SALES_STATS.KOPEKS_DIVISOR,
       })) ?? [],
-    [data?.daily_by_method],
+    [data?.daily_by_method, t],
   );
 
   if (isLoading) {

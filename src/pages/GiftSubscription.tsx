@@ -1,3 +1,4 @@
+import { getLocalizedApiErrorMessage } from '../utils/api-error-display';
 import { uiLocale } from '@/utils/uiLocale';
 import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
@@ -520,7 +521,7 @@ function BuyTabContent({
       }
     },
     onError: (err) => {
-      const msg = getApiErrorMessage(err, t('gift.failedDesc'));
+      const msg = getLocalizedApiErrorMessage(err, t('gift.failedDesc'), t);
       setSubmitError(msg);
     },
   });
@@ -857,7 +858,7 @@ function ActivateTabContent({ initialCode }: { initialCode?: string | null }) {
       const msg =
         raw === 'Cannot activate your own gift'
           ? t('gift.activateSelfError')
-          : raw || t('gift.activateError');
+          : getLocalizedApiErrorMessage(err, t('gift.activateError'), t);
       setActivateError(msg);
     },
   });
@@ -1322,7 +1323,7 @@ export default function GiftSubscription() {
 
   // Error state
   if (error || !config) {
-    const errMsg = getApiErrorMessage(error, t('gift.notFound'));
+    const errMsg = getLocalizedApiErrorMessage(error, t('gift.notFound'), t);
     return <ErrorState message={errMsg} />;
   }
 

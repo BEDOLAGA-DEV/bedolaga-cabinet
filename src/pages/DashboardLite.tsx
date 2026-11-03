@@ -1,3 +1,4 @@
+import { getLocalizedApiErrorMessage } from '@/utils/api-error-display';
 import { hasUnknownManagedTraffic } from '@/utils/trafficAccounting';
 import ManagedTrafficSummary from '@/components/subscription/ManagedTrafficSummary';
 import { useMemo, useState } from 'react';
@@ -13,7 +14,7 @@ import { LiteRow, LiteRowGroup } from '@/components/lite/LiteRow';
 import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 import { API } from '@/config/constants';
 import { useCurrency } from '@/hooks/useCurrency';
-import { getApiErrorMessage } from '@/utils/api-error';
+
 import { formatLiteDate } from '@/utils/liteDate';
 import { liteStatus, type LiteAction } from '@/utils/liteStatus';
 
@@ -107,7 +108,7 @@ export default function DashboardLite() {
       }
     },
     onError: (error: unknown) => {
-      setTrialError(getApiErrorMessage(error, t('common.error')));
+      setTrialError(getLocalizedApiErrorMessage(error, t('common.error'), t));
     },
   });
 

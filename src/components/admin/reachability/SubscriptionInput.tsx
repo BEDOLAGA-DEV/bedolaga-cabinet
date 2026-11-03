@@ -1,7 +1,8 @@
+import { localizeReachabilityText } from './reachabilityDisplay';
+import { getReachabilityErrorMessage } from './reachabilityDisplay';
 import type { UseQueryResult } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import type { ParsedInput, RejectedConfig } from '@/api/reachability';
-import { getApiErrorMessage } from '@/utils/api-error';
 
 interface SubscriptionInputProps {
   value: string;
@@ -53,7 +54,11 @@ export function SubscriptionInput({ value, onChange, parsed }: SubscriptionInput
         )}
         {parsed.isError && (
           <span role="alert" className="text-error-400">
-            {getApiErrorMessage(parsed.error, t('admin.reachability.subscription.parseFailed'))}
+            {getReachabilityErrorMessage(
+              parsed.error,
+              t('admin.reachability.subscription.parseFailed'),
+              t,
+            )}
           </span>
         )}
         {data?.sources.map((source) => (
@@ -81,15 +86,16 @@ export function SubscriptionInput({ value, onChange, parsed }: SubscriptionInput
         .map((item) => (
           <p key={item.preview} role="alert" className="mt-1.5 text-xs text-error-400">
             {t('admin.reachability.subscription.notLoaded')}:{' '}
-            {item.detail ??
-              t('admin.reachability.subscription.rejectedReasons.subscription_failed')}
+            {item.detail
+              ? localizeReachabilityText(item.detail, t)
+              : t('admin.reachability.subscription.rejectedReasons.subscription_failed')}
           </p>
         ))}
       {data?.sources
         .filter((source) => source.note)
         .map((source) => (
           <p key={`${source.kind}:${source.label}`} className="mt-1.5 text-xs text-warning-400">
-            {source.note}
+            {localizeReachabilityText(source.note ?? '', t)}
           </p>
         ))}
     </div>

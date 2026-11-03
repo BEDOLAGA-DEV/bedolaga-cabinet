@@ -1,3 +1,4 @@
+import { getLocalizedApiErrorMessage } from '../utils/api-error-display';
 import { useEffect, useRef, useState } from 'react';
 import { useSearchParams, Link, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
@@ -6,7 +7,7 @@ import { useAuthStore } from '../store/auth';
 import { useShallow } from 'zustand/shallow';
 import { consumeCampaignSlug, getPendingCampaignSlug } from '../utils/campaign';
 import { tokenStorage } from '../utils/token';
-import { getApiErrorMessage } from '../utils/api-error';
+
 import LanguageSwitcher from '../components/LanguageSwitcher';
 
 export default function VerifyEmail() {
@@ -56,7 +57,7 @@ export default function VerifyEmail() {
         redirectTimer = setTimeout(() => navigate('/', { replace: true }), 1500);
       } catch (err: unknown) {
         setStatus('error');
-        setError(getApiErrorMessage(err, t('emailVerification.failed')));
+        setError(getLocalizedApiErrorMessage(err, t('emailVerification.failed'), t));
       }
     };
 

@@ -12,7 +12,7 @@ import { renderWithProviders } from './testUtils';
  * «Спросить ещё раз». Ключи на экран не попадают.
  */
 
-vi.mock('react-i18next', async () => (await import('./testUtils')).i18nMock());
+vi.mock('react-i18next', async () => (await import('./testI18n')).i18nMock());
 
 const api = vi.hoisted(() => ({
   views: [] as unknown[],

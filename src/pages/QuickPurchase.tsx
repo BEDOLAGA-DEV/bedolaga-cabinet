@@ -1,3 +1,4 @@
+import { getLocalizedApiErrorMessage } from '../utils/api-error-display';
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useParams } from 'react-router';
@@ -29,7 +30,7 @@ import {
 } from '@/components/icons';
 import LanguageSwitcher from '../components/LanguageSwitcher';
 import { cn } from '../lib/utils';
-import { getApiErrorMessage } from '../utils/api-error';
+
 import { getPendingCampaignSlug } from '../utils/campaign';
 import { readContactPrefill, stripContactFromUrl } from '../utils/contactPrefill';
 import { formatPrice } from '../utils/format';
@@ -1009,9 +1010,10 @@ export default function QuickPurchase() {
       redirectTimeoutRef.current = setTimeout(() => setIsSubmitting(false), 5000);
     },
     onError: (err) => {
-      const msg = getApiErrorMessage(
+      const msg = getLocalizedApiErrorMessage(
         err,
         t('landing.purchaseError', 'Something went wrong. Please try again.'),
+        t,
       );
       setSubmitError(msg);
       setIsSubmitting(false);
@@ -1090,7 +1092,11 @@ export default function QuickPurchase() {
 
   // Error state
   if (error || !config) {
-    const errMsg = getApiErrorMessage(error, t('landing.notFound', 'Landing page not found'));
+    const errMsg = getLocalizedApiErrorMessage(
+      error,
+      t('landing.notFound', 'Landing page not found'),
+      t,
+    );
     return <ErrorState message={errMsg} />;
   }
 

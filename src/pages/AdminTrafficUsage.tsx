@@ -603,7 +603,7 @@ export default function AdminTrafficUsage() {
                     className="text-[9px] leading-tight opacity-60"
                     style={{ color: textColor }}
                   >
-                    {formatGbPerDay(dailyNode)} GB/d
+                    {formatGbPerDay(dailyNode)} {t('common.units.gbPerDay')}
                   </span>
                 )}
               </div>
@@ -657,7 +657,7 @@ export default function AdminTrafficUsage() {
             <span className="text-xs font-semibold text-dark-100">{formatBytes(bytes)}</span>
             {hasTotalThreshold && (
               <span className="text-[9px] leading-tight text-dark-400">
-                {formatGbPerDay(dailyTotal)} GB/d
+                {formatGbPerDay(dailyTotal)} {t('common.units.gbPerDay')}
               </span>
             )}
           </div>

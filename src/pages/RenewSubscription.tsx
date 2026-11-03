@@ -1,3 +1,4 @@
+import { getLocalizedApiErrorMessage } from '../utils/api-error-display';
 import { isUncertainPurchaseOutcome } from '@/utils/api-error';
 import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -93,7 +94,7 @@ export default function RenewSubscription() {
           return;
         }
       }
-      setError(typeof detail === 'string' ? detail : t('common.error'));
+      setError(getLocalizedApiErrorMessage(err, t('common.error'), t));
     },
   });
 

@@ -9,7 +9,7 @@ import type { RegionState } from './regionMap';
  * регионом, итогом словами и операторами «ок из»; касание открывает, второе касание — закрывает.
  */
 
-vi.mock('react-i18next', async () => (await import('./testUtils')).i18nMock());
+vi.mock('react-i18next', async () => (await import('./testI18n')).i18nMock());
 
 afterEach(cleanup);
 

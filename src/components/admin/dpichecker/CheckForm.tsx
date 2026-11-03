@@ -1,3 +1,4 @@
+import { getLocalizedApiErrorMessage } from '@/utils/api-error-display';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { type ReactNode, useCallback, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -11,7 +12,7 @@ import {
 } from '@/api/dpichecker';
 import { usePlatform } from '@/platform';
 import { useNativeDialog } from '@/platform/hooks/useNativeDialog';
-import { getApiErrorMessage } from '@/utils/api-error';
+
 import { buildLink, type Tab } from './deepLink';
 import { activeTargets, canPay } from './formState';
 import { PopPicker } from './PopPicker';
@@ -196,12 +197,16 @@ export function CheckForm({ checkType, prefill = null }: CheckFormProps) {
           />
           {estimate.isError && (
             <p className="text-sm text-error-400">
-              {getApiErrorMessage(estimate.error, t('admin.dpichecker.form.estimateFailed'))}
+              {getLocalizedApiErrorMessage(
+                estimate.error,
+                t('admin.dpichecker.form.estimateFailed'),
+                t,
+              )}
             </p>
           )}
           {launch.isError && (
             <p className="text-sm text-error-400">
-              {getApiErrorMessage(launch.error, t('admin.dpichecker.form.failed'))}
+              {getLocalizedApiErrorMessage(launch.error, t('admin.dpichecker.form.failed'), t)}
             </p>
           )}
           <div className="flex flex-col gap-2 sm:flex-row">

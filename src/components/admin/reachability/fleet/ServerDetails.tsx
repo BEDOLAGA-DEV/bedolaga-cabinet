@@ -1,3 +1,4 @@
+import { getReachabilityErrorMessage } from '../reachabilityDisplay';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
@@ -13,7 +14,7 @@ import { Button } from '@/components/primitives';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { useNotify } from '@/platform/hooks/useNotify';
-import { getApiErrorMessage } from '@/utils/api-error';
+
 import { OperatorIcon } from '../OperatorIcon';
 import { PurposeChip } from '../PurposeChip';
 import { buildReachabilityLink } from '../deepLink';
@@ -88,7 +89,7 @@ export function ServerDetails({ row, summaryRow, units, status, onCheck }: Serve
       invalidate();
       notify.success(t(`${base}.targets.purposeChanged`));
     },
-    onError: (error) => notify.error(getApiErrorMessage(error, '')),
+    onError: (error) => notify.error(getReachabilityErrorMessage(error, '', t)),
   });
 
   const breakdown = summaryRow

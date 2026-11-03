@@ -303,7 +303,7 @@ export default function DeepLinkRedirect() {
         {/* Footer */}
         <div className="mt-8 flex items-center justify-center gap-2 text-dark-600">
           <LinkIcon className="h-4 w-4" />
-          <span className="text-xs">VPN Config Redirect</span>
+          <span className="text-xs">{t('deepLink.configRedirect')}</span>
         </div>
       </div>
     </div>

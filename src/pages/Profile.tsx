@@ -1,3 +1,4 @@
+import { getLocalizedApiErrorMessage } from '../utils/api-error-display';
 import { uiLocale } from '@/utils/uiLocale';
 import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router';
@@ -118,7 +119,7 @@ export default function Profile() {
       startVerificationResendCooldown(UI.RESEND_COOLDOWN_SEC);
     },
     onError: (err: unknown) => {
-      setError(getApiErrorMessage(err, t('common.error')));
+      setError(getLocalizedApiErrorMessage(err, t('common.error'), t));
       setSuccess(null);
     },
   });
@@ -147,7 +148,7 @@ export default function Profile() {
       } else if (detail.includes('rate limit') || detail.includes('too many')) {
         setChangeError(t('profile.changeEmail.tooManyRequests'));
       } else {
-        setChangeError(detail || t('common.error'));
+        setChangeError(getLocalizedApiErrorMessage(err, t('common.error'), t));
       }
     },
   });
@@ -169,7 +170,7 @@ export default function Profile() {
       } else if (detail.includes('expired')) {
         setChangeError(t('profile.changeEmail.codeExpired'));
       } else {
-        setChangeError(detail || t('common.error'));
+        setChangeError(getLocalizedApiErrorMessage(err, t('common.error'), t));
       }
     },
   });
@@ -357,7 +358,7 @@ export default function Profile() {
               <div className="space-y-4">
                 <InfoRow
                   divider
-                  label="Email"
+                  label={t('profile.accounts.providers.email')}
                   value={
                     <>
                       <span>{user.email}</span>

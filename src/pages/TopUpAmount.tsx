@@ -1,3 +1,4 @@
+import { getLocalizedApiErrorMessage } from '../utils/api-error-display';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams, useSearchParams } from 'react-router';
@@ -208,7 +209,7 @@ export default function TopUpAmount() {
     },
     onError: (err: unknown) => {
       haptic.notification('error');
-      setError(getApiErrorMessage(err, t('balance.errors.invoiceFailed')));
+      setError(getLocalizedApiErrorMessage(err, t('balance.errors.invoiceFailed'), t));
     },
   });
 
@@ -294,7 +295,9 @@ export default function TopUpAmount() {
     onError: (err: unknown) => {
       const detail = getApiErrorMessage(err, '');
       setError(
-        detail.includes('not yet implemented') ? t('balance.useBot') : detail || t('common.error'),
+        detail.includes('not yet implemented')
+          ? t('balance.useBot')
+          : getLocalizedApiErrorMessage(err, t('common.error'), t),
       );
     },
   });

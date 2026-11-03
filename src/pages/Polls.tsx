@@ -2,12 +2,14 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { pollsApi, type PollInfo, type PollQuestion } from '../api/polls';
+import { useCurrency } from '../hooks/useCurrency';
 import { useFocusTrap } from '../hooks/useFocusTrap';
 import { ClipboardIcon, GiftIcon, CheckIcon, CloseIcon } from '@/components/icons';
 import { PageSkeleton, Skeleton } from '@/components/ui/skeleton';
 
 export default function Polls() {
   const { t } = useTranslation();
+  const { formatPositive } = useCurrency();
   const queryClient = useQueryClient();
   const [selectedPoll, setSelectedPoll] = useState<PollInfo | null>(null);
   const [currentQuestion, setCurrentQuestion] = useState<PollQuestion | null>(null);
@@ -52,7 +54,7 @@ export default function Polls() {
         setCurrentQuestion(null);
         setCompletionMessage({
           reward: data.reward_granted,
-          message: data.message || t('polls.completed'),
+          message: t('polls.completedThanks'),
         });
         queryClient.invalidateQueries({ queryKey: ['polls'] });
       } else if (data.next_question) {
@@ -153,10 +155,8 @@ export default function Polls() {
                 <div className="rounded-lg bg-success-500/20 p-4 text-center text-success-400">
                   <CheckIcon className="h-5 w-5" />
                   <p className="mt-2 font-medium">{completionMessage.message}</p>
-                  {completionMessage.reward && (
-                    <p className="mt-1 text-sm">
-                      +{completionMessage.reward} {t('polls.reward')}
-                    </p>
+                  {completionMessage.reward != null && completionMessage.reward > 0 && (
+                    <p className="mt-1 text-sm">{formatPositive(completionMessage.reward / 100)}</p>
                   )}
                 </div>
                 <button onClick={handleClosePoll} className="btn-secondary w-full">
@@ -223,10 +223,12 @@ export default function Polls() {
                     </span>
                   </div>
                 </div>
-                {poll.reward_amount && (
+                {poll.reward_amount != null && poll.reward_amount > 0 && (
                   <div className="flex shrink-0 items-center gap-1 text-accent-400">
                     <GiftIcon className="h-5 w-5" />
-                    <span className="text-sm font-medium">+{poll.reward_amount}</span>
+                    <span className="text-sm font-medium">
+                      {formatPositive(poll.reward_amount)}
+                    </span>
                   </div>
                 )}
               </div>

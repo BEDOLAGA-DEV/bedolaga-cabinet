@@ -1,3 +1,4 @@
+import { getLocalizedApiErrorMessage } from '@/utils/api-error-display';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -8,7 +9,7 @@ import { CopyIcon } from '@/components/icons';
 import { useToast } from '@/components/Toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
-import { getApiErrorMessage } from '@/utils/api-error';
+
 import { copyToClipboard } from '@/utils/clipboard';
 import { buildLink } from './deepLink';
 import { formatDate, toneOf } from './historyStyle';
@@ -55,7 +56,7 @@ function RunLine({ run }: { run: MonitorRun }) {
       )}
       {open.isError && (
         <p className="w-full text-sm text-error-400">
-          {getApiErrorMessage(open.error, t('admin.dpichecker.history.openFailed'))}
+          {getLocalizedApiErrorMessage(open.error, t('admin.dpichecker.history.openFailed'), t)}
         </p>
       )}
     </li>
@@ -79,7 +80,7 @@ export function MonitorRuns({
   if (runs.isError)
     return (
       <p className="text-sm text-error-400">
-        {getApiErrorMessage(runs.error, t('admin.dpichecker.monitors.runsFailed'))}
+        {getLocalizedApiErrorMessage(runs.error, t('admin.dpichecker.monitors.runsFailed'), t)}
       </p>
     );
   if (!runs.data?.items.length)
@@ -151,7 +152,7 @@ export function MonitorSettings({
       </button>
       {save.isError && (
         <p className="text-sm text-error-400">
-          {getApiErrorMessage(save.error, t('admin.dpichecker.form.failed'))}
+          {getLocalizedApiErrorMessage(save.error, t('admin.dpichecker.form.failed'), t)}
         </p>
       )}
     </div>

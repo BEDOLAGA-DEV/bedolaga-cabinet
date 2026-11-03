@@ -1,10 +1,11 @@
+import { getLocalizedApiErrorMessage } from '@/utils/api-error-display';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { dpicheckerApi, type NoisyScan, type ProbeScan } from '@/api/dpichecker';
 import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
-import { getApiErrorMessage } from '@/utils/api-error';
+
 import { CsvButton } from './CsvButton';
 import { CHECK_POLL_MS } from './pollInterval';
 import { useDpiStatus } from './useDpiStatus';
@@ -181,7 +182,7 @@ export function ScanResult({ actionId }: { actionId: number }) {
   if (!query.data) {
     return (
       <p className="text-sm text-error-400">
-        {getApiErrorMessage(query.error, t('admin.dpichecker.result.loadFailed'))}
+        {getLocalizedApiErrorMessage(query.error, t('admin.dpichecker.result.loadFailed'), t)}
       </p>
     );
   }
@@ -292,7 +293,7 @@ function ScanForm({ kind }: { kind: 'noisy' | 'probe' }) {
         )}
         {launch.isError && (
           <p className="text-sm text-error-400">
-            {getApiErrorMessage(launch.error, t('admin.dpichecker.form.failed'))}
+            {getLocalizedApiErrorMessage(launch.error, t('admin.dpichecker.form.failed'), t)}
           </p>
         )}
         <div className="flex flex-col gap-2 sm:flex-row">

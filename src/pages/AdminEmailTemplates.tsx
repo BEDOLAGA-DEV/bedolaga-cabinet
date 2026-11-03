@@ -1,3 +1,4 @@
+import { getLocalizedApiErrorMessage } from '@/utils/api-error-display';
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -12,7 +13,7 @@ import { Toggle } from '../components/admin/Toggle';
 import { EmailQueueCard } from '../components/admin/EmailQueueCard';
 import { useNativeDialog } from '../platform/hooks/useNativeDialog';
 import { useNotify } from '@/platform';
-import { getApiErrorMessage } from '@/utils/api-error';
+
 import { MailIcon, SaveIcon, EyeIcon, SendIcon, ResetIcon, EditIcon } from '@/components/icons';
 import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 
@@ -90,7 +91,7 @@ function TemplateCard({
           {customCount > 0 && (
             <span className="inline-flex items-center gap-1 rounded-full bg-accent-500/10 px-2 py-0.5 text-2xs text-accent-400">
               <span className="h-1.5 w-1.5 rounded-full bg-accent-400" />
-              {customCount} custom
+              {t('admin.emailTemplates.customCount', { total: customCount })}
             </span>
           )}
         </div>
@@ -160,7 +161,7 @@ function TemplateEditor({
 
   const notifyError = useCallback(
     (error: unknown) => {
-      notify.error(getApiErrorMessage(error, t('common.error')));
+      notify.error(getLocalizedApiErrorMessage(error, t('common.error'), t));
     },
     [notify, t],
   );
@@ -301,7 +302,7 @@ function TemplateEditor({
         </div>
         {langData && !langData.is_default && (
           <span className="flex-shrink-0 rounded-full bg-accent-500/15 px-2 py-1 text-2xs font-medium text-accent-400 ring-1 ring-accent-500/25 sm:px-2.5 sm:text-xs">
-            Custom
+            {t('admin.emailTemplates.customBadge')}
           </span>
         )}
       </div>
@@ -407,7 +408,7 @@ function TemplateEditor({
                 srcDoc={previewHtml}
                 sandbox=""
                 className="h-[420px] w-full sm:h-[560px]"
-                title="Email Preview"
+                title={t('common.emailPreview')}
               />
             )}
           </div>
@@ -500,7 +501,7 @@ function TemplateEditor({
               }}
               rows={12}
               className="input min-h-[200px] resize-y font-mono text-xs leading-relaxed sm:min-h-[300px] sm:text-sm"
-              placeholder="<h2>Title</h2><p>Content...</p>"
+              placeholder={t('admin.emailTemplates.htmlPlaceholder')}
               spellCheck={false}
             />
             <p className="mt-1 text-2xs text-dark-500">{t('admin.emailTemplates.bodyHint')}</p>

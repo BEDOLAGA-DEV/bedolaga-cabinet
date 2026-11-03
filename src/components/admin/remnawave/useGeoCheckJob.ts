@@ -1,8 +1,9 @@
+import { useTranslation } from 'react-i18next';
+import { getLocalizedApiErrorMessage } from '@/utils/api-error-display';
 import { useCallback, useRef, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { adminRemnawaveApi } from '@/api/adminRemnawave';
 import type { GeoCheckRequest, GeoCheckResult } from '@/api/adminRemnawave';
-import { getApiErrorMessage } from '@/utils/api-error';
 
 /** Как часто спрашивать панель о готовности отчёта. */
 const POLL_INTERVAL_MS = 2500;
@@ -41,6 +42,7 @@ export interface GeoCheckJob {
  * оставленная открытой модалка будет опрашивать панель бесконечно.
  */
 export function useGeoCheckJob(nodeUuid: string): GeoCheckJob {
+  const { t } = useTranslation();
   const [jobId, setJobId] = useState<string | null>(null);
   const [requestError, setRequestError] = useState<string | null>(null);
   const lastRequest = useRef<GeoCheckRequest>({});
@@ -52,7 +54,7 @@ export function useGeoCheckJob(nodeUuid: string): GeoCheckJob {
       startedAt.current = Date.now();
       setJobId(data.job_id);
     },
-    onError: (error) => setRequestError(getApiErrorMessage(error, '')),
+    onError: (error) => setRequestError(getLocalizedApiErrorMessage(error, '', t)),
   });
 
   const jobQuery = useQuery({

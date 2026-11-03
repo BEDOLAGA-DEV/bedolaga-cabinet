@@ -745,9 +745,7 @@ export default function Wheel() {
 
           {/* Right column (desktop) / Bottom (mobile): Prize Legend */}
           <div className="flex flex-col">
-            <h3 className="mb-3 text-sm font-semibold text-dark-300">
-              {t('wheel.prizes') || 'Призы'}
-            </h3>
+            <h3 className="mb-3 text-sm font-semibold text-dark-300">{t('wheel.prizes')}</h3>
             <WheelLegend prizes={config.prizes} />
           </div>
         </div>

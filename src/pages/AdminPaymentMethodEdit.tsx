@@ -1,10 +1,11 @@
+import { getLocalizedApiErrorMessage } from '../utils/api-error-display';
 import { useState, useEffect, useRef, type ChangeEvent } from 'react';
 import { Link, useParams, useNavigate } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { adminPaymentMethodsApi } from '../api/adminPaymentMethods';
 import { adminOverpayCertificateApi, OVERPAY_CERT_MAX_SIZE } from '../api/adminOverpayCertificate';
-import { METHOD_LABELS } from '../constants/paymentMethods';
+import { getPaymentMethodLabel } from '../constants/paymentMethods';
 import type { PromoGroupSimple } from '../types';
 import { usePlatform } from '../platform/hooks/usePlatform';
 import { useHapticFeedback } from '../platform/hooks/useHaptic';
@@ -52,7 +53,13 @@ function OverpayCertificateSection() {
     onError: (err) => {
       haptic.error();
       setCertWarning(null);
-      setCertError(extractErrorDetail(err) ?? t('admin.paymentMethods.overpayCertUploadError'));
+      setCertError(
+        getLocalizedApiErrorMessage(
+          err,
+          extractErrorDetail(err) ?? t('admin.paymentMethods.overpayCertUploadError'),
+          t,
+        ),
+      );
     },
   });
 
@@ -66,7 +73,13 @@ function OverpayCertificateSection() {
     },
     onError: (err) => {
       haptic.error();
-      setCertError(extractErrorDetail(err) ?? t('admin.paymentMethods.overpayCertDeleteError'));
+      setCertError(
+        getLocalizedApiErrorMessage(
+          err,
+          extractErrorDetail(err) ?? t('admin.paymentMethods.overpayCertDeleteError'),
+          t,
+        ),
+      );
     },
   });
 
@@ -409,7 +422,7 @@ export default function AdminPaymentMethodEdit() {
             {displayName}
           </h1>
           <p className="text-sm text-dark-500">
-            {METHOD_LABELS[config.method_id] || config.method_id}
+            {getPaymentMethodLabel(config.method_id, t) || config.method_id}
           </p>
         </div>
       </div>

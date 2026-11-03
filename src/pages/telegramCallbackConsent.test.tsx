@@ -18,7 +18,13 @@ const { loginWithTelegramWidget, navigate, translation } = vi.hoisted(() => ({
   loginWithTelegramWidget: vi.fn(),
   navigate: vi.fn(),
   translation: {
-    t: (key: string, fallback?: unknown) => (typeof fallback === 'string' ? fallback : key),
+    t: (key: string, fallback?: unknown) => {
+      if (typeof fallback === 'string') return fallback;
+      if (fallback && typeof fallback === 'object' && 'defaultValue' in fallback) {
+        return typeof fallback.defaultValue === 'string' ? fallback.defaultValue : key;
+      }
+      return key;
+    },
     i18n: { language: 'ru', changeLanguage: () => Promise.resolve() },
   },
 }));

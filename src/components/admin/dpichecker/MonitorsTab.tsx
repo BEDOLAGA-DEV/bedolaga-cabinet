@@ -1,3 +1,4 @@
+import { getLocalizedApiErrorMessage } from '@/utils/api-error-display';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -6,7 +7,7 @@ import { Toggle } from '@/components/admin/Toggle';
 import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { usePermissionStore } from '@/store/permissions';
-import { getApiErrorMessage } from '@/utils/api-error';
+
 import { GroupLink, MONITORS_KEY, MonitorRuns, MonitorSettings } from './MonitorExtras';
 
 const KEY = MONITORS_KEY;
@@ -150,7 +151,11 @@ function MonitorCard({ monitor, canRun }: { monitor: Monitor; canRun: boolean })
       )}
       {(patch.error || remove.error) && (
         <p className="text-sm text-error-400">
-          {getApiErrorMessage(patch.error ?? remove.error, t('admin.dpichecker.form.failed'))}
+          {getLocalizedApiErrorMessage(
+            patch.error ?? remove.error,
+            t('admin.dpichecker.form.failed'),
+            t,
+          )}
         </p>
       )}
     </section>
@@ -188,7 +193,7 @@ export function MonitorsTab() {
       )}
       {query.isError && (
         <p className="text-sm text-error-400">
-          {getApiErrorMessage(query.error, t('admin.dpichecker.result.loadFailed'))}
+          {getLocalizedApiErrorMessage(query.error, t('admin.dpichecker.result.loadFailed'), t)}
         </p>
       )}
       {query.data && live.length === 0 && (

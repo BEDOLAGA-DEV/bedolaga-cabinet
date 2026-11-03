@@ -1,9 +1,10 @@
+import { getLocalizedApiErrorMessage } from '@/utils/api-error-display';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { adminEmailQueueApi, type EmailQueueItem } from '../../api/adminEmailQueue';
 import { useNativeDialog } from '../../platform/hooks/useNativeDialog';
 import { useNotify } from '@/platform';
-import { getApiErrorMessage } from '@/utils/api-error';
+
 import { ClockIcon, TrashIcon, WarningIcon } from '@/components/icons';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -84,7 +85,7 @@ export function EmailQueueCard() {
         t('admin.emailQueue.cleared', 'Очередь очищена: {{count}}', { count: result.removed }),
       );
     },
-    onError: (error) => notify.error(getApiErrorMessage(error, t('common.error'))),
+    onError: (error) => notify.error(getLocalizedApiErrorMessage(error, t('common.error'), t)),
   });
 
   // Карточку не прячем ни при загрузке, ни при пустой очереди, ни при ошибке:
