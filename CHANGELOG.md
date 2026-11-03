@@ -1,5 +1,59 @@
 # Changelog
 
+## [1.82.0](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.81.1...v1.82.0) (2026-11-03)
+
+
+### Features
+
+* manage CisPay recurring payments and display traffic balances ([3da5b6a](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/3da5b6a4468865b4679ed7a814eec7f63d945a3d))
+* manage CisPay recurring payments and display traffic balances ([0cb9bb3](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/0cb9bb33eac90c61c8973a06d56c55536df43869))
+* manage CisPay recurring payments and display traffic balances ([8fda9b7](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/8fda9b7fb83679318b6d982e634059eefb5baa5c))
+* manage CisPay recurring payments and display traffic balances ([7cee56c](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/7cee56c6ac7df3efad146b46300764d8434a88d6))
+* manage CisPay recurring payments and display traffic balances ([a3610ef](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/a3610ef066da662b2be587d0147215a287f00b5e))
+* manage CisPay recurring payments and display traffic balances ([d80309c](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/d80309cc7acce86fc00b73bb18aa956be4fc5bbe))
+* manage CisPay recurring payments and display traffic balances ([6a243ab](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/6a243ab55449ed8fbc9aaf4994dce84226ef33d3))
+* manage CisPay recurring payments and display traffic balances ([759beec](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/759beec39303c377e632bac534104dc169863875))
+* manage CisPay recurring payments and display traffic balances ([a80828e](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/a80828e3451344aa4868605a3ef4a8eada91f8ec))
+* manage CisPay recurring payments and display traffic balances ([59dc5ce](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/59dc5cec74ca3b2e506502d7a43e8e442be7da9d))
+* manage CisPay recurring payments and display traffic balances ([7f9f3ad](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/7f9f3adeecee0c9d961657ccdc1c73de9c297819))
+* select tariff devices with server-confirmed pricing before purchase ([3da5b6a](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/3da5b6a4468865b4679ed7a814eec7f63d945a3d))
+* select tariff devices with server-confirmed pricing before purchase ([0cb9bb3](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/0cb9bb33eac90c61c8973a06d56c55536df43869))
+* select tariff devices with server-confirmed pricing before purchase ([8fda9b7](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/8fda9b7fb83679318b6d982e634059eefb5baa5c))
+* select tariff devices with server-confirmed pricing before purchase ([7cee56c](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/7cee56c6ac7df3efad146b46300764d8434a88d6))
+* select tariff devices with server-confirmed pricing before purchase ([a3610ef](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/a3610ef066da662b2be587d0147215a287f00b5e))
+* select tariff devices with server-confirmed pricing before purchase ([d80309c](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/d80309cc7acce86fc00b73bb18aa956be4fc5bbe))
+* select tariff devices with server-confirmed pricing before purchase ([6a243ab](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/6a243ab55449ed8fbc9aaf4994dce84226ef33d3))
+* select tariff devices with server-confirmed pricing before purchase ([759beec](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/759beec39303c377e632bac534104dc169863875))
+* select tariff devices with server-confirmed pricing before purchase ([a80828e](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/a80828e3451344aa4868605a3ef4a8eada91f8ec))
+* select tariff devices with server-confirmed pricing before purchase ([59dc5ce](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/59dc5cec74ca3b2e506502d7a43e8e442be7da9d))
+* select tariff devices with server-confirmed pricing before purchase ([7f9f3ad](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/7f9f3adeecee0c9d961657ccdc1c73de9c297819))
+
+
+### Bug Fixes
+
+* complete localization and payment and broadcast feedback ([3da5b6a](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/3da5b6a4468865b4679ed7a814eec7f63d945a3d))
+* complete localization and payment and broadcast feedback ([0cb9bb3](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/0cb9bb33eac90c61c8973a06d56c55536df43869))
+* complete localization and payment and broadcast feedback ([8fda9b7](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/8fda9b7fb83679318b6d982e634059eefb5baa5c))
+* complete localization and payment and broadcast feedback ([7cee56c](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/7cee56c6ac7df3efad146b46300764d8434a88d6))
+* complete localization and payment and broadcast feedback ([a3610ef](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/a3610ef066da662b2be587d0147215a287f00b5e))
+* complete localization and payment and broadcast feedback ([d80309c](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/d80309cc7acce86fc00b73bb18aa956be4fc5bbe))
+* complete localization and payment and broadcast feedback ([6a243ab](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/6a243ab55449ed8fbc9aaf4994dce84226ef33d3))
+* complete localization and payment and broadcast feedback ([759beec](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/759beec39303c377e632bac534104dc169863875))
+* complete localization and payment and broadcast feedback ([a80828e](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/a80828e3451344aa4868605a3ef4a8eada91f8ec))
+* complete localization and payment and broadcast feedback ([59dc5ce](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/59dc5cec74ca3b2e506502d7a43e8e442be7da9d))
+* complete localization and payment and broadcast feedback ([7f9f3ad](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/7f9f3adeecee0c9d961657ccdc1c73de9c297819))
+* stabilize price recalculation and explain device limits ([3da5b6a](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/3da5b6a4468865b4679ed7a814eec7f63d945a3d))
+* stabilize price recalculation and explain device limits ([0cb9bb3](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/0cb9bb33eac90c61c8973a06d56c55536df43869))
+* stabilize price recalculation and explain device limits ([8fda9b7](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/8fda9b7fb83679318b6d982e634059eefb5baa5c))
+* stabilize price recalculation and explain device limits ([7cee56c](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/7cee56c6ac7df3efad146b46300764d8434a88d6))
+* stabilize price recalculation and explain device limits ([a3610ef](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/a3610ef066da662b2be587d0147215a287f00b5e))
+* stabilize price recalculation and explain device limits ([d80309c](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/d80309cc7acce86fc00b73bb18aa956be4fc5bbe))
+* stabilize price recalculation and explain device limits ([6a243ab](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/6a243ab55449ed8fbc9aaf4994dce84226ef33d3))
+* stabilize price recalculation and explain device limits ([759beec](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/759beec39303c377e632bac534104dc169863875))
+* stabilize price recalculation and explain device limits ([a80828e](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/a80828e3451344aa4868605a3ef4a8eada91f8ec))
+* stabilize price recalculation and explain device limits ([59dc5ce](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/59dc5cec74ca3b2e506502d7a43e8e442be7da9d))
+* stabilize price recalculation and explain device limits ([7f9f3ad](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/commit/7f9f3adeecee0c9d961657ccdc1c73de9c297819))
+
 ## [1.81.1](https://github.com/BEDOLAGA-DEV/bedolaga-cabinet/compare/v1.81.0...v1.81.1) (2026-10-28)
 
 
