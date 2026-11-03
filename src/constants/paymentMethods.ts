@@ -1,3 +1,5 @@
+import type { TFunction } from 'i18next';
+
 export const METHOD_LABELS: Record<string, string> = {
   telegram_stars: 'Telegram Stars',
   tribute: 'Tribute',
@@ -32,3 +34,16 @@ export const METHOD_LABELS: Record<string, string> = {
   apple_iap: 'Apple In-App Purchase',
   manual: 'Ручное пополнение',
 };
+
+const METHOD_TRANSLATION_KEYS: Record<string, string> = {
+  platega_recurrent: 'common.paymentMethods.plategaRecurrent',
+  freekassa_sbp: 'common.paymentMethods.freekassaSbp',
+  freekassa_card: 'common.paymentMethods.freekassaCard',
+  manual: 'common.paymentMethods.manual',
+};
+
+/** Localize descriptive labels; provider brands and unknown IDs stay unchanged. */
+export function getPaymentMethodLabel(method: string, t: TFunction): string | undefined {
+  const key = METHOD_TRANSLATION_KEYS[method];
+  return key ? t(key) : METHOD_LABELS[method];
+}

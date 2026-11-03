@@ -1,3 +1,4 @@
+import { getReachabilityErrorMessage } from './reachabilityDisplay';
 import type { UseQueryResult } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import type {
@@ -9,7 +10,7 @@ import type {
   TargetIn,
 } from '@/api/reachability';
 import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
-import { getApiErrorMessage } from '@/utils/api-error';
+
 import { SectionHeading } from './SectionHeading';
 import { SubscriptionConfigs } from './SubscriptionConfigs';
 import { SubscriptionInput } from './SubscriptionInput';
@@ -81,7 +82,7 @@ export function SubscriptionTargets(props: SubscriptionTargetsProps) {
         </SkeletonGroup>
       )}
       {sourceError && (
-        <p className="text-sm text-error-400">{getApiErrorMessage(sourceError, '')}</p>
+        <p className="text-sm text-error-400">{getReachabilityErrorMessage(sourceError, '', t)}</p>
       )}
       {showList && !loading && (
         <SubscriptionConfigs

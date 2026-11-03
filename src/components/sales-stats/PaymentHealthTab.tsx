@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import type { SalesStatsParams } from '../../api/adminSalesStats';
 import { salesStatsApi } from '../../api/adminSalesStats';
-import { METHOD_LABELS } from '../../constants/paymentMethods';
+import { getPaymentMethodLabel } from '../../constants/paymentMethods';
 import { SALES_STATS } from '../../constants/salesStats';
 import { CardIcon, PercentIcon, WarningIcon } from '../../components/icons';
 import PaymentMethodIcon from '../PaymentMethodIcon';
@@ -82,7 +82,7 @@ export function PaymentHealthTab({ params }: PaymentHealthTabProps) {
                 <div className="min-w-0 flex-1">
                   <div className="flex items-baseline justify-between gap-2">
                     <span className="truncate text-sm text-dark-200">
-                      {METHOD_LABELS[g.method] || g.method}
+                      {getPaymentMethodLabel(g.method, t) || g.method}
                     </span>
                     <span className="shrink-0 text-xs text-dark-500">
                       {g.paid}/{g.total}

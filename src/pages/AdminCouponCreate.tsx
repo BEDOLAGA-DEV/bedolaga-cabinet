@@ -1,3 +1,4 @@
+import { getLocalizedApiErrorMessage } from '../utils/api-error-display';
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -7,7 +8,7 @@ import { couponsApi, type CouponBatchCreated } from '../api/coupons';
 import { tariffsApi } from '../api/tariffs';
 import { usePlatform } from '../platform/hooks/usePlatform';
 import { copyToClipboard } from '../utils/clipboard';
-import { getApiErrorMessage } from '../utils/api-error';
+
 import { BackIcon, CheckIcon, CopyIcon, DownloadIcon } from '@/components/icons';
 
 const downloadLinksFile = (batch: CouponBatchCreated | { id: number; links: string[] }) => {
@@ -54,7 +55,7 @@ export default function AdminCouponCreate() {
       setCreated(batch);
     },
     onError: (err) => {
-      setServerError(getApiErrorMessage(err, t('admin.coupons.errors.createFailed')));
+      setServerError(getLocalizedApiErrorMessage(err, t('admin.coupons.errors.createFailed'), t));
     },
   });
 

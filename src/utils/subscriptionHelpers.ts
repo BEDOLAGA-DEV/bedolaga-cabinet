@@ -1,9 +1,11 @@
+import type { TFunction } from 'i18next';
+import { getLocalizedApiErrorMessage } from './api-error-display';
 import { AxiosError } from 'axios';
 import i18n from '../i18n';
 
 export type PurchaseStep = 'period' | 'traffic' | 'servers' | 'devices' | 'confirm';
 
-export const getErrorMessage = (error: unknown): string => {
+const getRawErrorMessage = (error: unknown): string => {
   if (error instanceof AxiosError) {
     const detail = error.response?.data?.detail;
     if (typeof detail === 'string') return detail;
@@ -12,6 +14,9 @@ export const getErrorMessage = (error: unknown): string => {
   if (error instanceof Error) return error.message;
   return i18n.t('common.error');
 };
+
+export const getErrorMessage = (error: unknown, t: TFunction = i18n.t): string =>
+  getLocalizedApiErrorMessage(error, getRawErrorMessage(error), t);
 
 export const getInsufficientBalanceError = (
   error: unknown,

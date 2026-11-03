@@ -1,3 +1,4 @@
+import { getLocalizedApiErrorMessage } from '../utils/api-error-display';
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router';
 import { useTranslation } from 'react-i18next';
@@ -254,7 +255,7 @@ export default function Login() {
           }
 
           // Show backend error detail if available, otherwise generic message
-          setError(detail || t('auth.telegramRequired'));
+          setError(getLocalizedApiErrorMessage(err, t('auth.telegramRequired'), t));
         }
       }
 
@@ -367,7 +368,7 @@ export default function Login() {
       } else if (status === 429) {
         setError(t('auth.tooManyAttempts', 'Too many attempts. Please try again later'));
       } else {
-        setError(detail || t('common.error'));
+        setError(getLocalizedApiErrorMessage(err, t('common.error'), t));
       }
     } finally {
       setIsLoading(false);
@@ -388,7 +389,7 @@ export default function Login() {
       await authApi.forgotPassword(forgotPasswordEmail.trim());
       setForgotPasswordSent(true);
     } catch (err: unknown) {
-      setForgotPasswordError(getApiErrorMessage(err, t('common.error')));
+      setForgotPasswordError(getLocalizedApiErrorMessage(err, t('common.error'), t));
     } finally {
       setForgotPasswordLoading(false);
     }
@@ -618,7 +619,7 @@ export default function Login() {
                             <form onSubmit={handleForgotPassword} className="space-y-3">
                               <div>
                                 <label htmlFor="forgotEmail" className="label">
-                                  Email
+                                  {t('auth.email')}
                                 </label>
                                 <input
                                   id="forgotEmail"

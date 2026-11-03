@@ -1,3 +1,5 @@
+import { hasUnknownManagedTraffic } from '@/utils/trafficAccounting';
+import ManagedTrafficSummary from '@/components/subscription/ManagedTrafficSummary';
 import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -183,11 +185,16 @@ export default function SubscriptionLite() {
             : t('lite.status.active', { date: formatLiteDate(subscription.end_date) })}
         </p>
         <div className="mt-7">
-          <LiteMeter
-            usedGb={subscription.traffic_used_gb}
-            limitGb={subscription.traffic_limit_gb}
-            usedPercent={subscription.traffic_used_percent}
-          />
+          {hasUnknownManagedTraffic(subscription) ? (
+            <div className="h-9" aria-hidden="true" />
+          ) : (
+            <LiteMeter
+              usedGb={subscription.traffic_used_gb}
+              limitGb={subscription.traffic_limit_gb}
+              usedPercent={subscription.traffic_used_percent}
+            />
+          )}
+          <ManagedTrafficSummary subscription={subscription} />
         </div>
       </section>
 

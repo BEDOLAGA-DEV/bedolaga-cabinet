@@ -1,7 +1,8 @@
+import { useTranslation } from 'react-i18next';
+import { getReachabilityErrorMessage, localizeReachabilityText } from './reachabilityDisplay';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { type Job, reachabilityApi } from '@/api/reachability';
-import { getApiErrorMessage } from '@/utils/api-error';
 
 export type JobUiPhase = 'idle' | 'loading' | 'running' | 'done' | 'failed' | 'cancelled';
 
@@ -33,6 +34,7 @@ function uiPhase(jobId: number | null, job: Job | undefined, isError: boolean): 
  * раз в 15 с. Пока задача идёт, опрос не прекращается: страница обновляется сама.
  */
 export function useReachabilityJob(jobId: number | null, options: Options = {}) {
+  const { t } = useTranslation();
   const pollMs = options.pollMs ?? DEFAULT_POLL_MS;
   const slowPollMs = options.slowPollMs ?? DEFAULT_SLOW_POLL_MS;
   const slowAfterMs = options.slowAfterMs ?? DEFAULT_SLOW_AFTER_MS;
@@ -60,9 +62,9 @@ export function useReachabilityJob(jobId: number | null, options: Options = {}) 
   let error: string | null = null;
   if (query.isError) {
     const fallback = query.error instanceof Error ? query.error.message : '';
-    error = getApiErrorMessage(query.error, fallback);
+    error = getReachabilityErrorMessage(query.error, fallback, t);
   } else if (job?.status === 'failed') {
-    error = job.error_message;
+    error = job.error_message ? localizeReachabilityText(job.error_message, t) : job.error_message;
   }
   return { job, phase, error, refetch: query.refetch };
 }

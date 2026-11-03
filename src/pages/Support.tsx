@@ -1,3 +1,4 @@
+import { getLocalizedApiErrorMessage } from '../utils/api-error-display';
 import { uiLocale } from '@/utils/uiLocale';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -9,7 +10,7 @@ import { infoApi } from '../api/info';
 import { useAuthStore } from '../store/auth';
 import { logger } from '../utils/logger';
 import { checkRateLimit, getRateLimitResetTime, RATE_LIMIT_KEYS } from '../utils/rateLimit';
-import { getApiErrorMessage } from '../utils/api-error';
+
 import { isOpenTicketConflict } from '../utils/ticketErrors';
 import type { SupportConfig, TicketDetail } from '../types';
 import { Card } from '@/components/data-display/Card';
@@ -191,7 +192,7 @@ export default function Support() {
         queryClient.invalidateQueries({ queryKey: ['tickets'] });
         return;
       }
-      setFormError(getApiErrorMessage(error, t('support.errors.createFailed')));
+      setFormError(getLocalizedApiErrorMessage(error, t('support.errors.createFailed'), t));
     },
   });
 
@@ -220,7 +221,7 @@ export default function Support() {
       // Ответ в тикет молчал ровно так же: 403 (блокировка в поддержке) и 400
       // (тикет уже закрыт) выглядели как «кнопка не работает».
       log.error('Ticket reply failed', error);
-      setFormError(getApiErrorMessage(error, t('support.errors.replyFailed')));
+      setFormError(getLocalizedApiErrorMessage(error, t('support.errors.replyFailed'), t));
     },
   });
 
@@ -317,7 +318,7 @@ export default function Support() {
             {att.preview ? (
               <img
                 src={att.preview}
-                alt="Preview"
+                alt={t('common.preview')}
                 loading="lazy"
                 className="h-16 w-16 rounded-lg border border-dark-700 object-cover"
               />

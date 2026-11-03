@@ -1,3 +1,4 @@
+import { getReachabilityErrorMessage, localizeReachabilityText } from './reachabilityDisplay';
 import { useQuery } from '@tanstack/react-query';
 import { type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -6,7 +7,7 @@ import { type Job, type JobKind, type JobStatus, reachabilityApi } from '@/api/r
 import { ListRowSkeleton } from '@/components/admin/ListRowSkeleton';
 import { ChevronDownIcon, CloseIcon } from '@/components/icons';
 import { cn } from '@/lib/utils';
-import { getApiErrorMessage } from '@/utils/api-error';
+
 import { ChoiceChips } from './ChoiceChips';
 import { JobResult } from './JobResult';
 import { REACHABILITY_JOBS_KEY, jobsRefetchInterval } from './jobsRefetch';
@@ -260,7 +261,7 @@ export function RecentJobs({ initialJobId, targetKey = null, onClearTarget }: Re
 
       {jobs.isLoading && <ListRowSkeleton count={3} actions={[{ width: 'w-16', pill: true }]} />}
       {jobs.isError && (
-        <p className="text-sm text-error-400">{getApiErrorMessage(jobs.error, '')}</p>
+        <p className="text-sm text-error-400">{getReachabilityErrorMessage(jobs.error, '', t)}</p>
       )}
       {jobs.data && entries.length === 0 && (
         <p className="rounded-xl border border-dashed border-dark-700/60 p-6 text-center text-sm text-dark-400">
@@ -385,7 +386,7 @@ function ExpandedEntry({ entry, repeatTo, onClose }: ExpandedEntryProps) {
     <div className="space-y-3 border-t border-dark-700/60 bg-dark-900/40 p-3">
       {errors.map((message) => (
         <p key={message} className="text-sm text-error-400">
-          {message}
+          {localizeReachabilityText(message, t)}
         </p>
       ))}
       <JobResult job={shown} />

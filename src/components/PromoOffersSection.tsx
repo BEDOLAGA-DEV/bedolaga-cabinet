@@ -1,9 +1,11 @@
+import { localizeOwnedResultMessage } from '../utils/owned-result-message';
+import { getLocalizedApiErrorMessage } from '../utils/api-error-display';
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router';
 import { promoApi, type PromoOffer } from '../api/promo';
-import { getApiErrorMessage } from '../utils/api-error';
+
 import { ClockIcon, CheckIcon, XCircleIcon } from './icons';
 import { useDestructiveConfirm } from '@/platform/hooks/useNativeDialog';
 import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
@@ -113,7 +115,7 @@ export default function PromoOffersSection({ className = '' }: PromoOffersSectio
       setTimeout(() => setSuccessMessage(null), 5000);
     },
     onError: (error: unknown) => {
-      setErrorMessage(getApiErrorMessage(error, t('promo.offers.activationFailed')));
+      setErrorMessage(getLocalizedApiErrorMessage(error, t('promo.offers.activationFailed'), t));
       setClaimingId(null);
       setTimeout(() => setErrorMessage(null), 5000);
     },
@@ -151,7 +153,9 @@ export default function PromoOffersSection({ className = '' }: PromoOffersSectio
       };
       const detail = axiosErr.response?.data?.detail;
       const message = typeof detail === 'string' ? detail : detail?.message;
-      setErrorMessage(message || t('promo.deactivate.error'));
+      setErrorMessage(
+        getLocalizedApiErrorMessage(error, message || t('promo.deactivate.error'), t),
+      );
 
       setTimeout(() => setErrorMessage(null), 5000);
     },
@@ -257,7 +261,7 @@ export default function PromoOffersSection({ className = '' }: PromoOffersSectio
       {successMessage && (
         <div className="flex items-center gap-3 rounded-xl border border-success-500/30 bg-success-500/10 p-4 text-success-400">
           <CheckIcon />
-          <span>{successMessage}</span>
+          <span>{localizeOwnedResultMessage(successMessage, 'promo', t)}</span>
         </div>
       )}
 

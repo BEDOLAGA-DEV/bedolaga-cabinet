@@ -1,3 +1,4 @@
+import { getLocalizedApiErrorMessage } from '../utils/api-error-display';
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -8,7 +9,7 @@ import {
   UNDELIVERED_STATUSES,
 } from '../api/adminSystemErrors';
 import { AdminBackButton } from '../components/admin';
-import { getApiErrorMessage } from '../utils/api-error';
+
 import { PermissionGate } from '@/components/auth/PermissionGate';
 import { ChevronDownIcon, ClockIcon, InfoIcon, XIcon } from '@/components/icons';
 import { StatCard } from '@/components/stats';
@@ -105,7 +106,7 @@ export default function AdminSystemErrors() {
       }
     },
     onError: (err: unknown) => {
-      notify.error(getApiErrorMessage(err, t('common.error')));
+      notify.error(getLocalizedApiErrorMessage(err, t('common.error'), t));
     },
   });
 

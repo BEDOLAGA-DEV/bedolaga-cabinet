@@ -1,3 +1,4 @@
+import { localizeOwnedResultMessage } from '../utils/owned-result-message';
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -102,7 +103,9 @@ export default function Contests() {
               <div
                 className={`mb-4 rounded-lg p-4 ${result.is_winner ? 'bg-success-500/20 text-success-400' : 'bg-error-500/20 text-error-400'}`}
               >
-                <p className="font-medium">{result.message}</p>
+                <p className="font-medium">
+                  {localizeOwnedResultMessage(result.message, 'contest', t)}
+                </p>
               </div>
             )}
 

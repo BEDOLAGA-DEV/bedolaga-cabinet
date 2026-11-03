@@ -1,3 +1,4 @@
+import { localizeReachabilityText } from './reachabilityDisplay';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -145,7 +146,11 @@ export function SubscriptionSourcePicker({
           </Link>
         </div>
       )}
-      {referenceBroken && <p className="text-xs text-warning-400">{reference?.error}</p>}
+      {referenceBroken && (
+        <p className="text-xs text-warning-400">
+          {localizeReachabilityText(reference?.error ?? '', t)}
+        </p>
+      )}
     </div>
   );
 }

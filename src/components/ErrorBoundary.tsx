@@ -1,3 +1,4 @@
+import i18n from '../i18n';
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { safeSession } from '../utils/safeStorage';
 
@@ -70,15 +71,19 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
         <div className="min-h-viewport flex items-center justify-center bg-dark-900 p-4">
           <div className="max-w-md text-center">
             <div className="mb-4 text-4xl">⚠️</div>
-            <h1 className="mb-2 text-xl font-bold text-dark-50">Something went wrong</h1>
+            <h1 className="mb-2 text-xl font-bold text-dark-50">
+              {i18n.t('errorBoundary.title', { defaultValue: 'Something went wrong' })}
+            </h1>
             <p className="mb-6 text-dark-400">
-              An unexpected error occurred. Please try reloading the page.
+              {i18n.t('errorBoundary.reloadHint', {
+                defaultValue: 'An unexpected error occurred. Please try reloading the page.',
+              })}
             </p>
             <button
               onClick={() => window.location.reload()}
               className="rounded-xl bg-accent-500 px-6 py-3 font-medium text-on-accent transition-colors hover:bg-accent-600"
             >
-              Reload page
+              {i18n.t('errorBoundary.reload', { defaultValue: 'Reload page' })}
             </button>
           </div>
         </div>
@@ -88,12 +93,14 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     if (level === 'widget') {
       return (
         <div className="rounded-xl border border-error-500/30 bg-error-500/10 p-4 text-center">
-          <p className="text-sm text-error-400">Failed to load this section</p>
+          <p className="text-sm text-error-400">
+            {i18n.t('errorBoundary.sectionFailed', { defaultValue: 'Failed to load this section' })}
+          </p>
           <button
             onClick={this.handleReset}
             className="mt-2 text-sm text-accent-400 hover:text-accent-300"
           >
-            Try again
+            {i18n.t('common.retry', { defaultValue: 'Try again' })}
           </button>
         </div>
       );
@@ -104,17 +111,24 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       <div className="flex min-h-[50vh] items-center justify-center p-4">
         <div className="max-w-md text-center">
           <div className="mb-4 text-4xl">⚠️</div>
-          <h1 className="mb-2 text-xl font-bold text-dark-50">Something went wrong</h1>
+          <h1 className="mb-2 text-xl font-bold text-dark-50">
+            {i18n.t('errorBoundary.title', { defaultValue: 'Something went wrong' })}
+          </h1>
           <p className="mb-6 text-sm text-dark-400">
             {isChunk
-              ? 'App was updated. Reloading...'
-              : this.state.error?.message || 'An unexpected error occurred'}
+              ? i18n.t('errorBoundary.updated', { defaultValue: 'App was updated. Reloading…' })
+              : this.state.error?.message ||
+                i18n.t('errorBoundary.unexpected', {
+                  defaultValue: 'An unexpected error occurred',
+                })}
           </p>
           <button
             onClick={() => window.location.reload()}
             className="rounded-xl bg-accent-500 px-6 py-3 font-medium text-on-accent transition-colors hover:bg-accent-600"
           >
-            {isChunk ? 'Reload' : 'Try again'}
+            {isChunk
+              ? i18n.t('errorBoundary.reload', { defaultValue: 'Reload page' })
+              : i18n.t('common.retry', { defaultValue: 'Try again' })}
           </button>
         </div>
       </div>

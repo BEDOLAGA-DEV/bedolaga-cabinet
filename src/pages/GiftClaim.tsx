@@ -1,10 +1,11 @@
+import { getLocalizedApiErrorMessage } from '../utils/api-error-display';
 import { useMemo, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'framer-motion';
 import { landingApi, type GiftClaimResult } from '../api/landings';
-import { getApiErrorMessage } from '../utils/api-error';
+
 import { copyToClipboard } from '@/utils/clipboard';
 import { Spinner } from '@/components/ui/Spinner';
 import { AnimatedCheckmark } from '@/components/ui/AnimatedCheckmark';
@@ -71,7 +72,11 @@ export default function GiftClaim() {
     },
     onError: (err) => {
       setClaimError(
-        getApiErrorMessage(err, t('landing.giftClaim.error', 'Could not activate the gift.')),
+        getLocalizedApiErrorMessage(
+          err,
+          t('landing.giftClaim.error', 'Could not activate the gift.'),
+          t,
+        ),
       );
     },
   });

@@ -1,3 +1,4 @@
+import { getLocalizedApiErrorMessage } from '../utils/api-error-display';
 import { useState } from 'react';
 import { hasLegacySubscription } from '../utils/legacySubscription';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -9,7 +10,7 @@ import { balanceApi } from '../api/balance';
 import { useTheme } from '../hooks/useTheme';
 import { getGlassColors } from '../utils/glassTheme';
 import { useAuthStore } from '../store/auth';
-import { getApiErrorMessage } from '../utils/api-error';
+
 import SubscriptionListCard from '../components/subscription/SubscriptionListCard';
 import TrialOfferCard from '../components/dashboard/TrialOfferCard';
 import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
@@ -103,7 +104,7 @@ export default function Subscriptions() {
       refreshUser();
     },
     onError: (error: unknown) => {
-      setTrialError(getApiErrorMessage(error, t('common.error')));
+      setTrialError(getLocalizedApiErrorMessage(error, t('common.error'), t));
     },
   });
 

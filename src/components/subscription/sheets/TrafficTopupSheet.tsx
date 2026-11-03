@@ -1,4 +1,5 @@
 import { isUncertainPurchaseOutcome } from '@/utils/api-error';
+import { hasUnknownManagedTraffic } from '@/utils/trafficAccounting';
 import { useTranslation } from 'react-i18next';
 import { useCurrency } from '../../../hooks/useCurrency';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -84,7 +85,9 @@ export function TrafficTopupSheet({
             <div className="mt-1 text-sm text-dark-400">
               {t('subscription.additionalOptions.currentTrafficLimit', {
                 limit: subscription.traffic_limit_gb,
-                used: subscription.traffic_used_gb.toFixed(1),
+                used: hasUnknownManagedTraffic(subscription)
+                  ? '—'
+                  : subscription.traffic_used_gb.toFixed(1),
               })}
             </div>
           </div>

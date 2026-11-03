@@ -1,3 +1,4 @@
+import { getLocalizedApiErrorMessage } from '@/utils/api-error-display';
 import { uiLocale } from '@/utils/uiLocale';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -104,7 +105,7 @@ export default function SubscriptionCardExpired({
       } else if (err instanceof AxiosError) {
         const detail = err.response?.data?.detail;
         if (typeof detail === 'string') {
-          setRenewError(detail);
+          setRenewError(getLocalizedApiErrorMessage(err, t('dashboard.expired.renewError'), t));
         } else {
           setRenewError(t('dashboard.expired.renewError'));
         }

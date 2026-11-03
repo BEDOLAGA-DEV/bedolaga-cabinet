@@ -1,6 +1,7 @@
+import { useTranslation } from 'react-i18next';
+import { getLocalizedApiErrorMessage } from '../utils/api-error-display';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { LegalConsentConfig } from '../types';
-import { getApiErrorMessage } from '../utils/api-error';
 
 // Гейт согласия с офертой/политикой для НОВОГО пользователя. Бэк отвечает 428
 // на создание аккаунта без галочек «ознакомлен» и просит повторить ТОТ ЖЕ запрос
@@ -59,6 +60,7 @@ export interface LegalConsentGateState {
  * Список документов из 428 имеет приоритет: это то, что бэк требует прямо сейчас.
  */
 export function useLegalConsentGate(config?: LegalConsentConfig): LegalConsentGateState {
+  const { t } = useTranslation();
   const configDocuments = useMemo(() => config?.documents ?? [], [config]);
   const [requiredDocuments, setRequiredDocuments] = useState<string[] | null>(null);
   const [accepted, setAccepted] = useState<Record<string, boolean>>({});
@@ -105,12 +107,12 @@ export function useLegalConsentGate(config?: LegalConsentConfig): LegalConsentGa
         await pendingRetry(acceptedKeys);
         setPendingRetry(null);
       } catch (err) {
-        setError(getApiErrorMessage(err, fallbackError));
+        setError(getLocalizedApiErrorMessage(err, fallbackError, t));
       } finally {
         setIsSubmitting(false);
       }
     },
-    [pendingRetry, acceptedKeys],
+    [pendingRetry, acceptedKeys, t],
   );
 
   return {

@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import type { UserActivityItem } from '@/api/adminUsers';
 import { backTo } from '@/components/admin/AdminBackButton';
 import { stampParts, useSignedMoney } from '@/components/admin/users';
-import { METHOD_LABELS } from '@/constants/paymentMethods';
+import { getPaymentMethodLabel } from '@/constants/paymentMethods';
 import { cn } from '@/lib/utils';
 import { describeActivity } from './activityLabels';
 
@@ -21,7 +21,7 @@ export function usePaymentMethodLabel() {
     (method: string) =>
       method === 'balance'
         ? t('admin.users.detail.activity.fromBalance')
-        : (METHOD_LABELS[method] ?? null),
+        : (getPaymentMethodLabel(method, t) ?? null),
     [t],
   );
 }

@@ -1,8 +1,8 @@
+import { getLocalizedApiErrorMessage } from '@/utils/api-error-display';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { dpicheckerApi, type ReportRow } from '@/api/dpichecker';
 import { Skeleton } from '@/components/ui/skeleton';
-import { getApiErrorMessage } from '@/utils/api-error';
 
 /** Уже видно в строке точки или служебное — в «Подробно» не повторяем. */
 const SHOWN_ELSEWHERE = new Set(['name', 'pop_id', 'pop_name', 'host', 'resource', 'is_direct']);
@@ -40,7 +40,7 @@ export function PointDetails({
   if (report.isError || !report.data)
     return (
       <p className="text-sm text-error-400">
-        {getApiErrorMessage(report.error, t('admin.dpichecker.result.detailsFailed'))}
+        {getLocalizedApiErrorMessage(report.error, t('admin.dpichecker.result.detailsFailed'), t)}
       </p>
     );
   const row = findReportRow(report.data.rows, resourceName, popId);

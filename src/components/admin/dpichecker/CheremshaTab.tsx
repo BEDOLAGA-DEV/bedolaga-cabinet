@@ -1,9 +1,9 @@
+import { getLocalizedApiErrorMessage } from '@/utils/api-error-display';
 import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { type CheremshaItem, dpicheckerApi } from '@/api/dpichecker';
 import { cn } from '@/lib/utils';
-import { getApiErrorMessage } from '@/utils/api-error';
 
 const CHEREMSHA_MAX = 20;
 
@@ -60,7 +60,7 @@ export function CheremshaTab() {
         </button>
         {check.isError && (
           <p className="text-sm text-error-400">
-            {getApiErrorMessage(check.error, t('admin.dpichecker.form.failed'))}
+            {getLocalizedApiErrorMessage(check.error, t('admin.dpichecker.form.failed'), t)}
           </p>
         )}
       </section>

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 
@@ -96,6 +97,7 @@ const PRESET_COLORS = [
 ];
 
 export function ColorPicker({ value, onChange, label, description, disabled }: ColorPickerProps) {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [localValue, setLocalValue] = useState(value);
   const [hsl, setHsl] = useState(() => {
@@ -272,7 +274,7 @@ export function ColorPicker({ value, onChange, label, description, disabled }: C
         {/* Hue slider */}
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-dark-400">Hue</span>
+            <span className="text-xs font-medium text-dark-400">{t('colorPicker.hue')}</span>
             <span className="text-xs text-dark-500">{hsl.h}°</span>
           </div>
           <input
@@ -281,7 +283,7 @@ export function ColorPicker({ value, onChange, label, description, disabled }: C
             max="360"
             value={hsl.h}
             onChange={handleHueChange}
-            aria-label="Hue"
+            aria-label={t('colorPicker.hue')}
             className="h-3 w-full cursor-pointer appearance-none rounded-full"
             style={{
               background:
@@ -293,7 +295,7 @@ export function ColorPicker({ value, onChange, label, description, disabled }: C
         {/* Saturation slider */}
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-dark-400">Saturation</span>
+            <span className="text-xs font-medium text-dark-400">{t('colorPicker.saturation')}</span>
             <span className="text-xs text-dark-500">{hsl.s}%</span>
           </div>
           <input
@@ -302,7 +304,7 @@ export function ColorPicker({ value, onChange, label, description, disabled }: C
             max="100"
             value={hsl.s}
             onChange={handleSaturationChange}
-            aria-label="Saturation"
+            aria-label={t('colorPicker.saturation')}
             className="h-3 w-full cursor-pointer appearance-none rounded-full"
             style={{
               background: `linear-gradient(to right, hsl(${hsl.h}, 0%, ${hsl.l}%), hsl(${hsl.h}, 100%, ${hsl.l}%))`,
@@ -313,7 +315,7 @@ export function ColorPicker({ value, onChange, label, description, disabled }: C
         {/* Lightness slider */}
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-dark-400">Lightness</span>
+            <span className="text-xs font-medium text-dark-400">{t('colorPicker.lightness')}</span>
             <span className="text-xs text-dark-500">{hsl.l}%</span>
           </div>
           <input
@@ -322,7 +324,7 @@ export function ColorPicker({ value, onChange, label, description, disabled }: C
             max="100"
             value={hsl.l}
             onChange={handleLightnessChange}
-            aria-label="Lightness"
+            aria-label={t('colorPicker.lightness')}
             className="h-3 w-full cursor-pointer appearance-none rounded-full"
             style={{
               background: `linear-gradient(to right, #000000, hsl(${hsl.h}, ${hsl.s}%, 50%), #ffffff)`,
@@ -345,7 +347,9 @@ export function ColorPicker({ value, onChange, label, description, disabled }: C
 
         {/* Presets */}
         <div className="border-t border-dark-700 pt-2">
-          <span className="mb-2 block text-xs font-medium text-dark-400">Presets</span>
+          <span className="mb-2 block text-xs font-medium text-dark-400">
+            {t('colorPicker.presets')}
+          </span>
           <div className="grid grid-cols-6 gap-1.5">
             {PRESET_COLORS.map((preset) => (
               <button

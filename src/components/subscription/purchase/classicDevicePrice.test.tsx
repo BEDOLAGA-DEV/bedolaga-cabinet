@@ -97,7 +97,7 @@ it.each(['legacy', 'exact75', 'free30'])(
     purchase.mockRejectedValue(new Error('Connection lost'));
     fireEvent.click(button);
     await waitFor(() =>
-      expect(purchase).toHaveBeenCalledWith(1, 75, undefined, 10, expect.any(String)),
+      expect(purchase).toHaveBeenCalledWith(1, 75, undefined, 10, expect.any(String), undefined),
     );
     const checkout = purchase.mock.calls[0][4];
     expect(checkout).toMatch(

@@ -200,7 +200,14 @@ it.each([false, true])('unscoped multi catalog remains a purchase (lite=%s)', as
   fireEvent.click(screen.getByRole('button', { name: lite ? /Target/ : 'subscription.purchase' }));
   fireEvent.click(await screen.findByRole('button', { name: 'subscription.purchase' }));
   await waitFor(() =>
-    expect(state.purchase).toHaveBeenCalledWith(2, 30, undefined, undefined, expect.any(String)),
+    expect(state.purchase).toHaveBeenCalledWith(
+      2,
+      30,
+      undefined,
+      undefined,
+      expect.any(String),
+      undefined,
+    ),
   );
   expect(state.switch).not.toHaveBeenCalled();
   client.clear();

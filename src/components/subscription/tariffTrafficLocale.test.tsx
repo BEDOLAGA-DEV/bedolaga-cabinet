@@ -86,7 +86,7 @@ it.each(['grid', 'lite', 'form'] as const)(
     const rendered = render(content(tariff));
     for (const [language, expected] of [
       ['en', '200 GB'],
-      ['fa', '200 GB'],
+      ['fa', '200 گیگابایت'],
       ['zh', '200 GB'],
       ['ru', '200 ГБ'],
     ]) {

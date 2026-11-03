@@ -1,3 +1,4 @@
+import { localizeOwnedResultMessage } from '../utils/owned-result-message';
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -382,7 +383,10 @@ function NodeCard({ node, providerName, realtime, onAction, isLoading }: NodeCar
               {(loadAvg || ramPct !== null) && (
                 <div className="flex items-center gap-3">
                   {loadAvg && (
-                    <span className="flex items-center gap-1" title="load average 1 / 5 / 15 min">
+                    <span
+                      className="flex items-center gap-1"
+                      title={t('admin.remnawave.loadAverageHint')}
+                    >
                       <CpuIcon className="h-3 w-3 shrink-0 text-dark-500" />
                       {loadAvg}
                     </span>
@@ -446,7 +450,10 @@ function NodeCard({ node, providerName, realtime, onAction, isLoading }: NodeCar
                 </span>
               )}
               {loadAvg && (
-                <span className="flex items-center gap-1" title="load average 1 / 5 / 15 min">
+                <span
+                  className="flex items-center gap-1"
+                  title={t('admin.remnawave.loadAverageHint')}
+                >
                   <CpuIcon className="h-3 w-3 text-dark-500" />
                   {loadAvg}
                 </span>
@@ -596,7 +603,7 @@ function SyncCard({ title, description, onAction, isLoading, lastResult }: SyncC
             <p
               className={`mt-2 text-xs ${lastResult.success ? 'text-success-400' : 'text-error-400'}`}
             >
-              {lastResult.message}
+              {localizeOwnedResultMessage(lastResult.message ?? '', 'sync', t)}
             </p>
           )}
         </div>

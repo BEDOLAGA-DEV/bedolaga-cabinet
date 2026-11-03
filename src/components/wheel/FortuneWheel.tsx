@@ -1,3 +1,4 @@
+import { Trans } from 'react-i18next';
 import { useEffect, useRef, useState, memo } from 'react';
 import type { WheelPrize } from '../../api/wheel';
 
@@ -89,7 +90,9 @@ const FortuneWheel = memo(function FortuneWheel({
   if (prizes.length === 0) {
     return (
       <div className="mx-auto flex aspect-square w-full max-w-md items-center justify-center">
-        <p className="text-dark-400">No prizes configured</p>
+        <p className="text-dark-400">
+          <Trans i18nKey="wheel.noPrizesConfigured" />
+        </p>
       </div>
     );
   }

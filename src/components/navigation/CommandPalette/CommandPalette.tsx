@@ -191,19 +191,19 @@ export function CommandPalette({
                         <kbd className="rounded bg-dark-800 px-1.5 py-0.5 font-mono text-dark-400">
                           ↑↓
                         </kbd>
-                        <span>navigate</span>
+                        <span>{t('commandPalette.navigate')}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <kbd className="rounded bg-dark-800 px-1.5 py-0.5 font-mono text-dark-400">
                           ↵
                         </kbd>
-                        <span>select</span>
+                        <span>{t('commandPalette.select')}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <kbd className="rounded bg-dark-800 px-1.5 py-0.5 font-mono text-dark-400">
                           esc
                         </kbd>
-                        <span>close</span>
+                        <span>{t('common.close')}</span>
                       </div>
                     </div>
                   </Command>

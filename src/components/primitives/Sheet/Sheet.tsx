@@ -1,3 +1,4 @@
+import { Trans } from 'react-i18next';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { motion, AnimatePresence, useDragControls, type PanInfo } from 'framer-motion';
 import {
@@ -190,7 +191,9 @@ export const SheetContent = forwardRef<HTMLDivElement, SheetContentProps>(
                       )}
                     >
                       <CloseIcon />
-                      <span className="sr-only">Close</span>
+                      <span className="sr-only">
+                        <Trans i18nKey="common.close" />
+                      </span>
                     </DialogPrimitive.Close>
                   )}
 

@@ -9,7 +9,7 @@ import { CsvButton } from './CsvButton';
  * (в Telegram — штатный downloadFile; `<a download>` там выкидывал из приложения).
  */
 
-vi.mock('react-i18next', async () => (await import('./testUtils')).i18nMock());
+vi.mock('react-i18next', async () => (await import('./testI18n')).i18nMock());
 
 const platform = vi.hoisted(() => ({ downloadFile: vi.fn(async () => undefined) }));
 vi.mock('@/platform', () => ({ usePlatform: () => platform }));

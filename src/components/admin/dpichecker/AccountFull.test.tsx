@@ -13,7 +13,7 @@ import { renderWithProviders } from './testUtils';
  * (каждый открывается), правка интервала/порога/«сообщать об успехе» и код привязки группы.
  */
 
-vi.mock('react-i18next', async () => (await import('./testUtils')).i18nMock());
+vi.mock('react-i18next', async () => (await import('./testI18n')).i18nMock());
 
 const api = vi.hoisted(() => ({
   listMonitors: vi.fn(),

@@ -328,7 +328,7 @@ export default function AdminBanSystem() {
       const days = Math.floor(hours / 24);
       return `${days}d ${hours % 24}h`;
     }
-    return `${hours}h ${minutes}m`;
+    return `${t('common.units.hoursValue', { hours })} ${minutes}m`;
   };
 
   const formatDate = (dateStr: string | null) => {
@@ -1066,7 +1066,7 @@ export default function AdminBanSystem() {
                           : 'bg-dark-800 text-dark-400 hover:text-dark-200'
                       }`}
                     >
-                      {hours}h
+                      {t('common.units.hoursValue', { hours })}
                     </button>
                   ))}
                 </div>

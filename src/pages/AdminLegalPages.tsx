@@ -1,3 +1,4 @@
+import { getLocalizedApiErrorMessage } from '../utils/api-error-display';
 import { useCallback, useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -255,7 +256,13 @@ function DocumentEditor({
     },
     onError: (err) => {
       haptic.error();
-      setSaveError(extractErrorDetail(err) ?? t('admin.legalPages.saveError'));
+      setSaveError(
+        getLocalizedApiErrorMessage(
+          err,
+          extractErrorDetail(err) ?? t('admin.legalPages.saveError'),
+          t,
+        ),
+      );
     },
   });
 
@@ -371,7 +378,13 @@ function RulesEditor({ onDirtyChange }: { onDirtyChange: (dirty: boolean) => voi
     },
     onError: (err) => {
       haptic.error();
-      setSaveError(extractErrorDetail(err) ?? t('admin.legalPages.saveError'));
+      setSaveError(
+        getLocalizedApiErrorMessage(
+          err,
+          extractErrorDetail(err) ?? t('admin.legalPages.saveError'),
+          t,
+        ),
+      );
     },
   });
 
@@ -462,7 +475,13 @@ function FaqQuestionRow({
     },
     onError: (err) => {
       haptic.error();
-      setSaveError(extractErrorDetail(err) ?? t('admin.legalPages.saveError'));
+      setSaveError(
+        getLocalizedApiErrorMessage(
+          err,
+          extractErrorDetail(err) ?? t('admin.legalPages.saveError'),
+          t,
+        ),
+      );
     },
   });
 
@@ -585,7 +604,13 @@ function FaqEditor({ onDirtyChange }: { onDirtyChange: (dirty: boolean) => void 
     },
     onError: (err) => {
       haptic.error();
-      setSaveError(extractErrorDetail(err) ?? t('admin.legalPages.saveError'));
+      setSaveError(
+        getLocalizedApiErrorMessage(
+          err,
+          extractErrorDetail(err) ?? t('admin.legalPages.saveError'),
+          t,
+        ),
+      );
       if (data) setDisplayMode(data.display_mode);
     },
   });
@@ -604,7 +629,13 @@ function FaqEditor({ onDirtyChange }: { onDirtyChange: (dirty: boolean) => void 
     },
     onError: (err) => {
       haptic.error();
-      setSaveError(extractErrorDetail(err) ?? t('admin.legalPages.saveError'));
+      setSaveError(
+        getLocalizedApiErrorMessage(
+          err,
+          extractErrorDetail(err) ?? t('admin.legalPages.saveError'),
+          t,
+        ),
+      );
     },
   });
 
@@ -626,7 +657,13 @@ function FaqEditor({ onDirtyChange }: { onDirtyChange: (dirty: boolean) => void 
     },
     onError: (err) => {
       haptic.error();
-      setSaveError(extractErrorDetail(err) ?? t('admin.legalPages.saveError'));
+      setSaveError(
+        getLocalizedApiErrorMessage(
+          err,
+          extractErrorDetail(err) ?? t('admin.legalPages.saveError'),
+          t,
+        ),
+      );
     },
     onSettled: () => {
       invalidate();
@@ -642,7 +679,13 @@ function FaqEditor({ onDirtyChange }: { onDirtyChange: (dirty: boolean) => void 
     },
     onError: (err) => {
       haptic.error();
-      setSaveError(extractErrorDetail(err) ?? t('admin.legalPages.saveError'));
+      setSaveError(
+        getLocalizedApiErrorMessage(
+          err,
+          extractErrorDetail(err) ?? t('admin.legalPages.saveError'),
+          t,
+        ),
+      );
     },
   });
 

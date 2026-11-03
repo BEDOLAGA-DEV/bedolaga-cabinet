@@ -1,10 +1,11 @@
+import { getReachabilityErrorMessage } from './reachabilityDisplay';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { GeoPreview, JobKind, ReachabilityStatus } from '@/api/reachability';
 import { useNativeDialog } from '@/platform/hooks/useNativeDialog';
 import { useNotify } from '@/platform/hooks/useNotify';
-import { getApiErrorMessage } from '@/utils/api-error';
+
 import { REACHABILITY_JOBS_KEY } from './jobsRefetch';
 import type { LaunchAdapter, LaunchPreview } from './launchAdapters';
 import { type LaunchSummary, formatList, launchSummary } from './launchSummary';
@@ -82,7 +83,7 @@ export function useLaunch<B, R>(
       onStarted(result);
     },
     onError: (error) =>
-      notify.error(getApiErrorMessage(error, t('admin.reachability.progress.failed'))),
+      notify.error(getReachabilityErrorMessage(error, t('admin.reachability.progress.failed'), t)),
   });
 
   const targetsCount = body ? adapter.targetsCount(body) : 0;
@@ -111,7 +112,7 @@ export function useLaunch<B, R>(
       kind: t(`admin.reachability.kinds.${String(busy.options?.kind ?? adapter.kind)}`),
     });
   else if (preview.isError)
-    blocker = `${t('admin.reachability.launch.previewFailed')}: ${getApiErrorMessage(preview.error, '')}`;
+    blocker = `${t('admin.reachability.launch.previewFailed')}: ${getReachabilityErrorMessage(preview.error, '', t)}`;
   else if (preview.data && preview.data.units_resolved.length === 0)
     blocker = t('admin.reachability.launch.noUnits');
   else if (limit > 0 && cost !== null && cost > limit)

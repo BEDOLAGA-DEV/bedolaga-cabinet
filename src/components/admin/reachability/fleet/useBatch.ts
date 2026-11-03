@@ -1,7 +1,9 @@
+import { useTranslation } from 'react-i18next';
+import { getReachabilityErrorMessage } from '../reachabilityDisplay';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef } from 'react';
 import { type Batch, reachabilityApi } from '@/api/reachability';
-import { getApiErrorMessage } from '@/utils/api-error';
+
 import { REACHABILITY_JOBS_KEY } from '../jobsRefetch';
 import { REACHABILITY_STATUS_KEY } from '../useReachabilityStatus';
 import { REACHABILITY_SUMMARY_KEY } from '../useTargets';
@@ -19,6 +21,7 @@ interface Options {
  * Когда пачка завершилась, обновляются сводка флота, журнал и статус (баланс).
  */
 export function useBatch(batchId: number | null, options: Options = {}) {
+  const { t } = useTranslation();
   const pollMs = options.pollMs ?? DEFAULT_POLL_MS;
   const queryClient = useQueryClient();
   const query = useQuery<Batch>({
@@ -45,7 +48,7 @@ export function useBatch(batchId: number | null, options: Options = {}) {
     wasActive.current = isActive;
   }, [batch, isActive, queryClient]);
 
-  const error = query.isError ? getApiErrorMessage(query.error, '') : null;
+  const error = query.isError ? getReachabilityErrorMessage(query.error, '', t) : null;
   return { batch, isActive, error, refetch: query.refetch };
 }
 

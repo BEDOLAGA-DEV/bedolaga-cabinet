@@ -1,10 +1,10 @@
+import { getLocalizedApiErrorMessage } from '../utils/api-error-display';
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../store/auth';
 import { useLegalConsentGate } from '../hooks/useLegalConsentGate';
 import LegalConsentGate from '../components/LegalConsentGate';
-import { getApiErrorMessage } from '../utils/api-error';
 
 export default function TelegramCallback() {
   const { t } = useTranslation();
@@ -67,7 +67,7 @@ export default function TelegramCallback() {
           navigate('/');
         });
         if (needsConsent) return;
-        setError(getApiErrorMessage(err, t('common.error')));
+        setError(getLocalizedApiErrorMessage(err, t('common.error'), t));
       }
     };
 

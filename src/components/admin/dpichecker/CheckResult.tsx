@@ -1,3 +1,4 @@
+import { getLocalizedApiErrorMessage } from '@/utils/api-error-display';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -7,7 +8,7 @@ import { StatCard } from '@/components/stats';
 import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { usePermissionStore } from '@/store/permissions';
-import { getApiErrorMessage } from '@/utils/api-error';
+
 import { isRunning, resourceVerdict, rowNote, sortRows } from './checkView';
 import { DpiRegionMap } from './DpiRegionMap';
 import { PointDetails } from './PointDetails';
@@ -248,7 +249,7 @@ export function CheckResult({ actionId }: { actionId: number }) {
   if (query.isError || !query.data) {
     return (
       <p className="text-sm text-error-400">
-        {getApiErrorMessage(query.error, t('admin.dpichecker.result.loadFailed'))}
+        {getLocalizedApiErrorMessage(query.error, t('admin.dpichecker.result.loadFailed'), t)}
       </p>
     );
   }
@@ -384,7 +385,7 @@ export function CheckResult({ actionId }: { actionId: number }) {
       )}
       {failure && (
         <p className="text-sm text-error-400">
-          {getApiErrorMessage(failure, t('admin.dpichecker.form.failed'))}
+          {getLocalizedApiErrorMessage(failure, t('admin.dpichecker.form.failed'), t)}
         </p>
       )}
     </div>

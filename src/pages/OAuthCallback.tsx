@@ -1,3 +1,4 @@
+import { getLocalizedApiErrorMessage } from '../utils/api-error-display';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
@@ -93,7 +94,13 @@ export default function OAuthCallback() {
           }
         } catch (err: unknown) {
           setErrorMode('link-browser');
-          setError(getErrorDetail(err) || t('profile.accounts.linkError'));
+          setError(
+            getLocalizedApiErrorMessage(
+              err,
+              getErrorDetail(err) || t('profile.accounts.linkError'),
+              t,
+            ),
+          );
         }
         return;
       }
@@ -109,7 +116,13 @@ export default function OAuthCallback() {
           navigate('/', { replace: true });
         } catch (err: unknown) {
           const detail = getErrorDetail(err);
-          setError(detail || t('auth.oauthError', 'Authorization was denied or failed'));
+          setError(
+            getLocalizedApiErrorMessage(
+              err,
+              detail || t('auth.oauthError', 'Authorization was denied or failed'),
+              t,
+            ),
+          );
         }
         return;
       }
@@ -123,7 +136,13 @@ export default function OAuthCallback() {
         setServerCompleteResponse(response);
       } catch (err: unknown) {
         setErrorMode('link-server');
-        setError(getErrorDetail(err) || t('profile.accounts.linkError'));
+        setError(
+          getLocalizedApiErrorMessage(
+            err,
+            getErrorDetail(err) || t('profile.accounts.linkError'),
+            t,
+          ),
+        );
       }
     };
 

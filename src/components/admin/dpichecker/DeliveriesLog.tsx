@@ -1,10 +1,11 @@
+import { getLocalizedApiErrorMessage } from '@/utils/api-error-display';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { dpicheckerApi, type WebhookDelivery } from '@/api/dpichecker';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
-import { getApiErrorMessage } from '@/utils/api-error';
+
 import { formatDate, toneOf } from './historyStyle';
 
 const LIMIT = 25;
@@ -71,7 +72,7 @@ export function DeliveriesLog() {
         {log.isLoading && <Skeleton className="h-8 w-full" />}
         {log.isError && (
           <p className="text-sm text-error-400">
-            {getApiErrorMessage(log.error, t('admin.dpichecker.deliveries.loadFailed'))}
+            {getLocalizedApiErrorMessage(log.error, t('admin.dpichecker.deliveries.loadFailed'), t)}
           </p>
         )}
         {log.data?.items.length === 0 && (

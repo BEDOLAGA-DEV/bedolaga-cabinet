@@ -14,7 +14,7 @@ import { renderWithProviders } from './testUtils';
  * в запрос, строка ведёт к результату. «Потрачено по админам» убрано (владелец 24.09).
  */
 
-vi.mock('react-i18next', async () => (await import('./testUtils')).i18nMock());
+vi.mock('react-i18next', async () => (await import('./testI18n')).i18nMock());
 
 const api = vi.hoisted(() => ({
   listMonitors: vi.fn(),

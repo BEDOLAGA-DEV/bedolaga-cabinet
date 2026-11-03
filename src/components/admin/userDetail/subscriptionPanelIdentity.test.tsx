@@ -6,7 +6,7 @@ import type { UserDetailResponse, UserSubscriptionInfo } from '@/api/adminUsers'
 import { renderWithProviders } from '../dpichecker/testUtils';
 import { SubscriptionTab, type SubscriptionTabProps } from './SubscriptionTab';
 
-vi.mock('react-i18next', async () => (await import('../dpichecker/testUtils')).i18nMock());
+vi.mock('react-i18next', async () => (await import('../dpichecker/testI18n')).i18nMock());
 vi.mock('./SubscriptionCard', () => ({ SubscriptionCard: () => null }));
 vi.mock('./DevicesCard', () => ({ DevicesCard: () => null }));
 vi.mock('@/api/adminUsers', () => ({

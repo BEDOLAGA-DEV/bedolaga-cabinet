@@ -1,3 +1,4 @@
+import { localizeReachabilityText } from './reachabilityDisplay';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { RejectedConfig, SubscriptionConfig } from '@/api/reachability';
@@ -110,7 +111,7 @@ export function SubscriptionConfigs({
       </div>
       {note && (
         <p role="status" className="mt-2 text-xs text-warning-400">
-          {note}
+          {localizeReachabilityText(note, t)}
         </p>
       )}
       {configs.length === 0 && (

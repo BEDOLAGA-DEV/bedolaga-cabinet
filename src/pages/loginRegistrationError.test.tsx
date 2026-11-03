@@ -164,6 +164,8 @@ it('shows the successful logo retry after the cached preload failed', async () =
 });
 
 it.each([
+  ['register', 400, 'Disposable email addresses are not allowed', 'apiErrors.disposableEmail'],
+  ['register', 400, 'Provider-specific rejection', 'Provider-specific rejection'],
   ['register', 403, { code: 'registration_invite_required' }, 'auth.registrationInviteRequired'],
   [
     'login',

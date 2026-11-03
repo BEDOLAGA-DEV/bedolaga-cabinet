@@ -1,3 +1,4 @@
+import { getLocalizedApiErrorMessage } from '@/utils/api-error-display';
 import { type ReactElement, type ReactNode, useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -34,7 +35,6 @@ import {
 import { StatCard } from '@/components/stats';
 import { PageSkeleton, Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
-import { getApiErrorMessage } from '@/utils/api-error';
 
 /**
  * Grace access: temporary Telegram-only VPN for an expired or traffic-limited
@@ -616,7 +616,7 @@ export default function AdminGraceAccess() {
     onError: (mutationError: unknown) => {
       // Через общий разбор: у 422 от FastAPI detail — СПИСОК объектов, и он
       // попадал в JSX массивом, роняя экран вместо показа причины.
-      setSaveError(getApiErrorMessage(mutationError, t('admin.graceAccess.saveError')));
+      setSaveError(getLocalizedApiErrorMessage(mutationError, t('admin.graceAccess.saveError'), t));
     },
   });
 

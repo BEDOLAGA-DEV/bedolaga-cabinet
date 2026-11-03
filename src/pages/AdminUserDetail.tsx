@@ -1,3 +1,4 @@
+import { getLocalizedApiErrorMessage } from '@/utils/api-error-display';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
@@ -23,7 +24,7 @@ import { EmailIcon, TelegramSmallIcon } from '@/components/icons';
 import { PageSkeleton, Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { usePermissionStore } from '@/store/permissions';
-import { getApiErrorMessage } from '@/utils/api-error';
+
 import { useUserDetailActions } from './adminUserDetail/useUserDetailActions';
 import { salesModeOf } from './adminUserDetail/salesMode';
 import { useUserDetailData } from './adminUserDetail/useUserDetailData';
@@ -123,7 +124,7 @@ export default function AdminUserDetail() {
           <h1 className="text-xl font-bold text-dark-100">{t('admin.users.notFound')}</h1>
         </div>
         <p className="mb-4 text-sm text-dark-400">
-          {getApiErrorMessage(userQuery.error, t('admin.users.detail.loadError'))}
+          {getLocalizedApiErrorMessage(userQuery.error, t('admin.users.detail.loadError'), t)}
         </p>
         <button type="button" onClick={() => void userQuery.refetch()} className="btn-secondary">
           {t('common.retry')}

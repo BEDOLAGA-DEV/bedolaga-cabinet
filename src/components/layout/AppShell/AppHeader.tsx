@@ -226,7 +226,7 @@ export function AppHeader({
                     onCommandPaletteOpen();
                   }}
                   className="btn-icon hidden sm:flex"
-                  title="Search (⌘K)"
+                  title={t('common.searchShortcut', { shortcut: '⌘K' })}
                 >
                   <SearchIcon className="h-5 w-5" />
                 </button>
@@ -326,7 +326,7 @@ export function AppHeader({
                   {avatar.src ? (
                     <img
                       src={avatar.src}
-                      alt="Avatar"
+                      alt={t('common.avatar')}
                       className="h-10 w-10 shrink-0 rounded-full object-cover"
                       onError={avatar.onError}
                     />
