@@ -8,6 +8,7 @@ import {
   type CustomBroadcastButton,
 } from '../api/adminBroadcasts';
 import { getErrorMessage } from '../utils/subscriptionHelpers';
+import { telegramCaptionLength } from '../utils/telegramCaptionLength';
 import { AdminBackButton } from '../components/admin';
 import {
   BroadcastAudienceEditor,
@@ -74,12 +75,7 @@ export default function AdminBroadcastCreate() {
   const [messageText, setMessageText] = useState('');
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [telegramSentId, setTelegramSentId] = useState<number | null>(null);
-  const captionLength = useMemo(() => {
-    // Match the backend: strip tags, decode entities, count Unicode code points.
-    const decoder = document.createElement('textarea');
-    decoder.innerHTML = messageText.trim().replace(/<[^<>]+>/g, '');
-    return Array.from(decoder.value).length;
-  }, [messageText]);
+  const captionLength = useMemo(() => telegramCaptionLength(messageText), [messageText]);
   const [selectedButtons, setSelectedButtons] = useState<string[]>(['home']);
   const [customButtons, setCustomButtons] = useState<CustomBroadcastButton[]>([]);
   const [isAddingCustomButton, setIsAddingCustomButton] = useState(false);
