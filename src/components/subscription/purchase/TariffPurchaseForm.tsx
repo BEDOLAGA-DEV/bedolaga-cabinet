@@ -1,3 +1,4 @@
+import { CisPayPurchaseButton } from './CisPayPurchaseButton';
 import { tariffTrafficLabel } from '../../../utils/tariffTrafficLabel';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -60,6 +61,8 @@ export interface TariffPurchaseFormProps {
   lavaPurchaseEnabled?: boolean;
   /** Оформление привязкой Cashera доступно — показать вторую CTA. */
   casheraPurchaseEnabled?: boolean;
+  cispayPurchaseEnabled?: boolean;
+  cispaySubscriptionId?: number;
   onBack: () => void;
 }
 
@@ -70,6 +73,8 @@ export function TariffPurchaseForm({
   sbpPurchaseEnabled = false,
   lavaPurchaseEnabled = false,
   casheraPurchaseEnabled = false,
+  cispayPurchaseEnabled = false,
+  cispaySubscriptionId = subscriptionId,
   onBack,
 }: TariffPurchaseFormProps) {
   const { t } = useTranslation();
@@ -738,6 +743,15 @@ export function TariffPurchaseForm({
                 {sbpPurchaseButton}
                 {lavaPurchaseButton}
                 {casheraPurchaseButton}
+                {cispayPurchaseEnabled && !tariff.is_daily && !useCustomTraffic && (
+                  <CisPayPurchaseButton
+                    tariffId={tariff.id}
+                    subscriptionId={cispaySubscriptionId}
+                    periodDays={useCustomDays ? customDays : selectedTariffPeriod?.days}
+                    deviceLimit={recurrentDeviceLimit}
+                    disabled={purchaseMutation.isPending || quoteBlocked}
+                  />
+                )}
 
                 {purchaseMutation.isError &&
                   !getInsufficientBalanceError(purchaseMutation.error) && (
@@ -1251,6 +1265,15 @@ export function TariffPurchaseForm({
                     {sbpPurchaseButton}
                     {lavaPurchaseButton}
                     {casheraPurchaseButton}
+                    {cispayPurchaseEnabled && !tariff.is_daily && !useCustomTraffic && (
+                      <CisPayPurchaseButton
+                        tariffId={tariff.id}
+                        subscriptionId={cispaySubscriptionId}
+                        periodDays={useCustomDays ? customDays : selectedTariffPeriod?.days}
+                        deviceLimit={recurrentDeviceLimit}
+                        disabled={purchaseMutation.isPending || quoteBlocked}
+                      />
+                    )}
                   </>
                 );
               })()}

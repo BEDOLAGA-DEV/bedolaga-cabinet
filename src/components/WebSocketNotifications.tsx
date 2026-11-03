@@ -296,6 +296,14 @@ export default function WebSocketNotifications() {
         return;
       }
 
+      if (type === 'cispay_recurring.updated') {
+        queryClient.invalidateQueries({ queryKey: ['cispay-recurring'] });
+        queryClient.invalidateQueries({ queryKey: ['subscription'] });
+        queryClient.invalidateQueries({ queryKey: ['subscriptions-list'] });
+        queryClient.invalidateQueries({ queryKey: ['balance'] });
+        return;
+      }
+
       // SBP recurring events
       if (type === 'sbp_recurring.confirmed') {
         const amount = message.amount_rubles ?? (message.amount_kopeks ?? 0) / 100;

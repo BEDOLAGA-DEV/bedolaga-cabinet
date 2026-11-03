@@ -1,3 +1,5 @@
+import { hasUnknownManagedTraffic } from '@/utils/trafficAccounting';
+import ManagedTrafficSummary from '@/components/subscription/ManagedTrafficSummary';
 import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -192,11 +194,16 @@ export default function DashboardLite() {
           </h1>
           {subscription && (
             <div className="mt-7">
-              <LiteMeter
-                usedGb={subscription.traffic_used_gb}
-                limitGb={subscription.traffic_limit_gb}
-                usedPercent={subscription.traffic_used_percent}
-              />
+              {hasUnknownManagedTraffic(subscription) ? (
+                <div className="h-9" aria-hidden="true" />
+              ) : (
+                <LiteMeter
+                  usedGb={subscription.traffic_used_gb}
+                  limitGb={subscription.traffic_limit_gb}
+                  usedPercent={subscription.traffic_used_percent}
+                />
+              )}
+              <ManagedTrafficSummary subscription={subscription} />
             </div>
           )}
         </section>

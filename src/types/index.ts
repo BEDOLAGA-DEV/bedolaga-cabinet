@@ -65,7 +65,15 @@ export interface ServerInfo {
   country_code: string | null;
 }
 
+export interface TrafficAccountingSummary {
+  traffic_accounting_mode?: 'legacy' | 'managed';
+  traffic_remaining_gb?: number | null;
+  base_traffic_remaining_gb?: number | null;
+  next_traffic_refresh_at?: string | null;
+}
+
 export interface TrafficPurchase {
+  remaining_gb?: number | null;
   id: number;
   traffic_gb: number;
   expires_at: string;
@@ -74,7 +82,7 @@ export interface TrafficPurchase {
   progress_percent: number;
 }
 
-export interface Subscription {
+export interface Subscription extends TrafficAccountingSummary {
   id: number;
   status: string;
   is_trial: boolean;
@@ -118,7 +126,7 @@ export interface SubscriptionStatusResponse {
 }
 
 // Multi-tariff subscription list item (from GET /cabinet/subscriptions)
-export interface SubscriptionListItem {
+export interface SubscriptionListItem extends TrafficAccountingSummary {
   id: number;
   status: string;
   tariff_id: number | null;
@@ -370,6 +378,7 @@ export interface TariffsPurchaseOptions {
   platega_recurrent_enabled?: boolean;
   lava_recurrent_enabled?: boolean;
   cashera_recurrent_enabled?: boolean;
+  cispay_recurrent_enabled?: boolean;
 }
 
 export interface ClassicPurchaseOptions {

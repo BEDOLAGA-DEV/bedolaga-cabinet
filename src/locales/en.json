@@ -381,6 +381,14 @@
     "subscriptions": "Subscriptions"
   },
   "subscription": {
+    "accounting": {
+      "label": "Available traffic",
+      "available": "Total remaining",
+      "baseRemaining": "Included in the plan",
+      "nextRefresh": "Plan allowance renews",
+      "packageRemaining": "{{amount}} remaining",
+      "packageExpires": "Valid until"
+    },
     "dailyRenewalExplanation": "This plan renews one day at a time from your balance. Resuming after the paid period ends charges one day.",
     "dailyRenewalPrice": "Daily price: {{price}}",
     "purchaseOutcomeUnknown": "No response was received. The operation may have completed. Restore your connection and refresh the subscription in your VPN client, then check your subscription and balance in the cabinet before trying again.",
@@ -886,6 +894,58 @@
       "fixedReason": "This plan includes a fixed number of devices: {{count}}. It cannot be changed at checkout.",
       "renewalReason": "Renewing keeps your device limit. You can change it in subscription settings.",
       "unlimitedReason": "This plan has no device limit."
+    },
+    "cispayRecurring": {
+      "title": "CisPay autopay",
+      "choose": "Pay with CisPay and enable renewal",
+      "confirm": "Pay for the period and enable",
+      "consent": "Pay {{amount}} for {{days}} days now, then {{amount}} every {{days}} days. The first payment buys the period and enables automatic renewal.",
+      "schedule": "Your remaining paid time is kept. Charges are scheduled from the first payment, not your subscription expiry. You can disable autopay in subscription settings. Personal and promo-group discounts do not apply to recurring payments.",
+      "terms": "{{amount}} every {{days}} days",
+      "next": "Next charge: {{date}}",
+      "checking": "Checking autopay status.",
+      "cancel": "Disable autopay",
+      "refresh": "Refresh",
+      "error": "Could not set up autopay. Check your selection and retry. If your request was already sent, retrying returns the same payment.",
+      "cancelError": "Cancellation has not been confirmed. Refresh the status or try again.",
+      "setup": "Enable autopay",
+      "period": "Payment period",
+      "state": {
+        "none": "Autopay is not enabled.",
+        "CREATING": "Preparing payment…",
+        "CREATION_UNKNOWN": "Waiting for CisPay confirmation. Do not create another payment.",
+        "PENDING": "Complete the first payment to enable autopay.",
+        "ACTIVE": "Autopay is enabled.",
+        "PAUSED": "Autopay is paused.",
+        "CANCEL_PENDING": "Disabling autopay. Waiting for CisPay confirmation.",
+        "CANCELLED": "Autopay is disabled.",
+        "FAILED": "Could not enable autopay."
+      },
+      "reason": {
+        "target_changed": "Subscription terms changed. The received payment was credited to your balance.",
+        "manual_change": "The subscription was changed manually. Autopay is being disabled.",
+        "price_changed": "The price changed. Set up autopay again after cancellation.",
+        "subscription_deleted": "The subscription was deleted. Autopay is being disabled.",
+        "provider_permission": "The shop needs CisPay approval for recurring payments.",
+        "provider_rejected": "CisPay rejected setup.",
+        "unbound_in_bank": "The bank payment permission was revoked.",
+        "customer": "Cancellation requested by you.",
+        "config_changed": "Checking payment service configuration.",
+        "cancel_requested": "Cancellation request saved."
+      },
+      "continue": "Continue to payment",
+      "manage": "Manage autopay",
+      "errors": {
+        "balanceAutopay": "First turn off balance auto-renewal in subscription settings. Then connect CisPay.",
+        "existing": "An automatic payment is already active or being set up. Open subscription management.",
+        "quoteChanged": "The price or selected terms changed. Review the amount and confirm again.",
+        "disabledSubscription": "This subscription is disabled. Contact support before connecting automatic payments.",
+        "changeTariff": "Change your plan in subscription management first, then connect automatic payments.",
+        "devices": "Change your device count in subscription management first.",
+        "amount": "This amount is not supported for CisPay automatic payments. Choose another period or a one-time payment.",
+        "missingSubscription": "Subscription not found. Refresh and select it again.",
+        "selectSubscription": "Select the subscription you want to set up automatic payments for first."
+      }
     }
   },
   "balance": {

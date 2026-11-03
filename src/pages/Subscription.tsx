@@ -1,3 +1,5 @@
+import { hasUnknownManagedTraffic } from '@/utils/trafficAccounting';
+import ManagedTrafficSummary from '@/components/subscription/ManagedTrafficSummary';
 import { uiLocale } from '@/utils/uiLocale';
 import { useState, useEffect, useRef, useCallback, useMemo, memo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -219,6 +221,10 @@ export default function Subscription() {
     traffic_used_gb: number;
     traffic_used_percent: number;
     is_unlimited: boolean;
+    traffic_accounting_mode?: 'legacy' | 'managed';
+    traffic_remaining_gb?: number | null;
+    base_traffic_remaining_gb?: number | null;
+    next_traffic_refresh_at?: string | null;
   } | null>(null);
 
   // Detect multi-tariff mode from cached subscriptions-list
@@ -320,6 +326,10 @@ export default function Subscription() {
         traffic_used_gb: data.traffic_used_gb,
         traffic_used_percent: data.traffic_used_percent,
         is_unlimited: data.is_unlimited,
+        traffic_accounting_mode: data.traffic_accounting_mode,
+        traffic_remaining_gb: data.traffic_remaining_gb,
+        base_traffic_remaining_gb: data.base_traffic_remaining_gb,
+        next_traffic_refresh_at: data.next_traffic_refresh_at,
       });
       safeLocal.setItem(`traffic_refresh_ts_${subscriptionId ?? 'default'}`, Date.now().toString());
       if (data.rate_limited && data.retry_after_seconds) {
@@ -430,6 +440,7 @@ export default function Subscription() {
       {/* Current Subscription */}
       {subscription ? (
         (() => {
+          const unknownTraffic = hasUnknownManagedTraffic(subscription, trafficData);
           const usedGb = trafficData?.traffic_used_gb ?? subscription.traffic_used_gb;
           const isUnlimited =
             (trafficData?.is_unlimited ?? false) || subscription.traffic_limit_gb === 0;
@@ -635,9 +646,11 @@ export default function Subscription() {
                   </span>
                   <div className="flex items-center gap-2">
                     <span className="font-mono text-[11px] text-dark-400">
-                      {isUnlimited
-                        ? formatTraffic(usedGb)
-                        : `${formatTraffic(usedGb)} / ${formatTraffic(subscription.traffic_limit_gb)}`}
+                      {unknownTraffic
+                        ? '—'
+                        : isUnlimited
+                          ? formatTraffic(usedGb)
+                          : `${formatTraffic(usedGb)} / ${formatTraffic(subscription.traffic_limit_gb)}`}
                     </span>
                     <button
                       onClick={() => refreshTrafficMutation.mutate()}
@@ -660,13 +673,18 @@ export default function Subscription() {
                       {t(`subscription.trafficReset.${subscription.traffic_reset_mode}`)}
                     </div>
                   )}
-                <TrafficProgressBar
-                  usedGb={usedGb}
-                  limitGb={subscription.traffic_limit_gb}
-                  percent={usedPercent}
-                  isUnlimited={isUnlimited}
-                  compact
-                />
+                {unknownTraffic ? (
+                  <div className="h-2" aria-hidden="true" />
+                ) : (
+                  <TrafficProgressBar
+                    usedGb={usedGb}
+                    limitGb={subscription.traffic_limit_gb}
+                    percent={usedPercent}
+                    isUnlimited={isUnlimited}
+                    compact
+                  />
+                )}
+                <ManagedTrafficSummary subscription={subscription} refreshed={trafficData} />
               </div>
 
               {/* ─── Connect Device Button ─── */}
@@ -854,7 +872,7 @@ export default function Subscription() {
                           border: `1px solid ${g.innerBorder}`,
                         }}
                       >
-                        <div className="mb-2 flex items-center justify-between">
+                        <div className="mb-2 flex flex-wrap items-start justify-between gap-3">
                           <div className="flex items-center gap-2">
                             <div
                               className="flex h-7 w-7 items-center justify-center rounded-[8px]"
@@ -866,7 +884,7 @@ export default function Subscription() {
                               {purchase.traffic_gb} {t('common.units.gb')}
                             </span>
                           </div>
-                          <div className="text-right">
+                          <div className="min-w-0 text-end">
                             <div
                               className="text-[11px] font-medium"
                               style={{
@@ -878,7 +896,7 @@ export default function Subscription() {
                                 : t('subscription.days', { count: purchase.days_remaining })}
                             </div>
                             <div className="mt-0.5 font-mono text-[9px] text-dark-400">
-                              {t('subscription.trafficResetAt')}:{' '}
+                              {t('subscription.accounting.packageExpires')}:{' '}
                               {new Date(purchase.expires_at).toLocaleDateString(uiLocale(), {
                                 day: '2-digit',
                                 month: '2-digit',
@@ -887,6 +905,16 @@ export default function Subscription() {
                             </div>
                           </div>
                         </div>
+                        {subscription.traffic_accounting_mode === 'managed' &&
+                          typeof purchase.remaining_gb === 'number' &&
+                          Number.isFinite(purchase.remaining_gb) &&
+                          purchase.remaining_gb >= 0 && (
+                            <p className="mb-2 text-sm tabular-nums text-dark-300">
+                              {t('subscription.accounting.packageRemaining', {
+                                amount: formatTraffic(purchase.remaining_gb),
+                              })}
+                            </p>
+                          )}
                         <div
                           className="relative h-1.5 overflow-hidden rounded-full"
                           style={{ background: g.trackBg }}

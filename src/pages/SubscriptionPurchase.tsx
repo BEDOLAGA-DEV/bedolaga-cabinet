@@ -1,3 +1,4 @@
+import { resolveCisPayTarget } from '@/utils/cispayRecurring';
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -379,6 +380,12 @@ export default function SubscriptionPurchase() {
               /* Tariff Purchase Form (extracted into its own component) */
               <TariffPurchaseForm
                 key={selectedTariff.id}
+                cispaySubscriptionId={resolveCisPayTarget(
+                  subscriptionId,
+                  subscription,
+                  selectedTariff.id,
+                  isMultiTariff,
+                )}
                 tariff={selectedTariff}
                 subscriptionId={subscriptionId}
                 balanceKopeks={purchaseOptions?.balance_kopeks}
@@ -393,6 +400,11 @@ export default function SubscriptionPurchase() {
                   purchaseOptions !== undefined &&
                   'lava_recurrent_enabled' in purchaseOptions &&
                   purchaseOptions.lava_recurrent_enabled === true
+                }
+                cispayPurchaseEnabled={
+                  purchaseOptions !== undefined &&
+                  'cispay_recurrent_enabled' in purchaseOptions &&
+                  purchaseOptions.cispay_recurrent_enabled === true
                 }
                 casheraPurchaseEnabled={
                   isTariffsMode &&

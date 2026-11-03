@@ -60,7 +60,69 @@ const bodyWithSubId = (
   subscriptionId != null ? { params: { subscription_id: subscriptionId } } : {},
 ];
 
+export interface CisPayQuote {
+  quote_id: string;
+  expires_at: string;
+  amount_kopeks: number;
+  period_days: number;
+  device_limit: number;
+  first_payment_required: true;
+}
+export interface CisPayRecurringInfo {
+  status: string;
+  subscription_id?: number;
+  redirect_url?: string | null;
+  reason?: string | null;
+  amount_kopeks?: number;
+  period_days?: number;
+  next_charge_at?: string | null;
+}
+
 export const subscriptionApi = {
+  quoteCisPayRecurring: async (body: {
+    tariff_id: number;
+    period_days: number;
+    device_limit?: number;
+    subscription_id?: number;
+  }): Promise<CisPayQuote> => {
+    const { data } = await apiClient.post('/cabinet/subscription/cispay-recurrent/quote', body);
+    return data;
+  },
+  purchaseCisPayRecurring: async (
+    quote_id: string,
+    checkout_id: string,
+  ): Promise<CisPayRecurringInfo> => {
+    const { data } = await apiClient.post('/cabinet/subscription/cispay-recurrent/purchase', {
+      quote_id,
+      checkout_id,
+    });
+    return data;
+  },
+  getCisPayRecurring: async (
+    subscription_id: number,
+    adminUserId?: number,
+  ): Promise<CisPayRecurringInfo> => {
+    const { data } = await apiClient.get(
+      adminUserId
+        ? `/cabinet/admin/users/${adminUserId}/subscriptions/${subscription_id}/cispay-recurrent`
+        : '/cabinet/subscription/cispay-recurrent',
+      { params: { subscription_id } },
+    );
+    return data;
+  },
+  cancelCisPayRecurring: async (
+    subscription_id: number,
+    adminUserId?: number,
+  ): Promise<CisPayRecurringInfo> => {
+    const { data } = await apiClient.post(
+      adminUserId
+        ? `/cabinet/admin/users/${adminUserId}/subscriptions/${subscription_id}/cispay-recurrent/cancel`
+        : '/cabinet/subscription/cispay-recurrent/cancel',
+      null,
+      { params: { subscription_id } },
+    );
+    return data;
+  },
   // ── Multi-tariff endpoints ──────────────────────────────────────────
 
   getSubscriptions: async (): Promise<SubscriptionsListResponse> => {
@@ -183,6 +245,10 @@ export const subscriptionApi = {
     traffic_limit_gb: number;
     traffic_used_percent: number;
     is_unlimited: boolean;
+    traffic_accounting_mode?: 'legacy' | 'managed';
+    traffic_remaining_gb?: number | null;
+    base_traffic_remaining_gb?: number | null;
+    next_traffic_refresh_at?: string | null;
     lifetime_used_bytes?: number;
     lifetime_used_gb?: number;
   }> => {

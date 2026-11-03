@@ -162,6 +162,10 @@ export default function Dashboard() {
     traffic_used_gb: number;
     traffic_used_percent: number;
     is_unlimited: boolean;
+    traffic_accounting_mode?: 'legacy' | 'managed';
+    traffic_remaining_gb?: number | null;
+    base_traffic_remaining_gb?: number | null;
+    next_traffic_refresh_at?: string | null;
   } | null>(null);
 
   const refreshTrafficMutation = useMutation({
@@ -171,6 +175,10 @@ export default function Dashboard() {
         traffic_used_gb: data.traffic_used_gb,
         traffic_used_percent: data.traffic_used_percent,
         is_unlimited: data.is_unlimited,
+        traffic_accounting_mode: data.traffic_accounting_mode,
+        traffic_remaining_gb: data.traffic_remaining_gb,
+        base_traffic_remaining_gb: data.base_traffic_remaining_gb,
+        next_traffic_refresh_at: data.next_traffic_refresh_at,
       });
       safeLocal.setItem(
         `traffic_refresh_ts_${subscription?.id ?? 'default'}`,

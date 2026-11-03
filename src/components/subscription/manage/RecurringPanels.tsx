@@ -1,3 +1,5 @@
+import { canSetupCisPayTariff } from '@/utils/cispayRecurring';
+import { CisPayRecurringPanel } from './CisPayRecurringPanel';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 
@@ -294,6 +296,17 @@ export function RecurringPanels({ subscription, subscriptionId }: RecurringPanel
 
   return (
     <>
+      <CisPayRecurringPanel
+        subscriptionId={subscription.id}
+        canSetup={
+          purchaseOptions?.sales_mode === 'tariffs' &&
+          !!purchaseOptions.cispay_recurrent_enabled &&
+          subscription.status !== 'disabled' &&
+          canSetupCisPayTariff(
+            purchaseOptions.tariffs.find((tariff) => tariff.id === subscription.tariff_id),
+          )
+        }
+      />
       {/* ─── SBP Recurring Auto-payment ───
            Sibling of the autopay toggle above, guarded ONLY by
            is_trial + uiState — daily-tariff subscriptions must see

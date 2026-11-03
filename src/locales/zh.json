@@ -347,6 +347,14 @@
     "validUntil": "有效期至 {{date}}"
   },
   "subscription": {
+    "accounting": {
+      "label": "可用流量",
+      "available": "剩余总流量",
+      "baseRemaining": "其中套餐剩余",
+      "nextRefresh": "套餐流量刷新日期",
+      "packageRemaining": "剩余 {{amount}}",
+      "packageExpires": "有效期至"
+    },
     "dailyRenewalExplanation": "此套餐每天从余额中扣费续订。已付费时段结束后，恢复订阅将扣除一天的费用。",
     "dailyRenewalPrice": "每日价格：{{price}}",
     "purchaseOutcomeUnknown": "未收到响应，操作可能已完成。请恢复网络连接并在 VPN 客户端中刷新订阅，然后在个人中心检查订阅和余额，再决定是否重试。",
@@ -797,6 +805,58 @@
       "fixedReason": "此套餐的设备数量固定为 {{count}} 台，购买时无法更改。",
       "renewalReason": "续费会保留您的设备数量，您可以在订阅管理中修改。",
       "unlimitedReason": "此套餐不限制设备数量。"
+    },
+    "cispayRecurring": {
+      "title": "CisPay 自动付款",
+      "choose": "通过 CisPay 付款并开启自动续费",
+      "confirm": "支付本期并开启",
+      "consent": "现在支付 {{amount}} 购买 {{days}} 天，之后每 {{days}} 天支付 {{amount}}。首次付款购买本期并开启自动续费。",
+      "schedule": "已付费的剩余时间会保留。扣款周期从首次付款开始，而非订阅到期日。可在订阅管理中关闭自动付款。 自动付款不适用个人折扣和促销组折扣。",
+      "terms": "每 {{days}} 天 {{amount}}",
+      "next": "下次扣款：{{date}}",
+      "checking": "正在查询自动付款状态。",
+      "cancel": "关闭自动付款",
+      "refresh": "刷新",
+      "error": "无法设置自动付款。请检查所选条件后重试。已提交的请求重试时会返回同一笔付款。",
+      "cancelError": "取消尚未确认。请刷新状态或重试。",
+      "setup": "开启自动付款",
+      "period": "付款周期",
+      "state": {
+        "none": "未开启自动付款。",
+        "CREATING": "正在准备付款…",
+        "CREATION_UNKNOWN": "等待 CisPay 确认。请勿创建新付款。",
+        "PENDING": "完成首次付款以开启自动付款。",
+        "ACTIVE": "已开启自动付款。",
+        "PAUSED": "自动付款已暂停。",
+        "CANCEL_PENDING": "正在关闭自动付款，等待 CisPay 确认。",
+        "CANCELLED": "自动付款已关闭。",
+        "FAILED": "无法开启自动付款。"
+      },
+      "reason": {
+        "target_changed": "订阅条件已变更。收到的付款已存入余额。",
+        "manual_change": "订阅已手动变更，正在关闭自动付款。",
+        "price_changed": "价格已变更。取消后请重新开启自动付款。",
+        "subscription_deleted": "订阅已删除，正在关闭自动付款。",
+        "provider_permission": "商店需要 CisPay 批准才能使用自动付款。",
+        "provider_rejected": "CisPay 拒绝了设置请求。",
+        "unbound_in_bank": "银行扣款授权已撤销。",
+        "customer": "已按您的请求取消。",
+        "config_changed": "正在检查付款服务配置。",
+        "cancel_requested": "取消请求已保存。"
+      },
+      "continue": "继续付款",
+      "manage": "管理自动付款",
+      "errors": {
+        "balanceAutopay": "请先在订阅设置中关闭余额自动续费，再开通 CisPay。",
+        "existing": "此订阅已有自动付款或正在开通中。请打开订阅管理。",
+        "quoteChanged": "价格或所选条件已更改。请核对金额并重新确认。",
+        "disabledSubscription": "此订阅已停用。开通自动付款前请联系客服。",
+        "changeTariff": "请先在订阅管理中更换套餐，再开通自动付款。",
+        "devices": "请先在订阅管理中更改设备数量。",
+        "amount": "此金额不支持 CisPay 自动付款。请选择其他周期或一次性付款。",
+        "missingSubscription": "未找到订阅。请刷新并重新选择。",
+        "selectSubscription": "请先选择需要开通自动付款的订阅。"
+      }
     }
   },
   "balance": {

@@ -13,6 +13,7 @@ import {
 } from '@/components/icons';
 import type { SubscriptionListItem } from '../../types';
 import { needsTariff, tariffSelectionPath } from '@/utils/legacySubscription';
+import { hasUnknownManagedTraffic } from '@/utils/trafficAccounting';
 import { connectFooterState } from './connectFooterState';
 import { SubscriptionConnectFooter } from './SubscriptionConnectFooter';
 
@@ -114,6 +115,7 @@ export default function SubscriptionListCard({
   const isExpired = subscription.status === 'expired' || subscription.status === 'disabled';
   const trafficLimit = subscription.traffic_limit_gb;
   const trafficUsed = subscription.traffic_used_gb;
+  const unknownTraffic = hasUnknownManagedTraffic(subscription);
   const isUnlimited = trafficLimit === 0;
   const trafficPercent = isUnlimited
     ? 0
@@ -183,12 +185,14 @@ export default function SubscriptionListCard({
                 {t('subscription.traffic', 'Трафик')}
               </span>
               <span className="text-[11px] tabular-nums" style={{ color: g.textSecondary }}>
-                {isUnlimited
-                  ? '∞'
-                  : `${trafficUsed.toFixed(1)} / ${trafficLimit} ${t('common.units.gb', 'ГБ')}`}
+                {unknownTraffic
+                  ? '—'
+                  : isUnlimited
+                    ? '∞'
+                    : `${trafficUsed.toFixed(1)} / ${trafficLimit} ${t('common.units.gb', 'ГБ')}`}
               </span>
             </div>
-            {!isUnlimited && (
+            {!isUnlimited && !unknownTraffic && (
               <div className="h-1.5 overflow-hidden rounded-full" style={{ background: g.innerBg }}>
                 <div
                   className={`h-full rounded-full transition-all ${trafficColor}`}
