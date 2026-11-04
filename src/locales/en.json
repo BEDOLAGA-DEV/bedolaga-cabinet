@@ -922,7 +922,6 @@
       "refresh": "Refresh",
       "error": "Could not set up autopay. Check your selection and retry. If your request was already sent, retrying returns the same payment.",
       "cancelError": "Cancellation has not been confirmed. Refresh the status or try again.",
-      "setup": "Enable autopay",
       "period": "Payment period",
       "state": {
         "none": "Autopay is not enabled.",
