@@ -72,7 +72,6 @@ export function PartnerReferralSettings({ canEdit }: PartnerReferralSettingsProp
               isFavorite={false}
               showFavorite={false}
               canEdit={canEdit}
-              onToggleFavorite={() => {}}
               onUpdate={(value) => updateMutation.mutate({ key: setting.key, value })}
               onReset={() => resetMutation.mutate(setting.key)}
               isUpdating={busy}
