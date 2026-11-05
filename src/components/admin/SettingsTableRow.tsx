@@ -9,7 +9,9 @@ import { formatSettingKey, stripHtml } from './utils';
 interface SettingsTableRowProps {
   setting: SettingDefinition;
   isFavorite: boolean;
-  onToggleFavorite: () => void;
+  onToggleFavorite?: () => void;
+  showFavorite?: boolean;
+  canEdit?: boolean;
   onUpdate: (value: string) => void;
   onReset: () => void;
   isUpdating?: boolean;
@@ -22,6 +24,8 @@ export function SettingsTableRow({
   setting,
   isFavorite,
   onToggleFavorite,
+  showFavorite = true,
+  canEdit = true,
   onUpdate,
   onReset,
   isUpdating,
@@ -38,7 +42,7 @@ export function SettingsTableRow({
   const isBool = setting.type === 'bool';
   const boolChecked = setting.current === true || setting.current === 'true';
   // env-locked keys are pinned in .env and shadow the DB — show value, no input.
-  const locked = setting.read_only || setting.env_locked;
+  const locked = setting.read_only || setting.env_locked || !canEdit;
 
   const isLongValue = (() => {
     const val = String(setting.current ?? '');
@@ -160,6 +164,7 @@ export function SettingsTableRow({
           )}
 
           {/* Favorite button -- visible if favorited, hover-reveal otherwise */}
+          {showFavorite && (
           <button
             onClick={onToggleFavorite}
             className={cn(
@@ -181,6 +186,7 @@ export function SettingsTableRow({
           >
             <StarIcon filled={isFavorite} />
           </button>
+          )}
         </div>
       </div>
     </div>
