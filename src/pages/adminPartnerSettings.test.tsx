@@ -156,7 +156,7 @@ describe('основные реферальные настройки и прав
     await renderPage();
     expect(screen.queryByText('REFERRAL_COMMISSION_PERCENT')).toBeNull();
     expect(referralState.reads).toBe(0);
-    expect(screen.queryByRole('button', { name: 'Настройки' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Настройки системы' })).toBeNull();
   });
 
   it('показывает реферальные значения без возможности правки при settings:read', async () => {
@@ -167,7 +167,7 @@ describe('основные реферальные настройки и прав
     expect(screen.getByText('5')).toBeTruthy();
     expect(screen.queryByRole('button', { name: '5' })).toBeNull();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Настройки' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Настройки системы' }));
     expect(screen.getByText('Системные настройки открыты')).toBeTruthy();
   });
 
