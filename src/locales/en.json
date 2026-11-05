@@ -3430,6 +3430,7 @@
         "iface_additional": "Additional",
         "users_support": "Support",
         "users_referral": "Referral",
+        "users_registration": "Registration & access",
         "users_channel": "Channel",
         "users_localization": "Localization",
         "users_moderation": "Moderation",
@@ -3518,6 +3519,7 @@
         "CHANNEL": "Channel",
         "TIMEZONE": "Time Zone",
         "REFERRAL": "Referral System",
+        "REGISTRATION_ACCESS": "Registration & access",
         "MODERATION": "Moderation"
       },
       "settingNames": {
@@ -5517,6 +5519,8 @@
       },
       "settings": "Settings",
       "settingsSubtitle": "Partner program and withdrawal settings",
+      "advancedReferralSettings": "Advanced referral settings",
+      "advancedReferralSettingsDesc": "Commission rates, thresholds and reward limits",
       "settingsLoadError": "Failed to load settings",
       "settingsUpdateError": "Failed to save settings",
       "settingsSection": {
