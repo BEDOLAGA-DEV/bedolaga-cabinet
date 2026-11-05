@@ -157,7 +157,8 @@ describe('основные реферальные настройки и прав
     usePermissionStore.setState({ permissions: ['settings:read'] });
     await renderPage();
     await screen.findByText('REFERRAL_COMMISSION_PERCENT');
-    expect(screen.getByRole('button', { name: '5' })).toHaveProperty('disabled', true);
+    expect(screen.getByText('5')).toBeTruthy();
+    expect(screen.queryByRole('button', { name: '5' })).toBeNull();
 
     fireEvent.click(screen.getByRole('button', { name: 'Настройки' }));
     expect(screen.getByText('Системные настройки открыты')).toBeTruthy();
@@ -168,7 +169,7 @@ describe('основные реферальные настройки и прав
     await renderPage();
     await screen.findByText('REFERRAL_COMMISSION_PERCENT');
     fireEvent.click(screen.getByRole('button', { name: '5' }));
-    const input = screen.getByRole('spinbutton');
+    const input = screen.getByDisplayValue('5') as HTMLInputElement;
     fireEvent.change(input, { target: { value: '7' } });
     fireEvent.keyDown(input, { key: 'Enter' });
     await waitFor(() =>
