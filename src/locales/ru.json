@@ -3476,6 +3476,7 @@
         "iface_additional": "Дополнительно",
         "users_support": "Поддержка",
         "users_referral": "Реферальная система",
+        "users_registration": "Регистрация и доступ",
         "users_channel": "Канал",
         "users_localization": "Локализация",
         "users_moderation": "Модерация",
@@ -4612,6 +4613,7 @@
         "CHANNEL": "Канал",
         "TIMEZONE": "Часовой пояс",
         "REFERRAL": "Реферальная система",
+        "REGISTRATION_ACCESS": "Регистрация и доступ",
         "MODERATION": "Модерация"
       },
       "offlineConv": "Офлайн-конверсии",
@@ -5462,6 +5464,8 @@
       },
       "settings": "Настройки",
       "settingsSubtitle": "Настройки партнёрской программы и вывода средств",
+      "advancedReferralSettings": "Расширенные настройки рефералов",
+      "advancedReferralSettingsDesc": "Проценты, пороги и лимиты начислений",
       "settingsLoadError": "Не удалось загрузить настройки",
       "settingsUpdateError": "Не удалось сохранить настройки",
       "settingsSection": {
