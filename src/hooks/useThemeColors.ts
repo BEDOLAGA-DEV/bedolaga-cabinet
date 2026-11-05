@@ -161,12 +161,18 @@ function ensureFillCarriesText(bg: Rgb): Rgb {
 
   for (let step = 1; step <= 40; step += 1) {
     const k = step / 100;
-    const darker: Rgb = { r: bg.r * (1 - k), g: bg.g * (1 - k), b: bg.b * (1 - k) };
+    // Check the actual 8-bit color. Fractional channels can pass 4.5 while
+    // their rendered, rounded value falls below it (e.g. a plum accent).
+    const darker: Rgb = {
+      r: Math.round(bg.r * (1 - k)),
+      g: Math.round(bg.g * (1 - k)),
+      b: Math.round(bg.b * (1 - k)),
+    };
     if (contrastRatio(WHITE, darker) >= ON_COLOR_WHITE_MIN_RATIO) return darker;
     const lighter: Rgb = {
-      r: bg.r + (255 - bg.r) * k,
-      g: bg.g + (255 - bg.g) * k,
-      b: bg.b + (255 - bg.b) * k,
+      r: Math.round(bg.r + (255 - bg.r) * k),
+      g: Math.round(bg.g + (255 - bg.g) * k),
+      b: Math.round(bg.b + (255 - bg.b) * k),
     };
     if (contrastRatio(INK, lighter) >= ON_COLOR_WHITE_MIN_RATIO) return lighter;
   }

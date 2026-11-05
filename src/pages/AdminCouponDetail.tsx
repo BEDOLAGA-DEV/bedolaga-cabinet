@@ -1,3 +1,4 @@
+import { getLocalizedApiErrorMessage } from '../utils/api-error-display';
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -7,7 +8,7 @@ import { couponsApi } from '../api/coupons';
 import { usePlatform } from '../platform/hooks/usePlatform';
 import { copyToClipboard } from '../utils/clipboard';
 import { formatPrice, formatShortDate } from '../utils/format';
-import { getApiErrorMessage } from '../utils/api-error';
+
 import { useToast } from '../components/Toast';
 import { PermissionGate } from '../components/auth/PermissionGate';
 import {
@@ -67,7 +68,7 @@ export default function AdminCouponDetail() {
       showToast({
         type: 'error',
         title: t('admin.coupons.errors.revokeFailed'),
-        message: getApiErrorMessage(err, ''),
+        message: getLocalizedApiErrorMessage(err, '', t),
       });
     },
   });
@@ -89,7 +90,7 @@ export default function AdminCouponDetail() {
       showToast({
         type: 'error',
         title: t('admin.coupons.errors.deleteFailed'),
-        message: getApiErrorMessage(err, ''),
+        message: getLocalizedApiErrorMessage(err, '', t),
       });
     },
   });

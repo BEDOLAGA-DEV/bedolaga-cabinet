@@ -1,8 +1,9 @@
+import { getLocalizedApiErrorMessage } from '../utils/api-error-display';
 import { useEffect, useRef, useState } from 'react';
 import { useSearchParams, Link, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { authApi } from '../api/auth';
-import { getApiErrorMessage } from '../utils/api-error';
+
 import LanguageSwitcher from '../components/LanguageSwitcher';
 import { CheckIcon } from '@/components/icons';
 
@@ -53,7 +54,7 @@ export default function ResetPassword() {
       redirectTimerRef.current = setTimeout(() => navigate('/login', { replace: true }), 2000);
     } catch (err: unknown) {
       setStatus('error');
-      setError(getApiErrorMessage(err, t('common.error')));
+      setError(getLocalizedApiErrorMessage(err, t('common.error'), t));
     }
   };
 

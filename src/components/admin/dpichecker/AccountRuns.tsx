@@ -1,3 +1,4 @@
+import { getLocalizedApiErrorMessage } from '@/utils/api-error-display';
 import { useInfiniteQuery, useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -5,7 +6,7 @@ import { useNavigate } from 'react-router';
 import { type AccountKind, type CheckType, dpicheckerApi, type RemoteRun } from '@/api/dpichecker';
 import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
-import { getApiErrorMessage } from '@/utils/api-error';
+
 import { Segmented } from '../Segmented';
 import { buildLink } from './deepLink';
 import { formatDate, HISTORY_GRID, toneOf } from './historyStyle';
@@ -165,7 +166,7 @@ export function AccountRuns() {
         )}
         {runs.isError && (
           <p className="p-3 text-sm text-error-400">
-            {getApiErrorMessage(runs.error, t('admin.dpichecker.result.loadFailed'))}
+            {getLocalizedApiErrorMessage(runs.error, t('admin.dpichecker.result.loadFailed'), t)}
           </p>
         )}
         {runs.data && items.length === 0 && (
@@ -184,7 +185,7 @@ export function AccountRuns() {
         </ul>
         {open.isError && (
           <p className="p-3 text-sm text-error-400">
-            {getApiErrorMessage(open.error, t('admin.dpichecker.history.openFailed'))}
+            {getLocalizedApiErrorMessage(open.error, t('admin.dpichecker.history.openFailed'), t)}
           </p>
         )}
         {runs.hasNextPage && (

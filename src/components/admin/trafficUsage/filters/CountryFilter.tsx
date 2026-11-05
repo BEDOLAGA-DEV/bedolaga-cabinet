@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { useEffect, useRef, useState } from 'react';
 import { CheckIcon } from '@/components/icons';
 import { ChevronDownIcon, GlobeIcon } from '../TrafficIcons';
@@ -12,6 +13,7 @@ export function CountryFilter({
   selected: Set<string>;
   onChange: (next: Set<string>) => void;
 }) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -74,7 +76,7 @@ export function CountryFilter({
             >
               {allSelected && <CheckIcon className="h-3 w-3 text-white" />}
             </span>
-            All
+            {t('common.all')}
           </button>
 
           <div className="mx-2 border-t border-dark-700" />

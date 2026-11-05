@@ -13,7 +13,7 @@ import { renderWithProviders } from './testUtils';
  * «По расписанию» создаёт монитор.
  */
 
-vi.mock('react-i18next', async () => (await import('./testUtils')).i18nMock());
+vi.mock('react-i18next', async () => (await import('./testI18n')).i18nMock());
 
 const POPS: Pop[] = [
   { id: 1, location: 'russia', region: 'Москва', operator: null, is_healthy: true },

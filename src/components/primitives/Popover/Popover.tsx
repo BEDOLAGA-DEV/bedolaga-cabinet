@@ -1,3 +1,4 @@
+import { Trans } from 'react-i18next';
 import * as PopoverPrimitive from '@radix-ui/react-popover';
 import { motion } from 'framer-motion';
 import { forwardRef, type ComponentPropsWithoutRef } from 'react';
@@ -55,7 +56,9 @@ export const PopoverContent = forwardRef<HTMLDivElement, PopoverContentProps>(
               )}
             >
               <CloseIcon />
-              <span className="sr-only">Close</span>
+              <span className="sr-only">
+                <Trans i18nKey="common.close" />
+              </span>
             </PopoverPrimitive.Close>
           )}
         </motion.div>

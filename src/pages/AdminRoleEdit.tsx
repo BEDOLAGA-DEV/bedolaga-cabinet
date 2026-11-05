@@ -219,7 +219,7 @@ export default function AdminRoleEdit() {
   const [formError, setFormError] = useState<string | null>(null);
 
   // Fetch role for editing
-  const { isLoading: isLoadingRole } = useQuery({
+  const { data: role, isLoading: isLoadingRole } = useQuery({
     queryKey: ['admin-role', id],
     queryFn: () => rbacApi.getRoles(),
     enabled: isEdit,
@@ -313,6 +313,8 @@ export default function AdminRoleEdit() {
     }));
   }, []);
 
+  const isSystemRole = isEdit && role?.is_system === true;
+
   const handleSubmit = useCallback(
     (e: React.SyntheticEvent) => {
       e.preventDefault();
@@ -326,7 +328,7 @@ export default function AdminRoleEdit() {
       const payload = {
         name: formData.name.trim(),
         description: formData.description.trim() || null,
-        level: formData.level,
+        ...(isSystemRole ? {} : { level: formData.level }),
         permissions: formData.permissions,
         color: formData.color,
       };
@@ -334,10 +336,10 @@ export default function AdminRoleEdit() {
       if (isEdit) {
         updateMutation.mutate({ roleId: Number(id), payload });
       } else {
-        createMutation.mutate(payload);
+        createMutation.mutate({ ...payload, level: formData.level });
       }
     },
-    [formData, isEdit, id, createMutation, updateMutation, t],
+    [formData, isEdit, isSystemRole, id, createMutation, updateMutation, t],
   );
 
   const isSaving = createMutation.isPending || updateMutation.isPending;
@@ -413,6 +415,7 @@ export default function AdminRoleEdit() {
                   min={0}
                   max={999}
                   value={formData.level}
+                  disabled={isSystemRole}
                   onChange={(e) =>
                     setFormData((prev) => ({ ...prev, level: Number(e.target.value) }))
                   }
@@ -423,6 +426,7 @@ export default function AdminRoleEdit() {
                   min={0}
                   max={999}
                   value={formData.level}
+                  disabled={isSystemRole}
                   onChange={(e) =>
                     setFormData((prev) => ({
                       ...prev,

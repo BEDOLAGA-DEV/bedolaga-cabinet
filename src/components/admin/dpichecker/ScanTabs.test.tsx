@@ -12,7 +12,7 @@ import { renderWithProviders } from './testUtils';
  * словами по каждому адресу.
  */
 
-vi.mock('react-i18next', async () => (await import('./testUtils')).i18nMock());
+vi.mock('react-i18next', async () => (await import('./testI18n')).i18nMock());
 
 const NOISY_DONE = {
   id: 2628,

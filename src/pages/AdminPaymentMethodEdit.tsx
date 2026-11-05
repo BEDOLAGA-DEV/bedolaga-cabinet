@@ -1,10 +1,11 @@
+import { getLocalizedApiErrorMessage } from '../utils/api-error-display';
 import { useState, useEffect, useRef, type ChangeEvent } from 'react';
-import { useParams, useNavigate } from 'react-router';
+import { Link, useParams, useNavigate } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { adminPaymentMethodsApi } from '../api/adminPaymentMethods';
 import { adminOverpayCertificateApi, OVERPAY_CERT_MAX_SIZE } from '../api/adminOverpayCertificate';
-import { METHOD_LABELS } from '../constants/paymentMethods';
+import { getPaymentMethodLabel } from '../constants/paymentMethods';
 import type { PromoGroupSimple } from '../types';
 import { usePlatform } from '../platform/hooks/usePlatform';
 import { useHapticFeedback } from '../platform/hooks/useHaptic';
@@ -52,7 +53,13 @@ function OverpayCertificateSection() {
     onError: (err) => {
       haptic.error();
       setCertWarning(null);
-      setCertError(extractErrorDetail(err) ?? t('admin.paymentMethods.overpayCertUploadError'));
+      setCertError(
+        getLocalizedApiErrorMessage(
+          err,
+          extractErrorDetail(err) ?? t('admin.paymentMethods.overpayCertUploadError'),
+          t,
+        ),
+      );
     },
   });
 
@@ -66,7 +73,13 @@ function OverpayCertificateSection() {
     },
     onError: (err) => {
       haptic.error();
-      setCertError(extractErrorDetail(err) ?? t('admin.paymentMethods.overpayCertDeleteError'));
+      setCertError(
+        getLocalizedApiErrorMessage(
+          err,
+          extractErrorDetail(err) ?? t('admin.paymentMethods.overpayCertDeleteError'),
+          t,
+        ),
+      );
     },
   });
 
@@ -409,7 +422,7 @@ export default function AdminPaymentMethodEdit() {
             {displayName}
           </h1>
           <p className="text-sm text-dark-500">
-            {METHOD_LABELS[config.method_id] || config.method_id}
+            {getPaymentMethodLabel(config.method_id, t) || config.method_id}
           </p>
         </div>
       </div>
@@ -516,26 +529,42 @@ export default function AdminPaymentMethodEdit() {
               {config.available_sub_options.map((opt) => {
                 const enabled = subOptions[opt.id] !== false;
                 return (
-                  <button
-                    key={opt.id}
-                    onClick={() => setSubOptions((prev) => ({ ...prev, [opt.id]: !enabled }))}
-                    className={`flex w-full items-center justify-between rounded-xl border p-3 transition-all ${
-                      enabled
-                        ? 'border-accent-500/30 bg-dark-700/30 text-dark-100'
-                        : 'border-dark-800 bg-dark-900/30 text-dark-500'
-                    }`}
-                  >
-                    <span className="text-sm">{opt.name}</span>
-                    <div
-                      className={`flex h-5 w-5 shrink-0 items-center justify-center rounded ${
+                  <div key={opt.id}>
+                    <button
+                      type="button"
+                      aria-pressed={enabled}
+                      onClick={() => setSubOptions((prev) => ({ ...prev, [opt.id]: !enabled }))}
+                      className={`flex w-full items-center justify-between rounded-xl border p-3 transition-all ${
                         enabled
-                          ? 'bg-accent-500 text-on-accent'
-                          : 'border border-dark-600 bg-dark-700'
+                          ? 'border-accent-500/30 bg-dark-700/30 text-dark-100'
+                          : 'border-dark-800 bg-dark-900/30 text-dark-500'
                       }`}
                     >
-                      {enabled && <CheckIcon />}
-                    </div>
-                  </button>
+                      <span className="text-sm">{opt.name}</span>
+                      <div
+                        className={`flex h-5 w-5 shrink-0 items-center justify-center rounded ${
+                          enabled
+                            ? 'bg-accent-500 text-on-accent'
+                            : 'border border-dark-600 bg-dark-700'
+                        }`}
+                      >
+                        {enabled && <CheckIcon />}
+                      </div>
+                    </button>
+                    {opt.is_provider_enabled === false && (
+                      <p className="mt-2 text-xs text-dark-400">
+                        {t('admin.paymentMethods.providerOptionDisabled')}{' '}
+                        {methodId === 'cispay' && (
+                          <Link
+                            className="text-accent-400 underline underline-offset-2"
+                            to="/admin/settings?section=payments_cispay"
+                          >
+                            {t('admin.paymentMethods.providerSettings')}
+                          </Link>
+                        )}
+                      </p>
+                    )}
+                  </div>
                 );
               })}
             </div>

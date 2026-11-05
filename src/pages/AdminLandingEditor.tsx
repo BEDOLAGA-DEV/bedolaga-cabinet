@@ -1,3 +1,4 @@
+import { getLocalizedApiErrorMessage } from '../utils/api-error-display';
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { PiCaretDown } from 'react-icons/pi';
 import { useNavigate, useParams } from 'react-router';
@@ -27,7 +28,7 @@ import {
 } from '../components/admin/SortableSelectedMethodCard';
 import { useNotify } from '@/platform';
 import { usePlatform } from '../platform/hooks/usePlatform';
-import { getApiErrorMessage } from '../utils/api-error';
+
 import { BackIcon, PlusIcon } from '../components/icons/LandingIcons';
 import {
   DndContext,
@@ -288,7 +289,7 @@ export default function AdminLandingEditor() {
       navigate('/admin/landings');
     },
     onError: (err: unknown) => {
-      notify.error(getApiErrorMessage(err, t('common.error')));
+      notify.error(getLocalizedApiErrorMessage(err, t('common.error'), t));
     },
   });
 
@@ -303,7 +304,7 @@ export default function AdminLandingEditor() {
       navigate('/admin/landings');
     },
     onError: (err: unknown) => {
-      notify.error(getApiErrorMessage(err, t('common.error')));
+      notify.error(getLocalizedApiErrorMessage(err, t('common.error'), t));
     },
   });
 

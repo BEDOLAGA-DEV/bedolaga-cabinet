@@ -21,6 +21,7 @@ export interface PollInfo {
   total_questions: number;
   answered_questions: number;
   is_completed: boolean;
+  /** Rubles, as returned by the poll listing endpoint. */
   reward_amount: number | null;
 }
 
@@ -37,6 +38,7 @@ export interface PollAnswerResponse {
   next_question: PollQuestion | null;
   current_question_index: number | null;
   total_questions: number;
+  /** Kopeks credited after completing the poll. */
   reward_granted: number | null;
   message: string | null;
 }

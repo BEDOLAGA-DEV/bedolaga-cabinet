@@ -4,6 +4,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter, Route, Routes } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { PlatformProvider } from '@/platform/PlatformProvider';
+// Load the page during collection: cold module transformation is not part of a UI assertion.
+import AdminBroadcastCreate from './AdminBroadcastCreate';
 
 /**
  * Email-рассылка по промогруппе и одному человеку (issue бота #3271): раньше были
@@ -25,6 +27,8 @@ vi.mock('react-i18next', () => ({
 
 const api = vi.hoisted(() => ({
   getFilters: vi.fn(),
+  uploadMedia: vi.fn(),
+  getTariffs: vi.fn(),
   getEmailFilters: vi.fn(),
   getButtons: vi.fn(),
   preview: vi.fn(),
@@ -42,6 +46,7 @@ beforeEach(() => {
   for (const fn of Object.values(api)) fn.mockReset();
   api.getFilters.mockResolvedValue({ filters: [], tariff_filters: [], custom_filters: [] });
   api.getButtons.mockResolvedValue({ buttons: [] });
+  api.getTariffs.mockResolvedValue({ tariffs: [] });
   api.getEmailFilters.mockResolvedValue({
     filters: [{ key: 'all_email', label: 'Все с email', count: 10, group: 'basic' }],
     promo_group_filters: [
@@ -63,7 +68,6 @@ beforeEach(() => {
 afterEach(cleanup);
 
 async function renderPage(entry: string | { pathname: string; search: string; state: unknown }) {
-  const AdminBroadcastCreate = (await import('./AdminBroadcastCreate')).default;
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   render(
     <QueryClientProvider client={client}>
@@ -160,4 +164,88 @@ describe('AdminBroadcastCreate — email-адресаты', () => {
     expect(screen.queryByRole('combobox', { name: 'Email' })).toBeNull();
     expect(api.previewEmail).not.toHaveBeenCalled();
   });
+});
+
+it('показывает отказ API, сохраняя текст рассылки', async () => {
+  const { AxiosError } = await import('axios');
+  api.createCombined.mockRejectedValue(
+    new AxiosError('Bad request', '400', undefined, undefined, {
+      data: { detail: 'Текст слишком длинный для сообщения с медиа' },
+      status: 400,
+      statusText: 'Bad Request',
+      headers: {},
+      config: {} as never,
+    }),
+  );
+  await renderPage('/admin/broadcasts/create?email_user=42');
+  fireEvent.change(screen.getByPlaceholderText('admin.broadcasts.emailSubjectPlaceholder'), {
+    target: { value: 'Subject' },
+  });
+  fireEvent.change(screen.getByPlaceholderText('admin.broadcasts.emailContentPlaceholder'), {
+    target: { value: 'Draft content' },
+  });
+  fireEvent.click(screen.getByRole('button', { name: 'admin.broadcasts.send' }));
+  expect((await screen.findByRole('alert')).textContent).toContain('Текст слишком длинный');
+  expect(
+    (screen.getByPlaceholderText('admin.broadcasts.emailContentPlaceholder') as HTMLTextAreaElement)
+      .value,
+  ).toBe('Draft content');
+});
+
+it('проверяет длину подписи, позволяет длинный текст без медиа и не считает HTML-теги', async () => {
+  api.uploadMedia.mockResolvedValue({ file_id: 'A'.repeat(32) });
+  await renderPage('/admin/broadcasts/create');
+  fireEvent.change(screen.getByRole('combobox', { name: 'admin.broadcasts.audience.field' }), {
+    target: { value: 'basic' },
+  });
+  const input = screen.getByPlaceholderText('admin.broadcasts.messageTextPlaceholder');
+  const send = screen.getByRole('button', { name: 'admin.broadcasts.send' }) as HTMLButtonElement;
+  fireEvent.change(input, { target: { value: 'x'.repeat(1100) } });
+  expect(send.disabled).toBe(false);
+  fireEvent.change(document.querySelector('input[type=file]') as HTMLInputElement, {
+    target: { files: [new File(['test'], 'test.pdf', { type: 'application/pdf' })] },
+  });
+  await waitFor(() => expect(api.uploadMedia).toHaveBeenCalled());
+  expect((await screen.findByRole('alert')).textContent).toContain(
+    'admin.broadcasts.captionTooLong',
+  );
+  expect(send.disabled).toBe(true);
+  fireEvent.change(input, { target: { value: `<b>${'x'.repeat(1024)}</b>` } });
+  await waitFor(() => expect(send.disabled).toBe(false));
+  expect(screen.queryByRole('alert')).toBeNull();
+  fireEvent.click(send);
+  await waitFor(() =>
+    expect(api.createCombined).toHaveBeenCalledWith(
+      expect.objectContaining({
+        media: { type: 'document', file_id: 'A'.repeat(32) },
+        message_text: `<b>${'x'.repeat(1024)}</b>`,
+      }),
+      expect.anything(),
+    ),
+  );
+});
+
+it('при частичном успехе двух каналов не отправляет Telegram повторно', async () => {
+  api.createCombined
+    .mockResolvedValueOnce({ id: 900 })
+    .mockRejectedValueOnce(new Error('Email unavailable'));
+  await renderPage('/admin/broadcasts/create');
+  fireEvent.click(screen.getByText('admin.broadcasts.enableEmail'));
+  const fields = screen.getAllByRole('combobox', { name: 'admin.broadcasts.audience.field' });
+  for (const field of fields) fireEvent.change(field, { target: { value: 'basic' } });
+  fireEvent.change(screen.getByPlaceholderText('admin.broadcasts.messageTextPlaceholder'), {
+    target: { value: 'Telegram draft' },
+  });
+  fireEvent.change(screen.getByPlaceholderText('admin.broadcasts.emailSubjectPlaceholder'), {
+    target: { value: 'Subject' },
+  });
+  fireEvent.change(screen.getByPlaceholderText('admin.broadcasts.emailContentPlaceholder'), {
+    target: { value: 'Email draft' },
+  });
+  const send = screen.getByRole('button', { name: 'admin.broadcasts.send' }) as HTMLButtonElement;
+  fireEvent.click(send);
+  expect((await screen.findByRole('alert')).textContent).toContain('admin.broadcasts.partialSend');
+  expect(send.disabled).toBe(true);
+  fireEvent.click(send);
+  expect(api.createCombined).toHaveBeenCalledTimes(2);
 });

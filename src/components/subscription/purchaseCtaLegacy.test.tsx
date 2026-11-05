@@ -66,11 +66,11 @@ afterEach(() => {
   cleanup();
 });
 
-async function renderCta(sub: Subscription, isMultiTariff: boolean) {
+async function renderCta(sub: Subscription, isMultiTariff: boolean, isTariffsMode = true) {
   const Cta = (await import('./PurchaseCTAButton')).default;
   render(
     <MemoryRouter>
-      <Cta subscription={sub} isMultiTariff={isMultiTariff} />
+      <Cta subscription={sub} isMultiTariff={isMultiTariff} isTariffsMode={isTariffsMode} />
     </MemoryRouter>,
   );
 }
@@ -107,10 +107,37 @@ describe('старая подписка (нужен тариф)', () => {
 });
 
 describe('подписка с тарифом', () => {
+  it('в классическом режиме не добавляет смену тарифа', async () => {
+    await renderCta(subscription({ tariff_id: 7 }), false, false);
+    expect(href()).toBe('/subscription/purchase');
+    expect(screen.queryByRole('link', { name: 'subscription.switchTariff.title' })).toBeNull();
+  });
+
   it('в мультитарифе по-прежнему ведёт на продление', async () => {
     await renderCta(subscription({ tariff_id: 7, requires_tariff_selection: false }), true);
 
-    expect(href()).toBe('/subscriptions/42/renew');
+    expect(screen.getByRole('link', { name: 'subscription.extend' }).getAttribute('href')).toBe(
+      '/subscriptions/42/renew',
+    );
+    expect(
+      screen.getByRole('link', { name: 'subscription.switchTariff.title' }).getAttribute('href'),
+    ).toBe('/subscription/purchase?subscriptionId=42');
     expect(screen.getByText('subscription.extend')).toBeTruthy();
+  });
+
+  it('суточный тариф можно сменить без экрана ручного продления', async () => {
+    await renderCta(subscription({ tariff_id: 7, is_daily: true }), true);
+    expect(href()).toBe('/subscription/purchase?subscriptionId=42');
+    expect(screen.getByText('subscription.switchTariff.title')).toBeTruthy();
+    expect(screen.queryByText('subscription.extend')).toBeNull();
+  });
+
+  it.each([
+    { is_trial: true },
+    { is_active: false, is_expired: true },
+    { is_active: false, is_limited: true },
+  ])('не предлагает прямую смену неподдерживаемого состояния %j', async (flags) => {
+    await renderCta(subscription({ tariff_id: 7, ...flags }), true);
+    expect(screen.queryByRole('link', { name: 'subscription.switchTariff.title' })).toBeNull();
   });
 });

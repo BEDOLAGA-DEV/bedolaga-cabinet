@@ -4,8 +4,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import {
   adminPinnedMessagesApi,
-  PinnedMessageCreateRequest,
-  PinnedMessageUpdateRequest,
+  type PinnedMessageCreateRequest,
+  type PinnedMessageUpdateRequest,
 } from '../api/adminPinnedMessages';
 import { AdminBackButton, Toggle } from '../components/admin';
 import { PinIcon, XIcon, RefreshIcon, PhotoIcon, VideoIcon, SaveIcon } from '@/components/icons';
@@ -243,7 +243,7 @@ export default function AdminPinnedMessageCreate() {
               {mediaPreview && (
                 <img
                   src={mediaPreview}
-                  alt="Preview"
+                  alt={t('common.preview')}
                   className="mt-3 max-h-48 rounded-lg object-cover"
                 />
               )}

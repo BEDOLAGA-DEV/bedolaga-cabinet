@@ -11,6 +11,8 @@ export interface TrafficPurchaseInfo {
 
 export interface UserSubscriptionInfo {
   id: number;
+  /** Panel identity of this subscription; older backends may omit it. */
+  remnawave_id?: number | null;
   status: string;
   is_trial: boolean;
   start_date: string | null;

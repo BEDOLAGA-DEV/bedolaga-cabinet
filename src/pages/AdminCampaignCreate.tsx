@@ -128,7 +128,7 @@ function TariffSelector({
         <option value="">{t('admin.campaigns.form.notSelected')}</option>
         {tariffs.map((tariff) => (
           <option key={tariff.id} value={tariff.id}>
-            {tariff.name} ({tariff.traffic_limit_gb} GB, {tariff.device_limit}{' '}
+            {tariff.name} ({tariff.traffic_limit_gb} {t('common.units.gb')}, {tariff.device_limit}{' '}
             {t('admin.campaigns.form.devices')})
           </option>
         ))}

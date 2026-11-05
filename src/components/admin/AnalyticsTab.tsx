@@ -1,8 +1,9 @@
+import { getLocalizedApiErrorMessage } from '../../utils/api-error-display';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { brandingApi } from '../../api/branding';
-import { getApiErrorMessage } from '../../utils/api-error';
+
 import { CheckIcon, CloseIcon, PencilIcon } from './icons';
 import { GlobeIcon, TranslateIcon, TrendUpIcon } from '@/components/icons';
 
@@ -33,7 +34,7 @@ export function AnalyticsTab() {
       setError(null);
     },
     onError: (err: unknown) => {
-      setError(getApiErrorMessage(err, t('common.error')));
+      setError(getLocalizedApiErrorMessage(err, t('common.error'), t));
     },
   });
 

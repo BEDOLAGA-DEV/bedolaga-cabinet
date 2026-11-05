@@ -1,9 +1,10 @@
+import { getReachabilityErrorMessage, localizeReachabilityText } from './reachabilityDisplay';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { type Job, reachabilityApi } from '@/api/reachability';
 import { useNotify } from '@/platform/hooks/useNotify';
-import { getApiErrorMessage } from '@/utils/api-error';
+
 import type { GeoRow } from './geoRowsView';
 import { REACHABILITY_JOBS_KEY } from './jobsRefetch';
 import { recheckEntries, recheckKey, runningRechecks } from './geoRecheck';
@@ -75,7 +76,9 @@ export function useGeoRecheck(job: Pick<Job, 'id' | 'result'>): GeoRecheck {
         })
         .then(() => setWatching((current) => union(current, [key])))
         .catch((error: unknown) =>
-          notify.error(getApiErrorMessage(error, t('admin.reachability.geo.recheck.failed'))),
+          notify.error(
+            getReachabilityErrorMessage(error, t('admin.reachability.geo.recheck.failed'), t),
+          ),
         )
         .finally(() => starting.current.delete(key));
     },
@@ -96,7 +99,11 @@ export function useGeoRecheck(job: Pick<Job, 'id' | 'result'>): GeoRecheck {
           settled.current.add(key);
           const entry = entries.get(key);
           if (entry?.status === 'failed') {
-            notify.error(entry.error || t('admin.reachability.geo.recheck.failed'));
+            notify.error(
+              entry.error
+                ? localizeReachabilityText(entry.error, t)
+                : t('admin.reachability.geo.recheck.failed'),
+            );
           }
         }
         setWatching((current) => without(current, finished));

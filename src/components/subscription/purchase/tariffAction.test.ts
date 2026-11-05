@@ -100,8 +100,13 @@ describe('tariffAction', () => {
     ).toBe('purchase');
   });
 
-  it('в мультитарифе меняют не тариф, а покупают ещё один', () => {
+  it('в мультитарифе без выбранной подписки покупают ещё одну', () => {
     expect(ask({ isMultiTariff: true })).toBe('purchase');
+  });
+
+  it('в мультитарифе меняют тариф явно выбранной подписки', () => {
+    expect(ask({ isMultiTariff: true, subscriptionId: 1 })).toBe('switch');
+    expect(ask({ isMultiTariff: true, subscriptionId: 2 })).toBe('purchase');
   });
 
   it('вне режима тарифов флаги истечения не учитываются', () => {

@@ -589,7 +589,7 @@ export default function AdminTickets() {
                           {att.mediaType === 'photo' && att.preview ? (
                             <img
                               src={att.preview}
-                              alt="Preview"
+                              alt={t('common.preview')}
                               loading="lazy"
                               className="h-16 w-16 rounded-lg object-cover"
                             />

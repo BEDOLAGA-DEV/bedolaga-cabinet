@@ -1,3 +1,6 @@
+import { getLocalizedApiErrorMessage } from '@/utils/api-error-display';
+import { hasUnknownManagedTraffic } from '@/utils/trafficAccounting';
+import ManagedTrafficSummary from '@/components/subscription/ManagedTrafficSummary';
 import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -12,7 +15,7 @@ import { LiteRow, LiteRowGroup } from '@/components/lite/LiteRow';
 import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 import { API } from '@/config/constants';
 import { useCurrency } from '@/hooks/useCurrency';
-import { getApiErrorMessage } from '@/utils/api-error';
+
 import { formatLiteDate } from '@/utils/liteDate';
 import { liteStatus, type LiteAction } from '@/utils/liteStatus';
 
@@ -106,7 +109,7 @@ export default function DashboardLite() {
       }
     },
     onError: (error: unknown) => {
-      setTrialError(getApiErrorMessage(error, t('common.error')));
+      setTrialError(getLocalizedApiErrorMessage(error, t('common.error'), t));
     },
   });
 
@@ -193,11 +196,16 @@ export default function DashboardLite() {
           </h1>
           {subscription && (
             <div className="mt-7">
-              <LiteMeter
-                usedGb={subscription.traffic_used_gb}
-                limitGb={subscription.traffic_limit_gb}
-                usedPercent={subscription.traffic_used_percent}
-              />
+              {hasUnknownManagedTraffic(subscription) ? (
+                <div className="h-9" aria-hidden="true" />
+              ) : (
+                <LiteMeter
+                  usedGb={subscription.traffic_used_gb}
+                  limitGb={subscription.traffic_limit_gb}
+                  usedPercent={subscription.traffic_used_percent}
+                />
+              )}
+              <ManagedTrafficSummary subscription={subscription} />
               {/* Серверы с отдельным лимитом — сразу под общей шкалой: свой
                   расход читается одним движением сверху вниз. Со списком
                   подписок этой секции на экране нет вовсе, и премиум молчит

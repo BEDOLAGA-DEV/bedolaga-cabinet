@@ -1,3 +1,5 @@
+import { hasUnknownManagedTraffic } from '@/utils/trafficAccounting';
+import ManagedTrafficSummary from '@/components/subscription/ManagedTrafficSummary';
 import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -26,7 +28,11 @@ import { useTheme } from '@/hooks/useTheme';
 import { copyToClipboard } from '@/utils/clipboard';
 import { resolveConnectionUrlForUi } from '@/utils/connectionLink';
 import { getGlassColors } from '@/utils/glassTheme';
-import { showsAddonOptions } from '@/utils/legacySubscription';
+import {
+  canOpenTariffSwitch,
+  showsAddonOptions,
+  tariffSelectionPath,
+} from '@/utils/legacySubscription';
 import { formatLiteDate } from '@/utils/liteDate';
 
 type OpenPanel =
@@ -189,11 +195,16 @@ export default function SubscriptionLite() {
             : t('lite.status.active', { date: formatLiteDate(subscription.end_date) })}
         </p>
         <div className="mt-7">
-          <LiteMeter
-            usedGb={subscription.traffic_used_gb}
-            limitGb={subscription.traffic_limit_gb}
-            usedPercent={subscription.traffic_used_percent}
-          />
+          {hasUnknownManagedTraffic(subscription) ? (
+            <div className="h-9" aria-hidden="true" />
+          ) : (
+            <LiteMeter
+              usedGb={subscription.traffic_used_gb}
+              limitGb={subscription.traffic_limit_gb}
+              usedPercent={subscription.traffic_used_percent}
+            />
+          )}
+          <ManagedTrafficSummary subscription={subscription} />
         </div>
         <LitePremiumMeters items={subscription.premium_traffic ?? []} />
       </section>
@@ -211,13 +222,20 @@ export default function SubscriptionLite() {
             // Пробный период не продлевается: «Продлить» вела на экран «Нет
             // вариантов продления». После триала покупают тариф.
             <LiteRow
-              to="/subscription/purchase"
+              to={tariffSelectionPath(subscription.id)}
               label={t('lite.rows.plans', 'Посмотреть тарифы')}
             />
-          ) : (
+          ) : !subscription.is_daily || !subscription.is_active ? (
             <LiteRow
               to={`/subscriptions/${subscription.id}/renew`}
               label={t('lite.action.renew')}
+            />
+          ) : null}
+
+          {purchaseOptions?.sales_mode === 'tariffs' && canOpenTariffSwitch(subscription) && (
+            <LiteRow
+              to={tariffSelectionPath(subscription.id)}
+              label={t('subscription.switchTariff.title')}
             />
           )}
 

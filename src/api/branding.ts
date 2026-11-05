@@ -157,7 +157,7 @@ export const preloadLogo = async (branding: BrandingInfo): Promise<void> => {
 
 async function loadLogoBlob(logoPath: string): Promise<void> {
   try {
-    const logoUrl = `${import.meta.env.VITE_API_URL || ''}${logoPath}`;
+    const logoUrl = apiClient.getUri({ url: logoPath });
     const response = await fetchLogo(logoUrl);
     if (!response.ok) return;
 

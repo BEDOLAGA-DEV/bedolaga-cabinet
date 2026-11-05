@@ -1,9 +1,11 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
 import { QRCodeSVG } from 'qrcode.react';
 import { useBranding } from '../hooks/useBranding';
 import { AdminBackButton } from '@/components/admin';
+import { CopyIcon, CheckIcon } from '@/components/icons';
+import { copyToClipboard } from '@/utils/clipboard';
 
 interface ConnectionQRState {
   url: string;
@@ -22,9 +24,25 @@ export default function ConnectionQR() {
   const navigate = useNavigate();
   const location = useLocation();
   const { appName } = useBranding();
+  const [copyResult, setCopyResult] = useState<{
+    url: string;
+    status: 'copying' | 'copied' | 'error';
+  } | null>(null);
 
   const state = location.state as unknown;
   const validState = isValidState(state) ? state : null;
+  const copyStatus = copyResult?.url === validState?.url ? copyResult?.status : undefined;
+  const handleCopy = async () => {
+    if (!validState || validState.hideLink) return;
+    const url = validState.url;
+    setCopyResult({ url, status: 'copying' });
+    try {
+      await copyToClipboard(url);
+      setCopyResult({ url, status: 'copied' });
+    } catch {
+      setCopyResult({ url, status: 'error' });
+    }
+  };
   const subId = validState?.subscriptionId;
   const connectionPath = subId ? `/connection?sub=${subId}` : '/connection';
 
@@ -68,9 +86,36 @@ export default function ConnectionQR() {
           </div>
 
           {!validState.hideLink && (
-            <p className="mt-6 max-w-full truncate text-center font-mono text-xs text-dark-500">
-              {validState.url}
-            </p>
+            <div className="mt-6 w-full min-w-0 space-y-3">
+              <p
+                dir="ltr"
+                className="select-text break-all whitespace-normal text-left font-mono text-xs text-dark-400"
+              >
+                {validState.url}
+              </p>
+              <button
+                type="button"
+                className="btn-secondary inline-flex w-full items-center justify-center gap-2"
+                disabled={copyStatus === 'copying'}
+                onClick={handleCopy}
+              >
+                {copyStatus === 'copied' ? (
+                  <CheckIcon className="h-4 w-4" />
+                ) : (
+                  <CopyIcon className="h-4 w-4" />
+                )}
+                <span aria-live="polite">
+                  {copyStatus === 'copied'
+                    ? t('common.copied')
+                    : t('subscription.connection.copyLink')}
+                </span>
+              </button>
+              {copyStatus === 'error' && (
+                <p role="alert" className="text-sm text-error-400">
+                  {t('subscription.connection.copyFailed')}
+                </p>
+              )}
+            </div>
           )}
         </div>
       </div>

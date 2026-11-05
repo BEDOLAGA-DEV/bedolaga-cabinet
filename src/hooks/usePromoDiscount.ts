@@ -44,7 +44,10 @@ export function combinePromoDiscount(
     return { price: priceKopeks, original: null, percent: null, isPromoGroup: false };
   }
 
-  const finalPrice = hasPromo ? Math.round(priceKopeks * (1 - activePercent / 100)) : priceKopeks;
+  const percent = Math.max(0, Math.min(100, activePercent));
+  const finalPrice = hasPromo
+    ? priceKopeks - Math.floor((priceKopeks * percent) / 100)
+    : priceKopeks;
 
   if (hasExisting) {
     const original = existingOriginalPrice as number;

@@ -1,3 +1,4 @@
+import { getLocalizedApiErrorMessage } from '../utils/api-error-display';
 import { useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
@@ -74,7 +75,11 @@ export default function LinkTelegramCallback() {
       } catch (err: unknown) {
         showToast({
           type: 'error',
-          message: getErrorDetail(err) || t('profile.accounts.linkError'),
+          message: getLocalizedApiErrorMessage(
+            err,
+            getErrorDetail(err) || t('profile.accounts.linkError'),
+            t,
+          ),
         });
         navigate('/profile/accounts', { replace: true });
       }

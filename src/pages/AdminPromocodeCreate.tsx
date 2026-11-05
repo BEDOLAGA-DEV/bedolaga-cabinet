@@ -442,7 +442,11 @@ export default function AdminPromocodeCreate() {
               </option>
               {tariffsData?.tariffs?.map((tariff) => (
                 <option key={tariff.id} value={tariff.id}>
-                  {tariff.name} ({tariff.traffic_limit_gb} GB, {tariff.device_limit} устр.)
+                  {t('admin.tariffSummary', {
+                    name: tariff.name,
+                    traffic: tariff.traffic_limit_gb,
+                    devices: tariff.device_limit,
+                  })}
                 </option>
               ))}
             </select>

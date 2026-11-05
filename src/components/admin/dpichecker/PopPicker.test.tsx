@@ -6,7 +6,7 @@ import type { Location, Pop } from '@/api/dpichecker';
 import { PopPicker } from './PopPicker';
 import { renderWithProviders } from './testUtils';
 
-vi.mock('react-i18next', async () => (await import('./testUtils')).i18nMock());
+vi.mock('react-i18next', async () => (await import('./testI18n')).i18nMock());
 
 const RU: Pop[] = [
   { id: 1, location: 'russia', region: 'Москва', operator: null, is_healthy: true },

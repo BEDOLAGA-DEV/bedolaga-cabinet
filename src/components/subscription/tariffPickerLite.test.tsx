@@ -45,7 +45,14 @@ afterEach(() => {
 
 describe('TariffPickerLite', () => {
   it('показывает название, характеристики и цену', () => {
-    render([{ ...withPrice(1, 'Базовый', 14900), traffic_limit_label: '200 ГБ', device_limit: 5 }]);
+    render([
+      {
+        ...withPrice(1, 'Базовый', 14900),
+        traffic_limit_gb: 200,
+        traffic_limit_label: '200 ГБ',
+        device_limit: 5,
+      },
+    ]);
 
     expect(screen.getByText('Базовый')).toBeTruthy();
     expect(screen.getByText(/200 ГБ/)).toBeTruthy();

@@ -86,3 +86,21 @@ describe('старая подписка в списке', () => {
     expect(screen.queryByText('subscription.cta.moveToTariff')).toBeNull();
   });
 });
+
+it.each([0, 120])(
+  'does not present neutral counters as known usage for managed limit %s',
+  async (limit) => {
+    await renderCard(
+      item({
+        tariff_id: 7,
+        traffic_limit_gb: limit,
+        traffic_used_gb: 0,
+        traffic_accounting_mode: 'managed',
+        traffic_remaining_gb: null,
+      }),
+    );
+    expect(screen.getByText('—')).toBeTruthy();
+    expect(screen.queryByText('∞')).toBeNull();
+    expect(screen.queryByText(/^0\.0 \/ /)).toBeNull();
+  },
+);

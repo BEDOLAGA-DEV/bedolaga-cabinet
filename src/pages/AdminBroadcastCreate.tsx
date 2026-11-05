@@ -7,6 +7,8 @@ import {
   type CombinedBroadcastCreateRequest,
   type CustomBroadcastButton,
 } from '../api/adminBroadcasts';
+import { getErrorMessage } from '../utils/subscriptionHelpers';
+import { telegramCaptionLength } from '../utils/telegramCaptionLength';
 import { AdminBackButton } from '../components/admin';
 import {
   BroadcastAudienceEditor,
@@ -71,6 +73,9 @@ export default function AdminBroadcastCreate() {
 
   // Telegram-specific state
   const [messageText, setMessageText] = useState('');
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [telegramSentId, setTelegramSentId] = useState<number | null>(null);
+  const captionLength = useMemo(() => telegramCaptionLength(messageText), [messageText]);
   const [selectedButtons, setSelectedButtons] = useState<string[]>(['home']);
   const [customButtons, setCustomButtons] = useState<CustomBroadcastButton[]>([]);
   const [isAddingCustomButton, setIsAddingCustomButton] = useState(false);
@@ -167,6 +172,8 @@ export default function AdminBroadcastCreate() {
   // Create mutation (used for single-channel sends)
   const createMutation = useMutation({
     mutationFn: adminBroadcastsApi.createCombined,
+    onMutate: () => setSubmitError(null),
+    onError: (error) => setSubmitError(getErrorMessage(error)),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'broadcasts'] });
       navigate(`/admin/broadcasts/${data.id}`);
@@ -199,6 +206,8 @@ export default function AdminBroadcastCreate() {
       detectedType = 'document';
     }
 
+    setSubmitError(null);
+    setUploadedFileId(null);
     setMediaFile(file);
     setMediaType(detectedType);
 
@@ -215,7 +224,8 @@ export default function AdminBroadcastCreate() {
     try {
       const result = await adminBroadcastsApi.uploadMedia(file, detectedType);
       setUploadedFileId(result.file_id);
-    } catch {
+    } catch (error) {
+      setSubmitError(getErrorMessage(error));
       setMediaFile(null);
       setMediaPreview(null);
     } finally {
@@ -282,9 +292,14 @@ export default function AdminBroadcastCreate() {
     setCustomButtons((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const captionTooLong = !!mediaFile && captionLength > 1024;
+
   // Validate form
   const isTelegramValid =
-    telegramEnabled && isAudienceComplete(telegramAudience) && messageText.trim().length > 0;
+    telegramEnabled &&
+    isAudienceComplete(telegramAudience) &&
+    messageText.trim().length > 0 &&
+    !captionTooLong;
   const isEmailValid =
     emailEnabled &&
     isAudienceComplete(emailAudience) &&
@@ -302,7 +317,8 @@ export default function AdminBroadcastCreate() {
 
   // Submit
   const handleSubmit = async () => {
-    if (!isValid) return;
+    if (!isValid || telegramSentId !== null) return;
+    setSubmitError(null);
 
     // Single channel — use existing createMutation with navigation to detail
     if (telegramEnabled && !emailEnabled) {
@@ -335,6 +351,7 @@ export default function AdminBroadcastCreate() {
 
     // Both channels — two sequential requests, navigate to list
     setIsSubmitting(true);
+    let sentTelegramId: number | null = null;
     try {
       const telegramData: CombinedBroadcastCreateRequest = {
         channel: 'telegram',
@@ -356,11 +373,22 @@ export default function AdminBroadcastCreate() {
         category,
       };
 
-      await adminBroadcastsApi.createCombined(telegramData);
+      const telegramResult = await adminBroadcastsApi.createCombined(telegramData);
+      sentTelegramId = telegramResult.id;
+      setTelegramSentId(sentTelegramId);
       await adminBroadcastsApi.createCombined(emailData);
 
       queryClient.invalidateQueries({ queryKey: ['admin', 'broadcasts'] });
       navigate('/admin/broadcasts');
+    } catch (error) {
+      setSubmitError(
+        sentTelegramId === null
+          ? getErrorMessage(error)
+          : t('admin.broadcasts.partialSend', {
+              id: sentTelegramId,
+              error: getErrorMessage(error),
+            }),
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -495,11 +523,28 @@ export default function AdminBroadcastCreate() {
               value={messageText}
               onChange={(e) => setMessageText(e.target.value)}
               placeholder={t('admin.broadcasts.messageTextPlaceholder')}
+              aria-invalid={captionTooLong}
+              aria-describedby={mediaFile ? 'broadcast-caption-help' : undefined}
               rows={6}
               maxLength={4000}
               className="input min-h-[150px] resize-y"
             />
-            <div className="mt-1 text-right text-xs text-dark-400">{messageText.length}/4000</div>
+            <div className="mt-1 text-right text-xs text-dark-400">
+              {mediaFile ? `${captionLength}/1024` : `${messageText.length}/4000`}
+            </div>
+            {mediaFile && (
+              <p
+                id="broadcast-caption-help"
+                role={captionTooLong ? 'alert' : undefined}
+                className={`mt-2 break-words text-sm ${captionTooLong ? 'text-error-400' : 'text-dark-400'}`}
+              >
+                {t(
+                  captionTooLong
+                    ? 'admin.broadcasts.captionTooLong'
+                    : 'admin.broadcasts.captionLimit',
+                )}
+              </p>
+            )}
           </div>
 
           {/* Media upload */}
@@ -532,7 +577,7 @@ export default function AdminBroadcastCreate() {
                 {mediaPreview && (
                   <img
                     src={mediaPreview}
-                    alt="Preview"
+                    alt={t('common.preview')}
                     className="mt-3 max-h-48 rounded-lg object-cover"
                   />
                 )}
@@ -799,6 +844,12 @@ export default function AdminBroadcastCreate() {
         </div>
       )}
 
+      {submitError && (
+        <p role="alert" className="break-words text-sm text-error-400">
+          {submitError}
+        </p>
+      )}
+
       {/* Footer */}
       <div className="card flex items-center justify-end">
         <div className="flex gap-3">
@@ -807,7 +858,7 @@ export default function AdminBroadcastCreate() {
           </button>
           <button
             onClick={handleSubmit}
-            disabled={!isValid || isPending || isUploading}
+            disabled={!isValid || isPending || isUploading || telegramSentId !== null}
             className="btn-primary flex items-center gap-2"
           >
             {isPending ? <RefreshIcon /> : <BroadcastIcon className="h-6 w-6" />}

@@ -37,6 +37,15 @@ export const HEALTH_URL = resolveHealthUrl();
 // the app straight back into a still-broken backend.
 const GATEWAY_DOWN_STATUSES = new Set([502, 503, 504]);
 
+/** A proxy response is an outage too, not a rejection of the user's credentials. */
+export function isBackendUnavailableError(error: unknown): boolean {
+  return (
+    axios.isAxiosError(error) &&
+    error.code !== 'ERR_CANCELED' &&
+    (!error.response || GATEWAY_DOWN_STATUSES.has(error.response.status))
+  );
+}
+
 /**
  * Resolves true when the backend is actually serving — i.e. it returns an HTTP
  * response that is NOT a gateway-down status. A 404 still counts as up (a

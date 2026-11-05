@@ -1,3 +1,4 @@
+import { getLocalizedApiErrorMessage } from '../../utils/api-error-display';
 import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -39,7 +40,7 @@ import {
 import { Toggle } from './Toggle';
 import { useNotify } from '../../platform/hooks/useNotify';
 import { useNativeDialog } from '../../platform/hooks/useNativeDialog';
-import { getApiErrorMessage } from '../../utils/api-error';
+
 import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 
 const ChevronIcon = ({ expanded }: { expanded: boolean }) => (
@@ -513,7 +514,7 @@ export function MenuEditorTab() {
       queryClient.setQueryData(['menu-layout'], data);
     },
     onError: (err: unknown) => {
-      notify.error(getApiErrorMessage(err, t('common.error')));
+      notify.error(getLocalizedApiErrorMessage(err, t('common.error'), t));
     },
   });
 

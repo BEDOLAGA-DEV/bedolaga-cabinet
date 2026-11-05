@@ -1,3 +1,4 @@
+import { getLocalizedApiErrorMessage } from '../utils/api-error-display';
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -5,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { adminLandingsApi, type LandingListItem, resolveLocaleDisplay } from '../api/landings';
 import { useNotify } from '@/platform';
 import { copyToClipboard } from '../utils/clipboard';
-import { getApiErrorMessage } from '../utils/api-error';
+
 import { usePlatform } from '../platform/hooks/usePlatform';
 import { cn } from '../lib/utils';
 import { BackIcon, PlusIcon, TrashIcon, GripIcon } from '../components/icons/LandingIcons';
@@ -314,7 +315,7 @@ export default function AdminLandings() {
       notify.success(t('admin.landings.orderSaved'));
     },
     onError: (err: unknown) => {
-      notify.error(getApiErrorMessage(err, t('common.error')));
+      notify.error(getLocalizedApiErrorMessage(err, t('common.error'), t));
     },
   });
 
@@ -326,7 +327,7 @@ export default function AdminLandings() {
       notify.success(t('admin.landings.deleted'));
     },
     onError: (err: unknown) => {
-      notify.error(getApiErrorMessage(err, t('common.error')));
+      notify.error(getLocalizedApiErrorMessage(err, t('common.error'), t));
     },
   });
 
@@ -350,7 +351,7 @@ export default function AdminLandings() {
       queryClient.invalidateQueries({ queryKey: ['admin-landings'] });
     },
     onError: (err: unknown) => {
-      notify.error(getApiErrorMessage(err, t('common.error')));
+      notify.error(getLocalizedApiErrorMessage(err, t('common.error'), t));
     },
   });
 

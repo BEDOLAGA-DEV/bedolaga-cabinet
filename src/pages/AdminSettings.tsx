@@ -29,7 +29,7 @@ import { BackIcon, ChevronRightIcon } from '@/components/icons';
 const TARIFF_MODE_SETTINGS = ['MULTI_TARIFF_ENABLED', 'MAX_ACTIVE_SUBSCRIPTIONS'];
 
 export default function AdminSettings() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { capabilities } = usePlatform();
@@ -55,7 +55,7 @@ export default function AdminSettings() {
   });
 
   const { data: allSettings } = useQuery({
-    queryKey: ['admin-settings'],
+    queryKey: ['admin-settings', i18n.language],
     queryFn: () => adminSettingsApi.getSettings(),
   });
 

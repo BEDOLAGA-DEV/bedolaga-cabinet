@@ -3,17 +3,25 @@ import { useTranslation } from 'react-i18next';
 import { HoverBorderGradient } from '../ui/hover-border-gradient';
 import { ChevronRightIcon, SubscriptionIcon } from '@/components/icons';
 import type { Subscription } from '../../types';
-import { needsTariff, tariffSelectionPath } from '../../utils/legacySubscription';
+import {
+  canOpenTariffSwitch,
+  needsTariff,
+  tariffSelectionPath,
+} from '../../utils/legacySubscription';
+import { buttonVariants } from '@/components/primitives/Button/Button.variants';
+import { cn } from '@/lib/utils';
 
 interface PurchaseCTAButtonProps {
   subscription: Subscription | null;
   /** In multi-tariff mode, link to /subscriptions/:id/renew instead of /subscription/purchase */
   isMultiTariff?: boolean;
+  isTariffsMode?: boolean;
 }
 
 export default function PurchaseCTAButton({
   subscription,
   isMultiTariff = false,
+  isTariffsMode = false,
 }: PurchaseCTAButtonProps) {
   const { t } = useTranslation();
 
@@ -24,6 +32,33 @@ export default function PurchaseCTAButton({
   const isDaily = subscription?.is_daily;
   // Старая подписка (куплена в классике, тарифа нет): продлить нельзя — ведём на витрину тарифов.
   const requiresTariff = needsTariff(subscription);
+
+  if (isTariffsMode && subscription && canOpenTariffSwitch(subscription)) {
+    return (
+      <div className="flex flex-col gap-3 sm:flex-row">
+        {!isDaily && (
+          <Link
+            to={`/subscriptions/${subscription.id}/renew`}
+            className={cn(
+              buttonVariants({ variant: 'primary', size: 'lg' }),
+              'flex-none shadow-none hover:-translate-y-px hover:bg-accent-500 hover:shadow-none active:translate-y-0 active:bg-accent-500 focus-visible:ring-dark-100 sm:flex-1',
+            )}
+          >
+            {t('subscription.extend')}
+          </Link>
+        )}
+        <Link
+          to={tariffSelectionPath(subscription.id)}
+          className={cn(
+            buttonVariants({ variant: 'secondary', size: 'lg' }),
+            'flex-none focus-visible:ring-dark-100 sm:flex-1',
+          )}
+        >
+          {t('subscription.switchTariff.title')}
+        </Link>
+      </div>
+    );
+  }
 
   // Daily tariffs renew automatically — no manual renewal button needed in multi-tariff
   if (isMultiTariff && isDaily && !isExpired) return null;

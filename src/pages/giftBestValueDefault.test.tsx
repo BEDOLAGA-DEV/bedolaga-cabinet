@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, screen } from '@testing-library/react';
+import { cleanup, fireEvent, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router';
 import { render } from '@testing-library/react';
@@ -152,7 +152,7 @@ describe('подарок: выбранные по умолчанию тариф 
     await renderGift();
     await screen.findByText('Годовой');
 
-    expect(tariffCard('Годовой').getAttribute('aria-checked')).toBe('true');
+    await waitFor(() => expect(tariffCard('Годовой').getAttribute('aria-checked')).toBe('true'));
     expect(tariffCard('Базовый').getAttribute('aria-checked')).toBe('false');
   });
 
@@ -163,7 +163,7 @@ describe('подарок: выбранные по умолчанию тариф 
     await renderGift();
     await screen.findByText('1 месяц');
 
-    expect(periodCard('6 месяцев').getAttribute('aria-pressed')).toBe('true');
+    await waitFor(() => expect(periodCard('6 месяцев').getAttribute('aria-pressed')).toBe('true'));
     expect(periodCard('1 месяц').getAttribute('aria-pressed')).toBe('false');
   });
 

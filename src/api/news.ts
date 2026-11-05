@@ -1,4 +1,5 @@
 import apiClient from './client';
+import { resolveNewsMediaUrl, resolveNewsMediaContent } from './newsMedia';
 import type {
   NewsArticle,
   NewsCategory,
@@ -9,6 +10,18 @@ import type {
   NewsMediaUploadResponse,
 } from '../types/news';
 
+function resolveArticle<T extends { featured_image_url: string | null; content?: string }>(
+  article: T,
+): T {
+  return {
+    ...article,
+    featured_image_url: article.featured_image_url
+      ? resolveNewsMediaUrl(article.featured_image_url)
+      : null,
+    ...(article.content !== undefined ? { content: resolveNewsMediaContent(article.content) } : {}),
+  };
+}
+
 export const newsApi = {
   // User endpoints
   getNews: async (params?: {
@@ -17,33 +30,33 @@ export const newsApi = {
     offset?: number;
   }): Promise<NewsListResponse> => {
     const response = await apiClient.get<NewsListResponse>('/cabinet/news', { params });
-    return response.data;
+    return { ...response.data, items: response.data.items.map(resolveArticle) };
   },
 
   getArticle: async (slug: string): Promise<NewsArticle> => {
     const response = await apiClient.get<NewsArticle>(`/cabinet/news/${encodeURIComponent(slug)}`);
-    return response.data;
+    return resolveArticle(response.data);
   },
 
   // Admin endpoints
   getAdminNews: async (params?: { limit?: number; offset?: number }): Promise<NewsListResponse> => {
     const response = await apiClient.get<NewsListResponse>('/cabinet/admin/news', { params });
-    return response.data;
+    return { ...response.data, items: response.data.items.map(resolveArticle) };
   },
 
   getAdminArticle: async (id: number): Promise<NewsArticle> => {
     const response = await apiClient.get<NewsArticle>(`/cabinet/admin/news/${id}`);
-    return response.data;
+    return resolveArticle(response.data);
   },
 
   createArticle: async (data: NewsCreateRequest): Promise<NewsArticle> => {
     const response = await apiClient.post<NewsArticle>('/cabinet/admin/news', data);
-    return response.data;
+    return resolveArticle(response.data);
   },
 
   updateArticle: async (id: number, data: NewsUpdateRequest): Promise<NewsArticle> => {
     const response = await apiClient.put<NewsArticle>(`/cabinet/admin/news/${id}`, data);
-    return response.data;
+    return resolveArticle(response.data);
   },
 
   deleteArticle: async (id: number): Promise<void> => {
@@ -68,7 +81,13 @@ export const newsApi = {
       formData,
       { signal },
     );
-    return response.data;
+    return {
+      ...response.data,
+      url: resolveNewsMediaUrl(response.data.url, true),
+      thumbnail_url: response.data.thumbnail_url
+        ? resolveNewsMediaUrl(response.data.thumbnail_url, true)
+        : null,
+    };
   },
 
   deleteMedia: async (filename: string): Promise<void> => {

@@ -1,3 +1,4 @@
+import { CisPayRecurringPanel } from '@/components/subscription/manage/CisPayRecurringPanel';
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router';
 import { useTranslation } from 'react-i18next';
@@ -146,6 +147,11 @@ export function SubscriptionTab(props: SubscriptionTabProps) {
             </button>
           )}
 
+          <CisPayRecurringPanel
+            subscriptionId={selectedSub.id}
+            adminUserId={props.userId}
+            canManage={can.manage}
+          />
           <SubscriptionCard
             sub={selectedSub}
             tariffs={props.tariffs}
@@ -191,7 +197,7 @@ export function SubscriptionTab(props: SubscriptionTabProps) {
             userId={props.userId}
             subscriptionId={selectedSub.id}
             panelInfo={props.panelInfo}
-            remnawaveId={user.remnawave_id}
+            remnawaveId={selectedSub.remnawave_id ?? (mode === 'multi' ? null : user.remnawave_id)}
             reachabilityLink={props.reachabilityLink}
             dpicheckerLink={props.dpicheckerLink ?? null}
           />

@@ -50,13 +50,13 @@ const SETTING_I18N_MAP: Record<ChannelSettingKey, { label: string; desc: string 
 };
 
 function GlobalSettingsSection() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
   const haptic = useHaptic();
   const notify = useNotify();
 
   const { data: settings, isLoading } = useQuery({
-    queryKey: ['admin-settings', 'CHANNEL'],
+    queryKey: ['admin-settings', 'CHANNEL', i18n.language],
     queryFn: () => adminSettingsApi.getSettings('CHANNEL'),
   });
 

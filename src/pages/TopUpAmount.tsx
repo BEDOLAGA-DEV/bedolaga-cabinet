@@ -1,3 +1,4 @@
+import { getLocalizedApiErrorMessage } from '../utils/api-error-display';
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams, useSearchParams } from 'react-router';
@@ -5,6 +6,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { QRCodeSVG } from 'qrcode.react';
 
+import { useAuthStore } from '../store/auth';
 import { balanceApi } from '../api/balance';
 import { useCurrency } from '../hooks/useCurrency';
 import { checkRateLimit, getRateLimitResetTime, RATE_LIMIT_KEYS } from '../utils/rateLimit';
@@ -138,6 +140,10 @@ export default function TopUpAmount() {
   };
 
   const initialDisplayAmount = getInitialAmount();
+  const userEmail = useAuthStore((state) => state.user?.email);
+  const [paymentEmail, setPaymentEmail] = useState<string | null>(null);
+  const emailRef = useRef<HTMLInputElement>(null);
+  const customerEmail = paymentEmail ?? userEmail ?? '';
   const [amount, setAmount] = useState(initialDisplayAmount);
   const [error, setError] = useState<string | null>(null);
   const [selectedOption, setSelectedOption] = useState<string | null>(
@@ -203,7 +209,7 @@ export default function TopUpAmount() {
     },
     onError: (err: unknown) => {
       haptic.notification('error');
-      setError(getApiErrorMessage(err, t('balance.errors.invoiceFailed')));
+      setError(getLocalizedApiErrorMessage(err, t('balance.errors.invoiceFailed'), t));
     },
   });
 
@@ -223,6 +229,14 @@ export default function TopUpAmount() {
   >({
     mutationFn: (amountKopeks: number) => {
       if (!method) throw new Error('Method not loaded');
+      if (method.id === 'antilopay') {
+        return balanceApi.createTopUp(
+          amountKopeks,
+          method.id,
+          selectedOption || undefined,
+          customerEmail.trim(),
+        );
+      }
       return balanceApi.createTopUp(amountKopeks, method.id, selectedOption || undefined);
     },
     onSuccess: (data) => {
@@ -233,7 +247,7 @@ export default function TopUpAmount() {
         if (method && data.payment_id) {
           const methodKey = method.id.toLowerCase().replace(/-/g, '_');
           const displayName =
-            t(`balance.paymentMethods.${methodKey}.name`, { defaultValue: '' }) || method.name;
+            method.name || t(`balance.paymentMethods.${methodKey}.name`, { defaultValue: '' });
           saveTopUpPendingInfo({
             amount_kopeks: data.amount_kopeks,
             method_id: method.id,
@@ -281,7 +295,9 @@ export default function TopUpAmount() {
     onError: (err: unknown) => {
       const detail = getApiErrorMessage(err, '');
       setError(
-        detail.includes('not yet implemented') ? t('balance.useBot') : detail || t('common.error'),
+        detail.includes('not yet implemented')
+          ? t('balance.useBot')
+          : getLocalizedApiErrorMessage(err, t('common.error'), t),
       );
     },
   });
@@ -313,18 +329,28 @@ export default function TopUpAmount() {
 
   const hasOptions = method.options && method.options.length > 0;
   const orderedOptions = sortOptionsWithSbpFirst(method.options);
-  const minRubles = method.min_amount_kopeks / 100;
+  const selectedOptionMinimum =
+    method.options?.find((option) => option.id === selectedOption)?.min_amount_kopeks ?? 0;
+  const minRubles = Math.max(method.min_amount_kopeks, selectedOptionMinimum) / 100;
   const maxRubles = method.max_amount_kopeks / 100;
   const methodKey = method.id.toLowerCase().replace(/-/g, '_');
   const isStarsMethod = methodKey.includes('stars');
   const methodName =
-    t(`balance.paymentMethods.${methodKey}.name`, { defaultValue: '' }) || method.name;
+    method.name || t(`balance.paymentMethods.${methodKey}.name`, { defaultValue: '' });
 
   const handleSubmit = () => {
     setError(null);
     setPaymentUrl(null);
     setQrPayload(null);
     inputRef.current?.blur();
+    if (
+      method.id === 'antilopay' &&
+      (!customerEmail.trim() || !emailRef.current?.checkValidity())
+    ) {
+      setError(t('balance.paymentEmailInvalid'));
+      emailRef.current?.focus();
+      return;
+    }
 
     if (!checkRateLimit(RATE_LIMIT_KEYS.PAYMENT, 3, 30000)) {
       setError(
@@ -373,12 +399,13 @@ export default function TopUpAmount() {
       return;
     }
 
-    // Round for exact sources; ceil a hand-typed amount so float noise never lands sub-kopeck
-    // under the chosen value.
+    // Round exact sources; ceil genuine fractional kopeks for hand-typed FX amounts.
+    // Remove only floating-point noise at this magnitude (e.g. 6407.000000000001).
+    const kopeks = canonicalRubles * 100;
     const amountKopeks =
       targetCurrency === 'RUB' || usingPrefill || usingQuick
-        ? Math.round(canonicalRubles * 100)
-        : Math.ceil(canonicalRubles * 100);
+        ? Math.round(kopeks)
+        : Math.ceil(kopeks - Number.EPSILON * Math.abs(kopeks));
     if (isStarsMethod) {
       starsPaymentMutation.mutate(amountKopeks);
     } else {
@@ -474,6 +501,33 @@ export default function TopUpAmount() {
         </motion.div>
       )}
 
+      {method.id === 'antilopay' && (
+        <motion.div variants={staggerItem} className="space-y-2">
+          <label htmlFor="payment-email" className="text-sm font-medium text-dark-400">
+            {t('balance.paymentEmail')}
+          </label>
+          <input
+            ref={emailRef}
+            id="payment-email"
+            type="email"
+            inputMode="email"
+            autoComplete="email"
+            required
+            maxLength={254}
+            value={customerEmail}
+            onChange={(event) => {
+              setPaymentEmail(event.target.value);
+              setError(null);
+            }}
+            aria-describedby="payment-email-help"
+            className="input w-full"
+          />
+          <p id="payment-email-help" className="text-sm text-dark-400">
+            {t('balance.paymentEmailHelp')}
+          </p>
+        </motion.div>
+      )}
+
       {/* Amount input + Submit button - inline */}
       <motion.div variants={staggerItem} className="space-y-2">
         <label className="text-sm font-medium text-dark-400">{t('balance.enterAmount')}</label>
@@ -550,6 +604,14 @@ export default function TopUpAmount() {
                   setAmount(val);
                   setQuickRub(a);
                   inputRef.current?.blur();
+                  if (
+                    method.id === 'antilopay' &&
+                    (!customerEmail.trim() || !emailRef.current?.checkValidity())
+                  ) {
+                    setError(t('balance.paymentEmailInvalid'));
+                    emailRef.current?.focus();
+                    return;
+                  }
                 }}
                 hover
                 glow={isSelected}

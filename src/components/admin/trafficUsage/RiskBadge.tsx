@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { RISK_STYLES, formatGbPerDay, type RiskLevel } from './trafficUsageHelpers';
 
 // ──────────────────────────────────────────────────────────────────
@@ -13,6 +14,7 @@ export interface RiskBadgeProps {
 }
 
 export function RiskBadge({ level, ratio, gbPerDay }: RiskBadgeProps) {
+  const { t } = useTranslation();
   const style = RISK_STYLES[level];
   const barWidth = Math.min(ratio * 100, 100);
 
@@ -23,7 +25,7 @@ export function RiskBadge({ level, ratio, gbPerDay }: RiskBadgeProps) {
         <span className={`text-[11px] font-semibold tabular-nums ${style.text}`}>
           {formatGbPerDay(gbPerDay)}
         </span>
-        <span className={`text-[10px] ${style.text} opacity-60`}>GB/d</span>
+        <span className={`text-[10px] ${style.text} opacity-60`}>{t('common.units.gbPerDay')}</span>
       </div>
       <div className={`h-1 w-full max-w-[60px] rounded-full ${style.bg}`}>
         <div

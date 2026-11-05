@@ -1,10 +1,10 @@
+import { getLocalizedApiErrorMessage } from '@/utils/api-error-display';
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { subscriptionApi } from '@/api/subscription';
 import { DevicesIcon, PlusIcon, TrashIcon, WarningIcon } from '@/components/icons';
 import { ResponsiveSheet } from '@/components/ui/ResponsiveSheet';
-import { getApiErrorMessage } from '@/utils/api-error';
 
 interface DeviceLimitSheetProps {
   isOpen: boolean;
@@ -56,7 +56,9 @@ export function DeviceLimitSheet({
       onClose();
     },
     onError: (err) =>
-      setError(getApiErrorMessage(err, t('common.error', 'Не удалось выполнить действие'))),
+      setError(
+        getLocalizedApiErrorMessage(err, t('common.error', 'Не удалось выполнить действие'), t),
+      ),
   });
 
   return (

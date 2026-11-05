@@ -21,6 +21,7 @@ import {
 
 // Channel badge component
 function ChannelBadge({ channel }: { channel?: BroadcastChannel }) {
+  const { t } = useTranslation();
   if (!channel || channel === 'telegram') {
     return (
       <span className="flex items-center gap-1 rounded-full bg-accent-500/20 px-2 py-0.5 text-xs text-accent-400">
@@ -34,7 +35,7 @@ function ChannelBadge({ channel }: { channel?: BroadcastChannel }) {
     return (
       <span className="flex items-center gap-1 rounded-full bg-purple-500/20 px-2 py-0.5 text-xs text-purple-400">
         <EmailIcon />
-        <span className="hidden sm:inline">Email</span>
+        <span className="hidden sm:inline">{t('admin.broadcasts.channel.email')}</span>
       </span>
     );
   }
@@ -188,7 +189,7 @@ export default function AdminBroadcastDetail() {
                     expired: t('admin.broadcasts.atomic.expired', 'Истекла'),
                     trial: t('admin.broadcasts.atomic.trial', 'Триальная'),
                     paid: t('admin.broadcasts.atomic.paid', 'Оплаченная'),
-                    zero: '0 ГБ',
+                    zero: `0 ${t('common.units.gb')}`,
                     yes: t('common.yes', 'Да'),
                     no: t('common.no', 'Нет'),
                     custom_referrals: t('admin.broadcasts.atomic.referral', 'По рефералу'),
@@ -281,7 +282,9 @@ export default function AdminBroadcastDetail() {
                       {fieldLabel}{' '}
                       {['traffic_gt', 'traffic_lt'].includes(condition.field) ? '' : comparison}{' '}
                       {label}
-                      {['traffic_gt', 'traffic_lt'].includes(condition.field) ? ' ГБ' : ''}
+                      {['traffic_gt', 'traffic_lt'].includes(condition.field)
+                        ? ` ${t('common.units.gb')}`
+                        : ''}
                       {condition.value_to ? ` – ${condition.value_to}` : ''}
                     </>
                   )}

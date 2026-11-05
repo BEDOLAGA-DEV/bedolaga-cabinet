@@ -1,4 +1,14 @@
+import i18n from 'i18next';
 import apiClient from './client';
+
+export function settingsMetadataLanguage(language = i18n.language || 'ru'): string {
+  const tag = language.trim().toLowerCase();
+  if (!/^[a-z]{2}(?:[-_][a-z0-9]{2,8})*$/.test(tag)) return 'ru';
+  const base = tag.split(/[-_]/)[0];
+  return ['ru', 'en', 'zh', 'fa'].includes(base) ? base : 'ru';
+}
+
+const metadataParams = () => ({ language: settingsMetadataLanguage() });
 
 export interface SettingCategoryRef {
   key: string;
@@ -49,13 +59,14 @@ export const adminSettingsApi = {
   getCategories: async (): Promise<SettingCategorySummary[]> => {
     const response = await apiClient.get<SettingCategorySummary[]>(
       '/cabinet/admin/settings/categories',
+      { params: metadataParams() },
     );
     return response.data;
   },
 
   // Get all settings or settings for a specific category
   getSettings: async (categoryKey?: string): Promise<SettingDefinition[]> => {
-    const params = categoryKey ? { category_key: categoryKey } : {};
+    const params = { ...metadataParams(), ...(categoryKey ? { category_key: categoryKey } : {}) };
     const response = await apiClient.get<SettingDefinition[]>('/cabinet/admin/settings', {
       params,
     });
@@ -64,21 +75,29 @@ export const adminSettingsApi = {
 
   // Get a specific setting by key
   getSetting: async (key: string): Promise<SettingDefinition> => {
-    const response = await apiClient.get<SettingDefinition>(`/cabinet/admin/settings/${key}`);
+    const response = await apiClient.get<SettingDefinition>(`/cabinet/admin/settings/${key}`, {
+      params: metadataParams(),
+    });
     return response.data;
   },
 
   // Update a setting value
   updateSetting: async (key: string, value: unknown): Promise<SettingDefinition> => {
-    const response = await apiClient.put<SettingDefinition>(`/cabinet/admin/settings/${key}`, {
-      value,
-    });
+    const response = await apiClient.put<SettingDefinition>(
+      `/cabinet/admin/settings/${key}`,
+      {
+        value,
+      },
+      { params: metadataParams() },
+    );
     return response.data;
   },
 
   // Reset a setting to default
   resetSetting: async (key: string): Promise<SettingDefinition> => {
-    const response = await apiClient.delete<SettingDefinition>(`/cabinet/admin/settings/${key}`);
+    const response = await apiClient.delete<SettingDefinition>(`/cabinet/admin/settings/${key}`, {
+      params: metadataParams(),
+    });
     return response.data;
   },
 };

@@ -6,7 +6,7 @@ import { SupportDetails } from './SupportDetails';
 
 /** У ссылки подписки — кнопка «Проверить в DPI//CHECKER», когда раздел доступен админу. */
 
-vi.mock('react-i18next', async () => (await import('../dpichecker/testUtils')).i18nMock());
+vi.mock('react-i18next', async () => (await import('../dpichecker/testI18n')).i18nMock());
 
 const PANEL = { found: true, subscription_url: 'https://sub.example/abc' } as never;
 

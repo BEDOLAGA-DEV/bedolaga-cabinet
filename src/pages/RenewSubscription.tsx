@@ -1,7 +1,9 @@
+import { getLocalizedApiErrorMessage } from '../utils/api-error-display';
+import { isUncertainPurchaseOutcome } from '@/utils/api-error';
 import { useEffect, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { Navigate, useNavigate, useParams } from 'react-router';
+import { Link, Navigate, useNavigate, useParams } from 'react-router';
 import { subscriptionApi } from '../api/subscription';
 import { useTheme } from '../hooks/useTheme';
 import { getGlassColors } from '../utils/glassTheme';
@@ -13,7 +15,8 @@ import InsufficientBalancePrompt from '../components/InsufficientBalancePrompt';
 import { WebBackButton } from '../components/WebBackButton';
 import { BEST_VALUE_BORDER, BestValueBadge } from '../components/subscription/BestValueBadge';
 import { PageSkeleton, Skeleton } from '../components/ui/skeleton';
-import { needsTariff, tariffSelectionPath } from '../utils/legacySubscription';
+import { DailyPausePanel } from '../components/subscription/manage/DailyPausePanel';
+import { canOpenTariffSwitch, needsTariff, tariffSelectionPath } from '../utils/legacySubscription';
 
 export default function RenewSubscription() {
   const { subscriptionId } = useParams<{ subscriptionId: string }>();
@@ -43,7 +46,7 @@ export default function RenewSubscription() {
   const { data: options, isLoading } = useQuery({
     queryKey: ['renewal-options', subId],
     queryFn: () => subscriptionApi.getRenewalOptions(subId),
-    enabled: !!subId,
+    enabled: !!subId && !!subscription && !(subscription.is_daily && !subscription.is_trial),
     staleTime: 0,
     refetchOnMount: 'always',
   });
@@ -65,6 +68,7 @@ export default function RenewSubscription() {
   const balanceKopeks = purchaseOptions?.balance_kopeks ?? 0;
 
   const renewMutation = useMutation({
+    retry: false,
     mutationFn: (periodDays: number) => subscriptionApi.renewSubscription(periodDays, subId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['subscription', subId] });
@@ -74,6 +78,10 @@ export default function RenewSubscription() {
       navigate(`/subscriptions/${subId}`, { replace: true });
     },
     onError: (err: unknown) => {
+      if (isUncertainPurchaseOutcome(err)) {
+        setError(t('subscription.purchaseOutcomeUnknown'));
+        return;
+      }
       const detail =
         err && typeof err === 'object' && 'response' in err
           ? ((err as { response?: { data?: { detail?: unknown } } }).response?.data?.detail ?? null)
@@ -86,7 +94,7 @@ export default function RenewSubscription() {
           return;
         }
       }
-      setError(typeof detail === 'string' ? detail : t('common.error'));
+      setError(getLocalizedApiErrorMessage(err, t('common.error'), t));
     },
   });
 
@@ -152,8 +160,26 @@ export default function RenewSubscription() {
         </span>
       </div>
 
-      {/* Period options */}
-      {!options || options.length === 0 ? (
+      {/* Daily subscriptions use daily billing, not period renewal. */}
+      {subscription?.is_daily && !subscription.is_trial ? (
+        <section
+          className="space-y-4 rounded-2xl p-6"
+          style={{ background: g.cardBg, border: `1px solid ${g.cardBorder}` }}
+        >
+          <p className="text-sm text-dark-300">{t('subscription.dailyRenewalExplanation')}</p>
+          <p className="text-base font-semibold text-dark-50">
+            {t('subscription.dailyRenewalPrice', {
+              price: `${formatAmount((subscription.daily_price_kopeks ?? 0) / 100)}\u00A0${currencySymbol}`,
+            })}
+          </p>
+          <DailyPausePanel subscription={subscription} subscriptionId={subId} />
+          {canOpenTariffSwitch(subscription) && (
+            <Link className="btn-secondary w-full" to={tariffSelectionPath(subId)}>
+              {t('subscription.switchTariff.title')}
+            </Link>
+          )}
+        </section>
+      ) : !options || options.length === 0 ? (
         <div
           className="rounded-2xl p-6 text-center"
           style={{ background: g.cardBg, border: `1px solid ${g.cardBorder}` }}
@@ -265,7 +291,7 @@ export default function RenewSubscription() {
       )}
 
       {/* Renew button */}
-      {selectedPeriod && (
+      {!(subscription?.is_daily && !subscription.is_trial) && selectedPeriod && (
         <button
           onClick={() => handleRenew(selectedPeriod)}
           disabled={renewMutation.isPending}

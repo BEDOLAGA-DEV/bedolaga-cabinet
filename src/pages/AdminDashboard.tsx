@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import { backTo } from '@/components/admin';
 import { useTranslation } from 'react-i18next';
-import { METHOD_LABELS } from '../constants/paymentMethods';
+import { getPaymentMethodLabel } from '../constants/paymentMethods';
 import { useQuery } from '@tanstack/react-query';
 import { statsApi, type NodeStatus } from '../api/admin';
 import { formatUptime, parseCalendarDate } from '../utils/format';
@@ -99,7 +99,9 @@ function NodeCard({ node, onRestart, onToggle, isLoading }: NodeCardProps) {
             </span>
           )}
           {node.xray_uptime > 0 && (
-            <span className="text-dark-500">Uptime: {formatUptime(node.xray_uptime)}</span>
+            <span className="text-dark-500">
+              {t('admin.dashboard.nodeUptime', { uptime: formatUptime(node.xray_uptime) })}
+            </span>
           )}
         </div>
       )}
@@ -904,7 +906,8 @@ export default function AdminDashboard() {
                     <td className="px-2 py-3">
                       <span className="text-xs text-dark-400">
                         {payment.payment_method
-                          ? (METHOD_LABELS[payment.payment_method] ?? payment.payment_method)
+                          ? (getPaymentMethodLabel(payment.payment_method, t) ??
+                            payment.payment_method)
                           : '-'}
                       </span>
                     </td>
@@ -956,7 +959,8 @@ export default function AdminDashboard() {
                     </span>
                     <span className="truncate">
                       {payment.payment_method
-                        ? (METHOD_LABELS[payment.payment_method] ?? payment.payment_method)
+                        ? (getPaymentMethodLabel(payment.payment_method, t) ??
+                          payment.payment_method)
                         : '-'}
                     </span>
                   </span>

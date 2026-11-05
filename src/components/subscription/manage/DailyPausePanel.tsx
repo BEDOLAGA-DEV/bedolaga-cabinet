@@ -37,12 +37,17 @@ export function DailyPausePanel({ subscription, subscriptionId }: DailyPausePane
       ? t('subscription.free', 'Бесплатно')
       : `${formatAmount(kopeks / 100)}\u00A0${currencySymbol}`;
 
+  const isSuspended = ['expired', 'disabled', 'limited'].includes(subscription.status);
+  const needsResume = subscription.is_daily_paused || isSuspended;
+
   const pauseMutation = useMutation({
-    mutationFn: () => subscriptionApi.togglePause(subscriptionId),
+    retry: false,
+    mutationFn: () => subscriptionApi.togglePause(subscriptionId, !needsResume),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['subscription', subscriptionId] });
       queryClient.invalidateQueries({ queryKey: ['subscriptions-list'] });
       queryClient.invalidateQueries({ queryKey: ['balance'] });
+      queryClient.invalidateQueries({ queryKey: ['purchase-options', subscriptionId] });
     },
   });
 
@@ -58,37 +63,29 @@ export function DailyPausePanel({ subscription, subscriptionId }: DailyPausePane
           <div className="mt-1 text-[12px] text-dark-400">
             {subscription.is_limited
               ? t('subscription.trafficLimited')
-              : subscription.status === 'disabled'
-                ? t('subscription.pause.suspended')
-                : subscription.is_daily_paused
-                  ? t('subscription.pause.paused')
-                  : t('subscription.pause.active')}
+              : subscription.status === 'expired'
+                ? t('subscription.statusExpired')
+                : isSuspended
+                  ? t('subscription.pause.suspended')
+                  : subscription.is_daily_paused
+                    ? t('subscription.pause.paused')
+                    : t('subscription.pause.active')}
           </div>
         </div>
         <button
           onClick={() => pauseMutation.mutate()}
           disabled={pauseMutation.isPending}
-          className="rounded-[10px] px-4 py-2 text-sm font-semibold transition-colors duration-300"
-          style={{
-            background:
-              subscription.is_daily_paused || subscription.status === 'disabled'
-                ? 'rgba(var(--color-accent-400), 0.12)'
-                : 'rgba(255,184,0,0.12)',
-            border:
-              subscription.is_daily_paused || subscription.status === 'disabled'
-                ? '1px solid rgba(var(--color-accent-400), 0.2)'
-                : '1px solid rgba(255,184,0,0.2)',
-            color:
-              subscription.is_daily_paused || subscription.status === 'disabled'
-                ? 'rgb(var(--color-accent-400))'
-                : 'rgb(var(--color-urgent-400))',
-          }}
+          className={
+            needsResume
+              ? 'btn-primary shrink-0 px-4 py-2 text-sm'
+              : 'btn-secondary shrink-0 px-4 py-2 text-sm'
+          }
         >
           {pauseMutation.isPending ? (
             <span className="flex items-center gap-2">
               <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
             </span>
-          ) : subscription.is_daily_paused || subscription.status === 'disabled' ? (
+          ) : needsResume ? (
             t('subscription.pause.resumeBtn')
           ) : (
             t('subscription.pause.pauseBtn')
@@ -156,6 +153,7 @@ export function DailyPausePanel({ subscription, subscriptionId }: DailyPausePane
           </div>
         </div>
       ) : (
+        !isSuspended &&
         subscription.next_daily_charge_at &&
         (() => {
           const now = new Date();

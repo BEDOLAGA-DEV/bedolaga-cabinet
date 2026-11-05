@@ -41,3 +41,8 @@ Thumbs.db
 # Misc
 *.md
 LICENSE
+
+# Local agent context and archived artifacts
+.codex/
+AGENTS.md
+**/AGENTS.md
