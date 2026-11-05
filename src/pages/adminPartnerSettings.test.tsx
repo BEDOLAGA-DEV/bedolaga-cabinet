@@ -63,11 +63,15 @@ const referralState = {
     },
   ] as SettingDefinition[],
   writes: [] as Array<{ key: string; value: unknown }>,
+  reads: 0,
 };
 
 vi.mock('@/api/adminSettings', () => ({
   adminSettingsApi: {
-    getSettings: () => Promise.resolve(referralState.settings),
+    getSettings: () => {
+      referralState.reads += 1;
+      return Promise.resolve(referralState.settings);
+    },
     updateSetting: (key: string, value: unknown) => {
       referralState.writes.push({ key, value });
       return Promise.resolve(referralState.settings[0]);
@@ -103,6 +107,7 @@ afterEach(() => {
   state.payload = { ...state.payload, env_locked: [] };
   referralState.settings[0] = { ...referralState.settings[0], env_locked: false };
   referralState.writes.length = 0;
+  referralState.reads = 0;
   usePermissionStore.getState().reset();
 });
 
@@ -150,6 +155,7 @@ describe('основные реферальные настройки и прав
   it('не запрашивает и не показывает системные настройки без settings:read', async () => {
     await renderPage();
     expect(screen.queryByText('REFERRAL_COMMISSION_PERCENT')).toBeNull();
+    expect(referralState.reads).toBe(0);
     expect(screen.queryByRole('button', { name: 'Настройки' })).toBeNull();
   });
 
@@ -157,6 +163,7 @@ describe('основные реферальные настройки и прав
     usePermissionStore.setState({ permissions: ['settings:read'] });
     await renderPage();
     await screen.findByText('REFERRAL_COMMISSION_PERCENT');
+    expect(referralState.reads).toBe(1);
     expect(screen.getByText('5')).toBeTruthy();
     expect(screen.queryByRole('button', { name: '5' })).toBeNull();
 
