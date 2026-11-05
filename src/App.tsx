@@ -1058,7 +1058,7 @@ function App() {
         <Route
           path="/admin/partners/settings"
           element={
-            <PermissionRoute permission="partners:read">
+            <PermissionRoute permission="partners:settings">
               <LazyPage>
                 <AdminPartnerSettings />
               </LazyPage>

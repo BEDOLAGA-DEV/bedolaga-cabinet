@@ -8,6 +8,7 @@ import {
   type AdminPartnerApplicationItem,
 } from '../api/partners';
 import { AdminBackButton } from '../components/admin';
+import { PermissionGate } from '@/components/auth/PermissionGate';
 import { useCurrency } from '../hooks/useCurrency';
 import {
   BanknotesIcon,
@@ -55,13 +56,15 @@ export default function AdminPartners() {
           <h1 className="text-xl font-semibold text-dark-100">{t('admin.partners.title')}</h1>
           <p className="text-sm text-dark-400">{t('admin.partners.subtitle')}</p>
         </div>
-        <button
-          onClick={() => navigate('/admin/partners/settings')}
-          className="rounded-lg bg-dark-800 p-2 text-dark-400 transition-colors hover:bg-dark-700 hover:text-dark-200"
-          title={t('admin.partners.settings')}
-        >
-          <SettingsIcon className="h-5 w-5" />
-        </button>
+        <PermissionGate permission="partners:settings">
+          <button
+            onClick={() => navigate('/admin/partners/settings')}
+            className="rounded-lg bg-dark-800 p-2 text-dark-400 transition-colors hover:bg-dark-700 hover:text-dark-200"
+            title={t('admin.partners.settings')}
+          >
+            <SettingsIcon className="h-5 w-5" />
+          </button>
+        </PermissionGate>
       </div>
 
       {/* Stats Overview */}

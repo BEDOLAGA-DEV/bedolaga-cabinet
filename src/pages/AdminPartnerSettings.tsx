@@ -8,6 +8,8 @@ import { toNumber } from '../utils/inputHelpers';
 import { SettingsIcon } from '@/components/icons';
 import { PageSkeleton, Skeleton } from '@/components/ui/skeleton';
 import { EnvLockedBadge } from '@/components/admin/EnvLockedBadge';
+import { PartnerReferralSettings } from '@/components/admin/PartnerReferralSettings';
+import { usePermissionStore } from '@/store/permissions';
 
 type NumberOrEmpty = number | '';
 
@@ -16,6 +18,9 @@ export default function AdminPartnerSettings() {
   const navigate = useNavigate();
   const location = useLocation();
   const queryClient = useQueryClient();
+  const hasPermission = usePermissionStore((state) => state.hasPermission);
+  const canReadSettings = hasPermission('settings:read');
+  const canEditSettings = hasPermission('settings:edit');
 
   const {
     data: settings,
@@ -144,6 +149,20 @@ export default function AdminPartnerSettings() {
           →
         </span>
       </button>
+
+      {canReadSettings && (
+        <>
+          <PartnerReferralSettings canEdit={canEditSettings} />
+          <button
+            type="button"
+            onClick={() => navigate('/admin/settings?section=users_referral')}
+            className="card mb-6 flex w-full items-center justify-between text-left transition-colors hover:border-accent-500/40"
+          >
+            <span className="font-medium text-dark-100">{t('admin.settings.title')}</span>
+            <span aria-hidden="true" className="text-dark-500">→</span>
+          </button>
+        </>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Referral Program Section */}
