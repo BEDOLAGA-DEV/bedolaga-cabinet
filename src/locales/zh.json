@@ -2591,6 +2591,7 @@
         "iface_additional": "附加",
         "users_support": "支持",
         "users_referral": "推荐",
+        "users_registration": "注册与访问",
         "users_channel": "频道",
         "users_localization": "本地化",
         "users_moderation": "审核",
@@ -2679,6 +2680,7 @@
         "CHANNEL": "频道",
         "TIMEZONE": "时区",
         "REFERRAL": "推荐系统",
+        "REGISTRATION_ACCESS": "注册与访问",
         "MODERATION": "审核"
       },
       "settingNames": {
@@ -4572,6 +4574,8 @@
         "withdrawalSettings": "提款设置"
       },
       "settingsSubtitle": "推荐计划和合作伙伴提款设置",
+      "advancedReferralSettings": "高级推荐设置",
+      "advancedReferralSettingsDesc": "佣金比例、门槛和奖励次数限制",
       "settingsUpdateError": "保存推荐设置失败"
     },
     "partnerDetail": {
