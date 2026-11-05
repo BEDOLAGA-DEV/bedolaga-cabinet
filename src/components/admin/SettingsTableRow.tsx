@@ -165,27 +165,27 @@ export function SettingsTableRow({
 
           {/* Favorite button -- visible if favorited, hover-reveal otherwise */}
           {showFavorite && (
-          <button
-            onClick={onToggleFavorite}
-            className={cn(
-              'flex-shrink-0 rounded-lg p-1.5 transition-all',
-              isFavorite
-                ? 'text-warning-400 hover:bg-warning-500/15'
-                : 'text-dark-500 opacity-0 hover:bg-dark-700/50 hover:text-warning-400 group-focus-within:opacity-100 group-hover:opacity-100 max-lg:opacity-100 [@media(hover:none)]:opacity-100',
-            )}
-            title={
-              isFavorite
-                ? t('admin.settings.removeFromFavorites')
-                : t('admin.settings.addToFavorites')
-            }
-            aria-label={
-              isFavorite
-                ? t('admin.settings.removeFromFavorites')
-                : t('admin.settings.addToFavorites')
-            }
-          >
-            <StarIcon filled={isFavorite} />
-          </button>
+            <button
+              onClick={onToggleFavorite}
+              className={cn(
+                'flex-shrink-0 rounded-lg p-1.5 transition-all',
+                isFavorite
+                  ? 'text-warning-400 hover:bg-warning-500/15'
+                  : 'text-dark-500 opacity-0 hover:bg-dark-700/50 hover:text-warning-400 group-focus-within:opacity-100 group-hover:opacity-100 max-lg:opacity-100 [@media(hover:none)]:opacity-100',
+              )}
+              title={
+                isFavorite
+                  ? t('admin.settings.removeFromFavorites')
+                  : t('admin.settings.addToFavorites')
+              }
+              aria-label={
+                isFavorite
+                  ? t('admin.settings.removeFromFavorites')
+                  : t('admin.settings.addToFavorites')
+              }
+            >
+              <StarIcon filled={isFavorite} />
+            </button>
           )}
         </div>
       </div>
