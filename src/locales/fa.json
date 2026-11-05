@@ -383,7 +383,10 @@
     "devicesConnected": "{{count}} متصل",
     "trafficUsage": "{{used}} / {{limit}} گیگابایت",
     "usedTraffic": "{{amount}} مصرف شده",
-    "daysRemaining": "روزهای باقی‌مانده"
+    "daysRemaining": "روزهای باقی‌مانده",
+    "premiumTraffic": "ترافیک ویژه",
+    "premiumTrafficPaused": "سقف مصرف پر شد — دسترسی تا پایان دوره متوقف است",
+    "premiumTrafficTopped": "{{amount}} شارژ شد"
   },
   "subscription": {
     "accounting": {
@@ -576,7 +579,12 @@
       "minDeviceLimit_other": "حداقل تعرفه: {{count}} دستگاه",
       "connectedDevices_other": "دستگاه‌های متصل: {{count}}",
       "disconnectDevicesFirst_other": "برای کاهش سقف به کمتر از {{count}} دستگاه، ابتدا دستگاه‌ها را قطع کنید",
-      "newDeviceLimit_other": "سقف جدید: {{count}} دستگاه"
+      "newDeviceLimit_other": "سقف جدید: {{count}} دستگاه",
+      "buyPremiumTraffic": "خرید ترافیک ویژه",
+      "buyPremiumTrafficTitle": "ترافیک ویژه",
+      "premiumTrafficHint": "سقف مصرف جداگانه برای سرورهای ویژه",
+      "premiumTrafficExhausted": "سقف مصرف پر شد — برای بازگردانی دسترسی شارژ کنید",
+      "premiumTopupCapReached": "در هر دوره حداکثر {{cap}} گیگابایت قابل افزودن است"
     },
     "serverManagement": {
       "statusLegend": "✅ — متصل • ➕ — اضافه خواهد شد (پولی) • ➖ — قطع خواهد شد",
@@ -4236,7 +4244,23 @@
       "days_one": "{{count}} روز",
       "serverTrafficLimit": "سقف ترافیک",
       "useDefault": "پیش‌فرض",
-      "periodDisabled": "غیرفعال"
+      "periodDisabled": "غیرفعال",
+      "premiumLimitsTitle": "سقف ویژه به تفکیک سرور",
+      "premiumLimitsHint": "سقف مصرف جداگانه برای هر سرور. با پر شدن آن، کاربر فقط دسترسی همان سرور را از دست می‌دهد و بقیه کار می‌کنند. صفر یعنی این سرور سقف ویژه ندارد.",
+      "premiumLimitsNoServers": "ابتدا سرورهای تعرفه را انتخاب کنید",
+      "premiumLimitGb": "سقف (گیگابایت)",
+      "premiumLimitName": "برچسب",
+      "premiumMoveUp": "بالا",
+      "premiumMoveDown": "پایین",
+      "premiumTopupEnabled": "اجازه شارژ",
+      "premiumPackages": "بسته‌های شارژ",
+      "premiumPackagesEmpty": "بسته‌ای نیست — چیزی برای خرید وجود نخواهد داشت",
+      "premiumPackageGb": "حجم بسته (گیگابایت)",
+      "premiumPackagePrice": "قیمت بسته",
+      "premiumPackageAdd": "افزودن بسته",
+      "premiumPackageDuplicate": "بسته‌های هم‌حجم هنگام ذخیره ادغام می‌شوند",
+      "premiumMaxTopupGb": "سقف کل (گیگابایت)",
+      "premiumMaxTopupHint": "صفر یعنی بدون محدودیت"
     },
     "servers": {
       "title": "مدیریت اسکوادها",
@@ -5498,7 +5522,35 @@
         },
         "messages_one": "{{count}} پیام",
         "messages_other": "{{count}} پیام",
-        "ticketLoadError": "باز کردن تیکت ممکن نشد"
+        "ticketLoadError": "باز کردن تیکت ممکن نشد",
+        "premiumTraffic": {
+          "title": "ترافیک پریمیوم",
+          "limited": "قطع شده",
+          "notMeasured": "هنوز اندازه‌گیری نشده",
+          "extra": "{{gb}} گیگابایت خریداری‌شده",
+          "period": "دوره از {{date}}",
+          "checked": "اندازه‌گیری {{date}}",
+          "grantLabel": "چند گیگابایت برای {{name}} افزوده شود",
+          "grant": "افزودن",
+          "resetSquad": "بازنشانی",
+          "resetTitle": "بازنشانی ترافیک",
+          "resetButton": "بازنشانی",
+          "scope": {
+            "premium": "فقط پریمیوم",
+            "regular": "فقط عادی",
+            "both": "پریمیوم و عادی"
+          },
+          "scopeHint": {
+            "premium": "محدودیت‌های پریمیوم دوره جدید را آغاز می‌کنند و سرورهای قطع‌شده بازمی‌گردند. ترافیک عادی تغییر نمی‌کند.",
+            "regular": "ترافیک عادی در پنل بازنشانی می‌شود. محدودیت‌های پریمیوم تغییر نمی‌کنند.",
+            "both": "هم ترافیک عادی در پنل و هم محدودیت‌های پریمیوم بازنشانی می‌شوند."
+          },
+          "granted": "{{gb}} گیگابایت برای {{name}} افزوده شد.",
+          "resetPremiumDone": "دوره پریمیوم از نو آغاز شد.",
+          "resetRegularDone": "ترافیک عادی بازنشانی شد.",
+          "restoredNote": "سرور در نوبت بعدی — حداکثر ۵ دقیقه — به کاربر بازمی‌گردد.",
+          "error": "انجام عملیات ناموفق بود"
+        }
       },
       "notFound": "کاربر یافت نشد",
       "sendMessage": {
@@ -9086,7 +9138,9 @@
       "plans": "دیدن طرح‌ها",
       "support": "پشتیبانی",
       "copyLink": "کپی لینک اشتراک",
-      "copied": "کپی شد"
+      "copied": "کپی شد",
+      "buyPremiumTraffic": "خرید ترافیک پریمیوم",
+      "premiumPaused": "سقف مصرف تمام شد"
     },
     "error": {
       "load": "داده‌ها بارگذاری نشد",

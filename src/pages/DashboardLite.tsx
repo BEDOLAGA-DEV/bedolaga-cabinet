@@ -10,6 +10,7 @@ import { balanceApi } from '@/api/balance';
 import { subscriptionApi } from '@/api/subscription';
 import { LiteMeter } from '@/components/lite/LiteMeter';
 import { LitePromoSlot } from '@/components/lite/LitePromoSlot';
+import { LitePremiumMeters } from '@/components/lite/LitePremiumMeters';
 import { LiteRow, LiteRowGroup } from '@/components/lite/LiteRow';
 import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 import { API } from '@/config/constants';
@@ -205,6 +206,11 @@ export default function DashboardLite() {
                 />
               )}
               <ManagedTrafficSummary subscription={subscription} />
+              {/* Серверы с отдельным лимитом — сразу под общей шкалой: свой
+                  расход читается одним движением сверху вниз. Со списком
+                  подписок этой секции на экране нет вовсе, и премиум молчит
+                  вместе со шкалой — иначе непонятно, к какой он подписке. */}
+              <LitePremiumMeters items={subscription.premium_traffic ?? []} />
             </div>
           )}
         </section>
