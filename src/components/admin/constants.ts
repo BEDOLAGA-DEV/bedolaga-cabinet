@@ -118,6 +118,7 @@ export const SETTINGS_TREE: SettingsTreeConfig = {
       children: [
         { id: 'users_support', categories: ['SUPPORT'] },
         { id: 'users_referral', categories: ['REFERRAL'] },
+        { id: 'users_registration', categories: ['REGISTRATION_ACCESS'] },
         { id: 'users_channel', categories: ['CHANNEL'] },
         { id: 'users_localization', categories: ['LOCALIZATION', 'TIMEZONE'] },
         { id: 'users_moderation', categories: ['MODERATION', 'BAN_NOTIFICATIONS'] },
