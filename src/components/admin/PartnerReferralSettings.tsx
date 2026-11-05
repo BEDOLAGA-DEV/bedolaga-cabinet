@@ -62,7 +62,11 @@ export function PartnerReferralSettings({ canEdit }: PartnerReferralSettingsProp
       </p>
 
       {isPending && <p className="text-sm text-dark-400">{t('common.loading')}</p>}
-      {isError && <p role="alert" className="text-sm text-error-400">{t('admin.partners.settingsLoadError')}</p>}
+      {isError && (
+        <p role="alert" className="text-sm text-error-400">
+          {t('admin.partners.settingsLoadError')}
+        </p>
+      )}
       {!isPending && !isError && (
         <div className="overflow-hidden rounded-xl border border-dark-700/40">
           {visible.map((setting, index) => (
