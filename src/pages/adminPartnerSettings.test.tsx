@@ -182,6 +182,6 @@ describe('основные реферальные настройки и прав
     await renderPage();
     await screen.findByText('REFERRAL_COMMISSION_PERCENT');
     expect(screen.queryByRole('button', { name: '5' })).toBeNull();
-    expect(screen.getByText('Задано в .env')).toBeTruthy();
+    expect(screen.getByText('ENV')).toBeTruthy();
   });
 });
