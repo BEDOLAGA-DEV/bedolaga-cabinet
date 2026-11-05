@@ -145,6 +145,23 @@ export default function AdminPartnerSettings() {
         </span>
       </button>
 
+      {/* Расширенные параметры используют общий API системных настроек. */}
+      <button
+        type="button"
+        onClick={() => navigate('/admin/settings?section=users_referral')}
+        className="card mb-6 flex w-full items-center justify-between text-left transition-colors hover:border-accent-500/40"
+      >
+        <div>
+          <div className="font-medium text-dark-100">
+            {t('admin.partners.advancedReferralSettings')}
+          </div>
+          <div className="text-sm text-dark-500">
+            {t('admin.partners.advancedReferralSettingsDesc')}
+          </div>
+        </div>
+        <span aria-hidden="true" className="text-dark-500">→</span>
+      </button>
+
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Referral Program Section */}
         <div className="card">
