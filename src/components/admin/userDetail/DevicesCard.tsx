@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import type { UserDeviceBlock } from '@/api/adminUsers';
 import { CheckIcon, DevicesIcon, EditIcon, XIcon } from '@/components/icons';
 import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 import { useDestructiveConfirm } from '@/platform/hooks/useNativeDialog';
@@ -11,6 +12,7 @@ export interface DeviceRow {
   hwid: string;
   platform: string;
   device_model: string;
+  app?: string;
   created_at: string | null;
   local_name?: string | null;
 }
@@ -38,6 +40,9 @@ interface DevicesCardProps {
   onRename: (hwid: string, name: string) => Promise<boolean>;
   onDelete: (hwid: string) => Promise<boolean>;
   onResetAll: () => Promise<boolean>;
+  blocks?: UserDeviceBlock[];
+  onBlock?: (device: DeviceRow) => Promise<boolean>;
+  onUnblock?: (block: UserDeviceBlock) => Promise<boolean>;
 }
 
 /** Устройства подписки: переименование на месте, удаление и сброс через подтверждение. */
@@ -50,6 +55,9 @@ export function DevicesCard({
   onRename,
   onDelete,
   onResetAll,
+  blocks = [],
+  onBlock,
+  onUnblock,
 }: DevicesCardProps) {
   const { t } = useTranslation();
   const confirmDestructive = useDestructiveConfirm();
@@ -74,6 +82,15 @@ export function DevicesCard({
       t(`${ns}.devices.resetAll`),
     );
     if (ok) await onResetAll();
+  };
+
+  const block = async (device: DeviceRow) => {
+    const ok = await confirmDestructive(t(`${ns}.devices.blockConfirm`), t(`${ns}.devices.block`));
+    if (ok) await onBlock?.(device);
+  };
+
+  const unblock = async (blockItem: UserDeviceBlock) => {
+    await onUnblock?.(blockItem);
   };
 
   return (
@@ -116,6 +133,7 @@ export function DevicesCard({
             const subtitle = [
               device.local_name?.trim() ? device.device_model : null,
               device.platform,
+              device.app,
               device.created_at
                 ? t(`${ns}.subscription.deviceSince`, { date: formatShortDate(device.created_at) })
                 : null,
@@ -198,6 +216,17 @@ export function DevicesCard({
                         >
                           <XIcon className="h-4 w-4" />
                         </button>
+                        {onBlock && (
+                          <button
+                            type="button"
+                            onClick={() => void block(device)}
+                            disabled={busy}
+                            title={t(`${ns}.devices.block`)}
+                            className="btn-ghost shrink-0 px-2 text-xs text-warning-400 hover:text-warning-300"
+                          >
+                            {t(`${ns}.devices.block`)}
+                          </button>
+                        )}
                       </>
                     )}
                   </div>
@@ -206,6 +235,40 @@ export function DevicesCard({
             );
           })}
         </ul>
+      )}
+
+      {/* Заблокированные устройства: список жёстких банов с разблокировкой. */}
+      {canManage && blocks.length > 0 && (
+        <div className="mt-3 border-t border-dark-800/80 pt-3">
+          <div className="mb-2 text-sm font-medium text-dark-200">
+            {t(`${ns}.devices.blockedTitle`)} ({blocks.length})
+          </div>
+          <ul className="m-0 list-none divide-y divide-dark-800/80 p-0">
+            {blocks.map((blockItem) => (
+              <li key={blockItem.id} className="flex items-center gap-3 py-2.5">
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-sm font-medium text-dark-100">
+                    {blockItem.device_label || blockItem.platform || blockItem.hwid.slice(0, 12)}
+                  </div>
+                  <div className="mt-0.5 flex items-center gap-2 truncate text-xs text-dark-500">
+                    {blockItem.platform}
+                    <span className="font-mono">{blockItem.hwid.slice(0, 8)}…</span>
+                    {blockItem.banned_at && <span>{formatShortDate(blockItem.banned_at)}</span>}
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => void unblock(blockItem)}
+                  disabled={busy}
+                  title={t(`${ns}.devices.unblock`)}
+                  className="btn-ghost shrink-0 px-2 text-xs text-success-400 hover:text-success-300"
+                >
+                  {t(`${ns}.devices.unblock`)}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
     </Section>
   );

@@ -7,6 +7,7 @@ import type {
   UserAvailableTariff,
   UserDetailResponse,
   UserNodeUsageResponse,
+  UserDeviceBlock,
   UserPanelInfo,
   UserSubscriptionInfo,
 } from '@/api/adminUsers';
@@ -16,7 +17,7 @@ import { formatShortDate } from '@/utils/format';
 import type { SalesMode } from '@/pages/adminUserDetail/salesMode';
 import { CreateSubscriptionForm } from './CreateSubscriptionForm';
 import { DangerZone } from './DangerZone';
-import { type DeviceRow, DevicesCard } from './DevicesCard';
+import { deviceLongName, type DeviceRow, DevicesCard } from './DevicesCard';
 import { NodeUsageCard } from './NodeUsageCard';
 import { PanelSyncCard } from './PanelSyncCard';
 import {
@@ -42,6 +43,11 @@ export interface SubscriptionTabActions extends SubscriptionCardActions {
   renameDevice: (hwid: string, name: string) => Promise<boolean>;
   deleteDevice: (hwid: string) => Promise<boolean>;
   resetDevices: () => Promise<boolean>;
+  blockDevice: (
+    hwid: string,
+    meta?: { device_label?: string | null; platform?: string | null },
+  ) => Promise<boolean>;
+  unblockDevice: (hwid: string) => Promise<boolean>;
   syncFromPanel: () => Promise<boolean>;
   syncToPanel: () => Promise<boolean>;
 }
@@ -56,6 +62,7 @@ export interface SubscriptionTabProps {
   currentTariff: UserAvailableTariff | null;
   panelInfo: UserPanelInfo | null;
   devices: DeviceRow[];
+  deviceBlocks?: UserDeviceBlock[];
   devicesLoading: boolean;
   nodeUsage: UserNodeUsageResponse | null;
   syncStatus: PanelSyncStatusResponse | null;
@@ -175,6 +182,14 @@ export function SubscriptionTab(props: SubscriptionTabProps) {
               onRename={actions.renameDevice}
               onDelete={actions.deleteDevice}
               onResetAll={actions.resetDevices}
+              blocks={props.deviceBlocks ?? []}
+              onBlock={(device) =>
+                actions.blockDevice(device.hwid, {
+                  device_label: deviceLongName(device) || null,
+                  platform: device.platform || null,
+                })
+              }
+              onUnblock={(block) => actions.unblockDevice(block.hwid)}
             />
             {props.panelInfo?.found && <NodeUsageCard usage={props.nodeUsage} />}
           </div>

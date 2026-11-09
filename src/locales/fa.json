@@ -953,7 +953,16 @@
     "allDevicesDeleted": "همه دستگاه‌ها حذف شدند",
     "platform": "پلتفرم",
     "model": "مدل",
-    "devicesFree_other": "{{count}} دستگاه رایگان"
+    "devicesFree_other": "{{count}} دستگاه رایگان",
+    "blockDevice": "مسدود کردن دستگاه",
+    "unblockDevice": "رفع مسدودی",
+    "confirmBlockDevice": "این دستگاه را مسدود کنید؟ تا زمانی که آن را رفع مسدودی نکنید، نمی‌تواند متصل شود.",
+    "confirmUnblockDevice": "این دستگاه را رفع مسدودی کنید؟",
+    "blockedDevices": "دستگاه‌های مسدودشده",
+    "noBlockedDevices": "دستگاه مسدودشده‌ای وجود ندارد",
+    "deviceBlocked": "دستگاه مسدود شد",
+    "deviceUnblocked": "دستگاه از مسدودی خارج شد",
+    "blockedAt": "مسدودشده در"
   },
   "balance": {
     "paymentEmail": "ایمیل پرداخت",
@@ -4982,7 +4991,13 @@
           "allDeleted": "همه دستگاه‌ها بازنشانی شدند",
           "rename": "تغییر نام",
           "renameSave": "ذخیره",
-          "renamed": "نام دستگاه به‌روزرسانی شد"
+          "renamed": "نام دستگاه به‌روزرسانی شد",
+          "block": "مسدود کردن",
+          "blockConfirm": "این دستگاه را مسدود کنید؟ تا زمانی که آن را رفع مسدودی نکنید، نمی‌تواند متصل شود.",
+          "unblock": "رفع مسدودی",
+          "blockedTitle": "دستگاه‌های مسدودشده",
+          "blocked": "دستگاه مسدود شد",
+          "unblocked": "دستگاه از مسدودی خارج شد"
         },
         "referral": {
           "title": "برنامه ارجاع",

@@ -800,6 +800,50 @@ export const subscriptionApi = {
 
   // ── Tariff switch ───────────────────────────────────────────────────
 
+  getDeviceBlocks: async (): Promise<{
+    blocks: Array<{
+      id: number;
+      hwid: string;
+      device_label: string | null;
+      platform: string | null;
+      banned_at: string | null;
+      banned_by: string;
+    }>;
+    total: number;
+  }> => {
+    const response = await apiClient.get('/cabinet/subscription/devices/blocks');
+    return response.data;
+  },
+
+  blockDevice: async (
+    hwid: string,
+    payload?: { device_label?: string; platform?: string },
+  ): Promise<{
+    success: boolean;
+    already_blocked: boolean;
+    block: {
+      id: number;
+      hwid: string;
+      device_label: string | null;
+      platform: string | null;
+      banned_at: string | null;
+      banned_by: string;
+    };
+  }> => {
+    const response = await apiClient.post(
+      `/cabinet/subscription/devices/${encodeURIComponent(hwid)}/block`,
+      payload ?? {},
+    );
+    return response.data;
+  },
+
+  unblockDevice: async (hwid: string): Promise<{ success: boolean; hwid: string }> => {
+    const response = await apiClient.delete(
+      `/cabinet/subscription/devices/${encodeURIComponent(hwid)}/block`,
+    );
+    return response.data;
+  },
+
   previewTariffSwitch: async (
     tariffId: number,
     subscriptionId?: number,

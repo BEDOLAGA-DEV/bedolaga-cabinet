@@ -494,6 +494,15 @@ export interface UsersListParams {
   sort_order?: 'asc' | 'desc';
 }
 
+export interface UserDeviceBlock {
+  id: number;
+  hwid: string;
+  device_label: string | null;
+  platform: string | null;
+  banned_at: string | null;
+  banned_by: string;
+}
+
 export const adminUsersApi = {
   // List users
   getUsers: async (params: UsersListParams = {}): Promise<UsersListResponse> => {
@@ -815,7 +824,7 @@ export const adminUsersApi = {
     return response.data;
   },
 
-  // Get user devices
+  // Get user devices (connected + hard-blocked)
   getUserDevices: async (
     userId: number,
     subscriptionId?: number,
@@ -824,11 +833,13 @@ export const adminUsersApi = {
       hwid: string;
       platform: string;
       device_model: string;
+      app?: string;
       created_at: string | null;
       local_name?: string | null;
     }[];
     total: number;
     device_limit: number;
+    blocks: UserDeviceBlock[];
   }> => {
     const response = await apiClient.get(`/cabinet/admin/users/${userId}/devices`, {
       params: subscriptionId != null ? { subscription_id: subscriptionId } : undefined,
@@ -846,6 +857,28 @@ export const adminUsersApi = {
       `/cabinet/admin/users/${userId}/devices/${encodeURIComponent(hwid)}/name`,
       { name },
     );
+    return response.data;
+  },
+
+  // Hard-block a connected device (HWID)
+  blockUserDevice: async (
+    userId: number,
+    hwid: string,
+    meta?: { device_label?: string | null; platform?: string | null },
+  ): Promise<{ success: boolean; already_blocked: boolean; hwid: string }> => {
+    const response = await apiClient.post(
+      `/cabinet/admin/users/${userId}/devices/${hwid}/block`,
+      meta ?? {},
+    );
+    return response.data;
+  },
+
+  // Unblock a previously hard-blocked device (HWID)
+  unblockUserDevice: async (
+    userId: number,
+    hwid: string,
+  ): Promise<{ success: boolean; hwid: string }> => {
+    const response = await apiClient.delete(`/cabinet/admin/users/${userId}/devices/${hwid}/block`);
     return response.data;
   },
 

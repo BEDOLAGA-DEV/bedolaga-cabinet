@@ -149,6 +149,7 @@ export default function AdminUserDetail() {
     deactivateOffer: hasPermission('promocodes:edit'),
   };
   const devices = data.devicesQuery.data?.devices ?? null;
+  const deviceBlocks = data.devicesQuery.data?.blocks ?? [];
   // В шапке — только «Написать» и «⋯». «Продлить» / «Выдать» живут у самой подписки во
   // вкладке «Подписка»: в мультитарифе кнопка в шапке не говорила, какую подписку продлит.
   // На телефоне «Написать» — иконкой рядом с «⋯», в строке имени.
@@ -277,6 +278,7 @@ export default function AdminUserDetail() {
           currentTariff={data.currentTariff}
           panelInfo={data.panelInfo}
           devices={devices ?? []}
+          deviceBlocks={deviceBlocks}
           devicesLoading={data.devicesQuery.isLoading}
           nodeUsage={data.nodeUsage}
           syncStatus={data.syncStatusQuery.data ?? null}

@@ -912,7 +912,16 @@
       "newPackage": "新流量包",
       "switch": "更改",
       "switched": "流量已更改"
-    }
+    },
+    "blockDevice": "封锁设备",
+    "unblockDevice": "解除封锁",
+    "confirmBlockDevice": "封锁此设备？解除封锁前，它将无法连接。",
+    "confirmUnblockDevice": "解除对此设备的封锁？",
+    "blockedDevices": "已封锁设备",
+    "noBlockedDevices": "没有已封锁的设备",
+    "deviceBlocked": "设备已封锁",
+    "deviceUnblocked": "设备已解除封锁",
+    "blockedAt": "封锁于"
   },
   "balance": {
     "paymentEmail": "支付邮箱",
@@ -4926,7 +4935,13 @@
           "allDeleted": "所有设备已重置",
           "rename": "重命名",
           "renameSave": "保存",
-          "renamed": "设备名称已更新"
+          "renamed": "设备名称已更新",
+          "block": "封锁",
+          "blockConfirm": "封锁此设备？解除封锁前，它将无法连接。",
+          "unblock": "解除封锁",
+          "blockedTitle": "已封锁设备",
+          "blocked": "设备已封锁",
+          "unblocked": "设备已解除封锁"
         },
         "referral": {
           "title": "推荐计划",

@@ -32,6 +32,7 @@ import {
   PiPencilSimple,
   PiPlay,
   PiPlus,
+  PiProhibit,
   PiShield,
   PiShuffle,
   PiSignOut,
@@ -116,6 +117,10 @@ export const PencilIcon = ({ className }: IconProps) => (
 
 export const TrashIcon = ({ className }: IconProps) => (
   <PiTrash className={cn('h-5 w-5', className)} />
+);
+
+export const BanIcon = ({ className }: IconProps) => (
+  <PiProhibit className={cn('h-4 w-4', className)} />
 );
 
 export const UploadIcon = ({ className }: IconProps) => (

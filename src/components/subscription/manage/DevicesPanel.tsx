@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 
 import { subscriptionApi } from '@/api/subscription';
-import { CheckIcon, PencilIcon, PhoneIcon, TrashIcon, XIcon } from '@/components/icons';
+import { BanIcon, CheckIcon, PencilIcon, PhoneIcon, TrashIcon, XIcon } from '@/components/icons';
 import { Skeleton, SkeletonGroup } from '@/components/ui/skeleton';
 import { DEVICE_ALIAS_MAX_LENGTH } from '@/constants/devices';
 import { useHaptic } from '@/platform';
@@ -52,6 +52,33 @@ export function DevicesPanel({ subscription, subscriptionId }: DevicesPanelProps
     mutationFn: () => subscriptionApi.deleteAllDevices(subscriptionId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['devices', subscriptionId] });
+    },
+  });
+
+  // Hard-blocked (HWID) devices: shown below the connected list with an unblock action.
+  const { data: blockedDevices } = useQuery({
+    queryKey: ['device-blocks', subscriptionId],
+    queryFn: () => subscriptionApi.getDeviceBlocks(),
+    enabled: Boolean(subscription),
+  });
+
+  const blockDeviceMutation = useMutation({
+    mutationFn: (vars: { hwid: string; device_label?: string; platform?: string }) =>
+      subscriptionApi.blockDevice(vars.hwid, {
+        device_label: vars.device_label,
+        platform: vars.platform,
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['device-blocks'] });
+      queryClient.invalidateQueries({ queryKey: ['devices'] });
+    },
+  });
+
+  const unblockDeviceMutation = useMutation({
+    mutationFn: (hwid: string) => subscriptionApi.unblockDevice(hwid),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['device-blocks'] });
+      queryClient.invalidateQueries({ queryKey: ['devices'] });
     },
   });
 
@@ -233,6 +260,30 @@ export function DevicesPanel({ subscription, subscriptionId }: DevicesPanelProps
                         type="button"
                         onClick={async () => {
                           const confirmed = await destructiveConfirm(
+                            t('subscription.confirmBlockDevice'),
+                            t('subscription.blockDevice'),
+                            t('subscription.blockDevice'),
+                          );
+                          if (confirmed)
+                            blockDeviceMutation.mutate({
+                              hwid: device.hwid,
+                              device_label:
+                                device.local_name?.trim() || device.device_model || device.platform,
+                              platform: device.platform,
+                            });
+                        }}
+                        disabled={blockDeviceMutation.isPending}
+                        className="p-2 transition-colors"
+                        style={{ color: 'rgb(var(--color-critical-500))' }}
+                        title={t('subscription.blockDevice')}
+                        aria-label={t('subscription.blockDevice')}
+                      >
+                        <BanIcon className="h-4 w-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          const confirmed = await destructiveConfirm(
                             t('subscription.confirmDeleteDevice'),
                             t('subscription.deleteDevice'),
                             t('subscription.deleteDevice'),
@@ -257,6 +308,64 @@ export function DevicesPanel({ subscription, subscriptionId }: DevicesPanelProps
       ) : (
         <div className="py-8 text-center text-[12px] text-dark-400">
           {t('subscription.noDevices')}
+        </div>
+      )}
+
+      {blockedDevices?.blocks && blockedDevices.blocks.length > 0 && (
+        <div className="mt-6">
+          <div className="mb-3 flex items-center justify-between">
+            <h3 className="text-sm font-bold tracking-tight text-dark-50">
+              {t('subscription.blockedDevices')}
+            </h3>
+            <span className="font-mono text-[11px] text-dark-400">{blockedDevices.total}</span>
+          </div>
+          <div className="space-y-2">
+            {blockedDevices.blocks.map((b) => (
+              <div
+                key={b.id}
+                className="flex items-center justify-between rounded-[12px] p-3.5"
+                style={{
+                  background: g.innerBg,
+                  border: `1px solid ${g.innerBorder}`,
+                }}
+              >
+                <div className="flex min-w-0 items-center gap-3">
+                  <div
+                    className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-[10px]"
+                    style={{ background: g.trackBg, color: 'rgb(var(--color-critical-500))' }}
+                  >
+                    <BanIcon className="h-4 w-4" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-sm font-medium text-dark-50">
+                      {b.device_label || b.platform || b.hwid.slice(0, 8).toUpperCase()}
+                    </div>
+                    <div className="mt-0.5 flex items-center gap-1.5 text-[11px] text-dark-400">
+                      {b.platform && <span className="truncate">{b.platform}</span>}
+                      <span className="font-mono text-dark-400">
+                        {b.hwid.slice(0, 8).toUpperCase()}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    const confirmed = await destructiveConfirm(
+                      t('subscription.confirmUnblockDevice'),
+                      t('subscription.unblockDevice'),
+                    );
+                    if (confirmed) unblockDeviceMutation.mutate(b.hwid);
+                  }}
+                  disabled={unblockDeviceMutation.isPending}
+                  className="text-[11px] font-medium transition-colors"
+                  style={{ color: g.textSecondary }}
+                >
+                  {t('subscription.unblockDevice')}
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </>

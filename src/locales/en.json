@@ -597,6 +597,15 @@
     "platform": "Platform",
     "model": "Model",
     "connectedAt": "Connected",
+    "blockDevice": "Block device",
+    "unblockDevice": "Unblock",
+    "confirmBlockDevice": "Block this device? It won't be able to connect until you unblock it.",
+    "confirmUnblockDevice": "Unblock this device?",
+    "blockedDevices": "Blocked Devices",
+    "noBlockedDevices": "No blocked devices",
+    "deviceBlocked": "Device blocked",
+    "deviceUnblocked": "Device unblocked",
+    "blockedAt": "Blocked",
     "pause": {
       "title": "Subscription Pause",
       "paused": "Paused",
@@ -6024,7 +6033,13 @@
           "allDeleted": "All devices reset",
           "rename": "Rename",
           "renameSave": "Save",
-          "renamed": "Device name updated"
+          "renamed": "Device name updated",
+          "block": "Block",
+          "blockConfirm": "Block this device? It won't be able to connect until you unblock it.",
+          "unblock": "Unblock",
+          "blockedTitle": "Blocked devices",
+          "blocked": "Device blocked",
+          "unblocked": "Device unblocked"
         },
         "referral": {
           "title": "Referral program",

@@ -137,6 +137,19 @@ export function useUserDetailActions(userId: number, data: UserDetailData) {
         success: t('admin.users.detail.devices.allDeleted'),
         after: refreshCard,
       }),
+    blockDevice: (
+      hwid: string,
+      meta?: { device_label?: string | null; platform?: string | null },
+    ) =>
+      run(() => adminUsersApi.blockUserDevice(userId, hwid, meta), {
+        success: t('admin.users.detail.devices.blocked'),
+        after: refreshCard,
+      }),
+    unblockDevice: (hwid: string) =>
+      run(() => adminUsersApi.unblockUserDevice(userId, hwid), {
+        success: t('admin.users.detail.devices.unblocked'),
+        after: refreshCard,
+      }),
 
     syncFromPanel: () =>
       run(
