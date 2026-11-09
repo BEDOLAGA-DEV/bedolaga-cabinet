@@ -462,6 +462,9 @@ export interface PaymentMethod {
   is_available: boolean;
   options?: PaymentMethodOption[] | null;
   quick_amounts?: number[];
+  // Если true — разрешены только суммы из quick_amounts (товары с фиксированной ценой),
+  // свободный ввод суммы не показываем.
+  fixed_amounts_only?: boolean;
   // Если true — после получения payment_url кабинет сразу делает
   // window.location.href вместо показа панели с кнопкой "Открыть".
   open_url_direct?: boolean;

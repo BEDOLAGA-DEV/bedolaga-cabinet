@@ -924,6 +924,7 @@
     "topUp": "充值",
     "topUpBalance": "充值余额",
     "enterAmount": "输入金额",
+    "selectAmount": "选择金额",
     "paymentMethod": "支付方式",
     "paymentMethods": {
       "yookassa": {
